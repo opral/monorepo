@@ -1,12 +1,4 @@
-import {
-	Accessor,
-	Component,
-	createEffect,
-	createSignal,
-	ErrorBoundary,
-	onMount,
-	Show,
-} from "solid-js"
+import { Accessor, Component, createEffect, createSignal, ErrorBoundary, onMount } from "solid-js"
 import type { PageContextRenderer } from "./types.js"
 import { Dynamic } from "solid-js/web"
 import { LocalStorageProvider } from "@src/services/local-storage/index.js"
@@ -17,6 +9,9 @@ import { createI18nContext } from "@solid-primitives/i18n"
 export type RootProps = Accessor<{
 	pageContext: PageContextRenderer
 }>
+
+// let the page know that the locales are loaded
+export const [localesLoaded, setLocalesLoaded] = createSignal(false)
 
 // get translation files and put it in context provider
 const [response] = await rpc.getLangResources()
@@ -51,18 +46,15 @@ function RootWithProviders(props: {
 	locale: string
 }) {
 	const [, { locale }] = useI18n()
-	const [isLoaded, setIsLoaded] = createSignal(false)
 
 	onMount(() => {
 		locale(props.locale)
-		setIsLoaded(true)
+		setLocalesLoaded(true)
 	})
 
 	return (
 		// <div>Hallo Welt</div>
-		<Show when={isLoaded()}>
-			<Dynamic component={props.page} {...props.pageProps} />
-		</Show>
+		<Dynamic component={props.page} {...props.pageProps} />
 	)
 }
 
