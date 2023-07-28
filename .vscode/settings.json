@@ -6,7 +6,7 @@
 		"source.fixAll": true,
 		// only fix eslint issues on save (no typescript issues)
 		// see https://github.com/microsoft/vscode/issues/109530
-		"source.fixAll.eslint": true,
+		"source.fixAll.eslint": true
 	},
 	"gitlens.showWelcomeOnInstall": false,
 	"gitlens.showWhatsNewAfterUpgrades": false,
@@ -30,5 +30,5 @@
 	},
 	"[jsonc]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
+	}
 }
