@@ -171,7 +171,7 @@ describe("generally", () => {
 	it("should not initialize a plugin that uses the 'inlang' namespace except for inlang whitelisted plugins", async () => {
 		const mockPlugin: PluginApi = {
 			meta: {
-				id: "inlang.inlangWhitelistedPlugin",
+				id: "inlang.notWhitelistedPlugin",
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],

@@ -1,4 +1,5 @@
-import type { ResolvePlugins, ResolvedPluginsApi, PluginApi } from "./api.js"
+import type { ZodError, ZodIssue } from "zod"
+import { ResolvePlugins, ResolvedPluginsApi, PluginApi } from "./api.js"
 import {
 	PluginApiAlreadyDefinedError,
 	PluginError,
@@ -8,16 +9,7 @@ import {
 	PluginUsesReservedNamespaceError,
 	PluginUsesUnavailableApiError,
 } from "./errors.js"
-import { tryCatch } from "@inlang/result"
-
-/**
- * Plugin ids that should be excluded by namespace reserving.
- */
-export const whitelistedPlugins = [
-	"inlang.plugin-json",
-	"inlang.plugin-standard-lint-rules",
-	"inlang.plugin-i18next",
-]
+import { Result, tryCatch } from "@inlang/result"
 
 /**
  * Resolves plugins from the config.
@@ -52,17 +44,31 @@ export const resolvePlugins: ResolvePlugins = async (args) => {
 				})
 			}
 
-			// const parsed = tryCatch(() => PluginApi.parse(module.data.default))
+			const parsed = tryCatch(() => PluginApi.parse(module.data.default)) as Result<
+				PluginApi,
+				ZodError
+			>
 
-			// if (parsed.error) {
-			// 	throw new PluginInvalidIdError(
-			// 		`The id of the plugin '${module.data.default.meta.id}' is invalid. The plugin id must be in the format "namespace.my-plugin". Hence, lowercase with a namespaces and dashes for separation.`,
-			// 		{
-			// 			module: pluginInConfig.module,
-			// 			cause: parsed.error,
-			// 		},
-			// 	)
-			// }
+			if (parsed.error) {
+				const issue = parsed.error.issues[0]! as ZodIssue & { params: { errorName: string } }
+				if (issue.params.errorName === "PluginInvalidIdError") {
+					throw new PluginInvalidIdError(
+						`The id of the plugin '${module.data.default.meta.id}' is invalid. ${issue.message}`,
+						{
+							module: pluginInConfig.module,
+							cause: parsed.error,
+						},
+					)
+				} else if (issue.params.errorName === "PluginUsesReservedNamespaceError") {
+					throw new PluginUsesReservedNamespaceError(
+						`The plugin '${module.data.default.meta.id}' uses a reserved namespace. ${issue.message}`,
+						{
+							module: pluginInConfig.module,
+							cause: parsed.error,
+						},
+					)
+				}
+			}
 
 			const plugin = module.data.default as PluginApi
 			const api = plugin.setup({ config: args.config, options: pluginInConfig.options })
@@ -74,11 +80,11 @@ export const resolvePlugins: ResolvePlugins = async (args) => {
 			 */
 
 			// -- USES RESERVED NAMESPACE --
-			if (plugin.meta.id.includes("inlang") && !whitelistedPlugins.includes(plugin.meta.id)) {
-				throw new PluginUsesReservedNamespaceError("Plugin uses reserved namespace 'inlang'.", {
-					module: pluginInConfig.module,
-				})
-			}
+			// if (plugin.meta.id.includes("inlang") && !whitelistedPlugins.includes(plugin.meta.id)) {
+			// 	throw new PluginUsesReservedNamespaceError("Plugin uses reserved namespace 'inlang'.", {
+			// 		module: pluginInConfig.module,
+			// 	})
+			// }
 
 			for (const returnedApi of Object.keys(api)) {
 				// -- ALREADY DEFINED API --
@@ -123,11 +129,11 @@ export const resolvePlugins: ResolvePlugins = async (args) => {
 			}
 
 			// -- USES RESERVED NAMESPACE --
-			if (plugin.meta.id.startsWith("inlang.") && !whitelistedPlugins.includes(plugin.meta.id)) {
-				throw new PluginUsesReservedNamespaceError("Plugin uses reserved namespace 'inlang'.", {
-					module: pluginInConfig.module,
-				})
-			}
+			// if (plugin.meta.id.startsWith("inlang.") && !whitelistedPlugins.includes(plugin.meta.id)) {
+			// 	throw new PluginUsesReservedNamespaceError("Plugin uses reserved namespace 'inlang'.", {
+			// 		module: pluginInConfig.module,
+			// 	})
+			// }
 
 			/**
 			 * -------------- BEGIN ADDING TO RESULT --------------

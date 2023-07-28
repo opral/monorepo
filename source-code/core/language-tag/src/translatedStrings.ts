@@ -8,4 +8,11 @@ import { z } from "zod"
  */
 export type TranslatedStrings = Record<LanguageTag, string> & { en: string }
 
-export const TranslatedStrings = z.intersection(z.object({ en: z.string() }), z.record(z.string()))
+export const TranslatedStrings = z.intersection(
+	z.object({ en: z.string() }),
+	z.record(z.string()),
+	{
+		description:
+			"Translated strings for a given language tag. The language tag `en` is always required.",
+	},
+)
