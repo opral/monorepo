@@ -1,5 +1,5 @@
 import type { ResolvePlugins, ResolvedPluginsApi, PluginApi } from "./api.js"
-import { PluginException, PluginImportException } from "./errors.js"
+import { PluginException, PluginImportException } from "./exceptions.js"
 import { tryCatch } from "@inlang/result"
 import { parsePlugin } from "./parsePlugin.js"
 

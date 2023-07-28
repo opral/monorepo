@@ -11,7 +11,7 @@ import type {
 	PluginIncorrectlyDefinedUsedApisException,
 	PluginUsesReservedNamespaceException,
 	PluginUsesUnavailableApiException,
-} from "./errors.js"
+} from "./exceptions.js"
 
 type JSONSerializable<
 	T extends Record<string, string | string[] | Record<string, string | string[]>>,

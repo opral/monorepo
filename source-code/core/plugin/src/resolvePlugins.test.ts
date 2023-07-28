@@ -10,7 +10,7 @@ import {
 	PluginInvalidIdException,
 	PluginUsesReservedNamespaceException,
 	PluginUsesUnavailableApiException,
-} from "./errors.js"
+} from "./exceptions.js"
 import type { InlangEnvironment } from "@inlang/environment"
 import type { PluginApi } from "./api.js"
 
