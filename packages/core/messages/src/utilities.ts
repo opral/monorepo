@@ -27,7 +27,7 @@ export function getVariant(
 		//! do not return a reference to the message in a resource
 		//! modifications to the returned message will leak into the
 		//! resource which is considered to be unmutable.
-		return { data: JSON.parse(JSON.stringify(variant.pattern)) }
+		return { data: structuredClone(variant.pattern) }
 	}
 	return { error: new VariantDoesNotExistException(message.id, options.languageTag) }
 }
@@ -47,7 +47,7 @@ export function createVariant(
 		data: Variant
 	},
 ): Result<Message, VariantAlreadyExistsException | PatternsForLanguageTagDoNotExistException> {
-	const copy: Message = JSON.parse(JSON.stringify(message))
+	const copy: Message = structuredClone(message)
 	if (getVariant(copy, { languageTag: options.languageTag, selectors: options.data.match })) {
 		return { error: new VariantAlreadyExistsException(message.id, options.languageTag) }
 	}
@@ -74,7 +74,7 @@ export function updateVariant(
 		pattern: Variant["pattern"]
 	},
 ): Result<Message, VariantDoesNotExistException | PatternsForLanguageTagDoNotExistException> {
-	const copy: Message = JSON.parse(JSON.stringify(message))
+	const copy: Message = structuredClone(message)
 	if (copy.body[options.languageTag] === undefined) {
 		return { error: new PatternsForLanguageTagDoNotExistException(message.id, options.languageTag) }
 	}
@@ -95,45 +95,74 @@ export function updateVariant(
 const matchMostSpecificVariant = (
 	message: Message,
 	languageTag: LanguageTag,
-	preferenceSelectors: Record<string, string>,
+	selectors: Record<string, string>,
 ): Variant | undefined => {
-	// get all selectors of message
-	const messageSelectors = message.selectors
+	// resolve preferenceSelectors to match length and order of message selectors
+	const resolvedSelectors: Record<string, string> = {}
+	for (const messageSelector of message.selectors) {
+		resolvedSelectors[messageSelector] = selectors[messageSelector] ?? "*"
+	}
 
-	// resolve preferenceSelectors to match length and order of message selectors, but values in an Array to be comparable, example: ["male", "1"]
-	const resolvedPreferences: string[] = []
-	messageSelectors.forEach((messageSelector, index) => {
-		resolvedPreferences[index] = preferenceSelectors[messageSelector] ?? "*"
-	})
+	const index: Record<string, any> = {}
 
-	let matchedVariant: Variant | undefined
-	// go through the selectors to determine the precedence of patterns
-	// -> if there is no match, turn first selector to '*', still no match, turn second selector to '*'
-	for (let i = 0; i <= messageSelectors.length; i++) {
-		// find the exact match
-		const match: Variant | undefined = message.body[languageTag]!.find((variant) => {
-			return JSON.stringify(resolvedPreferences) === JSON.stringify(Object.values(variant.match))
-				? true
-				: false
-		})
-		if (!match) {
-			// if no variants matched, try again with less specific selectors
-			if (Object.keys(resolvedPreferences)[i]) {
-				resolvedPreferences[i] = "*"
+	for (const variant of message.body[languageTag]!) {
+		let isMatch = true
+		//check if vaiant is a match
+		for (const [key, value] of Object.entries(variant.match)) {
+			if (resolvedSelectors[key] !== value && value !== "*") {
+				isMatch = false
 			}
-		} else {
-			matchedVariant = match
+		}
+		if (isMatch) {
+			// add variant to nested index
+			function recursiveAddToIndex(
+				currentIndex: Record<string, any>,
+				currentKeys: string[],
+				variant: Variant,
+			) {
+				const key = variant.match[currentKeys[0]!]
+				if (currentKeys.length === 1) {
+					currentIndex[key!] = variant
+				} else {
+					if (!currentIndex[key!]) {
+						currentIndex[key!] = {}
+					}
+					recursiveAddToIndex(currentIndex[key!], currentKeys.slice(1), variant)
+				}
+			}
+			recursiveAddToIndex(index, message.selectors, variant)
 		}
 	}
 
-	if (matchedVariant) {
-		return matchedVariant
-	} else {
+	//find the most specific variant
+	const findOptimalMatch = (
+		index: Record<string, any>,
+		selectors: string[],
+	): Variant | undefined => {
+		const keys = Object.keys(index)
+
+		for (const key of keys) {
+			if (key === selectors[0] || key === "*") {
+				const nextOptimal = selectors.slice(1)
+
+				if (nextOptimal.length === 0) {
+					return (index[key] as Variant) || undefined
+				}
+
+				const match = findOptimalMatch(index[key] as Record<string, any>, nextOptimal)
+
+				if (match !== undefined) {
+					return match
+				}
+			}
+		}
 		return undefined
 	}
+
+	return findOptimalMatch(index, Object.values(resolvedSelectors))
 }
 
-class VariantDoesNotExistException extends Error {
+export class VariantDoesNotExistException extends Error {
 	readonly #id = "VariantDoesNotExistException"
 
 	constructor(messageId: string, languageTag: string) {
@@ -142,7 +171,7 @@ class VariantDoesNotExistException extends Error {
 		)
 	}
 }
-class VariantAlreadyExistsException extends Error {
+export class VariantAlreadyExistsException extends Error {
 	readonly #id = "VariantAlreadyExistsException"
 
 	constructor(messageId: string, languageTag: string) {
@@ -151,7 +180,7 @@ class VariantAlreadyExistsException extends Error {
 		)
 	}
 }
-class PatternsForLanguageTagDoNotExistException extends Error {
+export class PatternsForLanguageTagDoNotExistException extends Error {
 	readonly #id = "PatternsForLanguageTagDoNotExistException"
 
 	constructor(messageId: string, languageTag: string) {
