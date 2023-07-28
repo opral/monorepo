@@ -9,7 +9,7 @@ import {
 	PluginApiAlreadyDefinedException,
 	PluginFunctionLoadMessagesAlreadyDefinedException,
 	PluginFunctionSaveMessagesAlreadyDefinedException,
-} from "./errors.js"
+} from "./exceptions.js"
 import type { ResolvePluginResult } from "./resolvePlugins.js"
 
 /**
