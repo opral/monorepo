@@ -4,12 +4,19 @@ import type { LanguageTag } from "@inlang/language-tag"
 export type Message = {
 	id: string
 	expressions: Expression[]
-	selectors: Expression[]
+	/**
+	 * The order in which the selectors are placed determines the precedence of patterns.
+	 */
+	selectors: VariableReference["name"][]
 	body: Record<LanguageTag, Variant[]>
 }
 
 export type Variant = {
 	// a match can always only be string-based because a string is what is rendered to the UI
+	/**
+	 * The number of keys in each variant match MUST equal the number of expressions in the selectors.
+	 * Inspired by: https://github.com/unicode-org/message-format-wg/blob/main/spec/formatting.md#pattern-selection
+	 */
 	match: Record<string, string>
 	pattern: Pattern
 }
