@@ -12,7 +12,7 @@ export const missingMessage = (): MessageLintRule => ({
 	displayName: {
 		en: "Missing Message",
 	},
-	defaultLevel: "warn", // TODO: how to override level?
+	defaultLevel: "error", // TODO: how to override level?
 	message: ({ message: { id, body }, config, report }) => {
 		const languageTags = config.languageTags.filter(
 			(languageTag) => languageTag !== config.sourceLanguageTag,

@@ -19,7 +19,7 @@ export const identicalPattern = ({
 	displayName: {
 		en: "Identical Pattern",
 	},
-	defaultLevel: "warn", // TODO: how to override level?
+	defaultLevel: "warning", // TODO: how to override level?
 	message: ({ message: { id, body }, config, report }) => {
 		const referenceVariants = body[config.sourceLanguageTag]!
 

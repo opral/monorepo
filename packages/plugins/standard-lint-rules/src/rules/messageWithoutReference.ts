@@ -12,7 +12,7 @@ export const messageWithoutSource = (): MessageLintRule => ({
 	displayName: {
 		en: "Message Without Source",
 	},
-	defaultLevel: "warn", // TODO: how to override level? // reply from @samuelstroschein: you can't. the app sets the lint level. a rule can only set a default.
+	defaultLevel: "error", // TODO: how to override level? // reply from @samuelstroschein: you can't. the app sets the lint level. a rule can only set a default.
 	message: ({ message: { id, body }, config, report }) => {
 		if (Object.keys(body).length && !body[config.sourceLanguageTag]) {
 			report({
