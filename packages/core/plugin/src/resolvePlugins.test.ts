@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest"
 import { resolvePlugins } from "./resolvePlugins.js"
 import type { InlangConfig } from "@inlang/config"
 import {
+	PluginError,
 	PluginFunctionLoadMessagesAlreadyDefinedError,
 	PluginFunctionSaveMessagesAlreadyDefinedError,
 	PluginImportError,
@@ -584,6 +585,113 @@ describe("addAppSpecificApi", () => {
 
 		expect(resolved.data.appSpecificApi).toHaveProperty("my-app-1")
 		expect(resolved.data.appSpecificApi).toHaveProperty("my-app-2")
+	})
+})
+
+describe("error handling", () => {
+	it("should handle PluginError instances thrown during plugin setup", async () => {
+		const mockPlugin: PluginApi = {
+			meta: {
+				id: "plugin.plugin-save-messages",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				usedApis: ["saveMessages"],
+			},
+			setup: () => {
+				throw new PluginError("Plugin error", { module: "https://myplugin15.com/index.js" })
+			},
+		}
+
+		const pluginModule = "https://myplugin15.com/index.js"
+		const env = mockEnvWithPlugins({
+			[pluginModule]: mockPlugin,
+		})
+
+		const result = await resolvePlugins({
+			env,
+			config: {
+				plugins: [
+					{
+						options: {},
+						module: pluginModule,
+					},
+				],
+			} as unknown as InlangConfig,
+		})
+
+		expect(result.errors).toHaveLength(1)
+		expect(result.errors[0]).toBeInstanceOf(PluginError)
+	})
+
+	it("should handle generic Error instances thrown during plugin setup", async () => {
+		const mockPlugin: PluginApi = {
+			meta: {
+				id: "plugin.plugin-save-messages",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				usedApis: ["saveMessages"],
+			},
+			setup: () => {
+				throw new Error("Generic error")
+			},
+		}
+
+		const pluginModule = "https://myplugin15.com/index.js"
+		const env = mockEnvWithPlugins({
+			[pluginModule]: mockPlugin,
+		})
+
+		const result = await resolvePlugins({
+			env,
+			config: {
+				plugins: [
+					{
+						options: {},
+						module: pluginModule,
+					},
+				],
+			} as unknown as InlangConfig,
+		})
+
+		expect(result.errors).toHaveLength(1)
+		expect(result.errors[0]).toBeInstanceOf(PluginError)
+	})
+
+	it("should handle unhandled and unknown errors during plugin setup", async () => {
+		const mockPlugin: PluginApi = {
+			meta: {
+				id: "plugin.plugin-save-messages",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				usedApis: ["saveMessages"],
+			},
+			setup: () => {
+				throw "Unknown error"
+			},
+		}
+
+		const pluginModule = "https://myplugin15.com/index.js"
+		const env = mockEnvWithPlugins({
+			[pluginModule]: mockPlugin,
+		})
+
+		const result = await resolvePlugins({
+			env,
+			config: {
+				plugins: [
+					{
+						options: {},
+						module: pluginModule,
+					},
+				],
+			} as unknown as InlangConfig,
+		})
+
+		expect(result.errors).toHaveLength(1)
+		expect(result.errors[0]).toBeInstanceOf(PluginError)
 	})
 })
 

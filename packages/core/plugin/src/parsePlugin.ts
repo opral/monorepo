@@ -71,9 +71,7 @@ export const parsePlugin = (args: {
 
 	for (const returnedApi of Object.keys(api)) {
 		// -- ALREADY DEFINED API --
-		if (returnedApi === "addAppSpecificApi") {
-			continue
-		} else if (args.result.data[returnedApi as keyof typeof args.result.data] !== undefined) {
+		if (args.result.data[returnedApi as keyof typeof args.result.data] !== undefined) {
 			throw new PluginApiAlreadyDefinedError(
 				`Plugin ${args.pluginInConfig.module} defines a property ${returnedApi} that is already defined by another plugin.`,
 				{ module: args.pluginInConfig.module },
