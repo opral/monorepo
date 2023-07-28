@@ -1,10 +1,12 @@
 import { it, expect, describe } from "vitest"
 import { createMemoryFs } from "@inlang-git/fs"
-import { createObjectStoreFs } from "./objectStoreFs.js"
-import createMappedObjectStore from "./createMappedObjectStore.js"
-import initMappedObjectStore from "./initMappedObjectStore.js"
-import createRemoteMappedObjectStore from "./createRemoteMappedObjectStore.js"
-import resolveRemoteRef from "./remote/resolveRemoteRef.js"
+import {
+	createObjectStoreFs,
+	createMappedObjectStore,
+	initMappedObjectStore,
+	createRemoteMappedObjectStore,
+	resolveRemoteRef,
+} from "./index.js"
 
 // TODO: Merge this into one test file
 describe("git fs", async () => {

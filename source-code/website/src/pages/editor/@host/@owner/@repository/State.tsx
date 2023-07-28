@@ -10,14 +10,6 @@ import {
 	useContext,
 } from "solid-js"
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
-import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
-
-import { http, raw } from "@inlang-git/client/raw"
-import { createObjectStoreFs } from "@inlang-git/client/object-store-apis"
-import type { ObjectStoreFilesystem } from "@inlang-git/client/object-store-apis"
-
-import { createMemoryFs } from "@inlang-git/fs"
-import type { NodeishFilesystem } from "@inlang-git/fs"
 
 import { createStore, SetStoreFunction } from "solid-js/store"
 
@@ -37,8 +29,22 @@ import { getLocalStorage, useLocalStorage } from "@src/services/local-storage/in
 import { github } from "@src/services/github/index.js"
 import { showToast } from "@src/components/Toast.jsx"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
-import { parseOrigin } from "@inlang/telemetry"
 import { setSearchParams } from "./helper/setSearchParams.js"
+
+import { createMemoryFs } from "@inlang-git/fs"
+import type { NodeishFilesystem } from "@inlang-git/fs"
+
+import { http, raw } from "@inlang-git/client/raw"
+
+import type { ObjectStoreFilesystem } from "@inlang-git/client/object-store-apis"
+
+import {
+	createObjectStoreFs,
+	createMappedObjectStore,
+	initMappedObjectStore,
+	createRemoteMappedObjectStore,
+	resolveRemoteRef,
+} from "@inlang-git/client/object-store-apis"
 
 export type LocalChange = {
 	languageTag: ast.Resource["languageTag"]
@@ -91,6 +97,7 @@ type EditorStateSchema = {
 	 * Object Store interface
 	 */
 	objectFs: () => ObjectStoreFilesystem
+	/**
 	 * Id to filter messages
 	 */
 	filteredId: () => string
@@ -701,29 +708,27 @@ async function cloneRepository(args: {
 	}
 
 	const gitdir = ".git"
-	// do shallow clone, get first commit and just one branch
-	await raw.clone({
-		fs: args.fs,
-		http,
-		gitdir,
-		url: `https://${host}/${owner}/${repository}`,
-		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
-		remote: `${owner}/${repository}`,
-		singleBranch: true,
-		noCheckout: true,
-		depth: 1,
-	})
+
+	const hostUrl = `https://${host}/${owner}/${repository}`
+
+	const corsProxy = publicEnv.PUBLIC_GIT_PROXY_PATH
+	const fullUrl = corsProxy.endsWith("?")
+		? `${corsProxy}${hostUrl}`
+		: `${corsProxy}/${hostUrl.replace(/^https?:\/\//, "")}`
+
+	const remoteHead = await resolveRemoteRef("HEAD", fullUrl)
+
+	const objectStore = await createMappedObjectStore(".git", args.fs)
+		.then((store) => createRemoteMappedObjectStore(store, fullUrl))
+		.then((store) => initMappedObjectStore(store, remoteHead))
+
+	// Set HEAD so that `currentBranch` works properly
+	args.fs.writeFile(".git/HEAD", remoteHead)
 
 	// TODO: Don't re-create the fs each time we re-fetch, instead simply
 	// update the head of an existing fs interface. This will require garbage
 	// collection to remain memory efficient.
-	args.setObjectFs(
-		await createObjectStoreFs({
-			fs: args.fs,
-			gitdir,
-			treeOid: await raw.resolveRef({ fs: args.fs, gitdir, ref: "HEAD" }),
-		}),
-	)
+	args.setObjectFs(await createObjectStoreFs(objectStore))
 
 	// fetch 100 more commits, can get more commits if needed
 	// https://isomorphic-git.org/docs/en/faq#how-to-make-a-shallow-repository-unshallow
