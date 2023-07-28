@@ -2,7 +2,7 @@ import type { Message, MessageQueryApi } from "@inlang/messages"
 import type { LanguageTag, TranslatedStrings } from "@inlang/language-tag"
 import type { InlangConfig } from "@inlang/config"
 
-export type LintLevel = "error" | "warn"
+export type LintLevel = "error" | "warning"
 
 export type LintRule = {
 	id: `${string}.${string}`
