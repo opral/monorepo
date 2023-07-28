@@ -1,16 +1,16 @@
 import type { $ImportError } from "@inlang/environment"
 import type { InlangConfig } from "@inlang/config"
 
-type PluginErrorOptions = {
+type PluginExceptionOptions = {
 	module: InlangConfig["plugins"][number]["module"]
 } & Partial<Error>
 
-export class PluginError extends Error {
+export class PluginException extends Error {
 	public readonly module: string
 
-	constructor(message: string, options: PluginErrorOptions) {
+	constructor(message: string, options: PluginExceptionOptions) {
 		super(message)
-		this.name = "PluginError"
+		this.name = "PluginException"
 		this.module = options.module
 	}
 }
@@ -18,58 +18,58 @@ export class PluginError extends Error {
 /**
  * Error thrown when a plugin cannot be imported.
  */
-export class PluginImportError extends PluginError {
-	constructor(message: string, options: PluginErrorOptions & { cause: $ImportError }) {
+export class PluginImportException extends PluginException {
+	constructor(message: string, options: PluginExceptionOptions & { cause: $ImportError }) {
 		super(message, options)
-		this.name = "PluginImportError"
+		this.name = "PluginImportException"
 	}
 }
 
-export class PluginInvalidIdError extends PluginError {
-	constructor(message: string, options: PluginErrorOptions) {
+export class PluginInvalidIdException extends PluginException {
+	constructor(message: string, options: PluginExceptionOptions) {
 		super(message, options)
-		this.name = "PluginInvalidIdError"
+		this.name = "PluginInvalidIdException"
 	}
 }
 
-export class PluginUsesUnavailableApiError extends PluginError {
-	constructor(message: string, options: PluginErrorOptions) {
+export class PluginUsesUnavailableApiException extends PluginException {
+	constructor(message: string, options: PluginExceptionOptions) {
 		super(message, options)
-		this.name = "PluginIncorrectlyDefinedUsedApisError"
+		this.name = "PluginIncorrectlyDefinedUsedApisException"
 	}
 }
 
-export class PluginIncorrectlyDefinedUsedApisError extends PluginError {
-	constructor(message: string, options: PluginErrorOptions) {
+export class PluginIncorrectlyDefinedUsedApisException extends PluginException {
+	constructor(message: string, options: PluginExceptionOptions) {
 		super(message, options)
-		this.name = "PluginIncorrectlyDefinedUsedApisError"
+		this.name = "PluginIncorrectlyDefinedUsedApisException"
 	}
 }
 
-export class PluginUsesReservedNamespaceError extends PluginError {
-	constructor(message: string, options: PluginErrorOptions) {
+export class PluginUsesReservedNamespaceException extends PluginException {
+	constructor(message: string, options: PluginExceptionOptions) {
 		super(message, options)
-		this.name = "PluginUsesReservedNamespaceError"
+		this.name = "PluginUsesReservedNamespaceException"
 	}
 }
 
-export class PluginApiAlreadyDefinedError extends PluginError {
-	constructor(message: string, options: PluginErrorOptions) {
+export class PluginApiAlreadyDefinedException extends PluginException {
+	constructor(message: string, options: PluginExceptionOptions) {
 		super(message, options)
-		this.name = "PluginApiAlreadyDefinedError"
+		this.name = "PluginApiAlreadyDefinedException"
 	}
 }
 
-export class PluginFunctionLoadMessagesAlreadyDefinedError extends PluginError {
-	constructor(message: string, options: PluginErrorOptions) {
+export class PluginFunctionLoadMessagesAlreadyDefinedException extends PluginException {
+	constructor(message: string, options: PluginExceptionOptions) {
 		super(message, options)
-		this.name = "PluginFunctionLoadMessagesAlreadyDefinedError"
+		this.name = "PluginFunctionLoadMessagesAlreadyDefinedException"
 	}
 }
 
-export class PluginFunctionSaveMessagesAlreadyDefinedError extends PluginError {
-	constructor(message: string, options: PluginErrorOptions) {
+export class PluginFunctionSaveMessagesAlreadyDefinedException extends PluginException {
+	constructor(message: string, options: PluginExceptionOptions) {
 		super(message, options)
-		this.name = "PluginFunctionSaveMessagesAlreadyDefinedError"
+		this.name = "PluginFunctionSaveMessagesAlreadyDefinedException"
 	}
 }

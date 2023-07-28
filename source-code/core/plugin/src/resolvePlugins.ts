@@ -1,13 +1,12 @@
-import type { ZodError, ZodIssue } from "zod"
 import type { ResolvePlugins, ResolvedPluginsApi, PluginApi } from "./api.js"
-import { PluginError, PluginImportError } from "./errors.js"
-import { Result, tryCatch } from "@inlang/result"
+import { PluginException, PluginImportException } from "./errors.js"
+import { tryCatch } from "@inlang/result"
 import { parsePlugin } from "./parsePlugin.js"
 
 export type ResolvePluginResult = {
 	data: Partial<ResolvedPluginsApi> &
 		Pick<ResolvedPluginsApi, "lintRules" | "plugins" | "appSpecificApi">
-	errors: PluginError[]
+	errors: PluginException[]
 }
 
 /**
@@ -32,7 +31,7 @@ export const resolvePlugins: ResolvePlugins = async (args) => {
 			const module = await tryCatch(() => args.env.$import(pluginInConfig.module))
 
 			if (module.error) {
-				throw new PluginImportError(`Couldn't import the plugin "${pluginInConfig.module}"`, {
+				throw new PluginImportException(`Couldn't import the plugin "${pluginInConfig.module}"`, {
 					module: pluginInConfig.module,
 					cause: module.error as Error,
 				})
@@ -79,13 +78,15 @@ export const resolvePlugins: ResolvePlugins = async (args) => {
 			/**
 			 * -------------- BEGIN ERROR HANDLING --------------
 			 */
-			if (e instanceof PluginError) {
+			if (e instanceof PluginException) {
 				result.errors.push(e)
 			} else if (e instanceof Error) {
-				result.errors.push(new PluginError(e.message, { module: pluginInConfig.module, cause: e }))
+				result.errors.push(
+					new PluginException(e.message, { module: pluginInConfig.module, cause: e }),
+				)
 			} else {
 				result.errors.push(
-					new PluginError("Unhandled and unknown error", {
+					new PluginException("Unhandled and unknown error", {
 						module: pluginInConfig.module,
 						cause: e,
 					}),
