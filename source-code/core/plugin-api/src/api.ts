@@ -21,7 +21,7 @@ type JSONSerializable<
  * The plugin API is used to extend inlang's functionality.
  */
 export type PluginApi<
-	PluginOptions extends Record<string, string | string[]> = Record<string, never>,
+	PluginOptions extends Record<string, string | string[]> = Record<string, string>,
 	AppSpecificApis extends object = {},
 > = {
 	// * Must be JSON serializable if we want an external plugin manifest in the future.

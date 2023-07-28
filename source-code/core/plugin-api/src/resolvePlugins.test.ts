@@ -59,93 +59,149 @@ describe("generally", () => {
 		expect(resolved.errors[0]).toBeInstanceOf(PluginImportError)
 	})
 
-	// it("should return an error if a plugin uses APIs that are not available", async () => {
-	// 	const mockPlugin: PluginApi = {
-	// 		meta: {
-	// 			id: "plugin.myplugin1",
-	// 			description: { en: "" },
-	// 			displayName: { en: "" },
-	// 			keywords: [],
-	// 			// @ts-expect-error
-	// 			usedApis: ["nonExistentApi"], // Using an API that doesn't exist
-	// 		},
-	// 		setup: () => ({ addAppSpecificApi: () => undefined as any, addLintRules: () => [] }),
-	// 	}
+	it("should return an error if a plugin uses APIs that are not available", async () => {
+		const mockPlugin: PluginApi = {
+			meta: {
+				id: "plugin.my-plugin",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				// @ts-expect-error
+				usedApis: ["nonExistentApi"], // Plugin is using an API that is not available
+			},
+			// @ts-expect-error
+			setup: () => {
+				return {
+					nonExistentApi: () => undefined as any,
+				}
+			},
+		}
 
-	// 	const env = mockEnvWithPlugins([mockPlugin])
-	// 	const resolved = await resolvePlugins({ env, config: mockConfig })
+		const pluginModule = "https://myplugin.com/index.js"
+		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
 
-	// 	expect(resolved.errors.length).toBe(1)
-	// 	expect(resolved.errors[0]).toBeInstanceOf(PluginUsesUnavailableApiError)
-	// })
+		const resolved = await resolvePlugins({
+			env,
+			config: {
+				plugins: [
+					{
+						options: {},
+						module: pluginModule,
+					},
+				] satisfies InlangConfig["plugins"],
+			} as unknown as InlangConfig,
+		})
 
-	// it("should return an error if a plugin uses APIs that are not defined in meta.usedApis", async () => {
-	// 	const mockPlugin: PluginApi = {
-	// 		meta: {
-	// 			id: "plugin.myplugin1",
-	// 			description: { en: "" },
-	// 			displayName: { en: "" },
-	// 			keywords: [],
-	// 			// @ts-expect-error
-	// 			usedApis: ["nonExistentApi"], // API not defined in meta.usedApis
-	// 		},
-	// 		setup: () => ({ addAppSpecificApi: () => undefined as any, addLintRules: () => [] }),
-	// 	}
+		expect(resolved.errors.length).toBe(1)
+		console.log(resolved.errors)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesUnavailableApiError)
+	})
 
-	// 	const mockConfigWithUsedApis = {
-	// 		...mockConfig,
-	// 		usedApis: ["someOtherApi"], // Define some other API in meta.usedApis
-	// 	}
+	it("should return an error if a plugin uses APIs that are not defined in meta.usedApis", async () => {
+		const mockPlugin: PluginApi = {
+			meta: {
+				id: "plugin.plugin",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				usedApis: [], // Empty list of used APIs, but the plugin is using an API in the implementation
+			},
+			setup: () => {
+				return {
+					loadMessages: () => undefined as any,
+				}
+			},
+		}
 
-	// 	const env = mockEnvWithPlugins([mockPlugin])
-	// 	const resolved = await resolvePlugins({ env, config: mockConfigWithUsedApis })
+		const pluginModule = "https://myplugin2.com/index.js"
+		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
 
-	// 	expect(resolved.errors.length).toBe(1)
-	// 	expect(resolved.errors[0]).toBeInstanceOf(PluginIncorrectlyDefinedUsedApisError)
-	// })
+		const resolved = await resolvePlugins({
+			env,
+			config: {
+				plugins: [
+					{
+						options: {},
+						module: pluginModule,
+					},
+				] satisfies InlangConfig["plugins"],
+			} as unknown as InlangConfig,
+		})
 
-	// it("should return an error if a plugin DOES NOT use APIs that are defined in meta.usedApis", async () => {
-	// 	const mockPlugin: PluginApi = {
-	// 		meta: {
-	// 			id: "plugin.myplugin1",
-	// 			description: { en: "" },
-	// 			displayName: { en: "" },
-	// 			keywords: [],
-	// 			usedApis: [], // Empty usedApis array, not using any APIs
-	// 		},
-	// 		setup: () => ({ addAppSpecificApi: () => undefined as any, addLintRules: () => [] }),
-	// 	}
+		expect(resolved.errors.length).toBe(1)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginIncorrectlyDefinedUsedApisError)
+	})
 
-	// 	const mockConfigWithUsedApis = {
-	// 		...mockConfig,
-	// 		usedApis: ["someApi"], // Define some API in meta.usedApis
-	// 	}
+	it("should return an error if a plugin DOES NOT use APIs that are defined in meta.usedApis", async () => {
+		const mockPlugin: PluginApi = {
+			meta: {
+				id: "plugin.plugin",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				usedApis: ["loadMessages"],
+			},
+			setup: () => {
+				return {
+					saveMessages(args) {
+						return undefined as any
+					},
+				}
+			},
+		}
 
-	// 	const env = mockEnvWithPlugins([mockPlugin])
-	// 	const resolved = await resolvePlugins({ env, config: mockConfigWithUsedApis })
+		const pluginModule = "https://myplugin3.com/index.js"
+		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
+		const resolved = await resolvePlugins({
+			env,
+			config: {
+				plugins: [
+					{
+						options: {},
+						module: pluginModule,
+					},
+				] satisfies InlangConfig["plugins"],
+			} as unknown as InlangConfig,
+		})
 
-	// 	expect(resolved.errors.length).toBe(1)
-	// 	expect(resolved.errors[0]).toBeInstanceOf(PluginIncorrectlyDefinedUsedApisError)
-	// })
+		expect(resolved.errors.length).toBe(1)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginIncorrectlyDefinedUsedApisError)
+	})
 
-	// it("should not initialize a plugin that uses the 'inlang' namespace except for inlang whitelisted plugins", async () => {
-	// 	const mockPlugin: PluginApi = {
-	// 		meta: {
-	// 			id: "inlang.myplugin", // Using 'inlang' namespace, but not whitelisted
-	// 			description: { en: "" },
-	// 			displayName: { en: "" },
-	// 			keywords: [],
-	// 			usedApis: [],
-	// 		},
-	// 		setup: () => ({ addAppSpecificApi: () => undefined as any, addLintRules: () => [] }),
-	// 	}
+	it("should not initialize a plugin that uses the 'inlang' namespace except for inlang whitelisted plugins", async () => {
+		const mockPlugin: PluginApi = {
+			meta: {
+				id: "inlang.inlangWhitelistedPlugin",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				usedApis: ["loadMessages"], // Whitelisted plugin using the 'inlang' namespace
+			},
+			setup: () => {
+				return {
+					loadMessages: () => undefined as any,
+				}
+			},
+		}
 
-	// 	const env = mockEnvWithPlugins([mockPlugin])
-	// 	const resolved = await resolvePlugins({ env, config: mockConfig })
+		const pluginModule = "https://inlangwhitelist.com/index.js"
+		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
 
-	// 	expect(resolved.errors.length).toBe(1)
-	// 	expect(resolved.errors[0]).toBeInstanceOf(PluginUsesReservedNamespaceError)
-	// })
+		const resolved = await resolvePlugins({
+			env,
+			config: {
+				plugins: [
+					{
+						options: {},
+						module: pluginModule,
+					},
+				] satisfies InlangConfig["plugins"],
+			} as unknown as InlangConfig,
+		})
+
+		expect(resolved.errors.length).toBe(1)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesReservedNamespaceError)
+	})
 })
 
 // describe("loadMessages", () => {
