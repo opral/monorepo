@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/plugin-api",
+	"name": "@inlang/app",
 	"type": "module",
 	"version": "0.0.0",
 	"publishConfig": {
@@ -31,20 +31,19 @@
 	},
 	"dependencies": {
 		"@inlang/environment": "*",
-		"@inlang/result": "*",
-		"@inlang/messages": "*",
-		"@inlang/language-tag": "*",
-		"@inlang/lint-api": "*",
-		"@esbuild-plugins/node-modules-polyfill": "^0.2.2",
-		"@inlang-git/fs": "^0.0.4",
 		"@inlang/config": "*",
+		"@inlang/messages": "*",
+		"@inlang/plugin": "*",
+		"@inlang/lint": "*",
+		"@inlang/language-tag": "*",
+		"@inlang/result": "*",
+		"@inlang-git/fs": "*",
 		"deepmerge-ts": "^5.1.0",
 		"ts-dedent": "^2.2.0",
 		"zod": "^3.21.4"
 	},
 	"devDependencies": {
 		"@vitest/coverage-v8": "^0.33.0",
-		"esbuild": "^0.17.14",
 		"tsd": "^0.25.0",
 		"vitest": "^0.33.0"
 	},

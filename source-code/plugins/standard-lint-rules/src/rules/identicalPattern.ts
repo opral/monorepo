@@ -1,5 +1,5 @@
-import type { MessageLintRule } from "@inlang/lint-api"
-import type { Variant } from '@inlang/messages'
+import type { Variant } from "@inlang/messages"
+import type { MessageLintRule } from "@inlang/plugin"
 
 type IdenticalPatternRuleOptions = {
 	ignore: string[]
@@ -12,35 +12,39 @@ type IdenticalPatternRuleOptions = {
  * that the translations are redundant or can be combined into a single
  * message to reduce translation effort.
  */
-export const identicalPattern = ({ ignore = [] }: IdenticalPatternRuleOptions) => ({
+export const identicalPattern = ({
+	ignore = [],
+}: IdenticalPatternRuleOptions): MessageLintRule => ({
 	id: "inlang.identicalPattern",
 	displayName: {
-		en: 'Identical Pattern'
+		en: "Identical Pattern",
 	},
-	defaultLevel: 'warn', // TODO: how to override level?
+	defaultLevel: "warn", // TODO: how to override level?
 	message: ({ message: { id, body }, config, report }) => {
 		const referenceVariants = body[config.sourceLanguageTag]!
 
 		const languageTags = Object.keys(body)
 		for (const languageTag of languageTags) {
-			const isMessageIdentical = messageBodyToString(referenceVariants) === messageBodyToString(body[languageTag]!)
-			const shouldBeIgnored = (referenceVariants || [])
-				.some(variant => ignore.includes(patternToString(variant.pattern)))
+			const isMessageIdentical =
+				messageBodyToString(referenceVariants) === messageBodyToString(body[languageTag]!)
+			const shouldBeIgnored = (referenceVariants || []).some((variant) =>
+				ignore.includes(patternToString(variant.pattern)),
+			)
 			if (isMessageIdentical && !shouldBeIgnored) {
 				report({
 					messageId: id,
 					languageTag,
 					body: {
 						en: `Identical content found in language '${languageTag}' with message ID '${id}'.`,
-					}
+					},
 				})
 			}
 		}
 	},
-}) satisfies MessageLintRule
+})
 
 // TODO: use a generic toString function instead of JSON.stringify
 const messageBodyToString = (body: Variant[]) => JSON.stringify(body)
 
 // TODO: use a generic toString function instead of this custom code
-const patternToString = (pattern: Variant['pattern']) => JSON.stringify(pattern)
+const patternToString = (pattern: Variant["pattern"]) => JSON.stringify(pattern)
