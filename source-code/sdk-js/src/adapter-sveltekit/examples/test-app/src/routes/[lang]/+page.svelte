@@ -1,11 +1,15 @@
 <script>
 	import { i, languages, switchLanguage } from "@inlang/sdk-js"
+	import { onMount } from "svelte"
+	import { test } from "./test.js"
 
-	export let data
+	onMount(() => {
+		test()
+	})
 </script>
 
 {#each languages as lang}
-	<button on:click={() =>switchLanguage(lang)}>{lang}</button>
+	<button on:click={() => switchLanguage(lang)}>{lang}</button>
 {/each}
 
 <h1>{i("welcome")}</h1>

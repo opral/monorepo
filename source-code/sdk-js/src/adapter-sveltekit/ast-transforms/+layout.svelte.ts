@@ -32,6 +32,7 @@ export const transformLayoutSvelte = (
 const transformScript = (filePath: string, config: TransformConfig, code: string) => {
 	const sourceFile = codeToSourceFile(code, filePath)
 
+	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/client/shared", "addRuntimeToGlobalThis")
 	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/shared", "getRuntimeFromData")
 	addImport(
 		sourceFile,
@@ -48,10 +49,12 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 
 	const index = addDataExportIfMissingAndReturnInsertionIndex(sourceFile)
 
+	// TODO: add `addRuntimeToGlobalThis` code only if needed
 	sourceFile.insertStatements(
 		index + 1,
 		dedent`
 			$: if (browser) {
+				addRuntimeToGlobalThis(getRuntimeFromData(data))
 				addRuntimeToContext(getRuntimeFromData(data))
 				;({ i, language } = getRuntimeFromContext())
 				document.body.parentElement?.setAttribute('lang', language)
@@ -62,6 +65,7 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 	sourceFile.insertStatements(
 		index + 1,
 		dedent`
+			addRuntimeToGlobalThis(getRuntimeFromData(data))
 			addRuntimeToContext(getRuntimeFromData(data))
 			let { i, language } = getRuntimeFromContext()
 		`,

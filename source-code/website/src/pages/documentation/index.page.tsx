@@ -1,4 +1,4 @@
-import { For, Show, createRenderEffect, createSignal, createEffect } from "solid-js"
+import { For, Show, createRenderEffect, createEffect, createSignal, onMount } from "solid-js"
 import { Layout as RootLayout } from "@src/pages/Layout.jsx"
 import { Markdown, parseMarkdown } from "@src/services/markdown/index.js"
 import type { ProcessedTableOfContents } from "./index.page.server.jsx"
@@ -10,7 +10,7 @@ import { Feedback } from "./Feedback.jsx"
 import { EditButton } from "./EditButton.jsx"
 import { defaultLanguage } from "@src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
-import { fileSources } from "../../../../../documentation/tableOfContents.js"
+import { tableOfContents } from "../../../../../documentation/tableOfContents.js"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -29,8 +29,10 @@ export function Page(props: PageProps) {
 		if (props.markdown && props.markdown.frontmatter) {
 			const markdownHref = props.markdown.frontmatter.href
 
-			const files = fileSources as {
-				[key: string]: string[]
+			const files: Record<string, string[]> = {}
+			for (const [category, documentsArray] of Object.entries(tableOfContents)) {
+				const rawPaths = documentsArray.map((document) => document.raw)
+				files[category] = rawPaths
 			}
 
 			for (const section of Object.keys(props.processedTableOfContents)) {
@@ -176,7 +178,7 @@ function NavbarCommon(props: {
 		setHighlightedAnchor(anchor)
 	}
 
-	createEffect(() => {
+	onMount(() => {
 		if (
 			currentPageContext.urlParsed.hash &&
 			props.headings
@@ -186,6 +188,19 @@ function NavbarCommon(props: {
 				.includes(currentPageContext.urlParsed.hash.replace("#", ""))
 		) {
 			setHighlightedAnchor(currentPageContext.urlParsed.hash.replace("#", ""))
+
+			const targetElement = document.getElementById(
+				currentPageContext.urlParsed.hash.replace("#", ""),
+			)
+
+			checkLoadedImgs(() => {
+				const elementRect = targetElement!.getBoundingClientRect()
+				const offsetPosition = elementRect.top - 96 // The offset because of the fixed navbar
+
+				window.scrollBy({
+					top: offsetPosition,
+				})
+			})
 		}
 	})
 
@@ -264,4 +279,30 @@ function NavbarCommon(props: {
 			</For>
 		</ul>
 	)
+}
+
+function checkLoadedImgs(anchorScroll: () => void) {
+	let imgElementsLoaded = 0
+	const imgElements = document.querySelectorAll("img")
+	const imgElementsLength = imgElements.length
+
+	if (imgElementsLength === 0) {
+		anchorScroll()
+	} else {
+		for (const img of imgElements) {
+			if (img.complete) {
+				imgElementsLoaded++
+				if (imgElementsLoaded === imgElementsLength) {
+					anchorScroll()
+				}
+			} else {
+				img.addEventListener("load", () => {
+					imgElementsLoaded++
+					if (imgElementsLoaded === imgElementsLength) {
+						anchorScroll()
+					}
+				})
+			}
+		}
+	}
 }
