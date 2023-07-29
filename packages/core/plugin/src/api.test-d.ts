@@ -1,8 +1,8 @@
-import { PluginApi, ResolvePlugins } from "./api.js"
+import { Plugin, ResolvePlugins } from "./api.js"
 import { expectType } from "tsd"
 
 // the zod schema must be identical to the types
-expectType<PluginApi>(PluginApi.parse({} as any))
+expectType<Plugin>(Plugin.parse({} as any))
 
 type PluginOptions = {
 	pathPattern: string
@@ -21,7 +21,7 @@ type AppSpecificApis = {
 	"inlang.cli": AppSpecificApi2
 }
 
-const plugin1: PluginApi<PluginOptions, AppSpecificApis> = {
+const plugin1: Plugin<PluginOptions, AppSpecificApis> = {
 	meta: {
 		id: "inlang.plugin-i18next",
 		displayName: { en: "i18next" },
@@ -57,7 +57,7 @@ const plugin1: PluginApi<PluginOptions, AppSpecificApis> = {
 	},
 }
 
-expectType<PluginApi<PluginOptions, AppSpecificApis>>(plugin1)
+expectType<Plugin<PluginOptions, AppSpecificApis>>(plugin1)
 
 const resolvePlugins: ResolvePlugins = {} as any
 

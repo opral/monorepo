@@ -1,10 +1,10 @@
-import type { PluginApi } from "@inlang/plugin"
+import type { Plugin } from "@inlang/plugin"
 import * as rules from "./rules/index.js"
 
 /**
  * This plugin provides a set of standard lint rules.
  */
-export const standardLintRules: PluginApi = {
+export const standardLintRules: Plugin = {
 	meta: {
 		id: "inlang.standardLintRules",
 		displayName: {

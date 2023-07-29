@@ -1,6 +1,6 @@
 import type { InlangConfig } from "@inlang/config"
 import { tryCatch } from "@inlang/result"
-import { PluginApi, pluginIdRegex } from "./api.js"
+import { Plugin, pluginIdRegex } from "./api.js"
 import {
 	PluginIncorrectlyDefinedUsedApisException,
 	PluginUsesReservedNamespaceException,
@@ -23,7 +23,7 @@ const whitelistedPlugins = [
 
 export const parsePlugin = (args: {
 	config: InlangConfig
-	plugin: PluginApi
+	plugin: Plugin
 	pluginInConfig: InlangConfig["plugins"][0]
 	result: ResolvePluginResult
 }) => {
@@ -97,7 +97,7 @@ export const parsePlugin = (args: {
 	}
 
 	// -- USES UNAVAILABLE API / WILDCARD --
-	const parsed = tryCatch(() => PluginApi.parse(args.plugin))
+	const parsed = tryCatch(() => Plugin.parse(args.plugin))
 	if (parsed.error) {
 		throw new PluginUsesUnavailableApiException(
 			`Plugin ${args.pluginInConfig.module} uses unavailable api.`,
