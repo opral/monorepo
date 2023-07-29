@@ -106,28 +106,27 @@ export const load = initRootPageLoadWrapper<LayoutLoad>({
 		addRuntimeToContext,
 		getRuntimeFromContext
 	} from '@inlang/sdk-js/adapter-sveltekit/not-reactive'
+	import { addRuntimeToGlobalThis } from '@inlang/sdk-js/adapter-sveltekit/client/shared';
 	import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared'
 	import type { LayoutData } from "./$types.js"
 
 	export let data: LayoutData
 
+	addRuntimeToGlobalThis(getRuntimeFromData(data));
 	addRuntimeToContext(getRuntimeFromData(data))
 	let { language } = getRuntimeFromContext()
 
 	$: if (browser) {
+		addRuntimeToGlobalThis(getRuntimeFromData(data));
 		addRuntimeToContext(getRuntimeFromData(data))
 		({ language } = getRuntimeFromContext())
 	}
 </script>
 
 {#key language}
-	{#if language}
+	<!-- your code goes here -->
 
-		<!-- your code goes here -->
-
-		<slot />
-
-	{/key}
+	<slot />
 {/if}
 ```
 
@@ -152,7 +151,7 @@ If you want to use an import from the SDK inside a file where you have opted out
 </h2>
 ```
 
-### `*.js`
+### `*.js` (called from server)
 
 You need to pass the `i` function to the function you want to call it from.
 
@@ -177,6 +176,20 @@ And then call it from somewhere like this:
 	<title>{getPageTitle(i, 'home')}</title>
 </svelte:head>
 ```
+
+### `*.js` (called from client)
+
+If you create a function that only runs on the client, you don't need to pass the `i` function. Instead you can do the following:
+
+```ts
+import { getRuntimeFromGlobalThis } from "@inlang/sdk-js/adapter-sveltekit/client/shared"
+
+const getPageTitle = (page: string) => {
+	return getRuntimeFromGlobalThis().i(`title.${page}`)
+}
+```
+
+> Note: you can only do that inside a function and not on the top level of a file.
 
 ### `+layout.server.js`
 

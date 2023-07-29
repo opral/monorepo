@@ -1,5 +1,15 @@
 # @inlang/sdk-js
 
+## 0.11.0
+
+### Minor Changes
+
+- 7fb3e322: support for `.js` files called from `.svelte` components on the client
+
+### Patch Changes
+
+- 348eeb8c: allow to debug the applied transformations of a single file
+
 ## 0.10.1
 
 ### Patch Changes

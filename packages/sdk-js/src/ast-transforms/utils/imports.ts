@@ -115,6 +115,7 @@ export const getImportSpecifiersAsStrings = (sourceFile: SourceFile, path: strin
 
 	return importSpecifiers.map((importSpecifier) => importSpecifier.getText().replace("as", ":"))
 }
+
 // ------------------------------------------------------------------------------------------------
 
 export const isOptOutImportPresent = (sourceFile: SourceFile) =>
