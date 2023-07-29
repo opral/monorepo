@@ -39,8 +39,8 @@
 	},
 	"dependencies": {
 		"@inlang-git/fs": "^0.0.4",
-		"pako": "^2.1.0",
-		"isomorphic-git": "github:inlang/isomorphic-git"
+		"isomorphic-git": "github:inlang/isomorphic-git",
+		"pako": "~1.0.5"
 	},
 	"license": "Apache-2.0",
 	"devDependencies": {
