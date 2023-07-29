@@ -1,4 +1,4 @@
-import type { ResolvePlugins, ResolvedPluginsApi, PluginApi } from "./api.js"
+import type { ResolvePlugins, ResolvedPluginsApi, Plugin } from "./api.js"
 import { PluginException, PluginImportException } from "./exceptions.js"
 import { tryCatch } from "@inlang/result"
 import { parsePlugin } from "./parsePlugin.js"
@@ -37,7 +37,7 @@ export const resolvePlugins: ResolvePlugins = async (args) => {
 				})
 			}
 
-			const plugin = module.data.default as PluginApi
+			const plugin = module.data.default as Plugin
 			const api = plugin.setup({ config: args.config, options: pluginInConfig.options })
 			const lintRules = api.addLintRules?.() ?? []
 			const appSpecificApi = api.addAppSpecificApi?.() ?? {}

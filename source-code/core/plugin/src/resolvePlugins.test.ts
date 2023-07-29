@@ -12,7 +12,7 @@ import {
 	PluginUsesUnavailableApiException,
 } from "./exceptions.js"
 import type { InlangEnvironment } from "@inlang/environment"
-import type { PluginApi } from "./api.js"
+import type { Plugin } from "./api.js"
 
 describe("generally", () => {
 	it("should return an error if a plugin cannot be imported", async () => {
@@ -33,7 +33,7 @@ describe("generally", () => {
 	})
 
 	it("should return an error if a plugin uses an invalid id", async () => {
-		const mockPlugin: PluginApi = {
+		const mockPlugin: Plugin = {
 			meta: {
 				// @ts-expect-error the id is invalid
 				id: "no-namespace",
@@ -73,7 +73,7 @@ describe("generally", () => {
 	})
 
 	it("should return an error if a plugin uses APIs that are not available", async () => {
-		const mockPlugin: PluginApi = {
+		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.my-plugin",
 				description: { en: "" },
@@ -110,7 +110,7 @@ describe("generally", () => {
 	})
 
 	it("should return an error if a plugin uses APIs that are not defined in meta.usedApis", async () => {
-		const mockPlugin: PluginApi = {
+		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin",
 				description: { en: "" },
@@ -145,7 +145,7 @@ describe("generally", () => {
 	})
 
 	it("should return an error if a plugin DOES NOT use APIs that are defined in meta.usedApis", async () => {
-		const mockPlugin: PluginApi = {
+		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin",
 				description: { en: "" },
@@ -181,7 +181,7 @@ describe("generally", () => {
 	})
 
 	it("should not initialize a plugin that uses the 'inlang' namespace except for inlang whitelisted plugins", async () => {
-		const mockPlugin: PluginApi = {
+		const mockPlugin: Plugin = {
 			meta: {
 				id: "inlang.not-whitelisted-plugin",
 				description: { en: "" },
@@ -218,7 +218,7 @@ describe("generally", () => {
 
 describe("loadMessages", () => {
 	it("should load messages from a local source", async () => {
-		const mockPlugin: PluginApi = {
+		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin",
 				description: { en: "" },
@@ -253,7 +253,7 @@ describe("loadMessages", () => {
 	})
 
 	it("should collect an error if function is defined twice in multiple plugins", async () => {
-		const mockPlugin: PluginApi = {
+		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin-load-messages",
 				description: { en: "" },
@@ -267,7 +267,7 @@ describe("loadMessages", () => {
 				}
 			},
 		}
-		const mockPlugin2: PluginApi = {
+		const mockPlugin2: Plugin = {
 			meta: {
 				id: "plugin.plugin-load-messages2",
 				description: { en: "" },
@@ -311,7 +311,7 @@ describe("loadMessages", () => {
 
 describe("saveMessages", () => {
 	it("should save messages to a local source", async () => {
-		const mockPlugin: PluginApi = {
+		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin",
 				description: { en: "" },
@@ -344,7 +344,7 @@ describe("saveMessages", () => {
 	})
 
 	it("should collect an error if function is defined twice in multiple plugins", async () => {
-		const mockPlugin: PluginApi = {
+		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin-save-messages",
 				description: { en: "" },
@@ -358,7 +358,7 @@ describe("saveMessages", () => {
 				}
 			},
 		}
-		const mockPlugin2: PluginApi = {
+		const mockPlugin2: Plugin = {
 			meta: {
 				id: "plugin.plugin-save-messages2",
 				description: { en: "" },
@@ -402,7 +402,7 @@ describe("saveMessages", () => {
 
 describe("addLintRules", () => {
 	it("should resolve a single lint rule", async () => {
-		const mockPlugin: PluginApi = {
+		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin",
 				description: { en: "" },
@@ -441,7 +441,7 @@ describe("addLintRules", () => {
 	})
 
 	it("should resolve multiple lint rules", async () => {
-		const mockPlugin: PluginApi = {
+		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin",
 				description: { en: "" },
@@ -487,7 +487,7 @@ describe("addLintRules", () => {
 
 describe("addAppSpecificApi", () => {
 	it("it should resolve app specific configs", async () => {
-		const mockPlugin: PluginApi = {
+		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin",
 				description: { en: "" },
@@ -524,7 +524,7 @@ describe("addAppSpecificApi", () => {
 	})
 
 	it("it should resolve app specific configs", async () => {
-		const mockPlugin: PluginApi = {
+		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin",
 				description: { en: "" },
@@ -542,7 +542,7 @@ describe("addAppSpecificApi", () => {
 				}
 			},
 		}
-		const mockPlugin2: PluginApi = {
+		const mockPlugin2: Plugin = {
 			meta: {
 				id: "plugin.plugin2",
 				description: { en: "" },
@@ -590,7 +590,7 @@ describe("addAppSpecificApi", () => {
 
 describe("error handling", () => {
 	it("should handle PluginException instances thrown during plugin setup", async () => {
-		const mockPlugin: PluginApi = {
+		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin-save-messages",
 				description: { en: "" },
@@ -625,7 +625,7 @@ describe("error handling", () => {
 	})
 
 	it("should handle generic Error instances thrown during plugin setup", async () => {
-		const mockPlugin: PluginApi = {
+		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin-save-messages",
 				description: { en: "" },
@@ -660,7 +660,7 @@ describe("error handling", () => {
 	})
 
 	it("should handle unhandled and unknown errors during plugin setup", async () => {
-		const mockPlugin: PluginApi = {
+		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin-save-messages",
 				description: { en: "" },
@@ -697,7 +697,7 @@ describe("error handling", () => {
 
 // ---------------
 
-function mockEnvWithPlugins(plugins: Record<string, PluginApi>): InlangEnvironment {
+function mockEnvWithPlugins(plugins: Record<string, Plugin>): InlangEnvironment {
 	return {
 		$fs: () => undefined,
 		$import: (moduleUrl: string) => {

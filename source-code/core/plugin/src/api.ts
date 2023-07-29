@@ -25,7 +25,7 @@ export const pluginIdRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+(?:-[a-z0-9]+)
 /**
  * The plugin API is used to extend inlang's functionality.
  */
-export type PluginApi<
+export type Plugin<
 	PluginOptions extends Record<string, string | string[]> = Record<string, string>,
 	AppSpecificApis extends object = {},
 > = {
@@ -41,7 +41,7 @@ export type PluginApi<
 		 * If the plugin uses an API that is not listed here, the plugin will not be loaded.
 		 * Mainly used for the plugin marketplace.
 		 */
-		usedApis: z.infer<typeof PluginApi>["meta"]["usedApis"]
+		usedApis: z.infer<typeof Plugin>["meta"]["usedApis"]
 	}>
 	/**
 	 * The setup function is the first function that is called when inlang loads the plugin.
@@ -109,14 +109,14 @@ export type ResolvedPluginsApi<AppSpecificApis extends object = {}> = {
 	/**
 	 * Meta information about the imported plugins.
 	 */
-	plugins: Array<PluginApi["meta"] & { module: string }>
+	plugins: Array<Plugin["meta"] & { module: string }>
 }
 
 // --------------------------------------------- ZOD ---------------------------------------------
 
-export const PluginApi = z.object({
+export const Plugin = z.object({
 	meta: z.object({
-		id: z.custom<PluginApi["meta"]["id"]>((value) => pluginIdRegex.test(value as string)),
+		id: z.custom<Plugin["meta"]["id"]>((value) => pluginIdRegex.test(value as string)),
 		displayName: TranslatedStrings,
 		description: TranslatedStrings,
 		keywords: z.array(z.string()),
@@ -131,6 +131,6 @@ export const PluginApi = z.object({
 	}),
 	setup: z
 		.function()
-		.args(z.custom<Parameters<PluginApi["setup"]>[0]>())
-		.returns(z.custom<ReturnType<PluginApi["setup"]>>()),
+		.args(z.custom<Parameters<Plugin["setup"]>[0]>())
+		.returns(z.custom<ReturnType<Plugin["setup"]>>()),
 })
