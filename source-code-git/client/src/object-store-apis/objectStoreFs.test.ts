@@ -32,8 +32,9 @@ describe("git fs", async () => {
 		depth: 1,
 	})
 
-	const objectStore = await createMappedObjectStore(`${dir}/.git`, fs)
-	.then((store) => initMappedObjectStore(store, main))
+	const objectStore = await createMappedObjectStore(`${dir}/.git`, fs).then((store) =>
+		initMappedObjectStore(store, main),
+	)
 
 	const gitFs = await createObjectStoreFs(objectStore)
 
