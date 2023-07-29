@@ -26,7 +26,7 @@ const ctx = await context({
 	minify: !isDev && !isTest,
 	platform: "node",
 	sourcemap: isDev || isTest,
-	external: ["vscode", "@vitest/ui", "@vitest/browser", "webdriverio", "safaridriver", "playwright"],
+	external: ["vscode"],
 })
 
 if (isDev) {
