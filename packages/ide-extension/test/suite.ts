@@ -1,3 +1,6 @@
-import { startVitest } from 'vitest/node'
+import * as path from 'node:path';
+import { run } from 'node:test';
 
-startVitest('test', [], { run: true }).then((vitest) => vitest?.close())
+export function runSuite() {
+  run({ files: [path.resolve('**/**.test.js')] }).pipe(process.stdout);
+}
