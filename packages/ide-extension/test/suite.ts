@@ -1,6 +1,6 @@
 import * as path from 'node:path';
-import { run } from 'node:test';
+import { run as nodeTestRun } from 'node:test';
 
-export function runSuite() {
-  run({ files: [path.resolve('**/**.test.js')] }).pipe(process.stdout);
+export function run() {
+  nodeTestRun({ files: [path.resolve('**/**.test.js')] }).pipe(process.stdout);
 }
