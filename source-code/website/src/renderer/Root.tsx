@@ -1,4 +1,12 @@
-import { Accessor, Component, createEffect, createSignal, ErrorBoundary, onMount } from "solid-js"
+import {
+	Accessor,
+	Component,
+	createEffect,
+	createSignal,
+	ErrorBoundary,
+	onMount,
+	Show,
+} from "solid-js"
 import type { PageContextRenderer } from "./types.js"
 import { Dynamic } from "solid-js/web"
 import { LocalStorageProvider } from "@src/services/local-storage/index.js"
@@ -9,9 +17,6 @@ import { createI18nContext } from "@solid-primitives/i18n"
 export type RootProps = Accessor<{
 	pageContext: PageContextRenderer
 }>
-
-// let the page know that the locales are loaded
-export const [localesLoaded, setLocalesLoaded] = createSignal(false)
 
 // get translation files and put it in context provider
 const [response] = await rpc.getLangResources()
@@ -28,22 +33,32 @@ export function Root(props: {
 	page: Component
 	pageProps: Record<string, unknown>
 	locale: string
+	isEditor: boolean
 }) {
 	return (
 		<ErrorBoundary fallback={(error) => <ErrorMessage error={error} />}>
 			<I18nContext.Provider value={value}>
 				<LocalStorageProvider>
-					<RootWithProviders page={props.page} pageProps={props.pageProps} locale={props.locale} />
+					<RootWithProviders
+						page={props.page}
+						pageProps={props.pageProps}
+						locale={props.locale}
+						isEditor={props.isEditor}
+					/>
 				</LocalStorageProvider>
 			</I18nContext.Provider>
 		</ErrorBoundary>
 	)
 }
 
+// This signal is used to render the rest of the content after fetching locales data
+export const [localesLoaded, setLocalesLoaded] = createSignal(false)
+
 function RootWithProviders(props: {
 	page: Component
 	pageProps: Record<string, unknown>
 	locale: string
+	isEditor: boolean
 }) {
 	const [, { locale }] = useI18n()
 
@@ -53,8 +68,16 @@ function RootWithProviders(props: {
 	})
 
 	return (
-		// <div>Hallo Welt</div>
-		<Dynamic component={props.page} {...props.pageProps} />
+		<>
+			{/* Render the rest of the content after fetching locales data */}
+			<Show when={localesLoaded() && props.isEditor}>
+				<Dynamic component={props.page} {...props.pageProps} />
+			</Show>
+			{/* Render differently if it isn't the Editor */}
+			<Show when={!props.isEditor && props.pageProps !== undefined}>
+				<Dynamic component={props.page} {...props.pageProps} />
+			</Show>
+		</>
 	)
 }
 
