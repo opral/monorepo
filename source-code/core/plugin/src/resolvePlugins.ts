@@ -1,7 +1,13 @@
 import type { ResolvePlugins, ResolvedPluginsApi, Plugin } from "./api.js"
-import { PluginException, PluginImportException } from "./exceptions.js"
+import {
+	PluginException,
+	PluginFunctionLoadMessagesAlreadyDefinedException,
+	PluginFunctionSaveMessagesAlreadyDefinedException,
+	PluginImportException,
+} from "./exceptions.js"
 import { tryCatch } from "@inlang/result"
 import { parsePlugin } from "./parsePlugin.js"
+import { validatePlugins } from "./validatePlugins.js"
 
 export type ResolvePluginResult = {
 	data: Partial<ResolvedPluginsApi> &
@@ -30,35 +36,58 @@ export const resolvePlugins: ResolvePlugins = async (args) => {
 
 			const module = await tryCatch(() => args.env.$import(pluginInConfig.module))
 
+			// -- IMPORT ERROR --
 			if (module.error) {
-				throw new PluginImportException(`Couldn't import the plugin "${pluginInConfig.module}"`, {
-					module: pluginInConfig.module,
-					cause: module.error as Error,
-				})
+				result.errors.push(
+					new PluginImportException(`Couldn't import the plugin "${pluginInConfig.module}"`, {
+						module: pluginInConfig.module,
+						cause: module.error as Error,
+					}),
+				)
 			}
 
 			const plugin = module.data.default as Plugin
-			const api = plugin.setup({ config: args.config, options: pluginInConfig.options })
-			const lintRules = api.addLintRules?.() ?? []
-			const appSpecificApi = api.addAppSpecificApi?.() ?? {}
-
-			parsePlugin({
+			const setup = plugin.setup?.({
+				options: pluginInConfig.options,
 				config: args.config,
+			})
+			const lintRules = plugin.addLintRules?.() ?? []
+			const appSpecificApi = plugin.addAppSpecificApi?.() ?? {}
+
+			/**
+			 * -------------- PARSE & VALIDATE PLUGIN --------------
+			 */
+
+			// --- PARSE PLUGIN ---
+			const parsed = parsePlugin({
+				maybeValidPlugin: plugin,
+			})
+
+			if (parsed.errors) {
+				result.errors.push(...parsed.errors)
+			}
+
+			// --- VALIDATE PLUGINS ---
+			const validated = validatePlugins({
+				plugins: result,
 				plugin,
 				pluginInConfig,
-				result,
 			})
+
+			if (validated.errors) {
+				result.errors.push(...validated.errors)
+			}
 
 			/**
 			 * -------------- BEGIN ADDING TO RESULT --------------
 			 */
 
-			if (typeof api.loadMessages === "function") {
-				result.data.loadMessages = async () => await api.loadMessages!(args)
+			if (typeof plugin.loadMessages === "function") {
+				result.data.loadMessages = async () => await plugin.loadMessages!(args)
 			}
 
-			if (typeof api.saveMessages === "function") {
-				result.data.saveMessages = async (args) => await api.saveMessages!(args)
+			if (typeof plugin.saveMessages === "function") {
+				result.data.saveMessages = async (args) => await plugin.saveMessages!(args)
 			}
 
 			result.data.appSpecificApi = {

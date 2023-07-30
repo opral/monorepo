@@ -1,5 +1,6 @@
 import type { $ImportError } from "@inlang/environment"
 import type { InlangConfig } from "@inlang/config"
+import type { Plugin } from "./api.js"
 
 type PluginExceptionOptions = {
 	module: InlangConfig["plugins"][number]["module"]
@@ -32,17 +33,10 @@ export class PluginInvalidIdException extends PluginException {
 	}
 }
 
-export class PluginUsesUnavailableApiException extends PluginException {
+export class PluginUsesInvalidApiException extends PluginException {
 	constructor(message: string, options: PluginExceptionOptions) {
 		super(message, options)
-		this.name = "PluginIncorrectlyDefinedUsedApisException"
-	}
-}
-
-export class PluginIncorrectlyDefinedUsedApisException extends PluginException {
-	constructor(message: string, options: PluginExceptionOptions) {
-		super(message, options)
-		this.name = "PluginIncorrectlyDefinedUsedApisException"
+		this.name = "PluginUsesInvalidApiException"
 	}
 }
 
