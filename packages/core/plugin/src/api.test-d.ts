@@ -27,31 +27,30 @@ const plugin1: Plugin<PluginOptions, AppSpecificApis> = {
 		displayName: { en: "i18next" },
 		description: { en: "i18next plugin for inlang" },
 		keywords: ["i18next", "react", "nextjs"],
-		usedApis: ["addLintRules", "loadMessages", "saveMessages", "addAppSpecificApi"],
 	},
 	setup: ({ options, config }) => {
 		if (options.pathPattern === undefined) {
 			throw Error("Path pattern is undefined")
 		}
+		if (config === undefined) {
+			throw Error("Config is undefined")
+		}
+		return {}
+	},
+
+	loadMessages: async () => {
+		return []
+	},
+	saveMessages: async ({ messages }) => {
+		console.log(messages)
+	},
+	addAppSpecificApi: () => {
 		return {
-			loadMessages: async () => {
-				for (const languageTag of config.languageTags) {
-					console.log(languageTag + options.pathPattern)
-				}
-				return []
+			"inlang.ide-extension": {
+				messageReferenceMatcher: () => {},
 			},
-			saveMessages: async ({ messages }) => {
-				console.log(messages)
-			},
-			addAppSpecificApi: () => {
-				return {
-					"inlang.ide-extension": {
-						messageReferenceMatcher: () => {},
-					},
-					"inlang.cli": {
-						cliExtract: () => {},
-					},
-				}
+			"inlang.cli": {
+				cliExtract: () => {},
 			},
 		}
 	},
