@@ -1,7 +1,6 @@
 import type { InlangConfig } from "@inlang/config"
 import type { InlangEnvironment } from "@inlang/environment"
 import { TranslatedStrings } from "@inlang/language-tag"
-import type { LintRule } from "../../lint/dist/index.js"
 import type { Message } from "@inlang/messages"
 import { z } from "zod"
 import type {
@@ -50,7 +49,6 @@ export type Plugin<
 	 */
 	loadMessages?: (args: {}) => Promise<Message[]> | Message[]
 	saveMessages?: (args: { messages: Message[] }) => Promise<void> | void
-	addLintRules?: () => LintRule[]
 	/**
 	 * Define app specific APIs.
 	 *
@@ -88,7 +86,6 @@ export type ResolvePlugins = <AppSpecificApis extends object = {}>(args: {
 export type ResolvedPluginsApi<AppSpecificApis extends object = {}> = {
 	loadMessages: () => Promise<Message[]>
 	saveMessages: (args: { messages: Message[] }) => Promise<void>
-	lintRules: LintRule[]
 	/**
 	 * App specific APIs.
 	 *
@@ -96,10 +93,6 @@ export type ResolvedPluginsApi<AppSpecificApis extends object = {}> = {
 	 *  appSpecificApi["inlang.ide-extension"].messageReferenceMatcher()
 	 */
 	appSpecificApi: AppSpecificApis
-	/**
-	 * Meta information about the imported plugins.
-	 */
-	plugins: Array<Plugin["meta"] & { module: string }>
 }
 
 // --------------------------------------------- ZOD ---------------------------------------------
@@ -122,6 +115,5 @@ export const Plugin = z.object({
 			.args(z.object({ messages: z.custom<Message[]>() }))
 			.returns(z.custom<void>()),
 	),
-	addLintRules: z.optional(z.function().args().returns(z.custom<LintRule[]>())),
 	addAppSpecificApi: z.optional(z.function().args().returns(z.custom<Record<string, unknown>>())),
 })
