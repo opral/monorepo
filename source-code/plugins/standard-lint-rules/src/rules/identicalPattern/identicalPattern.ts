@@ -5,21 +5,25 @@ type IdenticalPatternRuleOptions = {
 	ignore: string[]
 }
 
-/**
- * Checks for identical patterns in different languages.
- *
- * A message with identical wording in multiple languages can indicate
- * that the translations are redundant or can be combined into a single
- * message to reduce translation effort.
- */
-export const identicalPattern = ({
+export const identicalPatternRule = ({
 	ignore = [],
 }: IdenticalPatternRuleOptions): MessageLintRule => ({
-	id: "inlang.identicalPattern",
-	displayName: {
-		en: "Identical Pattern",
+	meta: {
+		id: "inlang.identicalPattern",
+		displayName: {
+			en: "Identical Pattern",
+		},
+		description: {
+			en: `
+Checks for identical patterns in different languages.
+
+A message with identical wording in multiple languages can indicate
+that the translations are redundant or can be combined into a single
+message to reduce translation effort.
+`,
+		},
+		defaultLevel: "warning",
 	},
-	defaultLevel: "warning", // TODO: how to override level?
 	message: ({ message: { id, body }, config, report }) => {
 		const referenceVariants = body[config.sourceLanguageTag]!
 

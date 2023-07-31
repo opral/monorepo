@@ -1,12 +1,11 @@
 import { expect, test } from "vitest"
-import { messageWithoutReference } from "./messageWithoutReference.js"
 import { getLintReports, lint } from "@inlang/core/lint"
-import type { InlangConfig } from "@inlang/core/config"
+import type { InlangConfig } from "@inlang/config"
 
-const config: Pick<InlangConfig, "lint" | "sourceLanguageTag" | "languageTags"> = {
+const config: Pick<InlangConfig, "sourceLanguageTag" | "languageTags" | 'modules'> = {
 	sourceLanguageTag: "en",
 	languageTags: ["en", "de", "fr"],
-	lint: { rules: [messageWithoutReference("error")] },
+	modules: ["./index.js"],
 }
 
 const [lintedResources, errors] = await lint({
