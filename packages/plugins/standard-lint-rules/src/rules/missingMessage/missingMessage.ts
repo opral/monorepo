@@ -1,18 +1,22 @@
 import type { MessageLintRule } from "@inlang/plugin"
 
-/**
- * Checks for missing messages (translations).
- *
- * If a message exists in the reference resource but is missing
- * in a target resource, it is likely that the message has not
- * been translated yet.
- */
-export const missingMessage = (): MessageLintRule => ({
-	id: "inlang.missingMessage",
-	displayName: {
-		en: "Missing Message",
+export const missingMessageRule = (): MessageLintRule => ({
+	meta: {
+		id: "inlang.missingMessage",
+		displayName: {
+			en: "Missing Message",
+		},
+		description: {
+			en: `
+Checks for missing messages in a language tag.
+
+If a message exists in the reference resource but is missing
+in a target resource, it is likely that the message has not
+been translated yet.
+`,
+		},
+		defaultLevel: "error",
 	},
-	defaultLevel: "error", // TODO: how to override level?
 	message: ({ message: { id, body }, config, report }) => {
 		const languageTags = config.languageTags.filter(
 			(languageTag) => languageTag !== config.sourceLanguageTag,
@@ -24,7 +28,7 @@ export const missingMessage = (): MessageLintRule => ({
 					messageId: id,
 					languageTag,
 					body: {
-						en: `Message with id '${id}' is missing for '${languageTag}'.`, // TODO: simplify message as information is redundant
+						en: `Message with id '${id}' is missing for language tag '${languageTag}'.`,
 					},
 				})
 				return
@@ -36,7 +40,7 @@ export const missingMessage = (): MessageLintRule => ({
 					messageId: id,
 					languageTag,
 					body: {
-						en: `Empty pattern (length 0).`,
+						en: `Message with id '${id}' has no patterns for language tag '${languageTag}'.`,
 					},
 				})
 			} else if (
@@ -48,7 +52,7 @@ export const missingMessage = (): MessageLintRule => ({
 					messageId: id,
 					languageTag,
 					body: {
-						en: `The pattern contains only only one element which is an empty string.`,
+						en: `Message with id '${id}' has no content for language tag '${languageTag}'.`,
 					},
 				})
 			}

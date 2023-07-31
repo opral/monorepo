@@ -1,1 +1,1 @@
-export { standardLintRules as default } from "./plugin.js"
+export { default } from "./module.js"
