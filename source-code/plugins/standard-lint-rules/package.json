@@ -21,6 +21,7 @@
 	},
 	"devDependencies": {
 		"@inlang/module": "*",
+		"@inlang/linter": "*",
 		"concurrently": "^8.0.1",
 		"esbuild": "^0.17.19",
 		"tsd": "^0.28.1",

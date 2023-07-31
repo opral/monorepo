@@ -25,14 +25,17 @@ export type MessageLintRule = LintRule & {
 		query: Pick<MessageQueryApi, "get">
 		config: Readonly<InlangConfig>
 		report: ReportMessageLint
-	}) => void
+	}) => MaybePromise<void>
 }
+
+// TODO: make it a general type for other packages to use
+type MaybePromise<T> = T | Promise<T>
 
 export type ReportMessageLint = (args: {
 	messageId: Message["id"]
 	languageTag: LanguageTag
 	body: LintReport["body"]
-}) => MessageLintReport
+}) => void
 
 export type LintReport = {
 	ruleId: LintRule["meta"]["id"]
