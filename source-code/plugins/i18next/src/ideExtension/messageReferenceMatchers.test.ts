@@ -1,12 +1,12 @@
 import { it, expect } from "vitest"
 import { parse } from "./messageReferenceMatchers.js"
-import type { PluginSettings } from "../settings.js"
+import type { PluginOptions } from "../options.js"
 
 it("should not match a function that end with t but is not a t function", async () => {
 	const sourceCode = `
     const x = somet("some-id")
     `
-	const settings: PluginSettings = {
+	const settings: PluginOptions = {
 		pathPattern: "./{language}.json",
 	}
 	const matches = parse(sourceCode, settings)
@@ -17,7 +17,7 @@ it("should not match a string without a t function", async () => {
 	const sourceCode = `
     const x = some("some-id")
     `
-	const settings: PluginSettings = {
+	const settings: PluginOptions = {
 		pathPattern: "./{language}.json",
 	}
 	const matches = parse(sourceCode, settings)
@@ -29,7 +29,7 @@ it('should detect double quotes t("id")', async () => {
 	const sourceCode = `
     const x = t("some-id")
     `
-	const settings: PluginSettings = {
+	const settings: PluginOptions = {
 		pathPattern: "./{language}.json",
 	}
 	const matches = parse(sourceCode, settings)
@@ -46,7 +46,7 @@ it(`should detect single quotes t('id')`, async () => {
 	const sourceCode = `
     const x = t('some-id')
   `
-	const settings: PluginSettings = {
+	const settings: PluginOptions = {
 		pathPattern: "./{language}.json",
 	}
 	const matches = parse(sourceCode, settings)
@@ -60,7 +60,7 @@ it(`should detect JSX <p>{t('id')}</p>`, async () => {
 	const sourceCode = `
     <p>{t('some-id')}</p>
     `
-	const settings: PluginSettings = {
+	const settings: PluginOptions = {
 		pathPattern: "./{language}.json",
 	}
 	const matches = parse(sourceCode, settings)
@@ -74,7 +74,7 @@ it("should detect t('id', ...args)", async () => {
 	const sourceCode = `
     <p>{t('some-id' , { name: "inlang" }, variable, arg3)}</p>
     `
-	const settings: PluginSettings = {
+	const settings: PluginOptions = {
 		pathPattern: "./{language}.json",
 	}
 	const matches = parse(sourceCode, settings)
@@ -88,7 +88,7 @@ it("should not mismatch a string with different quotation marks", async () => {
 	const sourceCode = `
     <p>{t("yes')}</p>
     `
-	const settings: PluginSettings = {
+	const settings: PluginOptions = {
 		pathPattern: "./{language}.json",
 	}
 	const matches = parse(sourceCode, settings)
@@ -99,7 +99,7 @@ it("should not mismatch a string with different quotation marks", async () => {
 it.skip("should ignore whitespace", async () => {
 	// prefixing with space see test above
 	const sourceCode = `const x = t("some-id", undefined)`
-	const settings: PluginSettings = {
+	const settings: PluginOptions = {
 		pathPattern: "./{language}.json",
 	}
 	const matches = parse(sourceCode, settings)
@@ -143,7 +143,7 @@ it("should work on a production JSX example", async () => {
 
 		export default Custom404;
 		`
-	const settings: PluginSettings = {
+	const settings: PluginOptions = {
 		pathPattern: "./{language}.json",
 	}
 	const matches = parse(sourceCode, settings)
@@ -178,7 +178,7 @@ it("should work on a production JSX example with namespaces", async () => {
 
 		export default Custom404;
 		`
-	const settings: PluginSettings = {
+	const settings: PluginOptions = {
 		pathPattern: {
 			common: "./{language}/common.json",
 			vital: "./{language}/vital.json",
@@ -202,7 +202,7 @@ it("should work on a production JSX example with namespaces option syntax", asyn
 		<p>{t('c',{  ns: 'translation' })}</p>
 		<p>{t('d' , { ns: 'test'  })}</p>
 	`
-	const settings: PluginSettings = {
+	const settings: PluginOptions = {
 		pathPattern: {
 			common: "./{language}/common.json",
 			vital: "./{language}/vital.json",
@@ -226,7 +226,7 @@ it("should work on a production JSX example with namespaces option syntax and ad
 	const sourceCode = `
 		<p>{t("a", {ns: "common"}, variable, arg3)}</p>
 	`
-	const settings: PluginSettings = {
+	const settings: PluginOptions = {
 		pathPattern: {
 			common: "./{language}/common.json",
 		},
@@ -240,7 +240,7 @@ it("should add the default namespace if required by pathPattern", async () => {
 	const sourceCode = `
 		<p>{t("a")}</p>
 	`
-	const settings: PluginSettings = {
+	const settings: PluginOptions = {
 		pathPattern: {
 			common: "./{language}/common.json",
 		},

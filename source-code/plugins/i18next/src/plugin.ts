@@ -1,16 +1,55 @@
-import type { InlangConfig } from "@inlang/core/config"
-import type { InlangEnvironment } from "@inlang/core/environment"
-import type * as ast from "@inlang/core/ast"
-import { createPlugin } from "@inlang/core/plugin"
-import {
-	throwIfInvalidSettings,
-	type PluginSettings,
-	type PluginSettingsWithDefaults,
-} from "./settings.js"
-import { ideExtensionConfig } from "./ideExtension/config.js"
-import { flatten, unflatten } from "flat"
+import type { Message, Variant, LanguageTag, InlangEnvironment, InlangConfig, TranslatedStrings } from "@inlang/plugin"
+import { type PluginOptionsWithDefaults, type PluginOptions, throwIfInvalidOptions } from "./options.js"
 import { detectJsonSpacing, detectIsNested, replaceAll } from "./utilities.js"
-import type { FilteredResourcesProps } from "./types.js"
+import { flatten } from "flat"
+
+// Will be removed when plugin build is working -------------------------------
+
+type JSONSerializable<
+	T extends Record<string, string | string[] | Record<string, string | string[]>>,
+> = T
+
+export type Plugin<
+	PluginOptions extends Record<string, string | string[] | Record<string, string>> = Record<string, string>,
+	AppSpecificApis extends object = {},
+> = {
+	// * Must be JSON serializable if we want an external plugin manifest in the future.
+	meta: JSONSerializable<{
+		id: `${string}.${string}`
+		displayName: TranslatedStrings
+		description: TranslatedStrings
+		keywords: string[]
+	}>
+	/**
+	 * The setup function is the first function that is called when inlang loads the plugin.
+	 *
+	 * Use the setup function to initialize state, handle the options and more.
+	 */
+	setup: (args: { options: PluginOptions; config: Readonly<InlangConfig> }) => {}
+	/**
+	 * Load messages.
+	 *
+	 * - if messages with language tags that are not defined in the config.languageTags
+	 *   are returned, the user config will be automatically updated to include the
+	 *   new language tags.
+	 */
+	loadMessages?: (args: {}) => Promise<Message[]> | Message[]
+	saveMessages?: (args: { messages: Message[] }) => Promise<void> | void
+	/**
+	 * Define app specific APIs.
+	 *
+	 * @example
+	 * addAppSpecificApi: () => ({
+	 * 	 "inlang.ide-extension": {
+	 * 	   messageReferenceMatcher: () => {}
+	 * 	 }
+	 *  })
+	 */
+	addAppSpecificApi?: () => AppSpecificApis
+	// afterSetup: () => {}
+}
+
+// ----------------------------------------------------------------------------
 
 /**
  * The spacing of the JSON files in this repository.
@@ -67,135 +106,109 @@ function defaultNesting() {
 	)
 }
 
-export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
-	id: "inlang.plugin-i18next",
-	async config() {
-		// will throw if the settings are invalid,
-		// leading to better DX because fails fast
-		throwIfInvalidSettings(settings)
+// const pluginOptions: PluginSettingsWithDefaults = {
+// 	variableReferencePattern: ["{{", "}}"],
+// 	ignore: [], // ignore no files by default
+// 	...options,
+// }
 
-		const withDefaultSettings: PluginSettingsWithDefaults = {
-			variableReferencePattern: ["{{", "}}"],
-			ignore: [], // ignore no files by default
-			...settings,
-		}
+let pluginOptions: PluginOptions = {}
+const pluginOptionsWithDefaults: PluginOptionsWithDefaults = {
+	variableReferencePattern: ["{{", "}}"],
+	ignore: [],
+	...pluginOptions,
+}
+let pluginConfig: InlangConfig = {} 
 
-		return {
-			languageTags: await getLanguages({
-				$fs: env.$fs,
-				settings: withDefaultSettings,
-			}),
-			readResources: (args) =>
-				readResources({
-					...args,
-					$fs: env.$fs,
-					settings: withDefaultSettings,
-				}),
-			writeResources: (args) =>
-				writeResources({
-					...args,
-					$fs: env.$fs,
-					settings: withDefaultSettings,
-				}),
-			ideExtension: ideExtensionConfig(withDefaultSettings),
-		} satisfies Partial<InlangConfig>
+export const plugin: Plugin = {
+	meta: {
+		id: "inlang.plugin-i18next",
+		displayName: { en: "i18next" },
+		description: { en: "i18next plugin for inlang" },
+		keywords: ["i18next", "react", "nextjs"],
 	},
-}))
-
-/**
- * Automatically derives the languages in this repository.
- */
-async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: PluginSettings }) {
-	const languages: string[] = []
-
-	// because of duplication of code the pathArray is eather parsed by th epathPattern object or created by the pathPattern string
-	const pathArray: Array<string> =
-		typeof args.settings.pathPattern !== "string"
-			? Object.values(args.settings.pathPattern)
-			: [args.settings.pathPattern]
-
-	// When there are namespaces, this will loop through all namespaces and collect the languages, otherwise it is just one path
-	for (const path of pathArray) {
-		const [pathBeforeLanguage] = path.split("{language}")
-		const parentDirectory = await args.$fs.readdir(pathBeforeLanguage!)
-
-		for (const filePath of parentDirectory) {
-			//check if file really exists in the dir
-			const fileExists = await Promise.resolve(
-				args.$fs
-					.readFile(path.replace("{language}", filePath.replace(".json", "")))
-					.then(() => true)
-					.catch(() => false),
-			)
-
-			//collect languages for each pathPattern -> so we do not miss any language
-			//It is not enough to just get the prentDirectory -> there could be false directories
-			if (fileExists && args.settings.ignore?.some((s) => s === filePath) === false) {
-				languages.push(filePath.replace(".json", ""))
-			}
+	setup: ({ options, config }) => {
+    if (options.pathPattern === undefined) {
+			throwIfInvalidOptions(options)
+			pluginOptions = options
+			pluginConfig = config 
+			return {}
 		}
-	}
-
-	// Using Set(), an instance of unique values will be created, implicitly using this instance will delete the duplicates.
-	return [...new Set(languages)]
+	},
+	loadMessages: async () => {
+		return loadMessages(
+      {
+        $fs: env.$fs,
+        config: pluginConfig,
+        options: pluginOptionsWithDefaults,
+      }
+    )
+	},
+	saveMessages: async () => {
+    return saveMessages(
+      {
+        $fs: env.$fs,
+        config: pluginConfig,
+        options: pluginOptionsWithDefaults,
+      }
+    )
+	},
+	// addAppSpecificApi: () => {
+	// 	return {
+	// 		"inlang.ide-extension": {
+	// 			messageReferenceMatcher: () => {},
+	// 		},
+	// 		"inlang.cli": {
+	// 			cliExtract: () => {},
+	// 		},
+	// 	}
+	// },
 }
 
 /**
  * Reading resources.
  */
-async function readResources(
-	args: Parameters<InlangConfig["readResources"]>[0] & {
+async function loadMessages(
+	args: {
 		$fs: InlangEnvironment["$fs"]
-		settings: PluginSettingsWithDefaults
+		config: InlangConfig
+		options: PluginOptions
 	},
-): ReturnType<InlangConfig["readResources"]> {
-	const resources: ast.Resource[] = []
-	for (const language of args.config.languageTags) {
-		const resource: ast.Resource = {
-			type: "Resource",
-			languageTag: {
-				type: "LanguageTag",
-				name: language,
-			},
-			body: [],
-		}
-
-		if (typeof args.settings.pathPattern !== "string") {
-			for (const [prefix, path] of Object.entries(args.settings.pathPattern)) {
-				const messages = await getFileToParse(path, language, args.$fs)
-				if (messages) {
-					resource.body = [
-						...resource.body,
-						...parseBody(
-							messages,
-							args.settings.variableReferencePattern,
-							NESTED[path.replace("{language}", language)] ?? defaultNesting(),
-							prefix,
-						),
-					]
+): Promise<Message[]> {
+	const messages: Message[] = []
+	for (const languageTag of args.config.languageTags) {
+		if (typeof args.options.pathPattern !== "string") {
+			for (const [prefix, path] of Object.entries(args.options.pathPattern)) {
+				const messagesFromFile = await getFileToParse(
+					path, 
+					NESTED[path.replace("{language}", languageTag)] ?? defaultNesting(), 
+					languageTag, 
+					args.$fs
+				)
+				for ( const [key, value] of Object.entries(messagesFromFile) ) {
+					const prefixedKey = prefix + ":" + key;
+					addVariantToMessages(messages, prefixedKey, languageTag, value)	
 				}
 			}
 		} else {
-			const messages = await getFileToParse(args.settings.pathPattern, language, args.$fs)
-			resource.body = [
-				...resource.body,
-				...parseBody(
-					messages,
-					args.settings.variableReferencePattern,
-					NESTED[args.settings.pathPattern.replace("{language}", language)] ?? defaultNesting(),
-				),
-			]
+			const messagesFromFile = await getFileToParse(
+				args.options.pathPattern, 
+				NESTED[args.options.pathPattern.replace("{language}", languageTag)] ?? defaultNesting(), 
+				languageTag, 
+				args.$fs
+			)
+			for ( const [key, value] of Object.entries(messagesFromFile) ) {
+				addVariantToMessages(messages, key, languageTag, value)	
+			}
 		}
-		resources.push(resource)
 	}
-
-	return resources
+	return messages
 }
 
 /**
  * Get the files that needs to be parsed.
  */
-async function getFileToParse(path: string, language: string, $fs: InlangEnvironment["$fs"]) {
+async function getFileToParse(path: string, isNested: boolean, language: string, $fs: InlangEnvironment["$fs"]): Promise<Record<string, string>> {
 	const pathWithLanguage = path.replace("{language}", language)
 	// get file, make sure that is not braking when the namespace doesn't exist in every language dir
 	try {
@@ -205,259 +218,60 @@ async function getFileToParse(path: string, language: string, $fs: InlangEnviron
 		NESTED[pathWithLanguage] = detectIsNested(file as string)
 		FILE_HAS_NEW_LINE[pathWithLanguage] = (file as string).endsWith("\n")
 
-		return JSON.parse(file as string)
+		const flattenedMessages = isNested
+		? flatten(JSON.parse(file as string), {
+				transformKey: function (key) {
+					//replace dots in keys with unicode
+					return replaceAll(key, ".", "u002E")
+				},
+		  })
+		: JSON.parse(file as string)
+		return flattenedMessages
 	} catch (e) {
 		// if the namespace doesn't exist for this dir -> continue
 		if ((e as any).code === "FileNotFound" || (e as any).code === "ENOENT") {
 			// file does not exist yet
-			return
+			return {}
 		}
 		throw e
 	}
 }
 
 /**
- * Parses a resource.
- *
- * @example parseResource(resource, en, 2,["{{", "}}"])
+ * Add new item (message, variant) to the ast
  */
-function parseBody(
-	messages: Record<string, string>,
-	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
-	isNested: boolean,
-	prefix?: string,
-): ast.Resource["body"] {
-	// Only flatten when there is a nested structure
-	const flattenedMessages = isNested
-		? flatten(messages, {
-				transformKey: function (key) {
-					//replace dots in keys with unicode
-					return replaceAll(key, ".", "u002E")
-				},
-		  })
-		: messages
-	if (flattenedMessages !== undefined) {
-		//Iterate over the messages and execute parseMessage function
-		//If you have a nested structure but didn't add it to config throw error
-		return Object.entries(flattenedMessages!).map((message) => {
-			return parseMessage(message[0], message[1], variableReferencePattern, prefix)
-		})
-	} else {
-		return []
-	}
-}
+const addVariantToMessages = (messages: Message[], key: string, language: LanguageTag, value: string) => {
+	const messageIndex = messages.findIndex(m => m.id === key)
+	if(messageIndex !== -1){
+		const variant: Variant = {
+			match: {},
+			pattern: [{
+				type: "Text",
+				value,
+			}]
+		}
+		// Check if the language exists in the body of the message
+		if (!messages[messageIndex]?.body[language]) {
+			messages[messageIndex]!.body[language]! = [];
+		}
 
-/**
- * Parses a message.
- *
- * @example parseMessage("testId", "test", ["{{", "}}"])
- */
-function parseMessage(
-	id: string,
-	text: string,
-	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
-	prefix?: string,
-): ast.Message {
-	// add the prefix infromt if it has namespaces
-	const prefixedId = prefix
-		? prefix + ":" + replaceAll(id, "u002E", ".")
-		: replaceAll(id, "u002E", ".")
-	return {
-		type: "Message",
-		id: {
-			type: "Identifier",
-			name: prefixedId,
-		},
-		pattern: parsePattern(text, variableReferencePattern),
-	}
-}
-
-/**
- * Parses a pattern.
- *
- * @example parseMessage("testId", "test", ["{{", "}}"])
- */
-function parsePattern(
-	text: string,
-	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
-): ast.Pattern {
-	// dependent on the variableReferencePattern, different regex
-	// expressions are used for matching
-	const placeholder = variableReferencePattern[1]
-		? new RegExp(
-				`(\\${variableReferencePattern[0]}[^\\${variableReferencePattern[1]}]+\\${variableReferencePattern[1]})`,
-				"g",
-		  )
-		: new RegExp(`(${variableReferencePattern}\\w+)`, "g")
-	const elements: ast.Pattern["elements"] = text
-		.split(placeholder)
-		.filter((element) => element !== "")
-		.map((element) => {
-			if (placeholder.test(element)) {
-				return {
-					type: "Placeholder",
-					body: {
-						type: "VariableReference",
-						name: variableReferencePattern[1]
-							? element.slice(
-									variableReferencePattern[0].length,
-									// negative index, removing the trailing pattern
-									-variableReferencePattern[1].length,
-							  )
-							: element.slice(variableReferencePattern[0].length),
-					},
-				}
-			} else {
-				return {
-					type: "Text",
-					value: element,
-				}
+		//push new variant
+		messages[messageIndex]!.body[language]!.push(variant);
+	}else{
+		// message does not exist
+		messages.push({
+			id: key,
+			expressions: [],
+			selectors: [],
+			body: {
+				language : [{
+					match: {},
+					pattern: [{
+						type: "Text",
+						value,
+					}]
+				}]
 			}
 		})
-
-	return {
-		type: "Pattern",
-		elements,
 	}
-}
-
-/**
- * Writing resources.
- *
- * @example writeResources({resources, settings, $fs})
- */
-async function writeResources(
-	args: Parameters<InlangConfig["writeResources"]>[0] & {
-		settings: PluginSettingsWithDefaults
-		$fs: InlangEnvironment["$fs"]
-	},
-): ReturnType<InlangConfig["writeResources"]> {
-	for (const resource of args.resources) {
-		const language = resource.languageTag.name
-		const pathPattern: PluginSettings["pathPattern"] = args.settings.pathPattern
-
-		if (typeof pathPattern === "object") {
-			// filter the resources prefix -> performance optimized (only one loop over messages)
-			const filteredResources: FilteredResourcesProps = {}
-
-			for (const [prefix, path] of Object.entries(args.settings.pathPattern)) {
-				// check if directory exists
-				const directoryPath = path.replace("{language}", language).split("/").slice(0, -1).join("/")
-				try {
-					await args.$fs.readdir(directoryPath)
-				} catch {
-					// directory doesn't exists
-					await args.$fs.mkdir(directoryPath)
-				}
-				filteredResources[prefix] = []
-			}
-
-			//sort messages by prefxes (paths)
-			for (const message of resource.body) {
-				const prefix: string = message.id.name.includes(":")
-					? message.id.name.split(":")[0]!
-					: Object.keys(pathPattern)[0]!
-
-				if (prefix in filteredResources) {
-					//put the messages in the filteredResource object
-					filteredResources[prefix]!.push({
-						...message,
-						id: {
-							...message.id,
-							name: message.id.name.replace(prefix + ":", ""),
-						},
-					})
-				}
-			}
-
-			for (const [prefix, filteredMessages] of Object.entries(filteredResources)) {
-				//check if there is something to write in this file
-				if (filteredMessages.length !== 0) {
-					const pathWithLanguage = pathPattern[prefix]!.replace("{language}", language)
-					await args.$fs.writeFile(
-						pathWithLanguage,
-						serializeResource(
-							filteredMessages,
-							SPACING[pathWithLanguage] ?? defaultSpacing(),
-							FILE_HAS_NEW_LINE[pathWithLanguage]!,
-							NESTED[pathWithLanguage] ?? defaultNesting(),
-							args.settings.variableReferencePattern,
-						),
-					)
-				}
-			}
-		} else if (typeof pathPattern === "string") {
-			const pathWithLanguage = pathPattern.replace("{language}", language)
-			await args.$fs.writeFile(
-				pathWithLanguage,
-				serializeResource(
-					resource.body,
-					SPACING[pathWithLanguage] ?? defaultSpacing(),
-					FILE_HAS_NEW_LINE[pathWithLanguage]!,
-					NESTED[pathWithLanguage] ?? defaultNesting(),
-					args.settings.variableReferencePattern,
-				),
-			)
-		}
-	}
-}
-
-/**
- * Serializes a resource.
- */
-function serializeResource(
-	messages: ast.Message[],
-	space: number | string,
-	endsWithNewLine: boolean,
-	nested: boolean,
-	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
-): string {
-	let result: { [key: string]: string } = {}
-	for (const message of messages) {
-		//check if there are two dots after each other -> that would brake unflatten -> replace with unicode
-		let id = replaceAll(message.id.name, "..", "u002E.")
-		//check if the last char is a dot -> that would brake unflatten -> replace with unicode
-		if (id.slice(-1) === ".") {
-			id = id.replace(/.$/, "u002E")
-		}
-		result[id] = serializePattern(message.pattern, variableReferencePattern)
-	}
-	// for nested structures -> unflatten the keys
-	if (nested) {
-		result = unflatten(result, {
-			//prevent numbers from creating arrays automatically
-			object: true,
-		})
-	}
-	return (
-		replaceAll(JSON.stringify(result, undefined, space), "u002E", ".") +
-		(endsWithNewLine ? "\n" : "")
-	)
-}
-
-/**
- * Serializes a pattern.
- */
-function serializePattern(
-	pattern: ast.Message["pattern"],
-	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
-) {
-	const result: string[] = []
-	for (const element of pattern.elements) {
-		switch (element.type) {
-			case "Text":
-				result.push(element.value)
-				break
-			case "Placeholder":
-				result.push(
-					variableReferencePattern[1]
-						? `${variableReferencePattern[0]}${element.body.name}${variableReferencePattern[1]}`
-						: `${variableReferencePattern[0]}${element.body.name}`,
-				)
-				break
-			default:
-				throw new Error(`Unknown message pattern element of type: ${(element as any)?.type}`)
-		}
-	}
-	return result.join("")
 }
