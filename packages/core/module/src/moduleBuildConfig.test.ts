@@ -1,25 +1,25 @@
-import { pluginBuildConfig } from "./pluginBuildConfig.js"
+import { moduleBuildConfig } from "./moduleBuildConfig.js"
 import { it, expect } from "vitest"
 
 /**
- * The tests concern validation of the pluginBuildConfig function.
+ * The tests concern validation of the moduleBuildConfig function.
  *
  * Testing every little property that is defined by the function like
  * `bundle` or `platform` seems unnecessary.
  */
 
 it("should throw an error if entrypoints is undefined", () => {
-	expect(pluginBuildConfig({})).rejects.toThrow()
+	expect(moduleBuildConfig({})).rejects.toThrow()
 })
 
 it("should throw an error if entrypoints is not a single element", async () => {
-	await expect(pluginBuildConfig({ entryPoints: [] })).rejects.toThrow()
-	await expect(pluginBuildConfig({ entryPoints: ["a", "b"] })).rejects.toThrow()
+	await expect(moduleBuildConfig({ entryPoints: [] })).rejects.toThrow()
+	await expect(moduleBuildConfig({ entryPoints: ["a", "b"] })).rejects.toThrow()
 })
 
 it("should not be possible to pass properties that the function defines itself", async () => {
 	await expect(
-		pluginBuildConfig({
+		moduleBuildConfig({
 			entryPoints: ["a"],
 			// @ts-expect-error
 			bundle: false,
