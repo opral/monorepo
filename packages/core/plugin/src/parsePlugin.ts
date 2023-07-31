@@ -17,11 +17,7 @@ type ParsePluginResult = {
 /**
  * Plugin ids that should be excluded by namespace reserving.
  */
-const whitelistedPlugins = [
-	"inlang.plugin-json",
-	"inlang.plugin-standard-lint-rules",
-	"inlang.plugin-i18next",
-]
+const whitelistedPlugins = ["inlang.plugin-json", "inlang.plugin-i18next"]
 
 /**
  * Parses a plugin and returns the result.

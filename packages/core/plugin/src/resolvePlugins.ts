@@ -10,8 +10,7 @@ import { parsePlugin } from "./parsePlugin.js"
 import { validatePlugins } from "./validatePlugins.js"
 
 export type ResolvePluginResult = {
-	data: Partial<ResolvedPluginsApi> &
-		Pick<ResolvedPluginsApi, "lintRules" | "plugins" | "appSpecificApi">
+	data: Partial<ResolvedPluginsApi> & Pick<ResolvedPluginsApi, "plugins" | "appSpecificApi">
 	errors: PluginException[]
 }
 
@@ -22,7 +21,6 @@ export const resolvePlugins: ResolvePlugins = async (args) => {
 	const result: ResolvePluginResult = {
 		data: {
 			plugins: [],
-			lintRules: [],
 			appSpecificApi: {},
 		},
 		errors: [],

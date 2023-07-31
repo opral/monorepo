@@ -33,7 +33,6 @@
 		"@inlang/config": "*",
 		"@inlang/environment": "*",
 		"@inlang/language-tag": "*",
-		"@inlang/lint": "*",
 		"@inlang/messages": "*",
 		"@inlang/result": "*",
 		"@inlang-git/fs": "*",
