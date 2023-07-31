@@ -14,32 +14,9 @@ export type InlangConfig = {
 	 *  ]
 	 */
 	modules: string[]
-	/**
-	 * The resolved plugins.
-	 *
-	 * @example
-	 *   plugins: {
-	 *     "inlang.i18next": {
-	 * 	     options: {
-	 * 	       ignore: ["inlang", "globalization"],
-	 * 	     },
-	 *   }
-	 */
-	plugins: Record<string, PluginSettings>
-	/**
-	 * The linting system.
-	 */
-	lint: {
-		/**
-		 * The resolved linting rules.
-		 *
-		 * @example
-		 *  rules: {
-		 * 	  "inlang.missing-message": {
-		 * 		  level: "off",
-		 * 	  },
-		 */
-		rules: Record<string, LintRuleSettings>
+	settings: {
+		plugins: Record<string, PluginSettings>
+		lintRules: Record<string, LintRuleSettings>
 	}
 }
 
@@ -47,28 +24,36 @@ export type InlangConfig = {
  * The settings of a plugin.
  */
 export type PluginSettings = {
-	options: Record<string, string | string[]>
+	options?: JSONObject
 }
 
 /**
  * The settings of a lint rule.
  */
 export type LintRuleSettings = {
-	options?: Record<string, string | string[]>
-	level: "off" | "warning" | "error"
+	options?: JSONObject
+	level?: "off" | "warning" | "error"
 }
+
+type JSON = string | number | boolean | null | JSONObject | JSONArray
+
+type JSONObject = {
+	[key: string]: JSON
+}
+
+type JSONArray = Array<JSON>
 
 /**
  * ------------- Zod Types -------------
  */
 
 export const PluginSettings = z.object({
-	options: z.record(z.union([z.string(), z.array(z.string())])),
+	options: z.record(z.union([z.string(), z.array(z.string())])).optional(),
 })
 
 export const LintRuleSettings = z.object({
 	options: z.record(z.union([z.string(), z.array(z.string())])).optional(),
-	level: z.union([z.literal("off"), z.literal("warning"), z.literal("error")]),
+	level: z.union([z.literal("off"), z.literal("warning"), z.literal("error")]).optional(),
 })
 
 export const InlangConfig = z.object({
@@ -77,8 +62,8 @@ export const InlangConfig = z.object({
 	// TODO validate valid language tags
 	languageTags: z.array(z.string()),
 	modules: z.array(z.string()),
-	plugins: z.record(PluginSettings),
-	lint: z.object({
-		rules: z.record(LintRuleSettings),
+	settings: z.object({
+		plugins: z.record(PluginSettings),
+		lintRules: z.record(LintRuleSettings),
 	}),
 })

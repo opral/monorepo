@@ -1,19 +1,17 @@
 import { InlangConfig } from "./schema.js"
 import { expectType } from "tsd"
 
-const exampleConfig: InlangConfig = {
+const config: InlangConfig = {
 	sourceLanguageTag: "en",
 	languageTags: ["de", "en"],
 	modules: ["https://hello.com/x.js", "https://hello.com/y.js"],
-	plugins: {
-		"inlang.i18next": {
-			options: {
-				ignore: ["inlang", "globalization"],
+	settings: {
+		plugins: {
+			"inlang.i18next": {
+				options: {},
 			},
 		},
-	},
-	lint: {
-		rules: {
+		lintRules: {
 			"inlang.missing-language": {
 				level: "off",
 			},
@@ -21,7 +19,11 @@ const exampleConfig: InlangConfig = {
 	},
 }
 
-expectType<InlangConfig>(exampleConfig)
+config.settings.plugins?.["inlang.i18next"]?.options
+
+config.settings.lintRules?.["inlang.missing-language"]?.level
+
+expectType<InlangConfig>(config)
 
 // the zod schema must be identical to the types
 expectType<InlangConfig>(InlangConfig.parse({} as any))
