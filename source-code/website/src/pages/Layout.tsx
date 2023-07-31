@@ -17,6 +17,7 @@ import { defaultLanguage, extractLocale } from "@src/renderer/_default.page.rout
 import { useI18n } from "@solid-primitives/i18n"
 import { NewsletterForm } from "@src/components/NewsletterForm.jsx"
 import { localesLoaded } from "@src/renderer/Root.jsx"
+import { getLocale } from "@src/helper/getLocale.js"
 
 /**
  * Ensure that all elements use the same margins.
@@ -99,10 +100,7 @@ function Header(props: { landingpage?: boolean }) {
 	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false)
 	const [t, { locale }] = useI18n()
 
-	const getLocale = () => {
-		const language = locale() || defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
-	}
+	getLocale(defaultLanguage, locale)
 
 	return (
 		<>
@@ -113,7 +111,7 @@ function Header(props: { landingpage?: boolean }) {
 				<div class={`w-full h-full py-4 px-4 sm:px-10 ${props.landingpage && "px-10"}`}>
 					<nav class={"max-w-screen-xl w-full mx-auto xl:px-10"}>
 						<div class="flex">
-							<a href={getLocale() + "/"} class="flex items-center w-fit">
+							<a href={getLocale(defaultLanguage, locale) + "/"} class="flex items-center w-fit">
 								<img class="h-9 w-9" src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
 								<span class="self-center pl-2 text-left font-semibold text-surface-900">
 									inlang

@@ -11,6 +11,7 @@ import { EditButton } from "./EditButton.jsx"
 import { defaultLanguage } from "@src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
 import { tableOfContents } from "../../../../../documentation/tableOfContents.js"
+import { getLocale } from "@src/helper/getLocale.js"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -161,13 +162,12 @@ function NavbarCommon(props: {
 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
 	const [, { locale }] = useI18n()
 
-	const getLocale = () => {
-		const language = locale() || defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
-	}
+	getLocale(defaultLanguage, locale)
 
 	const isSelected = (href: string) => {
-		if (href === currentPageContext.urlParsed.pathname.replace(getLocale(), "")) {
+		if (
+			href === currentPageContext.urlParsed.pathname.replace(getLocale(defaultLanguage, locale), "")
+		) {
 			return true
 		} else {
 			return false
@@ -228,7 +228,7 @@ function NavbarCommon(props: {
 													: "text-info/80 hover:text-on-background ") +
 												"tracking-wide text-sm block w-full font-normal"
 											}
-											href={getLocale() + document.frontmatter.href}
+											href={getLocale(defaultLanguage, locale) + document.frontmatter.href}
 										>
 											{document.frontmatter.shortTitle}
 										</a>

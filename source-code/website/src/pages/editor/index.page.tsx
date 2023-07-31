@@ -7,16 +7,15 @@ import { CommunityProjects } from "../index/CommunityProjects.jsx"
 import { Button } from "../index/components/Button.jsx"
 import { useI18n } from "@solid-primitives/i18n"
 import { defaultLanguage } from "@src/renderer/_default.page.route.js"
+import { getLocale } from "@src/helper/getLocale.js"
 
 export function Page() {
 	/** is not reactive because window is not reactive */
 	const [input, setInput] = createSignal("")
 	const [, { locale }] = useI18n()
 
-	const getLocale = () => {
-		const language = locale() || defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
-	}
+	getLocale(defaultLanguage, locale)
+
 	const isValidUrl = () =>
 		z
 			.string()
