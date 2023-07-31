@@ -1,4 +1,3 @@
-import { LintRule, LintedMessage, getLintReports } from "@inlang/core/lint"
 import { useEditorState } from "../State.jsx"
 import { For, Show } from "solid-js"
 import type { Accessor } from "solid-js"
@@ -6,7 +5,7 @@ import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import { handleMissingMessage } from "../helper/handleMissingMessage.js"
 import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
-import type { LanguageTag } from "@inlang/core/languageTag"
+import type { LintRule, LanguageTag } from "@inlang/app"
 
 interface ListHeaderProps {
 	messages: Accessor<{

@@ -1,4 +1,3 @@
-import { query } from "@inlang/core/query"
 import {
 	createMemo,
 	createResource,
@@ -16,13 +15,12 @@ import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-ou
 import { Meta, Title } from "@solidjs/meta"
 import { EditorStateProvider, useEditorState } from "./State.jsx"
 import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
-import type { LintedMessage } from "@inlang/core/lint"
 import { rpc } from "@inlang/rpc"
 import { ListHeader, messageCount } from "./components/Listheader.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import type { RecentProjectType } from "@src/services/local-storage/src/schema.js"
-import type { LanguageTag } from "@inlang/core/languageTag"
+import { createQuery, type LanguageTag } from "@inlang/app"
 
 export function Page() {
 	return (
@@ -79,7 +77,7 @@ function TheActualPage() {
 				if (result[id] === undefined) {
 					result[id] = {}
 				}
-				const message = query(resource).get({ id }) as LintedMessage
+				const message = createQuery(resource).get({ where: id }) as LintedMessage
 				result[id]![resource.languageTag.name] = message
 			}
 		}

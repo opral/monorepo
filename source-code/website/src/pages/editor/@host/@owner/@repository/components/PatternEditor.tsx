@@ -1,13 +1,11 @@
 import { createSignal, onMount, Show } from "solid-js"
 import { useEditorIsFocused, createTiptapEditor } from "solid-tiptap"
-import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
-import { LocalChange, useEditorState } from "../State.jsx"
+import { useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
 import { showToast } from "@src/components/Toast.jsx"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
-import { getLintReports, LintedMessage } from "@inlang/core/lint"
 import { Shortcut } from "./Shortcut.jsx"
 import { rpc } from "@inlang/rpc"
 import { telemetryBrowser } from "@inlang/telemetry"
@@ -15,7 +13,14 @@ import { getTextValue, setTipTapMessage } from "../helper/parse.js"
 import { getEditorConfig } from "../helper/editorSetup.js"
 import { FloatingMenu } from "./FloatingMenu.jsx"
 import { handleMissingMessage } from "./../helper/handleMissingMessage.js"
-import type { LanguageTag } from "@inlang/core/languageTag"
+import type {
+	Text,
+	Expression,
+	Message,
+	VariableReference,
+	LintReport,
+	LanguageTag,
+} from "@inlang/app"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -23,9 +28,9 @@ import type { LanguageTag } from "@inlang/core/languageTag"
 export function PatternEditor(props: {
 	sourceLanguageTag: LanguageTag
 	languageTag: LanguageTag
-	id: ast.Message["id"]["name"]
-	sourceMessage?: ast.Message
-	message: ast.Message | undefined
+	id: Message["id"]
+	sourceMessage?: Message
+	message: Message | undefined
 }) {
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const {
@@ -37,7 +42,7 @@ export function PatternEditor(props: {
 		routeParams,
 		filteredLanguageTags,
 	} = useEditorState()
-	const [variableReferences, setVariableReferences] = createSignal<ast.VariableReference[]>([])
+	const [variableReferences, setVariableReferences] = createSignal<VariableReference[]>([])
 
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
@@ -178,15 +183,15 @@ export function PatternEditor(props: {
 	 */
 
 	const handleSave = async () => {
-		const _copy: ast.Message | undefined = copy()
+		const _copy: Message | undefined = copy()
 		const _textValue =
 			JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
 		if (!_textValue || !_copy) {
 			return
 		}
-		_copy.pattern.elements = _textValue as Array<ast.Text | ast.Placeholder>
+		_copy.pattern.elements = _textValue as Array<Text | Expression>
 
-		setLocalChanges((prev: LocalChange[]) => {
+		setLocalChanges((prev: Message[]) => {
 			if (JSON.stringify(copy()?.pattern.elements) === JSON.stringify(_copy.pattern.elements)) {
 				return [
 					...prev.filter(
@@ -285,7 +290,7 @@ export function PatternEditor(props: {
 				handleMissingMessage(report, filteredLanguageTags()),
 			)
 			if (filteredReports) {
-				filteredReports.map((lint) => {
+				filteredReports.map((lint: LintReport) => {
 					notifications.push({
 						notificationTitle: lint.id.includes(".") ? lint.id.split(".")[1]! : lint.id,
 						notificationDescription: lint.message,
