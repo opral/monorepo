@@ -167,7 +167,7 @@ function NavbarCommon(props: {
 	}
 
 	const isSelected = (href: string) => {
-		if (href === currentPageContext.urlParsed.pathname) {
+		if (href === currentPageContext.urlParsed.pathname.replace(getLocale(), "")) {
 			return true
 		} else {
 			return false

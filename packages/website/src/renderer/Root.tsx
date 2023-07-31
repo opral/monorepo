@@ -33,36 +33,51 @@ export function Root(props: {
 	page: Component
 	pageProps: Record<string, unknown>
 	locale: string
+	isEditor: boolean
 }) {
 	return (
 		<ErrorBoundary fallback={(error) => <ErrorMessage error={error} />}>
 			<I18nContext.Provider value={value}>
 				<LocalStorageProvider>
-					<RootWithProviders page={props.page} pageProps={props.pageProps} locale={props.locale} />
+					<RootWithProviders
+						page={props.page}
+						pageProps={props.pageProps}
+						locale={props.locale}
+						isEditor={props.isEditor}
+					/>
 				</LocalStorageProvider>
 			</I18nContext.Provider>
 		</ErrorBoundary>
 	)
 }
 
+// This signal is used to render the rest of the content after fetching locales data
+export const [localesLoaded, setLocalesLoaded] = createSignal(false)
+
 function RootWithProviders(props: {
 	page: Component
 	pageProps: Record<string, unknown>
 	locale: string
+	isEditor: boolean
 }) {
 	const [, { locale }] = useI18n()
-	const [isLoaded, setIsLoaded] = createSignal(false)
 
 	onMount(() => {
 		locale(props.locale)
-		setIsLoaded(true)
+		setLocalesLoaded(true)
 	})
 
 	return (
-		// <div>Hallo Welt</div>
-		<Show when={isLoaded()}>
-			<Dynamic component={props.page} {...props.pageProps} />
-		</Show>
+		<>
+			{/* Render the rest of the content after fetching locales data */}
+			<Show when={localesLoaded() && props.isEditor}>
+				<Dynamic component={props.page} {...props.pageProps} />
+			</Show>
+			{/* Render differently if it isn't the Editor */}
+			<Show when={!props.isEditor && props.pageProps !== undefined}>
+				<Dynamic component={props.page} {...props.pageProps} />
+			</Show>
+		</>
 	)
 }
 
