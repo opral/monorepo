@@ -6,8 +6,8 @@ import {
 	addRuntimeToContext as addRuntimeToContextShared,
 } from "../shared/context.js"
 import type * as Runtime from "../../../../runtime/index.js"
-import type { LanguageTag } from '@inlang/core/languageTag'
-import { logDeprecation } from '../../../../utils.js'
+import type { LanguageTag } from "@inlang/core/languageTag"
+import { logDeprecation } from "../../../../utils.js"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -15,17 +15,17 @@ type RuntimeContext<
 	LanguageTag extends LanguageTag = LanguageTag,
 	InlangFunction extends Runtime.InlangFunction = Runtime.InlangFunction,
 > = {
-		languageTag: Readable<LanguageTag>
-		sourceLanguageTag: LanguageTag
-		languageTags: LanguageTag[]
+	languageTag: Readable<LanguageTag>
+	sourceLanguageTag: LanguageTag
+	languageTags: LanguageTag[]
 	i: Readable<InlangFunction>
-		changeLanguageTag: (languageTag: LanguageTag) => Promise<void>
+	changeLanguageTag: (languageTag: LanguageTag) => Promise<void>
 	loadResource: SvelteKitClientRuntime["loadResource"]
 	route: (href: RelativeUrl) => RelativeUrl
-		switchLanguage: (languageTag: LanguageTag) => Promise<void>
-		referenceLanguage: LanguageTag
-		language: LanguageTag
-		languages: LanguageTag[]
+	switchLanguage: (languageTag: LanguageTag) => Promise<void>
+	referenceLanguage: LanguageTag
+	language: LanguageTag
+	languages: LanguageTag[]
 }
 
 export const getRuntimeFromContext = () => getRuntimeFromContextShared() as RuntimeContext
@@ -57,7 +57,7 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 		language: runtime.language!,
 		languages: runtime.languages,
 		switchLanguage: (...args: Parameters<typeof changeLanguageTag>) => {
-			logDeprecation('switchLanguage', 'changeLanguageTag')
+			logDeprecation("switchLanguage", "changeLanguageTag")
 			return changeLanguageTag(...args)
 		},
 	})

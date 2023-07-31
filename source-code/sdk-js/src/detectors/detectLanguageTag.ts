@@ -1,4 +1,4 @@
-import type { LanguageTag } from '@inlang/core/languageTag'
+import type { LanguageTag } from "@inlang/core/languageTag"
 import { matchLanguageTag } from "./matchLanguageTag.js"
 import type { Detector } from "./types.js"
 
@@ -33,5 +33,7 @@ export const detectLanguageTag = async (
 		allDetectedLanguageTags.push(...detectedLanguages)
 	}
 
-	return (allowRelated && matchLanguageTag(allDetectedLanguageTags, languageTags)) || sourceLanguageTag
+	return (
+		(allowRelated && matchLanguageTag(allDetectedLanguageTags, languageTags)) || sourceLanguageTag
+	)
 }

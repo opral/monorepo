@@ -1,7 +1,7 @@
 import type { LoadEvent } from "@sveltejs/kit"
 import { base } from "$app/paths"
 import { initRuntimeWithLanguageInformation } from "../../../runtime/index.js"
-import type { LanguageTag } from '@inlang/core/languageTag'
+import type { LanguageTag } from "@inlang/core/languageTag"
 
 type InitSvelteKitClientRuntimeArgs = {
 	fetch: LoadEvent["fetch"]

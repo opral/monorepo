@@ -12,7 +12,6 @@ export async function defineConfig(env) {
 			jsonPlugin({
 				pathPattern: "./languages/{language}.json",
 			}),
-
 		],
 	}
 }

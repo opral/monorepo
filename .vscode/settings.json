@@ -22,7 +22,7 @@
 		"**/.svelte-kit": true,
 		"**/build": true,
 		"**/coverage": true,
-		"**/.turbo": true,
+		"**/.turbo": true
 	},
 	"files.watcherExclude": {
 		"**/dist": true

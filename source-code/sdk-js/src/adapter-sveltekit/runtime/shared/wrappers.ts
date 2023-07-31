@@ -10,7 +10,7 @@ import {
 	getRuntimePromiseFromEvent,
 	wait,
 } from "./utils.js"
-import type { LanguageTag } from '@inlang/core/languageTag'
+import type { LanguageTag } from "@inlang/core/languageTag"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -43,7 +43,10 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 	const languageTag =
 		data.languageTag || !options.initDetectors
 			? data.languageTag
-			: await detectLanguageTag({ sourceLanguageTag, languageTags }, ...options.initDetectors(event))
+			: await detectLanguageTag(
+					{ sourceLanguageTag, languageTags },
+					...options.initDetectors(event),
+			  )
 
 	const runtime =
 		initializedRuntime[languageTag as LanguageTag] ||

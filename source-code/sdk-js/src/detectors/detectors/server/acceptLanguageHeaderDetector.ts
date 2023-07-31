@@ -7,7 +7,8 @@ type DetectorParameters = [HeadersObject]
 const REGEX_ACCEPT_LANGUAGE_SPLIT = /;|,/
 
 const acceptLanguageHeaderDetector = ((headers) =>
-	headers.get("Accept-Language")
+	headers
+		.get("Accept-Language")
 		?.split(REGEX_ACCEPT_LANGUAGE_SPLIT)
 		.filter((part) => !part.startsWith("q"))
 		.map((part) => part.trim())

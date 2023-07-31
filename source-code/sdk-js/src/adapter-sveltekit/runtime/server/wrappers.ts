@@ -7,7 +7,7 @@ import { initSvelteKitServerRuntime, type SvelteKitServerRuntime } from "./runti
 import { addRuntimeToLocals, getRuntimeFromLocals, initState } from "./state.js"
 import { sequence } from "@sveltejs/kit/hooks"
 import type { InlangConfigModule } from "@inlang/core/config"
-import type { LanguageTag } from '@inlang/core/languageTag'
+import type { LanguageTag } from "@inlang/core/languageTag"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -51,7 +51,9 @@ export const initHandleWrapper = (options: HandleOptions) => ({
 					return resolve(event)
 				}
 
-				const { sourceLanguageTag, languageTags } = await initState(await options.inlangConfigModule)
+				const { sourceLanguageTag, languageTags } = await initState(
+					await options.inlangConfigModule,
+				)
 
 				let languageTag = options.parseLanguageTag(event)
 				// TODO: create `isLanguage` helper function

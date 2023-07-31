@@ -2,7 +2,7 @@ import { expect, test } from "vitest"
 import { getLintReports, lint } from "@inlang/core/lint"
 import type { InlangConfig } from "@inlang/config"
 
-const config: Pick<InlangConfig, "sourceLanguageTag" | "languageTags" | 'modules'> = {
+const config: Pick<InlangConfig, "sourceLanguageTag" | "languageTags" | "modules"> = {
 	sourceLanguageTag: "en",
 	languageTags: ["en", "de", "fr"],
 	modules: ["./index.js"],

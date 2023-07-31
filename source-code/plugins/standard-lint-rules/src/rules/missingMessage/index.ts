@@ -1,1 +1,1 @@
-export { missingMessageRule as default } from './missingMessage.js'
+export { missingMessageRule as default } from "./missingMessage.js"

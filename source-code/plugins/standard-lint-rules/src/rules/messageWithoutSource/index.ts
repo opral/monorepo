@@ -1,1 +1,1 @@
-export { messageWithoutSourceRule as default } from './messageWithoutSource.js'
+export { messageWithoutSourceRule as default } from "./messageWithoutSource.js"
