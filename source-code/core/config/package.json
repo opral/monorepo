@@ -30,7 +30,11 @@
 		"node": ">=16.15.0"
 	},
 	"dependencies": {
+		"@inlang/language-tag": "*",
 		"zod": "^3.21.4"
 	},
-	"license": "Apache-2.0"
+	"license": "Apache-2.0",
+	"devDependencies": {
+		"tsd": "^0.28.1"
+	}
 }

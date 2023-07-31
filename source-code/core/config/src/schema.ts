@@ -1,8 +1,74 @@
+import type { LanguageTag } from "@inlang/language-tag"
 import { z } from "zod"
 
-const PluginSchema = z.object({
-	module: z.string(),
-	options: z.record(z.string()),
+export type InlangConfig = {
+	sourceLanguageTag: LanguageTag
+	languageTags: LanguageTag[]
+	/**
+	 * The modules to load.
+	 *
+	 * @example
+	 *  modules: [
+	 * 	  "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index.js",
+	 * 	  "https://cdn.jsdelivr.net/npm/@inlang/plugin-csv@1/dist/index.js",
+	 *  ]
+	 */
+	modules: string[]
+	/**
+	 * The resolved plugins.
+	 *
+	 * @example
+	 *   plugins: {
+	 *     "inlang.i18next": {
+	 * 	     options: {
+	 * 	       ignore: ["inlang", "globalization"],
+	 * 	     },
+	 *   }
+	 */
+	plugins: Record<string, PluginSettings>
+	/**
+	 * The linting system.
+	 */
+	lint: {
+		/**
+		 * The resolved linting rules.
+		 *
+		 * @example
+		 *  rules: {
+		 * 	  "inlang.missing-message": {
+		 * 		  level: "off",
+		 * 	  },
+		 */
+		rules: Record<string, LintRuleSettings>
+	}
+}
+
+/**
+ * The settings of a plugin.
+ */
+export type PluginSettings = {
+	options: Record<string, string | string[]>
+}
+
+/**
+ * The settings of a lint rule.
+ */
+export type LintRuleSettings = {
+	options?: Record<string, string | string[]>
+	level: "off" | "warning" | "error"
+}
+
+/**
+ * ------------- Zod Types -------------
+ */
+
+export const PluginSettings = z.object({
+	options: z.record(z.union([z.string(), z.array(z.string())])),
+})
+
+export const LintRuleSettings = z.object({
+	options: z.record(z.union([z.string(), z.array(z.string())])).optional(),
+	level: z.union([z.literal("off"), z.literal("warning"), z.literal("error")]),
 })
 
 export const InlangConfig = z.object({
@@ -10,10 +76,9 @@ export const InlangConfig = z.object({
 	sourceLanguageTag: z.string(),
 	// TODO validate valid language tags
 	languageTags: z.array(z.string()),
-	plugins: z.array(PluginSchema),
+	modules: z.array(z.string()),
+	plugins: z.record(PluginSettings),
 	lint: z.object({
-		rules: z.record(z.union([z.literal("off"), z.literal("warning"), z.literal("error")])),
+		rules: z.record(LintRuleSettings),
 	}),
 })
-
-export type InlangConfig = z.infer<typeof InlangConfig>
