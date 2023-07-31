@@ -19,7 +19,7 @@ const propertiesDefinedByInlang = ["bundle", "platform", "format", "target"] as 
  *     // your build options
  *   }))
  */
-export async function pluginBuildConfig(
+export async function moduleBuildConfig(
 	options: Omit<BuildOptions, (typeof propertiesDefinedByInlang)[number]>,
 ): Promise<BuildOptions> {
 	//! It is important to dynamically import esbuild plugins here.
