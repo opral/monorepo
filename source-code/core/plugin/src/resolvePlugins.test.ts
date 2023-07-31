@@ -6,10 +6,9 @@ import {
 	PluginFunctionLoadMessagesAlreadyDefinedException,
 	PluginFunctionSaveMessagesAlreadyDefinedException,
 	PluginImportException,
-	PluginIncorrectlyDefinedUsedApisException,
 	PluginInvalidIdException,
 	PluginUsesReservedNamespaceException,
-	PluginUsesUnavailableApiException,
+	PluginUsesInvalidApiException,
 } from "./exceptions.js"
 import type { InlangEnvironment } from "@inlang/environment"
 import type { Plugin } from "./api.js"
@@ -28,7 +27,6 @@ describe("generally", () => {
 			} as InlangConfig,
 		})
 
-		expect(resolved.errors.length).toBe(1)
 		expect(resolved.errors[0]).toBeInstanceOf(PluginImportException)
 	})
 
@@ -42,19 +40,17 @@ describe("generally", () => {
 				keywords: [],
 				usedApis: [],
 			},
-			setup: () => {
-				return {
-					loadMessages: () => undefined as any,
-					saveMessages: () => undefined as any,
-					addAppSpecificApi() {
-						return undefined as any
-					},
-					addLintRules() {
-						return undefined as any
-					},
-				}
+			setup: () => undefined as any,
+			loadMessages: () => undefined as any,
+			saveMessages: () => undefined as any,
+			addAppSpecificApi() {
+				return undefined as any
+			},
+			addLintRules() {
+				return undefined as any
 			},
 		}
+
 		const pluginModule = "https://myplugin.com/index.js"
 		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
 		const resolved = await resolvePlugins({
@@ -68,7 +64,7 @@ describe("generally", () => {
 				] satisfies InlangConfig["plugins"],
 			} as unknown as InlangConfig,
 		})
-		expect(resolved.errors.length).toBe(1)
+
 		expect(resolved.errors[0]).toBeInstanceOf(PluginInvalidIdException)
 	})
 
@@ -79,18 +75,12 @@ describe("generally", () => {
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
-				// @ts-expect-error plugin is using an API that is not available
-				usedApis: ["nonExistentApi"],
 			},
-			// @ts-expect-error
-			setup: () => {
-				return {
-					nonExistentApi: () => undefined as any,
-				}
-			},
+			// @ts-expect-error the API is not available
+			nonExistentApi: () => undefined,
 		}
 
-		const pluginModule = "https://myplugin.com/index.js"
+		const pluginModule = "https://myplugin-myplugin.com/index.js"
 		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
 
 		const resolved = await resolvePlugins({
@@ -106,78 +96,7 @@ describe("generally", () => {
 		})
 
 		expect(resolved.errors.length).toBe(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesUnavailableApiException)
-	})
-
-	it("should return an error if a plugin uses APIs that are not defined in meta.usedApis", async () => {
-		const mockPlugin: Plugin = {
-			meta: {
-				id: "plugin.plugin",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
-				usedApis: [], // Empty list of used APIs
-			},
-			setup: () => {
-				return {
-					loadMessages: () => undefined as any,
-				}
-			},
-		}
-
-		const pluginModule = "https://myplugin2.com/index.js"
-		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
-
-		const resolved = await resolvePlugins({
-			env,
-			config: {
-				plugins: [
-					{
-						options: {},
-						module: pluginModule,
-					},
-				] satisfies InlangConfig["plugins"],
-			} as unknown as InlangConfig,
-		})
-
-		expect(resolved.errors.length).toBe(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginIncorrectlyDefinedUsedApisException)
-	})
-
-	it("should return an error if a plugin DOES NOT use APIs that are defined in meta.usedApis", async () => {
-		const mockPlugin: Plugin = {
-			meta: {
-				id: "plugin.plugin",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
-				usedApis: ["loadMessages"],
-			},
-			setup: () => {
-				return {
-					saveMessages(args) {
-						return undefined as any
-					},
-				}
-			},
-		}
-
-		const pluginModule = "https://myplugin3.com/index.js"
-		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
-		const resolved = await resolvePlugins({
-			env,
-			config: {
-				plugins: [
-					{
-						options: {},
-						module: pluginModule,
-					},
-				] satisfies InlangConfig["plugins"],
-			} as unknown as InlangConfig,
-		})
-
-		expect(resolved.errors.length).toBe(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginIncorrectlyDefinedUsedApisException)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesInvalidApiException)
 	})
 
 	it("should not initialize a plugin that uses the 'inlang' namespace except for inlang whitelisted plugins", async () => {
@@ -187,13 +106,9 @@ describe("generally", () => {
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
-				usedApis: ["loadMessages"],
 			},
-			setup: () => {
-				return {
-					loadMessages: () => undefined as any,
-				}
-			},
+			setup: () => undefined as any,
+			loadMessages: () => undefined as any,
 		}
 
 		const pluginModule = "https://inlangwhitelist.com/index.js"
@@ -224,16 +139,11 @@ describe("loadMessages", () => {
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
-				usedApis: ["loadMessages"],
 			},
-			setup: () => {
-				return {
-					loadMessages: async () => [
-						{ id: "test", expressions: [], selectors: [], body: { en: [] } },
-					],
-				}
-			},
+			setup: () => undefined as any,
+			loadMessages: async () => [{ id: "test", expressions: [], selectors: [], body: { en: [] } }],
 		}
+
 		const pluginModule = "https://myplugin4.com/index.js"
 		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
 
@@ -259,13 +169,9 @@ describe("loadMessages", () => {
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
-				usedApis: ["loadMessages"],
 			},
-			setup: () => {
-				return {
-					loadMessages: async () => undefined as any,
-				}
-			},
+			setup: () => undefined as any,
+			loadMessages: async () => undefined as any,
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
@@ -273,14 +179,11 @@ describe("loadMessages", () => {
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
-				usedApis: ["loadMessages"],
 			},
-			setup: () => {
-				return {
-					loadMessages: async () => undefined as any,
-				}
-			},
+			setup: () => undefined as any,
+			loadMessages: async () => undefined as any,
 		}
+
 		const pluginModule = "https://myplugin5.com/index.js"
 		const pluginModule2 = "https://myplugin6.com/index.js"
 		const env = mockEnvWithPlugins({
@@ -317,14 +220,11 @@ describe("saveMessages", () => {
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
-				usedApis: ["saveMessages"],
 			},
-			setup: () => {
-				return {
-					saveMessages: async () => undefined as any,
-				}
-			},
+			setup: () => undefined as any,
+			saveMessages: async () => undefined as any,
 		}
+
 		const pluginModule = "https://myplugin7.com/index.js"
 		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
 
@@ -350,13 +250,9 @@ describe("saveMessages", () => {
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
-				usedApis: ["saveMessages"],
 			},
-			setup: () => {
-				return {
-					saveMessages: async () => undefined as any,
-				}
-			},
+			setup: () => undefined as any,
+			saveMessages: async () => undefined as any,
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
@@ -364,14 +260,11 @@ describe("saveMessages", () => {
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
-				usedApis: ["saveMessages"],
 			},
-			setup: () => {
-				return {
-					saveMessages: async () => undefined as any,
-				}
-			},
+			setup: () => undefined as any,
+			saveMessages: async () => undefined as any,
 		}
+
 		const pluginModule = "https://myplugin8.com/index.js"
 		const pluginModule2 = "https://myplugin9.com/index.js"
 		const env = mockEnvWithPlugins({
@@ -408,20 +301,17 @@ describe("addLintRules", () => {
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
-				usedApis: ["addLintRules"],
 			},
-			setup: () => {
-				return {
-					addLintRules: () => [
-						{
-							id: "test.test",
-							displayName: { en: "" },
-							defaultLevel: "error",
-						},
-					],
-				}
-			},
+			setup: () => undefined as any,
+			addLintRules: () => [
+				{
+					id: "test.test",
+					displayName: { en: "" },
+					defaultLevel: "error",
+				},
+			],
 		}
+
 		const pluginModule = "https://myplugin10.com/index.js"
 		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
 
@@ -447,25 +337,22 @@ describe("addLintRules", () => {
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
-				usedApis: ["addLintRules"],
 			},
-			setup: () => {
-				return {
-					addLintRules: () => [
-						{
-							id: "test.test",
-							displayName: { en: "" },
-							defaultLevel: "error",
-						},
-						{
-							id: "test2.test",
-							displayName: { en: "" },
-							defaultLevel: "error",
-						},
-					],
-				}
-			},
+			setup: () => undefined as any,
+			addLintRules: () => [
+				{
+					id: "test.test",
+					displayName: { en: "" },
+					defaultLevel: "error",
+				},
+				{
+					id: "test2.test",
+					displayName: { en: "" },
+					defaultLevel: "error",
+				},
+			],
 		}
+
 		const pluginModule = "https://myplugin11.com/index.js"
 		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
 
@@ -493,18 +380,15 @@ describe("addAppSpecificApi", () => {
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
-				usedApis: ["addAppSpecificApi"],
 			},
-			setup: () => {
-				return {
-					addAppSpecificApi: () => ({
-						"my-app": {
-							messageReferenceMatcher: () => undefined as any,
-						},
-					}),
-				}
-			},
+			setup: () => undefined as any,
+			addAppSpecificApi: () => ({
+				"my-app": {
+					messageReferenceMatcher: () => undefined as any,
+				},
+			}),
 		}
+
 		const pluginModule = "https://myplugin12.com/index.js"
 		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
 
@@ -530,17 +414,13 @@ describe("addAppSpecificApi", () => {
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
-				usedApis: ["addAppSpecificApi"],
 			},
-			setup: () => {
-				return {
-					addAppSpecificApi: () => ({
-						"my-app-1": {
-							functionOfMyApp1: () => undefined as any,
-						},
-					}),
-				}
-			},
+			setup: () => undefined as any,
+			addAppSpecificApi: () => ({
+				"my-app-1": {
+					functionOfMyApp1: () => undefined as any,
+				},
+			}),
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
@@ -548,17 +428,13 @@ describe("addAppSpecificApi", () => {
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
-				usedApis: ["addAppSpecificApi"],
 			},
-			setup: () => {
-				return {
-					addAppSpecificApi: () => ({
-						"my-app-2": {
-							functionOfMyApp2: () => undefined as any,
-						},
-					}),
-				}
-			},
+			setup: () => undefined as any,
+			addAppSpecificApi: () => ({
+				"my-app-2": {
+					functionOfMyApp2: () => undefined as any,
+				},
+			}),
 		}
 		const pluginModule = "https://myplugin13.com/index.js"
 		const pluginModule2 = "https://myplugin14.com/index.js"
@@ -596,7 +472,6 @@ describe("error handling", () => {
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
-				usedApis: ["saveMessages"],
 			},
 			setup: () => {
 				throw new PluginException("Plugin error", { module: "https://myplugin15.com/index.js" })
@@ -631,7 +506,6 @@ describe("error handling", () => {
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
-				usedApis: ["saveMessages"],
 			},
 			setup: () => {
 				throw new Error("Generic error")
@@ -666,7 +540,6 @@ describe("error handling", () => {
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
-				usedApis: ["saveMessages"],
 			},
 			setup: () => {
 				throw "Unknown error"

@@ -8,9 +8,8 @@ import type {
 	PluginApiAlreadyDefinedException,
 	PluginException,
 	PluginImportException,
-	PluginIncorrectlyDefinedUsedApisException,
 	PluginUsesReservedNamespaceException,
-	PluginUsesUnavailableApiException,
+	PluginUsesInvalidApiException,
 } from "./exceptions.js"
 
 type JSONSerializable<
@@ -35,43 +34,35 @@ export type Plugin<
 		displayName: TranslatedStrings
 		description: TranslatedStrings
 		keywords: string[]
-		/**
-		 * The APIs that the plugin uses.
-		 *
-		 * If the plugin uses an API that is not listed here, the plugin will not be loaded.
-		 * Mainly used for the plugin marketplace.
-		 */
-		usedApis: z.infer<typeof Plugin>["meta"]["usedApis"]
 	}>
 	/**
 	 * The setup function is the first function that is called when inlang loads the plugin.
 	 *
 	 * Use the setup function to initialize state, handle the options and more.
 	 */
-	setup: (args: { options: PluginOptions; config: Readonly<InlangConfig> }) => {
-		/**
-		 * Load messages.
-		 *
-		 * - if messages with language tags that are not defined in the config.languageTags
-		 *   are returned, the user config will be automatically updated to include the
-		 *   new language tags.
-		 */
-		loadMessages?: (args: {}) => Promise<Message[]> | Message[]
-		saveMessages?: (args: { messages: Message[] }) => Promise<void> | void
-		addLintRules?: () => LintRule[]
-		/**
-		 * Define app specific APIs.
-		 *
-		 * @example
-		 * addAppSpecificApi: () => ({
-		 * 	 "inlang.ide-extension": {
-		 * 	   messageReferenceMatcher: () => {}
-		 * 	 }
-		 *  })
-		 */
-		addAppSpecificApi?: () => AppSpecificApis
-		// afterSetup: () => {}
-	}
+	setup: (args: { options: PluginOptions; config: Readonly<InlangConfig> }) => {}
+	/**
+	 * Load messages.
+	 *
+	 * - if messages with language tags that are not defined in the config.languageTags
+	 *   are returned, the user config will be automatically updated to include the
+	 *   new language tags.
+	 */
+	loadMessages?: (args: {}) => Promise<Message[]> | Message[]
+	saveMessages?: (args: { messages: Message[] }) => Promise<void> | void
+	addLintRules?: () => LintRule[]
+	/**
+	 * Define app specific APIs.
+	 *
+	 * @example
+	 * addAppSpecificApi: () => ({
+	 * 	 "inlang.ide-extension": {
+	 * 	   messageReferenceMatcher: () => {}
+	 * 	 }
+	 *  })
+	 */
+	addAppSpecificApi?: () => AppSpecificApis
+	// afterSetup: () => {}
 }
 
 /**
@@ -86,9 +77,8 @@ export type ResolvePlugins = <AppSpecificApis extends object = {}>(args: {
 		| PluginException
 		| PluginImportException
 		| PluginApiAlreadyDefinedException
-		| PluginUsesUnavailableApiException
+		| PluginUsesInvalidApiException
 		| PluginUsesReservedNamespaceException
-		| PluginIncorrectlyDefinedUsedApisException
 	>
 }>
 
@@ -120,17 +110,18 @@ export const Plugin = z.object({
 		displayName: TranslatedStrings,
 		description: TranslatedStrings,
 		keywords: z.array(z.string()),
-		usedApis: z.array(
-			z.union([
-				z.literal("loadMessages"),
-				z.literal("saveMessages"),
-				z.literal("addLintRules"),
-				z.literal("addAppSpecificApi"),
-			]),
-		),
 	}),
 	setup: z
 		.function()
-		.args(z.custom<Parameters<Plugin["setup"]>[0]>())
-		.returns(z.custom<ReturnType<Plugin["setup"]>>()),
+		.args(z.object({ options: z.record(z.union([z.string(), z.array(z.string())])) }))
+		.returns(z.custom<{}>()),
+	loadMessages: z.optional(z.function().args().returns(z.custom<Message[]>())),
+	saveMessages: z.optional(
+		z
+			.function()
+			.args(z.object({ messages: z.custom<Message[]>() }))
+			.returns(z.custom<void>()),
+	),
+	addLintRules: z.optional(z.function().args().returns(z.custom<LintRule[]>())),
+	addAppSpecificApi: z.optional(z.function().args().returns(z.custom<Record<string, unknown>>())),
 })
