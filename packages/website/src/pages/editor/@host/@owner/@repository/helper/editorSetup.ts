@@ -6,13 +6,13 @@ import History from "@tiptap/extension-history"
 import HardBreak from "@tiptap/extension-hard-break"
 import FloatingMenu from "@tiptap/extension-floating-menu"
 import { setTipTapMessage } from "./parse.js"
-import type * as ast from "@inlang/core/ast"
 import PlaceholderNode from "./customExtensions/placeholder.js"
+import type { Message, VariableReference } from "@inlang/app"
 
 export const getEditorConfig = (
 	ref: HTMLDivElement,
-	message: ast.Message | undefined,
-	variableReferences: ast.VariableReference[],
+	message: Message | undefined,
+	variableReferences: VariableReference[],
 ) => {
 	return {
 		element: ref!,

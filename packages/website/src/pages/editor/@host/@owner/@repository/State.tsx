@@ -10,30 +10,79 @@ import {
 	useContext,
 } from "solid-js"
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
-import { http, raw } from "@inlang-git/client/raw"
-import { InlangConfig, InlangConfigModule, setupConfig } from "@inlang/core/config"
-import { initialize$import, InlangEnvironment } from "@inlang/core/environment"
 import { createStore, SetStoreFunction } from "solid-js/store"
-import type * as ast from "@inlang/core/ast"
-import type { Result } from "@inlang/core/utilities"
 import type { LocalStorageSchema } from "@src/services/local-storage/index.js"
 import { getLocalStorage, useLocalStorage } from "@src/services/local-storage/index.js"
-import { createMemoryFs } from "@inlang-git/fs"
-import type { NodeishFilesystem } from "@inlang-git/fs"
 import { github } from "@src/services/github/index.js"
-import { coreUsedConfigEvent, telemetryBrowser } from "@inlang/telemetry"
 import { showToast } from "@src/components/Toast.jsx"
-import { lint, LintedResource, LintRule } from "@inlang/core/lint"
-import { publicEnv } from "@inlang/env-variables"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
-import { parseOrigin } from "@inlang/telemetry"
 import { setSearchParams } from "./helper/setSearchParams.js"
-import type { LanguageTag } from "@inlang/core/languageTag"
+import { coreUsedConfigEvent, telemetryBrowser, parseOrigin } from "@inlang/telemetry"
+import type { NodeishFilesystem } from "@inlang-git/fs"
+import { createMemoryFs } from "@inlang-git/fs"
+import { http, raw } from "@inlang-git/client/raw"
+import { publicEnv } from "@inlang/env-variables"
+import {
+	create$import,
+	createQuery,
+	InlangConfig,
+	LanguageTag,
+	LintRule,
+	Result,
+	createInlang,
+	type InlangInstance,
+	type Message,
+} from "@inlang/app"
 
-export type LocalChange = {
-	languageTag: ast.Resource["languageTag"]
-	newCopy: ast.Message
-}
+const mockData: Message[] = [
+	{
+		id: "test",
+		expressions: [],
+		selectors: [],
+		body: {
+			"en-US": [
+				{
+					match: {},
+					pattern: [
+						{
+							type: "Text",
+							value: "Hello World",
+						},
+					],
+				},
+			],
+			"de-DE": [
+				{
+					match: {},
+					pattern: [
+						{
+							type: "Text",
+							value: "Hallo Welt",
+						},
+					],
+				},
+			],
+		},
+	},
+	{
+		id: "test2",
+		expressions: [],
+		selectors: [],
+		body: {
+			"en-US": [
+				{
+					match: {},
+					pattern: [
+						{
+							type: "Text",
+							value: "test2",
+						},
+					],
+				},
+			],
+		},
+	},
+]
 
 type EditorStateSchema = {
 	/**
@@ -133,19 +182,19 @@ type EditorStateSchema = {
 	 * Unpushed changes in the repository.
 	 */
 
-	localChanges: () => LocalChange[]
-	setLocalChanges: Setter<LocalChange[]>
+	localChanges: () => Message[]
+	setLocalChanges: Setter<Message[]>
 
 	/**
 	 * The resources in a given repository.
 	 */
-	resources: LintedResource[]
-	setResources: SetStoreFunction<LintedResource[]>
+	resources: Message[] // Show be linted
+	setResources: SetStoreFunction<Message[]> // Show be linted
 
 	/**
 	 * The reference resource.
 	 */
-	sourceResource: () => ast.Resource | undefined
+	sourceResource: () => Message[] | undefined
 
 	/**
 	 * Whether the user is a collaborator of the repository.
@@ -197,7 +246,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	 */
 	const [lastPush, setLastPush] = createSignal<Date>()
 
-	const [localChanges, setLocalChanges] = createSignal<LocalChange[]>([])
+	const [localChanges, setLocalChanges] = createSignal<Message[]>([])
 
 	const routeParams = () => currentPageContext.routeParams as EditorRouteParams
 
@@ -244,7 +293,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	 * The reference resource.
 	 */
 	const sourceResource = () =>
-		resources.find((resource) => resource.languageTag.name === sourceLanguageTag())
+		resources.filter((resource) => resource.body["languageTag"] === sourceLanguageTag())
 
 	const [localStorage] = useLocalStorage() ?? []
 
@@ -323,8 +372,38 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				// lastFsChange: fsChange(),
 			}
 		},
-		async (args) => {
-			const config = await readInlangConfig(args)
+		async () => {
+			// const config = {
+			// 	sourceLanguageTag: "en",
+			// 	languageTags: ["en", "de"],
+			// 	plugins: [
+			// 		{
+			// 			module: "../../../../../../../plugins/standard-lint-rules/dist/index.js",
+			// 			// "https://cdn.jsdelivr.net/npm/@inlang/plugin-standard-lint-rules@latest/dist/index.js",
+			// 			options: {},
+			// 		},
+			// 		{
+			// 			module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-json@latest/dist/index.js",
+			// 			options: {
+			// 				pathPattern: "./resources/{language}.json",
+			// 			},
+			// 		},
+			// 	],
+			// 	lint: {
+			// 		rules: {},
+			// 	},
+			// }
+			const inlang = createInlang({
+				configPath: "./inlang.config.json",
+				env: {
+					$import: create$import({
+						fs: fs(),
+						fetch,
+					}),
+					$fs: fs(),
+				},
+			})
+			const config = await inlang.config.get()
 			if (config) {
 				const languagesTags = // TODO: move this into setter logic
 					config.languageTags.sort((a: any, b: any) =>
@@ -576,7 +655,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	 *
 	 * Read below why the setter function is called setOrigin.
 	 */
-	const [resources, setOriginResources] = createStore<ast.Resource[]>([])
+	const [resources, setOriginResources] = createStore<Message[]>([])
 
 	/**
 	 * Custom setStore function to trigger filesystem writes on changes.
@@ -595,7 +674,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 		// write to filesystem
 		writeResources({
-			config,
+			inlang,
 			resources: args[0],
 			setFsChange,
 		})
@@ -610,7 +689,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		if (!inlangConfig.error && inlangConfig() && fsChange()) {
 			// setting the origin store because this should not trigger
 			// writing to the filesystem.
-			readResources(inlangConfig()!).then((r) => r && setOriginResources(r))
+			createQuery(mockData).getAll()
+			// readResources(inlang()!).then((r) => r && setOriginResources(r))
+			// inlang()?.query.messages.getAll()
 		}
 	})
 
@@ -809,51 +890,28 @@ export async function pushChanges(args: {
 	}
 }
 
-async function readInlangConfig(args: {
-	fs: NodeishFilesystem
-}): Promise<InlangConfig | undefined> {
-	try {
-		const env: InlangEnvironment = {
-			$import: initialize$import({
-				fs: args.fs,
-				fetch,
-			}),
-			$fs: args.fs,
-		}
-		const file = await args.fs.readFile("./inlang.config.js", { encoding: "utf-8" })
-		const withMimeType = "data:application/javascript;base64," + btoa(file.toString())
-		const module = (await import(/* @vite-ignore */ withMimeType)) as InlangConfigModule
-		const config = setupConfig({ module, env })
-		return config
-	} catch (error) {
-		if ((error as Error).message.includes("ENOENT")) {
-			// the config does not exist
-			return undefined
-		} else {
-			throw error
-		}
-	}
-}
-
-async function readResources(config: InlangConfig) {
+async function readResources(inlang: InlangInstance) {
 	// eslint-disable-next-line @typescript-eslint/no-empty-function
-	const resources = await config.readResources({ config }).catch(() => {})
-	if (!resources) return
+	const messages = createQuery(mockData)
+	// const messages = inlang.query.messages.getAll()
+	if (!messages) return
 
-	const [lintedResources] = await lint({ config, resources })
-	// const allLints = getLintReports(lintedResources ? lintedResources : ([] as LintedResource[]))
-	// console.info(allLints)
-	return lintedResources
+	// const [lintedResources] = await lint({ config, resources })
+	const lintedReports = inlang.lint.reports()
+	const lintedResources = lintedReports.map((report) => {
+	})
+	return messages
 }
 
 async function writeResources(args: {
-	config: InlangConfig
-	resources: ast.Resource[]
+	inlang: InlangInstance
+	resources: Message[]
 	setFsChange: (date: Date) => void
 }) {
-	await args.config.writeResources({ config: args.config, resources: args.resources })
+	for (const resource of args.resources) {
+		args.inlang.query.messages.upsert({ where: { id: resource.id }, data: resource })
+	}
 	args.setFsChange(new Date())
-
 	// showToast({
 	// 	variant: "info",
 	// 	title: "The change has been saved.",

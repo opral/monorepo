@@ -12,8 +12,6 @@ import { SignInDialog } from "@src/services/auth/index.js"
 import { publicEnv } from "@inlang/env-variables"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { TourHintWrapper, TourStepId } from "./Notification/TourHintWrapper.jsx"
-import { query } from "@inlang/core/query"
-import type { Resource } from "@inlang/core/ast"
 
 export const Gitfloat = () => {
 	const {
