@@ -2,6 +2,8 @@ import type { $ImportError } from "@inlang/environment"
 import type { InlangConfig } from "@inlang/config"
 import type { Plugin } from "./api.js"
 
+// TODO rename to error
+
 type PluginExceptionOptions = {
 	module: InlangConfig["plugins"][number]["module"]
 } & Partial<Error>
