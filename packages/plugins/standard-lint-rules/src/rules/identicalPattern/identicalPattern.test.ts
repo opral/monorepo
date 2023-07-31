@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
 import { getLintReports, lint } from "@inlang/core/lint"
+import { createLinter } from "@inlang/linter"
 
 import type { InlangConfig } from "@inlang/config"
 
@@ -9,14 +10,7 @@ const config: Pick<InlangConfig, "sourceLanguageTag" | "languageTags" | "modules
 	modules: ["./index.js"],
 }
 
-const [lintedResources, errors] = await lint({
-	config,
-	resources: [
-		createResource("en", createMessage("test", "Hello this is english")),
-		createResource("de", createMessage("test", "Hallo das is deutsch")),
-		createResource("fr", createMessage("test", "Hello this is english")),
-	],
-})
+const linter = await createLinter({})
 
 test("should report if identical message found in another language", async () => {
 	const reports = lintedResources.flatMap((resource) => getLintReports(resource))
