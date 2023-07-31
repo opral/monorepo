@@ -14,9 +14,9 @@ export type InlangConfig = {
 	 *  ]
 	 */
 	modules: string[]
-	settings: {
-		plugins: Record<string, PluginSettings>
-		lintRules: Record<string, LintRuleSettings>
+	settings?: {
+		plugins?: Record<string, PluginSettings>
+		lintRules?: Record<string, LintRuleSettings>
 	}
 }
 
