@@ -5,14 +5,18 @@ import type { InlangConfig } from "@inlang/config"
 export type LintLevel = "error" | "warning"
 
 export type LintRule = {
-	id: `${string}.${string}`
-	displayName: TranslatedStrings
-	/**
-	 * The default level of the lint rule.
-	 *
-	 * The lint level can be adjusted by the user in the config file.
-	 */
-	defaultLevel: LintLevel
+	meta: {
+		id: `${string}.${string}`
+		displayName: TranslatedStrings
+		description: TranslatedStrings
+		/**
+		 * The default level of the lint rule.
+		 *
+		 * The default lint level is added to the user config
+		 * on first run.
+		 */
+		defaultLevel: LintLevel
+	}
 }
 
 export type MessageLintRule = LintRule & {
@@ -31,7 +35,7 @@ export type ReportMessageLint = (args: {
 }) => MessageLintReport
 
 export type LintReport = {
-	ruleId: LintRule["id"]
+	ruleId: LintRule["meta"]["id"]
 	level: LintLevel
 	body: TranslatedStrings
 }
