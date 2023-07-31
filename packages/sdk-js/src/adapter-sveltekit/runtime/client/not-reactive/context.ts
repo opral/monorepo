@@ -9,30 +9,39 @@ import {
 	addRuntimeToContext as addRuntimeToContextShared,
 } from "../shared/context.js"
 import type { RelativeUrl } from "../../../../types.js"
-import type { LanguageTag } from '@inlang/core/languageTag'
-import { logDeprecation } from '../../../../utils.js'
+import type { LanguageTag } from "@inlang/core/languageTag"
+import { logDeprecation } from "../../../../utils.js"
 
 type RuntimeContext<
 	LanguageTag extends LanguageTag = LanguageTag,
 	InlangFunction extends Runtime.InlangFunction = Runtime.InlangFunction,
 > = {
-		sourceLanguageTag: LanguageTag
-		languageTag: LanguageTag
-		languageTags: LanguageTag[]
+	sourceLanguageTag: LanguageTag
+	languageTag: LanguageTag
+	languageTags: LanguageTag[]
 	i: InlangFunction
-		changeLanguageTag: (languageTag: LanguageTag) => Promise<void>
-		loadResource: SvelteKitClientRuntime["loadResource"]
-		route: (href: RelativeUrl) => RelativeUrl
-		switchLanguage: (languageTag: LanguageTag) => Promise<void>
-		referenceLanguage: LanguageTag
-		language: LanguageTag
-		languages: LanguageTag[]
+	changeLanguageTag: (languageTag: LanguageTag) => Promise<void>
+	loadResource: SvelteKitClientRuntime["loadResource"]
+	route: (href: RelativeUrl) => RelativeUrl
+	switchLanguage: (languageTag: LanguageTag) => Promise<void>
+	referenceLanguage: LanguageTag
+	language: LanguageTag
+	languages: LanguageTag[]
 }
 
 export const getRuntimeFromContext = () => getRuntimeFromContextShared() as RuntimeContext
 
 export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
-	const { languageTag, sourceLanguageTag, languageTags, i, loadResource, referenceLanguage, language, languages } = runtime
+	const {
+		languageTag,
+		sourceLanguageTag,
+		languageTags,
+		i,
+		loadResource,
+		referenceLanguage,
+		language,
+		languages,
+	} = runtime
 
 	const changeLanguageTag = async (languageTag: LanguageTag) => {
 		if (runtime.languageTag === languageTag) return
@@ -52,7 +61,7 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 		language: language!,
 		languages,
 		switchLanguage: (...args: Parameters<typeof changeLanguageTag>) => {
-			logDeprecation('switchLanguage', 'changeLanguageTag')
+			logDeprecation("switchLanguage", "changeLanguageTag")
 			return changeLanguageTag(...args)
 		},
 	})

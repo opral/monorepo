@@ -5,12 +5,13 @@ import type { Detector } from "./types.js"
 
 vi.mock("./matchLanguageTag.js", () => {
 	return {
-		matchLanguageTag: vi.fn((detectedLanguages: string[], languageTags: string[], allowRelated = true) =>
-			languageTags.find((lang) =>
-				detectedLanguages.some((l) =>
-					allowRelated ? l.startsWith(lang) || lang.startsWith(l) : l === lang,
+		matchLanguageTag: vi.fn(
+			(detectedLanguages: string[], languageTags: string[], allowRelated = true) =>
+				languageTags.find((lang) =>
+					detectedLanguages.some((l) =>
+						allowRelated ? l.startsWith(lang) || lang.startsWith(l) : l === lang,
+					),
 				),
-			),
 		),
 	}
 })

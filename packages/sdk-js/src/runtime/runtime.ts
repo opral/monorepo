@@ -6,8 +6,8 @@ import {
 	type InlangFunction,
 	type InlangString,
 } from "./inlang-function.js"
-import type { LanguageTag } from '@inlang/core/languageTag'
-import { logDeprecation } from '../utils.js'
+import type { LanguageTag } from "@inlang/core/languageTag"
+import { logDeprecation } from "../utils.js"
 
 export const isAsync = <T>(p: unknown): p is Promise<T> =>
 	!!p && typeof p === "object" && typeof (p as Promise<T>).then === "function"
@@ -19,10 +19,10 @@ type MaybePromise<T> = T | Promise<T>
 export type RuntimeContext<
 	LanguageTag extends LanguageTag = LanguageTag,
 	ReadResourcesMaybePromise extends
-	| (Ast.Resource | undefined)
-	| Promise<Ast.Resource | undefined> = MaybePromise<Resource | undefined>,
+		| (Ast.Resource | undefined)
+		| Promise<Ast.Resource | undefined> = MaybePromise<Resource | undefined>,
 > = {
-		readResource: (languageTag: LanguageTag) => ReadResourcesMaybePromise
+	readResource: (languageTag: LanguageTag) => ReadResourcesMaybePromise
 }
 
 export type RuntimeState<LanguageTag extends LanguageTag = LanguageTag> = {
@@ -115,12 +115,12 @@ export const initBaseRuntime = <
 		},
 		/** @deprecated Use `changeLanguageTag` instead. */
 		switchLanguage: (...args: Parameters<typeof changeLanguageTag>) => {
-			logDeprecation('switchLanguage', 'changeLanguageTag')
+			logDeprecation("switchLanguage", "changeLanguageTag")
 			return changeLanguageTag(...args)
 		},
 		/** @deprecated Use `languageTag` instead. */
 		get language() {
-			logDeprecation('language', 'languageTag')
+			logDeprecation("language", "languageTag")
 			return this.languageTag
 		},
 	}
@@ -136,7 +136,9 @@ export const initRuntimeWithLanguageInformation = <
 		languageTags: LanguageTag[]
 	},
 ) => {
-	const runtime = initBaseRuntime<LanguageTag, ReadResourcesMaybePromise, InlangFunctionArgs>(context)
+	const runtime = initBaseRuntime<LanguageTag, ReadResourcesMaybePromise, InlangFunctionArgs>(
+		context,
+	)
 
 	return {
 		...runtime,
@@ -158,12 +160,12 @@ export const initRuntimeWithLanguageInformation = <
 		},
 		/** @deprecated Use `sourceLanguageTag` instead. */
 		get referenceLanguage(): LanguageTag {
-			logDeprecation('referenceLanguage', 'sourceLanguageTag')
+			logDeprecation("referenceLanguage", "sourceLanguageTag")
 			return this.sourceLanguageTag
 		},
 		/** @deprecated Use `languageTags` instead. */
 		get languages(): LanguageTag[] {
-			logDeprecation('languages', 'languageTags')
+			logDeprecation("languages", "languageTags")
 			return this.languageTags
 		},
 	}

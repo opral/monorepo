@@ -4,7 +4,7 @@ import type { RequestEvent } from "@sveltejs/kit"
 import { initConfig } from "../../../config/config.js"
 import { inlangSymbol } from "../shared/utils.js"
 import type { SvelteKitServerRuntime } from "./runtime.js"
-import type { LanguageTag } from '@inlang/core/languageTag'
+import type { LanguageTag } from "@inlang/core/languageTag"
 
 let config: InlangConfig | undefined
 

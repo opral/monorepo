@@ -1,4 +1,4 @@
-import type { LanguageTag } from '@inlang/core/languageTag'
+import type { LanguageTag } from "@inlang/core/languageTag"
 import { initRuntimeWithLanguageInformation } from "../../../runtime/index.js"
 import { getResource } from "./index.js"
 
