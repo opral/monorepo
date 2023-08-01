@@ -11,7 +11,7 @@ import type {
 } from "./errors.js"
 
 type JSONSerializable<
-	T extends Record<string, string | string[] | Record<string, string | string[]>>,
+	T extends Record<string, string | string[] | Record<string, string | string[]>> | unknown,
 > = T
 
 /**
@@ -23,7 +23,7 @@ export const pluginIdRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+(?:-[a-z0-9]+)
  * The plugin API is used to extend inlang's functionality.
  */
 export type Plugin<
-	PluginOptions extends PluginSettings = Record<string, string>,
+	PluginOptions extends JSONSerializable<unknown> = Record<string, string>,
 	AppSpecificApis extends object = {},
 > = {
 	// * Must be JSON serializable if we want an external plugin manifest in the future.
