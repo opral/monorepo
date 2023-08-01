@@ -80,7 +80,8 @@ function defaultNesting() {
 // }
 
 let pluginOptions: PluginOptions | undefined = undefined
-let pluginConfig: InlangConfig = {}
+let pluginConfig: InlangConfig | undefined = undefined
+let pluginFs: InlangEnvironment["$fs"] | undefined = undefined
 
 export const plugin: Plugin<PluginOptions> = {
 	meta: {
@@ -89,27 +90,29 @@ export const plugin: Plugin<PluginOptions> = {
 		description: { en: "i18next plugin for inlang" },
 		keywords: ["i18next", "react", "nextjs"],
 	},
-	setup: ({ options, config }) => {
+	setup: ({ options, config, $fs }) => {
 		options.variableReferencePattern = ["{{", "}}"]
 		options.ignore = []
 		throwIfInvalidOptions(options)
 		pluginOptions = options
 		pluginConfig = config
+		pluginFs = $fs
 		return {}
 	},
 	loadMessages: async () => {
+		if (!pluginFs || !pluginConfig || !pluginOptions) throw new Error("Plugin not setup")
 		return loadMessages({
-			$fs: env.$fs,
+			$fs: pluginFs,
 			config: pluginConfig,
 			options: pluginOptions,
 		})
 	},
 	saveMessages: async () => {
-		return saveMessages({
-			$fs: env.$fs,
-			config: pluginConfig,
-			options: pluginOptions,
-		})
+		// return saveMessages({
+		// 	$fs: pluginFs!,
+		// 	config: pluginConfig!,
+		// 	options: pluginOptions!,
+		// })
 	},
 	// addAppSpecificApi: () => {
 	// 	return {
@@ -158,6 +161,7 @@ async function loadMessages(args: {
 			}
 		}
 	}
+	//console.log(messages)
 	return messages
 }
 
@@ -227,23 +231,23 @@ const addVariantToMessages = (
 		messages[messageIndex]!.body[language]!.push(variant)
 	} else {
 		// message does not exist
-		messages.push({
+		const message: Message = {
 			id: key,
 			expressions: [],
 			selectors: [],
-			body: {
-				language: [
+			body: {},
+		}
+		message.body[language] = [
+			{
+				match: {},
+				pattern: [
 					{
-						match: {},
-						pattern: [
-							{
-								type: "Text",
-								value,
-							},
-						],
+						type: "Text",
+						value,
 					},
 				],
 			},
-		})
+		]
+		messages.push(message)
 	}
 }
