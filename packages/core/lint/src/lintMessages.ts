@@ -5,12 +5,11 @@ import { lintMessage } from './lintMessage.js';
 // @ts-ignore
 import type { SuccessWithErrorResult } from '@inlang/result'
 
-export const lint = async (args: {
+export const lintMessages = async (args: {
 	config: InlangConfig,
 	messages: Message[],
 	query: MessageQueryApi
 }): Promise<SuccessWithErrorResult<LintReport[], LintException[]>> => {
-
 	const promises = args.messages.map(message => lintMessage({
 		config: args.config,
 		messages: args.messages,
@@ -18,8 +17,7 @@ export const lint = async (args: {
 		message
 	}))
 
-	const results = await Promise.allSettled(promises)
-
+	const results = await Promise.all(promises)
 
 	return {
 		data: results.map(result => result.data).filter(Boolean),

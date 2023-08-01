@@ -36,7 +36,7 @@ export const lintMessage = async (args: {
 		}
 	})
 
-	await Promise.allSettled(promises)
+	await Promise.all(promises)
 
 	return { data: reports, error: exceptions }
 }
