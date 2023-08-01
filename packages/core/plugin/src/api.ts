@@ -1,6 +1,7 @@
 import type { InlangConfig } from "@inlang/config"
 import { TranslatedStrings } from "@inlang/language-tag"
 import type { Message } from "@inlang/messages"
+import type { InlangEnvironment } from "@inlang/environment"
 import { z } from "zod"
 import type {
 	PluginApiAlreadyDefinedError,
@@ -18,20 +19,11 @@ type JSONSerializable<
  */
 export const pluginIdRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+(?:-[a-z0-9]+)*$/
 
-
-type JSON = string | number | boolean | null | JSONObject | JSONArray
-
-type JSONObject = {
-	[key: string]: JSON
-}
-
-type JSONArray = Array<JSON>
-
 /**
  * The plugin API is used to extend inlang's functionality.
  */
 export type Plugin<
-	PluginOptions extends JSON = JSON,
+	PluginOptions extends PluginSettings = Record<string, string>,
 	AppSpecificApis extends object = {},
 > = {
 	// * Must be JSON serializable if we want an external plugin manifest in the future.
@@ -46,7 +38,10 @@ export type Plugin<
 	 *
 	 * Use the setup function to initialize state, handle the options and more.
 	 */
-	setup: (args: { options: PluginOptions; config: Readonly<InlangConfig> }) => {}
+	setup: (args: {
+		options: Record<string, string | string[] | Record<string, string>>
+		fs: InlangEnvironment["$fs"]
+	}) => {}
 	/**
 	 * Load messages.
 	 *
@@ -54,7 +49,9 @@ export type Plugin<
 	 *   are returned, the user config will be automatically updated to include the
 	 *   new language tags.
 	 */
-	loadMessages?: (args: {}) => Promise<Message[]> | Message[]
+	loadMessages?: (args: {
+		languageTags: InlangConfig["languageTags"]
+	}) => Promise<Message[]> | Message[]
 	saveMessages?: (args: { messages: Message[] }) => Promise<void> | void
 	/**
 	 * Define app specific APIs.
@@ -77,7 +74,8 @@ export type ResolvePlugins = <AppSpecificApis extends object = {}>(args: {
 	plugins: Plugin[]
 	pluginsInConfig: Exclude<InlangConfig["settings"], undefined>["plugins"]
 	config: InlangConfig
-}) => {
+	env: InlangEnvironment
+}) => Promise<{
 	data: ResolvedPluginsApi<AppSpecificApis>
 	errors: Array<
 		| PluginError
@@ -85,13 +83,13 @@ export type ResolvePlugins = <AppSpecificApis extends object = {}>(args: {
 		| PluginUsesInvalidApiError
 		| PluginUsesReservedNamespaceError
 	>
-}
+}>
 
 /**
  * The API after resolving the plugins.
  */
 export type ResolvedPluginsApi<AppSpecificApis extends object = {}> = {
-	loadMessages: () => Promise<Message[]>
+	loadMessages: (args: { languageTags: InlangConfig["languageTags"] }) => Promise<Message[]>
 	saveMessages: (args: { messages: Message[] }) => Promise<void>
 	plugins: Record<string, Plugin>
 	/**
@@ -114,9 +112,19 @@ export const Plugin = z.object({
 	}),
 	setup: z
 		.function()
-		.args(z.object({ options: z.record(z.union([z.string(), z.array(z.string())])) }))
+		.args(
+			z.object({
+				options: z.record(z.union([z.string(), z.array(z.string()), z.record(z.string())])),
+				fs: z.custom<InlangEnvironment["$fs"]>(),
+			}),
+		)
 		.returns(z.custom<{}>()),
-	loadMessages: z.optional(z.function().args().returns(z.custom<Message[]>())),
+	loadMessages: z.optional(
+		z
+			.function()
+			.args(z.object({ languageTags: z.custom<InlangConfig["languageTags"]>() }))
+			.returns(z.custom<Message[]>()),
+	),
 	saveMessages: z.optional(
 		z
 			.function()
