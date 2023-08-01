@@ -1,6 +1,6 @@
 import { expect, it, describe } from "vitest"
 import { plugin } from "./plugin.js"
-import { InlangConfig, createMockEnvironment } from "@inlang/plugin"
+import { InlangConfig, createMockEnvironment, getVariant } from "@inlang/plugin"
 
 describe("plugin options", () => {
 	it("should throw if the path pattern does not include the {language} placeholder", async () => {
@@ -13,7 +13,7 @@ describe("plugin options", () => {
 		}
 
 		try {
-			plugin.setup({ options: { pathPattern: "./resources/" }, config: config })
+			plugin.setup({ options: { pathPattern: "./resources/" }, config, $fs: env.$fs })
 			throw new Error("should not reach this")
 		} catch (e) {
 			expect((e as Error).message).toContain("pathPattern")
@@ -29,7 +29,7 @@ describe("plugin options", () => {
 			modules: [],
 		}
 		try {
-			plugin.setup({ options: { pathPattern: "./resources/" }, config: config })
+			plugin.setup({ options: { pathPattern: "./resources/" }, config, $fs: env.$fs })
 			throw new Error("should not reach this")
 		} catch (e) {
 			expect((e as Error).message).toContain("pathPattern")
@@ -51,7 +51,8 @@ describe("plugin options", () => {
 						common: "./common.json",
 					},
 				},
-				config: config,
+				config,
+				$fs: env.$fs,
 			})
 			throw new Error("should not reach this")
 		} catch (e) {
@@ -74,7 +75,8 @@ describe("plugin options", () => {
 						common: "./{language}/common",
 					},
 				},
-				config: config,
+				config,
+				$fs: env.$fs,
 			})
 			throw new Error("should not reach this")
 		} catch (e) {
@@ -97,7 +99,8 @@ describe("plugin options", () => {
 						"namespaceWith.dot": "./{language}/common.json",
 					},
 				},
-				config: config,
+				config,
+				$fs: env.$fs,
 			})
 			throw new Error("should not reach this")
 		} catch (e) {
@@ -118,7 +121,8 @@ describe("plugin options", () => {
 				options: {
 					pathPattern: "./{language}/*.json",
 				},
-				config: config,
+				config,
+				$fs: env.$fs,
 			})
 			throw new Error("should not reach this")
 		} catch (e) {
@@ -127,20 +131,26 @@ describe("plugin options", () => {
 	})
 })
 
-// it("should not throw if the path pattern is valid", async () => {
-// 	const env = await createMockEnvironment({})
-// 	await env.$fs.writeFile("./en.json", "{}")
-// 	const config: InlangConfig = {
-// 		sourceLanguageTag: "en",
-// 		languageTags: ["en"],
-// 		modules: [],
-// 	}
-// 	const options = {
-// 		pathPattern: "./resources/",
-// 	}
-// 	plugin.setup({ options, config: config })
-// 	expect(await plugin.loadMessages!({ $fs: env.$fs, config, options })).toBeDefined()
-// })
+describe("loadMessage", () => {
+	it("should return messages if the path pattern is valid", async () => {
+		const env = await createMockEnvironment({})
+		await env.$fs.writeFile("./en.json", JSON.stringify({ test: "test" }))
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
+			modules: [],
+		}
+		const options = {
+			pathPattern: "./{language}.json",
+		}
+		plugin.setup({ options, config, $fs: env.$fs })
+		const messages = await plugin.loadMessages!({})
+		console.log(getVariant(messages[0]!, { languageTag: "en" }))
+		expect(
+			messages[0]?.body["en"]?.find((v) => Object.keys(v.match).length === 0)?.pattern[0]?.type,
+		).toBe("Text")
+	})
+})
 
 // it("should work with empty json files", async () => {
 // 	const env = await mockEnvironment({})

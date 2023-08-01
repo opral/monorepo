@@ -17,7 +17,6 @@ describe("getVariant", () => {
 			languageTag: "en",
 			selectors: { gender: "female", guestOther: "1" },
 		})
-		// should return the female variant
 		expect(variant.data![0]).toStrictEqual({
 			type: "Text",
 			value: "{$hostName} invites {$guestName} to her party.",
@@ -31,7 +30,6 @@ describe("getVariant", () => {
 			languageTag: "en",
 			selectors: { gender: "female", guestOther: "0" },
 		})
-		// should return the female variant
 		expect(variant.data![0]).toStrictEqual({
 			type: "Text",
 			value: "{$hostName} invites {$guestName} and {$guestsOther} other people to her party.",
@@ -45,7 +43,6 @@ describe("getVariant", () => {
 			languageTag: "en",
 			selectors: { guestOther: "0" },
 		})
-		// should return the female variant
 		expect(variant.data![0]).toStrictEqual({
 			type: "Text",
 			value: "{$hostName} does not give a party.",
@@ -59,7 +56,6 @@ describe("getVariant", () => {
 			languageTag: "en",
 			selectors: {},
 		})
-		// should return the female variant
 		expect(variant.data![0]).toStrictEqual({
 			type: "Text",
 			value: "{$hostName} invites {$guestName} and {$guestsOther} other people to their party.",
@@ -73,7 +69,6 @@ describe("getVariant", () => {
 			languageTag: "en",
 			selectors: { gender: "trans", guestOther: "2" },
 		})
-		// should return the female variant
 		expect(variant.data![0]).toStrictEqual({
 			type: "Text",
 			value: "{$hostName} invites {$guestName} and one other person to their party.",
@@ -83,7 +78,6 @@ describe("getVariant", () => {
 			languageTag: "en",
 			selectors: { gender: "male", guestOther: "8" },
 		})
-		// should return the female variant
 		expect(variant2.data![0]).toStrictEqual({
 			type: "Text",
 			value: "{$hostName} invites {$guestName} and {$guestsOther} other people to his party.",
@@ -102,7 +96,6 @@ describe("getVariant", () => {
 			languageTag: "en",
 			selectors: {},
 		})
-		// should return the female variant
 		expect(variant.data).toBeUndefined()
 		expect(variant.error).toBeInstanceOf(VariantDoesNotExistException)
 	})
@@ -114,9 +107,42 @@ describe("getVariant", () => {
 			languageTag: "de",
 			selectors: { gender: "female", guestOther: "1" },
 		})
-		// should return the female variant
 		expect(variant.data).toBeUndefined()
 		expect(variant.error).toBeInstanceOf(PatternsForLanguageTagDoNotExistException)
+	})
+
+	test("should return variant if no selector defined", () => {
+		let mockMessage: Message = getMockMessage()
+		mockMessage.body["en"] = [
+			{
+				match: {},
+				pattern: [
+					{
+						type: "Text",
+						value: "test",
+					},
+				],
+			},
+		]
+
+		const variant = getVariant(mockMessage, {
+			languageTag: "en",
+			selectors: {},
+		})
+		// should return the female variant
+		expect(variant.data![0]).toStrictEqual({
+			type: "Text",
+			value: "test",
+		})
+
+		const variant2 = getVariant(mockMessage, {
+			languageTag: "en",
+		})
+		// should return the female variant
+		expect(variant2.data![0]).toStrictEqual({
+			type: "Text",
+			value: "test",
+		})
 	})
 })
 

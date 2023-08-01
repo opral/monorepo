@@ -14,7 +14,7 @@ export function getVariant(
 	message: Message,
 	options: {
 		languageTag: LanguageTag
-		selectors: Record<string, string>
+		selectors?: Record<string, string>
 	},
 ): Result<
 	Variant["pattern"],
@@ -131,21 +131,27 @@ const matchVariant = (
 const matchMostSpecificVariant = (
 	message: Message,
 	languageTag: LanguageTag,
-	selectors: Record<string, string>,
+	selectors?: Record<string, string>,
 ): Variant | undefined => {
+	//make selector indefined if empty object
+	selectors = JSON.stringify(selectors) === "{}" ? undefined : selectors
+
 	// resolve preferenceSelectors to match length and order of message selectors
 	const resolvedSelectors = resolveSelector(message.selectors, selectors)
 	const index: Record<string, any> = {}
 
 	for (const variant of message.body[languageTag]!) {
 		let isMatch = true
+
 		//check if vaiant is a match
 		for (const [key, value] of Object.entries(variant.match)) {
 			if (resolvedSelectors[key] !== value && value !== "*") {
 				isMatch = false
 			}
 		}
-		if (isMatch) {
+		console.log(isMatch, selectors)
+		if (isMatch && selectors) {
+			console.log("indexing")
 			// add variant to nested index
 			function recursiveAddToIndex(
 				currentIndex: Record<string, any>,
@@ -163,6 +169,9 @@ const matchMostSpecificVariant = (
 				}
 			}
 			recursiveAddToIndex(index, message.selectors, variant)
+		} else if (isMatch && !selectors) {
+			console.log("return")
+			return variant
 		}
 	}
 
@@ -203,9 +212,10 @@ const matchMostSpecificVariant = (
  */
 const resolveSelector = (
 	messageSelectors: string[],
-	selectors: Record<string, string>,
+	selectors?: Record<string, string>,
 ): Record<string, string> => {
 	const resolvedSelectors: Record<string, string> = {}
+	if (!selectors) return {}
 	for (const messageSelector of messageSelectors) {
 		resolvedSelectors[messageSelector] = selectors[messageSelector] ?? "*"
 	}
