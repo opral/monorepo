@@ -1,17 +1,17 @@
 import type { InlangConfig } from "@inlang/config"
 import type { Plugin, ResolvedPluginsApi } from "./api.js"
 import {
-	PluginException,
-	PluginFunctionLoadMessagesAlreadyDefinedException,
-	PluginFunctionSaveMessagesAlreadyDefinedException,
-} from "./exceptions.js"
-import type { ResolvePluginResult } from "./resolvePlugins.js"
+	PluginError,
+	PluginFunctionLoadMessagesAlreadyDefinedError,
+	PluginFunctionSaveMessagesAlreadyDefinedError,
+} from "./errors.js"
+import type { ResolvePluginsResult } from "./resolvePlugins.js"
 
 type ValidatePluginResult = {
 	data: {
 		plugin: Plugin
 	}
-	errors: PluginException[]
+	errors: PluginError[]
 }
 
 /**
@@ -20,9 +20,9 @@ type ValidatePluginResult = {
  * @description Checks for duplicate APIs and other errors for resolved plugins.
  */
 export const validatePlugins = (args: {
-	plugins: ResolvePluginResult
+	plugins: ResolvePluginsResult
 	plugin: Plugin
-	pluginInConfig: InlangConfig["plugins"][number]
+	pluginInConfig?: InlangConfig["plugins"][string]
 }): ValidatePluginResult => {
 	const result: ValidatePluginResult = {
 		data: {
@@ -36,9 +36,9 @@ export const validatePlugins = (args: {
 		args.plugins.data.loadMessages !== undefined
 	) {
 		result.errors.push(
-			new PluginFunctionLoadMessagesAlreadyDefinedException(
+			new PluginFunctionLoadMessagesAlreadyDefinedError(
 				`Plugin ${args.plugin.meta.displayName} defines the loadMessages function, but it was already defined by another plugin.`,
-				{ module: args.pluginInConfig.module },
+				{ plugin: args.plugin.meta.id },
 			),
 		)
 	}
@@ -47,9 +47,9 @@ export const validatePlugins = (args: {
 		args.plugins.data.saveMessages !== undefined
 	) {
 		result.errors.push(
-			new PluginFunctionSaveMessagesAlreadyDefinedException(
+			new PluginFunctionSaveMessagesAlreadyDefinedError(
 				`Plugin ${args.plugin.meta.displayName} defines the saveMessages function, but it was already defined by another plugin.`,
-				{ module: args.pluginInConfig.module },
+				{ plugin: args.plugin.meta.id },
 			),
 		)
 	}

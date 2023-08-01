@@ -1,15 +1,18 @@
 import type { InlangConfig } from "@inlang/config"
 import type { InlangEnvironment } from "@inlang/environment"
 import { TranslatedStrings } from "@inlang/language-tag"
+import type { LintRule } from "@inlang/lint"
 import type { Message } from "@inlang/messages"
+import type { InlangModule } from "@inlang/module"
 import { z } from "zod"
 import type {
-	PluginApiAlreadyDefinedException,
-	PluginException,
-	PluginImportException,
-	PluginUsesReservedNamespaceException,
-	PluginUsesInvalidApiException,
-} from "./exceptions.js"
+	PluginApiAlreadyDefinedError,
+	PluginError,
+	PluginUsesReservedNamespaceError,
+	PluginUsesInvalidApiError,
+	ModuleError,
+	ModuleImportError,
+} from "./errors.js"
 
 type JSONSerializable<
 	T extends Record<string, string | string[] | Record<string, string | string[]>>,
@@ -24,7 +27,7 @@ export const pluginIdRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+(?:-[a-z0-9]+)
  * The plugin API is used to extend inlang's functionality.
  */
 export type Plugin<
-	PluginOptions extends Record<string, string | string[]> = Record<string, string>,
+	PluginOptions extends Record<string, string | string[]> = Record<string, string | string[]>,
 	AppSpecificApis extends object = {},
 > = {
 	// * Must be JSON serializable if we want an external plugin manifest in the future.
@@ -64,21 +67,48 @@ export type Plugin<
 }
 
 /**
- * Function that resolves (imports and initializes) the plugins.
+ * Function that resolves modules from the config.
  */
-export type ResolvePlugins = <AppSpecificApis extends object = {}>(args: {
+export type ResolvedModules = (args: {
 	config: InlangConfig
 	env: InlangEnvironment
 }) => Promise<{
+	data: {
+		plugins: Record<string, Plugin>
+		lintRules: Record<string, LintRule>
+		appSpecificApi: Record<string, unknown>
+	}
+	errors: Array<
+		| ModuleError
+		| ModuleImportError
+		>
+}>
+
+/**
+ * The API after resolving the modules.
+ */
+export type ResolvedModulesApi = {
+	plugins: Record<string, Plugin>
+	lintRules: Record<string, LintRule>
+	appSpecificApi: Record<string, unknown>
+}
+
+/**
+ * Function that resolves (imports and initializes) the plugins.
+ */
+export type ResolvePlugins = <AppSpecificApis extends object = {}>(args: {
+	plugins: Plugin[]
+	pluginsInConfig: InlangConfig["plugins"]
+	config: InlangConfig
+}) => {
 	data: ResolvedPluginsApi<AppSpecificApis>
 	errors: Array<
-		| PluginException
-		| PluginImportException
-		| PluginApiAlreadyDefinedException
-		| PluginUsesInvalidApiException
-		| PluginUsesReservedNamespaceException
+		| PluginError
+		| PluginApiAlreadyDefinedError
+		| PluginUsesInvalidApiError
+		| PluginUsesReservedNamespaceError
 	>
-}>
+}
 
 /**
  * The API after resolving the plugins.
@@ -86,6 +116,7 @@ export type ResolvePlugins = <AppSpecificApis extends object = {}>(args: {
 export type ResolvedPluginsApi<AppSpecificApis extends object = {}> = {
 	loadMessages: () => Promise<Message[]>
 	saveMessages: (args: { messages: Message[] }) => Promise<void>
+	plugins: Record<string, Plugin>
 	/**
 	 * App specific APIs.
 	 *

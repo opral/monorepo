@@ -32,6 +32,8 @@
 	"dependencies": {
 		"@inlang/config": "*",
 		"@inlang/environment": "*",
+		"@inlang/lint": "*",
+		"@inlang/module": "*",
 		"@inlang/language-tag": "*",
 		"@inlang/messages": "*",
 		"@inlang/result": "*",

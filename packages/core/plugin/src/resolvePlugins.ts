@@ -1,127 +1,102 @@
-import type { ResolvePlugins, ResolvedPluginsApi, Plugin } from "./api.js"
-import {
-	PluginException,
-	PluginFunctionLoadMessagesAlreadyDefinedException,
-	PluginFunctionSaveMessagesAlreadyDefinedException,
-	PluginImportException,
-} from "./exceptions.js"
-import { tryCatch } from "@inlang/result"
+import type { ResolvedPluginsApi, ResolvePlugins } from "./api.js"
+import { PluginError } from "./errors.js"
 import { parsePlugin } from "./parsePlugin.js"
 import { validatePlugins } from "./validatePlugins.js"
 
-export type ResolvePluginResult = {
-	data: Partial<ResolvedPluginsApi> & Pick<ResolvedPluginsApi, "plugins" | "appSpecificApi">
-	errors: PluginException[]
+export type ResolvePluginsResult = {
+    data: Partial<ResolvedPluginsApi> & Pick<ResolvedPluginsApi, "plugins" | "appSpecificApi">
+    errors: PluginError[]
 }
 
-/**
- * Resolves plugins from the config.
- */
-export const resolvePlugins: ResolvePlugins = async (args) => {
-	const result: ResolvePluginResult = {
-		data: {
-			plugins: [],
-			appSpecificApi: {},
-		},
-		errors: [],
-	}
+export const resolvePlugins: ResolvePlugins = (args) => {
+    const result: ResolvePluginsResult = {
+        data: {
+            plugins: {},
+            appSpecificApi: {},
+        },
+        errors: [],
+    }
 
-	for (const pluginInConfig of args.config.plugins) {
-		try {
-			/**
-			 * -------------- BEGIN SETUP --------------
-			 */
+    for (const plugin of args.plugins) {
+        const pluginId = plugin.meta.id
 
-			const module = await tryCatch(() => args.env.$import(pluginInConfig.module))
+        try {
+            const setup = plugin.setup?.({
+                options: args.pluginsInConfig[pluginId]?.options ?? {},
+                config: args.config,
+            })
+            const appSpecificApi = plugin.addAppSpecificApi?.() ?? {}
+        
+            /**
+             * -------------- PARSE & VALIDATE PLUGIN --------------
+             */
+        
+            // --- PARSE PLUGIN ---
+            const parsed = parsePlugin({
+                maybeValidPlugin: plugin,
+            })
+        
+            if (parsed.errors) {
+                result.errors.push(...parsed.errors)
+            }
+        
+            // --- VALIDATE PLUGINS ---
+            const validated = validatePlugins({
+                plugins: result,
+                plugin,
+                pluginInConfig: args.pluginsInConfig[pluginId],
+            })
 
-			// -- IMPORT ERROR --
-			if (module.error) {
-				result.errors.push(
-					new PluginImportException(`Couldn't import the plugin "${pluginInConfig.module}"`, {
-						module: pluginInConfig.module,
-						cause: module.error as Error,
-					}),
-				)
-			}
-
-			const plugin = module.data.default as Plugin
-			const setup = plugin.setup?.({
-				options: pluginInConfig.options,
-				config: args.config,
-			})
-			const lintRules = plugin.addLintRules?.() ?? []
-			const appSpecificApi = plugin.addAppSpecificApi?.() ?? {}
-
-			/**
-			 * -------------- PARSE & VALIDATE PLUGIN --------------
-			 */
-
-			// --- PARSE PLUGIN ---
-			const parsed = parsePlugin({
-				maybeValidPlugin: plugin,
-			})
-
-			if (parsed.errors) {
-				result.errors.push(...parsed.errors)
-			}
-
-			// --- VALIDATE PLUGINS ---
-			const validated = validatePlugins({
-				plugins: result,
-				plugin,
-				pluginInConfig,
-			})
-
-			if (validated.errors) {
-				result.errors.push(...validated.errors)
-			}
-
-			/**
-			 * -------------- BEGIN ADDING TO RESULT --------------
-			 */
-
-			if (typeof plugin.loadMessages === "function") {
-				result.data.loadMessages = async () => await plugin.loadMessages!(args)
-			}
-
-			if (typeof plugin.saveMessages === "function") {
-				result.data.saveMessages = async (args) => await plugin.saveMessages!(args)
-			}
-
-			result.data.appSpecificApi = {
-				...result.data.appSpecificApi,
-				...appSpecificApi,
-			}
-
-			result.data.plugins.push({
-				...plugin.meta,
-				module: pluginInConfig.module,
-			})
-
-			for (const lintRule of lintRules) {
-				result.data.lintRules.push(lintRule)
-			}
-		} catch (e) {
-			/**
+            if (validated.errors) {
+                result.errors.push(...validated.errors)
+            }
+        
+            if (validated.errors) {
+                result.errors.push(...validated.errors)
+            }
+        
+            /**
+             * -------------- BEGIN ADDING TO RESULT --------------
+             */
+        
+            if (typeof plugin.loadMessages === "function") {
+                result.data.loadMessages = async () => await plugin.loadMessages!(args)
+            }
+        
+            if (typeof plugin.saveMessages === "function") {
+                result.data.saveMessages = async (args: any) => await plugin.saveMessages!(args)
+            }
+        
+            result.data.appSpecificApi = {
+                ...result.data.appSpecificApi,
+                ...appSpecificApi,
+            }
+        
+            result.data.plugins = {
+                ...result.data.plugins,
+                [pluginId]: plugin,
+            }
+        } catch (e) {
+            			/**
 			 * -------------- BEGIN ERROR HANDLING --------------
 			 */
-			if (e instanceof PluginException) {
+			if (e instanceof PluginError) {
 				result.errors.push(e)
 			} else if (e instanceof Error) {
 				result.errors.push(
-					new PluginException(e.message, { module: pluginInConfig.module, cause: e }),
+					new PluginError(e.message, { plugin: pluginId, cause: e }),
 				)
 			} else {
 				result.errors.push(
-					new PluginException("Unhandled and unknown error", {
-						module: pluginInConfig.module,
+					new PluginError("Unhandled and unknown error", {
+						plugin: pluginId,
 						cause: e,
 					}),
 				)
 			}
 			continue
-		}
-	}
+        }
 
-	return result as any
+        return result as any
+    }
 }
