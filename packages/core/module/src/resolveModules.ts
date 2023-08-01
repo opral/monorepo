@@ -1,8 +1,7 @@
-import type { ResolvedModules, ResolvedModulesApi } from "./api.js"
+import type { ResolvedModulesApi, ResolvedModulesFunction } from "./api.js"
 import {
 	ModuleError,
 	ModuleImportError,
-	PluginError
 } from "./errors.js"
 import { tryCatch } from "@inlang/result"
 import type { InlangModule } from "@inlang/module"
@@ -10,21 +9,20 @@ import type { LintRule } from "@inlang/lint"
 import { resolvePlugins, type Plugin } from "@inlang/plugin"
 
 export type ResolveModuleResult = {
-	data: Partial<ResolvedModulesApi> & Pick<ResolvedModulesApi, "plugins" | "lintRules" | "appSpecificApi">
-	errors: Array<ModuleError | PluginError>
+	data: Partial<ResolvedModulesApi> & Pick<ResolvedModulesApi, "resolvedPlugins" | "resolvedLintRules">
+	errors: Array<ModuleError>
 }
 
 /**
  * Resolves plugins from the config.
  */
-export const resolveModules: ResolvedModules = async (args) => {
+export const resolveModules: ResolvedModulesFunction = async (args) => {
 	const pluginsInConfig = args.config.settings?.plugins
 
 	const result: ResolveModuleResult = {
 		data: {
-			plugins: {},
-			lintRules: {},
-			appSpecificApi: {},
+			resolvedPlugins: {},
+			resolvedLintRules: [],
 		},
 		errors: [],
 	}
@@ -51,16 +49,27 @@ export const resolveModules: ResolvedModules = async (args) => {
 
 			// --- GET PLUGIN & LINT RULES ---
 			const plugins = inlangModule.default.plugins as Plugin[]
-			const lintRules = inlangModule.default.lintRules as ((...args: unknown[]) => LintRule)[]
+			const lintRules = inlangModule.default.lintRules as LintRule[]
 
-			const resolvedPlugins = resolvePlugins({
+			const resolvedPlugins = await resolvePlugins({
 				plugins,
 				pluginsInConfig,
 				config: args.config,
+				env: args.env,
 			})
 
-			if (resolvedPlugins.errors) {
-				result.errors.push(...resolvedPlugins.errors)
+			/**
+			 * -------------- BEGIN ADDING TO RESULT --------------
+			 */
+
+			result.data.resolvedPlugins = {
+				...result.data.resolvedPlugins,
+				...resolvedPlugins.data.plugins,
+			}
+
+			result.data.resolvedLintRules = {
+				...result.data.resolvedLintRules,
+				...lintRules,
 			}
 		} catch (e) {
 			/**

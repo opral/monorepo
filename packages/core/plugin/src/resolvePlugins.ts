@@ -21,7 +21,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 		const pluginId = plugin.meta.id
 
 		try {
-			const setup = plugin.setup?.({
+			plugin.setup?.({
 				options: args.pluginsInConfig?.[pluginId]?.options,
 				fs: args.env.$fs,
 			})
@@ -60,7 +60,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			 */
 
 			if (typeof plugin.loadMessages === "function") {
-				result.data.loadMessages = async () => await plugin.loadMessages!(args)
+				result.data.loadMessages = async () => await plugin.loadMessages!({ languageTags: args.config.languageTags })
 			}
 
 			if (typeof plugin.saveMessages === "function") {

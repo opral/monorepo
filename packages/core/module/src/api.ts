@@ -1,6 +1,6 @@
 import type { InlangConfig, LintRuleSettings } from "@inlang/config"
 import type { LintRule } from "@inlang/lint"
-import type { Plugin, ResolvePlugins } from "@inlang/plugin"
+import type { Plugin, ResolvePluginsFunction } from "@inlang/plugin"
 import type { ModuleError, ModuleImportError } from "./errors.js"
 import type { InlangEnvironment } from "@inlang/environment"
 
@@ -22,7 +22,7 @@ import type { InlangEnvironment } from "@inlang/environment"
 export type InlangModule = {
 	default: {
 		plugins?: Plugin[]
-		lintRules?: ((...args: unknown[]) => LintRule)[]
+		lintRules?: LintRule[]
 	}
 }
 
@@ -34,8 +34,16 @@ export type ResolvedModulesFunction = (args: {
 	env: InlangEnvironment
 }) => Promise<{
 	data: {
-		resolvedPlugins: Awaited<ReturnType<ResolvePlugins>>
+		resolvedPlugins: Awaited<ReturnType<ResolvePluginsFunction>>
 		resolvedLintRules: LintRule[]
 	}
 	errors: Array<ModuleError | ModuleImportError>
 }>
+
+/**
+ * The API after resolving the modules.
+ */
+export type ResolvedModulesApi = {
+	resolvedPlugins: Awaited<ReturnType<ResolvePluginsFunction>>["data"]["plugins"]
+	resolvedLintRules: LintRule[]
+}
