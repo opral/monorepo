@@ -1,4 +1,4 @@
-import type { InlangConfig } from "@inlang/config"
+import type { InlangConfig, PluginOptions } from "@inlang/config"
 import { TranslatedStrings } from "@inlang/language-tag"
 import type { Message } from "@inlang/messages"
 import type { InlangEnvironment } from "@inlang/environment"
@@ -23,7 +23,7 @@ export const pluginIdRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+(?:-[a-z0-9]+)
  * The plugin API is used to extend inlang's functionality.
  */
 export type Plugin<
-	PluginOptions extends JSONSerializable<unknown> = Record<string, string>,
+	PluginOptions extends JSONSerializable<unknown> = Record<string, string> | unknown,
 	AppSpecificApis extends object = {},
 > = {
 	// * Must be JSON serializable if we want an external plugin manifest in the future.
@@ -39,7 +39,7 @@ export type Plugin<
 	 * Use the setup function to initialize state, handle the options and more.
 	 */
 	setup: (args: {
-		options: Record<string, string | string[] | Record<string, string>>
+		options: PluginOptions
 		fs: InlangEnvironment["$fs"]
 	}) => {}
 	/**

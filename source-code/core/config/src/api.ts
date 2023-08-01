@@ -35,7 +35,7 @@ export type LintRuleSettings = {
 	level?: "off" | "warning" | "error"
 }
 
-type PluginOptions = Record<string, string | string[] | Record<string, string>>
+export type PluginOptions = Record<string, string | string[] | Record<string, string>>
 
 /**
  * ------------- Zod Types -------------
