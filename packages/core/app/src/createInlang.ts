@@ -1,7 +1,7 @@
 import { InlangConfig } from "@inlang/config"
 import type { InlangInstance } from "./api.js"
 import type { InlangEnvironment } from "@inlang/environment"
-import { resolvePlugins } from "@inlang/plugin"
+import { resolveModules } from "@inlang/module"
 
 export async function createInlang(args: {
 	configPath: string
@@ -11,6 +11,6 @@ export async function createInlang(args: {
 	const configFile = (await args.env.$fs.readFile(args.configPath, { encoding: "utf-8" })) as string
 	const configJson = JSON.parse(configFile)
 	const config: InlangConfig = InlangConfig.passthrough().parse(configJson)
-	const resolvedPluginApi = await resolvePlugins({ config, env: args.env })
+	const resolvedPluginApi = await resolveModules({ config, env: args.env })
 	return {} as any
 }

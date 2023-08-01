@@ -1,4 +1,4 @@
-import type { Plugin, ResolvedModules, ResolvedModulesApi } from "./api.js"
+import type { ResolvedModules, ResolvedModulesApi } from "./api.js"
 import {
 	ModuleError,
 	ModuleImportError,
@@ -7,7 +7,7 @@ import {
 import { tryCatch } from "@inlang/result"
 import type { InlangModule } from "@inlang/module"
 import type { LintRule } from "@inlang/lint"
-import { resolvePlugins } from "./resolvePlugins.js"
+import { resolvePlugins, type Plugin } from "@inlang/plugin"
 
 export type ResolveModuleResult = {
 	data: Partial<ResolvedModulesApi> & Pick<ResolvedModulesApi, "plugins" | "lintRules" | "appSpecificApi">
@@ -18,8 +18,8 @@ export type ResolveModuleResult = {
  * Resolves plugins from the config.
  */
 export const resolveModules: ResolvedModules = async (args) => {
-	const pluginsInConfig = args.config.plugins
-	
+	const pluginsInConfig = args.config.settings?.plugins
+
 	const result: ResolveModuleResult = {
 		data: {
 			plugins: {},
@@ -48,7 +48,7 @@ export const resolveModules: ResolvedModules = async (args) => {
 			}
 
 			const inlangModule = importedModule.data.default as InlangModule
-			
+
 			// --- GET PLUGIN & LINT RULES ---
 			const plugins = inlangModule.default.plugins as Plugin[]
 			const lintRules = inlangModule.default.lintRules as LintRule[]
