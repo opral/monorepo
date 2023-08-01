@@ -4,63 +4,16 @@ import type {
 	LanguageTag,
 	InlangEnvironment,
 	InlangConfig,
-	TranslatedStrings,
+	Plugin,
 } from "@inlang/plugin"
 import { throwIfInvalidOptions } from "./options.js"
 import { detectJsonSpacing, detectIsNested, replaceAll } from "./utilities.js"
 import { flatten } from "flat"
 
-// Will be removed when plugin build is working -------------------------------
-
-type JSONSerializable<T extends Record<string, string | string[] | Record<string, string>>> = T
-
 export type PluginOptions = {
 	pathPattern: string | Record<string, string>
 	variableReferencePattern?: [string, string]
 	ignore?: string[]
-}
-
-export type Plugin<
-	PluginOptions extends Record<string, string | string[] | Record<string, string>> = Record<
-		string,
-		string
-	>,
-	AppSpecificApis extends object = {},
-> = {
-	// * Must be JSON serializable if we want an external plugin manifest in the future.
-	meta: JSONSerializable<{
-		id: `${string}.${string}`
-		displayName: TranslatedStrings
-		description: TranslatedStrings
-		keywords: string[]
-	}>
-	/**
-	 * The setup function is the first function that is called when inlang loads the plugin.
-	 *
-	 * Use the setup function to initialize state, handle the options and more.
-	 */
-	setup: (args: { options: PluginOptions; config: Readonly<InlangConfig> }) => {}
-	/**
-	 * Load messages.
-	 *
-	 * - if messages with language tags that are not defined in the config.languageTags
-	 *   are returned, the user config will be automatically updated to include the
-	 *   new language tags.
-	 */
-	loadMessages?: (args: {}) => Promise<Message[]> | Message[]
-	saveMessages?: (args: { messages: Message[] }) => Promise<void> | void
-	/**
-	 * Define app specific APIs.
-	 *
-	 * @example
-	 * addAppSpecificApi: () => ({
-	 * 	 "inlang.ide-extension": {
-	 * 	   messageReferenceMatcher: () => {}
-	 * 	 }
-	 *  })
-	 */
-	addAppSpecificApi?: () => AppSpecificApis
-	// afterSetup: () => {}
 }
 
 // ----------------------------------------------------------------------------
