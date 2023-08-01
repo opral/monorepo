@@ -1,16 +1,30 @@
-import type { Message, Variant, LanguageTag, InlangEnvironment, InlangConfig, TranslatedStrings } from "@inlang/plugin"
-import { type PluginOptionsWithDefaults, type PluginOptions, throwIfInvalidOptions } from "./options.js"
+import type {
+	Message,
+	Variant,
+	LanguageTag,
+	InlangEnvironment,
+	InlangConfig,
+	TranslatedStrings,
+} from "@inlang/plugin"
+import { throwIfInvalidOptions } from "./options.js"
 import { detectJsonSpacing, detectIsNested, replaceAll } from "./utilities.js"
 import { flatten } from "flat"
 
 // Will be removed when plugin build is working -------------------------------
 
-type JSONSerializable<
-	T extends Record<string, string | string[] | Record<string, string | string[]>>,
-> = T
+type JSONSerializable<T extends Record<string, string | string[] | Record<string, string>>> = T
+
+export type PluginOptions = {
+	pathPattern: string | Record<string, string>
+	variableReferencePattern?: [string, string]
+	ignore?: string[]
+}
 
 export type Plugin<
-	PluginOptions extends Record<string, string | string[] | Record<string, string>> = Record<string, string>,
+	PluginOptions extends Record<string, string | string[] | Record<string, string>> = Record<
+		string,
+		string
+	>,
 	AppSpecificApis extends object = {},
 > = {
 	// * Must be JSON serializable if we want an external plugin manifest in the future.
@@ -112,15 +126,10 @@ function defaultNesting() {
 // 	...options,
 // }
 
-let pluginOptions: PluginOptions = {}
-const pluginOptionsWithDefaults: PluginOptionsWithDefaults = {
-	variableReferencePattern: ["{{", "}}"],
-	ignore: [],
-	...pluginOptions,
-}
-let pluginConfig: InlangConfig = {} 
+let pluginOptions: PluginOptions | undefined = undefined
+let pluginConfig: InlangConfig = {}
 
-export const plugin: Plugin = {
+export const plugin: Plugin<PluginOptions> = {
 	meta: {
 		id: "inlang.plugin-i18next",
 		displayName: { en: "i18next" },
@@ -128,30 +137,26 @@ export const plugin: Plugin = {
 		keywords: ["i18next", "react", "nextjs"],
 	},
 	setup: ({ options, config }) => {
-    if (options.pathPattern === undefined) {
-			throwIfInvalidOptions(options)
-			pluginOptions = options
-			pluginConfig = config 
-			return {}
-		}
+		options.variableReferencePattern = ["{{", "}}"]
+		options.ignore = []
+		throwIfInvalidOptions(options)
+		pluginOptions = options
+		pluginConfig = config
+		return {}
 	},
 	loadMessages: async () => {
-		return loadMessages(
-      {
-        $fs: env.$fs,
-        config: pluginConfig,
-        options: pluginOptionsWithDefaults,
-      }
-    )
+		return loadMessages({
+			$fs: env.$fs,
+			config: pluginConfig,
+			options: pluginOptions,
+		})
 	},
 	saveMessages: async () => {
-    return saveMessages(
-      {
-        $fs: env.$fs,
-        config: pluginConfig,
-        options: pluginOptionsWithDefaults,
-      }
-    )
+		return saveMessages({
+			$fs: env.$fs,
+			config: pluginConfig,
+			options: pluginOptions,
+		})
 	},
 	// addAppSpecificApi: () => {
 	// 	return {
@@ -168,37 +173,35 @@ export const plugin: Plugin = {
 /**
  * Reading resources.
  */
-async function loadMessages(
-	args: {
-		$fs: InlangEnvironment["$fs"]
-		config: InlangConfig
-		options: PluginOptions
-	},
-): Promise<Message[]> {
+async function loadMessages(args: {
+	$fs: InlangEnvironment["$fs"]
+	config: InlangConfig
+	options: PluginOptions
+}): Promise<Message[]> {
 	const messages: Message[] = []
 	for (const languageTag of args.config.languageTags) {
 		if (typeof args.options.pathPattern !== "string") {
 			for (const [prefix, path] of Object.entries(args.options.pathPattern)) {
 				const messagesFromFile = await getFileToParse(
-					path, 
-					NESTED[path.replace("{language}", languageTag)] ?? defaultNesting(), 
-					languageTag, 
-					args.$fs
+					path,
+					NESTED[path.replace("{language}", languageTag)] ?? defaultNesting(),
+					languageTag,
+					args.$fs,
 				)
-				for ( const [key, value] of Object.entries(messagesFromFile) ) {
-					const prefixedKey = prefix + ":" + key;
-					addVariantToMessages(messages, prefixedKey, languageTag, value)	
+				for (const [key, value] of Object.entries(messagesFromFile)) {
+					const prefixedKey = prefix + ":" + key
+					addVariantToMessages(messages, prefixedKey, languageTag, value)
 				}
 			}
 		} else {
 			const messagesFromFile = await getFileToParse(
-				args.options.pathPattern, 
-				NESTED[args.options.pathPattern.replace("{language}", languageTag)] ?? defaultNesting(), 
-				languageTag, 
-				args.$fs
+				args.options.pathPattern,
+				NESTED[args.options.pathPattern.replace("{language}", languageTag)] ?? defaultNesting(),
+				languageTag,
+				args.$fs,
 			)
-			for ( const [key, value] of Object.entries(messagesFromFile) ) {
-				addVariantToMessages(messages, key, languageTag, value)	
+			for (const [key, value] of Object.entries(messagesFromFile)) {
+				addVariantToMessages(messages, key, languageTag, value)
 			}
 		}
 	}
@@ -208,7 +211,12 @@ async function loadMessages(
 /**
  * Get the files that needs to be parsed.
  */
-async function getFileToParse(path: string, isNested: boolean, language: string, $fs: InlangEnvironment["$fs"]): Promise<Record<string, string>> {
+async function getFileToParse(
+	path: string,
+	isNested: boolean,
+	language: string,
+	$fs: InlangEnvironment["$fs"],
+): Promise<Record<string, string>> {
 	const pathWithLanguage = path.replace("{language}", language)
 	// get file, make sure that is not braking when the namespace doesn't exist in every language dir
 	try {
@@ -219,13 +227,13 @@ async function getFileToParse(path: string, isNested: boolean, language: string,
 		FILE_HAS_NEW_LINE[pathWithLanguage] = (file as string).endsWith("\n")
 
 		const flattenedMessages = isNested
-		? flatten(JSON.parse(file as string), {
-				transformKey: function (key) {
-					//replace dots in keys with unicode
-					return replaceAll(key, ".", "u002E")
-				},
-		  })
-		: JSON.parse(file as string)
+			? flatten(JSON.parse(file as string), {
+					transformKey: function (key) {
+						//replace dots in keys with unicode
+						return replaceAll(key, ".", "u002E")
+					},
+			  })
+			: JSON.parse(file as string)
 		return flattenedMessages
 	} catch (e) {
 		// if the namespace doesn't exist for this dir -> continue
@@ -240,38 +248,49 @@ async function getFileToParse(path: string, isNested: boolean, language: string,
 /**
  * Add new item (message, variant) to the ast
  */
-const addVariantToMessages = (messages: Message[], key: string, language: LanguageTag, value: string) => {
-	const messageIndex = messages.findIndex(m => m.id === key)
-	if(messageIndex !== -1){
+const addVariantToMessages = (
+	messages: Message[],
+	key: string,
+	language: LanguageTag,
+	value: string,
+) => {
+	const messageIndex = messages.findIndex((m) => m.id === key)
+	if (messageIndex !== -1) {
 		const variant: Variant = {
 			match: {},
-			pattern: [{
-				type: "Text",
-				value,
-			}]
+			pattern: [
+				{
+					type: "Text",
+					value,
+				},
+			],
 		}
 		// Check if the language exists in the body of the message
 		if (!messages[messageIndex]?.body[language]) {
-			messages[messageIndex]!.body[language]! = [];
+			messages[messageIndex]!.body[language]! = []
 		}
 
 		//push new variant
-		messages[messageIndex]!.body[language]!.push(variant);
-	}else{
+		messages[messageIndex]!.body[language]!.push(variant)
+	} else {
 		// message does not exist
 		messages.push({
 			id: key,
 			expressions: [],
 			selectors: [],
 			body: {
-				language : [{
-					match: {},
-					pattern: [{
-						type: "Text",
-						value,
-					}]
-				}]
-			}
+				language: [
+					{
+						match: {},
+						pattern: [
+							{
+								type: "Text",
+								value,
+							},
+						],
+					},
+				],
+			},
 		})
 	}
 }
