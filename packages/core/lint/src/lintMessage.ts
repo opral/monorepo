@@ -1,5 +1,4 @@
-import type { InlangConfig, InlangInstance, Message, MessageQueryApi } from '@inlang/app'
-// @ts-ignore
+import type { InlangConfig, Message, MessageQueryApi } from '@inlang/app'
 import type { SuccessWithErrorResult } from '@inlang/result'
 import { LintException, LintReport, MessageLintRule, MessageLintReport } from './api.js'
 
