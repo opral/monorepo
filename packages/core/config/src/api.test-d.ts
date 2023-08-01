@@ -1,4 +1,4 @@
-import { InlangConfig } from "./schema.js"
+import { InlangConfig } from "./api.js"
 import { expectType } from "tsd"
 
 const config: InlangConfig = {

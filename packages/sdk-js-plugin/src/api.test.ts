@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest"
-import { SdkConfigInput, validateSdkConfig } from "./schema.js"
+import { SdkConfigInput, validateSdkConfig } from "./api.js"
 
 describe("validateSdkConfig", () => {
 	describe("languageNegotiation", () => {

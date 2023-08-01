@@ -1,4 +1,4 @@
-import type { InlangConfig } from '@inlang/config'
+import type { InlangConfig, LintRuleSettings } from '@inlang/config'
 import type { LintRule } from "@inlang/lint"
 import type { Plugin } from "@inlang/plugin"
 import type { ModuleError, ModuleImportError } from './errors.js'
@@ -38,8 +38,8 @@ export type ResolvedModules = (args: {
 	env: InlangEnvironment
 }) => Promise<{
 	data: {
-		plugins: Record<string, Plugin>
-		lintRules: Record<string, LintRule>
+		plugins: Record<string, Plugin['meta']>
+		lintRules: Record<string, { module: LintRule, settings: LintRuleSettings }>
 		appSpecificApi: Record<string, unknown>
 	}
 	errors: Array<
