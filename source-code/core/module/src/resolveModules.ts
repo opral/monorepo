@@ -51,7 +51,7 @@ export const resolveModules: ResolvedModules = async (args) => {
 
 			// --- GET PLUGIN & LINT RULES ---
 			const plugins = inlangModule.default.plugins as Plugin[]
-			const lintRules = inlangModule.default.lintRules as LintRule[]
+			const lintRules = inlangModule.default.lintRules as ((...args: unknown[]) => LintRule)[]
 
 			const resolvedPlugins = resolvePlugins({
 				plugins,

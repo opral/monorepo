@@ -4,10 +4,6 @@ import type { Plugin } from "@inlang/plugin"
 import type { ModuleError, ModuleImportError } from './errors.js'
 import type { InlangEnvironment } from '@inlang/environment'
 
-/* Avoids circular dependency */
-type PluginInModule = Plugin
-type LintRuleInModule = LintRule
-
 /**
  * The inlang module API.
  *
@@ -25,8 +21,8 @@ type LintRuleInModule = LintRule
 
 export type InlangModule = {
 	default: {
-		plugins: PluginInModule[]
-		lintRules: LintRuleInModule[]
+		plugins?: Plugin[]
+		lintRules?: ((...args: unknown[]) => LintRule)[]
 	}
 }
 
