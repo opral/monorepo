@@ -1,2 +1,2 @@
-export type { Result, SuccessResult, ErrorResult } from "./api.js"
+export type { Result, SuccessResult, ErrorResult, SuccessWithErrorResult } from "./api.js"
 export { tryCatch } from "./tryCatch.js"

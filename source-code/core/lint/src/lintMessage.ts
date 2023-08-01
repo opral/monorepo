@@ -1,14 +1,16 @@
-import type { InlangInstance, Message, LintReport, MessageLintRule, MessageLintReport, SuccessWithErrorResult } from '@inlang/app'
+import type { InlangConfig, InlangInstance, Message, MessageQueryApi } from '@inlang/app'
+// @ts-ignore
+import type { SuccessWithErrorResult } from '@inlang/result'
+import { LintException, LintReport, MessageLintRule, MessageLintReport } from './api.js'
 
 export const lintMessage = async (args: {
-	inlang: InlangInstance
+	config: InlangConfig,
+	messages: Message[],
+	query: MessageQueryApi,
 	message: Message
 }): Promise<SuccessWithErrorResult<LintReport[], LintException[]>> => {
 	const reports: LintReport[] = []
 	const exceptions: LintException[] = []
-
-	const config = args.inlang.config.get()
-	const query = args.inlang.query.messages
 
 	const rules = [] as MessageLintRule[] // TODO: how to get the lint rules?
 	const promises = rules.map(async rule => {
@@ -17,8 +19,8 @@ export const lintMessage = async (args: {
 		try {
 			await rule.message({
 				message: args.message,
-				query,
-				config,
+				query: args.query,
+				config: args.config,
 				report: (reportArgs => {
 					reports
 						.push({
@@ -30,22 +32,11 @@ export const lintMessage = async (args: {
 				}),
 			})
 		} catch (error) {
-			exceptions.push(new LintException(ruleId, error))
+			exceptions.push(new LintException(`Exception in lint rule '${ruleId}'.`, { cause: error }))
 		}
 	})
 
 	await Promise.allSettled(promises)
 
 	return { data: reports, error: exceptions }
-}
-
-export class LintException extends Error {
-	readonly #id = "LintException"
-
-	constructor(lintRuleId: string, cause: unknown) {
-		super(
-			`Exception in lint rule '${lintRuleId}'.`,
-			{ cause },
-		)
-	}
 }
