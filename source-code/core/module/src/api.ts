@@ -1,8 +1,8 @@
-import type { InlangConfig, LintRuleSettings } from '@inlang/config'
+import type { InlangConfig, LintRuleSettings } from "@inlang/config"
 import type { LintRule } from "@inlang/lint"
-import type { Plugin } from "@inlang/plugin"
-import type { ModuleError, ModuleImportError } from './errors.js'
-import type { InlangEnvironment } from '@inlang/environment'
+import type { Plugin, ResolvePlugins } from "@inlang/plugin"
+import type { ModuleError, ModuleImportError } from "./errors.js"
+import type { InlangEnvironment } from "@inlang/environment"
 
 /**
  * The inlang module API.
@@ -29,26 +29,13 @@ export type InlangModule = {
 /**
  * Function that resolves modules from the config.
  */
-export type ResolvedModules = (args: {
+export type ResolvedModulesFunction = (args: {
 	config: InlangConfig
 	env: InlangEnvironment
 }) => Promise<{
 	data: {
-		plugins: Record<string, Plugin['meta']>
-		lintRules: Record<string, { module: LintRule, settings: LintRuleSettings }>
-		appSpecificApi: Record<string, unknown>
+		resolvedPlugins: Awaited<ReturnType<ResolvePlugins>>
+		resolvedLintRules: LintRule[]
 	}
-	errors: Array<
-		| ModuleError
-		| ModuleImportError
-	>
+	errors: Array<ModuleError | ModuleImportError>
 }>
-
-/**
- * The API after resolving the modules.
- */
-export type ResolvedModulesApi = {
-	plugins: Record<string, Plugin>
-	lintRules: Record<string, LintRule>
-	appSpecificApi: Record<string, unknown>
-}
