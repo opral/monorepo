@@ -2,7 +2,6 @@ import type { InlangConfig } from '@inlang/config';
 import type { Message, MessageQueryApi } from '@inlang/messages';
 import type { LintException, LintReport } from './api.js';
 import { lintMessage } from './lintMessage.js';
-// @ts-ignore
 import type { SuccessWithErrorResult } from '@inlang/result'
 
 export const lintMessages = async (args: {
@@ -20,7 +19,7 @@ export const lintMessages = async (args: {
 	const results = await Promise.all(promises)
 
 	return {
-		data: results.map(result => result.data).filter(Boolean),
-		error: results.map(result => result.error).filter(Boolean)
+		data: results.flatMap(result => result.data).filter(Boolean),
+		error: results.flatMap(result => result.error).filter(Boolean)
 	}
 }
