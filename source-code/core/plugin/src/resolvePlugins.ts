@@ -1,4 +1,4 @@
-import type { ResolvedPluginsApi, ResolvePlugins } from "./api.js"
+import type { ResolvedPluginsApi, ResolvePluginsFunction } from "./api.js"
 import { PluginError } from "./errors.js"
 import { parsePlugin } from "./parsePlugin.js"
 import { validatePlugins } from "./validatePlugins.js"
@@ -8,7 +8,7 @@ export type ResolvePluginsResult = {
 	errors: PluginError[]
 }
 
-export const resolvePlugins: ResolvePlugins = (args) => {
+export const resolvePlugins: ResolvePluginsFunction = (args) => {
 	const result: ResolvePluginsResult = {
 		data: {
 			plugins: {},
