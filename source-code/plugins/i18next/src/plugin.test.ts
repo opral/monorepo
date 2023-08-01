@@ -108,10 +108,10 @@ it("should not throw if the path pattern is valid", async () => {
 		modules: [],
 	}
 	const options = {
-		pathPattern: "./resources/"
+		pathPattern: "./resources/",
 	}
 	plugin.setup({ options, config: config })
-	expect(await plugin.loadMessages!({$fs: env.$fs, config, options })).toBeDefined()
+	expect(await plugin.loadMessages!({ $fs: env.$fs, config, options })).toBeDefined()
 })
 
 // it("should work with empty json files", async () => {

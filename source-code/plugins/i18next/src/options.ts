@@ -1,4 +1,4 @@
-import type { Plugin } from "./plugin.js"
+import type { PluginOptions } from "./plugin.js"
 
 /**
  * Throws an error if the options are invalid.
@@ -38,49 +38,3 @@ export function throwIfInvalidOptions(options: PluginOptions) {
 		}
 	}
 }
-
-export type PluginOptions = {
-	/**
-	 * Defines the path pattern for the resources.
-	 *
-	 * Could be one path or multible namespaces
-	 * Must include the `{language}` placeholder.
-	 *
-	 * @example
-	 *  "./resources/{language}.json"
-	 *
-	 * @example
-	 *  {
-	 * 		"common": "./resources/{language}/common.json"
-	 * 		"card": "./resources/{language}/card.json"
-	 *  }
-	 */
-	pathPattern: string | Record<string, string>
-	/**
-	 * Defines the pattern for variable references.
-	 *
-	 * Can be either a single string ("Hello @user") or
-	 * an array of two strings ("Hello {{user}}").
-	 */
-	variableReferencePattern?: [string] | [string, string]
-	/**
-	 * Ignores all files that match the given pattern.
-	 */
-	ignore?: string[]
-}
-
-export type PluginOptionsWithDefaults = WithRequired<
-	PluginOptions,
-	"variableReferencePattern" | "ignore"
->
-
-type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
-
-// const options = {
-// 	"variableReferencePattern": ["{{", "}}"], // string[]
-// 	"standardPathPattern": "./resources/{language}.json", // string
-// 	"pathPattern": {
-// 		"common": "./resources/{language}/common.json",
-// 		"card": "./resources/{language}/card.json",
-// 	}, // Record<string, string>
-// } satisfies Plugin["setup"]
