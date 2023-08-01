@@ -24,24 +24,18 @@ export type InlangConfig = {
  * The settings of a plugin.
  */
 export type PluginSettings = {
-	options?: JSONObject
+	options?: PluginOptions
 }
 
 /**
  * The settings of a lint rule.
  */
 export type LintRuleSettings = {
-	options?: JSONObject
+	options?: PluginOptions
 	level?: "off" | "warning" | "error"
 }
 
-type JSON = string | number | boolean | null | JSONObject | JSONArray
-
-type JSONObject = {
-	[key: string]: JSON
-}
-
-type JSONArray = Array<JSON>
+type PluginOptions = Record<string, string | string[] | Record<string, string>>
 
 /**
  * ------------- Zod Types -------------

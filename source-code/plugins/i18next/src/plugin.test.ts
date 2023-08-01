@@ -9,7 +9,16 @@ describe("plugin options", () => {
 		const config: InlangConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en"],
-			modules: [],
+			modules: ["i18next"],
+			settings: {
+				plugins: {
+					i18next: {
+						options: {
+							pathPattern: "./resources/",
+						},
+					},
+				},
+			},
 		}
 
 		try {
