@@ -1,5 +1,5 @@
 export type { Plugin, ResolvedPluginsApi } from "./api.js"
-export { resolvePlugins } from "./resolvePlugins.js"
+export { resolveModules } from "./resolveModules.js"
 
 /**
  * -------- RE-EXPORTS --------

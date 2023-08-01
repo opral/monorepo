@@ -1,17 +1,17 @@
 import { Result, tryCatch } from "@inlang/result"
 import { Plugin, pluginIdRegex } from "./api.js"
 import {
-	PluginUsesReservedNamespaceException,
-	PluginUsesInvalidApiException,
-	PluginInvalidIdException,
-	PluginException,
-} from "./exceptions.js"
+	PluginUsesReservedNamespaceError,
+	PluginUsesInvalidApiError,
+	PluginInvalidIdError,
+	PluginError,
+} from "./errors.js"
 
 type ParsePluginResult = {
 	data: {
 		plugin: Plugin
 	}
-	errors: PluginException[]
+	errors: PluginError[]
 }
 
 /**
@@ -39,9 +39,9 @@ export const parsePlugin = (args: { maybeValidPlugin: Plugin }): ParsePluginResu
 	// -- INVALID ID in META --
 	if (new RegExp(pluginIdRegex).test(args.maybeValidPlugin.meta.id) === false) {
 		result.errors.push(
-			new PluginInvalidIdException(
+			new PluginInvalidIdError(
 				`Plugin ${args.maybeValidPlugin.meta.id} has an invalid id "${args.maybeValidPlugin.meta.id}". It must be kebap-case and contain a namespace like project.my-plugin.`,
-				{ module: args.maybeValidPlugin.meta.id },
+				{ plugin: args.maybeValidPlugin.meta.id },
 			),
 		)
 	}
@@ -52,10 +52,10 @@ export const parsePlugin = (args: { maybeValidPlugin: Plugin }): ParsePluginResu
 		!whitelistedPlugins.includes(args.maybeValidPlugin.meta.id)
 	) {
 		result.errors.push(
-			new PluginUsesReservedNamespaceException(
+			new PluginUsesReservedNamespaceError(
 				`Plugin ${args.maybeValidPlugin.meta.id} uses reserved namespace 'inlang'.`,
 				{
-					module: args.maybeValidPlugin.meta.id,
+					plugin: args.maybeValidPlugin.meta.id,
 				},
 			),
 		)
@@ -66,9 +66,9 @@ export const parsePlugin = (args: { maybeValidPlugin: Plugin }): ParsePluginResu
 
 	if (parsed.error) {
 		result.errors.push(
-			new PluginUsesInvalidApiException(
+			new PluginUsesInvalidApiError(
 				`Plugin ${args.maybeValidPlugin.meta.id} uses invalid API.`,
-				{ module: args.maybeValidPlugin.meta.id, cause: parsed.error as Error },
+				{ plugin: args.maybeValidPlugin.meta.id, cause: parsed.error as Error },
 			),
 		)
 	}

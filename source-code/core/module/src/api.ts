@@ -1,3 +1,10 @@
+import type { LintRule } from "@inlang/lint"
+import type { Plugin } from "@inlang/plugin"
+
+/* Avoids circular dependency */
+type PluginInModule = Plugin
+type LintRuleInModule = LintRule
+
 /**
  * The inlang module API.
  *
@@ -12,9 +19,10 @@
  *     lintRules: [lintRule1, lintRule2],
  *   }
  */
+
 export type InlangModule = {
 	default: {
-		plugins: any[]
-		lintRules: any[]
+		plugins: PluginInModule[]
+		lintRules: LintRuleInModule[]
 	}
 }

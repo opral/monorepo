@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { resolvePlugins } from "./resolvePlugins.js"
+import { resolvePlugins } from "./resolveModules.js"
 import type { InlangConfig } from "@inlang/config"
 import {
 	PluginException,
@@ -9,7 +9,7 @@ import {
 	PluginInvalidIdException,
 	PluginUsesReservedNamespaceException,
 	PluginUsesInvalidApiException,
-} from "./exceptions.js"
+} from "./errors.js"
 import type { InlangEnvironment } from "@inlang/environment"
 import type { Plugin } from "./api.js"
 
