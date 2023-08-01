@@ -22,56 +22,56 @@ export const resolvePlugins: ResolvePlugins = (args) => {
 
         try {
             const setup = plugin.setup?.({
-                options: args.pluginsInConfig[pluginId]?.options ?? {},
+                options: args.pluginsInConfig?.[pluginId]?.options ?? {},
                 config: args.config,
             })
             const appSpecificApi = plugin.addAppSpecificApi?.() ?? {}
-        
+
             /**
              * -------------- PARSE & VALIDATE PLUGIN --------------
              */
-        
+
             // --- PARSE PLUGIN ---
             const parsed = parsePlugin({
                 maybeValidPlugin: plugin,
             })
-        
+
             if (parsed.errors) {
                 result.errors.push(...parsed.errors)
             }
-        
+
             // --- VALIDATE PLUGINS ---
             const validated = validatePlugins({
                 plugins: result,
                 plugin,
-                pluginInConfig: args.pluginsInConfig[pluginId],
+                pluginInConfig: args.pluginsInConfig?.[pluginId],
             })
 
             if (validated.errors) {
                 result.errors.push(...validated.errors)
             }
-        
+
             if (validated.errors) {
                 result.errors.push(...validated.errors)
             }
-        
+
             /**
              * -------------- BEGIN ADDING TO RESULT --------------
              */
-        
+
             if (typeof plugin.loadMessages === "function") {
                 result.data.loadMessages = async () => await plugin.loadMessages!(args)
             }
-        
+
             if (typeof plugin.saveMessages === "function") {
                 result.data.saveMessages = async (args: any) => await plugin.saveMessages!(args)
             }
-        
+
             result.data.appSpecificApi = {
                 ...result.data.appSpecificApi,
                 ...appSpecificApi,
             }
-        
+
             result.data.plugins = {
                 ...result.data.plugins,
                 [pluginId]: plugin,

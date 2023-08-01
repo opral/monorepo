@@ -33,6 +33,7 @@
 		"@inlang/environment": "*",
 		"@inlang/config": "*",
 		"@inlang/messages": "*",
+		"@inlang/module": "*",
 		"@inlang/plugin": "*",
 		"@inlang/lint": "*",
 		"@inlang/language-tag": "*",

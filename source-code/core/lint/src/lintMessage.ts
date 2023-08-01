@@ -1,6 +1,7 @@
-import type { InlangConfig, Message, MessageQueryApi } from '@inlang/app'
 import type { SuccessWithErrorResult } from '@inlang/result'
 import { LintException, LintReport, MessageLintRule, MessageLintReport } from './api.js'
+import type { InlangConfig } from '@inlang/config'
+import type { Message, MessageQueryApi } from '@inlang/messages'
 
 export const lintMessage = async (args: {
 	config: InlangConfig,

@@ -1,17 +1,12 @@
 import type { InlangConfig } from "@inlang/config"
-import type { InlangEnvironment } from "@inlang/environment"
 import { TranslatedStrings } from "@inlang/language-tag"
-import type { LintRule } from "@inlang/lint"
 import type { Message } from "@inlang/messages"
-import type { InlangModule } from "@inlang/module"
 import { z } from "zod"
 import type {
 	PluginApiAlreadyDefinedError,
 	PluginError,
 	PluginUsesReservedNamespaceError,
 	PluginUsesInvalidApiError,
-	ModuleError,
-	ModuleImportError,
 } from "./errors.js"
 
 type JSONSerializable<
@@ -23,11 +18,20 @@ type JSONSerializable<
  */
 export const pluginIdRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+(?:-[a-z0-9]+)*$/
 
+
+type JSON = string | number | boolean | null | JSONObject | JSONArray
+
+type JSONObject = {
+	[key: string]: JSON
+}
+
+type JSONArray = Array<JSON>
+
 /**
  * The plugin API is used to extend inlang's functionality.
  */
 export type Plugin<
-	PluginOptions extends Record<string, string | string[]> = Record<string, string | string[]>,
+	PluginOptions extends JSON = JSON,
 	AppSpecificApis extends object = {},
 > = {
 	// * Must be JSON serializable if we want an external plugin manifest in the future.
@@ -67,38 +71,11 @@ export type Plugin<
 }
 
 /**
- * Function that resolves modules from the config.
- */
-export type ResolvedModules = (args: {
-	config: InlangConfig
-	env: InlangEnvironment
-}) => Promise<{
-	data: {
-		plugins: Record<string, Plugin>
-		lintRules: Record<string, LintRule>
-		appSpecificApi: Record<string, unknown>
-	}
-	errors: Array<
-		| ModuleError
-		| ModuleImportError
-		>
-}>
-
-/**
- * The API after resolving the modules.
- */
-export type ResolvedModulesApi = {
-	plugins: Record<string, Plugin>
-	lintRules: Record<string, LintRule>
-	appSpecificApi: Record<string, unknown>
-}
-
-/**
  * Function that resolves (imports and initializes) the plugins.
  */
 export type ResolvePlugins = <AppSpecificApis extends object = {}>(args: {
 	plugins: Plugin[]
-	pluginsInConfig: InlangConfig["plugins"]
+	pluginsInConfig: Exclude<InlangConfig["settings"], undefined>["plugins"]
 	config: InlangConfig
 }) => {
 	data: ResolvedPluginsApi<AppSpecificApis>

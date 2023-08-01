@@ -1,5 +1,5 @@
 import type { InlangConfig } from "@inlang/config"
-import type { Plugin, ResolvedPluginsApi } from "./api.js"
+import type { Plugin } from "./api.js"
 import {
 	PluginError,
 	PluginFunctionLoadMessagesAlreadyDefinedError,
@@ -22,7 +22,7 @@ type ValidatePluginResult = {
 export const validatePlugins = (args: {
 	plugins: ResolvePluginsResult
 	plugin: Plugin
-	pluginInConfig?: InlangConfig["plugins"][string]
+	pluginInConfig?: Exclude<Exclude<InlangConfig["settings"], undefined>["plugins"], undefined>[string]
 }): ValidatePluginResult => {
 	const result: ValidatePluginResult = {
 		data: {
