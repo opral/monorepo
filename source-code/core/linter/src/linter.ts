@@ -1,4 +1,5 @@
-import { InlangEnvironment, InlangInstance, LintReport, Message, MessageLintReport, MessageLintRule, createInlang } from '@inlang/app'
+import { InlangEnvironment, Message, createInlang } from '@inlang/app'
+import { lintMessage } from './lintMessage.js'
 
 export const createLinter = async (args: {
 	configPath: string
@@ -7,45 +8,14 @@ export const createLinter = async (args: {
 	const inlang = await createInlang(args)
 
 	return {
-		lintMessage: (message: Message) => lintMessage({ inlang, message }),
+		lintMessage: async (message: Message) => {
+			const { data, error } = await lintMessage({ inlang, message })
+			// TODO: check if reactivity works
+			// TODO: get rid of old entries
+			inlang.lint.reports().push(...data)
+			// TODO: get rid of old entries
+			inlang.lint.exceptions().push(...error)
+		},
 	}
 }
 
-const lintMessage = async (args: {
-	inlang: InlangInstance
-	message: Message
-}): Promise<void> => {
-	// TODO: how to get the lint rules?
-	for (const rule of [] as MessageLintRule[]) { // TODO: parallelize
-		try {
-			await rule.message({
-				message: args.message,
-				query: args.inlang.query.messages,
-				config: args.inlang.config.get(),
-				report: (reportArgs => {
-					// TODO: how to get rid of the old entry?
-					args.inlang.lint.reports()
-						.push({
-							type: "MessageLint",
-							ruleId: rule.meta.id,
-							level: rule.meta.defaultLevel, // TODO: set correct level
-							...reportArgs,
-						} satisfies MessageLintReport as unknown as LintReport) // TODO: WTF?
-				}),
-			})
-		} catch (e) {
-			// TODO: how to get rid of the old entry?
-			args.inlang.lint.exceptions()
-				.push(
-					new ExceptionDuringLinting(`Exception in lint rule '${rule.meta.id}'`, {
-						cause: e,
-					}),
-				)
-		}
-	}
-}
-
-// TODO: use new syntax
-class ExceptionDuringLinting extends Error {
-	readonly #id = "ExceptionDuringLinting"
-}
