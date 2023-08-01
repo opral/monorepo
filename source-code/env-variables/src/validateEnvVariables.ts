@@ -1,5 +1,5 @@
 import type { Result } from "@inlang/core/utilities"
-import { privateEnvVariablesSchema, publicEnvVariablesSchema } from "./schema.js"
+import { privateEnvVariablesSchema, publicEnvVariablesSchema } from "./api.js"
 
 /**
  * Validates the environment variables.

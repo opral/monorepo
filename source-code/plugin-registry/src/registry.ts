@@ -1,4 +1,4 @@
-import type { InlangPluginManifest } from "./schema.js"
+import type { InlangPluginManifest } from "./api.js"
 
 export const plugins: InlangPluginManifest[] = [
 	{

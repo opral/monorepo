@@ -1,4 +1,4 @@
-import { type SdkConfigInput, validateSdkConfig } from "./schema.js"
+import { type SdkConfigInput, validateSdkConfig } from "./api.js"
 import type { InlangConfig } from "@inlang/core/config"
 import { createPlugin } from "@inlang/core/plugin"
 
