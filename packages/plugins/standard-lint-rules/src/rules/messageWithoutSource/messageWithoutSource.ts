@@ -1,4 +1,4 @@
-import type { MessageLintRule } from "@inlang/plugin"
+import type { MessageLintRule } from "@inlang/lint"
 
 export const messageWithoutSourceRule = (): MessageLintRule => ({
 	meta: {

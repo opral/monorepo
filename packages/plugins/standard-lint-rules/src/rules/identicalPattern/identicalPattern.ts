@@ -1,5 +1,5 @@
 import type { Variant } from "@inlang/messages"
-import type { MessageLintRule } from "@inlang/plugin"
+import type { MessageLintRule } from "@inlang/lint"
 
 type IdenticalPatternRuleOptions = {
 	ignore: string[]
