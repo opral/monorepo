@@ -5,3 +5,4 @@ export type {
 	LintRule,
 	LintReport,
 } from "./api.js"
+export { lintMessage } from './lintMessage.js'
