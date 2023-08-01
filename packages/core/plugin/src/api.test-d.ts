@@ -1,4 +1,4 @@
-import { Plugin, ResolvePlugins } from "./api.js"
+import { Plugin, ResolvePluginsFunction } from "./api.js"
 import { expectType } from "tsd"
 
 // the zod schema must be identical to the types
@@ -58,7 +58,7 @@ const plugin1: Plugin<PluginOptions, AppSpecificApis> = {
 
 expectType<Plugin<PluginOptions, AppSpecificApis>>(plugin1)
 
-const resolvePlugins: ResolvePlugins = {} as any
+const resolvePlugins: ResolvePluginsFunction = {} as any
 
 const { data: resolvedWithoutAppSpecific, errors } = await resolvePlugins({} as any)
 

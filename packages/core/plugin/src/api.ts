@@ -70,7 +70,7 @@ export type Plugin<
 /**
  * Function that resolves (imports and initializes) the plugins.
  */
-export type ResolvePlugins = <AppSpecificApis extends object = {}>(args: {
+export type ResolvePluginsFunction = <AppSpecificApis extends object = {}>(args: {
 	plugins: Plugin[]
 	pluginsInConfig: Exclude<InlangConfig["settings"], undefined>["plugins"]
 	config: InlangConfig
