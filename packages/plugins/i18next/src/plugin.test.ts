@@ -1,118 +1,128 @@
-import { mockEnvironment } from "@inlang/core/test"
-import { expect, it } from "vitest"
+import { expect, it, describe } from "vitest"
 import { plugin } from "./plugin.js"
-import type { ResolvedPluginsApi, InlangConfig, Message } from "@inlang/plugin"
+import { InlangConfig, createMockEnvironment } from "@inlang/plugin"
 
-it("should throw if the path pattern does not include the {language} placeholder", async () => {
-	const env = await mockEnvironment({})
-	await env.$fs.writeFile("./en.json", "{}")
-	const config: InlangConfig = {
-		sourceLanguageTag: "en",
-		languageTags: ["en"],
-		modules: [],
-	}
+describe("plugin options", () => {
+	it("should throw if the path pattern does not include the {language} placeholder", async () => {
+		const env = await createMockEnvironment({})
+		await env.$fs.writeFile("./en.json", "{}")
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
+			modules: [],
+		}
 
-	try {
-		plugin.setup({ options: { pathPattern: "./resources/" }, config: config })
-		throw new Error("should not reach this")
-	} catch (e) {
-		expect((e as Error).message).toContain("pathPattern")
-	}
+		try {
+			plugin.setup({ options: { pathPattern: "./resources/" }, config: config })
+			throw new Error("should not reach this")
+		} catch (e) {
+			expect((e as Error).message).toContain("pathPattern")
+		}
+	})
+
+	it("should throw if the path pattern string does not end with '.json'", async () => {
+		const env = await createMockEnvironment({})
+		await env.$fs.writeFile("./en.json", "{}")
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
+			modules: [],
+		}
+		try {
+			plugin.setup({ options: { pathPattern: "./resources/" }, config: config })
+			throw new Error("should not reach this")
+		} catch (e) {
+			expect((e as Error).message).toContain("pathPattern")
+		}
+	})
+
+	it("should throw if the path pattern with namespaces does not include the {language} placeholder", async () => {
+		const env = await createMockEnvironment({})
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
+			modules: [],
+		}
+		await env.$fs.writeFile("./en.json", "{}")
+		try {
+			plugin.setup({ options: { pathPattern: {
+				"common": "./common.json",
+			} }, config: config })
+			throw new Error("should not reach this")
+		} catch (e) {
+			expect((e as Error).message).toContain("pathPattern")
+		}
+	})
+
+	it("should throw if the path pattern with namespaces does not end with '.json'", async () => {
+		const env = await createMockEnvironment({})
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
+			modules: [],
+		}
+		await env.$fs.writeFile("./en.json", "{}")
+		try {
+			plugin.setup({ options: { pathPattern: {
+				"common": "./{language}/common",
+			} }, config: config })
+			throw new Error("should not reach this")
+		} catch (e) {
+			expect((e as Error).message).toContain("pathPattern")
+		}
+	})
+
+	it("should throw if the path pattern with namespaces has a namespace with a dot", async () => {
+		const env = await createMockEnvironment({})
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
+			modules: [],
+		}
+		await env.$fs.writeFile("./en.json", "{}")
+		try {
+			plugin.setup({ options: { pathPattern: {
+				"namespaceWith.dot": "./{language}/common.json",
+			} }, config: config })
+			throw new Error("should not reach this")
+		} catch (e) {
+			expect((e as Error).message).toContain("pathPattern")
+		}
+	})
+
+	it("should throw if the path pattern includes wildcard", async () => {
+		const env = await createMockEnvironment({})
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
+			modules: [],
+		}
+		await env.$fs.writeFile("./en.json", "{}")
+		try {
+			plugin.setup({ options: {
+				pathPattern: "./{language}/*.json",
+			}, config: config })
+			throw new Error("should not reach this")
+		} catch (e) {
+			expect((e as Error).message).toContain("pathPattern")
+		}
+	})
 })
 
-it("should throw if the path pattern string does not end with '.json'", async () => {
-	const env = await mockEnvironment({})
-	await env.$fs.writeFile("./en.json", "{}")
-	const config: InlangConfig = {
-		sourceLanguageTag: "en",
-		languageTags: ["en"],
-		modules: [],
-	}
-	try {
-		plugin.setup({ options: { pathPattern: "./resources/" }, config: config })
-		throw new Error("should not reach this")
-	} catch (e) {
-		expect((e as Error).message).toContain("pathPattern")
-	}
-})
-
-// it("should throw if the path pattern with namespaces does not include the {language} placeholder", async () => {
-// 	const env = await mockEnvironment({})
+// it("should not throw if the path pattern is valid", async () => {
+// 	const env = await createMockEnvironment({})
 // 	await env.$fs.writeFile("./en.json", "{}")
-// 	const x = plugin({
-// 		pathPattern: {
-// 			common: "./common.json",
-// 		},
-// 	})(env)
-// 	try {
-// 		await x.config({})
-// 		throw new Error("should not reach this")
-// 	} catch (e) {
-// 		expect((e as Error).message).toContain("pathPattern")
+// 	const config: InlangConfig = {
+// 		sourceLanguageTag: "en",
+// 		languageTags: ["en"],
+// 		modules: [],
 // 	}
-// })
-
-// it("should throw if the path pattern with namespaces does not end with '.json'", async () => {
-// 	const env = await mockEnvironment({})
-// 	await env.$fs.writeFile("./en.json", "{}")
-// 	const x = plugin({
-// 		pathPattern: {
-// 			common: "./{language}/common",
-// 		},
-// 	})(env)
-// 	try {
-// 		await x.config({})
-// 		throw new Error("should not reach this")
-// 	} catch (e) {
-// 		expect((e as Error).message).toContain("pathPattern")
+// 	const options = {
+// 		pathPattern: "./resources/",
 // 	}
+// 	plugin.setup({ options, config: config })
+// 	expect(await plugin.loadMessages!({ $fs: env.$fs, config, options })).toBeDefined()
 // })
-
-// it("should throw if the path pattern with namespaces has a namespace with a dot", async () => {
-// 	const env = await mockEnvironment({})
-// 	await env.$fs.writeFile("./en.json", "{}")
-// 	const x = plugin({
-// 		pathPattern: {
-// 			"namespaceWith.dot": "./{language}/common.json",
-// 		},
-// 	})(env)
-// 	try {
-// 		await x.config({})
-// 		throw new Error("should not reach this")
-// 	} catch (e) {
-// 		expect((e as Error).message).toContain("pathPattern")
-// 	}
-// })
-
-// it("should throw if the path pattern includes wildcard", async () => {
-// 	const env = await mockEnvironment({})
-// 	await env.$fs.writeFile("./en.json", "{}")
-// 	const x = plugin({
-// 		pathPattern: "./{language}/*.json",
-// 	})(env)
-// 	try {
-// 		await x.config({})
-// 		throw new Error("should not reach this")
-// 	} catch (e) {
-// 		expect((e as Error).message).toContain("wildcard")
-// 	}
-// })
-
-it("should not throw if the path pattern is valid", async () => {
-	const env = await mockEnvironment({})
-	console.log(env)
-	await env.$fs.writeFile("./en.json", "{}")
-	const config: InlangConfig = {
-		sourceLanguageTag: "en",
-		languageTags: ["en"],
-		modules: [],
-	}
-	const options = {
-		pathPattern: "./resources/",
-	}
-	plugin.setup({ options, config: config })
-	expect(await plugin.loadMessages!({ $fs: env.$fs, config, options })).toBeDefined()
-})
 
 // it("should work with empty json files", async () => {
 // 	const env = await mockEnvironment({})
