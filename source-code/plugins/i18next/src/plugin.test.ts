@@ -45,9 +45,14 @@ describe("plugin options", () => {
 		}
 		await env.$fs.writeFile("./en.json", "{}")
 		try {
-			plugin.setup({ options: { pathPattern: {
-				"common": "./common.json",
-			} }, config: config })
+			plugin.setup({
+				options: {
+					pathPattern: {
+						common: "./common.json",
+					},
+				},
+				config: config,
+			})
 			throw new Error("should not reach this")
 		} catch (e) {
 			expect((e as Error).message).toContain("pathPattern")
@@ -63,9 +68,14 @@ describe("plugin options", () => {
 		}
 		await env.$fs.writeFile("./en.json", "{}")
 		try {
-			plugin.setup({ options: { pathPattern: {
-				"common": "./{language}/common",
-			} }, config: config })
+			plugin.setup({
+				options: {
+					pathPattern: {
+						common: "./{language}/common",
+					},
+				},
+				config: config,
+			})
 			throw new Error("should not reach this")
 		} catch (e) {
 			expect((e as Error).message).toContain("pathPattern")
@@ -81,9 +91,14 @@ describe("plugin options", () => {
 		}
 		await env.$fs.writeFile("./en.json", "{}")
 		try {
-			plugin.setup({ options: { pathPattern: {
-				"namespaceWith.dot": "./{language}/common.json",
-			} }, config: config })
+			plugin.setup({
+				options: {
+					pathPattern: {
+						"namespaceWith.dot": "./{language}/common.json",
+					},
+				},
+				config: config,
+			})
 			throw new Error("should not reach this")
 		} catch (e) {
 			expect((e as Error).message).toContain("pathPattern")
@@ -99,9 +114,12 @@ describe("plugin options", () => {
 		}
 		await env.$fs.writeFile("./en.json", "{}")
 		try {
-			plugin.setup({ options: {
-				pathPattern: "./{language}/*.json",
-			}, config: config })
+			plugin.setup({
+				options: {
+					pathPattern: "./{language}/*.json",
+				},
+				config: config,
+			})
 			throw new Error("should not reach this")
 		} catch (e) {
 			expect((e as Error).message).toContain("pathPattern")
