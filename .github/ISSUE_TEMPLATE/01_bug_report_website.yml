@@ -1,9 +1,9 @@
 name: Bug report for `inlang.com`
 description: Something is not working as expected on the `inlang.com` website
-title: '[bug] <title>'
+title: "[bug] <title>"
 labels:
-  - 'type: bug'
-  - 'scope: website'
+  - "type: bug"
+  - "scope: website"
 assignees:
   - NilsJacobsen
 body:
@@ -14,8 +14,8 @@ body:
   - type: input
     id: link
     attributes:
-      label: 'On what page did you encounter the bug?'
-      placeholder: 'https://inlang.com/...'
+      label: "On what page did you encounter the bug?"
+      placeholder: "https://inlang.com/..."
   - type: textarea
     id: bug-description
     attributes:
@@ -52,5 +52,5 @@ body:
   - type: textarea
     id: other
     attributes:
-      label: 'Other information'
+      label: "Other information"
       description: Do you have additional information that could help us fix the bug? Please include it here.
