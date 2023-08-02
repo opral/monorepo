@@ -15,21 +15,38 @@ export type LintRule = {
 		 * The default lint level is added to the user config
 		 * on first run.
 		 */
-		defaultLevel: LintLevel
 	}
-}
-
-export type MessageLintRule = LintRule & {
-	message: (args: {
-		message: Message
-		query: Pick<MessageQueryApi, "get">
-		config: Readonly<InlangConfig>
-		report: ReportMessageLint
-	}) => MaybePromise<void>
+	defaultLevel: LintLevel
 }
 
 // TODO: make it a general type for other packages to use
+type JSONSerializable<
+	T extends Record<string, string | string[] | Record<string, string | string[]>> | unknown,
+> = T
+
+// TODO: make it a general type for other packages to use
 type MaybePromise<T> = T | Promise<T>
+
+export type MessageLintRule<
+	RuleOptions extends JSONSerializable<unknown> = Record<string, string> | unknown
+> =
+	LintRule & {
+		setup: (args: { options: RuleOptions }) => Pick<InitializedMessageLintRule, 'message'>
+	}
+
+export type InitializedMessageLintRule =
+	Pick<LintRule, 'meta'> & {
+		module: string
+		level: LintLevel
+	} & {
+		message: (args: {
+			message: Message
+			query: Pick<MessageQueryApi, "get">
+			config: Readonly<InlangConfig>
+			report: ReportMessageLint
+		}) => MaybePromise<void>
+	}
+
 
 export type ReportMessageLint = (args: {
 	messageId: Message["id"]

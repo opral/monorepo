@@ -1,6 +1,6 @@
 import type { MessageLintRule } from "@inlang/lint"
 
-export const messageWithoutSourceRule = (): MessageLintRule => ({
+export const messageWithoutSourceRule = ({
 	meta: {
 		id: "inlang.messageWithoutSource",
 		displayName: {
@@ -15,17 +15,21 @@ the message (id) is no longer used in source code, but messages
 have not been updated accordingly.
 `,
 		},
-		defaultLevel: "error",
 	},
-	message: ({ message: { id, body }, config, report }) => {
-		if (Object.keys(body).length && !body[config.sourceLanguageTag]) {
-			report({
-				messageId: id,
-				languageTag: config.sourceLanguageTag,
-				body: {
-					en: `Message with id '${id}' is specified, but missing in the source.`,
-				},
-			})
+	defaultLevel: "error",
+	setup: () => {
+		return {
+			message: ({ message: { id, body }, config, report }) => {
+				if (Object.keys(body).length && !body[config.sourceLanguageTag]) {
+					report({
+						messageId: id,
+						languageTag: config.sourceLanguageTag,
+						body: {
+							en: `Message with id '${id}' is specified, but missing in the source.`,
+						},
+					})
+				}
+			},
 		}
-	},
-})
+	}
+}) as MessageLintRule<never>
