@@ -7,7 +7,7 @@
  */
 
 import Parsimmon from "parsimmon"
-import type { MessageReferenceMatch } from "@inlang/core/config"
+// import type { MessageReferenceMatch } from "@inlang/plugin"
 
 const parser = Parsimmon.createLanguage({
 	// The entry point for message reference matching.
