@@ -1,27 +1,17 @@
-import type { InlangEnvironment } from "@inlang/core/environment"
-import type { SerializedMessage } from "./types.js"
-
 /**
- * Recursive function to add nested keys to an object.
+ * Detects the nesting of the JSON file.
  *
- * @example addNestedKeys(message, ["common", "title"], "en", "test")
+ * @example detectJsonSpacing(stringifiedFile)
  */
-export const addNestedKeys = (
-	obj: any,
-	parentKeys: string[] | undefined,
-	keyName: string,
-	value: string,
-) => {
-	if (!parentKeys || parentKeys.length === 0) {
-		obj[keyName] = value
-	} else if (parentKeys.length === 1) {
-		obj[parentKeys[0]!] = { [keyName]: value }
-	} else {
-		if (!obj[parentKeys[0]!]) {
-			obj[parentKeys[0]!] = {}
+export const detectIsNested = (file: string): boolean | undefined => {
+	const json = JSON.parse(file)
+	if (file === "{}") return undefined
+	for (const value of Object.values(json)) {
+		if (typeof value === "object") {
+			return true
 		}
-		addNestedKeys(obj[parentKeys[0]!], parentKeys.slice(1), keyName, value)
 	}
+	return false
 }
 
 /**
@@ -45,6 +35,7 @@ export const detectJsonSpacing = (jsonString: string) => {
 		},
 		{
 			spacing: 4,
+
 			regex: /^{\n {4}[^ ]+.*$/m,
 		},
 		{
@@ -72,56 +63,15 @@ export const detectJsonSpacing = (jsonString: string) => {
 }
 
 /**
- * Recursive function to collect all strings in an object.
- * It creates and array, that contains the string, the parents and the id.
+ * replaceAll for old Browsers
  *
- * @example collectStringsWithParents(parsedResource)
+ * @example replaceAll("abs def abc", "abc", "o")
  */
-export const collectNestedSerializedMessages = (
-	node: unknown,
-	parents: string[] | undefined = [],
-	fileName?: string,
-) => {
-	const result: SerializedMessage[] = []
 
-	if (typeof node === "string") {
-		result.push({
-			text: node,
-			parentKeys: parents.length > 1 ? parents.slice(0, -1) : undefined,
-			id: fileName ? fileName + "." + parents.join(".") : parents.join("."),
-			keyName: parents.at(-1)!,
-		})
-	} else if (typeof node === "object" && node !== null) {
-		for (const key in node) {
-			// eslint-disable-next-line no-prototype-builtins
-			if (node.hasOwnProperty(key)) {
-				const currentParents = [...parents, key]
-				const childResults = collectNestedSerializedMessages(
-					node[key as keyof typeof node],
-					currentParents,
-					fileName,
-				)
-				result.push(...childResults)
-			}
-		}
-	}
-
-	return result
+export function replaceAll(str: string, find: string, replace: string) {
+	return str.replace(new RegExp(escapeRegExp(find), "g"), replace)
 }
 
-/**
- * Checks if a path is a directory.
- *
- * @example isDirectory({ path: "path/to/dir", $fs: fs })
- */
-export async function pathIsDirectory(args: {
-	path: string
-	$fs: InlangEnvironment["$fs"]
-}): Promise<boolean> {
-	return await Promise.resolve(
-		args.$fs
-			.readdir(args.path)
-			.then(() => true)
-			.catch(() => false),
-	)
+function escapeRegExp(string: string) {
+	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") // $& means the whole matched string
 }
