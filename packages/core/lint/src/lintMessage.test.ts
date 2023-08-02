@@ -1,24 +1,26 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { lintMessage } from "./lintMessage.js"
-import type { MessageLintReport, MessageLintRule } from './api.js'
-import type { InlangConfig } from '@inlang/config'
-import type { Message, MessageQueryApi } from '@inlang/messages'
+import type { MessageLintReport, MessageLintRule } from "./api.js"
+import type { InlangConfig } from "@inlang/config"
+import type { Message, MessageQueryApi } from "@inlang/messages"
 
 const lintRule1 = {
 	meta: {
-		id: 'lint-rule.1',
-		displayName: { en: '', }, description: { en: '', },
+		id: "lint-rule.1",
+		displayName: { en: "" },
+		description: { en: "" },
 	},
-	defaultLevel: 'error',
+	defaultLevel: "error",
 	message: vi.fn(),
 } satisfies MessageLintRule
 
 const lintRule2 = {
 	meta: {
-		id: 'lint-rule.2',
-		displayName: { en: '', }, description: { en: '', },
+		id: "lint-rule.2",
+		displayName: { en: "" },
+		description: { en: "" },
 	},
-	defaultLevel: 'warning',
+	defaultLevel: "warning",
 	message: vi.fn(),
 } satisfies MessageLintRule
 
@@ -38,7 +40,7 @@ describe("lintMessage", async () => {
 			m1Called = true
 		})
 		lintRule2.message.mockImplementation(async () => {
-			await new Promise(resolve => setTimeout(resolve, 0))
+			await new Promise((resolve) => setTimeout(resolve, 0))
 			m2Called = true
 		})
 
@@ -58,14 +60,14 @@ describe("lintMessage", async () => {
 		const fn = vi.fn()
 
 		lintRule1.message.mockImplementation(async () => {
-			fn('r1', 'before')
-			await new Promise(resolve => setTimeout(resolve, 0))
-			fn('r1', 'after')
+			fn("r1", "before")
+			await new Promise((resolve) => setTimeout(resolve, 0))
+			fn("r1", "after")
 		})
 		lintRule2.message.mockImplementation(async () => {
-			fn('r2', 'before')
-			await new Promise(resolve => setTimeout(resolve, 0))
-			fn('r2', 'after')
+			fn("r2", "before")
+			await new Promise((resolve) => setTimeout(resolve, 0))
+			fn("r2", "after")
 		})
 
 		await lintMessage({
@@ -77,15 +79,15 @@ describe("lintMessage", async () => {
 		})
 
 		expect(fn).toHaveBeenCalledTimes(4)
-		expect(fn).toHaveBeenNthCalledWith(1, 'r1', 'before')
-		expect(fn).toHaveBeenNthCalledWith(2, 'r2', 'before')
-		expect(fn).toHaveBeenNthCalledWith(3, 'r1', 'after')
-		expect(fn).toHaveBeenNthCalledWith(4, 'r2', 'after')
+		expect(fn).toHaveBeenNthCalledWith(1, "r1", "before")
+		expect(fn).toHaveBeenNthCalledWith(2, "r2", "before")
+		expect(fn).toHaveBeenNthCalledWith(3, "r1", "after")
+		expect(fn).toHaveBeenNthCalledWith(4, "r2", "after")
 	})
 
 	test("it should not abort the linting process when errors occur", async () => {
 		lintRule1.message.mockImplementation(() => {
-			throw new Error('error')
+			throw new Error("error")
 		})
 
 		lintRule2.message.mockImplementation(({ report }) => {

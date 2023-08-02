@@ -1,21 +1,24 @@
-import { LintException, LintReport, LintRule, MessageLintReport } from './api.js'
-import type { InlangConfig } from '@inlang/config'
-import type { Message, MessageQueryApi } from '@inlang/messages'
-import { setupMessageLintRules } from './setupMessageLintRules.js'
+import { LintException, LintReport, LintRule, MessageLintReport } from "./api.js"
+import type { InlangConfig } from "@inlang/config"
+import type { Message, MessageQueryApi } from "@inlang/messages"
+import { setupMessageLintRules } from "./setupMessageLintRules.js"
 
 export const lintMessage = async (args: {
-	config: InlangConfig,
-	rules: LintRule[],
-	messages: Message[],
-	query: MessageQueryApi,
+	config: InlangConfig
+	rules: LintRule[]
+	messages: Message[]
+	query: MessageQueryApi
 	message: Message
-}): Promise<{ data: LintReport[], errors: LintException[] }> => {
+}): Promise<{ data: LintReport[]; errors: LintException[] }> => {
 	const reports: MessageLintReport[] = []
 	const exceptions: LintException[] = []
 
-	const rules = await setupMessageLintRules({ settings: args.config.settings?.lintRules, rules: args.rules })
+	const rules = await setupMessageLintRules({
+		settings: args.config.settings?.lintRules,
+		rules: args.rules,
+	})
 
-	const promises = rules.map(async rule => {
+	const promises = rules.map(async (rule) => {
 		const ruleId = rule.meta.id
 		const level = rule.level
 		try {
@@ -23,15 +26,14 @@ export const lintMessage = async (args: {
 				message: args.message,
 				query: args.query,
 				config: args.config,
-				report: (reportArgs => {
-					reports
-						.push({
-							type: "MessageLint",
-							ruleId,
-							level,
-							...reportArgs,
-						})
-				}),
+				report: (reportArgs) => {
+					reports.push({
+						type: "MessageLint",
+						ruleId,
+						level,
+						...reportArgs,
+					})
+				},
 			})
 		} catch (error) {
 			exceptions.push(new LintException(`Exception in lint rule '${ruleId}'.`, { cause: error }))
