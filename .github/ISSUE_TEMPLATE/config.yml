@@ -1,6 +1,9 @@
-blank_issues_enabled: false
+blank_issues_enabled: true
 contact_links:
-  - name: GitHub Discussions
+  - name: Feature request
+    url: https://github.com/inlang/inlang/discussions
+    about: Have an idea for a new feature? Let us know here.
+  - name: Question
     url: https://github.com/inlang/inlang/discussions
     about: Please ask and answer questions here.
   - name: Discord Chat
