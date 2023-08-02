@@ -1,7 +1,8 @@
 import { expect, it, describe } from "vitest"
-import { plugin} from "./plugin.js"
+import { plugin } from "./plugin.js"
 import type { PluginOptions } from "./options.js"
-import { type Variant, createMockEnvironment, getVariant } from "@inlang/plugin"
+import type { Message, Variant } from "@inlang/plugin"
+import { createMockEnvironment, getVariant } from "@inlang/plugin"
 
 describe("option pathPattern", () => {
 	it("should throw if the path pattern does not include the {language} placeholder", async () => {
@@ -147,6 +148,88 @@ describe("loadMessage", () => {
 		const messages = await plugin.loadMessages!({ languageTags })
 		expect(getVariant(messages[0]!, { languageTag: "en" })).toBeTruthy()
 		expect(getVariant(messages[0]!, { languageTag: "de" })).toBeTruthy()
+	})
+})
+
+describe("saveMessage", () => {
+	it("test string pathPattern", async () => {
+		const env = await createMockEnvironment({})
+		await env.$fs.writeFile("./en.json", JSON.stringify({}))
+		const options: PluginOptions = {
+			pathPattern: "./{language}.json",
+		}
+		plugin.setup({ options, fs: env.$fs })
+		const messages: Message[] = [
+			{
+				id: "test",
+				expressions: [],
+				selectors: [],
+				body: {
+					en: [
+						{
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "Hello world",
+								},
+							],
+						},
+					],
+				},
+			},
+		]
+		await plugin.saveMessages!({ messages })
+	})
+
+	it("test object pathPattern", async () => {
+		const env = await createMockEnvironment({})
+		await env.$fs.writeFile("./en.json", JSON.stringify({}))
+		const options: PluginOptions = {
+			pathPattern: {
+				common: "./{language}/common.json",
+			},
+		}
+		plugin.setup({ options, fs: env.$fs })
+		const messages: Message[] = [
+			{
+				id: "common:test",
+				expressions: [],
+				selectors: [],
+				body: {
+					en: [
+						{
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "Hello world",
+								},
+							],
+						},
+					],
+				},
+			},
+			{
+				id: "common:test2",
+				expressions: [],
+				selectors: [],
+				body: {
+					en: [
+						{
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "Hello world2",
+								},
+							],
+						},
+					],
+				},
+			},
+		]
+		await plugin.saveMessages!({ messages })
 	})
 })
 

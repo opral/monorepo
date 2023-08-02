@@ -1,8 +1,15 @@
-import type { Message, Variant, LanguageTag, InlangEnvironment, Plugin } from "@inlang/plugin"
+import {
+	type Message,
+	type Variant,
+	type LanguageTag,
+	type InlangEnvironment,
+	type Plugin,
+	getVariant,
+} from "@inlang/plugin"
 import { throwIfInvalidOptions, type PluginOptions } from "./options.js"
 import { detectJsonSpacing, detectIsNested, replaceAll } from "./utilities.js"
-import { flatten } from "flat"
 import { ideExtensionConfig } from "./ideExtension/config.js"
+import { flatten, unflatten } from "flat"
 
 /**
  * The spacing of the JSON files in this repository.
@@ -91,14 +98,14 @@ export const plugin: Plugin<PluginOptions> = {
 			languageTags,
 		})
 	},
-	saveMessages: async () => {
-		// return saveMessages({
-		// 	$fs: pluginFs!,
-		// 	config: pluginConfig!,
-		// 	options: pluginOptions!,
-		// })
+	saveMessages: async ({ messages }) => {
+		return saveMessages({
+			fs: pluginFs!,
+			options: pluginOptions!,
+			messages,
+		})
 	},
-	addAppSpecificApi: ideExtensionConfig(pluginOptions!), 
+	addAppSpecificApi: ideExtensionConfig(pluginOptions!),
 }
 
 /**
@@ -271,4 +278,147 @@ function parsePattern(
 		})
 
 	return pattern
+}
+
+/**
+ * Writing resources.
+ *
+ * @example writeResources({resources, settings, $fs})
+ */
+async function saveMessages(args: {
+	fs: InlangEnvironment["$fs"]
+	options: PluginOptions
+	messages: Message[]
+}) {
+	if (typeof args.options.pathPattern === "object") {
+		// with namespaces
+		const storage: Record<
+			LanguageTag,
+			Record<string, Record<Message["id"], Variant["pattern"]>>
+		> = {}
+		for (const message of args.messages) {
+			for (const language of Object.keys(message.body)) {
+				const prefix: string = message.id.includes(":")
+					? message.id.split(":")[0]!
+					: Object.keys(args.options.pathPattern)[0]!
+				const resolvedId = message.id.replace(prefix + ":", "")
+				const serializedPattern: Variant["pattern"] = getVariant(message, {
+					languageTag: language,
+				}).data!
+
+				storage[language] ??= {}
+				storage[language]![prefix] ??= {}
+				storage[language]![prefix]![resolvedId] = serializedPattern
+			}
+		}
+		for (const [language, _value] of Object.entries(storage)) {
+			for (const path of Object.values(args.options.pathPattern)) {
+				// check if directory exists
+				const directoryPath = path.replace("{language}", language).split("/").slice(0, -1).join("/")
+				try {
+					await args.fs.readdir(directoryPath)
+				} catch {
+					await args.fs.mkdir(directoryPath)
+				}
+			}
+			for (const [prefix, value] of Object.entries(_value)) {
+				const pathWithLanguage = args.options.pathPattern[prefix]!.replace("{language}", language)
+				await args.fs.writeFile(
+					pathWithLanguage,
+					serializeFile(
+						value,
+						SPACING[pathWithLanguage] ?? defaultSpacing(),
+						FILE_HAS_NEW_LINE[pathWithLanguage]!,
+						NESTED[pathWithLanguage] ?? defaultNesting(),
+						args.options.variableReferencePattern,
+					),
+				)
+			}
+		}
+	} else {
+		// without namespaces
+		const storage: Record<LanguageTag, Record<Message["id"], Variant["pattern"]>> | undefined = {}
+		for (const message of args.messages) {
+			for (const language of Object.keys(message.body)) {
+				const serializedPattern: Variant["pattern"] = getVariant(message, {
+					languageTag: language,
+				}).data!
+				storage[language] ??= {}
+				storage[language]![message.id] = serializedPattern
+			}
+		}
+		for (const [language, value] of Object.entries(storage)) {
+			const pathWithLanguage = args.options.pathPattern.replace("{language}", language)
+			await args.fs.writeFile(
+				pathWithLanguage,
+				serializeFile(
+					value,
+					SPACING[pathWithLanguage] ?? defaultSpacing(),
+					FILE_HAS_NEW_LINE[pathWithLanguage]!,
+					NESTED[pathWithLanguage] ?? defaultNesting(),
+					args.options.variableReferencePattern,
+				),
+			)
+		}
+	}
+}
+
+/**
+ * Serializes a message.
+ */
+function serializeFile(
+	messages: Record<Message["id"], Variant["pattern"]>,
+	space: number | string,
+	endsWithNewLine: boolean,
+	nested: boolean,
+	variableReferencePattern: PluginOptions["variableReferencePattern"],
+): string {
+	let result: Record<string, string> = {}
+	for (const [messageId, pattern] of Object.entries(messages)) {
+		//check if there are two dots after each other -> that would brake unflatten -> replace with unicode
+		let id = replaceAll(messageId, "..", "u002E.")
+		//check if the last char is a dot -> that would brake unflatten -> replace with unicode
+		if (id.slice(-1) === ".") {
+			id = id.replace(/.$/, "u002E")
+		}
+		result[id] = serializePattern(pattern, variableReferencePattern)
+	}
+	// for nested structures -> unflatten the keys
+	if (nested) {
+		result = unflatten(result, {
+			//prevent numbers from creating arrays automatically
+			object: true,
+		})
+	}
+	return (
+		replaceAll(JSON.stringify(result, undefined, space), "u002E", ".") +
+		(endsWithNewLine ? "\n" : "")
+	)
+}
+
+/**
+ * Serializes a pattern.
+ */
+function serializePattern(
+	pattern: Variant["pattern"],
+	variableReferencePattern: PluginOptions["variableReferencePattern"],
+) {
+	const result: string[] = []
+	for (const element of pattern) {
+		switch (element.type) {
+			case "Text":
+				result.push(element.value)
+				break
+			case "Expression":
+				result.push(
+					variableReferencePattern![1]
+						? `${variableReferencePattern![0]}${element.body.name}${variableReferencePattern![1]}`
+						: `${variableReferencePattern![0]}${element.body.name}`,
+				)
+				break
+			default:
+				throw new Error(`Unknown message pattern element of type: ${(element as any)?.type}`)
+		}
+	}
+	return result.join("")
 }
