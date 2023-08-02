@@ -7,7 +7,7 @@
  */
 
 import Parsimmon from "parsimmon"
-import type { MessageReferenceMatch } from "@inlang/core/config"
+// import type { MessageReferenceMatch } from "@inlang/plugin"
 import type { PluginOptions } from "../options.js"
 
 const createParser = (settings: PluginOptions) => {
@@ -123,7 +123,7 @@ const createParser = (settings: PluginOptions) => {
 								character: end.column,
 							},
 						},
-					} satisfies MessageReferenceMatch
+					} // satisfies MessageReferenceMatch
 				},
 			)
 		},
@@ -131,7 +131,7 @@ const createParser = (settings: PluginOptions) => {
 }
 
 // Parse the expression
-export function parse(sourceCode: string, options: PluginOptions): MessageReferenceMatch[] {
+export function parse(sourceCode: string, options: PluginOptions) {
 	try {
 		const parser = createParser(options)
 		return parser.entry!.tryParse(sourceCode)

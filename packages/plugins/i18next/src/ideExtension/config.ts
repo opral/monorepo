@@ -1,17 +1,17 @@
-import type { InlangConfig } from "@inlang/core/config"
 import { parse } from "./messageReferenceMatchers.js"
-import type { PluginSettings } from "../options.js"
+import type { PluginOptions } from "../options.js"
+import type { Plugin } from "@inlang/plugin"
 
-export const ideExtensionConfig = (settings: PluginSettings): InlangConfig["ideExtension"] => {
-	return {
+export const ideExtensionConfig = (options: PluginOptions): Plugin["addAppSpecificApi"] => () => ({
+	"inlang.ideExtesion": {
 		messageReferenceMatchers: [
 			async (args) => {
-				return parse(args.documentText, settings)
+				return parse(args.documentText, options)
 			},
 		],
 		extractMessageOptions: [
 			{
-				callback: (messageId) => `{t("${messageId}")}`,
+				callback: (messageId: string) => `{t("${messageId}")}`,
 			},
 		],
 		documentSelectors: [
@@ -26,4 +26,4 @@ export const ideExtensionConfig = (settings: PluginSettings): InlangConfig["ideE
 			},
 		],
 	}
-}
+})

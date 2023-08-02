@@ -2,6 +2,7 @@ import type { Message, Variant, LanguageTag, InlangEnvironment, Plugin } from "@
 import { throwIfInvalidOptions, type PluginOptions } from "./options.js"
 import { detectJsonSpacing, detectIsNested, replaceAll } from "./utilities.js"
 import { flatten } from "flat"
+import { ideExtensionConfig } from "./ideExtension/config.js"
 
 /**
  * The spacing of the JSON files in this repository.
@@ -97,16 +98,7 @@ export const plugin: Plugin<PluginOptions> = {
 		// 	options: pluginOptions!,
 		// })
 	},
-	// addAppSpecificApi: () => {
-	// 	return {
-	// 		"inlang.ide-extension": {
-	// 			messageReferenceMatcher: () => {},
-	// 		},
-	// 		"inlang.cli": {
-	// 			cliExtract: () => {},
-	// 		},
-	// 	}
-	// },
+	addAppSpecificApi: ideExtensionConfig(pluginOptions!), 
 }
 
 /**
