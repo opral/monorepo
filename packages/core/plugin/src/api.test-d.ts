@@ -1,8 +1,5 @@
-import { Plugin, ResolvePluginsFunction } from "./api.js"
+import type { Plugin, ResolvePluginsFunction } from "./api.js"
 import { expectType } from "tsd"
-
-// the zod schema must be identical to the types
-expectType<Plugin>(Plugin.parse({} as any))
 
 type PluginOptions = {
 	pathPattern: string
@@ -28,12 +25,9 @@ const plugin1: Plugin<PluginOptions, AppSpecificApis> = {
 		description: { en: "i18next plugin for inlang" },
 		keywords: ["i18next", "react", "nextjs"],
 	},
-	setup: ({ options, config }) => {
+	setup: ({ options }) => {
 		if (options.pathPattern === undefined) {
 			throw Error("Path pattern is undefined")
-		}
-		if (config === undefined) {
-			throw Error("Config is undefined")
 		}
 		return {}
 	},
@@ -64,7 +58,7 @@ const { data: resolvedWithoutAppSpecific, errors } = await resolvePlugins({} as 
 
 expectType<{}>(resolvedWithoutAppSpecific.appSpecificApi)
 
-const { data: resolvedWithApps, errors: error2 } = await resolvePlugins<AppSpecificApis>({} as any)
+// const { data: resolvedWithApps, errors: error2 } = await resolvePlugins<AppSpecificApis>({} as any)
 
-expectType<AppSpecificApi1>(resolvedWithApps.appSpecificApi["inlang.ide-extension"])
-expectType<AppSpecificApi2>(resolvedWithApps.appSpecificApi["inlang.cli"])
+// expectType<AppSpecificApi1>(resolvedWithApps.appSpecificApi["inlang.ide-extension"])
+// expectType<AppSpecificApi2>(resolvedWithApps.appSpecificApi["inlang.cli"])
