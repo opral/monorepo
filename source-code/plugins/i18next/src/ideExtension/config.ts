@@ -3,10 +3,10 @@ import type { PluginOptions } from "../options.js"
 import type { Plugin } from "@inlang/plugin"
 
 export const ideExtensionConfig = (options: PluginOptions): Plugin["addAppSpecificApi"] => () => ({
-	"inlang.ideExtesion": {
+	"inlang.ide-extension": {
 		messageReferenceMatchers: [
-			async (args) => {
-				return parse(args.documentText, options)
+			async (sourceCode: string) => {
+				return parse(sourceCode, options)
 			},
 		],
 		extractMessageOptions: [
