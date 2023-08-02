@@ -9,7 +9,7 @@ const lintRuleWithoutSetup = {
 	},
 	defaultLevel: 'error',
 	message: () => { },
-} as MessageLintRule
+} satisfies MessageLintRule
 
 const lintRule1 = {
 	meta: {
@@ -19,7 +19,7 @@ const lintRule1 = {
 	defaultLevel: 'error',
 	setup: vi.fn(),
 	message: () => { },
-} as MessageLintRule
+} satisfies MessageLintRule
 
 const lintRule2 = {
 	meta: {
@@ -29,7 +29,7 @@ const lintRule2 = {
 	defaultLevel: 'warning',
 	setup: vi.fn(),
 	message: () => { },
-} as MessageLintRule
+} satisfies MessageLintRule
 
 describe("setupMessageLintRules", async () => {
 	beforeEach(() => {
@@ -54,9 +54,8 @@ describe("setupMessageLintRules", async () => {
 	})
 
 	test("it should await setup functions", async () => {
-		let called = false;
-
-		(lintRule2.setup! as ReturnType<typeof vi.fn>).mockImplementation(async () => {
+		let called = false
+		lintRule2.setup.mockImplementation(async () => {
 			await new Promise(resolve => setTimeout(resolve, 0))
 			called = true
 		})
@@ -109,7 +108,7 @@ describe("setupMessageLintRules", async () => {
 
 	test.todo("it should cache multiple setup calls the correct options", async () => {
 		let value
-		(lintRule1.setup! as ReturnType<typeof vi.fn>).mockImplementation(async () => {
+		lintRule1.setup.mockImplementation(async () => {
 			value = Math.random()
 		})
 
