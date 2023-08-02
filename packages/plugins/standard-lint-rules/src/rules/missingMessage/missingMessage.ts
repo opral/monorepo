@@ -17,48 +17,44 @@ been translated yet.
 		},
 	},
 	defaultLevel: "error",
-	setup: () => {
-		return {
-			message: ({ message: { id, body }, config, report }) => {
-				const languageTags = config.languageTags.filter(
-					(languageTag) => languageTag !== config.sourceLanguageTag,
-				)
-				for (const languageTag of languageTags) {
-					const variants = body[languageTag] || []
-					if (!variants.length) {
-						report({
-							messageId: id,
-							languageTag,
-							body: {
-								en: `Message with id '${id}' is missing for language tag '${languageTag}'.`,
-							},
-						})
-						return
-					}
+	message: ({ message: { id, body }, config, report }) => {
+		const languageTags = config.languageTags.filter(
+			(languageTag) => languageTag !== config.sourceLanguageTag,
+		)
+		for (const languageTag of languageTags) {
+			const variants = body[languageTag] || []
+			if (!variants.length) {
+				report({
+					messageId: id,
+					languageTag,
+					body: {
+						en: `Message with id '${id}' is missing for language tag '${languageTag}'.`,
+					},
+				})
+				return
+			}
 
-					const patterns = variants.flatMap(({ pattern }) => pattern)
-					if (patterns.length) {
-						report({
-							messageId: id,
-							languageTag,
-							body: {
-								en: `Message with id '${id}' has no patterns for language tag '${languageTag}'.`,
-							},
-						})
-					} else if (
-						patterns.length === 1 &&
-						patterns[0]!.type === "Text" &&
-						patterns[0]!.value === ""
-					) {
-						report({
-							messageId: id,
-							languageTag,
-							body: {
-								en: `Message with id '${id}' has no content for language tag '${languageTag}'.`,
-							},
-						})
-					}
-				}
+			const patterns = variants.flatMap(({ pattern }) => pattern)
+			if (patterns.length) {
+				report({
+					messageId: id,
+					languageTag,
+					body: {
+						en: `Message with id '${id}' has no patterns for language tag '${languageTag}'.`,
+					},
+				})
+			} else if (
+				patterns.length === 1 &&
+				patterns[0]!.type === "Text" &&
+				patterns[0]!.value === ""
+			) {
+				report({
+					messageId: id,
+					languageTag,
+					body: {
+						en: `Message with id '${id}' has no content for language tag '${languageTag}'.`,
+					},
+				})
 			}
 		}
 	}

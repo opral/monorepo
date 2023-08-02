@@ -5,6 +5,8 @@ type IdenticalPatternRuleOptions = {
 	ignore?: string[]
 }
 
+let options: IdenticalPatternRuleOptions
+
 export const identicalPatternRule = ({
 	meta: {
 		id: "inlang.identicalPattern",
@@ -22,31 +24,30 @@ message to reduce translation effort.
 		},
 	},
 	defaultLevel: "warning",
-	setup: ({ options }) => {
-		return {
-			message: ({ message: { id, body }, config, report }) => {
-				const referenceVariants = body[config.sourceLanguageTag]!
+	setup: (args) => {
+		options = args.options
+	},
+	message: ({ message: { id, body }, config, report }) => {
+		const referenceVariants = body[config.sourceLanguageTag]!
 
-				const languageTags = Object.keys(body)
-				for (const languageTag of languageTags) {
-					const isMessageIdentical =
-						messageBodyToString(referenceVariants) === messageBodyToString(body[languageTag]!)
-					const shouldBeIgnored = (referenceVariants || []).some((variant) =>
-						options.ignore?.includes(patternToString(variant.pattern)),
-					)
-					if (isMessageIdentical && !shouldBeIgnored) {
-						report({
-							messageId: id,
-							languageTag,
-							body: {
-								en: `Identical content found in language '${languageTag}' with message ID '${id}'.`,
-							},
-						})
-					}
-				}
-			},
+		const languageTags = Object.keys(body)
+		for (const languageTag of languageTags) {
+			const isMessageIdentical =
+				messageBodyToString(referenceVariants) === messageBodyToString(body[languageTag]!)
+			const shouldBeIgnored = (referenceVariants || []).some((variant) =>
+				options.ignore?.includes(patternToString(variant.pattern)),
+			)
+			if (isMessageIdentical && !shouldBeIgnored) {
+				report({
+					messageId: id,
+					languageTag,
+					body: {
+						en: `Identical content found in language '${languageTag}' with message ID '${id}'.`,
+					},
+				})
+			}
 		}
-	}
+	},
 }) as MessageLintRule<IdenticalPatternRuleOptions>
 
 // TODO: use a generic toString function instead of JSON.stringify
