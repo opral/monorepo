@@ -1,11 +1,4 @@
-import type {
-	Message,
-	Variant,
-	LanguageTag,
-	InlangEnvironment,
-	InlangConfig,
-	Plugin,
-} from "@inlang/plugin"
+import type { Message, Variant, LanguageTag, InlangEnvironment, Plugin } from "@inlang/plugin"
 import { throwIfInvalidOptions } from "./options.js"
 import { detectJsonSpacing, detectIsNested, replaceAll } from "./utilities.js"
 import { flatten } from "flat"
@@ -90,8 +83,7 @@ export const plugin: Plugin<PluginOptions> = {
 		keywords: ["i18next", "react", "nextjs"],
 	},
 	setup: ({ options, fs }) => {
-		options.variableReferencePattern = ["{{", "}}"]
-		options.ignore = []
+		options.variableReferencePattern = options.variableReferencePattern || ["{{", "}}"]
 		throwIfInvalidOptions(options)
 		pluginOptions = options
 		pluginFs = fs
@@ -213,12 +205,7 @@ const addVariantToMessages = (
 	if (messageIndex !== -1) {
 		const variant: Variant = {
 			match: {},
-			pattern: [
-				{
-					type: "Text",
-					value,
-				},
-			],
+			pattern: parsePattern(value, pluginOptions!.variableReferencePattern),
 		}
 		// Check if the language exists in the body of the message
 		if (!messages[messageIndex]?.body[language]) {
@@ -238,14 +225,57 @@ const addVariantToMessages = (
 		message.body[language] = [
 			{
 				match: {},
-				pattern: [
-					{
-						type: "Text",
-						value,
-					},
-				],
+				pattern: parsePattern(value, pluginOptions!.variableReferencePattern),
 			},
 		]
 		messages.push(message)
 	}
+}
+
+/**
+ * Parses a pattern.
+ *
+ * @example parseMessage("testId", "test", ["{{", "}}"])
+ */
+function parsePattern(
+	text: string,
+	variableReferencePattern: PluginOptions["variableReferencePattern"],
+): Message["body"][LanguageTag][number]["pattern"] {
+	// dependent on the variableReferencePattern, different regex
+	// expressions are used for matching
+	const placeholder = variableReferencePattern![1]
+		? new RegExp(
+				`(\\${variableReferencePattern![0]}[^\\${variableReferencePattern![1]}]+\\${
+					variableReferencePattern![1]
+				})`,
+				"g",
+		  )
+		: new RegExp(`(${variableReferencePattern}\\w+)`, "g")
+	const pattern: Message["body"][LanguageTag][number]["pattern"] = text
+		.split(placeholder)
+		.filter((element) => element !== "")
+		.map((element) => {
+			if (placeholder.test(element)) {
+				return {
+					type: "Expression",
+					body: {
+						type: "VariableReference",
+						name: variableReferencePattern![1]
+							? element.slice(
+									variableReferencePattern![0].length,
+									// negative index, removing the trailing pattern
+									-variableReferencePattern![1].length,
+							  )
+							: element.slice(variableReferencePattern![0].length),
+					},
+				}
+			} else {
+				return {
+					type: "Text",
+					value: element,
+				}
+			}
+		})
+
+	return pattern
 }

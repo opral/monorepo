@@ -1,5 +1,5 @@
 import { expect, it, describe } from "vitest"
-import { plugin } from "./plugin.js"
+import { plugin, type PluginOptions } from "./plugin.js"
 import { createMockEnvironment, getVariant } from "@inlang/plugin"
 
 describe("plugin options", () => {
@@ -99,10 +99,11 @@ describe("plugin options", () => {
 describe("loadMessage", () => {
 	it("should return messages if the path pattern is valid", async () => {
 		const env = await createMockEnvironment({})
-		await env.$fs.writeFile("./en.json", JSON.stringify({ test: "test" }))
+		await env.$fs.writeFile("./en.json", JSON.stringify({ test: "Hello {{name}} world" }))
 		const languageTags = ["en"]
-		const options = {
+		const options: PluginOptions = {
 			pathPattern: "./{language}.json",
+			variableReferencePattern: ["{{{", "}}}"],
 		}
 		plugin.setup({ options, fs: env.$fs })
 		const messages = await plugin.loadMessages!({ languageTags })
