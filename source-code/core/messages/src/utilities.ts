@@ -149,9 +149,7 @@ const matchMostSpecificVariant = (
 				isMatch = false
 			}
 		}
-		console.log(isMatch, selectors)
 		if (isMatch && selectors) {
-			console.log("indexing")
 			// add variant to nested index
 			function recursiveAddToIndex(
 				currentIndex: Record<string, any>,
@@ -170,7 +168,6 @@ const matchMostSpecificVariant = (
 			}
 			recursiveAddToIndex(index, message.selectors, variant)
 		} else if (isMatch && !selectors) {
-			console.log("return")
 			return variant
 		}
 	}
