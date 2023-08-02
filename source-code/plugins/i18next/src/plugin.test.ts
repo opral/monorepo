@@ -352,197 +352,100 @@ describe("formatting", () => {
 	})
 })
 
-// it("should parse Placeholders without adding Text elements around it", async () => {
-// 	const enResource = `{
-//     "test": "{{username}}"
-// }`
+describe("roundTrip", () => {
+	it("should serialize newly added messages", async () => {
+		const enResource = `{
+	"test": "{{username}}"
+}`
 
-// 	const env = await mockEnvironment({})
+		const env = await createMockEnvironment({})
+		await env.$fs.writeFile("./en.json", enResource)
+		const options: PluginOptions = {
+			pathPattern: "./{languageTag}.json",
+		}
+		plugin.setup({ options, fs: env.$fs })
 
-// 	await env.$fs.writeFile("./en.json", enResource)
+		const languageTags = ["en"]
+		const messages = await plugin.loadMessages!({
+			languageTags,
+		})
 
-// 	const x = plugin({ pathPattern: "./{languageTag}.json", variableReferencePattern: ["{{", "}}"] })(
-// 		env,
-// 	)
-// 	const config = await x.config({})
-// 	config.sourceLanguageTag = "en"
-// 	config.languageTags = ["en"]
-// 	const resources = await config.readResources!({
-// 		config: config as InlangConfig,
-// 	})
-// 	await config.writeResources!({
-// 		resources: resources,
-// 		config: config as InlangConfig,
-// 	})
-// 	const newResources = await config.readResources!({
-// 		config: config as InlangConfig,
-// 	})
-// 	expect(newResources[0]?.body[0]?.pattern?.elements[0]?.type).toBe("Placeholder")
-// 	expect(newResources[0]?.body[0]?.pattern?.elements[1]).toBe(undefined)
-// })
+		const variant: Variant = {
+			match: {},
+			pattern: [
+				{
+					type: "Text",
+					value: "This is new",
+				},
+			],
+		}
 
-// it("should serialize newly added messages", async () => {
-// 	const enResource = `{
-//     "test": "{{username}}"
-// }`
+		const newMessage = {
+			id: "test2",
+			expressions: [],
+			selectors: [],
+			body: {
+				en: [variant],
+			},
+		}
 
-// 	const env = await mockEnvironment({})
+		messages.push(newMessage)
 
-// 	await env.$fs.writeFile("./en.json", enResource)
+		await plugin.saveMessages!({
+			messages,
+		})
+		const newFile = (await env.$fs.readFile("./en.json", { encoding: "utf-8" })) as string
+		const json = JSON.parse(newFile)
+		expect(json.test).toBe("{{username}}")
+		expect(json.test2).toBe("This is new")
+	})
 
-// 	const x = plugin({ pathPattern: "./{languageTag}.json", variableReferencePattern: ["{{", "}}"] })(
-// 		env,
-// 	)
-// 	const config = await x.config({})
-// 	config.sourceLanguageTag = "en"
-// 	config.languageTags = ["en"]
-// 	const resources = await config.readResources!({
-// 		config: config as InlangConfig,
-// 	})
-// 	const [newResource] = query(resources[0]!).create({
-// 		message: {
-// 			type: "Message",
-// 			id: { type: "Identifier", name: "test2" },
-// 			pattern: { type: "Pattern", elements: [{ type: "Text", value: "Hello world" }] },
-// 		},
-// 	})
-// 	await config.writeResources!({
-// 		config: config as InlangConfig,
-// 		resources: [newResource!],
-// 	})
-// 	const newFile = (await env.$fs.readFile("./en.json", { encoding: "utf-8" })) as string
-// 	const json = JSON.parse(newFile)
-// 	expect(json.test).toBe("{{username}}")
-// 	expect(json.test2).toBe("Hello world")
-// })
+	it("should correctly parse resources with pathPattern that contain namespaces", async () => {
+		const testResource = `{
+	"test": "test"
+}`
 
-// it("should return languages of a pathPattern string", async () => {
-// 	const enResource = `{
-//     "test": "hello"
-// }`
+		const env = await createMockEnvironment({})
 
-// 	const env = await mockEnvironment({})
+		await env.$fs.mkdir("./en")
+		await env.$fs.writeFile("./en/common.json", testResource)
 
-// 	await env.$fs.writeFile("./en.json", enResource)
+		const options: PluginOptions = {
+			pathPattern: {
+				common: "./{languageTag}/common.json",
+			},
+		}
+		plugin.setup({ options, fs: env.$fs })
+		const languageTags = ["en"]
 
-// 	const x = plugin({ pathPattern: "./{languageTag}.json" })(env)
-// 	const config = await x.config({})
-// 	config.sourceLanguageTag = "en"
+		const messages = await plugin.loadMessages!({
+			languageTags,
+		})
 
-// 	const languages = config.languageTags
-// 	expect(languages).toStrictEqual(["en"])
-// })
+		const reference: Message[] = [
+			{
+				id: "common:test",
+				expressions: [],
+				selectors: [],
+				body: {
+					en: [
+						{
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "test",
+								},
+							],
+						},
+					],
+				},
+			},
+		]
 
-// it("should return languages of a pathPattern object", async () => {
-// 	const testResource = `{
-//     "test": "hello"
-// }`
-
-// 	const env = await mockEnvironment({})
-// 	await env.$fs.mkdir("./en")
-// 	await env.$fs.mkdir("./de")
-// 	await env.$fs.writeFile("./en/common.json", testResource)
-// 	await env.$fs.writeFile("./en/vital.json", testResource)
-// 	await env.$fs.writeFile("./de/common.json", testResource)
-// 	await env.$fs.writeFile("./de/vital.json", testResource)
-
-// 	const x = plugin({
-// 		pathPattern: {
-// 			common: "./{languageTag}/common.json",
-// 			vital: "./{languageTag}/vital.json",
-// 		},
-// 	})(env)
-// 	const config = await x.config({})
-// 	config.sourceLanguageTag = "en"
-
-// 	const languages = config.languageTags
-// 	expect(languages).toStrictEqual(["en", "de"])
-// })
-
-// it("should return languages of a pathPattern object in monorepo", async () => {
-// 	const testResource = `{
-//     "test": "hello"
-// }`
-
-// 	const env = await mockEnvironment({})
-// 	await env.$fs.mkdir("./projectA")
-// 	await env.$fs.mkdir("./projectA/en")
-// 	await env.$fs.mkdir("./projectA/de")
-// 	await env.$fs.mkdir("./projectB")
-// 	await env.$fs.mkdir("./projectB/en")
-// 	await env.$fs.mkdir("./projectB/de")
-// 	await env.$fs.mkdir("./projectB/fr")
-// 	await env.$fs.writeFile("./projectA/en/common.json", testResource)
-// 	await env.$fs.writeFile("./projectA/de/common.json", testResource)
-// 	await env.$fs.writeFile("./projectB/en/common.json", testResource)
-// 	await env.$fs.writeFile("./projectB/de/common.json", testResource)
-// 	await env.$fs.writeFile("./projectB/fr/common.json", testResource)
-
-// 	const x = plugin({
-// 		pathPattern: {
-// 			"projectA-common": "./projectA/{languageTag}/common.json",
-// 			"projectB-common": "./projectB/{languageTag}/common.json",
-// 		},
-// 	})(env)
-// 	const config = await x.config({})
-// 	config.sourceLanguageTag = "en"
-
-// 	const languages = config.languageTags
-// 	expect(languages).toStrictEqual(["en", "de", "fr"])
-// })
-
-// it("should correctly parse resources with pathPattern that contain namespaces", async () => {
-// 	const testResource = `{
-//     "test": "test"
-// }`
-
-// 	const env = await mockEnvironment({})
-
-// 	await env.$fs.mkdir("./en")
-// 	await env.$fs.writeFile("./en/common.json", testResource)
-
-// 	const x = plugin({
-// 		pathPattern: {
-// 			common: "./{languageTag}/common.json",
-// 		},
-// 	})(env)
-// 	const config = await x.config({})
-// 	config.sourceLanguageTag = "en"
-
-// 	const resources = await config.readResources!({
-// 		config: config as InlangConfig,
-// 	})
-
-// 	const reference = [
-// 		{
-// 			type: "Resource",
-// 			languageTag: {
-// 				type: "LanguageTag",
-// 				name: "en",
-// 			},
-// 			body: [
-// 				{
-// 					type: "Message",
-// 					id: {
-// 						type: "Identifier",
-// 						name: "common:test",
-// 					},
-// 					pattern: {
-// 						type: "Pattern",
-// 						elements: [
-// 							{
-// 								type: "Text",
-// 								value: "test",
-// 							},
-// 						],
-// 					},
-// 				},
-// 			],
-// 		},
-// 	]
-
-// 	expect(resources).toStrictEqual(reference)
-// })
+		expect(messages).toStrictEqual(reference)
+	})
+})
 
 // it("should add a new languageTag for pathPattern string", async () => {
 // 	const enResource = `{
