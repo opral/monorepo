@@ -28,13 +28,36 @@ export type PluginSettings = {
 }
 
 /**
- * The settings of a lint rule.
+ * The options of a lint rule.
+ *
+ * The options are defined by a user via the `LintRuleSettings`.
+ *
+ * ```bash
+ * └── config: InlangConfig
+ *   └── settings: InlangConfig["settings"]
+ *       └── lintRule: LintRuleSettings
+ *           ├── options: PluginOptions
+ *           └── ...other properties of LintRuleSettings
+ * ```
  */
 export type LintRuleSettings = {
 	options?: PluginOptions
 	level?: "off" | "warning" | "error"
 }
 
+/**
+ * The options of a plugin.
+ *
+ * The options are defined by a user via the `PluginSettings`.
+ *
+ * ```bash
+ * └── config: InlangConfig
+ *   └── settings: InlangConfig["settings"]
+ *       └── plugins: PluginSettings
+ *           ├── options: PluginOptions
+ *           └── ...other properties of PluginSettings
+ * ```
+ */
 export type PluginOptions = Record<string, string | string[] | Record<string, string>>
 
 /**

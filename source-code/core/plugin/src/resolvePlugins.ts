@@ -8,7 +8,8 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 		data: {
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
-			plugins: {},
+			appSpecificApi: {},
+			meta: {} as any,
 		},
 		errors: [],
 	}
@@ -18,7 +19,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 
 		try {
 			plugin.setup?.({
-				options: args.pluginsInConfig?.[pluginId]?.options,
+				options: args.pluginSettings?.[pluginId]?.options,
 				fs: args.env.$fs,
 			})
 
@@ -31,23 +32,20 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 				maybeValidPlugin: plugin,
 			})
 
-			if (parsed.errors) {
-				result.errors.push(...parsed.errors)
+			if (parsed.error) {
+				result.errors.push(...parsed.error)
+				continue
 			}
 
 			// --- VALIDATE PLUGINS ---
 			const validated = validatePlugins({
 				plugins: result,
 				plugin,
-				pluginInConfig: args.pluginsInConfig?.[pluginId],
 			})
 
 			if (validated.errors) {
 				result.errors.push(...validated.errors)
-			}
-
-			if (validated.errors) {
-				result.errors.push(...validated.errors)
+				continue
 			}
 
 			/**
@@ -55,17 +53,18 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			 */
 
 			if (typeof plugin.loadMessages === "function") {
-				result.data.loadMessages = async () => await plugin.loadMessages!({ languageTags: args.config.languageTags })
+				result.data.loadMessages = async () =>
+					await plugin.loadMessages!({ languageTags: args.config.languageTags })
 			}
 
 			if (typeof plugin.saveMessages === "function") {
 				result.data.saveMessages = async (args: any) => await plugin.saveMessages!(args)
 			}
 
-			result.data.plugins = {
-				...result.data.plugins,
-				[pluginId]: plugin,
-			}
+			// result.data.plugins = {
+			// 	...result.data.plugins,
+			// 	[pluginId]: plugin,
+			// }
 		} catch (e) {
 			/**
 			 * -------------- BEGIN ERROR HANDLING --------------

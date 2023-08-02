@@ -24,13 +24,8 @@ const whitelistedPlugins = ["inlang.plugin-json", "inlang.plugin-i18next"]
  *
  * @description Checks for invalid ids and other errors within a plugin.
  */
-export const parsePlugin = (args: { maybeValidPlugin: Plugin }): ParsePluginResult => {
-	const result: ParsePluginResult = {
-		data: {
-			plugin: args.maybeValidPlugin,
-		},
-		errors: [],
-	}
+export const parsePlugin = (args: { maybeValidPlugin: Plugin }): Result<Plugin, PluginError[]> => {
+	const errors: PluginError[] = []
 
 	/**
 	 * -------------- BEGIN VALIDATION --------------
@@ -38,7 +33,7 @@ export const parsePlugin = (args: { maybeValidPlugin: Plugin }): ParsePluginResu
 
 	// -- INVALID ID in META --
 	if (new RegExp(pluginIdRegex).test(args.maybeValidPlugin.meta.id) === false) {
-		result.errors.push(
+		errors.push(
 			new PluginInvalidIdError(
 				`Plugin ${args.maybeValidPlugin.meta.id} has an invalid id "${args.maybeValidPlugin.meta.id}". It must be kebap-case and contain a namespace like project.my-plugin.`,
 				{ plugin: args.maybeValidPlugin.meta.id },
@@ -51,7 +46,7 @@ export const parsePlugin = (args: { maybeValidPlugin: Plugin }): ParsePluginResu
 		args.maybeValidPlugin.meta.id.includes("inlang") &&
 		!whitelistedPlugins.includes(args.maybeValidPlugin.meta.id)
 	) {
-		result.errors.push(
+		errors.push(
 			new PluginUsesReservedNamespaceError(
 				`Plugin ${args.maybeValidPlugin.meta.id} uses reserved namespace 'inlang'.`,
 				{
@@ -65,13 +60,16 @@ export const parsePlugin = (args: { maybeValidPlugin: Plugin }): ParsePluginResu
 	const parsed = tryCatch(() => Plugin.parse(args.maybeValidPlugin))
 
 	if (parsed.error) {
-		result.errors.push(
-			new PluginUsesInvalidApiError(
-				`Plugin ${args.maybeValidPlugin.meta.id} uses invalid API.`,
-				{ plugin: args.maybeValidPlugin.meta.id, cause: parsed.error as Error },
-			),
+		errors.push(
+			new PluginUsesInvalidApiError(`Plugin ${args.maybeValidPlugin.meta.id} uses invalid API.`, {
+				plugin: args.maybeValidPlugin.meta.id,
+				cause: parsed.error as Error,
+			}),
 		)
 	}
 
-	return result
+	if (errors.length > 0) {
+		return { error: errors }
+	}
+	return { data: args.maybeValidPlugin }
 }

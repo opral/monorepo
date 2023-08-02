@@ -1,1 +1,1 @@
-export { InlangConfig, LintRuleSettings, PluginOptions } from "./api.js"
+export { InlangConfig, LintRuleSettings, PluginOptions, PluginSettings } from "./api.js"
