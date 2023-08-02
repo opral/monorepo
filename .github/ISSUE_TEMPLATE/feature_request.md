@@ -1,15 +1,9 @@
 ---
-name: Feature request
-about: Suggest an idea for this project
-title: ""
-labels: ""
-assignees: ""
+name: Feature request [OPEN IN DISCUSSIONS INSTEAD]
+about: Open feature requests in discussions instead of issues.
 ---
 
-# Please open feature requests in [the discussions](https://github.com/inlang/inlang/discussions/categories/feedback) instead.
+Open feature requests in disucssions instead of issues:
 
-Opening a discussion instead of an issue allows to:
-
-1. separate "issues" (TODOs) from feature requests
-2. voting of feature requests
-3. discussing the implementation
+- voting of feature requests
+- separate "issues" (TODOs/bugs) from feature requests
