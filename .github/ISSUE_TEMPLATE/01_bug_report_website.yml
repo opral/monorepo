@@ -44,8 +44,9 @@ body:
   - type: input
     id: browser-info
     attributes:
-      label: System Info
+      label: Browser Info
       description: Which browser and version do you use?
+      placeholder: Google Chrome 117.0
     validations:
       required: true
   - type: textarea
