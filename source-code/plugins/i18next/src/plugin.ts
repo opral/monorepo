@@ -80,7 +80,6 @@ function defaultNesting() {
 // }
 
 let pluginOptions: PluginOptions | undefined = undefined
-let pluginConfig: InlangConfig | undefined = undefined
 let pluginFs: InlangEnvironment["$fs"] | undefined = undefined
 
 export const plugin: Plugin<PluginOptions> = {
@@ -90,21 +89,20 @@ export const plugin: Plugin<PluginOptions> = {
 		description: { en: "i18next plugin for inlang" },
 		keywords: ["i18next", "react", "nextjs"],
 	},
-	setup: ({ options, config, $fs }) => {
+	setup: ({ options, fs }) => {
 		options.variableReferencePattern = ["{{", "}}"]
 		options.ignore = []
 		throwIfInvalidOptions(options)
 		pluginOptions = options
-		pluginConfig = config
-		pluginFs = $fs
+		pluginFs = fs
 		return {}
 	},
-	loadMessages: async () => {
-		if (!pluginFs || !pluginConfig || !pluginOptions) throw new Error("Plugin not setup")
+	loadMessages: async ({ languageTags }) => {
+		if (!pluginFs || !pluginOptions) throw new Error("Plugin not setup")
 		return loadMessages({
 			$fs: pluginFs,
-			config: pluginConfig,
 			options: pluginOptions,
+			languageTags,
 		})
 	},
 	saveMessages: async () => {
@@ -131,11 +129,11 @@ export const plugin: Plugin<PluginOptions> = {
  */
 async function loadMessages(args: {
 	$fs: InlangEnvironment["$fs"]
-	config: InlangConfig
 	options: PluginOptions
+	languageTags: LanguageTag[]
 }): Promise<Message[]> {
 	const messages: Message[] = []
-	for (const languageTag of args.config.languageTags) {
+	for (const languageTag of args.languageTags) {
 		if (typeof args.options.pathPattern !== "string") {
 			for (const [prefix, path] of Object.entries(args.options.pathPattern)) {
 				const messagesFromFile = await getFileToParse(
