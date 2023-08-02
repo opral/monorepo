@@ -34,8 +34,8 @@ export type ResolvedModulesFunction = (args: {
 	env: InlangEnvironment
 }) => Promise<{
 	data: {
-		resolvedPlugins?: Awaited<ReturnType<ResolvePluginsFunction>>
-		resolvedLintRules: LintRule[]
+		plugins: Awaited<ReturnType<ResolvePluginsFunction>>
+		lintRules: LintRule[]
 	}
 	errors: Array<ModuleError | ModuleImportError>
 }>

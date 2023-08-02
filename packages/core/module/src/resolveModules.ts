@@ -1,8 +1,5 @@
 import type { ResolvedModulesFunction } from "./api.js"
-import {
-	ModuleError,
-	ModuleImportError,
-} from "./errors.js"
+import { ModuleError, ModuleImportError } from "./errors.js"
 import { tryCatch } from "@inlang/result"
 import type { InlangModule } from "@inlang/module"
 import type { LintRule } from "@inlang/lint"
@@ -16,7 +13,7 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 
 	const result: Awaited<ReturnType<ResolvedModulesFunction>> = {
 		data: {
-			resolvedPlugins: {},
+			resolvedPlugins: {} as any,
 			resolvedLintRules: [],
 		},
 		errors: [],
@@ -57,10 +54,10 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 			 * -------------- BEGIN ADDING TO RESULT --------------
 			 */
 
-			result.data.resolvedPlugins = {
-				...result.data.resolvedPlugins,
-				...resolvedPlugins.data.plugins,
-			}
+			// result.data.resolvedPlugins = {
+			// 	...result.data.resolvedPlugins,
+			// 	...resolvedPlugins.data.plugins,
+			// }
 
 			result.data.resolvedLintRules = {
 				...result.data.resolvedLintRules,
@@ -73,9 +70,7 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 			if (e instanceof ModuleError) {
 				result.errors.push(e)
 			} else if (e instanceof Error) {
-				result.errors.push(
-					new ModuleError(e.message, { module: module, cause: e }),
-				)
+				result.errors.push(new ModuleError(e.message, { module: module, cause: e }))
 			} else {
 				result.errors.push(
 					new ModuleError("Unhandled and unknown error", {
@@ -90,5 +85,3 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 
 	return result as any
 }
-
-

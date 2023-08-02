@@ -4,7 +4,7 @@ import type { LintException, LintReport, LintRule } from "@inlang/lint"
 import type { MessageQueryApi } from "@inlang/messages"
 import type { Result } from "@inlang/result"
 import type { InvalidConfigError } from "./errors.js"
-import type { Plugin, ResolvedPluginsApi } from "@inlang/plugin"
+import type { ResolvedPlugins } from "@inlang/plugin"
 
 export type InlangInstance = {
 	config: {
@@ -25,12 +25,7 @@ export type InlangInstance = {
 	messages: {
 		query: MessageQueryApi
 	}
-	plugin: {
-		list: Reactive<"onlyGetter", Array<Pick<Plugin, "meta"> & { module: string }>>
-		appSpecificApi: ResolvedPluginsApi["appSpecificApi"]
-		// loadMessages: () => Promise<void>
-		// saveMessages: () => Promise<void>
-	}
+	plugins: ResolvedPlugins
 }
 
 type Reactive<WithSetter extends "onlyGetter" | "withSetter", T> = {

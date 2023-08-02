@@ -1,4 +1,4 @@
-import type { InlangConfig } from "@inlang/config"
+import type { InlangConfig, PluginSettings } from "@inlang/config"
 import { TranslatedStrings } from "@inlang/language-tag"
 import type { Message } from "@inlang/messages"
 import type { InlangEnvironment } from "@inlang/environment"
@@ -69,7 +69,7 @@ export type Plugin<
  */
 export type ResolvePluginsFunction = (args: {
 	plugins: Plugin[]
-	pluginsInConfig: Exclude<InlangConfig["settings"], undefined>["plugins"]
+	pluginSettings: Record<Plugin["meta"]["id"], PluginSettings>
 	config: InlangConfig
 	env: InlangEnvironment
 }) => Promise<{
@@ -88,7 +88,21 @@ export type ResolvePluginsFunction = (args: {
 export type ResolvedPlugins = {
 	loadMessages: (args: { languageTags: InlangConfig["languageTags"] }) => Promise<Message[]>
 	saveMessages: (args: { messages: Message[] }) => Promise<void>
-	plugins: Record<string, Plugin>
+	/**
+	 * App specific APIs.
+	 *
+	 * @example
+	 *   appSpecificApi['inlang.ide-extension'].messageReferenceMatcher()
+	 */
+	appSpecificApi: Record<string, unknown>
+	/**
+	 * Metainformation for a specific plugin.
+	 *
+	 * @example
+	 *   meta['inlang.plugin-i18next'].description['en']
+	 *   meta['inlang.plugin-i18next'].module
+	 */
+	meta: Record<Plugin["meta"]["id"], Pick<Plugin, "meta"> & { module: string }>
 }
 
 // --------------------------------------------- ZOD ---------------------------------------------

@@ -1,4 +1,3 @@
-import type { InlangConfig } from "@inlang/config"
 import type { Plugin, ResolvePluginsFunction } from "./api.js"
 import {
 	PluginError,
@@ -21,7 +20,6 @@ type ValidatePluginResult = {
 export const validatePlugins = (args: {
 	plugins: Awaited<ReturnType<ResolvePluginsFunction>>
 	plugin: Plugin
-	pluginInConfig?: Exclude<Exclude<InlangConfig["settings"], undefined>["plugins"], undefined>[string]
 }): ValidatePluginResult => {
 	const result: ValidatePluginResult = {
 		data: {
@@ -41,6 +39,7 @@ export const validatePlugins = (args: {
 			),
 		)
 	}
+	
 	if (
 		typeof args.plugin.saveMessages === "function" &&
 		args.plugins.data.saveMessages !== undefined
