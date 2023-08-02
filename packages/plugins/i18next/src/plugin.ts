@@ -291,7 +291,8 @@ async function saveMessages(args: {
 			for (const languageTag of Object.keys(message.body)) {
 				const prefix: string = message.id.includes(":")
 					? message.id.split(":")[0]!
-					: Object.keys(args.options.pathPattern)[0]!
+					: // TODO remove default namespace functionallity, add better parser
+					  Object.keys(args.options.pathPattern)[0]!
 				const resolvedId = message.id.replace(prefix + ":", "")
 				const serializedPattern: Variant["pattern"] = getVariant(message, {
 					languageTag: languageTag,
