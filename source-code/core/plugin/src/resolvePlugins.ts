@@ -1,18 +1,14 @@
-import type { ResolvedPluginsApi, ResolvePluginsFunction } from "./api.js"
+import type { ResolvedPlugins, ResolvePluginsFunction } from "./api.js"
 import { PluginError } from "./errors.js"
 import { parsePlugin } from "./parsePlugin.js"
 import { validatePlugins } from "./validatePlugins.js"
 
-export type ResolvePluginsResult = {
-	data: Partial<ResolvedPluginsApi> & Pick<ResolvedPluginsApi, "plugins" | "appSpecificApi">
-	errors: PluginError[]
-}
-
 export const resolvePlugins: ResolvePluginsFunction = (args) => {
-	const result: ResolvePluginsResult = {
+	const result: Awaited<ReturnType<ResolvePluginsFunction>> = {
 		data: {
+			loadMessages: () => undefined as any,
+			saveMessages: () => undefined as any,
 			plugins: {},
-			appSpecificApi: {},
 		},
 		errors: [],
 	}
@@ -25,7 +21,6 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 				options: args.pluginsInConfig?.[pluginId]?.options,
 				fs: args.env.$fs,
 			})
-			const appSpecificApi = plugin.addAppSpecificApi?.() ?? {}
 
 			/**
 			 * -------------- PARSE & VALIDATE PLUGIN --------------
@@ -65,11 +60,6 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 
 			if (typeof plugin.saveMessages === "function") {
 				result.data.saveMessages = async (args: any) => await plugin.saveMessages!(args)
-			}
-
-			result.data.appSpecificApi = {
-				...result.data.appSpecificApi,
-				...appSpecificApi,
 			}
 
 			result.data.plugins = {

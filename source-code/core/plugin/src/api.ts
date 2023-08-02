@@ -67,13 +67,13 @@ export type Plugin<
 /**
  * Function that resolves (imports and initializes) the plugins.
  */
-export type ResolvePluginsFunction = <AppSpecificApis extends object = {}>(args: {
+export type ResolvePluginsFunction = (args: {
 	plugins: Plugin[]
 	pluginsInConfig: Exclude<InlangConfig["settings"], undefined>["plugins"]
 	config: InlangConfig
 	env: InlangEnvironment
 }) => Promise<{
-	data: ResolvedPluginsApi<AppSpecificApis>
+	data: ResolvedPlugins
 	errors: Array<
 		| PluginError
 		| PluginApiAlreadyDefinedError
@@ -85,17 +85,10 @@ export type ResolvePluginsFunction = <AppSpecificApis extends object = {}>(args:
 /**
  * The API after resolving the plugins.
  */
-export type ResolvedPluginsApi<AppSpecificApis extends object = {}> = {
+export type ResolvedPlugins = {
 	loadMessages: (args: { languageTags: InlangConfig["languageTags"] }) => Promise<Message[]>
 	saveMessages: (args: { messages: Message[] }) => Promise<void>
 	plugins: Record<string, Plugin>
-	/**
-	 * App specific APIs.
-	 *
-	 * @example
-	 *  appSpecificApi["inlang.ide-extension"].messageReferenceMatcher()
-	 */
-	appSpecificApi: AppSpecificApis
 }
 
 // --------------------------------------------- ZOD ---------------------------------------------
