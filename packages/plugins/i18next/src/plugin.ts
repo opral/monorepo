@@ -92,7 +92,7 @@ export const plugin: Plugin<PluginOptions> = {
 	loadMessages: async ({ languageTags }) => {
 		if (!pluginFs || !pluginOptions) throw new Error("Plugin not setup")
 		return loadMessages({
-			$fs: pluginFs,
+			fs: pluginFs,
 			options: pluginOptions,
 			languageTags,
 		})
@@ -120,7 +120,7 @@ export const plugin: Plugin<PluginOptions> = {
  * Reading resources.
  */
 async function loadMessages(args: {
-	$fs: InlangEnvironment["$fs"]
+	fs: InlangEnvironment["$fs"]
 	options: PluginOptions
 	languageTags: LanguageTag[]
 }): Promise<Message[]> {
@@ -132,7 +132,7 @@ async function loadMessages(args: {
 					path,
 					NESTED[path.replace("{language}", languageTag)] ?? defaultNesting(),
 					languageTag,
-					args.$fs,
+					args.fs,
 				)
 				for (const [key, value] of Object.entries(messagesFromFile)) {
 					const prefixedKey = prefix + ":" + key
@@ -144,7 +144,7 @@ async function loadMessages(args: {
 				args.options.pathPattern,
 				NESTED[args.options.pathPattern.replace("{language}", languageTag)] ?? defaultNesting(),
 				languageTag,
-				args.$fs,
+				args.fs,
 			)
 			for (const [key, value] of Object.entries(messagesFromFile)) {
 				addVariantToMessages(messages, key, languageTag, value)
@@ -162,12 +162,12 @@ async function getFileToParse(
 	path: string,
 	isNested: boolean,
 	language: string,
-	$fs: InlangEnvironment["$fs"],
+	fs: InlangEnvironment["$fs"],
 ): Promise<Record<string, string>> {
 	const pathWithLanguage = path.replace("{language}", language)
 	// get file, make sure that is not braking when the namespace doesn't exist in every language dir
 	try {
-		const file = await $fs.readFile(pathWithLanguage, { encoding: "utf-8" })
+		const file = await fs.readFile(pathWithLanguage, { encoding: "utf-8" })
 		//analyse format of file
 		SPACING[pathWithLanguage] = detectJsonSpacing(file as string)
 		NESTED[pathWithLanguage] = detectIsNested(file as string)
