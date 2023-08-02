@@ -5,14 +5,14 @@
  * that can be imported into an inlang project.
  */
 
-import { context } from "esbuild"
-import { pluginBuildConfig } from "@inlang/core/plugin"
+import { build, context } from "esbuild"
+import { pluginBuildConfig } from "@inlang/plugin"
 
-const options = await pluginBuildConfig({
+const options = await build(pluginBuildConfig({
 	entryPoints: ["./src/index.js"],
 	outfile: "./dist/index.js",
 	minify: true,
-})
+}))
 
 const ctx = await context(options)
 
