@@ -1,14 +1,15 @@
 import { Plugin, pluginIdRegex, ResolvePluginsFunction } from "./api.js"
 import { PluginError, PluginFunctionLoadMessagesAlreadyDefinedError, PluginFunctionSaveMessagesAlreadyDefinedError, PluginInvalidIdError, PluginUsesInvalidApiError, PluginUsesReservedNamespaceError } from "./errors.js"
 import { tryCatch } from "@inlang/result"
+import { deepmerge } from "deepmerge-ts"
 
 const whitelistedPlugins = ["inlang.plugin-json", "inlang.plugin-i18next"]
 
 export const resolvePlugins: ResolvePluginsFunction = (args) => {
 	const result: Awaited<ReturnType<ResolvePluginsFunction>> = {
 		data: {
-			loadMessages: () => undefined as any,
-			saveMessages: () => undefined as any,
+			loadMessages: undefined,
+			saveMessages: undefined,
 			appSpecificApi: {},
 			meta: {},
 		},
@@ -90,7 +91,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 				)
 			}
 
-			if (result.errors.length > 0) {
+			if (result.errors.length > 0) {				
 				continue
 			}
 
@@ -105,6 +106,16 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 
 			if (typeof plugin.saveMessages === "function") {
 				result.data.saveMessages = async (args: any) => await plugin.saveMessages!(args)
+			}
+
+			if (typeof plugin.addAppSpecificApi === "function") {
+				const appSpecificApi = plugin.addAppSpecificApi()
+				for (const [namespace, api] of Object.entries(appSpecificApi)) {
+					result.data.appSpecificApi[namespace] = deepmerge(
+						result.data.appSpecificApi[namespace] || {},
+						api,
+					)
+				}
 			}
 
 			result.data.meta = {
@@ -132,7 +143,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			}
 			continue
 		}
-
-		return result as any
 	}
+
+	return result as any
 }

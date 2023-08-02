@@ -1,35 +1,18 @@
 import { describe, expect, it, vi } from "vitest"
-import { resolvePlugins } from "./resolveModules.js"
+import { resolvePlugins } from "./resolvePlugins.js"
 import type { InlangConfig } from "@inlang/config"
 import {
-	PluginException,
-	PluginFunctionLoadMessagesAlreadyDefinedException,
-	PluginFunctionSaveMessagesAlreadyDefinedException,
-	PluginImportException,
-	PluginInvalidIdException,
-	PluginUsesReservedNamespaceException,
-	PluginUsesInvalidApiException,
+	PluginError,
+	PluginFunctionLoadMessagesAlreadyDefinedError,
+	PluginFunctionSaveMessagesAlreadyDefinedError,
+	PluginInvalidIdError,
+	PluginUsesReservedNamespaceError,
+	PluginUsesInvalidApiError,
 } from "./errors.js"
 import type { InlangEnvironment } from "@inlang/environment"
 import type { Plugin } from "./api.js"
 
 describe("generally", () => {
-	it("should return an error if a plugin cannot be imported", async () => {
-		const resolved = await resolvePlugins({
-			env: {
-				$fs: {} as any,
-				$import: () => {
-					throw Error("Could not import")
-				},
-			},
-			config: {
-				plugins: [{ module: "https://myplugin.com/index.js", options: {} }],
-			} as InlangConfig,
-		})
-
-		expect(resolved.errors[0]).toBeInstanceOf(PluginImportException)
-	})
-
 	it("should return an error if a plugin uses an invalid id", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
@@ -46,26 +29,24 @@ describe("generally", () => {
 			addAppSpecificApi() {
 				return undefined as any
 			},
-			addLintRules() {
-				return undefined as any
-			},
 		}
 
-		const pluginModule = "https://myplugin.com/index.js"
-		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
-		const resolved = await resolvePlugins({
-			env,
-			config: {
-				plugins: [
-					{
-						options: {},
-						module: pluginModule,
-					},
-				] satisfies InlangConfig["plugins"],
-			} as unknown as InlangConfig,
-		})
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["de", "en"],
+			modules: ["https://myplugin.com/index.js"],
+		};
 
-		expect(resolved.errors[0]).toBeInstanceOf(PluginInvalidIdException)
+		const env = mockEnvWithPlugins({ [config.modules[0]!]: mockPlugin })
+		const resolved = await resolvePlugins({
+			module: config.modules[0]!,
+			plugins: [mockPlugin],
+			pluginSettings: {},
+			config,
+			env,
+		});	
+
+		expect(resolved.errors[0]).toBeInstanceOf(PluginInvalidIdError)
 	})
 
 	it("should return an error if a plugin uses APIs that are not available", async () => {
@@ -80,23 +61,23 @@ describe("generally", () => {
 			nonExistentApi: () => undefined,
 		}
 
-		const pluginModule = "https://myplugin-myplugin.com/index.js"
-		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["de", "en"],
+			modules: ["https://myplugin.com/index.js"],
+		};
 
+		const env = mockEnvWithPlugins({ [config.modules[0]!]: mockPlugin })
 		const resolved = await resolvePlugins({
+			module: config.modules[0]!,
+			plugins: [mockPlugin],
+			pluginSettings: {},
+			config,
 			env,
-			config: {
-				plugins: [
-					{
-						options: {},
-						module: pluginModule,
-					},
-				] satisfies InlangConfig["plugins"],
-			} as unknown as InlangConfig,
-		})
+		});
 
 		expect(resolved.errors.length).toBe(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesInvalidApiException)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesInvalidApiError)
 	})
 
 	it("should not initialize a plugin that uses the 'inlang' namespace except for inlang whitelisted plugins", async () => {
@@ -111,23 +92,23 @@ describe("generally", () => {
 			loadMessages: () => undefined as any,
 		}
 
-		const pluginModule = "https://inlangwhitelist.com/index.js"
-		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["de", "en"],
+			modules: ["https://myplugin.com/index.js"],
+		};
 
+		const env = mockEnvWithPlugins({ [config.modules[0]!]: mockPlugin })
 		const resolved = await resolvePlugins({
+			module: config.modules[0]!,
+			plugins: [mockPlugin],
+			pluginSettings: {},
+			config,
 			env,
-			config: {
-				plugins: [
-					{
-						options: {},
-						module: pluginModule,
-					},
-				] satisfies InlangConfig["plugins"],
-			} as unknown as InlangConfig,
-		})
+		});
 
 		expect(resolved.errors.length).toBe(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesReservedNamespaceException)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesReservedNamespaceError)
 	})
 })
 
@@ -144,28 +125,28 @@ describe("loadMessages", () => {
 			loadMessages: async () => [{ id: "test", expressions: [], selectors: [], body: { en: [] } }],
 		}
 
-		const pluginModule = "https://myplugin4.com/index.js"
-		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["de", "en"],
+			modules: ["https://myplugin.com/index.js"],
+		};
 
+		const env = mockEnvWithPlugins({ [config.modules[0]!]: mockPlugin })
 		const resolved = await resolvePlugins({
+			module: config.modules[0]!,
+			plugins: [mockPlugin],
+			pluginSettings: {},
+			config,
 			env,
-			config: {
-				plugins: [
-					{
-						options: {},
-						module: pluginModule,
-					},
-				],
-			} as unknown as InlangConfig,
-		})
+		});
 
-		expect(resolved.errors).toHaveLength(0)
+		expect(await resolved.data.loadMessages!({ languageTags: ["en"] })).toEqual([{ id: "test", expressions: [], selectors: [], body: { en: [] } }])
 	})
 
 	it("should collect an error if function is defined twice in multiple plugins", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.plugin-load-messages",
+				id: "plugin.plugin-load-messages-first",
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
@@ -175,7 +156,7 @@ describe("loadMessages", () => {
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
-				id: "plugin.plugin-load-messages2",
+				id: "plugin.plugin-load-messages-second",
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
@@ -184,31 +165,27 @@ describe("loadMessages", () => {
 			loadMessages: async () => undefined as any,
 		}
 
-		const pluginModule = "https://myplugin5.com/index.js"
-		const pluginModule2 = "https://myplugin6.com/index.js"
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["de", "en"],
+			modules: ["https://myplugin5.com/index.js", "https://myplugin6.com/index.js"],
+		};
+
 		const env = mockEnvWithPlugins({
-			[pluginModule]: mockPlugin,
-			[pluginModule2]: mockPlugin2,
+			[config.modules[0]!]: mockPlugin,
+			[config.modules[1]!]: mockPlugin2,
 		})
 
 		const resolved = await resolvePlugins({
+			module: config.modules[0]!,
+			plugins: [mockPlugin, mockPlugin2],
+			pluginSettings: {},
+			config,
 			env,
-			config: {
-				plugins: [
-					{
-						options: {},
-						module: pluginModule,
-					},
-					{
-						options: {},
-						module: pluginModule2,
-					},
-				],
-			} as unknown as InlangConfig,
-		})
+		});
 
 		expect(resolved.errors).toHaveLength(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginFunctionLoadMessagesAlreadyDefinedException)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginFunctionLoadMessagesAlreadyDefinedError)
 	})
 })
 
@@ -225,20 +202,20 @@ describe("saveMessages", () => {
 			saveMessages: async () => undefined as any,
 		}
 
-		const pluginModule = "https://myplugin7.com/index.js"
-		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["de", "en"],
+			modules: ["https://myplugin.com/index.js"],
+		};
 
+		const env = mockEnvWithPlugins({ [config.modules[0]!]: mockPlugin })
 		const resolved = await resolvePlugins({
+			module: config.modules[0]!,
+			plugins: [mockPlugin],
+			pluginSettings: {},
+			config,
 			env,
-			config: {
-				plugins: [
-					{
-						options: {},
-						module: pluginModule,
-					},
-				],
-			} as unknown as InlangConfig,
-		})
+		});
 
 		expect(resolved.errors).toHaveLength(0)
 	})
@@ -265,115 +242,32 @@ describe("saveMessages", () => {
 			saveMessages: async () => undefined as any,
 		}
 
-		const pluginModule = "https://myplugin8.com/index.js"
-		const pluginModule2 = "https://myplugin9.com/index.js"
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["de", "en"],
+			modules: ["https://myplugin5.com/index.js", "https://myplugin6.com/index.js"],
+		};
+
 		const env = mockEnvWithPlugins({
-			[pluginModule]: mockPlugin,
-			[pluginModule2]: mockPlugin2,
+			[config.modules[0]!]: mockPlugin,
+			[config.modules[1]!]: mockPlugin2,
 		})
 
 		const resolved = await resolvePlugins({
+			module: config.modules[0]!,
+			plugins: [mockPlugin, mockPlugin2],
+			pluginSettings: {},
+			config,
 			env,
-			config: {
-				plugins: [
-					{
-						options: {},
-						module: pluginModule,
-					},
-					{
-						options: {},
-						module: pluginModule2,
-					},
-				],
-			} as unknown as InlangConfig,
-		})
+		});
 
 		expect(resolved.errors).toHaveLength(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginFunctionSaveMessagesAlreadyDefinedException)
-	})
-})
-
-describe("addLintRules", () => {
-	it("should resolve a single lint rule", async () => {
-		const mockPlugin: Plugin = {
-			meta: {
-				id: "plugin.plugin",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
-			},
-			setup: () => undefined as any,
-			addLintRules: () => [
-				{
-					id: "test.test",
-					displayName: { en: "" },
-					defaultLevel: "error",
-				},
-			],
-		}
-
-		const pluginModule = "https://myplugin10.com/index.js"
-		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
-
-		const resolved = await resolvePlugins({
-			env,
-			config: {
-				plugins: [
-					{
-						options: {},
-						module: pluginModule,
-					},
-				],
-			} as unknown as InlangConfig,
-		})
-
-		expect(resolved.data.lintRules).toHaveLength(1)
-	})
-
-	it("should resolve multiple lint rules", async () => {
-		const mockPlugin: Plugin = {
-			meta: {
-				id: "plugin.plugin",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
-			},
-			setup: () => undefined as any,
-			addLintRules: () => [
-				{
-					id: "test.test",
-					displayName: { en: "" },
-					defaultLevel: "error",
-				},
-				{
-					id: "test2.test",
-					displayName: { en: "" },
-					defaultLevel: "error",
-				},
-			],
-		}
-
-		const pluginModule = "https://myplugin11.com/index.js"
-		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
-
-		const resolved = await resolvePlugins({
-			env,
-			config: {
-				plugins: [
-					{
-						options: {},
-						module: pluginModule,
-					},
-				],
-			} as unknown as InlangConfig,
-		})
-
-		expect(resolved.data.lintRules).toHaveLength(2)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginFunctionSaveMessagesAlreadyDefinedError)
 	})
 })
 
 describe("addAppSpecificApi", () => {
-	it("it should resolve app specific configs", async () => {
+	it("it should resolve app specific api", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin",
@@ -382,6 +276,8 @@ describe("addAppSpecificApi", () => {
 				keywords: [],
 			},
 			setup: () => undefined as any,
+			loadMessages: () => undefined as any,
+			saveMessages: () => undefined as any,
 			addAppSpecificApi: () => ({
 				"my-app": {
 					messageReferenceMatcher: () => undefined as any,
@@ -389,25 +285,25 @@ describe("addAppSpecificApi", () => {
 			}),
 		}
 
-		const pluginModule = "https://myplugin12.com/index.js"
-		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["de", "en"],
+			modules: ["https://myplugin.com/index.js"],
+		};
 
+		const env = mockEnvWithPlugins({ [config.modules[0]!]: mockPlugin })
 		const resolved = await resolvePlugins({
+			module: config.modules[0]!,
+			plugins: [mockPlugin],
+			pluginSettings: {},
+			config,
 			env,
-			config: {
-				plugins: [
-					{
-						options: {},
-						module: pluginModule,
-					},
-				],
-			} as unknown as InlangConfig,
-		})
+		});
 
 		expect(resolved.data.appSpecificApi).toHaveProperty("my-app")
 	})
 
-	it("it should resolve app specific configs", async () => {
+	it("it should resolve multiple app specific apis", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin",
@@ -420,6 +316,9 @@ describe("addAppSpecificApi", () => {
 				"my-app-1": {
 					functionOfMyApp1: () => undefined as any,
 				},
+				"my-app-2": {
+					functionOfMyApp2: () => undefined as any,
+				},
 			}),
 		}
 		const mockPlugin2: Plugin = {
@@ -430,42 +329,42 @@ describe("addAppSpecificApi", () => {
 				keywords: [],
 			},
 			setup: () => undefined as any,
+			loadMessages: () => undefined as any,
+			saveMessages: () => undefined as any,
 			addAppSpecificApi: () => ({
-				"my-app-2": {
-					functionOfMyApp2: () => undefined as any,
+				"my-app-3": {
+					functionOfMyApp3: () => undefined as any,
 				},
 			}),
 		}
-		const pluginModule = "https://myplugin13.com/index.js"
-		const pluginModule2 = "https://myplugin14.com/index.js"
+
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["de", "en"],
+			modules: ["https://myplugin5.com/index.js", "https://myplugin6.com/index.js"],
+		};
+
 		const env = mockEnvWithPlugins({
-			[pluginModule]: mockPlugin,
-			[pluginModule2]: mockPlugin2,
+			[config.modules[0]!]: mockPlugin,
+			[config.modules[1]!]: mockPlugin2,
 		})
 
 		const resolved = await resolvePlugins({
+			module: config.modules[0]!,
+			plugins: [mockPlugin, mockPlugin2],
+			pluginSettings: {},
+			config,
 			env,
-			config: {
-				plugins: [
-					{
-						options: {},
-						module: pluginModule,
-					},
-					{
-						options: {},
-						module: pluginModule2,
-					},
-				],
-			} as unknown as InlangConfig,
-		})
+		});
 
 		expect(resolved.data.appSpecificApi).toHaveProperty("my-app-1")
 		expect(resolved.data.appSpecificApi).toHaveProperty("my-app-2")
+		expect(resolved.data.appSpecificApi).toHaveProperty("my-app-3")
 	})
 })
 
 describe("error handling", () => {
-	it("should handle PluginException instances thrown during plugin setup", async () => {
+	it("should handle PluginError instances thrown during plugin setup", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin-save-messages",
@@ -474,29 +373,27 @@ describe("error handling", () => {
 				keywords: [],
 			},
 			setup: () => {
-				throw new PluginException("Plugin error", { module: "https://myplugin15.com/index.js" })
+				throw new PluginError("Plugin error", { plugin: "plugin.plugin-save-messages" })
 			},
 		}
 
-		const pluginModule = "https://myplugin15.com/index.js"
-		const env = mockEnvWithPlugins({
-			[pluginModule]: mockPlugin,
-		})
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["de", "en"],
+			modules: ["https://myplugin.com/index.js"],
+		};
 
-		const result = await resolvePlugins({
+		const env = mockEnvWithPlugins({ [config.modules[0]!]: mockPlugin })
+		const resolved = await resolvePlugins({
+			module: config.modules[0]!,
+			plugins: [mockPlugin],
+			pluginSettings: {},
+			config,
 			env,
-			config: {
-				plugins: [
-					{
-						options: {},
-						module: pluginModule,
-					},
-				],
-			} as unknown as InlangConfig,
-		})
+		});
 
-		expect(result.errors).toHaveLength(1)
-		expect(result.errors[0]).toBeInstanceOf(PluginException)
+		expect(resolved.errors).toHaveLength(1)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginError)
 	})
 
 	it("should handle generic Error instances thrown during plugin setup", async () => {
@@ -512,25 +409,23 @@ describe("error handling", () => {
 			},
 		}
 
-		const pluginModule = "https://myplugin15.com/index.js"
-		const env = mockEnvWithPlugins({
-			[pluginModule]: mockPlugin,
-		})
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["de", "en"],
+			modules: ["https://myplugin.com/index.js"],
+		};
 
-		const result = await resolvePlugins({
+		const env = mockEnvWithPlugins({ [config.modules[0]!]: mockPlugin })
+		const resolved = await resolvePlugins({
+			module: config.modules[0]!,
+			plugins: [mockPlugin],
+			pluginSettings: {},
+			config,
 			env,
-			config: {
-				plugins: [
-					{
-						options: {},
-						module: pluginModule,
-					},
-				],
-			} as unknown as InlangConfig,
-		})
+		});
 
-		expect(result.errors).toHaveLength(1)
-		expect(result.errors[0]).toBeInstanceOf(PluginException)
+		expect(resolved.errors).toHaveLength(1)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginError)
 	})
 
 	it("should handle unhandled and unknown errors during plugin setup", async () => {
@@ -546,25 +441,23 @@ describe("error handling", () => {
 			},
 		}
 
-		const pluginModule = "https://myplugin15.com/index.js"
-		const env = mockEnvWithPlugins({
-			[pluginModule]: mockPlugin,
-		})
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["de", "en"],
+			modules: ["https://myplugin.com/index.js"],
+		};
 
-		const result = await resolvePlugins({
+		const env = mockEnvWithPlugins({ [config.modules[0]!]: mockPlugin })
+		const resolved = await resolvePlugins({
+			module: config.modules[0]!,
+			plugins: [mockPlugin],
+			pluginSettings: {},
+			config,
 			env,
-			config: {
-				plugins: [
-					{
-						options: {},
-						module: pluginModule,
-					},
-				],
-			} as unknown as InlangConfig,
-		})
+		});
 
-		expect(result.errors).toHaveLength(1)
-		expect(result.errors[0]).toBeInstanceOf(PluginException)
+		expect(resolved.errors).toHaveLength(1)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginError)
 	})
 })
 

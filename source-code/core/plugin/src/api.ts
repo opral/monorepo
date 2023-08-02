@@ -87,8 +87,8 @@ export type ResolvePluginsFunction = (args: {
  * The API after resolving the plugins.
  */
 export type ResolvedPlugins = {
-	loadMessages: (args: { languageTags: InlangConfig["languageTags"] }) => Promise<Message[]>
-	saveMessages: (args: { messages: Message[] }) => Promise<void>
+	loadMessages?: (args: { languageTags: InlangConfig["languageTags"] }) => Promise<Message[]>
+	saveMessages?: (args: { messages: Message[] }) => Promise<void>
 	/**
 	 * App specific APIs.
 	 *
