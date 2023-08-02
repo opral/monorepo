@@ -110,7 +110,9 @@ export const plugin: Plugin<PluginOptions> = {
 }
 
 /**
- * Reading resources.
+ * Load messages
+ *
+ * @example const messages = await loadMessages({ fs, options, languageTags })
  */
 async function loadMessages(args: {
 	fs: InlangEnvironment["$fs"]
@@ -149,7 +151,11 @@ async function loadMessages(args: {
 }
 
 /**
- * Get the files that needs to be parsed.
+ * Get file to parse
+ *
+ * To get files and throw if files are not there. Also handles the flattening for nested files
+ *
+ * @example const storedMessages = await getFileToParse(path, isNested, language, fs)
  */
 async function getFileToParse(
 	path: string,
@@ -187,6 +193,8 @@ async function getFileToParse(
 
 /**
  * Add new item (message, variant) to the ast
+ *
+ * @example addVariantToMessages(messages, key, language, value)
  */
 const addVariantToMessages = (
 	messages: Message[],
@@ -228,7 +236,7 @@ const addVariantToMessages = (
 /**
  * Parses a pattern.
  *
- * @example parseMessage("testId", "test", ["{{", "}}"])
+ * @example parsePattern("Hello {{name}}!", ["{{", "}}"])
  */
 function parsePattern(
 	text: string,
