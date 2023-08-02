@@ -21,7 +21,7 @@ export type LintRule<
 		 */
 	}
 	defaultLevel: LintLevel
-		setup?: (args: { options: RuleOptions }) => void
+		setup?: (args: { options: RuleOptions }) => MaybePromise<void>
 }
 
 export const LintRule = z.object({

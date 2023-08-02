@@ -1,9 +1,11 @@
-import { LintException, LintReport, MessageLintReport, LintRule, MessageLintRule } from './api.js'
+import { LintException, LintReport, LintRule, MessageLintReport } from './api.js'
 import type { InlangConfig } from '@inlang/config'
 import type { Message, MessageQueryApi } from '@inlang/messages'
+import { setupMessageLintRules } from './setupMessageLintRules.js'
 
 export const lintMessage = async (args: {
 	config: InlangConfig,
+	rules: LintRule[],
 	messages: Message[],
 	query: MessageQueryApi,
 	message: Message
@@ -11,10 +13,11 @@ export const lintMessage = async (args: {
 	const reports: MessageLintReport[] = []
 	const exceptions: LintException[] = []
 
-	const rules = await setupMessageLintRules()
+	const rules = await setupMessageLintRules({ settings: args.config.settings?.lintRules, rules: args.rules })
+
 	const promises = rules.map(async rule => {
 		const ruleId = rule.meta.id
-		const level = rule.defaultLevel
+		const level = rule.level
 		try {
 			await rule.message({
 				message: args.message,
@@ -38,22 +41,4 @@ export const lintMessage = async (args: {
 	await Promise.all(promises)
 
 	return { data: reports, errors: exceptions }
-}
-
-const setupMessageLintRules = async (): Promise<MessageLintRule[]> => {
-	// // lint rules
-	// resolvedPluginApi.data.resolvedLintRules
-	// // settings
-	// config.settings?.lintRules['rule1']?.options
-	// // level
-	// config.settings?.lintRules['rule1']?.level
-
-	const rules = ([] as LintRule[]).filter(isMessageLintRule) // TODO: how to get the lint rules?
-
-	return []
-}
-
-// @ts-ignore // TODO
-function isMessageLintRule<Rule extends LintRule>(rule: Rule): rule is MessageLintRule {
-	return !!(rule as any)['message']
 }
