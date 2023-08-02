@@ -240,7 +240,7 @@ const addVariantToMessages = (
 function parsePattern(
 	text: string,
 	variableReferencePattern: PluginOptions["variableReferencePattern"],
-): Message["body"][LanguageTag][number]["pattern"] {
+): Variant["pattern"] {
 	// dependent on the variableReferencePattern, different regex
 	// expressions are used for matching
 	const placeholder = variableReferencePattern![1]
@@ -251,7 +251,7 @@ function parsePattern(
 				"g",
 		  )
 		: new RegExp(`(${variableReferencePattern}\\w+)`, "g")
-	const pattern: Message["body"][LanguageTag][number]["pattern"] = text
+	const pattern: Variant["pattern"] = text
 		.split(placeholder)
 		.filter((element) => element !== "")
 		.map((element) => {
