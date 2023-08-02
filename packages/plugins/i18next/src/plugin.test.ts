@@ -149,7 +149,70 @@ describe("loadMessage", () => {
 		expect(getVariant(messages[0]!, { languageTag: "en" })).toBeTruthy()
 		expect(getVariant(messages[0]!, { languageTag: "de" })).toBeTruthy()
 	})
-	// TODO test namespaces
+
+	// namespaces
+	it("should return messages if the path pattern is valid (namespace)", async () => {
+		const env = await createMockEnvironment({})
+		await env.$fs.mkdir("./en")
+		await env.$fs.writeFile("./en/common.json", JSON.stringify({ test: "Hello world" }))
+		const languageTags = ["en"]
+		const options: PluginOptions = {
+			pathPattern: {
+				"common": "./{languageTag}/common.json"
+			}
+		}
+		const messages = await plugin.loadMessages!({ languageTags })
+		plugin.setup({ options, fs: env.$fs })
+		expect(
+			(getVariant(messages[0]!, { languageTag: "en" }).data as Variant["pattern"])[0]?.type,
+		).toBe("Text")
+	})
+
+	it("should work with empty json files (namespace)", async () => {
+		const env = await createMockEnvironment({})
+		await env.$fs.mkdir("./en")
+		await env.$fs.writeFile("./en/common.json", JSON.stringify({}))
+		const languageTags = ["en"]
+		const options: PluginOptions = {
+			pathPattern: {
+				"common": "./{languageTag}/common.json",
+			}
+		}
+		plugin.setup({ options, fs: env.$fs })
+		expect(plugin.loadMessages!({ languageTags })).resolves.toBeTruthy()
+	})
+
+	it("should work with not yet existing files (namespace)", async () => {
+		const env = await createMockEnvironment({})
+		await env.$fs.mkdir("./en")
+		await env.$fs.writeFile("./en/common.json", JSON.stringify({ test: "Hello world" }))
+		const options: PluginOptions = {
+			pathPattern: {
+				"common": "./{languageTag}/common.json",
+			}
+		}
+		plugin.setup({ options, fs: env.$fs })
+		const languageTags = ["en", "de"]
+		expect(plugin.loadMessages!({ languageTags })).resolves.toBeTruthy()
+	})
+
+	it("should add multible variants to the same message (namespace)", async () => {
+		const env = await createMockEnvironment({})
+		await env.$fs.mkdir("./en")
+		await env.$fs.mkdir("./de")
+		await env.$fs.writeFile("./en/common.json", JSON.stringify({ test: "Hello world" }))
+		await env.$fs.writeFile("./de/common.json", JSON.stringify({ test: "Hallo welt" }))
+		const options: PluginOptions = {
+			pathPattern: {
+				"common": "./{languageTag}/common.json"
+			}
+		}
+		plugin.setup({ options, fs: env.$fs })
+		const languageTags = ["en", "de"]
+		const messages = await plugin.loadMessages!({ languageTags })
+		expect(getVariant(messages[0]!, { languageTag: "en" })).toBeTruthy()
+		expect(getVariant(messages[0]!, { languageTag: "de" })).toBeTruthy()
+	})
 })
 
 describe("saveMessage", () => {
@@ -235,7 +298,7 @@ describe("saveMessage", () => {
 })
 
 describe("expression", () => {
-	it("should correctly identify expression", async () => {
+	it("should correctly identify expression (at the end)", async () => {
 		const env = await createMockEnvironment({})
 		await env.$fs.writeFile("./en.json", JSON.stringify({ test: "Hello {{username}}" }))
 		const options: PluginOptions = {
@@ -244,8 +307,23 @@ describe("expression", () => {
 		plugin.setup({ options, fs: env.$fs })
 		const languageTags = ["en"]
 		const messages = await plugin.loadMessages!({ languageTags })
+		expect(getVariant(messages[0]!, { languageTag: "en" }).data!.length).toBe(2)
 		expect(getVariant(messages[0]!, { languageTag: "en" }).data![0]!.type).toBe("Text")
 		expect(getVariant(messages[0]!, { languageTag: "en" }).data![1]!.type).toBe("Expression")
+	})
+
+	it("should correctly identify expression (at the beginning)", async () => {
+		const env = await createMockEnvironment({})
+		await env.$fs.writeFile("./en.json", JSON.stringify({ test: "{{username}} the great" }))
+		const options: PluginOptions = {
+			pathPattern: "./{languageTag}.json",
+		}
+		plugin.setup({ options, fs: env.$fs })
+		const languageTags = ["en"]
+		const messages = await plugin.loadMessages!({ languageTags })
+		expect(getVariant(messages[0]!, { languageTag: "en" }).data!.length).toBe(2)
+		expect(getVariant(messages[0]!, { languageTag: "en" }).data![0]!.type).toBe("Expression")
+		expect(getVariant(messages[0]!, { languageTag: "en" }).data![1]!.type).toBe("Text")
 	})
 
 	it("should correctly apply the variableReferencePattern", async () => {
