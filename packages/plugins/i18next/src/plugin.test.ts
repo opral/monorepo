@@ -794,46 +794,35 @@ describe("roundTrip", () => {
 // 	}
 // })
 
-// it("should successfully do a roundtrip with complex content", async () => {
-// 	const complexContent = JSON.stringify(
-// 		{
-// 			"//multiLineString": {
-// 				multiline: "This is a\nmulti-line\nstring.",
-// 			},
-// 			unicodeCharacters: {
-// 				emoji: "\uD83D\uDE00",
-// 				currency: "€",
-// 			},
-// 			test: 'Single "quote" test',
-// 		},
-// 		undefined,
-// 		4,
-// 	)
-// 	const env = await mockEnvironment({})
-// 	await env.$fs.writeFile("./en.json", complexContent)
-
-// 	const x = plugin({
-// 		pathPattern: { common: "./{languageTag}.json" },
-// 	})(env)
-// 	const config = await x.config({})
-// 	config.sourceLanguageTag = "en"
-// 	config.languageTags = ["en"]
-
-// 	const resources = await config.readResources!({
-// 		config: config as InlangConfig,
-// 	})
-
-// 	await config.writeResources!({
-// 		resources: resources,
-// 		config: config as InlangConfig,
-// 	})
-
-// 	const newResources = await config.readResources!({
-// 		config: config as InlangConfig,
-// 	})
-
-// 	expect(newResources).toStrictEqual(resources)
-// })
+it("should successfully do a roundtrip with complex content", async () => {
+	const complexContent = JSON.stringify(
+		{
+			"//multiLineString": {
+				multiline: "This is a\nmulti-line\nstring.",
+			},
+			unicodeCharacters: {
+				emoji: "\uD83D\uDE00",
+				currency: "€",
+			},
+			test: 'Single "quote" test',
+		},
+		undefined,
+		4,
+	)
+	const env = await createMockEnvironment({})
+	await env.$fs.writeFile("./en.json", complexContent)
+	const languageTags = ["en"]
+	const options: PluginOptions = {
+		pathPattern: { 
+			common: "./{languageTag}.json" 
+		},
+	}
+	plugin.setup({ options, fs: env.$fs })
+	const messages = await plugin.loadMessages!({ languageTags })
+	plugin.saveMessages!({ messages })
+	const newMessage = await plugin.loadMessages!({ languageTags })
+	expect(newMessage).toStrictEqual(messages)
+})
 
 // it("should add default namespace if required by pathPattern", async () => {
 // 	const resources: ast.Resource[] = [
