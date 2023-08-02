@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { lintMessage } from "./lintMessage.js"
-import type { MessageLintRule } from './api.js'
+import type { MessageLintReport, MessageLintRule } from './api.js'
 import type { InlangConfig } from '@inlang/config'
-import { Message, createQuery } from '@inlang/messages'
+import type { Message, MessageQueryApi } from '@inlang/messages'
 
 const lintRule1 = {
 	meta: {
@@ -44,8 +44,8 @@ describe("lintMessage", async () => {
 
 		await lintMessage({
 			config: {} as InlangConfig,
+			query: {} as MessageQueryApi,
 			messages,
-			query: createQuery(messages),
 			message: message1,
 			rules: [lintRule1, lintRule2],
 		})
@@ -58,28 +58,29 @@ describe("lintMessage", async () => {
 		const fn = vi.fn()
 
 		lintRule1.message.mockImplementation(async () => {
-			fn(1)
+			fn('r1', 'before')
 			await new Promise(resolve => setTimeout(resolve, 0))
-			fn(3)
+			fn('r1', 'after')
 		})
 		lintRule2.message.mockImplementation(async () => {
-			fn(2)
+			fn('r2', 'before')
 			await new Promise(resolve => setTimeout(resolve, 0))
-			fn(4)
+			fn('r2', 'after')
 		})
 
 		await lintMessage({
 			config: {} as InlangConfig,
+			query: {} as MessageQueryApi,
 			messages,
-			query: createQuery(messages),
 			message: message1,
 			rules: [lintRule1, lintRule2],
 		})
 
-		expect(fn).toHaveBeenNthCalledWith(1, 1)
-		expect(fn).toHaveBeenNthCalledWith(2, 2)
-		expect(fn).toHaveBeenNthCalledWith(3, 3)
-		expect(fn).toHaveBeenNthCalledWith(4, 4)
+		expect(fn).toHaveBeenCalledTimes(4)
+		expect(fn).toHaveBeenNthCalledWith(1, 'r1', 'before')
+		expect(fn).toHaveBeenNthCalledWith(2, 'r2', 'before')
+		expect(fn).toHaveBeenNthCalledWith(3, 'r1', 'after')
+		expect(fn).toHaveBeenNthCalledWith(4, 'r2', 'after')
 	})
 
 	test("it should not abort the linting process when errors occur", async () => {
@@ -88,13 +89,13 @@ describe("lintMessage", async () => {
 		})
 
 		lintRule2.message.mockImplementation(({ report }) => {
-			report({ messageId: 'm2', languageTag: '', body: { en: '' } })
+			report({} as MessageLintReport)
 		})
 
 		const result = await lintMessage({
 			config: {} as InlangConfig,
+			query: {} as MessageQueryApi,
 			messages,
-			query: createQuery(messages),
 			message: message1,
 			rules: [lintRule1, lintRule2],
 		})
