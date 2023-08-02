@@ -19,7 +19,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 	for (const plugin of args.plugins) {
 		const pluginId = plugin.meta.id
 
-		try {
+		try {			
 			plugin.setup?.({
 				options: args.pluginSettings?.[pluginId]?.options,
 				fs: args.env.$fs,
@@ -91,7 +91,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 				)
 			}
 
-			if (result.errors.length > 0) {				
+			if (result.errors.length > 0) {								
 				continue
 			}
 
@@ -125,6 +125,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 					module: args.module,
 				},
 			}
+			
 		} catch (e) {
 			/**
 			 * -------------- BEGIN ERROR HANDLING --------------

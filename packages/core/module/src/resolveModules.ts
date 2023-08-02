@@ -1,14 +1,13 @@
 import type { ResolvedModulesFunction } from "./api.js"
 import { ModuleError, ModuleImportError } from "./errors.js"
 import { tryCatch } from "@inlang/result"
-import type { InlangModule } from "@inlang/module"
 import type { LintRule } from "@inlang/lint"
 import { LintRuleSchema } from "@inlang/lint"
 import { ResolvePluginsFunction, resolvePlugins, type Plugin } from "@inlang/plugin"
 import extend from "just-extend"
 
 /**
- * Resolves plugins from the config.
+ * Resolves modules from the config.
  */
 export const resolveModules: ResolvedModulesFunction = async (args) => {
 	const pluginSettings = args.config.settings?.plugins || {}
@@ -38,10 +37,9 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 					}),
 				)
 			}
-			const inlangModule = importedModule.data.default as InlangModule
 
 			// --- RESOLVE PLUGINS ---
-			const plugins = inlangModule.default.plugins as Plugin[]
+			const plugins = importedModule.data.default.plugins as Plugin[]
 			const resolvedPlugins = await resolvePlugins({
 				module,
 				plugins,
@@ -51,7 +49,7 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 			})
 
 			// --- PARSE LINT RULES ---
-			const lintRules = inlangModule.default.lintRules as LintRule[]
+			const lintRules = importedModule.data.default.lintRules as LintRule[]
 			const parsedLintRules = lintRules.map((rule) => {
 				const parsed = tryCatch(() => LintRuleSchema.parse(rule))
 				if (parsed.error) {
@@ -74,7 +72,7 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 			 */
 			result.data.plugins = extend(result.data.plugins, resolvedPlugins) as Awaited<ReturnType<ResolvePluginsFunction>>
 			result.data.lintRules = extend(result.data.lintRules, parsedLintRules) as LintRule[]
-
+			
 		} catch (e) {
 			/**
 			 * -------------- BEGIN ERROR HANDLING --------------
