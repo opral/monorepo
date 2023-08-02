@@ -2,7 +2,7 @@ import { expect, it, describe } from "vitest"
 import { plugin } from "./plugin.js"
 import type { PluginOptions } from "./options.js"
 import type { Message, Variant } from "@inlang/plugin"
-import { createMockEnvironment, getVariant } from "@inlang/plugin"
+import { createMockEnvironment, createVariant, getVariant } from "@inlang/plugin"
 
 describe("option pathPattern", () => {
 	it("should throw if the path pattern does not include the {languageTag} placeholder", async () => {
@@ -149,6 +149,7 @@ describe("loadMessage", () => {
 		expect(getVariant(messages[0]!, { languageTag: "en" })).toBeTruthy()
 		expect(getVariant(messages[0]!, { languageTag: "de" })).toBeTruthy()
 	})
+	// TODO test namespaces
 })
 
 describe("saveMessage", () => {
@@ -262,111 +263,96 @@ describe("expression", () => {
 	})
 })
 
-// it("should preserve the spacing resources and determine a default based on the majority for newly added resources", async () => {
-// 	// @prettier-ignore
-// 	const with4Spaces = `{
-//     "test": "test"
-// }`
+describe("formatting", () => {
+	it("should preserve the spacing resources and determine a default based on the majority for newly added resources", async () => {
+		// @prettier-ignore
+		const with4Spaces = `{
+    "test": "test"
+}`
 
-// 	// @prettier-ignore
-// 	const withTabs = `{
-// 	"test": "test"
-// }`
+		// @prettier-ignore
+		const withTabs = `{
+	"test": "test"
+}`
 
-// 	const env = await mockEnvironment({})
+		const env = await createMockEnvironment({})
 
-// 	await env.$fs.writeFile("./en.json", with4Spaces)
-// 	await env.$fs.writeFile("./fr.json", with4Spaces)
-// 	await env.$fs.writeFile("./de.json", withTabs)
+		await env.$fs.writeFile("./en.json", with4Spaces)
+		await env.$fs.writeFile("./fr.json", with4Spaces)
+		await env.$fs.writeFile("./de.json", withTabs)
+		const options: PluginOptions = {
+			pathPattern: "./{languageTag}.json",
+		}
+		plugin.setup({ options, fs: env.$fs })
+		const languageTags = ["en", "de", "fr"]
 
-// 	const x = plugin({ pathPattern: "./{languageTag}.json" })(env)
-// 	const config = await x.config({})
-// 	config.sourceLanguageTag = "en"
-// 	config.languageTags = ["en", "de", "fr"]
+		const messages = await plugin.loadMessages!({
+			languageTags,
+		})
 
-// 	const resources = await config.readResources!({
-// 		config: config as InlangConfig,
-// 	})
+		const variant: Variant = {
+			match: {},
+			pattern: [
+				{
+					type: "Text",
+					value: "test",
+				},
+			],
+		}
 
-// 	resources.push({
-// 		type: "Resource",
-// 		languageTag: {
-// 			type: "LanguageTag",
-// 			name: "es",
-// 		},
-// 		body: [
-// 			{
-// 				type: "Message",
-// 				id: {
-// 					type: "Identifier",
-// 					name: "test",
-// 				},
-// 				pattern: {
-// 					type: "Pattern",
-// 					elements: [
-// 						{
-// 							type: "Text",
-// 							value: "test",
-// 						},
-// 					],
-// 				},
-// 			},
-// 		],
-// 	})
+		const newMessage = createVariant(messages[0]!, { languageTag: "es", data: variant }).data
 
-// 	await config.writeResources!({
-// 		config: config as InlangConfig,
-// 		resources,
-// 	})
+		await plugin.saveMessages!({ messages: [newMessage!] })
 
-// 	const file1 = await env.$fs.readFile("./en.json", { encoding: "utf-8" })
-// 	const file2 = await env.$fs.readFile("./fr.json", { encoding: "utf-8" })
-// 	const file3 = await env.$fs.readFile("./de.json", { encoding: "utf-8" })
-// 	const file4 = await env.$fs.readFile("./es.json", { encoding: "utf-8" })
+		const file1 = await env.$fs.readFile("./en.json", { encoding: "utf-8" })
+		const file2 = await env.$fs.readFile("./fr.json", { encoding: "utf-8" })
+		const file3 = await env.$fs.readFile("./de.json", { encoding: "utf-8" })
+		const file4 = await env.$fs.readFile("./es.json", { encoding: "utf-8" })
 
-// 	expect(file1).toBe(with4Spaces)
-// 	expect(file2).toBe(with4Spaces)
-// 	expect(file3).toBe(withTabs)
-// 	expect(file4).toBe(with4Spaces)
-// })
+		expect(file1).toBe(with4Spaces)
+		expect(file2).toBe(with4Spaces)
+		expect(file3).toBe(withTabs)
+		expect(file4).toBe(with4Spaces)
+	})
 
-// it("should remember if a file has a new line at the end or not", async () => {
-// 	// @prettier-ignore
-// 	const withNewLine = `{
-//     "test": "test"
-// }
-// `
+	// it("should remember if a file has a new line at the end or not", async () => {
+	// 	// @prettier-ignore
+	// 	const withNewLine = `{
+	// 	"test": "test"
+	// }
+	// `
 
-// 	// @prettier-ignore
-// 	const withoutNewLine = `{
-// 	"test": "test"
-// }`
+	// 	// @prettier-ignore
+	// 	const withoutNewLine = `{
+	// 	"test": "test"
+	// }`
 
-// 	const env = await mockEnvironment({})
+	// 	const env = await createMockEnvironment({})
 
-// 	await env.$fs.writeFile("./en.json", withNewLine)
-// 	await env.$fs.writeFile("./fr.json", withoutNewLine)
+	// 	await env.$fs.writeFile("./en.json", withNewLine)
+	// 	await env.$fs.writeFile("./fr.json", withoutNewLine)
 
-// 	const x = plugin({ pathPattern: "./{languageTag}.json" })(env)
-// 	const config = await x.config({})
-// 	config.sourceLanguageTag = "en"
-// 	config.languageTags = ["en", "de", "fr"]
+	// 	const x = plugin({ pathPattern: "./{languageTag}.json" })(env)
+	// 	const config = await x.config({})
+	// 	config.sourceLanguageTag = "en"
+	// 	config.languageTags = ["en", "de", "fr"]
 
-// 	const resources = await config.readResources!({
-// 		config: config as InlangConfig,
-// 	})
+	// 	const resources = await config.readResources!({
+	// 		config: config as InlangConfig,
+	// 	})
 
-// 	await config.writeResources!({
-// 		config: config as InlangConfig,
-// 		resources,
-// 	})
+	// 	await config.writeResources!({
+	// 		config: config as InlangConfig,
+	// 		resources,
+	// 	})
 
-// 	const file1 = await env.$fs.readFile("./en.json", { encoding: "utf-8" })
-// 	const file2 = await env.$fs.readFile("./fr.json", { encoding: "utf-8" })
+	// 	const file1 = await env.$fs.readFile("./en.json", { encoding: "utf-8" })
+	// 	const file2 = await env.$fs.readFile("./fr.json", { encoding: "utf-8" })
 
-// 	expect(file1).toBe(withNewLine)
-// 	expect(file2).toBe(withoutNewLine)
-// })
+	// 	expect(file1).toBe(withNewLine)
+	// 	expect(file2).toBe(withoutNewLine)
+	// })
+})
 
 // it("should correctly identify placeholders with only no trailing pattern", async () => {
 // 	const enResource = `{

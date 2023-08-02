@@ -46,11 +46,11 @@ export function createVariant(
 		languageTag: LanguageTag
 		data: Variant
 	},
-): Result<Message, VariantAlreadyExistsException | PatternsForLanguageTagDoNotExistException> {
+): Result<Message, VariantAlreadyExistsException> {
 	const copy: Message = structuredClone(message)
 	// check if languageTag exists
 	if (copy.body[options.languageTag] === undefined) {
-		return { error: new PatternsForLanguageTagDoNotExistException(message.id, options.languageTag) }
+		copy.body[options.languageTag] = []
 	}
 	// check if variant already exists
 	if (matchVariant(copy, options.languageTag, options.data.match)) {

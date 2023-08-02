@@ -202,7 +202,7 @@ describe("createVariant", () => {
 		expect(variant.error).toBeInstanceOf(VariantAlreadyExistsException)
 	})
 
-	test("should return error if set of variants for specific language does not exist", () => {
+	test("should not return error if set of variants for specific language does not exist", () => {
 		let mockMessage: Message = getMockMessage()
 
 		const variant = createVariant(mockMessage, {
@@ -213,8 +213,8 @@ describe("createVariant", () => {
 			},
 		})
 		// should return the female variant
-		expect(variant.data).toBeUndefined()
-		expect(variant.error).toBeInstanceOf(PatternsForLanguageTagDoNotExistException)
+		expect(variant.data).toBeDefined()
+		expect(variant.error).toBeUndefined()
 	})
 })
 
