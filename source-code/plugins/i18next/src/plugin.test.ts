@@ -5,7 +5,7 @@ import type { Message, Variant } from "@inlang/plugin"
 import { createMockEnvironment, getVariant } from "@inlang/plugin"
 
 describe("option pathPattern", () => {
-	it("should throw if the path pattern does not include the {language} placeholder", async () => {
+	it("should throw if the path pattern does not include the {languageTag} placeholder", async () => {
 		const env = await createMockEnvironment({})
 		await env.$fs.writeFile("./en.json", "{}")
 		try {
@@ -27,7 +27,7 @@ describe("option pathPattern", () => {
 		}
 	})
 
-	it("should throw if the path pattern with namespaces does not include the {language} placeholder", async () => {
+	it("should throw if the path pattern with namespaces does not include the {languageTag} placeholder", async () => {
 		const env = await createMockEnvironment({})
 		await env.$fs.writeFile("./en.json", "{}")
 		try {
@@ -52,7 +52,7 @@ describe("option pathPattern", () => {
 			plugin.setup({
 				options: {
 					pathPattern: {
-						common: "./{language}/common",
+						common: "./{languageTag}/common",
 					},
 				},
 				fs: env.$fs,
@@ -70,7 +70,7 @@ describe("option pathPattern", () => {
 			plugin.setup({
 				options: {
 					pathPattern: {
-						"namespaceWith.dot": "./{language}/common.json",
+						"namespaceWith.dot": "./{languageTag}/common.json",
 					},
 				},
 				fs: env.$fs,
@@ -87,7 +87,7 @@ describe("option pathPattern", () => {
 		try {
 			plugin.setup({
 				options: {
-					pathPattern: "./{language}/*.json",
+					pathPattern: "./{languageTag}/*.json",
 				},
 				fs: env.$fs,
 			})
@@ -104,7 +104,7 @@ describe("loadMessage", () => {
 		await env.$fs.writeFile("./en.json", JSON.stringify({ test: "Hello world" }))
 		const languageTags = ["en"]
 		const options: PluginOptions = {
-			pathPattern: "./{language}.json",
+			pathPattern: "./{languageTag}.json",
 		}
 		plugin.setup({ options, fs: env.$fs })
 		const messages = await plugin.loadMessages!({ languageTags })
@@ -119,7 +119,7 @@ describe("loadMessage", () => {
 		await env.$fs.writeFile("./en.json", JSON.stringify({}))
 		const languageTags = ["en"]
 		const options: PluginOptions = {
-			pathPattern: "./{language}.json",
+			pathPattern: "./{languageTag}.json",
 		}
 		plugin.setup({ options, fs: env.$fs })
 		expect(plugin.loadMessages!({ languageTags })).resolves.toBeTruthy()
@@ -129,7 +129,7 @@ describe("loadMessage", () => {
 		const env = await createMockEnvironment({})
 		await env.$fs.writeFile("./en.json", JSON.stringify({ test: "Hello world" }))
 		const options: PluginOptions = {
-			pathPattern: "./{language}.json",
+			pathPattern: "./{languageTag}.json",
 		}
 		plugin.setup({ options, fs: env.$fs })
 		const languageTags = ["en", "de"]
@@ -141,7 +141,7 @@ describe("loadMessage", () => {
 		await env.$fs.writeFile("./en.json", JSON.stringify({ test: "Hello world" }))
 		await env.$fs.writeFile("./de.json", JSON.stringify({ test: "Hallo welt" }))
 		const options: PluginOptions = {
-			pathPattern: "./{language}.json",
+			pathPattern: "./{languageTag}.json",
 		}
 		plugin.setup({ options, fs: env.$fs })
 		const languageTags = ["en", "de"]
@@ -156,7 +156,7 @@ describe("saveMessage", () => {
 		const env = await createMockEnvironment({})
 		await env.$fs.writeFile("./en.json", JSON.stringify({}))
 		const options: PluginOptions = {
-			pathPattern: "./{language}.json",
+			pathPattern: "./{languageTag}.json",
 		}
 		plugin.setup({ options, fs: env.$fs })
 		const messages: Message[] = [
@@ -187,7 +187,7 @@ describe("saveMessage", () => {
 		await env.$fs.writeFile("./en.json", JSON.stringify({}))
 		const options: PluginOptions = {
 			pathPattern: {
-				common: "./{language}/common.json",
+				common: "./{languageTag}/common.json",
 			},
 		}
 		plugin.setup({ options, fs: env.$fs })
@@ -238,7 +238,7 @@ describe("expression", () => {
 		const env = await createMockEnvironment({})
 		await env.$fs.writeFile("./en.json", JSON.stringify({ test: "Hello {{username}}" }))
 		const options: PluginOptions = {
-			pathPattern: "./{language}.json",
+			pathPattern: "./{languageTag}.json",
 		}
 		plugin.setup({ options, fs: env.$fs })
 		const languageTags = ["en"]
@@ -246,12 +246,12 @@ describe("expression", () => {
 		expect(getVariant(messages[0]!, { languageTag: "en" }).data![0]!.type).toBe("Text")
 		expect(getVariant(messages[0]!, { languageTag: "en" }).data![1]!.type).toBe("Expression")
 	})
-	
+
 	it("should correctly apply the variableReferencePattern", async () => {
 		const env = await createMockEnvironment({})
 		await env.$fs.writeFile("./en.json", JSON.stringify({ test: "Hello @username" }))
 		const options: PluginOptions = {
-			pathPattern: "./{language}.json",
+			pathPattern: "./{languageTag}.json",
 			variableReferencePattern: ["@"],
 		}
 		plugin.setup({ options, fs: env.$fs })
@@ -279,7 +279,7 @@ describe("expression", () => {
 // 	await env.$fs.writeFile("./fr.json", with4Spaces)
 // 	await env.$fs.writeFile("./de.json", withTabs)
 
-// 	const x = plugin({ pathPattern: "./{language}.json" })(env)
+// 	const x = plugin({ pathPattern: "./{languageTag}.json" })(env)
 // 	const config = await x.config({})
 // 	config.sourceLanguageTag = "en"
 // 	config.languageTags = ["en", "de", "fr"]
@@ -347,7 +347,7 @@ describe("expression", () => {
 // 	await env.$fs.writeFile("./en.json", withNewLine)
 // 	await env.$fs.writeFile("./fr.json", withoutNewLine)
 
-// 	const x = plugin({ pathPattern: "./{language}.json" })(env)
+// 	const x = plugin({ pathPattern: "./{languageTag}.json" })(env)
 // 	const config = await x.config({})
 // 	config.sourceLanguageTag = "en"
 // 	config.languageTags = ["en", "de", "fr"]
@@ -377,7 +377,7 @@ describe("expression", () => {
 
 // 	await env.$fs.writeFile("./en.json", enResource)
 
-// 	const x = plugin({ pathPattern: "./{language}.json", variableReferencePattern: ["@:"] })(env)
+// 	const x = plugin({ pathPattern: "./{languageTag}.json", variableReferencePattern: ["@:"] })(env)
 // 	const config = await x.config({})
 // 	config.sourceLanguageTag = "en"
 // 	config.languageTags = ["en"]
@@ -404,7 +404,7 @@ describe("expression", () => {
 
 // 	await env.$fs.writeFile("./en.json", enResource)
 
-// 	const x = plugin({ pathPattern: "./{language}.json", variableReferencePattern: ["{{", "}}"] })(
+// 	const x = plugin({ pathPattern: "./{languageTag}.json", variableReferencePattern: ["{{", "}}"] })(
 // 		env,
 // 	)
 // 	const config = await x.config({})
@@ -433,7 +433,7 @@ describe("expression", () => {
 
 // 	await env.$fs.writeFile("./en.json", enResource)
 
-// 	const x = plugin({ pathPattern: "./{language}.json", variableReferencePattern: ["{{", "}}"] })(
+// 	const x = plugin({ pathPattern: "./{languageTag}.json", variableReferencePattern: ["{{", "}}"] })(
 // 		env,
 // 	)
 // 	const config = await x.config({})
@@ -468,7 +468,7 @@ describe("expression", () => {
 
 // 	await env.$fs.writeFile("./en.json", enResource)
 
-// 	const x = plugin({ pathPattern: "./{language}.json" })(env)
+// 	const x = plugin({ pathPattern: "./{languageTag}.json" })(env)
 // 	const config = await x.config({})
 // 	config.sourceLanguageTag = "en"
 
@@ -491,8 +491,8 @@ describe("expression", () => {
 
 // 	const x = plugin({
 // 		pathPattern: {
-// 			common: "./{language}/common.json",
-// 			vital: "./{language}/vital.json",
+// 			common: "./{languageTag}/common.json",
+// 			vital: "./{languageTag}/vital.json",
 // 		},
 // 	})(env)
 // 	const config = await x.config({})
@@ -523,8 +523,8 @@ describe("expression", () => {
 
 // 	const x = plugin({
 // 		pathPattern: {
-// 			"projectA-common": "./projectA/{language}/common.json",
-// 			"projectB-common": "./projectB/{language}/common.json",
+// 			"projectA-common": "./projectA/{languageTag}/common.json",
+// 			"projectB-common": "./projectB/{languageTag}/common.json",
 // 		},
 // 	})(env)
 // 	const config = await x.config({})
@@ -546,7 +546,7 @@ describe("expression", () => {
 
 // 	const x = plugin({
 // 		pathPattern: {
-// 			common: "./{language}/common.json",
+// 			common: "./{languageTag}/common.json",
 // 		},
 // 	})(env)
 // 	const config = await x.config({})
@@ -587,7 +587,7 @@ describe("expression", () => {
 // 	expect(resources).toStrictEqual(reference)
 // })
 
-// it("should add a new language for pathPattern string", async () => {
+// it("should add a new languageTag for pathPattern string", async () => {
 // 	const enResource = `{
 //     "test": "test"
 // }`
@@ -596,7 +596,7 @@ describe("expression", () => {
 
 // 	await env.$fs.writeFile("./en.json", enResource)
 
-// 	const x = plugin({ pathPattern: "./{language}.json" })(env)
+// 	const x = plugin({ pathPattern: "./{languageTag}.json" })(env)
 // 	const config = await x.config({})
 // 	config.sourceLanguageTag = "en"
 // 	config.languageTags = ["en"]
@@ -622,7 +622,7 @@ describe("expression", () => {
 // 	expect(json).toStrictEqual({})
 // })
 
-// it("should add a new language for pathPattern with namespaces", async () => {
+// it("should add a new languageTag for pathPattern with namespaces", async () => {
 // 	const enResource = `{
 //     "test": "test"
 // }`
@@ -633,7 +633,7 @@ describe("expression", () => {
 // 	await env.$fs.writeFile("./en/common.json", enResource)
 
 // 	const x = plugin({
-// 		pathPattern: { common: "./{language}/common.json" },
+// 		pathPattern: { common: "./{languageTag}/common.json" },
 // 	})(env)
 // 	const config = await x.config({})
 // 	config.sourceLanguageTag = "en"
@@ -671,7 +671,7 @@ describe("expression", () => {
 // 	await env.$fs.writeFile("./en/common.json", enResource)
 
 // 	const x = plugin({
-// 		pathPattern: { common: "./{language}/common.json" },
+// 		pathPattern: { common: "./{languageTag}/common.json" },
 // 	})(env)
 // 	const config = await x.config({})
 // 	config.sourceLanguageTag = "en"
@@ -741,7 +741,7 @@ describe("expression", () => {
 // 	await env.$fs.writeFile("./en/common.json", enResource)
 
 // 	const x = plugin({
-// 		pathPattern: { common: "./{language}/common.json" },
+// 		pathPattern: { common: "./{languageTag}/common.json" },
 // 	})(env)
 // 	const config = await x.config({})
 // 	config.sourceLanguageTag = "en"
@@ -832,7 +832,7 @@ describe("expression", () => {
 // 	await env.$fs.writeFile("./fr.json", withNesting)
 // 	await env.$fs.writeFile("./de.json", withoutNesting)
 
-// 	const x = plugin({ pathPattern: "./{language}.json" })(env)
+// 	const x = plugin({ pathPattern: "./{languageTag}.json" })(env)
 // 	const config = await x.config({})
 // 	config.sourceLanguageTag = "en"
 // 	config.languageTags = ["en", "de", "fr"]
@@ -916,7 +916,7 @@ describe("expression", () => {
 // 	await env.$fs.writeFile("./en.json", "{}")
 
 // 	const x = plugin({
-// 		pathPattern: { common: "./{language}.json" },
+// 		pathPattern: { common: "./{languageTag}.json" },
 // 	})(env)
 // 	const config = await x.config({})
 // 	config.sourceLanguageTag = "en"
@@ -951,7 +951,7 @@ describe("expression", () => {
 // 	await env.$fs.writeFile("./en.json", complexContent)
 
 // 	const x = plugin({
-// 		pathPattern: { common: "./{language}.json" },
+// 		pathPattern: { common: "./{languageTag}.json" },
 // 	})(env)
 // 	const config = await x.config({})
 // 	config.sourceLanguageTag = "en"
@@ -1005,7 +1005,7 @@ describe("expression", () => {
 // 	await env.$fs.writeFile("./en.json", "{}")
 
 // 	const x = plugin({
-// 		pathPattern: { common: "./{language}.json" },
+// 		pathPattern: { common: "./{languageTag}.json" },
 // 	})(env)
 // 	const config = await x.config({})
 // 	config.sourceLanguageTag = "en"
@@ -1037,8 +1037,8 @@ describe("expression", () => {
 
 // 	const x = plugin({
 // 		pathPattern: {
-// 			common: "./{language}/common.json",
-// 			vital: "./{language}/vital.json",
+// 			common: "./{languageTag}/common.json",
+// 			vital: "./{languageTag}/vital.json",
 // 		},
 // 	})(env)
 // 	const config = await x.config({})
@@ -1059,7 +1059,7 @@ describe("expression", () => {
 // 	expect(isThrown).toBe(false)
 // })
 
-// it("should get the correct languages, when single namespace is defined as a pathPattern string 'pathPattern: `public/locales/{language}/translation.json`'", async () => {
+// it("should get the correct languages, when single namespace is defined as a pathPattern string 'pathPattern: `public/locales/{languageTag}/translation.json`'", async () => {
 // 	const test = JSON.stringify({
 // 		test: "test",
 // 	})
@@ -1071,7 +1071,7 @@ describe("expression", () => {
 // 	await env.$fs.writeFile("./de/common.json", test)
 
 // 	const x = plugin({
-// 		pathPattern: "./{language}/common.json",
+// 		pathPattern: "./{languageTag}/common.json",
 // 	})(env)
 // 	const config = await x.config({})
 // 	config.sourceLanguageTag = "en"

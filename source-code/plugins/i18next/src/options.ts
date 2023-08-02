@@ -11,13 +11,13 @@ export type PluginOptions = {
  */
 export function throwIfInvalidOptions(options: PluginOptions) {
 	if (typeof options.pathPattern === "string") {
-		if (options.pathPattern.includes("{language}") === false) {
+		if (options.pathPattern.includes("{languageTag}") === false) {
 			throw new Error(
-				"The pathPattern setting must be defined and include the {language} placeholder. An example would be './resources/{language}.json'.",
+				"The pathPattern setting must be defined and include the {languageTag} placeholder. An example would be './resources/{languageTag}.json'.",
 			)
 		} else if (options.pathPattern.endsWith(".json") === false) {
 			throw new Error(
-				"The pathPattern setting must end with '.json'. An example would be './resources/{language}.json'.",
+				"The pathPattern setting must end with '.json'. An example would be './resources/{languageTag}.json'.",
 			)
 		} else if (options.pathPattern.includes("*")) {
 			throw new Error(
@@ -26,13 +26,13 @@ export function throwIfInvalidOptions(options: PluginOptions) {
 		}
 	} else {
 		for (const [prefix, path] of Object.entries(options.pathPattern)) {
-			if (path === undefined || path.includes("{language}") === false) {
+			if (path === undefined || path.includes("{languageTag}") === false) {
 				throw new Error(
-					"The pathPattern setting must be defined and include the {language} placeholder. An example would be './resources/{language}.json'.",
+					"The pathPattern setting must be defined and include the {languageTag} placeholder. An example would be './resources/{languageTag}.json'.",
 				)
 			} else if (path.endsWith(".json") === false) {
 				throw new Error(
-					"The pathPattern setting must end with '.json'. An example would be './resources/{language}.json'.",
+					"The pathPattern setting must end with '.json'. An example would be './resources/{languageTag}.json'.",
 				)
 			} else if (prefix.includes(".")) {
 				throw new Error(

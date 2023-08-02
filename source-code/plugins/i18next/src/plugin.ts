@@ -124,7 +124,7 @@ async function loadMessages(args: {
 			for (const [prefix, path] of Object.entries(args.options.pathPattern)) {
 				const messagesFromFile = await getFileToParse(
 					path,
-					NESTED[path.replace("{language}", languageTag)] ?? defaultNesting(),
+					NESTED[path.replace("{languageTag}", languageTag)] ?? defaultNesting(),
 					languageTag,
 					args.fs,
 				)
@@ -136,7 +136,7 @@ async function loadMessages(args: {
 		} else {
 			const messagesFromFile = await getFileToParse(
 				args.options.pathPattern,
-				NESTED[args.options.pathPattern.replace("{language}", languageTag)] ?? defaultNesting(),
+				NESTED[args.options.pathPattern.replace("{languageTag}", languageTag)] ?? defaultNesting(),
 				languageTag,
 				args.fs,
 			)
@@ -154,16 +154,16 @@ async function loadMessages(args: {
  *
  * To get files and throw if files are not there. Also handles the flattening for nested files
  *
- * @example const storedMessages = await getFileToParse(path, isNested, language, fs)
+ * @example const storedMessages = await getFileToParse(path, isNested, languageTag, fs)
  */
 async function getFileToParse(
 	path: string,
 	isNested: boolean,
-	language: string,
+	languageTag: string,
 	fs: InlangEnvironment["$fs"],
 ): Promise<Record<string, string>> {
-	const pathWithLanguage = path.replace("{language}", language)
-	// get file, make sure that is not braking when the namespace doesn't exist in every language dir
+	const pathWithLanguage = path.replace("{languageTag}", languageTag)
+	// get file, make sure that is not braking when the namespace doesn't exist in every languageTag dir
 	try {
 		const file = await fs.readFile(pathWithLanguage, { encoding: "utf-8" })
 		//analyse format of file
@@ -193,12 +193,12 @@ async function getFileToParse(
 /**
  * Add new item (message, variant) to the ast
  *
- * @example addVariantToMessages(messages, key, language, value)
+ * @example addVariantToMessages(messages, key, languageTag, value)
  */
 const addVariantToMessages = (
 	messages: Message[],
 	key: string,
-	language: LanguageTag,
+	languageTag: LanguageTag,
 	value: string,
 ) => {
 	const messageIndex = messages.findIndex((m) => m.id === key)
@@ -207,13 +207,13 @@ const addVariantToMessages = (
 			match: {},
 			pattern: parsePattern(value, pluginOptions!.variableReferencePattern),
 		}
-		// Check if the language exists in the body of the message
-		if (!messages[messageIndex]?.body[language]) {
-			messages[messageIndex]!.body[language]! = []
+		// Check if the languageTag exists in the body of the message
+		if (!messages[messageIndex]?.body[languageTag]) {
+			messages[messageIndex]!.body[languageTag]! = []
 		}
 
 		//push new variant
-		messages[messageIndex]!.body[language]!.push(variant)
+		messages[messageIndex]!.body[languageTag]!.push(variant)
 	} else {
 		// message does not exist
 		const message: Message = {
@@ -222,7 +222,7 @@ const addVariantToMessages = (
 			selectors: [],
 			body: {},
 		}
-		message.body[language] = [
+		message.body[languageTag] = [
 			{
 				match: {},
 				pattern: parsePattern(value, pluginOptions!.variableReferencePattern),
@@ -297,24 +297,28 @@ async function saveMessages(args: {
 			Record<string, Record<Message["id"], Variant["pattern"]>>
 		> = {}
 		for (const message of args.messages) {
-			for (const language of Object.keys(message.body)) {
+			for (const languageTag of Object.keys(message.body)) {
 				const prefix: string = message.id.includes(":")
 					? message.id.split(":")[0]!
 					: Object.keys(args.options.pathPattern)[0]!
 				const resolvedId = message.id.replace(prefix + ":", "")
 				const serializedPattern: Variant["pattern"] = getVariant(message, {
-					languageTag: language,
+					languageTag: languageTag,
 				}).data!
 
-				storage[language] ??= {}
-				storage[language]![prefix] ??= {}
-				storage[language]![prefix]![resolvedId] = serializedPattern
+				storage[languageTag] ??= {}
+				storage[languageTag]![prefix] ??= {}
+				storage[languageTag]![prefix]![resolvedId] = serializedPattern
 			}
 		}
-		for (const [language, _value] of Object.entries(storage)) {
+		for (const [languageTag, _value] of Object.entries(storage)) {
 			for (const path of Object.values(args.options.pathPattern)) {
 				// check if directory exists
-				const directoryPath = path.replace("{language}", language).split("/").slice(0, -1).join("/")
+				const directoryPath = path
+					.replace("{languageTag}", languageTag)
+					.split("/")
+					.slice(0, -1)
+					.join("/")
 				try {
 					await args.fs.readdir(directoryPath)
 				} catch {
@@ -322,7 +326,10 @@ async function saveMessages(args: {
 				}
 			}
 			for (const [prefix, value] of Object.entries(_value)) {
-				const pathWithLanguage = args.options.pathPattern[prefix]!.replace("{language}", language)
+				const pathWithLanguage = args.options.pathPattern[prefix]!.replace(
+					"{languageTag}",
+					languageTag,
+				)
 				await args.fs.writeFile(
 					pathWithLanguage,
 					serializeFile(
@@ -339,16 +346,16 @@ async function saveMessages(args: {
 		// without namespaces
 		const storage: Record<LanguageTag, Record<Message["id"], Variant["pattern"]>> | undefined = {}
 		for (const message of args.messages) {
-			for (const language of Object.keys(message.body)) {
+			for (const languageTag of Object.keys(message.body)) {
 				const serializedPattern: Variant["pattern"] = getVariant(message, {
-					languageTag: language,
+					languageTag: languageTag,
 				}).data!
-				storage[language] ??= {}
-				storage[language]![message.id] = serializedPattern
+				storage[languageTag] ??= {}
+				storage[languageTag]![message.id] = serializedPattern
 			}
 		}
-		for (const [language, value] of Object.entries(storage)) {
-			const pathWithLanguage = args.options.pathPattern.replace("{language}", language)
+		for (const [languageTag, value] of Object.entries(storage)) {
+			const pathWithLanguage = args.options.pathPattern.replace("{languageTag}", languageTag)
 			await args.fs.writeFile(
 				pathWithLanguage,
 				serializeFile(
