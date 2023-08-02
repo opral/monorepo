@@ -1,9 +1,9 @@
 name: Bug report for `@inlang/sdk-js`
 description: Something is not working as expected in the `@inlang/sdk-js` package
-title: '[bug] <title>'
+title: "[bug] <title>"
 labels:
-  - 'type: bug'
-  - 'scope: sdk-js'
+  - "type: bug"
+  - "scope: sdk-js"
 assignees:
   - ivanhofer
 body:
@@ -14,10 +14,10 @@ body:
   - type: checkboxes
     id: config-validated
     attributes:
-      label: 'Did you check if the config file includes errors?'
-      description: 'Please validate the config file with `npx @inlang/cli config validate`. If you see errors, it has probably nothing to do with the `@inlang/sdk-js` package and then please fill out the regular bug report form: https://github.com/inlang/inlang/issues/new/choose'
+      label: "Did you check if the config file includes errors?"
+      description: "Please validate the config file with `npx @inlang/cli config validate`. If you see errors, it has probably nothing to do with the `@inlang/sdk-js` package and then please fill out the regular bug report form: https://github.com/inlang/inlang/issues/new/choose"
       options:
-        - label: 'Yes, I have validated the config file'
+        - label: "Yes, I have validated the config file"
           required: true
   - type: textarea
     id: bug-description
@@ -53,5 +53,5 @@ body:
   - type: textarea
     id: other
     attributes:
-      label: 'Other information'
+      label: "Other information"
       description: Do you have additional information that could help us fix the bug? Please include it here.
