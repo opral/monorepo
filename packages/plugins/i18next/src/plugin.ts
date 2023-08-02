@@ -281,9 +281,9 @@ function parsePattern(
 }
 
 /**
- * Writing resources.
+ * Save messages
  *
- * @example writeResources({resources, settings, $fs})
+ * @example await saveMessages({ fs, options, messages })
  */
 async function saveMessages(args: {
 	fs: InlangEnvironment["$fs"]
@@ -364,7 +364,11 @@ async function saveMessages(args: {
 }
 
 /**
- * Serializes a message.
+ * Serializes file
+ *
+ * For all messages that belong in one file.
+ *
+ * @example const serializedFile = serializeFile(messages, space, endsWithNewLine, nested, variableReferencePattern)
  */
 function serializeFile(
 	messages: Record<Message["id"], Variant["pattern"]>,
@@ -398,6 +402,8 @@ function serializeFile(
 
 /**
  * Serializes a pattern.
+ *
+ * @example const serializedPattern = serializePattern(pattern, variableReferencePattern)
  */
 function serializePattern(
 	pattern: Variant["pattern"],
