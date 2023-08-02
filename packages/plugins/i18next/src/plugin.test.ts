@@ -6,7 +6,6 @@ describe("plugin options", () => {
 	it("should throw if the path pattern does not include the {language} placeholder", async () => {
 		const env = await createMockEnvironment({})
 		await env.$fs.writeFile("./en.json", "{}")
-
 		try {
 			plugin.setup({ options: { pathPattern: "./resources/" }, fs: env.$fs })
 			throw new Error("should not reach this")
