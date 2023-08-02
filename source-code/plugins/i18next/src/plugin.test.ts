@@ -1,8 +1,9 @@
 import { expect, it, describe } from "vitest"
-import { plugin, type PluginOptions } from "./plugin.js"
-import { Variant, createMockEnvironment, getVariant } from "@inlang/plugin"
+import { plugin} from "./plugin.js"
+import type { PluginOptions } from "./options.js"
+import { type Variant, createMockEnvironment, getVariant } from "@inlang/plugin"
 
-describe("plugin options", () => {
+describe("option pathPattern", () => {
 	it("should throw if the path pattern does not include the {language} placeholder", async () => {
 		const env = await createMockEnvironment({})
 		await env.$fs.writeFile("./en.json", "{}")
@@ -99,7 +100,7 @@ describe("plugin options", () => {
 describe("loadMessage", () => {
 	it("should return messages if the path pattern is valid", async () => {
 		const env = await createMockEnvironment({})
-		await env.$fs.writeFile("./en.json", JSON.stringify({ test: "Hello {{name}} world" }))
+		await env.$fs.writeFile("./en.json", JSON.stringify({ test: "Hello world" }))
 		const languageTags = ["en"]
 		const options: PluginOptions = {
 			pathPattern: "./{language}.json",
@@ -125,7 +126,7 @@ describe("loadMessage", () => {
 
 	it("should work with not yet existing files", async () => {
 		const env = await createMockEnvironment({})
-		await env.$fs.writeFile("./en.json", JSON.stringify({ test: "Hello {{name}} world" }))
+		await env.$fs.writeFile("./en.json", JSON.stringify({ test: "Hello world" }))
 		const options: PluginOptions = {
 			pathPattern: "./{language}.json",
 		}
@@ -136,8 +137,8 @@ describe("loadMessage", () => {
 
 	it("should add multible variants to the same message", async () => {
 		const env = await createMockEnvironment({})
-		await env.$fs.writeFile("./en.json", JSON.stringify({ test: "Hello {{name}} world" }))
-		await env.$fs.writeFile("./de.json", JSON.stringify({ test: "Hallo {{name}} welt" }))
+		await env.$fs.writeFile("./en.json", JSON.stringify({ test: "Hello world" }))
+		await env.$fs.writeFile("./de.json", JSON.stringify({ test: "Hallo welt" }))
 		const options: PluginOptions = {
 			pathPattern: "./{language}.json",
 		}
@@ -146,6 +147,21 @@ describe("loadMessage", () => {
 		const messages = await plugin.loadMessages!({ languageTags })
 		expect(getVariant(messages[0]!, { languageTag: "en" })).toBeTruthy()
 		expect(getVariant(messages[0]!, { languageTag: "de" })).toBeTruthy()
+	})
+})
+
+describe("expression", () => {
+	it("should correctly identify expression", async () => {
+		const env = await createMockEnvironment({})
+		await env.$fs.writeFile("./en.json", JSON.stringify({ test: "Hello {{username}}" }))
+		const options: PluginOptions = {
+			pathPattern: "./{language}.json",
+		}
+		plugin.setup({ options, fs: env.$fs })
+		const languageTags = ["en"]
+		const messages = await plugin.loadMessages!({ languageTags })
+		expect(getVariant(messages[0]!, { languageTag: "en" }).data![0]!.type).toBe("Text")
+		expect(getVariant(messages[0]!, { languageTag: "en" }).data![1]!.type).toBe("Expression")
 	})
 })
 
@@ -253,28 +269,6 @@ describe("loadMessage", () => {
 
 // 	expect(file1).toBe(withNewLine)
 // 	expect(file2).toBe(withoutNewLine)
-// })
-
-// it("should correctly identify placeholders", async () => {
-// 	const enResource = `{
-//     "test": "Hello {{username}}"
-// }`
-
-// 	const env = await mockEnvironment({})
-
-// 	await env.$fs.writeFile("./en.json", enResource)
-
-// 	const x = plugin({ pathPattern: "./{language}.json", variableReferencePattern: ["{{", "}}"] })(
-// 		env,
-// 	)
-// 	const config = await x.config({})
-// 	config.sourceLanguageTag = "en"
-// 	config.languageTags = ["en"]
-// 	const resources = await config.readResources!({
-// 		config: config as InlangConfig,
-// 	})
-// 	expect(resources[0]?.body[0]?.pattern?.elements[0]?.type).toBe("Text")
-// 	expect(resources[0]?.body[0]?.pattern?.elements[1]?.type).toBe("Placeholder")
 // })
 
 // it("should correctly identify placeholders with only no trailing pattern", async () => {
