@@ -71,14 +71,14 @@ const parser = Parsimmon.createLanguage({
 							character: end.column,
 						},
 					},
-				} satisfies MessageReferenceMatch
+				}
 			},
 		)
 	},
 })
 
 // Parse the expression
-export function parse(sourceCode: string): MessageReferenceMatch[] {
+export function parse(sourceCode: string) {
 	try {
 		return parser.entry!.tryParse(sourceCode)
 	} catch {
