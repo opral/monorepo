@@ -1,6 +1,8 @@
 import type { Message, MessageQueryApi } from "@inlang/messages"
 import type { LanguageTag, TranslatedStrings } from "@inlang/language-tag"
+import { TranslatedStrings as TranslatedStringsSchema } from "@inlang/language-tag"
 import type { InlangConfig } from "@inlang/config"
+import { z } from "zod"
 
 export type LintLevel = "error" | "warning"
 
@@ -21,6 +23,16 @@ export type LintRule<
 	defaultLevel: LintLevel
 		setup?: (args: { options: RuleOptions }) => void
 }
+
+export const LintRule = z.object({
+	meta: z.object({
+		id: z.string(),
+		displayName: TranslatedStringsSchema,
+		description: TranslatedStringsSchema,
+	}),
+	defaultLevel: z.union([z.literal("error"), z.literal("warning")]),
+	setup: z.function(z.tuple([]), z.undefined()).optional(),
+})
 
 // TODO: make it a general type for other packages to use
 type JSONSerializable<

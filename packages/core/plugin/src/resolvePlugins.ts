@@ -1,7 +1,8 @@
-import type { ResolvedPlugins, ResolvePluginsFunction } from "./api.js"
-import { PluginError } from "./errors.js"
-import { parsePlugin } from "./parsePlugin.js"
-import { validatePlugins } from "./validatePlugins.js"
+import { Plugin, pluginIdRegex, ResolvePluginsFunction } from "./api.js"
+import { PluginError, PluginFunctionLoadMessagesAlreadyDefinedError, PluginFunctionSaveMessagesAlreadyDefinedError, PluginInvalidIdError, PluginUsesInvalidApiError, PluginUsesReservedNamespaceError } from "./errors.js"
+import { tryCatch } from "@inlang/result"
+
+const whitelistedPlugins = ["inlang.plugin-json", "inlang.plugin-i18next"]
 
 export const resolvePlugins: ResolvePluginsFunction = (args) => {
 	const result: Awaited<ReturnType<ResolvePluginsFunction>> = {
@@ -9,7 +10,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
 			appSpecificApi: {},
-			meta: {} as any,
+			meta: {},
 		},
 		errors: [],
 	}
@@ -24,27 +25,72 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			})
 
 			/**
-			 * -------------- PARSE & VALIDATE PLUGIN --------------
+			 * -------------- RESOLVE PLUGIN --------------
 			 */
 
-			// --- PARSE PLUGIN ---
-			const parsed = parsePlugin({
-				maybeValidPlugin: plugin,
-			})
-
-			if (parsed.error) {
-				result.errors.push(...parsed.error)
-				continue
+			// -- INVALID ID in META --
+			if (new RegExp(pluginIdRegex).test(plugin.meta.id) === false) {
+				result.errors.push(
+					new PluginInvalidIdError(
+						`Plugin ${plugin.meta.id} has an invalid id "${plugin.meta.id}". It must be kebap-case and contain a namespace like project.my-plugin.`,
+						{ plugin: plugin.meta.id },
+					),
+				)
 			}
 
-			// --- VALIDATE PLUGINS ---
-			const validated = validatePlugins({
-				plugins: result,
-				plugin,
-			})
+			// -- USES RESERVED NAMESPACE --
+			if (
+				plugin.meta.id.includes("inlang") &&
+				!whitelistedPlugins.includes(plugin.meta.id)
+			) {
+				result.errors.push(
+					new PluginUsesReservedNamespaceError(
+						`Plugin ${plugin.meta.id} uses reserved namespace 'inlang'.`,
+						{
+							plugin: plugin.meta.id,
+						},
+					),
+				)
+			}
 
-			if (validated.errors) {
-				result.errors.push(...validated.errors)
+			// -- USES UNAVAILABLE API / WILDCARD --
+			const parsed = tryCatch(() => Plugin.parse(plugin))
+
+			if (parsed.error) {
+				result.errors.push(
+					new PluginUsesInvalidApiError(`Plugin ${plugin.meta.id} uses invalid API.`, {
+						plugin: plugin.meta.id,
+						cause: parsed.error as Error,
+					}),
+				)
+			}
+
+			// -- ALREADY DEFINED LOADMESSAGES / SAVEMESSAGES --
+			if (
+				typeof plugin.loadMessages === "function" &&
+				result.data.loadMessages !== undefined
+			) {
+				result.errors.push(
+					new PluginFunctionLoadMessagesAlreadyDefinedError(
+						`Plugin ${plugin.meta.displayName} defines the loadMessages function, but it was already defined by another plugin.`,
+						{ plugin: plugin.meta.id },
+					),
+				)
+			}
+			
+			if (
+				typeof plugin.saveMessages === "function" &&
+				result.data.saveMessages !== undefined
+			) {
+				result.errors.push(
+					new PluginFunctionSaveMessagesAlreadyDefinedError(
+						`Plugin ${plugin.meta.displayName} defines the saveMessages function, but it was already defined by another plugin.`,
+						{ plugin: plugin.meta.id },
+					),
+				)
+			}
+
+			if (result.errors.length > 0) {
 				continue
 			}
 
@@ -61,10 +107,13 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 				result.data.saveMessages = async (args: any) => await plugin.saveMessages!(args)
 			}
 
-			// result.data.plugins = {
-			// 	...result.data.plugins,
-			// 	[pluginId]: plugin,
-			// }
+			result.data.meta = {
+				...result.data.meta,
+				[pluginId]: {
+					...plugin.meta,
+					module: args.module,
+				},
+			}
 		} catch (e) {
 			/**
 			 * -------------- BEGIN ERROR HANDLING --------------

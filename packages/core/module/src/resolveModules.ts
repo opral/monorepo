@@ -3,7 +3,9 @@ import { ModuleError, ModuleImportError } from "./errors.js"
 import { tryCatch } from "@inlang/result"
 import type { InlangModule } from "@inlang/module"
 import type { LintRule } from "@inlang/lint"
-import { resolvePlugins, type Plugin } from "@inlang/plugin"
+import { LintRuleSchema } from "@inlang/lint"
+import { ResolvePluginsFunction, resolvePlugins, type Plugin } from "@inlang/plugin"
+import extend from "just-extend"
 
 /**
  * Resolves plugins from the config.
@@ -36,48 +38,43 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 					}),
 				)
 			}
-
 			const inlangModule = importedModule.data.default as InlangModule
 
-			// --- GET PLUGIN & LINT RULES ---
+			// --- RESOLVE PLUGINS ---
 			const plugins = inlangModule.default.plugins as Plugin[]
-			const lintRules = inlangModule.default.lintRules as LintRule[]
-
 			const resolvedPlugins = await resolvePlugins({
+				module,
 				plugins,
 				pluginSettings,
 				config: args.config,
 				env: args.env,
 			})
 
+			// --- PARSE LINT RULES ---
+			const lintRules = inlangModule.default.lintRules as LintRule[]
+			const parsedLintRules = lintRules.map((rule) => {
+				const parsed = tryCatch(() => LintRuleSchema.parse(rule))
+				if (parsed.error) {
+					result.errors.push(
+						new ModuleError(
+							`Couldn't parse lint rule "${rule.meta.id}" from module "${module}"`,
+							{
+								module,
+								cause: parsed.error as Error,
+							},
+						),
+					)
+					return
+				}
+				return parsed.data
+			})
+
 			/**
 			 * -------------- BEGIN ADDING TO RESULT --------------
 			 */
+			result.data.plugins = extend(result.data.plugins, resolvedPlugins) as Awaited<ReturnType<ResolvePluginsFunction>>
+			result.data.lintRules = extend(result.data.lintRules, parsedLintRules) as LintRule[]
 
-			// TODO: use deepmerge algorith e.g. `just-extend`
-			// result.data.plugins = extend(result.data.plugins, resolvedPlugins)
-
-			result.data.plugins = {
-				errors: {
-					...result.data.plugins.errors,
-					...resolvedPlugins.errors,
-				},
-				data: {
-					...result.data.plugins.data,
-					...resolvedPlugins.data,
-					meta: {
-						...result.data.plugins.data.meta,
-						...resolvedPlugins.data.meta,
-					}
-				}
-			}
-
-			// TODO: validate `lintRules`
-
-			result.data.lintRules = {
-				...result.data.lintRules,
-				...lintRules,
-			}
 		} catch (e) {
 			/**
 			 * -------------- BEGIN ERROR HANDLING --------------
