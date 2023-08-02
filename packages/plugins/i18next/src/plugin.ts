@@ -125,26 +125,16 @@ async function loadMessages(args: {
 	for (const languageTag of args.languageTags) {
 		if (typeof args.options.pathPattern !== "string") {
 			for (const [prefix, path] of Object.entries(args.options.pathPattern)) {
-				const messagesFromFile = await getFileToParse(
-					path,
-					NESTED[path.replace("{languageTag}", languageTag)] ?? defaultNesting(),
-					languageTag,
-					args.fs,
-				)
+				const messagesFromFile = await getFileToParse(path, languageTag, args.fs)
 				for (const [key, value] of Object.entries(messagesFromFile)) {
-					const prefixedKey = prefix + ":" + key
+					const prefixedKey = prefix + ":" + replaceAll(key, "u002E", ".")
 					addVariantToMessages(messages, prefixedKey, languageTag, value)
 				}
 			}
 		} else {
-			const messagesFromFile = await getFileToParse(
-				args.options.pathPattern,
-				NESTED[args.options.pathPattern.replace("{languageTag}", languageTag)] ?? defaultNesting(),
-				languageTag,
-				args.fs,
-			)
+			const messagesFromFile = await getFileToParse(args.options.pathPattern, languageTag, args.fs)
 			for (const [key, value] of Object.entries(messagesFromFile)) {
-				addVariantToMessages(messages, key, languageTag, value)
+				addVariantToMessages(messages, replaceAll(key, "u002E", "."), languageTag, value)
 			}
 		}
 	}
@@ -161,7 +151,6 @@ async function loadMessages(args: {
  */
 async function getFileToParse(
 	path: string,
-	isNested: boolean,
 	languageTag: string,
 	fs: InlangEnvironment["$fs"],
 ): Promise<Record<string, string>> {
@@ -173,8 +162,7 @@ async function getFileToParse(
 		SPACING[pathWithLanguage] = detectJsonSpacing(file as string)
 		NESTED[pathWithLanguage] = detectIsNested(file as string)
 		FILE_HAS_NEW_LINE[pathWithLanguage] = (file as string).endsWith("\n")
-
-		const flattenedMessages = isNested
+		const flattenedMessages = NESTED[pathWithLanguage]
 			? flatten(JSON.parse(file as string), {
 					transformKey: function (key) {
 						//replace dots in keys with unicode
@@ -246,7 +234,7 @@ function parsePattern(
 ): Variant["pattern"] {
 	// dependent on the variableReferencePattern, different regex
 	// expressions are used for matching
-	const placeholder = variableReferencePattern![1]
+	const expression = variableReferencePattern![1]
 		? new RegExp(
 				`(\\${variableReferencePattern![0]}[^\\${variableReferencePattern![1]}]+\\${
 					variableReferencePattern![1]
@@ -255,10 +243,10 @@ function parsePattern(
 		  )
 		: new RegExp(`(${variableReferencePattern}\\w+)`, "g")
 	const pattern: Variant["pattern"] = text
-		.split(placeholder)
+		.split(expression)
 		.filter((element) => element !== "")
 		.map((element) => {
-			if (placeholder.test(element)) {
+			if (expression.test(element)) {
 				return {
 					type: "Expression",
 					body: {

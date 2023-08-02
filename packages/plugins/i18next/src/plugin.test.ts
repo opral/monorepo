@@ -492,6 +492,149 @@ describe("formatting", () => {
 
 		expect(messages).toStrictEqual(reference)
 	})
+
+	it("should escape `.` in nested json structures", async () => {
+		const enResource = `{
+	"a.": {
+		"b": "test"
+	},
+	"c.": "test"
+}`
+
+		const env = await createMockEnvironment({})
+
+		await env.$fs.mkdir("./en")
+		await env.$fs.writeFile("./en/common.json", enResource)
+
+		const options: PluginOptions = {
+			pathPattern: {
+				common: "./{languageTag}/common.json",
+			},
+		}
+		plugin.setup({ options, fs: env.$fs })
+		const languageTags = ["en"]
+		const messages = await plugin.loadMessages!({
+			languageTags,
+		})
+
+		const reference: Message[] = [
+			{
+				id: "common:a..b",
+				expressions: [],
+				selectors: [],
+				body: {
+					en: [
+						{
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "test",
+								},
+							],
+						},
+					],
+				},
+			},
+			{
+				id: "common:c.",
+				expressions: [],
+				selectors: [],
+				body: {
+					en: [
+						{
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "test",
+								},
+							],
+						},
+					],
+				},
+			},
+		]
+
+		expect(messages).toStrictEqual(reference)
+		await plugin.saveMessages!({
+			messages,
+		})
+
+		const file = await env.$fs.readFile("./en/common.json", { encoding: "utf-8" })
+		const json = JSON.parse(file as string)
+		expect(json["a."].b).toStrictEqual("test")
+		expect(json["c."]).toStrictEqual("test")
+	})
+
+	it("should correctly detect the nesting in a file and determine a default based on the majority for newly added resources", async () => {
+		const withNesting = JSON.stringify(
+			{
+				test: {
+					test: "test",
+				},
+			},
+			undefined,
+			2,
+		)
+
+		const withoutNesting = JSON.stringify(
+			{
+				"test.test": "test",
+			},
+			undefined,
+			4,
+		)
+
+		const env = await createMockEnvironment({})
+
+		await env.$fs.writeFile("./en.json", withNesting)
+		await env.$fs.writeFile("./fr.json", withNesting)
+		await env.$fs.writeFile("./de.json", withoutNesting)
+
+		const options: PluginOptions = {
+			pathPattern: "./{languageTag}.json",
+		}
+		plugin.setup({ options, fs: env.$fs })
+		const languageTags = ["en", "de", "fr"]
+
+		const messages = await plugin.loadMessages!({
+			languageTags,
+		})
+
+		messages.push({
+			id: "test.test",
+			expressions: [],
+			selectors: [],
+			body: {
+				es: [
+					{
+						match: {},
+						pattern: [
+							{
+								type: "Text",
+								value: "test",
+							},
+						],
+					},
+				],
+			},
+		})
+
+		await plugin.saveMessages!({
+			messages,
+		})
+
+		const file1 = await env.$fs.readFile("./en.json", { encoding: "utf-8" })
+		const file2 = await env.$fs.readFile("./fr.json", { encoding: "utf-8" })
+		const file3 = await env.$fs.readFile("./de.json", { encoding: "utf-8" })
+		const file4 = await env.$fs.readFile("./es.json", { encoding: "utf-8" })
+
+		expect(file1).toBe(withNesting)
+		expect(file2).toBe(withNesting)
+		expect(file3).toBe(withoutNesting)
+		expect(file4).toBe(withNesting)
+	})
 })
 
 describe("roundTrip", () => {
@@ -589,211 +732,6 @@ describe("roundTrip", () => {
 	})
 })
 
-// it("should escape `.` in nested json structures", async () => {
-// 	const enResource = `{
-// 	"a.": {
-// 		"b": "test"
-// 	},
-// 	"c.": "test"
-// }`
-
-// 	const env = await mockEnvironment({})
-
-// 	await env.$fs.mkdir("./en")
-// 	await env.$fs.writeFile("./en/common.json", enResource)
-
-// 	const x = plugin({
-// 		pathPattern: { common: "./{languageTag}/common.json" },
-// 	})(env)
-// 	const config = await x.config({})
-// 	config.sourceLanguageTag = "en"
-// 	config.languageTags = ["en"]
-// 	const resources = await config.readResources!({
-// 		config: config as InlangConfig,
-// 	})
-
-// 	const reference = [
-// 		{
-// 			type: "Resource",
-// 			languageTag: {
-// 				type: "LanguageTag",
-// 				name: "en",
-// 			},
-// 			body: [
-// 				{
-// 					type: "Message",
-// 					id: {
-// 						type: "Identifier",
-// 						name: "common:a..b",
-// 					},
-// 					pattern: {
-// 						type: "Pattern",
-// 						elements: [
-// 							{
-// 								type: "Text",
-// 								value: "test",
-// 							},
-// 						],
-// 					},
-// 				},
-// 				{
-// 					type: "Message",
-// 					id: {
-// 						type: "Identifier",
-// 						name: "common:c.",
-// 					},
-// 					pattern: {
-// 						type: "Pattern",
-// 						elements: [
-// 							{
-// 								type: "Text",
-// 								value: "test",
-// 							},
-// 						],
-// 					},
-// 				},
-// 			],
-// 		},
-// 	]
-
-// 	expect(resources).toStrictEqual(reference)
-
-// 	await config.writeResources!({
-// 		resources: resources,
-// 		config: config as InlangConfig,
-// 	})
-
-// 	const file = await env.$fs.readFile("./en/common.json", { encoding: "utf-8" })
-// 	const json = JSON.parse(file as string)
-// 	expect(json["a."].b).toStrictEqual("test")
-// 	expect(json["c."]).toStrictEqual("test")
-// })
-
-// it("should correctly detect the nesting in a file and determine a default based on the majority for newly added resources", async () => {
-// 	const withNesting = JSON.stringify(
-// 		{
-// 			test: {
-// 				test: "test",
-// 			},
-// 		},
-// 		undefined,
-// 		2,
-// 	)
-
-// 	const withoutNesting = JSON.stringify(
-// 		{
-// 			"test.test": "test",
-// 		},
-// 		undefined,
-// 		4,
-// 	)
-
-// 	const env = await mockEnvironment({})
-
-// 	await env.$fs.writeFile("./en.json", withNesting)
-// 	await env.$fs.writeFile("./fr.json", withNesting)
-// 	await env.$fs.writeFile("./de.json", withoutNesting)
-
-// 	const x = plugin({ pathPattern: "./{languageTag}.json" })(env)
-// 	const config = await x.config({})
-// 	config.sourceLanguageTag = "en"
-// 	config.languageTags = ["en", "de", "fr"]
-
-// 	const resources = await config.readResources!({
-// 		config: config as InlangConfig,
-// 	})
-
-// 	resources.push({
-// 		type: "Resource",
-// 		languageTag: {
-// 			type: "LanguageTag",
-// 			name: "es",
-// 		},
-// 		body: [
-// 			{
-// 				type: "Message",
-// 				id: {
-// 					type: "Identifier",
-// 					name: "test.test",
-// 				},
-// 				pattern: {
-// 					type: "Pattern",
-// 					elements: [
-// 						{
-// 							type: "Text",
-// 							value: "test",
-// 						},
-// 					],
-// 				},
-// 			},
-// 		],
-// 	})
-
-// 	await config.writeResources!({
-// 		config: config as InlangConfig,
-// 		resources,
-// 	})
-
-// 	const file1 = await env.$fs.readFile("./en.json", { encoding: "utf-8" })
-// 	const file2 = await env.$fs.readFile("./fr.json", { encoding: "utf-8" })
-// 	const file3 = await env.$fs.readFile("./de.json", { encoding: "utf-8" })
-// 	const file4 = await env.$fs.readFile("./es.json", { encoding: "utf-8" })
-
-// 	expect(file1).toBe(withNesting)
-// 	expect(file2).toBe(withNesting)
-// 	expect(file3).toBe(withoutNesting)
-// 	expect(file4).toBe(withNesting)
-// })
-
-// it("should throw if element type is not known", async () => {
-// 	const resources: ast.Resource[] = [
-// 		{
-// 			type: "Resource",
-// 			languageTag: {
-// 				type: "LanguageTag",
-// 				name: "en",
-// 			},
-// 			body: [
-// 				{
-// 					type: "Message",
-// 					id: {
-// 						type: "Identifier",
-// 						name: "test",
-// 					},
-// 					pattern: {
-// 						type: "Pattern",
-// 						elements: [
-// 							{
-// 								// @ts-ignore
-// 								type: "FalseType",
-// 								value: "test",
-// 							},
-// 						],
-// 					},
-// 				},
-// 			],
-// 		},
-// 	]
-// 	const env = await mockEnvironment({})
-// 	await env.$fs.writeFile("./en.json", "{}")
-
-// 	const x = plugin({
-// 		pathPattern: { common: "./{languageTag}.json" },
-// 	})(env)
-// 	const config = await x.config({})
-// 	config.sourceLanguageTag = "en"
-// 	config.languageTags = ["en"]
-
-// 	try {
-// 		await config.writeResources!({
-// 			resources: resources,
-// 			config: config as InlangConfig,
-// 		})
-// 	} catch (e) {
-// 		expect((e as Error).message).toContain("Unknown message pattern element of type")
-// 	}
-// })
-
 it("should successfully do a roundtrip with complex content", async () => {
 	const complexContent = JSON.stringify(
 		{
@@ -813,8 +751,8 @@ it("should successfully do a roundtrip with complex content", async () => {
 	await env.$fs.writeFile("./en.json", complexContent)
 	const languageTags = ["en"]
 	const options: PluginOptions = {
-		pathPattern: { 
-			common: "./{languageTag}.json" 
+		pathPattern: {
+			common: "./{languageTag}.json",
 		},
 	}
 	plugin.setup({ options, fs: env.$fs })
