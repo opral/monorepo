@@ -1,4 +1,4 @@
-import type { NodeishFilesystem, NodeishStats } from "../interface.js"
+import type { NodeishFilesystem, NodeishStats } from "../NodeishFilesystemApi.js"
 import { FilesystemError } from "../errors/FilesystemError.js"
 
 type Inode = Uint8Array | Set<string>
@@ -50,9 +50,12 @@ export function createMemoryFs(): NodeishFilesystem {
 			fsMap.set(path, data)
 		},
 
+		// @ts-expect-error
+		//   Typescript can't derive that the return type is either
+		//   a string or a Uint8Array based on the options.
 		readFile: async function (
 			path: Parameters<NodeishFilesystem["readFile"]>[0],
-			options: Parameters<NodeishFilesystem["readFile"]>[1],
+			options?: Parameters<NodeishFilesystem["readFile"]>[1],
 		) {
 			const decoder = new TextDecoder()
 

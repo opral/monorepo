@@ -1,5 +1,5 @@
 import { test, expect, afterAll, describe } from "vitest"
-import type { NodeishFilesystem } from "../interface.js"
+import type { NodeishFilesystem } from "../NodeishFilesystemApi.js"
 import { createMemoryFs } from "./memoryFs.js"
 
 describe("node fs", async () => {
