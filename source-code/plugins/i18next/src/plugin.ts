@@ -1,15 +1,7 @@
 import type { Message, Variant, LanguageTag, InlangEnvironment, Plugin } from "@inlang/plugin"
-import { throwIfInvalidOptions } from "./options.js"
+import { throwIfInvalidOptions, type PluginOptions } from "./options.js"
 import { detectJsonSpacing, detectIsNested, replaceAll } from "./utilities.js"
 import { flatten } from "flat"
-
-export type PluginOptions = {
-	pathPattern: string | Record<string, string>
-	variableReferencePattern?: [string, string]
-	ignore?: string[]
-}
-
-// ----------------------------------------------------------------------------
 
 /**
  * The spacing of the JSON files in this repository.
@@ -35,6 +27,16 @@ const NESTED: Record<string, ReturnType<typeof detectIsNested>> = {}
  * { "/de.json" = false }
  */
 const FILE_HAS_NEW_LINE: Record<string, boolean> = {}
+
+/**
+ * pluginOptions that are saved in plugin State (available for plugin functions)
+ */
+let pluginOptions: PluginOptions | undefined = undefined
+
+/**
+ * fileSystem that is saved in plugin State (available for plugin functions)
+ */
+let pluginFs: InlangEnvironment["$fs"] | undefined = undefined
 
 /**
  * Defines the default spacing for JSON files.
@@ -65,15 +67,6 @@ function defaultNesting() {
 			.pop() ?? false // if no default has been found -> false -> flatten
 	)
 }
-
-// const pluginOptions: PluginSettingsWithDefaults = {
-// 	variableReferencePattern: ["{{", "}}"],
-// 	ignore: [], // ignore no files by default
-// 	...options,
-// }
-
-let pluginOptions: PluginOptions | undefined = undefined
-let pluginFs: InlangEnvironment["$fs"] | undefined = undefined
 
 export const plugin: Plugin<PluginOptions> = {
 	meta: {

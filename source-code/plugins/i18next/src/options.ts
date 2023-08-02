@@ -1,4 +1,8 @@
-import type { PluginOptions } from "./plugin.js"
+// pluginOptions for i18next plugin
+export type PluginOptions = {
+	pathPattern: string | Record<string, string>
+	variableReferencePattern?: [string, string] //default is ["{{", "}}"]
+}
 
 /**
  * Throws an error if the options are invalid.
