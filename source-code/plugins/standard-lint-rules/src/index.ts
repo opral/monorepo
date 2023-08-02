@@ -4,6 +4,5 @@ import { messageWithoutSourceRule } from "./rules/messageWithoutSource/messageWi
 import { missingMessageRule } from "./rules/missingMessage/missingMessage.js"
 
 export default {
-	plugins: [],
 	lintRules: [identicalPatternRule, messageWithoutSourceRule, missingMessageRule],
 } satisfies InlangModule['default']
