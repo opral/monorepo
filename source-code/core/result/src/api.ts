@@ -2,8 +2,6 @@ export type SuccessResult<Data> = { data: Data; error?: never }
 
 export type ErrorResult<Error> = { data?: never; error: Error }
 
-export type SuccessWithErrorResult<Data, Error> = { data: Data; error: Error }
-
 /**
  * A result represents an either success or an error, but never both.
  *
@@ -26,4 +24,3 @@ export type SuccessWithErrorResult<Data, Error> = { data: Data; error: Error }
 export type Result<Data, Error> =
 	| SuccessResult<Data>
 	| ErrorResult<Error>
-	| SuccessWithErrorResult<Data, Error>

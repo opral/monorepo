@@ -4,7 +4,9 @@ import type { InlangConfig } from "@inlang/config"
 
 export type LintLevel = "error" | "warning"
 
-export type LintRule = {
+export type LintRule<
+	RuleOptions extends JSONSerializable<unknown> = Record<string, string> | unknown
+> = {
 	meta: {
 		id: `${string}.${string}`
 		displayName: TranslatedStrings
@@ -17,6 +19,7 @@ export type LintRule = {
 		 */
 	}
 	defaultLevel: LintLevel
+		setup?: (args: { options: RuleOptions }) => void
 }
 
 // TODO: make it a general type for other packages to use
@@ -30,15 +33,7 @@ type MaybePromise<T> = T | Promise<T>
 export type MessageLintRule<
 	RuleOptions extends JSONSerializable<unknown> = Record<string, string> | unknown
 > =
-	LintRule & {
-		setup: (args: { options: RuleOptions }) => Pick<InitializedMessageLintRule, 'message'>
-	}
-
-export type InitializedMessageLintRule =
-	Pick<LintRule, 'meta'> & {
-		module: string
-		level: LintLevel
-	} & {
+	LintRule<RuleOptions> & {
 		message: (args: {
 			message: Message
 			query: Pick<MessageQueryApi, "get">
@@ -46,7 +41,6 @@ export type InitializedMessageLintRule =
 			report: ReportMessageLint
 		}) => MaybePromise<void>
 	}
-
 
 export type ReportMessageLint = (args: {
 	messageId: Message["id"]

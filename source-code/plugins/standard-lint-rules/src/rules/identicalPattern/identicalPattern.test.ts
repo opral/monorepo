@@ -4,7 +4,7 @@ import { identicalPatternRule } from "./identicalPattern.js"
 
 test("should report if identical message found in another language", async () => {
 	// TODO setup
-	const l = identicalPatternRule.setup({ options: { ignore: [] } })
+	const l = identicalPatternRule.setup!({ options: { ignore: [] } })
 
 	const { data: lintedResources, error: errors } = await lintMessage({})
 	expect(errors).toHaveLength(0)

@@ -12,5 +12,6 @@ export async function createInlang(args: {
 	const configJson = JSON.parse(configFile)
 	const config: InlangConfig = InlangConfig.passthrough().parse(configJson)
 	const resolvedPluginApi = await resolveModules({ config, env: args.env })
+
 	return {} as any
 }
