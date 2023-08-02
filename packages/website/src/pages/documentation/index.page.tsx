@@ -45,7 +45,7 @@ export function Page(props: PageProps) {
 							const fileSource = files[section]?.[index] || undefined
 
 							const gitHubLink =
-								"https://github.com/inlang/inlang/blob/main/documentation" + "/" + fileSource
+								"https://github.com/inlang/inlang/edit/main/documentation" + "/" + fileSource
 
 							setEditLink(gitHubLink)
 						}
@@ -167,7 +167,7 @@ function NavbarCommon(props: {
 	}
 
 	const isSelected = (href: string) => {
-		if (href === currentPageContext.urlParsed.pathname) {
+		if (href === currentPageContext.urlParsed.pathname.replace(getLocale(), "")) {
 			return true
 		} else {
 			return false
