@@ -213,6 +213,95 @@ describe("loadMessage", () => {
 		expect(getVariant(messages[0]!, { languageTag: "en" })).toBeTruthy()
 		expect(getVariant(messages[0]!, { languageTag: "de" })).toBeTruthy()
 	})
+
+	it("should not throw an error when load messages with empty namespaces", async () => {
+		const test = JSON.stringify({
+			test: "test",
+		})
+
+		const env = await createMockEnvironment({})
+		await env.$fs.mkdir("./en")
+		await env.$fs.mkdir("./de")
+		await env.$fs.writeFile("./en/common.json", test)
+		await env.$fs.writeFile("./en/vital.json", test)
+		await env.$fs.writeFile("./de/common.json", test)
+		const options: PluginOptions = {
+			pathPattern: {
+				common: "./{languageTag}/common.json",
+				vital: "./{languageTag}/vital.json",
+			},
+		}
+		plugin.setup({ options, fs: env.$fs })
+		const languageTags = ["en", "de"]
+
+		let isThrown = false
+
+		try {
+			await plugin.loadMessages!({
+				languageTags,
+			})
+		} catch (e) {
+			isThrown = true
+		}
+
+		expect(isThrown).toBe(false)
+	})
+
+	it("should get the correct languages, when single namespace is defined as a pathPattern string 'pathPattern: `public/locales/{languageTag}/translation.json`'", async () => {
+		const test = JSON.stringify({
+			test: "test",
+		})
+
+		const env = await createMockEnvironment({})
+		await env.$fs.mkdir("./en")
+		await env.$fs.mkdir("./de")
+		await env.$fs.writeFile("./en/common.json", test)
+		await env.$fs.writeFile("./de/common.json", test)
+
+		const options: PluginOptions = {
+			pathPattern: {
+				pathPattern: "./{languageTag}/common.json",
+			},
+		}
+		plugin.setup({ options, fs: env.$fs })
+		const languageTags = ["en", "de"]
+
+		let isThrown = false
+
+		try {
+			await plugin.loadMessages!({
+				languageTags,
+			})
+		} catch (e) {
+			isThrown = true
+		}
+
+		expect(isThrown).toBe(false)
+	})
+
+	it("should not throw an error when the path to the resources is not present", async () => {
+		const env = await createMockEnvironment({})
+
+		const options: PluginOptions = {
+			pathPattern: {
+				pathPattern: ".lang/{languageTag}.json",
+			},
+		}
+		plugin.setup({ options, fs: env.$fs })
+		const languageTags = ["en"]
+
+		let isThrown = false
+
+		try {
+			await plugin.loadMessages!({
+				languageTags,
+			})
+		} catch (e) {
+			isThrown = true
+		}
+
+		expect(isThrown).toBe(false)
+	})
 })
 
 describe("saveMessage", () => {
@@ -730,154 +819,53 @@ describe("roundTrip", () => {
 
 		expect(messages).toStrictEqual(reference)
 	})
-})
 
-it("should successfully do a roundtrip with complex content", async () => {
-	const complexContent = JSON.stringify(
-		{
-			"//multiLineString": {
-				multiline: "This is a\nmulti-line\nstring.",
+	it("should successfully do a roundtrip with complex content", async () => {
+		const complexContent = JSON.stringify(
+			{
+				"//multiLineString": {
+					multiline: "This is a\nmulti-line\nstring.",
+				},
+				unicodeCharacters: {
+					emoji: "\uD83D\uDE00",
+					currency: "€",
+				},
+				test: 'Single "quote" test',
 			},
-			unicodeCharacters: {
-				emoji: "\uD83D\uDE00",
-				currency: "€",
+			undefined,
+			4,
+		)
+		const env = await createMockEnvironment({})
+		await env.$fs.writeFile("./en.json", complexContent)
+		const languageTags = ["en"]
+		const options: PluginOptions = {
+			pathPattern: {
+				common: "./{languageTag}.json",
 			},
-			test: 'Single "quote" test',
-		},
-		undefined,
-		4,
-	)
-	const env = await createMockEnvironment({})
-	await env.$fs.writeFile("./en.json", complexContent)
-	const languageTags = ["en"]
-	const options: PluginOptions = {
-		pathPattern: {
-			common: "./{languageTag}.json",
-		},
-	}
-	plugin.setup({ options, fs: env.$fs })
-	const messages = await plugin.loadMessages!({ languageTags })
-	plugin.saveMessages!({ messages })
-	const newMessage = await plugin.loadMessages!({ languageTags })
-	expect(newMessage).toStrictEqual(messages)
+		}
+		plugin.setup({ options, fs: env.$fs })
+		const messages = await plugin.loadMessages!({ languageTags })
+		plugin.saveMessages!({ messages })
+		const newMessage = await plugin.loadMessages!({ languageTags })
+		expect(newMessage).toStrictEqual(messages)
+	})
+
+	it("should successfully do a roundtrip with empty message value", async () => {
+		const test = JSON.stringify({
+			test: "",
+		})
+		const env = await createMockEnvironment({})
+		await env.$fs.writeFile("./en.json", test)
+		const languageTags = ["en"]
+		const options: PluginOptions = {
+			pathPattern: {
+				common: "./{languageTag}.json",
+			},
+		}
+		plugin.setup({ options, fs: env.$fs })
+		const messages = await plugin.loadMessages!({ languageTags })
+		plugin.saveMessages!({ messages })
+		const newMessage = await plugin.loadMessages!({ languageTags })
+		expect(newMessage).toStrictEqual(messages)
+	})
 })
-
-// it("should add default namespace if required by pathPattern", async () => {
-// 	const resources: ast.Resource[] = [
-// 		{
-// 			type: "Resource",
-// 			languageTag: {
-// 				type: "LanguageTag",
-// 				name: "en",
-// 			},
-// 			body: [
-// 				{
-// 					type: "Message",
-// 					id: {
-// 						type: "Identifier",
-// 						name: "test",
-// 					},
-// 					pattern: {
-// 						type: "Pattern",
-// 						elements: [
-// 							{
-// 								type: "Text",
-// 								value: "test",
-// 							},
-// 						],
-// 					},
-// 				},
-// 			],
-// 		},
-// 	]
-// 	const env = await mockEnvironment({})
-// 	await env.$fs.writeFile("./en.json", "{}")
-
-// 	const x = plugin({
-// 		pathPattern: { common: "./{languageTag}.json" },
-// 	})(env)
-// 	const config = await x.config({})
-// 	config.sourceLanguageTag = "en"
-// 	config.languageTags = ["en"]
-
-// 	await config.writeResources!({
-// 		resources: resources,
-// 		config: config as InlangConfig,
-// 	})
-
-// 	const newResources = await config.readResources!({
-// 		config: config as InlangConfig,
-// 	})
-
-// 	expect(newResources[0]?.body[0]?.id.name).toStrictEqual("common:test")
-// })
-
-// it("should not throw an error when read Resources with empty namespaces", async () => {
-// 	const test = JSON.stringify({
-// 		test: "test",
-// 	})
-
-// 	const env = await mockEnvironment({})
-// 	await env.$fs.mkdir("./en")
-// 	await env.$fs.mkdir("./de")
-// 	await env.$fs.writeFile("./en/common.json", test)
-// 	await env.$fs.writeFile("./en/vital.json", test)
-// 	await env.$fs.writeFile("./de/common.json", test)
-
-// 	const x = plugin({
-// 		pathPattern: {
-// 			common: "./{languageTag}/common.json",
-// 			vital: "./{languageTag}/vital.json",
-// 		},
-// 	})(env)
-// 	const config = await x.config({})
-// 	config.sourceLanguageTag = "en"
-
-// 	expect(config.languageTags).toStrictEqual(["en", "de"])
-
-// 	let isThrown = false
-
-// 	try {
-// 		await config.readResources!({
-// 			config: config as InlangConfig,
-// 		})
-// 	} catch (e) {
-// 		isThrown = true
-// 	}
-
-// 	expect(isThrown).toBe(false)
-// })
-
-// it("should get the correct languages, when single namespace is defined as a pathPattern string 'pathPattern: `public/locales/{languageTag}/translation.json`'", async () => {
-// 	const test = JSON.stringify({
-// 		test: "test",
-// 	})
-
-// 	const env = await mockEnvironment({})
-// 	await env.$fs.mkdir("./en")
-// 	await env.$fs.mkdir("./de")
-// 	await env.$fs.writeFile("./en/common.json", test)
-// 	await env.$fs.writeFile("./de/common.json", test)
-
-// 	const x = plugin({
-// 		pathPattern: "./{languageTag}/common.json",
-// 	})(env)
-// 	const config = await x.config({})
-// 	config.sourceLanguageTag = "en"
-
-// 	expect(config.languageTags).toStrictEqual(["en", "de"])
-
-// 	let isThrown = false
-
-// 	try {
-// 		await config.readResources!({
-// 			config: config as InlangConfig,
-// 		})
-// 	} catch (e) {
-// 		isThrown = true
-// 	}
-
-// 	expect(isThrown).toBe(false)
-// })
-
-// // TODO test empty string
