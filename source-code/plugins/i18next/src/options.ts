@@ -1,7 +1,7 @@
 // pluginOptions for i18next plugin
 export type PluginOptions = {
 	pathPattern: string | Record<string, string>
-	variableReferencePattern?: [string, string] //default is ["{{", "}}"]
+	variableReferencePattern?: string[] //default is ["{{", "}}"]
 }
 
 /**

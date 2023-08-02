@@ -246,6 +246,20 @@ describe("expression", () => {
 		expect(getVariant(messages[0]!, { languageTag: "en" }).data![0]!.type).toBe("Text")
 		expect(getVariant(messages[0]!, { languageTag: "en" }).data![1]!.type).toBe("Expression")
 	})
+	
+	it("should correctly apply the variableReferencePattern", async () => {
+		const env = await createMockEnvironment({})
+		await env.$fs.writeFile("./en.json", JSON.stringify({ test: "Hello @username" }))
+		const options: PluginOptions = {
+			pathPattern: "./{language}.json",
+			variableReferencePattern: ["@"],
+		}
+		plugin.setup({ options, fs: env.$fs })
+		const languageTags = ["en"]
+		const messages = await plugin.loadMessages!({ languageTags })
+		expect(getVariant(messages[0]!, { languageTag: "en" }).data![0]!.type).toBe("Text")
+		expect(getVariant(messages[0]!, { languageTag: "en" }).data![1]!.type).toBe("Expression")
+	})
 })
 
 // it("should preserve the spacing resources and determine a default based on the majority for newly added resources", async () => {
