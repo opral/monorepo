@@ -158,8 +158,8 @@ describe("loadMessage", () => {
 		const languageTags = ["en"]
 		const options: PluginOptions = {
 			pathPattern: {
-				"common": "./{languageTag}/common.json"
-			}
+				common: "./{languageTag}/common.json",
+			},
 		}
 		const messages = await plugin.loadMessages!({ languageTags })
 		plugin.setup({ options, fs: env.$fs })
@@ -175,8 +175,8 @@ describe("loadMessage", () => {
 		const languageTags = ["en"]
 		const options: PluginOptions = {
 			pathPattern: {
-				"common": "./{languageTag}/common.json",
-			}
+				common: "./{languageTag}/common.json",
+			},
 		}
 		plugin.setup({ options, fs: env.$fs })
 		expect(plugin.loadMessages!({ languageTags })).resolves.toBeTruthy()
@@ -188,8 +188,8 @@ describe("loadMessage", () => {
 		await env.$fs.writeFile("./en/common.json", JSON.stringify({ test: "Hello world" }))
 		const options: PluginOptions = {
 			pathPattern: {
-				"common": "./{languageTag}/common.json",
-			}
+				common: "./{languageTag}/common.json",
+			},
 		}
 		plugin.setup({ options, fs: env.$fs })
 		const languageTags = ["en", "de"]
@@ -204,8 +204,8 @@ describe("loadMessage", () => {
 		await env.$fs.writeFile("./de/common.json", JSON.stringify({ test: "Hallo welt" }))
 		const options: PluginOptions = {
 			pathPattern: {
-				"common": "./{languageTag}/common.json"
-			}
+				common: "./{languageTag}/common.json",
+			},
 		}
 		plugin.setup({ options, fs: env.$fs })
 		const languageTags = ["en", "de"]
@@ -428,6 +428,70 @@ describe("formatting", () => {
 		expect(file1).toBe(withNewLine)
 		expect(file2).toBe(withoutNewLine)
 	})
+
+	it("should escape `.` in flattened json structures", async () => {
+		const enResource = `{
+    "test.": "test",
+	"test.test": "test"
+}`
+
+		const env = await createMockEnvironment({})
+
+		await env.$fs.mkdir("./en")
+		await env.$fs.writeFile("./en/common.json", enResource)
+
+		const options: PluginOptions = {
+			pathPattern: {
+				common: "./{languageTag}/common.json",
+			},
+		}
+		plugin.setup({ options, fs: env.$fs })
+		const languageTags = ["en"]
+		const messages = await plugin.loadMessages!({
+			languageTags,
+		})
+
+		const reference: Message[] = [
+			{
+				id: "common:test.",
+				expressions: [],
+				selectors: [],
+				body: {
+					en: [
+						{
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "test",
+								},
+							],
+						},
+					],
+				},
+			},
+			{
+				id: "common:test.test",
+				expressions: [],
+				selectors: [],
+				body: {
+					en: [
+						{
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "test",
+								},
+							],
+						},
+					],
+				},
+			},
+		]
+
+		expect(messages).toStrictEqual(reference)
+	})
 })
 
 describe("roundTrip", () => {
@@ -524,146 +588,6 @@ describe("roundTrip", () => {
 		expect(messages).toStrictEqual(reference)
 	})
 })
-
-// it("should add a new languageTag for pathPattern string", async () => {
-// 	const enResource = `{
-//     "test": "test"
-// }`
-
-// 	const env = await mockEnvironment({})
-
-// 	await env.$fs.writeFile("./en.json", enResource)
-
-// 	const x = plugin({ pathPattern: "./{languageTag}.json" })(env)
-// 	const config = await x.config({})
-// 	config.sourceLanguageTag = "en"
-// 	config.languageTags = ["en"]
-// 	const resources = await config.readResources!({
-// 		config: config as InlangConfig,
-// 	})
-// 	resources.push({
-// 		type: "Resource",
-// 		languageTag: {
-// 			type: "LanguageTag",
-// 			name: "de",
-// 		},
-// 		body: [],
-// 	})
-
-// 	await config.writeResources!({
-// 		config: config as InlangConfig,
-// 		resources: resources,
-// 	})
-
-// 	const newFile = (await env.$fs.readFile("./de.json", { encoding: "utf-8" })) as string
-// 	const json = JSON.parse(newFile)
-// 	expect(json).toStrictEqual({})
-// })
-
-// it("should add a new languageTag for pathPattern with namespaces", async () => {
-// 	const enResource = `{
-//     "test": "test"
-// }`
-
-// 	const env = await mockEnvironment({})
-
-// 	await env.$fs.mkdir("./en")
-// 	await env.$fs.writeFile("./en/common.json", enResource)
-
-// 	const x = plugin({
-// 		pathPattern: { common: "./{languageTag}/common.json" },
-// 	})(env)
-// 	const config = await x.config({})
-// 	config.sourceLanguageTag = "en"
-// 	config.languageTags = ["en"]
-// 	const resources = await config.readResources!({
-// 		config: config as InlangConfig,
-// 	})
-// 	resources.push({
-// 		type: "Resource",
-// 		languageTag: {
-// 			type: "LanguageTag",
-// 			name: "de",
-// 		},
-// 		body: [],
-// 	})
-
-// 	await config.writeResources!({
-// 		config: config as InlangConfig,
-// 		resources: resources,
-// 	})
-
-// 	const dir = await env.$fs.readdir("./de")
-// 	expect(dir).toStrictEqual([])
-// })
-
-// it("should escape `.` in flattened json structures", async () => {
-// 	const enResource = `{
-//     "test.": "test",
-// 	"test.test": "test"
-// }`
-
-// 	const env = await mockEnvironment({})
-
-// 	await env.$fs.mkdir("./en")
-// 	await env.$fs.writeFile("./en/common.json", enResource)
-
-// 	const x = plugin({
-// 		pathPattern: { common: "./{languageTag}/common.json" },
-// 	})(env)
-// 	const config = await x.config({})
-// 	config.sourceLanguageTag = "en"
-// 	config.languageTags = ["en"]
-// 	const resources = await config.readResources!({
-// 		config: config as InlangConfig,
-// 	})
-
-// 	const reference = [
-// 		{
-// 			type: "Resource",
-// 			languageTag: {
-// 				type: "LanguageTag",
-// 				name: "en",
-// 			},
-// 			body: [
-// 				{
-// 					type: "Message",
-// 					id: {
-// 						type: "Identifier",
-// 						name: "common:test.",
-// 					},
-// 					pattern: {
-// 						type: "Pattern",
-// 						elements: [
-// 							{
-// 								type: "Text",
-// 								value: "test",
-// 							},
-// 						],
-// 					},
-// 				},
-// 				{
-// 					type: "Message",
-// 					id: {
-// 						type: "Identifier",
-// 						name: "common:test.test",
-// 					},
-// 					pattern: {
-// 						type: "Pattern",
-// 						elements: [
-// 							{
-// 								type: "Text",
-// 								value: "test",
-// 							},
-// 						],
-// 					},
-// 				},
-// 			],
-// 		},
-// 	]
-
-// 	expect(resources).toStrictEqual(reference)
-// })
 
 // it("should escape `.` in nested json structures", async () => {
 // 	const enResource = `{
