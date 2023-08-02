@@ -3,7 +3,7 @@ description: Something is not working as expected in the `@inlang/sdk-js` packag
 title: "[bug] <title>"
 labels:
   - "type: bug"
-  - "type: sdk-js"
+  - "scope: sdk-js"
 assignees:
   - ivanhofer
 body:
