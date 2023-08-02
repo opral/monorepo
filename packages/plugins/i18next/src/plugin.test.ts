@@ -5,7 +5,7 @@ import type { Message, Variant } from "@inlang/plugin"
 import { createMockEnvironment, createVariant, getVariant } from "@inlang/plugin"
 
 describe("option pathPattern", () => {
-	it("should throw if the path pattern does not include the {languageTag} placeholder", async () => {
+	it("should throw if the path pattern does not include the {languageTag} expression", async () => {
 		const env = await createMockEnvironment({})
 		await env.$fs.writeFile("./en.json", "{}")
 		try {
@@ -27,7 +27,7 @@ describe("option pathPattern", () => {
 		}
 	})
 
-	it("should throw if the path pattern with namespaces does not include the {languageTag} placeholder", async () => {
+	it("should throw if the path pattern with namespaces does not include the {languageTag} expression", async () => {
 		const env = await createMockEnvironment({})
 		await env.$fs.writeFile("./en.json", "{}")
 		try {
