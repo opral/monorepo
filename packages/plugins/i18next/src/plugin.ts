@@ -80,7 +80,7 @@ function defaultNesting() {
 // }
 
 let pluginOptions: PluginOptions | undefined = undefined
-let pluginConfig: InlangConfig | undefined = undefined
+const pluginConfig: InlangConfig | undefined = undefined
 let pluginFs: InlangEnvironment["$fs"] | undefined = undefined
 
 export const plugin: Plugin<PluginOptions> = {
@@ -90,13 +90,12 @@ export const plugin: Plugin<PluginOptions> = {
 		description: { en: "i18next plugin for inlang" },
 		keywords: ["i18next", "react", "nextjs"],
 	},
-	setup: ({ options, config, $fs }) => {
+	setup: ({ options, fs }) => {
 		options.variableReferencePattern = ["{{", "}}"]
 		options.ignore = []
 		throwIfInvalidOptions(options)
 		pluginOptions = options
-		pluginConfig = config
-		pluginFs = $fs
+		pluginFs = fs
 		return {}
 	},
 	loadMessages: async () => {
