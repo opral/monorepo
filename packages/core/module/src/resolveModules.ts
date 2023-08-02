@@ -9,12 +9,12 @@ import { resolvePlugins, type Plugin } from "@inlang/plugin"
  * Resolves plugins from the config.
  */
 export const resolveModules: ResolvedModulesFunction = async (args) => {
-	const pluginsInConfig = args.config.settings?.plugins
+	const pluginSettings = args.config.settings?.plugins || {}
 
 	const result: Awaited<ReturnType<ResolvedModulesFunction>> = {
 		data: {
-			resolvedPlugins: {} as any,
-			resolvedLintRules: [],
+			plugins: { data: {} as any, errors: [] },
+			lintRules: [],
 		},
 		errors: [],
 	}
@@ -45,7 +45,7 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 
 			const resolvedPlugins = await resolvePlugins({
 				plugins,
-				pluginsInConfig,
+				pluginSettings,
 				config: args.config,
 				env: args.env,
 			})
@@ -54,13 +54,28 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 			 * -------------- BEGIN ADDING TO RESULT --------------
 			 */
 
-			// result.data.resolvedPlugins = {
-			// 	...result.data.resolvedPlugins,
-			// 	...resolvedPlugins.data.plugins,
-			// }
+			// TODO: use deepmerge algorith e.g. `just-extend`
+			// result.data.plugins = extend(result.data.plugins, resolvedPlugins)
 
-			result.data.resolvedLintRules = {
-				...result.data.resolvedLintRules,
+			result.data.plugins = {
+				errors: {
+					...result.data.plugins.errors,
+					...resolvedPlugins.errors,
+				},
+				data: {
+					...result.data.plugins.data,
+					...resolvedPlugins.data,
+					meta: {
+						...result.data.plugins.data.meta,
+						...resolvedPlugins.data.meta,
+					}
+				}
+			}
+
+			// TODO: validate `lintRules`
+
+			result.data.lintRules = {
+				...result.data.lintRules,
 				...lintRules,
 			}
 		} catch (e) {
