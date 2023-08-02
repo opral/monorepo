@@ -1,34 +1,37 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { setupMessageLintRules } from "./setupMessageLintRules.js"
-import type { MessageLintRule } from './api.js'
+import type { MessageLintRule } from "./api.js"
 
 const lintRuleWithoutSetup = {
 	meta: {
-		id: 'lint-rule.without-setup',
-		displayName: { en: '', }, description: { en: '', },
+		id: "lint-rule.without-setup",
+		displayName: { en: "" },
+		description: { en: "" },
 	},
-	defaultLevel: 'error',
-	message: () => { },
+	defaultLevel: "error",
+	message: vi.fn(),
 } satisfies MessageLintRule
 
 const lintRule1 = {
 	meta: {
-		id: 'lint-rule.1',
-		displayName: { en: '', }, description: { en: '', },
+		id: "lint-rule.1",
+		displayName: { en: "" },
+		description: { en: "" },
 	},
-	defaultLevel: 'error',
+	defaultLevel: "error",
 	setup: vi.fn(),
-	message: () => { },
+	message: vi.fn(),
 } satisfies MessageLintRule
 
 const lintRule2 = {
 	meta: {
-		id: 'lint-rule.2',
-		displayName: { en: '', }, description: { en: '', },
+		id: "lint-rule.2",
+		displayName: { en: "" },
+		description: { en: "" },
 	},
-	defaultLevel: 'warning',
+	defaultLevel: "warning",
 	setup: vi.fn(),
-	message: () => { },
+	message: vi.fn(),
 } satisfies MessageLintRule
 
 describe("setupMessageLintRules", async () => {
@@ -37,16 +40,19 @@ describe("setupMessageLintRules", async () => {
 	})
 
 	test("it should not fail if setup function is missing", async () => {
-		expect(async () => await setupMessageLintRules({
-			rules: [lintRuleWithoutSetup],
-			settings: {}
-		})).not.toThrow()
+		expect(
+			async () =>
+				await setupMessageLintRules({
+					rules: [lintRuleWithoutSetup],
+					settings: {},
+				}),
+		).not.toThrow()
 	})
 
 	test("it should call all setup functions", async () => {
 		await setupMessageLintRules({
 			rules: [lintRule1, lintRule2],
-			settings: {}
+			settings: {},
 		})
 
 		expect(lintRule1.setup).toHaveBeenCalled()
@@ -56,13 +62,13 @@ describe("setupMessageLintRules", async () => {
 	test("it should await setup functions", async () => {
 		let called = false
 		lintRule2.setup.mockImplementation(async () => {
-			await new Promise(resolve => setTimeout(resolve, 0))
+			await new Promise((resolve) => setTimeout(resolve, 0))
 			called = true
 		})
 
 		await setupMessageLintRules({
 			rules: [lintRule2],
-			settings: {}
+			settings: {},
 		})
 
 		expect(lintRule2.setup).toHaveBeenCalled()
@@ -72,7 +78,7 @@ describe("setupMessageLintRules", async () => {
 	test("it should not return disabled lintrules", async () => {
 		const rules = await setupMessageLintRules({
 			rules: [lintRule1],
-			settings: { 'lint-rule.1': { level: 'off' } },
+			settings: { "lint-rule.1": { level: "off" } },
 		})
 
 		expect(rules).toHaveLength(0)
@@ -84,23 +90,23 @@ describe("setupMessageLintRules", async () => {
 			settings: {},
 		})
 
-		expect(rules[0]!.level).toBe('error')
+		expect(rules[0]!.level).toBe("error")
 	})
 
 	test("it should override the default lint level", async () => {
 		const rules = await setupMessageLintRules({
 			rules: [lintRule1],
-			settings: { 'lint-rule.1': { level: 'warning' } },
+			settings: { "lint-rule.1": { level: "warning" } },
 		})
 
-		expect(rules[0]!.level).toBe('warning')
+		expect(rules[0]!.level).toBe("warning")
 	})
 
 	test("it should pass the correct options", async () => {
 		const options = {}
 		const rules = await setupMessageLintRules({
 			rules: [lintRule1],
-			settings: { 'lint-rule.1': { options } },
+			settings: { "lint-rule.1": { options } },
 		})
 
 		expect(rules[0]!.setup).toHaveBeenCalledWith({ options })

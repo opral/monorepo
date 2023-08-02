@@ -7,7 +7,7 @@ import { z } from "zod"
 export type LintLevel = "error" | "warning"
 
 export type LintRule<
-	RuleOptions extends JSONSerializable<unknown> = Record<string, string> | unknown
+	RuleOptions extends JSONSerializable<unknown> = Record<string, string> | unknown,
 > = {
 	meta: {
 		id: `${string}.${string}`
@@ -21,7 +21,7 @@ export type LintRule<
 		 */
 	}
 	defaultLevel: LintLevel
-		setup?: (args: { options: RuleOptions }) => MaybePromise<void>
+	setup?: (args: { options: RuleOptions }) => MaybePromise<void>
 }
 
 export const LintRule = z.object({
@@ -43,16 +43,15 @@ type JSONSerializable<
 type MaybePromise<T> = T | Promise<T>
 
 export type MessageLintRule<
-	RuleOptions extends JSONSerializable<unknown> = Record<string, string> | unknown
-> =
-	LintRule<RuleOptions> & {
-		message: (args: {
-			message: Message
-			query: Pick<MessageQueryApi, "get">
-			config: Readonly<InlangConfig>
-			report: ReportMessageLint
-		}) => MaybePromise<void>
-	}
+	RuleOptions extends JSONSerializable<unknown> = Record<string, string> | unknown,
+> = LintRule<RuleOptions> & {
+	message: (args: {
+		message: Message
+		query: Pick<MessageQueryApi, "get">
+		config: Readonly<InlangConfig>
+		report: ReportMessageLint
+	}) => MaybePromise<void>
+}
 
 export type ReportMessageLint = (args: {
 	messageId: Message["id"]
