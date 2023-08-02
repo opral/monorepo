@@ -21,6 +21,4 @@ export type ErrorResult<Error> = { data?: never; error: Error }
  *  }
  *
  */
-export type Result<Data, Error> =
-	| SuccessResult<Data>
-	| ErrorResult<Error>
+export type Result<Data, Error> = SuccessResult<Data> | ErrorResult<Error>
