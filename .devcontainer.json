@@ -1,7 +1,10 @@
 {
 	"name": "inlang-dev-container",
 	"image": "mcr.microsoft.com/devcontainers/javascript-node:18-bullseye",
-	"postCreateCommand": "sudo apt update && sudo apt install --no-install-recommends -y chromium xvfb",
+	"postCreateCommand": "sudo apt update && sudo apt install --no-install-recommends -y chromium",
+	"features": {
+		"ghcr.io/devcontainers/features/desktop-lite:1": {}
+	},
 	"customizations": {
 		"vscode": {
 			"extensions": [
