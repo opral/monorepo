@@ -262,11 +262,11 @@ function parsePattern(
 						type: "VariableReference",
 						name: variableReferencePattern![1]
 							? element.slice(
-									variableReferencePattern![0].length,
+									variableReferencePattern![0]!.length,
 									// negative index, removing the trailing pattern
 									-variableReferencePattern![1].length,
 							  )
-							: element.slice(variableReferencePattern![0].length),
+							: element.slice(variableReferencePattern![0]!.length),
 					},
 				}
 			} else {
