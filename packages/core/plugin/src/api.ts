@@ -1,4 +1,4 @@
-import type { InlangConfig, PluginOptions } from "@inlang/config"
+import type { InlangConfig } from "@inlang/config"
 import { TranslatedStrings } from "@inlang/language-tag"
 import type { Message } from "@inlang/messages"
 import type { InlangEnvironment } from "@inlang/environment"
@@ -38,10 +38,7 @@ export type Plugin<
 	 *
 	 * Use the setup function to initialize state, handle the options and more.
 	 */
-	setup: (args: {
-		options: PluginOptions
-		fs: InlangEnvironment["$fs"]
-	}) => {}
+	setup: (args: { options: PluginOptions; fs: InlangEnvironment["$fs"] }) => {}
 	/**
 	 * Load messages.
 	 *
