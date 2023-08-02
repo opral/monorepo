@@ -32,7 +32,7 @@ describe("examples", () => {
 						encoding: "utf-8",
 					}),
 				) as InlangConfig
-				const options = config.settings.plugins["inlang.plugin-i18next"].options
+				const options = config.settings.plugins["inlang.plugin-json"].options
 				plugin.setup({ fs: env.$fs, options: options })
 				const messages = await plugin.loadMessages({
 					languageTags: config.languageTags,
