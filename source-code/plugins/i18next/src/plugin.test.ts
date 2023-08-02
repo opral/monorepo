@@ -315,71 +315,42 @@ describe("formatting", () => {
 		expect(file4).toBe(with4Spaces)
 	})
 
-	// it("should remember if a file has a new line at the end or not", async () => {
-	// 	// @prettier-ignore
-	// 	const withNewLine = `{
-	// 	"test": "test"
-	// }
-	// `
+	it("should remember if a file has a new line at the end or not", async () => {
+		// @prettier-ignore
+		const withNewLine = `{
+	"test": "test"
+}
+`
 
-	// 	// @prettier-ignore
-	// 	const withoutNewLine = `{
-	// 	"test": "test"
-	// }`
+		// @prettier-ignore
+		const withoutNewLine = `{
+	"test": "test"
+}`
 
-	// 	const env = await createMockEnvironment({})
+		const env = await createMockEnvironment({})
 
-	// 	await env.$fs.writeFile("./en.json", withNewLine)
-	// 	await env.$fs.writeFile("./fr.json", withoutNewLine)
+		await env.$fs.writeFile("./en.json", withNewLine)
+		await env.$fs.writeFile("./fr.json", withoutNewLine)
 
-	// 	const x = plugin({ pathPattern: "./{languageTag}.json" })(env)
-	// 	const config = await x.config({})
-	// 	config.sourceLanguageTag = "en"
-	// 	config.languageTags = ["en", "de", "fr"]
+		const options: PluginOptions = {
+			pathPattern: "./{languageTag}.json",
+		}
+		plugin.setup({ options, fs: env.$fs })
+		const languageTags = ["en", "de", "fr"]
 
-	// 	const resources = await config.readResources!({
-	// 		config: config as InlangConfig,
-	// 	})
+		const messages = await plugin.loadMessages!({
+			languageTags,
+		})
 
-	// 	await config.writeResources!({
-	// 		config: config as InlangConfig,
-	// 		resources,
-	// 	})
+		await plugin.saveMessages!({ messages })
 
-	// 	const file1 = await env.$fs.readFile("./en.json", { encoding: "utf-8" })
-	// 	const file2 = await env.$fs.readFile("./fr.json", { encoding: "utf-8" })
+		const file1 = await env.$fs.readFile("./en.json", { encoding: "utf-8" })
+		const file2 = await env.$fs.readFile("./fr.json", { encoding: "utf-8" })
 
-	// 	expect(file1).toBe(withNewLine)
-	// 	expect(file2).toBe(withoutNewLine)
-	// })
+		expect(file1).toBe(withNewLine)
+		expect(file2).toBe(withoutNewLine)
+	})
 })
-
-// it("should correctly identify placeholders with only no trailing pattern", async () => {
-// 	const enResource = `{
-//     "test": "Hello @:username"
-// }`
-
-// 	const env = await mockEnvironment({})
-
-// 	await env.$fs.writeFile("./en.json", enResource)
-
-// 	const x = plugin({ pathPattern: "./{languageTag}.json", variableReferencePattern: ["@:"] })(env)
-// 	const config = await x.config({})
-// 	config.sourceLanguageTag = "en"
-// 	config.languageTags = ["en"]
-// 	const resources = await config.readResources!({
-// 		config: config as InlangConfig,
-// 	})
-// 	await config.writeResources!({
-// 		resources: resources,
-// 		config: config as InlangConfig,
-// 	})
-// 	const newResources = await config.readResources!({
-// 		config: config as InlangConfig,
-// 	})
-// 	expect(newResources[0]?.body[0]?.pattern?.elements[0]?.type).toBe("Text")
-// 	expect(newResources[0]?.body[0]?.pattern?.elements[1]?.type).toBe("Placeholder")
-// })
 
 // it("should parse Placeholders without adding Text elements around it", async () => {
 // 	const enResource = `{
