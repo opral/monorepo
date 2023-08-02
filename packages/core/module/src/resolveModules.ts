@@ -1,4 +1,4 @@
-import type { ResolvedModulesApi, ResolvedModulesFunction } from "./api.js"
+import type { ResolvedModulesFunction } from "./api.js"
 import {
 	ModuleError,
 	ModuleImportError,
@@ -8,18 +8,13 @@ import type { InlangModule } from "@inlang/module"
 import type { LintRule } from "@inlang/lint"
 import { resolvePlugins, type Plugin } from "@inlang/plugin"
 
-export type ResolveModuleResult = {
-	data: Partial<ResolvedModulesApi> & Pick<ResolvedModulesApi, "resolvedPlugins" | "resolvedLintRules">
-	errors: Array<ModuleError>
-}
-
 /**
  * Resolves plugins from the config.
  */
 export const resolveModules: ResolvedModulesFunction = async (args) => {
 	const pluginsInConfig = args.config.settings?.plugins
 
-	const result: ResolveModuleResult = {
+	const result: Awaited<ReturnType<ResolvedModulesFunction>> = {
 		data: {
 			resolvedPlugins: {},
 			resolvedLintRules: [],

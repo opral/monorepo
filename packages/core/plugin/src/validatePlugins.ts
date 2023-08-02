@@ -1,11 +1,10 @@
 import type { InlangConfig } from "@inlang/config"
-import type { Plugin } from "./api.js"
+import type { Plugin, ResolvePluginsFunction } from "./api.js"
 import {
 	PluginError,
 	PluginFunctionLoadMessagesAlreadyDefinedError,
 	PluginFunctionSaveMessagesAlreadyDefinedError,
 } from "./errors.js"
-import type { ResolvePluginsResult } from "./resolvePlugins.js"
 
 type ValidatePluginResult = {
 	data: {
@@ -20,7 +19,7 @@ type ValidatePluginResult = {
  * @description Checks for duplicate APIs and other errors for resolved plugins.
  */
 export const validatePlugins = (args: {
-	plugins: ResolvePluginsResult
+	plugins: Awaited<ReturnType<ResolvePluginsFunction>>
 	plugin: Plugin
 	pluginInConfig?: Exclude<Exclude<InlangConfig["settings"], undefined>["plugins"], undefined>[string]
 }): ValidatePluginResult => {
