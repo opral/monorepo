@@ -10,7 +10,7 @@ import Parsimmon from "parsimmon"
 // import type { MessageReferenceMatch } from "@inlang/plugin"
 import type { PluginOptions } from "../options.js"
 
-const createParser = (settings: PluginOptions) => {
+const createParser = (options: PluginOptions) => {
 	// Create a Parsimmon language
 	return Parsimmon.createLanguage({
 		// The entry point for message reference matching.
@@ -100,13 +100,13 @@ const createParser = (settings: PluginOptions) => {
 
 					// -- handle namespaces --
 					// only handle namespaces when the pathPattern require namespaces
-					if (typeof settings.pathPattern === "object") {
+					if (typeof options.pathPattern === "object") {
 						if (namespace) {
 							// if namespace gets parsed, prepend it to the messageId
 							messageId = namespace + ":" + messageId
 						} else if (!messageId.includes(":")) {
 							// if no namespace gets parsed and the namespace is not already included in the messageId, prepend the default namespace
-							const defaultNamespace = Object.keys(settings.pathPattern)[0]
+							const defaultNamespace = Object.keys(options.pathPattern)[0]
 							messageId = defaultNamespace + ":" + messageId
 						}
 					}
