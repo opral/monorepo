@@ -14,7 +14,7 @@ body:
   - type: dropdown
     id: config-validated
     attributes:
-      label: "Did you check id the config file includes errors?"
+      label: "Did you check if the config file includes errors?"
       description: "Please validate the config file with `npx @inlang/cli config validate`. If you see errors, it has probably nothing to do with the `@inlang/sdk-js` package and then please fill out the regular bug report form: https://github.com/inlang/inlang/issues/new/choose"
       options:
         - "No, I have not validated the config file"
