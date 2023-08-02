@@ -68,6 +68,7 @@ export type Plugin<
  * Function that resolves (imports and initializes) the plugins.
  */
 export type ResolvePluginsFunction = (args: {
+	module: string
 	plugins: Plugin[]
 	pluginSettings: Record<Plugin["meta"]["id"], PluginSettings>
 	config: InlangConfig
