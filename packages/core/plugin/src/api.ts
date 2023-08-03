@@ -34,12 +34,6 @@ export type Plugin<
 		keywords: string[]
 	}>
 	/**
-	 * The setup function is the first function that is called when inlang loads the plugin.
-	 *
-	 * Use the setup function to initialize state, handle the options and more.
-	 */
-		setup: (args: { options: PluginOptions; fs: InlangEnvironment["$fs"] }) => void
-	/**
 	 * Load messages.
 	 *
 	 * - if messages with language tags that are not defined in the config.languageTags
@@ -48,8 +42,14 @@ export type Plugin<
 	 */
 	loadMessages?: (args: {
 		languageTags: InlangConfig["languageTags"]
+		options: PluginOptions
+		fs: InlangEnvironment["$fs"]
 	}) => Promise<Message[]> | Message[]
-	saveMessages?: (args: { messages: Message[] }) => Promise<void> | void
+	saveMessages?: (args: {
+		messages: Message[]
+		options: PluginOptions
+		fs: InlangEnvironment["$fs"]
+	}) => Promise<void> | void
 	/**
 	 * Define app specific APIs.
 	 *

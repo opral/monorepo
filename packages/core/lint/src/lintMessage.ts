@@ -26,6 +26,7 @@ export const lintMessage = async (args: {
 				message: args.message,
 				query: args.query,
 				config: args.config,
+				options: {},
 				report: (reportArgs) => {
 					reports.push({
 						type: "MessageLint",
