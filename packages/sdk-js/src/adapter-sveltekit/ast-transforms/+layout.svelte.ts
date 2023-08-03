@@ -1,4 +1,4 @@
-import { addImport, removeImport } from "../../ast-transforms/utils/imports.js"
+import { addImport, findImportDeclarations, getImportSpecifiers, removeImport } from "../../ast-transforms/utils/imports.js"
 import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
 import type { TransformConfig } from "../vite-plugin/config.js"
 import { transformSvelte } from "./_.svelte.js"
@@ -62,7 +62,7 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 		`,
 	)
 
-	sourceFile.insertStatements(
+	const insertedStatements = sourceFile.insertStatements(
 		index + 1,
 		dedent`
 			addRuntimeToGlobalThis(getRuntimeFromData(data))
@@ -70,6 +70,12 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 			let { i, language } = getRuntimeFromContext()
 		`,
 	)
+
+	// move @inlang/sdk-js import declarations below inserted code
+	const imports = findImportDeclarations(sourceFile, "@inlang/sdk-js")
+	for (const importDeclaration of imports) {
+		importDeclaration.setOrder(insertedStatements.at(-1)!.getChildIndex() + 1)
+	}
 
 	return nodeToCode(sourceFile)
 }
