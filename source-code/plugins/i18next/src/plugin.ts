@@ -17,7 +17,7 @@ import { flatten, unflatten } from "flat"
  * @example
  *  { "/en.json" = 2 }
  */
-const SPACING: Record<string, ReturnType<typeof detectJsonSpacing>> = {}
+let SPACING: Record<string, ReturnType<typeof detectJsonSpacing>> = {}
 
 /**
  * The nesting the JSON files in this repository
@@ -25,7 +25,7 @@ const SPACING: Record<string, ReturnType<typeof detectJsonSpacing>> = {}
  * @example
  *  { "/en.json" = nested }
  */
-const NESTED: Record<string, ReturnType<typeof detectIsNested>> = {}
+let NESTED: Record<string, ReturnType<typeof detectIsNested>> = {}
 
 /**
  * Whether a file has a new line at the end.
@@ -34,7 +34,7 @@ const NESTED: Record<string, ReturnType<typeof detectIsNested>> = {}
  * { "/en.json" = true }
  * { "/de.json" = false }
  */
-const FILE_HAS_NEW_LINE: Record<string, boolean> = {}
+let FILE_HAS_NEW_LINE: Record<string, boolean> = {}
 
 /**
  * Defines the default spacing for JSON files.
@@ -76,6 +76,9 @@ export const plugin: Plugin<PluginOptions> = {
 	loadMessages: async ({ languageTags, options, nodeishFs }) => {
 		options.variableReferencePattern = options.variableReferencePattern || ["{{", "}}"]
 		throwIfInvalidOptions(options)
+		SPACING = {}
+		NESTED = {}
+		FILE_HAS_NEW_LINE = {}
 		return loadMessages({
 			nodeishFs,
 			options,
@@ -90,6 +93,9 @@ export const plugin: Plugin<PluginOptions> = {
 			options,
 			messages,
 		})
+	},
+	detectedLanguageTags: async ({ nodeishFs, options }) => {
+		return []
 	},
 	// addAppSpecificApi: () => {
 	// 	return { ...ideExtensionConfig(pluginOptions!) }
