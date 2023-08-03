@@ -129,15 +129,6 @@ export const Plugin = z.object({
 		description: TranslatedStrings,
 		keywords: z.array(z.string()),
 	}),
-	setup: z
-		.function()
-		.args(
-			z.object({
-				options: z.record(z.union([z.string(), z.array(z.string()), z.record(z.string())])),
-				fs: z.custom<InlangEnvironment["$fs"]>(),
-			}),
-		)
-		.returns(z.void()),
 	loadMessages: z.optional(
 		z
 			.function()
@@ -151,4 +142,4 @@ export const Plugin = z.object({
 			.returns(z.custom<void>()),
 	),
 	addAppSpecificApi: z.optional(z.function().args().returns(z.custom<Record<string, unknown>>())),
-})
+}).strict()

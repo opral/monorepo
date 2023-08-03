@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest"
 import { resolvePlugins } from "./resolvePlugins.js"
 import type { InlangConfig } from "@inlang/config"
 import {
-	PluginError,
 	PluginFunctionLoadMessagesAlreadyDefinedError,
 	PluginFunctionSaveMessagesAlreadyDefinedError,
 	PluginInvalidIdError,
@@ -24,7 +23,6 @@ describe("generally", () => {
 				keywords: [],
 				usedApis: [],
 			},
-			
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
 			addAppSpecificApi() {
@@ -53,13 +51,17 @@ describe("generally", () => {
 	it("should return an error if a plugin uses APIs that are not available", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.my-plugin",
+				id: "plugin.undefined-api",
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
 			},
 			// @ts-expect-error the API is not available
-			nonExistentApi: () => undefined,
+			nonExistentKey: {
+				nonexistentOptions: "value"
+			},
+			loadMessages: () => undefined as any,
+			saveMessages: () => undefined as any,
 		}
 
 		const config: InlangConfig = {
@@ -89,7 +91,6 @@ describe("generally", () => {
 				displayName: { en: "" },
 				keywords: [],
 			},
-			
 			loadMessages: () => undefined as any,
 		}
 
@@ -122,7 +123,6 @@ describe("loadMessages", () => {
 				displayName: { en: "" },
 				keywords: [],
 			},
-			
 			loadMessages: async () => [{ id: "test", expressions: [], selectors: [], body: { en: [] } }],
 		}
 
@@ -141,7 +141,7 @@ describe("loadMessages", () => {
 			env,
 		});
 
-		expect(await resolved.data.loadMessages!({ languageTags: ["en"] })).toEqual([{ id: "test", expressions: [], selectors: [], body: { en: [] } }])
+		expect(await resolved.data.loadMessages!({languageTags: ["en"], options: {}, fs: env.$fs})).toEqual([{ id: "test", expressions: [], selectors: [], body: { en: [] } }])
 	})
 
 	it("should collect an error if function is defined twice in multiple plugins", async () => {
@@ -162,7 +162,6 @@ describe("loadMessages", () => {
 				displayName: { en: "" },
 				keywords: [],
 			},
-			
 			loadMessages: async () => undefined as any,
 		}
 
@@ -199,7 +198,6 @@ describe("saveMessages", () => {
 				displayName: { en: "" },
 				keywords: [],
 			},
-			
 			saveMessages: async () => undefined as any,
 		}
 
@@ -229,7 +227,6 @@ describe("saveMessages", () => {
 				displayName: { en: "" },
 				keywords: [],
 			},
-			
 			saveMessages: async () => undefined as any,
 		}
 		const mockPlugin2: Plugin = {
@@ -276,7 +273,6 @@ describe("addAppSpecificApi", () => {
 				displayName: { en: "" },
 				keywords: [],
 			},
-			
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
 			addAppSpecificApi: () => ({
@@ -312,7 +308,6 @@ describe("addAppSpecificApi", () => {
 				displayName: { en: "" },
 				keywords: [],
 			},
-			
 			addAppSpecificApi: () => ({
 				"my-app-1": {
 					functionOfMyApp1: () => undefined as any,

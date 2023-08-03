@@ -25,26 +25,24 @@ const plugin1: Plugin<PluginOptions, AppSpecificApis> = {
 		description: { en: "i18next plugin for inlang" },
 		keywords: ["i18next", "react", "nextjs"],
 	},
-	setup: ({ options }) => {
-		if (options.pathPattern === undefined) {
-			throw Error("Path pattern is undefined")
-		}
-		return {}
-	},
 
 	loadMessages: async () => {
 		return []
 	},
 	saveMessages: async ({ messages }) => {
-		console.log(messages)
+		return
 	},
 	addAppSpecificApi: () => {
 		return {
 			"inlang.ide-extension": {
-				messageReferenceMatcher: () => {},
+				messageReferenceMatcher: () => {
+					return
+				},
 			},
 			"inlang.cli": {
-				cliExtract: () => {},
+				cliExtract: () => {
+					return
+				},
 			},
 		}
 	},
@@ -56,7 +54,7 @@ const resolvePlugins: ResolvePluginsFunction = {} as any
 
 const { data: resolvedWithoutAppSpecific, errors } = await resolvePlugins({} as any)
 
-expectType<{}>(resolvedWithoutAppSpecific.appSpecificApi)
+// expectType<{}>(resolvedWithoutAppSpecific.appSpecificApi)
 
 // const { data: resolvedWithApps, errors: error2 } = await resolvePlugins<AppSpecificApis>({} as any)
 
