@@ -1,2 +1,1 @@
-export type { LanguageTag } from "./types.js"
-export { TranslatedStrings } from "./translatedStrings.js"
+export { LanguageTag, TranslatedStrings } from "./schema.js"

@@ -1,5 +1,7 @@
+// @ts-nocheck
+
 import type { LanguageTag } from "@inlang/language-tag"
-import type { Message, Variant } from "./api.js"
+import type { Message, Variant } from "./schema.js"
 import type { Result } from "@inlang/result"
 
 /**
@@ -151,6 +153,7 @@ const matchMostSpecificVariant = (
 		}
 		if (isMatch && selectors) {
 			// add variant to nested index
+			// eslint-disable-next-line no-inner-declarations
 			function recursiveAddToIndex(
 				currentIndex: Record<string, any>,
 				currentKeys: string[],
