@@ -93,7 +93,14 @@ export type ResolvedPlugins = {
 	 * App specific APIs.
 	 *
 	 * @example
-	 *   appSpecificApi['inlang.ide-extension'].messageReferenceMatcher()
+	 *  // define
+	 *  appSpecificApi: () => ({
+	 * 	 "inlang.ide-extension": {
+	 * 	   messageReferenceMatcher: () => {}
+	 * 	 }
+	 *  })
+	 *  // use
+	 *  appSpecificApi['inlang.ide-extension'].messageReferenceMatcher()
 	 */
 	appSpecificApi: Record<string, unknown>
 	/**
