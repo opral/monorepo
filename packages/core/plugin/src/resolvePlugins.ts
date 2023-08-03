@@ -1,5 +1,5 @@
 import { Plugin, pluginIdRegex, ResolvePluginsFunction } from "./api.js"
-import { PluginError, PluginFunctionLoadMessagesAlreadyDefinedError, PluginFunctionSaveMessagesAlreadyDefinedError, PluginInvalidIdError, PluginUsesInvalidApiError, PluginUsesReservedNamespaceError } from "./errors.js"
+import { PluginAppSpecificApiReturnError, PluginError, PluginFunctionLoadMessagesAlreadyDefinedError, PluginFunctionSaveMessagesAlreadyDefinedError, PluginInvalidIdError, PluginUsesInvalidApiError, PluginUsesReservedNamespaceError } from "./errors.js"
 import { tryCatch } from "@inlang/result"
 import { deepmerge } from "deepmerge-ts"
 
@@ -73,7 +73,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			) {
 				result.errors.push(
 					new PluginFunctionLoadMessagesAlreadyDefinedError(
-						`Plugin ${plugin.meta.displayName} defines the loadMessages function, but it was already defined by another plugin.`,
+						`Plugin ${plugin.meta.id} defines the loadMessages function, but it was already defined by another plugin.`,
 						{ plugin: plugin.meta.id },
 					),
 				)
@@ -85,13 +85,27 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			) {
 				result.errors.push(
 					new PluginFunctionSaveMessagesAlreadyDefinedError(
-						`Plugin ${plugin.meta.displayName} defines the saveMessages function, but it was already defined by another plugin.`,
+						`Plugin ${plugin.meta.id} defines the saveMessages function, but it was already defined by another plugin.`,
 						{ plugin: plugin.meta.id },
 					),
 				)
 			}
 
-			if (result.errors.length > 0) {								
+			// --- ADD APP SPECIFIC API ---
+			if (typeof plugin.addAppSpecificApi === "function") {
+				const appSpecificApi = plugin.addAppSpecificApi()
+				if (typeof appSpecificApi !== "object") {
+					result.errors.push(
+						new PluginAppSpecificApiReturnError(
+							`Plugin ${plugin.meta.id} defines the addAppSpecificApi function, but it does not return an object.`,
+							{ plugin: plugin.meta.id },
+						),
+					)
+				}
+			}
+
+			// -- CONTINUE IF ERRORS --
+			if (result.errors.length > 0) {												
 				continue
 			}
 
@@ -118,14 +132,10 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 				}
 			}
 
-			result.data.meta = {
-				...result.data.meta,
-				[pluginId]: {
-					...plugin.meta,
-					module: args.module,
-				},
+			result.data.meta[plugin.meta.id] = {
+				...plugin.meta,
+				module: args.module,
 			}
-			
 		} catch (e) {
 			/**
 			 * -------------- BEGIN ERROR HANDLING --------------

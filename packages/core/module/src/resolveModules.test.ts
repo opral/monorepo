@@ -7,30 +7,6 @@ import { resolveModules } from "./resolveModules.js";
 
 describe("generally", () => {
 	it("should return an error if a plugin cannot be imported", async () => {
-		// const mockPlugin: Plugin = {
-		// 	meta: {
-		// 		// @ts-expect-error the id is invalid
-		// 		id: "no-namespace",
-		// 		description: { en: "" },
-		// 		displayName: { en: "" },
-		// 		keywords: [],
-		// 		usedApis: [],
-		// 	},
-		// 	setup: () => undefined as any,
-		// 	loadMessages: () => undefined as any,
-		// 	saveMessages: () => undefined as any,
-		// 	addAppSpecificApi() {
-		// 		return undefined as any
-		// 	},
-		// }
-		
-		// const module: InlangModule = {
-		// 	default: {
-		// 		plugins: [mockPlugin],
-		// 		lintRules: [],
-		// 	},
-		// }
-
 		const config: InlangConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
@@ -61,7 +37,11 @@ describe('resolveModules', () => {
 		setup: () => undefined as any,
 		loadMessages: () => undefined as any,
 		saveMessages: () => undefined as any,
-		addAppSpecificApi: () => undefined as any,
+		addAppSpecificApi: () => ({
+			"inlang.ide-extension": {
+				messageReferenceMatcher: () => undefined as any
+			}
+		}),
 	  };
   
 	  const mockLintRule: LintRule = {
@@ -96,9 +76,11 @@ describe('resolveModules', () => {
   
 	  // Assert results
 	  expect(resolved.errors).toHaveLength(0);
-	  // TODO: Fix this test
-	  // expect(resolved.data.plugins.data["meta"]["mock.plugin"]).toBeDefined();
-	  expect(resolved.data.lintRules).toHaveLength(1);
+	  // Check for the meta data of the plugin
+	  expect(resolved.data.plugins.data["meta"]["mock.plugin"]).toBeDefined();
+	  // Check for the app specific api
+	  expect(resolved.data.plugins.data["appSpecificApi"]["inlang.ide-extension"]).toBeDefined();
+	  // Check for the lint rule
 	  expect(resolved.data.lintRules[0]!.meta.id).toBe('mock.lint-rule');
 	});
   
@@ -185,108 +167,3 @@ describe('resolveModules', () => {
 	  expect(resolved.errors[0]).toBeInstanceOf(ModuleError);
 	});
   });
-  
-
-// function mockEnvWithModules (modules: Record<string, any>) {
-// 	return {
-// 		$import: (module: string) => {
-// 			return {
-// 				data: modules[module],
-// 				error: undefined,
-// 			}
-// 		},
-// 	}
-// }
-
-	// it("should return an error if a plugin cannot be imported", async () => {
-	// 	const resolved = await resolvePlugins({
-	// 		env: {
-	// 			$fs: {} as any,
-	// 			$import: () => {
-	// 				throw Error("Could not import")
-	// 			},
-	// 		},
-	// 		config: {
-	// 			plugins: [{ module: "https://myplugin.com/index.js", options: {} }],
-	// 		} as InlangConfig,
-	// 	})
-
-
-// describe("addLintRules", () => {
-// 	it("should resolve a single lint rule", async () => {
-// 		const mockPlugin: Plugin = {
-// 			meta: {
-// 				id: "plugin.plugin",
-// 				description: { en: "" },
-// 				displayName: { en: "" },
-// 				keywords: [],
-// 			},
-// 			setup: () => undefined as any,
-// 			addLintRules: () => [
-// 				{
-// 					id: "test.test",
-// 					displayName: { en: "" },
-// 					defaultLevel: "error",
-// 				},
-// 			],
-// 		}
-
-// 		const pluginModule = "https://myplugin10.com/index.js"
-// 		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
-
-// 		const resolved = await resolvePlugins({
-// 			env,
-// 			config: {
-// 				plugins: [
-// 					{
-// 						options: {},
-// 						module: pluginModule,
-// 					},
-// 				],
-// 			} as unknown as InlangConfig,
-// 		})
-
-// 		expect(resolved.data.lintRules).toHaveLength(1)
-// 	})
-
-// 	it("should resolve multiple lint rules", async () => {
-// 		const mockPlugin: Plugin = {
-// 			meta: {
-// 				id: "plugin.plugin",
-// 				description: { en: "" },
-// 				displayName: { en: "" },
-// 				keywords: [],
-// 			},
-// 			setup: () => undefined as any,
-// 			addLintRules: () => [
-// 				{
-// 					id: "test.test",
-// 					displayName: { en: "" },
-// 					defaultLevel: "error",
-// 				},
-// 				{
-// 					id: "test2.test",
-// 					displayName: { en: "" },
-// 					defaultLevel: "error",
-// 				},
-// 			],
-// 		}
-
-// 		const pluginModule = "https://myplugin11.com/index.js"
-// 		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
-
-// 		const resolved = await resolvePlugins({
-// 			env,
-// 			config: {
-// 				plugins: [
-// 					{
-// 						options: {},
-// 						module: pluginModule,
-// 					},
-// 				],
-// 			} as unknown as InlangConfig,
-// 		})
-
-// 		expect(resolved.data.lintRules).toHaveLength(2)
-// 	})
-// })

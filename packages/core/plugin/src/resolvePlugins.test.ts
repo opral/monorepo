@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest"
+import { describe, expect, it } from "vitest"
 import { resolvePlugins } from "./resolvePlugins.js"
 import type { InlangConfig } from "@inlang/config"
 import {
@@ -8,6 +8,7 @@ import {
 	PluginInvalidIdError,
 	PluginUsesReservedNamespaceError,
 	PluginUsesInvalidApiError,
+	PluginAppSpecificApiReturnError,
 } from "./errors.js"
 import type { InlangEnvironment } from "@inlang/environment"
 import type { Plugin } from "./api.js"
@@ -27,7 +28,7 @@ describe("generally", () => {
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
 			addAppSpecificApi() {
-				return undefined as any
+				return {}
 			},
 		}
 
@@ -361,7 +362,144 @@ describe("addAppSpecificApi", () => {
 		expect(resolved.data.appSpecificApi).toHaveProperty("my-app-2")
 		expect(resolved.data.appSpecificApi).toHaveProperty("my-app-3")
 	})
+
+	it("it should throw an error if return value is not an object", async () => {
+		const mockPlugin: Plugin = {
+			meta: {
+				id: "plugin.plugin",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+			},
+			setup: () => undefined as any,
+			loadMessages: () => undefined as any,
+			saveMessages: () => undefined as any,
+			addAppSpecificApi: () => undefined as any,
+		}
+
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["de", "en"],
+			modules: ["https://myplugin.com/index.js"],
+		};
+
+		const env = mockEnvWithPlugins({ [config.modules[0]!]: mockPlugin })
+		const resolved = await resolvePlugins({
+			module: config.modules[0]!,
+			plugins: [mockPlugin],
+			pluginSettings: {},
+			config,
+			env,
+		});
+
+		expect(resolved.errors).toHaveLength(1)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginAppSpecificApiReturnError)
+	})
 })
+
+describe("meta", () => {
+	it("should resolve meta data", async () => {
+		const mockPlugin: Plugin = {
+			meta: {
+				id: "plugin.plugin",
+				description: { en: "My plugin description" },
+				displayName: { en: "My Plugin" },
+				keywords: ["plugin", "my-plugin"],
+			},
+			setup: () => undefined as any,
+			loadMessages: () => undefined as any,
+			saveMessages: () => undefined as any,
+			addAppSpecificApi: () => {
+				return {}
+			},
+		}
+
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["de", "en"],
+			modules: ["https://myplugin.com/index.js"],
+		};
+
+		const env = mockEnvWithPlugins({ [config.modules[0]!]: mockPlugin })
+		const resolved = await resolvePlugins({
+			module: config.modules[0]!,
+			plugins: [mockPlugin],
+			pluginSettings: {
+				"plugin.plugin": {
+					options: {
+						"my-app-1": {
+							option1: "value1",
+						},
+						"my-app-2": {
+							option2: "value2",
+						},
+					},
+				},
+			},
+			config,
+			env,
+		});
+
+		expect(resolved.data.meta).toHaveProperty("plugin.plugin")
+	})
+
+	it("should resolve meta data from multiple plugins", async () => {
+		const mockPlugin: Plugin = {
+			meta: {
+				id: "plugin.plugin",
+				description: { en: "My plugin description" },
+				displayName: { en: "My Plugin" },
+				keywords: ["plugin", "my-plugin"],
+			},
+			setup: () => undefined as any,
+			loadMessages: () => undefined as any,
+			saveMessages: () => undefined as any,
+			addAppSpecificApi: () => {
+				return {}
+			},
+		}
+		const mockPlugin2: Plugin = {
+			meta: {
+				id: "plugin.plugin2",
+				description: { en: "My plugin description 2" },
+				displayName: { en: "My Plugin 2" },
+				keywords: ["plugin", "my-plugin-2"],
+			},
+			setup: () => undefined as any,
+			addAppSpecificApi: () => ({
+				"my-app-1": {
+					functionOfMyApp1: () => undefined as any,
+				},
+			})
+		}
+
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["de", "en"],
+			modules: [
+				"https://myplugin.com/index.js",
+				"https://myplugin2.com/index.js",
+			],
+		};
+
+		const env = mockEnvWithPlugins({
+			[config.modules[0]!]: mockPlugin,
+			[config.modules[1]!]: mockPlugin2,
+		})
+
+		const resolved = await resolvePlugins({
+			module: config.modules[0]!,
+			plugins: [mockPlugin, mockPlugin2],
+			pluginSettings: {},
+			config,
+			env,
+		});
+
+		expect(resolved.data.meta).toHaveProperty("plugin.plugin")
+		expect(resolved.data.meta).toHaveProperty("plugin.plugin2")
+	})
+})
+
 
 describe("error handling", () => {
 	it("should handle PluginError instances thrown during plugin setup", async () => {
