@@ -1,6 +1,6 @@
 {
 	"sourceLanguageTag": "en",
-	"languageTags": ["en"],
+	"languageTags": ["en", "de", "fr"],
 	"modules": ["./dist/index.js"],
 	"settings": {
 		"plugins": {
