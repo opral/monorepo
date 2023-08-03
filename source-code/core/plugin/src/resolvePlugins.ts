@@ -1,5 +1,13 @@
 import { Plugin, pluginIdRegex, ResolvePluginsFunction } from "./api.js"
-import { PluginAppSpecificApiReturnError, PluginError, PluginFunctionLoadMessagesAlreadyDefinedError, PluginFunctionSaveMessagesAlreadyDefinedError, PluginInvalidIdError, PluginUsesInvalidApiError, PluginUsesReservedNamespaceError } from "./errors.js"
+import {
+	PluginAppSpecificApiReturnError,
+	PluginError,
+	PluginFunctionLoadMessagesAlreadyDefinedError,
+	PluginFunctionSaveMessagesAlreadyDefinedError,
+	PluginInvalidIdError,
+	PluginUsesInvalidApiError,
+	PluginUsesReservedNamespaceError,
+} from "./errors.js"
 import { tryCatch } from "@inlang/result"
 import { deepmerge } from "deepmerge-ts"
 
@@ -32,10 +40,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 		}
 
 		// -- USES RESERVED NAMESPACE --
-		if (
-			plugin.meta.id.includes("inlang") &&
-			!whitelistedPlugins.includes(plugin.meta.id)
-		) {
+		if (plugin.meta.id.includes("inlang") && !whitelistedPlugins.includes(plugin.meta.id)) {
 			result.errors.push(
 				new PluginUsesReservedNamespaceError(
 					`Plugin ${plugin.meta.id} uses reserved namespace 'inlang'.`,
@@ -61,10 +66,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 		}
 
 		// -- ALREADY DEFINED LOADMESSAGES / SAVEMESSAGES --
-		if (
-			typeof plugin.loadMessages === "function" &&
-			result.data.loadMessages !== undefined
-		) {
+		if (typeof plugin.loadMessages === "function" && result.data.loadMessages !== undefined) {
 			result.errors.push(
 				new PluginFunctionLoadMessagesAlreadyDefinedError(
 					`Plugin ${plugin.meta.id} defines the loadMessages function, but it was already defined by another plugin.`,
@@ -72,11 +74,8 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 				),
 			)
 		}
-		
-		if (
-			typeof plugin.saveMessages === "function" &&
-			result.data.saveMessages !== undefined
-		) {
+
+		if (typeof plugin.saveMessages === "function" && result.data.saveMessages !== undefined) {
 			result.errors.push(
 				new PluginFunctionSaveMessagesAlreadyDefinedError(
 					`Plugin ${plugin.meta.id} defines the saveMessages function, but it was already defined by another plugin.`,
@@ -99,7 +98,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 		}
 
 		// -- CONTINUE IF ERRORS --
-		if (result.errors.length > 0) {					
+		if (result.errors.length > 0) {
 			continue
 		}
 
@@ -116,10 +115,12 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 		}
 
 		if (typeof plugin.addAppSpecificApi === "function") {
-			const appSpecificApi = plugin.addAppSpecificApi()
+			const appSpecificApi = plugin.addAppSpecificApi({
+				options: args.pluginSettings[plugin.meta.id]?.options,
+			}) as ReturnType<Exclude<Plugin["addAppSpecificApi"], undefined>>
 			for (const [namespace, api] of Object.entries(appSpecificApi)) {
 				result.data.appSpecificApi[namespace] = deepmerge(
-					result.data.appSpecificApi[namespace] || {},
+					result.data.appSpecificApi[namespace] ?? {},
 					api,
 				)
 			}
