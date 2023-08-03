@@ -3,15 +3,6 @@ import { describe, it, test, expect, vi } from "vitest"
 import { transformLayoutSvelte } from "./+layout.svelte.js"
 import { initTransformConfig } from "./test.utils.js"
 
-vi.mock("./_.svelte.js", async () => {
-	const svelteTransforms = await vi.importActual<typeof import("./_.svelte.js")>("./_.svelte.js")
-
-	return {
-		...svelteTransforms,
-		transformSvelte: (_: unknown, __: unknown, c: string) => c,
-	}
-})
-
 describe("transformLayoutSvelte", () => {
 	describe("root=true", () => {
 		test("should insert code to an empty file", () => {
@@ -252,7 +243,6 @@ describe("transformLayoutSvelte", () => {
 				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
 				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
 				import { addRuntimeToGlobalThis } from '@inlang/sdk-js/adapter-sveltekit/client/shared';
-				console.info(123);
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
 				addRuntimeToContext(getRuntimeFromData(data));
@@ -263,6 +253,7 @@ describe("transformLayoutSvelte", () => {
 				    ({ i, languageTag } = getRuntimeFromContext());
 				    document.body.parentElement?.setAttribute('lang', language);
 				}
+				console.info(123);
 				console.info(i(\\"welcome\\"));
 				</script>{#key languageTag}
 
@@ -324,6 +315,117 @@ describe("transformLayoutSvelte", () => {
 			const config = initTransformConfig()
 			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toEqual(code)
+		})
+	})
+
+	describe("ensure getRuntimeFromContext is called the first time after the data export", () => {
+		test("single import", () => {
+			const code = dedent`
+				<script lang="ts">
+					import { browser } from '$app/environment'
+					import { languages } from '@inlang/sdk-js'
+
+					console.log(languages)
+				</script>
+			`
+			const config = initTransformConfig()
+			const transformed = transformLayoutSvelte("", config, code, true)
+			expect(transformed).toMatchInlineSnapshot(`
+				"<script lang=\\"ts\\">
+					import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
+				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
+				import { addRuntimeToGlobalThis } from '@inlang/sdk-js/adapter-sveltekit/client/shared';
+				import { browser } from '$app/environment';
+				export let data;
+				addRuntimeToGlobalThis(getRuntimeFromData(data));
+				addRuntimeToContext(getRuntimeFromData(data));
+				let { i, language } = getRuntimeFromContext();
+				$: if (browser) {
+				    addRuntimeToGlobalThis(getRuntimeFromData(data));
+				    addRuntimeToContext(getRuntimeFromData(data));
+				    ({ i, language } = getRuntimeFromContext());
+				    document.body.parentElement?.setAttribute('lang', language);
+				}
+				const { languages } = getRuntimeFromContext();
+				console.log(languages);
+				</script>"
+			`)
+		})
+
+		test("multiple imports", () => {
+			const code = dedent`
+				<script lang="ts">
+					import { languages } from '@inlang/sdk-js'
+					import { switchLanguage } from '@inlang/sdk-js'
+					import { browser } from '$app/environment'
+
+					const doSomething = () => console.log(languages)
+
+					if (browser) doSomething()
+				</script>
+
+				<button on:click={() => switchLanguage('en')}>Switch Language</button>
+			`
+			const config = initTransformConfig()
+			const transformed = transformLayoutSvelte("", config, code, true)
+			expect(transformed).toMatchInlineSnapshot(`
+				"<script lang=\\"ts\\">
+					import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
+				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
+				import { addRuntimeToGlobalThis } from '@inlang/sdk-js/adapter-sveltekit/client/shared';
+				import { browser } from '$app/environment';
+				export let data;
+				addRuntimeToGlobalThis(getRuntimeFromData(data));
+				addRuntimeToContext(getRuntimeFromData(data));
+				let { i, language } = getRuntimeFromContext();
+				$: if (browser) {
+				    addRuntimeToGlobalThis(getRuntimeFromData(data));
+				    addRuntimeToContext(getRuntimeFromData(data));
+				    ({ i, language } = getRuntimeFromContext());
+				    document.body.parentElement?.setAttribute('lang', language);
+				}
+				const { switchLanguage, languages } = getRuntimeFromContext();
+				const doSomething = () => console.log(languages);
+				if (browser)
+				    doSomething();
+				</script>{#key language}
+
+				<button on:click={() => switchLanguage('en')}>Switch Language</button>{/key}"
+			`)
+		})
+
+		test("data export already defined", () => {
+			const code = dedent`
+				<script lang="ts">
+					import { languages } from '@inlang/sdk-js'
+
+					console.log(languages)
+
+					export let data
+				</script>
+			`
+			const config = initTransformConfig()
+			const transformed = transformLayoutSvelte("", config, code, true)
+			expect(transformed).toMatchInlineSnapshot(`
+				"<script lang=\\"ts\\">
+					import { browser } from '$app/environment';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
+				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
+				import { addRuntimeToGlobalThis } from '@inlang/sdk-js/adapter-sveltekit/client/shared';
+				export let data;
+				addRuntimeToGlobalThis(getRuntimeFromData(data));
+				addRuntimeToContext(getRuntimeFromData(data));
+				let { i, language } = getRuntimeFromContext();
+				$: if (browser) {
+				    addRuntimeToGlobalThis(getRuntimeFromData(data));
+				    addRuntimeToContext(getRuntimeFromData(data));
+				    ({ i, language } = getRuntimeFromContext());
+				    document.body.parentElement?.setAttribute('lang', language);
+				}
+				const { languages } = getRuntimeFromContext();
+				console.log(languages);
+				</script>"
+			`)
 		})
 	})
 })
