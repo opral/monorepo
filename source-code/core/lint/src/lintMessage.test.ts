@@ -6,7 +6,7 @@ import type { Message, MessageQueryApi } from "@inlang/messages"
 
 const lintRule1 = {
 	meta: {
-		id: "lint-rule.1",
+		id: "r.1",
 		displayName: { en: "" },
 		description: { en: "" },
 	},
@@ -16,7 +16,7 @@ const lintRule1 = {
 
 const lintRule2 = {
 	meta: {
-		id: "lint-rule.2",
+		id: "r.2",
 		displayName: { en: "" },
 		description: { en: "" },
 	},
@@ -31,6 +31,65 @@ const messages = [message1]
 describe("lintMessage", async () => {
 	beforeEach(() => {
 		vi.resetAllMocks()
+	})
+
+	describe("resolve rules and options", async () => {
+		test("it should not run disabled lintrules", async () => {
+			await lintMessage({
+				config: { settings: { lintRules: { "r.1": { level: "off" } } } } as Partial<InlangConfig> as InlangConfig,
+				query: {} as MessageQueryApi,
+				messages,
+				message: message1,
+				rules: [lintRule1, lintRule2],
+			})
+
+			expect(lintRule1.message).not.toHaveBeenCalled()
+			expect(lintRule2.message).toHaveBeenCalledOnce()
+		})
+
+		test("it should set the default lint level", async () => {
+			lintRule1.message.mockImplementation(({ report }) => report({} as MessageLintReport))
+
+			const reports = await lintMessage({
+				config: {} as InlangConfig,
+				query: {} as MessageQueryApi,
+				messages,
+				message: message1,
+				rules: [lintRule1],
+			})
+
+			expect(reports.data[0]!.level).toBe('error')
+		})
+
+		test("it should override the default lint level", async () => {
+			lintRule1.message.mockImplementation(({ report }) => report({} as MessageLintReport))
+
+			const reports = await lintMessage({
+				config: { settings: { lintRules: { "r.1": { level: "warning" } } } } as Partial<InlangConfig> as InlangConfig,
+				query: {} as MessageQueryApi,
+				messages,
+				message: message1,
+				rules: [lintRule1],
+			})
+			expect(reports.data[0]!.level).toBe("warning")
+		})
+
+		test.only("it should pass the correct options", async () => {
+			const options = {}
+
+			const fn = vi.fn()
+			lintRule1.message.mockImplementation(({ options }) => fn(options))
+
+			await lintMessage({
+				config: { settings: { lintRules: { "r.1": { options } } } } as Partial<InlangConfig> as InlangConfig,
+				query: {} as MessageQueryApi,
+				messages,
+				message: message1,
+				rules: [lintRule1],
+			})
+
+			expect(fn).toHaveBeenCalledWith(options)
+		})
 	})
 
 	test("it should await all rules", async () => {
@@ -60,14 +119,14 @@ describe("lintMessage", async () => {
 		const fn = vi.fn()
 
 		lintRule1.message.mockImplementation(async () => {
-			fn("r1", "before")
+			fn("r.1", "before")
 			await new Promise((resolve) => setTimeout(resolve, 0))
-			fn("r1", "after")
+			fn("r.1", "after")
 		})
 		lintRule2.message.mockImplementation(async () => {
-			fn("r2", "before")
+			fn("r.2", "before")
 			await new Promise((resolve) => setTimeout(resolve, 0))
-			fn("r2", "after")
+			fn("r.2", "after")
 		})
 
 		await lintMessage({
@@ -79,10 +138,10 @@ describe("lintMessage", async () => {
 		})
 
 		expect(fn).toHaveBeenCalledTimes(4)
-		expect(fn).toHaveBeenNthCalledWith(1, "r1", "before")
-		expect(fn).toHaveBeenNthCalledWith(2, "r2", "before")
-		expect(fn).toHaveBeenNthCalledWith(3, "r1", "after")
-		expect(fn).toHaveBeenNthCalledWith(4, "r2", "after")
+		expect(fn).toHaveBeenNthCalledWith(1, "r.1", "before")
+		expect(fn).toHaveBeenNthCalledWith(2, "r.2", "before")
+		expect(fn).toHaveBeenNthCalledWith(3, "r.1", "after")
+		expect(fn).toHaveBeenNthCalledWith(4, "r.2", "after")
 	})
 
 	test("it should not abort the linting process when errors occur", async () => {
