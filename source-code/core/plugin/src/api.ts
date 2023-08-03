@@ -24,7 +24,7 @@ export const pluginIdRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+(?:-[a-z0-9]+)
  */
 export type Plugin<
 	PluginOptions extends JSONSerializable<unknown> = Record<string, string> | unknown,
-	AppSpecificApis extends object = {},
+	AppSpecificApis extends JSONSerializable<unknown> = Record<string, string>,
 > = {
 	// * Must be JSON serializable if we want an external plugin manifest in the future.
 	meta: JSONSerializable<{
@@ -38,7 +38,7 @@ export type Plugin<
 	 *
 	 * Use the setup function to initialize state, handle the options and more.
 	 */
-	setup: (args: { options: PluginOptions; fs: InlangEnvironment["$fs"] }) => {}
+		setup: (args: { options: PluginOptions; fs: InlangEnvironment["$fs"] }) => void
 	/**
 	 * Load messages.
 	 *
@@ -123,7 +123,7 @@ export const Plugin = z.object({
 				fs: z.custom<InlangEnvironment["$fs"]>(),
 			}),
 		)
-		.returns(z.custom<{}>()),
+		.returns(z.void()),
 	loadMessages: z.optional(
 		z
 			.function()

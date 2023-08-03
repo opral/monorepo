@@ -9,7 +9,7 @@
 export type NodeishFilesystem = {
 	writeFile(path: string, data: string | Uint8Array, options?: { mode: number }): Promise<void>
 	readFile(path: string): Promise<Uint8Array>
-	readFile(path: string, options: { encoding: "utf-8" }): Promise<string>
+	readFile(path: string, options: { encoding: "utf-8" | "binary" }): Promise<string>
 	readdir(path: string): Promise<string[]>
 	/**
 	 * https://nodejs.org/api/fs.html#fspromisesmkdirpath-options
