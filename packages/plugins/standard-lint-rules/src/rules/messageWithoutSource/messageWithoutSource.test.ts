@@ -1,38 +1,48 @@
 import { expect, test } from "vitest"
-import { getLintReports, lint } from "@inlang/core/lint"
 import type { InlangConfig } from "@inlang/config"
+import { lintMessage } from '@inlang/lint'
+import type { Message, MessageQueryApi } from '@inlang/messages'
+import { messageWithoutSourceRule } from './messageWithoutSource.js'
 
-const config: Pick<InlangConfig, "sourceLanguageTag" | "languageTags" | "modules"> = {
-	sourceLanguageTag: "en",
-	languageTags: ["en", "de", "fr"],
-	modules: ["./index.js"],
+const message1: Message = {
+	id: "1",
+	expressions: [],
+	selectors: [],
+	body: {
+		en: [],
+		de: [],
+	},
 }
 
-const [lintedResources, errors] = await lint({
-	config,
-	resources: [
-		createResource("en", createMessage("test", "1")),
-		createResource("de", createMessage("test", "1")),
-		createResource("fr", createMessage("test", "1"), createMessage("test2", "2")),
-	],
+const messages = [message1]
+
+test("should not report if source message present", async () => {
+	const result = await lintMessage({
+		config: {
+			sourceLanguageTag: "en",
+		} as Partial<InlangConfig> as InlangConfig,
+		query: {} as MessageQueryApi,
+		messages,
+		message: message1,
+		rules: [messageWithoutSourceRule],
+	})
+
+	expect(result.errors).toHaveLength(0)
+	expect(result.data).toHaveLength(0)
 })
 
-test("should report if key is missing", async () => {
-	const reports = lintedResources.flatMap((resource) => getLintReports(resource))
-	expect(reports).toHaveLength(1)
-	expect(reports[0]?.message).toBe(
-		"Message with id 'test2' is specified, but missing in the reference.",
-	)
-})
+test("should report if source message is missing", async () => {
+	const result = await lintMessage({
+		config: {
+			sourceLanguageTag: "it",
+		} as Partial<InlangConfig> as InlangConfig,
+		query: {} as MessageQueryApi,
+		messages,
+		message: message1,
+		rules: [messageWithoutSourceRule],
+	})
 
-test("it should not throw errors", () => {
-	expect(errors).toBeUndefined()
-})
-
-test("should not process nodes of the reference language", async () => {
-	const referenceResource = lintedResources.find(
-		(resource) => resource.languageTag.name === config.sourceLanguageTag,
-	)!
-
-	expect(referenceResource.lint).toBeUndefined()
+	expect(result.errors).toHaveLength(0)
+	expect(result.data).toHaveLength(1)
+	expect(result.data[0]!.languageTag).toBe("it")
 })
