@@ -8,19 +8,19 @@ type InitSvelteKitClientRuntimeArgs = {
 	referenceLanguage: Language
 	languages: Language[]
 	language: Language | undefined
+	cache?: Record<Language, Resource | undefined>
 }
-
-const resources: Record<Language, Resource | undefined> = {}
 
 export const initSvelteKitClientRuntime = async ({
 	fetch,
 	language,
 	referenceLanguage,
 	languages,
+	cache = {},
 }: InitSvelteKitClientRuntimeArgs) => {
 	const runtime = initRuntimeWithLanguageInformation({
 		readResource: async (language: string) =>
-			(resources[language] ??= await fetch(`${base}/inlang/${language}.json`).then((response) =>
+		(cache[language] ??= await fetch(`${base}/inlang/${language}.json`).then((response) =>
 				response.ok ? (response.json() as Promise<Resource>) : undefined,
 			)),
 		referenceLanguage,
