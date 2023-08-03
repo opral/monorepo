@@ -19,12 +19,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 	for (const plugin of args.plugins) {
 		const pluginId = plugin.meta.id
 
-		try {			
-			plugin.setup?.({
-				options: args.pluginSettings?.[pluginId]?.options,
-				fs: args.env.$fs,
-			})
-
+		try {
 			/**
 			 * -------------- RESOLVE PLUGIN --------------
 			 */
@@ -114,12 +109,11 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			 */
 
 			if (typeof plugin.loadMessages === "function") {
-				result.data.loadMessages = async () =>
-					await plugin.loadMessages!({ languageTags: args.config.languageTags })
+				result.data.loadMessages = plugin.loadMessages
 			}
 
 			if (typeof plugin.saveMessages === "function") {
-				result.data.saveMessages = async (args: any) => await plugin.saveMessages!(args)
+				result.data.saveMessages = plugin.saveMessages
 			}
 
 			if (typeof plugin.addAppSpecificApi === "function") {
