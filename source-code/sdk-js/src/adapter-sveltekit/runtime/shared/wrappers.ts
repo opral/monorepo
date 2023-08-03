@@ -13,6 +13,8 @@ import {
 
 // ------------------------------------------------------------------------------------------------
 
+const cache: Record<Language, Resource | undefined> = {}
+
 const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, any>>(
 	event: Parameters<Load>[0],
 	options?: {
@@ -47,6 +49,7 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 		language,
 		referenceLanguage,
 		languages,
+		cache,
 	})
 
 	resolveRuntimePromise(runtime)
