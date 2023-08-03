@@ -101,9 +101,9 @@ export const plugin: Plugin<PluginOptions> = {
 			options,
 		})
 	},
-	// addAppSpecificApi: ({ options }) => {
-	// 	return { ...ideExtensionConfig(options) }
-	// },
+	addAppSpecificApi: ({ options }) => {
+		return { ...ideExtensionConfig(options) }
+	},
 }
 
 /**
