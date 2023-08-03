@@ -103,7 +103,7 @@ export type ResolvedPlugins = {
 	 *   meta['inlang.plugin-i18next'].description['en']
 	 *   meta['inlang.plugin-i18next'].module
 	 */
-	meta: Record<Plugin["meta"]["id"], Pick<Plugin, "meta"> & { module: string }>
+	meta: Record<Plugin["meta"]["id"], Plugin["meta"] & { module: string }>
 }
 
 // --------------------------------------------- ZOD ---------------------------------------------

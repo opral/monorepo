@@ -68,3 +68,10 @@ export class PluginFunctionSaveMessagesAlreadyDefinedError extends PluginError {
 		this.name = "PluginFunctionSaveMessagesAlreadyDefinedError"
 	}
 }
+
+export class PluginAppSpecificApiReturnError extends PluginError {
+	constructor(message: string, options: PluginErrorOptions) {
+		super(message, options)
+		this.name = "PluginAppSpecificApiReturnError"
+	}
+}
