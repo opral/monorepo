@@ -108,6 +108,28 @@ describe('resolveModules', () => {
 	  // Assert results
 	  expect(resolved.errors[0]).toBeInstanceOf(ModuleImportError);
 	});
+
+	it('should return an error if a plugin does not export any plugins or lint rules', async () => {
+		const config: InlangConfig = {
+		  sourceLanguageTag: 'en',
+		  languageTags: ['de', 'en'],
+		  modules: ['https://myplugin.com/index.js'],
+		};
+
+		const env = {
+			$fs: {} as any,
+			$import: async () => ({
+				default: {},
+			} 
+			),
+		};
+
+		// Call the function
+		const resolved = await resolveModules({ config, env });
+
+		// Assert results
+		expect(resolved.errors[0]).toBeInstanceOf(ModuleError);
+	});
   
 	it('should handle invalid lint rule schema', async () => {
 	  const invalidLintRule = {
