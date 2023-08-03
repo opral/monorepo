@@ -107,7 +107,9 @@ export const plugin: Plugin<PluginOptions> = {
 			messages,
 		})
 	},
-	addAppSpecificApi: ideExtensionConfig(),
+	addAppSpecificApi: () => {
+		return { ...ideExtensionConfig() }
+	},
 }
 
 /**
