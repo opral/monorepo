@@ -1,4 +1,4 @@
-import { LintException, LintReport, LintRule, MessageLintReport, MessageLintRule } from "./api.js"
+import { LintException, LintRule, MessageLintReport, MessageLintRule } from "./api.js"
 import type { InlangConfig } from "@inlang/config"
 import type { Message, MessageQueryApi } from "@inlang/messages"
 
@@ -8,7 +8,7 @@ export const lintMessage = async (args: {
 	messages: Message[]
 	query: MessageQueryApi
 	message: Message
-}): Promise<{ data: LintReport[]; errors: LintException[] }> => {
+}): Promise<{ data: MessageLintReport[]; errors: LintException[] }> => {
 	const reports: MessageLintReport[] = []
 	const exceptions: LintException[] = []
 

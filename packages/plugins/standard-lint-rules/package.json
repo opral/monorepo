@@ -15,7 +15,10 @@
 		"dev": "DEV=true node ./build.js",
 		"build": "node ./build.js",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "vitest run",
+		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"test:watch": "npm-run-all --print-label --parallel tsc:watch vitest:watch",
+		"tsc:watch": "tsc --noEmit --watch",
+		"vitest:watch": "vitest watch --passWithNoTests --coverage",
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
