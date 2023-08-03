@@ -91,7 +91,6 @@ export const plugin: Plugin<PluginOptions> = {
 		SPACING = {}
 		NESTED = {}
 		FILE_HAS_NEW_LINE = {}
-		return {}
 	},
 	loadMessages: async ({ languageTags }) => {
 		if (!pluginFs || !pluginOptions) throw new Error("Plugin not setup")
