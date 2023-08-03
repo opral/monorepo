@@ -35,21 +35,28 @@ export type Plugin<
 	}>
 	/**
 	 * Load messages.
-	 *
-	 * - if messages with language tags that are not defined in the config.languageTags
-	 *   are returned, the user config will be automatically updated to include the
-	 *   new language tags.
 	 */
 	loadMessages?: (args: {
 		languageTags: Readonly<InlangConfig["languageTags"]>
 		options: Readonly<PluginOptions>
-		fs: InlangEnvironment["$fs"]
+		nodeishFs: InlangEnvironment["$fs"]
 	}) => Promise<Message[]> | Message[]
 	saveMessages?: (args: {
 		messages: Message[]
 		options: Readonly<PluginOptions>
 		fs: InlangEnvironment["$fs"]
 	}) => Promise<void> | void
+	/**
+	 * Detect language tags in the project.
+	 *
+	 * Some projects use files or another config file as the source
+	 * of truth for the language tags. This function allows plugins
+	 * to detect language tags of those other sources.
+	 *
+	 * Apps update the config.languageTags automatically if new
+	 * language tags are detected.
+	 */
+	detectedLanguageTags?: (args: { fs: InlangEnvironment["$fs"] }) => Promise<string[]> | string[]
 	/**
 	 * Define app specific APIs.
 	 *
