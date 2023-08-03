@@ -388,6 +388,45 @@ describe("addAppSpecificApi", () => {
 		expect(resolved.errors).toHaveLength(1)
 		expect(resolved.errors[0]).toBeInstanceOf(PluginAppSpecificApiReturnError)
 	})
+
+	it("it should throw an error if the passed options are not defined inside appSpecificApi", async () => {
+		const mockPlugin: Plugin = {
+			meta: {
+				id: "plugin.plugin",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+			},
+			loadMessages: () => undefined as any,
+			saveMessages: () => undefined as any,
+			addAppSpecificApi: ({ options = {hello: "world"} }) => ({
+				"my-app": {
+					messageReferenceMatcher: () => {
+						return options
+					},
+				},
+			}),
+		}
+
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["de", "en"],
+			modules: ["https://myplugin.com/index.js?pathPattern=src/**/*.{ts,tsx}"],
+		};
+
+		const env = mockEnvWithPlugins({ [config.modules[0]!]: mockPlugin })
+		const resolved = await resolvePlugins({
+			module: config.modules[0]!,
+			plugins: [mockPlugin],
+			pluginSettings: {},
+			config,
+			env,
+		});
+
+		expect(resolved.data.appSpecificApi).toHaveProperty("my-app")
+		// @ts-expect-error messageReferenceMatcher is not known to typescript
+		expect(resolved.data.appSpecificApi?.["my-app"].messageReferenceMatcher()).toEqual({hello: "world"})
+	})
 })
 
 describe("meta", () => {
