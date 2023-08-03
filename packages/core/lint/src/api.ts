@@ -1,25 +1,26 @@
 import type { Message, MessageQueryApi } from "@inlang/messages"
-import type { LanguageTag, TranslatedStrings } from "@inlang/language-tag"
-import { TranslatedStrings as TranslatedStringsSchema } from "@inlang/language-tag"
+import { LanguageTag, TranslatedStrings } from "@inlang/language-tag"
 import type { InlangConfig } from "@inlang/config"
-import { z } from "zod"
+import { Type, Static } from "@sinclair/typebox"
 
-export type LintLevel = "error" | "warning"
+export type LintLevel = Static<typeof LintLevel>
+export const LintLevel = Type.Union([Type.Literal("error"), Type.Literal("warning")])
 
-export type LintRule = {
-	meta: {
-		id: `${string}.${string}`
-		displayName: TranslatedStrings
-		description: TranslatedStrings
-	}
+export type LintRule = Static<typeof LintRule>
+export const LintRule = Type.Object({
+	meta: Type.Object({
+		id: Type.String(),
+		displayName: TranslatedStrings,
+		description: TranslatedStrings,
+	}),
 	/**
 	 * The default level of the lint rule.
 	 *
 	 * The default level exists as a fallback if the user
 	 * did not specify a level for the rule in the settings.
 	 */
-	defaultLevel: LintLevel
-}
+	defaultLevel: LintLevel,
+})
 
 export type MessageLintRule<
 	RuleOptions extends JSONSerializable<unknown> = Record<string, string> | unknown,
@@ -65,15 +66,3 @@ export class LintException extends Error {
 		this.name = "LintException"
 	}
 }
-
-/// ------ ZOD
-
-export const LintRule = z.object({
-	meta: z.object({
-		id: z.string(),
-		displayName: TranslatedStringsSchema,
-		description: TranslatedStringsSchema,
-	}),
-	defaultLevel: z.union([z.literal("error"), z.literal("warning")]),
-	setup: z.function(z.tuple([]), z.undefined()).optional(),
-})

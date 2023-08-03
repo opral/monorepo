@@ -1,10 +1,10 @@
 import type { ResolvedModulesFunction } from "./api.js"
 import { ModuleError, ModuleImportError } from "./errors.js"
 import { tryCatch } from "@inlang/result"
-import type { LintRule } from "@inlang/lint"
-import { LintRuleSchema } from "@inlang/lint"
+import { LintRule } from "@inlang/lint"
 import { ResolvePluginsFunction, resolvePlugins, type Plugin } from "@inlang/plugin"
 import extend from "just-extend"
+import { Value } from "@sinclair/typebox/value"
 
 /**
  * Resolves modules from the config.
@@ -49,7 +49,6 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 				continue
 			}
 
-
 			// --- RESOLVE PLUGINS ---
 			if (importedModule.data.default.plugins) {
 				const plugins = importedModule.data.default.plugins as Plugin[]
@@ -62,15 +61,16 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 				})
 
 				// -- ADD RESOLVED PLUGINS TO RESULT --
-				result.data.plugins = extend(result.data.plugins, resolvedPlugins) as Awaited<ReturnType<ResolvePluginsFunction>>
+				result.data.plugins = extend(result.data.plugins, resolvedPlugins) as Awaited<
+					ReturnType<ResolvePluginsFunction>
+				>
 			}
 
-
 			// --- PARSE LINT RULES ---
-			if(importedModule.data.default.lintRules) {
+			if (importedModule.data.default.lintRules) {
 				const lintRules = importedModule.data.default.lintRules as LintRule[]
 				const parsedLintRules = lintRules.map((rule) => {
-					const parsed = tryCatch(() => LintRuleSchema.parse(rule))
+					const parsed = tryCatch(() => Value.Check(LintRule, rule))
 					if (parsed.error) {
 						result.errors.push(
 							new ModuleError(

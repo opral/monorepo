@@ -7,7 +7,7 @@ import {
 	updateVariant,
 } from "./utilities.js"
 import { describe, test, expect } from "vitest"
-import type { Message } from "./api.js"
+import type { Message } from "./schema.js"
 
 describe("getVariant", () => {
 	test("should return the correct variant of a message", () => {
