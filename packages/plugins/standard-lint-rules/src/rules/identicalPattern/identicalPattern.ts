@@ -26,7 +26,9 @@ message to reduce translation effort.
 		const referenceVariants = body[config.sourceLanguageTag]!
 
 		const languageTags = Object.keys(body)
-		for (const languageTag of languageTags.filter((languageTag) => languageTag !== config.sourceLanguageTag)) {
+			.filter((languageTag) => languageTag !== config.sourceLanguageTag)
+
+		for (const languageTag of languageTags) {
 			const isMessageIdentical =
 				messageBodyToString(referenceVariants) === messageBodyToString(body[languageTag]!)
 			const shouldBeIgnored = (referenceVariants || []).some((variant) =>
