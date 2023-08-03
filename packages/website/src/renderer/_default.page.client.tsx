@@ -58,7 +58,7 @@ const [currentPageProps, setCurrentPageProps] = createStore<Record<string, unkno
 
 export function render(pageContext: PageContextRenderer) {
 	try {
-		const isEditor = pageContext.urlPathname.startsWith("/editor")
+		const isEditor = pageContext.urlPathname.includes("/editor")
 		setCurrentPageContext(pageContext)
 		setCurrentPage(() => pageContext.Page)
 		setCurrentPageProps(pageContext.pageProps)
@@ -70,7 +70,12 @@ export function render(pageContext: PageContextRenderer) {
 			;(isEditor ? renderApp : hydrate)(
 				() => (
 					<MetaProvider>
-						<Root page={currentPage()!} pageProps={currentPageProps} locale={pageContext.locale} />
+						<Root
+							page={currentPage()!}
+							pageProps={currentPageProps}
+							isEditor={isEditor}
+							locale={pageContext.locale}
+						/>
 					</MetaProvider>
 				),
 				rootElement,

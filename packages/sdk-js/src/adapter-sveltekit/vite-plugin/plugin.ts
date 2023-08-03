@@ -2,10 +2,11 @@ import { dedent } from "ts-dedent"
 import type { ViteDevServer, Plugin } from "vite"
 import { assertAppTemplateIsCorrect } from "./checks/appTemplate.js"
 import { assertRoutesFolderPathExists, assertNecessaryFilesArePresent } from "./checks/routes.js"
-import { getTransformConfig, resetConfig } from "./config.js"
+import { getTransformConfig, resetConfig, type TransformConfig } from "./config.js"
 import { filePathForOutput, getFileInformation } from "./fileInformation.js"
 import { transformCode } from "../ast-transforms/index.js"
 import { InlangSdkException } from "./exceptions.js"
+import { inspect } from "node:util"
 
 let viteServer: ViteDevServer | undefined
 
@@ -72,7 +73,6 @@ export const plugin = () => {
 
 		async transform(code, id) {
 			const config = await getTransformConfig()
-
 			const fileInformation = getFileInformation(config, id)
 			// eslint-disable-next-line unicorn/no-null
 			if (!fileInformation) return null
@@ -87,6 +87,8 @@ export const plugin = () => {
 			}
 
 			if (config.debug || includesDebugImport(code)) {
+				logConfig(config)
+
 				console.info(dedent`
 					-- INLANG DEBUG START ----------------------------------------------------------
 
@@ -107,6 +109,21 @@ export const plugin = () => {
 			return transformedCode
 		},
 	} satisfies Plugin
+}
+
+let configLogged = false
+const logConfig = (config: TransformConfig) => {
+	if (configLogged) return
+
+	const { inlang: _, ...configToLog } = config
+	console.info(dedent`
+		-- INLANG RESOLVED CONFIG ------------------------------------------------------
+
+		${inspect(configToLog, false, 99)}
+
+	`)
+
+	configLogged = true
 }
 
 const REGEX_DEBUG_IMPORT = /import\s+["']@inlang\/sdk-js\/debug["']/
