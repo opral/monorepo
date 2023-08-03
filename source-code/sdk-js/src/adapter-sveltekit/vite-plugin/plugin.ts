@@ -6,7 +6,7 @@ import { getTransformConfig, resetConfig, type TransformConfig } from "./config.
 import { filePathForOutput, getFileInformation } from "./fileInformation.js"
 import { transformCode } from "../ast-transforms/index.js"
 import { InlangSdkException } from "./exceptions.js"
-import { inspect } from 'node:util'
+import { inspect } from "node:util"
 
 let viteServer: ViteDevServer | undefined
 
