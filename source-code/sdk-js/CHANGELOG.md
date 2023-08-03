@@ -1,5 +1,12 @@
 # @inlang/sdk-js
 
+## 0.11.1
+
+### Patch Changes
+
+- 23659501: ensure `getRuntimeFromContext` get's called after it has been set in root `+layout.svelte`
+- f55b2be5: move `data` export right after imports in `+layout.svelte`
+
 ## 0.11.0
 
 ### Minor Changes
