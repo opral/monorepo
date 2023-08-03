@@ -10,7 +10,6 @@ import { throwIfInvalidOptions, type PluginOptions } from "./options.js"
 import { detectJsonSpacing, detectIsNested, replaceAll } from "./utilities.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
 import { flatten, unflatten } from "flat"
-import { parse } from "./ideExtension/messageReferenceMatchers.js"
 
 /**
  * The spacing of the JSON files in this repository.
