@@ -24,7 +24,7 @@ describe("generally", () => {
 				keywords: [],
 				usedApis: [],
 			},
-			setup: () => undefined as any,
+			
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
 			addAppSpecificApi() {
@@ -89,7 +89,7 @@ describe("generally", () => {
 				displayName: { en: "" },
 				keywords: [],
 			},
-			setup: () => undefined as any,
+			
 			loadMessages: () => undefined as any,
 		}
 
@@ -122,7 +122,7 @@ describe("loadMessages", () => {
 				displayName: { en: "" },
 				keywords: [],
 			},
-			setup: () => undefined as any,
+			
 			loadMessages: async () => [{ id: "test", expressions: [], selectors: [], body: { en: [] } }],
 		}
 
@@ -152,7 +152,7 @@ describe("loadMessages", () => {
 				displayName: { en: "" },
 				keywords: [],
 			},
-			setup: () => undefined as any,
+			
 			loadMessages: async () => undefined as any,
 		}
 		const mockPlugin2: Plugin = {
@@ -162,7 +162,7 @@ describe("loadMessages", () => {
 				displayName: { en: "" },
 				keywords: [],
 			},
-			setup: () => undefined as any,
+			
 			loadMessages: async () => undefined as any,
 		}
 
@@ -199,7 +199,7 @@ describe("saveMessages", () => {
 				displayName: { en: "" },
 				keywords: [],
 			},
-			setup: () => undefined as any,
+			
 			saveMessages: async () => undefined as any,
 		}
 
@@ -229,7 +229,7 @@ describe("saveMessages", () => {
 				displayName: { en: "" },
 				keywords: [],
 			},
-			setup: () => undefined as any,
+			
 			saveMessages: async () => undefined as any,
 		}
 		const mockPlugin2: Plugin = {
@@ -239,7 +239,7 @@ describe("saveMessages", () => {
 				displayName: { en: "" },
 				keywords: [],
 			},
-			setup: () => undefined as any,
+			
 			saveMessages: async () => undefined as any,
 		}
 
@@ -276,7 +276,7 @@ describe("addAppSpecificApi", () => {
 				displayName: { en: "" },
 				keywords: [],
 			},
-			setup: () => undefined as any,
+			
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
 			addAppSpecificApi: () => ({
@@ -312,7 +312,7 @@ describe("addAppSpecificApi", () => {
 				displayName: { en: "" },
 				keywords: [],
 			},
-			setup: () => undefined as any,
+			
 			addAppSpecificApi: () => ({
 				"my-app-1": {
 					functionOfMyApp1: () => undefined as any,
@@ -329,7 +329,6 @@ describe("addAppSpecificApi", () => {
 				displayName: { en: "" },
 				keywords: [],
 			},
-			setup: () => undefined as any,
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
 			addAppSpecificApi: () => ({
@@ -371,7 +370,6 @@ describe("addAppSpecificApi", () => {
 				displayName: { en: "" },
 				keywords: [],
 			},
-			setup: () => undefined as any,
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
 			addAppSpecificApi: () => undefined as any,
@@ -406,7 +404,6 @@ describe("meta", () => {
 				displayName: { en: "My Plugin" },
 				keywords: ["plugin", "my-plugin"],
 			},
-			setup: () => undefined as any,
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
 			addAppSpecificApi: () => {
@@ -451,7 +448,6 @@ describe("meta", () => {
 				displayName: { en: "My Plugin" },
 				keywords: ["plugin", "my-plugin"],
 			},
-			setup: () => undefined as any,
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
 			addAppSpecificApi: () => {
@@ -465,7 +461,6 @@ describe("meta", () => {
 				displayName: { en: "My Plugin 2" },
 				keywords: ["plugin", "my-plugin-2"],
 			},
-			setup: () => undefined as any,
 			addAppSpecificApi: () => ({
 				"my-app-1": {
 					functionOfMyApp1: () => undefined as any,
@@ -497,105 +492,6 @@ describe("meta", () => {
 
 		expect(resolved.data.meta).toHaveProperty("plugin.plugin")
 		expect(resolved.data.meta).toHaveProperty("plugin.plugin2")
-	})
-})
-
-
-describe("error handling", () => {
-	it("should handle PluginError instances thrown during plugin setup", async () => {
-		const mockPlugin: Plugin = {
-			meta: {
-				id: "plugin.plugin-save-messages",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
-			},
-			setup: () => {
-				throw new PluginError("Plugin error", { plugin: "plugin.plugin-save-messages" })
-			},
-		}
-
-		const config: InlangConfig = {
-			sourceLanguageTag: "en",
-			languageTags: ["de", "en"],
-			modules: ["https://myplugin.com/index.js"],
-		};
-
-		const env = mockEnvWithPlugins({ [config.modules[0]!]: mockPlugin })
-		const resolved = await resolvePlugins({
-			module: config.modules[0]!,
-			plugins: [mockPlugin],
-			pluginSettings: {},
-			config,
-			env,
-		});
-
-		expect(resolved.errors).toHaveLength(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginError)
-	})
-
-	it("should handle generic Error instances thrown during plugin setup", async () => {
-		const mockPlugin: Plugin = {
-			meta: {
-				id: "plugin.plugin-save-messages",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
-			},
-			setup: () => {
-				throw new Error("Generic error")
-			},
-		}
-
-		const config: InlangConfig = {
-			sourceLanguageTag: "en",
-			languageTags: ["de", "en"],
-			modules: ["https://myplugin.com/index.js"],
-		};
-
-		const env = mockEnvWithPlugins({ [config.modules[0]!]: mockPlugin })
-		const resolved = await resolvePlugins({
-			module: config.modules[0]!,
-			plugins: [mockPlugin],
-			pluginSettings: {},
-			config,
-			env,
-		});
-
-		expect(resolved.errors).toHaveLength(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginError)
-	})
-
-	it("should handle unhandled and unknown errors during plugin setup", async () => {
-		const mockPlugin: Plugin = {
-			meta: {
-				id: "plugin.plugin-save-messages",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
-			},
-			setup: () => {
-				throw "Unknown error"
-			},
-		}
-
-		const config: InlangConfig = {
-			sourceLanguageTag: "en",
-			languageTags: ["de", "en"],
-			modules: ["https://myplugin.com/index.js"],
-		};
-
-		const env = mockEnvWithPlugins({ [config.modules[0]!]: mockPlugin })
-		const resolved = await resolvePlugins({
-			module: config.modules[0]!,
-			plugins: [mockPlugin],
-			pluginSettings: {},
-			config,
-			env,
-		});
-
-		expect(resolved.errors).toHaveLength(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginError)
 	})
 })
 

@@ -34,7 +34,6 @@ describe('resolveModules', () => {
 		  displayName: { en: 'Mock Plugin' },
 		  keywords: [],
 		},
-		setup: () => undefined as any,
 		loadMessages: () => undefined as any,
 		saveMessages: () => undefined as any,
 		addAppSpecificApi: () => ({
@@ -50,8 +49,7 @@ describe('resolveModules', () => {
 		  description: { en: 'Mock lint rule description' },
 		  displayName: { en: 'Mock Lint Rule' },
 		},
-		defaultLevel: 'error',
-		setup: () => undefined as any,
+		defaultLevel: 'error'
 	  };
   
 	  const config: InlangConfig = {
