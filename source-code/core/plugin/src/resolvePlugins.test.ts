@@ -141,7 +141,7 @@ describe("loadMessages", () => {
 			env,
 		});
 
-		expect(await resolved.data.loadMessages!({languageTags: ["en"], options: {}, fs: env.$fs})).toEqual([{ id: "test", expressions: [], selectors: [], body: { en: [] } }])
+		expect(await resolved.data.loadMessages!({languageTags: ["en"], options: {}, nodeishFs: env.$fs})).toEqual([{ id: "test", expressions: [], selectors: [], body: { en: [] } }])
 	})
 
 	it("should collect an error if function is defined twice in multiple plugins", async () => {
