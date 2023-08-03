@@ -11,7 +11,7 @@ export const addOrMoveDataExportAndReturnIndex = (sourceFile: SourceFile) => {
 	const dataExport = findExport(sourceFile, "data")
 	if (dataExport) {
 		// move data export after imports
-		(dataExport.getParent().getParent() as VariableStatement)?.setOrder(index)
+		;(dataExport.getParent().getParent() as VariableStatement)?.setOrder(index)
 	} else {
 		sourceFile.insertStatements(index, `export let data`)
 	}
