@@ -24,7 +24,7 @@ export const pluginIdRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+(?:-[a-z0-9]+)
  */
 export type Plugin<
 	PluginOptions extends JSONSerializable<unknown> = Record<string, string> | unknown,
-	AppSpecificApis extends JSONSerializable<unknown> = Record<string, string>,
+	AppSpecificApis extends JSONSerializable<unknown> = Record<string, unknown>,
 > = {
 	// * Must be JSON serializable if we want an external plugin manifest in the future.
 	meta: JSONSerializable<{
