@@ -1,6 +1,6 @@
 import { expect, it, describe } from "vitest"
 import type { PluginOptions } from "./options.js"
-import type { Message, Plugin, Variant } from "@inlang/plugin"
+import type { Message, Variant } from "@inlang/plugin"
 import { createMockEnvironment, createVariant, getVariant } from "@inlang/plugin"
 
 describe("option pathPattern", () => {
@@ -916,5 +916,37 @@ describe("roundTrip", () => {
 		plugin.saveMessages!({ messages, options, nodeishFs: env.$fs })
 		const newMessage = await plugin.loadMessages!({ languageTags, options, nodeishFs: env.$fs })
 		expect(newMessage).toStrictEqual(messages)
+	})
+})
+
+describe("detectedLanguages", () => {
+	it("get correct LanguageTags with string pathPattern", async () => {
+		const env = await createMockEnvironment({})
+		await env.$fs.writeFile("./en.json", "{}")
+		await env.$fs.writeFile("./de.json", "{}")
+		await env.$fs.writeFile("./fr.json", "{}")
+		const options: PluginOptions = {
+			pathPattern: "./{languageTag}.json",
+		}
+		const { plugin } = await import("./plugin.js")
+		const detectedLanguages = await plugin.detectedLanguageTags!({ options, nodeishFs: env.$fs })
+		expect(detectedLanguages).toStrictEqual(["en", "de", "fr"])
+	})
+
+	it("get correct LanguageTags with object pathPattern", async () => {
+		const env = await createMockEnvironment({})
+		await env.$fs.mkdir("./en")
+		await env.$fs.writeFile("./en/common.json", "{}")
+		await env.$fs.mkdir("./de")
+		await env.$fs.writeFile("./de/common.json", "{}")
+
+		const options: PluginOptions = {
+			pathPattern: {
+				common: "./{languageTag}/common.json",
+			},
+		}
+		const { plugin } = await import("./plugin.js")
+		const detectedLanguages = await plugin.detectedLanguageTags!({ options, nodeishFs: env.$fs })
+		expect(detectedLanguages).toStrictEqual(["en", "de"])
 	})
 })
