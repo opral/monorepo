@@ -1,6 +1,6 @@
 import { createQuery } from "./query.js"
 import { it, describe, expect } from "vitest"
-import type { Message } from "./api.js"
+import type { Message } from "./schema.js"
 
 describe("create", () => {
 	const query = createQuery([])
