@@ -41,13 +41,13 @@ export type Plugin<
 	 *   new language tags.
 	 */
 	loadMessages?: (args: {
-		languageTags: InlangConfig["languageTags"]
-		options: PluginOptions
+		languageTags: Readonly<InlangConfig["languageTags"]>
+		options: Readonly<PluginOptions>
 		fs: InlangEnvironment["$fs"]
 	}) => Promise<Message[]> | Message[]
 	saveMessages?: (args: {
 		messages: Message[]
-		options: PluginOptions
+		options: Readonly<PluginOptions>
 		fs: InlangEnvironment["$fs"]
 	}) => Promise<void> | void
 	/**
