@@ -38,13 +38,13 @@ export type Plugin<
 	 */
 	loadMessages?: (args: {
 		languageTags: Readonly<InlangConfig["languageTags"]>
-		options: Readonly<PluginOptions>
+		options: PluginOptions
 		nodeishFs: InlangEnvironment["$fs"]
 	}) => Promise<Message[]> | Message[]
 	saveMessages?: (args: {
 		messages: Message[]
-		options: Readonly<PluginOptions>
-		fs: InlangEnvironment["$fs"]
+		options: PluginOptions
+		nodeishFs: InlangEnvironment["$fs"]
 	}) => Promise<void> | void
 	/**
 	 * Detect language tags in the project.
@@ -132,13 +132,25 @@ export const Plugin = z.object({
 	loadMessages: z.optional(
 		z
 			.function()
-			.args(z.object({ languageTags: z.custom<InlangConfig["languageTags"]>() }))
+			.args(
+				z.object({
+					languageTags: z.custom<InlangConfig["languageTags"]>(),
+					options: z.record(z.union([z.string(), z.array(z.string()), z.record(z.string())])),
+					fs: z.custom<InlangEnvironment["$fs"]>(),
+				}),
+			)
 			.returns(z.custom<Message[]>()),
 	),
 	saveMessages: z.optional(
 		z
 			.function()
-			.args(z.object({ messages: z.custom<Message[]>() }))
+			.args(
+				z.object({
+					messages: z.custom<Message[]>(),
+					options: z.record(z.union([z.string(), z.array(z.string()), z.record(z.string())])),
+					fs: z.custom<InlangEnvironment["$fs"]>(),
+				}),
+			)
 			.returns(z.custom<void>()),
 	),
 	addAppSpecificApi: z.optional(z.function().args().returns(z.custom<Record<string, unknown>>())),
