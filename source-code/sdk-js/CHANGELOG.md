@@ -1,5 +1,12 @@
 # @inlang/sdk-js
 
+## 0.11.2
+
+### Patch Changes
+
+- 2f1045a5: [feature] show resolved config when debugging output
+- 2f1045a5: [fix] detection of static output
+
 ## 0.11.1
 
 ### Patch Changes
