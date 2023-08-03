@@ -6,33 +6,32 @@ import { z } from "zod"
 
 export type LintLevel = "error" | "warning"
 
-export type LintRule<
-	RuleOptions extends JSONSerializable<unknown> = Record<string, string> | unknown,
-> = {
+export type LintRule = {
 	meta: {
 		id: `${string}.${string}`
 		displayName: TranslatedStrings
 		description: TranslatedStrings
-		/**
-		 * The default level of the lint rule.
-		 *
-		 * The default lint level is added to the user config
-		 * on first run.
-		 */
 	}
+	/**
+	 * The default level of the lint rule.
+	 *
+	 * The default level exists as a fallback if the user
+	 * did not specify a level for the rule in the settings.
+	 */
 	defaultLevel: LintLevel
-	setup?: (args: { options: RuleOptions }) => MaybePromise<void>
 }
 
-export const LintRule = z.object({
-	meta: z.object({
-		id: z.string(),
-		displayName: TranslatedStringsSchema,
-		description: TranslatedStringsSchema,
-	}),
-	defaultLevel: z.union([z.literal("error"), z.literal("warning")]),
-	setup: z.function(z.tuple([]), z.undefined()).optional(),
-})
+export type MessageLintRule<
+	RuleOptions extends JSONSerializable<unknown> = Record<string, string> | unknown,
+> = LintRule & {
+	message: (args: {
+		message: Message
+		query: Pick<MessageQueryApi, "get">
+		config: Readonly<InlangConfig>
+		options: RuleOptions
+		report: ReportMessageLint
+	}) => MaybePromise<void>
+}
 
 // TODO: make it a general type for other packages to use
 type JSONSerializable<
@@ -41,17 +40,6 @@ type JSONSerializable<
 
 // TODO: make it a general type for other packages to use
 type MaybePromise<T> = T | Promise<T>
-
-export type MessageLintRule<
-	RuleOptions extends JSONSerializable<unknown> = Record<string, string> | unknown,
-> = LintRule<RuleOptions> & {
-	message: (args: {
-		message: Message
-		query: Pick<MessageQueryApi, "get">
-		config: Readonly<InlangConfig>
-		report: ReportMessageLint
-	}) => MaybePromise<void>
-}
 
 export type ReportMessageLint = (args: {
 	messageId: Message["id"]
@@ -77,3 +65,15 @@ export class LintException extends Error {
 		this.name = "LintException"
 	}
 }
+
+/// ------ ZOD
+
+export const LintRule = z.object({
+	meta: z.object({
+		id: z.string(),
+		displayName: TranslatedStringsSchema,
+		description: TranslatedStringsSchema,
+	}),
+	defaultLevel: z.union([z.literal("error"), z.literal("warning")]),
+	setup: z.function(z.tuple([]), z.undefined()).optional(),
+})
