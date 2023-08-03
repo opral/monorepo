@@ -1,11 +1,9 @@
-import type { Variant } from "@inlang/messages"
+import type { Text, Variant } from "@inlang/messages"
 import type { MessageLintRule } from "@inlang/lint"
 
 type IdenticalPatternRuleOptions = {
 	ignore?: string[]
 }
-
-let options: IdenticalPatternRuleOptions
 
 export const identicalPatternRule = ({
 	meta: {
@@ -24,19 +22,17 @@ message to reduce translation effort.
 		},
 	},
 	defaultLevel: "warning",
-	setup: (args) => {
-		options = args.options
-	},
-	message: ({ message: { id, body }, config, report }) => {
+	message: ({ message: { id, body }, config, report, options }) => {
 		const referenceVariants = body[config.sourceLanguageTag]!
 
 		const languageTags = Object.keys(body)
-		for (const languageTag of languageTags) {
+		for (const languageTag of languageTags.filter((languageTag) => languageTag !== config.sourceLanguageTag)) {
 			const isMessageIdentical =
 				messageBodyToString(referenceVariants) === messageBodyToString(body[languageTag]!)
 			const shouldBeIgnored = (referenceVariants || []).some((variant) =>
 				options.ignore?.includes(patternToString(variant.pattern)),
 			)
+
 			if (isMessageIdentical && !shouldBeIgnored) {
 				report({
 					messageId: id,
@@ -54,4 +50,8 @@ message to reduce translation effort.
 const messageBodyToString = (body: Variant[]) => JSON.stringify(body)
 
 // TODO: use a generic toString function instead of this custom code
-const patternToString = (pattern: Variant["pattern"]) => JSON.stringify(pattern)
+const patternToString = (pattern: Variant["pattern"]) =>
+	pattern
+		.filter((pattern): pattern is Text => pattern.type === 'Text')
+		.map((part) => part.value)
+		.join("")
