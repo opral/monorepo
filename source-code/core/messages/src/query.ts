@@ -1,4 +1,4 @@
-import type { Message } from "./api.js"
+import type { Message } from "./schema.js"
 
 export type MessageQueryApi = {
 	create: (args: { data: Message }) => void

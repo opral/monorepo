@@ -2,7 +2,8 @@ import type { InlangConfig, PluginSettings } from "@inlang/config"
 import { TranslatedStrings } from "@inlang/language-tag"
 import type { Message } from "@inlang/messages"
 import type { InlangEnvironment } from "@inlang/environment"
-import { z } from "zod"
+import { Type } from "@sinclair/typebox"
+
 import type {
 	PluginApiAlreadyDefinedError,
 	PluginError,
@@ -15,16 +16,11 @@ type JSONSerializable<
 > = T
 
 /**
- * Regex for valid plugin ids.
- */
-export const pluginIdRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+(?:-[a-z0-9]+)*$/
-
-/**
  * The plugin API is used to extend inlang's functionality.
  */
 export type Plugin<
 	PluginOptions extends JSONSerializable<unknown> = Record<string, string> | unknown,
-	AppSpecificApis extends JSONSerializable<unknown> = Record<string, unknown>,
+	AppSpecificApis extends Record<string, unknown> = Record<string, unknown>,
 > = {
 	// * Must be JSON serializable if we want an external plugin manifest in the future.
 	meta: JSONSerializable<{
@@ -127,62 +123,19 @@ export type ResolvedPlugins = {
 	meta: Record<Plugin["meta"]["id"], Plugin["meta"] & { module: string }>
 }
 
-// --------------------------------------------- ZOD ---------------------------------------------
+// ---------------------------- RUNTIME VALIDATION TYPES ---------------------------------------------
 
-const PluginOptions = z.record(z.union([z.string(), z.array(z.string()), z.record(z.string())]))
-
-export const Plugin = z
-	.object({
-		meta: z.object({
-			id: z.custom<Plugin["meta"]["id"]>((value) => pluginIdRegex.test(value as string)),
-			displayName: TranslatedStrings,
-			description: TranslatedStrings,
-			keywords: z.array(z.string()),
+export const Plugin = Type.Object({
+	meta: Type.Object({
+		id: Type.TemplateLiteral(`${Type.String()}.${Type.String()}`, {
+			examples: ["inlang.plugin-i18next", "erasor.plugin-vodoo"],
 		}),
-		loadMessages: z.optional(
-			z
-				.function()
-				.args(
-					z.object({
-						languageTags: z.custom<InlangConfig["languageTags"]>(),
-						options: PluginOptions,
-						nodeishFs: z.custom<InlangEnvironment["$fs"]>(),
-					}),
-				)
-				.returns(z.custom<Message[]>()),
-		),
-		saveMessages: z.optional(
-			z
-				.function()
-				.args(
-					z.object({
-						messages: z.custom<Message[]>(),
-						options: PluginOptions,
-						nodeishFs: z.custom<InlangEnvironment["$fs"]>(),
-					}),
-				)
-				.returns(z.custom<void>()),
-		),
-		detectedLanguageTags: z.optional(
-			z
-				.function()
-				.args(
-					z.object({
-						nodeishFs: z.custom<InlangEnvironment["$fs"]>(),
-						options: PluginOptions,
-					}),
-				)
-				.returns(z.custom<Promise<string[]> | string[]>()),
-		),
-		addAppSpecificApi: z.optional(
-			z
-				.function()
-				.args(
-					z.object({
-						options: PluginOptions,
-					}),
-				)
-				.returns(z.custom<Record<string, unknown>>()),
-		),
-	})
-	.strict()
+		displayName: TranslatedStrings,
+		description: TranslatedStrings,
+		keywords: Type.Array(Type.String()),
+	}),
+	loadMessages: Type.Any(),
+	saveMessages: Type.Any(),
+	detectedLanguageTags: Type.Any(),
+	addAppSpecificApi: Type.Any(),
+})

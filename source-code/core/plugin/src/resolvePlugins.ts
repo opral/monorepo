@@ -1,10 +1,8 @@
-import { Plugin, pluginIdRegex, ResolvePluginsFunction } from "./api.js"
+import type { ResolvePluginsFunction } from "./api.js"
 import {
 	PluginAppSpecificApiReturnError,
 	PluginFunctionLoadMessagesAlreadyDefinedError,
 	PluginFunctionSaveMessagesAlreadyDefinedError,
-	PluginInvalidIdError,
-	PluginUsesInvalidApiError,
 	PluginUsesReservedNamespaceError,
 } from "./errors.js"
 import { deepmerge } from "deepmerge-ts"
@@ -27,15 +25,15 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 		 * -------------- RESOLVE PLUGIN --------------
 		 */
 
-		// -- INVALID ID in META --
-		if (new RegExp(pluginIdRegex).test(plugin.meta.id) === false) {
-			result.errors.push(
-				new PluginInvalidIdError(
-					`Plugin ${plugin.meta.id} has an invalid id "${plugin.meta.id}". It must be kebap-case and contain a namespace like project.my-plugin.`,
-					{ plugin: plugin.meta.id },
-				),
-			)
-		}
+		// // -- INVALID ID in META --
+		// if (new RegExp(pluginIdRegex).test(plugin.meta.id) === false) {
+		// 	result.errors.push(
+		// 		new PluginInvalidIdError(
+		// 			`Plugin ${plugin.meta.id} has an invalid id "${plugin.meta.id}". It must be kebap-case and contain a namespace like project.my-plugin.`,
+		// 			{ plugin: plugin.meta.id },
+		// 		),
+		// 	)
+		// }
 
 		// -- USES RESERVED NAMESPACE --
 		if (plugin.meta.id.includes("inlang") && !whitelistedPlugins.includes(plugin.meta.id)) {
@@ -49,19 +47,19 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			)
 		}
 
-		// -- USES INVALID API --
-		const pluginSchema = Plugin.safeParse(plugin)
-		if (pluginSchema.success === false) {
-			result.errors.push(
-				new PluginUsesInvalidApiError(
-					`Plugin ${plugin.meta.id} uses invalid API. Please check the type of the exposed plugin.`,
-					{
-						plugin: plugin.meta.id,
-						cause: pluginSchema.error,
-					},
-				),
-			)
-		}
+		// // -- USES INVALID API --
+		// const pluginSchema = Plugin.safeParse(plugin)
+		// if (pluginSchema.success === false) {
+		// 	result.errors.push(
+		// 		new PluginUsesInvalidApiError(
+		// 			`Plugin ${plugin.meta.id} uses invalid API. Please check the type of the exposed plugin.`,
+		// 			{
+		// 				plugin: plugin.meta.id,
+		// 				cause: pluginSchema.error,
+		// 			},
+		// 		),
+		// 	)
+		// }
 
 		// -- ALREADY DEFINED LOADMESSAGES / SAVEMESSAGES --
 		if (typeof plugin.loadMessages === "function" && result.data.loadMessages !== undefined) {
