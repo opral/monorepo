@@ -70,7 +70,7 @@ export type Plugin<
 	 * 	 }
 	 *  })
 	 */
-	addAppSpecificApi?: () => AppSpecificApis
+	addAppSpecificApi?: (args: { options: PluginOptions }) => AppSpecificApis
 	// afterSetup: () => {}
 }
 
@@ -113,7 +113,7 @@ export type ResolvedPlugins = {
 	 *  // use
 	 *  appSpecificApi['inlang.ide-extension'].messageReferenceMatcher()
 	 */
-	appSpecificApi: Record<string, unknown>
+	appSpecificApi?: Plugin["addAppSpecificApi"]
 	/**
 	 * Metainformation for a specific plugin.
 	 *
@@ -125,6 +125,8 @@ export type ResolvedPlugins = {
 }
 
 // --------------------------------------------- ZOD ---------------------------------------------
+
+const PluginOptions = z.record(z.union([z.string(), z.array(z.string()), z.record(z.string())]))
 
 export const Plugin = z
 	.object({
@@ -138,13 +140,11 @@ export const Plugin = z
 			z
 				.function()
 				.args(
-					z
-						.object({
-							languageTags: z.custom<InlangConfig["languageTags"]>(),
-							options: z.record(z.union([z.string(), z.array(z.string()), z.record(z.string())])),
-							nodeishFs: z.custom<InlangEnvironment["$fs"]>(),
-						})
-						.strict(),
+					z.object({
+						languageTags: z.custom<InlangConfig["languageTags"]>(),
+						options: PluginOptions,
+						nodeishFs: z.custom<InlangEnvironment["$fs"]>(),
+					}),
 				)
 				.returns(z.custom<Message[]>()),
 		),
@@ -152,13 +152,11 @@ export const Plugin = z
 			z
 				.function()
 				.args(
-					z
-						.object({
-							messages: z.custom<Message[]>(),
-							options: z.record(z.union([z.string(), z.array(z.string()), z.record(z.string())])),
-							nodeishFs: z.custom<InlangEnvironment["$fs"]>(),
-						})
-						.strict(),
+					z.object({
+						messages: z.custom<Message[]>(),
+						options: PluginOptions,
+						nodeishFs: z.custom<InlangEnvironment["$fs"]>(),
+					}),
 				)
 				.returns(z.custom<void>()),
 		),
@@ -166,15 +164,22 @@ export const Plugin = z
 			z
 				.function()
 				.args(
-					z
-						.object({
-							nodeishFs: z.custom<InlangEnvironment["$fs"]>(),
-							options: z.record(z.union([z.string(), z.array(z.string()), z.record(z.string())])),
-						})
-						.strict(),
+					z.object({
+						nodeishFs: z.custom<InlangEnvironment["$fs"]>(),
+						options: PluginOptions,
+					}),
 				)
 				.returns(z.custom<Promise<string[]> | string[]>()),
 		),
-		addAppSpecificApi: z.optional(z.function().args().returns(z.custom<Record<string, unknown>>())),
+		addAppSpecificApi: z.optional(
+			z
+				.function()
+				.args(
+					z.object({
+						options: PluginOptions,
+					}),
+				)
+				.returns(z.custom<Record<string, unknown>>()),
+		),
 	})
 	.strict()
