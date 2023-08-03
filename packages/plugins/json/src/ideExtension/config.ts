@@ -24,5 +24,5 @@ export const ideExtensionConfig = (): Plugin["addAppSpecificApi"] => () => ({
 				language: "svelte",
 			},
 		],
-	}
+	},
 })
