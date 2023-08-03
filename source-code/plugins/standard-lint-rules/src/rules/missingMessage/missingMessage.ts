@@ -18,11 +18,12 @@ been translated yet.
 	},
 	defaultLevel: "error",
 	message: ({ message: { id, body }, config, report }) => {
-		const languageTags = config.languageTags.filter(
-			(languageTag) => languageTag !== config.sourceLanguageTag,
-		)
+		const languageTags = config.languageTags
+			.filter((languageTag) => languageTag !== config.sourceLanguageTag)
+
 		for (const languageTag of languageTags) {
 			const variants = body[languageTag] || []
+
 			if (!variants.length) {
 				report({
 					messageId: id,
@@ -35,7 +36,7 @@ been translated yet.
 			}
 
 			const patterns = variants.flatMap(({ pattern }) => pattern)
-			if (patterns.length) {
+			if (!patterns.length) {
 				report({
 					messageId: id,
 					languageTag,

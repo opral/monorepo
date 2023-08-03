@@ -1,66 +1,105 @@
 import { expect, test } from "vitest"
-import { getLintReports, lint } from "@inlang/core/lint"
 import type { InlangConfig } from "@inlang/config"
+import type { Message, MessageQueryApi } from '@inlang/messages'
+import { missingMessageRule } from './missingMessage.js'
+import { lintMessage } from '@inlang/lint'
 
-const config: Pick<InlangConfig, "sourceLanguageTag" | "languageTags" | "modules"> = {
-	sourceLanguageTag: "en",
-	languageTags: ["en", "de", "fr"],
-	modules: ["./index.js"],
+
+const message1: Message = {
+	id: "1",
+	expressions: [],
+	selectors: [],
+	body: {
+		en: [{ match: {}, pattern: [{ type: 'Text', value: 'Inlang' }] }],
+		de: [{ match: {}, pattern: [{ type: 'Text', value: 'Inlang' }] }],
+		fr: [],
+		es: [{ match: {}, pattern: [] }],
+		cn: [{ match: {}, pattern: [{ type: 'Text', value: '' }] }],
+	},
 }
 
-const [lintedResources, errors] = await lint({
-	config,
-	resources: [
-		createResource("en", createMessage("test", "1")),
-		createResource("de"),
-		createResource("fr", createMessage("test", "1")),
-	],
-})
+const messages = [message1]
 
-test("it should not throw errors", () => {
-	expect(errors).toBeUndefined()
-})
-
-test("should report if a message is missing", async () => {
-	const reports = lintedResources.flatMap((resource) => getLintReports(resource))
-	expect(reports).toHaveLength(1)
-	expect(reports[0]!.message).toBe("Message with id 'test' is missing for 'de'.")
-})
-
-test("should report if a message has an empty pattern", async () => {
-	const [lintedResources] = await lint({
-		config,
-		resources: [
-			createResource("en", createMessage("test", "1")),
-			createResource("fr", createMessage("test", "1")),
-			createResource("de", {
-				type: "Message",
-				id: { type: "Identifier", name: "test" },
-				pattern: { type: "Pattern", elements: [] },
-			}),
-		],
+test("should not report if all messages are present", async () => {
+	const result = await lintMessage({
+		config: {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "de"],
+		} as Partial<InlangConfig> as InlangConfig,
+		query: {} as MessageQueryApi,
+		messages,
+		message: message1,
+		rules: [missingMessageRule],
 	})
-	const reports = lintedResources.flatMap((resource) => getLintReports(resource))
-	expect(reports).toHaveLength(1)
-	expect(reports[0]!.message).toBe("Empty pattern (length 0).")
+
+	expect(result.errors).toHaveLength(0)
+	expect(result.data).toHaveLength(0)
+})
+
+test("should report if a languageTag is not present", async () => {
+	const result = await lintMessage({
+		config: {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "it"],
+		} as Partial<InlangConfig> as InlangConfig,
+		query: {} as MessageQueryApi,
+		messages,
+		message: message1,
+		rules: [missingMessageRule],
+	})
+
+	expect(result.errors).toHaveLength(0)
+	expect(result.data).toHaveLength(1)
+	expect(result.data[0]!.languageTag).toBe('it')
+})
+
+test("should report if no variants are defined", async () => {
+	const result = await lintMessage({
+		config: {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "fr"],
+		} as Partial<InlangConfig> as InlangConfig,
+		query: {} as MessageQueryApi,
+		messages,
+		message: message1,
+		rules: [missingMessageRule],
+	})
+
+	expect(result.errors).toHaveLength(0)
+	expect(result.data).toHaveLength(1)
+	expect(result.data[0]!.languageTag).toBe('fr')
+})
+
+test("should report if no patterns are defined", async () => {
+	const result = await lintMessage({
+		config: {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "es"],
+		} as Partial<InlangConfig> as InlangConfig,
+		query: {} as MessageQueryApi,
+		messages,
+		message: message1,
+		rules: [missingMessageRule],
+	})
+
+	expect(result.errors).toHaveLength(0)
+	expect(result.data).toHaveLength(1)
+	expect(result.data[0]!.languageTag).toBe('es')
 })
 
 test("should report if a message has a pattern with only one text element that is an empty string", async () => {
-	const [lintedResources] = await lint({
-		config,
-		resources: [
-			createResource("en", createMessage("test", "1")),
-			createResource("fr", createMessage("test", "1")),
-			createResource("de", {
-				type: "Message",
-				id: { type: "Identifier", name: "test" },
-				pattern: { type: "Pattern", elements: [{ type: "Text", value: "" }] },
-			}),
-		],
+	const result = await lintMessage({
+		config: {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "cn"],
+		} as Partial<InlangConfig> as InlangConfig,
+		query: {} as MessageQueryApi,
+		messages,
+		message: message1,
+		rules: [missingMessageRule],
 	})
-	const reports = lintedResources.flatMap((resource) => getLintReports(resource))
-	expect(reports).toHaveLength(1)
-	expect(reports[0]!.message).toBe(
-		"The pattern contains only only one element which is an empty string.",
-	)
+
+	expect(result.errors).toHaveLength(0)
+	expect(result.data).toHaveLength(1)
+	expect(result.data[0]!.languageTag).toBe('cn')
 })
