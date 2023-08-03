@@ -101,8 +101,8 @@ export const plugin: Plugin<PluginOptions> = {
 			options,
 		})
 	},
-	// addAppSpecificApi: () => {
-	// 	return { ...ideExtensionConfig(pluginOptions!) }
+	// addAppSpecificApi: ({ options }) => {
+	// 	return { ...ideExtensionConfig(options) }
 	// },
 }
 
@@ -436,6 +436,8 @@ function serializePattern(
 
 /**
  * Detect languageTags from resources
+ *
+ * @example const languageTags = await detectLanguageTags({ fs, options })
  */
 async function detectLanguageTags(args: {
 	nodeishFs: InlangEnvironment["$fs"]

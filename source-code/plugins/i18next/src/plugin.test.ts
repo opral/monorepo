@@ -919,7 +919,7 @@ describe("roundTrip", () => {
 	})
 })
 
-describe("detectedLanguages", () => {
+describe("detectedLanguageTags", () => {
 	it("get correct LanguageTags with string pathPattern", async () => {
 		const env = await createMockEnvironment({})
 		await env.$fs.writeFile("./en.json", "{}")
@@ -949,4 +949,6 @@ describe("detectedLanguages", () => {
 		const detectedLanguages = await plugin.detectedLanguageTags!({ options, nodeishFs: env.$fs })
 		expect(detectedLanguages).toStrictEqual(["en", "de"])
 	})
+
+	//Todo: test ignore
 })
