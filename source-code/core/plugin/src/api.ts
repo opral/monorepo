@@ -71,7 +71,6 @@ export type Plugin<
 	 *  })
 	 */
 	addAppSpecificApi?: (args: { options: PluginOptions }) => AppSpecificApis
-	// afterSetup: () => {}
 }
 
 /**
@@ -105,15 +104,19 @@ export type ResolvedPlugins = {
 	 *
 	 * @example
 	 *  // define
-	 *  appSpecificApi: () => ({
+	 *  appSpecificApi: ({ options }) => ({
 	 * 	 "inlang.ide-extension": {
-	 * 	   messageReferenceMatcher: () => {}
+	 * 	   messageReferenceMatcher: () => {
+	 * 		 // use options
+	 * 		 options.pathPattern
+	 * 		return
+	 * 	   }
 	 * 	 }
 	 *  })
 	 *  // use
 	 *  appSpecificApi['inlang.ide-extension'].messageReferenceMatcher()
 	 */
-	appSpecificApi?: Plugin["addAppSpecificApi"]
+	appSpecificApi?: ReturnType<NonNullable<Plugin["addAppSpecificApi"]>>
 	/**
 	 * Metainformation for a specific plugin.
 	 *
