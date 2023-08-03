@@ -53,8 +53,8 @@ export type Plugin<
 	 * of truth for the language tags. This function allows plugins
 	 * to detect language tags of those other sources.
 	 *
-	 * Apps update the config.languageTags automatically if new
-	 * language tags are detected.
+	 * Apps use this function to prompt the user to update their
+	 * language tags in the config if additional language tags are detected.
 	 */
 	detectedLanguageTags?: (args: { fs: InlangEnvironment["$fs"] }) => Promise<string[]> | string[]
 	/**
