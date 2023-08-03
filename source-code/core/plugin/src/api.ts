@@ -122,36 +122,38 @@ export type ResolvedPlugins = {
 
 // --------------------------------------------- ZOD ---------------------------------------------
 
-export const Plugin = z.object({
-	meta: z.object({
-		id: z.custom<Plugin["meta"]["id"]>((value) => pluginIdRegex.test(value as string)),
-		displayName: TranslatedStrings,
-		description: TranslatedStrings,
-		keywords: z.array(z.string()),
-	}),
-	loadMessages: z.optional(
-		z
-			.function()
-			.args(
-				z.object({
-					languageTags: z.custom<InlangConfig["languageTags"]>(),
-					options: z.record(z.union([z.string(), z.array(z.string()), z.record(z.string())])),
-					fs: z.custom<InlangEnvironment["$fs"]>(),
-				}),
-			)
-			.returns(z.custom<Message[]>()),
-	),
-	saveMessages: z.optional(
-		z
-			.function()
-			.args(
-				z.object({
-					messages: z.custom<Message[]>(),
-					options: z.record(z.union([z.string(), z.array(z.string()), z.record(z.string())])),
-					fs: z.custom<InlangEnvironment["$fs"]>(),
-				}),
-			)
-			.returns(z.custom<void>()),
-	),
-	addAppSpecificApi: z.optional(z.function().args().returns(z.custom<Record<string, unknown>>())),
-}).strict()
+export const Plugin = z
+	.object({
+		meta: z.object({
+			id: z.custom<Plugin["meta"]["id"]>((value) => pluginIdRegex.test(value as string)),
+			displayName: TranslatedStrings,
+			description: TranslatedStrings,
+			keywords: z.array(z.string()),
+		}),
+		loadMessages: z.optional(
+			z
+				.function()
+				.args(
+					z.object({
+						languageTags: z.custom<InlangConfig["languageTags"]>(),
+						options: z.record(z.union([z.string(), z.array(z.string()), z.record(z.string())])),
+						nodeishFs: z.custom<InlangEnvironment["$fs"]>(),
+					}),
+				)
+				.returns(z.custom<Message[]>()),
+		),
+		saveMessages: z.optional(
+			z
+				.function()
+				.args(
+					z.object({
+						messages: z.custom<Message[]>(),
+						options: z.record(z.union([z.string(), z.array(z.string()), z.record(z.string())])),
+						nodeishFs: z.custom<InlangEnvironment["$fs"]>(),
+					}),
+				)
+				.returns(z.custom<void>()),
+		),
+		addAppSpecificApi: z.optional(z.function().args().returns(z.custom<Record<string, unknown>>())),
+	})
+	.strict()
