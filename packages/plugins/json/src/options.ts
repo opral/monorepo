@@ -2,6 +2,7 @@
 export type PluginOptions = {
 	pathPattern: string | Record<string, string>
 	variableReferencePattern?: string[] //default is ["{{", "}}"]
+	ignore: string[] // default is []
 }
 
 /**

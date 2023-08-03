@@ -15,7 +15,7 @@ import { flatten, unflatten } from "flat"
  * The spacing of the JSON files in this repository.
  *
  * @example
- *  { "/en.json" = 2 }
+ * { "/en.json" = 2 }
  */
 let SPACING: Record<string, ReturnType<typeof detectJsonSpacing>> = {}
 
@@ -23,7 +23,7 @@ let SPACING: Record<string, ReturnType<typeof detectJsonSpacing>> = {}
  * The nesting the JSON files in this repository
  *
  * @example
- *  { "/en.json" = nested }
+ * { "/en.json" = nested }
  */
 let NESTED: Record<string, ReturnType<typeof detectIsNested>> = {}
 
@@ -35,16 +35,6 @@ let NESTED: Record<string, ReturnType<typeof detectIsNested>> = {}
  * { "/de.json" = false }
  */
 let FILE_HAS_NEW_LINE: Record<string, boolean> = {}
-
-/**
- * pluginOptions that are saved in plugin State (available for plugin functions)
- */
-let pluginOptions: PluginOptions | undefined = undefined
-
-/**
- * fileSystem that is saved in plugin State (available for plugin functions)
- */
-let pluginFs: InlangEnvironment["$fs"] | undefined = undefined
 
 /**
  * Defines the default spacing for JSON files.
@@ -83,33 +73,37 @@ export const plugin: Plugin<PluginOptions> = {
 		description: { en: "JSON plugin for inlang" },
 		keywords: ["json", "generic"],
 	},
-	setup: ({ options, fs }) => {
+	loadMessages: async ({ languageTags, options, nodeishFs }) => {
 		options.variableReferencePattern = options.variableReferencePattern || ["{{", "}}"]
 		throwIfInvalidOptions(options)
-		pluginOptions = options
-		pluginFs = fs
 		SPACING = {}
 		NESTED = {}
 		FILE_HAS_NEW_LINE = {}
-	},
-	loadMessages: async ({ languageTags }) => {
-		if (!pluginFs || !pluginOptions) throw new Error("Plugin not setup")
 		return loadMessages({
-			fs: pluginFs,
-			options: pluginOptions,
+			nodeishFs,
+			options,
 			languageTags,
 		})
 	},
-	saveMessages: async ({ messages }) => {
+	saveMessages: async ({ messages, options, nodeishFs }) => {
+		options.variableReferencePattern = options.variableReferencePattern || ["{{", "}}"]
+		throwIfInvalidOptions(options)
 		return saveMessages({
-			fs: pluginFs!,
-			options: pluginOptions!,
+			nodeishFs,
+			options,
 			messages,
 		})
 	},
-	addAppSpecificApi: () => {
-		return { ...ideExtensionConfig() }
+	detectedLanguageTags: async ({ nodeishFs, options }) => {
+		options.ignore = options.ignore || []
+		return detectLanguageTags({
+			nodeishFs,
+			options,
+		})
 	},
+	// addAppSpecificApi: ({ options }) => {
+	// 	return { ...ideExtensionConfig(options) }
+	// },
 }
 
 /**
@@ -118,24 +112,34 @@ export const plugin: Plugin<PluginOptions> = {
  * @example const messages = await loadMessages({ fs, options, languageTags })
  */
 async function loadMessages(args: {
-	fs: InlangEnvironment["$fs"]
+	nodeishFs: InlangEnvironment["$fs"]
 	options: PluginOptions
-	languageTags: LanguageTag[]
+	languageTags: Readonly<LanguageTag[]>
 }): Promise<Message[]> {
 	const messages: Message[] = []
 	for (const languageTag of args.languageTags) {
 		if (typeof args.options.pathPattern !== "string") {
 			for (const [prefix, path] of Object.entries(args.options.pathPattern)) {
-				const messagesFromFile = await getFileToParse(path, languageTag, args.fs)
+				const messagesFromFile = await getFileToParse(path, languageTag, args.nodeishFs)
 				for (const [key, value] of Object.entries(messagesFromFile)) {
 					const prefixedKey = prefix + ":" + replaceAll(key, "u002E", ".")
-					addVariantToMessages(messages, prefixedKey, languageTag, value)
+					addVariantToMessages(messages, prefixedKey, languageTag, value, args.options)
 				}
 			}
 		} else {
-			const messagesFromFile = await getFileToParse(args.options.pathPattern, languageTag, args.fs)
+			const messagesFromFile = await getFileToParse(
+				args.options.pathPattern,
+				languageTag,
+				args.nodeishFs,
+			)
 			for (const [key, value] of Object.entries(messagesFromFile)) {
-				addVariantToMessages(messages, replaceAll(key, "u002E", "."), languageTag, value)
+				addVariantToMessages(
+					messages,
+					replaceAll(key, "u002E", "."),
+					languageTag,
+					value,
+					args.options,
+				)
 			}
 		}
 	}
@@ -153,12 +157,12 @@ async function loadMessages(args: {
 async function getFileToParse(
 	path: string,
 	languageTag: string,
-	fs: InlangEnvironment["$fs"],
+	nodeishFs: InlangEnvironment["$fs"],
 ): Promise<Record<string, string>> {
 	const pathWithLanguage = path.replace("{languageTag}", languageTag)
 	// get file, make sure that is not braking when the namespace doesn't exist in every languageTag dir
 	try {
-		const file = await fs.readFile(pathWithLanguage, { encoding: "utf-8" })
+		const file = await nodeishFs.readFile(pathWithLanguage, { encoding: "utf-8" })
 		//analyse format of file
 		SPACING[pathWithLanguage] = detectJsonSpacing(file as string)
 		NESTED[pathWithLanguage] = detectIsNested(file as string)
@@ -192,12 +196,13 @@ const addVariantToMessages = (
 	key: string,
 	languageTag: LanguageTag,
 	value: string,
+	options: PluginOptions,
 ) => {
 	const messageIndex = messages.findIndex((m) => m.id === key)
 	if (messageIndex !== -1) {
 		const variant: Variant = {
 			match: {},
-			pattern: parsePattern(value, pluginOptions!.variableReferencePattern),
+			pattern: parsePattern(value, options.variableReferencePattern),
 		}
 		// Check if the languageTag exists in the body of the message
 		if (!messages[messageIndex]?.body[languageTag]) {
@@ -217,7 +222,7 @@ const addVariantToMessages = (
 		message.body[languageTag] = [
 			{
 				match: {},
-				pattern: parsePattern(value, pluginOptions!.variableReferencePattern),
+				pattern: parsePattern(value, options.variableReferencePattern),
 			},
 		]
 		messages.push(message)
@@ -278,7 +283,7 @@ function parsePattern(
  * @example await saveMessages({ fs, options, messages })
  */
 async function saveMessages(args: {
-	fs: InlangEnvironment["$fs"]
+	nodeishFs: InlangEnvironment["$fs"]
 	options: PluginOptions
 	messages: Message[]
 }) {
@@ -312,9 +317,9 @@ async function saveMessages(args: {
 					.slice(0, -1)
 					.join("/")
 				try {
-					await args.fs.readdir(directoryPath)
+					await args.nodeishFs.readdir(directoryPath)
 				} catch {
-					await args.fs.mkdir(directoryPath)
+					await args.nodeishFs.mkdir(directoryPath)
 				}
 			}
 			for (const [prefix, value] of Object.entries(_value)) {
@@ -322,7 +327,7 @@ async function saveMessages(args: {
 					"{languageTag}",
 					languageTag,
 				)
-				await args.fs.writeFile(
+				await args.nodeishFs.writeFile(
 					pathWithLanguage,
 					serializeFile(
 						value,
@@ -348,7 +353,7 @@ async function saveMessages(args: {
 		}
 		for (const [languageTag, value] of Object.entries(storage)) {
 			const pathWithLanguage = args.options.pathPattern.replace("{languageTag}", languageTag)
-			await args.fs.writeFile(
+			await args.nodeishFs.writeFile(
 				pathWithLanguage,
 				serializeFile(
 					value,
@@ -426,4 +431,46 @@ function serializePattern(
 		}
 	}
 	return result.join("")
+}
+
+/**
+ * Detect languageTags from resources
+ *
+ * @example const languageTags = await detectLanguageTags({ fs, options })
+ */
+async function detectLanguageTags(args: {
+	nodeishFs: InlangEnvironment["$fs"]
+	options: PluginOptions
+}): Promise<string[]> {
+	const languages: string[] = []
+
+	// because of duplication of code the pathArray is eather parsed by th epathPattern object or created by the pathPattern string
+	const pathArray: Array<string> =
+		typeof args.options.pathPattern !== "string"
+			? Object.values(args.options.pathPattern)
+			: [args.options.pathPattern]
+
+	// When there are namespaces, this will loop through all namespaces and collect the languages, otherwise it is just one path
+	for (const path of pathArray) {
+		const [pathBeforeLanguage] = path.split("{languageTag}")
+		const parentDirectory = await args.nodeishFs.readdir(pathBeforeLanguage!)
+
+		for (const filePath of parentDirectory) {
+			//check if file really exists in the dir
+			const fileExists = await Promise.resolve(
+				args.nodeishFs
+					.readFile(path.replace("{languageTag}", filePath.replace(".json", "")))
+					.then(() => true)
+					.catch(() => false),
+			)
+			//collect languages for each pathPattern -> so we do not miss any language
+			//It is not enough to just get the prentDirectory -> there could be false directories
+			if (fileExists && args.options.ignore?.some((s) => s === filePath) === false) {
+				languages.push(filePath.replace(".json", ""))
+			}
+		}
+	}
+
+	// Using Set(), an instance of unique values will be created, implicitly using this instance will delete the duplicates.
+	return [...new Set(languages)]
 }
