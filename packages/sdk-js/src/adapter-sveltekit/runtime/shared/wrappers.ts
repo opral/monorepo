@@ -1,4 +1,3 @@
-import { browser } from "$app/environment"
 import type * as Kit from "@sveltejs/kit"
 import { detectLanguageTag, type Detector } from "../../../detectors/index.js"
 import { initSvelteKitClientRuntime, type SvelteKitClientRuntime } from "../client/runtime.js"
@@ -14,7 +13,7 @@ import type { LanguageTag } from "@inlang/core/languageTag"
 
 // ------------------------------------------------------------------------------------------------
 
-let initializedRuntime: Record<LanguageTag, SvelteKitClientRuntime> = {}
+const cache: Record<LanguageTag, Resource | undefined> = {}
 
 const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, any>>(
 	event: Parameters<Load>[0],
@@ -48,20 +47,15 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 					...options.initDetectors(event),
 			  )
 
-	const runtime =
-		initializedRuntime[languageTag as LanguageTag] ||
-		(await initSvelteKitClientRuntime({
-			fetch: event.fetch,
-			languageTag,
-			sourceLanguageTag,
-			languageTags,
-		}))
+	const runtime = await initSvelteKitClientRuntime({
+		fetch: event.fetch,
+		language,
+		referenceLanguage,
+		languages,
+		cache,
+	})
 
 	resolveRuntimePromise(runtime)
-
-	if (browser && languageTag) {
-		initializedRuntime = { [languageTag]: runtime }
-	}
 
 	return runtime
 }
