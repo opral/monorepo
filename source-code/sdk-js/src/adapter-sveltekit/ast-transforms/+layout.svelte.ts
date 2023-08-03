@@ -4,7 +4,7 @@ import type { TransformConfig } from "../vite-plugin/config.js"
 import { transformSvelte } from "./_.svelte.js"
 import { dedent } from "ts-dedent"
 import { isOptOutImportPresent } from "./utils/imports.js"
-import { addDataExportIfMissingAndReturnInsertionIndex } from "./utils/exports.js"
+import { addOrMoveDataExportAndReturnIndex } from "./utils/exports.js"
 import { insertSlotIfEmptyFile, wrapMarkupChildren } from "./utils/markup.js"
 import { getSvelteFileParts, markupToAst } from "./utils/svelte.util.js"
 import { MagicString } from "../magic-string.js"
@@ -47,7 +47,7 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 	// remove imports to avoid conflicts, those imports get added in a reactive way
 	removeImport(sourceFile, "@inlang/sdk-js", "i", "language")
 
-	const index = addDataExportIfMissingAndReturnInsertionIndex(sourceFile)
+	const index = addOrMoveDataExportAndReturnIndex(sourceFile)
 
 	// TODO: add `addRuntimeToGlobalThis` code only if needed
 	sourceFile.insertStatements(

@@ -243,7 +243,6 @@ describe("transformLayoutSvelte", () => {
 				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
 				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
 				import { addRuntimeToGlobalThis } from '@inlang/sdk-js/adapter-sveltekit/client/shared';
-				console.info(123);
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
 				addRuntimeToContext(getRuntimeFromData(data));
@@ -254,6 +253,7 @@ describe("transformLayoutSvelte", () => {
 				    ({ i, language } = getRuntimeFromContext());
 				    document.body.parentElement?.setAttribute('lang', language);
 				}
+				console.info(123);
 				console.info(i(\\"welcome\\"));
 				</script>{#key language}
 
@@ -391,6 +391,40 @@ describe("transformLayoutSvelte", () => {
 				</script>{#key language}
 
 				<button on:click={() => switchLanguage('en')}>Switch Language</button>{/key}"
+			`)
+		})
+
+		test("data export already defined", () => {
+			const code = dedent`
+				<script lang="ts">
+					import { languages } from '@inlang/sdk-js'
+
+					console.log(languages)
+
+					export let data
+				</script>
+			`
+			const config = initTransformConfig()
+			const transformed = transformLayoutSvelte("", config, code, true)
+			expect(transformed).toMatchInlineSnapshot(`
+				"<script lang=\\"ts\\">
+					import { browser } from '$app/environment';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
+				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
+				import { addRuntimeToGlobalThis } from '@inlang/sdk-js/adapter-sveltekit/client/shared';
+				export let data;
+				addRuntimeToGlobalThis(getRuntimeFromData(data));
+				addRuntimeToContext(getRuntimeFromData(data));
+				let { i, language } = getRuntimeFromContext();
+				$: if (browser) {
+				    addRuntimeToGlobalThis(getRuntimeFromData(data));
+				    addRuntimeToContext(getRuntimeFromData(data));
+				    ({ i, language } = getRuntimeFromContext());
+				    document.body.parentElement?.setAttribute('lang', language);
+				}
+				const { languages } = getRuntimeFromContext();
+				console.log(languages);
+				</script>"
 			`)
 		})
 	})
