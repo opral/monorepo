@@ -120,7 +120,7 @@ export const resetConfig = () => (configPromise = undefined)
 
 // ------------------------------------------------------------------------------------------------
 
-class InlangSdkConfigException extends InlangSdkException { }
+class InlangSdkConfigException extends InlangSdkException {}
 
 function assertConfigWithSdk(
 	config: InlangConfig | undefined,
@@ -217,11 +217,14 @@ const shouldContentBePrerendered = async (routesFolder: string) => {
 
 	const modules = await Promise.all(
 		filesToLookFor.map(async (file) => {
-			const contents = await readFile(path.resolve(routesFolder, file), { encoding: "utf-8" })
-				.catch(() => undefined)
+			const contents = await readFile(path.resolve(routesFolder, file), {
+				encoding: "utf-8",
+			}).catch(() => undefined)
 			if (!contents) return {}
 
-			return import("data:application/javascript;base64," + Buffer.from(contents).toString("base64"))
+			return import(
+				"data:application/javascript;base64," + Buffer.from(contents).toString("base64")
+			)
 		}),
 	)
 
