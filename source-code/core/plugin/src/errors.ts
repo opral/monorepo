@@ -1,7 +1,4 @@
-import type { $ImportError } from "@inlang/environment"
 import type { Plugin } from "./api.js"
-
-// TODO rename to error
 
 type PluginErrorOptions = {
 	plugin: Plugin["meta"]["id"]
@@ -21,7 +18,7 @@ export class PluginError extends Error {
  * Error thrown when a plugin cannot be imported.
  */
 export class PluginImportError extends PluginError {
-	constructor(message: string, options: PluginErrorOptions & { cause: $ImportError }) {
+	constructor(message: string, options: PluginErrorOptions) {
 		super(message, options)
 		this.name = "PluginImportError"
 	}

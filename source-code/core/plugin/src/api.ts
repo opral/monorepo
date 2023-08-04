@@ -1,9 +1,8 @@
 import type { InlangConfig, PluginSettings } from "@inlang/config"
 import { TranslatedStrings } from "@inlang/language-tag"
 import type { Message } from "@inlang/messages"
-import type { InlangEnvironment } from "@inlang/environment"
 import { Type } from "@sinclair/typebox"
-
+import type { NodeishFilesystem as LisaNodeishFilesystem } from "@inlang-git/fs"
 import type {
 	PluginApiAlreadyDefinedError,
 	PluginError,
@@ -14,6 +13,16 @@ import type {
 type JSONSerializable<
 	T extends Record<string, string | string[] | Record<string, string | string[]>> | unknown,
 > = T
+
+/**
+ * The filesystem is a subset of the node:fs/promises module.
+ *
+ * Internally, the filesystem is implemented by project lisa.
+ */
+export type NodeishFilesystem = Pick<
+	LisaNodeishFilesystem,
+	"readFile" | "readdir" | "mkdir" | "rm" | "rmdir"
+>
 
 /**
  * The plugin API is used to extend inlang's functionality.
@@ -35,12 +44,12 @@ export type Plugin<
 	loadMessages?: (args: {
 		languageTags: Readonly<InlangConfig["languageTags"]>
 		options: PluginOptions
-		nodeishFs: InlangEnvironment["$fs"]
+		nodeishFs: NodeishFilesystem
 	}) => Promise<Message[]> | Message[]
 	saveMessages?: (args: {
 		messages: Message[]
 		options: PluginOptions
-		nodeishFs: InlangEnvironment["$fs"]
+		nodeishFs: NodeishFilesystem
 	}) => Promise<void> | void
 	/**
 	 * Detect language tags in the project.
@@ -53,7 +62,7 @@ export type Plugin<
 	 * language tags in the config if additional language tags are detected.
 	 */
 	detectedLanguageTags?: (args: {
-		nodeishFs: InlangEnvironment["$fs"]
+		nodeishFs: NodeishFilesystem
 		options: PluginOptions
 	}) => Promise<string[]> | string[]
 	/**
@@ -76,8 +85,6 @@ export type ResolvePluginsFunction = (args: {
 	module: string
 	plugins: Plugin[]
 	pluginSettings: Record<Plugin["meta"]["id"], PluginSettings>
-	config: InlangConfig
-	env: InlangEnvironment
 }) => Promise<{
 	data: ResolvedPlugins
 	errors: Array<
