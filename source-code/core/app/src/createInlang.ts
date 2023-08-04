@@ -1,7 +1,7 @@
 import { InlangConfig } from "@inlang/config"
 import type { InlangInstance } from "./api.js"
 import { ImportFunction, createImport, resolveModules } from "@inlang/module"
-import type { NodeishFilesystem } from "@inlang/plugin"
+import type { NodeishFilesystemSubset } from "@inlang/plugin"
 
 /**
  * Creates an inlang instance.
@@ -12,7 +12,7 @@ import type { NodeishFilesystem } from "@inlang/plugin"
  */
 export async function createInlang(args: {
 	configPath: string
-	nodeishFs: NodeishFilesystem
+	nodeishFs: NodeishFilesystemSubset
 	_import?: ImportFunction
 }): Promise<InlangInstance> {
 	// TODO #1182 the filesystem type is incorrect. manual type casting is required
