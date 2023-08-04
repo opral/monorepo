@@ -5,6 +5,7 @@ export type {
 	NodeishFilesystemSubset,
 } from "./api.js"
 export { resolvePlugins } from "./resolvePlugins.js"
+export { pluginBuildConfig } from "./pluginBuildConfig.js"
 
 /**
  * -------- RE-EXPORTS --------
