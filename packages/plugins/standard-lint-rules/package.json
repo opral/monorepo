@@ -22,9 +22,10 @@
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
+	"dependencies": {
+		"@inlang/module": "*"
+	},
 	"devDependencies": {
-		"@inlang/module": "*",
-		"@inlang/lint": "*",
 		"concurrently": "^8.0.1",
 		"esbuild": "^0.17.19",
 		"tsd": "^0.28.1",
