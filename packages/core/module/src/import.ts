@@ -1,6 +1,6 @@
 import { dedent } from "ts-dedent"
 import { normalizePath } from "@inlang-git/fs"
-import type { NodeishFilesystem } from "@inlang/plugin"
+import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import { ModuleImportError } from "./errors.js"
 
 /**
@@ -22,7 +22,7 @@ export type ImportFunction = (uri: string) => Promise<any>
  */
 export function createImport(args: {
 	/** the fs from which the file can be read */
-	readFile: NodeishFilesystem["readFile"]
+	readFile: NodeishFilesystemSubset["readFile"]
 	/** http client implementation */
 	fetch: typeof fetch
 }): (uri: string) => ReturnType<typeof $import> {
@@ -36,7 +36,7 @@ async function $import(
 		/**
 		 * Required to import from a local path.
 		 */
-		readFile: NodeishFilesystem["readFile"]
+		readFile: NodeishFilesystemSubset["readFile"]
 		/**
 		 * Required to import via network.
 		 */

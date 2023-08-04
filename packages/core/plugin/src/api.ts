@@ -10,13 +10,13 @@ type JSONSerializable<
 > = T
 
 /**
- * The filesystem is a subset of the node:fs/promises module.
+ * The filesystem is a subset of project lisa's nodeish filesystem.
  *
- * Internally, the filesystem is implemented by project lisa.
+ * - only uses minimally required functions to decrease the API footprint on the ecosystem.
  */
-export type NodeishFilesystem = Pick<
+export type NodeishFilesystemSubset = Pick<
 	LisaNodeishFilesystem,
-	"readFile" | "readdir" | "mkdir" | "rm" | "rmdir"
+	"readFile" | "readdir" | "mkdir" | "writeFile"
 >
 
 /**
@@ -39,12 +39,12 @@ export type Plugin<
 	loadMessages?: (args: {
 		languageTags: Readonly<InlangConfig["languageTags"]>
 		options: PluginOptions
-		nodeishFs: NodeishFilesystem
+		nodeishFs: NodeishFilesystemSubset
 	}) => Promise<Message[]> | Message[]
 	saveMessages?: (args: {
 		messages: Message[]
 		options: PluginOptions
-		nodeishFs: NodeishFilesystem
+		nodeishFs: NodeishFilesystemSubset
 	}) => Promise<void> | void
 	/**
 	 * Detect language tags in the project.
@@ -57,7 +57,7 @@ export type Plugin<
 	 * language tags in the config if additional language tags are detected.
 	 */
 	detectedLanguageTags?: (args: {
-		nodeishFs: NodeishFilesystem
+		nodeishFs: NodeishFilesystemSubset
 		options: PluginOptions
 	}) => Promise<string[]> | string[]
 	/**
