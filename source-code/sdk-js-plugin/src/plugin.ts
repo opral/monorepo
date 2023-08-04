@@ -19,4 +19,4 @@ export const sdkPlugin = {
 			"inlang.ide-extension": ideExtensionDefaultConfig,
 		}
 	},
-} satisfies Plugin<SdkConfigInput>
+} as Plugin<SdkConfigInput>

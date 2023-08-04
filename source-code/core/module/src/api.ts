@@ -21,7 +21,7 @@ import type { InlangEnvironment } from "@inlang/environment"
 
 export type InlangModule = {
 	default: {
-		plugins?: Plugin[]
+		plugins?: Plugin<any>[]
 		lintRules?: LintRule[]
 	}
 }
