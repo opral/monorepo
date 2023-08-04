@@ -6,7 +6,7 @@
  */
 
 import { context } from "esbuild"
-import { pluginBuildConfig } from "@inlang/core/plugin"
+import { pluginBuildConfig } from "@inlang/plugin"
 
 const options = await pluginBuildConfig({
 	entryPoints: ["./src/index.js"],
