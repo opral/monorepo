@@ -51,7 +51,7 @@ describe("generally", () => {
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
 			},
-			// @ts-expect-error the API is not available
+			// @ts-expect-error the key is not available in type
 			nonExistentKey: {
 				nonexistentOptions: "value",
 			},

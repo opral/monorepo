@@ -59,7 +59,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 		if (errors.length > 0) {
 			result.errors.push(
 				new PluginUsesInvalidSchemaError(
-					`Plugin ${plugin.meta.id} uses an invalid schema. Please check the documentation for the correct type.`,
+					`Plugin ${plugin.meta.id} uses an invalid schema. Please check the documentation for the correct Plugin type.`,
 					{
 						plugin: plugin.meta.id,
 						cause: errors,
