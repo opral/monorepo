@@ -3,12 +3,7 @@ import { TranslatedStrings } from "@inlang/language-tag"
 import type { Message } from "@inlang/messages"
 import { Type } from "@sinclair/typebox"
 import type { NodeishFilesystem as LisaNodeishFilesystem } from "@inlang-git/fs"
-import type {
-	PluginApiAlreadyDefinedError,
-	PluginError,
-	PluginUsesReservedNamespaceError,
-	PluginUsesInvalidApiError,
-} from "./errors.js"
+import type { PluginError } from "./errors.js"
 
 type JSONSerializable<
 	T extends Record<string, string | string[] | Record<string, string | string[]>> | unknown,
