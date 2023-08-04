@@ -117,10 +117,10 @@ export type ResolvedPlugins = {
 
 export const Plugin = Type.Object({
 	meta: Type.Object({
-		id: Type.TemplateLiteral([Type.String()], { 
-			pattern: "^[a-z0-9-]+\\.[a-z0-9-]+$",
-			examples: ["example.my-plugin"]
-		}),
+		id: Type.String({ 
+      pattern: "^[a-z0-9-]+\\.[a-z0-9-]+$",
+      examples: ["example.my-plugin"]
+    }),
 		displayName: TranslatedStrings,
 		description: TranslatedStrings,
 		keywords: Type.Array(Type.String()),
