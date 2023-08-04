@@ -4,12 +4,7 @@ import type { Message } from "@inlang/messages"
 import type { InlangEnvironment } from "@inlang/environment"
 import { Type } from "@sinclair/typebox"
 
-import type {
-	PluginApiAlreadyDefinedError,
-	PluginError,
-	PluginUsesReservedNamespaceError,
-	PluginUsesInvalidApiError,
-} from "./errors.js"
+import type { PluginError} from "./errors.js"
 
 type JSONSerializable<
 	T extends Record<string, string | string[] | Record<string, string | string[]>> | unknown,
@@ -80,12 +75,7 @@ export type ResolvePluginsFunction = (args: {
 	env: InlangEnvironment
 }) => Promise<{
 	data: ResolvedPlugins
-	errors: Array<
-		| PluginError
-		| PluginApiAlreadyDefinedError
-		| PluginUsesInvalidApiError
-		| PluginUsesReservedNamespaceError
-	>
+	errors: Array<PluginError>
 }>
 
 /**
@@ -127,15 +117,16 @@ export type ResolvedPlugins = {
 
 export const Plugin = Type.Object({
 	meta: Type.Object({
-		id: Type.TemplateLiteral(`${Type.String()}.${Type.String()}`, {
-			examples: ["inlang.plugin-i18next", "erasor.plugin-vodoo"],
+		id: Type.TemplateLiteral([Type.String()], { 
+			pattern: "^[a-z0-9-]+\\.[a-z0-9-]+$",
+			examples: ["example.my-plugin"]
 		}),
 		displayName: TranslatedStrings,
 		description: TranslatedStrings,
 		keywords: Type.Array(Type.String()),
 	}),
-	loadMessages: Type.Any(),
-	saveMessages: Type.Any(),
-	detectedLanguageTags: Type.Any(),
-	addAppSpecificApi: Type.Any(),
+	loadMessages: Type.Optional(Type.Any()),
+	saveMessages: Type.Optional(Type.Any()),
+	detectedLanguageTags: Type.Optional(Type.Any()),
+	addAppSpecificApi: Type.Optional(Type.Any()),
 })

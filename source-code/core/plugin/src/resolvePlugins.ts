@@ -1,13 +1,20 @@
-import type { ResolvePluginsFunction } from "./api.js"
+import { Plugin, ResolvePluginsFunction } from "./api.js"
 import {
 	PluginAppSpecificApiReturnError,
 	PluginFunctionLoadMessagesAlreadyDefinedError,
 	PluginFunctionSaveMessagesAlreadyDefinedError,
+	PluginUsesInvalidIdError,
+	PluginUsesInvalidSchemaError,
 	PluginUsesReservedNamespaceError,
 } from "./errors.js"
 import { deepmerge } from "deepmerge-ts"
+import { Value } from "@sinclair/typebox/value"
+import { TypeCompiler } from "@sinclair/typebox/compiler"
+import { tryCatch } from "@inlang/result"
 
 const whitelistedPlugins = ["inlang.plugin-json", "inlang.plugin-i18next"]
+
+const PluginCompiler = TypeCompiler.Compile(Plugin)
 
 export const resolvePlugins: ResolvePluginsFunction = (args) => {
 	const result: Awaited<ReturnType<ResolvePluginsFunction>> = {
@@ -21,19 +28,22 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 	}
 
 	for (const plugin of args.plugins) {
+		const errors = [...PluginCompiler.Errors(plugin)]	
+		
 		/**
 		 * -------------- RESOLVE PLUGIN --------------
 		 */
 
-		// // -- INVALID ID in META --
-		// if (new RegExp(pluginIdRegex).test(plugin.meta.id) === false) {
-		// 	result.errors.push(
-		// 		new PluginInvalidIdError(
-		// 			`Plugin ${plugin.meta.id} has an invalid id "${plugin.meta.id}". It must be kebap-case and contain a namespace like project.my-plugin.`,
-		// 			{ plugin: plugin.meta.id },
-		// 		),
-		// 	)
-		// }
+		// -- INVALID ID in META --
+		const hasInvalidId = errors.some((error) => error.path === "/meta/id")
+		if (hasInvalidId) {
+			result.errors.push(
+				new PluginUsesInvalidIdError(
+					`Plugin ${plugin.meta.id} has an invalid id "${plugin.meta.id}". It must be kebap-case and contain a namespace like project.my-plugin.`,
+					{ plugin: plugin.meta.id },
+				),
+			)
+		}
 
 		// -- USES RESERVED NAMESPACE --
 		if (plugin.meta.id.includes("inlang") && !whitelistedPlugins.includes(plugin.meta.id)) {
@@ -47,19 +57,18 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			)
 		}
 
-		// // -- USES INVALID API --
-		// const pluginSchema = Plugin.safeParse(plugin)
-		// if (pluginSchema.success === false) {
-		// 	result.errors.push(
-		// 		new PluginUsesInvalidApiError(
-		// 			`Plugin ${plugin.meta.id} uses invalid API. Please check the type of the exposed plugin.`,
-		// 			{
-		// 				plugin: plugin.meta.id,
-		// 				cause: pluginSchema.error,
-		// 			},
-		// 		),
-		// 	)
-		// }
+		// -- USES INVALID SCHEMA --	
+		if (errors.length > 0) {
+			result.errors.push(
+				new PluginUsesInvalidSchemaError(
+					`Plugin ${plugin.meta.id} uses an invalid schema. Please check the documentation for the correct type.`,
+					{
+						plugin: plugin.meta.id,
+						cause: errors,
+					},
+				),
+			)
+		}
 
 		// -- ALREADY DEFINED LOADMESSAGES / SAVEMESSAGES --
 		if (typeof plugin.loadMessages === "function" && result.data.loadMessages !== undefined) {
