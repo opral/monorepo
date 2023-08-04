@@ -1,6 +1,0 @@
-export type { InlangEnvironment } from "./api.js"
-export type { $fs } from "./$fs.js"
-export type { $import } from "./$import.js"
-export { create$import } from "./$import.js"
-export { createMockEnvironment } from "./mock/mockEnvironment.js"
-export { $ImportError } from "./errors.js"

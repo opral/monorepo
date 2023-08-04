@@ -1,14 +1,23 @@
 import type { InlangConfig, PluginSettings } from "@inlang/config"
 import { TranslatedStrings } from "@inlang/language-tag"
 import type { Message } from "@inlang/messages"
-import type { InlangEnvironment } from "@inlang/environment"
 import { Type } from "@sinclair/typebox"
-
-import type { PluginError} from "./errors.js"
+import type { NodeishFilesystem as LisaNodeishFilesystem } from "@inlang-git/fs"
+import type { PluginError } from "./errors.js"
 
 type JSONSerializable<
 	T extends Record<string, string | string[] | Record<string, string | string[]>> | unknown,
 > = T
+
+/**
+ * The filesystem is a subset of project lisa's nodeish filesystem.
+ *
+ * - only uses minimally required functions to decrease the API footprint on the ecosystem.
+ */
+export type NodeishFilesystemSubset = Pick<
+	LisaNodeishFilesystem,
+	"readFile" | "readdir" | "mkdir" | "writeFile"
+>
 
 /**
  * The plugin API is used to extend inlang's functionality.
@@ -30,12 +39,12 @@ export type Plugin<
 	loadMessages?: (args: {
 		languageTags: Readonly<InlangConfig["languageTags"]>
 		options: PluginOptions
-		nodeishFs: InlangEnvironment["$fs"]
+		nodeishFs: NodeishFilesystemSubset
 	}) => Promise<Message[]> | Message[]
 	saveMessages?: (args: {
 		messages: Message[]
 		options: PluginOptions
-		nodeishFs: InlangEnvironment["$fs"]
+		nodeishFs: NodeishFilesystemSubset
 	}) => Promise<void> | void
 	/**
 	 * Detect language tags in the project.
@@ -48,7 +57,7 @@ export type Plugin<
 	 * language tags in the config if additional language tags are detected.
 	 */
 	detectedLanguageTags?: (args: {
-		nodeishFs: InlangEnvironment["$fs"]
+		nodeishFs: NodeishFilesystemSubset
 		options: PluginOptions
 	}) => Promise<string[]> | string[]
 	/**
@@ -71,8 +80,6 @@ export type ResolvePluginsFunction = (args: {
 	module: string
 	plugins: Plugin[]
 	pluginSettings: Record<Plugin["meta"]["id"], PluginSettings>
-	config: InlangConfig
-	env: InlangEnvironment
 }) => Promise<{
 	data: ResolvedPlugins
 	errors: Array<PluginError>
@@ -117,10 +124,10 @@ export type ResolvedPlugins = {
 
 export const Plugin = Type.Object({
 	meta: Type.Object({
-		id: Type.String({ 
-      pattern: "^[a-z0-9-]+\\.[a-z0-9-]+$",
-      examples: ["example.my-plugin"]
-    }),
+		id: Type.String({
+			pattern: "^[a-z0-9-]+\\.[a-z0-9-]+$",
+			examples: ["example.my-plugin"],
+		}),
 		displayName: TranslatedStrings,
 		description: TranslatedStrings,
 		keywords: Type.Array(Type.String()),

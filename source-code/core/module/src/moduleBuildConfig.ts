@@ -57,7 +57,7 @@ export async function moduleBuildConfig(
 			Solution: Only define one entry point like \`["src/index.js"]\`
 
 			Context: Inlang expects plugins to be a single file that can be imported like
-			\`const plugin = await env.$import("https://example.com/plugin.js")\`.
+			\`const plugin = await $import("https://example.com/plugin.js")\`.
 		`)
 	}
 

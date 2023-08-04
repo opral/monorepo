@@ -1,4 +1,9 @@
-export type { Plugin, ResolvedPlugins, ResolvePluginsFunction } from "./api.js"
+export type {
+	Plugin,
+	ResolvedPlugins,
+	ResolvePluginsFunction,
+	NodeishFilesystemSubset,
+} from "./api.js"
 export { resolvePlugins } from "./resolvePlugins.js"
 
 /**
@@ -8,7 +13,6 @@ export { resolvePlugins } from "./resolvePlugins.js"
  */
 
 export * from "@inlang/config"
-export * from "@inlang/environment"
 export * from "@inlang/language-tag"
 export * from "@inlang/messages"
 export * from "@inlang/result"

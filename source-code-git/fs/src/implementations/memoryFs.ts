@@ -3,7 +3,7 @@ import { FilesystemError } from "../errors/FilesystemError.js"
 
 type Inode = Uint8Array | Set<string>
 
-export function createMemoryFs(): NodeishFilesystem {
+export function createNodeishMemoryFs(): NodeishFilesystem {
 	// local state
 	const fsMap: Map<string, Inode> = new Map()
 	const fsStats: Map<string, NodeishStats> = new Map()

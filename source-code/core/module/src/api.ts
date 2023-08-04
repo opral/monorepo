@@ -2,7 +2,7 @@ import type { InlangConfig } from "@inlang/config"
 import type { LintRule } from "@inlang/lint"
 import type { Plugin, ResolvePluginsFunction } from "@inlang/plugin"
 import type { ModuleError, ModuleImportError } from "./errors.js"
-import type { InlangEnvironment } from "@inlang/environment"
+import type { ImportFunction } from "./import.js"
 
 /**
  * The inlang module API.
@@ -31,7 +31,7 @@ export type InlangModule = {
  */
 export type ResolvedModulesFunction = (args: {
 	config: InlangConfig
-	env: InlangEnvironment
+	$import: ImportFunction
 }) => Promise<{
 	data: {
 		plugins: Awaited<ReturnType<ResolvePluginsFunction>>

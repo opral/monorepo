@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 
 import { describe, expect, it } from "vitest"
-import { create$import } from "./$import.js"
-import { createMemoryFs } from "@inlang-git/fs"
+import { createImport } from "./import.js"
+import { createMemoryFs } from "@inlang/plugin"
 
 describe("$import", async () => {
 	const fs = createMemoryFs()
@@ -26,31 +26,30 @@ describe("$import", async () => {
 		`,
 	)
 
-	const $import = create$import({
-		// @ts-ignore
-		fs,
+	const _import = createImport({
+		readFile: fs.readFile,
 		fetch,
 	})
 
 	it("should import a module from a local path", async () => {
-		const module = await $import("./mock-module.js")
+		const module = await _import("./mock-module.js")
 		expect(module.hello()).toBe("hello")
 	})
 
 	it("should import a module from a nested local path", async () => {
-		const module = await $import("./nested/mock-module-two.js")
+		const module = await _import("./nested/mock-module-two.js")
 		expect(module.hello()).toBe("world")
 	})
 
 	it("should import an ES module from a url", async () => {
-		const module = await $import("https://cdn.jsdelivr.net/npm/normalize-url@7.2.0/index.js")
+		const module = await _import("https://cdn.jsdelivr.net/npm/normalize-url@7.2.0/index.js")
 		const normalizeUrl = module.default
 		expect(normalizeUrl("inlang.com")).toBe("http://inlang.com")
 	})
 
 	it("should throw if a module is loaded that is not an ES module", async () => {
 		try {
-			await $import("https://cdn.jsdelivr.net/npm/lodash@4.17.21")
+			await _import("https://cdn.jsdelivr.net/npm/lodash@4.17.21")
 			throw "function did not throw"
 		} catch {
 			expect(true).toBe(true)
