@@ -3,7 +3,7 @@
         <img width="300" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/logo-white-background.png"/>
     </p>
     <h2 align="center">
-        Globalization infrastructure for software 
+        Globalization infrastructure for software
     </h2>
 </div>
 
@@ -67,5 +67,6 @@ The IDE-extension allows you to translate your content directly in your IDE.
 ✅ lint translations </br>
 ✅ machine translate </br>
 ✅ open inlang editor </br>
+✅ Automation integration with CI/CD</br>
 
 ![CLI validate example](https://github.com/inlang/inlang/assets/59048346/44fcaf1e-aff4-4533-b973-1690fc6db93e)
