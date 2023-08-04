@@ -21,7 +21,7 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"devDependencies": {
-		"@inlang/plugin": "*",
+		"@inlang/module": "*",
 		"@size-limit/preset-app": "^8.2.4",
 		"@types/flat": "^5.0.2",
 		"@types/lodash.merge": "^4.6.7",
