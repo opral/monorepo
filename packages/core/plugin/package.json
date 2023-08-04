@@ -32,7 +32,6 @@
 	"dependencies": {
 		"@inlang-git/fs": "*",
 		"@inlang/config": "*",
-		"@inlang/environment": "*",
 		"@inlang/language-tag": "*",
 		"@inlang/messages": "*",
 		"@inlang/result": "*",
