@@ -98,14 +98,14 @@ Loads all Resources during build time and adds them to the bundle.
 You can tell `inlang` to ignore certain routes in your project. Those routes will have no i18n code setup, so accessing any `@inlang/sdk-js` imports inside those routes could fail during runtime.
 
 ```js
-{
+sdkPlugin({
 	routing: {
 		exclude: [
 			"/api",
 			"/login",
 		],
 	},
-},
+}),
 ```
 
 - All entries must be defined as a relative path `/`.
