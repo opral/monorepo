@@ -4,10 +4,10 @@ import type { InlangConfig } from "@inlang/config"
 import {
 	PluginFunctionLoadMessagesAlreadyDefinedError,
 	PluginFunctionSaveMessagesAlreadyDefinedError,
-	PluginInvalidIdError,
+	PluginUsesInvalidIdError,
 	PluginUsesReservedNamespaceError,
-	PluginUsesInvalidApiError,
 	PluginAppSpecificApiReturnError,
+	PluginUsesInvalidSchemaError,
 } from "./errors.js"
 import type { InlangEnvironment } from "@inlang/environment"
 import type { Plugin } from "./api.js"
@@ -18,10 +18,9 @@ describe("generally", () => {
 			meta: {
 				// @ts-expect-error the id is invalid
 				id: "no-namespace",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
-				usedApis: [],
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+				keywords: ["plugin", "my-plugin"],
 			},
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
@@ -45,16 +44,16 @@ describe("generally", () => {
 			env,
 		});	
 
-		expect(resolved.errors[0]).toBeInstanceOf(PluginInvalidIdError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesInvalidIdError)
 	})
 
 	it("should return an error if a plugin uses APIs that are not available", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.undefined-api",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+				keywords: ["plugin", "my-plugin"],
 			},
 			// @ts-expect-error the API is not available
 			nonExistentKey: {
@@ -80,16 +79,16 @@ describe("generally", () => {
 		});
 
 		expect(resolved.errors.length).toBe(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesInvalidApiError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesInvalidSchemaError)
 	})
 
 	it("should not initialize a plugin that uses the 'inlang' namespace except for inlang whitelisted plugins", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
 				id: "inlang.not-whitelisted-plugin",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+				keywords: ["plugin", "my-plugin"],
 			},
 			loadMessages: () => undefined as any,
 		}
@@ -119,9 +118,9 @@ describe("loadMessages", () => {
 		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+				keywords: ["plugin", "my-plugin"],
 			},
 			loadMessages: async () => [{ id: "test", expressions: [], selectors: [], body: { en: [] } }],
 		}
@@ -148,9 +147,9 @@ describe("loadMessages", () => {
 		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin-load-messages-first",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+				keywords: ["plugin", "my-plugin"],
 			},
 			
 			loadMessages: async () => undefined as any,
@@ -158,9 +157,9 @@ describe("loadMessages", () => {
 		const mockPlugin2: Plugin = {
 			meta: {
 				id: "plugin.plugin-load-messages-second",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+				keywords: ["plugin", "my-plugin"],
 			},
 			loadMessages: async () => undefined as any,
 		}
@@ -194,9 +193,9 @@ describe("saveMessages", () => {
 		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+				keywords: ["plugin", "my-plugin"],
 			},
 			saveMessages: async () => undefined as any,
 		}
@@ -223,18 +222,18 @@ describe("saveMessages", () => {
 		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin-save-messages",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+				keywords: ["plugin", "my-plugin"],
 			},
 			saveMessages: async () => undefined as any,
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
 				id: "plugin.plugin-save-messages2",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+				keywords: ["plugin", "my-plugin"],
 			},
 			
 			saveMessages: async () => undefined as any,
@@ -269,9 +268,9 @@ describe("addAppSpecificApi", () => {
 		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+				keywords: ["plugin", "my-plugin"],
 			},
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
@@ -304,9 +303,9 @@ describe("addAppSpecificApi", () => {
 		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+				keywords: ["plugin", "my-plugin"],
 			},
 			addAppSpecificApi: () => ({
 				"my-app-1": {
@@ -320,9 +319,9 @@ describe("addAppSpecificApi", () => {
 		const mockPlugin2: Plugin = {
 			meta: {
 				id: "plugin.plugin2",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+				keywords: ["plugin", "my-plugin"],
 			},
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
@@ -361,9 +360,9 @@ describe("addAppSpecificApi", () => {
 		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+				keywords: ["plugin", "my-plugin"],
 			},
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
@@ -393,9 +392,9 @@ describe("addAppSpecificApi", () => {
 		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+				keywords: ["plugin", "my-plugin"],
 			},
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
@@ -435,7 +434,7 @@ describe("meta", () => {
 			meta: {
 				id: "plugin.plugin",
 				description: { en: "My plugin description" },
-				displayName: { en: "My Plugin" },
+				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
 			},
 			loadMessages: () => undefined as any,
@@ -479,7 +478,7 @@ describe("meta", () => {
 			meta: {
 				id: "plugin.plugin",
 				description: { en: "My plugin description" },
-				displayName: { en: "My Plugin" },
+				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
 			},
 			loadMessages: () => undefined as any,
@@ -491,9 +490,9 @@ describe("meta", () => {
 		const mockPlugin2: Plugin = {
 			meta: {
 				id: "plugin.plugin2",
-				description: { en: "My plugin description 2" },
-				displayName: { en: "My Plugin 2" },
-				keywords: ["plugin", "my-plugin-2"],
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+				keywords: ["plugin", "my-plugin"],
 			},
 			addAppSpecificApi: () => ({
 				"my-app-1": {
