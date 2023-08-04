@@ -8,9 +8,7 @@ import {
 	PluginUsesReservedNamespaceError,
 } from "./errors.js"
 import { deepmerge } from "deepmerge-ts"
-import { Value } from "@sinclair/typebox/value"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
-import { tryCatch } from "@inlang/result"
 
 const whitelistedPlugins = ["inlang.plugin-json", "inlang.plugin-i18next"]
 
