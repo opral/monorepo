@@ -52,7 +52,6 @@ describe("tFunction", () => {
     <p>{$i("yes')}</p>
     `
 		const matches = parse(sourceCode)
-		console.info(matches)
 		expect(matches).toHaveLength(0)
 	})
 
