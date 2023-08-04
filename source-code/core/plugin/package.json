@@ -34,7 +34,6 @@
 		"@inlang/config": "*",
 		"@inlang/environment": "*",
 		"@inlang/language-tag": "*",
-		"@inlang/lint": "*",
 		"@inlang/messages": "*",
 		"@inlang/result": "*",
 		"deepmerge-ts": "^5.1.0",
