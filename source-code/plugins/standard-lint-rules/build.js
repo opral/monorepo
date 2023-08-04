@@ -1,5 +1,5 @@
 import { context } from "esbuild"
-import { pluginBuildConfig } from "@inlang/core/plugin"
+import { pluginBuildConfig } from "@inlang/plugin"
 
 const ctx = await context(
 	await pluginBuildConfig({
