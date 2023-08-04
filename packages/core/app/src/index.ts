@@ -8,7 +8,6 @@ export { createInlang } from "./createInlang.js"
  */
 
 export * from "@inlang/config"
-export * from "@inlang/environment"
 export * from "@inlang/language-tag"
 export * from "@inlang/lint"
 export * from "@inlang/messages"

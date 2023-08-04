@@ -6,7 +6,8 @@
 		"access": "public"
 	},
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/index.js",
+		"./test": "./dist/test/index.js"
 	},
 	"files": [
 		"./dist",
@@ -32,7 +33,6 @@
 	"dependencies": {
 		"@inlang-git/fs": "*",
 		"@inlang/config": "*",
-		"@inlang/environment": "*",
 		"@inlang/language-tag": "*",
 		"@inlang/messages": "*",
 		"@inlang/result": "*",

@@ -6,9 +6,6 @@ import { ResolvePluginsFunction, resolvePlugins, type Plugin } from "@inlang/plu
 import extend from "just-extend"
 import { Value } from "@sinclair/typebox/value"
 
-/**
- * Resolves modules from the config.
- */
 export const resolveModules: ResolvedModulesFunction = async (args) => {
 	const pluginSettings = args.config.settings?.plugins || {}
 
@@ -26,7 +23,7 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 			 * -------------- BEGIN SETUP --------------
 			 */
 
-			const importedModule = await tryCatch(() => args.env.$import(module))
+			const importedModule = await tryCatch(() => args.$import(module))
 
 			// -- IMPORT MODULE --
 			if (importedModule.error) {
@@ -56,8 +53,6 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 					module,
 					plugins,
 					pluginSettings,
-					config: args.config,
-					env: args.env,
 				})
 
 				// -- ADD RESOLVED PLUGINS TO RESULT --

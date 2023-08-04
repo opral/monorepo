@@ -1,10 +1,9 @@
-import { createMemoryFs, normalizePath } from "@inlang-git/fs"
+import { createNodeishMemoryFs, normalizePath } from "@inlang-git/fs"
 import { dedent } from "ts-dedent"
-import type { InlangEnvironment } from "../api.js"
-import { create$import } from "../$import.js"
+import type { NodeishFilesystemSubset } from "../api.js"
 
 /**
- * Initializes a mock environment.
+ * Initializes a mock fs.
  *
  * The mock environment uses a virtual file system (memoryFs). If
  * testing inlang depends on files in the local file system,
@@ -13,27 +12,20 @@ import { create$import } from "../$import.js"
  *
  * @param copyDirectory - if defined, copies directories (paths) into the environment
  */
-export async function createMockEnvironment(args: {
+export async function createMockNodeishFs(args: {
 	copyDirectory?: {
-		fs: InlangEnvironment["$fs"]
+		fs: NodeishFilesystemSubset
 		paths: string[]
 	}
-}): Promise<InlangEnvironment> {
-	const $fs = createMemoryFs()
-	const $import = create$import({
-		fs: $fs,
-		fetch,
-	})
-	const env = {
-		$fs,
-		$import,
-	}
+}): Promise<NodeishFilesystemSubset> {
+	const nodeishFs = createNodeishMemoryFs()
+
 	if (args.copyDirectory) {
 		for (const path of args.copyDirectory.paths) {
-			await copyDirectory({ copyFrom: args.copyDirectory.fs, copyTo: $fs, path })
+			await copyDirectory({ copyFrom: args.copyDirectory.fs, copyTo: nodeishFs, path })
 		}
 	}
-	return env
+	return nodeishFs
 }
 
 /**
@@ -41,9 +33,9 @@ export async function createMockEnvironment(args: {
  *
  * Useful for mocking the environment.
  */
-export async function copyDirectory(args: {
-	copyFrom: InlangEnvironment["$fs"]
-	copyTo: InlangEnvironment["$fs"]
+async function copyDirectory(args: {
+	copyFrom: NodeishFilesystemSubset
+	copyTo: NodeishFilesystemSubset
 	path: string
 }) {
 	try {

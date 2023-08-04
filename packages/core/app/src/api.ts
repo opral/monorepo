@@ -1,5 +1,4 @@
 import type { InlangConfig } from "@inlang/config"
-import type { InlangEnvironment } from "@inlang/environment"
 import type { LintException, LintReport, LintRule } from "@inlang/lint"
 import type { MessageQueryApi } from "@inlang/messages"
 import type { Result } from "@inlang/result"
@@ -14,7 +13,6 @@ export type InlangInstance = {
 		 */
 		set: (config: InlangConfig) => Result<void, InvalidConfigError>
 	}
-	env: InlangEnvironment
 	lint: {
 		rules: Reactive<"onlyGetter", Array<Pick<LintRule, "meta"> & { module: string }>>
 		// for now, only simply array that can be improved in the future
