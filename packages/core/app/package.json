@@ -30,7 +30,6 @@
 		"node": ">=16.15.0"
 	},
 	"dependencies": {
-		"@inlang/environment": "*",
 		"@inlang/config": "*",
 		"@inlang/messages": "*",
 		"@inlang/module": "*",
