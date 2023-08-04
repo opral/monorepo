@@ -1,4 +1,4 @@
-import { type z, literal, union, string, number, object, boolean, array } from "zod"
+import { type Input, type Output, literal, union, string, number, object, boolean, array, useDefault, optional, startsWith, minLength, type ArraySchema, type StringSchema } from "valibot"
 
 const zUrlNegotiatorVariantPath = object({
 	type: literal("path"),
@@ -14,23 +14,23 @@ const zUrlNegotiatorVariantDomain = object({
 
 const zUrlNegotiatorVariantQuery = object({
 	type: literal("query"),
-	parameter: string().default("lang"),
+	parameter: useDefault(string(), "lang"),
 })
 
 const zUrlNegotiator = object({
 	type: literal("url"),
-	variant: union(
+	variant: useDefault(union(
 		[
 			zUrlNegotiatorVariantPath,
 			// zUrlNegotiatorVariantDomain, // TODO: introduce option later
 			// zUrlNegotiatorVariantQuery, // TODO: introduce option later
 		] as any /* typecast needed because we currently only specify a single item */,
-	).default(zUrlNegotiatorVariantPath.parse({ type: "path" })),
+	), zUrlNegotiatorVariantPath.parse({ type: "path" })),
 })
 
 const zCookieNegotiator = object({
 	type: literal("cookie"),
-	key: string().default("language"),
+	key: useDefault(string(), "language"),
 })
 
 const zAcceptLanguageHeaderNegotiator = object({
@@ -43,12 +43,12 @@ const zNavigatorNegotiator = object({
 
 const zLocalStorageNegotiator = object({
 	type: literal("localStorage"),
-	key: string().default("language"),
+	key: useDefault(string(), "language"),
 })
 
 const zSessionStorageNegotiator = object({
 	type: literal("sessionStorage"),
-	key: string().default("language"),
+	key: useDefault(string(), "language"),
 })
 
 const zLanguageNegotiationStrategy = union([
@@ -64,33 +64,46 @@ const zLanguageNegotiationStrategy = union([
 
 const zResources = object({
 	// in the future we will also support `number` to specify a TTL until resources get updated
-	cache: literal("build-time").default("build-time"),
+	cache: useDefault(literal("build-time"), "build-time"),
 })
 
 // ------------------------------------------------------------------------------------------------
 
 const zSdkConfig = object({
-	debug: boolean().default(false),
+	debug: useDefault(boolean(), false),
 	languageNegotiation: object({
-		strict: boolean().optional().default(false),
-		strategies: array(zLanguageNegotiationStrategy)
-			.min(1, "You must define at least one language negotiation strategy.")
-			.transform(
-				(t) =>
-					t as [
-						typeof zLanguageNegotiationStrategy._type,
-						...(typeof zLanguageNegotiationStrategy._type)[],
-					],
-			),
+		strict: useDefault(optional(boolean()), false),
+		strategies: array(
+			zLanguageNegotiationStrategy,
+			[minLength(1, "You must define at least one language negotiation strategy.")]
+		)
+		// TODO: find the valibot way of doing this
+		// as unknown as ArraySchema<[typeof zLanguageNegotiationStrategy, ...typeof zLanguageNegotiationStrategy[]]>
+
+		// .transform(
+		// 	(t) =>
+		// 		t as [
+		// 			typeof zLanguageNegotiationStrategy._type,
+		// 			...(typeof zLanguageNegotiationStrategy._type)[],
+		// 		],
+		// ),
 	}),
-	resources: zResources.default({ cache: "build-time" }),
-	routing: object({
-		exclude: array(string().startsWith("/")).default([]),
-	}).default({ exclude: [] }),
+	resources: useDefault(zResources, { cache: "build-time" }),
+	routing: useDefault(object({
+		exclude: useDefault(optional(array(string([startsWith("/")]))), []),
+	}), { exclude: [] }),
 })
 
 export const validateSdkConfig = (config?: SdkConfigInput): SdkConfig => zSdkConfig.parse(config)
 
-export type SdkConfigInput = z.input<typeof zSdkConfig>
+export type SdkConfigInput = Input<typeof zSdkConfig>
 
-export type SdkConfig = z.output<typeof zSdkConfig>
+export type SdkConfig = Output<typeof zSdkConfig>
+
+
+const t = array(string())
+const t1 = t.parse([])
+const u = array(1 as any) as ArraySchema<
+	typeof zLanguageNegotiationStrategy
+>
+const u1 = u.parse([])
