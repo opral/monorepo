@@ -1,7 +1,7 @@
 import type { InlangConfig, PluginSettings } from "@inlang/config"
-import { TranslatedStrings } from "@inlang/language-tag"
-import type { Message } from "@inlang/messages"
-import { Type } from "@sinclair/typebox"
+import { LanguageTag, TranslatedStrings } from "@inlang/language-tag"
+import { Message } from "@inlang/messages"
+import { Static, TSchema, Type } from "@sinclair/typebox"
 import type { NodeishFilesystem as LisaNodeishFilesystem } from "@inlang-git/fs"
 import type { PluginError } from "./errors.js"
 
@@ -18,60 +18,6 @@ export type NodeishFilesystemSubset = Pick<
 	LisaNodeishFilesystem,
 	"readFile" | "readdir" | "mkdir" | "writeFile"
 >
-
-/**
- * The plugin API is used to extend inlang's functionality.
- */
-export type Plugin<
-	PluginOptions extends JSONSerializable<unknown> = Record<string, string> | unknown,
-	AppSpecificApis extends Record<string, unknown> = Record<string, unknown>,
-> = {
-	// * Must be JSON serializable if we want an external plugin manifest in the future.
-	meta: JSONSerializable<{
-		id: `${string}.${string}`
-		displayName: TranslatedStrings
-		description: TranslatedStrings
-		keywords: string[]
-	}>
-	/**
-	 * Load messages.
-	 */
-	loadMessages?: (args: {
-		languageTags: Readonly<InlangConfig["languageTags"]>
-		options: PluginOptions
-		nodeishFs: NodeishFilesystemSubset
-	}) => Promise<Message[]> | Message[]
-	saveMessages?: (args: {
-		messages: Message[]
-		options: PluginOptions
-		nodeishFs: NodeishFilesystemSubset
-	}) => Promise<void> | void
-	/**
-	 * Detect language tags in the project.
-	 *
-	 * Some projects use files or another config file as the source
-	 * of truth for the language tags. This function allows plugins
-	 * to detect language tags of those other sources.
-	 *
-	 * Apps use this function to prompt the user to update their
-	 * language tags in the config if additional language tags are detected.
-	 */
-	detectedLanguageTags?: (args: {
-		nodeishFs: NodeishFilesystemSubset
-		options: PluginOptions
-	}) => Promise<string[]> | string[]
-	/**
-	 * Define app specific APIs.
-	 *
-	 * @example
-	 * addAppSpecificApi: () => ({
-	 * 	 "inlang.ide-extension": {
-	 * 	   messageReferenceMatcher: () => {}
-	 * 	 }
-	 *  })
-	 */
-	addAppSpecificApi?: (args: { options: PluginOptions }) => AppSpecificApis
-}
 
 /**
  * Function that resolves (imports and initializes) the plugins.
@@ -122,6 +68,57 @@ export type ResolvedPlugins = {
 
 // ---------------------------- RUNTIME VALIDATION TYPES ---------------------------------------------
 
+const PromiseLike = (T: TSchema) => Type.Union([T, Type.Promise(T)])
+
+/**
+ * The plugin API is used to extend inlang's functionality.
+ */
+export type Plugin<
+	PluginOptions extends JSONSerializable<unknown> = Record<string, string> | unknown,
+	AppSpecificApis extends Record<string, unknown> = Record<string, unknown>,
+> = Omit<
+	Static<typeof Plugin>,
+	'loadMessages' | 'saveMessages' | 'detectedLanguageTags' | 'addAppSpecificApi'
+> & {
+	/**
+	 * Load messages.
+	 */
+	loadMessages?: (args: {
+		languageTags: Readonly<InlangConfig["languageTags"]>
+		options: PluginOptions
+		nodeishFs: NodeishFilesystemSubset
+	}) => Promise<Message[]> | Message[]
+	saveMessages?: (args: {
+		messages: Message[]
+		options: PluginOptions
+		nodeishFs: NodeishFilesystemSubset
+	}) => Promise<void> | void
+	/**
+	 * Detect language tags in the project.
+	 *
+	 * Some projects use files or another config file as the source
+	 * of truth for the language tags. This function allows plugins
+	 * to detect language tags of those other sources.
+	 *
+	 * Apps use this function to prompt the user to update their
+	 * language tags in the config if additional language tags are detected.
+	 */
+	detectedLanguageTags?: (args: {
+		nodeishFs: NodeishFilesystemSubset
+		options: PluginOptions
+	}) => Promise<string[]> | string[]
+	/**
+	 * Define app specific APIs.
+	 *
+	 * @example
+	 * addAppSpecificApi: () => ({
+	 * 	 "inlang.ide-extension": {
+	 * 	   messageReferenceMatcher: () => {}
+	 * 	 }
+	 *  })
+	 */
+	addAppSpecificApi?: (args: { options: PluginOptions }) => AppSpecificApis
+}
 export const Plugin = Type.Object({
 	meta: Type.Object({
 		id: Type.String({
@@ -132,8 +129,21 @@ export const Plugin = Type.Object({
 		description: TranslatedStrings,
 		keywords: Type.Array(Type.String()),
 	}),
-	loadMessages: Type.Optional(Type.Any()),
-	saveMessages: Type.Optional(Type.Any()),
-	detectedLanguageTags: Type.Optional(Type.Any()),
-	addAppSpecificApi: Type.Optional(Type.Any()),
+	loadMessages: Type.Optional(Type.Function([Type.Object({
+		languageTags: LanguageTag,
+		options: Type.Union([Type.Object({}), Type.Undefined()]),
+		nodeishFs: Type.Object({}),
+	})], PromiseLike(Type.Array(Message)))),
+	saveMessages: Type.Optional(Type.Function([Type.Object({
+		messages: Type.Array(Message),
+		options: Type.Union([Type.Object({}), Type.Undefined()]),
+		nodeishFs: Type.Object({}),
+	})], PromiseLike(Type.Void()))),
+	detectedLanguageTags: Type.Optional(Type.Function([Type.Object({
+		options: Type.Union([Type.Object({}), Type.Undefined()]),
+		nodeishFs: Type.Object({}),
+	})], PromiseLike(Type.Array(Type.String())))),
+	addAppSpecificApi: Type.Optional(Type.Function([Type.Object({
+		options: Type.Union([Type.Object({}), Type.Undefined()]),
+	})], PromiseLike(Type.Record(Type.String(), Type.Any())))),
 }, { additionalProperties: false })
