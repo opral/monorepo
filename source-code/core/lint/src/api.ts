@@ -1,12 +1,14 @@
 import type { Message, MessageQueryApi } from "@inlang/messages"
-import { LanguageTag, TranslatedStrings } from "@inlang/language-tag"
+import { type LanguageTag, TranslatedStrings } from "@inlang/language-tag"
 import type { InlangConfig } from "@inlang/config"
-import { Type, Static } from "@sinclair/typebox"
+import { Type, type Static } from "@sinclair/typebox"
 
 export type LintLevel = Static<typeof LintLevel>
+
 export const LintLevel = Type.Union([Type.Literal("error"), Type.Literal("warning")])
 
 export type LintRule = Static<typeof LintRule>
+
 export const LintRule = Type.Object({
 	meta: Type.Object({
 		id: Type.String(),
