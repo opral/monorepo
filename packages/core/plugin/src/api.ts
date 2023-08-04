@@ -136,4 +136,4 @@ export const Plugin = Type.Object({
 	saveMessages: Type.Optional(Type.Any()),
 	detectedLanguageTags: Type.Optional(Type.Any()),
 	addAppSpecificApi: Type.Optional(Type.Any()),
-})
+}, { additionalProperties: false })

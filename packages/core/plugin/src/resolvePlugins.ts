@@ -26,8 +26,8 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 	}
 
 	for (const plugin of args.plugins) {
-		const errors = [...PluginCompiler.Errors(plugin)]	
-		
+		const errors = [...PluginCompiler.Errors(plugin)]
+
 		/**
 		 * -------------- RESOLVE PLUGIN --------------
 		 */
@@ -55,7 +55,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			)
 		}
 
-		// -- USES INVALID SCHEMA --	
+		// -- USES INVALID SCHEMA --
 		if (errors.length > 0) {
 			result.errors.push(
 				new PluginUsesInvalidSchemaError(
