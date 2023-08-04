@@ -87,12 +87,7 @@ export type ResolvePluginsFunction = (args: {
 	pluginSettings: Record<Plugin["meta"]["id"], PluginSettings>
 }) => Promise<{
 	data: ResolvedPlugins
-	errors: Array<
-		| PluginError
-		| PluginApiAlreadyDefinedError
-		| PluginUsesInvalidApiError
-		| PluginUsesReservedNamespaceError
-	>
+	errors: Array<PluginError>
 }>
 
 /**
@@ -134,15 +129,16 @@ export type ResolvedPlugins = {
 
 export const Plugin = Type.Object({
 	meta: Type.Object({
-		id: Type.TemplateLiteral(`${Type.String()}.${Type.String()}`, {
-			examples: ["inlang.plugin-i18next", "erasor.plugin-vodoo"],
+		id: Type.String({
+			pattern: "^[a-z0-9-]+\\.[a-z0-9-]+$",
+			examples: ["example.my-plugin"],
 		}),
 		displayName: TranslatedStrings,
 		description: TranslatedStrings,
 		keywords: Type.Array(Type.String()),
 	}),
-	loadMessages: Type.Any(),
-	saveMessages: Type.Any(),
-	detectedLanguageTags: Type.Any(),
-	addAppSpecificApi: Type.Any(),
+	loadMessages: Type.Optional(Type.Any()),
+	saveMessages: Type.Optional(Type.Any()),
+	detectedLanguageTags: Type.Optional(Type.Any()),
+	addAppSpecificApi: Type.Optional(Type.Any()),
 })

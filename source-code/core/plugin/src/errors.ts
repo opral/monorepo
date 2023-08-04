@@ -24,17 +24,17 @@ export class PluginImportError extends PluginError {
 	}
 }
 
-export class PluginInvalidIdError extends PluginError {
+export class PluginUsesInvalidIdError extends PluginError {
 	constructor(message: string, options: PluginErrorOptions) {
 		super(message, options)
-		this.name = "PluginInvalidIdError"
+		this.name = "PluginUsesInvalidIdError"
 	}
 }
 
-export class PluginUsesInvalidApiError extends PluginError {
+export class PluginUsesInvalidSchemaError extends PluginError {
 	constructor(message: string, options: PluginErrorOptions) {
 		super(message, options)
-		this.name = "PluginUsesInvalidApiError"
+		this.name = "PluginUsesInvalidSchemaError"
 	}
 }
 
