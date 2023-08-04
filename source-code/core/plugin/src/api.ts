@@ -80,6 +80,9 @@ export type Plugin<
 	Static<typeof Plugin>,
 	'loadMessages' | 'saveMessages' | 'detectedLanguageTags' | 'addAppSpecificApi'
 > & {
+		meta: {
+			id: `${string}.${string}`
+		}
 	/**
 	 * Load messages.
 	 */
