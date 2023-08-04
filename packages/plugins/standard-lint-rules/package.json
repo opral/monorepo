@@ -23,7 +23,7 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/module": "*"
+		"@inlang/lint": "*"
 	},
 	"devDependencies": {
 		"concurrently": "^8.0.1",

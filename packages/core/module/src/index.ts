@@ -3,10 +3,8 @@ export { moduleBuildConfig } from "./moduleBuildConfig.js"
 export { resolveModules } from "./resolveModules.js"
 
 /**
- * -------- RE-EXPORTS --------
+ * Does not re-export `@inlang/plugin` and `@inlang/lint` to
+ * keep both APIs under separate semver versions.
  *
- * See https://github.com/inlang/inlang/issues/1184
+ * See https://github.com/inlang/inlang/issues/1184#issuecomment-1655592062
  */
-
-export * from "@inlang/plugin"
-export * from "@inlang/lint"
