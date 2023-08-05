@@ -99,11 +99,3 @@ export const validateSdkConfig = (config?: SdkConfigInput): SdkConfig => zSdkCon
 export type SdkConfigInput = Input<typeof zSdkConfig>
 
 export type SdkConfig = Output<typeof zSdkConfig>
-
-
-const t = array(string())
-const t1 = t.parse([])
-const u = array(1 as any) as ArraySchema<
-	typeof zLanguageNegotiationStrategy
->
-const u1 = u.parse([])
