@@ -1,6 +1,7 @@
 import { Plugin, ResolvePluginsFunction } from "./api.js"
 import {
 	PluginAppSpecificApiReturnError,
+	PluginFunctionDetectLanguageTagsAlreadyDefinedError,
 	PluginFunctionLoadMessagesAlreadyDefinedError,
 	PluginFunctionSaveMessagesAlreadyDefinedError,
 	PluginUsesInvalidIdError,
@@ -11,14 +12,15 @@ import { deepmerge } from "deepmerge-ts"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 
 const whitelistedPlugins = ["inlang.plugin-json", "inlang.plugin-i18next"]
-
 const PluginCompiler = TypeCompiler.Compile(Plugin)
+
 
 export const resolvePlugins: ResolvePluginsFunction = (args) => {
 	const result: Awaited<ReturnType<ResolvePluginsFunction>> = {
 		data: {
 			loadMessages: undefined,
 			saveMessages: undefined,
+			detectedLanguageTags: undefined,
 			appSpecificApi: {},
 			meta: {},
 		},
@@ -68,7 +70,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			)
 		}
 
-		// -- ALREADY DEFINED LOADMESSAGES / SAVEMESSAGES --
+		// -- ALREADY DEFINED LOADMESSAGES / SAVEMESSAGES / DETECTEDLANGUAGETAGS --
 		if (typeof plugin.loadMessages === "function" && result.data.loadMessages !== undefined) {
 			result.errors.push(
 				new PluginFunctionLoadMessagesAlreadyDefinedError(
@@ -82,6 +84,15 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			result.errors.push(
 				new PluginFunctionSaveMessagesAlreadyDefinedError(
 					`Plugin ${plugin.meta.id} defines the saveMessages function, but it was already defined by another plugin.`,
+					{ plugin: plugin.meta.id },
+				),
+			)
+		}
+
+		if (typeof plugin.detectedLanguageTags === "function" && result.data.detectedLanguageTags !== undefined) {
+			result.errors.push(
+				new PluginFunctionDetectLanguageTagsAlreadyDefinedError(
+					`Plugin ${plugin.meta.id} defines the detectedLanguageTags function, but it was already defined by another plugin.`,
 					{ plugin: plugin.meta.id },
 				),
 			)
@@ -119,11 +130,15 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			result.data.saveMessages = plugin.saveMessages
 		}
 
+		if (typeof plugin.detectedLanguageTags === "function") {
+			result.data.detectedLanguageTags = plugin.detectedLanguageTags
+		}
+
 		if (typeof plugin.addAppSpecificApi === "function") {
 			const appSpecificApi = plugin.addAppSpecificApi({
 				options: args.pluginSettings[plugin.meta.id]?.options,
 			})
-			result.data.appSpecificApi = deepmerge(result.data.appSpecificApi || {}, appSpecificApi)
+			result.data.appSpecificApi = deepmerge(result.data.appSpecificApi, appSpecificApi)
 		}
 
 		result.data.meta[plugin.meta.id] = {

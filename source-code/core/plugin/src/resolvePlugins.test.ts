@@ -8,6 +8,7 @@ import {
 	PluginUsesReservedNamespaceError,
 	PluginAppSpecificApiReturnError,
 	PluginUsesInvalidSchemaError,
+	PluginFunctionDetectLanguageTagsAlreadyDefinedError,
 } from "./errors.js"
 import type { Plugin } from "./api.js"
 
@@ -236,6 +237,98 @@ describe("saveMessages", () => {
 
 		expect(resolved.errors).toHaveLength(1)
 		expect(resolved.errors[0]).toBeInstanceOf(PluginFunctionSaveMessagesAlreadyDefinedError)
+	})
+})
+
+describe("detectedLanguageTags", () => {
+	it("should detect language tags from a local source", async () => {
+		const mockPlugin: Plugin = {
+			meta: {
+				id: "plugin.plugin-detected-language-tags",
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+				keywords: ["plugin", "detected-language-tags"],
+			},
+			detectedLanguageTags: async () => ["de", "en"],
+			loadMessages: async () => undefined as any,
+			saveMessages: async () => undefined as any,
+			addAppSpecificApi: () => {
+				return {}
+			},
+		}
+		const mockPlugin2: Plugin = {
+			meta: {
+				id: "plugin.plugin-detected-language-tags2",
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+				keywords: ["plugin", "detected-language-tags"],
+			},
+			addAppSpecificApi: () => {
+				return {}
+			},
+		}
+
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: [],
+			modules: ["https://myplugin5.com/index.js", "https://myplugin6.com/index.js"],
+		}
+
+		const resolved = await resolvePlugins({
+			module: config.modules[0]!,
+			plugins: [mockPlugin, mockPlugin2],
+			pluginSettings: {},
+		})
+
+		expect(resolved.data.detectedLanguageTags).toBeDefined()
+		expect(await resolved.data.detectedLanguageTags!({
+				options: {},
+				nodeishFs: {} as any,
+		})).toEqual(["de", "en"])
+	})
+
+	it("should collect an error if function is defined twice in multiple plugins", async () => {
+		const mockPlugin: Plugin = {
+			meta: {
+				id: "plugin.plugin-detected-language-tags",
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+				keywords: ["plugin", "detected-language-tags"],
+			},
+			detectedLanguageTags: async () => ["de", "en"],
+			loadMessages: async () => undefined as any,
+			saveMessages: async () => undefined as any,
+			addAppSpecificApi: () => {
+				return {}
+			},
+		}
+		const mockPlugin2: Plugin = {
+			meta: {
+				id: "plugin.plugin-detected-language-tags2",
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+				keywords: ["plugin", "detected-language-tags"],
+			},
+			detectedLanguageTags: async () => ["de", "en"],
+			addAppSpecificApi: () => {
+				return {}
+			},
+		}
+
+		const config: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: [],
+			modules: ["https://myplugin5.com/index.js", "https://myplugin6.com/index.js"],
+		}
+
+		const resolved = await resolvePlugins({
+			module: config.modules[0]!,
+			plugins: [mockPlugin, mockPlugin2],
+			pluginSettings: {},
+		})
+
+		expect(resolved.errors).toHaveLength(1)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginFunctionDetectLanguageTagsAlreadyDefinedError)
 	})
 })
 
