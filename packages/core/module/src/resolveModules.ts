@@ -78,7 +78,7 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 						)
 						return
 					}
-					return parsed.data
+					return rule
 				})
 
 				// -- ADD PARSED LINT RULES TO RESULT --

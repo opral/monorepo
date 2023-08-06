@@ -16,7 +16,6 @@ describe("generally", () => {
 	it("should return an error if a plugin uses an invalid id", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				// @ts-expect-error the id is invalid
 				id: "no-namespace",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
