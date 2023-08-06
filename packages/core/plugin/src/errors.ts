@@ -17,24 +17,10 @@ export class PluginError extends Error {
 /**
  * Error thrown when a plugin cannot be imported.
  */
-export class PluginImportError extends PluginError {
-	constructor(message: string, options: PluginErrorOptions) {
-		super(message, options)
-		this.name = "PluginImportError"
-	}
-}
-
 export class PluginUsesInvalidIdError extends PluginError {
 	constructor(message: string, options: PluginErrorOptions) {
 		super(message, options)
 		this.name = "PluginUsesInvalidIdError"
-	}
-}
-
-export class PluginUsesInvalidSchemaError extends PluginError {
-	constructor(message: string, options: PluginErrorOptions) {
-		super(message, options)
-		this.name = "PluginUsesInvalidSchemaError"
 	}
 }
 
@@ -45,10 +31,10 @@ export class PluginUsesReservedNamespaceError extends PluginError {
 	}
 }
 
-export class PluginApiAlreadyDefinedError extends PluginError {
+export class PluginUsesInvalidSchemaError extends PluginError {
 	constructor(message: string, options: PluginErrorOptions) {
 		super(message, options)
-		this.name = "PluginApiAlreadyDefinedError"
+		this.name = "PluginUsesInvalidSchemaError"
 	}
 }
 
@@ -63,6 +49,13 @@ export class PluginFunctionSaveMessagesAlreadyDefinedError extends PluginError {
 	constructor(message: string, options: PluginErrorOptions) {
 		super(message, options)
 		this.name = "PluginFunctionSaveMessagesAlreadyDefinedError"
+	}
+}
+
+export class PluginFunctionDetectLanguageTagsAlreadyDefinedError extends PluginError {
+	constructor(message: string, options: PluginErrorOptions) {
+		super(message, options)
+		this.name = "PluginFunctionDetectLanguageTagsAlreadyDefinedError"
 	}
 }
 
