@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
+import { createNodeishMemoryFs } from "@inlang-git/fs"
 import { describe, expect, it } from "vitest"
 import { createImport } from "./import.js"
-import { createMemoryFs } from "@inlang/plugin"
 
 describe("$import", async () => {
-	const fs = createMemoryFs()
+	const fs = createNodeishMemoryFs()
 	await fs.writeFile(
 		"./mock-module.js",
 		`
