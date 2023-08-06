@@ -9,5 +9,4 @@ body:
     id: proposal
     attributes:
       label: Desired solution
-      description: What would solve your use case? 
-      
+      description: What would solve your use case?
