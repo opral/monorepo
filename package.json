@@ -53,6 +53,7 @@
 		"patch-package": "^6.5.1",
 		"prettier": "2.8.3",
 		"turbo": "^1.10.7",
-		"typescript": "^4.9.4"
+		"typescript": "^4.9.4",
+		"jsdom": "^22.1.0"
 	}
 }
