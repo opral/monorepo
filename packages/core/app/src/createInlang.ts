@@ -43,10 +43,15 @@ export async function createInlang(args: {
 		}
 
 		// config reactivity
-		const [config, setConfig] = createSignal(parsedConfig as InlangConfig)
+		const [config, setConfig] = createSignal(parsedConfig)
+
+		// derived signals
 		const [lintRules, setLintRules] = createSignal([])
 		const [lintReports, setLintReports] = createSignal([])
 		const [lintExceptions, setLintExceptions] = createSignal([])
+
+		// init signals
+		const [initLints, setInitLints] = createSignal(false)
 
 		// access plugins (not reactive)
 		const plugins = (
@@ -63,26 +68,28 @@ export async function createInlang(args: {
 		})
 
 		// set derived signals
-		const setDerivedSignals = async (config: InlangConfig) => {
+		const onConfigChange = async (config: InlangConfig, initLints: boolean) => {
 			const resolvedModules = await resolveModules({
 				config,
 				nodeishFs: args.nodeishFs,
 				_import: args._import,
 			})
 			setLintRules(resolvedModules.data.lintRules)
-			const lintReports = await lintMessages({
-				config,
-				query: createQuery(messages),
-				messages: messages,
-				rules: resolvedModules.data.lintRules,
-			})
-			setLintReports(lintReports.data)
-			setLintExceptions(lintReports.errors)
+			if (initLints) {
+				const lintReports = await lintMessages({
+					config,
+					query: createQuery(messages),
+					messages: messages,
+					rules: resolvedModules.data.lintRules,
+				})
+				setLintReports(lintReports.data)
+				setLintExceptions(lintReports.errors)
+			}
 		}
 
 		// trigger derived signals
 		createEffect(() => {
-			setDerivedSignals(config())
+			onConfigChange(config(), setInitLints())
 		})
 
 		// createEffect(() => {
@@ -100,13 +107,17 @@ export async function createInlang(args: {
 				},
 				reports: {
 					get: lintReports,
-				} as any,
-				exceptions: lintExceptions,
+					init: () => initLints(true),
+				},
+				exceptions: {
+					get: lintExceptions,
+					init: () => initLints(true),
+				},
 			},
-			plugins: {} as any,
+			plugins,
 			messages: {
 				query: createQuery(messages),
 			},
-		} satisfies InlangInstance
+		} as InlangInstance
 	})
 }
