@@ -1,7 +1,7 @@
 import type { ResolvedModulesFunction } from "./api.js"
 import { ModuleError, ModuleImportError } from "./errors.js"
 import { tryCatch } from "@inlang/result"
-import { LintRule } from "@inlang/lint"
+import { LintRule, ResolvedLintRule } from "@inlang/lint"
 import { ResolvePluginsFunction, resolvePlugins, type Plugin } from "@inlang/plugin"
 import extend from "just-extend"
 import { Value } from "@sinclair/typebox/value"
@@ -63,9 +63,10 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 
 			// --- PARSE LINT RULES ---
 			if (importedModule.data.default.lintRules) {
-				const lintRules = importedModule.data.default.lintRules as LintRule[]
+				const lintRules = importedModule.data.default.lintRules as ResolvedLintRule[]
 				const parsedLintRules = lintRules.map((rule) => {
 					const parsed = tryCatch(() => Value.Check(LintRule, rule))
+					// -- LINT RULE IS INVALID --
 					if (parsed.error) {
 						result.errors.push(
 							new ModuleError(
@@ -78,6 +79,9 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 						)
 						return
 					}
+
+					// -- LINT RULE IS VALID --
+					// Add module to lint rule meta
 					return {
 						...rule,
 						meta: {
@@ -88,7 +92,7 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 				})
 
 				// -- ADD PARSED LINT RULES TO RESULT --
-				result.data.lintRules = extend(result.data.lintRules, parsedLintRules) as LintRule[]
+				result.data.lintRules = extend(result.data.lintRules, parsedLintRules) as ResolvedLintRule[]
 			}
 		} catch (e) {
 			/**
