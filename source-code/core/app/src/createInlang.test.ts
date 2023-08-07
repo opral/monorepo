@@ -6,6 +6,7 @@ import type { InlangConfig } from "@inlang/config"
 import type { Message, Plugin } from "@inlang/plugin"
 import type { LintRule } from "@inlang/lint"
 import type { InlangModule } from "@inlang/module"
+// @ts-ignore
 import { createSignal, createRoot, createEffect } from "solid-js/dist/solid.js"
 
 const config: InlangConfig = {
@@ -111,7 +112,7 @@ describe("config", () => {
 	})
 
 	// TO DO: test that config set
-	it ("should set the new config", async () => {
+	it("should set the new config", async () => {
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 		const inlang = await createInlang({
 			configPath: "./inlang.config.json",
@@ -122,32 +123,32 @@ describe("config", () => {
 		inlang.config.set(newConfig)
 		expect(inlang.config.get()).toEqual(newConfig)
 	})
-	
-	it("should be reactive if the config changes", async () => { createRoot( async () => {
-		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
-		const inlang = await createInlang({
-			configPath: "./inlang.config.json",
-			nodeishFs: fs,
-			_import: $import,
+
+	it("should be reactive if the config changes", async () => {
+		createRoot(async () => {
+			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			const inlang = await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: $import,
+			})
+			const reactiveConfig = inlang.config.get
+			let counter = 0
+
+			createEffect(() => {
+				// 2 times because init + set
+				if (!reactiveConfig().languageTags) return
+				counter += 1
+			})
+
+			inlang.config.set({ ...reactiveConfig(), languageTags: ["en", "de"] })
+			expect(counter).toBe(2)
 		})
-		const reactiveConfig = inlang.config.get
-		let counter = 0
-
-		createEffect(() => {
-			// 2 times because init + set
-			if (!reactiveConfig().languageTags) return
-			counter += 1
-		})		
-
-		inlang.config.set({ ...reactiveConfig(), languageTags: ["en", "de"] })
-		expect(counter).toBe(2)
-	})})
+	})
 })
-
 
 describe("query", () => {
 	it("get", async () => {
-
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 		const inlang = await createInlang({
 			configPath: "./inlang.config.json",
