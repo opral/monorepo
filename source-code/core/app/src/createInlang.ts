@@ -1,7 +1,8 @@
 import { InlangConfig } from "@inlang/config"
 import type { InlangInstance } from "./api.js"
-import { ImportFunction, createImport, resolveModules } from "@inlang/module"
-import type { NodeishFilesystemSubset } from "@inlang/plugin"
+import { resolveModules } from "@inlang/module"
+// @ts-ignore
+import { createSignal, createRoot } from "solid-js/dist/solid.js"
 
 /**
  * Creates an inlang instance.
@@ -15,17 +16,41 @@ export async function createInlang(args: {
 	nodeishFs: NodeishFilesystemSubset
 	_import?: ImportFunction
 }): Promise<InlangInstance> {
-	// TODO #1182 the filesystem type is incorrect. manual type casting is required
-	const configFile = await args.nodeishFs.readFile(args.configPath, { encoding: "utf-8" })
-	const configJson = JSON.parse(configFile)
-	const config: InlangConfig = InlangConfig.passthrough().parse(configJson)
+	return createRoot(async () => {
+		// just for testing
+		if (!args.env.$fs) return {} as any
+		// TODO #1182 the filesystem type is incorrect. manual type casting is required
+		const configFile = (await args.env.$fs.readFile(args.configPath, {
+			encoding: "utf-8",
+		})) as string
+		const configJson = JSON.parse(configFile)
 
-	const $import = args._import ?? createImport({ readFile: args.nodeishFs.readFile, fetch })
+		const parsedConfig: InlangConfig = InlangConfig.passthrough().parse(configJson)
 
-	const resolvedPluginApi = await resolveModules({
-		config,
-		$import,
+		const $import = args._import ?? createImport({ readFile: args.nodeishFs.readFile, fetch })
+
+		const resolvedPluginApi = await resolveModules({ config: parsedConfig, $import })
+
+		const [config, setConfig] = createSignal<InlangConfig>(parsedConfig)
+		const [lintRules, setLintRules] = createSignal<Record<string, any>>({})
+
+		for (const rule of Object.values(resolvedPluginApi.data.lintRules)) {
+			console.log(rule)
+		}
+
+		return {
+			config: {
+				get: config,
+				set: setConfig,
+			},
+			env: args.env,
+			lint: {
+				rules: {} as any,
+				reports: {} as any,
+				exceptions: {} as any,
+			},
+			plugins: {} as any,
+			messages: {} as any,
+		}
 	})
-
-	return {} as any
 }
