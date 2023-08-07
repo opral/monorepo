@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.11.4
+
+### Patch Changes
+
+- c12b0b4e: [fix] don't throw while detecting static application when reading TypeScript files
+
 ## 0.11.3
 
 ### Patch Changes
