@@ -1,16 +1,11 @@
 import type { InlangInstance } from "./api.js"
 import { ImportFunction, resolveModules } from "@inlang/module"
 // @ts-ignore
-import {
-	createSignal,
-	createRoot,
-	createMemo,
-	createEffect,
-	createResource,
-} from "solid-js/dist/solid.js"
-import { NodeishFilesystemSubset, InlangConfig, createQuery, ResolvedPlugins } from "@inlang/plugin"
+import { createSignal, createRoot, createEffect } from "solid-js/dist/solid.js"
+import { NodeishFilesystemSubset, InlangConfig, createQuery } from "@inlang/plugin"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { InvalidConfigError } from "./errors.js"
+import { lintMessages } from "@inlang/lint"
 
 const ConfigCompiler = TypeCompiler.Compile(InlangConfig)
 
@@ -49,46 +44,50 @@ export async function createInlang(args: {
 
 		// config reactivity
 		const [config, setConfig] = createSignal(parsedConfig as InlangConfig)
+		const [lintRules, setLintRules] = createSignal([])
+		const [lintReports, setLintReports] = createSignal([])
+		const [lintExceptions, setLintExceptions] = createSignal([])
 
-		// resolve modules
-		const getResolvedModules = async (config: InlangConfig) => {
+		// access plugins (not reactive)
+		const plugins = (
+			await resolveModules({
+				config: parsedConfig,
+				nodeishFs: args.nodeishFs,
+				_import: args._import,
+			})
+		).data.plugins.data
+
+		// access messages (not reactive)
+		const messages = await plugins.loadMessages({
+			languageTags: ["en"],
+		})
+
+		// set derived signals
+		const setDerivedSignals = async (config: InlangConfig) => {
 			const resolvedModules = await resolveModules({
 				config,
 				nodeishFs: args.nodeishFs,
 				_import: args._import,
 			})
-			return resolvedModules
+			setLintRules(resolvedModules.data.lintRules)
+			const lintReports = await lintMessages({
+				config,
+				query: createQuery(messages),
+				messages: messages,
+				rules: resolvedModules.data.lintRules,
+			})
+			setLintReports(lintReports.data)
+			setLintExceptions(lintReports.errors)
 		}
 
-		const resolvedModules = await resolveModules({
-			config: parsedConfig,
-			nodeishFs: args.nodeishFs,
-			_import: args._import,
+		// trigger derived signals
+		createEffect(() => {
+			setDerivedSignals(config())
 		})
 
-		// access plugins
-		const plugins = resolvedModules.data.plugins.data
-
-		// lint rules derived reactivity
-		const getLintRules = async () => {
-			if (config()) {
-				const resolvedModules = await resolveModules({
-					config: config(),
-					nodeishFs: args.nodeishFs,
-					_import: args._import,
-				})
-				return resolvedModules.data.lintRules.map((rule) => rule.meta)
-			} else {
-				return []
-			}
-		}
-
-		const messages = await plugins.loadMessages({
-			languageTags: ["en"],
-		})
-
-		// lint reports reactivity
-		const [lintReports] = createSignal({})
+		// createEffect(() => {
+		// 	console.log(lintReports())
+		// })
 
 		return {
 			config: {
@@ -97,12 +96,12 @@ export async function createInlang(args: {
 			},
 			lint: {
 				rules: {
-					get: {} as any,
+					get: lintRules,
 				},
 				reports: {
 					get: lintReports,
 				} as any,
-				exceptions: {} as any,
+				exceptions: lintExceptions,
 			},
 			plugins: {} as any,
 			messages: {
