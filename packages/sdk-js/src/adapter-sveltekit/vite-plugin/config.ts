@@ -14,8 +14,8 @@ import * as svelteKit from "@sveltejs/kit"
 import { findDepPkgJsonPath } from "vitefu"
 import { InlangSdkException } from "./exceptions.js"
 import { transformWithEsbuild } from "vite"
-import { codeToSourceFile, nodeToCode } from '../../ast-transforms/utils/js.util.js'
-import { ImportDeclaration, Node } from 'ts-morph'
+import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
+import { ImportDeclaration, Node } from "ts-morph"
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => false))
 
@@ -123,7 +123,7 @@ export const resetConfig = () => (configPromise = undefined)
 
 // ------------------------------------------------------------------------------------------------
 
-class InlangSdkConfigException extends InlangSdkException { }
+class InlangSdkConfigException extends InlangSdkException {}
 
 function assertConfigWithSdk(
 	config: InlangConfig | undefined,
@@ -221,7 +221,7 @@ const shouldContentBePrerendered = async (routesFolder: string) => {
 	const modules = await Promise.all(
 		filesToLookFor.map(async (file) => {
 			const filePath = path.resolve(routesFolder, file)
-			const contents = await readFile(filePath, { encoding: "utf-8", }).catch(() => undefined)
+			const contents = await readFile(filePath, { encoding: "utf-8" }).catch(() => undefined)
 			if (!contents || !contents.trim()) return {}
 
 			const { code } = await transformWithEsbuild(contents, filePath)
@@ -235,7 +235,10 @@ const shouldContentBePrerendered = async (routesFolder: string) => {
 				importDeclaration.remove()
 			}
 
-			return import("data:application/javascript;base64," + Buffer.from(nodeToCode(sourceFile)).toString("base64"))
+			return import(
+				"data:application/javascript;base64," +
+					Buffer.from(nodeToCode(sourceFile)).toString("base64")
+			)
 		}),
 	)
 
