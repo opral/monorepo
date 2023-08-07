@@ -159,9 +159,8 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 
 		result.data.meta[plugin.meta.id] = {
 			...plugin.meta,
-			module: args.module,
 		}
 	}
 
-	return result as any
+	return result
 }

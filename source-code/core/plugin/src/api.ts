@@ -1,7 +1,7 @@
 import type { InlangConfig, PluginSettings } from "@inlang/config"
 import { LanguageTag, TranslatedStrings } from "@inlang/language-tag"
 import { Message } from "@inlang/messages"
-import { Static, TSchema, Type } from "@sinclair/typebox"
+import { Static, TSchema, Type, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
 import type { NodeishFilesystem as LisaNodeishFilesystem } from "@inlang-git/fs"
 import type { PluginError } from "./errors.js"
 
@@ -23,14 +23,13 @@ export type NodeishFilesystemSubset = Pick<
  * Function that resolves (imports and initializes) the plugins.
  */
 export type ResolvePluginsFunction = (args: {
-	module: string
-	plugins: Plugin[]
-	nodeishFs: NodeishFilesystemSubset
+	plugins: Array<Plugin>
 	pluginSettings: Record<Plugin["meta"]["id"], PluginSettings>
-}) => Promise<{
+	nodeishFs: NodeishFilesystemSubset
+}) => {
 	data: ResolvedPlugins
 	errors: Array<PluginError>
-}>
+}
 
 /**
  * The API after resolving the plugins.
@@ -64,7 +63,7 @@ export type ResolvedPlugins = {
 	 *   meta['inlang.plugin-i18next'].description['en']
 	 *   meta['inlang.plugin-i18next'].module
 	 */
-	meta: Record<Plugin["meta"]["id"], Plugin["meta"] & { module: string }>
+	meta: Record<Plugin["meta"]["id"], Plugin["meta"]>
 }
 
 // ---------------------------- RUNTIME VALIDATION TYPES ---------------------------------------------
@@ -81,9 +80,6 @@ export type Plugin<
 	Static<typeof Plugin>,
 	"loadMessages" | "saveMessages" | "detectedLanguageTags" | "addAppSpecificApi"
 > & {
-	meta: {
-		id: Static<typeof Plugin.meta.id>
-	}
 	/**
 	 * Load messages.
 	 */
@@ -123,13 +119,14 @@ export type Plugin<
 	 */
 	addAppSpecificApi?: (args: { options: PluginOptions }) => AppSpecificApis
 }
+
 export const Plugin = Type.Object(
 	{
 		meta: Type.Object({
 			id: Type.String({
 				pattern: "^[a-z0-9-]+\\.[a-z0-9-]+$",
 				examples: ["example.my-plugin"],
-			}),
+			}) as unknown as TTemplateLiteral<[TLiteral<`${string}.${string}`>]>,
 			displayName: TranslatedStrings,
 			description: TranslatedStrings,
 			keywords: Type.Array(Type.String()),

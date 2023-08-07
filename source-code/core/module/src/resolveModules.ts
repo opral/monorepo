@@ -1,122 +1,80 @@
-import type { ResolvedModulesFunction } from "./api.js"
+import type { InlangModule, ResolveModulesFunction } from "./api.js"
 import { ModuleError, ModuleImportError } from "./errors.js"
 import { tryCatch } from "@inlang/result"
-import { LintRule, ResolvedLintRule } from "@inlang/lint"
-import { ResolvePluginsFunction, resolvePlugins, type Plugin } from "@inlang/plugin"
-import extend from "just-extend"
-import { Value } from "@sinclair/typebox/value"
+import type { LintRule } from "@inlang/lint"
+import { resolvePlugins, type Plugin } from "@inlang/plugin"
 import { createImport } from "./import.js"
+import { resolveLintRules } from "./resolveLintRules.js"
 
-export const resolveModules: ResolvedModulesFunction = async (args) => {
+export const resolveModules: ResolveModulesFunction = async (args) => {
 	const _import = args._import ?? createImport({ readFile: args.nodeishFs.readFile, fetch })
-
 	const pluginSettings = args.config.settings?.plugins || {}
+	const moduleErrors: Array<ModuleError> = []
 
-	const result: Awaited<ReturnType<ResolvedModulesFunction>> = {
-		data: {
-			plugins: { data: {} as any, errors: [] },
-			lintRules: [],
-		},
-		errors: [],
+	let allPlugins: Array<Plugin> = []
+	let allLintRules: Array<LintRule> = []
+
+	const meta: Awaited<ReturnType<ResolveModulesFunction>>["data"]["module"]["meta"] = {
+		plugins: {},
+		lintRules: {},
 	}
 
 	for (const module of args.config.modules) {
-		try {
-			/**
-			 * -------------- BEGIN SETUP --------------
-			 */
+		/**
+		 * -------------- BEGIN SETUP --------------
+		 */
 
-			const importedModule = await tryCatch(() => _import(module))
+		const importedModule = await tryCatch<InlangModule>(() => _import(module))
 
-			// -- IMPORT MODULE --
-			if (importedModule.error) {
-				result.errors.push(
-					new ModuleImportError(`Couldn't import the plugin "${module}"`, {
-						module,
-						cause: importedModule.error as Error,
-					}),
-				)
-			}
-
-			// -- MODULE DOES NOT EXPORT PLUGINS OR LINT RULES --
-			if (!importedModule.data.default.plugins && !importedModule.data.default.lintRule) {
-				result.errors.push(
-					new ModuleError(`Module "${module}" does not export any plugins or lintRules.`, {
-						module,
-						cause: new Error(`Module "${module}" does not export any plugins or lintRules.`),
-					}),
-				)
-				continue
-			}
-
-			// --- RESOLVE PLUGINS ---
-			if (importedModule.data.default.plugins) {
-				const plugins = importedModule.data.default.plugins as Plugin[]
-				const resolvedPlugins = await resolvePlugins({
+		// -- IMPORT MODULE --
+		if (importedModule.error) {
+			moduleErrors.push(
+				new ModuleImportError(`Couldn't import the plugin "${module}"`, {
 					module,
-					plugins,
-					pluginSettings,
-					nodeishFs: args.nodeishFs,
-				})
-
-				// -- ADD RESOLVED PLUGINS TO RESULT --
-				result.data.plugins = extend(result.data.plugins, resolvedPlugins) as Awaited<
-					ReturnType<ResolvePluginsFunction>
-				>
-			}
-
-			// --- PARSE LINT RULES ---
-			if (importedModule.data.default.lintRules) {
-				const lintRules = importedModule.data.default.lintRules as ResolvedLintRule[]
-				const parsedLintRules = lintRules.map((rule) => {
-					const parsed = tryCatch(() => Value.Check(LintRule, rule))
-					// -- LINT RULE IS INVALID --
-					if (parsed.error) {
-						result.errors.push(
-							new ModuleError(
-								`Couldn't parse lint rule "${rule.meta.id}" from module "${module}"`,
-								{
-									module,
-									cause: parsed.error as Error,
-								},
-							),
-						)
-						return
-					}
-
-					// -- LINT RULE IS VALID --
-					// Add module to lint rule meta
-					return {
-						...rule,
-						meta: {
-							...rule.meta,
-							module,
-						},
-					}
-				})
-
-				// -- ADD PARSED LINT RULES TO RESULT --
-				result.data.lintRules = extend(result.data.lintRules, parsedLintRules) as ResolvedLintRule[]
-			}
-		} catch (e) {
-			/**
-			 * -------------- BEGIN ERROR HANDLING --------------
-			 */
-			if (e instanceof ModuleError) {
-				result.errors.push(e)
-			} else if (e instanceof Error) {
-				result.errors.push(new ModuleError(e.message, { module: module, cause: e }))
-			} else {
-				result.errors.push(
-					new ModuleError("Unhandled and unknown error", {
-						module: module,
-						cause: e as Error,
-					}),
-				)
-			}
+					cause: importedModule.error as Error,
+				}),
+			)
 			continue
 		}
+
+		// -- MODULE DOES NOT EXPORT PLUGINS OR LINT RULES --
+		if (!importedModule.data?.default?.plugins && !importedModule.data?.default?.lintRules) {
+			moduleErrors.push(
+				new ModuleError(`Module "${module}" does not export any plugins or lintRules.`, {
+					module,
+				}),
+			)
+			continue
+		}
+
+		for (const plugin of importedModule.data.default?.plugins ?? []) {
+			meta.plugins[plugin.meta.id] = module
+		}
+
+		for (const lintRule of importedModule.data.default?.lintRules ?? []) {
+			meta.lintRules[lintRule.meta.id] = module
+		}
+
+		allPlugins = [...allPlugins, ...(importedModule.data.default.plugins ?? [])]
+		allLintRules = [...allLintRules, ...(importedModule.data.default.lintRules ?? [])]
 	}
 
-	return result as any
+	const resolvedPlugins = resolvePlugins({
+		plugins: allPlugins,
+		pluginSettings,
+		nodeishFs: args.nodeishFs,
+	})
+
+	const resolvedLintRules = resolveLintRules({ lintRules: allLintRules })
+
+	return {
+		data: {
+			module: {
+				meta,
+			},
+			plugins: resolvedPlugins,
+			lintRules: resolvedLintRules,
+		},
+		errors: moduleErrors,
+	}
 }

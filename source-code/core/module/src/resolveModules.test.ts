@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest"
 import type { InlangModule } from "./api.js"
 import { ModuleError, ModuleImportError } from "./errors.js"
 import { resolveModules } from "./resolveModules.js"
+import { LintRuleError } from "./resolveLintRules.js"
 
 describe("generally", () => {
 	it("should return an error if a plugin cannot be imported", async () => {
@@ -80,9 +81,7 @@ describe("resolveModules", () => {
 		// Check for the app specific api
 		expect(resolved.data.plugins.data["appSpecificApi"]?.["inlang.ide-extension"]).toBeDefined()
 		// Check for the lint rule
-		expect(resolved.data.lintRules[0]!.meta.id).toBe("mock.lint-rule")
-		// Check for module data in lint rule meta
-		expect(resolved.data.lintRules[0]!.meta.module).toBe(config.modules[0])
+		expect(resolved.data.lintRules.data[0]!.meta.id).toBe("mock.lint-rule")
 	})
 
 	it("should return an error if a plugin cannot be imported", async () => {
@@ -130,7 +129,6 @@ describe("resolveModules", () => {
 				id: "invalid-lint-rule",
 				description: "This is an invalid lint rule",
 			},
-			validator: "thisIsNotAFunction", // Invalid validator, should be a function
 		}
 
 		const config: InlangConfig = {
@@ -139,22 +137,20 @@ describe("resolveModules", () => {
 			modules: ["https://myplugin.com/index.js"],
 		}
 
-		const _import = async () => ({
-			data: {
+		const _import = async () =>
+			({
 				default: {
 					plugins: [],
 					// @ts-expect-error the lint rule is invalid
 					lintRules: [invalidLintRule],
 				},
-			} satisfies InlangModule,
-			errors: [],
-		})
+			} satisfies InlangModule)
 
 		// Call the function
 		const resolved = await resolveModules({ config, _import, nodeishFs: {} as any })
 
 		// Assert results
-		expect(resolved.errors[0]).toBeInstanceOf(ModuleError)
+		expect(resolved.data.lintRules.errors[0]).toBeInstanceOf(LintRuleError)
 	})
 
 	it("should handle other unhandled errors during plugin resolution", async () => {

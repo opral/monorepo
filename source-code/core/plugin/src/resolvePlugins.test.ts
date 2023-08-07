@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest"
 import { resolvePlugins } from "./resolvePlugins.js"
-import type { InlangConfig } from "@inlang/config"
 import {
 	PluginFunctionLoadMessagesAlreadyDefinedError,
 	PluginFunctionSaveMessagesAlreadyDefinedError,
@@ -16,6 +15,7 @@ describe("generally", () => {
 	it("should return an error if a plugin uses an invalid id", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
+				// @ts-expect-error - invalid id
 				id: "no-namespace",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
@@ -28,14 +28,7 @@ describe("generally", () => {
 			},
 		}
 
-		const config: InlangConfig = {
-			sourceLanguageTag: "en",
-			languageTags: ["de", "en"],
-			modules: ["https://myplugin.com/index.js"],
-		}
-
 		const resolved = await resolvePlugins({
-			module: config.modules[0]!,
 			plugins: [mockPlugin],
 			pluginSettings: {},
 			nodeishFs: {} as any,
@@ -60,14 +53,7 @@ describe("generally", () => {
 			saveMessages: () => undefined as any,
 		}
 
-		const config: InlangConfig = {
-			sourceLanguageTag: "en",
-			languageTags: ["de", "en"],
-			modules: ["https://myplugin.com/index.js"],
-		}
-
 		const resolved = await resolvePlugins({
-			module: config.modules[0]!,
 			plugins: [mockPlugin],
 			pluginSettings: {},
 			nodeishFs: {} as any,
@@ -88,14 +74,7 @@ describe("generally", () => {
 			loadMessages: () => undefined as any,
 		}
 
-		const config: InlangConfig = {
-			sourceLanguageTag: "en",
-			languageTags: ["de", "en"],
-			modules: ["https://myplugin.com/index.js"],
-		}
-
 		const resolved = await resolvePlugins({
-			module: config.modules[0]!,
 			plugins: [mockPlugin],
 			pluginSettings: {},
 			nodeishFs: {} as any,
@@ -118,14 +97,7 @@ describe("loadMessages", () => {
 			loadMessages: async () => [{ id: "test", expressions: [], selectors: [], body: { en: [] } }],
 		}
 
-		const config: InlangConfig = {
-			sourceLanguageTag: "en",
-			languageTags: ["de", "en"],
-			modules: ["https://myplugin.com/index.js"],
-		}
-
 		const resolved = await resolvePlugins({
-			module: config.modules[0]!,
 			plugins: [mockPlugin],
 			pluginSettings: {},
 			nodeishFs: {} as any,
@@ -159,14 +131,7 @@ describe("loadMessages", () => {
 			loadMessages: async () => undefined as any,
 		}
 
-		const config: InlangConfig = {
-			sourceLanguageTag: "en",
-			languageTags: ["de", "en"],
-			modules: ["https://myplugin5.com/index.js", "https://myplugin6.com/index.js"],
-		}
-
 		const resolved = await resolvePlugins({
-			module: config.modules[0]!,
 			plugins: [mockPlugin, mockPlugin2],
 			nodeishFs: {} as any,
 			pluginSettings: {},
@@ -189,14 +154,7 @@ describe("saveMessages", () => {
 			saveMessages: async () => undefined as any,
 		}
 
-		const config: InlangConfig = {
-			sourceLanguageTag: "en",
-			languageTags: ["de", "en"],
-			modules: ["https://myplugin.com/index.js"],
-		}
-
 		const resolved = await resolvePlugins({
-			module: config.modules[0]!,
 			plugins: [mockPlugin],
 			nodeishFs: {} as any,
 			pluginSettings: {},
@@ -226,14 +184,7 @@ describe("saveMessages", () => {
 			saveMessages: async () => undefined as any,
 		}
 
-		const config: InlangConfig = {
-			sourceLanguageTag: "en",
-			languageTags: ["de", "en"],
-			modules: ["https://myplugin5.com/index.js", "https://myplugin6.com/index.js"],
-		}
-
 		const resolved = await resolvePlugins({
-			module: config.modules[0]!,
 			plugins: [mockPlugin, mockPlugin2],
 			pluginSettings: {},
 			nodeishFs: {} as any,
@@ -272,14 +223,7 @@ describe("detectedLanguageTags", () => {
 			},
 		}
 
-		const config: InlangConfig = {
-			sourceLanguageTag: "en",
-			languageTags: [],
-			modules: ["https://myplugin5.com/index.js", "https://myplugin6.com/index.js"],
-		}
-
 		const resolved = await resolvePlugins({
-			module: config.modules[0]!,
 			plugins: [mockPlugin, mockPlugin2],
 			pluginSettings: {},
 			nodeishFs: {} as any,
@@ -317,14 +261,7 @@ describe("detectedLanguageTags", () => {
 			},
 		}
 
-		const config: InlangConfig = {
-			sourceLanguageTag: "en",
-			languageTags: [],
-			modules: ["https://myplugin5.com/index.js", "https://myplugin6.com/index.js"],
-		}
-
 		const resolved = await resolvePlugins({
-			module: config.modules[0]!,
 			plugins: [mockPlugin, mockPlugin2],
 			pluginSettings: {},
 			nodeishFs: {} as any,
@@ -353,14 +290,7 @@ describe("addAppSpecificApi", () => {
 			}),
 		}
 
-		const config: InlangConfig = {
-			sourceLanguageTag: "en",
-			languageTags: ["de", "en"],
-			modules: ["https://myplugin.com/index.js"],
-		}
-
 		const resolved = await resolvePlugins({
-			module: config.modules[0]!,
 			plugins: [mockPlugin],
 			pluginSettings: {},
 			nodeishFs: {} as any,
@@ -402,14 +332,7 @@ describe("addAppSpecificApi", () => {
 			}),
 		}
 
-		const config: InlangConfig = {
-			sourceLanguageTag: "en",
-			languageTags: ["de", "en"],
-			modules: ["https://myplugin5.com/index.js", "https://myplugin6.com/index.js"],
-		}
-
 		const resolved = await resolvePlugins({
-			module: config.modules[0]!,
 			plugins: [mockPlugin, mockPlugin2],
 			pluginSettings: {},
 			nodeishFs: {} as any,
@@ -433,14 +356,7 @@ describe("addAppSpecificApi", () => {
 			addAppSpecificApi: () => undefined as any,
 		}
 
-		const config: InlangConfig = {
-			sourceLanguageTag: "en",
-			languageTags: ["de", "en"],
-			modules: ["https://myplugin.com/index.js"],
-		}
-
 		const resolved = await resolvePlugins({
-			module: config.modules[0]!,
 			plugins: [mockPlugin],
 			pluginSettings: {},
 			nodeishFs: {} as any,
@@ -469,14 +385,7 @@ describe("addAppSpecificApi", () => {
 			}),
 		}
 
-		const config: InlangConfig = {
-			sourceLanguageTag: "en",
-			languageTags: ["de", "en"],
-			modules: ["https://myplugin.com/index.js?pathPattern=src/**/*.{ts,tsx}"],
-		}
-
 		const resolved = await resolvePlugins({
-			module: config.modules[0]!,
 			plugins: [mockPlugin],
 			pluginSettings: {},
 			nodeishFs: {} as any,
@@ -506,14 +415,7 @@ describe("meta", () => {
 			},
 		}
 
-		const config: InlangConfig = {
-			sourceLanguageTag: "en",
-			languageTags: ["de", "en"],
-			modules: ["https://myplugin.com/index.js"],
-		}
-
 		const resolved = await resolvePlugins({
-			module: config.modules[0]!,
 			plugins: [mockPlugin],
 			nodeishFs: {} as any,
 			pluginSettings: {
@@ -561,14 +463,7 @@ describe("meta", () => {
 			}),
 		}
 
-		const config: InlangConfig = {
-			sourceLanguageTag: "en",
-			languageTags: ["de", "en"],
-			modules: ["https://myplugin.com/index.js", "https://myplugin2.com/index.js"],
-		}
-
 		const resolved = await resolvePlugins({
-			module: config.modules[0]!,
 			plugins: [mockPlugin, mockPlugin2],
 			pluginSettings: {},
 			nodeishFs: {} as any,

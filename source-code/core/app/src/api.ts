@@ -4,6 +4,7 @@ import type { MessageQueryApi } from "@inlang/messages"
 import type { Result } from "@inlang/result"
 import type { InvalidConfigError } from "./errors.js"
 import type { ResolvedPlugins } from "@inlang/plugin"
+import type { ResolveModulesFunction } from "@inlang/module"
 
 export type InlangInstance = {
 	config: {
@@ -13,6 +14,7 @@ export type InlangInstance = {
 		 */
 		set: (config: InlangConfig) => Result<void, InvalidConfigError>
 	}
+	module: Awaited<ReturnType<ResolveModulesFunction>>["data"]["module"]
 	lint: {
 		rules: Reactive<"onlyGetter", Array<Pick<LintRule, "meta"> & { module: string }>>
 		// for now, only simply array that can be improved in the future
