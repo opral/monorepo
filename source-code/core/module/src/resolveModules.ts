@@ -78,7 +78,13 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 						)
 						return
 					}
-					return rule
+					return {
+						...rule,
+						meta: {
+							...rule.meta,
+							module,
+						},
+					}
 				})
 
 				// -- ADD PARSED LINT RULES TO RESULT --
