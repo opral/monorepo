@@ -5,6 +5,11 @@ import type { Message } from "./schema.js"
 describe("create", () => {
 	const query = createQuery([])
 
+	it("should be possible to pass a custom map implementation", () => {
+		const query = createQuery([], { customMap: Map })
+		expect(query).toBeDefined()
+	})
+
 	it("should return an object, not an array", () => {
 		expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
 
@@ -63,7 +68,6 @@ describe("update", () => {
 function createMessage(args: { id: string; text: string }): Message {
 	return {
 		id: args.id,
-		expressions: [],
 		selectors: [],
 		body: {
 			en: [
