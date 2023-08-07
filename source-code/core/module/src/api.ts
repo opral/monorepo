@@ -1,5 +1,5 @@
 import type { InlangConfig } from "@inlang/config"
-import type { LintRule } from "@inlang/lint"
+import type { LintRule, ResolvedLintRule } from "@inlang/lint"
 import type { Plugin, ResolvePluginsFunction } from "@inlang/plugin"
 import type { ModuleError, ModuleImportError } from "./errors.js"
 import type { ImportFunction } from "./import.js"
@@ -35,7 +35,7 @@ export type ResolvedModulesFunction = (args: {
 }) => Promise<{
 	data: {
 		plugins: Awaited<ReturnType<ResolvePluginsFunction>>
-		lintRules: LintRule[]
+		lintRules: ResolvedLintRule[]
 	}
 	errors: Array<ModuleError | ModuleImportError>
 }>

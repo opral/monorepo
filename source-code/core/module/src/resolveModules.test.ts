@@ -80,6 +80,8 @@ describe("resolveModules", () => {
 		expect(resolved.data.plugins.data["appSpecificApi"]?.["inlang.ide-extension"]).toBeDefined()
 		// Check for the lint rule		
 		expect(resolved.data.lintRules[0]!.meta.id).toBe("mock.lint-rule")
+		// Check for module data in lint rule meta
+		expect(resolved.data.lintRules[0]!.meta.module).toBe(config.modules[0])
 	})
 
 	it("should return an error if a plugin cannot be imported", async () => {

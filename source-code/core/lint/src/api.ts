@@ -24,6 +24,16 @@ export const LintRule = Type.Object({
 	defaultLevel: LintLevel,
 })
 
+export type ResolvedLintRule = LintRule & {
+	meta: LintRule["meta"] & {
+		/**
+		 * The module that the lint rule was imported from.
+		 * This is useful for debugging.
+		 */
+		module: string
+	}
+}
+
 export type MessageLintRule<
 	RuleOptions extends JSONSerializable<unknown> = Record<string, string> | unknown,
 > = LintRule & {
