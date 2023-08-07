@@ -32,9 +32,9 @@ type Reactive<WithSetter extends "onlyGetter" | "withSetter", T> = {
 	get: () => T
 } & (WithSetter extends "withSetter"
 	? {
-			set: (value: T) => void
-	  }
-	: {})
+	set: (value: T) => void
+}
+	: Record<never, never>)
 
 /**
  * A reactive async value.
@@ -52,6 +52,6 @@ type ReactiveAsync<WithSetter extends "onlyGetter" | "withSetter", T> = {
 	get: () => T
 } & (WithSetter extends "withSetter"
 	? {
-			set: (value: T) => Promise<void>
-	  }
-	: {})
+	set: (value: T) => Promise<void>
+}
+	: Record<never, never>)
