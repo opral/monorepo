@@ -25,6 +25,7 @@ export type NodeishFilesystemSubset = Pick<
 export type ResolvePluginsFunction = (args: {
 	module: string
 	plugins: Plugin[]
+	nodeishFs: NodeishFilesystemSubset
 	pluginSettings: Record<Plugin["meta"]["id"], PluginSettings>
 }) => Promise<{
 	data: ResolvedPlugins
@@ -35,9 +36,9 @@ export type ResolvePluginsFunction = (args: {
  * The API after resolving the plugins.
  */
 export type ResolvedPlugins = {
-	loadMessages?: Plugin["loadMessages"]
-	saveMessages?: Plugin["saveMessages"]
-	detectedLanguageTags?: Plugin["detectedLanguageTags"]
+	loadMessages: (args: { languageTags: LanguageTag[] }) => Promise<Message[]> | Message[]
+	saveMessages: (args: { messages: Message[] }) => Promise<void> | void
+	detectedLanguageTags?: () => Promise<string[]> | string[]
 	/**
 	 * App specific APIs.
 	 *
@@ -55,7 +56,7 @@ export type ResolvedPlugins = {
 	 *  // use
 	 *  appSpecificApi['inlang.ide-extension'].messageReferenceMatcher()
 	 */
-	appSpecificApi?: ReturnType<NonNullable<Plugin["addAppSpecificApi"]>>
+	appSpecificApi: Record<Plugin["meta"]["id"], unknown>
 	/**
 	 * Metainformation for a specific plugin.
 	 *
@@ -78,11 +79,11 @@ export type Plugin<
 	AppSpecificApis extends Record<string, unknown> = Record<string, unknown>,
 > = Omit<
 	Static<typeof Plugin>,
-	'loadMessages' | 'saveMessages' | 'detectedLanguageTags' | 'addAppSpecificApi'
+	"loadMessages" | "saveMessages" | "detectedLanguageTags" | "addAppSpecificApi"
 > & {
-		meta: {
-			id: Static<typeof Plugin.meta.id>
-		}
+	meta: {
+		id: Static<typeof Plugin.meta.id>
+	}
 	/**
 	 * Load messages.
 	 */
@@ -122,31 +123,62 @@ export type Plugin<
 	 */
 	addAppSpecificApi?: (args: { options: PluginOptions }) => AppSpecificApis
 }
-export const Plugin = Type.Object({
-	meta: Type.Object({
-		id: Type.String({
-			pattern: "^[a-z0-9-]+\\.[a-z0-9-]+$",
-			examples: ["example.my-plugin"],
+export const Plugin = Type.Object(
+	{
+		meta: Type.Object({
+			id: Type.String({
+				pattern: "^[a-z0-9-]+\\.[a-z0-9-]+$",
+				examples: ["example.my-plugin"],
+			}),
+			displayName: TranslatedStrings,
+			description: TranslatedStrings,
+			keywords: Type.Array(Type.String()),
 		}),
-		displayName: TranslatedStrings,
-		description: TranslatedStrings,
-		keywords: Type.Array(Type.String()),
-	}),
-	loadMessages: Type.Optional(Type.Function([Type.Object({
-		languageTags: LanguageTag,
-		options: Type.Union([Type.Object({}), Type.Undefined()]),
-		nodeishFs: Type.Object({}),
-	})], PromiseLike(Type.Array(Message)))),
-	saveMessages: Type.Optional(Type.Function([Type.Object({
-		messages: Type.Array(Message),
-		options: Type.Union([Type.Object({}), Type.Undefined()]),
-		nodeishFs: Type.Object({}),
-	})], PromiseLike(Type.Void()))),
-	detectedLanguageTags: Type.Optional(Type.Function([Type.Object({
-		options: Type.Union([Type.Object({}), Type.Undefined()]),
-		nodeishFs: Type.Object({}),
-	})], PromiseLike(Type.Array(Type.String())))),
-	addAppSpecificApi: Type.Optional(Type.Function([Type.Object({
-		options: Type.Union([Type.Object({}), Type.Undefined()]),
-	})], PromiseLike(Type.Record(Type.String(), Type.Any())))),
-}, { additionalProperties: false })
+		loadMessages: Type.Optional(
+			Type.Function(
+				[
+					Type.Object({
+						languageTags: LanguageTag,
+						options: Type.Union([Type.Object({}), Type.Undefined()]),
+						nodeishFs: Type.Object({}),
+					}),
+				],
+				PromiseLike(Type.Array(Message)),
+			),
+		),
+		saveMessages: Type.Optional(
+			Type.Function(
+				[
+					Type.Object({
+						messages: Type.Array(Message),
+						options: Type.Union([Type.Object({}), Type.Undefined()]),
+						nodeishFs: Type.Object({}),
+					}),
+				],
+				PromiseLike(Type.Void()),
+			),
+		),
+		detectedLanguageTags: Type.Optional(
+			Type.Function(
+				[
+					Type.Object({
+						options: Type.Union([Type.Object({}), Type.Undefined()]),
+						nodeishFs: Type.Object({}),
+					}),
+				],
+				PromiseLike(Type.Array(Type.String())),
+			),
+		),
+		addAppSpecificApi: Type.Optional(
+			Type.Function(
+				[
+					Type.Object({
+						options: Type.Union([Type.Object({}), Type.Undefined()]),
+					}),
+				],
+				PromiseLike(Type.Record(Type.String(), Type.Any())),
+			),
+		),
+	},
+	{ additionalProperties: false },
+)

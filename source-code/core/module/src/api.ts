@@ -1,6 +1,6 @@
 import type { InlangConfig } from "@inlang/config"
 import type { LintRule, ResolvedLintRule } from "@inlang/lint"
-import type { Plugin, ResolvePluginsFunction } from "@inlang/plugin"
+import type { NodeishFilesystemSubset, Plugin, ResolvePluginsFunction } from "@inlang/plugin"
 import type { ModuleError, ModuleImportError } from "./errors.js"
 import type { ImportFunction } from "./import.js"
 
@@ -28,10 +28,13 @@ export type InlangModule = {
 
 /**
  * Function that resolves modules from the config.
+ *
+ * Pass a custom `_import` function to override the default import function.
  */
 export type ResolvedModulesFunction = (args: {
 	config: InlangConfig
-	$import: ImportFunction
+	nodeishFs: NodeishFilesystemSubset
+	_import?: ImportFunction
 }) => Promise<{
 	data: {
 		plugins: Awaited<ReturnType<ResolvePluginsFunction>>
