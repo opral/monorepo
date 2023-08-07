@@ -12,10 +12,15 @@ export type MessageQueryApi = {
 /**
  * Creates a query API for messages.
  *
- * Creates an index internally for faster get operations.
+ * - `options.customMap` is an optional custom map implementation to use instead of `Map` (useful for reactivity)
  */
-export function createQuery(messages: Array<Message>): MessageQueryApi {
-	const index = new Map(messages.map((message) => [message.id, message]))
+export function createQuery(
+	messages: Array<Message>,
+	options?: { customMap: typeof Map },
+): MessageQueryApi {
+	const index = new (options?.customMap ? options.customMap : Map)(
+		messages.map((message) => [message.id, message]),
+	)
 	return {
 		create: ({ data }) => {
 			index.set(data.id, data)
@@ -24,7 +29,7 @@ export function createQuery(messages: Array<Message>): MessageQueryApi {
 			return index.get(where.id)
 		},
 		getAll: () => {
-			return Array.from(index.values())
+			return [...index.values()]
 		},
 		update: ({ where, data }) => {
 			const message = index.get(where.id)
