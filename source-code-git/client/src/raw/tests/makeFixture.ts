@@ -1,4 +1,4 @@
-import { createMemoryFs, normalizePath } from "@inlang-git/fs"
+import { createNodeishMemoryFs, normalizePath } from "@inlang-git/fs"
 import type { NodeishFilesystem } from "@inlang-git/fs"
 import * as nodeFs from "node:fs/promises"
 // @ts-expect-error - internal apis have no type declarations
@@ -39,7 +39,7 @@ export async function makeFixture(fixtureName: string) {
 	const fixtureDir = "src/raw/tests/fixtures"
 	const dir = `${fixtureDir}/${fixtureName}`
 	const gitdir = `${fixtureDir}/${fixtureName}.git`
-	const fs = createMemoryFs()
+	const fs = createNodeishMemoryFs()
 
 	await nodeFs
 		.readdir(dir)
