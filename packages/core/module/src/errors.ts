@@ -1,7 +1,7 @@
 export class ModuleError extends Error {
 	public readonly module: string
 
-	constructor(message: string, options: { module: string; cause: Error }) {
+	constructor(message: string, options: { module: string; cause?: Error }) {
 		super(message)
 		this.name = "ModuleError"
 		this.module = options.module

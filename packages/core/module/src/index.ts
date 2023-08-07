@@ -1,4 +1,4 @@
-export type { InlangModule } from "./api.js"
+export type { InlangModule, ResolveModulesFunction } from "./api.js"
 export { moduleBuildConfig } from "./moduleBuildConfig.js"
 export { resolveModules } from "./resolveModules.js"
 export { type ImportFunction } from "./import.js"

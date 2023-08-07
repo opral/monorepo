@@ -1,7 +1,7 @@
 import type { Message, MessageQueryApi } from "@inlang/messages"
 import { type LanguageTag, TranslatedStrings } from "@inlang/language-tag"
 import type { InlangConfig } from "@inlang/config"
-import { Type, type Static } from "@sinclair/typebox"
+import { Type, type Static, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
 
 export type LintLevel = Static<typeof LintLevel>
 
@@ -9,30 +9,26 @@ export const LintLevel = Type.Union([Type.Literal("error"), Type.Literal("warnin
 
 export type LintRule = Static<typeof LintRule>
 
-export const LintRule = Type.Object({
-	meta: Type.Object({
-		id: Type.String(),
-		displayName: TranslatedStrings,
-		description: TranslatedStrings,
-	}),
-	/**
-	 * The default level of the lint rule.
-	 *
-	 * The default level exists as a fallback if the user
-	 * did not specify a level for the rule in the settings.
-	 */
-	defaultLevel: LintLevel,
-})
-
-export type ResolvedLintRule = LintRule & {
-	meta: LintRule["meta"] & {
+export const LintRule = Type.Object(
+	{
+		meta: Type.Object({
+			id: Type.String({
+				pattern: "^[a-z0-9-]+\\.[a-z0-9-]+$",
+				examples: ["example.my-plugin"],
+			}) as unknown as TTemplateLiteral<[TLiteral<`${string}.${string}`>]>,
+			displayName: TranslatedStrings,
+			description: TranslatedStrings,
+		}),
 		/**
-		 * The module that the lint rule was imported from.
-		 * This is useful for debugging.
+		 * The default level of the lint rule.
+		 *
+		 * The default level exists as a fallback if the user
+		 * did not specify a level for the rule in the settings.
 		 */
-		module: string
-	}
-}
+		defaultLevel: LintLevel,
+	},
+	{ additionalProperties: false },
+)
 
 export type MessageLintRule<
 	RuleOptions extends JSONSerializable<unknown> = Record<string, string> | unknown,
