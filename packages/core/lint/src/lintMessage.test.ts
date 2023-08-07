@@ -36,7 +36,7 @@ describe("lintMessage", async () => {
 	describe("resolve rules and options", async () => {
 		test("it should not run disabled lintrules", async () => {
 			await lintMessage({
-				config: { settings: { lintRules: { "r.1": { level: "off" } } } } as Partial<InlangConfig> as InlangConfig,
+				config: { settings: { lintRules: { "r.1": { level: "off" } } } as Partial<InlangConfig['settings']> } as InlangConfig,
 				query: {} as MessageQueryApi,
 				messages,
 				message: message1,
@@ -65,7 +65,7 @@ describe("lintMessage", async () => {
 			lintRule1.message.mockImplementation(({ report }) => report({} as MessageLintReport))
 
 			const reports = await lintMessage({
-				config: { settings: { lintRules: { "r.1": { level: "warning" } } } } as Partial<InlangConfig> as InlangConfig,
+				config: { settings: { lintRules: { "r.1": { level: "warning" } } } as Partial<InlangConfig['settings']> } as InlangConfig,
 				query: {} as MessageQueryApi,
 				messages,
 				message: message1,
@@ -81,7 +81,7 @@ describe("lintMessage", async () => {
 			lintRule1.message.mockImplementation(({ options }) => fn(options))
 
 			await lintMessage({
-				config: { settings: { lintRules: { "r.1": { options } } } } as Partial<InlangConfig> as InlangConfig,
+				config: { settings: { lintRules: { "r.1": { options } } } as Partial<InlangConfig['settings']> } as InlangConfig,
 				query: {} as MessageQueryApi,
 				messages,
 				message: message1,
