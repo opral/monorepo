@@ -11,16 +11,16 @@ import type { PageContextRenderer } from "./types.js"
 import { Dynamic } from "solid-js/web"
 import { LocalStorageProvider } from "@src/services/local-storage/index.js"
 import { I18nContext, useI18n } from "@solid-primitives/i18n"
-import { rpc } from "@inlang/rpc"
 import { createI18nContext } from "@solid-primitives/i18n"
+
+// manually import the translations via vite's file resolver
+import de from "../../lang/de.json?raw"
+import en from "../../lang/en.json?raw"
+import zh from "../../lang/zh.json?raw"
 
 export type RootProps = Accessor<{
 	pageContext: PageContextRenderer
 }>
-
-// get translation files and put it in context provider
-const [response] = await rpc.getLangResources()
-const value = createI18nContext(response, "en")
 
 /**
  * The Page that is being rendered.
@@ -35,9 +35,18 @@ export function Root(props: {
 	locale: string
 	isEditor: boolean
 }) {
+	const i18nvalue = createI18nContext(
+		{
+			de: JSON.parse(de),
+			en: JSON.parse(en),
+			zh: JSON.parse(zh),
+		},
+		"en",
+	)
+
 	return (
 		<ErrorBoundary fallback={(error) => <ErrorMessage error={error} />}>
-			<I18nContext.Provider value={value}>
+			<I18nContext.Provider value={i18nvalue}>
 				<LocalStorageProvider>
 					<RootWithProviders
 						page={props.page}
