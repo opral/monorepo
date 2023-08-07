@@ -1,15 +1,5 @@
-import { LintRule } from "@inlang/lint"
+import { LintRule, LintRuleError } from "@inlang/lint"
 import { Value } from "@sinclair/typebox/value"
-
-export class LintRuleError extends Error {
-	public readonly module: string
-
-	constructor(message: string, options: { module: string; cause?: Error }) {
-		super(message)
-		this.module = options.module
-		this.name = "LintRuleError"
-	}
-}
 
 export const resolveLintRules = (args: {
 	lintRules: Array<LintRule & { meta: { module?: string } }>
