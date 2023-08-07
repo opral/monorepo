@@ -1,7 +1,7 @@
 export type { InlangModule } from "./api.js"
 export { moduleBuildConfig } from "./moduleBuildConfig.js"
 export { resolveModules } from "./resolveModules.js"
-export { createImport, type ImportFunction } from "./import.js"
+export { type ImportFunction } from "./import.js"
 
 /**
  * Does not re-export `@inlang/plugin` and `@inlang/lint` to

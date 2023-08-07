@@ -5,8 +5,11 @@ import { LintRule, ResolvedLintRule } from "@inlang/lint"
 import { ResolvePluginsFunction, resolvePlugins, type Plugin } from "@inlang/plugin"
 import extend from "just-extend"
 import { Value } from "@sinclair/typebox/value"
+import { createImport } from "./import.js"
 
 export const resolveModules: ResolvedModulesFunction = async (args) => {
+	const _import = args._import ?? createImport({ readFile: args.nodeishFs.readFile, fetch })
+
 	const pluginSettings = args.config.settings?.plugins || {}
 
 	const result: Awaited<ReturnType<ResolvedModulesFunction>> = {
@@ -23,7 +26,7 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 			 * -------------- BEGIN SETUP --------------
 			 */
 
-			const importedModule = await tryCatch(() => args.$import(module))
+			const importedModule = await tryCatch(() => _import(module))
 
 			// -- IMPORT MODULE --
 			if (importedModule.error) {
@@ -53,6 +56,7 @@ export const resolveModules: ResolvedModulesFunction = async (args) => {
 					module,
 					plugins,
 					pluginSettings,
+					nodeishFs: args.nodeishFs,
 				})
 
 				// -- ADD RESOLVED PLUGINS TO RESULT --

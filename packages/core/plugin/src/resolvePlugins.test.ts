@@ -38,6 +38,7 @@ describe("generally", () => {
 			module: config.modules[0]!,
 			plugins: [mockPlugin],
 			pluginSettings: {},
+			nodeishFs: {} as any,
 		})
 
 		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesInvalidIdError)
@@ -69,6 +70,7 @@ describe("generally", () => {
 			module: config.modules[0]!,
 			plugins: [mockPlugin],
 			pluginSettings: {},
+			nodeishFs: {} as any,
 		})
 
 		expect(resolved.errors.length).toBe(1)
@@ -96,6 +98,7 @@ describe("generally", () => {
 			module: config.modules[0]!,
 			plugins: [mockPlugin],
 			pluginSettings: {},
+			nodeishFs: {} as any,
 		})
 
 		expect(resolved.errors.length).toBe(1)
@@ -125,13 +128,12 @@ describe("loadMessages", () => {
 			module: config.modules[0]!,
 			plugins: [mockPlugin],
 			pluginSettings: {},
+			nodeishFs: {} as any,
 		})
 
 		expect(
 			await resolved.data.loadMessages!({
 				languageTags: ["en"],
-				options: {},
-				nodeishFs: {} as any,
 			}),
 		).toEqual([{ id: "test", expressions: [], selectors: [], body: { en: [] } }])
 	})
@@ -166,6 +168,7 @@ describe("loadMessages", () => {
 		const resolved = await resolvePlugins({
 			module: config.modules[0]!,
 			plugins: [mockPlugin, mockPlugin2],
+			nodeishFs: {} as any,
 			pluginSettings: {},
 		})
 
@@ -195,6 +198,7 @@ describe("saveMessages", () => {
 		const resolved = await resolvePlugins({
 			module: config.modules[0]!,
 			plugins: [mockPlugin],
+			nodeishFs: {} as any,
 			pluginSettings: {},
 		})
 
@@ -232,6 +236,7 @@ describe("saveMessages", () => {
 			module: config.modules[0]!,
 			plugins: [mockPlugin, mockPlugin2],
 			pluginSettings: {},
+			nodeishFs: {} as any,
 		})
 
 		expect(resolved.errors).toHaveLength(1)
@@ -277,13 +282,11 @@ describe("detectedLanguageTags", () => {
 			module: config.modules[0]!,
 			plugins: [mockPlugin, mockPlugin2],
 			pluginSettings: {},
+			nodeishFs: {} as any,
 		})
 
 		expect(resolved.data.detectedLanguageTags).toBeDefined()
-		expect(await resolved.data.detectedLanguageTags!({
-				options: {},
-				nodeishFs: {} as any,
-		})).toEqual(["de", "en"])
+		expect(await resolved.data.detectedLanguageTags!()).toEqual(["de", "en"])
 	})
 
 	it("should collect an error if function is defined twice in multiple plugins", async () => {
@@ -324,6 +327,7 @@ describe("detectedLanguageTags", () => {
 			module: config.modules[0]!,
 			plugins: [mockPlugin, mockPlugin2],
 			pluginSettings: {},
+			nodeishFs: {} as any,
 		})
 
 		expect(resolved.errors).toHaveLength(1)
@@ -359,6 +363,7 @@ describe("addAppSpecificApi", () => {
 			module: config.modules[0]!,
 			plugins: [mockPlugin],
 			pluginSettings: {},
+			nodeishFs: {} as any,
 		})
 
 		expect(resolved.data.appSpecificApi).toHaveProperty("my-app")
@@ -407,6 +412,7 @@ describe("addAppSpecificApi", () => {
 			module: config.modules[0]!,
 			plugins: [mockPlugin, mockPlugin2],
 			pluginSettings: {},
+			nodeishFs: {} as any,
 		})
 
 		expect(resolved.data.appSpecificApi).toHaveProperty("my-app-1")
@@ -437,6 +443,7 @@ describe("addAppSpecificApi", () => {
 			module: config.modules[0]!,
 			plugins: [mockPlugin],
 			pluginSettings: {},
+			nodeishFs: {} as any,
 		})
 
 		expect(resolved.errors).toHaveLength(1)
@@ -472,6 +479,7 @@ describe("addAppSpecificApi", () => {
 			module: config.modules[0]!,
 			plugins: [mockPlugin],
 			pluginSettings: {},
+			nodeishFs: {} as any,
 		})
 
 		expect(resolved.data.appSpecificApi).toHaveProperty("my-app")
@@ -507,6 +515,7 @@ describe("meta", () => {
 		const resolved = await resolvePlugins({
 			module: config.modules[0]!,
 			plugins: [mockPlugin],
+			nodeishFs: {} as any,
 			pluginSettings: {
 				"plugin.plugin": {
 					options: {
@@ -562,6 +571,7 @@ describe("meta", () => {
 			module: config.modules[0]!,
 			plugins: [mockPlugin, mockPlugin2],
 			pluginSettings: {},
+			nodeishFs: {} as any,
 		})
 
 		expect(resolved.data.meta).toHaveProperty("plugin.plugin")

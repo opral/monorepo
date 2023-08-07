@@ -15,7 +15,8 @@ describe("generally", () => {
 
 		const resolved = await resolveModules({
 			config,
-			$import: () => {
+			nodeishFs: {} as any,
+			_import: () => {
 				throw new ModuleImportError("Could not import", {
 					module: config.modules[0]!,
 					cause: new Error("Could not import"),
@@ -61,7 +62,7 @@ describe("resolveModules", () => {
 			modules: ["https://myplugin.com/index.js"],
 		}
 
-		const $import = async () =>
+		const _import = async () =>
 			({
 				default: {
 					plugins: [mockPlugin],
@@ -70,7 +71,7 @@ describe("resolveModules", () => {
 			} satisfies InlangModule)
 
 		// Call the function
-		const resolved = await resolveModules({ config, $import })
+		const resolved = await resolveModules({ config, _import, nodeishFs: {} as any })
 
 		// Assert results
 		expect(resolved.errors).toHaveLength(0)
@@ -78,7 +79,7 @@ describe("resolveModules", () => {
 		expect(resolved.data.plugins.data["meta"]["mock.plugin"]).toBeDefined()
 		// Check for the app specific api
 		expect(resolved.data.plugins.data["appSpecificApi"]?.["inlang.ide-extension"]).toBeDefined()
-		// Check for the lint rule		
+		// Check for the lint rule
 		expect(resolved.data.lintRules[0]!.meta.id).toBe("mock.lint-rule")
 		// Check for module data in lint rule meta
 		expect(resolved.data.lintRules[0]!.meta.module).toBe(config.modules[0])
@@ -91,7 +92,7 @@ describe("resolveModules", () => {
 			modules: ["https://myplugin.com/index.js"],
 		}
 
-		const $import = async () => {
+		const _import = async () => {
 			throw new ModuleImportError("Could not import", {
 				module: config.modules[0]!,
 				cause: new Error(),
@@ -99,7 +100,7 @@ describe("resolveModules", () => {
 		}
 
 		// Call the function
-		const resolved = await resolveModules({ config, $import })
+		const resolved = await resolveModules({ config, _import, nodeishFs: {} as any })
 
 		// Assert results
 		expect(resolved.errors[0]).toBeInstanceOf(ModuleImportError)
@@ -112,12 +113,12 @@ describe("resolveModules", () => {
 			modules: ["https://myplugin.com/index.js"],
 		}
 
-		const $import = async () => ({
+		const _import = async () => ({
 			default: {},
 		})
 
 		// Call the function
-		const resolved = await resolveModules({ config, $import })
+		const resolved = await resolveModules({ config, _import, nodeishFs: {} as any })
 
 		// Assert results
 		expect(resolved.errors[0]).toBeInstanceOf(ModuleError)
@@ -138,7 +139,7 @@ describe("resolveModules", () => {
 			modules: ["https://myplugin.com/index.js"],
 		}
 
-		const $import = async () => ({
+		const _import = async () => ({
 			data: {
 				default: {
 					plugins: [],
@@ -150,7 +151,7 @@ describe("resolveModules", () => {
 		})
 
 		// Call the function
-		const resolved = await resolveModules({ config, $import })
+		const resolved = await resolveModules({ config, _import, nodeishFs: {} as any })
 
 		// Assert results
 		expect(resolved.errors[0]).toBeInstanceOf(ModuleError)
@@ -164,12 +165,12 @@ describe("resolveModules", () => {
 			modules: ["https://myplugin.com/index.js"],
 		}
 
-		const $import = async () => {
+		const _import = async () => {
 			throw new Error(errorMessage)
 		}
 
 		// Call the function
-		const resolved = await resolveModules({ config, $import })
+		const resolved = await resolveModules({ config, _import, nodeishFs: {} as any })
 
 		// Assert results
 		expect(resolved.errors[0]).toBeInstanceOf(ModuleError)

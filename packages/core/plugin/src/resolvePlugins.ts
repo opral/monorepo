@@ -14,12 +14,11 @@ import { TypeCompiler } from "@sinclair/typebox/compiler"
 const whitelistedPlugins = ["inlang.plugin-json", "inlang.plugin-i18next"]
 const PluginCompiler = TypeCompiler.Compile(Plugin)
 
-
 export const resolvePlugins: ResolvePluginsFunction = (args) => {
 	const result: Awaited<ReturnType<ResolvePluginsFunction>> = {
 		data: {
-			loadMessages: undefined,
-			saveMessages: undefined,
+			loadMessages: undefined as any,
+			saveMessages: undefined as any,
 			detectedLanguageTags: undefined,
 			appSpecificApi: {},
 			meta: {},
@@ -89,7 +88,10 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			)
 		}
 
-		if (typeof plugin.detectedLanguageTags === "function" && result.data.detectedLanguageTags !== undefined) {
+		if (
+			typeof plugin.detectedLanguageTags === "function" &&
+			result.data.detectedLanguageTags !== undefined
+		) {
 			result.errors.push(
 				new PluginFunctionDetectLanguageTagsAlreadyDefinedError(
 					`Plugin ${plugin.meta.id} defines the detectedLanguageTags function, but it was already defined by another plugin.`,
@@ -123,15 +125,29 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 		 */
 
 		if (typeof plugin.loadMessages === "function") {
-			result.data.loadMessages = plugin.loadMessages
+			result.data.loadMessages = (_args) =>
+				plugin.loadMessages!({
+					..._args,
+					options: args.pluginSettings[plugin.meta.id]?.options,
+					nodeishFs: args.nodeishFs,
+				})
 		}
 
 		if (typeof plugin.saveMessages === "function") {
-			result.data.saveMessages = plugin.saveMessages
+			result.data.saveMessages = (_args) =>
+				plugin.saveMessages!({
+					..._args,
+					options: args.pluginSettings[plugin.meta.id]?.options,
+					nodeishFs: args.nodeishFs,
+				})
 		}
 
 		if (typeof plugin.detectedLanguageTags === "function") {
-			result.data.detectedLanguageTags = plugin.detectedLanguageTags
+			result.data.detectedLanguageTags = () =>
+				plugin.detectedLanguageTags!({
+					options: args.pluginSettings[plugin.meta.id]?.options,
+					nodeishFs: args.nodeishFs,
+				})
 		}
 
 		if (typeof plugin.addAppSpecificApi === "function") {

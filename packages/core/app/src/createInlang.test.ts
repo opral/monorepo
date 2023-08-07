@@ -67,9 +67,8 @@ const env = {
 describe("test", () => {
 	it("test", async () => {
 		await env.$fs.writeFile("./inlang.config.json", JSON.stringify(config))
-		const instance = await createInlang({
+		const inlang = await createInlang({
 			configPath: "./inlang.config.json",
-			env: env,
 		})
 		const reactiveConfig = instance.config.get()
 		instance.config.set({ ...reactiveConfig, languageTags: ["en", "de"] })
