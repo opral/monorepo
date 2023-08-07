@@ -1,10 +1,9 @@
 import type { InlangModule, ResolveModulesFunction } from "./api.js"
 import { ModuleError, ModuleImportError } from "./errors.js"
 import { tryCatch } from "@inlang/result"
-import type { LintRule } from "@inlang/lint"
+import { LintRule, resolveLintRules } from "@inlang/lint"
 import { resolvePlugins, type Plugin } from "@inlang/plugin"
 import { createImport } from "./import.js"
-import { resolveLintRules } from "./resolveLintRules.js"
 
 export const resolveModules: ResolveModulesFunction = async (args) => {
 	const _import = args._import ?? createImport({ readFile: args.nodeishFs.readFile, fetch })

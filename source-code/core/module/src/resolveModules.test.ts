@@ -1,10 +1,9 @@
-import type { LintRule } from "@inlang/lint"
+import { LintRule, LintRuleError } from "@inlang/lint"
 import type { InlangConfig, Plugin } from "@inlang/plugin"
 import { describe, expect, it } from "vitest"
 import type { InlangModule } from "./api.js"
 import { ModuleError, ModuleImportError } from "./errors.js"
 import { resolveModules } from "./resolveModules.js"
-import { LintRuleError } from "./resolveLintRules.js"
 
 describe("generally", () => {
 	it("should return an error if a plugin cannot be imported", async () => {
