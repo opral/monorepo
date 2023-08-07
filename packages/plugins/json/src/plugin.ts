@@ -2,9 +2,9 @@ import {
 	type Message,
 	type Variant,
 	type LanguageTag,
-	type InlangEnvironment,
 	type Plugin,
 	getVariant,
+	type NodeishFilesystemSubset,
 } from "@inlang/plugin"
 import { throwIfInvalidOptions, type PluginOptions } from "./options.js"
 import { detectJsonSpacing, detectIsNested, replaceAll } from "./utilities.js"
@@ -112,7 +112,7 @@ export const plugin: Plugin<PluginOptions> = {
  * @example const messages = await loadMessages({ fs, options, languageTags })
  */
 async function loadMessages(args: {
-	nodeishFs: InlangEnvironment["$fs"]
+	nodeishFs: NodeishFilesystemSubset
 	options: PluginOptions
 	languageTags: Readonly<LanguageTag[]>
 }): Promise<Message[]> {
@@ -157,7 +157,7 @@ async function loadMessages(args: {
 async function getFileToParse(
 	path: string,
 	languageTag: string,
-	nodeishFs: InlangEnvironment["$fs"],
+	nodeishFs: NodeishFilesystemSubset,
 ): Promise<Record<string, string>> {
 	const pathWithLanguage = path.replace("{languageTag}", languageTag)
 	// get file, make sure that is not braking when the namespace doesn't exist in every languageTag dir
@@ -215,7 +215,6 @@ const addVariantToMessages = (
 		// message does not exist
 		const message: Message = {
 			id: key,
-			expressions: [],
 			selectors: [],
 			body: {},
 		}
@@ -254,17 +253,14 @@ function parsePattern(
 		.map((element) => {
 			if (expression.test(element)) {
 				return {
-					type: "Expression",
-					body: {
-						type: "VariableReference",
-						name: variableReferencePattern![1]
-							? element.slice(
-									variableReferencePattern![0]!.length,
-									// negative index, removing the trailing pattern
-									-variableReferencePattern![1].length,
-							  )
-							: element.slice(variableReferencePattern![0]!.length),
-					},
+					type: "VariableReference",
+					name: variableReferencePattern![1]
+						? element.slice(
+								variableReferencePattern![0]!.length,
+								// negative index, removing the trailing pattern
+								-variableReferencePattern![1].length,
+							)
+						: element.slice(variableReferencePattern![0]!.length),
 				}
 			} else {
 				return {
@@ -283,7 +279,7 @@ function parsePattern(
  * @example await saveMessages({ fs, options, messages })
  */
 async function saveMessages(args: {
-	nodeishFs: InlangEnvironment["$fs"]
+	nodeishFs: NodeishFilesystemSubset
 	options: PluginOptions
 	messages: Message[]
 }) {
@@ -419,11 +415,11 @@ function serializePattern(
 			case "Text":
 				result.push(element.value)
 				break
-			case "Expression":
+			case "VariableReference":
 				result.push(
 					variableReferencePattern![1]
-						? `${variableReferencePattern![0]}${element.body.name}${variableReferencePattern![1]}`
-						: `${variableReferencePattern![0]}${element.body.name}`,
+						? `${variableReferencePattern![0]}${element.name}${variableReferencePattern![1]}`
+						: `${variableReferencePattern![0]}${element.name}`,
 				)
 				break
 			default:
@@ -439,7 +435,7 @@ function serializePattern(
  * @example const languageTags = await detectLanguageTags({ fs, options })
  */
 async function detectLanguageTags(args: {
-	nodeishFs: InlangEnvironment["$fs"]
+	nodeishFs: NodeishFilesystemSubset
 	options: PluginOptions
 }): Promise<string[]> {
 	const languages: string[] = []

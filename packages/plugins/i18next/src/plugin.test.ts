@@ -6,7 +6,7 @@ import { createMockNodeishFs } from "@inlang/plugin/test"
 import { plugin } from "./plugin.js"
 
 describe("option pathPattern", () => {
-	it("should throw if the path pattern does not include the {languageTag} expression", async () => {
+	it("should throw if the path pattern does not include the {languageTag} variable reference", async () => {
 		const fs = await createMockNodeishFs({})
 		await fs.writeFile("./en.json", "{}")
 		try {
@@ -36,7 +36,7 @@ describe("option pathPattern", () => {
 		}
 	})
 
-	it("should throw if the path pattern with namespaces does not include the {languageTag} expression", async () => {
+	it("should throw if the path pattern with namespaces does not include the {languageTag} variable reference", async () => {
 		const fs = await createMockNodeishFs({})
 		await fs.writeFile("./en.json", "{}")
 		try {
@@ -383,8 +383,8 @@ describe("saveMessage", () => {
 	})
 })
 
-describe("expression", () => {
-	it("should correctly identify expression (at the end)", async () => {
+describe("variable reference", () => {
+	it("should correctly identify variable reference (at the end)", async () => {
 		const fs = await createMockNodeishFs({})
 		await fs.writeFile("./en.json", JSON.stringify({ test: "Hello {{username}}" }))
 		const options: PluginOptions = {
@@ -394,10 +394,10 @@ describe("expression", () => {
 		const messages = await plugin.loadMessages!({ languageTags, options, nodeishFs: fs })
 		expect(getVariant(messages[0]!, { languageTag: "en" }).data!.length).toBe(2)
 		expect(getVariant(messages[0]!, { languageTag: "en" }).data![0]!.type).toBe("Text")
-		expect(getVariant(messages[0]!, { languageTag: "en" }).data![1]!.type).toBe("Expression")
+		expect(getVariant(messages[0]!, { languageTag: "en" }).data![1]!.type).toBe("VariableReference")
 	})
 
-	it("should correctly identify expression (at the beginning)", async () => {
+	it("should correctly identify variable reference (at the beginning)", async () => {
 		const fs = await createMockNodeishFs({})
 		await fs.writeFile("./en.json", JSON.stringify({ test: "{{username}} the great" }))
 		const options: PluginOptions = {
@@ -406,7 +406,7 @@ describe("expression", () => {
 		const languageTags = ["en"]
 		const messages = await plugin.loadMessages!({ languageTags, options, nodeishFs: fs })
 		expect(getVariant(messages[0]!, { languageTag: "en" }).data!.length).toBe(2)
-		expect(getVariant(messages[0]!, { languageTag: "en" }).data![0]!.type).toBe("Expression")
+		expect(getVariant(messages[0]!, { languageTag: "en" }).data![0]!.type).toBe("VariableReference")
 		expect(getVariant(messages[0]!, { languageTag: "en" }).data![1]!.type).toBe("Text")
 	})
 
@@ -420,7 +420,7 @@ describe("expression", () => {
 		const languageTags = ["en"]
 		const messages = await plugin.loadMessages!({ languageTags, options, nodeishFs: fs })
 		expect(getVariant(messages[0]!, { languageTag: "en" }).data![0]!.type).toBe("Text")
-		expect(getVariant(messages[0]!, { languageTag: "en" }).data![1]!.type).toBe("Expression")
+		expect(getVariant(messages[0]!, { languageTag: "en" }).data![1]!.type).toBe("VariableReference")
 	})
 })
 
@@ -733,9 +733,8 @@ describe("roundTrip", () => {
 				},
 			],
 		}
-		const newMessage = {
+		const newMessage: Message = {
 			id: "test2",
-			expressions: [],
 			selectors: [],
 			body: {
 				en: [variant],
