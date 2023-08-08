@@ -114,18 +114,6 @@ export const createInlang = async (args: {
 		// TODO: remove workaround and init reactive query above
 		const queryMessages = createQuery(messages() || [])
 
-		createEffect(() => {
-			console.log(
-				Object.entries(modules()!.data.plugins.data.meta).map(([id, meta]) => {
-					const module = modules()!.data.module.meta.plugins[id as `${string}.${string}`]
-					return {
-						...meta,
-						module,
-					}
-				}),
-			)
-		})
-
 		return {
 			meta: {
 				modules: () => [
@@ -150,7 +138,6 @@ export const createInlang = async (args: {
 					}),
 			},
 			errors: {
-				// TODO: make reactive (using store)
 				module: () => modules()!.errors,
 				plugin: () => modules()!.data.plugins.errors,
 				lintRules: () => [...modules()!.data.lintRules.errors, ...(lintErrors() || [])],
