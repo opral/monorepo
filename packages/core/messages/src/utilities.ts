@@ -1,8 +1,9 @@
-// @ts-nocheck
 
+// @ts-nocheck
 import type { LanguageTag } from "@inlang/language-tag"
 import type { Message, Variant } from "./schema.js"
 import type { Result } from "@inlang/result"
+import { MessagePatternsForLanguageTagDoNotExistError, MessageVariantAlreadyExistsError, MessageVariantDoesNotExistError } from "./errors.js"
 
 /**
  * Get the variant of a message
@@ -20,10 +21,10 @@ export function getVariant(
 	},
 ): Result<
 	Variant["pattern"],
-	VariantDoesNotExistException | PatternsForLanguageTagDoNotExistException
+	MessageVariantDoesNotExistError | MessagePatternsForLanguageTagDoNotExistError
 > {
 	if (!message.body[options.languageTag])
-		return { error: new PatternsForLanguageTagDoNotExistException(message.id, options.languageTag) }
+		return { error: new MessagePatternsForLanguageTagDoNotExistError(message.id, options.languageTag) }
 	const variant = matchMostSpecificVariant(message, options.languageTag, options.selectors)
 	if (variant) {
 		//! do not return a reference to the message in a resource
@@ -31,7 +32,7 @@ export function getVariant(
 		//! resource which is considered to be unmutable.
 		return { data: structuredClone(variant.pattern) }
 	}
-	return { error: new VariantDoesNotExistException(message.id, options.languageTag) }
+	return { error: new MessageVariantDoesNotExistError(message.id, options.languageTag) }
 }
 
 /**
@@ -48,7 +49,7 @@ export function createVariant(
 		languageTag: LanguageTag
 		data: Variant
 	},
-): Result<Message, VariantAlreadyExistsException> {
+): Result<Message, MessageVariantAlreadyExistsError> {
 	const copy: Message = structuredClone(message)
 	// check if languageTag exists
 	if (copy.body[options.languageTag] === undefined) {
@@ -56,7 +57,7 @@ export function createVariant(
 	}
 	// check if variant already exists
 	if (matchVariant(copy, options.languageTag, options.data.match)) {
-		return { error: new VariantAlreadyExistsException(message.id, options.languageTag) }
+		return { error: new MessageVariantAlreadyExistsError(message.id, options.languageTag) }
 	}
 
 	// need to resolve selectors to match length and order of message selectors
@@ -82,17 +83,17 @@ export function updateVariant(
 		selectors: Record<string, string>
 		pattern: Variant["pattern"]
 	},
-): Result<Message, VariantDoesNotExistException | PatternsForLanguageTagDoNotExistException> {
+): Result<Message, MessageVariantDoesNotExistError | MessagePatternsForLanguageTagDoNotExistError> {
 	const copy: Message = structuredClone(message)
 	if (copy.body[options.languageTag] === undefined) {
-		return { error: new PatternsForLanguageTagDoNotExistException(message.id, options.languageTag) }
+		return { error: new MessagePatternsForLanguageTagDoNotExistError(message.id, options.languageTag) }
 	}
 	const variant = matchVariant(copy, options.languageTag, options.selectors)
 	if (variant) {
 		variant.pattern = options.pattern
 		return { data: copy }
 	}
-	return { error: new VariantDoesNotExistException(message.id, options.languageTag) }
+	return { error: new MessageVariantDoesNotExistError(message.id, options.languageTag) }
 }
 
 /**
@@ -156,7 +157,7 @@ const matchMostSpecificVariant = (
 			// eslint-disable-next-line no-inner-declarations
 			function recursiveAddToIndex(
 				currentIndex: Record<string, any>,
-				currentKeys: string[],
+				currentKeys: Message["selectors"],
 				variant: Variant,
 			) {
 				const key = variant.match[currentKeys[0]!]
@@ -211,7 +212,7 @@ const matchMostSpecificVariant = (
  *  const variant = resolveSelector(["gender","count"], selector: {count: "2"})
  */
 const resolveSelector = (
-	messageSelectors: string[],
+	messageSelectors: Message["selectors"],
 	selectors?: Record<string, string>,
 ): Record<string, string> => {
 	const resolvedSelectors: Record<string, string> = {}
@@ -220,30 +221,4 @@ const resolveSelector = (
 		resolvedSelectors[messageSelector] = selectors[messageSelector] ?? "*"
 	}
 	return resolvedSelectors
-}
-
-export class VariantDoesNotExistException extends Error {
-	readonly #id = "VariantDoesNotExistException"
-
-	constructor(messageId: string, languageTag: string) {
-		super(
-			`For message '${messageId}' and '${languageTag}', there doesn't exist a variant for this specific matchers.`,
-		)
-	}
-}
-export class VariantAlreadyExistsException extends Error {
-	readonly #id = "VariantAlreadyExistsException"
-
-	constructor(messageId: string, languageTag: string) {
-		super(
-			`For message '${messageId}' and '${languageTag}', there already exists a variant for this specific matchers.`,
-		)
-	}
-}
-export class PatternsForLanguageTagDoNotExistException extends Error {
-	readonly #id = "PatternsForLanguageTagDoNotExistException"
-
-	constructor(messageId: string, languageTag: string) {
-		super(`For message '${messageId}' there are no patterns with the languageTag '${languageTag}'.`)
-	}
 }

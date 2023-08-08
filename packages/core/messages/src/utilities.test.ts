@@ -1,13 +1,11 @@
 import {
-	PatternsForLanguageTagDoNotExistException,
-	VariantAlreadyExistsException,
-	VariantDoesNotExistException,
 	createVariant,
 	getVariant,
 	updateVariant,
 } from "./utilities.js"
 import { describe, test, expect } from "vitest"
 import type { Message } from "./schema.js"
+import { MessagePatternsForLanguageTagDoNotExistError, MessageVariantAlreadyExistsError, MessageVariantDoesNotExistError } from "./errors.js"
 
 describe("getVariant", () => {
 	test("should return the correct variant of a message", () => {
@@ -85,7 +83,7 @@ describe("getVariant", () => {
 	})
 
 	test("should return error of no variant matches", () => {
-		let mockMessage: Message = getMockMessage()
+		const mockMessage: Message = getMockMessage()
 		mockMessage.body["en"] = [
 			...mockMessage.body["en"]!.filter(
 				(v) => v.match.gender !== "*" || v.match.guestOther !== "*",
@@ -97,22 +95,22 @@ describe("getVariant", () => {
 			selectors: {},
 		})
 		expect(variant.data).toBeUndefined()
-		expect(variant.error).toBeInstanceOf(VariantDoesNotExistException)
+		expect(variant.error).toBeInstanceOf(MessageVariantDoesNotExistError)
 	})
 
 	test("should return error if set of variants for specific language does not exist", () => {
-		let mockMessage: Message = getMockMessage()
+		const mockMessage: Message = getMockMessage()
 
 		const variant = getVariant(mockMessage, {
 			languageTag: "de",
 			selectors: { gender: "female", guestOther: "1" },
 		})
 		expect(variant.data).toBeUndefined()
-		expect(variant.error).toBeInstanceOf(PatternsForLanguageTagDoNotExistException)
+		expect(variant.error).toBeInstanceOf(MessagePatternsForLanguageTagDoNotExistError)
 	})
 
 	test("should return variant if no selector defined", () => {
-		let mockMessage: Message = getMockMessage()
+		const mockMessage: Message = getMockMessage()
 		mockMessage.body["en"] = [
 			{
 				match: {},
@@ -188,7 +186,7 @@ describe("createVariant", () => {
 	})
 
 	test("should return error if variant matches", () => {
-		let mockMessage: Message = getMockMessage()
+		const mockMessage: Message = getMockMessage()
 
 		const variant = createVariant(mockMessage, {
 			languageTag: "en",
@@ -199,11 +197,11 @@ describe("createVariant", () => {
 		})
 		// should return the female variant
 		expect(variant.data).toBeUndefined()
-		expect(variant.error).toBeInstanceOf(VariantAlreadyExistsException)
+		expect(variant.error).toBeInstanceOf(MessageVariantAlreadyExistsError)
 	})
 
 	test("should not return error if set of variants for specific language does not exist", () => {
-		let mockMessage: Message = getMockMessage()
+		const mockMessage: Message = getMockMessage()
 
 		const variant = createVariant(mockMessage, {
 			languageTag: "de",
@@ -251,7 +249,7 @@ describe("updateVariant", () => {
 	})
 
 	test("should return error if no variant matches", () => {
-		let mockMessage: Message = getMockMessage()
+		const mockMessage: Message = getMockMessage()
 
 		mockMessage.body["en"] = [
 			...mockMessage.body["en"]!.filter(
@@ -266,11 +264,11 @@ describe("updateVariant", () => {
 		})
 		// should return the female variant
 		expect(variant.data).toBeUndefined()
-		expect(variant.error).toBeInstanceOf(VariantDoesNotExistException)
+		expect(variant.error).toBeInstanceOf(MessageVariantDoesNotExistError)
 	})
 
 	test("should return error if set of variants for specific language does not exist", () => {
-		let mockMessage: Message = getMockMessage()
+		const mockMessage: Message = getMockMessage()
 
 		const variant = updateVariant(mockMessage, {
 			languageTag: "de",
@@ -279,15 +277,14 @@ describe("updateVariant", () => {
 		})
 		// should return the female variant
 		expect(variant.data).toBeUndefined()
-		expect(variant.error).toBeInstanceOf(PatternsForLanguageTagDoNotExistException)
+		expect(variant.error).toBeInstanceOf(MessagePatternsForLanguageTagDoNotExistError)
 	})
 })
 
 const getMockMessage = (): Message => {
 	return {
 		id: "first-message",
-		expressions: [],
-		selectors: ["gender", "guestOther"],
+		selectors: [{type: "VariableReference", name: "gender"}, {type: "VariableReference", name: "guestOther"}],
 		body: {
 			en: [
 				{
