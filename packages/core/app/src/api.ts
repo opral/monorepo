@@ -3,19 +3,29 @@ import type { LintRuleError, LintError, LintReport, LintRule } from "@inlang/lin
 import type { MessageQueryApi } from "@inlang/messages"
 import type { Result } from "@inlang/result"
 import type { InvalidConfigError } from "./errors.js"
-import type { Plugin, PluginAppSpecificApiReturnError, PluginFunctionDetectLanguageTagsAlreadyDefinedError, PluginFunctionLoadMessagesAlreadyDefinedError, PluginFunctionSaveMessagesAlreadyDefinedError, PluginUsesInvalidIdError, PluginUsesInvalidSchemaError, PluginUsesReservedNamespaceError, ResolvedPlugins } from "@inlang/plugin"
-import type { ModuleImportError, ModuleError } from '@inlang/module'
+import type {
+	Plugin,
+	PluginAppSpecificApiReturnError,
+	PluginFunctionDetectLanguageTagsAlreadyDefinedError,
+	PluginFunctionLoadMessagesAlreadyDefinedError,
+	PluginFunctionSaveMessagesAlreadyDefinedError,
+	PluginUsesInvalidIdError,
+	PluginUsesInvalidSchemaError,
+	PluginUsesReservedNamespaceError,
+	ResolvedPlugins,
+} from "@inlang/plugin"
+import type { ModuleImportError, ModuleError } from "@inlang/module"
 
 // TODO: remove all getters and use solid store for whole object, just expose `setConfig`
 export type InlangInstance = {
 	meta: {
-		modules: string[]
-		plugins: (Plugin['meta'] & { module: string })[]
-		lintRules: (LintRule['meta'] & { module: string })[]
+		modules: () => string[]
+		plugins: () => (Plugin["meta"] & { module: string })[]
+		lintRules: () => (LintRule["meta"] & { module: string })[]
 	}
 	errors: {
-		module: (ModuleImportError | ModuleError)[]
-		plugin: (
+		module: () => (ModuleImportError | ModuleError)[]
+		plugin: () => (
 			| PluginAppSpecificApiReturnError
 			| PluginFunctionDetectLanguageTagsAlreadyDefinedError
 			| PluginFunctionLoadMessagesAlreadyDefinedError
@@ -25,18 +35,13 @@ export type InlangInstance = {
 			| PluginUsesReservedNamespaceError
 			| Error
 		)[]
-		lintRules: (LintRuleError | LintError)[]
+		lintRules: () => (LintRuleError | LintError)[]
 	}
-	appSpecificApi: ResolvedPlugins['appSpecificApi']
-	config: {
-		get: () => InlangConfig
-		/**
-		 * Set the config for the instance.
-		 */
-		set: (config: InlangConfig) => Result<void, InvalidConfigError>
-	}
-	messages: {
-		query: MessageQueryApi
+	appSpecificApi: () => ResolvedPlugins["appSpecificApi"]
+	config: () => InlangConfig
+	setConfig: (config: InlangConfig) => Result<void, InvalidConfigError>
+	query: {
+		messages: MessageQueryApi
 	}
 	lint: {
 		/**
@@ -45,8 +50,6 @@ export type InlangInstance = {
 		init: () => Promise<void>
 		// for now, only simply array that can be improved in the future
 		// see https://github.com/inlang/inlang/issues/1098
-		reports: {
-			get: () => LintReport[]
-		}
+		reports: () => LintReport[]
 	}
 }
