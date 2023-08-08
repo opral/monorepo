@@ -1,6 +1,6 @@
 import type { InlangInstance } from "./api.js"
 import { ImportFunction, ResolveModulesFunction, resolveModules } from "@inlang/module"
-import { NodeishFilesystemSubset, InlangConfig, createQuery, ResolvedPlugins, Message, tryCatch } from "@inlang/plugin"
+import { NodeishFilesystemSubset, InlangConfig, createQuery, ResolvedPlugins, Message, tryCatch, Result } from "@inlang/plugin"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
 import { InvalidConfigError } from "./errors.js"
@@ -135,13 +135,11 @@ const loadConfig = async (args: {
 	configPath: string
 	nodeishFs: NodeishFilesystemSubset
 }) => {
-	// TODO #1182 the filesystem type is incorrect. manual type casting is required
 	const { data: configFile, error: configFileError } =
 		await tryCatch(async () => await args.nodeishFs.readFile(args.configPath, { encoding: "utf-8" }))
 	if (configFileError) throw configFileError // TODO: improve error
 
-	// TODO: fix tryCatch typing to get rid of !
-	const { data: parsedConfig, error: parseConfigError } = tryCatch(() => JSON.parse(configFile!))
+	const { data: parsedConfig, error: parseConfigError } = tryCatch(() => JSON.parse(configFile))
 	if (parseConfigError) throw parseConfigError // TODO: improve error
 
 	const typeErrors = [...ConfigCompiler.Errors(parsedConfig)]
