@@ -6,7 +6,7 @@
 		"access": "public"
 	},
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/api.js"
 	},
 	"files": [
 		"./dist",
@@ -21,7 +21,10 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"@project-lisa/fs": "*"
+		"octokit": "*",
+		"@project-lisa/fs": "*",
+		"@inlang-git/fs": "*",
+		"isomorphic-git": "github:inlang/isomorphic-git"
 	},
 	"license": "Apache-2.0"
 }
