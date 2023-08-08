@@ -30,14 +30,23 @@ export type Repository = {
 	push: (args: { dir: string }) => any
 	pull: (args: { dir: string, author: any, fastForward: boolean, singleBranch: true }) => any
   add: (args: { dir: string, filepath: string }) => any
-	listRemotes: (args?: { fs?: NodeishFilesystem }) => Promise<Awaited<ReturnType<typeof raw.listRemotes>> | undefined>
+	listRemotes: () => Promise<Awaited<ReturnType<typeof raw.listRemotes>> | undefined>
 	log: (args: { dir: string, since: any}) => unknown
   statusMatrix: (args: { dir:string, filter: any }) => any
-  mergeUpstream: (args: { branch: string }) => any
-  getMeta: () => unknown
-  isCollaborator: (args: { username: string }) => any
+  mergeUpstream: (args: { branch: string }) => ReturnType<typeof github.request<"POST /repos/{owner}/{repo}/merge-upstream">>
+  isCollaborator: (args: { username: string }) => boolean
   getOrigin: () => Promise<string>
-  getMainBranch: () => unknown
+  getCurrentBranch: () => Promise<string | undefined>
+  getMeta: () => Promise<{
+    name: string,
+    isPrivate: boolean,
+    isFork: boolean,
+    owner: { name?: string, email?: string },
+    parent:  {
+      url: string,
+      fullName: string
+    } | undefined
+  }>
 
   // TODO: implement these before publishing api, but not used in badge or editor
   // currentBranch: () => unknown
@@ -89,12 +98,14 @@ export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesys
      *
      * @returns The git origin url or undefined if it could not be found.
      */
-    async listRemotes (args) {
+    async listRemotes () {
       try {
+        const wrappedFS = wrap(rawFs, 'listRemotes')
+
         const remotes = await raw.listRemotes({
-          fs: args?.fs || rawFs,
+          fs: wrappedFS,
           dir: await raw.findRoot({
-            fs: wrap(rawFs, 'listRemotes'),
+            fs: wrappedFS,
               filepath: "/"
           }),
         })
@@ -169,33 +180,8 @@ export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesys
       })
     },
 
-    /**
-     * Additional information about a repository provided by GitHub.
-     */
-    async getMeta () {
-      // githubRepositoryInformation: Resource<
-      // 	Awaited<ReturnType<typeof github.request<"GET /repos/{owner}/{repo}">>>
-      // >
-      const { data: { name, private: isPrivate, fork: isFork, parent, owner: ownerMetaData }} = await github
-        .request("GET /repos/{owner}/{repo}", {
-          owner,
-          repo: repoName,
-        })
-
-        return {
-          name,
-          isPrivate,
-          isFork,
-          owner: ownerMetaData,
-          parent: parent ? {
-            url: transformRemote(parent.git_url),
-            fullName: parent.full_name
-          } : undefined
-        }
-    },
-
     async isCollaborator ({ username }) {
-      let response
+      let response: Awaited<ReturnType<typeof github.request<"GET /repos/{owner}/{repo}/collaborators/{username}">>> | undefined
       try {
         response = await github.request(
           "GET /repos/{owner}/{repo}/collaborators/{username}",
@@ -232,12 +218,34 @@ export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesys
       return transformRemote(result)
     },
 
-    getMainBranch () {
-      // FIXME: make real impl. and stateless
-      return raw.currentBranch({
+    async getCurrentBranch () {
+      // TODO: make stateless?, migrate to getMainBranch
+      return await raw.currentBranch({
         fs: wrap(rawFs, 'getMainBranch'),
         dir: "/",
-      })
-    }
+      }) || undefined
+    },
+
+     /**
+     * Additional information about a repository provided by GitHub.
+     */
+     async getMeta () {
+      const { data: { name, private: isPrivate, fork: isFork, parent, owner: ownerMetaData }}: Awaited<ReturnType<typeof github.request<"GET /repos/{owner}/{repo}">>> = await github
+        .request("GET /repos/{owner}/{repo}", {
+          owner,
+          repo: repoName,
+        })
+
+        return {
+          name,
+          isPrivate,
+          isFork,
+          owner: { name: ownerMetaData.name || undefined, email: ownerMetaData.email || undefined},
+          parent: parent ? {
+            url: transformRemote(parent.git_url),
+            fullName: parent.full_name
+          } : undefined
+        }
+    },
   }
 }
