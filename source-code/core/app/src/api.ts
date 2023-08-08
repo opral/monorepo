@@ -1,5 +1,5 @@
 import type { InlangConfig } from "@inlang/config"
-import type { LintReport, LintRule } from "@inlang/lint"
+import type { LintRuleError, LintError, LintReport, LintRule } from "@inlang/lint"
 import type { MessageQueryApi } from "@inlang/messages"
 import type { Result } from "@inlang/result"
 import type { InvalidConfigError } from "./errors.js"
@@ -15,7 +15,7 @@ export type InlangInstance = {
 	errors: {
 		module: Error[] // TODO: define Error type more precisely
 		plugin: Error[] // TODO: define Error type more precisely
-		lintRules: Error[] // TODO: define Error type more precisely
+		lintRules: (LintRuleError | LintError)[]
 	}
 	appSpecificApi: ResolvedPlugins['appSpecificApi']
 	config: {
