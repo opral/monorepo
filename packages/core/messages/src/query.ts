@@ -26,10 +26,10 @@ export function createQuery(
 			index.set(data.id, data)
 		},
 		get: ({ where }) => {
-			return index.get(where.id)
+			return structuredClone(index.get(where.id))
 		},
 		getAll: () => {
-			return [...index.values()]
+			return structuredClone([...index.values()])
 		},
 		update: ({ where, data }) => {
 			const message = index.get(where.id)

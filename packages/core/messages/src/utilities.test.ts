@@ -157,7 +157,7 @@ describe("createVariant", () => {
 		})
 		// should return the female variant
 		expect(
-			message.data!.body["en"]?.find(
+			message.data!.body.en?.find(
 				(v) => v.match.gender === "female" && v.match.guestOther === "0",
 			)?.pattern,
 		).toStrictEqual([])
@@ -165,8 +165,8 @@ describe("createVariant", () => {
 
 	test("should create a variant, also if matcher are not full defined", () => {
 		const mockMessage: Message = getMockMessage()
-		mockMessage.body["en"] = [
-			...mockMessage.body["en"]!.filter(
+		mockMessage.body.en = [
+			...mockMessage.body.en!.filter(
 				(v) => v.match.gender !== "*" || v.match.guestOther !== "*",
 			),
 		]
@@ -180,7 +180,7 @@ describe("createVariant", () => {
 		})
 		// should return the female variant
 		expect(
-			message.data!.body["en"]?.find((v) => v.match.gender === "*" && v.match.guestOther === "*")
+			message.data!.body.en?.find((v) => v.match.gender === "*" && v.match.guestOther === "*")
 				?.pattern,
 		).toStrictEqual([])
 	})
@@ -227,7 +227,7 @@ describe("updateVariant", () => {
 		})
 		// should return the female variant
 		expect(
-			message.data!.body["en"]?.find(
+			message.data!.body.en?.find(
 				(v) => v.match.gender === "female" && v.match.guestOther === "1",
 			)?.pattern,
 		).toStrictEqual([])
@@ -243,7 +243,7 @@ describe("updateVariant", () => {
 		})
 		// should return the female variant
 		expect(
-			message.data!.body["en"]?.find((v) => v.match.gender === "*" && v.match.guestOther === "*")
+			message.data!.body.en?.find((v) => v.match.gender === "*" && v.match.guestOther === "*")
 				?.pattern,
 		).toStrictEqual([])
 	})
