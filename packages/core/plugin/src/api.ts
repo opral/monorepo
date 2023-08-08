@@ -3,7 +3,7 @@ import { LanguageTag, TranslatedStrings } from "@inlang/language-tag"
 import { Message } from "@inlang/messages"
 import { Static, TSchema, Type, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
 import type { NodeishFilesystem as LisaNodeishFilesystem } from "@inlang-git/fs"
-import type { PluginError } from "./errors.js"
+import type { PluginAppSpecificApiReturnError, PluginFunctionDetectLanguageTagsAlreadyDefinedError, PluginFunctionLoadMessagesAlreadyDefinedError, PluginFunctionSaveMessagesAlreadyDefinedError, PluginUsesInvalidIdError, PluginUsesInvalidSchemaError, PluginUsesReservedNamespaceError } from './errors.js'
 
 type JSONSerializable<
 	T extends Record<string, string | string[] | Record<string, string | string[]>> | unknown,
@@ -28,7 +28,15 @@ export type ResolvePluginsFunction = (args: {
 	nodeishFs: NodeishFilesystemSubset
 }) => {
 	data: ResolvedPlugins
-	errors: Array<PluginError>
+		errors: Array<
+			| PluginAppSpecificApiReturnError
+			| PluginFunctionDetectLanguageTagsAlreadyDefinedError
+			| PluginFunctionLoadMessagesAlreadyDefinedError
+			| PluginFunctionSaveMessagesAlreadyDefinedError
+			| PluginUsesInvalidIdError
+			| PluginUsesInvalidSchemaError
+			| PluginUsesReservedNamespaceError
+		>
 }
 
 /**

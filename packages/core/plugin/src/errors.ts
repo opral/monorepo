@@ -4,7 +4,7 @@ type PluginErrorOptions = {
 	plugin: Plugin["meta"]["id"]
 } & Partial<Error>
 
-export class PluginError extends Error {
+class PluginError extends Error {
 	public readonly plugin: string
 
 	constructor(message: string, options: PluginErrorOptions) {
