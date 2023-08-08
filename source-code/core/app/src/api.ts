@@ -1,12 +1,23 @@
 import type { InlangConfig } from "@inlang/config"
-import type { LintError, LintReport, LintRule } from "@inlang/lint"
+import type { LintReport, LintRule } from "@inlang/lint"
 import type { MessageQueryApi } from "@inlang/messages"
 import type { Result } from "@inlang/result"
 import type { InvalidConfigError } from "./errors.js"
-import type { ResolvedPlugins } from "@inlang/plugin"
-import type { ResolveModulesFunction } from "@inlang/module"
+import type { Plugin, ResolvedPlugins } from "@inlang/plugin"
 
+// TODO: remove all getters and use solid store for whole object, just expose `setConfig`
 export type InlangInstance = {
+	meta: {
+		modules: string[]
+		plugins: (Plugin['meta'] & { module: string })[]
+		lintRules: (LintRule['meta'] & { module: string })[]
+	}
+	errors: {
+		module: Error[] // TODO: define Error type more precisely
+		plugin: Error[] // TODO: define Error type more precisely
+		lintRules: Error[] // TODO: define Error type more precisely
+	}
+	appSpecificApi: ResolvedPlugins['appSpecificApi']
 	config: {
 		get: () => InlangConfig
 		/**
@@ -14,44 +25,18 @@ export type InlangInstance = {
 		 */
 		set: (config: InlangConfig) => Result<void, InvalidConfigError>
 	}
-	module: Awaited<ReturnType<ResolveModulesFunction>>["data"]["module"]
-	lint: {
-		/**
-			* Initialize lint.
-			*/
-		init: () => Promise<void>
-		rules: Reactive<"onlyGetter", Array<Pick<LintRule, "meta">>>
-		// for now, only simply array that can be improved in the future
-		// see https://github.com/inlang/inlang/issues/1098
-		reports: Reactive<"onlyGetter", LintReport[]>
-		errors: Reactive<"onlyGetter", LintError[]>
-	}
 	messages: {
 		query: MessageQueryApi
 	}
-	plugins: ResolvedPlugins
+	lint: {
+		/**
+		 * Initialize lint.
+		 */
+		init: () => Promise<void>
+		// for now, only simply array that can be improved in the future
+		// see https://github.com/inlang/inlang/issues/1098
+		reports: {
+			get: () => LintReport[]
+		}
+	}
 }
-
-type Reactive<WithSetter extends "onlyGetter" | "withSetter", T> = {
-	get: () => T
-} & (WithSetter extends "withSetter"
-	? {
-	set: (value: T) => void
-}
-	: Record<never, never>)
-
-/**
- * A reactive async value.
- *
- * @throws If the value is not yet initialized.
- */
-type ReactiveAsync<WithSetter extends "onlyGetter" | "withSetter", T> = {
-	/**
-	 * @throws If the value is not yet initialized.
-	 */
-	get: () => T
-} & (WithSetter extends "withSetter"
-	? {
-	set: (value: T) => Promise<void>
-}
-	: Record<never, never>)
