@@ -7,6 +7,7 @@ import {
 	ResolvedPlugins,
 	Message,
 	tryCatch,
+	Plugin,
 } from "@inlang/plugin"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
@@ -113,16 +114,40 @@ export const createInlang = async (args: {
 		// TODO: remove workaround and init reactive query above
 		const queryMessages = createQuery(messages() || [])
 
-		// createEffect(() => {
-		// 	console.log([...Object.values(modules()!.data.module.meta.lintRules)])
-		// })
+		createEffect(() => {
+			console.log(
+				Object.entries(modules()!.data.plugins.data.meta).map(([id, meta]) => {
+					const module = modules()!.data.module.meta.plugins[id as `${string}.${string}`]
+					return {
+						...meta,
+						module,
+					}
+				}),
+			)
+		})
 
 		return {
 			meta: {
-				// TODO: make reactive (using store)
-				modules: () => [], // TODO: get meta data
-				lintRules: () => [], // TODO: get meta data
-				plugins: () => [], // TODO: get meta data
+				modules: () => [
+					...new Set([
+						...Object.values(modules()!.data.module.meta.lintRules),
+						...Object.values(modules()!.data.module.meta.plugins),
+					]),
+				],
+				lintRules: () =>
+					modules()!.data.lintRules.data.map((rule) => {
+						return {
+							...rule.meta,
+							module: modules()!.data.module.meta.lintRules[rule.meta.id as `${string}.${string}`],
+						} as LintRule["meta"] & { module: string }
+					}),
+				plugins: () =>
+					Object.entries(modules()!.data.plugins.data.meta).map(([id, meta]) => {
+						return {
+							...meta,
+							module: modules()!.data.module.meta.plugins[id as `${string}.${string}`],
+						} as Plugin["meta"] & { module: string }
+					}),
 			},
 			errors: {
 				// TODO: make reactive (using store)
@@ -154,7 +179,7 @@ const loadConfig = async (args: { configPath: string; nodeishFs: NodeishFilesyst
 	)
 	if (configFileError) throw configFileError // TODO: improve error
 
-	const { data: parsedConfig, error: parseConfigError } = tryCatch(() => JSON.parse(configFile))
+	const { data: parsedConfig, error: parseConfigError } = tryCatch(() => JSON.parse(configFile!))
 	if (parseConfigError) throw parseConfigError // TODO: improve error
 
 	const typeErrors = [...ConfigCompiler.Errors(parsedConfig)]
