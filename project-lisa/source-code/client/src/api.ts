@@ -84,14 +84,17 @@ export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesys
     console.error('error cloning the repository', err)
   })
 
-  return {
-    fs: wrap(rawFs, 'app', (_prop, [callTarget, thisArg, argumentsList]) => {
-      if (pending) {
-        return pending.then(() => Reflect.apply(callTarget, thisArg, argumentsList))
-      }
+  // delay all fs and repo operations until the repo clone and checkout have finished, this is preparation for the lazy feature
+  function delayedAction ({ execute }: { execute: () => any }) {
+    if (pending) {
+      return pending.then(execute)
+    }
 
-      return Reflect.apply(callTarget, thisArg, argumentsList)
-    }),
+    return execute()
+  }
+
+  return {
+    fs: wrap(rawFs, 'app', delayedAction),
 
     /**
      * Gets the git origin url of the current repository.
@@ -100,7 +103,7 @@ export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesys
      */
     async listRemotes () {
       try {
-        const wrappedFS = wrap(rawFs, 'listRemotes')
+        const wrappedFS = wrap(rawFs, 'listRemotes', delayedAction)
 
         const remotes = await raw.listRemotes({
           fs: wrappedFS,
@@ -118,7 +121,7 @@ export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesys
 
     statusMatrix ({ dir = "/", filter }) {
       return raw.statusMatrix({
-        fs: wrap(rawFs, 'statusMatrix'),
+        fs: wrap(rawFs, 'statusMatrix', delayedAction),
         dir,
         filter
       })
@@ -126,7 +129,7 @@ export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesys
 
     add ({ dir = "/", filepath }) {
       return raw.add({
-        fs: wrap(rawFs, 'add'),
+        fs: wrap(rawFs, 'add', delayedAction),
         dir,
         filepath
       })
@@ -134,7 +137,7 @@ export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesys
 
     commit ({ dir = "/", author, message }) {
       return raw.commit({
-        fs: wrap(rawFs, 'commit'),
+        fs: wrap(rawFs, 'commit', delayedAction),
         dir,
         author,
         message
@@ -143,7 +146,7 @@ export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesys
 
     push ({ dir = "/" }) {
       return raw.push({
-        fs: wrap(rawFs, 'push'),
+        fs: wrap(rawFs, 'push', delayedAction),
         url: normalizedUrl,
         corsProxy,
         http,
@@ -153,7 +156,7 @@ export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesys
 
     pull ({ dir = "/", author, fastForward, singleBranch }) {
       return raw.pull({
-        fs: wrap(rawFs, 'pull'),
+        fs: wrap(rawFs, 'pull', delayedAction),
         url: normalizedUrl,
         corsProxy,
         http,
@@ -166,7 +169,7 @@ export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesys
 
     log ({ dir = "/", since }) {
       return raw.log({
-        fs: wrap(rawFs, 'log'),
+        fs: wrap(rawFs, 'log', delayedAction),
         dir,
         since
       })
@@ -202,9 +205,8 @@ export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesys
      * The function ensures that the same orgin is always returned for the same repository.
      */
     async getOrigin (): Promise<string> {
-      const remotes = await this.listRemotes()
-      // 	remotes: Array<{ remote: string; url: string }> | undefined
-      // }): string {
+      const remotes: Array<{ remote: string; url: string }> | undefined = await this.listRemotes()
+
       const origin = remotes?.find((elements) => elements.remote === "origin")
       if (origin === undefined) {
         return "unknown"
@@ -221,7 +223,7 @@ export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesys
     async getCurrentBranch () {
       // TODO: make stateless?, migrate to getMainBranch
       return await raw.currentBranch({
-        fs: wrap(rawFs, 'getMainBranch'),
+        fs: wrap(rawFs, 'getMainBranch', delayedAction),
         dir: "/",
       }) || undefined
     },
