@@ -13,9 +13,9 @@ export const resolveModules: ResolveModulesFunction = async (args) => {
 	let allPlugins: Array<Plugin> = []
 	let allLintRules: Array<LintRule> = []
 
-	const meta: Awaited<ReturnType<ResolveModulesFunction>>["data"]["module"]["meta"] = {
-		plugins: {},
-		lintRules: {},
+	const meta: Awaited<ReturnType<ResolveModulesFunction>>["data"]["meta"] = {
+		plugins: [],
+		lintRules: [],
 	}
 
 	for (const module of args.config.modules) {
@@ -47,11 +47,11 @@ export const resolveModules: ResolveModulesFunction = async (args) => {
 		}
 
 		for (const plugin of importedModule.data.default?.plugins ?? []) {
-			meta.plugins[plugin.meta.id] = module
+			meta.plugins = [...meta.plugins, { ...plugin.meta, module }]
 		}
 
 		for (const lintRule of importedModule.data.default?.lintRules ?? []) {
-			meta.lintRules[lintRule.meta.id] = module
+			meta.lintRules = [...meta.lintRules, { ...lintRule.meta, module }]
 		}
 
 		allPlugins = [...allPlugins, ...(importedModule.data.default.plugins ?? [])]
@@ -65,12 +65,9 @@ export const resolveModules: ResolveModulesFunction = async (args) => {
 	})
 
 	const resolvedLintRules = resolveLintRules({ lintRules: allLintRules })
-
 	return {
 		data: {
-			module: {
-				meta,
-			},
+			meta,
 			plugins: resolvedPlugins,
 			lintRules: resolvedLintRules,
 		},
