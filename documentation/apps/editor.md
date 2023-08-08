@@ -2,12 +2,12 @@
 title: Edit translations with inlang's web editor
 shortTitle: Web Editor
 href: /documentation/apps/web-editor
-description: inlang's web editor is a simple and easy to use no-code tool to manage your translations.
+description: inlang's web editor is a simple and easy-to-use no-code tool to manage your translations.
 ---
 
 # {% $frontmatter.shortTitle %}
 
-The inlang web editor is a simple and easy to use no-code tool to manage your translations. It let's translators work on translations without having to touch the code and pushes changes directly to your git repository.
+The inlang web editor is a simple and easy-to-use no-code tool to manage your translations. It lets translators work on translations without having to touch the code and pushes changes directly to your git repository.
 
 ### Benefits
 
@@ -24,7 +24,7 @@ You can use the editor with any git repository. The only requirement is that you
 A plugin to read and write your translation files. To find the correct plugin for your project, check out the [plugin registry](/documentation/plugins/registry).
 
 **Recommended:**
-A plugin to enable linting feature for your translation files. For example, you can use the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules) plugin.
+A plugin to enable the linting feature for your translation files. For example, you can use the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules) plugin.
 
 {% QuickLinks %}
 
@@ -61,11 +61,11 @@ Example: `https://inlang.com/editor/github.com/orga/project?search='common'&lint
 
 - **🔎 search**
 
-  `?search='mySearch'` The search parameter filters messages by search string. The parameter should be provided only once.
+  `?search='mySearch'` The search parameter filters messages by the search string. The parameter should be provided only once.
 
 - **🚨 lint**
 
-  `?lint='missingMessage&lint=messageWithoutReference'` The lint parameter filters the messages by lint rule. The parameter could be provided multiple times.
+  `?lint='missingMessage&lint=messageWithoutReference'` The lint parameter filters the messages by the lint rule. The parameter could be provided multiple times.
 
 - **🌎 lang**
 
