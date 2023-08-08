@@ -68,9 +68,9 @@ export type MessageLintReport = LintReport & {
 	languageTag: LanguageTag
 }
 
-export class LintException extends Error {
+export class LintError extends Error {
 	constructor(message: string, options?: ErrorOptions) {
 		super(message, options)
-		this.name = "LintException"
+		this.name = "LintError"
 	}
 }

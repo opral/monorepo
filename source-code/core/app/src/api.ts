@@ -1,5 +1,5 @@
 import type { InlangConfig } from "@inlang/config"
-import type { LintException, LintReport, LintRule } from "@inlang/lint"
+import type { LintError, LintReport, LintRule } from "@inlang/lint"
 import type { MessageQueryApi } from "@inlang/messages"
 import type { Result } from "@inlang/result"
 import type { InvalidConfigError } from "./errors.js"
@@ -24,7 +24,7 @@ export type InlangInstance = {
 		// for now, only simply array that can be improved in the future
 		// see https://github.com/inlang/inlang/issues/1098
 		reports: Reactive<"onlyGetter", LintReport[]>
-		exceptions: Reactive<"onlyGetter", LintException[]>
+		errors: Reactive<"onlyGetter", LintError[]>
 	}
 	messages: {
 		query: MessageQueryApi
