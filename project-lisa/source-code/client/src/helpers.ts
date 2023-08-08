@@ -8,9 +8,9 @@ export const wrap = (targetRoot: NodeishFilesystem, _module: string, fn?: (key: 
   return new Proxy(targetRoot, {
     get (getTarget: typeof targetRoot, prop, receiver) {
       if (getTarget[prop as keyof typeof targetRoot]) {
-        return new Proxy(getTarget[prop as keyof typeof targetRoot], {
+        return new Proxy(getTarget[prop as keyof typeof getTarget], {
           apply (callTarget, thisArg, argumentsList) {
-            // console.log(`${module} fs:`, prop, argumentsList)
+            // console.verbose(`${module} fs:`, prop, argumentsList)
             return fn ? fn(prop as keyof typeof targetRoot, [callTarget, thisArg, argumentsList]) : Reflect.apply(callTarget, thisArg, argumentsList)
           }
         })
