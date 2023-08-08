@@ -5,9 +5,7 @@ import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
 import { InvalidConfigError } from "./errors.js"
 import { LintException, LintReport, LintRule, lintMessages } from "@inlang/lint"
-// @ts-ignore
-import * as solid from "solid-js/dist/solid.js"
-const { createSignal, createRoot, createEffect } = solid as typeof import('solid-js')
+import { createRoot, createSignal, createEffect } from './solid.js'
 
 const ConfigCompiler = TypeCompiler.Compile(InlangConfig)
 

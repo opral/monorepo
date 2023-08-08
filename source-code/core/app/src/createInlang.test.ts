@@ -6,8 +6,7 @@ import type { InlangConfig } from "@inlang/config"
 import type { Message, Plugin } from "@inlang/plugin"
 import type { LintRule } from "@inlang/lint"
 import type { InlangModule } from "@inlang/module"
-// @ts-ignore
-import { createSignal, createRoot, createEffect } from "solid-js/dist/solid.js"
+import { createRoot, createEffect } from "./solid.js"
 
 const config: InlangConfig = {
 	sourceLanguageTag: "en",
