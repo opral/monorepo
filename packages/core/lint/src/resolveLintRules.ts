@@ -1,5 +1,6 @@
-import { LintRule, LintRuleError } from "@inlang/lint"
 import { Value } from "@sinclair/typebox/value"
+import { LintRule } from './api.js'
+import { LintRuleError } from './errors.js'
 
 export const resolveLintRules = (args: {
 	lintRules: Array<LintRule & { meta: { module?: string } }>

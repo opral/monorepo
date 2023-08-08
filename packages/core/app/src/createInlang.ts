@@ -4,7 +4,7 @@ import { NodeishFilesystemSubset, InlangConfig, createQuery, ResolvedPlugins, Me
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
 import { InvalidConfigError } from "./errors.js"
-import { LintException, LintReport, LintRule, lintMessages } from "@inlang/lint"
+import { LintError, LintReport, LintRule, lintMessages } from "@inlang/lint"
 import { createRoot, createSignal, createEffect } from './solid.js'
 
 const ConfigCompiler = TypeCompiler.Compile(InlangConfig)
@@ -76,7 +76,7 @@ export const createInlang = async (args: {
 	}
 
 	const [lintReports, setLintReports] = createSignal<LintReport[]>()
-	const [lintErrors, setLintErrors] = createSignal<LintException[]>()
+	const [lintErrors, setLintErrors] = createSignal<LintError[]>()
 	createEffect(() => {
 		const msgs = messages()
 		if (!msgs || !lintInitialized()) return
@@ -107,7 +107,7 @@ export const createInlang = async (args: {
 		errors: { // TODO: make reactive (using store)
 			module: modules()!.errors,
 			plugin: modules()!.data.plugins.errors,
-			lintRules: modules()!.data.lintRules.errors,
+			lintRules: [...modules()!.data.lintRules.errors, ...(lintErrors() || [])],
 		},
 		config: {
 			get: config as () => InlangConfig,
