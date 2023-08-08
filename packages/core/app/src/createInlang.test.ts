@@ -92,12 +92,12 @@ const mockLintRule: LintRule = {
 }
 
 const $import = async () =>
-	({
-		default: {
-			plugins: [mockPlugin],
-			lintRules: [mockLintRule],
-		},
-	} satisfies InlangModule)
+({
+	default: {
+		plugins: [mockPlugin],
+		lintRules: [mockLintRule],
+	},
+} satisfies InlangModule)
 
 describe("config", () => {
 	it("should get the config", async () => {
@@ -110,7 +110,7 @@ describe("config", () => {
 		expect(inlang.config.get()).toEqual(config)
 	})
 
-	// TO DO: test that config set
+	// TODO: test that config set
 	it("should set the new config", async () => {
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 		const inlang = await createInlang({
@@ -135,8 +135,8 @@ describe("config", () => {
 			let counter = 0
 
 			createEffect(() => {
-				// 2 times because init + set
-				if (!reactiveConfig().languageTags) return
+				// 2 times because effect creation + set
+				reactiveConfig()
 				counter += 1
 			})
 
@@ -156,5 +156,54 @@ describe("query", () => {
 		})
 		const message = inlang.messages.query.get({ where: { id: "common:a..b" } })
 		expect(message?.id).toBe("common:a..b")
+	})
+})
+
+describe("initialization", () => {
+	describe("config", () => {
+		it.todo("should throw if config file is not found")
+		it.todo("should throw if config file is not a valid JSON")
+		it.todo("should throw if config file is does not match schema")
+		it.todo("should return the parsed config")
+	})
+
+	describe("modules", () => {
+		it.todo("should throw if plugins contain errors ???")
+		it.todo("should throw if lintRules contain errors ???")
+		it.todo("should return meta data")
+		it.todo("should return plugins")
+		it.todo("should return lint rules")
+	})
+
+	describe("flow", () => {
+		it.todo("should not call functions multiple times")
+		it.todo("should load modules after config")
+		it.todo("should not load messages")
+		it.todo("should not call lint")
+	})
+
+	describe("instance object", () => {
+		it.todo("should contain all fields")
+	})
+})
+
+describe("reactivity", () => {
+	describe("modules", () => {
+		it.todo("should react to changes to config")
+	})
+
+	describe("messages", () => {
+		it.todo("should react to changes to config")
+		it.todo("should react to changes to modules")
+	})
+
+	describe("lint", () => {
+		it.todo("should react to changes to config")
+		it.todo("should react to changes to modules")
+		it.todo("should react to changes to mesages")
+	})
+
+	describe("query", () => {
+		it.todo("should react to changes to mesages")
 	})
 })

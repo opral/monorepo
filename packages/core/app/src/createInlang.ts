@@ -146,7 +146,6 @@ const loadConfig = async (args: {
 	const parsedConfig = JSON.parse(configFile) // TODO: this could throw!
 	const typeErrors = [...ConfigCompiler.Errors(parsedConfig)]
 
-	// -- USES INVALID SCHEMA --
 	if (typeErrors.length > 0) {
 		const errors: Array<InvalidConfigError> = []
 
