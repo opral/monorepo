@@ -1,19 +1,13 @@
 import type { InlangInstance } from "./api.js"
 import { ImportFunction, ResolveModulesFunction, resolveModules } from "@inlang/module"
-import {
-	NodeishFilesystemSubset,
-	InlangConfig,
-	createQuery,
-	ResolvedPlugins,
-	Message,
-	tryCatch,
-	Plugin,
-} from "@inlang/plugin"
+import { NodeishFilesystemSubset, InlangConfig, Message, tryCatch } from "@inlang/plugin"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
 import { InvalidConfigError } from "./errors.js"
-import { LintError, LintReport, LintRule, lintMessages } from "@inlang/lint"
+import { LintError, LintReport, lintMessages } from "@inlang/lint"
 import { createRoot, createSignal, createEffect } from "./solid.js"
+import { ReactiveMap } from "@solid-primitives/map"
+import { createReactiveQuery } from "./createReactiveQuery.js"
 
 const ConfigCompiler = TypeCompiler.Compile(InlangConfig)
 
@@ -21,7 +15,7 @@ const ConfigCompiler = TypeCompiler.Compile(InlangConfig)
  * Creates an inlang instance.
  *
  * - Use `_import` to pass a custom import function for testing,
- *   and supporting legacy modules such as CJS.
+ *   and supporting legacy resolvedModules such as CJS.
  *
  */
 export const createInlang = async (args: {
@@ -29,54 +23,64 @@ export const createInlang = async (args: {
 	nodeishFs: NodeishFilesystemSubset
 	_import?: ImportFunction
 }): Promise<InlangInstance> =>
-	createRoot(async () => {
+	await createRoot(async () => {
 		const [initialized, markInitAsComplete] = createAwaitable()
 
 		// -- config ------------------------------------------------------------
 
 		const [config, setConfig] = createSignal<InlangConfig>()
 		createEffect(() => {
-			loadConfig({ configPath: args.configPath, nodeishFs: args.nodeishFs }).then(setConfig)
+			loadConfig({ configPath: args.configPath, nodeishFs: args.nodeishFs })
+				.then(setConfig)
+				.catch((err) => {
+					console.error("ERROR IN LOAD CONFIG ", err)
+				})
 		})
 		// TODO: create FS watcher and update config on change
 
-		// -- modules -----------------------------------------------------------
+		console.log({ config })
 
-		const [modules, setModules] = createSignal<Awaited<ReturnType<ResolveModulesFunction>>>()
-		const [plugins, setPlugins] = createSignal<ResolvedPlugins>()
-		const [lintRules, setLintRules] = createSignal<Pick<LintRule, "meta">[]>([])
+		// -- resolvedModules -----------------------------------------------------------
+
+		const [resolvedModules, setResolvedModules] =
+			createSignal<Awaited<ReturnType<ResolveModulesFunction>>>()
+
 		createEffect(() => {
 			const conf = config()
 			if (!conf) return
 
-			loadModules({ config: conf, nodeishFs: args.nodeishFs, _import: args._import }).then(
-				(modules) => {
-					setModules(modules)
-					setPlugins(modules.data.plugins.data)
-					setLintRules(modules.data.lintRules.data)
-
+			loadModules({ config: conf, nodeishFs: args.nodeishFs, _import: args._import })
+				.then((resolvedModules) => {
+					setResolvedModules(resolvedModules)
 					// TODO: handle `detectedLanguageTags`
-				},
-			)
+				})
+				.catch((err) => {
+					console.error("ERROR IN LOAD MODULES ", err)
+				})
 		})
-
 		// -- messages ----------------------------------------------------------
 
 		const [messages, setMessages] = createSignal<Message[]>()
 		createEffect(() => {
-			const plugs = plugins()
-			if (!plugs) return
-
-			makeTrulyAsync(plugs.loadMessages({ languageTags: config()!.languageTags })).then(
-				(messages) => {
+			console.log("0 effect load messages is triggered")
+			const _resolvedModules = resolvedModules()
+			if (!_resolvedModules) return
+			//console.log(_resolvedModules.data.plugins.data)
+			makeTrulyAsync(
+				_resolvedModules.data.plugins.data.loadMessages({ languageTags: config()!.languageTags }),
+			)
+				.then((messages) => {
+					console.log("1 messsages loaded")
 					setMessages(messages)
 
 					markInitAsComplete()
-				},
-			)
+				})
+				.catch((err) => {
+					console.error("3 ERROR IN LOAD MESSAGES ", err)
+				})
 		})
 
-		// const query = createQuery(messages() || []) // TODO: make query reactive
+		const query = createReactiveQuery(() => messages() ?? [])
 
 		// -- lint --------------------------------------------------------------
 
@@ -97,8 +101,8 @@ export const createInlang = async (args: {
 			lintMessages({
 				config: config() as InlangConfig,
 				messages: msgs,
-				query: queryMessages,
-				rules: lintRules() as LintRule[],
+				query,
+				rules: resolvedModules()!.data.lintRules.data,
 			}).then((report) => {
 				setLintReports(report.data)
 				setLintErrors(report.errors)
@@ -111,36 +115,21 @@ export const createInlang = async (args: {
 
 		await initialized
 
-		// TODO: remove workaround and init reactive query above
-		const queryMessages = createQuery(messages() || [])
+		// createEffect(() => {
+		// 	console.log(config())
+		// })
+
+		// console.log(resolveModules().data.meta.plugins)
 
 		return {
 			meta: {
-				modules: () => [
-					...new Set([
-						...Object.values(modules()!.data.module.meta.lintRules),
-						...Object.values(modules()!.data.module.meta.plugins),
-					]),
-				],
-				lintRules: () =>
-					modules()!.data.lintRules.data.map((rule) => {
-						return {
-							...rule.meta,
-							module: modules()!.data.module.meta.lintRules[rule.meta.id as `${string}.${string}`],
-						} as LintRule["meta"] & { module: string }
-					}),
-				plugins: () =>
-					Object.entries(modules()!.data.plugins.data.meta).map(([id, meta]) => {
-						return {
-							...meta,
-							module: modules()!.data.module.meta.plugins[id as `${string}.${string}`],
-						} as Plugin["meta"] & { module: string }
-					}),
+				plugins: () => resolvedModules()!.data.meta.plugins,
+				lintRules: () => resolvedModules()!.data.meta.lintRules,
 			},
 			errors: {
-				module: () => modules()!.errors,
-				plugin: () => modules()!.data.plugins.errors,
-				lintRules: () => [...modules()!.data.lintRules.errors, ...(lintErrors() || [])],
+				module: () => resolvedModules()!.errors,
+				plugin: () => resolvedModules()!.data.plugins.errors,
+				lintRules: () => [...resolvedModules()!.data.lintRules.errors, ...(lintErrors() || [])],
 			},
 			config: config as () => InlangConfig,
 			setConfig: setConfig,
@@ -153,9 +142,9 @@ export const createInlang = async (args: {
 					return reports
 				},
 			},
-			appSpecificApi: () => plugins()!.appSpecificApi, // TODO: make reactive (using store)
+			appSpecificApi: () => resolvedModules()!.data.plugins.data!.appSpecificApi, // TODO: make reactive (using store)
 			query: {
-				messages: queryMessages,
+				messages: query,
 			},
 		} satisfies InlangInstance
 	})

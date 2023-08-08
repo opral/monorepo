@@ -5,18 +5,13 @@ import type { Message } from "./schema.js"
 describe("create", () => {
 	const query = createQuery([])
 
-	it("should be possible to pass a custom map implementation", () => {
-		const query = createQuery([], { customMap: Map })
-		expect(query).toBeDefined()
-	})
-
 	it("should create a message", () => {
 		expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
 
 		const mockMessage = createMessage({ id: "first-message", text: "Hello World" })
 
 		query.create({ data: mockMessage })
-		
+
 		expect(query.get({ where: { id: "first-message" } })).toEqual(mockMessage)
 	})
 })
@@ -26,7 +21,7 @@ describe("get", () => {
 
 	it("should return undefined if a message does not exist", () => {
 		const message = query.get({ where: { id: "none-existent-message" } })
-		
+
 		expect(typeof message).toBe("undefined")
 	})
 
@@ -109,10 +104,10 @@ function createMessage(args: { id: string; text: string }): Message {
 						{
 							type: "Text",
 							value: args.text,
-						}
-					]
-				}
-			] 
-		}
+						},
+					],
+				},
+			],
+		},
 	}
 }

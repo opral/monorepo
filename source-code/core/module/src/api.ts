@@ -37,11 +37,9 @@ export type ResolveModulesFunction = (args: {
 	_import?: ImportFunction
 }) => Promise<{
 	data: {
-		module: {
-			meta: {
-				plugins: Record<Plugin["meta"]["id"], InlangConfig["modules"][number]>
-				lintRules: Record<LintRule["meta"]["id"], InlangConfig["modules"][number]>
-			}
+		meta: {
+			plugins: Array<Plugin["meta"] & { module: string }>
+			lintRules: Array<LintRule["meta"] & { module: string }>
 		}
 		plugins: {
 			data: Awaited<ReturnType<ResolvePluginsFunction>>["data"]

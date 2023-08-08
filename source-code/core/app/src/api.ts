@@ -14,14 +14,13 @@ import type {
 	PluginUsesReservedNamespaceError,
 	ResolvedPlugins,
 } from "@inlang/plugin"
-import type { ModuleImportError, ModuleError } from "@inlang/module"
+import type { ModuleImportError, ModuleError, ResolveModulesFunction } from "@inlang/module"
 
 // TODO: remove all getters and use solid store for whole object, just expose `setConfig`
 export type InlangInstance = {
 	meta: {
-		modules: () => string[]
-		plugins: () => (Plugin["meta"] & { module: string })[]
-		lintRules: () => (LintRule["meta"] & { module: string })[]
+		plugins: () => Awaited<ReturnType<ResolveModulesFunction>>["data"]["meta"]["plugins"]
+		lintRules: () => Awaited<ReturnType<ResolveModulesFunction>>["data"]["meta"]["lintRules"]
 	}
 	errors: {
 		module: () => (ModuleImportError | ModuleError)[]
