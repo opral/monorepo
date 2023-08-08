@@ -80,7 +80,7 @@ export async function createInlang(args: {
 					config,
 					query: createQuery(messages),
 					messages: messages,
-					rules: resolvedModules.data.lintRules,
+					rules: resolvedModules.data.lintRules.data,
 				})
 				setLintReports(lintReports.data)
 				setLintExceptions(lintReports.errors)
