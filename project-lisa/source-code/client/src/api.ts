@@ -1,24 +1,243 @@
+import _git from "isomorphic-git"
+import _http from "isomorphic-git/http/web/index.js"
+import { createMemoryFs } from "@inlang-git/fs"
+import type { NodeishFilesystem } from "@inlang-git/fs"
+import { github } from "./github.js"
+import { wrap, transformRemote } from "./helpers.js"
+
 /**
- * Exports of the lisa client.
- */
-export type LisaClient = {
-	load: (
-		path: string,
-		options: {
-			fs: unknown
-			auth?: unknown
-		},
-	) => Promise<Repository>
-}
+ * Raw git cli api. (Used for legacy migrations)
+ *
+ * Used for legacy migrations. The idea of the `git-sdk` is to abstract working with git as
+ * a CLI. Sometimes access to the "raw" git CLI is required to
+ * achieve actions that are unsupported, or not yet, supported
+ * by the `git-sdk`. Esepcially useful for faster development
+ * iterations and progressively develop own api layer on top.
+*/
+export const raw = _git
+
+/**
+  * The http client for the git raw api. (Used for legacy migrations)
+  *
+  * Note: The http client is web-based. Node version 18 is
+  * required for the http client to work in node environments.
+*/
+export const http = _http
 
 export type Repository = {
-	fs: any
-	commit: () => unknown
-	push: () => unknown
-	pull: () => unknown
-	currentBranch: () => unknown
-	changeBranch: () => unknown
-	listRemotes: () => unknown
-	log: () => unknown
-	status: () => any
+	fs: NodeishFilesystem
+	commit: (args: { dir: string, author: any, message: string}) => any
+	push: (args: { dir: string }) => any
+	pull: (args: { dir: string, author: any, fastForward: boolean, singleBranch: true }) => any
+  add: (args: { dir: string, filepath: string }) => any
+	listRemotes: (args?: { fs?: NodeishFilesystem }) => Promise<Awaited<ReturnType<typeof raw.listRemotes>> | undefined>
+	log: (args: { dir: string, since: any}) => unknown
+  statusMatrix: (args: { dir:string, filter: any }) => any
+  mergeUpstream: (args: { branch: string }) => any
+  getMeta: () => unknown
+  isCollaborator: (args: { username: string }) => any
+  getOrigin: () => Promise<string>
+  getMainBranch: () => unknown
+
+  // TODO: implement these before publishing api, but not used in badge or editor
+  // currentBranch: () => unknown
+	// changeBranch: () => unknown
+  // status: () => unknown
+}
+
+export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesystem, path?: string, corsProxy?: string, auth?: unknown }): Repository {
+  const rawFs = fs ? fs : createMemoryFs()
+
+  // parse url in the format of github.com/inlang/example and split it to host, owner and repo
+  const [host, owner, repoName] = [...url.split("/")]
+
+  // check if all 3 parts are present, if not, return an error
+  if (!host || !owner || !repoName) {
+    throw new Error(
+      `Invalid url format for '${url}' for cloning repository, please use the format of github.com/inlang/example.`,
+    )
+  }
+
+  const normalizedUrl = `https://${host}/${owner}/${repoName}`
+
+  let pending: Promise<void> | undefined = raw.clone({
+    fs: wrap(rawFs, 'clone'),
+    http,
+    dir: "/",
+    corsProxy,
+    url: normalizedUrl,
+    singleBranch: true,
+    depth: 1,
+    noTags: true,
+  }).finally(() => {
+    pending = undefined
+  }).catch((err: any) => {
+    console.error('error cloning the repository', err)
+  })
+
+  return {
+    fs: wrap(rawFs, 'app', (_prop, [callTarget, thisArg, argumentsList]) => {
+      if (pending) {
+        return pending.then(() => Reflect.apply(callTarget, thisArg, argumentsList))
+      }
+
+      return Reflect.apply(callTarget, thisArg, argumentsList)
+    }),
+
+    /**
+     * Gets the git origin url of the current repository.
+     *
+     * @returns The git origin url or undefined if it could not be found.
+     */
+    async listRemotes (args) {
+      try {
+        const remotes = await raw.listRemotes({
+          fs: args?.fs || rawFs,
+          dir: await raw.findRoot({
+            fs: wrap(rawFs, 'listRemotes'),
+              filepath: "/"
+          }),
+        })
+
+        return remotes
+      } catch (_err) {
+        return undefined
+      }
+    },
+
+    statusMatrix ({ dir = "/", filter }) {
+      return raw.statusMatrix({
+        fs: wrap(rawFs, 'statusMatrix'),
+        dir,
+        filter
+      })
+    },
+
+    add ({ dir = "/", filepath }) {
+      return raw.add({
+        fs: wrap(rawFs, 'add'),
+        dir,
+        filepath
+      })
+    },
+
+    commit ({ dir = "/", author, message }) {
+      return raw.commit({
+        fs: wrap(rawFs, 'commit'),
+        dir,
+        author,
+        message
+      })
+    },
+
+    push ({ dir = "/" }) {
+      return raw.push({
+        fs: wrap(rawFs, 'push'),
+        url: normalizedUrl,
+        corsProxy,
+        http,
+        dir
+      })
+    },
+
+    pull ({ dir = "/", author, fastForward, singleBranch }) {
+      return raw.pull({
+        fs: wrap(rawFs, 'pull'),
+        url: normalizedUrl,
+        corsProxy,
+        http,
+        dir,
+        fastForward,
+        singleBranch,
+        author
+      })
+    },
+
+    log ({ dir = "/", since }) {
+      return raw.log({
+        fs: wrap(rawFs, 'log'),
+        dir,
+        since
+      })
+    },
+
+    mergeUpstream ({ branch }) {
+      return github.request("POST /repos/{owner}/{repo}/merge-upstream", {
+      	branch,
+      	owner,
+      	repo: repoName,
+      })
+    },
+
+    /**
+     * Additional information about a repository provided by GitHub.
+     */
+    async getMeta () {
+      // githubRepositoryInformation: Resource<
+      // 	Awaited<ReturnType<typeof github.request<"GET /repos/{owner}/{repo}">>>
+      // >
+      const { data: { name, private: isPrivate, fork: isFork, parent, owner: ownerMetaData }} = await github
+        .request("GET /repos/{owner}/{repo}", {
+          owner,
+          repo: repoName,
+        })
+
+        return {
+          name,
+          isPrivate,
+          isFork,
+          owner: ownerMetaData,
+          parent: parent ? {
+            url: transformRemote(parent.git_url),
+            fullName: parent.full_name
+          } : undefined
+        }
+    },
+
+    async isCollaborator ({ username }) {
+      let response
+      try {
+        response = await github.request(
+          "GET /repos/{owner}/{repo}/collaborators/{username}",
+          {
+            owner,
+            repo: repoName,
+            username,
+          },
+        )
+      } catch (_err) { /* throws on non collaborator access */ }
+
+      return response?.status === 204 ? true : false
+    },
+
+    /**
+     * Parses the origin from remotes.
+     *
+     * The function ensures that the same orgin is always returned for the same repository.
+     */
+    async getOrigin (): Promise<string> {
+      const remotes = await this.listRemotes()
+      // 	remotes: Array<{ remote: string; url: string }> | undefined
+      // }): string {
+      const origin = remotes?.find((elements) => elements.remote === "origin")
+      if (origin === undefined) {
+        return "unknown"
+      }
+      // polyfill for some editor related origin issues
+      let result = origin.url
+      if (result.endsWith(".git") === false) {
+        result += ".git"
+      }
+
+      return transformRemote(result)
+    },
+
+    getMainBranch () {
+      // FIXME: make real impl. and stateless
+      return raw.currentBranch({
+        fs: wrap(rawFs, 'getMainBranch'),
+        dir: "/",
+      })
+    }
+  }
 }
