@@ -6,6 +6,15 @@ export type {
 } from "./api.js"
 export { resolvePlugins } from "./resolvePlugins.js"
 export { pluginBuildConfig } from "./pluginBuildConfig.js"
+export {
+	PluginAppSpecificApiReturnError,
+	PluginFunctionDetectLanguageTagsAlreadyDefinedError,
+	PluginFunctionLoadMessagesAlreadyDefinedError,
+	PluginFunctionSaveMessagesAlreadyDefinedError,
+	PluginUsesInvalidIdError,
+	PluginUsesInvalidSchemaError,
+	PluginUsesReservedNamespaceError,
+} from "./errors.js"
 
 /**
  * -------- RE-EXPORTS --------
