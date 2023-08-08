@@ -17,11 +17,16 @@ export function tryCatch<Data>(
 ): PromiseLike<Result<Data, unknown>> | Result<Data, unknown> {
 	try {
 		const callbackResult = callback() as Data | Promise<Data>
-		if (callbackResult instanceof Promise) { // TODO: this is not the best way to check for a promise
-			return callbackResult.then((data) => ({ data } as SuccessResult<Data>)).catch((error) => ({ error } as unknown as ErrorResult<unknown>))
+		if (isAsync(callbackResult)) {
+			return callbackResult
+				.then(data => ({ data } as SuccessResult<Data>))
+				.catch((error) => ({ error } as ErrorResult<unknown>))
 		}
-		return { data: callbackResult }
+		return { data: callbackResult } as any
 	} catch (e) {
-		return { error: e }
+		return { error: e } as any
 	}
 }
+
+const isAsync = <T>(p: unknown): p is Promise<T> =>
+	!!p && typeof p === 'object' && typeof (p as Promise<T>).then === 'function'
