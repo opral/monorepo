@@ -68,7 +68,40 @@ describe("initialization", () => {
 				nodeishFs: fs,
 				_import: $import,
 			})
-			expect(inlang.config.get()).toEqual(config)
+			expect(inlang.config()).toEqual(config)
+		})
+
+		it("should set a new config", async () => {
+			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			const inlang = await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: $import,
+			})
+			expect(inlang.config()).toEqual(config)
+
+			const newConfig: InlangConfig = {
+				sourceLanguageTag: "en",
+				languageTags: ["en"],
+				modules: ["./dist/index.js"],
+				settings: {
+					plugins: {
+						"inlang.plugin-json": {
+							options: {
+								pathPattern: "./examples/example01/{languageTag}.json",
+								variableReferencePattern: ["{", "}"],
+							},
+						},
+					},
+					lintRules: {
+						"inlang.missingMessage": {
+							level: "warning",
+						},
+					},
+				},
+			}
+			inlang.setConfig(newConfig)
+			expect(inlang.config()).toEqual(newConfig)
 		})
 	})
 
@@ -92,6 +125,88 @@ describe("initialization", () => {
 	})
 })
 
+describe("functionality", () => {
+	describe("config", () => {
+		it("should return the config", async () => {
+			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			const inlang = await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: $import,
+			})
+			expect(inlang.config()).toEqual(config)
+		})
+
+		it("should set a new config", async () => {
+			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			const inlang = await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: $import,
+			})
+			expect(inlang.config()).toEqual(config)
+		})
+	})
+
+	describe("meta", () => {
+		it("should return the meta data", async () => {
+			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			const inlang = await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: $import,
+			})
+
+			const pluginMeta = structuredClone(mockPlugin.meta)
+			// @ts-expect-error
+			pluginMeta.module = config.modules[0]
+
+			const lintRuleMeta = structuredClone(mockLintRule.meta)
+			// @ts-expect-error
+			lintRuleMeta.module = config.modules[0]
+
+			expect(inlang.meta.modules()).toEqual(config.modules)
+			expect(inlang.meta.plugins()).toEqual([pluginMeta])
+			expect(inlang.meta.lintRules()).toEqual([lintRuleMeta])
+		})
+	})
+
+	describe("errors", () => {
+		it.todo("should return the errors", async () => {
+			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			const inlang = await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: $import,
+			})
+			// console.log(inlang.errors)
+			// expect(inlang.errors()).toEqual([])
+		})
+	})
+
+	describe("appSpecificApi", () => {
+		it("should return the app specific api", async () => {
+			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			const inlang = await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: $import,
+			})
+			
+			// @ts-expect-error
+			expect(JSON.stringify(inlang.appSpecificApi())).toEqual(JSON.stringify(mockPlugin.addAppSpecificApi()))
+		})
+	})
+
+	describe("messages", () => {
+		it.todo("should return the messages")
+	})
+	
+	describe("lint", () => {
+		it.todo("should return the lint reports")
+	})
+})
+
 describe("reactivity", () => {
 	describe("config", () => {
 		it("should react to changes to config", async () => { 
@@ -102,7 +217,7 @@ describe("reactivity", () => {
 					nodeishFs: fs,
 					_import: $import,
 				})
-				const reactiveConfig = inlang.config.get
+				const reactiveConfig = inlang.config
 				let counter = 0
 	
 				createEffect(() => {
@@ -111,7 +226,7 @@ describe("reactivity", () => {
 					counter += 1
 				})		
 	
-				inlang.config.set({ ...reactiveConfig(), languageTags: ["en", "de"] })
+				inlang.setConfig({ ...reactiveConfig(), languageTags: ["en", "de"] })
 				expect(counter).toBe(2)
 			})
 		})
