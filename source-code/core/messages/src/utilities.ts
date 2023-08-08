@@ -142,7 +142,7 @@ const matchMostSpecificVariant = (
 	// resolve preferenceSelectors to match length and order of message selectors
 	const resolvedSelectors = resolveSelector(message.selectors, selectors)
 	const index: Record<string, any> = {}
-
+	
 	for (const variant of message.body[languageTag]!) {
 		let isMatch = true
 
@@ -160,7 +160,7 @@ const matchMostSpecificVariant = (
 				currentKeys: Message["selectors"],
 				variant: Variant,
 			) {
-				const key = variant.match[currentKeys[0]!]
+				const key = variant.match[currentKeys[0].name]
 				if (currentKeys.length === 1) {
 					currentIndex[key!] = variant
 				} else {
@@ -218,7 +218,7 @@ const resolveSelector = (
 	const resolvedSelectors: Record<string, string> = {}
 	if (!selectors) return {}
 	for (const messageSelector of messageSelectors) {
-		resolvedSelectors[messageSelector] = selectors[messageSelector] ?? "*"
+		resolvedSelectors[messageSelector.name] = selectors[messageSelector.name] ?? "*"
 	}
 	return resolvedSelectors
 }
