@@ -1,13 +1,11 @@
 import satori from "satori"
-import { cloneRespository } from "./repo/clone.js"
-import { getGitRemotes } from "./repo/getGitRemotes.js"
 import { setupConfig } from "@inlang/core/config"
 import { initialize$import, type InlangEnvironment } from "@inlang/core/environment"
 import { getLintReports, lint } from "@inlang/core/lint"
-import { createMemoryFs } from "@inlang-git/fs"
+import { load } from "@project-lisa/client"
 import { markup } from "./helper/markup.js"
 import { readFileSync } from "node:fs"
-import { telemetryNode, parseOrigin } from "@inlang/telemetry"
+import { telemetryNode } from "@inlang/telemetry"
 import { removeCommas } from "./helper/removeCommas.js"
 import { missingTranslations } from "./helper/missingTranslations.js"
 import { caching } from "cache-manager"
@@ -28,21 +26,20 @@ export const badge = async (url: string) => {
 		return fromCache
 	}
 
-	// initialize a new file system on each request to prevent cross request pollution
-	const fs = createMemoryFs()
-	await cloneRespository(url, fs)
+	// initialize a lisa repo instance on each request to prevent cross request pollution
+	const repo = await load({ url })
 
 	// Set up the environment functions
 	const env: InlangEnvironment = {
 		$import: initialize$import({
-			fs,
+			fs: repo.fs,
 			fetch,
 		}),
-		$fs: fs,
+		$fs: repo.fs,
 	}
 
 	// Get the content of the inlang.config.js file
-	const file = await fs.readFile("/inlang.config.js", { encoding: "utf-8" }).catch((e) => {
+	const file = await repo.fs.readFile("/inlang.config.js", { encoding: "utf-8" }).catch((e) => {
 		if (e.code !== "ENOENT") throw e
 		throw new Error("No inlang.config.js file found in the repository.")
 	})
@@ -101,7 +98,7 @@ export const badge = async (url: string) => {
 	)
 
 	await cache.set(url, image)
-	const gitOrigin = parseOrigin({ remotes: await getGitRemotes({ fs }) })
+	const gitOrigin = await repo.getOrigin()
 
 	telemetryNode.capture({
 		event: "BADGE created",

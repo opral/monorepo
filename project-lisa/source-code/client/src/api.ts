@@ -17,10 +17,10 @@ import { wrap, transformRemote } from "./helpers.js"
 export const raw = _git
 
 /**
-  * The http client for the git raw api. (Used for legacy migrations)
-  *
-  * Note: The http client is web-based. Node version 18 is
-  * required for the http client to work in node environments.
+	* The http client for the git raw api. (Used for legacy migrations)
+	*
+	* Note: The http client is web-based. Node version 18 is
+	* required for the http client to work in node environments.
 */
 export const http = _http
 
@@ -29,225 +29,225 @@ export type Repository = {
 	commit: (args: { dir: string, author: any, message: string}) => Promise<Awaited<ReturnType<typeof raw.commit>> | undefined>
 	push: (args: { dir: string }) => Promise<Awaited<ReturnType<typeof raw.push>> | undefined>
 	pull: (args: { dir: string, author: any, fastForward: boolean, singleBranch: true }) => any
-  add: (args: { dir: string, filepath: string }) =>  Promise<Awaited<ReturnType<typeof raw.add>>>
+	add: (args: { dir: string, filepath: string }) => Promise<Awaited<ReturnType<typeof raw.add>>>
 	listRemotes: () => Promise<Awaited<ReturnType<typeof raw.listRemotes>> | undefined>
-	log: (args: { dir: string, since: any}) =>  Promise<Awaited<ReturnType<typeof raw.log>>>
-  statusMatrix: (args: { dir:string, filter: any }) => Promise<Awaited<ReturnType<typeof raw.statusMatrix>>>
-  mergeUpstream: (args: { branch: string }) => ReturnType<typeof github.request<"POST /repos/{owner}/{repo}/merge-upstream">>
-  isCollaborator: (args: { username: string }) => Promise<boolean>
-  getOrigin: () => Promise<string>
-  getCurrentBranch: () => Promise<string | undefined>
-  getMeta: () => Promise<{
-    name: string,
-    isPrivate: boolean,
-    isFork: boolean,
-    owner: { name?: string, email?: string },
-    parent:  {
-      url: string,
-      fullName: string
-    } | undefined
-  }>
+	log: (args: { dir: string, since: any}) => Promise<Awaited<ReturnType<typeof raw.log>>>
+	statusMatrix: (args: { dir:string, filter: any }) => Promise<Awaited<ReturnType<typeof raw.statusMatrix>>>
+	mergeUpstream: (args: { branch: string }) => ReturnType<typeof github.request<"POST /repos/{owner}/{repo}/merge-upstream">>
+	isCollaborator: (args: { username: string }) => Promise<boolean>
+	getOrigin: () => Promise<string>
+	getCurrentBranch: () => Promise<string | undefined>
+	getMeta: () => Promise<{
+		name: string,
+		isPrivate: boolean,
+		isFork: boolean,
+		owner: { name?: string, email?: string },
+		parent:  {
+			url: string,
+			fullName: string
+		} | undefined
+	}>
 
-  // TODO: implement these before publishing api, but not used in badge or editor
-  // currentBranch: () => unknown
+	// TODO: implement these before publishing api, but not used in badge or editor
+	// currentBranch: () => unknown
 	// changeBranch: () => unknown
-  // status: () => unknown
+	// status: () => unknown
 }
 
 export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesystem, path?: string, corsProxy?: string, auth?: unknown }): Repository {
-  const rawFs = fs ? fs : createNodeishMemoryFs()
+	const rawFs = fs ? fs : createNodeishMemoryFs()
 
-  // parse url in the format of github.com/inlang/example and split it to host, owner and repo
-  const [host, owner, repoName] = [...url.split("/")]
+	// parse url in the format of github.com/inlang/example and split it to host, owner and repo
+	const [host, owner, repoName] = [...url.split("/")]
 
-  // check if all 3 parts are present, if not, return an error
-  if (!host || !owner || !repoName) {
-    throw new Error(
-      `Invalid url format for '${url}' for cloning repository, please use the format of github.com/inlang/example.`,
-    )
-  }
+	// check if all 3 parts are present, if not, return an error
+	if (!host || !owner || !repoName) {
+		throw new Error(
+			`Invalid url format for '${url}' for cloning repository, please use the format of github.com/inlang/example.`,
+		)
+	}
 
-  const normalizedUrl = `https://${host}/${owner}/${repoName}`
+	const normalizedUrl = `https://${host}/${owner}/${repoName}`
 
-  let pending: Promise<void> | undefined = raw.clone({
-    fs: wrap(rawFs, 'clone'),
-    http,
-    dir: "/",
-    corsProxy,
-    url: normalizedUrl,
-    singleBranch: true,
-    depth: 1,
-    noTags: true,
-  }).finally(() => {
-    pending = undefined
-  }).catch((err: any) => {
-    console.error('error cloning the repository', err)
-  })
+	let pending: Promise<void> | undefined = raw.clone({
+		fs: wrap(rawFs, 'clone'),
+		http,
+		dir: "/",
+		corsProxy,
+		url: normalizedUrl,
+		singleBranch: true,
+		depth: 1,
+		noTags: true,
+	}).finally(() => {
+		pending = undefined
+	}).catch((err: any) => {
+		console.error('error cloning the repository', err)
+	})
 
-  // delay all fs and repo operations until the repo clone and checkout have finished, this is preparation for the lazy feature
-  function delayedAction ({ execute }: { execute: () => any }) {
-    if (pending) {
-      return pending.then(execute)
-    }
+	// delay all fs and repo operations until the repo clone and checkout have finished, this is preparation for the lazy feature
+	function delayedAction ({ execute }: { execute: () => any }) {
+		if (pending) {
+			return pending.then(execute)
+		}
 
-    return execute()
-  }
+		return execute()
+	}
 
-  return {
-    fs: wrap(rawFs, 'app', delayedAction),
+	return {
+		fs: wrap(rawFs, 'app', delayedAction),
 
-    /**
-     * Gets the git origin url of the current repository.
-     *
-     * @returns The git origin url or undefined if it could not be found.
-     */
-    async listRemotes () {
-      try {
-        const wrappedFS = wrap(rawFs, 'listRemotes', delayedAction)
+		/**
+		 * Gets the git origin url of the current repository.
+		 *
+		 * @returns The git origin url or undefined if it could not be found.
+		 */
+		async listRemotes () {
+			try {
+				const wrappedFS = wrap(rawFs, 'listRemotes', delayedAction)
 
-        const remotes = await raw.listRemotes({
-          fs: wrappedFS,
-          dir: await raw.findRoot({
-            fs: wrappedFS,
-              filepath: "/"
-          }),
-        })
+				const remotes = await raw.listRemotes({
+					fs: wrappedFS,
+					dir: await raw.findRoot({
+						fs: wrappedFS,
+							filepath: "/"
+					}),
+				})
 
-        return remotes
-      } catch (_err) {
-        return undefined
-      }
-    },
+				return remotes
+			} catch (_err) {
+				return undefined
+			}
+		},
 
-    statusMatrix ({ dir = "/", filter }) {
-      return raw.statusMatrix({
-        fs: wrap(rawFs, 'statusMatrix', delayedAction),
-        dir,
-        filter
-      })
-    },
+		statusMatrix ({ dir = "/", filter }) {
+			return raw.statusMatrix({
+				fs: wrap(rawFs, 'statusMatrix', delayedAction),
+				dir,
+				filter
+			})
+		},
 
-    add ({ dir = "/", filepath }) {
-      return raw.add({
-        fs: wrap(rawFs, 'add', delayedAction),
-        dir,
-        filepath
-      })
-    },
+		add ({ dir = "/", filepath }) {
+			return raw.add({
+				fs: wrap(rawFs, 'add', delayedAction),
+				dir,
+				filepath
+			})
+		},
 
-    commit ({ dir = "/", author, message }) {
-      return raw.commit({
-        fs: wrap(rawFs, 'commit', delayedAction),
-        dir,
-        author,
-        message
-      })
-    },
+		commit ({ dir = "/", author, message }) {
+			return raw.commit({
+				fs: wrap(rawFs, 'commit', delayedAction),
+				dir,
+				author,
+				message
+			})
+		},
 
-    push ({ dir = "/" }) {
-      return raw.push({
-        fs: wrap(rawFs, 'push', delayedAction),
-        url: normalizedUrl,
-        corsProxy,
-        http,
-        dir
-      })
-    },
+		push ({ dir = "/" }) {
+			return raw.push({
+				fs: wrap(rawFs, 'push', delayedAction),
+				url: normalizedUrl,
+				corsProxy,
+				http,
+				dir
+			})
+		},
 
-    pull ({ dir = "/", author, fastForward, singleBranch }) {
-      return raw.pull({
-        fs: wrap(rawFs, 'pull', delayedAction),
-        url: normalizedUrl,
-        corsProxy,
-        http,
-        dir,
-        fastForward,
-        singleBranch,
-        author
-      })
-    },
+		pull ({ dir = "/", author, fastForward, singleBranch }) {
+			return raw.pull({
+				fs: wrap(rawFs, 'pull', delayedAction),
+				url: normalizedUrl,
+				corsProxy,
+				http,
+				dir,
+				fastForward,
+				singleBranch,
+				author
+			})
+		},
 
-    log ({ dir = "/", since }) {
-      return raw.log({
-        fs: wrap(rawFs, 'log', delayedAction),
-        dir,
-        since
-      })
-    },
+		log ({ dir = "/", since }) {
+			return raw.log({
+				fs: wrap(rawFs, 'log', delayedAction),
+				dir,
+				since
+			})
+		},
 
-    mergeUpstream ({ branch }) {
-      return github.request("POST /repos/{owner}/{repo}/merge-upstream", {
-      	branch,
-      	owner,
-      	repo: repoName,
-      })
-    },
+		mergeUpstream ({ branch }) {
+			return github.request("POST /repos/{owner}/{repo}/merge-upstream", {
+				branch,
+				owner,
+				repo: repoName,
+			})
+		},
 
-    async isCollaborator ({ username }) {
-      let response: Awaited<ReturnType<typeof github.request<"GET /repos/{owner}/{repo}/collaborators/{username}">>> | undefined
-      try {
-        response = await github.request(
-          "GET /repos/{owner}/{repo}/collaborators/{username}",
-          {
-            owner,
-            repo: repoName,
-            username,
-          },
-        )
-      } catch (_err) { /* throws on non collaborator access */ }
+		async isCollaborator ({ username }) {
+			let response: Awaited<ReturnType<typeof github.request<"GET /repos/{owner}/{repo}/collaborators/{username}">>> | undefined
+			try {
+				response = await github.request(
+					"GET /repos/{owner}/{repo}/collaborators/{username}",
+					{
+						owner,
+						repo: repoName,
+						username,
+					},
+				)
+			} catch (_err) { /* throws on non collaborator access */ }
 
-      return response?.status === 204 ? true : false
-    },
+			return response?.status === 204 ? true : false
+		},
 
-    /**
-     * Parses the origin from remotes.
-     *
-     * The function ensures that the same orgin is always returned for the same repository.
-     */
-    async getOrigin (): Promise<string> {
-      const remotes: Array<{ remote: string; url: string }> | undefined = await this.listRemotes()
+		/**
+		 * Parses the origin from remotes.
+		 *
+		 * The function ensures that the same orgin is always returned for the same repository.
+		 */
+		async getOrigin (): Promise<string> {
+			const remotes: Array<{ remote: string; url: string }> | undefined = await this.listRemotes()
 
-      const origin = remotes?.find((elements) => elements.remote === "origin")
-      if (origin === undefined) {
-        return "unknown"
-      }
-      // polyfill for some editor related origin issues
-      let result = origin.url
-      if (result.endsWith(".git") === false) {
-        result += ".git"
-      }
+			const origin = remotes?.find((elements) => elements.remote === "origin")
+			if (origin === undefined) {
+				return "unknown"
+			}
+			// polyfill for some editor related origin issues
+			let result = origin.url
+			if (result.endsWith(".git") === false) {
+				result += ".git"
+			}
 
-      return transformRemote(result)
-    },
+			return transformRemote(result)
+		},
 
-    async getCurrentBranch () {
-      // TODO: make stateless?, migrate to getMainBranch
-      return await raw.currentBranch({
-        fs: wrap(rawFs, 'getMainBranch', delayedAction),
-        dir: "/",
-      }) || undefined
-    },
+		async getCurrentBranch () {
+			// TODO: make stateless?, migrate to getMainBranch
+			return await raw.currentBranch({
+				fs: wrap(rawFs, 'getMainBranch', delayedAction),
+				dir: "/",
+			}) || undefined
+		},
 
-     /**
-     * Additional information about a repository provided by GitHub.
-     */
-     async getMeta () {
-      const { data: { name, private: isPrivate, fork: isFork, parent, owner: ownerMetaData }}: Awaited<ReturnType<typeof github.request<"GET /repos/{owner}/{repo}">>> = await github
-        .request("GET /repos/{owner}/{repo}", {
-          owner,
-          repo: repoName,
-        })
+		 /**
+		 * Additional information about a repository provided by GitHub.
+		 */
+		 async getMeta () {
+			const { data: { name, private: isPrivate, fork: isFork, parent, owner: ownerMetaData }}: Awaited<ReturnType<typeof github.request<"GET /repos/{owner}/{repo}">>> = await github
+				.request("GET /repos/{owner}/{repo}", {
+					owner,
+					repo: repoName,
+				})
 
-        return {
-          name,
-          isPrivate,
-          isFork,
-          owner: { name: ownerMetaData.name || undefined, email: ownerMetaData.email || undefined},
-          parent: parent ? {
-            url: transformRemote(parent.git_url),
-            fullName: parent.full_name
-          } : undefined
-        }
-    },
-  }
+				return {
+					name,
+					isPrivate,
+					isFork,
+					owner: { name: ownerMetaData.name || undefined, email: ownerMetaData.email || undefined},
+					parent: parent ? {
+						url: transformRemote(parent.git_url),
+						fullName: parent.full_name
+					} : undefined
+				}
+		},
+	}
 }
