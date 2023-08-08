@@ -42,7 +42,7 @@ export async function createInlang(args: {
 			if (!conf) return
 
 			loadModules({ config: conf, nodeishFs: args.nodeishFs, _import: args._import }).then((modules) => {
-				setModules(modules) // TODO: do we need a signal for this?
+				setModules(modules) // TODO: do we need a signal for this? Or just store modules.data.meta
 				// TODO: what to do with errors here?
 				setPlugins(modules.data.plugins.data)
 				setLintRules(modules.data.lintRules.data)
@@ -77,8 +77,8 @@ export async function createInlang(args: {
 			return lintReportsInitialized
 		}
 
-		const [lintReports, setLintReports] = createSignal<LintReport[]>([])
-		const [lintExceptions, setLintExceptions] = createSignal<LintException[]>([])
+		const [lintReports, setLintReports] = createSignal<LintReport[]>()
+		const [lintExceptions, setLintExceptions] = createSignal<LintException[]>()
 		createEffect(() => {
 			const msgs = messages()
 			if (!msgs || !lintInitialized()) return
@@ -101,28 +101,36 @@ export async function createInlang(args: {
 		const query = createQuery(messages() || [])
 
 		return {
-			module: modules()!.data.module,
+			module: modules()!.data.module, // TODO: shouldn't this also be reactive?
 			config: {
 				get: config as () => InlangConfig,
 				set: setConfig,
 			},
 			lint: {
-				// init: initLint, // TODO: move init command here
+				init: initLint,
 				rules: {
 					get: lintRules,
 				},
 				reports: {
-					get: lintReports,
-					init: initLint,
+					get: () => {
+						const reports = lintReports()
+						// TODO: improve error
+						if (!reports) throw new Error('lint not initialized yet')
+						return reports
+					},
 				},
 				exceptions: {
-					get: lintExceptions,
-					init: initLint,
+					get: () => {
+						const exceptions = lintExceptions()
+						// TODO: improve error
+						if (!exceptions) throw new Error('lint not initialized yet')
+						return exceptions
+					},
 				},
 			},
 			plugins: plugins() as ResolvedPlugins, // TODO: shouldn't this also be reactive?
 			messages: {
-				// init, // TODO: expose load messages
+				// init, // TODO: expose load messages to app (also save)
 				query,
 			},
 		} satisfies InlangInstance
@@ -153,6 +161,7 @@ const loadConfig = async (args: {
 	return Value.Cast(InlangConfig, parsedConfig)
 }
 
+// TODO: throw if errors occured?
 const loadModules = async (args: {
 	config: InlangConfig
 	nodeishFs: NodeishFilesystemSubset
