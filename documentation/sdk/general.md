@@ -2,12 +2,12 @@
 title: SDK Overview and Setup
 shortTitle: Overview
 href: /documentation/sdk/overview
-description: inlang is not framework specific. It can be used with any framework such as React, Vue, Svelte, Next.js, etc.
+description: inlang is not framework specific. It can be used with any framework, such as React, Vue, Svelte, Next.js, etc.
 ---
 
 # {% $frontmatter.shortTitle %} SDKs
 
-inlang is not Framework specific. It can be used with any framework. To translate with the [editor](/editor) or use the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension) only the `inlang.config.js` file is needed.
+inlang is not Framework specific. It can be used with any framework. To translate with the [editor](/editor) or use the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension), only the `inlang.config.js` file is needed.
 
 To get started with globalizing your app, you just need to choose an SDK from the options below and follow their setup guide. Once that's done, you can jump right into the [Quickstart](/documentation/quick-start). Plus, if you go with the SvelteKit SDK, you won't have to worry about any extra inlang setup!
 
@@ -50,9 +50,9 @@ Nothing that fits your needs? Check out [i18n libraries that are supported via p
 ## What benefits does the SDK provide?
 
 - easy setup in a few simple step
-- fully configurable depending on your projects needs
+- fully configurable depending on your project's needs
 - fully integrated with your Framework (compiler-based to avoid a heavy runtime)
-- automatic language specific routing (e.g. `/en/site`, `/de/site`)
+- automatic language-specific routing (e.g., `/en/site`, `/de/site`)
 - faster page loads (resource splitting per route) [coming soon]
 - automatic setup for inlang editor and VS Code extension
 
@@ -62,6 +62,6 @@ inlang's SDK works the same in each environment it runs. Take a look at the [Usa
 
 Inlang also provides custom solutions that are built specifically for certain Frameworks.
 
-#### Your favorite frameworks is missing?
+#### Your favorite frameworks are missing?
 
-[Reach out to us](https://github.com/inlang/inlang/discussions) and we develop an SDK for your favorite framework.
+[Reach out to us](https://github.com/inlang/inlang/discussions), and we develop an SDK for your favorite framework.
