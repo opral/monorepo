@@ -16,11 +16,15 @@ export type InlangInstance = {
 	}
 	module: Awaited<ReturnType<ResolveModulesFunction>>["data"]["module"]
 	lint: {
+		/**
+			* Initialize lint.
+			*/
+		init: () => Promise<void>
 		rules: Reactive<"onlyGetter", Array<Pick<LintRule, "meta">>>
 		// for now, only simply array that can be improved in the future
 		// see https://github.com/inlang/inlang/issues/1098
-		reports: ReactiveAsync<"onlyGetter", LintReport[]>
-		exceptions: ReactiveAsync<"onlyGetter", LintException[]>
+		reports: Reactive<"onlyGetter", LintReport[]>
+		exceptions: Reactive<"onlyGetter", LintException[]>
 	}
 	messages: {
 		query: MessageQueryApi
@@ -42,10 +46,6 @@ type Reactive<WithSetter extends "onlyGetter" | "withSetter", T> = {
  * @throws If the value is not yet initialized.
  */
 type ReactiveAsync<WithSetter extends "onlyGetter" | "withSetter", T> = {
-	/**
-	 * Initialize the getter.
-	 */
-	init: () => Promise<void>
 	/**
 	 * @throws If the value is not yet initialized.
 	 */
