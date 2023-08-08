@@ -22,12 +22,10 @@ export async function createInlang(args: {
 	_import?: ImportFunction
 }): Promise<InlangInstance> {
 	return createRoot(async () => {
-		// just for testing // TODO: remove
-		if (!args.nodeishFs) return {} as any
-
 		const [initialized, markInitAsComplete] = createAwaitable()
 
 		// -- config ------------------------------------------------------------
+
 		const [config, setConfig] = createSignal<InlangConfig>()
 		createEffect(() => {
 			loadConfig({ configPath: args.configPath, nodeishFs: args.nodeishFs }).then(setConfig)
@@ -37,21 +35,18 @@ export async function createInlang(args: {
 		// -- modules -----------------------------------------------------------
 
 		const [modules, setModules] = createSignal<Awaited<ReturnType<ResolveModulesFunction>>>()
+		const [plugins, setPlugins] = createSignal<ResolvedPlugins>() // TODO: is `ResolvedPlugins` the correct naming?
+		const [lintRules, setLintRules] = createSignal<Pick<LintRule, 'meta'>[]>([])
 		createEffect(() => {
 			const conf = config()
 			if (!conf) return
 
-			loadModules({ config: conf, nodeishFs: args.nodeishFs, _import: args._import }).then(setModules)
-		})
-
-		const [plugins, setPlugins] = createSignal<ResolvedPlugins>() // TODO: is `ResolvedPlugins` the correct naming?
-		const [lintRules, setLintRules] = createSignal<Pick<LintRule, 'meta'>[]>([])
-		createEffect(() => {
-			const mods = modules()
-			if (!mods) return
-
-			setPlugins(mods.data.plugins.data)
-			setLintRules(mods.data.lintRules.data)
+			loadModules({ config: conf, nodeishFs: args.nodeishFs, _import: args._import }).then((modules) => {
+				setModules(modules) // TODO: do we need a signal for this?
+				// TODO: what to do with errors here?
+				setPlugins(modules.data.plugins.data)
+				setLintRules(modules.data.lintRules.data)
+			})
 		})
 
 		// -- messages ----------------------------------------------------------
@@ -60,8 +55,10 @@ export async function createInlang(args: {
 		createEffect(() => {
 			const plugs = plugins()
 			if (!plugs) return
+
 			// TODO: should createInlang already load messages ? I don't think so
-			makeTrulyAsync(plugs.loadMessages({ languageTags: ["en"], }))  // TODO: why 'en' and why only 'en'?
+			// TODO: call effect only with the same params as the app initialized it with
+			makeTrulyAsync(plugs.loadMessages({ languageTags: ["en"] }))  // TODO: why 'en' and why only 'en'?
 				.then((messages) => {
 					setMessages(messages)
 
@@ -73,10 +70,10 @@ export async function createInlang(args: {
 
 		// -- lint --------------------------------------------------------------
 
-		const [processLints, setProcessLints] = createSignal(false)
+		const [lintInitialized, setLintInitialized] = createSignal(false)
 		const [lintReportsInitialized, markLintReportsAsInitialized] = createAwaitable()
 		const initLint = () => {
-			setProcessLints(true)
+			setLintInitialized(true)
 			return lintReportsInitialized
 		}
 
@@ -84,13 +81,14 @@ export async function createInlang(args: {
 		const [lintExceptions, setLintExceptions] = createSignal<LintException[]>([])
 		createEffect(() => {
 			const msgs = messages()
-			if (!msgs || !processLints()) return
+			if (!msgs || !lintInitialized()) return
 
 			// TODO: only lint changed messages and update arrays selectively
 			lintMessages({ config: config() as InlangConfig, messages: msgs, query, rules: lintRules() as LintRule[] })
 				.then((report) => {
 					setLintReports(report.data)
-					setLintExceptions(report.errors)
+					setLintExceptions(report.errors) // TODO: errors or exceptions as name?
+
 					markLintReportsAsInitialized()
 				})
 		})
@@ -103,17 +101,13 @@ export async function createInlang(args: {
 		const query = createQuery(messages() || [])
 
 		return {
-			module: {
-				meta: {
-					plugins: {},
-					lintRules: {},
-				},
-			},
+			module: modules()!.data.module,
 			config: {
 				get: config as () => InlangConfig,
 				set: setConfig,
 			},
 			lint: {
+				// init: initLint, // TODO: move init command here
 				rules: {
 					get: lintRules,
 				},
@@ -128,6 +122,7 @@ export async function createInlang(args: {
 			},
 			plugins: plugins() as ResolvedPlugins, // TODO: shouldn't this also be reactive?
 			messages: {
+				// init, // TODO: expose load messages
 				query,
 			},
 		} satisfies InlangInstance
