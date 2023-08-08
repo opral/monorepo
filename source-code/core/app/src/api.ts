@@ -16,7 +16,7 @@ export type InlangInstance = {
 	}
 	module: Awaited<ReturnType<ResolveModulesFunction>>["data"]["module"]
 	lint: {
-		rules: Reactive<"onlyGetter", Array<Pick<LintRule, "meta"> & { module: string }>>
+		rules: Reactive<"onlyGetter", Array<Pick<LintRule, "meta">>>
 		// for now, only simply array that can be improved in the future
 		// see https://github.com/inlang/inlang/issues/1098
 		reports: ReactiveAsync<"onlyGetter", LintReport[]>
