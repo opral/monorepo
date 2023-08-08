@@ -4,3 +4,10 @@ export class InvalidConfigError extends Error {
 		this.name = "InvalidConfigError"
 	}
 }
+
+export class ConfigPathNotFoundError extends Error {
+	constructor(message: string, options: ErrorOptions) {
+		super(message, options)
+		this.name = "ConfigPathNotFoundError"
+	}
+}

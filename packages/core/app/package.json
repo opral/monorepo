@@ -30,14 +30,14 @@
 		"node": ">=16.15.0"
 	},
 	"dependencies": {
-		"@inlang-git/fs": "*",
 		"@inlang/config": "*",
+		"@inlang/language-tag": "*",
+		"@inlang/lint": "*",
 		"@inlang/messages": "*",
 		"@inlang/module": "*",
 		"@inlang/plugin": "*",
-		"@inlang/lint": "*",
-		"@inlang/language-tag": "*",
 		"@inlang/result": "*",
+		"@solid-primitives/map": "^0.4.7",
 		"deepmerge-ts": "^5.1.0",
 		"ts-dedent": "^2.2.0"
 	},
