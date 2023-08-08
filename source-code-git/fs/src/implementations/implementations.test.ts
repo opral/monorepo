@@ -1,6 +1,6 @@
 import { test, expect, afterAll, describe } from "vitest"
 import type { NodeishFilesystem } from "../NodeishFilesystemApi.js"
-import { createMemoryFs } from "./memoryFs.js"
+import { createNodeishMemoryFs } from "./memoryFs.js"
 
 describe("node fs", async () => {
 	const fs = await import("node:fs/promises")
@@ -13,7 +13,7 @@ describe("node fs", async () => {
 })
 
 describe("memory fs", async () => {
-	const fs = createMemoryFs()
+	const fs = createNodeishMemoryFs()
 
 	await runFsTestSuite("memory fs", "", fs)
 })

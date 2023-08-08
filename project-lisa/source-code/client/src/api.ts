@@ -1,6 +1,6 @@
 import _git from "isomorphic-git"
 import _http from "isomorphic-git/http/web/index.js"
-import { createMemoryFs } from "@inlang-git/fs"
+import { createNodeishMemoryFs } from "@inlang-git/fs"
 import type { NodeishFilesystem } from "@inlang-git/fs"
 import { github } from "./github.js"
 import { wrap, transformRemote } from "./helpers.js"
@@ -26,15 +26,15 @@ export const http = _http
 
 export type Repository = {
 	fs: NodeishFilesystem
-	commit: (args: { dir: string, author: any, message: string}) => any
-	push: (args: { dir: string }) => any
+	commit: (args: { dir: string, author: any, message: string}) => Promise<Awaited<ReturnType<typeof raw.commit>> | undefined>
+	push: (args: { dir: string }) => Promise<Awaited<ReturnType<typeof raw.push>> | undefined>
 	pull: (args: { dir: string, author: any, fastForward: boolean, singleBranch: true }) => any
-  add: (args: { dir: string, filepath: string }) => any
+  add: (args: { dir: string, filepath: string }) =>  Promise<Awaited<ReturnType<typeof raw.add>>>
 	listRemotes: () => Promise<Awaited<ReturnType<typeof raw.listRemotes>> | undefined>
-	log: (args: { dir: string, since: any}) => unknown
-  statusMatrix: (args: { dir:string, filter: any }) => any
+	log: (args: { dir: string, since: any}) =>  Promise<Awaited<ReturnType<typeof raw.log>>>
+  statusMatrix: (args: { dir:string, filter: any }) => Promise<Awaited<ReturnType<typeof raw.statusMatrix>>>
   mergeUpstream: (args: { branch: string }) => ReturnType<typeof github.request<"POST /repos/{owner}/{repo}/merge-upstream">>
-  isCollaborator: (args: { username: string }) => boolean
+  isCollaborator: (args: { username: string }) => Promise<boolean>
   getOrigin: () => Promise<string>
   getCurrentBranch: () => Promise<string | undefined>
   getMeta: () => Promise<{
@@ -55,7 +55,7 @@ export type Repository = {
 }
 
 export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesystem, path?: string, corsProxy?: string, auth?: unknown }): Repository {
-  const rawFs = fs ? fs : createMemoryFs()
+  const rawFs = fs ? fs : createNodeishMemoryFs()
 
   // parse url in the format of github.com/inlang/example and split it to host, owner and repo
   const [host, owner, repoName] = [...url.split("/")]
