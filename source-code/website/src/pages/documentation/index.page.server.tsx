@@ -2,7 +2,7 @@ import type { OnBeforeRender } from "@src/renderer/types.js"
 import type { PageProps } from "./index.page.jsx"
 import { tableOfContents, FrontmatterSchema } from "../../../../../documentation/tableOfContents.js"
 import { parseMarkdown } from "@src/services/markdown/index.js"
-import { RenderErrorPage } from "vite-plugin-ssr/server"
+import { RenderErrorPage } from "vite-plugin-ssr/RenderErrorPage"
 
 /**
  * the table of contents without the html for each document
