@@ -13,7 +13,7 @@ import { getSupportedLibrary, SupportedLibrary } from "../../utilities/getSuppor
 
 export const init = new Command()
 	.command("init")
-	.description("Initialize the inlang.config.js file.")
+	.description("Initialize the inlang.config.json file.")
 	.action(initCommandAction)
 
 /**
@@ -26,7 +26,7 @@ export const init = new Command()
 export async function initCommandAction() {
 	// Check if config file already exists
 	const packageJsonPath = "./package.json"
-	const inlangConfigPath = "./inlang.config.js"
+	const inlangConfigPath = "./inlang.config.json"
 	const rootDir = "./"
 
 	if (fs.existsSync(inlangConfigPath)) {
@@ -92,7 +92,7 @@ export async function initCommandAction() {
 		} else {
 			log.info(`🗂️  Found language folder path: ${italic(pathPattern)}`)
 			log.info(
-				`🗂️  Please adjust the ${`pathPattern`} in the inlang.config.js manually if it is not parsed correctly.`,
+				`🗂️  Please adjust the ${`pathPattern`} in the inlang.config.json manually if it is not parsed correctly.`,
 			)
 		}
 	}
@@ -112,5 +112,5 @@ export async function initCommandAction() {
 		return
 	}
 
-	log.success(`🎉 inlang.config.js file created successfully.`)
+	log.success(`🎉 inlang.config.json file created successfully.`)
 }

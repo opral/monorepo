@@ -7,7 +7,7 @@ import { getLatestVersion } from "../../utilities/getLatestVersion.js"
 import prompts from "prompts"
 import { bold, italic } from "../../utilities/format.js"
 
-const configFile = "inlang.config.js"
+const configFile = "inlang.config.json"
 
 export const update = new Command()
 	.command("update")

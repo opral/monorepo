@@ -22,7 +22,7 @@ async function lintCommandAction() {
 
 		if (inlang.meta.lintRules().length === 0) {
 			log.error(
-				`🚫 For this command to work, you need lint rules configured in your inlang.config.js – for example, the ${bold(
+				`🚫 For this command to work, you need lint rules configured in your inlang.config.json – for example, the ${bold(
 					"@inlang/plugin-standard-lint-rule",
 				)} plugin: https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules. ${italic(
 					"Learn more about lints here:",
