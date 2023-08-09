@@ -12,8 +12,12 @@ async function test() {
     // Passed to --extensionTestsPath
     const extensionTestsPath = path.resolve(__dirname, './suite.cjs');
 
+    // If the first argument is a path to a file/folder/workspace, the launched VS Code instance
+    // will open it.
+    const launchArgs = [path.resolve(__dirname, '../../starters/inlang-nextjs')];
+
     // Download VS Code, unzip it and run the integration test
-    await runTests({ extensionDevelopmentPath, extensionTestsPath });
+    await runTests({ extensionDevelopmentPath, extensionTestsPath, launchArgs });
   } catch (err) {
     console.error(err);
     console.error('Failed to run tests');
