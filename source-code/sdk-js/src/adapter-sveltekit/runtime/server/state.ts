@@ -28,7 +28,7 @@ export const initState = async (module: InlangConfigModule) => {
 		config = await initConfig(module)
 	}
 
-	await reloadResources()
+	await reloadMessages()
 
 	return {
 		sourceLanguageTag: config.sourceLanguageTag,
@@ -38,14 +38,14 @@ export const initState = async (module: InlangConfigModule) => {
 
 // ------------------------------------------------------------------------------------------------
 
-let _resources: Message[] = []
+let _messages: Message[] = []
 
 // TODO: fix resources if needed (add missing Keys, etc.)
-export const reloadResources = async () =>
-	(_resources = (await config?.readResources({ config })) || [])
+export const reloadMessages = async () =>
+	(_messages = (await config?.readResources({ config })) || [])
 
-export const getResource = (languageTag: LanguageTag) =>
-	_resources.find(({ languageTag: { name } }) => name === languageTag)
+export const loadMessages = (languageTag: LanguageTag) =>
+	_messages // TODO: filter
 
 // ------------------------------------------------------------------------------------------------
 

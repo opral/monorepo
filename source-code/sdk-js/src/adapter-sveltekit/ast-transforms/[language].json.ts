@@ -33,7 +33,7 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 		index,
 		dedent`
 			export const GET = async ({ params: { language } }) => {
-				await reloadResources()
+				await reloadMessages()
 				return json(getResource(language) || null)
 			}
 		`,
@@ -55,7 +55,7 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 		)
 	}
 
-	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/server", "getResource", "reloadResources")
+	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/server", "getResource", "reloadMessages")
 	addImport(sourceFile, "@sveltejs/kit", "json")
 
 	return transformServerRequestJs(filePath, config, nodeToCode(sourceFile))

@@ -1,5 +1,5 @@
 import { parse } from "svelte/compiler"
-import type { Ast } from "./../../../../node_modules/svelte/types/compiler/interfaces.js"
+import type { Ast } from "./../../../../../../node_modules/svelte/types/compiler/interfaces.js"
 
 export const markupToAst = (markup: string) => parse(markup) as any as Ast
 

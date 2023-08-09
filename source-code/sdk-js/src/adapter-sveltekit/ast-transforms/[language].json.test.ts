@@ -22,9 +22,9 @@ describe("transformLanguageJson", () => {
 
 		expect(transformed).toMatchInlineSnapshot(`
 			"import { json } from '@sveltejs/kit';
-			import { getResource, reloadResources } from '@inlang/sdk-js/adapter-sveltekit/server';
+			import { getResource, reloadMessages } from '@inlang/sdk-js/adapter-sveltekit/server';
 			export const GET = async ({ params: { language } }) => {
-			    await reloadResources();
+			    await reloadMessages();
 			    return json(getResource(language) || null);
 			};"
 		`)
@@ -40,9 +40,9 @@ describe("transformLanguageJson", () => {
 		)
 		expect(transformed).toMatchInlineSnapshot(`
 			"import { json } from '@sveltejs/kit';
-			import { getResource, reloadResources } from '@inlang/sdk-js/adapter-sveltekit/server';
+			import { getResource, reloadMessages } from '@inlang/sdk-js/adapter-sveltekit/server';
 			export const GET = async ({ params: { language } }) => {
-			    await reloadResources();
+			    await reloadMessages();
 			    return json(getResource(language) || null);
 			};
 			const someFunction = console.info(123);"
@@ -66,9 +66,9 @@ describe("transformLanguageJson", () => {
 				    const { languageTags } = await initState(await import('../../../../inlang.config.js'));
 				    return languageTags.map(languageTag => ({ language: languageTag }));
 				};
-				import { initState, getResource, reloadResources } from '@inlang/sdk-js/adapter-sveltekit/server';
+				import { initState, getResource, reloadMessages } from '@inlang/sdk-js/adapter-sveltekit/server';
 				export const GET = async ({ params: { language } }) => {
-				    await reloadResources();
+				    await reloadMessages();
 				    return json(getResource(language) || null);
 				};"
 			`)
@@ -87,9 +87,9 @@ describe("transformLanguageJson", () => {
 
 			expect(transformed).toMatchInlineSnapshot(`
 				"import { json } from '@sveltejs/kit';
-				import { getResource, reloadResources } from '@inlang/sdk-js/adapter-sveltekit/server';
+				import { getResource, reloadMessages } from '@inlang/sdk-js/adapter-sveltekit/server';
 				export const GET = async ({ params: { language } }) => {
-				    await reloadResources();
+				    await reloadMessages();
 				    return json(getResource(language) || null);
 				};
 				export const prerender = true;"
@@ -119,9 +119,9 @@ describe("transformLanguageJson", () => {
 
 		expect(transformed).toMatchInlineSnapshot(`
 			"import { json } from '@sveltejs/kit';
-			import { getResource, reloadResources, initRequestHandlerWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+			import { getResource, reloadMessages, initRequestHandlerWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
 			export const GET = initRequestHandlerWrapper().use(async ({ params: { language } }, { languages }) => {
-			    await reloadResources();
+			    await reloadMessages();
 			    return json(getResource(language) || null);
 			});
 			export const POST = initRequestHandlerWrapper().use(async function POST(_, { languages }) {
