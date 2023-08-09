@@ -9,11 +9,11 @@ import {
 	getRuntimePromiseFromEvent,
 	wait,
 } from "./utils.js"
-import type { LanguageTag } from "@inlang/core/languageTag"
+import type { LanguageTag, Message } from "@inlang/app"
 
 // ------------------------------------------------------------------------------------------------
 
-const cache: Record<LanguageTag, Resource | undefined> = {}
+const cache: Record<LanguageTag, Message[] | undefined> = {}
 
 const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, any>>(
 	event: Parameters<Load>[0],
@@ -49,9 +49,9 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 
 	const runtime = await initSvelteKitClientRuntime({
 		fetch: event.fetch,
-		language,
-		referenceLanguage,
-		languages,
+		sourceLanguageTag,
+		languageTags,
+		languageTag,
 		cache,
 	})
 

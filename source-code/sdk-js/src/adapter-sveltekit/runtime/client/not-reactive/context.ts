@@ -1,19 +1,17 @@
-import { replaceLanguageInUrl } from "../../shared/utils.js"
+import { inlangSymbol, replaceLanguageInUrl } from "../../shared/utils.js"
 import type { SvelteKitClientRuntime } from "../runtime.js"
 import { goto } from "$app/navigation"
 import { page } from "$app/stores"
 import { get } from "svelte/store"
 import type * as Runtime from "../../../../runtime/index.js"
-import {
-	getRuntimeFromContext as getRuntimeFromContextShared,
-	addRuntimeToContext as addRuntimeToContextShared,
-} from "../shared/context.js"
+import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/context.js"
 import type { RelativeUrl } from "../../../../types.js"
-import type { LanguageTag } from "@inlang/core/languageTag"
+import type { LanguageTag as LanguageTagBase } from "@inlang/app"
 import { logDeprecation } from "../../../../utils.js"
+import { setContext } from "svelte"
 
 type RuntimeContext<
-	LanguageTag extends LanguageTag = LanguageTag,
+	LanguageTag extends LanguageTagBase = LanguageTagBase,
 	InlangFunction extends Runtime.InlangFunction = Runtime.InlangFunction,
 > = {
 	sourceLanguageTag: LanguageTag
@@ -43,7 +41,7 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 		languages,
 	} = runtime
 
-	const changeLanguageTag = async (languageTag: LanguageTag) => {
+	const changeLanguageTag = async (languageTag: LanguageTagBase) => {
 		if (runtime.languageTag === languageTag) return
 
 		return goto(replaceLanguageInUrl(get(page).url, languageTag), { invalidateAll: true })
@@ -56,7 +54,7 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 		i,
 		loadResource,
 		changeLanguageTag,
-		route: route.bind(undefined, languageTag as LanguageTag),
+		route: route.bind(undefined, languageTag as LanguageTagBase),
 		referenceLanguage,
 		language: language!,
 		languages,
@@ -67,7 +65,7 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	})
 }
 
-const route = (languageTag: LanguageTag, href: RelativeUrl) => {
+const route = (languageTag: LanguageTagBase, href: RelativeUrl) => {
 	if (!href.startsWith("/")) return href as RelativeUrl
 
 	const url = `/${languageTag}${href}`

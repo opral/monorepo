@@ -1,22 +1,20 @@
 // workaround for https://github.com/inlang/inlang/issues/1091
-import type * as Ast from "@inlang/core/ast"
 import { get } from "svelte/store"
 import type { RelativeUrl } from "../../../../index.js"
 import type { SvelteKitClientRuntime } from "../index.js"
-import {
-	getRuntimeFromContext as getRuntimeFromContextShared,
-	addRuntimeToContext as addRuntimeToContextShared,
-} from "../shared/context.js"
+import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/context.js"
 import type * as Runtime from "../../../../runtime/index.js"
 import { goto } from "$app/navigation"
 import { page } from "$app/stores"
-import type { LanguageTag } from "@inlang/core/languageTag"
+import type { LanguageTag as LanguageTagBase } from "@inlang/app"
 import { logDeprecation } from "../../../../utils.js"
+import { inlangSymbol } from '../../shared/utils.js'
+import { setContext } from "svelte"
 
 // ------------------------------------------------------------------------------------------------
 
 type RuntimeContext<
-	LanguageTag extends LanguageTag = LanguageTag,
+	LanguageTag extends LanguageTagBase = LanguageTagBase,
 	InlangFunction extends Runtime.InlangFunction = Runtime.InlangFunction,
 > = {
 	sourceLanguageTag: LanguageTag
@@ -46,7 +44,7 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 		languages,
 	} = runtime
 
-	const changeLanguageTag = async (languageTag: LanguageTag) => {
+	const changeLanguageTag = async (languageTag: LanguageTagBase) => {
 		if (runtime.languageTag === languageTag) return
 
 		localStorage.setItem("languageTag", languageTag)
@@ -72,7 +70,6 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	})
 }
 
-// TODO: output warning during dev that calling this does not make sense
 const route = (href: RelativeUrl) => {
 	if (import.meta.env.DEV) {
 		console.info(

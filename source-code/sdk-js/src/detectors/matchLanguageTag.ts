@@ -1,4 +1,4 @@
-import type { LanguageTag } from "@inlang/core/languageTag"
+import type { LanguageTag } from "@inlang/app"
 import type { Detector } from "./types.js"
 
 /**

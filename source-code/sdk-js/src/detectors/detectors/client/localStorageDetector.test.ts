@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vitest"
 import { initLocalStorageDetector, localStorageDetector } from "./localStorageDetector.js"
-import type { LanguageTag } from "@inlang/core/languageTag"
+import type { LanguageTag } from "@inlang/app"
 
 const languageTag = "de" satisfies LanguageTag
 

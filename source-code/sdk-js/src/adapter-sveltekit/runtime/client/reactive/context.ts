@@ -1,18 +1,17 @@
 import { writable, type Readable } from "svelte/store"
 import type { RelativeUrl } from "../../../../index.js"
 import type { SvelteKitClientRuntime } from "../index.js"
-import {
-	getRuntimeFromContext as getRuntimeFromContextShared,
-	addRuntimeToContext as addRuntimeToContextShared,
-} from "../shared/context.js"
+import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/context.js"
 import type * as Runtime from "../../../../runtime/index.js"
-import type { LanguageTag } from "@inlang/core/languageTag"
+import type { LanguageTag as LanguageTagBase } from "@inlang/app"
 import { logDeprecation } from "../../../../utils.js"
+import { inlangSymbol } from '../../shared/utils.js'
+import { setContext } from "svelte"
 
 // ------------------------------------------------------------------------------------------------
 
 type RuntimeContext<
-	LanguageTag extends LanguageTag = LanguageTag,
+	LanguageTag extends LanguageTagBase = LanguageTagBase,
 	InlangFunction extends Runtime.InlangFunction = Runtime.InlangFunction,
 > = {
 	languageTag: Readable<LanguageTag>
@@ -31,10 +30,10 @@ type RuntimeContext<
 export const getRuntimeFromContext = () => getRuntimeFromContextShared() as RuntimeContext
 
 export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
-	const _language = writable(runtime.languageTag as LanguageTag)
+	const _language = writable(runtime.languageTag as LanguageTagBase)
 	const _i = writable(runtime.i)
 
-	const changeLanguageTag = async (languageTag: LanguageTag) => {
+	const changeLanguageTag = async (languageTag: LanguageTagBase) => {
 		if (runtime.languageTag === languageTag) return
 
 		await runtime.loadResource(languageTag)
