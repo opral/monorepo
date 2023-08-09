@@ -72,8 +72,8 @@ export const InlangConfig = Type.Object({
 	modules: Type.Array(Type.String()),
 	settings: Type.Optional(
 		Type.Object({
-			plugins: Type.Record(Type.String(), PluginSettings),
-			lintRules: Type.Record(Type.String(), LintRuleSettings),
+			plugins: Type.Optional(Type.Record(Type.String(), PluginSettings)),
+			lintRules: Type.Optional(Type.Record(Type.String(), LintRuleSettings)),
 		}),
 	),
 })

@@ -128,7 +128,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			result.data.loadMessages = (_args) =>
 				plugin.loadMessages!({
 					..._args,
-					options: args.pluginSettings[plugin.meta.id]?.options,
+					options: args.pluginSettings[plugin.meta.id]?.options || {},
 					nodeishFs: args.nodeishFs,
 				})
 		}
@@ -137,7 +137,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			result.data.saveMessages = (_args) =>
 				plugin.saveMessages!({
 					..._args,
-					options: args.pluginSettings[plugin.meta.id]?.options,
+					options: args.pluginSettings[plugin.meta.id]?.options || {},
 					nodeishFs: args.nodeishFs,
 				})
 		}
@@ -145,14 +145,14 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 		if (typeof plugin.detectedLanguageTags === "function") {
 			result.data.detectedLanguageTags = () =>
 				plugin.detectedLanguageTags!({
-					options: args.pluginSettings[plugin.meta.id]?.options,
+					options: args.pluginSettings[plugin.meta.id]?.options || {},
 					nodeishFs: args.nodeishFs,
 				})
 		}
 
 		if (typeof plugin.addAppSpecificApi === "function") {
 			const appSpecificApi = plugin.addAppSpecificApi({
-				options: args.pluginSettings[plugin.meta.id]?.options,
+				options: args.pluginSettings[plugin.meta.id]?.options || {},
 			})
 			result.data.appSpecificApi = deepmerge(result.data.appSpecificApi, appSpecificApi)
 		}

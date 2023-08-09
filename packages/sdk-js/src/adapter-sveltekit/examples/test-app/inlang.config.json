@@ -1,0 +1,16 @@
+{
+	"sourceLanguageTag": "en",
+	"languageTags": [],
+	"modules": [
+		"../../../../../plugins/json/dist/index.js"
+	],
+	"settings": {
+		"plugins": {
+			"inlang.plugin-json": {
+				"options": {
+					"pathPattern": "./languages/{{languageTag}}.json"
+				}
+			}
+		}
+	}
+}
