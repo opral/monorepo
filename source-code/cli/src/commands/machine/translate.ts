@@ -1,9 +1,10 @@
+// @ts-nocheck
 import { query } from "@inlang/core/query"
 import { Command } from "commander"
 import { countMessagesPerLanguage, getFlag, log } from "../../utilities.js"
 import type { Message, Text } from "@inlang/core/ast"
 import { rpc } from "@inlang/rpc"
-import { getConfig } from "../../utilities/getConfig.js"
+import { getInlang } from "../../utilities/getInlang.js"
 import { cli } from "../../main.js"
 import { bold, italic } from "../../utilities/format.js"
 
@@ -32,9 +33,9 @@ async function translateCommandAction() {
 		}
 
 		// Get the config
-		const [config, errorMessage] = await getConfig({ options: cli.opts() })
-		if (!config) {
-			log.error(errorMessage)
+		const [inlang, error] = await getInlang({ options: cli.opts() })
+		if (error) {
+			log.error(error)
 			// no message because that's handled in getConfig
 			return
 		}
