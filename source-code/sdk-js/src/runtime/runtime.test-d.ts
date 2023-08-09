@@ -1,4 +1,3 @@
-import type { Resource } from "@inlang/core/ast"
 import { expectType } from "tsd"
 import { initRuntime, type RuntimeContext } from "./runtime.js"
 import type { Message } from '@inlang/app'

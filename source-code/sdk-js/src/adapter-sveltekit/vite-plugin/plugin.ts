@@ -48,6 +48,7 @@ export const plugin = () => {
 					export const sourceLanguageTag = ${JSON.stringify(config.inlang.sourceLanguageTag)}
 					export const languageTags = ${JSON.stringify(config.inlang.languageTags)}
 					export const resources = ${JSON.stringify(
+						// @ts-ignore
 						await config.inlang.readResources({ config: config.inlang }),
 					)}
 				`
