@@ -7,6 +7,7 @@ import { filePathForOutput, getFileInformation } from "./fileInformation.js"
 import { transformCode } from "../ast-transforms/index.js"
 import { InlangSdkException } from "./exceptions.js"
 import { inspect } from "node:util"
+import { initInlangApp } from './inlang-app.js'
 
 let viteServer: ViteDevServer | undefined
 
@@ -42,6 +43,7 @@ export const plugin = () => {
 		},
 
 		async load(id) {
+			const app = await initInlangApp()
 			const config = await getTransformConfig()
 			if (id === resolvedVirtualModuleId) {
 				return dedent`
@@ -58,6 +60,7 @@ export const plugin = () => {
 		},
 
 		async buildStart() {
+			const app = await initInlangApp()
 			const config = await getTransformConfig()
 
 			await assertAppTemplateIsCorrect(config)
@@ -73,6 +76,7 @@ export const plugin = () => {
 		},
 
 		async transform(code, id) {
+			const app = await initInlangApp()
 			const config = await getTransformConfig()
 			const fileInformation = getFileInformation(config, id)
 			// eslint-disable-next-line unicorn/no-null
