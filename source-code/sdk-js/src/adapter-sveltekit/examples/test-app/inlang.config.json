@@ -1,6 +1,9 @@
 {
 	"sourceLanguageTag": "en",
-	"languageTags": [],
+	"languageTags": [
+		"en",
+		"de"
+	],
 	"modules": [
 		"../../../../../plugins/json/dist/index.js"
 	],

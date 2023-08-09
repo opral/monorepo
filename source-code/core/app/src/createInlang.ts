@@ -3,7 +3,7 @@ import { ImportFunction, ResolveModulesFunction, resolveModules } from "@inlang/
 import { NodeishFilesystemSubset, InlangConfig, Message, tryCatch } from "@inlang/plugin"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
-import { InvalidConfigError } from "./errors.js"
+import { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError } from "./errors.js"
 import { LintError, LintReport, lintMessages } from "@inlang/lint"
 import { createRoot, createSignal, createEffect } from "./solid.js"
 import { ReactiveMap } from "@solid-primitives/map"
@@ -24,7 +24,7 @@ export const createInlang = async (args: {
 	_import?: ImportFunction
 }): Promise<InlangInstance> =>
 	await createRoot(async () => {
-		const [initialized, markInitAsComplete] = createAwaitable()
+		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
 
 		// -- config ------------------------------------------------------------
 
@@ -34,6 +34,7 @@ export const createInlang = async (args: {
 				.then(setConfig)
 				.catch((err) => {
 					console.error("Error in load config ", err)
+					markInitAsFailed(err)
 				})
 		})
 		// TODO: create FS watcher and update config on change
@@ -110,7 +111,9 @@ export const createInlang = async (args: {
 
 		// -- app ---------------------------------------------------------------
 
-		await initialized
+		await initialized.catch(e => {
+			throw e
+		})
 
 		// createEffect(() => {
 		// 	console.log(config())
@@ -150,10 +153,13 @@ const loadConfig = async (args: { configPath: string; nodeishFs: NodeishFilesyst
 	const { data: configFile, error: configFileError } = await tryCatch(
 		async () => await args.nodeishFs.readFile(args.configPath, { encoding: "utf-8" }),
 	)
-	if (configFileError) throw configFileError // TODO: improve error
+	if (configFileError)
+		throw new ConfigPathNotFoundError(`Could not locate config file in (${args.configPath}).`, { cause: configFileError })
 
 	const { data: parsedConfig, error: parseConfigError } = tryCatch(() => JSON.parse(configFile!))
-	if (parseConfigError) throw parseConfigError // TODO: improve error
+	if (parseConfigError) throw new ConfigSyntaxError(`The config is not a valid JSON file.`, {
+		cause: parseConfigError,
+	})
 
 	const typeErrors = [...ConfigCompiler.Errors(parsedConfig)]
 
@@ -179,10 +185,14 @@ const loadModules = async (args: {
 
 const createAwaitable = () => {
 	let resolve: () => void
+	let reject: () => void
 
-	const promise = new Promise<void>((res) => (resolve = res))
+	const promise = new Promise<void>((res, rej) => {
+		resolve = res
+		reject = rej
+	})
 
-	return [promise, resolve!] as [awaitable: Promise<void>, resolve: () => void]
+	return [promise, resolve!, reject!] as [awaitable: Promise<void>, resolve: () => void, reject: (e: unknown) => void]
 }
 
 // TODO: create global util type

@@ -5,6 +5,13 @@ export class InvalidConfigError extends Error {
 	}
 }
 
+export class ConfigSyntaxError extends Error {
+	constructor(message: string, options: ErrorOptions) {
+		super(message, options)
+		this.name = "ConfigSyntaxError"
+	}
+}
+
 export class ConfigPathNotFoundError extends Error {
 	constructor(message: string, options: ErrorOptions) {
 		super(message, options)
