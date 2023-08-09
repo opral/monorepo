@@ -1,9 +1,8 @@
-import { getLintReports, lint as _lint } from "@inlang/core/lint"
 import { Command } from "commander"
 import { cli } from "../../main.js"
 import { log } from "../../utilities.js"
 import Table from "cli-table3"
-import { getConfig } from "../../utilities/getConfig.js"
+import { getInlang } from "../../utilities/getInlang.js"
 import { bold, italic } from "../../utilities/format.js"
 
 export const lint = new Command()
@@ -15,13 +14,13 @@ export const lint = new Command()
 async function lintCommandAction() {
 	try {
 		// Get the config
-		const [config, errorMessage] = await getConfig({ options: cli.opts() })
-		if (!config) {
-			log.error(errorMessage)
+		const [inlang, error] = await getInlang({ options: cli.opts() })
+		if (error) {
+			log.error(error)
 			return
 		}
 
-		if (config.lint?.rules === undefined) {
+		if (inlang.meta.lintRules().length === 0) {
 			log.error(
 				`🚫 For this command to work, you need lint rules configured in your inlang.config.js – for example, the ${bold(
 					"@inlang/plugin-standard-lint-rule",
@@ -32,21 +31,13 @@ async function lintCommandAction() {
 			return
 		}
 
-		const resources = await config.readResources({ config })
+		// Init linting
+		inlang.lint.init()
 
-		// Get resources with lints
-		const [resourcesWithLints, errors] = await _lint({ resources, config })
-		if (errors) {
-			console.error(
-				"🚫 Lints partially failed. Please check if you have your lint rules configured correctly.",
-				errors.length && errors,
-			)
-		}
+		// Get lint reports
+		const lintReport = inlang.lint.reports()
 
-		// Get lint report
-		const lints = getLintReports(resourcesWithLints)
-
-		if (lints.length === 0) {
+		if (lintReport.length === 0) {
 			log.success("🎉 Linting successful.")
 			return
 		}
@@ -60,12 +51,12 @@ async function lintCommandAction() {
 
 		let hasError = false
 
-		for (const lint of lints) {
+		for (const lint of lintReport) {
 			if (lint.level === "error") {
 				hasError = true
-				lintTable.push(["Error", lint.id, lint.message])
-			} else if (lint.level === "warn") {
-				lintTable.push(["Warning", lint.id, lint.message])
+				lintTable.push(["Error", lint.ruleId, lint.body.en])
+			} else if (lint.level === "warning") {
+				lintTable.push(["Warning", lint.ruleId, lint.body.en])
 			}
 		}
 
@@ -78,8 +69,8 @@ async function lintCommandAction() {
 			head: ["Level", "Count"],
 		})
 
-		summaryTable.push(["Error", lints.filter((lint) => lint.level === "error").length])
-		summaryTable.push(["Warning", lints.filter((lint) => lint.level === "warn").length])
+		summaryTable.push(["Error", lintReport.filter((lint) => lint.level === "error").length])
+		summaryTable.push(["Warning", lintReport.filter((lint) => lint.level === "warning").length])
 
 		log.log("") // spacer line
 		log.log("📊 Summary")
