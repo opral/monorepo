@@ -7,11 +7,11 @@ import HardBreak from "@tiptap/extension-hard-break"
 import FloatingMenu from "@tiptap/extension-floating-menu"
 import { setTipTapMessage } from "./parse.js"
 import PlaceholderNode from "./customExtensions/placeholder.js"
-import type { Message, VariableReference } from "@inlang/app"
+import type { Variant, VariableReference } from "@inlang/app"
 
 export const getEditorConfig = (
 	ref: HTMLDivElement,
-	message: Message | undefined,
+	variant: Variant | undefined,
 	variableReferences: VariableReference[],
 ) => {
 	return {
@@ -67,6 +67,6 @@ export const getEditorConfig = (
 				spellcheck: false,
 			},
 		},
-		content: message && message.pattern.elements.length > 0 ? setTipTapMessage(message) : undefined,
+		content: variant !== undefined && variant.pattern.length > 0 ? setTipTapMessage(variant.pattern) : undefined,
 	}
 }

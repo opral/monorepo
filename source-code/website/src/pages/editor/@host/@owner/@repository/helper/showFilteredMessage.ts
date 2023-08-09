@@ -2,7 +2,7 @@ import type { Message, LanguageTag } from "@inlang/app"
 import { handleMissingMessage } from "./handleMissingMessage.js"
 
 export const showFilteredMessage = (
-	messages: Record<Message, LintedMessage | undefined>,
+	message: Message[] | undefined,
 	filteredLanguageTags: LanguageTag[],
 	textSearch: string,
 	filteredLintRules: `${string}.${string}`[],

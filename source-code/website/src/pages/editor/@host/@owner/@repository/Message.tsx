@@ -8,12 +8,13 @@ import { showFilteredMessage } from "./helper/showFilteredMessage.js"
 import IconCopy from "~icons/material-symbols/content-copy-outline"
 import copy from "clipboard-copy"
 import { showToast } from "@src/components/Toast.jsx"
+import type { Message as MessageType } from "@inlang/app"
 
-export function Messages(props: {
-	messages: Record<ast.Resource["languageTag"]["name"], LintedMessage | undefined>
+export function Message(props: {
+	message: MessageType
 }) {
 	const {
-		inlangConfig,
+		inlang,
 		sourceLanguageTag,
 		filteredLanguageTags,
 		textSearch,
@@ -21,24 +22,7 @@ export function Messages(props: {
 		filteredLintRules,
 	} = useEditorState()
 	const sourceMessage = () => {
-		return props.messages[sourceLanguageTag()!]
-	}
-
-	/**
-	 * The id of the message.
-	 *
-	 * If the reference language is not defined, the first message id is used.
-	 */
-	const id: () => ast.Message["id"]["name"] = () => {
-		if (sourceMessage()) {
-			return sourceMessage()!.id.name
-		}
-		for (const message of Object.values(props.messages)) {
-			if (message?.id.name !== undefined) {
-				return message.id.name
-			}
-		}
-		throw Error("No message id found")
+		return props.message.body[sourceLanguageTag()!]
 	}
 
 	// performance optimization to only render visible elements
@@ -64,14 +48,14 @@ export function Messages(props: {
 			// Using a <Show> would re-trigger the render of all pattern and
 			// web components. See https://github.com/inlang/inlang/pull/555
 			classList={{
-				["hidden"]:
-					showFilteredMessage(
-						props.messages,
-						filteredLanguageTags(),
-						textSearch(),
-						filteredLintRules(),
-						filteredId(),
-					).length === 0,
+				// ["hidden"]:
+				// 	showFilteredMessage(
+				// 		props.message,
+				// 		filteredLanguageTags(),
+				// 		textSearch(),
+				// 		filteredLintRules(),
+				// 		filteredId(),
+				// 	).length === 0,
 			}}
 		>
 			<div class="flex gap-2 items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 border-x border-b-0 border-surface-2">
@@ -79,7 +63,7 @@ export function Messages(props: {
 					slot="summary"
 					class="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left text-on-surface before:text-on-surface"
 				>
-					{id()}
+					{props.message.id}
 				</h3>
 				<div
 					onClick={() => {
@@ -89,7 +73,7 @@ export function Messages(props: {
 								document.location.host +
 								document.location.pathname +
 								"?id=" +
-								id(),
+								props.message.id,
 						),
 							showToast({ variant: "success", title: "Copy to clipboard", duration: 3000 })
 					}}
@@ -99,7 +83,7 @@ export function Messages(props: {
 				</div>
 			</div>
 			<div>
-				<For each={inlangConfig()?.languageTags}>
+				<For each={inlang()?.config().languageTags}>
 					{(languageTag) => {
 						return (
 							<>
@@ -112,11 +96,11 @@ export function Messages(props: {
 									}
 								>
 									<PatternEditor
-										sourceLanguageTag={inlangConfig()!.sourceLanguageTag}
+										sourceLanguageTag={inlang()?.config()?.sourceLanguageTag}
 										languageTag={languageTag}
-										id={id()}
+										id={props.message.id}
 										sourceMessage={sourceMessage()}
-										message={props.messages[languageTag]}
+										variant={props.message["body"][languageTag] ? props.message["body"][languageTag]![0] : undefined}
 									/>
 								</Show>
 							</>
