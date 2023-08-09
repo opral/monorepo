@@ -1,10 +1,10 @@
-import type { Resource } from "@inlang/core/ast"
 import type { InlangConfig, InlangConfigModule } from "@inlang/core/config"
 import type { RequestEvent } from "@sveltejs/kit"
 import { initConfig } from "../../../config/config.js"
 import { inlangSymbol } from "../shared/utils.js"
 import type { SvelteKitServerRuntime } from "./runtime.js"
-import type { LanguageTag } from "@inlang/core/languageTag"
+import type { LanguageTag } from "@inlang/app"
+import type { Message } from '@inlang/messages'
 
 let config: InlangConfig | undefined
 
@@ -38,7 +38,7 @@ export const initState = async (module: InlangConfigModule) => {
 
 // ------------------------------------------------------------------------------------------------
 
-let _resources: Resource[] = []
+let _resources: Message[] = []
 
 // TODO: fix resources if needed (add missing Keys, etc.)
 export const reloadResources = async () =>

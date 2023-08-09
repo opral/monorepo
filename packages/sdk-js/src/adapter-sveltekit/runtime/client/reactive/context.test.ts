@@ -8,6 +8,8 @@ import { createResource } from "@inlang/core/test"
 let mockedFetch: Mock
 let runtime: SvelteKitClientRuntime
 
+// TODO: refactor
+
 beforeEach(async () => {
 	vi.resetAllMocks()
 
