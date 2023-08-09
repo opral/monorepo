@@ -4,7 +4,7 @@ import { getGitRemotes } from "./repo/getGitRemotes.js"
 import { setupConfig } from "@inlang/core/config"
 import { initialize$import, type InlangEnvironment } from "@inlang/core/environment"
 import { getLintReports, lint } from "@inlang/core/lint"
-import { createMemoryFs } from "@inlang-git/fs"
+import { createNodeishMemoryFs } from "@inlang-git/fs"
 import { markup } from "./helper/markup.js"
 import { readFileSync } from "node:fs"
 import { telemetryNode, parseOrigin } from "@inlang/telemetry"
@@ -29,7 +29,7 @@ export const badge = async (url: string) => {
 	}
 
 	// initialize a new file system on each request to prevent cross request pollution
-	const fs = createMemoryFs()
+	const fs = createNodeishMemoryFs()
 	await cloneRespository(url, fs)
 
 	// Set up the environment functions

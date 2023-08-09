@@ -19,11 +19,10 @@ import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
 import { coreUsedConfigEvent, telemetryBrowser, parseOrigin } from "@inlang/telemetry"
 import type { NodeishFilesystem } from "@inlang-git/fs"
-import { createMemoryFs } from "@inlang-git/fs"
+import { createNodeishMemoryFs } from "@inlang-git/fs"
 import { http, raw } from "@inlang-git/client/raw"
 import { publicEnv } from "@inlang/env-variables"
 import {
-	create$import,
 	createQuery,
 	InlangConfig,
 	LanguageTag,
@@ -37,7 +36,6 @@ import {
 const mockData: Message[] = [
 	{
 		id: "test",
-		expressions: [],
 		selectors: [],
 		body: {
 			"en-US": [
@@ -66,7 +64,6 @@ const mockData: Message[] = [
 	},
 	{
 		id: "test2",
-		expressions: [],
 		selectors: [],
 		body: {
 			"en-US": [
@@ -164,7 +161,7 @@ type EditorStateSchema = {
 	tourStep: () => TourStepId
 	setTourStep: Setter<TourStepId>
 
-	lint: () => InlangConfig["lint"]
+	lint: () => InlangInstance["lint"]
 
 	/**
 	 * FilterLanguages show or hide the different messages.
@@ -175,8 +172,8 @@ type EditorStateSchema = {
 	/**
 	 * Filtered lint rules.
 	 */
-	filteredLintRules: () => LintRule["id"][]
-	setFilteredLintRules: Setter<LintRule["id"][]>
+	filteredLintRules: () => LintRule["meta"]["id"][]
+	setFilteredLintRules: Setter<LintRule["meta"]["id"][]>
 
 	/**
 	 * Unpushed changes in the repository.
@@ -255,7 +252,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const [fsChange, setFsChange] = createSignal(new Date())
 
 	const [doesInlangConfigExist, setDoesInlangConfigExist] = createSignal<boolean>(false)
-	const [lint, setLint] = createSignal<InlangConfig["lint"]>()
+	const [lint, setLint] = createSignal<InlangInstance["lint"]>()
 	const [sourceLanguageTag, setSourceLanguageTag] = createSignal<LanguageTag>()
 	const [languageTags, setLanguageTags] = createSignal<LanguageTag[]>([])
 	const [tourStep, setTourStep] = createSignal<TourStepId>("github-login")
@@ -280,14 +277,14 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		setSearchParams({ key: "lang", value: filteredLanguageTags() })
 	})
 
-	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["id"][]>(
+	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["meta"]["id"][]>(
 		params.getAll("lint") as `${string}.${string}`[],
 	)
 	createEffect(() => {
 		setSearchParams({ key: "lint", value: filteredLintRules() })
 	})
 
-	const [fs, setFs] = createSignal<NodeishFilesystem>(createMemoryFs())
+	const [fs, setFs] = createSignal<NodeishFilesystem>(createNodeishMemoryFs())
 
 	/**
 	 * The reference resource.
@@ -302,7 +299,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		() => {
 			// re-initialize fs on every cloneRepository call
 			// until subdirectories are supported
-			setFs(createMemoryFs())
+			setFs(createNodeishMemoryFs())
 			return {
 				fs: fs(),
 				routeParams: currentPageContext.routeParams as EditorRouteParams,
@@ -373,37 +370,38 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}
 		},
 		async () => {
-			// const config = {
-			// 	sourceLanguageTag: "en",
-			// 	languageTags: ["en", "de"],
-			// 	plugins: [
-			// 		{
-			// 			module: "../../../../../../../plugins/standard-lint-rules/dist/index.js",
-			// 			// "https://cdn.jsdelivr.net/npm/@inlang/plugin-standard-lint-rules@latest/dist/index.js",
-			// 			options: {},
-			// 		},
-			// 		{
-			// 			module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-json@latest/dist/index.js",
-			// 			options: {
-			// 				pathPattern: "./resources/{language}.json",
-			// 			},
-			// 		},
-			// 	],
-			// 	lint: {
-			// 		rules: {},
-			// 	},
-			// }
+			const config: InlangConfig = {
+				"sourceLanguageTag": "en",
+				"languageTags": ["en", "de"],
+				"modules": [
+					"../../../../../../../plugins/standard-lint-rules/dist/index.js",
+					"../../../../../../../plugins/json/dist/index.js"
+				],
+				"settings": {
+					"plugins": {
+						"json": {
+							"options": {
+								"pathPattern": "./resources/{language}.json"
+							}
+						}
+					},
+					"lintRules": {
+						"standard-lint-rules": {}
+					}
+				}
+			}
 			const inlang = createInlang({
 				configPath: "./inlang.config.json",
-				env: {
-					$import: create$import({
-						fs: fs(),
-						fetch,
-					}),
-					$fs: fs(),
-				},
+				nodeishFs: fs(),
+				_import: async () =>
+				({
+					// default: {
+					// 	plugins: [mockPlugin],
+					// 	lintRules: [mockLintRule],
+					// },
+				}),
 			})
-			const config = await inlang.config.get()
+			// const config = await (await inlang).config
 			if (config) {
 				const languagesTags = // TODO: move this into setter logic
 					config.languageTags.sort((a: any, b: any) =>
@@ -417,7 +415,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					) || []
 				// initializes the languages to all languages
 				setDoesInlangConfigExist(true)
-				setLint(config.lint)
+				setLint((await inlang).lint)
 				setSourceLanguageTag(config.sourceLanguageTag)
 				setLanguageTags(languagesTags)
 				telemetryBrowser.capture(coreUsedConfigEvent.name, coreUsedConfigEvent.properties(config))
@@ -428,7 +426,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	createEffect(() => {
 		const langs = languageTags()
-		setInlangConfig.mutate((config) => (config ? { ...config, languages: langs } : undefined))
+		// setInlangConfig.mutate((config) => (config ? { ...config, languages: langs } : undefined))
 	})
 
 	//the effect should skip tour guide steps if not needed
