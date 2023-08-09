@@ -32,14 +32,14 @@ export const badge = async (url: string) => {
 	// Set up the environment functions
 	const env: InlangEnvironment = {
 		$import: initialize$import({
-			fs: repo.fs,
+			fs: repo.nodeishFs,
 			fetch,
 		}),
-		$fs: repo.fs,
+		$fs: repo.nodeishFs,
 	}
 
 	// Get the content of the inlang.config.js file
-	const file = await repo.fs.readFile("/inlang.config.js", { encoding: "utf-8" }).catch((e) => {
+	const file = await repo.nodeishFs.readFile("/inlang.config.js", { encoding: "utf-8" }).catch((e) => {
 		if (e.code !== "ENOENT") throw e
 		throw new Error("No inlang.config.js file found in the repository.")
 	})
