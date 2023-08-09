@@ -1,37 +1,34 @@
 import * as path from 'node:path';
 import Mocha from 'mocha';
-import * as glob from '/workspaces/inlang/source-code/ide-extension/node_modules/glob/dist/cjs/src/index.js';
+import { glob } from 'glob';
 
-export function run(): Promise<void> {
+export async function run() {
   // Create the mocha test
   const mocha = new Mocha({
     ui: 'tdd'
   });
 
-  const testsRoot = path.resolve(__dirname, '..');
+  const testsRoot = path.resolve(__dirname, '.');
 
-  return new Promise((c, e) => {
-    glob('**/**.test.js', { cwd: testsRoot }, (err, files) => {
-      if (err) {
-        return e(err);
-      }
+  const tests = await glob('**/**.test.js', { cwd: testsRoot });
 
-      // Add files to the test suite
-      for (const f of files) mocha.addFile(path.resolve(testsRoot, f));
+  return new Promise<void>((resolve, reject) => {
+    for (const f of tests) {
+      mocha.addFile(path.resolve(testsRoot, f))
+    }
 
-      try {
-        // Run the mocha test
-        mocha.run(failures => {
-          if (failures > 0) {
-            e(new Error(`${failures} tests failed.`));
-          } else {
-            c();
-          }
-        });
-      } catch (err) {
-        console.error(err);
-        e(err);
-      }
-    });
-  });
+    try {
+      // Run the mocha test
+      mocha.run(failures => {
+        if (failures > 0) {
+          reject(new Error(`${failures} tests failed.`));
+        } else {
+          resolve();
+        }
+      });
+    } catch (err) {
+      console.error(err);
+      reject(err);
+    }
+  })
 }

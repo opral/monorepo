@@ -3,7 +3,11 @@
 	"image": "mcr.microsoft.com/devcontainers/javascript-node:18-bullseye",
 	"postCreateCommand": "sudo apt update && sudo apt install --no-install-recommends -y chromium",
 	"features": {
-		"ghcr.io/devcontainers/features/desktop-lite:1": {}
+		"desktop-lite": {
+			"password": "vscode",
+			"webPort": "6080",
+			"vncPort": "5901"
+		}
 	},
 	"customizations": {
 		"vscode": {
