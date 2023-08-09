@@ -1,4 +1,6 @@
-import type { InlangConfig } from "@inlang/core/config"
+import type { InlangConfig } from "@inlang/app";
+
+
 
 /**
  * Captures the config after set up.

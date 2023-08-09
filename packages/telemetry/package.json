@@ -21,7 +21,7 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/core": "*",
+		"@inlang/app": "*",
 		"@inlang/env-variables": "*",
 		"http-proxy-middleware": "^2.0.6"
 	},
