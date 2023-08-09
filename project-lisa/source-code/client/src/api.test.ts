@@ -10,7 +10,9 @@ import { open, createNodeishMemoryFs } from "./index.js"
 // -- loading a remote repository is possible
 //    - uses lisa.dev which acts as a proxy to github.com. Legacy git hosts don't support
 //      all features we need like lazy fetching, auth, etc.
-const repository = open("https://github.com/inlang/example.git", { nodeishFs: createNodeishMemoryFs() })
+const repository = open("https://github.com/inlang/example.git", {
+	nodeishFs: createNodeishMemoryFs(),
+})
 
 // -- file is lazy fetched upon first access
 let file = await repository.nodeishFs.readFile("/foo.txt", { encoding: "utf-8" })
@@ -23,8 +25,8 @@ await repository.nodeishFs.writeFile("foo.txt", file)
 // TODO: implement status api
 const status = await repository.status()
 
-if (status !== 'unmodified') {
-	await repository.commit({ author: 'tests', message: 'test changes commit'})
+if (status !== "unmodified") {
+	await repository.commit({ author: "tests", message: "test changes commit" })
 
 	// TODO testing strategy?
 	// await repository.push()

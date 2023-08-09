@@ -6,7 +6,6 @@ import { Value } from "@sinclair/typebox/value"
 import { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError } from "./errors.js"
 import { LintError, LintReport, lintMessages } from "@inlang/lint"
 import { createRoot, createSignal, createEffect } from "./solid.js"
-import { ReactiveMap } from "@solid-primitives/map"
 import { createReactiveQuery } from "./createReactiveQuery.js"
 
 const ConfigCompiler = TypeCompiler.Compile(InlangConfig)
@@ -22,14 +21,15 @@ export const createInlang = async (args: {
 	configPath: string
 	nodeishFs: NodeishFilesystemSubset
 	_import?: ImportFunction
-}): Promise<InlangInstance> =>
-	await createRoot(async () => {
+}): Promise<InlangInstance> => {
+	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
 
 		// -- config ------------------------------------------------------------
 
 		const [config, setConfig] = createSignal<InlangConfig>()
 		createEffect(() => {
+			//console.log("set config internal")
 			loadConfig({ configPath: args.configPath, nodeishFs: args.nodeishFs })
 				.then(setConfig)
 				.catch((err) => {
@@ -39,9 +39,11 @@ export const createInlang = async (args: {
 		})
 		// TODO: create FS watcher and update config on change
 
-		// console.log({ config })
-
 		// -- resolvedModules -----------------------------------------------------------
+
+		createEffect(() => {
+			console.log(config())
+		})
 
 		const [resolvedModules, setResolvedModules] =
 			createSignal<Awaited<ReturnType<ResolveModulesFunction>>>()
@@ -49,7 +51,6 @@ export const createInlang = async (args: {
 		createEffect(() => {
 			const conf = config()
 			if (!conf) return
-
 			loadModules({ config: conf, nodeishFs: args.nodeishFs, _import: args._import })
 				.then((resolvedModules) => {
 					setResolvedModules(resolvedModules)
@@ -111,7 +112,7 @@ export const createInlang = async (args: {
 
 		// -- app ---------------------------------------------------------------
 
-		await initialized.catch(e => {
+		await initialized.catch((e) => {
 			throw e
 		})
 
@@ -148,18 +149,22 @@ export const createInlang = async (args: {
 			},
 		} satisfies InlangInstance
 	})
+}
 
 const loadConfig = async (args: { configPath: string; nodeishFs: NodeishFilesystemSubset }) => {
 	const { data: configFile, error: configFileError } = await tryCatch(
 		async () => await args.nodeishFs.readFile(args.configPath, { encoding: "utf-8" }),
 	)
 	if (configFileError)
-		throw new ConfigPathNotFoundError(`Could not locate config file in (${args.configPath}).`, { cause: configFileError })
+		throw new ConfigPathNotFoundError(`Could not locate config file in (${args.configPath}).`, {
+			cause: configFileError,
+		})
 
 	const { data: parsedConfig, error: parseConfigError } = tryCatch(() => JSON.parse(configFile!))
-	if (parseConfigError) throw new ConfigSyntaxError(`The config is not a valid JSON file.`, {
-		cause: parseConfigError,
-	})
+	if (parseConfigError)
+		throw new ConfigSyntaxError(`The config is not a valid JSON file.`, {
+			cause: parseConfigError,
+		})
 
 	const typeErrors = [...ConfigCompiler.Errors(parsedConfig)]
 
@@ -192,7 +197,11 @@ const createAwaitable = () => {
 		reject = rej
 	})
 
-	return [promise, resolve!, reject!] as [awaitable: Promise<void>, resolve: () => void, reject: (e: unknown) => void]
+	return [promise, resolve!, reject!] as [
+		awaitable: Promise<void>,
+		resolve: () => void,
+		reject: (e: unknown) => void,
+	]
 }
 
 // TODO: create global util type
