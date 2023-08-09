@@ -10,7 +10,7 @@ let inlangInstance: InlangInstance | undefined = undefined
 
 export async function getInlang(args: {
 	options: OptionValues
-}): Promise<Result<InlangInstance, "No inlang.config.js file found in the repository.">> {
+}): Promise<Result<InlangInstance, "No inlang.config.json file found in the repository.">> {
 	if (inlangInstance) return [inlangInstance]
 
 	// Set up the environment functions
@@ -25,10 +25,10 @@ export async function getInlang(args: {
 	const baseDirectory = process.cwd()
 	const filePath = args.options.config
 		? resolve(baseDirectory, args.options.config)
-		: resolve(baseDirectory, "inlang.config.js")
+		: resolve(baseDirectory, "inlang.config.json")
 
 	if (!env.$fs.readFile(filePath)) {
-		return [undefined, "No inlang.config.js file found in the repository."]
+		return [undefined, "No inlang.config.json file found in the repository."]
 	}
 
 	const inlang = createInlang({
