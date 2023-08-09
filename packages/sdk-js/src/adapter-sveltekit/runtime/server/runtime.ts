@@ -1,6 +1,6 @@
 import type { LanguageTag } from "@inlang/app"
 import { initRuntimeWithLanguageInformation } from "../../../runtime/index.js"
-import { getResource } from "./index.js"
+import { loadMessages } from "./index.js"
 
 type InitSvelteKitServerRuntimeArgs = {
 	sourceLanguageTag: LanguageTag
@@ -14,7 +14,7 @@ export const initSvelteKitServerRuntime = ({
 	languageTags,
 }: InitSvelteKitServerRuntimeArgs) => {
 	const runtime = initRuntimeWithLanguageInformation({
-		loadMessages: (languageTag: LanguageTag) => getResource(languageTag),
+		loadMessages: (languageTag: LanguageTag) => loadMessages(languageTag),
 		sourceLanguageTag,
 		languageTags,
 	})

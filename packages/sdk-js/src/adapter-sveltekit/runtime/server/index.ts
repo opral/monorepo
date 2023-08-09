@@ -8,8 +8,8 @@ export {
 } from "./wrappers.js"
 export {
 	initState,
-	getResource,
-	reloadResources,
+	loadMessages,
+	reloadMessages,
 	addRuntimeToLocals,
 	getRuntimeFromLocals,
 } from "./state.js"
