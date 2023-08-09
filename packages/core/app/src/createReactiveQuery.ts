@@ -12,12 +12,7 @@ export function createReactiveQuery(messages: () => Array<Message>): MessageQuer
 	const [index, setIndex] = createSignal<ReactiveMap<string, Message>>(new ReactiveMap([]))
 
 	createEffect(() => {
-		console.log("load")
 		setIndex(new ReactiveMap(messages().map((message) => [message.id, message])))
-	})
-
-	createEffect(() => {
-		console.log(index())
 	})
 
 	return {
@@ -28,7 +23,6 @@ export function createReactiveQuery(messages: () => Array<Message>): MessageQuer
 			return structuredClone(index().get(where.id))
 		},
 		getAll: () => {
-			console.log("get all", [...index().values()])
 			return structuredClone([...index().values()])
 		},
 		update: ({ where, data }) => {
