@@ -20,7 +20,7 @@ export const initSvelteKitClientRuntime = async ({
 	cache = {},
 }: InitSvelteKitClientRuntimeArgs) => {
 	const runtime = initRuntimeWithLanguageInformation({
-		readResource: async (languageTag: LanguageTag) =>
+		loadMessages: async (languageTag: LanguageTag) =>
 			(cache[languageTag] ??= await fetch(`${base}/inlang/${languageTag}.json`).then((response) =>
 				response.ok ? (response.json() as Promise<Message[]>) : undefined,
 			)),
@@ -29,7 +29,7 @@ export const initSvelteKitClientRuntime = async ({
 	})
 
 	if (languageTag) {
-		await runtime.loadResource(languageTag)
+		await runtime.loadMessages(languageTag)
 		runtime.changeLanguageTag(languageTag)
 	}
 

@@ -22,7 +22,7 @@ export const changeLanguageTag: (languageTag: LanguageTag) => Promise<void> = ()
 	throw error
 }
 
-export const loadResource: Runtime["loadResource"] = () => {
+export const loadResource: Runtime["loadMessages"] = () => {
 	throw error
 }
 

@@ -1,4 +1,4 @@
-import type { Message, Placeholder, Resource } from "@inlang/core/ast"
+import type { LanguageTag, Message, Pattern, VariableReference } from "@inlang/app"
 
 type BaseArgs = Record<string, unknown> | never
 
@@ -22,33 +22,34 @@ export type InlangFunction<
 export const createInlangFunction = <
 	InlangFunctionArgs extends InlangFunctionBaseArgs = InlangFunctionBaseArgs,
 >(
-	resource: Resource,
+	messages: Message[],
+	languageTag: LanguageTag,
 ): InlangFunction<InlangFunctionArgs> =>
 	((key, args) => {
-		const message = resource.body.find((message) => message.id.name === key)
-		if (!message) return ""
+		const pattern = messages.find((message) => message.id === key)?.body[languageTag]?.[0]?.pattern
+		if (!pattern) return ""
 
-		return message.pattern.elements
+		return pattern
 			.map((element) => serializeElement(element, args || {}))
 			.join("") as InlangString
 	}) as InlangFunction<InlangFunctionArgs>
 
 const serializeElement = (
-	element: Message["pattern"]["elements"][number],
+	element: Pattern[number],
 	args: BaseArgs,
 ): string => {
 	switch (element.type) {
 		case "Text":
 			return element.value
-		case "Placeholder": {
-			return serializePlaceholder(element, args)
+		case "VariableReference": {
+			return serializeVariableReference(element, args)
 		}
 	}
 }
 
-const serializePlaceholder = (placeholder: Placeholder, args: BaseArgs): string => {
-	switch (placeholder.body.type) {
+const serializeVariableReference = (variableReference: VariableReference, args: BaseArgs): string => {
+	switch (variableReference.type) {
 		case "VariableReference":
-			return (args[placeholder.body.name] as string) ?? ""
+			return (args[variableReference.name] as string) ?? ""
 	}
 }

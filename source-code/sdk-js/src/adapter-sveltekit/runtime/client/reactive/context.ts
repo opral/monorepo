@@ -19,7 +19,7 @@ type RuntimeContext<
 	languageTags: LanguageTag[]
 	i: Readable<InlangFunction>
 	changeLanguageTag: (languageTag: LanguageTag) => Promise<void>
-	loadResource: SvelteKitClientRuntime["loadResource"]
+		loadResource: SvelteKitClientRuntime["loadMessages"]
 	route: (href: RelativeUrl) => RelativeUrl
 	switchLanguage: (languageTag: LanguageTag) => Promise<void>
 	referenceLanguage: LanguageTag
@@ -36,7 +36,7 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	const changeLanguageTag = async (languageTag: LanguageTagBase) => {
 		if (runtime.languageTag === languageTag) return
 
-		await runtime.loadResource(languageTag)
+		await runtime.loadMessages(languageTag)
 
 		runtime.changeLanguageTag(languageTag)
 
@@ -49,7 +49,7 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 		sourceLanguageTag: runtime.sourceLanguageTag,
 		languageTags: runtime.languageTags,
 		i: readonly(_i),
-		loadResource: runtime.loadResource,
+		loadResource: runtime.loadMessages,
 		changeLanguageTag,
 		route,
 		referenceLanguage: runtime.referenceLanguage,

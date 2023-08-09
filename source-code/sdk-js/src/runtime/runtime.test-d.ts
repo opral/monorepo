@@ -1,19 +1,20 @@
 import type { Resource } from "@inlang/core/ast"
 import { expectType } from "tsd"
 import { initRuntime, type RuntimeContext } from "./runtime.js"
+import type { Message } from '@inlang/app'
 
 // ------------------------------------------------------------------------------------------------
 
-const context: RuntimeContext<string, Promise<Resource | undefined>> = {
-	readResource: () => Promise.resolve(undefined),
+const context: RuntimeContext<string, Promise<Message[] | undefined>> = {
+	loadMessages: () => Promise.resolve(undefined),
 }
 
 {
 	const runtime = initRuntime(context)
 
-	runtime.loadResource("")
-	runtime.loadResource("en")
-	runtime.loadResource("test-1234")
+	runtime.loadMessages("")
+	runtime.loadMessages("en")
+	runtime.loadMessages("test-1234")
 
 	runtime.changeLanguageTag("")
 	runtime.changeLanguageTag("en")
@@ -34,7 +35,7 @@ const context: RuntimeContext<string, Promise<Resource | undefined>> = {
 {
 	const runtime = initRuntime<
 		"de" | "en",
-		Promise<Resource | undefined>,
+		Promise<Message[] | undefined>,
 		{
 			hello: never
 			welcome: { name: string }
@@ -42,10 +43,10 @@ const context: RuntimeContext<string, Promise<Resource | undefined>> = {
 	>(context)
 
 	// @ts-expect-error must be a valid languageTag
-	runtime.loadResource("")
-	runtime.loadResource("en")
+	runtime.loadMessages("")
+	runtime.loadMessages("en")
 	// @ts-expect-error must be a valid languageTag
-	runtime.loadResource("test-1234")
+	runtime.loadMessages("test-1234")
 
 	// @ts-expect-error must be a valid languageTag
 	runtime.changeLanguageTag("")

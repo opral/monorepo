@@ -14,13 +14,13 @@ export const initSvelteKitServerRuntime = ({
 	languageTags,
 }: InitSvelteKitServerRuntimeArgs) => {
 	const runtime = initRuntimeWithLanguageInformation({
-		readResource: (languageTag: LanguageTag) => getResource(languageTag),
+		loadMessages: (languageTag: LanguageTag) => getResource(languageTag),
 		sourceLanguageTag,
 		languageTags,
 	})
 
 	if (languageTag) {
-		runtime.loadResource(languageTag)
+		runtime.loadMessages(languageTag)
 		runtime.changeLanguageTag(languageTag)
 	}
 
