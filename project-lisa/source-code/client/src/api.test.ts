@@ -23,7 +23,7 @@ file += "bar"
 await repository.nodeishFs.writeFile("foo.txt", file)
 
 // TODO: implement status api
-const status = await repository.status()
+const status = await repository.status({ filepath: "./foo.txt" })
 
 if (status !== "unmodified") {
 	await repository.commit({ author: "tests", message: "test changes commit" })
