@@ -6,10 +6,11 @@ import type { DataPayload } from "../shared/wrappers.js"
 import { initSvelteKitServerRuntime, type SvelteKitServerRuntime } from "./runtime.js"
 import { addRuntimeToLocals, getRuntimeFromLocals, initState } from "./state.js"
 import { sequence } from "@sveltejs/kit/hooks"
-import type { InlangConfigModule } from "@inlang/core/config"
 import type { LanguageTag } from "@inlang/app"
 
 // ------------------------------------------------------------------------------------------------
+
+type InlangConfigModule = any
 
 type WrappedHandle = (
 	input: Parameters<Kit.Handle>[0],

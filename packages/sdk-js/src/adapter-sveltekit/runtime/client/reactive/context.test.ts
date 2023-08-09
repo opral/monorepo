@@ -3,7 +3,6 @@ import { getRuntimeFromContext, addRuntimeToContext } from "./context.js"
 import * as svelte from "svelte"
 import { type SvelteKitClientRuntime, initSvelteKitClientRuntime } from "../runtime.js"
 import { get } from "svelte/store"
-import { createResource } from "@inlang/core/test"
 
 let mockedFetch: Mock
 let runtime: SvelteKitClientRuntime
@@ -17,7 +16,7 @@ beforeEach(async () => {
 
 	mockedFetch = vi.fn().mockImplementation(async (url) => {
 		const languageTag = url.endsWith("de.json") ? "de" : "en"
-		return new Response(JSON.stringify(createResource(languageTag)))
+		return new Response(JSON.stringify([]))
 	})
 
 	runtime = await initSvelteKitClientRuntime({

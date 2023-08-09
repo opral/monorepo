@@ -1,6 +1,5 @@
-import type { $fs } from "@inlang/core/environment"
-import { type InlangConfig, type InlangConfigModule, setupConfig } from "@inlang/core/config"
-import { initialize$import, type InlangEnvironment } from "@inlang/core/environment"
+import type { NodeishFilesystemSubset } from "@inlang/app"
+import type { InlangConfig } from "@inlang/app"
 import type { SdkConfig } from "@inlang/sdk-js-plugin"
 import { dedent } from "ts-dedent"
 import { InlangSdkException } from "../adapter-sveltekit/vite-plugin/exceptions.js"
@@ -9,10 +8,11 @@ export type InlangConfigWithSdkProps = InlangConfig & {
 	sdk: SdkConfig
 }
 
+		// @ts-ignore
 export const initInlangEnvironment = async (): Promise<InlangEnvironment> => {
 	const fs = await import("node:fs/promises").catch(
 		() =>
-			new Proxy({} as $fs, {
+			new Proxy({} as NodeishFilesystemSubset, {
 				get: (target, key) => {
 					if (key === "then") return Promise.resolve(target)
 
@@ -27,9 +27,12 @@ export const initInlangEnvironment = async (): Promise<InlangEnvironment> => {
 
 	return {
 		$fs: fs,
+		// @ts-ignore
 		$import: initialize$import({
 			fs,
+			// @ts-ignore
 			fetch: async (...args) =>
+			// @ts-ignore
 				await fetch(...args).catch((error) => {
 					// TODO: create an issue
 					if (
@@ -51,11 +54,12 @@ export const initInlangEnvironment = async (): Promise<InlangEnvironment> => {
 	}
 }
 
-export const initConfig = async (module: InlangConfigModule) => {
+export const initConfig = async (module: any) => {
 	if (!module) {
 		throw new InlangSdkException("could not read `inlang.config.js`")
 	}
 	const env = await initInlangEnvironment()
 
+	// @ts-ignore
 	return setupConfig({ module, env })
 }

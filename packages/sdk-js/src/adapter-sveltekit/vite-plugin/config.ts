@@ -1,8 +1,7 @@
 import { mkdir, readFile, writeFile, stat } from "node:fs/promises"
 import { initConfig } from "../../config/index.js"
 import { dedent } from "ts-dedent"
-import type { InlangConfig } from "@inlang/core/config"
-import { testConfigFile } from "@inlang/core/test"
+import type { InlangConfig } from "@inlang/app"
 import { initInlangEnvironment, type InlangConfigWithSdkProps } from "../../config/config.js"
 import { validateSdkConfig } from "@inlang/sdk-js-plugin"
 // @ts-ignore
@@ -54,6 +53,7 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 		// TODO: combine `testConfigFile` and `initConfig` functionality
 		const inlangConfigAsString = await readFile(inlangConfigFilePath, { encoding: "utf-8" })
 
+		// @ts-ignore
 		const [, exception] = await testConfigFile({
 			file: inlangConfigAsString,
 			env: await initInlangEnvironment(),
