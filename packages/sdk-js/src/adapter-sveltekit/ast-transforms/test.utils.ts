@@ -36,7 +36,7 @@ export const initTransformConfig = (
 						exclude: [],
 					},
 				},
-			},
+			} as any,
 			svelteKit: {
 				usesTypeScript: false,
 				version: undefined,

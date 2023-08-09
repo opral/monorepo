@@ -18,7 +18,7 @@ export const initState = async (module: InlangConfigModule) => {
 				languageTags,
 				readResources: async () => resources,
 				writeResources: async () => undefined,
-			} as InlangConfig
+			} as any as InlangConfig
 		} catch {
 			/* empty */
 		}
@@ -31,8 +31,8 @@ export const initState = async (module: InlangConfigModule) => {
 	await reloadMessages()
 
 	return {
-		sourceLanguageTag: config.sourceLanguageTag,
-		languageTags: config.languageTags,
+		sourceLanguageTag: config.referenceLanguage,
+		languageTags: config.languages,
 	}
 }
 
@@ -42,7 +42,7 @@ let _messages: Message[] = []
 
 // TODO: fix resources if needed (add missing Keys, etc.)
 export const reloadMessages = async () =>
-	(_messages = (await config?.readResources({ config })) || [])
+	(_messages = (await config?.readResources({ config })) as any || [])
 
 export const loadMessages = (languageTag: LanguageTag) =>
 	_messages // TODO: filter
