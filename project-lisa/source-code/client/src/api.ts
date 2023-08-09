@@ -5,7 +5,7 @@ import { github } from "./github.js"
 import { withLazyFetching, transformRemote } from "./helpers.js"
 
 export type Repository = {
-	fs: NodeishFilesystem
+	nodeishFs: NodeishFilesystem
 	commit: (args: { author: any, message: string}) => Promise<Awaited<ReturnType<typeof raw.commit>> | undefined>
 	push: () => Promise<Awaited<ReturnType<typeof raw.push>> | undefined>
 	pull: (args: { author: any, fastForward: boolean, singleBranch: true }) => any
@@ -77,7 +77,7 @@ export function open (url: string, args: { nodeishFs: NodeishFilesystem, working
 	}
 
 	return {
-		fs: withLazyFetching(rawFs, 'app', delayedAction),
+		nodeishFs: withLazyFetching(rawFs, 'app', delayedAction),
 
 		/**
 		 * Gets the git origin url of the current repository.
