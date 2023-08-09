@@ -9,7 +9,7 @@ import { gitOrigin, telemetry } from "./services/telemetry/implementation.js"
 import fetchPolyfill from "node-fetch"
 import { lint } from "./commands/lint/index.js"
 import { coreUsedConfigEvent } from "@inlang/telemetry"
-import { getConfig } from "./utilities/getConfig.js"
+import { getInlang } from "./utilities/getInlang.js"
 // --------------- INIT ---------------
 
 // polyfilling node < 18 with fetch
@@ -73,12 +73,13 @@ telemetry.groupIdentify({
 })
 
 try {
-	const [inlangConfig] = await getConfig({ options: cli.opts() })
+	const [inlang] = await getInlang({ options: cli.opts() })
+	const config = inlang?.config()
 
-	if (inlangConfig) {
+	if (config) {
 		telemetry.capture({
 			event: coreUsedConfigEvent.name,
-			properties: coreUsedConfigEvent.properties(inlangConfig),
+			properties: coreUsedConfigEvent.properties(config),
 		})
 	}
 } catch (error) {
