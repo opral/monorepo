@@ -1,33 +1,59 @@
 # @inlang/sdk-js
 
+## 0.11.4
+
+### Patch Changes
+
+- c12b0b4e: [fix] don't throw while detecting static application when reading TypeScript files
+
+## 0.11.3
+
+### Patch Changes
+
+- 5b5cfacc: [fix] don't load resources multiple times
+
+## 0.11.2
+
+### Patch Changes
+
+- 2f1045a5: [feature] show resolved config when debugging output
+- 2f1045a5: [fix] detection of static output
+
+## 0.11.1
+
+### Patch Changes
+
+- 23659501: [fix] ensure `getRuntimeFromContext` get's called after it has been set in root `+layout.svelte`
+- f55b2be5: [fix] move `data` export right after imports in `+layout.svelte`
+
 ## 0.11.0
 
 ### Minor Changes
 
-- 7fb3e322: support for `.js` files called from `.svelte` components on the client
+- 7fb3e322: [feature] support for `.js` files called from `.svelte` components on the client
 
 ### Patch Changes
 
-- 348eeb8c: allow to debug the applied transformations of a single file
+- 348eeb8c: [feature] allow to debug the applied transformations of a single file
 
 ## 0.10.1
 
 ### Patch Changes
 
-- 7cf3e86b: don't minify plugin bundle
-- cd4754e1: don't throw error on first start of the application
+- 7cf3e86b: [chore] don't minify plugin bundle
+- cd4754e1: [fix] don't throw error on first start of the application
 
 ## 0.10.0
 
 ### Minor Changes
 
-- 3b811085: support `@inlang/sdk-js` imports in `+*.js` files
+- 3b811085: [feature] support `@inlang/sdk-js` imports in `+*.js` files
 
 ## 0.9.2
 
 ### Patch Changes
 
-- c9d41796: correctly set `html` `lang` attribute when changing language
+- c9d41796: [feature] update `html` `lang` attribute when changing language
 
 ## 0.9.1
 

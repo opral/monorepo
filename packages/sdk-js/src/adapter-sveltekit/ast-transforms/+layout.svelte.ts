@@ -1,10 +1,15 @@
-import { addImport, removeImport } from "../../ast-transforms/utils/imports.js"
+import {
+	addImport,
+	findImportDeclarations,
+	getImportSpecifiers,
+	removeImport,
+} from "../../ast-transforms/utils/imports.js"
 import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
 import type { TransformConfig } from "../vite-plugin/config.js"
 import { transformSvelte } from "./_.svelte.js"
 import { dedent } from "ts-dedent"
 import { isOptOutImportPresent } from "./utils/imports.js"
-import { addDataExportIfMissingAndReturnInsertionIndex } from "./utils/exports.js"
+import { addOrMoveDataExportAndReturnIndex } from "./utils/exports.js"
 import { insertSlotIfEmptyFile, wrapMarkupChildren } from "./utils/markup.js"
 import { getSvelteFileParts, markupToAst } from "./utils/svelte.util.js"
 import { MagicString } from "../magic-string.js"
@@ -47,7 +52,7 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 	// remove imports to avoid conflicts, those imports get added in a reactive way
 	removeImport(sourceFile, "@inlang/sdk-js", "i", "language")
 
-	const index = addDataExportIfMissingAndReturnInsertionIndex(sourceFile)
+	const index = addOrMoveDataExportAndReturnIndex(sourceFile)
 
 	// TODO: add `addRuntimeToGlobalThis` code only if needed
 	sourceFile.insertStatements(
@@ -62,7 +67,7 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 		`,
 	)
 
-	sourceFile.insertStatements(
+	const insertedStatements = sourceFile.insertStatements(
 		index + 1,
 		dedent`
 			addRuntimeToGlobalThis(getRuntimeFromData(data))
@@ -70,6 +75,12 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 			let { i, language } = getRuntimeFromContext()
 		`,
 	)
+
+	// move @inlang/sdk-js import declarations below inserted code
+	const imports = findImportDeclarations(sourceFile, "@inlang/sdk-js")
+	for (const importDeclaration of imports) {
+		importDeclaration.setOrder(insertedStatements.at(-1)!.getChildIndex() + 1)
+	}
 
 	return nodeToCode(sourceFile)
 }
