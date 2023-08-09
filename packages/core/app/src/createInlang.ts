@@ -33,12 +33,12 @@ export const createInlang = async (args: {
 			loadConfig({ configPath: args.configPath, nodeishFs: args.nodeishFs })
 				.then(setConfig)
 				.catch((err) => {
-					console.error("ERROR IN LOAD CONFIG ", err)
+					console.error("Error in load config ", err)
 				})
 		})
 		// TODO: create FS watcher and update config on change
 
-		console.log({ config })
+		// console.log({ config })
 
 		// -- resolvedModules -----------------------------------------------------------
 
@@ -48,21 +48,20 @@ export const createInlang = async (args: {
 		createEffect(() => {
 			const conf = config()
 			if (!conf) return
-			
+
 			loadModules({ config: conf, nodeishFs: args.nodeishFs, _import: args._import })
 				.then((resolvedModules) => {
 					setResolvedModules(resolvedModules)
 					// TODO: handle `detectedLanguageTags`
 				})
 				.catch((err) => {
-					console.error("ERROR IN LOAD MODULES ", err)
+					console.error("Error in load config ", err)
 				})
 		})
 		// -- messages ----------------------------------------------------------
 
 		const [messages, setMessages] = createSignal<Message[]>()
 		createEffect(() => {
-			console.log("0 effect load messages is triggered")
 			const _resolvedModules = resolvedModules()
 			if (!_resolvedModules) return
 
@@ -70,13 +69,11 @@ export const createInlang = async (args: {
 				_resolvedModules.data.plugins.data.loadMessages({ languageTags: config()!.languageTags }),
 			)
 				.then((messages) => {
-					console.log("1 messsages loaded")
 					setMessages(messages)
-
 					markInitAsComplete()
 				})
 				.catch((err) => {
-					console.error("3 ERROR IN LOAD MESSAGES ", err)
+					console.error("Error in load messages ", err)
 				})
 		})
 
