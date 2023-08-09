@@ -23,6 +23,7 @@ import { createNodeishMemoryFs } from "@inlang-git/fs"
 import { http, raw } from "@inlang-git/client/raw"
 import { publicEnv } from "@inlang/env-variables"
 import {
+	//create$import,
 	createQuery,
 	InlangConfig,
 	LanguageTag,
@@ -373,16 +374,35 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}
 		},
 		async () => {
-			const inlang = await createInlang({
+			const config: InlangConfig = {
+				sourceLanguageTag: "en",
+				languageTags: ["en", "de"],
+				modules: [
+					"../../../../../../../plugins/standard-lint-rules/dist/index.js",
+					"../../../../../../../plugins/json/dist/index.js",
+				],
+				settings: {
+					plugins: {
+						json: {
+							options: {
+								pathPattern: "./resources/{language}.json",
+							},
+						},
+					},
+					lintRules: {
+						"standard-lint-rules": {},
+					},
+				},
+			}
+			const inlang = createInlang({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs(),
-				_import: async () =>
-				({
-					default: {
-						plugins: [...pluginJson.plugins],
-						lintRules: [...pluginLint.lintRules],
-					},
-				} satisfies InlangModule)
+				_import: async () => ({
+					// default: {
+					// 	plugins: [mockPlugin],
+					// 	lintRules: [mockLintRule],
+					// },
+				}),
 			})
 			const config = inlang.config()
 			if (config) {
@@ -401,7 +421,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				setLint(inlang.lint)
 				setSourceLanguageTag(config.sourceLanguageTag)
 				setLanguageTags(languagesTags)
-				telemetryBrowser.capture(coreUsedConfigEvent.name, coreUsedConfigEvent.properties(config))
+				//telemetryBrowser.capture(coreUsedConfigEvent.name, coreUsedConfigEvent.properties(config))
 			}
 			return config
 		},
@@ -654,11 +674,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 
 		// write to filesystem
-		writeResources({
-			inlang,
-			resources: args[0],
-			setFsChange,
-		})
+		// writeResources({
+		// 	inlang,
+		// 	resources: args[0],
+		// 	setFsChange,
+		// })
 	}
 
 	const [lastPullTime, setLastPullTime] = createSignal<Date>()
@@ -792,83 +812,83 @@ export async function pushChanges(args: {
 	setLastPush: (date: Date) => void
 	setLastPullTime: (date: Date) => void
 }): Promise<Result<true, PushException | PullException>> {
-	const { host, owner, repository } = args.routeParams
-	if (host === undefined || owner === undefined || repository === undefined) {
-		return [undefined, new PushException("h3ni329 Invalid route params")]
-	}
-	// stage all changes
-	const status = await raw.statusMatrix({
-		fs: args.fs,
-		dir: "/",
-		filter: (f: any) =>
-			f.endsWith(".json") ||
-			f.endsWith(".po") ||
-			f.endsWith(".yaml") ||
-			f.endsWith(".yml") ||
-			f.endsWith(".js") ||
-			f.endsWith(".ts"),
-	})
-	const filesWithUncommittedChanges = status.filter(
-		(row: any) =>
-			// files with unstaged and uncommitted changes
-			(row[2] === 2 && row[3] === 1) ||
-			// added files
-			(row[2] === 2 && row[3] === 0),
-	)
-	// add all changes
-	for (const file of filesWithUncommittedChanges) {
-		await raw.add({ fs: args.fs, dir: "/", filepath: file[0] })
-	}
-	// commit changes
-	await raw.commit({
-		fs: args.fs,
-		dir: "/",
-		author: {
-			name: args.user.username,
-			email: args.user.email,
-		},
-		message: "inlang: update translations",
-	})
-	// triggering a side effect here to trigger a re-render
-	// of components that depends on fs
-	args.setFsChange(new Date())
-
-	// push changes
-	const requestArgs = {
-		fs: args.fs,
-		http,
-		dir: "/",
-		author: {
-			name: args.user.username,
-		},
-		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
-		url: `https://${host}/${owner}/${repository}`,
-	}
-	try {
-		// pull changes before pushing
-		// https://github.com/inlang/inlang/issues/250
-		const [, exception] = await pull(args)
-		if (exception) {
-			return [
-				undefined,
-				new PullException("Failed to pull: " + exception.message, {
-					cause: exception,
-				}),
-			]
-		}
-		const push = await raw.push(requestArgs)
-		if (push.ok === false) {
-			return [undefined, new PushException("Failed to push", { cause: push.error })]
-		}
-		await raw.pull(requestArgs)
-		const time = new Date()
-		// triggering a rebuild of everything fs related
-		args.setFsChange(time)
-		args.setLastPush(time)
-		return [true, undefined]
-	} catch (error) {
-		return [undefined, (error as PushException) ?? "h3ni329 Unknown error"]
-	}
+	// const { host, owner, repository } = args.routeParams
+	// if (host === undefined || owner === undefined || repository === undefined) {
+	// 	return [undefined, new PushException("h3ni329 Invalid route params")]
+	// }
+	// // stage all changes
+	// const status = await raw.statusMatrix({
+	// 	fs: args.fs,
+	// 	dir: "/",
+	// 	filter: (f: any) =>
+	// 		f.endsWith(".json") ||
+	// 		f.endsWith(".po") ||
+	// 		f.endsWith(".yaml") ||
+	// 		f.endsWith(".yml") ||
+	// 		f.endsWith(".js") ||
+	// 		f.endsWith(".ts"),
+	// })
+	// const filesWithUncommittedChanges = status.filter(
+	// 	(row: any) =>
+	// 		// files with unstaged and uncommitted changes
+	// 		(row[2] === 2 && row[3] === 1) ||
+	// 		// added files
+	// 		(row[2] === 2 && row[3] === 0),
+	// )
+	// // add all changes
+	// for (const file of filesWithUncommittedChanges) {
+	// 	await raw.add({ fs: args.fs, dir: "/", filepath: file[0] })
+	// }
+	// // commit changes
+	// await raw.commit({
+	// 	fs: args.fs,
+	// 	dir: "/",
+	// 	author: {
+	// 		name: args.user.username,
+	// 		email: args.user.email,
+	// 	},
+	// 	message: "inlang: update translations",
+	// })
+	// // triggering a side effect here to trigger a re-render
+	// // of components that depends on fs
+	// args.setFsChange(new Date())
+	// // push changes
+	// const requestArgs = {
+	// 	fs: args.fs,
+	// 	http,
+	// 	dir: "/",
+	// 	author: {
+	// 		name: args.user.username,
+	// 	},
+	// 	corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
+	// 	url: `https://${host}/${owner}/${repository}`,
+	// }
+	// try {
+	// 	// pull changes before pushing
+	// 	// https://github.com/inlang/inlang/issues/250
+	// 	const [, exception] = await pull(args)
+	// 	if (exception) {
+	// 		return [
+	// 			undefined,
+	// 			new PullException("Failed to pull: " + exception.message, {
+	// 				cause: exception,
+	// 			}),
+	// 		]
+	// 	}
+	// 	const push = await raw.push(requestArgs)
+	// 	if (push.ok === false) {
+	// 		return [undefined, new PushException("Failed to push", { cause: push.error })]
+	// 	}
+	// 	await raw.pull(requestArgs)
+	// 	const time = new Date()
+	// 	// triggering a rebuild of everything fs related
+	// 	args.setFsChange(time)
+	// 	args.setLastPush(time)
+	// 	return [true, undefined]
+	// } catch (error) {
+	// 	return [undefined, (error as PushException) ?? "h3ni329 Unknown error"]
+	// }
+	return {} as any
 }
 
 async function readResources(inlang: InlangInstance) {
@@ -877,10 +897,9 @@ async function readResources(inlang: InlangInstance) {
 	// const messages = inlang.query.messages.getAll()
 	if (!messages) return
 
-	// const [lintedResources] = await lint({ config, resources })
+	//const [lintedResources] = await lint({ config, resources })
 	const lintedReports = inlang.lint.reports()
-	const lintedResources = lintedReports.map((report) => {
-	})
+	//const lintedResources = lintedReports.map((report) => {})
 	return messages
 }
 
@@ -930,29 +949,30 @@ async function pull(args: {
 	setFsChange: (date: Date) => void
 	setLastPullTime: (date: Date) => void
 }): Promise<Result<true, PullException>> {
-	try {
-		await raw.pull({
-			fs: args.fs,
-			http,
-			dir: "/",
-			corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
-			singleBranch: true,
-			author: {
-				name: args.user?.username,
-			},
-			// try to not create a merge commit
-			// rebasing would be the best option but it is not supported by isomorphic-git
-			// a switch to https://libgit2.org/ seems unavoidable
-			fastForward: true,
-		})
-		const time = new Date()
-		// triggering a rebuild of everything fs related
-		args.setFsChange(time)
-		args.setLastPullTime(time)
-		return [true, undefined]
-	} catch (error) {
-		return [undefined, error as PullException]
-	}
+	// try {
+	// 	await raw.pull({
+	// 		fs: args.fs,
+	// 		http,
+	// 		dir: "/",
+	// 		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
+	// 		singleBranch: true,
+	// 		author: {
+	// 			name: args.user?.username,
+	// 		},
+	// 		// try to not create a merge commit
+	// 		// rebasing would be the best option but it is not supported by isomorphic-git
+	// 		// a switch to https://libgit2.org/ seems unavoidable
+	// 		fastForward: true,
+	// 	})
+	// 	const time = new Date()
+	// 	// triggering a rebuild of everything fs related
+	// 	args.setFsChange(time)
+	// 	args.setLastPullTime(time)
+	// 	return [true, undefined]
+	// } catch (error) {
+	// 	return [undefined, error as PullException]
+	// }
+	return {} as any
 }
 async function getGitOrigin(args: { fs: NodeishFilesystem }) {
 	try {

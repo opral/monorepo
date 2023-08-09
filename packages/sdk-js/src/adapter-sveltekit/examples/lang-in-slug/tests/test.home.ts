@@ -7,7 +7,7 @@ const checkHeadline = async (page: Page, text: string) => {
 	expect(h1).toContain(text)
 }
 
-test("Home page", async ({ page }) => {
+test("Home page", async ({ page }: any) => {
 	await page.goto(`${baseURL}/en`)
 	expect(page.url()).toBe(`${baseURL}/en`)
 
@@ -15,7 +15,7 @@ test("Home page", async ({ page }) => {
 	expect(page.url()).toBe(`${baseURL}/de`)
 
 	const logs: any = []
-	page.on("console", (msg) => logs.push(msg.text()))
+	page.on("console", (msg: any) => logs.push(msg.text()))
 
 	// Go to english page
 	await page.goto(`${baseURL}/en`)
