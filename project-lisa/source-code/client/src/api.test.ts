@@ -13,12 +13,12 @@ import { open, createNodeishMemoryFs } from "./index.js"
 const repository = open("https://github.com/inlang/example.git", { nodeishFs: createNodeishMemoryFs() })
 
 // -- file is lazy fetched upon first access
-let file = await repository.fs.readFile("/foo.txt", { encoding: "utf-8" })
+let file = await repository.nodeishFs.readFile("/foo.txt", { encoding: "utf-8" })
 
 // modifying the file
 file += "bar"
 
-await repository.fs.writeFile("foo.txt", file)
+await repository.nodeishFs.writeFile("foo.txt", file)
 
 // TODO: implement status api
 const status = await repository.status()
