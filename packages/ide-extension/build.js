@@ -13,28 +13,51 @@ const isDev = process?.env?.DEV !== undefined
 // eslint-disable-next-line no-undef
 const isTest = process?.env?.TEST !== undefined
 
+const defaultEntryPoints = [{ in: "./src/main.ts", out: "./main" }];
 
-const entryPoints = [{ in: "./src/main.ts", out: "./main" }]
+// Production configuration
+/** @type {import("esbuild").BuildOptions} */
+let buildOptions = {
+	entryPoints: defaultEntryPoints,
+	outdir: "./dist/",
+	outExtension: { '.js': '.cjs' },
+	platform: "node",
+	bundle: true,
+	minify: true,
+	sourcemap: false,
+	external: ["vscode"],
+}
+
+// Test configuration
 if (isTest) {
-	entryPoints.push({ in: "./test/test.ts", out: "./test" });
-	entryPoints.push({ in: "./test/suite.ts", out: "./suite" });
 	const tests = await glob("./test/**/*.test.ts");
-	for (const t of tests) {
-		entryPoints.push({ in: t, out: t })
+
+	buildOptions = {
+		...buildOptions,
+		entryPoints: [
+			...defaultEntryPoints,
+			{ in: "./test/test.ts", out: "./test" },
+			{ in: "./test/suite.ts", out: "./suite" },
+			...tests.map((t) => ({ in: t, out: t }))
+		],
+		format: 'cjs',
+		bundle: false,
+		minify: false,
+		sourcemap: true,
+		external: []
 	}
 }
 
-const ctx = await context({
-	entryPoints,
-	outdir: "./dist/",
-	outExtension: { '.js': '.cjs' },
-	bundle: !isTest,
-	minify: !isDev && !isTest,
-	format: !isTest ? undefined : 'cjs',
-	platform: "node",
-	sourcemap: isDev || isTest,
-	external: !isTest ? ["vscode"] : [],
-})
+// Dev configuration
+if (isDev) {
+	buildOptions = {
+		...buildOptions,
+		minify: false,
+		sourcemap: true,
+	}
+}
+
+const ctx = await context(buildOptions);
 
 if (isDev) {
 	await ctx.watch()
