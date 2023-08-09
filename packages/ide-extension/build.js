@@ -27,14 +27,14 @@ let buildOptions = {
 
 // Test configuration
 if (isTest) {
-	const tests = await glob("./test/**/*.test.ts");
+	const tests = await glob("./src/**/*.e2e.test.ts");
 
 	buildOptions = {
 		...buildOptions,
 		entryPoints: [
 			...defaultEntryPoints,
-			{ in: "./test/test.ts", out: "./test" },
-			{ in: "./test/suite.ts", out: "./suite" },
+			{ in: "./src/test.ts", out: "./test" },
+			{ in: "./src/suite.ts", out: "./suite" },
 			...tests.map((t) => ({ in: t, out: t.split('.').slice(0, -1).join('.') }))
 		],
 		format: 'cjs',
