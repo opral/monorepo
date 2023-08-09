@@ -48,7 +48,7 @@ export const createInlang = async (args: {
 		createEffect(() => {
 			const conf = config()
 			if (!conf) return
-
+			
 			loadModules({ config: conf, nodeishFs: args.nodeishFs, _import: args._import })
 				.then((resolvedModules) => {
 					setResolvedModules(resolvedModules)
@@ -65,7 +65,7 @@ export const createInlang = async (args: {
 			console.log("0 effect load messages is triggered")
 			const _resolvedModules = resolvedModules()
 			if (!_resolvedModules) return
-			//console.log(_resolvedModules.data.plugins.data)
+
 			makeTrulyAsync(
 				_resolvedModules.data.plugins.data.loadMessages({ languageTags: config()!.languageTags }),
 			)

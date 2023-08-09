@@ -9,7 +9,7 @@ import IconTranslate from "~icons/material-symbols/translate"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { showToast } from "@src/components/Toast.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
-import type { LanguageTag } from "@inlang/core/languageTag"
+import type { LanguageTag } from "@inlang/app"
 
 interface Filter {
 	name: string

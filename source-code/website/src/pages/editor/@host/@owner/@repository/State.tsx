@@ -32,13 +32,16 @@ import {
 	type InlangInstance,
 	type Message,
 } from "@inlang/app"
+import type { InlangModule } from "@inlang/module"
+import pluginJson from "../../../../../../../plugins/json/dist/index.js"
+import pluginLint from "../../../../../../../plugins/standard-lint-rules/dist/index.js"
 
 const mockData: Message[] = [
 	{
 		id: "test",
 		selectors: [],
 		body: {
-			"en-US": [
+			en: [
 				{
 					match: {},
 					pattern: [
@@ -49,7 +52,7 @@ const mockData: Message[] = [
 					],
 				},
 			],
-			"de-DE": [
+			de: [
 				{
 					match: {},
 					pattern: [
@@ -66,7 +69,7 @@ const mockData: Message[] = [
 		id: "test2",
 		selectors: [],
 		body: {
-			"en-US": [
+			en: [
 				{
 					match: {},
 					pattern: [
@@ -370,38 +373,18 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}
 		},
 		async () => {
-			const config: InlangConfig = {
-				"sourceLanguageTag": "en",
-				"languageTags": ["en", "de"],
-				"modules": [
-					"../../../../../../../plugins/standard-lint-rules/dist/index.js",
-					"../../../../../../../plugins/json/dist/index.js"
-				],
-				"settings": {
-					"plugins": {
-						"json": {
-							"options": {
-								"pathPattern": "./resources/{language}.json"
-							}
-						}
-					},
-					"lintRules": {
-						"standard-lint-rules": {}
-					}
-				}
-			}
-			const inlang = createInlang({
+			const inlang = await createInlang({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs(),
 				_import: async () =>
 				({
-					// default: {
-					// 	plugins: [mockPlugin],
-					// 	lintRules: [mockLintRule],
-					// },
-				}),
+					default: {
+						plugins: [...pluginJson.plugins],
+						lintRules: [...pluginLint.lintRules],
+					},
+				} satisfies InlangModule)
 			})
-			// const config = await (await inlang).config
+			const config = inlang.config()
 			if (config) {
 				const languagesTags = // TODO: move this into setter logic
 					config.languageTags.sort((a: any, b: any) =>
@@ -415,7 +398,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					) || []
 				// initializes the languages to all languages
 				setDoesInlangConfigExist(true)
-				setLint((await inlang).lint)
+				setLint(inlang.lint)
 				setSourceLanguageTag(config.sourceLanguageTag)
 				setLanguageTags(languagesTags)
 				telemetryBrowser.capture(coreUsedConfigEvent.name, coreUsedConfigEvent.properties(config))
@@ -426,7 +409,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	createEffect(() => {
 		const langs = languageTags()
-		// setInlangConfig.mutate((config) => (config ? { ...config, languages: langs } : undefined))
+		setInlangConfig.mutate((config) => (config ? { ...config, languages: langs } : undefined))
 	})
 
 	//the effect should skip tour guide steps if not needed

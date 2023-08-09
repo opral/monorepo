@@ -411,7 +411,6 @@ describe("reactivity", () => {
 
 				inlang.setConfig({ ...inlang.config(), languageTags: [] })
 
-				console.log("should be 0")
 				setTimeout(() => {
 					expect(counter).toBe(2)
 					expect(inlang.query.messages.getAll().length).toEqual(0)
