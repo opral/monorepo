@@ -3,21 +3,21 @@
  */
 
 import { context } from "esbuild"
-import { glob } from "glob";
+import { glob } from "glob"
 
 // eslint-disable-next-line no-undef
 const isDev = process?.env?.DEV !== undefined
 // eslint-disable-next-line no-undef
 const isTest = process?.env?.TEST !== undefined
 
-const defaultEntryPoints = [{ in: "./src/main.ts", out: "./main" }];
+const defaultEntryPoints = [{ in: "./src/main.ts", out: "./main" }]
 
 // Production configuration
 /** @type {import("esbuild").BuildOptions} */
 let buildOptions = {
 	entryPoints: defaultEntryPoints,
 	outdir: "./dist/",
-	outExtension: { '.js': '.cjs' },
+	outExtension: { ".js": ".cjs" },
 	platform: "node",
 	bundle: true,
 	minify: true,
@@ -27,7 +27,7 @@ let buildOptions = {
 
 // Test configuration
 if (isTest) {
-	const tests = await glob("./src/**/*.e2e.test.ts");
+	const tests = await glob("./src/**/*.e2e.test.ts")
 
 	buildOptions = {
 		...buildOptions,
@@ -35,13 +35,13 @@ if (isTest) {
 			...defaultEntryPoints,
 			{ in: "./src/test.ts", out: "./test" },
 			{ in: "./src/suite.ts", out: "./suite" },
-			...tests.map((t) => ({ in: t, out: t.split('.').slice(0, -1).join('.') }))
+			...tests.map((t) => ({ in: t, out: t.split(".").slice(0, -1).join(".") })),
 		],
-		format: 'cjs',
+		format: "cjs",
 		bundle: false,
 		minify: false,
 		sourcemap: true,
-		external: []
+		external: [],
 	}
 }
 
@@ -54,7 +54,7 @@ if (isDev) {
 	}
 }
 
-const ctx = await context(buildOptions);
+const ctx = await context(buildOptions)
 
 if (isDev) {
 	await ctx.watch()
