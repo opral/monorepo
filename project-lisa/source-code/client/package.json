@@ -6,7 +6,7 @@
 		"access": "public"
 	},
 	"exports": {
-		".": "./dist/api.js"
+		".": "./dist/index.js"
 	},
 	"files": [
 		"./dist",
@@ -24,7 +24,7 @@
 		"octokit": "*",
 		"@project-lisa/fs": "*",
 		"@inlang-git/fs": "*",
-		"isomorphic-git": "github:inlang/isomorphic-git"
+		"isomorphic-git": "1.24.5"
 	},
 	"license": "Apache-2.0"
 }

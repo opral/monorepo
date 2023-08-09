@@ -1,39 +1,20 @@
-import _git from "isomorphic-git"
-import _http from "isomorphic-git/http/web/index.js"
+import raw from "isomorphic-git"
+import http from "isomorphic-git/http/web/index.js"
 import { createNodeishMemoryFs } from "@inlang-git/fs"
 import type { NodeishFilesystem } from "@inlang-git/fs"
 import { github } from "./github.js"
-import { wrap, transformRemote } from "./helpers.js"
-
-/**
- * Raw git cli api. (Used for legacy migrations)
- *
- * Used for legacy migrations. The idea of the `git-sdk` is to abstract working with git as
- * a CLI. Sometimes access to the "raw" git CLI is required to
- * achieve actions that are unsupported, or not yet, supported
- * by the `git-sdk`. Esepcially useful for faster development
- * iterations and progressively develop own api layer on top.
-*/
-export const raw = _git
-
-/**
-	* The http client for the git raw api. (Used for legacy migrations)
-	*
-	* Note: The http client is web-based. Node version 18 is
-	* required for the http client to work in node environments.
-*/
-export const http = _http
+import { withLazyFetching, transformRemote } from "./helpers.js"
 
 export type Repository = {
 	fs: NodeishFilesystem
-	commit: (args: { dir: string, author: any, message: string}) => Promise<Awaited<ReturnType<typeof raw.commit>> | undefined>
-	push: (args: { dir: string }) => Promise<Awaited<ReturnType<typeof raw.push>> | undefined>
-	pull: (args: { dir: string, author: any, fastForward: boolean, singleBranch: true }) => any
-	add: (args: { dir: string, filepath: string }) =>  Promise<Awaited<ReturnType<typeof raw.add>>>
+	commit: (args: { author: any, message: string}) => Promise<Awaited<ReturnType<typeof raw.commit>> | undefined>
+	push: () => Promise<Awaited<ReturnType<typeof raw.push>> | undefined>
+	pull: (args: { author: any, fastForward: boolean, singleBranch: true }) => any
+	add: (args: { filepath: string }) =>  Promise<Awaited<ReturnType<typeof raw.add>>>
 	listRemotes: () => Promise<Awaited<ReturnType<typeof raw.listRemotes>> | undefined>
-	log: (args: { dir: string, since: any}) =>  Promise<Awaited<ReturnType<typeof raw.log>>>
-	statusMatrix: (args: { dir:string, filter: any }) => Promise<Awaited<ReturnType<typeof raw.statusMatrix>>>
-	status: (args: { dir: string, filepath: string }) => Promise<Awaited<ReturnType<typeof raw.status>>>
+	log: (args: { since: any}) =>  Promise<Awaited<ReturnType<typeof raw.log>>>
+	statusMatrix: (args: { filter: any }) => Promise<Awaited<ReturnType<typeof raw.statusMatrix>>>
+	status: (args: { filepath: string }) => Promise<Awaited<ReturnType<typeof raw.status>>>
 	mergeUpstream: (args: { branch: string }) => ReturnType<typeof github.request<"POST /repos/{owner}/{repo}/merge-upstream">>
 	isCollaborator: (args: { username: string }) => Promise<boolean>
 	getOrigin: () => Promise<string>
@@ -54,8 +35,8 @@ export type Repository = {
 	// changeBranch: () => unknown
 }
 
-export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesystem, path?: string, corsProxy?: string, auth?: unknown }): Repository {
-	const rawFs = fs ? fs : createNodeishMemoryFs()
+export function open (url: string, args?: { nodeishFs?: NodeishFilesystem, workingDirectory?: string, corsProxy?: string, auth?: unknown }): Repository {
+	const rawFs = args?.nodeishFs ? args.nodeishFs : createNodeishMemoryFs()
 
 	// parse url in the format of github.com/inlang/example and split it to host, owner and repo
 	const [host, owner, repoName] = [...url.split("/")]
@@ -69,11 +50,14 @@ export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesys
 
 	const normalizedUrl = `https://${host}/${owner}/${repoName}`
 
+	// the directory we use for all git operations
+	const dir = "/"
+
 	let pending: Promise<void> | undefined = raw.clone({
-		fs: wrap(rawFs, 'clone'),
+		fs: withLazyFetching(rawFs, 'clone'),
 		http,
-		dir: "/",
-		corsProxy,
+		dir,
+		corsProxy: args?.corsProxy,
 		url: normalizedUrl,
 		singleBranch: true,
 		depth: 1,
@@ -94,7 +78,7 @@ export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesys
 	}
 
 	return {
-		fs: wrap(rawFs, 'app', delayedAction),
+		fs: withLazyFetching(rawFs, 'app', delayedAction),
 
 		/**
 		 * Gets the git origin url of the current repository.
@@ -103,14 +87,11 @@ export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesys
 		 */
 		async listRemotes () {
 			try {
-				const wrappedFS = wrap(rawFs, 'listRemotes', delayedAction)
+				const withLazyFetchingpedFS = withLazyFetching(rawFs, 'listRemotes', delayedAction)
 
 				const remotes = await raw.listRemotes({
-					fs: wrappedFS,
-					dir: await raw.findRoot({
-						fs: wrappedFS,
-							filepath: "/"
-					}),
+					fs: withLazyFetchingpedFS,
+					dir
 				})
 
 				return remotes
@@ -119,79 +100,79 @@ export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesys
 			}
 		},
 
-		status ({ dir = "/", filepath }) {
+		status (cmdArgs) {
 			return raw.status({
-				fs: wrap(rawFs, 'statusMatrix', delayedAction),
+				fs: withLazyFetching(rawFs, 'statusMatrix', delayedAction),
 				dir,
-				filepath
+				filepath: cmdArgs.filepath
 			})
 		},
 
-		statusMatrix ({ dir = "/", filter }) {
+		statusMatrix (cmdArgs) {
 			return raw.statusMatrix({
-				fs: wrap(rawFs, 'statusMatrix', delayedAction),
+				fs: withLazyFetching(rawFs, 'statusMatrix', delayedAction),
 				dir,
-				filter
+				filter: cmdArgs.filter
 			})
 		},
 
-		add ({ dir = "/", filepath }) {
+		add (cmdArgs) {
 			return raw.add({
-				fs: wrap(rawFs, 'add', delayedAction),
+				fs: withLazyFetching(rawFs, 'add', delayedAction),
 				dir,
-				filepath
+				filepath: cmdArgs.filepath
 			})
 		},
 
-		commit ({ dir = "/", author, message }) {
+		commit (cmdArgs) {
 			return raw.commit({
-				fs: wrap(rawFs, 'commit', delayedAction),
+				fs: withLazyFetching(rawFs, 'commit', delayedAction),
 				dir,
-				author,
-				message
+				author: cmdArgs.author,
+				message: cmdArgs.message
 			})
 		},
 
-		push ({ dir = "/" }) {
+		push () {
 			return raw.push({
-				fs: wrap(rawFs, 'push', delayedAction),
+				fs: withLazyFetching(rawFs, 'push', delayedAction),
 				url: normalizedUrl,
-				corsProxy,
+				corsProxy: args?.corsProxy,
 				http,
 				dir
 			})
 		},
 
-		pull ({ dir = "/", author, fastForward, singleBranch }) {
+		pull (cmdArgs) {
 			return raw.pull({
-				fs: wrap(rawFs, 'pull', delayedAction),
+				fs: withLazyFetching(rawFs, 'pull', delayedAction),
 				url: normalizedUrl,
-				corsProxy,
+				corsProxy: args?.corsProxy,
 				http,
 				dir,
-				fastForward,
-				singleBranch,
-				author
+				fastForward: cmdArgs.fastForward,
+				singleBranch: cmdArgs.singleBranch,
+				author: cmdArgs.author
 			})
 		},
 
-		log ({ dir = "/", since }) {
+		log (cmdArgs) {
 			return raw.log({
-				fs: wrap(rawFs, 'log', delayedAction),
+				fs: withLazyFetching(rawFs, 'log', delayedAction),
 				dir,
-				since
+				since: cmdArgs.since
 			})
 		},
 
-		mergeUpstream ({ branch }) {
+		mergeUpstream (cmdArgs) {
 			return github.request("POST /repos/{owner}/{repo}/merge-upstream", {
-				branch,
+				branch: cmdArgs.branch,
 				owner,
 				repo: repoName,
 			})
 		},
 
-		async isCollaborator ({ username }) {
+		async isCollaborator (cmdArgs) {
 			let response: Awaited<ReturnType<typeof github.request<"GET /repos/{owner}/{repo}/collaborators/{username}">>> | undefined
 			try {
 				response = await github.request(
@@ -199,7 +180,7 @@ export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesys
 					{
 						owner,
 						repo: repoName,
-						username,
+						username: cmdArgs.username,
 					},
 				)
 			} catch (_err) { /* throws on non collaborator access */ }
@@ -229,10 +210,10 @@ export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesys
 		},
 
 		async getCurrentBranch () {
-			// TODO: make stateless?, migrate to getMainBranch
+			// TODO: make stateless
 			return await raw.currentBranch({
-				fs: wrap(rawFs, 'getMainBranch', delayedAction),
-				dir: "/",
+				fs: withLazyFetching(rawFs, 'getCurrentBranch', delayedAction),
+				dir,
 			}) || undefined
 		},
 
