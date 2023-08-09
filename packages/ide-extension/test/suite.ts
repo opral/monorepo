@@ -8,9 +8,9 @@ export async function run() {
     ui: 'tdd'
   });
 
-  const testsRoot = path.resolve(__dirname, '.');
+  const testsRoot = path.resolve(__dirname);
 
-  const tests = await glob('**/**.test.js', { cwd: testsRoot });
+  const tests = await glob('**/*.test.*.cjs', { cwd: testsRoot });
 
   return new Promise<void>((resolve, reject) => {
     for (const f of tests) {
