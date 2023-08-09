@@ -1,26 +1,47 @@
 import { createInlangFunction } from "./inlang-function.js"
 import { test, describe, expect } from "vitest"
-import { createMessage, createResource } from "@inlang/core/test"
+import type { Message, Pattern } from '@inlang/app'
 
-const resource = createResource(
-	"en",
-	createMessage("hello", "world"),
-	createMessage("welcome", [
-		{ type: "Text", value: "Welcome, " },
-		{
-			type: "Placeholder",
-			body: {
+// TODO: create util function
+export const createMessage = (id: string, patterns: Record<string, Pattern | string>): Message => ({
+	id,
+	selectors: [],
+	body: Object.fromEntries(
+		Object.entries(patterns).map(
+			([languageTag, patterns]) =>
+			([
+				languageTag,
+				[{
+					match: {},
+					pattern: typeof patterns === "string"
+						? [{
+							type: 'Text',
+							value: patterns,
+						}]
+						: patterns
+				}]
+			])
+		)
+	)
+})
+
+const messages = [
+	createMessage("hello", { en: "world" }),
+	createMessage("welcome", {
+		en: [
+			{ type: "Text", value: "Welcome, " },
+			{
 				type: "VariableReference",
 				name: "name",
 			},
-		},
-		{ type: "Text", value: "!" },
-	]),
-)
+			{ type: "Text", value: "!" },
+		]
+	}),
+]
 
 describe("createInlangFunction", () => {
 	test("it should resolve the message", () => {
-		const fn = createInlangFunction(resource)
+		const fn = createInlangFunction(messages, 'en')
 
 		const result = fn("hello")
 
@@ -28,7 +49,7 @@ describe("createInlangFunction", () => {
 	})
 
 	test("it should resolve the message with placeholder", () => {
-		const fn = createInlangFunction(resource)
+		const fn = createInlangFunction(messages, 'en')
 
 		const result = fn("welcome", { name: "Inlang" })
 
@@ -36,7 +57,7 @@ describe("createInlangFunction", () => {
 	})
 
 	test("it should return an empty string for a placeholder if placeholder does not get passed as args", () => {
-		const fn = createInlangFunction(resource)
+		const fn = createInlangFunction(messages, 'en')
 
 		const result = fn("welcome", {})
 
@@ -44,17 +65,33 @@ describe("createInlangFunction", () => {
 	})
 
 	test("it should not fail if no placeholders get passed as args", () => {
-		const fn = createInlangFunction(resource)
+		const fn = createInlangFunction(messages, 'en')
 
 		const result = fn("welcome")
 
 		expect(result).toBe("Welcome, !")
 	})
 
-	test("it should return an empty string if key does not exist in resource", () => {
-		const fn = createInlangFunction(resource)
+	test("it should return an empty string if key does not exist in message", () => {
+		const fn = createInlangFunction(messages, 'en')
 
 		const result = fn("missing-key")
+
+		expect(result).toBe("")
+	})
+
+	test("it should return an empty string if language does not exist in message", () => {
+		const fn = createInlangFunction([createMessage('key', { 'de': 'Hi' })], 'en')
+
+		const result = fn("key")
+
+		expect(result).toBe("")
+	})
+
+	test("it should return an empty string if pattern does not exist in message", () => {
+		const fn = createInlangFunction([createMessage('key', { 'en': [] })], 'en')
+
+		const result = fn("key")
 
 		expect(result).toBe("")
 	})

@@ -1,12 +1,12 @@
-import type { Resource } from "@inlang/core/ast"
 import { createInlangFunction } from "./inlang-function.js"
+import type { Message } from '@inlang/app'
 
-const resource = {} as Resource
+const messages = [] as Message[]
 
 // ------------------------------------------------------------------------------------------------
 
 {
-	const i = createInlangFunction(resource)
+	const i = createInlangFunction(messages, "en")
 
 	i("hello")
 	i("welcome")
@@ -19,7 +19,7 @@ const resource = {} as Resource
 	const i = createInlangFunction<{
 		hello: never
 		welcome: { name: string }
-	}>(resource)
+	}>(messages, 'en')
 
 	i("hello")
 	// @ts-expect-error does not accept args

@@ -2,7 +2,7 @@ import { test, describe, expect, vi } from "vitest"
 import { initSvelteKitClientRuntime } from "./runtime.js"
 import { rest } from "msw"
 import { setupServer } from "msw/node"
-import { createMessage, createResource } from "@inlang/core/test"
+import { createMessage } from '../../../runtime/inlang-function.test.js'
 
 //TODO: refactor
 
@@ -29,7 +29,7 @@ describe("initSvelteKitClientRuntime", () => {
 			rest.get(`${PREFIX}/inlang/en.json`, (_, res, ctx) =>
 				res(
 					ctx.status(200),
-					ctx.body(JSON.stringify(createResource("en", createMessage("hello", "World!")))),
+					ctx.body(JSON.stringify([createMessage("hello", { en: "World!" })])),
 				),
 			),
 		)
