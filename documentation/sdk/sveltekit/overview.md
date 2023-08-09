@@ -70,7 +70,7 @@ You can configure the inlang SDK depending on your needs. You can learn more in 
 
 ## Further reading
 
-The sdk is using the [json-plugin](https://github.com/inlang/inlang/tree/main/source-code/plugins/json) as a default interface to parse the language strings. To use this code, you need to have language resources in JSON format in a `languages` folder in the root of your project. Each file should have the language ID as the file name. If that doesn't match your requirements check out the other [plugins](https://inlang.com/documentation/plugins/registry).
+The SDK is using the [json-plugin](https://github.com/inlang/inlang/tree/main/source-code/plugins/json) as a default interface to parse the language strings. To use this code, you need to have language resources in JSON format in a `languages` folder at the root of your project. Each file should have the language ID as the file name. If that doesn't match your requirements, check out the other [plugins](https://inlang.com/documentation/plugins/registry).
 
 ```
 languages
@@ -92,4 +92,4 @@ A valid JSON file would look like this.
 
 ---
 
-_Is something unclear or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr) or open a [Discussion](https://github.com/inlang/inlang/discussions) or an [Issue](https://github.com/inlang/inlang/issues) on [Github](https://github.com/inlang/inlang)._
+_Is something unclear, or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr) or open a [Discussion](https://github.com/inlang/inlang/discussions) or an [Issue](https://github.com/inlang/inlang/issues) on [Github](https://github.com/inlang/inlang)._

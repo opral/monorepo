@@ -1,0 +1,57 @@
+name: Bug report for `@inlang/sdk-js`
+description: Something is not working as expected in the `@inlang/sdk-js` package
+title: "[bug] <title>"
+labels:
+  - "type: bug"
+  - "scope: sdk-js"
+assignees:
+  - ivanhofer
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report! **Before you start, make sure you have the latest versions of the packages you're using.**
+  - type: checkboxes
+    id: config-validated
+    attributes:
+      label: "Did you check if the config file includes errors?"
+      description: "Please validate the config file with `npx @inlang/cli config validate`. If you see errors, it has probably nothing to do with the `@inlang/sdk-js` package and then please fill out the regular bug report form: https://github.com/inlang/inlang/issues/new/choose"
+      options:
+        - label: "Yes, I have validated the config file"
+          required: true
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Problem
+      description: A clear and concise description of what the bug is. If you intend to submit a PR for this issue, tell us in the description. Thanks!
+      placeholder: Bug description
+    validations:
+      required: true
+  - type: textarea
+    id: fix-description
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+      placeholder: What did you expect to happen?
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: A link to a repository that reproduces the issue. Reproductions must be short, self-contained and correct and must not contain files or code that aren't relevant to the issue — please do NOT just paste a link to your project. Explaining how to reproduce is generally not enough. It pushes the burden of creating a reproduction project onto a small set of maintainers and isn't scalable. If no reproduction is provided, the issue will be closed.
+      placeholder: Reproduction
+    validations:
+      required: true
+  - type: textarea
+    id: system-info
+    attributes:
+      label: System Info
+      description: Output of `npx envinfo --system --binaries --browsers --npmPackages "{@inlang/*,svelte,@sveltejs/*}"`
+      render: Shell
+      placeholder: System, Binaries, Browsers
+    validations:
+      required: true
+  - type: textarea
+    id: other
+    attributes:
+      label: "Other information"
+      description: Do you have additional information that could help us fix the bug? Please include it here.

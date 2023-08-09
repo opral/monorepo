@@ -1,5 +1,4 @@
 ---
-# the frontmatter is only relevant for rendering this site on the website
 title: Contributing to inlang
 shortTitle: Contributing
 href: /documentation/contributing
@@ -8,15 +7,15 @@ description: Learn on how to contribute to inlang and its ecosystem.
 
 # Contributing
 
-Inlang is setup as [monorepo](https://monorepo.tools/) with NPM workspaces and [turborepo](https://turbo.build/).
+Inlang is set up as [monorepo](https://monorepo.tools/) with NPM workspaces and [turborepo](https://turbo.build/).
 
-Furthermore, the repository makes use of [Dev Containers](https://containers.dev/) ensuring that everyone works in the same environment. If you don't use dev containers, we won't be able to support dev related setup problems.
+Furthermore, the repository makes use of [Dev Containers](https://containers.dev/), ensuring that everyone works in the same environment. If you don't use dev containers, we won't be able to support dev-related setup problems.
 
 ## Getting started
 
-Make sure you have [Git](https://git-scm.com/), [Docker](https://www.docker.com/), [Visual Studio Code](https://code.visualstudio.com/) and the [VSCode DevContainers Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) installed. Provide your Docker setup plenty of memory (>4GB). If you are a Windows user, please read the subsection below.
+Make sure you have [Git](https://git-scm.com/), [Docker](https://www.docker.com/), [Visual Studio Code](https://code.visualstudio.com/) and the [VSCode DevContainers Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) installed. Provide your Docker setup with plenty of memory (>4GB). If you are a Windows user, please read the subsection below.
 
-1. Clone inlangs repository.
+1. Clone inlang's repository.
 2. Open the repository folder in Visual Studio Code.
 3. Run `Dev Containers: Reopen in Container` via `CTRL + Shift + P` or `⌘ + Shift + P`.
 4. `npm install` to install dependencies.
@@ -38,4 +37,4 @@ Install [Windows Subsystem Linux 2 (WSL 2)](https://learn.microsoft.com/en-us/wi
 ## Debugging
 
 1. Run `npm run dev`.
-2. Several debug launch configs can be found in the VSCode sidemenu.
+2. Several debug launch configs can be found in the VSCode side menu.
