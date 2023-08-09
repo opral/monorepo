@@ -8,7 +8,7 @@ import {
 	Show,
 	onMount,
 } from "solid-js"
-import { Messages } from "./Messages.jsx"
+import { Message } from "./Message.jsx"
 import { Layout as EditorLayout } from "./Layout.jsx"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
@@ -16,11 +16,10 @@ import { Meta, Title } from "@solidjs/meta"
 import { EditorStateProvider, useEditorState } from "./State.jsx"
 import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
 import { rpc } from "@inlang/rpc"
-import { ListHeader, messageCount } from "./components/Listheader.jsx"
+import { messageCount } from "./components/Listheader.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import type { RecentProjectType } from "@src/services/local-storage/src/schema.js"
-import { createQuery, type LanguageTag } from "@inlang/app"
 
 export function Page() {
 	return (
@@ -40,7 +39,7 @@ export function Page() {
  */
 function TheActualPage() {
 	const {
-		inlangConfig,
+		inlang,
 		resources,
 		routeParams,
 		repositoryIsCloned,
@@ -65,23 +64,23 @@ function TheActualPage() {
 	 */
 
 	const messages = createMemo(() => {
-		const result: {
-			[id: string]: {
-				[language: LanguageTag]: LintedMessage | undefined
-			}
-		} = {}
-		for (const resource of resources) {
-			for (const id of query(resource).includedMessageIds()) {
-				// defining the initial object, otherwise the following assignment will fail
-				// with "cannot set property 'x' of undefined"
-				if (result[id] === undefined) {
-					result[id] = {}
-				}
-				const message = createQuery(resource).get({ where: id }) as LintedMessage
-				result[id]![resource.languageTag.name] = message
-			}
-		}
-		return result
+		// const result: {
+		// 	[id: string]: {
+		// 		[language: LanguageTag]: LintedMessage | undefined
+		// 	}
+		// } = {}
+		// for (const resource of resources) {
+		// 	for (const id of query(resource).includedMessageIds()) {
+		// 		// defining the initial object, otherwise the following assignment will fail
+		// 		// with "cannot set property 'x' of undefined"
+		// 		if (result[id] === undefined) {
+		// 			result[id] = {}
+		// 		}
+		// 		const message = createQuery(resource).get({ where: id }) as LintedMessage
+		// 		result[id]![resource.languageTag.name] = message
+		// 	}
+		// }
+		return inlang()?.query.messages.getAll()
 	})
 
 	onMount(() => {
@@ -134,12 +133,12 @@ function TheActualPage() {
 				<Match when={repositoryIsCloned.error}>
 					<p class="text-danger">{repositoryIsCloned.error.message}</p>
 				</Match>
-				<Match when={inlangConfig.error}>
+				{/* <Match when={inlang()?.errors.module || inlang()?.errors.plugin || inlang()?.errors.lintRules}>
 					<p class="text-danger">
-						An error occurred while initializing the config: {inlangConfig.error.message}
+						An error occurred while initializing the config: {inlang.error.message}
 					</p>
-				</Match>
-				<Match when={repositoryIsCloned.loading || inlangConfig.loading}>
+				</Match> */}
+				<Match when={repositoryIsCloned.loading || inlang() === undefined}>
 					<div class="flex flex-col grow justify-center items-center min-w-full gap-2">
 						{/* sl-spinner need a own div otherwise the spinner has a bug. The wheel is rendered on the outer div  */}
 						<div>
@@ -179,31 +178,31 @@ function TheActualPage() {
 				</Match>
 				<Match when={doesInlangConfigExist()}>
 					<div>
-						<ListHeader messages={messages} />
+						{/* <ListHeader messages={messages()} /> */}
 						<TourHintWrapper
 							currentId="textfield"
 							position="bottom-left"
 							offset={{ x: 110, y: 144 }}
 							isVisible={tourStep() === "textfield"}
 						>
-							<For each={Object.keys(messages())}>
-								{(id) => {
-									return <Messages messages={messages()[id]!} />
+							<For each={messages()}>
+								{(message) => {
+									return <Message message={message} />
 								}}
 							</For>
 						</TourHintWrapper>
 						<div
 							class="flex flex-col h-[calc(100vh_-_288px)] grow justify-center items-center min-w-full gap-2"
-							classList={{
-								["hidden"]:
-									messageCount(
-										messages,
-										filteredLanguageTags(),
-										textSearch(),
-										filteredLintRules(),
-										filteredId(),
-									) !== 0,
-							}}
+							// classList={{
+							// 	["hidden"]:
+							// 		messageCount(
+							// 			messages,
+							// 			filteredLanguageTags(),
+							// 			textSearch(),
+							// 			filteredLintRules(),
+							// 			filteredId(),
+							// 		) !== 0,
+							// }}
 						>
 							<NoMatchPlaceholder />
 							<p class="text-base font-medium text-left text-on-background">

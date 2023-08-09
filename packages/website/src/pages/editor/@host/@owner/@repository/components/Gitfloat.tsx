@@ -28,7 +28,7 @@ export const Gitfloat = () => {
 		fs,
 		setLastPullTime,
 		tourStep,
-		inlangConfig,
+		inlang,
 	} = useEditorState()
 	const [localStorage] = useLocalStorage()
 
@@ -248,7 +248,7 @@ export const Gitfloat = () => {
 					offset={{ x: 0, y: 60 }}
 					isVisible={
 						(tourStep() === "github-login" || tourStep() === "fork-repository") &&
-						inlangConfig() !== undefined
+						inlang() !== undefined
 					}
 				>
 					<div class="w-full flex justify-start items-center rounded-lg bg-inverted-surface shadow-xl ">

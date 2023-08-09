@@ -20,7 +20,7 @@ interface Filter {
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	const {
-		inlangConfig,
+		inlang,
 		repositoryIsCloned,
 		setTextSearch,
 		filteredLintRules,
@@ -66,7 +66,7 @@ export function Layout(props: { children: JSXElement }) {
 		if (
 			newFilter !== undefined &&
 			!selectedFilters().some((filter) => filter.name === newFilter.name) &&
-			(newFilter.name !== "Linting" || inlangConfig()?.lint?.rules)
+			(newFilter.name !== "Linting" || inlang()?.lint?.reports)
 		) {
 			setSelectedFilters([...selectedFilters(), newFilter])
 		}
@@ -102,7 +102,7 @@ export function Layout(props: { children: JSXElement }) {
 			repositoryIsCloned.error === undefined &&
 			repositoryIsCloned.loading === false &&
 			isLessThanHalfASecondAgo(repositoryIsCloned()!) &&
-			inlangConfig()
+			inlang()
 		) {
 			if (filteredLanguageTags().length > 0) {
 				addFilter("Language")
@@ -110,7 +110,7 @@ export function Layout(props: { children: JSXElement }) {
 				// 	setFilteredLanguages(onlyLanguagesTheUserSpeaks())
 				// 	addFilter("Language")
 			} else {
-				setFilteredLanguageTags(inlangConfig()!.languageTags)
+				setFilteredLanguageTags(inlang()!.config().languageTags)
 			}
 		}
 	})
@@ -171,13 +171,13 @@ export function Layout(props: { children: JSXElement }) {
 				<div class="flex justify-between gap-2 py-5 sticky top-[72px] z-30 bg-background">
 					<div class="absolute -left-2 w-[calc(100%_+_16px)] h-full -translate-y-5 bg-background" />
 					<div class="flex z-20 justify-between gap-2 items-center">
-						<Show when={inlangConfig()}>
+						<Show when={inlang()}>
 							<For each={filters}>
 								{(filter) => (
 									<Show
 										when={
 											selectedFilters().includes(filter) &&
-											(filter.name !== "Linting" || inlangConfig()?.lint?.rules)
+											(filter.name !== "Linting" || inlang()?.lint?.reports())
 										}
 									>
 										<TourHintWrapper
@@ -193,7 +193,7 @@ export function Layout(props: { children: JSXElement }) {
 							</For>
 							<Show
 								when={
-									inlangConfig()?.lint?.rules
+									inlang()?.lint?.reports()
 										? selectedFilters().length !== filters.length
 										: selectedFilters().length !== filters.length - 1
 								}
@@ -202,7 +202,7 @@ export function Layout(props: { children: JSXElement }) {
 										prop:size="small"
 										onClick={() => {
 											setFilteredLanguageTags(
-												setFilteredLanguageTags(() => inlangConfig()!.languageTags),
+												setFilteredLanguageTags(() => inlang()?.config().languageTags),
 											)
 											setFilteredLintRules([])
 											setSelectedFilters([])
@@ -225,7 +225,7 @@ export function Layout(props: { children: JSXElement }) {
 												<Show
 													when={
 														!selectedFilters().includes(filter) &&
-														(filter.name !== "Linting" || inlangConfig()?.lint?.rules)
+														(filter.name !== "Linting" || inlang()?.lint?.reports())
 													}
 												>
 													<sl-menu-item>
@@ -233,8 +233,8 @@ export function Layout(props: { children: JSXElement }) {
 															onClick={() => {
 																if (filter.name === "Linting" && filteredLintRules.length === 0) {
 																	setFilteredLintRules(
-																		inlangConfig()
-																			?.lint?.rules?.flat()
+																		inlang()
+																			?.lint?.reports?.flat()
 																			.map((rule) => rule.id) ?? [],
 																	)
 																}
@@ -394,16 +394,16 @@ function BranchMenu() {
 }
 
 function LanguageFilter(props: { clearFunction: any }) {
-	const { inlangConfig, setFilteredLanguageTags, filteredLanguageTags } = useEditorState()
+	const { inlang, setFilteredLanguageTags, filteredLanguageTags } = useEditorState()
 
 	onMount(() => {
 		if (filteredLanguageTags().length === 0 || filteredLanguageTags() === undefined) {
-			setFilteredLanguageTags(() => inlangConfig()!.languageTags)
+			setFilteredLanguageTags(() => inlang()?.config()?.languageTags)
 		}
 	})
 
 	return (
-		<Show when={inlangConfig() && filteredLanguageTags() && filteredLanguageTags().length > 0}>
+		<Show when={inlang()?.config() && filteredLanguageTags() && filteredLanguageTags().length > 0}>
 			<sl-select
 				prop:name="Language Select"
 				prop:placeholder="none"
@@ -435,30 +435,30 @@ function LanguageFilter(props: { clearFunction: any }) {
 					<span class="text-left text-outline-variant grow">Select</span>
 					<a
 						class="cursor-pointer link link-primary opacity-75"
-						onClick={() => setFilteredLanguageTags(() => inlangConfig()!.languageTags)}
+						onClick={() => setFilteredLanguageTags(() => inlang()?.config()?.languageTags)}
 					>
 						All
 					</a>
 					<a
 						class="cursor-pointer link link-primary opacity-75"
 						// filter all except the source language
-						onClick={() => setFilteredLanguageTags([inlangConfig()!.sourceLanguageTag])}
+						onClick={() => setFilteredLanguageTags([inlang()?.config()?.sourceLanguageTag])}
 					>
 						None
 					</a>
 				</div>
 				<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
 				<div class="max-h-[300px] overflow-y-auto text-sm">
-					<For each={inlangConfig()?.languageTags}>
+					<For each={inlang()?.config()?.languageTags}>
 						{(language) => (
 							<sl-option
 								prop:value={language}
 								prop:selected={filteredLanguageTags().includes(language)}
-								prop:disabled={language === inlangConfig()?.sourceLanguageTag}
-								class={language === inlangConfig()?.sourceLanguageTag ? "opacity-50" : ""}
+								prop:disabled={language === inlang()?.config()?.sourceLanguageTag}
+								class={language === inlang()?.config()?.sourceLanguageTag ? "opacity-50" : ""}
 							>
 								{language}
-								{language === inlangConfig()?.sourceLanguageTag ? (
+								{language === inlang()?.config()?.sourceLanguageTag ? (
 									<sl-badge prop:variant="neutral" class="relative translate-x-3">
 										<span class="after:content-['ref'] after:text-background" />
 									</sl-badge>
@@ -475,10 +475,10 @@ function LanguageFilter(props: { clearFunction: any }) {
 }
 
 function LintFilter(props: { clearFunction: any }) {
-	const { inlangConfig, filteredLintRules, setFilteredLintRules } = useEditorState()
+	const { inlang, filteredLintRules, setFilteredLintRules } = useEditorState()
 
 	const lintRuleIds = () =>
-		inlangConfig()
+		inlang()
 			?.lint?.rules?.flat()
 			.map((rule) => rule.id) ?? []
 

@@ -20,6 +20,7 @@ import type {
 	VariableReference,
 	LintReport,
 	LanguageTag,
+	Variant,
 } from "@inlang/app"
 
 /**
@@ -29,8 +30,9 @@ export function PatternEditor(props: {
 	sourceLanguageTag: LanguageTag
 	languageTag: LanguageTag
 	id: Message["id"]
-	sourceMessage?: Message
-	message: Message | undefined
+	variableReference: VariableReference[]
+	sourceMessage?: Message["body"][LanguageTag]
+	variant: Variant | undefined
 }) {
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const {
@@ -42,7 +44,6 @@ export function PatternEditor(props: {
 		routeParams,
 		filteredLanguageTags,
 	} = useEditorState()
-	const [variableReferences, setVariableReferences] = createSignal<VariableReference[]>([])
 
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
@@ -66,13 +67,6 @@ export function PatternEditor(props: {
 	}
 
 	onMount(() => {
-		if (props.sourceMessage) {
-			setVariableReferences(
-				props.sourceMessage.pattern.elements
-					.filter((element) => element.type === "Placeholder")
-					.map((element) => element.body) as ast.VariableReference[],
-			)
-		}
 		document.addEventListener("focusin", handleLineItemFocusIn)
 		return () => {
 			document.removeEventListener("focusin", handleLineItemFocusIn)
@@ -82,23 +76,23 @@ export function PatternEditor(props: {
 	//create editor
 	let textArea!: HTMLDivElement
 	const editor = createTiptapEditor(() => {
-		if (
-			localChanges().some(
-				(change) =>
-					change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
-			)
-		) {
-			return getEditorConfig(
-				textArea,
-				localChanges().find(
-					(change) =>
-						change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
-				)?.newCopy,
-				variableReferences(),
-			)
-		} else {
-			return getEditorConfig(textArea, props.message, variableReferences())
-		}
+		// if (
+		// 	localChanges().some(
+		// 		(change) =>
+		// 			change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
+		// 	)
+		// ) {
+		// 	return getEditorConfig(
+		// 		textArea,
+		// 		localChanges().find(
+		// 			(change) =>
+		// 				change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
+		// 		)?.newCopy,
+		// 		props.variableReference,
+		// 	)
+		// } else {
+			return getEditorConfig(textArea, props.variant, props.variableReference)
+		// }
 	})
 
 	const getEditorFocus = () => {
@@ -111,27 +105,23 @@ export function PatternEditor(props: {
 		}
 	}
 
-	/** the resource the message belongs to */
+	/** the resource the variant belongs to */
 	const resource = () =>
 		resources.find((resource) => resource.languageTag.name === props.languageTag)!
 
-	/** copy of the message to conduct and track changes */
-	const copy: () => ast.Message | undefined = () =>
-		props.message
-			? // clone message
-			  structuredClone(props.message)
-			: // new message
+	/** copy of the variant to conduct and track changes */
+	const copy: () => Variant | undefined = () =>
+		props.variant
+			? // clone variant
+			  structuredClone(props.variant)
+			: // new variant
 			  {
-					type: "Message",
-					id: {
-						type: "Identifier",
-						name: props.id,
-					},
-					pattern: {
-						type: "Pattern",
-						elements: [{ type: "Text", value: "" }],
-					},
-			  }
+					match: {},
+					pattern: [{
+							type: "Text",
+							value: ""
+					}]
+			  } satisfies Variant
 
 	// const [_isFork] = createResource(
 	// 	() => localStorage.user,
@@ -150,33 +140,33 @@ export function PatternEditor(props: {
 	// 	}
 	// );
 
-	const hasChanges = () => {
-		const _updatedText =
-			JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
-		let compare_elements
-		if (
-			localChanges().some(
-				(change) =>
-					change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
-			)
-		) {
-			compare_elements = localChanges().find(
-				(change) =>
-					change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
-			)?.newCopy.pattern.elements
-		} else {
-			compare_elements = props.message?.pattern.elements
-		}
-		if (_updatedText) {
-			if (JSON.stringify(_updatedText) !== JSON.stringify(compare_elements)) {
-				return _updatedText
-			} else {
-				return ""
-			}
-		} else {
-			return false
-		}
-	}
+	// const hasChanges = () => {
+	// 	const _updatedText =
+	// 		JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
+	// 	let compare_elements
+	// 	if (
+	// 		localChanges().some(
+	// 			(change) =>
+	// 				change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
+	// 		)
+	// 	) {
+	// 		compare_elements = localChanges().find(
+	// 			(change) =>
+	// 				change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
+	// 		)?.newCopy.pattern.elements
+	// 	} else {
+	// 		compare_elements = props.message?.pattern.elements
+	// 	}
+	// 	if (_updatedText) {
+	// 		if (JSON.stringify(_updatedText) !== JSON.stringify(compare_elements)) {
+	// 			return _updatedText
+	// 		} else {
+	// 			return ""
+	// 		}
+	// 	} else {
+	// 		return false
+	// 	}
+	// }
 
 	/**
 	 * Saves the changes of the message.
@@ -232,102 +222,103 @@ export function PatternEditor(props: {
 
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
 
-	const handleMachineTranslate = async () => {
-		if (props.sourceMessage === undefined) {
-			return showToast({
-				variant: "info",
-				title: "Can't translate if the reference message does not exist.",
-			})
-		}
-		const textArr: Array<string> = []
-		props.sourceMessage.pattern.elements.map((element) => {
-			if (element.type === "Text") {
-				textArr.push(element.value)
-			} else if (element.type === "Placeholder") {
-				textArr.push(element.body.name)
-			}
-		})
-		const text = textArr.join("")
-		//const text = props.referenceMessage.pattern.elements[0]?.value as string
-		if (text === undefined) {
-			return showToast({
-				variant: "info",
-				title: "Can't translate empty text",
-			})
-		} else if (localStorage.showMachineTranslationWarning) {
-			setShowMachineLearningWarningDialog(true)
-			return machineLearningWarningDialog?.show()
-		}
-		setMachineTranslationIsLoading(true)
-		const [translation, exception] = await rpc.machineTranslate({
-			text,
-			sourceLanguageTag: sourceResource()!.languageTag.name,
-			targetLanguageTag: props.languageTag,
-		})
-		if (exception) {
-			showToast({
-				variant: "warning",
-				title: "Machine translation failed.",
-				message: exception.message,
-			})
-		} else {
-			const _copy: ast.Message | undefined = copy()
-			if (_copy) {
-				_copy.pattern.elements = [{ type: "Text", value: translation }] as Array<
-					ast.Text | ast.Placeholder
-				>
-				editor().commands.setContent(setTipTapMessage(_copy))
-			}
-		}
-		setMachineTranslationIsLoading(false)
-	}
+	// const handleMachineTranslate = async () => {
+	// 	if (props.sourceMessage === undefined) {
+	// 		return showToast({
+	// 			variant: "info",
+	// 			title: "Can't translate if the reference message does not exist.",
+	// 		})
+	// 	}
+	// 	const textArr: Array<string> = []
+	// 	props.sourceMessage.pattern.elements.map((element) => {
+	// 		if (element.type === "Text") {
+	// 			textArr.push(element.value)
+	// 		} else if (element.type === "Placeholder") {
+	// 			textArr.push(element.body.name)
+	// 		}
+	// 	})
+	// 	const text = textArr.join("")
+	// 	//const text = props.referenceMessage.pattern.elements[0]?.value as string
+	// 	if (text === undefined) {
+	// 		return showToast({
+	// 			variant: "info",
+	// 			title: "Can't translate empty text",
+	// 		})
+	// 	} else if (localStorage.showMachineTranslationWarning) {
+	// 		setShowMachineLearningWarningDialog(true)
+	// 		return machineLearningWarningDialog?.show()
+	// 	}
+	// 	setMachineTranslationIsLoading(true)
+	// 	const [translation, exception] = await rpc.machineTranslate({
+	// 		text,
+	// 		sourceLanguageTag: sourceResource()!.languageTag.name,
+	// 		targetLanguageTag: props.languageTag,
+	// 	})
+	// 	if (exception) {
+	// 		showToast({
+	// 			variant: "warning",
+	// 			title: "Machine translation failed.",
+	// 			message: exception.message,
+	// 		})
+	// 	} else {
+	// 		const _copy: ast.Message | undefined = copy()
+	// 		if (_copy) {
+	// 			_copy.pattern.elements = [{ type: "Text", value: translation }] as Array<
+	// 				ast.Text | ast.Placeholder
+	// 			>
+	// 			editor().commands.setContent(setTipTapMessage(_copy))
+	// 		}
+	// 	}
+	// 	setMachineTranslationIsLoading(false)
+	// }
 
-	const getNotificationHints = () => {
-		const notifications: Array<Notification> = []
-		if (props.message) {
-			const lintReports = getLintReports(props.message as LintedMessage)
-			const filteredReports = lintReports.filter((report) =>
-				handleMissingMessage(report, filteredLanguageTags()),
-			)
-			if (filteredReports) {
-				filteredReports.map((lint: LintReport) => {
-					notifications.push({
-						notificationTitle: lint.id.includes(".") ? lint.id.split(".")[1]! : lint.id,
-						notificationDescription: lint.message,
-						notificationType: lint.level,
-					})
-				})
-			}
-		}
+	// const getNotificationHints = () => {
+	// 	const notifications: Array<Notification> = []
+	// 	if (props.message) {
+	// 		const lintReports = (props.message as LintedMessage)
+	// 		const filteredReports = lintReports.filter((report) =>
+	// 			handleMissingMessage(report, filteredLanguageTags()),
+	// 		)
+	// 		if (filteredReports) {
+	// 			console.log(filteredReports)
+	// 			filteredReports.map((lint: LintReport) => {
+	// 				notifications.push({
+	// 					notificationTitle: lint.id.includes(".") ? lint.id.split(".")[1]! : lint.id,
+	// 					notificationDescription: lint.message,
+	// 					notificationType: lint.level,
+	// 				})
+	// 			})
+	// 		}
+	// 	}
 
-		if (hasChanges() && localStorage.user === undefined) {
-			notifications.push({
-				notificationTitle: "Access:",
-				notificationDescription: "Sign in to commit changes.",
-				notificationType: "warn",
-			})
-		}
-		if (hasChanges() && userIsCollaborator() === false) {
-			notifications.push({
-				notificationTitle: "Fork:",
-				notificationDescription: "Fork the project to commit changes.",
-				notificationType: "info",
-			})
-		}
-		return notifications
-	}
+	// 	if (hasChanges() && localStorage.user === undefined) {
+	// 		notifications.push({
+	// 			notificationTitle: "Access:",
+	// 			notificationDescription: "Sign in to commit changes.",
+	// 			notificationType: "warn",
+	// 		})
+	// 	}
+	// 	if (hasChanges() && userIsCollaborator() === false) {
+	// 		notifications.push({
+	// 			notificationTitle: "Fork:",
+	// 			notificationDescription: "Fork the project to commit changes.",
+	// 			notificationType: "info",
+	// 		})
+	// 	}
+	// 	return notifications
+	// }
 
-	const handleShortcut = (event: KeyboardEvent) => {
-		if (
-			((event.ctrlKey && event.code === "KeyS" && navigator.platform.includes("Win")) ||
-				(event.metaKey && event.code === "KeyS" && navigator.platform.includes("Mac"))) &&
-			hasChanges() &&
-			userIsCollaborator()
-		) {
-			event.preventDefault()
-			handleSave()
-		}
-	}
+	// const handleShortcut = (event: KeyboardEvent) => {
+	// 	if (
+	// 		((event.ctrlKey && event.code === "KeyS" && navigator.platform.includes("Win")) ||
+	// 			(event.metaKey && event.code === "KeyS" && navigator.platform.includes("Mac"))) &&
+	// 		hasChanges() &&
+	// 		userIsCollaborator()
+	// 	) {
+	// 		event.preventDefault()
+	// 		handleSave()
+	// 	}
+	// }
 
 	return (
 		// outer element is needed for clickOutside directive
@@ -358,7 +349,7 @@ export function PatternEditor(props: {
 				id="parent"
 				class="w-full text-sm p-[6px] focus-within:border-none focus-within:ring-0 focus-within:outline-none"
 			>
-				<FloatingMenu variableReferences={variableReferences()} editor={editor} />
+				<FloatingMenu variableReferences={props.variableReference} editor={editor} />
 
 				{/* tiptap editor */}
 				<div
@@ -378,7 +369,7 @@ export function PatternEditor(props: {
 			{/* action bar */}
 			<div class="w-[164px] h-8 flex justify-end items-center gap-2">
 				<div class="flex items-center justify-end gap-2">
-					<Show
+					{/* <Show
 						when={
 							JSON.stringify(getTextValue(editor)) === "[]" || getTextValue(editor) === undefined
 						}
@@ -397,8 +388,8 @@ export function PatternEditor(props: {
 							<MaterialSymbolsTranslateRounded slot="prefix" />
 							Machine translate
 						</sl-button>
-					</Show>
-					<Show when={hasChanges() && isLineItemFocused()}>
+					</Show> */}
+					{/* <Show when={hasChanges() && isLineItemFocused()}>
 						<sl-button
 							prop:variant="primary"
 							prop:size="small"
@@ -410,14 +401,14 @@ export function PatternEditor(props: {
 							<Shortcut slot="suffix" color="primary" codes={["ControlLeft", "s"]} />
 							Save
 						</sl-button>
-					</Show>
+					</Show> */}
 				</div>
-				<Show when={!getEditorFocus() && !isLineItemFocused() && hasChanges()}>
+				{/* <Show when={!getEditorFocus() && !isLineItemFocused() && hasChanges()}>
 					<div class="bg-hover-primary w-2 h-2 rounded-full" />
-				</Show>
-				{getNotificationHints().length !== 0 && (
+				</Show> */}
+				{/* {getNotificationHints().length !== 0 && (
 					<NotificationHint notifications={getNotificationHints()} />
-				)}
+				)} */}
 				<Show when={showMachineLearningWarningDialog()}>
 					<sl-dialog prop:label="Machine translations pitfalls" ref={machineLearningWarningDialog}>
 						<ol class="">
