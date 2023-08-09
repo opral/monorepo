@@ -1,6 +1,5 @@
 import raw from "isomorphic-git"
 import http from "isomorphic-git/http/web/index.js"
-import { createNodeishMemoryFs } from "@inlang-git/fs"
 import type { NodeishFilesystem } from "@inlang-git/fs"
 import { github } from "./github.js"
 import { withLazyFetching, transformRemote } from "./helpers.js"
@@ -35,8 +34,8 @@ export type Repository = {
 	// changeBranch: () => unknown
 }
 
-export function open (url: string, args?: { nodeishFs?: NodeishFilesystem, workingDirectory?: string, corsProxy?: string, auth?: unknown }): Repository {
-	const rawFs = args?.nodeishFs ? args.nodeishFs : createNodeishMemoryFs()
+export function open (url: string, args: { nodeishFs: NodeishFilesystem, workingDirectory?: string, corsProxy?: string, auth?: unknown }): Repository {
+	const rawFs = args.nodeishFs
 
 	// parse url in the format of github.com/inlang/example and split it to host, owner and repo
 	const [host, owner, repoName] = [...url.split("/")]
