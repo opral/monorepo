@@ -6,7 +6,7 @@ import { cli } from "../../main.js"
 import { log } from "../../utilities.js"
 import { italic } from "../../utilities/format.js"
 import { nodeFileSystem } from "../../utilities/fs/env/node.js"
-import { getConfig } from "../../utilities/getConfig.js"
+import { getInlang } from "../../utilities/getInlang.js"
 import { getConfigContent } from "../../utilities/getConfigContent.js"
 import { getLanguageFolderPath } from "../../utilities/getLanguageFolderPath.js"
 import { getSupportedLibrary, SupportedLibrary } from "../../utilities/getSupportedLibrary.js"
@@ -106,9 +106,9 @@ export async function initCommandAction() {
 	fs.writeFileSync(inlangConfigPath, configContent)
 
 	// validate the config file
-	const [, errorMessage] = await getConfig({ options: cli.opts() })
-	if (errorMessage) {
-		log.error(errorMessage)
+	const [, error] = await getInlang({ options: cli.opts() })
+	if (error) {
+		log.error(error)
 		return
 	}
 
