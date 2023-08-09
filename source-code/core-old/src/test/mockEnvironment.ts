@@ -1,4 +1,4 @@
-import { createMemoryFs, normalizePath } from "@inlang-git/fs"
+import { createNodeishMemoryFs, normalizePath } from "@inlang-git/fs"
 import { dedent } from "ts-dedent"
 import type { InlangEnvironment } from "../environment/types.js"
 import { initialize$import } from "../environment/$import.js"
@@ -19,7 +19,7 @@ export async function mockEnvironment(args: {
 		paths: string[]
 	}
 }): Promise<InlangEnvironment> {
-	const $fs = createMemoryFs()
+	const $fs = createNodeishMemoryFs()
 	const $import = initialize$import({
 		fs: $fs,
 		fetch,
