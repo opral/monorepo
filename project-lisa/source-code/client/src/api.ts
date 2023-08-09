@@ -33,6 +33,7 @@ export type Repository = {
 	listRemotes: () => Promise<Awaited<ReturnType<typeof raw.listRemotes>> | undefined>
 	log: (args: { dir: string, since: any}) =>  Promise<Awaited<ReturnType<typeof raw.log>>>
 	statusMatrix: (args: { dir:string, filter: any }) => Promise<Awaited<ReturnType<typeof raw.statusMatrix>>>
+	status: (args: { dir: string, filepath: string }) => Promise<Awaited<ReturnType<typeof raw.status>>>
 	mergeUpstream: (args: { branch: string }) => ReturnType<typeof github.request<"POST /repos/{owner}/{repo}/merge-upstream">>
 	isCollaborator: (args: { username: string }) => Promise<boolean>
 	getOrigin: () => Promise<string>
@@ -51,7 +52,6 @@ export type Repository = {
 	// TODO: implement these before publishing api, but not used in badge or editor
 	// currentBranch: () => unknown
 	// changeBranch: () => unknown
-	// status: () => unknown
 }
 
 export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesystem, path?: string, corsProxy?: string, auth?: unknown }): Repository {
@@ -117,6 +117,14 @@ export function load ({ url, fs, corsProxy }: { url: string, fs?: NodeishFilesys
 			} catch (_err) {
 				return undefined
 			}
+		},
+
+		status ({ dir = "/", filepath }) {
+			return raw.status({
+				fs: wrap(rawFs, 'statusMatrix', delayedAction),
+				dir,
+				filepath
+			})
 		},
 
 		statusMatrix ({ dir = "/", filter }) {

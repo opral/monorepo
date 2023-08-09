@@ -24,9 +24,11 @@ file += "bar"
 await repository.fs.writeFile("foo.txt", file)
 
 // TODO: implement status api
-// const status = await repository.status()
+const status = await repository.status()
 
-// if (status.hasChanges) {
-// 	await repository.commit()
-// 	await repository.push()
-// }
+if (status.hasChanges) {
+	await repository.commit()
+
+	// TODO testing strategy?
+	// await repository.push()
+}
