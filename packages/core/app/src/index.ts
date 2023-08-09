@@ -2,6 +2,7 @@ export type { InlangInstance } from "./api.js"
 export { createInlang } from "./createInlang.js"
 export { tryAutoGenerateInlangConfig } from "./tryAutoGenerateConfig.js"
 export { parseConfig } from "./parseConfig.js"
+export { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError } from "./errors.js"
 
 /**
  * -------- RE-EXPORTS --------
