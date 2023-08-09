@@ -1,5 +1,6 @@
 export type { InlangInstance } from "./api.js"
 export { createInlang } from "./createInlang.js"
+export { tryAutoGenerateInlangConfig } from "./tryAutoGenerateConfig.js"
 
 /**
  * -------- RE-EXPORTS --------
