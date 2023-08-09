@@ -6,27 +6,34 @@
  */
 
 import { context } from "esbuild"
+import { glob } from "glob";
 
 // eslint-disable-next-line no-undef
 const isDev = process?.env?.DEV !== undefined
 // eslint-disable-next-line no-undef
 const isTest = process?.env?.TEST !== undefined
 
+
 const entryPoints = [{ in: "./src/main.ts", out: "./main" }]
 if (isTest) {
 	entryPoints.push({ in: "./test/test.ts", out: "./test" });
 	entryPoints.push({ in: "./test/suite.ts", out: "./suite" });
+	const tests = await glob("./test/**/*.test.ts");
+	for (const t of tests) {
+		entryPoints.push({ in: t, out: t })
+	}
 }
 
 const ctx = await context({
 	entryPoints,
 	outdir: "./dist/",
 	outExtension: { '.js': '.cjs' },
-	bundle: true,
+	bundle: !isTest,
 	minify: !isDev && !isTest,
+	format: !isTest ? undefined : 'cjs',
 	platform: "node",
 	sourcemap: isDev || isTest,
-	external: ["vscode"],
+	external: !isTest ? ["vscode"] : [],
 })
 
 if (isDev) {
