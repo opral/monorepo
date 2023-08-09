@@ -1,8 +1,5 @@
 /**
  * This is the build script for the project.
- *
- * It takes the source code and bundles it into a single file
- * that can be imported into an inlang project.
  */
 
 import { context } from "esbuild"
@@ -38,7 +35,7 @@ if (isTest) {
 			...defaultEntryPoints,
 			{ in: "./test/test.ts", out: "./test" },
 			{ in: "./test/suite.ts", out: "./suite" },
-			...tests.map((t) => ({ in: t, out: t }))
+			...tests.map((t) => ({ in: t, out: t.split('.').slice(0, -1).join('.') }))
 		],
 		format: 'cjs',
 		bundle: false,
