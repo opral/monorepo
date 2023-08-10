@@ -41,18 +41,22 @@ export function Layout(props: { children: JSXElement }) {
 	// 	return languages ?? []
 	// }
 
+	const removeFilter = (filterName: string) => {
+		setSelectedFilters(selectedFilters().filter((filter: Filter) => filter.name !== filterName))
+	}
+	
 	const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
 	const [addLanguageText, setAddLanguageText] = createSignal("")
 	const filters: Filter[] = [
 		{
 			name: "Language",
-			icon: () => <IconTranslate class="w-5 h-5" />,
-			component: () => <LanguageFilter clearFunction={removeFilter("Language")} />,
+			icon: <IconTranslate class="w-5 h-5" />,
+			component: <LanguageFilter clearFunction={removeFilter("Language")} />,
 		},
 		{
 			name: "Linting",
-			icon: () => <WarningIcon />,
-			component: () => <LintFilter clearFunction={removeFilter("Linting")} />,
+			icon: <WarningIcon />,
+			component: <LintFilter clearFunction={removeFilter("Linting")} />,
 		},
 	]
 
@@ -68,10 +72,6 @@ export function Layout(props: { children: JSXElement }) {
 		) {
 			setSelectedFilters([...selectedFilters(), newFilter])
 		}
-	}
-
-	const removeFilter = (filterName: string) => {
-		setSelectedFilters(selectedFilters().filter((filter: Filter) => filter.name !== filterName))
 	}
 
 	//add linting rule to filter
