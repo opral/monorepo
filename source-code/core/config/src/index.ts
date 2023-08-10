@@ -1,1 +1,1 @@
-export * from "./schema.js"
+export { InlangConfig, JSON } from "./schema.js"
