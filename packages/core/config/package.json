@@ -16,7 +16,7 @@
 		"build": "tsc --build ./tsconfig.build.json",
 		"dev": "tsc --watch",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "tsc --noEmit",
+		"test": "tsc --noEmit && vitest run",
 		"test:watch": "",
 		"---- LINT ----------------------------------------------------------": "",
 		"lint": "cd ../.. && npm run lint:base ./source-code/core",
@@ -35,6 +35,6 @@
 	},
 	"license": "Apache-2.0",
 	"devDependencies": {
-		"tsd": "^0.28.1"
+		"vitest": "^0.34.1"
 	}
 }
