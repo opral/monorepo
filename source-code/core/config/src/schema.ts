@@ -1,4 +1,5 @@
 import { Static, Type } from "@sinclair/typebox"
+import { LanguageTag } from "@inlang/language-tag"
 
 /**
  * The options of a plugin.
@@ -58,9 +59,8 @@ export const PluginSettings = Type.Object({
 
 export type InlangConfig = Static<typeof InlangConfig>
 export const InlangConfig = Type.Object({
-	// TODO: Validate languageTags with `@inlang/language-tag` library.
-	sourceLanguageTag: Type.String(),
-	languageTags: Type.Array(Type.String()),
+	sourceLanguageTag: LanguageTag,
+	languageTags: Type.Array(LanguageTag),
 	/**
 	 * The modules to load.
 	 *
