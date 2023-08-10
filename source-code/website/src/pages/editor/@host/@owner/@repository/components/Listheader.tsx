@@ -52,7 +52,7 @@ export const messageCount = (
 
 export const ListHeader = (props: ListHeaderProps) => {
 	const {
-		inlangConfig,
+		inlang,
 		setFilteredLintRules,
 		filteredLintRules,
 		filteredLanguageTags,
@@ -63,19 +63,12 @@ export const ListHeader = (props: ListHeaderProps) => {
 		tourStep,
 	} = useEditorState()
 
-	const lintRuleIds = () =>
-		inlangConfig()
-			?.lint?.rules?.flat()
-			.map((rule) => rule.id) ?? []
-
 	const getLintSummary = () => {
 		const lintSummary: Array<RuleSummaryItem> = []
 
 		// loop over lints
-		lintRuleIds().map((lintId) => {
-			const lintRule = inlangConfig()
-				?.lint?.rules.flat()
-				.find((rule) => rule.id === lintId)
+		inlang()?.meta.lintRules().map((lintRule) => lintRule)
+		.map((lintRule) => {
 			// loop over messages
 			let counter = 0
 			for (const id of Object.keys(props.messages())) {
@@ -84,7 +77,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 						props.messages()[id]!,
 						filteredLanguageTags(),
 						textSearch(),
-						[lintId],
+						[lintRule.id],
 						filteredId(),
 					) as LintedMessage[],
 				).filter((report) => handleMissingMessage(report, filteredLanguageTags()))
@@ -95,7 +88,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 				counter !== 0 &&
 				(filteredLintRules().length === 0 || filteredLintRules().includes(lintRule.id))
 			) {
-				lintSummary.push({ id: lintId, amount: counter, rule: lintRule!, level: lintRule.level })
+				lintSummary.push({ id: lintRule.id, amount: counter, rule: lintRule!, level: lintRule.level })
 			}
 		})
 		return lintSummary

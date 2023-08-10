@@ -9,7 +9,7 @@ import IconTranslate from "~icons/material-symbols/translate"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { showToast } from "@src/components/Toast.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
-import type { LanguageTag } from "@inlang/app"
+import type { LanguageTag, LintRule } from "@inlang/app"
 
 interface Filter {
 	name: string
@@ -217,9 +217,7 @@ export function Layout(props: { children: JSXElement }) {
 															onClick={() => {
 																if (filter.name === "Linting" && filteredLintRules.length === 0) {
 																	setFilteredLintRules(
-																		inlang()
-																			?.lint?.reports?.flat()
-																			.map((rule) => rule.id) ?? [],
+																		inlang()?.meta.lintRules().map((lintRule) => lintRule.id) ?? [],
 																	)
 																}
 																addFilter(filter.name)
@@ -454,12 +452,6 @@ function LanguageFilter(props: { clearFunction: any }) {
 
 function LintFilter(props: { clearFunction: any }) {
 	const { inlang, filteredLintRules, setFilteredLintRules } = useEditorState()
-
-	const lintRuleIds = () =>
-		inlang()
-			?.lint?.rules?.flat()
-			.map((rule) => rule.id) ?? []
-
 	return (
 		<sl-select
 			prop:name="Lint Filter Select"
@@ -506,7 +498,7 @@ function LintFilter(props: { clearFunction: any }) {
 				<span class="text-left text-outline-variant grow">Select</span>
 				<a
 					class="cursor-pointer link link-primary opacity-75"
-					onClick={() => setFilteredLintRules(lintRuleIds())}
+					onClick={() => setFilteredLintRules(inlang()?.meta.lintRules().map((lintRule) => lintRule.id) ?? [])}
 				>
 					All
 				</a>
@@ -519,9 +511,9 @@ function LintFilter(props: { clearFunction: any }) {
 			</div>
 			<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
 			<div class="max-h-[300px] overflow-y-auto">
-				<For each={lintRuleIds()}>
-					{(id) => (
-						<sl-option prop:value={id}>{id.includes(".") ? id.split(".")[1] : id}</sl-option>
+				<For each={inlang()?.meta.lintRules().map((lintRule) => lintRule) ?? []}>
+					{(lintRule) => (
+						<sl-option prop:value={lintRule.id}>{lintRule.displayName.en}</sl-option>
 					)}
 				</For>
 			</div>
