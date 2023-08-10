@@ -30,8 +30,6 @@ export function Layout(props: { children: JSXElement }) {
 		userIsCollaborator,
 		languageTags,
 		setLanguageTags,
-		resources,
-		setResources,
 		tourStep,
 	} = useEditorState()
 
@@ -139,26 +137,12 @@ export function Layout(props: { children: JSXElement }) {
 		}
 		setLanguageTags([...languageTags(), languageTag])
 		setFilteredLanguageTags([...filteredLanguageTags(), languageTag])
-		setResources([
-			...resources,
-			{
-				type: "Resource",
-				languageTag: {
-					type: "LanguageTag",
-					name: languageTag,
-				},
-				body: [],
-			},
-		])
-	}
-
-	const isAddingResourcePossible = () => {
-		// @ts-expect-error - metadata doesn't exist anymore
-		if (resources.some((resource) => !resource.metadata || resource.metadata.space)) {
-			return true
-		} else {
-			return false
-		}
+		inlang()?.setConfig({
+			...(inlang()?.config() || {}),
+			sourceLanguageTag: inlang()?.config().sourceLanguageTag || '',
+			modules: inlang()?.config().modules || [],
+			languageTags: [...languageTags(), languageTag],
+		})
 	}
 
 	return (
@@ -202,7 +186,7 @@ export function Layout(props: { children: JSXElement }) {
 										prop:size="small"
 										onClick={() => {
 											setFilteredLanguageTags(
-												setFilteredLanguageTags(() => inlang()?.config().languageTags),
+												setFilteredLanguageTags(inlang()?.config().languageTags || []),
 											)
 											setFilteredLintRules([])
 											setSelectedFilters([])
@@ -291,16 +275,10 @@ export function Layout(props: { children: JSXElement }) {
 					prop:value={addLanguageText()}
 					onInput={(e) => setAddLanguageText(e.currentTarget.value)}
 				/>
-				<Show when={!isAddingResourcePossible()}>
-					<p class="text-xs pb-4 -mt-4 pr-8 text-danger">
-						Your plugin is using metadata to parse resources. This is not yet supported.
-					</p>
-				</Show>
 				<sl-button
 					class="w-full"
 					prop:size={"small"}
 					prop:variant={"primary"}
-					prop:disabled={!isAddingResourcePossible()}
 					onClick={() => {
 						addLanguage(addLanguageText())
 						setAddLanguageModalOpen(false)
@@ -398,7 +376,7 @@ function LanguageFilter(props: { clearFunction: any }) {
 
 	onMount(() => {
 		if (filteredLanguageTags().length === 0 || filteredLanguageTags() === undefined) {
-			setFilteredLanguageTags(() => inlang()?.config()?.languageTags)
+			setFilteredLanguageTags(() => inlang()?.config()?.languageTags || [])
 		}
 	})
 
@@ -435,14 +413,14 @@ function LanguageFilter(props: { clearFunction: any }) {
 					<span class="text-left text-outline-variant grow">Select</span>
 					<a
 						class="cursor-pointer link link-primary opacity-75"
-						onClick={() => setFilteredLanguageTags(() => inlang()?.config()?.languageTags)}
+						onClick={() => setFilteredLanguageTags(() => inlang()?.config()?.languageTags || [])}
 					>
 						All
 					</a>
 					<a
 						class="cursor-pointer link link-primary opacity-75"
 						// filter all except the source language
-						onClick={() => setFilteredLanguageTags([inlang()?.config()?.sourceLanguageTag])}
+						onClick={() => setFilteredLanguageTags(() => inlang()?.config()?.languageTags || [])}
 					>
 						None
 					</a>

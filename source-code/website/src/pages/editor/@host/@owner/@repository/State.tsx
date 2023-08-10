@@ -10,7 +10,6 @@ import {
 	useContext,
 } from "solid-js"
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
-import { createStore, SetStoreFunction } from "solid-js/store"
 import type { LocalStorageSchema } from "@src/services/local-storage/index.js"
 import { getLocalStorage, useLocalStorage } from "@src/services/local-storage/index.js"
 import { github } from "@src/services/github/index.js"
@@ -184,15 +183,9 @@ type EditorStateSchema = {
 	setLocalChanges: Setter<Message[]>
 
 	/**
-	 * The resources in a given repository.
-	 */
-	resources: Message[] // Show be linted
-	setResources: SetStoreFunction<Message[]> // Show be linted
-
-	/**
 	 * The reference resource.
 	 */
-	sourceResource: () => Message[] | undefined
+	sourceMessages: () => Message[] | undefined
 
 	/**
 	 * Whether the user is a collaborator of the repository.
@@ -289,8 +282,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	/**
 	 * The reference resource.
 	 */
-	const sourceResource = () =>
-		resources.filter((resource) => resource.body["languageTag"] === sourceLanguageTag())
+	const sourceMessages = () =>
+		inlang()?.query.messages.getAll()
+		.filter((message) => message.body["languageTag"] === sourceLanguageTag())
 
 	const [localStorage] = useLocalStorage() ?? []
 
@@ -624,49 +618,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 	)
 
-	/**
-	 * The resources.
-	 *
-	 * Read below why the setter function is called setOrigin.
-	 */
-	const [resources, setOriginResources] = createStore<Message[]>([])
-
-	/**
-	 * Custom setStore function to trigger filesystem writes on changes.
-	 *
-	 * Listening to changes on an entire store is not possible, see
-	 * https://github.com/solidjs/solid/discussions/829. A workaround
-	 * (which seems much better than effects anyways) is to modify the
-	 * setStore function to trigger the desired side-effect.
-	 */
-	const setResources: typeof setOriginResources = (...args: any) => {
-		const localStorage = getLocalStorage()
-		if (inlang === undefined || localStorage?.user === undefined) {
-			return
-		}
-
-		// write to filesystem
-		writeResources({
-			inlang: inlang()!,
-			resources: args[0],
-			setFsChange,
-		})
-	}
-
 	const [lastPullTime, setLastPullTime] = createSignal<Date>()
-
-	/**
-	 * If a change in the filesystem is detected, re-read the resources.
-	 */
-	createEffect(() => {
-		if (inlang() && fsChange()) { // TODO: Error Handling
-			// setting the origin store because this should not trigger
-			// writing to the filesystem.
-			createQuery(mockData).getAll()
-			// readResources(inlang()!).then((r) => r && setOriginResources(r))
-			// inlang()?.query.messages.getAll()
-		}
-	})
 
 	return (
 		<EditorStateContext.Provider
@@ -697,9 +649,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setFilteredLintRules,
 					localChanges,
 					setLocalChanges,
-					resources,
-					setResources,
-					sourceResource,
+					sourceMessages,
 					userIsCollaborator,
 					repoIsPrivate,
 					setLastPush,
@@ -859,34 +809,6 @@ export async function pushChanges(args: {
 	} catch (error) {
 		return [undefined, (error as PushException) ?? "h3ni329 Unknown error"]
 	}
-}
-
-async function readResources(inlang: InlangInstance) {
-	// eslint-disable-next-line @typescript-eslint/no-empty-function
-	const messages = createQuery(mockData)
-	// const messages = inlang.query.messages.getAll()
-	if (!messages) return
-
-	//const [lintedResources] = await lint({ config, resources })
-	const lintedReports = inlang.lint.reports()
-	//const lintedResources = lintedReports.map((report) => {})
-	return messages
-}
-
-async function writeResources(args: {
-	inlang: InlangInstance
-	resources: Message[]
-	setFsChange: (date: Date) => void
-}) {
-	for (const resource of args.resources) {
-		args.inlang.query.messages.upsert({ where: { id: resource.id }, data: resource })
-	}
-	args.setFsChange(new Date())
-	// showToast({
-	// 	variant: "info",
-	// 	title: "The change has been saved.",
-	// 	message: `Don't forget to push the changes.`,
-	// })
 }
 
 async function _unpushedChanges(args: {

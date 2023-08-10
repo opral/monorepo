@@ -40,7 +40,6 @@ export function Page() {
 function TheActualPage() {
 	const {
 		inlang,
-		resources,
 		routeParams,
 		repositoryIsCloned,
 		doesInlangConfigExist,
