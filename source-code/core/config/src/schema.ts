@@ -58,6 +58,7 @@ export const PluginSettings = Type.Object({
 
 export type InlangConfig = Static<typeof InlangConfig>
 export const InlangConfig = Type.Object({
+	// TODO: Validate languageTags with `@inlang/language-tag` library.
 	sourceLanguageTag: Type.String(),
 	languageTags: Type.Array(Type.String()),
 	/**
