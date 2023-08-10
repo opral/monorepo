@@ -19,25 +19,27 @@ import type { ModuleImportError, ModuleError, ResolveModulesFunction } from "@in
 // TODO: remove all getters and use solid store for whole object, just expose `setConfig`
 export type InlangInstance = {
 	meta: {
-		plugins: () => Awaited<ReturnType<ResolveModulesFunction>>["data"]["meta"]["plugins"]
-		lintRules: () => Awaited<ReturnType<ResolveModulesFunction>>["data"]["meta"]["lintRules"]
+		plugins: Observable<Awaited<ReturnType<ResolveModulesFunction>>["data"]["meta"]["plugins"]>
+		lintRules: Observable<Awaited<ReturnType<ResolveModulesFunction>>["data"]["meta"]["lintRules"]>
 	}
 	errors: {
-		module: () => (ModuleImportError | ModuleError)[]
-		plugin: () => (
-			| PluginAppSpecificApiReturnError
-			| PluginFunctionDetectLanguageTagsAlreadyDefinedError
-			| PluginFunctionLoadMessagesAlreadyDefinedError
-			| PluginFunctionSaveMessagesAlreadyDefinedError
-			| PluginUsesInvalidIdError
-			| PluginUsesInvalidSchemaError
-			| PluginUsesReservedNamespaceError
-			| Error
-		)[]
-		lintRules: () => (LintRuleError | LintError)[]
+		module: Observable<(ModuleImportError | ModuleError)[]>
+		plugin: Observable<
+			(
+				| PluginAppSpecificApiReturnError
+				| PluginFunctionDetectLanguageTagsAlreadyDefinedError
+				| PluginFunctionLoadMessagesAlreadyDefinedError
+				| PluginFunctionSaveMessagesAlreadyDefinedError
+				| PluginUsesInvalidIdError
+				| PluginUsesInvalidSchemaError
+				| PluginUsesReservedNamespaceError
+				| Error
+			)[]
+		>
+		lintRules: Observable<(LintRuleError | LintError)[]>
 	}
-	appSpecificApi: () => ResolvedPlugins["appSpecificApi"]
-	config: () => InlangConfig
+	appSpecificApi: Observable<ResolvedPlugins["appSpecificApi"]>
+	config: Observable<InlangConfig>
 	setConfig: (config: InlangConfig) => Result<void, InvalidConfigError>
 	query: {
 		messages: MessageQueryApi
@@ -49,6 +51,21 @@ export type InlangInstance = {
 		init: () => Promise<void>
 		// for now, only simply array that can be improved in the future
 		// see https://github.com/inlang/inlang/issues/1098
-		reports: () => LintReport[]
+		reports: Observable<LintReport[]>
 	}
 }
+
+interface Observable<T> {
+	subscribe(observer: ObservableObserver<T>): {
+		unsubscribe(): void
+	}
+	[Symbol.observable](): Observable<T>
+}
+
+export type ObservableObserver<T> =
+	| ((v: T) => void)
+	| {
+			next?: (v: T) => void
+			error?: (v: any) => void
+			complete?: (v: boolean) => void
+	  }

@@ -1,16 +1,14 @@
 import { createNodeishMemoryFs } from "@inlang-git/fs"
 import {
 	InlangConfig,
-	InlangInstance,
 	LintRule,
 	Message,
-	MessageQueryApi,
 	Plugin,
 	createInlang,
+	withSolidReactivity,
 } from "@inlang/app"
 import type { ImportFunction, InlangModule } from "@inlang/module"
-import { s } from "@markdoc/markdoc/dist/src/schema.js"
-import { onMount, createEffect, createSignal, Show, Accessor, For, createResource } from "solid-js"
+import { createEffect, Show, createResource, from } from "solid-js"
 
 export const Page = () => {
 	const config: InlangConfig = {
@@ -107,16 +105,28 @@ export const Page = () => {
 	const [inlang] = createResource(async () => {
 		const fs = createNodeishMemoryFs()
 		await fs.writeFile("/inlang.config.json", JSON.stringify(config))
-		return createInlang({
-			nodeishFs: fs,
-			configPath: "/inlang.config.json",
-			_import: $import,
-		})
+		return withSolidReactivity(
+			createInlang({
+				nodeishFs: fs,
+				configPath: "/inlang.config.json",
+				_import: $import,
+			}),
+			from,
+		)
 	})
-
 	createEffect(() => {
 		if (!inlang.loading) {
 			console.log("config changes", inlang()?.config())
+		}
+	})
+	createEffect(() => {
+		if (!inlang.loading) {
+			console.log("meta plugins changes", inlang()!.meta.plugins()[0]?.id)
+		}
+	})
+	createEffect(() => {
+		if (!inlang.loading) {
+			console.log("meta plugins changes", inlang()!.query.messages.getAll())
 		}
 	})
 
@@ -132,6 +142,7 @@ export const Page = () => {
 		<div>
 			<Show when={!inlang.loading} fallback={<div>loading</div>}>
 				<div>{inlang()!.config()?.sourceLanguageTag}</div>
+				<div>{inlang()!.meta.plugins()[0]?.id}</div>
 			</Show>
 		</div>
 	)

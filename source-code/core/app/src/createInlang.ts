@@ -5,7 +5,7 @@ import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
 import { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError } from "./errors.js"
 import { LintError, LintReport, lintMessages } from "@inlang/lint"
-import { createRoot, createSignal, createEffect } from "./solid.js"
+import { createRoot, createSignal, createEffect, observable } from "./solid.js"
 import { createReactiveQuery } from "./createReactiveQuery.js"
 
 const ConfigCompiler = TypeCompiler.Compile(InlangConfig)
@@ -40,10 +40,6 @@ export const createInlang = async (args: {
 		// TODO: create FS watcher and update config on change
 
 		// -- resolvedModules -----------------------------------------------------------
-
-		createEffect(() => {
-			console.log(config())
-		})
 
 		const [resolvedModules, setResolvedModules] =
 			createSignal<Awaited<ReturnType<ResolveModulesFunction>>>()
@@ -124,26 +120,29 @@ export const createInlang = async (args: {
 
 		return {
 			meta: {
-				plugins: () => resolvedModules()!.data.meta.plugins,
-				lintRules: () => resolvedModules()!.data.meta.lintRules,
+				plugins: observable(() => resolvedModules()!.data.meta.plugins),
+				lintRules: observable(() => resolvedModules()!.data.meta.lintRules),
 			},
 			errors: {
-				module: () => resolvedModules()!.errors,
-				plugin: () => resolvedModules()!.data.plugins.errors,
-				lintRules: () => [...resolvedModules()!.data.lintRules.errors, ...(lintErrors() || [])],
+				module: observable(() => resolvedModules()!.errors),
+				plugin: observable(() => resolvedModules()!.data.plugins.errors),
+				lintRules: observable(() => [
+					...resolvedModules()!.data.lintRules.errors,
+					...(lintErrors() || []),
+				]),
 			},
-			config: config as () => InlangConfig,
+			config: observable(config),
 			setConfig: setConfig,
 			lint: {
 				init: initLint,
-				reports: () => {
+				reports: observable(() => {
 					const reports = lintReports()
 					// TODO: improve error
-					if (!reports) throw new Error("lint not initialized yet")
+					if (!reports) return [] //throw new Error("lint not initialized yet")
 					return reports
-				},
+				}),
 			},
-			appSpecificApi: () => resolvedModules()!.data.plugins.data!.appSpecificApi, // TODO: make reactive (using store)
+			appSpecificApi: observable(() => resolvedModules()!.data.plugins.data!.appSpecificApi), // TODO: make reactive (using store)
 			query: {
 				messages: query,
 			},
