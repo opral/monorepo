@@ -6,8 +6,8 @@ const JSONArray = Type.Array(JSONValue)
 const JSONObject = Type.Record(Type.String(), Type.Union([JSONValue, JSONArray]))
 
 // JSON utility
-export type JSON = Static<typeof JSON>
-export const JSON = Type.Union([JSONValue, JSONArray, JSONObject])
+type JSON = Static<typeof JSON>
+const JSON = Type.Union([JSONValue, JSONArray, JSONObject])
 
 /**
  * The inlang config.
@@ -35,10 +35,9 @@ export const InlangConfig = Type.Object(
 		 */
 		settings: Type.Record(
 			Type.String({
-				pattern: "^(?:[a-z0-9]+(?:-[a-z0-9]+)*)?\\.[a-z0-9]+(?:-[a-z0-9]+)*$",
-				description:
-					"Settings are key-value pairs. The key must be conform to the `{namespace}.{key}` pattern. The value must be a JSON.",
-				examples: ["example.plugin-sqlite", "example.lint-rule-missing-message"],
+				pattern: "^(?:[a-z0-9]+(?:[A-Z][a-z0-9]+)*)\\.[a-z][a-zA-Z0-9]*$",
+				description: "The key must be conform to the `{namespace}.{key}` pattern.",
+				examples: ["example.pluginSqlite", "example.lintRuleMissingMessage"],
 			}) as unknown as TTemplateLiteral<[TLiteral<`${string}.${string}`>]>,
 			JSON,
 			{

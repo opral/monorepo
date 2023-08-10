@@ -12,9 +12,9 @@ describe("config settings", () => {
 		}
 		const passCases = [
 			// regular
-			"namespace.hello-world",
+			"namespace.helloWorld",
 			// with numbers
-			"namespace.plugin-i18n",
+			"namespace.pluginI18n",
 			// only one word
 			"namespace.world",
 		]
@@ -31,17 +31,14 @@ describe("config settings", () => {
 			languageTags: ["en", "de"],
 			modules: [],
 			settings: {
-				"hello.world": {},
+				// @ts-expect-error - Namespace is missing
+				withoutNamespace: {},
 			},
 		}
-
-		expect(Value.Check(InlangConfig, mockConfig)).toBe(true)
-		// @ts-expect-error - Namespace is missing
-		mockConfig.settings["no-namespace"] = {}
 		expect(Value.Check(InlangConfig, mockConfig)).toBe(false)
 	})
 
-	it("should enforce kebap-case", () => {
+	it("should enforce camelCase", () => {
 		const mockConfig: InlangConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
@@ -50,12 +47,11 @@ describe("config settings", () => {
 		}
 
 		const failCases = [
-			"namespace.helloWorld",
-			"namespace.Hello-world",
+			"namespace.hello-World",
+			"namespace.HelloWorld",
 			"namespace.hello_world",
 			"namespace.hello world",
 			"namespace.hello-worlD",
-			"namespace.HelloWorld",
 		]
 
 		for (const failCase of failCases) {
@@ -88,7 +84,7 @@ describe("config settings", () => {
 			languageTags: ["en", "de"],
 			modules: [],
 			settings: {
-				"namespace.hello-world": {
+				"namespace.helloWorld": {
 					hello: "World",
 					bool: true,
 					// eslint-disable-next-line unicorn/no-null
