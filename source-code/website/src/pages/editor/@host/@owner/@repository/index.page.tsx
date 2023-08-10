@@ -20,6 +20,7 @@ import { messageCount } from "./components/Listheader.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import type { RecentProjectType } from "@src/services/local-storage/src/schema.js"
+import type { ModuleError, ModuleImportError } from "@inlang/module"
 
 export function Page() {
 	return (
@@ -132,10 +133,27 @@ function TheActualPage() {
 				<Match when={repositoryIsCloned.error}>
 					<p class="text-danger">{repositoryIsCloned.error.message}</p>
 				</Match>
-				{/* <Match when={inlang()?.errors.module || inlang()?.errors.plugin || inlang()?.errors.lintRules}>
-					<p class="text-danger">
-						An error occurred while initializing the config: {inlang.error.message}
+				{/* <Match when={inlang()?.errors.module().length !== 0 || inlang()?.errors.plugin().length !== 0  || inlang()?.errors.lintRules().length !== 0 }>
+					<p class="text-danger pb-2">
+						An error occurred while initializing the config:
 					</p>
+					<ul class="text-danger">
+						{inlang()?.errors.module().length !== 0 &&
+							<For each={inlang()?.errors.module()}>
+								{(error) => <ErrorPrint error={error} />}
+							</For>
+						}
+						{inlang()?.errors.plugin().length !== 0 &&
+							<For each={inlang()?.errors.plugin()}>
+								{(error) => <ErrorPrint error={error} />}
+							</For>
+						}
+						{inlang()?.errors.lintRules().length !== 0 &&
+							<For each={inlang()?.errors.lintRules()}>
+								{(error) => <ErrorPrint error={error} />}
+							</For>
+						}
+					</ul>
 				</Match> */}
 				<Match when={repositoryIsCloned.loading || inlang() === undefined}>
 					<div class="flex flex-col grow justify-center items-center min-w-full gap-2">
@@ -192,16 +210,16 @@ function TheActualPage() {
 						</TourHintWrapper>
 						<div
 							class="flex flex-col h-[calc(100vh_-_288px)] grow justify-center items-center min-w-full gap-2"
-							// classList={{
-							// 	["hidden"]:
-							// 		messageCount(
-							// 			messages,
-							// 			filteredLanguageTags(),
-							// 			textSearch(),
-							// 			filteredLintRules(),
-							// 			filteredId(),
-							// 		) !== 0,
-							// }}
+							classList={{
+								["hidden"]:
+									messageCount(
+										messages()!,
+										filteredLanguageTags(),
+										textSearch(),
+										filteredLintRules(),
+										filteredId(),
+									) !== 0,
+							}}
 						>
 							<NoMatchPlaceholder />
 							<p class="text-base font-medium text-left text-on-background">
@@ -366,5 +384,17 @@ function RepositoryDoesNotExistOrNotAuthorizedCard() {
 				</a>
 			</div>
 		</div>
+	)
+	
+}
+
+const ErrorPrint = (error: any) => {
+	return (
+		<li class="pt-2">
+			<span class="font-semibold">{error.error.name}: </span><br/> 
+			{error.error.message} <br/> 
+			{error.error.cause && <p>{error.error.cause}</p>}
+			{error.error.stack && <p>{error.error.stack}</p>}
+		</li>
 	)
 }

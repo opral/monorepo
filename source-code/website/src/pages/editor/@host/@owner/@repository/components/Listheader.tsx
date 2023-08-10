@@ -1,18 +1,13 @@
 import { useEditorState } from "../State.jsx"
 import { For, Show } from "solid-js"
-import type { Accessor } from "solid-js"
 import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import { handleMissingMessage } from "../helper/handleMissingMessage.js"
 import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
-import type { LintRule, LanguageTag } from "@inlang/app"
+import type { LintRule, LanguageTag, Message } from "@inlang/app"
 
 interface ListHeaderProps {
-	messages: Accessor<{
-		[id: string]: {
-			[language: string]: LintedMessage | undefined
-		}
-	}>
+	messages: Message[]
 }
 
 type RuleSummaryItem = {
@@ -23,26 +18,22 @@ type RuleSummaryItem = {
 }
 
 export const messageCount = (
-	messages: Accessor<{
-		[id: string]: {
-			[language: string]: LintedMessage | undefined
-		}
-	}>,
+	messages: Message[],
 	filteredLanguageTags: LanguageTag[],
 	textSearch: string,
 	filteredLintRules: `${string}.${string}`[],
 	messageId: string,
 ) => {
 	let counter = 0
-	for (const id of Object.keys(messages())) {
+	for (const message of messages) {
 		if (
 			showFilteredMessage(
-				messages()[id]!,
+				message,
 				filteredLanguageTags,
 				textSearch,
 				filteredLintRules,
 				messageId,
-			).length > 0
+			) !== undefined
 		) {
 			counter++
 		}
@@ -71,15 +62,15 @@ export const ListHeader = (props: ListHeaderProps) => {
 		.map((lintRule) => {
 			// loop over messages
 			let counter = 0
-			for (const id of Object.keys(props.messages())) {
+			for (const id of Object.keys(props.messages)) {
 				const filteredReports = getLintReports(
 					showFilteredMessage(
-						props.messages()[id]!,
+						props.messages.find((message) => message.id === id)!,
 						filteredLanguageTags(),
 						textSearch(),
 						[lintRule.id],
 						filteredId(),
-					) as LintedMessage[],
+					),
 				).filter((report) => handleMissingMessage(report, filteredLanguageTags()))
 				counter += filteredReports.length
 			}
@@ -138,19 +129,19 @@ export const ListHeader = (props: ListHeaderProps) => {
 								<sl-button
 									prop:size="small"
 									class={
-										filteredLintRules().includes(rule.rule["id"])
+										filteredLintRules().includes(rule.rule.meta.id)
 											? rule.level === "warn"
 												? "ring-warning/20 ring-1 rounded"
 												: "ring-danger/20 ring-1 rounded"
 											: ""
 									}
 									onClick={() => {
-										if (filteredLintRules().includes(rule.rule["id"])) {
+										if (filteredLintRules().includes(rule.rule.meta.id)) {
 											setFilteredLintRules(
-												filteredLintRules().filter((id) => id !== rule.rule["id"]),
+												filteredLintRules().filter((id) => id !== rule.rule.meta.id),
 											)
 										} else {
-											setFilteredLintRules([rule.rule["id"]])
+											setFilteredLintRules([rule.rule.meta.id])
 											setTourStep("textfield")
 										}
 									}}
@@ -170,7 +161,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 										<div class="-ml-[4px] h-5 rounded">
 											<div
 												class={
-													rule.rule.level === "warn"
+													rule.level === "warn"
 														? " text-focus-warning bg-warning/20 h-full px-2 rounded flex items-center justify-center"
 														: "text-focus-danger bg-danger/20 h-full px-2 rounded flex items-center justify-center"
 												}
