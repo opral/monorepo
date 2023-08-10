@@ -20,8 +20,6 @@ export const Gitfloat = () => {
 		currentBranch,
 		localChanges,
 		setLocalChanges,
-		resources,
-		setResources,
 		setFsChange,
 		setLastPush,
 		routeParams,
@@ -108,29 +106,23 @@ export const Gitfloat = () => {
 		// write resources to fs
 		/** the resource the message belongs to */
 
-		let _resources = resources.map((resource) => {
-			return { ...resource }
-		})
+		// for (const change of localChanges()) {
+		// 	const [updatedResource] = query(
+		// 		_resources.find(
+		// 			(resource: Resource) => resource.languageTag.name === change.languageTag.name,
+		// 		)!,
+		// 	).upsert({ message: change.newCopy! })!
 
-		for (const change of localChanges()) {
-			const [updatedResource] = query(
-				_resources.find(
-					(resource: Resource) => resource.languageTag.name === change.languageTag.name,
-				)!,
-			).upsert({ message: change.newCopy! })!
-
-			_resources = [
-				...(_resources.filter(
-					(resource) => resource.languageTag.name !== change.languageTag.name,
-				) as Resource[]),
-				updatedResource as Resource,
-			]
-		}
-
-		setResources(_resources)
+		// 	_resources = [
+		// 		...(_resources.filter(
+		// 			(resource) => resource.languageTag.name !== change.languageTag.name,
+		// 		) as Resource[]),
+		// 		updatedResource as Resource,
+		// 	]
+		// }
 
 		// commit & push
-		const [, exception] = await pushChanges({
+		const push = await pushChanges({
 			fs: fs(),
 			routeParams: routeParams(),
 			user: localStorage.user,
@@ -143,12 +135,12 @@ export const Gitfloat = () => {
 		telemetryBrowser.capture("EDITOR pushed changes", {
 			owner: routeParams().owner,
 			repository: routeParams().repository,
-			sucess: exception === undefined,
+			sucess: push.error === undefined,
 		})
-		if (exception) {
+		if (push.error) {
 			return showToast({
 				title: "Failed to push changes",
-				message: "Please try again or file a bug. " + exception,
+				message: "Please try again or file a bug. " + push.error.message,
 				variant: "danger",
 			})
 		} else {
@@ -292,7 +284,7 @@ export const Gitfloat = () => {
 								class={"on-inverted " + (gitState() === "pullrequest" && "grow")}
 							>
 								{data[gitState()].buttontext}
-								<div slot="suffix">{data[gitState()].icon}</div>
+								<div slot="suffix">{data[gitState()].icon()}</div>
 							</sl-button>
 						</div>
 					</div>

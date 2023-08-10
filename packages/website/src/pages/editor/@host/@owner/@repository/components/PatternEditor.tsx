@@ -36,10 +36,8 @@ export function PatternEditor(props: {
 }) {
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const {
-		resources,
 		localChanges,
 		setLocalChanges,
-		sourceResource,
 		userIsCollaborator,
 		routeParams,
 		filteredLanguageTags,
@@ -105,10 +103,6 @@ export function PatternEditor(props: {
 		}
 	}
 
-	/** the resource the variant belongs to */
-	const resource = () =>
-		resources.find((resource) => resource.languageTag.name === props.languageTag)!
-
 	/** copy of the variant to conduct and track changes */
 	const copy: () => Variant | undefined = () =>
 		props.variant
@@ -173,41 +167,41 @@ export function PatternEditor(props: {
 	 */
 
 	const handleSave = async () => {
-		const _copy: Message | undefined = copy()
+		const _copy: Variant | undefined = copy()
 		const _textValue =
 			JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
 		if (!_textValue || !_copy) {
 			return
 		}
-		_copy.pattern.elements = _textValue as Array<Text | Expression>
+		_copy.pattern = _textValue as Array<Text | VariableReference>
 
-		setLocalChanges((prev: Message[]) => {
-			if (JSON.stringify(copy()?.pattern.elements) === JSON.stringify(_copy.pattern.elements)) {
-				return [
-					...prev.filter(
-						(change) =>
-							!(
-								change.languageTag === resource().languageTag &&
-								change.newCopy.id.name === _copy.id.name
-							),
-					),
-				]
-			} else {
-				return [
-					...prev.filter(
-						(change) =>
-							!(
-								change.languageTag === resource().languageTag &&
-								change.newCopy.id.name === _copy.id.name
-							),
-					),
-					{
-						languageTag: resource().languageTag,
-						newCopy: _copy,
-					},
-				]
-			}
-		})
+		// setLocalChanges((prev: Message[]) => {
+		// 	if (JSON.stringify(copy()?.pattern) === JSON.stringify(_copy.pattern)) {
+		// 		return [
+		// 			...prev.filter(
+		// 				(change) =>
+		// 					!(
+		// 						change.languageTag === resource().languageTag &&
+		// 						change.newCopy.id.name === _copy.id.name
+		// 					),
+		// 			),
+		// 		]
+		// 	} else {
+		// 		return [
+		// 			...prev.filter(
+		// 				(change) =>
+		// 					!(
+		// 						change.languageTag === resource().languageTag &&
+		// 						change.newCopy.id.name === _copy.id.name
+		// 					),
+		// 			),
+		// 			{
+		// 				languageTag: resource().languageTag,
+		// 				newCopy: _copy,
+		// 			},
+		// 		]
+		// 	}
+		// })
 
 		//this is a dirty fix for getting focus back to the editor after save
 		setTimeout(() => {
@@ -308,17 +302,17 @@ export function PatternEditor(props: {
 	// 	return notifications
 	// }
 
-	// const handleShortcut = (event: KeyboardEvent) => {
-	// 	if (
-	// 		((event.ctrlKey && event.code === "KeyS" && navigator.platform.includes("Win")) ||
-	// 			(event.metaKey && event.code === "KeyS" && navigator.platform.includes("Mac"))) &&
-	// 		hasChanges() &&
-	// 		userIsCollaborator()
-	// 	) {
-	// 		event.preventDefault()
-	// 		handleSave()
-	// 	}
-	// }
+	const handleShortcut = (event: KeyboardEvent) => {
+		if (
+			((event.ctrlKey && event.code === "KeyS" && navigator.platform.includes("Win")) ||
+				(event.metaKey && event.code === "KeyS" && navigator.platform.includes("Mac"))) &&
+			// hasChanges() &&
+			userIsCollaborator()
+		) {
+			event.preventDefault()
+			handleSave()
+		}
+	}
 
 	return (
 		// outer element is needed for clickOutside directive
