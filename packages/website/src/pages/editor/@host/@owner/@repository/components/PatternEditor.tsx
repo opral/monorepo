@@ -15,7 +15,6 @@ import { FloatingMenu } from "./FloatingMenu.jsx"
 import { handleMissingMessage } from "./../helper/handleMissingMessage.js"
 import type {
 	Text,
-	Expression,
 	Message,
 	VariableReference,
 	LintReport,
@@ -27,10 +26,9 @@ import type {
  * The pattern editor is a component that allows the user to edit the pattern of a message.
  */
 export function PatternEditor(props: {
-	sourceLanguageTag: LanguageTag
+	sourceLanguageTag: LanguageTag | undefined
 	languageTag: LanguageTag
 	id: Message["id"]
-	variableReference: VariableReference[]
 	sourceMessage?: Message["body"][LanguageTag]
 	variant: Variant | undefined
 }) {
@@ -42,6 +40,8 @@ export function PatternEditor(props: {
 		routeParams,
 		filteredLanguageTags,
 	} = useEditorState()
+
+	const [variableReferences, setVariableReferences] = createSignal<VariableReference[]>([])
 
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
@@ -65,6 +65,14 @@ export function PatternEditor(props: {
 	}
 
 	onMount(() => {
+		if (props.sourceMessage) {
+			setVariableReferences(
+				props.sourceMessage[0]?.pattern
+					.filter((pattern) => pattern.type === "VariableReference")
+					.map((variableReference) => variableReference) as VariableReference[],
+			)
+		}
+
 		document.addEventListener("focusin", handleLineItemFocusIn)
 		return () => {
 			document.removeEventListener("focusin", handleLineItemFocusIn)
@@ -89,7 +97,7 @@ export function PatternEditor(props: {
 		// 		props.variableReference,
 		// 	)
 		// } else {
-			return getEditorConfig(textArea, props.variant, props.variableReference)
+			return getEditorConfig(textArea, props.variant, variableReferences())
 		// }
 	})
 
@@ -343,7 +351,7 @@ export function PatternEditor(props: {
 				id="parent"
 				class="w-full text-sm p-[6px] focus-within:border-none focus-within:ring-0 focus-within:outline-none"
 			>
-				<FloatingMenu variableReferences={props.variableReference} editor={editor} />
+				<FloatingMenu variableReferences={variableReferences()} editor={editor} />
 
 				{/* tiptap editor */}
 				<div

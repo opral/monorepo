@@ -1,5 +1,3 @@
-import type * as ast from "@inlang/core/ast"
-import type { LintedMessage } from "@inlang/core/lint"
 import { createEffect, createSignal, For, Show } from "solid-js"
 import { useEditorState } from "./State.jsx"
 import { createVisibilityObserver } from "@solid-primitives/intersection-observer"
