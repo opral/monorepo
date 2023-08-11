@@ -1,5 +1,5 @@
 import { createInlangFunction } from "./inlang-function.js"
-import type { Message } from '@inlang/app'
+import type { Message } from "@inlang/app"
 
 const messages = [] as Message[]
 
@@ -19,7 +19,7 @@ const messages = [] as Message[]
 	const i = createInlangFunction<{
 		hello: never
 		welcome: { name: string }
-	}>(messages, 'en')
+	}>(messages, "en")
 
 	i("hello")
 	// @ts-expect-error does not accept args

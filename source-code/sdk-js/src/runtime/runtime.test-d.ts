@@ -1,6 +1,6 @@
 import { expectType } from "tsd"
 import { initRuntime, type RuntimeContext } from "./runtime.js"
-import type { Message } from '@inlang/app'
+import type { Message } from "@inlang/app"
 
 // ------------------------------------------------------------------------------------------------
 

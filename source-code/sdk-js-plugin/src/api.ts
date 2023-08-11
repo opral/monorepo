@@ -1,4 +1,20 @@
-import { type Input, type Output, literal, union, string, number, object, boolean, array, useDefault, optional, startsWith, minLength, type ArraySchema, type StringSchema } from "valibot"
+import {
+	type Input,
+	type Output,
+	literal,
+	union,
+	string,
+	number,
+	object,
+	boolean,
+	array,
+	useDefault,
+	optional,
+	startsWith,
+	minLength,
+	type ArraySchema,
+	type StringSchema,
+} from "valibot"
 
 const zUrlNegotiatorVariantPath = object({
 	type: literal("path"),
@@ -19,13 +35,16 @@ const zUrlNegotiatorVariantQuery = object({
 
 const zUrlNegotiator = object({
 	type: literal("url"),
-	variant: useDefault(union(
-		[
-			zUrlNegotiatorVariantPath,
-			// zUrlNegotiatorVariantDomain, // TODO: introduce option later
-			// zUrlNegotiatorVariantQuery, // TODO: introduce option later
-		] as any /* typecast needed because we currently only specify a single item */,
-	), zUrlNegotiatorVariantPath.parse({ type: "path" })),
+	variant: useDefault(
+		union(
+			[
+				zUrlNegotiatorVariantPath,
+				// zUrlNegotiatorVariantDomain, // TODO: introduce option later
+				// zUrlNegotiatorVariantQuery, // TODO: introduce option later
+			] as any /* typecast needed because we currently only specify a single item */,
+		),
+		zUrlNegotiatorVariantPath.parse({ type: "path" }),
+	),
 })
 
 const zCookieNegotiator = object({
@@ -73,10 +92,9 @@ const zSdkConfig = object({
 	debug: useDefault(boolean(), false),
 	languageNegotiation: object({
 		strict: useDefault(optional(boolean()), false),
-		strategies: array(
-			zLanguageNegotiationStrategy,
-			[minLength(1, "You must define at least one language negotiation strategy.")]
-		)
+		strategies: array(zLanguageNegotiationStrategy, [
+			minLength(1, "You must define at least one language negotiation strategy."),
+		]),
 		// TODO: find the valibot way of doing this
 		// as unknown as ArraySchema<[typeof zLanguageNegotiationStrategy, ...typeof zLanguageNegotiationStrategy[]]>
 
@@ -89,9 +107,12 @@ const zSdkConfig = object({
 		// ),
 	}),
 	resources: useDefault(zResources, { cache: "build-time" }),
-	routing: useDefault(object({
-		exclude: useDefault(optional(array(string([startsWith("/")]))), []),
-	}), { exclude: [] }),
+	routing: useDefault(
+		object({
+			exclude: useDefault(optional(array(string([startsWith("/")]))), []),
+		}),
+		{ exclude: [] },
+	),
 })
 
 export const validateSdkConfig = (config?: SdkConfigInput): SdkConfig => zSdkConfig.parse(config)

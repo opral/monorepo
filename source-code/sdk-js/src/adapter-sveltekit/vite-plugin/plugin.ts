@@ -7,7 +7,7 @@ import { filePathForOutput, getFileInformation } from "./fileInformation.js"
 import { transformCode } from "../ast-transforms/index.js"
 import { InlangSdkException } from "./exceptions.js"
 import { inspect } from "node:util"
-import { initInlangApp } from './inlang-app.js'
+import { initInlangApp } from "./inlang-app.js"
 
 let viteServer: ViteDevServer | undefined
 

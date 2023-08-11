@@ -14,10 +14,10 @@ type MaybePromise<T> = T | Promise<T>
 export type RuntimeContext<
 	LanguageTag extends LanguageTagBase = LanguageTagBase,
 	LoadMessagesMaybePromise extends
-	| (Message[] | undefined)
-	| Promise<Message[] | undefined> = MaybePromise<Message[] | undefined>,
+		| (Message[] | undefined)
+		| Promise<Message[] | undefined> = MaybePromise<Message[] | undefined>,
 > = {
-		loadMessages: (languageTag: LanguageTag) => LoadMessagesMaybePromise
+	loadMessages: (languageTag: LanguageTag) => LoadMessagesMaybePromise
 }
 
 export type RuntimeState<LanguageTag extends LanguageTagBase = LanguageTagBase> = {

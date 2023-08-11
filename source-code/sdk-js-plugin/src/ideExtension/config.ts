@@ -1,7 +1,7 @@
 import type { InlangConfig } from "@inlang/core/config"
 
 // TODO: import type from ide-extension package
-export const ideExtensionDefaultConfig: InlangConfig['ideExtension'] = {
+export const ideExtensionDefaultConfig: InlangConfig["ideExtension"] = {
 	messageReferenceMatchers: [
 		async (args) => {
 			const regex = /(?<!\w){?i\(['"](?<messageId>\S+)['"]\)}?/gm

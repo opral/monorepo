@@ -2,7 +2,7 @@ import { test, describe, expect, vi } from "vitest"
 import { initSvelteKitClientRuntime } from "./runtime.js"
 import { rest } from "msw"
 import { setupServer } from "msw/node"
-import { createMessage } from '../../../runtime/inlang-function.test.js'
+import { createMessage } from "../../../runtime/inlang-function.test.js"
 
 //TODO: refactor
 
@@ -27,10 +27,7 @@ describe("initSvelteKitClientRuntime", () => {
 	test("should initialize a runtime instance and fetch the resource for the set languageTag", async () => {
 		const server = setupServer(
 			rest.get(`${PREFIX}/inlang/en.json`, (_, res, ctx) =>
-				res(
-					ctx.status(200),
-					ctx.body(JSON.stringify([createMessage("hello", { en: "World!" })])),
-				),
+				res(ctx.status(200), ctx.body(JSON.stringify([createMessage("hello", { en: "World!" })]))),
 			),
 		)
 

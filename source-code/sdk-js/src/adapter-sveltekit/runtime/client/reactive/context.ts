@@ -5,7 +5,7 @@ import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/
 import type * as Runtime from "../../../../runtime/index.js"
 import type { LanguageTag as LanguageTagBase } from "@inlang/app"
 import { logDeprecation } from "../../../../utils.js"
-import { inlangSymbol } from '../../shared/utils.js'
+import { inlangSymbol } from "../../shared/utils.js"
 import { setContext } from "svelte"
 
 // ------------------------------------------------------------------------------------------------
@@ -19,7 +19,7 @@ type RuntimeContext<
 	languageTags: LanguageTag[]
 	i: Readable<InlangFunction>
 	changeLanguageTag: (languageTag: LanguageTag) => Promise<void>
-		loadResource: SvelteKitClientRuntime["loadMessages"]
+	loadResource: SvelteKitClientRuntime["loadMessages"]
 	route: (href: RelativeUrl) => RelativeUrl
 	switchLanguage: (languageTag: LanguageTag) => Promise<void>
 	referenceLanguage: LanguageTag
