@@ -10,11 +10,8 @@ export async function defineConfig(env) {
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-standard-lint-rules@3/dist/index.js",
 	)
 
-  return {
-    sourceLanguageTag: "en",
-    plugins: [
-      jsonPlugin({ pathPattern: "lang/{language}.json" }),
-      standardLintRules(),
-    ],
-  };
+	return {
+		sourceLanguageTag: "en",
+		plugins: [jsonPlugin({ pathPattern: "lang/{language}.json" }), standardLintRules()],
+	}
 }

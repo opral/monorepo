@@ -6,8 +6,8 @@ import {
 	type RuntimeContext,
 	type RuntimeState,
 } from "./runtime.js"
-import type { Message } from '@inlang/app'
-import { createMessage } from './inlang-function.test.js'
+import type { Message } from "@inlang/app"
+import { createMessage } from "./inlang-function.test.js"
 
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -18,7 +18,8 @@ const messageMap = {
 }
 
 const context: RuntimeContext<string, Promise<Message[] | undefined>> = {
-	loadMessages: (languageTag) => Promise.resolve(messageMap[languageTag as keyof typeof messageMap]),
+	loadMessages: (languageTag) =>
+		Promise.resolve(messageMap[languageTag as keyof typeof messageMap]),
 }
 
 describe("initRuntime", () => {

@@ -1,8 +1,8 @@
-import { ConfigPathNotFoundError, createInlang, tryCatch, type InlangInstance } from '@inlang/app'
-import { InlangSdkException } from './exceptions.js'
-import type { NodeishFilesystem } from '@inlang-git/fs'
-import { writeFile } from 'node:fs/promises'
-import { dedent } from 'ts-dedent'
+import { ConfigPathNotFoundError, createInlang, tryCatch, type InlangInstance } from "@inlang/app"
+import { InlangSdkException } from "./exceptions.js"
+import type { NodeishFilesystem } from "@inlang-git/fs"
+import { writeFile } from "node:fs/promises"
+import { dedent } from "ts-dedent"
 import path from "node:path"
 
 let appPromise: Promise<unknown> | undefined = undefined
@@ -16,7 +16,7 @@ export const initInlangApp = async (): Promise<unknown> => {
 	// eslint-disable-next-line no-async-promise-executor
 	return (appPromise = new Promise<unknown>(async (resolve) => {
 		const { data: appInstance, error: createInlangError } = await tryCatch(async () =>
-			createInlang({ nodeishFs: await getFs(), configPath: './inlang.config.json' })
+			createInlang({ nodeishFs: await getFs(), configPath: "./inlang.config.json" }),
 		)
 
 		if (createInlangError) {
@@ -37,24 +37,27 @@ export const initInlangApp = async (): Promise<unknown> => {
 	}))
 }
 
-const getFs = () => import("node:fs/promises").catch(() =>
-	new Proxy({} as NodeishFilesystem, {
-		get: (target, key) => {
-			if (key === "then") return Promise.resolve(target)
+const getFs = () =>
+	import("node:fs/promises").catch(
+		() =>
+			new Proxy({} as NodeishFilesystem, {
+				get: (target, key) => {
+					if (key === "then") return Promise.resolve(target)
 
-			return () => {
-				throw new InlangSdkException(
-					"`node:fs/promises` is not available in the current environment",
-				)
-			}
-		},
-	}),
-)
+					return () => {
+						throw new InlangSdkException(
+							"`node:fs/promises` is not available in the current environment",
+						)
+					}
+				},
+			}),
+	)
 
 // TODO: use correct modules link
-const createBasicInlangConfig = async () => writeFile(
-	PATH_TO_INLANG_CONFIG_FILE,
-	dedent`
+const createBasicInlangConfig = async () =>
+	writeFile(
+		PATH_TO_INLANG_CONFIG_FILE,
+		dedent`
 		{
 			"sourceLanguageTag": "en",
 			"languageTags": ["en", "de"],
@@ -72,16 +75,15 @@ const createBasicInlangConfig = async () => writeFile(
 				}
 			}
 		}
-	`)
+	`,
+	)
 
-class InlangSdkConfigException extends InlangSdkException { }
+class InlangSdkConfigException extends InlangSdkException {}
 
 // TODO: automatically add modules if missing ???
-function assertSdkWasSetUp(
-	appSpecificApi: InlangInstance["appSpecificApi"],
-) {
+function assertSdkWasSetUp(appSpecificApi: InlangInstance["appSpecificApi"]) {
 	let appSpecificApiValue: any
-	appSpecificApi.subscribe(value => appSpecificApiValue = value)
+	appSpecificApi.subscribe((value) => (appSpecificApiValue = value))
 
 	if (!("inlang.sdk-js" in appSpecificApiValue)) {
 		throw new InlangSdkConfigException(dedent`

@@ -70,7 +70,10 @@ const initRuntime = async (
 	const languageTag =
 		language || !options.initDetectors
 			? language
-			: await detectLanguageTag({ sourceLanguageTag, languageTags }, ...options.initDetectors(event))
+			: await detectLanguageTag(
+					{ sourceLanguageTag, languageTags },
+					...options.initDetectors(event),
+			  )
 
 	return initSvelteKitClientRuntime({
 		fetch: event.fetch,
@@ -95,16 +98,16 @@ export const initRootLayoutLoadWrapper = <
 				runtime: SvelteKitClientRuntime,
 			) => Promise<Data> | Data,
 		) =>
-			async (event: Parameters<LayoutLoad>[0]): Promise<DataWithRuntime<Data>> => {
-				const runtime = await initRuntimeForWrappers(event, options)
+		async (event: Parameters<LayoutLoad>[0]): Promise<DataWithRuntime<Data>> => {
+			const runtime = await initRuntimeForWrappers(event, options)
 
 			const payload = await load(event, runtime)
 
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { "[inlang]": _, ...data } = payload || event.data
 
-				return addRuntimeToData(data, runtime)
-			},
+			return addRuntimeToData(data, runtime)
+		},
 })
 
 // ------------------------------------------------------------------------------------------------
@@ -126,8 +129,8 @@ export const initRootPageLoadWrapper = <
 				runtime: SvelteKitClientRuntime,
 			) => Promise<Data> | Data,
 		) =>
-			async (event: Parameters<PageLoad>[0]): Promise<Data> => {
-				const data = await event.parent()
+		async (event: Parameters<PageLoad>[0]): Promise<Data> => {
+			const data = await event.parent()
 
 			const languageTag: LanguageTag | undefined = data.languageTag
 
@@ -149,8 +152,8 @@ export const initRootPageLoadWrapper = <
 
 			const runtime = await initRuntimeForWrappers(event)
 
-				return load(event, runtime)
-			},
+			return load(event, runtime)
+		},
 })
 
 // ------------------------------------------------------------------------------------------------
@@ -163,9 +166,9 @@ export const initLoadWrapper = <Load extends Kit.Load<any, any, any, any, any>>(
 				runtime: SvelteKitClientRuntime,
 			) => Promise<Data> | Data,
 		) =>
-			async (event: Parameters<Load>[0]): Promise<Data> => {
-				const runtime = await initRuntimeForWrappers(event)
+		async (event: Parameters<Load>[0]): Promise<Data> => {
+			const runtime = await initRuntimeForWrappers(event)
 
-				return load(event, runtime)
-			},
+			return load(event, runtime)
+		},
 })

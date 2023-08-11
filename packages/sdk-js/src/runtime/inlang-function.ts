@@ -29,15 +29,10 @@ export const createInlangFunction = <
 		const pattern = messages.find((message) => message.id === key)?.body[languageTag]?.[0]?.pattern
 		if (!pattern) return ""
 
-		return pattern
-			.map((element) => serializeElement(element, args || {}))
-			.join("") as InlangString
+		return pattern.map((element) => serializeElement(element, args || {})).join("") as InlangString
 	}) as InlangFunction<InlangFunctionArgs>
 
-const serializeElement = (
-	element: Pattern[number],
-	args: BaseArgs,
-): string => {
+const serializeElement = (element: Pattern[number], args: BaseArgs): string => {
 	switch (element.type) {
 		case "Text":
 			return element.value
@@ -47,7 +42,10 @@ const serializeElement = (
 	}
 }
 
-const serializeVariableReference = (variableReference: VariableReference, args: BaseArgs): string => {
+const serializeVariableReference = (
+	variableReference: VariableReference,
+	args: BaseArgs,
+): string => {
 	switch (variableReference.type) {
 		case "VariableReference":
 			return (args[variableReference.name] as string) ?? ""

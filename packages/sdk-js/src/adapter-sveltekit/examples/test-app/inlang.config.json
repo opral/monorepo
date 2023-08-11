@@ -1,9 +1,6 @@
 {
 	"sourceLanguageTag": "en",
-	"languageTags": [
-		"en",
-		"de"
-	],
+	"languageTags": ["en", "de"],
 	"modules": [
 		"../../../../../plugins/json/dist/index.js",
 		"../../../../../sdk-js-plugin/dist/index.js"
@@ -25,9 +22,7 @@
 						]
 					},
 					"routing": {
-						"exclude": [
-							"/api"
-						]
+						"exclude": ["/api"]
 					}
 				}
 			}

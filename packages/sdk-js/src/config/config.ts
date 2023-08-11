@@ -8,7 +8,7 @@ export type InlangConfigWithSdkProps = InlangConfig & {
 	sdk: SdkConfig
 }
 
-		// @ts-ignore
+// @ts-ignore
 export const initInlangEnvironment = async (): Promise<InlangEnvironment> => {
 	const fs = await import("node:fs/promises").catch(
 		() =>
@@ -32,7 +32,7 @@ export const initInlangEnvironment = async (): Promise<InlangEnvironment> => {
 			fs,
 			// @ts-ignore
 			fetch: async (...args) =>
-			// @ts-ignore
+				// @ts-ignore
 				await fetch(...args).catch((error) => {
 					// TODO: create an issue
 					if (

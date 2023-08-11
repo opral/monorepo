@@ -8,7 +8,7 @@ import { goto } from "$app/navigation"
 import { page } from "$app/stores"
 import type { LanguageTag as LanguageTagBase } from "@inlang/app"
 import { logDeprecation } from "../../../../utils.js"
-import { inlangSymbol } from '../../shared/utils.js'
+import { inlangSymbol } from "../../shared/utils.js"
 import { setContext } from "svelte"
 
 // ------------------------------------------------------------------------------------------------
@@ -22,7 +22,7 @@ type RuntimeContext<
 	languageTag: LanguageTag
 	i: InlangFunction
 	changeLanguageTag: (languageTag: LanguageTag) => Promise<void>
-		loadResource: SvelteKitClientRuntime["loadMessages"]
+	loadResource: SvelteKitClientRuntime["loadMessages"]
 	route: (href: RelativeUrl) => RelativeUrl
 	switchLanguage: (languageTag: LanguageTag) => Promise<void>
 	referenceLanguage: LanguageTag
