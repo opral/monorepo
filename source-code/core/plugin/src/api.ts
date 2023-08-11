@@ -126,7 +126,7 @@ export type Plugin<Settings extends InlangConfig["settings"] | unknown = unknown
 	 * 	 }
 	 *  })
 	 */
-	addAppSpecificApi?: (args: { settings: Settings }) => Record<`${string}.${string}`, any>
+	addAppSpecificApi?: (args: { settings: Settings }) => Record<`${string}.app.${string}`, any>
 }
 
 export const Plugin = Type.Object(

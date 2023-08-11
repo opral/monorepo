@@ -5,8 +5,8 @@ import { expectType } from "tsd"
 import { Plugin } from "./api.js"
 
 describe("Plugin", () => {
-	test("meta.id should enforce namespace.plugin* patterns", () => {
-		expectType<`${string}.plugin${string}`>("" as Plugin["meta"]["id"])
+	test("meta.id should enforce namespace.plugin.* patterns", () => {
+		expectType<`${string}.plugin.${string}`>("" as Plugin["meta"]["id"])
 
 		const mockPlugin: Plugin = {
 			meta: {
