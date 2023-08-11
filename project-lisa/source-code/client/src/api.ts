@@ -4,11 +4,18 @@ import type { NodeishFilesystem } from "@inlang-git/fs"
 import { github } from "./github.js"
 import { withLazyFetching, transformRemote } from "./helpers.js"
 
+type Author = {
+  name?: string
+  email?: string
+  timestamp?: number
+  timezoneOffset?: number
+}
+
 export type Repository = {
 	nodeishFs: NodeishFilesystem
-	commit: (args: { author: any, message: string}) => Promise<Awaited<ReturnType<typeof raw.commit>> | undefined>
+	commit: (args: { author: Author, message: string}) => Promise<Awaited<ReturnType<typeof raw.commit>> | undefined>
 	push: () => Promise<Awaited<ReturnType<typeof raw.push>> | undefined>
-	pull: (args: { author: any, fastForward: boolean, singleBranch: true }) => any
+	pull: (args: { author: Author, fastForward: boolean, singleBranch: true }) => any
 	add: (args: { filepath: string }) =>  Promise<Awaited<ReturnType<typeof raw.add>>>
 	listRemotes: () => Promise<Awaited<ReturnType<typeof raw.listRemotes>> | undefined>
 	log: (args: { since: any}) =>  Promise<Awaited<ReturnType<typeof raw.log>>>
