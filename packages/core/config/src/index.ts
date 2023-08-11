@@ -1,1 +1,1 @@
-export { InlangConfig } from "./schema.js"
+export { InlangConfig, SystemSettings } from "./schema.js"

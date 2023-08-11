@@ -1,13 +1,57 @@
 import { Static, TLiteral, TTemplateLiteral, Type } from "@sinclair/typebox"
 import { LanguageTag } from "@inlang/language-tag"
 
+/**
+ * ---------------- UTILTIIES ----------------
+ */
+
 const JSONValue = Type.Union([Type.String(), Type.Number(), Type.Boolean(), Type.Null()])
 const JSONArray = Type.Array(JSONValue)
 const JSONObject = Type.Record(Type.String(), Type.Union([JSONValue, JSONArray]))
 
-// JSON utility
 type JSON = Static<typeof JSON>
 const JSON = Type.Union([JSONValue, JSONArray, JSONObject])
+
+/**
+ * ---------------- SYSTEM SETTINGS ----------------
+ */
+
+export type SystemSettings = Static<typeof SystemSettings>
+export const SystemSettings = Type.Object({
+	/**
+	 * The lint rule levels used by the system.
+	 */
+	"system.lintRuleLevels": Type.Optional(
+		Type.Record(
+			Type.TemplateLiteral("${string}.lintRule${string}"),
+			Type.Union([Type.Literal("error"), Type.Literal("warning"), Type.Literal("off")]),
+		),
+	),
+})
+
+/**
+ * ---------------- EXTERNAL SETTINGS ----------------
+ */
+
+/**
+ * Settings defined via apps, plugins, lint rules, etc.
+ */
+const ExternalSettings = Type.Record(
+	Type.String({
+		pattern: "^(?!system\\.)[a-z0-9]+(?:[A-Z][a-z0-9]+)*\\.[a-z][a-zA-Z0-9]*$",
+		description:
+			"The key must be conform to the `{namespace}.{key}` pattern and can't start with `system`.",
+		examples: ["example.pluginSqlite", "example.lintRuleMissingMessage"],
+	}) as unknown as TTemplateLiteral<[TLiteral<`${string}.${string}`>]>,
+	JSON,
+	{
+		additionalProperties: false,
+	},
+)
+
+/**
+ * ---------------- CONFIG ----------------
+ */
 
 /**
  * The inlang config.
@@ -33,18 +77,7 @@ export const InlangConfig = Type.Object(
 		 * The `key` must be conform to the `{namespace}.{key}` pattern.
 		 * The `value` must be a JSON.
 		 */
-		settings: Type.Record(
-			Type.String({
-				pattern: "^(?:[a-z0-9]+(?:[A-Z][a-z0-9]+)*)\\.[a-z][a-zA-Z0-9]*$",
-				description: "The key must be conform to the `{namespace}.{key}` pattern.",
-				examples: ["example.pluginSqlite", "example.lintRuleMissingMessage"],
-			}) as unknown as TTemplateLiteral<[TLiteral<`${string}.${string}`>]>,
-			JSON,
-			{
-				// see https://github.com/sinclairzx81/typebox/issues/527
-				additionalProperties: false,
-			},
-		),
+		settings: Type.Intersect([SystemSettings, ExternalSettings]),
 	},
 	// see https://github.com/sinclairzx81/typebox/issues/527
 	{ additionalProperties: false },
