@@ -133,9 +133,9 @@ export const Plugin = Type.Object(
 	{
 		meta: Type.Object({
 			id: Type.String({
-				pattern: "^(?:[a-zA-Z0-9]+(?:\\.[a-zA-Z0-9]+)*)\\.plugin[a-zA-Z][a-zA-Z0-9]*$",
-				examples: ["example.myPlugin"],
-			}) as unknown as TTemplateLiteral<[TLiteral<`${string}.plugin${string}`>]>,
+				pattern: "^(?!system\\.)([a-z]+)\\.(plugin)\\.([a-z][a-zA-Z0-9]*)$",
+				examples: ["namespace.plugin.example"],
+			}) as unknown as TTemplateLiteral<[TLiteral<`${string}.plugin.${string}`>]>,
 			displayName: TranslatedStrings,
 			description: TranslatedStrings,
 			keywords: Type.Array(Type.String()),

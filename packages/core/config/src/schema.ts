@@ -22,9 +22,9 @@ export const SystemSettings = Type.Object({
 	/**
 	 * The lint rule levels used by the system.
 	 */
-	"system.lintRuleLevels": Type.Optional(
+	"system.lint.ruleLevels": Type.Optional(
 		Type.Record(
-			Type.TemplateLiteral("${string}.lintRule${string}"),
+			Type.TemplateLiteral("${string}.lintRule.${string}"),
 			Type.Union([Type.Literal("error"), Type.Literal("warning"), Type.Literal("off")]),
 		),
 	),
@@ -39,11 +39,13 @@ export const SystemSettings = Type.Object({
  */
 const ExternalSettings = Type.Record(
 	Type.String({
-		pattern: "^(?!system\\.)[a-z0-9]+(?:[A-Z][a-z0-9]+)*\\.[a-z][a-zA-Z0-9]*$",
+		pattern: "^(?!system\\.)([a-z]+)\\.(app|plugin|lintRule)\\.([a-z][a-zA-Z0-9]*)$",
 		description:
-			"The key must be conform to the `{namespace}.{key}` pattern and can't start with `system`.",
+			"The key must be conform to `{namespace:string}.{type:app|plugin|lintRule}.{name:string}`. The namespace `system` namespace is reserved and can't be used.",
 		examples: ["example.pluginSqlite", "example.lintRuleMissingMessage"],
-	}) as unknown as TTemplateLiteral<[TLiteral<`${string}.${string}`>]>,
+	}) as unknown as TTemplateLiteral<
+		[TLiteral<`${string}.${"app" | "plugin" | "lintRule"}.${string}`>]
+	>,
 	JSONObject,
 	{
 		additionalProperties: false,

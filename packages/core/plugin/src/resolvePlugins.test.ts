@@ -40,7 +40,7 @@ describe("generally", () => {
 	it("should return an error if a plugin uses APIs that are not available", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "namespace.pluginUndefinedApi",
+				id: "namespace.plugin.undefinedApi",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
@@ -66,7 +66,7 @@ describe("generally", () => {
 	it("should not initialize a plugin that uses the 'inlang' namespace except for inlang whitelisted plugins", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "inlang.pluginNotWhitelisted",
+				id: "inlang.plugin.notWhitelisted",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
@@ -89,7 +89,7 @@ describe("loadMessages", () => {
 	it("should load messages from a local source", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "namespace.pluginPlaceholder",
+				id: "namespace.plugin.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
@@ -113,7 +113,7 @@ describe("loadMessages", () => {
 	it("should collect an error if function is defined twice in multiple plugins", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.pluginLoadMessagesFirst",
+				id: "plugin.plugin.loadMessagesFirst",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
@@ -122,7 +122,7 @@ describe("loadMessages", () => {
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
-				id: "plugin.pluginLoadMessagesSecond",
+				id: "plugin.plugin.loadMessagesSecond",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
@@ -145,7 +145,7 @@ describe("saveMessages", () => {
 	it("should save messages to a local source", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.pluginPlaceholder",
+				id: "namespace.plugin.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
@@ -165,7 +165,7 @@ describe("saveMessages", () => {
 	it("should collect an error if function is defined twice in multiple plugins", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.pluginSaveMessages",
+				id: "plugin.plugin.saveMessages",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
@@ -174,7 +174,7 @@ describe("saveMessages", () => {
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
-				id: "plugin.pluginSaveMessages2",
+				id: "plugin.plugin.saveMessages2",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
@@ -198,7 +198,7 @@ describe("detectedLanguageTags", () => {
 	it("should detect language tags from a local source", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.pluginDetectedLanguageTags",
+				id: "plugin.plugin.detectedLanguageTags",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: [],
@@ -210,7 +210,7 @@ describe("detectedLanguageTags", () => {
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
-				id: "plugin.pluginDetectedLanguageTags2",
+				id: "plugin.plugin.detectedLanguageTags2",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "detected-language-tags"],
@@ -233,10 +233,10 @@ describe("detectedLanguageTags", () => {
 	it("should collect an error if function is defined twice in multiple plugins", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.pluginDetectedLanguageTags",
+				id: "plugin.plugin.detectedLanguageTags",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "detected-language-tags"],
+				keywords: [],
 			},
 			detectedLanguageTags: async () => ["de", "en"],
 			addAppSpecificApi: () => {
@@ -245,10 +245,10 @@ describe("detectedLanguageTags", () => {
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
-				id: "plugin.pluginDetectedLanguageTags2",
+				id: "plugin.plugin.detectedLanguageTags2",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "detected-language-tags"],
+				keywords: [],
 			},
 			detectedLanguageTags: async () => ["de", "en"],
 			addAppSpecificApi: () => {
@@ -271,7 +271,7 @@ describe("addAppSpecificApi", () => {
 	it("it should resolve app specific api", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.pluginPlaceholder",
+				id: "namespace.plugin.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
@@ -296,7 +296,7 @@ describe("addAppSpecificApi", () => {
 	it("it should resolve multiple app specific apis", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.pluginPlaceholder",
+				id: "namespace.plugin.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
@@ -312,7 +312,7 @@ describe("addAppSpecificApi", () => {
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
-				id: "plugin.pluginPlaceholder2",
+				id: "namespace.plugin.placeholder2",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
@@ -339,7 +339,7 @@ describe("addAppSpecificApi", () => {
 	it("it should throw an error if return value is not an object", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.pluginPlaceholder",
+				id: "namespace.plugin.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: [],
@@ -361,7 +361,7 @@ describe("addAppSpecificApi", () => {
 	it("it should throw an error if the passed options are not defined inside appSpecificApi", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.pluginPlaceholder",
+				id: "namespace.plugin.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: [],
@@ -392,10 +392,10 @@ describe("meta", () => {
 	it("should resolve meta data", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "namespace.pluginPlaceholder",
+				id: "namespace.plugin.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "my-plugin"],
+				keywords: [],
 			},
 		}
 
@@ -411,7 +411,7 @@ describe("meta", () => {
 	it("should resolve meta data from multiple plugins", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.pluginPlaceholder",
+				id: "namespace.plugin.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: [],
@@ -419,7 +419,7 @@ describe("meta", () => {
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
-				id: "plugin.pluginPlaceholder2",
+				id: "namespace.plugin.placeholder2",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: [],

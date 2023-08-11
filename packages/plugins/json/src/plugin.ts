@@ -68,8 +68,8 @@ function defaultNesting() {
 
 export const plugin: Plugin<PluginSettings> = {
 	meta: {
-		id: "inlang.plugin-json",
-		displayName: { en: "JSON" },
+		id: "inlang.plugin.json",
+		displayName: { en: "Plugin JSON" },
 		description: { en: "JSON plugin for inlang" },
 		keywords: ["json", "generic"],
 	},

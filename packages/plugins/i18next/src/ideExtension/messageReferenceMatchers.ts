@@ -7,10 +7,9 @@
  */
 
 import Parsimmon from "parsimmon"
-// import type { MessageReferenceMatch } from "@inlang/plugin"
-import type { PluginOptions } from "../settings.js"
+import type { PluginSettings } from "../settings.js"
 
-const createParser = (options: PluginOptions) => {
+const createParser = (settings: PluginSettings) => {
 	// Create a Parsimmon language
 	return Parsimmon.createLanguage({
 		// The entry point for message reference matching.
@@ -100,13 +99,13 @@ const createParser = (options: PluginOptions) => {
 
 					// -- handle namespaces --
 					// only handle namespaces when the pathPattern require namespaces
-					if (typeof options.pathPattern === "object") {
+					if (typeof settings.pathPattern === "object") {
 						if (namespace) {
 							// if namespace gets parsed, prepend it to the messageId
 							messageId = namespace + ":" + messageId
 						} else if (!messageId.includes(":")) {
 							// if no namespace gets parsed and the namespace is not already included in the messageId, prepend the default namespace
-							const defaultNamespace = Object.keys(options.pathPattern)[0]
+							const defaultNamespace = Object.keys(settings.pathPattern)[0]
 							messageId = defaultNamespace + ":" + messageId
 						}
 					}
@@ -131,9 +130,9 @@ const createParser = (options: PluginOptions) => {
 }
 
 // Parse the expression
-export function parse(sourceCode: string, options: PluginOptions) {
+export function parse(sourceCode: string, settings: PluginSettings) {
 	try {
-		const parser = createParser(options)
+		const parser = createParser(settings)
 		return parser.entry!.tryParse(sourceCode)
 	} catch {
 		return []
