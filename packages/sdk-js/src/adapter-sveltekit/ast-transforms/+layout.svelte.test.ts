@@ -18,6 +18,7 @@ describe("transformLayoutSvelte", () => {
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
 				addRuntimeToContext(getRuntimeFromData(data));
+				const { sourceLanguageTag } = getRuntimeFromContext();
 				let { i, languageTag } = getRuntimeFromContext();
 				$: if (browser) {
 				    addRuntimeToGlobalThis(getRuntimeFromData(data));
@@ -26,7 +27,7 @@ describe("transformLayoutSvelte", () => {
 				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				</script>
-				{#key languageTag}<slot />{/key}"
+				{#if languageTag || !sourceLanguageTag}{#key languageTag}<slot />{/key}{/if}"
 			`)
 		})
 
@@ -53,6 +54,7 @@ describe("transformLayoutSvelte", () => {
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
 				addRuntimeToContext(getRuntimeFromData(data));
+				const { sourceLanguageTag } = getRuntimeFromContext();
 				let { i, languageTag } = getRuntimeFromContext();
 				$: if (browser) {
 				    addRuntimeToGlobalThis(getRuntimeFromData(data));
@@ -61,11 +63,11 @@ describe("transformLayoutSvelte", () => {
 				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				console.info(data);
-				</script>{#key languageTag}
+				</script>{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
 				<h1>this is a test</h1>
 
-				<p>{JSON.stringify(data, null, 3)}</p>{/key}"
+				<p>{JSON.stringify(data, null, 3)}</p>{/key}{/if}"
 			`)
 		})
 
@@ -98,6 +100,7 @@ describe("transformLayoutSvelte", () => {
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
 				addRuntimeToContext(getRuntimeFromData(data));
+				const { sourceLanguageTag } = getRuntimeFromContext();
 				let { i, languageTag } = getRuntimeFromContext();
 				$: if (browser) {
 				    addRuntimeToGlobalThis(getRuntimeFromData(data));
@@ -106,21 +109,21 @@ describe("transformLayoutSvelte", () => {
 				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				</script>
-				<svelte:window on:load={onLoad} />{#key languageTag}
+				<svelte:window on:load={onLoad} />{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
 				test
 
-				{/key}<svelte:body on:click={onClick} />{#key languageTag}
+				{/key}{/if}<svelte:body on:click={onClick} />{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
 				other test
 
-				{/key}<svelte:head>
+				{/key}{/if}<svelte:head>
 					<title>test</title>
-				</svelte:head>{#key languageTag}
+				</svelte:head>{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
-				{/key}<svelte:options tag=\\"test\\" />{#key languageTag}
+				{/key}{/if}<svelte:options tag=\\"test\\" />{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
-				random content{/key}"
+				random content{/key}{/if}"
 			`)
 		})
 
@@ -175,6 +178,7 @@ describe("transformLayoutSvelte", () => {
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
 				addRuntimeToContext(getRuntimeFromData(data));
+				const { sourceLanguageTag } = getRuntimeFromContext();
 				let { i, languageTag } = getRuntimeFromContext();
 				$: if (browser) {
 				    addRuntimeToGlobalThis(getRuntimeFromData(data));
@@ -182,9 +186,10 @@ describe("transformLayoutSvelte", () => {
 				    ({ i, languageTag } = getRuntimeFromContext());
 				    document.body.parentElement?.setAttribute('lang', language);
 				}
-				</script>{#key languageTag}
+				const { languageTag } = getRuntimeFromContext();
+				</script>{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
-				{languageTag}{/key}"
+				{languageTag}{/key}{/if}"
 			`)
 		})
 
@@ -208,6 +213,7 @@ describe("transformLayoutSvelte", () => {
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
 				addRuntimeToContext(getRuntimeFromData(data));
+				const { sourceLanguageTag } = getRuntimeFromContext();
 				let { i, languageTag } = getRuntimeFromContext();
 				$: if (browser) {
 				    addRuntimeToGlobalThis(getRuntimeFromData(data));
@@ -216,9 +222,9 @@ describe("transformLayoutSvelte", () => {
 				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				console.info(i(\\"welcome\\"));
-				</script>{#key languageTag}
+				</script>{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
-				<slot />{/key}"
+				<slot />{/key}{/if}"
 			`)
 		})
 
@@ -246,6 +252,7 @@ describe("transformLayoutSvelte", () => {
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
 				addRuntimeToContext(getRuntimeFromData(data));
+				const { sourceLanguageTag } = getRuntimeFromContext();
 				let { i, languageTag } = getRuntimeFromContext();
 				$: if (browser) {
 				    addRuntimeToGlobalThis(getRuntimeFromData(data));
@@ -255,9 +262,9 @@ describe("transformLayoutSvelte", () => {
 				}
 				console.info(123);
 				console.info(i(\\"welcome\\"));
-				</script>{#key languageTag}
+				</script>{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
-				<slot />{/key}"
+				<slot />{/key}{/if}"
 			`)
 		})
 
@@ -274,6 +281,7 @@ describe("transformLayoutSvelte", () => {
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
 				addRuntimeToContext(getRuntimeFromData(data));
+				const { sourceLanguageTag } = getRuntimeFromContext();
 				let { i, languageTag } = getRuntimeFromContext();
 				$: if (browser) {
 				    addRuntimeToGlobalThis(getRuntimeFromData(data));
@@ -339,11 +347,12 @@ describe("transformLayoutSvelte", () => {
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
 				addRuntimeToContext(getRuntimeFromData(data));
-				let { i, language } = getRuntimeFromContext();
+				const { sourceLanguageTag } = getRuntimeFromContext();
+				let { i, languageTag } = getRuntimeFromContext();
 				$: if (browser) {
 				    addRuntimeToGlobalThis(getRuntimeFromData(data));
 				    addRuntimeToContext(getRuntimeFromData(data));
-				    ({ i, language } = getRuntimeFromContext());
+				    ({ i, languageTag } = getRuntimeFromContext());
 				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				const { languages } = getRuntimeFromContext();
@@ -377,20 +386,21 @@ describe("transformLayoutSvelte", () => {
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
 				addRuntimeToContext(getRuntimeFromData(data));
-				let { i, language } = getRuntimeFromContext();
+				const { sourceLanguageTag } = getRuntimeFromContext();
+				let { i, languageTag } = getRuntimeFromContext();
 				$: if (browser) {
 				    addRuntimeToGlobalThis(getRuntimeFromData(data));
 				    addRuntimeToContext(getRuntimeFromData(data));
-				    ({ i, language } = getRuntimeFromContext());
+				    ({ i, languageTag } = getRuntimeFromContext());
 				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				const { switchLanguage, languages } = getRuntimeFromContext();
 				const doSomething = () => console.log(languages);
 				if (browser)
 				    doSomething();
-				</script>{#key language}
+				</script>{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
-				<button on:click={() => switchLanguage('en')}>Switch Language</button>{/key}"
+				<button on:click={() => switchLanguage('en')}>Switch Language</button>{/key}{/if}"
 			`)
 		})
 
@@ -415,11 +425,12 @@ describe("transformLayoutSvelte", () => {
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
 				addRuntimeToContext(getRuntimeFromData(data));
-				let { i, language } = getRuntimeFromContext();
+				const { sourceLanguageTag } = getRuntimeFromContext();
+				let { i, languageTag } = getRuntimeFromContext();
 				$: if (browser) {
 				    addRuntimeToGlobalThis(getRuntimeFromData(data));
 				    addRuntimeToContext(getRuntimeFromData(data));
-				    ({ i, language } = getRuntimeFromContext());
+				    ({ i, languageTag } = getRuntimeFromContext());
 				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				const { languages } = getRuntimeFromContext();

@@ -10,16 +10,19 @@ import {
 	wait,
 } from "./utils.js"
 import type { LanguageTag, Message } from "@inlang/app"
+import type { LayoutServerDataPayload } from "../server/wrappers.js"
 
 // ------------------------------------------------------------------------------------------------
 
 const cache: Record<LanguageTag, Message[] | undefined> = {}
 
+type InitRuntimeForWrappersOptions = {
+	initDetectors?: (event: Parameters<Kit.Load>[0]) => Detector[]
+}
+
 const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, any>>(
 	event: Parameters<Load>[0],
-	options?: {
-		initDetectors?: (event: Parameters<Load>[0]) => Detector[]
-	},
+	options?: InitRuntimeForWrappersOptions,
 ): Promise<SvelteKitClientRuntime> => {
 	const existingPromise = getRuntimePromiseFromEvent(event)
 	if (existingPromise) return existingPromise
@@ -35,40 +38,50 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 
 	addRuntimePromiseToEvent(event, new Promise((resolve) => (resolveRuntimePromise = resolve)))
 
-	const data = (event.data as DataPayload)["[inlang]"]
-	const { sourceLanguageTag, languageTags } = data
-
-	// TODO: only add this conditional logic if shared detection strategies get used
-	const languageTag =
-		data.languageTag || !options.initDetectors
-			? data.languageTag
-			: await detectLanguageTag(
-					{ sourceLanguageTag, languageTags },
-					...options.initDetectors(event),
-			  )
-
-	const runtime = await initSvelteKitClientRuntime({
-		fetch: event.fetch,
-		sourceLanguageTag,
-		languageTags,
-		languageTag,
-		cache,
-	})
+	const runtime = await initRuntime(event, options, event.data)
 
 	resolveRuntimePromise(runtime)
 
 	return runtime
 }
 
-// ------------------------------------------------------------------------------------------------
-
-export type DataPayload = {
-	"[inlang]": {
-		sourceLanguageTag: LanguageTag
-		languageTags: LanguageTag[]
-		languageTag: LanguageTag | undefined
+const initRuntime = async (
+	event: Parameters<Kit.Load>[0],
+	options: InitRuntimeForWrappersOptions,
+	data: LayoutServerDataPayload["[inlang]"],
+) => {
+	if (!data) {
+		// TODO: warn only during development
+		const useWarn = (defaultValue?: unknown) => () =>
+			console.warn(
+				"inlang was not correctly set up on this page. Please check `routing.exclude` in your `inlang.config.js` file.",
+			)! || defaultValue
+		return {
+			i: useWarn(""),
+			loadMessages: useWarn(),
+			changeLanguageTag: useWarn(),
+			languageTags: [],
+		} as Partial<SvelteKitClientRuntime> as SvelteKitClientRuntime
 	}
+
+	const { sourceLanguageTag, languageTags, languageTag: language } = data
+
+	// TODO: only add this conditional logic if shared detection strategies get used
+	const languageTag =
+		language || !options.initDetectors
+			? language
+			: await detectLanguageTag({ sourceLanguageTag, languageTags }, ...options.initDetectors(event))
+
+	return initSvelteKitClientRuntime({
+		fetch: event.fetch,
+		sourceLanguageTag,
+		languageTags,
+		languageTag,
+		cache,
+	})
 }
+
+// ------------------------------------------------------------------------------------------------
 
 export const initRootLayoutLoadWrapper = <
 	LayoutLoad extends Kit.Load<any, any, any, any, any>,
@@ -82,16 +95,16 @@ export const initRootLayoutLoadWrapper = <
 				runtime: SvelteKitClientRuntime,
 			) => Promise<Data> | Data,
 		) =>
-		async (event: Parameters<LayoutLoad>[0]): Promise<DataWithRuntime<Data>> => {
-			const runtime = await initRuntimeForWrappers(event, options)
+			async (event: Parameters<LayoutLoad>[0]): Promise<DataWithRuntime<Data>> => {
+				const runtime = await initRuntimeForWrappers(event, options)
 
 			const payload = await load(event, runtime)
 
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { "[inlang]": _, ...data } = payload || event.data
 
-			return addRuntimeToData(data, runtime)
-		},
+				return addRuntimeToData(data, runtime)
+			},
 })
 
 // ------------------------------------------------------------------------------------------------
@@ -113,8 +126,8 @@ export const initRootPageLoadWrapper = <
 				runtime: SvelteKitClientRuntime,
 			) => Promise<Data> | Data,
 		) =>
-		async (event: Parameters<PageLoad>[0]): Promise<Data> => {
-			const data = await event.parent()
+			async (event: Parameters<PageLoad>[0]): Promise<Data> => {
+				const data = await event.parent()
 
 			const languageTag: LanguageTag | undefined = data.languageTag
 
@@ -136,8 +149,8 @@ export const initRootPageLoadWrapper = <
 
 			const runtime = await initRuntimeForWrappers(event)
 
-			return load(event, runtime)
-		},
+				return load(event, runtime)
+			},
 })
 
 // ------------------------------------------------------------------------------------------------
@@ -150,9 +163,9 @@ export const initLoadWrapper = <Load extends Kit.Load<any, any, any, any, any>>(
 				runtime: SvelteKitClientRuntime,
 			) => Promise<Data> | Data,
 		) =>
-		async (event: Parameters<Load>[0]): Promise<Data> => {
-			const runtime = await initRuntimeForWrappers(event)
+			async (event: Parameters<Load>[0]): Promise<Data> => {
+				const runtime = await initRuntimeForWrappers(event)
 
-			return load(event, runtime)
-		},
+				return load(event, runtime)
+			},
 })
