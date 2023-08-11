@@ -6,21 +6,23 @@ import type { InlangConfig } from "@inlang/config"
 
 const lintRule1 = {
 	meta: {
-		id: "lint-rule.1",
+		id: "x.lintRule1",
 		displayName: { en: "" },
 		description: { en: "" },
 	},
 	defaultLevel: "error",
+	type: "MessageLint",
 	message: vi.fn(),
 } satisfies MessageLintRule
 
 const lintRule2 = {
 	meta: {
-		id: "lint-rule.2",
+		id: "x.lintRule2",
 		displayName: { en: "" },
 		description: { en: "" },
 	},
 	defaultLevel: "warning",
+	type: "MessageLint",
 	message: vi.fn(),
 } satisfies MessageLintRule
 

@@ -3,74 +3,89 @@ import { type LanguageTag, TranslatedStrings } from "@inlang/language-tag"
 import type { InlangConfig } from "@inlang/config"
 import { Type, type Static, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
 
-export type LintLevel = Static<typeof LintLevel>
+/**
+ * ---------------- BASIS ----------------
+ */
 
+export type LintLevel = Static<typeof LintLevel>
 export const LintLevel = Type.Union([Type.Literal("error"), Type.Literal("warning")])
 
-export type LintRule = Static<typeof LintRule>
-
-export const LintRule = Type.Object(
-	{
-		meta: Type.Object({
-			id: Type.String({
-				pattern: "^[a-z0-9-]+\\.[a-z0-9-]+$",
-				examples: ["example.my-plugin"],
-			}) as unknown as TTemplateLiteral<[TLiteral<`${string}.${string}`>]>,
-			displayName: TranslatedStrings,
-			description: TranslatedStrings,
-		}),
-		/**
-		 * The default level of the lint rule.
-		 *
-		 * The default level exists as a fallback if the user
-		 * did not specify a level for the rule in the settings.
-		 */
-		defaultLevel: LintLevel,
-	},
-	{ additionalProperties: false },
-)
-
-export type MessageLintRule<
-	RuleOptions extends JSONSerializable<unknown> = Record<string, string> | unknown,
-> = LintRule & {
-	message: (args: {
-		message: Message
-		query: Pick<MessageQueryApi, "get">
-		config: Readonly<InlangConfig>
-		options: RuleOptions
-		report: ReportMessageLint
-	}) => MaybePromise<void>
-}
-
-// TODO: make it a general type for other packages to use
-type JSONSerializable<
-	T extends Record<string, string | string[] | Record<string, string | string[]>> | unknown,
-> = T
-
-// TODO: make it a general type for other packages to use
-type MaybePromise<T> = T | Promise<T>
-
-export type ReportMessageLint = (args: {
-	messageId: Message["id"]
-	languageTag: LanguageTag
-	body: LintReport["body"]
-}) => void
-
-export type LintReport = {
-	ruleId: LintRule["meta"]["id"]
+/**
+ * The basis of a lint report (required to contruct a lint report union type)
+ */
+export type LintReportBase = {
+	ruleId: LintRuleBase["meta"]["id"]
+	type: LintRuleBase["type"]
 	level: LintLevel
 	body: TranslatedStrings
 }
 
-export type MessageLintReport = LintReport & {
+/**
+ * The basis of a lint rule (required to contruct a lint rule union type)
+ */
+export type LintRuleBase = Static<typeof LintRuleBase>
+export const LintRuleBase = Type.Object({
+	meta: Type.Object({
+		id: Type.String({
+			pattern: "^(?:[a-zA-Z0-9]+(?:\\.[a-zA-Z0-9]+)*)\\.lintRule[a-zA-Z][a-zA-Z0-9]*$",
+			description: "The key must be conform to the `{namespace}.{key}` pattern.",
+			examples: ["example.pluginSqlite", "example.lintRuleMissingMessage"],
+		}) as unknown as TTemplateLiteral<[TLiteral<`${string}.lintRule${string}`>]>,
+		displayName: TranslatedStrings,
+		description: TranslatedStrings,
+	}),
+	// (in the future, more literals like CodeLint are expected)
+	type: Type.Union([Type.Literal("MessageLint")]),
+	/**
+	 * The default level of the lint rule.
+	 *
+	 * The default level exists as a fallback if the user
+	 * did not specify a level for the rule in the settings.
+	 */
+	defaultLevel: LintLevel,
+})
+
+/**
+ * ---------------- MESSAGE LINT ----------------
+ */
+
+export type MessageLintRule = Static<typeof MessageLintRule> & {
+	message: (args: {
+		message: Message
+		query: Pick<MessageQueryApi, "get">
+		config: Readonly<InlangConfig>
+		settings: InlangConfig["settings"][LintRuleBase["meta"]["id"]]
+		report: (args: {
+			messageId: Message["id"]
+			languageTag: LanguageTag
+			body: LintReportBase["body"]
+		}) => void
+	}) => MaybePromise<void>
+}
+export const MessageLintRule = Type.Intersect([
+	LintRuleBase,
+	Type.Object({
+		type: Type.Literal("MessageLint"),
+	}),
+])
+
+export type MessageLintReport = LintReportBase & {
 	type: "MessageLint"
 	messageId: Message["id"]
 	languageTag: LanguageTag
 }
 
-export class LintError extends Error {
-	constructor(message: string, options?: ErrorOptions) {
-		super(message, options)
-		this.name = "LintError"
-	}
-}
+/**
+ * ---------------- LINT ----------------
+ */
+
+export type LintRule = MessageLintRule
+export const LintRule = Type.Union([MessageLintRule])
+
+export type LintReport = MessageLintReport
+
+/**
+ * ---------------- UTILITIES ----------------
+ */
+
+type MaybePromise<T> = T | Promise<T>
