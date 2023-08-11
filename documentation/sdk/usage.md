@@ -7,11 +7,11 @@ description: This is a list of all the functions you can export from the inlang 
 
 # {% $frontmatter.title %}
 
-With `@inlang/sdk-js` you get many useful functions to help you implement internationalization in your application. This is a list of all the functions, what they provide and how to use them.
+With `@inlang/sdk-js` you get many useful functions to help you implement internationalization in your application. This is a list of all the functions, what they provide, and how to use them.
 
 ## `i`
 
-Use the inlang function (`i`) to get a language dependent text. The function takes the key of the text as a parameter and returns the string according to the current languageTag.
+Use the inlang function (`i`) to get a language-dependent text. The function takes the key of the text as a parameter and returns the string according to the current languageTag.
 
 #### Example
 
@@ -118,4 +118,4 @@ The `loadResource` function allows you to load the resource file for a specific 
 
 ---
 
-_Is something unclear or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr) or open a [Discussion](https://github.com/inlang/inlang/discussions) or an [Issue](https://github.com/inlang/inlang/issues) on [Github](https://github.com/inlang/inlang)._
+_Is something unclear, or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr) or open a [Discussion](https://github.com/inlang/inlang/discussions) or an [Issue](https://github.com/inlang/inlang/issues) on [Github](https://github.com/inlang/inlang)._

@@ -7,7 +7,7 @@ description: The inlang Command Line Interface (CLI) automates globalization pro
 
 # Inlang CLI
 
-[@inlang/cli](https://github.com/inlang/inlang/tree/main/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infastructure. It ca be used to automate localization tasks, such as machine translation, linting and more.
+[@inlang/cli](https://github.com/inlang/inlang/tree/main/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infrastructure. It can be used to automate localization tasks, such as machine translation, lining, and more.
 
 ### Benefits
 
@@ -15,7 +15,7 @@ description: The inlang Command Line Interface (CLI) automates globalization pro
 - ⚙️ Integrate localization into your **CI/CD** pipeline
 - 🔍 **Lint** your translations
 - 🤖 **Machine translate** your resources
-- 🖊️ Open web editor right from the command line
+- 🖊️ Open the web editor right from the command line
 - ✅ Validate your `inlang.config.json` configuration file
 
 ## Installation
@@ -44,10 +44,10 @@ If one of the commands can't be found, you are probably using an outdated versio
 
 ## Commands
 
-We recommend to use the CLI with `npx` to avoid installing the CLI globally. Not installing the CLI globally has the following advantages:
+We recommend using the CLI with `npx` to avoid installing the CLI globally. Not installing the CLI globally has the following advantages:
 
 - the installed CLI version is scoped to the project, ensuring that it always works.
-- the CLI gets installed for team members too, avoiding "why is this command not working for me" questions.
+- the CLI gets installed for team members, avoiding "why is this command not working for me" questions.
 
 `npx` is auto-installed with Node and NPM.
 
@@ -80,7 +80,7 @@ The config command is used to interactively configure and create the inlang.conf
 This command scans your file system hierarchy and finds out how your localization files are setup.
 It returns a complete config for you to use in your project, which you can modify to your needs.
 
-To use the `config init` command, simply run:
+To use the `config init` command, simply run the following:
 
 ```sh
 npx @inlang/cli config init
@@ -90,7 +90,7 @@ This will launch an interactive prompt that will guide you through the process o
 
 #### `config validate`
 
-This command validates the `inlang.config.json` file in the current directory. It checks if the file is valid JSON and if it contains **all required fields**. It also checks if the specified resources exist and perform a _dry run of the translation process_.
+This command validates the `inlang.config.json` file in the current directory. It checks if the file is valid JSON and if it contains **all required fields**. It also checks if the specified resources exist and performs a _dry run of the translation process_.
 
 To validate the `inlang.config.json` file, run the following command:
 
@@ -102,7 +102,7 @@ npx @inlang/cli config validate
 
 This command updates the `inlang.config.json` file with the latest versions of the plugins used. This is helpful if you want to **update your plugins** to the latest major version and don't want to look them up manually.
 
-Keep in mind updating to a new major version might break your configuration. _We recommend to always check the changelog of the plugin before updating._
+Keep in mind updating to a new major version might break your configuration. _We recommend always checking the changelog of the plugin before updating._
 
 To update the `inlang.config.json` file, run the following command:
 
@@ -128,7 +128,7 @@ npx @inlang/cli machine translate
 
 The translate command has the following options:
 
-- `-f, --force`: If this option is set, the command will not prompt for confirmation. This is useful for CI/CD build pipelines. **We advise you to only use `machine translate` in build pipelines to avoid out-of-context / wrong translations.**
+- `-f, --force`: If this option is set, the command will not prompt confirmation. This is useful for CI/CD build pipelines. **We advise you to only use `machine translate` in build pipelines to avoid out-of-context/wrong translations.**
 
 This command reads the inlang.config.json file in the repository and retrieves the resources and reference language specified in the configuration. It then translates all messages from the reference language to other languages defined in the configuration.
 
@@ -138,7 +138,7 @@ The translations are performed using machine translation services. The translate
 
 ### `lint`
 
-The lint command lints the translation with the configured lint rules, for example with the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules).
+The lint command lints the translation with the configured lint rules, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules).
 
 ```sh
 npx @inlang/cli lint
@@ -146,7 +146,7 @@ npx @inlang/cli lint
 
 The `lint` command is provided with an optional `--no-fail` flag, which will not fail the command if there are any linting errors.
 
-`lint` will read through all resources and find potential errors and warnings in the translation strings, for example with the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns / duplicates**.
+`lint` will read through all resources and find potential errors and warnings in the translation strings, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns/duplicates**.
 
 However, it's totally up to you how you configure your lints. _You can build your own plugin with your customized set of lints_ with the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules) as a starter template.
 

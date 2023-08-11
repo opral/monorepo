@@ -7,7 +7,7 @@ description: Configure the inlang SDK to your needs.
 
 # {% $frontmatter.shortTitle %} Options
 
-You can configure the SDK behavior to your needs with the `inlang.config.js` file. This file is located in the root of your project. Just add the `sdkPlugin` and configure it to your project's needs.
+You can configure the SDK behavior to your needs with the `inlang.config.js` file. This file is located at the root of your project. Just add the `sdkPlugin` and configure it to your project's needs.
 
 If you don't have a `inlang.config.js` file yet, you can create one by following our [Quickstart-Guide](/documentation/quick-start).
 
@@ -77,7 +77,7 @@ The `resources` property defines how to deal with resources read with the resolv
 
 Defines how to cache resources.
 
-> Right now we only support static Resources. Please open an [Issue](https://github.com/inlang/inlang/issues) if you need to regularly fetch Resources.
+> Right now, we only support static Resources. Please open an [Issue](https://github.com/inlang/inlang/issues) if you need to regularly fetch Resources.
 
 - build-time (default)
 
@@ -98,19 +98,19 @@ Loads all Resources during build time and adds them to the bundle.
 You can tell `inlang` to ignore certain routes in your project. Those routes will have no i18n code setup, so accessing any `@inlang/sdk-js` imports inside those routes could fail during runtime.
 
 ```js
-{
+sdkPlugin({
 	routing: {
 		exclude: [
 			"/api",
 			"/login",
 		],
 	},
-},
+}),
 ```
 
 - All entries must be defined as a relative path `/`.
-- If `/api` get's specified, all subpaths (e.g. `/api/users`) will also match (`startsWith`).
+- If `/api` gets specified, all subpaths (e.g., `/api/users`) will also match (`startsWith`).
 
 ---
 
-_Is something unclear or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr) or open a [Discussion](https://github.com/inlang/inlang/discussions) or an [Issue](https://github.com/inlang/inlang/issues) on [Github](https://github.com/inlang/inlang)._
+_Is something unclear, or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr) or open a [Discussion](https://github.com/inlang/inlang/discussions) or an [Issue](https://github.com/inlang/inlang/issues) on [Github](https://github.com/inlang/inlang)._

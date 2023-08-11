@@ -12,6 +12,9 @@ import type { Config as SvelteConfig } from "@sveltejs/kit"
 import * as svelteKit from "@sveltejs/kit"
 import { findDepPkgJsonPath } from "vitefu"
 import { InlangSdkException } from "./exceptions.js"
+import { transformWithEsbuild } from "vite"
+import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
+import { ImportDeclaration, Node } from "ts-morph"
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => false))
 
@@ -217,13 +220,24 @@ const shouldContentBePrerendered = async (routesFolder: string) => {
 
 	const modules = await Promise.all(
 		filesToLookFor.map(async (file) => {
-			const contents = await readFile(path.resolve(routesFolder, file), {
-				encoding: "utf-8",
-			}).catch(() => undefined)
-			if (!contents) return {}
+			const filePath = path.resolve(routesFolder, file)
+			const contents = await readFile(filePath, { encoding: "utf-8" }).catch(() => undefined)
+			if (!contents || !contents.trim()) return {}
+
+			const { code } = await transformWithEsbuild(contents, filePath)
+			if (!code.trim()) return {}
+
+			const sourceFile = codeToSourceFile(code)
+			const importDeclarations = sourceFile
+				.forEachChildAsArray()
+				.filter((node) => Node.isImportDeclaration(node)) as ImportDeclaration[]
+			for (const importDeclaration of importDeclarations) {
+				importDeclaration.remove()
+			}
 
 			return import(
-				"data:application/javascript;base64," + Buffer.from(contents).toString("base64")
+				"data:application/javascript;base64," +
+					Buffer.from(nodeToCode(sourceFile)).toString("base64")
 			)
 		}),
 	)

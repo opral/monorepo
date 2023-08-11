@@ -12,7 +12,7 @@
 		"unplugin",
 		"vite"
 	],
-	"version": "0.11.3",
+	"version": "0.11.4",
 	"scripts": {
 		"dev": "npm-run-all --print-label --parallel dev:runtime dev:plugin tsc:watch",
 		"dev:runtime": "tsc --project ./tsconfig.build.json --watch",
