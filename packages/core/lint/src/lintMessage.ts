@@ -28,7 +28,8 @@ export const lintMessage = async (args: {
 				await rule.message({
 					message: args.message,
 					query: args.query,
-					config: args.config,
+					sourceLanguageTag: args.config.sourceLanguageTag,
+					languageTags: args.config.languageTags,
 					settings,
 					report: (reportArgs) => {
 						reports.push({
