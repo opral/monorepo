@@ -123,7 +123,7 @@ export const resetConfig = () => (configPromise = undefined)
 
 // ------------------------------------------------------------------------------------------------
 
-class InlangSdkConfigException extends InlangSdkException { }
+class InlangSdkConfigException extends InlangSdkException {}
 
 function assertConfigWithSdk(
 	config: InlangConfig | undefined,
