@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.11.5
+
+### Patch Changes
+
+- c32b22ea: [fix] use AST to detect static output
+
 ## 0.11.4
 
 ### Patch Changes
