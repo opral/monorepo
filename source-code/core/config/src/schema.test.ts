@@ -3,6 +3,38 @@ import { Value } from "@sinclair/typebox/value"
 import { describe, it, expect } from "vitest"
 
 describe("config.settings", () => {
+	it("should enforce an object as value", () => {
+		const mockConfig: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "de"],
+			modules: [],
+			settings: {
+				// @ts-expect-error - Value is not an object
+				"namespace.helloWorld": "value",
+				// @ts-expect-error - Value is not an object
+				"x.e": false,
+				"x.y": {},
+			},
+		}
+		expect(Value.Check(InlangConfig, mockConfig)).toBe(false)
+	})
+
+	it("should be possible to have one nested object layer", () => {
+		const mockConfig: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "de"],
+			modules: [],
+			settings: {
+				"x.y": {
+					hello: {
+						world: 4,
+					},
+				},
+			},
+		}
+		expect(Value.Check(InlangConfig, mockConfig)).toBe(true)
+	})
+
 	it("should pass with correct keys", () => {
 		const mockConfig: InlangConfig = {
 			sourceLanguageTag: "en",
@@ -66,8 +98,8 @@ describe("config.settings", () => {
 			languageTags: ["en", "de"],
 			modules: [],
 			settings: {
-				// @ts-expect-error - Function is not a JSON
 				"namespace.hello-world": {
+					// @ts-expect-error - Function is not a JSON
 					myFunction: () => {
 						return "Hello World"
 					},
