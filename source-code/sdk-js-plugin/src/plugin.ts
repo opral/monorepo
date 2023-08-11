@@ -6,7 +6,7 @@ import { ideExtensionDefaultConfig } from './ideExtension/config.js'
 
 export const sdkPlugin = {
 	meta: {
-		id: "inlang.sdk-js",
+		id: "inlang.plugin-sdk-js",
 		displayName: { en: "Inlang SDK for JavaScript" },
 		description: { en: "Plugin for the Inlang SDK for JavaScript" },
 		keywords: ["inlang", "sdk", "runtime", "plugin", "tranform", "javascript", "typescript", "svelte", "sveltekit"],

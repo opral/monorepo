@@ -17,7 +17,7 @@ import { LanguageTag } from "@inlang/language-tag"
 export type PluginOptions = Static<typeof PluginOptions>
 export const PluginOptions = Type.Record(
 	Type.String(),
-	Type.Union([Type.String(), Type.Array(Type.String()), Type.Record(Type.String(), Type.String())]),
+	Type.Union([Type.String(), Type.Any()]),
 )
 
 /**
