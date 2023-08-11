@@ -12,10 +12,9 @@ import type { Config as SvelteConfig } from "@sveltejs/kit"
 import * as svelteKit from "@sveltejs/kit"
 import { findDepPkgJsonPath } from "vitefu"
 import { InlangSdkException } from "./exceptions.js"
-import { transformWithEsbuild } from "vite"
-import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
-import { ImportDeclaration, Node } from "ts-morph"
-import { findExport } from '../../ast-transforms/utils/exports.js'
+import { codeToSourceFile } from "../../ast-transforms/utils/js.util.js"
+import { Node } from "ts-morph"
+import { findExport } from "../../ast-transforms/utils/exports.js"
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => false))
 
@@ -240,10 +239,13 @@ const shouldContentBePrerendered = async (routesFolder: string) => {
 		}),
 	)
 
-	return prerenderExportVCalues.map((node) =>
-		Node.isTrueLiteral(node)
-		|| (Node.isStringLiteral(node) && node.getLiteralText() === 'auto')
-	).some(Boolean)
+	return prerenderExportVCalues
+		.map(
+			(node) =>
+				Node.isTrueLiteral(node) ||
+				(Node.isStringLiteral(node) && node.getLiteralText() === "auto"),
+		)
+		.some(Boolean)
 }
 
 // ------------------------------------------------------------------------------------------------
