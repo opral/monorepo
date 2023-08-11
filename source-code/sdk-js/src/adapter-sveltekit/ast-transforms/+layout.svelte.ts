@@ -50,7 +50,7 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 	addImport(sourceFile, "$app/environment", "browser")
 
 	// remove imports to avoid conflicts, those imports get added in a reactive way
-	removeImport(sourceFile, "@inlang/sdk-js", "i", "languageTag")
+	removeImport(sourceFile, "@inlang/sdk-js", "i", "language", "sourceLanguageTag")
 
 	const index = addOrMoveDataExportAndReturnIndex(sourceFile)
 
@@ -72,6 +72,7 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 		dedent`
 			addRuntimeToGlobalThis(getRuntimeFromData(data))
 			addRuntimeToContext(getRuntimeFromData(data))
+			const { sourceLanguageTag } = getRuntimeFromContext()
 			let { i, languageTag } = getRuntimeFromContext()
 		`,
 	)
@@ -100,12 +101,11 @@ const transformMarkup = (config: TransformConfig, markup: string): string => {
 
 	const markup1 = s.toString()
 	const s1 = new MagicString(markup1)
-	// const ast1 = markupToAst(markup1)
-	// TODO: only insert if reactive stores are not used
-	// TODO: check what to do with `routing.exclude` option
-	// if (!config.languageInUrl) {
-	// wrapMarkupChildren(s1, ast1, "{#if languageTag}$$_INLANG_WRAP_$${/if}")
-	// }
+	const ast1 = markupToAst(markup1)
+	// TODO: only insert `if (languageTag)` reactive stores are not used
+	if (!config.languageInUrl) {
+		wrapMarkupChildren(s1, ast1, "{#if languageTag || !sourceLanguageTag}$$_INLANG_WRAP_$${/if}")
+	}
 
 	return s1.toString()
 }

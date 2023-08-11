@@ -195,7 +195,7 @@ describe("transformHooksServerJs", () => {
 				export const handle = initHandleWrapper({
 				    inlangConfigModule: import(\\"../inlang.config.js\\"),
 				    excludedRoutes: [],
-				    getLanguage: () => undefined,
+				    parseLanguageTag: () => undefined,
 				}).use(({ event, resolve }, { i }) => {
 				    console.info(i('hi'));
 				    return resolve(event);
