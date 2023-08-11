@@ -1,11 +1,11 @@
-import type { InlangInstance } from "./api.js"
+import type { InlangInstance, Subscribable } from "./api.js"
 import { ImportFunction, ResolveModulesFunction, resolveModules } from "@inlang/module"
 import { NodeishFilesystemSubset, InlangConfig, Message, tryCatch } from "@inlang/plugin"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
 import { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError } from "./errors.js"
-import { LintError, LintReport, lintMessages } from "@inlang/lint"
-import { createRoot, createSignal, createEffect, observable } from "./solid.js"
+import { LintRuleThrowedError, LintReport, lintMessages } from "@inlang/lint"
+import { createRoot, createSignal, createEffect } from "./solid.js"
 import { createReactiveQuery } from "./createReactiveQuery.js"
 
 const ConfigCompiler = TypeCompiler.Compile(InlangConfig)
@@ -88,7 +88,7 @@ export const createInlang = async (args: {
 		}
 
 		const [lintReports, setLintReports] = createSignal<LintReport[]>()
-		const [lintErrors, setLintErrors] = createSignal<LintError[]>()
+		const [lintErrors, setLintErrors] = createSignal<LintRuleThrowedError[]>([])
 		createEffect(() => {
 			const msgs = messages()
 			if (!msgs || !lintInitialized()) return
@@ -115,27 +115,29 @@ export const createInlang = async (args: {
 
 		return {
 			meta: {
-				plugins: observable(() => resolvedModules()!.data.meta.plugins),
-				lintRules: observable(() => resolvedModules()!.data.meta.lintRules),
+				plugins: createSubscribable(() => resolvedModules()!.data.meta.plugins),
+				lintRules: createSubscribable(() => resolvedModules()!.data.meta.lintRules),
 			},
-			errors: observable(() => [
+			errors: createSubscribable(() => [
 				...resolvedModules()!.errors,
 				...resolvedModules()!.data.plugins.errors,
 				...resolvedModules()!.data.lintRules.errors,
 				...(lintErrors() || []),
 			]),
-			config: observable(config),
+			config: createSubscribable(() => config()!),
 			setConfig: setConfig,
 			lint: {
 				init: initLint,
-				reports: observable(() => {
+				reports: createSubscribable(() => {
 					const reports = lintReports()
 					// TODO: improve error
 					if (!reports) return []
 					return reports
 				}),
 			},
-			appSpecificApi: observable(() => resolvedModules()!.data.plugins.data!.appSpecificApi),
+			appSpecificApi: createSubscribable(
+				() => resolvedModules()!.data.plugins.data!.appSpecificApi,
+			),
 			query: {
 				messages: query,
 			},
@@ -200,3 +202,13 @@ const createAwaitable = () => {
 type MaybePromise<T> = T | Promise<T>
 
 const makeTrulyAsync = <T>(fn: MaybePromise<T>): Promise<T> => (async () => fn)()
+
+function createSubscribable<T>(signal: () => T): Subscribable<T> {
+	return Object.assign(signal, {
+		subscribe: (callback: any) => {
+			createEffect(() => {
+				callback(signal())
+			})
+		},
+	})
+}

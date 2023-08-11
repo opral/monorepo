@@ -1,10 +1,9 @@
 import type { InlangConfig } from "@inlang/config"
-import type { LintRuleError, LintError, LintReport, LintRule } from "@inlang/lint"
+import type { InvalidLintRuleError, LintRuleThrowedError, LintReport } from "@inlang/lint"
 import type { MessageQueryApi } from "@inlang/messages"
 import type { Result } from "@inlang/result"
 import type { InvalidConfigError } from "./errors.js"
 import type {
-	Plugin,
 	PluginAppSpecificApiReturnError,
 	PluginFunctionDetectLanguageTagsAlreadyDefinedError,
 	PluginFunctionLoadMessagesAlreadyDefinedError,
@@ -19,10 +18,12 @@ import type { ModuleImportError, ModuleError, ResolveModulesFunction } from "@in
 // TODO: remove all getters and use solid store for whole object, just expose `setConfig`
 export type InlangInstance = {
 	meta: {
-		plugins: Observable<Awaited<ReturnType<ResolveModulesFunction>>["data"]["meta"]["plugins"]>
-		lintRules: Observable<Awaited<ReturnType<ResolveModulesFunction>>["data"]["meta"]["lintRules"]>
+		plugins: Subscribable<Awaited<ReturnType<ResolveModulesFunction>>["data"]["meta"]["plugins"]>
+		lintRules: Subscribable<
+			Awaited<ReturnType<ResolveModulesFunction>>["data"]["meta"]["lintRules"]
+		>
 	}
-	errors: Observable<
+	errors: Subscribable<
 		(
 			| ModuleImportError
 			| ModuleError
@@ -33,13 +34,13 @@ export type InlangInstance = {
 			| PluginUsesInvalidIdError
 			| PluginUsesInvalidSchemaError
 			| PluginUsesReservedNamespaceError
+			| InvalidLintRuleError
+			| LintRuleThrowedError
 			| Error
-			| LintRuleError
-			| LintError
 		)[]
 	>
-	appSpecificApi: Observable<ResolvedPlugins["appSpecificApi"]>
-	config: Observable<InlangConfig>
+	appSpecificApi: Subscribable<ResolvedPlugins["appSpecificApi"]>
+	config: Subscribable<InlangConfig>
 	setConfig: (config: InlangConfig) => Result<void, InvalidConfigError>
 	query: {
 		messages: MessageQueryApi
@@ -51,21 +52,11 @@ export type InlangInstance = {
 		init: () => Promise<void>
 		// for now, only simply array that can be improved in the future
 		// see https://github.com/inlang/inlang/issues/1098
-		reports: Observable<LintReport[]>
+		reports: Subscribable<LintReport[]>
 	}
 }
 
-export interface Observable<T> {
-	subscribe(observer: ObservableObserver<T>): {
-		unsubscribe(): void
-	}
-	[Symbol.observable](): Observable<T>
+export type Subscribable<Value> = {
+	(): Value
+	subscribe: (callback: (value: Value) => void) => void
 }
-
-export type ObservableObserver<T> =
-	| ((v: T) => void)
-	| {
-			next?: (v: T) => void
-			error?: (v: any) => void
-			complete?: (v: boolean) => void
-	  }
