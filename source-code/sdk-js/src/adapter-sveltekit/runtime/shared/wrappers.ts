@@ -38,7 +38,7 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 
 	addRuntimePromiseToEvent(event, new Promise((resolve) => (resolveRuntimePromise = resolve)))
 
-	const runtime = await initRuntime(event, options, event.data['[inlang]'])
+	const runtime = await initRuntime(event, options, event.data["[inlang]"])
 
 	resolveRuntimePromise(runtime)
 
