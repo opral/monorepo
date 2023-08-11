@@ -37,7 +37,7 @@ test("should not report if pattern is present in 'ignore'", async () => {
 		config: {
 			sourceLanguageTag: "en",
 			settings: {
-				"inlang.lintRuleIdenticalPattern": { ignore: ["This is Inlang"] },
+				"inlang.lintRule.identicalPattern": { ignore: ["This is Inlang"] },
 			},
 		} as Partial<InlangConfig> as InlangConfig,
 		query: {} as MessageQueryApi,

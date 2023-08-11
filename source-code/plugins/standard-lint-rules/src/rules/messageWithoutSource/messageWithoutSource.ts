@@ -3,7 +3,7 @@ import type { MessageLintRule } from "@inlang/lint"
 export const messageWithoutSourceRule: MessageLintRule = {
 	type: "MessageLint",
 	meta: {
-		id: "inlang.lintRuleMessageWithoutSource",
+		id: "inlang.lintRule.messageWithoutSource",
 		displayName: {
 			en: "Message Without Source",
 		},

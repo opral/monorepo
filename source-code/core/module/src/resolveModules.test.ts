@@ -34,7 +34,7 @@ describe("resolveModules", () => {
 		// Define mock data
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "namepsace.pluginMock",
+				id: "namepsace.plugin.mock",
 				description: { en: "Mock plugin description" },
 				displayName: { en: "Mock Plugin" },
 				keywords: [],
@@ -51,7 +51,7 @@ describe("resolveModules", () => {
 		const mockLintRule: LintRule = {
 			type: "MessageLint",
 			meta: {
-				id: "namepsace.lintRuleMock",
+				id: "namepsace.lintRule.mock",
 				description: { en: "Mock lint rule description" },
 				displayName: { en: "Mock Lint Rule" },
 			},
