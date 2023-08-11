@@ -22,22 +22,22 @@ export type InlangInstance = {
 		plugins: Observable<Awaited<ReturnType<ResolveModulesFunction>>["data"]["meta"]["plugins"]>
 		lintRules: Observable<Awaited<ReturnType<ResolveModulesFunction>>["data"]["meta"]["lintRules"]>
 	}
-	errors: {
-		module: Observable<(ModuleImportError | ModuleError)[]>
-		plugin: Observable<
-			(
-				| PluginAppSpecificApiReturnError
-				| PluginFunctionDetectLanguageTagsAlreadyDefinedError
-				| PluginFunctionLoadMessagesAlreadyDefinedError
-				| PluginFunctionSaveMessagesAlreadyDefinedError
-				| PluginUsesInvalidIdError
-				| PluginUsesInvalidSchemaError
-				| PluginUsesReservedNamespaceError
-				| Error
-			)[]
-		>
-		lintRules: Observable<(LintRuleError | LintError)[]>
-	}
+	errors: Observable<
+		(
+			| ModuleImportError
+			| ModuleError
+			| PluginAppSpecificApiReturnError
+			| PluginFunctionDetectLanguageTagsAlreadyDefinedError
+			| PluginFunctionLoadMessagesAlreadyDefinedError
+			| PluginFunctionSaveMessagesAlreadyDefinedError
+			| PluginUsesInvalidIdError
+			| PluginUsesInvalidSchemaError
+			| PluginUsesReservedNamespaceError
+			| Error
+			| LintRuleError
+			| LintError
+		)[]
+	>
 	appSpecificApi: Observable<ResolvedPlugins["appSpecificApi"]>
 	config: Observable<InlangConfig>
 	setConfig: (config: InlangConfig) => Result<void, InvalidConfigError>
@@ -55,7 +55,7 @@ export type InlangInstance = {
 	}
 }
 
-interface Observable<T> {
+export interface Observable<T> {
 	subscribe(observer: ObservableObserver<T>): {
 		unsubscribe(): void
 	}

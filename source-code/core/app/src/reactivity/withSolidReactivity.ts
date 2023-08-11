@@ -19,34 +19,35 @@ import type { InvalidConfigError } from "../errors.js"
 export const withSolidReactivity = async (instancePromise: Promise<InlangInstance>, from: any) => {
 	const instance = await instancePromise
 
-	if (instance) {
-		instance.config = from(instance.config)
-		instance.meta.plugins = from(instance.meta.plugins)
-		instance.meta.lintRules = from(instance.meta.lintRules)
-		instance.errors.module = from(instance.errors.module)
-		instance.errors.plugin = from(instance.errors.plugin)
-		instance.errors.lintRules = from(instance.errors.lintRules)
-		instance.appSpecificApi = from(instance.appSpecificApi)
-		instance.lint.reports = from(instance.lint.reports)
+	const convertObservablesToSignals = (obj: any): any => {
+		if (typeof obj !== "object" || obj === null) {
+			// Base case: if obj is not an object or is null, return as is
+			return obj
+		}
+
+		if (Array.isArray(obj)) {
+			// If obj is an array, process each element
+			return obj.map((item) => convertObservablesToSignals(item))
+		}
+
+		// If obj is an object, process its properties
+		const result: Record<string, unknown> = {}
+		for (const key in obj) {
+			if (obj[key]) {
+				if (obj[key].subscribe) {
+					result[key] = from(obj[key])
+				} else if (typeof obj[key] === "object") {
+					result[key] = convertObservablesToSignals(obj[key])
+				} else {
+					result[key] = obj[key]
+				}
+			}
+		}
+		return result
 	}
 
-	return instance as any as SolidInlangInstance // TODO: fix type
+	return convertObservablesToSignals(instance) as SolidInlangInstance
 }
-
-interface Observable<T> {
-	subscribe(observer: ObservableObserver<T>): {
-		unsubscribe(): void
-	}
-	[Symbol.observable](): Observable<T>
-}
-
-export type ObservableObserver<T> =
-	| ((v: T) => void)
-	| {
-			next?: (v: T) => void
-			error?: (v: any) => void
-			complete?: (v: boolean) => void
-	  }
 
 export type SolidInlangInstance = {
 	meta: {
