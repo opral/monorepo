@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.11.7
+
+### Patch Changes
+
+- 9d583412: [fix] passing payload from server to client
+
 ## 0.11.6
 
 ### Patch Changes
