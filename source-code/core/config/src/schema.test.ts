@@ -2,7 +2,7 @@ import { InlangConfig } from "./schema.js"
 import { Value } from "@sinclair/typebox/value"
 import { describe, it, expect } from "vitest"
 
-describe("config settings", () => {
+describe("config.settings", () => {
 	it("should pass with correct keys", () => {
 		const mockConfig: InlangConfig = {
 			sourceLanguageTag: "en",
@@ -95,5 +95,18 @@ describe("config settings", () => {
 			},
 		}
 		expect(Value.Check(InlangConfig, mockConfig)).toBe(true)
+	})
+
+	// (reserving system namespace for internal use only)
+	it("should not be possible to define unknown system settings", () => {
+		const mockConfig: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "de"],
+			modules: [],
+			settings: {
+				"system.unknown": {},
+			},
+		}
+		expect(Value.Check(InlangConfig, mockConfig)).toBe(false)
 	})
 })
