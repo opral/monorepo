@@ -6,7 +6,7 @@ import type { Message, MessageQueryApi } from "@inlang/messages"
 
 const lintRule1 = {
 	meta: {
-		id: "r.lintRule1",
+		id: "r.lintRule.1",
 		displayName: { en: "" },
 		description: { en: "" },
 	},
@@ -17,7 +17,7 @@ const lintRule1 = {
 
 const lintRule2 = {
 	meta: {
-		id: "r.lintRule2",
+		id: "r.lintRule.2",
 		displayName: { en: "" },
 		description: { en: "" },
 	},

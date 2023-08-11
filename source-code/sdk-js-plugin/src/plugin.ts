@@ -4,9 +4,9 @@ import { ideExtensionDefaultConfig } from "./ideExtension/config.js"
 
 // ------------------------------------------------------------------------------------------------
 
-export const sdkPlugin = {
+export const sdkPlugin: Plugin<SdkConfigInput> = {
 	meta: {
-		id: "inlang.plugin-sdk-js",
+		id: "inlang.plugin.sdkJs",
 		displayName: { en: "Inlang SDK for JavaScript" },
 		description: { en: "Plugin for the Inlang SDK for JavaScript" },
 		keywords: [
@@ -25,8 +25,8 @@ export const sdkPlugin = {
 		const parsedConfig = validateSdkConfig(settings)
 
 		return {
-			"inlang.sdk-js": parsedConfig,
-			"inlang.ide-extension": ideExtensionDefaultConfig,
+			"inlang.app.sdkJs": parsedConfig,
+			"inlang.app.ideExtension": ideExtensionDefaultConfig,
 		}
 	},
-} as Plugin<SdkConfigInput>
+}

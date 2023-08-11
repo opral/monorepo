@@ -10,10 +10,10 @@ describe("config.settings", () => {
 			modules: [],
 			settings: {
 				// @ts-expect-error - Value is not an object
-				"namespace.helloWorld": "value",
+				"namespace.plugin.helloWorld": "value",
 				// @ts-expect-error - Value is not an object
-				"x.e": false,
-				"x.y": {},
+				"x.plugin.x": false,
+				"x.plugin.y": {},
 			},
 		}
 		expect(Value.Check(InlangConfig, mockConfig)).toBe(false)
@@ -25,7 +25,7 @@ describe("config.settings", () => {
 			languageTags: ["en", "de"],
 			modules: [],
 			settings: {
-				"x.y": {
+				"x.plugin.y": {
 					hello: {
 						world: 4,
 					},
@@ -35,7 +35,7 @@ describe("config.settings", () => {
 		expect(Value.Check(InlangConfig, mockConfig)).toBe(true)
 	})
 
-	it("should pass with correct keys", () => {
+	it("should pass lintRule|plugin|app keys", () => {
 		const mockConfig: InlangConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
@@ -43,12 +43,9 @@ describe("config.settings", () => {
 			settings: {},
 		}
 		const passCases = [
-			// regular
-			"namespace.helloWorld",
-			// with numbers
-			"namespace.pluginI18n",
-			// only one word
-			"namespace.world",
+			"namespace.lintRule.helloWorld",
+			"namespace.plugin.i18n",
+			"namespace.app.ideExtension",
 		]
 
 		for (const passCase of passCases) {
@@ -70,6 +67,19 @@ describe("config.settings", () => {
 		expect(Value.Check(InlangConfig, mockConfig)).toBe(false)
 	})
 
+	it("should fail on unknown types", () => {
+		const mockConfig: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "de"],
+			modules: [],
+			settings: {
+				// @ts-expect-error - unknown type
+				"namespace.unknownType.name": {},
+			},
+		}
+		expect(Value.Check(InlangConfig, mockConfig)).toBe(false)
+	})
+
 	it("should enforce camelCase", () => {
 		const mockConfig: InlangConfig = {
 			sourceLanguageTag: "en",
@@ -79,11 +89,11 @@ describe("config.settings", () => {
 		}
 
 		const failCases = [
-			"namespace.hello-World",
-			"namespace.HelloWorld",
-			"namespace.hello_world",
-			"namespace.hello world",
-			"namespace.hello-worlD",
+			"namespace.plugin.hello-World",
+			"namespace.plugin.HelloWorld",
+			"namespace.plugin.hello_world",
+			"namespace.plugin.hello world",
+			"namespace.plugin.hello-worlD",
 		]
 
 		for (const failCase of failCases) {
@@ -98,7 +108,7 @@ describe("config.settings", () => {
 			languageTags: ["en", "de"],
 			modules: [],
 			settings: {
-				"namespace.hello-world": {
+				"namespace.app.name": {
 					// @ts-expect-error - Function is not a JSON
 					myFunction: () => {
 						return "Hello World"
@@ -116,7 +126,7 @@ describe("config.settings", () => {
 			languageTags: ["en", "de"],
 			modules: [],
 			settings: {
-				"namespace.helloWorld": {
+				"namespace.plugin.helloWorld": {
 					hello: "World",
 					bool: true,
 					// eslint-disable-next-line unicorn/no-null
@@ -136,7 +146,8 @@ describe("config.settings", () => {
 			languageTags: ["en", "de"],
 			modules: [],
 			settings: {
-				"system.unknown": {},
+				// @ts-expect-error - unknown system key
+				"system.unknown.name": {},
 			},
 		}
 		expect(Value.Check(InlangConfig, mockConfig)).toBe(false)

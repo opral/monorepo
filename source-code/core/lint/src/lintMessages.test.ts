@@ -6,7 +6,7 @@ import type { InlangConfig } from "@inlang/config"
 
 const lintRule1 = {
 	meta: {
-		id: "x.lintRule1",
+		id: "x.lintRule.1",
 		displayName: { en: "" },
 		description: { en: "" },
 	},
@@ -17,7 +17,7 @@ const lintRule1 = {
 
 const lintRule2 = {
 	meta: {
-		id: "x.lintRule2",
+		id: "x.lintRule.2",
 		displayName: { en: "" },
 		description: { en: "" },
 	},

@@ -10,18 +10,18 @@ describe("Plugin", () => {
 
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "namespace.pluginPlaceholder",
+				id: "namespace.plugin.placeholder",
 				displayName: { en: "" },
 				description: { en: "" },
 				keywords: [],
 			},
 		}
 
-		const passCases = ["namespace.pluginHelloWorld", "namespace.pluginI18n"]
+		const passCases = ["namespace.plugin.helloWorld", "namespace.plugin.i18n"]
 		const failCases = [
 			"namespace.hello_World",
 			"namespace.plugin-HelloWorld",
-			"namespace.myCoolPlugin",
+			"namespace.lintRule.coolPlugin",
 		]
 
 		for (const pass of passCases) {
@@ -43,7 +43,7 @@ describe("Plugin", () => {
 			modules: [],
 			settings: {},
 		}
-		const cases = ["namespace.pluginHelloWorld", "namespace.pluginI18n"]
+		const cases = ["namespace.plugin.helloWorld", "namespace.plugin.i18n"]
 
 		for (const _case of cases) {
 			const config = { ...mockConfig, settings: { [_case]: {} } }
