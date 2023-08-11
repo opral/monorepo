@@ -33,7 +33,7 @@ export const createInlang = async (args: {
 			loadConfig({ configPath: args.configPath, nodeishFs: args.nodeishFs })
 				.then(setConfig)
 				.catch((err) => {
-					console.error("Error in load config ", err)
+					//console.error("Error in load config ", err)
 					markInitAsFailed(err)
 				})
 		})
@@ -113,25 +113,17 @@ export const createInlang = async (args: {
 			throw e
 		})
 
-		// createEffect(() => {
-		// 	console.log(config())
-		// })
-
-		// console.log(resolveModules().data.meta.plugins)
-
 		return {
 			meta: {
 				plugins: observable(() => resolvedModules()!.data.meta.plugins),
 				lintRules: observable(() => resolvedModules()!.data.meta.lintRules),
 			},
-			errors: {
-				module: observable(() => resolvedModules()!.errors),
-				plugin: observable(() => resolvedModules()!.data.plugins.errors),
-				lintRules: observable(() => [
-					...resolvedModules()!.data.lintRules.errors,
-					...(lintErrors() || []),
-				]),
-			},
+			errors: observable(() => [
+				...resolvedModules()!.errors,
+				...resolvedModules()!.data.plugins.errors,
+				...resolvedModules()!.data.lintRules.errors,
+				...(lintErrors() || []),
+			]),
 			config: observable(config),
 			setConfig: setConfig,
 			lint: {
@@ -139,11 +131,11 @@ export const createInlang = async (args: {
 				reports: observable(() => {
 					const reports = lintReports()
 					// TODO: improve error
-					if (!reports) return [] //throw new Error("lint not initialized yet")
+					if (!reports) return []
 					return reports
 				}),
 			},
-			appSpecificApi: observable(() => resolvedModules()!.data.plugins.data!.appSpecificApi), // TODO: make reactive (using store)
+			appSpecificApi: observable(() => resolvedModules()!.data.plugins.data!.appSpecificApi),
 			query: {
 				messages: query,
 			},

@@ -126,7 +126,7 @@ export const Page = () => {
 	})
 	createEffect(() => {
 		if (!inlang.loading) {
-			console.log("meta plugins changes", inlang()!.query.messages.getAll())
+			console.log("messages changes", inlang()!.query.messages.getAll())
 		}
 	})
 
@@ -137,6 +137,16 @@ export const Page = () => {
 			sourceLanguageTag: "fr",
 		})
 	}, 2000)
+
+	setTimeout(() => {
+		console.log("timeout createMessage")
+		inlang()?.query.messages.create({
+			data: {
+				...exampleMessages[0],
+				id: "d",
+			} as Message,
+		})
+	}, 4000)
 
 	return (
 		<div>
