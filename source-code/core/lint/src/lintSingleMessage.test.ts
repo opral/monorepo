@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
-import { lintMessage } from "./lintMessage.js"
+import { lintSingleMessage } from "./lintSingleMessage.js"
 import type { MessageLintReport, MessageLintRule } from "./api.js"
 import type { InlangConfig } from "@inlang/config"
 import type { Message, MessageQueryApi } from "@inlang/messages"
@@ -30,14 +30,14 @@ const message1 = {} as Message
 
 const messages = [message1]
 
-describe("lintMessage", async () => {
+describe("lintSingleMessage", async () => {
 	beforeEach(() => {
 		vi.resetAllMocks()
 	})
 
 	describe("resolve rules and options", async () => {
 		test("it should not run disabled lintrules", async () => {
-			await lintMessage({
+			await lintSingleMessage({
 				config: {
 					settings: { "system.lintRuleLevels": { [lintRule1.meta.id]: "off" } } as Partial<
 						InlangConfig["settings"]
@@ -56,7 +56,7 @@ describe("lintMessage", async () => {
 		test("it should set the default lint level", async () => {
 			lintRule1.message.mockImplementation(({ report }) => report({} as MessageLintReport))
 
-			const reports = await lintMessage({
+			const reports = await lintSingleMessage({
 				config: {} as InlangConfig,
 				query: {} as MessageQueryApi,
 				messages,
@@ -70,7 +70,7 @@ describe("lintMessage", async () => {
 		test("it should override the default lint level", async () => {
 			lintRule1.message.mockImplementation(({ report }) => report({} as MessageLintReport))
 
-			const reports = await lintMessage({
+			const reports = await lintSingleMessage({
 				config: {
 					settings: { "system.lintRuleLevels": { [lintRule1.meta.id]: "warning" } } as Partial<
 						InlangConfig["settings"]
@@ -90,7 +90,7 @@ describe("lintMessage", async () => {
 			const fn = vi.fn()
 			lintRule1.message.mockImplementation(({ settings }) => fn(settings))
 
-			await lintMessage({
+			await lintSingleMessage({
 				config: {
 					settings: { [lintRule1.meta.id]: settings } as Partial<InlangConfig["settings"]>,
 				} as InlangConfig,
@@ -115,7 +115,7 @@ describe("lintMessage", async () => {
 			m2Called = true
 		})
 
-		await lintMessage({
+		await lintSingleMessage({
 			config: {} as InlangConfig,
 			query: {} as MessageQueryApi,
 			messages,
@@ -141,7 +141,7 @@ describe("lintMessage", async () => {
 			fn(lintRule2.meta.id, "after")
 		})
 
-		await lintMessage({
+		await lintSingleMessage({
 			config: {} as InlangConfig,
 			query: {} as MessageQueryApi,
 			messages,
@@ -165,7 +165,7 @@ describe("lintMessage", async () => {
 			report({} as MessageLintReport)
 		})
 
-		const result = await lintMessage({
+		const result = await lintSingleMessage({
 			config: {} as InlangConfig,
 			query: {} as MessageQueryApi,
 			messages,
