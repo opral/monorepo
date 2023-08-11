@@ -1,4 +1,4 @@
-import { ConfigPathNotFoundError, createInlang, tryCatch } from '@inlang/app'
+import { ConfigPathNotFoundError, createInlang, tryCatch, type InlangInstance } from '@inlang/app'
 import { InlangSdkException } from './exceptions.js'
 import type { NodeishFilesystem } from '@inlang-git/fs'
 import { writeFile } from 'node:fs/promises'
@@ -29,9 +29,9 @@ export const initInlangApp = async (): Promise<unknown> => {
 			throw createInlangError
 		}
 
-		// await createDemoResourcesIfNoMessagesExistYet()
+		assertSdkWasSetUp(appInstance.appSpecificApi)
 
-		console.log(11, appInstance);
+		// await createDemoResourcesIfNoMessagesExistYet()
 
 		resolve(appInstance)
 	}))
@@ -59,7 +59,8 @@ const createBasicInlangConfig = async () => writeFile(
 			"sourceLanguageTag": "en",
 			"languageTags": ["en", "de"],
 			"modules": [
-				"../../../../../plugins/json/dist/index.js"
+				"../../../../../plugins/json/dist/index.js",
+				"../../../../../sdk-js-plugin/dist/index.js",
 			],
 			"settings": {
 				"plugins": {
@@ -72,3 +73,20 @@ const createBasicInlangConfig = async () => writeFile(
 			}
 		}
 	`)
+
+class InlangSdkConfigException extends InlangSdkException { }
+
+// TODO: automatically add modules if missing ???
+function assertSdkWasSetUp(
+	appSpecificApi: InlangInstance["appSpecificApi"],
+) {
+	let appSpecificApiValue: any
+	appSpecificApi.subscribe(value => appSpecificApiValue = value)
+
+	if (!("inlang.sdk-js" in appSpecificApiValue)) {
+		throw new InlangSdkConfigException(dedent`
+				Invalid config. Make sure to add the 'inlang.plugin-sdk-js' to your 'inlang.config.json' file.
+				See https://inlang.com/documentation/sdk/configuration
+			`)
+	}
+}

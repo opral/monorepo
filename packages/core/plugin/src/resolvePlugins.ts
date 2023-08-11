@@ -10,8 +10,9 @@ import {
 } from "./errors.js"
 import { deepmerge } from "deepmerge-ts"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
+import { tryCatch } from '@inlang/result'
 
-const whitelistedPlugins = ["inlang.plugin-json", "inlang.plugin-i18next"]
+const whitelistedPlugins = ["inlang.plugin-json", "inlang.plugin-i18next", "inlang.plugin-sdk-js"]
 const PluginCompiler = TypeCompiler.Compile(Plugin)
 
 export const resolvePlugins: ResolvePluginsFunction = (args) => {
@@ -102,14 +103,20 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 
 		// --- ADD APP SPECIFIC API ---
 		if (typeof plugin.addAppSpecificApi === "function") {
-			const appSpecificApi = plugin.addAppSpecificApi({
-				options: args.pluginSettings[plugin.meta.id]?.options,
-			})
+			// TODO: why do we call this function 2 times (here for validation and later for retrieving the actual value)?
+			const { data: appSpecificApi, error } = tryCatch(() => plugin.addAppSpecificApi!({
+				options: args.pluginSettings[plugin.meta.id]?.options || {},
+			}))
+			if (error) {
+				// @ts-ignore
+				delete error.stack
+				result.errors.push(error as any) // TODO: add correct error type
+			}
 			if (typeof appSpecificApi !== "object") {
 				result.errors.push(
 					new PluginAppSpecificApiReturnError(
 						`Plugin ${plugin.meta.id} defines the addAppSpecificApi function, but it does not return an object.`,
-						{ plugin: plugin.meta.id },
+						{ plugin: plugin.meta.id, cause: error },
 					),
 				)
 			}
@@ -151,10 +158,12 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 		}
 
 		if (typeof plugin.addAppSpecificApi === "function") {
-			const appSpecificApi = plugin.addAppSpecificApi({
+			const { data: appSpecificApi } = tryCatch(() => plugin.addAppSpecificApi!({
 				options: args.pluginSettings[plugin.meta.id]?.options || {},
-			})
-			result.data.appSpecificApi = deepmerge(result.data.appSpecificApi, appSpecificApi)
+			}))
+			if (appSpecificApi) {
+				result.data.appSpecificApi = deepmerge(result.data.appSpecificApi, appSpecificApi)
+			}
 		}
 
 		result.data.meta[plugin.meta.id] = {

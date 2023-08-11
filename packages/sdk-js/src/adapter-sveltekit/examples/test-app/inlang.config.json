@@ -5,13 +5,30 @@
 		"de"
 	],
 	"modules": [
-		"../../../../../plugins/json/dist/index.js"
+		"../../../../../plugins/json/dist/index.js",
+		"../../../../../sdk-js-plugin/dist/index.js"
 	],
 	"settings": {
 		"plugins": {
 			"inlang.plugin-json": {
 				"options": {
 					"pathPattern": "./languages/{{languageTag}}.json"
+				}
+			},
+			"inlang.plugin-sdk-js": {
+				"options": {
+					"languageNegotiation": {
+						"strategies": [
+							{
+								"type": "url"
+							}
+						]
+					},
+					"routing": {
+						"exclude": [
+							"/api"
+						]
+					}
 				}
 			}
 		}

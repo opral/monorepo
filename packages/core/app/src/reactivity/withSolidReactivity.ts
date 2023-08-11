@@ -30,7 +30,7 @@ export const withSolidReactivity = async (instancePromise: Promise<InlangInstanc
 		instance.lint.reports = from(instance.lint.reports)
 	}
 
-	return instance as SolidInlangInstance
+	return instance as any as SolidInlangInstance // TODO: fix type
 }
 
 interface Observable<T> {

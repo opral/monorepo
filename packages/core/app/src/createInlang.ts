@@ -53,7 +53,8 @@ export const createInlang = async (args: {
 					// TODO: handle `detectedLanguageTags`
 				})
 				.catch((err) => {
-					console.error("Error in load config ", err)
+					delete err.stack // TODO: find a way to get rid of the filename in the stack trace or else we won't be able to read the actual error message
+					console.error("Error in load modules ", err)
 				})
 		})
 		// -- messages ----------------------------------------------------------
