@@ -7,9 +7,13 @@ export class InvalidLintRuleError extends Error {
 		this.name = "LintRuleError"
 	}
 }
-export class LintError extends Error {
+
+/**
+ * Error when a lint rule throws during the linting process.
+ */
+export class LintRuleThrowedError extends Error {
 	constructor(message: string, options?: ErrorOptions) {
 		super(message, options)
-		this.name = "LintError"
+		this.name = "LintRuleThrowedError"
 	}
 }

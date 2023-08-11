@@ -1,7 +1,7 @@
 import type { LintRule, MessageLintReport } from "./api.js"
 import type { InlangConfig } from "@inlang/config"
 import type { Message, MessageQueryApi } from "@inlang/messages"
-import { LintError } from "./errors.js"
+import { LintRuleThrowedError } from "./errors.js"
 
 export const lintSingleMessage = async (args: {
 	config: InlangConfig
@@ -9,9 +9,9 @@ export const lintSingleMessage = async (args: {
 	messages: Message[]
 	query: MessageQueryApi
 	message: Message
-}): Promise<{ data: MessageLintReport[]; errors: LintError[] }> => {
+}): Promise<{ data: MessageLintReport[]; errors: LintRuleThrowedError[] }> => {
 	const reports: MessageLintReport[] = []
-	const errors: LintError[] = []
+	const errors: LintRuleThrowedError[] = []
 
 	const promises = args.rules
 		.filter((rule) => rule.type === "MessageLint")
@@ -41,7 +41,12 @@ export const lintSingleMessage = async (args: {
 					},
 				})
 			} catch (error) {
-				errors.push(new LintError(`Error in lint rule '${ruleId}'.`, { cause: error }))
+				errors.push(
+					new LintRuleThrowedError(
+						`Lint rule '${ruleId}' throwed while linting message "${args.message.id}".`,
+						{ cause: error },
+					),
+				)
 			}
 		})
 

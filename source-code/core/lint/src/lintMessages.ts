@@ -2,14 +2,14 @@ import type { InlangConfig } from "@inlang/config"
 import type { Message, MessageQueryApi } from "@inlang/messages"
 import type { LintReport, LintRule } from "./api.js"
 import { lintSingleMessage } from "./lintSingleMessage.js"
-import type { LintError } from "./errors.js"
+import type { LintRuleThrowedError } from "./errors.js"
 
 export const lintMessages = async (args: {
 	config: InlangConfig
 	rules: LintRule[]
 	messages: Message[]
 	query: MessageQueryApi
-}): Promise<{ data: LintReport[]; errors: LintError[] }> => {
+}): Promise<{ data: LintReport[]; errors: LintRuleThrowedError[] }> => {
 	const promises = args.messages.map((message) =>
 		lintSingleMessage({
 			config: args.config,
