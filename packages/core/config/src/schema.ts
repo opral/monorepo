@@ -2,15 +2,16 @@ import { Static, TLiteral, TTemplateLiteral, Type } from "@sinclair/typebox"
 import { LanguageTag } from "@inlang/language-tag"
 
 /**
- * ---------------- UTILTIIES ----------------
+ * ---------------- UTILITIES ----------------
  */
 
 const JSONValue = Type.Union([Type.String(), Type.Number(), Type.Boolean(), Type.Null()])
 const JSONArray = Type.Array(JSONValue)
-const JSONObject = Type.Record(Type.String(), Type.Union([JSONValue, JSONArray]))
+// avoiding recursive types in JSON object
+const NestedJSONObject = Type.Record(Type.String(), Type.Union([JSONValue, JSONArray]))
 
-type JSON = Static<typeof JSON>
-const JSON = Type.Union([JSONValue, JSONArray, JSONObject])
+export type JSONObject = Static<typeof JSONObject>
+const JSONObject = Type.Record(Type.String(), Type.Union([JSONValue, JSONArray, NestedJSONObject]))
 
 /**
  * ---------------- SYSTEM SETTINGS ----------------
@@ -43,7 +44,7 @@ const ExternalSettings = Type.Record(
 			"The key must be conform to the `{namespace}.{key}` pattern and can't start with `system`.",
 		examples: ["example.pluginSqlite", "example.lintRuleMissingMessage"],
 	}) as unknown as TTemplateLiteral<[TLiteral<`${string}.${string}`>]>,
-	JSON,
+	JSONObject,
 	{
 		additionalProperties: false,
 	},
