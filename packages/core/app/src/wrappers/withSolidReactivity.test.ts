@@ -142,7 +142,7 @@ describe("messages", () => {
 			}
 			const _mockPlugin: Plugin = {
 				meta: {
-					id: "mock.plugin",
+					id: "mock.plugin.name",
 					displayName: {
 						en: "hello",
 					},
@@ -254,10 +254,10 @@ const config: InlangConfig = {
 	languageTags: ["en"],
 	modules: ["./dist/index.js"],
 	settings: {
-		"system.lint.levels": {
+		"system.lint.ruleLevels": {
 			"inlang.lintRule.missingMessage": "error",
 		},
-		"inlang.pluginI18next": {
+		"inlang.plugin.i18next": {
 			pathPattern: "./examples/example01/{languageTag}.json",
 			variableReferencePattern: ["{", "}"],
 		},
@@ -266,7 +266,7 @@ const config: InlangConfig = {
 
 const mockPlugin: Plugin = {
 	meta: {
-		id: "inlang.plugin-i18next",
+		id: "inlang.plugin.i18next",
 		description: { en: "Mock plugin description" },
 		displayName: { en: "Mock Plugin" },
 		keywords: [],
@@ -320,7 +320,7 @@ const exampleMessages: Message[] = [
 const mockLintRule: LintRule = {
 	type: "MessageLint",
 	meta: {
-		id: "namespace.lintRuleMock",
+		id: "namespace.lintRule.mock",
 		description: { en: "Mock lint rule description" },
 		displayName: { en: "Mock Lint Rule" },
 	},
