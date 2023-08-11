@@ -8,7 +8,7 @@
 
 import Parsimmon from "parsimmon"
 // import type { MessageReferenceMatch } from "@inlang/plugin"
-import type { PluginOptions } from "../options.js"
+import type { PluginOptions } from "../settings.js"
 
 const createParser = (options: PluginOptions) => {
 	// Create a Parsimmon language

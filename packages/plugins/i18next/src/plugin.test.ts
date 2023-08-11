@@ -1,5 +1,5 @@
 import { expect, it, describe } from "vitest"
-import type { PluginOptions } from "./options.js"
+import type { PluginSettings } from "./settings.js"
 import type { Message, Variant } from "@inlang/plugin"
 import { createVariant, getVariant } from "@inlang/plugin"
 import { createMockNodeishFs } from "@inlang/plugin/test"
@@ -12,7 +12,7 @@ describe("option pathPattern", () => {
 		try {
 			await plugin.loadMessages!({
 				languageTags: ["en"],
-				options: { pathPattern: "./resources/" },
+				settings: { pathPattern: "./resources/" },
 				nodeishFs: fs,
 			})
 			throw new Error("should not reach this")
@@ -27,7 +27,7 @@ describe("option pathPattern", () => {
 		try {
 			await plugin.loadMessages!({
 				languageTags: ["en"],
-				options: { pathPattern: "./resources/" },
+				settings: { pathPattern: "./resources/" },
 				nodeishFs: fs,
 			})
 			throw new Error("should not reach this")
@@ -42,7 +42,7 @@ describe("option pathPattern", () => {
 		try {
 			await plugin.loadMessages!({
 				languageTags: ["en"],
-				options: {
+				settings: {
 					pathPattern: {
 						common: "./common.json",
 					},
@@ -61,7 +61,7 @@ describe("option pathPattern", () => {
 		try {
 			await plugin.loadMessages!({
 				languageTags: ["en"],
-				options: {
+				settings: {
 					pathPattern: {
 						common: "./{languageTag}/common",
 					},
@@ -80,7 +80,7 @@ describe("option pathPattern", () => {
 		try {
 			await plugin.loadMessages!({
 				languageTags: ["en"],
-				options: {
+				settings: {
 					pathPattern: {
 						"namespaceWith.dot": "./{languageTag}/common.json",
 					},
@@ -99,7 +99,7 @@ describe("option pathPattern", () => {
 		try {
 			await plugin.loadMessages!({
 				languageTags: ["en"],
-				options: {
+				settings: {
 					pathPattern: "./{languageTag}/*.json",
 				},
 				nodeishFs: fs,
@@ -116,11 +116,11 @@ describe("loadMessage", () => {
 		const fs = await createMockNodeishFs({})
 		await fs.writeFile("./en.json", JSON.stringify({ test: "Hello world" }))
 		const languageTags = ["en"]
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
 
-		const messages = await plugin.loadMessages!({ languageTags, options, nodeishFs: fs })
+		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
 		//console.log(getVariant(messages[0]!, { languageTag: "en" }))
 		expect(
 			(getVariant(messages[0]!, { languageTag: "en" }).data as Variant["pattern"])[0]?.type,
@@ -131,34 +131,34 @@ describe("loadMessage", () => {
 		const fs = await createMockNodeishFs({})
 		await fs.writeFile("./en.json", JSON.stringify({}))
 		const languageTags = ["en"]
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
 
-		expect(plugin.loadMessages!({ languageTags, options, nodeishFs: fs })).resolves.toBeTruthy()
+		expect(plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })).resolves.toBeTruthy()
 	})
 
 	it("should work with not yet existing files", async () => {
 		const fs = await createMockNodeishFs({})
 		await fs.writeFile("./en.json", JSON.stringify({ test: "Hello world" }))
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
 
 		const languageTags = ["en", "de"]
-		expect(plugin.loadMessages!({ languageTags, options, nodeishFs: fs })).resolves.toBeTruthy()
+		expect(plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })).resolves.toBeTruthy()
 	})
 
 	it("should add multible variants to the same message", async () => {
 		const fs = await createMockNodeishFs({})
 		await fs.writeFile("./en.json", JSON.stringify({ test: "Hello world" }))
 		await fs.writeFile("./de.json", JSON.stringify({ test: "Hallo welt" }))
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
 
 		const languageTags = ["en", "de"]
-		const messages = await plugin.loadMessages!({ languageTags, options, nodeishFs: fs })
+		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
 		expect(getVariant(messages[0]!, { languageTag: "en" })).toBeTruthy()
 		expect(getVariant(messages[0]!, { languageTag: "de" })).toBeTruthy()
 	})
@@ -169,13 +169,13 @@ describe("loadMessage", () => {
 		await fs.mkdir("./en")
 		await fs.writeFile("./en/common.json", JSON.stringify({ test: "Hello world" }))
 		const languageTags = ["en"]
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: {
 				common: "./{languageTag}/common.json",
 			},
 		}
 
-		const messages = await plugin.loadMessages!({ languageTags, options, nodeishFs: fs })
+		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
 		expect(
 			(getVariant(messages[0]!, { languageTag: "en" }).data as Variant["pattern"])[0]?.type,
 		).toBe("Text")
@@ -186,27 +186,27 @@ describe("loadMessage", () => {
 		await fs.mkdir("./en")
 		await fs.writeFile("./en/common.json", JSON.stringify({}))
 		const languageTags = ["en"]
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: {
 				common: "./{languageTag}/common.json",
 			},
 		}
 
-		expect(plugin.loadMessages!({ languageTags, options, nodeishFs: fs })).resolves.toBeTruthy()
+		expect(plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })).resolves.toBeTruthy()
 	})
 
 	it("should work with not yet existing files (namespace)", async () => {
 		const fs = await createMockNodeishFs({})
 		await fs.mkdir("./en")
 		await fs.writeFile("./en/common.json", JSON.stringify({ test: "Hello world" }))
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: {
 				common: "./{languageTag}/common.json",
 			},
 		}
 
 		const languageTags = ["en", "de"]
-		expect(plugin.loadMessages!({ languageTags, options, nodeishFs: fs })).resolves.toBeTruthy()
+		expect(plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })).resolves.toBeTruthy()
 	})
 
 	it("should add multible variants to the same message (namespace)", async () => {
@@ -215,13 +215,13 @@ describe("loadMessage", () => {
 		await fs.mkdir("./de")
 		await fs.writeFile("./en/common.json", JSON.stringify({ test: "Hello world" }))
 		await fs.writeFile("./de/common.json", JSON.stringify({ test: "Hallo welt" }))
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: {
 				common: "./{languageTag}/common.json",
 			},
 		}
 		const languageTags = ["en", "de"]
-		const messages = await plugin.loadMessages!({ languageTags, options, nodeishFs: fs })
+		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
 		expect(getVariant(messages[0]!, { languageTag: "en" })).toBeTruthy()
 		expect(getVariant(messages[0]!, { languageTag: "de" })).toBeTruthy()
 	})
@@ -236,7 +236,7 @@ describe("loadMessage", () => {
 		await fs.writeFile("./en/common.json", test)
 		await fs.writeFile("./en/vital.json", test)
 		await fs.writeFile("./de/common.json", test)
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: {
 				common: "./{languageTag}/common.json",
 				vital: "./{languageTag}/vital.json",
@@ -247,7 +247,7 @@ describe("loadMessage", () => {
 		try {
 			await plugin.loadMessages!({
 				languageTags,
-				options,
+				settings,
 				nodeishFs: fs,
 			})
 		} catch (e) {
@@ -265,7 +265,7 @@ describe("loadMessage", () => {
 		await fs.mkdir("./de")
 		await fs.writeFile("./en/common.json", test)
 		await fs.writeFile("./de/common.json", test)
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: {
 				pathPattern: "./{languageTag}/common.json",
 			},
@@ -275,7 +275,7 @@ describe("loadMessage", () => {
 		try {
 			await plugin.loadMessages!({
 				languageTags,
-				options,
+				settings,
 				nodeishFs: fs,
 			})
 		} catch (e) {
@@ -286,7 +286,7 @@ describe("loadMessage", () => {
 
 	it("should not throw an error when the path to the resources is not present", async () => {
 		const fs = await createMockNodeishFs({})
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: {
 				pathPattern: ".lang/{languageTag}.json",
 			},
@@ -296,7 +296,7 @@ describe("loadMessage", () => {
 		try {
 			await plugin.loadMessages!({
 				languageTags,
-				options,
+				settings,
 				nodeishFs: fs,
 			})
 		} catch (e) {
@@ -310,7 +310,7 @@ describe("saveMessage", () => {
 	it("test string pathPattern", async () => {
 		const fs = await createMockNodeishFs({})
 		await fs.writeFile("./en.json", JSON.stringify({}))
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
 		const messages: Message[] = [
@@ -332,13 +332,13 @@ describe("saveMessage", () => {
 				},
 			},
 		]
-		await plugin.saveMessages!({ messages, options, nodeishFs: fs })
+		await plugin.saveMessages!({ messages, settings, nodeishFs: fs })
 	})
 
 	it("test object pathPattern", async () => {
 		const fs = await createMockNodeishFs({})
 		await fs.writeFile("./en.json", JSON.stringify({}))
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: {
 				common: "./{languageTag}/common.json",
 			},
@@ -379,7 +379,7 @@ describe("saveMessage", () => {
 				},
 			},
 		]
-		await plugin.saveMessages!({ messages, options, nodeishFs: fs })
+		await plugin.saveMessages!({ messages, settings, nodeishFs: fs })
 	})
 })
 
@@ -387,11 +387,11 @@ describe("variable reference", () => {
 	it("should correctly identify variable reference (at the end)", async () => {
 		const fs = await createMockNodeishFs({})
 		await fs.writeFile("./en.json", JSON.stringify({ test: "Hello {{username}}" }))
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
 		const languageTags = ["en"]
-		const messages = await plugin.loadMessages!({ languageTags, options, nodeishFs: fs })
+		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
 		expect(getVariant(messages[0]!, { languageTag: "en" }).data!.length).toBe(2)
 		expect(getVariant(messages[0]!, { languageTag: "en" }).data![0]!.type).toBe("Text")
 		expect(getVariant(messages[0]!, { languageTag: "en" }).data![1]!.type).toBe("VariableReference")
@@ -400,11 +400,11 @@ describe("variable reference", () => {
 	it("should correctly identify variable reference (at the beginning)", async () => {
 		const fs = await createMockNodeishFs({})
 		await fs.writeFile("./en.json", JSON.stringify({ test: "{{username}} the great" }))
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
 		const languageTags = ["en"]
-		const messages = await plugin.loadMessages!({ languageTags, options, nodeishFs: fs })
+		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
 		expect(getVariant(messages[0]!, { languageTag: "en" }).data!.length).toBe(2)
 		expect(getVariant(messages[0]!, { languageTag: "en" }).data![0]!.type).toBe("VariableReference")
 		expect(getVariant(messages[0]!, { languageTag: "en" }).data![1]!.type).toBe("Text")
@@ -413,12 +413,12 @@ describe("variable reference", () => {
 	it("should correctly apply the variableReferencePattern", async () => {
 		const fs = await createMockNodeishFs({})
 		await fs.writeFile("./en.json", JSON.stringify({ test: "Hello @username" }))
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 			variableReferencePattern: ["@"],
 		}
 		const languageTags = ["en"]
-		const messages = await plugin.loadMessages!({ languageTags, options, nodeishFs: fs })
+		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
 		expect(getVariant(messages[0]!, { languageTag: "en" }).data![0]!.type).toBe("Text")
 		expect(getVariant(messages[0]!, { languageTag: "en" }).data![1]!.type).toBe("VariableReference")
 	})
@@ -440,13 +440,13 @@ describe("formatting", () => {
 		await fs.writeFile("./en.json", with4Spaces)
 		await fs.writeFile("./fr.json", with4Spaces)
 		await fs.writeFile("./de.json", withTabs)
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
 		const languageTags = ["en", "de", "fr"]
 		const messages = await plugin.loadMessages!({
 			languageTags,
-			options,
+			settings,
 			nodeishFs: fs,
 		})
 		const variant: Variant = {
@@ -459,7 +459,7 @@ describe("formatting", () => {
 			],
 		}
 		const newMessage = createVariant(messages[0]!, { languageTag: "es", data: variant }).data
-		await plugin.saveMessages!({ messages: [newMessage!], options, nodeishFs: fs })
+		await plugin.saveMessages!({ messages: [newMessage!], settings, nodeishFs: fs })
 
 		const file1 = await fs.readFile("./en.json", { encoding: "utf-8" })
 		const file2 = await fs.readFile("./fr.json", { encoding: "utf-8" })
@@ -487,16 +487,16 @@ describe("formatting", () => {
 		const fs = await createMockNodeishFs({})
 		await fs.writeFile("./en.json", withNewLine)
 		await fs.writeFile("./fr.json", withoutNewLine)
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
 		const languageTags = ["en", "de", "fr"]
 		const messages = await plugin.loadMessages!({
 			languageTags,
-			options,
+			settings,
 			nodeishFs: fs,
 		})
-		await plugin.saveMessages!({ messages, options, nodeishFs: fs })
+		await plugin.saveMessages!({ messages, settings, nodeishFs: fs })
 		const file1 = await fs.readFile("./en.json", { encoding: "utf-8" })
 		const file2 = await fs.readFile("./fr.json", { encoding: "utf-8" })
 		expect(file1).toBe(withNewLine)
@@ -512,7 +512,7 @@ describe("formatting", () => {
 		const fs = await createMockNodeishFs({})
 		await fs.mkdir("./en")
 		await fs.writeFile("./en/common.json", enResource)
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: {
 				common: "./{languageTag}/common.json",
 			},
@@ -520,7 +520,7 @@ describe("formatting", () => {
 		const languageTags = ["en"]
 		const messages = await plugin.loadMessages!({
 			languageTags,
-			options,
+			settings,
 			nodeishFs: fs,
 		})
 		const reference: Message[] = [
@@ -574,7 +574,7 @@ describe("formatting", () => {
 		const fs = await createMockNodeishFs({})
 		await fs.mkdir("./en")
 		await fs.writeFile("./en/common.json", enResource)
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: {
 				common: "./{languageTag}/common.json",
 			},
@@ -582,7 +582,7 @@ describe("formatting", () => {
 		const languageTags = ["en"]
 		const messages = await plugin.loadMessages!({
 			languageTags,
-			options,
+			settings,
 			nodeishFs: fs,
 		})
 		const reference: Message[] = [
@@ -624,7 +624,7 @@ describe("formatting", () => {
 		expect(messages).toStrictEqual(reference)
 		await plugin.saveMessages!({
 			messages,
-			options,
+			settings,
 			nodeishFs: fs,
 		})
 		const file = await fs.readFile("./en/common.json", { encoding: "utf-8" })
@@ -658,7 +658,7 @@ describe("formatting", () => {
 		await fs.writeFile("./fr.json", withNesting)
 		await fs.writeFile("./de.json", withoutNesting)
 
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
 
@@ -666,7 +666,7 @@ describe("formatting", () => {
 
 		const messages = await plugin.loadMessages!({
 			languageTags,
-			options,
+			settings,
 			nodeishFs: fs,
 		})
 
@@ -690,7 +690,7 @@ describe("formatting", () => {
 
 		await plugin.saveMessages!({
 			messages,
-			options,
+			settings,
 			nodeishFs: fs,
 		})
 
@@ -714,14 +714,14 @@ describe("roundTrip", () => {
 
 		const fs = await createMockNodeishFs({})
 		await fs.writeFile("./en.json", enResource)
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
 
 		const languageTags = ["en"]
 		const messages = await plugin.loadMessages!({
 			languageTags,
-			options,
+			settings,
 			nodeishFs: fs,
 		})
 		const variant: Variant = {
@@ -743,7 +743,7 @@ describe("roundTrip", () => {
 		messages.push(newMessage)
 		await plugin.saveMessages!({
 			messages,
-			options,
+			settings,
 			nodeishFs: fs,
 		})
 		const newFile = (await fs.readFile("./en.json", { encoding: "utf-8" })) as string
@@ -760,7 +760,7 @@ describe("roundTrip", () => {
 		const fs = await createMockNodeishFs({})
 		await fs.mkdir("./en")
 		await fs.writeFile("./en/common.json", testResource)
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: {
 				common: "./{languageTag}/common.json",
 			},
@@ -768,7 +768,7 @@ describe("roundTrip", () => {
 		const languageTags = ["en"]
 		const messages = await plugin.loadMessages!({
 			languageTags,
-			options,
+			settings,
 			nodeishFs: fs,
 		})
 		const reference: Message[] = [
@@ -811,14 +811,14 @@ describe("roundTrip", () => {
 		const fs = await createMockNodeishFs({})
 		await fs.writeFile("./en.json", complexContent)
 		const languageTags = ["en"]
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: {
 				common: "./{languageTag}.json",
 			},
 		}
-		const messages = await plugin.loadMessages!({ languageTags, options, nodeishFs: fs })
-		plugin.saveMessages!({ messages, options, nodeishFs: fs })
-		const newMessage = await plugin.loadMessages!({ languageTags, options, nodeishFs: fs })
+		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
+		plugin.saveMessages!({ messages, settings, nodeishFs: fs })
+		const newMessage = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
 		expect(newMessage).toStrictEqual(messages)
 	})
 
@@ -829,14 +829,14 @@ describe("roundTrip", () => {
 		const fs = await createMockNodeishFs({})
 		await fs.writeFile("./en.json", test)
 		const languageTags = ["en"]
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: {
 				common: "./{languageTag}.json",
 			},
 		}
-		const messages = await plugin.loadMessages!({ languageTags, options, nodeishFs: fs })
-		plugin.saveMessages!({ messages, options, nodeishFs: fs })
-		const newMessage = await plugin.loadMessages!({ languageTags, options, nodeishFs: fs })
+		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
+		plugin.saveMessages!({ messages, settings, nodeishFs: fs })
+		const newMessage = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
 		expect(newMessage).toStrictEqual(messages)
 	})
 })
@@ -847,10 +847,10 @@ describe("detectedLanguageTags", () => {
 		await fs.writeFile("./en.json", "{}")
 		await fs.writeFile("./de.json", "{}")
 		await fs.writeFile("./fr.json", "{}")
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
-		const detectedLanguages = await plugin.detectedLanguageTags!({ options, nodeishFs: fs })
+		const detectedLanguages = await plugin.detectedLanguageTags!({ settings, nodeishFs: fs })
 		expect(detectedLanguages).toStrictEqual(["en", "de", "fr"])
 	})
 
@@ -860,12 +860,12 @@ describe("detectedLanguageTags", () => {
 		await fs.writeFile("./en/common.json", "{}")
 		await fs.mkdir("./de")
 		await fs.writeFile("./de/common.json", "{}")
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: {
 				common: "./{languageTag}/common.json",
 			},
 		}
-		const detectedLanguages = await plugin.detectedLanguageTags!({ options, nodeishFs: fs })
+		const detectedLanguages = await plugin.detectedLanguageTags!({ settings, nodeishFs: fs })
 		expect(detectedLanguages).toStrictEqual(["en", "de"])
 	})
 
@@ -874,11 +874,11 @@ describe("detectedLanguageTags", () => {
 		await fs.writeFile("./en.json", "{}")
 		await fs.writeFile("./de.json", "{}")
 		await fs.writeFile("./package.json", "{}")
-		const options: PluginOptions = {
+		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 			ignore: ["package.json"],
 		}
-		const detectedLanguages = await plugin.detectedLanguageTags!({ options, nodeishFs: fs })
+		const detectedLanguages = await plugin.detectedLanguageTags!({ settings, nodeishFs: fs })
 		expect(detectedLanguages).toStrictEqual(["en", "de"])
 	})
 })
