@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.11.6
+
+### Patch Changes
+
+- 67affcf1: [fix]: improve logic to render excluded pages
+
 ## 0.11.5
 
 ### Patch Changes
