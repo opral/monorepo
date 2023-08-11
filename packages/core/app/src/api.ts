@@ -1,5 +1,5 @@
 import type { InlangConfig } from "@inlang/config"
-import type { InvalidLintRuleError, LintRuleThrowedError, LintReport } from "@inlang/lint"
+import type { InvalidLintRuleError, LintError, LintReport } from "@inlang/lint"
 import type { MessageQueryApi } from "@inlang/messages"
 import type { Result } from "@inlang/result"
 import type { InvalidConfigError } from "./errors.js"
@@ -35,8 +35,9 @@ export type InlangInstance = {
 			| PluginUsesInvalidSchemaError
 			| PluginUsesReservedNamespaceError
 			| InvalidLintRuleError
-			| LintRuleThrowedError
 			| Error
+			| InvalidLintRuleError
+			| LintError
 		)[]
 	>
 	appSpecificApi: Subscribable<ResolvedPlugins["appSpecificApi"]>
