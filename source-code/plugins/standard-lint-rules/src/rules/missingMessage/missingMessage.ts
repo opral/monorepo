@@ -1,8 +1,9 @@
 import type { MessageLintRule } from "@inlang/lint"
 
-export const missingMessageRule = {
+export const missingMessageRule: MessageLintRule = {
+	type: "MessageLint",
 	meta: {
-		id: "inlang.missingMessage",
+		id: "inlang.lintRuleMissingMessage",
 		displayName: {
 			en: "Missing Message",
 		},
@@ -17,19 +18,20 @@ been translated yet.
 		},
 	},
 	defaultLevel: "error",
-	message: ({ message: { id, body }, config, report }) => {
-		const languageTags = config.languageTags
-			.filter((languageTag) => languageTag !== config.sourceLanguageTag)
+	message: ({ message: { id, body }, languageTags, sourceLanguageTag, report }) => {
+		const translatedLanguageTags = languageTags.filter(
+			(languageTag) => languageTag !== sourceLanguageTag,
+		)
 
-		for (const languageTag of languageTags) {
-			const variants = body[languageTag] || []
+		for (const translatedLanguageTag of translatedLanguageTags) {
+			const variants = body[translatedLanguageTag] ?? []
 
 			if (!variants.length) {
 				report({
 					messageId: id,
-					languageTag,
+					languageTag: translatedLanguageTag,
 					body: {
-						en: `Message with id '${id}' is missing for language tag '${languageTag}'.`,
+						en: `Message with id '${id}' is missing for language tag '${translatedLanguageTag}'.`,
 					},
 				})
 				return
@@ -39,24 +41,24 @@ been translated yet.
 			if (!patterns.length) {
 				report({
 					messageId: id,
-					languageTag,
+					languageTag: translatedLanguageTag,
 					body: {
-						en: `Message with id '${id}' has no patterns for language tag '${languageTag}'.`,
+						en: `Message with id '${id}' has no patterns for language tag '${translatedLanguageTag}'.`,
 					},
 				})
 			} else if (
 				patterns.length === 1 &&
-				patterns[0]!.type === "Text" &&
-				patterns[0]!.value === ""
+				patterns[0]?.type === "Text" &&
+				patterns[0]?.value === ""
 			) {
 				report({
 					messageId: id,
-					languageTag,
+					languageTag: translatedLanguageTag,
 					body: {
-						en: `Message with id '${id}' has no content for language tag '${languageTag}'.`,
+						en: `Message with id '${id}' has no content for language tag '${translatedLanguageTag}'.`,
 					},
 				})
 			}
 		}
-	}
-} as MessageLintRule<never>
+	},
+}

@@ -1,13 +1,14 @@
 import type { Text, Variant } from "@inlang/messages"
 import type { MessageLintRule } from "@inlang/lint"
 
-type IdenticalPatternRuleOptions = {
+type Settings = {
 	ignore?: string[]
 }
 
-export const identicalPatternRule = ({
+export const identicalPatternRule: MessageLintRule<Settings> = {
+	type: "MessageLint",
 	meta: {
-		id: "inlang.identicalPattern",
+		id: "inlang.lintRuleIdenticalPattern",
 		displayName: {
 			en: "Identical Pattern",
 		},
@@ -22,17 +23,18 @@ message to reduce translation effort.
 		},
 	},
 	defaultLevel: "warning",
-	message: ({ message: { id, body }, config, report, options }) => {
-		const referenceVariants = body[config.sourceLanguageTag]!
+	message: ({ message: { id, body }, sourceLanguageTag, report, settings }) => {
+		const referenceVariants = body[sourceLanguageTag]!
 
-		const languageTags = Object.keys(body)
-			.filter((languageTag) => languageTag !== config.sourceLanguageTag)
+		const translatedLanguageTags = Object.keys(body).filter(
+			(languageTag) => languageTag !== sourceLanguageTag,
+		)
 
-		for (const languageTag of languageTags) {
+		for (const languageTag of translatedLanguageTags) {
 			const isMessageIdentical =
 				messageBodyToString(referenceVariants) === messageBodyToString(body[languageTag]!)
 			const shouldBeIgnored = (referenceVariants || []).some((variant) =>
-				options.ignore?.includes(patternToString(variant.pattern)),
+				settings.ignore?.includes(patternToString(variant.pattern)),
 			)
 
 			if (isMessageIdentical && !shouldBeIgnored) {
@@ -46,7 +48,7 @@ message to reduce translation effort.
 			}
 		}
 	},
-}) as MessageLintRule<IdenticalPatternRuleOptions>
+}
 
 // TODO: use a generic toString function instead of JSON.stringify
 const messageBodyToString = (body: Variant[]) => JSON.stringify(body)
@@ -54,6 +56,6 @@ const messageBodyToString = (body: Variant[]) => JSON.stringify(body)
 // TODO: use a generic toString function instead of this custom code
 const patternToString = (pattern: Variant["pattern"]) =>
 	pattern
-		.filter((pattern): pattern is Text => pattern.type === 'Text')
+		.filter((pattern): pattern is Text => pattern.type === "Text")
 		.map((part) => part.value)
 		.join("")

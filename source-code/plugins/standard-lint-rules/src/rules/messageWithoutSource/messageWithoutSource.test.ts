@@ -1,12 +1,11 @@
 import { expect, test } from "vitest"
 import type { InlangConfig } from "@inlang/config"
-import { lintMessage } from '@inlang/lint'
+import { lintSingleMessage } from '@inlang/lint'
 import type { Message, MessageQueryApi } from '@inlang/messages'
 import { messageWithoutSourceRule } from './messageWithoutSource.js'
 
 const message1: Message = {
 	id: "1",
-	expressions: [],
 	selectors: [],
 	body: {
 		en: [],
@@ -17,7 +16,7 @@ const message1: Message = {
 const messages = [message1]
 
 test("should not report if source message present", async () => {
-	const result = await lintMessage({
+	const result = await lintSingleMessage({
 		config: {
 			sourceLanguageTag: "en",
 		} as Partial<InlangConfig> as InlangConfig,
@@ -32,7 +31,7 @@ test("should not report if source message present", async () => {
 })
 
 test("should report if source message is missing", async () => {
-	const result = await lintMessage({
+	const result = await lintSingleMessage({
 		config: {
 			sourceLanguageTag: "it",
 		} as Partial<InlangConfig> as InlangConfig,

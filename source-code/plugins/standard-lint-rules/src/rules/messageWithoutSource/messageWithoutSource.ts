@@ -1,8 +1,9 @@
 import type { MessageLintRule } from "@inlang/lint"
 
-export const messageWithoutSourceRule = {
+export const messageWithoutSourceRule: MessageLintRule = {
+	type: "MessageLint",
 	meta: {
-		id: "inlang.messageWithoutSource",
+		id: "inlang.lintRuleMessageWithoutSource",
 		displayName: {
 			en: "Message Without Source",
 		},
@@ -17,15 +18,15 @@ have not been updated accordingly.
 		},
 	},
 	defaultLevel: "error",
-	message: ({ message: { id, body }, config, report }) => {
-		if (Object.keys(body).length && !body[config.sourceLanguageTag]) {
+	message: ({ message: { id, body }, sourceLanguageTag, report }) => {
+		if (Object.keys(body).length && !body[sourceLanguageTag]) {
 			report({
 				messageId: id,
-				languageTag: config.sourceLanguageTag,
+				languageTag: sourceLanguageTag,
 				body: {
 					en: `Message with id '${id}' is specified, but missing in the source.`,
 				},
 			})
 		}
 	},
-} as MessageLintRule<never>
+}
