@@ -15,6 +15,7 @@ import { InlangSdkException } from "./exceptions.js"
 import { transformWithEsbuild } from "vite"
 import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
 import { ImportDeclaration, Node } from "ts-morph"
+import { findExport } from '../../ast-transforms/utils/exports.js'
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => false))
 
@@ -123,7 +124,7 @@ export const resetConfig = () => (configPromise = undefined)
 
 // ------------------------------------------------------------------------------------------------
 
-class InlangSdkConfigException extends InlangSdkException {}
+class InlangSdkConfigException extends InlangSdkException { }
 
 function assertConfigWithSdk(
 	config: InlangConfig | undefined,
@@ -218,31 +219,31 @@ const createDemoResources = async () => {
 const shouldContentBePrerendered = async (routesFolder: string) => {
 	const filesToLookFor = ["+layout.server.js", "+layout.server.ts", "+layout.js", "+layout.ts"]
 
-	const modules = await Promise.all(
+	const prerenderExportVCalues = await Promise.all(
 		filesToLookFor.map(async (file) => {
 			const filePath = path.resolve(routesFolder, file)
 			const contents = await readFile(filePath, { encoding: "utf-8" }).catch(() => undefined)
-			if (!contents || !contents.trim()) return {}
+			if (!contents || !contents.trim()) return undefined
 
-			const { code } = await transformWithEsbuild(contents, filePath)
-			if (!code.trim()) return {}
+			const sourceFile = codeToSourceFile(contents)
 
-			const sourceFile = codeToSourceFile(code)
-			const importDeclarations = sourceFile
-				.forEachChildAsArray()
-				.filter((node) => Node.isImportDeclaration(node)) as ImportDeclaration[]
-			for (const importDeclaration of importDeclarations) {
-				importDeclaration.remove()
+			const prerenderExport = findExport(sourceFile, "prerender")
+			if (!prerenderExport) {
+				return undefined
 			}
 
-			return import(
-				"data:application/javascript;base64," +
-					Buffer.from(nodeToCode(sourceFile)).toString("base64")
-			)
+			if (!Node.isVariableDeclaration(prerenderExport)) {
+				return undefined
+			}
+
+			return prerenderExport.getInitializer() as Node | undefined
 		}),
 	)
 
-	return modules.map((mod) => [true, "auto"].includes(mod.prerender)).some(Boolean)
+	return prerenderExportVCalues.map((node) =>
+		Node.isTrueLiteral(node)
+		|| (Node.isStringLiteral(node) && node.getLiteralText() === 'auto')
+	).some(Boolean)
 }
 
 // ------------------------------------------------------------------------------------------------
