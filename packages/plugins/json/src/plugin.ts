@@ -6,7 +6,7 @@ import {
 	getVariant,
 	type NodeishFilesystemSubset,
 } from "@inlang/plugin"
-import { throwIfInvalidOptions, type PluginOptions } from "./options.js"
+import { throwIfInvalidSettings, type PluginSettings } from "./settings.js"
 import { detectJsonSpacing, detectIsNested, replaceAll } from "./utilities.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
 import { flatten, unflatten } from "flat"
@@ -66,39 +66,39 @@ function defaultNesting() {
 	)
 }
 
-export const plugin: Plugin<PluginOptions> = {
+export const plugin: Plugin<PluginSettings> = {
 	meta: {
 		id: "inlang.plugin-json",
 		displayName: { en: "JSON" },
 		description: { en: "JSON plugin for inlang" },
 		keywords: ["json", "generic"],
 	},
-	loadMessages: async ({ languageTags, options, nodeishFs }) => {
-		options.variableReferencePattern = options.variableReferencePattern || ["{{", "}}"]
-		throwIfInvalidOptions(options)
+	loadMessages: async ({ languageTags, settings, nodeishFs }) => {
+		settings.variableReferencePattern = settings.variableReferencePattern || ["{{", "}}"]
+		throwIfInvalidSettings(settings)
 		SPACING = {}
 		NESTED = {}
 		FILE_HAS_NEW_LINE = {}
 		return loadMessages({
 			nodeishFs,
-			options,
+			settings,
 			languageTags,
 		})
 	},
-	saveMessages: async ({ messages, options, nodeishFs }) => {
-		options.variableReferencePattern = options.variableReferencePattern || ["{{", "}}"]
-		throwIfInvalidOptions(options)
+	saveMessages: async ({ messages, settings, nodeishFs }) => {
+		settings.variableReferencePattern = settings.variableReferencePattern || ["{{", "}}"]
+		throwIfInvalidSettings(settings)
 		return saveMessages({
 			nodeishFs,
-			options,
+			settings,
 			messages,
 		})
 	},
-	detectedLanguageTags: async ({ nodeishFs, options }) => {
-		options.ignore = options.ignore || []
+	detectedLanguageTags: async ({ nodeishFs, settings }) => {
+		settings.ignore = settings.ignore || []
 		return detectLanguageTags({
 			nodeishFs,
-			options,
+			settings,
 		})
 	},
 	addAppSpecificApi: () => {
@@ -109,26 +109,26 @@ export const plugin: Plugin<PluginOptions> = {
 /**
  * Load messages
  *
- * @example const messages = await loadMessages({ fs, options, languageTags })
+ * @example const messages = await loadMessages({ fs, settings, languageTags })
  */
 async function loadMessages(args: {
 	nodeishFs: NodeishFilesystemSubset
-	options: PluginOptions
+	settings: PluginSettings
 	languageTags: Readonly<LanguageTag[]>
 }): Promise<Message[]> {
 	const messages: Message[] = []
 	for (const languageTag of args.languageTags) {
-		if (typeof args.options.pathPattern !== "string") {
-			for (const [prefix, path] of Object.entries(args.options.pathPattern)) {
+		if (typeof args.settings.pathPattern !== "string") {
+			for (const [prefix, path] of Object.entries(args.settings.pathPattern)) {
 				const messagesFromFile = await getFileToParse(path, languageTag, args.nodeishFs)
 				for (const [key, value] of Object.entries(messagesFromFile)) {
 					const prefixedKey = prefix + ":" + replaceAll(key, "u002E", ".")
-					addVariantToMessages(messages, prefixedKey, languageTag, value, args.options)
+					addVariantToMessages(messages, prefixedKey, languageTag, value, args.settings)
 				}
 			}
 		} else {
 			const messagesFromFile = await getFileToParse(
-				args.options.pathPattern,
+				args.settings.pathPattern,
 				languageTag,
 				args.nodeishFs,
 			)
@@ -138,7 +138,7 @@ async function loadMessages(args: {
 					replaceAll(key, "u002E", "."),
 					languageTag,
 					value,
-					args.options,
+					args.settings,
 				)
 			}
 		}
@@ -196,13 +196,13 @@ const addVariantToMessages = (
 	key: string,
 	languageTag: LanguageTag,
 	value: string,
-	options: PluginOptions,
+	settings: PluginSettings,
 ) => {
 	const messageIndex = messages.findIndex((m) => m.id === key)
 	if (messageIndex !== -1) {
 		const variant: Variant = {
 			match: {},
-			pattern: parsePattern(value, options.variableReferencePattern),
+			pattern: parsePattern(value, settings.variableReferencePattern),
 		}
 		// Check if the languageTag exists in the body of the message
 		if (!messages[messageIndex]?.body[languageTag]) {
@@ -221,7 +221,7 @@ const addVariantToMessages = (
 		message.body[languageTag] = [
 			{
 				match: {},
-				pattern: parsePattern(value, options.variableReferencePattern),
+				pattern: parsePattern(value, settings.variableReferencePattern),
 			},
 		]
 		messages.push(message)
@@ -235,7 +235,7 @@ const addVariantToMessages = (
  */
 function parsePattern(
 	text: string,
-	variableReferencePattern: PluginOptions["variableReferencePattern"],
+	variableReferencePattern: PluginSettings["variableReferencePattern"],
 ): Variant["pattern"] {
 	// dependent on the variableReferencePattern, different regex
 	// expressions are used for matching
@@ -259,7 +259,7 @@ function parsePattern(
 								variableReferencePattern![0]!.length,
 								// negative index, removing the trailing pattern
 								-variableReferencePattern![1].length,
-							)
+						  )
 						: element.slice(variableReferencePattern![0]!.length),
 				}
 			} else {
@@ -276,14 +276,14 @@ function parsePattern(
 /**
  * Save messages
  *
- * @example await saveMessages({ fs, options, messages })
+ * @example await saveMessages({ fs, settings, messages })
  */
 async function saveMessages(args: {
 	nodeishFs: NodeishFilesystemSubset
-	options: PluginOptions
+	settings: PluginSettings
 	messages: Message[]
 }) {
-	if (typeof args.options.pathPattern === "object") {
+	if (typeof args.settings.pathPattern === "object") {
 		// with namespaces
 		const storage: Record<
 			LanguageTag,
@@ -293,7 +293,7 @@ async function saveMessages(args: {
 			for (const languageTag of Object.keys(message.body)) {
 				const prefix: string = message.id.includes(":")
 					? message.id.split(":")[0]!
-					: Object.keys(args.options.pathPattern)[0]!
+					: Object.keys(args.settings.pathPattern)[0]!
 				const resolvedId = message.id.replace(prefix + ":", "")
 				const serializedPattern: Variant["pattern"] = getVariant(message, {
 					languageTag: languageTag,
@@ -305,7 +305,7 @@ async function saveMessages(args: {
 			}
 		}
 		for (const [languageTag, _value] of Object.entries(storage)) {
-			for (const path of Object.values(args.options.pathPattern)) {
+			for (const path of Object.values(args.settings.pathPattern)) {
 				// check if directory exists
 				const directoryPath = path
 					.replace("{languageTag}", languageTag)
@@ -319,7 +319,7 @@ async function saveMessages(args: {
 				}
 			}
 			for (const [prefix, value] of Object.entries(_value)) {
-				const pathWithLanguage = args.options.pathPattern[prefix]!.replace(
+				const pathWithLanguage = args.settings.pathPattern[prefix]!.replace(
 					"{languageTag}",
 					languageTag,
 				)
@@ -330,7 +330,7 @@ async function saveMessages(args: {
 						SPACING[pathWithLanguage] ?? defaultSpacing(),
 						FILE_HAS_NEW_LINE[pathWithLanguage]!,
 						NESTED[pathWithLanguage] ?? defaultNesting(),
-						args.options.variableReferencePattern,
+						args.settings.variableReferencePattern,
 					),
 				)
 			}
@@ -348,7 +348,7 @@ async function saveMessages(args: {
 			}
 		}
 		for (const [languageTag, value] of Object.entries(storage)) {
-			const pathWithLanguage = args.options.pathPattern.replace("{languageTag}", languageTag)
+			const pathWithLanguage = args.settings.pathPattern.replace("{languageTag}", languageTag)
 			await args.nodeishFs.writeFile(
 				pathWithLanguage,
 				serializeFile(
@@ -356,7 +356,7 @@ async function saveMessages(args: {
 					SPACING[pathWithLanguage] ?? defaultSpacing(),
 					FILE_HAS_NEW_LINE[pathWithLanguage]!,
 					NESTED[pathWithLanguage] ?? defaultNesting(),
-					args.options.variableReferencePattern,
+					args.settings.variableReferencePattern,
 				),
 			)
 		}
@@ -375,7 +375,7 @@ function serializeFile(
 	space: number | string,
 	endsWithNewLine: boolean,
 	nested: boolean,
-	variableReferencePattern: PluginOptions["variableReferencePattern"],
+	variableReferencePattern: PluginSettings["variableReferencePattern"],
 ): string {
 	let result: Record<string, string> = {}
 	for (const [messageId, pattern] of Object.entries(messages)) {
@@ -407,7 +407,7 @@ function serializeFile(
  */
 function serializePattern(
 	pattern: Variant["pattern"],
-	variableReferencePattern: PluginOptions["variableReferencePattern"],
+	variableReferencePattern: PluginSettings["variableReferencePattern"],
 ) {
 	const result: string[] = []
 	for (const element of pattern) {
@@ -432,19 +432,19 @@ function serializePattern(
 /**
  * Detect languageTags from resources
  *
- * @example const languageTags = await detectLanguageTags({ fs, options })
+ * @example const languageTags = await detectLanguageTags({ fs, settings })
  */
 async function detectLanguageTags(args: {
 	nodeishFs: NodeishFilesystemSubset
-	options: PluginOptions
+	settings: PluginSettings
 }): Promise<string[]> {
 	const languages: string[] = []
 
 	// because of duplication of code the pathArray is eather parsed by th epathPattern object or created by the pathPattern string
 	const pathArray: Array<string> =
-		typeof args.options.pathPattern !== "string"
-			? Object.values(args.options.pathPattern)
-			: [args.options.pathPattern]
+		typeof args.settings.pathPattern !== "string"
+			? Object.values(args.settings.pathPattern)
+			: [args.settings.pathPattern]
 
 	// When there are namespaces, this will loop through all namespaces and collect the languages, otherwise it is just one path
 	for (const path of pathArray) {
@@ -461,7 +461,7 @@ async function detectLanguageTags(args: {
 			)
 			//collect languages for each pathPattern -> so we do not miss any language
 			//It is not enough to just get the prentDirectory -> there could be false directories
-			if (fileExists && args.options.ignore?.some((s) => s === filePath) === false) {
+			if (fileExists && args.settings.ignore?.some((s) => s === filePath) === false) {
 				languages.push(filePath.replace(".json", ""))
 			}
 		}
