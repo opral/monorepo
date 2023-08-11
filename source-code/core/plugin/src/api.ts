@@ -1,13 +1,17 @@
-import type { InlangConfig, PluginSettings } from "@inlang/config"
+import type { InlangConfig } from "@inlang/config"
 import { LanguageTag, TranslatedStrings } from "@inlang/language-tag"
 import { Message } from "@inlang/messages"
 import { Static, TSchema, Type, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
 import type { NodeishFilesystem as LisaNodeishFilesystem } from "@inlang-git/fs"
-import type { PluginAppSpecificApiReturnError, PluginFunctionDetectLanguageTagsAlreadyDefinedError, PluginFunctionLoadMessagesAlreadyDefinedError, PluginFunctionSaveMessagesAlreadyDefinedError, PluginUsesInvalidIdError, PluginUsesInvalidSchemaError, PluginUsesReservedNamespaceError } from './errors.js'
-
-type JSONSerializable<
-	T extends Record<string, string | string[] | Record<string, string | string[]>> | unknown,
-> = T
+import type {
+	PluginAppSpecificApiReturnError,
+	PluginFunctionDetectLanguageTagsAlreadyDefinedError,
+	PluginFunctionLoadMessagesAlreadyDefinedError,
+	PluginFunctionSaveMessagesAlreadyDefinedError,
+	PluginUsesInvalidIdError,
+	PluginUsesInvalidSchemaError,
+	PluginUsesReservedNamespaceError,
+} from "./errors.js"
 
 /**
  * The filesystem is a subset of project lisa's nodeish filesystem.
@@ -24,19 +28,19 @@ export type NodeishFilesystemSubset = Pick<
  */
 export type ResolvePluginsFunction = (args: {
 	plugins: Array<Plugin>
-	pluginSettings: Record<Plugin["meta"]["id"], PluginSettings>
+	settings: InlangConfig["settings"]
 	nodeishFs: NodeishFilesystemSubset
 }) => {
 	data: ResolvedPlugins
-		errors: Array<
-			| PluginAppSpecificApiReturnError
-			| PluginFunctionDetectLanguageTagsAlreadyDefinedError
-			| PluginFunctionLoadMessagesAlreadyDefinedError
-			| PluginFunctionSaveMessagesAlreadyDefinedError
-			| PluginUsesInvalidIdError
-			| PluginUsesInvalidSchemaError
-			| PluginUsesReservedNamespaceError
-		>
+	errors: Array<
+		| PluginAppSpecificApiReturnError
+		| PluginFunctionDetectLanguageTagsAlreadyDefinedError
+		| PluginFunctionLoadMessagesAlreadyDefinedError
+		| PluginFunctionSaveMessagesAlreadyDefinedError
+		| PluginUsesInvalidIdError
+		| PluginUsesInvalidSchemaError
+		| PluginUsesReservedNamespaceError
+	>
 }
 
 /**
@@ -51,19 +55,19 @@ export type ResolvedPlugins = {
 	 *
 	 * @example
 	 *  // define
-	 *  appSpecificApi: ({ options }) => ({
+	 *  appSpecificApi: ({ settings }) => ({
 	 * 	 "inlang.ide-extension": {
 	 * 	   messageReferenceMatcher: () => {
-	 * 		 // use options
-	 * 		 options.pathPattern
+	 * 		 // use settings
+	 * 		 settings.pathPattern
 	 * 		return
 	 * 	   }
 	 * 	 }
 	 *  })
 	 *  // use
-	 *  appSpecificApi['inlang.ide-extension'].messageReferenceMatcher()
+	 *  appSpecificApi['inlang.ideExtension'].messageReferenceMatcher()
 	 */
-	appSpecificApi: Record<Plugin["meta"]["id"], unknown>
+	appSpecificApi: ReturnType<NonNullable<Plugin["addAppSpecificApi"]>>
 	/**
 	 * Metainformation for a specific plugin.
 	 *
@@ -81,10 +85,7 @@ const PromiseLike = (T: TSchema) => Type.Union([T, Type.Promise(T)])
 /**
  * The plugin API is used to extend inlang's functionality.
  */
-export type Plugin<
-	PluginOptions extends JSONSerializable<unknown> = Record<string, string> | unknown,
-	AppSpecificApis extends Record<string, unknown> = Record<string, unknown>,
-> = Omit<
+export type Plugin<Settings extends InlangConfig["settings"] | unknown = unknown> = Omit<
 	Static<typeof Plugin>,
 	"loadMessages" | "saveMessages" | "detectedLanguageTags" | "addAppSpecificApi"
 > & {
@@ -93,12 +94,12 @@ export type Plugin<
 	 */
 	loadMessages?: (args: {
 		languageTags: Readonly<InlangConfig["languageTags"]>
-		options: PluginOptions
+		settings: Settings
 		nodeishFs: NodeishFilesystemSubset
 	}) => Promise<Message[]> | Message[]
 	saveMessages?: (args: {
 		messages: Message[]
-		options: PluginOptions
+		settings: Settings
 		nodeishFs: NodeishFilesystemSubset
 	}) => Promise<void> | void
 	/**
@@ -113,7 +114,7 @@ export type Plugin<
 	 */
 	detectedLanguageTags?: (args: {
 		nodeishFs: NodeishFilesystemSubset
-		options: PluginOptions
+		settings: Settings
 	}) => Promise<string[]> | string[]
 	/**
 	 * Define app specific APIs.
@@ -125,16 +126,16 @@ export type Plugin<
 	 * 	 }
 	 *  })
 	 */
-	addAppSpecificApi?: (args: { options: PluginOptions }) => AppSpecificApis
+	addAppSpecificApi?: (args: { settings: Settings }) => Record<`${string}.${string}`, any>
 }
 
 export const Plugin = Type.Object(
 	{
 		meta: Type.Object({
 			id: Type.String({
-				pattern: "^[a-z0-9-]+\\.[a-z0-9-]+$",
-				examples: ["example.my-plugin"],
-			}) as unknown as TTemplateLiteral<[TLiteral<`${string}.${string}`>]>,
+				pattern: "^(?:[a-zA-Z0-9]+(?:\\.[a-zA-Z0-9]+)*)\\.plugin[a-zA-Z][a-zA-Z0-9]*$",
+				examples: ["example.myPlugin"],
+			}) as unknown as TTemplateLiteral<[TLiteral<`${string}.plugin${string}`>]>,
 			displayName: TranslatedStrings,
 			description: TranslatedStrings,
 			keywords: Type.Array(Type.String()),
@@ -144,7 +145,7 @@ export const Plugin = Type.Object(
 				[
 					Type.Object({
 						languageTags: LanguageTag,
-						options: Type.Union([Type.Object({}), Type.Undefined()]),
+						settings: Type.Union([Type.Object({}), Type.Undefined()]),
 						nodeishFs: Type.Object({}),
 					}),
 				],
@@ -156,7 +157,7 @@ export const Plugin = Type.Object(
 				[
 					Type.Object({
 						messages: Type.Array(Message),
-						options: Type.Union([Type.Object({}), Type.Undefined()]),
+						settings: Type.Union([Type.Object({}), Type.Undefined()]),
 						nodeishFs: Type.Object({}),
 					}),
 				],
@@ -167,7 +168,7 @@ export const Plugin = Type.Object(
 			Type.Function(
 				[
 					Type.Object({
-						options: Type.Union([Type.Object({}), Type.Undefined()]),
+						settings: Type.Union([Type.Object({}), Type.Undefined()]),
 						nodeishFs: Type.Object({}),
 					}),
 				],
@@ -178,7 +179,7 @@ export const Plugin = Type.Object(
 			Type.Function(
 				[
 					Type.Object({
-						options: Type.Union([Type.Object({}), Type.Undefined()]),
+						settings: Type.Union([Type.Object({}), Type.Undefined()]),
 					}),
 				],
 				PromiseLike(Type.Record(Type.String(), Type.Any())),

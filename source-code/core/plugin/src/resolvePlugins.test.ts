@@ -30,7 +30,7 @@ describe("generally", () => {
 
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin],
-			pluginSettings: {},
+			settings: {},
 			nodeishFs: {} as any,
 		})
 
@@ -40,7 +40,7 @@ describe("generally", () => {
 	it("should return an error if a plugin uses APIs that are not available", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.undefined-api",
+				id: "namespace.pluginUndefinedApi",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
@@ -55,7 +55,7 @@ describe("generally", () => {
 
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin],
-			pluginSettings: {},
+			settings: {},
 			nodeishFs: {} as any,
 		})
 
@@ -66,7 +66,7 @@ describe("generally", () => {
 	it("should not initialize a plugin that uses the 'inlang' namespace except for inlang whitelisted plugins", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "inlang.not-whitelisted-plugin",
+				id: "inlang.pluginNotWhitelisted",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
@@ -76,7 +76,7 @@ describe("generally", () => {
 
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin],
-			pluginSettings: {},
+			settings: {},
 			nodeishFs: {} as any,
 		})
 
@@ -89,7 +89,7 @@ describe("loadMessages", () => {
 	it("should load messages from a local source", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.plugin",
+				id: "namespace.pluginPlaceholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
@@ -99,7 +99,7 @@ describe("loadMessages", () => {
 
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin],
-			pluginSettings: {},
+			settings: {},
 			nodeishFs: {} as any,
 		})
 
@@ -113,17 +113,16 @@ describe("loadMessages", () => {
 	it("should collect an error if function is defined twice in multiple plugins", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.plugin-load-messages-first",
+				id: "plugin.pluginLoadMessagesFirst",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
 			},
-
 			loadMessages: async () => undefined as any,
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
-				id: "plugin.plugin-load-messages-second",
+				id: "plugin.pluginLoadMessagesSecond",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
@@ -134,7 +133,7 @@ describe("loadMessages", () => {
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin, mockPlugin2],
 			nodeishFs: {} as any,
-			pluginSettings: {},
+			settings: {},
 		})
 
 		expect(resolved.errors).toHaveLength(1)
@@ -146,7 +145,7 @@ describe("saveMessages", () => {
 	it("should save messages to a local source", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.plugin",
+				id: "plugin.pluginPlaceholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
@@ -157,7 +156,7 @@ describe("saveMessages", () => {
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin],
 			nodeishFs: {} as any,
-			pluginSettings: {},
+			settings: {},
 		})
 
 		expect(resolved.errors).toHaveLength(0)
@@ -166,7 +165,7 @@ describe("saveMessages", () => {
 	it("should collect an error if function is defined twice in multiple plugins", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.plugin-save-messages",
+				id: "plugin.pluginSaveMessages",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
@@ -175,7 +174,7 @@ describe("saveMessages", () => {
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
-				id: "plugin.plugin-save-messages2",
+				id: "plugin.pluginSaveMessages2",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
@@ -186,7 +185,7 @@ describe("saveMessages", () => {
 
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin, mockPlugin2],
-			pluginSettings: {},
+			settings: {},
 			nodeishFs: {} as any,
 		})
 
@@ -199,21 +198,19 @@ describe("detectedLanguageTags", () => {
 	it("should detect language tags from a local source", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.plugin-detected-language-tags",
+				id: "plugin.pluginDetectedLanguageTags",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "detected-language-tags"],
+				keywords: [],
 			},
 			detectedLanguageTags: async () => ["de", "en"],
-			loadMessages: async () => undefined as any,
-			saveMessages: async () => undefined as any,
 			addAppSpecificApi: () => {
 				return {}
 			},
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
-				id: "plugin.plugin-detected-language-tags2",
+				id: "plugin.pluginDetectedLanguageTags2",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "detected-language-tags"],
@@ -225,7 +222,7 @@ describe("detectedLanguageTags", () => {
 
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin, mockPlugin2],
-			pluginSettings: {},
+			settings: {},
 			nodeishFs: {} as any,
 		})
 
@@ -236,21 +233,19 @@ describe("detectedLanguageTags", () => {
 	it("should collect an error if function is defined twice in multiple plugins", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.plugin-detected-language-tags",
+				id: "plugin.pluginDetectedLanguageTags",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "detected-language-tags"],
 			},
 			detectedLanguageTags: async () => ["de", "en"],
-			loadMessages: async () => undefined as any,
-			saveMessages: async () => undefined as any,
 			addAppSpecificApi: () => {
 				return {}
 			},
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
-				id: "plugin.plugin-detected-language-tags2",
+				id: "plugin.pluginDetectedLanguageTags2",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "detected-language-tags"],
@@ -263,7 +258,7 @@ describe("detectedLanguageTags", () => {
 
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin, mockPlugin2],
-			pluginSettings: {},
+			settings: {},
 			nodeishFs: {} as any,
 		})
 
@@ -276,13 +271,12 @@ describe("addAppSpecificApi", () => {
 	it("it should resolve app specific api", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.plugin",
+				id: "plugin.pluginPlaceholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
 			},
-			loadMessages: () => undefined as any,
-			saveMessages: () => undefined as any,
+
 			addAppSpecificApi: () => ({
 				"my-app": {
 					messageReferenceMatcher: () => undefined as any,
@@ -292,7 +286,7 @@ describe("addAppSpecificApi", () => {
 
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin],
-			pluginSettings: {},
+			settings: {},
 			nodeishFs: {} as any,
 		})
 
@@ -302,7 +296,7 @@ describe("addAppSpecificApi", () => {
 	it("it should resolve multiple app specific apis", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.plugin",
+				id: "plugin.pluginPlaceholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
@@ -318,13 +312,12 @@ describe("addAppSpecificApi", () => {
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
-				id: "plugin.plugin2",
+				id: "plugin.pluginPlaceholder2",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
 			},
-			loadMessages: () => undefined as any,
-			saveMessages: () => undefined as any,
+
 			addAppSpecificApi: () => ({
 				"my-app-3": {
 					functionOfMyApp3: () => undefined as any,
@@ -334,7 +327,7 @@ describe("addAppSpecificApi", () => {
 
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin, mockPlugin2],
-			pluginSettings: {},
+			settings: {},
 			nodeishFs: {} as any,
 		})
 
@@ -346,19 +339,18 @@ describe("addAppSpecificApi", () => {
 	it("it should throw an error if return value is not an object", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.plugin",
+				id: "plugin.pluginPlaceholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "my-plugin"],
+				keywords: [],
 			},
-			loadMessages: () => undefined as any,
-			saveMessages: () => undefined as any,
-			addAppSpecificApi: () => undefined as any,
+			// @ts-expect-error - invalid return type
+			addAppSpecificApi: () => undefined,
 		}
 
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin],
-			pluginSettings: {},
+			settings: {},
 			nodeishFs: {} as any,
 		})
 
@@ -369,17 +361,15 @@ describe("addAppSpecificApi", () => {
 	it("it should throw an error if the passed options are not defined inside appSpecificApi", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.plugin",
+				id: "plugin.pluginPlaceholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "my-plugin"],
+				keywords: [],
 			},
-			loadMessages: () => undefined as any,
-			saveMessages: () => undefined as any,
-			addAppSpecificApi: ({ options = { hello: "world" } }) => ({
-				"my-app": {
+			addAppSpecificApi: () => ({
+				"namespace.myApp": {
 					messageReferenceMatcher: () => {
-						return options
+						return { hello: "world" }
 					},
 				},
 			}),
@@ -387,13 +377,12 @@ describe("addAppSpecificApi", () => {
 
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin],
-			pluginSettings: {},
+			settings: {},
 			nodeishFs: {} as any,
 		})
 
-		expect(resolved.data.appSpecificApi).toHaveProperty("my-app")
-		// @ts-expect-error messageReferenceMatcher is not known to typescript
-		expect(resolved.data.appSpecificApi?.["my-app"].messageReferenceMatcher()).toEqual({
+		expect(resolved.data.appSpecificApi).toHaveProperty("namespace.myApp")
+		expect(resolved.data.appSpecificApi?.["namespace.myApp"].messageReferenceMatcher()).toEqual({
 			hello: "world",
 		})
 	})
@@ -403,58 +392,37 @@ describe("meta", () => {
 	it("should resolve meta data", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.plugin",
+				id: "namespace.pluginPlaceholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 				keywords: ["plugin", "my-plugin"],
 			},
-			loadMessages: () => undefined as any,
-			saveMessages: () => undefined as any,
-			addAppSpecificApi: () => {
-				return {}
-			},
 		}
 
-		const resolved = await resolvePlugins({
+		const resolved = resolvePlugins({
 			plugins: [mockPlugin],
 			nodeishFs: {} as any,
-			pluginSettings: {
-				"plugin.plugin": {
-					options: {
-						"my-app-1": {
-							option1: "value1",
-						},
-						"my-app-2": {
-							option2: "value2",
-						},
-					},
-				},
-			},
+			settings: {},
 		})
 
-		expect(resolved.data.meta).toHaveProperty("plugin.plugin")
+		expect(resolved.data.meta).toHaveProperty(mockPlugin.meta.id)
 	})
 
 	it("should resolve meta data from multiple plugins", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.plugin",
+				id: "plugin.pluginPlaceholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "my-plugin"],
-			},
-			loadMessages: () => undefined as any,
-			saveMessages: () => undefined as any,
-			addAppSpecificApi: () => {
-				return {}
+				keywords: [],
 			},
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
-				id: "plugin.plugin2",
+				id: "plugin.pluginPlaceholder2",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "my-plugin"],
+				keywords: [],
 			},
 			addAppSpecificApi: () => ({
 				"my-app-1": {
@@ -463,13 +431,13 @@ describe("meta", () => {
 			}),
 		}
 
-		const resolved = await resolvePlugins({
+		const resolved = resolvePlugins({
 			plugins: [mockPlugin, mockPlugin2],
-			pluginSettings: {},
+			settings: {},
 			nodeishFs: {} as any,
 		})
 
-		expect(resolved.data.meta).toHaveProperty("plugin.plugin")
-		expect(resolved.data.meta).toHaveProperty("plugin.plugin2")
+		expect(resolved.data.meta).toHaveProperty(mockPlugin.meta.id)
+		expect(resolved.data.meta).toHaveProperty(mockPlugin2.meta.id)
 	})
 })

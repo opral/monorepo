@@ -10,7 +10,7 @@ import {
 } from "./errors.js"
 import { deepmerge } from "deepmerge-ts"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
-import { tryCatch } from '@inlang/result'
+import { tryCatch } from "@inlang/result"
 
 const whitelistedPlugins = ["inlang.plugin-json", "inlang.plugin-i18next", "inlang.plugin-sdk-js"]
 const PluginCompiler = TypeCompiler.Compile(Plugin)
@@ -104,9 +104,11 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 		// --- ADD APP SPECIFIC API ---
 		if (typeof plugin.addAppSpecificApi === "function") {
 			// TODO: why do we call this function 2 times (here for validation and later for retrieving the actual value)?
-			const { data: appSpecificApi, error } = tryCatch(() => plugin.addAppSpecificApi!({
-				options: args.pluginSettings[plugin.meta.id]?.options || {},
-			}))
+			const { data: appSpecificApi, error } = tryCatch(() =>
+				plugin.addAppSpecificApi!({
+					settings: args.settings[plugin.meta.id] ?? {},
+				}),
+			)
 			if (error) {
 				// @ts-ignore
 				delete error.stack
@@ -135,7 +137,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			result.data.loadMessages = (_args) =>
 				plugin.loadMessages!({
 					..._args,
-					options: args.pluginSettings[plugin.meta.id]?.options || {},
+					settings: args.settings[plugin.meta.id] ?? {},
 					nodeishFs: args.nodeishFs,
 				})
 		}
@@ -144,7 +146,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			result.data.saveMessages = (_args) =>
 				plugin.saveMessages!({
 					..._args,
-					options: args.pluginSettings[plugin.meta.id]?.options || {},
+					settings: args.settings[plugin.meta.id] ?? {},
 					nodeishFs: args.nodeishFs,
 				})
 		}
@@ -152,15 +154,17 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 		if (typeof plugin.detectedLanguageTags === "function") {
 			result.data.detectedLanguageTags = () =>
 				plugin.detectedLanguageTags!({
-					options: args.pluginSettings[plugin.meta.id]?.options || {},
+					settings: args.settings[plugin.meta.id] ?? {},
 					nodeishFs: args.nodeishFs,
 				})
 		}
 
 		if (typeof plugin.addAppSpecificApi === "function") {
-			const { data: appSpecificApi } = tryCatch(() => plugin.addAppSpecificApi!({
-				options: args.pluginSettings[plugin.meta.id]?.options || {},
-			}))
+			const { data: appSpecificApi } = tryCatch(() =>
+				plugin.addAppSpecificApi!({
+					settings: args.settings[plugin.meta.id] ?? {},
+				}),
+			)
 			if (appSpecificApi) {
 				result.data.appSpecificApi = deepmerge(result.data.appSpecificApi, appSpecificApi)
 			}
