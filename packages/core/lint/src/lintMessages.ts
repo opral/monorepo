@@ -1,7 +1,8 @@
 import type { InlangConfig } from "@inlang/config"
 import type { Message, MessageQueryApi } from "@inlang/messages"
-import type { LintError, LintReport, LintRule } from "./api.js"
+import type { LintReport, LintRule } from "./api.js"
 import { lintMessage } from "./lintMessage.js"
+import type { LintError } from "./errors.js"
 
 export const lintMessages = async (args: {
 	config: InlangConfig

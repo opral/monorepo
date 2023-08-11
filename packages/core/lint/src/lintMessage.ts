@@ -1,6 +1,7 @@
-import { LintError, LintRule, MessageLintReport, MessageLintRule } from "./api.js"
+import type { LintRule, MessageLintReport } from "./api.js"
 import type { InlangConfig } from "@inlang/config"
 import type { Message, MessageQueryApi } from "@inlang/messages"
+import { LintError } from "./errors.js"
 
 export const lintMessage = async (args: {
 	config: InlangConfig
@@ -12,10 +13,12 @@ export const lintMessage = async (args: {
 	const reports: MessageLintReport[] = []
 	const errors: LintError[] = []
 
-	const promises = args.rules.filter(isMessageLintRule)
+	const promises = args.rules
+		.filter((rule) => rule.type === "MessageLint")
 		.map(async (rule) => {
 			const ruleId = rule.meta.id
-			const { level = rule.defaultLevel, options = {} } = args.config.settings?.lintRules?.[ruleId] || {}
+			const settings = args.config?.settings?.[ruleId] ?? {}
+			const level = args.config.settings?.["system.lintRuleLevels"]?.[ruleId] ?? rule.defaultLevel
 
 			if (level === "off") {
 				return
@@ -26,7 +29,7 @@ export const lintMessage = async (args: {
 					message: args.message,
 					query: args.query,
 					config: args.config,
-					options,
+					settings,
 					report: (reportArgs) => {
 						reports.push({
 							type: "MessageLint",
@@ -45,7 +48,3 @@ export const lintMessage = async (args: {
 
 	return { data: reports, errors }
 }
-
-// @ts-ignore
-const isMessageLintRule = <Rule extends LintRule>(rule: Rule): rule is MessageLintRule =>
-	!!(rule as any)["message"]

@@ -6,21 +6,23 @@ import type { Message, MessageQueryApi } from "@inlang/messages"
 
 const lintRule1 = {
 	meta: {
-		id: "r.1",
+		id: "r.lintRule1",
 		displayName: { en: "" },
 		description: { en: "" },
 	},
+	type: "MessageLint",
 	defaultLevel: "error",
 	message: vi.fn(),
 } satisfies MessageLintRule
 
 const lintRule2 = {
 	meta: {
-		id: "r.2",
+		id: "r.lintRule2",
 		displayName: { en: "" },
 		description: { en: "" },
 	},
 	defaultLevel: "warning",
+	type: "MessageLint",
 	message: vi.fn(),
 } satisfies MessageLintRule
 
@@ -36,7 +38,11 @@ describe("lintMessage", async () => {
 	describe("resolve rules and options", async () => {
 		test("it should not run disabled lintrules", async () => {
 			await lintMessage({
-				config: { settings: { lintRules: { "r.1": { level: "off" } } } as Partial<InlangConfig['settings']> } as InlangConfig,
+				config: {
+					settings: { "system.lintRuleLevels": { [lintRule1.meta.id]: "off" } } as Partial<
+						InlangConfig["settings"]
+					>,
+				} as InlangConfig,
 				query: {} as MessageQueryApi,
 				messages,
 				message: message1,
@@ -58,14 +64,18 @@ describe("lintMessage", async () => {
 				rules: [lintRule1],
 			})
 
-			expect(reports.data[0]!.level).toBe('error')
+			expect(reports.data[0]!.level).toBe("error")
 		})
 
 		test("it should override the default lint level", async () => {
 			lintRule1.message.mockImplementation(({ report }) => report({} as MessageLintReport))
 
 			const reports = await lintMessage({
-				config: { settings: { lintRules: { "r.1": { level: "warning" } } } as Partial<InlangConfig['settings']> } as InlangConfig,
+				config: {
+					settings: { "system.lintRuleLevels": { [lintRule1.meta.id]: "warning" } } as Partial<
+						InlangConfig["settings"]
+					>,
+				} as InlangConfig,
 				query: {} as MessageQueryApi,
 				messages,
 				message: message1,
@@ -74,21 +84,23 @@ describe("lintMessage", async () => {
 			expect(reports.data[0]!.level).toBe("warning")
 		})
 
-		test.only("it should pass the correct options", async () => {
-			const options = {}
+		test.only("it should pass the correct settings", async () => {
+			const settings = {}
 
 			const fn = vi.fn()
-			lintRule1.message.mockImplementation(({ options }) => fn(options))
+			lintRule1.message.mockImplementation(({ settings }) => fn(settings))
 
 			await lintMessage({
-				config: { settings: { lintRules: { "r.1": { options } } } as Partial<InlangConfig['settings']> } as InlangConfig,
+				config: {
+					settings: { [lintRule1.meta.id]: settings } as Partial<InlangConfig["settings"]>,
+				} as InlangConfig,
 				query: {} as MessageQueryApi,
 				messages,
 				message: message1,
 				rules: [lintRule1],
 			})
 
-			expect(fn).toHaveBeenCalledWith(options)
+			expect(fn).toHaveBeenCalledWith(settings)
 		})
 	})
 
@@ -119,14 +131,14 @@ describe("lintMessage", async () => {
 		const fn = vi.fn()
 
 		lintRule1.message.mockImplementation(async () => {
-			fn("r.1", "before")
+			fn(lintRule1.meta.id, "before")
 			await new Promise((resolve) => setTimeout(resolve, 0))
-			fn("r.1", "after")
+			fn(lintRule1.meta.id, "after")
 		})
 		lintRule2.message.mockImplementation(async () => {
-			fn("r.2", "before")
+			fn(lintRule2.meta.id, "before")
 			await new Promise((resolve) => setTimeout(resolve, 0))
-			fn("r.2", "after")
+			fn(lintRule2.meta.id, "after")
 		})
 
 		await lintMessage({
@@ -138,10 +150,10 @@ describe("lintMessage", async () => {
 		})
 
 		expect(fn).toHaveBeenCalledTimes(4)
-		expect(fn).toHaveBeenNthCalledWith(1, "r.1", "before")
-		expect(fn).toHaveBeenNthCalledWith(2, "r.2", "before")
-		expect(fn).toHaveBeenNthCalledWith(3, "r.1", "after")
-		expect(fn).toHaveBeenNthCalledWith(4, "r.2", "after")
+		expect(fn).toHaveBeenNthCalledWith(1, lintRule1.meta.id, "before")
+		expect(fn).toHaveBeenNthCalledWith(2, lintRule2.meta.id, "before")
+		expect(fn).toHaveBeenNthCalledWith(3, lintRule1.meta.id, "after")
+		expect(fn).toHaveBeenNthCalledWith(4, lintRule2.meta.id, "after")
 	})
 
 	test("it should not abort the linting process when errors occur", async () => {
