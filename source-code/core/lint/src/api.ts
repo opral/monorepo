@@ -53,7 +53,8 @@ export type MessageLintRule = Static<typeof MessageLintRule> & {
 	message: (args: {
 		message: Message
 		query: Pick<MessageQueryApi, "get">
-		config: Readonly<InlangConfig>
+		sourceLanguageTag: LanguageTag
+		languageTags: LanguageTag[]
 		settings: InlangConfig["settings"][LintRuleBase["meta"]["id"]]
 		report: (args: {
 			messageId: Message["id"]
