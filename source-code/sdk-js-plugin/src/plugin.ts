@@ -21,8 +21,8 @@ export const sdkPlugin = {
 			"sveltekit",
 		],
 	},
-	addAppSpecificApi({ options }) {
-		const parsedConfig = validateSdkConfig(options)
+	addAppSpecificApi({ settings }) {
+		const parsedConfig = validateSdkConfig(settings)
 
 		return {
 			"inlang.sdk-js": parsedConfig,

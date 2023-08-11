@@ -31,7 +31,7 @@ export const initInlangApp = async (): Promise<unknown> => {
 
 		assertSdkWasSetUp(appInstance.appSpecificApi)
 
-		// await createDemoResourcesIfNoMessagesExistYet()
+		await createDemoResourcesIfNoMessagesExistYet(appInstance)
 
 		resolve(appInstance)
 	}))
@@ -91,4 +91,10 @@ function assertSdkWasSetUp(appSpecificApi: InlangInstance["appSpecificApi"]) {
 				See https://inlang.com/documentation/sdk/configuration
 			`)
 	}
+}
+
+
+const createDemoResourcesIfNoMessagesExistYet = async (appInstance: InlangInstance) => {
+	appInstance
+
 }
