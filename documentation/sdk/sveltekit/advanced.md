@@ -7,17 +7,17 @@ description: i18n SDK designed and fully integrated for SvelteKit.
 
 # {% $frontmatter.title %}
 
-The SDK sets up everything automatically you need in order to make your application support multiple languages. Currently only a basic feature set is supported, but we are working on adding more features in the coming weeks.
+The SDK sets up everything automatically you need in order to make your application support multiple languages. Currently, only a basic feature set is supported, but we are working on adding more features in the coming weeks.
 
-It may be the case that you encounter a bug or reach a point where our automations fall over. In that case you can always opt out of the magic the SDK provides and manually write the code yourself. This makes sure you are not blocked by the SDK and can continue working on your project.
+It may be the case that you encounter a bug or reach a point where our automation falls over. In that case, you can always opt out of the magic the SDK provides and manually write the code yourself. This makes sure you are not blocked by the SDK and can continue working on your project.
 
-In order to opt-out of the SDK magic, just add the following import anywhere in your file:
+In order to opt out of the SDK magic, just add the following import anywhere in your file:
 
 ```js
 import "@inlang/sdk-js/no-transforms"
 ```
 
-By adding this line, the code in that file will not be transformed and you need to make sure you manually add the necessary functionality.
+By adding this line, the code in that file will not be transformed, and you need to make sure you manually add the necessary functionality.
 
 > You can add the following import to any file to log the transforms that got applied to that file by the SDK:
 >
@@ -178,9 +178,9 @@ And then call it from somewhere like this:
 </svelte:head>
 ```
 
-### `*.js` (called from client)
+### `*.js` (called from the client)
 
-If you create a function that only runs on the client, you don't need to pass the `i` function. Instead you can do the following:
+If you create a function that only runs on the client, you don't need to pass the `i` function. Instead, you can do the following:
 
 ```ts
 import { getRuntimeFromGlobalThis } from "@inlang/sdk-js/adapter-sveltekit/client/shared"
@@ -247,7 +247,7 @@ export const load = initPageServerLoadWrapper<PageServerLoad>().use(({ params },
 })
 ```
 
-> You need to replace `initPageServerLoadWrapper` with `initRootPageServerLoadWrapper` of it is your root server page file.
+> You need to replace `initPageServerLoadWrapper` with `initRootPageServerLoadWrapper` if it is your root server page file.
 
 Using inlang inside Actions looks similar:
 
@@ -282,7 +282,7 @@ export const load = initLoadWrapper<PageLoad>().use(({ params }, { i }) => {
 })
 ```
 
-> You need to replace `initLoadWrapper` with `initRootPageLoadWrapper` of it is your root page file.
+> You need to replace `initLoadWrapper` with `initRootPageLoadWrapper` if it is your root page file.
 
 ### `+server.js`
 

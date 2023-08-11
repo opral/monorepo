@@ -10,7 +10,7 @@ description: Learn how you can get started with inlang in less than 5 minutes to
 An `inlang.config.js` needs to be created at the root of your git repository.
 
 {% Callout variant="info" %}
-You are not globalizing yet? Checkout the [SDKs](/documentation/sdk/overview) first.
+Are you not globalizing yet? Check out the [SDKs](/documentation/sdk/overview) first.
 {% /Callout %}
 
 ## Using the CLI

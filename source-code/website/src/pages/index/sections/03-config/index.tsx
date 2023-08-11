@@ -119,7 +119,6 @@ const ConfigPage = () => {
 					>
 						{t("landing.config.title.config")}
 					</a>
-					.
 				</h2>
 			</div>
 
