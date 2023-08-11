@@ -1,4 +1,4 @@
-import { LintRule, LintRuleError } from "@inlang/lint"
+import { LintRule, InvalidLintRuleError } from "@inlang/lint"
 import type { InlangConfig, Plugin } from "@inlang/plugin"
 import { describe, expect, it } from "vitest"
 import type { InlangModule } from "./api.js"
@@ -11,6 +11,7 @@ describe("generally", () => {
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
 			modules: ["https://myplugin.com/index.js"],
+			settings: {},
 		}
 
 		const resolved = await resolveModules({
@@ -33,7 +34,7 @@ describe("resolveModules", () => {
 		// Define mock data
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "mock.plugin",
+				id: "namepsace.pluginMock",
 				description: { en: "Mock plugin description" },
 				displayName: { en: "Mock Plugin" },
 				keywords: [],
@@ -41,25 +42,28 @@ describe("resolveModules", () => {
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
 			addAppSpecificApi: () => ({
-				"inlang.ide-extension": {
+				"inlang.ideExtension": {
 					messageReferenceMatcher: () => undefined as any,
 				},
 			}),
 		}
 
 		const mockLintRule: LintRule = {
+			type: "MessageLint",
 			meta: {
-				id: "mock.lint-rule",
+				id: "namepsace.lintRuleMock",
 				description: { en: "Mock lint rule description" },
 				displayName: { en: "Mock Lint Rule" },
 			},
 			defaultLevel: "error",
+			message: () => undefined,
 		}
 
 		const config: InlangConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
 			modules: ["https://myplugin.com/index.js"],
+			settings: {},
 		}
 
 		const _import = async () =>
@@ -76,11 +80,11 @@ describe("resolveModules", () => {
 		// Assert results
 		expect(resolved.errors).toHaveLength(0)
 		// Check for the meta data of the plugin
-		expect(resolved.data.plugins.data["meta"]["mock.plugin"]).toBeDefined()
+		expect(resolved.data.plugins.data["meta"][mockPlugin.meta.id]).toBeDefined()
 		// Check for the app specific api
-		expect(resolved.data.plugins.data["appSpecificApi"]?.["inlang.ide-extension"]).toBeDefined()
+		expect(resolved.data.plugins.data["appSpecificApi"]?.["inlang.ideExtension"]).toBeDefined()
 		// Check for the lint rule
-		expect(resolved.data.lintRules.data[0]!.meta.id).toBe("mock.lint-rule")
+		expect(resolved.data.lintRules.data[0]!.meta.id).toBe(mockLintRule.meta.id)
 	})
 
 	it("should return an error if a plugin cannot be imported", async () => {
@@ -88,6 +92,7 @@ describe("resolveModules", () => {
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
 			modules: ["https://myplugin.com/index.js"],
+			settings: {},
 		}
 
 		const _import = async () => {
@@ -109,6 +114,7 @@ describe("resolveModules", () => {
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
 			modules: ["https://myplugin.com/index.js"],
+			settings: {},
 		}
 
 		const _import = async () => ({
@@ -134,6 +140,7 @@ describe("resolveModules", () => {
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
 			modules: ["https://myplugin.com/index.js"],
+			settings: {},
 		}
 
 		const _import = async () =>
@@ -149,7 +156,7 @@ describe("resolveModules", () => {
 		const resolved = await resolveModules({ config, _import, nodeishFs: {} as any })
 
 		// Assert results
-		expect(resolved.data.lintRules.errors[0]).toBeInstanceOf(LintRuleError)
+		expect(resolved.data.lintRules.errors[0]).toBeInstanceOf(InvalidLintRuleError)
 	})
 
 	it("should handle other unhandled errors during plugin resolution", async () => {
@@ -158,6 +165,7 @@ describe("resolveModules", () => {
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
 			modules: ["https://myplugin.com/index.js"],
+			settings: {},
 		}
 
 		const _import = async () => {

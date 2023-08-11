@@ -7,7 +7,6 @@ import { createImport } from "./import.js"
 
 export const resolveModules: ResolveModulesFunction = async (args) => {
 	const _import = args._import ?? createImport({ readFile: args.nodeishFs.readFile, fetch })
-	const pluginSettings = args.config.settings?.plugins || {}
 	const moduleErrors: Array<ModuleError> = []
 
 	let allPlugins: Array<Plugin> = []
@@ -60,7 +59,7 @@ export const resolveModules: ResolveModulesFunction = async (args) => {
 
 	const resolvedPlugins = resolvePlugins({
 		plugins: allPlugins,
-		pluginSettings,
+		settings: args.config.settings,
 		nodeishFs: args.nodeishFs,
 	})
 
