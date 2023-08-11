@@ -49,13 +49,15 @@ export const LintRuleBase = Type.Object({
  * ---------------- MESSAGE LINT ----------------
  */
 
-export type MessageLintRule = Static<typeof MessageLintRule> & {
+export type MessageLintRule<
+	Settings extends InlangConfig["settings"][LintRuleBase["meta"]["id"]] | unknown = unknown,
+> = Static<typeof MessageLintRule> & {
 	message: (args: {
 		message: Message
 		query: Pick<MessageQueryApi, "get">
 		sourceLanguageTag: LanguageTag
 		languageTags: LanguageTag[]
-		settings: InlangConfig["settings"][LintRuleBase["meta"]["id"]]
+		settings: Settings
 		report: (args: {
 			messageId: Message["id"]
 			languageTag: LanguageTag
@@ -80,7 +82,10 @@ export type MessageLintReport = LintReportBase & {
  * ---------------- LINT ----------------
  */
 
-export type LintRule = MessageLintRule
+export type LintRule<
+	// must be any to avoid typescript complaining about "recursive types"
+	Settings extends InlangConfig["settings"][LintRuleBase["meta"]["id"]] | unknown = any,
+> = MessageLintRule<Settings>
 export const LintRule = Type.Union([MessageLintRule])
 
 export type LintReport = MessageLintReport

@@ -3,7 +3,7 @@ import type { InlangConfig } from "@inlang/config"
 import type { Message, MessageQueryApi } from "@inlang/messages"
 import { LintError } from "./errors.js"
 
-export const lintMessage = async (args: {
+export const lintSingleMessage = async (args: {
 	config: InlangConfig
 	rules: LintRule[]
 	messages: Message[]
