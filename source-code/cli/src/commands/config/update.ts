@@ -59,7 +59,10 @@ async function updateCommandAction() {
 		// get the latest version of each plugin
 		const pluginURLsWithLatestVersion = await Promise.all(
 			pluginURLsParsed.map(async (pluginURL) => {
-				const latestVersion = await getLatestVersion(pluginURL.publisher + "/" + pluginURL.name!)
+				const latestVersion = await getLatestVersion(
+					pluginURL.publisher + "/" + pluginURL.name!,
+					pluginURL.name! !== "sdk-js-plugin"
+				)
 				return {
 					...pluginURL,
 					latestVersion,
