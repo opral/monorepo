@@ -1,6 +1,6 @@
 import { it, expect } from "vitest"
 import { parse } from "./messageReferenceMatchers.js"
-import type { PluginOptions } from "../options.js"
+import type { PluginOptions } from "../settings.js"
 
 it("should not match a function that end with t but is not a t function", async () => {
 	const sourceCode = `
