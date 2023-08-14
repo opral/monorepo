@@ -1,13 +1,15 @@
-import type { Message, LanguageTag } from "@inlang/app"
-import { handleMissingMessage } from "./handleMissingMessage.js"
-
+import type { LintReport, Message } from "@inlang/app"
+import { useEditorState } from "../State.jsx"
 export const showFilteredMessage = (
 	message: Message | undefined,
-	filteredLanguageTags: LanguageTag[],
-	textSearch: string,
-	filteredLintRules: `${string}.${string}`[],
-	messageId: string,
 ) => {
+	const {
+		filteredLintRules,
+		filteredLanguageTags,
+		filteredId,
+		textSearch,
+		inlang,
+	} = useEditorState()
 	// filteredByLanguage
 	const filteredByLanguage = {
 		...message,
@@ -16,7 +18,7 @@ export const showFilteredMessage = (
 				if (filteredLanguageTags.length === 0) {
 					return true
 				} else {
-					if (message !== undefined && filteredLanguageTags.includes(language)) {
+					if (message !== undefined && filteredLanguageTags().includes(language)) {
 						return true
 					}
 				}
@@ -24,19 +26,19 @@ export const showFilteredMessage = (
 			}),
 		),
 	} as Message
-
+	if (Object.entries(filteredByLanguage.body).length === 0) return false
 
 	// filteredById	
-	const filteredById = (messageId === "" || (message !== undefined && message.id === messageId)) 
-	? filteredByLanguage : undefined
+	const filteredById = (filteredId() === "" || (message !== undefined && message.id === filteredId())) 
+	? filteredByLanguage : false
 
 	// filteredBySearch
 	const filteredBySearch = (
-		textSearch.length === 0 || 
+		textSearch().length === 0 || 
 		(
 			message !== undefined &&
 			(
-				message?.id.toLowerCase().includes(textSearch.toLowerCase()) ||
+				message?.id.toLowerCase().includes(textSearch().toLowerCase()) ||
 				Object.values(message!.body).some((value) => {
 						value[0]?.pattern.map((pattern) => {
 							if (pattern.type === "Text") {
@@ -46,32 +48,28 @@ export const showFilteredMessage = (
 							} else {
 								return false
 							}
-						}).join("").includes(textSearch.toLowerCase())
+						}).join("").includes(textSearch().toLowerCase())
 					}
 				)
 			)
 		)
-	) ? filteredById : undefined
+	) ? filteredById : false
 
-	// // filteredByLintRules
-	// const filteredByLintRules = filteredBySearch.filter((message) => {
-	// 	if (filteredLintRules.length === 0) {
-	// 		return true
-	// 	} else {
-	// 		for (const report of getLintReports(message!)) {
-	// 			if (
-	// 				filteredLintRules.includes(report.id) &&
-	// 				handleMissingMessage(report, filteredLanguageTags)
-	// 			) {
-	// 				return true
-	// 			}
-	// 			false
-	// 			continue
-	// 		}
-	// 	}
-	// 	return false
-	// })
+	// filteredByLintRules
+	const filteredByLintRules = (
+		filteredLintRules().length === 0 ||
+		(
+			message !== undefined &&
+			// filtered report includes messageId and lintRuleId
+			inlang()?.lint.reports().some((report: LintReport) => {
+				if (filteredLintRules().includes(report.ruleId) && report.messageId === message?.id) {
+					return true
+				}
+				return false
+			})
+		)
+	) ? filteredBySearch : false
 
-	// return if matched
-	return filteredBySearch
+	// return matches all filters
+	return filteredByLintRules
 }

@@ -1,4 +1,4 @@
-import type { JSXElement, JSX } from "solid-js"
+import { JSXElement, JSX, Show } from "solid-js"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 
 export type TourStepId =
@@ -26,18 +26,18 @@ export const TourHintWrapper = (props: TourHintWrapperProps) => {
 	return (
 		<div class="relative max-content">
 			<TourStepWrapper position={props.position} offset={props.offset} isVisible={props.isVisible}>
-				{(() => {
-					switch (props.currentId) {
-						case "github-login":
-							return <GithubLogin />
-						case "fork-repository":
-							return <ForkRepository />
-						case "missing-message-rule":
-							return <MissingMessageRule />
-						case "textfield":
-							return <Textfield />
-					}
-				})()}
+				<Show when={props.currentId === "github-login"}>
+					<GithubLogin />
+				</Show>
+				<Show when={props.currentId === "fork-repository"}>
+					<ForkRepository />
+				</Show>
+				<Show when={props.currentId === "missing-message-rule"}>
+					<MissingMessageRule />
+				</Show>
+				<Show when={props.currentId === "textfield"}>
+					<Textfield />
+				</Show>
 			</TourStepWrapper>
 			{props.children}
 		</div>
