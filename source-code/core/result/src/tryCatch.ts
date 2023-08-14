@@ -19,7 +19,7 @@ export function tryCatch<Data>(
 		const callbackResult = callback() as Data | Promise<Data>
 		if (isAsync(callbackResult)) {
 			return callbackResult
-				.then(data => ({ data } as SuccessResult<Data>))
+				.then((data) => ({ data } as SuccessResult<Data>))
 				.catch((error) => ({ error } as ErrorResult<unknown>))
 		}
 		return { data: callbackResult } as any
@@ -29,4 +29,4 @@ export function tryCatch<Data>(
 }
 
 const isAsync = <T>(p: unknown): p is Promise<T> =>
-	!!p && typeof p === 'object' && typeof (p as Promise<T>).then === 'function'
+	!!p && typeof p === "object" && typeof (p as Promise<T>).then === "function"
