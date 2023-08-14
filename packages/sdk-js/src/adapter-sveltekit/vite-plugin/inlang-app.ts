@@ -87,7 +87,7 @@ function assertSdkWasSetUp(appSpecificApi: InlangInstance["appSpecificApi"]) {
 
 	if (!("inlang.sdk-js" in appSpecificApiValue)) {
 		throw new InlangSdkConfigException(dedent`
-				Invalid config. Make sure to add the 'inlang.plugin.sdk-js' to your 'inlang.config.json' file.
+				Invalid config. Make sure to add the 'inlang.plugin.sdkJs' to your 'inlang.config.json' file.
 				See https://inlang.com/documentation/sdk/configuration
 			`)
 	}
