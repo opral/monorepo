@@ -1,5 +1,12 @@
 # @inlang/sdk-js
 
+## 0.11.8
+
+### Patch Changes
+
+- 87234d68: [fix] correctly change lanugage state in SPA mode
+- 87234d68: [fix] keep scroll position when changing language in SPA mode
+
 ## 0.11.7
 
 ### Patch Changes
