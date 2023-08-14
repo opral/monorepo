@@ -83,7 +83,9 @@ export type ResolvedPlugins = {
 /**
  * The plugin API is used to extend inlang's functionality.
  */
-export type Plugin<Settings extends InlangConfig["settings"] | unknown = unknown> = Omit<
+export type Plugin<
+	Settings extends InlangConfig["settings"][Plugin["meta"]["id"]] | unknown = unknown,
+> = Omit<
 	Static<typeof Plugin>,
 	"loadMessages" | "saveMessages" | "detectedLanguageTags" | "addAppSpecificApi"
 > & {
