@@ -31,7 +31,9 @@ export const createInlang = async (args: {
 		createEffect(() => {
 			//console.log("set config internal")
 			loadConfig({ configPath: args.configPath, nodeishFs: args.nodeishFs })
-				.then(setConfig)
+				.then((config) => {
+					setConfig(config)
+				})
 				.catch((err) => {
 					//console.error("Error in load config ", err)
 					markInitAsFailed(err)
@@ -59,13 +61,16 @@ export const createInlang = async (args: {
 		})
 		// -- messages ----------------------------------------------------------
 
+		let configValue: InlangConfig
+		createEffect(() => configValue = config()!) // workaround to not run effects twice (e.g. config change + modules change) (I'm sure there exists a solid way of doing this, but I haven't found it yet)
+
 		const [messages, setMessages] = createSignal<Message[]>()
 		createEffect(() => {
 			const _resolvedModules = resolvedModules()
 			if (!_resolvedModules) return
 
 			makeTrulyAsync(
-				_resolvedModules.data.plugins.data.loadMessages({ languageTags: config()!.languageTags }),
+				_resolvedModules.data.plugins.data.loadMessages({ languageTags: configValue!.languageTags }),
 			)
 				.then((messages) => {
 					setMessages(messages)
@@ -95,7 +100,7 @@ export const createInlang = async (args: {
 
 			// TODO: only lint changed messages and update arrays selectively
 			lintMessages({
-				config: config() as InlangConfig,
+				config: configValue,
 				messages: msgs,
 				query,
 				rules: resolvedModules()!.data.lintRules.data,

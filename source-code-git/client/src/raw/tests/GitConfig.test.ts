@@ -226,7 +226,7 @@ describe("GitConfig", () => {
 			expect(d).toEqual(true)
 			expect(e).toEqual(false)
 			expect(f).toEqual(true)
-			expect(g).toEqual(2)
+			expect(g).toBe(2)
 		})
 
 		it("special boolean", async () => {
@@ -589,13 +589,13 @@ describe("GitConfig", () => {
 		it("simple", async () => {
 			const config = GitConfig.from(`[one]
       keyaaa = valaaa
-          
+
       [remote "foo"]
       url = https://foo.com/project.git
 
       [remote "bar"]
       url = https://bar.com/project.git
-            
+
       [two]
       keyaaa = valaaa`)
 			const subsections = await config.getSubsections("remote")
@@ -617,17 +617,17 @@ describe("GitConfig", () => {
 		it("subsection", async () => {
 			const config = GitConfig.from(`[one]
       keyaaa = valaaa
-      
+
       [remote "foo"]
       url = https://foo.com/project.git
       ; this is a comment
-      
+
       [remote "bar"]
       url = https://bar.com/project.git`)
 			await config.deleteSection("remote", "foo")
 			expect(config.toString()).toEqual(`[one]
       keyaaa = valaaa
-      
+
       [remote "bar"]
       url = https://bar.com/project.git`)
 		})

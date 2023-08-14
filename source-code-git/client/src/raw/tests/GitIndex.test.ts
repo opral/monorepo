@@ -103,7 +103,7 @@ describe("GitIndex", () => {
 
 		// Test
 		await GitIndexManager.acquire({ fs, gitdir, cache: {} }, async function (index) {
-			expect(index.unmergedPaths.length).toEqual(2)
+			expect(index.unmergedPaths.length).toBe(2)
 			expect(index.entriesFlat.length).toBe(7)
 			expect(index.unmergedPaths).toContain("a")
 			expect(index.unmergedPaths).toContain("b")

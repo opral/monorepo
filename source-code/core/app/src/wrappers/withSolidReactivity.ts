@@ -1,4 +1,4 @@
-import type { ModuleError, ModuleImportError, ResolveModulesFunction } from "@inlang/module"
+import type { ResolveModulesFunction } from "@inlang/module"
 import type { InlangInstance } from "../api.js"
 
 import { observable, type from as solidFrom } from "../solid.js"
@@ -10,8 +10,8 @@ export const withSolidReactivity = (
 		from: typeof solidFrom
 	},
 ): SolidInlangInstance => {
-	const convert = <T>(signal: () => T) => {
-		return args.from(observable(signal))
+	const convert = <T>(signal: () => T): () => T => {
+		return args.from(observable(signal)) as () => T
 	}
 
 	return {
@@ -27,7 +27,8 @@ export const withSolidReactivity = (
 			plugins: convert(instance.meta.plugins),
 		},
 		setConfig: instance.setConfig,
-	} as any
+		query: instance.query,
+	} satisfies SolidInlangInstance
 }
 
 export type SolidInlangInstance = {

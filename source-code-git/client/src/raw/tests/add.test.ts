@@ -18,13 +18,13 @@ describe("add", () => {
 		// Test
 		await init({ fs, dir })
 		await add({ fs, dir, filepath: "a.txt" })
-		expect((await listFiles({ fs, dir })).length).toEqual(1)
+		expect((await listFiles({ fs, dir })).length).toBe(1)
 		await add({ fs, dir, filepath: "a.txt" })
-		expect((await listFiles({ fs, dir })).length).toEqual(1)
+		expect((await listFiles({ fs, dir })).length).toBe(1)
 		await add({ fs, dir, filepath: "a-copy.txt" })
-		expect((await listFiles({ fs, dir })).length).toEqual(2)
+		expect((await listFiles({ fs, dir })).length).toBe(2)
 		await add({ fs, dir, filepath: "b.txt" })
-		expect((await listFiles({ fs, dir })).length).toEqual(3)
+		expect((await listFiles({ fs, dir })).length).toBe(3)
 	})
 	it("multiple files", async () => {
 		// Setup
@@ -32,7 +32,7 @@ describe("add", () => {
 		// Test
 		await init({ fs, dir })
 		await add({ fs, dir, filepath: ["a.txt", "a-copy.txt", "b.txt"] })
-		expect((await listFiles({ fs, dir })).length).toEqual(3)
+		expect((await listFiles({ fs, dir })).length).toBe(3)
 	})
 	it("multiple files with one failure (normal error)", async () => {
 		// Setup
@@ -67,7 +67,7 @@ describe("add", () => {
 		}
 		expect(err.caller).toEqual("git.add")
 		expect(err.name).toEqual("MultipleGitError")
-		expect(err.errors.length).toEqual(2)
+		expect(err.errors.length).toBe(2)
 		err.errors.forEach((e) => {
 			expect(e.name).toEqual("NotFoundError")
 		})
@@ -98,7 +98,7 @@ describe("add", () => {
 			filepath: ["a.txt", "i.txt"],
 			force: true,
 		})
-		expect((await listFiles({ fs, dir })).length).toEqual(2)
+		expect((await listFiles({ fs, dir })).length).toBe(2)
 		expect(await listFiles({ fs, dir })).toEqual(["a.txt", "i.txt"])
 	})
 	it("symlink", async () => {
@@ -111,10 +111,10 @@ describe("add", () => {
 		// Test
 		await init({ fs, dir })
 		await add({ fs, dir, filepath: "c/e.txt" })
-		expect((await listFiles({ fs, dir })).length).toEqual(1)
+		expect((await listFiles({ fs, dir })).length).toBe(1)
 		if (!symlinkCreated) return
 		await add({ fs, dir, filepath: "e-link.txt" })
-		expect((await listFiles({ fs, dir })).length).toEqual(2)
+		expect((await listFiles({ fs, dir })).length).toBe(2)
 		const walkResult = await walk({
 			fs,
 			dir,
@@ -122,7 +122,7 @@ describe("add", () => {
 			map: async (filepath, [stage]) =>
 				filepath === "e-link.txt" && stage ? stage.oid() : undefined,
 		})
-		expect(walkResult.length).toEqual(1)
+		expect(walkResult.length).toBe(1)
 		const oid = walkResult[0]
 		const { blob: symlinkTarget } = await readBlob({ fs, dir, oid })
 		let symlinkTargetStr = Buffer.from(symlinkTarget).toString("utf8")
@@ -137,7 +137,7 @@ describe("add", () => {
 		// Test
 		await init({ fs, dir })
 		await add({ fs, dir, filepath: "i.txt" })
-		expect((await listFiles({ fs, dir })).length).toEqual(0)
+		expect((await listFiles({ fs, dir })).length).toBe(0)
 	})
 	it("ignored file but with force=true", async () => {
 		// Setup
@@ -146,7 +146,7 @@ describe("add", () => {
 		// Test
 		await init({ fs, dir })
 		await add({ fs, dir, filepath: "i.txt", force: true })
-		expect((await listFiles({ fs, dir })).length).toEqual(1)
+		expect((await listFiles({ fs, dir })).length).toBe(1)
 	})
 	it("non-existant file", async () => {
 		// Setup
@@ -166,9 +166,9 @@ describe("add", () => {
 		const { fs, dir } = await makeFixture("test-add")
 		// Test
 		await init({ fs, dir })
-		expect((await listFiles({ fs, dir })).length).toEqual(0)
+		expect((await listFiles({ fs, dir })).length).toBe(0)
 		await add({ fs, dir, filepath: "c" })
-		expect((await listFiles({ fs, dir })).length).toEqual(4)
+		expect((await listFiles({ fs, dir })).length).toBe(4)
 	})
 	it("folder with .gitignore", async () => {
 		// Setup
@@ -176,9 +176,9 @@ describe("add", () => {
 		await writeGitIgnore(fs, dir)
 		// Test
 		await init({ fs, dir })
-		expect((await listFiles({ fs, dir })).length).toEqual(0)
+		expect((await listFiles({ fs, dir })).length).toBe(0)
 		await add({ fs, dir, filepath: "c" })
-		expect((await listFiles({ fs, dir })).length).toEqual(3)
+		expect((await listFiles({ fs, dir })).length).toBe(3)
 	})
 	it("folder with .gitignore and force", async () => {
 		// Setup
@@ -186,9 +186,9 @@ describe("add", () => {
 		await writeGitIgnore(fs, dir)
 		// Test
 		await init({ fs, dir })
-		expect((await listFiles({ fs, dir })).length).toEqual(0)
+		expect((await listFiles({ fs, dir })).length).toBe(0)
 		await add({ fs, dir, filepath: "c", force: true })
-		expect((await listFiles({ fs, dir })).length).toEqual(4)
+		expect((await listFiles({ fs, dir })).length).toBe(4)
 	})
 	it("git add .", async () => {
 		// Setup
@@ -196,7 +196,7 @@ describe("add", () => {
 		await writeGitIgnore(fs, dir)
 		// Test
 		await init({ fs, dir })
-		expect((await listFiles({ fs, dir })).length).toEqual(0)
+		expect((await listFiles({ fs, dir })).length).toBe(0)
 		await add({ fs, dir, filepath: "." })
 		expect((await listFiles({ fs, dir })).length).toEqual(7)
 	})

@@ -2,252 +2,13 @@ import { describe, it, expect } from "vitest"
 import { createInlang } from "../createInlang.js"
 import { createMockNodeishFs } from "@inlang/plugin/test"
 import type { InlangConfig } from "@inlang/config"
-import type { Message, Plugin } from "@inlang/plugin"
+import type { Message, Plugin, Text } from "@inlang/plugin"
 import type { ImportFunction, InlangModule } from "@inlang/module"
-import { createRoot, createEffect, from } from "../solid.js"
+import { createEffect, from } from "../solid.js"
 import { withSolidReactivity } from "./withSolidReactivity.js"
 import type { LintRule } from "@inlang/lint"
 
-describe("config", () => {
-	it("should react to changes to config", async () => {
-		const fs = await createMockNodeishFs()
-		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
-		await createRoot(async () => {
-			const inlang = withSolidReactivity(
-				await createInlang({
-					configPath: "./inlang.config.json",
-					nodeishFs: fs,
-					_import: $import,
-				}),
-				{ from },
-			)
-			let counter = 0
-
-			createEffect(() => {
-				// 2 times because effect creation + set
-				inlang.config()
-				counter += 1
-			})
-
-			inlang.setConfig({ ...inlang.config(), languageTags: ["en", "de"] })
-			expect(counter).toBe(2)
-		})
-	})
-})
-
-describe("meta", () => {
-	it("should react to changes to config", async () => {
-		await createRoot(async () => {
-			const fs = await createMockNodeishFs()
-			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
-			const inlang = withSolidReactivity(
-				await createInlang({
-					configPath: "./inlang.config.json",
-					nodeishFs: fs,
-					_import: $import,
-				}),
-				{ from },
-			)
-			let counterPlugins = 0
-			let counterLint = 0
-
-			createEffect(() => {
-				// 2 times because effect creation + set
-				inlang.meta.plugins()
-				counterPlugins += 1
-			})
-
-			createEffect(() => {
-				// 2 times because effect creation + set
-				inlang.meta.lintRules()
-				counterLint += 1
-			})
-
-			inlang.setConfig({ ...inlang.config(), languageTags: ["en", "fr"] })
-			setTimeout(() => {
-				expect(counterPlugins).toBe(2)
-				expect(counterLint).toBe(2)
-			}, 100)
-		})
-	})
-})
-
-describe("lintRules meta", () => {
-	it.todo("should react to changes to config", async () => {
-		const fs = await createMockNodeishFs()
-		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
-		await createRoot(async () => {
-			const inlang = withSolidReactivity(
-				await createInlang({
-					configPath: "./inlang.config.json",
-					nodeishFs: fs,
-					_import: $import,
-				}),
-				{ from },
-			)
-			let counter = 0
-
-			createEffect(() => {
-				// 2 times because effect creation + set
-				inlang.meta.lintRules()
-				counter += 1
-			})
-
-			inlang.setConfig({ ...inlang.config(), modules: ["/test"] })
-			expect(counter).toBe(2)
-			expect(inlang.meta.lintRules()[0]?.id).toBe("mock.lint-rule")
-		})
-	})
-})
-
-describe("plugins", () => {
-	it("should react to changes to config", async () => {
-		const fs = await createMockNodeishFs()
-		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
-		await createRoot(async () => {
-			const inlang = withSolidReactivity(
-				await createInlang({
-					configPath: "./inlang.config.json",
-					nodeishFs: fs,
-					_import: $import,
-				}),
-				{ from },
-			)
-			let counter = 0
-
-			createEffect(() => {
-				// 2 times because effect creation + set
-				inlang.meta.lintRules()
-				counter += 1
-			})
-
-			inlang.setConfig({ ...inlang.config(), languageTags: ["en", "de"] })
-			setTimeout(() => {
-				expect(counter).toBe(2)
-				expect(inlang.meta.lintRules()[0]?.id).toBe("inlang.plugin.i18next")
-			}, 100)
-		})
-	})
-})
-
-describe("messages", () => {
-	it("should react to changes to config", async () => {
-		await createRoot(async () => {
-			const fs = await createMockNodeishFs()
-			const mockConfig: InlangConfig = {
-				sourceLanguageTag: "en",
-				languageTags: ["en", "de"],
-				modules: ["./plugin-a.js"],
-				settings: {},
-			}
-			const _mockPlugin: Plugin = {
-				meta: {
-					id: "mock.plugin.name",
-					displayName: {
-						en: "hello",
-					},
-					description: {
-						en: "wo",
-					},
-					keywords: [],
-				},
-				loadMessages: ({ languageTags }) => {
-					if (languageTags.length === 0) {
-						return []
-					} else {
-						return exampleMessages
-					}
-				},
-				saveMessages: () => undefined as any,
-			}
-
-			const mockImport: ImportFunction = async () =>
-			({
-				default: {
-					plugins: [_mockPlugin],
-					lintRules: [mockLintRule],
-				},
-			} satisfies InlangModule)
-
-			await fs.writeFile("./inlang.config.json", JSON.stringify(mockConfig))
-
-			const inlang = withSolidReactivity(
-				await createInlang({
-					configPath: "./inlang.config.json",
-					nodeishFs: fs,
-					_import: $import,
-				}),
-				{ from },
-			)
-			let counter = 0
-
-			createEffect(() => {
-				// 2 times because effect creation + set
-				inlang.query.messages.getAll()
-				counter += 1
-			})
-
-			expect(inlang.query.messages.getAll().length).toEqual(2)
-
-			inlang.setConfig({ ...inlang.config(), languageTags: [] })
-
-			setTimeout(() => {
-				expect(counter).toBe(2)
-				expect(inlang.query.messages.getAll().length).toEqual(0)
-			}, 100)
-		})
-	})
-	it("should react to change messages", async () => {
-		await createRoot(async () => {
-			const fs = await createMockNodeishFs()
-			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
-			const inlang = withSolidReactivity(
-				await createInlang({
-					configPath: "./inlang.config.json",
-					nodeishFs: fs,
-					_import: $import,
-				}),
-				{ from },
-			)
-			let counter = 0
-
-			createEffect(() => {
-				// 2 times because effect creation + set
-				inlang.query.messages.getAll()
-				counter += 1
-			})
-			inlang.query.messages.update({
-				where: { id: "a" },
-				data: {
-					...exampleMessages[0],
-					body: {
-						en: [
-							{
-								match: {},
-								pattern: [
-									{
-										type: "Text",
-										value: "test2",
-									},
-								],
-							},
-						],
-					},
-				},
-			})
-			setTimeout(() => {
-				expect(counter).toBe(2)
-				expect(inlang.query.messages.getAll().length).toEqual(2)
-			}, 200)
-		})
-	})
-})
-
-describe("lint", () => {
-	it.todo("should react to changes to config")
-	it.todo("should react to changes to modules")
-	it.todo("should react to changes to mesages")
-})
+// ------------------------------------------------------------------------------------------------
 
 const config: InlangConfig = {
 	sourceLanguageTag: "en",
@@ -272,14 +33,10 @@ const mockPlugin: Plugin = {
 		keywords: [],
 	},
 	loadMessages: () => exampleMessages,
-	saveMessages: () => undefined as any,
-	addAppSpecificApi: () => ({
-		"inlang.app.ide-extension": {
-			messageReferenceMatcher: (text: string) => text as any,
-		},
-	}),
+	saveMessages: () => undefined,
 }
 
+// TODO: use `createMessage` utility
 const exampleMessages: Message[] = [
 	{
 		id: "a",
@@ -335,3 +92,234 @@ const $import: ImportFunction = async () =>
 		lintRules: [mockLintRule],
 	},
 } satisfies InlangModule)
+
+// ------------------------------------------------------------------------------------------------
+
+describe("config", () => {
+	it("should react to changes to config", async () => {
+		const fs = await createMockNodeishFs()
+		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+		const inlang = withSolidReactivity(
+			await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: $import,
+			}),
+			{ from },
+		)
+
+		let counter = 0
+		createEffect(() => {
+			inlang.config()
+			counter += 1
+		})
+
+		const newConfig = { ...inlang.config(), languageTags: ["en", "de"] }
+		inlang.setConfig(newConfig)
+
+		// TODO: how can we await `setConfig` correctly
+		await new Promise((resolve) => setTimeout(resolve, 0))
+
+		expect(counter).toBe(2) // 2 times because effect creation + set
+		expect(inlang.config()).toStrictEqual(newConfig)
+	})
+})
+
+describe("meta", () => {
+	it("should react to changes to config", async () => {
+		const fs = await createMockNodeishFs()
+		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+		const inlang = withSolidReactivity(
+			await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: $import,
+			}),
+			{ from },
+		)
+		let counterPlugins = 0
+		let counterLint = 0
+
+		createEffect(() => {
+			inlang.meta.plugins()
+			counterPlugins += 1
+		})
+
+		createEffect(() => {
+			inlang.meta.lintRules()
+			counterLint += 1
+		})
+
+		inlang.setConfig({ ...inlang.config(), languageTags: ["en", "fr"] })
+
+		// TODO: how can we await `setConfig` correctly
+		await new Promise((resolve) => setTimeout(resolve, 0))
+
+		expect(counterPlugins).toBe(2) // 2 times because effect creation + set
+		expect(counterLint).toBe(2) // 2 times because effect creation + set
+	})
+})
+
+describe("messages", () => {
+	it("should react to changes to config", async () => {
+		const fs = await createMockNodeishFs()
+		const mockConfig: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "de"],
+			modules: ["./plugin-a.js"],
+			settings: {},
+		}
+		const mockPlugin: Plugin = {
+			meta: {
+				id: "mock.plugin.name",
+				displayName: {
+					en: "hello",
+				},
+				description: {
+					en: "wo",
+				},
+				keywords: [],
+			},
+			loadMessages: ({ languageTags }) => languageTags.length ? exampleMessages : [],
+			saveMessages: () => undefined,
+		}
+
+		const mockImport: ImportFunction = async () => ({ default: { plugins: [mockPlugin] } } satisfies InlangModule)
+
+		await fs.writeFile("./inlang.config.json", JSON.stringify(mockConfig))
+		const inlang = withSolidReactivity(
+			await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: mockImport,
+			}),
+			{ from },
+		)
+
+		let counter = 0
+		createEffect(() => {
+			inlang.query.messages.getAll()
+			counter += 1
+		})
+
+		expect(inlang.query.messages.getAll().length).toBe(2)
+
+		inlang.setConfig({ ...inlang.config(), languageTags: [] })
+
+		// TODO: how can we await `setConfig` correctly
+		await new Promise((resolve) => setTimeout(resolve, 0))
+
+		expect(counter).toBe(2) // 2 times because effect creation + set
+		expect(inlang.query.messages.getAll().length).toBe(0)
+	})
+
+	it("should react to changes to messages", async () => {
+		const fs = await createMockNodeishFs()
+		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+		const inlang = withSolidReactivity(
+			await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: $import,
+			}),
+			{ from },
+		)
+
+		let counter = 0
+		createEffect(() => {
+			inlang.query.messages.getAll()
+			counter += 1
+		})
+
+		const messagesBefore = inlang.query.messages.getAll()
+		expect(messagesBefore.length).toBe(2)
+		expect((messagesBefore[0]!.body.en![0]!.pattern[0]! as Text).value).toBe('test')
+
+		inlang.query.messages.update({
+			where: { id: "a" },
+			// TODO: use `createMessage` utility
+			data: {
+				...exampleMessages[0],
+				body: {
+					en: [
+						{
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "test2",
+								},
+							],
+						},
+					],
+				},
+			},
+		})
+
+		// TODO: how can we await `query-messages.update` correctly
+		await new Promise((resolve) => setTimeout(resolve, 0))
+
+		expect(counter).toBe(2) // 2 times because effect creation + set
+		const messagesAfter = inlang.query.messages.getAll()
+		expect(messagesAfter.length).toBe(2)
+		expect((messagesAfter[0]!.body.en![0]!.pattern[0]! as Text).value).toBe('test2')
+	})
+})
+
+describe("lint", () => {
+	it("should not react to changes to config if not initialized", async () => {
+		const fs = await createMockNodeishFs()
+		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+		const inlang = withSolidReactivity(
+			await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: $import,
+			}),
+			{ from },
+		)
+
+		let counter = 0
+		createEffect(() => {
+			inlang.lint.reports()
+			counter += 1
+		})
+
+		const newConfig = { ...inlang.config(), languageTags: ["en", "de"] }
+		inlang.setConfig(newConfig)
+
+		expect(counter).toBe(1)
+		expect(inlang.lint.reports()).toEqual([])
+	})
+
+	it("should react to changes to config", async () => {
+		const fs = await createMockNodeishFs()
+		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+		const inlang = withSolidReactivity(
+			await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: $import,
+			}),
+			{ from },
+		)
+		await inlang.lint.init()
+
+		let counter = 0
+		createEffect(() => {
+			inlang.lint.reports()
+			counter += 1
+		})
+
+		const newConfig = { ...inlang.config(), languageTags: ["en", "de"] }
+		inlang.setConfig(newConfig)
+
+		// TODO: how can we await `setConfig` correctly
+		await new Promise((resolve) => setTimeout(resolve, 0))
+
+		expect(counter).toBe(2) // 2 times because effect creation + set
+	})
+
+	it.todo("should react to changes to modules")
+	it.todo("should react to changes to mesages")
+})
