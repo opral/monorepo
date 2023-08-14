@@ -22,8 +22,6 @@ import { createNodeishMemoryFs } from "@inlang-git/fs"
 import { http, raw } from "@inlang-git/client/raw"
 import { publicEnv } from "@inlang/env-variables"
 import {
-	//create$import,
-	createQuery,
 	LanguageTag,
 	LintRule,
 	Result,
@@ -34,54 +32,6 @@ import {
 import type { InlangModule } from "@inlang/module"
 import pluginJson from "../../../../../../../plugins/json/dist/index.js"
 import pluginLint from "../../../../../../../plugins/standard-lint-rules/dist/index.js"
-
-const mockData: Message[] = [
-	{
-		id: "test",
-		selectors: [],
-		body: {
-			en: [
-				{
-					match: {},
-					pattern: [
-						{
-							type: "Text",
-							value: "Hello World",
-						},
-					],
-				},
-			],
-			de: [
-				{
-					match: {},
-					pattern: [
-						{
-							type: "Text",
-							value: "Hallo Welt",
-						},
-					],
-				},
-			],
-		},
-	},
-	{
-		id: "test2",
-		selectors: [],
-		body: {
-			en: [
-				{
-					match: {},
-					pattern: [
-						{
-							type: "Text",
-							value: "test2",
-						},
-					],
-				},
-			],
-		},
-	},
-]
 
 type EditorStateSchema = {
 	/**
@@ -271,7 +221,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	})
 
 	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["meta"]["id"][]>(
-		params.getAll("lint") as `${string}.${string}`[],
+		params.getAll("lint") as LintRule["meta"]["id"][],
 	)
 	createEffect(() => {
 		setSearchParams({ key: "lint", value: filteredLintRules() })
@@ -370,7 +320,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				_import: async () =>
 				({
 					default: {
+						// @ts-ignore
 						plugins: [...pluginJson.plugins],
+						// @ts-ignore
 						lintRules: [...pluginLint.lintRules],
 					},
 				} satisfies InlangModule)
@@ -407,9 +359,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			setTourStep("fork-repository")
 		} else if (tourStep() === "fork-repository" && inlang() && filteredLanguageTags()) {
 			if (filteredLanguageTags().length > 0) {
-				setTourStep("default-languages")
-			} else {
-				setTourStep("default-languages")
 				setTimeout(() => {
 					const element = document.getElementById("missingMessage-summary")
 					element !== null ? setTourStep("missing-message-rule") : setTourStep("textfield")

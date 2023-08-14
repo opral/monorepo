@@ -16,7 +16,7 @@ import { Meta, Title } from "@solidjs/meta"
 import { EditorStateProvider, useEditorState } from "./State.jsx"
 import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
 import { rpc } from "@inlang/rpc"
-import { messageCount } from "./components/Listheader.jsx"
+import { ListHeader, messageCount } from "./components/Listheader.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import type { RecentProjectType } from "@src/services/local-storage/src/schema.js"
@@ -178,34 +178,34 @@ function TheActualPage() {
 							).
 							<br />
 							<br />
-							We are working on increasing the performance. Progress can be tracked in{" "}
-							<a
-								href="https://github.com/orgs/inlang/projects/9"
-								target="_blank"
-								class="link link-primary"
-							>
-								project #9
-							</a>
-							.
-						</p>
-					</div>
-				</Match>
-				<Match when={!doesInlangConfigExist()}>
-					<NoInlangConfigFoundCard />
-				</Match>
-				<Match when={doesInlangConfigExist()}>
-					<div>
-						{/* <ListHeader messages={messages()} /> */}
-						<TourHintWrapper
-							currentId="textfield"
-							position="bottom-left"
-							offset={{ x: 110, y: 144 }}
-							isVisible={tourStep() === "textfield"}
-						>
-							<For each={messages()}>
-								{(message) => {
-									return <Message message={message} />
-								}}
+										We are working on increasing the performance. Progress can be tracked in{" "}
+										<a
+											href="https://github.com/orgs/inlang/projects/9"
+											target="_blank"
+											class="link link-primary"
+										>
+											project #9
+										</a>
+										.
+									</p>
+								</div>
+							</Match>
+							<Match when={!doesInlangConfigExist()}>
+								<NoInlangConfigFoundCard />
+							</Match>
+							<Match when={doesInlangConfigExist() && messages() !== undefined}>
+								<div>
+									{/* <ListHeader messages={messages()!} /> */}
+									<TourHintWrapper
+										currentId="textfield"
+										position="bottom-left"
+										offset={{ x: 110, y: 144 }}
+										isVisible={tourStep() === "textfield"}
+									>
+										<For each={messages()!}>
+											{(message) => {
+												return <Message message={message} />
+											}}
 							</For>
 						</TourHintWrapper>
 						<div

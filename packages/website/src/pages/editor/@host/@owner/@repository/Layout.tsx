@@ -8,7 +8,6 @@ import IconClose from "~icons/material-symbols/close"
 import IconTranslate from "~icons/material-symbols/translate"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { showToast } from "@src/components/Toast.jsx"
-import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
 import type { LanguageTag } from "@inlang/app"
 
 interface Filter {
@@ -30,16 +29,7 @@ export function Layout(props: { children: JSXElement }) {
 		userIsCollaborator,
 		languageTags,
 		setLanguageTags,
-		tourStep,
 	} = useEditorState()
-
-	// const onlyLanguagesTheUserSpeaks = () => {
-	// 	const languages = inlangConfig()?.languages.filter(
-	// 		(language) =>
-	// 			navigator.languages.includes(language) || language === inlangConfig()!.referenceLanguage,
-	// 	)
-	// 	return languages ?? []
-	// }
 
 	const removeFilter = (filterName: string) => {
 		setSelectedFilters(selectedFilters().filter((filter: Filter) => filter.name !== filterName))
@@ -104,9 +94,6 @@ export function Layout(props: { children: JSXElement }) {
 		) {
 			if (filteredLanguageTags().length > 0) {
 				addFilter("Language")
-				// } else if (onlyLanguagesTheUserSpeaks().length > 1) {
-				// 	setFilteredLanguages(onlyLanguagesTheUserSpeaks())
-				// 	addFilter("Language")
 			} else {
 				setFilteredLanguageTags(inlang()!.config().languageTags)
 			}
@@ -164,14 +151,7 @@ export function Layout(props: { children: JSXElement }) {
 											(filter.name !== "Linting" || inlang()?.lint?.reports())
 										}
 									>
-										<TourHintWrapper
-											currentId="default-languages"
-											position="bottom-left"
-											offset={{ x: 0, y: 40 }}
-											isVisible={filter.name === "Language" && tourStep() === "default-languages"}
-										>
-											{filter.component}
-										</TourHintWrapper>
+										{filter.component}
 									</Show>
 								)}
 							</For>
@@ -252,7 +232,6 @@ export function Layout(props: { children: JSXElement }) {
 						</sl-button>
 					</div>
 				</div>
-				{/* <hr class="h-px w-full bg-outline-variant my-2"> </hr> */}
 				{props.children}
 			</div>
 			<sl-dialog
