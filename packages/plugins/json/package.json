@@ -14,17 +14,15 @@
 	"scripts": {
 		"dev": "DEV=true node ./build.js",
 		"build": "node ./build.js && size-limit",
-		"--- Pretest is required to build the plugin before testing. ---": "",
+		"--- TEST -----------------------------------------------------------": "",
 		"pretest": "node ./build.js",
 		"test": "vitest run --coverage",
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
-	"dependencies": {
-		"@inlang/plugin": "*"
-	},
 	"devDependencies": {
-		"@size-limit/preset-app": "^8.2.4",
+		"@inlang/plugin": "*",
+		"@size-limit/preset-small-lib": "^8.2.4",
 		"@types/flat": "^5.0.2",
 		"@types/lodash.merge": "^4.6.7",
 		"@types/parsimmon": "^1.10.6",
