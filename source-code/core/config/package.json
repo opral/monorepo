@@ -17,7 +17,7 @@
 		"dev": "tsc -p ./tsconfig.build.json --watch",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run",
-		"test:watch": "",
+		"test:watch": "vitest watch --passWithNoTests --coverage",
 		"---- LINT ----------------------------------------------------------": "",
 		"lint": "cd ../.. && npm run lint:base ./source-code/core",
 		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/core",

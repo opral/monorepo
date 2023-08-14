@@ -1,6 +1,6 @@
 import type { Message, MessageQueryApi } from "@inlang/messages"
 import { ReactiveMap } from "@solid-primitives/map"
-import { createEffect, createSignal } from "./solid.js"
+import { createEffect } from "./solid.js"
 
 /**
  * Creates a query API for messages.
@@ -9,37 +9,41 @@ import { createEffect, createSignal } from "./solid.js"
  */
 export function createReactiveQuery(messages: () => Array<Message>): MessageQueryApi {
 	//let index: ReactiveMap<string, Message>
-	const [index, setIndex] = createSignal<ReactiveMap<string, Message>>(new ReactiveMap([]))
+	const index = new ReactiveMap<string, Message>([])
 
 	createEffect(() => {
-		setIndex(new ReactiveMap(messages().map((message) => [message.id, message])))
+		// TODO: update index
+		// q: replace all entries?
+		// q: just add new entries?
+		// q: remove old entries?
+		// setIndex(new ReactiveMap(messages().map((message) => [message.id, message])))
 	})
 
 	return {
 		create: ({ data }) => {
-			index().set(data.id, data)
+			index.set(data.id, data)
 		},
 		get: ({ where }) => {
-			return structuredClone(index().get(where.id))
+			return structuredClone(index.get(where.id))
 		},
 		getAll: () => {
-			return structuredClone([...index().values()])
+			return structuredClone([...index.values()])
 		},
 		update: ({ where, data }) => {
-			const message = index().get(where.id)
+			const message = index.get(where.id)
 			if (message === undefined) return
-			index()!.set(where.id, { ...message, ...data })
+			index!.set(where.id, { ...message, ...data })
 		},
 		upsert: ({ where, data }) => {
-			const message = index().get(where.id)
+			const message = index.get(where.id)
 			if (message === undefined) {
-				return index().set(where.id, data)
+				index.set(where.id, data)
+			} else {
+				index.set(where.id, { ...message, ...data })
 			}
-			index().set(where.id, { ...message, ...data })
-			return
 		},
 		delete: ({ where }) => {
-			index().delete(where.id)
+			index.delete(where.id)
 		},
 	}
 }
