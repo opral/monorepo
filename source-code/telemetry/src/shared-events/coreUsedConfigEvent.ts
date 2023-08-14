@@ -3,6 +3,9 @@ import type { InlangConfig } from "@inlang/app";
 
 
 /**
+ * 
+ * @deprecated DON'T USE THIS - CONTACT @samuelstroschein
+ * 
  * Captures the config after set up.
  *
  * Config information provides us insights into questions like:
