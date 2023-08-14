@@ -96,5 +96,4 @@ function assertSdkWasSetUp(appSpecificApi: InlangInstance["appSpecificApi"]) {
 
 const createDemoResourcesIfNoMessagesExistYet = async (appInstance: InlangInstance) => {
 	appInstance
-
-}}
+}

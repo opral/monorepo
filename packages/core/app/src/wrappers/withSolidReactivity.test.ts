@@ -10,7 +10,7 @@ import type { LintRule } from "@inlang/lint"
 
 describe("config", () => {
 	it("should react to changes to config", async () => {
-		const fs = await createMockNodeishFs({})
+		const fs = await createMockNodeishFs()
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 		await createRoot(async () => {
 			const inlang = withSolidReactivity(
@@ -38,7 +38,7 @@ describe("config", () => {
 describe("meta", () => {
 	it("should react to changes to config", async () => {
 		await createRoot(async () => {
-			const fs = await createMockNodeishFs({})
+			const fs = await createMockNodeishFs()
 			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 			const inlang = withSolidReactivity(
 				await createInlang({
@@ -74,7 +74,7 @@ describe("meta", () => {
 
 describe("lintRules meta", () => {
 	it.todo("should react to changes to config", async () => {
-		const fs = await createMockNodeishFs({})
+		const fs = await createMockNodeishFs()
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 		await createRoot(async () => {
 			const inlang = withSolidReactivity(
@@ -102,7 +102,7 @@ describe("lintRules meta", () => {
 
 describe("plugins", () => {
 	it("should react to changes to config", async () => {
-		const fs = await createMockNodeishFs({})
+		const fs = await createMockNodeishFs()
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 		await createRoot(async () => {
 			const inlang = withSolidReactivity(
@@ -133,7 +133,7 @@ describe("plugins", () => {
 describe("messages", () => {
 	it("should react to changes to config", async () => {
 		await createRoot(async () => {
-			const fs = await createMockNodeishFs({})
+			const fs = await createMockNodeishFs()
 			const mockConfig: InlangConfig = {
 				sourceLanguageTag: "en",
 				languageTags: ["en", "de"],
@@ -199,7 +199,7 @@ describe("messages", () => {
 	})
 	it("should react to change messages", async () => {
 		await createRoot(async () => {
-			const fs = await createMockNodeishFs({})
+			const fs = await createMockNodeishFs()
 			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 			const inlang = withSolidReactivity(
 				await createInlang({

@@ -42,14 +42,11 @@ const ExternalSettings = Type.Record(
 		pattern: "^(?!system\\.)([a-z]+)\\.(app|plugin|lintRule)\\.([a-z][a-zA-Z0-9]*)$",
 		description:
 			"The key must be conform to `{namespace:string}.{type:app|plugin|lintRule}.{name:string}`. The namespace `system` namespace is reserved and can't be used.",
-		examples: ["example.pluginSqlite", "example.lintRuleMissingMessage"],
+		examples: ["example.plugin.sqlite", "example.lintRule.missingMessage"],
 	}) as unknown as TTemplateLiteral<
 		[TLiteral<`${string}.${"app" | "plugin" | "lintRule"}.${string}`>]
 	>,
 	JSONObject,
-	{
-		additionalProperties: false,
-	},
 )
 
 /**
@@ -77,10 +74,10 @@ export const InlangConfig = Type.Object(
 		/**
 		 * Settings are key-value pairs.
 		 *
-		 * The `key` must be conform to the `{namespace}.{key}` pattern.
+		 * The `key` must be conform to the `{namespace}.{type}.{key}` pattern.
 		 * The `value` must be a JSON.
 		 */
-		settings: Type.Intersect([SystemSettings, ExternalSettings]),
+		settings: Type.Optional(Type.Intersect([SystemSettings, ExternalSettings])),
 	},
 	// see https://github.com/sinclairzx81/typebox/issues/527
 	{ additionalProperties: false },
