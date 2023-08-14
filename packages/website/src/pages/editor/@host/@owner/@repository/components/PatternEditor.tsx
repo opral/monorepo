@@ -12,14 +12,13 @@ import { telemetryBrowser } from "@inlang/telemetry"
 import { getTextValue, setTipTapMessage } from "../helper/parse.js"
 import { getEditorConfig } from "../helper/editorSetup.js"
 import { FloatingMenu } from "./FloatingMenu.jsx"
-import { handleMissingMessage } from "./../helper/handleMissingMessage.js"
 import type {
 	Text,
 	Message,
 	VariableReference,
 	LintReport,
 	LanguageTag,
-	Variant,
+	Variant
 } from "@inlang/app"
 
 /**
@@ -39,6 +38,7 @@ export function PatternEditor(props: {
 		userIsCollaborator,
 		routeParams,
 		filteredLanguageTags,
+		inlang
 	} = useEditorState()
 
 	const [variableReferences, setVariableReferences] = createSignal<VariableReference[]>([])
@@ -142,33 +142,33 @@ export function PatternEditor(props: {
 	// 	}
 	// );
 
-	// const hasChanges = () => {
-	// 	const _updatedText =
-	// 		JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
-	// 	let compare_elements
-	// 	if (
-	// 		localChanges().some(
-	// 			(change) =>
-	// 				change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
-	// 		)
-	// 	) {
-	// 		compare_elements = localChanges().find(
-	// 			(change) =>
-	// 				change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
-	// 		)?.newCopy.pattern.elements
-	// 	} else {
-	// 		compare_elements = props.message?.pattern.elements
-	// 	}
-	// 	if (_updatedText) {
-	// 		if (JSON.stringify(_updatedText) !== JSON.stringify(compare_elements)) {
-	// 			return _updatedText
-	// 		} else {
-	// 			return ""
-	// 		}
-	// 	} else {
-	// 		return false
-	// 	}
-	// }
+	const hasChanges = () => {
+		const _updatedText =
+			JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
+		let compare_elements
+		// if (
+		// 	localChanges().some(
+		// 		(change) =>
+		// 			change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
+		// 	)
+		// ) {
+		// 	compare_elements = localChanges().find(
+		// 		(change) =>
+		// 			change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
+		// 	)?.newCopy.pattern.elements
+		// } else {
+			compare_elements = props.variant?.pattern
+		// }
+		if (_updatedText) {
+			if (JSON.stringify(_updatedText) !== JSON.stringify(compare_elements)) {
+				return _updatedText
+			} else {
+				return ""
+			}
+		} else {
+			return false
+		}
+	}
 
 	/**
 	 * Saves the changes of the message.
@@ -224,97 +224,90 @@ export function PatternEditor(props: {
 
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
 
-	// const handleMachineTranslate = async () => {
-	// 	if (props.sourceMessage === undefined) {
-	// 		return showToast({
-	// 			variant: "info",
-	// 			title: "Can't translate if the reference message does not exist.",
-	// 		})
-	// 	}
-	// 	const textArr: Array<string> = []
-	// 	props.sourceMessage.pattern.elements.map((element) => {
-	// 		if (element.type === "Text") {
-	// 			textArr.push(element.value)
-	// 		} else if (element.type === "Placeholder") {
-	// 			textArr.push(element.body.name)
-	// 		}
-	// 	})
-	// 	const text = textArr.join("")
-	// 	//const text = props.referenceMessage.pattern.elements[0]?.value as string
-	// 	if (text === undefined) {
-	// 		return showToast({
-	// 			variant: "info",
-	// 			title: "Can't translate empty text",
-	// 		})
-	// 	} else if (localStorage.showMachineTranslationWarning) {
-	// 		setShowMachineLearningWarningDialog(true)
-	// 		return machineLearningWarningDialog?.show()
-	// 	}
-	// 	setMachineTranslationIsLoading(true)
-	// 	const [translation, exception] = await rpc.machineTranslate({
-	// 		text,
-	// 		sourceLanguageTag: sourceResource()!.languageTag.name,
-	// 		targetLanguageTag: props.languageTag,
-	// 	})
-	// 	if (exception) {
-	// 		showToast({
-	// 			variant: "warning",
-	// 			title: "Machine translation failed.",
-	// 			message: exception.message,
-	// 		})
-	// 	} else {
-	// 		const _copy: ast.Message | undefined = copy()
-	// 		if (_copy) {
-	// 			_copy.pattern.elements = [{ type: "Text", value: translation }] as Array<
-	// 				ast.Text | ast.Placeholder
-	// 			>
-	// 			editor().commands.setContent(setTipTapMessage(_copy))
-	// 		}
-	// 	}
-	// 	setMachineTranslationIsLoading(false)
-	// }
+	const handleMachineTranslate = async () => {
+		if (props.sourceMessage === undefined) {
+			return showToast({
+				variant: "info",
+				title: "Can't translate if the reference message does not exist.",
+			})
+		}
+		let text = ""
+		Object.values(props.sourceMessage).some((value) => {
+			text = (value.pattern.map((pattern) => {
+				if (pattern.type === "Text") {
+					return pattern.value.toLocaleLowerCase()
+				} else if (pattern.type === "VariableReference") {
+					return pattern.name.toLowerCase()
+				} else {
+					return false
+				}
+			}).join(""))
+		}
+	)
+		
+		if (text === "") {
+			return showToast({
+				variant: "info",
+				title: "Can't translate empty text",
+			})
+		} else if (localStorage.showMachineTranslationWarning) {
+			setShowMachineLearningWarningDialog(true)
+			return machineLearningWarningDialog?.show()
+		}
+		setMachineTranslationIsLoading(true)
+		const [translation, exception] = await rpc.machineTranslate({
+			text,
+			sourceLanguageTag: inlang()?.config().sourceLanguageTag!,
+			targetLanguageTag: props.languageTag,
+		})
+		if (exception) {
+			showToast({
+				variant: "warning",
+				title: "Machine translation failed.",
+				message: exception.message,
+			})
+		} else {
+			editor().commands.setContent(setTipTapMessage( [{ type: "Text", value: translation }]))
+		}
+		setMachineTranslationIsLoading(false)
+	}
 
-	// const getNotificationHints = () => {
-	// 	const notifications: Array<Notification> = []
-	// 	if (props.message) {
-	// 		const lintReports = (props.message as LintedMessage)
-	// 		const filteredReports = lintReports.filter((report) =>
-	// 			handleMissingMessage(report, filteredLanguageTags()),
-	// 		)
-	// 		if (filteredReports) {
-	// 			console.log(filteredReports)
-	// 			filteredReports.map((lint: LintReport) => {
-	// 				notifications.push({
-	// 					notificationTitle: lint.id.includes(".") ? lint.id.split(".")[1]! : lint.id,
-	// 					notificationDescription: lint.message,
-	// 					notificationType: lint.level,
-	// 				})
-	// 			})
-	// 		}
-	// 	}
+	const getNotificationHints = () => {
+		const notifications: Array<Notification> = []
+		if (props.variant?.pattern) {
+			inlang()?.lint.reports().map((report: LintReport) => {
+				if (report.messageId === props.id && report.languageTag === props.languageTag) {
+					return notifications.push({
+						notificationTitle: report.ruleId,
+						notificationDescription: report.body.en,
+						notificationType: report.level,
+					})
+				}					
+			})
+		}
 
-	// 	if (hasChanges() && localStorage.user === undefined) {
-	// 		notifications.push({
-	// 			notificationTitle: "Access:",
-	// 			notificationDescription: "Sign in to commit changes.",
-	// 			notificationType: "warn",
-	// 		})
-	// 	}
-	// 	if (hasChanges() && userIsCollaborator() === false) {
-	// 		notifications.push({
-	// 			notificationTitle: "Fork:",
-	// 			notificationDescription: "Fork the project to commit changes.",
-	// 			notificationType: "info",
-	// 		})
-	// 	}
-	// 	return notifications
-	// }
+		if (hasChanges() && localStorage.user === undefined) {
+			notifications.push({
+				notificationTitle: "Access:",
+				notificationDescription: "Sign in to commit changes.",
+				notificationType: "warning",
+			})
+		}
+		if (hasChanges() && userIsCollaborator() === false) {
+			notifications.push({
+				notificationTitle: "Fork:",
+				notificationDescription: "Fork the project to commit changes.",
+				notificationType: "warning",
+			})
+		}
+		return notifications
+	}
 
 	const handleShortcut = (event: KeyboardEvent) => {
 		if (
 			((event.ctrlKey && event.code === "KeyS" && navigator.platform.includes("Win")) ||
 				(event.metaKey && event.code === "KeyS" && navigator.platform.includes("Mac"))) &&
-			// hasChanges() &&
+			hasChanges() &&
 			userIsCollaborator()
 		) {
 			event.preventDefault()
@@ -371,7 +364,7 @@ export function PatternEditor(props: {
 			{/* action bar */}
 			<div class="w-[164px] h-8 flex justify-end items-center gap-2">
 				<div class="flex items-center justify-end gap-2">
-					{/* <Show
+					<Show
 						when={
 							JSON.stringify(getTextValue(editor)) === "[]" || getTextValue(editor) === undefined
 						}
@@ -390,8 +383,8 @@ export function PatternEditor(props: {
 							<MaterialSymbolsTranslateRounded slot="prefix" />
 							Machine translate
 						</sl-button>
-					</Show> */}
-					{/* <Show when={hasChanges() && isLineItemFocused()}>
+					</Show>
+					<Show when={hasChanges() && isLineItemFocused()}>
 						<sl-button
 							prop:variant="primary"
 							prop:size="small"
@@ -403,14 +396,14 @@ export function PatternEditor(props: {
 							<Shortcut slot="suffix" color="primary" codes={["ControlLeft", "s"]} />
 							Save
 						</sl-button>
-					</Show> */}
+					</Show>
 				</div>
-				{/* <Show when={!getEditorFocus() && !isLineItemFocused() && hasChanges()}>
+				<Show when={!getEditorFocus() && !isLineItemFocused() && hasChanges()}>
 					<div class="bg-hover-primary w-2 h-2 rounded-full" />
-				</Show> */}
-				{/* {getNotificationHints().length !== 0 && (
+				</Show>
+				{getNotificationHints().length !== 0 && (
 					<NotificationHint notifications={getNotificationHints()} />
-				)} */}
+				)}
 				<Show when={showMachineLearningWarningDialog()}>
 					<sl-dialog prop:label="Machine translations pitfalls" ref={machineLearningWarningDialog}>
 						<ol class="">
@@ -441,7 +434,7 @@ export function PatternEditor(props: {
 							onClick={() => {
 								setLocalStorage("showMachineTranslationWarning", false)
 								machineLearningWarningDialog?.hide()
-								//handleMachineTranslate()
+								handleMachineTranslate()
 							}}
 						>
 							Proceed with machine translating

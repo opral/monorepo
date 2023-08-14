@@ -15,9 +15,6 @@ export function Message(props: {
 		inlang,
 		sourceLanguageTag,
 		filteredLanguageTags,
-		textSearch,
-		filteredId,
-		filteredLintRules,
 	} = useEditorState()
 	const sourceMessage = () => {
 		return props.message.body[sourceLanguageTag()!]
