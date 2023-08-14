@@ -1,6 +1,6 @@
-export type SuccessResult<Data> = { data: Data; error: never }
+export type SuccessResult<Data> = { data: Data; error?: never }
 
-export type ErrorResult<Error> = { error: Error; data: never }
+export type ErrorResult<Error> = { data?: never; error: Error }
 
 /**
  * A result represents an either success or an error, but never both.
