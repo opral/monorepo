@@ -36,8 +36,9 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 		if (runtime.language === language) return
 
 		localStorage.setItem("language", language)
+		runtime.switchLanguage(language)
 
-		return goto(get(page).url, { invalidateAll: true })
+		return goto(get(page).url, { invalidateAll: true, noScroll: true, })
 	}
 
 	addRuntimeToContextShared<RuntimeContext>({
