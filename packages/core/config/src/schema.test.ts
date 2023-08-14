@@ -152,4 +152,18 @@ describe("config.settings", () => {
 		}
 		expect(Value.Check(InlangConfig, mockConfig)).toBe(false)
 	})
+
+	it("should be possible to define known system settings", () => {
+		const mockConfig: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "de"],
+			modules: [],
+			settings: {
+				"system.lint.ruleLevels": {
+					"namespace.lintRule.helloWorld": "error",
+				},
+			},
+		}
+		expect(Value.Check(InlangConfig, mockConfig)).toBe(true)
+	})
 })
