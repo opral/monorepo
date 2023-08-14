@@ -39,7 +39,12 @@ export const SystemSettings = Type.Object({
  */
 const ExternalSettings = Type.Record(
 	Type.String({
-		pattern: "^(?!system\\.)([a-z]+)\\.(app|plugin|lintRule)\\.([a-z][a-zA-Z0-9]*)$",
+		// pattern includes SystemSettings keys
+		pattern: `^((?!system\\.)([a-z]+)\\.(app|plugin|lintRule)\\.([a-z][a-zA-Z0-9]*)|${Object.keys(
+			SystemSettings.properties,
+		)
+			.map((key) => key.replaceAll(".", "\\."))
+			.join("|")})$`,
 		description:
 			"The key must be conform to `{namespace:string}.{type:app|plugin|lintRule}.{name:string}`. The namespace `system` namespace is reserved and can't be used.",
 		examples: ["example.plugin.sqlite", "example.lintRule.missingMessage"],
@@ -47,6 +52,7 @@ const ExternalSettings = Type.Record(
 		[TLiteral<`${string}.${"app" | "plugin" | "lintRule"}.${string}`>]
 	>,
 	JSONObject,
+	{ additionalProperties: false },
 )
 
 /**
