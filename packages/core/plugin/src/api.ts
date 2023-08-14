@@ -1,4 +1,4 @@
-import type { InlangConfig } from "@inlang/config"
+import type { InlangConfig, JSONObject } from "@inlang/config"
 import { LanguageTag, WithLanguageTags } from "@inlang/language-tag"
 import { Static, Type, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
 import type { NodeishFilesystem as LisaNodeishFilesystem } from "@inlang-git/fs"
@@ -84,7 +84,7 @@ export type ResolvedPlugins = {
  * The plugin API is used to extend inlang's functionality.
  */
 export type Plugin<
-	Settings extends InlangConfig["settings"][Plugin["meta"]["id"]] | unknown = unknown,
+	Settings extends JSONObject | unknown = unknown,
 > = Omit<
 	Static<typeof Plugin>,
 	"loadMessages" | "saveMessages" | "detectedLanguageTags" | "addAppSpecificApi"

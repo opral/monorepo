@@ -1,6 +1,6 @@
 import type { Message, MessageQueryApi } from "@inlang/messages"
 import { type LanguageTag, WithLanguageTags } from "@inlang/language-tag"
-import type { InlangConfig } from "@inlang/config"
+import type { JSONObject } from "@inlang/config"
 import { Type, type Static, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
 
 /**
@@ -50,7 +50,7 @@ export const LintRuleBase = Type.Object({
  */
 
 export type MessageLintRule<
-	Settings extends InlangConfig["settings"][LintRuleBase["meta"]["id"]] | unknown = unknown,
+	Settings extends JSONObject | unknown = unknown,
 > = Static<typeof MessageLintRule> & {
 	message: (args: {
 		message: Message
@@ -83,8 +83,7 @@ export type MessageLintReport = LintReportBase & {
  */
 
 export type LintRule<
-	// must be any to avoid typescript complaining about "recursive types"
-	Settings extends InlangConfig["settings"][LintRuleBase["meta"]["id"]] | unknown = any,
+	Settings extends JSONObject | unknown = unknown,
 > = MessageLintRule<Settings>
 export const LintRule = Type.Union([MessageLintRule])
 
