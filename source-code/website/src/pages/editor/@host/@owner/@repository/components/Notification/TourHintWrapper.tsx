@@ -1,11 +1,9 @@
 import type { JSXElement, JSX } from "solid-js"
-import { useEditorState } from "../../State.jsx"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 
 export type TourStepId =
 	| "github-login"
 	| "fork-repository"
-	| "default-languages"
 	| "missing-message-rule"
 	| "textfield"
 
@@ -34,8 +32,6 @@ export const TourHintWrapper = (props: TourHintWrapperProps) => {
 							return <GithubLogin />
 						case "fork-repository":
 							return <ForkRepository />
-						case "default-languages":
-							return <DefaultLanguages />
 						case "missing-message-rule":
 							return <MissingMessageRule />
 						case "textfield":
@@ -172,51 +168,6 @@ const ForkRepository = () => {
 				>
 					Stay in preview
 				</p>
-			</div>
-		</div>
-	)
-}
-
-const DefaultLanguages = () => {
-	const { setTourStep, filteredLanguageTags } = useEditorState()
-	return (
-		<div class="w-full flex flex-col gap-2">
-			<div class="w-full overflow-hidden">
-				<img
-					class="rounded"
-					width="100%"
-					src="/images/TourGuideSVGs/default-languages.svg"
-					alt="default-languages"
-				/>
-			</div>
-			<div class="flex items-center justify-between">
-				<div class="pt-2 pb-1 px-1 flex flex-col gap-1">
-					<p class="text-sm font-medium text-info-on-inverted-container">Language detection</p>
-					<p>We filtered by your browser defaults.</p>
-				</div>
-				<div
-					onClick={() =>
-						filteredLanguageTags().length > 0
-							? setTourStep("missing-message-rule")
-							: setTourStep("textfield")
-					}
-					class="w-8 h-8 flex justify-center items-center bg-background/10 hover:bg-background/20 rounded-md cursor-pointer"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke-width={2}
-						stroke="currentColor"
-						class="w-4 h-4"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-						/>
-					</svg>
-				</div>
 			</div>
 		</div>
 	)
