@@ -37,7 +37,7 @@ Use the following template to create your plugin [plugin-template](https://githu
 ```ts
 const myPlugin = createPlugin(() => {
 	return {
-		id: "inlang.plugin-template",
+		id: "inlang.plugin.template",
 		config: () => {
 			return {
 				languages: ["en", "de"],

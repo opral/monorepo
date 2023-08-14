@@ -7,12 +7,12 @@
 	],
 	"settings": {
 		"plugins": {
-			"inlang.plugin-json": {
+			"inlang.plugin.json": {
 				"options": {
 					"pathPattern": "./languages/{{languageTag}}.json"
 				}
 			},
-			"inlang.plugin-sdk-js": {
+			"inlang.plugin.sdk-js": {
 				"options": {
 					"languageNegotiation": {
 						"strategies": [
