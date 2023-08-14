@@ -2,6 +2,13 @@
 	"name": "inlang-dev-container",
 	"image": "mcr.microsoft.com/devcontainers/javascript-node:18-bullseye",
 	"postCreateCommand": "sudo apt update && sudo apt install --no-install-recommends -y chromium",
+	"features": {
+		"desktop-lite": {
+			"password": "vscode",
+			"webPort": "6080",
+			"vncPort": "5901"
+		}
+	},
 	"customizations": {
 		"vscode": {
 			"extensions": [
