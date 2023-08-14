@@ -8,7 +8,6 @@ import { open } from "./commands/open/index.js"
 import { gitOrigin, telemetry } from "./services/telemetry/implementation.js"
 import fetchPolyfill from "node-fetch"
 import { lint } from "./commands/lint/index.js"
-import { coreUsedConfigEvent } from "@inlang/telemetry"
 import { getInlang } from "./utilities/getInlang.js"
 // --------------- INIT ---------------
 
@@ -74,14 +73,6 @@ telemetry.groupIdentify({
 
 try {
 	const [inlang] = await getInlang({ options: cli.opts() })
-	const config = inlang?.config()
-
-	if (config) {
-		telemetry.capture({
-			event: coreUsedConfigEvent.name,
-			properties: coreUsedConfigEvent.properties(config),
-		})
-	}
 } catch (error) {
 	// ignore, because of telemetry usage
 }
