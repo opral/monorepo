@@ -83,7 +83,7 @@ export const InlangConfig = Type.Object(
 		 * The `key` must be conform to the `{namespace}.{type}.{key}` pattern.
 		 * The `value` must be a JSON.
 		 */
-		settings: Type.Optional(Type.Intersect([SystemSettings, ExternalSettings])),
+		settings: Type.Intersect([SystemSettings, ExternalSettings]),
 	},
 	// see https://github.com/sinclairzx81/typebox/issues/527
 	{ additionalProperties: false },

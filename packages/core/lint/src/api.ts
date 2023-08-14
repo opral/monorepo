@@ -1,7 +1,7 @@
 import type { Message, MessageQueryApi } from "@inlang/messages"
 import { type LanguageTag, WithLanguageTags } from "@inlang/language-tag"
-import type { JSONObject } from "@inlang/config"
 import { Type, type Static, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
+import type { InlangConfig } from "@inlang/config"
 
 /**
  * ---------------- BASIS ----------------
@@ -50,7 +50,7 @@ export const LintRuleBase = Type.Object({
  */
 
 export type MessageLintRule<
-	Settings extends JSONObject | unknown = unknown,
+	Settings extends InlangConfig["settings"][LintRule["meta"]["id"]] | unknown = unknown,
 > = Static<typeof MessageLintRule> & {
 	message: (args: {
 		message: Message
@@ -83,7 +83,7 @@ export type MessageLintReport = LintReportBase & {
  */
 
 export type LintRule<
-	Settings extends JSONObject | unknown = unknown,
+	Settings extends InlangConfig["settings"][LintRule["meta"]["id"]] | unknown = unknown,
 > = MessageLintRule<Settings>
 export const LintRule = Type.Union([MessageLintRule])
 
