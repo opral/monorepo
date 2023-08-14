@@ -1,5 +1,5 @@
 import type { Message, MessageQueryApi } from "@inlang/messages"
-import { type LanguageTag, TranslatedStrings } from "@inlang/language-tag"
+import { type LanguageTag, WithLanguageTags } from "@inlang/language-tag"
 import type { InlangConfig } from "@inlang/config"
 import { Type, type Static, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
 
@@ -17,7 +17,7 @@ export type LintReportBase = {
 	ruleId: LintRuleBase["meta"]["id"]
 	type: LintRuleBase["type"]
 	level: LintLevel
-	body: TranslatedStrings
+	body: WithLanguageTags<string>
 }
 
 /**
@@ -31,8 +31,8 @@ export const LintRuleBase = Type.Object({
 			description: "The key must be conform to `{namespace}.lintRule.{name}` pattern.",
 			examples: ["example.lintRule.patternInvalid", "example.lintRule.missingMessage"],
 		}) as unknown as TTemplateLiteral<[TLiteral<`${string}.lintRule.${string}`>]>,
-		displayName: TranslatedStrings,
-		description: TranslatedStrings,
+		displayName: WithLanguageTags(Type.String()),
+		description: WithLanguageTags(Type.String()),
 	}),
 	// (in the future, more literals like CodeLint are expected)
 	type: Type.Union([Type.Literal("MessageLint")]),
