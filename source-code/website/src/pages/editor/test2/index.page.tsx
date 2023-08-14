@@ -17,7 +17,7 @@ export const Page = () => {
 		modules: ["./dist/index.js"],
 		settings: {
 			plugins: {
-				"inlang.plugin-i18next": {
+				"inlang.plugin.i18next": {
 					options: {
 						pathPattern: "./examples/example01/{languageTag}.json",
 						variableReferencePattern: ["{", "}"],
@@ -34,7 +34,7 @@ export const Page = () => {
 
 	const mockPlugin: Plugin = {
 		meta: {
-			id: "inlang.plugin-i18next",
+			id: "inlang.plugin.i18next",
 			description: { en: "Mock plugin description" },
 			displayName: { en: "Mock Plugin" },
 			keywords: [],
@@ -42,7 +42,7 @@ export const Page = () => {
 		loadMessages: () => exampleMessages,
 		saveMessages: () => undefined as any,
 		addAppSpecificApi: () => ({
-			"inlang.ide-extension": {
+			"inlang.app.ide-extension": {
 				messageReferenceMatcher: (text: string) => text as any,
 			},
 		}),

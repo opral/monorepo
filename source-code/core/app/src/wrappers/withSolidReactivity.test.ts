@@ -124,7 +124,7 @@ describe("plugins", () => {
 			inlang.setConfig({ ...inlang.config(), languageTags: ["en", "de"] })
 			setTimeout(() => {
 				expect(counter).toBe(2)
-				expect(inlang.meta.lintRules()[0]?.id).toBe("inlang.plugin-i18next")
+				expect(inlang.meta.lintRules()[0]?.id).toBe("inlang.plugin.i18next")
 			}, 100)
 		})
 	})
@@ -162,12 +162,12 @@ describe("messages", () => {
 			}
 
 			const mockImport: ImportFunction = async () =>
-				({
-					default: {
-						plugins: [_mockPlugin],
-						lintRules: [mockLintRule],
-					},
-				} satisfies InlangModule)
+			({
+				default: {
+					plugins: [_mockPlugin],
+					lintRules: [mockLintRule],
+				},
+			} satisfies InlangModule)
 
 			await fs.writeFile("./inlang.config.json", JSON.stringify(mockConfig))
 
@@ -274,7 +274,7 @@ const mockPlugin: Plugin = {
 	loadMessages: () => exampleMessages,
 	saveMessages: () => undefined as any,
 	addAppSpecificApi: () => ({
-		"inlang.ide-extension": {
+		"inlang.app.ide-extension": {
 			messageReferenceMatcher: (text: string) => text as any,
 		},
 	}),
@@ -329,9 +329,9 @@ const mockLintRule: LintRule = {
 }
 
 const $import: ImportFunction = async () =>
-	({
-		default: {
-			plugins: [mockPlugin],
-			lintRules: [mockLintRule],
-		},
-	} satisfies InlangModule)
+({
+	default: {
+		plugins: [mockPlugin],
+		lintRules: [mockLintRule],
+	},
+} satisfies InlangModule)

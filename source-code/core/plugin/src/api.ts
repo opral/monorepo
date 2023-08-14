@@ -56,7 +56,7 @@ export type ResolvedPlugins = {
 	 * @example
 	 *  // define
 	 *  appSpecificApi: ({ settings }) => ({
-	 * 	 "inlang.ide-extension": {
+	 * 	 "inlang.app.ide-extension": {
 	 * 	   messageReferenceMatcher: () => {
 	 * 		 // use settings
 	 * 		 settings.pathPattern
@@ -72,8 +72,8 @@ export type ResolvedPlugins = {
 	 * Metainformation for a specific plugin.
 	 *
 	 * @example
-	 *   meta['inlang.plugin-i18next'].description['en']
-	 *   meta['inlang.plugin-i18next'].module
+	 *   meta['inlang.plugin.i18next'].description['en']
+	 *   meta['inlang.plugin.i18next'].module
 	 */
 	meta: Record<Plugin["meta"]["id"], Plugin["meta"]>
 }
@@ -121,7 +121,7 @@ export type Plugin<Settings extends InlangConfig["settings"] | unknown = unknown
 	 *
 	 * @example
 	 * addAppSpecificApi: () => ({
-	 * 	 "inlang.ide-extension": {
+	 * 	 "inlang.app.ide-extension": {
 	 * 	   messageReferenceMatcher: () => {}
 	 * 	 }
 	 *  })

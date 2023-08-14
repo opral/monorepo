@@ -68,7 +68,7 @@ describe("initialization", () => {
 					modules: ["./dist/index.js"],
 					settings: {
 						plugins: {
-							"inlang.plugin-i18next": {
+							"inlang.plugin.i18next": {
 								options: {
 									pathPattern: "./examples/example01/{languageTag}.json",
 									variableReferencePattern: ["{", "}"],
@@ -177,7 +177,7 @@ describe("functionality", () => {
 					modules: ["./dist/index.js"],
 					settings: {
 						plugins: {
-							"inlang.plugin-i18next": {
+							"inlang.plugin.i18next": {
 								options: {
 									pathPattern: "./examples/example01/{languageTag}.json",
 									variableReferencePattern: ["{", "}"],
@@ -246,7 +246,7 @@ describe("functionality", () => {
 
 			inlang.meta.plugins.subscribe((plugins) => {
 				expect(plugins[0]).toStrictEqual({
-					id: "inlang.plugin-i18next",
+					id: "inlang.plugin.i18next",
 					displayName: {
 						en: "Mock Plugin",
 					},
@@ -286,7 +286,7 @@ describe("functionality", () => {
 			})
 
 			inlang.appSpecificApi.subscribe((api) => {
-				expect(api["inlang.ide-extension"]).toBeDefined()
+				expect(api["inlang.app.ide-extension"]).toBeDefined()
 			})
 		})
 	})
@@ -362,7 +362,7 @@ const mockPlugin: Plugin = {
 	loadMessages: () => exampleMessages,
 	saveMessages: () => undefined as any,
 	addAppSpecificApi: () => ({
-		"inlang.ide-extension": {
+		"inlang.app.ide-extension": {
 			messageReferenceMatcher: (text: string) => text as any,
 		},
 	}),
