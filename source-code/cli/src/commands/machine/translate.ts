@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { query } from "@inlang/core/query"
 import { Command } from "commander"
-import { countMessagesPerLanguage, getFlag, log } from "../../utilities.js"
+import { getFlag, log } from "../../utilities.js"
 import type { Message, Text } from "@inlang/core/ast"
 import { rpc } from "@inlang/rpc"
 import { getInlang } from "../../utilities/getInlang.js"
@@ -143,4 +143,27 @@ async function translateCommandAction() {
 	} catch (error) {
 		log.error(error)
 	}
+}
+
+/**
+ * Counts the number of messages per language.
+ *
+ * @param resource The resource to count the messages for.
+ * @returns A record with the language as key and the number of messages as value.
+ *
+ */
+const countMessagesPerLanguage = (resource: Resource[]): Record<string, number> => {
+	const counts: Record<string, number> = {}
+
+	for (const { languageTag, body } of resource) {
+		const language = languageTag.name
+
+		if (!counts[language]) {
+			counts[language] = 0
+		}
+
+		counts[language] += body.length
+	}
+
+	return counts
 }

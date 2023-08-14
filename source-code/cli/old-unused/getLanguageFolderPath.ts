@@ -1,11 +1,11 @@
 import path from "node:path"
 import { log } from "../utilities.js"
-import type { FileSystem } from "./fs/types.js"
 import { potentialFolders } from "./potentialFolders.js"
+import type { NodeishFilesystem } from "@inlang-git/fs"
 
 export const getLanguageFolderPath = async (args: {
 	rootDir: string
-	fs: FileSystem
+	fs: NodeishFilesystem
 }): Promise<string | undefined> => {
 	log.info("Searching for language folder in", args.rootDir)
 	try {
@@ -13,7 +13,7 @@ export const getLanguageFolderPath = async (args: {
 			dir: string,
 			ignoredPaths: string[],
 		): Promise<string | undefined> => {
-			const files = await args.fs.readDirectory(dir)
+			const files = await args.fs.readdir(dir)
 
 			const gitignorePath = path.join(dir, ".gitignore")
 			let subIgnoredPaths: string[] = []
