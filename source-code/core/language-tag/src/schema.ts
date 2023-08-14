@@ -1,4 +1,4 @@
-import { Type, Static } from "@sinclair/typebox"
+import { Type, Static, TSchema } from "@sinclair/typebox"
 
 /**
  * Follow the IETF BCP 47 language tag schema.
@@ -11,12 +11,13 @@ export type LanguageTag = Static<typeof LanguageTag>
 export const LanguageTag = Type.String()
 
 /**
- * Translated strings for a given language tag.
+ * Content for a language tag.
  *
  * The language tag `en` is always required.
  */
-export type TranslatedStrings = Static<typeof TranslatedStrings>
-export const TranslatedStrings = Type.Intersect([
-	Type.Object({ en: Type.String() }),
-	Type.Record(LanguageTag, Type.String()),
-])
+export type WithLanguageTags<T> = {
+	en: T
+	[languageTag: string]: T
+}
+export const WithLanguageTags = <T extends TSchema>(type: T) =>
+	Type.Intersect([Type.Object({ en: type }), Type.Record(LanguageTag, type)])

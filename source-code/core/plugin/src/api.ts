@@ -1,7 +1,6 @@
 import type { InlangConfig } from "@inlang/config"
-import { LanguageTag, TranslatedStrings } from "@inlang/language-tag"
-import { Message } from "@inlang/messages"
-import { Static, TSchema, Type, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
+import { LanguageTag, WithLanguageTags } from "@inlang/language-tag"
+import { Static, Type, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
 import type { NodeishFilesystem as LisaNodeishFilesystem } from "@inlang-git/fs"
 import type {
 	PluginAppSpecificApiReturnError,
@@ -12,6 +11,7 @@ import type {
 	PluginUsesInvalidSchemaError,
 	PluginUsesReservedNamespaceError,
 } from "./errors.js"
+import type { Message } from "@inlang/messages"
 
 /**
  * The filesystem is a subset of project lisa's nodeish filesystem.
@@ -80,8 +80,6 @@ export type ResolvedPlugins = {
 
 // ---------------------------- RUNTIME VALIDATION TYPES ---------------------------------------------
 
-const PromiseLike = (T: TSchema) => Type.Union([T, Type.Promise(T)])
-
 /**
  * The plugin API is used to extend inlang's functionality.
  */
@@ -136,55 +134,14 @@ export const Plugin = Type.Object(
 				pattern: "^(?!system\\.)([a-z]+)\\.(plugin)\\.([a-z][a-zA-Z0-9]*)$",
 				examples: ["namespace.plugin.example"],
 			}) as unknown as TTemplateLiteral<[TLiteral<`${string}.plugin.${string}`>]>,
-			displayName: TranslatedStrings,
-			description: TranslatedStrings,
+			displayName: WithLanguageTags(Type.String()),
+			description: WithLanguageTags(Type.String()),
 			keywords: Type.Array(Type.String()),
 		}),
-		loadMessages: Type.Optional(
-			Type.Function(
-				[
-					Type.Object({
-						languageTags: LanguageTag,
-						settings: Type.Union([Type.Object({}), Type.Undefined()]),
-						nodeishFs: Type.Object({}),
-					}),
-				],
-				PromiseLike(Type.Array(Message)),
-			),
-		),
-		saveMessages: Type.Optional(
-			Type.Function(
-				[
-					Type.Object({
-						messages: Type.Array(Message),
-						settings: Type.Union([Type.Object({}), Type.Undefined()]),
-						nodeishFs: Type.Object({}),
-					}),
-				],
-				PromiseLike(Type.Void()),
-			),
-		),
-		detectedLanguageTags: Type.Optional(
-			Type.Function(
-				[
-					Type.Object({
-						settings: Type.Union([Type.Object({}), Type.Undefined()]),
-						nodeishFs: Type.Object({}),
-					}),
-				],
-				PromiseLike(Type.Array(Type.String())),
-			),
-		),
-		addAppSpecificApi: Type.Optional(
-			Type.Function(
-				[
-					Type.Object({
-						settings: Type.Union([Type.Object({}), Type.Undefined()]),
-					}),
-				],
-				PromiseLike(Type.Record(Type.String(), Type.Any())),
-			),
-		),
+		loadMessages: Type.Optional(Type.Any()),
+		saveMessages: Type.Optional(Type.Any()),
+		detectedLanguageTags: Type.Optional(Type.Any()),
+		addAppSpecificApi: Type.Optional(Type.Any()),
 	},
 	{ additionalProperties: false },
 )
