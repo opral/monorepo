@@ -195,7 +195,7 @@ function TheActualPage() {
 							</Match>
 							<Match when={doesInlangConfigExist() && messages() !== undefined}>
 								<div>
-									{/* <ListHeader messages={messages()!} /> */}
+									<ListHeader messages={messages()!} />
 									<TourHintWrapper
 										currentId="textfield"
 										position="bottom-left"
@@ -211,14 +211,7 @@ function TheActualPage() {
 						<div
 							class="flex flex-col h-[calc(100vh_-_288px)] grow justify-center items-center min-w-full gap-2"
 							classList={{
-								["hidden"]:
-									messageCount(
-										messages()!,
-										filteredLanguageTags(),
-										textSearch(),
-										filteredLintRules(),
-										filteredId(),
-									) !== 0,
+								["hidden"]:	messageCount(messages()!) !== 0,
 							}}
 						>
 							<NoMatchPlaceholder />
