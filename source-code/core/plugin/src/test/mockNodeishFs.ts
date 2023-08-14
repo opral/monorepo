@@ -12,7 +12,7 @@ import type { NodeishFilesystemSubset } from "../api.js"
  *
  * @param copyDirectory - if defined, copies directories (paths) into the environment
  */
-export async function createMockNodeishFs(args: {
+export async function createMockNodeishFs(args?: {
 	copyDirectory?: {
 		fs: NodeishFilesystemSubset
 		paths: string[]
@@ -20,7 +20,7 @@ export async function createMockNodeishFs(args: {
 }): Promise<NodeishFilesystemSubset> {
 	const nodeishFs = createNodeishMemoryFs()
 
-	if (args.copyDirectory) {
+	if (args?.copyDirectory) {
 		for (const path of args.copyDirectory.paths) {
 			await copyDirectory({ copyFrom: args.copyDirectory.fs, copyTo: nodeishFs, path })
 		}

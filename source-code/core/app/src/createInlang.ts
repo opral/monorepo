@@ -161,7 +161,6 @@ const loadConfig = async (args: { configPath: string; nodeishFs: NodeishFilesyst
 		})
 
 	const typeErrors = [...ConfigCompiler.Errors(parsedConfig)]
-
 	if (typeErrors.length > 0) {
 		throw new InvalidConfigError(`The config is invalid according to the schema.`, {
 			cause: typeErrors,
@@ -203,6 +202,8 @@ type MaybePromise<T> = T | Promise<T>
 
 const makeTrulyAsync = <T>(fn: MaybePromise<T>): Promise<T> => (async () => fn)()
 
+
+// TODO: how do we unsubscribe? Do we need that?
 function createSubscribable<T>(signal: () => T): Subscribable<T> {
 	return Object.assign(signal, {
 		subscribe: (callback: any) => {

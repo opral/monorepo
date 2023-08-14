@@ -106,7 +106,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			// TODO: why do we call this function 2 times (here for validation and later for retrieving the actual value)?
 			const { data: appSpecificApi, error } = tryCatch(() =>
 				plugin.addAppSpecificApi!({
-					settings: args.settings[plugin.meta.id] ?? {},
+					settings: args.settings?.[plugin.meta.id] ?? {},
 				}),
 			)
 			if (error) {
@@ -137,7 +137,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			result.data.loadMessages = (_args) =>
 				plugin.loadMessages!({
 					..._args,
-					settings: args.settings[plugin.meta.id] ?? {},
+					settings: args.settings?.[plugin.meta.id] ?? {},
 					nodeishFs: args.nodeishFs,
 				})
 		}
@@ -146,7 +146,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			result.data.saveMessages = (_args) =>
 				plugin.saveMessages!({
 					..._args,
-					settings: args.settings[plugin.meta.id] ?? {},
+					settings: args.settings?.[plugin.meta.id] ?? {},
 					nodeishFs: args.nodeishFs,
 				})
 		}
@@ -154,7 +154,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 		if (typeof plugin.detectedLanguageTags === "function") {
 			result.data.detectedLanguageTags = () =>
 				plugin.detectedLanguageTags!({
-					settings: args.settings[plugin.meta.id] ?? {},
+					settings: args.settings?.[plugin.meta.id] ?? {},
 					nodeishFs: args.nodeishFs,
 				})
 		}
@@ -162,7 +162,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 		if (typeof plugin.addAppSpecificApi === "function") {
 			const { data: appSpecificApi } = tryCatch(() =>
 				plugin.addAppSpecificApi!({
-					settings: args.settings[plugin.meta.id] ?? {},
+					settings: args.settings?.[plugin.meta.id] ?? {},
 				}),
 			)
 			if (appSpecificApi) {
