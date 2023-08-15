@@ -14,7 +14,7 @@ export function tryCatch<Data>(callback: () => Promise<Data>): Promise<Result<Da
 export function tryCatch<Data>(callback: () => Data): Result<Data, Error>
 export function tryCatch<Data>(
 	callback: () => Data | Promise<Data>,
-): Promise<Result<Data, Error>> | Result<Data, NonNullable<unknown>> {
+): Promise<Result<Data, Error>> | Result<Data, Error> {
 	try {
 		const callbackResult = callback() as Data | Promise<Data>
 		if (isAsync(callbackResult)) {
