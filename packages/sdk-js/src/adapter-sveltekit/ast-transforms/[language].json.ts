@@ -2,7 +2,7 @@ import { dedent } from "ts-dedent"
 import { findExport } from "../../ast-transforms/utils/exports.js"
 import { addImport, isOptOutImportPresent } from "../../ast-transforms/utils/imports.js"
 import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
-import type { TransformConfig } from "../vite-plugin/config.js"
+import type { TransformConfig } from "../vite-plugin/inlang-app.js"
 import { InlangSdkException } from "../vite-plugin/exceptions.js"
 import { filePathForOutput } from "../vite-plugin/fileInformation.js"
 import { transformServerRequestJs } from "./+server.js.js"
@@ -21,7 +21,7 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 		`)
 
 	const index = sourceFile.getPos()
-	if (config.isStatic && config.inlang.sdk.resources.cache === "build-time")
+	if (config.isStatic && config.settings.resources.cache === "build-time")
 		sourceFile.insertText(
 			index,
 			dedent`
@@ -34,7 +34,7 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 		dedent`
 			export const GET = async ({ params: { language } }) => {
 				await reloadMessages()
-				return json(getResource(language) || null)
+				return json(loadMessages(language) || null)
 			}
 		`,
 	)
@@ -47,7 +47,7 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 			index,
 			dedent`
 			export const entries = async () => {
-				const { languageTags } = await initState(await import('../../../../inlang.config.js'))
+				const { languageTags } = await initState()
 
 				return languageTags.map(languageTag => ({ language: languageTag }))
 			}
@@ -55,7 +55,7 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 		)
 	}
 
-	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/server", "getResource", "reloadMessages")
+	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/server", "loadMessages", "reloadMessages")
 	addImport(sourceFile, "@sveltejs/kit", "json")
 
 	return transformServerRequestJs(filePath, config, nodeToCode(sourceFile))

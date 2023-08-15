@@ -1,6 +1,6 @@
 import { assertNoImportsFromSdkJs } from "../../ast-transforms/utils/assertions.js"
 import { codeToSourceFile } from "../../ast-transforms/utils/js.util.js"
-import type { TransformConfig } from "../vite-plugin/config.js"
+import type { TransformConfig } from "../vite-plugin/inlang-app.js"
 import { filePathForOutput } from "../vite-plugin/fileInformation.js"
 
 export const transformServerJs = (filePath: string, config: TransformConfig, code: string) => {

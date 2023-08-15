@@ -1,13 +1,13 @@
 import { describe, test, expect } from "vitest"
 import { transformSvelte } from "./_.svelte.js"
 import { dedent } from "ts-dedent"
-import { initTransformConfig } from "./test.utils.js"
+import { initTestApp } from "./test.utils.js"
 
 describe("transformSvelte", () => {
 	describe("empty file", () => {
 		test("should not do anything", () => {
 			const code = ""
-			const config = initTransformConfig()
+			const config = initTestApp()
 			const transformed = transformSvelte("", config, code)
 			expect(transformed).toEqual(code)
 		})
@@ -22,7 +22,7 @@ describe("transformSvelte", () => {
 
 				<h1>{i('hello')}</h1>
 			`
-			const config = initTransformConfig()
+			const config = initTestApp()
 			const transformed = transformSvelte("", config, code)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
@@ -40,7 +40,7 @@ describe("transformSvelte", () => {
 					import { i as u } from "@inlang/sdk-js"
 				</script>
 			`
-			const config = initTransformConfig()
+			const config = initTestApp()
 			const transformed = transformSvelte("", config, code)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
@@ -57,7 +57,7 @@ describe("transformSvelte", () => {
 					import { languageTags, i } from "@inlang/sdk-js"
 				</script>
 			`
-			const config = initTransformConfig()
+			const config = initTestApp()
 			const transformed = transformSvelte("", config, code)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
@@ -74,7 +74,7 @@ describe("transformSvelte", () => {
 					import { languageTags, i } from "@inlang/sdk-js"
 				</script>
 			`
-			const config = initTransformConfig()
+			const config = initTestApp()
 			const transformed = transformSvelte("", config, code)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script context=\\"module\\">
@@ -91,7 +91,7 @@ describe("transformSvelte", () => {
 					import { languageTags, i } from "@inlang/sdk-js"
 				</script>
 			`
-			const config = initTransformConfig({ languageInUrl: true })
+			const config = initTestApp({ languageInUrl: true })
 			const transformed = transformSvelte("", config, code)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script context=\\"module\\">
@@ -110,7 +110,7 @@ describe("transformSvelte", () => {
 
 			<h1>hello</h1>
 		`
-		const config = initTransformConfig()
+		const config = initTestApp()
 		const transformed = transformSvelte("", config, code)
 		expect(transformed).toEqual(code)
 	})
@@ -124,7 +124,7 @@ describe("transformSvelte", () => {
 				import { i } from "@inlang/sdk-js"
 			</script>
 		`
-		const config = initTransformConfig()
+		const config = initTestApp()
 		const transformed = transformSvelte("", config, code)
 		expect(transformed).toMatchInlineSnapshot(`
 			"<script context=\\"module\\">

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest"
 import { transformPageSvelte } from "./+page.svelte.js"
 import { transformSvelte } from "./_.svelte.js"
-import { initTransformConfig } from "./test.utils.js"
+import { initTestApp } from "./test.utils.js"
 import { dedent } from "ts-dedent"
 
 describe("transformPageSvelte", () => {
@@ -14,7 +14,7 @@ describe("transformPageSvelte", () => {
 
 			{i('hello')}
 		`
-		const config = initTransformConfig()
+		const config = initTestApp()
 		const transformed = transformPageSvelte("", config, code, true)
 		expect(transformed).toBe(transformSvelte("", config, code))
 	})

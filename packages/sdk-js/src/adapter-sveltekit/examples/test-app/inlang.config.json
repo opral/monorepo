@@ -10,7 +10,7 @@
 	],
 	"settings": {
 		"inlang.plugin.json": {
-			"pathPattern": "./languages/{{languageTag}}.json"
+			"pathPattern": "./languages/{languageTag}.json"
 		},
 		"inlang.plugin.sdkJs": {
 			"languageNegotiation": {

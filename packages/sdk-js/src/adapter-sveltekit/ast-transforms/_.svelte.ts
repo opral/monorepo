@@ -8,7 +8,7 @@ import {
 	getImportSpecifiersAsStrings,
 } from "../../ast-transforms/utils/imports.js"
 import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
-import type { TransformConfig } from "../vite-plugin/config.js"
+import type { TransformConfig } from "../vite-plugin/inlang-app.js"
 import { isOptOutImportPresent } from "./utils/imports.js"
 import { getSvelteFileParts, type SvelteFileParts } from "./utils/svelte.util.js"
 

@@ -1,13 +1,13 @@
 import { dedent } from "ts-dedent"
 import { describe, it, test, expect, vi } from "vitest"
 import { transformLayoutSvelte } from "./+layout.svelte.js"
-import { initTransformConfig } from "./test.utils.js"
+import { initTestApp } from "./test.utils.js"
 
 describe("transformLayoutSvelte", () => {
 	describe("root=true", () => {
 		test("should insert code to an empty file", () => {
 			const code = ""
-			const config = initTransformConfig()
+			const config = initTestApp()
 			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
@@ -24,7 +24,7 @@ describe("transformLayoutSvelte", () => {
 				    addRuntimeToGlobalThis(getRuntimeFromData(data));
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, languageTag } = getRuntimeFromContext());
-				    document.body.parentElement?.setAttribute('lang', language);
+				    document.body.parentElement?.setAttribute('lang', languageTag);
 				}
 				</script>
 				{#if languageTag || !sourceLanguageTag}{#key languageTag}<slot />{/key}{/if}"
@@ -43,7 +43,7 @@ describe("transformLayoutSvelte", () => {
 
 				<p>{JSON.stringify(data, null, 3)}</p>
 			`
-			const config = initTransformConfig()
+			const config = initTestApp()
 			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
@@ -60,14 +60,13 @@ describe("transformLayoutSvelte", () => {
 				    addRuntimeToGlobalThis(getRuntimeFromData(data));
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, languageTag } = getRuntimeFromContext());
-				    document.body.parentElement?.setAttribute('lang', language);
+				    document.body.parentElement?.setAttribute('lang', languageTag);
 				}
 				console.info(data);
 				</script>{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
 				<h1>this is a test</h1>
 
-				<p>{JSON.stringify(data, null, 3)}</p>{/key}{/if}"
 				<p>{JSON.stringify(data, null, 3)}</p>{/key}{/if}"
 			`)
 		})
@@ -90,7 +89,7 @@ describe("transformLayoutSvelte", () => {
 
 				random content
 			`
-			const config = initTransformConfig()
+			const config = initTestApp()
 			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
@@ -107,7 +106,7 @@ describe("transformLayoutSvelte", () => {
 				    addRuntimeToGlobalThis(getRuntimeFromData(data));
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, languageTag } = getRuntimeFromContext());
-				    document.body.parentElement?.setAttribute('lang', language);
+				    document.body.parentElement?.setAttribute('lang', languageTag);
 				}
 				</script>
 				<svelte:window on:load={onLoad} />{#if languageTag || !sourceLanguageTag}{#key languageTag}
@@ -119,13 +118,11 @@ describe("transformLayoutSvelte", () => {
 				other test
 
 				{/key}{/if}<svelte:head>
-				{/key}{/if}<svelte:head>
 					<title>test</title>
 				</svelte:head>{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
 				{/key}{/if}<svelte:options tag=\\"test\\" />{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
-				random content{/key}{/if}"
 				random content{/key}{/if}"
 			`)
 		})
@@ -140,7 +137,7 @@ describe("transformLayoutSvelte", () => {
 					<title>{i('title')}</title>
 				</svelte:head>
 			`
-			const config = initTransformConfig()
+			const config = initTestApp()
 			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
@@ -170,7 +167,7 @@ describe("transformLayoutSvelte", () => {
 
 				{languageTag}
 			`
-			const config = initTransformConfig()
+			const config = initTestApp()
 			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
@@ -187,9 +184,8 @@ describe("transformLayoutSvelte", () => {
 				    addRuntimeToGlobalThis(getRuntimeFromData(data));
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, languageTag } = getRuntimeFromContext());
-				    document.body.parentElement?.setAttribute('lang', language);
+				    document.body.parentElement?.setAttribute('lang', languageTag);
 				}
-				const { languageTag } = getRuntimeFromContext();
 				</script>{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
 				{languageTag}{/key}{/if}"
@@ -205,7 +201,7 @@ describe("transformLayoutSvelte", () => {
 
 				<slot />
 			`
-			const config = initTransformConfig()
+			const config = initTestApp()
 			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
@@ -222,12 +218,11 @@ describe("transformLayoutSvelte", () => {
 				    addRuntimeToGlobalThis(getRuntimeFromData(data));
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, languageTag } = getRuntimeFromContext());
-				    document.body.parentElement?.setAttribute('lang', language);
+				    document.body.parentElement?.setAttribute('lang', languageTag);
 				}
 				console.info(i(\\"welcome\\"));
 				</script>{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
-				<slot />{/key}{/if}"
 				<slot />{/key}{/if}"
 			`)
 		})
@@ -245,7 +240,7 @@ describe("transformLayoutSvelte", () => {
 
 				<slot />
 			`
-			const config = initTransformConfig()
+			const config = initTestApp()
 			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
@@ -262,20 +257,19 @@ describe("transformLayoutSvelte", () => {
 				    addRuntimeToGlobalThis(getRuntimeFromData(data));
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, languageTag } = getRuntimeFromContext());
-				    document.body.parentElement?.setAttribute('lang', language);
+				    document.body.parentElement?.setAttribute('lang', languageTag);
 				}
 				console.info(123);
 				console.info(i(\\"welcome\\"));
 				</script>{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
 				<slot />{/key}{/if}"
-				<slot />{/key}{/if}"
 			`)
 		})
 
 		test("languageInUrl", () => {
 			const code = ""
-			const config = initTransformConfig({ languageInUrl: true })
+			const config = initTestApp({ languageInUrl: true })
 			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
@@ -292,7 +286,7 @@ describe("transformLayoutSvelte", () => {
 				    addRuntimeToGlobalThis(getRuntimeFromData(data));
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, languageTag } = getRuntimeFromContext());
-				    document.body.parentElement?.setAttribute('lang', language);
+				    document.body.parentElement?.setAttribute('lang', languageTag);
 				}
 				</script>
 				{#key languageTag}<slot />{/key}"
@@ -303,7 +297,7 @@ describe("transformLayoutSvelte", () => {
 	describe("non-root", () => {
 		test("should not do anything", () => {
 			const code = ""
-			const config = initTransformConfig()
+			const config = initTestApp()
 			const transformed = transformLayoutSvelte("", config, code, false)
 			expect(transformed).toEqual(code)
 		})
@@ -315,7 +309,7 @@ describe("transformLayoutSvelte", () => {
 				<script context>
 					import '@inlang/sdk-js/no-transforms';
 				</script>`
-			const config = initTransformConfig()
+			const config = initTestApp()
 			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toEqual(code)
 		})
@@ -325,7 +319,7 @@ describe("transformLayoutSvelte", () => {
 				<script>
 					import '@inlang/sdk-js/no-transforms';
 				</script>`
-			const config = initTransformConfig()
+			const config = initTestApp()
 			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toEqual(code)
 		})
@@ -341,7 +335,7 @@ describe("transformLayoutSvelte", () => {
 					console.log(languages)
 				</script>
 			`
-			const config = initTransformConfig()
+			const config = initTestApp()
 			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script lang=\\"ts\\">
@@ -358,7 +352,7 @@ describe("transformLayoutSvelte", () => {
 				    addRuntimeToGlobalThis(getRuntimeFromData(data));
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, languageTag } = getRuntimeFromContext());
-				    document.body.parentElement?.setAttribute('lang', language);
+				    document.body.parentElement?.setAttribute('lang', languageTag);
 				}
 				const { languages } = getRuntimeFromContext();
 				console.log(languages);
@@ -380,7 +374,7 @@ describe("transformLayoutSvelte", () => {
 
 				<button on:click={() => switchLanguage('en')}>Switch Language</button>
 			`
-			const config = initTransformConfig()
+			const config = initTestApp()
 			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script lang=\\"ts\\">
@@ -397,7 +391,7 @@ describe("transformLayoutSvelte", () => {
 				    addRuntimeToGlobalThis(getRuntimeFromData(data));
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, languageTag } = getRuntimeFromContext());
-				    document.body.parentElement?.setAttribute('lang', language);
+				    document.body.parentElement?.setAttribute('lang', languageTag);
 				}
 				const { switchLanguage, languages } = getRuntimeFromContext();
 				const doSomething = () => console.log(languages);
@@ -405,7 +399,6 @@ describe("transformLayoutSvelte", () => {
 				    doSomething();
 				</script>{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
-				<button on:click={() => switchLanguage('en')}>Switch Language</button>{/key}{/if}"
 				<button on:click={() => switchLanguage('en')}>Switch Language</button>{/key}{/if}"
 			`)
 		})
@@ -420,7 +413,7 @@ describe("transformLayoutSvelte", () => {
 					export let data
 				</script>
 			`
-			const config = initTransformConfig()
+			const config = initTestApp()
 			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script lang=\\"ts\\">
@@ -437,7 +430,7 @@ describe("transformLayoutSvelte", () => {
 				    addRuntimeToGlobalThis(getRuntimeFromData(data));
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, languageTag } = getRuntimeFromContext());
-				    document.body.parentElement?.setAttribute('lang', language);
+				    document.body.parentElement?.setAttribute('lang', languageTag);
 				}
 				const { languages } = getRuntimeFromContext();
 				console.log(languages);
@@ -454,7 +447,7 @@ describe.skip("transformLayoutSvelte", () => {
 				it("resolves imports correctly", async () => {
 					const transformed = transformLayoutSvelte(
 						"",
-						initTransformConfig(),
+						initTestApp(),
 						dedent`
 							<script>
 								import { languageTags, i } from "@inlang/sdk-js"
@@ -495,7 +488,7 @@ describe.skip("transformLayoutSvelte", () => {
 				it("resolves imports correctly (not-reactive)", async () => {
 					const transformed = transformLayoutSvelte(
 						"",
-						initTransformConfig({
+						initTestApp({
 							languageInUrl: true,
 						}),
 						dedent`

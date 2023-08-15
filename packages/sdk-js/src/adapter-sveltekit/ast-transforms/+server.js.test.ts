@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { initTransformConfig } from "./test.utils.js"
+import { initTestApp } from "./test.utils.js"
 import { transformServerRequestJs } from "./+server.js.js"
 import { dedent } from "ts-dedent"
 
@@ -8,14 +8,14 @@ import { dedent } from "ts-dedent"
 describe("transformServerRequestJs", () => {
 	test("should not do anything if no SDK import is found", () => {
 		const code = "export const GET = () => new Repsonse('hi')"
-		const config = initTransformConfig()
+		const config = initTestApp()
 		const transformed = transformServerRequestJs("", config, code)
 		expect(transformed).toEqual(code)
 	})
 
 	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
 		const code = "import '@inlang/sdk-js/no-transforms'"
-		const config = initTransformConfig()
+		const config = initTestApp()
 		const transformed = transformServerRequestJs("", config, code)
 		expect(transformed).toEqual(code)
 	})
@@ -23,7 +23,7 @@ describe("transformServerRequestJs", () => {
 	test("should transform '@inlang/sdk-js' imports correctly", () => {
 		const transformed = transformServerRequestJs(
 			"",
-			initTransformConfig(),
+			initTestApp(),
 			dedent`
 				import { i } from '@inlang/sdk-js'
 
@@ -40,7 +40,7 @@ describe("transformServerRequestJs", () => {
 	test("should transform function declaration to function expression", () => {
 		const transformed = transformServerRequestJs(
 			"",
-			initTransformConfig(),
+			initTestApp(),
 			dedent`
 				import { languages } from '@inlang/sdk-js'
 
@@ -61,7 +61,7 @@ describe("transformServerRequestJs", () => {
 	test("should transform multiple '@inlang/sdk-js' imports correctly", () => {
 		const transformed = transformServerRequestJs(
 			"",
-			initTransformConfig(),
+			initTestApp(),
 			dedent`
 				import { json } from '@sveltejs/kit'
 				import { i, language } from '@inlang/sdk-js'

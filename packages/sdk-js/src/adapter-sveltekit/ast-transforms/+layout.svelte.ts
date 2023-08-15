@@ -5,7 +5,7 @@ import {
 	removeImport,
 } from "../../ast-transforms/utils/imports.js"
 import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
-import type { TransformConfig } from "../vite-plugin/config.js"
+import type { TransformConfig } from "../vite-plugin/inlang-app.js"
 import { transformSvelte } from "./_.svelte.js"
 import { dedent } from "ts-dedent"
 import { isOptOutImportPresent } from "./utils/imports.js"
@@ -50,7 +50,7 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 	addImport(sourceFile, "$app/environment", "browser")
 
 	// remove imports to avoid conflicts, those imports get added in a reactive way
-	removeImport(sourceFile, "@inlang/sdk-js", "i", "language", "sourceLanguageTag")
+	removeImport(sourceFile, "@inlang/sdk-js", "i", "languageTag", "sourceLanguageTag")
 
 	const index = addOrMoveDataExportAndReturnIndex(sourceFile)
 
@@ -62,7 +62,7 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 				addRuntimeToGlobalThis(getRuntimeFromData(data))
 				addRuntimeToContext(getRuntimeFromData(data))
 				;({ i, languageTag } = getRuntimeFromContext())
-				document.body.parentElement?.setAttribute('lang', language)
+				document.body.parentElement?.setAttribute('lang', languageTag)
 			}
 		`,
 	)

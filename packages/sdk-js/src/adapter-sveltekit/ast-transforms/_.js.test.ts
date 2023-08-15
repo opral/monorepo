@@ -1,19 +1,19 @@
 import { describe, expect, test } from "vitest"
 import { transformJs } from "./_.js.js"
-import { initTransformConfig } from "./test.utils.js"
+import { initTestApp } from "./test.utils.js"
 import { dedent } from "ts-dedent"
 
 describe("transformJs", () => {
 	test("should not do anything if no SDK import is found", () => {
 		const code = "export const fn = () => 'hi'"
-		const config = initTransformConfig()
+		const config = initTestApp()
 		const transformed = transformJs("", config, code)
 		expect(transformed).toEqual(code)
 	})
 
 	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
 		const code = "import '@inlang/sdk-js/no-transforms'"
-		const config = initTransformConfig()
+		const config = initTestApp()
 		const transformed = transformJs("", config, code)
 		expect(transformed).toEqual(code)
 	})
@@ -21,7 +21,7 @@ describe("transformJs", () => {
 	test("should transform '@inlang/sdk-js' imports correctly", () => {
 		const transformed = transformJs(
 			"",
-			initTransformConfig(),
+			initTestApp(),
 			dedent`
 				import { i } from '@inlang/sdk-js'
 
@@ -39,7 +39,7 @@ describe("transformJs", () => {
 		expect(() =>
 			transformJs(
 				"/test.js",
-				initTransformConfig(),
+				initTestApp(),
 				dedent`
 				import { i } from '@inlang/sdk-js'
 

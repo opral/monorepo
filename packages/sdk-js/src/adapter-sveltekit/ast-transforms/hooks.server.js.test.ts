@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest"
 import { dedent } from "ts-dedent"
 import { transformHooksServerJs } from "./hooks.server.js.js"
-import { initTransformConfig } from "./test.utils.js"
+import { initTestApp } from "./test.utils.js"
 
 // TODO: create test matrix for all possible combinations
 
@@ -10,7 +10,7 @@ describe("transformHooksServerJs", () => {
 		describe("lang-in-slug", () => {
 			test("non-static", () => {
 				const code = ""
-				const config = initTransformConfig({ languageInUrl: true })
+				const config = initTestApp({ languageInUrl: true })
 				const transformed = transformHooksServerJs("", config, code)
 
 				expect(transformed).toMatchInlineSnapshot(`
@@ -19,7 +19,6 @@ describe("transformHooksServerJs", () => {
 					import { redirect } from '@sveltejs/kit';
 					import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
 					export const handle = initHandleWrapper({
-					    inlangConfigModule: import(\\"../inlang.config.js\\"),
 					    excludedRoutes: [],
 					    parseLanguageTag: ({ url }) => url.pathname.split(\\"/\\")[1],
 					    initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
@@ -33,13 +32,12 @@ describe("transformHooksServerJs", () => {
 
 			test("static", () => {
 				const code = ""
-				const config = initTransformConfig({ languageInUrl: true, isStatic: true })
+				const config = initTestApp({ languageInUrl: true, isStatic: true })
 				const transformed = transformHooksServerJs("", config, code)
 
 				expect(transformed).toMatchInlineSnapshot(`
 					"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
 					export const handle = initHandleWrapper({
-					    inlangConfigModule: import(\\"../inlang.config.js\\"),
 					    excludedRoutes: [],
 					    parseLanguageTag: ({ url }) => url.pathname.split(\\"/\\")[1],
 					}).use(({ resolve, event }) => resolve(event));"
@@ -50,13 +48,12 @@ describe("transformHooksServerJs", () => {
 		describe("spa", () => {
 			test("static", () => {
 				const code = ""
-				const config = initTransformConfig({ isStatic: true })
+				const config = initTestApp({ isStatic: true })
 				const transformed = transformHooksServerJs("", config, code)
 
 				expect(transformed).toMatchInlineSnapshot(`
 					"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
 					export const handle = initHandleWrapper({
-					    inlangConfigModule: import(\\"../inlang.config.js\\"),
 					    excludedRoutes: [],
 					    parseLanguageTag: () => undefined,
 					}).use(({ resolve, event }) => resolve(event));"
@@ -84,7 +81,7 @@ describe("transformHooksServerJs", () => {
 				};
 			}
 		`
-		const config = initTransformConfig()
+		const config = initTestApp()
 		const transformed = transformHooksServerJs("", config, code)
 		expect(transformed).toMatchInlineSnapshot(`
 			"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
@@ -102,7 +99,6 @@ describe("transformHooksServerJs", () => {
 			    };
 			}
 			export const handle = initHandleWrapper({
-			    inlangConfigModule: import(\\"../inlang.config.js\\"),
 			    excludedRoutes: [],
 			    parseLanguageTag: () => undefined,
 			}).use(({ resolve, event }) => resolve(event));"
@@ -112,7 +108,7 @@ describe("transformHooksServerJs", () => {
 	test("should wrap handle if already defined", () => {
 		const transformed = transformHooksServerJs(
 			"",
-			initTransformConfig(),
+			initTestApp(),
 			dedent`
 				export function handle({ event, resolve }) {
 					console.info('TADAA!')
@@ -124,7 +120,6 @@ describe("transformHooksServerJs", () => {
 		expect(transformed).toMatchInlineSnapshot(`
 			"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
 			export const handle = initHandleWrapper({
-			    inlangConfigModule: import(\\"../inlang.config.js\\"),
 			    excludedRoutes: [],
 			    parseLanguageTag: () => undefined,
 			}).use(function handle({ event, resolve }) {
@@ -137,7 +132,7 @@ describe("transformHooksServerJs", () => {
 	test("should wrap handle if sequence helper get's used", () => {
 		const transformed = transformHooksServerJs(
 			"",
-			initTransformConfig(),
+			initTestApp(),
 			dedent`
 				import { sequence } from '@sveltejs/kit'
 
@@ -161,7 +156,6 @@ describe("transformHooksServerJs", () => {
 			    return resolve(event);
 			}
 			export const handle = initHandleWrapper({
-			    inlangConfigModule: import(\\"../inlang.config.js\\"),
 			    excludedRoutes: [],
 			    parseLanguageTag: () => undefined,
 			}).use(sequence(handle1, handle2));"
@@ -170,7 +164,7 @@ describe("transformHooksServerJs", () => {
 
 	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
 		const code = "import '@inlang/sdk-js/no-transforms'"
-		const config = initTransformConfig()
+		const config = initTestApp()
 		const transformed = transformHooksServerJs("", config, code)
 		expect(transformed).toEqual(code)
 	})
@@ -179,7 +173,7 @@ describe("transformHooksServerJs", () => {
 		test("should transform imports correctly", () => {
 			const transformed = transformHooksServerJs(
 				"",
-				initTransformConfig(),
+				initTestApp(),
 				dedent`
 					import { i } from '@inlang/sdk-js'
 
@@ -193,7 +187,6 @@ describe("transformHooksServerJs", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
 				export const handle = initHandleWrapper({
-				    inlangConfigModule: import(\\"../inlang.config.js\\"),
 				    excludedRoutes: [],
 				    parseLanguageTag: () => undefined,
 				}).use(({ event, resolve }, { i }) => {

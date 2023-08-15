@@ -2,12 +2,12 @@ import { dedent } from "ts-dedent"
 import type { ViteDevServer, Plugin } from "vite"
 import { assertAppTemplateIsCorrect } from "./checks/appTemplate.js"
 import { assertRoutesFolderPathExists, assertNecessaryFilesArePresent } from "./checks/routes.js"
-import { getTransformConfig, resetConfig, type TransformConfig } from "./config.js"
+import { initInlangApp, resetApp, type TransformConfig } from "./inlang-app.js"
 import { filePathForOutput, getFileInformation } from "./fileInformation.js"
 import { transformCode } from "../ast-transforms/index.js"
 import { InlangSdkException } from "./exceptions.js"
 import { inspect } from "node:util"
-import { initInlangApp } from "./inlang-app.js"
+import { } from "./inlang-app.js"
 
 let viteServer: ViteDevServer | undefined
 
@@ -43,15 +43,13 @@ export const plugin = () => {
 		},
 
 		async load(id) {
-			const app = await initInlangApp()
-			const config = await getTransformConfig()
 			if (id === resolvedVirtualModuleId) {
+				const app = await initInlangApp()
 				return dedent`
-					export const sourceLanguageTag = ${JSON.stringify(config.inlang.sourceLanguageTag)}
-					export const languageTags = ${JSON.stringify(config.inlang.languageTags)}
-					export const resources = ${JSON.stringify(
-						// @ts-ignore
-						await config.inlang.readResources({ config: config.inlang }),
+					export const sourceLanguageTag = ${JSON.stringify(app.inlang.config().sourceLanguageTag)}
+					export const languageTags = ${JSON.stringify(app.inlang.config().languageTags)}
+					export const messages = ${JSON.stringify(
+						app.inlang.query.messages.getAll(),
 					)}
 				`
 			}
@@ -61,15 +59,14 @@ export const plugin = () => {
 
 		async buildStart() {
 			const app = await initInlangApp()
-			const config = await getTransformConfig()
 
-			await assertAppTemplateIsCorrect(config)
-			await assertRoutesFolderPathExists(config)
-			const hasCreatedANewFile = await assertNecessaryFilesArePresent(config)
+			await assertAppTemplateIsCorrect(app)
+			await assertRoutesFolderPathExists(app)
+			const hasCreatedANewFile = await assertNecessaryFilesArePresent(app)
 
 			if (hasCreatedANewFile) {
 				setTimeout(() => {
-					resetConfig()
+					resetApp()
 					viteServer && viteServer.restart()
 				}, 1000) // if the server immediately get's restarted, then you would not be able to kill the process with CTRL + C; It seems that delaying the restart fixes this issue
 			}
@@ -77,22 +74,21 @@ export const plugin = () => {
 
 		async transform(code, id) {
 			const app = await initInlangApp()
-			const config = await getTransformConfig()
-			const fileInformation = getFileInformation(config, id)
+			const fileInformation = getFileInformation(app, id)
 			// eslint-disable-next-line unicorn/no-null
 			if (!fileInformation) return null
 
-			const filePath = filePathForOutput(config, id)
+			const filePath = filePathForOutput(app, id)
 
 			let transformedCode: string = code
 			try {
-				transformedCode = transformCode(id, config, code, fileInformation)
+				transformedCode = transformCode(id, app, code, fileInformation)
 			} catch (error) {
 				throw new InlangTransformException(filePath, error as Error)
 			}
 
-			if (config.debug || includesDebugImport(code)) {
-				logConfig(config)
+			if (app.debug || includesDebugImport(code)) {
+				logConfig(app)
 
 				console.info(dedent`
 					-- INLANG DEBUG START ----------------------------------------------------------
