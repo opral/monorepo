@@ -22,6 +22,15 @@ function asyncPassing(): Promise<string> {
 expectType<Result<string, unknown>>(tryCatch(() => syncPassing()))
 expectType<Result<string, unknown>>(await tryCatch(() => asyncPassing()))
 
+const result = tryCatch(() => syncPassing())
+if (result.error) {
+	expectType<undefined>(result.data)
+	expectType<unknown>(result.error)
+} else {
+	expectType<string>(result.data)
+	expectType<undefined>(result.error)
+}
+
 describe("sync", () => {
 	it("should return an error if the callback throws", () => {
 		const result = tryCatch(() => syncFailing())
