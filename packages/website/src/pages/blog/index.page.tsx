@@ -2,7 +2,7 @@ import { Title, Meta } from "@solidjs/meta"
 import { For } from "solid-js"
 import { Layout } from "../Layout.jsx"
 import type { PageProps } from "./@id/index.page.jsx"
-import { defaultLanguage } from "@src/renderer/_default.page.route.js"
+import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
 
 export function Page(props: PageProps) {

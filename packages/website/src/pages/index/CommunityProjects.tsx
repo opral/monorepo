@@ -1,9 +1,9 @@
 import { For, Show } from "solid-js"
 import { repositories } from "./repositories.js"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
-import { useLocalStorage } from "@src/services/local-storage/index.js"
+import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { useI18n } from "@solid-primitives/i18n"
-import { defaultLanguage } from "@src/renderer/_default.page.route.js"
+import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 
 export function CommunityProjects() {
 	const [store] = useLocalStorage()

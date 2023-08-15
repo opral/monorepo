@@ -1,7 +1,7 @@
 import { LandingPageLayout as RootLayout } from "../Layout.jsx"
 import { useI18n } from "@solid-primitives/i18n"
 import { Meta, Title } from "@solidjs/meta"
-import { NewsletterForm } from "@src/components/NewsletterForm.jsx"
+import { NewsletterForm } from "#src/components/NewsletterForm.jsx"
 
 export type PageProps = {
 	markdown: string

@@ -1,4 +1,4 @@
-import { defaultLanguage } from "@src/renderer/_default.page.route.js"
+import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 
 export type LocalStorageSchema = {
 	/**

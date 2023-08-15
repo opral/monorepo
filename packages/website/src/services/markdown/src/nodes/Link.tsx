@@ -1,5 +1,5 @@
 import { useI18n } from "@solid-primitives/i18n"
-import { defaultLanguage } from "@src/renderer/_default.page.route.js"
+import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { JSXElement, Match, Switch } from "solid-js"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 

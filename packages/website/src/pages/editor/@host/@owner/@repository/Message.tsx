@@ -5,17 +5,11 @@ import { PatternEditor } from "./components/PatternEditor.jsx"
 import { showFilteredMessage } from "./helper/showFilteredMessage.js"
 import IconCopy from "~icons/material-symbols/content-copy-outline"
 import copy from "clipboard-copy"
-import { showToast } from "@src/components/Toast.jsx"
+import { showToast } from "#src/components/Toast.jsx"
 import type { Message as MessageType } from "@inlang/app"
 
-export function Message(props: {
-	message: MessageType
-}) {
-	const {
-		inlang,
-		sourceLanguageTag,
-		filteredLanguageTags,
-	} = useEditorState()
+export function Message(props: { message: MessageType }) {
+	const { inlang, sourceLanguageTag, filteredLanguageTags } = useEditorState()
 	const sourceMessage = () => {
 		return props.message.body[sourceLanguageTag()!]
 	}
@@ -88,7 +82,11 @@ export function Message(props: {
 										languageTag={languageTag}
 										id={props.message.id}
 										sourceMessage={sourceMessage()}
-										variant={props.message["body"][languageTag] ? props.message["body"][languageTag]![0] : undefined}
+										variant={
+											props.message["body"][languageTag]
+												? props.message["body"][languageTag]![0]
+												: undefined
+										}
 									/>
 								</Show>
 							</>

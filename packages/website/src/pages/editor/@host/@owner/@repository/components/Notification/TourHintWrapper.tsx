@@ -1,11 +1,7 @@
 import { JSXElement, JSX, Show } from "solid-js"
-import { useLocalStorage } from "@src/services/local-storage/index.js"
+import { useLocalStorage } from "#src/services/local-storage/index.js"
 
-export type TourStepId =
-	| "github-login"
-	| "fork-repository"
-	| "missing-message-rule"
-	| "textfield"
+export type TourStepId = "github-login" | "fork-repository" | "missing-message-rule" | "textfield"
 
 export type Position = "top-right" | "top-left" | "bottom-right" | "bottom-left"
 

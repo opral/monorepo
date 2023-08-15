@@ -1,4 +1,4 @@
-import { currentPageContext } from "@src/renderer/state.js"
+import { currentPageContext } from "#src/renderer/state.js"
 import {
 	createContext,
 	createEffect,
@@ -10,10 +10,10 @@ import {
 	useContext,
 } from "solid-js"
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
-import type { LocalStorageSchema } from "@src/services/local-storage/index.js"
-import { getLocalStorage, useLocalStorage } from "@src/services/local-storage/index.js"
-import { github } from "@src/services/github/index.js"
-import { showToast } from "@src/components/Toast.jsx"
+import type { LocalStorageSchema } from "#src/services/local-storage/index.js"
+import { getLocalStorage, useLocalStorage } from "#src/services/local-storage/index.js"
+import { github } from "#src/services/github/index.js"
+import { showToast } from "#src/components/Toast.jsx"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
 import { coreUsedConfigEvent, telemetryBrowser, parseOrigin } from "@inlang/telemetry"
@@ -233,8 +233,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	 * The reference resource.
 	 */
 	const sourceMessages = () =>
-		inlang()?.query.messages.getAll()
-		.filter((message) => message.body["languageTag"] === sourceLanguageTag())
+		inlang()
+			?.query.messages.getAll()
+			.filter((message) => message.body["languageTag"] === sourceLanguageTag())
 
 	const [localStorage] = useLocalStorage() ?? []
 
@@ -318,14 +319,14 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				configPath: "./inlang.config.json",
 				nodeishFs: fs(),
 				_import: async () =>
-				({
-					default: {
-						// @ts-ignore
-						plugins: [...pluginJson.plugins],
-						// @ts-ignore
-						lintRules: [...pluginLint.lintRules],
-					},
-				} satisfies InlangModule)
+					({
+						default: {
+							// @ts-ignore
+							plugins: [...pluginJson.plugins],
+							// @ts-ignore
+							lintRules: [...pluginLint.lintRules],
+						},
+					} satisfies InlangModule),
 			})
 			const config = inlang.config()
 			if (config) {
@@ -347,9 +348,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				telemetryBrowser.capture(coreUsedConfigEvent.name, coreUsedConfigEvent.properties(config))
 			}
 			return inlang
-		}
+		},
 	)
-
 
 	//the effect should skip tour guide steps if not needed
 	createEffect(() => {
