@@ -74,7 +74,7 @@ export const plugin: Plugin<PluginSettings> = {
 		keywords: ["json", "generic"],
 	},
 	loadMessages: async ({ languageTags, settings, nodeishFs }) => {
-		settings.variableReferencePattern = settings.variableReferencePattern || ["{{", "}}"]
+		settings.variableReferencePattern = settings.variableReferencePattern || ["{", "}"]
 		throwIfInvalidSettings(settings)
 		SPACING = {}
 		NESTED = {}
@@ -86,7 +86,7 @@ export const plugin: Plugin<PluginSettings> = {
 		})
 	},
 	saveMessages: async ({ messages, settings, nodeishFs }) => {
-		settings.variableReferencePattern = settings.variableReferencePattern || ["{{", "}}"]
+		settings.variableReferencePattern = settings.variableReferencePattern || ["{", "}"]
 		throwIfInvalidSettings(settings)
 		return saveMessages({
 			nodeishFs,
@@ -231,7 +231,7 @@ const addVariantToMessages = (
 /**
  * Parses a pattern.
  *
- * @example parsePattern("Hello {{name}}!", ["{{", "}}"])
+ * @example parsePattern("Hello {name}!", ["{", "}"])
  */
 function parsePattern(
 	text: string,

@@ -21,6 +21,21 @@ describe("option pathPattern", () => {
 		}
 	})
 
+	it("should throw if the path pattern uses double curly brackets for {languageTag} variable reference", async () => {
+		const fs = await createMockNodeishFs()
+		await fs.writeFile("./en.json", "{}")
+		try {
+			await plugin.loadMessages!({
+				languageTags: ["en"],
+				settings: { pathPattern: "./{{languageTag}}.json" },
+				nodeishFs: fs,
+			})
+			throw new Error("should not reach this")
+		} catch (e) {
+			expect((e as Error).message).toContain("pathPattern")
+		}
+	})
+
 	it("should throw if the path pattern string does not end with '.json'", async () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile("./en.json", "{}")
@@ -45,6 +60,25 @@ describe("option pathPattern", () => {
 				settings: {
 					pathPattern: {
 						common: "./common.json",
+					},
+				},
+				nodeishFs: fs,
+			})
+			throw new Error("should not reach this")
+		} catch (e) {
+			expect((e as Error).message).toContain("pathPattern")
+		}
+	})
+
+	it("should throw if the path pattern with namespaces uses double curly brackets for {languageTag} variable reference", async () => {
+		const fs = await createMockNodeishFs()
+		await fs.writeFile("./en.json", "{}")
+		try {
+			await plugin.loadMessages!({
+				languageTags: ["en"],
+				settings: {
+					pathPattern: {
+						common: "./{{languageTag}}.json",
 					},
 				},
 				nodeishFs: fs,
@@ -386,7 +420,7 @@ describe("saveMessage", () => {
 describe("variable reference", () => {
 	it("should correctly identify variable reference (at the end)", async () => {
 		const fs = await createMockNodeishFs()
-		await fs.writeFile("./en.json", JSON.stringify({ test: "Hello {{username}}" }))
+		await fs.writeFile("./en.json", JSON.stringify({ test: "Hello {username}" }))
 		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
@@ -399,7 +433,7 @@ describe("variable reference", () => {
 
 	it("should correctly identify variable reference (at the beginning)", async () => {
 		const fs = await createMockNodeishFs()
-		await fs.writeFile("./en.json", JSON.stringify({ test: "{{username}} the great" }))
+		await fs.writeFile("./en.json", JSON.stringify({ test: "{username} the great" }))
 		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
@@ -709,7 +743,7 @@ describe("formatting", () => {
 describe("roundTrip", () => {
 	it("should serialize newly added messages", async () => {
 		const enResource = `{
-	"test": "{{username}}"
+	"test": "{username}"
 }`
 
 		const fs = await createMockNodeishFs()
@@ -748,7 +782,7 @@ describe("roundTrip", () => {
 		})
 		const newFile = (await fs.readFile("./en.json", { encoding: "utf-8" })) as string
 		const json = JSON.parse(newFile)
-		expect(json.test).toBe("{{username}}")
+		expect(json.test).toBe("{username}")
 		expect(json.test2).toBe("This is new")
 	})
 

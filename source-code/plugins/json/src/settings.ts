@@ -16,6 +16,10 @@ export function throwIfInvalidSettings(settings: PluginSettings) {
 			throw new Error(
 				"The pathPattern setting must be defined and include the {languageTag} variable reference. An example would be './resources/{languageTag}.json'.",
 			)
+		} else if (settings.pathPattern.includes("{{languageTag}}") === true) {
+			throw new Error(
+				"The pathPattern setting must use single brackets instead of double brackets for the {languageTag} variable reference. An example would be './resources/{languageTag}.json'.",
+			)
 		} else if (settings.pathPattern.endsWith(".json") === false) {
 			throw new Error(
 				"The pathPattern setting must end with '.json'. An example would be './resources/{languageTag}.json'.",
@@ -30,6 +34,10 @@ export function throwIfInvalidSettings(settings: PluginSettings) {
 			if (path === undefined || path.includes("{languageTag}") === false) {
 				throw new Error(
 					"The pathPattern setting must be defined and include the {languageTag} variable reference An example would be './resources/{languageTag}.json'.",
+				)
+			} else if (path === undefined || path.includes("{{languageTag}}") === true) {
+				throw new Error(
+					"The pathPattern setting must use single brackets instead of double brackets for the {languageTag} variable reference. An example would be './resources/{languageTag}.json'.",
 				)
 			} else if (path.endsWith(".json") === false) {
 				throw new Error(
