@@ -22,11 +22,17 @@ type RuntimeContext<
 	languageTag: LanguageTag
 	i: InlangFunction
 	changeLanguageTag: (languageTag: LanguageTag) => Promise<void>
-	loadResource: SvelteKitClientRuntime["loadMessages"]
+		loadMessages: SvelteKitClientRuntime["loadMessages"]
 	route: (href: RelativeUrl) => RelativeUrl
-	switchLanguage: (languageTag: LanguageTag) => Promise<void>
+		/** @deprecated Use `changeLanguageTag` instead. */
+		switchLanguage: (languageTag: LanguageTag) => Promise<void>
+		/** @deprecated Use `loadMessages` instead. */
+		loadResource: SvelteKitClientRuntime["loadMessages"]
+	/** @deprecated Use `sourceLanguageTag` instead. */
 	referenceLanguage: LanguageTag
+		/** @deprecated Use `languageTag` instead. */
 	language: LanguageTag
+		/** @deprecated Use `languageTags` instead. */
 	languages: LanguageTag[]
 }
 
@@ -38,10 +44,7 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 		sourceLanguageTag,
 		languageTags,
 		i,
-		loadMessages: loadResource,
-		referenceLanguage,
-		language,
-		languages,
+		loadMessages,
 	} = runtime
 
 	const changeLanguageTag = async (languageTag: LanguageTagBase) => {
@@ -58,15 +61,25 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 		sourceLanguageTag,
 		languageTags,
 		i,
-		loadResource,
+		loadMessages,
 		changeLanguageTag,
 		route,
-		referenceLanguage,
-		language: language!,
-		languages,
+		get referenceLanguage() {
+			return runtime.referenceLanguage
+		},
+		get languages() {
+			return runtime.languages
+		},
+		get language() {
+			return runtime.language!
+		},
 		switchLanguage: (...args: Parameters<typeof changeLanguageTag>) => {
 			logDeprecation("switchLanguage", "changeLanguageTag")
 			return changeLanguageTag(...args)
+		},
+		loadResource: (...args: Parameters<typeof runtime.loadResource>) => {
+			logDeprecation("loadResource", "loadMessages")
+			return runtime.loadResource(...args)
 		},
 	})
 }

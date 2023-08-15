@@ -22,7 +22,7 @@ export const changeLanguageTag: (languageTag: LanguageTag) => Promise<void> = ()
 	throw error
 }
 
-export const loadResource: Runtime["loadMessages"] = () => {
+export const loadMessages: Runtime["loadMessages"] = () => {
 	throw error
 }
 
@@ -32,6 +32,8 @@ export const route: (href: RelativeUrl) => RelativeUrl = () => {
 
 /** @deprecated Use `changeLanguageTag` instead. */
 export const switchLanguage = changeLanguageTag
+/** @deprecated Use `loadMessages` instead. */
+export const loadResource = loadMessages
 /** @deprecated Use `sourceLanguageTag` instead. */
 export const referenceLanguage = sourceLanguageTag
 /** @deprecated Use `languageTags` instead. */

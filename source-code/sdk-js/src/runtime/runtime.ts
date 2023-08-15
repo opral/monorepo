@@ -14,8 +14,8 @@ type MaybePromise<T> = T | Promise<T>
 export type RuntimeContext<
 	LanguageTag extends LanguageTagBase = LanguageTagBase,
 	LoadMessagesMaybePromise extends
-		| (Message[] | undefined)
-		| Promise<Message[] | undefined> = MaybePromise<Message[] | undefined>,
+	| (Message[] | undefined)
+	| Promise<Message[] | undefined> = MaybePromise<Message[] | undefined>,
 > = {
 	loadMessages: (languageTag: LanguageTag) => LoadMessagesMaybePromise
 }
@@ -125,6 +125,11 @@ export const initBaseRuntime = <
 			logDeprecation("switchLanguage", "changeLanguageTag")
 			return changeLanguageTag(...args)
 		},
+		/** @deprecated Use `loadMessages` instead. */
+		loadResource: (...args: Parameters<typeof loadMessages>) => {
+			logDeprecation("loadResource", "loadMessages")
+			return _loadMessages(...args)
+		},
 		/** @deprecated Use `languageTag` instead. */
 		get language() {
 			logDeprecation("language", "languageTag")
@@ -148,18 +153,27 @@ export const initRuntimeWithLanguageInformation = <
 	)
 
 	return {
-		...runtime,
-		get languageTag() {
-			return runtime.languageTag
-		},
+		loadMessages: runtime.loadMessages,
+		changeLanguageTag: runtime.changeLanguageTag,
 		get i() {
 			return runtime.i
+		},
+		get languageTag() {
+			return runtime.languageTag
 		},
 		get sourceLanguageTag() {
 			return context.sourceLanguageTag
 		},
 		get languageTags() {
 			return context.languageTags
+		},
+		/** @deprecated Use `changeLanguageTag` instead. */
+		switchLanguage: (...args: Parameters<typeof runtime.switchLanguage>) => {
+			return runtime.switchLanguage(...args)
+		},
+		/** @deprecated Use `loadMessages` instead. */
+		loadResource: (...args: Parameters<typeof runtime.loadResource>) => {
+			return runtime.loadResource(...args)
 		},
 		/** @deprecated Use `languageTag` instead. */
 		get language(): LanguageTag | undefined {

@@ -115,7 +115,7 @@ export const initTransformConfig = async (): Promise<TransformConfig> => {
 			(await getInstalledVersionOfPackage("@sveltejs/kit"))
 
 		resolve({
-			debug: !settings.debug,
+			debug: settings.debug,
 
 			sourceLanguageTag: inlang.config().sourceLanguageTag,
 			languageTags: inlang.config().languageTags,

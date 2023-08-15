@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises"
+import { mkdir, rm, writeFile } from "node:fs/promises"
 import path, { dirname } from "node:path"
 import { dedent } from "ts-dedent"
 import { doesPathExist, type TransformConfig } from "../inlang-app.js"
@@ -30,11 +30,11 @@ export const assertNecessaryFilesArePresent = async (config: TransformConfig) =>
 		switch (fileType) {
 			case "hooks.server.js":
 				return `${config.svelteKit.files.serverHooks}.${fileEnding}`
-			case "[language].json":
+			case "[languageTag].json":
 				return path.resolve(
 					config.svelteKit.files.routes,
 					"inlang",
-					"[language].json",
+					"[languageTag].json",
 					`+server.${fileEnding}`,
 				)
 			case "+layout.server.js":
@@ -64,7 +64,7 @@ export const assertNecessaryFilesArePresent = async (config: TransformConfig) =>
 
 	const filesTypesToCreate = [
 		`hooks.server.js`,
-		`[language].json`,
+		`[languageTag].json`,
 		`+layout.server.js`,
 		`+layout.js`,
 		"+layout.svelte",
@@ -92,6 +92,8 @@ export const assertNecessaryFilesArePresent = async (config: TransformConfig) =>
 						You can remove this comment and modify the file as you like. We just need to make sure it exists.
 						Please do not delete it (inlang will recreate it if needed).
 					`
+
+					// TODO: show log message
 					await writeFile(
 						path,
 						path.endsWith(".svelte") ? `<!-- ${message} -->` : `/* ${message} */`,

@@ -1,5 +1,5 @@
 <script>
-	import { i, languageTags, switchLanguage } from "@inlang/sdk-js"
+	import { i, languageTags, changeLanguageTag } from "@inlang/sdk-js"
 	import { onMount } from "svelte"
 	import { test } from "./test.js"
 
@@ -9,7 +9,7 @@
 </script>
 
 {#each languageTags as lang}
-	<button on:click={() =>switchLanguage(lang)}>{lang}</button>
+	<button on:click={() => changeLanguageTag(lang)}>{lang}</button>
 {/each}
 
 <h1>{i("welcome")}</h1>

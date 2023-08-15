@@ -8,7 +8,7 @@ import { createEffect } from "./solid.js"
  */
 export function createReactiveQuery(messages: () => Array<Message>): MessageQueryApi {
 	//let index: ReactiveMap<string, Message>
-	const index = new ReactiveMap<string, Message>([])
+	const index = new ReactiveMap<string, Message>(messages().map((message) => [message.id, message]))
 
 	createEffect(() => {
 		// TODO: update index
