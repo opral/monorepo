@@ -15,7 +15,6 @@ import type {
 	Text,
 	Message,
 	VariableReference,
-	LintReport,
 	LanguageTag,
 	Variant,
 } from "@inlang/app"
@@ -114,17 +113,17 @@ export function PatternEditor(props: {
 	const copy: () => Variant | undefined = () =>
 		props.variant
 			? // clone variant
-			  structuredClone(props.variant)
+			structuredClone(props.variant)
 			: // new variant
-			  ({
-					match: {},
-					pattern: [
-						{
-							type: "Text",
-							value: "",
-						},
-					],
-			  } satisfies Variant)
+			({
+				match: {},
+				pattern: [
+					{
+						type: "Text",
+						value: "",
+					},
+				],
+			} satisfies Variant)
 
 	// const [_isFork] = createResource(
 	// 	() => localStorage.user,
@@ -257,6 +256,7 @@ export function PatternEditor(props: {
 			return machineLearningWarningDialog?.show()
 		}
 		setMachineTranslationIsLoading(true)
+		console.warn("needs to be implemented :)")
 		// const [translation, exception] = await rpc.machineTranslate({
 		// 	text,
 		// 	sourceLanguageTag: inlang()?.config().sourceLanguageTag!,
@@ -276,19 +276,16 @@ export function PatternEditor(props: {
 
 	const getNotificationHints = () => {
 		const notifications: Array<Notification> = []
-		if (props.variant?.pattern) {
-			inlang()
-				?.lint.reports()
-				.map((report: LintReport) => {
-					if (report.messageId === props.id && report.languageTag === props.languageTag) {
-						return notifications.push({
-							notificationTitle: report.ruleId,
-							notificationDescription: report.body.en,
-							notificationType: report.level,
-						})
-					}
+		inlang()?.lint.reports().map((report) => {
+			if (report.messageId === props.id && report.languageTag === props.languageTag) {
+				console.log(report)
+				notifications.push({
+					notificationTitle: inlang()?.meta.lintRules().find((rule) => rule.id === report.ruleId)?.displayName["en"] || report.ruleId,
+					notificationDescription: report.body.en,
+					notificationType: report.level,
 				})
-		}
+			}
+		})
 
 		if (hasChanges() && localStorage.user === undefined) {
 			notifications.push({

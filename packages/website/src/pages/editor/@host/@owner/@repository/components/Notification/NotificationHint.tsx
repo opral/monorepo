@@ -53,8 +53,8 @@ const getDominantType = (notifications: Array<Notification>) => {
 	return dominantType
 }
 
-export const getTypeBasedStyling = (type: "off" | "warn" | "error") => {
-	if (type === "warn") {
+export const getTypeBasedStyling = (type: "off" | "warning" | "error") => {
+	if (type === "warning") {
 		return "hover:bg-warning/10 text-warning"
 	} else if (type === "error") {
 		return "hover:bg-danger/10 text-danger"
