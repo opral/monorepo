@@ -20,7 +20,7 @@ export function createReactiveQuery(messages: () => Array<Message>): MessageQuer
 
 	return {
 		create: ({ data }) => {
-			index.set(data.id, data)
+			return index.set(data.id, data)
 		},
 		get: ({ where }) => {
 			return structuredClone(index.get(where.id))

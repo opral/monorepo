@@ -11,14 +11,10 @@ describe("get", () => {
 			let message: Message | undefined
 			createEffect(() => {
 				message = query.get({ where: { id: "1" } })
-				console.log(1, message)
 			})
-			await new Promise((resolve) => setTimeout(resolve, 0))
 			expect(message).toBeUndefined()
 
-			query.create({ data: { id: "1", selectors: [], body: {} } })
-			await new Promise((resolve) => setTimeout(resolve, 0))
-
+			await query.create({ data: { id: "1", selectors: [], body: {} } })
 			expect(message).toBeDefined()
 
 			const anotherMessage = query.get({ where: { id: "1" } })
