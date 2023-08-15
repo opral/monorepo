@@ -1,13 +1,12 @@
 import { createSignal, onMount, Show } from "solid-js"
 import { useEditorIsFocused, createTiptapEditor } from "solid-tiptap"
-import { useLocalStorage } from "@src/services/local-storage/index.js"
+import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
-import { showToast } from "@src/components/Toast.jsx"
+import { showToast } from "#src/components/Toast.jsx"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
 import { Shortcut } from "./Shortcut.jsx"
-import { rpc } from "@inlang/rpc"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { getTextValue, setTipTapMessage } from "../helper/parse.js"
 import { getEditorConfig } from "../helper/editorSetup.js"
@@ -18,7 +17,7 @@ import type {
 	VariableReference,
 	LintReport,
 	LanguageTag,
-	Variant
+	Variant,
 } from "@inlang/app"
 
 /**
@@ -38,7 +37,7 @@ export function PatternEditor(props: {
 		userIsCollaborator,
 		routeParams,
 		filteredLanguageTags,
-		inlang
+		inlang,
 	} = useEditorState()
 
 	const [variableReferences, setVariableReferences] = createSignal<VariableReference[]>([])
@@ -97,7 +96,7 @@ export function PatternEditor(props: {
 		// 		props.variableReference,
 		// 	)
 		// } else {
-			return getEditorConfig(textArea, props.variant, variableReferences())
+		return getEditorConfig(textArea, props.variant, variableReferences())
 		// }
 	})
 
@@ -117,13 +116,15 @@ export function PatternEditor(props: {
 			? // clone variant
 			  structuredClone(props.variant)
 			: // new variant
-			  {
+			  ({
 					match: {},
-					pattern: [{
+					pattern: [
+						{
 							type: "Text",
-							value: ""
-					}]
-			  } satisfies Variant
+							value: "",
+						},
+					],
+			  } satisfies Variant)
 
 	// const [_isFork] = createResource(
 	// 	() => localStorage.user,
@@ -157,7 +158,7 @@ export function PatternEditor(props: {
 		// 			change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
 		// 	)?.newCopy.pattern.elements
 		// } else {
-			compare_elements = props.variant?.pattern
+		compare_elements = props.variant?.pattern
 		// }
 		if (_updatedText) {
 			if (JSON.stringify(_updatedText) !== JSON.stringify(compare_elements)) {
@@ -233,18 +234,19 @@ export function PatternEditor(props: {
 		}
 		let text = ""
 		Object.values(props.sourceMessage).some((value) => {
-			text = (value.pattern.map((pattern) => {
-				if (pattern.type === "Text") {
-					return pattern.value.toLocaleLowerCase()
-				} else if (pattern.type === "VariableReference") {
-					return pattern.name.toLowerCase()
-				} else {
-					return false
-				}
-			}).join(""))
-		}
-	)
-		
+			text = value.pattern
+				.map((pattern) => {
+					if (pattern.type === "Text") {
+						return pattern.value.toLocaleLowerCase()
+					} else if (pattern.type === "VariableReference") {
+						return pattern.name.toLowerCase()
+					} else {
+						return false
+					}
+				})
+				.join("")
+		})
+
 		if (text === "") {
 			return showToast({
 				variant: "info",
@@ -255,35 +257,37 @@ export function PatternEditor(props: {
 			return machineLearningWarningDialog?.show()
 		}
 		setMachineTranslationIsLoading(true)
-		const [translation, exception] = await rpc.machineTranslate({
-			text,
-			sourceLanguageTag: inlang()?.config().sourceLanguageTag!,
-			targetLanguageTag: props.languageTag,
-		})
-		if (exception) {
-			showToast({
-				variant: "warning",
-				title: "Machine translation failed.",
-				message: exception.message,
-			})
-		} else {
-			editor().commands.setContent(setTipTapMessage( [{ type: "Text", value: translation }]))
-		}
+		// const [translation, exception] = await rpc.machineTranslate({
+		// 	text,
+		// 	sourceLanguageTag: inlang()?.config().sourceLanguageTag!,
+		// 	targetLanguageTag: props.languageTag,
+		// })
+		// if (exception) {
+		// 	showToast({
+		// 		variant: "warning",
+		// 		title: "Machine translation failed.",
+		// 		message: exception.message,
+		// 	})
+		// } else {
+		// 	editor().commands.setContent(setTipTapMessage([{ type: "Text", value: translation }]))
+		// }
 		setMachineTranslationIsLoading(false)
 	}
 
 	const getNotificationHints = () => {
 		const notifications: Array<Notification> = []
 		if (props.variant?.pattern) {
-			inlang()?.lint.reports().map((report: LintReport) => {
-				if (report.messageId === props.id && report.languageTag === props.languageTag) {
-					return notifications.push({
-						notificationTitle: report.ruleId,
-						notificationDescription: report.body.en,
-						notificationType: report.level,
-					})
-				}					
-			})
+			inlang()
+				?.lint.reports()
+				.map((report: LintReport) => {
+					if (report.messageId === props.id && report.languageTag === props.languageTag) {
+						return notifications.push({
+							notificationTitle: report.ruleId,
+							notificationDescription: report.body.en,
+							notificationType: report.level,
+						})
+					}
+				})
 		}
 
 		if (hasChanges() && localStorage.user === undefined) {

@@ -3,7 +3,7 @@ import { FeatureGitTitle } from "../../components/FeatureGitTitle.jsx"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
 import cliImage from "./../../assets/cli-image.png"
 import copy from "clipboard-copy"
-import { showToast } from "@src/components/Toast.jsx"
+import { showToast } from "#src/components/Toast.jsx"
 import MaterialSymbolsContentCopyOutline from "~icons/material-symbols/content-copy-outline"
 
 const data = {

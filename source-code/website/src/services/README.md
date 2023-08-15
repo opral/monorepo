@@ -1,4 +1,4 @@
-# @src/services
+# #src/services
 
 Services are "services" that are not core of inlang but are required to build inlang.
 

@@ -6,7 +6,7 @@ import { Meta, Title } from "@solidjs/meta"
 import { CommunityProjects } from "../index/CommunityProjects.jsx"
 import { Button } from "../index/components/Button.jsx"
 import { useI18n } from "@solid-primitives/i18n"
-import { defaultLanguage } from "@src/renderer/_default.page.route.js"
+import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 
 export function Page() {
 	/** is not reactive because window is not reactive */

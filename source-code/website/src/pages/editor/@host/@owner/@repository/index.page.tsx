@@ -15,11 +15,11 @@ import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-ou
 import { Meta, Title } from "@solidjs/meta"
 import { EditorStateProvider, useEditorState } from "./State.jsx"
 import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
-import { rpc } from "@inlang/rpc"
+// import { rpc } from "@inlang/rpc"
 import { ListHeader, messageCount } from "./components/Listheader.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
-import { useLocalStorage } from "@src/services/local-storage/index.js"
-import type { RecentProjectType } from "@src/services/local-storage/src/schema.js"
+import { useLocalStorage } from "#src/services/local-storage/index.js"
+import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"
 import type { ModuleError, ModuleImportError } from "@inlang/module"
 
 export function Page() {
@@ -178,40 +178,40 @@ function TheActualPage() {
 							).
 							<br />
 							<br />
-										We are working on increasing the performance. Progress can be tracked in{" "}
-										<a
-											href="https://github.com/orgs/inlang/projects/9"
-											target="_blank"
-											class="link link-primary"
-										>
-											project #9
-										</a>
-										.
-									</p>
-								</div>
-							</Match>
-							<Match when={!doesInlangConfigExist()}>
-								<NoInlangConfigFoundCard />
-							</Match>
-							<Match when={doesInlangConfigExist() && messages() !== undefined}>
-								<div>
-									<ListHeader messages={messages()!} />
-									<TourHintWrapper
-										currentId="textfield"
-										position="bottom-left"
-										offset={{ x: 110, y: 144 }}
-										isVisible={tourStep() === "textfield"}
-									>
-										<For each={messages()!}>
-											{(message) => {
-												return <Message message={message} />
-											}}
+							We are working on increasing the performance. Progress can be tracked in{" "}
+							<a
+								href="https://github.com/orgs/inlang/projects/9"
+								target="_blank"
+								class="link link-primary"
+							>
+								project #9
+							</a>
+							.
+						</p>
+					</div>
+				</Match>
+				<Match when={!doesInlangConfigExist()}>
+					<NoInlangConfigFoundCard />
+				</Match>
+				<Match when={doesInlangConfigExist() && messages() !== undefined}>
+					<div>
+						<ListHeader messages={messages()!} />
+						<TourHintWrapper
+							currentId="textfield"
+							position="bottom-left"
+							offset={{ x: 110, y: 144 }}
+							isVisible={tourStep() === "textfield"}
+						>
+							<For each={messages()!}>
+								{(message) => {
+									return <Message message={message} />
+								}}
 							</For>
 						</TourHintWrapper>
 						<div
 							class="flex flex-col h-[calc(100vh_-_288px)] grow justify-center items-center min-w-full gap-2"
 							classList={{
-								["hidden"]:	messageCount(messages()!) !== 0,
+								["hidden"]: messageCount(messages()!) !== 0,
 							}}
 						>
 							<NoMatchPlaceholder />
@@ -271,55 +271,55 @@ function NoInlangConfigFoundCard() {
 /**
  * Deactivated because bug https://github.com/inlang/inlang/issues/838#issuecomment-1560745678
  */
-function NoInlangConfigFoundCardWithAutoGeneration() {
-	const { fs, setFsChange } = useEditorState()
+// function NoInlangConfigFoundCardWithAutoGeneration() {
+// 	const { fs, setFsChange } = useEditorState()
 
-	const [shouldGenerateConfig, setShouldGenerateConfig] = createSignal(false)
+// 	const [shouldGenerateConfig, setShouldGenerateConfig] = createSignal(false)
 
-	const [successGeneratingConfig, { refetch }] = createResource(shouldGenerateConfig, async () => {
-		const [configFile, error] = await rpc.generateConfigFile({
-			applicationId: "EDITOR",
-			resolveFrom: "/",
-			fs: fs(),
-		})
-		if (error) {
-			return false
-		} else {
-			await fs().writeFile("/inlang.config.js", configFile)
-			setFsChange(new Date())
-			return true
-		}
-	})
+// 	const [successGeneratingConfig, { refetch }] = createResource(shouldGenerateConfig, async () => {
+// const [configFile, error] = await rpc.generateConfigFile({
+// 	applicationId: "EDITOR",
+// 	resolveFrom: "/",
+// 	fs: fs(),
+// })
+// if (error) {
+// 	return false
+// } else {
+// 	await fs().writeFile("/inlang.config.js", configFile)
+// 	setFsChange(new Date())
+// 	return true
+// }
+// 	})
 
-	return (
-		<Show when={successGeneratingConfig() !== false} fallback={<CouldntGenerateConfigCard />}>
-			<div class="flex grow items-center justify-center">
-				<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
-					<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center" />
-					<h1 class="font-semibold pt-5">Inlang has not been set up for this repository yet.</h1>
-					<p class="pt-1.5 pb-8">
-						We can try to automatically the config for you. (The inlang.config.js file has not been
-						found at the root of the repository.)
-					</p>
-					<Switch>
-						<Match when={successGeneratingConfig() === undefined}>
-							<sl-button
-								prop:variant="primary"
-								prop:loading={successGeneratingConfig.loading}
-								onClick={() => {
-									setShouldGenerateConfig(true)
-									refetch()
-								}}
-							>
-								Try to generate config
-							</sl-button>
-						</Match>
-					</Switch>
-				</div>
-			</div>
-		</Show>
-	)
-}
+// 	return (
+// 		<Show when={successGeneratingConfig() !== false} fallback={<CouldntGenerateConfigCard />}>
+// 			<div class="flex grow items-center justify-center">
+// 				<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
+// 					<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center" />
+// 					<h1 class="font-semibold pt-5">Inlang has not been set up for this repository yet.</h1>
+// 					<p class="pt-1.5 pb-8">
+// 						We can try to automatically the config for you. (The inlang.config.js file has not been
+// 						found at the root of the repository.)
+// 					</p>
+// 					<Switch>
+// 						<Match when={successGeneratingConfig() === undefined}>
+// 							<sl-button
+// 								prop:variant="primary"
+// 								prop:loading={successGeneratingConfig.loading}
+// 								onClick={() => {
+// 									setShouldGenerateConfig(true)
+// 									refetch()
+// 								}}
+// 							>
+// 								Try to generate config
+// 							</sl-button>
+// 						</Match>
+// 					</Switch>
+// 				</div>
+// 			</div>
+// 		</Show>
+// 	)
+// }
 
 function CouldntGenerateConfigCard() {
 	return (
@@ -378,14 +378,14 @@ function RepositoryDoesNotExistOrNotAuthorizedCard() {
 			</div>
 		</div>
 	)
-	
 }
 
 const ErrorPrint = (error: any) => {
 	return (
 		<li class="pt-2">
-			<span class="font-semibold">{error.error.name}: </span><br/> 
-			{error.error.message} <br/> 
+			<span class="font-semibold">{error.error.name}: </span>
+			<br />
+			{error.error.message} <br />
 			{error.error.cause && <p>{error.error.cause}</p>}
 			{error.error.stack && <p>{error.error.stack}</p>}
 		</li>

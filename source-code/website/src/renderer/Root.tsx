@@ -9,7 +9,7 @@ import {
 } from "solid-js"
 import type { PageContextRenderer } from "./types.js"
 import { Dynamic } from "solid-js/web"
-import { LocalStorageProvider } from "@src/services/local-storage/index.js"
+import { LocalStorageProvider } from "#src/services/local-storage/index.js"
 import { I18nContext, useI18n } from "@solid-primitives/i18n"
 import { createI18nContext } from "@solid-primitives/i18n"
 

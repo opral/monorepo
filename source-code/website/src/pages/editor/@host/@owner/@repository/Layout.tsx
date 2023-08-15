@@ -1,13 +1,13 @@
 import { createEffect, createSignal, For, JSXElement, on, onMount, Show } from "solid-js"
 import { useEditorState } from "./State.jsx"
-import { Layout as RootLayout } from "@src/pages/Layout.jsx"
+import { Layout as RootLayout } from "#src/pages/Layout.jsx"
 import { SearchInput } from "./components/SearchInput.jsx"
 import { Gitfloat } from "./components/Gitfloat.jsx"
 import IconAdd from "~icons/material-symbols/add"
 import IconClose from "~icons/material-symbols/close"
 import IconTranslate from "~icons/material-symbols/translate"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
-import { showToast } from "@src/components/Toast.jsx"
+import { showToast } from "#src/components/Toast.jsx"
 import type { LanguageTag } from "@inlang/app"
 
 interface Filter {
@@ -34,7 +34,7 @@ export function Layout(props: { children: JSXElement }) {
 	const removeFilter = (filterName: string) => {
 		setSelectedFilters(selectedFilters().filter((filter: Filter) => filter.name !== filterName))
 	}
-	
+
 	const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
 	const [addLanguageText, setAddLanguageText] = createSignal("")
 	const filters: Filter[] = [
@@ -126,7 +126,7 @@ export function Layout(props: { children: JSXElement }) {
 		setFilteredLanguageTags([...filteredLanguageTags(), languageTag])
 		inlang()?.setConfig({
 			...(inlang()?.config() || {}),
-			sourceLanguageTag: inlang()?.config().sourceLanguageTag || '',
+			sourceLanguageTag: inlang()?.config().sourceLanguageTag || "",
 			modules: inlang()?.config().modules || [],
 			languageTags: [...languageTags(), languageTag],
 		})
@@ -197,7 +197,9 @@ export function Layout(props: { children: JSXElement }) {
 															onClick={() => {
 																if (filter.name === "Linting" && filteredLintRules.length === 0) {
 																	setFilteredLintRules(
-																		inlang()?.meta.lintRules().map((lintRule) => lintRule.id) ?? [],
+																		inlang()
+																			?.meta.lintRules()
+																			.map((lintRule) => lintRule.id) ?? [],
 																	)
 																}
 																addFilter(filter.name)
@@ -477,7 +479,13 @@ function LintFilter(props: { clearFunction: any }) {
 				<span class="text-left text-outline-variant grow">Select</span>
 				<a
 					class="cursor-pointer link link-primary opacity-75"
-					onClick={() => setFilteredLintRules(inlang()?.meta.lintRules().map((lintRule) => lintRule.id) ?? [])}
+					onClick={() =>
+						setFilteredLintRules(
+							inlang()
+								?.meta.lintRules()
+								.map((lintRule) => lintRule.id) ?? [],
+						)
+					}
 				>
 					All
 				</a>
@@ -490,10 +498,14 @@ function LintFilter(props: { clearFunction: any }) {
 			</div>
 			<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
 			<div class="max-h-[300px] overflow-y-auto">
-				<For each={inlang()?.meta.lintRules().map((lintRule) => lintRule) ?? []}>
-					{(lintRule) => (
-						<sl-option prop:value={lintRule.id}>{lintRule.displayName.en}</sl-option>
-					)}
+				<For
+					each={
+						inlang()
+							?.meta.lintRules()
+							.map((lintRule) => lintRule) ?? []
+					}
+				>
+					{(lintRule) => <sl-option prop:value={lintRule.id}>{lintRule.displayName.en}</sl-option>}
 				</For>
 			</div>
 		</sl-select>

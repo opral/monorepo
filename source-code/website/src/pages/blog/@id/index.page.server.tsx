@@ -1,10 +1,10 @@
-import type { OnBeforeRender } from "@src/renderer/types.js"
+import type { OnBeforeRender } from "#src/renderer/types.js"
 import type { PageProps } from "./index.page.jsx"
 import {
 	tableOfContents,
 	FrontmatterSchema,
 } from "../../../../../../content/blog/tableOfContents.js"
-import { parseMarkdown } from "@src/services/markdown/index.js"
+import { parseMarkdown } from "#src/services/markdown/index.js"
 
 /**
  * the table of contents without the html for each document

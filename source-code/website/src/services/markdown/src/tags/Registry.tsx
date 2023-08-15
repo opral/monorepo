@@ -1,7 +1,7 @@
 import { Accessor, For, Show, createEffect, createSignal, onMount } from "solid-js"
-import { Icon } from "@src/components/Icon.jsx"
+import { Icon } from "#src/components/Icon.jsx"
 import { plugins, InlangPluginManifest } from "@inlang/plugin-registry"
-import { SearchIcon } from "@src/pages/editor/@host/@owner/@repository/components/SearchInput.jsx"
+import { SearchIcon } from "#src/pages/editor/@host/@owner/@repository/components/SearchInput.jsx"
 
 export const Registry = () => {
 	const [textValue, setTextValue] = createSignal<string>("")
