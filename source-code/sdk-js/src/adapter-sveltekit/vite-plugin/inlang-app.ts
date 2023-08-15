@@ -1,4 +1,4 @@
-import { ConfigPathNotFoundError, createInlang, tryCatch, type InlangInstance } from "@inlang/app"
+import { ConfigPathNotFoundError, createInlang, tryCatch, type InlangInstance, LanguageTag, Message } from "@inlang/app"
 import { InlangSdkException } from "./exceptions.js"
 import type { NodeishFilesystem } from "@inlang-git/fs"
 import { readFile, stat, writeFile } from "node:fs/promises"
@@ -22,13 +22,21 @@ export const doesPathExist = async (path: string) => !!(await stat(path).catch((
 type VersionString = `${number}.${number}.${number}${string}`
 
 export type TransformConfig = {
-	inlang: InlangInstance // TODO: don't pass everything
 	debug: boolean
+
+	sourceLanguageTag: LanguageTag
+	languageTags: LanguageTag[]
+	readMessages: () => Promise<Message[]>
+
 	cwdFolderPath: string
-	languageInUrl: boolean
-	isStatic: boolean
-	rootRoutesFolder: string
-	settings: SdkConfig
+	options: {
+		rootRoutesFolder: string
+		languageInUrl: boolean
+		isStatic: boolean
+		resourcesCache: SdkConfig["resources"]["cache"]
+		excludedRoutes: SdkConfig["routing"]["exclude"]
+	}
+
 	svelteKit: {
 		version: VersionString | undefined
 		usesTypeScript: boolean
@@ -44,7 +52,7 @@ const PATH_TO_CWD = process.cwd()
 
 let appPromise: Promise<TransformConfig> | undefined = undefined
 
-export const initInlangApp = async (): Promise<TransformConfig> => {
+export const initTransformConfig = async (): Promise<TransformConfig> => {
 	if (appPromise) return appPromise
 
 	// eslint-disable-next-line no-async-promise-executor
@@ -57,7 +65,7 @@ export const initInlangApp = async (): Promise<TransformConfig> => {
 			if (instanceResult.error instanceof ConfigPathNotFoundError) {
 				await createBasicInlangConfig()
 				appPromise = undefined
-				return resolve(initInlangApp())
+				return resolve(initTransformConfig())
 			}
 
 			throw instanceResult.error
@@ -107,18 +115,26 @@ export const initInlangApp = async (): Promise<TransformConfig> => {
 			(await getInstalledVersionOfPackage("@sveltejs/kit"))
 
 		resolve({
-			cwdFolderPath: PATH_TO_CWD,
 			debug: !settings.debug,
-			languageInUrl,
-			isStatic,
-			rootRoutesFolder,
-			inlang,
+
+			sourceLanguageTag: inlang.config().sourceLanguageTag,
+			languageTags: inlang.config().languageTags,
+			readMessages: async () => inlang.query.messages.getAll(),
+
+			cwdFolderPath: PATH_TO_CWD,
+			options: {
+				rootRoutesFolder,
+				languageInUrl,
+				isStatic,
+				resourcesCache: settings.resources.cache,
+				excludedRoutes: settings.routing.exclude,
+			},
+
 			svelteKit: {
 				version: svelteKitVersion,
 				usesTypeScript,
 				files,
 			},
-			settings,
 		})
 	}))
 }

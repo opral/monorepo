@@ -21,7 +21,7 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 		`)
 
 	const index = sourceFile.getPos()
-	if (config.isStatic && config.settings.resources.cache === "build-time")
+	if (config.options.isStatic && config.options.resourcesCache === "build-time")
 		sourceFile.insertText(
 			index,
 			dedent`

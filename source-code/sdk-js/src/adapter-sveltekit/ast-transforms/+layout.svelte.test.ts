@@ -269,7 +269,7 @@ describe("transformLayoutSvelte", () => {
 
 		test("languageInUrl", () => {
 			const code = ""
-			const config = initTestApp({ languageInUrl: true })
+			const config = initTestApp({ options: { languageInUrl: true } })
 			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
@@ -489,7 +489,7 @@ describe.skip("transformLayoutSvelte", () => {
 					const transformed = transformLayoutSvelte(
 						"",
 						initTestApp({
-							languageInUrl: true,
+							options: { languageInUrl: true, }
 						}),
 						dedent`
 							<script>

@@ -11,7 +11,7 @@ describe("transformPageJs", () => {
 			describe("lang-in-slug", () => {
 				test("non-static", () => {
 					const code = ""
-					const config = initTestApp({ languageInUrl: true })
+					const config = initTestApp({ options: { languageInUrl: true } })
 					const transformed = transformPageJs("", config, code, true)
 
 					expect(transformed).toMatchInlineSnapshot(`
@@ -26,8 +26,10 @@ describe("transformPageJs", () => {
 				test("static", () => {
 					const code = ""
 					const config = initTestApp({
-						languageInUrl: true,
-						isStatic: true,
+						options: {
+							languageInUrl: true,
+							isStatic: true,
+						}
 					})
 					const transformed = transformPageJs("", config, code, true)
 
@@ -53,7 +55,7 @@ describe("transformPageJs", () => {
 			const code = dedent`
 				export const load = async () => { };
 			`
-			const config = initTestApp({ languageInUrl: true })
+			const config = initTestApp({ options: { languageInUrl: true } })
 			const transformed = transformPageJs("", config, code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`

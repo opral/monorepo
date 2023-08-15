@@ -1,7 +1,7 @@
 export {
 	getRuntimeFromData,
 	addRuntimeToData,
-	type DataWithRuntime,
+	type ObjectWithClientRuntime as ObjectWithRuntime,
 	addRuntimePromiseToEvent,
 	getRuntimePromiseFromEvent,
 	type EventWithRuntimePromise,

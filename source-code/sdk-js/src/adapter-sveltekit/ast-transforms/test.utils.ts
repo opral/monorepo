@@ -13,35 +13,20 @@ export const initTestApp = (
 	deepmerge(
 		{
 			debug: false,
-			isStatic: false,
-			languageInUrl: false,
-			cwdFolderPath: "",
-			rootRoutesFolder: "",
-			settings: {
-				debug: false,
-				languageNegotiation: {
-					strict: false,
-					strategies: [{ type: "localStorage", key: "languageTag" }],
-				},
-				resources: {
-					cache: "build-time",
-				},
-				routing: {
-					exclude: [],
-				},
-			},
-			// TODO:
-			inlang: {
-				config: () => ({
-					sourceLanguageTag: "en",
-					languageTags: ["en", "de"],
-					modules: [],
-					settings: {},
-				}),
 
-				readResources: async () => [],
-				writeResources: async () => undefined,
-			} as any,
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
+			readMessages: async () => [],
+
+			cwdFolderPath: "",
+			options: {
+				rootRoutesFolder: "",
+				isStatic: false,
+				languageInUrl: false,
+				resourcesCache: "build-time",
+				excludedRoutes: [],
+			},
+
 			svelteKit: {
 				usesTypeScript: false,
 				version: undefined,

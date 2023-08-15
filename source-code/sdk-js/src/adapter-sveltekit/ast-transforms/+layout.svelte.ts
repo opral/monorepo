@@ -42,7 +42,7 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 	addImport(
 		sourceFile,
 		`@inlang/sdk-js/adapter-sveltekit/client/${
-			config.languageInUrl ? "not-reactive" : "reactive-workaround"
+		config.options.languageInUrl ? "not-reactive" : "reactive-workaround"
 		}`,
 		"addRuntimeToContext",
 		"getRuntimeFromContext",
@@ -103,7 +103,7 @@ const transformMarkup = (config: TransformConfig, markup: string): string => {
 	const s1 = new MagicString(markup1)
 	const ast1 = markupToAst(markup1)
 	// TODO: only insert `if (languageTag)` reactive stores are not used
-	if (!config.languageInUrl) {
+	if (!config.options.languageInUrl) {
 		wrapMarkupChildren(s1, ast1, "{#if languageTag || !sourceLanguageTag}$$_INLANG_WRAP_$${/if}")
 	}
 

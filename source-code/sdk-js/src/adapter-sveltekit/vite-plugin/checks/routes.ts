@@ -7,10 +7,10 @@ import { InlangException } from "../../../exceptions.js"
 import { InlangSdkException } from "../exceptions.js"
 
 export const assertRoutesFolderPathExists = async (config: TransformConfig) => {
-	if (!(await doesPathExist(config.rootRoutesFolder))) {
+	if (!(await doesPathExist(config.options.rootRoutesFolder))) {
 		throw new InlangException(dedent`
 
-			Could not find the folder '${config.rootRoutesFolder.replace(config.cwdFolderPath, "")}'.
+			Could not find the folder '${config.options.rootRoutesFolder.replace(config.cwdFolderPath, "")}'.
 			It is needed in order to circumvent a current limitation of SvelteKit. See https://github.com/inlang/inlang/issues/647.
 			Please create the folder and move all existing route files into it.
 
@@ -68,7 +68,7 @@ export const assertNecessaryFilesArePresent = async (config: TransformConfig) =>
 		`+layout.server.js`,
 		`+layout.js`,
 		"+layout.svelte",
-		...(config.isStatic && config.languageInUrl
+		...(config.options.isStatic && config.options.languageInUrl
 			? ([`+page.js`, "+page.svelte"] satisfies FileType[])
 			: []),
 	] satisfies FileType[]
