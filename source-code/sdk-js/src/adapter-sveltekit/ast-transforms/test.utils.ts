@@ -1,41 +1,46 @@
 import { deepmerge } from "deepmerge-ts"
-import type { TransformConfig } from "../vite-plugin/config.js"
+import type { TransformConfig } from "../vite-plugin/inlang-app.js"
 
 type DeepPartial<T> = T extends Record<PropertyKey, unknown>
 	? {
-			[Key in keyof T]?: DeepPartial<T[Key]>
-	  }
+	[Key in keyof T]?: DeepPartial<T[Key]>
+}
 	: T
 
-export const initTransformConfig = (
+export const initTestApp = (
 	overrides: DeepPartial<TransformConfig> = {},
 ): TransformConfig =>
 	deepmerge(
 		{
+			debug: false,
 			isStatic: false,
 			languageInUrl: false,
 			cwdFolderPath: "",
 			rootRoutesFolder: "",
-			sourceFileName: "",
-			sourceMapName: "",
+			settings: {
+				debug: false,
+				languageNegotiation: {
+					strict: false,
+					strategies: [{ type: "localStorage", key: "languageTag" }],
+				},
+				resources: {
+					cache: "build-time",
+				},
+				routing: {
+					exclude: [],
+				},
+			},
+			// TODO:
 			inlang: {
-				sourceLanguageTag: "en",
-				languageTags: ["en", "de"],
+				config: () => ({
+					sourceLanguageTag: "en",
+					languageTags: ["en", "de"],
+					modules: [],
+					settings: {},
+				}),
+
 				readResources: async () => [],
 				writeResources: async () => undefined,
-				sdk: {
-					debug: false,
-					languageNegotiation: {
-						strict: false,
-						strategies: [{ type: "localStorage", key: "languageTag" }],
-					},
-					resources: {
-						cache: "build-time",
-					},
-					routing: {
-						exclude: [],
-					},
-				},
 			} as any,
 			svelteKit: {
 				usesTypeScript: false,

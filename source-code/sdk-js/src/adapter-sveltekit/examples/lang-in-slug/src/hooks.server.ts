@@ -5,7 +5,6 @@ import { redirect } from "@sveltejs/kit"
 import { replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared"
 
 export const handle = initHandleWrapper({
-	inlangConfigModule: import("../inlang.config.js"),
 	parseLanguageTag: ({ url }) => url.pathname.split("/")[1],
 	initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
 	redirect: {

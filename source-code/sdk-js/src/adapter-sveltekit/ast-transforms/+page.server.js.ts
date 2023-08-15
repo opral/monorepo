@@ -6,7 +6,7 @@ import {
 } from "../../ast-transforms/utils/imports.js"
 import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
 import { wrapExportedFunction } from "../../ast-transforms/utils/wrap.js"
-import type { TransformConfig } from "../vite-plugin/config.js"
+import type { TransformConfig } from "../vite-plugin/inlang-app.js"
 
 export const transformPageServerJs = (filePath: string, config: TransformConfig, code: string) => {
 	const sourceFile = codeToSourceFile(code, filePath)

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { initTransformConfig } from "./test.utils.js"
+import { initTestApp } from "./test.utils.js"
 import { transformPageServerJs } from "./+page.server.js.js"
 import { dedent } from "ts-dedent"
 
@@ -8,14 +8,14 @@ import { dedent } from "ts-dedent"
 describe("transformPageServerJs", () => {
 	test("should not do anything if no SDK import is found", () => {
 		const code = "export cons tload = () => ({ })"
-		const config = initTransformConfig()
+		const config = initTestApp()
 		const transformed = transformPageServerJs("", config, code)
 		expect(transformed).toEqual(code)
 	})
 
 	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
 		const code = "import '@inlang/sdk-js/no-transforms'"
-		const config = initTransformConfig()
+		const config = initTestApp()
 		const transformed = transformPageServerJs("", config, code)
 		expect(transformed).toEqual(code)
 	})
@@ -23,7 +23,7 @@ describe("transformPageServerJs", () => {
 	test("should transform '@inlang/sdk-js' imports correctly", () => {
 		const transformed = transformPageServerJs(
 			"",
-			initTransformConfig(),
+			initTestApp(),
 			dedent`
 				import { i } from '@inlang/sdk-js'
 

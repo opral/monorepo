@@ -9,15 +9,12 @@ import type { LanguageTag } from "@inlang/app"
 
 // ------------------------------------------------------------------------------------------------
 
-type InlangConfigModule = any
-
 type WrappedHandle = (
 	input: Parameters<Kit.Handle>[0],
 	runtime: SvelteKitServerRuntime,
 ) => ReturnType<Kit.Handle>
 
 type HandleOptions = {
-	inlangConfigModule: Promise<InlangConfigModule>
 	parseLanguageTag: (event: Kit.RequestEvent) => LanguageTag | undefined
 	initDetectors?: (event: Kit.RequestEvent) => Detector[]
 	redirect?: {
@@ -51,9 +48,7 @@ export const initHandleWrapper = (options: HandleOptions) => ({
 					return resolve(event)
 				}
 
-				const { sourceLanguageTag, languageTags } = await initState(
-					await options.inlangConfigModule,
-				)
+				const { sourceLanguageTag, languageTags } = await initState()
 
 				let languageTag = options.parseLanguageTag(event)
 				// TODO: create `isLanguage` helper function
@@ -112,8 +107,7 @@ export const initRootLayoutServerLoadWrapper = <
 				runtime: SvelteKitServerRuntime,
 			) => Promise<Data> | Data,
 		) =>
-		async (event: Parameters<LayoutServerLoad>[0]): Promise<Data & LayoutServerDataPayload> => {
-		async (event: Parameters<LayoutServerLoad>[0]): Promise<Data & LayoutServerDataPayload> => {
+			async (event: Parameters<LayoutServerLoad>[0]): Promise<Data & LayoutServerDataPayload> => {
 			const runtime = getRuntimeFromLocals(event.locals)
 
 			// TODO: only insert if languageTag detection strategy url is used

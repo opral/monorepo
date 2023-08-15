@@ -1,42 +1,46 @@
-import type { InlangConfig } from "@inlang/app"
-import type { RequestEvent } from "@sveltejs/kit"
-import { initConfig } from "../../../config/config.js"
+import type { RequestEvent } from '@sveltejs/kit'
+import { initInlangApp } from "../../../adapter-sveltekit/vite-plugin/inlang-app.js"
 import { inlangSymbol } from "../shared/utils.js"
 import type { SvelteKitServerRuntime } from "./runtime.js"
 import type { LanguageTag } from "@inlang/app"
 import type { Message } from "@inlang/messages"
 
-let config: InlangConfig | undefined
+type State = {
+	sourceLanguageTag: LanguageTag,
+	languageTags: LanguageTag[],
+	readMessages: () => Promise<Message[]>
+}
 
-// @ts-ignore
-export const initState = async (module: InlangConfigModule) => {
-	if (!config && !import.meta.env.DEV) {
+let state: State
+
+export const initState = async () => {
+	if (!state && !import.meta.env.DEV) {
 		try {
-			const { languageTags, sourceLanguageTag, resources } = await import("virtual:inlang-static")
-
-			config = {
+			const { languageTags, sourceLanguageTag, messages } = await import("virtual:inlang-static")
+			state = {
 				sourceLanguageTag,
 				languageTags,
-				readResources: async () => resources,
-				writeResources: async () => undefined,
-			} as any as InlangConfig
+				readMessages: async () => messages,
+			} as State
 		} catch {
 			/* empty */
 		}
 	}
 
-	if (!config) {
-		// @ts-ignore
-		config = await initConfig(module)
+	if (!state) {
+		const inlang = await initInlangApp()
+		state = {
+			sourceLanguageTag: inlang.inlang.config().sourceLanguageTag,
+			languageTags: inlang.inlang.config().languageTags,
+			readMessages: async () => inlang.inlang.query.messages.getAll(),
+		}
 	}
 
 	await reloadMessages()
 
 	return {
-		// @ts-ignore
-		sourceLanguageTag: config.referenceLanguage,
-		// @ts-ignore
-		languageTags: config.languages,
+		sourceLanguageTag: state.sourceLanguageTag,
+		languageTags: state.languageTags,
 	}
 }
 
@@ -46,8 +50,7 @@ let _messages: Message[] = []
 
 // TODO: fix resources if needed (add missing Keys, etc.)
 export const reloadMessages = async () =>
-	// @ts-ignore
-	(_messages = ((await config?.readResources({ config })) as any) || [])
+	(_messages = (await state?.readMessages()) || [])
 
 export const loadMessages = (languageTag: LanguageTag) => _messages // TODO: filter
 

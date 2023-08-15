@@ -1,5 +1,5 @@
 import path, { normalize } from "node:path"
-import type { TransformConfig } from "./config.js"
+import type { TransformConfig } from "./inlang-app.js"
 
 export type FileType =
 	| "hooks.server.js"

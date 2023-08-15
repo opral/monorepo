@@ -1,5 +1,5 @@
 import { readFile, writeFile } from "node:fs/promises"
-import type { TransformConfig } from "../config.js"
+import type { TransformConfig } from "../inlang-app.js"
 
 export const assertAppTemplateIsCorrect = async ({ svelteKit, cwdFolderPath }: TransformConfig) => {
 	const appTemplatePath = svelteKit.files.appTemplate

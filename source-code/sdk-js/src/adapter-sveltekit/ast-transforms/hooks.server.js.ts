@@ -7,7 +7,7 @@ import {
 } from "../../ast-transforms/utils/imports.js"
 import { wrapExportedFunction } from "../../ast-transforms/utils/wrap.js"
 import { nodeToCode, codeToNode, codeToSourceFile } from "../../ast-transforms/utils/js.util.js"
-import type { TransformConfig } from "../vite-plugin/config.js"
+import type { TransformConfig } from "../vite-plugin/inlang-app.js"
 
 // TODO: test
 const addImports = (
@@ -31,21 +31,18 @@ const addImports = (
 const getOptions = (config: TransformConfig) => {
 	const options = dedent`
 	{
-		inlangConfigModule: import("../inlang.config.js"),
-		excludedRoutes: ${JSON.stringify(config.inlang.sdk.routing.exclude)},
-		parseLanguageTag: ${
-			config.languageInUrl ? `({ url }) => url.pathname.split("/")[1]` : `() => undefined`
+		excludedRoutes: ${JSON.stringify(config.settings.routing.exclude)},
+		parseLanguageTag: ${config.languageInUrl ? `({ url }) => url.pathname.split("/")[1]` : `() => undefined`
 		},
-		${
-			!config.isStatic && config.languageInUrl
-				? `
+		${!config.isStatic && config.languageInUrl
+			? `
 			initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
 			redirect: {
 				throwable: redirect,
 				getPath: ({ url }, languageTag) => replaceLanguageInUrl(url, languageTag),
 			},
 		`
-				: ""
+		: ""
 		},
 	}`
 

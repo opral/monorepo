@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { dedent } from "ts-dedent"
-import { initTransformConfig } from "./test.utils.js"
+import { initTestApp } from "./test.utils.js"
 import { transformPageJs } from "./+page.js.js"
 
 // TODO: create test matrix for all possible combinations
@@ -11,7 +11,7 @@ describe("transformPageJs", () => {
 			describe("lang-in-slug", () => {
 				test("non-static", () => {
 					const code = ""
-					const config = initTransformConfig({ languageInUrl: true })
+					const config = initTestApp({ languageInUrl: true })
 					const transformed = transformPageJs("", config, code, true)
 
 					expect(transformed).toMatchInlineSnapshot(`
@@ -25,7 +25,7 @@ describe("transformPageJs", () => {
 
 				test("static", () => {
 					const code = ""
-					const config = initTransformConfig({
+					const config = initTestApp({
 						languageInUrl: true,
 						isStatic: true,
 					})
@@ -53,7 +53,7 @@ describe("transformPageJs", () => {
 			const code = dedent`
 				export const load = async () => { };
 			`
-			const config = initTransformConfig({ languageInUrl: true })
+			const config = initTestApp({ languageInUrl: true })
 			const transformed = transformPageJs("", config, code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`
@@ -69,7 +69,7 @@ describe("transformPageJs", () => {
 	describe("non-root", () => {
 		test("should not do anything", () => {
 			const code = ""
-			const config = initTransformConfig()
+			const config = initTestApp()
 			const transformed = transformPageJs("", config, code, false)
 			expect(transformed).toEqual(code)
 		})
@@ -77,7 +77,7 @@ describe("transformPageJs", () => {
 
 	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
 		const code = "import '@inlang/sdk-js/no-transforms'"
-		const config = initTransformConfig()
+		const config = initTestApp()
 		const transformed = transformPageJs("", config, code, true)
 		expect(transformed).toEqual(code)
 	})
@@ -85,7 +85,7 @@ describe("transformPageJs", () => {
 	test("should transform '@inlang/sdk-js' imports correctly", () => {
 		const transformed = transformPageJs(
 			"",
-			initTransformConfig(),
+			initTestApp(),
 			dedent`
 				import { languages } from '@inlang/sdk-js'
 

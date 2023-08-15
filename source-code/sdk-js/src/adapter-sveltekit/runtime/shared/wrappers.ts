@@ -54,7 +54,7 @@ const initRuntime = async (
 		// TODO: warn only during development
 		const useWarn = (defaultValue?: unknown) => () =>
 			console.warn(
-				"inlang was not correctly set up on this page. Please check `routing.exclude` in your `inlang.config.js` file.",
+				"inlang was not correctly set up on this page. Please check the `routing.exclude` settings in your `inlang.config.json` file.",
 			)! || defaultValue
 		return {
 			i: useWarn(""),
