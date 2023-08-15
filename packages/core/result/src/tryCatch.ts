@@ -22,9 +22,9 @@ export function tryCatch<Data>(
 				.then((data) => ({ data } as SuccessResult<Data>))
 				.catch((error) => ({ error } as ErrorResult<unknown>))
 		}
-		return { data: callbackResult } as any
+		return { data: callbackResult } as SuccessResult<Data>
 	} catch (e) {
-		return { error: e } as any
+		return { error: e } as ErrorResult<unknown>
 	}
 }
 
