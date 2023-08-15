@@ -68,6 +68,7 @@ describe("transformLayoutSvelte", () => {
 				<h1>this is a test</h1>
 
 				<p>{JSON.stringify(data, null, 3)}</p>{/key}{/if}"
+				<p>{JSON.stringify(data, null, 3)}</p>{/key}{/if}"
 			`)
 		})
 
@@ -118,11 +119,13 @@ describe("transformLayoutSvelte", () => {
 				other test
 
 				{/key}{/if}<svelte:head>
+				{/key}{/if}<svelte:head>
 					<title>test</title>
 				</svelte:head>{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
 				{/key}{/if}<svelte:options tag=\\"test\\" />{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
+				random content{/key}{/if}"
 				random content{/key}{/if}"
 			`)
 		})
@@ -225,6 +228,7 @@ describe("transformLayoutSvelte", () => {
 				</script>{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
 				<slot />{/key}{/if}"
+				<slot />{/key}{/if}"
 			`)
 		})
 
@@ -264,6 +268,7 @@ describe("transformLayoutSvelte", () => {
 				console.info(i(\\"welcome\\"));
 				</script>{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
+				<slot />{/key}{/if}"
 				<slot />{/key}{/if}"
 			`)
 		})
@@ -400,6 +405,7 @@ describe("transformLayoutSvelte", () => {
 				    doSomething();
 				</script>{#if languageTag || !sourceLanguageTag}{#key languageTag}
 
+				<button on:click={() => switchLanguage('en')}>Switch Language</button>{/key}{/if}"
 				<button on:click={() => switchLanguage('en')}>Switch Language</button>{/key}{/if}"
 			`)
 		})

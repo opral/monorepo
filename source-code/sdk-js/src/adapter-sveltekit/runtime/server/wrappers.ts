@@ -113,6 +113,7 @@ export const initRootLayoutServerLoadWrapper = <
 			) => Promise<Data> | Data,
 		) =>
 		async (event: Parameters<LayoutServerLoad>[0]): Promise<Data & LayoutServerDataPayload> => {
+		async (event: Parameters<LayoutServerLoad>[0]): Promise<Data & LayoutServerDataPayload> => {
 			const runtime = getRuntimeFromLocals(event.locals)
 
 			// TODO: only insert if languageTag detection strategy url is used
