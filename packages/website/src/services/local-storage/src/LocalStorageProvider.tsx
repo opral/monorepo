@@ -67,13 +67,17 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 			// set user to undefined if an error occurs
 			.catch(() => setStore("user", undefined))
 
-		// listen for changes in other windows
-		window.addEventListener("storage", onStorageSetByOtherWindow)
+		if (typeof window !== "undefined") {
+			// listen for changes in other windows
+			window.addEventListener("storage", onStorageSetByOtherWindow)
+		}
 	})
 
 	onCleanup(() => {
 		// remove listener
-		window.removeEventListener("storage", onStorageSetByOtherWindow)
+		if (typeof window !== "undefined") {
+			window.removeEventListener("storage", onStorageSetByOtherWindow)
+		}
 	})
 
 	/** changed in another window should be reflected. thus listen for changes  */
