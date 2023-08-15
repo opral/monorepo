@@ -17,7 +17,7 @@ const addImports = (
 ) => {
 	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/server", wrapperFunctionName)
 
-	if (!config.isStatic && config.languageInUrl) {
+	if (!config.options.isStatic && config.options.languageInUrl) {
 		addImport(sourceFile, "@sveltejs/kit", "redirect")
 		addImport(sourceFile, "@inlang/sdk-js/detectors/server", "initAcceptLanguageHeaderDetector")
 		addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/shared", "replaceLanguageInUrl")
@@ -31,10 +31,10 @@ const addImports = (
 const getOptions = (config: TransformConfig) => {
 	const options = dedent`
 	{
-		excludedRoutes: ${JSON.stringify(config.settings.routing.exclude)},
-		parseLanguageTag: ${config.languageInUrl ? `({ url }) => url.pathname.split("/")[1]` : `() => undefined`
+		excludedRoutes: ${JSON.stringify(config.options.excludedRoutes)},
+		parseLanguageTag: ${config.options.languageInUrl ? `({ url }) => url.pathname.split("/")[1]` : `() => undefined`
 		},
-		${!config.isStatic && config.languageInUrl
+		${!config.options.isStatic && config.options.languageInUrl
 			? `
 			initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
 			redirect: {

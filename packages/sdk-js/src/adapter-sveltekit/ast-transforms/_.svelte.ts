@@ -46,7 +46,7 @@ const transformSdkImports = (config: TransformConfig, sourceFile: SourceFile) =>
 	addImport(
 		sourceFile,
 		`@inlang/sdk-js/adapter-sveltekit/client/${
-			config.languageInUrl ? "not-reactive" : "reactive-workaround"
+		config.options.languageInUrl ? "not-reactive" : "reactive-workaround"
 		}`,
 		"getRuntimeFromContext",
 	)

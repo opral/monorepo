@@ -4,7 +4,7 @@ import { initSvelteKitClientRuntime, type SvelteKitClientRuntime } from "../clie
 import {
 	addRuntimePromiseToEvent,
 	addRuntimeToData,
-	type DataWithRuntime,
+	type ObjectWithClientRuntime,
 	type EventWithRuntimePromise,
 	getRuntimePromiseFromEvent,
 	wait,
@@ -98,7 +98,7 @@ export const initRootLayoutLoadWrapper = <
 				runtime: SvelteKitClientRuntime,
 			) => Promise<Data> | Data,
 		) =>
-		async (event: Parameters<LayoutLoad>[0]): Promise<DataWithRuntime<Data>> => {
+			async (event: Parameters<LayoutLoad>[0]): Promise<ObjectWithClientRuntime<Data>> => {
 			const runtime = await initRuntimeForWrappers(event, options)
 
 			const payload = await load(event, runtime)

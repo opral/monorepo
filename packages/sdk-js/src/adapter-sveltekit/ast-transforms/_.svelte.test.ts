@@ -91,7 +91,7 @@ describe("transformSvelte", () => {
 					import { languageTags, i } from "@inlang/sdk-js"
 				</script>
 			`
-			const config = initTestApp({ languageInUrl: true })
+			const config = initTestApp({ options: { languageInUrl: true } })
 			const transformed = transformSvelte("", config, code)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script context=\\"module\\">

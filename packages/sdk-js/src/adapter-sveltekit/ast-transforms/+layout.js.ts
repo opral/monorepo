@@ -20,7 +20,7 @@ const addImports = (
 	wrapperFunctionName: string,
 ) => {
 	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/shared", wrapperFunctionName)
-	if (root && !config.languageInUrl) {
+	if (root && !config.options.languageInUrl) {
 		addImport(sourceFile, "$app/environment", "browser")
 		addImport(
 			sourceFile,
@@ -36,7 +36,7 @@ const addImports = (
 // TODO: use ast transformation instead of string manipulation
 // TODO: test
 const getOptions = (config: TransformConfig, root: boolean) =>
-	config.languageInUrl
+	config.options.languageInUrl
 		? "{}"
 		: dedent`
 			{

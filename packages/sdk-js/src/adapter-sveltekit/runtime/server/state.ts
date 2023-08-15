@@ -1,15 +1,11 @@
 import type { RequestEvent } from '@sveltejs/kit'
-import { initInlangApp } from "../../../adapter-sveltekit/vite-plugin/inlang-app.js"
-import { inlangSymbol } from "../shared/utils.js"
+import { initTransformConfig, type TransformConfig } from "../../../adapter-sveltekit/vite-plugin/inlang-app.js"
+import { inlangSymbol, type ObjectWithClientRuntime } from "../shared/utils.js"
 import type { SvelteKitServerRuntime } from "./runtime.js"
 import type { LanguageTag } from "@inlang/app"
 import type { Message } from "@inlang/messages"
 
-type State = {
-	sourceLanguageTag: LanguageTag,
-	languageTags: LanguageTag[],
-	readMessages: () => Promise<Message[]>
-}
+type State = Pick<TransformConfig, 'sourceLanguageTag' | 'languageTags' | 'readMessages'>
 
 let state: State
 
@@ -28,11 +24,11 @@ export const initState = async () => {
 	}
 
 	if (!state) {
-		const inlang = await initInlangApp()
+		const config = await initTransformConfig()
 		state = {
-			sourceLanguageTag: inlang.inlang.config().sourceLanguageTag,
-			languageTags: inlang.inlang.config().languageTags,
-			readMessages: async () => inlang.inlang.query.messages.getAll(),
+			sourceLanguageTag: config.sourceLanguageTag,
+			languageTags: config.languageTags,
+			readMessages: config.readMessages,
 		}
 	}
 
@@ -56,10 +52,16 @@ export const loadMessages = (languageTag: LanguageTag) => _messages // TODO: fil
 
 // ------------------------------------------------------------------------------------------------
 
+// ------------------------------------------------------------------------------------------------
+
+type ObjectWithServerRuntime<Data extends Record<string, unknown> = Record<string, unknown>> = Data & {
+	[inlangSymbol]: SvelteKitServerRuntime
+}
+
 export const addRuntimeToLocals = (
 	locals: RequestEvent["locals"],
 	runtime: SvelteKitServerRuntime,
-) => ((locals as any)[inlangSymbol] = runtime)
+) => ((locals as ObjectWithServerRuntime)[inlangSymbol] = runtime)
 
 export const getRuntimeFromLocals = (locals: RequestEvent["locals"]): SvelteKitServerRuntime =>
-	(locals as any)[inlangSymbol]
+	(locals as ObjectWithServerRuntime)[inlangSymbol]

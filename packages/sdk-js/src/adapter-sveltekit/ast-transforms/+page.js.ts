@@ -22,7 +22,7 @@ const addImports = (
 	addImport(ast, "$app/environment", "browser")
 	addImport(ast, "@inlang/sdk-js/adapter-sveltekit/shared", wrapperFunctionName)
 
-	if (config.languageInUrl && config.isStatic) {
+	if (config.options.languageInUrl && config.options.isStatic) {
 		addImport(ast, "@inlang/sdk-js/adapter-sveltekit/shared", "replaceLanguageInUrl")
 		addImport(
 			ast,
@@ -38,7 +38,7 @@ const addImports = (
 
 // TODO: test
 const getOptions = (config: TransformConfig, root: boolean) =>
-	config.languageInUrl && config.isStatic
+	config.options.languageInUrl && config.options.isStatic
 		? dedent`
 			{
 					browser,

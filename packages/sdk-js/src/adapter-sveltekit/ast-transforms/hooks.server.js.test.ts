@@ -10,7 +10,7 @@ describe("transformHooksServerJs", () => {
 		describe("lang-in-slug", () => {
 			test("non-static", () => {
 				const code = ""
-				const config = initTestApp({ languageInUrl: true })
+				const config = initTestApp({ options: { languageInUrl: true } })
 				const transformed = transformHooksServerJs("", config, code)
 
 				expect(transformed).toMatchInlineSnapshot(`
@@ -32,7 +32,7 @@ describe("transformHooksServerJs", () => {
 
 			test("static", () => {
 				const code = ""
-				const config = initTestApp({ languageInUrl: true, isStatic: true })
+				const config = initTestApp({ options: { languageInUrl: true, isStatic: true } })
 				const transformed = transformHooksServerJs("", config, code)
 
 				expect(transformed).toMatchInlineSnapshot(`
@@ -48,7 +48,7 @@ describe("transformHooksServerJs", () => {
 		describe("spa", () => {
 			test("static", () => {
 				const code = ""
-				const config = initTestApp({ isStatic: true })
+				const config = initTestApp({ options: { isStatic: true } })
 				const transformed = transformHooksServerJs("", config, code)
 
 				expect(transformed).toMatchInlineSnapshot(`

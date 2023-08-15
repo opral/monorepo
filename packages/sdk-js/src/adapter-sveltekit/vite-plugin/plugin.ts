@@ -2,7 +2,7 @@ import { dedent } from "ts-dedent"
 import type { ViteDevServer, Plugin } from "vite"
 import { assertAppTemplateIsCorrect } from "./checks/appTemplate.js"
 import { assertRoutesFolderPathExists, assertNecessaryFilesArePresent } from "./checks/routes.js"
-import { initInlangApp, resetApp, type TransformConfig } from "./inlang-app.js"
+import { initTransformConfig, resetApp, type TransformConfig } from "./inlang-app.js"
 import { filePathForOutput, getFileInformation } from "./fileInformation.js"
 import { transformCode } from "../ast-transforms/index.js"
 import { InlangSdkException } from "./exceptions.js"
@@ -44,13 +44,11 @@ export const plugin = () => {
 
 		async load(id) {
 			if (id === resolvedVirtualModuleId) {
-				const app = await initInlangApp()
+				const config = await initTransformConfig()
 				return dedent`
-					export const sourceLanguageTag = ${JSON.stringify(app.inlang.config().sourceLanguageTag)}
-					export const languageTags = ${JSON.stringify(app.inlang.config().languageTags)}
-					export const messages = ${JSON.stringify(
-						app.inlang.query.messages.getAll(),
-					)}
+					export const sourceLanguageTag = ${JSON.stringify(config.sourceLanguageTag)}
+					export const languageTags = ${JSON.stringify(config.languageTags)}
+					export const messages = ${JSON.stringify(config.readMessages())}
 				`
 			}
 
@@ -58,11 +56,11 @@ export const plugin = () => {
 		},
 
 		async buildStart() {
-			const app = await initInlangApp()
+			const config = await initTransformConfig()
 
-			await assertAppTemplateIsCorrect(app)
-			await assertRoutesFolderPathExists(app)
-			const hasCreatedANewFile = await assertNecessaryFilesArePresent(app)
+			await assertAppTemplateIsCorrect(config)
+			await assertRoutesFolderPathExists(config)
+			const hasCreatedANewFile = await assertNecessaryFilesArePresent(config)
 
 			if (hasCreatedANewFile) {
 				setTimeout(() => {
@@ -73,22 +71,22 @@ export const plugin = () => {
 		},
 
 		async transform(code, id) {
-			const app = await initInlangApp()
-			const fileInformation = getFileInformation(app, id)
+			const config = await initTransformConfig()
+			const fileInformation = getFileInformation(config, id)
 			// eslint-disable-next-line unicorn/no-null
 			if (!fileInformation) return null
 
-			const filePath = filePathForOutput(app, id)
+			const filePath = filePathForOutput(config, id)
 
 			let transformedCode: string = code
 			try {
-				transformedCode = transformCode(id, app, code, fileInformation)
+				transformedCode = transformCode(id, config, code, fileInformation)
 			} catch (error) {
 				throw new InlangTransformException(filePath, error as Error)
 			}
 
-			if (app.debug || includesDebugImport(code)) {
-				logConfig(app)
+			if (config.debug || includesDebugImport(code)) {
+				logConfig(config)
 
 				console.info(dedent`
 					-- INLANG DEBUG START ----------------------------------------------------------
@@ -116,7 +114,7 @@ let configLogged = false
 const logConfig = (config: TransformConfig) => {
 	if (configLogged) return
 
-	const { inlang: _, ...configToLog } = config
+	const { readMessages: _, ...configToLog } = config
 	console.info(dedent`
 		-- INLANG RESOLVED CONFIG ------------------------------------------------------
 

@@ -79,8 +79,10 @@ describe("transformLanguageJson", () => {
 			const transformed = transformLanguageJson(
 				"",
 				initTestApp({
-					isStatic: true,
-					settings: { resources: { cache: "build-time" } },
+					options: {
+						isStatic: true,
+						resourcesCache: "build-time",
+					}
 				}),
 				code,
 			)
