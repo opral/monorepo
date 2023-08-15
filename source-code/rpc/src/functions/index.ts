@@ -1,8 +1,8 @@
-import { machineTranslate } from "./machineTranslateMessage.js"
+import { machineTranslateMessage } from "./machineTranslateMessage.js"
 import { subscribeNewsletter } from "./subscribeNewsletter.js"
 
 export const allRpcs = {
-	machineTranslate,
+	machineTranslateMessage,
 	subscribeNewsletter,
 }
 
