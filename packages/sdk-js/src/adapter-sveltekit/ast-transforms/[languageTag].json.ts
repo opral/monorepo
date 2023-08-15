@@ -32,9 +32,9 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 	sourceFile.insertText(
 		index,
 		dedent`
-			export const GET = async ({ params: { language } }) => {
+			export const GET = async ({ params: { languageTag } }) => {
 				await reloadMessages()
-				return json(loadMessages(language) || null)
+				return json(loadMessages(languageTag) || null)
 			}
 		`,
 	)
@@ -49,7 +49,7 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 			export const entries = async () => {
 				const { languageTags } = await initState()
 
-				return languageTags.map(languageTag => ({ language: languageTag }))
+				return languageTags.map(languageTag => ({ languageTag }))
 			}
 		`,
 		)

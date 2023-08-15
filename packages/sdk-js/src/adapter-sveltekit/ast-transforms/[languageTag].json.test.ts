@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest"
 import { dedent } from "ts-dedent"
-import { transformLanguageJson } from "./[language].json.js"
+import { transformLanguageJson } from "./[languageTag].json.js"
 import { initTestApp } from "./test.utils.js"
 
 describe("transformLanguageJson", () => {
@@ -23,9 +23,9 @@ describe("transformLanguageJson", () => {
 		expect(transformed).toMatchInlineSnapshot(`
 			"import { json } from '@sveltejs/kit';
 			import { loadMessages, reloadMessages } from '@inlang/sdk-js/adapter-sveltekit/server';
-			export const GET = async ({ params: { language } }) => {
+			export const GET = async ({ params: { languageTag } }) => {
 			    await reloadMessages();
-			    return json(loadMessages(language) || null);
+			    return json(loadMessages(languageTag) || null);
 			};"
 		`)
 	})
@@ -41,9 +41,9 @@ describe("transformLanguageJson", () => {
 		expect(transformed).toMatchInlineSnapshot(`
 			"import { json } from '@sveltejs/kit';
 			import { loadMessages, reloadMessages } from '@inlang/sdk-js/adapter-sveltekit/server';
-			export const GET = async ({ params: { language } }) => {
+			export const GET = async ({ params: { languageTag } }) => {
 			    await reloadMessages();
-			    return json(loadMessages(language) || null);
+			    return json(loadMessages(languageTag) || null);
 			};
 			const someFunction = console.info(123);"
 		`)
@@ -64,12 +64,12 @@ describe("transformLanguageJson", () => {
 				"import { json } from '@sveltejs/kit';
 				export const entries = async () => {
 				    const { languageTags } = await initState();
-				    return languageTags.map(languageTag => ({ language: languageTag }));
+				    return languageTags.map(languageTag => ({ languageTag }));
 				};
 				import { initState, loadMessages, reloadMessages } from '@inlang/sdk-js/adapter-sveltekit/server';
-				export const GET = async ({ params: { language } }) => {
+				export const GET = async ({ params: { languageTag } }) => {
 				    await reloadMessages();
-				    return json(loadMessages(language) || null);
+				    return json(loadMessages(languageTag) || null);
 				};"
 			`)
 		})
@@ -90,9 +90,9 @@ describe("transformLanguageJson", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"import { json } from '@sveltejs/kit';
 				import { loadMessages, reloadMessages } from '@inlang/sdk-js/adapter-sveltekit/server';
-				export const GET = async ({ params: { language } }) => {
+				export const GET = async ({ params: { languageTag } }) => {
 				    await reloadMessages();
-				    return json(loadMessages(language) || null);
+				    return json(loadMessages(languageTag) || null);
 				};
 				export const prerender = true;"
 			`)
@@ -122,9 +122,9 @@ describe("transformLanguageJson", () => {
 		expect(transformed).toMatchInlineSnapshot(`
 			"import { json } from '@sveltejs/kit';
 			import { loadMessages, reloadMessages, initRequestHandlerWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
-			export const GET = initRequestHandlerWrapper().use(async ({ params: { language } }, { languages }) => {
+			export const GET = initRequestHandlerWrapper().use(async ({ params: { languageTag } }, { languages }) => {
 			    await reloadMessages();
-			    return json(loadMessages(language) || null);
+			    return json(loadMessages(languageTag) || null);
 			});
 			export const POST = initRequestHandlerWrapper().use(async function POST(_, { languages }) {
 			    return { languages };

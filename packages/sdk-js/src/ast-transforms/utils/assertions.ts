@@ -42,7 +42,7 @@ const getSection = (type: FileType, root: boolean) => {
 		case "+page.svelte":
 		case "*.svelte":
 			return "#*.svelte"
-		case "[language].json":
+		case "[languageTag].json":
 		case "+layout.server.js":
 		case "+layout.js":
 		case "hooks.server.js":

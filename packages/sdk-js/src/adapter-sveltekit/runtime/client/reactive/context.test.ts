@@ -95,7 +95,7 @@ describe("addRuntimeToContext", () => {
 
 		expect(mockedFetch).toHaveBeenCalledTimes(1)
 
-		await r.loadResource("de")
+		await r.loadMessages("de")
 		expect(mockedFetch).toHaveBeenCalledTimes(2)
 
 		await r.changeLanguageTag("de")

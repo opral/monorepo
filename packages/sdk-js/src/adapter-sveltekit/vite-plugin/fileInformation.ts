@@ -3,7 +3,7 @@ import type { TransformConfig } from "./inlang-app.js"
 
 export type FileType =
 	| "hooks.server.js"
-	| "[language].json"
+	| "[languageTag].json"
 	| "+server.js"
 	| "+layout.server.js"
 	| "+layout.js"
@@ -46,12 +46,12 @@ export const getFileInformation = (
 	const root = dir === config.svelteKit.files.routes
 
 	if (
-		dir === path.resolve(config.svelteKit.files.routes, "inlang", "[language].json") &&
+		dir === path.resolve(config.svelteKit.files.routes, "inlang", "[languageTag].json") &&
 		name === "+server" &&
 		scriptExtensions.includes(ext)
 	) {
 		return {
-			type: "[language].json",
+			type: "[languageTag].json",
 			root: true,
 		}
 	}

@@ -9,7 +9,7 @@ import { transformPageJs } from "./+page.js.js"
 import { transformPageServerJs } from "./+page.server.js.js"
 import { transformPageSvelte } from "./+page.svelte.js"
 import { transformServerRequestJs } from "./+server.js.js"
-import { transformLanguageJson } from "./[language].json.js"
+import { transformLanguageJson } from "./[languageTag].json.js"
 import { transformJs } from "./_.js.js"
 import { transformServerJs } from "./_.server.js.js"
 import { transformSvelte } from "./_.svelte.js"
@@ -26,7 +26,7 @@ export const transformCode = (
 	switch (type) {
 		case "hooks.server.js":
 			return transformHooksServerJs(filePath, config, code)
-		case "[language].json":
+		case "[languageTag].json":
 			return transformLanguageJson(filePath, config, code)
 		case "+server.js":
 			return transformServerRequestJs(filePath, config, code)

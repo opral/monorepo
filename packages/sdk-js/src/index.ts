@@ -4,10 +4,11 @@ export {
 	languageTag,
 	i,
 	changeLanguageTag,
-	loadResource,
+	loadMessages,
 	route,
 	// deprecated exports
 	switchLanguage,
+	loadResource,
 	referenceLanguage,
 	languages,
 	language,

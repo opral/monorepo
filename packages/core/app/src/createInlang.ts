@@ -81,8 +81,6 @@ export const createInlang = async (args: {
 				})
 		})
 
-		const query = createReactiveQuery(() => messages() ?? [])
-
 		// -- lint --------------------------------------------------------------
 
 		const [lintInitialized, setLintInitialized] = createSignal(false)
@@ -117,6 +115,8 @@ export const createInlang = async (args: {
 		await initialized.catch((e) => {
 			throw e
 		})
+
+		const query = createReactiveQuery(() => messages()!)
 
 		return {
 			meta: {

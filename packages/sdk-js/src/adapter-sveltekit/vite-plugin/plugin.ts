@@ -2,12 +2,14 @@ import { dedent } from "ts-dedent"
 import type { ViteDevServer, Plugin } from "vite"
 import { assertAppTemplateIsCorrect } from "./checks/appTemplate.js"
 import { assertRoutesFolderPathExists, assertNecessaryFilesArePresent } from "./checks/routes.js"
-import { initTransformConfig, resetApp, type TransformConfig } from "./inlang-app.js"
+import { doesPathExist, initTransformConfig, resetApp, type TransformConfig } from "./inlang-app.js"
 import { filePathForOutput, getFileInformation } from "./fileInformation.js"
 import { transformCode } from "../ast-transforms/index.js"
 import { InlangSdkException } from "./exceptions.js"
 import { inspect } from "node:util"
 import { } from "./inlang-app.js"
+import path from 'node:path'
+import { rm } from 'node:fs/promises'
 
 let viteServer: ViteDevServer | undefined
 
@@ -62,7 +64,15 @@ export const plugin = () => {
 			await assertRoutesFolderPathExists(config)
 			const hasCreatedANewFile = await assertNecessaryFilesArePresent(config)
 
-			if (hasCreatedANewFile) {
+			// remove old files // TODO: remove this in version 1
+			let deletedFolder = false
+			const pathToOldLanguagesFolder = path.resolve(config.svelteKit.files.routes, "inlang", "[language].json")
+			if (await doesPathExist(pathToOldLanguagesFolder)) {
+				await rm(pathToOldLanguagesFolder, { recursive: true })
+				deletedFolder = true
+			}
+
+			if (hasCreatedANewFile || deletedFolder) {
 				setTimeout(() => {
 					resetApp()
 					viteServer && viteServer.restart()
