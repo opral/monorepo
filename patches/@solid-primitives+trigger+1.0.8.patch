@@ -1,0 +1,15 @@
+diff --git a/node_modules/@solid-primitives/trigger/dist/index.js b/node_modules/@solid-primitives/trigger/dist/index.js
+index 2310625..fc0aa04 100644
+--- a/node_modules/@solid-primitives/trigger/dist/index.js
++++ b/node_modules/@solid-primitives/trigger/dist/index.js
+@@ -1,7 +1,8 @@
+-import { createSignal, getListener, onCleanup, DEV } from 'solid-js';
+-import { isServer } from 'solid-js/web';
++import { createSignal, getListener, onCleanup, DEV } from 'solid-js/dist/solid.js';
+ import { noop } from '@solid-primitives/utils';
+ 
++const isServer = false
++
+ // src/index.ts
+ var triggerOptions = !isServer && DEV ? { equals: false, name: "trigger" } : { equals: false };
+ var triggerCacheOptions = !isServer && DEV ? { equals: false, internal: true } : triggerOptions;

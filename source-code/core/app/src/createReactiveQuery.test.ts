@@ -3,21 +3,21 @@ import { createReactiveQuery } from './createReactiveQuery.js'
 import { createEffect, createRoot } from './solid.js'
 import type { Message, Text } from '@inlang/plugin'
 
+const createChangeListener = async (cb: () => void) => createEffect(cb)
+
 describe("get", () => {
-	it.only("should react to `create`", async () => {
+	it("should react to `create`", async () => {
 		await createRoot(async () => {
 			const query = createReactiveQuery(() => [])
 
-			let message: Message | undefined
-			createEffect(() => {
+			// eslint-disable-next-line unicorn/no-null
+			let message: Message | undefined | null = null
+			await createChangeListener(() =>
 				message = query.get({ where: { id: "1" } })
-				console.log(1, message)
-			})
-			await new Promise((resolve) => setTimeout(resolve, 0))
+			)
 			expect(message).toBeUndefined()
 
 			query.create({ data: { id: "1", selectors: [], body: {} } })
-			await new Promise((resolve) => setTimeout(resolve, 0))
 
 			expect(message).toBeDefined()
 
@@ -50,10 +50,9 @@ describe("get", () => {
 			})
 
 			let message: Message | undefined
-			createEffect(() => {
+			await createChangeListener(() =>
 				message = query.get({ where: { id: "1" } })
-			})
-			await new Promise((resolve) => setTimeout(resolve, 0))
+			)
 
 			expect(message).toBeDefined()
 			expect((message!.body.en![0]!.pattern[0]! as Text).value).toBe('before')
@@ -75,7 +74,6 @@ describe("get", () => {
 					}
 				}
 			})
-			await new Promise((resolve) => setTimeout(resolve, 0))
 
 			expect((message!.body.en![0]!.pattern[0]! as Text).value).toBe('after')
 		})
