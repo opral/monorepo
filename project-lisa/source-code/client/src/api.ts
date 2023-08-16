@@ -19,10 +19,10 @@ export type Repository = {
 	pull: (args: { author: Author, fastForward: boolean, singleBranch: true }) => any
 	add: (args: { filepath: string }) =>  Promise<Awaited<ReturnType<typeof raw.add>>>
 	listRemotes: () => Promise<Awaited<ReturnType<typeof raw.listRemotes>> | undefined>
-	log: (args: { since: any}) =>  Promise<Awaited<ReturnType<typeof raw.log>>>
+	log: (args?: { since?: Date, depth?: number }) =>  Promise<Awaited<ReturnType<typeof raw.log>>>
 	statusMatrix: (args: { filter: any }) => Promise<Awaited<ReturnType<typeof raw.statusMatrix>>>
 	status: (args: { filepath: string }) => Promise<Awaited<ReturnType<typeof raw.status>>>
-	mergeUpstream: (args: { branch: string }) => ReturnType<typeof github.request<"POST /repos/{owner}/{repo}/merge-upstream">>
+	mergeUpstream: (args: { branch: string }) => Promise<Endpoints["POST /repos/{owner}/{repo}/merge-upstream"]["response"]["data"] | undefined>
 	isCollaborator: (args: { username: string }) => Promise<boolean>
 	getOrigin: () => Promise<string>
 	getCurrentBranch: () => Promise<string | undefined>
@@ -37,7 +37,7 @@ export type Repository = {
 		} | undefined
 	}>
 
-	// TODO: implement these before publishing api, but not used in badge or editor
+	// TODO: implement these before publishing api, but not used in badge or editor, depends on strategy for statelessness
 	// currentBranch: () => unknown
 	// changeBranch: () => unknown
 }
@@ -189,10 +189,10 @@ export function open (url: string, args: { nodeishFs: NodeishFilesystem, working
 			let response
 			try {
 				response = await github.request("POST /repos/{owner}/{repo}/merge-upstream", {
-				branch: cmdArgs.branch,
-				owner,
-				repo: repoName,
-			})
+					branch: cmdArgs.branch,
+					owner,
+					repo: repoName,
+				})
 			} catch (_err) { /* ignore */ }
 
 			return response?.data
@@ -209,7 +209,7 @@ export function open (url: string, args: { nodeishFs: NodeishFilesystem, working
 						username: cmdArgs.username,
 					},
 				)
-			} catch (_err) { /* throws on non collaborator access */ }
+			} catch (_err) { /*  throws on non collaborator access */ }
 
 			return response?.status === 204 ? true : false
 		},
