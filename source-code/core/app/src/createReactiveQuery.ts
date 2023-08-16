@@ -16,8 +16,10 @@ export function createReactiveQuery(messages: () => Array<Message>): MessageQuer
 	})
 
 	return {
-		create: ({ data }) => {
+		create: ({ data }): boolean => {
+			if (index.has(data.id)) return false
 			index.set(data.id, data)
+			return true
 		},
 		get: ({ where }) => {
 			return structuredClone(index.get(where.id))
@@ -25,10 +27,11 @@ export function createReactiveQuery(messages: () => Array<Message>): MessageQuer
 		getAll: () => {
 			return structuredClone([...index.values()])
 		},
-		update: ({ where, data }) => {
+		update: ({ where, data }): boolean => {
 			const message = index.get(where.id)
-			if (message === undefined) return
+			if (message === undefined) return false
 			index.set(where.id, { ...message, ...data })
+			return true
 		},
 		upsert: ({ where, data }) => {
 			const message = index.get(where.id)
@@ -37,9 +40,12 @@ export function createReactiveQuery(messages: () => Array<Message>): MessageQuer
 			} else {
 				index.set(where.id, { ...message, ...data })
 			}
+			return true
 		},
-		delete: ({ where }) => {
+		delete: ({ where }): boolean => {
+			if (!index.has(where.id)) return false
 			index.delete(where.id)
+			return true
 		},
 	}
 }

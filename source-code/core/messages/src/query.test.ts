@@ -2,6 +2,8 @@ import { createQuery } from "./query.js"
 import { it, describe, expect } from "vitest"
 import type { Message } from "./schema.js"
 
+// TODO: test return value of mutation functions
+
 describe("create", () => {
 	const query = createQuery([])
 
