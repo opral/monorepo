@@ -40,6 +40,7 @@ export function SignInDialog(props: {
 						window.open(githubAuthUrl(props.githubAppClientId), "_blank")
 					}}
 				>
+					{/* @ts-ignore */}
 					<IconGithub slot="prefix" />
 					Sign in with GitHub
 				</sl-button>

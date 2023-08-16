@@ -63,26 +63,6 @@ function TheActualPage() {
 	 *  }
 	 */
 
-	const messages = createMemo(() => {
-		// const result: {
-		// 	[id: string]: {
-		// 		[language: LanguageTag]: LintedMessage | undefined
-		// 	}
-		// } = {}
-		// for (const resource of resources) {
-		// 	for (const id of query(resource).includedMessageIds()) {
-		// 		// defining the initial object, otherwise the following assignment will fail
-		// 		// with "cannot set property 'x' of undefined"
-		// 		if (result[id] === undefined) {
-		// 			result[id] = {}
-		// 		}
-		// 		const message = createQuery(resource).get({ where: id }) as LintedMessage
-		// 		result[id]![resource.languageTag.name] = message
-		// 	}
-		// }
-		return inlang()?.query.messages.getAll()
-	})
-
 	onMount(() => {
 		setLocalStorage("recentProjects", (prev) => {
 			let recentProjects = prev[0] !== undefined ? prev : []
@@ -193,16 +173,16 @@ function TheActualPage() {
 				<Match when={!doesInlangConfigExist()}>
 					<NoInlangConfigFoundCard />
 				</Match>
-				<Match when={doesInlangConfigExist() && messages() !== undefined}>
+				<Match when={doesInlangConfigExist() && inlang()?.query.messages.getAll() !== undefined}>
 					<div>
-						<ListHeader messages={messages()!} />
+						<ListHeader messages={inlang()?.query.messages.getAll() || []} />
 						<TourHintWrapper
 							currentId="textfield"
 							position="bottom-left"
 							offset={{ x: 110, y: 144 }}
 							isVisible={tourStep() === "textfield"}
 						>
-							<For each={messages()!}>
+							<For each={inlang()?.query.messages.getAll()}>
 								{(message) => {
 									return <Message message={message} />
 								}}
@@ -211,7 +191,7 @@ function TheActualPage() {
 						<div
 							class="flex flex-col h-[calc(100vh_-_288px)] grow justify-center items-center min-w-full gap-2"
 							classList={{
-								["hidden"]: messageCount(messages()!) !== 0,
+								["hidden"]: messageCount(inlang()?.query.messages.getAll() || []) !== 0,
 							}}
 						>
 							<NoMatchPlaceholder />
@@ -230,24 +210,24 @@ function TheActualPage() {
 }
 
 function NoInlangConfigFoundCard() {
-	const { fs, setFsChange } = useEditorState()
+	// const { fs, setFsChange } = useEditorState()
 
-	const [shouldGenerateConfig, setShouldGenerateConfig] = createSignal(false)
+	// const [shouldGenerateConfig, setShouldGenerateConfig] = createSignal(false)
 
-	const [successGeneratingConfig, { refetch }] = createResource(shouldGenerateConfig, async () => {
-		const [configFile, error] = await rpc.generateConfigFile({
-			applicationId: "EDITOR",
-			resolveFrom: "/",
-			fs: fs(),
-		})
-		if (error) {
-			return false
-		} else {
-			await fs().writeFile("/inlang.config.js", configFile)
-			setFsChange(new Date())
-			return true
-		}
-	})
+	// const [successGeneratingConfig, { refetch }] = createResource(shouldGenerateConfig, async () => {
+	// 	const [configFile, error] = await rpc.generateConfigFile({
+	// 		applicationId: "EDITOR",
+	// 		resolveFrom: "/",
+	// 		fs: fs(),
+	// 	})
+	// 	if (error) {
+	// 		return false
+	// 	} else {
+	// 		await fs().writeFile("/inlang.config.js", configFile)
+	// 		setFsChange(new Date())
+	// 		return true
+	// 	}
+	// })
 
 	return (
 		<div class="flex grow items-center justify-center">
@@ -260,6 +240,7 @@ function NoInlangConfigFoundCard() {
 				<a class="self-center" href="/documentation" target="_blank">
 					<sl-button prop:variant="text">
 						Take me to the documentation
+						{/* @ts-ignore */}
 						<MaterialSymbolsArrowOutwardRounded slot="suffix" />
 					</sl-button>
 				</a>
@@ -321,27 +302,28 @@ function NoInlangConfigFoundCard() {
 // 	)
 // }
 
-function CouldntGenerateConfigCard() {
-	return (
-		<div class="flex grow items-center justify-center">
-			<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
-				<p class="text-4xl self-center" slot="suffix">
-					😔
-				</p>
-				<h1 class="font-semibold pt-5">Couldn't generate the config file.</h1>
-				<p class="pt-1.5 pb-8">
-					Please refer to the documentation and write the config file manually.
-				</p>
-				<a class="self-center" href="/documentation" target="_blank">
-					<sl-button prop:variant="text">
-						Take me to the documentation
-						<MaterialSymbolsArrowOutwardRounded slot="suffix" />
-					</sl-button>
-				</a>
-			</div>
-		</div>
-	)
-}
+// function CouldntGenerateConfigCard() {
+// 	return (
+// 		<div class="flex grow items-center justify-center">
+// 			<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
+// 				<p class="text-4xl self-center" slot="suffix">
+// 					😔
+// 				</p>
+// 				<h1 class="font-semibold pt-5">Couldn't generate the config file.</h1>
+// 				<p class="pt-1.5 pb-8">
+// 					Please refer to the documentation and write the config file manually.
+// 				</p>
+// 				<a class="self-center" href="/documentation" target="_blank">
+// 					<sl-button prop:variant="text">
+// 						Take me to the documentation
+// 						{/* @ts-ignore */}
+// 						<MaterialSymbolsArrowOutwardRounded slot="suffix" />
+// 					</sl-button>
+// 				</a>
+// 			</div>
+// 		</div>
+// 	)
+// }
 
 function RepositoryDoesNotExistOrNotAuthorizedCard() {
 	const { routeParams } = useEditorState()
@@ -372,6 +354,7 @@ function RepositoryDoesNotExistOrNotAuthorizedCard() {
 				>
 					<sl-button prop:variant="text">
 						I need help
+						{/* @ts-ignore */}
 						<MaterialSymbolsArrowOutwardRounded slot="suffix" />
 					</sl-button>
 				</a>

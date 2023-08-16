@@ -3,7 +3,7 @@ import { For, Show } from "solid-js"
 import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
-import type { LintRule, LanguageTag, Message, MessageLintReport, LintReport, InlangConfig, SystemSettings } from "@inlang/app"
+import type { LintRule, Message, MessageLintReport } from "@inlang/app"
 
 interface ListHeaderProps {
 	messages: Message[]
@@ -20,7 +20,7 @@ export const messageCount = (
 ) => {
 	let counter = 0
 	for (const message of messages) {
-		if (showFilteredMessage(message)) counter++	
+		if (showFilteredMessage(message)) counter++
 	}
 	return counter
 }
@@ -73,6 +73,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 				fallback={
 					<div class="flex gap-2 items-center">
 						<sl-button prop:size="small" onClick={() => setFilteredId("")}>
+							{/* @ts-ignore */}
 							<IconArrowLeft slot="prefix" />
 							Back to all messages
 						</sl-button>
@@ -101,48 +102,48 @@ export const ListHeader = (props: ListHeaderProps) => {
 										: String(lintRule.id) === "missingMessage") && tourStep() === "missing-message-rule"
 								}
 							> */}
-								<sl-button
-									prop:size="small"
-									class={
-										filteredLintRules()?.includes(lintRule.rule.id || "")
-											? lintRule.level === "warning"
-												? "ring-warning/20 ring-1 rounded"
-												: "ring-danger/20 ring-1 rounded"
-											: ""
+							<sl-button
+								prop:size="small"
+								class={
+									filteredLintRules()?.includes(lintRule.rule.id || "")
+										? lintRule.level === "warning"
+											? "ring-warning/20 ring-1 rounded"
+											: "ring-danger/20 ring-1 rounded"
+										: ""
+								}
+								onClick={() => {
+									if (filteredLintRules().includes(lintRule.rule.id)) {
+										setFilteredLintRules(
+											filteredLintRules().filter((id) => id !== lintRule.rule.id),
+										)
+									} else {
+										setFilteredLintRules([lintRule.rule.id])
+										setTourStep("textfield")
 									}
-									onClick={() => {
-										if (filteredLintRules().includes(lintRule.rule.id)) {
-											setFilteredLintRules(
-												filteredLintRules().filter((id) => id !== lintRule.rule.id),
-											)
-										} else {
-											setFilteredLintRules([lintRule.rule.id])
-											setTourStep("textfield")
-										}
-									}}
-								>
-									<div
-										class="flex gap-2 items-center h-7"
-										
-									>
-										<div class="-ml-[4px] h-5 rounded">
-											<div
-												class={
-													lintRule.level === "warning"
-														? " text-focus-warning bg-warning/20 h-full px-2 rounded flex items-center justify-center"
-														: "text-focus-danger bg-danger/20 h-full px-2 rounded flex items-center justify-center"
-												}
-											>
-												{lintRule.amount}
-											</div>
-										</div>
+								}}
+							>
+								<div
+									class="flex gap-2 items-center h-7"
 
-										<div class="text-xs text-on-surface-variant font-medium">
-											{lintRule.rule.displayName["en"]}
-											{/* TODO: Show tooltip with description on hover */}
+								>
+									<div class="-ml-[4px] h-5 rounded">
+										<div
+											class={
+												lintRule.level === "warning"
+													? " text-focus-warning bg-warning/20 h-full px-2 rounded flex items-center justify-center"
+													: "text-focus-danger bg-danger/20 h-full px-2 rounded flex items-center justify-center"
+											}
+										>
+											{lintRule.amount}
 										</div>
 									</div>
-								</sl-button>
+
+									<div class="text-xs text-on-surface-variant font-medium">
+										{lintRule.rule.displayName["en"]}
+										{/* TODO: Show tooltip with description on hover */}
+									</div>
+								</div>
+							</sl-button>
 							{/* </TourHintWrapper> */}
 						</Show>
 					)}
