@@ -11,6 +11,7 @@ import { telemetryBrowser } from "@inlang/telemetry"
 import { getTextValue, setTipTapMessage } from "../helper/parse.js"
 import { getEditorConfig } from "../helper/editorSetup.js"
 import { FloatingMenu } from "./FloatingMenu.jsx"
+// import { rpc } from "@inlang/rpc"
 import {
 	Message,
 	VariableReference,
@@ -53,7 +54,6 @@ export function PatternEditor(props: {
 	// 			setIsLineItemFocused(false)
 	// 		}
 	// 	} else {
-	// 		console.log("leave line item")
 	// 		if (
 	// 			document.activeElement.parentElement?.parentElement?.parentElement?.children[1] === textArea
 	// 		) {
@@ -109,7 +109,7 @@ export function PatternEditor(props: {
 	// 	if (editor()) {
 	// 		const isFocus = useEditorIsFocused(() => editor())
 	// 		if (isFocus() && localStorage.isFirstUse) {
-	// 			setLocalStorage("isFirstUse", false)
+	// 	setLocalStorage("isFirstUse", false)
 	// 		}
 	// 		return isFocus()
 	// 	}
@@ -117,6 +117,7 @@ export function PatternEditor(props: {
 
 	const autoSave = () => {
 		const newPattern = getTextValue(editor) as Variant["pattern"];
+		if (JSON.stringify(variant()?.pattern) === JSON.stringify(newPattern)) return;
 		let newMessage;
 		if (variant() === undefined) {
 			newMessage = createVariant(props.message, {
@@ -293,19 +294,26 @@ export function PatternEditor(props: {
 		}
 		setMachineTranslationIsLoading(true)
 		console.warn("needs to be implemented :)")
-		// const [translation, exception] = await rpc.machineTranslate({
-		// 	text,
-		// 	sourceLanguageTag: inlang()?.config()?.sourceLanguageTag!,
-		// 	targetLanguageTag: props.languageTag,
+		// const translation = await rpc.machineTranslateMessage({
+		// 	message: props.message,
+		// 	sourceLanguageTag: inlang()!.config()!.sourceLanguageTag!,
+		// 	targetLanguageTags: [props.languageTag],
 		// })
-		// if (exception) {
+		// if (translation.data === undefined) {
 		// 	showToast({
 		// 		variant: "warning",
 		// 		title: "Machine translation failed.",
-		// 		message: exception.message,
+		// 		message: translation.error,
 		// 	})
 		// } else {
-		// 	editor().commands.setContent(setTipTapMessage([{ type: "Text", value: translation }]))
+		// 	editor().commands.setContent(setTipTapMessage(
+		// 		getVariant(translation.data!, {
+		// 			where: {
+		// 				languageTag: props.languageTag,
+		// 				selectors: {},
+		// 			},
+		// 		})?.pattern || [],
+		// 	))
 		// }
 		setMachineTranslationIsLoading(false)
 	}
@@ -389,6 +397,7 @@ export function PatternEditor(props: {
 					ref={textArea}
 					// onKeyDown={(event) => handleShortcut(event)}
 					onFocusIn={() => {
+						setLocalStorage("isFirstUse", false)
 						telemetryBrowser.capture("EDITOR clicked in field", {
 							targetLanguage: props.languageTag,
 							owner: routeParams().owner,
@@ -441,7 +450,8 @@ export function PatternEditor(props: {
 						</sl-button>
 					</Show> */}
 				</div >
-				{/* <Show when={!getEditorFocus() && !isLineItemFocused()
+				{/* <Show when={!getEditorFocus()
+					// && !isLineItemFocused()
 					// && hasChanges()
 				}>
 					<div class="bg-hover-primary w-2 h-2 rounded-full" />
