@@ -39,6 +39,36 @@ describe("getVariant", () => {
 		})
 	})
 
+	test("it should return undefined (but never throw an error) if selectors is an empty array", () => {
+		const mockMessage: Message = {
+			id: "mockMessage",
+			selectors: [],
+			body: {
+				en: [
+					{
+						pattern: [{ type: "Text", value: "Gender male" }],
+						match: {
+							gender: "male",
+						},
+					},
+				],
+				de: [
+					{
+						pattern: [{ type: "Text", value: "Veraltete Übersetzung" }],
+						match: {},
+					},
+				],
+			},
+		}
+		const variant = getVariant(mockMessage, {
+			where: {
+				languageTag: "fr",
+				selectors: {},
+			},
+		})
+		expect(variant).toBeUndefined()
+	})
+
 	test("the matcher should resolve not existing selectors to '*'", () => {
 		const mockMessage: Message = getMockMessage()
 

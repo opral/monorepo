@@ -171,14 +171,18 @@ const matchMostSpecificVariant = (
 				currentKeys: Message["selectors"],
 				variant: Variant,
 			) {
-				const key = variant.match[currentKeys[0]!.name]
-				if (currentKeys.length === 1) {
-					currentIndex[key!] = variant
-				} else {
-					if (!currentIndex[key!]) {
-						currentIndex[key!] = {}
+				if (currentKeys[0]?.name) {
+					const key = variant.match[currentKeys[0].name]
+					if (key) {
+						if (currentKeys.length === 1) {
+							currentIndex[key] = variant
+						} else {
+							if (!currentIndex[key]) {
+								currentIndex[key] = {}
+							}
+							recursiveAddToIndex(currentIndex[key], currentKeys.slice(1), variant)
+						}
 					}
-					recursiveAddToIndex(currentIndex[key!], currentKeys.slice(1), variant)
 				}
 			}
 			recursiveAddToIndex(index, message.selectors, variant)
