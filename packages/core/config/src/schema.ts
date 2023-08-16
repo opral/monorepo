@@ -31,7 +31,7 @@ export const SystemSettings = Type.Object({
 	 */
 	"system.lint.ruleLevels": Type.Optional(
 		Type.Record(
-			Type.TemplateLiteral("${string}.lintRule.${string}"),
+			Type.TemplateLiteral([Type.String(), Type.Literal(".lintRule."), Type.String()]),
 			Type.Union([Type.Literal("error"), Type.Literal("warning"), Type.Literal("off")]),
 		),
 	),
