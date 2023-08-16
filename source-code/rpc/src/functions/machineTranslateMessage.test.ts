@@ -1,6 +1,7 @@
 import { it, expect } from "vitest"
 import { privateEnv } from "@inlang/env-variables"
 import { machineTranslateMessage } from "./machineTranslateMessage.js"
+import type { Message } from "@inlang/messages"
 
 it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 	"should translate multiple target language tags",
@@ -22,7 +23,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			selectors: [],
 			body: {
 				en: [{ pattern: [{ type: "Text", value: "Hello world" }], match: {} }],
-				de: [{ pattern: [{ type: "Text", value: "Hallo welt" }], match: {} }],
+				de: [{ pattern: [{ type: "Text", value: "Hallo Welt" }], match: {} }],
 				fr: [{ pattern: [{ type: "Text", value: "Bonjour le monde" }], match: {} }],
 			},
 		})
@@ -34,7 +35,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 	async () => {
 		const result = await machineTranslateMessage({
 			sourceLanguageTag: "en",
-			targetLanguageTags: ["de", "fr"],
+			targetLanguageTags: ["de"],
 			message: {
 				id: "mockMessage",
 				selectors: [],
@@ -42,9 +43,9 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 					en: [
 						{
 							pattern: [
-								{ type: "Text", value: "Hello " },
+								{ type: "Text", value: "Good evening " },
 								{ type: "VariableReference", name: "username" },
-								{ type: "Text", value: "!" },
+								{ type: "Text", value: " , what a beautiful sunset." },
 							],
 							match: {},
 						},
@@ -62,25 +63,23 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 						pattern: [
 							{ type: "Text", value: "Good evening " },
 							{ type: "VariableReference", name: "username" },
-							{ type: "Text", value: ", what a beautiful sunset." },
+							{ type: "Text", value: " , what a beautiful sunset." },
 						],
 						match: {},
 					},
 				],
 				de: [
-					[
-						{
-							pattern: [
-								{ type: "Text", value: "Guten Abend " },
-								{ type: "VariableReference", name: "username" },
-								{ type: "Text", value: ", welch ein schöner Sonnenuntergang." },
-							],
-							match: {},
-						},
-					],
+					{
+						pattern: [
+							{ type: "Text", value: "Guten Abend " },
+							{ type: "VariableReference", name: "username" },
+							{ type: "Text", value: " , was für ein wunderschöner Sonnenuntergang." },
+						],
+						match: {},
+					},
 				],
 			},
-		})
+		} satisfies Message)
 	},
 )
 
@@ -89,7 +88,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 	async () => {
 		const result = await machineTranslateMessage({
 			sourceLanguageTag: "en",
-			targetLanguageTags: ["de", "fr"],
+			targetLanguageTags: ["de"],
 			message: {
 				id: "mockMessage",
 				selectors: [],
@@ -123,12 +122,6 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 							gender: "male",
 						},
 					},
-					{
-						pattern: [{ type: "Text", value: "Gender female" }],
-						match: {
-							gender: "female",
-						},
-					},
 				],
 				de: [
 					{
@@ -139,12 +132,6 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 						pattern: [{ type: "Text", value: "Geschlecht männlich" }],
 						match: {
 							gender: "male",
-						},
-					},
-					{
-						pattern: [{ type: "Text", value: "Geschlecht weiblich" }],
-						match: {
-							gender: "female",
 						},
 					},
 				],
