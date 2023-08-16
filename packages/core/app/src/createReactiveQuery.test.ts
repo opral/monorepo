@@ -31,6 +31,8 @@ export const createMessage = (id: string, patterns: Record<string, Pattern | str
 	),
 })
 
+// TODO: test return value of mutation functions
+
 describe("get", () => {
 	it("should react to `create`", async () => {
 		await createRoot(async () => {
