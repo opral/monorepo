@@ -2,10 +2,9 @@
 
 **Opportunity**
 
-- build the version control system and storage layer for next-gen apps like inlang and successors to Figma, Excel, Word, Adobe Premiere, et al.
-- hands-down deep CS work
-- small team, overproportional impact
-- watch this video 45 sec video https://www.youtube.com/watch?v=bCcluZriRnc
+- Bring version control and CI/CD to the rest of the world.
+- enable next-gen apps like inlang and successors to Figma, Excel, Adobe Premiere, Autodesk, et al.
+- be at the forefront of [local first software](https://www.inkandswitch.com/local-first/)
 
 **Requirements**
 
@@ -13,3 +12,4 @@
 - web engineer (JS/TS) with systems knowledge (C/Rust)
 - senior level
 - located in the EU
+
