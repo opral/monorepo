@@ -59,7 +59,6 @@ CLI for inlang.
 Options:
   -V, --version         output the version number
   -h, --help            display help for command
-  -c, --config [path]   path to the config file.
 
 Commands:
   config [command]   Commands for managing the config file.

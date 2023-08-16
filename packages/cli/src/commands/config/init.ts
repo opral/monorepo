@@ -1,9 +1,6 @@
 import { Command } from "commander"
 import fs from "node:fs"
-import path from "node:path"
 import prompts from "prompts"
-import { cli } from "../../main.js"
-import { getInlang } from "../../utilities/getInlang.js"
 import { log } from "../../utilities/log.js"
 
 export const init = new Command()
@@ -107,5 +104,5 @@ export async function initCommandAction() {
 	// 	return
 	// }
 
-	log.success(`🎉 inlang.config.json file created successfully.`)
+	// log.success(`🎉 inlang.config.json file created successfully.`)
 }

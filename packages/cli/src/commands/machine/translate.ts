@@ -1,12 +1,7 @@
-// @ts-nocheck
-import { query } from "@inlang/core/query"
 import { Command } from "commander"
-import { getFlag, log } from "../../utilities.js"
-import type { Message, Text } from "@inlang/core/ast"
 import { rpc } from "@inlang/rpc"
-import { getInlang } from "../../utilities/getInlang.js"
-import { cli } from "../../main.js"
-import { bold, italic } from "../../utilities/format.js"
+import { getInlangInstance } from "../../utilities/getInlangInstance.js"
+import { log } from "../../utilities/log.js"
 
 export const translate = new Command()
 	.command("translate")
@@ -33,137 +28,37 @@ async function translateCommandAction() {
 		}
 
 		// Get the config
-		const [inlang, error] = await getInlang({ options: cli.opts() })
+		const { data: inlang, error } = await getInlangInstance()
 		if (error) {
 			log.error(error)
 			// no message because that's handled in getConfig
 			return
 		}
 
-		// Get all resources
-		let resources = await config.readResources({ config })
-
-		// Get reference language resource
-		const sourceResource = resources.find(
-			(resource) => resource.languageTag.name === config.sourceLanguageTag,
-		)!
-
-		// Count messages per language
-		const messageCounts = countMessagesPerLanguage(resources)
-		log.info(
-			"🌏 Found " +
-				Object.keys(messageCounts).length +
-				" languages with a total of " +
-				Object.values(messageCounts).reduce((a, b) => a + b, 0) +
-				" messages.",
-		)
-
 		// Get languages to translate to with the reference language removed
-		const languagesToTranslateTo = resources.filter(
-			(resource) => resource.languageTag.name !== config.sourceLanguageTag,
-		)
-		log.info(
-			"📝 Translating to " +
-				languagesToTranslateTo.length +
-				" languages. [" +
-				[...new Set(languagesToTranslateTo)]
-					.map((language) => language.languageTag.name)
-					.join(", ") +
-				"]",
-		)
+		const languagesTagsToTranslateTo = inlang
+			.config()
+			.languageTags.filter((tag) => tag !== inlang.config().sourceLanguageTag)
 
-		// Translate all messages
-		for (const language of languagesToTranslateTo) {
-			for (const message of sourceResource.body) {
-				// skip if message already exists in language
-				if (language.body.some((langMessage) => langMessage.id.name === message.id.name)) {
-					continue
-				}
+		log.info(`📝 Translating to ${languagesTagsToTranslateTo.length} languages.`)
 
-				// 🌏 Translation
-				const [translation, exception] = await rpc.machineTranslate({
-					sourceLanguageTag: config.sourceLanguageTag,
-					targetLanguageTag: language.languageTag.name,
-					text: (message.pattern.elements[0]! as Text).value as string,
-				})
-				if (exception) {
-					log.error("Couldn't translate message " + message.id.name + ". ", exception.message)
-					continue
-				}
-
-				log.info(
-					getFlag(language.languageTag.name) +
-						" Translated message " +
-						bold(message.id.name) +
-						" to " +
-						italic(translation),
-				)
-
-				const newMessage: Message = {
-					type: "Message",
-					id: { type: "Identifier", name: message.id.name },
-					pattern: {
-						type: "Pattern",
-						elements: [{ type: "Text", value: translation }],
-					},
-				}
-
-				// find language resource to add the new message to
-				const languageResource = resources.find(
-					(resource) => resource.languageTag.name === language.languageTag.name,
-				)
-				if (languageResource) {
-					const [newResource, exception] = query(languageResource).upsert({
-						message: newMessage,
-					})
-
-					if (exception) {
-						log.error("Couldn't upsert new message. ", exception.message)
-					}
-
-					// merge the new resource with the existing resources
-					resources = resources.map((resource) => {
-						if (resource.languageTag.name === language.languageTag.name && newResource) {
-							return newResource
-						}
-						return resource
-					})
-				}
+		// parallelize in the future
+		for (const message of inlang.query.messages.getAll()) {
+			const { data: translatedMessage, error } = await rpc.machineTranslateMessage({
+				message,
+				sourceLanguageTag: inlang.config().sourceLanguageTag,
+				targetLanguageTags: languagesTagsToTranslateTo,
+			})
+			if (error) {
+				log.error(`❌ Couldn't translate message "${message.id}": ${error}`)
+				continue
 			}
+			inlang.query.messages.update({ where: { id: message.id }, data: translatedMessage! })
+			log.info(`✅ Machine translated message "${message.id}"`)
 		}
-
-		// write the new resource to the file system
-		await config.writeResources({
-			config,
-			resources: resources,
-		})
-
 		// Log the message counts
-		log.info("✅ Translated all messages.")
+		log.info("Machine translate complete.")
 	} catch (error) {
 		log.error(error)
 	}
-}
-
-/**
- * Counts the number of messages per language.
- *
- * @param resource The resource to count the messages for.
- * @returns A record with the language as key and the number of messages as value.
- *
- */
-const countMessagesPerLanguage = (resource: Resource[]): Record<string, number> => {
-	const counts: Record<string, number> = {}
-
-	for (const { languageTag, body } of resource) {
-		const language = languageTag.name
-
-		if (!counts[language]) {
-			counts[language] = 0
-		}
-
-		counts[language] += body.length
-	}
-
-	return counts
 }
