@@ -25,6 +25,7 @@
 	--sl-input-font-family: "Inter", sans-serif;
 	--sl-font-sans: "Inter", sans-serif;
 }
+
 /* The font Inter with variable font support (if supported) */
 @supports (font-variation-settings: normal) {
 	:root {
@@ -99,6 +100,11 @@ sl-textarea::part(base) {
 sl-tooltip::part(base) {
 	--sl-tooltip-background-color: theme(colors.inverted-surface);
 	--sl-tooltip-color: theme(colors.on-inverted-surface);
+}
+
+sl-tooltip.small::part(body) {
+	font-size: 0.875rem;
+	line-height: 1.25rem;
 }
 
 sl-badge::part(base) {
@@ -188,6 +194,7 @@ sl-option::part(label) {
 sl-select::part(tag) {
 	--sl-input-height-small: 26px;
 }
+
 sl-select::part(combobox) sl-tag {
 	--sl-input-height-small: 26px;
 }
@@ -195,6 +202,7 @@ sl-select::part(combobox) sl-tag {
 sl-tag {
 	--sl-input-height-small: 26px;
 }
+
 sl-input::part(base) {
 	--tw-ring-color: "#FFF";
 	--sl-input-border-radius-large: 8px;
