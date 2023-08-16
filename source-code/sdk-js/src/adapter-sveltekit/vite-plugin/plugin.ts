@@ -50,7 +50,7 @@ export const plugin = () => {
 				return dedent`
 					export const sourceLanguageTag = ${JSON.stringify(config.sourceLanguageTag)}
 					export const languageTags = ${JSON.stringify(config.languageTags)}
-					export const messages = ${JSON.stringify(config.readMessages())}
+					export const messages = ${JSON.stringify(await config.readMessages())}
 				`
 			}
 
