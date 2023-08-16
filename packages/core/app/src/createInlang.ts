@@ -151,28 +151,36 @@ export const createInlang = async (args: {
 }
 
 const loadConfig = async (args: { configPath: string; nodeishFs: NodeishFilesystemSubset }) => {
-	const { data: configFile, error: configFileError } = await tryCatch(
-		async () => await args.nodeishFs.readFile(args.configPath, { encoding: "utf-8" }),
-	)
-	if (configFileError)
-		throw new ConfigPathNotFoundError(`Could not locate config file in (${args.configPath}).`, {
-			cause: configFileError,
-		})
+	let json: string
+	if (args.configPath.startsWith('data:')) {
+		json = (await import(args.configPath, { assert: { type: 'json' } })).default
+		// TODO: add error handling
+	} else {
+		const { data: configFile, error: configFileError } = await tryCatch(
+			async () => await args.nodeishFs.readFile(args.configPath, { encoding: "utf-8" }),
+		)
+		if (configFileError)
+			throw new ConfigPathNotFoundError(`Could not locate config file in (${args.configPath}).`, {
+				cause: configFileError,
+			})
 
-	const { data: parsedConfig, error: parseConfigError } = tryCatch(() => JSON.parse(configFile!))
-	if (parseConfigError)
-		throw new ConfigSyntaxError(`The config is not a valid JSON file.`, {
-			cause: parseConfigError,
-		})
+		const { data: parsedConfig, error: parseConfigError } = tryCatch(() => JSON.parse(configFile!))
+		if (parseConfigError)
+			throw new ConfigSyntaxError(`The config is not a valid JSON file.`, {
+				cause: parseConfigError,
+			})
 
-	const typeErrors = [...ConfigCompiler.Errors(parsedConfig)]
+		json = parsedConfig
+	}
+
+	const typeErrors = [...ConfigCompiler.Errors(json)]
 	if (typeErrors.length > 0) {
 		throw new InvalidConfigError(`The config is invalid according to the schema.`, {
 			cause: typeErrors,
 		})
 	}
 
-	return Value.Cast(InlangConfig, parsedConfig)
+	return Value.Cast(InlangConfig, json)
 }
 
 const loadModules = async (args: {
