@@ -1,14 +1,15 @@
+import { Octokit } from "octokit"
 import raw from "isomorphic-git"
 import http from "isomorphic-git/http/web/index.js"
 import type { NodeishFilesystem } from "@inlang-git/fs"
-import { github } from "./github.js"
 import { withLazyFetching, transformRemote } from "./helpers.js"
+import type { Endpoints } from "@octokit/types";
 
 type Author = {
-  name?: string
-  email?: string
-  timestamp?: number
-  timezoneOffset?: number
+	name?: string
+	email?: string
+	timestamp?: number
+	timezoneOffset?: number
 }
 
 export type Repository = {
@@ -53,6 +54,19 @@ export function open (url: string, args: { nodeishFs: NodeishFilesystem, working
 			`Invalid url format for '${url}' for cloning repository, please use the format of github.com/inlang/example.`,
 		)
 	}
+
+	const github = new Octokit({
+		request: {
+			fetch: (...args: any) => {
+				// modify the path to be proxied by the server
+				if (args.corsProxy) {
+					args[0] = args.corsProxy + args[0]
+				}
+				// @ts-ignore
+				return fetch(...args)
+			},
+		},
+	})
 
 	const normalizedUrl = `https://${host}/${owner}/${repoName}`
 
