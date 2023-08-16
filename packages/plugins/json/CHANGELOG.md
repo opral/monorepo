@@ -1,5 +1,11 @@
 # @inlang/plugin-json
 
+## 3.0.12
+
+### Patch Changes
+
+- Remove login of "files" in console
+
 ## 3.0.11
 
 ### Patch Changes
