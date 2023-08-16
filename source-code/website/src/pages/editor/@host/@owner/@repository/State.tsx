@@ -129,8 +129,8 @@ type EditorStateSchema = {
 	 * Unpushed changes in the repository.
 	 */
 
-	localChanges: () => Message[]
-	setLocalChanges: Setter<Message[]>
+	localChanges: () => number // Message[]
+	setLocalChanges: Setter<number>// Setter<Message[]>
 
 	/**
 	 * The reference resource.
@@ -187,7 +187,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	 */
 	const [lastPush, setLastPush] = createSignal<Date>()
 
-	const [localChanges, setLocalChanges] = createSignal<Message[]>([])
+	const [localChanges, setLocalChanges] = createSignal<number>(0)
 
 	const routeParams = () => currentPageContext.routeParams as EditorRouteParams
 
@@ -681,7 +681,7 @@ export async function pushChanges(args: {
 }): Promise<Result<true, PushException | PullException>> {
 	const { host, owner, repository } = args.routeParams
 	if (host === undefined || owner === undefined || repository === undefined) {
-		return [undefined, new PushException("h3ni329 Invalid route params")]
+		return { error: new PushException("Invalid route params") }
 	}
 	// stage all changes
 	const status = await raw.statusMatrix({
@@ -702,6 +702,9 @@ export async function pushChanges(args: {
 			// added files
 			(row[2] === 2 && row[3] === 0),
 	)
+	if (filesWithUncommittedChanges.length === 0) {
+		return { error: new PushException("No changes to push") }
+	}
 	// add all changes
 	for (const file of filesWithUncommittedChanges) {
 		await raw.add({ fs: args.fs, dir: "/", filepath: file[0] })
@@ -733,27 +736,22 @@ export async function pushChanges(args: {
 	try {
 		// pull changes before pushing
 		// https://github.com/inlang/inlang/issues/250
-		const [, exception] = await pull(args)
-		if (exception) {
-			return [
-				undefined,
-				new PullException("Failed to pull: " + exception.message, {
-					cause: exception,
-				}),
-			]
+		const pullResult = await pull(args)
+		if (pullResult.error !== undefined) {
+			return { error: pullResult.error }
 		}
 		const push = await raw.push(requestArgs)
 		if (push.ok === false) {
-			return [undefined, new PushException("Failed to push", { cause: push.error })]
+			return { error: new PushException("Failed to push", { cause: push.error }) }
 		}
 		await raw.pull(requestArgs)
 		const time = new Date()
 		// triggering a rebuild of everything fs related
 		args.setFsChange(time)
 		args.setLastPush(time)
-		return [true, undefined]
+		return { data: true }
 	} catch (error) {
-		return [undefined, (error as PushException) ?? "h3ni329 Unknown error"]
+		return { error: (error as PushException) ?? "Unknown error" }
 	}
 }
 
@@ -806,9 +804,9 @@ async function pull(args: {
 		// triggering a rebuild of everything fs related
 		args.setFsChange(time)
 		args.setLastPullTime(time)
-		return [true, undefined]
+		return { data: true }
 	} catch (error) {
-		return [undefined, error as PullException]
+		return { error: error as PullException }
 	}
 }
 async function getGitOrigin(args: { fs: NodeishFilesystem }) {
