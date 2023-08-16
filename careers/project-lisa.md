@@ -13,4 +13,3 @@
 - web engineer (JS/TS) with systems knowledge (C/Rust)
 - senior level
 - located in the EU
-
