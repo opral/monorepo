@@ -110,9 +110,7 @@ export const initTransformConfig = async (): Promise<TransformConfig> => {
 
 		const usesTypeScript = await doesPathExist(path.resolve(PATH_TO_CWD, "tsconfig.json"))
 
-		const svelteKitVersion =
-			(svelteKit as unknown as { VERSION: string }).VERSION ||
-			(await getInstalledVersionOfPackage("@sveltejs/kit"))
+		const svelteKitVersion = await getSvelteKitVersion()
 
 		resolve({
 			debug: settings.debug,
@@ -293,10 +291,18 @@ const shouldContentBePrerendered = async (routesFolder: string) => {
 
 // ------------------------------------------------------------------------------------------------
 
-const getInstalledVersionOfPackage = async (pkg: string) => {
-	const pkgJsonPath = await findDepPkgJsonPath(pkg, PATH_TO_CWD)
+export const getSvelteKitVersion = async () => {
+	const packageName = '@sveltejs/kit'
+	const pkg = await import(packageName).catch(() => ({}))
+	if ("VERSION" in pkg) return pkg.VERSION
+
+	const pkgJsonPath = await findDepPkgJsonPath(packageName, PATH_TO_CWD).catch(() => undefined)
 	if (!pkgJsonPath) return undefined
 
-	const pkgJson = JSON.parse(await readFile(pkgJsonPath, { encoding: "utf-8" }))
-	return pkgJson.version
+	try {
+		const pkgJson = JSON.parse(await readFile(pkgJsonPath, { encoding: "utf-8" }).catch(() => "{}"))
+		return pkgJson.version
+	} catch {
+		return undefined
+	}
 }
