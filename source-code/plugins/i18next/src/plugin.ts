@@ -296,13 +296,18 @@ async function saveMessages(args: {
 					: // TODO remove default namespace functionallity, add better parser
 					  Object.keys(args.settings.pathPattern)[0]!
 				const resolvedId = message.id.replace(prefix + ":", "")
-				const serializedPattern: Variant["pattern"] = getVariant(message, {
-					languageTag: languageTag,
-				}).data!
+				const variant = getVariant(message, {
+					where: {
+						languageTag: languageTag,
+					},
+				})
+				if (variant === undefined) {
+					continue
+				}
 
 				storage[languageTag] ??= {}
 				storage[languageTag]![prefix] ??= {}
-				storage[languageTag]![prefix]![resolvedId] = serializedPattern
+				storage[languageTag]![prefix]![resolvedId] = variant.pattern
 			}
 		}
 		for (const [languageTag, _value] of Object.entries(storage)) {
@@ -341,11 +346,16 @@ async function saveMessages(args: {
 		const storage: Record<LanguageTag, Record<Message["id"], Variant["pattern"]>> | undefined = {}
 		for (const message of args.messages) {
 			for (const languageTag of Object.keys(message.body)) {
-				const serializedPattern: Variant["pattern"] = getVariant(message, {
-					languageTag: languageTag,
-				}).data!
+				const variant = getVariant(message, {
+					where: {
+						languageTag: languageTag,
+					},
+				})
+				if (variant === undefined) {
+					continue
+				}
 				storage[languageTag] ??= {}
-				storage[languageTag]![message.id] = serializedPattern
+				storage[languageTag]![message.id] = variant.pattern
 			}
 		}
 		for (const [languageTag, value] of Object.entries(storage)) {

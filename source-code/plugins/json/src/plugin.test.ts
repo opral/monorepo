@@ -155,10 +155,8 @@ describe("loadMessage", () => {
 		}
 
 		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
-		//console.log(getVariant(messages[0]!, { languageTag: "en" }))
-		expect(
-			(getVariant(messages[0]!, { languageTag: "en" }).data as Variant["pattern"])[0]?.type,
-		).toBe("Text")
+		const variant = getVariant(messages[0]!, { where: { languageTag: "en" } })
+		expect(variant?.pattern[0]?.type).toBe("Text")
 	})
 
 	it("should work with empty json files", async () => {
@@ -193,8 +191,8 @@ describe("loadMessage", () => {
 
 		const languageTags = ["en", "de"]
 		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
-		expect(getVariant(messages[0]!, { languageTag: "en" })).toBeTruthy()
-		expect(getVariant(messages[0]!, { languageTag: "de" })).toBeTruthy()
+		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })).toBeTruthy()
+		expect(getVariant(messages[0]!, { where: { languageTag: "de" } })).toBeTruthy()
 	})
 
 	// namespaces
@@ -210,9 +208,8 @@ describe("loadMessage", () => {
 		}
 
 		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
-		expect(
-			(getVariant(messages[0]!, { languageTag: "en" }).data as Variant["pattern"])[0]?.type,
-		).toBe("Text")
+		const variant = getVariant(messages[0]!, { where: { languageTag: "en" } })
+		expect(variant?.pattern[0]?.type).toBe("Text")
 	})
 
 	it("should work with empty json files (namespace)", async () => {
@@ -256,8 +253,8 @@ describe("loadMessage", () => {
 		}
 		const languageTags = ["en", "de"]
 		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
-		expect(getVariant(messages[0]!, { languageTag: "en" })).toBeTruthy()
-		expect(getVariant(messages[0]!, { languageTag: "de" })).toBeTruthy()
+		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })).toBeTruthy()
+		expect(getVariant(messages[0]!, { where: { languageTag: "de" } })).toBeTruthy()
 	})
 
 	it("should not throw an error when load messages with empty namespaces", async () => {
@@ -426,9 +423,13 @@ describe("variable reference", () => {
 		}
 		const languageTags = ["en"]
 		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
-		expect(getVariant(messages[0]!, { languageTag: "en" }).data!.length).toBe(2)
-		expect(getVariant(messages[0]!, { languageTag: "en" }).data![0]!.type).toBe("Text")
-		expect(getVariant(messages[0]!, { languageTag: "en" }).data![1]!.type).toBe("VariableReference")
+		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern.length).toBe(2)
+		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern[0]?.type).toBe(
+			"Text",
+		)
+		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern[1]?.type).toBe(
+			"VariableReference",
+		)
 	})
 
 	it("should correctly identify variable reference (at the beginning)", async () => {
@@ -439,9 +440,13 @@ describe("variable reference", () => {
 		}
 		const languageTags = ["en"]
 		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
-		expect(getVariant(messages[0]!, { languageTag: "en" }).data!.length).toBe(2)
-		expect(getVariant(messages[0]!, { languageTag: "en" }).data![0]!.type).toBe("VariableReference")
-		expect(getVariant(messages[0]!, { languageTag: "en" }).data![1]!.type).toBe("Text")
+		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern.length).toBe(2)
+		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern[0]?.type).toBe(
+			"VariableReference",
+		)
+		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern[1]?.type).toBe(
+			"Text",
+		)
 	})
 
 	it("should correctly apply the variableReferencePattern", async () => {
@@ -453,8 +458,12 @@ describe("variable reference", () => {
 		}
 		const languageTags = ["en"]
 		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
-		expect(getVariant(messages[0]!, { languageTag: "en" }).data![0]!.type).toBe("Text")
-		expect(getVariant(messages[0]!, { languageTag: "en" }).data![1]!.type).toBe("VariableReference")
+		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern[0]?.type).toBe(
+			"Text",
+		)
+		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern[1]?.type).toBe(
+			"VariableReference",
+		)
 	})
 })
 
@@ -492,7 +501,10 @@ describe("formatting", () => {
 				},
 			],
 		}
-		const newMessage = createVariant(messages[0]!, { languageTag: "es", data: variant }).data
+		const newMessage = createVariant(messages[0]!, {
+			where: { languageTag: "es" },
+			data: variant,
+		}).data
 		await plugin.saveMessages!({ messages: [newMessage!], settings, nodeishFs: fs })
 
 		const file1 = await fs.readFile("./en.json", { encoding: "utf-8" })
