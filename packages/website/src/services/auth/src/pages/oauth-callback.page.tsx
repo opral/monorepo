@@ -48,6 +48,7 @@ export function Page() {
 									window.close()
 								}}
 							>
+								{/* @ts-ignore */}
 								<MaterialSymbolsArrowBackRounded slot="prefix" />
 								Return to app
 							</sl-button>

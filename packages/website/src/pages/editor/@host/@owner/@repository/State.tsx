@@ -16,7 +16,7 @@ import { github } from "#src/services/github/index.js"
 import { showToast } from "#src/components/Toast.jsx"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
-import { coreUsedConfigEvent, telemetryBrowser, parseOrigin } from "@inlang/telemetry"
+import { telemetryBrowser, parseOrigin } from "@inlang/telemetry"
 import type { NodeishFilesystem } from "@inlang-git/fs"
 import { createNodeishMemoryFs } from "@inlang-git/fs"
 import { http, raw } from "@inlang-git/client/raw"
@@ -319,14 +319,14 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				configPath: "./inlang.config.json",
 				nodeishFs: fs(),
 				_import: async () =>
-					({
-						default: {
-							// @ts-ignore
-							plugins: [...pluginJson.plugins],
-							// @ts-ignore
-							lintRules: [...pluginLint.lintRules],
-						},
-					} satisfies InlangModule),
+				({
+					default: {
+						// @ts-ignore
+						plugins: [...pluginJson.plugins],
+						// @ts-ignore
+						lintRules: [...pluginLint.lintRules],
+					},
+				} satisfies InlangModule),
 			})
 			const config = inlang.config()
 			if (config) {
@@ -337,15 +337,14 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						a === config.sourceLanguageTag
 							? -1
 							: b === config.sourceLanguageTag
-							? 1
-							: a.localeCompare(b),
+								? 1
+								: a.localeCompare(b),
 					) || []
 				// initializes the languages to all languages
 				setDoesInlangConfigExist(true)
 				setSourceLanguageTag(config.sourceLanguageTag)
 				setLanguageTags(languagesTags)
 				await inlang.lint.init()
-				telemetryBrowser.capture(coreUsedConfigEvent.name, coreUsedConfigEvent.properties(config))
 			}
 			return inlang
 		},
@@ -357,13 +356,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			setTourStep("github-login")
 		} else if (!userIsCollaborator()) {
 			setTourStep("fork-repository")
-		} else if (tourStep() === "fork-repository" && inlang() && filteredLanguageTags()) {
-			if (filteredLanguageTags().length > 0) {
-				setTimeout(() => {
-					const element = document.getElementById("missingMessage-summary")
-					element !== null ? setTourStep("missing-message-rule") : setTourStep("textfield")
-				}, 100)
-			}
+		} else if (tourStep() === "fork-repository" && inlang()) {
+			setTimeout(() => {
+				const element = document.getElementById("missingMessage-summary")
+				element !== null ? setTourStep("missing-message-rule") : setTourStep("textfield")
+			}, 100)
 		} else if (tourStep() === "missing-message-rule" && inlang()) {
 			setTimeout(() => {
 				const element = document.getElementById("missingMessage-summary")
@@ -602,8 +599,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					userIsCollaborator,
 					repoIsPrivate,
 					setLastPush,
-					fs,
 					setLastPullTime,
+					fs,
 				} satisfies EditorStateSchema
 			}
 		>
