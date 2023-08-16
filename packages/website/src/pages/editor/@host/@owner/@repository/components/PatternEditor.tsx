@@ -11,23 +11,21 @@ import { telemetryBrowser } from "@inlang/telemetry"
 import { getTextValue, setTipTapMessage } from "../helper/parse.js"
 import { getEditorConfig } from "../helper/editorSetup.js"
 import { FloatingMenu } from "./FloatingMenu.jsx"
-import type {
-	Text,
+import {
 	Message,
 	VariableReference,
 	LanguageTag,
 	Variant,
+	createVariant,
+	updateVariantPattern,
 } from "@inlang/app"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
  */
 export function PatternEditor(props: {
-	sourceLanguageTag: LanguageTag | undefined
 	languageTag: LanguageTag
-	id: Message["id"]
-	sourceMessage?: Message["body"][LanguageTag]
-	variant: Variant | undefined
+	message: Message
 }) {
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const {
@@ -37,6 +35,7 @@ export function PatternEditor(props: {
 		routeParams,
 		filteredLanguageTags,
 		inlang,
+		sourceLanguageTag
 	} = useEditorState()
 
 	const [variableReferences, setVariableReferences] = createSignal<VariableReference[]>([])
@@ -46,35 +45,42 @@ export function PatternEditor(props: {
 
 	let machineLearningWarningDialog: SlDialog | undefined
 
-	const [isLineItemFocused, setIsLineItemFocused] = createSignal(false)
+	// const [isLineItemFocused, setIsLineItemFocused] = createSignal(false)
 
-	const handleLineItemFocusIn = () => {
-		if (document.activeElement?.tagName !== "SL-BUTTON") {
-			if (document.activeElement !== textArea.children[0]) {
-				setIsLineItemFocused(false)
-			}
-		} else {
-			if (
-				document.activeElement.parentElement?.parentElement?.parentElement?.children[1] === textArea
-			) {
-				setIsLineItemFocused(true)
-			}
-		}
-	}
+	// const handleLineItemFocusIn = () => {
+	// 	if (document.activeElement?.tagName !== "SL-BUTTON") {
+	// 		if (document.activeElement !== textArea.children[0]) {
+	// 			setIsLineItemFocused(false)
+	// 		}
+	// 	} else {
+	// 		console.log("leave line item")
+	// 		if (
+	// 			document.activeElement.parentElement?.parentElement?.parentElement?.children[1] === textArea
+	// 		) {
+	// 			setIsLineItemFocused(true)
+	// 		}
+	// 	}
+	// }
+
+	const sourceMessage = () => props.message.body[sourceLanguageTag()!]
+
+	const variant = () => props.message["body"][props.languageTag]
+		? props.message["body"][props.languageTag]![0]
+		: undefined
 
 	onMount(() => {
-		if (props.sourceMessage) {
+		if (sourceMessage()) {
 			setVariableReferences(
-				props.sourceMessage[0]?.pattern
+				sourceMessage()![0]?.pattern
 					.filter((pattern) => pattern.type === "VariableReference")
 					.map((variableReference) => variableReference) as VariableReference[],
 			)
 		}
 
-		document.addEventListener("focusin", handleLineItemFocusIn)
-		return () => {
-			document.removeEventListener("focusin", handleLineItemFocusIn)
-		}
+		// document.addEventListener("focusin", handleLineItemFocusIn)
+		// return () => {
+		// 	document.removeEventListener("focusin", handleLineItemFocusIn)
+		// }
 	})
 
 	//create editor
@@ -83,47 +89,77 @@ export function PatternEditor(props: {
 		// if (
 		// 	localChanges().some(
 		// 		(change) =>
-		// 			change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
+		// 			change.languageTag.name === props.languageTag && change.newCopy.id.name === props.message.id,
 		// 	)
 		// ) {
 		// 	return getEditorConfig(
 		// 		textArea,
 		// 		localChanges().find(
 		// 			(change) =>
-		// 				change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
+		// 				change.languageTag.name === props.languageTag && change.newCopy.id.name === props.message.id,
 		// 		)?.newCopy,
 		// 		props.variableReference,
 		// 	)
 		// } else {
-		return getEditorConfig(textArea, props.variant, variableReferences())
+		return getEditorConfig(textArea, variant(), variableReferences())
 		// }
 	})
 
-	const getEditorFocus = () => {
-		if (editor()) {
-			const isFocus = useEditorIsFocused(() => editor())
-			if (isFocus() && localStorage.isFirstUse) {
-				setLocalStorage("isFirstUse", false)
-			}
-			return isFocus()
+	// const getEditorFocus = () => {
+	// 	if (editor()) {
+	// 		const isFocus = useEditorIsFocused(() => editor())
+	// 		if (isFocus() && localStorage.isFirstUse) {
+	// 			setLocalStorage("isFirstUse", false)
+	// 		}
+	// 		return isFocus()
+	// 	}
+	// }
+
+	const autoSave = () => {
+		const newPattern = getTextValue(editor) as Variant["pattern"];
+		let newMessage;
+		if (variant() === undefined) {
+			newMessage = createVariant(props.message, {
+				where: { languageTag: props.languageTag },
+				data: {
+					match: {},
+					pattern: newPattern,
+				}
+			})
+		} else {
+			newMessage = updateVariantPattern(props.message, {
+				where: {
+					languageTag: props.languageTag,
+					selectors: {},
+				},
+				data: newPattern,
+			})
+		};
+		if (newMessage.data) {
+			inlang()?.query.messages.upsert({
+				where: { id: props.message.id },
+				data: newMessage.data,
+			});
+		} else {
+			throw new Error("Cannot update message: ", newMessage.error)
 		}
 	}
 
-	/** copy of the variant to conduct and track changes */
-	const copy: () => Variant | undefined = () =>
-		props.variant
-			? // clone variant
-			structuredClone(props.variant)
-			: // new variant
-			({
-				match: {},
-				pattern: [
-					{
-						type: "Text",
-						value: "",
-					},
-				],
-			} satisfies Variant)
+	/** copy of the variant() to conduct and track changes */
+	// const copy: () => Variant | undefined = () =>
+	// 	variant()
+	// 		? // clone variant()
+	// 		structuredClone(variant())
+	// 		: // new variant()
+	// 		({
+	// 			match: {},
+	// 			pattern: [
+	// 				{
+	// 					type: "Text",
+	// 					value: "",
+	// 				},
+	// 			],
+	// 		} satisfies Variant)
 
 	// const [_isFork] = createResource(
 	// 	() => localStorage.user,
@@ -142,97 +178,97 @@ export function PatternEditor(props: {
 	// 	}
 	// );
 
-	const hasChanges = () => {
-		const _updatedText =
-			JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
-		let compare_elements
-		// if (
-		// 	localChanges().some(
-		// 		(change) =>
-		// 			change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
-		// 	)
-		// ) {
-		// 	compare_elements = localChanges().find(
-		// 		(change) =>
-		// 			change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
-		// 	)?.newCopy.pattern.elements
-		// } else {
-		compare_elements = props.variant?.pattern
-		// }
-		if (_updatedText) {
-			if (JSON.stringify(_updatedText) !== JSON.stringify(compare_elements)) {
-				return _updatedText
-			} else {
-				return ""
-			}
-		} else {
-			return false
-		}
-	}
+	// const hasChanges = () => {
+	// 	const _updatedText =
+	// 		JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
+	// 	let compare_elements
+	// 	// if (
+	// 	// 	localChanges().some(
+	// 	// 		(change) =>
+	// 	// 			change.languageTag.name === props.languageTag && change.newCopy.id.name === props.message.id,
+	// 	// 	)
+	// 	// ) {
+	// 	// 	compare_elements = localChanges().find(
+	// 	// 		(change) =>
+	// 	// 			change.languageTag.name === props.languageTag && change.newCopy.id.name === props.message.id,
+	// 	// 	)?.newCopy.pattern.elements
+	// 	// } else {
+	// 	compare_elements = variant()?.pattern
+	// 	// }
+	// 	if (_updatedText) {
+	// 		if (JSON.stringify(_updatedText) !== JSON.stringify(compare_elements)) {
+	// 			return _updatedText
+	// 		} else {
+	// 			return ""
+	// 		}
+	// 	} else {
+	// 		return false
+	// 	}
+	// }
 
 	/**
 	 * Saves the changes of the message.
 	 */
 
-	const handleSave = async () => {
-		const _copy: Variant | undefined = copy()
-		const _textValue =
-			JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
-		if (!_textValue || !_copy) {
-			return
-		}
-		_copy.pattern = _textValue as Array<Text | VariableReference>
+	// const handleSave = async () => {
+	// 	const _copy: Variant | undefined = copy()
+	// 	const _textValue =
+	// 		JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
+	// 	if (!_textValue || !_copy) {
+	// 		return
+	// 	}
+	// 	_copy.pattern = _textValue as Array<Text | VariableReference>
 
-		// setLocalChanges((prev: Message[]) => {
-		// 	if (JSON.stringify(copy()?.pattern) === JSON.stringify(_copy.pattern)) {
-		// 		return [
-		// 			...prev.filter(
-		// 				(change) =>
-		// 					!(
-		// 						change.languageTag === resource().languageTag &&
-		// 						change.newCopy.id.name === _copy.id.name
-		// 					),
-		// 			),
-		// 		]
-		// 	} else {
-		// 		return [
-		// 			...prev.filter(
-		// 				(change) =>
-		// 					!(
-		// 						change.languageTag === resource().languageTag &&
-		// 						change.newCopy.id.name === _copy.id.name
-		// 					),
-		// 			),
-		// 			{
-		// 				languageTag: resource().languageTag,
-		// 				newCopy: _copy,
-		// 			},
-		// 		]
-		// 	}
-		// })
+	// setLocalChanges((prev: Message[]) => {
+	// 	if (JSON.stringify(copy()?.pattern) === JSON.stringify(_copy.pattern)) {
+	// 		return [
+	// 			...prev.filter(
+	// 				(change) =>
+	// 					!(
+	// 						change.languageTag === resource().languageTag &&
+	// 						change.newCopy.id.name === _copy.id.name
+	// 					),
+	// 			),
+	// 		]
+	// 	} else {
+	// 		return [
+	// 			...prev.filter(
+	// 				(change) =>
+	// 					!(
+	// 						change.languageTag === resource().languageTag &&
+	// 						change.newCopy.id.name === _copy.id.name
+	// 					),
+	// 			),
+	// 			{
+	// 				languageTag: resource().languageTag,
+	// 				newCopy: _copy,
+	// 			},
+	// 		]
+	// 	}
+	// })
 
-		//this is a dirty fix for getting focus back to the editor after save
-		setTimeout(() => {
-			textArea.parentElement?.click()
-		}, 500)
-		telemetryBrowser.capture("EDITOR saved changes", {
-			targetLanguage: props.languageTag,
-			owner: routeParams().owner,
-			repository: routeParams().repository,
-		})
-	}
+	//this is a dirty fix for getting focus back to the editor after save
+	// 	setTimeout(() => {
+	// 		textArea.parentElement?.click()
+	// 	}, 500)
+	// 	telemetryBrowser.capture("EDITOR saved changes", {
+	// 		targetLanguage: props.languageTag,
+	// 		owner: routeParams().owner,
+	// 		repository: routeParams().repository,
+	// 	})
+	// }
 
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
 
 	const handleMachineTranslate = async () => {
-		if (props.sourceMessage === undefined) {
+		if (sourceMessage() === undefined) {
 			return showToast({
 				variant: "info",
 				title: "Can't translate if the reference message does not exist.",
 			})
 		}
 		let text = ""
-		Object.values(props.sourceMessage).some((value) => {
+		Object.values(sourceMessage()!).some((value) => {
 			text = value.pattern
 				.map((pattern) => {
 					if (pattern.type === "Text") {
@@ -259,7 +295,7 @@ export function PatternEditor(props: {
 		console.warn("needs to be implemented :)")
 		// const [translation, exception] = await rpc.machineTranslate({
 		// 	text,
-		// 	sourceLanguageTag: inlang()?.config().sourceLanguageTag!,
+		// 	sourceLanguageTag: inlang()?.config()?.sourceLanguageTag!,
 		// 	targetLanguageTag: props.languageTag,
 		// })
 		// if (exception) {
@@ -277,8 +313,7 @@ export function PatternEditor(props: {
 	const getNotificationHints = () => {
 		const notifications: Array<Notification> = []
 		inlang()?.lint.reports().map((report) => {
-			if (report.messageId === props.id && report.languageTag === props.languageTag) {
-				console.log(report)
+			if (report.messageId === props.message.id && report.languageTag === props.languageTag) {
 				notifications.push({
 					notificationTitle: inlang()?.meta.lintRules().find((rule) => rule.id === report.ruleId)?.displayName["en"] || report.ruleId,
 					notificationDescription: report.body.en,
@@ -287,14 +322,16 @@ export function PatternEditor(props: {
 			}
 		})
 
-		if (hasChanges() && localStorage.user === undefined) {
+		if (//hasChanges() && 
+			localStorage.user === undefined) {
 			notifications.push({
 				notificationTitle: "Access:",
 				notificationDescription: "Sign in to commit changes.",
 				notificationType: "warning",
 			})
 		}
-		if (hasChanges() && userIsCollaborator() === false) {
+		if (//hasChanges() && 
+			userIsCollaborator() === false) {
 			notifications.push({
 				notificationTitle: "Fork:",
 				notificationDescription: "Fork the project to commit changes.",
@@ -304,17 +341,17 @@ export function PatternEditor(props: {
 		return notifications
 	}
 
-	const handleShortcut = (event: KeyboardEvent) => {
-		if (
-			((event.ctrlKey && event.code === "KeyS" && navigator.platform.includes("Win")) ||
-				(event.metaKey && event.code === "KeyS" && navigator.platform.includes("Mac"))) &&
-			hasChanges() &&
-			userIsCollaborator()
-		) {
-			event.preventDefault()
-			handleSave()
-		}
-	}
+	// const handleShortcut = (event: KeyboardEvent) => {
+	// 	if (
+	// 		((event.ctrlKey && event.code === "KeyS" && navigator.platform.includes("Win")) ||
+	// 			(event.metaKey && event.code === "KeyS" && navigator.platform.includes("Mac"))) &&
+	// 		hasChanges() &&
+	// 		userIsCollaborator()
+	// 	) {
+	// 		event.preventDefault()
+	// 		handleSave()
+	// 	}
+	// }
 
 	return (
 		// outer element is needed for clickOutside directive
@@ -323,21 +360,20 @@ export function PatternEditor(props: {
 			onClick={() => {
 				editor().chain().focus()
 			}}
-			onFocusIn={() => setIsLineItemFocused(true)}
+			// onFocusIn={() => setIsLineItemFocused(true)}
 			class="flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border first:mt-0 -mt-[1px] border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus-within:relative focus-within:border-primary focus-within:ring-[3px] focus-within:ring-hover-primary/50"
 		>
 			<div class="flex justify-start items-start gap-2 py-[5px]">
 				<div class="flex justify-start items-center flex-grow-0 flex-shrink-0 w-[72px] gap-2 py-0">
 					<div class="flex justify-start items-start flex-grow-0 flex-shrink-0 relative gap-2">
-						<p class="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left text-on-surface-variant">
+						<p class="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left text-on-surface-variant()">
 							{props.languageTag}
 						</p>
 					</div>
-					{props.sourceLanguageTag === props.languageTag && (
+					{inlang()?.config()?.sourceLanguageTag === props.languageTag && (
 						<sl-badge prop:variant="neutral">ref</sl-badge>
 					)}
 				</div>
-				{/* TODO: #169 use proper text editor instead of input element */}
 			</div>
 
 			{/* tiptap floating menu */}
@@ -349,9 +385,9 @@ export function PatternEditor(props: {
 
 				{/* tiptap editor */}
 				<div
-					id={props.id + "-" + props.languageTag}
+					id={props.message.id + "-" + props.languageTag}
 					ref={textArea}
-					onKeyDown={(event) => handleShortcut(event)}
+					// onKeyDown={(event) => handleShortcut(event)}
 					onFocusIn={() => {
 						telemetryBrowser.capture("EDITOR clicked in field", {
 							targetLanguage: props.languageTag,
@@ -359,6 +395,7 @@ export function PatternEditor(props: {
 							repository: routeParams().repository,
 						})
 					}}
+					onFocusOut={autoSave}
 				/>
 			</div>
 
@@ -381,27 +418,34 @@ export function PatternEditor(props: {
 							prop:variant="neutral"
 							prop:size="small"
 						>
+							{/* @ts-ignore */}
 							<MaterialSymbolsTranslateRounded slot="prefix" />
 							Machine translate
 						</sl-button>
 					</Show>
-					<Show when={hasChanges() && isLineItemFocused()}>
+					{/* <Show when={
+						// hasChanges() && 
+						isLineItemFocused()}>
 						<sl-button
 							prop:variant="primary"
 							prop:size="small"
-							prop:disabled={hasChanges() === false || userIsCollaborator() === false}
+							prop:disabled={
+								// hasChanges() === false || 
+								userIsCollaborator() === false}
 							onClick={() => {
-								handleSave()
+								autoSave()
 							}}
 						>
 							<Shortcut slot="suffix" color="primary" codes={["ControlLeft", "s"]} />
 							Save
 						</sl-button>
-					</Show>
-				</div>
-				<Show when={!getEditorFocus() && !isLineItemFocused() && hasChanges()}>
+					</Show> */}
+				</div >
+				{/* <Show when={!getEditorFocus() && !isLineItemFocused()
+					// && hasChanges()
+				}>
 					<div class="bg-hover-primary w-2 h-2 rounded-full" />
-				</Show>
+				</Show> */}
 				{getNotificationHints().length !== 0 && (
 					<NotificationHint notifications={getNotificationHints()} />
 				)}

@@ -125,10 +125,8 @@ export function Layout(props: { children: JSXElement }) {
 		setLanguageTags([...languageTags(), languageTag])
 		setFilteredLanguageTags([...filteredLanguageTags(), languageTag])
 		inlang()?.setConfig({
-			...(inlang()?.config() || {}),
-			sourceLanguageTag: inlang()?.config().sourceLanguageTag || "",
-			modules: inlang()?.config().modules || [],
-			languageTags: [...languageTags(), languageTag],
+			...inlang()!.config(),
+			languageTags: [...inlang()!.config().languageTags, languageTag],
 		})
 	}
 

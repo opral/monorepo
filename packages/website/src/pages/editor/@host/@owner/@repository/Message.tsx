@@ -9,10 +9,7 @@ import { showToast } from "#src/components/Toast.jsx"
 import type { Message as MessageType } from "@inlang/app"
 
 export function Message(props: { message: MessageType }) {
-	const { inlang, sourceLanguageTag, filteredLanguageTags } = useEditorState()
-	const sourceMessage = () => {
-		return props.message.body[sourceLanguageTag()!]
-	}
+	const { inlang, filteredLanguageTags } = useEditorState()
 
 	// performance optimization to only render visible elements
 	// see https://github.com/inlang/inlang/issues/333
@@ -51,11 +48,11 @@ export function Message(props: { message: MessageType }) {
 					onClick={() => {
 						copy(
 							document.location.protocol +
-								"//" +
-								document.location.host +
-								document.location.pathname +
-								"?id=" +
-								props.message.id,
+							"//" +
+							document.location.host +
+							document.location.pathname +
+							"?id=" +
+							props.message.id,
 						),
 							showToast({ variant: "success", title: "Copy to clipboard", duration: 3000 })
 					}}
@@ -78,15 +75,8 @@ export function Message(props: { message: MessageType }) {
 									}
 								>
 									<PatternEditor
-										sourceLanguageTag={inlang()?.config()?.sourceLanguageTag}
 										languageTag={languageTag}
-										id={props.message.id}
-										sourceMessage={sourceMessage()}
-										variant={
-											props.message["body"][languageTag]
-												? props.message["body"][languageTag]![0]
-												: undefined
-										}
+										message={props.message}
 									/>
 								</Show>
 							</>
