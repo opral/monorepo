@@ -1,0 +1,7 @@
+{
+	"extends": ["../../../.eslintrc.json"],
+	"rules": {
+		// conflicts with solidjs
+		"@typescript-eslint/no-non-null-assertion": "off"
+	}
+}

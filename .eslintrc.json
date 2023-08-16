@@ -60,7 +60,7 @@
 				]
 			}
 		],
-		// conflicts with SolidJS
-		"@typescript-eslint/no-non-null-assertion": "off"
+		// multiple bugs because of non null assertions. set to error in the future.
+		"@typescript-eslint/no-non-null-assertion": "warn"
 	}
 }
