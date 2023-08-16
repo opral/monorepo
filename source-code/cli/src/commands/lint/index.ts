@@ -1,9 +1,8 @@
 import { Command } from "commander"
-import { cli } from "../../main.js"
-import { log } from "../../utilities.js"
 import Table from "cli-table3"
-import { getInlang } from "../../utilities/getInlang.js"
+import { getInlangInstance } from "../../utilities/getInlangInstance.js"
 import { bold, italic } from "../../utilities/format.js"
+import { log } from "../../utilities/log.js"
 
 export const lint = new Command()
 	.command("lint")
@@ -13,8 +12,7 @@ export const lint = new Command()
 
 async function lintCommandAction() {
 	try {
-		// Get the config
-		const [inlang, error] = await getInlang({ options: cli.opts() })
+		const { data: inlang, error } = await getInlangInstance()
 		if (error) {
 			log.error(error)
 			return

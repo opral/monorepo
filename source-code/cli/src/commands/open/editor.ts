@@ -1,8 +1,8 @@
 import { exec } from "node:child_process"
 import { Command } from "commander"
-import { log } from "../../utilities.js"
-import { getGitRemotes } from "../../utilities/getGitRemotes.js"
 import { parseOrigin } from "@inlang/telemetry"
+import { log } from "../../utilities/log.js"
+import { getGitRemotes } from "../../utilities/getGitRemotes.js"
 
 export const editor = new Command()
 	.command("editor")
