@@ -4,18 +4,15 @@ import { createEffect } from "./solid.js"
 
 /**
  * Creates a query API for messages.
-	@@ -9,41 +9,43 @@ import { createEffect } from "./solid.js"
  */
 export function createReactiveQuery(messages: () => Array<Message>): MessageQueryApi {
-	//let index: ReactiveMap<string, Message>
-	const index = new ReactiveMap<string, Message>(messages().map((message) => [message.id, message]))
+	const index = new ReactiveMap<string, Message>()
 
 	createEffect(() => {
-		// TODO: update index
-		// q: replace all entries?
-		// q: just add new entries?
-		// q: remove old entries?
-		// setIndex(new ReactiveMap(messages().map((message) => [message.id, message])))
+		index.clear()
+		for (const message of messages()) {
+			index.set(message.id, message)
+		}
 	})
 
 	return {
@@ -31,7 +28,7 @@ export function createReactiveQuery(messages: () => Array<Message>): MessageQuer
 		update: ({ where, data }) => {
 			const message = index.get(where.id)
 			if (message === undefined) return
-			index!.set(where.id, { ...message, ...data })
+			index.set(where.id, { ...message, ...data })
 		},
 		upsert: ({ where, data }) => {
 			const message = index.get(where.id)
