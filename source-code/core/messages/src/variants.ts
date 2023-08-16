@@ -1,9 +1,12 @@
-
 // @ts-nocheck
 import type { LanguageTag } from "@inlang/language-tag"
 import type { Message, Variant } from "./schema.js"
 import type { Result } from "@inlang/result"
-import { MessagePatternsForLanguageTagDoNotExistError, MessageVariantAlreadyExistsError, MessageVariantDoesNotExistError } from "./errors.js"
+import {
+	MessagePatternsForLanguageTagDoNotExistError,
+	MessageVariantAlreadyExistsError,
+	MessageVariantDoesNotExistError,
+} from "./errors.js"
 
 /**
  * Get the variant of a message
@@ -24,7 +27,9 @@ export function getVariant(
 	MessageVariantDoesNotExistError | MessagePatternsForLanguageTagDoNotExistError
 > {
 	if (!message.body[options.languageTag])
-		return { error: new MessagePatternsForLanguageTagDoNotExistError(message.id, options.languageTag) }
+		return {
+			error: new MessagePatternsForLanguageTagDoNotExistError(message.id, options.languageTag),
+		}
 	const variant = matchMostSpecificVariant(message, options.languageTag, options.selectors)
 	if (variant) {
 		//! do not return a reference to the message in a resource
@@ -86,7 +91,9 @@ export function updateVariant(
 ): Result<Message, MessageVariantDoesNotExistError | MessagePatternsForLanguageTagDoNotExistError> {
 	const copy: Message = structuredClone(message)
 	if (copy.body[options.languageTag] === undefined) {
-		return { error: new MessagePatternsForLanguageTagDoNotExistError(message.id, options.languageTag) }
+		return {
+			error: new MessagePatternsForLanguageTagDoNotExistError(message.id, options.languageTag),
+		}
 	}
 	const variant = matchVariant(copy, options.languageTag, options.selectors)
 	if (variant) {
@@ -142,7 +149,7 @@ const matchMostSpecificVariant = (
 	// resolve preferenceSelectors to match length and order of message selectors
 	const resolvedSelectors = resolveSelector(message.selectors, selectors)
 	const index: Record<string, any> = {}
-	
+
 	for (const variant of message.body[languageTag]!) {
 		let isMatch = true
 

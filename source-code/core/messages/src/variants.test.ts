@@ -1,11 +1,11 @@
-import {
-	createVariant,
-	getVariant,
-	updateVariant,
-} from "./utilities.js"
+import { createVariant, getVariant, updateVariant } from "./variants.js"
 import { describe, test, expect } from "vitest"
 import type { Message } from "./schema.js"
-import { MessagePatternsForLanguageTagDoNotExistError, MessageVariantAlreadyExistsError, MessageVariantDoesNotExistError } from "./errors.js"
+import {
+	MessagePatternsForLanguageTagDoNotExistError,
+	MessageVariantAlreadyExistsError,
+	MessageVariantDoesNotExistError,
+} from "./errors.js"
 
 describe("getVariant", () => {
 	test("should return the correct variant of a message", () => {
@@ -157,18 +157,15 @@ describe("createVariant", () => {
 		})
 		// should return the female variant
 		expect(
-			message.data!.body.en?.find(
-				(v) => v.match.gender === "female" && v.match.guestOther === "0",
-			)?.pattern,
+			message.data!.body.en?.find((v) => v.match.gender === "female" && v.match.guestOther === "0")
+				?.pattern,
 		).toStrictEqual([])
 	})
 
 	test("should create a variant, also if matcher are not full defined", () => {
 		const mockMessage: Message = getMockMessage()
 		mockMessage.body.en = [
-			...mockMessage.body.en!.filter(
-				(v) => v.match.gender !== "*" || v.match.guestOther !== "*",
-			),
+			...mockMessage.body.en!.filter((v) => v.match.gender !== "*" || v.match.guestOther !== "*"),
 		]
 
 		const message = createVariant(mockMessage, {
@@ -227,9 +224,8 @@ describe("updateVariant", () => {
 		})
 		// should return the female variant
 		expect(
-			message.data!.body.en?.find(
-				(v) => v.match.gender === "female" && v.match.guestOther === "1",
-			)?.pattern,
+			message.data!.body.en?.find((v) => v.match.gender === "female" && v.match.guestOther === "1")
+				?.pattern,
 		).toStrictEqual([])
 	})
 
@@ -284,7 +280,10 @@ describe("updateVariant", () => {
 const getMockMessage = (): Message => {
 	return {
 		id: "first-message",
-		selectors: [{type: "VariableReference", name: "gender"}, {type: "VariableReference", name: "guestOther"}],
+		selectors: [
+			{ type: "VariableReference", name: "gender" },
+			{ type: "VariableReference", name: "guestOther" },
+		],
 		body: {
 			en: [
 				{
