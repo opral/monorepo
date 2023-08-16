@@ -8,7 +8,7 @@ import { open } from "./commands/open/index.js"
 import { gitOrigin, telemetry } from "./services/telemetry/implementation.js"
 import fetchPolyfill from "node-fetch"
 import { lint } from "./commands/lint/index.js"
-import { getInlang } from "./utilities/getInlangInstance.js"
+import { getInlangInstance } from "./utilities/getInlangInstance.js"
 // --------------- INIT ---------------
 
 // polyfilling node < 18 with fetch
@@ -72,7 +72,7 @@ telemetry.groupIdentify({
 })
 
 try {
-	const { data: inlang } = await getInlang({ options: cli.opts() })
+	const { data: inlang } = await getInlangInstance()
 } catch (error) {
 	// ignore, because of telemetry usage
 }

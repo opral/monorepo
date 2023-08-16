@@ -11,7 +11,12 @@ export async function getInlangInstance(): Promise<Result<InlangInstance, Error>
 	const baseDirectory = process.cwd()
 	const configPath = resolve(baseDirectory, "inlang.config.json")
 
-	if (await fs.readFile(configPath)) {
+	const configExists = await fs
+		.access(configPath)
+		.then(() => true)
+		.catch(() => false)
+
+	if (configExists === false) {
 		return { error: new Error("No inlang.config.json file found in the repository.") }
 	}
 	cached = await tryCatch(() => createInlang({ configPath, nodeishFs: fs }))
