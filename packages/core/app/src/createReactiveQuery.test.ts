@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect } from "vitest"
 import { createReactiveQuery } from './createReactiveQuery.js'
-import { createEffect, createRoot } from './solid.js'
+import { createEffect, createRoot, createSignal } from './solid.js'
 import type { Message, Pattern, Text } from '@inlang/plugin'
 
 const createChangeListener = async (cb: () => void) => createEffect(cb)
@@ -101,8 +102,24 @@ describe("get", () => {
 		})
 	})
 
-	it.todo("should react to changes to the input `messages`", async () => {
+	it("should react to changes to the input `messages`", async () => {
+		const [messages, setMessages] = createSignal<Message[]>([])
+		const query = createReactiveQuery(messages)
 
+		// eslint-disable-next-line unicorn/no-null
+		let message: Message | undefined | null = null
+		await createChangeListener(() =>
+			message = query.get({ where: { id: "1" } })
+		)
+		expect(message).toBeUndefined()
+
+		query.create({ data: createMessage('1', { 'en': 'before' }) })
+		expect(message).toBeDefined()
+		expect((message!.body.en![0]!.pattern[0]! as Text).value).toBe('before')
+
+		setMessages([createMessage('1', { 'en': 'after' })])
+		expect(message).toBeDefined()
+		expect((message!.body.en![0]!.pattern[0]! as Text).value).toBe('after')
 	})
 })
 
@@ -193,8 +210,23 @@ describe("getAll", () => {
 		})
 	})
 
-	it.todo("should react to changes to the input `messages`", async () => {
+	it("should react to changes to the input `messages`", async () => {
+		const [inputMessages, setMessages] = createSignal<Message[]>([createMessage('1', { 'en': 'before' })])
+		const query = createReactiveQuery(inputMessages)
 
+		let messages: Message[] | undefined
+		await createChangeListener(() =>
+			messages = query.getAll()
+		)
+		expect(messages).toHaveLength(1)
+
+		query.create({ data: createMessage('2', { 'en': '' }) })
+		expect(messages).toHaveLength(2)
+		expect((messages![0]!.body.en![0]!.pattern[0]! as Text).value).toBe('before')
+
+		setMessages([createMessage('1', { 'en': 'after' })])
+		expect(messages).toHaveLength(1)
+		expect((messages![0]!.body.en![0]!.pattern[0]! as Text).value).toBe('after')
 	})
 })
 
