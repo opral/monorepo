@@ -179,17 +179,23 @@ export function open (url: string, args: { nodeishFs: NodeishFilesystem, working
 		log (cmdArgs) {
 			return raw.log({
 				fs: withLazyFetching(rawFs, 'log', delayedAction),
+				depth: cmdArgs?.depth,
 				dir,
-				since: cmdArgs.since
+				since: cmdArgs?.since
 			})
 		},
 
-		mergeUpstream (cmdArgs) {
-			return github.request("POST /repos/{owner}/{repo}/merge-upstream", {
+		async mergeUpstream (cmdArgs) {
+			let response
+			try {
+				response = await github.request("POST /repos/{owner}/{repo}/merge-upstream", {
 				branch: cmdArgs.branch,
 				owner,
 				repo: repoName,
 			})
+			} catch (_err) { /* ignore */ }
+
+			return response?.data
 		},
 
 		async isCollaborator (cmdArgs) {
