@@ -1,4 +1,4 @@
-import { createVariant, getVariant, updateVariant } from "./variants.js"
+import { createVariant, getVariant, updateVariantPattern } from "./variant.js"
 import { describe, test, expect } from "vitest"
 import type { Message } from "./schema.js"
 import {
@@ -12,10 +12,13 @@ describe("getVariant", () => {
 		const mockMessage: Message = getMockMessage()
 
 		const variant = getVariant(mockMessage, {
-			languageTag: "en",
-			selectors: { gender: "female", guestOther: "1" },
+			where: {
+				languageTag: "en",
+				selectors: { gender: "female", guestOther: "1" },
+			},
 		})
-		expect(variant.data![0]).toStrictEqual({
+
+		expect(variant?.pattern[0]).toStrictEqual({
 			type: "Text",
 			value: "{$hostName} invites {$guestName} to her party.",
 		})
@@ -25,10 +28,12 @@ describe("getVariant", () => {
 		const mockMessage: Message = getMockMessage()
 
 		const variant = getVariant(mockMessage, {
-			languageTag: "en",
-			selectors: { gender: "female", guestOther: "0" },
+			where: {
+				languageTag: "en",
+				selectors: { gender: "female", guestOther: "0" },
+			},
 		})
-		expect(variant.data![0]).toStrictEqual({
+		expect(variant?.pattern[0]).toStrictEqual({
 			type: "Text",
 			value: "{$hostName} invites {$guestName} and {$guestsOther} other people to her party.",
 		})
@@ -38,10 +43,12 @@ describe("getVariant", () => {
 		const mockMessage: Message = getMockMessage()
 
 		const variant = getVariant(mockMessage, {
-			languageTag: "en",
-			selectors: { guestOther: "0" },
+			where: {
+				languageTag: "en",
+				selectors: { guestOther: "0" },
+			},
 		})
-		expect(variant.data![0]).toStrictEqual({
+		expect(variant?.pattern[0]).toStrictEqual({
 			type: "Text",
 			value: "{$hostName} does not give a party.",
 		})
@@ -51,10 +58,12 @@ describe("getVariant", () => {
 		const mockMessage: Message = getMockMessage()
 
 		const variant = getVariant(mockMessage, {
-			languageTag: "en",
-			selectors: {},
+			where: {
+				languageTag: "en",
+				selectors: {},
+			},
 		})
-		expect(variant.data![0]).toStrictEqual({
+		expect(variant?.pattern[0]).toStrictEqual({
 			type: "Text",
 			value: "{$hostName} invites {$guestName} and {$guestsOther} other people to their party.",
 		})
@@ -64,25 +73,29 @@ describe("getVariant", () => {
 		const mockMessage: Message = getMockMessage()
 
 		const variant = getVariant(mockMessage, {
-			languageTag: "en",
-			selectors: { gender: "trans", guestOther: "2" },
+			where: {
+				languageTag: "en",
+				selectors: { gender: "trans", guestOther: "2" },
+			},
 		})
-		expect(variant.data![0]).toStrictEqual({
+		expect(variant?.pattern[0]).toStrictEqual({
 			type: "Text",
 			value: "{$hostName} invites {$guestName} and one other person to their party.",
 		})
 
 		const variant2 = getVariant(mockMessage, {
-			languageTag: "en",
-			selectors: { gender: "male", guestOther: "8" },
+			where: {
+				languageTag: "en",
+				selectors: { gender: "male", guestOther: "8" },
+			},
 		})
-		expect(variant2.data![0]).toStrictEqual({
+		expect(variant2?.pattern[0]).toStrictEqual({
 			type: "Text",
 			value: "{$hostName} invites {$guestName} and {$guestsOther} other people to his party.",
 		})
 	})
 
-	test("should return error of no variant matches", () => {
+	test("should return undefined of no variant matches", () => {
 		const mockMessage: Message = getMockMessage()
 		mockMessage.body["en"] = [
 			...mockMessage.body["en"]!.filter(
@@ -91,25 +104,27 @@ describe("getVariant", () => {
 		]
 
 		const variant = getVariant(mockMessage, {
-			languageTag: "en",
-			selectors: {},
+			where: {
+				languageTag: "en",
+				selectors: {},
+			},
 		})
-		expect(variant.data).toBeUndefined()
-		expect(variant.error).toBeInstanceOf(MessageVariantDoesNotExistError)
+		expect(variant).toBeUndefined()
 	})
 
-	test("should return error if set of variants for specific language does not exist", () => {
+	test("should return undefined if a variant for specific language does not exist", () => {
 		const mockMessage: Message = getMockMessage()
 
 		const variant = getVariant(mockMessage, {
-			languageTag: "de",
-			selectors: { gender: "female", guestOther: "1" },
+			where: {
+				languageTag: "de",
+				selectors: { gender: "female", guestOther: "1" },
+			},
 		})
-		expect(variant.data).toBeUndefined()
-		expect(variant.error).toBeInstanceOf(MessagePatternsForLanguageTagDoNotExistError)
+		expect(variant).toBeUndefined()
 	})
 
-	test("should return variant if no selector defined", () => {
+	test("should return the catch all variant if no selector defined", () => {
 		const mockMessage: Message = getMockMessage()
 		mockMessage.body["en"] = [
 			{
@@ -124,20 +139,13 @@ describe("getVariant", () => {
 		]
 
 		const variant = getVariant(mockMessage, {
-			languageTag: "en",
-			selectors: {},
+			where: {
+				languageTag: "en",
+				selectors: {},
+			},
 		})
 		// should return the female variant
-		expect(variant.data![0]).toStrictEqual({
-			type: "Text",
-			value: "test",
-		})
-
-		const variant2 = getVariant(mockMessage, {
-			languageTag: "en",
-		})
-		// should return the female variant
-		expect(variant2.data![0]).toStrictEqual({
+		expect(variant?.pattern[0]).toStrictEqual({
 			type: "Text",
 			value: "test",
 		})
@@ -149,7 +157,9 @@ describe("createVariant", () => {
 		const mockMessage: Message = getMockMessage()
 
 		const message = createVariant(mockMessage, {
-			languageTag: "en",
+			where: {
+				languageTag: "en",
+			},
 			data: {
 				match: { gender: "female", guestOther: "0" },
 				pattern: [],
@@ -169,7 +179,9 @@ describe("createVariant", () => {
 		]
 
 		const message = createVariant(mockMessage, {
-			languageTag: "en",
+			where: {
+				languageTag: "en",
+			},
 			data: {
 				match: {},
 				pattern: [],
@@ -186,7 +198,9 @@ describe("createVariant", () => {
 		const mockMessage: Message = getMockMessage()
 
 		const variant = createVariant(mockMessage, {
-			languageTag: "en",
+			where: {
+				languageTag: "en",
+			},
 			data: {
 				match: { gender: "male", guestOther: "1" },
 				pattern: [],
@@ -201,7 +215,9 @@ describe("createVariant", () => {
 		const mockMessage: Message = getMockMessage()
 
 		const variant = createVariant(mockMessage, {
-			languageTag: "de",
+			where: {
+				languageTag: "de",
+			},
 			data: {
 				match: { gender: "female", guestOther: "1" },
 				pattern: [],
@@ -217,10 +233,12 @@ describe("updateVariant", () => {
 	test("should update a variant of a message", () => {
 		const mockMessage: Message = getMockMessage()
 
-		const message = updateVariant(mockMessage, {
-			languageTag: "en",
-			selectors: { gender: "female", guestOther: "1" },
-			pattern: [],
+		const message = updateVariantPattern(mockMessage, {
+			where: {
+				languageTag: "en",
+				selectors: { gender: "female", guestOther: "1" },
+			},
+			data: [],
 		})
 		// should return the female variant
 		expect(
@@ -232,10 +250,12 @@ describe("updateVariant", () => {
 	test("should update a variant, also if matcher are not full defined", () => {
 		const mockMessage: Message = getMockMessage()
 
-		const message = updateVariant(mockMessage, {
-			languageTag: "en",
-			selectors: {},
-			pattern: [],
+		const message = updateVariantPattern(mockMessage, {
+			where: {
+				languageTag: "en",
+				selectors: {},
+			},
+			data: [],
 		})
 		// should return the female variant
 		expect(
@@ -253,10 +273,12 @@ describe("updateVariant", () => {
 			),
 		]
 
-		const variant = updateVariant(mockMessage, {
-			languageTag: "en",
-			selectors: {},
-			pattern: [],
+		const variant = updateVariantPattern(mockMessage, {
+			where: {
+				languageTag: "en",
+				selectors: {},
+			},
+			data: [],
 		})
 		// should return the female variant
 		expect(variant.data).toBeUndefined()
@@ -266,10 +288,12 @@ describe("updateVariant", () => {
 	test("should return error if set of variants for specific language does not exist", () => {
 		const mockMessage: Message = getMockMessage()
 
-		const variant = updateVariant(mockMessage, {
-			languageTag: "de",
-			selectors: {},
-			pattern: [],
+		const variant = updateVariantPattern(mockMessage, {
+			where: {
+				languageTag: "de",
+				selectors: {},
+			},
+			data: [],
 		})
 		// should return the female variant
 		expect(variant.data).toBeUndefined()
