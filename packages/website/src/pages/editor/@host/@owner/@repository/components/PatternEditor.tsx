@@ -1,5 +1,5 @@
 import { createSignal, onMount, Show } from "solid-js"
-import { useEditorIsFocused, createTiptapEditor } from "solid-tiptap"
+import { createTiptapEditor, useEditorIsFocused } from "solid-tiptap"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
@@ -19,6 +19,7 @@ import {
 	Variant,
 	createVariant,
 	updateVariantPattern,
+	getVariant,
 } from "@inlang/app"
 
 /**
@@ -40,6 +41,8 @@ export function PatternEditor(props: {
 	} = useEditorState()
 
 	const [variableReferences, setVariableReferences] = createSignal<VariableReference[]>([])
+
+	const [hasChanges, setHasChanges] = createSignal(false)
 
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
@@ -109,7 +112,7 @@ export function PatternEditor(props: {
 	// 	if (editor()) {
 	// 		const isFocus = useEditorIsFocused(() => editor())
 	// 		if (isFocus() && localStorage.isFirstUse) {
-	// 	setLocalStorage("isFirstUse", false)
+	// 			setLocalStorage("isFirstUse", false)
 	// 		}
 	// 		return isFocus()
 	// 	}
@@ -117,7 +120,13 @@ export function PatternEditor(props: {
 
 	const autoSave = () => {
 		const newPattern = getTextValue(editor) as Variant["pattern"];
-		if (JSON.stringify(variant()?.pattern) === JSON.stringify(newPattern)) return;
+		if (JSON.stringify(variant()?.pattern) === JSON.stringify(newPattern)) {
+			if (hasChanges() && localChanges() > 0) {
+				setLocalChanges((prev) => prev -= 1);
+				setHasChanges(false);
+			}
+			return;
+		}
 		let newMessage;
 		if (variant() === undefined) {
 			newMessage = createVariant(props.message, {
@@ -141,6 +150,10 @@ export function PatternEditor(props: {
 				where: { id: props.message.id },
 				data: newMessage.data,
 			});
+			if (!hasChanges()) {
+				setLocalChanges((prev) => prev += 1);
+				setHasChanges(true);
+			}
 		} else {
 			throw new Error("Cannot update message: ", newMessage.error)
 		}
@@ -433,26 +446,29 @@ export function PatternEditor(props: {
 						</sl-button>
 					</Show>
 					{/* <Show when={
-						// hasChanges() && 
+						hasChanges() &&
 						isLineItemFocused()}>
 						<sl-button
 							prop:variant="primary"
 							prop:size="small"
 							prop:disabled={
-								// hasChanges() === false || 
+								hasChanges() === false ||
 								userIsCollaborator() === false}
 							onClick={() => {
+								editor().commands.setContent(setTipTapMessage(
+									variant()?.pattern || []
+								))
 								autoSave()
 							}}
 						>
 							<Shortcut slot="suffix" color="primary" codes={["ControlLeft", "s"]} />
-							Save
+							Revert
 						</sl-button>
 					</Show> */}
 				</div >
 				{/* <Show when={!getEditorFocus()
-					// && !isLineItemFocused()
-					// && hasChanges()
+					&& !isLineItemFocused()
+					&& hasChanges()
 				}>
 					<div class="bg-hover-primary w-2 h-2 rounded-full" />
 				</Show> */}
