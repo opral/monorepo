@@ -4,14 +4,24 @@ import type { NodeishFilesystem } from "@inlang-git/fs"
 import { readFile, stat, writeFile } from "node:fs/promises"
 import { dedent } from "ts-dedent"
 import path from "node:path"
-import { pathToFileURL } from 'node:url'
 import type { Config as SvelteConfig } from "@sveltejs/kit"
 import type { SdkConfig } from '@inlang/sdk-js-plugin'
 import { codeToSourceFile } from '../../ast-transforms/utils/js.util.js'
 import { findExport } from '../../ast-transforms/utils/exports.js'
 import { Node } from 'ts-morph'
 import { findDepPkgJsonPath } from "vitefu"
-import * as svelteKit from "@sveltejs/kit"
+
+import {
+	createRoot as _createRoot,
+	createEffect as _createEffect,
+	createSignal as _createSignal,
+	// @ts-ignore
+} from "solid-js/dist/solid.js"
+import { } from 'solid-js'
+
+const createRoot = _createRoot as typeof import("solid-js")["createRoot"]
+const createEffect = _createEffect as typeof import("solid-js")["createEffect"]
+const createSignal = _createSignal as typeof import("solid-js")["createSignal"]
 
 // ------------------------------------------------------------------------------------------------
 
@@ -26,7 +36,7 @@ export type TransformConfig = {
 
 	sourceLanguageTag: LanguageTag
 	languageTags: LanguageTag[]
-	readMessages: () => Promise<Message[]>
+	messages: () => Message[]
 
 	cwdFolderPath: string
 	options: {
@@ -57,21 +67,20 @@ export const initTransformConfig = async (): Promise<TransformConfig> => {
 
 	// eslint-disable-next-line no-async-promise-executor
 	return (appPromise = new Promise<TransformConfig>(async (resolve) => {
-		const instanceResult = await tryCatch(async () =>
+		const { data: inlang, error: createInlangError } = await tryCatch(async () =>
 			createInlang({ nodeishFs: await getFs(), configPath: "./inlang.config.json" }),
 		)
 
-		if (instanceResult.error) {
-			if (instanceResult.error instanceof ConfigPathNotFoundError) {
+		if (createInlangError) {
+			if (createInlangError instanceof ConfigPathNotFoundError) {
 				await createBasicInlangConfig()
 				appPromise = undefined
 				return resolve(initTransformConfig())
 			}
 
-			throw instanceResult.error
+			throw createInlangError
 		}
 
-		const inlang = instanceResult.data! // TODO: check result type
 
 		await updateSdkPluginVersion(inlang)
 		await createDemoResourcesIfNoMessagesExistYet(inlang)
@@ -117,7 +126,7 @@ export const initTransformConfig = async (): Promise<TransformConfig> => {
 
 			sourceLanguageTag: inlang.config().sourceLanguageTag,
 			languageTags: inlang.config().languageTags,
-			readMessages: async () => inlang.query.messages.getAll(),
+			messages: () => inlang.query.messages.getAll(),
 
 			cwdFolderPath: PATH_TO_CWD,
 			options: {
@@ -293,7 +302,7 @@ const shouldContentBePrerendered = async (routesFolder: string) => {
 
 export const getSvelteKitVersion = async () => {
 	const packageName = '@sveltejs/kit'
-	const pkg = await import(packageName).catch(() => ({}))
+	const pkg = await import(/* @vite-ignore */ packageName).catch(() => ({}))
 	if ("VERSION" in pkg) return pkg.VERSION
 
 	const pkgJsonPath = await findDepPkgJsonPath(packageName, PATH_TO_CWD).catch(() => undefined)

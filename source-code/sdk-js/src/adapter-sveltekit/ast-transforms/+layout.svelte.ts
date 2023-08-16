@@ -80,6 +80,7 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 	// move @inlang/sdk-js import declarations below inserted code
 	const imports = findImportDeclarations(sourceFile, "@inlang/sdk-js")
 	for (const importDeclaration of imports) {
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		importDeclaration.setOrder(insertedStatements.at(-1)!.getChildIndex() + 1)
 	}
 

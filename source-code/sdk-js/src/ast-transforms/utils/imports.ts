@@ -79,9 +79,8 @@ const textWithoutQuotes = (text: string) => text.replace(/^['"]|['"]$/g, "")
 
 export const findImportDeclarations = (sourceFile: SourceFile, path: string) =>
 	sourceFile
-		.forEachChildAsArray()
+		.getImportDeclarations()
 		.map((node) =>
-			Node.isImportDeclaration(node) &&
 			textWithoutQuotes(node.getModuleSpecifier().getText()) === path
 				? node
 				: undefined,

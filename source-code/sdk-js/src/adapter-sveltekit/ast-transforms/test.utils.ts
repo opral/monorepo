@@ -16,7 +16,7 @@ export const initTestApp = (
 
 			sourceLanguageTag: "en",
 			languageTags: ["en"],
-			readMessages: async () => [],
+			messages: () => [],
 
 			cwdFolderPath: "",
 			options: {

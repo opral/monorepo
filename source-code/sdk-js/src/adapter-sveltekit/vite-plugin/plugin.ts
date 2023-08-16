@@ -10,6 +10,14 @@ import { inspect } from "node:util"
 import { } from "./inlang-app.js"
 import path from 'node:path'
 import { rm } from 'node:fs/promises'
+import {
+	createEffect as _createEffect,
+	// @ts-ignore
+} from "solid-js/dist/solid.js"
+import { } from 'solid-js'
+
+const createEffect = _createEffect as typeof import("solid-js")["createEffect"]
+
 
 let viteServer: ViteDevServer | undefined
 
@@ -50,7 +58,7 @@ export const plugin = () => {
 				return dedent`
 					export const sourceLanguageTag = ${JSON.stringify(config.sourceLanguageTag)}
 					export const languageTags = ${JSON.stringify(config.languageTags)}
-					export const messages = ${JSON.stringify(await config.readMessages())}
+					export const messages = ${JSON.stringify(config.messages())}
 				`
 			}
 
@@ -78,6 +86,16 @@ export const plugin = () => {
 					viteServer && viteServer.restart()
 				}, 1000) // if the server immediately get's restarted, then you would not be able to kill the process with CTRL + C; It seems that delaying the restart fixes this issue
 			}
+
+			createEffect(() => {
+				config.messages()
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				viteServer!.ws.send({
+					type: 'custom',
+					event: 'inlang-messages-changed',
+					// TODO: only HMR if the currently visible language changes
+				})
+			})
 		},
 
 		async transform(code, id) {
@@ -124,7 +142,7 @@ let configLogged = false
 const logConfig = (config: TransformConfig) => {
 	if (configLogged) return
 
-	const { readMessages: _, ...configToLog } = config
+	const { messages: _, ...configToLog } = config
 	console.info(dedent`
 		-- INLANG RESOLVED CONFIG ------------------------------------------------------
 

@@ -69,9 +69,59 @@ export const transformLayoutJs = (
 
 	addImports(sourceFile, config, root, wrapperFunctionName)
 
+	injectHotReloadCode(sourceFile)
+
 	const options = root ? getOptions(config, root) : undefined
 	wrapExportedFunction(sourceFile, options, wrapperFunctionName, "load")
 	removeImport(sourceFile, "@inlang/sdk-js")
 
 	return nodeToCode(sourceFile)
 }
+
+
+// ------------------------------------------------------------------------------------------------
+
+const injectHotReloadCode = (sourceFile: SourceFile) => {
+	// addImport(sourceFile, "@inlang/sdk-js", "language")
+
+	// sourceFile.addVariableStatement({
+	// 	declarations: [{
+	// 		name: 'inlang_hmr_language',
+	// 		// type: 'string',
+	// 	}]
+	// })
+
+	sourceFile.insertText(0, dedent`
+		if (import.meta.hot) {
+			import.meta.hot.on('inlang-messages-changed', async () => {
+				location.reload()
+			})
+		}
+	`)
+
+	// const loadFn = findOrCreateExport(sourceFile, 'load', '() => { }')
+	// const block = findFunctionBodyBlock(loadFn)
+
+	// block.insertStatements(0, dedent`
+	// 	inlang_hmr_language = language
+	// `)
+}
+
+// const findFunctionBodyBlock = (node: Node): Block => {
+// 	if (Node.isSatisfiesExpression(node) || Node.isParenthesizedExpression(node)) {
+// 		return findFunctionBodyBlock(node.getExpression())
+// 	}
+// 	if (Node.isCallExpression(node)) {
+// 		return findFunctionBodyBlock(node.getArguments()[0]!)
+// 	}
+
+// 	if (Node.isVariableDeclaration(node)) {
+// 		return findFunctionBodyBlock(node.getInitializer()!)
+// 	}
+
+// 	if (Node.isArrowFunction(node) || Node.isFunctionDeclaration(node)) {
+// 		return node.getBody() as Block
+// 	}
+
+// 	throw new Error(`Could not find function body block for kind '${node.getKindName()}'.`)
+// }
