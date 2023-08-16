@@ -14,7 +14,12 @@ describe("transformLayoutJs", () => {
 				const transformed = transformLayoutJs("", config, code, true)
 
 				expect(transformed).toMatchInlineSnapshot(`
-					"import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
+					"if (import.meta.hot) {
+					    import.meta.hot.on('inlang-messages-changed', async () => {
+					        location.reload();
+					    });
+					}
+					import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
 					export const load = initRootLayoutLoadWrapper({}).use(() => { });"
 				`)
 			})
@@ -25,7 +30,12 @@ describe("transformLayoutJs", () => {
 				const transformed = transformLayoutJs("", config, code, true)
 
 				expect(transformed).toMatchInlineSnapshot(`
-					"import { initLocalStorageDetector, navigatorDetector } from '@inlang/sdk-js/detectors/client';
+					"if (import.meta.hot) {
+					    import.meta.hot.on('inlang-messages-changed', async () => {
+					        location.reload();
+					    });
+					}
+					import { initLocalStorageDetector, navigatorDetector } from '@inlang/sdk-js/detectors/client';
 					import { browser } from '$app/environment';
 					import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
 					export const load = initRootLayoutLoadWrapper({
@@ -45,7 +55,12 @@ describe("transformLayoutJs", () => {
 			const transformed = transformLayoutJs("", config, code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`
-				"import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
+				"if (import.meta.hot) {
+				    import.meta.hot.on('inlang-messages-changed', async () => {
+				        location.reload();
+				    });
+				}
+				import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
 				export const load = initRootLayoutLoadWrapper({}).use(async () => { });"
 			`)
 		})
@@ -83,7 +98,12 @@ describe("transformLayoutJs", () => {
 		)
 
 		expect(transformed).toMatchInlineSnapshot(`
-			"import { initLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
+			"if (import.meta.hot) {
+			    import.meta.hot.on('inlang-messages-changed', async () => {
+			        location.reload();
+			    });
+			}
+			import { initLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
 			import type { LayoutLoad } from '@sveltejs/kit';
 			export const load = initLoadWrapper().use(async((_, { languages }) => {
 			    return { languages };

@@ -27,6 +27,7 @@ beforeEach(async () => {
 	})
 
 	vi.mock("$app/navigation", () => ({ goto: vi.fn() }))
+	vi.mock("$app/environment", () => ({ browser: true }))
 	vi.mock("$app/stores", () => ({ page: vi.fn() }))
 	vi.mock("$app/paths", () => ({ base: "" }))
 	vi.mock("svelte", () => ({ getContext: vi.fn(), setContext: vi.fn() }))

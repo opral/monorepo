@@ -7,6 +7,7 @@ import { createMessage } from "../../../runtime/inlang-function.test.js"
 //TODO: refactor
 
 vi.mock("$app/paths", () => ({ base: "" }))
+vi.mock("$app/environment", () => ({ browser: true }))
 
 const PREFIX = "https://www.inlang.com"
 

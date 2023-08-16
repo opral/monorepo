@@ -8,8 +8,6 @@ import {
 	ExportSpecifier,
 	ArrowFunction,
 	FunctionExpression,
-	ParenthesizedExpression,
-	SatisfiesExpression,
 } from "ts-morph"
 import { codeToNode, nodeToCode } from "./js.util.js"
 import { findOrCreateExport } from "./exports.js"
@@ -117,17 +115,17 @@ const findFunctionExpression = (
 }
 
 const findFunction = (node: Node): ArrowFunction | FunctionExpression => {
-	if (ArrowFunction.isArrowFunction(node) || FunctionExpression.isFunctionExpression(node))
+	if (Node.isArrowFunction(node) || Node.isFunctionExpression(node))
 		return node
 
 	if (
-		ParenthesizedExpression.isParenthesizedExpression(node) ||
-		SatisfiesExpression.isSatisfiesExpression(node)
+		Node.isParenthesizedExpression(node) ||
+		Node.isSatisfiesExpression(node)
 	) {
 		return findFunction(node.getExpression())
 	}
 
-	if (CallExpression.isCallExpression(node)) {
+	if (Node.isCallExpression(node)) {
 		return findFunction(node.getArguments()[0]!)
 	}
 

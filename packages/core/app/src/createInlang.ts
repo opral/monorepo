@@ -153,7 +153,7 @@ export const createInlang = async (args: {
 const loadConfig = async (args: { configPath: string; nodeishFs: NodeishFilesystemSubset }) => {
 	let json: string
 	if (args.configPath.startsWith('data:')) {
-		json = (await import(args.configPath, { assert: { type: 'json' } })).default
+		json = (await import(args.configPath)).default
 		// TODO: add error handling
 	} else {
 		const { data: configFile, error: configFileError } = await tryCatch(

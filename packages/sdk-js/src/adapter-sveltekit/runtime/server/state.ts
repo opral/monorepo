@@ -5,18 +5,19 @@ import type { SvelteKitServerRuntime } from "./runtime.js"
 import type { LanguageTag } from "@inlang/app"
 import type { Message } from "@inlang/messages"
 
-type State = Pick<TransformConfig, 'sourceLanguageTag' | 'languageTags' | 'readMessages'>
+type State = Pick<TransformConfig, 'sourceLanguageTag' | 'languageTags' | 'messages'>
 
 let state: State
 
 export const initState = async () => {
+
 	if (!state && !import.meta.env.DEV) {
 		try {
 			const { languageTags, sourceLanguageTag, messages } = await import("virtual:inlang-static")
 			state = {
 				sourceLanguageTag,
 				languageTags,
-				readMessages: async () => messages,
+				messages: () => messages,
 			} as State
 		} catch {
 			/* empty */
@@ -28,7 +29,7 @@ export const initState = async () => {
 		state = {
 			sourceLanguageTag: config.sourceLanguageTag,
 			languageTags: config.languageTags,
-			readMessages: config.readMessages,
+			messages: config.messages,
 		}
 	}
 
@@ -46,7 +47,7 @@ let _messages: Message[] = []
 
 // TODO: fix resources if needed (add missing Keys, etc.)
 export const reloadMessages = async () =>
-	(_messages = (await state?.readMessages()) || [])
+	(_messages = state?.messages()) || []
 
 export const loadMessages = (languageTag: LanguageTag) => _messages // TODO: filter
 
