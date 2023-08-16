@@ -367,7 +367,7 @@ describe("addAppSpecificApi", () => {
 				keywords: [],
 			},
 			addAppSpecificApi: () => ({
-				"namespace.myApp": {
+				"namespace.app.placeholder": {
 					messageReferenceMatcher: () => {
 						return { hello: "world" }
 					},
@@ -381,8 +381,10 @@ describe("addAppSpecificApi", () => {
 			nodeishFs: {} as any,
 		})
 
-		expect(resolved.data.appSpecificApi).toHaveProperty("namespace.myApp")
-		expect(resolved.data.appSpecificApi?.["namespace.myApp"].messageReferenceMatcher()).toEqual({
+		expect(resolved.data.appSpecificApi).toHaveProperty("namespace.app.placeholder")
+		expect(
+			resolved.data.appSpecificApi?.["namespace.app.placeholder"].messageReferenceMatcher(),
+		).toEqual({
 			hello: "world",
 		})
 	})
