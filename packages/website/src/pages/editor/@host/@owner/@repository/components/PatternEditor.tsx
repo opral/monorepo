@@ -11,7 +11,6 @@ import { telemetryBrowser } from "@inlang/telemetry"
 import { getTextValue, setTipTapMessage } from "../helper/parse.js"
 import { getEditorConfig } from "../helper/editorSetup.js"
 import { FloatingMenu } from "./FloatingMenu.jsx"
-// import { rpc } from "@inlang/rpc"
 import {
 	Message,
 	VariableReference,
@@ -306,28 +305,39 @@ export function PatternEditor(props: {
 			return machineLearningWarningDialog?.show()
 		}
 		setMachineTranslationIsLoading(true)
-		console.warn("needs to be implemented :)")
-		// const translation = await rpc.machineTranslateMessage({
-		// 	message: props.message,
-		// 	sourceLanguageTag: inlang()!.config()!.sourceLanguageTag!,
-		// 	targetLanguageTags: [props.languageTag],
-		// })
-		// if (translation.data === undefined) {
-		// 	showToast({
-		// 		variant: "warning",
-		// 		title: "Machine translation failed.",
-		// 		message: translation.error,
-		// 	})
-		// } else {
-		// 	editor().commands.setContent(setTipTapMessage(
-		// 		getVariant(translation.data!, {
-		// 			where: {
-		// 				languageTag: props.languageTag,
-		// 				selectors: {},
-		// 			},
-		// 		})?.pattern || [],
-		// 	))
-		// }
+		const { rpc } = await import("@inlang/rpc");
+		const translation = await rpc.machineTranslateMessage({
+			message: props.message,
+			sourceLanguageTag: inlang()!.config()!.sourceLanguageTag!,
+			targetLanguageTags: [props.languageTag],
+		})
+		if (translation.error !== undefined) {
+			showToast({
+				variant: "warning",
+				title: "Machine translation failed.",
+				message: translation.error,
+			})
+		}
+		else {
+			const newPattern = getVariant(translation.data, {
+				where: {
+					languageTag: props.languageTag,
+					selectors: {},
+				},
+			})?.pattern || []
+			if (JSON.stringify(newPattern) !== "[]") {
+				editor().commands.setContent(setTipTapMessage(
+					newPattern
+				))
+			} else {
+				showToast({
+					variant: "warning",
+					title: "Machine translation failed.",
+					message: "Empty pattern already exists for this language.",
+				})
+			}
+		}
+
 		setMachineTranslationIsLoading(false)
 	}
 
