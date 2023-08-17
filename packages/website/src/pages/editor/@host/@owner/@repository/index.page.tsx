@@ -113,28 +113,26 @@ function TheActualPage() {
 				<Match when={repositoryIsCloned.error}>
 					<p class="text-danger">{repositoryIsCloned.error.message}</p>
 				</Match>
-				{/* <Match when={inlang()?.errors.module().length !== 0 || inlang()?.errors.plugin().length !== 0  || inlang()?.errors.lintRules().length !== 0 }>
+				<Match when={inlang()?.errors().length !== 0 && inlang()}>
 					<p class="text-danger pb-2">
 						An error occurred while initializing the config:
 					</p>
 					<ul class="text-danger">
-						{inlang()?.errors.module().length !== 0 &&
-							<For each={inlang()?.errors.module()}>
-								{(error) => <ErrorPrint error={error} />}
-							</For>
-						}
-						{inlang()?.errors.plugin().length !== 0 &&
-							<For each={inlang()?.errors.plugin()}>
-								{(error) => <ErrorPrint error={error} />}
-							</For>
-						}
-						{inlang()?.errors.lintRules().length !== 0 &&
-							<For each={inlang()?.errors.lintRules()}>
-								{(error) => <ErrorPrint error={error} />}
+						{inlang()?.errors().length !== 0 &&
+							<For each={inlang()?.errors()}>
+								{(error) => {
+									return (<li class="pt-2">
+										<span class="font-semibold">{error.name}: </span>
+										<br />
+										error.message <br />
+										error.cause? && <p>{error.cause as string}</p>
+										error.stack && <p>{error.stack}</p>
+									</li>)
+								}}
 							</For>
 						}
 					</ul>
-				</Match> */}
+				</Match>
 				<Match when={repositoryIsCloned.loading || inlang() === undefined}>
 					<div class="flex flex-col grow justify-center items-center min-w-full gap-2">
 						{/* sl-spinner need a own div otherwise the spinner has a bug. The wheel is rendered on the outer div  */}
@@ -360,17 +358,5 @@ function RepositoryDoesNotExistOrNotAuthorizedCard() {
 				</a>
 			</div>
 		</div>
-	)
-}
-
-const ErrorPrint = (error: any) => {
-	return (
-		<li class="pt-2">
-			<span class="font-semibold">{error.error.name}: </span>
-			<br />
-			{error.error.message} <br />
-			{error.error.cause && <p>{error.error.cause}</p>}
-			{error.error.stack && <p>{error.error.stack}</p>}
-		</li>
 	)
 }
