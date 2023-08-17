@@ -79,6 +79,7 @@
 		"openEditor": "Editor öffnen",
 		"link": {
 			"blog": "Blog",
+			"marketplace": "Marktplatz",
 			"docs": "Dokumentation",
 			"feedback": "Feedback"
 		}
@@ -92,7 +93,7 @@
 		},
 		"resources": {
 			"title": "Ressourcen",
-			"blog": "Blog",
+			"marketplace": "Marktplatz",
 			"roadmap": "Produktplan",
 			"github": "GitHub",
 			"twitter": "Twitter",
@@ -102,7 +103,8 @@
 			"title": "Kontakt",
 			"getInTouch": "In Kontakt treten",
 			"join": "Bewerben",
-			"feedback": "Feedback"
+			"feedback": "Feedback",
+			"blog": "Blog"
 		}
 	},
 	"newsletter": {

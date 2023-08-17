@@ -31,16 +31,18 @@ const layoutMargins = "max-w-screen-xl w-full mx-auto px-4 sm:px-10 "
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	return (
-		<div class="flex flex-col">
-			<Header />
-			{/* the outer div is growing to occupy the entire height and thereby
+		<Show when={localesLoaded()}>
+			<div class="flex flex-col">
+				<Header />
+				{/* the outer div is growing to occupy the entire height and thereby
 			push the footer to the bottom */}
-			<div class={"grow flex flex-col min-h-screen " + layoutMargins}>
-				{/* the children are wrapped in a div to avoid flex and grow being applied to them from the outer div */}
-				{props.children}
+				<div class={"grow flex flex-col min-h-screen " + layoutMargins}>
+					{/* the children are wrapped in a div to avoid flex and grow being applied to them from the outer div */}
+					{props.children}
+				</div>
+				<Footer isLandingPage={false} />
 			</div>
-			<Footer isLandingPage={false} />
-		</div>
+		</Show>
 	)
 }
 
@@ -85,7 +87,7 @@ const socialMediaLinks = [
 function Header(props: { landingpage?: boolean }) {
 	const getLinks = () => {
 		return [
-			{ name: `${t("header.link.blog")}`, href: "/blog", type: "text" as buttonType },
+			{ name: `${t("header.link.marketplace")}`, href: "/marketplace", type: "text" as buttonType },
 			{ name: `${t("header.link.docs")}`, href: "/documentation", type: "text" as buttonType },
 			{
 				name: `${t("header.link.feedback")}`,
@@ -146,7 +148,8 @@ function Header(props: { landingpage?: boolean }) {
 										when={
 											currentPageContext.urlParsed.pathname.includes("editor") === false &&
 											currentPageContext.urlParsed.pathname.includes("documentation") === false &&
-											currentPageContext.urlParsed.pathname.includes("blog") === false
+											currentPageContext.urlParsed.pathname.includes("blog") === false &&
+											currentPageContext.urlParsed.pathname.includes("marketplace") === false
 										}
 									>
 										<LanguagePicker />
@@ -227,7 +230,11 @@ const Footer = (props: { isLandingPage: boolean }) => {
 	}
 	const getResourceLinks = () => {
 		return [
-			{ name: `${t("footer.resources.blog")}`, href: "/blog", type: "text" as buttonType },
+			{
+				name: `${t("footer.resources.marketplace")}`,
+				href: "/marketplace",
+				type: "text" as buttonType,
+			},
 			{
 				name: `${t("footer.resources.roadmap")}`,
 				href: "https://github.com/orgs/inlang/projects?query=is%3Aopen",
@@ -267,6 +274,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 				href: "https://github.com/inlang/inlang/discussions/categories/feedback",
 				type: "text" as buttonType,
 			},
+			{ name: `${t("footer.contact.blog")}`, href: "/blog", type: "text" as buttonType },
 		]
 	}
 

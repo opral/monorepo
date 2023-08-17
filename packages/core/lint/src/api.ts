@@ -33,6 +33,17 @@ export const LintRuleBase = Type.Object({
 		}) as unknown as TTemplateLiteral<[TLiteral<`${string}.lintRule.${string}`>]>,
 		displayName: WithLanguageTags(Type.String()),
 		description: WithLanguageTags(Type.String()),
+		/* This is used for the marketplace, required if 
+			you want to publish your plugin to the marketplace */
+		marketplace: Type.Optional(
+			Type.Object({
+				icon: Type.Optional(Type.String()),
+				linkToReadme: Type.Optional(WithLanguageTags(Type.String())),
+				keywords: Type.Optional(Type.Array(Type.String())),
+				publisherName: Type.Optional(Type.String()),
+				publisherIcon: Type.Optional(Type.String()),
+			}),
+		),
 	}),
 	// (in the future, more literals like CodeLint are expected)
 	type: Type.Union([Type.Literal("MessageLint")]),
