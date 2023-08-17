@@ -80,7 +80,8 @@ async function lintCommandAction() {
 			log.info(
 				"ℹ️  You can add the `--no-fail` flag to disable throwing an error if linting fails.",
 			)
-			throw new Error("🚫 Lint failed with errors.")
+			console.error("🚫 Lint failed with errors.")
+			process.exit(1)
 		}
 	} catch (error) {
 		log.error(error)
