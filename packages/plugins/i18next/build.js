@@ -8,20 +8,19 @@
 import { context } from "esbuild"
 import { pluginBuildConfig } from "@inlang/plugin"
 
+// eslint-disable-next-line no-undef
+const isProduction = !process.env.DEV
+
 const options = await pluginBuildConfig({
 	entryPoints: ["./src/index.js"],
 	outfile: "./dist/index.js",
-	minify: true,
-	define: {
-		__dirname: '"hello"',
-		__filename: '"hello"',
-	},
+	minify: isProduction,
 })
 
 const ctx = await context(options)
 
 // eslint-disable-next-line no-undef
-if (process.env.DEV) {
+if (isProduction === false) {
 	await ctx.watch()
 	console.info("👀 watching for changes...")
 } else {
