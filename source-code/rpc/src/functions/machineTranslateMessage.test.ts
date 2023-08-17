@@ -139,3 +139,56 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 		})
 	},
 )
+
+it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
+	"should not return escaped quotation marks",
+	async () => {
+		const result = await machineTranslateMessage({
+			sourceLanguageTag: "en",
+			targetLanguageTags: ["de"],
+			message: {
+				id: "mockMessage",
+				selectors: [],
+				body: {
+					en: [
+						{
+							pattern: [
+								{ type: "Text", value: "' " },
+								{ type: "VariableReference", name: "id" },
+								{ type: "Text", value: " ' added a new todo" },
+							],
+							match: {},
+						},
+					],
+				},
+			},
+		})
+		expect(result.error).toBeUndefined()
+		expect(result.data).toEqual({
+			id: "mockMessage",
+			selectors: [],
+			body: {
+				en: [
+					{
+						pattern: [
+							{ type: "Text", value: "' " },
+							{ type: "VariableReference", name: "id" },
+							{ type: "Text", value: " ' added a new todo" },
+						],
+						match: {},
+					},
+				],
+				de: [
+					{
+						pattern: [
+							{ type: "Text", value: "' " },
+							{ type: "VariableReference", name: "id" },
+							{ type: "Text", value: " ' hat eine neue Aufgabe hinzugefügt" },
+						],
+						match: {},
+					},
+				],
+			},
+		})
+	},
+)

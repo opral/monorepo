@@ -72,29 +72,30 @@ function serializePattern(pattern: Message["body"][LanguageTag][number]["pattern
 
 function deserializePattern(text: string): Message["body"][LanguageTag][number]["pattern"] {
 	const result: Message["body"][LanguageTag][number]["pattern"] = []
+	// google translate espaces quotes, need to replace the escaped stuff
+	const unescapedText = text.replaceAll("&quot;", '"').replaceAll("&#39;", "'")
 	let i = 0
-	while (i < text.length) {
+	while (i < unescapedText.length) {
 		// class="notranslate" tells the google api to not translate this part
-		const start = text.indexOf('<span class="notranslate">', i)
+		const start = unescapedText.indexOf('<span class="notranslate">', i)
 		// no placeholders, immediately return text
 		if (start === -1) {
-			result.push({ type: "Text", value: text.slice(i) })
+			result.push({ type: "Text", value: unescapedText.slice(i) })
 			break
 		}
 		// placeholder somewhere in the middle
 		else if (i < start) {
-			result.push({ type: "Text", value: text.slice(i, start) })
+			result.push({ type: "Text", value: unescapedText.slice(i, start) })
 			// move the index to the start of the placeholder and avoid pushing the same text element multiple times
 			i = start
 			continue
 		}
-		const end = text.indexOf("</span>", start)
+		const end = unescapedText.indexOf("</span>", start)
 		if (end === -1) {
-			result.push({ type: "Text", value: text.slice(i) })
+			result.push({ type: "Text", value: unescapedText.slice(i) })
 			break
 		}
-		// google translate espaces quotes, need to replace the escaped stuff
-		const json = text.slice(start + 26, end).replaceAll("&quot;", '"')
+		const json = unescapedText.slice(start + 26, end)
 		result.push(JSON.parse(json))
 		i = end + 7
 	}
