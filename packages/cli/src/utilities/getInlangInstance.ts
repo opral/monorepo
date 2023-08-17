@@ -23,18 +23,21 @@ export async function getInlangInstance(): Promise<Result<InlangInstance, Error>
 		return { error: new Error("No inlang.config.json file found in the repository.") }
 	}
 
-	cached = await tryCatch(() => createInlang({
-		configPath,
-		nodeishFs: fs,
-		_import: async () => ({
-			default: {
-				// @ts-ignore
-				plugins: [...pluginJson.plugins],
-				// @ts-ignore
-				lintRules: [...pluginLint.lintRules],
-			},
-		} satisfies InlangModule),
-	}))
+	cached = await tryCatch(() =>
+		createInlang({
+			configPath,
+			nodeishFs: fs,
+			_import: async () =>
+				({
+					default: {
+						// @ts-ignore
+						plugins: [...pluginJson.plugins],
+						// @ts-ignore
+						lintRules: [...pluginLint.lintRules],
+					},
+				} satisfies InlangModule),
+		}),
+	)
 
 	return cached
 }
