@@ -36,13 +36,6 @@ export const LintRuleBase = Type.Object({
 	}),
 	// (in the future, more literals like CodeLint are expected)
 	type: Type.Union([Type.Literal("MessageLint")]),
-	/**
-	 * The default level of the lint rule.
-	 *
-	 * The default level exists as a fallback if the user
-	 * did not specify a level for the rule in the settings.
-	 */
-	defaultLevel: LintLevel,
 })
 
 /**

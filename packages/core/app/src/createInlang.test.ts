@@ -11,7 +11,7 @@ import { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError } from "
 
 const getValue = <T>(subscribable: { subscribe: (subscriber: (value: T) => void) => void }): T => {
 	let value: T
-	subscribable.subscribe(v => void (value = v))
+	subscribable.subscribe((v) => void (value = v))
 	return value!
 }
 
@@ -91,17 +91,16 @@ const mockLintRule: LintRule = {
 		description: { en: "Mock lint rule description" },
 		displayName: { en: "Mock Lint Rule" },
 	},
-	defaultLevel: "error",
 	message: () => undefined,
 }
 
 const $import: ImportFunction = async () =>
-({
-	default: {
-		plugins: [mockPlugin],
-		lintRules: [mockLintRule],
-	},
-} satisfies InlangModule)
+	({
+		default: {
+			plugins: [mockPlugin],
+			lintRules: [mockLintRule],
+		},
+	} satisfies InlangModule)
 
 // ------------------------------------------------------------------------------------------------
 
@@ -110,33 +109,39 @@ describe("initialization", () => {
 		it("should throw if config file is not found", async () => {
 			const fs = await createMockNodeishFs()
 
-			expect(() => createInlang({
-				configPath: "./test.json",
-				nodeishFs: fs,
-				_import: $import,
-			})).rejects.toThrow(ConfigPathNotFoundError)
+			expect(() =>
+				createInlang({
+					configPath: "./test.json",
+					nodeishFs: fs,
+					_import: $import,
+				}),
+			).rejects.toThrow(ConfigPathNotFoundError)
 		})
 
 		it("should throw if config file is not a valid JSON", async () => {
 			const fs = await createMockNodeishFs()
 			await fs.writeFile("./inlang.config.json", "invalid json")
 
-			expect(() => createInlang({
-				configPath: "./inlang.config.json",
-				nodeishFs: fs,
-				_import: $import,
-			})).rejects.toThrow(ConfigSyntaxError)
+			expect(() =>
+				createInlang({
+					configPath: "./inlang.config.json",
+					nodeishFs: fs,
+					_import: $import,
+				}),
+			).rejects.toThrow(ConfigSyntaxError)
 		})
 
 		it("should throw if config file is does not match schema", async () => {
 			const fs = await createMockNodeishFs()
 			await fs.writeFile("./inlang.config.json", JSON.stringify({}))
 
-			expect(() => createInlang({
-				configPath: "./inlang.config.json",
-				nodeishFs: fs,
-				_import: $import,
-			})).rejects.toThrow(InvalidConfigError)
+			expect(() =>
+				createInlang({
+					configPath: "./inlang.config.json",
+					nodeishFs: fs,
+					_import: $import,
+				}),
+			).rejects.toThrow(InvalidConfigError)
 		})
 
 		it("should return the parsed config", async () => {
@@ -334,4 +339,3 @@ describe("functionality", () => {
 		})
 	})
 })
-

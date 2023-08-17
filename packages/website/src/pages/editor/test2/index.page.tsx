@@ -91,7 +91,6 @@ export const Page = () => {
 			description: { en: "Mock lint rule description" },
 			displayName: { en: "Mock Lint Rule" },
 		},
-		defaultLevel: "error",
 	}
 
 	const $import: ImportFunction = async () =>
