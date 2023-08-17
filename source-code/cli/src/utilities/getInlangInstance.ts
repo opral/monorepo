@@ -1,6 +1,9 @@
 import fs from "node:fs/promises"
 import { resolve } from "node:path"
 import { createInlang, InlangInstance, Result, tryCatch } from "@inlang/app"
+import type { InlangModule } from "@inlang/module"
+import pluginJson from "../../../plugins/json/dist/index.js"
+import pluginLint from "../../../plugins/standard-lint-rules/dist/index.js"
 
 // in case multiple commands run getInlang in the same process
 let cached: Awaited<ReturnType<typeof getInlangInstance>> | undefined = undefined
@@ -19,6 +22,22 @@ export async function getInlangInstance(): Promise<Result<InlangInstance, Error>
 	if (configExists === false) {
 		return { error: new Error("No inlang.config.json file found in the repository.") }
 	}
-	cached = await tryCatch(() => createInlang({ configPath, nodeishFs: fs }))
+
+	cached = await tryCatch(() =>
+		createInlang({
+			configPath,
+			nodeishFs: fs,
+			_import: async () =>
+				({
+					default: {
+						// @ts-ignore
+						plugins: [...pluginJson.plugins],
+						// @ts-ignore
+						lintRules: [...pluginLint.lintRules],
+					},
+				} satisfies InlangModule),
+		}),
+	)
+
 	return cached
 }
