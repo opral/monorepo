@@ -30,10 +30,10 @@ async function lintCommandAction() {
 		}
 
 		// Init linting
-		inlang.lint.init()
+		await inlang.lint.init()
 
 		// Get lint reports
-		const lintReport = inlang.lint.reports()
+		const lintReport = await inlang.lint.reports()
 
 		if (lintReport.length === 0) {
 			log.success("🎉 Linting successful.")
