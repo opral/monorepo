@@ -16,6 +16,15 @@ in a target resource, it is likely that the message has not
 been translated yet.
 `,
 		},
+		marketplace: {
+			icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
+			linkToReadme: {
+				en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules",
+			},
+			keywords: ["lint-rule", "standard", "missing-message"],
+			publisherName: "@inlang",
+			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		},
 	},
 	defaultLevel: "error",
 	message: ({ message: { id, body }, languageTags, sourceLanguageTag, report }) => {
