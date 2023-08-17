@@ -45,7 +45,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 							pattern: [
 								{ type: "Text", value: "Good evening " },
 								{ type: "VariableReference", name: "username" },
-								{ type: "Text", value: " , what a beautiful sunset." },
+								{ type: "Text", value: ", what a beautiful sunset." },
 							],
 							match: {},
 						},
@@ -63,7 +63,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 						pattern: [
 							{ type: "Text", value: "Good evening " },
 							{ type: "VariableReference", name: "username" },
-							{ type: "Text", value: " , what a beautiful sunset." },
+							{ type: "Text", value: ", what a beautiful sunset." },
 						],
 						match: {},
 					},
@@ -153,9 +153,9 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 					en: [
 						{
 							pattern: [
-								{ type: "Text", value: "' " },
+								{ type: "Text", value: "'" },
 								{ type: "VariableReference", name: "id" },
-								{ type: "Text", value: " ' added a new todo" },
+								{ type: "Text", value: "' added a new todo" },
 							],
 							match: {},
 						},
@@ -171,9 +171,9 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 				en: [
 					{
 						pattern: [
-							{ type: "Text", value: "' " },
+							{ type: "Text", value: "'" },
 							{ type: "VariableReference", name: "id" },
-							{ type: "Text", value: " ' added a new todo" },
+							{ type: "Text", value: "' added a new todo" },
 						],
 						match: {},
 					},
