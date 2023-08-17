@@ -42,7 +42,7 @@ describe("resolveModules", () => {
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
 			addAppSpecificApi: () => ({
-				"inlang.ideExtension": {
+				"inlang.app.ideExtension": {
 					messageReferenceMatcher: () => undefined as any,
 				},
 			}),
@@ -82,7 +82,7 @@ describe("resolveModules", () => {
 		// Check for the meta data of the plugin
 		expect(resolved.data.plugins.data["meta"][mockPlugin.meta.id]).toBeDefined()
 		// Check for the app specific api
-		expect(resolved.data.plugins.data["appSpecificApi"]?.["inlang.ideExtension"]).toBeDefined()
+		expect(resolved.data.plugins.data["appSpecificApi"]?.["inlang.app.ideExtension"]).toBeDefined()
 		// Check for the lint rule
 		expect(resolved.data.lintRules.data[0]!.meta.id).toBe(mockLintRule.meta.id)
 	})

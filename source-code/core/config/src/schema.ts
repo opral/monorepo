@@ -5,20 +5,13 @@ import { LanguageTag } from "@inlang/language-tag"
  * ---------------- UTILITIES ----------------
  */
 
-type JSONPrimitive = boolean | null | number | string
+const JSONValue = Type.Union([Type.String(), Type.Number(), Type.Boolean(), Type.Null()])
+const JSONArray = Type.Array(JSONValue)
+// avoiding recursive types in JSON object
+const NestedJSONObject = Type.Record(Type.String(), Type.Union([JSONValue, JSONArray]))
 
-type JSONArray = JSON[]
-
-export type JSONObject = {
-	[K in string]?: JSON
-}
-
-type JSON = JSONArray | JSONObject | JSONPrimitive
-
-// typebox is not able to create a proper JSON type, so we need to use `any`
-const JSONPrimitive = Type.Union([Type.String(), Type.Number(), Type.Boolean(), Type.Null()])
-const JSON = Type.Union([JSONPrimitive, Type.Array(Type.Any()), Type.Record(Type.String(), Type.Any())])
-const JSONObject = Type.Record(Type.String(), JSON)
+export type JSONObject = Static<typeof JSONObject>
+const JSONObject = Type.Record(Type.String(), Type.Union([JSONValue, JSONArray, NestedJSONObject]))
 
 /**
  * ---------------- SYSTEM SETTINGS ----------------
