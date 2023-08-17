@@ -22,7 +22,6 @@ message to reduce translation effort.
 `,
 		},
 	},
-	defaultLevel: "warning",
 	message: ({ message: { id, body }, sourceLanguageTag, report, settings }) => {
 		const referenceVariants = body[sourceLanguageTag]!
 

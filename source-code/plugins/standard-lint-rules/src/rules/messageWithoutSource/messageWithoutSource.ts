@@ -17,7 +17,6 @@ have not been updated accordingly.
 `,
 		},
 	},
-	defaultLevel: "error",
 	message: ({ message: { id, body }, sourceLanguageTag, report }) => {
 		if (Object.keys(body).length && !body[sourceLanguageTag]) {
 			report({

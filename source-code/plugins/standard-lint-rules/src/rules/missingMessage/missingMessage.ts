@@ -17,7 +17,6 @@ been translated yet.
 `,
 		},
 	},
-	defaultLevel: "error",
 	message: ({ message: { id, body }, languageTags, sourceLanguageTag, report }) => {
 		const translatedLanguageTags = languageTags.filter(
 			(languageTag) => languageTag !== sourceLanguageTag,
