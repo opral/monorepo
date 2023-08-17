@@ -332,7 +332,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			if (config) {
 				const languagesTags = // TODO: move this into setter logic
 					config.languageTags.sort((a: any, b: any) =>
-						// reference language should be first
+						// source language should be first
 						// sort alphabetically otherwise
 						a === config.sourceLanguageTag
 							? -1

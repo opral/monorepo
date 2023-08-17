@@ -482,8 +482,7 @@ function LintFilter(props: { clearFunction: any }) {
 							inlang()
 								?.meta.lintRules()
 								.map((lintRule) => lintRule.id) ?? [],
-						)
-					}
+						)}
 				>
 					All
 				</a>

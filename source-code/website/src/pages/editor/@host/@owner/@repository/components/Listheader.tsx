@@ -12,7 +12,7 @@ interface ListHeaderProps {
 type RuleSummaryItem = {
 	rule: LintRule["meta"]
 	amount: number
-	level: "error" | "warning" | "off"
+	level: "error" | "warning"
 }
 
 export const messageCount = (
@@ -42,7 +42,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 
 		inlang()?.meta.lintRules().map((lintRule) => lintRule)
 			.map((lintRule) => {
-				let level: "error" | "warning" | "off" = "off"
+				let level: "error" | "warning"
 				const filteredReports = reports?.filter((report: MessageLintReport) => report.ruleId === lintRule.id)
 				const filteredMessages = filteredReports?.filter((report: MessageLintReport) => {
 					level = report.level
@@ -57,7 +57,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 					counter !== 0 &&
 					(filteredLintRules().length === 0 || filteredLintRules().includes(lintRule.id))
 				) {
-					lintSummary.push({ rule: lintRule, amount: counter, level: level })
+					lintSummary.push({ rule: lintRule, amount: counter, level: level! })
 				}
 			})
 
@@ -89,7 +89,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 			<div class="flex gap-2">
 				<For each={getLintSummary()}>
 					{(lintRule) => (
-						<Show when={lintRule.amount !== 0 && lintRule.level !== "off"}>
+						<Show when={lintRule.amount !== 0}>
 							<TourHintWrapper
 								currentId="missing-message-rule"
 								position="bottom-right"
