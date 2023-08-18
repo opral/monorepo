@@ -1,4 +1,3 @@
-import { InlangConfig } from "@inlang/config"
 import { Value } from "@sinclair/typebox/value"
 import { describe, test, expect } from "vitest"
 import { LintRuleBase } from "./api.js"
@@ -15,7 +14,6 @@ describe("LintRule", () => {
 				displayName: { en: "" },
 				description: { en: "" },
 			},
-			defaultLevel: "error",
 		}
 
 		const passCases = ["namespace.lintRule.helloWorld", "namespace.lintRule.i18n"]

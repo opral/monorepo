@@ -31,7 +31,6 @@ message to reduce translation effort.
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		},
 	},
-	defaultLevel: "warning",
 	message: ({ message: { id, body }, sourceLanguageTag, report, settings }) => {
 		const referenceVariants = body[sourceLanguageTag]!
 

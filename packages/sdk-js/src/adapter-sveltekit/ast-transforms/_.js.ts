@@ -6,7 +6,7 @@ import {
 } from "../../ast-transforms/utils/imports.js"
 import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
 import { findAllIdentifiersComingFromAnImport } from "../../ast-transforms/utils/usage.js"
-import type { TransformConfig } from "../vite-plugin/inlang-app.js"
+import type { TransformConfig } from "../vite-plugin/config/index.js"
 import { assertNodeInsideFunctionScope } from "./utils/assertions.js"
 
 export const transformJs = (filePath: string, config: TransformConfig, code: string) => {

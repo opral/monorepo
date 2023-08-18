@@ -156,12 +156,12 @@ type EditorStateSchema = {
 	/**
 	 * The last time the repository was pushed.
 	 */
-	setLastPush: Setter<Date>
+	setLastPush: Setter<Date | undefined>
 
 	/**
 	 * The last time the repository has been pulled.
 	 */
-	setLastPullTime: Setter<Date>
+	setLastPullTime: Setter<Date | undefined>
 }
 
 const EditorStateContext = createContext<EditorStateSchema>()

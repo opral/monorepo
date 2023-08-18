@@ -26,7 +26,6 @@ have not been updated accordingly.
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		},
 	},
-	defaultLevel: "error",
 	message: ({ message: { id, body }, sourceLanguageTag, report }) => {
 		if (Object.keys(body).length && !body[sourceLanguageTag]) {
 			report({

@@ -1,5 +1,5 @@
 import { Node } from "ts-morph"
-import type { TransformConfig } from "../../vite-plugin/inlang-app.js"
+import type { TransformConfig } from "../../vite-plugin/config/index.js"
 import { InlangSdkException } from "../../vite-plugin/exceptions.js"
 import { filePathForOutput } from "../../vite-plugin/fileInformation.js"
 
