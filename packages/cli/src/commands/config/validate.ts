@@ -1,6 +1,6 @@
 import { Command } from "commander"
 import { cli } from "../../main.js"
-import { getInlangInstance } from "../../utilities/getInlangInstance.js"
+import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { log } from "../../utilities/log.js"
 import { Value } from "@sinclair/typebox/value"
 
@@ -14,7 +14,7 @@ export async function validateCommandAction() {
 		log.info("🔎 Validating the config file...")
 
 		// Get the config
-		const { error } = await getInlangInstance()
+		const { error } = await getInlangProject()
 		if (error) {
 			log.error(error)
 			return

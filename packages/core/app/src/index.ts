@@ -1,4 +1,4 @@
-export type { InlangInstance, InstalledLintRule, InstalledPlugin } from "./api.js"
+export type { InlangProject, InstalledLintRule, InstalledPlugin } from "./api.js"
 export { createInlang } from "./createInlang.js"
 export { withSolidReactivity } from "./wrappers/withSolidReactivity.js"
 export { tryAutoGenerateInlangConfig } from "./tryAutoGenerateConfig.js"

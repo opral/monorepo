@@ -1,4 +1,4 @@
-import type { InlangConfig, InlangInstance } from "@inlang/app"
+import type { InlangConfig, InlangProject } from "@inlang/app"
 import {
 	createEffect,
 	createSignal,

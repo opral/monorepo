@@ -1,4 +1,4 @@
-import type { InlangInstance } from '@inlang/app'
+import type { InlangProject } from '@inlang/app'
 import type { SdkConfig } from '@inlang/sdk-js-plugin'
 import { dedent } from 'ts-dedent'
 import { InlangSdkException } from '../../exceptions.js'
@@ -6,7 +6,7 @@ import { InlangSdkException } from '../../exceptions.js'
 class InlangSdkConfigException extends InlangSdkException { }
 
 // TODO: automatically add modules if missing ???
-export function getSettings(inlang: InlangInstance) {
+export function getSettings(inlang: InlangProject) {
 	const settings = inlang.appSpecificApi()["inlang.app.sdkJs"] as SdkConfig | undefined
 	if (!settings) {
 		throw new InlangSdkConfigException(dedent`

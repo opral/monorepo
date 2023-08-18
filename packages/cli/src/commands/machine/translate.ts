@@ -1,6 +1,6 @@
 import { Command } from "commander"
 import { rpc } from "@inlang/rpc"
-import { getInlangInstance } from "../../utilities/getInlangInstance.js"
+import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { log } from "../../utilities/log.js"
 
 export const translate = new Command()
@@ -28,7 +28,7 @@ async function translateCommandAction() {
 		}
 
 		// Get the config
-		const { data: inlang, error } = await getInlangInstance()
+		const { data: inlang, error } = await getInlangProject()
 		if (error) {
 			log.error(error)
 			// no message because that's handled in getConfig
