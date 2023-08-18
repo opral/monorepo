@@ -1,31 +1,6 @@
 import { createInlangFunction } from "./inlang-function.js"
 import { test, describe, expect } from "vitest"
-import type { Message, Pattern } from "@inlang/app"
-
-// TODO: create util function
-export const createMessage = (id: string, patterns: Record<string, Pattern | string>): Message => ({
-	id,
-	selectors: [],
-	body: Object.fromEntries(
-		Object.entries(patterns).map(([languageTag, patterns]) => [
-			languageTag,
-			[
-				{
-					match: {},
-					pattern:
-						typeof patterns === "string"
-							? [
-									{
-										type: "Text",
-										value: patterns,
-									},
-							  ]
-							: patterns,
-				},
-			],
-		]),
-	),
-})
+import { createMessage } from '../test.util.js'
 
 const messages = [
 	createMessage("hello", { en: "world" }),
