@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { LanguageTag } from "@inlang/language-tag"
 import type { Message, Variant } from "./schema.js"
 import type { Result } from "@inlang/result"
@@ -31,7 +32,7 @@ export function getVariant(
 	if (variant) {
 		//! do not return a reference to the message in a resource
 		//! modifications to the returned message will leak into the
-		//! resource which is considered to be unmutable.
+		//! resource which is considered to be immutable.
 		return structuredClone(variant)
 	}
 	return undefined
@@ -56,9 +57,8 @@ export function createVariant(
 ): Result<Message, MessageVariantAlreadyExistsError> {
 	const copy: Message = structuredClone(message)
 	// check if languageTag exists
-	if (copy.body[args.where.languageTag] === undefined) {
-		copy.body[args.where.languageTag] = []
-	}
+	copy.body[args.where.languageTag] ??= []
+
 	// check if variant already exists
 	if (matchVariant(copy, args.where.languageTag, args.data.match)) {
 		return { error: new MessageVariantAlreadyExistsError(message.id, args.where.languageTag) }
@@ -108,7 +108,7 @@ export function updateVariantPattern(
 }
 
 /**
- * Returns the specific variant definied by selectors or undefined
+ * Returns the specific variant defined by selectors or undefined
  *
  * @example
  *  const variant = matchVariant(message, languageTag: "en", selectors: { gender: "male" })
@@ -147,7 +147,7 @@ const matchMostSpecificVariant = (
 	languageTag: LanguageTag,
 	selectors?: Record<string, string>,
 ): Variant | undefined => {
-	//make selector indefined if empty object
+	// make selector undefined if empty object
 	selectors = JSON.stringify(selectors) === "{}" ? undefined : selectors
 
 	// resolve preferenceSelectors to match length and order of message selectors
@@ -157,7 +157,7 @@ const matchMostSpecificVariant = (
 	for (const variant of message.body[languageTag]!) {
 		let isMatch = true
 
-		//check if vaiant is a match
+		//check if variant is a match
 		for (const [key, value] of Object.entries(variant.match)) {
 			if (resolvedSelectors[key] !== value && value !== "*") {
 				isMatch = false
@@ -221,7 +221,7 @@ const matchMostSpecificVariant = (
 
 /**
  * Returns resolved selector.
- * -> Adds all posible selectors, if not defined it adds '*'. Order is determined by messageSelectors
+ * -> Adds all possible selectors, if not defined it adds '*'. Order is determined by messageSelectors
  *
  * @example
  *  const variant = resolveSelector(["gender","count"], selector: {count: "2"})
