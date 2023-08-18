@@ -50,7 +50,7 @@ export const registry = [
 			linkToReadme: {
 				en: "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
 			},
-			keywords: ["web", "editor", "no-code"],
+			keywords: ["vscode", "efficiency", "extension"],
 			publisherName: "@inlang",
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		},
