@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { InlangInstance, Subscribable } from "./api.js"
 import { ImportFunction, ResolveModulesFunction, resolveModules } from "@inlang/module"
-import { NodeishFilesystemSubset, InlangConfig, Message, tryCatch } from "@inlang/plugin"
+import { NodeishFilesystemSubset, InlangConfig, Message, tryCatch, Result } from "@inlang/plugin"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
 import { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError } from "./errors.js"
@@ -27,7 +28,7 @@ export const createInlang = async (args: {
 
 		// -- config ------------------------------------------------------------
 
-		const [config, setConfig] = createSignal<InlangConfig>()
+		const [config, _setConfig] = createSignal<InlangConfig>()
 		createEffect(() => {
 			//console.log("set config internal")
 			loadConfig({ configPath: args.configPath, nodeishFs: args.nodeishFs })
@@ -40,6 +41,22 @@ export const createInlang = async (args: {
 				})
 		})
 		// TODO: create FS watcher and update config on change
+
+		const setConfig = (config: InlangConfig): Result<void, InvalidConfigError> => {
+			try {
+				const validatedConfig = validateConfig(config)
+				_setConfig(validatedConfig)
+
+				writeConfigToDisk({ nodeishFs: args.nodeishFs, config: validatedConfig })
+				return { data: undefined }
+			} catch (error: unknown) {
+				if (error instanceof InvalidConfigError) {
+					return { error: error }
+				}
+
+				throw new Error('unhandled')
+			}
+		}
 
 		// -- resolvedModules -----------------------------------------------------------
 
@@ -59,6 +76,7 @@ export const createInlang = async (args: {
 					console.error("Error in load modules ", err)
 				})
 		})
+
 		// -- messages ----------------------------------------------------------
 
 		let configValue: InlangConfig
@@ -130,7 +148,7 @@ export const createInlang = async (args: {
 				...(lintErrors() || []),
 			]),
 			config: createSubscribable(() => config()!),
-			setConfig: setConfig,
+			setConfig,
 			lint: {
 				init: initLint,
 				reports: createSubscribable(() => {
@@ -150,8 +168,10 @@ export const createInlang = async (args: {
 	})
 }
 
+// ------------------------------------------------------------------------------------------------
+
 const loadConfig = async (args: { configPath: string; nodeishFs: NodeishFilesystemSubset }) => {
-	let json: string
+	let json: JSON
 	if (args.configPath.startsWith('data:')) {
 		json = (await import(args.configPath)).default
 		// TODO: add error handling
@@ -173,15 +193,36 @@ const loadConfig = async (args: { configPath: string; nodeishFs: NodeishFilesyst
 		json = parsedConfig
 	}
 
-	const typeErrors = [...ConfigCompiler.Errors(json)]
+	return validateConfig(json)
+}
+
+const validateConfig = (config: JSONObject) => {
+	const typeErrors = [...ConfigCompiler.Errors(config)]
 	if (typeErrors.length > 0) {
 		throw new InvalidConfigError(`The config is invalid according to the schema.`, {
 			cause: typeErrors,
 		})
 	}
 
-	return Value.Cast(InlangConfig, json)
+	return Value.Cast(InlangConfig, config)
 }
+
+const writeConfigToDisk = async (args: {
+	nodeishFs: NodeishFilesystemSubset
+	config: InlangConfig
+}) => {
+	const { data: serializedConfig, error: serializeConfigError } = tryCatch(() =>
+		JSON.stringify(args.config, undefined, 2),
+	)
+	if (serializeConfigError) throw serializeConfigError
+
+	const { error: writeConfigError } = await tryCatch(async () =>
+		args.nodeishFs.writeFile("./inlang.config.json", serializedConfig!),
+	)
+	if (writeConfigError) throw writeConfigError
+}
+
+// ------------------------------------------------------------------------------------------------
 
 const loadModules = async (args: {
 	config: InlangConfig
@@ -209,6 +250,11 @@ const createAwaitable = () => {
 		reject: (e: unknown) => void,
 	]
 }
+
+// ------------------------------------------------------------------------------------------------
+
+// TODO: define better type
+type JSONObject = any
 
 // TODO: create global util type
 type MaybePromise<T> = T | Promise<T>

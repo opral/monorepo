@@ -11,18 +11,6 @@ import { findExport } from '../../ast-transforms/utils/exports.js'
 import { Node } from 'ts-morph'
 import { findDepPkgJsonPath } from "vitefu"
 
-import {
-	createRoot as _createRoot,
-	createEffect as _createEffect,
-	createSignal as _createSignal,
-	// @ts-ignore
-} from "solid-js/dist/solid.js"
-import { } from 'solid-js'
-
-const createRoot = _createRoot as typeof import("solid-js")["createRoot"]
-const createEffect = _createEffect as typeof import("solid-js")["createEffect"]
-const createSignal = _createSignal as typeof import("solid-js")["createSignal"]
-
 // ------------------------------------------------------------------------------------------------
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => false))

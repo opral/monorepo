@@ -10,7 +10,7 @@ const JSONArray = Type.Array(JSONValue)
 // avoiding recursive types in JSON object
 const NestedJSONObject = Type.Record(Type.String(), Type.Union([JSONValue, JSONArray]))
 
-export type JSONObject = Static<typeof JSONObject>
+type JSONObject = Static<typeof JSONObject>
 const JSONObject = Type.Record(Type.String(), Type.Union([JSONValue, JSONArray, NestedJSONObject]))
 
 /**
