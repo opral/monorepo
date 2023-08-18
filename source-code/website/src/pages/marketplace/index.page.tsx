@@ -16,6 +16,7 @@ export type PageProps = {
 export function Page() {
 	const [textValue, setTextValue] = createSignal<string>("")
 	const [tags, setTags] = createSignal<Record<string, any>[]>([])
+	const [results, setResults] = createSignal<number>(0)
 
 	createEffect(() => {
 		items.forEach((item: any) => {
@@ -64,8 +65,25 @@ export function Page() {
 							</div>
 						</div>
 					</div>
-					<div class="grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-center items-stretch py-8 mb-8">
-						<Gallery tags={tags} textValue={textValue} setTextValue={setTextValue} />
+					<div
+						class={
+							"mb-6 " +
+							(textValue() !== "" || tags().find((tag) => tag.activated === false)
+								? "py-0"
+								: "py-11")
+						}
+					>
+						<Show when={textValue() !== "" || tags().find((tag) => tag.activated === false)}>
+							<p class="text-sm py-3 text-surface-400 text-right">{results()} results</p>
+						</Show>
+						<div class="grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-center items-stretch">
+							<Gallery
+								tags={tags}
+								textValue={textValue}
+								setTextValue={setTextValue}
+								setResults={setResults}
+							/>
+						</div>
 					</div>
 					<GetHelp />
 				</div>
@@ -74,37 +92,48 @@ export function Page() {
 	)
 }
 
+function filterItem(item: any, tags: Record<string, any>[], textValue: string) {
+	const isTagActivated = tags.find(
+		(tag) => tag.activated && tag.name === item.id.split(".")[1]?.toLowerCase(),
+	)
+	const isSearchMatch =
+		item.displayName.en?.toLowerCase().includes(textValue.toLowerCase()) ||
+		item.marketplace.publisherName.toLowerCase().includes(textValue.toLowerCase()) ||
+		item.marketplace.keywords.some((keyword: string) =>
+			keyword.toLowerCase().includes(textValue.toLowerCase()),
+		) ||
+		item.id.split(".")[1]?.toLowerCase().includes(textValue.toLowerCase()) ||
+		item.id.toLowerCase().includes(textValue.toLowerCase())
+
+	return isTagActivated && isSearchMatch
+}
+
 const Gallery = ({
 	tags,
 	textValue,
 	setTextValue,
+	setResults,
 }: {
 	tags: Accessor<Record<string, any>[]>
 	textValue: Accessor<string>
 	setTextValue: (value: string) => void
+	setResults: (value: number) => void
 }) => {
+	createEffect(() => {
+		const activatedItems = items.filter((item) => {
+			return filterItem(item, tags(), textValue())
+		})
+
+		setResults(activatedItems.length)
+	})
+
 	return (
 		<>
 			<For each={items}>
 				{(item) => {
 					return (
 						<Show
-							when={
-								/* filter by tags */
-								tags().find(
-									(tag) => tag.activated && tag.name === item.id.split(".")[1]?.toLowerCase(),
-								) &&
-								/* filter by search */
-								(item.displayName.en?.toLowerCase().includes(textValue().toLowerCase()) ||
-									item.marketplace.publisherName
-										.toLowerCase()
-										.includes(textValue().toLowerCase()) ||
-									item.marketplace.keywords.some((keyword: string) =>
-										keyword.toLowerCase().includes(textValue().toLowerCase()),
-									) ||
-									item.id.split(".")[1]?.toLowerCase().includes(textValue().toLowerCase()) ||
-									item.id.toLocaleLowerCase().includes(textValue().toLowerCase()))
-							}
+							when={filterItem(item, tags(), textValue()) || filterItem(item, tags(), textValue())}
 						>
 							<a
 								href={item.marketplace.linkToReadme.en}
