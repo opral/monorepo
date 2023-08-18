@@ -1,4 +1,4 @@
-import { LandingPageLayout as RootLayout } from "../Layout.jsx"
+import { Layout } from "../Layout.jsx"
 import { useI18n } from "@solid-primitives/i18n"
 import { Meta, Title } from "@solidjs/meta"
 
@@ -18,7 +18,7 @@ export function Page() {
 			/>
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<Meta name="robots" content="noindex" />
-			<RootLayout>
+			<Layout>
 				<div class="relative max-w-screen-xl w-full mx-auto bg-background">
 					<div class="invisible xl:visible absolute top-0 left-0 h-full w-full z-0">
 						<div class="flex w-full h-full justify-between mx-auto items-end">
@@ -60,7 +60,7 @@ export function Page() {
 						</div>
 					</div>
 				</div>
-			</RootLayout>
+			</Layout>
 		</>
 	)
 }

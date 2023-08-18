@@ -3,7 +3,7 @@ import Question from "~icons/material-symbols/help-outline"
 /**
  * Get Help component for the footer.
  */
-export function GetHelp() {
+export function GetHelp({ text }: { text: string }) {
 	return (
 		<a
 			class="flex items-center gap-2 justify-center text-sm hover:text-info/100 transition-colors duration-150"
@@ -11,7 +11,7 @@ export function GetHelp() {
 			target="_blank"
 		>
 			<Question />
-			<p>Need help or have questions? Join our Discord!</p>
+			<p>{text}</p>
 		</a>
 	)
 }
