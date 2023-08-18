@@ -1,10 +1,11 @@
-import { mkdir, rm, writeFile } from "node:fs/promises"
+import { mkdir, writeFile } from "node:fs/promises"
 import path, { dirname } from "node:path"
 import { dedent } from "ts-dedent"
-import { doesPathExist, type TransformConfig } from "../inlang-app.js"
+import type { TransformConfig } from "../config/index.js"
 import type { FileType } from "../fileInformation.js"
 import { InlangException } from "../../../exceptions.js"
 import { InlangSdkException } from "../exceptions.js"
+import { doesPathExist } from '../config/utils/utils.js'
 
 export const assertRoutesFolderPathExists = async (config: TransformConfig) => {
 	if (!(await doesPathExist(config.options.rootRoutesFolder))) {

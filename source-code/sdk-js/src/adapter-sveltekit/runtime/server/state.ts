@@ -1,5 +1,5 @@
 import type { RequestEvent } from '@sveltejs/kit'
-import { initTransformConfig, type TransformConfig } from "../../../adapter-sveltekit/vite-plugin/inlang-app.js"
+import { initTransformConfig, type TransformConfig } from "../../vite-plugin/config/index.js"
 import { inlangSymbol } from "../shared/utils.js"
 import type { SvelteKitServerRuntime } from "./runtime.js"
 import type { LanguageTag } from "@inlang/app"

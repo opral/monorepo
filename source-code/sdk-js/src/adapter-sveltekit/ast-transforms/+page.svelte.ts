@@ -1,4 +1,4 @@
-import type { TransformConfig } from "../vite-plugin/inlang-app.js"
+import type { TransformConfig } from "../vite-plugin/config/index.js"
 import { transformSvelte } from "./_.svelte.js"
 
 export const transformPageSvelte = (

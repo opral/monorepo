@@ -212,6 +212,7 @@ const writeConfigToDisk = async (args: {
 	config: InlangConfig
 }) => {
 	const { data: serializedConfig, error: serializeConfigError } = tryCatch(() =>
+		// TODO: this will probably not match the original formatting
 		JSON.stringify(args.config, undefined, 2),
 	)
 	if (serializeConfigError) throw serializeConfigError

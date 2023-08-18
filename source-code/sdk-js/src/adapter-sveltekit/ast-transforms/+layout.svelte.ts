@@ -5,7 +5,7 @@ import {
 	removeImport,
 } from "../../ast-transforms/utils/imports.js"
 import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
-import type { TransformConfig } from "../vite-plugin/inlang-app.js"
+import type { TransformConfig } from "../vite-plugin/config/index.js"
 import { transformSvelte } from "./_.svelte.js"
 import { dedent } from "ts-dedent"
 import { isOptOutImportPresent } from "./utils/imports.js"
