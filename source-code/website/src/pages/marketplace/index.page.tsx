@@ -165,6 +165,28 @@ interface SearchInputProps {
 }
 
 const Search = (props: SearchInputProps) => {
+	createEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.metaKey && e.key === "f") {
+				e.preventDefault()
+				const input = document.querySelector("sl-input")
+				input?.focus()
+			}
+		}
+		const handleKeyUp = (e: KeyboardEvent) => {
+			if (e.key === "Escape") {
+				const input = document.querySelector("sl-input")
+				input?.blur()
+			}
+		}
+		document.addEventListener("keyup", handleKeyUp)
+		document.addEventListener("keydown", handleKeyDown)
+		return () => {
+			document.removeEventListener("keyup", handleKeyUp)
+			document.removeEventListener("keydown", handleKeyDown)
+		}
+	})
+
 	return (
 		<div>
 			<sl-input
