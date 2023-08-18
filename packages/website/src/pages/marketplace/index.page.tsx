@@ -9,10 +9,6 @@ import { GetHelp } from "#src/components/GetHelp.jsx"
 import Plus from "~icons/material-symbols/add-rounded"
 import Package from "~icons/material-symbols/package-2"
 
-export type PageProps = {
-	markdown: string
-}
-
 export function Page() {
 	const [textValue, setTextValue] = createSignal<string>("")
 	const [tags, setTags] = createSignal<Record<string, any>[]>([])
@@ -85,7 +81,7 @@ export function Page() {
 							/>
 						</div>
 					</div>
-					<GetHelp />
+					<GetHelp text="Need help or have questions? Join our Discord!" />
 				</div>
 			</Layout>
 		</>
@@ -120,7 +116,7 @@ const Gallery = ({
 	setResults: (value: number) => void
 }) => {
 	createEffect(() => {
-		const activatedItems = items.filter((item) => {
+		const activatedItems = items.filter((item: any) => {
 			return filterItem(item, tags(), textValue())
 		})
 
