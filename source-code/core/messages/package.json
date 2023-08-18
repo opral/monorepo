@@ -31,7 +31,6 @@
 	},
 	"dependencies": {
 		"@inlang/language-tag": "*",
-		"@inlang/config": "*",
 		"@sinclair/typebox": "^0.30.0"
 	},
 	"devDependencies": {
