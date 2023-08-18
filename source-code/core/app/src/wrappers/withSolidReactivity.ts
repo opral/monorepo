@@ -1,4 +1,3 @@
-import type { ResolveModulesFunction } from "@inlang/module"
 import type { InlangInstance } from "../api.js"
 
 import { observable, type from as solidFrom } from "../solid.js"
@@ -10,7 +9,7 @@ export const withSolidReactivity = (
 		from: typeof solidFrom
 	},
 ): SolidInlangInstance => {
-	const convert = <T>(signal: () => T): () => T => {
+	const convert = <T>(signal: () => T): (() => T) => {
 		return args.from(observable(signal)) as () => T
 	}
 
@@ -22,9 +21,9 @@ export const withSolidReactivity = (
 			init: instance.lint.init,
 			reports: convert(instance.lint.reports),
 		},
-		meta: {
-			lintRules: convert(instance.meta.lintRules),
-			plugins: convert(instance.meta.plugins),
+		installed: {
+			lintRules: convert(instance.installed.lintRules),
+			plugins: convert(instance.installed.plugins),
 		},
 		setConfig: instance.setConfig,
 		query: instance.query,
@@ -33,9 +32,9 @@ export const withSolidReactivity = (
 
 export type SolidInlangInstance = {
 	appSpecificApi: () => ReturnType<InlangInstance["appSpecificApi"]>
-	meta: {
-		plugins: () => Awaited<ReturnType<ResolveModulesFunction>>["data"]["meta"]["plugins"]
-		lintRules: () => Awaited<ReturnType<ResolveModulesFunction>>["data"]["meta"]["lintRules"]
+	installed: {
+		plugins: () => ReturnType<InlangInstance["installed"]["plugins"]>
+		lintRules: () => ReturnType<InlangInstance["installed"]["lintRules"]>
 	}
 	errors: () => ReturnType<InlangInstance["errors"]>
 	config: () => ReturnType<InlangInstance["config"]>
