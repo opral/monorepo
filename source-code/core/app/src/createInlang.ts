@@ -185,9 +185,7 @@ export const createInlang = async (args: {
 
 		const query = createReactiveQuery(() => messages()!)
 
-		let debouncedSave = (_: any) => {
-			// Skip initial call for setup
-			debouncedSave = debounce(500, async (newMessages) => {
+		const debouncedSave = skipFirst(debounce(500, async (newMessages) => {
 				// console.log('saving changes to messages')
 				try {
 					await resolvedModules()!.data.plugins.data.saveMessages({ messages: newMessages})
@@ -196,8 +194,7 @@ export const createInlang = async (args: {
 						cause: err,
 					})
 				}
-			}, { atBegin: false })
-		}
+			}, { atBegin: false }))
 
 		createEffect(() => {
 			debouncedSave(query.getAll())
@@ -321,6 +318,17 @@ type JSONObject = any
 type MaybePromise<T> = T | Promise<T>
 
 const makeTrulyAsync = <T>(fn: MaybePromise<T>): Promise<T> => (async () => fn)()
+
+// Skip initial call, eg. to skip setup of a createEffect
+function skipFirst (func) {
+	let initial = false
+	return function (_: any) {
+		if (initial) {
+			return func.apply(this, arguments)
+		}
+		initial = true
+	}
+}
 
 // TODO: how do we unsubscribe? Do we need that?
 // COMMENT from @samuelstroschein: Likely not. The reactivity is handled internally with auto dispose from SolidJS.
