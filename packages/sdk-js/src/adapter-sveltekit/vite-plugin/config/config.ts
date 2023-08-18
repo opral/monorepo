@@ -1,16 +1,16 @@
 import { ConfigPathNotFoundError, createInlang, tryCatch, LanguageTag, Message } from "@inlang/app"
 import { InlangSdkException } from "../exceptions.js"
-import type { NodeishFilesystem } from "@inlang-git/fs"
-import path from "node:path"
+import path, { resolve } from "node:path"
 import type { Config as SvelteConfig } from "@sveltejs/kit"
 import type { SdkConfig } from '@inlang/sdk-js-plugin'
 import { getSvelteKitVersion } from './utils/getSvelteKitVersion.js'
 import { shouldContentBePrerendered } from './utils/shouldContentBePrerendered.js'
-import { updateSdkPluginVersion } from './utils/updatePluginModule.js'
+import { updateSdkModuleVersion } from './utils/updateSdkModuleVersion.js'
 import { getSettings } from './utils/getSettings.js'
 import { createBasicInlangConfig } from './utils/createBasicInlangConfig.js'
 import { createDemoResourcesIfNoMessagesExistYet } from './utils/createDemoResourcesIfNoMessagesExistYet.js'
 import { doesPathExist } from './utils/utils.js'
+import { getNodeishFs } from './utils/getNodeishFs.js'
 
 type VersionString = `${number}.${number}.${number}${string}`
 
@@ -42,6 +42,7 @@ export type TransformConfig = {
 }
 
 export const PATH_TO_CWD = process.cwd()
+export const PATH_TO_INLANG_CONFIG = resolve(PATH_TO_CWD, "./inlang.config.json")
 
 let transformConfig: Promise<TransformConfig> | undefined = undefined
 
@@ -51,7 +52,7 @@ export const initTransformConfig = async (): Promise<TransformConfig> => {
 	// eslint-disable-next-line no-async-promise-executor
 	return (transformConfig = new Promise<TransformConfig>(async (resolve) => {
 		const { data: inlang, error: createInlangError } = await tryCatch(async () =>
-			createInlang({ nodeishFs: await getNodeishFs(), configPath: "./inlang.config.json" }),
+			createInlang({ nodeishFs: await getNodeishFs(), configPath: PATH_TO_INLANG_CONFIG }),
 		)
 
 		if (createInlangError) {
@@ -64,7 +65,7 @@ export const initTransformConfig = async (): Promise<TransformConfig> => {
 			throw createInlangError
 		}
 
-		await updateSdkPluginVersion(inlang)
+		await updateSdkModuleVersion(inlang)
 		await createDemoResourcesIfNoMessagesExistYet(inlang)
 
 		const settings = getSettings(inlang)
@@ -129,25 +130,3 @@ export const initTransformConfig = async (): Promise<TransformConfig> => {
 }
 
 export const resetTransformConfig = () => (transformConfig = undefined)
-
-// ------------------------------------------------------------------------------------------------
-
-/**
- * some runtimes (e.g. vercel edge) throw an error if they see a direct 'node:fs' import statement in
- * the code even if it never get's used. To not run into this issue we can use a proxy to only import
- * the fs module if it is actually used and we can still throw an error if it is not available.
-**/
-const getNodeishFs = () =>
-	import("node:fs/promises").catch(() =>
-		new Proxy({} as NodeishFilesystem, {
-			get: (target, key) => {
-				if (key === "then") return Promise.resolve(target)
-
-				return () => {
-					throw new InlangSdkException(
-						"`node:fs/promises` is not available in the current environment",
-					)
-				}
-			},
-		}),
-	)
