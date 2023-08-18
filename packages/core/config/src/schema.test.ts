@@ -159,7 +159,7 @@ describe("config.settings", () => {
 			languageTags: ["en", "de"],
 			modules: [],
 			settings: {
-				"system.lint.ruleLevels": {
+				"system.lintRuleLevels": {
 					"namespace.lintRule.helloWorld": "error",
 				},
 			},

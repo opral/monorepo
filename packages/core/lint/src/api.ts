@@ -1,7 +1,7 @@
 import type { Message, MessageQueryApi } from "@inlang/messages"
 import { type LanguageTag, WithLanguageTags } from "@inlang/language-tag"
 import { Type, type Static, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
-import type { InlangConfig } from "@inlang/config"
+import type { JSONSerializableObject } from "@inlang/json-serializable"
 
 /**
  * ---------------- BASIS ----------------
@@ -42,9 +42,9 @@ export const LintRuleBase = Type.Object({
  * ---------------- MESSAGE LINT ----------------
  */
 
-export type MessageLintRule<
-	Settings extends InlangConfig["settings"][LintRule["meta"]["id"]] | any = any,
-> = Static<typeof MessageLintRule> & {
+export type MessageLintRule<Settings extends JSONSerializableObject | any = any> = Static<
+	typeof MessageLintRule
+> & {
 	message: (args: {
 		message: Message
 		query: Pick<MessageQueryApi, "get">
@@ -75,9 +75,8 @@ export type MessageLintReport = LintReportBase & {
  * ---------------- LINT ----------------
  */
 
-export type LintRule<
-	Settings extends InlangConfig["settings"][LintRule["meta"]["id"]] | any = any,
-> = MessageLintRule<Settings>
+export type LintRule<Settings extends JSONSerializableObject | any = any> =
+	MessageLintRule<Settings>
 export const LintRule = Type.Union([MessageLintRule])
 
 export type LintReport = MessageLintReport

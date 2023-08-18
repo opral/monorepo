@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { lintSingleMessage } from "./lintSingleMessage.js"
 import type { MessageLintReport, MessageLintRule } from "./api.js"
-import type { InlangConfig } from "@inlang/config"
 import type { Message, MessageQueryApi } from "@inlang/messages"
+import { tryCatch } from "@inlang/result"
 
 const lintRule1 = {
 	meta: {
@@ -36,11 +36,12 @@ describe("lintSingleMessage", async () => {
 	describe("resolve rules and settings", async () => {
 		test("it should not run disabled lintrules", async () => {
 			await lintSingleMessage({
-				config: {
-					settings: { "system.lint.ruleLevels": { [lintRule1.meta.id]: "off" } } satisfies Partial<
-						InlangConfig["settings"]
-					>,
-				} as unknown as InlangConfig,
+				lintLevels: {
+					[lintRule1.meta.id]: "warning",
+				},
+				lintRuleSettings: {},
+				sourceLanguageTag: "en",
+				languageTags: ["en"],
 				query: {} as MessageQueryApi,
 				messages,
 				message: message1,
@@ -51,29 +52,39 @@ describe("lintSingleMessage", async () => {
 			expect(lintRule2.message).toHaveBeenCalledOnce()
 		})
 
-		test("it should set the default lint level to warning if not defined in system.lint.ruleLevels", async () => {
+		// the lint function is unopinionated and does not set a default level.
+		// opinionated users like the inlang instance can very well set a default level (separation of concerns)
+		test("it should throw if a lint level is not provided for a given lint rule", async () => {
 			lintRule1.message.mockImplementation(({ report }) => report({} as MessageLintReport))
 
-			const reports = await lintSingleMessage({
-				config: {} as InlangConfig,
-				query: {} as MessageQueryApi,
-				messages,
-				message: message1,
-				rules: [lintRule1],
-			})
-
-			expect(reports.data[0]?.level).toBe("warning")
+			const result = await tryCatch(() =>
+				lintSingleMessage({
+					lintLevels: {
+						[lintRule1.meta.id]: "warning",
+					},
+					lintRuleSettings: {},
+					sourceLanguageTag: "en",
+					languageTags: ["en"],
+					query: {} as MessageQueryApi,
+					messages,
+					message: message1,
+					rules: [lintRule1],
+				}),
+			)
+			expect(result.error).toBeDefined()
+			expect(result.data).toBeUndefined()
 		})
 
 		test("it should override the default lint level", async () => {
 			lintRule1.message.mockImplementation(({ report }) => report({} as MessageLintReport))
 
 			const reports = await lintSingleMessage({
-				config: {
-					settings: { "system.lintRuleLevels": { [lintRule1.meta.id]: "error" } } as Partial<
-						InlangConfig["settings"]
-					>,
-				} as InlangConfig,
+				lintLevels: {
+					[lintRule1.meta.id]: "error",
+				},
+				lintRuleSettings: {},
+				sourceLanguageTag: "en",
+				languageTags: ["en"],
 				query: {} as MessageQueryApi,
 				messages,
 				message: message1,
@@ -89,9 +100,14 @@ describe("lintSingleMessage", async () => {
 			lintRule1.message.mockImplementation(({ settings }) => fn(settings))
 
 			await lintSingleMessage({
-				config: {
-					settings: { [lintRule1.meta.id]: settings } as Partial<InlangConfig["settings"]>,
-				} as InlangConfig,
+				lintLevels: {
+					[lintRule1.meta.id]: "warning",
+				},
+				lintRuleSettings: {
+					[lintRule1.meta.id]: settings,
+				},
+				sourceLanguageTag: "en",
+				languageTags: ["en"],
 				query: {} as MessageQueryApi,
 				messages,
 				message: message1,
@@ -114,7 +130,10 @@ describe("lintSingleMessage", async () => {
 		})
 
 		await lintSingleMessage({
-			config: {} as InlangConfig,
+			lintLevels: {},
+			lintRuleSettings: {},
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
 			query: {} as MessageQueryApi,
 			messages,
 			message: message1,
@@ -140,7 +159,10 @@ describe("lintSingleMessage", async () => {
 		})
 
 		await lintSingleMessage({
-			config: {} as InlangConfig,
+			lintLevels: {},
+			lintRuleSettings: {},
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
 			query: {} as MessageQueryApi,
 			messages,
 			message: message1,
@@ -164,7 +186,10 @@ describe("lintSingleMessage", async () => {
 		})
 
 		const result = await lintSingleMessage({
-			config: {} as InlangConfig,
+			lintLevels: {},
+			lintRuleSettings: {},
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
 			query: {} as MessageQueryApi,
 			messages,
 			message: message1,

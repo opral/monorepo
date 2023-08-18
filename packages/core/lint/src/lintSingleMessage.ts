@@ -1,10 +1,19 @@
-import type { LintRule, MessageLintReport } from "./api.js"
-import type { InlangConfig } from "@inlang/config"
+import type { LintLevel, LintRule, MessageLintReport } from "./api.js"
 import type { Message, MessageQueryApi } from "@inlang/messages"
 import { LintRuleThrowedError } from "./errors.js"
+import type { LanguageTag } from "@inlang/language-tag"
+import type { JSONSerializableObject } from "@inlang/json-serializable"
 
+/**
+ * Lint a single message.
+ *
+ * - the lint rule levels defaults to `warning`.
+ */
 export const lintSingleMessage = async (args: {
-	config: InlangConfig
+	sourceLanguageTag: LanguageTag
+	languageTags: LanguageTag[]
+	lintRuleSettings: Record<LintRule["meta"]["id"], JSONSerializableObject>
+	lintLevels: Record<LintRule["meta"]["id"], LintLevel>
 	rules: LintRule[]
 	messages: Message[]
 	query: MessageQueryApi
@@ -17,20 +26,16 @@ export const lintSingleMessage = async (args: {
 		.filter((rule) => rule.type === "MessageLint")
 		.map(async (rule) => {
 			const ruleId = rule.meta.id
-			const settings = args.config?.settings?.[ruleId] ?? {}
-			// default to warning, see https://github.com/inlang/inlang/issues/1254
-			const level = args.config.settings?.["system.lint.ruleLevels"]?.[ruleId] ?? "warning"
+			const settings = args.lintRuleSettings?.[ruleId] ?? {}
+			const level = args.lintLevels?.[ruleId]
 
-			if (level === "off") {
-				return
+			if (level === undefined) {
+				throw Error("No lint level provided for lint rule: " + ruleId)
 			}
 
 			try {
 				await rule.message({
-					message: args.message,
-					query: args.query,
-					sourceLanguageTag: args.config.sourceLanguageTag,
-					languageTags: args.config.languageTags,
+					...args,
 					settings,
 					report: (reportArgs) => {
 						reports.push({
