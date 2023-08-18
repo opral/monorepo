@@ -1,6 +1,6 @@
-import { vi, describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { standaloneUpdateSdkModuleVersion, updateSdkModuleVersion } from './updateSdkModuleVersion.js'
-import { createMockNodeishFs } from "@inlang/plugin/test"
+import { createMockNodeishFs } from "@inlang/app/test"
 import { InlangConfig, createInlang, type Plugin, type InlangInstance, type NodeishFilesystemSubset } from '@inlang/app'
 import type { InlangModule } from '@inlang/module'
 // @ts-ignore
