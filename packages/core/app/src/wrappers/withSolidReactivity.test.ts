@@ -15,7 +15,7 @@ const config: InlangConfig = {
 	languageTags: ["en"],
 	modules: ["./dist/index.js"],
 	settings: {
-		"system.lint.ruleLevels": {
+		"system.lintRuleLevels": {
 			"inlang.lintRule.missingMessage": "error",
 		},
 		"inlang.plugin.i18next": {
@@ -124,8 +124,8 @@ describe("config", () => {
 	})
 })
 
-describe("meta", () => {
-	it("should react to changes to config", async () => {
+describe("installed", () => {
+	it("react to changes that are unrelated to installed items", async () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 		const inlang = withSolidReactivity(
@@ -140,12 +140,12 @@ describe("meta", () => {
 		let counterLint = 0
 
 		createEffect(() => {
-			inlang.meta.plugins()
+			inlang.installed.plugins()
 			counterPlugins += 1
 		})
 
 		createEffect(() => {
-			inlang.meta.lintRules()
+			inlang.installed.lintRules()
 			counterLint += 1
 		})
 

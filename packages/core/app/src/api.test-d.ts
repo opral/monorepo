@@ -12,3 +12,7 @@ inlang.lint.reports.subscribe((value) => {
 
 inlang.lint.reports()
 inlang.lint.reports.subscribe(() => undefined)
+
+inlang.installed.lintRules()[0]?.lintLevel
+inlang.installed.lintRules()[0]?.module
+inlang.installed.lintRules()[0]?.meta

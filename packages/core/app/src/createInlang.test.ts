@@ -21,7 +21,7 @@ const config: InlangConfig = {
 	languageTags: ["en"],
 	modules: ["./dist/index.js"],
 	settings: {
-		"system.lint.ruleLevels": {
+		"system.lintRuleLevels": {
 			"inlang.lintRule.missingMessage": "error",
 		},
 		"inlang.plugin.i18next": {
@@ -95,13 +95,13 @@ const mockLintRule: LintRule = {
 	message: () => undefined,
 }
 
-const $import: ImportFunction = async () =>
-({
-	default: {
-		plugins: [mockPlugin],
-		lintRules: [mockLintRule],
-	},
-} satisfies InlangModule)
+const _import: ImportFunction = async () =>
+	({
+		default: {
+			plugins: [mockPlugin],
+			lintRules: [mockLintRule],
+		},
+	} satisfies InlangModule)
 
 // ------------------------------------------------------------------------------------------------
 
@@ -114,7 +114,7 @@ describe("initialization", () => {
 				createInlang({
 					configPath: "./test.json",
 					nodeishFs: fs,
-					_import: $import,
+					_import: _import,
 				}),
 			).rejects.toThrow(ConfigPathNotFoundError)
 		})
@@ -127,7 +127,7 @@ describe("initialization", () => {
 				createInlang({
 					configPath: "./inlang.config.json",
 					nodeishFs: fs,
-					_import: $import,
+					_import: _import,
 				}),
 			).rejects.toThrow(ConfigSyntaxError)
 		})
@@ -140,7 +140,7 @@ describe("initialization", () => {
 				createInlang({
 					configPath: "./inlang.config.json",
 					nodeishFs: fs,
-					_import: $import,
+					_import: _import,
 				}),
 			).rejects.toThrow(InvalidConfigError)
 		})
@@ -151,7 +151,7 @@ describe("initialization", () => {
 			const inlang = await createInlang({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
-				_import: $import,
+				_import: _import,
 			})
 
 			expect(getValue(inlang.config)).toStrictEqual(config)
@@ -211,7 +211,7 @@ describe("functionality", () => {
 			const inlang = await createInlang({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
-				_import: $import,
+				_import: _import,
 			})
 
 			expect(getValue(inlang.config)).toStrictEqual(config)
@@ -223,7 +223,7 @@ describe("functionality", () => {
 			const inlang = await createInlang({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
-				_import: $import,
+				_import: _import,
 			})
 
 			expect(inlang.config()).toStrictEqual(config)
@@ -245,7 +245,7 @@ describe("functionality", () => {
 			const inlang = await createInlang({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
-				_import: $import,
+				_import: _import,
 			})
 
 			const result = inlang.setConfig({} as InlangConfig)
@@ -259,7 +259,7 @@ describe("functionality", () => {
 			const inlang = await createInlang({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
-				_import: $import,
+				_import: _import,
 			})
 
 			const before = await fs.readFile("./inlang.config.json", { encoding: "utf-8" })
@@ -278,29 +278,71 @@ describe("functionality", () => {
 		})
 	})
 
-	describe("meta", () => {
-		it("should return the meta data", async () => {
+	describe("installed", () => {
+		it("should return the installed items", async () => {
 			const fs = await createMockNodeishFs()
 			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 			const inlang = await createInlang({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
-				_import: $import,
+				_import: _import,
 			})
 
-			inlang.meta.plugins.subscribe((plugins) => {
-				expect(plugins[0]).toStrictEqual({
-					id: "inlang.plugin.i18next",
-					displayName: {
-						en: "Mock Plugin",
-					},
-					description: {
-						en: "Mock plugin description",
-					},
-					keywords: [],
-					module: "./dist/index.js",
-				})
+			expect(inlang.installed.plugins()[0]).toStrictEqual({
+				meta: mockPlugin.meta,
+				module: config.modules[0],
 			})
+
+			expect(inlang.installed.lintRules()[0]).toEqual({
+				meta: mockLintRule.meta,
+				module: config.modules[0],
+				lintLevel: "warning",
+				disabled: false,
+			})
+		})
+
+		it("should apply 'warning' as default lint level to lint rules that have no lint level defined in the config", async () => {
+			const fs = await createMockNodeishFs()
+			await fs.writeFile(
+				"./inlang.config.json",
+				JSON.stringify({
+					sourceLanguageTag: "en",
+					languageTags: ["en"],
+					modules: ["./dist/index.js"],
+					settings: {
+						"system.lintRuleLevels": {},
+					},
+				} satisfies InlangConfig),
+			)
+			const inlang = await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: _import,
+			})
+
+			expect(inlang.installed.lintRules()[0]?.lintLevel).toBe("warning")
+		})
+
+		it.skip("should apply 'disabled' to lint rules if defined in the system settings", async () => {
+			const fs = await createMockNodeishFs()
+			await fs.writeFile(
+				"./inlang.config.json",
+				JSON.stringify({
+					sourceLanguageTag: "en",
+					languageTags: ["en"],
+					modules: ["./dist/index.js"],
+					settings: {
+						"system.disabled": [mockLintRule.meta.id],
+					},
+				} satisfies InlangConfig),
+			)
+			const inlang = await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: _import,
+			})
+
+			expect(inlang.installed.lintRules()[0]?.disabled).toBe(true)
 		})
 	})
 
@@ -311,7 +353,7 @@ describe("functionality", () => {
 			const inlang = await createInlang({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
-				_import: $import,
+				_import: _import,
 			})
 			inlang.errors.subscribe((errors) => {
 				expect(errors).toStrictEqual([])
@@ -326,7 +368,7 @@ describe("functionality", () => {
 			const inlang = await createInlang({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
-				_import: $import,
+				_import: _import,
 			})
 
 			inlang.appSpecificApi.subscribe((api) => {
@@ -342,7 +384,7 @@ describe("functionality", () => {
 			const inlang = await createInlang({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
-				_import: $import,
+				_import: _import,
 			})
 
 			expect(inlang.query.messages.getAll()).toEqual(exampleMessages)
@@ -356,7 +398,7 @@ describe("functionality", () => {
 			const inlang = await createInlang({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
-				_import: $import,
+				_import: _import,
 			})
 			// TODO: test with real lint rules
 			try {
@@ -372,7 +414,7 @@ describe("functionality", () => {
 			const inlang = await createInlang({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
-				_import: $import,
+				_import: _import,
 			})
 			await inlang.lint.init()
 			// TODO: test with real lint rules
