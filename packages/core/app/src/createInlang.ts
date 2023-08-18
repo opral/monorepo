@@ -15,6 +15,7 @@ import { LintRuleThrowedError, LintReport, lintMessages } from "@inlang/lint"
 import { createRoot, createSignal, createEffect } from "./solid.js"
 import { createReactiveQuery } from "./createReactiveQuery.js"
 import { InlangConfig } from "@inlang/config"
+import { debounce } from "throttle-debounce"
 
 const ConfigCompiler = TypeCompiler.Compile(InlangConfig)
 
@@ -181,6 +182,23 @@ export const createInlang = async (args: {
 		})
 
 		const query = createReactiveQuery(() => messages()!)
+
+		let debouncedSave = (_newMessages) => {
+			// Skip initial call for setup
+			debouncedSave = debounce(500, async (newMessages) => {
+				// console.log('saving changes to messages')
+				try {
+					await resolvedModules()?.data.plugins.data.saveMessages({ messages: newMessages})
+				} catch (err) {
+					console.error("Error in saving messages ", err)
+				}
+			}, { atBegin: false })
+		}
+
+		createEffect(() => {
+			const newMessages = query.getAll()
+			debouncedSave(newMessages)
+		})
 
 		return {
 			installed: {
