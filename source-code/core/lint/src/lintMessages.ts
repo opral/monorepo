@@ -1,21 +1,22 @@
-import type { InlangConfig } from "@inlang/config"
 import type { Message, MessageQueryApi } from "@inlang/messages"
-import type { LintReport, LintRule } from "./api.js"
 import { lintSingleMessage } from "./lintSingleMessage.js"
 import type { LintRuleThrowedError } from "./errors.js"
+import type { LanguageTag } from "@inlang/language-tag"
+import type { LintLevel, LintReport, LintRule } from "./api.js"
+import type { JSONSerializableObject } from "@inlang/json-serializable"
 
 export const lintMessages = async (args: {
-	config: InlangConfig
+	sourceLanguageTag: LanguageTag
+	languageTags: LanguageTag[]
+	lintRuleSettings: Record<LintRule["meta"]["id"], JSONSerializableObject>
+	lintLevels: Record<LintRule["meta"]["id"], LintLevel>
 	rules: LintRule[]
 	messages: Message[]
 	query: MessageQueryApi
 }): Promise<{ data: LintReport[]; errors: LintRuleThrowedError[] }> => {
 	const promises = args.messages.map((message) =>
 		lintSingleMessage({
-			config: args.config,
-			rules: args.rules,
-			messages: args.messages,
-			query: args.query,
+			...args,
 			message,
 		}),
 	)

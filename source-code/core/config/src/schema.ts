@@ -1,17 +1,14 @@
 import { Static, TLiteral, TTemplateLiteral, Type } from "@sinclair/typebox"
 import { LanguageTag } from "@inlang/language-tag"
+import { LintLevel, LintRule } from "@inlang/lint"
+import { JSONSerializableObject } from "@inlang/json-serializable"
 
 /**
- * ---------------- UTILITIES ----------------
+ * ---------------- UTILITY TYPES ----------------
  */
 
-const JSONValue = Type.Union([Type.String(), Type.Number(), Type.Boolean(), Type.Null()])
-const JSONArray = Type.Array(JSONValue)
-// avoiding recursive types in JSON object
-const NestedJSONObject = Type.Record(Type.String(), Type.Union([JSONValue, JSONArray]))
-
-type JSONObject = Static<typeof JSONObject>
-const JSONObject = Type.Record(Type.String(), Type.Union([JSONValue, JSONArray, NestedJSONObject]))
+// workaround to get the id from a union type
+const LintRuleId = LintRule["allOf"][0]["properties"]["meta"]["properties"]["id"]
 
 /**
  * ---------------- SYSTEM SETTINGS ----------------
@@ -19,14 +16,20 @@ const JSONObject = Type.Record(Type.String(), Type.Union([JSONValue, JSONArray, 
 
 export type SystemSettings = Static<typeof SystemSettings>
 export const SystemSettings = Type.Object({
-	/**
-	 * The lint rule levels used by the system.
-	 */
-	"system.lint.ruleLevels": Type.Optional(
-		Type.Record(
-			Type.TemplateLiteral([Type.String(), Type.Literal(".lintRule."), Type.String()]),
-			Type.Union([Type.Literal("error"), Type.Literal("warning"), Type.Literal("off")]),
-		),
+	"system.disabled": Type.Optional(
+		Type.Array(Type.Union([LintRuleId]), {
+			// in the future plugins too
+			description: "The lint rules that should be disabled.",
+			examples: [["inlang.lintRule.missingMessage", "inlang.lintRule.patternInvalid"]],
+		}),
+	),
+	"system.lintRuleLevels": Type.Optional(
+		Type.Record(LintRuleId, LintLevel, {
+			description: "The lint rule levels. To disable a lint rule, use `system.disabled`.",
+			examples: [
+				{ "inlang.lintRule.missingMessage": "error", "inlang.lintRule.patternInvalid": "warning" },
+			],
+		}),
 	),
 })
 
@@ -51,7 +54,7 @@ const ExternalSettings = Type.Record(
 	}) as unknown as TTemplateLiteral<
 		[TLiteral<`${string}.${"app" | "plugin" | "lintRule"}.${string}`>]
 	>,
-	JSONObject,
+	JSONSerializableObject,
 	{ additionalProperties: false },
 )
 
