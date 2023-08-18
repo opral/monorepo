@@ -1,5 +1,5 @@
-import { createMemo, createSignal, onMount, Show } from "solid-js"
-import { createTiptapEditor, useEditorIsFocused } from "solid-tiptap"
+import { createEffect, createSignal, on, onMount, Show } from "solid-js"
+import { createTiptapEditor, useEditorJSON } from "solid-tiptap"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
@@ -41,6 +41,8 @@ export function PatternEditor(props: {
 	} = useEditorState()
 
 	const [variableReferences, setVariableReferences] = createSignal<VariableReference[]>([])
+
+	const [hasChanges, setHasChanges] = createSignal(false)
 
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
@@ -89,27 +91,26 @@ export function PatternEditor(props: {
 	//create editor
 	let textArea!: HTMLDivElement
 	const editor = createTiptapEditor(() => {
-		// if (
-		// 	localChanges().some(
-		// 		(change) =>
-		// 			change.languageTag.name === props.languageTag && change.newCopy.id.name === props.message.id,
-		// 	)
-		// ) {
-		// 	return getEditorConfig(
-		// 		textArea,
-		// 		localChanges().find(
-		// 			(change) =>
-		// 				change.languageTag.name === props.languageTag && change.newCopy.id.name === props.message.id,
-		// 		)?.newCopy,
-		// 		props.variableReference,
-		// 	)
-		// } else {
 		return getEditorConfig(textArea, variant(), variableReferences())
-		// }
 	})
 
+	const currentJSON = useEditorJSON(() => editor());
+
+	createEffect(on(currentJSON, () => {
+		if (currentJSON().content[0].content !== undefined) {
+			setHasChanges((prev) => {
+				const hasChanged = JSON.stringify(variant()?.pattern) !== JSON.stringify(newPattern())
+				if (prev !== hasChanged && hasChanged) {
+					setLocalChanges((prev) => prev += 1)
+				} else if (prev !== hasChanged && !hasChanged) {
+					setLocalChanges((prev) => prev -= 1)
+				}
+				return hasChanged
+			})
+		}
+	}))
+
 	const autoSave = () => {
-		console.log("autoSave")
 		let newMessage;
 		if (variant() === undefined) {
 			newMessage = createVariant(props.message, {
@@ -141,22 +142,6 @@ export function PatternEditor(props: {
 		}
 	}
 
-	/** copy of the variant() to conduct and track changes */
-	// const copy: () => Variant | undefined = () =>
-	// 	variant()
-	// 		? // clone variant()
-	// 		structuredClone(variant())
-	// 		: // new variant()
-	// 		({
-	// 			match: {},
-	// 			pattern: [
-	// 				{
-	// 					type: "Text",
-	// 					value: "",
-	// 				},
-	// 			],
-	// 		} satisfies Variant)
-
 	// const [_isFork] = createResource(
 	// 	() => localStorage.user,
 	// 	async (user) => {
@@ -173,95 +158,6 @@ export function PatternEditor(props: {
 	// 		}
 	// 	}
 	// );
-
-	const hasChanges = () => {
-		if (JSON.stringify(variant()?.pattern) === JSON.stringify(newPattern())) {
-			// if (localChanges() > 0) {
-			// 	setLocalChanges((prev) => prev -= 1)
-			// }
-			return false
-		} else {
-			// setLocalChanges((prev) => prev += 1)
-			return true
-		}
-	}
-	// 	const _updatedText =
-	// 		JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
-	// 	let compare_elements
-	// 	// if (
-	// 	// 	localChanges().some(
-	// 	// 		(change) =>
-	// 	// 			change.languageTag.name === props.languageTag && change.newCopy.id.name === props.message.id,
-	// 	// 	)
-	// 	// ) {
-	// 	// 	compare_elements = localChanges().find(
-	// 	// 		(change) =>
-	// 	// 			change.languageTag.name === props.languageTag && change.newCopy.id.name === props.message.id,
-	// 	// 	)?.newCopy.pattern.elements
-	// 	// } else {
-	// 	compare_elements = variant()?.pattern
-	// 	// }
-	// 	if (_updatedText) {
-	// 		if (JSON.stringify(_updatedText) !== JSON.stringify(compare_elements)) {
-	// 			return _updatedText
-	// 		} else {
-	// 			return ""
-	// 		}
-	// 	} else {
-	// 		return false
-	// 	}
-
-	/**
-	 * Saves the changes of the message.
-	 */
-
-	// const handleSave = async () => {
-	// 	const _copy: Variant | undefined = copy()
-	// 	const _textValue =
-	// 		JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
-	// 	if (!_textValue || !_copy) {
-	// 		return
-	// 	}
-	// 	_copy.pattern = _textValue as Array<Text | VariableReference>
-
-	// setLocalChanges((prev: Message[]) => {
-	// 	if (JSON.stringify(copy()?.pattern) === JSON.stringify(_copy.pattern)) {
-	// 		return [
-	// 			...prev.filter(
-	// 				(change) =>
-	// 					!(
-	// 						change.languageTag === resource().languageTag &&
-	// 						change.newCopy.id.name === _copy.id.name
-	// 					),
-	// 			),
-	// 		]
-	// 	} else {
-	// 		return [
-	// 			...prev.filter(
-	// 				(change) =>
-	// 					!(
-	// 						change.languageTag === resource().languageTag &&
-	// 						change.newCopy.id.name === _copy.id.name
-	// 					),
-	// 			),
-	// 			{
-	// 				languageTag: resource().languageTag,
-	// 				newCopy: _copy,
-	// 			},
-	// 		]
-	// 	}
-	// })
-
-	//this is a dirty fix for getting focus back to the editor after save
-	// 	setTimeout(() => {
-	// 		textArea.parentElement?.click()
-	// 	}, 500)
-	// 	telemetryBrowser.capture("EDITOR saved changes", {
-	// 		targetLanguage: props.languageTag,
-	// 		owner: routeParams().owner,
-	// 		repository: routeParams().repository,
-	// 	})
-	// }
 
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
 
@@ -435,7 +331,6 @@ export function PatternEditor(props: {
 					>
 						<sl-button
 							onClick={handleMachineTranslate}
-							// prop:disabled={true}
 							// prop:disabled={
 							// 	(textValue() !== undefined && textValue() !== "") ||
 							// 	props.referenceMessage === undefined
@@ -463,6 +358,7 @@ export function PatternEditor(props: {
 								editor().commands.setContent(setTipTapMessage(
 									variant()?.pattern || []
 								))
+								textArea.parentElement?.click()
 							}}
 						>
 							{/* <Shortcut slot="suffix" color="primary" codes={["ControlLeft", "s"]} /> */}
