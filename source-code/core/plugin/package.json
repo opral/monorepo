@@ -32,7 +32,7 @@
 	},
 	"dependencies": {
 		"@inlang-git/fs": "*",
-		"@inlang/config": "*",
+		"@inlang/json-serializable": "*",
 		"@inlang/language-tag": "*",
 		"@inlang/messages": "*",
 		"@inlang/result": "*",
