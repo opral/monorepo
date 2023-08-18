@@ -1,4 +1,3 @@
-export { queryBaseTests } from './query.test.js'
 import type { Message } from "./schema.js"
 
 export type MessageQueryApi = {

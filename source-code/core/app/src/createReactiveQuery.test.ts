@@ -4,7 +4,7 @@ import { createReactiveQuery } from './createReactiveQuery.js'
 import { createEffect, createRoot, createSignal } from './solid.js'
 import type { Message, Pattern, Text } from '@inlang/plugin'
 // TODO: find a better approach to share tests between packages
-import { queryBaseTests } from '../../../../node_modules/@inlang/messages/dist/query.js'
+import { queryBaseTests } from '../../../../node_modules/@inlang/messages/dist/query.test-util.js'
 
 const createChangeListener = async (cb: () => void) => createEffect(cb)
 
@@ -33,7 +33,7 @@ export const createMessage = (id: string, patterns: Record<string, Pattern | str
 	),
 })
 
-queryBaseTests({
+await queryBaseTests({
 	createQueryFn: (messages) => createReactiveQuery(() => messages),
 })
 
