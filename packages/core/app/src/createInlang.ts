@@ -10,7 +10,7 @@ import {
 } from "@inlang/plugin"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
-import { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError, PluginSaveError, PluginLoadError } from "./errors.js"
+import { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError, PluginLoadMessagesError, PluginSaveMessagesError } from "./errors.js"
 import { LintRuleThrowedError, LintReport, lintMessages } from "@inlang/lint"
 import { createRoot, createSignal, createEffect } from "./solid.js"
 import { createReactiveQuery } from "./createReactiveQuery.js"
@@ -105,7 +105,7 @@ export const createInlang = async (args: {
 					markInitAsComplete()
 				})
 				.catch((err) => {
-					throw new PluginLoadError("Error in load messages", {
+					throw new PluginLoadMessagesError("Error in load messages", {
 						cause: err,
 					})
 				})
@@ -190,7 +190,7 @@ export const createInlang = async (args: {
 				try {
 					await resolvedModules()!.data.plugins.data.saveMessages({ messages: newMessages})
 				} catch (err) {
-					throw new PluginSaveError("Error in saving messages", {
+					throw new PluginSaveMessagesError("Error in saving messages", {
 						cause: err,
 					})
 				}
@@ -320,11 +320,12 @@ type MaybePromise<T> = T | Promise<T>
 const makeTrulyAsync = <T>(fn: MaybePromise<T>): Promise<T> => (async () => fn)()
 
 // Skip initial call, eg. to skip setup of a createEffect
-function skipFirst (func) {
+function skipFirst (func: (args: any) => any) {
 	let initial = false
-	return function (_: any) {
+	return function (...args: any) {
 		if (initial) {
-			return func.apply(this, arguments)
+			// @ts-ignore
+			return func.apply(this, args)
 		}
 		initial = true
 	}
