@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect } from "vitest"
 import { createInlang } from "./createInlang.js"
 import { createMockNodeishFs } from "@inlang/plugin/test"
@@ -95,12 +96,12 @@ const mockLintRule: LintRule = {
 }
 
 const $import: ImportFunction = async () =>
-	({
-		default: {
-			plugins: [mockPlugin],
-			lintRules: [mockLintRule],
-		},
-	} satisfies InlangModule)
+({
+	default: {
+		plugins: [mockPlugin],
+		lintRules: [mockLintRule],
+	},
+} satisfies InlangModule)
 
 // ------------------------------------------------------------------------------------------------
 
@@ -234,6 +235,46 @@ describe("functionality", () => {
 			inlang.setConfig({ ...config, languageTags: ["en", "de", "fr"] })
 			expect(getValue(inlang.config)).toStrictEqual({ ...config, languageTags: ["en", "de", "fr"] })
 			expect(inlang.config().languageTags).toStrictEqual(["en", "de", "fr"])
+		})
+	})
+
+	describe("setConfig", () => {
+		it("should fail if config is not valid", async () => {
+			const fs = await createMockNodeishFs()
+			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			const inlang = await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: $import,
+			})
+
+			const result = inlang.setConfig({} as InlangConfig)
+			expect(result.data).toBeUndefined()
+			expect(result.error).toBeInstanceOf(InvalidConfigError)
+		})
+
+		it("should write config to disk", async () => {
+			const fs = await createMockNodeishFs()
+			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			const inlang = await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: $import,
+			})
+
+			const before = await fs.readFile("./inlang.config.json", { encoding: "utf-8" })
+			expect(before).toBeDefined()
+
+			const result = inlang.setConfig({ ...config, languageTags: [] })
+			expect(result.data).toBeUndefined()
+			expect(result.error).toBeUndefined()
+
+			// TODO: how to wait for fs.writeFile to finish?
+			await new Promise((resolve) => setTimeout(resolve, 0))
+
+			const after = await fs.readFile("./inlang.config.json", { encoding: "utf-8" })
+			expect(after).toBeDefined()
+			expect(after).not.toBe(before)
 		})
 	})
 
