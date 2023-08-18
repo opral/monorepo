@@ -1,12 +1,13 @@
-import { createSignal, onMount, Show } from "solid-js"
+import { createMemo, createSignal, onMount, Show } from "solid-js"
 import { createTiptapEditor, useEditorIsFocused } from "solid-tiptap"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
 import { showToast } from "#src/components/Toast.jsx"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
+import MaterialSymbolsCheck from "~icons/material-symbols/check"
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
-import { Shortcut } from "./Shortcut.jsx"
+// import { Shortcut } from "./Shortcut.jsx"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { getTextValue, setTipTapMessage } from "../helper/parse.js"
 import { getEditorConfig } from "../helper/editorSetup.js"
@@ -41,34 +42,34 @@ export function PatternEditor(props: {
 
 	const [variableReferences, setVariableReferences] = createSignal<VariableReference[]>([])
 
-	const [hasChanges, setHasChanges] = createSignal(false)
-
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
 
 	let machineLearningWarningDialog: SlDialog | undefined
 
-	// const [isLineItemFocused, setIsLineItemFocused] = createSignal(false)
+	const [isLineItemFocused, setIsLineItemFocused] = createSignal(false)
 
-	// const handleLineItemFocusIn = () => {
-	// 	if (document.activeElement?.tagName !== "SL-BUTTON") {
-	// 		if (document.activeElement !== textArea.children[0]) {
-	// 			setIsLineItemFocused(false)
-	// 		}
-	// 	} else {
-	// 		if (
-	// 			document.activeElement.parentElement?.parentElement?.parentElement?.children[1] === textArea
-	// 		) {
-	// 			setIsLineItemFocused(true)
-	// 		}
-	// 	}
-	// }
+	const handleLineItemFocusIn = () => {
+		if (document.activeElement?.tagName !== "SL-BUTTON") {
+			if (document.activeElement !== textArea.children[0]) {
+				setIsLineItemFocused(false)
+			}
+		} else {
+			if (
+				document.activeElement.parentElement?.parentElement?.parentElement?.children[1] === textArea
+			) {
+				setIsLineItemFocused(true)
+			}
+		}
+	}
 
 	const sourceMessage = () => props.message.body[sourceLanguageTag()!]
 
 	const variant = () => props.message["body"][props.languageTag]
 		? props.message["body"][props.languageTag]![0]
 		: undefined
+
+	const newPattern = () => getTextValue(editor) as Variant["pattern"];
 
 	onMount(() => {
 		if (sourceMessage()) {
@@ -79,10 +80,10 @@ export function PatternEditor(props: {
 			)
 		}
 
-		// document.addEventListener("focusin", handleLineItemFocusIn)
-		// return () => {
-		// 	document.removeEventListener("focusin", handleLineItemFocusIn)
-		// }
+		document.addEventListener("focusin", handleLineItemFocusIn)
+		return () => {
+			document.removeEventListener("focusin", handleLineItemFocusIn)
+		}
 	})
 
 	//create editor
@@ -107,32 +108,15 @@ export function PatternEditor(props: {
 		// }
 	})
 
-	// const getEditorFocus = () => {
-	// 	if (editor()) {
-	// 		const isFocus = useEditorIsFocused(() => editor())
-	// 		if (isFocus() && localStorage.isFirstUse) {
-	// 			setLocalStorage("isFirstUse", false)
-	// 		}
-	// 		return isFocus()
-	// 	}
-	// }
-
 	const autoSave = () => {
-		const newPattern = getTextValue(editor) as Variant["pattern"];
-		if (JSON.stringify(variant()?.pattern) === JSON.stringify(newPattern)) {
-			if (hasChanges() && localChanges() > 0) {
-				setLocalChanges((prev) => prev -= 1);
-				setHasChanges(false);
-			}
-			return;
-		}
+		console.log("autoSave")
 		let newMessage;
 		if (variant() === undefined) {
 			newMessage = createVariant(props.message, {
 				where: { languageTag: props.languageTag },
 				data: {
 					match: {},
-					pattern: newPattern,
+					pattern: newPattern(),
 				}
 			})
 		} else {
@@ -141,17 +125,16 @@ export function PatternEditor(props: {
 					languageTag: props.languageTag,
 					selectors: {},
 				},
-				data: newPattern,
+				data: newPattern(),
 			})
 		};
 		if (newMessage.data) {
-			inlang()?.query.messages.upsert({
+			const upsertSuccessful = inlang()?.query.messages.upsert({
 				where: { id: props.message.id },
 				data: newMessage.data,
 			});
-			if (!hasChanges()) {
-				setLocalChanges((prev) => prev += 1);
-				setHasChanges(true);
+			if (!upsertSuccessful) {
+				throw new Error("Cannot update message")
 			}
 		} else {
 			throw new Error("Cannot update message: ", newMessage.error)
@@ -191,7 +174,17 @@ export function PatternEditor(props: {
 	// 	}
 	// );
 
-	// const hasChanges = () => {
+	const hasChanges = () => {
+		if (JSON.stringify(variant()?.pattern) === JSON.stringify(newPattern())) {
+			// if (localChanges() > 0) {
+			// 	setLocalChanges((prev) => prev -= 1)
+			// }
+			return false
+		} else {
+			// setLocalChanges((prev) => prev += 1)
+			return true
+		}
+	}
 	// 	const _updatedText =
 	// 		JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
 	// 	let compare_elements
@@ -217,7 +210,6 @@ export function PatternEditor(props: {
 	// 	} else {
 	// 		return false
 	// 	}
-	// }
 
 	/**
 	 * Saves the changes of the message.
@@ -353,16 +345,14 @@ export function PatternEditor(props: {
 			}
 		})
 
-		if (//hasChanges() && 
-			localStorage.user === undefined) {
+		if (hasChanges() && localStorage.user === undefined) {
 			notifications.push({
 				notificationTitle: "Access:",
 				notificationDescription: "Sign in to commit changes.",
 				notificationType: "warning",
 			})
 		}
-		if (//hasChanges() && 
-			userIsCollaborator() === false) {
+		if (hasChanges() && userIsCollaborator() === false) {
 			notifications.push({
 				notificationTitle: "Fork:",
 				notificationDescription: "Fork the project to commit changes.",
@@ -380,7 +370,11 @@ export function PatternEditor(props: {
 	// 		userIsCollaborator()
 	// 	) {
 	// 		event.preventDefault()
-	// 		handleSave()
+	// 		showToast({
+	// 			variant: "info",
+	// 			title: "Inlang saved changes."
+	// 		})
+	// 		// handleSave()
 	// 	}
 	// }
 
@@ -391,7 +385,8 @@ export function PatternEditor(props: {
 			onClick={() => {
 				editor().chain().focus()
 			}}
-			// onFocusIn={() => setIsLineItemFocused(true)}
+			onFocusIn={() => setIsLineItemFocused(true)}
+			onFocusOut={() => { autoSave() }}
 			class="flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border first:mt-0 -mt-[1px] border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus-within:relative focus-within:border-primary focus-within:ring-[3px] focus-within:ring-hover-primary/50"
 		>
 			<div class="flex justify-start items-start gap-2 py-[5px]">
@@ -427,7 +422,6 @@ export function PatternEditor(props: {
 							repository: routeParams().repository,
 						})
 					}}
-					onFocusOut={autoSave}
 				/>
 			</div>
 
@@ -455,9 +449,10 @@ export function PatternEditor(props: {
 							Machine translate
 						</sl-button>
 					</Show>
-					{/* <Show when={
+					<Show when={
 						hasChanges() &&
-						isLineItemFocused()}>
+						isLineItemFocused()
+					}>
 						<sl-button
 							prop:variant="primary"
 							prop:size="small"
@@ -468,20 +463,16 @@ export function PatternEditor(props: {
 								editor().commands.setContent(setTipTapMessage(
 									variant()?.pattern || []
 								))
-								autoSave()
 							}}
 						>
-							<Shortcut slot="suffix" color="primary" codes={["ControlLeft", "s"]} />
+							{/* <Shortcut slot="suffix" color="primary" codes={["ControlLeft", "s"]} /> */}
 							Revert
 						</sl-button>
-					</Show> */}
+					</Show>
 				</div >
-				{/* <Show when={!getEditorFocus()
-					&& !isLineItemFocused()
-					&& hasChanges()
-				}>
-					<div class="bg-hover-primary w-2 h-2 rounded-full" />
-				</Show> */}
+				<Show when={!isLineItemFocused() && hasChanges()}>
+					<MaterialSymbolsCheck class="text-hover-primary w-6 h-6 mr-1" />
+				</Show>
 				{getNotificationHints().length !== 0 && (
 					<NotificationHint notifications={getNotificationHints()} />
 				)}
