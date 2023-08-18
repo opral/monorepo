@@ -169,7 +169,7 @@ const Gallery = ({
 										}
 										color={
 											item.id.split(".")[1]?.toLowerCase() === "app"
-												? "#BF7CE4"
+												? "#3B82F6"
 												: item.id.split(".")[1]?.toLowerCase() === "plugin"
 												? "#BF7CE4"
 												: "#06B6D4"
