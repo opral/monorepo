@@ -9,6 +9,7 @@ export interface MarketplaceMetadata {
 	keywords: string[]
 	publisherName: string
 	publisherIcon: string
+	bundle?: number
 }
 
 /**

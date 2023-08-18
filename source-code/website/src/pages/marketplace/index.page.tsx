@@ -7,6 +7,7 @@ import { SearchIcon } from "../editor/@host/@owner/@repository/components/Search
 import { Button } from "../index/components/Button.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import Plus from "~icons/material-symbols/add-rounded"
+import Package from "~icons/material-symbols/package-2"
 
 export type PageProps = {
 	markdown: string
@@ -64,7 +65,7 @@ export function Page() {
 						</div>
 					</div>
 					<div class="grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-center items-stretch py-8 mb-8">
-						<Gallery tags={tags} textValue={textValue} />
+						<Gallery tags={tags} textValue={textValue} setTextValue={setTextValue} />
 					</div>
 					<GetHelp />
 				</div>
@@ -76,9 +77,11 @@ export function Page() {
 const Gallery = ({
 	tags,
 	textValue,
+	setTextValue,
 }: {
 	tags: Accessor<Record<string, any>[]>
 	textValue: Accessor<string>
+	setTextValue: (value: string) => void
 }) => {
 	return (
 		<>
@@ -99,7 +102,8 @@ const Gallery = ({
 									item.marketplace.keywords.some((keyword: string) =>
 										keyword.toLowerCase().includes(textValue().toLowerCase()),
 									) ||
-									item.id.split(".")[1]?.toLowerCase().includes(textValue().toLowerCase()))
+									item.id.split(".")[1]?.toLowerCase().includes(textValue().toLowerCase()) ||
+									item.id.toLocaleLowerCase().includes(textValue().toLowerCase()))
 							}
 						>
 							<a
@@ -120,11 +124,41 @@ const Gallery = ({
 										</p>
 									</div>
 									<Show when={item.marketplace.publisherName && item.marketplace.publisherIcon}>
-										<div class="flex gap-2 items-center pt-6">
-											<img class="w-6 h-6 rounded-full m-0" src={item.marketplace.publisherIcon} />
-											<p class="m-0 text-surface-600 no-underline hover:text-surface-900 font-medium">
-												{item.marketplace.publisherName}
-											</p>
+										<div class="w-full flex items-end justify-between">
+											<div class="flex gap-2 items-center pt-6">
+												<img
+													class="w-6 h-6 rounded-full m-0"
+													src={item.marketplace.publisherIcon}
+												/>
+												<p class="m-0 text-surface-600 no-underline hover:text-surface-900 font-medium">
+													{item.marketplace.publisherName}
+												</p>
+											</div>
+											<Show when={item.marketplace.bundle}>
+												<sl-tooltip
+													prop:content={`Comes in a bundle of ${item.marketplace.bundle}`}
+													prop:distance={16}
+													prop:hoist={true}
+													prop:placement="top"
+												>
+													<div
+														onClick={(e) => {
+															e.preventDefault()
+															e.stopPropagation()
+
+															// set text name to the first and second id part e.g. inlang.lintRule
+															setTextValue(
+																`${item.id.split(".")[0]?.toLowerCase()}.${item.id
+																	.split(".")[1]
+																	?.toLowerCase()}`,
+															)
+														}}
+														class="text-surface-500 text-xl hover:text-surface-900 transition-all"
+													>
+														<Package />
+													</div>
+												</sl-tooltip>
+											</Show>
 										</div>
 									</Show>
 									<Chip

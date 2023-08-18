@@ -68,7 +68,15 @@ async function getMetaData(modules) {
 				console.warn(`Module ${item.meta.id} has no marketplace metadata.`)
 				continue
 			}
-			meta.push(item.meta)
+			data.default[type].length > 1
+				? meta.push({
+						...item.meta,
+						marketplace: {
+							...item.meta.marketplace,
+							bundle: data.default[type].length,
+						},
+				  })
+				: meta.push(item.meta)
 		}
 	}
 
