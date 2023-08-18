@@ -14,16 +14,16 @@ const LintRuleId = LintRule["allOf"][0]["properties"]["meta"]["properties"]["id"
  * ---------------- SYSTEM SETTINGS ----------------
  */
 
-export type SystemSettings = Static<typeof SystemSettings>
-export const SystemSettings = Type.Object({
-	"system.disabled": Type.Optional(
+export type ProjectSettings = Static<typeof ProjectSettings>
+export const ProjectSettings = Type.Object({
+	"project.disabled": Type.Optional(
 		Type.Array(Type.Union([LintRuleId]), {
 			// in the future plugins too
 			description: "The lint rules that should be disabled.",
 			examples: [["inlang.lintRule.missingMessage", "inlang.lintRule.patternInvalid"]],
 		}),
 	),
-	"system.lintRuleLevels": Type.Optional(
+	"project.lintRuleLevels": Type.Optional(
 		Type.Record(LintRuleId, LintLevel, {
 			description: "The lint rule levels. To disable a lint rule, use `system.disabled`.",
 			examples: [
@@ -42,14 +42,14 @@ export const SystemSettings = Type.Object({
  */
 const ExternalSettings = Type.Record(
 	Type.String({
-		// pattern includes SystemSettings keys
-		pattern: `^((?!system\\.)([a-z]+)\\.(app|plugin|lintRule)\\.([a-z][a-zA-Z0-9]*)|${Object.keys(
-			SystemSettings.properties,
+		// pattern includes ProjectSettings keys
+		pattern: `^((?!project\\.)([a-z]+)\\.(app|plugin|lintRule)\\.([a-z][a-zA-Z0-9]*)|${Object.keys(
+			ProjectSettings.properties,
 		)
 			.map((key) => key.replaceAll(".", "\\."))
 			.join("|")})$`,
 		description:
-			"The key must be conform to `{namespace:string}.{type:app|plugin|lintRule}.{name:string}`. The namespace `system` namespace is reserved and can't be used.",
+			"The key must be conform to `{namespace:string}.{type:app|plugin|lintRule}.{name:string}`. The namespace `project` namespace is reserved and can't be used.",
 		examples: ["example.plugin.sqlite", "example.lintRule.missingMessage"],
 	}) as unknown as TTemplateLiteral<
 		[TLiteral<`${string}.${"app" | "plugin" | "lintRule"}.${string}`>]
@@ -82,11 +82,8 @@ export const InlangConfig = Type.Object(
 		modules: Type.Array(Type.String()),
 		/**
 		 * Settings are key-value pairs.
-		 *
-		 * The `key` must be conform to the `{namespace}.{type}.{key}` pattern.
-		 * The `value` must be a JSON.
 		 */
-		settings: Type.Intersect([SystemSettings, ExternalSettings]),
+		settings: Type.Intersect([ProjectSettings, ExternalSettings]),
 	},
 	// see https://github.com/sinclairzx81/typebox/issues/527
 	{ additionalProperties: false },

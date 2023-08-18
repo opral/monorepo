@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type { InlangInstance, InstalledLintRule, InstalledPlugin, Subscribable } from "./api.js"
+import type { InlangProject, InstalledLintRule, InstalledPlugin, Subscribable } from "./api.js"
 import { ImportFunction, ResolveModulesFunction, resolveModules } from "@inlang/module"
 import { NodeishFilesystemSubset, Message, tryCatch, Result } from "@inlang/plugin"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
@@ -23,7 +23,7 @@ export const createInlang = async (args: {
 	configPath: string
 	nodeishFs: NodeishFilesystemSubset
 	_import?: ImportFunction
-}): Promise<InlangInstance> => {
+}): Promise<InlangProject> => {
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
 
@@ -113,8 +113,8 @@ export const createInlang = async (args: {
 							resolvedModules()?.meta.find((m) => m.lintRules.includes(rule.meta.id))?.module ??
 							"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
 						// default to warning, see https://github.com/inlang/inlang/issues/1254
-						lintLevel: configValue.settings["system.lintRuleLevels"]?.[rule.meta.id] ?? "warning",
-						disabled: configValue.settings["system.disabled"]?.includes(rule.meta.id) ?? false,
+						lintLevel: configValue.settings["project.lintRuleLevels"]?.[rule.meta.id] ?? "warning",
+						disabled: configValue.settings["project.disabled"]?.includes(rule.meta.id) ?? false,
 					} satisfies InstalledLintRule),
 			) satisfies Array<InstalledLintRule>
 
@@ -152,7 +152,7 @@ export const createInlang = async (args: {
 				messages: msgs,
 				query,
 				rules: resolvedModules()!.lintRules.filter(
-					(rule) => configValue.settings["system.disabled"]?.includes(rule.meta.id) === false,
+					(rule) => configValue.settings["project.disabled"]?.includes(rule.meta.id) === false,
 				),
 			}).then((report) => {
 				setLintReports(report.data)
@@ -191,7 +191,7 @@ export const createInlang = async (args: {
 			query: {
 				messages: query,
 			},
-		} satisfies InlangInstance
+		} satisfies InlangProject
 	})
 }
 

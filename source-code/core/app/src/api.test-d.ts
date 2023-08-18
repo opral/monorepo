@@ -1,8 +1,8 @@
 import type { LintReport } from "@inlang/lint"
-import type { InlangInstance } from "./api.js"
+import type { InlangProject } from "./api.js"
 import { expectType } from "tsd"
 
-const inlang: InlangInstance = {} as any
+const inlang: InlangProject = {} as any
 
 expectType<LintReport[]>(inlang.lint.reports())
 

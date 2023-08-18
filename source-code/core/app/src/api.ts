@@ -42,7 +42,7 @@ export type InstalledLintRule = {
 }
 
 // TODO: remove all getters and use solid store for whole object, just expose `setConfig`
-export type InlangInstance = {
+export type InlangProject = {
 	installed: {
 		plugins: Subscribable<InstalledPlugin[]>
 		lintRules: Subscribable<InstalledLintRule[]>

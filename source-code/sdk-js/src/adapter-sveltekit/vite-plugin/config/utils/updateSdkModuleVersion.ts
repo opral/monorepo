@@ -1,4 +1,4 @@
-import { createInlang, type InlangInstance } from '@inlang/app';
+import { createInlang, type InlangProject } from '@inlang/app';
 import { getNodeishFs } from './getNodeishFs.js';
 import { PATH_TO_INLANG_CONFIG } from '../config.js';
 // @ts-ignore
@@ -8,7 +8,7 @@ import { version } from '../../../../../package.json';
  * @returns `true` iff the version was updated
  * @returns `false` iff the version is already up2date
  */
-export const updateSdkModuleVersion = async (inlang: InlangInstance): Promise<boolean> => {
+export const updateSdkModuleVersion = async (inlang: InlangProject): Promise<boolean> => {
 	const config = inlang.config()
 	const sdkJSPluginModule = config.modules.find((module) => module.includes('@inlang/sdk-js-plugin'))
 	if (!sdkJSPluginModule) return false
