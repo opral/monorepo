@@ -10,7 +10,7 @@ import {
 } from "@inlang/plugin"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
-import { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError } from "./errors.js"
+import { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError, PluginSaveError, PluginLoadError } from "./errors.js"
 import { LintRuleThrowedError, LintReport, lintMessages } from "@inlang/lint"
 import { createRoot, createSignal, createEffect } from "./solid.js"
 import { createReactiveQuery } from "./createReactiveQuery.js"
@@ -105,7 +105,9 @@ export const createInlang = async (args: {
 					markInitAsComplete()
 				})
 				.catch((err) => {
-					console.error("Error in load messages ", err)
+					throw new PluginLoadError("Error in load messages", {
+						cause: err,
+					})
 				})
 		})
 
@@ -183,21 +185,22 @@ export const createInlang = async (args: {
 
 		const query = createReactiveQuery(() => messages()!)
 
-		let debouncedSave = (_newMessages) => {
+		let debouncedSave = (_: any) => {
 			// Skip initial call for setup
 			debouncedSave = debounce(500, async (newMessages) => {
 				// console.log('saving changes to messages')
 				try {
 					await resolvedModules()?.data.plugins.data.saveMessages({ messages: newMessages})
 				} catch (err) {
-					console.error("Error in saving messages ", err)
+					throw new PluginSaveError("Error in saving messages", {
+						cause: err,
+					})
 				}
 			}, { atBegin: false })
 		}
 
 		createEffect(() => {
-			const newMessages = query.getAll()
-			debouncedSave(newMessages)
+			debouncedSave(query.getAll())
 		})
 
 		return {
