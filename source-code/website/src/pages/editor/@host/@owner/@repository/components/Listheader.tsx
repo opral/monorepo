@@ -39,11 +39,11 @@ export const ListHeader = (props: ListHeaderProps) => {
 	const getLintSummary = () => {
 		const lintSummary: Array<RuleSummaryItem> = []
 		const reports = inlang()?.lint.reports()
-
-		inlang()?.meta.lintRules().map((lintRule) => lintRule)
+		inlang()?.installed.lintRules()
+			.filter((lintRule) => !lintRule.disabled)
 			.map((lintRule) => {
 				let level: "error" | "warning"
-				const filteredReports = reports?.filter((report: MessageLintReport) => report.ruleId === lintRule.id)
+				const filteredReports = reports?.filter((report: MessageLintReport) => report.ruleId === lintRule.meta.id)
 				const filteredMessages = filteredReports?.filter((report: MessageLintReport) => {
 					level = report.level
 					return showFilteredMessage(
@@ -55,9 +55,9 @@ export const ListHeader = (props: ListHeaderProps) => {
 				if (
 					lintRule &&
 					counter !== 0 &&
-					(filteredLintRules().length === 0 || filteredLintRules().includes(lintRule.id))
+					(filteredLintRules().length === 0 || filteredLintRules().includes(lintRule.meta.id))
 				) {
-					lintSummary.push({ rule: lintRule, amount: counter, level: level! })
+					lintSummary.push({ rule: lintRule.meta, amount: counter, level: level! })
 				}
 			})
 

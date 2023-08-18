@@ -7,7 +7,6 @@ import { showToast } from "#src/components/Toast.jsx"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import MaterialSymbolsCheck from "~icons/material-symbols/check"
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
-// import { Shortcut } from "./Shortcut.jsx"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { getTextValue, setTipTapMessage } from "../helper/parse.js"
 import { getEditorConfig } from "../helper/editorSetup.js"
@@ -234,7 +233,9 @@ export function PatternEditor(props: {
 		inlang()?.lint.reports().map((report) => {
 			if (report.messageId === props.message.id && report.languageTag === props.languageTag) {
 				notifications.push({
-					notificationTitle: inlang()?.meta.lintRules().find((rule) => rule.id === report.ruleId)?.displayName["en"] || report.ruleId,
+					notificationTitle: inlang()?.installed.lintRules()
+						.filter((lintRule) => !lintRule.disabled)
+						.find((rule) => rule.meta.id === report.ruleId)?.meta.displayName["en"] || report.ruleId,
 					notificationDescription: report.body.en,
 					notificationType: report.level,
 				})
@@ -258,21 +259,21 @@ export function PatternEditor(props: {
 		return notifications
 	}
 
-	// const handleShortcut = (event: KeyboardEvent) => {
-	// 	if (
-	// 		((event.ctrlKey && event.code === "KeyS" && navigator.platform.includes("Win")) ||
-	// 			(event.metaKey && event.code === "KeyS" && navigator.platform.includes("Mac"))) &&
-	// 		hasChanges() &&
-	// 		userIsCollaborator()
-	// 	) {
-	// 		event.preventDefault()
-	// 		showToast({
-	// 			variant: "info",
-	// 			title: "Inlang saved changes."
-	// 		})
-	// 		// handleSave()
-	// 	}
-	// }
+	const handleShortcut = (event: KeyboardEvent) => {
+		// @ts-ignore
+		const platform = navigator?.userAgentData?.platform || navigator?.platform
+		if (
+			((event.ctrlKey && event.code === "KeyS" && platform.toLowerCase().includes("win")) ||
+				(event.metaKey && event.code === "KeyS" && platform.toLowerCase().includes("mac"))) &&
+			userIsCollaborator()
+		) {
+			event.preventDefault()
+			showToast({
+				variant: "info",
+				title: "Inlang saves automatically but make shure to push your changes."
+			})
+		}
+	}
 
 	return (
 		// outer element is needed for clickOutside directive
@@ -309,7 +310,7 @@ export function PatternEditor(props: {
 				<div
 					id={props.message.id + "-" + props.languageTag}
 					ref={textArea}
-					// onKeyDown={(event) => handleShortcut(event)}
+					onKeyDown={(event) => handleShortcut(event)}
 					onFocusIn={() => {
 						setLocalStorage("isFirstUse", false)
 						telemetryBrowser.capture("EDITOR clicked in field", {
@@ -361,13 +362,26 @@ export function PatternEditor(props: {
 								textArea.parentElement?.click()
 							}}
 						>
-							{/* <Shortcut slot="suffix" color="primary" codes={["ControlLeft", "s"]} /> */}
 							Revert
 						</sl-button>
 					</Show>
 				</div >
 				<Show when={!isLineItemFocused() && hasChanges()}>
-					<MaterialSymbolsCheck class="text-hover-primary w-6 h-6 mr-1" />
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+						class="text-hover-primary mr-1"
+					>
+						<path
+							d="M4 12L9 17L19.5 6.5"
+							stroke="currentColor"
+							stroke-width="2"
+							class="animate-draw"
+						/>
+					</svg>
 				</Show>
 				{getNotificationHints().length !== 0 && (
 					<NotificationHint notifications={getNotificationHints()} />

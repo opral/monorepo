@@ -199,8 +199,9 @@ export function Layout(props: { children: JSXElement }) {
 																if (filter.name === "Linting" && filteredLintRules.length === 0) {
 																	setFilteredLintRules(
 																		inlang()
-																			?.meta.lintRules()
-																			.map((lintRule) => lintRule.id) ?? [],
+																			?.installed.lintRules()
+																			.filter((lintRule) => !lintRule.disabled)
+																			.map((lintRule) => lintRule.meta.id) ?? [],
 																	)
 																}
 																addFilter(filter.name)
@@ -483,8 +484,9 @@ function LintFilter(props: { clearFunction: any }) {
 					onClick={() =>
 						setFilteredLintRules(
 							inlang()
-								?.meta.lintRules()
-								.map((lintRule) => lintRule.id) ?? [],
+								?.installed.lintRules()
+								.filter((lintRule) => !lintRule.disabled)
+								.map((lintRule) => lintRule.meta.id) ?? [],
 						)}
 				>
 					All
@@ -501,11 +503,12 @@ function LintFilter(props: { clearFunction: any }) {
 				<For
 					each={
 						inlang()
-							?.meta.lintRules()
+							?.installed.lintRules()
+							.filter((lintRule) => !lintRule.disabled)
 							.map((lintRule) => lintRule) ?? []
 					}
 				>
-					{(lintRule) => <sl-option prop:value={lintRule.id}>{lintRule.displayName.en}</sl-option>}
+					{(lintRule) => <sl-option prop:value={lintRule.meta.id}>{lintRule.meta.displayName["en"]}</sl-option>}
 				</For>
 			</div>
 		</sl-select>
