@@ -125,6 +125,7 @@ export const registry = [
 			keywords: ["lint-rule", "standard", "identical-pattern"],
 			publisherName: "@inlang",
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+			bundle: 3,
 		},
 	},
 	{
@@ -143,6 +144,7 @@ export const registry = [
 			keywords: ["lint-rule", "standard", "message-without-source"],
 			publisherName: "@inlang",
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+			bundle: 3,
 		},
 	},
 	{
@@ -161,6 +163,7 @@ export const registry = [
 			keywords: ["lint-rule", "standard", "missing-message"],
 			publisherName: "@inlang",
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+			bundle: 3,
 		},
 	},
 ]
