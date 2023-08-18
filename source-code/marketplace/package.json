@@ -9,7 +9,8 @@
 		"./src"
 	],
 	"scripts": {
-		"build": "node ./buildRegistry.js && npx prettier ./src --write",
+		"build": "node ./buildRegistry.js && npx prettier ./src --write && tsc --build ./tsconfig.build.json",
+		"dev": "tsc -p ./tsconfig.build.json --watch",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"test:watch": "vitest watch --passWithNoTests --coverage",
