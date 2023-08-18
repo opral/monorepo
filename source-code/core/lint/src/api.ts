@@ -47,13 +47,6 @@ export const LintRuleBase = Type.Object({
 	}),
 	// (in the future, more literals like CodeLint are expected)
 	type: Type.Union([Type.Literal("MessageLint")]),
-	/**
-	 * The default level of the lint rule.
-	 *
-	 * The default level exists as a fallback if the user
-	 * did not specify a level for the rule in the settings.
-	 */
-	defaultLevel: LintLevel,
 })
 
 /**
@@ -61,7 +54,7 @@ export const LintRuleBase = Type.Object({
  */
 
 export type MessageLintRule<
-	Settings extends InlangConfig["settings"][LintRule["meta"]["id"]] | unknown = unknown,
+	Settings extends InlangConfig["settings"][LintRule["meta"]["id"]] | any = any,
 > = Static<typeof MessageLintRule> & {
 	message: (args: {
 		message: Message
@@ -94,7 +87,7 @@ export type MessageLintReport = LintReportBase & {
  */
 
 export type LintRule<
-	Settings extends InlangConfig["settings"][LintRule["meta"]["id"]] | unknown = unknown,
+	Settings extends InlangConfig["settings"][LintRule["meta"]["id"]] | any = any,
 > = MessageLintRule<Settings>
 export const LintRule = Type.Union([MessageLintRule])
 

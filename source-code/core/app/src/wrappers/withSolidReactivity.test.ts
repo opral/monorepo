@@ -81,17 +81,16 @@ const mockLintRule: LintRule = {
 		description: { en: "Mock lint rule description" },
 		displayName: { en: "Mock Lint Rule" },
 	},
-	defaultLevel: "error",
 	message: () => undefined,
 }
 
 const $import: ImportFunction = async () =>
-({
-	default: {
-		plugins: [mockPlugin],
-		lintRules: [mockLintRule],
-	},
-} satisfies InlangModule)
+	({
+		default: {
+			plugins: [mockPlugin],
+			lintRules: [mockLintRule],
+		},
+	} satisfies InlangModule)
 
 // ------------------------------------------------------------------------------------------------
 
@@ -180,11 +179,12 @@ describe("messages", () => {
 				},
 				keywords: [],
 			},
-			loadMessages: ({ languageTags }) => languageTags.length ? exampleMessages : [],
+			loadMessages: ({ languageTags }) => (languageTags.length ? exampleMessages : []),
 			saveMessages: () => undefined,
 		}
 
-		const mockImport: ImportFunction = async () => ({ default: { plugins: [mockPlugin] } } satisfies InlangModule)
+		const mockImport: ImportFunction = async () =>
+			({ default: { plugins: [mockPlugin] } } satisfies InlangModule)
 
 		await fs.writeFile("./inlang.config.json", JSON.stringify(mockConfig))
 		const inlang = withSolidReactivity(
@@ -233,7 +233,7 @@ describe("messages", () => {
 
 		const messagesBefore = inlang.query.messages.getAll()
 		expect(messagesBefore.length).toBe(2)
-		expect((messagesBefore[0]!.body.en![0]!.pattern[0]! as Text).value).toBe('test')
+		expect((messagesBefore[0]!.body.en![0]!.pattern[0]! as Text).value).toBe("test")
 
 		inlang.query.messages.update({
 			where: { id: "a" },
@@ -262,7 +262,7 @@ describe("messages", () => {
 		expect(counter).toBe(2) // 2 times because effect creation + set
 		const messagesAfter = inlang.query.messages.getAll()
 		expect(messagesAfter.length).toBe(2)
-		expect((messagesAfter[0]!.body.en![0]!.pattern[0]! as Text).value).toBe('test2')
+		expect((messagesAfter[0]!.body.en![0]!.pattern[0]! as Text).value).toBe("test2")
 	})
 })
 

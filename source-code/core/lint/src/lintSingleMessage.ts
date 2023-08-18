@@ -18,7 +18,8 @@ export const lintSingleMessage = async (args: {
 		.map(async (rule) => {
 			const ruleId = rule.meta.id
 			const settings = args.config?.settings?.[ruleId] ?? {}
-			const level = args.config.settings?.["system.lint.ruleLevels"]?.[ruleId] ?? rule.defaultLevel
+			// default to warning, see https://github.com/inlang/inlang/issues/1254
+			const level = args.config.settings?.["system.lint.ruleLevels"]?.[ruleId] ?? "warning"
 
 			if (level === "off") {
 				return

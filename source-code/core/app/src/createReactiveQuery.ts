@@ -3,7 +3,7 @@ import { ReactiveMap } from "@solid-primitives/map"
 import { createEffect } from "./solid.js"
 
 /**
- * Creates a query API for messages.
+ * Creates a reactive query API for messages.
  */
 export function createReactiveQuery(messages: () => Array<Message>): MessageQueryApi {
 	const index = new ReactiveMap<string, Message>()

@@ -60,6 +60,9 @@ export function Layout(props: { children: JSXElement }) {
 			!selectedFilters().some((filter) => filter.name === newFilter.name) &&
 			(newFilter.name !== "Linting" || inlang()?.lint?.reports)
 		) {
+			if (newFilter.name === "Language") {
+				setFilteredLanguageTags(() => inlang()?.config()?.languageTags || [])
+			}
 			setSelectedFilters([...selectedFilters(), newFilter])
 		}
 	}

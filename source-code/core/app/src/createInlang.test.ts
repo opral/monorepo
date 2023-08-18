@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect } from "vitest"
 import { createInlang } from "./createInlang.js"
 import { createMockNodeishFs } from "@inlang/plugin/test"
@@ -11,7 +12,7 @@ import { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError } from "
 
 const getValue = <T>(subscribable: { subscribe: (subscriber: (value: T) => void) => void }): T => {
 	let value: T
-	subscribable.subscribe(v => void (value = v))
+	subscribable.subscribe((v) => void (value = v))
 	return value!
 }
 
@@ -91,7 +92,6 @@ const mockLintRule: LintRule = {
 		description: { en: "Mock lint rule description" },
 		displayName: { en: "Mock Lint Rule" },
 	},
-	defaultLevel: "error",
 	message: () => undefined,
 }
 
@@ -110,33 +110,39 @@ describe("initialization", () => {
 		it("should throw if config file is not found", async () => {
 			const fs = await createMockNodeishFs()
 
-			expect(() => createInlang({
-				configPath: "./test.json",
-				nodeishFs: fs,
-				_import: $import,
-			})).rejects.toThrow(ConfigPathNotFoundError)
+			expect(() =>
+				createInlang({
+					configPath: "./test.json",
+					nodeishFs: fs,
+					_import: $import,
+				}),
+			).rejects.toThrow(ConfigPathNotFoundError)
 		})
 
 		it("should throw if config file is not a valid JSON", async () => {
 			const fs = await createMockNodeishFs()
 			await fs.writeFile("./inlang.config.json", "invalid json")
 
-			expect(() => createInlang({
-				configPath: "./inlang.config.json",
-				nodeishFs: fs,
-				_import: $import,
-			})).rejects.toThrow(ConfigSyntaxError)
+			expect(() =>
+				createInlang({
+					configPath: "./inlang.config.json",
+					nodeishFs: fs,
+					_import: $import,
+				}),
+			).rejects.toThrow(ConfigSyntaxError)
 		})
 
 		it("should throw if config file is does not match schema", async () => {
 			const fs = await createMockNodeishFs()
 			await fs.writeFile("./inlang.config.json", JSON.stringify({}))
 
-			expect(() => createInlang({
-				configPath: "./inlang.config.json",
-				nodeishFs: fs,
-				_import: $import,
-			})).rejects.toThrow(InvalidConfigError)
+			expect(() =>
+				createInlang({
+					configPath: "./inlang.config.json",
+					nodeishFs: fs,
+					_import: $import,
+				}),
+			).rejects.toThrow(InvalidConfigError)
 		})
 
 		it("should return the parsed config", async () => {
@@ -229,6 +235,46 @@ describe("functionality", () => {
 			inlang.setConfig({ ...config, languageTags: ["en", "de", "fr"] })
 			expect(getValue(inlang.config)).toStrictEqual({ ...config, languageTags: ["en", "de", "fr"] })
 			expect(inlang.config().languageTags).toStrictEqual(["en", "de", "fr"])
+		})
+	})
+
+	describe("setConfig", () => {
+		it("should fail if config is not valid", async () => {
+			const fs = await createMockNodeishFs()
+			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			const inlang = await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: $import,
+			})
+
+			const result = inlang.setConfig({} as InlangConfig)
+			expect(result.data).toBeUndefined()
+			expect(result.error).toBeInstanceOf(InvalidConfigError)
+		})
+
+		it("should write config to disk", async () => {
+			const fs = await createMockNodeishFs()
+			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			const inlang = await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: $import,
+			})
+
+			const before = await fs.readFile("./inlang.config.json", { encoding: "utf-8" })
+			expect(before).toBeDefined()
+
+			const result = inlang.setConfig({ ...config, languageTags: [] })
+			expect(result.data).toBeUndefined()
+			expect(result.error).toBeUndefined()
+
+			// TODO: how to wait for fs.writeFile to finish?
+			await new Promise((resolve) => setTimeout(resolve, 0))
+
+			const after = await fs.readFile("./inlang.config.json", { encoding: "utf-8" })
+			expect(after).toBeDefined()
+			expect(after).not.toBe(before)
 		})
 	})
 
@@ -334,4 +380,3 @@ describe("functionality", () => {
 		})
 	})
 })
-

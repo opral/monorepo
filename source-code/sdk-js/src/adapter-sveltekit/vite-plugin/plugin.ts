@@ -2,22 +2,20 @@ import { dedent } from "ts-dedent"
 import type { ViteDevServer, Plugin } from "vite"
 import { assertAppTemplateIsCorrect } from "./checks/appTemplate.js"
 import { assertRoutesFolderPathExists, assertNecessaryFilesArePresent } from "./checks/routes.js"
-import { doesPathExist, initTransformConfig, resetApp, type TransformConfig } from "./inlang-app.js"
+import { initTransformConfig, resetTransformConfig, type TransformConfig } from "./config/index.js"
 import { filePathForOutput, getFileInformation } from "./fileInformation.js"
 import { transformCode } from "../ast-transforms/index.js"
 import { InlangSdkException } from "./exceptions.js"
 import { inspect } from "node:util"
-import { } from "./inlang-app.js"
 import path from 'node:path'
 import { rm } from 'node:fs/promises'
+import { doesPathExist } from './config/utils/utils.js'
 import {
 	createEffect as _createEffect,
 	// @ts-ignore
 } from "solid-js/dist/solid.js"
-import { } from 'solid-js'
 
 const createEffect = _createEffect as typeof import("solid-js")["createEffect"]
-
 
 let viteServer: ViteDevServer | undefined
 
@@ -82,7 +80,7 @@ export const plugin = () => {
 
 			if (hasCreatedANewFile || deletedFolder) {
 				setTimeout(() => {
-					resetApp()
+					resetTransformConfig()
 					viteServer && viteServer.restart()
 				}, 1000) // if the server immediately get's restarted, then you would not be able to kill the process with CTRL + C; It seems that delaying the restart fixes this issue
 			}

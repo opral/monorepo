@@ -7,7 +7,7 @@ import {
 } from "../../ast-transforms/utils/imports.js"
 import { wrapExportedFunction } from "../../ast-transforms/utils/wrap.js"
 import { nodeToCode, codeToNode, codeToSourceFile } from "../../ast-transforms/utils/js.util.js"
-import type { TransformConfig } from "../vite-plugin/inlang-app.js"
+import type { TransformConfig } from "../vite-plugin/config/index.js"
 
 // TODO: test
 const addImports = (

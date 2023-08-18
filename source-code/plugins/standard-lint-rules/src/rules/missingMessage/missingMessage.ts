@@ -26,7 +26,6 @@ been translated yet.
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		},
 	},
-	defaultLevel: "error",
 	message: ({ message: { id, body }, languageTags, sourceLanguageTag, report }) => {
 		const translatedLanguageTags = languageTags.filter(
 			(languageTag) => languageTag !== sourceLanguageTag,

@@ -1,17 +1,17 @@
-import { createSignal, onMount, Show } from "solid-js"
-import { createTiptapEditor, useEditorIsFocused } from "solid-tiptap"
+import { createEffect, createSignal, on, onMount, Show } from "solid-js"
+import { createTiptapEditor, useEditorJSON } from "solid-tiptap"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
 import { showToast } from "#src/components/Toast.jsx"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
+import MaterialSymbolsCheck from "~icons/material-symbols/check"
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
-import { Shortcut } from "./Shortcut.jsx"
+// import { Shortcut } from "./Shortcut.jsx"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { getTextValue, setTipTapMessage } from "../helper/parse.js"
 import { getEditorConfig } from "../helper/editorSetup.js"
 import { FloatingMenu } from "./FloatingMenu.jsx"
-// import { rpc } from "@inlang/rpc"
 import {
 	Message,
 	VariableReference,
@@ -49,27 +49,29 @@ export function PatternEditor(props: {
 
 	let machineLearningWarningDialog: SlDialog | undefined
 
-	// const [isLineItemFocused, setIsLineItemFocused] = createSignal(false)
+	const [isLineItemFocused, setIsLineItemFocused] = createSignal(false)
 
-	// const handleLineItemFocusIn = () => {
-	// 	if (document.activeElement?.tagName !== "SL-BUTTON") {
-	// 		if (document.activeElement !== textArea.children[0]) {
-	// 			setIsLineItemFocused(false)
-	// 		}
-	// 	} else {
-	// 		if (
-	// 			document.activeElement.parentElement?.parentElement?.parentElement?.children[1] === textArea
-	// 		) {
-	// 			setIsLineItemFocused(true)
-	// 		}
-	// 	}
-	// }
+	const handleLineItemFocusIn = () => {
+		if (document.activeElement?.tagName !== "SL-BUTTON") {
+			if (document.activeElement !== textArea.children[0]) {
+				setIsLineItemFocused(false)
+			}
+		} else {
+			if (
+				document.activeElement.parentElement?.parentElement?.parentElement?.children[1] === textArea
+			) {
+				setIsLineItemFocused(true)
+			}
+		}
+	}
 
 	const sourceMessage = () => props.message.body[sourceLanguageTag()!]
 
 	const variant = () => props.message["body"][props.languageTag]
 		? props.message["body"][props.languageTag]![0]
 		: undefined
+
+	const newPattern = () => getTextValue(editor) as Variant["pattern"];
 
 	onMount(() => {
 		if (sourceMessage()) {
@@ -80,60 +82,42 @@ export function PatternEditor(props: {
 			)
 		}
 
-		// document.addEventListener("focusin", handleLineItemFocusIn)
-		// return () => {
-		// 	document.removeEventListener("focusin", handleLineItemFocusIn)
-		// }
+		document.addEventListener("focusin", handleLineItemFocusIn)
+		return () => {
+			document.removeEventListener("focusin", handleLineItemFocusIn)
+		}
 	})
 
 	//create editor
 	let textArea!: HTMLDivElement
 	const editor = createTiptapEditor(() => {
-		// if (
-		// 	localChanges().some(
-		// 		(change) =>
-		// 			change.languageTag.name === props.languageTag && change.newCopy.id.name === props.message.id,
-		// 	)
-		// ) {
-		// 	return getEditorConfig(
-		// 		textArea,
-		// 		localChanges().find(
-		// 			(change) =>
-		// 				change.languageTag.name === props.languageTag && change.newCopy.id.name === props.message.id,
-		// 		)?.newCopy,
-		// 		props.variableReference,
-		// 	)
-		// } else {
 		return getEditorConfig(textArea, variant(), variableReferences())
-		// }
 	})
 
-	// const getEditorFocus = () => {
-	// 	if (editor()) {
-	// 		const isFocus = useEditorIsFocused(() => editor())
-	// 		if (isFocus() && localStorage.isFirstUse) {
-	// 			setLocalStorage("isFirstUse", false)
-	// 		}
-	// 		return isFocus()
-	// 	}
-	// }
+	const currentJSON = useEditorJSON(() => editor());
+
+	createEffect(on(currentJSON, () => {
+		if (currentJSON().content[0].content !== undefined) {
+			setHasChanges((prev) => {
+				const hasChanged = JSON.stringify(variant()?.pattern) !== JSON.stringify(newPattern())
+				if (prev !== hasChanged && hasChanged) {
+					setLocalChanges((prev) => prev += 1)
+				} else if (prev !== hasChanged && !hasChanged) {
+					setLocalChanges((prev) => prev -= 1)
+				}
+				return hasChanged
+			})
+		}
+	}))
 
 	const autoSave = () => {
-		const newPattern = getTextValue(editor) as Variant["pattern"];
-		if (JSON.stringify(variant()?.pattern) === JSON.stringify(newPattern)) {
-			if (hasChanges() && localChanges() > 0) {
-				setLocalChanges((prev) => prev -= 1);
-				setHasChanges(false);
-			}
-			return;
-		}
 		let newMessage;
 		if (variant() === undefined) {
 			newMessage = createVariant(props.message, {
 				where: { languageTag: props.languageTag },
 				data: {
 					match: {},
-					pattern: newPattern,
+					pattern: newPattern(),
 				}
 			})
 		} else {
@@ -142,38 +126,21 @@ export function PatternEditor(props: {
 					languageTag: props.languageTag,
 					selectors: {},
 				},
-				data: newPattern,
+				data: newPattern(),
 			})
 		};
 		if (newMessage.data) {
-			inlang()?.query.messages.upsert({
+			const upsertSuccessful = inlang()?.query.messages.upsert({
 				where: { id: props.message.id },
 				data: newMessage.data,
 			});
-			if (!hasChanges()) {
-				setLocalChanges((prev) => prev += 1);
-				setHasChanges(true);
+			if (!upsertSuccessful) {
+				throw new Error("Cannot update message")
 			}
 		} else {
 			throw new Error("Cannot update message: ", newMessage.error)
 		}
 	}
-
-	/** copy of the variant() to conduct and track changes */
-	// const copy: () => Variant | undefined = () =>
-	// 	variant()
-	// 		? // clone variant()
-	// 		structuredClone(variant())
-	// 		: // new variant()
-	// 		({
-	// 			match: {},
-	// 			pattern: [
-	// 				{
-	// 					type: "Text",
-	// 					value: "",
-	// 				},
-	// 			],
-	// 		} satisfies Variant)
 
 	// const [_isFork] = createResource(
 	// 	() => localStorage.user,
@@ -191,86 +158,6 @@ export function PatternEditor(props: {
 	// 		}
 	// 	}
 	// );
-
-	// const hasChanges = () => {
-	// 	const _updatedText =
-	// 		JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
-	// 	let compare_elements
-	// 	// if (
-	// 	// 	localChanges().some(
-	// 	// 		(change) =>
-	// 	// 			change.languageTag.name === props.languageTag && change.newCopy.id.name === props.message.id,
-	// 	// 	)
-	// 	// ) {
-	// 	// 	compare_elements = localChanges().find(
-	// 	// 		(change) =>
-	// 	// 			change.languageTag.name === props.languageTag && change.newCopy.id.name === props.message.id,
-	// 	// 	)?.newCopy.pattern.elements
-	// 	// } else {
-	// 	compare_elements = variant()?.pattern
-	// 	// }
-	// 	if (_updatedText) {
-	// 		if (JSON.stringify(_updatedText) !== JSON.stringify(compare_elements)) {
-	// 			return _updatedText
-	// 		} else {
-	// 			return ""
-	// 		}
-	// 	} else {
-	// 		return false
-	// 	}
-	// }
-
-	/**
-	 * Saves the changes of the message.
-	 */
-
-	// const handleSave = async () => {
-	// 	const _copy: Variant | undefined = copy()
-	// 	const _textValue =
-	// 		JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
-	// 	if (!_textValue || !_copy) {
-	// 		return
-	// 	}
-	// 	_copy.pattern = _textValue as Array<Text | VariableReference>
-
-	// setLocalChanges((prev: Message[]) => {
-	// 	if (JSON.stringify(copy()?.pattern) === JSON.stringify(_copy.pattern)) {
-	// 		return [
-	// 			...prev.filter(
-	// 				(change) =>
-	// 					!(
-	// 						change.languageTag === resource().languageTag &&
-	// 						change.newCopy.id.name === _copy.id.name
-	// 					),
-	// 			),
-	// 		]
-	// 	} else {
-	// 		return [
-	// 			...prev.filter(
-	// 				(change) =>
-	// 					!(
-	// 						change.languageTag === resource().languageTag &&
-	// 						change.newCopy.id.name === _copy.id.name
-	// 					),
-	// 			),
-	// 			{
-	// 				languageTag: resource().languageTag,
-	// 				newCopy: _copy,
-	// 			},
-	// 		]
-	// 	}
-	// })
-
-	//this is a dirty fix for getting focus back to the editor after save
-	// 	setTimeout(() => {
-	// 		textArea.parentElement?.click()
-	// 	}, 500)
-	// 	telemetryBrowser.capture("EDITOR saved changes", {
-	// 		targetLanguage: props.languageTag,
-	// 		owner: routeParams().owner,
-	// 		repository: routeParams().repository,
-	// 	})
-	// }
 
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
 
@@ -306,28 +193,39 @@ export function PatternEditor(props: {
 			return machineLearningWarningDialog?.show()
 		}
 		setMachineTranslationIsLoading(true)
-		console.warn("needs to be implemented :)")
-		// const translation = await rpc.machineTranslateMessage({
-		// 	message: props.message,
-		// 	sourceLanguageTag: inlang()!.config()!.sourceLanguageTag!,
-		// 	targetLanguageTags: [props.languageTag],
-		// })
-		// if (translation.data === undefined) {
-		// 	showToast({
-		// 		variant: "warning",
-		// 		title: "Machine translation failed.",
-		// 		message: translation.error,
-		// 	})
-		// } else {
-		// 	editor().commands.setContent(setTipTapMessage(
-		// 		getVariant(translation.data!, {
-		// 			where: {
-		// 				languageTag: props.languageTag,
-		// 				selectors: {},
-		// 			},
-		// 		})?.pattern || [],
-		// 	))
-		// }
+		const { rpc } = await import("@inlang/rpc");
+		const translation = await rpc.machineTranslateMessage({
+			message: props.message,
+			sourceLanguageTag: inlang()!.config()!.sourceLanguageTag!,
+			targetLanguageTags: [props.languageTag],
+		})
+		if (translation.error !== undefined) {
+			showToast({
+				variant: "warning",
+				title: "Machine translation failed.",
+				message: translation.error,
+			})
+		}
+		else {
+			const newPattern = getVariant(translation.data, {
+				where: {
+					languageTag: props.languageTag,
+					selectors: {},
+				},
+			})?.pattern || []
+			if (JSON.stringify(newPattern) !== "[]") {
+				editor().commands.setContent(setTipTapMessage(
+					newPattern
+				))
+			} else {
+				showToast({
+					variant: "warning",
+					title: "Machine translation failed.",
+					message: "Empty pattern already exists for this language.",
+				})
+			}
+		}
+
 		setMachineTranslationIsLoading(false)
 	}
 
@@ -343,16 +241,14 @@ export function PatternEditor(props: {
 			}
 		})
 
-		if (//hasChanges() && 
-			localStorage.user === undefined) {
+		if (hasChanges() && localStorage.user === undefined) {
 			notifications.push({
 				notificationTitle: "Access:",
 				notificationDescription: "Sign in to commit changes.",
 				notificationType: "warning",
 			})
 		}
-		if (//hasChanges() && 
-			userIsCollaborator() === false) {
+		if (hasChanges() && userIsCollaborator() === false) {
 			notifications.push({
 				notificationTitle: "Fork:",
 				notificationDescription: "Fork the project to commit changes.",
@@ -370,7 +266,11 @@ export function PatternEditor(props: {
 	// 		userIsCollaborator()
 	// 	) {
 	// 		event.preventDefault()
-	// 		handleSave()
+	// 		showToast({
+	// 			variant: "info",
+	// 			title: "Inlang saved changes."
+	// 		})
+	// 		// handleSave()
 	// 	}
 	// }
 
@@ -381,7 +281,8 @@ export function PatternEditor(props: {
 			onClick={() => {
 				editor().chain().focus()
 			}}
-			// onFocusIn={() => setIsLineItemFocused(true)}
+			onFocusIn={() => setIsLineItemFocused(true)}
+			onFocusOut={() => { autoSave() }}
 			class="flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border first:mt-0 -mt-[1px] border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus-within:relative focus-within:border-primary focus-within:ring-[3px] focus-within:ring-hover-primary/50"
 		>
 			<div class="flex justify-start items-start gap-2 py-[5px]">
@@ -417,7 +318,6 @@ export function PatternEditor(props: {
 							repository: routeParams().repository,
 						})
 					}}
-					onFocusOut={autoSave}
 				/>
 			</div>
 
@@ -431,7 +331,6 @@ export function PatternEditor(props: {
 					>
 						<sl-button
 							onClick={handleMachineTranslate}
-							// prop:disabled={true}
 							// prop:disabled={
 							// 	(textValue() !== undefined && textValue() !== "") ||
 							// 	props.referenceMessage === undefined
@@ -445,9 +344,10 @@ export function PatternEditor(props: {
 							Machine translate
 						</sl-button>
 					</Show>
-					{/* <Show when={
+					<Show when={
 						hasChanges() &&
-						isLineItemFocused()}>
+						isLineItemFocused()
+					}>
 						<sl-button
 							prop:variant="primary"
 							prop:size="small"
@@ -458,20 +358,17 @@ export function PatternEditor(props: {
 								editor().commands.setContent(setTipTapMessage(
 									variant()?.pattern || []
 								))
-								autoSave()
+								textArea.parentElement?.click()
 							}}
 						>
-							<Shortcut slot="suffix" color="primary" codes={["ControlLeft", "s"]} />
+							{/* <Shortcut slot="suffix" color="primary" codes={["ControlLeft", "s"]} /> */}
 							Revert
 						</sl-button>
-					</Show> */}
+					</Show>
 				</div >
-				{/* <Show when={!getEditorFocus()
-					&& !isLineItemFocused()
-					&& hasChanges()
-				}>
-					<div class="bg-hover-primary w-2 h-2 rounded-full" />
-				</Show> */}
+				<Show when={!isLineItemFocused() && hasChanges()}>
+					<MaterialSymbolsCheck class="text-hover-primary w-6 h-6 mr-1" />
+				</Show>
 				{getNotificationHints().length !== 0 && (
 					<NotificationHint notifications={getNotificationHints()} />
 				)}

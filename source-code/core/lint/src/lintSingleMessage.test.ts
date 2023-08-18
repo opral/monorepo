@@ -11,7 +11,6 @@ const lintRule1 = {
 		description: { en: "" },
 	},
 	type: "MessageLint",
-	defaultLevel: "error",
 	message: vi.fn(),
 } satisfies MessageLintRule
 
@@ -21,7 +20,6 @@ const lintRule2 = {
 		displayName: { en: "" },
 		description: { en: "" },
 	},
-	defaultLevel: "warning",
 	type: "MessageLint",
 	message: vi.fn(),
 } satisfies MessageLintRule
@@ -35,14 +33,14 @@ describe("lintSingleMessage", async () => {
 		vi.resetAllMocks()
 	})
 
-	describe("resolve rules and options", async () => {
+	describe("resolve rules and settings", async () => {
 		test("it should not run disabled lintrules", async () => {
 			await lintSingleMessage({
 				config: {
-					settings: { "system.lintRuleLevels": { [lintRule1.meta.id]: "off" } } as Partial<
+					settings: { "system.lint.ruleLevels": { [lintRule1.meta.id]: "off" } } satisfies Partial<
 						InlangConfig["settings"]
 					>,
-				} as InlangConfig,
+				} as unknown as InlangConfig,
 				query: {} as MessageQueryApi,
 				messages,
 				message: message1,
@@ -53,7 +51,7 @@ describe("lintSingleMessage", async () => {
 			expect(lintRule2.message).toHaveBeenCalledOnce()
 		})
 
-		test("it should set the default lint level", async () => {
+		test("it should set the default lint level to warning if not defined in system.lint.ruleLevels", async () => {
 			lintRule1.message.mockImplementation(({ report }) => report({} as MessageLintReport))
 
 			const reports = await lintSingleMessage({
@@ -64,7 +62,7 @@ describe("lintSingleMessage", async () => {
 				rules: [lintRule1],
 			})
 
-			expect(reports.data[0]!.level).toBe("error")
+			expect(reports.data[0]?.level).toBe("warning")
 		})
 
 		test("it should override the default lint level", async () => {
@@ -72,7 +70,7 @@ describe("lintSingleMessage", async () => {
 
 			const reports = await lintSingleMessage({
 				config: {
-					settings: { "system.lintRuleLevels": { [lintRule1.meta.id]: "warning" } } as Partial<
+					settings: { "system.lintRuleLevels": { [lintRule1.meta.id]: "error" } } as Partial<
 						InlangConfig["settings"]
 					>,
 				} as InlangConfig,
@@ -81,7 +79,7 @@ describe("lintSingleMessage", async () => {
 				message: message1,
 				rules: [lintRule1],
 			})
-			expect(reports.data[0]!.level).toBe("warning")
+			expect(reports.data[0]?.level).toBe("error")
 		})
 
 		test.only("it should pass the correct settings", async () => {

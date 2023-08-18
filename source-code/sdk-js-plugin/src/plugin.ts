@@ -1,5 +1,5 @@
 import { type SdkConfigInput, validateSdkConfig } from "./api.js"
-import { Plugin } from "@inlang/plugin"
+import type { Plugin } from "@inlang/plugin"
 import { ideExtensionDefaultConfig } from "./ideExtension/config.js"
 
 // ------------------------------------------------------------------------------------------------

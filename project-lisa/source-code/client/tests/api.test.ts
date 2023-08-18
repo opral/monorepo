@@ -29,32 +29,37 @@ describe("main workflow", () => {
 	it("can commit local modifications to the repo", async () => {
 		const statusPre = await repository.status({ filepath: "inlang.config.js" })
 
-		expect(statusPre).toBe('*modified')
+		expect(statusPre).toBe("*modified")
 
-		await repository.add({ filepath:"inlang.config.js" })
-		await repository.commit({ author: { name: "tests", email: "test@inlang.dev" }, message: "test changes commit" })
+		await repository.add({ filepath: "inlang.config.js" })
+		await repository.commit({
+			author: { name: "tests", email: "test@inlang.dev" },
+			message: "test changes commit",
+		})
 
 		const statusPost = await repository.status({ filepath: "inlang.config.js" })
 
-		expect(statusPost).toBe('unmodified')
+		expect(statusPost).toBe("unmodified")
 	})
 
 	it("exposes proper origin", async () => {
 		const gitOrigin = await repository.getOrigin()
-		expect(gitOrigin).toBe('github.com/inlang/example.git')
+		expect(gitOrigin).toBe("github.com/inlang/example.git")
 	})
 
 	it("exposes current branch", async () => {
 		const branch = await repository.getCurrentBranch()
-		expect(branch).toBe('main')
+		expect(branch).toBe("main")
 	})
 
 	it("exposes remotes", async () => {
 		const remotes = await repository.listRemotes()
-		expect(remotes).toEqual([{
-		  "remote": "origin",
-		  "url": "https://github.com/inlang/example",
-		}])
+		expect(remotes).toEqual([
+			{
+				remote: "origin",
+				url: "https://github.com/inlang/example",
+			},
+		])
 	})
 
 	it("exposes log", async () => {
@@ -63,22 +68,22 @@ describe("main workflow", () => {
 
 		// TODO: migrate to exact object validation when we have the git proxy and can test local frozen repos
 		expect(log.length).toBe(1)
-		expect(log[0].oid).toBeTypeOf('string')
-		expect(log[0].commit.message).toBeTypeOf('string')
+		expect(log[0].oid).toBeTypeOf("string")
+		expect(log[0].commit.message).toBeTypeOf("string")
 	})
 
 	it.todo("returns collaborator information", async () => {
 		// currently would only test 1:1 the github api, enable this when we have lisa server auth
-		const isCollaborator1 = await repository.isCollaborator({ username: 'IamnotACollaborator' })
+		const isCollaborator1 = await repository.isCollaborator({ username: "IamnotACollaborator" })
 		expect(isCollaborator1).toBe(false)
 
-		const isCollaborator2 = await repository.isCollaborator({ username: 'lucidNTR' })
+		const isCollaborator2 = await repository.isCollaborator({ username: "lucidNTR" })
 		expect(isCollaborator2).toBe(true)
 	})
 
 	it.todo("exposes metadata for repo", async () => {
 		const metadata = await repository.getMeta()
-		expect(metadata).toBe('main')
+		expect(metadata).toBe("main")
 	})
 
 	it.todo("allows pushing back to git origin", async () => {

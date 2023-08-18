@@ -10,7 +10,6 @@ const lintRule1 = {
 		displayName: { en: "" },
 		description: { en: "" },
 	},
-	defaultLevel: "error",
 	type: "MessageLint",
 	message: vi.fn(),
 } satisfies MessageLintRule
@@ -21,7 +20,6 @@ const lintRule2 = {
 		displayName: { en: "" },
 		description: { en: "" },
 	},
-	defaultLevel: "warning",
 	type: "MessageLint",
 	message: vi.fn(),
 } satisfies MessageLintRule
