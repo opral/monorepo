@@ -1,7 +1,7 @@
 /**
  * A chip that displays a short text. Color should be a valid HEX color.
  */
-export function Chip(props: { text: string; color: string; customClasses?: string }) {
+export function Chip(props: { text: string | undefined; color: string; customClasses?: string }) {
 	return (
 		<div
 			style={{

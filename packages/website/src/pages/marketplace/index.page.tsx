@@ -44,7 +44,7 @@ export function Page() {
 			<Layout>
 				<div class="py-16 md:py-20 min-h-screen relative">
 					<div class="grid xl:grid-cols-3 pb-8">
-						<h1 class="xl:col-span-2 text-[40px] md:text-5xl font-bold text-left">
+						<h1 class="xl:col-span-2 text-[40px] md:text-5xl font-bold text-left leading-tight">
 							Explore the marketplace
 						</h1>
 					</div>
@@ -56,13 +56,15 @@ export function Page() {
 						/>
 						<div class="flex justify-between items-center">
 							<Tags tags={tags} setTags={setTags} />
-							<Button type="text" href="/documentation">
-								Build your own
-							</Button>
+							<div class="max-sm:hidden">
+								<Button type="text" href="/documentation">
+									Build your own
+								</Button>
+							</div>
 						</div>
 					</div>
 					<div class="grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-center items-stretch py-8 mb-8">
-						<Gallery tags={tags()} />
+						<Gallery tags={tags} textValue={textValue} />
 					</div>
 					<GetHelp />
 				</div>
@@ -71,62 +73,85 @@ export function Page() {
 	)
 }
 
-const Gallery = ({ tags }: { tags: Record<string, any>[] }) => {
+const Gallery = ({
+	tags,
+	textValue,
+}: {
+	tags: Accessor<Record<string, any>[]>
+	textValue: Accessor<string>
+}) => {
 	return (
 		<>
 			<For each={items}>
 				{(item) => {
 					return (
-						<a
-							href={item.marketplace.linkToReadme.en}
-							target="_blanc"
-							class="relative no-underline"
+						<Show
+							when={
+								/* filter by tags */
+								tags().find(
+									(tag) => tag.activated && tag.name === item.id.split(".")[1]?.toLowerCase(),
+								) &&
+								/* filter by search */
+								(item.displayName.en?.toLowerCase().includes(textValue().toLowerCase()) ||
+									item.marketplace.publisherName
+										.toLowerCase()
+										.includes(textValue().toLowerCase()) ||
+									item.marketplace.keywords.some((keyword: string) =>
+										keyword.toLowerCase().includes(textValue().toLowerCase()),
+									) ||
+									item.id.split(".")[1]?.toLowerCase().includes(textValue().toLowerCase()))
+							}
 						>
-							<div class="flex flex-col relative justify-between gap-4 bg-surface-100 h-full hover:bg-surface-200 p-6 rounded-xl border border-surface-2 cursor-pointer">
-								<div class="flex flex-col gap-4">
-									<div class="flex items-center gap-4">
-										<img class="w-10 h-10 rounded-md m-0 shadow-lg" src={item.marketplace.icon} />
-										<p class="m-0 text-surface-900 font-semibold text-md">{item.displayName.en}</p>
-									</div>
-									<p class="m-0 font-normal leading-6 text-sm tracking-wide text-surface-500 line-clamp-3">
-										{item.description.en}
-									</p>
-								</div>
-								<Show when={item.marketplace.publisherName && item.marketplace.publisherIcon}>
-									<div class="flex gap-2 items-center pt-6">
-										<img class="w-6 h-6 rounded-full m-0" src={item.marketplace.publisherIcon} />
-										<p class="m-0 text-surface-600 no-underline hover:text-surface-900 font-medium">
-											{item.marketplace.publisherName}
+							<a
+								href={item.marketplace.linkToReadme.en}
+								target="_blanc"
+								class="relative no-underline h-64"
+							>
+								<div class="flex flex-col relative justify-between gap-4 bg-surface-100 h-full hover:bg-surface-200 p-6 rounded-xl border border-surface-2 cursor-pointer">
+									<div class="flex flex-col gap-4">
+										<div class="flex items-center gap-4">
+											<img class="w-10 h-10 rounded-md m-0 shadow-lg" src={item.marketplace.icon} />
+											<p class="m-0 text-surface-900 font-semibold text-md">
+												{item.displayName.en}
+											</p>
+										</div>
+										<p class="m-0 font-normal leading-6 text-sm tracking-wide text-surface-500 line-clamp-3">
+											{item.description.en}
 										</p>
 									</div>
-								</Show>
-								<Chip
-									text={
-										item.id.split(".")[1].toLowerCase() === "lintrule"
-											? "lint rule"
-											: item.id.split(".")[1].toLowerCase()
-									}
-									color={
-										item.id.split(".")[1].toLowerCase() === "app"
-											? "#BF7CE4"
-											: item.id.split(".")[1].toLowerCase() === "plugin"
-											? "#BF7CE4"
-											: "#06B6D4"
-									}
-									customClasses="absolute top-4"
-								/>
-							</div>
-						</a>
+									<Show when={item.marketplace.publisherName && item.marketplace.publisherIcon}>
+										<div class="flex gap-2 items-center pt-6">
+											<img class="w-6 h-6 rounded-full m-0" src={item.marketplace.publisherIcon} />
+											<p class="m-0 text-surface-600 no-underline hover:text-surface-900 font-medium">
+												{item.marketplace.publisherName}
+											</p>
+										</div>
+									</Show>
+									<Chip
+										text={
+											item.id.split(".")[1]?.toLowerCase() === "lintrule"
+												? "lint rule"
+												: item.id.split(".")[1]?.toLowerCase()
+										}
+										color={
+											item.id.split(".")[1]?.toLowerCase() === "app"
+												? "#BF7CE4"
+												: item.id.split(".")[1]?.toLowerCase() === "plugin"
+												? "#BF7CE4"
+												: "#06B6D4"
+										}
+										customClasses="absolute top-4 z-5 backdrop-filter backdrop-blur-lg"
+									/>
+								</div>
+							</a>
+						</Show>
 					)
 				}}
 			</For>
-			{/* position it in center */}
 			<a href="/documentation" target="" class="relative no-underline xl:col-start-2">
-				<div class="flex flex-col h-56 relative justify-center items-center gap-4 bg-surface-100 max-h-full hover:bg-surface-200 p-6 rounded-xl border border-surface-2 cursor-pointer">
+				<div class="flex flex-col h-64 text-surface-500 relative justify-center items-center gap-4 bg-surface-100 max-h-full hover:bg-surface-200 p-6 rounded-xl border border-surface-2 cursor-pointer">
 					<Plus class="text-4xl" />
-					<p class="m-0 font-normal leading-6 text-sm tracking-wide text-surface-500 line-clamp-3">
-						Build your own
-					</p>
+					<p class="m-0 font-normal leading-6 text-sm tracking-wide line-clamp-3">Build your own</p>
 				</div>
 			</a>
 		</>
