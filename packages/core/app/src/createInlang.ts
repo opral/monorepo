@@ -190,7 +190,7 @@ export const createInlang = async (args: {
 			debouncedSave = debounce(500, async (newMessages) => {
 				// console.log('saving changes to messages')
 				try {
-					await resolvedModules()?.data.plugins.data.saveMessages({ messages: newMessages})
+					await resolvedModules()!.data.plugins.data.saveMessages({ messages: newMessages})
 				} catch (err) {
 					throw new PluginSaveError("Error in saving messages", {
 						cause: err,
