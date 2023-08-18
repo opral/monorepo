@@ -1,6 +1,6 @@
 export type {
 	Plugin,
-	ResolvedPlugins,
+	RuntimePluginApi,
 	ResolvePluginsFunction,
 	NodeishFilesystemSubset,
 } from "./api.js"
@@ -22,7 +22,7 @@ export {
  * See https://github.com/inlang/inlang/issues/1184
  */
 
-export * from "@inlang/config"
 export * from "@inlang/language-tag"
 export * from "@inlang/messages"
 export * from "@inlang/result"
+export * from "@inlang/json-serializable"

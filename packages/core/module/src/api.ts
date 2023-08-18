@@ -1,7 +1,12 @@
 import type { InlangConfig } from "@inlang/config"
-import type { LintRule } from "@inlang/lint"
-import type { NodeishFilesystemSubset, Plugin, ResolvePluginsFunction } from "@inlang/plugin"
-import type { ModuleError, ModuleImportError } from "./errors.js"
+import type { LintRule, resolveLintRules } from "@inlang/lint"
+import type {
+	NodeishFilesystemSubset,
+	Plugin,
+	ResolvePluginsFunction,
+	RuntimePluginApi,
+} from "@inlang/plugin"
+import type { ModuleHasNoExportsError, ModuleImportError } from "./errors.js"
 import type { ImportFunction } from "./import.js"
 
 /**
@@ -36,19 +41,61 @@ export type ResolveModulesFunction = (args: {
 	nodeishFs: NodeishFilesystemSubset
 	_import?: ImportFunction
 }) => Promise<{
-	data: {
-		meta: {
-			plugins: Array<Plugin["meta"] & { module: string }>
-			lintRules: Array<LintRule["meta"] & { module: string }>
-		}
-		plugins: {
-			data: Awaited<ReturnType<ResolvePluginsFunction>>["data"]
-			errors: Awaited<ReturnType<ResolvePluginsFunction>>["errors"]
-		}
-		lintRules: {
-			data: Array<LintRule>
-			errors: Array<Error>
-		}
-	}
-	errors: Array<ModuleError | ModuleImportError>
+	/**
+	 * Metadata about the resolved modules.
+	 *
+	 * @example
+	 * [{
+	 * 	  module: "https://myplugin.com/index.js",
+	 * 	  plugins: ["samuel.plugin.json", "inlang.plugin.yaml"],
+	 * 	  lintRules: ["samuel.lintRule.missingPattern", "inlang.lintRule.missingDescription"],
+	 * }]
+	 */
+	meta: Array<{
+		/**
+		 * The module link.
+		 *
+		 * @example "https://myplugin.com/index.js"
+		 */
+		module: string
+		/**
+		 * The resolved plugin ids of the module.
+		 *
+		 * @example ["samuel.plugin.json", "inlang.plugin.yaml"]
+		 */
+		plugins: Array<Plugin["meta"]["id"]>
+		/**
+		 * The resolved lint rule ids of the module.
+		 *
+		 * @example ["samuel.lintRule.missingPattern", "inlang.lintRule.missingDescription"]
+		 */
+		lintRules: Array<LintRule["meta"]["id"]>
+	}>
+	/**
+	 * The resolved plugins.
+	 */
+	plugins: Array<Plugin>
+	/**
+	 * The resolved lint rules.
+	 */
+	lintRules: Array<LintRule>
+	/**
+	 * The resolved runtime api provided by plugins.
+	 */
+	runtimePluginApi: RuntimePluginApi
+	/**
+	 * Errors during the resolution process.
+	 *
+	 * This includes errors from:
+	 * - importing modules
+	 * - resolving plugins
+	 * - resolving lint rules
+	 * - resolving the runtime plugin api
+	 */
+	errors: Array<
+		| ModuleHasNoExportsError
+		| ModuleImportError
+		| Awaited<ReturnType<ResolvePluginsFunction>>["errors"][number]
+		| Awaited<ReturnType<typeof resolveLintRules>>["errors"][number]
+	>
 }>

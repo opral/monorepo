@@ -1,5 +1,5 @@
 import type { InlangModule, ResolveModulesFunction } from "./api.js"
-import { ModuleError, ModuleImportError } from "./errors.js"
+import { ModuleError, ModuleImportError, ModuleHasNoExportsError } from "./errors.js"
 import { tryCatch } from "@inlang/result"
 import { LintRule, resolveLintRules } from "@inlang/lint"
 import { resolvePlugins, type Plugin } from "@inlang/plugin"
@@ -12,10 +12,7 @@ export const resolveModules: ResolveModulesFunction = async (args) => {
 	let allPlugins: Array<Plugin> = []
 	let allLintRules: Array<LintRule> = []
 
-	const meta: Awaited<ReturnType<ResolveModulesFunction>>["data"]["meta"] = {
-		plugins: [],
-		lintRules: [],
-	}
+	const meta: Awaited<ReturnType<ResolveModulesFunction>>["meta"] = []
 
 	for (const module of args.config.modules) {
 		/**
@@ -38,23 +35,27 @@ export const resolveModules: ResolveModulesFunction = async (args) => {
 		// -- MODULE DOES NOT EXPORT PLUGINS OR LINT RULES --
 		if (!importedModule.data?.default?.plugins && !importedModule.data?.default?.lintRules) {
 			moduleErrors.push(
-				new ModuleError(`Module "${module}" does not export any plugins or lintRules.`, {
-					module,
-				}),
+				new ModuleHasNoExportsError(
+					`Module "${module}" does not export any plugins or lintRules.`,
+					{
+						module,
+					},
+				),
 			)
 			continue
 		}
 
-		for (const plugin of importedModule.data.default?.plugins ?? []) {
-			meta.plugins = [...meta.plugins, { ...plugin.meta, module }]
-		}
+		const plugins = importedModule.data.default.plugins ?? []
+		const lintRules = importedModule.data.default.lintRules ?? []
 
-		for (const lintRule of importedModule.data.default?.lintRules ?? []) {
-			meta.lintRules = [...meta.lintRules, { ...lintRule.meta, module }]
-		}
+		meta.push({
+			module,
+			plugins: plugins.map((plugin) => plugin.meta.id) ?? [],
+			lintRules: lintRules.map((lintRule) => lintRule.meta.id) ?? [],
+		})
 
-		allPlugins = [...allPlugins, ...(importedModule.data.default.plugins ?? [])]
-		allLintRules = [...allLintRules, ...(importedModule.data.default.lintRules ?? [])]
+		allPlugins = [...allPlugins, ...plugins]
+		allLintRules = [...allLintRules, ...lintRules]
 	}
 
 	const resolvedPlugins = resolvePlugins({
@@ -64,12 +65,12 @@ export const resolveModules: ResolveModulesFunction = async (args) => {
 	})
 
 	const resolvedLintRules = resolveLintRules({ lintRules: allLintRules })
+
 	return {
-		data: {
-			meta,
-			plugins: resolvedPlugins,
-			lintRules: resolvedLintRules,
-		},
-		errors: moduleErrors,
+		meta,
+		lintRules: allLintRules,
+		plugins: allPlugins,
+		runtimePluginApi: resolvedPlugins.data,
+		errors: [...moduleErrors, ...resolvedLintRules.errors, ...resolvedPlugins.errors],
 	}
 }
