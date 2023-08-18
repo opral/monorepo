@@ -113,7 +113,6 @@ export const Gitfloat = () => {
 			setLastPush,
 			setLastPullTime,
 		})
-		setLocalChanges(0)
 		setIsLoading(false)
 		telemetryBrowser.capture("EDITOR pushed changes", {
 			owner: routeParams().owner,
@@ -127,6 +126,7 @@ export const Gitfloat = () => {
 				variant: "danger",
 			})
 		} else {
+			setLocalChanges(0)
 			setHasPushedChanges(true)
 			return showToast({
 				title: "Changes have been pushed",
