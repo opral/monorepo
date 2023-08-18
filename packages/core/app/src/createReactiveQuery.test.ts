@@ -8,7 +8,7 @@ import { queryBaseTests } from '../../../../node_modules/@inlang/messages/dist/q
 
 const createChangeListener = async (cb: () => void) => createEffect(cb)
 
-// TODO: create util function
+// TODO: create global util function
 export const createMessage = (id: string, patterns: Record<string, Pattern | string>): Message => ({
 	id,
 	selectors: [],

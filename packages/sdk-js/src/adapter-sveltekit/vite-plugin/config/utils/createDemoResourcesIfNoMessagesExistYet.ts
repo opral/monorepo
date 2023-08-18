@@ -1,29 +1,14 @@
 import type { InlangInstance } from '@inlang/app';
+import { createMessage } from '../../../../test.util.js';
 
 export const createDemoResourcesIfNoMessagesExistYet = async (inlang: InlangInstance) => {
-	// const resourcesFolder = path.resolve(cwdFolderPath, "languageTags")
+	const messages = inlang.query.messages.getAll()
+	if (messages.length) return
 
-	// if (!(await doesPathExist(resourcesFolder))) {
-	// 	await mkdir(path.resolve(resourcesFolder))
-	// }
-
-	// await writeFile(
-	// 	path.resolve(resourcesFolder, "en.json"),
-	// 	dedent`
-	// 	{
-	// 	  "welcome": "Welcome to inlang"
-	// 	}
-	// `,
-	// 	{ encoding: "utf-8" },
-	// )
-
-	// await writeFile(
-	// 	path.resolve(resourcesFolder, "de.json"),
-	// 	dedent`
-	// 	{
-	// 	  "welcome": "Willkommen bei inlang"
-	// 	}
-	// `,
-	// 	{ encoding: "utf-8" },
-	// )
+	inlang.query.messages.create({
+		data: createMessage('welcome', {
+			en: 'Welcome to inlang',
+			de: 'Willkommen bei inlang',
+		}),
+	})
 }
