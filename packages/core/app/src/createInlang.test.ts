@@ -21,7 +21,7 @@ const config: InlangConfig = {
 	languageTags: ["en"],
 	modules: ["./dist/index.js"],
 	settings: {
-		"system.lintRuleLevels": {
+		"project.lintRuleLevels": {
 			"inlang.lintRule.missingMessage": "error",
 		},
 		"inlang.plugin.i18next": {
@@ -310,7 +310,7 @@ describe("functionality", () => {
 					languageTags: ["en"],
 					modules: ["./dist/index.js"],
 					settings: {
-						"system.lintRuleLevels": {},
+						"project.lintRuleLevels": {},
 					},
 				} satisfies InlangConfig),
 			)
