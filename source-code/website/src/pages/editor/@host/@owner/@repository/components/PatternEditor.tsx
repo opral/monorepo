@@ -259,6 +259,7 @@ export function PatternEditor(props: {
 		return notifications
 	}
 
+	let timer: ReturnType<typeof setTimeout>;
 	const handleShortcut = (event: KeyboardEvent) => {
 		// @ts-ignore
 		const platform = navigator?.userAgentData?.platform || navigator?.platform
@@ -268,10 +269,13 @@ export function PatternEditor(props: {
 			userIsCollaborator()
 		) {
 			event.preventDefault()
-			showToast({
-				variant: "info",
-				title: "Inlang saves automatically but make shure to push your changes."
-			})
+			clearTimeout(timer);
+			timer = setTimeout(() => {
+				showToast({
+					variant: "info",
+					title: "Inlang saves automatically but make shure to push your changes."
+				})
+			}, 500);
 		}
 	}
 
