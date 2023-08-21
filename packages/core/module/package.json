@@ -30,6 +30,7 @@
 		"node": ">=18.0.0"
 	},
 	"dependencies": {
+		"@inlang/config": "*",
 		"@inlang-git/fs": "*",
 		"@esbuild-plugins/node-modules-polyfill": "^0.2.2",
 		"@inlang/lint": "*",
