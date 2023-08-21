@@ -10,7 +10,13 @@ import {
 } from "@inlang/plugin"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
-import { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError, PluginLoadMessagesError, PluginSaveMessagesError } from "./errors.js"
+import {
+	ConfigPathNotFoundError,
+	ConfigSyntaxError,
+	InvalidConfigError,
+	PluginLoadMessagesError,
+	PluginSaveMessagesError,
+} from "./errors.js"
 import { LintRuleThrowedError, LintReport, lintMessages } from "@inlang/lint"
 import { createRoot, createSignal, createEffect } from "./solid.js"
 import { createReactiveQuery } from "./createReactiveQuery.js"
@@ -79,8 +85,13 @@ export const createInlang = async (args: {
 					if (resolvedModules.errors.length) {
 						throw new Error(resolvedModules.errors as any)
 					}
-					if (!resolvedModules.runtimePluginApi.loadMessages || !resolvedModules.runtimePluginApi.saveMessages) {
-						throw new Error("It seems you did not install any plugin that handles messages. Please add one to make inlang work.") // TODO: add link to docs
+					if (
+						!resolvedModules.runtimePluginApi.loadMessages ||
+						!resolvedModules.runtimePluginApi.saveMessages
+					) {
+						throw new Error(
+							"It seems you did not install any plugin that handles messages. Please add one to make inlang work.",
+						) // TODO: add link to docs
 					}
 
 					setResolvedModules(resolvedModules)
@@ -193,16 +204,22 @@ export const createInlang = async (args: {
 
 		const query = createReactiveQuery(() => messages()!)
 
-		const debouncedSave = skipFirst(debounce(500, async (newMessages) => {
-				// console.log('saving changes to messages')
-				try {
-					await resolvedModules()!.data.plugins.data.saveMessages({ messages: newMessages})
-				} catch (err) {
-					throw new PluginSaveMessagesError("Error in saving messages", {
-						cause: err,
-					})
-				}
-			}, { atBegin: false }))
+		const debouncedSave = skipFirst(
+			debounce(
+				500,
+				async (newMessages) => {
+					// console.log('saving changes to messages')
+					try {
+						await resolvedModules()!.runtimePluginApi.saveMessages({ messages: newMessages })
+					} catch (err) {
+						throw new PluginSaveMessagesError("Error in saving messages", {
+							cause: err,
+						})
+					}
+				},
+				{ atBegin: false },
+			),
+		)
 
 		createEffect(() => {
 			debouncedSave(query.getAll())
@@ -328,7 +345,7 @@ type MaybePromise<T> = T | Promise<T>
 const makeTrulyAsync = <T>(fn: MaybePromise<T>): Promise<T> => (async () => fn)()
 
 // Skip initial call, eg. to skip setup of a createEffect
-function skipFirst (func: (args: any) => any) {
+function skipFirst(func: (args: any) => any) {
 	let initial = false
 	return function (...args: any) {
 		if (initial) {

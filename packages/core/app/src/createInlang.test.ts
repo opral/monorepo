@@ -656,31 +656,27 @@ describe("functionality", () => {
 								},
 							],
 						},
+						{
+							languageTag: "en",
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "a en",
+								},
+							],
+						},
+						{
+							languageTag: "de",
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "a de",
+								},
+							],
+						},
 					],
-					body: {
-						en: [
-							{
-								match: {},
-								pattern: [
-									{
-										type: "Text",
-										value: "a en",
-									},
-								],
-							},
-						],
-						de: [
-							{
-								match: {},
-								pattern: [
-									{
-										type: "Text",
-										value: "a de",
-									},
-								],
-							},
-						],
-					},
 				},
 				{
 					id: "b",
@@ -696,31 +692,27 @@ describe("functionality", () => {
 								},
 							],
 						},
+						{
+							languageTag: "en",
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "b en",
+								},
+							],
+						},
+						{
+							languageTag: "de",
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "b de",
+								},
+							],
+						},
 					],
-					body: {
-						en: [
-							{
-								match: {},
-								pattern: [
-									{
-										type: "Text",
-										value: "b en",
-									},
-								],
-							},
-						],
-						de: [
-							{
-								match: {},
-								pattern: [
-									{
-										type: "Text",
-										value: "b de",
-									},
-								],
-							},
-						],
-					},
 				},
 			])
 		})
