@@ -6,37 +6,11 @@ inlang's Marketplace provides you with apps, plugins and lint rules for your nex
 
 If you have created a plugin or lint rule, you can publish it to the Marketplace in three easy steps:
 
-### 1️⃣ Add the necessary meta information to your `plugin or lint-rule file`
+### 1️⃣ Add the necessary `marketplace` property to your plugin or lint-rule.
 
-The marketplace needs some more information than necessary for the plugin to work.
+### 2️⃣ Add the link to your `plugin` or `lint-rule` module to the registry
 
-How your meta information should look like can be seen in the following example:
-
-```ts
-meta: {
-        // ...
-		marketplace: {
-			icon: "https://link-to-your-icon.com/icon.png",
-			linkToReadme: {
-				en: "https://link-to-your-readme.com/en",
-			},
-			keywords: ["keywords", "for", "your", "plugin"],
-			publisherName: "@your-username",
-			publisherIcon: "https://link-to-your-icon.com/icon.png",
-		},
-	},
-```
-
-### 2️⃣ Add the link to your `plugin or lint-rule file` to the registry.json array under `modules``
-
-```json
-{
-	"modules": [
-		// ...
-		"https://link-to-your-plugin-or-lint-rule.com/plugin-or-lint-rule.js"
-	]
-}
-```
+Add your module to [this file](https://github.com/inlang/inlang/blob/main/source-code/marketplace/registry.json) via a PR.
 
 ### 3️⃣ Create a pull request and wait for approval
 

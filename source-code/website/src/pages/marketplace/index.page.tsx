@@ -14,20 +14,18 @@ export function Page() {
 	const [tags, setTags] = createSignal<Record<string, any>[]>([])
 	const [results, setResults] = createSignal<number>(0)
 
-	createEffect(() => {
-		items.forEach((item: any) => {
-			setTags((tags) => {
-				const newTags = [...tags]
-				const tagId = item.id.split(".")[1].toLowerCase()
+	items.forEach((item: any) => {
+		setTags((tags) => {
+			const newTags = [...tags]
+			const tagId = item.id.split(".")[1].toLowerCase()
 
-				const tagIndex = newTags.findIndex((tag) => tag.name === tagId)
+			const tagIndex = newTags.findIndex((tag) => tag.name === tagId)
 
-				if (tagIndex === -1) {
-					newTags.push({ name: tagId, activated: true })
-				}
+			if (tagIndex === -1) {
+				newTags.push({ name: tagId, activated: true })
+			}
 
-				return newTags
-			})
+			return newTags
 		})
 	})
 

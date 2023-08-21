@@ -16,14 +16,20 @@ import fs from "node:fs/promises"
 async function main() {
 	const registry = JSON.parse(await fs.readFile("./registry.json", "utf-8"))
 
-	for (let module of registry.modules) {
-		if (module.includes("@latest") || !module.includes("jsdelivr")) continue
-		registry.modules[registry.modules.indexOf(module)] = getLatestVersion(module)
+	const items = []
+
+	if (registry.modules) {
+		for (let module of registry.modules) {
+			if (module.includes("@latest") || !module.includes("jsdelivr")) continue
+			registry.modules[registry.modules.indexOf(module)] = getLatestVersion(module)
+		}
+
+		const moduleItems = await getMetaData(registry.modules)
+
+		items.push(...moduleItems, ...registry.apps)
+	} else {
+		items.push(...registry.apps)
 	}
-
-	const moduleItems = await getMetaData(registry.modules)
-
-	const items = [...registry.apps, ...moduleItems]
 
 	await fs.writeFile(
 		"./src/registry.ts",
@@ -76,8 +82,9 @@ async function getMetaData(modules) {
 				!item.meta.marketplace.icon ||
 				!item.meta.marketplace.linkToReadme
 			) {
-				console.warn(`Module ${item.meta.id} has no marketplace metadata.`)
-				continue
+				throw new Error(
+					`Module ${item.meta.id} has no marketplace metadata. Remove it from the registry.`,
+				)
 			}
 			data.default[type].length > 1
 				? meta.push({

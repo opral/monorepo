@@ -77,7 +77,7 @@ export const plugin: Plugin<PluginSettings> = {
 				en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/i18next",
 			},
 			keywords: ["i18next", "react", "nextjs"],
-			publisherName: "@inlang",
+			publisherName: "inlang",
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		},
 	},

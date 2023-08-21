@@ -75,7 +75,7 @@ export const plugin: Plugin<PluginSettings> = {
 			icon: "https://github.com/inlang/inlang/blob/main/source-code/plugins/json/assets/icon.png?raw=true",
 			linkToReadme: { en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/json" },
 			keywords: ["json", "generic"],
-			publisherName: "@inlang",
+			publisherName: "inlang",
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		},
 	},

@@ -37,11 +37,11 @@ export const LintRuleBase = Type.Object({
 			you want to publish your plugin to the marketplace */
 		marketplace: Type.Optional(
 			Type.Object({
-				icon: Type.Optional(Type.String()),
-				linkToReadme: Type.Optional(WithLanguageTags(Type.String())),
-				keywords: Type.Optional(Type.Array(Type.String())),
-				publisherName: Type.Optional(Type.String()),
-				publisherIcon: Type.Optional(Type.String()),
+				icon: Type.String(),
+				linkToReadme: WithLanguageTags(Type.String()),
+				keywords: Type.Array(Type.String()),
+				publisherName: Type.String(),
+				publisherIcon: Type.String(),
 			}),
 		),
 	}),
