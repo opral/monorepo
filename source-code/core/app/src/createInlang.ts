@@ -75,12 +75,20 @@ export const createInlang = async (args: {
 			if (!conf) return
 			loadModules({ config: conf, nodeishFs: args.nodeishFs, _import: args._import })
 				.then((resolvedModules) => {
+					if (resolvedModules.errors.length) {
+						throw new Error(resolvedModules.errors as any)
+					}
+					if (!resolvedModules.runtimePluginApi.loadMessages || !resolvedModules.runtimePluginApi.saveMessages) {
+						throw new Error("It seems you did not install any plugin that handles messages. Please add one to make inlang work.") // TODO: add link to docs
+					}
+
 					setResolvedModules(resolvedModules)
 					// TODO: handle `detectedLanguageTags`
 				})
 				.catch((err) => {
 					delete err.stack // TODO: find a way to get rid of the filename in the stack trace or else we won't be able to read the actual error message
 					console.error("Error in load modules ", err)
+					markInitAsFailed(err)
 				})
 		})
 
