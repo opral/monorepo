@@ -98,6 +98,7 @@ function filterItem(item: any, tags: Record<string, any>[], textValue: string) {
 		item.marketplace.keywords.some((keyword: string) =>
 			keyword.toLowerCase().includes(textValue.toLowerCase()),
 		) ||
+		item.marketplace.bundleName?.toLowerCase().includes(textValue.toLowerCase()) ||
 		item.id.split(".")[1]?.toLowerCase().includes(textValue.toLowerCase()) ||
 		item.id.toLowerCase().includes(textValue.toLowerCase())
 
@@ -159,9 +160,9 @@ const Gallery = ({
 													{item.marketplace.publisherName}
 												</p>
 											</div>
-											<Show when={item.marketplace.bundle}>
+											<Show when={item.marketplace.bundleItems}>
 												<sl-tooltip
-													prop:content={`Comes in a bundle of ${item.marketplace.bundle}`}
+													prop:content={`Comes in a bundle of ${item.marketplace.bundleItems}`}
 													prop:distance={16}
 													prop:hoist={true}
 													prop:placement="top"
@@ -170,13 +171,8 @@ const Gallery = ({
 														onClick={(e) => {
 															e.preventDefault()
 															e.stopPropagation()
-
-															// set text name to the first and second id part e.g. inlang.lintRule
-															setTextValue(
-																`${item.id.split(".")[0]?.toLowerCase()}.${item.id
-																	.split(".")[1]
-																	?.toLowerCase()}`,
-															)
+															setTextValue(`${item.marketplace.bundleName}`)
+															window.scrollTo({ top: 0 })
 														}}
 														class="text-surface-500 text-xl hover:text-surface-900 transition-all"
 													>

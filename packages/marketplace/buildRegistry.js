@@ -58,6 +58,17 @@ async function getMetaData(modules) {
 		const data = await import(module)
 		const type = Object.keys(data.default)[0]
 
+		/* Generates a name for finding the bundle */
+		let bundleName
+		if (data.default[type].length > 1) {
+			bundleName = module
+				.slice(
+					module.indexOf("/", module.indexOf("/") + 1) + 1,
+					module.indexOf("/", module.indexOf("/", module.indexOf("/") + 1) + 1),
+				)
+				.toLowerCase()
+		}
+
 		for (const item of data.default[type]) {
 			if (
 				!item.meta.marketplace ||
@@ -73,7 +84,8 @@ async function getMetaData(modules) {
 						...item.meta,
 						marketplace: {
 							...item.meta.marketplace,
-							bundle: data.default[type].length,
+							bundleItems: data.default[type].length,
+							bundleName: bundleName,
 						},
 				  })
 				: meta.push(item.meta)
