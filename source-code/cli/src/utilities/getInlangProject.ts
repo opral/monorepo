@@ -1,14 +1,14 @@
 import fs from "node:fs/promises"
 import { resolve } from "node:path"
-import { createInlang, InlangInstance, Result, tryCatch } from "@inlang/app"
+import { createInlang, InlangProject, Result, tryCatch } from "@inlang/app"
 import type { InlangModule } from "@inlang/module"
 import pluginJson from "../../../plugins/json/dist/index.js"
 import pluginLint from "../../../plugins/standard-lint-rules/dist/index.js"
 
 // in case multiple commands run getInlang in the same process
-let cached: Awaited<ReturnType<typeof getInlangInstance>> | undefined = undefined
+let cached: Awaited<ReturnType<typeof getInlangProject>> | undefined = undefined
 
-export async function getInlangInstance(): Promise<Result<InlangInstance, Error>> {
+export async function getInlangProject(): Promise<Result<InlangProject, Error>> {
 	if (cached) return cached
 
 	const baseDirectory = process.cwd()

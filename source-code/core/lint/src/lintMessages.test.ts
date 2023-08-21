@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, test, vi } from "vitest"
 import { lintMessages } from "./lintMessages.js"
 import type { MessageLintReport, MessageLintRule } from "./api.js"
 import type { Message, MessageQueryApi } from "@inlang/messages"
-import type { InlangConfig } from "@inlang/config"
 
 const lintRule1 = {
 	meta: {
@@ -43,8 +42,13 @@ describe("lintMessages", async () => {
 		})
 
 		await lintMessages({
-			config: {} as InlangConfig,
-			query: {} as MessageQueryApi,
+			lintLevels: {
+				[lintRule1.meta.id]: "warning",
+				[lintRule2.meta.id]: "warning",
+			},
+			lintRuleSettings: {},
+			sourceLanguageTag: "en",
+			languageTags: [],
 			messages,
 			rules: [lintRule1, lintRule2],
 		})
@@ -68,8 +72,13 @@ describe("lintMessages", async () => {
 		})
 
 		await lintMessages({
-			config: {} as InlangConfig,
-			query: {} as MessageQueryApi,
+			lintLevels: {
+				[lintRule1.meta.id]: "warning",
+				[lintRule2.meta.id]: "warning",
+			},
+			lintRuleSettings: {},
+			sourceLanguageTag: "en",
+			languageTags: [],
 			messages,
 			rules: [lintRule1, lintRule2],
 		})
@@ -98,8 +107,13 @@ describe("lintMessages", async () => {
 		})
 
 		const { data, errors } = await lintMessages({
-			config: {} as InlangConfig,
-			query: {} as MessageQueryApi,
+			lintLevels: {
+				[lintRule1.meta.id]: "warning",
+				[lintRule2.meta.id]: "warning",
+			},
+			lintRuleSettings: {},
+			sourceLanguageTag: "en",
+			languageTags: [],
 			messages,
 			rules: [lintRule1, lintRule2],
 		})

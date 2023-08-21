@@ -1,45 +1,44 @@
-import type { ResolveModulesFunction } from "@inlang/module"
-import type { InlangInstance } from "../api.js"
+import type { InlangProject } from "../api.js"
 
 import { observable, type from as solidFrom } from "../solid.js"
 import type { MessageQueryApi } from "@inlang/messages"
 
 export const withSolidReactivity = (
-	instance: InlangInstance,
+	project: InlangProject,
 	args: {
 		from: typeof solidFrom
 	},
-): SolidInlangInstance => {
-	const convert = <T>(signal: () => T): () => T => {
+): SolidInlangProject => {
+	const convert = <T>(signal: () => T): (() => T) => {
 		return args.from(observable(signal)) as () => T
 	}
 
 	return {
-		appSpecificApi: convert(instance.appSpecificApi),
-		config: convert(instance.config),
-		errors: convert(instance.errors),
+		appSpecificApi: convert(project.appSpecificApi),
+		config: convert(project.config),
+		errors: convert(project.errors),
 		lint: {
-			init: instance.lint.init,
-			reports: convert(instance.lint.reports),
+			init: project.lint.init,
+			reports: convert(project.lint.reports),
 		},
-		meta: {
-			lintRules: convert(instance.meta.lintRules),
-			plugins: convert(instance.meta.plugins),
+		installed: {
+			lintRules: convert(project.installed.lintRules),
+			plugins: convert(project.installed.plugins),
 		},
-		setConfig: instance.setConfig,
-		query: instance.query,
-	} satisfies SolidInlangInstance
+		setConfig: project.setConfig,
+		query: project.query,
+	} satisfies SolidInlangProject
 }
 
-export type SolidInlangInstance = {
-	appSpecificApi: () => ReturnType<InlangInstance["appSpecificApi"]>
-	meta: {
-		plugins: () => Awaited<ReturnType<ResolveModulesFunction>>["data"]["meta"]["plugins"]
-		lintRules: () => Awaited<ReturnType<ResolveModulesFunction>>["data"]["meta"]["lintRules"]
+export type SolidInlangProject = {
+	appSpecificApi: () => ReturnType<InlangProject["appSpecificApi"]>
+	installed: {
+		plugins: () => ReturnType<InlangProject["installed"]["plugins"]>
+		lintRules: () => ReturnType<InlangProject["installed"]["lintRules"]>
 	}
-	errors: () => ReturnType<InlangInstance["errors"]>
-	config: () => ReturnType<InlangInstance["config"]>
-	setConfig: InlangInstance["setConfig"]
+	errors: () => ReturnType<InlangProject["errors"]>
+	config: () => ReturnType<InlangProject["config"]>
+	setConfig: InlangProject["setConfig"]
 	query: {
 		messages: MessageQueryApi
 	}
@@ -47,9 +46,9 @@ export type SolidInlangInstance = {
 		/**
 		 * Initialize lint.
 		 */
-		init: () => ReturnType<InlangInstance["lint"]["init"]>
+		init: () => ReturnType<InlangProject["lint"]["init"]>
 		// for now, only simply array that can be improved in the future
 		// see https://github.com/inlang/inlang/issues/1098
-		reports: () => ReturnType<InlangInstance["lint"]["reports"]>
+		reports: () => ReturnType<InlangProject["lint"]["reports"]>
 	}
 }

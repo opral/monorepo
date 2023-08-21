@@ -1,9 +1,16 @@
 import type { InlangConfig } from "@inlang/config"
-import type { InvalidLintRuleError, LintRuleThrowedError, LintReport } from "@inlang/lint"
+import type {
+	InvalidLintRuleError,
+	LintRuleThrowedError,
+	LintReport,
+	LintRule,
+	LintLevel,
+} from "@inlang/lint"
 import type { MessageQueryApi } from "@inlang/messages"
 import type { Result } from "@inlang/result"
 import type { InvalidConfigError } from "./errors.js"
 import type {
+	Plugin,
 	PluginAppSpecificApiReturnError,
 	PluginFunctionDetectLanguageTagsAlreadyDefinedError,
 	PluginFunctionLoadMessagesAlreadyDefinedError,
@@ -11,17 +18,34 @@ import type {
 	PluginUsesInvalidIdError,
 	PluginUsesInvalidSchemaError,
 	PluginUsesReservedNamespaceError,
-	ResolvedPlugins,
+	RuntimePluginApi,
 } from "@inlang/plugin"
-import type { ModuleImportError, ModuleError, ResolveModulesFunction } from "@inlang/module"
+import type { ModuleImportError, ModuleError } from "@inlang/module"
+
+export type InstalledPlugin = {
+	meta: Plugin["meta"]
+	/**
+	 * The module which the plugin is installed from.
+	 */
+	module: string
+	// disabled: boolean
+}
+
+export type InstalledLintRule = {
+	meta: LintRule["meta"]
+	/**
+	 * The module which the lint rule is installed from.
+	 */
+	module: string
+	lintLevel: LintLevel
+	disabled: boolean
+}
 
 // TODO: remove all getters and use solid store for whole object, just expose `setConfig`
-export type InlangInstance = {
-	meta: {
-		plugins: Subscribable<Awaited<ReturnType<ResolveModulesFunction>>["data"]["meta"]["plugins"]>
-		lintRules: Subscribable<
-			Awaited<ReturnType<ResolveModulesFunction>>["data"]["meta"]["lintRules"]
-		>
+export type InlangProject = {
+	installed: {
+		plugins: Subscribable<InstalledPlugin[]>
+		lintRules: Subscribable<InstalledLintRule[]>
 	}
 	errors: Subscribable<
 		(
@@ -40,7 +64,7 @@ export type InlangInstance = {
 			| LintRuleThrowedError
 		)[]
 	>
-	appSpecificApi: Subscribable<ResolvedPlugins["appSpecificApi"]>
+	appSpecificApi: Subscribable<RuntimePluginApi["appSpecificApi"]>
 	config: Subscribable<InlangConfig>
 	setConfig: (config: InlangConfig) => Result<void, InvalidConfigError>
 	query: {

@@ -38,6 +38,7 @@ export const Pattern = Type.Array(Type.Union([Text, Expression]))
  */
 export type Variant = Static<typeof Variant>
 export const Variant = Type.Object({
+	languageTag: LanguageTag,
 	/**
 	 * The number of keys in each variant match MUST equal the number of expressions in the selectors.
 	 *
@@ -55,5 +56,5 @@ export const Message = Type.Object({
 	 * The order in which the selectors are placed determines the precedence of patterns.
 	 */
 	selectors: Type.Array(Expression),
-	body: Type.Record(LanguageTag, Type.Array(Variant)),
+	variants: Type.Array(Variant),
 })

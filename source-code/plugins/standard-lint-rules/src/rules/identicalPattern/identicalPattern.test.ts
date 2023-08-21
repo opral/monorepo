@@ -18,9 +18,12 @@ const messages = [message1]
 
 test("should report if identical message found in another language", async () => {
 	const result = await lintSingleMessage({
-		config: {
-			sourceLanguageTag: "en",
-		} as Partial<InlangConfig> as InlangConfig,
+		sourceLanguageTag: "en",
+		languageTags: ["en"],
+		lintLevels: {
+			[identicalPatternRule.meta.id]: "warning",
+		},
+		lintRuleSettings: {},
 		query: {} as MessageQueryApi,
 		messages,
 		message: message1,
@@ -34,12 +37,16 @@ test("should report if identical message found in another language", async () =>
 
 test("should not report if pattern is present in 'ignore'", async () => {
 	const result = await lintSingleMessage({
-		config: {
-			sourceLanguageTag: "en",
-			settings: {
-				"inlang.lintRule.identicalPattern": { ignore: ["This is Inlang"] },
+		sourceLanguageTag: "en",
+		languageTags: ["en"],
+		lintLevels: {
+			[identicalPatternRule.meta.id]: "warning",
+		},
+		lintRuleSettings: {
+			[identicalPatternRule.meta.id]: {
+				ignore: ["This is Inlang"],
 			},
-		} as Partial<InlangConfig> as InlangConfig,
+		},
 		query: {} as MessageQueryApi,
 		messages,
 		message: message1,

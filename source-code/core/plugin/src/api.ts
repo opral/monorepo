@@ -1,4 +1,3 @@
-import type { InlangConfig } from "@inlang/config"
 import { LanguageTag, WithLanguageTags } from "@inlang/language-tag"
 import { Static, Type, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
 import type { NodeishFilesystem as LisaNodeishFilesystem } from "@inlang-git/fs"
@@ -12,6 +11,7 @@ import type {
 	PluginUsesReservedNamespaceError,
 } from "./errors.js"
 import type { Message } from "@inlang/messages"
+import type { JSONSerializableObject } from "@inlang/json-serializable"
 
 /**
  * The filesystem is a subset of project lisa's nodeish filesystem.
@@ -28,10 +28,10 @@ export type NodeishFilesystemSubset = Pick<
  */
 export type ResolvePluginsFunction = (args: {
 	plugins: Array<Plugin>
-	settings: InlangConfig["settings"]
+	settings: Record<Plugin["meta"]["id"], JSONSerializableObject>
 	nodeishFs: NodeishFilesystemSubset
 }) => {
-	data: ResolvedPlugins
+	data: RuntimePluginApi
 	errors: Array<
 		| PluginAppSpecificApiReturnError
 		| PluginFunctionDetectLanguageTagsAlreadyDefinedError
@@ -46,7 +46,7 @@ export type ResolvePluginsFunction = (args: {
 /**
  * The API after resolving the plugins.
  */
-export type ResolvedPlugins = {
+export type RuntimePluginApi = {
 	loadMessages: (args: { languageTags: LanguageTag[] }) => Promise<Message[]> | Message[]
 	saveMessages: (args: { messages: Message[] }) => Promise<void> | void
 	detectedLanguageTags?: () => Promise<string[]> | string[]
@@ -68,14 +68,6 @@ export type ResolvedPlugins = {
 	 *  appSpecificApi['inlang.ideExtension'].messageReferenceMatcher()
 	 */
 	appSpecificApi: ReturnType<NonNullable<Plugin["addAppSpecificApi"]>>
-	/**
-	 * Metainformation for a specific plugin.
-	 *
-	 * @example
-	 *   meta['inlang.plugin.i18next'].description['en']
-	 *   meta['inlang.plugin.i18next'].module
-	 */
-	meta: Record<Plugin["meta"]["id"], Plugin["meta"]>
 }
 
 // ---------------------------- RUNTIME VALIDATION TYPES ---------------------------------------------
@@ -83,9 +75,7 @@ export type ResolvedPlugins = {
 /**
  * The plugin API is used to extend inlang's functionality.
  */
-export type Plugin<
-	Settings extends InlangConfig["settings"][Plugin["meta"]["id"]] | unknown = unknown,
-> = Omit<
+export type Plugin<Settings extends JSONSerializableObject | unknown = unknown> = Omit<
 	Static<typeof Plugin>,
 	"loadMessages" | "saveMessages" | "detectedLanguageTags" | "addAppSpecificApi"
 > & {
@@ -93,7 +83,7 @@ export type Plugin<
 	 * Load messages.
 	 */
 	loadMessages?: (args: {
-		languageTags: Readonly<InlangConfig["languageTags"]>
+		languageTags: LanguageTag[]
 		settings: Settings
 		nodeishFs: NodeishFilesystemSubset
 	}) => Promise<Message[]> | Message[]

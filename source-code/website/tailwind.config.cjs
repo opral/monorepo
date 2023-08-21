@@ -40,6 +40,14 @@ module.exports = {
 							"0 0 0 30px rgb(34 211 238 / 0.1), 0 0 0 60px rgb(34 211 238 / 0.05), 0 0 0 90px transparent",
 					},
 				},
+				draw: {
+					"0%": {
+						"stroke-dasharray": "0 100%",
+					},
+					"100%": {
+						"stroke-dasharray": "100% 100%",
+					}
+				}
 			},
 			animation: {
 				slideIn: "slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1",
@@ -47,6 +55,7 @@ module.exports = {
 				fadeInTop: "fadeInTop 0.3s ease-out 1",
 				fadeInBottom: "fadeInBottom 0.3s ease-out 1",
 				ripple: "ripple 2s linear infinite",
+				draw: "draw 0.3s cubic-bezier(0.650, 0.000, 0.450, 1.000) forwards"
 			},
 		},
 		// no tailwind colors. use color system colors only. see below
