@@ -159,14 +159,9 @@ export const createInlang = async (args: {
 					installedLintRules().map((rule) => [rule.meta.id, rule.lintLevel]),
 				),
 				messages: msgs,
-				query,
-				rules:
-					configValue.settings["project.disabled"] !== undefined
-						? resolvedModules()!.lintRules.filter(
-								(rule) =>
-									configValue.settings["project.disabled"]?.includes(rule.meta.id) === false,
-						  )
-						: resolvedModules()!.lintRules,
+				rules: resolvedModules()!.lintRules.filter(
+					(rule) => configValue.settings["project.disabled"]?.includes(rule.meta.id) === false,
+				),
 			}).then((report) => {
 				setLintReports(report.data)
 				setLintErrors(report.errors)
