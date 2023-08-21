@@ -1,7 +1,7 @@
 import { Layout } from "../Layout.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import { marketplaceItems } from "@inlang/marketplace"
-import { For, Show, Accessor, createSignal, createEffect, onMount } from "solid-js"
+import { For, Show, Accessor, createSignal, createEffect } from "solid-js"
 import { Chip } from "#src/components/Chip.jsx"
 import { SearchIcon } from "../editor/@host/@owner/@repository/components/SearchInput.jsx"
 import { Button } from "../index/components/Button.jsx"
@@ -43,7 +43,7 @@ export function Page() {
 							setTextValue={setSearchValue}
 						/>
 						<div class="flex justify-between items-center">
-							<Tags tags={selectedTags} setTags={setTags} />
+							<Tags />
 							<div class="max-sm:hidden">
 								<Button type="text" href="/documentation">
 									Build your own
@@ -51,20 +51,8 @@ export function Page() {
 							</div>
 						</div>
 					</div>
-					<div
-						class={
-							"mb-6 " +
-							(searchValue() !== "" || tags().find((tag) => tag.activated === false)
-								? "py-0"
-								: "py-11")
-						}
-					>
-						<Show when={searchValue() !== "" || tags().find((tag) => tag.activated === false)}>
-							<p class="text-sm py-3 text-surface-400 text-right">{results()} results</p>
-						</Show>
-						<div class="grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-center items-stretch">
-							<Gallery />
-						</div>
+					<div class="mb-16 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-center items-stretch">
+						<Gallery />
 					</div>
 					<GetHelp text="Need help or have questions? Join our Discord!" />
 				</div>
@@ -74,118 +62,102 @@ export function Page() {
 }
 
 function filterItem(item: any, selectedCategories: Category[], searchValue: string) {
+	console.log(item)
 	if (selectedCategories.includes(item.type.toLowerCase())) {
 		return false
 	}
 
 	const isSearchMatch =
-		item.displayName.en?.toLowerCase().includes(searchValue.toLowerCase()) ||
-		item.marketplace.publisherName.toLowerCase().includes(searchValue.toLowerCase()) ||
-		item.marketplace.keywords.some((keyword: string) =>
+		item.meta.displayName.en?.toLowerCase().includes(searchValue.toLowerCase()) ||
+		item.meta.marketplace.publisherName.toLowerCase().includes(searchValue.toLowerCase()) ||
+		item.meta.marketplace.keywords.some((keyword: string) =>
 			keyword.toLowerCase().includes(searchValue.toLowerCase()),
 		) ||
-		item.marketplace.bundleName?.toLowerCase().includes(searchValue.toLowerCase()) ||
-		item.id.split(".")[1]?.toLowerCase().includes(searchValue.toLowerCase()) ||
-		item.id.toLowerCase().includes(searchValue.toLowerCase())
+		item.meta.marketplace.bundleName?.toLowerCase().includes(searchValue.toLowerCase()) ||
+		item.meta.id.split(".")[1]?.toLowerCase().includes(searchValue.toLowerCase()) ||
+		item.meta.id.toLowerCase().includes(searchValue.toLowerCase())
 
 	return isSearchMatch
 }
 
-const Gallery = ({
-	tags,
-	textValue,
-	setTextValue,
-	setResults,
-}: {
-	tags: Accessor<Record<string, any>[]>
-	textValue: Accessor<string>
-	setTextValue: (value: string) => void
-	setResults: (value: number) => void
-}) => {
-	createEffect(() => {
-		const activatedItems = marketplaceItems.filter((item: any) => {
-			return filterItem(item, tags(), textValue())
-		})
-
-		setResults(activatedItems.length)
-	})
-
+const Gallery = () => {
 	return (
 		<>
-			<For each={marketplaceItems}>
+			<For each={filteredItems()}>
 				{(item) => {
 					return (
-						<Show
-							when={filterItem(item, tags(), textValue()) || filterItem(item, tags(), textValue())}
+						<a
+							href={item.meta.marketplace.linkToReadme.en}
+							target="_blanc"
+							class="relative no-underline h-64"
 						>
-							<a
-								href={item.marketplace.linkToReadme.en}
-								target="_blanc"
-								class="relative no-underline h-64"
-							>
-								<div class="flex flex-col relative justify-between gap-4 bg-surface-100 h-full hover:bg-surface-200 p-6 rounded-xl border border-surface-2 cursor-pointer">
-									<div class="flex flex-col gap-4">
-										<div class="flex items-center gap-4">
-											<img class="w-10 h-10 rounded-md m-0 shadow-lg" src={item.marketplace.icon} />
-											<p class="m-0 text-surface-900 font-semibold text-md">
-												{item.displayName.en}
-											</p>
-										</div>
-										<p class="m-0 font-normal leading-6 text-sm tracking-wide text-surface-500 line-clamp-3">
-											{item.description.en}
+							<div class="flex flex-col relative justify-between gap-4 bg-surface-100 h-full hover:bg-surface-200 p-6 rounded-xl border border-surface-2 cursor-pointer">
+								<div class="flex flex-col gap-4">
+									<div class="flex items-center gap-4">
+										<img
+											class="w-10 h-10 rounded-md m-0 shadow-lg"
+											src={item.meta.marketplace.icon}
+										/>
+										<p class="m-0 text-surface-900 font-semibold text-md">
+											{item.meta.displayName.en}
 										</p>
 									</div>
-									<Show when={item.marketplace.publisherName && item.marketplace.publisherIcon}>
-										<div class="w-full flex items-end justify-between">
-											<div class="flex gap-2 items-center pt-6">
-												<img
-													class="w-6 h-6 rounded-full m-0"
-													src={item.marketplace.publisherIcon}
-												/>
-												<p class="m-0 text-surface-600 no-underline hover:text-surface-900 font-medium">
-													{item.marketplace.publisherName}
-												</p>
-											</div>
-											<Show when={item.marketplace.bundleItems}>
-												<sl-tooltip
-													prop:content={`Comes in a bundle of ${item.marketplace.bundleItems}`}
-													prop:distance={16}
-													prop:hoist={true}
-													prop:placement="top"
-												>
-													<div
-														onClick={(e) => {
-															e.preventDefault()
-															e.stopPropagation()
-															setTextValue(`${item.marketplace.bundleName}`)
-															window.scrollTo({ top: 0 })
-														}}
-														class="text-surface-500 text-xl hover:text-surface-900 transition-all"
-													>
-														<Package />
-													</div>
-												</sl-tooltip>
-											</Show>
-										</div>
-									</Show>
-									<Chip
-										text={
-											item.id.split(".")[1]?.toLowerCase() === "lintrule"
-												? "lint rule"
-												: item.id.split(".")[1]?.toLowerCase()
-										}
-										color={
-											item.id.split(".")[1]?.toLowerCase() === "app"
-												? "#3B82F6"
-												: item.id.split(".")[1]?.toLowerCase() === "plugin"
-												? "#BF7CE4"
-												: "#06B6D4"
-										}
-										customClasses="absolute right-4 top-4 z-5 backdrop-filter backdrop-blur-lg"
-									/>
+									<p class="m-0 font-normal leading-6 text-sm tracking-wide text-surface-500 line-clamp-3">
+										{item.meta.description.en}
+									</p>
 								</div>
-							</a>
-						</Show>
+								<Show
+									when={item.meta.marketplace.publisherName && item.meta.marketplace.publisherIcon}
+								>
+									<div class="w-full flex items-end justify-between">
+										<div class="flex gap-2 items-center pt-6">
+											<img
+												class="w-6 h-6 rounded-full m-0"
+												src={item.meta.marketplace.publisherIcon}
+											/>
+											<p class="m-0 text-surface-600 no-underline hover:text-surface-900 font-medium">
+												{item.meta.marketplace.publisherName}
+											</p>
+										</div>
+										<Show when={item.moduleItems}>
+											<sl-tooltip
+												prop:content={`Comes in a bundle of ${item.moduleItems?.length}`}
+												prop:distance={16}
+												prop:hoist={true}
+												prop:placement="top"
+											>
+												<div
+													onClick={(e) => {
+														e.preventDefault()
+														e.stopPropagation()
+														setSearchValue(`${item.meta.displayName.en}`)
+														window.scrollTo({ top: 0 })
+													}}
+													class="text-surface-500 text-xl hover:text-surface-900 transition-all"
+												>
+													<Package />
+												</div>
+											</sl-tooltip>
+										</Show>
+									</div>
+								</Show>
+								<Chip
+									text={
+										item.meta.id.split(".")[1]?.toLowerCase() === "lintrule"
+											? "lint rule"
+											: item.meta.id.split(".")[1]?.toLowerCase()
+									}
+									color={
+										item.meta.id.split(".")[1]?.toLowerCase() === "app"
+											? "#3B82F6"
+											: item.meta.id.split(".")[1]?.toLowerCase() === "plugin"
+											? "#BF7CE4"
+											: "#06B6D4"
+									}
+									customClasses="absolute right-4 top-4 z-5 backdrop-filter backdrop-blur-lg"
+								/>
+							</div>
+						</a>
 					)
 				}}
 			</For>
@@ -255,35 +227,50 @@ interface TagsProps {
 	setTags: (value: Record<string, any>[]) => void
 }
 
-const Tags = (props: TagsProps) => {
-	const toggleTagActivation = (index: number) => {
-		const updatedTags = props.tags().map((tag, i) => {
-			if (i === index) {
-				return { ...tag, activated: !tag.activated }
-			}
-			return tag
-		})
+const Tags = () => {
+	function selectTag(tag: Category) {
+		if (selectedTags().includes(tag)) {
+			setSelectedTags(selectedTags().filter((t) => t !== tag))
+		} else {
+			setSelectedTags([...selectedTags(), tag])
+		}
 	}
 
 	return (
 		<div class="flex gap-3">
-			<For each={props.tags()}>
-				{(tag) => {
-					return (
-						<div
-							onClick={() => toggleTagActivation(props.tags().indexOf(tag))}
-							class={
-								"gap-2 px-3 py-1.5 rounded-full cursor-pointer text-sm capitalize hover:opacity-90 transition-all duration-100 " +
-								(tag.activated
-									? "bg-surface-800 text-background"
-									: "bg-surface-200 text-surface-600")
-							}
-						>
-							<p class="m-0">{tag.name === "lintrule" ? "lint rule" : tag.name}</p>
-						</div>
-					)
-				}}
-			</For>
+			<div
+				onClick={() => selectTag("app")}
+				class={
+					"gap-2 px-3 py-1.5 rounded-full cursor-pointer text-sm capitalize hover:opacity-90 transition-all duration-100 " +
+					(selectedTags().includes("app")
+						? "bg-surface-800 text-background"
+						: "bg-surface-200 text-surface-600")
+				}
+			>
+				<p class="m-0">Apps</p>
+			</div>
+			<div
+				onClick={() => selectTag("plugin")}
+				class={
+					"gap-2 px-3 py-1.5 rounded-full cursor-pointer text-sm capitalize hover:opacity-90 transition-all duration-100 " +
+					(selectedTags().includes("plugin")
+						? "bg-surface-800 text-background"
+						: "bg-surface-200 text-surface-600")
+				}
+			>
+				<p class="m-0">Plugins</p>
+			</div>
+			<div
+				onClick={() => selectTag("lintRule")}
+				class={
+					"gap-2 px-3 py-1.5 rounded-full cursor-pointer text-sm capitalize hover:opacity-90 transition-all duration-100 " +
+					(selectedTags().includes("lintRule")
+						? "bg-surface-800 text-background"
+						: "bg-surface-200 text-surface-600")
+				}
+			>
+				<p class="m-0">Lint Rules</p>
+			</div>
 		</div>
 	)
 }
