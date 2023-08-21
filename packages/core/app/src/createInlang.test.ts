@@ -52,36 +52,34 @@ const exampleMessages: Message[] = [
 	{
 		id: "a",
 		selectors: [],
-		body: {
-			en: [
-				{
-					match: {},
-					pattern: [
-						{
-							type: "Text",
-							value: "test",
-						},
-					],
-				},
-			],
-		},
+		variants: [
+			{
+				languageTag: "en",
+				match: {},
+				pattern: [
+					{
+						type: "Text",
+						value: "test",
+					},
+				],
+			},
+		],
 	},
 	{
 		id: "b",
 		selectors: [],
-		body: {
-			en: [
-				{
-					match: {},
-					pattern: [
-						{
-							type: "Text",
-							value: "test",
-						},
-					],
-				},
-			],
-		},
+		variants: [
+			{
+				languageTag: "en",
+				match: {},
+				pattern: [
+					{
+						type: "Text",
+						value: "test",
+					},
+				],
+			},
+		],
 	},
 ]
 
