@@ -13,20 +13,19 @@ export const showFilteredMessage = (
 	// filteredByLanguage
 	const filteredByLanguage = {
 		...message,
-		body: Object.fromEntries(
-			Object.entries(message!.body).filter(([language]) => {
-				if (filteredLanguageTags.length === 0) {
+		variants: 
+			message?.variants.filter((variant) => {
+				if (filteredLanguageTags().length === 0) {
 					return true
 				} else {
-					if (message !== undefined && filteredLanguageTags().includes(language)) {
+					if (message !== undefined && filteredLanguageTags().includes(variant.languageTag)) {
 						return true
 					}
 				}
 				return false
 			}),
-		),
 	} as Message
-	if (Object.entries(filteredByLanguage.body).length === 0) return false
+	if (filteredByLanguage.variants.length === 0) return false
 
 	// filteredById	
 	const filteredById = (filteredId() === "" || (message !== undefined && message.id === filteredId())) 
@@ -39,18 +38,17 @@ export const showFilteredMessage = (
 			message !== undefined &&
 			(
 				message?.id.toLowerCase().includes(textSearch().toLowerCase()) ||
-				Object.values(message!.body).some((value) => {
-						value[0]?.pattern.map((pattern) => {
-							if (pattern.type === "Text") {
-								return pattern.value.toLocaleLowerCase()
-							} else if (pattern.type === "VariableReference") {
-								return pattern.name.toLowerCase()
-							} else {
-								return false
-							}
-						}).join("").includes(textSearch().toLowerCase())
-					}
-				)
+				message.variants.some((variant) => {
+					variant.pattern.map((pattern) => {
+						if (pattern.type === "Text") {
+							return pattern.value.toLocaleLowerCase()
+						} else if (pattern.type === "VariableReference") {
+							return pattern.name.toLowerCase()
+						} else {
+							return false
+						}
+					}).join("").includes(textSearch().toLowerCase())
+				})
 			)
 		)
 	) ? filteredById : false
