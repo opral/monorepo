@@ -60,7 +60,7 @@ export const resolveModules: ResolveModulesFunction = async (args) => {
 
 	const resolvedPlugins = resolvePlugins({
 		plugins: allPlugins,
-		settings: args.config.settings,
+		settings: args.config.settings as any, // TODO: fix type
 		nodeishFs: args.nodeishFs,
 	})
 

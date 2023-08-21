@@ -4,23 +4,18 @@ import type { Message, Pattern } from '@inlang/app';
 export const createMessage = (id: string, patterns: Record<string, Pattern | string>): Message => ({
 	id,
 	selectors: [],
-	body: Object.fromEntries(
-		Object.entries(patterns).map(([languageTag, patterns]) => [
+	variants:
+		Object.entries(patterns).map(([languageTag, patterns]) => ({
 			languageTag,
-			[
-				{
-					match: {},
-					pattern:
-						typeof patterns === "string"
-							? [
-								{
-									type: "Text",
-									value: patterns,
-								},
-							]
-							: patterns,
-				},
-			],
-		]),
-	),
+			match: {},
+			pattern:
+				typeof patterns === "string"
+					? [
+						{
+							type: "Text",
+							value: patterns,
+						},
+					]
+					: patterns,
+		})),
 })
