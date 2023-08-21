@@ -4,15 +4,12 @@ import { setState, state } from "./state.js"
 import { extractMessageCommand } from "./commands/extractMessage.js"
 import { messagePreview } from "./decorations/messagePreview.js"
 import { determineClosestPath } from "./utilities/determineClosestPath.js"
-import { setupConfig } from "@inlang/core/config"
 import { ExtractMessage } from "./actions/extractMessage.js"
 import { msg } from "./utilities/message.js"
-import { createInlangEnv, importInlangConfig } from "./services/inlang-environment/index.js"
 import { getGitOrigin, telemetry } from "./services/telemetry/index.js"
 import { version } from "../package.json"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
 import { promptToReloadWindow } from "./utilities/promptToReload.js"
-import { coreUsedConfigEvent } from "@inlang/telemetry"
 import { recommendation, isDisabledRecommendation } from "./utilities/recommendation.js"
 import {
 	createInlangConfigFile,
@@ -21,6 +18,8 @@ import {
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 import { openInEditorCommand } from "./commands/openInEditor.js"
 import { editMessageCommand } from "./commands/editMessage.js"
+import { createInlang, tryCatch } from "@inlang/app"
+import { createFileSystemMapper } from "./services/inlang-environment/src/createFileSystemMapper.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
@@ -65,16 +64,16 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		return
 	}
 	// checking whether a config file exists -> if not dont start the extension
-	const potentialConfigFileUris = await vscode.workspace.findFiles("inlang.config.js")
+	const potentialConfigFileUris = await vscode.workspace.findFiles("inlang.config.json")
 	if (potentialConfigFileUris.length === 0) {
-		console.warn("No inlang.config.js file found.")
+		console.warn("No inlang.config.json file found.")
 
 		// get workspace folder
 		const _workspaceFolder = vscode.workspace.getWorkspaceFolder(activeTextEditor.document.uri)
 		if (!_workspaceFolder) {
 			console.warn("No workspace folder found.")
 		} else {
-			console.info("Creating inlang.config.js file.")
+			console.info("Creating inlang.config.json file.")
 			await createInlangConfigFile({ workspaceFolder: _workspaceFolder })
 		}
 		return
@@ -94,34 +93,36 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
 	// watch for changes in the config file
 	const watcher = vscode.workspace.createFileSystemWatcher(
-		new vscode.RelativePattern(workspaceFolder, "inlang.config.js"),
+		new vscode.RelativePattern(workspaceFolder, "inlang.config.json"),
 	)
 
-	const module = await importInlangConfig(closestConfigPathUri.fsPath)
-	const env = createInlangEnv({ workspaceFolder })
-	const config = await setupConfig({ module, env })
+	const {data: inlang, error  } = await tryCatch(() => createInlang(
+		{
+			configPath: closestConfigPathUri.fsPath,
+			nodeishFs: createFileSystemMapper(vscode.workspace.fs, workspaceFolder.uri),
+		},
+	))
 
-	telemetry.capture({
-		event: coreUsedConfigEvent.name,
-		properties: coreUsedConfigEvent.properties(config),
-	})
+	if (error) {
+		console.error(error)
+		// no error message because that gets handled in createInlang
+		return
+	}
 
-	const loadResources = async () => {
-		const resources = await config.readResources({ config })
+	const loadMessages = async () => {
 		setState({
-			config,
-			resources,
+			inlang
 		})
 	}
 
-	await loadResources()
+	await loadMessages()
 
 	// debounce future loading of resources
-	const debouncedLoadResources = debounce(1000, loadResources)
+	const debouncedLoadMessages = debounce(1000, loadMessages)
 
 	// register event listeners
 	vscode.workspace.onDidChangeTextDocument(() => {
-		debouncedLoadResources()
+		debouncedLoadMessages()
 	})
 
 	// listen for changes in the config file
@@ -140,8 +141,8 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	)
 
 	const documentSelectors: vscode.DocumentSelector = [
-		{ language: "javascript", pattern: "!inlang.config.js" },
-		...(state().config.ideExtension?.documentSelectors || []), // an empty array as fallback
+		{ language: "javascript", pattern: "!inlang.config.json" },
+		...state().inlang.appSpecificApi()["inlang.app.ideExtension"].documentSelectors || undefined
 	]
 	// register source actions
 	args.context.subscriptions.push(
@@ -153,7 +154,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	// register decorations
 	messagePreview(args)
 
-	// properties missing decoration in inlang.config.js
+	// properties missing decoration in inlang.config.json
 	propertiesMissingPreview()
 
 	// add inlang extension to recommended extensions
@@ -162,6 +163,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	// linter diagnostics
 	linterDiagnostics(args)
 }
+
 
 // this method is called when your extension is deactivated
 // export function deactivate() {}

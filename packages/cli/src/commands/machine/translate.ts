@@ -31,7 +31,7 @@ async function translateCommandAction() {
 		const { data: inlang, error } = await getInlangProject()
 		if (error) {
 			log.error(error)
-			// no message because that's handled in getConfig
+			// no message because that's handled in getInlangProject
 			return
 		}
 
