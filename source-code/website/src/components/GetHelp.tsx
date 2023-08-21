@@ -1,7 +1,7 @@
 import Question from "~icons/material-symbols/help-outline"
 
 /**
- * Get Help component for the footer.
+ * This component conveniently links to the discord server with custom text.
  */
 export function GetHelp({ text }: { text: string }) {
 	return (

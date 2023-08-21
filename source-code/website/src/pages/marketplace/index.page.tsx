@@ -195,7 +195,7 @@ const Gallery = ({
 												? "#BF7CE4"
 												: "#06B6D4"
 										}
-										customClasses="absolute top-4 z-5 backdrop-filter backdrop-blur-lg"
+										customClasses="absolute right-4 top-4 z-5 backdrop-filter backdrop-blur-lg"
 									/>
 								</div>
 							</a>
