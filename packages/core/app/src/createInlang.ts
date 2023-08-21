@@ -160,9 +160,13 @@ export const createInlang = async (args: {
 				),
 				messages: msgs,
 				query,
-				rules: resolvedModules()!.lintRules.filter(
-					(rule) => configValue.settings["project.disabled"]?.includes(rule.meta.id) === false,
-				),
+				rules:
+					configValue.settings["project.disabled"] !== undefined
+						? resolvedModules()!.lintRules.filter(
+								(rule) =>
+									configValue.settings["project.disabled"]?.includes(rule.meta.id) === false,
+						  )
+						: resolvedModules()!.lintRules,
 			}).then((report) => {
 				setLintReports(report.data)
 				setLintErrors(report.errors)
