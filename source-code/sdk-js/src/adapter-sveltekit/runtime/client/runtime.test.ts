@@ -2,9 +2,7 @@ import { test, describe, expect, vi } from "vitest"
 import { initSvelteKitClientRuntime } from "./runtime.js"
 import { rest } from "msw"
 import { setupServer } from "msw/node"
-import { createMessage } from "../../../runtime/inlang-function.test.js"
-
-//TODO: refactor
+import { createMessage } from '../../../test.util.js'
 
 vi.mock("$app/paths", () => ({ base: "" }))
 vi.mock("$app/environment", () => ({ browser: true }))

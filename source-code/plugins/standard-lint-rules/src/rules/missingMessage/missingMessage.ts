@@ -26,15 +26,14 @@ been translated yet.
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		},
 	},
-	message: ({ message: { id, body }, languageTags, sourceLanguageTag, report }) => {
+	message: ({ message: { id, variants }, languageTags, sourceLanguageTag, report }) => {
 		const translatedLanguageTags = languageTags.filter(
 			(languageTag) => languageTag !== sourceLanguageTag,
 		)
 
 		for (const translatedLanguageTag of translatedLanguageTags) {
-			const variants = body[translatedLanguageTag] ?? []
-
-			if (!variants.length) {
+			const filteredVariants = variants.filter((variant) => variant.languageTag === translatedLanguageTag) ?? []
+			if (!filteredVariants.length) {
 				report({
 					messageId: id,
 					languageTag: translatedLanguageTag,
@@ -43,29 +42,6 @@ been translated yet.
 					},
 				})
 				return
-			}
-
-			const patterns = variants.flatMap(({ pattern }) => pattern)
-			if (!patterns.length) {
-				report({
-					messageId: id,
-					languageTag: translatedLanguageTag,
-					body: {
-						en: `Message with id '${id}' has no patterns for language tag '${translatedLanguageTag}'.`,
-					},
-				})
-			} else if (
-				patterns.length === 1 &&
-				patterns[0]?.type === "Text" &&
-				patterns[0]?.value === ""
-			) {
-				report({
-					messageId: id,
-					languageTag: translatedLanguageTag,
-					body: {
-						en: `Message with id '${id}' has no content for language tag '${translatedLanguageTag}'.`,
-					},
-				})
 			}
 		}
 	},

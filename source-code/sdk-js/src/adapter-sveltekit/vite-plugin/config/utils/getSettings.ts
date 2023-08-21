@@ -1,19 +1,18 @@
 import type { InlangProject } from '@inlang/app'
 import type { SdkConfig } from '@inlang/sdk-js-plugin'
-import { dedent } from 'ts-dedent'
-import { InlangSdkException } from '../../exceptions.js'
 
-class InlangSdkConfigException extends InlangSdkException { }
-
-// TODO: automatically add modules if missing ???
 export function getSettings(inlang: InlangProject) {
 	const settings = inlang.appSpecificApi()["inlang.app.sdkJs"] as SdkConfig | undefined
-	if (!settings) {
-		throw new InlangSdkConfigException(dedent`
-				Invalid config. Make sure to add the 'inlang.plugin.sdkJs' to your 'inlang.config.json' file.
-				See https://inlang.com/documentation/sdk/configuration
-			`)
-	}
+	if (settings) return settings
 
-	return settings
+	// automatically add module if missing
+	const config = inlang.config()
+	inlang.setConfig({
+		...config,
+		modules: [...config.modules, "../../../../../sdk-js-plugin/dist/index.js"]
+	})
+
+	console.info('Adding missing `inlang.app.sdkJs` module to `inlang.config.json`')
+
+	return undefined
 }

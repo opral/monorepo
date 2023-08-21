@@ -17,8 +17,6 @@
 
 	$: if (browser && $languageTag) {
 		document.body.parentElement?.setAttribute("lang", $languageTag)
-
-		// TODO: only if localStorageDetector
 		localStorage.setItem('languageTag', $languageTag)
 	}
 

@@ -1,11 +1,7 @@
 import {
-	createMemo,
-	createResource,
-	createSignal,
 	For,
 	Match,
 	Switch,
-	Show,
 	onMount,
 } from "solid-js"
 import { Message } from "./Message.jsx"
@@ -20,7 +16,6 @@ import { ListHeader, messageCount } from "./components/Listheader.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"
-import type { ModuleError, ModuleImportError } from "@inlang/module"
 
 export function Page() {
 	return (
@@ -106,13 +101,14 @@ function TheActualPage() {
 						{inlang()?.errors().length !== 0 &&
 							<For each={inlang()?.errors()}>
 								{(error) => {
-									return (<li class="pt-2">
-										<span class="font-semibold">{error.name}: </span>
-										<br />
-										error.message <br />
-										error.cause? && <p>{error.cause as string}</p>
-										error.stack && <p>{error.stack}</p>
-									</li>)
+									return (
+										<li class="pt-2">
+											<span class="font-semibold">{error.name}: </span>
+											<br />
+											{error.message} <br />
+											{error.stack && <p>{error.stack}</p>}
+										</li>
+									);
 								}}
 							</For>
 						}

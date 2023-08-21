@@ -37,14 +37,17 @@ export const initRuntime = <
 export type Runtime = ReturnType<typeof initRuntime>
 
 const mergeMessages = (oldMessages: Message[], newMessages: Message[]) => {
+	const messages = structuredClone(oldMessages)
 	for (const newMessage of newMessages) {
-		const message = oldMessages.find(({ id }) => id === newMessage.id)
+		const message = messages.find(({ id }) => id === newMessage.id)
 		if (!message) {
-			oldMessages.push(newMessage)
+			messages.push(newMessage)
 		} else {
-			message.variants = { ...message.variants, ...newMessage.variants }
+			message.variants = [...message.variants, ...newMessage.variants]
 		}
 	}
+
+	return messages
 }
 
 export const initBaseRuntime = <
@@ -74,7 +77,7 @@ export const initBaseRuntime = <
 
 		const setMessages = (messages: Message[] | undefined) => {
 			if (!messages) return
-			mergeMessages(state.messages, messages)
+			state.messages = mergeMessages(state.messages, messages)
 			loadedLanguageTags.push(languageTag)
 		}
 

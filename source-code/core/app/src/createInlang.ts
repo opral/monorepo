@@ -10,11 +10,18 @@ import {
 } from "@inlang/plugin"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
-import { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError } from "./errors.js"
+import {
+	ConfigPathNotFoundError,
+	ConfigSyntaxError,
+	InvalidConfigError,
+	PluginLoadMessagesError,
+	PluginSaveMessagesError,
+} from "./errors.js"
 import { LintRuleThrowedError, LintReport, lintMessages } from "@inlang/lint"
 import { createRoot, createSignal, createEffect } from "./solid.js"
 import { createReactiveQuery } from "./createReactiveQuery.js"
 import { InlangConfig } from "@inlang/config"
+import { debounce } from "throttle-debounce"
 
 const ConfigCompiler = TypeCompiler.Compile(InlangConfig)
 
@@ -75,12 +82,25 @@ export const createInlang = async (args: {
 			if (!conf) return
 			loadModules({ config: conf, nodeishFs: args.nodeishFs, _import: args._import })
 				.then((resolvedModules) => {
+					if (resolvedModules.errors.length) {
+						throw new Error(resolvedModules.errors as any)
+					}
+					if (
+						!resolvedModules.runtimePluginApi.loadMessages ||
+						!resolvedModules.runtimePluginApi.saveMessages
+					) {
+						throw new Error(
+							"It seems you did not install any plugin that handles messages. Please add one to make inlang work.",
+						) // TODO: add link to docs
+					}
+
 					setResolvedModules(resolvedModules)
 					// TODO: handle `detectedLanguageTags`
 				})
 				.catch((err) => {
 					delete err.stack // TODO: find a way to get rid of the filename in the stack trace or else we won't be able to read the actual error message
 					console.error("Error in load modules ", err)
+					markInitAsFailed(err)
 				})
 		})
 
@@ -104,7 +124,9 @@ export const createInlang = async (args: {
 					markInitAsComplete()
 				})
 				.catch((err) => {
-					console.error("Error in load messages ", err)
+					throw new PluginLoadMessagesError("Error in load messages", {
+						cause: err,
+					})
 				})
 		})
 
@@ -182,6 +204,27 @@ export const createInlang = async (args: {
 
 		const query = createReactiveQuery(() => messages()!)
 
+		const debouncedSave = skipFirst(
+			debounce(
+				500,
+				async (newMessages) => {
+					// console.log('saving changes to messages')
+					try {
+						await resolvedModules()!.runtimePluginApi.saveMessages({ messages: newMessages })
+					} catch (err) {
+						throw new PluginSaveMessagesError("Error in saving messages", {
+							cause: err,
+						})
+					}
+				},
+				{ atBegin: false },
+			),
+		)
+
+		createEffect(() => {
+			debouncedSave(query.getAll())
+		})
+
 		return {
 			installed: {
 				plugins: createSubscribable(() => installedPlugins()),
@@ -212,7 +255,7 @@ export const createInlang = async (args: {
 const loadConfig = async (args: { configPath: string; nodeishFs: NodeishFilesystemSubset }) => {
 	let json: JSON
 	if (args.configPath.startsWith("data:")) {
-		json = (await import(args.configPath)).default
+		json = (await import(/* @vite-ignore */ args.configPath)).default
 		// TODO: add error handling
 	} else {
 		const { data: configFile, error: configFileError } = await tryCatch(
@@ -300,6 +343,18 @@ type JSONObject = any
 type MaybePromise<T> = T | Promise<T>
 
 const makeTrulyAsync = <T>(fn: MaybePromise<T>): Promise<T> => (async () => fn)()
+
+// Skip initial call, eg. to skip setup of a createEffect
+function skipFirst(func: (args: any) => any) {
+	let initial = false
+	return function (...args: any) {
+		if (initial) {
+			// @ts-ignore
+			return func.apply(this, args)
+		}
+		initial = true
+	}
+}
 
 // TODO: how do we unsubscribe? Do we need that?
 // COMMENT from @samuelstroschein: Likely not. The reactivity is handled internally with auto dispose from SolidJS.

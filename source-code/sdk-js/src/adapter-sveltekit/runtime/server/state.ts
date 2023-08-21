@@ -10,7 +10,6 @@ type State = Pick<TransformConfig, 'sourceLanguageTag' | 'languageTags' | 'messa
 let state: State
 
 export const initState = async () => {
-
 	if (!state && !import.meta.env.DEV) {
 		try {
 			const { languageTags, sourceLanguageTag, messages } = await import("virtual:inlang-static")
@@ -49,7 +48,7 @@ let _messages: Message[] = []
 export const reloadMessages = async () =>
 	(_messages = state?.messages()) || []
 
-export const loadMessages = (languageTag: LanguageTag) => _messages // TODO: filter
+export const loadMessages = (languageTag: LanguageTag) => _messages // TODO: filter out language variants
 
 // ------------------------------------------------------------------------------------------------
 

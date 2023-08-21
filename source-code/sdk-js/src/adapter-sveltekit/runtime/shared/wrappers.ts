@@ -51,10 +51,9 @@ const initRuntime = async (
 	data: LayoutServerDataPayload["[inlang]"],
 ) => {
 	if (!data) {
-		// TODO: warn only during development
 		const useWarn = (defaultValue?: unknown) => () =>
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			console.warn(
+			import.meta.env.DEV && console.warn(
 				"inlang was not correctly set up on this page. Please check the `routing.exclude` settings in your `inlang.config.json` file.",
 			)! || defaultValue
 		return {
