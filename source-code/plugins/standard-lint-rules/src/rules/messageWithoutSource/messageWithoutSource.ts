@@ -17,8 +17,8 @@ have not been updated accordingly.
 `,
 		},
 	},
-	message: ({ message: { id, body }, sourceLanguageTag, report }) => {
-		if (Object.keys(body).length && !body[sourceLanguageTag]) {
+	message: ({ message: { id, variants }, sourceLanguageTag, report }) => {
+		if (!variants.some((variant) => variant.languageTag === sourceLanguageTag)) {
 			report({
 				messageId: id,
 				languageTag: sourceLanguageTag,
