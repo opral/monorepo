@@ -2,10 +2,11 @@
 	"name": "@inlang/marketplace",
 	"type": "module",
 	"version": "0.0.0",
-	"publishConfig": {
-		"access": "public"
+	"exports": {
+		".": "./dist/index.js"
 	},
 	"files": [
+		"./dist",
 		"./src"
 	],
 	"scripts": {
@@ -26,6 +27,8 @@
 		"node": ">=16.15.0"
 	},
 	"dependencies": {
+		"@inlang/module": "*",
+		"@inlang/language-tag": "*",
 		"@sinclair/typebox": "^0.30.0"
 	},
 	"devDependencies": {

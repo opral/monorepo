@@ -1,34 +1,17 @@
 import fs from "node:fs/promises"
 
-/**
- * @typedef {Object} ModuleMetaData
- * @property {string} id
- * @property {Record<string, string>} displayName
- * @property {Record<string, string>} description
- * @property {Record<string, string>} marketplace
- * @property {string[]} keywords
- * @property {string} icon
- * @property {string} linkToReadme
- * @property {string} publisherName
- * @property {string} publisherIcon
- */
-
 async function main() {
 	const registry = JSON.parse(await fs.readFile("./registry.json", "utf-8"))
+	/** @type {import("./src/schema.js").MarketplaceItem[]} */
+	const items = [...registry.apps]
 
-	const items = []
-
-	if (registry.modules) {
-		for (let module of registry.modules) {
-			if (module.includes("@latest") || !module.includes("jsdelivr")) continue
-			registry.modules[registry.modules.indexOf(module)] = getLatestVersion(module)
-		}
-
-		const moduleItems = await getMetaData(registry.modules)
-
-		items.push(...moduleItems, ...registry.apps)
-	} else {
-		items.push(...registry.apps)
+	for (let module of registry.modules) {
+		// if (module.includes("jsdelivr") === false) {
+		// 	throw new Error(
+		// 		`Module ${module} is not hosted on jsdelivr. Please host it there and update the registry.json file.`,
+		// 	)
+		// }
+		items.push(...(await getMarketplaceItems(module)))
 	}
 
 	await fs.writeFile(
@@ -41,63 +24,46 @@ async function main() {
 
 await main()
 
-/**
- * @param {string} path
- * @returns {string}
- */
-function getLatestVersion(module) {
-	return (
-		module.slice(0, module.lastIndexOf("@")) +
-		"@latest" +
-		module.slice(module.indexOf("/", module.lastIndexOf("@")))
-	)
-}
+// /**
+//  * @param {string} path
+//  * @returns {string}
+//  */
+// function getLatestVersion(module) {
+// 	return (
+// 		module.slice(0, module.lastIndexOf("@")) +
+// 		"@latest" +
+// 		module.slice(module.indexOf("/", module.lastIndexOf("@")))
+// 	)
+// }
 
 /**
- * @param {string[]} modules
- * @returns {Promise<ModuleMetaData[]>}
+ * @param {string} module
+ * @returns {Promise<import("./src/schema.js").MarketplaceItem[]>}
  */
-async function getMetaData(modules) {
-	const meta = []
+async function getMarketplaceItems(module) {
+	const result = []
 
-	for (const module of modules) {
-		const data = await import(module)
-		const type = Object.keys(data.default)[0]
+	/** @type {import("@inlang/module").InlangModule} */
+	const inlangModule = await import(module)
+	// const type = Object.keys(data.default)[0]]
 
-		/* Generates a name for finding the bundle */
-		let bundleName
-		if (data.default[type].length > 1) {
-			bundleName = module
-				.slice(
-					module.indexOf("/", module.indexOf("/") + 1) + 1,
-					module.indexOf("/", module.indexOf("/", module.indexOf("/") + 1) + 1),
-				)
-				.toLowerCase()
+	const exportedItems = [
+		...(inlangModule.default.plugins ?? []),
+		...(inlangModule.default.lintRules ?? []),
+	]
+
+	for (const item of exportedItems) {
+		if (item.meta.marketplace === undefined) {
+			throw Error(
+				`Module ${item.meta.id} has no marketplace metadata. Remove it from the registry.`,
+			)
 		}
-
-		for (const item of data.default[type]) {
-			if (
-				!item.meta.marketplace ||
-				!item.meta.marketplace.keywords ||
-				!item.meta.marketplace.icon ||
-				!item.meta.marketplace.linkToReadme
-			) {
-				throw new Error(
-					`Module ${item.meta.id} has no marketplace metadata. Remove it from the registry.`,
-				)
-			}
-			data.default[type].length > 1
-				? meta.push({
-						...item.meta,
-						marketplace: {
-							...item.meta.marketplace,
-							bundleItems: data.default[type].length,
-							bundleName: bundleName,
-						},
-				  })
-				: meta.push(item.meta)
-		}
+		result.push({
+			...item.meta,
+			moduleItems: exportedItems.length,
+			module,
+		})
 	}
 
-	return meta
+	return result
 }
