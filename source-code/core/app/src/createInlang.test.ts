@@ -381,7 +381,7 @@ describe("functionality", () => {
 					displayName: { en: "Mock Plugin" },
 					keywords: [],
 				},
-				loadMessages: () => [{ id: "some-message", selectors: [], body: {} }],
+				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
 			}
 			const fs = await createMockNodeishFs()
 			await fs.writeFile(
@@ -445,7 +445,7 @@ describe("functionality", () => {
 					displayName: { en: "Mock Plugin" },
 					keywords: [],
 				},
-				loadMessages: () => [{ id: "some-message", selectors: [], body: {} }],
+				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
 			}
 			const fs = await createMockNodeishFs()
 			await fs.writeFile(
