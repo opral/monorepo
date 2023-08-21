@@ -7,8 +7,6 @@ import type { Message, Plugin } from "@inlang/plugin"
 import type { LintRule } from "@inlang/lint"
 import type { ImportFunction, InlangModule } from "@inlang/module"
 import { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError } from "./errors.js"
-import pluginJson from "../../../plugins/json/dist/index.js"
-import pluginLint from "../../../plugins/standard-lint-rules/dist/index.js"
 
 // ------------------------------------------------------------------------------------------------
 
