@@ -14,3 +14,6 @@ export const JSONSerializableObject = Type.Record(
 	Type.String(),
 	Type.Union([JSONValue, JSONArray, NestedJSONObject]),
 )
+
+export type JSONSerializable = Static<typeof JSONSerializable>
+export const JSONSerializable = Type.Union([JSONSerializableObject, JSONArray, JSONValue])

@@ -1,1 +1,1 @@
-export { JSONSerializableObject } from "./schema.js"
+export { JSONSerializableObject, JSONSerializable } from "./schema.js"
