@@ -50,11 +50,10 @@ export const initTransformConfig = async (): Promise<TransformConfig> => {
 	if (transformConfig) return transformConfig
 
 	// eslint-disable-next-line no-async-promise-executor
-	return (transformConfig = new Promise<TransformConfig>(async (resolve) => {
+	return (transformConfig = new Promise<TransformConfig>(async (resolve, reject) => {
 		const { data: inlang, error: createInlangError } = await tryCatch(async () =>
-			createInlang({ nodeishFs: await getNodeishFs(), configPath: PATH_TO_INLANG_CONFIG }),
+			createInlang({ nodeishFs: await getNodeishFs(), configPath: PATH_TO_INLANG_CONFIG })
 		)
-
 		if (createInlangError) {
 			if (createInlangError instanceof ConfigPathNotFoundError) {
 				await createBasicInlangConfig()
@@ -62,13 +61,21 @@ export const initTransformConfig = async (): Promise<TransformConfig> => {
 				return resolve(initTransformConfig())
 			}
 
-			throw createInlangError
+			return reject(createInlangError)
+		}
+
+		if (inlang.errors.length) {
+			return reject(inlang.errors)
 		}
 
 		await updateSdkModuleVersion(inlang)
 		await createDemoResourcesIfNoMessagesExistYet(inlang)
 
 		const settings = getSettings(inlang)
+		if (!settings) {
+			transformConfig = undefined
+			return resolve(initTransformConfig())
+		}
 
 		const { default: svelteConfig } = (await import(/* @vite-ignore */
 			/*pathToFileURL*/(path.resolve(PATH_TO_CWD, "svelte.config.js")).toString()

@@ -64,7 +64,9 @@ export const plugin = () => {
 		},
 
 		async buildStart() {
-			const config = await initTransformConfig()
+			const config = await initTransformConfig().catch(error => {
+				throw new Error(error)
+			})
 
 			await assertAppTemplateIsCorrect(config)
 			await assertRoutesFolderPathExists(config)
