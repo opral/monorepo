@@ -652,16 +652,6 @@ describe("functionality", () => {
 							pattern: [
 								{
 									type: "Text",
-									value: "test",
-								},
-							],
-						},
-						{
-							languageTag: "en",
-							match: {},
-							pattern: [
-								{
-									type: "Text",
 									value: "a en",
 								},
 							],
@@ -682,16 +672,6 @@ describe("functionality", () => {
 					id: "b",
 					selectors: [],
 					variants: [
-						{
-							languageTag: "en",
-							match: {},
-							pattern: [
-								{
-									type: "Text",
-									value: "test",
-								},
-							],
-						},
 						{
 							languageTag: "en",
 							match: {},
