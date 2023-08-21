@@ -7,6 +7,8 @@ import type { Message, Plugin } from "@inlang/plugin"
 import type { LintRule } from "@inlang/lint"
 import type { ImportFunction, InlangModule } from "@inlang/module"
 import { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError } from "./errors.js"
+import pluginJson from "../../../plugins/json/dist/index.js"
+import pluginLint from "../../../plugins/standard-lint-rules/dist/index.js"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -520,6 +522,120 @@ describe("functionality", () => {
 			})
 
 			expect(inlang.query.messages.getAll()).toEqual(exampleMessages)
+		})
+	})
+
+	describe("query", () => {
+		it("updates should trigger the plugin persistence", async () => {
+			const fs = await createMockNodeishFs()
+
+			await fs.writeFile(
+				"./inlang.config.json",
+				JSON.stringify({
+					sourceLanguageTag: "en",
+					languageTags: ["en", "de"],
+					modules: [""],
+					settings: {
+						"inlang.plugin.json": {
+							pathPattern: "./resources/{languageTag}.json",
+						},
+					},
+				}),
+			)
+
+			await fs.mkdir("./resources")
+
+			const inlang = await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: async () =>
+					({
+						default: {
+							// @ts-ignore
+							plugins: [...pluginJson.plugins],
+							// @ts-ignore
+							lintRules: [...pluginLint.lintRules],
+						},
+					} satisfies InlangModule),
+			})
+
+			await inlang.query.messages.upsert({
+				where: { id: "a" },
+				data: {
+					id: "a",
+					selectors: [],
+					body: {
+						en: [
+							{
+								match: {},
+								pattern: [
+									{
+										type: "Text",
+										value: "a en",
+									},
+								],
+							},
+						],
+						de: [
+							{
+								match: {},
+								pattern: [
+									{
+										type: "Text",
+										value: "a de",
+									},
+								],
+							},
+						],
+					},
+				},
+			})
+			await inlang.query.messages.upsert({
+				where: { id: "b" },
+				data: {
+					id: "b",
+					selectors: [],
+					body: {
+						en: [
+							{
+								match: {},
+								pattern: [
+									{
+										type: "Text",
+										value: "b en",
+									},
+								],
+							},
+						],
+						de: [
+							{
+								match: {},
+								pattern: [
+									{
+										type: "Text",
+										value: "b de",
+									},
+								],
+							},
+						],
+					},
+				},
+			})
+
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			const enFile = await fs.readFile("/resources/en.json", { encoding: "utf-8" })
+			const deFile = await fs.readFile("/resources/de.json", { encoding: "utf-8" })
+
+			expect(JSON.parse(enFile)).toStrictEqual({
+				a: "a en",
+				b: "b en",
+			})
+
+			expect(JSON.parse(deFile)).toStrictEqual({
+				a: "a de",
+				b: "b de",
+			})
 		})
 	})
 
