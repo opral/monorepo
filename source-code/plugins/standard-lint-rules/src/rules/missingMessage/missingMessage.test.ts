@@ -1,4 +1,4 @@
-import { expect, test } from "vitest"
+import { describe, expect, test } from "vitest"
 import type { Message } from "@inlang/messages"
 import { missingMessageRule } from "./missingMessage.js"
 import { lintSingleMessage } from "@inlang/lint"
@@ -69,38 +69,38 @@ test("should report if no variants are defined", async () => {
 	expect(result.data[0]!.languageTag).toBe("fr")
 })
 
-test("should report if no patterns are defined", async () => {
-	const result = await lintSingleMessage({
-		sourceLanguageTag: "en",
-		languageTags: ["en", "es"],
-		lintLevels: {
-			[missingMessageRule.meta.id]: "warning",
-		},
-		lintRuleSettings: {},
-		messages,
-		message: message1,
-		rules: [missingMessageRule],
+describe("reported by emptyPattern lintRule", () => {
+	test("should not report if no patterns are defined", async () => {
+		const result = await lintSingleMessage({
+			sourceLanguageTag: "en",
+			languageTags: ["en", "es"],
+			lintLevels: {
+				[missingMessageRule.meta.id]: "warning",
+			},
+			lintRuleSettings: {},
+			messages,
+			message: message1,
+			rules: [missingMessageRule],
+		})
+
+		expect(result.errors).toHaveLength(0)
+		expect(result.data).toHaveLength(0)
 	})
 
-	expect(result.errors).toHaveLength(0)
-	expect(result.data).toHaveLength(1)
-	expect(result.data[0]!.languageTag).toBe("es")
-})
+	test("should not report if a message has a pattern with only one text element that is an empty string", async () => {
+		const result = await lintSingleMessage({
+			sourceLanguageTag: "en",
+			languageTags: ["en", "cn"],
+			lintLevels: {
+				[missingMessageRule.meta.id]: "warning",
+			},
+			lintRuleSettings: {},
+			messages,
+			message: message1,
+			rules: [missingMessageRule],
+		})
 
-test("should report if a message has a pattern with only one text element that is an empty string", async () => {
-	const result = await lintSingleMessage({
-		sourceLanguageTag: "en",
-		languageTags: ["en", "cn"],
-		lintLevels: {
-			[missingMessageRule.meta.id]: "warning",
-		},
-		lintRuleSettings: {},
-		messages,
-		message: message1,
-		rules: [missingMessageRule],
+		expect(result.errors).toHaveLength(0)
+		expect(result.data).toHaveLength(0)
 	})
-
-	expect(result.errors).toHaveLength(0)
-	expect(result.data).toHaveLength(1)
-	expect(result.data[0]!.languageTag).toBe("cn")
 })
