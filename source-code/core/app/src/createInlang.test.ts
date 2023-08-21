@@ -52,36 +52,34 @@ const exampleMessages: Message[] = [
 	{
 		id: "a",
 		selectors: [],
-		body: {
-			en: [
-				{
-					match: {},
-					pattern: [
-						{
-							type: "Text",
-							value: "test",
-						},
-					],
-				},
-			],
-		},
+		variants: [
+			{
+				languageTag: "en",
+				match: {},
+				pattern: [
+					{
+						type: "Text",
+						value: "test",
+					},
+				],
+			},
+		],
 	},
 	{
 		id: "b",
 		selectors: [],
-		body: {
-			en: [
-				{
-					match: {},
-					pattern: [
-						{
-							type: "Text",
-							value: "test",
-						},
-					],
-				},
-			],
-		},
+		variants: [
+			{
+				languageTag: "en",
+				match: {},
+				pattern: [
+					{
+						type: "Text",
+						value: "test",
+					},
+				],
+			},
+		],
 	},
 ]
 
@@ -323,7 +321,7 @@ describe("functionality", () => {
 			expect(inlang.installed.lintRules()[0]?.lintLevel).toBe("warning")
 		})
 
-		it.skip("should apply 'disabled' to lint rules if defined in the system settings", async () => {
+		it("should apply 'disabled' to lint rules if defined in the project settings", async () => {
 			const fs = await createMockNodeishFs()
 			await fs.writeFile(
 				"./inlang.config.json",
@@ -332,7 +330,7 @@ describe("functionality", () => {
 					languageTags: ["en"],
 					modules: ["./dist/index.js"],
 					settings: {
-						"system.disabled": [mockLintRule.meta.id],
+						"project.disabled": [mockLintRule.meta.id],
 					},
 				} satisfies InlangConfig),
 			)
@@ -343,6 +341,140 @@ describe("functionality", () => {
 			})
 
 			expect(inlang.installed.lintRules()[0]?.disabled).toBe(true)
+		})
+
+		it("should return lint reports for non-disabled lint rules ", async () => {
+			const enabledLintRule: LintRule = {
+				type: "MessageLint",
+				meta: {
+					id: "namespace.lintRule.enabled",
+					description: { en: "Mock lint rule description" },
+					displayName: { en: "Mock Lint Rule" },
+				},
+				message: ({ report }) => {
+					report({
+						messageId: "some-message-1",
+						languageTag: "en",
+						body: { en: "lintrule1" },
+					})
+				},
+			}
+			const disabledLintRule: LintRule = {
+				type: "MessageLint",
+				meta: {
+					id: "namespace.lintRule.disabled",
+					description: { en: "" },
+					displayName: { en: "" },
+				},
+				message: ({ report }) => {
+					report({
+						messageId: "some-message-2",
+						languageTag: "en",
+						body: { en: "lintrule2" },
+					})
+				},
+			}
+			const _mockPlugin: Plugin = {
+				meta: {
+					id: "inlang.plugin.i18next",
+					description: { en: "Mock plugin description" },
+					displayName: { en: "Mock Plugin" },
+					keywords: [],
+				},
+				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
+			}
+			const fs = await createMockNodeishFs()
+			await fs.writeFile(
+				"./inlang.config.json",
+				JSON.stringify({
+					sourceLanguageTag: "en",
+					languageTags: ["en"],
+					modules: ["some-module.js"],
+					settings: {
+						"project.disabled": [disabledLintRule.meta.id],
+					},
+				} satisfies InlangConfig),
+			)
+			const _import = async () => {
+				return {
+					default: {
+						plugins: [_mockPlugin],
+						lintRules: [enabledLintRule, disabledLintRule],
+					},
+				} satisfies InlangModule
+			}
+			const inlang = await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: _import,
+			})
+			await inlang.lint.init()
+			expect(inlang.lint.reports()).toHaveLength(1)
+			expect(inlang.lint.reports()[0]?.ruleId).toBe(enabledLintRule.meta.id)
+			expect(
+				inlang.installed.lintRules().find((rule) => rule.meta.id === disabledLintRule.meta.id)
+					?.disabled,
+			).toBe(true)
+			expect(
+				inlang.installed.lintRules().find((rule) => rule.meta.id === enabledLintRule.meta.id)
+					?.disabled,
+			).toBe(false)
+		})
+
+		// yep, this is a typical "hm, we have a bug here, let's write a test for it" test
+		it("should return lint reports if disabled is not set", async () => {
+			const _mockLintRule: LintRule = {
+				type: "MessageLint",
+				meta: {
+					id: "namespace.lintRule.mock",
+					description: { en: "Mock lint rule description" },
+					displayName: { en: "Mock Lint Rule" },
+				},
+				message: ({ report }) => {
+					report({
+						messageId: "some-message-1",
+						languageTag: "en",
+						body: { en: "lintrule1" },
+					})
+				},
+			}
+			const _mockPlugin: Plugin = {
+				meta: {
+					id: "inlang.plugin.i18next",
+					description: { en: "Mock plugin description" },
+					displayName: { en: "Mock Plugin" },
+					keywords: [],
+				},
+				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
+			}
+			const fs = await createMockNodeishFs()
+			await fs.writeFile(
+				"./inlang.config.json",
+				JSON.stringify({
+					sourceLanguageTag: "en",
+					languageTags: ["en"],
+					modules: ["some-module.js"],
+					settings: {},
+				} satisfies InlangConfig),
+			)
+			const _import = async () => {
+				return {
+					default: {
+						plugins: [_mockPlugin],
+						lintRules: [_mockLintRule],
+					},
+				} satisfies InlangModule
+			}
+			const inlang = await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: _import,
+			})
+			await inlang.lint.init()
+			expect(inlang.lint.reports()).toHaveLength(1)
+			expect(inlang.lint.reports()[0]?.ruleId).toBe(_mockLintRule.meta.id)
+			expect(inlang.installed.lintRules()).toHaveLength(1)
+			expect(inlang.installed.lintRules()[0]?.disabled).toBe(false)
 		})
 	})
 

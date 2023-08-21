@@ -348,19 +348,18 @@ describe("saveMessage", () => {
 			{
 				id: "test",
 				selectors: [],
-				body: {
-					en: [
-						{
-							match: {},
-							pattern: [
-								{
-									type: "Text",
-									value: "Hello world",
-								},
-							],
-						},
-					],
-				},
+				variants: [
+					{
+						languageTag: "en",
+						match: {},
+						pattern: [
+							{
+								type: "Text",
+								value: "Hello world",
+							},
+						],
+					},
+				],
 			},
 		]
 		await plugin.saveMessages!({ messages, settings, nodeishFs: fs })
@@ -378,36 +377,34 @@ describe("saveMessage", () => {
 			{
 				id: "common:test",
 				selectors: [],
-				body: {
-					en: [
-						{
-							match: {},
-							pattern: [
-								{
-									type: "Text",
-									value: "Hello world",
-								},
-							],
-						},
-					],
-				},
+				variants: [
+					{
+						languageTag: "en",
+						match: {},
+						pattern: [
+							{
+								type: "Text",
+								value: "Hello world",
+							},
+						],
+					},
+				],
 			},
 			{
 				id: "common:test2",
 				selectors: [],
-				body: {
-					en: [
-						{
-							match: {},
-							pattern: [
-								{
-									type: "Text",
-									value: "Hello world2",
-								},
-							],
-						},
-					],
-				},
+				variants: [
+					{
+						languageTag: "en",
+						match: {},
+						pattern: [
+							{
+								type: "Text",
+								value: "Hello world2",
+							},
+						],
+					},
+				],
 			},
 		]
 		await plugin.saveMessages!({ messages, settings, nodeishFs: fs })
@@ -493,6 +490,7 @@ describe("formatting", () => {
 			nodeishFs: fs,
 		})
 		const variant: Variant = {
+			languageTag: "es",
 			match: {},
 			pattern: [
 				{
@@ -502,9 +500,9 @@ describe("formatting", () => {
 			],
 		}
 		const newMessage = createVariant(messages[0]!, {
-			where: { languageTag: "es" },
 			data: variant,
 		}).data
+
 		await plugin.saveMessages!({ messages: [newMessage!], settings, nodeishFs: fs })
 
 		const file1 = await fs.readFile("./en.json", { encoding: "utf-8" })
@@ -573,36 +571,34 @@ describe("formatting", () => {
 			{
 				id: "common:test.",
 				selectors: [],
-				body: {
-					en: [
-						{
-							match: {},
-							pattern: [
-								{
-									type: "Text",
-									value: "test",
-								},
-							],
-						},
-					],
-				},
+				variants: [
+					{
+						languageTag: "en",
+						match: {},
+						pattern: [
+							{
+								type: "Text",
+								value: "test",
+							},
+						],
+					},
+				],
 			},
 			{
 				id: "common:test.test",
 				selectors: [],
-				body: {
-					en: [
-						{
-							match: {},
-							pattern: [
-								{
-									type: "Text",
-									value: "test",
-								},
-							],
-						},
-					],
-				},
+				variants: [
+					{
+						languageTag: "en",
+						match: {},
+						pattern: [
+							{
+								type: "Text",
+								value: "test",
+							},
+						],
+					},
+				],
 			},
 		]
 
@@ -635,36 +631,34 @@ describe("formatting", () => {
 			{
 				id: "common:a..b",
 				selectors: [],
-				body: {
-					en: [
-						{
-							match: {},
-							pattern: [
-								{
-									type: "Text",
-									value: "test",
-								},
-							],
-						},
-					],
-				},
+				variants: [
+					{
+						languageTag: "en",
+						match: {},
+						pattern: [
+							{
+								type: "Text",
+								value: "test",
+							},
+						],
+					},
+				],
 			},
 			{
 				id: "common:c.",
 				selectors: [],
-				body: {
-					en: [
-						{
-							match: {},
-							pattern: [
-								{
-									type: "Text",
-									value: "test",
-								},
-							],
-						},
-					],
-				},
+				variants: [
+					{
+						languageTag: "en",
+						match: {},
+						pattern: [
+							{
+								type: "Text",
+								value: "test",
+							},
+						],
+					},
+				],
 			},
 		]
 		expect(messages).toStrictEqual(reference)
@@ -719,19 +713,18 @@ describe("formatting", () => {
 		messages.push({
 			id: "test.test",
 			selectors: [],
-			body: {
-				es: [
-					{
-						match: {},
-						pattern: [
-							{
-								type: "Text",
-								value: "test",
-							},
-						],
-					},
-				],
-			},
+			variants: [
+				{
+					languageTag: "es",
+					match: {},
+					pattern: [
+						{
+							type: "Text",
+							value: "test",
+						},
+					],
+				},
+			],
 		})
 
 		await plugin.saveMessages!({
@@ -771,6 +764,7 @@ describe("roundTrip", () => {
 			nodeishFs: fs,
 		})
 		const variant: Variant = {
+			languageTag: "en",
 			match: {},
 			pattern: [
 				{
@@ -782,9 +776,7 @@ describe("roundTrip", () => {
 		const newMessage: Message = {
 			id: "test2",
 			selectors: [],
-			body: {
-				en: [variant],
-			},
+			variants: [variant],
 		}
 		messages.push(newMessage)
 		await plugin.saveMessages!({
@@ -821,19 +813,18 @@ describe("roundTrip", () => {
 			{
 				id: "common:test",
 				selectors: [],
-				body: {
-					en: [
-						{
-							match: {},
-							pattern: [
-								{
-									type: "Text",
-									value: "test",
-								},
-							],
-						},
-					],
-				},
+				variants: [
+					{
+						languageTag: "en",
+						match: {},
+						pattern: [
+							{
+								type: "Text",
+								value: "test",
+							},
+						],
+					},
+				],
 			},
 		]
 		expect(messages).toStrictEqual(reference)

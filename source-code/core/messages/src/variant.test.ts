@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { createVariant, getVariant, updateVariantPattern } from "./variant.js"
 import { describe, test, expect } from "vitest"
-import type { Message } from "./schema.js"
+import type { Message, Variant } from "./schema.js"
 import {
 	MessagePatternsForLanguageTagDoNotExistError,
 	MessageVariantAlreadyExistsError,
@@ -44,22 +44,20 @@ describe("getVariant", () => {
 		const mockMessage: Message = {
 			id: "mockMessage",
 			selectors: [],
-			body: {
-				en: [
-					{
-						pattern: [{ type: "Text", value: "Gender male" }],
-						match: {
-							gender: "male",
-						},
+			variants: [
+				{
+					languageTag: "en",
+					pattern: [{ type: "Text", value: "Gender male" }],
+					match: {
+						gender: "male",
 					},
-				],
-				de: [
-					{
-						pattern: [{ type: "Text", value: "Veraltete Übersetzung" }],
-						match: {},
-					},
-				],
-			},
+				},
+				{
+					languageTag: "de",
+					pattern: [{ type: "Text", value: "Veraltete Übersetzung" }],
+					match: {},
+				},
+			],
 		}
 		const variant = getVariant(mockMessage, {
 			where: {
@@ -128,9 +126,9 @@ describe("getVariant", () => {
 
 	test("should return undefined of no variant matches", () => {
 		const mockMessage: Message = getMockMessage()
-		mockMessage.body["en"] = [
-			...mockMessage.body["en"]!.filter(
-				(v) => v.match.gender !== "*" || v.match.guestOther !== "*",
+		mockMessage.variants = [
+			...mockMessage.variants!.filter(
+				(v) => v.languageTag === "en" && (v.match.gender !== "*" || v.match.guestOther !== "*"),
 			),
 		]
 
@@ -156,9 +154,10 @@ describe("getVariant", () => {
 	})
 
 	test("should return the catch all variant if no selector defined", () => {
-		const mockMessage: Message = getMockMessage()
-		mockMessage.body["en"] = [
+		const mockMessage: Message = {} as any
+		mockMessage.variants = [
 			{
+				languageTag: "en",
 				match: {},
 				pattern: [
 					{
@@ -187,41 +186,42 @@ describe("createVariant", () => {
 	test("should create a variant for a message", () => {
 		const mockMessage: Message = getMockMessage()
 
+		const newVariant: Variant = {
+			languageTag: "en",
+			match: { gender: "female", guestOther: "0" },
+			pattern: [],
+		}
 		const message = createVariant(mockMessage, {
-			where: {
-				languageTag: "en",
-			},
-			data: {
-				match: { gender: "female", guestOther: "0" },
-				pattern: [],
-			},
+			data: newVariant,
 		})
 		// should return the female variant
 		expect(
-			message.data!.body.en?.find((v) => v.match.gender === "female" && v.match.guestOther === "0")
-				?.pattern,
+			message.data!.variants.find(
+				(v) => v.languageTag === "en" && v.match.gender === "female" && v.match.guestOther === "0",
+			)?.pattern,
 		).toStrictEqual([])
 	})
 
 	test("should create a variant, also if matcher are not full defined", () => {
 		const mockMessage: Message = getMockMessage()
-		mockMessage.body.en = [
-			...mockMessage.body.en!.filter((v) => v.match.gender !== "*" || v.match.guestOther !== "*"),
+		mockMessage.variants = [
+			...mockMessage.variants!.filter(
+				(v) => v.languageTag === "en" && (v.match.gender !== "*" || v.match.guestOther !== "*"),
+			),
 		]
 
 		const message = createVariant(mockMessage, {
-			where: {
-				languageTag: "en",
-			},
 			data: {
+				languageTag: "en",
 				match: {},
 				pattern: [],
 			},
 		})
 		// should return the female variant
 		expect(
-			message.data!.body.en?.find((v) => v.match.gender === "*" && v.match.guestOther === "*")
-				?.pattern,
+			message.data!.variants.find(
+				(v) => v.languageTag === "en" && v.match.gender === "*" && v.match.guestOther === "*",
+			)?.pattern,
 		).toStrictEqual([])
 	})
 
@@ -229,10 +229,8 @@ describe("createVariant", () => {
 		const mockMessage: Message = getMockMessage()
 
 		const variant = createVariant(mockMessage, {
-			where: {
-				languageTag: "en",
-			},
 			data: {
+				languageTag: "en",
 				match: { gender: "male", guestOther: "1" },
 				pattern: [],
 			},
@@ -246,10 +244,8 @@ describe("createVariant", () => {
 		const mockMessage: Message = getMockMessage()
 
 		const variant = createVariant(mockMessage, {
-			where: {
-				languageTag: "de",
-			},
 			data: {
+				languageTag: "de",
 				match: { gender: "female", guestOther: "1" },
 				pattern: [],
 			},
@@ -273,8 +269,9 @@ describe("updateVariant", () => {
 		})
 		// should return the female variant
 		expect(
-			message.data!.body.en?.find((v) => v.match.gender === "female" && v.match.guestOther === "1")
-				?.pattern,
+			message.data!.variants.find(
+				(v) => v.languageTag === "en" && v.match.gender === "female" && v.match.guestOther === "1",
+			)?.pattern,
 		).toStrictEqual([])
 	})
 
@@ -290,17 +287,18 @@ describe("updateVariant", () => {
 		})
 		// should return the female variant
 		expect(
-			message.data!.body.en?.find((v) => v.match.gender === "*" && v.match.guestOther === "*")
-				?.pattern,
+			message.data!.variants.find(
+				(v) => v.languageTag === "en" && v.match.gender === "*" && v.match.guestOther === "*",
+			)?.pattern,
 		).toStrictEqual([])
 	})
 
 	test("should return error if no variant matches", () => {
 		const mockMessage: Message = getMockMessage()
 
-		mockMessage.body["en"] = [
-			...mockMessage.body["en"]!.filter(
-				(v) => v.match.gender !== "*" || v.match.guestOther !== "*",
+		mockMessage.variants = [
+			...mockMessage.variants!.filter(
+				(v) => v.languageTag === "en" && (v.match.gender !== "*" || v.match.guestOther !== "*"),
 			),
 		]
 
@@ -339,102 +337,108 @@ const getMockMessage = (): Message => {
 			{ type: "VariableReference", name: "gender" },
 			{ type: "VariableReference", name: "guestOther" },
 		],
-		body: {
-			en: [
-				{
-					match: { gender: "female", guestOther: "1" },
-					pattern: [
-						{
-							type: "Text",
-							value: "{$hostName} invites {$guestName} to her party.",
-						},
-					],
-				},
-				{
-					match: { gender: "female", guestOther: "2" },
-					pattern: [
-						{
-							type: "Text",
-							value: "{$hostName} invites {$guestName} and one other person to her party.",
-						},
-					],
-				},
-				{
-					match: { gender: "female", guestOther: "*" },
-					pattern: [
-						{
-							type: "Text",
-							value:
-								"{$hostName} invites {$guestName} and {$guestsOther} other people to her party.",
-						},
-					],
-				},
-				{
-					match: { gender: "male", guestOther: "1" },
-					pattern: [
-						{
-							type: "Text",
-							value: "{$hostName} invites {$guestName} to his party.",
-						},
-					],
-				},
-				{
-					match: { gender: "male", guestOther: "2" },
-					pattern: [
-						{
-							type: "Text",
-							value: "{$hostName} invites {$guestName} and one other person to his party.",
-						},
-					],
-				},
-				{
-					match: { gender: "male", guestOther: "*" },
-					pattern: [
-						{
-							type: "Text",
-							value:
-								"{$hostName} invites {$guestName} and {$guestsOther} other people to his party.",
-						},
-					],
-				},
-				{
-					match: { gender: "*", guestOther: "0" },
-					pattern: [
-						{
-							type: "Text",
-							value: "{$hostName} does not give a party.",
-						},
-					],
-				},
-				{
-					match: { gender: "*", guestOther: "1" },
-					pattern: [
-						{
-							type: "Text",
-							value: "{$hostName} invites {$guestName} to their party.",
-						},
-					],
-				},
-				{
-					match: { gender: "*", guestOther: "2" },
-					pattern: [
-						{
-							type: "Text",
-							value: "{$hostName} invites {$guestName} and one other person to their party.",
-						},
-					],
-				},
-				{
-					match: { gender: "*", guestOther: "*" },
-					pattern: [
-						{
-							type: "Text",
-							value:
-								"{$hostName} invites {$guestName} and {$guestsOther} other people to their party.",
-						},
-					],
-				},
-			],
-		},
+		variants: [
+			{
+				languageTag: "en",
+				match: { gender: "female", guestOther: "1" },
+				pattern: [
+					{
+						type: "Text",
+						value: "{$hostName} invites {$guestName} to her party.",
+					},
+				],
+			},
+			{
+				languageTag: "en",
+				match: { gender: "female", guestOther: "2" },
+				pattern: [
+					{
+						type: "Text",
+						value: "{$hostName} invites {$guestName} and one other person to her party.",
+					},
+				],
+			},
+			{
+				languageTag: "en",
+				match: { gender: "female", guestOther: "*" },
+				pattern: [
+					{
+						type: "Text",
+						value: "{$hostName} invites {$guestName} and {$guestsOther} other people to her party.",
+					},
+				],
+			},
+			{
+				languageTag: "en",
+				match: { gender: "male", guestOther: "1" },
+				pattern: [
+					{
+						type: "Text",
+						value: "{$hostName} invites {$guestName} to his party.",
+					},
+				],
+			},
+			{
+				languageTag: "en",
+				match: { gender: "male", guestOther: "2" },
+				pattern: [
+					{
+						type: "Text",
+						value: "{$hostName} invites {$guestName} and one other person to his party.",
+					},
+				],
+			},
+			{
+				languageTag: "en",
+				match: { gender: "male", guestOther: "*" },
+				pattern: [
+					{
+						type: "Text",
+						value: "{$hostName} invites {$guestName} and {$guestsOther} other people to his party.",
+					},
+				],
+			},
+			{
+				languageTag: "en",
+				match: { gender: "*", guestOther: "0" },
+				pattern: [
+					{
+						type: "Text",
+						value: "{$hostName} does not give a party.",
+					},
+				],
+			},
+			{
+				languageTag: "en",
+				match: { gender: "*", guestOther: "1" },
+				pattern: [
+					{
+						type: "Text",
+						value: "{$hostName} invites {$guestName} to their party.",
+					},
+				],
+			},
+			{
+				languageTag: "en",
+				match: { gender: "*", guestOther: "2" },
+				pattern: [
+					{
+						type: "Text",
+						value: "{$hostName} invites {$guestName} and one other person to their party.",
+					},
+				],
+			},
+			{
+				languageTag: "en",
+				match: { gender: "*", guestOther: "*" },
+				pattern: [
+					{
+						type: "Text",
+						value:
+							"{$hostName} invites {$guestName} and {$guestsOther} other people to their party.",
+					},
+				],
+			},
+		],
 	}
 }

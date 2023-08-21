@@ -3,22 +3,6 @@ import { Value } from "@sinclair/typebox/value"
 import { describe, it, expect } from "vitest"
 
 describe("config.settings", () => {
-	it("should enforce an object as value", () => {
-		const mockConfig: InlangConfig = {
-			sourceLanguageTag: "en",
-			languageTags: ["en", "de"],
-			modules: [],
-			settings: {
-				// @ts-expect-error - Value is not an object
-				"namespace.plugin.helloWorld": "value",
-				// @ts-expect-error - Value is not an object
-				"x.plugin.x": false,
-				"x.plugin.y": {},
-			},
-		}
-		expect(Value.Check(InlangConfig, mockConfig)).toBe(false)
-	})
-
 	it("should be possible to have one nested object layer", () => {
 		const mockConfig: InlangConfig = {
 			sourceLanguageTag: "en",
@@ -108,8 +92,8 @@ describe("config.settings", () => {
 			languageTags: ["en", "de"],
 			modules: [],
 			settings: {
+				// @ts-expect-error - Function is not a JSON
 				"namespace.app.name": {
-					// @ts-expect-error - Function is not a JSON
 					myFunction: () => {
 						return "Hello World"
 					},
@@ -164,6 +148,19 @@ describe("config.settings", () => {
 				},
 			},
 		}
+		expect(Value.Check(InlangConfig, mockConfig)).toBe(true)
+	})
+
+	it("should be possible to disable lint rules", () => {
+		const mockConfig: InlangConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "de"],
+			modules: [],
+			settings: {
+				"project.disabled": ["namespace.lintRule.helloWorld"],
+			},
+		}
+
 		expect(Value.Check(InlangConfig, mockConfig)).toBe(true)
 	})
 })

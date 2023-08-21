@@ -1,7 +1,7 @@
 import { Static, TLiteral, TTemplateLiteral, Type } from "@sinclair/typebox"
 import { LanguageTag } from "@inlang/language-tag"
 import { LintLevel, LintRule } from "@inlang/lint"
-import { JSONSerializableObject } from "@inlang/json-serializable"
+import { JSONSerializable } from "@inlang/json-serializable"
 
 /**
  * ---------------- UTILITY TYPES ----------------
@@ -10,6 +10,12 @@ import { JSONSerializableObject } from "@inlang/json-serializable"
 // workaround to get the id from a union type
 const LintRuleId = LintRule["allOf"][0]["properties"]["meta"]["properties"]["id"]
 
+export const Disabled = Type.Array(Type.Union([LintRuleId]), {
+	// in the future plugins too
+	description: "The lint rules that should be disabled.",
+	examples: [["inlang.lintRule.missingMessage", "inlang.lintRule.patternInvalid"]],
+})
+
 /**
  * ---------------- SYSTEM SETTINGS ----------------
  */
@@ -17,17 +23,20 @@ const LintRuleId = LintRule["allOf"][0]["properties"]["meta"]["properties"]["id"
 export type ProjectSettings = Static<typeof ProjectSettings>
 export const ProjectSettings = Type.Object({
 	"project.disabled": Type.Optional(
-		Type.Array(Type.Union([LintRuleId]), {
+		Type.Array(Type.Union([Type.String()]), {
 			// in the future plugins too
 			description: "The lint rules that should be disabled.",
-			examples: [["inlang.lintRule.missingMessage", "inlang.lintRule.patternInvalid"]],
+			examples: ["inlang.lintRule.missingMessage", "inlang.lintRule.patternInvalid"],
 		}),
 	),
 	"project.lintRuleLevels": Type.Optional(
 		Type.Record(LintRuleId, LintLevel, {
 			description: "The lint rule levels. To disable a lint rule, use `system.disabled`.",
 			examples: [
-				{ "inlang.lintRule.missingMessage": "error", "inlang.lintRule.patternInvalid": "warning" },
+				{
+					"inlang.lintRule.missingMessage": "error",
+					"inlang.lintRule.patternInvalid": "warning",
+				},
 			],
 		}),
 	),
@@ -54,7 +63,7 @@ const ExternalSettings = Type.Record(
 	}) as unknown as TTemplateLiteral<
 		[TLiteral<`${string}.${"app" | "plugin" | "lintRule"}.${string}`>]
 	>,
-	JSONSerializableObject,
+	JSONSerializable,
 	{ additionalProperties: false },
 )
 

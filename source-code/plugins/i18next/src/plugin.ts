@@ -1,11 +1,4 @@
-import {
-	type Message,
-	type Variant,
-	type LanguageTag,
-	type Plugin,
-	getVariant,
-	type NodeishFilesystemSubset,
-} from "@inlang/plugin"
+import type { Message, Variant, LanguageTag, Plugin, NodeishFilesystemSubset } from "@inlang/plugin"
 import { throwIfInvalidSettings, type PluginSettings } from "./settings.js"
 import { detectJsonSpacing, detectIsNested, replaceAll } from "./utilities.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
@@ -209,27 +202,25 @@ const addVariantToMessages = (
 	const messageIndex = messages.findIndex((m) => m.id === key)
 	if (messageIndex !== -1) {
 		const variant: Variant = {
+			languageTag,
 			match: {},
-			pattern: parsePattern(value, settings.variableReferencePattern),
-		}
-		// Check if the languageTag exists in the body of the message
-		if (!messages[messageIndex]?.body[languageTag]) {
-			messages[messageIndex]!.body[languageTag]! = []
+			pattern: parsePattern(value, settings.variableReferencePattern!),
 		}
 
 		//push new variant
-		messages[messageIndex]!.body[languageTag]!.push(variant)
+		messages[messageIndex]?.variants.push(variant)
 	} else {
 		// message does not exist
 		const message: Message = {
 			id: key,
 			selectors: [],
-			body: {},
+			variants: [],
 		}
-		message.body[languageTag] = [
+		message.variants = [
 			{
+				languageTag,
 				match: {},
-				pattern: parsePattern(value, settings.variableReferencePattern),
+				pattern: parsePattern(value, settings.variableReferencePattern!),
 			},
 		]
 		messages.push(message)
@@ -241,34 +232,31 @@ const addVariantToMessages = (
  *
  * @example parsePattern("Hello {{name}}!", ["{{", "}}"])
  */
-function parsePattern(
-	text: string,
-	variableReferencePattern: PluginSettings["variableReferencePattern"],
-): Variant["pattern"] {
+function parsePattern(text: string, variableReferencePattern: string[]): Variant["pattern"] {
 	// dependent on the variableReferencePattern, different regex
 	// expressions are used for matching
-	const expression = variableReferencePattern![1]
+
+	const expression = variableReferencePattern[1]
 		? new RegExp(
-				`(\\${variableReferencePattern![0]}[^\\${variableReferencePattern![1]}]+\\${
-					variableReferencePattern![1]
-				})`,
+				`(\\${variableReferencePattern[0]}[^\\${variableReferencePattern[1]}]+\\${variableReferencePattern[1]})`,
 				"g",
 		  )
 		: new RegExp(`(${variableReferencePattern}\\w+)`, "g")
+
 	const pattern: Variant["pattern"] = text
 		.split(expression)
 		.filter((element) => element !== "")
 		.map((element) => {
-			if (expression.test(element)) {
+			if (expression.test(element) && variableReferencePattern[0]) {
 				return {
 					type: "VariableReference",
-					name: variableReferencePattern![1]
+					name: variableReferencePattern[1]
 						? element.slice(
-								variableReferencePattern![0]!.length,
+								variableReferencePattern[0].length,
 								// negative index, removing the trailing pattern
-								-variableReferencePattern![1].length,
+								-variableReferencePattern[1].length,
 						  )
-						: element.slice(variableReferencePattern![0]!.length),
+						: element.slice(variableReferencePattern[0].length),
 				}
 			} else {
 				return {
@@ -277,7 +265,6 @@ function parsePattern(
 				}
 			}
 		})
-
 	return pattern
 }
 
@@ -298,24 +285,16 @@ async function saveMessages(args: {
 			Record<string, Record<Message["id"], Variant["pattern"]>>
 		> = {}
 		for (const message of args.messages) {
-			for (const languageTag of Object.keys(message.body)) {
+			for (const variant of message.variants) {
 				const prefix: string = message.id.includes(":")
-					? message.id.split(":")[0]!
+					? (message.id.split(":")[0] as string)
 					: // TODO remove default namespace functionallity, add better parser
-					  Object.keys(args.settings.pathPattern)[0]!
+					  (Object.keys(args.settings.pathPattern)[0] as string)
 				const resolvedId = message.id.replace(prefix + ":", "")
-				const variant = getVariant(message, {
-					where: {
-						languageTag: languageTag,
-					},
-				})
-				if (variant === undefined) {
-					continue
-				}
 
-				storage[languageTag] ??= {}
-				storage[languageTag]![prefix] ??= {}
-				storage[languageTag]![prefix]![resolvedId] = variant.pattern
+				storage[variant.languageTag] ??= {}
+				storage[variant.languageTag]![prefix] ??= {}
+				storage[variant.languageTag]![prefix]![resolvedId] = variant.pattern
 			}
 		}
 		for (const [languageTag, _value] of Object.entries(storage)) {
@@ -333,7 +312,7 @@ async function saveMessages(args: {
 				}
 			}
 			for (const [prefix, value] of Object.entries(_value)) {
-				const pathWithLanguage = args.settings.pathPattern[prefix]!.replace(
+				const pathWithLanguage = (args.settings.pathPattern[prefix] as string).replace(
 					"{languageTag}",
 					languageTag,
 				)
@@ -353,17 +332,9 @@ async function saveMessages(args: {
 		// without namespaces
 		const storage: Record<LanguageTag, Record<Message["id"], Variant["pattern"]>> | undefined = {}
 		for (const message of args.messages) {
-			for (const languageTag of Object.keys(message.body)) {
-				const variant = getVariant(message, {
-					where: {
-						languageTag: languageTag,
-					},
-				})
-				if (variant === undefined) {
-					continue
-				}
-				storage[languageTag] ??= {}
-				storage[languageTag]![message.id] = variant.pattern
+			for (const variant of message.variants) {
+				storage[variant.languageTag] ??= {}
+				storage[variant.languageTag]![message.id] = variant.pattern
 			}
 		}
 		for (const [languageTag, value] of Object.entries(storage)) {
@@ -404,7 +375,7 @@ function serializeFile(
 		if (id.slice(-1) === ".") {
 			id = id.replace(/.$/, "u002E")
 		}
-		result[id] = serializePattern(pattern, variableReferencePattern)
+		result[id] = serializePattern(pattern, variableReferencePattern!)
 	}
 	// for nested structures -> unflatten the keys
 	if (nested) {
@@ -424,10 +395,7 @@ function serializeFile(
  *
  * @example const serializedPattern = serializePattern(pattern, variableReferencePattern)
  */
-function serializePattern(
-	pattern: Variant["pattern"],
-	variableReferencePattern: PluginSettings["variableReferencePattern"],
-) {
+function serializePattern(pattern: Variant["pattern"], variableReferencePattern: string[]) {
 	const result: string[] = []
 	for (const element of pattern) {
 		switch (element.type) {
@@ -436,9 +404,9 @@ function serializePattern(
 				break
 			case "VariableReference":
 				result.push(
-					variableReferencePattern![1]
-						? `${variableReferencePattern![0]}${element.name}${variableReferencePattern![1]}`
-						: `${variableReferencePattern![0]}${element.name}`,
+					variableReferencePattern[1]
+						? `${variableReferencePattern[0]}${element.name}${variableReferencePattern[1]}`
+						: `${variableReferencePattern[0]}${element.name}`,
 				)
 				break
 			default:
