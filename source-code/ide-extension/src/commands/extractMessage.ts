@@ -4,6 +4,7 @@ import { query } from "@inlang/core/query"
 import type { Message } from "@inlang/core/ast"
 import { msg } from "../utilities/message.js"
 import { telemetry } from "../services/telemetry/index.js"
+import type { IdeExtensionConfig } from "../api.js"
 
 /**
  * Helps the user to extract messages from the active text editor.
@@ -12,8 +13,7 @@ export const extractMessageCommand = {
 	id: "inlang.extractMessage",
 	title: "Inlang: Extract Message",
 	callback: async function (textEditor: vscode.TextEditor) {
-		const { ideExtension, sourceLanguageTag, writeResources } = state().config
-
+		const ideExtension = state().inlang.appSpecificApi()["inlang.app.ideExtension"] as IdeExtensionConfig | undefined
 		// guards
 		if (!ideExtension) {
 			return msg(
@@ -29,7 +29,7 @@ export const extractMessageCommand = {
 				"notification",
 			)
 		}
-		if (sourceLanguageTag === undefined) {
+		if (state().inlang.config().sourceLanguageTag === undefined) {
 			return msg(
 				"The `sourceLanguageTag` is not defined in the inlang.config.js but required to extract a message.",
 				"warn",
