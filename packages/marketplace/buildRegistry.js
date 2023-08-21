@@ -24,6 +24,7 @@ async function main() {
 
 await main()
 
+// ToDo: Move to new install app
 // /**
 //  * @param {string} path
 //  * @returns {string}
@@ -45,7 +46,6 @@ async function getMarketplaceItems(module) {
 
 	/** @type {import("@inlang/module").InlangModule} */
 	const inlangModule = await import(module)
-	// const type = Object.keys(data.default)[0]]
 
 	const exportedItems = [
 		...(inlangModule.default.plugins ?? []),
@@ -59,11 +59,15 @@ async function getMarketplaceItems(module) {
 			)
 		}
 		result.push({
-			...item.meta,
-			moduleItems: exportedItems.length,
+			meta: {
+				...item.meta,
+			},
+			type: item.meta.id.split(".")[1],
+			moduleItems: exportedItems.map((item) => item.meta.id),
 			module,
 		})
 	}
 
+	// @ts-ignore
 	return result
 }
