@@ -24,6 +24,9 @@ type HandleOptions = {
 	excludedRoutes?: RelativeUrl[]
 }
 
+const initIsLanguage = (languageTags: LanguageTag[]) => (languageTag: string | undefined) =>
+	languageTags.includes(languageTag as string)
+
 export const initHandleWrapper = (options: HandleOptions) => ({
 	use: (handle: WrappedHandle) => {
 		let runtime: SvelteKitServerRuntime
@@ -49,10 +52,10 @@ export const initHandleWrapper = (options: HandleOptions) => ({
 				}
 
 				const { sourceLanguageTag, languageTags } = await initState()
+				const isLanguage = initIsLanguage(languageTags)
 
 				let languageTag = options.parseLanguageTag(event)
-				// TODO: create `isLanguage` helper function
-				if (!languageTag || !languageTags.includes(languageTag)) {
+				if (!isLanguage(languageTag)) {
 					if (options.redirect) {
 						const detectedLanguageTag = await detectLanguageTag(
 							{ sourceLanguageTag, languageTags },
@@ -108,24 +111,24 @@ export const initRootLayoutServerLoadWrapper = <
 			) => Promise<Data> | Data,
 		) =>
 			async (event: Parameters<LayoutServerLoad>[0]): Promise<Data & LayoutServerDataPayload> => {
-			const runtime = getRuntimeFromLocals(event.locals)
+				const runtime = getRuntimeFromLocals(event.locals)
 
-			// TODO: only insert if languageTag detection strategy url is used
-			event.params.lang
+				// TODO: only insert if languageTag detection strategy url is used
+				event.params.lang
 
-			return {
-				...(await load(event, runtime)),
-				...(runtime
-					? {
+				return {
+					...(await load(event, runtime)),
+					...(runtime
+						? {
 							"[inlang]": {
 								sourceLanguageTag: runtime.sourceLanguageTag, // TODO: only pass this if `sourceLanguageTag` gets used somewhere or detection strategy is on client. If removed we need to find a new heuristic to detect excluded routes
 								languageTags: runtime.languageTags, // TODO: only pass this if `languageTags` get used somewhere
 								languageTag: runtime.languageTag, // TODO: only pass this if `languageTag` gets detected on server
 							},
-					  }
-					: undefined),
-			}
-		},
+						}
+						: undefined),
+				}
+			},
 })
 
 // ------------------------------------------------------------------------------------------------
@@ -135,11 +138,11 @@ const initGenericServerWrapper = <Event extends Kit.RequestEvent>() => ({
 		<Data extends Record<string, any> | void>(
 			fn: (event: Event, runtime: SvelteKitServerRuntime) => Promise<Data> | Data,
 		) =>
-		async (event: Event): Promise<Data> => {
-			const runtime = getRuntimeFromLocals(event.locals)
+			async (event: Event): Promise<Data> => {
+				const runtime = getRuntimeFromLocals(event.locals)
 
-			return fn(event, runtime)
-		},
+				return fn(event, runtime)
+			},
 })
 
 export const initServerLoadWrapper = <ServerLoad extends Kit.ServerLoad<any, any, any, any>>() =>

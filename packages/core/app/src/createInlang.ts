@@ -212,7 +212,7 @@ export const createInlang = async (args: {
 const loadConfig = async (args: { configPath: string; nodeishFs: NodeishFilesystemSubset }) => {
 	let json: JSON
 	if (args.configPath.startsWith("data:")) {
-		json = (await import(args.configPath)).default
+		json = (await import(/* @vite-ignore */ args.configPath)).default
 		// TODO: add error handling
 	} else {
 		const { data: configFile, error: configFileError } = await tryCatch(
