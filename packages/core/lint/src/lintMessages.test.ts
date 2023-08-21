@@ -49,7 +49,6 @@ describe("lintMessages", async () => {
 			lintRuleSettings: {},
 			sourceLanguageTag: "en",
 			languageTags: [],
-			query: {} as MessageQueryApi,
 			messages,
 			rules: [lintRule1, lintRule2],
 		})
@@ -80,7 +79,6 @@ describe("lintMessages", async () => {
 			lintRuleSettings: {},
 			sourceLanguageTag: "en",
 			languageTags: [],
-			query: {} as MessageQueryApi,
 			messages,
 			rules: [lintRule1, lintRule2],
 		})
@@ -116,7 +114,6 @@ describe("lintMessages", async () => {
 			lintRuleSettings: {},
 			sourceLanguageTag: "en",
 			languageTags: [],
-			query: {} as MessageQueryApi,
 			messages,
 			rules: [lintRule1, lintRule2],
 		})

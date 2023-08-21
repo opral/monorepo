@@ -1,4 +1,4 @@
-import type { Message, MessageQueryApi } from "@inlang/messages"
+import type { Message } from "@inlang/messages"
 import { type LanguageTag, WithLanguageTags } from "@inlang/language-tag"
 import { Type, type Static, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
 import type { JSONSerializableObject } from "@inlang/json-serializable"
@@ -47,7 +47,6 @@ export type MessageLintRule<Settings extends JSONSerializableObject | any = any>
 > & {
 	message: (args: {
 		message: Message
-		query: Pick<MessageQueryApi, "get">
 		sourceLanguageTag: LanguageTag
 		languageTags: LanguageTag[]
 		settings: Settings
