@@ -17,4 +17,18 @@ describe("JSONSerializableObject", () => {
 		}
 		expect(Value.Check(JSONSerializableObject, mockJson)).toBe(true)
 	})
+
+	// from https://github.com/inlang/inlang/pull/1142#discussion_r1300055458
+	it("should allow objects in arrays", () => {
+		const mockJson: JSONSerializableObject = {
+			languageNegotiation: {
+				strategies: [
+					{
+						type: "url",
+					},
+				],
+			},
+		}
+		expect(Value.Check(JSONSerializableObject, mockJson)).toBe(true)
+	})
 })
