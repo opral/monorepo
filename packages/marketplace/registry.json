@@ -1,19 +1,21 @@
 {
 	"apps": [
 		{
-			"id": "inlang.app.webEditor",
-			"displayName": {
-				"en": "Web Editor"
-			},
-			"description": {
-				"en": "The inlang web editor is a simple and easy-to-use no-code tool to manage your translations."
-			},
-			"marketplace": {
-				"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-				"linkToReadme": { "en": "https://inlang.com/editor" },
-				"keywords": ["web", "editor", "no-code"],
-				"publisherName": "inlang",
-				"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg"
+			"meta": {
+				"id": "inlang.app.webEditor",
+				"displayName": {
+					"en": "Web Editor"
+				},
+				"description": {
+					"en": "The inlang web editor is a simple and easy-to-use no-code tool to manage your translations."
+				},
+				"marketplace": {
+					"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+					"linkToReadme": { "en": "https://inlang.com/editor" },
+					"keywords": ["web", "editor", "no-code"],
+					"publisherName": "inlang",
+					"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg"
+				}
 			}
 		},
 		{

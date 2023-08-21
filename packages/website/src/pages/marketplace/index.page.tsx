@@ -1,7 +1,7 @@
 import { Layout } from "../Layout.jsx"
 import { Meta, Title } from "@solidjs/meta"
-import { marketplaceItems as items } from "@inlang/marketplace/src"
-import { For, Show, Accessor, createSignal, createEffect } from "solid-js"
+import { marketplaceItems } from "@inlang/marketplace"
+import { For, Show, Accessor, createSignal, createEffect, onMount } from "solid-js"
 import { Chip } from "#src/components/Chip.jsx"
 import { SearchIcon } from "../editor/@host/@owner/@repository/components/SearchInput.jsx"
 import { Button } from "../index/components/Button.jsx"
@@ -9,26 +9,18 @@ import { GetHelp } from "#src/components/GetHelp.jsx"
 import Plus from "~icons/material-symbols/add-rounded"
 import Package from "~icons/material-symbols/package-2"
 
-export function Page() {
-	const [textValue, setTextValue] = createSignal<string>("")
-	const [tags, setTags] = createSignal<Record<string, any>[]>([])
-	const [results, setResults] = createSignal<number>(0)
+type Category = "app" | "plugin" | "lintRule"
 
-	items.forEach((item: any) => {
-		setTags((tags) => {
-			const newTags = [...tags]
-			const tagId = item.id.split(".")[1].toLowerCase()
+const [searchValue, setSearchValue] = createSignal<string>("")
 
-			const tagIndex = newTags.findIndex((tag) => tag.name === tagId)
+const [selectedTags, setSelectedTags] = createSignal<Category[]>(["app", "plugin", "lintRule"])
 
-			if (tagIndex === -1) {
-				newTags.push({ name: tagId, activated: true })
-			}
-
-			return newTags
-		})
+const filteredItems = () =>
+	marketplaceItems.filter((item: any) => {
+		return filterItem(item, selectedTags(), searchValue())
 	})
 
+export function Page() {
 	return (
 		<>
 			<Title>inlang Marketplace</Title>
@@ -47,11 +39,11 @@ export function Page() {
 					<div class="w-full top-16 sticky bg-background pb-4 pt-8 z-10 border-b border-surface-2 flex flex-col gap-5">
 						<Search
 							placeholder={"Search for apps, plugins, lint rules ..."}
-							textValue={textValue}
-							setTextValue={setTextValue}
+							textValue={searchValue}
+							setTextValue={setSearchValue}
 						/>
 						<div class="flex justify-between items-center">
-							<Tags tags={tags} setTags={setTags} />
+							<Tags tags={selectedTags} setTags={setTags} />
 							<div class="max-sm:hidden">
 								<Button type="text" href="/documentation">
 									Build your own
@@ -62,21 +54,16 @@ export function Page() {
 					<div
 						class={
 							"mb-6 " +
-							(textValue() !== "" || tags().find((tag) => tag.activated === false)
+							(searchValue() !== "" || tags().find((tag) => tag.activated === false)
 								? "py-0"
 								: "py-11")
 						}
 					>
-						<Show when={textValue() !== "" || tags().find((tag) => tag.activated === false)}>
+						<Show when={searchValue() !== "" || tags().find((tag) => tag.activated === false)}>
 							<p class="text-sm py-3 text-surface-400 text-right">{results()} results</p>
 						</Show>
 						<div class="grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-center items-stretch">
-							<Gallery
-								tags={tags}
-								textValue={textValue}
-								setTextValue={setTextValue}
-								setResults={setResults}
-							/>
+							<Gallery />
 						</div>
 					</div>
 					<GetHelp text="Need help or have questions? Join our Discord!" />
@@ -86,21 +73,22 @@ export function Page() {
 	)
 }
 
-function filterItem(item: any, tags: Record<string, any>[], textValue: string) {
-	const isTagActivated = tags.find(
-		(tag) => tag.activated && tag.name === item.id.split(".")[1]?.toLowerCase(),
-	)
-	const isSearchMatch =
-		item.displayName.en?.toLowerCase().includes(textValue.toLowerCase()) ||
-		item.marketplace.publisherName.toLowerCase().includes(textValue.toLowerCase()) ||
-		item.marketplace.keywords.some((keyword: string) =>
-			keyword.toLowerCase().includes(textValue.toLowerCase()),
-		) ||
-		item.marketplace.bundleName?.toLowerCase().includes(textValue.toLowerCase()) ||
-		item.id.split(".")[1]?.toLowerCase().includes(textValue.toLowerCase()) ||
-		item.id.toLowerCase().includes(textValue.toLowerCase())
+function filterItem(item: any, selectedCategories: Category[], searchValue: string) {
+	if (selectedCategories.includes(item.type.toLowerCase())) {
+		return false
+	}
 
-	return isTagActivated && isSearchMatch
+	const isSearchMatch =
+		item.displayName.en?.toLowerCase().includes(searchValue.toLowerCase()) ||
+		item.marketplace.publisherName.toLowerCase().includes(searchValue.toLowerCase()) ||
+		item.marketplace.keywords.some((keyword: string) =>
+			keyword.toLowerCase().includes(searchValue.toLowerCase()),
+		) ||
+		item.marketplace.bundleName?.toLowerCase().includes(searchValue.toLowerCase()) ||
+		item.id.split(".")[1]?.toLowerCase().includes(searchValue.toLowerCase()) ||
+		item.id.toLowerCase().includes(searchValue.toLowerCase())
+
+	return isSearchMatch
 }
 
 const Gallery = ({
@@ -115,7 +103,7 @@ const Gallery = ({
 	setResults: (value: number) => void
 }) => {
 	createEffect(() => {
-		const activatedItems = items.filter((item: any) => {
+		const activatedItems = marketplaceItems.filter((item: any) => {
 			return filterItem(item, tags(), textValue())
 		})
 
@@ -124,7 +112,7 @@ const Gallery = ({
 
 	return (
 		<>
-			<For each={items}>
+			<For each={marketplaceItems}>
 				{(item) => {
 					return (
 						<Show
@@ -275,7 +263,6 @@ const Tags = (props: TagsProps) => {
 			}
 			return tag
 		})
-		props.setTags(updatedTags)
 	}
 
 	return (
