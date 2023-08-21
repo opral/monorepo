@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { describe, it, expect } from "vitest"
+import { describe, it, expect, vi } from "vitest"
 import { createInlang } from "./createInlang.js"
 import { createMockNodeishFs } from "@inlang/plugin/test"
 import type { InlangConfig } from "@inlang/config"
@@ -520,6 +520,210 @@ describe("functionality", () => {
 			})
 
 			expect(inlang.query.messages.getAll()).toEqual(exampleMessages)
+		})
+	})
+
+	describe("query", () => {
+		it("updates should trigger the plugin persistence", async () => {
+			const fs = await createMockNodeishFs()
+
+			await fs.writeFile(
+				"./inlang.config.json",
+				JSON.stringify({
+					sourceLanguageTag: "en",
+					languageTags: ["en", "de"],
+					modules: [""],
+					settings: {
+						"inlang.plugin.json": {
+							pathPattern: "./resources/{languageTag}.json",
+						},
+					},
+				}),
+			)
+
+			await fs.mkdir("./resources")
+
+			const mockSaveFn = vi.fn()
+
+			const _mockPlugin: Plugin = {
+				meta: {
+					id: "inlang.plugin.json",
+					description: { en: "Mock plugin description" },
+					displayName: { en: "Mock Plugin" },
+					keywords: [],
+				},
+				loadMessages: () => exampleMessages,
+				saveMessages: mockSaveFn,
+			}
+
+			const _import = async () => {
+				return {
+					default: {
+						plugins: [_mockPlugin],
+					},
+				} satisfies InlangModule
+			}
+
+			const inlang = await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: _import,
+			})
+
+			await inlang.query.messages.upsert({
+				where: { id: "a" },
+				data: {
+					id: "a",
+					selectors: [],
+					body: {
+						en: [
+							{
+								match: {},
+								pattern: [
+									{
+										type: "Text",
+										value: "a en",
+									},
+								],
+							},
+						],
+						de: [
+							{
+								match: {},
+								pattern: [
+									{
+										type: "Text",
+										value: "a de",
+									},
+								],
+							},
+						],
+					},
+				},
+			})
+
+			await inlang.query.messages.upsert({
+				where: { id: "b" },
+				data: {
+					id: "b",
+					selectors: [],
+					body: {
+						en: [
+							{
+								match: {},
+								pattern: [
+									{
+										type: "Text",
+										value: "b en",
+									},
+								],
+							},
+						],
+						de: [
+							{
+								match: {},
+								pattern: [
+									{
+										type: "Text",
+										value: "b de",
+									},
+								],
+							},
+						],
+					},
+				},
+			})
+
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			expect(mockSaveFn.mock.calls.length).toBe(1)
+
+			expect(mockSaveFn.mock.calls[0][0].settings).toStrictEqual({
+				pathPattern: "./resources/{languageTag}.json",
+			})
+
+			expect(mockSaveFn.mock.calls[0][0].messages).toStrictEqual([
+				{
+					id: "a",
+					selectors: [],
+					variants: [
+						{
+							languageTag: "en",
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "test",
+								},
+							],
+						},
+					],
+					body: {
+						en: [
+							{
+								match: {},
+								pattern: [
+									{
+										type: "Text",
+										value: "a en",
+									},
+								],
+							},
+						],
+						de: [
+							{
+								match: {},
+								pattern: [
+									{
+										type: "Text",
+										value: "a de",
+									},
+								],
+							},
+						],
+					},
+				},
+				{
+					id: "b",
+					selectors: [],
+					variants: [
+						{
+							languageTag: "en",
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "test",
+								},
+							],
+						},
+					],
+					body: {
+						en: [
+							{
+								match: {},
+								pattern: [
+									{
+										type: "Text",
+										value: "b en",
+									},
+								],
+							},
+						],
+						de: [
+							{
+								match: {},
+								pattern: [
+									{
+										type: "Text",
+										value: "b de",
+									},
+								],
+							},
+						],
+					},
+				},
+			])
 		})
 	})
 
