@@ -323,7 +323,7 @@ describe("functionality", () => {
 			expect(inlang.installed.lintRules()[0]?.lintLevel).toBe("warning")
 		})
 
-		it.skip("should apply 'disabled' to lint rules if defined in the system settings", async () => {
+		it("should apply 'disabled' to lint rules if defined in the project settings", async () => {
 			const fs = await createMockNodeishFs()
 			await fs.writeFile(
 				"./inlang.config.json",
@@ -332,7 +332,7 @@ describe("functionality", () => {
 					languageTags: ["en"],
 					modules: ["./dist/index.js"],
 					settings: {
-						"system.disabled": [mockLintRule.meta.id],
+						"project.disabled": [mockLintRule.meta.id],
 					},
 				} satisfies InlangConfig),
 			)

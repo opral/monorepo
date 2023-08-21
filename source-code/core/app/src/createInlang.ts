@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { InlangProject, InstalledLintRule, InstalledPlugin, Subscribable } from "./api.js"
 import { ImportFunction, ResolveModulesFunction, resolveModules } from "@inlang/module"
-import { NodeishFilesystemSubset, Message, tryCatch, Result } from "@inlang/plugin"
+import {
+	NodeishFilesystemSubset,
+	Message,
+	tryCatch,
+	Result,
+	JSONSerializableObject,
+} from "@inlang/plugin"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
 import { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError } from "./errors.js"
@@ -145,7 +151,10 @@ export const createInlang = async (args: {
 			lintMessages({
 				sourceLanguageTag: configValue!.sourceLanguageTag,
 				languageTags: configValue!.languageTags,
-				lintRuleSettings: configValue!.settings,
+				lintRuleSettings: configValue!.settings as Record<
+					`${string}.lintRule.${string}`,
+					JSONSerializableObject
+				>,
 				lintLevels: Object.fromEntries(
 					installedLintRules().map((rule) => [rule.meta.id, rule.lintLevel]),
 				),
