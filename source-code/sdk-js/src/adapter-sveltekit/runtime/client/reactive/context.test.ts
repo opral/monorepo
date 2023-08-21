@@ -7,17 +7,12 @@ import { get } from "svelte/store"
 let mockedFetch: Mock
 let runtime: SvelteKitClientRuntime
 
-// TODO: refactor
-
 beforeEach(async () => {
 	vi.resetAllMocks()
 
 	let ctx: ReturnType<typeof getRuntimeFromContext>
 
-	mockedFetch = vi.fn().mockImplementation(async (url) => {
-		const languageTag = url.endsWith("de.json") ? "de" : "en"
-		return new Response(JSON.stringify([]))
-	})
+	mockedFetch = vi.fn().mockImplementation(async () => new Response(JSON.stringify([])))
 
 	runtime = await initSvelteKitClientRuntime({
 		fetch: mockedFetch,

@@ -65,6 +65,7 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 			return runtime.languages
 		},
 		get language() {
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			return runtime.language!
 		},
 		switchLanguage: (...args: Parameters<typeof changeLanguageTag>) => {
@@ -78,7 +79,6 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	})
 }
 
-// TODO: output warning during dev that calling this does not make sense
 const route = (href: RelativeUrl) => {
 	if (import.meta.env.DEV) {
 		console.info(

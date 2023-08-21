@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, expect, test } from "vitest"
 import {
 	initBaseRuntime,
@@ -7,7 +8,7 @@ import {
 	type RuntimeState,
 } from "./runtime.js"
 import type { Message } from "@inlang/app"
-import { createMessage } from "./inlang-function.test.js"
+import { createMessage } from '../test.util.js'
 
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -61,13 +62,13 @@ describe("initBaseRuntime", () => {
 			expect(state.messages).toHaveLength(0)
 
 			await runtime.loadMessages("en")
-			expect(state.messages).toMatchObject(messageMap.en)
-			expect(state.messages).toHaveLength(1)
+			expect(state.messages[0]!.variants).toMatchObject(messageMap.en[0]!.variants)
+			expect(state.messages[0]!.variants).toHaveLength(1)
 
 			await runtime.loadMessages("de")
-			expect(state.messages).toMatchObject(messageMap.en)
-			expect(state.messages).toMatchObject(messageMap.de)
-			expect(Object.keys(state.messages[0]!.body)).toHaveLength(2)
+
+			expect(state.messages[0]!.variants).toMatchObject([...messageMap.en[0]!.variants, ...messageMap.de[0]!.variants])
+			expect(Object.keys(state.messages[0]!.variants)).toHaveLength(2)
 		})
 
 		test("it should not fail if messages were not found", async () => {
@@ -201,7 +202,13 @@ describe("initBaseRuntime", () => {
 		})
 
 		test("it should return the inlang function for the current languageTag", async () => {
-			const runtime = initBaseRuntime(context)
+			const state = {
+				languageTag: "en",
+				messages: [],
+				i: undefined,
+			}
+			const runtime = initBaseRuntime(context, state)
+
 
 			await runtime.loadMessages("en")
 			runtime.changeLanguageTag("en")
