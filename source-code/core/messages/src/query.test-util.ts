@@ -3,7 +3,7 @@ import type { MessageQueryApi } from "./query.js"
 import type { Message, Text } from "./schema.js"
 
 export const queryBaseTests = async <QueryApi extends MessageQueryApi>(args: {
-	createQueryFn: (messages: Message[]) => QueryApi,
+	createQueryFn: (messages: Message[]) => QueryApi
 }) => {
 	const vitest = await import("vitest")
 	const { it, describe, expect } = vitest
@@ -21,7 +21,9 @@ export const queryBaseTests = async <QueryApi extends MessageQueryApi>(args: {
 		})
 
 		it("should return false if message with id already exists", () => {
-			const query = args.createQueryFn([createMessage({ id: "first-message", text: "Hello World" })])
+			const query = args.createQueryFn([
+				createMessage({ id: "first-message", text: "Hello World" }),
+			])
 			expect(query.get({ where: { id: "first-message" } })).toBeDefined()
 
 			const mockMessage = createMessage({ id: "first-message", text: "Some Text" })
@@ -34,26 +36,37 @@ export const queryBaseTests = async <QueryApi extends MessageQueryApi>(args: {
 
 	describe("get", () => {
 		it("should return undefined if a message does not exist", () => {
-			const query = args.createQueryFn([createMessage({ id: "first-message", text: "Hello World" })])
+			const query = args.createQueryFn([
+				createMessage({ id: "first-message", text: "Hello World" }),
+			])
 			const message = query.get({ where: { id: "none-existent-message" } })
 			expect(message).toBeUndefined()
 		})
 
 		it("should return an object, not an array", () => {
-			const query = args.createQueryFn([createMessage({ id: "first-message", text: "Hello World" })])
+			const query = args.createQueryFn([
+				createMessage({ id: "first-message", text: "Hello World" }),
+			])
 			const message = query.get({ where: { id: "first-message" } })
 			expect(message).toBeDefined()
 			expect(Array.isArray(message)).toBe(false)
 		})
 
 		it("mutating the returned value should not affect subsequent return values", () => {
-			const query = args.createQueryFn([createMessage({ id: "first-message", text: "Hello World" })])
-			const message1 = query.get({ where: { id: "first-message" } })!;
-			(message1.body.en![0]!.pattern![0]! as Text).value = "Hello World 2"
+			const query = args.createQueryFn([
+				createMessage({ id: "first-message", text: "Hello World" }),
+			])
+			const message1 = query.get({ where: { id: "first-message" } })!
+			;(message1.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value =
+				"Hello World 2"
 			const message2 = query.get({ where: { id: "first-message" } })!
 
-			expect((message1.body.en![0]!.pattern![0]! as Text).value).toBe("Hello World 2")
-			expect((message2.body.en![0]!.pattern![0]! as Text).value).toBe("Hello World")
+			expect(
+				(message1.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value,
+			).toBe("Hello World 2")
+			expect(
+				(message2.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value,
+			).toBe("Hello World")
 		})
 	})
 
@@ -77,19 +90,28 @@ export const queryBaseTests = async <QueryApi extends MessageQueryApi>(args: {
 		})
 
 		it("mutating the returned value should not affect subsequent return values", () => {
-			const query = args.createQueryFn([createMessage({ id: "first-message", text: "Hello World" })])
-			const messages1 = query.getAll();
-			(messages1[0]!.body.en![0]!.pattern![0]! as Text).value = "Hello World 2"
+			const query = args.createQueryFn([
+				createMessage({ id: "first-message", text: "Hello World" }),
+			])
+			const messages1 = query.getAll()
+			;(messages1[0]!.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value =
+				"Hello World 2"
 			const messages2 = query.getAll()
 
-			expect((messages1[0]!.body.en![0]!.pattern![0]! as Text).value).toBe("Hello World 2")
-			expect((messages2[0]!.body.en![0]!.pattern![0]! as Text).value).toBe("Hello World")
+			expect(
+				(messages1[0]!.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value,
+			).toBe("Hello World 2")
+			expect(
+				(messages2[0]!.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value,
+			).toBe("Hello World")
 		})
 	})
 
 	describe("update", () => {
 		it("should update a message", () => {
-			const query = args.createQueryFn([createMessage({ id: "first-message", text: "Hello World" })])
+			const query = args.createQueryFn([
+				createMessage({ id: "first-message", text: "Hello World" }),
+			])
 			expect(query.get({ where: { id: "first-message" } })).toBeDefined()
 
 			const mockMessage = createMessage({ id: "first-message", text: "Hello World 2" })
@@ -104,7 +126,7 @@ export const queryBaseTests = async <QueryApi extends MessageQueryApi>(args: {
 			expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
 
 			const mockMessage = createMessage({ id: "first-message", text: "Hello World" })
-			const updated = query.update({ where: { id: 'first-message' }, data: mockMessage })
+			const updated = query.update({ where: { id: "first-message" }, data: mockMessage })
 			expect(updated).toBe(false)
 		})
 	})
@@ -115,18 +137,20 @@ export const queryBaseTests = async <QueryApi extends MessageQueryApi>(args: {
 			expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
 
 			const mockMessage = createMessage({ id: "first-message", text: "Hello World" })
-			const upserted = query.upsert({ where: { id: 'first-message' }, data: mockMessage })
+			const upserted = query.upsert({ where: { id: "first-message" }, data: mockMessage })
 
 			expect(query.get({ where: { id: "first-message" } })).toEqual(mockMessage)
 			expect(upserted).toBe(true)
 		})
 
 		it("should update message if id already exists", () => {
-			const query = args.createQueryFn([createMessage({ id: "first-message", text: "Hello World" })])
+			const query = args.createQueryFn([
+				createMessage({ id: "first-message", text: "Hello World" }),
+			])
 			expect(query.get({ where: { id: "first-message" } })).toBeDefined()
 
 			const mockMessage = createMessage({ id: "first-message", text: "Hello World 2" })
-			const upserted = query.upsert({ where: { id: 'first-message' }, data: mockMessage })
+			const upserted = query.upsert({ where: { id: "first-message" }, data: mockMessage })
 
 			expect(query.get({ where: { id: "first-message" } })).toEqual(mockMessage)
 			expect(upserted).toBe(true)
@@ -135,10 +159,12 @@ export const queryBaseTests = async <QueryApi extends MessageQueryApi>(args: {
 
 	describe("delete", () => {
 		it("should delete a message", () => {
-			const query = args.createQueryFn([createMessage({ id: "first-message", text: "Hello World" })])
+			const query = args.createQueryFn([
+				createMessage({ id: "first-message", text: "Hello World" }),
+			])
 			expect(query.get({ where: { id: "first-message" } })).toBeDefined()
 
-			const deleted = query.delete({ where: { id: 'first-message' } })
+			const deleted = query.delete({ where: { id: "first-message" } })
 
 			expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
 			expect(deleted).toBe(true)
@@ -148,7 +174,7 @@ export const queryBaseTests = async <QueryApi extends MessageQueryApi>(args: {
 			const query = args.createQueryFn([])
 			expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
 
-			const deleted = query.delete({ where: { id: 'first-message' } })
+			const deleted = query.delete({ where: { id: "first-message" } })
 			expect(deleted).toBe(false)
 		})
 	})
@@ -160,18 +186,17 @@ function createMessage(args: { id: string; text: string }): Message {
 	return {
 		id: args.id,
 		selectors: [],
-		body: {
-			en: [
-				{
-					match: {},
-					pattern: [
-						{
-							type: "Text",
-							value: args.text,
-						},
-					],
-				},
-			],
-		},
+		variants: [
+			{
+				languageTag: "en",
+				match: {},
+				pattern: [
+					{
+						type: "Text",
+						value: args.text,
+					},
+				],
+			},
+		],
 	}
 }
