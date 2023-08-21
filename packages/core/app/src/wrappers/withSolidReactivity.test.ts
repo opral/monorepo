@@ -41,36 +41,34 @@ const exampleMessages: Message[] = [
 	{
 		id: "a",
 		selectors: [],
-		body: {
-			en: [
-				{
-					match: {},
-					pattern: [
-						{
-							type: "Text",
-							value: "test",
-						},
-					],
-				},
-			],
-		},
+		variants: [
+			{
+				languageTag: "en",
+				match: {},
+				pattern: [
+					{
+						type: "Text",
+						value: "test",
+					},
+				],
+			},
+		],
 	},
 	{
 		id: "b",
 		selectors: [],
-		body: {
-			en: [
-				{
-					match: {},
-					pattern: [
-						{
-							type: "Text",
-							value: "test",
-						},
-					],
-				},
-			],
-		},
+		variants: [
+			{
+				languageTag: "en",
+				match: {},
+				pattern: [
+					{
+						type: "Text",
+						value: "test",
+					},
+				],
+			},
+		],
 	},
 ]
 
@@ -233,36 +231,45 @@ describe("messages", () => {
 
 		const messagesBefore = inlang.query.messages.getAll()
 		expect(messagesBefore.length).toBe(2)
-		expect((messagesBefore[0]!.body.en![0]!.pattern[0]! as Text).value).toBe("test")
+		expect(
+			(
+				messagesBefore[0]?.variants.find((variant) => variant.languageTag === "en")
+					?.pattern[0] as Text
+			).value,
+		).toBe("test")
 
 		inlang.query.messages.update({
 			where: { id: "a" },
 			// TODO: use `createMessage` utility
 			data: {
 				...exampleMessages[0],
-				body: {
-					en: [
-						{
-							match: {},
-							pattern: [
-								{
-									type: "Text",
-									value: "test2",
-								},
-							],
-						},
-					],
-				},
+				variants: [
+					{
+						languageTag: "en",
+						match: {},
+						pattern: [
+							{
+								type: "Text",
+								value: "test2",
+							},
+						],
+					},
+				],
 			},
 		})
 
 		// TODO: how can we await `query-messages.update` correctly
-		await new Promise((resolve) => setTimeout(resolve, 0))
+		await new Promise((resolve) => setTimeout(resolve, 10))
 
 		expect(counter).toBe(2) // 2 times because effect creation + set
 		const messagesAfter = inlang.query.messages.getAll()
 		expect(messagesAfter.length).toBe(2)
-		expect((messagesAfter[0]!.body.en![0]!.pattern[0]! as Text).value).toBe("test2")
+		expect(
+			(
+				messagesBefore[0]?.variants.find((variant) => variant.languageTag === "en")
+					?.pattern[0] as Text
+			).value,
+		).toBe("test2")
 	})
 })
 

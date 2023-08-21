@@ -94,11 +94,11 @@ export const assertNecessaryFilesArePresent = async (config: TransformConfig) =>
 						Please do not delete it (inlang will recreate it if needed).
 					`
 
-					// TODO: show log message
 					await writeFile(
 						path,
 						path.endsWith(".svelte") ? `<!-- ${message} -->` : `/* ${message} */`,
 					)
+					console.info(`[INLANG] Created file (${path.replace(config.cwdFolderPath, "")}).`)
 
 					resolve(true)
 				}),

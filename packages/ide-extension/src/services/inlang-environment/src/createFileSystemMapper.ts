@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import type { InlangEnvironment } from "@inlang/core/environment"
+import type { NodeishFilesystemSubset } from "@inlang/app"
 
 /**
  * Creates a new mapper between vscode and inlang file systems.
@@ -11,15 +11,15 @@ import type { InlangEnvironment } from "@inlang/core/environment"
 export function createFileSystemMapper(
 	target: vscode.FileSystem,
 	base: vscode.Uri,
-): InlangEnvironment["$fs"] {
+): NodeishFilesystemSubset {
 	return {
 		readdir: async (path) => {
 			return (await target.readDirectory(vscode.Uri.joinPath(base, path))).map((dir) => dir[0])
 		},
-		readFile: async (id) => {
-			const path = vscode.Uri.joinPath(base, id)
-			const rawFile = await target.readFile(path)
-			return new TextDecoder().decode(rawFile)
+		readFile: async (path) => {
+			const joinedPath = vscode.Uri.joinPath(base, path)
+			const rawFile = await target.readFile(joinedPath)
+			return new TextDecoder().decode(rawFile) as any
 		},
 		writeFile: async (file, data) => {
 			return target.writeFile(

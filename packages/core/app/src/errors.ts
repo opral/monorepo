@@ -18,3 +18,17 @@ export class ConfigPathNotFoundError extends Error {
 		this.name = "ConfigPathNotFoundError"
 	}
 }
+
+export class PluginSaveMessagesError extends Error {
+	constructor(message: string, options: ErrorOptions) {
+		super(message, options)
+		this.name = "PluginSaveMessagesError"
+	}
+}
+
+export class PluginLoadMessagesError extends Error {
+	constructor(message: string, options: ErrorOptions) {
+		super(message, options)
+		this.name = "PluginLoadMessagesError"
+	}
+}

@@ -1,18 +1,13 @@
-import type { Resource } from "@inlang/core/ast"
-import type { InlangConfig } from "@inlang/core/config"
+import type { InlangConfig, InlangProject, Message } from "@inlang/app"
 
 /**
  * The state of the vscode extension.
  */
 type State = {
 	/**
-	 * Closest inlang configuration.
+	 * Inlang project
 	 */
-	config: InlangConfig
-	/**
-	 * All ressources found by the inlang configuration.
-	 */
-	resources: Resource[]
+	inlang: InlangProject
 }
 
 let _state: State
