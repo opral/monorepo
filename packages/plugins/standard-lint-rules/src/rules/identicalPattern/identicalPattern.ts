@@ -22,26 +22,25 @@ message to reduce translation effort.
 `,
 		},
 	},
-	message: ({ message: { id, body }, sourceLanguageTag, report, settings }) => {
-		const referenceVariants = body[sourceLanguageTag]!
+	message: ({ message: { id, variants }, sourceLanguageTag, report, settings }) => {
+		const referenceVariant = variants.find((variant) => variant.languageTag === sourceLanguageTag)
+		if (referenceVariant === undefined) return
 
-		const translatedLanguageTags = Object.keys(body).filter(
-			(languageTag) => languageTag !== sourceLanguageTag,
+		const translatedVariants = variants.filter(
+			(variant) =>  variant.languageTag !== sourceLanguageTag,
 		)
 
-		for (const languageTag of translatedLanguageTags) {
+		for (const variant of translatedVariants) {
 			const isMessageIdentical =
-				messageBodyToString(referenceVariants) === messageBodyToString(body[languageTag]!)
-			const shouldBeIgnored = (referenceVariants || []).some((variant) =>
-				settings.ignore?.includes(patternToString(variant.pattern)),
-			)
+			messageVariantToString(referenceVariant) === messageVariantToString(variant)
+			const shouldBeIgnored = settings.ignore?.includes(patternToString(referenceVariant.pattern))
 
 			if (isMessageIdentical && !shouldBeIgnored) {
 				report({
 					messageId: id,
-					languageTag,
+					languageTag: variant.languageTag,
 					body: {
-						en: `Identical content found in language '${languageTag}' with message ID '${id}'.`,
+						en: `Identical content found in language '${ variant.languageTag}' with message ID '${id}'.`,
 					},
 				})
 			}
@@ -50,7 +49,10 @@ message to reduce translation effort.
 }
 
 // TODO: use a generic toString function instead of JSON.stringify
-const messageBodyToString = (body: Variant[]) => JSON.stringify(body)
+const messageVariantToString = (variant: Variant) => {
+	const variantWithoutLanguageTag = { ...variant, languageTag: undefined }
+	return JSON.stringify(variantWithoutLanguageTag)
+}
 
 // TODO: use a generic toString function instead of this custom code
 const patternToString = (pattern: Variant["pattern"]) =>

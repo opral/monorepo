@@ -1,19 +1,17 @@
 import { expect, test } from "vitest"
-import type { InlangConfig } from "@inlang/config"
-import type { Message, MessageQueryApi } from "@inlang/messages"
+import type { Message } from "@inlang/messages"
 import { missingMessageRule } from "./missingMessage.js"
 import { lintSingleMessage } from "@inlang/lint"
 
 const message1: Message = {
 	id: "1",
 	selectors: [],
-	body: {
-		en: [{ match: {}, pattern: [{ type: "Text", value: "Inlang" }] }],
-		de: [{ match: {}, pattern: [{ type: "Text", value: "Inlang" }] }],
-		fr: [],
-		es: [{ match: {}, pattern: [] }],
-		cn: [{ match: {}, pattern: [{ type: "Text", value: "" }] }],
-	},
+	variants: [
+		{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "Inlang" }] },
+		{ languageTag: "de", match: {}, pattern: [{ type: "Text", value: "Inlang" }] },
+		{ languageTag: "es", match: {}, pattern: [] },
+		{ languageTag: "cn", match: {}, pattern: [{ type: "Text", value: "" }] },
+	],
 }
 
 const messages = [message1]
@@ -26,7 +24,6 @@ test("should not report if all messages are present", async () => {
 			[missingMessageRule.meta.id]: "warning",
 		},
 		lintRuleSettings: {},
-		query: {} as MessageQueryApi,
 		messages,
 		message: message1,
 		rules: [missingMessageRule],
@@ -44,7 +41,6 @@ test("should report if a languageTag is not present", async () => {
 			[missingMessageRule.meta.id]: "warning",
 		},
 		lintRuleSettings: {},
-		query: {} as MessageQueryApi,
 		messages,
 		message: message1,
 		rules: [missingMessageRule],
@@ -63,7 +59,6 @@ test("should report if no variants are defined", async () => {
 			[missingMessageRule.meta.id]: "warning",
 		},
 		lintRuleSettings: {},
-		query: {} as MessageQueryApi,
 		messages,
 		message: message1,
 		rules: [missingMessageRule],
@@ -82,7 +77,6 @@ test("should report if no patterns are defined", async () => {
 			[missingMessageRule.meta.id]: "warning",
 		},
 		lintRuleSettings: {},
-		query: {} as MessageQueryApi,
 		messages,
 		message: message1,
 		rules: [missingMessageRule],
@@ -101,7 +95,6 @@ test("should report if a message has a pattern with only one text element that i
 			[missingMessageRule.meta.id]: "warning",
 		},
 		lintRuleSettings: {},
-		query: {} as MessageQueryApi,
 		messages,
 		message: message1,
 		rules: [missingMessageRule],

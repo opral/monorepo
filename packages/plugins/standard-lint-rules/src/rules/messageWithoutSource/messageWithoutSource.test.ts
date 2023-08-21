@@ -1,15 +1,15 @@
 import { expect, test } from "vitest"
 import { lintSingleMessage } from "@inlang/lint"
-import type { Message, MessageQueryApi } from "@inlang/messages"
+import type { Message } from "@inlang/messages"
 import { messageWithoutSourceRule } from "./messageWithoutSource.js"
 
 const message1: Message = {
 	id: "1",
 	selectors: [],
-	body: {
-		en: [],
-		de: [],
-	},
+	variants: [
+		{ languageTag: "en", match: {}, pattern: [] },
+		{ languageTag: "de", match: {}, pattern: [] },
+	]
 }
 
 const messages = [message1]
@@ -22,7 +22,6 @@ test("should not report if source message present", async () => {
 			[messageWithoutSourceRule.meta.id]: "warning",
 		},
 		lintRuleSettings: {},
-		query: {} as MessageQueryApi,
 		messages,
 		message: message1,
 		rules: [messageWithoutSourceRule],
@@ -40,7 +39,6 @@ test("should report if source message is missing", async () => {
 			[messageWithoutSourceRule.meta.id]: "warning",
 		},
 		lintRuleSettings: {},
-		query: {} as MessageQueryApi,
 		messages,
 		message: message1,
 		rules: [messageWithoutSourceRule],
