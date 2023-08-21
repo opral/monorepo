@@ -14,7 +14,7 @@ import {
  * All actions are immutable.
  *
  * @example
- * 	const variant = getVariant(message, { languageTag: "en", selectors: { gender: "male" }});
+ * 	const variant = getVariant(message, { where: { languageTag: "en", selectors: { gender: "male" }}});
  */
 export function getVariant(
 	message: Message,
@@ -25,9 +25,6 @@ export function getVariant(
 		}
 	},
 ): Variant | undefined {
-	if (message.body[args.where.languageTag] === undefined) {
-		return undefined
-	}
 	const variant = matchMostSpecificVariant(message, args.where.languageTag, args.where.selectors)
 	if (variant) {
 		//! do not return a reference to the message in a resource
@@ -49,23 +46,18 @@ export function getVariant(
 export function createVariant(
 	message: Message,
 	args: {
-		where: {
-			languageTag: LanguageTag
-		}
 		data: Variant
 	},
 ): Result<Message, MessageVariantAlreadyExistsError> {
 	const copy: Message = structuredClone(message)
-	// check if languageTag exists
-	copy.body[args.where.languageTag] ??= []
 
 	// check if variant already exists
-	if (matchVariant(copy, args.where.languageTag, args.data.match)) {
-		return { error: new MessageVariantAlreadyExistsError(message.id, args.where.languageTag) }
+	if (matchVariant(copy, args.data.languageTag, args.data.match)) {
+		return { error: new MessageVariantAlreadyExistsError(message.id, args.data.languageTag) }
 	}
 
 	// need to resolve selectors to match length and order of message selectors
-	copy.body[args.where.languageTag]!.push({
+	copy.variants.push({
 		...args.data,
 		match: resolveSelector(copy.selectors, args.data.match),
 	})
@@ -91,11 +83,16 @@ export function updateVariantPattern(
 	},
 ): Result<Message, MessageVariantDoesNotExistError | MessagePatternsForLanguageTagDoNotExistError> {
 	const copy: Message = structuredClone(message)
-	if (copy.body[args.where.languageTag] === undefined) {
+
+	const containsLanguageTag = message.variants.some(
+		(variant) => variant.languageTag === args.where.languageTag,
+	)
+	if (!containsLanguageTag) {
 		return {
 			error: new MessagePatternsForLanguageTagDoNotExistError(message.id, args.where.languageTag),
 		}
 	}
+
 	const variant = matchVariant(copy, args.where.languageTag, args.where.selectors)
 	if (variant === undefined) {
 		return { error: new MessageVariantDoesNotExistError(message.id, args.where.languageTag) }
@@ -121,7 +118,10 @@ const matchVariant = (
 	// resolve preferenceSelectors to match length and order of message selectors
 	const resolvedSelectors = resolveSelector(message.selectors, selectors)
 
-	for (const variant of message.body[languageTag]!) {
+	const languageVariants = message.variants.filter((variant) => variant.languageTag === languageTag)
+	if (languageVariants.length === 0) return undefined
+
+	for (const variant of languageVariants) {
 		let isMatch = true
 		//check if vaiant is a match
 		for (const [key, value] of Object.entries(variant.match)) {
@@ -154,7 +154,10 @@ const matchMostSpecificVariant = (
 	const resolvedSelectors = resolveSelector(message.selectors, selectors)
 	const index: Record<string, any> = {}
 
-	for (const variant of message.body[languageTag]!) {
+	const languageVariants = message.variants.filter((variant) => variant.languageTag === languageTag)
+	if (languageVariants.length === 0) return undefined
+
+	for (const variant of languageVariants) {
 		let isMatch = true
 
 		//check if variant is a match

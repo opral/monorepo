@@ -42,7 +42,7 @@ const mergeMessages = (oldMessages: Message[], newMessages: Message[]) => {
 		if (!message) {
 			oldMessages.push(newMessage)
 		} else {
-			message.body = { ...message.body, ...newMessage.body }
+			message.variants = { ...message.variants, ...newMessage.variants }
 		}
 	}
 }
