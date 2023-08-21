@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { describe, it, expect } from "vitest"
+import { describe, it, expect, vi } from "vitest"
 import { createInlang } from "./createInlang.js"
 import { createMockNodeishFs } from "@inlang/plugin/test"
 import type { InlangConfig } from "@inlang/config"
@@ -545,18 +545,31 @@ describe("functionality", () => {
 
 			await fs.mkdir("./resources")
 
+			const mockSaveFn = vi.fn()
+
+			const _mockPlugin: Plugin = {
+				meta: {
+					id: "inlang.plugin.json",
+					description: { en: "Mock plugin description" },
+					displayName: { en: "Mock Plugin" },
+					keywords: [],
+				},
+				loadMessages: () => exampleMessages,
+				saveMessages: mockSaveFn,
+			}
+
+			const _import = async () => {
+				return {
+					default: {
+						plugins: [_mockPlugin],
+					},
+				} satisfies InlangModule
+			}
+
 			const inlang = await createInlang({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
-				_import: async () =>
-					({
-						default: {
-							// @ts-ignore
-							plugins: [...pluginJson.plugins],
-							// @ts-ignore
-							lintRules: [...pluginLint.lintRules],
-						},
-					} satisfies InlangModule),
+				_import: _import,
 			})
 
 			await inlang.query.messages.upsert({
@@ -590,6 +603,7 @@ describe("functionality", () => {
 					},
 				},
 			})
+
 			await inlang.query.messages.upsert({
 				where: { id: "b" },
 				data: {
@@ -624,18 +638,94 @@ describe("functionality", () => {
 
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
-			const enFile = await fs.readFile("/resources/en.json", { encoding: "utf-8" })
-			const deFile = await fs.readFile("/resources/de.json", { encoding: "utf-8" })
+			expect(mockSaveFn.mock.calls.length).toBe(1)
 
-			expect(JSON.parse(enFile)).toStrictEqual({
-				a: "a en",
-				b: "b en",
+			expect(mockSaveFn.mock.calls[0][0].settings).toStrictEqual({
+				pathPattern: "./resources/{languageTag}.json",
 			})
 
-			expect(JSON.parse(deFile)).toStrictEqual({
-				a: "a de",
-				b: "b de",
-			})
+			expect(mockSaveFn.mock.calls[0][0].messages).toStrictEqual([
+				{
+					id: "a",
+					selectors: [],
+					variants: [
+						{
+							languageTag: "en",
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "test",
+								},
+							],
+						},
+					],
+					body: {
+						en: [
+							{
+								match: {},
+								pattern: [
+									{
+										type: "Text",
+										value: "a en",
+									},
+								],
+							},
+						],
+						de: [
+							{
+								match: {},
+								pattern: [
+									{
+										type: "Text",
+										value: "a de",
+									},
+								],
+							},
+						],
+					},
+				},
+				{
+					id: "b",
+					selectors: [],
+					variants: [
+						{
+							languageTag: "en",
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "test",
+								},
+							],
+						},
+					],
+					body: {
+						en: [
+							{
+								match: {},
+								pattern: [
+									{
+										type: "Text",
+										value: "b en",
+									},
+								],
+							},
+						],
+						de: [
+							{
+								match: {},
+								pattern: [
+									{
+										type: "Text",
+										value: "b de",
+									},
+								],
+							},
+						],
+					},
+				},
+			])
 		})
 	})
 
