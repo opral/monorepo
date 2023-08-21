@@ -10,11 +10,12 @@ import {
 } from "@inlang/plugin"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
-import { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError } from "./errors.js"
+import { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError, PluginLoadMessagesError, PluginSaveMessagesError } from "./errors.js"
 import { LintRuleThrowedError, LintReport, lintMessages } from "@inlang/lint"
 import { createRoot, createSignal, createEffect } from "./solid.js"
 import { createReactiveQuery } from "./createReactiveQuery.js"
 import { InlangConfig } from "@inlang/config"
+import { debounce } from "throttle-debounce"
 
 const ConfigCompiler = TypeCompiler.Compile(InlangConfig)
 
@@ -112,7 +113,9 @@ export const createInlang = async (args: {
 					markInitAsComplete()
 				})
 				.catch((err) => {
-					console.error("Error in load messages ", err)
+					throw new PluginLoadMessagesError("Error in load messages", {
+						cause: err,
+					})
 				})
 		})
 
@@ -189,6 +192,21 @@ export const createInlang = async (args: {
 		})
 
 		const query = createReactiveQuery(() => messages()!)
+
+		const debouncedSave = skipFirst(debounce(500, async (newMessages) => {
+				// console.log('saving changes to messages')
+				try {
+					await resolvedModules()!.data.plugins.data.saveMessages({ messages: newMessages})
+				} catch (err) {
+					throw new PluginSaveMessagesError("Error in saving messages", {
+						cause: err,
+					})
+				}
+			}, { atBegin: false }))
+
+		createEffect(() => {
+			debouncedSave(query.getAll())
+		})
 
 		return {
 			installed: {
@@ -308,6 +326,18 @@ type JSONObject = any
 type MaybePromise<T> = T | Promise<T>
 
 const makeTrulyAsync = <T>(fn: MaybePromise<T>): Promise<T> => (async () => fn)()
+
+// Skip initial call, eg. to skip setup of a createEffect
+function skipFirst (func: (args: any) => any) {
+	let initial = false
+	return function (...args: any) {
+		if (initial) {
+			// @ts-ignore
+			return func.apply(this, args)
+		}
+		initial = true
+	}
+}
 
 // TODO: how do we unsubscribe? Do we need that?
 // COMMENT from @samuelstroschein: Likely not. The reactivity is handled internally with auto dispose from SolidJS.
