@@ -5,7 +5,6 @@ import { useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
 import { showToast } from "#src/components/Toast.jsx"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
-import MaterialSymbolsCheck from "~icons/material-symbols/check"
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { getTextValue, setTipTapMessage } from "../helper/parse.js"
@@ -64,10 +63,10 @@ export function PatternEditor(props: {
 		}
 	}
 
-	const sourceMessage = () => props.message.body[sourceLanguageTag()!]
+	const sourceMessage = () => props.message.variants.filter((variant) => variant.languageTag === sourceLanguageTag()!)
 
-	const variant = () => props.message["body"][props.languageTag]
-		? props.message["body"][props.languageTag]![0]
+	const variant = () => props.message.variants.filter((variant) => variant.languageTag === props.languageTag)
+		? props.message.variants.filter((variant) => variant.languageTag === props.languageTag)![0]
 		: undefined
 
 	const newPattern = () => getTextValue(editor) as Variant["pattern"];
@@ -113,8 +112,8 @@ export function PatternEditor(props: {
 		let newMessage;
 		if (variant() === undefined) {
 			newMessage = createVariant(props.message, {
-				where: { languageTag: props.languageTag },
 				data: {
+					languageTag: props.languageTag,
 					match: {},
 					pattern: newPattern(),
 				}
@@ -354,7 +353,7 @@ export function PatternEditor(props: {
 						isLineItemFocused()
 					}>
 						<sl-button
-							prop:variant="primary"
+							prop:variant="default"
 							prop:size="small"
 							prop:disabled={
 								hasChanges() === false ||
