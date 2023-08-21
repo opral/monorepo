@@ -6,6 +6,7 @@ async function main() {
 	const items = [...registry.apps]
 
 	for (let module of registry.modules) {
+		// ToDo: Activate after plugin registry is live
 		// if (module.includes("jsdelivr") === false) {
 		// 	throw new Error(
 		// 		`Module ${module} is not hosted on jsdelivr. Please host it there and update the registry.json file.`,
@@ -44,7 +45,6 @@ await main()
 async function getMarketplaceItems(module) {
 	const result = []
 
-	/** @type {import("@inlang/module").InlangModule} */
 	const inlangModule = await import(module)
 
 	const exportedItems = [
@@ -54,20 +54,23 @@ async function getMarketplaceItems(module) {
 
 	for (const item of exportedItems) {
 		if (item.meta.marketplace === undefined) {
-			throw Error(
+			throw new Error(
 				`Module ${item.meta.id} has no marketplace metadata. Remove it from the registry.`,
 			)
 		}
-		result.push({
+
+		// Create a new object that matches the structure of MarketplaceItem
+		const marketplaceItem = {
 			meta: {
 				...item.meta,
 			},
 			type: item.meta.id.split(".")[1],
 			moduleItems: exportedItems.map((item) => item.meta.id),
 			module,
-		})
+		}
+
+		result.push(marketplaceItem)
 	}
 
-	// @ts-ignore
 	return result
 }
