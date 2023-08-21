@@ -344,6 +344,84 @@ describe("functionality", () => {
 
 			expect(inlang.installed.lintRules()[0]?.disabled).toBe(true)
 		})
+
+		it("should return lint reports for non-disabled lint rules ", async () => {
+			const enabledLintRule: LintRule = {
+				type: "MessageLint",
+				meta: {
+					id: "namespace.lintRule.enabled",
+					description: { en: "Mock lint rule description" },
+					displayName: { en: "Mock Lint Rule" },
+				},
+				message: ({ report }) => {
+					report({
+						messageId: "some-message-1",
+						languageTag: "en",
+						body: { en: "lintrule1" },
+					})
+				},
+			}
+			const disabledLintRule: LintRule = {
+				type: "MessageLint",
+				meta: {
+					id: "namespace.lintRule.disabled",
+					description: { en: "" },
+					displayName: { en: "" },
+				},
+				message: ({ report }) => {
+					report({
+						messageId: "some-message-2",
+						languageTag: "en",
+						body: { en: "lintrule2" },
+					})
+				},
+			}
+			const _mockPlugin: Plugin = {
+				meta: {
+					id: "inlang.plugin.i18next",
+					description: { en: "Mock plugin description" },
+					displayName: { en: "Mock Plugin" },
+					keywords: [],
+				},
+				loadMessages: () => [{ id: "some-message", selectors: [], body: {} }],
+			}
+			const fs = await createMockNodeishFs()
+			await fs.writeFile(
+				"./inlang.config.json",
+				JSON.stringify({
+					sourceLanguageTag: "en",
+					languageTags: ["en"],
+					modules: ["some-module.js"],
+					settings: {
+						"project.disabled": [disabledLintRule.meta.id],
+					},
+				} satisfies InlangConfig),
+			)
+			const _import = async () => {
+				return {
+					default: {
+						plugins: [_mockPlugin],
+						lintRules: [enabledLintRule, disabledLintRule],
+					},
+				} satisfies InlangModule
+			}
+			const inlang = await createInlang({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import: _import,
+			})
+			await inlang.lint.init()
+			expect(inlang.lint.reports()).toHaveLength(1)
+			expect(inlang.lint.reports()[0]?.ruleId).toBe(enabledLintRule.meta.id)
+			expect(
+				inlang.installed.lintRules().find((rule) => rule.meta.id === disabledLintRule.meta.id)
+					?.disabled,
+			).toBe(true)
+			expect(
+				inlang.installed.lintRules().find((rule) => rule.meta.id === enabledLintRule.meta.id)
+					?.disabled,
+			).toBe(false)
+		})
 	})
 
 	describe("errors", () => {
