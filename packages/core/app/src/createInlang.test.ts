@@ -382,6 +382,7 @@ describe("functionality", () => {
 					keywords: [],
 				},
 				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
+				saveMessages: () => undefined,
 			}
 			const fs = await createMockNodeishFs()
 			await fs.writeFile(
@@ -446,6 +447,7 @@ describe("functionality", () => {
 					keywords: [],
 				},
 				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
+				saveMessages: () => undefined,
 			}
 			const fs = await createMockNodeishFs()
 			await fs.writeFile(
@@ -575,30 +577,28 @@ describe("functionality", () => {
 				data: {
 					id: "a",
 					selectors: [],
-					body: {
-						en: [
-							{
-								match: {},
-								pattern: [
-									{
-										type: "Text",
-										value: "a en",
-									},
-								],
-							},
-						],
-						de: [
-							{
-								match: {},
-								pattern: [
-									{
-										type: "Text",
-										value: "a de",
-									},
-								],
-							},
-						],
-					},
+					variants: [
+						{
+							languageTag: "en",
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "a en",
+								},
+							],
+						},
+						{
+							languageTag: "de",
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "a de",
+								},
+							],
+						},
+					],
 				},
 			})
 
@@ -607,30 +607,29 @@ describe("functionality", () => {
 				data: {
 					id: "b",
 					selectors: [],
-					body: {
-						en: [
-							{
-								match: {},
-								pattern: [
-									{
-										type: "Text",
-										value: "b en",
-									},
-								],
-							},
-						],
-						de: [
-							{
-								match: {},
-								pattern: [
-									{
-										type: "Text",
-										value: "b de",
-									},
-								],
-							},
-						],
-					},
+					variants: [
+						{
+							languageTag: "en",
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "b en",
+								},
+							],
+						},
+
+						{
+							languageTag: "de",
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "b de",
+								},
+							],
+						},
+					],
 				},
 			})
 
