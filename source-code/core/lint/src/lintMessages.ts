@@ -1,4 +1,4 @@
-import type { Message, MessageQueryApi } from "@inlang/messages"
+import type { Message } from "@inlang/messages"
 import { lintSingleMessage } from "./lintSingleMessage.js"
 import type { LintRuleThrowedError } from "./errors.js"
 import type { LanguageTag } from "@inlang/language-tag"
@@ -12,7 +12,6 @@ export const lintMessages = async (args: {
 	lintLevels: Record<LintRule["meta"]["id"], LintLevel>
 	rules: LintRule[]
 	messages: Message[]
-	query: MessageQueryApi
 }): Promise<{ data: LintReport[]; errors: LintRuleThrowedError[] }> => {
 	const promises = args.messages.map((message) =>
 		lintSingleMessage({

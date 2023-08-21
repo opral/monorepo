@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { lintSingleMessage } from "./lintSingleMessage.js"
 import type { MessageLintReport, MessageLintRule } from "./api.js"
-import type { Message, MessageQueryApi } from "@inlang/messages"
+import type { Message } from "@inlang/messages"
 import { tryCatch } from "@inlang/result"
 
 const lintRule1 = {
@@ -42,7 +42,6 @@ describe("lintSingleMessage", async () => {
 				lintRuleSettings: {},
 				sourceLanguageTag: "en",
 				languageTags: ["en"],
-				query: {} as MessageQueryApi,
 				messages,
 				message: message1,
 				rules: [lintRule1, lintRule2],
@@ -65,7 +64,6 @@ describe("lintSingleMessage", async () => {
 					lintRuleSettings: {},
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
-					query: {} as MessageQueryApi,
 					messages,
 					message: message1,
 					rules: [lintRule1],
@@ -85,7 +83,6 @@ describe("lintSingleMessage", async () => {
 				lintRuleSettings: {},
 				sourceLanguageTag: "en",
 				languageTags: ["en"],
-				query: {} as MessageQueryApi,
 				messages,
 				message: message1,
 				rules: [lintRule1],
@@ -108,7 +105,6 @@ describe("lintSingleMessage", async () => {
 				},
 				sourceLanguageTag: "en",
 				languageTags: ["en"],
-				query: {} as MessageQueryApi,
 				messages,
 				message: message1,
 				rules: [lintRule1],
@@ -134,7 +130,6 @@ describe("lintSingleMessage", async () => {
 			lintRuleSettings: {},
 			sourceLanguageTag: "en",
 			languageTags: ["en"],
-			query: {} as MessageQueryApi,
 			messages,
 			message: message1,
 			rules: [lintRule1, lintRule2],
@@ -163,7 +158,6 @@ describe("lintSingleMessage", async () => {
 			lintRuleSettings: {},
 			sourceLanguageTag: "en",
 			languageTags: ["en"],
-			query: {} as MessageQueryApi,
 			messages,
 			message: message1,
 			rules: [lintRule1, lintRule2],
@@ -190,7 +184,6 @@ describe("lintSingleMessage", async () => {
 			lintRuleSettings: {},
 			sourceLanguageTag: "en",
 			languageTags: ["en"],
-			query: {} as MessageQueryApi,
 			messages,
 			message: message1,
 			rules: [lintRule1, lintRule2],
