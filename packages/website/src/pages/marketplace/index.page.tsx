@@ -9,14 +9,15 @@ import { GetHelp } from "#src/components/GetHelp.jsx"
 import Plus from "~icons/material-symbols/add-rounded"
 import Package from "~icons/material-symbols/package-2"
 
-type Category = "app" | "plugin" | "lintRule"
+type Category = "app" | "plugin" | "lintrule"
 
 const [searchValue, setSearchValue] = createSignal<string>("")
 
-const [selectedTags, setSelectedTags] = createSignal<Category[]>(["app", "plugin", "lintRule"])
+const [selectedTags, setSelectedTags] = createSignal<Category[]>(["app", "plugin", "lintrule"])
 
 const filteredItems = () =>
 	marketplaceItems.filter((item: any) => {
+		console.log(item)
 		return filterItem(item, selectedTags(), searchValue())
 	})
 
@@ -62,8 +63,7 @@ export function Page() {
 }
 
 function filterItem(item: any, selectedCategories: Category[], searchValue: string) {
-	console.log(item)
-	if (selectedCategories.includes(item.type.toLowerCase())) {
+	if (!selectedCategories.includes(item.type.toLowerCase())) {
 		return false
 	}
 
@@ -75,7 +75,8 @@ function filterItem(item: any, selectedCategories: Category[], searchValue: stri
 		) ||
 		item.meta.marketplace.bundleName?.toLowerCase().includes(searchValue.toLowerCase()) ||
 		item.meta.id.split(".")[1]?.toLowerCase().includes(searchValue.toLowerCase()) ||
-		item.meta.id.toLowerCase().includes(searchValue.toLowerCase())
+		item.meta.id.toLowerCase().includes(searchValue.toLowerCase()) ||
+		item.module?.toLowerCase() === searchValue.toLowerCase()
 
 	return isSearchMatch
 }
@@ -119,7 +120,7 @@ const Gallery = () => {
 												{item.meta.marketplace.publisherName}
 											</p>
 										</div>
-										<Show when={item.moduleItems}>
+										{item.type !== "app" && item.moduleItems.length > 1 && (
 											<sl-tooltip
 												prop:content={`Comes in a bundle of ${item.moduleItems?.length}`}
 												prop:distance={16}
@@ -130,7 +131,7 @@ const Gallery = () => {
 													onClick={(e) => {
 														e.preventDefault()
 														e.stopPropagation()
-														setSearchValue(`${item.meta.displayName.en}`)
+														setSearchValue(`${item.module ?? item.meta.id}`)
 														window.scrollTo({ top: 0 })
 													}}
 													class="text-surface-500 text-xl hover:text-surface-900 transition-all"
@@ -138,15 +139,11 @@ const Gallery = () => {
 													<Package />
 												</div>
 											</sl-tooltip>
-										</Show>
+										)}
 									</div>
 								</Show>
 								<Chip
-									text={
-										item.meta.id.split(".")[1]?.toLowerCase() === "lintrule"
-											? "lint rule"
-											: item.meta.id.split(".")[1]?.toLowerCase()
-									}
+									text={item.type.toLocaleLowerCase() === "lintrule" ? "Lint Rule" : item.type}
 									color={
 										item.meta.id.split(".")[1]?.toLowerCase() === "app"
 											? "#3B82F6"
@@ -222,11 +219,6 @@ const Search = (props: SearchInputProps) => {
 	)
 }
 
-interface TagsProps {
-	tags: Accessor<Record<string, any>[]>
-	setTags: (value: Record<string, any>[]) => void
-}
-
 const Tags = () => {
 	function selectTag(tag: Category) {
 		if (selectedTags().includes(tag)) {
@@ -261,10 +253,10 @@ const Tags = () => {
 				<p class="m-0">Plugins</p>
 			</div>
 			<div
-				onClick={() => selectTag("lintRule")}
+				onClick={() => selectTag("lintrule")}
 				class={
 					"gap-2 px-3 py-1.5 rounded-full cursor-pointer text-sm capitalize hover:opacity-90 transition-all duration-100 " +
-					(selectedTags().includes("lintRule")
+					(selectedTags().includes("lintrule")
 						? "bg-surface-800 text-background"
 						: "bg-surface-200 text-surface-600")
 				}
