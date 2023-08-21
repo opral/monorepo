@@ -26,7 +26,7 @@ import {
 	LintRule,
 	Result,
 	createInlang,
-	type InlangInstance,
+	type InlangProject,
 	type Message,
 } from "@inlang/app"
 import type { InlangModule } from "@inlang/module"
@@ -101,7 +101,7 @@ type EditorStateSchema = {
 	 *
 	 * Undefined if no inlang config exists/has been found.
 	 */
-	inlang: Resource<InlangInstance | undefined>
+	inlang: Resource<InlangProject | undefined>
 
 	doesInlangConfigExist: () => boolean
 
@@ -130,7 +130,7 @@ type EditorStateSchema = {
 	 */
 
 	localChanges: () => number // Message[]
-	setLocalChanges: Setter<number>// Setter<Message[]>
+	setLocalChanges: Setter<number> // Setter<Message[]>
 
 	/**
 	 * The reference resource.
@@ -319,14 +319,14 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				configPath: "./inlang.config.json",
 				nodeishFs: fs(),
 				_import: async () =>
-				({
-					default: {
-						// @ts-ignore
-						plugins: [...pluginJson.plugins],
-						// @ts-ignore
-						lintRules: [...pluginLint.lintRules],
-					},
-				} satisfies InlangModule),
+					({
+						default: {
+							// @ts-ignore
+							plugins: [...pluginJson.plugins],
+							// @ts-ignore
+							lintRules: [...pluginLint.lintRules],
+						},
+					} satisfies InlangModule),
 			})
 			const config = inlang.config()
 			if (config) {
@@ -337,8 +337,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						a === config.sourceLanguageTag
 							? -1
 							: b === config.sourceLanguageTag
-								? 1
-								: a.localeCompare(b),
+							? 1
+							: a.localeCompare(b),
 					) || []
 				// initializes the languages to all languages
 				setDoesInlangConfigExist(true)

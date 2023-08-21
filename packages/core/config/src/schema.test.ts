@@ -139,27 +139,27 @@ describe("config.settings", () => {
 		expect(Value.Check(InlangConfig, mockConfig)).toBe(true)
 	})
 
-	// (reserving system namespace for internal use only)
-	it("should not be possible to define unknown system settings", () => {
+	// (reserving project namespace for internal use only)
+	it("should not be possible to define unknown project settings", () => {
 		const mockConfig: InlangConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
 			modules: [],
 			settings: {
-				// @ts-expect-error - unknown system key
-				"system.unknown.name": {},
+				// @ts-expect-error - unknown project key
+				"project.unknown.name": {},
 			},
 		}
 		expect(Value.Check(InlangConfig, mockConfig)).toBe(false)
 	})
 
-	it("should be possible to define known system settings", () => {
+	it("should be possible to define known project settings", () => {
 		const mockConfig: InlangConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
 			modules: [],
 			settings: {
-				"system.lint.ruleLevels": {
+				"project.lintRuleLevels": {
 					"namespace.lintRule.helloWorld": "error",
 				},
 			},

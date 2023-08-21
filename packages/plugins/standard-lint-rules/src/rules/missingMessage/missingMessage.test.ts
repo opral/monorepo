@@ -20,10 +20,12 @@ const messages = [message1]
 
 test("should not report if all messages are present", async () => {
 	const result = await lintSingleMessage({
-		config: {
-			sourceLanguageTag: "en",
-			languageTags: ["en", "de"],
-		} as Partial<InlangConfig> as InlangConfig,
+		sourceLanguageTag: "en",
+		languageTags: ["en", "de"],
+		lintLevels: {
+			[missingMessageRule.meta.id]: "warning",
+		},
+		lintRuleSettings: {},
 		query: {} as MessageQueryApi,
 		messages,
 		message: message1,
@@ -36,10 +38,12 @@ test("should not report if all messages are present", async () => {
 
 test("should report if a languageTag is not present", async () => {
 	const result = await lintSingleMessage({
-		config: {
-			sourceLanguageTag: "en",
-			languageTags: ["en", "it"],
-		} as Partial<InlangConfig> as InlangConfig,
+		sourceLanguageTag: "en",
+		languageTags: ["en", "it"],
+		lintLevels: {
+			[missingMessageRule.meta.id]: "warning",
+		},
+		lintRuleSettings: {},
 		query: {} as MessageQueryApi,
 		messages,
 		message: message1,
@@ -53,10 +57,12 @@ test("should report if a languageTag is not present", async () => {
 
 test("should report if no variants are defined", async () => {
 	const result = await lintSingleMessage({
-		config: {
-			sourceLanguageTag: "en",
-			languageTags: ["en", "fr"],
-		} as Partial<InlangConfig> as InlangConfig,
+		sourceLanguageTag: "en",
+		languageTags: ["en", "fr"],
+		lintLevels: {
+			[missingMessageRule.meta.id]: "warning",
+		},
+		lintRuleSettings: {},
 		query: {} as MessageQueryApi,
 		messages,
 		message: message1,
@@ -70,10 +76,12 @@ test("should report if no variants are defined", async () => {
 
 test("should report if no patterns are defined", async () => {
 	const result = await lintSingleMessage({
-		config: {
-			sourceLanguageTag: "en",
-			languageTags: ["en", "es"],
-		} as Partial<InlangConfig> as InlangConfig,
+		sourceLanguageTag: "en",
+		languageTags: ["en", "es"],
+		lintLevels: {
+			[missingMessageRule.meta.id]: "warning",
+		},
+		lintRuleSettings: {},
 		query: {} as MessageQueryApi,
 		messages,
 		message: message1,
@@ -87,10 +95,12 @@ test("should report if no patterns are defined", async () => {
 
 test("should report if a message has a pattern with only one text element that is an empty string", async () => {
 	const result = await lintSingleMessage({
-		config: {
-			sourceLanguageTag: "en",
-			languageTags: ["en", "cn"],
-		} as Partial<InlangConfig> as InlangConfig,
+		sourceLanguageTag: "en",
+		languageTags: ["en", "cn"],
+		lintLevels: {
+			[missingMessageRule.meta.id]: "warning",
+		},
+		lintRuleSettings: {},
 		query: {} as MessageQueryApi,
 		messages,
 		message: message1,

@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type { InlangInstance, Subscribable } from "./api.js"
+import type { InlangProject, InstalledLintRule, InstalledPlugin, Subscribable } from "./api.js"
 import { ImportFunction, ResolveModulesFunction, resolveModules } from "@inlang/module"
-import { NodeishFilesystemSubset, InlangConfig, Message, tryCatch, Result } from "@inlang/plugin"
+import { NodeishFilesystemSubset, Message, tryCatch, Result } from "@inlang/plugin"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
 import { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError } from "./errors.js"
 import { LintRuleThrowedError, LintReport, lintMessages } from "@inlang/lint"
 import { createRoot, createSignal, createEffect } from "./solid.js"
 import { createReactiveQuery } from "./createReactiveQuery.js"
+import { InlangConfig } from "@inlang/config"
 
 const ConfigCompiler = TypeCompiler.Compile(InlangConfig)
 
@@ -22,7 +23,7 @@ export const createInlang = async (args: {
 	configPath: string
 	nodeishFs: NodeishFilesystemSubset
 	_import?: ImportFunction
-}): Promise<InlangInstance> => {
+}): Promise<InlangProject> => {
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
 
@@ -54,7 +55,7 @@ export const createInlang = async (args: {
 					return { error: error }
 				}
 
-				throw new Error('unhandled')
+				throw new Error("unhandled")
 			}
 		}
 
@@ -80,7 +81,7 @@ export const createInlang = async (args: {
 		// -- messages ----------------------------------------------------------
 
 		let configValue: InlangConfig
-		createEffect(() => configValue = config()!) // workaround to not run effects twice (e.g. config change + modules change) (I'm sure there exists a solid way of doing this, but I haven't found it yet)
+		createEffect(() => (configValue = config()!)) // workaround to not run effects twice (e.g. config change + modules change) (I'm sure there exists a solid way of doing this, but I haven't found it yet)
 
 		const [messages, setMessages] = createSignal<Message[]>()
 		createEffect(() => {
@@ -88,7 +89,9 @@ export const createInlang = async (args: {
 			if (!_resolvedModules) return
 
 			makeTrulyAsync(
-				_resolvedModules.data.plugins.data.loadMessages({ languageTags: configValue!.languageTags }),
+				_resolvedModules.runtimePluginApi.loadMessages({
+					languageTags: configValue!.languageTags,
+				}),
 			)
 				.then((messages) => {
 					setMessages(messages)
@@ -98,6 +101,30 @@ export const createInlang = async (args: {
 					console.error("Error in load messages ", err)
 				})
 		})
+
+		// -- installed items ----------------------------------------------------
+
+		const installedLintRules = () =>
+			resolvedModules()!.lintRules.map(
+				(rule) =>
+					({
+						meta: rule.meta,
+						module:
+							resolvedModules()?.meta.find((m) => m.lintRules.includes(rule.meta.id))?.module ??
+							"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
+						// default to warning, see https://github.com/inlang/inlang/issues/1254
+						lintLevel: configValue.settings["project.lintRuleLevels"]?.[rule.meta.id] ?? "warning",
+						disabled: configValue.settings["project.disabled"]?.includes(rule.meta.id) ?? false,
+					} satisfies InstalledLintRule),
+			) satisfies Array<InstalledLintRule>
+
+		const installedPlugins = () =>
+			resolvedModules()!.plugins.map((plugin) => ({
+				meta: plugin.meta,
+				module:
+					resolvedModules()?.meta.find((m) => m.plugins.includes(plugin.meta.id))?.module ??
+					"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
+			})) satisfies Array<InstalledPlugin>
 
 		// -- lint --------------------------------------------------------------
 
@@ -116,10 +143,17 @@ export const createInlang = async (args: {
 
 			// TODO: only lint changed messages and update arrays selectively
 			lintMessages({
-				config: configValue,
+				sourceLanguageTag: configValue!.sourceLanguageTag,
+				languageTags: configValue!.languageTags,
+				lintRuleSettings: configValue!.settings,
+				lintLevels: Object.fromEntries(
+					installedLintRules().map((rule) => [rule.meta.id, rule.lintLevel]),
+				),
 				messages: msgs,
 				query,
-				rules: resolvedModules()!.data.lintRules.data,
+				rules: resolvedModules()!.lintRules.filter(
+					(rule) => configValue.settings["project.disabled"]?.includes(rule.meta.id) === false,
+				),
 			}).then((report) => {
 				setLintReports(report.data)
 				setLintErrors(report.errors)
@@ -137,16 +171,11 @@ export const createInlang = async (args: {
 		const query = createReactiveQuery(() => messages()!)
 
 		return {
-			meta: {
-				plugins: createSubscribable(() => resolvedModules()!.data.meta.plugins),
-				lintRules: createSubscribable(() => resolvedModules()!.data.meta.lintRules),
+			installed: {
+				plugins: createSubscribable(() => installedPlugins()),
+				lintRules: createSubscribable(() => installedLintRules()),
 			},
-			errors: createSubscribable(() => [
-				...resolvedModules()!.errors,
-				...resolvedModules()!.data.plugins.errors,
-				...resolvedModules()!.data.lintRules.errors,
-				...(lintErrors() || []),
-			]),
+			errors: createSubscribable(() => [...resolvedModules()!.errors, ...(lintErrors() ?? [])]),
 			config: createSubscribable(() => config()!),
 			setConfig,
 			lint: {
@@ -158,13 +187,11 @@ export const createInlang = async (args: {
 					return reports
 				}),
 			},
-			appSpecificApi: createSubscribable(
-				() => resolvedModules()!.data.plugins.data!.appSpecificApi,
-			),
+			appSpecificApi: createSubscribable(() => resolvedModules()!.runtimePluginApi.appSpecificApi),
 			query: {
 				messages: query,
 			},
-		} satisfies InlangInstance
+		} satisfies InlangProject
 	})
 }
 
@@ -172,7 +199,7 @@ export const createInlang = async (args: {
 
 const loadConfig = async (args: { configPath: string; nodeishFs: NodeishFilesystemSubset }) => {
 	let json: JSON
-	if (args.configPath.startsWith('data:')) {
+	if (args.configPath.startsWith("data:")) {
 		json = (await import(args.configPath)).default
 		// TODO: add error handling
 	} else {
@@ -262,8 +289,8 @@ type MaybePromise<T> = T | Promise<T>
 
 const makeTrulyAsync = <T>(fn: MaybePromise<T>): Promise<T> => (async () => fn)()
 
-
 // TODO: how do we unsubscribe? Do we need that?
+// COMMENT from @samuelstroschein: Likely not. The reactivity is handled internally with auto dispose from SolidJS.
 function createSubscribable<T>(signal: () => T): Subscribable<T> {
 	return Object.assign(signal, {
 		subscribe: (callback: any) => {

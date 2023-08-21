@@ -1,6 +1,6 @@
 import { Command } from "commander"
 import Table from "cli-table3"
-import { getInlangInstance } from "../../utilities/getInlangInstance.js"
+import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { bold, italic } from "../../utilities/format.js"
 import { log } from "../../utilities/log.js"
 
@@ -12,13 +12,13 @@ export const lint = new Command()
 
 async function lintCommandAction() {
 	try {
-		const { data: inlang, error } = await getInlangInstance()
+		const { data: inlang, error } = await getInlangProject()
 		if (error) {
 			log.error(error)
 			return
 		}
 
-		if (inlang.meta.lintRules().length === 0) {
+		if (inlang.installed.lintRules().length === 0) {
 			log.error(
 				`🚫 For this command to work, you need lint rules configured in your inlang.config.json – for example, the ${bold(
 					"@inlang/plugin-standard-lint-rule",

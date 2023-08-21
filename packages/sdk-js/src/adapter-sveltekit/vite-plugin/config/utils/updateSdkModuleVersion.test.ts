@@ -1,7 +1,7 @@
-import { vi, describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { standaloneUpdateSdkModuleVersion, updateSdkModuleVersion } from './updateSdkModuleVersion.js'
-import { createMockNodeishFs } from "@inlang/plugin/test"
-import { InlangConfig, createInlang, type Plugin, type InlangInstance, type NodeishFilesystemSubset } from '@inlang/app'
+import { createMockNodeishFs } from "@inlang/app/test"
+import { InlangConfig, createInlang, type Plugin, type InlangProject, type NodeishFilesystemSubset } from '@inlang/app'
 import type { InlangModule } from '@inlang/module'
 // @ts-ignore
 import { version } from '../../../../../package.json';
@@ -15,7 +15,7 @@ const getConfig = (...modules: string[]): InlangConfig => ({
 })
 
 // TODO: create utility function
-const createMockInlang = async (fs: NodeishFilesystemSubset): Promise<InlangInstance> => {
+const createMockInlang = async (fs: NodeishFilesystemSubset): Promise<InlangProject> => {
 	const mockPlugin: Plugin = {
 		meta: {
 			id: "mock.plugin.name",

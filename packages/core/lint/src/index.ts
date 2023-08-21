@@ -1,4 +1,4 @@
-export { MessageLintReport, MessageLintRule, LintRule, LintReport } from "./api.js"
+export { MessageLintReport, MessageLintRule, LintRule, LintReport, LintLevel } from "./api.js"
 export { InvalidLintRuleError, LintRuleThrowedError } from "./errors.js"
 export { lintMessages } from "./lintMessages.js"
 export { resolveLintRules } from "./resolveLintRules.js"

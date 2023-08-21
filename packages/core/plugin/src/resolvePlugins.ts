@@ -22,7 +22,6 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			saveMessages: undefined as any,
 			detectedLanguageTags: undefined,
 			appSpecificApi: {},
-			meta: {},
 		},
 		errors: [],
 	}
@@ -168,10 +167,6 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			if (appSpecificApi) {
 				result.data.appSpecificApi = deepmerge(result.data.appSpecificApi, appSpecificApi)
 			}
-		}
-
-		result.data.meta[plugin.meta.id] = {
-			...plugin.meta,
 		}
 	}
 

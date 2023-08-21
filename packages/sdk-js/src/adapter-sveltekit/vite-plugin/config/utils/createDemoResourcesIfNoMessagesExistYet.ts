@@ -1,7 +1,7 @@
-import type { InlangInstance } from '@inlang/app';
+import type { InlangProject } from '@inlang/app';
 import { createMessage } from '../../../../test.util.js';
 
-export const createDemoResourcesIfNoMessagesExistYet = async (inlang: InlangInstance) => {
+export const createDemoResourcesIfNoMessagesExistYet = async (inlang: InlangProject) => {
 	const messages = inlang.query.messages.getAll()
 	if (messages.length) return
 
