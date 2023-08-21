@@ -15,7 +15,7 @@ export const registry = [
 				en: "https://inlang.com/editor",
 			},
 			keywords: ["web", "editor", "no-code"],
-			publisherName: "@inlang",
+			publisherName: "inlang",
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		},
 	},
@@ -33,7 +33,7 @@ export const registry = [
 				en: "https://github.com/inlang/inlang/tree/main/source-code/cli",
 			},
 			keywords: ["cli", "automation"],
-			publisherName: "@inlang",
+			publisherName: "inlang",
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		},
 	},
@@ -51,7 +51,7 @@ export const registry = [
 				en: "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
 			},
 			keywords: ["vscode", "efficiency", "extension"],
-			publisherName: "@inlang",
+			publisherName: "inlang",
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		},
 	},
@@ -69,104 +69,8 @@ export const registry = [
 				en: "#",
 			},
 			keywords: ["badge", "embed"],
-			publisherName: "@inlang",
+			publisherName: "inlang",
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		},
-	},
-	{
-		id: "inlang.plugin.json",
-		displayName: {
-			en: "Plugin JSON",
-		},
-		description: {
-			en: "JSON plugin for inlang",
-		},
-		marketplace: {
-			icon: "https://github.com/inlang/inlang/blob/main/source-code/plugins/json/assets/icon.png?raw=true",
-			linkToReadme: {
-				en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/json",
-			},
-			keywords: ["json", "generic"],
-			publisherName: "@inlang",
-			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		},
-	},
-	{
-		id: "inlang.plugin.i18next",
-		displayName: {
-			en: "i18next",
-		},
-		description: {
-			en: "i18next plugin for inlang",
-		},
-		marketplace: {
-			icon: "https://github.com/inlang/inlang/blob/main/source-code/plugins/i18next/assets/icon.png?raw=true",
-			linkToReadme: {
-				en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/i18next",
-			},
-			keywords: ["i18next", "react", "nextjs"],
-			publisherName: "@inlang",
-			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		},
-	},
-	{
-		id: "inlang.lintRule.identicalPattern",
-		displayName: {
-			en: "Identical Pattern",
-		},
-		description: {
-			en: "\nChecks for identical patterns in different languages.\n\nA message with identical wording in multiple languages can indicate\nthat the translations are redundant or can be combined into a single\nmessage to reduce translation effort.\n",
-		},
-		marketplace: {
-			icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
-			linkToReadme: {
-				en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules",
-			},
-			keywords: ["lint-rule", "standard", "identical-pattern"],
-			publisherName: "@inlang",
-			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-			bundleItems: 3,
-			bundleName: "standard-lint-rules",
-		},
-	},
-	{
-		id: "inlang.lintRule.messageWithoutSource",
-		displayName: {
-			en: "Message Without Source",
-		},
-		description: {
-			en: "\nChecks for likely outdated messages.\n\nA message with a missing source is usually an indication that\nthe message (id) is no longer used in source code, but messages\nhave not been updated accordingly.\n",
-		},
-		marketplace: {
-			icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
-			linkToReadme: {
-				en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules",
-			},
-			keywords: ["lint-rule", "standard", "message-without-source"],
-			publisherName: "@inlang",
-			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-			bundleItems: 3,
-			bundleName: "standard-lint-rules",
-		},
-	},
-	{
-		id: "inlang.lintRule.missingMessage",
-		displayName: {
-			en: "Missing Message",
-		},
-		description: {
-			en: "\nChecks for missing messages in a language tag.\n\nIf a message exists in the reference resource but is missing\nin a target resource, it is likely that the message has not\nbeen translated yet.\n",
-		},
-		marketplace: {
-			icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
-			linkToReadme: {
-				en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules",
-			},
-			keywords: ["lint-rule", "standard", "missing-message"],
-			publisherName: "@inlang",
-			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-			bundleItems: 3,
-			bundleName: "standard-lint-rules",
 		},
 	},
 ]

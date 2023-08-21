@@ -12,7 +12,7 @@
 				"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 				"linkToReadme": { "en": "https://inlang.com/editor" },
 				"keywords": ["web", "editor", "no-code"],
-				"publisherName": "@inlang",
+				"publisherName": "inlang",
 				"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg"
 			}
 		},
@@ -28,7 +28,7 @@
 				"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 				"linkToReadme": { "en": "https://github.com/inlang/inlang/tree/main/source-code/cli" },
 				"keywords": ["cli", "automation"],
-				"publisherName": "@inlang",
+				"publisherName": "inlang",
 				"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg"
 			}
 		},
@@ -46,7 +46,7 @@
 					"en": "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension"
 				},
 				"keywords": ["vscode", "efficiency", "extension"],
-				"publisherName": "@inlang",
+				"publisherName": "inlang",
 				"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg"
 			}
 		},
@@ -62,7 +62,7 @@
 				"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 				"linkToReadme": { "en": "#" },
 				"keywords": ["badge", "embed"],
-				"publisherName": "@inlang",
+				"publisherName": "inlang",
 				"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg"
 			}
 		}

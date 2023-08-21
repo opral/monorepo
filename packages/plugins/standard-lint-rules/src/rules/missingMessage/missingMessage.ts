@@ -22,7 +22,7 @@ been translated yet.
 				en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules",
 			},
 			keywords: ["lint-rule", "standard", "missing-message"],
-			publisherName: "@inlang",
+			publisherName: "inlang",
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		},
 	},

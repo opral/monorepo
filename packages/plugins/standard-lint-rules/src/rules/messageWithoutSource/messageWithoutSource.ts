@@ -22,7 +22,7 @@ have not been updated accordingly.
 				en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules",
 			},
 			keywords: ["lint-rule", "standard", "message-without-source"],
-			publisherName: "@inlang",
+			publisherName: "inlang",
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		},
 	},
