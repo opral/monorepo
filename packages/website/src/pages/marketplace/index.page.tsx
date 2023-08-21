@@ -16,7 +16,7 @@ const [searchValue, setSearchValue] = createSignal<string>("")
 const [selectedTags, setSelectedTags] = createSignal<Category[]>(["app", "plugin", "lintrule"])
 
 const filteredItems = () =>
-	marketplaceItems.filter((item: any) => {
+	marketplaceItems.filter((item: Record<string, any>) => {
 		console.log(item)
 		return filterItem(item, selectedTags(), searchValue())
 	})
@@ -62,7 +62,11 @@ export function Page() {
 	)
 }
 
-function filterItem(item: any, selectedCategories: Category[], searchValue: string) {
+function filterItem(
+	item: Record<string, any>,
+	selectedCategories: Category[],
+	searchValue: string,
+) {
 	if (!selectedCategories.includes(item.type.toLowerCase())) {
 		return false
 	}
