@@ -3,23 +3,25 @@ import Table from "cli-table3"
 import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { bold, italic } from "../../utilities/format.js"
 import { log } from "../../utilities/log.js"
+import type { InlangProject } from "@inlang/app"
 
 export const lint = new Command()
 	.command("lint")
 	.description("Commands for linting translations.")
 	.option("--no-fail", "Disable throwing an error if linting fails.") // defaults to false https://github.com/tj/commander.js#other-option-types-negatable-boolean-and-booleanvalue
-	.action(lintCommandAction)
-
-async function lintCommandAction() {
-	try {
+	.action(async () => {
 		const { data: inlang, error } = await getInlangProject()
 		if (error) {
 			log.error(error)
 			return
 		}
+		await lintCommandAction({ inlang, logger: log })
+	})
 
-		if (inlang.installed.lintRules().length === 0) {
-			log.error(
+export async function lintCommandAction(args: { inlang: InlangProject; logger: any }) {
+	try {
+		if (args.inlang.installed.lintRules().length === 0) {
+			args.logger.error(
 				`🚫 For this command to work, you need lint rules configured in your project.inlang.json – for example, the ${bold(
 					"@inlang/plugin-standard-lint-rule",
 				)} plugin: https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules. ${italic(
@@ -30,13 +32,13 @@ async function lintCommandAction() {
 		}
 
 		// Init linting
-		await inlang.lint.init()
+		await args.inlang.lint.init()
 
 		// Get lint reports
-		const lintReport = await inlang.lint.reports()
+		const lintReport = await args.inlang.lint.reports()
 
 		if (lintReport.length === 0) {
-			log.success("🎉 Linting successful.")
+			args.logger.success("🎉 Linting successful.")
 			return
 		}
 
@@ -58,9 +60,9 @@ async function lintCommandAction() {
 			}
 		}
 
-		log.log("") // spacer line
-		log.log("🚨 Lint Report")
-		log.log(lintTable.toString())
+		args.logger.log("") // spacer line
+		args.logger.log("🚨 Lint Report")
+		args.logger.log(lintTable.toString())
 
 		// create summary table with total number of errors and warnings
 		const summaryTable = new Table({
@@ -70,20 +72,22 @@ async function lintCommandAction() {
 		summaryTable.push(["Error", lintReport.filter((lint) => lint.level === "error").length])
 		summaryTable.push(["Warning", lintReport.filter((lint) => lint.level === "warning").length])
 
-		log.log("") // spacer line
-		log.log("📊 Summary")
-		log.log(summaryTable.toString())
+		args.logger.log("") // spacer line
+		args.logger.log("📊 Summary")
+		args.logger.log(summaryTable.toString())
 
 		if (hasError && lint.opts().fail) {
 			// spacer line
-			log.log("")
-			log.info(
+			args.logger.log("")
+			args.logger.info(
 				"ℹ️  You can add the `--no-fail` flag to disable throwing an error if linting fails.",
 			)
 			console.error("🚫 Lint failed with errors.")
 			process.exit(1)
 		}
+
+		return { lintTable, summaryTable }
 	} catch (error) {
-		log.error(error)
+		args.logger.error(error)
 	}
 }
