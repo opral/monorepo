@@ -57,7 +57,7 @@ export function open(
 		nodeishFs: NodeishFilesystem
 		workingDirectory?: string
 		corsProxy?: string
-		auth?: unknown
+		auth?: unknown // unimplemented
 	},
 ): Repository {
 	const rawFs = args.nodeishFs
@@ -70,6 +70,9 @@ export function open(
 		throw new Error(
 			`Invalid url format for '${url}' for cloning repository, please use the format of github.com/inlang/example.`,
 		)
+	}
+	if (args.auth) {
+		console.warn('Auth currently not implemented in lisa client')
 	}
 
 	const github = new Octokit({
