@@ -63,7 +63,6 @@ export type InlangProject = {
 			| PluginUsesInvalidSchemaError
 			| PluginUsesReservedNamespaceError
 			| InvalidLintRuleError
-			| InvalidLintRuleError
 			| LintRuleThrowedError
 			| PluginSaveMessagesError
 			| NoMessagesPluginError
