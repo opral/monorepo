@@ -6,7 +6,7 @@ export const getStringFromPattern = (args: {
 	pattern: Pattern
 	languageTag: LanguageTag
 	messageId: Message["id"]
-}): string => {
+}): string | null => {
 	return args.pattern
 		.map((element) => {
 			if (element.type === "Text") {
