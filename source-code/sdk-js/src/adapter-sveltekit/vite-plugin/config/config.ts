@@ -64,8 +64,10 @@ export const initTransformConfig = async (): Promise<TransformConfig> => {
 			return reject(createInlangError)
 		}
 
-		if (inlang.errors.length) {
-			return reject(inlang.errors)
+		const errors = inlang.errors()
+		if (errors.length) {
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			return reject(errors[0]!)
 		}
 
 		await updateSdkModuleVersion(inlang)

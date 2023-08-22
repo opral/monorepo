@@ -25,7 +25,6 @@ const createMockInlang = async (fs: NodeishFilesystemSubset): Promise<InlangProj
 			description: {
 				en: "wo",
 			},
-			keywords: [],
 		},
 		loadMessages: () => ([]),
 		saveMessages: () => undefined,
