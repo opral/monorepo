@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from "vitest"
-import { open, createNodeishMemoryFs } from "../src/index.js"
+import { openRepository, createNodeishMemoryFs } from "../src/index.js"
 
 // - loading multiple repositories is possible
 // - loading a local repository is possible: const localRepository = await load("/bar.git", { fs: nodeFs })
@@ -11,7 +11,7 @@ describe("main workflow", () => {
 	let repository
 	it("opens a repo url without error and without blocking io", async () => {
 		// fix normalization of .git
-		repository = open("github.com/inlang/example", {
+		repository = openRepository("github.com/inlang/example", {
 			nodeishFs: createNodeishMemoryFs(),
 		})
 	})

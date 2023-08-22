@@ -1,12 +1,12 @@
 import { describe, bench } from "vitest"
-import { open, createNodeishMemoryFs } from "../src/index.js"
+import { openRepository, createNodeishMemoryFs } from "../src/index.js"
 
 describe("main workflow", () => {
 	let repository
 	bench(
 		"opens a repo url without error and without blocking i",
 		() => {
-			repository = open("github.com/inlang/example.git", {
+			repository = openRepository("github.com/inlang/example.git", {
 				nodeishFs: createNodeishMemoryFs(),
 			})
 		},
