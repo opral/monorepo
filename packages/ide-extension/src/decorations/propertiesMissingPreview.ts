@@ -1,8 +1,11 @@
 import { state } from "../state.js"
 import * as vscode from "vscode"
+import type { IdeExtensionConfigSchema } from "../api.js"
 
 export const propertiesMissingPreview = () => {
-	const ideExtension = state().config.ideExtension
+	const ideExtension = state().inlang.appSpecificApi()["inlang.app.ideExtension"] as
+		| IdeExtensionConfigSchema
+		| undefined
 
 	const activeTextEditor = vscode.window.activeTextEditor
 	if (!activeTextEditor) {
@@ -10,7 +13,7 @@ export const propertiesMissingPreview = () => {
 	}
 
 	if (!ideExtension) {
-		// create decoration in inlang.config.js file stating that the ideExtension properties are missing
+		// create decoration in inlang.config.json file stating that the ideExtension properties are missing
 		const decorationType = vscode.window.createTextEditorDecorationType({
 			after: {
 				contentText:
@@ -27,8 +30,8 @@ export const propertiesMissingPreview = () => {
 		const firstLine = document.lineAt(0)
 		const range = new vscode.Range(firstLine.range.start, firstLine.range.end)
 
-		// if the file is inlang.config.js -> decorate the first line with the decorationType
-		if (document.fileName.endsWith("inlang.config.js")) {
+		// if the file is inlang.config.json -> decorate the first line with the decorationType
+		if (document.fileName.endsWith("inlang.config.json")) {
 			activeTextEditor.setDecorations(decorationType, [range])
 		}
 	}
