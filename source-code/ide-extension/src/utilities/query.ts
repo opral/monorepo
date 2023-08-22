@@ -1,4 +1,4 @@
-import type { Message } from "@inlang/core/ast"
+import type { Message } from "@inlang/app"
 
 export function getMessageAsString(message?: Message) {
 	if (!message?.pattern.elements || message.pattern.elements.length < 1) {

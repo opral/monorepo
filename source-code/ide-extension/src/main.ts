@@ -96,12 +96,12 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		new vscode.RelativePattern(workspaceFolder, "inlang.config.json"),
 	)
 
-	const {data: inlang, error  } = await tryCatch(() => createInlang(
-		{
+	const { data: inlang, error } = await tryCatch(() =>
+		createInlang({
 			configPath: closestConfigPathUri.fsPath,
-			nodeishFs: createFileSystemMapper(vscode.workspace.fs, workspaceFolder.uri),
-		},
-	))
+			nodeishFs: createFileSystemMapper(workspaceFolder.uri),
+		}),
+	)
 
 	if (error) {
 		console.error(error)

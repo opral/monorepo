@@ -20,20 +20,19 @@ export function tryCatch<Data>(
 		if (isAsync(callbackResult)) {
 			return callbackResult
 				.then((data) => ({ data }))
-				.catch((e) => {
-					if (e instanceof Error) {
-						return { error: e }
-					}
-					return { error: new Error(`Unknown error has been caught: ${e}`, { cause: e }) }
-				})
+				.catch(getErrorResponse)
 		}
 		return { data: callbackResult }
 	} catch (e) {
-		if (e instanceof Error) {
-			return { error: e }
-		}
-		return { error: new Error(`Unknown error has been caught: ${e}`, { cause: e }) }
+		return getErrorResponse(e)
 	}
+}
+
+const getErrorResponse = (error: unknown) => {
+	if (error instanceof Error) {
+		return { error: error }
+	}
+	return { error: new Error(`Unknown error has been caught: ${error}`, { cause: error }) }
 }
 
 const isAsync = <T>(p: unknown): p is Promise<T> =>

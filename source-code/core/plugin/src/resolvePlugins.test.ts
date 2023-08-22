@@ -19,7 +19,6 @@ describe("generally", () => {
 				id: "no-namespace",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "my-plugin"],
 			},
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
@@ -43,7 +42,6 @@ describe("generally", () => {
 				id: "namespace.plugin.undefinedApi",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "my-plugin"],
 			},
 			// @ts-expect-error the key is not available in type
 			nonExistentKey: {
@@ -69,7 +67,6 @@ describe("generally", () => {
 				id: "inlang.plugin.notWhitelisted",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "my-plugin"],
 			},
 			loadMessages: () => undefined as any,
 		}
@@ -92,9 +89,8 @@ describe("loadMessages", () => {
 				id: "namespace.plugin.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "my-plugin"],
 			},
-			loadMessages: async () => [{ id: "test", expressions: [], selectors: [], body: { en: [] } }],
+			loadMessages: async () => [{ id: "test", expressions: [], selectors: [], variants: [] }],
 		}
 
 		const resolved = await resolvePlugins({
@@ -107,7 +103,7 @@ describe("loadMessages", () => {
 			await resolved.data.loadMessages!({
 				languageTags: ["en"],
 			}),
-		).toEqual([{ id: "test", expressions: [], selectors: [], body: { en: [] } }])
+		).toEqual([{ id: "test", expressions: [], selectors: [], variants: [] }])
 	})
 
 	it("should collect an error if function is defined twice in multiple plugins", async () => {
@@ -116,7 +112,6 @@ describe("loadMessages", () => {
 				id: "plugin.plugin.loadMessagesFirst",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "my-plugin"],
 			},
 			loadMessages: async () => undefined as any,
 		}
@@ -125,7 +120,6 @@ describe("loadMessages", () => {
 				id: "plugin.plugin.loadMessagesSecond",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "my-plugin"],
 			},
 			loadMessages: async () => undefined as any,
 		}
@@ -148,7 +142,6 @@ describe("saveMessages", () => {
 				id: "namespace.plugin.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "my-plugin"],
 			},
 			saveMessages: async () => undefined as any,
 		}
@@ -168,7 +161,6 @@ describe("saveMessages", () => {
 				id: "plugin.plugin.saveMessages",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "my-plugin"],
 			},
 			saveMessages: async () => undefined as any,
 		}
@@ -177,7 +169,6 @@ describe("saveMessages", () => {
 				id: "plugin.plugin.saveMessages2",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "my-plugin"],
 			},
 
 			saveMessages: async () => undefined as any,
@@ -201,7 +192,6 @@ describe("detectedLanguageTags", () => {
 				id: "plugin.plugin.detectedLanguageTags",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: [],
 			},
 			detectedLanguageTags: async () => ["de", "en"],
 			addAppSpecificApi: () => {
@@ -213,7 +203,6 @@ describe("detectedLanguageTags", () => {
 				id: "plugin.plugin.detectedLanguageTags2",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "detected-language-tags"],
 			},
 			addAppSpecificApi: () => {
 				return {}
@@ -236,7 +225,6 @@ describe("detectedLanguageTags", () => {
 				id: "plugin.plugin.detectedLanguageTags",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: [],
 			},
 			detectedLanguageTags: async () => ["de", "en"],
 			addAppSpecificApi: () => {
@@ -248,7 +236,6 @@ describe("detectedLanguageTags", () => {
 				id: "plugin.plugin.detectedLanguageTags2",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: [],
 			},
 			detectedLanguageTags: async () => ["de", "en"],
 			addAppSpecificApi: () => {
@@ -274,7 +261,6 @@ describe("addAppSpecificApi", () => {
 				id: "namespace.plugin.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "my-plugin"],
 			},
 
 			addAppSpecificApi: () => ({
@@ -299,7 +285,6 @@ describe("addAppSpecificApi", () => {
 				id: "namespace.plugin.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "my-plugin"],
 			},
 			addAppSpecificApi: () => ({
 				"my-app-1": {
@@ -315,7 +300,6 @@ describe("addAppSpecificApi", () => {
 				id: "namespace.plugin.placeholder2",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: ["plugin", "my-plugin"],
 			},
 
 			addAppSpecificApi: () => ({
@@ -342,7 +326,6 @@ describe("addAppSpecificApi", () => {
 				id: "namespace.plugin.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: [],
 			},
 			// @ts-expect-error - invalid return type
 			addAppSpecificApi: () => undefined,
@@ -364,7 +347,6 @@ describe("addAppSpecificApi", () => {
 				id: "namespace.plugin.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
-				keywords: [],
 			},
 			addAppSpecificApi: () => ({
 				"namespace.app.placeholder": {

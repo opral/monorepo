@@ -15,10 +15,10 @@ Promise<Result<Message, string>> {
 		}
 		const copy = structuredClone(args.message)
 		for (const targetLanguageTag of args.targetLanguageTags) {
-			if (!args.sourceLanguageTag || !args.message.body[args.sourceLanguageTag]) {
+			if (!args.sourceLanguageTag || !args.message.variants.some((variant) => variant.languageTag === args.sourceLanguageTag)) {
 				throw new Error("Source Language configuration missing")
 			}
-			for (const variant of args.message.body[args.sourceLanguageTag]!) {
+			for (const variant of args.message.variants.filter((variant) => variant.languageTag === args.sourceLanguageTag)) {
 				const targetVariant = getVariant(args.message, {
 					where: {
 						languageTag: targetLanguageTag,
@@ -46,10 +46,8 @@ Promise<Result<Message, string>> {
 				}
 				const json = await response.json()
 				const translation = json.data.translations[0].translatedText
-				if (copy.body[targetLanguageTag] === undefined) {
-					copy.body[targetLanguageTag] = []
-				}
-				copy.body[targetLanguageTag]?.push({
+				copy.variants.push({
+					languageTag: targetLanguageTag,
 					match: variant.match,
 					pattern: deserializePattern(translation, placeholderMetadata),
 				})
@@ -80,7 +78,7 @@ const escapeStart = `<span class="notranslate">`
 const escapeEnd = "</span>"
 
 function serializePattern(
-	pattern: Message["body"][LanguageTag][number]["pattern"],
+	pattern: Message["variants"][number]["pattern"],
 	placeholderMetadata: PlaceholderMetadata,
 ) {
 	let result = ""
@@ -106,8 +104,8 @@ function serializePattern(
 function deserializePattern(
 	text: string,
 	placeholderMetadata: PlaceholderMetadata,
-): Message["body"][LanguageTag][number]["pattern"] {
-	const result: Message["body"][LanguageTag][number]["pattern"] = []
+): Message["variants"][number]["pattern"] {
+	const result: Message["variants"][number]["pattern"] = []
 	// google translate espaces quotes, need to replace the escaped stuff
 	const unescapedText = text.replaceAll("&quot;", '"').replaceAll("&#39;", "'")
 	let i = 0

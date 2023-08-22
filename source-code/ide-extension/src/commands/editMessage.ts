@@ -1,59 +1,100 @@
-import { query } from "@inlang/core/query"
-import { setState, state } from "../state.js"
+import { state } from "../state.js"
 import { msg } from "../utilities/message.js"
 import { EventEmitter, window } from "vscode"
-import type { Message } from "@inlang/core/ast"
-import { getMessageAsString } from "../utilities/query.js"
+import type { LanguageTag, Message, Pattern } from "@inlang/app"
 
 const onDidEditMessageEmitter = new EventEmitter<void>()
 export const onDidEditMessage = onDidEditMessageEmitter.event
 
+// get string from pattern
+const getStringFromPattern = (args: {
+	pattern: Pattern
+	languageTag: LanguageTag
+	messageId: Message["id"]
+}): string => {
+	return args.pattern
+		.map((element) => {
+			if (element.type === "Text") {
+				return element.value
+			} else if (element.type === "VariableReference") {
+				return `{${element.name}}` // TODO: Use framework specific placeholder indication
+			} else {
+				return msg(
+					`Unknown pattern element type in message with id ${args.messageId} for languageTag ${args.languageTag}.`,
+				)
+			}
+		})
+		.join("")
+}
+
+// get Pattern from string
+const getPatternFromString = (args: { string: string }): Pattern => {
+	const patternElements = args.string.split(/({.*?})/g) // TODO: Use framework specific placeholder indication
+	const patternElementsWithTypes = patternElements.map((element) => {
+		if (element.startsWith("{") && element.endsWith("}")) {
+			return {
+				type: "VariableReference" as const,
+				name: element.slice(1, -1),
+			}
+		} else {
+			return {
+				type: "Text" as const,
+				value: element,
+			}
+		}
+	})
+	return patternElementsWithTypes
+}
+
 export const editMessageCommand = {
 	id: "inlang.editMessage",
 	title: "Inlang: Edit Message",
-	callback: async function ({ messageId, resource }: { messageId: string; resource: string }) {
-		const { writeResources } = state().config
-		const currentResource = state().resources.find((r) => r.languageTag.name === resource)
-		if (!currentResource) {
-			return msg("Couldn't retrieve resource", "warn", "notification")
+	callback: async function ({
+		messageId,
+		languageTag,
+	}: {
+		messageId: Message["id"]
+		languageTag: LanguageTag
+	}) {
+		// Get the message from the state
+		const message = state().inlang.query.messages.get({ where: { id: messageId } })
+		if (!message) {
+			return msg(`Message with id ${messageId} not found.`)
 		}
 
-		const message = getMessageAsString(query(currentResource).get({ id: messageId }))
+		// Find the variant with the specified language tag
+		const variant = message.variants.find((v) => v.languageTag === languageTag)
+		if (!variant) {
+			return msg(
+				`Variant with language tag ${languageTag} in message with id ${messageId} not found.`,
+			)
+		}
 
+		// Construct the complete pattern text
+		const stringPattern = getStringFromPattern({ pattern: variant.pattern, languageTag, messageId })
+
+		// Show input box with current message content
 		const newValue = await window.showInputBox({
 			title: "Enter new value:",
-			value: message,
+			value: stringPattern,
 		})
-
-		if (newValue === undefined) {
+		if (!newValue) {
 			return
 		}
 
-		const newMessage: Message = {
-			type: "Message",
-			id: { type: "Identifier", name: messageId },
-			pattern: {
-				type: "Pattern",
-				elements: [{ type: "Text", value: newValue }],
-			},
-		}
+		// Update the pattern
+		variant.pattern = getPatternFromString({ string: newValue })
 
-		const [newResource, exception] = query(currentResource).upsert({ message: newMessage })
-
-		if (exception) {
-			return window.showErrorMessage("Couldn't update message. ", exception.message)
-		}
-		const resources = state().resources.map((r) =>
-			r.languageTag.name === resource ? newResource : r,
-		)
-		await writeResources({
-			config: state().config,
-			resources,
+		// Upsert the updated message
+		state().inlang.query.messages.upsert({
+			where: { id: messageId },
+			data: message,
 		})
-		setState({ ...state(), resources })
 
+		// Emit event to notify that a message was edited
 		onDidEditMessageEmitter.fire()
 
+		// Return success message
 		return msg("Message updated.")
 	},
 } as const
