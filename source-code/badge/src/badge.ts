@@ -6,12 +6,7 @@ import { telemetryNode } from "@inlang/telemetry"
 import { removeCommas } from "./helper/removeCommas.js"
 import { calculateSummary } from "./helper/calculateSummary.js"
 import { caching } from "cache-manager"
-import { createInlang } from "@inlang/app"
-import type { InlangModule } from "@inlang/module"
-//@ts-ignore
-import pluginJson from "../../plugins/json/dist/index.js"
-//@ts-ignore
-import pluginLint from "../../plugins/standard-lint-rules/dist/index.js"
+import { openInlangProject } from "@inlang/app"
 
 const fontMedium = readFileSync(new URL("./assets/static/Inter-Medium.ttf", import.meta.url))
 const fontBold = readFileSync(new URL("./assets/static/Inter-Bold.ttf", import.meta.url))
@@ -38,18 +33,9 @@ export const badge = async (url: string) => {
 		throw new Error("No inlang.config.js file found in the repository.")
 	})
 
-	const inlang = await createInlang({
+	const inlang = await openInlangProject({
 		configPath: "./inlang.config.json",
 		nodeishFs: repo.nodeishFs,
-		_import: async () =>
-			({
-				default: {
-					// @ts-ignore
-					plugins: [...pluginJson.plugins],
-					// @ts-ignore
-					lintRules: [...pluginLint.lintRules],
-				},
-			} satisfies InlangModule),
 	})
 
 	// access all messages via inlang instance query
