@@ -210,7 +210,7 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 						report.ruleId === "inlang.lintRule.emptyPattern",
 				).length !== 0
 
-		let newMessage = structuredClone(props.message)
+		const newMessage = structuredClone(props.message)
 		if (hasEmptyPattern) {
 			newMessage.variants = newMessage.variants.filter(
 				(variant) => variant.languageTag !== props.languageTag,
