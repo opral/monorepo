@@ -114,22 +114,22 @@ export const Page = () => {
 	})
 	createEffect(() => {
 		if (!inlang.loading) {
-			console.log("config changes", inlang()?.config())
+			console.info("config changes", inlang()?.config())
 		}
 	})
 	createEffect(() => {
 		if (!inlang.loading) {
-			console.log("meta plugins changes", inlang()!.meta.plugins()[0]?.id)
+			console.info("meta plugins changes", inlang()!.meta.plugins()[0]?.id)
 		}
 	})
 	createEffect(() => {
 		if (!inlang.loading) {
-			console.log("messages changes", inlang()!.query.messages.getAll())
+			console.info("messages changes", inlang()!.query.messages.getAll())
 		}
 	})
 
 	setTimeout(() => {
-		console.log("timeout set config")
+		console.info("timeout set config")
 		inlang()?.setConfig({
 			...config,
 			sourceLanguageTag: "fr",
@@ -137,7 +137,7 @@ export const Page = () => {
 	}, 2000)
 
 	setTimeout(() => {
-		console.log("timeout createMessage")
+		console.info("timeout createMessage")
 		inlang()?.query.messages.create({
 			data: {
 				...exampleMessages[0],
