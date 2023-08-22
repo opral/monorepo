@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { LintRule } from "@inlang/lint"
 import type { Plugin } from "@inlang/plugin"
 import { describe, expect, it } from "vitest"

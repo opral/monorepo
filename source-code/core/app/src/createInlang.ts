@@ -14,6 +14,7 @@ import {
 	ConfigPathNotFoundError,
 	ConfigSyntaxError,
 	InvalidConfigError,
+	NoMessagesPluginError,
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
 } from "./errors.js"
@@ -62,7 +63,6 @@ export const createInlang = async (args: {
 				writeConfigToDisk({ nodeishFs: args.nodeishFs, config: validatedConfig })
 				return { data: undefined }
 			} catch (error: unknown) {
-				// TODO: test if this actually works
 				if (error instanceof InvalidConfigError) {
 					return { error }
 				}
@@ -82,7 +82,11 @@ export const createInlang = async (args: {
 
 			loadModules({ config: conf, nodeishFs: args.nodeishFs, _import: args._import })
 				.then((resolvedModules) => {
+					if (!resolvedModules.runtimePluginApi.loadMessages || !resolvedModules.runtimePluginApi.saveMessages) {
+						throw new NoMessagesPluginError()
+					}
 					setResolvedModules(resolvedModules)
+
 					// TODO: handle `detectedLanguageTags`
 				})
 				.catch((err) => markInitAsFailed(err))
@@ -191,7 +195,6 @@ export const createInlang = async (args: {
 			debounce(
 				500,
 				async (newMessages) => {
-					// console.log('saving changes to messages')
 					try {
 						await resolvedModules()!.runtimePluginApi.saveMessages({ messages: newMessages })
 					} catch (err) {

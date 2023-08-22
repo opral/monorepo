@@ -1,5 +1,5 @@
 import type { InlangModule, ResolveModulesFunction } from "./api.js"
-import { ModuleError, ModuleImportError, ModuleHasNoExportsError, NoMessagesPluginError } from "./errors.js"
+import { ModuleError, ModuleImportError, ModuleHasNoExportsError } from "./errors.js"
 import { tryCatch } from "@inlang/result"
 import { LintRule, resolveLintRules } from "@inlang/lint"
 import { resolvePlugins, type Plugin } from "@inlang/plugin"
@@ -45,6 +45,8 @@ export const resolveModules: ResolveModulesFunction = async (args) => {
 			continue
 		}
 
+		// TODO: check if module is valid using typebox
+
 		const plugins = importedModule.data.default.plugins ?? []
 		const lintRules = importedModule.data.default.lintRules ?? []
 
@@ -66,17 +68,11 @@ export const resolveModules: ResolveModulesFunction = async (args) => {
 
 	const resolvedLintRules = resolveLintRules({ lintRules: allLintRules })
 
-	// TODO: test
-	const otherErrors: NoMessagesPluginError[] = []
-	if (!resolvedPlugins.data.loadMessages || !resolvedPlugins.data.saveMessages) {
-		otherErrors.push(new NoMessagesPluginError())
-	}
-
 	return {
 		meta,
 		lintRules: allLintRules,
 		plugins: allPlugins,
 		runtimePluginApi: resolvedPlugins.data,
-		errors: [...moduleErrors, ...resolvedLintRules.errors, ...resolvedPlugins.errors, ...otherErrors],
+		errors: [...moduleErrors, ...resolvedLintRules.errors, ...resolvedPlugins.errors],
 	}
 }
