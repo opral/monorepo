@@ -1,6 +1,6 @@
 import type { LanguageTag } from "@inlang/app"
-import type { MessageReferenceMatch } from "@inlang/core/config"
 import { MarkdownString, Uri } from "vscode"
+import type { MessageReferenceMatch } from "../api.js"
 import { state } from "../state.js"
 import { getStringFromPattern } from "../utilities/query.js"
 
