@@ -63,7 +63,7 @@ export function PatternEditor(props: {
 		}
 	}
 
-	const sourceMessage = () => props.message.variants.filter((variant) => variant.languageTag === sourceLanguageTag()!)
+	const sourceVariant = () => getVariant(props.message, { where: { languageTag: sourceLanguageTag()! } })
 
 	const variant = () => props.message.variants.filter((variant) => variant.languageTag === props.languageTag)
 		? props.message.variants.filter((variant) => variant.languageTag === props.languageTag)![0]
@@ -72,9 +72,9 @@ export function PatternEditor(props: {
 	const newPattern = () => getTextValue(editor) as Variant["pattern"];
 
 	onMount(() => {
-		if (sourceMessage()) {
+		if (sourceVariant()) {
 			setVariableReferences(
-				sourceMessage()![0]?.pattern
+				sourceVariant()?.pattern
 					.filter((pattern) => pattern.type === "VariableReference")
 					.map((variableReference) => variableReference) as VariableReference[],
 			)
@@ -160,27 +160,23 @@ export function PatternEditor(props: {
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
 
 	const handleMachineTranslate = async () => {
-		if (sourceMessage() === undefined) {
+		if (sourceVariant() === undefined) {
 			return showToast({
 				variant: "info",
 				title: "Can't translate if the reference message does not exist.",
 			})
 		}
-		let text = ""
-		Object.values(sourceMessage()!).some((value) => {
-			text = value.pattern
-				.map((pattern) => {
-					if (pattern.type === "Text") {
-						return pattern.value.toLocaleLowerCase()
-					} else if (pattern.type === "VariableReference") {
-						return pattern.name.toLowerCase()
-					} else {
-						return false
-					}
-				})
-				.join("")
-		})
-
+		const text = sourceVariant()!.pattern
+			.map((pattern) => {
+				if (pattern.type === "Text") {
+					return pattern.value.toLocaleLowerCase()
+				} else if (pattern.type === "VariableReference") {
+					return pattern.name.toLowerCase()
+				} else {
+					return false
+				}
+			})
+			.join("")
 		if (text === "") {
 			return showToast({
 				variant: "info",
@@ -235,7 +231,7 @@ export function PatternEditor(props: {
 					notificationTitle: inlang()?.installed.lintRules()
 						.filter((lintRule) => !lintRule.disabled)
 						.find((rule) => rule.meta.id === report.ruleId)?.meta.displayName["en"] || report.ruleId,
-					notificationDescription: report.body.en,
+					notificationDescription: report.body["en"]!,
 					notificationType: report.level,
 				})
 			}
