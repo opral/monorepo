@@ -1,14 +1,17 @@
 import satori from "satori"
-import { setupConfig } from "@inlang/core/config"
-import { initialize$import, type InlangEnvironment } from "@inlang/core/environment"
-import { getLintReports, lint } from "@inlang/core/lint"
 import { open, createNodeishMemoryFs } from "@project-lisa/client"
 import { markup } from "./helper/markup.js"
 import { readFileSync } from "node:fs"
 import { telemetryNode } from "@inlang/telemetry"
 import { removeCommas } from "./helper/removeCommas.js"
-import { missingTranslations } from "./helper/missingTranslations.js"
+import { calculateSummary } from "./helper/calculateSummary.js"
 import { caching } from "cache-manager"
+import { createInlang } from "@inlang/app"
+import type { InlangModule } from "@inlang/module"
+//@ts-ignore
+import pluginJson from "../../plugins/json/dist/index.js"
+//@ts-ignore
+import pluginLint from "../../plugins/standard-lint-rules/dist/index.js"
 
 const fontMedium = readFileSync(new URL("./assets/static/Inter-Medium.ttf", import.meta.url))
 const fontBold = readFileSync(new URL("./assets/static/Inter-Bold.ttf", import.meta.url))
@@ -27,53 +30,46 @@ export const badge = async (url: string) => {
 	}
 
 	// initialize a lisa repo instance on each request to prevent cross request pollution
-	const repo = await open(url, { nodeishFs: createNodeishMemoryFs() })
-
-	// Set up the environment functions
-	const env: InlangEnvironment = {
-		$import: initialize$import({
-			fs: repo.nodeishFs,
-			fetch,
-		}),
-		$fs: repo.nodeishFs,
-	}
+	const repo = open(url, { nodeishFs: createNodeishMemoryFs() })
 
 	// Get the content of the inlang.config.js file
-	const file = await repo.nodeishFs.readFile("/inlang.config.js", { encoding: "utf-8" }).catch((e) => {
+	await repo.nodeishFs.readFile("./inlang.config.js", { encoding: "utf-8" }).catch((e) => {
 		if (e.code !== "ENOENT") throw e
 		throw new Error("No inlang.config.js file found in the repository.")
 	})
 
-	const base64Data = Buffer.from(file.toString(), "binary").toString("base64")
-	const config = await setupConfig({
-		module: await import("data:application/javascript;base64," + base64Data),
-		env,
+	const inlang = await createInlang({
+		configPath: "./inlang.config.json",
+		nodeishFs: repo.nodeishFs,
+		_import: async () =>
+			({
+				default: {
+					// @ts-ignore
+					plugins: [...pluginJson.plugins],
+					// @ts-ignore
+					lintRules: [...pluginLint.lintRules],
+				},
+			} satisfies InlangModule),
 	})
 
-	const resources = await config.readResources({ config })
+	// access all messages via inlang instance query
+	const messages = inlang.query.messages.getAll()
 
-	// Get ressources with lints
-	const [resourcesWithLints, errors] = await lint({ resources, config })
-	if (errors) {
-		console.error("lints partially failed", errors)
+	// throw if no sourceLanguageTag is found
+	if (!inlang.config().sourceLanguageTag) {
+		throw new Error("No sourceLanguageTag found, please add one to your inlang.config.json")
 	}
 
-	const lints = getLintReports(resourcesWithLints)
+	// initialize lint to access reports
+	await inlang.lint.init()
 
-	// find in resources the resource from the preferredLanguage
-	const referenceResource = resources.find(
-		(resource) => resource.languageTag.name === config.sourceLanguageTag,
-	)
-	if (!referenceResource) {
-		throw new Error("No sourceLanguageTag found, please add one to your inlang.config.js")
-	}
-
-	const { percentage, numberOfMissingTranslations } = missingTranslations({
-		resources,
-		referenceResource,
+	const { percentage, errors, warnings, numberOfMissingVariants } = calculateSummary({
+		reports: inlang.lint.reports(),
+		languageTags: inlang.config().languageTags,
+		messages,
 	})
 
-	const vdom = removeCommas(markup(percentage, numberOfMissingTranslations, lints))
+	const vdom = removeCommas(markup(percentage, errors, warnings, numberOfMissingVariants))
 
 	// render the image
 	const image = await satori(
