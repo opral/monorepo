@@ -6,7 +6,7 @@ import {
 import { createMockNodeishFs } from "@inlang/app/test"
 import {
 	InlangConfig,
-	createInlang,
+	openInlangProject,
 	type Plugin,
 	type InlangProject,
 	type NodeishFilesystemSubset,
@@ -39,7 +39,7 @@ const createMockInlang = async (fs: NodeishFilesystemSubset): Promise<InlangProj
 		saveMessages: () => undefined,
 	}
 
-	return await createInlang({
+	return await openInlangProject({
 		nodeishFs: fs,
 		configPath: "./inlang.config.json",
 		_import: async (url) =>

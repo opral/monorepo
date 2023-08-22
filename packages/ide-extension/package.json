@@ -63,7 +63,7 @@
 		"package": "npx @vscode/vsce package",
 		"---- TEST ----------------------------------------------------------": "",
 		"pretest": "node ./build.js",
-		"test": "vitest run --coverage",
+		"_test": "vitest run --coverage",
 		"test:e2e": "TEST=true npm run pretest && node ./dist/test.cjs",
 		"---- LINT ----------------------------------------------------------": "",
 		"lint": "cd ../.. && npm run lint:base ./source-code/ide-extension",

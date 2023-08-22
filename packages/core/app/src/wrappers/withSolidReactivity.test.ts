@@ -1,5 +1,4 @@
 import { describe, it, expect } from "vitest"
-import { createInlang } from "../createInlang.js"
 import { createMockNodeishFs } from "@inlang/plugin/test"
 import type { InlangConfig } from "@inlang/config"
 import type { Message, Plugin, Text } from "@inlang/plugin"
@@ -7,6 +6,7 @@ import type { ImportFunction, InlangModule } from "@inlang/module"
 import { createEffect, from } from "../solid.js"
 import { withSolidReactivity } from "./withSolidReactivity.js"
 import type { LintRule } from "@inlang/lint"
+import { openInlangProject } from "../openInlangProject.js"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -96,7 +96,7 @@ describe("config", () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 		const inlang = withSolidReactivity(
-			await createInlang({
+			await openInlangProject({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
 				_import: $import,
@@ -126,7 +126,7 @@ describe("installed", () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 		const inlang = withSolidReactivity(
-			await createInlang({
+			await openInlangProject({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
 				_import: $import,
@@ -184,7 +184,7 @@ describe("messages", () => {
 
 		await fs.writeFile("./inlang.config.json", JSON.stringify(mockConfig))
 		const inlang = withSolidReactivity(
-			await createInlang({
+			await openInlangProject({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
 				_import: mockImport,
@@ -213,7 +213,7 @@ describe("messages", () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 		const inlang = withSolidReactivity(
-			await createInlang({
+			await openInlangProject({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
 				_import: $import,
@@ -276,7 +276,7 @@ describe("lint", () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 		const inlang = withSolidReactivity(
-			await createInlang({
+			await openInlangProject({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
 				_import: $import,
@@ -301,7 +301,7 @@ describe("lint", () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 		const inlang = withSolidReactivity(
-			await createInlang({
+			await openInlangProject({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
 				_import: $import,
