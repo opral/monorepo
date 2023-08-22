@@ -8,7 +8,7 @@ import type {
 } from "@inlang/lint"
 import type { MessageQueryApi } from "@inlang/messages"
 import type { Result } from "@inlang/result"
-import type { InvalidConfigError } from "./errors.js"
+import type { InvalidConfigError, PluginSaveMessagesError } from "./errors.js"
 import type {
 	Plugin,
 	PluginAppSpecificApiReturnError,
@@ -59,9 +59,10 @@ export type InlangProject = {
 			| PluginUsesInvalidSchemaError
 			| PluginUsesReservedNamespaceError
 			| InvalidLintRuleError
-			| Error
 			| InvalidLintRuleError
 			| LintRuleThrowedError
+			| PluginSaveMessagesError
+			| Error
 		)[]
 	>
 	appSpecificApi: Subscribable<RuntimePluginApi["appSpecificApi"]>

@@ -6,7 +6,7 @@ import type {
 	ResolvePluginsFunction,
 	RuntimePluginApi,
 } from "@inlang/plugin"
-import type { ModuleHasNoExportsError, ModuleImportError } from "./errors.js"
+import type { ModuleHasNoExportsError, ModuleImportError, NoMessagesPluginError } from "./errors.js"
 import type { ImportFunction } from "./import.js"
 
 /**
@@ -97,5 +97,6 @@ export type ResolveModulesFunction = (args: {
 		| ModuleImportError
 		| Awaited<ReturnType<ResolvePluginsFunction>>["errors"][number]
 		| Awaited<ReturnType<typeof resolveLintRules>>["errors"][number]
+		| NoMessagesPluginError
 	>
 }>
