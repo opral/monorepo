@@ -53,6 +53,10 @@ describe("pluginBuildConfig", () => {
 			external: ["other-plugin"],
 		})
 
-		expect(options.external).toEqual(["other-plugin", "@esbuild-plugins/node-modules-polyfill", "ts-dedent"])
+		expect(options.external).toEqual([
+			"other-plugin",
+			"@esbuild-plugins/node-modules-polyfill",
+			"ts-dedent",
+		])
 	})
 })

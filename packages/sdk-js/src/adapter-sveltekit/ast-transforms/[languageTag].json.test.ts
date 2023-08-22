@@ -82,7 +82,7 @@ describe("transformLanguageJson", () => {
 					options: {
 						isStatic: true,
 						resourcesCache: "build-time",
-					}
+					},
 				}),
 				code,
 			)

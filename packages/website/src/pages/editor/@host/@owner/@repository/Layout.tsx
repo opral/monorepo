@@ -487,7 +487,8 @@ function LintFilter(props: { clearFunction: any }) {
 								?.installed.lintRules()
 								.filter((lintRule) => !lintRule.disabled)
 								.map((lintRule) => lintRule.meta.id) ?? [],
-						)}
+						)
+					}
 				>
 					All
 				</a>
@@ -508,7 +509,9 @@ function LintFilter(props: { clearFunction: any }) {
 							.map((lintRule) => lintRule) ?? []
 					}
 				>
-					{(lintRule) => <sl-option prop:value={lintRule.meta.id}>{lintRule.meta.displayName["en"]}</sl-option>}
+					{(lintRule) => (
+						<sl-option prop:value={lintRule.meta.id}>{lintRule.meta.displayName["en"]}</sl-option>
+					)}
 				</For>
 			</div>
 		</sl-select>

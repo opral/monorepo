@@ -32,17 +32,19 @@ const getOptions = (config: TransformConfig) => {
 	const options = dedent`
 	{
 		excludedRoutes: ${JSON.stringify(config.options.excludedRoutes)},
-		parseLanguageTag: ${config.options.languageInUrl ? `({ url }) => url.pathname.split("/")[1]` : `() => undefined`
+		parseLanguageTag: ${
+			config.options.languageInUrl ? `({ url }) => url.pathname.split("/")[1]` : `() => undefined`
 		},
-		${!config.options.isStatic && config.options.languageInUrl
-			? `
+		${
+			!config.options.isStatic && config.options.languageInUrl
+				? `
 			initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
 			redirect: {
 				throwable: redirect,
 				getPath: ({ url }, languageTag) => replaceLanguageInUrl(url, languageTag),
 			},
 		`
-		: ""
+				: ""
 		},
 	}`
 

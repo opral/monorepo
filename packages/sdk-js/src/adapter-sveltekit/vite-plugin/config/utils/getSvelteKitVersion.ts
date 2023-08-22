@@ -1,9 +1,9 @@
-import { readFile } from 'node:fs/promises'
-import { findDepPkgJsonPath } from 'vitefu'
-import { PATH_TO_CWD } from '../config.js'
+import { readFile } from "node:fs/promises"
+import { findDepPkgJsonPath } from "vitefu"
+import { PATH_TO_CWD } from "../config.js"
 
 export const getSvelteKitVersion = async () => {
-	const packageName = '@sveltejs/kit'
+	const packageName = "@sveltejs/kit"
 	const pkg = await import(/* @vite-ignore */ packageName).catch(() => ({}))
 	if ("VERSION" in pkg) return pkg.VERSION
 
