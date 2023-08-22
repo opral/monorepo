@@ -8,10 +8,10 @@ import { calculateSummary } from "./helper/calculateSummary.js"
 import { caching } from "cache-manager"
 import { createInlang } from "@inlang/app"
 import type { InlangModule } from "@inlang/module"
-//@ts-ignore
-import pluginJson from "../../plugins/json/dist/index.js"
-//@ts-ignore
-import pluginLint from "../../plugins/standard-lint-rules/dist/index.js"
+// @ts-ignore
+import pluginJson from "@inlang/plugin-json/dist/index.js"
+// @ts-ignore
+import pluginLint from "@inlang/plugin-standard-lint-rules/dist/index.js"
 
 const fontMedium = readFileSync(new URL("./assets/static/Inter-Medium.ttf", import.meta.url))
 const fontBold = readFileSync(new URL("./assets/static/Inter-Bold.ttf", import.meta.url))

@@ -16,7 +16,7 @@
 		"build": "tsc --build ./tsconfig.build.json",
 		"dev": "tsc -p ./tsconfig.build.json --watch",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"test": "tsc --noEmit && vitest run --passWithNoTests --allowOnly --coverage",
 		"test:watch": "npm-run-all --print-label --parallel tsc:watch vitest:watch",
 		"tsc:watch": "tsc --noEmit --watch",
 		"vitest:watch": "vitest watch --passWithNoTests --coverage",

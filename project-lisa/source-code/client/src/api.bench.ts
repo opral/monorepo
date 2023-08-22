@@ -1,8 +1,8 @@
 import { describe, bench } from "vitest"
-import { open, createNodeishMemoryFs } from "../src/index.js"
+import { open, createNodeishMemoryFs } from "./index.js"
 
 describe("main workflow", () => {
-	let repository
+	let repository: ReturnType<typeof open>
 	bench(
 		"opens a repo url without error and without blocking i",
 		() => {

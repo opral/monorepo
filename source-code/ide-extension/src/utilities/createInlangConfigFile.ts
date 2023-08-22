@@ -1,13 +1,7 @@
-import { getConfigContent } from "@inlang/cli/src/utilities/getConfigContent"
-import { getLanguageFolderPath } from "@inlang/cli/src/utilities/getLanguageFolderPath"
-import {
-	getSupportedLibrary,
-	SupportedLibrary,
-} from "@inlang/cli/src/utilities/getSupportedLibrary"
 import { italic } from "@inlang/cli/src/utlilities/format"
-import path from "node:path"
+// import path from "node:path"
 import * as vscode from "vscode"
-import { createFileSystemMapper } from "../services/inlang-environment/src/createFileSystemMapper.js"
+// import { createFileSystemMapper } from "../services/inlang-environment/src/createFileSystemMapper.js"
 import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js"
 import { msg } from "./message.js"
 import { getSetting, updateSetting } from "./settings/index.js"
@@ -36,26 +30,25 @@ export const createInlangConfigFile = async (args: { workspaceFolder: vscode.Wor
 
 	if (createConfigFile === "Accept") {
 		// Get language folder path
-		const languageFolderPath = await getLanguageFolderPathRelativeToWorkspace(args.workspaceFolder)
+		// const languageFolderPath = await getLanguageFolderPathRelativeToWorkspace(args.workspaceFolder)
 
-		// Generate path pattern
-		const pathPattern = generatePathPattern(languageFolderPath)
-
-		if (pathPattern === "") {
-			console.warn(
-				"Could not find a language folder in the project. You have to enter the path to your language files (pathPattern) manually.",
-			)
-		} else {
-			console.info(`🗂️ Found language folder path: ${italic(pathPattern)}`)
-			console.info(
-				`🗂️ Please adjust the 'pathPattern' in the inlang.config.js manually if it is not parsed correctly.`,
-			)
-		}
+		// // Generate path pattern
+		// const pathPattern = generatePathPattern(languageFolderPath)
+		// if (pathPattern === "") {
+		// 	console.warn(
+		// 		"Could not find a language folder in the project. You have to enter the path to your language files (pathPattern) manually.",
+		// 	)
+		// } else {
+		// 	console.info(`🗂️ Found language folder path: ${italic(pathPattern)}`)
+		// 	console.info(
+		// 		`🗂️ Please adjust the 'pathPattern' in the inlang.config.js manually if it is not parsed correctly.`,
+		// 	)
+		// }
 
 		// Generate config file content
-		msg("Creating inlang.config.js ...", "info", "statusBar", vscode.StatusBarAlignment.Left, 5000)
-		const configContent = await getConfigContent({ plugin, pathPattern })
-		await writeConfigFile(configContent, args.workspaceFolder)
+		msg("Currently disabled: reating inlang.config.js ...", "info", "statusBar", vscode.StatusBarAlignment.Left, 5000)
+		// const configContent = await getConfigContent({ plugin, pathPattern })
+		// await writeConfigFile(configContent, args.workspaceFolder)
 	} else if (createConfigFile === "Reject") {
 		// Disable config file creation
 		disableConfigFileCreation()
@@ -99,8 +92,10 @@ const getSupportedLibraryInProject = async (
 	workspaceFolder: vscode.WorkspaceFolder,
 ): Promise<SupportedLibrary> => {
 	if (await vscode.workspace.findFiles("package.json")) {
-		const packageJson = await readPackageJson(workspaceFolder)
-		return getSupportedLibrary({ packageJson })
+		// const _packageJson = await readPackageJson(workspaceFolder)
+		// return getSupportedLibrary({ packageJson })
+		console.warn("📦 package.json found in this directory. But not implemented: Using fallback plugin: json")
+		return "json"
 	} else {
 		console.warn("📦 No package.json found in this directory. Using fallback plugin: json")
 		return "json"
@@ -136,19 +131,19 @@ const promptUserToCreateConfigFile = async (): Promise<string | undefined> => {
  * @param workspaceFolder - The workspace folder.
  * @returns A promise that resolves to the language folder path.
  */
-const getLanguageFolderPathRelativeToWorkspace = async (
-	workspaceFolder: vscode.WorkspaceFolder,
-): Promise<string | undefined> => {
-	const languageFolderPath = await getLanguageFolderPath({
-		fs: createFileSystemMapper(workspaceFolder.uri),
-		rootDir: workspaceFolder.uri.fsPath,
-	})
-	if (languageFolderPath) {
-		const relativePath = path.relative(workspaceFolder.uri.fsPath, languageFolderPath)
-		return path.join(relativePath, "{language}.json")
-	}
-	return undefined
-}
+// const getLanguageFolderPathRelativeToWorkspace = async (
+// 	workspaceFolder: vscode.WorkspaceFolder,
+// ): Promise<string | undefined> => {
+// 	const languageFolderPath = await getLanguageFolderPath({
+// 		fs: createFileSystemMapper(workspaceFolder.uri),
+// 		rootDir: workspaceFolder.uri.fsPath,
+// 	})
+// 	if (languageFolderPath) {
+// 		const relativePath = path.relative(workspaceFolder.uri.fsPath, languageFolderPath)
+// 		return path.join(relativePath, "{language}.json")
+// 	}
+// 	return undefined
+// }
 
 /**
  * Generates the path pattern based on the language folder path.
