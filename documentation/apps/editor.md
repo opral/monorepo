@@ -53,7 +53,7 @@ A plugin to enable the linting feature for your translation files. For example, 
 
 In order to reference specific messages within the editor, it is possible to utilize `searchParams` to apply particular filters. You can stack these parameters behind each other.
 
-Example: `https://inlang.com/editor/github.com/orga/project?search='common'&lint='missingMessage'`
+Example: `https://inlang.com/editor/github.com/orga/project?search='common'&lint='missingTranslation'`
 
 - **🆔 id**
 
@@ -65,7 +65,7 @@ Example: `https://inlang.com/editor/github.com/orga/project?search='common'&lint
 
 - **🚨 lint**
 
-  `?lint='missingMessage&lint=messageWithoutReference'` The lint parameter filters the messages by the lint rule. The parameter could be provided multiple times.
+  `?lint='missingTranslation&lint=messageWithoutReference'` The lint parameter filters the messages by the lint rule. The parameter could be provided multiple times.
 
 - **🌎 lang**
 

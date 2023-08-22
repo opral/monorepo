@@ -29,7 +29,7 @@ export const TourHintWrapper = (props: TourHintWrapperProps) => {
 					<ForkRepository />
 				</Show>
 				<Show when={props.currentId === "missing-message-rule"}>
-					<MissingMessageRule />
+					<missingTranslationRule />
 				</Show>
 				<Show when={props.currentId === "textfield"}>
 					<Textfield />
@@ -169,7 +169,7 @@ const ForkRepository = () => {
 	)
 }
 
-const MissingMessageRule = () => {
+const missingTranslationRule = () => {
 	return (
 		<div class="w-full flex flex-col gap-2">
 			<div class="w-full overflow-hidden">

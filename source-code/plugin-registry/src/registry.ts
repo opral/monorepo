@@ -12,7 +12,7 @@ export const plugins: InlangPluginManifest[] = [
 		icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
 		repository:
 			"https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules/",
-		keywords: ["lint", "inlang", "report", "missingMessage"],
+		keywords: ["lint", "inlang", "report", "missingTranslation"],
 	},
 	{
 		id: "typesafe-i18n",

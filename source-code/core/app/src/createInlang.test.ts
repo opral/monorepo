@@ -22,7 +22,7 @@ const config: InlangConfig = {
 	modules: ["./dist/index.js"],
 	settings: {
 		"project.lintRuleLevels": {
-			"inlang.lintRule.missingMessage": "error",
+			"inlang.lintRule.missingTranslation": "error",
 		},
 		"inlang.plugin.i18next": {
 			pathPattern: "./examples/example01/{languageTag}.json",

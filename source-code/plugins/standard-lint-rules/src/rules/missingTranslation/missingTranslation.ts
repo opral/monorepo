@@ -1,19 +1,19 @@
 import type { MessageLintRule } from "@inlang/lint"
 
-export const missingMessageRule: MessageLintRule = {
+export const missingTranslationRule: MessageLintRule = {
 	type: "MessageLint",
 	meta: {
-		id: "inlang.lintRule.missingMessage",
+		id: "inlang.lintRule.missingTranslation",
 		displayName: {
-			en: "Missing Message",
+			en: "Missing Translation",
 		},
 		description: {
 			en: `
-Checks for missing messages in a language tag.
+Checks for missing variants for a specific languageTag.
 
-If a message exists in the reference resource but is missing
-in a target resource, it is likely that the message has not
-been translated yet.
+If a variant exists for the sourceLanguageTag but is missing
+for a listed languageTag, it is likely that the message has not
+been translated for this languageTag yet.
 `,
 		},
 		marketplace: {
@@ -21,7 +21,7 @@ been translated yet.
 			linkToReadme: {
 				en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules",
 			},
-			keywords: ["lint-rule", "standard", "missing-message"],
+			keywords: ["lint-rule", "standard", "missing-translation"],
 			publisherName: "inlang",
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		},
@@ -32,13 +32,14 @@ been translated yet.
 		)
 
 		for (const translatedLanguageTag of translatedLanguageTags) {
-			const filteredVariants = variants.filter((variant) => variant.languageTag === translatedLanguageTag) ?? []
+			const filteredVariants =
+				variants.filter((variant) => variant.languageTag === translatedLanguageTag) ?? []
 			if (!filteredVariants.length) {
 				report({
 					messageId: id,
 					languageTag: translatedLanguageTag,
 					body: {
-						en: `Message with id '${id}' is missing for language tag '${translatedLanguageTag}'.`,
+						en: `Message with id '${id}' has a missing variant for language tag '${translatedLanguageTag}'.`,
 					},
 				})
 				return
