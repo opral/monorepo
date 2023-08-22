@@ -33,7 +33,6 @@ export function PatternEditor(props: {
 		setLocalChanges,
 		userIsCollaborator,
 		routeParams,
-		filteredLanguageTags,
 		inlang,
 		sourceLanguageTag
 	} = useEditorState()
@@ -186,10 +185,18 @@ export function PatternEditor(props: {
 			setShowMachineLearningWarningDialog(true)
 			return machineLearningWarningDialog?.show()
 		}
+		// check if empty Message is present for message
+		const hasEmptyPattern = inlang()?.lint.reports().filter((report) => report.messageId === props.message.id && report.languageTag === props.languageTag && report.ruleId === "inlang.lintRule.emptyPattern").length !== 0
+
+		let newMessage = structuredClone(props.message)
+		if (hasEmptyPattern) {
+			newMessage.variants = newMessage.variants.filter((variant) => variant.languageTag !== props.languageTag)
+		}
+
 		setMachineTranslationIsLoading(true)
 		const { rpc } = await import("@inlang/rpc");
 		const translation = await rpc.machineTranslateMessage({
-			message: props.message,
+			message: newMessage,
 			sourceLanguageTag: inlang()!.config()!.sourceLanguageTag!,
 			targetLanguageTags: [props.languageTag],
 		})
