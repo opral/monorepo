@@ -6,13 +6,12 @@ import { Button } from "../index/components/Button.jsx"
 import { useI18n } from "@solid-primitives/i18n"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { InstallationProvider } from "./InstallationProvider.jsx"
+import { LocalStorageProvider } from "#src/services/local-storage/index.js"
 
 //! TEST LINK: http://localhost:3000/install?repo=github.com/floriandwt/inlang-ide-next-demo&module=https://cdn.jsdelivr.net/npm/@inlang/plugin-json@3/dist/index.js,https://cdn.jsdelivr.net/npm/@inlang/plugin-json@3/dist/index.js
 
 export function Page() {
 	/** is not reactive because window is not reactive */
-	const [input, setInput] = createSignal("")
-	const [tourStep, setTourStep] = createSignal(0)
 	const [, { locale }] = useI18n()
 
 	const url = new URLSearchParams(window.location.search)
@@ -39,10 +38,10 @@ export function Page() {
 			/>
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<RootLayout>
-				<div class="py-16">
-					<Show when={validateInstallation()} fallback={<ConfigureInstallation />}>
+				<div class="flex flex-col items-center justify-center h-screen gap-16 pb-64">
+					<Show when={validateInstallation()}>
 						<InstallationProvider repo={repo} modules={modules}>
-							<ShowInstallation />
+							<ShowProgress />
 						</InstallationProvider>
 					</Show>
 				</div>
@@ -51,9 +50,9 @@ export function Page() {
 	)
 }
 
-function ShowInstallation() {
+function ShowProgress() {
 	return (
-		<div class="flex flex-col items-center justify-center min-h-screen gap-16 pb-64">
+		<>
 			{/* Loading spinner */}
 			<div class="relative h-24 w-24 animate-spin">
 				<div class="h-full w-full bg-background border-primary border-4 rounded-full" />
@@ -62,17 +61,6 @@ function ShowInstallation() {
 			<h2 class="text-[24px] leading-tight md:text-2xl font-semibold text-center">
 				Installing your modules…
 			</h2>
-		</div>
-	)
-}
-
-function ConfigureInstallation() {
-	return (
-		<div>
-			<h2 class="text-[24px] leading-tight md:text-2xl font-semibold mb-8">
-				Installing your modules…
-			</h2>
-			<CommunityProjects justShowRecent />
-		</div>
+		</>
 	)
 }
