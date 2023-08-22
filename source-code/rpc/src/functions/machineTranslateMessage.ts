@@ -15,10 +15,15 @@ Promise<Result<Message, string>> {
 		}
 		const copy = structuredClone(args.message)
 		for (const targetLanguageTag of args.targetLanguageTags) {
-			if (!args.sourceLanguageTag || !args.message.variants.some((variant) => variant.languageTag === args.sourceLanguageTag)) {
+			if (
+				!args.sourceLanguageTag ||
+				!args.message.variants.some((variant) => variant.languageTag === args.sourceLanguageTag)
+			) {
 				throw new Error("Source Language configuration missing")
 			}
-			for (const variant of args.message.variants.filter((variant) => variant.languageTag === args.sourceLanguageTag)) {
+			for (const variant of args.message.variants.filter(
+				(variant) => variant.languageTag === args.sourceLanguageTag,
+			)) {
 				const targetVariant = getVariant(args.message, {
 					where: {
 						languageTag: targetLanguageTag,

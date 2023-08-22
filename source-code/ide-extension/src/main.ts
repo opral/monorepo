@@ -111,7 +111,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
 	const loadMessages = async () => {
 		setState({
-			inlang
+			inlang,
 		})
 	}
 
@@ -142,7 +142,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
 	const documentSelectors: vscode.DocumentSelector = [
 		{ language: "javascript", pattern: "!inlang.config.json" },
-		...state().inlang.appSpecificApi()["inlang.app.ideExtension"].documentSelectors || undefined
+		...(state().inlang.appSpecificApi()["inlang.app.ideExtension"].documentSelectors || undefined),
 	]
 	// register source actions
 	args.context.subscriptions.push(
@@ -163,7 +163,6 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	// linter diagnostics
 	linterDiagnostics(args)
 }
-
 
 // this method is called when your extension is deactivated
 // export function deactivate() {}

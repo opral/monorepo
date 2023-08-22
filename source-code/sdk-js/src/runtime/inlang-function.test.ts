@@ -1,6 +1,6 @@
 import { createInlangFunction } from "./inlang-function.js"
 import { test, describe, expect } from "vitest"
-import { createMessage } from '../test.util.js'
+import { createMessage } from "../test.util.js"
 
 const messages = [
 	createMessage("hello", { en: "world" }),

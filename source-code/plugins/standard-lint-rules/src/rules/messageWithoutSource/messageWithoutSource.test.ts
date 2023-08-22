@@ -9,7 +9,7 @@ const message1: Message = {
 	variants: [
 		{ languageTag: "en", match: {}, pattern: [] },
 		{ languageTag: "de", match: {}, pattern: [] },
-	]
+	],
 }
 
 const messages = [message1]

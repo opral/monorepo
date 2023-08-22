@@ -238,7 +238,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const sourceMessages = () =>
 		inlang()
 			?.query.messages.getAll()
-			.filter((message) => message.variants.filter((variant) => variant.languageTag === sourceLanguageTag()))
+			.filter((message) =>
+				message.variants.filter((variant) => variant.languageTag === sourceLanguageTag()),
+			)
 
 	const [localStorage] = useLocalStorage() ?? []
 
@@ -318,19 +320,22 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}
 		},
 		async () => {
-			const inlang = withSolidReactivity(await createInlang({
-				configPath: "./inlang.config.json",
-				nodeishFs: fs(),
-				_import: async () =>
-					({
-						default: {
-							// @ts-ignore
-							plugins: [...pluginJson.plugins],
-							// @ts-ignore
-							lintRules: [...pluginLint.lintRules],
-						},
-					} satisfies InlangModule),
-			}), { from })
+			const inlang = withSolidReactivity(
+				await createInlang({
+					configPath: "./inlang.config.json",
+					nodeishFs: fs(),
+					_import: async () =>
+						({
+							default: {
+								// @ts-ignore
+								plugins: [...pluginJson.plugins],
+								// @ts-ignore
+								lintRules: [...pluginLint.lintRules],
+							},
+						} satisfies InlangModule),
+				}),
+				{ from },
+			)
 			const config = inlang.config()
 			if (config) {
 				const languagesTags = // TODO: move this into setter logic

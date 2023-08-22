@@ -6,10 +6,7 @@ import Text from "@tiptap/extension-text"
 import { createEffect } from "solid-js"
 import type { LanguageTag, Message } from "@inlang/app"
 
-export const TipTapEditor = (props: {
-	languageTag: LanguageTag
-	id: Message["id"]
-}) => {
+export const TipTapEditor = (props: { languageTag: LanguageTag; id: Message["id"] }) => {
 	//editor
 	let ref!: HTMLDivElement
 

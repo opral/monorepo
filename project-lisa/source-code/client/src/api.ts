@@ -72,7 +72,7 @@ export function open(
 		)
 	}
 	if (args.auth) {
-		console.warn('Auth currently not implemented in lisa client')
+		console.warn("Auth currently not implemented in lisa client")
 	}
 
 	const github = new Octokit({

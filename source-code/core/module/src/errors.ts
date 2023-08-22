@@ -26,4 +26,3 @@ export class ModuleImportError extends ModuleError {
 		this.name = "ModuleImportError"
 	}
 }
-
