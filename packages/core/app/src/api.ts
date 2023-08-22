@@ -45,7 +45,6 @@ export type InstalledLintRule = {
 	disabled: boolean
 }
 
-
 export type InlangProject = {
 	installed: {
 		plugins: Subscribable<InstalledPlugin[]>
