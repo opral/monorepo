@@ -1,5 +1,5 @@
-/** @example `repo={repositoryURL}&modules={modulesURL}` */
+/** @example `repository={repositoryURL}&modules={modulesURL}` */
 export type InstallationRouteParams = {
-	repository: string
-	modules: string[]
+	repo: string
+	module: string[]
 }
