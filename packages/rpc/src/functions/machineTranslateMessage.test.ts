@@ -12,20 +12,20 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			message: {
 				id: "mockMessage",
 				selectors: [],
-				body: {
-					en: [{ pattern: [{ type: "Text", value: "Hello world" }], match: {} }],
-				},
+				variants: [
+					{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "Hello world" } ]},
+				],
 			},
 		})
 		expect(result.error).toBeUndefined()
 		expect(result.data).toEqual({
 			id: "mockMessage",
 			selectors: [],
-			body: {
-				en: [{ pattern: [{ type: "Text", value: "Hello world" }], match: {} }],
-				de: [{ pattern: [{ type: "Text", value: "Hallo Welt" }], match: {} }],
-				fr: [{ pattern: [{ type: "Text", value: "Bonjour le monde" }], match: {} }],
-			},
+			variants: [
+				{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "Hello world" }] },
+				{ languageTag: "de", match: {}, pattern: [{ type: "Text", value: "Hallo Welt" }]},
+				{ languageTag: "fr", match: {}, pattern: [{ type: "Text", value: "Bonjour le monde" }] },
+			],
 		})
 	},
 )
@@ -39,46 +39,25 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			message: {
 				id: "mockMessage",
 				selectors: [],
-				body: {
-					en: [
-						{
-							pattern: [
-								{ type: "Text", value: "Good evening " },
-								{ type: "VariableReference", name: "username" },
-								{ type: "Text", value: ", what a beautiful sunset." },
-							],
-							match: {},
-						},
-					],
-				},
+				variants: [
+					{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "Good evening" }]},
+					{ languageTag: "en", match: {}, pattern: [{ type: "VariableReference", name: "username" }]},
+					{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: ", what a beautiful sunset." }]},
+				],
 			},
 		})
 		expect(result.error).toBeUndefined()
 		expect(result.data).toEqual({
 			id: "mockMessage",
 			selectors: [],
-			body: {
-				en: [
-					{
-						pattern: [
-							{ type: "Text", value: "Good evening " },
-							{ type: "VariableReference", name: "username" },
-							{ type: "Text", value: ", what a beautiful sunset." },
-						],
-						match: {},
-					},
-				],
-				de: [
-					{
-						pattern: [
-							{ type: "Text", value: "Guten Abend " },
-							{ type: "VariableReference", name: "username" },
-							{ type: "Text", value: " , was für ein wunderschöner Sonnenuntergang." },
-						],
-						match: {},
-					},
-				],
-			},
+			variants: [
+				{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "Good evening" }]},
+				{ languageTag: "en", match: {}, pattern: [{ type: "VariableReference", name: "username" }]},
+				{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: ", what a beautiful sunset." }]},
+				{ languageTag: "de", match: {}, pattern: [{ type: "Text", value: "Guten Abend" }]},
+				{ languageTag: "de", match: {}, pattern: [{ type: "VariableReference", name: "username" }]},
+				{ languageTag: "de", match: {}, pattern: [{ type: "Text", value: ", was für ein wunderschöner Sonnenuntergang." }]},
+			],
 		} satisfies Message)
 	},
 )
@@ -92,53 +71,25 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			message: {
 				id: "mockMessage",
 				selectors: [],
-				body: {
-					en: [
-						{
-							pattern: [{ type: "Text", value: "Gender male" }],
-							match: {
-								gender: "male",
-							},
-						},
-					],
-					de: [
-						{
-							pattern: [{ type: "Text", value: "Veraltete Übersetzung" }],
-							match: {},
-						},
-					],
-				},
+				variants: [
+					{ languageTag: "en", match: { gender: "male" }, pattern: [{ type: "Text", value: "Gender male" }]},
+					{ languageTag: "de", match: {}, pattern: [{ type: "Text", value: "Veraltete Übersetzung" }]},
+				],
 			},
 		})
 		expect(result.error).toBeUndefined()
 		expect(result.data).toEqual({
 			id: "mockMessage",
 			selectors: [],
-			body: {
-				en: [
-					{
-						pattern: [{ type: "Text", value: "Gender male" }],
-						match: {
-							gender: "male",
-						},
-					},
+			variants: [
+				{ languageTag: "en",	match: { gender: "male" }, pattern: [{ type: "Text", value: "Gender male" }]},
+				{ languageTag: "de",	match: {}, pattern: [{ type: "Text", value: "Veraltete Übersetzung" }]},
+				{ languageTag: "de",	match: { gender: "male" }, pattern: [{ type: "Text", value: "Geschlecht männlich" }]}
 				],
-				de: [
-					{
-						pattern: [{ type: "Text", value: "Veraltete Übersetzung" }],
-						match: {},
-					},
-					{
-						pattern: [{ type: "Text", value: "Geschlecht männlich" }],
-						match: {
-							gender: "male",
-						},
-					},
-				],
-			},
 		})
 	},
 )
+
 
 it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 	"should not return escaped quotation marks",
@@ -149,46 +100,31 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			message: {
 				id: "mockMessage",
 				selectors: [],
-				body: {
-					en: [
-						{
-							pattern: [
-								{ type: "Text", value: "'" },
-								{ type: "VariableReference", name: "id" },
-								{ type: "Text", value: "' added a new todo" },
-							],
-							match: {},
-						},
-					],
-				},
+				variants: [
+					{ languageTag: "en", match: {}, pattern: [
+						{ type: "Text", value: "'" },
+						{ type: "VariableReference", name: "id" },
+						{ type: "Text", value: "' added a new todo" },
+					]},
+				],
 			},
 		})
 		expect(result.error).toBeUndefined()
 		expect(result.data).toEqual({
 			id: "mockMessage",
 			selectors: [],
-			body: {
-				en: [
-					{
-						pattern: [
-							{ type: "Text", value: "'" },
-							{ type: "VariableReference", name: "id" },
-							{ type: "Text", value: "' added a new todo" },
-						],
-						match: {},
-					},
-				],
-				de: [
-					{
-						pattern: [
-							{ type: "Text", value: "' " },
-							{ type: "VariableReference", name: "id" },
-							{ type: "Text", value: " ' hat eine neue Aufgabe hinzugefügt" },
-						],
-						match: {},
-					},
-				],
-			},
+			variants: [
+				{ languageTag: "en", match: {}, pattern: [
+					{ type: "Text", value: "'" },
+					{ type: "VariableReference", name: "id" },
+					{ type: "Text", value: "' added a new todo" },
+				]},
+				{ languageTag: "de", match: {}, pattern: [
+					{ type: "Text", value: "' " },
+					{ type: "VariableReference", name: "id" },
+					{ type: "Text", value: " ' hat eine neue Aufgabe hinzugefügt" },
+				]},
+			],
 		})
 	},
 )

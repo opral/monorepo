@@ -5,9 +5,9 @@ import {
 	SupportedLibrary,
 } from "@inlang/cli/src/utilities/getSupportedLibrary"
 import { italic } from "@inlang/cli/src/utlilities/format"
-import { vscodeFs } from "@inlang/cli/src/utlilities/fs"
 import path from "node:path"
 import * as vscode from "vscode"
+import { createFileSystemMapper } from "../services/inlang-environment/src/createFileSystemMapper.js"
 import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js"
 import { msg } from "./message.js"
 import { getSetting, updateSetting } from "./settings/index.js"
@@ -140,7 +140,7 @@ const getLanguageFolderPathRelativeToWorkspace = async (
 	workspaceFolder: vscode.WorkspaceFolder,
 ): Promise<string | undefined> => {
 	const languageFolderPath = await getLanguageFolderPath({
-		fs: vscodeFs,
+		fs: createFileSystemMapper(workspaceFolder.uri),
 		rootDir: workspaceFolder.uri.fsPath,
 	})
 	if (languageFolderPath) {
