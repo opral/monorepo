@@ -133,6 +133,34 @@ export const registry = [
 	},
 	{
 		meta: {
+			id: "inlang.lintRule.emptyPattern",
+			displayName: {
+				en: "Empty Pattern",
+			},
+			description: {
+				en: "\nChecks for empty pattern in a language tag.\n\nIf a message exists in the reference resource but the pattern\nin a target resource is empty, it is likely that the message has not\nbeen translated yet.\n",
+			},
+			marketplace: {
+				icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
+				linkToReadme: {
+					en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules",
+				},
+				keywords: ["lint-rule", "standard", "empty-pattern"],
+				publisherName: "inlang",
+				publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+			},
+		},
+		type: "lintRule",
+		moduleItems: [
+			"inlang.lintRule.emptyPattern",
+			"inlang.lintRule.identicalPattern",
+			"inlang.lintRule.messageWithoutSource",
+			"inlang.lintRule.missingMessage",
+		],
+		module: "../plugins/standard-lint-rules/dist/index.js",
+	},
+	{
+		meta: {
 			id: "inlang.lintRule.identicalPattern",
 			displayName: {
 				en: "Identical Pattern",
@@ -152,6 +180,7 @@ export const registry = [
 		},
 		type: "lintRule",
 		moduleItems: [
+			"inlang.lintRule.emptyPattern",
 			"inlang.lintRule.identicalPattern",
 			"inlang.lintRule.messageWithoutSource",
 			"inlang.lintRule.missingMessage",
@@ -179,6 +208,7 @@ export const registry = [
 		},
 		type: "lintRule",
 		moduleItems: [
+			"inlang.lintRule.emptyPattern",
 			"inlang.lintRule.identicalPattern",
 			"inlang.lintRule.messageWithoutSource",
 			"inlang.lintRule.missingMessage",
@@ -206,6 +236,7 @@ export const registry = [
 		},
 		type: "lintRule",
 		moduleItems: [
+			"inlang.lintRule.emptyPattern",
 			"inlang.lintRule.identicalPattern",
 			"inlang.lintRule.messageWithoutSource",
 			"inlang.lintRule.missingMessage",

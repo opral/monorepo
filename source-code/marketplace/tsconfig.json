@@ -1,10 +1,10 @@
 {
 	"extends": "../../tsconfig.base.json",
-	"include": ["src/**/*.ts", "buildRegistry.js"],
+	"include": ["src/**/*.ts"],
 	"compilerOptions": {
 		"lib": ["ESNext"],
 		"types": ["node"],
 		"outDir": "./dist",
-		"rootDir": "."
+		"rootDir": "./src"
 	}
 }
