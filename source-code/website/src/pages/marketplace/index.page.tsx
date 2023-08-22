@@ -13,12 +13,15 @@ type Category = "app" | "plugin" | "lintrule"
 
 const [searchValue, setSearchValue] = createSignal<string>("")
 
-const [selectedTags, setSelectedTags] = createSignal<Category[]>(["app", "plugin", "lintrule"])
+const [selectedCategories, setSelectedCategories] = createSignal<Category[]>([
+	"app",
+	"plugin",
+	"lintrule",
+])
 
 const filteredItems = () =>
 	marketplaceItems.filter((item: Record<string, any>) => {
-		console.log(item)
-		return filterItem(item, selectedTags(), searchValue())
+		return filterItem(item, selectedCategories(), searchValue())
 	})
 
 export function Page() {
@@ -225,10 +228,10 @@ const Search = (props: SearchInputProps) => {
 
 const Tags = () => {
 	function selectTag(tag: Category) {
-		if (selectedTags().includes(tag)) {
-			setSelectedTags(selectedTags().filter((t) => t !== tag))
+		if (selectedCategories().includes(tag)) {
+			setSelectedCategories(selectedCategories().filter((t) => t !== tag))
 		} else {
-			setSelectedTags([...selectedTags(), tag])
+			setSelectedCategories([...selectedCategories(), tag])
 		}
 	}
 
@@ -238,7 +241,7 @@ const Tags = () => {
 				onClick={() => selectTag("app")}
 				class={
 					"gap-2 px-3 py-1.5 rounded-full cursor-pointer text-sm capitalize hover:opacity-90 transition-all duration-100 " +
-					(selectedTags().includes("app")
+					(selectedCategories().includes("app")
 						? "bg-surface-800 text-background"
 						: "bg-surface-200 text-surface-600")
 				}
@@ -249,7 +252,7 @@ const Tags = () => {
 				onClick={() => selectTag("plugin")}
 				class={
 					"gap-2 px-3 py-1.5 rounded-full cursor-pointer text-sm capitalize hover:opacity-90 transition-all duration-100 " +
-					(selectedTags().includes("plugin")
+					(selectedCategories().includes("plugin")
 						? "bg-surface-800 text-background"
 						: "bg-surface-200 text-surface-600")
 				}
@@ -260,7 +263,7 @@ const Tags = () => {
 				onClick={() => selectTag("lintrule")}
 				class={
 					"gap-2 px-3 py-1.5 rounded-full cursor-pointer text-sm capitalize hover:opacity-90 transition-all duration-100 " +
-					(selectedTags().includes("lintrule")
+					(selectedCategories().includes("lintrule")
 						? "bg-surface-800 text-background"
 						: "bg-surface-200 text-surface-600")
 				}
