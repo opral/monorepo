@@ -1,7 +1,7 @@
 import type { LanguageTag, Message, Pattern } from "@inlang/app"
 import { msg } from "./message.js"
 
-// get string from pattern
+// get string from Pattern
 export const getStringFromPattern = (args: {
 	pattern: Pattern
 	languageTag: LanguageTag
