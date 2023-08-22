@@ -1,0 +1,87 @@
+{
+	"apps": [
+		{
+			"meta": {
+				"id": "inlang.app.webEditor",
+				"displayName": {
+					"en": "Web Editor"
+				},
+				"description": {
+					"en": "The inlang web editor is a simple and easy-to-use no-code tool to manage your translations."
+				},
+				"marketplace": {
+					"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+					"linkToReadme": { "en": "https://inlang.com/editor" },
+					"keywords": ["web", "editor", "no-code"],
+					"publisherName": "inlang",
+					"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg"
+				}
+			},
+			"type": "app"
+		},
+		{
+			"meta": {
+				"id": "inlang.app.cli",
+				"displayName": {
+					"en": "CLI"
+				},
+				"description": {
+					"en": "@inlang/cli is a command line interface (CLI) tool that allows you to interact with the Inlang infrastructure."
+				},
+				"marketplace": {
+					"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+					"linkToReadme": { "en": "https://github.com/inlang/inlang/tree/main/source-code/cli" },
+					"keywords": ["cli", "automation"],
+					"publisherName": "inlang",
+					"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg"
+				}
+			},
+			"type": "app"
+		},
+		{
+			"meta": {
+				"id": "inlang.app.ideExtension",
+				"displayName": {
+					"en": "IDE Extension"
+				},
+				"description": {
+					"en": "The VS Code extension provides seamless integration of Inlang's globalization infrastructure into Visual Studio Code."
+				},
+				"marketplace": {
+					"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+					"linkToReadme": {
+						"en": "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension"
+					},
+					"keywords": ["vscode", "efficiency", "extension"],
+					"publisherName": "inlang",
+					"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg"
+				}
+			},
+			"type": "app"
+		},
+		{
+			"meta": {
+				"id": "inlang.app.badge",
+				"displayName": {
+					"en": "Badge"
+				},
+				"description": {
+					"en": "Create a badge to show how many translations are missing in your project."
+				},
+				"marketplace": {
+					"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+					"linkToReadme": { "en": "#" },
+					"keywords": ["badge", "embed"],
+					"publisherName": "inlang",
+					"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg"
+				}
+			},
+			"type": "app"
+		}
+	],
+	"modules": [
+		"../plugins/json/dist/index.js",
+		"../plugins/i18next/dist/index.js",
+		"../plugins/standard-lint-rules/dist/index.js"
+	]
+}

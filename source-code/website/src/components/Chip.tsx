@@ -1,0 +1,16 @@
+/**
+ * Displays a short text. Color should be a valid HEX color.
+ */
+export function Chip(props: { text: string | undefined; color: string; customClasses?: string }) {
+	return (
+		<div
+			style={{
+				color: props.color,
+				background: props.color + "2A",
+			}}
+			class={`text-sm px-2 py-1 rounded-full capitalize ${props.customClasses}`}
+		>
+			{props.text}
+		</div>
+	)
+}

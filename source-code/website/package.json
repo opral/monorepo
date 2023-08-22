@@ -27,6 +27,7 @@
 		"@inlang-git/fs": "*",
 		"@inlang/app": "*",
 		"@inlang/telemetry": "*",
+		"@inlang/marketplace": "*",
 		"@isomorphic-git/cors-proxy": "^2.7.1",
 		"@markdoc/markdoc": "^0.1.13",
 		"@sentry/browser": "^7.27.0",

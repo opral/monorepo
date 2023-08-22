@@ -1,7 +1,6 @@
 import { createSignal } from "solid-js"
 import { useI18n } from "@solid-primitives/i18n"
 import { showToast } from "#src/components/Toast.jsx"
-// import { rpc } from "@inlang/rpc"
 
 export function NewsletterForm() {
 	const [t] = useI18n()
@@ -11,7 +10,6 @@ export function NewsletterForm() {
 
 	const fetchSubscriber = async (email: any) => {
 		setLoading(true)
-		// const [response] = await rpc.subscribeNewsletter({ email })
 		const response = {} as any
 		if (response === "already subscribed") {
 			showToast({
@@ -95,7 +93,6 @@ export function NewsletterForm() {
 						// @ts-ignore
 						setEmail(event.target.value)
 					}}
-					// on enter press
 					onKeyDown={(event) => {
 						if (event.key === "Enter") {
 							handleSubscribe()
