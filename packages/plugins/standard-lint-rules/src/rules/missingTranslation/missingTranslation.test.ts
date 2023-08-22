@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import type { Message } from "@inlang/messages"
-import { missingMessageRule } from "./missingMessage.js"
+import { missingTranslationRule } from "./missingTranslation.js"
 import { lintSingleMessage } from "@inlang/lint"
 
 const message1: Message = {
@@ -21,12 +21,12 @@ test("should not report if all messages are present", async () => {
 		sourceLanguageTag: "en",
 		languageTags: ["en", "de"],
 		lintLevels: {
-			[missingMessageRule.meta.id]: "warning",
+			[missingTranslationRule.meta.id]: "warning",
 		},
 		lintRuleSettings: {},
 		messages,
 		message: message1,
-		rules: [missingMessageRule],
+		rules: [missingTranslationRule],
 	})
 
 	expect(result.errors).toHaveLength(0)
@@ -38,12 +38,12 @@ test("should report if a languageTag is not present", async () => {
 		sourceLanguageTag: "en",
 		languageTags: ["en", "it"],
 		lintLevels: {
-			[missingMessageRule.meta.id]: "warning",
+			[missingTranslationRule.meta.id]: "warning",
 		},
 		lintRuleSettings: {},
 		messages,
 		message: message1,
-		rules: [missingMessageRule],
+		rules: [missingTranslationRule],
 	})
 
 	expect(result.errors).toHaveLength(0)
@@ -56,12 +56,12 @@ test("should report if no variants are defined", async () => {
 		sourceLanguageTag: "en",
 		languageTags: ["en", "fr"],
 		lintLevels: {
-			[missingMessageRule.meta.id]: "warning",
+			[missingTranslationRule.meta.id]: "warning",
 		},
 		lintRuleSettings: {},
 		messages,
 		message: message1,
-		rules: [missingMessageRule],
+		rules: [missingTranslationRule],
 	})
 
 	expect(result.errors).toHaveLength(0)
@@ -75,12 +75,12 @@ describe("reported by emptyPattern lintRule", () => {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "es"],
 			lintLevels: {
-				[missingMessageRule.meta.id]: "warning",
+				[missingTranslationRule.meta.id]: "warning",
 			},
 			lintRuleSettings: {},
 			messages,
 			message: message1,
-			rules: [missingMessageRule],
+			rules: [missingTranslationRule],
 		})
 
 		expect(result.errors).toHaveLength(0)
@@ -92,12 +92,12 @@ describe("reported by emptyPattern lintRule", () => {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "cn"],
 			lintLevels: {
-				[missingMessageRule.meta.id]: "warning",
+				[missingTranslationRule.meta.id]: "warning",
 			},
 			lintRuleSettings: {},
 			messages,
 			message: message1,
-			rules: [missingMessageRule],
+			rules: [missingTranslationRule],
 		})
 
 		expect(result.errors).toHaveLength(0)

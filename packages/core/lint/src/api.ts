@@ -29,7 +29,7 @@ export const LintRuleBase = Type.Object({
 		id: Type.String({
 			pattern: "^(?!system\\.)([a-z]+)\\.(lintRule)\\.([a-z][a-zA-Z0-9]*)$",
 			description: "The key must be conform to `{namespace}.lintRule.{name}` pattern.",
-			examples: ["example.lintRule.patternInvalid", "example.lintRule.missingMessage"],
+			examples: ["example.lintRule.patternInvalid", "example.lintRule.missingTranslation"],
 		}) as unknown as TTemplateLiteral<[TLiteral<`${string}.lintRule.${string}`>]>,
 		displayName: WithLanguageTags(Type.String()),
 		description: WithLanguageTags(Type.String()),

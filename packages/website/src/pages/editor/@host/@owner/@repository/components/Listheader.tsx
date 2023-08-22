@@ -81,9 +81,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 					</div>
 				}
 			>
-				<div class="font-medium text-on-surface">
-					{messageCount(props.messages) + " Messages"}
-				</div>
+				<div class="font-medium text-on-surface">{messageCount(props.messages) + " Messages"}</div>
 			</Show>
 
 			<div class="flex gap-2">
@@ -95,8 +93,8 @@ export const ListHeader = (props: ListHeaderProps) => {
 								position="bottom-right"
 								offset={{ x: 0, y: 40 }}
 								isVisible={
-									lintRule.rule.id === "inlang.lintRule.missingMessage"
-									&& tourStep() === "missing-message-rule"
+									lintRule.rule.id === "inlang.lintRule.missingTranslation" &&
+									tourStep() === "missing-message-rule"
 								}
 							>
 								<sl-tooltip
@@ -129,8 +127,8 @@ export const ListHeader = (props: ListHeaderProps) => {
 										<div
 											class="flex gap-2 items-center h-7"
 											id={
-												(lintRule.rule.id === "inlang.lintRule.missingMessage")
-													? "missingMessage-summary"
+												lintRule.rule.id === "inlang.lintRule.missingTranslation"
+													? "missingTranslation-summary"
 													: "lint-summary"
 											}
 										>

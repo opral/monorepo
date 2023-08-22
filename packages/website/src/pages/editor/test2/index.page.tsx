@@ -25,7 +25,7 @@ export const Page = () => {
 				},
 			},
 			lintRules: {
-				"inlang.missingMessage": {
+				"inlang.missingTranslation": {
 					level: "error",
 				},
 			},
