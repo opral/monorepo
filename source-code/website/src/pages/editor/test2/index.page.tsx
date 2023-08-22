@@ -4,7 +4,7 @@ import {
 	LintRule,
 	Message,
 	Plugin,
-	createInlang,
+	openInlangProject,
 	withSolidReactivity,
 } from "@inlang/app"
 import type { ImportFunction, InlangModule } from "@inlang/module"
@@ -104,7 +104,7 @@ export const Page = () => {
 		const fs = createNodeishMemoryFs()
 		await fs.writeFile("/inlang.config.json", JSON.stringify(config))
 		return withSolidReactivity(
-			createInlang({
+			openInlangProject({
 				nodeishFs: fs,
 				configPath: "/inlang.config.json",
 				_import: $import,

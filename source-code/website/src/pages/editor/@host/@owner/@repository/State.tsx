@@ -26,7 +26,7 @@ import {
 	LanguageTag,
 	LintRule,
 	Result,
-	createInlang,
+	openInlangProject,
 	withSolidReactivity,
 	type SolidInlangProject,
 	type Message,
@@ -321,7 +321,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 		async () => {
 			const inlang = withSolidReactivity(
-				await createInlang({
+				await openInlangProject({
 					configPath: "./inlang.config.json",
 					nodeishFs: fs(),
 					_import: async () =>

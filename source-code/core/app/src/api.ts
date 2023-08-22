@@ -45,7 +45,7 @@ export type InstalledLintRule = {
 	disabled: boolean
 }
 
-// TODO: remove all getters and use solid store for whole object, just expose `setConfig`
+
 export type InlangProject = {
 	installed: {
 		plugins: Subscribable<InstalledPlugin[]>

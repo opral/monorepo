@@ -18,7 +18,7 @@ import {
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 import { openInEditorCommand } from "./commands/openInEditor.js"
 import { editMessageCommand } from "./commands/editMessage.js"
-import { createInlang, tryCatch } from "@inlang/app"
+import { openInlangProject, tryCatch } from "@inlang/app"
 import { createFileSystemMapper } from "./services/inlang-environment/src/createFileSystemMapper.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -97,7 +97,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	)
 
 	const { data: inlang, error } = await tryCatch(() =>
-		createInlang({
+		openInlangProject({
 			configPath: closestConfigPathUri.fsPath,
 			nodeishFs: createFileSystemMapper(workspaceFolder.uri),
 		}),
