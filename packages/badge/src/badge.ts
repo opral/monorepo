@@ -1,5 +1,5 @@
 import satori from "satori"
-import { open, createNodeishMemoryFs } from "@project-lisa/client"
+import { openRepository, createNodeishMemoryFs } from "@project-lisa/client"
 import { markup } from "./helper/markup.js"
 import { readFileSync } from "node:fs"
 import { telemetryNode } from "@inlang/telemetry"
@@ -25,7 +25,7 @@ export const badge = async (url: string) => {
 	}
 
 	// initialize a lisa repo instance on each request to prevent cross request pollution
-	const repo = open(url, { nodeishFs: createNodeishMemoryFs() })
+	const repo = openRepository(url, { nodeishFs: createNodeishMemoryFs() })
 
 	// Get the content of the inlang.config.js file
 	await repo.nodeishFs.readFile("./inlang.config.js", { encoding: "utf-8" }).catch((e) => {
