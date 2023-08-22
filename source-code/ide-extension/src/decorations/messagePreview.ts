@@ -1,9 +1,9 @@
 import * as vscode from "vscode"
-import { query } from "@inlang/core/query"
 import { state } from "../state.js"
 import { contextTooltip } from "./contextTooltip.js"
 import { onDidEditMessage } from "../commands/editMessage.js"
-import { getMessageAsString } from "../utilities/query.js"
+import { getStringFromPattern } from "../utilities/query.js"
+import type { IdeExtensionConfigSchema } from "../api.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -27,68 +27,71 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 		}
 
 		// Get the reference language
-		const { sourceLanguageTag } = state().config
-		const messageReferenceMatchers = state().config.ideExtension?.messageReferenceMatchers
+		const sourceLanguageTag = state().inlang.config().sourceLanguageTag
+		const messageReferenceMatchers = state().inlang.appSpecificApi()["inlang.app.ideExtension"]
+			.messageReferenceMatchers as IdeExtensionConfigSchema["messageReferenceMatchers"]
 
-		const refResource = state().resources.find(
-			(resource) => resource.languageTag.name === sourceLanguageTag,
-		)
-
-		if (
-			sourceLanguageTag === undefined ||
-			messageReferenceMatchers === undefined ||
-			refResource === undefined
-		) {
+		if (sourceLanguageTag === undefined || messageReferenceMatchers === undefined) {
 			// don't show an error message. See issue:
 			// https://github.com/inlang/inlang/issues/927
 			return
 		}
 
 		// Get the message references
-		const wrappedDecorations = (state().config.ideExtension?.messageReferenceMatchers ?? []).map(
-			async (matcher) => {
-				const messages = await matcher({
-					documentText: activeTextEditor.document.getText(),
+		const wrappedDecorations = (messageReferenceMatchers ?? []).map(async (matcher) => {
+			const messages = await matcher({
+				documentText: activeTextEditor.document.getText(),
+			})
+			return messages.map((message) => {
+				const _message = state().inlang.query.messages.get({
+					where: { id: message.messageId },
 				})
-				return messages.map((message) => {
-					const translation = getMessageAsString(
-						query(refResource).get({
-							id: message.messageId,
-						}),
-					)
 
-					const truncatedTranslation =
-						translation &&
-						(translation.length > (MAXIMUM_PREVIEW_LENGTH || 0)
-							? `${translation.slice(0, MAXIMUM_PREVIEW_LENGTH)}...`
-							: translation)
-					const range = new vscode.Range(
-						// VSCode starts to count lines and columns from zero
-						new vscode.Position(
-							message.position.start.line - 1,
-							message.position.start.character - 1,
-						),
-						new vscode.Position(message.position.end.line - 1, message.position.end.character - 1),
-					)
-					const decoration: vscode.DecorationOptions = {
-						range,
-						renderOptions: {
-							after: {
-								contentText:
-									truncatedTranslation ??
-									`ERROR: '${message.messageId}' not found in sourec language tag '${sourceLanguageTag}'`,
-								backgroundColor: translation ? "rgb(45 212 191/.15)" : "drgb(244 63 94/.15)",
-								border: translation
-									? "1px solid rgb(45 212 191/.50)"
-									: "1px solid rgb(244 63 94/.50)",
-							},
+				const variant = _message?.variants?.find((v) => v.languageTag === sourceLanguageTag)
+
+				const translation = getStringFromPattern({
+					pattern: variant?.pattern || [
+						{
+							type: "Text",
+							value: "", // TODO: Fix pattern type to be always defined either/or Text / VariableReference
 						},
-						hoverMessage: contextTooltip(message),
-					}
-					return decoration
+					],
+					languageTag: sourceLanguageTag,
+					messageId: message.messageId,
 				})
-			},
-		)
+
+				const truncatedTranslation =
+					translation &&
+					(translation.length > (MAXIMUM_PREVIEW_LENGTH || 0)
+						? `${translation.slice(0, MAXIMUM_PREVIEW_LENGTH)}...`
+						: translation)
+				const range = new vscode.Range(
+					// VSCode starts to count lines and columns from zero
+					new vscode.Position(
+						message.position.start.line - 1,
+						message.position.start.character - 1,
+					),
+					new vscode.Position(message.position.end.line - 1, message.position.end.character - 1),
+				)
+				const decoration: vscode.DecorationOptions = {
+					range,
+					renderOptions: {
+						after: {
+							contentText:
+								truncatedTranslation !== ""
+									? `ERROR: '${message.messageId}' not found in source with language tag '${sourceLanguageTag}'`
+									: truncatedTranslation, // TODO: Fix pattern type to be always defined either/or Text / VariableReference
+							backgroundColor: translation ? "rgb(45 212 191/.15)" : "drgb(244 63 94/.15)",
+							border: translation
+								? "1px solid rgb(45 212 191/.50)"
+								: "1px solid rgb(244 63 94/.50)",
+						},
+					},
+					hoverMessage: contextTooltip(message),
+				}
+				return decoration
+			})
+		})
 		const decorations = (await Promise.all(wrappedDecorations || [])).flat()
 		activeTextEditor.setDecorations(messagePreview, decorations)
 	}
