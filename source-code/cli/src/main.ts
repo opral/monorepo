@@ -37,7 +37,7 @@ export const cli = new Command()
 	// Global options
 	.option("-c, --config <value>", "Path to the inlang.config.json file.")
 	// Hooks
-	.hook("postAction", (command) => {
+	.hook('postAction', (command) => {
 		// name enables better grouping in the telemetry dashboard
 		const name = command.args.filter(
 			// shouldn't start with a flag and the previous arg shouldn't be a flag
