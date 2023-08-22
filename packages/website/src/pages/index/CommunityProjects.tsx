@@ -5,7 +5,7 @@ import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { useI18n } from "@solid-primitives/i18n"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 
-export function CommunityProjects() {
+export function CommunityProjects(props: { justShowRecent?: boolean }) {
 	const [store] = useLocalStorage()
 	const [, { locale }] = useI18n()
 
@@ -42,31 +42,35 @@ export function CommunityProjects() {
 				</div>
 			</Show>
 			{/* START repository grid */}
-			<div class="w-full flex flex-col md:flex-row justify-between items-end pb-6">
-				<div class="flex flex-col gap-2 grow">
-					<h2 class="text-2xl font-medium text-slate-900">Community</h2>
-					<p class="text-md font-regular text-outline-variant">
-						Explore projects in the inlang community or contribute translations.
-					</p>
+			<Show when={!props.justShowRecent}>
+				<div class="w-full flex flex-col md:flex-row justify-between items-end pb-6">
+					<div class="flex flex-col gap-2 grow">
+						<h2 class="text-2xl font-medium text-slate-900">Community</h2>
+						<p class="text-md font-regular text-outline-variant">
+							Explore projects in the inlang community or contribute translations.
+						</p>
+					</div>
+					<a
+						href="https://github.com/inlang/inlang/tree/main/source-code/website/src/pages/index/repositories.ts"
+						target="_blank"
+						class="w-full md:w-auto"
+					>
+						<sl-button prop:variant="default" prop:size="medium" class="w-full pt-4 md:pt-0">
+							Add your repository
+							<MaterialSymbolsArrowOutward
+								// @ts-ignore
+								slot="suffix"
+							/>
+						</sl-button>
+					</a>
 				</div>
-				<a
-					href="https://github.com/inlang/inlang/tree/main/source-code/website/src/pages/index/repositories.ts"
-					target="_blank"
-					class="w-full md:w-auto"
-				>
-					<sl-button prop:variant="default" prop:size="medium" class="w-full pt-4 md:pt-0">
-						Add your repository
-						<MaterialSymbolsArrowOutward
-							// @ts-ignore
-							slot="suffix"
-						/>
-					</sl-button>
-				</a>
-			</div>
 
-			<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-4 w-full auto-rows-min">
-				<For each={repositories}>{(repository) => <RepositoryCard repository={repository} />}</For>
-			</div>
+				<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-4 w-full auto-rows-min">
+					<For each={repositories}>
+						{(repository) => <RepositoryCard repository={repository} />}
+					</For>
+				</div>
+			</Show>
 			{/* END repository grid */}
 		</div>
 	)
