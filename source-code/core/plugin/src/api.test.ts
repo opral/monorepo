@@ -13,7 +13,6 @@ describe("Plugin", () => {
 				id: "namespace.plugin.placeholder",
 				displayName: { en: "" },
 				description: { en: "" },
-				keywords: [],
 			},
 		}
 

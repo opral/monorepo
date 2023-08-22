@@ -30,7 +30,6 @@ const mockPlugin: Plugin = {
 		id: "inlang.plugin.i18next",
 		description: { en: "Mock plugin description" },
 		displayName: { en: "Mock Plugin" },
-		keywords: [],
 	},
 	loadMessages: () => exampleMessages,
 	saveMessages: () => undefined,
@@ -175,7 +174,6 @@ describe("messages", () => {
 				description: {
 					en: "wo",
 				},
-				keywords: [],
 			},
 			loadMessages: ({ languageTags }) => (languageTags.length ? exampleMessages : []),
 			saveMessages: () => undefined,

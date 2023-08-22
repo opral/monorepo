@@ -38,7 +38,6 @@ describe("resolveModules", () => {
 				id: "namepsace.plugin.mock",
 				description: { en: "Mock plugin description" },
 				displayName: { en: "Mock Plugin" },
-				keywords: [],
 			},
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
