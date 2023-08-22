@@ -46,7 +46,13 @@ export const createInlangConfigFile = async (args: { workspaceFolder: vscode.Wor
 		// }
 
 		// Generate config file content
-		msg("Currently disabled: reating inlang.config.js ...", "info", "statusBar", vscode.StatusBarAlignment.Left, 5000)
+		msg(
+			"Currently disabled: reating inlang.config.js ...",
+			"info",
+			"statusBar",
+			vscode.StatusBarAlignment.Left,
+			5000,
+		)
 		// const configContent = await getConfigContent({ plugin, pathPattern })
 		// await writeConfigFile(configContent, args.workspaceFolder)
 	} else if (createConfigFile === "Reject") {
@@ -94,7 +100,9 @@ const getSupportedLibraryInProject = async (
 	if (await vscode.workspace.findFiles("package.json")) {
 		// const _packageJson = await readPackageJson(workspaceFolder)
 		// return getSupportedLibrary({ packageJson })
-		console.warn("📦 package.json found in this directory. But not implemented: Using fallback plugin: json")
+		console.warn(
+			"📦 package.json found in this directory. But not implemented: Using fallback plugin: json",
+		)
 		return "json"
 	} else {
 		console.warn("📦 No package.json found in this directory. Using fallback plugin: json")
