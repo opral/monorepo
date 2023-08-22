@@ -1,7 +1,8 @@
-import { getLintReports, lint, LintReport } from "@inlang/core/lint"
 import * as vscode from "vscode"
 import { state } from "../state.js"
 import structuredClonePolyfill from "@ungap/structured-clone"
+import type { IdeExtensionConfigSchema } from "../api.js"
+import type { MessageLintReport } from "@inlang/app"
 
 // polyfilling node < 17 with structuredClone
 if (typeof structuredClone === "undefined") {
@@ -17,55 +18,58 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 			return
 		}
 
-		const resources = state().resources
+		const ideExtension = state().inlang.appSpecificApi()["inlang.app.ideExtension"] as
+			| IdeExtensionConfigSchema
+			| undefined
 
-		const [resourcesWithLints, errors] = await lint({ resources, config: state().config })
-
-		if (errors) {
-			console.error(errors)
+		if (!ideExtension) {
+			return
 		}
 
-		// Use `getLintReports` to get lint reports
-		const lintReports = getLintReports(resourcesWithLints)
+		// init lint
+		await state().inlang.lint.init()
 
+		// get lint report
+		const reports = state().inlang.lint.reports()
 		const diagnostics: vscode.Diagnostic[] = []
 
-		const wrappedLints = (state().config.ideExtension?.messageReferenceMatchers ?? []).map(
-			async (matcher) => {
-				const messages = await matcher({
-					documentText: activeTextEditor.document.getText(),
-				})
-				for (const message of messages) {
-					// TODO: Can be improved with lintReport exposing the messageId
-					const matchingLintReports = lintReports.filter((lintReport) =>
-						lintReport.message.includes(message.messageId),
+		const wrappedLints = (ideExtension.messageReferenceMatchers ?? []).map(async (matcher) => {
+			const messages = await matcher({
+				documentText: activeTextEditor.document.getText(),
+			})
+			for (const message of messages) {
+				// TODO: Can be improved with lintReport exposing the messageId
+				const matchingLintReports = reports.filter(
+					(report) => (report.messageId = message.messageId),
+				)
+
+				for (const report of matchingLintReports) {
+					const { level } = report
+
+					const diagnosticRange = new vscode.Range(
+						new vscode.Position(
+							message.position.start.line - 1,
+							message.position.start.character - 1,
+						),
+						new vscode.Position(message.position.end.line - 1, message.position.end.character - 1),
 					)
 
-					for (const lintReport of matchingLintReports) {
-						const { level } = lintReport
+					const sourceLanguageTag = state().inlang.config().sourceLanguageTag
 
-						const diagnosticRange = new vscode.Range(
-							new vscode.Position(
-								message.position.start.line - 1,
-								message.position.start.character - 1,
-							),
-							new vscode.Position(
-								message.position.end.line - 1,
-								message.position.end.character - 1,
-							),
-						)
+					// Get the lint message for the source language tag or fallback to "en"
+					// @ts-ignore // TODO: Fix this with proper type
+					const lintMessage = report.body[sourceLanguageTag] || report.body.en
 
-						const diagnostic = new vscode.Diagnostic(
-							diagnosticRange,
-							"[" + message.messageId + "] – " + lintReport.message,
-							mapLintLevelToSeverity(level),
-						)
+					const diagnostic = new vscode.Diagnostic(
+						diagnosticRange,
+						`[${message.messageId}] – ${lintMessage}`,
+						mapLintLevelToSeverity(level),
+					)
 
-						diagnostics.push(diagnostic)
-					}
+					diagnostics.push(diagnostic)
 				}
-			},
-		)
+			}
+		})
 
 		await Promise.all(wrappedLints || [])
 
@@ -73,10 +77,10 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 		linterDiagnosticCollection.set(activeTextEditor.document.uri, diagnostics)
 	}
 
-	function mapLintLevelToSeverity(level: LintReport["level"]): vscode.DiagnosticSeverity {
+	function mapLintLevelToSeverity(level: MessageLintReport["level"]): vscode.DiagnosticSeverity {
 		if (level === "error") {
 			return vscode.DiagnosticSeverity.Error
-		} else if (level === "warn") {
+		} else if (level === "warning") {
 			return vscode.DiagnosticSeverity.Warning
 		}
 		return vscode.DiagnosticSeverity.Error
