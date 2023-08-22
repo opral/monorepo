@@ -1,7 +1,7 @@
 import { state } from "../state.js"
 import { msg } from "../utilities/message.js"
 import { EventEmitter, window } from "vscode"
-import type { LanguageTag, Message, Pattern } from "@inlang/app"
+import type { LanguageTag, Message } from "@inlang/app"
 import { getPatternFromString, getStringFromPattern } from "../utilities/query.js"
 
 const onDidEditMessageEmitter = new EventEmitter<void>()
