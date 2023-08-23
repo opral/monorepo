@@ -72,4 +72,3 @@ telemetry.groupIdentify({
 		name: gitOrigin,
 	},
 })
-
