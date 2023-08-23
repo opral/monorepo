@@ -28,7 +28,6 @@ export function Layout(props: { children: JSXElement }) {
 		setFilteredLanguageTags,
 		userIsCollaborator,
 		languageTags,
-		setLanguageTags,
 	} = useEditorState()
 
 	const removeFilter = (filterName: string) => {
@@ -125,7 +124,6 @@ export function Layout(props: { children: JSXElement }) {
 			})
 			return
 		}
-		setLanguageTags([...languageTags(), languageTag])
 		setFilteredLanguageTags([...filteredLanguageTags(), languageTag])
 		inlang()?.setConfig({
 			...inlang()!.config(),

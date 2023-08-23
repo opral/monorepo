@@ -110,7 +110,6 @@ type EditorStateSchema = {
 	sourceLanguageTag: () => LanguageTag | undefined
 
 	languageTags: () => LanguageTag[]
-	setLanguageTags: Setter<LanguageTag[]>
 
 	tourStep: () => TourStepId
 	setTourStep: Setter<TourStepId>
@@ -198,8 +197,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [fsChange, setFsChange] = createSignal(new Date())
 
-	const [sourceLanguageTag, setSourceLanguageTag] = createSignal<LanguageTag>()
-	const [languageTags, setLanguageTags] = createSignal<LanguageTag[]>([])
 	const [tourStep, setTourStep] = createSignal<TourStepId>("github-login")
 
 	//set filter with search params
@@ -301,12 +298,14 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 	)
 
+	// open the repository
 	const { host, owner, repository } = routeParams()
 	const repo = openRepository(`${host}/${owner}/${repository}`, {
 		nodeishFs: createNodeishMemoryFs(),
 		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
 	})
 
+	// open the inlang project and store it in a resource
 	const [inlang] = createResource(async () => {
 		const inlang = withSolidReactivity(
 			await openInlangProject({
@@ -324,39 +323,30 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}),
 			{ from },
 		)
+		//initialize lint to get reports
+		await inlang.lint.init()
 		return inlang
 	})
 
+	// DERIVED when config exists
 	const doesInlangConfigExist = () => {
 		return inlang()?.config() ? true : false
+	}
+
+	// DERIVED source language tag from inlang config
+	const sourceLanguageTag = () => {
+		return inlang()?.config().sourceLanguageTag
+	}
+
+	// DERIVED language tags from inlang config
+	const languageTags = () => {
+		return inlang()?.config().languageTags ?? []
 	}
 
 	createEffect(() => {
 		if (!inlang.loading) {
 			console.info("messages changes", inlang()?.query.messages.getAll())
 		}
-	})
-
-	setTimeout(() => {
-		console.info("timeout createMessage")
-		if (!inlang.loading) {
-			inlang()!.query.messages.create({ data: createMessage("test", { en: "test" }) })
-		}
-	}, 2000)
-
-	const createMessage = (id: string, patterns: Record<string, string>): Message => ({
-		id,
-		selectors: [],
-		variants: Object.entries(patterns).map(([languageTag, patterns]) => ({
-			languageTag,
-			match: {},
-			pattern: [
-				{
-					type: "Text",
-					value: patterns,
-				},
-			],
-		})),
 	})
 
 	//the effect should skip tour guide steps if not needed
@@ -595,7 +585,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					doesInlangConfigExist,
 					sourceLanguageTag,
 					languageTags,
-					setLanguageTags,
 					tourStep,
 					setTourStep,
 					filteredLanguageTags,
