@@ -52,7 +52,7 @@ export const badge = async (url: string) => {
 	const { percentage, errors, warnings, numberOfMissingVariants } = calculateSummary({
 		reports: inlang.lint.reports(),
 		languageTags: inlang.config().languageTags,
-		messages,
+		messages: Object.values(messages),
 	})
 
 	const vdom = removeCommas(markup(percentage, errors, warnings, numberOfMissingVariants))

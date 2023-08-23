@@ -128,11 +128,6 @@ type EditorStateSchema = {
 	setLocalChanges: Setter<number> // Setter<Message[]>
 
 	/**
-	 * The reference resource.
-	 */
-	sourceMessages: () => Message[] | undefined
-
-	/**
 	 * Whether the user is a collaborator of the repository.
 	 *
 	 * Check whether the user is logged in before using this resource.
@@ -216,16 +211,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	})
 
 	const [fs, setFs] = createSignal<NodeishFilesystem>(createNodeishMemoryFs())
-
-	/**
-	 * The reference resource.
-	 */
-	const sourceMessages = () =>
-		inlang()
-			?.query.messages.getAll()
-			.filter((message) =>
-				message.variants.filter((variant) => variant.languageTag === sourceLanguageTag()),
-			)
 
 	const [localStorage] = useLocalStorage() ?? []
 
@@ -334,7 +319,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	createEffect(() => {
 		if (!inlang.loading) {
-			console.info("messages changes", inlang()?.query.messages.getAll())
+			console.info("messages changes", Object.values(inlang()?.query.messages.getAll() || {}))
 		}
 	})
 
@@ -468,7 +453,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setFilteredLintRules,
 					localChanges,
 					setLocalChanges,
-					sourceMessages,
 					userIsCollaborator,
 					setLastPush,
 					lastPullTime,

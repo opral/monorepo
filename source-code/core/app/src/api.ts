@@ -93,7 +93,7 @@ export type Subscribable<Value extends (...args: any[]) => unknown> = {
 export type MessageQueryApi = {
 	create: (args: { data: Message }) => boolean
 	get: Subscribable<(args: { where: { id: Message["id"] } }) => Message | undefined>
-	getAll: Subscribable<() => Array<Message>>
+	getAll: Subscribable<() => { [id: string]: Message }>
 	update: (args: { where: { id: Message["id"] }; data: Partial<Message> }) => boolean
 	upsert: (args: { where: { id: Message["id"] }; data: Message }) => void
 	delete: (args: { where: { id: Message["id"] } }) => boolean
