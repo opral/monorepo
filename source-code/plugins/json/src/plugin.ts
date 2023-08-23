@@ -169,11 +169,11 @@ async function getFileToParse(
 		FILE_HAS_NEW_LINE[pathWithLanguage] = (file as string).endsWith("\n")
 		const flattenedMessages = NESTED[pathWithLanguage]
 			? flatten(JSON.parse(file as string), {
-				transformKey: function (key) {
-					//replace dots in keys with unicode
-					return replaceAll(key, ".", "u002E")
-				},
-			})
+					transformKey: function (key) {
+						//replace dots in keys with unicode
+						return replaceAll(key, ".", "u002E")
+					},
+			  })
 			: JSON.parse(file as string)
 		return flattenedMessages
 	} catch (e) {
@@ -236,9 +236,9 @@ function parsePattern(text: string, variableReferencePattern: string[]): Variant
 	// expressions are used for matching
 	const expression = variableReferencePattern[1]
 		? new RegExp(
-			`(\\${variableReferencePattern[0]}[^\\${variableReferencePattern[1]}]+\\${variableReferencePattern[1]})`,
-			"g",
-		)
+				`(\\${variableReferencePattern[0]}[^\\${variableReferencePattern[1]}]+\\${variableReferencePattern[1]})`,
+				"g",
+		  )
 		: new RegExp(`(${variableReferencePattern}\\w+)`, "g")
 	const pattern: Variant["pattern"] = text
 		.split(expression)
@@ -249,10 +249,10 @@ function parsePattern(text: string, variableReferencePattern: string[]): Variant
 					type: "VariableReference",
 					name: variableReferencePattern[1]
 						? element.slice(
-							variableReferencePattern[0].length,
-							// negative index, removing the trailing pattern
-							-variableReferencePattern[1].length,
-						)
+								variableReferencePattern[0].length,
+								// negative index, removing the trailing pattern
+								-variableReferencePattern[1].length,
+						  )
 						: element.slice(variableReferencePattern[0].length),
 				}
 			} else {
@@ -336,7 +336,9 @@ async function saveMessages(args: {
 		}
 		for (const [languageTag, value] of Object.entries(storage)) {
 			const pathWithLanguage = args.settings.pathPattern.replace("{languageTag}", languageTag)
-			await args.nodeishFs.mkdir(pathWithLanguage.split("/").slice(0, -1).join("/"), { recursive: true })
+			await args.nodeishFs.mkdir(pathWithLanguage.split("/").slice(0, -1).join("/"), {
+				recursive: true,
+			})
 			await args.nodeishFs.writeFile(
 				pathWithLanguage,
 				serializeFile(
