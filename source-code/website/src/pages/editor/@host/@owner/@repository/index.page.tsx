@@ -1,5 +1,4 @@
 import { For, Match, Switch, onMount } from "solid-js"
-import { Message } from "./Message.jsx"
 import { Layout as EditorLayout } from "./Layout.jsx"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
@@ -11,6 +10,9 @@ import { ListHeader, messageCount } from "./components/Listheader.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"
+import { createMemo } from "solid-js"
+import type { Message as MessageType } from "@inlang/app"
+import { Message } from "./Message.jsx"
 
 export function Page() {
 	return (
@@ -32,6 +34,16 @@ function TheActualPage() {
 	const { inlang, routeParams, repositoryIsCloned, doesInlangConfigExist, tourStep } =
 		useEditorState()
 	const [, setLocalStorage] = useLocalStorage()
+
+	const messages = createMemo(() => {
+		const result: {
+			[id: string]: MessageType
+		} = {}
+		for (const message of inlang()?.query.messages.getAll() || []) {
+			result[message.id] = message
+		}
+		return result
+	})
 
 	onMount(() => {
 		setLocalStorage("recentProjects", (prev) => {
@@ -140,7 +152,7 @@ function TheActualPage() {
 				<Match when={!doesInlangConfigExist()}>
 					<NoInlangConfigFoundCard />
 				</Match>
-				<Match when={doesInlangConfigExist() && inlang()?.query.messages.getAll() !== undefined}>
+				<Match when={doesInlangConfigExist() && messages() !== undefined}>
 					<div>
 						<ListHeader messages={inlang()?.query.messages.getAll() || []} />
 						<TourHintWrapper
@@ -149,9 +161,9 @@ function TheActualPage() {
 							offset={{ x: 110, y: 144 }}
 							isVisible={tourStep() === "textfield"}
 						>
-							<For each={inlang()?.query.messages.getAll()}>
-								{(message) => {
-									return <Message message={message} />
+							<For each={Object.keys(messages())}>
+								{(id) => {
+									return <Message message={messages()[id]!} />
 								}}
 							</For>
 						</TourHintWrapper>
