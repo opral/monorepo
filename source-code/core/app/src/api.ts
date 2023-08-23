@@ -90,7 +90,7 @@ export type Subscribable<Value> = {
 	subscribe: (callback: (value: Value) => void) => void
 }
 
-type MessageQueryApi = {
+export type MessageQueryApi = {
 	create: (args: { data: Message }) => boolean
 	get: (args: { where: { id: Message["id"] } }) => Message | undefined
 	getAll: Subscribable<Array<Message>>
