@@ -49,10 +49,6 @@ type EditorStateSchema = {
 	 */
 	currentBranch: Resource<string | undefined>
 	/**
-	 * Unpushed changes in the repository.
-	 */
-	unpushedChanges: Resource<Awaited<ReturnType<typeof raw.log>>>
-	/**
 	 * Additional information about a repository provided by GitHub.
 	 */
 	githubRepositoryInformation: Resource<
@@ -368,27 +364,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	})
 
-	// re-fetched if the file system changes
-	const [unpushedChanges] = createResource(() => {
-		if (
-			repositoryIsCloned.error ||
-			repositoryIsCloned.loading ||
-			repositoryIsCloned() === undefined
-		) {
-			return false
-		}
-		return {
-			fs: fs(),
-			repositoryClonedTime: repositoryIsCloned()!,
-			lastPushTime: lastPush(),
-			lastPullTime: lastPullTime(),
-			// while unpushed changes does not require last fs change,
-			// unpushed changed should react to fsChange. Hence, pass
-			// the signal to _unpushedChanges
-			lastFsChange: fsChange(),
-		}
-	}, _unpushedChanges)
-
 	const [repoIsPrivate] = createResource(
 		/**
 		 * createResource is not reacting to changes like: "false","Null", or "undefined".
@@ -571,7 +546,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				{
 					repositoryIsCloned,
 					currentBranch,
-					unpushedChanges,
 					githubRepositoryInformation,
 					routeParams,
 					searchParams,
@@ -752,30 +726,6 @@ export async function pushChanges(args: {
 	} catch (error) {
 		return { error: (error as PushException) ?? "Unknown error" }
 	}
-}
-
-async function _unpushedChanges(args: {
-	fs: NodeishFilesystem
-	repositoryClonedTime: Date
-	lastPushTime?: Date
-	lastPullTime?: Date
-}) {
-	if (args.repositoryClonedTime === undefined) {
-		return []
-	}
-	// filter out undefined values and sort by date
-	// get the last event
-	const lastRelevantEvent = [args.lastPushTime, args.repositoryClonedTime, args.lastPullTime]
-		.filter((value) => value !== undefined)
-		.sort((a, b) => a!.getTime() - b!.getTime())
-		.at(-1)
-
-	const unpushedChanges = await raw.log({
-		fs: args.fs,
-		dir: "/",
-		since: lastRelevantEvent,
-	})
-	return unpushedChanges
 }
 
 async function pull(args: {
