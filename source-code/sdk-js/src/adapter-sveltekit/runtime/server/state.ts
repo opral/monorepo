@@ -39,11 +39,11 @@ export const initState = async () => {
 
 // ------------------------------------------------------------------------------------------------
 
-// TODO: fix resources if needed (add missing Keys, etc.)
-export const loadMessages = (languageTag: LanguageTag) => state?.messages()
-	.map(message => ({
+// TODO: fix resources if needed with fallback logic https://github.com/inlang/inlang/discussions/1267
+export const loadMessages = (languageTag: LanguageTag) =>
+	state?.messages().map((message) => ({
 		...message,
-		variants: message.variants.filter(variant => variant.languageTag === languageTag)
+		variants: message.variants.filter((variant) => variant.languageTag === languageTag),
 	}))
 
 // ------------------------------------------------------------------------------------------------
