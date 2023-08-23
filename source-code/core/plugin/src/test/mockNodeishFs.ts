@@ -1,4 +1,4 @@
-import { createNodeishMemoryFs, normalizePath } from "@inlang-git/fs"
+import { NodeishFilesystem, createNodeishMemoryFs, normalizePath } from "@inlang-git/fs"
 import { dedent } from "ts-dedent"
 import type { NodeishFilesystemSubset } from "../api.js"
 
@@ -17,7 +17,7 @@ export async function createMockNodeishFs(args?: {
 		fs: NodeishFilesystemSubset
 		paths: string[]
 	}
-}): Promise<NodeishFilesystemSubset> {
+}): Promise<NodeishFilesystem> {
 	const nodeishFs = createNodeishMemoryFs()
 
 	if (args?.copyDirectory) {

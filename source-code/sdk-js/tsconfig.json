@@ -10,6 +10,7 @@
 		"outDir": "./dist",
 		"rootDir": "./src",
 		"verbatimModuleSyntax": true,
-		"ignoreDeprecations": "5.0"
+		"ignoreDeprecations": "5.0",
+		"resolveJsonModule": true
 	}
 }

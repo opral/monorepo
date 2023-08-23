@@ -1,7 +1,6 @@
 import {
 	ConfigPathNotFoundError,
 	openInlangProject,
-	tryCatch,
 	LanguageTag,
 	Message,
 } from "@inlang/app"
@@ -17,6 +16,7 @@ import { createBasicInlangConfig } from "./utils/createBasicInlangConfig.js"
 import { createDemoResourcesIfNoMessagesExistYet } from "./utils/createDemoResourcesIfNoMessagesExistYet.js"
 import { doesPathExist } from "./utils/utils.js"
 import { getNodeishFs } from "./utils/getNodeishFs.js"
+import { createImport } from '@inlang/module'
 
 type VersionString = `${number}.${number}.${number}${string}`
 
@@ -49,48 +49,62 @@ export type TransformConfig = {
 
 export const PATH_TO_CWD = process.cwd()
 export const PATH_TO_INLANG_CONFIG = resolve(PATH_TO_CWD, "./inlang.config.json")
+export const PATH_TO_SVELTE_CONFIG = resolve(PATH_TO_CWD, "./svelte.config.js")
 
 let transformConfig: Promise<TransformConfig> | undefined = undefined
 
 export const initTransformConfig = async (): Promise<TransformConfig> => {
 	if (transformConfig) return transformConfig
 
+	const nodeishFs = await getNodeishFs()
+
 	// eslint-disable-next-line no-async-promise-executor
 	return (transformConfig = new Promise<TransformConfig>(async (resolve, reject) => {
-		const { data: inlang, error: createInlangError } = await tryCatch(async () =>
-			openInlangProject({ nodeishFs: await getNodeishFs(), configPath: PATH_TO_INLANG_CONFIG }),
-		)
-		if (createInlangError) {
-			if (createInlangError instanceof ConfigPathNotFoundError) {
-				await createBasicInlangConfig()
-				transformConfig = undefined
-				return resolve(initTransformConfig())
-			}
-
-			return reject(createInlangError)
-		}
+		const inlang = await openInlangProject({ nodeishFs, configPath: PATH_TO_INLANG_CONFIG })
 
 		const errors = inlang.errors()
 		if (errors.length) {
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			return reject(errors[0]!)
+			const error = errors[0]!
+			if (error instanceof ConfigPathNotFoundError) {
+				await createBasicInlangConfig(nodeishFs)
+				resetTransformConfig()
+				return resolve(initTransformConfig())
+			}
+
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			return reject(error)
 		}
 
 		await updateSdkModuleVersion(inlang)
 		await createDemoResourcesIfNoMessagesExistYet(inlang)
 
-		const settings = getSettings(inlang)
+		// TODO: refactor
+		let settings: SdkConfig | undefined
+		try {
+			settings = getSettings(inlang)
+		} catch (error) {
+			reject(error)
+			return
+		}
+
 		if (!settings) {
-			transformConfig = undefined
+			resetTransformConfig()
 			return resolve(initTransformConfig())
 		}
 
-		const { default: svelteConfig } = (await import(
-			/* @vite-ignore */
-			/*pathToFileURL*/ path.resolve(PATH_TO_CWD, "svelte.config.js").toString()
-		).catch((error: unknown) => {
-			throw new InlangSdkException("Could not find svelte.config.js file.", error as Error)
-		})) as { default: SvelteConfig }
+		// TODO: refactor
+		const { default: svelteConfig } = (await (import.meta.env?.TEST
+			? createImport({ readFile: nodeishFs.readFile, fetch })(PATH_TO_SVELTE_CONFIG)
+			: import(/* @vite-ignore */PATH_TO_SVELTE_CONFIG)
+		)
+			.catch((error: unknown) => {
+				reject(new InlangSdkException("Could not find svelte.config.js file.", error as Error))
+				return { default: undefined }
+			})) as { default: SvelteConfig }
+		if (!svelteConfig) {
+			return
+		}
 
 		const files = {
 			appTemplate: path.resolve(
@@ -115,7 +129,7 @@ export const initTransformConfig = async (): Promise<TransformConfig> => {
 			(await shouldContentBePrerendered(files.routes)) ||
 			(await shouldContentBePrerendered(rootRoutesFolder))
 
-		const usesTypeScript = await doesPathExist(path.resolve(PATH_TO_CWD, "tsconfig.json"))
+		const usesTypeScript = await doesPathExist(nodeishFs, path.resolve(PATH_TO_CWD, "tsconfig.json"))
 
 		const svelteKitVersion = await getSvelteKitVersion()
 

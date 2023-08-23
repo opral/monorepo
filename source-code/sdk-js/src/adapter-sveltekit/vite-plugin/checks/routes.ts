@@ -6,9 +6,10 @@ import type { FileType } from "../fileInformation.js"
 import { InlangException } from "../../../exceptions.js"
 import { InlangSdkException } from "../exceptions.js"
 import { doesPathExist } from "../config/utils/utils.js"
+import type { NodeishFilesystem } from '@inlang-git/fs'
 
-export const assertRoutesFolderPathExists = async (config: TransformConfig) => {
-	if (!(await doesPathExist(config.options.rootRoutesFolder))) {
+export const assertRoutesFolderPathExists = async (nodeishFs: NodeishFilesystem, config: TransformConfig) => {
+	if (!(await doesPathExist(nodeishFs, config.options.rootRoutesFolder))) {
 		throw new InlangException(dedent`
 
 			Could not find the folder '${config.options.rootRoutesFolder.replace(config.cwdFolderPath, "")}'.
@@ -21,7 +22,7 @@ export const assertRoutesFolderPathExists = async (config: TransformConfig) => {
 
 // --------------------------------------------------------------------------------------------------------------------
 
-export const assertNecessaryFilesArePresent = async (config: TransformConfig) => {
+export const assertNecessaryFilesArePresent = async (nodeishFs: NodeishFilesystem, config: TransformConfig) => {
 	const preferredFileEnding = config.svelteKit.usesTypeScript ? "ts" : "js"
 
 	const getPathForFileType = (
@@ -60,7 +61,7 @@ export const assertNecessaryFilesArePresent = async (config: TransformConfig) =>
 			? [getPathForFileType(fileType)]
 			: [getPathForFileType(fileType, "js"), getPathForFileType(fileType, "ts")]
 
-		return (await Promise.all(files.map((file) => doesPathExist(file)))).some((result) => result)
+		return (await Promise.all(files.map((file) => doesPathExist(nodeishFs, file)))).some((result) => result)
 	}
 
 	const filesTypesToCreate = [

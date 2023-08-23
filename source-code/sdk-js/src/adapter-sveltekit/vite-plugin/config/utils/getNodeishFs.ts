@@ -1,4 +1,4 @@
-import type { NodeishFilesystem } from "@inlang-git/fs"
+import type { NodeishFilesystem } from '@inlang-git/fs'
 import { InlangSdkException } from "../../exceptions.js"
 
 /**
@@ -6,7 +6,7 @@ import { InlangSdkException } from "../../exceptions.js"
  * the code even if it never get's used. To not run into this issue we can use a proxy to only import
  * the fs module if it is actually used and we can still throw an error if it is not available.
  **/
-export const getNodeishFs = () =>
+export const getNodeishFs = (): Promise<NodeishFilesystem> =>
 	import("node:fs/promises").catch(
 		() =>
 			new Proxy({} as NodeishFilesystem, {
@@ -21,3 +21,4 @@ export const getNodeishFs = () =>
 				},
 			}),
 	)
+

@@ -15,11 +15,12 @@ export const updateSdkModuleVersion = async (inlang: InlangProject): Promise<boo
 	)
 	if (!sdkJSPluginModule) return false
 
-	const usedVersion = (sdkJSPluginModule.match(/@inlang\/sdk-js-plugin@(.*)\//) || [])[1]?.split(
+	const usedVersion = (sdkJSPluginModule.match(/@inlang\/sdk-js-plugin@(.*)/) || [])[1]?.split(
 		"/",
 	)[0]
 	if (usedVersion === version) return false
 
+	// TODO: check for correct link
 	const newModule = `https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin@${version}/dist/index.js`
 	inlang.setConfig({
 		...config,

@@ -1,5 +1,5 @@
 import { dedent } from "ts-dedent"
-import type { ViteDevServer, Plugin } from "vite"
+import type { ViteDevServer, Plugin as VitePlugin } from "vite"
 import { assertAppTemplateIsCorrect } from "./checks/appTemplate.js"
 import { assertRoutesFolderPathExists, assertNecessaryFilesArePresent } from "./checks/routes.js"
 import { initTransformConfig, resetTransformConfig, type TransformConfig } from "./config/index.js"
@@ -10,6 +10,8 @@ import { inspect } from "node:util"
 import path from "node:path"
 import { rm } from "node:fs/promises"
 import { doesPathExist } from "./config/utils/utils.js"
+import { getNodeishFs } from './config/utils/getNodeishFs.js'
+// TODO: expose those functions somewhere
 import {
 	createEffect as _createEffect,
 	// @ts-ignore
@@ -22,7 +24,9 @@ let viteServer: ViteDevServer | undefined
 const virtualModuleId = "virtual:inlang-static"
 const resolvedVirtualModuleId = "\0" + virtualModuleId
 
-export const plugin = () => {
+export const plugin = async () => {
+	const fs = await getNodeishFs()
+
 	return {
 		name: "vite-plugin-inlang-sdk-js-sveltekit",
 		// makes sure we run before vite-plugin-svelte
@@ -69,8 +73,8 @@ export const plugin = () => {
 			})
 
 			await assertAppTemplateIsCorrect(config)
-			await assertRoutesFolderPathExists(config)
-			const hasCreatedANewFile = await assertNecessaryFilesArePresent(config)
+			await assertRoutesFolderPathExists(fs, config)
+			const hasCreatedANewFile = await assertNecessaryFilesArePresent(fs, config)
 
 			// remove old files // TODO: remove this in version 1
 			let deletedFolder = false
@@ -79,7 +83,7 @@ export const plugin = () => {
 				"inlang",
 				"[language].json",
 			)
-			if (await doesPathExist(pathToOldLanguagesFolder)) {
+			if (await doesPathExist(fs, pathToOldLanguagesFolder)) {
 				await rm(pathToOldLanguagesFolder, { recursive: true })
 				deletedFolder = true
 			}
@@ -139,7 +143,7 @@ export const plugin = () => {
 
 			return transformedCode
 		},
-	} satisfies Plugin
+	} satisfies VitePlugin
 }
 
 let configLogged = false
