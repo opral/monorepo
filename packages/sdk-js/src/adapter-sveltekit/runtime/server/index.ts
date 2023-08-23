@@ -9,7 +9,6 @@ export {
 export {
 	initState,
 	loadMessages,
-	reloadMessages,
 	addRuntimeToLocals,
 	getRuntimeFromLocals,
 } from "./state.js"

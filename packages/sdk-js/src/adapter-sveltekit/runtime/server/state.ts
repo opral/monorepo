@@ -3,7 +3,6 @@ import { initTransformConfig, type TransformConfig } from "../../vite-plugin/con
 import { inlangSymbol } from "../shared/utils.js"
 import type { SvelteKitServerRuntime } from "./runtime.js"
 import type { LanguageTag } from "@inlang/app"
-import type { Message } from "@inlang/messages"
 
 type State = Pick<TransformConfig, "sourceLanguageTag" | "languageTags" | "messages">
 
@@ -32,8 +31,6 @@ export const initState = async () => {
 		}
 	}
 
-	await reloadMessages()
-
 	return {
 		sourceLanguageTag: state.sourceLanguageTag,
 		languageTags: state.languageTags,
@@ -42,12 +39,12 @@ export const initState = async () => {
 
 // ------------------------------------------------------------------------------------------------
 
-let _messages: Message[] = []
-
 // TODO: fix resources if needed (add missing Keys, etc.)
-export const reloadMessages = async () => (_messages = state?.messages()) || []
-
-export const loadMessages = (languageTag: LanguageTag) => _messages // TODO: filter out language variants
+export const loadMessages = (languageTag: LanguageTag) => state?.messages()
+	.map(message => ({
+		...message,
+		variants: message.variants.filter(variant => variant.languageTag === languageTag)
+	}))
 
 // ------------------------------------------------------------------------------------------------
 
