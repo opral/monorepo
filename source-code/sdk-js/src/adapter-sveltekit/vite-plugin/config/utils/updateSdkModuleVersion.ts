@@ -1,4 +1,4 @@
-import { createInlang, type InlangProject } from "@inlang/app"
+import { openInlangProject, type InlangProject } from "@inlang/app"
 import { getNodeishFs } from "./getNodeishFs.js"
 import { PATH_TO_INLANG_CONFIG } from "../config.js"
 // @ts-ignore
@@ -39,7 +39,7 @@ export const updateSdkModuleVersion = async (inlang: InlangProject): Promise<boo
  * @returns `false` iff the version is already up2date
  */
 export const standaloneUpdateSdkModuleVersion = async () => {
-	const inlang = await createInlang({
+	const inlang = await openInlangProject({
 		nodeishFs: await getNodeishFs(),
 		configPath: PATH_TO_INLANG_CONFIG,
 	})

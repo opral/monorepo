@@ -4,6 +4,7 @@ import {
 	createEffect,
 	createResource,
 	createSignal,
+	from,
 	JSXElement,
 	Resource,
 	Setter,
@@ -11,7 +12,7 @@ import {
 } from "solid-js"
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
 import type { LocalStorageSchema } from "#src/services/local-storage/index.js"
-import { getLocalStorage, useLocalStorage } from "#src/services/local-storage/index.js"
+import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { github } from "#src/services/github/index.js"
 import { showToast } from "#src/components/Toast.jsx"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
@@ -25,8 +26,9 @@ import {
 	LanguageTag,
 	LintRule,
 	Result,
-	createInlang,
-	type InlangProject,
+	openInlangProject,
+	withSolidReactivity,
+	type SolidInlangProject,
 	type Message,
 } from "@inlang/app"
 import type { InlangModule } from "@inlang/module"
@@ -101,7 +103,7 @@ type EditorStateSchema = {
 	 *
 	 * Undefined if no inlang config exists/has been found.
 	 */
-	inlang: Resource<InlangProject | undefined>
+	inlang: Resource<SolidInlangProject | undefined>
 
 	doesInlangConfigExist: () => boolean
 
@@ -161,6 +163,7 @@ type EditorStateSchema = {
 	/**
 	 * The last time the repository has been pulled.
 	 */
+	lastPullTime: () => Date | undefined
 	setLastPullTime: Setter<Date | undefined>
 }
 
@@ -317,19 +320,22 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}
 		},
 		async () => {
-			const inlang = await createInlang({
-				configPath: "./inlang.config.json",
-				nodeishFs: fs(),
-				_import: async () =>
-					({
-						default: {
-							// @ts-ignore
-							plugins: [...pluginJson.plugins],
-							// @ts-ignore
-							lintRules: [...pluginLint.lintRules],
-						},
-					} satisfies InlangModule),
-			})
+			const inlang = withSolidReactivity(
+				await openInlangProject({
+					configPath: "./inlang.config.json",
+					nodeishFs: fs(),
+					_import: async () =>
+						({
+							default: {
+								// @ts-ignore
+								plugins: [...pluginJson.plugins],
+								// @ts-ignore
+								lintRules: [...pluginLint.lintRules],
+							},
+						} satisfies InlangModule),
+				}),
+				{ from },
+			)
 			const config = inlang.config()
 			if (config) {
 				const languagesTags = // TODO: move this into setter logic
@@ -601,6 +607,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					userIsCollaborator,
 					repoIsPrivate,
 					setLastPush,
+					lastPullTime,
 					setLastPullTime,
 					fs,
 				} satisfies EditorStateSchema

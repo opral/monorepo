@@ -1,48 +1,61 @@
-import type * as vscode from "vscode"
+/**
+ * The config schema for the ide extension.
+ *
+ *
+ */
+//! Exists as manual type for readability and better hover DX.
+export type IdeExtensionConfigSchema = {
+	/**
+	 * Defines matchers for message references inside the code.
+	 *
+	 * @param args represents the data to conduct the search on
+	 * @returns a promise with matched message references
+	 */
+	messageReferenceMatchers: ((args: { documentText: string }) => Promise<MessageReferenceMatch[]>)[]
 
-export type IdeExtensionConfig = {
 	/**
-	 * The message reference matchers.
-	 * These are used to find message references in the source code.
-	 * The first matcher that returns a match is used.
+	 * Defines the options to extract messages.
 	 */
-	messageReferenceMatchers: Array<(sourceCode: string) => Promise<Array<string>>>
-	/**
-	 * The extract message options.
-	 * These are used to replace the highlighted text when extracting a message.
-	 */
-	extractMessageOptions: Array<{
+	extractMessageOptions: {
 		/**
-		 * The callback that returns the replacement string.
-		 * The first callback that returns a string is used.
-		 * @param messageId The message id.
-		 * @param messageValue The message value.
-		 * @returns The replacement string.
-		 * ```ts
-		 * {
-		 *  callback: (messageId: string, messageValue: string) => `{t("${messageId}")}`,
-		 * }
-		 * ```
+		 * Function which is called, when the user finished the message extraction command.
+		 *
+		 * @param messageId is the message identifier entered by the user
+		 * @param selection is the text which was extracted
+		 * @returns the code which is inserted into the document
 		 */
-		callback: (messageId: string, messageValue: string) => string
-	}>
+		callback: (messageId: string, selection: string) => string
+	}[]
+
 	/**
-	 * The document selectors.
-	 * These are used to determine which documents should be parsed for message references.
-	 * @example
-	 * ```ts
-	 * {
-	 * documentSelectors: [
-	 * {
-	 *  language: "javascript",
-	 * },
-	 * {
-	 *  language: "typescript",
-	 * },
-	 * {
-	 * 	language: "svelte",
-	 * },
-	 * ```
+	 * An array of VSCode DocumentSelectors.
+	 *
+	 * The document selectors specify for which files/programming languages
+	 * (typescript, svelte, etc.) the extension should be activated.
+	 *
+	 * See https://code.visualstudio.com/api/references/document-selector
 	 */
-	documentSelectors: vscode.DocumentSelector
+	documentSelectors?: Array<{
+		language?: string
+	}>
+}
+
+/**
+ * The result of a message reference matcher.
+ *
+ * The result contains the message id and the position
+ * from where to where the reference can be found.
+ */
+export type MessageReferenceMatch = {
+	/**
+	 * The messages id.
+	 */
+	messageId: string
+	/**
+	 * The position from where to where the reference can be found.
+	 */
+	position: {
+		start: { line: number; character: number }
+		end: { line: number; character: number }
+	}
 }

@@ -17,7 +17,7 @@ export const Disabled = Type.Array(Type.Union([LintRuleId]), {
 })
 
 /**
- * ---------------- SYSTEM SETTINGS ----------------
+ * ---------------- PROJECT SETTINGS ----------------
  */
 
 export type ProjectSettings = Static<typeof ProjectSettings>

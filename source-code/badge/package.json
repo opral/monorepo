@@ -22,7 +22,7 @@
 	},
 	"dependencies": {
 		"@project-lisa/client": "*",
-		"@inlang/core": "*",
+		"@inlang/app": "*",
 		"@inlang/telemetry": "*",
 		"@resvg/resvg-js": "^2.4.1",
 		"cache-manager": "^5.2.1",

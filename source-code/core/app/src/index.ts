@@ -1,6 +1,6 @@
 export type { InlangProject, InstalledLintRule, InstalledPlugin } from "./api.js"
-export { createInlang } from "./createInlang.js"
-export { withSolidReactivity } from "./wrappers/withSolidReactivity.js"
+export { openInlangProject } from "./openInlangProject.js"
+export { withSolidReactivity, SolidInlangProject } from "./wrappers/withSolidReactivity.js"
 export { tryAutoGenerateInlangConfig } from "./tryAutoGenerateConfig.js"
 export { parseConfig } from "./parseConfig.js"
 export { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError } from "./errors.js"
