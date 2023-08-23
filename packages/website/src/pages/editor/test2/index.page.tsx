@@ -104,13 +104,13 @@ export const Page = () => {
 		}
 	})
 
-	setTimeout(() => {
-		console.info("timeout set config")
-		inlang()?.setConfig({
-			...config,
-			sourceLanguageTag: "fr",
-		})
-	}, 2000)
+	// setTimeout(() => {
+	// 	console.info("timeout set config")
+	// 	inlang()?.setConfig({
+	// 		...config,
+	// 		sourceLanguageTag: "fr",
+	// 	})
+	// }, 2000)
 
 	setTimeout(() => {
 		console.info("timeout createMessage")
