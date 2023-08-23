@@ -70,6 +70,16 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 
 	const newPattern = () => getTextValue(editor) as Variant["pattern"]
 
+	//create editor
+	let textArea!: HTMLDivElement
+	const editor = createTiptapEditor(() => {
+		return getEditorConfig(textArea, variant(), variableReferences())
+	})
+
+	const currentJSON = useEditorJSON(() => editor())
+
+	const [previousContent, setPreviousContent] = createSignal()
+
 	onMount(() => {
 		if (sourceVariant()) {
 			setVariableReferences(
@@ -78,6 +88,7 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 					.map((variableReference) => variableReference) as VariableReference[],
 			)
 		}
+		setPreviousContent(currentJSON().content[0].content)
 
 		document.addEventListener("focusin", handleLineItemFocusIn)
 		return () => {
@@ -96,18 +107,11 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 		}),
 	)
 
-	//create editor
-	let textArea!: HTMLDivElement
-	const editor = createTiptapEditor(() => {
-		return getEditorConfig(textArea, variant(), variableReferences())
-	})
-
-	const currentJSON = useEditorJSON(() => editor())
-
 	createEffect(
 		on(currentJSON, () => {
-			if (currentJSON().content[0].content !== undefined) {
+			if (currentJSON().content[0].content !== undefined && JSON.stringify(currentJSON().content[0].content) !== JSON.stringify(previousContent())) {
 				autoSave()
+				setPreviousContent(currentJSON().content[0].content)
 				setHasChanges((prev) => {
 					const hasChanged = JSON.stringify(referencePattern()) !== JSON.stringify(newPattern())
 					if (prev !== hasChanged && hasChanged) {
@@ -141,13 +145,13 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 			})
 		}
 		if (newMessage.data) {
-			// const upsertSuccessful = inlang()?.query.messages.upsert({
-			// 	where: { id: props.message.id },
-			// 	data: newMessage.data,
-			// })
-			// if (!upsertSuccessful) {
-			// 	throw new Error("Cannot update message")
-			// }
+			const upsertSuccessful = inlang()?.query.messages.upsert({
+				where: { id: props.message.id },
+				data: newMessage.data,
+			})
+			if (!upsertSuccessful) {
+				throw new Error("Cannot update message")
+			}
 		} else {
 			throw new Error("Cannot update message: ", newMessage.error)
 		}
