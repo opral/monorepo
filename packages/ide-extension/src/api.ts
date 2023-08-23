@@ -5,7 +5,7 @@ export type IdeExtensionConfig = {
 	 * The message reference matchers.
 	 * These are used to find message references in the source code.
 	 * The first matcher that returns a match is used.
-*/
+	 */
 	messageReferenceMatchers: Array<(sourceCode: string) => Promise<Array<string>>>
 	/**
 	 * The extract message options.
@@ -22,7 +22,7 @@ export type IdeExtensionConfig = {
 		 * {
 		 *  callback: (messageId: string, messageValue: string) => `{t("${messageId}")}`,
 		 * }
-         * ```
+		 * ```
 		 */
 		callback: (messageId: string, messageValue: string) => string
 	}>
@@ -30,7 +30,7 @@ export type IdeExtensionConfig = {
 	 * The document selectors.
 	 * These are used to determine which documents should be parsed for message references.
 	 * @example
-     * ```ts
+	 * ```ts
 	 * {
 	 * documentSelectors: [
 	 * {
@@ -42,7 +42,7 @@ export type IdeExtensionConfig = {
 	 * {
 	 * 	language: "svelte",
 	 * },
-     * ```
+	 * ```
 	 */
 	documentSelectors: vscode.DocumentSelector
 }

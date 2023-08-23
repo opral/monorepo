@@ -8,7 +8,11 @@ import type {
 } from "@inlang/lint"
 import type { MessageQueryApi } from "@inlang/messages"
 import type { Result } from "@inlang/result"
-import type { InvalidConfigError, NoMessagesPluginError, PluginSaveMessagesError } from "./errors.js"
+import type {
+	InvalidConfigError,
+	NoMessagesPluginError,
+	PluginSaveMessagesError,
+} from "./errors.js"
 import type {
 	Plugin,
 	PluginAppSpecificApiReturnError,

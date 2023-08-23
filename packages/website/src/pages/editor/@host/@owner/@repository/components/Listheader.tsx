@@ -15,9 +15,7 @@ type RuleSummaryItem = {
 	level: "error" | "warning"
 }
 
-export const messageCount = (
-	messages: Message[]
-) => {
+export const messageCount = (messages: Message[]) => {
 	let counter = 0
 	for (const message of messages) {
 		if (showFilteredMessage(message)) counter++
@@ -39,15 +37,18 @@ export const ListHeader = (props: ListHeaderProps) => {
 	const getLintSummary = () => {
 		const lintSummary: Array<RuleSummaryItem> = []
 		const reports = inlang()?.lint.reports()
-		inlang()?.installed.lintRules()
+		inlang()
+			?.installed.lintRules()
 			.filter((lintRule) => !lintRule.disabled)
 			.map((lintRule) => {
 				let level: "error" | "warning"
-				const filteredReports = reports?.filter((report: MessageLintReport) => report.ruleId === lintRule.meta.id)
+				const filteredReports = reports?.filter(
+					(report: MessageLintReport) => report.ruleId === lintRule.meta.id,
+				)
 				const filteredMessages = filteredReports?.filter((report: MessageLintReport) => {
 					level = report.level
 					return showFilteredMessage(
-						inlang()?.query.messages.get({ where: { id: report.messageId } })
+						inlang()?.query.messages.get({ where: { id: report.messageId } }),
 					)
 				})
 				const counter = filteredMessages?.length || 0

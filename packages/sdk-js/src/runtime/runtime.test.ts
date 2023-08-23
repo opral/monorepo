@@ -8,7 +8,7 @@ import {
 	type RuntimeState,
 } from "./runtime.js"
 import type { Message } from "@inlang/app"
-import { createMessage } from '../test.util.js'
+import { createMessage } from "../test.util.js"
 
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -67,7 +67,10 @@ describe("initBaseRuntime", () => {
 
 			await runtime.loadMessages("de")
 
-			expect(state.messages[0]!.variants).toMatchObject([...messageMap.en[0]!.variants, ...messageMap.de[0]!.variants])
+			expect(state.messages[0]!.variants).toMatchObject([
+				...messageMap.en[0]!.variants,
+				...messageMap.de[0]!.variants,
+			])
 			expect(Object.keys(state.messages[0]!.variants)).toHaveLength(2)
 		})
 
@@ -208,7 +211,6 @@ describe("initBaseRuntime", () => {
 				i: undefined,
 			}
 			const runtime = initBaseRuntime(context, state)
-
 
 			await runtime.loadMessages("en")
 			runtime.changeLanguageTag("en")

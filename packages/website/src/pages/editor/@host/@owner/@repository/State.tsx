@@ -235,7 +235,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const sourceMessages = () =>
 		inlang()
 			?.query.messages.getAll()
-			.filter((message) => message.variants.filter((variant) => variant.languageTag === sourceLanguageTag()))
+			.filter((message) =>
+				message.variants.filter((variant) => variant.languageTag === sourceLanguageTag()),
+			)
 
 	const [localStorage] = useLocalStorage() ?? []
 

@@ -67,6 +67,9 @@ export const getEditorConfig = (
 				spellcheck: false,
 			},
 		},
-		content: variant !== undefined && variant.pattern.length > 0 ? setTipTapMessage(variant.pattern) : undefined,
+		content:
+			variant !== undefined && variant.pattern.length > 0
+				? setTipTapMessage(variant.pattern)
+				: undefined,
 	}
 }

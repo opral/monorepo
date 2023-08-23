@@ -1,8 +1,8 @@
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-import { findExport } from '../../../../ast-transforms/utils/exports.js'
-import { codeToSourceFile } from '../../../../ast-transforms/utils/js.util.js'
-import { Node } from 'ts-morph'
+import { readFile } from "node:fs/promises"
+import path from "node:path"
+import { findExport } from "../../../../ast-transforms/utils/exports.js"
+import { codeToSourceFile } from "../../../../ast-transforms/utils/js.util.js"
+import { Node } from "ts-morph"
 
 export const shouldContentBePrerendered = async (routesFolder: string) => {
 	const filesToLookFor = ["+layout.server.js", "+layout.server.ts", "+layout.js", "+layout.ts"]
