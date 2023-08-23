@@ -1,8 +1,8 @@
-import { createSignal, Show } from "solid-js"
+import { createSignal, For, Show } from "solid-js"
 import { Layout as RootLayout } from "../Layout.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import { navigate } from "vite-plugin-ssr/client/router"
-import { CommunityProjects } from "../index/CommunityProjects.jsx"
+import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { Button } from "../index/components/Button.jsx"
 import { z } from "zod"
 import { useI18n } from "@solid-primitives/i18n"
@@ -11,8 +11,10 @@ import { InstallationProvider } from "./InstallationProvider.jsx"
 import { SetupCard } from "./components/SetupCard.jsx"
 import { Gitlogin } from "./components/GitLogin.jsx"
 import { Icon } from "#src/components/Icon.jsx"
+import { GetHelp } from "#src/components/GetHelp.jsx"
+import { RepositoryCard } from "../index/CommunityProjects.jsx"
 
-//! TEST LINK: http://localhost:3000/install?repo=github.com/floriandwt/inlang-ide-next-demo&module=https://cdn.jsdelivr.net/npm/@inlang/plugin-json@3/dist/index.js
+//! TEST LINK: http://localhost:3000/install?repo=github.com/floriandwt/inlang-ide-next-demo&module=../plugins/json/dist/index.js
 
 export type Step = {
 	type: string
@@ -42,7 +44,6 @@ const dynamicTitle = () => {
 }
 
 export function Page() {
-	/** is not reactive because window is not reactive */
 	const [, { locale }] = useI18n()
 
 	const url = new URLSearchParams(window.location.search)
@@ -63,42 +64,50 @@ export function Page() {
 			/>
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<RootLayout>
-				<div class="flex flex-col items-center justify-center h-screen gap-16 pb-64">
+				<div class="h-screen flex flex-col items-center justify-center pb-32">
 					<InstallationProvider repo={repo} modules={modules} step={step} setStep={setStep}>
-						<Show when={step().type === "github-login"}>
-							<SetupCard>
-								<div class="text-center">
-									<h2 class="text-[24px] leading-tight md:text-2xl font-semibold mb-2">
-										Please authorize to continue
-									</h2>
-									<p class="text-surface-500">
-										We need your authorization to install modules in your repository.
-									</p>
-								</div>
-								<Gitlogin />
-							</SetupCard>
-						</Show>
-
-						<Show when={step().type === "installing"}>
-							<ShowProgress />
-						</Show>
-						<Show when={step().type === "success"}>
-							<ShowSuccess />
-						</Show>
-						<Show when={step().error}>
-							<Show when={step().type === "no-repo"} fallback={<ShowError />}>
-								<ChooseRepo />
+						<div
+							class={
+								"flex-grow flex justify-center items-center " +
+								(step().type !== "no-repo" && "pb-16")
+							}
+						>
+							<Show when={step().type === "github-login"}>
+								<SetupCard>
+									<div class="text-center">
+										<h2 class="text-[24px] leading-tight md:text-2xl font-semibold mb-2">
+											Please authorize to continue
+										</h2>
+										<p class="text-surface-500">
+											We need your authorization to install modules in your repository.
+										</p>
+									</div>
+									<Gitlogin />
+								</SetupCard>
 							</Show>
-						</Show>
+							<Show when={step().type === "installing"}>
+								<ShowProgress />
+							</Show>
+							<Show when={step().type === "success"}>
+								<ShowSuccess />
+							</Show>
+							<Show when={step().error}>
+								<Show when={step().type === "no-repo"} fallback={<ShowError />}>
+									<ChooseRepo modules={modules} />
+								</Show>
+							</Show>
+						</div>
 					</InstallationProvider>
+					<GetHelp text="Need help installing modules?" />
 				</div>
 			</RootLayout>
 		</>
 	)
 }
 
-function ChooseRepo() {
+function ChooseRepo({ modules }: { modules?: string[] }) {
 	const [input, setInput] = createSignal("")
+	const [store] = useLocalStorage()
 
 	const isValidUrl = () =>
 		z
@@ -107,73 +116,76 @@ function ChooseRepo() {
 			.regex(/github/)
 			.safeParse(input()).success
 
+	function generateInstallLink() {
+		const url = new URL(input())
+		return `/install?repo=${url.host}${url.pathname
+			.split("/")
+			.slice(0, 3)
+			.join("/")}&module=${modules?.join(",")}`
+	}
+
 	return (
 		<div class="w-full flex flex-col items-center">
-			<div class="flex flex-col p-2 md:p-10 items-center tracking-tight">
-				<h2 class="text-[40px] leading-tight md:text-6xl font-bold pb-6 md:pb-8 text-center">
-					Repository not found
+			<div class="flex flex-col justify-center gap-4 items-center">
+				<h2 class="text-[24px] leading-tight md:text-2xl font-semibold text-center">
+					No valid repository URL provided.
 				</h2>
-				<p class="text-xl text-surface-600 w-full md:w-[600px] text-center leading-relaxed">
-					To install something, you must have the{" "}
-					<span class="text-base font-mono py-[5px] px-2 bg-surface-100 rounded-lg text-surface-600">
-						inlang.config.js
-					</span>{" "}
-					file in your repository. Use the{" "}
-					<span
-						class="text-hover-primary hover:opacity-70 cursor-pointer"
-						onClick={() => navigate("/documentation/quick-start")}
-					>
-						inlang CLI
-					</span>{" "}
-					to create this file.
+				<p class="text-surface-500 text-center">
+					You can install modules into your repository <br /> by providing the repository URL below.
 				</p>
 			</div>
-			<form
-				class="relative w-full md:w-[600px] flex items-center group mt-4 mb-24"
-				onSubmit={(event) => {
-					event.preventDefault()
-					// add repo to url as query repo=github.com/owner/repo but replace protocol so its in this format: github.com/owner/repo
-					navigate(`/install?repo=${input().replace(/(^\w+:|^)\/\//, "")}`)
-					setStep({
-						type: "installing",
-					})
-				}}
-			>
-				<div class="pl-5 pr-2 gap-2 relative z-10 flex items-center w-full border border-surface-200 bg-background rounded-lg focus-within:border-primary transition-all ">
-					<input
-						class="active:outline-0 focus:outline-0 border-0 h-14 grow placeholder:text-surface-500 placeholder:font-normal placeholder:text-base"
-						placeholder="Enter repository url ..."
-						onInput={(event) => {
-							// @ts-ignore
-							setInput(event.target.value)
-						}}
-						onPaste={(event) => {
-							// @ts-ignore
-							setInput(event.target.value)
-						}}
-						on:sl-change={() =>
-							isValidUrl()
-								? navigate(`/install?repo=${input().replace(/(^\w+:|^)\/\//, "")}`)
-								: undefined
-						}
-					/>
-					<button
-						disabled={isValidUrl() === false}
-						onClick={() => {
-							navigate(`/install?repo=${input().replace(/(^\w+:|^)\/\//, "")}`)
-						}}
-						class={
-							(isValidUrl()
-								? "bg-surface-800 text-background hover:bg-on-background"
-								: "bg-background text-surface-600 border") +
-							" flex justify-center items-center h-10 relative rounded-md px-4 border-surface-200 transition-all duration-100 text-sm font-medium"
-						}
-					>
-						Install modules
-					</button>
+			<div class="flex flex-col p-2 md:p-10 items-center tracking-tight">
+				<form
+					class="relative w-full md:w-[600px] flex items-center group mt-4 mb-8"
+					onSubmit={(event) => {
+						event.preventDefault()
+						navigate(generateInstallLink())
+					}}
+				>
+					<div class="px-2 gap-2 relative z-10 flex items-center w-full border border-surface-200 bg-background rounded-lg focus-within:border-primary transition-all ">
+						<input
+							class="active:outline-0 focus:outline-0 focus:ring-0 border-0 h-14 grow placeholder:text-surface-500 placeholder:font-normal placeholder:text-base"
+							placeholder="Enter repository url ..."
+							onInput={(event) => {
+								// @ts-ignore
+								setInput(event.target.value)
+							}}
+							onPaste={(event) => {
+								// @ts-ignore
+								setInput(event.target.value)
+							}}
+							on:sl-change={() => {
+								isValidUrl() ? navigate(generateInstallLink()) : undefined
+							}}
+						/>
+						<button
+							disabled={isValidUrl() === false}
+							onClick={() => {
+								navigate(generateInstallLink())
+							}}
+							class={
+								(isValidUrl()
+									? "bg-surface-800 text-background hover:bg-on-background"
+									: "bg-background text-surface-600 border") +
+								" flex justify-center items-center h-10 relative rounded-md px-4 border-surface-200 transition-all duration-100 text-sm font-medium"
+							}
+						>
+							Start Installation
+						</button>
+					</div>
+				</form>
+			</div>
+			<div>
+				<h2 class="text-lg font-medium text-slate-900">Recent</h2>
+				<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 py-4 w-full auto-rows-min pb-24">
+					{/* Shows a total of max 3 repos */}
+					<For each={store.recentProjects.slice(0, 3)}>
+						{(recentProject) => (
+							<RepositoryCard repository={recentProject} install modules={modules} />
+						)}
+					</For>
 				</div>
-			</form>
-			{/* <CommunityProjects justShowRecent /> */}
+			</div>
 		</div>
 	)
 }
@@ -199,19 +211,19 @@ function ShowProgress() {
 function ShowSuccess() {
 	return (
 		<SetupCard success>
-			<Icon name="success" class="w-24 h-24 text-success-500 mb-2 text-success" />
-			<div class="flex flex-col justify-center gap-4 items-center">
+			<Icon name="success" class="w-20 h-20 text-success-500 mb-2 text-success" />
+			<div class="flex flex-col justify-center gap-2 items-center">
 				<h2 class="text-[24px] leading-tight md:text-2xl font-semibold text-center">
 					Installing your modules…
 				</h2>
-				<p class="text-surface-500 text-center mb-2">{step().message}</p>
+				<p class="text-surface-500 text-center mb-4">{step().message}</p>
 				<Button
 					function={() => {
-						window.close()
+						navigate("/marketplace")
 					}}
 					type="secondary"
 				>
-					Close Window
+					Go to Marketplace
 				</Button>
 			</div>
 		</SetupCard>
@@ -221,25 +233,21 @@ function ShowSuccess() {
 function ShowError() {
 	return (
 		<SetupCard error>
-			<Icon name="danger" class="w-24 h-24 text-error-500 mb-2 text-danger" />
-			<div class="flex flex-col justify-center gap-4 items-center">
+			<Icon name="danger" class="w-20 h-20 text-error-500 mb-2 text-danger" />
+			<div class="flex flex-col justify-center gap-2 items-center">
 				<h2 class="text-[24px] leading-tight md:text-2xl font-semibold text-center">
 					{step().type === "already-installed"
 						? "Modules already installed"
 						: "Something went wrong"}
 				</h2>
-				<p class="text-surface-500 text-center mb-2">
-					{step().message} You can close this window now.
-				</p>
+				<p class="text-surface-500 text-center mb-4">{step().message}</p>
 				<Button
 					function={() => {
-						step().type === "no-modules" // redirect to /marketplace
-							? (window.location.href = "/marketplace") // close window
-							: window.close()
+						navigate("/marketplace")
 					}}
 					type="secondary"
 				>
-					{step().type === "no-modules" ? "Search on marketplace" : "Close Window"}
+					Go to Marketplace
 				</Button>
 			</div>
 		</SetupCard>
