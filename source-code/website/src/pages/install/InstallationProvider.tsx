@@ -28,8 +28,6 @@ export function InstallationProvider(props: {
 	const [localStorage] = useLocalStorage() ?? []
 	const user = localStorage?.user
 
-	console.log("user", user)
-
 	createEffect(() => {
 		if (!user) {
 			setStep("github-login")
@@ -71,25 +69,30 @@ async function initializeRepo(repoURL: string, modulesURL: string[], user: user)
 		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
 	})
 
-	// Get the content of the inlang.config.js file
-	await repo.nodeishFs.readFile("./inlang.config.js", { encoding: "utf-8" }).catch((e) => {
-		if (e.code !== "ENOENT") throw e
-		throw new Error("No inlang.config.js file found in the repository.")
-	})
+	// Get the content of the inlang.config.js file as js object
+	const inlangConfig = await repo.nodeishFs
+		.readFile("./inlang.config.js", {
+			encoding: "utf-8",
+		})
+		.catch((e) => {
+			if (e.code !== "ENOENT") throw e
+			throw new Error("No inlang.config.js file found in the repository.")
+		})
 
-	const inlang = await createInlang({
-		configPath: "./inlang.config.json",
-		nodeishFs: repo.nodeishFs,
-		// _import: async () =>
-		// 	({
-		// 		default: {
-		// 			// @ts-ignore
-		// 			plugins: [...pluginJson.plugins],
-		// 			// @ts-ignore
-		// 			lintRules: [...pluginLint.lintRules],
-		// 		},
-		// 	} satisfies InlangModule),
-	})
+	//! Should inlang be created??
+	// const inlang = await createInlang({
+	// 	configPath: "./inlang.config.json",
+	// 	nodeishFs: repo.nodeishFs,
+	// 	_import: async () =>
+	// 		({
+	// 			default: {
+	// 				// @ts-ignore
+	// 				plugins: [...pluginJson.plugins],
+	// 				// @ts-ignore
+	// 				lintRules: [...pluginLint.lintRules],
+	// 			},
+	// 		} satisfies InlangModule),
+	// })
 
-	console.log("inlang", inlang)
+	console.log("inlang", inlangConfig)
 }
