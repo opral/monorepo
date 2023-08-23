@@ -1,6 +1,6 @@
 import type { InlangProject } from "@inlang/app"
 import { type SdkConfig, validateSdkConfig } from "@inlang/sdk-js-plugin"
-import { InlangSdkException } from '../../exceptions.js'
+import { InlangSdkException } from "../../exceptions.js"
 
 export function getSettings(inlang: InlangProject) {
 	const settings = inlang.appSpecificApi()["inlang.app.sdkJs"] as SdkConfig | undefined
