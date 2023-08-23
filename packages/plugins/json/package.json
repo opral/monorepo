@@ -12,21 +12,21 @@
 		"access": "public"
 	},
 	"scripts": {
-		"dev": "DEV=true node ./build.js",
-		"build": "node ./build.js && size-limit",
+		"dev": "inlang module build --entry ./src/index.ts --outdir ./dist --watch",
+		"build": "inlang module build --entry ./src/index.ts --outdir ./dist",
 		"--- TEST -----------------------------------------------------------": "",
-		"pretest": "node ./build.js",
+		"pretest": "npm run build",
 		"test": "vitest run --coverage",
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"devDependencies": {
+		"@inlang/cli": "*",
 		"@inlang/plugin": "*",
 		"@size-limit/preset-small-lib": "^8.2.4",
 		"@types/flat": "^5.0.2",
 		"@types/lodash.merge": "^4.6.7",
 		"@types/parsimmon": "^1.10.6",
-		"esbuild": "^0.17.19",
 		"flat": "^5.0.2",
 		"lodash.merge": "^4.6.2",
 		"parsimmon": "^1.18.1",

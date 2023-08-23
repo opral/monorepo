@@ -865,8 +865,3 @@ var zn = (e, t) => {
 	}
 export { En as default }
 /*! Bundled license information:
-
-@inlang/core/dist/plugin/pluginBuildConfig.js:
-  (*! DON'T TOP-LEVEL IMPORT ESBUILD PLUGINS. USE DYNAMIC IMPORTS. *)
-  (*! See https://github.com/inlang/inlang/issues/486 *)
-*/
