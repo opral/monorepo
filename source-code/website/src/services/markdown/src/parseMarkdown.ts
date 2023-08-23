@@ -1,5 +1,5 @@
 import Markdoc, { type ValidationError } from "@markdoc/markdoc"
-import { Type, Static } from "@sinclair/typebox"
+import { Type } from "@sinclair/typebox"
 import { parse as parseYaml } from "yaml"
 import { config } from "./config.js"
 
