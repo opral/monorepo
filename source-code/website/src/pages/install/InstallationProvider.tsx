@@ -1,15 +1,14 @@
 import { type JSXElement, onMount } from "solid-js"
 import { open, createNodeishMemoryFs } from "@project-lisa/client"
 import { publicEnv } from "@inlang/env-variables"
-import { LocalStorageProvider, useLocalStorage } from "#src/services/local-storage/index.js"
+import {
+	LocalStorageProvider,
+	getLocalStorage,
+	useLocalStorage,
+} from "#src/services/local-storage/index.js"
 import type { InlangConfig } from "@inlang/app"
 import type { Step } from "./index.page.jsx"
-
-type user = {
-	username: string
-	avatarUrl: string
-	email: string
-}
+import { marketplaceItems as modules } from "@inlang/marketplace"
 
 export function InstallationProvider(props: {
 	repo: string
@@ -22,7 +21,7 @@ export function InstallationProvider(props: {
 	const user = localStorage?.user
 
 	onMount(() => {
-		if (!user) {
+		if (!user && getLocalStorage()) {
 			props.setStep({
 				type: "github-login",
 				error: false,
@@ -33,10 +32,16 @@ export function InstallationProvider(props: {
 				message: "No repository URL provided.",
 				error: true,
 			})
-		} else if (!props.modules) {
+		} else if (!props.modules || props.modules.length === 0) {
 			props.setStep({
 				type: "no-modules",
 				message: "No modules provided.",
+				error: true,
+			})
+		} else if (!validateModules(props.modules)) {
+			props.setStep({
+				type: "invalid-modules",
+				message: "Invalid modules provided.",
 				error: true,
 			})
 		} else {
@@ -185,4 +190,12 @@ function writeObjectToPlainText(object: Record<string, unknown>) {
 
 function sendSuccessResponseToSource(response: string, source: Window) {
 	// ToDo: send the response to the source window
+}
+
+function validateModules(modules: string[]) {
+	const validModules = modules.filter((module) => modules.includes(module))
+	if (validModules.length === 0) {
+		return false
+	}
+	return true
 }
