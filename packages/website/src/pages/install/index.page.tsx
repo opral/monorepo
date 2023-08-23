@@ -8,7 +8,7 @@ import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { InstallationProvider } from "./InstallationProvider.jsx"
 import { LocalStorageProvider } from "#src/services/local-storage/index.js"
 
-//! TEST LINK: http://localhost:3000/install?repo=github.com/floriandwt/inlang-ide-next-demo&module=https://cdn.jsdelivr.net/npm/@inlang/plugin-json@3/dist/index.js,https://cdn.jsdelivr.net/npm/@inlang/plugin-json@3/dist/index.js
+//! TEST LINK: http://localhost:3000/install?repo=github.com/floriandwt/inlang-ide-next-demo&module=https://cdn.jsdelivr.net/npm/@inlang/plugin-json@3/dist/index.js
 
 export function Page() {
 	/** is not reactive because window is not reactive */
