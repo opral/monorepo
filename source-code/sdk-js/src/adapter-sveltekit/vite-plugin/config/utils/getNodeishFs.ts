@@ -1,4 +1,4 @@
-import type { NodeishFilesystem } from '@inlang-git/fs'
+import type { NodeishFilesystem } from "@inlang-git/fs"
 import { InlangSdkException } from "../../exceptions.js"
 
 /**
@@ -21,4 +21,3 @@ export const getNodeishFs = (): Promise<NodeishFilesystem> =>
 				},
 			}),
 	)
-

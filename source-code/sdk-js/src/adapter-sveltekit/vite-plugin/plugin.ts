@@ -10,7 +10,7 @@ import { inspect } from "node:util"
 import path from "node:path"
 import { rm } from "node:fs/promises"
 import { doesPathExist } from "./config/utils/utils.js"
-import { getNodeishFs } from './config/utils/getNodeishFs.js'
+import { getNodeishFs } from "./config/utils/getNodeishFs.js"
 // TODO: expose those functions somewhere
 import {
 	createEffect as _createEffect,
