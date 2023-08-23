@@ -84,18 +84,18 @@ export const tableOfContents: Record<string, { raw: string; import: string }[]> 
 			raw: "./ast.md?raw",
 			import: (await import("./ast.md?raw")).default,
 		},
-		{
-			raw: "../source-code/core/environment/README.md?raw",
-			import: (await import("../source-code/core/environment/README.md?raw")).default,
-		},
+		// {
+		// 	raw: "../source-code/core/environment/README.md?raw",
+		// 	import: (await import("../source-code/core/environment/README.md?raw")).default,
+		// },
 		{
 			raw: "./query.md?raw",
 			import: (await import("./query.md?raw")).default,
 		},
-		{
-			raw: "../source-code/core/lint/README.md?raw",
-			import: (await import("../source-code/core/lint/README.md?raw")).default,
-		},
+		// {
+		// 	raw: "../source-code/core/lint/README.md?raw",
+		// 	import: (await import("../source-code/core/lint/README.md?raw")).default,
+		// },
 	],
 	Community: [
 		{

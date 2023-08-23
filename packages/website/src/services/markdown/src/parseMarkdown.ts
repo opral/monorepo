@@ -1,6 +1,6 @@
 import Markdoc, { type ValidationError } from "@markdoc/markdoc"
+import { Type, Static } from "@sinclair/typebox"
 import { parse as parseYaml } from "yaml"
-import { z } from "zod"
 import { config } from "./config.js"
 
 /**
@@ -11,20 +11,20 @@ import { config } from "./config.js"
  *
  * See https://markdoc.dev/docs/frontmatter
  */
-export type RequiredFrontmatter = z.infer<typeof RequiredFrontmatter>
-export const RequiredFrontmatter = z.object({
-	href: z
-		.string({
+export type RequiredFrontmatter = typeof RequiredFrontmatter
+export const RequiredFrontmatter = Type.Object({
+	href: Type.String({
 			description:
 				"The href is the path where the markdown is rendered e.g. /documentation/intro and simultaneously acts as id.",
-		})
-		.startsWith("/"),
-	title: z.string(),
-	shortTitle: z.string().optional(),
-	description: z
-		.string({ description: "Description for SEO and prerendering purposes." })
-		.min(10)
-		.max(160),
+			pattern: "^/.*",
+		}),
+	title: Type.String(),
+	shortTitle: Type.Optional(Type.String()),
+	description: Type.String({ 
+		description: "Description for SEO and prerendering purposes.",
+		minLength: 10, 
+		maxLength: 160 
+	})
 })
 
 /**
@@ -52,7 +52,7 @@ export function parseMarkdown<FrontmatterSchema extends RequiredFrontmatter>(arg
 	error?: string
 } {
 	const ast = Markdoc.parse(args.text)
-	const frontmatter = args.FrontmatterSchema.parse(parseYaml(ast.attributes.frontmatter ?? ""))
+	const frontmatter = parseYaml(ast.attributes.frontmatter ?? "") as typeof args.FrontmatterSchema
 	const errors = Markdoc.validate(ast, config)
 	if (errors.length > 0) {
 		return {
