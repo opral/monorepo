@@ -14,17 +14,17 @@ import { config } from "./config.js"
 export type RequiredFrontmatter = typeof RequiredFrontmatter
 export const RequiredFrontmatter = Type.Object({
 	href: Type.String({
-			description:
-				"The href is the path where the markdown is rendered e.g. /documentation/intro and simultaneously acts as id.",
-			pattern: "^/.*",
-		}),
+		description:
+			"The href is the path where the markdown is rendered e.g. /documentation/intro and simultaneously acts as id.",
+		pattern: "^/.*",
+	}),
 	title: Type.String(),
 	shortTitle: Type.Optional(Type.String()),
-	description: Type.String({ 
+	description: Type.String({
 		description: "Description for SEO and prerendering purposes.",
-		minLength: 10, 
-		maxLength: 160 
-	})
+		minLength: 10,
+		maxLength: 160,
+	}),
 })
 
 /**
