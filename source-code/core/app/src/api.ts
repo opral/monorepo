@@ -50,8 +50,8 @@ export type InlangProject = {
 		plugins: Subscribable<() => InstalledPlugin[]>
 		lintRules: Subscribable<() => InstalledLintRule[]>
 	}
-	errors: Subscribable<() =>
-		(
+	errors: Subscribable<
+		() => (
 			| ModuleImportError
 			| ModuleError
 			| PluginAppSpecificApiReturnError
