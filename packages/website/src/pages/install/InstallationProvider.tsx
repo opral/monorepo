@@ -6,9 +6,9 @@ import {
 	getLocalStorage,
 	useLocalStorage,
 } from "#src/services/local-storage/index.js"
-import type { InlangConfig } from "@inlang/app"
+import type { InlangConfig, tryCatch } from "@inlang/app"
 import type { Step } from "./index.page.jsx"
-import { marketplaceItems as modules } from "@inlang/marketplace"
+import { marketplaceItems } from "@inlang/marketplace"
 
 export function InstallationProvider(props: {
 	repo: string
@@ -50,28 +50,23 @@ export function InstallationProvider(props: {
 				message: "Starting installation...",
 				error: false,
 			})
+
 			initializeRepo(props.repo, props.modules, user!, props.step, props.setStep)
 		}
 	})
 
-	return (
-		<>
-			<LocalStorageProvider>{props.children}</LocalStorageProvider>
-		</>
-	)
+	return <LocalStorageProvider>{props.children}</LocalStorageProvider>
 }
 
 async function initializeRepo(
 	repoURL: string,
 	modulesURL: string[],
-	user: user,
+	user: { username: string; email: string },
 	step: () => Step,
 	setStep: (step: Step) => void,
 ) {
-	// In case of a redirect error, remove double module entries
 	modulesURL = modulesURL.filter((module, index) => modulesURL.indexOf(module) === index)
 
-	// Open the repository
 	const repo = open(repoURL, {
 		nodeishFs: createNodeishMemoryFs(),
 		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
@@ -82,7 +77,7 @@ async function initializeRepo(
 		message: "Cloning Repository...",
 	})
 
-	// Get the content of the inlang.config.js file
+	// Todo: tryCatch()
 	const inlangConfigString = (await repo.nodeishFs
 		.readFile("./inlang.config.js", {
 			encoding: "utf-8",
@@ -95,7 +90,6 @@ async function initializeRepo(
 			})
 		})) as string
 
-	// Convert the inlang.config.js file to a JavaScript object
 	let inlangConfig: InlangConfig
 	try {
 		inlangConfig = eval(`(${inlangConfigString.replace(/[^{]*/, "")})`)
@@ -119,21 +113,17 @@ async function initializeRepo(
 		}
 	})
 
-	// Add the modules to the inlang.config.js file
 	if (!inlangConfig.modules) inlangConfig.modules = []
 
-	// only install modules that are not already installed
 	const modulesToInstall = modulesURL.filter(
 		(moduleURL) => !inlangConfig.modules?.includes(moduleURL),
 	)
 	inlangConfig.modules.push(...modulesToInstall)
 
-	// Merge into the inlangConfigString to be able to write it back to the file
 	const generatedInlangConfig = String(
 		inlangConfigString.replace(/{[^}]*}/, writeObjectToPlainText(inlangConfig)),
 	)
 
-	// Write the new inlang.config.js back to the repository
 	await repo.nodeishFs.writeFile("./inlang.config.js", generatedInlangConfig)
 
 	if (step().error) return
@@ -143,12 +133,10 @@ async function initializeRepo(
 		message: "Comitting changes...",
 	})
 
-	// Add the changes
 	await repo.add({
 		filepath: "inlang.config.js",
 	})
 
-	// Commit the changes
 	await repo.commit({
 		message: "inlang: install modules (test)",
 		author: {
@@ -162,10 +150,8 @@ async function initializeRepo(
 		message: "Almost done...",
 	})
 
-	// Push the changes
 	await repo.push()
 
-	// Set the step to done
 	setStep({
 		type: "success",
 		message: "Successfully installed the modules: " + modulesURL.join(", "),
@@ -173,6 +159,9 @@ async function initializeRepo(
 	})
 }
 
+/**
+ * This function writes an object to a string in plain text, otherwise it would end up in [Object object]
+ */
 function writeObjectToPlainText(object: Record<string, unknown>) {
 	let result = "{"
 	for (const key in object) {
@@ -189,13 +178,25 @@ function writeObjectToPlainText(object: Record<string, unknown>) {
 }
 
 function sendSuccessResponseToSource(response: string, source: Window) {
-	// ToDo: send the response to the source window
+	// ToDo: send the response to the source window e.g. CLI
 }
 
+/**
+ * This function checks if the modules provided in the URL are in the marketplace registry.
+ */
 function validateModules(modules: string[]) {
-	const validModules = modules.filter((module) => modules.includes(module))
-	if (validModules.length === 0) {
-		return false
-	}
-	return true
+	let check = true
+	modules.forEach((module) => {
+		if (
+			!marketplaceItems.some(
+				(marketplaceItem) =>
+					marketplaceItem.type !== "app" && marketplaceItem.module.includes(module),
+			)
+		) {
+			check = false
+		} else {
+			check = true
+		}
+	})
+	return check
 }
