@@ -27,7 +27,7 @@ export type LintRuleBase = Static<typeof LintRuleBase>
 export const LintRuleBase = Type.Object({
 	meta: Type.Object({
 		id: Type.String({
-			pattern: "^(?!system\\.)([a-z]+)\\.(lintRule)\\.([a-z][a-zA-Z0-9]*)$",
+			pattern: "^(?!project\\.)([a-z]+)\\.(lintRule)\\.([a-z][a-zA-Z0-9]*)$",
 			description: "The key must be conform to `{namespace}.lintRule.{name}` pattern.",
 			examples: ["example.lintRule.patternInvalid", "example.lintRule.missingTranslation"],
 		}) as unknown as TTemplateLiteral<[TLiteral<`${string}.lintRule.${string}`>]>,
