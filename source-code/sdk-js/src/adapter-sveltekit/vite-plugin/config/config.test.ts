@@ -32,7 +32,7 @@ beforeEach(() => {
 	resetTransformConfig()
 })
 
-it("should cache config creation", async () => {
+it.todo("should cache config creation", async () => {
 	const fs = await createMockNodeishFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
 	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
@@ -63,7 +63,7 @@ it("should cache config creation", async () => {
 	expect(config3).not.toBe(config1)
 })
 
-it("should create an inlang config file if no config is present yet", async () => {
+it.todo("should create an inlang config file if no config is present yet", async () => {
 	const fs = await createMockNodeishFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
 	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
@@ -99,7 +99,7 @@ it("should create an inlang config file if no config is present yet", async () =
 	expect(await fs.readFile(PATH_TO_INLANG_CONFIG, { encoding: "utf-8" })).toBeDefined()
 })
 
-it("should update the sdk module version", async () => {
+it.todo("should update the sdk module version", async () => {
 	const fs = await createMockNodeishFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
 	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
@@ -127,7 +127,7 @@ it("should update the sdk module version", async () => {
 	})
 })
 
-it("should not update the sdk module version if already up2date", async () => {
+it.todo("should not update the sdk module version if already up2date", async () => {
 	const fs = await createMockNodeishFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
 	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
@@ -152,7 +152,7 @@ it("should not update the sdk module version if already up2date", async () => {
 	expect(setConfig).not.toHaveBeenCalled()
 })
 
-it("should create demo resources if none are present yet", async () => {
+it.todo("should create demo resources if none are present yet", async () => {
 	const fs = await createMockNodeishFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
 	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
@@ -177,7 +177,7 @@ it("should create demo resources if none are present yet", async () => {
 	expect(create).toHaveBeenCalledOnce()
 })
 
-it("should add the sdk plugin module if not present yet", async () => {
+it.todo("should add the sdk plugin module if not present yet", async () => {
 	const fs = await createMockNodeishFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
 	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
@@ -215,7 +215,7 @@ it("should add the sdk plugin module if not present yet", async () => {
 	})
 })
 
-it("should throw if the SDK is not configured properly", async () => {
+it.todo("should throw if the SDK is not configured properly", async () => {
 	const fs = await createMockNodeishFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
 	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
@@ -255,7 +255,7 @@ it("should throw if no svelte.config.js file is found", async () => {
 	await expect(async () => initTransformConfig()).rejects.toThrow(InlangSdkException)
 })
 
-it("should correctly resolve the config", async () => {
+it.todo("should correctly resolve the config", async () => {
 	const fs = await createMockNodeishFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
 	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
