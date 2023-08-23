@@ -864,4 +864,3 @@ var zn = (e, t) => {
 			: (e[t[0]] || (e[t[0]] = {}), Ie(e[t[0]], t.slice(1), n, r))
 	}
 export { En as default }
-/*! Bundled license information:
