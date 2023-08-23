@@ -48,7 +48,14 @@ export type SolidInlangProject = {
 	config: () => ReturnType<InlangProject["config"]>
 	setConfig: InlangProject["setConfig"]
 	query: {
-		messages: MessageQueryApi
+		messages: {
+			create: MessageQueryApi["create"]
+			update: MessageQueryApi["update"]
+			delete: MessageQueryApi["delete"]
+			upsert: MessageQueryApi["upsert"]
+			get: MessageQueryApi["get"]
+			getAll: () => ReturnType<MessageQueryApi["getAll"]>
+		}
 	}
 	lint: {
 		/**
