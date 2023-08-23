@@ -1,24 +1,20 @@
-import { createSignal, Show, type JSXElement, onMount, createEffect } from "solid-js"
+import { createSignal, Show, type JSXElement, onMount } from "solid-js"
 import { open, createNodeishMemoryFs } from "@project-lisa/client"
-import { createInlang } from "@inlang/app"
 import { publicEnv } from "@inlang/env-variables"
-import type { InlangModule } from "@inlang/module"
-import {
-	LocalStorageProvider,
-	getLocalStorage,
-	useLocalStorage,
-} from "#src/services/local-storage/index.js"
+import { LocalStorageProvider, useLocalStorage } from "#src/services/local-storage/index.js"
 import { Gitlogin } from "./components/GitLogin.jsx"
 import { SetupCard } from "./components/SetupCard.jsx"
-import { set } from "zod"
 import type { InlangConfig } from "@inlang/app"
+import { Icon } from "#src/components/Icon.jsx"
 
 type Error =
 	| { type: "already-installed"; message: string }
 	| { type: "no-inlang-config"; message: string }
 	| { type: "error"; message: string }
 
-type State = "github-login" | "select-repo" | "select-module" | "installing" | "done" | Error
+type ValidState = "github-login" | "select-repo" | "select-module" | "installing" | "done"
+
+type State = ValidState | Error
 
 type user = {
 	username: string
@@ -66,13 +62,28 @@ export function InstallationProvider(props: {
 					</SetupCard>
 				</Show>
 				<Show when={step() === "installing"}>{props.children}</Show>
-				<Show when={step()?.type}>
+				<Show when={step() === "done"}>
+					<SetupCard>
+						<Icon class="text-success mx-auto text-6xl" name={"success"} />
+						<div>
+							<h2 class="text-[24px] leading-tight md:text-2xl font-semibold mb-2">Done</h2>
+							<p class="text-surface-500">
+								Your modules were successfully installed in your repository.
+							</p>
+						</div>
+					</SetupCard>
+				</Show>
+				{/* // TODO: Fix types
+				@ts-ignore */}
+				<Show when={step().type}>
 					<SetupCard error>
 						<div>
 							<h2 class="text-[24px] leading-tight md:text-2xl font-semibold mb-2">
-								{step()?.type}
+								{/* @ts-ignore */}
+								{step().type}
 							</h2>
-							<p class="text-surface-500">{step()?.message}</p>
+							{/* @ts-ignore */}
+							<p>{step().message}</p>
 						</div>
 					</SetupCard>
 				</Show>
@@ -92,7 +103,7 @@ async function initializeRepo(repoURL: string, modulesURL: string[], user: user)
 	})
 
 	// Get the content of the inlang.config.js file
-	const inlangConfigString = await repo.nodeishFs
+	const inlangConfigString = (await repo.nodeishFs
 		.readFile("./inlang.config.js", {
 			encoding: "utf-8",
 		})
@@ -103,7 +114,7 @@ async function initializeRepo(repoURL: string, modulesURL: string[], user: user)
 				message: "No inlang.config.js file found in the repository.",
 			})
 			return
-		})
+		})) as string
 
 	// Convert the inlang.config.js file to a JavaScript object
 	let inlangConfig: InlangConfig
