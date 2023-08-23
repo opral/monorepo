@@ -25,7 +25,16 @@ export const withSolidReactivity = (
 			plugins: convert(project.installed.plugins),
 		},
 		setConfig: project.setConfig,
-		query: project.query,
+		query: {
+			messages: {
+				create: project.query.messages.create,
+				update: project.query.messages.update,
+				delete: project.query.messages.delete,
+				upsert: project.query.messages.upsert,
+				get: project.query.messages.get,
+				getAll: convert(project.query.messages.getAll),
+			},
+		},
 	} satisfies SolidInlangProject
 }
 

@@ -19,7 +19,7 @@ import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
 import { telemetryBrowser, parseOrigin } from "@inlang/telemetry"
 import type { NodeishFilesystem } from "@inlang-git/fs"
-import { createNodeishMemoryFs } from "@inlang-git/fs"
+import { open, createNodeishMemoryFs } from "@project-lisa/client"
 import { http, raw } from "@inlang-git/client/raw"
 import { publicEnv } from "@inlang/env-variables"
 import {
@@ -243,6 +243,22 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			)
 
 	const [localStorage] = useLocalStorage() ?? []
+
+	const [repo] = createResource(
+		() => {
+			setFs(createNodeishMemoryFs())
+			return {
+				fs: fs(),
+				routeParams: currentPageContext.routeParams as EditorRouteParams,
+				user: localStorage?.user,
+				setFsChange,
+			}
+		},
+		async (args) => {
+			const { host, owner, repository } = args.routeParams
+			return open(`https://${host}/${owner}/${repository}`, { nodeishFs: fs() })
+		},
+	)
 
 	// re-fetched if currentPageContext changes
 	const [repositoryIsCloned] = createResource(

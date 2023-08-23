@@ -227,11 +227,11 @@ describe("messages", () => {
 			counter += 1
 		})
 
-		const messagesBefore = inlang.query.messages.getAll()
-		expect(messagesBefore.length).toBe(2)
+		const messagesBefore = inlang.query.messages.getAll
+		expect(messagesBefore().length).toBe(2)
 		expect(
 			(
-				messagesBefore[0]?.variants.find((variant) => variant.languageTag === "en")
+				messagesBefore()[0]?.variants.find((variant) => variant.languageTag === "en")
 					?.pattern[0] as Text
 			).value,
 		).toBe("test")
@@ -256,15 +256,12 @@ describe("messages", () => {
 			},
 		})
 
-		// TODO: how can we await `query-messages.update` correctly
-		await new Promise((resolve) => setTimeout(resolve, 10))
-
 		expect(counter).toBe(2) // 2 times because effect creation + set
-		const messagesAfter = inlang.query.messages.getAll()
-		expect(messagesAfter.length).toBe(2)
+		const messagesAfter = inlang.query.messages.getAll
+		expect(messagesAfter().length).toBe(2)
 		expect(
 			(
-				messagesBefore[0]?.variants.find((variant) => variant.languageTag === "en")
+				messagesAfter()[0]?.variants.find((variant) => variant.languageTag === "en")
 					?.pattern[0] as Text
 			).value,
 		).toBe("test2")

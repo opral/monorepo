@@ -353,7 +353,7 @@ function skipFirst(func: (args: any) => any) {
 
 // TODO: how do we unsubscribe? Do we need that?
 // COMMENT from @samuelstroschein: Likely not. The reactivity is handled internally with auto dispose from SolidJS.
-function createSubscribable<T>(signal: () => T): Subscribable<T> {
+export function createSubscribable<T>(signal: () => T): Subscribable<T> {
 	return Object.assign(signal, {
 		subscribe: (callback: any) => {
 			createEffect(() => {
