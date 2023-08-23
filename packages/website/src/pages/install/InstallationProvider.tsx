@@ -10,25 +10,33 @@ import {
 } from "#src/services/local-storage/index.js"
 import { Gitlogin } from "./components/GitLogin.jsx"
 import { SetupCard } from "./components/SetupCard.jsx"
+import { set } from "zod"
+import type { InlangConfig } from "@inlang/app"
 
-type State = "github-login" | "select-repo" | "select-module" | "installing"
+type Error =
+	| { type: "already-installed"; message: string }
+	| { type: "no-inlang-config"; message: string }
+	| { type: "error"; message: string }
+
+type State = "github-login" | "select-repo" | "select-module" | "installing" | "done" | Error
+
 type user = {
 	username: string
 	avatarUrl: string
 	email: string
 }
 
+const [step, setStep] = createSignal<State>("github-login")
+
 export function InstallationProvider(props: {
 	repo: string
 	modules: string[]
 	children: JSXElement
 }) {
-	const [step, setStep] = createSignal<State>("github-login")
-
 	const [localStorage] = useLocalStorage() ?? []
 	const user = localStorage?.user
 
-	createEffect(() => {
+	onMount(() => {
 		if (!user) {
 			setStep("github-login")
 		} else if (!props.repo) {
@@ -58,12 +66,25 @@ export function InstallationProvider(props: {
 					</SetupCard>
 				</Show>
 				<Show when={step() === "installing"}>{props.children}</Show>
+				<Show when={step()?.type}>
+					<SetupCard error>
+						<div>
+							<h2 class="text-[24px] leading-tight md:text-2xl font-semibold mb-2">
+								{step()?.type}
+							</h2>
+							<p class="text-surface-500">{step()?.message}</p>
+						</div>
+					</SetupCard>
+				</Show>
 			</LocalStorageProvider>
 		</>
 	)
 }
 
 async function initializeRepo(repoURL: string, modulesURL: string[], user: user) {
+	// In case of a redirect error, remove double module entries
+	modulesURL = modulesURL.filter((module, index) => modulesURL.indexOf(module) === index)
+
 	// Open the repository
 	const repo = open(repoURL, {
 		nodeishFs: createNodeishMemoryFs(),
@@ -77,22 +98,89 @@ async function initializeRepo(repoURL: string, modulesURL: string[], user: user)
 		})
 		.catch((e) => {
 			if (e.code !== "ENOENT") throw e
-			throw new Error("No inlang.config.js file found in the repository.")
+			setStep({
+				type: "no-inlang-config",
+				message: "No inlang.config.js file found in the repository.",
+			})
+			return
 		})
 
 	// Convert the inlang.config.js file to a JavaScript object
-	let inlangConfig
+	let inlangConfig: InlangConfig
 	try {
 		inlangConfig = eval(`(${inlangConfigString.replace(/[^{]*/, "")})`)
 	} catch (e) {
-		throw new Error("Error parsing inlang.config.js: " + e)
+		setStep({
+			type: "error",
+			message: "Error parsing inlang.config.js: " + e,
+		})
+		return
 	}
 
+	inlangConfig.modules?.forEach((module: string) => {
+		const installedModules = modulesURL.every((moduleURL) => module.includes(moduleURL))
+		if (installedModules) {
+			setStep({
+				type: "already-installed",
+				message: "The modules are already installed in your repository.",
+			})
+			return
+		}
+	})
+
 	// Add the modules to the inlang.config.js file
-	inlangConfig.modules.push(...modulesURL)
+	if (!inlangConfig.modules) inlangConfig.modules = []
+
+	// only install modules that are not already installed
+	const modulesToInstall = modulesURL.filter(
+		(moduleURL) => !inlangConfig.modules?.includes(moduleURL),
+	)
+	inlangConfig.modules.push(...modulesToInstall)
 
 	// Merge into the inlangConfigString to be able to write it back to the file
-	const newInlangConfigString = inlangConfigString.replace(/{[^}]*}/, JSON.stringify(inlangConfig))
+	const generatedInlangConfig = String(
+		inlangConfigString.replace(/{[^}]*}/, writeObjectToPlainText(inlangConfig)),
+	)
 
-	console.log("newInlangConfigString", newInlangConfigString)
+	// Write the new inlang.config.js back to the repository
+	await repo.nodeishFs.writeFile("./inlang.config.js", generatedInlangConfig)
+
+	console.log(step())
+
+	if (step() !== "installing") return
+
+	// Add the changes
+	await repo.add({
+		filepath: "inlang.config.js",
+	})
+
+	// Commit the changes
+	await repo.commit({
+		message: "inlang: install modules (test)",
+		author: {
+			name: user.username,
+			email: user.email,
+		},
+	})
+
+	// Push the changes
+	await repo.push()
+
+	// Set the step to done
+	setStep("done")
+}
+
+function writeObjectToPlainText(object: Record<string, unknown>) {
+	let result = "{"
+	for (const key in object) {
+		if (Array.isArray(object[key])) {
+			result += `${key}: ${JSON.stringify(object[key])}, `
+		} else {
+			result += `${key}: ${JSON.stringify(object[key])}, `
+		}
+	}
+	result += "}"
+
+	result = result.replace(/,(?![^[]*\])/g, ",\n")
+	return result
 }
