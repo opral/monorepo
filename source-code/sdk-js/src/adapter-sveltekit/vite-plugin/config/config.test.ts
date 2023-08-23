@@ -1,12 +1,23 @@
 import { createMockNodeishFs } from "@inlang/app/test"
 import { it, beforeEach, vi, expect } from "vitest"
-import { PATH_TO_CWD, PATH_TO_INLANG_CONFIG, PATH_TO_SVELTE_CONFIG, initTransformConfig, resetTransformConfig } from "./config.js"
-import { openInlangProject, type InlangProject, ConfigPathNotFoundError, createQuery } from "@inlang/app"
-import * as createBasicInlangConfigModule from './utils/createBasicInlangConfig.js'
-import { getNodeishFs } from './utils/getNodeishFs.js'
-import { createMessage } from '../../../test.util.js'
+import {
+	PATH_TO_CWD,
+	PATH_TO_INLANG_CONFIG,
+	PATH_TO_SVELTE_CONFIG,
+	initTransformConfig,
+	resetTransformConfig,
+} from "./config.js"
+import {
+	openInlangProject,
+	type InlangProject,
+	ConfigPathNotFoundError,
+	createQuery,
+} from "@inlang/app"
+import * as createBasicInlangConfigModule from "./utils/createBasicInlangConfig.js"
+import { getNodeishFs } from "./utils/getNodeishFs.js"
+import { createMessage } from "../../../test.util.js"
 import { version } from "../../../../package.json"
-import { InlangSdkException } from '../exceptions.js'
+import { InlangSdkException } from "../exceptions.js"
 
 vi.mock("./utils/getNodeishFs.js")
 vi.mock("@inlang/app", async () => {
@@ -24,16 +35,21 @@ beforeEach(() => {
 it("should cache config creation", async () => {
 	const fs = await createMockNodeishFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
-	await fs.writeFile(PATH_TO_SVELTE_CONFIG, 'export default {}')
+	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
 
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
-	vi.mocked(openInlangProject).mockImplementation(async () => ({
-		errors: () => [],
-		config: () => ({ modules: ['@inlang/sdk-js-plugin'] }),
-		setConfig: () => undefined,
-		query: { messages: createQuery([createMessage('hi', { en: 'hello' })]) },
-		appSpecificApi: () => ({ "inlang.app.sdkJs": { "languageNegotiation": { "strategies": [{ "type": "url" }] } } })
-	} as unknown as InlangProject))
+	vi.mocked(openInlangProject).mockImplementation(
+		async () =>
+			({
+				errors: () => [],
+				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+				setConfig: () => undefined,
+				query: { messages: createQuery([createMessage("hi", { en: "hello" })]) },
+				appSpecificApi: () => ({
+					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+				}),
+			} as unknown as InlangProject),
+	)
 
 	const config1 = await initTransformConfig()
 	expect(config1).toBeDefined()
@@ -50,22 +66,30 @@ it("should cache config creation", async () => {
 it("should create an inlang config file if no config is present yet", async () => {
 	const fs = await createMockNodeishFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
-	await fs.writeFile(PATH_TO_SVELTE_CONFIG, 'export default {}')
+	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
 
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
-	vi.mocked(openInlangProject).mockImplementationOnce(async () => ({
-		errors: () => [new ConfigPathNotFoundError('', {})],
-	} as unknown as InlangProject))
+	vi.mocked(openInlangProject).mockImplementationOnce(
+		async () =>
+			({
+				errors: () => [new ConfigPathNotFoundError("", {})],
+			} as unknown as InlangProject),
+	)
 
-	vi.mocked(openInlangProject).mockImplementationOnce(async () => ({
-		errors: () => [],
-		config: () => ({ modules: ['@inlang/sdk-js-plugin'] }),
-		setConfig: () => undefined,
-		query: { messages: createQuery([createMessage('hi', { en: 'hello' })]) },
-		appSpecificApi: () => ({ "inlang.app.sdkJs": { "languageNegotiation": { "strategies": [{ "type": "url" }] } } })
-	} as unknown as InlangProject))
+	vi.mocked(openInlangProject).mockImplementationOnce(
+		async () =>
+			({
+				errors: () => [],
+				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+				setConfig: () => undefined,
+				query: { messages: createQuery([createMessage("hi", { en: "hello" })]) },
+				appSpecificApi: () => ({
+					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+				}),
+			} as unknown as InlangProject),
+	)
 
-	const spy = vi.spyOn(createBasicInlangConfigModule, 'createBasicInlangConfig')
+	const spy = vi.spyOn(createBasicInlangConfigModule, "createBasicInlangConfig")
 
 	await expect(() => fs.readFile(PATH_TO_INLANG_CONFIG, { encoding: "utf-8" })).rejects.toThrow()
 
@@ -78,42 +102,50 @@ it("should create an inlang config file if no config is present yet", async () =
 it("should update the sdk module version", async () => {
 	const fs = await createMockNodeishFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
-	await fs.writeFile(PATH_TO_SVELTE_CONFIG, 'export default {}')
+	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
 
 	const setConfig = vi.fn()
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
-	vi.mocked(openInlangProject).mockImplementationOnce(async () => ({
-		errors: () => [],
-		config: () => ({ modules: ['@inlang/sdk-js-plugin'] }),
-		setConfig,
-		query: { messages: createQuery([createMessage('hi', { en: 'hello' })]) },
-		appSpecificApi: () => ({ "inlang.app.sdkJs": { "languageNegotiation": { "strategies": [{ "type": "url" }] } } })
-	} as unknown as InlangProject))
+	vi.mocked(openInlangProject).mockImplementationOnce(
+		async () =>
+			({
+				errors: () => [],
+				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+				setConfig,
+				query: { messages: createQuery([createMessage("hi", { en: "hello" })]) },
+				appSpecificApi: () => ({
+					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+				}),
+			} as unknown as InlangProject),
+	)
 
 	await initTransformConfig()
 
 	expect(setConfig).toHaveBeenCalledOnce()
 	expect(setConfig).toHaveBeenNthCalledWith(1, {
-		"modules": [
-			`https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin@${version}/dist/index.js`,
-		],
+		modules: [`https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin@${version}/dist/index.js`],
 	})
 })
 
 it("should not update the sdk module version if already up2date", async () => {
 	const fs = await createMockNodeishFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
-	await fs.writeFile(PATH_TO_SVELTE_CONFIG, 'export default {}')
+	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
 
 	const setConfig = vi.fn()
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
-	vi.mocked(openInlangProject).mockImplementationOnce(async () => ({
-		errors: () => [],
-		config: () => ({ modules: [`@inlang/sdk-js-plugin@${version}`] }),
-		setConfig,
-		query: { messages: createQuery([createMessage('hi', { en: 'hello' })]) },
-		appSpecificApi: () => ({ "inlang.app.sdkJs": { "languageNegotiation": { "strategies": [{ "type": "url" }] } } })
-	} as unknown as InlangProject))
+	vi.mocked(openInlangProject).mockImplementationOnce(
+		async () =>
+			({
+				errors: () => [],
+				config: () => ({ modules: [`@inlang/sdk-js-plugin@${version}`] }),
+				setConfig,
+				query: { messages: createQuery([createMessage("hi", { en: "hello" })]) },
+				appSpecificApi: () => ({
+					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+				}),
+			} as unknown as InlangProject),
+	)
 
 	await initTransformConfig()
 
@@ -123,17 +155,22 @@ it("should not update the sdk module version if already up2date", async () => {
 it("should create demo resources if none are present yet", async () => {
 	const fs = await createMockNodeishFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
-	await fs.writeFile(PATH_TO_SVELTE_CONFIG, 'export default {}')
+	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
 
 	const create = vi.fn()
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
-	vi.mocked(openInlangProject).mockImplementationOnce(async () => ({
-		errors: () => [],
-		config: () => ({ modules: ['@inlang/sdk-js-plugin'] }),
-		setConfig: () => undefined,
-		query: { messages: { getAll: () => [], create }, },
-		appSpecificApi: () => ({ "inlang.app.sdkJs": { "languageNegotiation": { "strategies": [{ "type": "url" }] } } })
-	} as unknown as InlangProject))
+	vi.mocked(openInlangProject).mockImplementationOnce(
+		async () =>
+			({
+				errors: () => [],
+				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+				setConfig: () => undefined,
+				query: { messages: { getAll: () => [], create } },
+				appSpecificApi: () => ({
+					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+				}),
+			} as unknown as InlangProject),
+	)
 
 	await initTransformConfig()
 
@@ -143,48 +180,57 @@ it("should create demo resources if none are present yet", async () => {
 it("should add the sdk plugin module if not present yet", async () => {
 	const fs = await createMockNodeishFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
-	await fs.writeFile(PATH_TO_SVELTE_CONFIG, 'export default {}')
+	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
 
 	const setConfig = vi.fn()
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
-	vi.mocked(openInlangProject).mockImplementationOnce(async () => ({
-		errors: () => [],
-		config: () => ({ modules: [] }),
-		setConfig,
-		query: { messages: createQuery([createMessage('hi', { en: 'hello' })]) },
-		appSpecificApi: () => ({})
-	} as unknown as InlangProject))
-	vi.mocked(openInlangProject).mockImplementationOnce(async () => ({
-		errors: () => [],
-		config: () => ({ modules: ['@inlang/sdk-js-plugin'] }),
-		setConfig: () => undefined,
-		query: { messages: createQuery([createMessage('hi', { en: 'hello' })]) },
-		appSpecificApi: () => ({ "inlang.app.sdkJs": { "languageNegotiation": { "strategies": [{ "type": "url" }] } } })
-	} as unknown as InlangProject))
+	vi.mocked(openInlangProject).mockImplementationOnce(
+		async () =>
+			({
+				errors: () => [],
+				config: () => ({ modules: [] }),
+				setConfig,
+				query: { messages: createQuery([createMessage("hi", { en: "hello" })]) },
+				appSpecificApi: () => ({}),
+			} as unknown as InlangProject),
+	)
+	vi.mocked(openInlangProject).mockImplementationOnce(
+		async () =>
+			({
+				errors: () => [],
+				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+				setConfig: () => undefined,
+				query: { messages: createQuery([createMessage("hi", { en: "hello" })]) },
+				appSpecificApi: () => ({
+					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+				}),
+			} as unknown as InlangProject),
+	)
 
 	await initTransformConfig()
 
 	expect(setConfig).toHaveBeenCalledOnce()
 	expect(setConfig).toHaveBeenNthCalledWith(1, {
-		"modules": [
-			"../../../../../sdk-js-plugin/dist/index.js",
-		],
+		modules: ["../../../../../sdk-js-plugin/dist/index.js"],
 	})
 })
 
 it("should throw if the SDK is not configured properly", async () => {
 	const fs = await createMockNodeishFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
-	await fs.writeFile(PATH_TO_SVELTE_CONFIG, 'export default {}')
+	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
 
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
-	vi.mocked(openInlangProject).mockImplementationOnce(async () => ({
-		errors: () => [],
-		config: () => ({ modules: ['@inlang/sdk-js-plugin'] }),
-		setConfig: () => undefined,
-		query: { messages: createQuery([createMessage('hi', { en: 'hello' })]) },
-		appSpecificApi: () => ({ "inlang.app.sdkJs": {} })
-	} as unknown as InlangProject))
+	vi.mocked(openInlangProject).mockImplementationOnce(
+		async () =>
+			({
+				errors: () => [],
+				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+				setConfig: () => undefined,
+				query: { messages: createQuery([createMessage("hi", { en: "hello" })]) },
+				appSpecificApi: () => ({ "inlang.app.sdkJs": {} }),
+			} as unknown as InlangProject),
+	)
 
 	await expect(async () => initTransformConfig()).rejects.toThrow(InlangSdkException)
 })
@@ -193,13 +239,18 @@ it("should throw if no svelte.config.js file is found", async () => {
 	const fs = await createMockNodeishFs()
 
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
-	vi.mocked(openInlangProject).mockImplementationOnce(async () => ({
-		errors: () => [],
-		config: () => ({ modules: ['@inlang/sdk-js-plugin'] }),
-		setConfig: () => undefined,
-		query: { messages: createQuery([createMessage('hi', { en: 'hello' })]) },
-		appSpecificApi: () => ({ "inlang.app.sdkJs": { "languageNegotiation": { "strategies": [{ "type": "url" }] } } })
-	} as unknown as InlangProject))
+	vi.mocked(openInlangProject).mockImplementationOnce(
+		async () =>
+			({
+				errors: () => [],
+				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+				setConfig: () => undefined,
+				query: { messages: createQuery([createMessage("hi", { en: "hello" })]) },
+				appSpecificApi: () => ({
+					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+				}),
+			} as unknown as InlangProject),
+	)
 
 	await expect(async () => initTransformConfig()).rejects.toThrow(InlangSdkException)
 })
@@ -207,23 +258,28 @@ it("should throw if no svelte.config.js file is found", async () => {
 it("should correctly resolve the config", async () => {
 	const fs = await createMockNodeishFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
-	await fs.writeFile(PATH_TO_SVELTE_CONFIG, 'export default {}')
+	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
 
 	const create = vi.fn()
 	const setConfig = vi.fn()
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
-	vi.mocked(openInlangProject).mockImplementationOnce(async () => ({
-		errors: () => [],
-		config: () => ({
-			sourceLanguageTag: 'en',
-			languageTags: ['en', 'de'],
-			modules: [`@inlang/sdk-js-plugin@${version}`]
-		}),
-		setConfig,
-		query: { messages: { getAll: () => [createMessage('hi', { en: 'hello' })], create }, },
-		appSpecificApi: () => ({ "inlang.app.sdkJs": { "languageNegotiation": { "strategies": [{ "type": "url" }] } } })
-	} as unknown as InlangProject))
-	const spy = vi.spyOn(createBasicInlangConfigModule, 'createBasicInlangConfig')
+	vi.mocked(openInlangProject).mockImplementationOnce(
+		async () =>
+			({
+				errors: () => [],
+				config: () => ({
+					sourceLanguageTag: "en",
+					languageTags: ["en", "de"],
+					modules: [`@inlang/sdk-js-plugin@${version}`],
+				}),
+				setConfig,
+				query: { messages: { getAll: () => [createMessage("hi", { en: "hello" })], create } },
+				appSpecificApi: () => ({
+					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+				}),
+			} as unknown as InlangProject),
+	)
+	const spy = vi.spyOn(createBasicInlangConfigModule, "createBasicInlangConfig")
 
 	const config = await initTransformConfig()
 
@@ -260,4 +316,3 @@ it("should correctly resolve the config", async () => {
 		}
 	`)
 })
-
