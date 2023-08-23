@@ -4,7 +4,6 @@ import IconGithub from "~icons/cib/github"
 import type { SlDialog } from "@shoelace-style/shoelace"
 import { SignInDialog } from "#src/services/auth/index.js"
 import { publicEnv } from "@inlang/env-variables"
-import { Button } from "#src/pages/index/components/Button.jsx"
 
 export const Gitlogin = () => {
 	const [localStorage] = useLocalStorage()
