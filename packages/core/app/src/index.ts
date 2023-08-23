@@ -3,7 +3,14 @@ export { openInlangProject } from "./openInlangProject.js"
 export { withSolidReactivity, SolidInlangProject } from "./wrappers/withSolidReactivity.js"
 export { tryAutoGenerateInlangConfig } from "./tryAutoGenerateConfig.js"
 export { parseConfig } from "./parseConfig.js"
-export { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError, NoMessagesPluginError, PluginLoadMessagesError, PluginSaveMessagesError } from "./errors.js"
+export {
+	ConfigPathNotFoundError,
+	ConfigSyntaxError,
+	InvalidConfigError,
+	NoMessagesPluginError,
+	PluginLoadMessagesError,
+	PluginSaveMessagesError,
+} from "./errors.js"
 
 /**
  * -------- RE-EXPORTS --------
