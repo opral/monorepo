@@ -1,20 +1,9 @@
-import { createSignal, Show, type JSXElement, onMount } from "solid-js"
+import { type JSXElement, onMount } from "solid-js"
 import { open, createNodeishMemoryFs } from "@project-lisa/client"
 import { publicEnv } from "@inlang/env-variables"
 import { LocalStorageProvider, useLocalStorage } from "#src/services/local-storage/index.js"
-import { Gitlogin } from "./components/GitLogin.jsx"
-import { SetupCard } from "./components/SetupCard.jsx"
 import type { InlangConfig } from "@inlang/app"
-import { Icon } from "#src/components/Icon.jsx"
-
-type Error =
-	| { type: "already-installed"; message: string }
-	| { type: "no-inlang-config"; message: string }
-	| { type: "error"; message: string }
-
-type ValidState = "github-login" | "select-repo" | "select-module" | "installing" | "done"
-
-type State = ValidState | Error
+import type { Step } from "./index.page.jsx"
 
 type user = {
 	username: string
@@ -22,11 +11,11 @@ type user = {
 	email: string
 }
 
-const [step, setStep] = createSignal<State>("github-login")
-
 export function InstallationProvider(props: {
 	repo: string
 	modules: string[]
+	step: () => Step
+	setStep: (step: Step) => void
 	children: JSXElement
 }) {
 	const [localStorage] = useLocalStorage() ?? []
@@ -34,65 +23,46 @@ export function InstallationProvider(props: {
 
 	onMount(() => {
 		if (!user) {
-			setStep("github-login")
+			props.setStep({
+				type: "github-login",
+				error: false,
+			})
 		} else if (!props.repo) {
-			setStep("select-repo")
+			props.setStep({
+				type: "no-repo",
+				message: "No repository URL provided.",
+				error: true,
+			})
 		} else if (!props.modules) {
-			setStep("select-module")
+			props.setStep({
+				type: "no-modules",
+				message: "No modules provided.",
+				error: true,
+			})
 		} else {
-			setStep("installing")
-			initializeRepo(props.repo, props.modules, user!)
+			props.setStep({
+				type: "installing",
+				message: "Starting installation...",
+				error: false,
+			})
+			initializeRepo(props.repo, props.modules, user!, props.step, props.setStep)
 		}
 	})
 
 	return (
 		<>
-			<LocalStorageProvider>
-				<Show when={step() === "github-login"}>
-					<SetupCard>
-						<div>
-							<h2 class="text-[24px] leading-tight md:text-2xl font-semibold mb-2">
-								Please authorize to continue
-							</h2>
-							<p class="text-surface-500">
-								We need your authorization to install modules in your repository.
-							</p>
-						</div>
-						<Gitlogin />
-					</SetupCard>
-				</Show>
-				<Show when={step() === "installing"}>{props.children}</Show>
-				<Show when={step() === "done"}>
-					<SetupCard>
-						<Icon class="text-success mx-auto text-6xl" name={"success"} />
-						<div>
-							<h2 class="text-[24px] leading-tight md:text-2xl font-semibold mb-2">Done</h2>
-							<p class="text-surface-500">
-								Your modules were successfully installed in your repository.
-							</p>
-						</div>
-					</SetupCard>
-				</Show>
-				{/* // TODO: Fix types
-				@ts-ignore */}
-				<Show when={step().type}>
-					<SetupCard error>
-						<div>
-							<h2 class="text-[24px] leading-tight md:text-2xl font-semibold mb-2">
-								{/* @ts-ignore */}
-								{step().type}
-							</h2>
-							{/* @ts-ignore */}
-							<p>{step().message}</p>
-						</div>
-					</SetupCard>
-				</Show>
-			</LocalStorageProvider>
+			<LocalStorageProvider>{props.children}</LocalStorageProvider>
 		</>
 	)
 }
 
-async function initializeRepo(repoURL: string, modulesURL: string[], user: user) {
+async function initializeRepo(
+	repoURL: string,
+	modulesURL: string[],
+	user: user,
+	step: () => Step,
+	setStep: (step: Step) => void,
+) {
 	// In case of a redirect error, remove double module entries
 	modulesURL = modulesURL.filter((module, index) => modulesURL.indexOf(module) === index)
 
@@ -100,6 +70,11 @@ async function initializeRepo(repoURL: string, modulesURL: string[], user: user)
 	const repo = open(repoURL, {
 		nodeishFs: createNodeishMemoryFs(),
 		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
+	})
+
+	setStep({
+		type: "installing",
+		message: "Cloning Repository...",
 	})
 
 	// Get the content of the inlang.config.js file
@@ -113,7 +88,6 @@ async function initializeRepo(repoURL: string, modulesURL: string[], user: user)
 				type: "no-inlang-config",
 				message: "No inlang.config.js file found in the repository.",
 			})
-			return
 		})) as string
 
 	// Convert the inlang.config.js file to a JavaScript object
@@ -124,6 +98,7 @@ async function initializeRepo(repoURL: string, modulesURL: string[], user: user)
 		setStep({
 			type: "error",
 			message: "Error parsing inlang.config.js: " + e,
+			error: true,
 		})
 		return
 	}
@@ -134,8 +109,8 @@ async function initializeRepo(repoURL: string, modulesURL: string[], user: user)
 			setStep({
 				type: "already-installed",
 				message: "The modules are already installed in your repository.",
+				error: true,
 			})
-			return
 		}
 	})
 
@@ -156,9 +131,12 @@ async function initializeRepo(repoURL: string, modulesURL: string[], user: user)
 	// Write the new inlang.config.js back to the repository
 	await repo.nodeishFs.writeFile("./inlang.config.js", generatedInlangConfig)
 
-	console.log(step())
+	if (step().error) return
 
-	if (step() !== "installing") return
+	setStep({
+		type: "installing",
+		message: "Comitting changes...",
+	})
 
 	// Add the changes
 	await repo.add({
@@ -174,11 +152,20 @@ async function initializeRepo(repoURL: string, modulesURL: string[], user: user)
 		},
 	})
 
+	setStep({
+		type: "installing",
+		message: "Almost done...",
+	})
+
 	// Push the changes
 	await repo.push()
 
 	// Set the step to done
-	setStep("done")
+	setStep({
+		type: "success",
+		message: "Successfully installed the modules: " + modulesURL.join(", "),
+		error: false,
+	})
 }
 
 function writeObjectToPlainText(object: Record<string, unknown>) {
@@ -194,4 +181,8 @@ function writeObjectToPlainText(object: Record<string, unknown>) {
 
 	result = result.replace(/,(?![^[]*\])/g, ",\n")
 	return result
+}
+
+function sendSuccessResponseToSource(response: string, source: Window) {
+	// ToDo: send the response to the source window
 }
