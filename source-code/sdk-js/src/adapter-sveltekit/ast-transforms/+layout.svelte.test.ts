@@ -489,7 +489,7 @@ describe.skip("transformLayoutSvelte", () => {
 					const transformed = transformLayoutSvelte(
 						"",
 						initTestApp({
-							options: { languageInUrl: true, }
+							options: { languageInUrl: true },
 						}),
 						dedent`
 							<script>

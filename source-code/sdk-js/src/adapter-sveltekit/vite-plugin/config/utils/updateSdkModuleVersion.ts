@@ -1,8 +1,8 @@
-import { createInlang, type InlangProject } from '@inlang/app';
-import { getNodeishFs } from './getNodeishFs.js';
-import { PATH_TO_INLANG_CONFIG } from '../config.js';
+import { createInlang, type InlangProject } from "@inlang/app"
+import { getNodeishFs } from "./getNodeishFs.js"
+import { PATH_TO_INLANG_CONFIG } from "../config.js"
 // @ts-ignore
-import { version } from '../../../../../package.json';
+import { version } from "../../../../../package.json"
 
 /**
  * @returns `true` iff the version was updated
@@ -10,16 +10,20 @@ import { version } from '../../../../../package.json';
  */
 export const updateSdkModuleVersion = async (inlang: InlangProject): Promise<boolean> => {
 	const config = inlang.config()
-	const sdkJSPluginModule = config.modules.find((module) => module.includes('@inlang/sdk-js-plugin'))
+	const sdkJSPluginModule = config.modules.find((module) =>
+		module.includes("@inlang/sdk-js-plugin"),
+	)
 	if (!sdkJSPluginModule) return false
 
-	const usedVersion = (sdkJSPluginModule.match(/@inlang\/sdk-js-plugin@(.*)\//) || [])[1]?.split('/')[0]
+	const usedVersion = (sdkJSPluginModule.match(/@inlang\/sdk-js-plugin@(.*)\//) || [])[1]?.split(
+		"/",
+	)[0]
 	if (usedVersion === version) return false
 
 	const newModule = `https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin@${version}/dist/index.js`
 	inlang.setConfig({
 		...config,
-		modules: config.modules.map((module) => module === sdkJSPluginModule ? newModule : module)
+		modules: config.modules.map((module) => (module === sdkJSPluginModule ? newModule : module)),
 	})
 
 	// TODO: how to actually wait for the config to be written?
@@ -35,7 +39,10 @@ export const updateSdkModuleVersion = async (inlang: InlangProject): Promise<boo
  * @returns `false` iff the version is already up2date
  */
 export const standaloneUpdateSdkModuleVersion = async () => {
-	const inlang = await createInlang({ nodeishFs: await getNodeishFs(), configPath: PATH_TO_INLANG_CONFIG })
+	const inlang = await createInlang({
+		nodeishFs: await getNodeishFs(),
+		configPath: PATH_TO_INLANG_CONFIG,
+	})
 
 	return await updateSdkModuleVersion(inlang)
 }

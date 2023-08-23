@@ -13,7 +13,9 @@ export const extractMessageCommand = {
 	id: "inlang.extractMessage",
 	title: "Inlang: Extract Message",
 	callback: async function (textEditor: vscode.TextEditor) {
-		const ideExtension = state().inlang.appSpecificApi()["inlang.app.ideExtension"] as IdeExtensionConfig | undefined
+		const ideExtension = state().inlang.appSpecificApi()["inlang.app.ideExtension"] as
+			| IdeExtensionConfig
+			| undefined
 		// guards
 		if (!ideExtension) {
 			return msg(

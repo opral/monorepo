@@ -36,12 +36,12 @@ message to reduce translation effort.
 		if (referenceVariant === undefined) return
 
 		const translatedVariants = variants.filter(
-			(variant) =>  variant.languageTag !== sourceLanguageTag,
+			(variant) => variant.languageTag !== sourceLanguageTag,
 		)
 
 		for (const variant of translatedVariants) {
 			const isMessageIdentical =
-			messageVariantToString(referenceVariant) === messageVariantToString(variant)
+				messageVariantToString(referenceVariant) === messageVariantToString(variant)
 			const shouldBeIgnored = settings.ignore?.includes(patternToString(referenceVariant.pattern))
 
 			if (isMessageIdentical && !shouldBeIgnored) {
@@ -49,7 +49,7 @@ message to reduce translation effort.
 					messageId: id,
 					languageTag: variant.languageTag,
 					body: {
-						en: `Identical content found in language '${ variant.languageTag}' with message ID '${id}'.`,
+						en: `Identical content found in language '${variant.languageTag}' with message ID '${id}'.`,
 					},
 				})
 			}

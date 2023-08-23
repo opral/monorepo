@@ -48,11 +48,11 @@ export function Message(props: { message: MessageType }) {
 					onClick={() => {
 						copy(
 							document.location.protocol +
-							"//" +
-							document.location.host +
-							document.location.pathname +
-							"?id=" +
-							props.message.id,
+								"//" +
+								document.location.host +
+								document.location.pathname +
+								"?id=" +
+								props.message.id,
 						),
 							showToast({ variant: "success", title: "Copy to clipboard", duration: 3000 })
 					}}
@@ -74,10 +74,7 @@ export function Message(props: { message: MessageType }) {
 										(elementIsVisible() || hasBeenRendered())
 									}
 								>
-									<PatternEditor
-										languageTag={languageTag}
-										message={props.message}
-									/>
+									<PatternEditor languageTag={languageTag} message={props.message} />
 								</Show>
 							</>
 						)

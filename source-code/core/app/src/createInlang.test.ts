@@ -6,7 +6,12 @@ import type { InlangConfig } from "@inlang/config"
 import type { Message, Plugin } from "@inlang/plugin"
 import type { LintRule } from "@inlang/lint"
 import type { ImportFunction, InlangModule } from "@inlang/module"
-import { ConfigPathNotFoundError, ConfigSyntaxError, InvalidConfigError, NoMessagesPluginError } from "./errors.js"
+import {
+	ConfigPathNotFoundError,
+	ConfigSyntaxError,
+	InvalidConfigError,
+	NoMessagesPluginError,
+} from "./errors.js"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -93,12 +98,12 @@ const mockLintRule: LintRule = {
 }
 
 const _import: ImportFunction = async () =>
-({
-	default: {
-		plugins: [mockPlugin],
-		lintRules: [mockLintRule],
-	},
-} satisfies InlangModule)
+	({
+		default: {
+			plugins: [mockPlugin],
+			lintRules: [mockLintRule],
+		},
+	} satisfies InlangModule)
 
 // ------------------------------------------------------------------------------------------------
 
@@ -158,11 +163,11 @@ describe("initialization", () => {
 	describe("modules", () => {
 		it("should return an error if no plugin defines readMessages", async () => {
 			const $badImport: ImportFunction = async () =>
-			({
-				default: {
-					plugins: [{ ...mockPlugin, loadMessages: undefined as any } as Plugin],
-				},
-			} satisfies InlangModule)
+				({
+					default: {
+						plugins: [{ ...mockPlugin, loadMessages: undefined as any } as Plugin],
+					},
+				} satisfies InlangModule)
 
 			const fs = await createMockNodeishFs()
 			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
@@ -177,11 +182,11 @@ describe("initialization", () => {
 
 		it("should return an error if no plugin defines writeMessages", async () => {
 			const $badImport: ImportFunction = async () =>
-			({
-				default: {
-					plugins: [{ ...mockPlugin, writeMessages: undefined as any } as Plugin],
-				},
-			} satisfies InlangModule)
+				({
+					default: {
+						plugins: [{ ...mockPlugin, writeMessages: undefined as any } as Plugin],
+					},
+				} satisfies InlangModule)
 
 			const fs = await createMockNodeishFs()
 			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
@@ -196,11 +201,11 @@ describe("initialization", () => {
 
 		it("should return an error if an error occurs while resolving a plugin", async () => {
 			const $badImport: ImportFunction = async () =>
-			({
-				default: {
-					plugins: [{} as Plugin],
-				},
-			} satisfies InlangModule)
+				({
+					default: {
+						plugins: [{} as Plugin],
+					},
+				} satisfies InlangModule)
 
 			const fs = await createMockNodeishFs()
 			await fs.writeFile("./inlang.config.json", JSON.stringify(config))

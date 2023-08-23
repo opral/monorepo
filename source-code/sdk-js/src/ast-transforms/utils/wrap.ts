@@ -115,13 +115,9 @@ const findFunctionExpression = (
 }
 
 const findFunction = (node: Node): ArrowFunction | FunctionExpression => {
-	if (Node.isArrowFunction(node) || Node.isFunctionExpression(node))
-		return node
+	if (Node.isArrowFunction(node) || Node.isFunctionExpression(node)) return node
 
-	if (
-		Node.isParenthesizedExpression(node) ||
-		Node.isSatisfiesExpression(node)
-	) {
+	if (Node.isParenthesizedExpression(node) || Node.isSatisfiesExpression(node)) {
 		return findFunction(node.getExpression())
 	}
 

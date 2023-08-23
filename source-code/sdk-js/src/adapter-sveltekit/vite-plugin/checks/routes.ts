@@ -5,7 +5,7 @@ import type { TransformConfig } from "../config/index.js"
 import type { FileType } from "../fileInformation.js"
 import { InlangException } from "../../../exceptions.js"
 import { InlangSdkException } from "../exceptions.js"
-import { doesPathExist } from '../config/utils/utils.js'
+import { doesPathExist } from "../config/utils/utils.js"
 
 export const assertRoutesFolderPathExists = async (config: TransformConfig) => {
 	if (!(await doesPathExist(config.options.rootRoutesFolder))) {

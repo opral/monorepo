@@ -13,7 +13,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 				id: "mockMessage",
 				selectors: [],
 				variants: [
-					{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "Hello world" } ]},
+					{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "Hello world" }] },
 				],
 			},
 		})
@@ -23,7 +23,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			selectors: [],
 			variants: [
 				{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "Hello world" }] },
-				{ languageTag: "de", match: {}, pattern: [{ type: "Text", value: "Hallo Welt" }]},
+				{ languageTag: "de", match: {}, pattern: [{ type: "Text", value: "Hallo Welt" }] },
 				{ languageTag: "fr", match: {}, pattern: [{ type: "Text", value: "Bonjour le monde" }] },
 			],
 		})
@@ -40,9 +40,17 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 				id: "mockMessage",
 				selectors: [],
 				variants: [
-					{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "Good evening" }]},
-					{ languageTag: "en", match: {}, pattern: [{ type: "VariableReference", name: "username" }]},
-					{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: ", what a beautiful sunset." }]},
+					{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "Good evening" }] },
+					{
+						languageTag: "en",
+						match: {},
+						pattern: [{ type: "VariableReference", name: "username" }],
+					},
+					{
+						languageTag: "en",
+						match: {},
+						pattern: [{ type: "Text", value: ", what a beautiful sunset." }],
+					},
 				],
 			},
 		})
@@ -51,12 +59,28 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			id: "mockMessage",
 			selectors: [],
 			variants: [
-				{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "Good evening" }]},
-				{ languageTag: "en", match: {}, pattern: [{ type: "VariableReference", name: "username" }]},
-				{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: ", what a beautiful sunset." }]},
-				{ languageTag: "de", match: {}, pattern: [{ type: "Text", value: "Guten Abend" }]},
-				{ languageTag: "de", match: {}, pattern: [{ type: "VariableReference", name: "username" }]},
-				{ languageTag: "de", match: {}, pattern: [{ type: "Text", value: ", was für ein wunderschöner Sonnenuntergang." }]},
+				{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "Good evening" }] },
+				{
+					languageTag: "en",
+					match: {},
+					pattern: [{ type: "VariableReference", name: "username" }],
+				},
+				{
+					languageTag: "en",
+					match: {},
+					pattern: [{ type: "Text", value: ", what a beautiful sunset." }],
+				},
+				{ languageTag: "de", match: {}, pattern: [{ type: "Text", value: "Guten Abend" }] },
+				{
+					languageTag: "de",
+					match: {},
+					pattern: [{ type: "VariableReference", name: "username" }],
+				},
+				{
+					languageTag: "de",
+					match: {},
+					pattern: [{ type: "Text", value: ", was für ein wunderschöner Sonnenuntergang." }],
+				},
 			],
 		} satisfies Message)
 	},
@@ -72,8 +96,16 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 				id: "mockMessage",
 				selectors: [],
 				variants: [
-					{ languageTag: "en", match: { gender: "male" }, pattern: [{ type: "Text", value: "Gender male" }]},
-					{ languageTag: "de", match: {}, pattern: [{ type: "Text", value: "Veraltete Übersetzung" }]},
+					{
+						languageTag: "en",
+						match: { gender: "male" },
+						pattern: [{ type: "Text", value: "Gender male" }],
+					},
+					{
+						languageTag: "de",
+						match: {},
+						pattern: [{ type: "Text", value: "Veraltete Übersetzung" }],
+					},
 				],
 			},
 		})
@@ -82,14 +114,25 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			id: "mockMessage",
 			selectors: [],
 			variants: [
-				{ languageTag: "en",	match: { gender: "male" }, pattern: [{ type: "Text", value: "Gender male" }]},
-				{ languageTag: "de",	match: {}, pattern: [{ type: "Text", value: "Veraltete Übersetzung" }]},
-				{ languageTag: "de",	match: { gender: "male" }, pattern: [{ type: "Text", value: "Geschlecht männlich" }]}
-				],
+				{
+					languageTag: "en",
+					match: { gender: "male" },
+					pattern: [{ type: "Text", value: "Gender male" }],
+				},
+				{
+					languageTag: "de",
+					match: {},
+					pattern: [{ type: "Text", value: "Veraltete Übersetzung" }],
+				},
+				{
+					languageTag: "de",
+					match: { gender: "male" },
+					pattern: [{ type: "Text", value: "Geschlecht männlich" }],
+				},
+			],
 		})
 	},
 )
-
 
 it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 	"should not return escaped quotation marks",
@@ -101,11 +144,15 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 				id: "mockMessage",
 				selectors: [],
 				variants: [
-					{ languageTag: "en", match: {}, pattern: [
-						{ type: "Text", value: "'" },
-						{ type: "VariableReference", name: "id" },
-						{ type: "Text", value: "' added a new todo" },
-					]},
+					{
+						languageTag: "en",
+						match: {},
+						pattern: [
+							{ type: "Text", value: "'" },
+							{ type: "VariableReference", name: "id" },
+							{ type: "Text", value: "' added a new todo" },
+						],
+					},
 				],
 			},
 		})
@@ -114,16 +161,24 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			id: "mockMessage",
 			selectors: [],
 			variants: [
-				{ languageTag: "en", match: {}, pattern: [
-					{ type: "Text", value: "'" },
-					{ type: "VariableReference", name: "id" },
-					{ type: "Text", value: "' added a new todo" },
-				]},
-				{ languageTag: "de", match: {}, pattern: [
-					{ type: "Text", value: "' " },
-					{ type: "VariableReference", name: "id" },
-					{ type: "Text", value: " ' hat eine neue Aufgabe hinzugefügt" },
-				]},
+				{
+					languageTag: "en",
+					match: {},
+					pattern: [
+						{ type: "Text", value: "'" },
+						{ type: "VariableReference", name: "id" },
+						{ type: "Text", value: "' added a new todo" },
+					],
+				},
+				{
+					languageTag: "de",
+					match: {},
+					pattern: [
+						{ type: "Text", value: "' " },
+						{ type: "VariableReference", name: "id" },
+						{ type: "Text", value: " ' hat eine neue Aufgabe hinzugefügt" },
+					],
+				},
 			],
 		})
 	},

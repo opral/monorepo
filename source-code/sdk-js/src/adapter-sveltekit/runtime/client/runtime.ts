@@ -3,7 +3,7 @@ import { base } from "$app/paths"
 import { initRuntimeWithLanguageInformation } from "../../../runtime/index.js"
 import type { Message } from "@inlang/app"
 import type { LanguageTag } from "@inlang/app"
-import { browser } from '$app/environment'
+import { browser } from "$app/environment"
 
 type InitSvelteKitClientRuntimeArgs = {
 	fetch: LoadEvent["fetch"]
@@ -23,8 +23,8 @@ export const initSvelteKitClientRuntime = async ({
 	const runtime = initRuntimeWithLanguageInformation({
 		loadMessages: async (languageTag: LanguageTag) => {
 			if (!browser) cache = {} // disable the cache on the server
-			return (cache[languageTag] ??= await fetch(`${base}/inlang/${languageTag}.json`).then((response) =>
-				response.ok ? (response.json() as Promise<Message[]>) : undefined,
+			return (cache[languageTag] ??= await fetch(`${base}/inlang/${languageTag}.json`).then(
+				(response) => (response.ok ? (response.json() as Promise<Message[]>) : undefined),
 			))
 		},
 		sourceLanguageTag,

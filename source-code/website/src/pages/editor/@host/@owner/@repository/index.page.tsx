@@ -1,9 +1,4 @@
-import {
-	For,
-	Match,
-	Switch,
-	onMount,
-} from "solid-js"
+import { For, Match, Switch, onMount } from "solid-js"
 import { Message } from "./Message.jsx"
 import { Layout as EditorLayout } from "./Layout.jsx"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
@@ -34,13 +29,8 @@ export function Page() {
  * is required to use the useEditorState hook.
  */
 function TheActualPage() {
-	const {
-		inlang,
-		routeParams,
-		repositoryIsCloned,
-		doesInlangConfigExist,
-		tourStep,
-	} = useEditorState()
+	const { inlang, routeParams, repositoryIsCloned, doesInlangConfigExist, tourStep } =
+		useEditorState()
 	const [, setLocalStorage] = useLocalStorage()
 
 	onMount(() => {
@@ -94,11 +84,9 @@ function TheActualPage() {
 					<p class="text-danger">{repositoryIsCloned.error.message}</p>
 				</Match>
 				<Match when={inlang()?.errors().length !== 0 && inlang()}>
-					<p class="text-danger pb-2">
-						An error occurred while initializing the config:
-					</p>
+					<p class="text-danger pb-2">An error occurred while initializing the config:</p>
 					<ul class="text-danger">
-						{inlang()?.errors().length !== 0 &&
+						{inlang()?.errors().length !== 0 && (
 							<For each={inlang()?.errors()}>
 								{(error) => {
 									return (
@@ -108,10 +96,10 @@ function TheActualPage() {
 											{error.message} <br />
 											{error.stack && <p>{error.stack}</p>}
 										</li>
-									);
+									)
 								}}
 							</For>
-						}
+						)}
 					</ul>
 				</Match>
 				<Match when={repositoryIsCloned.loading || inlang() === undefined}>

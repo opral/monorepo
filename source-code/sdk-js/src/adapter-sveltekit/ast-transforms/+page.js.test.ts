@@ -29,7 +29,7 @@ describe("transformPageJs", () => {
 						options: {
 							languageInUrl: true,
 							isStatic: true,
-						}
+						},
 					})
 					const transformed = transformPageJs("", config, code, true)
 

@@ -7,9 +7,9 @@ import { filePathForOutput, getFileInformation } from "./fileInformation.js"
 import { transformCode } from "../ast-transforms/index.js"
 import { InlangSdkException } from "./exceptions.js"
 import { inspect } from "node:util"
-import path from 'node:path'
-import { rm } from 'node:fs/promises'
-import { doesPathExist } from './config/utils/utils.js'
+import path from "node:path"
+import { rm } from "node:fs/promises"
+import { doesPathExist } from "./config/utils/utils.js"
 import {
 	createEffect as _createEffect,
 	// @ts-ignore
@@ -64,7 +64,7 @@ export const plugin = () => {
 		},
 
 		async buildStart() {
-			const config = await initTransformConfig().catch(error => {
+			const config = await initTransformConfig().catch((error) => {
 				throw new Error(error)
 			})
 
@@ -74,7 +74,11 @@ export const plugin = () => {
 
 			// remove old files // TODO: remove this in version 1
 			let deletedFolder = false
-			const pathToOldLanguagesFolder = path.resolve(config.svelteKit.files.routes, "inlang", "[language].json")
+			const pathToOldLanguagesFolder = path.resolve(
+				config.svelteKit.files.routes,
+				"inlang",
+				"[language].json",
+			)
 			if (await doesPathExist(pathToOldLanguagesFolder)) {
 				await rm(pathToOldLanguagesFolder, { recursive: true })
 				deletedFolder = true
@@ -91,8 +95,8 @@ export const plugin = () => {
 				config.messages()
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				viteServer!.ws.send({
-					type: 'custom',
-					event: 'inlang-messages-changed',
+					type: "custom",
+					event: "inlang-messages-changed",
 					// TODO: only HMR if the currently visible language changes
 				})
 			})

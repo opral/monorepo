@@ -1,7 +1,7 @@
-import { writeFile } from 'node:fs/promises';
-import path from 'node:path';
-import { dedent } from 'ts-dedent';
-import { PATH_TO_CWD } from '../config.js';
+import { writeFile } from "node:fs/promises"
+import path from "node:path"
+import { dedent } from "ts-dedent"
+import { PATH_TO_CWD } from "../config.js"
 
 // TODO: use correct modules link
 export const createBasicInlangConfig = async () =>

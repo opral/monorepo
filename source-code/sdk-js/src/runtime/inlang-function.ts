@@ -1,4 +1,10 @@
-import { getVariant, type LanguageTag, type Message, type Pattern, type VariableReference } from "@inlang/app"
+import {
+	getVariant,
+	type LanguageTag,
+	type Message,
+	type Pattern,
+	type VariableReference,
+} from "@inlang/app"
 
 type BaseArgs = Record<string, unknown> | never
 
@@ -29,8 +35,11 @@ export const createInlangFunction = <
 		const message = messages.find((message) => message.id === key)
 		if (!message) return ""
 
-		return getVariant(message, { where: { languageTag } })?.pattern
-			.map((element) => serializeElement(element, args || {})).join("") as InlangString || ''
+		return (
+			(getVariant(message, { where: { languageTag } })
+				?.pattern.map((element) => serializeElement(element, args || {}))
+				.join("") as InlangString) || ""
+		)
 	}) as InlangFunction<InlangFunctionArgs>
 
 const serializeElement = (element: Pattern[number], args: BaseArgs): string => {

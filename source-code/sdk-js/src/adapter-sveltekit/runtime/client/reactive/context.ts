@@ -19,17 +19,17 @@ type RuntimeContext<
 	languageTags: LanguageTag[]
 	i: Readable<InlangFunction>
 	changeLanguageTag: (languageTag: LanguageTag) => Promise<void>
-		loadMessages: SvelteKitClientRuntime["loadMessages"]
+	loadMessages: SvelteKitClientRuntime["loadMessages"]
 	route: (href: RelativeUrl) => RelativeUrl
-		/** @deprecated Use `changeLanguageTag` instead. */
-		switchLanguage: (languageTag: LanguageTag) => Promise<void>
-		/** @deprecated Use `loadMessages` instead. */
-		loadResource: SvelteKitClientRuntime["loadMessages"]
+	/** @deprecated Use `changeLanguageTag` instead. */
+	switchLanguage: (languageTag: LanguageTag) => Promise<void>
+	/** @deprecated Use `loadMessages` instead. */
+	loadResource: SvelteKitClientRuntime["loadMessages"]
 	/** @deprecated Use `sourceLanguageTag` instead. */
 	referenceLanguage: LanguageTag
-		/** @deprecated Use `languageTag` instead. */
+	/** @deprecated Use `languageTag` instead. */
 	language: LanguageTag
-		/** @deprecated Use `languageTags` instead. */
+	/** @deprecated Use `languageTags` instead. */
 	languages: LanguageTag[]
 }
 
