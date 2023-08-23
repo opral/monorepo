@@ -244,21 +244,21 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [localStorage] = useLocalStorage() ?? []
 
-	const [repo] = createResource(
-		() => {
-			setFs(createNodeishMemoryFs())
-			return {
-				fs: fs(),
-				routeParams: currentPageContext.routeParams as EditorRouteParams,
-				user: localStorage?.user,
-				setFsChange,
-			}
-		},
-		async (args) => {
-			const { host, owner, repository } = args.routeParams
-			return open(`https://${host}/${owner}/${repository}`, { nodeishFs: fs() })
-		},
-	)
+	// const [repo] = createResource(
+	// 	() => {
+	// 		setFs(createNodeishMemoryFs())
+	// 		return {
+	// 			fs: fs(),
+	// 			routeParams: currentPageContext.routeParams as EditorRouteParams,
+	// 			user: localStorage?.user,
+	// 			setFsChange,
+	// 		}
+	// 	},
+	// 	async (args) => {
+	// 		const { host, owner, repository } = args.routeParams
+	// 		return open(`https://${host}/${owner}/${repository}`, { nodeishFs: fs() })
+	// 	},
+	// )
 
 	// re-fetched if currentPageContext changes
 	const [repositoryIsCloned] = createResource(
