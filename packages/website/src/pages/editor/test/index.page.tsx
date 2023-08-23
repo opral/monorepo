@@ -17,12 +17,12 @@ export const Page = () => {
 
 	createEffect(() => {
 		if (!instance.loading) {
-			console.log("config changes", instance().config())
+			console.info("config changes", instance().config())
 		}
 	})
 
 	setTimeout(() => {
-		console.log("timeout set config")
+		console.info("timeout set config")
 		instance()?.setConfig("new")
 	}, 2000)
 

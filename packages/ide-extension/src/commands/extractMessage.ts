@@ -1,10 +1,9 @@
 import * as vscode from "vscode"
-import { setState, state } from "../state.js"
-import { query } from "@inlang/core/query"
-import type { Message } from "@inlang/core/ast"
+import { state } from "../state.js"
 import { msg } from "../utilities/message.js"
 import { telemetry } from "../services/telemetry/index.js"
-import type { IdeExtensionConfig } from "../api.js"
+import type { IdeExtensionConfigSchema } from "../api.js"
+import type { Message } from "@inlang/app"
 
 /**
  * Helps the user to extract messages from the active text editor.
@@ -14,26 +13,26 @@ export const extractMessageCommand = {
 	title: "Inlang: Extract Message",
 	callback: async function (textEditor: vscode.TextEditor) {
 		const ideExtension = state().inlang.appSpecificApi()["inlang.app.ideExtension"] as
-			| IdeExtensionConfig
+			| IdeExtensionConfigSchema
 			| undefined
 		// guards
 		if (!ideExtension) {
 			return msg(
-				"There is no `ideExtension` object in the inlang.config.json configured.",
+				"There is no `plugin` configuration for the inlang extension. One of the `modules` should expose a `plugin` which has `appSpecificApi` containing `inlang.app.ideExtension`",
 				"warn",
 				"notification",
 			)
 		}
 		if (ideExtension.extractMessageOptions === undefined) {
 			return msg(
-				"There are no `extractMessageOptions` in the `ideExtension` object in the inlang.config.json configured.",
+				"The `extractMessageOptions` are not defined in `inlang.app.ideExtension` but required to extract a message.",
 				"warn",
 				"notification",
 			)
 		}
 		if (state().inlang.config().sourceLanguageTag === undefined) {
 			return msg(
-				"The `sourceLanguageTag` is not defined in the inlang.config.js but required to extract a message.",
+				"The `sourceLanguageTag` is not defined in the inlang.config.json but required to extract a message.",
 				"warn",
 				"notification",
 			)
@@ -79,32 +78,31 @@ export const extractMessageCommand = {
 		}
 
 		const message: Message = {
-			type: "Message",
-			id: { type: "Identifier", name: messageId },
-			pattern: {
-				type: "Pattern",
-				elements: [{ type: "Text", value: messageValue }],
-			},
+			id: messageId,
+			selectors: [],
+			variants: [
+				{
+					languageTag: state().inlang.config().sourceLanguageTag as string,
+					match: {},
+					pattern: [
+						{
+							type: "Text",
+							value: preparedExtractOption,
+						},
+					],
+				},
+			],
 		}
-		// find reference language resource
-		const referenceResource = state().resources.find(
-			(resource) => resource.languageTag.name === sourceLanguageTag,
-		)
-		if (referenceResource) {
-			const [newResource, exception] = query(referenceResource).upsert({ message })
-			if (exception) {
-				return vscode.window.showErrorMessage("Couldn't upsert new message. ", exception.message)
-			}
-			const resources = state().resources.map((resource) =>
-				resource.languageTag.name === sourceLanguageTag ? newResource : resource,
-			)
-			await writeResources({
-				config: state().config,
-				resources,
-			})
-			// update resources in extension state
-			setState({ ...state(), resources })
+
+		// create message
+		const success = state().inlang.query.messages.create({
+			data: message,
+		})
+
+		if (!success) {
+			return vscode.window.showErrorMessage(`Couldn't upsert new message with id ${messageId}.`)
 		}
+
 		await textEditor.edit((editor) => {
 			editor.replace(textEditor.selection, preparedExtractOption)
 		})

@@ -18,6 +18,7 @@ import {
 	createVariant,
 	updateVariantPattern,
 	getVariant,
+	Pattern,
 } from "@inlang/app"
 
 /**
@@ -32,6 +33,7 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 		routeParams,
 		inlang,
 		sourceLanguageTag,
+		lastPullTime,
 	} = useEditorState()
 
 	const [variableReferences, setVariableReferences] = createSignal<VariableReference[]>([])
@@ -62,10 +64,9 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 	const sourceVariant = () =>
 		getVariant(props.message, { where: { languageTag: sourceLanguageTag()! } })
 
-	const variant = () =>
-		props.message.variants.filter((variant) => variant.languageTag === props.languageTag)
-			? props.message.variants.filter((variant) => variant.languageTag === props.languageTag)![0]
-			: undefined
+	const variant = () => getVariant(props.message, { where: { languageTag: props.languageTag } })
+
+	const [referencePattern, setReferencePattern] = createSignal<Pattern>()
 
 	const newPattern = () => getTextValue(editor) as Variant["pattern"]
 
@@ -84,6 +85,17 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 		}
 	})
 
+	createEffect(
+		on(lastPullTime, () => {
+			setReferencePattern(
+				inlang()
+					?.query.messages.get({ where: { id: props.message.id } })
+					?.variants.find((variant) => variant.languageTag === props.languageTag)?.pattern,
+			)
+			setHasChanges(false)
+		}),
+	)
+
 	//create editor
 	let textArea!: HTMLDivElement
 	const editor = createTiptapEditor(() => {
@@ -95,8 +107,9 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 	createEffect(
 		on(currentJSON, () => {
 			if (currentJSON().content[0].content !== undefined) {
+				autoSave()
 				setHasChanges((prev) => {
-					const hasChanged = JSON.stringify(variant()?.pattern) !== JSON.stringify(newPattern())
+					const hasChanged = JSON.stringify(referencePattern()) !== JSON.stringify(newPattern())
 					if (prev !== hasChanged && hasChanged) {
 						setLocalChanges((prev) => (prev += 1))
 					} else if (prev !== hasChanged && !hasChanged) {
@@ -197,7 +210,7 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 						report.ruleId === "inlang.lintRule.emptyPattern",
 				).length !== 0
 
-		let newMessage = structuredClone(props.message)
+		const newMessage = structuredClone(props.message)
 		if (hasEmptyPattern) {
 			newMessage.variants = newMessage.variants.filter(
 				(variant) => variant.languageTag !== props.languageTag,
@@ -299,13 +312,8 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 		// outer element is needed for clickOutside directive
 		// to close the action bar when clicking outside
 		<div
-			onClick={() => {
-				editor().chain().focus()
-			}}
+			onClick={() => editor().chain().focus()}
 			onFocusIn={() => setIsLineItemFocused(true)}
-			onFocusOut={() => {
-				autoSave()
-			}}
 			class="flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border first:mt-0 -mt-[1px] border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus-within:relative focus-within:border-primary focus-within:ring-[3px] focus-within:ring-hover-primary/50"
 		>
 			<div class="flex justify-start items-start gap-2 py-[5px]">
