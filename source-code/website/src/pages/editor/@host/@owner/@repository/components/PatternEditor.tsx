@@ -141,13 +141,13 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 			})
 		}
 		if (newMessage.data) {
-			const upsertSuccessful = inlang()?.query.messages.upsert({
-				where: { id: props.message.id },
-				data: newMessage.data,
-			})
-			if (!upsertSuccessful) {
-				throw new Error("Cannot update message")
-			}
+			// const upsertSuccessful = inlang()?.query.messages.upsert({
+			// 	where: { id: props.message.id },
+			// 	data: newMessage.data,
+			// })
+			// if (!upsertSuccessful) {
+			// 	throw new Error("Cannot update message")
+			// }
 		} else {
 			throw new Error("Cannot update message: ", newMessage.error)
 		}

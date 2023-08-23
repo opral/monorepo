@@ -19,7 +19,7 @@ import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
 import { telemetryBrowser, parseOrigin } from "@inlang/telemetry"
 import type { NodeishFilesystem } from "@inlang-git/fs"
-import { open, createNodeishMemoryFs } from "@project-lisa/client"
+import { openRepository, createNodeishMemoryFs } from "@project-lisa/client"
 import { http, raw } from "@inlang-git/client/raw"
 import { publicEnv } from "@inlang/env-variables"
 import {
@@ -198,7 +198,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [fsChange, setFsChange] = createSignal(new Date())
 
-	const [doesInlangConfigExist, setDoesInlangConfigExist] = createSignal<boolean>(false)
 	const [sourceLanguageTag, setSourceLanguageTag] = createSignal<LanguageTag>()
 	const [languageTags, setLanguageTags] = createSignal<LanguageTag[]>([])
 	const [tourStep, setTourStep] = createSignal<TourStepId>("github-login")
@@ -243,22 +242,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			)
 
 	const [localStorage] = useLocalStorage() ?? []
-
-	// const [repo] = createResource(
-	// 	() => {
-	// 		setFs(createNodeishMemoryFs())
-	// 		return {
-	// 			fs: fs(),
-	// 			routeParams: currentPageContext.routeParams as EditorRouteParams,
-	// 			user: localStorage?.user,
-	// 			setFsChange,
-	// 		}
-	// 	},
-	// 	async (args) => {
-	// 		const { host, owner, repository } = args.routeParams
-	// 		return open(`https://${host}/${owner}/${repository}`, { nodeishFs: fs() })
-	// 	},
-	// )
 
 	// re-fetched if currentPageContext changes
 	const [repositoryIsCloned] = createResource(
@@ -318,61 +301,63 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 	)
 
-	const [inlang] = createResource(
-		() => {
-			if (
-				repositoryIsCloned.error ||
-				repositoryIsCloned.loading ||
-				repositoryIsCloned() === undefined
-			) {
-				return false
-			}
-			return {
-				fs: fs(),
-				// BUG: this is not reactive
-				// See https://github.com/inlang/inlang/issues/838#issuecomment-1560745678
-				// we need to listen to inlang.config.js changes
-				// lastFsChange: fsChange(),
-			}
-		},
-		async () => {
-			const inlang = withSolidReactivity(
-				await openInlangProject({
-					configPath: "./inlang.config.json",
-					nodeishFs: fs(),
-					_import: async () =>
-						({
-							default: {
-								// @ts-ignore
-								plugins: [...pluginJson.plugins],
-								// @ts-ignore
-								lintRules: [...pluginLint.lintRules],
-							},
-						} satisfies InlangModule),
-				}),
-				{ from },
-			)
-			const config = inlang.config()
-			if (config) {
-				const languagesTags = // TODO: move this into setter logic
-					config.languageTags.sort((a: any, b: any) =>
-						// source language should be first
-						// sort alphabetically otherwise
-						a === config.sourceLanguageTag
-							? -1
-							: b === config.sourceLanguageTag
-							? 1
-							: a.localeCompare(b),
-					) || []
-				// initializes the languages to all languages
-				setDoesInlangConfigExist(true)
-				setSourceLanguageTag(config.sourceLanguageTag)
-				setLanguageTags(languagesTags)
-				await inlang.lint.init()
-			}
-			return inlang
-		},
-	)
+	const { host, owner, repository } = routeParams()
+	const repo = openRepository(`${host}/${owner}/${repository}`, {
+		nodeishFs: createNodeishMemoryFs(),
+		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
+	})
+
+	const [inlang] = createResource(async () => {
+		const inlang = withSolidReactivity(
+			await openInlangProject({
+				nodeishFs: repo.nodeishFs,
+				configPath: "/inlang.config.json",
+				_import: async () =>
+					({
+						default: {
+							// @ts-ignore
+							plugins: [...pluginJson.plugins],
+							// @ts-ignore
+							lintRules: [...pluginLint.lintRules],
+						},
+					} satisfies InlangModule),
+			}),
+			{ from },
+		)
+		return inlang
+	})
+
+	const doesInlangConfigExist = () => {
+		return inlang()?.config() ? true : false
+	}
+
+	createEffect(() => {
+		if (!inlang.loading) {
+			console.info("messages changes", inlang()?.query.messages.getAll())
+		}
+	})
+
+	setTimeout(() => {
+		console.info("timeout createMessage")
+		if (!inlang.loading) {
+			inlang()!.query.messages.create({ data: createMessage("test", { en: "test" }) })
+		}
+	}, 2000)
+
+	const createMessage = (id: string, patterns: Record<string, string>): Message => ({
+		id,
+		selectors: [],
+		variants: Object.entries(patterns).map(([languageTag, patterns]) => ({
+			languageTag,
+			match: {},
+			pattern: [
+				{
+					type: "Text",
+					value: patterns,
+				},
+			],
+		})),
+	})
 
 	//the effect should skip tour guide steps if not needed
 	createEffect(() => {
