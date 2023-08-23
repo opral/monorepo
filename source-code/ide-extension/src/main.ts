@@ -20,6 +20,7 @@ import { openInEditorCommand } from "./commands/openInEditor.js"
 import { editMessageCommand } from "./commands/editMessage.js"
 import { openInlangProject, tryCatch } from "@inlang/app"
 import { createFileSystemMapper } from "./services/inlang-environment/src/createFileSystemMapper.js"
+import { _import } from "./services/inlang-environment/src/_import.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
@@ -100,6 +101,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		openInlangProject({
 			configPath: closestConfigPathUri.fsPath,
 			nodeishFs: createFileSystemMapper(workspaceFolder.uri),
+			_import: _import(closestConfigPathUri.fsPath),
 		}),
 	)
 

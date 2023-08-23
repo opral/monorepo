@@ -1,25 +1,25 @@
 import { normalizePath } from "@inlang-git/fs"
-import type { $import as InlangEnvironment$import } from "@inlang/core/environment"
 import fetch from "node-fetch"
 import fs from "node:fs/promises"
 import ts from "typescript"
 import requireFromString from "require-from-string"
+import type { ImportFunction } from "@inlang/app"
 
 /**
  * Wraps the import function to inject the base path.
  *
  * The wrapping is necessary to resolve relative imports.
  */
-export function create$import(basePath: string): InlangEnvironment$import {
+export function _import(basePath: string): ImportFunction {
 	return (uri: string) => {
 		if (uri.startsWith("./")) {
-			return $import(normalizePath(basePath + "/" + uri.slice(2)))
+			return createImport(normalizePath(basePath + "/" + uri.slice(2)))
 		}
-		return $import(uri)
+		return createImport(uri)
 	}
 }
 
-const $import: InlangEnvironment$import = async (uri: string) => {
+const createImport: ImportFunction = async (uri: string) => {
 	// polyfill for environments that don't support dynamic
 	// http imports yet like VSCode.
 	const moduleAsText = uri.startsWith("http")
