@@ -11,6 +11,7 @@ export {
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
 } from "./errors.js"
+export { createReactiveQuery } from './createReactiveQuery.js'
 
 /**
  * -------- RE-EXPORTS --------

@@ -3,8 +3,6 @@ import { describe, it, expect } from "vitest"
 import { createReactiveQuery } from "./createReactiveQuery.js"
 import { createEffect, createRoot, createSignal } from "./solid.js"
 import type { Message, Pattern, Text } from "@inlang/plugin"
-// TODO: find a better approach to share tests between packages
-import { queryBaseTests } from "../../../../node_modules/@inlang/messages/dist/query.test-util.js"
 
 const createChangeListener = async (cb: () => void) => createEffect(cb)
 
@@ -18,17 +16,184 @@ export const createMessage = (id: string, patterns: Record<string, Pattern | str
 		pattern:
 			typeof patterns === "string"
 				? [
-						{
-							type: "Text",
-							value: patterns,
-						},
-				  ]
+					{
+						type: "Text",
+						value: patterns,
+					},
+				]
 				: patterns,
 	})),
 })
 
-await queryBaseTests({
-	createQueryFn: (messages) => createReactiveQuery(() => messages),
+describe("create", () => {
+	it("should create a message", () => {
+		const query = createReactiveQuery(() => [])
+		expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
+
+		const mockMessage = createMessage('first-message', { en: "Hello World" })
+		const created = query.create({ data: mockMessage })
+
+		expect(query.get({ where: { id: "first-message" } })).toEqual(mockMessage)
+		expect(created).toBe(true)
+	})
+
+	it("should return false if message with id already exists", () => {
+		const query = createReactiveQuery(() => [
+			createMessage("first-message", { en: "Hello World" }),
+		])
+		expect(query.get({ where: { id: "first-message" } })).toBeDefined()
+
+		const mockMessage = createMessage("first-message", { en: "Some Text" })
+		query.create({ data: mockMessage })
+
+		const created = query.create({ data: mockMessage })
+		expect(created).toBe(false)
+	})
+})
+
+describe("get", () => {
+	it("should return undefined if a message does not exist", () => {
+		const query = createReactiveQuery(() => [
+			createMessage("first-message", { en: "Hello World" }),
+		])
+		const message = query.get({ where: { id: "none-existent-message" } })
+		expect(message).toBeUndefined()
+	})
+
+	it("should return an object, not an array", () => {
+		const query = createReactiveQuery(() => [
+			createMessage("first-message", { en: "Hello World" }),
+		])
+		const message = query.get({ where: { id: "first-message" } })
+		expect(message).toBeDefined()
+		expect(Array.isArray(message)).toBe(false)
+	})
+
+	it("mutating the returned value should not affect subsequent return values", () => {
+		const query = createReactiveQuery(() => [
+			createMessage("first-message", { en: "Hello World" }),
+		])
+		const message1 = query.get({ where: { id: "first-message" } })!
+			; (message1.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value =
+				"Hello World 2"
+		const message2 = query.get({ where: { id: "first-message" } })!
+
+		expect(
+			(message1.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value,
+		).toBe("Hello World 2")
+		expect(
+			(message2.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value,
+		).toBe("Hello World")
+	})
+})
+
+describe("getAll", () => {
+	it("should return an empty array if no messages exist", () => {
+		const query = createReactiveQuery(() => [])
+		const messages = query.getAll()
+
+		expect(messages).toEqual([])
+	})
+
+	it("should return all message objects", () => {
+		const query = createReactiveQuery(() => [])
+		const mockMessage1 = createMessage("first-message", { en: "Hello World" })
+		const mockMessage2 = createMessage("second-message", { en: "Hello World 2" })
+		query.create({ data: mockMessage1 })
+		query.create({ data: mockMessage2 })
+
+		const messages = query.getAll()
+		expect(messages).toEqual([mockMessage1, mockMessage2])
+	})
+
+	it("mutating the returned value should not affect subsequent return values", () => {
+		const query = createReactiveQuery(() => [
+			createMessage("first-message", { en: "Hello World" }),
+		])
+		const messages1 = query.getAll()
+			; (messages1[0]!.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value =
+				"Hello World 2"
+		const messages2 = query.getAll()
+
+		expect(
+			(messages1[0]!.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value,
+		).toBe("Hello World 2")
+		expect(
+			(messages2[0]!.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value,
+		).toBe("Hello World")
+	})
+})
+
+describe("update", () => {
+	it("should update a message", () => {
+		const query = createReactiveQuery(() => [
+			createMessage("first-message", { en: "Hello World" }),
+		])
+		expect(query.get({ where: { id: "first-message" } })).toBeDefined()
+
+		const mockMessage = createMessage("first-message", { en: "Hello World 2" })
+		const updated = query.update({ where: { id: "first-message" }, data: mockMessage })
+
+		expect(query.get({ where: { id: "first-message" } })).toEqual(mockMessage)
+		expect(updated).toBe(true)
+	})
+
+	it("should return false if message with id does not exist exists", () => {
+		const query = createReactiveQuery(() => [])
+		expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
+
+		const mockMessage = createMessage("first-message", { en: "Hello World" })
+		const updated = query.update({ where: { id: "first-message" }, data: mockMessage })
+		expect(updated).toBe(false)
+	})
+})
+
+describe("upsert", () => {
+	it("should create a message if not present yet", () => {
+		const query = createReactiveQuery(() => [])
+		expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
+
+		const mockMessage = createMessage("first-message", { en: "Hello World" })
+		const upserted = query.upsert({ where: { id: "first-message" }, data: mockMessage })
+
+		expect(query.get({ where: { id: "first-message" } })).toEqual(mockMessage)
+		expect(upserted).toBe(true)
+	})
+
+	it("should update message if id already exists", () => {
+		const query = createReactiveQuery(() => [
+			createMessage("first-message", { en: "Hello World" }),
+		])
+		expect(query.get({ where: { id: "first-message" } })).toBeDefined()
+
+		const mockMessage = createMessage("first-message", { en: "Hello World 2" })
+		const upserted = query.upsert({ where: { id: "first-message" }, data: mockMessage })
+
+		expect(query.get({ where: { id: "first-message" } })).toEqual(mockMessage)
+		expect(upserted).toBe(true)
+	})
+})
+
+describe("delete", () => {
+	it("should delete a message", () => {
+		const query = createReactiveQuery(() => [
+			createMessage("first-message", { en: "Hello World" }),
+		])
+		expect(query.get({ where: { id: "first-message" } })).toBeDefined()
+
+		const deleted = query.delete({ where: { id: "first-message" } })
+
+		expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
+		expect(deleted).toBe(true)
+	})
+
+	it("should return false if message with id does not exist", () => {
+		const query = createReactiveQuery(() => [])
+		expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
+
+		const deleted = query.delete({ where: { id: "first-message" } })
+		expect(deleted).toBe(false)
+	})
 })
 
 describe("reactivity", () => {
