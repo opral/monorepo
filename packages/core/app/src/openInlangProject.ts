@@ -129,15 +129,15 @@ export const openInlangProject = async (args: {
 		const installedLintRules = () =>
 			resolvedModules()!.lintRules.map(
 				(rule) =>
-				({
-					meta: rule.meta,
-					module:
-						resolvedModules()?.meta.find((m) => m.lintRules.includes(rule.meta.id))?.module ??
-						"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
-					// default to warning, see https://github.com/inlang/inlang/issues/1254
-					lintLevel: configValue.settings["project.lintRuleLevels"]?.[rule.meta.id] ?? "warning",
-					disabled: configValue.settings["project.disabled"]?.includes(rule.meta.id) ?? false,
-				} satisfies InstalledLintRule),
+					({
+						meta: rule.meta,
+						module:
+							resolvedModules()?.meta.find((m) => m.lintRules.includes(rule.meta.id))?.module ??
+							"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
+						// default to warning, see https://github.com/inlang/inlang/issues/1254
+						lintLevel: configValue.settings["project.lintRuleLevels"]?.[rule.meta.id] ?? "warning",
+						disabled: configValue.settings["project.disabled"]?.includes(rule.meta.id) ?? false,
+					} satisfies InstalledLintRule),
 			) satisfies Array<InstalledLintRule>
 
 		const installedPlugins = () =>
@@ -178,9 +178,9 @@ export const openInlangProject = async (args: {
 				rules:
 					configValue.settings["project.disabled"] !== undefined
 						? resolvedModules()!.lintRules.filter(
-							(rule) =>
-								configValue.settings["project.disabled"]?.includes(rule.meta.id) === false,
-						)
+								(rule) =>
+									configValue.settings["project.disabled"]?.includes(rule.meta.id) === false,
+						  )
 						: resolvedModules()!.lintRules,
 			}).then((report) => {
 				setLintReports(report.data)
@@ -351,7 +351,9 @@ function skipFirst(func: (args: any) => any) {
 	}
 }
 
-export function createSubscribable<R = unknown, T extends (...args: any[]) => R = () => R>(signal: T): Subscribable<T> {
+export function createSubscribable<R = unknown, T extends (...args: any[]) => R = () => R>(
+	signal: T,
+): Subscribable<T> {
 	return Object.assign(signal, {
 		subscribe: (callback: any) => {
 			createEffect(() => {
