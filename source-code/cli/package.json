@@ -40,7 +40,7 @@
 	},
 	"scripts": {
 		"dev": "node ./build.js",
-		"build": "NODE_ENV=production node ./build.js",
+		"build": "cross-env NODE_ENV=production node ./build.js",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage --test-timeout=10000",
 		"test:watch": "vitest watch --passWithNoTests --coverage --test-timeout=10000",
@@ -65,6 +65,7 @@
 		"commander": "^10.0.0",
 		"consola": "^2.15.3",
 		"console-table-printer": "^2.11.2",
+		"cross-env": "^7.0.3",
 		"esbuild": "^0.17.19",
 		"estree-walker": "^3.0.3",
 		"fast-glob": "^3.2.12",
