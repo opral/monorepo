@@ -6,7 +6,7 @@ import type {
 	LintRule,
 	LintLevel,
 } from "@inlang/lint"
-import type { MessageQueryApi } from "@inlang/messages"
+import type { Message } from "@inlang/messages"
 import type { Result } from "@inlang/result"
 import type {
 	InvalidConfigError,
@@ -88,4 +88,13 @@ export type InlangProject = {
 export type Subscribable<Value> = {
 	(): Value
 	subscribe: (callback: (value: Value) => void) => void
+}
+
+type MessageQueryApi = {
+	create: (args: { data: Message }) => boolean
+	get: (args: { where: { id: Message["id"] } }) => Message | undefined
+	getAll: Subscribable<Array<Message>>
+	update: (args: { where: { id: Message["id"] }; data: Partial<Message> }) => boolean
+	upsert: (args: { where: { id: Message["id"] }; data: Message }) => void
+	delete: (args: { where: { id: Message["id"] } }) => boolean
 }
