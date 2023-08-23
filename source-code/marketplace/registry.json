@@ -79,9 +79,5 @@
 			"type": "app"
 		}
 	],
-	"modules": [
-		"../plugins/json/dist/index.js",
-		"../plugins/i18next/dist/index.js",
-		"../plugins/standard-lint-rules/dist/index.js"
-	]
+	"modules": []
 }
