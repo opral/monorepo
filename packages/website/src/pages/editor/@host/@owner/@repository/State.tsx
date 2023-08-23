@@ -19,7 +19,7 @@ import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
 import { telemetryBrowser, parseOrigin } from "@inlang/telemetry"
 import type { NodeishFilesystem } from "@inlang-git/fs"
-import { openRepository, createNodeishMemoryFs } from "@project-lisa/client"
+import { openRepository, createNodeishMemoryFs, Repository } from "@project-lisa/client"
 import { http, raw } from "@inlang-git/client/raw"
 import { publicEnv } from "@inlang/env-variables"
 import {
@@ -51,9 +51,7 @@ type EditorStateSchema = {
 	/**
 	 * Additional information about a repository provided by GitHub.
 	 */
-	githubRepositoryInformation: Resource<
-		Awaited<ReturnType<typeof github.request<"GET /repos/{owner}/{repo}">>>
-	>
+	githubRepositoryInformation: Resource<Awaited<ReturnType<Repository["getMeta"]>>>
 	/**
 	 * Route parameters like `/github.com/inlang/website`.
 	 *
@@ -144,11 +142,6 @@ type EditorStateSchema = {
 	 * 	if (user && isCollaborator())
 	 */
 	userIsCollaborator: Resource<boolean>
-
-	/**
-	 * Whether the is private or not.
-	 */
-	repoIsPrivate: Resource<boolean | undefined>
 
 	/**
 	 * The last time the repository was pushed.
@@ -364,35 +357,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	})
 
-	const [repoIsPrivate] = createResource(
-		/**
-		 * createResource is not reacting to changes like: "false","Null", or "undefined".
-		 * Hence, a string needs to be passed to the fetch of the resource.
-		 */
-		() => {
-			if (
-				currentPageContext.routeParams.owner === undefined ||
-				currentPageContext.routeParams.repository === undefined
-			) {
-				return false
-			}
-			return {
-				routeParams: currentPageContext.routeParams as EditorRouteParams,
-			}
-		},
-		async (args) => {
-			try {
-				const response = await github.request("GET /repos/{owner}/{repo}", {
-					owner: args.routeParams.owner,
-					repo: args.routeParams.repository,
-				})
-				return response.data.private
-			} catch (error) {
-				return undefined
-			}
-		},
-	)
-
 	const [userIsCollaborator] = createResource(
 		/**
 		 * createResource is not reacting to changes like: "false","Null", or "undefined".
@@ -418,6 +382,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				return false
 			}
 			try {
+				//console.log(await repo.isCollaborator({ username: args.user.username }))
+				// TODO: use lisa api to check collaborator
 				const response = await github.request(
 					"GET /repos/{owner}/{repo}/collaborators/{username}",
 					{
@@ -448,11 +414,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				routeParams: routeParams(),
 			}
 		},
-		async (args) =>
-			github.request("GET /repos/{owner}/{repo}", {
-				owner: args.routeParams.owner,
-				repo: args.routeParams.repository,
-			}),
+		async () => await repo.getMeta(),
 	)
 
 	const [currentBranch] = createResource(
@@ -474,67 +436,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				dir: "/",
 			})
 			return branch ?? undefined
-		},
-	)
-
-	// syncing a forked repository
-	//
-	// If a repository is a fork, it needs to be synced with the upstream repository.
-	// This is done by merging the upstream repository into the forked repository.
-	//
-	// https://github.com/inlang/inlang/issues/326
-	//
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [maybeSyncForkOnClone] = createResource(
-		() => {
-			if (
-				(githubRepositoryInformation() && githubRepositoryInformation()?.data.fork !== true) ||
-				currentBranch() === undefined ||
-				localStorage.user === undefined ||
-				// route params can be undefined if the user navigated away from the editor
-				routeParams().owner === undefined ||
-				routeParams().repository === undefined
-			) {
-				return false
-			}
-			// pass all reactive variables
-			return {
-				branch: currentBranch()!,
-				owner: routeParams().owner,
-				repo: routeParams().repository,
-				fs: fs(),
-				setFsChange: setFsChange,
-				user: localStorage.user,
-			}
-		},
-		async (args) => {
-			try {
-				// merge upstream
-				const response = await github.request("POST /repos/{owner}/{repo}/merge-upstream", {
-					branch: args.branch,
-					owner: args.owner,
-					repo: args.repo,
-				})
-				if (response.data.merge_type && response.data.merge_type !== "none") {
-					showToast({
-						variant: "info",
-						title: "Synced fork",
-						message:
-							"The fork has been synced with its parent repository. The latest changes will be pulled.",
-					})
-					// pull afterwards
-					await pull({ setLastPullTime, ...args })
-				}
-			} catch (error) {
-				showToast({
-					variant: "warning",
-					title: "Syncing fork failed",
-					message:
-						"The fork likely has outstanding changes that have not been merged and led to a merge conflict. You can resolve the merge conflict manually by opening your GitHub repository.",
-				})
-				// rethrow for resource.error to work
-				throw error
-			}
 		},
 	)
 
@@ -569,7 +470,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setLocalChanges,
 					sourceMessages,
 					userIsCollaborator,
-					repoIsPrivate,
 					setLastPush,
 					lastPullTime,
 					setLastPullTime,
