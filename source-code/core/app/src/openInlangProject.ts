@@ -213,7 +213,7 @@ export const openInlangProject = async (args: {
 		)
 
 		createEffect(() => {
-			debouncedSave(query.getAll())
+			debouncedSave(Object.values(query.getAll()))
 		})
 
 		return {
