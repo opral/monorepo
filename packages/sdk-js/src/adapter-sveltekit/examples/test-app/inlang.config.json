@@ -1,25 +1,30 @@
 {
-	"sourceLanguageTag": "en",
-	"languageTags": ["en", "de"],
-	"modules": [
-		"../../../../../plugins/json/dist/index.js",
-		"../../../../../sdk-js-plugin/dist/index.js"
-	],
-	"settings": {
-		"inlang.plugin.json": {
-			"pathPattern": "./languages/{languageTag}.json"
-		},
-		"inlang.plugin.sdkJs": {
-			"languageNegotiation": {
-				"strategies": [
-					{
-						"type": "url"
-					}
-				]
-			},
-			"routing": {
-				"exclude": ["/api"]
-			}
-		}
-	}
+  "sourceLanguageTag": "en",
+  "languageTags": [
+    "en",
+    "de"
+  ],
+  "modules": [
+    "../../../../../plugins/json/dist/index.js",
+    "../../../../../sdk-js-plugin/dist/index.js"
+  ],
+  "settings": {
+    "inlang.plugin.json": {
+      "pathPattern": "./languages/{languageTag}.json"
+    },
+    "inlang.plugin.sdkJs": {
+      "languageNegotiation": {
+        "strategies": [
+          {
+            "type": "url"
+          }
+        ]
+      },
+      "routing": {
+        "exclude": [
+          "/api"
+        ]
+      }
+    }
+  }
 }
