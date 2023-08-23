@@ -113,7 +113,7 @@ export const Page = () => {
 	}, 2000)
 
 	setTimeout(() => {
-		console.log("timeout createMessage")
+		console.info("timeout createMessage")
 		if (!inlang.loading) {
 			inlang()!.query.messages.create({
 				data: {
