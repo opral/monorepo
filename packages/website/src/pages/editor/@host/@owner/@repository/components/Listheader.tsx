@@ -103,7 +103,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 									prop:placement="bottom"
 									prop:trigger="hover"
 									class="small"
-									style="	--show-delay: 1s;"
+									style={{ "--show-delay": "1s" }}
 								>
 									<sl-button
 										prop:size="small"
