@@ -12,7 +12,7 @@ import {
 	optional,
 	startsWith,
 	minLength,
-	parse
+	parse,
 } from "valibot"
 
 const zUrlNegotiatorVariantPath = object({
@@ -107,14 +107,17 @@ const zSdkConfig = object({
 	}),
 	resources: withDefault(optional(zResources), { cache: "build-time" }),
 	routing: withDefault(
-		optional(object({
-			exclude: withDefault(optional(array(string([startsWith("/")]))), []),
-		})),
+		optional(
+			object({
+				exclude: withDefault(optional(array(string([startsWith("/")]))), []),
+			}),
+		),
 		{ exclude: [] },
 	),
 })
 
-export const validateSdkConfig = (config?: SdkConfigInput): SdkConfig => parse(zSdkConfig, config) as SdkConfig
+export const validateSdkConfig = (config?: SdkConfigInput): SdkConfig =>
+	parse(zSdkConfig, config) as SdkConfig
 
 export type SdkConfigInput = Input<typeof zSdkConfig>
 

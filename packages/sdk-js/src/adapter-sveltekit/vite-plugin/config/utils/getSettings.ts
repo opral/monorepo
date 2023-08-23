@@ -11,7 +11,7 @@ export const defaultSdkPluginSettings = {
 				} as any,
 			],
 		},
-	} satisfies SdkConfigInput
+	} satisfies SdkConfigInput,
 }
 
 export function getSettings(inlang: InlangProject) {
