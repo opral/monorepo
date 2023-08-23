@@ -64,13 +64,14 @@ export function InstallationProvider(props: {
 }
 
 async function initializeRepo(repoURL: string, modulesURL: string[], user: user) {
+	// Open the repository
 	const repo = open(repoURL, {
 		nodeishFs: createNodeishMemoryFs(),
 		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
 	})
 
-	// Get the content of the inlang.config.js file as js object
-	const inlangConfig = await repo.nodeishFs
+	// Get the content of the inlang.config.js file
+	const inlangConfigString = await repo.nodeishFs
 		.readFile("./inlang.config.js", {
 			encoding: "utf-8",
 		})
@@ -79,20 +80,19 @@ async function initializeRepo(repoURL: string, modulesURL: string[], user: user)
 			throw new Error("No inlang.config.js file found in the repository.")
 		})
 
-	//! Should inlang be created??
-	// const inlang = await createInlang({
-	// 	configPath: "./inlang.config.json",
-	// 	nodeishFs: repo.nodeishFs,
-	// 	_import: async () =>
-	// 		({
-	// 			default: {
-	// 				// @ts-ignore
-	// 				plugins: [...pluginJson.plugins],
-	// 				// @ts-ignore
-	// 				lintRules: [...pluginLint.lintRules],
-	// 			},
-	// 		} satisfies InlangModule),
-	// })
+	// Convert the inlang.config.js file to a JavaScript object
+	let inlangConfig
+	try {
+		inlangConfig = eval(`(${inlangConfigString.replace(/[^{]*/, "")})`)
+	} catch (e) {
+		throw new Error("Error parsing inlang.config.js: " + e)
+	}
 
-	console.log("inlang", inlangConfig)
+	// Add the modules to the inlang.config.js file
+	inlangConfig.modules.push(...modulesURL)
+
+	// Merge into the inlangConfigString to be able to write it back to the file
+	const newInlangConfigString = inlangConfigString.replace(/{[^}]*}/, JSON.stringify(inlangConfig))
+
+	console.log("newInlangConfigString", newInlangConfigString)
 }
