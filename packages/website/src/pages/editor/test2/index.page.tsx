@@ -100,7 +100,7 @@ export const Page = () => {
 	// })
 	createEffect(() => {
 		if (!inlang.loading) {
-			console.info("messages changes", inlang()!.query.messages.getAll())
+			console.info("messages changes", Object.values(inlang()!.query.messages.getAll() || {}))
 		}
 	})
 

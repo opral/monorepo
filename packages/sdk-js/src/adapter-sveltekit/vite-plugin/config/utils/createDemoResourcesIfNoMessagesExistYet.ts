@@ -3,7 +3,7 @@ import { createMessage } from "../../../../test.util.js"
 
 export const createDemoResourcesIfNoMessagesExistYet = async (inlang: InlangProject) => {
 	const messages = inlang.query.messages.getAll()
-	if (messages.length) return
+	if (Object.values(messages).length) return
 
 	inlang.query.messages.create({
 		data: createMessage("welcome", {

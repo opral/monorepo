@@ -35,16 +35,6 @@ function TheActualPage() {
 		useEditorState()
 	const [, setLocalStorage] = useLocalStorage()
 
-	const messages = createMemo(() => {
-		const result: {
-			[id: string]: MessageType
-		} = {}
-		for (const message of inlang()?.query.messages.getAll() || []) {
-			result[message.id] = message
-		}
-		return result
-	})
-
 	onMount(() => {
 		setLocalStorage("recentProjects", (prev) => {
 			let recentProjects = prev[0] !== undefined ? prev : []
@@ -152,25 +142,26 @@ function TheActualPage() {
 				<Match when={!doesInlangConfigExist()}>
 					<NoInlangConfigFoundCard />
 				</Match>
-				<Match when={doesInlangConfigExist() && messages() !== undefined}>
+				<Match when={doesInlangConfigExist() && inlang()?.query.messages.getAll() !== undefined}>
 					<div>
-						<ListHeader messages={inlang()?.query.messages.getAll() || []} />
+						<ListHeader messages={Object.values(inlang()?.query.messages.getAll() || {})} />
 						<TourHintWrapper
 							currentId="textfield"
 							position="bottom-left"
 							offset={{ x: 110, y: 144 }}
 							isVisible={tourStep() === "textfield"}
 						>
-							<For each={Object.keys(messages())}>
+							<For each={Object.keys(inlang()!.query.messages.getAll())}>
 								{(id) => {
-									return <Message message={messages()[id]!} />
+									return <Message message={inlang()!.query.messages.getAll()[id]!} />
 								}}
 							</For>
 						</TourHintWrapper>
 						<div
 							class="flex flex-col h-[calc(100vh_-_288px)] grow justify-center items-center min-w-full gap-2"
 							classList={{
-								["hidden"]: messageCount(inlang()?.query.messages.getAll() || []) !== 0,
+								["hidden"]:
+									messageCount(Object.values(inlang()?.query.messages.getAll() || {})) !== 0,
 							}}
 						>
 							<NoMatchPlaceholder />

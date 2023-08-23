@@ -554,7 +554,7 @@ describe("functionality", () => {
 				_import,
 			})
 
-			expect(inlang.query.messages.getAll()).toEqual(exampleMessages)
+			expect(Object.values(inlang.query.messages.getAll())).toEqual(exampleMessages)
 		})
 	})
 
@@ -673,7 +673,7 @@ describe("functionality", () => {
 				pathPattern: "./resources/{languageTag}.json",
 			})
 
-			expect(mockSaveFn.mock.calls[0][0].messages).toStrictEqual([
+			expect(Object.values(mockSaveFn.mock.calls[0][0].messages)).toStrictEqual([
 				{
 					id: "a",
 					selectors: [],

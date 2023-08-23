@@ -198,7 +198,7 @@ describe("messages", () => {
 			counter += 1
 		})
 
-		expect(inlang.query.messages.getAll().length).toBe(2)
+		expect(Object.values(inlang.query.messages.getAll()).length).toBe(2)
 
 		inlang.setConfig({ ...inlang.config(), languageTags: [] })
 
@@ -206,7 +206,7 @@ describe("messages", () => {
 		await new Promise((resolve) => setTimeout(resolve, 0))
 
 		expect(counter).toBe(2) // 2 times because effect creation + set
-		expect(inlang.query.messages.getAll().length).toBe(0)
+		expect(Object.values(inlang.query.messages.getAll()).length).toBe(0)
 	})
 
 	it("should react to changes to messages", async () => {
@@ -228,10 +228,10 @@ describe("messages", () => {
 		})
 
 		const messagesBefore = inlang.query.messages.getAll
-		expect(messagesBefore().length).toBe(2)
+		expect(Object.values(messagesBefore()).length).toBe(2)
 		expect(
 			(
-				messagesBefore()[0]?.variants.find((variant) => variant.languageTag === "en")
+				Object.values(messagesBefore())[0]?.variants.find((variant) => variant.languageTag === "en")
 					?.pattern[0] as Text
 			).value,
 		).toBe("test")
@@ -258,10 +258,10 @@ describe("messages", () => {
 
 		expect(counter).toBe(2) // 2 times because effect creation + set
 		const messagesAfter = inlang.query.messages.getAll
-		expect(messagesAfter().length).toBe(2)
+		expect(Object.values(messagesAfter()).length).toBe(2)
 		expect(
 			(
-				messagesAfter()[0]?.variants.find((variant) => variant.languageTag === "en")
+				Object.values(messagesAfter())[0]?.variants.find((variant) => variant.languageTag === "en")
 					?.pattern[0] as Text
 			).value,
 		).toBe("test2")

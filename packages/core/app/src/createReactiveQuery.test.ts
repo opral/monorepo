@@ -84,7 +84,7 @@ describe("getAll", () => {
 		const query = createReactiveQuery(() => [])
 		const messages = query.getAll()
 
-		expect(messages).toEqual([])
+		expect(Object.values(messages!)).toEqual([])
 	})
 
 	it("should return all message objects", () => {
@@ -95,22 +95,23 @@ describe("getAll", () => {
 		query.create({ data: mockMessage2 })
 
 		const messages = query.getAll()
-		expect(messages).toEqual([mockMessage1, mockMessage2])
+		expect(Object.values(messages!)).toEqual([mockMessage1, mockMessage2])
 	})
 
 	it("mutating the returned value should not affect subsequent return values", () => {
 		const query = createReactiveQuery(() => [createMessage("first-message", { en: "Hello World" })])
 		const messages1 = query.getAll()
-		;(messages1[0]!.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value =
-			"Hello World 2"
-		const messages2 = query.getAll()
+		;(
+			Object.values(messages1!)[0]!.variants.find((v) => v.languageTag === "en")!
+				.pattern![0]! as Text
+		).value = "Hello World 2"
 
 		expect(
-			(messages1[0]!.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value,
+			(
+				Object.values(query.getAll()!)[0]!.variants.find((v) => v.languageTag === "en")!
+					.pattern![0]! as Text
+			).value,
 		).toBe("Hello World 2")
-		expect(
-			(messages2[0]!.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value,
-		).toBe("Hello World")
 	})
 })
 
@@ -286,18 +287,18 @@ describe("reactivity", () => {
 			await createRoot(async () => {
 				const query = createReactiveQuery(() => [])
 
-				let messages: Message[] | undefined = undefined
+				let messages: { [id: string]: Message } | undefined = undefined
 				await createChangeListener(() => (messages = query.getAll()))
-				expect(messages).toHaveLength(0)
+				expect(Object.values(messages!)).toHaveLength(0)
 
 				query.create({ data: createMessage("1", { en: "before" }) })
-				expect(messages).toHaveLength(1)
+				expect(Object.values(messages!)).toHaveLength(1)
 
 				query.create({ data: createMessage("2", { en: "before" }) })
-				expect(messages).toHaveLength(2)
+				expect(Object.values(messages!)).toHaveLength(2)
 
 				query.create({ data: createMessage("3", { en: "before" }) })
-				expect(messages).toHaveLength(3)
+				expect(Object.values(messages!)).toHaveLength(3)
 			})
 		})
 
@@ -305,21 +306,21 @@ describe("reactivity", () => {
 			await createRoot(async () => {
 				const query = createReactiveQuery(() => [createMessage("1", { en: "before" })])
 
-				let messages: Message[] | undefined = undefined
+				let messages: { [id: string]: Message } | undefined = undefined
 				await createChangeListener(() => (messages = query.getAll()))
-				expect(messages).toHaveLength(1)
+				expect(Object.values(messages!)).toHaveLength(1)
 				expect(
 					(
-						messages![0]!.variants.find((variant) => variant.languageTag === "en")!
+						Object.values(messages!)![0]!.variants.find((variant) => variant.languageTag === "en")!
 							.pattern[0]! as Text
 					).value,
 				).toBe("before")
 
 				query.update({ where: { id: "1" }, data: createMessage("1", { en: "after" }) })
-				expect(messages).toHaveLength(1)
+				expect(Object.values(messages!)).toHaveLength(1)
 				expect(
 					(
-						messages![0]!.variants.find((variant) => variant.languageTag === "en")!
+						Object.values(messages!)![0]!.variants.find((variant) => variant.languageTag === "en")!
 							.pattern[0]! as Text
 					).value,
 				).toBe("after")
@@ -330,15 +331,15 @@ describe("reactivity", () => {
 			await createRoot(async () => {
 				const query = createReactiveQuery(() => [])
 
-				let messages: Message[] | undefined
+				let messages: { [id: string]: Message } | undefined = undefined
 				await createChangeListener(() => (messages = query.getAll()))
-				expect(messages).toHaveLength(0)
+				expect(Object.values(messages!)).toHaveLength(0)
 
 				query.upsert({ where: { id: "1" }, data: createMessage("1", { en: "before" }) })
-				expect(messages).toHaveLength(1)
+				expect(Object.values(messages!)).toHaveLength(1)
 				expect(
 					(
-						messages![0]!.variants.find((variant) => variant.languageTag === "en")!
+						Object.values(messages!)![0]!.variants.find((variant) => variant.languageTag === "en")!
 							.pattern[0]! as Text
 					).value,
 				).toBe("before")
@@ -346,7 +347,7 @@ describe("reactivity", () => {
 				query.upsert({ where: { id: "1" }, data: createMessage("1", { en: "after" }) })
 				expect(
 					(
-						messages![0]!.variants.find((variant) => variant.languageTag === "en")!
+						Object.values(messages!)![0]!.variants.find((variant) => variant.languageTag === "en")!
 							.pattern[0]! as Text
 					).value,
 				).toBe("after")
@@ -361,22 +362,22 @@ describe("reactivity", () => {
 					createMessage("3", { en: "" }),
 				])
 
-				let messages: Message[] | undefined
+				let messages: { [id: string]: Message } | undefined = undefined
 				await createChangeListener(() => (messages = query.getAll()))
-				expect(messages).toHaveLength(3)
+				expect(Object.values(messages!)).toHaveLength(3)
 
 				query.delete({ where: { id: "1" } })
-				expect(messages).toHaveLength(2)
+				expect(Object.values(messages!)).toHaveLength(2)
 
 				// deleting the same id again should not have an effect
 				query.delete({ where: { id: "1" } })
-				expect(messages).toHaveLength(2)
+				expect(Object.values(messages!)).toHaveLength(2)
 
 				query.delete({ where: { id: "2" } })
-				expect(messages).toHaveLength(1)
+				expect(Object.values(messages!)).toHaveLength(1)
 
 				query.delete({ where: { id: "3" } })
-				expect(messages).toHaveLength(0)
+				expect(Object.values(messages!)).toHaveLength(0)
 			})
 		})
 
@@ -386,24 +387,24 @@ describe("reactivity", () => {
 			])
 			const query = createReactiveQuery(inputMessages)
 
-			let messages: Message[] | undefined
+			let messages: { [id: string]: Message } | undefined = undefined
 			await createChangeListener(() => (messages = query.getAll()))
-			expect(messages).toHaveLength(1)
+			expect(Object.values(messages!)).toHaveLength(1)
 
 			query.create({ data: createMessage("2", { en: "" }) })
-			expect(messages).toHaveLength(2)
+			expect(Object.values(messages!)).toHaveLength(2)
 			expect(
 				(
-					messages![0]!.variants.find((variant) => variant.languageTag === "en")!
+					Object.values(messages!)![0]!.variants.find((variant) => variant.languageTag === "en")!
 						.pattern[0]! as Text
 				).value,
 			).toBe("before")
 
 			setMessages([createMessage("1", { en: "after" })])
-			expect(messages).toHaveLength(1)
+			expect(Object.values(messages!)).toHaveLength(1)
 			expect(
 				(
-					messages![0]!.variants.find((variant) => variant.languageTag === "en")!
+					Object.values(messages!)![0]!.variants.find((variant) => variant.languageTag === "en")!
 						.pattern[0]! as Text
 				).value,
 			).toBe("after")
