@@ -25,9 +25,9 @@ export function createReactiveQuery(
 			index.set(data.id, data)
 			return true
 		},
-		get: ({ where }) => {
+		get: createSubscribable(({ where }) => {
 			return structuredClone(index.get(where.id))
-		},
+		}),
 		getAll: createSubscribable(() => {
 			return structuredClone([...index.values()])
 		}),
