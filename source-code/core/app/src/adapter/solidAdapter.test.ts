@@ -4,7 +4,7 @@ import type { InlangConfig } from "@inlang/config"
 import type { Message, Plugin, Text } from "@inlang/plugin"
 import type { ImportFunction, InlangModule } from "@inlang/module"
 import { createEffect, from } from "../solid.js"
-import { withSolidReactivity } from "./withSolidReactivity.js"
+import { solidAdapter } from "./solidAdapter.js"
 import type { LintRule } from "@inlang/lint"
 import { openInlangProject } from "../openInlangProject.js"
 
@@ -95,7 +95,7 @@ describe("config", () => {
 	it("should react to changes to config", async () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
-		const inlang = withSolidReactivity(
+		const inlang = solidAdapter(
 			await openInlangProject({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
@@ -125,7 +125,7 @@ describe("installed", () => {
 	it("react to changes that are unrelated to installed items", async () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
-		const inlang = withSolidReactivity(
+		const inlang = solidAdapter(
 			await openInlangProject({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
@@ -183,7 +183,7 @@ describe("messages", () => {
 			({ default: { plugins: [mockPlugin] } } satisfies InlangModule)
 
 		await fs.writeFile("./inlang.config.json", JSON.stringify(mockConfig))
-		const inlang = withSolidReactivity(
+		const inlang = solidAdapter(
 			await openInlangProject({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
@@ -212,7 +212,7 @@ describe("messages", () => {
 	it("should react to changes to messages", async () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
-		const inlang = withSolidReactivity(
+		const inlang = solidAdapter(
 			await openInlangProject({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
@@ -272,7 +272,7 @@ describe("lint", () => {
 	it("should not react to changes to config if not initialized", async () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
-		const inlang = withSolidReactivity(
+		const inlang = solidAdapter(
 			await openInlangProject({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
@@ -297,7 +297,7 @@ describe("lint", () => {
 	it("should react to changes to config", async () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
-		const inlang = withSolidReactivity(
+		const inlang = solidAdapter(
 			await openInlangProject({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,

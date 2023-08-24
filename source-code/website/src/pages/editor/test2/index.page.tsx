@@ -1,5 +1,5 @@
 import { createNodeishMemoryFs } from "@inlang-git/fs"
-import { InlangConfig, Message, Plugin, openInlangProject, withSolidReactivity } from "@inlang/app"
+import { InlangConfig, Message, Plugin, openInlangProject, solidAdapter } from "@inlang/app"
 import type { ImportFunction, InlangModule } from "@inlang/module"
 import { createEffect, Show, createResource, from } from "solid-js"
 
@@ -79,7 +79,7 @@ export const Page = () => {
 		const fs = createNodeishMemoryFs()
 		await fs.writeFile("/inlang.config.json", JSON.stringify(config))
 
-		return withSolidReactivity(
+		return solidAdapter(
 			await openInlangProject({
 				nodeishFs: fs,
 				configPath: "/inlang.config.json",

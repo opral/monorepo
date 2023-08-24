@@ -2,12 +2,12 @@ import type { InlangProject } from "../api.js"
 import { observable, type from as solidFrom } from "../solid.js"
 import type { MessageQueryApi } from "@inlang/app"
 
-export const withSolidReactivity = (
+export const solidAdapter = (
 	project: InlangProject,
 	args: {
 		from: typeof solidFrom
 	},
-): SolidInlangProject => {
+): InlangProjectWithSolidAdapter => {
 	const convert = <T>(signal: () => T): (() => T) => {
 		return args.from(observable(signal)) as () => T
 	}
@@ -35,10 +35,10 @@ export const withSolidReactivity = (
 				getAll: convert(project.query.messages.getAll),
 			},
 		},
-	} satisfies SolidInlangProject
+	} satisfies InlangProjectWithSolidAdapter
 }
 
-export type SolidInlangProject = {
+export type InlangProjectWithSolidAdapter = {
 	appSpecificApi: () => ReturnType<InlangProject["appSpecificApi"]>
 	installed: {
 		plugins: () => ReturnType<InlangProject["installed"]["plugins"]>

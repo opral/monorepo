@@ -27,8 +27,8 @@ import {
 	LintRule,
 	Result,
 	openInlangProject,
-	withSolidReactivity,
-	type SolidInlangProject,
+	solidAdapter,
+	type InlangProjectWithSolidAdapter,
 } from "@inlang/app"
 import type { InlangModule } from "@inlang/module"
 import pluginJson from "../../../../../../../plugins/json/dist/index.js"
@@ -95,7 +95,7 @@ type EditorStateSchema = {
 	 *
 	 * Undefined if no inlang config exists/has been found.
 	 */
-	inlang: Resource<SolidInlangProject | undefined>
+	inlang: Resource<InlangProjectWithSolidAdapter | undefined>
 
 	doesInlangConfigExist: () => boolean
 
@@ -214,7 +214,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	// open the inlang project and store it in a resource
 	const [inlang] = createResource(async () => {
-		const inlang = withSolidReactivity(
+		const inlang = solidAdapter(
 			await openInlangProject({
 				nodeishFs: repo.nodeishFs,
 				configPath: "/inlang.config.json",
