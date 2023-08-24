@@ -22,10 +22,10 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"octokit": "3.1.0",
-		"@octokit/types": "11.1.0",
 		"@inlang-git/fs": "*",
-		"isomorphic-git": "1.24.5"
+		"@octokit/types": "11.1.0",
+		"isomorphic-git": "1.24.5",
+		"octokit": "3.1.0"
 	},
 	"license": "Apache-2.0"
 }

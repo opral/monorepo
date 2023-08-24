@@ -46,7 +46,7 @@ export function openRepository(
 	// the directory we use for all git operations
 	const dir = "/"
 
-	let pending: Promise<void> | undefined = raw
+	let pending: Promise<void | { error: Error }> | undefined = raw
 		.clone({
 			fs: withLazyFetching(rawFs, "clone"),
 			http,
@@ -62,6 +62,7 @@ export function openRepository(
 		})
 		.catch((err: any) => {
 			console.error("error cloning the repository", err)
+			return { error: err }
 		})
 
 	// delay all fs and repo operations until the repo clone and checkout have finished, this is preparation for the lazy feature
@@ -224,6 +225,24 @@ export function openRepository(
 					dir,
 				})) || undefined
 			)
+		},
+
+		getErrors() {
+			return {
+				subscribe: (cb: (err: Error) => void) => {
+					if (pending) {
+						pending.catch((maybeError) => {
+							if (maybeError) {
+								cb(maybeError.error)
+							}
+						})
+					}
+
+					return () => {
+						/* implement unsubscribe when we handle internal errors while usage */
+					}
+				},
+			}
 		},
 
 		/**
