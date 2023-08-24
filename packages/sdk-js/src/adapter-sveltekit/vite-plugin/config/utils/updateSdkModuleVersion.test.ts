@@ -16,15 +16,14 @@ import type { InlangModule } from "@inlang/module"
 import { version } from "../../../../../package.json"
 import { PATH_TO_CWD, PATH_TO_INLANG_CONFIG } from "../config.js"
 
-const getConfig = (...modules: string[]): InlangConfig => ({
+const getMockedConfig = (...modules: string[]): InlangConfig => ({
 	sourceLanguageTag: "en",
 	languageTags: ["en"],
 	settings: { "inlang.plugin.json": { pathPattern: "{languageTag}.json" } },
 	modules: ["plugin-json-mock", ...modules],
 })
 
-// TODO: create utility function
-const createMockInlang = async (fs: NodeishFilesystemSubset): Promise<InlangProject> => {
+const openMockedInlangProject = async (fs: NodeishFilesystemSubset): Promise<InlangProject> => {
 	const mockPlugin: Plugin = {
 		meta: {
 			id: "mock.plugin.name",
@@ -52,8 +51,8 @@ const createMockInlang = async (fs: NodeishFilesystemSubset): Promise<InlangProj
 describe("updateSdkModuleVersion", () => {
 	it("should not do anything if module is not defined", async () => {
 		const fs = await createMockNodeishFs()
-		await fs.writeFile("./inlang.config.json", JSON.stringify(getConfig()))
-		const inlang = await createMockInlang(fs)
+		await fs.writeFile("./inlang.config.json", JSON.stringify(getMockedConfig()))
+		const inlang = await openMockedInlangProject(fs)
 
 		const updated = await updateSdkModuleVersion(inlang)
 		expect(updated).toBe(false)
@@ -63,9 +62,9 @@ describe("updateSdkModuleVersion", () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile(
 			"./inlang.config.json",
-			JSON.stringify(getConfig(`https://cdn.com/@inlang/sdk-js-plugin@${version}/index.js`)),
+			JSON.stringify(getMockedConfig(`https://cdn.com/@inlang/sdk-js-plugin@${version}/index.js`)),
 		)
-		const inlang = await createMockInlang(fs)
+		const inlang = await openMockedInlangProject(fs)
 
 		const updated = await updateSdkModuleVersion(inlang)
 		expect(updated).toBe(false)
@@ -76,9 +75,9 @@ describe("updateSdkModuleVersion", () => {
 			const fs = await createMockNodeishFs()
 			await fs.writeFile(
 				"./inlang.config.json",
-				JSON.stringify(getConfig("https://cdn.com/@inlang/sdk-js-plugin/index.js")),
+				JSON.stringify(getMockedConfig("https://cdn.com/@inlang/sdk-js-plugin/index.js")),
 			)
-			const inlang = await createMockInlang(fs)
+			const inlang = await openMockedInlangProject(fs)
 
 			const updated = await updateSdkModuleVersion(inlang)
 			expect(updated).toBe(true)
@@ -91,9 +90,9 @@ describe("updateSdkModuleVersion", () => {
 			const fs = await createMockNodeishFs()
 			await fs.writeFile(
 				"./inlang.config.json",
-				JSON.stringify(getConfig("https://cdn.com/@inlang/sdk-js-plugin@0.0.0/index.js")),
+				JSON.stringify(getMockedConfig("https://cdn.com/@inlang/sdk-js-plugin@0.0.0/index.js")),
 			)
-			const inlang = await createMockInlang(fs)
+			const inlang = await openMockedInlangProject(fs)
 
 			const updated = await updateSdkModuleVersion(inlang)
 			expect(updated).toBe(true)
@@ -106,9 +105,9 @@ describe("updateSdkModuleVersion", () => {
 			const fs = await createMockNodeishFs()
 			await fs.writeFile(
 				"./inlang.config.json",
-				JSON.stringify(getConfig("https://cdn.com/@inlang/sdk-js-plugin@0.0/index.js")),
+				JSON.stringify(getMockedConfig("https://cdn.com/@inlang/sdk-js-plugin@0.0/index.js")),
 			)
-			const inlang = await createMockInlang(fs)
+			const inlang = await openMockedInlangProject(fs)
 
 			const updated = await updateSdkModuleVersion(inlang)
 			expect(updated).toBe(true)
@@ -121,9 +120,9 @@ describe("updateSdkModuleVersion", () => {
 			const fs = await createMockNodeishFs()
 			await fs.writeFile(
 				"./inlang.config.json",
-				JSON.stringify(getConfig("https://cdn.com/@inlang/sdk-js-plugin@0/index.js")),
+				JSON.stringify(getMockedConfig("https://cdn.com/@inlang/sdk-js-plugin@0/index.js")),
 			)
-			const inlang = await createMockInlang(fs)
+			const inlang = await openMockedInlangProject(fs)
 
 			const updated = await updateSdkModuleVersion(inlang)
 			expect(updated).toBe(true)
@@ -144,7 +143,7 @@ describe.skip("standaloneUpdateSdkModuleVersion", () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile(
 			PATH_TO_INLANG_CONFIG,
-			JSON.stringify(getConfig(`https://cdn.com/@inlang/sdk-js-plugin@${version}/index.js`)),
+			JSON.stringify(getMockedConfig(`https://cdn.com/@inlang/sdk-js-plugin@${version}/index.js`)),
 		)
 
 		const updated = await standaloneUpdateSdkModuleVersion()
@@ -157,7 +156,7 @@ describe.skip("standaloneUpdateSdkModuleVersion", () => {
 
 		await fs.writeFile(
 			PATH_TO_INLANG_CONFIG,
-			JSON.stringify(getConfig("https://cdn.com/@inlang/sdk-js-plugin@0/index.js")),
+			JSON.stringify(getMockedConfig("https://cdn.com/@inlang/sdk-js-plugin@0/index.js")),
 		)
 
 		const updated = await standaloneUpdateSdkModuleVersion()

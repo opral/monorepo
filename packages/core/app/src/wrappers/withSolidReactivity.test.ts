@@ -323,5 +323,5 @@ describe("lint", () => {
 	})
 
 	it.todo("should react to changes to modules")
-	it.todo("should react to changes to mesages")
+	it.todo("should react to changes to messages")
 })
