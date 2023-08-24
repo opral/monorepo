@@ -25,8 +25,12 @@ export function createMessagesQuery(
 			index.set(data.id, data)
 			return true
 		},
-		get: createSubscribable(({ where }) => {
-			return structuredClone(index.get(where.id))
+		get: createSubscribable((args) => {
+			if (!args) return undefined
+			return structuredClone(index.get(args.where.id))
+		}),
+		includedMessageIds: createSubscribable(() => {
+			return structuredClone([...index.keys()])
 		}),
 		getAll: createSubscribable(
 			createMemo(() => {
