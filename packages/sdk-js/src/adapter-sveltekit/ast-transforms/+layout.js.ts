@@ -78,7 +78,6 @@ export const transformLayoutJs = (
 	return nodeToCode(sourceFile)
 }
 
-
 // ------------------------------------------------------------------------------------------------
 
 const injectHotReloadCode = (sourceFile: SourceFile) => {
@@ -91,13 +90,16 @@ const injectHotReloadCode = (sourceFile: SourceFile) => {
 	// 	}]
 	// })
 
-	sourceFile.insertText(0, dedent`
+	sourceFile.insertText(
+		0,
+		dedent`
 		if (import.meta.hot) {
 			import.meta.hot.on('inlang-messages-changed', async () => {
 				location.reload()
 			})
 		}
-	`)
+	`,
+	)
 
 	// const loadFn = findOrCreateExport(sourceFile, 'load', '() => { }')
 	// const block = findFunctionBodyBlock(loadFn)

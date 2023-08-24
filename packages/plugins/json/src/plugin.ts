@@ -163,7 +163,7 @@ async function getFileToParse(
 	// get file, make sure that is not braking when the namespace doesn't exist in every languageTag dir
 	try {
 		const file = await nodeishFs.readFile(pathWithLanguage, { encoding: "utf-8" })
-		//analyse format of file
+		// analyze format of file
 		SPACING[pathWithLanguage] = detectJsonSpacing(file as string)
 		NESTED[pathWithLanguage] = detectIsNested(file as string)
 		FILE_HAS_NEW_LINE[pathWithLanguage] = (file as string).endsWith("\n")
@@ -336,6 +336,9 @@ async function saveMessages(args: {
 		}
 		for (const [languageTag, value] of Object.entries(storage)) {
 			const pathWithLanguage = args.settings.pathPattern.replace("{languageTag}", languageTag)
+			await args.nodeishFs.mkdir(pathWithLanguage.split("/").slice(0, -1).join("/"), {
+				recursive: true,
+			})
 			await args.nodeishFs.writeFile(
 				pathWithLanguage,
 				serializeFile(

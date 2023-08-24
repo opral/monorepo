@@ -7,7 +7,9 @@ export const inlangSymbol = Symbol.for("inlang")
 
 // ------------------------------------------------------------------------------------------------
 
-export type ObjectWithClientRuntime<Data extends Record<string, unknown> | void = Record<string, unknown>> = Data & {
+export type ObjectWithClientRuntime<
+	Data extends Record<string, unknown> | void = Record<string, unknown>,
+> = Data & {
 	[inlangSymbol]: SvelteKitClientRuntime
 }
 
@@ -32,7 +34,7 @@ export const addRuntimePromiseToEvent = <Event extends LoadEvent>(
 	event: Event,
 	runtimePromise: Promise<SvelteKitClientRuntime>,
 ): EventWithRuntimePromise<Event> => {
-	; (event as EventWithRuntimePromise<Event>).params[inlangSymbol] = runtimePromise
+	;(event as EventWithRuntimePromise<Event>).params[inlangSymbol] = runtimePromise
 
 	return event as EventWithRuntimePromise<Event>
 }
@@ -45,7 +47,8 @@ export const getRuntimePromiseFromEvent = <Event extends LoadEvent>(
 
 export const replaceLanguageInUrl = (url: URL, languageTag: LanguageTag) =>
 	new URL(
-		`${url.origin}${replaceLanguageInSlug(url.pathname as RelativeUrl, languageTag)}${url.search}${url.hash
+		`${url.origin}${replaceLanguageInSlug(url.pathname as RelativeUrl, languageTag)}${url.search}${
+			url.hash
 		}`,
 	)
 

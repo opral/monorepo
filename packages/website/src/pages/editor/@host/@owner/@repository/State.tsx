@@ -4,6 +4,7 @@ import {
 	createEffect,
 	createResource,
 	createSignal,
+	from,
 	JSXElement,
 	Resource,
 	Setter,
@@ -11,22 +12,23 @@ import {
 } from "solid-js"
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
 import type { LocalStorageSchema } from "#src/services/local-storage/index.js"
-import { getLocalStorage, useLocalStorage } from "#src/services/local-storage/index.js"
+import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { github } from "#src/services/github/index.js"
 import { showToast } from "#src/components/Toast.jsx"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
 import { telemetryBrowser, parseOrigin } from "@inlang/telemetry"
 import type { NodeishFilesystem } from "@inlang-git/fs"
-import { createNodeishMemoryFs } from "@inlang-git/fs"
+import { openRepository, createNodeishMemoryFs, Repository } from "@project-lisa/client"
 import { http, raw } from "@inlang-git/client/raw"
 import { publicEnv } from "@inlang/env-variables"
 import {
 	LanguageTag,
 	LintRule,
 	Result,
-	createInlang,
-	type InlangProject,
+	openInlangProject,
+	withSolidReactivity,
+	type SolidInlangProject,
 	type Message,
 } from "@inlang/app"
 import type { InlangModule } from "@inlang/module"
@@ -47,15 +49,9 @@ type EditorStateSchema = {
 	 */
 	currentBranch: Resource<string | undefined>
 	/**
-	 * Unpushed changes in the repository.
-	 */
-	unpushedChanges: Resource<Awaited<ReturnType<typeof raw.log>>>
-	/**
 	 * Additional information about a repository provided by GitHub.
 	 */
-	githubRepositoryInformation: Resource<
-		Awaited<ReturnType<typeof github.request<"GET /repos/{owner}/{repo}">>>
-	>
+	githubRepositoryInformation: Resource<Awaited<ReturnType<Repository["getMeta"]>>>
 	/**
 	 * Route parameters like `/github.com/inlang/website`.
 	 *
@@ -101,14 +97,13 @@ type EditorStateSchema = {
 	 *
 	 * Undefined if no inlang config exists/has been found.
 	 */
-	inlang: Resource<InlangProject | undefined>
+	inlang: Resource<SolidInlangProject | undefined>
 
 	doesInlangConfigExist: () => boolean
 
 	sourceLanguageTag: () => LanguageTag | undefined
 
 	languageTags: () => LanguageTag[]
-	setLanguageTags: Setter<LanguageTag[]>
 
 	tourStep: () => TourStepId
 	setTourStep: Setter<TourStepId>
@@ -133,11 +128,6 @@ type EditorStateSchema = {
 	setLocalChanges: Setter<number> // Setter<Message[]>
 
 	/**
-	 * The reference resource.
-	 */
-	sourceMessages: () => Message[] | undefined
-
-	/**
 	 * Whether the user is a collaborator of the repository.
 	 *
 	 * Check whether the user is logged in before using this resource.
@@ -149,11 +139,6 @@ type EditorStateSchema = {
 	userIsCollaborator: Resource<boolean>
 
 	/**
-	 * Whether the is private or not.
-	 */
-	repoIsPrivate: Resource<boolean | undefined>
-
-	/**
 	 * The last time the repository was pushed.
 	 */
 	setLastPush: Setter<Date | undefined>
@@ -161,6 +146,7 @@ type EditorStateSchema = {
 	/**
 	 * The last time the repository has been pulled.
 	 */
+	lastPullTime: () => Date | undefined
 	setLastPullTime: Setter<Date | undefined>
 }
 
@@ -195,9 +181,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [fsChange, setFsChange] = createSignal(new Date())
 
-	const [doesInlangConfigExist, setDoesInlangConfigExist] = createSignal<boolean>(false)
-	const [sourceLanguageTag, setSourceLanguageTag] = createSignal<LanguageTag>()
-	const [languageTags, setLanguageTags] = createSignal<LanguageTag[]>([])
 	const [tourStep, setTourStep] = createSignal<TourStepId>("github-login")
 
 	//set filter with search params
@@ -228,14 +211,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	})
 
 	const [fs, setFs] = createSignal<NodeishFilesystem>(createNodeishMemoryFs())
-
-	/**
-	 * The reference resource.
-	 */
-	const sourceMessages = () =>
-		inlang()
-			?.query.messages.getAll()
-			.filter((message) => message.variants.filter((variant) => variant.languageTag === sourceLanguageTag()))
 
 	const [localStorage] = useLocalStorage() ?? []
 
@@ -297,27 +272,19 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 	)
 
-	const [inlang] = createResource(
-		() => {
-			if (
-				repositoryIsCloned.error ||
-				repositoryIsCloned.loading ||
-				repositoryIsCloned() === undefined
-			) {
-				return false
-			}
-			return {
-				fs: fs(),
-				// BUG: this is not reactive
-				// See https://github.com/inlang/inlang/issues/838#issuecomment-1560745678
-				// we need to listen to inlang.config.js changes
-				// lastFsChange: fsChange(),
-			}
-		},
-		async () => {
-			const inlang = await createInlang({
-				configPath: "./inlang.config.json",
-				nodeishFs: fs(),
+	// open the repository
+	const { host, owner, repository } = routeParams()
+	const repo = openRepository(`${host}/${owner}/${repository}`, {
+		nodeishFs: createNodeishMemoryFs(),
+		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
+	})
+
+	// open the inlang project and store it in a resource
+	const [inlang] = createResource(async () => {
+		const inlang = withSolidReactivity(
+			await openInlangProject({
+				nodeishFs: repo.nodeishFs,
+				configPath: "/inlang.config.json",
 				_import: async () =>
 					({
 						default: {
@@ -327,28 +294,34 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 							lintRules: [...pluginLint.lintRules],
 						},
 					} satisfies InlangModule),
-			})
-			const config = inlang.config()
-			if (config) {
-				const languagesTags = // TODO: move this into setter logic
-					config.languageTags.sort((a: any, b: any) =>
-						// source language should be first
-						// sort alphabetically otherwise
-						a === config.sourceLanguageTag
-							? -1
-							: b === config.sourceLanguageTag
-							? 1
-							: a.localeCompare(b),
-					) || []
-				// initializes the languages to all languages
-				setDoesInlangConfigExist(true)
-				setSourceLanguageTag(config.sourceLanguageTag)
-				setLanguageTags(languagesTags)
-				await inlang.lint.init()
-			}
-			return inlang
-		},
-	)
+			}),
+			{ from },
+		)
+		//initialize lint to get reports
+		await inlang.lint.init()
+		return inlang
+	})
+
+	// DERIVED when config exists
+	const doesInlangConfigExist = () => {
+		return inlang()?.config() ? true : false
+	}
+
+	// DERIVED source language tag from inlang config
+	const sourceLanguageTag = () => {
+		return inlang()?.config().sourceLanguageTag
+	}
+
+	// DERIVED language tags from inlang config
+	const languageTags = () => {
+		return inlang()?.config().languageTags ?? []
+	}
+
+	createEffect(() => {
+		if (!inlang.loading) {
+			console.info("messages changes", Object.values(inlang()?.query.messages.getAll() || {}))
+		}
+	})
 
 	//the effect should skip tour guide steps if not needed
 	createEffect(() => {
@@ -358,66 +331,16 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			setTourStep("fork-repository")
 		} else if (tourStep() === "fork-repository" && inlang()) {
 			setTimeout(() => {
-				const element = document.getElementById("missingMessage-summary")
+				const element = document.getElementById("missingTranslation-summary")
 				element !== null ? setTourStep("missing-message-rule") : setTourStep("textfield")
 			}, 100)
 		} else if (tourStep() === "missing-message-rule" && inlang()) {
 			setTimeout(() => {
-				const element = document.getElementById("missingMessage-summary")
+				const element = document.getElementById("missingTranslation-summary")
 				element !== null ? setTourStep("missing-message-rule") : setTourStep("textfield")
 			}, 100)
 		}
 	})
-
-	// re-fetched if the file system changes
-	const [unpushedChanges] = createResource(() => {
-		if (
-			repositoryIsCloned.error ||
-			repositoryIsCloned.loading ||
-			repositoryIsCloned() === undefined
-		) {
-			return false
-		}
-		return {
-			fs: fs(),
-			repositoryClonedTime: repositoryIsCloned()!,
-			lastPushTime: lastPush(),
-			lastPullTime: lastPullTime(),
-			// while unpushed changes does not require last fs change,
-			// unpushed changed should react to fsChange. Hence, pass
-			// the signal to _unpushedChanges
-			lastFsChange: fsChange(),
-		}
-	}, _unpushedChanges)
-
-	const [repoIsPrivate] = createResource(
-		/**
-		 * createResource is not reacting to changes like: "false","Null", or "undefined".
-		 * Hence, a string needs to be passed to the fetch of the resource.
-		 */
-		() => {
-			if (
-				currentPageContext.routeParams.owner === undefined ||
-				currentPageContext.routeParams.repository === undefined
-			) {
-				return false
-			}
-			return {
-				routeParams: currentPageContext.routeParams as EditorRouteParams,
-			}
-		},
-		async (args) => {
-			try {
-				const response = await github.request("GET /repos/{owner}/{repo}", {
-					owner: args.routeParams.owner,
-					repo: args.routeParams.repository,
-				})
-				return response.data.private
-			} catch (error) {
-				return undefined
-			}
-		},
-	)
 
 	const [userIsCollaborator] = createResource(
 		/**
@@ -444,6 +367,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				return false
 			}
 			try {
+				//console.log(await repo.isCollaborator({ username: args.user.username }))
+				// TODO: use lisa api to check collaborator
 				const response = await github.request(
 					"GET /repos/{owner}/{repo}/collaborators/{username}",
 					{
@@ -474,11 +399,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				routeParams: routeParams(),
 			}
 		},
-		async (args) =>
-			github.request("GET /repos/{owner}/{repo}", {
-				owner: args.routeParams.owner,
-				repo: args.routeParams.repository,
-			}),
+		async () => await repo.getMeta(),
 	)
 
 	const [currentBranch] = createResource(
@@ -503,67 +424,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 	)
 
-	// syncing a forked repository
-	//
-	// If a repository is a fork, it needs to be synced with the upstream repository.
-	// This is done by merging the upstream repository into the forked repository.
-	//
-	// https://github.com/inlang/inlang/issues/326
-	//
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [maybeSyncForkOnClone] = createResource(
-		() => {
-			if (
-				(githubRepositoryInformation() && githubRepositoryInformation()?.data.fork !== true) ||
-				currentBranch() === undefined ||
-				localStorage.user === undefined ||
-				// route params can be undefined if the user navigated away from the editor
-				routeParams().owner === undefined ||
-				routeParams().repository === undefined
-			) {
-				return false
-			}
-			// pass all reactive variables
-			return {
-				branch: currentBranch()!,
-				owner: routeParams().owner,
-				repo: routeParams().repository,
-				fs: fs(),
-				setFsChange: setFsChange,
-				user: localStorage.user,
-			}
-		},
-		async (args) => {
-			try {
-				// merge upstream
-				const response = await github.request("POST /repos/{owner}/{repo}/merge-upstream", {
-					branch: args.branch,
-					owner: args.owner,
-					repo: args.repo,
-				})
-				if (response.data.merge_type && response.data.merge_type !== "none") {
-					showToast({
-						variant: "info",
-						title: "Synced fork",
-						message:
-							"The fork has been synced with its parent repository. The latest changes will be pulled.",
-					})
-					// pull afterwards
-					await pull({ setLastPullTime, ...args })
-				}
-			} catch (error) {
-				showToast({
-					variant: "warning",
-					title: "Syncing fork failed",
-					message:
-						"The fork likely has outstanding changes that have not been merged and led to a merge conflict. You can resolve the merge conflict manually by opening your GitHub repository.",
-				})
-				// rethrow for resource.error to work
-				throw error
-			}
-		},
-	)
-
 	const [lastPullTime, setLastPullTime] = createSignal<Date>()
 
 	return (
@@ -572,7 +432,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				{
 					repositoryIsCloned,
 					currentBranch,
-					unpushedChanges,
 					githubRepositoryInformation,
 					routeParams,
 					searchParams,
@@ -586,7 +445,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					doesInlangConfigExist,
 					sourceLanguageTag,
 					languageTags,
-					setLanguageTags,
 					tourStep,
 					setTourStep,
 					filteredLanguageTags,
@@ -595,10 +453,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setFilteredLintRules,
 					localChanges,
 					setLocalChanges,
-					sourceMessages,
 					userIsCollaborator,
-					repoIsPrivate,
 					setLastPush,
+					lastPullTime,
 					setLastPullTime,
 					fs,
 				} satisfies EditorStateSchema
@@ -753,30 +610,6 @@ export async function pushChanges(args: {
 	} catch (error) {
 		return { error: (error as PushException) ?? "Unknown error" }
 	}
-}
-
-async function _unpushedChanges(args: {
-	fs: NodeishFilesystem
-	repositoryClonedTime: Date
-	lastPushTime?: Date
-	lastPullTime?: Date
-}) {
-	if (args.repositoryClonedTime === undefined) {
-		return []
-	}
-	// filter out undefined values and sort by date
-	// get the last event
-	const lastRelevantEvent = [args.lastPushTime, args.repositoryClonedTime, args.lastPullTime]
-		.filter((value) => value !== undefined)
-		.sort((a, b) => a!.getTime() - b!.getTime())
-		.at(-1)
-
-	const unpushedChanges = await raw.log({
-		fs: args.fs,
-		dir: "/",
-		since: lastRelevantEvent,
-	})
-	return unpushedChanges
 }
 
 async function pull(args: {

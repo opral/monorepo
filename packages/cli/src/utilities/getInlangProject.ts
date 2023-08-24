@@ -1,9 +1,6 @@
 import fs from "node:fs/promises"
 import { resolve } from "node:path"
-import { createInlang, InlangProject, Result, tryCatch } from "@inlang/app"
-import type { InlangModule } from "@inlang/module"
-import pluginJson from "../../../plugins/json/dist/index.js"
-import pluginLint from "../../../plugins/standard-lint-rules/dist/index.js"
+import { openInlangProject, InlangProject, Result, tryCatch } from "@inlang/app"
 
 // in case multiple commands run getInlang in the same process
 let cached: Awaited<ReturnType<typeof getInlangProject>> | undefined = undefined
@@ -24,18 +21,9 @@ export async function getInlangProject(): Promise<Result<InlangProject, Error>> 
 	}
 
 	cached = await tryCatch(() =>
-		createInlang({
+		openInlangProject({
 			configPath,
 			nodeishFs: fs,
-			_import: async () =>
-				({
-					default: {
-						// @ts-ignore
-						plugins: [...pluginJson.plugins],
-						// @ts-ignore
-						lintRules: [...pluginLint.lintRules],
-					},
-				} satisfies InlangModule),
 		}),
 	)
 

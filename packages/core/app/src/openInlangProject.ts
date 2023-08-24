@@ -14,6 +14,7 @@ import {
 	ConfigPathNotFoundError,
 	ConfigSyntaxError,
 	InvalidConfigError,
+	NoMessagesPluginError,
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
 } from "./errors.js"
@@ -32,7 +33,7 @@ const ConfigCompiler = TypeCompiler.Compile(InlangConfig)
  *   and supporting legacy resolvedModules such as CJS.
  *
  */
-export const createInlang = async (args: {
+export const openInlangProject = async (args: {
 	configPath: string
 	nodeishFs: NodeishFilesystemSubset
 	_import?: ImportFunction
@@ -62,7 +63,6 @@ export const createInlang = async (args: {
 				writeConfigToDisk({ nodeishFs: args.nodeishFs, config: validatedConfig })
 				return { data: undefined }
 			} catch (error: unknown) {
-				// TODO: test if this actually works
 				if (error instanceof InvalidConfigError) {
 					return { error }
 				}
@@ -82,7 +82,14 @@ export const createInlang = async (args: {
 
 			loadModules({ config: conf, nodeishFs: args.nodeishFs, _import: args._import })
 				.then((resolvedModules) => {
+					if (
+						!resolvedModules.runtimePluginApi.loadMessages ||
+						!resolvedModules.runtimePluginApi.saveMessages
+					) {
+						throw new NoMessagesPluginError()
+					}
 					setResolvedModules(resolvedModules)
+
 					// TODO: handle `detectedLanguageTags`
 				})
 				.catch((err) => markInitAsFailed(err))
@@ -112,7 +119,9 @@ export const createInlang = async (args: {
 					setMessages(messages)
 					markInitAsComplete()
 				})
-				.catch((err) => markInitAsFailed(new PluginLoadMessagesError("Error in load messages", { cause: err, })))
+				.catch((err) =>
+					markInitAsFailed(new PluginLoadMessagesError("Error in load messages", { cause: err })),
+				)
 		})
 
 		// -- installed items ----------------------------------------------------
@@ -120,15 +129,15 @@ export const createInlang = async (args: {
 		const installedLintRules = () =>
 			resolvedModules()!.lintRules.map(
 				(rule) =>
-				({
-					meta: rule.meta,
-					module:
-						resolvedModules()?.meta.find((m) => m.lintRules.includes(rule.meta.id))?.module ??
-						"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
-					// default to warning, see https://github.com/inlang/inlang/issues/1254
-					lintLevel: configValue.settings["project.lintRuleLevels"]?.[rule.meta.id] ?? "warning",
-					disabled: configValue.settings["project.disabled"]?.includes(rule.meta.id) ?? false,
-				} satisfies InstalledLintRule),
+					({
+						meta: rule.meta,
+						module:
+							resolvedModules()?.meta.find((m) => m.lintRules.includes(rule.meta.id))?.module ??
+							"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
+						// default to warning, see https://github.com/inlang/inlang/issues/1254
+						lintLevel: configValue.settings["project.lintRuleLevels"]?.[rule.meta.id] ?? "warning",
+						disabled: configValue.settings["project.disabled"]?.includes(rule.meta.id) ?? false,
+					} satisfies InstalledLintRule),
 			) satisfies Array<InstalledLintRule>
 
 		const installedPlugins = () =>
@@ -169,9 +178,9 @@ export const createInlang = async (args: {
 				rules:
 					configValue.settings["project.disabled"] !== undefined
 						? resolvedModules()!.lintRules.filter(
-							(rule) =>
-								configValue.settings["project.disabled"]?.includes(rule.meta.id) === false,
-						)
+								(rule) =>
+									configValue.settings["project.disabled"]?.includes(rule.meta.id) === false,
+						  )
 						: resolvedModules()!.lintRules,
 			}).then((report) => {
 				setLintReports(report.data)
@@ -183,7 +192,7 @@ export const createInlang = async (args: {
 
 		// -- app ---------------------------------------------------------------
 
-		const initializeError: Error | undefined = await initialized.catch(error => error)
+		const initializeError: Error | undefined = await initialized.catch((error) => error)
 
 		const query = createReactiveQuery(() => messages() || [])
 
@@ -191,7 +200,6 @@ export const createInlang = async (args: {
 			debounce(
 				500,
 				async (newMessages) => {
-					// console.log('saving changes to messages')
 					try {
 						await resolvedModules()!.runtimePluginApi.saveMessages({ messages: newMessages })
 					} catch (err) {
@@ -205,7 +213,7 @@ export const createInlang = async (args: {
 		)
 
 		createEffect(() => {
-			debouncedSave(query.getAll())
+			debouncedSave(Object.values(query.getAll()))
 		})
 
 		return {
@@ -215,8 +223,8 @@ export const createInlang = async (args: {
 			},
 			errors: createSubscribable(() => [
 				...(initializeError ? [initializeError] : []),
-				...resolvedModules() ? resolvedModules()!.errors : [],
-				...(lintErrors() ?? [])
+				...(resolvedModules() ? resolvedModules()!.errors : []),
+				...(lintErrors() ?? []),
 			]),
 			config: createSubscribable(() => config()!),
 			setConfig,
@@ -343,14 +351,14 @@ function skipFirst(func: (args: any) => any) {
 	}
 }
 
-// TODO: how do we unsubscribe? Do we need that?
-// COMMENT from @samuelstroschein: Likely not. The reactivity is handled internally with auto dispose from SolidJS.
-function createSubscribable<T>(signal: () => T): Subscribable<T> {
+export function createSubscribable<R = unknown, T extends (...args: any[]) => R = () => R>(
+	signal: T,
+): Subscribable<T> {
 	return Object.assign(signal, {
 		subscribe: (callback: any) => {
 			createEffect(() => {
 				callback(signal())
 			})
 		},
-	})
+	}) as Subscribable<T>
 }

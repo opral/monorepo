@@ -27,8 +27,8 @@
 	},
 	"scripts": {
 		"dev": "npm-run-all --print-label --parallel dev:watch tsc:watch",
-		"dev:watch": "DEV=true node ./build.js",
-		"build": "node ./build.js && tsc -p tsconfig.build.json",
+		"dev:watch": "inlang module build --entry ./src/index.ts --outdir ./dist --watch",
+		"build": "inlang module build --entry ./src/index.ts --outdir ./dist && tsc -p tsconfig.build.json",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit --emitDeclarationOnly false && vitest run --passWithNoTests --coverage",
 		"test:watch": "npm-run-all --print-label --parallel tsc:watch vitest:watch tsc:watch:plugin",
@@ -38,12 +38,13 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"devDependencies": {
+		"@inlang/cli": "*",
 		"@inlang/plugin": "*",
 		"chevrotain": "^10.5.0",
 		"esbuild": "^0.17.10",
 		"npm-run-all": "^4.1.5",
 		"typescript": "^4.9.5",
-		"valibot": "^0.9.0",
+		"valibot": "^0.13.1",
 		"vitest": "^0.29.1"
 	},
 	"license": "Apache-2.0"

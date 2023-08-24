@@ -1,10 +1,4 @@
-import {
-	For,
-	Match,
-	Switch,
-	onMount,
-} from "solid-js"
-import { Message } from "./Message.jsx"
+import { For, Match, Switch, onMount } from "solid-js"
 import { Layout as EditorLayout } from "./Layout.jsx"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
@@ -16,6 +10,9 @@ import { ListHeader, messageCount } from "./components/Listheader.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"
+import { createMemo } from "solid-js"
+import type { Message as MessageType } from "@inlang/app"
+import { Message } from "./Message.jsx"
 
 export function Page() {
 	return (
@@ -34,13 +31,8 @@ export function Page() {
  * is required to use the useEditorState hook.
  */
 function TheActualPage() {
-	const {
-		inlang,
-		routeParams,
-		repositoryIsCloned,
-		doesInlangConfigExist,
-		tourStep,
-	} = useEditorState()
+	const { inlang, routeParams, repositoryIsCloned, doesInlangConfigExist, tourStep } =
+		useEditorState()
 	const [, setLocalStorage] = useLocalStorage()
 
 	onMount(() => {
@@ -94,11 +86,9 @@ function TheActualPage() {
 					<p class="text-danger">{repositoryIsCloned.error.message}</p>
 				</Match>
 				<Match when={inlang()?.errors().length !== 0 && inlang()}>
-					<p class="text-danger pb-2">
-						An error occurred while initializing the config:
-					</p>
+					<p class="text-danger pb-2">An error occurred while initializing the config:</p>
 					<ul class="text-danger">
-						{inlang()?.errors().length !== 0 &&
+						{inlang()?.errors().length !== 0 && (
 							<For each={inlang()?.errors()}>
 								{(error) => {
 									return (
@@ -108,10 +98,10 @@ function TheActualPage() {
 											{error.message} <br />
 											{error.stack && <p>{error.stack}</p>}
 										</li>
-									);
+									)
 								}}
 							</For>
-						}
+						)}
 					</ul>
 				</Match>
 				<Match when={repositoryIsCloned.loading || inlang() === undefined}>
@@ -154,23 +144,24 @@ function TheActualPage() {
 				</Match>
 				<Match when={doesInlangConfigExist() && inlang()?.query.messages.getAll() !== undefined}>
 					<div>
-						<ListHeader messages={inlang()?.query.messages.getAll() || []} />
+						<ListHeader messages={Object.values(inlang()?.query.messages.getAll() || {})} />
 						<TourHintWrapper
 							currentId="textfield"
 							position="bottom-left"
 							offset={{ x: 110, y: 144 }}
 							isVisible={tourStep() === "textfield"}
 						>
-							<For each={inlang()?.query.messages.getAll()}>
-								{(message) => {
-									return <Message message={message} />
+							<For each={Object.keys(inlang()!.query.messages.getAll())}>
+								{(id) => {
+									return <Message message={inlang()!.query.messages.getAll()[id]!} />
 								}}
 							</For>
 						</TourHintWrapper>
 						<div
 							class="flex flex-col h-[calc(100vh_-_288px)] grow justify-center items-center min-w-full gap-2"
 							classList={{
-								["hidden"]: messageCount(inlang()?.query.messages.getAll() || []) !== 0,
+								["hidden"]:
+									messageCount(Object.values(inlang()?.query.messages.getAll() || {})) !== 0,
 							}}
 						>
 							<NoMatchPlaceholder />

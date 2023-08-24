@@ -1,11 +1,10 @@
-import type { RequestEvent } from '@sveltejs/kit'
+import type { RequestEvent } from "@sveltejs/kit"
 import { initTransformConfig, type TransformConfig } from "../../vite-plugin/config/index.js"
 import { inlangSymbol } from "../shared/utils.js"
 import type { SvelteKitServerRuntime } from "./runtime.js"
 import type { LanguageTag } from "@inlang/app"
-import type { Message } from "@inlang/messages"
 
-type State = Pick<TransformConfig, 'sourceLanguageTag' | 'languageTags' | 'messages'>
+type State = Pick<TransformConfig, "sourceLanguageTag" | "languageTags" | "messages">
 
 let state: State
 
@@ -32,8 +31,6 @@ export const initState = async () => {
 		}
 	}
 
-	await reloadMessages()
-
 	return {
 		sourceLanguageTag: state.sourceLanguageTag,
 		languageTags: state.languageTags,
@@ -42,21 +39,21 @@ export const initState = async () => {
 
 // ------------------------------------------------------------------------------------------------
 
-let _messages: Message[] = []
-
-// TODO: fix resources if needed (add missing Keys, etc.)
-export const reloadMessages = async () =>
-	(_messages = state?.messages()) || []
-
-export const loadMessages = (languageTag: LanguageTag) => _messages // TODO: filter out language variants
-
-// ------------------------------------------------------------------------------------------------
+// TODO: fix resources if needed with fallback logic https://github.com/inlang/inlang/discussions/1267
+export const loadMessages = (languageTag: LanguageTag) =>
+	state?.messages().map((message) => ({
+		...message,
+		variants: message.variants.filter((variant) => variant.languageTag === languageTag),
+	}))
 
 // ------------------------------------------------------------------------------------------------
 
-type ObjectWithServerRuntime<Data extends Record<string, unknown> = Record<string, unknown>> = Data & {
-	[inlangSymbol]: SvelteKitServerRuntime
-}
+// ------------------------------------------------------------------------------------------------
+
+type ObjectWithServerRuntime<Data extends Record<string, unknown> = Record<string, unknown>> =
+	Data & {
+		[inlangSymbol]: SvelteKitServerRuntime
+	}
 
 export const addRuntimeToLocals = (
 	locals: RequestEvent["locals"],

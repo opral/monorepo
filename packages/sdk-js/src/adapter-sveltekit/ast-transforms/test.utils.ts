@@ -1,15 +1,14 @@
 import { deepmerge } from "deepmerge-ts"
 import type { TransformConfig } from "../vite-plugin/config/index.js"
+import type { Message } from "@inlang/app"
 
 type DeepPartial<T> = T extends Record<PropertyKey, unknown>
 	? {
-	[Key in keyof T]?: DeepPartial<T[Key]>
-}
+			[Key in keyof T]?: DeepPartial<T[Key]>
+	  }
 	: T
 
-export const initTestApp = (
-	overrides: DeepPartial<TransformConfig> = {},
-): TransformConfig =>
+export const initTestApp = (overrides: DeepPartial<TransformConfig> = {}): TransformConfig =>
 	deepmerge(
 		{
 			debug: false,

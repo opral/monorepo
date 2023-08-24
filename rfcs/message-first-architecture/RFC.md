@@ -147,8 +147,8 @@ lints.reports.filter((report) => report.level === "error")
 ##### Currently
 
 ```ts
-export const missingMessage = createLintRule({
-	id: "inlang.missingMessage",
+export const missingTranslation = createLintRule({
+	id: "inlang.missingTranslation",
 	setup: ({ report }) => {
 		let targetLanguage: LanguageTag["name"] | undefined
 		return {
@@ -182,8 +182,8 @@ export const missingMessage = createLintRule({
 - The mental model is simple: "I have a message and I can query all the messages to derive is something is wrong"
 
 ```ts
-export const missingMessage = createLintRule({
-	id: "inlang.missingMessage",
+export const missingTranslation = createLintRule({
+	id: "inlang.missingTranslation",
 	message: ({ message, messages, config }) => {
 		if (message.languageTag !== config.referenceLanguageTag) {
 			return

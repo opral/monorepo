@@ -15,9 +15,7 @@ type RuleSummaryItem = {
 	level: "error" | "warning"
 }
 
-export const messageCount = (
-	messages: Message[]
-) => {
+export const messageCount = (messages: Message[]) => {
 	let counter = 0
 	for (const message of messages) {
 		if (showFilteredMessage(message)) counter++
@@ -39,15 +37,18 @@ export const ListHeader = (props: ListHeaderProps) => {
 	const getLintSummary = () => {
 		const lintSummary: Array<RuleSummaryItem> = []
 		const reports = inlang()?.lint.reports()
-		inlang()?.installed.lintRules()
+		inlang()
+			?.installed.lintRules()
 			.filter((lintRule) => !lintRule.disabled)
 			.map((lintRule) => {
 				let level: "error" | "warning"
-				const filteredReports = reports?.filter((report: MessageLintReport) => report.ruleId === lintRule.meta.id)
+				const filteredReports = reports?.filter(
+					(report: MessageLintReport) => report.ruleId === lintRule.meta.id,
+				)
 				const filteredMessages = filteredReports?.filter((report: MessageLintReport) => {
 					level = report.level
 					return showFilteredMessage(
-						inlang()?.query.messages.get({ where: { id: report.messageId } })
+						inlang()?.query.messages.get({ where: { id: report.messageId } }),
 					)
 				})
 				const counter = filteredMessages?.length || 0
@@ -81,9 +82,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 					</div>
 				}
 			>
-				<div class="font-medium text-on-surface">
-					{messageCount(props.messages) + " Messages"}
-				</div>
+				<div class="font-medium text-on-surface">{messageCount(props.messages) + " Messages"}</div>
 			</Show>
 
 			<div class="flex gap-2">
@@ -95,8 +94,8 @@ export const ListHeader = (props: ListHeaderProps) => {
 								position="bottom-right"
 								offset={{ x: 0, y: 40 }}
 								isVisible={
-									lintRule.rule.id === "inlang.lintRule.missingMessage"
-									&& tourStep() === "missing-message-rule"
+									lintRule.rule.id === "inlang.lintRule.missingTranslation" &&
+									tourStep() === "missing-message-rule"
 								}
 							>
 								<sl-tooltip
@@ -104,7 +103,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 									prop:placement="bottom"
 									prop:trigger="hover"
 									class="small"
-									style="	--show-delay: 1s;"
+									style={{ "--show-delay": "1s" }}
 								>
 									<sl-button
 										prop:size="small"
@@ -129,8 +128,8 @@ export const ListHeader = (props: ListHeaderProps) => {
 										<div
 											class="flex gap-2 items-center h-7"
 											id={
-												(lintRule.rule.id === "inlang.lintRule.missingMessage")
-													? "missingMessage-summary"
+												lintRule.rule.id === "inlang.lintRule.missingTranslation"
+													? "missingTranslation-summary"
 													: "lint-summary"
 											}
 										>

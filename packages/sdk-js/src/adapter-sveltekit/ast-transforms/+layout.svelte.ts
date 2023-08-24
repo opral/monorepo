@@ -42,7 +42,7 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 	addImport(
 		sourceFile,
 		`@inlang/sdk-js/adapter-sveltekit/client/${
-		config.options.languageInUrl ? "not-reactive" : "reactive-workaround"
+			config.options.languageInUrl ? "not-reactive" : "reactive-workaround"
 		}`,
 		"addRuntimeToContext",
 		"getRuntimeFromContext",

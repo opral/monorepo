@@ -1,7 +1,6 @@
 import type { InlangProject } from "../api.js"
-
 import { observable, type from as solidFrom } from "../solid.js"
-import type { MessageQueryApi } from "@inlang/messages"
+import type { MessageQueryApi } from "@inlang/app"
 
 export const withSolidReactivity = (
 	project: InlangProject,
@@ -26,7 +25,16 @@ export const withSolidReactivity = (
 			plugins: convert(project.installed.plugins),
 		},
 		setConfig: project.setConfig,
-		query: project.query,
+		query: {
+			messages: {
+				create: project.query.messages.create,
+				update: project.query.messages.update,
+				delete: project.query.messages.delete,
+				upsert: project.query.messages.upsert,
+				get: project.query.messages.get,
+				getAll: convert(project.query.messages.getAll),
+			},
+		},
 	} satisfies SolidInlangProject
 }
 
@@ -40,7 +48,14 @@ export type SolidInlangProject = {
 	config: () => ReturnType<InlangProject["config"]>
 	setConfig: InlangProject["setConfig"]
 	query: {
-		messages: MessageQueryApi
+		messages: {
+			create: MessageQueryApi["create"]
+			update: MessageQueryApi["update"]
+			delete: MessageQueryApi["delete"]
+			upsert: MessageQueryApi["upsert"]
+			get: MessageQueryApi["get"]
+			getAll: () => ReturnType<MessageQueryApi["getAll"]>
+		}
 	}
 	lint: {
 		/**

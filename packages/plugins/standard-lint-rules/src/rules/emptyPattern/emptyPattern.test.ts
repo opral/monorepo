@@ -46,7 +46,7 @@ test("should report if no patterns are defined", async () => {
 		rules: [emptyPatternRule],
 	})
 
-  expect(result.errors).toHaveLength(0)
+	expect(result.errors).toHaveLength(0)
 	expect(result.data).toHaveLength(1)
 	expect(result.data[0]!.languageTag).toBe("es")
 })
@@ -64,43 +64,43 @@ test("should report if a message has a pattern with only one text element that i
 		rules: [emptyPatternRule],
 	})
 
-  expect(result.errors).toHaveLength(0)
+	expect(result.errors).toHaveLength(0)
 	expect(result.data).toHaveLength(1)
 	expect(result.data[0]!.languageTag).toBe("cn")
 })
 
-describe("reported by missingMessageRule", () => {
-  test("should not report if a languageTag is not present", async () => {
-    const result = await lintSingleMessage({
-      sourceLanguageTag: "en",
-      languageTags: ["en", "it"],
-      lintLevels: {
-        [emptyPatternRule.meta.id]: "warning",
-      },
-      lintRuleSettings: {},
-      messages,
-      message: message1,
-      rules: [emptyPatternRule],
-    })
+describe("reported by missingTranslationRule", () => {
+	test("should not report if a languageTag is not present", async () => {
+		const result = await lintSingleMessage({
+			sourceLanguageTag: "en",
+			languageTags: ["en", "it"],
+			lintLevels: {
+				[emptyPatternRule.meta.id]: "warning",
+			},
+			lintRuleSettings: {},
+			messages,
+			message: message1,
+			rules: [emptyPatternRule],
+		})
 
-    expect(result.errors).toHaveLength(0)
-    expect(result.data).toHaveLength(0)
-  })
+		expect(result.errors).toHaveLength(0)
+		expect(result.data).toHaveLength(0)
+	})
 
-  test("should not report if no variants are defined", async () => {
-    const result = await lintSingleMessage({
-      sourceLanguageTag: "en",
-      languageTags: ["en", "fr"],
-      lintLevels: {
-        [emptyPatternRule.meta.id]: "warning",
-      },
-      lintRuleSettings: {},
-      messages,
-      message: message1,
-      rules: [emptyPatternRule],
-    })
+	test("should not report if no variants are defined", async () => {
+		const result = await lintSingleMessage({
+			sourceLanguageTag: "en",
+			languageTags: ["en", "fr"],
+			lintLevels: {
+				[emptyPatternRule.meta.id]: "warning",
+			},
+			lintRuleSettings: {},
+			messages,
+			message: message1,
+			rules: [emptyPatternRule],
+		})
 
-    expect(result.errors).toHaveLength(0)
-    expect(result.data).toHaveLength(0)
-  })
+		expect(result.errors).toHaveLength(0)
+		expect(result.data).toHaveLength(0)
+	})
 })

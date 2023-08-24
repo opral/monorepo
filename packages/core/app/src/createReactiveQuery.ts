@@ -1,11 +1,15 @@
-import type { Message, MessageQueryApi } from "@inlang/messages"
+import type { Message } from "@inlang/messages"
 import { ReactiveMap } from "@solid-primitives/map"
-import { createEffect } from "./solid.js"
+import { createEffect, createMemo } from "./solid.js"
+import { createSubscribable } from "./openInlangProject.js"
+import type { InlangProject } from "./api.js"
 
 /**
  * Creates a reactive query API for messages.
  */
-export function createReactiveQuery(messages: () => Array<Message>): MessageQueryApi {
+export function createReactiveQuery(
+	messages: () => Array<Message>,
+): InlangProject["query"]["messages"] {
 	const index = new ReactiveMap<string, Message>()
 
 	createEffect(() => {
@@ -21,12 +25,21 @@ export function createReactiveQuery(messages: () => Array<Message>): MessageQuer
 			index.set(data.id, data)
 			return true
 		},
-		get: ({ where }) => {
+		get: createSubscribable(({ where }) => {
 			return structuredClone(index.get(where.id))
-		},
-		getAll: () => {
-			return structuredClone([...index.values()])
-		},
+		}),
+		getAll: createSubscribable(
+			createMemo(() => {
+				const result: {
+					[id: string]: Message
+				} = {}
+				for (const message of structuredClone([...index.values()])) {
+					result[message.id] = message
+				}
+				return result
+			}),
+			//return structuredClone([...index.values()])
+		),
 		update: ({ where, data }): boolean => {
 			const message = index.get(where.id)
 			if (message === undefined) return false

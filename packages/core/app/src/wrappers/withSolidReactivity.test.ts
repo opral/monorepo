@@ -1,5 +1,4 @@
 import { describe, it, expect } from "vitest"
-import { createInlang } from "../createInlang.js"
 import { createMockNodeishFs } from "@inlang/plugin/test"
 import type { InlangConfig } from "@inlang/config"
 import type { Message, Plugin, Text } from "@inlang/plugin"
@@ -7,6 +6,7 @@ import type { ImportFunction, InlangModule } from "@inlang/module"
 import { createEffect, from } from "../solid.js"
 import { withSolidReactivity } from "./withSolidReactivity.js"
 import type { LintRule } from "@inlang/lint"
+import { openInlangProject } from "../openInlangProject.js"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -16,7 +16,7 @@ const config: InlangConfig = {
 	modules: ["./dist/index.js"],
 	settings: {
 		"project.lintRuleLevels": {
-			"inlang.lintRule.missingMessage": "error",
+			"inlang.lintRule.missingTranslation": "error",
 		},
 		"inlang.plugin.i18next": {
 			pathPattern: "./examples/example01/{languageTag}.json",
@@ -96,7 +96,7 @@ describe("config", () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 		const inlang = withSolidReactivity(
-			await createInlang({
+			await openInlangProject({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
 				_import: $import,
@@ -126,7 +126,7 @@ describe("installed", () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 		const inlang = withSolidReactivity(
-			await createInlang({
+			await openInlangProject({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
 				_import: $import,
@@ -184,7 +184,7 @@ describe("messages", () => {
 
 		await fs.writeFile("./inlang.config.json", JSON.stringify(mockConfig))
 		const inlang = withSolidReactivity(
-			await createInlang({
+			await openInlangProject({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
 				_import: mockImport,
@@ -198,7 +198,7 @@ describe("messages", () => {
 			counter += 1
 		})
 
-		expect(inlang.query.messages.getAll().length).toBe(2)
+		expect(Object.values(inlang.query.messages.getAll()).length).toBe(2)
 
 		inlang.setConfig({ ...inlang.config(), languageTags: [] })
 
@@ -206,14 +206,14 @@ describe("messages", () => {
 		await new Promise((resolve) => setTimeout(resolve, 0))
 
 		expect(counter).toBe(2) // 2 times because effect creation + set
-		expect(inlang.query.messages.getAll().length).toBe(0)
+		expect(Object.values(inlang.query.messages.getAll()).length).toBe(0)
 	})
 
 	it("should react to changes to messages", async () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 		const inlang = withSolidReactivity(
-			await createInlang({
+			await openInlangProject({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
 				_import: $import,
@@ -227,11 +227,11 @@ describe("messages", () => {
 			counter += 1
 		})
 
-		const messagesBefore = inlang.query.messages.getAll()
-		expect(messagesBefore.length).toBe(2)
+		const messagesBefore = inlang.query.messages.getAll
+		expect(Object.values(messagesBefore()).length).toBe(2)
 		expect(
 			(
-				messagesBefore[0]?.variants.find((variant) => variant.languageTag === "en")
+				Object.values(messagesBefore())[0]?.variants.find((variant) => variant.languageTag === "en")
 					?.pattern[0] as Text
 			).value,
 		).toBe("test")
@@ -256,15 +256,12 @@ describe("messages", () => {
 			},
 		})
 
-		// TODO: how can we await `query-messages.update` correctly
-		await new Promise((resolve) => setTimeout(resolve, 10))
-
 		expect(counter).toBe(2) // 2 times because effect creation + set
-		const messagesAfter = inlang.query.messages.getAll()
-		expect(messagesAfter.length).toBe(2)
+		const messagesAfter = inlang.query.messages.getAll
+		expect(Object.values(messagesAfter()).length).toBe(2)
 		expect(
 			(
-				messagesBefore[0]?.variants.find((variant) => variant.languageTag === "en")
+				Object.values(messagesAfter())[0]?.variants.find((variant) => variant.languageTag === "en")
 					?.pattern[0] as Text
 			).value,
 		).toBe("test2")
@@ -276,7 +273,7 @@ describe("lint", () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 		const inlang = withSolidReactivity(
-			await createInlang({
+			await openInlangProject({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
 				_import: $import,
@@ -301,7 +298,7 @@ describe("lint", () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 		const inlang = withSolidReactivity(
-			await createInlang({
+			await openInlangProject({
 				configPath: "./inlang.config.json",
 				nodeishFs: fs,
 				_import: $import,
@@ -326,5 +323,5 @@ describe("lint", () => {
 	})
 
 	it.todo("should react to changes to modules")
-	it.todo("should react to changes to mesages")
+	it.todo("should react to changes to messages")
 })

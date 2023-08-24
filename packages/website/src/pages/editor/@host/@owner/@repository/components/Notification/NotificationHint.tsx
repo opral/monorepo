@@ -47,7 +47,8 @@ export const NotificationHint = (props: NotificationHintProps) => {
 const getDominantType = (notifications: Array<Notification>) => {
 	let dominantType: NotificationType = "off"
 	notifications.map((notification) => {
-		if (notification.notificationType === "warning" && dominantType === "off") dominantType = "warning"
+		if (notification.notificationType === "warning" && dominantType === "off")
+			dominantType = "warning"
 		if (notification.notificationType === "error") dominantType = "error"
 	})
 	return dominantType

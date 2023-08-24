@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { lintMessages } from "./lintMessages.js"
 import type { MessageLintReport, MessageLintRule } from "./api.js"
-import type { Message, MessageQueryApi } from "@inlang/messages"
+import type { Message } from "@inlang/messages"
 
 const lintRule1 = {
 	meta: {

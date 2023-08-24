@@ -26,10 +26,10 @@ export const getTextValue = (editor: Accessor<EditorRef>) => {
 						}
 						break
 					case "placeholderNode":
-						patterns.push({ 
-							type: "VariableReference", 
-							name: tiptap_node.attrs.id 
-					}	as VariableReference)
+						patterns.push({
+							type: "VariableReference",
+							name: tiptap_node.attrs.id,
+						} as VariableReference)
 						break
 					case "hardBreak":
 						if (patterns.at(-1)?.type === "Text") {

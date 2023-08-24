@@ -52,10 +52,12 @@ const initRuntime = async (
 ) => {
 	if (!data) {
 		const useWarn = (defaultValue?: unknown) => () =>
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			import.meta.env.DEV && console.warn(
-				"inlang was not correctly set up on this page. Please check the `routing.exclude` settings in your `inlang.config.json` file.",
-			)! || defaultValue
+			(import.meta.env.DEV &&
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				console.warn(
+					"inlang was not correctly set up on this page. Please check the `routing.exclude` settings in your `inlang.config.json` file.",
+				)!) ||
+			defaultValue
 		return {
 			i: useWarn(""),
 			loadMessages: useWarn(),
@@ -98,7 +100,7 @@ export const initRootLayoutLoadWrapper = <
 				runtime: SvelteKitClientRuntime,
 			) => Promise<Data> | Data,
 		) =>
-			async (event: Parameters<LayoutLoad>[0]): Promise<ObjectWithClientRuntime<Data>> => {
+		async (event: Parameters<LayoutLoad>[0]): Promise<ObjectWithClientRuntime<Data>> => {
 			const runtime = await initRuntimeForWrappers(event, options)
 
 			const payload = await load(event, runtime)

@@ -43,7 +43,7 @@ async function translateCommandAction() {
 		log.info(`📝 Translating to ${languagesTagsToTranslateTo.length} languages.`)
 
 		// parallelize in the future
-		for (const message of inlang.query.messages.getAll()) {
+		for (const message of Object.values(inlang.query.messages.getAll())) {
 			const { data: translatedMessage, error } = await rpc.machineTranslateMessage({
 				message,
 				sourceLanguageTag: inlang.config().sourceLanguageTag,
