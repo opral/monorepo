@@ -5,7 +5,7 @@ export { tryAutoGenerateInlangConfig } from "./tryAutoGenerateConfig.js"
 export { parseConfig } from "./parseConfig.js"
 export {
 	ConfigPathNotFoundError,
-	ConfigSyntaxError,
+	ConfigJSONSyntaxError,
 	InvalidConfigError,
 	NoMessagesPluginError,
 	PluginLoadMessagesError,

@@ -8,7 +8,7 @@ import type { LintRule } from "@inlang/lint"
 import type { ImportFunction, InlangModule } from "@inlang/module"
 import {
 	ConfigPathNotFoundError,
-	ConfigSyntaxError,
+	ConfigJSONSyntaxError,
 	InvalidConfigError,
 	NoMessagesPluginError,
 } from "./errors.js"
@@ -131,7 +131,7 @@ describe("initialization", () => {
 				_import,
 			})
 
-			expect(inlang.errors()![0]).toBeInstanceOf(ConfigSyntaxError)
+			expect(inlang.errors()![0]).toBeInstanceOf(ConfigJSONSyntaxError)
 		})
 
 		it("should return an error if config file is does not match schema", async () => {

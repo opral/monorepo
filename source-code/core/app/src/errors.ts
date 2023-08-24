@@ -5,10 +5,10 @@ export class InvalidConfigError extends Error {
 	}
 }
 
-export class ConfigSyntaxError extends Error {
+export class ConfigJSONSyntaxError extends Error {
 	constructor(message: string, options: ErrorOptions) {
 		super(message, options)
-		this.name = "ConfigSyntaxError"
+		this.name = "ConfigJSONSyntaxError"
 	}
 }
 
