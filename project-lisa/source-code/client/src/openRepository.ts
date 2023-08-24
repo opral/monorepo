@@ -33,9 +33,8 @@ export function openRepository(
 		request: {
 			fetch: (...args: any) => {
 				// modify the path to be proxied by the server
-				if (args.corsProxy) {
-					args[0] = args.corsProxy + args[0]
-				}
+				// if (args.corsProxy) {
+				args[0] = "/github-proxy/" + args[0]
 				// @ts-ignore
 				return fetch(...args)
 			},
