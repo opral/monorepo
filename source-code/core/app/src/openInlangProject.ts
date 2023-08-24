@@ -342,14 +342,12 @@ function skipFirst(func: (args: any) => any) {
 	}
 }
 
-export function createSubscribable<R = unknown, T extends (...args: any[]) => R = () => R>(
-	signal: T,
-): Subscribable<T> {
+export function createSubscribable<T>(signal: () => T): Subscribable<T> {
 	return Object.assign(signal, {
-		subscribe: (callback: any) => {
+		subscribe: (callback: (value: T) => void) => {
 			createEffect(() => {
 				callback(signal())
 			})
 		},
-	}) as Subscribable<T>
+	})
 }
