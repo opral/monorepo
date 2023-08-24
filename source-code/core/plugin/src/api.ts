@@ -30,7 +30,7 @@ export type ResolvePluginsFunction = (args: {
 	plugins: Array<Plugin>
 	settings: Record<Plugin["meta"]["id"], JSONSerializableObject>
 	nodeishFs: NodeishFilesystemSubset
-}) => {
+}) => Promise<{
 	data: RuntimePluginApi
 	errors: Array<
 		| PluginReturnedInvalidAppSpecificApiError
@@ -41,7 +41,7 @@ export type ResolvePluginsFunction = (args: {
 		| PluginUsesInvalidSchemaError
 		| PluginUsesReservedNamespaceError
 	>
-}
+}>
 
 /**
  * The API after resolving the plugins.
@@ -49,7 +49,10 @@ export type ResolvePluginsFunction = (args: {
 export type RuntimePluginApi = {
 	loadMessages: (args: { languageTags: LanguageTag[] }) => Promise<Message[]> | Message[]
 	saveMessages: (args: { messages: Message[] }) => Promise<void> | void
-	detectedLanguageTags?: () => Promise<string[]> | string[]
+	/**
+	 * Detect language tags in the project provided plugins.
+	 */
+	detectedLanguageTags: LanguageTag[]
 	/**
 	 * App specific APIs.
 	 *
@@ -105,7 +108,7 @@ export type Plugin<Settings extends JSONSerializableObject | unknown = unknown> 
 	detectedLanguageTags?: (args: {
 		nodeishFs: NodeishFilesystemSubset
 		settings: Settings
-	}) => Promise<string[]> | string[]
+	}) => Promise<LanguageTag[]> | LanguageTag[]
 	/**
 	 * Define app specific APIs.
 	 *
