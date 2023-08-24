@@ -38,7 +38,7 @@ export function InstallationProvider(props: {
 		} else if (!props.modules || props.modules.length === 0 || props.modules[0] === "") {
 			props.setStep({
 				type: "no-modules",
-				message: "No modules provided.",
+				message: "No modules provided. You can find modules in the marketplace.",
 				error: true,
 			})
 			// ToDo: Enable this when the marketplace is ready
@@ -107,7 +107,6 @@ async function initializeRepo(
 	const inlangConfigString = configResult.data
 
 	const parseConfigResult = tryCatch(() => {
-		// return eval(`(${inlangConfigString.replace(/[^{]*/, "")})`)
 		return JSON.parse(inlangConfigString)
 	})
 
@@ -185,7 +184,14 @@ async function initializeRepo(
 }
 
 function createInlangConfig(modules: string[]) {
-	// ToDo: create inlang.config.js file
+	// ToDo: Implement for future purposes
+	const inlangConfig = {
+		sourceLanguageTags: ["en"],
+		languageTags: ["en"],
+		modules: modules,
+	}
+
+	return inlangConfig
 }
 
 function sendSuccessResponseToSource(response: string, source: Window) {
