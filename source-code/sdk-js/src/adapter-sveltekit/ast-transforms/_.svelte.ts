@@ -1,5 +1,5 @@
 import type { SourceFile } from "ts-morph"
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 import {
 	findImportDeclarations,
 	addImport,

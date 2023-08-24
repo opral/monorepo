@@ -1,4 +1,4 @@
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 import { describe, it, expect } from "vitest"
 import { removeHtmlLangAttribute } from "./appTemplate.js"
 

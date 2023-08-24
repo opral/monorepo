@@ -1,4 +1,4 @@
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 import type { SourceFile } from "ts-morph"
 import {
 	addImport,

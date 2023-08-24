@@ -13,7 +13,7 @@ import { codeToNode, nodeToCode } from "./js.util.js"
 import { findOrCreateExport } from "./exports.js"
 import { InlangException } from "../../exceptions.js"
 import { InlangSdkException } from "../../adapter-sveltekit/vite-plugin/exceptions.js"
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 import { getImportSpecifiersAsStrings } from "./imports.js"
 
 const WRAP_IDENTIFIER = "$$_INLANG_WRAP_$$"
