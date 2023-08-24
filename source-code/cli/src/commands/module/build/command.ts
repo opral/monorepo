@@ -31,6 +31,12 @@ export async function buildCommandAction(args: { entry: string; outdir: string; 
 				// increase debugging experience by not minifying
 				// in assumed dev mode
 				minify: args.watch ? false : true,
+				plugins: [
+					{
+						name: "logger",
+						setup: ({ onEnd }) => onEnd(() => console.info("🎉 changes processed")),
+					},
+				],
 			}),
 		)
 
