@@ -1,4 +1,4 @@
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 import { describe, it, test, expect, vi } from "vitest"
 import { transformLayoutSvelte } from "./+layout.svelte.js"
 import { initTestApp } from "./test.utils.js"

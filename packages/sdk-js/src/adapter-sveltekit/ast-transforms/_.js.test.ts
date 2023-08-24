@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest"
 import { transformJs } from "./_.js.js"
 import { initTestApp } from "./test.utils.js"
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 
 describe("transformJs", () => {
 	test("should not do anything if no SDK import is found", () => {

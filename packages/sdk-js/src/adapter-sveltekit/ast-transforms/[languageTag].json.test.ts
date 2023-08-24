@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest"
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 import { transformLanguageJson } from "./[languageTag].json.js"
 import { initTestApp } from "./test.utils.js"
 
