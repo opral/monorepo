@@ -53,7 +53,7 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 		)
 	}
 
-	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/server", "loadMessages", "reloadMessages")
+	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/server", "loadMessages")
 	addImport(sourceFile, "@sveltejs/kit", "json")
 
 	return transformServerRequestJs(filePath, config, nodeToCode(sourceFile))

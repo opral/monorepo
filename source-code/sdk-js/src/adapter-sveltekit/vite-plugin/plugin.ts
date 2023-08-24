@@ -106,7 +106,7 @@ export const plugin = async () => {
 			createEffect(() => {
 				config.messages()
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				viteServer!.ws.send({
+				viteServer?.ws.send({
 					type: "custom",
 					event: "inlang-messages-changed",
 					// TODO: only HMR if the currently visible language changes
