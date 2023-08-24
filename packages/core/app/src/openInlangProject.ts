@@ -14,7 +14,7 @@ import {
 } from "./errors.js"
 import { LintRuleThrowedError, LintReport, lintMessages } from "@inlang/lint"
 import { createRoot, createSignal, createEffect } from "./solid.js"
-import { createReactiveQuery } from "./createReactiveQuery.js"
+import { createMessagesQuery } from "./createMessagesQuery.js"
 import { InlangConfig } from "@inlang/config"
 import { debounce } from "throttle-debounce"
 
@@ -188,7 +188,7 @@ export const openInlangProject = async (args: {
 
 		const initializeError: Error | undefined = await initialized.catch((error) => error)
 
-		const query = createReactiveQuery(() => messages() || [])
+		const query = createMessagesQuery(() => messages() || [])
 
 		const debouncedSave = skipFirst(
 			debounce(

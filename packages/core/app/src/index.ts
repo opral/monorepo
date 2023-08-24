@@ -2,7 +2,6 @@ export type { InlangProject, InstalledLintRule, InstalledPlugin, MessageQueryApi
 export { openInlangProject } from "./openInlangProject.js"
 export { solidAdapter, InlangProjectWithSolidAdapter } from "./adapter/solidAdapter.js"
 export { tryAutoGenerateInlangConfig } from "./tryAutoGenerateConfig.js"
-export { parseConfig } from "./parseConfig.js"
 export {
 	ConfigPathNotFoundError,
 	ConfigJSONSyntaxError,
@@ -11,7 +10,6 @@ export {
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
 } from "./errors.js"
-export { createReactiveQuery } from "./createReactiveQuery.js"
 
 /**
  * -------- RE-EXPORTS --------
