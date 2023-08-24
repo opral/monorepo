@@ -2,8 +2,7 @@ import * as vscode from "vscode"
 import { state } from "../state.js"
 import { msg } from "../utilities/message.js"
 import { telemetry } from "../services/telemetry/index.js"
-import type { IdeExtensionConfigSchema } from "../api.js"
-import type { Message } from "@inlang/app"
+import type { IdeExtensionConfig, Message } from "@inlang/app"
 
 /**
  * Helps the user to extract messages from the active text editor.
@@ -13,7 +12,7 @@ export const extractMessageCommand = {
 	title: "Inlang: Extract Message",
 	callback: async function (textEditor: vscode.TextEditor) {
 		const ideExtension = state().inlang.appSpecificApi()["inlang.app.ideExtension"] as
-			| IdeExtensionConfigSchema
+			| IdeExtensionConfig
 			| undefined
 		// guards
 		if (!ideExtension) {
@@ -49,10 +48,14 @@ export const extractMessageCommand = {
 
 		const preparedExtractOptions = ideExtension.extractMessageOptions.reduce((acc, option) => {
 			// eslint-disable-next-line
-			if (acc.find((accOption) => accOption === option.callback(messageId, messageValue))) {
+			if (
+				acc.find(
+					(accOption) => accOption === option.callback({ messageId, selection: messageValue }),
+				)
+			) {
 				return acc
 			}
-			return [...acc, option.callback(messageId, messageValue)]
+			return [...acc, option.callback({ messageId, selection: messageValue })]
 		}, [] as string[])
 
 		const preparedExtractOption = await vscode.window.showQuickPick(

@@ -1,10 +1,10 @@
 import { state } from "../state.js"
 import * as vscode from "vscode"
-import type { IdeExtensionConfigSchema } from "../api.js"
+import type { IdeExtensionConfig } from "@inlang/app"
 
 export const propertiesMissingPreview = () => {
 	const ideExtension = state().inlang.appSpecificApi()["inlang.app.ideExtension"] as
-		| IdeExtensionConfigSchema
+		| IdeExtensionConfig
 		| undefined
 
 	const activeTextEditor = vscode.window.activeTextEditor

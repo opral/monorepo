@@ -1,4 +1,4 @@
-import { Static, Type } from "@sinclair/typebox"
+import { Static, TString, Type } from "@sinclair/typebox"
 
 /**
  * The result of a message reference matcher.
@@ -58,7 +58,15 @@ export const IdeExtensionConfigSchema = Type.Object({
 			 * @param selection is the text which was extracted
 			 * @returns the code which is inserted into the document
 			 */
-			callback: Type.Function([Type.Tuple([Type.String(), Type.String()])], Type.String()),
+			callback: Type.Function(
+				[
+					Type.Object({
+						messageId: Type.String(),
+						selection: Type.String(),
+					}),
+				],
+				Type.String(),
+			),
 		}),
 	),
 	/**

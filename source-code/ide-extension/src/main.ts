@@ -19,8 +19,8 @@ import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 import { openInEditorCommand } from "./commands/openInEditor.js"
 import { editMessageCommand } from "./commands/editMessage.js"
 import { openInlangProject, tryCatch } from "@inlang/app"
-import { createFileSystemMapper } from "./services/inlang-environment/src/createFileSystemMapper.js"
-import { _import } from "./services/inlang-environment/src/_import.js"
+import { createFileSystemMapper } from "./utilities/createFileSystemMapper.js"
+import { _import } from "./utilities/import/_import.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
