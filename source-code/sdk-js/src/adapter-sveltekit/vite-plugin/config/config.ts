@@ -120,8 +120,8 @@ export const initTransformConfig = async (): Promise<TransformConfig> => {
 
 		const rootRoutesFolder = path.resolve(files.routes, languageInUrl ? "[lang]" : "")
 		const isStatic =
-			(await shouldContentBePrerendered(files.routes)) ||
-			(await shouldContentBePrerendered(rootRoutesFolder))
+			(await shouldContentBePrerendered(nodeishFs, files.routes)) ||
+			(await shouldContentBePrerendered(nodeishFs, rootRoutesFolder))
 
 		const usesTypeScript = await doesPathExist(
 			nodeishFs,
