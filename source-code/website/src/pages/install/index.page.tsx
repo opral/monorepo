@@ -141,7 +141,7 @@ function ChooseRepo(props: { modules?: string[] }) {
 					class="relative w-full md:w-[600px] flex items-center group mt-4 mb-8"
 					onSubmit={(event) => {
 						event.preventDefault()
-						navigate(generateInstallLink())
+						setSearchParams(generateInstallLink())
 					}}
 				>
 					<div class="px-2 gap-2 relative z-10 flex items-center w-full border border-surface-200 bg-background rounded-lg focus-within:border-primary transition-all ">
@@ -157,13 +157,13 @@ function ChooseRepo(props: { modules?: string[] }) {
 								setInput(event.target.value)
 							}}
 							on:sl-change={() => {
-								isValidUrl() ? navigate(generateInstallLink()) : undefined
+								isValidUrl() ? setSearchParams(generateInstallLink()) : undefined
 							}}
 						/>
 						<button
 							disabled={isValidUrl() === false}
 							onClick={() => {
-								navigate(generateInstallLink())
+								setSearchParams(generateInstallLink())
 							}}
 							class={
 								(isValidUrl()
@@ -183,7 +183,16 @@ function ChooseRepo(props: { modules?: string[] }) {
 					{/* Shows a total of max 3 repos */}
 					<For each={store.recentProjects.slice(0, 3)}>
 						{(recentProject) => (
-							<RepositoryCard repository={recentProject} install modules={props.modules} />
+							/* The surrounding div sets the searchParams */
+							<div
+								onClick={() =>
+									setSearchParams(
+										`/install?repo=${recentProject.repository}&module=${props.modules?.join(",")}`,
+									)
+								}
+							>
+								<RepositoryCard repository={recentProject} install modules={props.modules} />
+							</div>
 						)}
 					</For>
 				</div>
@@ -220,10 +229,9 @@ function ShowSuccess(props: { repo: string }) {
 				</h2>
 				<p class="text-surface-500 text-center mb-4">{step().message}</p>
 				<Button
+					// eslint-disable-next-line solid/reactivity
 					function={() => {
-						createEffect(() => {
-							navigate(`/editor/${props.repo}/`)
-						})
+						setSearchParams(`/editor/${props.repo}`)
 					}}
 					type="secondary"
 				>
