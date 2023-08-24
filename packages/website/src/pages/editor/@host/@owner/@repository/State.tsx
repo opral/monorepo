@@ -19,7 +19,7 @@ import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
 import { telemetryBrowser, parseOrigin } from "@inlang/telemetry"
 import type { NodeishFilesystem } from "@inlang-git/fs"
-import { openRepository, createNodeishMemoryFs, Repository } from "@project-lisa/client"
+import { openRepository, createNodeishMemoryFs, Repository } from "@lix-js/client"
 import { http, raw } from "@inlang-git/client/raw"
 import { publicEnv } from "@inlang/env-variables"
 import {

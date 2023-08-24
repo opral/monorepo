@@ -21,7 +21,7 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"@project-lisa/client": "*",
+		"@lix-js/client": "*",
 		"@inlang/app": "*",
 		"@inlang/telemetry": "*",
 		"@resvg/resvg-js": "^2.4.1",
