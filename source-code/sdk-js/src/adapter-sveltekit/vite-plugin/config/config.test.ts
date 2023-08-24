@@ -21,12 +21,10 @@ import { InlangSdkException } from "../exceptions.js"
 import { validateSdkConfig, type SdkConfig } from "@inlang/sdk-js-plugin"
 
 vi.mock("./utils/getNodeishFs.js")
-vi.mock("@inlang/app", async () => {
-	return {
-		...(await vi.importActual<typeof import("@inlang/app")>("@inlang/app")),
-		openInlangProject: vi.fn(),
-	}
-})
+vi.mock("@inlang/app", async () => ({
+	...(await vi.importActual<typeof import("@inlang/app")>("@inlang/app")),
+	openInlangProject: vi.fn(),
+}))
 
 beforeEach(() => {
 	vi.resetAllMocks()
