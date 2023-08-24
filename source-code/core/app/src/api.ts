@@ -15,7 +15,7 @@ import type {
 } from "./errors.js"
 import type {
 	Plugin,
-	PluginAppSpecificApiReturnError,
+	PluginReturnedInvalidAppSpecificApiError,
 	PluginFunctionDetectLanguageTagsAlreadyDefinedError,
 	PluginFunctionLoadMessagesAlreadyDefinedError,
 	PluginFunctionSaveMessagesAlreadyDefinedError,
@@ -54,7 +54,7 @@ export type InlangProject = {
 		() => (
 			| ModuleImportError
 			| ModuleError
-			| PluginAppSpecificApiReturnError
+			| PluginReturnedInvalidAppSpecificApiError
 			| PluginFunctionDetectLanguageTagsAlreadyDefinedError
 			| PluginFunctionLoadMessagesAlreadyDefinedError
 			| PluginFunctionSaveMessagesAlreadyDefinedError

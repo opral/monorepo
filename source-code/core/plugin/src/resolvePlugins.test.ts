@@ -5,7 +5,7 @@ import {
 	PluginFunctionSaveMessagesAlreadyDefinedError,
 	PluginUsesInvalidIdError,
 	PluginUsesReservedNamespaceError,
-	PluginAppSpecificApiReturnError,
+	PluginReturnedInvalidAppSpecificApiError,
 	PluginUsesInvalidSchemaError,
 	PluginFunctionDetectLanguageTagsAlreadyDefinedError,
 } from "./errors.js"
@@ -338,7 +338,7 @@ describe("addAppSpecificApi", () => {
 		})
 
 		expect(resolved.errors).toHaveLength(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginAppSpecificApiReturnError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginReturnedInvalidAppSpecificApiError)
 	})
 
 	it("it should throw an error if the passed options are not defined inside appSpecificApi", async () => {

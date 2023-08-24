@@ -59,9 +59,9 @@ export class PluginFunctionDetectLanguageTagsAlreadyDefinedError extends PluginE
 	}
 }
 
-export class PluginAppSpecificApiReturnError extends PluginError {
+export class PluginReturnedInvalidAppSpecificApiError extends PluginError {
 	constructor(message: string, options: PluginErrorOptions) {
 		super(message, options)
-		this.name = "PluginAppSpecificApiReturnError"
+		this.name = "PluginReturnedInvalidAppSpecificApiError"
 	}
 }
