@@ -85,8 +85,7 @@ export type MessageLintReport = LintReportBase & {
  * ---------------- LINT ----------------
  */
 
-export type LintRule<Settings extends JSONObject | any = any> =
-	MessageLintRule<Settings>
+export type LintRule<Settings extends JSONObject | any = any> = MessageLintRule<Settings>
 export const LintRule = Type.Union([MessageLintRule])
 
 export type LintReport = MessageLintReport

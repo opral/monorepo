@@ -325,8 +325,6 @@ const createAwaitable = () => {
 
 // ------------------------------------------------------------------------------------------------
 
-
-
 // TODO: create global util type
 type MaybePromise<T> = T | Promise<T>
 
