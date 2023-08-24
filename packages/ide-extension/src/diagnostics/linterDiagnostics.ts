@@ -1,8 +1,7 @@
 import * as vscode from "vscode"
 import { state } from "../state.js"
 import structuredClonePolyfill from "@ungap/structured-clone"
-import type { IdeExtensionConfigSchema } from "../api.js"
-import type { MessageLintReport } from "@inlang/app"
+import type { IdeExtensionConfig, MessageLintReport } from "@inlang/app"
 
 // polyfilling node < 17 with structuredClone
 if (typeof structuredClone === "undefined") {
@@ -19,7 +18,7 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 		}
 
 		const ideExtension = state().inlang.appSpecificApi()["inlang.app.ideExtension"] as
-			| IdeExtensionConfigSchema
+			| IdeExtensionConfig
 			| undefined
 
 		if (!ideExtension) {

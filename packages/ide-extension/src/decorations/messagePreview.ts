@@ -3,7 +3,7 @@ import { state } from "../state.js"
 import { contextTooltip } from "./contextTooltip.js"
 import { onDidEditMessage } from "../commands/editMessage.js"
 import { getStringFromPattern } from "../utilities/query.js"
-import type { IdeExtensionConfigSchema } from "../api.js"
+import type { IdeExtensionConfig } from "@inlang/app"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -29,7 +29,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 		// Get the reference language
 		const sourceLanguageTag = state().inlang.config().sourceLanguageTag
 		const messageReferenceMatchers = state().inlang.appSpecificApi()["inlang.app.ideExtension"]
-			.messageReferenceMatchers as IdeExtensionConfigSchema["messageReferenceMatchers"]
+			.messageReferenceMatchers as IdeExtensionConfig["messageReferenceMatchers"]
 
 		if (sourceLanguageTag === undefined || messageReferenceMatchers === undefined) {
 			// don't show an error message. See issue:
