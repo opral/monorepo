@@ -13,6 +13,7 @@ import { Gitlogin } from "./components/GitLogin.jsx"
 import { Icon } from "#src/components/Icon.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import { RepositoryCard } from "../index/CommunityProjects.jsx"
+import { setSearchParams } from "./helper/setSearchParams.js"
 
 //! TEST LINK: http://localhost:3000/install?repo=github.com/floriandwt/inlang-ide-next-demo&module=../plugins/test/dist/index.js
 
