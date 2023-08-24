@@ -317,12 +317,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		return inlang()?.config().languageTags ?? []
 	}
 
-	createEffect(() => {
-		if (!inlang.loading) {
-			console.info("messages changes", Object.values(inlang()?.query.messages.getAll() || {}))
-		}
-	})
-
 	//the effect should skip tour guide steps if not needed
 	createEffect(() => {
 		if (localStorage?.user === undefined) {
@@ -560,7 +554,7 @@ export async function pushChanges(args: {
 			(row[2] === 2 && row[3] === 0),
 	)
 	if (filesWithUncommittedChanges.length === 0) {
-		return { error: new PushException("No changes to push") }
+		return { error: new PushException("No changes to push.") }
 	}
 	// add all changes
 	for (const file of filesWithUncommittedChanges) {
