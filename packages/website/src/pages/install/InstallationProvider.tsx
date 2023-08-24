@@ -1,12 +1,12 @@
-import { type JSXElement, onMount } from "solid-js"
-import { open, createNodeishMemoryFs } from "@project-lisa/client"
+import { type JSXElement, createEffect } from "solid-js"
+import { openRepository, createNodeishMemoryFs } from "@project-lisa/client"
 import { publicEnv } from "@inlang/env-variables"
 import {
 	LocalStorageProvider,
 	getLocalStorage,
 	useLocalStorage,
 } from "#src/services/local-storage/index.js"
-import type { InlangConfig, tryCatch } from "@inlang/app"
+import { InlangConfig, tryCatch } from "@inlang/app"
 import type { Step } from "./index.page.jsx"
 import { marketplaceItems } from "@inlang/marketplace"
 
@@ -23,7 +23,7 @@ export function InstallationProvider(props: {
 	/**
 	 * This function checks for common errors before repo initialization (to be more performant) and sets the step accordingly.
 	 */
-	onMount(() => {
+	createEffect(() => {
 		if (!user && getLocalStorage()) {
 			props.setStep({
 				type: "github-login",
@@ -41,12 +41,14 @@ export function InstallationProvider(props: {
 				message: "No modules provided.",
 				error: true,
 			})
-		} else if (!validateModules(props.modules)) {
-			props.setStep({
-				type: "invalid-modules",
-				message: "Invalid modules provided.",
-				error: true,
-			})
+			// ToDo: Enable this when the marketplace is ready
+			// } else if (!validateModules(props.modules)) {
+			// 	props.setStep({
+			// 		type: "invalid-modules",
+			// 		message: "Invalid modules provided.",
+			// 		error: true,
+			// 	})
+			// }
 		} else {
 			props.setStep({
 				type: "installing",
@@ -74,7 +76,7 @@ async function initializeRepo(
 ) {
 	modulesURL = modulesURL.filter((module, index) => modulesURL.indexOf(module) === index)
 
-	const repo = open(repoURL, {
+	const repo = openRepository(repoURL, {
 		nodeishFs: createNodeishMemoryFs(),
 		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
 	})
@@ -84,32 +86,46 @@ async function initializeRepo(
 		message: "Cloning Repository...",
 	})
 
-	// Todo: tryCatch()
-	const inlangConfigString = (await repo.nodeishFs
-		.readFile("./inlang.config.js", {
+	const configResult = await tryCatch(async () => {
+		const inlangConfigString = (await repo.nodeishFs.readFile("./inlang.config.js", {
 			encoding: "utf-8",
-		})
-		.catch((e) => {
-			if (e.code !== "ENOENT") throw e
+		})) as string
+
+		return inlangConfigString
+	})
+
+	if (configResult.error) {
+		if (configResult.error) {
+			throw configResult.error
+		} else {
 			setStep({
 				type: "no-inlang-config",
 				message: "No inlang.config.js file found in the repository.",
 			})
-		})) as string
+		}
 
-	let inlangConfig: InlangConfig
-	try {
-		inlangConfig = eval(`(${inlangConfigString.replace(/[^{]*/, "")})`)
-	} catch (e) {
-		setStep({
-			type: "error",
-			message: "Error parsing inlang.config.js: " + e,
-			error: true,
-		})
 		return
 	}
 
-	inlangConfig.modules?.forEach((module: string) => {
+	const inlangConfigString = configResult.data
+
+	const parseConfigResult = tryCatch(() => {
+		return eval(`(${inlangConfigString.replace(/[^{]*/, "")})`)
+	})
+
+	if (parseConfigResult.error) {
+		setStep({
+			type: "error",
+			message: "Error parsing inlang.config.js: " + parseConfigResult.error,
+			error: true,
+		})
+
+		return
+	}
+
+	const inlangConfig = parseConfigResult.data as InlangConfig
+
+	for (const module of inlangConfig.modules) {
 		const installedModules = modulesURL.every((moduleURL) => module.includes(moduleURL))
 		if (installedModules) {
 			setStep({
@@ -118,7 +134,7 @@ async function initializeRepo(
 				error: true,
 			})
 		}
-	})
+	}
 
 	if (!inlangConfig.modules) inlangConfig.modules = []
 
@@ -145,7 +161,7 @@ async function initializeRepo(
 	})
 
 	await repo.commit({
-		message: "inlang: install modules (test)",
+		message: "inlang: install module",
 		author: {
 			name: user.username,
 			email: user.email,
@@ -161,7 +177,12 @@ async function initializeRepo(
 
 	setStep({
 		type: "success",
-		message: "Successfully installed the modules: " + modulesURL.join(", "),
+		message:
+			"Successfully installed the modules: " +
+			modulesURL.join(", ") +
+			" in your repository: " +
+			repoURL +
+			".",
 		error: false,
 	})
 }
@@ -193,7 +214,7 @@ function sendSuccessResponseToSource(response: string, source: Window) {
  */
 function validateModules(modules: string[]) {
 	let check = true
-	modules.forEach((module) => {
+	for (const module of modules) {
 		if (
 			!marketplaceItems.some(
 				(marketplaceItem) =>
@@ -204,6 +225,6 @@ function validateModules(modules: string[]) {
 		} else {
 			check = true
 		}
-	})
+	}
 	return check
 }

@@ -1,4 +1,4 @@
-import { createSignal, For, Show } from "solid-js"
+import { createEffect, createSignal, For, Show } from "solid-js"
 import { Layout as RootLayout } from "../Layout.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import { navigate } from "vite-plugin-ssr/client/router"
@@ -14,7 +14,7 @@ import { Icon } from "#src/components/Icon.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import { RepositoryCard } from "../index/CommunityProjects.jsx"
 
-//! TEST LINK: http://localhost:3000/install?repo=github.com/floriandwt/inlang-ide-next-demo&module=../plugins/json/dist/index.js
+//! TEST LINK: http://localhost:3000/install?repo=github.com/floriandwt/inlang-ide-next-demo&module=../plugins/test/dist/index.js
 
 export type Step = {
 	type: string
@@ -50,6 +50,7 @@ export function Page() {
 	const repo = url.get("repo") || ""
 	const modules = url.get("module")?.split(",") || []
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const getLocale = () => {
 		const language = locale() || defaultLanguage
 		return language !== defaultLanguage ? "/" + language : ""
@@ -89,7 +90,7 @@ export function Page() {
 								<ShowProgress />
 							</Show>
 							<Show when={step().type === "success"}>
-								<ShowSuccess />
+								<ShowSuccess repo={repo} />
 							</Show>
 							<Show when={step().error}>
 								<Show when={step().type === "no-repo"} fallback={<ShowError />}>
@@ -105,7 +106,7 @@ export function Page() {
 	)
 }
 
-function ChooseRepo({ modules }: { modules?: string[] }) {
+function ChooseRepo(props: { modules?: string[] }) {
 	const [input, setInput] = createSignal("")
 	const [store] = useLocalStorage()
 
@@ -121,7 +122,7 @@ function ChooseRepo({ modules }: { modules?: string[] }) {
 		return `/install?repo=${url.host}${url.pathname
 			.split("/")
 			.slice(0, 3)
-			.join("/")}&module=${modules?.join(",")}`
+			.join("/")}&module=${props.modules?.join(",")}`
 	}
 
 	return (
@@ -170,7 +171,7 @@ function ChooseRepo({ modules }: { modules?: string[] }) {
 								" flex justify-center items-center h-10 relative rounded-md px-4 border-surface-200 transition-all duration-100 text-sm font-medium"
 							}
 						>
-							Start Installation
+							Install
 						</button>
 					</div>
 				</form>
@@ -181,7 +182,7 @@ function ChooseRepo({ modules }: { modules?: string[] }) {
 					{/* Shows a total of max 3 repos */}
 					<For each={store.recentProjects.slice(0, 3)}>
 						{(recentProject) => (
-							<RepositoryCard repository={recentProject} install modules={modules} />
+							<RepositoryCard repository={recentProject} install modules={props.modules} />
 						)}
 					</For>
 				</div>
@@ -208,22 +209,24 @@ function ShowProgress() {
 	)
 }
 
-function ShowSuccess() {
+function ShowSuccess(props: { repo: string }) {
 	return (
 		<SetupCard success>
 			<Icon name="success" class="w-20 h-20 text-success-500 mb-2 text-success" />
 			<div class="flex flex-col justify-center gap-2 items-center">
 				<h2 class="text-[24px] leading-tight md:text-2xl font-semibold text-center">
-					Installing your modules…
+					Installation successful
 				</h2>
 				<p class="text-surface-500 text-center mb-4">{step().message}</p>
 				<Button
 					function={() => {
-						navigate("/marketplace")
+						createEffect(() => {
+							navigate(`/editor/${props.repo}/`)
+						})
 					}}
 					type="secondary"
 				>
-					Go to Marketplace
+					Check it out
 				</Button>
 			</div>
 		</SetupCard>
