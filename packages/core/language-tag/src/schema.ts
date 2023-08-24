@@ -13,13 +13,15 @@ export type LanguageTag = Static<typeof LanguageTag>
 export const LanguageTag = Type.String({ pattern: languageTagRegex })
 
 /**
- * Content for a language tag.
+ * Translatable type.
  *
- * The language tag `en` is always required.
+ * The language tag `en` is always required. Other language
+ * tags are optional. Hence the name "translatable" and not
+ * "translated".
  */
-export type WithLanguageTags<T> = {
+export type Translatable<T> = {
 	en: T
 	[languageTag: LanguageTag]: T
 }
-export const WithLanguageTags = <T extends TSchema>(type: T) =>
+export const Translatable = <T extends TSchema>(type: T) =>
 	Type.Intersect([Type.Object({ en: type }), Type.Record(LanguageTag, type)])

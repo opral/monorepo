@@ -1,5 +1,5 @@
 import type { Message } from "@inlang/messages"
-import { type LanguageTag, WithLanguageTags } from "@inlang/language-tag"
+import { type LanguageTag, Translatable } from "@inlang/language-tag"
 import { Type, type Static, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
 import type { JSONObject } from "@inlang/json-types"
 
@@ -17,7 +17,7 @@ export type LintReportBase = {
 	ruleId: LintRuleBase["meta"]["id"]
 	type: LintRuleBase["type"]
 	level: LintLevel
-	body: WithLanguageTags<string>
+	body: Translatable<string>
 }
 
 /**
@@ -31,14 +31,14 @@ export const LintRuleBase = Type.Object({
 			description: "The key must be conform to `{namespace}.lintRule.{name}` pattern.",
 			examples: ["example.lintRule.patternInvalid", "example.lintRule.missingTranslation"],
 		}) as unknown as TTemplateLiteral<[TLiteral<`${string}.lintRule.${string}`>]>,
-		displayName: WithLanguageTags(Type.String()),
-		description: WithLanguageTags(Type.String()),
+		displayName: Translatable(Type.String()),
+		description: Translatable(Type.String()),
 		/* This is used for the marketplace, required if 
 			you want to publish your plugin to the marketplace */
 		marketplace: Type.Optional(
 			Type.Object({
 				icon: Type.String(),
-				linkToReadme: WithLanguageTags(Type.String()),
+				linkToReadme: Translatable(Type.String()),
 				keywords: Type.Array(Type.String()),
 				publisherName: Type.String(),
 				publisherIcon: Type.String(),
