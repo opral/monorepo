@@ -2,7 +2,7 @@ import { LanguageTag, WithLanguageTags } from "@inlang/language-tag"
 import { Static, Type, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
 import type { NodeishFilesystem as LisaNodeishFilesystem } from "@inlang-git/fs"
 import type {
-	PluginAppSpecificApiReturnError,
+	PluginReturnedInvalidAppSpecificApiError,
 	PluginFunctionDetectLanguageTagsAlreadyDefinedError,
 	PluginFunctionLoadMessagesAlreadyDefinedError,
 	PluginFunctionSaveMessagesAlreadyDefinedError,
@@ -33,7 +33,7 @@ export type ResolvePluginsFunction = (args: {
 }) => {
 	data: RuntimePluginApi
 	errors: Array<
-		| PluginAppSpecificApiReturnError
+		| PluginReturnedInvalidAppSpecificApiError
 		| PluginFunctionDetectLanguageTagsAlreadyDefinedError
 		| PluginFunctionLoadMessagesAlreadyDefinedError
 		| PluginFunctionSaveMessagesAlreadyDefinedError

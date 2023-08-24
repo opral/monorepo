@@ -6,7 +6,7 @@ export type {
 } from "./api.js"
 export { resolvePlugins } from "./resolvePlugins.js"
 export {
-	PluginAppSpecificApiReturnError,
+	PluginReturnedInvalidAppSpecificApiError,
 	PluginFunctionDetectLanguageTagsAlreadyDefinedError,
 	PluginFunctionLoadMessagesAlreadyDefinedError,
 	PluginFunctionSaveMessagesAlreadyDefinedError,

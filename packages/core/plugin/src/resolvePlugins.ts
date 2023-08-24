@@ -1,6 +1,6 @@
 import { Plugin, ResolvePluginsFunction } from "./api.js"
 import {
-	PluginAppSpecificApiReturnError,
+	PluginReturnedInvalidAppSpecificApiError,
 	PluginFunctionDetectLanguageTagsAlreadyDefinedError,
 	PluginFunctionLoadMessagesAlreadyDefinedError,
 	PluginFunctionSaveMessagesAlreadyDefinedError,
@@ -115,7 +115,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			}
 			if (typeof appSpecificApi !== "object") {
 				result.errors.push(
-					new PluginAppSpecificApiReturnError(
+					new PluginReturnedInvalidAppSpecificApiError(
 						`Plugin ${plugin.meta.id} defines the addAppSpecificApi function, but it does not return an object.`,
 						{ plugin: plugin.meta.id, cause: error },
 					),
