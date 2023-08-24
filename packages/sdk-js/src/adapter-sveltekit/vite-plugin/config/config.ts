@@ -74,30 +74,30 @@ export const initTransformConfig = async (): Promise<TransformConfig> => {
 		await updateSdkModuleVersion(inlang)
 		await createDemoResourcesIfNoMessagesExistYet(inlang)
 
-		// TODO: refactor
-		let settings: SdkConfig | undefined
-		try {
-			settings = getSettings(inlang)
-		} catch (error) {
-			reject(error)
-			return
-		}
-
+		const settings = getSettings(inlang)
 		if (!settings) {
 			resetTransformConfig()
 			return resolve(initTransformConfig())
 		}
+		if (settings instanceof InlangSdkException) {
+			return reject(settings)
+		}
 
-		// TODO: refactor
+		// we can't use `import` in tests to import something from the virtual file system
+		// so we need to use `createImport` instead
 		const { default: svelteConfig } = (await (import.meta.env?.TEST
 			? createImport({ readFile: nodeishFs.readFile, fetch })(PATH_TO_SVELTE_CONFIG)
 			: import(/* @vite-ignore */ PATH_TO_SVELTE_CONFIG)
 		).catch((error: unknown) => {
-			reject(new InlangSdkException("Could not find svelte.config.js file.", error as Error))
-			return { default: undefined }
-		})) as { default: SvelteConfig }
-		if (!svelteConfig) {
-			return
+			return {
+				default: new InlangSdkException(
+					`Could not find 'svelte.config.js' file (${PATH_TO_SVELTE_CONFIG})`,
+					error as Error,
+				)
+			}
+		})) as { default: SvelteConfig | InlangSdkException }
+		if (svelteConfig instanceof InlangSdkException) {
+			return reject(svelteConfig)
 		}
 
 		const files = {

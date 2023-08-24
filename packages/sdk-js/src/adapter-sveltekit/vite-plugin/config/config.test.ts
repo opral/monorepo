@@ -18,6 +18,7 @@ import { getNodeishFs } from "./utils/getNodeishFs.js"
 import { createMessage } from "../../../test.util.js"
 import { version } from "../../../../package.json"
 import { InlangSdkException } from "../exceptions.js"
+import { validateSdkConfig, type SdkConfig } from "@inlang/sdk-js-plugin"
 
 vi.mock("./utils/getNodeishFs.js")
 vi.mock("@inlang/app", async () => {
@@ -40,15 +41,17 @@ it("should cache config creation", async () => {
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
 	vi.mocked(openInlangProject).mockImplementation(
 		async () =>
-			({
-				errors: () => [],
-				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
-				setConfig: () => undefined,
-				query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
-				appSpecificApi: () => ({
-					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+		({
+			errors: () => [],
+			config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+			setConfig: () => undefined,
+			query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
+			appSpecificApi: () => ({
+				"inlang.app.sdkJs": validateSdkConfig({
+					languageNegotiation: { strategies: [{ type: "url" }] },
 				}),
-			} as unknown as InlangProject),
+			}),
+		} as unknown as InlangProject),
 	)
 
 	const config1 = await initTransformConfig()
@@ -71,22 +74,24 @@ it("should create an inlang config file if no config is present yet", async () =
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
 	vi.mocked(openInlangProject).mockImplementationOnce(
 		async () =>
-			({
-				errors: () => [new ConfigPathNotFoundError("", {})],
-			} as unknown as InlangProject),
+		({
+			errors: () => [new ConfigPathNotFoundError("", {})],
+		} as unknown as InlangProject),
 	)
 
 	vi.mocked(openInlangProject).mockImplementationOnce(
 		async () =>
-			({
-				errors: () => [],
-				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
-				setConfig: () => undefined,
-				query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
-				appSpecificApi: () => ({
-					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+		({
+			errors: () => [],
+			config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+			setConfig: () => undefined,
+			query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
+			appSpecificApi: () => ({
+				"inlang.app.sdkJs": validateSdkConfig({
+					languageNegotiation: { strategies: [{ type: "url" }] },
 				}),
-			} as unknown as InlangProject),
+			}),
+		} as unknown as InlangProject),
 	)
 
 	const spy = vi.spyOn(createBasicInlangConfigModule, "createBasicInlangConfig")
@@ -108,15 +113,17 @@ it("should update the sdk module version", async () => {
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
 	vi.mocked(openInlangProject).mockImplementationOnce(
 		async () =>
-			({
-				errors: () => [],
-				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
-				setConfig,
-				query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
-				appSpecificApi: () => ({
-					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+		({
+			errors: () => [],
+			config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+			setConfig,
+			query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
+			appSpecificApi: () => ({
+				"inlang.app.sdkJs": validateSdkConfig({
+					languageNegotiation: { strategies: [{ type: "url" }] },
 				}),
-			} as unknown as InlangProject),
+			}),
+		} as unknown as InlangProject),
 	)
 
 	await initTransformConfig()
@@ -136,15 +143,17 @@ it("should not update the sdk module version if already up2date", async () => {
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
 	vi.mocked(openInlangProject).mockImplementationOnce(
 		async () =>
-			({
-				errors: () => [],
-				config: () => ({ modules: [`@inlang/sdk-js-plugin@${version}`] }),
-				setConfig,
-				query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
-				appSpecificApi: () => ({
-					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+		({
+			errors: () => [],
+			config: () => ({ modules: [`@inlang/sdk-js-plugin@${version}`] }),
+			setConfig,
+			query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
+			appSpecificApi: () => ({
+				"inlang.app.sdkJs": validateSdkConfig({
+					languageNegotiation: { strategies: [{ type: "url" }] },
 				}),
-			} as unknown as InlangProject),
+			}),
+		} as unknown as InlangProject),
 	)
 
 	await initTransformConfig()
@@ -161,15 +170,17 @@ it("should create demo resources if none are present yet", async () => {
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
 	vi.mocked(openInlangProject).mockImplementationOnce(
 		async () =>
-			({
-				errors: () => [],
-				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
-				setConfig: () => undefined,
-				query: { messages: { getAll: () => [], create } },
-				appSpecificApi: () => ({
-					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+		({
+			errors: () => [],
+			config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+			setConfig: () => undefined,
+			query: { messages: { getAll: () => [], create } },
+			appSpecificApi: () => ({
+				"inlang.app.sdkJs": validateSdkConfig({
+					languageNegotiation: { strategies: [{ type: "url" }] },
 				}),
-			} as unknown as InlangProject),
+			}),
+		} as unknown as InlangProject),
 	)
 
 	await initTransformConfig()
@@ -186,25 +197,27 @@ it("should add the sdk plugin module if not present yet", async () => {
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
 	vi.mocked(openInlangProject).mockImplementationOnce(
 		async () =>
-			({
-				errors: () => [],
-				config: () => ({ modules: [] }),
-				setConfig,
-				query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
-				appSpecificApi: () => ({}),
-			} as unknown as InlangProject),
+		({
+			errors: () => [],
+			config: () => ({ modules: [] }),
+			setConfig,
+			query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
+			appSpecificApi: () => ({}),
+		} as unknown as InlangProject),
 	)
 	vi.mocked(openInlangProject).mockImplementationOnce(
 		async () =>
-			({
-				errors: () => [],
-				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
-				setConfig: () => undefined,
-				query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
-				appSpecificApi: () => ({
-					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+		({
+			errors: () => [],
+			config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+			setConfig: () => undefined,
+			query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
+			appSpecificApi: () => ({
+				"inlang.app.sdkJs": validateSdkConfig({
+					languageNegotiation: { strategies: [{ type: "url" }] },
 				}),
-			} as unknown as InlangProject),
+			}),
+		} as unknown as InlangProject),
 	)
 
 	await initTransformConfig()
@@ -212,6 +225,17 @@ it("should add the sdk plugin module if not present yet", async () => {
 	expect(setConfig).toHaveBeenCalledOnce()
 	expect(setConfig).toHaveBeenNthCalledWith(1, {
 		modules: ["../../../../../sdk-js-plugin/dist/index.js"],
+		"settings": {
+			"inlang.plugin.sdkJs": {
+				"languageNegotiation": {
+					"strategies": [
+						{
+							"type": "localStorage",
+						},
+					],
+				},
+			},
+		},
 	})
 })
 
@@ -223,13 +247,13 @@ it("should throw if the SDK is not configured properly", async () => {
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
 	vi.mocked(openInlangProject).mockImplementationOnce(
 		async () =>
-			({
-				errors: () => [],
-				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
-				setConfig: () => undefined,
-				query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
-				appSpecificApi: () => ({ "inlang.app.sdkJs": {} }),
-			} as unknown as InlangProject),
+		({
+			errors: () => [],
+			config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+			setConfig: () => undefined,
+			query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
+			appSpecificApi: () => ({ "inlang.app.sdkJs": {} as SdkConfig }),
+		} as unknown as InlangProject),
 	)
 
 	await expect(async () => initTransformConfig()).rejects.toThrow(InlangSdkException)
@@ -241,15 +265,17 @@ it("should throw if no svelte.config.js file is found", async () => {
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
 	vi.mocked(openInlangProject).mockImplementationOnce(
 		async () =>
-			({
-				errors: () => [],
-				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
-				setConfig: () => undefined,
-				query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
-				appSpecificApi: () => ({
-					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+		({
+			errors: () => [],
+			config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+			setConfig: () => undefined,
+			query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
+			appSpecificApi: () => ({
+				"inlang.app.sdkJs": validateSdkConfig({
+					languageNegotiation: { strategies: [{ type: "url" }] },
 				}),
-			} as unknown as InlangProject),
+			}),
+		} as unknown as InlangProject),
 	)
 
 	await expect(async () => initTransformConfig()).rejects.toThrow(InlangSdkException)
@@ -265,19 +291,21 @@ it("should correctly resolve the config", async () => {
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
 	vi.mocked(openInlangProject).mockImplementationOnce(
 		async () =>
-			({
-				errors: () => [],
-				config: () => ({
-					sourceLanguageTag: "en",
-					languageTags: ["en", "de"],
-					modules: [`@inlang/sdk-js-plugin@${version}`],
+		({
+			errors: () => [],
+			config: () => ({
+				sourceLanguageTag: "en",
+				languageTags: ["en", "de"],
+				modules: [`@inlang/sdk-js-plugin@${version}`],
+			}),
+			setConfig,
+			query: { messages: { getAll: () => [createMessage("hi", { en: "hello" })], create } },
+			appSpecificApi: () => ({
+				"inlang.app.sdkJs": validateSdkConfig({
+					languageNegotiation: { strategies: [{ type: "url" }] },
 				}),
-				setConfig,
-				query: { messages: { getAll: () => [createMessage("hi", { en: "hello" })], create } },
-				appSpecificApi: () => ({
-					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
-				}),
-			} as unknown as InlangProject),
+			}),
+		} as unknown as InlangProject),
 	)
 	const spy = vi.spyOn(createBasicInlangConfigModule, "createBasicInlangConfig")
 

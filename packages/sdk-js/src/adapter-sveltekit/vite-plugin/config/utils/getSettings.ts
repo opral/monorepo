@@ -1,5 +1,5 @@
 import type { InlangProject } from "@inlang/app"
-import type { SdkConfig, SdkConfigInput } from "@inlang/sdk-js-plugin"
+import { validateSdkConfig, type SdkConfig, type SdkConfigInput } from "@inlang/sdk-js-plugin"
 import { InlangSdkException } from "../../exceptions.js"
 
 export const defaultSdkPluginSettings = {
@@ -28,15 +28,15 @@ export function getSettings(inlang: InlangProject) {
 			},
 		})
 
-		console.info("Adding missing `inlang.app.sdkJs` module to `inlang.config.json`")
-
+		console.info("Adding missing `inlang.app.sdkJs` module to `inlang.config.json` and applying default settings.")
 		return undefined
 	}
 
 	try {
-		return settings
+		// this already happens in the plugin, but we cannot be sure if any other plugin modifies that
+		// to be on the safe side, we check again here
+		return validateSdkConfig(settings)
 	} catch (error) {
-		// TODO: better error class
-		throw new InlangSdkException(`Invalid \`inlang.app.sdkJs\` config`, error as Error)
+		return new InlangSdkException(`Invalid \`inlang.app.sdkJs\` config`, error as Error)
 	}
 }
