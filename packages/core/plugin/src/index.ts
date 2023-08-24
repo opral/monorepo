@@ -15,6 +15,11 @@ export {
 } from "./errors.js"
 
 /**
+ * -------- APP-SPECIFIC APIS --------
+ */
+export type { IdeExtensionConfig } from "./appSpecificApis/inlang.app.ideExtension.js"
+
+/**
  * -------- RE-EXPORTS --------
  *
  * See https://github.com/inlang/inlang/issues/1184
