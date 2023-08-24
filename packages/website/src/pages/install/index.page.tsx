@@ -256,12 +256,13 @@ function ShowError() {
 				</h2>
 				<p class="text-surface-500 text-center mb-4">{step().message}</p>
 				<Button
+					// eslint-disable-next-line solid/reactivity
 					function={() => {
-						window.location.reload()
+						step().type === "no-modules" ? navigate("/marketplace") : window.location.reload()
 					}}
 					type="secondary"
 				>
-					Try again
+					{step().type === "no-modules" ? "Browse modules" : "Try again"}
 				</Button>
 			</div>
 		</SetupCard>
