@@ -187,7 +187,9 @@ function ChooseRepo(props: { modules?: string[] }) {
 							<div
 								onClick={() =>
 									setSearchParams(
-										`/install?repo=${recentProject.repository}&module=${props.modules?.join(",")}`,
+										`/install?repo=github.com/${recentProject.owner}/${
+											recentProject.repository
+										}&module=${props.modules?.join(",")}`,
 									)
 								}
 							>
@@ -255,11 +257,11 @@ function ShowError() {
 				<p class="text-surface-500 text-center mb-4">{step().message}</p>
 				<Button
 					function={() => {
-						navigate("/marketplace")
+						window.location.reload()
 					}}
 					type="secondary"
 				>
-					Go to Marketplace
+					Try again
 				</Button>
 			</div>
 		</SetupCard>

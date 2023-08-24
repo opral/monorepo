@@ -87,7 +87,7 @@ async function initializeRepo(
 	})
 
 	const configResult = await tryCatch(async () => {
-		const inlangConfigString = (await repo.nodeishFs.readFile("./inlang.config.js", {
+		const inlangConfigString = (await repo.nodeishFs.readFile("./inlang.config.json", {
 			encoding: "utf-8",
 		})) as string
 
@@ -95,14 +95,11 @@ async function initializeRepo(
 	})
 
 	if (configResult.error) {
-		if (configResult.error) {
-			throw configResult.error
-		} else {
-			setStep({
-				type: "no-inlang-config",
-				message: "No inlang.config.js file found in the repository.",
-			})
-		}
+		setStep({
+			type: "no-inlang-config",
+			message: "No inlang.config.json file found in the repository.",
+			error: true,
+		})
 
 		return
 	}
@@ -110,7 +107,8 @@ async function initializeRepo(
 	const inlangConfigString = configResult.data
 
 	const parseConfigResult = tryCatch(() => {
-		return eval(`(${inlangConfigString.replace(/[^{]*/, "")})`)
+		// return eval(`(${inlangConfigString.replace(/[^{]*/, "")})`)
+		return JSON.parse(inlangConfigString)
 	})
 
 	if (parseConfigResult.error) {
@@ -138,18 +136,20 @@ async function initializeRepo(
 
 	if (!inlangConfig.modules) inlangConfig.modules = []
 
-	const modulesToInstall = modulesURL.filter(
-		(moduleURL) => !inlangConfig.modules?.includes(moduleURL),
-	)
+	const modulesToInstall = modulesURL.filter((moduleURL) => {
+		!inlangConfig.modules?.includes(moduleURL)
+	})
 	inlangConfig.modules.push(...modulesToInstall)
 
-	const generatedInlangConfig = String(
-		inlangConfigString.replace(/{[^}]*}/, writeObjectToPlainText(inlangConfig)),
-	)
+	const generatedInlangConfig = JSON.stringify(inlangConfig, undefined, 2)
 
-	await repo.nodeishFs.writeFile("./inlang.config.js", generatedInlangConfig)
+	console.log(modulesToInstall)
+
+	await repo.nodeishFs.writeFile("./inlang.config.json", generatedInlangConfig)
 
 	if (step().error) return
+
+	return
 
 	setStep({
 		type: "installing",
@@ -157,7 +157,7 @@ async function initializeRepo(
 	})
 
 	await repo.add({
-		filepath: "inlang.config.js",
+		filepath: "inlang.config.json",
 	})
 
 	await repo.commit({
@@ -187,22 +187,8 @@ async function initializeRepo(
 	})
 }
 
-/**
- * This function writes an object to a string in plain text, otherwise it would end up in [Object object]
- */
-function writeObjectToPlainText(object: Record<string, unknown>) {
-	let result = "{"
-	for (const key in object) {
-		if (Array.isArray(object[key])) {
-			result += `${key}: ${JSON.stringify(object[key])}, `
-		} else {
-			result += `${key}: ${JSON.stringify(object[key])}, `
-		}
-	}
-	result += "}"
-
-	result = result.replace(/,(?![^[]*\])/g, ",\n")
-	return result
+function createInlangConfig(modules: string[]) {
+	// ToDo: create inlang.config.js file
 }
 
 function sendSuccessResponseToSource(response: string, source: Window) {
