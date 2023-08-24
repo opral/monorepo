@@ -1,15 +1,16 @@
+import type { ArgumentsType } from "vitest"
 import type { InlangProject } from "../api.js"
 import { observable, type from as solidFrom } from "../solid.js"
 import type { MessageQueryApi } from "@inlang/app"
 
 export const solidAdapter = (
 	project: InlangProject,
-	args: {
+	arg: {
 		from: typeof solidFrom
 	},
 ): InlangProjectWithSolidAdapter => {
-	const convert = <T>(signal: () => T): (() => T) => {
-		return args.from(observable(signal)) as () => T
+	const convert = <T>(signal: (args?: any) => T): (() => T) => {
+		return arg.from(observable(signal)) as () => T
 	}
 
 	return {
@@ -33,6 +34,7 @@ export const solidAdapter = (
 				upsert: project.query.messages.upsert,
 				get: project.query.messages.get,
 				getAll: convert(project.query.messages.getAll),
+				includedMessageIds: convert(project.query.messages.includedMessageIds),
 			},
 		},
 	} satisfies InlangProjectWithSolidAdapter
@@ -55,6 +57,7 @@ export type InlangProjectWithSolidAdapter = {
 			upsert: MessageQueryApi["upsert"]
 			get: MessageQueryApi["get"]
 			getAll: () => ReturnType<MessageQueryApi["getAll"]>
+			includedMessageIds: () => ReturnType<MessageQueryApi["includedMessageIds"]>
 		}
 	}
 	lint: {

@@ -1,7 +1,7 @@
 import { createNodeishMemoryFs } from "@inlang-git/fs"
 import { InlangConfig, Message, Plugin, openInlangProject, solidAdapter } from "@inlang/app"
 import type { ImportFunction, InlangModule } from "@inlang/module"
-import { createEffect, Show, createResource, from } from "solid-js"
+import { createEffect, Show, createResource, from, observable } from "solid-js"
 
 export const Page = () => {
 	const config: InlangConfig = {
@@ -100,7 +100,7 @@ export const Page = () => {
 	// })
 	createEffect(() => {
 		if (!inlang.loading) {
-			console.info("messages changes", Object.values(inlang()!.query.messages.getAll() || {}))
+			console.info("messages change", inlang()!.query.messages.includedMessageIds() || [])
 		}
 	})
 
