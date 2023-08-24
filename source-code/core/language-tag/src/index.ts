@@ -1,1 +1,1 @@
-export { LanguageTag, WithLanguageTags } from "./schema.js"
+export { LanguageTag, Translatable } from "./schema.js"
