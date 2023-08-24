@@ -1,3 +1,4 @@
+import 'solid-devtools'
 import { Component, createSignal } from "solid-js"
 import { createStore } from "solid-js/store"
 import { hydrate, render as renderApp } from "solid-js/web"
