@@ -2,7 +2,7 @@ import path from "node:path"
 import { findExport } from "../../../../ast-transforms/utils/exports.js"
 import { codeToSourceFile } from "../../../../ast-transforms/utils/js.util.js"
 import { Node } from "ts-morph"
-import type { NodeishFilesystem } from '@inlang-git/fs'
+import type { NodeishFilesystem } from "@inlang-git/fs"
 
 export const shouldContentBePrerendered = async (fs: NodeishFilesystem, routesFolder: string) => {
 	const filesToLookFor = ["+layout.server.js", "+layout.server.ts", "+layout.js", "+layout.ts"]

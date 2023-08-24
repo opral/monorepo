@@ -28,7 +28,9 @@ export function getSettings(inlang: InlangProject) {
 			},
 		})
 
-		console.info("Adding missing `inlang.app.sdkJs` module to `inlang.config.json` and applying default settings.")
+		console.info(
+			"Adding missing `inlang.app.sdkJs` module to `inlang.config.json` and applying default settings.",
+		)
 		return undefined
 	}
 

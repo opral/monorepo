@@ -93,7 +93,7 @@ export const initTransformConfig = async (): Promise<TransformConfig> => {
 				default: new InlangSdkException(
 					`Could not find 'svelte.config.js' file (${PATH_TO_SVELTE_CONFIG})`,
 					error as Error,
-				)
+				),
 			}
 		})) as { default: SvelteConfig | InlangSdkException }
 		if (svelteConfig instanceof InlangSdkException) {
