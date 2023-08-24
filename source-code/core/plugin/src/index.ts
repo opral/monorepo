@@ -23,4 +23,4 @@ export {
 export * from "@inlang/language-tag"
 export * from "@inlang/messages"
 export * from "@inlang/result"
-export * from "@inlang/json-serializable"
+export * from "@inlang/json-types"

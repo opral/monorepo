@@ -10,7 +10,7 @@ import type {
 	PluginUsesReservedNamespaceError,
 } from "./errors.js"
 import type { Message } from "@inlang/messages"
-import type { JSONSerializableObject } from "@inlang/json-serializable"
+import type { JSONObject } from "@inlang/json-types"
 
 /**
  * The filesystem is a subset of project lisa's nodeish filesystem.
@@ -27,7 +27,7 @@ export type NodeishFilesystemSubset = Pick<
  */
 export type ResolvePluginsFunction = (args: {
 	plugins: Array<Plugin>
-	settings: Record<Plugin["meta"]["id"], JSONSerializableObject>
+	settings: Record<Plugin["meta"]["id"], JSONObject>
 	nodeishFs: NodeishFilesystemSubset
 }) => Promise<{
 	data: RuntimePluginApi
@@ -76,7 +76,7 @@ export type RuntimePluginApi = {
 /**
  * The plugin API is used to extend inlang's functionality.
  */
-export type Plugin<Settings extends JSONSerializableObject | unknown = unknown> = Omit<
+export type Plugin<Settings extends JSONObject | unknown = unknown> = Omit<
 	Static<typeof Plugin>,
 	"loadMessages" | "saveMessages" | "detectedLanguageTags" | "addAppSpecificApi"
 > & {
