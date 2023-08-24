@@ -7,8 +7,8 @@ export type {
 export { resolvePlugins } from "./resolvePlugins.js"
 export {
 	PluginReturnedInvalidAppSpecificApiError,
-	PluginFunctionLoadMessagesAlreadyDefinedError,
-	PluginFunctionSaveMessagesAlreadyDefinedError,
+	PluginLoadMessagesFunctionAlreadyDefinedError,
+	PluginSaveMessagesFunctionAlreadyDefinedError,
 	PluginHasInvalidIdError,
 	PluginHasInvalidSchemaError,
 	PluginUsesReservedNamespaceError,

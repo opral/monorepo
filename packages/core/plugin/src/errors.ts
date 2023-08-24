@@ -36,17 +36,17 @@ export class PluginHasInvalidSchemaError extends PluginError {
 	}
 }
 
-export class PluginFunctionLoadMessagesAlreadyDefinedError extends PluginError {
+export class PluginLoadMessagesFunctionAlreadyDefinedError extends PluginError {
 	constructor(message: string, options: PluginErrorOptions) {
 		super(message, options)
-		this.name = "PluginFunctionLoadMessagesAlreadyDefinedError"
+		this.name = "PluginLoadMessagesFunctionAlreadyDefinedError"
 	}
 }
 
-export class PluginFunctionSaveMessagesAlreadyDefinedError extends PluginError {
+export class PluginSaveMessagesFunctionAlreadyDefinedError extends PluginError {
 	constructor(message: string, options: PluginErrorOptions) {
 		super(message, options)
-		this.name = "PluginFunctionSaveMessagesAlreadyDefinedError"
+		this.name = "PluginSaveMessagesFunctionAlreadyDefinedError"
 	}
 }
 
