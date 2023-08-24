@@ -11,6 +11,7 @@ import type {
 } from "./errors.js"
 import type { Message } from "@inlang/messages"
 import type { JSONObject } from "@inlang/json-types"
+import type { IdeExtensionConfig } from "./index.js"
 
 /**
  * The filesystem is a subset of project lisa's nodeish filesystem.
@@ -117,7 +118,9 @@ export type Plugin<Settings extends JSONObject | unknown = unknown> = Omit<
 	 * 	 }
 	 *  })
 	 */
-	addAppSpecificApi?: (args: { settings: Settings }) => Record<`${string}.app.${string}`, any>
+	addAppSpecificApi?: (args: {
+		settings: Settings
+	}) => Record<`${string}.app.${string}`, any> | { "inlang.app.ideExtension": IdeExtensionConfig }
 }
 
 export const Plugin = Type.Object(
