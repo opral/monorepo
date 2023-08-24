@@ -13,11 +13,11 @@ const LintRuleId = LintRule["allOf"][0]["properties"]["meta"]["properties"]["id"
 export const Disabled = Type.Array(Type.Union([LintRuleId]), {
 	// in the future plugins too
 	description: "The lint rules that should be disabled.",
-	examples: [["inlang.lintRule.missingMessage", "inlang.lintRule.patternInvalid"]],
+	examples: [["inlang.lintRule.missingTranslation", "inlang.lintRule.patternInvalid"]],
 })
 
 /**
- * ---------------- SYSTEM SETTINGS ----------------
+ * ---------------- PROJECT SETTINGS ----------------
  */
 
 export type ProjectSettings = Static<typeof ProjectSettings>
@@ -26,7 +26,7 @@ export const ProjectSettings = Type.Object({
 		Type.Array(Type.Union([Type.String()]), {
 			// in the future plugins too
 			description: "The lint rules that should be disabled.",
-			examples: ["inlang.lintRule.missingMessage", "inlang.lintRule.patternInvalid"],
+			examples: ["inlang.lintRule.missingTranslation", "inlang.lintRule.patternInvalid"],
 		}),
 	),
 	"project.lintRuleLevels": Type.Optional(
@@ -34,7 +34,7 @@ export const ProjectSettings = Type.Object({
 			description: "The lint rule levels. To disable a lint rule, use `system.disabled`.",
 			examples: [
 				{
-					"inlang.lintRule.missingMessage": "error",
+					"inlang.lintRule.missingTranslation": "error",
 					"inlang.lintRule.patternInvalid": "warning",
 				},
 			],
@@ -59,7 +59,7 @@ const ExternalSettings = Type.Record(
 			.join("|")})$`,
 		description:
 			"The key must be conform to `{namespace:string}.{type:app|plugin|lintRule}.{name:string}`. The namespace `project` namespace is reserved and can't be used.",
-		examples: ["example.plugin.sqlite", "example.lintRule.missingMessage"],
+		examples: ["example.plugin.sqlite", "example.lintRule.missingTranslation"],
 	}) as unknown as TTemplateLiteral<
 		[TLiteral<`${string}.${"app" | "plugin" | "lintRule"}.${string}`>]
 	>,

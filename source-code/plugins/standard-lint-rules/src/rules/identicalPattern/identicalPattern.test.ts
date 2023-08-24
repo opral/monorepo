@@ -9,7 +9,7 @@ const message1: Message = {
 	variants: [
 		{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "This is Inlang" }] },
 		{ languageTag: "de", match: {}, pattern: [{ type: "Text", value: "Das ist Inlang" }] },
-		{ languageTag: "fr", match: {}, pattern: [{ type: "Text", value: "This is Inlang" }] }
+		{ languageTag: "fr", match: {}, pattern: [{ type: "Text", value: "This is Inlang" }] },
 	],
 }
 

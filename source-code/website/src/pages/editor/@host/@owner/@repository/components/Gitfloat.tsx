@@ -38,11 +38,7 @@ export const Gitfloat = () => {
 			return "fork"
 		}
 		// if changes exist in a fork, show the pull request button
-		else if (
-			hasPushedChanges() &&
-			localChanges() === 0 &&
-			githubRepositoryInformation()?.data.fork
-		) {
+		else if (hasPushedChanges() && localChanges() === 0 && githubRepositoryInformation()?.isFork) {
 			return "pullrequest"
 		}
 		// user is logged in and a collaborator, thus show changeStatus
@@ -136,10 +132,13 @@ export const Gitfloat = () => {
 	}
 
 	const pullrequestUrl = () => {
-		return `https://github.com/${githubRepositoryInformation()?.data.parent?.full_name
-			}/compare/${currentBranch()}...${githubRepositoryInformation()?.data.owner.login}:${githubRepositoryInformation()?.data.name
-			}:${currentBranch()}?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20conducted%20here%0A%0APreview%20the%20messages%20on%20https%3A%2F%2Finlang.com%2Fgithub.com%2F${(currentPageContext.routeParams as EditorRouteParams).owner
-			}%2F${(currentPageContext.routeParams as EditorRouteParams).repository}%20.`
+		return `https://github.com/${
+			githubRepositoryInformation()?.parent?.fullName
+		}/compare/${currentBranch()}...${githubRepositoryInformation()?.name}:${
+			githubRepositoryInformation()?.owner.name
+		}:${currentBranch()}?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20conducted%20here%0A%0APreview%20the%20messages%20on%20https%3A%2F%2Finlang.com%2Fgithub.com%2F${
+			(currentPageContext.routeParams as EditorRouteParams).owner
+		}%2F${(currentPageContext.routeParams as EditorRouteParams).repository}%20.`
 	}
 
 	interface GitfloatData {

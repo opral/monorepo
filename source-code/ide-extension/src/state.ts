@@ -1,4 +1,4 @@
-import type { InlangConfig, InlangProject, Message } from "@inlang/app"
+import type { InlangProject } from "@inlang/app"
 
 /**
  * The state of the vscode extension.

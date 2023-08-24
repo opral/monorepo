@@ -81,9 +81,7 @@ export const findImportDeclarations = (sourceFile: SourceFile, path: string) =>
 	sourceFile
 		.getImportDeclarations()
 		.map((node) =>
-			textWithoutQuotes(node.getModuleSpecifier().getText()) === path
-				? node
-				: undefined,
+			textWithoutQuotes(node.getModuleSpecifier().getText()) === path ? node : undefined,
 		)
 		.filter(Boolean) as ImportDeclaration[]
 

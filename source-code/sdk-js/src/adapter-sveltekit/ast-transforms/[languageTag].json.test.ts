@@ -24,7 +24,6 @@ describe("transformLanguageJson", () => {
 			"import { json } from '@sveltejs/kit';
 			import { loadMessages, reloadMessages } from '@inlang/sdk-js/adapter-sveltekit/server';
 			export const GET = async ({ params: { languageTag } }) => {
-			    await reloadMessages();
 			    return json(loadMessages(languageTag) || null);
 			};"
 		`)
@@ -42,7 +41,6 @@ describe("transformLanguageJson", () => {
 			"import { json } from '@sveltejs/kit';
 			import { loadMessages, reloadMessages } from '@inlang/sdk-js/adapter-sveltekit/server';
 			export const GET = async ({ params: { languageTag } }) => {
-			    await reloadMessages();
 			    return json(loadMessages(languageTag) || null);
 			};
 			const someFunction = console.info(123);"
@@ -68,7 +66,6 @@ describe("transformLanguageJson", () => {
 				};
 				import { initState, loadMessages, reloadMessages } from '@inlang/sdk-js/adapter-sveltekit/server';
 				export const GET = async ({ params: { languageTag } }) => {
-				    await reloadMessages();
 				    return json(loadMessages(languageTag) || null);
 				};"
 			`)
@@ -82,7 +79,7 @@ describe("transformLanguageJson", () => {
 					options: {
 						isStatic: true,
 						resourcesCache: "build-time",
-					}
+					},
 				}),
 				code,
 			)
@@ -91,7 +88,6 @@ describe("transformLanguageJson", () => {
 				"import { json } from '@sveltejs/kit';
 				import { loadMessages, reloadMessages } from '@inlang/sdk-js/adapter-sveltekit/server';
 				export const GET = async ({ params: { languageTag } }) => {
-				    await reloadMessages();
 				    return json(loadMessages(languageTag) || null);
 				};
 				export const prerender = true;"
@@ -123,7 +119,6 @@ describe("transformLanguageJson", () => {
 			"import { json } from '@sveltejs/kit';
 			import { loadMessages, reloadMessages, initRequestHandlerWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
 			export const GET = initRequestHandlerWrapper().use(async ({ params: { languageTag } }, { languages }) => {
-			    await reloadMessages();
 			    return json(loadMessages(languageTag) || null);
 			});
 			export const POST = initRequestHandlerWrapper().use(async function POST(_, { languages }) {

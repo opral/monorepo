@@ -12,8 +12,8 @@
 		"access": "public"
 	},
 	"scripts": {
-		"dev": "DEV=true node ./build.js",
-		"build": "node ./build.js",
+		"dev": "inlang module build --entry ./src/index.ts --outdir ./dist --watch",
+		"build": "inlang module build --entry ./src/index.ts --outdir ./dist",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"test:watch": "npm-run-all --print-label --parallel tsc:watch vitest:watch",
@@ -27,8 +27,8 @@
 		"@inlang/plugin": "*"
 	},
 	"devDependencies": {
+		"@inlang/cli": "*",
 		"concurrently": "^8.0.1",
-		"esbuild": "^0.17.19",
 		"tsd": "^0.28.1",
 		"typescript": "4.9.3",
 		"vitest": "^0.29.8"

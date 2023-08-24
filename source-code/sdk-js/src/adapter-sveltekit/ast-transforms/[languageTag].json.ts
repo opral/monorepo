@@ -33,7 +33,6 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 		index,
 		dedent`
 			export const GET = async ({ params: { languageTag } }) => {
-				await reloadMessages()
 				return json(loadMessages(languageTag) || null)
 			}
 		`,

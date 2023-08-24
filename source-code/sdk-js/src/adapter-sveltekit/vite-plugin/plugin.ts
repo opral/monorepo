@@ -1,5 +1,5 @@
 import { dedent } from "ts-dedent"
-import type { ViteDevServer, Plugin } from "vite"
+import type { ViteDevServer, Plugin as VitePlugin } from "vite"
 import { assertAppTemplateIsCorrect } from "./checks/appTemplate.js"
 import { assertRoutesFolderPathExists, assertNecessaryFilesArePresent } from "./checks/routes.js"
 import { initTransformConfig, resetTransformConfig, type TransformConfig } from "./config/index.js"
@@ -7,9 +7,11 @@ import { filePathForOutput, getFileInformation } from "./fileInformation.js"
 import { transformCode } from "../ast-transforms/index.js"
 import { InlangSdkException } from "./exceptions.js"
 import { inspect } from "node:util"
-import path from 'node:path'
-import { rm } from 'node:fs/promises'
-import { doesPathExist } from './config/utils/utils.js'
+import path from "node:path"
+import { rm } from "node:fs/promises"
+import { doesPathExist } from "./config/utils/utils.js"
+import { getNodeishFs } from "./config/utils/getNodeishFs.js"
+// TODO: expose those functions somewhere
 import {
 	createEffect as _createEffect,
 	// @ts-ignore
@@ -22,7 +24,9 @@ let viteServer: ViteDevServer | undefined
 const virtualModuleId = "virtual:inlang-static"
 const resolvedVirtualModuleId = "\0" + virtualModuleId
 
-export const plugin = () => {
+export const plugin = async () => {
+	const fs = await getNodeishFs()
+
 	return {
 		name: "vite-plugin-inlang-sdk-js-sveltekit",
 		// makes sure we run before vite-plugin-svelte
@@ -64,18 +68,22 @@ export const plugin = () => {
 		},
 
 		async buildStart() {
-			const config = await initTransformConfig().catch(error => {
+			const config = await initTransformConfig().catch((error) => {
 				throw new Error(error)
 			})
 
 			await assertAppTemplateIsCorrect(config)
-			await assertRoutesFolderPathExists(config)
-			const hasCreatedANewFile = await assertNecessaryFilesArePresent(config)
+			await assertRoutesFolderPathExists(fs, config)
+			const hasCreatedANewFile = await assertNecessaryFilesArePresent(fs, config)
 
 			// remove old files // TODO: remove this in version 1
 			let deletedFolder = false
-			const pathToOldLanguagesFolder = path.resolve(config.svelteKit.files.routes, "inlang", "[language].json")
-			if (await doesPathExist(pathToOldLanguagesFolder)) {
+			const pathToOldLanguagesFolder = path.resolve(
+				config.svelteKit.files.routes,
+				"inlang",
+				"[language].json",
+			)
+			if (await doesPathExist(fs, pathToOldLanguagesFolder)) {
 				await rm(pathToOldLanguagesFolder, { recursive: true })
 				deletedFolder = true
 			}
@@ -91,8 +99,8 @@ export const plugin = () => {
 				config.messages()
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				viteServer!.ws.send({
-					type: 'custom',
-					event: 'inlang-messages-changed',
+					type: "custom",
+					event: "inlang-messages-changed",
 					// TODO: only HMR if the currently visible language changes
 				})
 			})
@@ -135,7 +143,7 @@ export const plugin = () => {
 
 			return transformedCode
 		},
-	} satisfies Plugin
+	} satisfies VitePlugin
 }
 
 let configLogged = false

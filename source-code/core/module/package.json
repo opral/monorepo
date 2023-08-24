@@ -32,10 +32,8 @@
 	"dependencies": {
 		"@inlang/config": "*",
 		"@inlang-git/fs": "*",
-		"@esbuild-plugins/node-modules-polyfill": "^0.2.2",
 		"@inlang/lint": "*",
 		"@inlang/plugin": "*",
-		"esbuild": "^0.17.14",
 		"just-extend": "^6.2.0"
 	},
 	"devDependencies": {

@@ -864,9 +864,3 @@ var zn = (e, t) => {
 			: (e[t[0]] || (e[t[0]] = {}), Ie(e[t[0]], t.slice(1), n, r))
 	}
 export { En as default }
-/*! Bundled license information:
-
-@inlang/core/dist/plugin/pluginBuildConfig.js:
-  (*! DON'T TOP-LEVEL IMPORT ESBUILD PLUGINS. USE DYNAMIC IMPORTS. *)
-  (*! See https://github.com/inlang/inlang/issues/486 *)
-*/

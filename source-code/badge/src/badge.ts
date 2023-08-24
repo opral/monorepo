@@ -1,17 +1,12 @@
 import satori from "satori"
-import { open, createNodeishMemoryFs } from "@project-lisa/client"
+import { openRepository, createNodeishMemoryFs } from "@project-lisa/client"
 import { markup } from "./helper/markup.js"
 import { readFileSync } from "node:fs"
 import { telemetryNode } from "@inlang/telemetry"
 import { removeCommas } from "./helper/removeCommas.js"
 import { calculateSummary } from "./helper/calculateSummary.js"
 import { caching } from "cache-manager"
-import { createInlang } from "@inlang/app"
-import type { InlangModule } from "@inlang/module"
-//@ts-ignore
-import pluginJson from "../../plugins/json/dist/index.js"
-//@ts-ignore
-import pluginLint from "../../plugins/standard-lint-rules/dist/index.js"
+import { openInlangProject } from "@inlang/app"
 
 const fontMedium = readFileSync(new URL("./assets/static/Inter-Medium.ttf", import.meta.url))
 const fontBold = readFileSync(new URL("./assets/static/Inter-Bold.ttf", import.meta.url))
@@ -30,7 +25,7 @@ export const badge = async (url: string) => {
 	}
 
 	// initialize a lisa repo instance on each request to prevent cross request pollution
-	const repo = open(url, { nodeishFs: createNodeishMemoryFs() })
+	const repo = openRepository(url, { nodeishFs: createNodeishMemoryFs() })
 
 	// Get the content of the inlang.config.js file
 	await repo.nodeishFs.readFile("./inlang.config.js", { encoding: "utf-8" }).catch((e) => {
@@ -38,18 +33,9 @@ export const badge = async (url: string) => {
 		throw new Error("No inlang.config.js file found in the repository.")
 	})
 
-	const inlang = await createInlang({
+	const inlang = await openInlangProject({
 		configPath: "./inlang.config.json",
 		nodeishFs: repo.nodeishFs,
-		_import: async () =>
-			({
-				default: {
-					// @ts-ignore
-					plugins: [...pluginJson.plugins],
-					// @ts-ignore
-					lintRules: [...pluginLint.lintRules],
-				},
-			} satisfies InlangModule),
 	})
 
 	// access all messages via inlang instance query
@@ -66,7 +52,7 @@ export const badge = async (url: string) => {
 	const { percentage, errors, warnings, numberOfMissingVariants } = calculateSummary({
 		reports: inlang.lint.reports(),
 		languageTags: inlang.config().languageTags,
-		messages,
+		messages: Object.values(messages),
 	})
 
 	const vdom = removeCommas(markup(percentage, errors, warnings, numberOfMissingVariants))

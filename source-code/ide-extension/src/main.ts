@@ -18,8 +18,9 @@ import {
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 import { openInEditorCommand } from "./commands/openInEditor.js"
 import { editMessageCommand } from "./commands/editMessage.js"
-import { createInlang, tryCatch } from "@inlang/app"
+import { openInlangProject, tryCatch } from "@inlang/app"
 import { createFileSystemMapper } from "./services/inlang-environment/src/createFileSystemMapper.js"
+import { _import } from "./services/inlang-environment/src/_import.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
@@ -97,9 +98,10 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	)
 
 	const { data: inlang, error } = await tryCatch(() =>
-		createInlang({
+		openInlangProject({
 			configPath: closestConfigPathUri.fsPath,
 			nodeishFs: createFileSystemMapper(workspaceFolder.uri),
+			_import: _import(closestConfigPathUri.fsPath),
 		}),
 	)
 
@@ -111,7 +113,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
 	const loadMessages = async () => {
 		setState({
-			inlang
+			inlang,
 		})
 	}
 
@@ -142,7 +144,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
 	const documentSelectors: vscode.DocumentSelector = [
 		{ language: "javascript", pattern: "!inlang.config.json" },
-		...state().inlang.appSpecificApi()["inlang.app.ideExtension"].documentSelectors || undefined
+		...(state().inlang.appSpecificApi()["inlang.app.ideExtension"].documentSelectors || undefined),
 	]
 	// register source actions
 	args.context.subscriptions.push(
@@ -163,7 +165,6 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	// linter diagnostics
 	linterDiagnostics(args)
 }
-
 
 // this method is called when your extension is deactivated
 // export function deactivate() {}

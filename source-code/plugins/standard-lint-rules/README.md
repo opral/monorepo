@@ -32,7 +32,7 @@ Optionally, you can adjust the lint level of each rule or disable rules alltoget
 ```ts
 standardLintRules({
 	// disable a rule
-	missingMessage: "off",
+	missingTranslation: "off",
 	// adjust the lint level of a rule
 	identicalPattern: "warning",
 })
@@ -42,7 +42,7 @@ standardLintRules({
 
 Are you missing a rule? Create a PR or add a comment [in the discussion thread](https://github.com/inlang/inlang/discussions/406).
 
-### missingMessage
+### missingTranslation
 
 Checks for missing messages (translations).
 

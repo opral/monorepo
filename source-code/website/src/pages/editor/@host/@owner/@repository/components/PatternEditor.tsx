@@ -18,15 +18,13 @@ import {
 	createVariant,
 	updateVariantPattern,
 	getVariant,
+	Pattern,
 } from "@inlang/app"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
  */
-export function PatternEditor(props: {
-	languageTag: LanguageTag
-	message: Message
-}) {
+export function PatternEditor(props: { languageTag: LanguageTag; message: Message }) {
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const {
 		localChanges,
@@ -34,7 +32,8 @@ export function PatternEditor(props: {
 		userIsCollaborator,
 		routeParams,
 		inlang,
-		sourceLanguageTag
+		sourceLanguageTag,
+		lastPullTime,
 	} = useEditorState()
 
 	const [variableReferences, setVariableReferences] = createSignal<VariableReference[]>([])
@@ -62,28 +61,14 @@ export function PatternEditor(props: {
 		}
 	}
 
-	const sourceVariant = () => getVariant(props.message, { where: { languageTag: sourceLanguageTag()! } })
+	const sourceVariant = () =>
+		getVariant(props.message, { where: { languageTag: sourceLanguageTag()! } })
 
-	const variant = () => props.message.variants.filter((variant) => variant.languageTag === props.languageTag)
-		? props.message.variants.filter((variant) => variant.languageTag === props.languageTag)![0]
-		: undefined
+	const variant = () => getVariant(props.message, { where: { languageTag: props.languageTag } })
 
-	const newPattern = () => getTextValue(editor) as Variant["pattern"];
+	const [referencePattern, setReferencePattern] = createSignal<Pattern>()
 
-	onMount(() => {
-		if (sourceVariant()) {
-			setVariableReferences(
-				sourceVariant()?.pattern
-					.filter((pattern) => pattern.type === "VariableReference")
-					.map((variableReference) => variableReference) as VariableReference[],
-			)
-		}
-
-		document.addEventListener("focusin", handleLineItemFocusIn)
-		return () => {
-			document.removeEventListener("focusin", handleLineItemFocusIn)
-		}
-	})
+	const newPattern = () => getTextValue(editor) as Variant["pattern"]
 
 	//create editor
 	let textArea!: HTMLDivElement
@@ -91,31 +76,67 @@ export function PatternEditor(props: {
 		return getEditorConfig(textArea, variant(), variableReferences())
 	})
 
-	const currentJSON = useEditorJSON(() => editor());
+	const currentJSON = useEditorJSON(() => editor())
 
-	createEffect(on(currentJSON, () => {
-		if (currentJSON().content[0].content !== undefined) {
-			setHasChanges((prev) => {
-				const hasChanged = JSON.stringify(variant()?.pattern) !== JSON.stringify(newPattern())
-				if (prev !== hasChanged && hasChanged) {
-					setLocalChanges((prev) => prev += 1)
-				} else if (prev !== hasChanged && !hasChanged) {
-					setLocalChanges((prev) => prev -= 1)
-				}
-				return hasChanged
-			})
+	const [previousContent, setPreviousContent] = createSignal()
+
+	onMount(() => {
+		if (sourceVariant()) {
+			setVariableReferences(
+				sourceVariant()
+					?.pattern.filter((pattern) => pattern.type === "VariableReference")
+					.map((variableReference) => variableReference) as VariableReference[],
+			)
 		}
-	}))
+		setPreviousContent(currentJSON().content[0].content)
+
+		document.addEventListener("focusin", handleLineItemFocusIn)
+		return () => {
+			document.removeEventListener("focusin", handleLineItemFocusIn)
+		}
+	})
+
+	createEffect(
+		on(lastPullTime, () => {
+			setReferencePattern(
+				inlang()
+					?.query.messages.get({ where: { id: props.message.id } })
+					?.variants.find((variant) => variant.languageTag === props.languageTag)?.pattern,
+			)
+			setHasChanges(false)
+		}),
+	)
+
+	createEffect(
+		on(currentJSON, () => {
+			if (
+				currentJSON().content[0].content !== undefined &&
+				JSON.stringify(currentJSON().content[0].content) !== JSON.stringify(previousContent())
+			) {
+				autoSave()
+				setPreviousContent(currentJSON().content[0].content)
+				setHasChanges((prev) => {
+					const hasChanged = JSON.stringify(referencePattern()) !== JSON.stringify(newPattern())
+					if (prev !== hasChanged && hasChanged) {
+						setLocalChanges((prev) => (prev += 1))
+					} else if (prev !== hasChanged && !hasChanged) {
+						setLocalChanges((prev) => (prev -= 1))
+					}
+					return hasChanged
+				})
+			}
+		}),
+	)
 
 	const autoSave = () => {
-		let newMessage;
+		let newMessage
 		if (variant() === undefined) {
 			newMessage = createVariant(props.message, {
 				data: {
 					languageTag: props.languageTag,
 					match: {},
 					pattern: newPattern(),
-				}
+				},
 			})
 		} else {
 			newMessage = updateVariantPattern(props.message, {
@@ -125,12 +146,12 @@ export function PatternEditor(props: {
 				},
 				data: newPattern(),
 			})
-		};
+		}
 		if (newMessage.data) {
 			const upsertSuccessful = inlang()?.query.messages.upsert({
 				where: { id: props.message.id },
 				data: newMessage.data,
-			});
+			})
 			if (!upsertSuccessful) {
 				throw new Error("Cannot update message")
 			}
@@ -165,8 +186,8 @@ export function PatternEditor(props: {
 				title: "Can't translate if the reference message does not exist.",
 			})
 		}
-		const text = sourceVariant()!.pattern
-			.map((pattern) => {
+		const text = sourceVariant()!
+			.pattern.map((pattern) => {
 				if (pattern.type === "Text") {
 					return pattern.value.toLocaleLowerCase()
 				} else if (pattern.type === "VariableReference") {
@@ -186,15 +207,25 @@ export function PatternEditor(props: {
 			return machineLearningWarningDialog?.show()
 		}
 		// check if empty Message is present for message
-		const hasEmptyPattern = inlang()?.lint.reports().filter((report) => report.messageId === props.message.id && report.languageTag === props.languageTag && report.ruleId === "inlang.lintRule.emptyPattern").length !== 0
+		const hasEmptyPattern =
+			inlang()
+				?.lint.reports()
+				.filter(
+					(report) =>
+						report.messageId === props.message.id &&
+						report.languageTag === props.languageTag &&
+						report.ruleId === "inlang.lintRule.emptyPattern",
+				).length !== 0
 
-		let newMessage = structuredClone(props.message)
+		const newMessage = structuredClone(props.message)
 		if (hasEmptyPattern) {
-			newMessage.variants = newMessage.variants.filter((variant) => variant.languageTag !== props.languageTag)
+			newMessage.variants = newMessage.variants.filter(
+				(variant) => variant.languageTag !== props.languageTag,
+			)
 		}
 
 		setMachineTranslationIsLoading(true)
-		const { rpc } = await import("@inlang/rpc");
+		const { rpc } = await import("@inlang/rpc")
 		const translation = await rpc.machineTranslateMessage({
 			message: newMessage,
 			sourceLanguageTag: inlang()!.config()!.sourceLanguageTag!,
@@ -206,18 +237,16 @@ export function PatternEditor(props: {
 				title: "Machine translation failed.",
 				message: translation.error,
 			})
-		}
-		else {
-			const newPattern = getVariant(translation.data, {
-				where: {
-					languageTag: props.languageTag,
-					selectors: {},
-				},
-			})?.pattern || []
+		} else {
+			const newPattern =
+				getVariant(translation.data, {
+					where: {
+						languageTag: props.languageTag,
+						selectors: {},
+					},
+				})?.pattern || []
 			if (JSON.stringify(newPattern) !== "[]") {
-				editor().commands.setContent(setTipTapMessage(
-					newPattern
-				))
+				editor().commands.setContent(setTipTapMessage(newPattern))
 			} else {
 				showToast({
 					variant: "warning",
@@ -232,17 +261,22 @@ export function PatternEditor(props: {
 
 	const getNotificationHints = () => {
 		const notifications: Array<Notification> = []
-		inlang()?.lint.reports().map((report) => {
-			if (report.messageId === props.message.id && report.languageTag === props.languageTag) {
-				notifications.push({
-					notificationTitle: inlang()?.installed.lintRules()
-						.filter((lintRule) => !lintRule.disabled)
-						.find((rule) => rule.meta.id === report.ruleId)?.meta.displayName["en"] || report.ruleId,
-					notificationDescription: report.body["en"]!,
-					notificationType: report.level,
-				})
-			}
-		})
+		inlang()
+			?.lint.reports()
+			.map((report) => {
+				if (report.messageId === props.message.id && report.languageTag === props.languageTag) {
+					notifications.push({
+						notificationTitle:
+							inlang()
+								?.installed.lintRules()
+								.filter((lintRule) => !lintRule.disabled)
+								.find((rule) => rule.meta.id === report.ruleId)?.meta.displayName["en"] ||
+							report.ruleId,
+						notificationDescription: report.body["en"]!,
+						notificationType: report.level,
+					})
+				}
+			})
 
 		if (hasChanges() && localStorage.user === undefined) {
 			notifications.push({
@@ -261,7 +295,7 @@ export function PatternEditor(props: {
 		return notifications
 	}
 
-	let timer: ReturnType<typeof setTimeout>;
+	let timer: ReturnType<typeof setTimeout>
 	const handleShortcut = (event: KeyboardEvent) => {
 		// @ts-ignore
 		const platform = navigator?.userAgentData?.platform || navigator?.platform
@@ -271,13 +305,13 @@ export function PatternEditor(props: {
 			userIsCollaborator()
 		) {
 			event.preventDefault()
-			clearTimeout(timer);
+			clearTimeout(timer)
 			timer = setTimeout(() => {
 				showToast({
 					variant: "info",
-					title: "Inlang saves automatically but make shure to push your changes."
+					title: "Inlang saves automatically but make shure to push your changes.",
 				})
-			}, 500);
+			}, 500)
 		}
 	}
 
@@ -285,11 +319,8 @@ export function PatternEditor(props: {
 		// outer element is needed for clickOutside directive
 		// to close the action bar when clicking outside
 		<div
-			onClick={() => {
-				editor().chain().focus()
-			}}
+			onClick={() => editor().chain().focus()}
 			onFocusIn={() => setIsLineItemFocused(true)}
-			onFocusOut={() => { autoSave() }}
 			class="flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border first:mt-0 -mt-[1px] border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus-within:relative focus-within:border-primary focus-within:ring-[3px] focus-within:ring-hover-primary/50"
 		>
 			<div class="flex justify-start items-start gap-2 py-[5px]">
@@ -351,27 +382,20 @@ export function PatternEditor(props: {
 							Machine translate
 						</sl-button>
 					</Show>
-					<Show when={
-						hasChanges() &&
-						isLineItemFocused()
-					}>
+					<Show when={hasChanges() && isLineItemFocused()}>
 						<sl-button
 							prop:variant="default"
 							prop:size="small"
-							prop:disabled={
-								hasChanges() === false ||
-								userIsCollaborator() === false}
+							prop:disabled={hasChanges() === false || userIsCollaborator() === false}
 							onClick={() => {
-								editor().commands.setContent(setTipTapMessage(
-									variant()?.pattern || []
-								))
+								editor().commands.setContent(setTipTapMessage(variant()?.pattern || []))
 								textArea.parentElement?.click()
 							}}
 						>
 							Revert
 						</sl-button>
 					</Show>
-				</div >
+				</div>
 				<Show when={!isLineItemFocused() && hasChanges()}>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"

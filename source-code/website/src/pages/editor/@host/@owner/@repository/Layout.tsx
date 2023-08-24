@@ -28,7 +28,6 @@ export function Layout(props: { children: JSXElement }) {
 		setFilteredLanguageTags,
 		userIsCollaborator,
 		languageTags,
-		setLanguageTags,
 	} = useEditorState()
 
 	const removeFilter = (filterName: string) => {
@@ -125,7 +124,6 @@ export function Layout(props: { children: JSXElement }) {
 			})
 			return
 		}
-		setLanguageTags([...languageTags(), languageTag])
 		setFilteredLanguageTags([...filteredLanguageTags(), languageTag])
 		inlang()?.setConfig({
 			...inlang()!.config(),
@@ -487,7 +485,8 @@ function LintFilter(props: { clearFunction: any }) {
 								?.installed.lintRules()
 								.filter((lintRule) => !lintRule.disabled)
 								.map((lintRule) => lintRule.meta.id) ?? [],
-						)}
+						)
+					}
 				>
 					All
 				</a>
@@ -508,7 +507,9 @@ function LintFilter(props: { clearFunction: any }) {
 							.map((lintRule) => lintRule) ?? []
 					}
 				>
-					{(lintRule) => <sl-option prop:value={lintRule.meta.id}>{lintRule.meta.displayName["en"]}</sl-option>}
+					{(lintRule) => (
+						<sl-option prop:value={lintRule.meta.id}>{lintRule.meta.displayName["en"]}</sl-option>
+					)}
 				</For>
 			</div>
 		</sl-select>

@@ -18,9 +18,7 @@ export function tryCatch<Data>(
 	try {
 		const callbackResult = callback() as Data | Promise<Data>
 		if (isAsync(callbackResult)) {
-			return callbackResult
-				.then((data) => ({ data }))
-				.catch(getErrorResponse)
+			return callbackResult.then((data) => ({ data })).catch(getErrorResponse)
 		}
 		return { data: callbackResult }
 	} catch (e) {

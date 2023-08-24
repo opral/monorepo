@@ -1,6 +1,7 @@
 import { Command } from "commander"
 import { config } from "./commands/config/index.js"
 import { machine } from "./commands/machine/index.js"
+import { module } from "./commands/module/index.js"
 import { version } from "../package.json"
 import consola, { Consola } from "consola"
 import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
@@ -34,8 +35,9 @@ export const cli = new Command()
 	.addCommand(lint)
 	.addCommand(machine)
 	.addCommand(open)
+	.addCommand(module)
 	// Global options
-	.option("-c, --config <value>", "Path to the inlang.config.json file.")
+	// .option("-c, --config <value>", "Path to the inlang.config.json file.")
 	// Hooks
 	.hook("postAction", (command) => {
 		// name enables better grouping in the telemetry dashboard
@@ -70,9 +72,3 @@ telemetry.groupIdentify({
 		name: gitOrigin,
 	},
 })
-
-try {
-	const { data: inlang } = await getInlangProject()
-} catch (error) {
-	// ignore, because of telemetry usage
-}

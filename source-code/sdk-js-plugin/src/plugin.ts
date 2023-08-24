@@ -15,7 +15,7 @@ export const sdkPlugin: Plugin<SdkConfigInput> = {
 		// 		"sdk",
 		// 		"runtime",
 		// 		"plugin",
-		// 		"tranform",
+		// 		"transform",
 		// 		"javascript",
 		// 		"typescript",
 		// 		"svelte",
