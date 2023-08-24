@@ -14,7 +14,6 @@ class PluginError extends Error {
 	}
 }
 
-
 export class PluginHasInvalidIdError extends PluginError {
 	constructor(message: string, options: PluginErrorOptions) {
 		super(message, options)
@@ -49,7 +48,6 @@ export class PluginSaveMessagesFunctionAlreadyDefinedError extends PluginError {
 		this.name = "PluginSaveMessagesFunctionAlreadyDefinedError"
 	}
 }
-
 
 export class PluginReturnedInvalidAppSpecificApiError extends PluginError {
 	constructor(message: string, options: PluginErrorOptions) {
