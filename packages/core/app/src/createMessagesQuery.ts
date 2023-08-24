@@ -2,7 +2,7 @@ import type { Message } from "@inlang/messages"
 import { ReactiveMap } from "@solid-primitives/map"
 import { createEffect, createMemo } from "./solid.js"
 import { createSubscribable } from "./openInlangProject.js"
-import type { InlangProject } from "./api.js"
+import type { InlangProject, MessageQueryApi } from "./api.js"
 
 /**
  * Creates a reactive query API for messages.
@@ -19,16 +19,17 @@ export function createMessagesQuery(
 		}
 	})
 
+	const get = (args: Parameters<MessageQueryApi['get']>[0]) => structuredClone(index.get(args.where.id))
+
 	return {
 		create: ({ data }): boolean => {
 			if (index.has(data.id)) return false
 			index.set(data.id, data)
 			return true
 		},
-		get: createSubscribable((args) => {
-			if (!args) return undefined
-			return structuredClone(index.get(args.where.id))
-		}),
+		get: Object.assign(get, {
+			subscribe: (args: Parameters<MessageQueryApi['get']['subscribe']>[0], callback: Parameters<MessageQueryApi['get']['subscribe']>[1]) => createSubscribable(() => get(args)).subscribe(callback),
+		}) as any,
 		includedMessageIds: createSubscribable(() => {
 			return structuredClone([...index.keys()])
 		}),

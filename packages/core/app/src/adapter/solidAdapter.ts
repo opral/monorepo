@@ -1,4 +1,3 @@
-import type { ArgumentsType } from "vitest"
 import type { InlangProject } from "../api.js"
 import { observable, type from as solidFrom } from "../solid.js"
 import type { MessageQueryApi } from "@inlang/app"
