@@ -499,7 +499,6 @@ export async function pushChanges(args: {
 	setFsChange: (date: Date) => void
 	setLastPullTime: (date: Date) => void
 }): Promise<Result<true, PushException | PullException>> {
-	console.log("try to push")
 	// stage all changes
 	const status = await args.repo.statusMatrix({
 		filter: (f: any) =>
@@ -510,7 +509,6 @@ export async function pushChanges(args: {
 			f.endsWith(".js") ||
 			f.endsWith(".ts"),
 	})
-	console.log("status", status)
 	const filesWithUncommittedChanges = status.filter(
 		(row: any) =>
 			// files with unstaged and uncommitted changes
@@ -518,7 +516,6 @@ export async function pushChanges(args: {
 			// added files
 			(row[2] === 2 && row[3] === 0),
 	)
-	console.log("filesWithUncommittedChanges", filesWithUncommittedChanges)
 	if (filesWithUncommittedChanges.length === 0) {
 		return { error: new PushException("No changes to push.") }
 	}
