@@ -50,7 +50,7 @@ describe("lintMessages", async () => {
 			sourceLanguageTag: "en",
 			languageTags: [],
 			messages,
-			rules: [lintRule1, lintRule2],
+			lintRules: [lintRule1, lintRule2],
 		})
 
 		expect(lintRule1.message).toHaveBeenCalledTimes(3)
@@ -80,7 +80,7 @@ describe("lintMessages", async () => {
 			sourceLanguageTag: "en",
 			languageTags: [],
 			messages,
-			rules: [lintRule1, lintRule2],
+			lintRules: [lintRule1, lintRule2],
 		})
 
 		expect(fn).toHaveBeenCalledTimes(12)
@@ -115,7 +115,7 @@ describe("lintMessages", async () => {
 			sourceLanguageTag: "en",
 			languageTags: [],
 			messages,
-			rules: [lintRule1, lintRule2],
+			lintRules: [lintRule1, lintRule2],
 		})
 
 		expect(data).toHaveLength(3)
