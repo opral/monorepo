@@ -14,14 +14,14 @@ export const lintSingleMessage = async (args: {
 	languageTags: LanguageTag[]
 	lintRuleSettings: Record<LintRule["meta"]["id"], JSONObject>
 	lintLevels: Record<LintRule["meta"]["id"], LintLevel>
-	rules: LintRule[]
+	lintRules: LintRule[]
 	messages: Message[]
 	message: Message
 }): Promise<{ data: MessageLintReport[]; errors: LintRuleThrowedError[] }> => {
 	const reports: MessageLintReport[] = []
 	const errors: LintRuleThrowedError[] = []
 
-	const promises = args.rules
+	const promises = args.lintRules
 		.filter((rule) => rule.type === "MessageLint")
 		.map(async (rule) => {
 			const ruleId = rule.meta.id

@@ -10,7 +10,7 @@ export const lintMessages = async (args: {
 	languageTags: LanguageTag[]
 	lintRuleSettings: Record<LintRule["meta"]["id"], JSONObject>
 	lintLevels: Record<LintRule["meta"]["id"], LintLevel>
-	rules: LintRule[]
+	lintRules: LintRule[]
 	messages: Message[]
 }): Promise<{ data: LintReport[]; errors: LintRuleThrowedError[] }> => {
 	const promises = args.messages.map((message) =>
