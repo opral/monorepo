@@ -6,7 +6,7 @@ import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
 import {
 	ConfigPathNotFoundError,
-	ConfigSyntaxError,
+	ConfigJSONSyntaxError,
 	InvalidConfigError,
 	NoMessagesPluginError,
 	PluginLoadMessagesError,
@@ -257,7 +257,7 @@ const loadConfig = async (args: { configPath: string; nodeishFs: NodeishFilesyst
 
 		const { data: parsedConfig, error: parseConfigError } = tryCatch(() => JSON.parse(configFile!))
 		if (parseConfigError)
-			throw new ConfigSyntaxError(`The config is not a valid JSON file.`, {
+			throw new ConfigJSONSyntaxError(`The config is not a valid JSON file.`, {
 				cause: parseConfigError,
 			})
 
