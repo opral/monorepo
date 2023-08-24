@@ -36,6 +36,10 @@ import pluginLint from "../../../../../../../plugins/standard-lint-rules/dist/in
 
 type EditorStateSchema = {
 	/**
+	 * Returns a repository object
+	 */
+	repo: Repository
+	/**
 	 * Whether a repository is cloned and when it was cloned.
 	 *
 	 * The value is `false` if the repository is not cloned. Otherwise,
@@ -64,11 +68,6 @@ type EditorStateSchema = {
 	 * Utility to access the route parameters in a typesafe manner.
 	 */
 	searchParams: () => EditorSearchParams
-
-	/**
-	 * Virtual filesystem
-	 */
-	fs: () => NodeishFilesystem
 
 	/**
 	 * Id to filter messages
@@ -204,67 +203,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		setSearchParams({ key: "lint", value: filteredLintRules() })
 	})
 
-	const [fs, setFs] = createSignal<NodeishFilesystem>(createNodeishMemoryFs())
-
 	const [localStorage] = useLocalStorage() ?? []
-
-	// re-fetched if currentPageContext changes
-	const [repositoryIsCloned] = createResource(
-		() => {
-			// re-initialize fs on every cloneRepository call
-			// until subdirectories are supported
-			setFs(createNodeishMemoryFs())
-			return {
-				fs: fs(),
-				routeParams: currentPageContext.routeParams as EditorRouteParams,
-				user: localStorage?.user,
-				setFsChange,
-			}
-		},
-		async (args) => {
-			const result = await cloneRepository(args)
-			// not blocking the execution by using the callback pattern
-			// the user does not need to wait for the response
-			// checks whether the gitOrigin corresponds to the pattern.
-
-			const gitOrigin = await repo.getOrigin()
-			//You must include at least one group property for a group to be visible in the "Persons & Groups" tab
-			//https://posthog.com/docs/product-analytics/group-analytics#setting-and-updating-group-properties
-			telemetryBrowser.group("repository", gitOrigin, {
-				name: gitOrigin,
-			})
-			github
-				.request("GET /repos/{owner}/{repo}", {
-					owner: args.routeParams.owner,
-					repo: args.routeParams.repository,
-				})
-				.then((response) => {
-					telemetryBrowser.group("repository", gitOrigin, {
-						visibility: response.data.private ? "Private" : "Public",
-						isFork: response.data.fork ? "Fork" : "isNotFork",
-						// parseOrgin requiers a "remote"="origing" to transform the url in the git origin
-						parentGitOrigin: response.data.parent?.git_url
-							? parseOrigin({ remotes: [{ remote: "origin", url: response.data.parent.git_url }] })
-							: "",
-					})
-					telemetryBrowser.capture("EDITOR cloned repository", {
-						owner: args.routeParams.owner,
-						repository: args.routeParams.repository,
-						userPermission: userIsCollaborator() ? "iscollaborator" : "isNotCollaborator",
-					})
-				})
-				.catch((error) => {
-					telemetryBrowser.capture("EDITOR cloned repository", {
-						owner: args.routeParams.owner,
-						repository: args.routeParams.repository,
-						errorDuringIsPrivateRequest: error,
-						userPermission: userIsCollaborator() ? "collaborator" : "contributor",
-					})
-				})
-
-			return result
-		},
-	)
 
 	// open the repository
 	const { host, owner, repository } = routeParams()
@@ -329,6 +268,63 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}, 100)
 		}
 	})
+
+	// re-fetched if currentPageContext changes
+	const [repositoryIsCloned] = createResource(
+		() => {
+			// re-initialize fs on every cloneRepository call
+			// until subdirectories are supported
+			return {
+				fs: repo.nodeishFs,
+				routeParams: currentPageContext.routeParams as EditorRouteParams,
+				user: localStorage?.user,
+				setFsChange,
+			}
+		},
+		async (args) => {
+			const result = await cloneRepository(args)
+			// not blocking the execution by using the callback pattern
+			// the user does not need to wait for the response
+			// checks whether the gitOrigin corresponds to the pattern.
+
+			const gitOrigin = await repo.getOrigin()
+			//You must include at least one group property for a group to be visible in the "Persons & Groups" tab
+			//https://posthog.com/docs/product-analytics/group-analytics#setting-and-updating-group-properties
+			telemetryBrowser.group("repository", gitOrigin, {
+				name: gitOrigin,
+			})
+			github
+				.request("GET /repos/{owner}/{repo}", {
+					owner: args.routeParams.owner,
+					repo: args.routeParams.repository,
+				})
+				.then((response) => {
+					telemetryBrowser.group("repository", gitOrigin, {
+						visibility: response.data.private ? "Private" : "Public",
+						isFork: response.data.fork ? "Fork" : "isNotFork",
+						// parseOrgin requiers a "remote"="origing" to transform the url in the git origin
+						parentGitOrigin: response.data.parent?.git_url
+							? parseOrigin({ remotes: [{ remote: "origin", url: response.data.parent.git_url }] })
+							: "",
+					})
+					telemetryBrowser.capture("EDITOR cloned repository", {
+						owner: args.routeParams.owner,
+						repository: args.routeParams.repository,
+						userPermission: userIsCollaborator() ? "iscollaborator" : "isNotCollaborator",
+					})
+				})
+				.catch((error) => {
+					telemetryBrowser.capture("EDITOR cloned repository", {
+						owner: args.routeParams.owner,
+						repository: args.routeParams.repository,
+						errorDuringIsPrivateRequest: error,
+						userPermission: userIsCollaborator() ? "collaborator" : "contributor",
+					})
+				})
+
+			return result
+		},
+	)
 
 	const [userIsCollaborator] = createResource(
 		/**
@@ -400,6 +396,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		<EditorStateContext.Provider
 			value={
 				{
+					repo,
 					repositoryIsCloned,
 					currentBranch,
 					githubRepositoryInformation,
@@ -426,7 +423,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					userIsCollaborator,
 					lastPullTime,
 					setLastPullTime,
-					fs,
 				} satisfies EditorStateSchema
 			}
 		>
@@ -501,9 +497,9 @@ export async function pushChanges(args: {
 	repo: Repository
 	user: NonNullable<LocalStorageSchema["user"]>
 	setFsChange: (date: Date) => void
-	setLastPush: (date: Date) => void
 	setLastPullTime: (date: Date) => void
 }): Promise<Result<true, PushException | PullException>> {
+	console.log("try to push")
 	// stage all changes
 	const status = await args.repo.statusMatrix({
 		filter: (f: any) =>
@@ -514,6 +510,7 @@ export async function pushChanges(args: {
 			f.endsWith(".js") ||
 			f.endsWith(".ts"),
 	})
+	console.log("status", status)
 	const filesWithUncommittedChanges = status.filter(
 		(row: any) =>
 			// files with unstaged and uncommitted changes
@@ -521,6 +518,7 @@ export async function pushChanges(args: {
 			// added files
 			(row[2] === 2 && row[3] === 0),
 	)
+	console.log("filesWithUncommittedChanges", filesWithUncommittedChanges)
 	if (filesWithUncommittedChanges.length === 0) {
 		return { error: new PushException("No changes to push.") }
 	}
@@ -541,19 +539,6 @@ export async function pushChanges(args: {
 	args.setFsChange(new Date())
 	// push changes
 	try {
-		// pull changes before pushing
-		// https://github.com/inlang/inlang/issues/250
-		const pullResult = await args.repo.pull({
-			author: {
-				name: args.user.username,
-				email: args.user.email,
-			},
-			fastForward: true,
-			singleBranch: true,
-		})
-		if (pullResult.error !== undefined) {
-			return { error: pullResult.error }
-		}
 		const push = await args.repo.push()
 		if (push?.ok === false) {
 			return { error: new PushException("Failed to push", { cause: push.error }) }
@@ -569,7 +554,7 @@ export async function pushChanges(args: {
 		const time = new Date()
 		// triggering a rebuild of everything fs related
 		args.setFsChange(time)
-		args.setLastPush(time)
+		args.setLastPullTime(time)
 		return { data: true }
 	} catch (error) {
 		return { error: (error as PushException) ?? "Unknown error" }
