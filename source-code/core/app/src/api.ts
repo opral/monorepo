@@ -90,9 +90,12 @@ export type Subscribable<Value> = {
 
 export type MessageQueryApi = {
 	create: (args: { data: Message }) => boolean
-	get:
-	& ((args: { where: { id: Message["id"] } }) => Message | undefined)
-	& { subscribe: (args: { where: { id: Message["id"] } }, callback: (message: Message | undefined) => void) => void }
+	get: ((args: { where: { id: Message["id"] } }) => Message | undefined) & {
+		subscribe: (
+			args: { where: { id: Message["id"] } },
+			callback: (message: Message | undefined) => void,
+		) => void
+	}
 	includedMessageIds: Subscribable<string[]>
 	getAll: Subscribable<{ [id: string]: Message }>
 	update: (args: { where: { id: Message["id"] }; data: Partial<Message> }) => boolean
