@@ -137,19 +137,16 @@ async function initializeRepo(
 	if (!inlangConfig.modules) inlangConfig.modules = []
 
 	const modulesToInstall = modulesURL.filter((moduleURL) => {
-		!inlangConfig.modules?.includes(moduleURL)
+		const installedModules = inlangConfig.modules.every((module) => module.includes(moduleURL))
+		return !installedModules
 	})
 	inlangConfig.modules.push(...modulesToInstall)
 
 	const generatedInlangConfig = JSON.stringify(inlangConfig, undefined, 2)
 
-	console.log(modulesToInstall)
-
 	await repo.nodeishFs.writeFile("./inlang.config.json", generatedInlangConfig)
 
 	if (step().error) return
-
-	return
 
 	setStep({
 		type: "installing",
