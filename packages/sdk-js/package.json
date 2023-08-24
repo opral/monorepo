@@ -9,7 +9,6 @@
 		"internationalization",
 		"L10n",
 		"localization",
-		"unplugin",
 		"vite"
 	],
 	"version": "0.11.8",

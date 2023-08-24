@@ -43,6 +43,14 @@ export const plugin = async () => {
 					// to be able to use `SvelteKit`'s `$app` aliases
 					noExternal: ["@inlang/sdk-js"],
 				},
+				optimizeDeps: {
+					include: [
+						'@inlang/sdk-js/**/*',
+					],
+					exclude: [
+						"vitefu"
+					]
+				},
 			}
 		},
 
