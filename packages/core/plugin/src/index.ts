@@ -1,6 +1,6 @@
 export type {
 	Plugin,
-	RuntimePluginApi,
+	ResolvedPluginApi,
 	ResolvePluginsFunction,
 	NodeishFilesystemSubset,
 } from "./api.js"

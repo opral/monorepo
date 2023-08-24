@@ -72,7 +72,7 @@ export const resolveModules: ResolveModulesFunction = async (args) => {
 		meta,
 		lintRules: allLintRules,
 		plugins: allPlugins,
-		runtimePluginApi: resolvedPlugins.data,
+		resolvedPluginApi: resolvedPlugins.data,
 		errors: [...moduleErrors, ...resolvedLintRules.errors, ...resolvedPlugins.errors],
 	}
 }

@@ -31,7 +31,7 @@ export type ResolvePluginsFunction = (args: {
 	settings: Record<Plugin["meta"]["id"], JSONObject>
 	nodeishFs: NodeishFilesystemSubset
 }) => Promise<{
-	data: RuntimePluginApi
+	data: ResolvedPluginApi
 	errors: Array<
 		| PluginReturnedInvalidAppSpecificApiError
 		| PluginLoadMessagesFunctionAlreadyDefinedError
@@ -45,7 +45,7 @@ export type ResolvePluginsFunction = (args: {
 /**
  * The API after resolving the plugins.
  */
-export type RuntimePluginApi = {
+export type ResolvedPluginApi = {
 	loadMessages: (args: { languageTags: LanguageTag[] }) => Promise<Message[]> | Message[]
 	saveMessages: (args: { messages: Message[] }) => Promise<void> | void
 	/**
