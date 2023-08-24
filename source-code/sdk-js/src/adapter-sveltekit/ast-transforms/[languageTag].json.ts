@@ -1,4 +1,4 @@
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 import { findExport } from "../../ast-transforms/utils/exports.js"
 import { addImport, isOptOutImportPresent } from "../../ast-transforms/utils/imports.js"
 import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
@@ -53,7 +53,7 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 		)
 	}
 
-	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/server", "loadMessages", "reloadMessages")
+	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/server", "loadMessages")
 	addImport(sourceFile, "@sveltejs/kit", "json")
 
 	return transformServerRequestJs(filePath, config, nodeToCode(sourceFile))

@@ -16,6 +16,12 @@ export const VariableReference = Type.Object({
 	name: Type.String(),
 })
 
+/**
+ * An expression is a reference to a variable or a function.
+ *
+ * Think of expressions as elements that are rendered to a
+ * text value during runtime.
+ */
 export type Expression = Static<typeof Expression>
 export const Expression = Type.Union([VariableReference])
 

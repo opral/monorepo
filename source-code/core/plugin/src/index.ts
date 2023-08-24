@@ -6,12 +6,11 @@ export type {
 } from "./api.js"
 export { resolvePlugins } from "./resolvePlugins.js"
 export {
-	PluginAppSpecificApiReturnError,
-	PluginFunctionDetectLanguageTagsAlreadyDefinedError,
-	PluginFunctionLoadMessagesAlreadyDefinedError,
-	PluginFunctionSaveMessagesAlreadyDefinedError,
-	PluginUsesInvalidIdError,
-	PluginUsesInvalidSchemaError,
+	PluginReturnedInvalidAppSpecificApiError,
+	PluginLoadMessagesFunctionAlreadyDefinedError,
+	PluginSaveMessagesFunctionAlreadyDefinedError,
+	PluginHasInvalidIdError,
+	PluginHasInvalidSchemaError,
 	PluginUsesReservedNamespaceError,
 } from "./errors.js"
 
@@ -24,4 +23,4 @@ export {
 export * from "@inlang/language-tag"
 export * from "@inlang/messages"
 export * from "@inlang/result"
-export * from "@inlang/json-serializable"
+export * from "@inlang/json-types"

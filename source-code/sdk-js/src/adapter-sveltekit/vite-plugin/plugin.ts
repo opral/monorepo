@@ -1,4 +1,4 @@
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 import type { ViteDevServer, Plugin as VitePlugin } from "vite"
 import { assertAppTemplateIsCorrect } from "./checks/appTemplate.js"
 import { assertRoutesFolderPathExists, assertNecessaryFilesArePresent } from "./checks/routes.js"
@@ -42,6 +42,10 @@ export const plugin = async () => {
 					// makes sure that `@inlang/sdk-js` get's transformed by vite in order
 					// to be able to use `SvelteKit`'s `$app` aliases
 					noExternal: ["@inlang/sdk-js"],
+				},
+				optimizeDeps: {
+					include: ["@inlang/sdk-js/**/*"],
+					exclude: ["vitefu"],
 				},
 			}
 		},
@@ -98,7 +102,7 @@ export const plugin = async () => {
 			createEffect(() => {
 				config.messages()
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				viteServer!.ws.send({
+				viteServer?.ws.send({
 					type: "custom",
 					event: "inlang-messages-changed",
 					// TODO: only HMR if the currently visible language changes

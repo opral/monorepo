@@ -2,16 +2,15 @@ import { LanguageTag, WithLanguageTags } from "@inlang/language-tag"
 import { Static, Type, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
 import type { NodeishFilesystem as LisaNodeishFilesystem } from "@inlang-git/fs"
 import type {
-	PluginAppSpecificApiReturnError,
-	PluginFunctionDetectLanguageTagsAlreadyDefinedError,
-	PluginFunctionLoadMessagesAlreadyDefinedError,
-	PluginFunctionSaveMessagesAlreadyDefinedError,
-	PluginUsesInvalidIdError,
-	PluginUsesInvalidSchemaError,
+	PluginReturnedInvalidAppSpecificApiError,
+	PluginLoadMessagesFunctionAlreadyDefinedError,
+	PluginSaveMessagesFunctionAlreadyDefinedError,
+	PluginHasInvalidIdError,
+	PluginHasInvalidSchemaError,
 	PluginUsesReservedNamespaceError,
 } from "./errors.js"
 import type { Message } from "@inlang/messages"
-import type { JSONSerializableObject } from "@inlang/json-serializable"
+import type { JSONObject } from "@inlang/json-types"
 
 /**
  * The filesystem is a subset of project lisa's nodeish filesystem.
@@ -28,20 +27,19 @@ export type NodeishFilesystemSubset = Pick<
  */
 export type ResolvePluginsFunction = (args: {
 	plugins: Array<Plugin>
-	settings: Record<Plugin["meta"]["id"], JSONSerializableObject>
+	settings: Record<Plugin["meta"]["id"], JSONObject>
 	nodeishFs: NodeishFilesystemSubset
-}) => {
+}) => Promise<{
 	data: RuntimePluginApi
 	errors: Array<
-		| PluginAppSpecificApiReturnError
-		| PluginFunctionDetectLanguageTagsAlreadyDefinedError
-		| PluginFunctionLoadMessagesAlreadyDefinedError
-		| PluginFunctionSaveMessagesAlreadyDefinedError
-		| PluginUsesInvalidIdError
-		| PluginUsesInvalidSchemaError
+		| PluginReturnedInvalidAppSpecificApiError
+		| PluginLoadMessagesFunctionAlreadyDefinedError
+		| PluginSaveMessagesFunctionAlreadyDefinedError
+		| PluginHasInvalidIdError
+		| PluginHasInvalidSchemaError
 		| PluginUsesReservedNamespaceError
 	>
-}
+}>
 
 /**
  * The API after resolving the plugins.
@@ -49,7 +47,10 @@ export type ResolvePluginsFunction = (args: {
 export type RuntimePluginApi = {
 	loadMessages: (args: { languageTags: LanguageTag[] }) => Promise<Message[]> | Message[]
 	saveMessages: (args: { messages: Message[] }) => Promise<void> | void
-	detectedLanguageTags?: () => Promise<string[]> | string[]
+	/**
+	 * Detect language tags in the project provided plugins.
+	 */
+	detectedLanguageTags: LanguageTag[]
 	/**
 	 * App specific APIs.
 	 *
@@ -75,7 +76,7 @@ export type RuntimePluginApi = {
 /**
  * The plugin API is used to extend inlang's functionality.
  */
-export type Plugin<Settings extends JSONSerializableObject | unknown = unknown> = Omit<
+export type Plugin<Settings extends JSONObject | unknown = unknown> = Omit<
 	Static<typeof Plugin>,
 	"loadMessages" | "saveMessages" | "detectedLanguageTags" | "addAppSpecificApi"
 > & {
@@ -105,7 +106,7 @@ export type Plugin<Settings extends JSONSerializableObject | unknown = unknown> 
 	detectedLanguageTags?: (args: {
 		nodeishFs: NodeishFilesystemSubset
 		settings: Settings
-	}) => Promise<string[]> | string[]
+	}) => Promise<LanguageTag[]> | LanguageTag[]
 	/**
 	 * Define app specific APIs.
 	 *

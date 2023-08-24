@@ -3,12 +3,12 @@ import { lintSingleMessage } from "./lintSingleMessage.js"
 import type { LintRuleThrowedError } from "./errors.js"
 import type { LanguageTag } from "@inlang/language-tag"
 import type { LintLevel, LintReport, LintRule } from "./api.js"
-import type { JSONSerializableObject } from "@inlang/json-serializable"
+import type { JSONObject } from "@inlang/json-types"
 
 export const lintMessages = async (args: {
 	sourceLanguageTag: LanguageTag
 	languageTags: LanguageTag[]
-	lintRuleSettings: Record<LintRule["meta"]["id"], JSONSerializableObject>
+	lintRuleSettings: Record<LintRule["meta"]["id"], JSONObject>
 	lintLevels: Record<LintRule["meta"]["id"], LintLevel>
 	rules: LintRule[]
 	messages: Message[]

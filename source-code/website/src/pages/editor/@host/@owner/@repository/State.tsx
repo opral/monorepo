@@ -29,13 +29,16 @@ import {
 	openInlangProject,
 	withSolidReactivity,
 	type SolidInlangProject,
-	type Message,
 } from "@inlang/app"
 import type { InlangModule } from "@inlang/module"
 import pluginJson from "../../../../../../../plugins/json/dist/index.js"
 import pluginLint from "../../../../../../../plugins/standard-lint-rules/dist/index.js"
 
 type EditorStateSchema = {
+	/**
+	 * Returns a repository object
+	 */
+	repo: Repository
 	/**
 	 * Whether a repository is cloned and when it was cloned.
 	 *
@@ -65,11 +68,6 @@ type EditorStateSchema = {
 	 * Utility to access the route parameters in a typesafe manner.
 	 */
 	searchParams: () => EditorSearchParams
-
-	/**
-	 * Virtual filesystem
-	 */
-	fs: () => NodeishFilesystem
 
 	/**
 	 * Id to filter messages
@@ -139,11 +137,6 @@ type EditorStateSchema = {
 	userIsCollaborator: Resource<boolean>
 
 	/**
-	 * The last time the repository was pushed.
-	 */
-	setLastPush: Setter<Date | undefined>
-
-	/**
 	 * The last time the repository has been pulled.
 	 */
 	lastPullTime: () => Date | undefined
@@ -168,11 +161,6 @@ export const useEditorState = () => {
  * See https://www.solidjs.com/tutorial/stores_context.
  */
 export function EditorStateProvider(props: { children: JSXElement }) {
-	/**
-	 *  Date of the last push to the Repo
-	 */
-	const [lastPush, setLastPush] = createSignal<Date>()
-
 	const [localChanges, setLocalChanges] = createSignal<number>(0)
 
 	const routeParams = () => currentPageContext.routeParams as EditorRouteParams
@@ -182,6 +170,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const [fsChange, setFsChange] = createSignal(new Date())
 
 	const [tourStep, setTourStep] = createSignal<TourStepId>("github-login")
+
+	/**
+	 *  Date of the last push to the Repo
+	 */
+	const [lastPullTime, setLastPullTime] = createSignal<Date>()
 
 	//set filter with search params
 	const params = new URL(document.URL).searchParams
@@ -210,67 +203,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		setSearchParams({ key: "lint", value: filteredLintRules() })
 	})
 
-	const [fs, setFs] = createSignal<NodeishFilesystem>(createNodeishMemoryFs())
-
 	const [localStorage] = useLocalStorage() ?? []
-
-	// re-fetched if currentPageContext changes
-	const [repositoryIsCloned] = createResource(
-		() => {
-			// re-initialize fs on every cloneRepository call
-			// until subdirectories are supported
-			setFs(createNodeishMemoryFs())
-			return {
-				fs: fs(),
-				routeParams: currentPageContext.routeParams as EditorRouteParams,
-				user: localStorage?.user,
-				setFsChange,
-			}
-		},
-		async (args) => {
-			const result = await cloneRepository(args)
-			// not blocking the execution by using the callback pattern
-			// the user does not need to wait for the response
-			// checks whether the gitOrigin corresponds to the pattern.
-
-			const gitOrigin = parseOrigin({ remotes: await getGitOrigin(args) })
-			//You must include at least one group property for a group to be visible in the "Persons & Groups" tab
-			//https://posthog.com/docs/product-analytics/group-analytics#setting-and-updating-group-properties
-			telemetryBrowser.group("repository", gitOrigin, {
-				name: gitOrigin,
-			})
-			github
-				.request("GET /repos/{owner}/{repo}", {
-					owner: args.routeParams.owner,
-					repo: args.routeParams.repository,
-				})
-				.then((response) => {
-					telemetryBrowser.group("repository", gitOrigin, {
-						visibility: response.data.private ? "Private" : "Public",
-						isFork: response.data.fork ? "Fork" : "isNotFork",
-						// parseOrgin requiers a "remote"="origing" to transform the url in the git origin
-						parentGitOrigin: response.data.parent?.git_url
-							? parseOrigin({ remotes: [{ remote: "origin", url: response.data.parent.git_url }] })
-							: "",
-					})
-					telemetryBrowser.capture("EDITOR cloned repository", {
-						owner: args.routeParams.owner,
-						repository: args.routeParams.repository,
-						userPermission: userIsCollaborator() ? "iscollaborator" : "isNotCollaborator",
-					})
-				})
-				.catch((error) => {
-					telemetryBrowser.capture("EDITOR cloned repository", {
-						owner: args.routeParams.owner,
-						repository: args.routeParams.repository,
-						errorDuringIsPrivateRequest: error,
-						userPermission: userIsCollaborator() ? "collaborator" : "contributor",
-					})
-				})
-
-			return result
-		},
-	)
 
 	// open the repository
 	const { host, owner, repository } = routeParams()
@@ -317,12 +250,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		return inlang()?.config().languageTags ?? []
 	}
 
-	createEffect(() => {
-		if (!inlang.loading) {
-			console.info("messages changes", Object.values(inlang()?.query.messages.getAll() || {}))
-		}
-	})
-
 	//the effect should skip tour guide steps if not needed
 	createEffect(() => {
 		if (localStorage?.user === undefined) {
@@ -341,6 +268,63 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}, 100)
 		}
 	})
+
+	// re-fetched if currentPageContext changes
+	const [repositoryIsCloned] = createResource(
+		() => {
+			// re-initialize fs on every cloneRepository call
+			// until subdirectories are supported
+			return {
+				fs: repo.nodeishFs,
+				routeParams: currentPageContext.routeParams as EditorRouteParams,
+				user: localStorage?.user,
+				setFsChange,
+			}
+		},
+		async (args) => {
+			const result = await cloneRepository(args)
+			// not blocking the execution by using the callback pattern
+			// the user does not need to wait for the response
+			// checks whether the gitOrigin corresponds to the pattern.
+
+			const gitOrigin = await repo.getOrigin()
+			//You must include at least one group property for a group to be visible in the "Persons & Groups" tab
+			//https://posthog.com/docs/product-analytics/group-analytics#setting-and-updating-group-properties
+			telemetryBrowser.group("repository", gitOrigin, {
+				name: gitOrigin,
+			})
+			github
+				.request("GET /repos/{owner}/{repo}", {
+					owner: args.routeParams.owner,
+					repo: args.routeParams.repository,
+				})
+				.then((response) => {
+					telemetryBrowser.group("repository", gitOrigin, {
+						visibility: response.data.private ? "Private" : "Public",
+						isFork: response.data.fork ? "Fork" : "isNotFork",
+						// parseOrgin requiers a "remote"="origing" to transform the url in the git origin
+						parentGitOrigin: response.data.parent?.git_url
+							? parseOrigin({ remotes: [{ remote: "origin", url: response.data.parent.git_url }] })
+							: "",
+					})
+					telemetryBrowser.capture("EDITOR cloned repository", {
+						owner: args.routeParams.owner,
+						repository: args.routeParams.repository,
+						userPermission: userIsCollaborator() ? "iscollaborator" : "isNotCollaborator",
+					})
+				})
+				.catch((error) => {
+					telemetryBrowser.capture("EDITOR cloned repository", {
+						owner: args.routeParams.owner,
+						repository: args.routeParams.repository,
+						errorDuringIsPrivateRequest: error,
+						userPermission: userIsCollaborator() ? "collaborator" : "contributor",
+					})
+				})
+
+			return result
+		},
+	)
 
 	const [userIsCollaborator] = createResource(
 		/**
@@ -367,17 +351,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				return false
 			}
 			try {
-				//console.log(await repo.isCollaborator({ username: args.user.username }))
-				// TODO: use lisa api to check collaborator
-				const response = await github.request(
-					"GET /repos/{owner}/{repo}/collaborators/{username}",
-					{
-						owner: args.routeParams.owner,
-						repo: args.routeParams.repository,
-						username: args.user.username,
-					},
-				)
-				return response.status === 204 ? true : false
+				return await repo.isCollaborator({ username: args.user.username })
 			} catch (error) {
 				// the user is not a collaborator, hence the request will fail
 				return false
@@ -411,25 +385,18 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			) {
 				return false
 			}
-			return {
-				fs: fs(),
-			}
+			return true
 		},
-		async (args) => {
-			const branch = await raw.currentBranch({
-				fs: args.fs,
-				dir: "/",
-			})
-			return branch ?? undefined
+		async () => {
+			return await repo.getCurrentBranch()
 		},
 	)
-
-	const [lastPullTime, setLastPullTime] = createSignal<Date>()
 
 	return (
 		<EditorStateContext.Provider
 			value={
 				{
+					repo,
 					repositoryIsCloned,
 					currentBranch,
 					githubRepositoryInformation,
@@ -454,10 +421,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					localChanges,
 					setLocalChanges,
 					userIsCollaborator,
-					setLastPush,
 					lastPullTime,
 					setLastPullTime,
-					fs,
 				} satisfies EditorStateSchema
 			}
 		>
@@ -529,21 +494,14 @@ export class UnknownException extends Error {
  * Pushed changes and pulls right afterwards.
  */
 export async function pushChanges(args: {
-	fs: NodeishFilesystem
-	routeParams: EditorRouteParams
+	repo: Repository
 	user: NonNullable<LocalStorageSchema["user"]>
 	setFsChange: (date: Date) => void
-	setLastPush: (date: Date) => void
 	setLastPullTime: (date: Date) => void
 }): Promise<Result<true, PushException | PullException>> {
-	const { host, owner, repository } = args.routeParams
-	if (host === undefined || owner === undefined || repository === undefined) {
-		return { error: new PushException("Invalid route params") }
-	}
+	console.log("try to push")
 	// stage all changes
-	const status = await raw.statusMatrix({
-		fs: args.fs,
-		dir: "/",
+	const status = await args.repo.statusMatrix({
 		filter: (f: any) =>
 			f.endsWith(".json") ||
 			f.endsWith(".po") ||
@@ -552,6 +510,7 @@ export async function pushChanges(args: {
 			f.endsWith(".js") ||
 			f.endsWith(".ts"),
 	})
+	console.log("status", status)
 	const filesWithUncommittedChanges = status.filter(
 		(row: any) =>
 			// files with unstaged and uncommitted changes
@@ -559,17 +518,16 @@ export async function pushChanges(args: {
 			// added files
 			(row[2] === 2 && row[3] === 0),
 	)
+	console.log("filesWithUncommittedChanges", filesWithUncommittedChanges)
 	if (filesWithUncommittedChanges.length === 0) {
-		return { error: new PushException("No changes to push") }
+		return { error: new PushException("No changes to push.") }
 	}
 	// add all changes
 	for (const file of filesWithUncommittedChanges) {
-		await raw.add({ fs: args.fs, dir: "/", filepath: file[0] })
+		await args.repo.add({ filepath: file[0] })
 	}
 	// commit changes
-	await raw.commit({
-		fs: args.fs,
-		dir: "/",
+	await args.repo.commit({
 		author: {
 			name: args.user.username,
 			email: args.user.email,
@@ -580,58 +538,18 @@ export async function pushChanges(args: {
 	// of components that depends on fs
 	args.setFsChange(new Date())
 	// push changes
-	const requestArgs = {
-		fs: args.fs,
-		http,
-		dir: "/",
-		author: {
-			name: args.user.username,
-		},
-		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
-		url: `https://${host}/${owner}/${repository}`,
-	}
 	try {
-		// pull changes before pushing
-		// https://github.com/inlang/inlang/issues/250
-		const pullResult = await pull(args)
-		if (pullResult.error !== undefined) {
-			return { error: pullResult.error }
-		}
-		const push = await raw.push(requestArgs)
-		if (push.ok === false) {
+		const push = await args.repo.push()
+		if (push?.ok === false) {
 			return { error: new PushException("Failed to push", { cause: push.error }) }
 		}
-		await raw.pull(requestArgs)
-		const time = new Date()
-		// triggering a rebuild of everything fs related
-		args.setFsChange(time)
-		args.setLastPush(time)
-		return { data: true }
-	} catch (error) {
-		return { error: (error as PushException) ?? "Unknown error" }
-	}
-}
-
-async function pull(args: {
-	fs: NodeishFilesystem
-	user: LocalStorageSchema["user"]
-	setFsChange: (date: Date) => void
-	setLastPullTime: (date: Date) => void
-}): Promise<Result<true, PullException>> {
-	try {
-		await raw.pull({
-			fs: args.fs,
-			http,
-			dir: "/",
-			corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
-			singleBranch: true,
+		await args.repo.pull({
 			author: {
-				name: args.user?.username,
+				name: args.user.username,
+				email: args.user.email,
 			},
-			// try to not create a merge commit
-			// rebasing would be the best option but it is not supported by isomorphic-git
-			// a switch to https://libgit2.org/ seems unavoidable
 			fastForward: true,
+			singleBranch: true,
 		})
 		const time = new Date()
 		// triggering a rebuild of everything fs related
@@ -639,17 +557,6 @@ async function pull(args: {
 		args.setLastPullTime(time)
 		return { data: true }
 	} catch (error) {
-		return { error: error as PullException }
-	}
-}
-async function getGitOrigin(args: { fs: NodeishFilesystem }) {
-	try {
-		const remotes = await raw.listRemotes({
-			fs: args.fs,
-			dir: await raw.findRoot({ fs: args.fs, filepath: "/" }),
-		})
-		return remotes
-	} catch (e) {
-		return undefined
+		return { error: (error as PushException) ?? "Unknown error" }
 	}
 }

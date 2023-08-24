@@ -25,8 +25,8 @@ const JSONObject4 = Type.Record(Type.String(), Type.Union([JSONValue4, JSONArray
 
 // ------------ ACTUAL TYPES ------------
 
-export type JSONSerializableObject = Static<typeof JSONSerializableObject>
-export const JSONSerializableObject = JSONObject4
+export type JSONObject = Static<typeof JSONObject>
+export const JSONObject = JSONObject4
 
-export type JSONSerializable = Static<typeof JSONSerializable>
-export const JSONSerializable = Type.Union([JSONObject4, JSONValue4, JSONArray4])
+export type JSON = Static<typeof JSON>
+export const JSON = Type.Union([JSONObject4, JSONValue4, JSONArray4])

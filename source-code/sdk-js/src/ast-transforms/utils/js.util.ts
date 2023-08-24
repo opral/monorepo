@@ -1,5 +1,5 @@
 import { Project, Node, QuoteKind, IndentationText, ScriptKind } from "ts-morph"
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 import { InlangException } from "../../exceptions.js"
 
 // ------------------------------------------------------------------------------------------------

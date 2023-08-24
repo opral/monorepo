@@ -18,14 +18,13 @@ import { getNodeishFs } from "./utils/getNodeishFs.js"
 import { createMessage } from "../../../test.util.js"
 import { version } from "../../../../package.json"
 import { InlangSdkException } from "../exceptions.js"
+import { validateSdkConfig, type SdkConfig } from "@inlang/sdk-js-plugin"
 
 vi.mock("./utils/getNodeishFs.js")
-vi.mock("@inlang/app", async () => {
-	return {
-		...(await vi.importActual<typeof import("@inlang/app")>("@inlang/app")),
-		openInlangProject: vi.fn(),
-	}
-})
+vi.mock("@inlang/app", async () => ({
+	...(await vi.importActual<typeof import("@inlang/app")>("@inlang/app")),
+	openInlangProject: vi.fn(),
+}))
 
 beforeEach(() => {
 	vi.resetAllMocks()
@@ -46,7 +45,9 @@ it("should cache config creation", async () => {
 				setConfig: () => undefined,
 				query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
 				appSpecificApi: () => ({
-					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+					"inlang.app.sdkJs": validateSdkConfig({
+						languageNegotiation: { strategies: [{ type: "url" }] },
+					}),
 				}),
 			} as unknown as InlangProject),
 	)
@@ -84,7 +85,9 @@ it("should create an inlang config file if no config is present yet", async () =
 				setConfig: () => undefined,
 				query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
 				appSpecificApi: () => ({
-					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+					"inlang.app.sdkJs": validateSdkConfig({
+						languageNegotiation: { strategies: [{ type: "url" }] },
+					}),
 				}),
 			} as unknown as InlangProject),
 	)
@@ -114,7 +117,9 @@ it("should update the sdk module version", async () => {
 				setConfig,
 				query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
 				appSpecificApi: () => ({
-					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+					"inlang.app.sdkJs": validateSdkConfig({
+						languageNegotiation: { strategies: [{ type: "url" }] },
+					}),
 				}),
 			} as unknown as InlangProject),
 	)
@@ -142,7 +147,9 @@ it("should not update the sdk module version if already up2date", async () => {
 				setConfig,
 				query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
 				appSpecificApi: () => ({
-					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+					"inlang.app.sdkJs": validateSdkConfig({
+						languageNegotiation: { strategies: [{ type: "url" }] },
+					}),
 				}),
 			} as unknown as InlangProject),
 	)
@@ -167,7 +174,9 @@ it("should create demo resources if none are present yet", async () => {
 				setConfig: () => undefined,
 				query: { messages: { getAll: () => [], create } },
 				appSpecificApi: () => ({
-					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+					"inlang.app.sdkJs": validateSdkConfig({
+						languageNegotiation: { strategies: [{ type: "url" }] },
+					}),
 				}),
 			} as unknown as InlangProject),
 	)
@@ -202,7 +211,9 @@ it("should add the sdk plugin module if not present yet", async () => {
 				setConfig: () => undefined,
 				query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
 				appSpecificApi: () => ({
-					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+					"inlang.app.sdkJs": validateSdkConfig({
+						languageNegotiation: { strategies: [{ type: "url" }] },
+					}),
 				}),
 			} as unknown as InlangProject),
 	)
@@ -212,6 +223,17 @@ it("should add the sdk plugin module if not present yet", async () => {
 	expect(setConfig).toHaveBeenCalledOnce()
 	expect(setConfig).toHaveBeenNthCalledWith(1, {
 		modules: ["../../../../../sdk-js-plugin/dist/index.js"],
+		settings: {
+			"inlang.plugin.sdkJs": {
+				languageNegotiation: {
+					strategies: [
+						{
+							type: "localStorage",
+						},
+					],
+				},
+			},
+		},
 	})
 })
 
@@ -228,7 +250,7 @@ it("should throw if the SDK is not configured properly", async () => {
 				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
 				setConfig: () => undefined,
 				query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
-				appSpecificApi: () => ({ "inlang.app.sdkJs": {} }),
+				appSpecificApi: () => ({ "inlang.app.sdkJs": {} as SdkConfig }),
 			} as unknown as InlangProject),
 	)
 
@@ -247,7 +269,9 @@ it("should throw if no svelte.config.js file is found", async () => {
 				setConfig: () => undefined,
 				query: { messages: createReactiveQuery(() => [createMessage("hi", { en: "hello" })]) },
 				appSpecificApi: () => ({
-					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+					"inlang.app.sdkJs": validateSdkConfig({
+						languageNegotiation: { strategies: [{ type: "url" }] },
+					}),
 				}),
 			} as unknown as InlangProject),
 	)
@@ -275,7 +299,9 @@ it("should correctly resolve the config", async () => {
 				setConfig,
 				query: { messages: { getAll: () => [createMessage("hi", { en: "hello" })], create } },
 				appSpecificApi: () => ({
-					"inlang.app.sdkJs": { languageNegotiation: { strategies: [{ type: "url" }] } },
+					"inlang.app.sdkJs": validateSdkConfig({
+						languageNegotiation: { strategies: [{ type: "url" }] },
+					}),
 				}),
 			} as unknown as InlangProject),
 	)

@@ -1,13 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { InlangProject, InstalledLintRule, InstalledPlugin, Subscribable } from "./api.js"
 import { ImportFunction, ResolveModulesFunction, resolveModules } from "@inlang/module"
-import {
-	NodeishFilesystemSubset,
-	Message,
-	tryCatch,
-	Result,
-	JSONSerializableObject,
-} from "@inlang/plugin"
+import { NodeishFilesystemSubset, Message, tryCatch, Result, JSONObject } from "@inlang/plugin"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
 import {
@@ -169,7 +163,7 @@ export const openInlangProject = async (args: {
 				languageTags: configValue!.languageTags,
 				lintRuleSettings: configValue!.settings as Record<
 					`${string}.lintRule.${string}`,
-					JSONSerializableObject
+					JSONObject
 				>,
 				lintLevels: Object.fromEntries(
 					installedLintRules().map((rule) => [rule.meta.id, rule.lintLevel]),
@@ -273,7 +267,7 @@ const loadConfig = async (args: { configPath: string; nodeishFs: NodeishFilesyst
 	return validateConfig(json)
 }
 
-const validateConfig = (config: JSONObject) => {
+const validateConfig = (config: unknown) => {
 	const typeErrors = [...ConfigCompiler.Errors(config)]
 	if (typeErrors.length > 0) {
 		throw new InvalidConfigError(`The config is invalid according to the schema.`, {
@@ -330,9 +324,6 @@ const createAwaitable = () => {
 }
 
 // ------------------------------------------------------------------------------------------------
-
-// TODO: define better type
-type JSONObject = any
 
 // TODO: create global util type
 type MaybePromise<T> = T | Promise<T>

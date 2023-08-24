@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest"
 import { transformSvelte } from "./_.svelte.js"
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 import { initTestApp } from "./test.utils.js"
 
 describe("transformSvelte", () => {

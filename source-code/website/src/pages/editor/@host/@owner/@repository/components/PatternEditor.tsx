@@ -27,7 +27,6 @@ import {
 export function PatternEditor(props: { languageTag: LanguageTag; message: Message }) {
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const {
-		localChanges,
 		setLocalChanges,
 		userIsCollaborator,
 		routeParams,
@@ -72,9 +71,35 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 
 	//create editor
 	let textArea!: HTMLDivElement
-	const editor = createTiptapEditor(() => {
-		return getEditorConfig(textArea, variant(), variableReferences())
-	})
+	let editor: any
+
+	/*
+		Needs to be refactored, but it works for now:
+		- should initialize editor if not created
+		- should only rerender editor if variant pattern from query message is different to current editor content
+	*/
+	// eslint-disable-next-line solid/reactivity
+	const [currentPattern, setCurrentPattern] = createSignal<Variant["pattern"]>(
+		variant()?.pattern || [],
+	)
+
+	function createOrUpdateEditor() {
+		const newVariant = variant()
+
+		if (JSON.stringify(currentPattern()) !== JSON.stringify(variant())) {
+			if (editor) {
+				editor.destroy()
+			}
+
+			editor = createTiptapEditor(() => {
+				return getEditorConfig(textArea, newVariant, variableReferences())
+			})
+
+			setCurrentPattern(variant()?.pattern || [])
+		}
+	}
+	// eslint-disable-next-line solid/reactivity
+	createOrUpdateEditor()
 
 	const currentJSON = useEditorJSON(() => editor())
 
@@ -388,7 +413,7 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 							prop:size="small"
 							prop:disabled={hasChanges() === false || userIsCollaborator() === false}
 							onClick={() => {
-								editor().commands.setContent(setTipTapMessage(variant()?.pattern || []))
+								editor().commands.setContent(setTipTapMessage(referencePattern()!))
 								textArea.parentElement?.click()
 							}}
 						>

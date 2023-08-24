@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest"
 import { transformPageSvelte } from "./+page.svelte.js"
 import { transformSvelte } from "./_.svelte.js"
 import { initTestApp } from "./test.utils.js"
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 
 describe("transformPageSvelte", () => {
 	test("should call transformSvelte", async () => {

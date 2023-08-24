@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises"
 import path, { dirname } from "node:path"
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 import type { TransformConfig } from "../config/index.js"
 import type { FileType } from "../fileInformation.js"
 import { InlangException } from "../../../exceptions.js"

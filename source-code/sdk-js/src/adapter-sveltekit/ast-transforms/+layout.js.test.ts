@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 import { initTestApp } from "./test.utils.js"
 import { transformLayoutJs } from "./+layout.js.js"
 

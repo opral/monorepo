@@ -60,7 +60,7 @@ export const resolveModules: ResolveModulesFunction = async (args) => {
 		allLintRules = [...allLintRules, ...lintRules]
 	}
 
-	const resolvedPlugins = resolvePlugins({
+	const resolvedPlugins = await resolvePlugins({
 		plugins: allPlugins,
 		settings: args.config.settings as any, // TODO: fix type
 		nodeishFs: args.nodeishFs,

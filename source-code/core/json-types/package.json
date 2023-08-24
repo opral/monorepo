@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/json-serializable",
+	"name": "@inlang/json-types",
 	"type": "module",
 	"version": "1.0.0",
 	"publishConfig": {

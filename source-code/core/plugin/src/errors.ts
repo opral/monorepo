@@ -14,13 +14,10 @@ class PluginError extends Error {
 	}
 }
 
-/**
- * Error thrown when a plugin cannot be imported.
- */
-export class PluginUsesInvalidIdError extends PluginError {
+export class PluginHasInvalidIdError extends PluginError {
 	constructor(message: string, options: PluginErrorOptions) {
 		super(message, options)
-		this.name = "PluginUsesInvalidIdError"
+		this.name = "PluginHasInvalidIdError"
 	}
 }
 
@@ -31,37 +28,30 @@ export class PluginUsesReservedNamespaceError extends PluginError {
 	}
 }
 
-export class PluginUsesInvalidSchemaError extends PluginError {
+export class PluginHasInvalidSchemaError extends PluginError {
 	constructor(message: string, options: PluginErrorOptions) {
 		super(message, options)
-		this.name = "PluginUsesInvalidSchemaError"
+		this.name = "PluginHasInvalidSchemaError"
 	}
 }
 
-export class PluginFunctionLoadMessagesAlreadyDefinedError extends PluginError {
+export class PluginLoadMessagesFunctionAlreadyDefinedError extends PluginError {
 	constructor(message: string, options: PluginErrorOptions) {
 		super(message, options)
-		this.name = "PluginFunctionLoadMessagesAlreadyDefinedError"
+		this.name = "PluginLoadMessagesFunctionAlreadyDefinedError"
 	}
 }
 
-export class PluginFunctionSaveMessagesAlreadyDefinedError extends PluginError {
+export class PluginSaveMessagesFunctionAlreadyDefinedError extends PluginError {
 	constructor(message: string, options: PluginErrorOptions) {
 		super(message, options)
-		this.name = "PluginFunctionSaveMessagesAlreadyDefinedError"
+		this.name = "PluginSaveMessagesFunctionAlreadyDefinedError"
 	}
 }
 
-export class PluginFunctionDetectLanguageTagsAlreadyDefinedError extends PluginError {
+export class PluginReturnedInvalidAppSpecificApiError extends PluginError {
 	constructor(message: string, options: PluginErrorOptions) {
 		super(message, options)
-		this.name = "PluginFunctionDetectLanguageTagsAlreadyDefinedError"
-	}
-}
-
-export class PluginAppSpecificApiReturnError extends PluginError {
-	constructor(message: string, options: PluginErrorOptions) {
-		super(message, options)
-		this.name = "PluginAppSpecificApiReturnError"
+		this.name = "PluginReturnedInvalidAppSpecificApiError"
 	}
 }
