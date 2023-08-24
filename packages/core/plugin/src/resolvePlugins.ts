@@ -3,8 +3,8 @@ import {
 	PluginReturnedInvalidAppSpecificApiError,
 	PluginFunctionLoadMessagesAlreadyDefinedError,
 	PluginFunctionSaveMessagesAlreadyDefinedError,
-	PluginUsesInvalidIdError,
-	PluginUsesInvalidSchemaError,
+	PluginHasInvalidIdError,
+	PluginHasInvalidSchemaError,
 	PluginUsesReservedNamespaceError,
 } from "./errors.js"
 import { deepmerge } from "deepmerge-ts"
@@ -36,7 +36,7 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 		const hasInvalidId = errors.some((error) => error.path === "/meta/id")
 		if (hasInvalidId) {
 			result.errors.push(
-				new PluginUsesInvalidIdError(
+				new PluginHasInvalidIdError(
 					`Plugin ${plugin.meta.id} has an invalid id "${plugin.meta.id}". It must be kebap-case and contain a namespace like project.my-plugin.`,
 					{ plugin: plugin.meta.id },
 				),
@@ -58,7 +58,7 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 		// -- USES INVALID SCHEMA --
 		if (errors.length > 0) {
 			result.errors.push(
-				new PluginUsesInvalidSchemaError(
+				new PluginHasInvalidSchemaError(
 					`Plugin ${plugin.meta.id} uses an invalid schema. Please check the documentation for the correct Plugin type.`,
 					{
 						plugin: plugin.meta.id,
