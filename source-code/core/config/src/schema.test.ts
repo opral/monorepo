@@ -92,8 +92,8 @@ describe("config.settings", () => {
 			languageTags: ["en", "de"],
 			modules: [],
 			settings: {
-				// @ts-expect-error - Function is not a JSON
 				"namespace.app.name": {
+					// @ts-expect-error - Function is not a JSON
 					myFunction: () => {
 						return "Hello World"
 					},

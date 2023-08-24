@@ -67,9 +67,9 @@ export type ResolvedPluginApi = {
 	 * 	 }
 	 *  })
 	 *  // use
-	 *  appSpecificApi['inlang.ideExtension'].messageReferenceMatcher()
+	 *  appSpecificApi['inlang.app.ide-extension'].messageReferenceMatcher()
 	 */
-	appSpecificApi: ReturnType<NonNullable<Plugin["addAppSpecificApi"]>>
+	appSpecificApi: Record<`${string}.app.${string}`, unknown> & { "inlang.app.ideExtension"?: IdeExtensionConfig }
 }
 
 // ---------------------------- RUNTIME VALIDATION TYPES ---------------------------------------------
@@ -120,7 +120,7 @@ export type Plugin<Settings extends JSONObject | unknown = unknown> = Omit<
 	 */
 	addAppSpecificApi?: (args: {
 		settings: Settings
-	}) => Record<`${string}.app.${string}`, any> | { "inlang.app.ideExtension": IdeExtensionConfig }
+	}) => Record<`${string}.app.${string}`, unknown> | { "inlang.app.ideExtension": IdeExtensionConfig }
 }
 
 export const Plugin = Type.Object(
