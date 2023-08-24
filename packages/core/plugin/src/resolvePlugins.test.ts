@@ -330,7 +330,9 @@ describe("addAppSpecificApi", () => {
 
 		expect(resolved.data.appSpecificApi).toHaveProperty("namespace.app.placeholder")
 		expect(
-			(resolved.data.appSpecificApi?.["namespace.app.placeholder"] as any).messageReferenceMatcher(),
+			(
+				resolved.data.appSpecificApi?.["namespace.app.placeholder"] as any
+			).messageReferenceMatcher(),
 		).toEqual({
 			hello: "world",
 		})
