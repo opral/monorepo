@@ -70,8 +70,8 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 	const newPattern = () => getTextValue(editor) as Variant["pattern"]
 
 	//create editor
-	let textArea!: HTMLDivElement;
-	let editor: any;
+	let textArea!: HTMLDivElement
+	let editor: any
 
 	/*
 		Needs to be refactored, but it works for now:
@@ -79,25 +79,27 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 		- should only rerender editor if variant pattern from query message is different to current editor content
 	*/
 	// eslint-disable-next-line solid/reactivity
-	const [currentPattern, setCurrentPattern] = createSignal<Variant["pattern"]>(variant()?.pattern || [])
+	const [currentPattern, setCurrentPattern] = createSignal<Variant["pattern"]>(
+		variant()?.pattern || [],
+	)
 
 	function createOrUpdateEditor() {
-		const newVariant = variant();
+		const newVariant = variant()
 
 		if (JSON.stringify(currentPattern()) !== JSON.stringify(variant())) {
 			if (editor) {
-				editor.destroy();
+				editor.destroy()
 			}
 
 			editor = createTiptapEditor(() => {
-				return getEditorConfig(textArea, newVariant, variableReferences());
-			});
+				return getEditorConfig(textArea, newVariant, variableReferences())
+			})
 
 			setCurrentPattern(variant()?.pattern || [])
 		}
 	}
 	// eslint-disable-next-line solid/reactivity
-	createOrUpdateEditor();
+	createOrUpdateEditor()
 
 	const currentJSON = useEditorJSON(() => editor())
 
