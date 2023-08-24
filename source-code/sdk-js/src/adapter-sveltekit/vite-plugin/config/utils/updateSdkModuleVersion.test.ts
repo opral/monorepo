@@ -47,20 +47,24 @@ const openMockedInlangProject = async (fs: NodeishFilesystemSubset): Promise<Inl
 		nodeishFs: fs,
 		configPath: "./inlang.config.json",
 		_import: async (url) =>
-		({
-			default: url === "plugin-json-mock" ? { plugins: [mockPlugin] } : {},
-		} satisfies InlangModule),
+			({
+				default: url === "plugin-json-mock" ? { plugins: [mockPlugin] } : {},
+			} satisfies InlangModule),
 	})
 }
 
 describe("updateSdkModuleVersion", () => {
 	beforeEach(() => {
 		vi.resetAllMocks()
-		vi.mocked(openInlangProject).mockImplementation(async (...args: Parameters<typeof openInlangProject>) => {
-			const { openInlangProject } = await vi.importActual<typeof import("@inlang/app")>("@inlang/app")
+		vi.mocked(openInlangProject).mockImplementation(
+			async (...args: Parameters<typeof openInlangProject>) => {
+				const { openInlangProject } = await vi.importActual<typeof import("@inlang/app")>(
+					"@inlang/app",
+				)
 
-			return openInlangProject(...args)
-		})
+				return openInlangProject(...args)
+			},
+		)
 	})
 
 	it("should not do anything if module is not defined", async () => {
@@ -162,7 +166,9 @@ describe("standaloneUpdateSdkModuleVersion", () => {
 		const config = getMockedConfig(`https://cdn.com/@inlang/sdk-js-plugin@${version}/index.js`)
 		await fs.writeFile(PATH_TO_INLANG_CONFIG, JSON.stringify(config))
 
-		vi.mocked(openInlangProject).mockImplementationOnce(async () => ({ config: () => config } as InlangProject))
+		vi.mocked(openInlangProject).mockImplementationOnce(
+			async () => ({ config: () => config } as InlangProject),
+		)
 
 		const updated = await standaloneUpdateSdkModuleVersion()
 		expect(updated).toBe(false)
@@ -174,12 +180,15 @@ describe("standaloneUpdateSdkModuleVersion", () => {
 		const config = getMockedConfig(`https://cdn.com/@inlang/sdk-js-plugin@0/index.js`)
 		await fs.writeFile(PATH_TO_INLANG_CONFIG, JSON.stringify(config))
 
-		vi.mocked(openInlangProject).mockImplementationOnce(async () => ({
-			config: () => config,
-			setConfig(config) {
-				fs.writeFile(PATH_TO_INLANG_CONFIG, JSON.stringify(config))
-			},
-		} as InlangProject))
+		vi.mocked(openInlangProject).mockImplementationOnce(
+			async () =>
+				({
+					config: () => config,
+					setConfig(config) {
+						fs.writeFile(PATH_TO_INLANG_CONFIG, JSON.stringify(config))
+					},
+				} as InlangProject),
+		)
 
 		const updated = await standaloneUpdateSdkModuleVersion()
 		expect(updated).toBe(true)
