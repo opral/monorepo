@@ -1,5 +1,5 @@
 import satori from "satori"
-import { openRepository, createNodeishMemoryFs } from "@project-lisa/client"
+import { openRepository, createNodeishMemoryFs } from "@lix-js/client"
 import { markup } from "./helper/markup.js"
 import { readFileSync } from "node:fs"
 import { telemetryNode } from "@inlang/telemetry"

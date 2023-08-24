@@ -61,7 +61,6 @@ export function openRepository(
 			pending = undefined
 		})
 		.catch((err: any) => {
-			console.error("error cloning the repository", err)
 			return { error: err }
 		})
 
@@ -227,22 +226,20 @@ export function openRepository(
 			)
 		},
 
-		getErrors() {
-			return {
-				subscribe: (cb: (err: Error) => void) => {
-					if (pending) {
-						pending.catch((maybeError) => {
-							if (maybeError) {
-								cb(maybeError.error)
-							}
-						})
-					}
+		errors: {
+			subscribe: (cb: (err: Error) => void) => {
+				if (pending) {
+					pending.catch((maybeError) => {
+						if (maybeError?.error) {
+							cb(maybeError.error)
+						}
+					})
+				}
 
-					return () => {
-						/* implement unsubscribe when we handle internal errors while usage */
-					}
-				},
-			}
+				return () => {
+					/* implement unsubscribe when we handle internal errors while usage */
+				}
+			},
 		},
 
 		/**

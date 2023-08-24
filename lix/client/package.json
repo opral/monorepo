@@ -1,5 +1,5 @@
 {
-	"name": "@project-lisa/client",
+	"name": "@lix-js/client",
 	"version": "0.0.1",
 	"type": "module",
 	"publishConfig": {

@@ -30,7 +30,7 @@ export type Repository = {
 	isCollaborator: (args: { username: string }) => Promise<boolean>
 	getOrigin: () => Promise<string>
 	getCurrentBranch: () => Promise<string | undefined>
-	getErrors: () => { subscribe: (callback: (value: Error) => void) => () => void }
+	errors: { subscribe: (callback: (value: Error) => void) => () => void }
 	getMeta: () => Promise<{
 		name: string
 		isPrivate: boolean

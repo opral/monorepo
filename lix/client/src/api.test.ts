@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from "vitest"
+import { describe, it, expect, vi } from "vitest"
 import { openRepository, createNodeishMemoryFs } from "./index.js"
 
 // - loading multiple repositories is possible
@@ -9,6 +9,21 @@ import { openRepository, createNodeishMemoryFs } from "./index.js"
 
 describe("main workflow", () => {
 	let repository: ReturnType<typeof openRepository>
+
+	it.todo("allows to subscribe to errors", async () => {
+		const errorHandler = vi.fn()
+		repository = openRepository("github.com/inlang/exampl", {
+			nodeishFs: createNodeishMemoryFs(),
+		})
+		repository.errors.subscribe((error) => {
+			console.log(error)
+			errorHandler(error)
+		})
+		await new Promise((resolve) => setTimeout(resolve, 100))
+		expect(errorHandler.mock.calls.length).toBe(1)
+		expect(errorHandler.mock.calls[0]).toStrictEqual({})
+	})
+
 	it("opens a repo url without error and without blocking io", async () => {
 		// fix normalization of .git
 		repository = openRepository("github.com/inlang/example", {
@@ -16,14 +31,14 @@ describe("main workflow", () => {
 		})
 	})
 
-	let file
+	let fileContent = ""
 	it("file is lazy fetched upon first access", async () => {
-		file = await repository.nodeishFs.readFile("./inlang.config.js", { encoding: "utf-8" })
+		fileContent = await repository.nodeishFs.readFile("./inlang.config.js", { encoding: "utf-8" })
 	})
 
 	it("modifying the file", async () => {
-		file += "\n// bar"
-		await repository.nodeishFs.writeFile("./inlang.config.js", file)
+		fileContent += "\n// bar"
+		await repository.nodeishFs.writeFile("./inlang.config.js", fileContent)
 	})
 
 	it("can commit local modifications to the repo", async () => {

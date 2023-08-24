@@ -1,5 +1,5 @@
 {
-	"name": "@project-lisa/server",
+	"name": "@lix-js/server",
 	"type": "module",
 	"private": true,
 	"exports": {
@@ -16,10 +16,10 @@
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"test:watch": "vitest watch --passWithNoTests --coverage",
 		"---- LINT ----------------------------------------------------------": "",
-		"lint": "cd ../.. && npm run lint:base ./source-code/server",
-		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/server",
-		"format": "cd ../.. && npm run format:base ./source-code/server",
-		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/server",
+		"lint": "cd .. && npm run lint:base ./lix/server",
+		"lint:fix": "cd .. && npm run lint:fix:base ./lix/server",
+		"format": "cd .. && npm run format:base ./lix/server",
+		"format:fix": "cd .. && npm run format:fix:base ./lix/server",
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
