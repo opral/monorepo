@@ -9,10 +9,10 @@ import {
 } from "./errors.js"
 
 /**
- * Tries to match the most specific variant of a message.  
- * 
- * The selectors determine the specificity of a variant. If no selectors are provided, 
- * or if the selectors do not match any variant, the catch all variant is returned 
+ * Tries to match the most specific variant of a message.
+ *
+ * The selectors determine the specificity of a variant. If no selectors are provided,
+ * or if the selectors do not match any variant, the catch all variant is returned
  * (if it exists).
  *
  * @example
