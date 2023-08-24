@@ -1,8 +1,8 @@
 import { Plugin, ResolvePluginsFunction } from "./api.js"
 import {
 	PluginReturnedInvalidAppSpecificApiError,
-	PluginFunctionLoadMessagesAlreadyDefinedError,
-	PluginFunctionSaveMessagesAlreadyDefinedError,
+	PluginLoadMessagesFunctionAlreadyDefinedError,
+	PluginSaveMessagesFunctionAlreadyDefinedError,
 	PluginHasInvalidIdError,
 	PluginHasInvalidSchemaError,
 	PluginUsesReservedNamespaceError,
@@ -71,7 +71,7 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 		// -- ALREADY DEFINED LOADMESSAGES / SAVEMESSAGES / DETECTEDLANGUAGETAGS --
 		if (typeof plugin.loadMessages === "function" && result.data.loadMessages !== undefined) {
 			result.errors.push(
-				new PluginFunctionLoadMessagesAlreadyDefinedError(
+				new PluginLoadMessagesFunctionAlreadyDefinedError(
 					`Plugin ${plugin.meta.id} defines the loadMessages function, but it was already defined by another plugin.`,
 					{ plugin: plugin.meta.id },
 				),
@@ -80,7 +80,7 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 
 		if (typeof plugin.saveMessages === "function" && result.data.saveMessages !== undefined) {
 			result.errors.push(
-				new PluginFunctionSaveMessagesAlreadyDefinedError(
+				new PluginSaveMessagesFunctionAlreadyDefinedError(
 					`Plugin ${plugin.meta.id} defines the saveMessages function, but it was already defined by another plugin.`,
 					{ plugin: plugin.meta.id },
 				),

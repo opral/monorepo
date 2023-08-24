@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest"
 import { resolvePlugins } from "./resolvePlugins.js"
 import {
-	PluginFunctionLoadMessagesAlreadyDefinedError,
-	PluginFunctionSaveMessagesAlreadyDefinedError,
+	PluginLoadMessagesFunctionAlreadyDefinedError,
+	PluginSaveMessagesFunctionAlreadyDefinedError,
 	PluginHasInvalidIdError,
 	PluginUsesReservedNamespaceError,
 	PluginReturnedInvalidAppSpecificApiError,
@@ -130,7 +130,7 @@ describe("loadMessages", () => {
 		})
 
 		expect(resolved.errors).toHaveLength(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginFunctionLoadMessagesAlreadyDefinedError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginLoadMessagesFunctionAlreadyDefinedError)
 	})
 })
 
@@ -180,7 +180,7 @@ describe("saveMessages", () => {
 		})
 
 		expect(resolved.errors).toHaveLength(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginFunctionSaveMessagesAlreadyDefinedError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginSaveMessagesFunctionAlreadyDefinedError)
 	})
 })
 
