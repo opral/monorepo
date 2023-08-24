@@ -1,4 +1,4 @@
-import 'solid-devtools'
+import "solid-devtools"
 import { Component, createSignal } from "solid-js"
 import { createStore } from "solid-js/store"
 import { hydrate, render as renderApp } from "solid-js/web"
@@ -68,7 +68,7 @@ export function render(pageContext: PageContextRenderer) {
 			//
 			// In the future, the editor might be server-side rendered.
 			// For now, the trouble of isomorphic rendering the editor is not worth it.
-			;(isEditor ? renderApp : hydrate)(
+			; (isEditor ? renderApp : hydrate)(
 				() => (
 					<MetaProvider>
 						<Root

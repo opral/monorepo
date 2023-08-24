@@ -5,7 +5,7 @@ import { telefunc } from "telefunc/vite"
 import { fileURLToPath, URL } from "node:url"
 import Icons from "unplugin-icons/vite"
 import { nodePolyfills } from "vite-plugin-node-polyfills"
-import devtools from 'solid-devtools/vite'
+import devtools from "solid-devtools/vite"
 
 const isProduction = process.env.NODE_ENV === "production"
 
