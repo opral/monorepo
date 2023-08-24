@@ -1,15 +1,60 @@
-import { describe, it } from "vitest"
+import { createNodeishMemoryFs } from "@inlang-git/fs"
+import { describe, it, expect } from "vitest"
+import { shouldContentBePrerendered } from "./shouldContentBePrerendered.js"
+import dedent from "dedent"
 
 describe("should return `false`", () => {
-	it.todo("if no file exists")
-	it.todo("if file does not have a `prerender` export")
-	it.todo("if file has a `prerender` export set to `false`")
+	it("if no file exists", async () => {
+		const fs = createNodeishMemoryFs()
+		expect(await shouldContentBePrerendered(fs, "/")).toBe(false)
+	})
+
+	it("if file does not have a `prerender` export", async () => {
+		const fs = createNodeishMemoryFs()
+		fs.writeFile("/+layout.server.js", 'export const foo = "bar"')
+		expect(await shouldContentBePrerendered(fs, "/")).toBe(false)
+	})
+
+	it("if file has a `prerender` export set to `false`", async () => {
+		const fs = createNodeishMemoryFs()
+		fs.writeFile("/+layout.js", "export const prerender = false")
+		expect(await shouldContentBePrerendered(fs, "/")).toBe(false)
+	})
 })
 
 describe("should return `true`", () => {
-	it.todo("if a file has a `prerender` export set to `true`")
-	it.todo("if a file has a `prerender` export set to `auto`")
-	it.todo("should work in `.js` files")
-	it.todo("should work in `.ts` files")
-	it.todo("should work with import statements")
+	it("if a file has a `prerender` export set to `true`", async () => {
+		const fs = createNodeishMemoryFs()
+		fs.writeFile("/+layout.server.js", "export const prerender = true")
+		expect(await shouldContentBePrerendered(fs, "/")).toBe(true)
+	})
+
+	it("if a file has a `prerender` export set to `auto`", async () => {
+		const fs = createNodeishMemoryFs()
+		fs.writeFile("/+layout.js", 'export const prerender = "auto"')
+		expect(await shouldContentBePrerendered(fs, "/")).toBe(true)
+	})
+
+	it("should work with TypeScript syntax", async () => {
+		const fs = createNodeishMemoryFs()
+		fs.writeFile(
+			"/+layout.ts",
+			dedent`
+			export const prerender: boolean = true
+		`,
+		)
+		expect(await shouldContentBePrerendered(fs, "/")).toBe(true)
+	})
+
+	it("should work with import statements", async () => {
+		const fs = createNodeishMemoryFs()
+		fs.writeFile(
+			"/+layout.server.ts",
+			dedent`
+			import * from "foo"
+			export const prerender: any = 'auto'
+		`,
+		)
+		expect(await shouldContentBePrerendered(fs, "/")).toBe(true)
+	})
 })

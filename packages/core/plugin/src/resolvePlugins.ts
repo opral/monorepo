@@ -1,11 +1,10 @@
 import { Plugin, ResolvePluginsFunction } from "./api.js"
 import {
-	PluginAppSpecificApiReturnError,
-	PluginFunctionDetectLanguageTagsAlreadyDefinedError,
-	PluginFunctionLoadMessagesAlreadyDefinedError,
-	PluginFunctionSaveMessagesAlreadyDefinedError,
-	PluginUsesInvalidIdError,
-	PluginUsesInvalidSchemaError,
+	PluginReturnedInvalidAppSpecificApiError,
+	PluginLoadMessagesFunctionAlreadyDefinedError,
+	PluginSaveMessagesFunctionAlreadyDefinedError,
+	PluginHasInvalidIdError,
+	PluginHasInvalidSchemaError,
 	PluginUsesReservedNamespaceError,
 } from "./errors.js"
 import { deepmerge } from "deepmerge-ts"
@@ -15,12 +14,12 @@ import { tryCatch } from "@inlang/result"
 const whitelistedPlugins = ["inlang.plugin.json", "inlang.plugin.i18next", "inlang.plugin.sdkJs"]
 const PluginCompiler = TypeCompiler.Compile(Plugin)
 
-export const resolvePlugins: ResolvePluginsFunction = (args) => {
+export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 	const result: Awaited<ReturnType<ResolvePluginsFunction>> = {
 		data: {
 			loadMessages: undefined as any,
 			saveMessages: undefined as any,
-			detectedLanguageTags: undefined,
+			detectedLanguageTags: [],
 			appSpecificApi: {},
 		},
 		errors: [],
@@ -37,7 +36,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 		const hasInvalidId = errors.some((error) => error.path === "/meta/id")
 		if (hasInvalidId) {
 			result.errors.push(
-				new PluginUsesInvalidIdError(
+				new PluginHasInvalidIdError(
 					`Plugin ${plugin.meta.id} has an invalid id "${plugin.meta.id}". It must be kebap-case and contain a namespace like project.my-plugin.`,
 					{ plugin: plugin.meta.id },
 				),
@@ -59,7 +58,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 		// -- USES INVALID SCHEMA --
 		if (errors.length > 0) {
 			result.errors.push(
-				new PluginUsesInvalidSchemaError(
+				new PluginHasInvalidSchemaError(
 					`Plugin ${plugin.meta.id} uses an invalid schema. Please check the documentation for the correct Plugin type.`,
 					{
 						plugin: plugin.meta.id,
@@ -72,7 +71,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 		// -- ALREADY DEFINED LOADMESSAGES / SAVEMESSAGES / DETECTEDLANGUAGETAGS --
 		if (typeof plugin.loadMessages === "function" && result.data.loadMessages !== undefined) {
 			result.errors.push(
-				new PluginFunctionLoadMessagesAlreadyDefinedError(
+				new PluginLoadMessagesFunctionAlreadyDefinedError(
 					`Plugin ${plugin.meta.id} defines the loadMessages function, but it was already defined by another plugin.`,
 					{ plugin: plugin.meta.id },
 				),
@@ -81,20 +80,8 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 
 		if (typeof plugin.saveMessages === "function" && result.data.saveMessages !== undefined) {
 			result.errors.push(
-				new PluginFunctionSaveMessagesAlreadyDefinedError(
+				new PluginSaveMessagesFunctionAlreadyDefinedError(
 					`Plugin ${plugin.meta.id} defines the saveMessages function, but it was already defined by another plugin.`,
-					{ plugin: plugin.meta.id },
-				),
-			)
-		}
-
-		if (
-			typeof plugin.detectedLanguageTags === "function" &&
-			result.data.detectedLanguageTags !== undefined
-		) {
-			result.errors.push(
-				new PluginFunctionDetectLanguageTagsAlreadyDefinedError(
-					`Plugin ${plugin.meta.id} defines the detectedLanguageTags function, but it was already defined by another plugin.`,
 					{ plugin: plugin.meta.id },
 				),
 			)
@@ -115,7 +102,7 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			}
 			if (typeof appSpecificApi !== "object") {
 				result.errors.push(
-					new PluginAppSpecificApiReturnError(
+					new PluginReturnedInvalidAppSpecificApiError(
 						`Plugin ${plugin.meta.id} defines the addAppSpecificApi function, but it does not return an object.`,
 						{ plugin: plugin.meta.id, cause: error },
 					),
@@ -151,11 +138,13 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 		}
 
 		if (typeof plugin.detectedLanguageTags === "function") {
-			result.data.detectedLanguageTags = () =>
-				plugin.detectedLanguageTags!({
-					settings: args.settings?.[plugin.meta.id] ?? {},
-					nodeishFs: args.nodeishFs,
-				})
+			const detectedLangugeTags = await plugin.detectedLanguageTags!({
+				settings: args.settings?.[plugin.meta.id] ?? {},
+				nodeishFs: args.nodeishFs,
+			})
+			result.data.detectedLanguageTags = [
+				...new Set([...result.data.detectedLanguageTags, ...detectedLangugeTags]),
+			]
 		}
 
 		if (typeof plugin.addAppSpecificApi === "function") {

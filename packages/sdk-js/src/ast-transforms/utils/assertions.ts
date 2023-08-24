@@ -1,6 +1,6 @@
 import type { SourceFile } from "ts-morph"
 import { isSdkImportPresent } from "./imports.js"
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 import { InlangSdkException } from "../../adapter-sveltekit/vite-plugin/exceptions.js"
 import type { FileType } from "../../adapter-sveltekit/vite-plugin/fileInformation.js"
 

@@ -1,4 +1,4 @@
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 import { describe, test, expect } from "vitest"
 import { getSvelteFileParts } from "./svelte.util.js"
 

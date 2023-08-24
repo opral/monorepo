@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, it, expect, vi, beforeEach } from "vitest"
 import {
 	standaloneUpdateSdkModuleVersion,
 	updateSdkModuleVersion,
@@ -15,6 +15,11 @@ import type { InlangModule } from "@inlang/module"
 // @ts-ignore
 import { version } from "../../../../../package.json"
 import { PATH_TO_CWD, PATH_TO_INLANG_CONFIG } from "../config.js"
+
+vi.mock("@inlang/app", async () => ({
+	...(await vi.importActual<typeof import("@inlang/app")>("@inlang/app")),
+	openInlangProject: vi.fn(),
+}))
 
 const getMockedConfig = (...modules: string[]): InlangConfig => ({
 	sourceLanguageTag: "en",
@@ -49,6 +54,19 @@ const openMockedInlangProject = async (fs: NodeishFilesystemSubset): Promise<Inl
 }
 
 describe("updateSdkModuleVersion", () => {
+	beforeEach(() => {
+		vi.resetAllMocks()
+		vi.mocked(openInlangProject).mockImplementation(
+			async (...args: Parameters<typeof openInlangProject>) => {
+				const { openInlangProject } = await vi.importActual<typeof import("@inlang/app")>(
+					"@inlang/app",
+				)
+
+				return openInlangProject(...args)
+			},
+		)
+	})
+
 	it("should not do anything if module is not defined", async () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile("./inlang.config.json", JSON.stringify(getMockedConfig()))
@@ -133,17 +151,23 @@ describe("updateSdkModuleVersion", () => {
 	})
 })
 
-// TODO: check how we can mock `@inlang/app`
-describe.skip("standaloneUpdateSdkModuleVersion", () => {
+describe("standaloneUpdateSdkModuleVersion", () => {
+	beforeEach(() => {
+		vi.resetAllMocks()
+	})
+
 	it("should throw if inlang could not be setup correctly", async () => {
 		expect(() => standaloneUpdateSdkModuleVersion()).rejects.toThrow()
 	})
 
 	it("should not do anything if version is already identical", async () => {
 		const fs = await createMockNodeishFs()
-		await fs.writeFile(
-			PATH_TO_INLANG_CONFIG,
-			JSON.stringify(getMockedConfig(`https://cdn.com/@inlang/sdk-js-plugin@${version}/index.js`)),
+		await fs.mkdir(PATH_TO_INLANG_CONFIG, { recursive: true })
+		const config = getMockedConfig(`https://cdn.com/@inlang/sdk-js-plugin@${version}/index.js`)
+		await fs.writeFile(PATH_TO_INLANG_CONFIG, JSON.stringify(config))
+
+		vi.mocked(openInlangProject).mockImplementationOnce(
+			async () => ({ config: () => config } as InlangProject),
 		)
 
 		const updated = await standaloneUpdateSdkModuleVersion()
@@ -153,10 +177,17 @@ describe.skip("standaloneUpdateSdkModuleVersion", () => {
 	it("should update the version in the config file if it is not identical", async () => {
 		const fs = await createMockNodeishFs()
 		await fs.mkdir(PATH_TO_CWD, { recursive: true })
+		const config = getMockedConfig(`https://cdn.com/@inlang/sdk-js-plugin@0/index.js`)
+		await fs.writeFile(PATH_TO_INLANG_CONFIG, JSON.stringify(config))
 
-		await fs.writeFile(
-			PATH_TO_INLANG_CONFIG,
-			JSON.stringify(getMockedConfig("https://cdn.com/@inlang/sdk-js-plugin@0/index.js")),
+		vi.mocked(openInlangProject).mockImplementationOnce(
+			async () =>
+				({
+					config: () => config,
+					setConfig(config) {
+						fs.writeFile(PATH_TO_INLANG_CONFIG, JSON.stringify(config))
+					},
+				} as InlangProject),
 		)
 
 		const updated = await standaloneUpdateSdkModuleVersion()

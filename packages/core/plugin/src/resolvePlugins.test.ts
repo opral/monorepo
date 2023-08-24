@@ -1,13 +1,12 @@
 import { describe, expect, it } from "vitest"
 import { resolvePlugins } from "./resolvePlugins.js"
 import {
-	PluginFunctionLoadMessagesAlreadyDefinedError,
-	PluginFunctionSaveMessagesAlreadyDefinedError,
-	PluginUsesInvalidIdError,
+	PluginLoadMessagesFunctionAlreadyDefinedError,
+	PluginSaveMessagesFunctionAlreadyDefinedError,
+	PluginHasInvalidIdError,
 	PluginUsesReservedNamespaceError,
-	PluginAppSpecificApiReturnError,
-	PluginUsesInvalidSchemaError,
-	PluginFunctionDetectLanguageTagsAlreadyDefinedError,
+	PluginReturnedInvalidAppSpecificApiError,
+	PluginHasInvalidSchemaError,
 } from "./errors.js"
 import type { Plugin } from "./api.js"
 
@@ -33,7 +32,7 @@ describe("generally", () => {
 			nodeishFs: {} as any,
 		})
 
-		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesInvalidIdError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginHasInvalidIdError)
 	})
 
 	it("should return an error if a plugin uses APIs that are not available", async () => {
@@ -58,7 +57,7 @@ describe("generally", () => {
 		})
 
 		expect(resolved.errors.length).toBe(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesInvalidSchemaError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginHasInvalidSchemaError)
 	})
 
 	it("should not initialize a plugin that uses the 'inlang' namespace except for inlang whitelisted plugins", async () => {
@@ -131,7 +130,7 @@ describe("loadMessages", () => {
 		})
 
 		expect(resolved.errors).toHaveLength(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginFunctionLoadMessagesAlreadyDefinedError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginLoadMessagesFunctionAlreadyDefinedError)
 	})
 })
 
@@ -181,12 +180,12 @@ describe("saveMessages", () => {
 		})
 
 		expect(resolved.errors).toHaveLength(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginFunctionSaveMessagesAlreadyDefinedError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginSaveMessagesFunctionAlreadyDefinedError)
 	})
 })
 
 describe("detectedLanguageTags", () => {
-	it("should detect language tags from a local source", async () => {
+	it("should merge language tags from plugins", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin.detectedLanguageTags",
@@ -207,6 +206,7 @@ describe("detectedLanguageTags", () => {
 			addAppSpecificApi: () => {
 				return {}
 			},
+			detectedLanguageTags: async () => ["de", "fr"],
 		}
 
 		const resolved = await resolvePlugins({
@@ -215,42 +215,7 @@ describe("detectedLanguageTags", () => {
 			nodeishFs: {} as any,
 		})
 
-		expect(resolved.data.detectedLanguageTags).toBeDefined()
-		expect(await resolved.data.detectedLanguageTags!()).toEqual(["de", "en"])
-	})
-
-	it("should collect an error if function is defined twice in multiple plugins", async () => {
-		const mockPlugin: Plugin = {
-			meta: {
-				id: "plugin.plugin.detectedLanguageTags",
-				description: { en: "My plugin description" },
-				displayName: { en: "My plugin" },
-			},
-			detectedLanguageTags: async () => ["de", "en"],
-			addAppSpecificApi: () => {
-				return {}
-			},
-		}
-		const mockPlugin2: Plugin = {
-			meta: {
-				id: "plugin.plugin.detectedLanguageTags2",
-				description: { en: "My plugin description" },
-				displayName: { en: "My plugin" },
-			},
-			detectedLanguageTags: async () => ["de", "en"],
-			addAppSpecificApi: () => {
-				return {}
-			},
-		}
-
-		const resolved = await resolvePlugins({
-			plugins: [mockPlugin, mockPlugin2],
-			settings: {},
-			nodeishFs: {} as any,
-		})
-
-		expect(resolved.errors).toHaveLength(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginFunctionDetectLanguageTagsAlreadyDefinedError)
+		expect(resolved.data.detectedLanguageTags).toEqual(["de", "en", "fr"])
 	})
 })
 
@@ -338,7 +303,7 @@ describe("addAppSpecificApi", () => {
 		})
 
 		expect(resolved.errors).toHaveLength(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginAppSpecificApiReturnError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginReturnedInvalidAppSpecificApiError)
 	})
 
 	it("it should throw an error if the passed options are not defined inside appSpecificApi", async () => {

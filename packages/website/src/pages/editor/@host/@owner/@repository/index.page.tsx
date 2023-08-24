@@ -5,13 +5,10 @@ import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-ou
 import { Meta, Title } from "@solidjs/meta"
 import { EditorStateProvider, useEditorState } from "./State.jsx"
 import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
-// import { rpc } from "@inlang/rpc"
 import { ListHeader, messageCount } from "./components/Listheader.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"
-import { createMemo } from "solid-js"
-import type { Message as MessageType } from "@inlang/app"
 import { Message } from "./Message.jsx"
 
 export function Page() {

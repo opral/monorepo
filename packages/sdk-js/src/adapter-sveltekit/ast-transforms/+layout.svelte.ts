@@ -7,7 +7,7 @@ import {
 import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
 import type { TransformConfig } from "../vite-plugin/config/index.js"
 import { transformSvelte } from "./_.svelte.js"
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 import { isOptOutImportPresent } from "./utils/imports.js"
 import { addOrMoveDataExportAndReturnIndex } from "./utils/exports.js"
 import { insertSlotIfEmptyFile, wrapMarkupChildren } from "./utils/markup.js"

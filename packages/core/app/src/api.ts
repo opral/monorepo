@@ -15,12 +15,11 @@ import type {
 } from "./errors.js"
 import type {
 	Plugin,
-	PluginAppSpecificApiReturnError,
-	PluginFunctionDetectLanguageTagsAlreadyDefinedError,
-	PluginFunctionLoadMessagesAlreadyDefinedError,
-	PluginFunctionSaveMessagesAlreadyDefinedError,
-	PluginUsesInvalidIdError,
-	PluginUsesInvalidSchemaError,
+	PluginReturnedInvalidAppSpecificApiError,
+	PluginLoadMessagesFunctionAlreadyDefinedError,
+	PluginSaveMessagesFunctionAlreadyDefinedError,
+	PluginHasInvalidIdError,
+	PluginHasInvalidSchemaError,
 	PluginUsesReservedNamespaceError,
 	RuntimePluginApi,
 } from "@inlang/plugin"
@@ -54,12 +53,11 @@ export type InlangProject = {
 		() => (
 			| ModuleImportError
 			| ModuleError
-			| PluginAppSpecificApiReturnError
-			| PluginFunctionDetectLanguageTagsAlreadyDefinedError
-			| PluginFunctionLoadMessagesAlreadyDefinedError
-			| PluginFunctionSaveMessagesAlreadyDefinedError
-			| PluginUsesInvalidIdError
-			| PluginUsesInvalidSchemaError
+			| PluginReturnedInvalidAppSpecificApiError
+			| PluginLoadMessagesFunctionAlreadyDefinedError
+			| PluginSaveMessagesFunctionAlreadyDefinedError
+			| PluginHasInvalidIdError
+			| PluginHasInvalidSchemaError
 			| PluginUsesReservedNamespaceError
 			| InvalidLintRuleError
 			| LintRuleThrowedError

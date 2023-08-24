@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest"
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 import { transformHooksServerJs } from "./hooks.server.js.js"
 import { initTestApp } from "./test.utils.js"
 

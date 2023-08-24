@@ -1,4 +1,4 @@
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 import { InlangSdkException } from "../../adapter-sveltekit/vite-plugin/exceptions.js"
 import { codeToSourceFile } from "./js.util.js"
 import { Node, SyntaxKind, type SourceFile } from "ts-morph"

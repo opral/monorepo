@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest"
 import { codeToSourceFile } from "./js.util.js"
 import { findAllIdentifiersComingFromAnImport } from "./usage.js"
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 
 describe("findAllIdentifiersComingFromAnImport", () => {
 	test("regular usage", () => {
