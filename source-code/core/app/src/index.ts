@@ -7,7 +7,7 @@ export {
 	ConfigPathNotFoundError,
 	ConfigJSONSyntaxError,
 	InvalidConfigError,
-	NoMessagesPluginError,
+	NoPluginProvidesLoadOrSaveMessagesError,
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
 } from "./errors.js"

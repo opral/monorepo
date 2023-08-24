@@ -8,7 +8,7 @@ import {
 	ConfigPathNotFoundError,
 	ConfigJSONSyntaxError,
 	InvalidConfigError,
-	NoMessagesPluginError,
+	NoPluginProvidesLoadOrSaveMessagesError,
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
 } from "./errors.js"
@@ -80,7 +80,7 @@ export const openInlangProject = async (args: {
 						!resolvedModules.runtimePluginApi.loadMessages ||
 						!resolvedModules.runtimePluginApi.saveMessages
 					) {
-						throw new NoMessagesPluginError()
+						throw new NoPluginProvidesLoadOrSaveMessagesError()
 					}
 					setResolvedModules(resolvedModules)
 

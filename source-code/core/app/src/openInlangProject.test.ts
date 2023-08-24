@@ -10,7 +10,7 @@ import {
 	ConfigPathNotFoundError,
 	ConfigJSONSyntaxError,
 	InvalidConfigError,
-	NoMessagesPluginError,
+	NoPluginProvidesLoadOrSaveMessagesError,
 } from "./errors.js"
 
 // ------------------------------------------------------------------------------------------------
@@ -177,7 +177,7 @@ describe("initialization", () => {
 				_import: $badImport,
 			})
 
-			expect(inlang.errors()![0]).toBeInstanceOf(NoMessagesPluginError)
+			expect(inlang.errors()![0]).toBeInstanceOf(NoPluginProvidesLoadOrSaveMessagesError)
 		})
 
 		it("should return an error if no plugin defines writeMessages", async () => {
@@ -196,7 +196,7 @@ describe("initialization", () => {
 				_import: $badImport,
 			})
 
-			expect(inlang.errors()![0]).toBeInstanceOf(NoMessagesPluginError)
+			expect(inlang.errors()![0]).toBeInstanceOf(NoPluginProvidesLoadOrSaveMessagesError)
 		})
 
 		it("should return an error if an error occurs while resolving a plugin", async () => {

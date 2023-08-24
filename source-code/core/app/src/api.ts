@@ -10,7 +10,7 @@ import type { Message } from "@inlang/messages"
 import type { Result } from "@inlang/result"
 import type {
 	InvalidConfigError,
-	NoMessagesPluginError,
+	NoPluginProvidesLoadOrSaveMessagesError,
 	PluginSaveMessagesError,
 } from "./errors.js"
 import type {
@@ -62,7 +62,7 @@ export type InlangProject = {
 			| InvalidLintRuleError
 			| LintRuleThrowedError
 			| PluginSaveMessagesError
-			| NoMessagesPluginError
+			| NoPluginProvidesLoadOrSaveMessagesError
 			| Error
 		)[]
 	>
