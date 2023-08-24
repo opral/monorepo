@@ -29,7 +29,6 @@ import {
 	openInlangProject,
 	withSolidReactivity,
 	type SolidInlangProject,
-	type Message,
 } from "@inlang/app"
 import type { InlangModule } from "@inlang/module"
 import pluginJson from "../../../../../../../plugins/json/dist/index.js"
@@ -139,11 +138,6 @@ type EditorStateSchema = {
 	userIsCollaborator: Resource<boolean>
 
 	/**
-	 * The last time the repository was pushed.
-	 */
-	setLastPush: Setter<Date | undefined>
-
-	/**
 	 * The last time the repository has been pulled.
 	 */
 	lastPullTime: () => Date | undefined
@@ -168,11 +162,6 @@ export const useEditorState = () => {
  * See https://www.solidjs.com/tutorial/stores_context.
  */
 export function EditorStateProvider(props: { children: JSXElement }) {
-	/**
-	 *  Date of the last push to the Repo
-	 */
-	const [lastPush, setLastPush] = createSignal<Date>()
-
 	const [localChanges, setLocalChanges] = createSignal<number>(0)
 
 	const routeParams = () => currentPageContext.routeParams as EditorRouteParams
@@ -182,6 +171,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const [fsChange, setFsChange] = createSignal(new Date())
 
 	const [tourStep, setTourStep] = createSignal<TourStepId>("github-login")
+
+	/**
+	 *  Date of the last push to the Repo
+	 */
+	const [lastPullTime, setLastPullTime] = createSignal<Date>()
 
 	//set filter with search params
 	const params = new URL(document.URL).searchParams
@@ -233,7 +227,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			// the user does not need to wait for the response
 			// checks whether the gitOrigin corresponds to the pattern.
 
-			const gitOrigin = parseOrigin({ remotes: await getGitOrigin(args) })
+			const gitOrigin = await repo.getOrigin()
 			//You must include at least one group property for a group to be visible in the "Persons & Groups" tab
 			//https://posthog.com/docs/product-analytics/group-analytics#setting-and-updating-group-properties
 			telemetryBrowser.group("repository", gitOrigin, {
@@ -361,17 +355,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				return false
 			}
 			try {
-				//console.log(await repo.isCollaborator({ username: args.user.username }))
-				// TODO: use lisa api to check collaborator
-				const response = await github.request(
-					"GET /repos/{owner}/{repo}/collaborators/{username}",
-					{
-						owner: args.routeParams.owner,
-						repo: args.routeParams.repository,
-						username: args.user.username,
-					},
-				)
-				return response.status === 204 ? true : false
+				return await repo.isCollaborator({ username: args.user.username })
 			} catch (error) {
 				// the user is not a collaborator, hence the request will fail
 				return false
@@ -405,20 +389,12 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			) {
 				return false
 			}
-			return {
-				fs: fs(),
-			}
+			return true
 		},
-		async (args) => {
-			const branch = await raw.currentBranch({
-				fs: args.fs,
-				dir: "/",
-			})
-			return branch ?? undefined
+		async () => {
+			return await repo.getCurrentBranch()
 		},
 	)
-
-	const [lastPullTime, setLastPullTime] = createSignal<Date>()
 
 	return (
 		<EditorStateContext.Provider
@@ -448,7 +424,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					localChanges,
 					setLocalChanges,
 					userIsCollaborator,
-					setLastPush,
 					lastPullTime,
 					setLastPullTime,
 					fs,
@@ -523,21 +498,14 @@ export class UnknownException extends Error {
  * Pushed changes and pulls right afterwards.
  */
 export async function pushChanges(args: {
-	fs: NodeishFilesystem
-	routeParams: EditorRouteParams
+	repo: Repository
 	user: NonNullable<LocalStorageSchema["user"]>
 	setFsChange: (date: Date) => void
 	setLastPush: (date: Date) => void
 	setLastPullTime: (date: Date) => void
 }): Promise<Result<true, PushException | PullException>> {
-	const { host, owner, repository } = args.routeParams
-	if (host === undefined || owner === undefined || repository === undefined) {
-		return { error: new PushException("Invalid route params") }
-	}
 	// stage all changes
-	const status = await raw.statusMatrix({
-		fs: args.fs,
-		dir: "/",
+	const status = await args.repo.statusMatrix({
 		filter: (f: any) =>
 			f.endsWith(".json") ||
 			f.endsWith(".po") ||
@@ -558,12 +526,10 @@ export async function pushChanges(args: {
 	}
 	// add all changes
 	for (const file of filesWithUncommittedChanges) {
-		await raw.add({ fs: args.fs, dir: "/", filepath: file[0] })
+		await args.repo.add({ filepath: file[0] })
 	}
 	// commit changes
-	await raw.commit({
-		fs: args.fs,
-		dir: "/",
+	await args.repo.commit({
 		author: {
 			name: args.user.username,
 			email: args.user.email,
@@ -574,28 +540,32 @@ export async function pushChanges(args: {
 	// of components that depends on fs
 	args.setFsChange(new Date())
 	// push changes
-	const requestArgs = {
-		fs: args.fs,
-		http,
-		dir: "/",
-		author: {
-			name: args.user.username,
-		},
-		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
-		url: `https://${host}/${owner}/${repository}`,
-	}
 	try {
 		// pull changes before pushing
 		// https://github.com/inlang/inlang/issues/250
-		const pullResult = await pull(args)
+		const pullResult = await args.repo.pull({
+			author: {
+				name: args.user.username,
+				email: args.user.email,
+			},
+			fastForward: true,
+			singleBranch: true,
+		})
 		if (pullResult.error !== undefined) {
 			return { error: pullResult.error }
 		}
-		const push = await raw.push(requestArgs)
-		if (push.ok === false) {
+		const push = await args.repo.push()
+		if (push?.ok === false) {
 			return { error: new PushException("Failed to push", { cause: push.error }) }
 		}
-		await raw.pull(requestArgs)
+		await args.repo.pull({
+			author: {
+				name: args.user.username,
+				email: args.user.email,
+			},
+			fastForward: true,
+			singleBranch: true,
+		})
 		const time = new Date()
 		// triggering a rebuild of everything fs related
 		args.setFsChange(time)
@@ -603,47 +573,5 @@ export async function pushChanges(args: {
 		return { data: true }
 	} catch (error) {
 		return { error: (error as PushException) ?? "Unknown error" }
-	}
-}
-
-async function pull(args: {
-	fs: NodeishFilesystem
-	user: LocalStorageSchema["user"]
-	setFsChange: (date: Date) => void
-	setLastPullTime: (date: Date) => void
-}): Promise<Result<true, PullException>> {
-	try {
-		await raw.pull({
-			fs: args.fs,
-			http,
-			dir: "/",
-			corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
-			singleBranch: true,
-			author: {
-				name: args.user?.username,
-			},
-			// try to not create a merge commit
-			// rebasing would be the best option but it is not supported by isomorphic-git
-			// a switch to https://libgit2.org/ seems unavoidable
-			fastForward: true,
-		})
-		const time = new Date()
-		// triggering a rebuild of everything fs related
-		args.setFsChange(time)
-		args.setLastPullTime(time)
-		return { data: true }
-	} catch (error) {
-		return { error: error as PullException }
-	}
-}
-async function getGitOrigin(args: { fs: NodeishFilesystem }) {
-	try {
-		const remotes = await raw.listRemotes({
-			fs: args.fs,
-			dir: await raw.findRoot({ fs: args.fs, filepath: "/" }),
-		})
-		return remotes
-	} catch (e) {
-		return undefined
 	}
 }
