@@ -1,9 +1,10 @@
-import type { BuildOptions } from "esbuild-wasm"
+import type { BuildOptions, Plugin } from "esbuild-wasm"
 
 export const moduleBuildOptions = (args: {
 	entry: string
 	outdir: string
 	minify: boolean
+	plugins?: Plugin[]
 }): BuildOptions => {
 	return {
 		entryPoints: [args.entry],
@@ -23,5 +24,6 @@ export const moduleBuildOptions = (args: {
 		platform: "neutral",
 		// sourcemaps are unused at the moment
 		sourcemap: false,
+		plugins: args.plugins,
 	}
 }
