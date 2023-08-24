@@ -1,5 +1,5 @@
 import type { RequestEvent } from "@sveltejs/kit"
-import { initTransformConfig, type TransformConfig } from "../../vite-plugin/config/index.js"
+import type { TransformConfig } from "../../vite-plugin/config/index.js"
 import { inlangSymbol } from "../shared/utils.js"
 import type { SvelteKitServerRuntime } from "./runtime.js"
 import type { LanguageTag } from "@inlang/app"
@@ -9,25 +9,26 @@ type State = Pick<TransformConfig, "sourceLanguageTag" | "languageTags" | "messa
 let state: State
 
 export const initState = async () => {
-	if (!state && !import.meta.env.DEV) {
-		try {
-			const { languageTags, sourceLanguageTag, messages } = await import("virtual:inlang-static")
-			state = {
-				sourceLanguageTag,
-				languageTags,
-				messages: () => messages,
-			} as State
-		} catch {
-			/* empty */
-		}
-	}
-
 	if (!state) {
-		const config = await initTransformConfig()
-		state = {
-			sourceLanguageTag: config.sourceLanguageTag,
-			languageTags: config.languageTags,
-			messages: config.messages,
+		if (import.meta.env.DEV) {
+			const { initTransformConfig } = await import("../../vite-plugin/config/index.js")
+			const config = await initTransformConfig()
+			state = {
+				sourceLanguageTag: config.sourceLanguageTag,
+				languageTags: config.languageTags,
+				messages: config.messages,
+			}
+		} else {
+			try {
+				const { languageTags, sourceLanguageTag, messages } = await import("virtual:inlang-static")
+				state = {
+					sourceLanguageTag,
+					languageTags,
+					messages: () => messages,
+				} as State
+			} catch {
+				/* empty */
+			}
 		}
 	}
 
