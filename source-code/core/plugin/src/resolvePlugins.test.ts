@@ -3,11 +3,10 @@ import { resolvePlugins } from "./resolvePlugins.js"
 import {
 	PluginFunctionLoadMessagesAlreadyDefinedError,
 	PluginFunctionSaveMessagesAlreadyDefinedError,
-	PluginUsesInvalidIdError,
+	PluginHasInvalidIdError,
 	PluginUsesReservedNamespaceError,
 	PluginReturnedInvalidAppSpecificApiError,
-	PluginUsesInvalidSchemaError,
-	PluginFunctionDetectLanguageTagsAlreadyDefinedError,
+	PluginHasInvalidSchemaError,
 } from "./errors.js"
 import type { Plugin } from "./api.js"
 
@@ -33,7 +32,7 @@ describe("generally", () => {
 			nodeishFs: {} as any,
 		})
 
-		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesInvalidIdError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginHasInvalidIdError)
 	})
 
 	it("should return an error if a plugin uses APIs that are not available", async () => {
@@ -58,7 +57,7 @@ describe("generally", () => {
 		})
 
 		expect(resolved.errors.length).toBe(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesInvalidSchemaError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginHasInvalidSchemaError)
 	})
 
 	it("should not initialize a plugin that uses the 'inlang' namespace except for inlang whitelisted plugins", async () => {

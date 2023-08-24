@@ -3,11 +3,10 @@ import { Static, Type, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
 import type { NodeishFilesystem as LisaNodeishFilesystem } from "@inlang-git/fs"
 import type {
 	PluginReturnedInvalidAppSpecificApiError,
-	PluginFunctionDetectLanguageTagsAlreadyDefinedError,
 	PluginFunctionLoadMessagesAlreadyDefinedError,
 	PluginFunctionSaveMessagesAlreadyDefinedError,
-	PluginUsesInvalidIdError,
-	PluginUsesInvalidSchemaError,
+	PluginHasInvalidIdError,
+	PluginHasInvalidSchemaError,
 	PluginUsesReservedNamespaceError,
 } from "./errors.js"
 import type { Message } from "@inlang/messages"
@@ -34,11 +33,10 @@ export type ResolvePluginsFunction = (args: {
 	data: RuntimePluginApi
 	errors: Array<
 		| PluginReturnedInvalidAppSpecificApiError
-		| PluginFunctionDetectLanguageTagsAlreadyDefinedError
 		| PluginFunctionLoadMessagesAlreadyDefinedError
 		| PluginFunctionSaveMessagesAlreadyDefinedError
-		| PluginUsesInvalidIdError
-		| PluginUsesInvalidSchemaError
+		| PluginHasInvalidIdError
+		| PluginHasInvalidSchemaError
 		| PluginUsesReservedNamespaceError
 	>
 }>
