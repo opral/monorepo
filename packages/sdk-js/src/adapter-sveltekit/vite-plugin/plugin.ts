@@ -44,12 +44,8 @@ export const plugin = async () => {
 					noExternal: ["@inlang/sdk-js"],
 				},
 				optimizeDeps: {
-					include: [
-						'@inlang/sdk-js/**/*',
-					],
-					exclude: [
-						"vitefu"
-					]
+					include: ["@inlang/sdk-js/**/*"],
+					exclude: ["vitefu"],
 				},
 			}
 		},
