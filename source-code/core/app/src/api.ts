@@ -21,7 +21,7 @@ import type {
 	PluginHasInvalidIdError,
 	PluginHasInvalidSchemaError,
 	PluginUsesReservedNamespaceError,
-	RuntimePluginApi,
+	ResolvedPluginApi,
 } from "@inlang/plugin"
 import type { ModuleImportError, ModuleError } from "@inlang/module"
 
@@ -66,7 +66,7 @@ export type InlangProject = {
 			| Error
 		)[]
 	>
-	appSpecificApi: Subscribable<() => RuntimePluginApi["appSpecificApi"]>
+	appSpecificApi: Subscribable<() => ResolvedPluginApi["appSpecificApi"]>
 	config: Subscribable<() => InlangConfig>
 	setConfig: (config: InlangConfig) => Result<void, InvalidConfigError>
 	query: {

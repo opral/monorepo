@@ -4,7 +4,7 @@ import type {
 	NodeishFilesystemSubset,
 	Plugin,
 	ResolvePluginsFunction,
-	RuntimePluginApi,
+	ResolvedPluginApi,
 } from "@inlang/plugin"
 import type { ModuleHasNoExportsError, ModuleImportError } from "./errors.js"
 import type { ImportFunction } from "./import.js"
@@ -80,9 +80,9 @@ export type ResolveModulesFunction = (args: {
 	 */
 	lintRules: Array<LintRule>
 	/**
-	 * The resolved runtime api provided by plugins.
+	 * The resolved api provided by plugins.
 	 */
-	runtimePluginApi: RuntimePluginApi
+	resolvedPluginApi: ResolvedPluginApi
 	/**
 	 * Errors during the resolution process.
 	 *

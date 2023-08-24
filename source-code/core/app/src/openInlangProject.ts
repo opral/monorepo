@@ -77,8 +77,8 @@ export const openInlangProject = async (args: {
 			loadModules({ config: conf, nodeishFs: args.nodeishFs, _import: args._import })
 				.then((resolvedModules) => {
 					if (
-						!resolvedModules.runtimePluginApi.loadMessages ||
-						!resolvedModules.runtimePluginApi.saveMessages
+						!resolvedModules.resolvedPluginApi.loadMessages ||
+						!resolvedModules.resolvedPluginApi.saveMessages
 					) {
 						throw new NoPluginProvidesLoadOrSaveMessagesError()
 					}
@@ -99,13 +99,13 @@ export const openInlangProject = async (args: {
 			const _resolvedModules = resolvedModules()
 			if (!_resolvedModules) return
 
-			if (!_resolvedModules.runtimePluginApi.loadMessages) {
+			if (!_resolvedModules.resolvedPluginApi.loadMessages) {
 				markInitAsFailed(undefined)
 				return
 			}
 
 			makeTrulyAsync(
-				_resolvedModules.runtimePluginApi.loadMessages({
+				_resolvedModules.resolvedPluginApi.loadMessages({
 					languageTags: configValue!.languageTags,
 				}),
 			)
@@ -195,7 +195,7 @@ export const openInlangProject = async (args: {
 				500,
 				async (newMessages) => {
 					try {
-						await resolvedModules()!.runtimePluginApi.saveMessages({ messages: newMessages })
+						await resolvedModules()!.resolvedPluginApi.saveMessages({ messages: newMessages })
 					} catch (err) {
 						throw new PluginSaveMessagesError("Error in saving messages", {
 							cause: err,
@@ -231,7 +231,7 @@ export const openInlangProject = async (args: {
 					return reports
 				}),
 			},
-			appSpecificApi: createSubscribable(() => resolvedModules()!.runtimePluginApi.appSpecificApi),
+			appSpecificApi: createSubscribable(() => resolvedModules()!.resolvedPluginApi.appSpecificApi),
 			query: {
 				messages: query,
 			},
