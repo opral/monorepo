@@ -45,7 +45,7 @@ const mockPlugin: Plugin = {
 	loadMessages: () => exampleMessages,
 	saveMessages: () => undefined as any,
 	addAppSpecificApi: () => ({
-		"inlang.app.ide-extension": {
+		"inlang.app.ideExtension": {
 			messageReferenceMatcher: (text: string) => text as any,
 		},
 	}),
@@ -539,7 +539,7 @@ describe("functionality", () => {
 			})
 
 			inlang.appSpecificApi.subscribe((api) => {
-				expect(api["inlang.app.ide-extension"]).toBeDefined()
+				expect(api["inlang.app.ideExtension"]).toBeDefined()
 			})
 		})
 	})

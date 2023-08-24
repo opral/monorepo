@@ -169,7 +169,7 @@ export const openInlangProject = async (args: {
 					installedLintRules().map((rule) => [rule.meta.id, rule.lintLevel]),
 				),
 				messages: msgs,
-				rules:
+				lintRules:
 					configValue.settings["project.disabled"] !== undefined
 						? resolvedModules()!.lintRules.filter(
 								(rule) =>

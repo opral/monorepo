@@ -44,7 +44,7 @@ describe("lintSingleMessage", async () => {
 				languageTags: ["en"],
 				messages,
 				message: message1,
-				rules: [lintRule1, lintRule2],
+				lintRules: [lintRule1, lintRule2],
 			})
 
 			expect(lintRule1.message).not.toHaveBeenCalled()
@@ -66,7 +66,7 @@ describe("lintSingleMessage", async () => {
 					languageTags: ["en"],
 					messages,
 					message: message1,
-					rules: [lintRule1],
+					lintRules: [lintRule1],
 				}),
 			)
 			expect(result.error).toBeDefined()
@@ -85,7 +85,7 @@ describe("lintSingleMessage", async () => {
 				languageTags: ["en"],
 				messages,
 				message: message1,
-				rules: [lintRule1],
+				lintRules: [lintRule1],
 			})
 			expect(reports.data[0]?.level).toBe("error")
 		})
@@ -107,7 +107,7 @@ describe("lintSingleMessage", async () => {
 				languageTags: ["en"],
 				messages,
 				message: message1,
-				rules: [lintRule1],
+				lintRules: [lintRule1],
 			})
 
 			expect(fn).toHaveBeenCalledWith(settings)
@@ -132,7 +132,7 @@ describe("lintSingleMessage", async () => {
 			languageTags: ["en"],
 			messages,
 			message: message1,
-			rules: [lintRule1, lintRule2],
+			lintRules: [lintRule1, lintRule2],
 		})
 
 		expect(m1Called).toBe(true)
@@ -160,7 +160,7 @@ describe("lintSingleMessage", async () => {
 			languageTags: ["en"],
 			messages,
 			message: message1,
-			rules: [lintRule1, lintRule2],
+			lintRules: [lintRule1, lintRule2],
 		})
 
 		expect(fn).toHaveBeenCalledTimes(4)
@@ -186,7 +186,7 @@ describe("lintSingleMessage", async () => {
 			languageTags: ["en"],
 			messages,
 			message: message1,
-			rules: [lintRule1, lintRule2],
+			lintRules: [lintRule1, lintRule2],
 		})
 
 		expect(result.data).length(1)
