@@ -186,7 +186,7 @@ describe("saveMessages", () => {
 })
 
 describe("detectedLanguageTags", () => {
-	it("should detect language tags from a local source", async () => {
+	it("should merge language tags from plugins", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.plugin.detectedLanguageTags",
@@ -207,6 +207,7 @@ describe("detectedLanguageTags", () => {
 			addAppSpecificApi: () => {
 				return {}
 			},
+			detectedLanguageTags: async () => ["de", "fr"],
 		}
 
 		const resolved = await resolvePlugins({
@@ -215,42 +216,7 @@ describe("detectedLanguageTags", () => {
 			nodeishFs: {} as any,
 		})
 
-		expect(resolved.data.detectedLanguageTags).toBeDefined()
-		expect(await resolved.data.detectedLanguageTags!()).toEqual(["de", "en"])
-	})
-
-	it("should collect an error if function is defined twice in multiple plugins", async () => {
-		const mockPlugin: Plugin = {
-			meta: {
-				id: "plugin.plugin.detectedLanguageTags",
-				description: { en: "My plugin description" },
-				displayName: { en: "My plugin" },
-			},
-			detectedLanguageTags: async () => ["de", "en"],
-			addAppSpecificApi: () => {
-				return {}
-			},
-		}
-		const mockPlugin2: Plugin = {
-			meta: {
-				id: "plugin.plugin.detectedLanguageTags2",
-				description: { en: "My plugin description" },
-				displayName: { en: "My plugin" },
-			},
-			detectedLanguageTags: async () => ["de", "en"],
-			addAppSpecificApi: () => {
-				return {}
-			},
-		}
-
-		const resolved = await resolvePlugins({
-			plugins: [mockPlugin, mockPlugin2],
-			settings: {},
-			nodeishFs: {} as any,
-		})
-
-		expect(resolved.errors).toHaveLength(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginFunctionDetectLanguageTagsAlreadyDefinedError)
+		expect(resolved.data.detectedLanguageTags).toEqual(["de", "en", "fr"])
 	})
 })
 

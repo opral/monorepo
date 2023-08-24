@@ -1,7 +1,6 @@
 import { Plugin, ResolvePluginsFunction } from "./api.js"
 import {
 	PluginReturnedInvalidAppSpecificApiError,
-	PluginFunctionDetectLanguageTagsAlreadyDefinedError,
 	PluginFunctionLoadMessagesAlreadyDefinedError,
 	PluginFunctionSaveMessagesAlreadyDefinedError,
 	PluginUsesInvalidIdError,
@@ -15,12 +14,12 @@ import { tryCatch } from "@inlang/result"
 const whitelistedPlugins = ["inlang.plugin.json", "inlang.plugin.i18next", "inlang.plugin.sdkJs"]
 const PluginCompiler = TypeCompiler.Compile(Plugin)
 
-export const resolvePlugins: ResolvePluginsFunction = (args) => {
+export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 	const result: Awaited<ReturnType<ResolvePluginsFunction>> = {
 		data: {
 			loadMessages: undefined as any,
 			saveMessages: undefined as any,
-			detectedLanguageTags: undefined,
+			detectedLanguageTags: [],
 			appSpecificApi: {},
 		},
 		errors: [],
@@ -88,18 +87,6 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 			)
 		}
 
-		if (
-			typeof plugin.detectedLanguageTags === "function" &&
-			result.data.detectedLanguageTags !== undefined
-		) {
-			result.errors.push(
-				new PluginFunctionDetectLanguageTagsAlreadyDefinedError(
-					`Plugin ${plugin.meta.id} defines the detectedLanguageTags function, but it was already defined by another plugin.`,
-					{ plugin: plugin.meta.id },
-				),
-			)
-		}
-
 		// --- ADD APP SPECIFIC API ---
 		if (typeof plugin.addAppSpecificApi === "function") {
 			// TODO: why do we call this function 2 times (here for validation and later for retrieving the actual value)?
@@ -151,11 +138,13 @@ export const resolvePlugins: ResolvePluginsFunction = (args) => {
 		}
 
 		if (typeof plugin.detectedLanguageTags === "function") {
-			result.data.detectedLanguageTags = () =>
-				plugin.detectedLanguageTags!({
-					settings: args.settings?.[plugin.meta.id] ?? {},
-					nodeishFs: args.nodeishFs,
-				})
+			const detectedLangugeTags = await plugin.detectedLanguageTags!({
+				settings: args.settings?.[plugin.meta.id] ?? {},
+				nodeishFs: args.nodeishFs,
+			})
+			result.data.detectedLanguageTags = [
+				...new Set([...result.data.detectedLanguageTags, ...detectedLangugeTags]),
+			]
 		}
 
 		if (typeof plugin.addAppSpecificApi === "function") {
