@@ -7,7 +7,7 @@ import type { InlangProject } from "./api.js"
 /**
  * Creates a reactive query API for messages.
  */
-export function createReactiveQuery(
+export function createMessagesQuery(
 	messages: () => Array<Message>,
 ): InlangProject["query"]["messages"] {
 	const index = new ReactiveMap<string, Message>()
