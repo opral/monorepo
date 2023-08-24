@@ -1,7 +1,7 @@
 import { Static, TLiteral, TTemplateLiteral, Type } from "@sinclair/typebox"
 import { LanguageTag } from "@inlang/language-tag"
 import { LintLevel, LintRule } from "@inlang/lint"
-import { JSONSerializable } from "@inlang/json-serializable"
+import { JSONObject } from "@inlang/json-types"
 
 /**
  * ---------------- UTILITY TYPES ----------------
@@ -63,7 +63,7 @@ const ExternalSettings = Type.Record(
 	}) as unknown as TTemplateLiteral<
 		[TLiteral<`${string}.${"app" | "plugin" | "lintRule"}.${string}`>]
 	>,
-	JSONSerializable,
+	JSONObject,
 	{ additionalProperties: false },
 )
 

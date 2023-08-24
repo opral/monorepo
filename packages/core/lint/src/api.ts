@@ -1,7 +1,7 @@
 import type { Message } from "@inlang/messages"
 import { type LanguageTag, WithLanguageTags } from "@inlang/language-tag"
 import { Type, type Static, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
-import type { JSONSerializableObject } from "@inlang/json-serializable"
+import type { JSONObject } from "@inlang/json-types"
 
 /**
  * ---------------- BASIS ----------------
@@ -53,7 +53,7 @@ export const LintRuleBase = Type.Object({
  * ---------------- MESSAGE LINT ----------------
  */
 
-export type MessageLintRule<Settings extends JSONSerializableObject | any = any> = Static<
+export type MessageLintRule<Settings extends JSONObject | any = any> = Static<
 	typeof MessageLintRule
 > & {
 	message: (args: {
@@ -85,7 +85,7 @@ export type MessageLintReport = LintReportBase & {
  * ---------------- LINT ----------------
  */
 
-export type LintRule<Settings extends JSONSerializableObject | any = any> =
+export type LintRule<Settings extends JSONObject | any = any> =
 	MessageLintRule<Settings>
 export const LintRule = Type.Union([MessageLintRule])
 
