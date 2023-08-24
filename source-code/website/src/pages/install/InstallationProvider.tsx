@@ -20,6 +20,9 @@ export function InstallationProvider(props: {
 	const [localStorage] = useLocalStorage() ?? []
 	const user = localStorage?.user
 
+	/**
+	 * This function checks for common errors before repo initialization (to be more performant) and sets the step accordingly.
+	 */
 	onMount(() => {
 		if (!user && getLocalStorage()) {
 			props.setStep({
@@ -32,7 +35,7 @@ export function InstallationProvider(props: {
 				message: "No repository URL provided.",
 				error: true,
 			})
-		} else if (!props.modules || props.modules.length === 0) {
+		} else if (!props.modules || props.modules.length === 0 || props.modules[0] === "") {
 			props.setStep({
 				type: "no-modules",
 				message: "No modules provided.",
@@ -58,6 +61,10 @@ export function InstallationProvider(props: {
 	return <LocalStorageProvider>{props.children}</LocalStorageProvider>
 }
 
+/**
+ * This function initializes the repository by adding the modules to the inlang.config.js file and pushing the changes to the repository.
+ * If there are any errors, the error will be displayed in the UI.
+ */
 async function initializeRepo(
 	repoURL: string,
 	modulesURL: string[],
