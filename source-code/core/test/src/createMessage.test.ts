@@ -3,11 +3,10 @@ import { createMessage } from "./createMessage.js"
 
 test("should create a simple message", () => {
 	expect(
-		createMessage('welcome', {
-			de: "Hallo inlang"
-		})
-	)
-		.toMatchInlineSnapshot(`
+		createMessage("welcome", {
+			de: "Hallo inlang",
+		}),
+	).toMatchInlineSnapshot(`
 		{
 		  "id": "welcome",
 		  "selectors": [],
@@ -29,15 +28,14 @@ test("should create a simple message", () => {
 
 test("should create a message with pattern", () => {
 	expect(
-		createMessage('greeting', {
+		createMessage("greeting", {
 			en: [
-				{ type: 'Text', value: 'Hi ' },
-				{ type: 'VariableReference', name: 'name' },
-				{ type: 'Text', value: '"' }
-			]
-		})
-	)
-		.toMatchInlineSnapshot(`
+				{ type: "Text", value: "Hi " },
+				{ type: "VariableReference", name: "name" },
+				{ type: "Text", value: '"' },
+			],
+		}),
+	).toMatchInlineSnapshot(`
 			{
 			  "id": "greeting",
 			  "selectors": [],
@@ -67,14 +65,11 @@ test("should create a message with pattern", () => {
 
 test("should create a message with a pattern", () => {
 	expect(
-		createMessage('welcome', {
+		createMessage("welcome", {
 			en: "hello inlang",
-			de: [
-				{ type: 'Text', value: 'Hallo inlang' },
-			],
-		})
-	)
-		.toMatchInlineSnapshot(`
+			de: [{ type: "Text", value: "Hallo inlang" }],
+		}),
+	).toMatchInlineSnapshot(`
 			{
 			  "id": "welcome",
 			  "selectors": [],
