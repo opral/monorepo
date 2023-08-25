@@ -19,7 +19,6 @@ export const RequiredFrontmatter = Type.Object({
 		pattern: "^/.*",
 	}),
 	title: Type.String(),
-	shortTitle: Type.Optional(Type.String()),
 	description: Type.String({
 		description: "Description for SEO and prerendering purposes.",
 		minLength: 10,
