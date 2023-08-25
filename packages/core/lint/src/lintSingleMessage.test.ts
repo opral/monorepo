@@ -34,33 +34,14 @@ describe("lintSingleMessage", async () => {
 	})
 
 	describe("resolve rules and settings", async () => {
-		test("it should not run disabled lintrules", async () => {
-			await lintSingleMessage({
-				lintLevels: {
-					[lintRule1.meta.id]: "warning",
-				},
-				lintRuleSettings: {},
-				sourceLanguageTag: "en",
-				languageTags: ["en"],
-				messages,
-				message: message1,
-				lintRules: [lintRule1, lintRule2],
-			})
-
-			expect(lintRule1.message).not.toHaveBeenCalled()
-			expect(lintRule2.message).toHaveBeenCalledOnce()
-		})
-
-		// the lint function is unopinionated and does not set a default level.
+		// the lint function is un-opinionated and does not set a default level.
 		// opinionated users like the inlang instance can very well set a default level (separation of concerns)
 		test("it should throw if a lint level is not provided for a given lint rule", async () => {
 			lintRule1.message.mockImplementation(({ report }) => report({} as MessageLintReport))
 
 			const result = await tryCatch(() =>
 				lintSingleMessage({
-					lintLevels: {
-						[lintRule1.meta.id]: "warning",
-					},
+					lintLevels: {},
 					lintRuleSettings: {},
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
@@ -90,7 +71,7 @@ describe("lintSingleMessage", async () => {
 			expect(reports.data[0]?.level).toBe("error")
 		})
 
-		test.only("it should pass the correct settings", async () => {
+		test("it should pass the correct settings", async () => {
 			const settings = {}
 
 			const fn = vi.fn()
@@ -126,7 +107,10 @@ describe("lintSingleMessage", async () => {
 		})
 
 		await lintSingleMessage({
-			lintLevels: {},
+			lintLevels: {
+				[lintRule1.meta.id]: "warning",
+				[lintRule2.meta.id]: "warning",
+			},
 			lintRuleSettings: {},
 			sourceLanguageTag: "en",
 			languageTags: ["en"],
@@ -154,7 +138,10 @@ describe("lintSingleMessage", async () => {
 		})
 
 		await lintSingleMessage({
-			lintLevels: {},
+			lintLevels: {
+				[lintRule1.meta.id]: "warning",
+				[lintRule2.meta.id]: "warning",
+			},
 			lintRuleSettings: {},
 			sourceLanguageTag: "en",
 			languageTags: ["en"],
@@ -180,7 +167,10 @@ describe("lintSingleMessage", async () => {
 		})
 
 		const result = await lintSingleMessage({
-			lintLevels: {},
+			lintLevels: {
+				[lintRule1.meta.id]: "warning",
+				[lintRule2.meta.id]: "warning",
+			},
 			lintRuleSettings: {},
 			sourceLanguageTag: "en",
 			languageTags: ["en"],
