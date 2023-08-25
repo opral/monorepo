@@ -400,7 +400,13 @@ function LanguageFilter(props: { clearFunction: any }) {
 						class="cursor-pointer link link-primary opacity-75"
 						// filter all except the source language
 						// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-						onClick={() => setFilteredLanguageTags(inlang()?.config()?.sourceLanguageTag ? [inlang()?.config()?.sourceLanguageTag!] : [])}
+						onClick={() =>
+							setFilteredLanguageTags(
+								[inlang()?.config()?.sourceLanguageTag].filter(
+									(languageTag): languageTag is string => !!languageTag,
+								),
+							)
+						}
 					>
 						None
 					</a>

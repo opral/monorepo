@@ -106,12 +106,12 @@ export const Page = () => {
 	})
 	// createEffect(() => {
 	// 	if (!inlang.loading) {
-	// 		console.log("config changes", inlang()?.config())
+	// 		console.debug("config changes", inlang()?.config())
 	// 	}
 	// })
 	// createEffect(() => {
 	// 	if (!inlang.loading) {
-	// 		console.log("meta plugins changes", inlang()!.installed.plugins()[0]?.meta.id)
+	// 		console.debug("meta plugins changes", inlang()!.installed.plugins()[0]?.meta.id)
 	// 	}
 	// })
 	createEffect(() => {
@@ -123,7 +123,7 @@ export const Page = () => {
 	createEffect(() => {
 		if (!inlang.loading) {
 			inlang()!.query.messages.get.subscribe({ where: { id: "d" } }, (message) =>
-				console.log(message),
+				console.debug(message),
 			)
 		}
 	})
@@ -172,7 +172,7 @@ const MessageConponent = (args: { id: string; inlang: InlangProjectWithSolidAdap
 	})
 
 	createEffect(() => {
-		console.log(message())
+		console.debug(message())
 	})
 
 	return (
