@@ -31,11 +31,12 @@ export const solidAdapter = (
 				update: project.query.messages.update,
 				delete: project.query.messages.delete,
 				upsert: project.query.messages.upsert,
-				get: (args) => {
-					const [message, setMessage] = createSignal<Message | undefined>()
-					project.query.messages.get.subscribe(args, setMessage)
-					return message()
-				},
+				get: project.query.messages.get,
+				// get: (args) => {
+				// 	const [message, setMessage] = createSignal<Message | undefined>()
+				// 	project.query.messages.get.subscribe(args, setMessage)
+				// 	return message()
+				// },
 				getAll: convert(project.query.messages.getAll),
 				includedMessageIds: convert(project.query.messages.includedMessageIds),
 			},
@@ -58,7 +59,8 @@ export type InlangProjectWithSolidAdapter = {
 			update: MessageQueryApi["update"]
 			delete: MessageQueryApi["delete"]
 			upsert: MessageQueryApi["upsert"]
-			get: (args: Parameters<MessageQueryApi["get"]>[0]) => ReturnType<MessageQueryApi["get"]>
+			get: MessageQueryApi["get"]
+			//get: (args: Parameters<MessageQueryApi["get"]>[0]) => ReturnType<MessageQueryApi["get"]>
 			getAll: () => ReturnType<MessageQueryApi["getAll"]>
 			includedMessageIds: () => ReturnType<MessageQueryApi["includedMessageIds"]>
 		}
