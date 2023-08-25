@@ -206,11 +206,11 @@ function NavbarCommon(props: {
 	})
 
 	return (
-		<ul role="list" class="w-full">
+		<ul role="list" class="w-full space-y-3">
 			<For each={Object.keys(props.processedTableOfContents)}>
 				{(section) => (
-					<li class="py-3">
-						<h2 class="tracking-wide pt-2 text-sm font-semibold text-on-surface pb-2">{section}</h2>
+					<li class="">
+						<h2 class="tracking-wide pt-2 text font-semibold text-on-surface pb-2">{section}</h2>
 						<ul class="space-y-2" role="list">
 							<For
 								each={
@@ -231,7 +231,7 @@ function NavbarCommon(props: {
 											}
 											href={getLocale() + document.frontmatter.href}
 										>
-											{document.frontmatter.shortTitle}
+											{document.frontmatter.title}
 										</a>
 										{props.headings &&
 											props.headings.length > 1 &&
@@ -240,7 +240,7 @@ function NavbarCommon(props: {
 													<For each={props.headings}>
 														{(heading) =>
 															heading !== undefined &&
-															heading !== document.frontmatter.shortTitle &&
+															heading !== document.frontmatter.title &&
 															props.headings.filter((h: any) => h === heading).length < 2 && (
 																<li>
 																	<a
