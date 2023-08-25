@@ -29,10 +29,6 @@ import {
 	solidAdapter,
 	type InlangProjectWithSolidAdapter,
 } from "@inlang/app"
-import type { InlangModule } from "@inlang/module"
-import pluginJson from "../../../../../../../plugins/json/dist/index.js"
-import pluginI18next from "../../../../../../../plugins/i18next/dist/index.js"
-import pluginLint from "../../../../../../../plugins/standard-lint-rules/dist/index.js"
 
 type EditorStateSchema = {
 	/**
@@ -217,18 +213,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		const inlang = solidAdapter(
 			await openInlangProject({
 				nodeishFs: repo.nodeishFs,
-				configPath: "/inlang.config.json",
-				_import: async () =>
-					({
-						default: {
-							// @ts-ignore
-							plugins: [...pluginJson.plugins],
-							// @ts-ignore
-							// plugins: [...pluginI18next.plugins],
-							// @ts-ignore
-							lintRules: [...pluginLint.lintRules],
-						},
-					} satisfies InlangModule),
+				configPath: "/inlang.config.json"
 			}),
 			{ from },
 		)
