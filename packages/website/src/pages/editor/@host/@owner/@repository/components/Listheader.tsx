@@ -50,8 +50,14 @@ export const ListHeader = (props: ListHeaderProps) => {
 				let counter = 0
 				filteredReports?.filter((report: MessageLintReport) => {
 					level = report.level
-					if (showFilteredMessage(inlang()?.query.messages.get({ where: { id: report.messageId } }))
-						&& filteredLanguageTags().includes(report.languageTag)) { counter++ }
+					if (
+						showFilteredMessage(
+							inlang()?.query.messages.get({ where: { id: report.messageId } }),
+						) &&
+						filteredLanguageTags().includes(report.languageTag)
+					) {
+						counter++
+					}
 				})
 
 				if (
