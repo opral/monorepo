@@ -49,12 +49,16 @@ export const openInlangProject = async (args: {
 		})
 		// TODO: create FS watcher and update config on change
 
+		const writeConfigToDisk = skipFirst((config: InlangConfig) =>
+			_writeConfigToDisk({ nodeishFs: args.nodeishFs, config }),
+		)
+
 		const setConfig = (config: InlangConfig): Result<void, InvalidConfigError> => {
 			try {
 				const validatedConfig = validateConfig(config)
 				_setConfig(validatedConfig)
 
-				writeConfigToDisk({ nodeishFs: args.nodeishFs, config: validatedConfig })
+				writeConfigToDisk(validatedConfig)
 				return { data: undefined }
 			} catch (error: unknown) {
 				if (error instanceof InvalidConfigError) {
@@ -278,7 +282,7 @@ const validateConfig = (config: unknown) => {
 	return Value.Cast(InlangConfig, config)
 }
 
-const writeConfigToDisk = async (args: {
+const _writeConfigToDisk = async (args: {
 	nodeishFs: NodeishFilesystemSubset
 	config: InlangConfig
 }) => {

@@ -158,6 +158,28 @@ describe("initialization", () => {
 
 			expect(getValue(inlang.config)).toStrictEqual(config)
 		})
+
+		it("should not re-write the config to disk when initializing", async () => {
+			const fs = await createMockNodeishFs()
+			const configWithDeifferentFormatting = JSON.stringify(config, undefined, 4)
+			await fs.writeFile("./inlang.config.json", configWithDeifferentFormatting)
+
+			const inlang = await openInlangProject({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import,
+			})
+
+			const configOnDisk = await fs.readFile("./inlang.config.json", { encoding: "utf-8" })
+			expect(configOnDisk).toBe(configWithDeifferentFormatting)
+
+			inlang.setConfig(inlang.config())
+			// TODO: how can we await `setConfig` correctly
+			await new Promise((resolve) => setTimeout(resolve, 0))
+
+			const newConfigOnDisk = await fs.readFile("./inlang.config.json", { encoding: "utf-8" })
+			expect(newConfigOnDisk).not.toBe(configWithDeifferentFormatting)
+		})
 	})
 
 	describe("modules", () => {
