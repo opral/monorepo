@@ -58,6 +58,8 @@
 		"@inlang/rpc": "*",
 		"@sentry/node": "^7.64.0",
 		"@sinclair/typebox": "^0.31.3",
+		"@types/promptly": "^3.0.2",
+		"@types/prompts": "^2.4.4",
 		"commander": "^11.0.0",
 		"consola": "^3.2.3",
 		"cross-env": "^7.0.3",
