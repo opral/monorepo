@@ -1,30 +1,8 @@
 import Markdoc, { type ValidationError } from "@markdoc/markdoc"
-import { Type } from "@sinclair/typebox"
+import type { TSchema } from "@sinclair/typebox"
+import { Value } from "@sinclair/typebox/value"
 import { parse as parseYaml } from "yaml"
 import { config } from "./config.js"
-
-/**
- * The frontmatter that is required by the markdown service.
- *
- * `href` the url slug e.g. /documentation/intro
- * `title` the title of the document
- *
- * See https://markdoc.dev/docs/frontmatter
- */
-export type RequiredFrontmatter = typeof RequiredFrontmatter
-export const RequiredFrontmatter = Type.Object({
-	href: Type.String({
-		description:
-			"The href is the path where the markdown is rendered e.g. /documentation/intro and simultaneously acts as id.",
-		pattern: "^/.*",
-	}),
-	title: Type.String(),
-	description: Type.String({
-		description: "Description for SEO and prerendering purposes.",
-		minLength: 10,
-		maxLength: 160,
-	}),
-})
 
 /**
  * Parses a Markdoc document.
@@ -42,20 +20,24 @@ export const RequiredFrontmatter = Type.Object({
  * 	<Element>
  *
  */
-export function parseMarkdown<FrontmatterSchema extends RequiredFrontmatter>(args: {
+export function parseMarkdown<FrontmatterSchema extends TSchema>(args: {
 	text: string
-	FrontmatterSchema: typeof RequiredFrontmatter
+	frontmatterSchema: FrontmatterSchema
 }): {
 	frontmatter: FrontmatterSchema
 	renderableTree?: Markdoc.RenderableTreeNode
 	error?: string
 } {
 	const ast = Markdoc.parse(args.text)
-	const frontmatter = parseYaml(ast.attributes.frontmatter ?? "") as typeof args.FrontmatterSchema
+	const frontmatter = parseYaml(ast.attributes.frontmatter ?? "")
+	if (Value.Check(args.frontmatterSchema, frontmatter) === false) {
+		const errors = [...Value.Errors(args.frontmatterSchema, frontmatter)]
+		throw Error(errors.join("\n"))
+	}
 	const errors = Markdoc.validate(ast, config)
 	if (errors.length > 0) {
 		return {
-			frontmatter: frontmatter as FrontmatterSchema,
+			frontmatter: frontmatter,
 			error: errors.map((object) => beautifyError(object.error)).join("\n"),
 		}
 	}
@@ -68,7 +50,7 @@ export function parseMarkdown<FrontmatterSchema extends RequiredFrontmatter>(arg
 		...config,
 	})
 	return {
-		frontmatter: frontmatter as FrontmatterSchema,
+		frontmatter: frontmatter,
 		renderableTree,
 	}
 }

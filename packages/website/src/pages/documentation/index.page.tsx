@@ -10,7 +10,7 @@ import { Feedback } from "./Feedback.jsx"
 import { EditButton } from "./EditButton.jsx"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
-import { tableOfContents } from "../../../../../documentation/tableOfContents.js"
+import tableOfContents from "../../../../../documentation/tableOfContents.json"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.

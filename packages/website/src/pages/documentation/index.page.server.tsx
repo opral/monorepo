@@ -1,9 +1,10 @@
 import type { OnBeforeRender } from "#src/renderer/types.js"
 import type { PageProps } from "./index.page.jsx"
-import { tableOfContents, FrontmatterSchema } from "../../../../../documentation/tableOfContents.js"
 import { parseMarkdown } from "#src/services/markdown/index.js"
 import { RenderErrorPage } from "vite-plugin-ssr/RenderErrorPage"
 import fs from "node:fs/promises"
+import { DocumentationFrontmatterSchema } from "./frontmatterSchema.js"
+import tableOfContents from "../../../../../documentation/tableOfContents.json"
 
 /**
  * The root of the repository.
@@ -72,7 +73,7 @@ async function generateIndexAndTableOfContents() {
 			})
 			const markdown = parseMarkdown({
 				text: raw,
-				FrontmatterSchema,
+				frontmatterSchema: DocumentationFrontmatterSchema,
 			})
 			// not pushing to processedTableOfContents directly in case
 			// the category is undefined so far
