@@ -3,7 +3,7 @@ import { For, Show } from "solid-js"
 import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
-import type { LintRule, Message, MessageLintReport } from "@inlang/app"
+import type { LintRule, MessageLintReport } from "@inlang/app"
 
 interface ListHeaderProps {
 	ids: string[]
@@ -19,7 +19,7 @@ export const messageCount = (ids: string[]) => {
 	const { inlang } = useEditorState()
 	let counter = 0
 	for (const id of ids) {
-		if (inlang()?.query.messages.get({ where: { id: id } })) counter++
+		if (showFilteredMessage(inlang()?.query.messages.get({ where: { id: id } }))) counter++
 	}
 	return counter
 }
