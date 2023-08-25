@@ -97,7 +97,7 @@ export const registry = [
 			marketplace: {
 				icon: "https://github.com/inlang/inlang/blob/main/source-code/plugins/json/assets/icon.png?raw=true",
 				linkToReadme: {
-					en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/json",
+					en: "https://github.com/inlang/inlang/blob/main/source-code/plugins/json/README.md",
 				},
 				keywords: ["json", "generic"],
 				publisherName: "inlang",
@@ -120,7 +120,7 @@ export const registry = [
 			marketplace: {
 				icon: "https://github.com/inlang/inlang/blob/main/source-code/plugins/i18next/assets/icon.png?raw=true",
 				linkToReadme: {
-					en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/i18next",
+					en: "https://github.com/inlang/inlang/blob/main/source-code/plugins/i18next/README.md",
 				},
 				keywords: ["i18next", "react", "nextjs"],
 				publisherName: "inlang",
@@ -143,7 +143,7 @@ export const registry = [
 			marketplace: {
 				icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
 				linkToReadme: {
-					en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules",
+					en: "https://github.com/inlang/inlang/blob/main/source-code/plugins/standard-lint-rules/README.md",
 				},
 				keywords: ["lint-rule", "standard", "empty-pattern"],
 				publisherName: "inlang",
@@ -171,7 +171,7 @@ export const registry = [
 			marketplace: {
 				icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
 				linkToReadme: {
-					en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules",
+					en: "https://github.com/inlang/inlang/blob/main/source-code/plugins/standard-lint-rules/README.md",
 				},
 				keywords: ["lint-rule", "standard", "identical-pattern"],
 				publisherName: "inlang",
@@ -199,7 +199,7 @@ export const registry = [
 			marketplace: {
 				icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
 				linkToReadme: {
-					en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules",
+					en: "https://github.com/inlang/inlang/blob/main/source-code/plugins/standard-lint-rules/README.md",
 				},
 				keywords: ["lint-rule", "standard", "message-without-source"],
 				publisherName: "inlang",
@@ -227,7 +227,7 @@ export const registry = [
 			marketplace: {
 				icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
 				linkToReadme: {
-					en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules",
+					en: "https://github.com/inlang/inlang/blob/main/source-code/plugins/standard-lint-rules/README.md",
 				},
 				keywords: ["lint-rule", "standard", "missing-translation"],
 				publisherName: "inlang",

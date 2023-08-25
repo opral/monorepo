@@ -7,7 +7,7 @@ import { parseMarkdown } from "#src/services/markdown/index.js"
 const FrontmatterSchema = RequiredFrontmatter
 
 const fetchReadmeContents = async () => {
-	const readmeContents = []
+	const readmeContents = [] as string[]
 
 	const rawLink = (githubLink: string) => {
 		const parts = githubLink.split("/")
@@ -16,19 +16,36 @@ const fetchReadmeContents = async () => {
 		const branch = parts[6]
 		const filePath = parts.slice(7).join("/")
 
-		console.log(`https://raw.githubusercontent.com/${username}/${repository}/${branch}/${filePath}`)
-
 		return `https://raw.githubusercontent.com/${username}/${repository}/${branch}/${filePath}`
 	}
 
 	for (const item of marketplaceItems) {
+		if (
+			!item.meta.marketplace.linkToReadme.en ||
+			!item.meta.displayName.en ||
+			!item.meta.marketplace.linkToReadme.en.includes("README.md") ||
+			readmeContents.includes(item.meta.marketplace.linkToReadme.en)
+		) {
+			continue
+		}
 		const rawReadmeLink = rawLink(item.meta.marketplace.linkToReadme.en)
 		const response = await fetch(rawReadmeLink)
 		const readmeText = await response.text()
-		readmeContents.push(readmeText)
-	}
 
-	// console.log(readmeContents)
+		generateFrontmatter(
+			item.meta.displayName.en,
+			`/marketplace/${item.meta.displayName.en?.toLowerCase().replaceAll(" ", "-")}`,
+			readmeText,
+		)
+
+		readmeContents.push(
+			generateFrontmatter(
+				item.meta.displayName.en,
+				`/marketplace/${item.meta.displayName.en?.toLowerCase().replaceAll(" ", "-")}`,
+				readmeText,
+			),
+		)
+	}
 
 	return readmeContents
 }
@@ -103,4 +120,18 @@ async function generateIndexAndTableOfContents() {
 		processedTableOfContents[markdown.frontmatter.href] = markdown.frontmatter
 		index[markdown.frontmatter.href] = markdown
 	}
+}
+
+/**
+ * Generates the necessary frontmatter data used e.g. in SEO.
+ */
+function generateFrontmatter(title: string, href: string, document: string) {
+	const frontmatterDocument = `---
+title: ${title}
+href: ${href}
+---
+
+${document}`
+
+	return frontmatterDocument
 }
