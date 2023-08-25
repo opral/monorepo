@@ -31,7 +31,7 @@ export function Page(props: PageProps) {
 
 			const files: Record<string, string[]> = {}
 			for (const [category, documentsArray] of Object.entries(tableOfContents)) {
-				const rawPaths = documentsArray.map((document) => document.raw)
+				const rawPaths = documentsArray.map((document) => document)
 				files[category] = rawPaths
 			}
 
@@ -60,7 +60,8 @@ export function Page(props: PageProps) {
 
 		if (!props.markdown?.renderableTree) return
 
-		for (const heading of props.markdown.renderableTree.children) {
+		// @ts-expect-error - some type mismatch
+		for (const heading of props.markdown.renderableTree.children ?? []) {
 			if (heading.name === "Heading") {
 				if (heading.children[0].name) {
 					setHeadings((prev) => [...prev, heading.children[0].children[0]])
