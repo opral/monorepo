@@ -1,7 +1,23 @@
 import { createNodeishMemoryFs } from "@inlang-git/fs"
-import { InlangConfig, Message, Plugin, openInlangProject, solidAdapter } from "@inlang/app"
+import {
+	InlangConfig,
+	Message,
+	Plugin,
+	openInlangProject,
+	solidAdapter,
+	InlangProjectWithSolidAdapter,
+} from "@inlang/app"
 import type { ImportFunction, InlangModule } from "@inlang/module"
-import { createEffect, Show, createResource, from, observable } from "solid-js"
+import {
+	createEffect,
+	Show,
+	createResource,
+	from,
+	observable,
+	For,
+	createSignal,
+	Resource,
+} from "solid-js"
 
 export const Page = () => {
 	const config: InlangConfig = {
@@ -86,7 +102,7 @@ export const Page = () => {
 				_import: $import,
 			}),
 			{ from },
-		)
+		) as InlangProjectWithSolidAdapter
 	})
 	// createEffect(() => {
 	// 	if (!inlang.loading) {
@@ -101,6 +117,14 @@ export const Page = () => {
 	createEffect(() => {
 		if (!inlang.loading) {
 			console.info("messages change", inlang()!.query.messages.includedMessageIds() || [])
+		}
+	})
+
+	createEffect(() => {
+		if (!inlang.loading) {
+			inlang()!.query.messages.get.subscribe({ where: { id: "d" } }, (message) =>
+				console.log(message),
+			)
 		}
 	})
 
@@ -128,7 +152,33 @@ export const Page = () => {
 		<div>
 			<Show when={!inlang.loading} fallback={<div>loading</div>}>
 				<div>{inlang()!.config()?.sourceLanguageTag}</div>
+				<For each={inlang()!.query.messages.includedMessageIds()}>
+					{(id) => {
+						return <MessageConponent id={id} inlang={inlang()!} />
+					}}
+				</For>
 			</Show>
+		</div>
+	)
+}
+
+const MessageConponent = (args: { id: string; inlang: InlangProjectWithSolidAdapter }) => {
+	const [message, setMessage] = createSignal<Message | undefined>(undefined)
+
+	createEffect(() => {
+		args.inlang.query.messages.get.subscribe({ where: { id: args.id } }, (message) =>
+			setMessage(message),
+		)
+	})
+
+	createEffect(() => {
+		console.log(message())
+	})
+
+	return (
+		<div>
+			<div>{message()?.id}</div>
+			<div>{message()?.variants[0]?.pattern[0].value}</div>
 		</div>
 	)
 }

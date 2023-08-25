@@ -1,4 +1,4 @@
-import type { LanguageTag, LintReport, Message } from "@inlang/app"
+import type { LanguageTag, LintReport } from "@inlang/app"
 
 /**
  * Get the percentage of translated messages.
@@ -7,7 +7,7 @@ import type { LanguageTag, LintReport, Message } from "@inlang/app"
 export function calculateSummary(args: {
 	reports: LintReport[]
 	languageTags: LanguageTag[]
-	messages: Message[]
+	messageIds: string[]
 }): {
 	percentage: number
 	errors: number
@@ -22,7 +22,7 @@ export function calculateSummary(args: {
 	).length
 
 	// only works with no specified selectors
-	const totalNumberOfVariants = args.languageTags.length * args.messages.length
+	const totalNumberOfVariants = args.languageTags.length * args.messageIds.length
 
 	return {
 		percentage: Math.round(100 - (lintedVariantNumber / totalNumberOfVariants) * 100),

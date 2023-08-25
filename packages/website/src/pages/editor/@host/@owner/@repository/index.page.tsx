@@ -139,26 +139,29 @@ function TheActualPage() {
 				<Match when={!doesInlangConfigExist()}>
 					<NoInlangConfigFoundCard />
 				</Match>
-				<Match when={doesInlangConfigExist() && inlang()?.query.messages.getAll() !== undefined}>
+				<Match
+					when={
+						doesInlangConfigExist() && inlang()?.query.messages.includedMessageIds() !== undefined
+					}
+				>
 					<div>
-						<ListHeader messages={Object.values(inlang()?.query.messages.getAll() || {})} />
+						<ListHeader ids={inlang()?.query.messages.includedMessageIds() || []} />
 						<TourHintWrapper
 							currentId="textfield"
 							position="bottom-left"
 							offset={{ x: 110, y: 144 }}
 							isVisible={tourStep() === "textfield"}
 						>
-							<For each={Object.keys(inlang()!.query.messages.getAll())}>
+							<For each={inlang()!.query.messages.includedMessageIds()}>
 								{(id) => {
-									return <Message message={inlang()!.query.messages.getAll()[id]!} />
+									return <Message id={id} />
 								}}
 							</For>
 						</TourHintWrapper>
 						<div
 							class="flex flex-col h-[calc(100vh_-_288px)] grow justify-center items-center min-w-full gap-2"
 							classList={{
-								["hidden"]:
-									messageCount(Object.values(inlang()?.query.messages.getAll() || {})) !== 0,
+								["hidden"]: messageCount(inlang()?.query.messages.includedMessageIds() || []) !== 0,
 							}}
 						>
 							<NoMatchPlaceholder />

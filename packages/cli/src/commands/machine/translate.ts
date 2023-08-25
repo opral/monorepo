@@ -43,18 +43,18 @@ async function translateCommandAction() {
 		log.info(`📝 Translating to ${languagesTagsToTranslateTo.length} languages.`)
 
 		// parallelize in the future
-		for (const message of Object.values(inlang.query.messages.getAll())) {
+		for (const id of inlang.query.messages.includedMessageIds()) {
 			const { data: translatedMessage, error } = await rpc.machineTranslateMessage({
-				message,
+				message: inlang.query.messages.get({ where: { id } })!,
 				sourceLanguageTag: inlang.config().sourceLanguageTag,
 				targetLanguageTags: languagesTagsToTranslateTo,
 			})
 			if (error) {
-				log.error(`❌ Couldn't translate message "${message.id}": ${error}`)
+				log.error(`❌ Couldn't translate message "${id}": ${error}`)
 				continue
 			}
-			inlang.query.messages.update({ where: { id: message.id }, data: translatedMessage! })
-			log.info(`✅ Machine translated message "${message.id}"`)
+			inlang.query.messages.update({ where: { id: id }, data: translatedMessage! })
+			log.info(`✅ Machine translated message "${id}"`)
 		}
 		// Log the message counts
 		log.info("Machine translate complete.")

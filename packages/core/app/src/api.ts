@@ -97,6 +97,9 @@ export type MessageQueryApi = {
 		) => void
 	}
 	includedMessageIds: Subscribable<string[]>
+	/*
+	 * getAll is depricated do not use it
+	 */
 	getAll: Subscribable<{ [id: string]: Message }>
 	update: (args: { where: { id: Message["id"] }; data: Partial<Message> }) => boolean
 	upsert: (args: { where: { id: Message["id"] }; data: Message }) => void

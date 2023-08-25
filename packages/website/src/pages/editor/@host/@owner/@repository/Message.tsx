@@ -8,8 +8,9 @@ import copy from "clipboard-copy"
 import { showToast } from "#src/components/Toast.jsx"
 import type { Message as MessageType } from "@inlang/app"
 
-export function Message(props: { message: MessageType }) {
+export function Message(props: { id: string }) {
 	const { inlang, filteredLanguageTags } = useEditorState()
+	const [message, setMessage] = createSignal<MessageType>()
 
 	// performance optimization to only render visible elements
 	// see https://github.com/inlang/inlang/issues/333
@@ -25,6 +26,14 @@ export function Message(props: { message: MessageType }) {
 		}
 	})
 
+	createEffect(() => {
+		if (!inlang.loading) {
+			inlang()!.query.messages.get.subscribe({ where: { id: props.id } }, (message) =>
+				setMessage(message),
+			)
+		}
+	})
+
 	return (
 		<div
 			ref={patternListElement}
@@ -34,7 +43,7 @@ export function Message(props: { message: MessageType }) {
 			// Using a <Show> would re-trigger the render of all pattern and
 			// web components. See https://github.com/inlang/inlang/pull/555
 			classList={{
-				["hidden"]: !showFilteredMessage(props.message),
+				["hidden"]: message() ? !showFilteredMessage(message()) : true,
 			}}
 		>
 			<div class="flex gap-2 items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 border-x border-b-0 border-surface-2">
@@ -42,7 +51,7 @@ export function Message(props: { message: MessageType }) {
 					slot="summary"
 					class="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left text-on-surface before:text-on-surface"
 				>
-					{props.message.id}
+					{message() ? message()!.id : "id"}
 				</h3>
 				<div
 					onClick={() => {
@@ -52,7 +61,7 @@ export function Message(props: { message: MessageType }) {
 								document.location.host +
 								document.location.pathname +
 								"?id=" +
-								props.message.id,
+								message()?.id,
 						),
 							showToast({ variant: "success", title: "Copy to clipboard", duration: 3000 })
 					}}
@@ -71,10 +80,11 @@ export function Message(props: { message: MessageType }) {
 										(filteredLanguageTags().includes(languageTag) ||
 											filteredLanguageTags().length === 0) &&
 										// only render if visible or has been rendered before
-										(elementIsVisible() || hasBeenRendered())
+										(elementIsVisible() || hasBeenRendered()) &&
+										message()
 									}
 								>
-									<PatternEditor languageTag={languageTag} message={props.message} />
+									<PatternEditor languageTag={languageTag} message={message()!} />
 								</Show>
 							</>
 						)

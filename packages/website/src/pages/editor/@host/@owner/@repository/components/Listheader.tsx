@@ -6,7 +6,7 @@ import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
 import type { LintRule, Message, MessageLintReport } from "@inlang/app"
 
 interface ListHeaderProps {
-	messages: Message[]
+	ids: string[]
 }
 
 type RuleSummaryItem = {
@@ -15,10 +15,11 @@ type RuleSummaryItem = {
 	level: "error" | "warning"
 }
 
-export const messageCount = (messages: Message[]) => {
+export const messageCount = (ids: string[]) => {
+	const { inlang } = useEditorState()
 	let counter = 0
-	for (const message of messages) {
-		if (showFilteredMessage(message)) counter++
+	for (const id of ids) {
+		if (inlang()?.query.messages.get({ where: { id: id } })) counter++
 	}
 	return counter
 }
@@ -82,7 +83,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 					</div>
 				}
 			>
-				<div class="font-medium text-on-surface">{messageCount(props.messages) + " Messages"}</div>
+				<div class="font-medium text-on-surface">{messageCount(props.ids) + " Messages"}</div>
 			</Show>
 
 			<div class="flex gap-2">
