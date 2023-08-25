@@ -16,12 +16,12 @@ description: Inlang is an ecosystem of apps, plugins, and lint rules that helps 
 
 ### Infrastructure approach
 
-For every use case, there is an app, a plugin, a lint rule, or a custom solution that can be built. Inlang is one common infrastructure core that powers an entire ecosystem of tools, applications, best practices, and automations to go global. 
+For every use case, there is an app, a plugin, a lint rule, or a custom solution that can be built. Inlang is one common infrastructure core that powers an entire ecosystem of tools, applications, best practices, and automations to go global.
 
 {% Figure
-    src="https://github.com/inlang/inlang/assets/58360188/55c61841-ab73-4fa8-a828-3c2016ced872"
-    alt="one config file to power all infrastructure tools"
-    caption="Sketch about the concept of one configuration file that powers all tools, automation, and applications for globalization that developers build on top of."
+src="https://github.com/inlang/inlang/assets/58360188/55c61841-ab73-4fa8-a828-3c2016ced872"
+alt="one config file to power all infrastructure tools"
+caption="Sketch about the concept of one configuration file that powers all tools, automation, and applications for globalization that developers build on top of."
 
 /%}
 
@@ -38,4 +38,3 @@ Inlang apps are built on lix, a git-compatible version control application frame
     caption="Lix repositories act as building blocks for tools, applications like the editor, and automation via CI/CD."
 
 /%}
-
