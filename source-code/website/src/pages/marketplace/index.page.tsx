@@ -136,7 +136,6 @@ const Gallery = () => {
 											>
 												<div
 													onClick={(e) => {
-														e.preventDefault()
 														e.stopPropagation()
 														setSearchValue(`${item.module ?? item.meta.id}`)
 														window.scrollTo({ top: 0 })

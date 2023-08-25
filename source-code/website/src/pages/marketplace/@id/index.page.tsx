@@ -8,6 +8,7 @@ import { marketplaceItems } from "@inlang/marketplace"
 import type { MarketplaceItem } from "@inlang/marketplace"
 import { Button } from "#src/pages/index/components/Button.jsx"
 import { Chip } from "#src/components/Chip.jsx"
+import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -19,6 +20,7 @@ export type PageProps = {
 
 export function Page(props: PageProps) {
 	const [item, setItem] = createSignal<MarketplaceItem | undefined>(undefined)
+	const [readmore, setReadmore] = createSignal<boolean>(false)
 
 	createEffect(() => {
 		setItem(
@@ -36,15 +38,33 @@ export function Page(props: PageProps) {
 			<Title>{props.markdown?.frontmatter?.title}</Title>
 			<Meta name="description" content={props.markdown?.frontmatter?.description} />
 			<Layout>
-				<div class="py-24">
+				<div class="py-28">
 					<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-40 gap-16">
 						<Show
 							when={props.markdown?.renderableTree && item()}
 							fallback={<p class="text-danger">{props.markdown?.error}</p>}
 						>
-							<div class="col-span-1 md:col-span-3 py-8">
-								<h1 class="text-3xl font-bold mb-4">{item().meta.displayName.en}</h1>
-								<p class="text-surface-500 mb-8">{item().meta.description.en}</p>
+							<div class="col-span-1 md:col-span-3 pb-16 border-b border-surface-2">
+								<div class="flex items-start gap-8 mb-10">
+									<img
+										class="w-16 h-16 rounded-md m-0 shadow-lg"
+										src={item().meta.marketplace.icon}
+									/>
+									<div class="flex flex-col gap-3">
+										<h1 class="text-3xl font-bold">{item().meta.displayName.en}</h1>
+										<div class="inline-block text-surface-500 ">
+											<p class={!readmore() && "lg:line-clamp-2"}>{item().meta.description.en}</p>
+											<Show when={item().meta.description.en.length > 205}>
+												<p
+													onClick={() => setReadmore(!readmore())}
+													class="cursor-pointer hover:text-surface-700 transition-all duration-150 font-medium max-lg:hidden"
+												>
+													{readmore() ? "Minimize" : "Read more"}
+												</p>
+											</Show>
+										</div>
+									</div>
+								</div>
 								<div class="flex items-center gap-4">
 									<Show
 										when={item().type !== "app"}
@@ -63,6 +83,10 @@ export function Page(props: PageProps) {
 										href={item()?.meta.marketplace.linkToReadme.en.replace("README.md", "")}
 									>
 										GitHub
+										<MaterialSymbolsArrowOutward
+											// @ts-ignore
+											slot="suffix"
+										/>
 									</Button>
 								</div>
 							</div>
@@ -100,9 +124,9 @@ export function Page(props: PageProps) {
 											</For>
 										</div>
 									</div>
-									<Show when={item().moduleItems.length > 1}>
+									<Show when={item().moduleItems && item().moduleItems.length > 1}>
 										<div class="flex flex-col gap-3">
-											<h3 class="text-sm text-surface-400">Comes with</h3>
+											<h3 class="text-sm text-surface-400">Bundled with</h3>
 											<div class="flex flex-col items-start">
 												<For each={item().moduleItems}>
 													{(moduleItem) => (
@@ -141,15 +165,12 @@ export function Page(props: PageProps) {
 									</Show>
 								</div>
 							</div>
-							<div class="w-full col-span-1 md:col-span-3 rounded-lg pb-16">
+							<div class="w-full col-span-1 md:col-span-3 rounded-lg">
 								<Markdown renderableTree={props.markdown.renderableTree!} />
 							</div>
 						</Show>
 					</div>
-					{/* <a class="flex justify-center link link-primary py-4 text-primary " href="/marketplace">
-						&lt;- Back to Marketplace
-					</a> */}
-					<GetHelp text="Have questions?" />
+					<GetHelp text="Do you have questions?" />
 				</div>
 			</Layout>
 		</>
