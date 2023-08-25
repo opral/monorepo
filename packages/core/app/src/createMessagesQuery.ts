@@ -37,18 +37,9 @@ export function createMessagesQuery(
 		includedMessageIds: createSubscribable(() => {
 			return structuredClone([...index.keys()])
 		}),
-		getAll: createSubscribable(
-			createMemo(() => {
-				const result: {
-					[id: string]: Message
-				} = {}
-				for (const message of structuredClone([...index.values()])) {
-					result[message.id] = message
-				}
-				return result
-			}),
-			//return structuredClone([...index.values()])
-		),
+		getAll: createSubscribable(() => {
+			return structuredClone([...index.values()])
+		}),
 		update: ({ where, data }): boolean => {
 			const message = index.get(where.id)
 			if (message === undefined) return false
