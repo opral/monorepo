@@ -51,7 +51,7 @@ export function createVariant(
 		data: Variant
 	},
 ): Result<Message, MessageVariantAlreadyExistsError> {
-	const copy: Message = structuredClone(message)
+	const copy = structuredClone(message)
 
 	// check if variant already exists
 	if (matchVariant(copy, args.data.languageTag, args.data.match)) {
@@ -84,7 +84,7 @@ export function updateVariantPattern(
 		data: Variant["pattern"]
 	},
 ): Result<Message, MessageVariantDoesNotExistError | MessagePatternsForLanguageTagDoNotExistError> {
-	const copy: Message = structuredClone(message)
+	const copy = structuredClone(message)
 
 	const containsLanguageTag = message.variants.some(
 		(variant) => variant.languageTag === args.where.languageTag,

@@ -1,6 +1,7 @@
 import { it, expect } from "vitest"
 import { calculateSummary } from "./calculateSummary.js"
-import type { LanguageTag, LintReport, Message, Pattern } from "@inlang/app"
+import type { LanguageTag, LintReport, Message } from "@inlang/app"
+import { createMessage } from "@inlang/test"
 
 it("should return 100% when no translation are missing", () => {
 	const messages: Message[] = [createMessage("test", { en: "test", de: "test" })]
@@ -120,22 +121,4 @@ it("should work with multiple resources", () => {
 	const result = calculateSummary({ reports, languageTags, messages })
 	expect(result.percentage).toBe(56)
 	expect(result.numberOfMissingVariants).toBe(4)
-})
-
-const createMessage = (id: string, patterns: Record<string, Pattern | string>): Message => ({
-	id,
-	selectors: [],
-	variants: Object.entries(patterns).map(([languageTag, patterns]) => ({
-		languageTag,
-		match: {},
-		pattern:
-			typeof patterns === "string"
-				? [
-						{
-							type: "Text",
-							value: patterns,
-						},
-				  ]
-				: patterns,
-	})),
 })

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect, test } from "vitest"
 import { lintSingleMessage } from "@inlang/lint"
 import type { Message } from "@inlang/messages"
@@ -25,7 +26,7 @@ test("should report if identical message found in another language", async () =>
 		lintRuleSettings: {},
 		messages,
 		message: message1,
-		rules: [identicalPatternRule],
+		lintRules: [identicalPatternRule],
 	})
 
 	expect(result.errors).toHaveLength(0)
@@ -47,7 +48,7 @@ test("should not report if pattern is present in 'ignore'", async () => {
 		},
 		messages,
 		message: message1,
-		rules: [identicalPatternRule],
+		lintRules: [identicalPatternRule],
 	})
 
 	expect(result.errors).toHaveLength(0)

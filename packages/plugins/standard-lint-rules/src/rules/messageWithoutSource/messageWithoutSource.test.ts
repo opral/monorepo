@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect, test } from "vitest"
 import { lintSingleMessage } from "@inlang/lint"
 import type { Message } from "@inlang/messages"
@@ -24,7 +25,7 @@ test("should not report if source message present", async () => {
 		lintRuleSettings: {},
 		messages,
 		message: message1,
-		rules: [messageWithoutSourceRule],
+		lintRules: [messageWithoutSourceRule],
 	})
 
 	expect(result.errors).toHaveLength(0)
@@ -41,7 +42,7 @@ test("should report if source message is missing", async () => {
 		lintRuleSettings: {},
 		messages,
 		message: message1,
-		rules: [messageWithoutSourceRule],
+		lintRules: [messageWithoutSourceRule],
 	})
 
 	expect(result.errors).toHaveLength(0)

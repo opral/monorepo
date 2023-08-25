@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, expect, test } from "vitest"
 import type { Message } from "@inlang/messages"
 import { missingTranslationRule } from "./missingTranslation.js"
@@ -26,7 +27,7 @@ test("should not report if all messages are present", async () => {
 		lintRuleSettings: {},
 		messages,
 		message: message1,
-		rules: [missingTranslationRule],
+		lintRules: [missingTranslationRule],
 	})
 
 	expect(result.errors).toHaveLength(0)
@@ -43,7 +44,7 @@ test("should report if a languageTag is not present", async () => {
 		lintRuleSettings: {},
 		messages,
 		message: message1,
-		rules: [missingTranslationRule],
+		lintRules: [missingTranslationRule],
 	})
 
 	expect(result.errors).toHaveLength(0)
@@ -61,7 +62,7 @@ test("should report if no variants are defined", async () => {
 		lintRuleSettings: {},
 		messages,
 		message: message1,
-		rules: [missingTranslationRule],
+		lintRules: [missingTranslationRule],
 	})
 
 	expect(result.errors).toHaveLength(0)
@@ -80,7 +81,7 @@ describe("reported by emptyPattern lintRule", () => {
 			lintRuleSettings: {},
 			messages,
 			message: message1,
-			rules: [missingTranslationRule],
+			lintRules: [missingTranslationRule],
 		})
 
 		expect(result.errors).toHaveLength(0)
@@ -97,7 +98,7 @@ describe("reported by emptyPattern lintRule", () => {
 			lintRuleSettings: {},
 			messages,
 			message: message1,
-			rules: [missingTranslationRule],
+			lintRules: [missingTranslationRule],
 		})
 
 		expect(result.errors).toHaveLength(0)

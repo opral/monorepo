@@ -24,6 +24,7 @@
 		"@lix-js/client": "*",
 		"@inlang/app": "*",
 		"@inlang/telemetry": "*",
+		"@inlang/test": "*",
 		"@resvg/resvg-js": "^2.4.1",
 		"cache-manager": "^5.2.1",
 		"satori": "^0.4.7",
