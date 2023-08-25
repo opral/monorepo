@@ -1,7 +1,7 @@
-import type { InlangConfig } from "@inlang/core/config"
+import { IdeExtensionConfig } from "@inlang/app"
 
 // TODO: import type from ide-extension package
-export const ideExtensionDefaultConfig: InlangConfig["ideExtension"] = {
+export const ideExtensionDefaultConfig: IdeExtensionConfig = {
 	messageReferenceMatchers: [
 		async (args) => {
 			const regex = /(?<!\w){?i\(['"](?<messageId>\S+)['"]\)}?/gm
@@ -38,7 +38,7 @@ export const ideExtensionDefaultConfig: InlangConfig["ideExtension"] = {
 	],
 	extractMessageOptions: [
 		{
-			callback: (messageId) => `{i("${messageId}")}`,
+			callback: (args: { messageId: string }) => `{t("${args.messageId}")}`,
 		},
 	],
 	documentSelectors: [

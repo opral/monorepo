@@ -1,16 +1,16 @@
 import { parse } from "./messageReferenceMatchers.js"
-import type { Plugin } from "@inlang/plugin"
+import type { IdeExtensionConfig, Plugin } from "@inlang/app"
 
 export const ideExtensionConfig = (): Plugin["addAppSpecificApi"] => () => ({
 	"inlang.app.ideExtension": {
 		messageReferenceMatchers: [
-			async (sourceCode: string) => {
-				return parse(sourceCode)
+			async (args: { documentText: string }) => {
+				return parse(args.documentText)
 			},
 		],
 		extractMessageOptions: [
 			{
-				callback: (messageId: string) => `{t("${messageId}")}`,
+				callback: (args: { messageId: string }) => `{t("${args.messageId}")}`,
 			},
 		],
 		documentSelectors: [
@@ -24,5 +24,5 @@ export const ideExtensionConfig = (): Plugin["addAppSpecificApi"] => () => ({
 				language: "svelte",
 			},
 		],
-	},
+	} satisfies IdeExtensionConfig,
 })
