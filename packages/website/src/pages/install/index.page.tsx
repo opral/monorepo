@@ -178,26 +178,28 @@ function ChooseRepo(props: { modules?: string[] }) {
 				</form>
 			</div>
 			<div>
-				<h2 class="text-lg font-medium text-slate-900">Recent</h2>
-				<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 py-4 w-full auto-rows-min pb-24">
-					{/* Shows a total of max 3 repos */}
-					<For each={store.recentProjects.slice(0, 3)}>
-						{(recentProject) => (
-							/* The surrounding div sets the searchParams */
-							<div
-								onClick={() =>
-									setSearchParams(
-										`/install?repo=github.com/${recentProject.owner}/${
-											recentProject.repository
-										}&module=${props.modules?.join(",")}`,
-									)
-								}
-							>
-								<RepositoryCard repository={recentProject} install modules={props.modules} />
-							</div>
-						)}
-					</For>
-				</div>
+				<Show when={store.recentProjects.length > 0}>
+					<h2 class="text-lg font-medium text-slate-900">Recent</h2>
+					<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 py-4 w-full auto-rows-min pb-24">
+						{/* Shows a total of max 3 repos */}
+						<For each={store.recentProjects.slice(0, 3)}>
+							{(recentProject) => (
+								/* The surrounding div sets the searchParams */
+								<div
+									onClick={() =>
+										setSearchParams(
+											`/install?repo=github.com/${recentProject.owner}/${
+												recentProject.repository
+											}&module=${props.modules?.join(",")}`,
+										)
+									}
+								>
+									<RepositoryCard repository={recentProject} install modules={props.modules} />
+								</div>
+							)}
+						</For>
+					</div>
+				</Show>
 			</div>
 		</div>
 	)
