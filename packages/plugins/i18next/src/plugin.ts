@@ -67,7 +67,7 @@ export const plugin: Plugin<PluginSettings> = {
 		marketplace: {
 			icon: "https://github.com/inlang/inlang/blob/main/source-code/plugins/i18next/assets/icon.png?raw=true",
 			linkToReadme: {
-				en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/i18next",
+				en: "https://github.com/inlang/inlang/blob/main/source-code/plugins/i18next/README.md",
 			},
 			keywords: ["i18next", "react", "nextjs"],
 			publisherName: "inlang",

@@ -67,7 +67,9 @@ export const plugin: Plugin<PluginSettings> = {
 		description: { en: "JSON plugin for inlang" },
 		marketplace: {
 			icon: "https://github.com/inlang/inlang/blob/main/source-code/plugins/json/assets/icon.png?raw=true",
-			linkToReadme: { en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/json" },
+			linkToReadme: {
+				en: "https://github.com/inlang/inlang/blob/main/source-code/plugins/json/README.md",
+			},
 			keywords: ["json", "generic"],
 			publisherName: "inlang",
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",

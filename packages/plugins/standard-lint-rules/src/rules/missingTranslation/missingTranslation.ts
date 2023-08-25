@@ -19,7 +19,7 @@ been translated for this languageTag yet.
 		marketplace: {
 			icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
 			linkToReadme: {
-				en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules",
+				en: "https://github.com/inlang/inlang/blob/main/source-code/plugins/standard-lint-rules/README.md",
 			},
 			keywords: ["lint-rule", "standard", "missing-translation"],
 			publisherName: "inlang",
