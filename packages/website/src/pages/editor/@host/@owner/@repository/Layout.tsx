@@ -114,7 +114,7 @@ export function Layout(props: { children: JSXElement }) {
 		}
 	})
 
-	const addLanguage = (languageTag: LanguageTag) => {
+	const addLanguageTag = (languageTag: LanguageTag) => {
 		if (languageTags().includes(languageTag)) {
 			showToast({
 				variant: "warning",
@@ -259,7 +259,7 @@ export function Layout(props: { children: JSXElement }) {
 					prop:size={"small"}
 					prop:variant={"primary"}
 					onClick={() => {
-						addLanguage(addLanguageText())
+						addLanguageTag(addLanguageText())
 						setAddLanguageModalOpen(false)
 					}}
 				>
@@ -359,6 +359,14 @@ function LanguageFilter(props: { clearFunction: any }) {
 		}
 	})
 
+	function languageTagSort(arr: string[], sourceLanguage: string) {
+		arr.sort();
+		const sourceIndex = arr.indexOf(sourceLanguage);
+		arr.splice(sourceIndex, 1);
+		arr.unshift(sourceLanguage);
+		return arr;
+	}
+
 	return (
 		<Show when={inlang()?.config() && filteredLanguageTags() && filteredLanguageTags().length > 0}>
 			<sl-select
@@ -399,12 +407,10 @@ function LanguageFilter(props: { clearFunction: any }) {
 					<a
 						class="cursor-pointer link link-primary opacity-75"
 						// filter all except the source language
-						// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
 						onClick={() =>
 							setFilteredLanguageTags(
-								[inlang()?.config()?.sourceLanguageTag].filter(
-									(languageTag): languageTag is string => !!languageTag,
-								),
+								// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+								[inlang()?.config()?.sourceLanguageTag!]
 							)
 						}
 					>
@@ -413,7 +419,8 @@ function LanguageFilter(props: { clearFunction: any }) {
 				</div>
 				<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
 				<div class="max-h-[300px] overflow-y-auto text-sm">
-					<For each={inlang()?.config()?.languageTags}>
+					{/* eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain */}
+					<For each={languageTagSort(inlang()?.config().languageTags || [], inlang()?.config().sourceLanguageTag!)}>
 						{(language) => (
 							<sl-option
 								prop:value={language}
