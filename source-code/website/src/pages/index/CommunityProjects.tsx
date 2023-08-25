@@ -131,7 +131,7 @@ export function RepositoryCard(props: {
 		>
 			<div>
 				<div class="flex flex-col">
-					<div class="flex justify-between">
+					<div class="flex justify-between gap-4">
 						<img
 							class="w-10 h-10 rounded-md m-0 shadow-lg"
 							src={`https://github.com/${props.repository.owner}.png?size=40`}
