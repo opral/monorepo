@@ -101,11 +101,6 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => 
 			pageProps: {
 				markdown: index[pageContext.urlPathname],
 				processedTableOfContents: processedTableOfContents,
-				marketplaceItem: marketplaceItems.find(
-					(item) =>
-						`/marketplace/${item.meta.displayName.en?.toLowerCase().replaceAll(" ", "-")}` ===
-						pageContext.urlPathname,
-				),
 			},
 		},
 	}
