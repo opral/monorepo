@@ -315,7 +315,7 @@ it("should correctly resolve the config", async () => {
 
 	expect(config).toMatchInlineSnapshot(`
 		{
-		  "cwdFolderPath": "/home/ivanhofer/projects/inlang/inlang/source-code/sdk-js",
+		  "cwdFolderPath": "${PATH_TO_CWD}",
 		  "debug": false,
 		  "languageTags": [
 		    "en",
@@ -327,14 +327,14 @@ it("should correctly resolve the config", async () => {
 		    "isStatic": false,
 		    "languageInUrl": true,
 		    "resourcesCache": "build-time",
-		    "rootRoutesFolder": "/home/ivanhofer/projects/inlang/inlang/source-code/sdk-js/src/routes/[lang]",
+		    "rootRoutesFolder": "${PATH_TO_CWD}/src/routes/[lang]",
 		  },
 		  "sourceLanguageTag": "en",
 		  "svelteKit": {
 		    "files": {
-		      "appTemplate": "/home/ivanhofer/projects/inlang/inlang/source-code/sdk-js/src/app.html",
-		      "routes": "/home/ivanhofer/projects/inlang/inlang/source-code/sdk-js/src/routes",
-		      "serverHooks": "/home/ivanhofer/projects/inlang/inlang/source-code/sdk-js/src/hooks.server",
+		      "appTemplate": "${PATH_TO_CWD}/src/app.html",
+		      "routes": "${PATH_TO_CWD}/src/routes",
+		      "serverHooks": "${PATH_TO_CWD}/src/hooks.server",
 		    },
 		    "usesTypeScript": false,
 		    "version": "1.0.0",
