@@ -1,19 +1,19 @@
 import type { PluginSettings } from "../settings.js"
 import { parse } from "./messageReferenceMatchers.js"
-import type { Plugin } from "@inlang/plugin"
+import type { IdeExtensionConfig, Plugin } from "@inlang/app"
 
 export const ideExtensionConfig =
 	(settings: PluginSettings): Plugin["addAppSpecificApi"] =>
 	() => ({
 		"inlang.app.ideExtension": {
 			messageReferenceMatchers: [
-				async (sourceCode: string) => {
-					return parse(sourceCode, settings)
+				async (args: { documentText: string }) => {
+					return parse(args.documentText, settings)
 				},
 			],
 			extractMessageOptions: [
 				{
-					callback: (messageId: string) => `{t("${messageId}")}`,
+					callback: (args: { messageId: string }) => `{t("${args.messageId}")}`,
 				},
 			],
 			documentSelectors: [
@@ -27,5 +27,5 @@ export const ideExtensionConfig =
 					language: "svelte",
 				},
 			],
-		},
+		} satisfies IdeExtensionConfig,
 	})
