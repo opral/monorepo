@@ -9,6 +9,7 @@ import {
 import { InlangConfig, tryCatch } from "@inlang/app"
 import type { Step } from "./index.page.jsx"
 import { marketplaceItems } from "@inlang/marketplace"
+import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"
 
 export function InstallationProvider(props: {
 	repo: string
@@ -17,7 +18,7 @@ export function InstallationProvider(props: {
 	setStep: (step: Step) => void
 	children: JSXElement
 }) {
-	const [localStorage] = useLocalStorage() ?? []
+	const [localStorage, setLocalStorage] = useLocalStorage() ?? []
 	const user = localStorage?.user
 
 	/**
@@ -56,9 +57,40 @@ export function InstallationProvider(props: {
 				error: false,
 			})
 
+			setRecentProject()
 			initializeRepo(props.repo, props.modules, user!, props.step, props.setStep)
 		}
 	})
+
+	/* Set recent project into local storage */
+	function setRecentProject() {
+		// eslint-disable-next-line solid/reactivity
+		setLocalStorage("recentProjects", (prev) => {
+			let recentProjects = prev[0] !== undefined ? prev : []
+
+			const newProject: RecentProjectType = {
+				owner: props.repo.slice(
+					props.repo.indexOf("/") + 1,
+					props.repo.indexOf("/", props.repo.indexOf("/") + 1),
+				),
+				repository: props.repo.slice(
+					props.repo.indexOf("/", props.repo.indexOf("/") + 1) + 1,
+					props.repo.length,
+				),
+				description: "",
+				lastOpened: new Date().getTime(),
+			}
+
+			recentProjects = recentProjects.filter(
+				(project) =>
+					!(project.owner === newProject.owner && project.repository === newProject.repository),
+			)
+
+			recentProjects.push(newProject)
+
+			return recentProjects.sort((a, b) => b.lastOpened - a.lastOpened).slice(0, 7)
+		})
+	}
 
 	return <LocalStorageProvider>{props.children}</LocalStorageProvider>
 }
@@ -80,6 +112,21 @@ async function initializeRepo(
 		nodeishFs: createNodeishMemoryFs(),
 		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
 	})
+
+	// check if user is collaborator
+	const isCollaborator = await repo.isCollaborator({
+		username: user.username,
+	})
+
+	if (!isCollaborator) {
+		setStep({
+			type: "error",
+			message: "You are not a collaborator of this repository.",
+			error: true,
+		})
+
+		return
+	}
 
 	setStep({
 		type: "installing",
@@ -136,6 +183,8 @@ async function initializeRepo(
 	if (!inlangConfig.modules) inlangConfig.modules = []
 
 	const modulesToInstall = modulesURL.filter((moduleURL) => {
+		if (inlangConfig.modules.length === 0) return true
+
 		const installedModules = inlangConfig.modules.every((module) => module.includes(moduleURL))
 		return !installedModules
 	})
@@ -145,6 +194,7 @@ async function initializeRepo(
 
 	await repo.nodeishFs.writeFile("./inlang.config.json", generatedInlangConfig)
 
+	/* If any error gets unreturned before, stop the process here */
 	if (step().error) return
 
 	setStep({
