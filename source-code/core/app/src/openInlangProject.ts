@@ -160,7 +160,6 @@ export const openInlangProject = async (args: {
 		createEffect(() => {
 			const msgs = messages()
 			if (!msgs || !lintInitialized()) return
-
 			// TODO: only lint changed messages and update arrays selectively
 			lintMessages({
 				sourceLanguageTag: configValue!.sourceLanguageTag,
@@ -193,6 +192,12 @@ export const openInlangProject = async (args: {
 		const initializeError: Error | undefined = await initialized.catch((error) => error)
 
 		const query = createMessagesQuery(() => messages() || [])
+
+		query.getAll.subscribe((m) => {
+			if (m.length !== 0 && JSON.stringify(m) !== JSON.stringify(messages())) {
+				setMessages(m)
+			}
+		})
 
 		const debouncedSave = skipFirst(
 			debounce(
