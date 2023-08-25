@@ -10,17 +10,18 @@ import { openRepository, createNodeishMemoryFs } from "./index.js"
 describe("main workflow", () => {
 	let repository: ReturnType<typeof openRepository>
 
-	it.todo("allows to subscribe to errors", async () => {
+	it("allows to subscribe to errors", async () => {
 		const errorHandler = vi.fn()
-		repository = openRepository("github.com/inlang/exampl", {
+		repository = openRepository("github.com/inlang/examplX", {
 			nodeishFs: createNodeishMemoryFs(),
 		})
-		repository.errors.subscribe((error) => {
-			errorHandler(error)
-		})
-		await new Promise((resolve) => setTimeout(resolve, 100))
+
+		repository.errors.subscribe(errorHandler)
+
+		await new Promise((resolve) => setTimeout(resolve, 1000))
+
 		expect(errorHandler.mock.calls.length).toBe(1)
-		expect(errorHandler.mock.calls[0]).toStrictEqual({})
+		expect(errorHandler.mock.calls[0][0][0].code).toBe("HttpError")
 	})
 
 	it("opens a repo url without error and without blocking io", async () => {

@@ -1,6 +1,7 @@
 import type { NodeishFilesystem } from "@inlang-git/fs"
 import type raw from "isomorphic-git"
 import type { Endpoints } from "@octokit/types"
+import type { Subscribable } from "@inlang/app"
 
 type Author = {
 	name?: string
@@ -30,7 +31,7 @@ export type Repository = {
 	isCollaborator: (args: { username: string }) => Promise<boolean>
 	getOrigin: () => Promise<string>
 	getCurrentBranch: () => Promise<string | undefined>
-	errors: { subscribe: (callback: (value: Error) => void) => () => void }
+	errors: Subscribable<Error[]>
 	getMeta: () => Promise<{
 		name: string
 		isPrivate: boolean

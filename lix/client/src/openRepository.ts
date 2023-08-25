@@ -4,6 +4,7 @@ import { transformRemote, withLazyFetching } from "./helpers.js"
 import raw from "isomorphic-git"
 import http from "isomorphic-git/http/node"
 import { Octokit } from "octokit"
+import { createSignal, createEffect } from "@inlang/app/solid"
 
 export function openRepository(
 	url: string,
@@ -15,6 +16,8 @@ export function openRepository(
 	},
 ): Repository {
 	const rawFs = args.nodeishFs
+
+	const [errors, setErrors] = createSignal<Error[]>([])
 
 	// parse url in the format of github.com/inlang/example and split it to host, owner and repo
 	const [host, owner, repoName] = [...url.split("/")]
@@ -60,8 +63,8 @@ export function openRepository(
 		.finally(() => {
 			pending = undefined
 		})
-		.catch((err: any) => {
-			return { error: err }
+		.catch((newError: Error) => {
+			setErrors((previous) => [...(previous || []), newError])
 		})
 
 	// delay all fs and repo operations until the repo clone and checkout have finished, this is preparation for the lazy feature
@@ -226,21 +229,18 @@ export function openRepository(
 			)
 		},
 
-		errors: {
-			subscribe: (cb: (err: Error) => void) => {
-				if (pending) {
-					pending.catch((maybeError) => {
-						if (maybeError?.error) {
-							cb(maybeError.error)
-						}
-					})
-				}
-
-				return () => {
-					/* implement unsubscribe when we handle internal errors while usage */
-				}
+		errors: Object.assign(errors, {
+			subscribe: (callback: (value: Error[]) => void) => {
+				createEffect(() => {
+					// TODO: the subscription should not send the whole array but jsut the new errors
+					// const maybeLastError = errors().at(-1)
+					const allErrors = errors()
+					if (allErrors.length) {
+						callback(allErrors)
+					}
+				})
 			},
-		},
+		}),
 
 		/**
 		 * Additional information about a repository provided by GitHub.
