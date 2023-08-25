@@ -1,6 +1,6 @@
 import type { InlangProject } from "../api.js"
-import { observable, type from as solidFrom } from "../solid.js"
-import type { MessageQueryApi } from "@inlang/app"
+import { createSignal, observable, type from as solidFrom } from "../solid.js"
+import type { Message, MessageQueryApi } from "@inlang/app"
 
 export const solidAdapter = (
 	project: InlangProject,
@@ -31,7 +31,11 @@ export const solidAdapter = (
 				update: project.query.messages.update,
 				delete: project.query.messages.delete,
 				upsert: project.query.messages.upsert,
-				get: project.query.messages.get,
+				get: (args) => {
+					const [message, setMessage] = createSignal<Message | undefined>()
+					project.query.messages.get.subscribe(args, setMessage)
+					return message()
+				},
 				getAll: convert(project.query.messages.getAll),
 				includedMessageIds: convert(project.query.messages.includedMessageIds),
 			},
@@ -54,7 +58,7 @@ export type InlangProjectWithSolidAdapter = {
 			update: MessageQueryApi["update"]
 			delete: MessageQueryApi["delete"]
 			upsert: MessageQueryApi["upsert"]
-			get: MessageQueryApi["get"]
+			get: (args: Parameters<MessageQueryApi["get"]>[0]) => ReturnType<MessageQueryApi["get"]>
 			getAll: () => ReturnType<MessageQueryApi["getAll"]>
 			includedMessageIds: () => ReturnType<MessageQueryApi["includedMessageIds"]>
 		}
