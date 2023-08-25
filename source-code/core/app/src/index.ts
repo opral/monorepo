@@ -2,7 +2,7 @@ export type { InlangProject, InstalledLintRule, InstalledPlugin, MessageQueryApi
 export { openInlangProject } from "./openInlangProject.js"
 export { solidAdapter, InlangProjectWithSolidAdapter } from "./adapter/solidAdapter.js"
 export { tryAutoGenerateInlangConfig } from "./tryAutoGenerateConfig.js"
-export { createMessagesQuery } from './createMessagesQuery.js'
+export { createMessagesQuery } from "./createMessagesQuery.js"
 export {
 	ConfigPathNotFoundError,
 	ConfigJSONSyntaxError,

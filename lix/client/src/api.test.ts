@@ -16,7 +16,6 @@ describe("main workflow", () => {
 			nodeishFs: createNodeishMemoryFs(),
 		})
 		repository.errors.subscribe((error) => {
-			console.log(error)
 			errorHandler(error)
 		})
 		await new Promise((resolve) => setTimeout(resolve, 100))

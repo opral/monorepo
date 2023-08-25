@@ -48,8 +48,8 @@ describe("get", () => {
 	it("mutating the returned value should not affect subsequent return values", () => {
 		const query = createMessagesQuery(() => [createMessage("first-message", { en: "Hello World" })])
 		const message1 = query.get({ where: { id: "first-message" } })!
-			; (message1.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value =
-				"Hello World 2"
+		;(message1.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value =
+			"Hello World 2"
 		const message2 = query.get({ where: { id: "first-message" } })!
 
 		expect(
@@ -83,10 +83,10 @@ describe("getAll", () => {
 	it("mutating the returned value should not affect subsequent return values", () => {
 		const query = createMessagesQuery(() => [createMessage("first-message", { en: "Hello World" })])
 		const messages1 = query.getAll()
-			; (
-				Object.values(messages1!)[0]!.variants.find((v) => v.languageTag === "en")!
-					.pattern![0]! as Text
-			).value = "Hello World 2"
+		;(
+			Object.values(messages1!)[0]!.variants.find((v) => v.languageTag === "en")!
+				.pattern![0]! as Text
+		).value = "Hello World 2"
 
 		expect(
 			(
