@@ -135,7 +135,6 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 	createEffect(
 		on(currentJSON, () => {
 			if (
-				currentJSON().content[0].content !== undefined &&
 				JSON.stringify(currentJSON().content[0].content) !== JSON.stringify(previousContent())
 			) {
 				autoSave()
