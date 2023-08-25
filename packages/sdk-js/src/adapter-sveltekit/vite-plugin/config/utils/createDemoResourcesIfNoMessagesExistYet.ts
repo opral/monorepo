@@ -1,4 +1,5 @@
 import type { InlangProject } from "@inlang/app"
+// eslint-disable-next-line no-restricted-imports
 import { createMessage } from "@inlang/test"
 
 export const createDemoResourcesIfNoMessagesExistYet = async (inlang: InlangProject) => {

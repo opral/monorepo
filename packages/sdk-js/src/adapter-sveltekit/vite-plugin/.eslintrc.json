@@ -1,6 +1,4 @@
 {
 	"extends": ["../../../.eslintrc.json"],
-	"rules": {
-		"no-restricted-imports": "off"
-	}
+	"rules": {}
 }
