@@ -8,7 +8,7 @@ export const solidAdapter = (
 		from: typeof solidFrom
 	},
 ): InlangProjectWithSolidAdapter => {
-	const convert = <T>(signal: (args?: any) => T): (() => T) => {
+	const convert = <T>(signal: () => T): (() => T) => {
 		return arg.from(observable(signal)) as () => T
 	}
 
@@ -31,7 +31,7 @@ export const solidAdapter = (
 				update: project.query.messages.update,
 				delete: project.query.messages.delete,
 				upsert: project.query.messages.upsert,
-				get: project.query.messages.get,
+				get: (...args) => convert(project.query.messages.get.bind(undefined, ...args))(),
 				getAll: convert(project.query.messages.getAll),
 				includedMessageIds: convert(project.query.messages.includedMessageIds),
 			},
@@ -54,7 +54,7 @@ export type InlangProjectWithSolidAdapter = {
 			update: MessageQueryApi["update"]
 			delete: MessageQueryApi["delete"]
 			upsert: MessageQueryApi["upsert"]
-			get: MessageQueryApi["get"]
+			get: (...args: Parameters<MessageQueryApi["get"]>) => ReturnType<MessageQueryApi["get"]>
 			getAll: () => ReturnType<MessageQueryApi["getAll"]>
 			includedMessageIds: () => ReturnType<MessageQueryApi["includedMessageIds"]>
 		}
