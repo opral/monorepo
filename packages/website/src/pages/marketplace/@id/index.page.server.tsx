@@ -43,6 +43,7 @@ const fetchReadmeContents = async () => {
 				item.meta.displayName.en,
 				`/marketplace/${item.meta.displayName.en?.toLowerCase().replaceAll(" ", "-")}`,
 				readmeText,
+				item.meta.description.en?.replace("@", "").replace(/(\r\n|\n|\r)/gm, " "),
 			),
 		)
 	}
@@ -100,6 +101,11 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => 
 			pageProps: {
 				markdown: index[pageContext.urlPathname],
 				processedTableOfContents: processedTableOfContents,
+				marketplaceItem: marketplaceItems.find(
+					(item) =>
+						`/marketplace/${item.meta.displayName.en?.toLowerCase().replaceAll(" ", "-")}` ===
+						pageContext.urlPathname,
+				),
 			},
 		},
 	}
@@ -125,10 +131,11 @@ async function generateIndexAndTableOfContents() {
 /**
  * Generates the necessary frontmatter data used e.g. in SEO.
  */
-function generateFrontmatter(title: string, href: string, document: string) {
+function generateFrontmatter(title: string, href: string, document: string, description?: string) {
 	const frontmatterDocument = `---
 title: ${title}
 href: ${href}
+\n${description ? `description: ${description} \n` : ""}
 ---
 
 ${document}`
