@@ -14,7 +14,6 @@ import type { EditorRouteParams, EditorSearchParams } from "./types.js"
 import type { LocalStorageSchema } from "#src/services/local-storage/index.js"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { github } from "#src/services/github/index.js"
-import { showToast } from "#src/components/Toast.jsx"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
 import { telemetryBrowser, parseOrigin } from "@inlang/telemetry"
@@ -32,6 +31,7 @@ import {
 } from "@inlang/app"
 import type { InlangModule } from "@inlang/module"
 import pluginJson from "../../../../../../../plugins/json/dist/index.js"
+import pluginI18next from "../../../../../../../plugins/i18next/dist/index.js"
 import pluginLint from "../../../../../../../plugins/standard-lint-rules/dist/index.js"
 
 type EditorStateSchema = {
@@ -223,6 +223,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						default: {
 							// @ts-ignore
 							plugins: [...pluginJson.plugins],
+							// @ts-ignore
+							// plugins: [...pluginI18next.plugins],
 							// @ts-ignore
 							lintRules: [...pluginLint.lintRules],
 						},
