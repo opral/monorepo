@@ -27,6 +27,7 @@ export const messageCount = (ids: string[]) => {
 export const ListHeader = (props: ListHeaderProps) => {
 	const {
 		inlang,
+		filteredLanguageTags,
 		setFilteredLintRules,
 		filteredLintRules,
 		filteredId,
@@ -46,13 +47,12 @@ export const ListHeader = (props: ListHeaderProps) => {
 				const filteredReports = reports?.filter(
 					(report: MessageLintReport) => report.ruleId === lintRule.meta.id,
 				)
-				const filteredMessages = filteredReports?.filter((report: MessageLintReport) => {
+				let counter = 0
+				filteredReports?.filter((report: MessageLintReport) => {
 					level = report.level
-					return showFilteredMessage(
-						inlang()?.query.messages.get({ where: { id: report.messageId } }),
-					)
+					if (showFilteredMessage(inlang()?.query.messages.get({ where: { id: report.messageId } }))
+						&& filteredLanguageTags().includes(report.languageTag)) { counter++ }
 				})
-				const counter = filteredMessages?.length || 0
 
 				if (
 					lintRule &&
