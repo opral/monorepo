@@ -193,12 +193,6 @@ export const openInlangProject = async (args: {
 
 		const query = createMessagesQuery(() => messages() || [])
 
-		query.getAll.subscribe((m) => {
-			if (m.length !== 0 && JSON.stringify(m) !== JSON.stringify(messages())) {
-				setMessages(m)
-			}
-		})
-
 		const debouncedSave = skipFirst(
 			debounce(
 				500,
@@ -210,13 +204,19 @@ export const openInlangProject = async (args: {
 							cause: err,
 						})
 					}
+					if (
+						newMessages.length !== 0 &&
+						JSON.stringify(newMessages) !== JSON.stringify(messages())
+					) {
+						setMessages(newMessages)
+					}
 				},
 				{ atBegin: false },
 			),
 		)
 
 		createEffect(() => {
-			debouncedSave(Object.values(query.getAll()))
+			debouncedSave(query.getAll())
 		})
 
 		return {
