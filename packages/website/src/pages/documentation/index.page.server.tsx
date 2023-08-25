@@ -3,6 +3,14 @@ import type { PageProps } from "./index.page.jsx"
 import { tableOfContents, FrontmatterSchema } from "../../../../../documentation/tableOfContents.js"
 import { parseMarkdown } from "#src/services/markdown/index.js"
 import { RenderErrorPage } from "vite-plugin-ssr/RenderErrorPage"
+import fs from "node:fs/promises"
+
+/**
+ * The root of the repository.
+ *
+ * Makes it possible to use absolute paths for rendering markdown.
+ */
+const repositoryRoot = new URL("../../../../../", import.meta.url)
 
 /**
  * the table of contents without the html for each document
@@ -43,7 +51,7 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => 
 	return {
 		pageContext: {
 			pageProps: {
-				markdown: index[pageContext.urlPathname],
+				markdown: index[pageContext.urlPathname]!,
 				processedTableOfContents: processedTableOfContents,
 			},
 		},
@@ -56,9 +64,14 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => 
 async function generateIndexAndTableOfContents() {
 	for (const [category, documents] of Object.entries(tableOfContents)) {
 		const frontmatters: { frontmatter: any }[] = []
+
 		for (const document of documents) {
+			// resolve the markdown file from the repository root.
+			const raw = await fs.readFile(new URL(`documentation/${document}`, repositoryRoot), {
+				encoding: "utf-8",
+			})
 			const markdown = parseMarkdown({
-				text: document.import,
+				text: raw,
 				FrontmatterSchema,
 			})
 			// not pushing to processedTableOfContents directly in case
