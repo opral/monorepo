@@ -7,7 +7,8 @@
 	},
 	"exports": {
 		".": "./dist/index.js",
-		"./test": "./dist/test/index.js"
+		"./test": "./dist/test/index.js",
+		"./solid": "./dist/solid.js"
 	},
 	"files": [
 		"./dist",

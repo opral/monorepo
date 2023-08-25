@@ -1,4 +1,10 @@
-export type { InlangProject, InstalledLintRule, InstalledPlugin, MessageQueryApi } from "./api.js"
+export type {
+	InlangProject,
+	InstalledLintRule,
+	InstalledPlugin,
+	MessageQueryApi,
+	Subscribable,
+} from "./api.js"
 export { openInlangProject } from "./openInlangProject.js"
 export { solidAdapter, InlangProjectWithSolidAdapter } from "./adapter/solidAdapter.js"
 export { tryAutoGenerateInlangConfig } from "./tryAutoGenerateConfig.js"
