@@ -55,7 +55,11 @@ export const showFilteredMessage = (message: Message | undefined) => {
 			inlang()
 				?.lint.reports()
 				.some((report: LintReport) => {
-					if (filteredLintRules().includes(report.ruleId) && report.messageId === message?.id) {
+					if (
+						filteredLintRules().includes(report.ruleId) &&
+						filteredLanguageTags().includes(report.languageTag) &&
+						report.messageId === message?.id
+					) {
 						return true
 					}
 					return false

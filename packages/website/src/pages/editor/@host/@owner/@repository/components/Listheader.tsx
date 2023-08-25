@@ -53,8 +53,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 					if (
 						showFilteredMessage(
 							inlang()?.query.messages.get({ where: { id: report.messageId } }),
-						) &&
-						filteredLanguageTags().includes(report.languageTag)
+						)
 					) {
 						counter++
 					}
