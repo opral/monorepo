@@ -9,6 +9,7 @@ import IconTranslate from "~icons/material-symbols/translate"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { showToast } from "#src/components/Toast.jsx"
 import type { LanguageTag } from "@inlang/app"
+import { sortLanguageTags } from "./helper/sortLanguageTags.js"
 
 interface Filter {
 	name: string
@@ -359,14 +360,6 @@ function LanguageFilter(props: { clearFunction: any }) {
 		}
 	})
 
-	function languageTagSort(arr: string[], sourceLanguage: string) {
-		arr.sort();
-		const sourceIndex = arr.indexOf(sourceLanguage);
-		arr.splice(sourceIndex, 1);
-		arr.unshift(sourceLanguage);
-		return arr;
-	}
-
 	return (
 		<Show when={inlang()?.config() && filteredLanguageTags() && filteredLanguageTags().length > 0}>
 			<sl-select
@@ -420,7 +413,7 @@ function LanguageFilter(props: { clearFunction: any }) {
 				<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
 				<div class="max-h-[300px] overflow-y-auto text-sm">
 					{/* eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain */}
-					<For each={languageTagSort(inlang()?.config().languageTags || [], inlang()?.config().sourceLanguageTag!)}>
+					<For each={sortLanguageTags(inlang()?.config().languageTags || [], inlang()?.config().sourceLanguageTag!)}>
 						{(language) => (
 							<sl-option
 								prop:value={language}
