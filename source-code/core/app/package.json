@@ -38,6 +38,7 @@
 		"@inlang/module": "*",
 		"@inlang/plugin": "*",
 		"@inlang/result": "*",
+		"@inlang/test": "*",
 		"@sinclair/typebox": "^0.18.0",
 		"@solid-primitives/map": "^0.4.7",
 		"deepmerge-ts": "^5.1.0",

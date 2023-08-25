@@ -15,10 +15,10 @@ import {
 } from "@inlang/app"
 import * as createBasicInlangConfigModule from "./utils/createBasicInlangConfig.js"
 import { getNodeishFs } from "./utils/getNodeishFs.js"
-import { createMessage } from "../../../test.util.js"
 import { version } from "../../../../package.json"
 import { InlangSdkException } from "../exceptions.js"
 import { validateSdkConfig, type SdkConfig } from "@inlang/sdk-js-plugin"
+import { createMessage } from "@inlang/test"
 
 vi.mock("./utils/getNodeishFs.js")
 vi.mock("@inlang/app", async () => ({
