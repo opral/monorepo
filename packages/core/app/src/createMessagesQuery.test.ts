@@ -93,7 +93,7 @@ describe("getAll", () => {
 				Object.values(query.getAll()!)[0]!.variants.find((v) => v.languageTag === "en")!
 					.pattern![0]! as Text
 			).value,
-		).toBe("Hello World 2")
+		).toBe("Hello World")
 	})
 })
 
@@ -273,7 +273,7 @@ describe("reactivity", () => {
 			await createRoot(async () => {
 				const query = createMessagesQuery(() => [])
 
-				let messages: { [id: string]: Message } | undefined = undefined
+				let messages: Message[] | undefined = undefined
 				await createChangeListener(() => (messages = query.getAll()))
 				expect(Object.values(messages!)).toHaveLength(0)
 
@@ -292,7 +292,7 @@ describe("reactivity", () => {
 			await createRoot(async () => {
 				const query = createMessagesQuery(() => [createMessage("1", { en: "before" })])
 
-				let messages: { [id: string]: Message } | undefined = undefined
+				let messages: Message[] | undefined = undefined
 				await createChangeListener(() => (messages = query.getAll()))
 				expect(Object.values(messages!)).toHaveLength(1)
 				expect(
@@ -317,7 +317,7 @@ describe("reactivity", () => {
 			await createRoot(async () => {
 				const query = createMessagesQuery(() => [])
 
-				let messages: { [id: string]: Message } | undefined = undefined
+				let messages: Message[] | undefined = undefined
 				await createChangeListener(() => (messages = query.getAll()))
 				expect(Object.values(messages!)).toHaveLength(0)
 
@@ -348,7 +348,7 @@ describe("reactivity", () => {
 					createMessage("3", { en: "" }),
 				])
 
-				let messages: { [id: string]: Message } | undefined = undefined
+				let messages: Message[] | undefined = undefined
 				await createChangeListener(() => (messages = query.getAll()))
 				expect(Object.values(messages!)).toHaveLength(3)
 
@@ -373,7 +373,7 @@ describe("reactivity", () => {
 			])
 			const query = createMessagesQuery(inputMessages)
 
-			let messages: { [id: string]: Message } | undefined = undefined
+			let messages: Message[] | undefined = undefined
 			await createChangeListener(() => (messages = query.getAll()))
 			expect(Object.values(messages!)).toHaveLength(1)
 
