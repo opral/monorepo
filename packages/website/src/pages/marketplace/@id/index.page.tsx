@@ -69,9 +69,11 @@ export function Page(props: PageProps) {
 									<Show
 										when={item().type !== "app"}
 										fallback={
-											<Button type="primary" href="#">
-												Open App
-											</Button>
+											<Show when={item().linkToApp}>
+												<Button type="primary" href={item().linkToApp}>
+													Open App
+												</Button>
+											</Show>
 										}
 									>
 										<Button type="primary" href={`/install?module=${item().module}`}>
