@@ -32,7 +32,7 @@ export function parseMarkdown<FrontmatterSchema extends TSchema>(args: {
 	const frontmatter = parseYaml(ast.attributes.frontmatter ?? "")
 	if (Value.Check(args.frontmatterSchema, frontmatter) === false) {
 		const errors = [...Value.Errors(args.frontmatterSchema, frontmatter)]
-		throw Error(errors.join("\n"))
+		throw Error(`Invalid frontmatter for ${args.text.slice(0, 100)}...` + errors.map(beautifyError))
 	}
 	const errors = Markdoc.validate(ast, config)
 	if (errors.length > 0) {
@@ -62,7 +62,7 @@ export function parseMarkdown<FrontmatterSchema extends TSchema>(args: {
  * the object to the console is not very helpful. This
  * function returns a string that is easier to read.
  */
-function beautifyError(error: ValidationError): string {
+function beautifyError(error: object): string {
 	// for now, simply stringify the error
 	// TODO:
 	// - add information about the name and path of the document
