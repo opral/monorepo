@@ -15,8 +15,6 @@ import { GetHelp } from "#src/components/GetHelp.jsx"
 import { RepositoryCard } from "../index/CommunityProjects.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
 
-//! TEST LINK: http://localhost:3000/install?repo=github.com/floriandwt/inlang-ide-next-demo&module=../plugins/test/dist/index.js
-
 export type Step = {
 	type: string
 	message?: string
@@ -26,6 +24,9 @@ export type Step = {
 const [step, setStep] = createSignal<Step>({
 	type: "initial",
 })
+const [optIn, setOptIn] = createSignal(false)
+
+let optInButton: HTMLButtonElement
 
 const dynamicTitle = () => {
 	switch (step().type) {
@@ -67,7 +68,17 @@ export function Page() {
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<RootLayout>
 				<div class="h-screen flex flex-col items-center justify-center pb-32">
-					<InstallationProvider repo={repo} modules={modules} step={step} setStep={setStep}>
+					<InstallationProvider
+						repo={repo}
+						modules={modules}
+						step={step}
+						setStep={setStep}
+						optIn={{
+							optIn,
+							setOptIn,
+							optInButton,
+						}}
+					>
 						<div
 							class={
 								"flex-grow flex justify-center items-center " +
@@ -86,6 +97,9 @@ export function Page() {
 									</div>
 									<Gitlogin />
 								</SetupCard>
+							</Show>
+							<Show when={step().type === "opt-in"}>
+								<OptIn />
 							</Show>
 							<Show when={step().type === "installing"}>
 								<ShowProgress />
@@ -202,6 +216,43 @@ function ChooseRepo(props: { modules?: string[] }) {
 				</Show>
 			</div>
 		</div>
+	)
+}
+
+function OptIn() {
+	return (
+		<SetupCard>
+			<div class="flex flex-col justify-center gap-4 items-center mb-8">
+				<Icon name="warning" class="w-20 h-20 text-primary-500 mb-2 text-warning" />
+				<h2 class="text-[24px] leading-tight md:text-2xl font-semibold text-center">
+					{step().message}
+				</h2>
+				<p class="text-surface-500 text-center">
+					The config in your repository will be updated to include the modules you selected.
+				</p>
+			</div>
+			<div class="flex items-center gap-6">
+				<Button
+					// eslint-disable-next-line solid/reactivity
+					function={() => {
+						setOptIn(true)
+					}}
+					type="primary"
+					ref={optInButton}
+				>
+					Understand
+				</Button>
+				<Button
+					// eslint-disable-next-line solid/reactivity
+					function={() => {
+						setSearchParams(`/marketplace`)
+					}}
+					type="text"
+				>
+					Cancel
+				</Button>
+			</div>
+		</SetupCard>
 	)
 }
 

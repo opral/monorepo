@@ -1,4 +1,4 @@
-import { type JSXElement, createEffect } from "solid-js"
+import { type JSXElement, createEffect, createSignal } from "solid-js"
 import { openRepository, createNodeishMemoryFs } from "@project-lisa/client"
 import { publicEnv } from "@inlang/env-variables"
 import {
@@ -16,6 +16,7 @@ export function InstallationProvider(props: {
 	modules: string[]
 	step: () => Step
 	setStep: (step: Step) => void
+	optIn: Record<string, any>
 	children: JSXElement
 }) {
 	const [localStorage, setLocalStorage] = useLocalStorage() ?? []
@@ -50,6 +51,11 @@ export function InstallationProvider(props: {
 			// 		error: true,
 			// 	})
 			// }
+		} else if (!props.optIn.optIn()) {
+			props.setStep({
+				type: "opt-in",
+				message: "Please opt-in to the installation.",
+			})
 		} else {
 			props.setStep({
 				type: "installing",
@@ -201,6 +207,8 @@ async function initializeRepo(
 		type: "installing",
 		message: "Comitting changes...",
 	})
+
+	return
 
 	await repo.add({
 		filepath: "inlang.config.json",
