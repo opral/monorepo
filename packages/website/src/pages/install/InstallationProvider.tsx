@@ -208,8 +208,6 @@ async function initializeRepo(
 		message: "Comitting changes...",
 	})
 
-	return
-
 	await repo.add({
 		filepath: "inlang.config.json",
 	})
