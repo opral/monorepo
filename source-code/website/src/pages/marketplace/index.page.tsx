@@ -95,7 +95,7 @@ const Gallery = () => {
 				{(item) => {
 					return (
 						<a
-							href={item.meta.marketplace.linkToReadme.en}
+							href={`/marketplace/${item.meta.displayName.en?.toLowerCase().replaceAll(" ", "-")}`}
 							target="_blanc"
 							class="relative no-underline h-64"
 						>
