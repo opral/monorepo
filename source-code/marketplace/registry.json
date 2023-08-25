@@ -19,7 +19,8 @@
 					"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg"
 				}
 			},
-			"type": "app"
+			"type": "app",
+			"linkToApp": "/editor"
 		},
 		{
 			"meta": {
@@ -61,7 +62,8 @@
 					"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg"
 				}
 			},
-			"type": "app"
+			"type": "app",
+			"linkToApp": "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension&ssr=false#review-details"
 		},
 		{
 			"meta": {
