@@ -386,7 +386,9 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 				<div class="flex items-center justify-end gap-2">
 					<Show
 						when={
-							JSON.stringify(getTextValue(editor)) === "[]" || getTextValue(editor) === undefined
+							getTextValue(editor) === undefined
+							|| JSON.stringify(getTextValue(editor)) === "[]"
+							|| JSON.stringify(getTextValue(editor)) === `[{"type":"Text","value":""}]`
 						}
 					>
 						<sl-button
