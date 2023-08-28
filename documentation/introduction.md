@@ -1,7 +1,7 @@
 ---
 title: Introduction
 href: /documentation
-description: Inlang is an ecosystem of apps, plugins, and lint rules that helps organizations to go global.
+description: Inlang is globalization infrastructure that powers an ecosystem of apps, plugins, and lint rules to go global.
 ---
 
 # {% $frontmatter.title %}
