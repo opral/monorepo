@@ -90,11 +90,6 @@ function Header(props: { landingpage?: boolean }) {
 			{ name: `${t("header.link.marketplace")}`, href: "/marketplace", type: "text" as buttonType },
 			{ name: `${t("header.link.blog")}`, href: "/blog", type: "text" as buttonType },
 			{ name: `${t("header.link.docs")}`, href: "/documentation", type: "text" as buttonType },
-			{
-				name: `${t("header.link.feedback")}`,
-				href: "https://github.com/inlang/inlang/discussions",
-				type: "text" as buttonType,
-			},
 		]
 	}
 
