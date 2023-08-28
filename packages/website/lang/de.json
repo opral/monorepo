@@ -50,12 +50,12 @@
 			}
 		},
 		"pricing": {
-			"title": "Kostenlos für den individuellen Gebrauch und Open Source",
+			"title": "Kostenlos für den individuellen Gebrauch",
 			"caption": "Preisgestaltung",
-			"description": "Inlang ist ein kommerzielles Produkt. Die individuelle Nutzung und Open Source bleiben jedoch kostenlos. Wir verstehen den individuellen Einsatz als gutes „Marketing“, das uns hilft, Unternehmenskunden zu gewinnen.",
+			"description": "Inlang ist ein kommerzielles Produkt. Die individuelle Nutzung ist kostenfrei. Wir verstehen den individuellen Einsatz als gutes „Marketing“, das uns hilft, Unternehmenskunden zu gewinnen.",
 			"free": {
 				"name": "frei",
-				"title": "Einzelpersonen und Open Source",
+				"title": "Individueller Gebrauch",
 				"amount": "0€"
 			},
 			"paid": {
