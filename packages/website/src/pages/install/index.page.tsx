@@ -28,6 +28,9 @@ const [optIn, setOptIn] = createSignal(false)
 
 let optInButton: HTMLButtonElement
 
+/**
+ * Sets a title, useful for cloning of larger repos to see process in the tab
+ */
 const dynamicTitle = () => {
 	switch (step().type) {
 		case "initial":
@@ -121,6 +124,7 @@ export function Page() {
 	)
 }
 
+/* This Component uses a lot of logic from the editor, it lets the user select a repository */
 function ChooseRepo(props: { modules?: string[] }) {
 	const [input, setInput] = createSignal("")
 	const [store] = useLocalStorage()
@@ -219,6 +223,7 @@ function ChooseRepo(props: { modules?: string[] }) {
 	)
 }
 
+/* Lets the user opt-in before making changes to the repository */
 function OptIn() {
 	return (
 		<SetupCard>
@@ -256,6 +261,7 @@ function OptIn() {
 	)
 }
 
+/* This Component showcases the process lix and the InstallationProvider is doing */
 function ShowProgress() {
 	return (
 		<SetupCard>
@@ -274,6 +280,7 @@ function ShowProgress() {
 	)
 }
 
+/* This Component shows the success message and converts the user to the editor */
 function ShowSuccess(props: { repo: string }) {
 	return (
 		<SetupCard success>
@@ -297,6 +304,7 @@ function ShowSuccess(props: { repo: string }) {
 	)
 }
 
+/* This Component shows errors, the more transparent errors are shown the better the UX */
 function ShowError() {
 	return (
 		<SetupCard error>
