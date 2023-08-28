@@ -24,7 +24,7 @@ export function Page(props: PageProps) {
 	const [item, setItem] = createSignal<MarketplaceItem | undefined>(undefined)
 	const [readmore, setReadmore] = createSignal<boolean>(false)
 
-	/* Automatically sets the fitting item */
+	/* Automatically sets the fitting item e.g. when changing bundle */
 	createEffect(() => {
 		setItem(
 			marketplaceItems.find(
@@ -41,14 +41,14 @@ export function Page(props: PageProps) {
 			<Title>{props.markdown?.frontmatter?.title}</Title>
 			<Meta name="description" content={props.markdown?.frontmatter?.description} />
 			<Layout>
-				<div class="py-28">
-					<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-40 gap-16">
+				<div class="md:py-28 py-16">
+					<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-40 md:gap-16 gap-6">
 						<Show
 							when={props.markdown?.renderableTree}
 							fallback={<p class="text-danger">{props.markdown?.error}</p>}
 						>
-							<div class="col-span-1 md:col-span-3 pb-16 border-b border-surface-2">
-								<div class="flex items-start gap-8 mb-10">
+							<div class="col-span-1 md:col-span-3 md:pb-16 pb-12 border-b border-surface-2">
+								<div class="flex max-md:flex-col items-start gap-8 mb-10">
 									<img
 										class="w-16 h-16 rounded-md m-0 shadow-lg"
 										src={item()?.meta.marketplace.icon}
@@ -71,8 +71,7 @@ export function Page(props: PageProps) {
 										</div>
 									</div>
 								</div>
-								<div class="flex gap-4">
-									{/* <div class="flex items-center gap-4"> */}
+								<div class="flex gap-4 flex-wrap">
 									<Show
 										when={item()?.type !== "app"}
 										fallback={
