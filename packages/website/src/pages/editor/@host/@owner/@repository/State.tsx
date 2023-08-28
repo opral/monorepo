@@ -213,7 +213,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	})
 
 	// open the inlang project and store it in a resource
-	const [inlang] = createResource(lixErrors, async () => {
+	const [inlang] = createResource(async () => {
 		if (lixErrors().length === 0) {
 			const inlang = solidAdapter(
 				await openInlangProject({
@@ -223,7 +223,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				{ from },
 			)
 			//initialize lint to get reports
-			await inlang.lint.init()
+			if (inlang.errors().length === 0) {
+				await inlang.lint.init()
+			}
 			return inlang
 		} else {
 			return undefined
@@ -237,12 +239,12 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	// DERIVED source language tag from inlang config
 	const sourceLanguageTag = () => {
-		return inlang()?.config().sourceLanguageTag
+		return inlang()?.config()?.sourceLanguageTag
 	}
 
 	// DERIVED language tags from inlang config
 	const languageTags = () => {
-		return inlang()?.config().languageTags ?? []
+		return inlang()?.config()?.languageTags ?? []
 	}
 
 	//the effect should skip tour guide steps if not needed

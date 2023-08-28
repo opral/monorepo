@@ -97,7 +97,7 @@ export function Layout(props: { children: JSXElement }) {
 			if (filteredLanguageTags().length > 0) {
 				addFilter("Language")
 			} else {
-				setFilteredLanguageTags(inlang()!.config().languageTags)
+				if (inlang()?.config()) setFilteredLanguageTags(inlang()!.config()!.languageTags)
 			}
 		}
 	})
@@ -125,8 +125,8 @@ export function Layout(props: { children: JSXElement }) {
 		}
 		setFilteredLanguageTags([...filteredLanguageTags(), languageTag])
 		inlang()?.setConfig({
-			...inlang()!.config(),
-			languageTags: [...inlang()!.config().languageTags, languageTag],
+			...inlang()!.config()!,
+			languageTags: [...inlang()!.config()!.languageTags, languageTag],
 		})
 	}
 
@@ -164,7 +164,7 @@ export function Layout(props: { children: JSXElement }) {
 										prop:size="small"
 										onClick={() => {
 											setFilteredLanguageTags(
-												setFilteredLanguageTags(inlang()?.config().languageTags || []),
+												setFilteredLanguageTags(inlang()?.config()?.languageTags || []),
 											)
 											setFilteredLintRules([])
 											setSelectedFilters([])
@@ -401,7 +401,7 @@ function LanguageFilter(props: { clearFunction: any }) {
 						onClick={() =>
 							setFilteredLanguageTags(
 								// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-								[inlang()?.config()?.sourceLanguageTag!]
+								[inlang()?.config()?.sourceLanguageTag!],
 							)
 						}
 					>
@@ -411,7 +411,12 @@ function LanguageFilter(props: { clearFunction: any }) {
 				<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
 				<div class="max-h-[300px] overflow-y-auto text-sm">
 					{/* eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain */}
-					<For each={sortLanguageTags(inlang()?.config().languageTags || [], inlang()?.config().sourceLanguageTag!)}>
+					<For
+						each={sortLanguageTags(
+							inlang()?.config()?.languageTags || [],
+							inlang()?.config()?.sourceLanguageTag || "en",
+						)}
+					>
 						{(language) => (
 							<sl-option
 								prop:value={language}

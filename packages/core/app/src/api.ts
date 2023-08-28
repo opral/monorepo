@@ -67,7 +67,7 @@ export type InlangProject = {
 		)[]
 	>
 	appSpecificApi: Subscribable<ResolvedPluginApi["appSpecificApi"]>
-	config: Subscribable<InlangConfig>
+	config: Subscribable<InlangConfig | undefined>
 	setConfig: (config: InlangConfig) => Result<void, InvalidConfigError>
 	query: {
 		messages: MessageQueryApi
