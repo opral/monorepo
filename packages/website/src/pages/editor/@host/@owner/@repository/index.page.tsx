@@ -1,4 +1,4 @@
-import { For, Match, Switch, onMount } from "solid-js"
+import { For, Match, Switch, createEffect, createSignal, onMount } from "solid-js"
 import { Layout as EditorLayout } from "./Layout.jsx"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
@@ -28,8 +28,7 @@ export function Page() {
  * is required to use the useEditorState hook.
  */
 function TheActualPage() {
-	const { inlang, routeParams, repositoryIsCloned, doesInlangConfigExist, tourStep } =
-		useEditorState()
+	const { inlang, routeParams, doesInlangConfigExist, tourStep, lixErrors } = useEditorState()
 	const [, setLocalStorage] = useLocalStorage()
 
 	onMount(() => {
@@ -71,16 +70,30 @@ function TheActualPage() {
 					</p>
 				}
 			>
-				<Match when={repositoryIsCloned.error?.message.includes("404")}>
-					<RepositoryDoesNotExistOrNotAuthorizedCard />
+				<Match when={lixErrors().some((e) => e.message.includes("401"))}>
+					<RepositoryDoesNotExistOrNotAuthorizedCard code={401} />
 				</Match>
-				<Match when={repositoryIsCloned.error?.message.includes("401")}>
-					<p class="text-lg font-medium text-center flex justify-center items-center h-full grow">
-						You want to access a private repository, please sign-in at the bottom.
-					</p>
+				<Match when={lixErrors().some((e) => e.message.includes("404"))}>
+					<RepositoryDoesNotExistOrNotAuthorizedCard code={404} />
 				</Match>
-				<Match when={repositoryIsCloned.error}>
-					<p class="text-danger">{repositoryIsCloned.error.message}</p>
+				<Match when={lixErrors().length > 0}>
+					<p class="text-danger pb-2">An error occurred while cloning the repository</p>
+					<ul class="text-danger">
+						{lixErrors().length !== 0 && (
+							<For each={lixErrors()}>
+								{(error) => {
+									return (
+										<li class="pt-2">
+											<span class="font-semibold">{error.name}: </span>
+											<br />
+											{error.message} <br />
+											{error.stack && <p>{error.stack}</p>}
+										</li>
+									)
+								}}
+							</For>
+						)}
+					</ul>
 				</Match>
 				<Match when={inlang()?.errors().length !== 0 && inlang()}>
 					<p class="text-danger pb-2">An error occurred while initializing the config:</p>
@@ -101,14 +114,13 @@ function TheActualPage() {
 						)}
 					</ul>
 				</Match>
-				<Match when={repositoryIsCloned.loading || inlang() === undefined}>
+				<Match when={inlang() === undefined}>
 					<div class="flex flex-col grow justify-center items-center min-w-full gap-2">
 						{/* sl-spinner need a own div otherwise the spinner has a bug. The wheel is rendered on the outer div  */}
 						<div>
 							{/* use font-size to change the spinner size    */}
 							<sl-spinner class="text-4xl" />
 						</div>
-
 						<p class="text-lg font-medium">Cloning large repositories can take a few minutes...</p>
 						<br />
 						<p class="max-w-lg">
@@ -200,28 +212,34 @@ function NoInlangConfigFoundCard() {
 	)
 }
 
-function RepositoryDoesNotExistOrNotAuthorizedCard() {
+function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number }) {
 	const { routeParams } = useEditorState()
 
 	return (
 		<div class="flex grow items-center justify-center">
-			<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
-				<h1 class="self-center text-5xl font-light">404</h1>
-				<h2 class="font-semibold pt-5">The repository has not been found.</h2>
-				<p class="pt-1.5">
-					Make sure that you the repository owner{" "}
-					<code class="bg-secondary-container py-1 px-1.5 rounded text-on-secondary-container">
-						{routeParams().owner}
-					</code>{" "}
-					and the repository name{" "}
-					<code class="bg-secondary-container py-1 px-1.5 rounded text-on-secondary-container">
-						{routeParams().repository}
-					</code>{" "}
-					contain no mistake.
-					<span class="pt-2 block">
-						Alternatively, you might not have access to the repository.
-					</span>
-				</p>
+			<div class="border border-outline p-12 rounded-xl flex flex-col max-w-lg">
+				<h1 class="text-5xl font-light pt-2">{args.code}</h1>
+				<h2 class="font-semibold pt-12">
+					Repo does not exist or you don't have sufficient access rights.
+				</h2>
+				<ul class="pt-8 list-disc pl-4">
+					<li>
+						Make sure that you the repository owner{" "}
+						<code class="bg-secondary-container py-1 px-1.5 rounded text-on-secondary-container">
+							{routeParams().owner}
+						</code>{" "}
+						and the repository name{" "}
+						<code class="bg-secondary-container py-1 px-1.5 rounded text-on-secondary-container">
+							{routeParams().repository}
+						</code>{" "}
+						contain no mistake.
+					</li>
+					<li class="pt-2">Alternatively, you might not have access to the repository.</li>
+					<li class="pt-2">
+						If this is a <span class="font-bold">private repository</span> please sign in at the
+						bottom of the page.
+					</li>
+				</ul>
 				<a
 					class="self-end pt-5"
 					href="https://github.com/inlang/inlang/discussions/categories/help-questions-answers"
