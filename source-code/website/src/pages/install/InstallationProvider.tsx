@@ -1,5 +1,5 @@
-import { type JSXElement, createEffect, createSignal } from "solid-js"
-import { openRepository, createNodeishMemoryFs } from "@project-lisa/client"
+import { type JSXElement, createEffect } from "solid-js"
+import { openRepository, createNodeishMemoryFs } from "@lix-js/client"
 import { publicEnv } from "@inlang/env-variables"
 import {
 	LocalStorageProvider,

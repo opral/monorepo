@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, Show } from "solid-js"
+import { createSignal, For, Show } from "solid-js"
 import { Layout as RootLayout } from "../Layout.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import { navigate } from "vite-plugin-ssr/client/router"
@@ -222,7 +222,7 @@ function ChooseRepo(props: { modules?: string[] }) {
 function OptIn() {
 	return (
 		<SetupCard>
-			<div class="flex flex-col justify-center gap-4 items-center mb-8">
+			<div class="flex flex-col justify-center gap-4 items-center mb-2">
 				<Icon name="warning" class="w-20 h-20 text-primary-500 mb-2 text-warning" />
 				<h2 class="text-[24px] leading-tight md:text-2xl font-semibold text-center">
 					{step().message}

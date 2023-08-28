@@ -1,10 +1,10 @@
 import type { OnBeforeRender } from "#src/renderer/types.js"
 import type { PageProps } from "./index.page.jsx"
 import { marketplaceItems } from "@inlang/marketplace"
-import { RequiredFrontmatter } from "#src/services/markdown/index.js"
+import { MarketplaceFrontmatterSchema } from "./frontmatterSchema.js"
 import { parseMarkdown } from "#src/services/markdown/index.js"
 
-const FrontmatterSchema = RequiredFrontmatter
+// const FrontmatterSchema = RequiredFrontmatter
 
 const fetchReadmeContents = async () => {
 	const readmeContents = [] as string[]
@@ -76,13 +76,13 @@ const index: Record<string, Awaited<ReturnType<typeof parseMarkdown>>> = {}
  */
 const processedTableOfContents: ProcessedTableOfContents = {}
 
-;(async () => {
+;;(async () => {
 	const contents = await fetchReadmeContents()
 
 	for (const document of contents) {
 		const markdown = parseMarkdown({
 			text: document,
-			FrontmatterSchema,
+			frontmatterSchema: MarketplaceFrontmatterSchema,
 		})
 
 		processedTableOfContents[markdown.frontmatter.href] = markdown.frontmatter
@@ -115,7 +115,7 @@ async function generateIndexAndTableOfContents() {
 	for (const document of contents) {
 		const markdown = parseMarkdown({
 			text: document,
-			FrontmatterSchema,
+			frontmatterSchema: MarketplaceFrontmatterSchema,
 		})
 
 		processedTableOfContents[markdown.frontmatter.href] = markdown.frontmatter
@@ -128,9 +128,13 @@ async function generateIndexAndTableOfContents() {
  */
 function generateFrontmatter(title: string, href: string, document: string, description?: string) {
 	const frontmatterDocument = `---
-title: ${title}
 href: ${href}
-\n${description ? `description: ${description} \n` : ""}
+title: ${title}
+\n${
+		description
+			? `description: ${description.slice(0, 156)}... \n`
+			: `description: ${title} on inlang marketplace\n`
+	}
 ---
 
 ${document}`

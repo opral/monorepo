@@ -41,22 +41,24 @@ export function Page(props: PageProps) {
 				<div class="py-28">
 					<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-40 gap-16">
 						<Show
-							when={props.markdown?.renderableTree && item()}
+							when={props.markdown?.renderableTree}
 							fallback={<p class="text-danger">{props.markdown?.error}</p>}
 						>
 							<div class="col-span-1 md:col-span-3 pb-16 border-b border-surface-2">
 								<div class="flex items-start gap-8 mb-10">
 									<img
 										class="w-16 h-16 rounded-md m-0 shadow-lg"
-										src={item().meta.marketplace.icon}
+										src={item()?.meta.marketplace.icon}
 									/>
 									<div class="flex flex-col gap-3">
-										<h1 class="text-3xl font-bold">{item().meta.displayName.en}</h1>
+										<h1 class="text-3xl font-bold">{item()?.meta.displayName.en}</h1>
 										<div class="inline-block text-surface-500 ">
-											<p class={!readmore() && "lg:line-clamp-2"}>{item().meta.description.en}</p>
-											<Show when={item().meta.description.en.length > 205}>
+											<p class={!readmore() ? "lg:line-clamp-2" : ""}>
+												{item()?.meta.description.en}
+											</p>
+											<Show when={item()?.meta?.description?.en?.length > 205}>
 												<p
-													onClick={() => setReadmore(!readmore())}
+													onClick={() => setReadmore((prev) => !prev)}
 													class="cursor-pointer hover:text-surface-700 transition-all duration-150 font-medium max-lg:hidden"
 												>
 													{readmore() ? "Minimize" : "Read more"}
@@ -67,22 +69,20 @@ export function Page(props: PageProps) {
 								</div>
 								<div class="flex items-center gap-4">
 									<Show
-										when={item().type !== "app"}
+										when={item()?.type !== "app"}
 										fallback={
-											<Show when={item().linkToApp}>
-												<Button type="primary" href={item().linkToApp}>
-													Open App
-												</Button>
-											</Show>
+											<Button type="primary" href={item()?.linkToApp}>
+												Open App
+											</Button>
 										}
 									>
-										<Button type="primary" href={`/install?module=${item().module}`}>
+										<Button type="primary" href={`/install?module=${item()?.module}`}>
 											Install Module
 										</Button>
 									</Show>
 									<Button
 										type="secondary"
-										href={item()?.meta.marketplace.linkToReadme.en.replace("README.md", "")}
+										href={item()?.meta.marketplace.linkToReadme.en?.replace("README.md", "")}
 									>
 										GitHub
 										<MaterialSymbolsArrowOutward
@@ -100,24 +100,24 @@ export function Page(props: PageProps) {
 										<div class="flex gap-2 items-center">
 											<img
 												class="w-6 h-6 rounded-full m-0"
-												src={item().meta.marketplace.publisherIcon}
+												src={item()?.meta.marketplace.publisherIcon}
 											/>
 											<p class="m-0 text-surface-600 no-underline font-medium">
-												{item().meta.marketplace.publisherName}
+												{item()?.meta.marketplace.publisherName}
 											</p>
 										</div>
 									</div>
 									<div class="flex flex-col gap-3 mb-8">
 										<h3 class="text-sm text-surface-400">Keywords</h3>
 										<div class="flex flex-wrap gap-2 items-center">
-											<For each={item().meta.marketplace.keywords}>
+											<For each={item()?.meta.marketplace.keywords}>
 												{(keyword) => (
 													<Chip
 														text={keyword}
 														color={
-															item().type === "app"
+															item()?.type === "app"
 																? "#3B82F6"
-																: item().type === "plugin"
+																: item()?.type === "plugin"
 																? "#BF7CE4"
 																: "#06B6D4"
 														}
@@ -126,11 +126,11 @@ export function Page(props: PageProps) {
 											</For>
 										</div>
 									</div>
-									<Show when={item().moduleItems && item().moduleItems.length > 1}>
+									<Show when={item()?.moduleItems && item()?.moduleItems.length > 1}>
 										<div class="flex flex-col gap-3">
 											<h3 class="text-sm text-surface-400">Bundled with</h3>
 											<div class="flex flex-col items-start">
-												<For each={item().moduleItems}>
+												<For each={item()?.moduleItems}>
 													{(moduleItem) => (
 														<Show when={moduleItem !== item()?.meta.id}>
 															<Button
