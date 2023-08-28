@@ -37,7 +37,7 @@ type LintRule = ExportedItemFromModule & {
 
 type App = MarketplaceItemBase & {
 	type: "app"
-	linkToApp?: string
+	linkToApp: string
 }
 
 type Plugin = ExportedItemFromModule & {
