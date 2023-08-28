@@ -9,6 +9,7 @@ import type { MarketplaceItem } from "@inlang/marketplace"
 import { Button } from "#src/pages/index/components/Button.jsx"
 import { Chip } from "#src/components/Chip.jsx"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
+import { SelectRepo } from "../SelectRepo.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -67,7 +68,8 @@ export function Page(props: PageProps) {
 										</div>
 									</div>
 								</div>
-								<div class="flex items-center gap-4">
+								<div class="flex gap-4">
+									{/* <div class="flex items-center gap-4"> */}
 									<Show
 										when={item()?.type !== "app"}
 										fallback={
@@ -76,9 +78,12 @@ export function Page(props: PageProps) {
 											</Button>
 										}
 									>
-										<Button type="primary" href={`/install?module=${item()?.module}`}>
-											Install Module
-										</Button>
+										<div class="flex items-center gap-2">
+											<Button type="primary" href={`/install?module=${item()?.module}`}>
+												Install Module
+												<SelectRepo size="medium" modules={[item()?.module]} />
+											</Button>
+										</div>
 									</Show>
 									<Button
 										type="secondary"
@@ -91,6 +96,7 @@ export function Page(props: PageProps) {
 										/>
 									</Button>
 								</div>
+								{/* </div> */}
 							</div>
 							<div class="col-span-1 row-span-2 p-4 relative">
 								<div class="sticky top-28">
