@@ -16,7 +16,7 @@ description: Inlang is an ecosystem of apps, plugins, and lint rules that helps 
 
 ### Infrastructure approach
 
-For every use case, there is an app, a plugin, a lint rule, or a custom solution that can be built. Inlang's infrastructure powers an entire ecosystem of tools, applications, best practices, and automations for organizations to go global.
+For every use case, there is an app, a plugin, a lint rule, or a custom solution that can be built. Inlang's infrastructure powers an ecosystem of tools, applications, best practices, and automations for organizations to go global.
 
 {% Figure
 src="https://github.com/inlang/inlang/assets/58360188/55c61841-ab73-4fa8-a828-3c2016ced872"
