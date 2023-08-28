@@ -145,7 +145,6 @@ async function loadMessages(args: {
 			}
 		}
 	}
-	//console.log(messages)
 	return messages
 }
 
@@ -338,9 +337,14 @@ async function saveMessages(args: {
 		}
 		for (const [languageTag, value] of Object.entries(storage)) {
 			const pathWithLanguage = args.settings.pathPattern.replace("{languageTag}", languageTag)
-			await args.nodeishFs.mkdir(pathWithLanguage.split("/").slice(0, -1).join("/"), {
-				recursive: true,
-			})
+			try {
+				await args.nodeishFs.readdir(pathWithLanguage.split("/").slice(0, -1).join("/"))
+			} catch {
+				await args.nodeishFs.mkdir(pathWithLanguage.split("/").slice(0, -1).join("/"), {
+					recursive: true,
+				})
+			}
+
 			await args.nodeishFs.writeFile(
 				pathWithLanguage,
 				serializeFile(

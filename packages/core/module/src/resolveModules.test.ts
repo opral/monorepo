@@ -82,7 +82,7 @@ describe("resolveModules", () => {
 		// Check for the meta data of the plugin
 		expect(resolved.plugins.some((plugin) => plugin.meta.id === mockPlugin.meta.id)).toBeDefined()
 		// Check for the app specific api
-		expect(resolved.runtimePluginApi["appSpecificApi"]?.["inlang.app.ideExtension"]).toBeDefined()
+		expect(resolved.resolvedPluginApi["appSpecificApi"]?.["inlang.app.ideExtension"]).toBeDefined()
 		// Check for the lint rule
 		expect(resolved.lintRules[0]?.meta.id).toBe(mockLintRule.meta.id)
 	})

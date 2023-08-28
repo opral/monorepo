@@ -1,7 +1,23 @@
 import { createNodeishMemoryFs } from "@inlang-git/fs"
-import { InlangConfig, Message, Plugin, openInlangProject, withSolidReactivity } from "@inlang/app"
+import {
+	InlangConfig,
+	Message,
+	Plugin,
+	openInlangProject,
+	solidAdapter,
+	InlangProjectWithSolidAdapter,
+} from "@inlang/app"
 import type { ImportFunction, InlangModule } from "@inlang/module"
-import { createEffect, Show, createResource, from } from "solid-js"
+import {
+	createEffect,
+	Show,
+	createResource,
+	from,
+	observable,
+	For,
+	createSignal,
+	Resource,
+} from "solid-js"
 
 export const Page = () => {
 	const config: InlangConfig = {
@@ -79,28 +95,36 @@ export const Page = () => {
 		const fs = createNodeishMemoryFs()
 		await fs.writeFile("/inlang.config.json", JSON.stringify(config))
 
-		return withSolidReactivity(
+		return solidAdapter(
 			await openInlangProject({
 				nodeishFs: fs,
 				configPath: "/inlang.config.json",
 				_import: $import,
 			}),
 			{ from },
-		)
+		) as InlangProjectWithSolidAdapter
 	})
 	// createEffect(() => {
 	// 	if (!inlang.loading) {
-	// 		console.log("config changes", inlang()?.config())
+	// 		console.debug("config changes", inlang()?.config())
 	// 	}
 	// })
 	// createEffect(() => {
 	// 	if (!inlang.loading) {
-	// 		console.log("meta plugins changes", inlang()!.installed.plugins()[0]?.meta.id)
+	// 		console.debug("meta plugins changes", inlang()!.installed.plugins()[0]?.meta.id)
 	// 	}
 	// })
 	createEffect(() => {
 		if (!inlang.loading) {
-			console.info("messages changes", Object.values(inlang()!.query.messages.getAll() || {}))
+			console.info("messages change", inlang()!.query.messages.includedMessageIds() || [])
+		}
+	})
+
+	createEffect(() => {
+		if (!inlang.loading) {
+			inlang()!.query.messages.get.subscribe({ where: { id: "d" } }, (message) =>
+				console.debug(message),
+			)
 		}
 	})
 
@@ -128,7 +152,33 @@ export const Page = () => {
 		<div>
 			<Show when={!inlang.loading} fallback={<div>loading</div>}>
 				<div>{inlang()!.config()?.sourceLanguageTag}</div>
+				<For each={inlang()!.query.messages.includedMessageIds()}>
+					{(id) => {
+						return <MessageConponent id={id} inlang={inlang()!} />
+					}}
+				</For>
 			</Show>
+		</div>
+	)
+}
+
+const MessageConponent = (args: { id: string; inlang: InlangProjectWithSolidAdapter }) => {
+	const [message, setMessage] = createSignal<Message | undefined>(undefined)
+
+	createEffect(() => {
+		args.inlang.query.messages.get.subscribe({ where: { id: args.id } }, (message) =>
+			setMessage(message),
+		)
+	})
+
+	createEffect(() => {
+		console.debug(message())
+	})
+
+	return (
+		<div>
+			<div>{message()?.id}</div>
+			<div>{message()?.variants[0]?.pattern[0].value}</div>
 		</div>
 	)
 }

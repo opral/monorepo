@@ -10,7 +10,7 @@ import type { Message } from "@inlang/messages"
 import type { Result } from "@inlang/result"
 import type {
 	InvalidConfigError,
-	NoMessagesPluginError,
+	NoPluginProvidesLoadOrSaveMessagesError,
 	PluginSaveMessagesError,
 } from "./errors.js"
 import type {
@@ -21,7 +21,7 @@ import type {
 	PluginHasInvalidIdError,
 	PluginHasInvalidSchemaError,
 	PluginUsesReservedNamespaceError,
-	RuntimePluginApi,
+	ResolvedPluginApi,
 } from "@inlang/plugin"
 import type { ModuleImportError, ModuleError } from "@inlang/module"
 
@@ -46,11 +46,11 @@ export type InstalledLintRule = {
 
 export type InlangProject = {
 	installed: {
-		plugins: Subscribable<() => InstalledPlugin[]>
-		lintRules: Subscribable<() => InstalledLintRule[]>
+		plugins: Subscribable<InstalledPlugin[]>
+		lintRules: Subscribable<InstalledLintRule[]>
 	}
 	errors: Subscribable<
-		() => (
+		(
 			| ModuleImportError
 			| ModuleError
 			| PluginReturnedInvalidAppSpecificApiError
@@ -62,12 +62,12 @@ export type InlangProject = {
 			| InvalidLintRuleError
 			| LintRuleThrowedError
 			| PluginSaveMessagesError
-			| NoMessagesPluginError
+			| NoPluginProvidesLoadOrSaveMessagesError
 			| Error
 		)[]
 	>
-	appSpecificApi: Subscribable<() => RuntimePluginApi["appSpecificApi"]>
-	config: Subscribable<() => InlangConfig>
+	appSpecificApi: Subscribable<ResolvedPluginApi["appSpecificApi"]>
+	config: Subscribable<InlangConfig>
 	setConfig: (config: InlangConfig) => Result<void, InvalidConfigError>
 	query: {
 		messages: MessageQueryApi
@@ -79,19 +79,28 @@ export type InlangProject = {
 		init: () => Promise<void>
 		// for now, only simply array that can be improved in the future
 		// see https://github.com/inlang/inlang/issues/1098
-		reports: Subscribable<() => LintReport[]>
+		reports: Subscribable<LintReport[]>
 	}
 }
 
-export type Subscribable<Value extends (...args: any[]) => unknown> = {
-	(...args: Parameters<Value>): ReturnType<Value>
-	subscribe: (callback: (value: ReturnType<Value>) => void) => void
+export type Subscribable<Value> = {
+	(): Value
+	subscribe: (callback: (value: Value) => void) => void
 }
 
 export type MessageQueryApi = {
 	create: (args: { data: Message }) => boolean
-	get: Subscribable<(args: { where: { id: Message["id"] } }) => Message | undefined>
-	getAll: Subscribable<() => { [id: string]: Message }>
+	get: ((args: { where: { id: Message["id"] } }) => Message | undefined) & {
+		subscribe: (
+			args: { where: { id: Message["id"] } },
+			callback: (message: Message | undefined) => void,
+		) => void
+	}
+	includedMessageIds: Subscribable<string[]>
+	/*
+	 * getAll is depricated do not use it
+	 */
+	getAll: Subscribable<Message[]>
 	update: (args: { where: { id: Message["id"] }; data: Partial<Message> }) => boolean
 	upsert: (args: { where: { id: Message["id"] }; data: Message }) => void
 	delete: (args: { where: { id: Message["id"] } }) => boolean

@@ -1,33 +1,15 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect } from "vitest"
-import { createReactiveQuery } from "./createReactiveQuery.js"
+import { createMessagesQuery } from "./createMessagesQuery.js"
 import { createEffect, createRoot, createSignal } from "./solid.js"
-import type { Message, Pattern, Text } from "@inlang/plugin"
+import type { Message, Text } from "@inlang/plugin"
+import { createMessage } from "@inlang/test"
 
 const createChangeListener = async (cb: () => void) => createEffect(cb)
 
-// TODO: create global util function
-export const createMessage = (id: string, patterns: Record<string, Pattern | string>): Message => ({
-	id,
-	selectors: [],
-	variants: Object.entries(patterns).map(([languageTag, patterns]) => ({
-		languageTag,
-		match: {},
-		pattern:
-			typeof patterns === "string"
-				? [
-						{
-							type: "Text",
-							value: patterns,
-						},
-				  ]
-				: patterns,
-	})),
-})
-
 describe("create", () => {
 	it("should create a message", () => {
-		const query = createReactiveQuery(() => [])
+		const query = createMessagesQuery(() => [])
 		expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
 
 		const mockMessage = createMessage("first-message", { en: "Hello World" })
@@ -38,7 +20,7 @@ describe("create", () => {
 	})
 
 	it("should return false if message with id already exists", () => {
-		const query = createReactiveQuery(() => [createMessage("first-message", { en: "Hello World" })])
+		const query = createMessagesQuery(() => [createMessage("first-message", { en: "Hello World" })])
 		expect(query.get({ where: { id: "first-message" } })).toBeDefined()
 
 		const mockMessage = createMessage("first-message", { en: "Some Text" })
@@ -51,20 +33,20 @@ describe("create", () => {
 
 describe("get", () => {
 	it("should return undefined if a message does not exist", () => {
-		const query = createReactiveQuery(() => [createMessage("first-message", { en: "Hello World" })])
+		const query = createMessagesQuery(() => [createMessage("first-message", { en: "Hello World" })])
 		const message = query.get({ where: { id: "none-existent-message" } })
 		expect(message).toBeUndefined()
 	})
 
 	it("should return an object, not an array", () => {
-		const query = createReactiveQuery(() => [createMessage("first-message", { en: "Hello World" })])
+		const query = createMessagesQuery(() => [createMessage("first-message", { en: "Hello World" })])
 		const message = query.get({ where: { id: "first-message" } })
 		expect(message).toBeDefined()
 		expect(Array.isArray(message)).toBe(false)
 	})
 
 	it("mutating the returned value should not affect subsequent return values", () => {
-		const query = createReactiveQuery(() => [createMessage("first-message", { en: "Hello World" })])
+		const query = createMessagesQuery(() => [createMessage("first-message", { en: "Hello World" })])
 		const message1 = query.get({ where: { id: "first-message" } })!
 		;(message1.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value =
 			"Hello World 2"
@@ -81,14 +63,14 @@ describe("get", () => {
 
 describe("getAll", () => {
 	it("should return an empty array if no messages exist", () => {
-		const query = createReactiveQuery(() => [])
+		const query = createMessagesQuery(() => [])
 		const messages = query.getAll()
 
 		expect(Object.values(messages!)).toEqual([])
 	})
 
 	it("should return all message objects", () => {
-		const query = createReactiveQuery(() => [])
+		const query = createMessagesQuery(() => [])
 		const mockMessage1 = createMessage("first-message", { en: "Hello World" })
 		const mockMessage2 = createMessage("second-message", { en: "Hello World 2" })
 		query.create({ data: mockMessage1 })
@@ -99,7 +81,7 @@ describe("getAll", () => {
 	})
 
 	it("mutating the returned value should not affect subsequent return values", () => {
-		const query = createReactiveQuery(() => [createMessage("first-message", { en: "Hello World" })])
+		const query = createMessagesQuery(() => [createMessage("first-message", { en: "Hello World" })])
 		const messages1 = query.getAll()
 		;(
 			Object.values(messages1!)[0]!.variants.find((v) => v.languageTag === "en")!
@@ -111,13 +93,13 @@ describe("getAll", () => {
 				Object.values(query.getAll()!)[0]!.variants.find((v) => v.languageTag === "en")!
 					.pattern![0]! as Text
 			).value,
-		).toBe("Hello World 2")
+		).toBe("Hello World")
 	})
 })
 
 describe("update", () => {
 	it("should update a message", () => {
-		const query = createReactiveQuery(() => [createMessage("first-message", { en: "Hello World" })])
+		const query = createMessagesQuery(() => [createMessage("first-message", { en: "Hello World" })])
 		expect(query.get({ where: { id: "first-message" } })).toBeDefined()
 
 		const mockMessage = createMessage("first-message", { en: "Hello World 2" })
@@ -128,7 +110,7 @@ describe("update", () => {
 	})
 
 	it("should return false if message with id does not exist exists", () => {
-		const query = createReactiveQuery(() => [])
+		const query = createMessagesQuery(() => [])
 		expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
 
 		const mockMessage = createMessage("first-message", { en: "Hello World" })
@@ -139,7 +121,7 @@ describe("update", () => {
 
 describe("upsert", () => {
 	it("should create a message if not present yet", () => {
-		const query = createReactiveQuery(() => [])
+		const query = createMessagesQuery(() => [])
 		expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
 
 		const mockMessage = createMessage("first-message", { en: "Hello World" })
@@ -150,7 +132,7 @@ describe("upsert", () => {
 	})
 
 	it("should update message if id already exists", () => {
-		const query = createReactiveQuery(() => [createMessage("first-message", { en: "Hello World" })])
+		const query = createMessagesQuery(() => [createMessage("first-message", { en: "Hello World" })])
 		expect(query.get({ where: { id: "first-message" } })).toBeDefined()
 
 		const mockMessage = createMessage("first-message", { en: "Hello World 2" })
@@ -163,7 +145,7 @@ describe("upsert", () => {
 
 describe("delete", () => {
 	it("should delete a message", () => {
-		const query = createReactiveQuery(() => [createMessage("first-message", { en: "Hello World" })])
+		const query = createMessagesQuery(() => [createMessage("first-message", { en: "Hello World" })])
 		expect(query.get({ where: { id: "first-message" } })).toBeDefined()
 
 		const deleted = query.delete({ where: { id: "first-message" } })
@@ -173,7 +155,7 @@ describe("delete", () => {
 	})
 
 	it("should return false if message with id does not exist", () => {
-		const query = createReactiveQuery(() => [])
+		const query = createMessagesQuery(() => [])
 		expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
 
 		const deleted = query.delete({ where: { id: "first-message" } })
@@ -185,7 +167,7 @@ describe("reactivity", () => {
 	describe("get", () => {
 		it("should react to `create`", async () => {
 			await createRoot(async () => {
-				const query = createReactiveQuery(() => [])
+				const query = createMessagesQuery(() => [])
 
 				// eslint-disable-next-line unicorn/no-null
 				let message: Message | undefined | null = null
@@ -203,7 +185,7 @@ describe("reactivity", () => {
 
 		it("should react to `update`", async () => {
 			await createRoot(async () => {
-				const query = createReactiveQuery(() => [createMessage("1", { en: "before" })])
+				const query = createMessagesQuery(() => [createMessage("1", { en: "before" })])
 
 				let message: Message | undefined
 				await createChangeListener(() => (message = query.get({ where: { id: "1" } })))
@@ -223,7 +205,7 @@ describe("reactivity", () => {
 
 		it("should react to `upsert`", async () => {
 			await createRoot(async () => {
-				const query = createReactiveQuery(() => [])
+				const query = createMessagesQuery(() => [])
 
 				let message: Message | undefined
 				await createChangeListener(() => (message = query.get({ where: { id: "1" } })))
@@ -246,7 +228,7 @@ describe("reactivity", () => {
 
 		it("should react to `delete`", async () => {
 			await createRoot(async () => {
-				const query = createReactiveQuery(() => [createMessage("1", { en: "" })])
+				const query = createMessagesQuery(() => [createMessage("1", { en: "" })])
 
 				let message: Message | undefined
 				await createChangeListener(() => (message = query.get({ where: { id: "1" } })))
@@ -259,7 +241,7 @@ describe("reactivity", () => {
 
 		it("should react to changes to the input `messages`", async () => {
 			const [messages, setMessages] = createSignal<Message[]>([])
-			const query = createReactiveQuery(messages)
+			const query = createMessagesQuery(messages)
 
 			// eslint-disable-next-line unicorn/no-null
 			let message: Message | undefined | null = null
@@ -282,12 +264,16 @@ describe("reactivity", () => {
 		})
 	})
 
+	describe.todo("subscribe", () => {
+		// TODO: add tests for `subscribe`
+	})
+
 	describe("getAll", () => {
 		it("should react to `create`", async () => {
 			await createRoot(async () => {
-				const query = createReactiveQuery(() => [])
+				const query = createMessagesQuery(() => [])
 
-				let messages: { [id: string]: Message } | undefined = undefined
+				let messages: Message[] | undefined = undefined
 				await createChangeListener(() => (messages = query.getAll()))
 				expect(Object.values(messages!)).toHaveLength(0)
 
@@ -304,9 +290,9 @@ describe("reactivity", () => {
 
 		it("should react to `update`", async () => {
 			await createRoot(async () => {
-				const query = createReactiveQuery(() => [createMessage("1", { en: "before" })])
+				const query = createMessagesQuery(() => [createMessage("1", { en: "before" })])
 
-				let messages: { [id: string]: Message } | undefined = undefined
+				let messages: Message[] | undefined = undefined
 				await createChangeListener(() => (messages = query.getAll()))
 				expect(Object.values(messages!)).toHaveLength(1)
 				expect(
@@ -329,9 +315,9 @@ describe("reactivity", () => {
 
 		it("should react to `upsert`", async () => {
 			await createRoot(async () => {
-				const query = createReactiveQuery(() => [])
+				const query = createMessagesQuery(() => [])
 
-				let messages: { [id: string]: Message } | undefined = undefined
+				let messages: Message[] | undefined = undefined
 				await createChangeListener(() => (messages = query.getAll()))
 				expect(Object.values(messages!)).toHaveLength(0)
 
@@ -356,13 +342,13 @@ describe("reactivity", () => {
 
 		it("should react to `delete`", async () => {
 			await createRoot(async () => {
-				const query = createReactiveQuery(() => [
+				const query = createMessagesQuery(() => [
 					createMessage("1", { en: "" }),
 					createMessage("2", { en: "" }),
 					createMessage("3", { en: "" }),
 				])
 
-				let messages: { [id: string]: Message } | undefined = undefined
+				let messages: Message[] | undefined = undefined
 				await createChangeListener(() => (messages = query.getAll()))
 				expect(Object.values(messages!)).toHaveLength(3)
 
@@ -385,9 +371,9 @@ describe("reactivity", () => {
 			const [inputMessages, setMessages] = createSignal<Message[]>([
 				createMessage("1", { en: "before" }),
 			])
-			const query = createReactiveQuery(inputMessages)
+			const query = createMessagesQuery(inputMessages)
 
-			let messages: { [id: string]: Message } | undefined = undefined
+			let messages: Message[] | undefined = undefined
 			await createChangeListener(() => (messages = query.getAll()))
 			expect(Object.values(messages!)).toHaveLength(1)
 
@@ -414,8 +400,8 @@ describe("reactivity", () => {
 
 it("instances should not share state", async () => {
 	await createRoot(async () => {
-		const query1 = createReactiveQuery(() => [createMessage("1", { en: "before" })])
-		const query2 = createReactiveQuery(() => [])
+		const query1 = createMessagesQuery(() => [createMessage("1", { en: "before" })])
+		const query2 = createMessagesQuery(() => [])
 
 		// eslint-disable-next-line unicorn/no-null
 		let message1: Message | undefined | null = null

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, expect, test } from "vitest"
 import type { Message } from "@inlang/messages"
 import { emptyPatternRule } from "./emptyPattern.js"
@@ -26,7 +27,7 @@ test("should not report if all messages are present", async () => {
 		lintRuleSettings: {},
 		messages,
 		message: message1,
-		rules: [emptyPatternRule],
+		lintRules: [emptyPatternRule],
 	})
 
 	expect(result.errors).toHaveLength(0)
@@ -43,7 +44,7 @@ test("should report if no patterns are defined", async () => {
 		lintRuleSettings: {},
 		messages,
 		message: message1,
-		rules: [emptyPatternRule],
+		lintRules: [emptyPatternRule],
 	})
 
 	expect(result.errors).toHaveLength(0)
@@ -61,7 +62,7 @@ test("should report if a message has a pattern with only one text element that i
 		lintRuleSettings: {},
 		messages,
 		message: message1,
-		rules: [emptyPatternRule],
+		lintRules: [emptyPatternRule],
 	})
 
 	expect(result.errors).toHaveLength(0)
@@ -80,7 +81,7 @@ describe("reported by missingTranslationRule", () => {
 			lintRuleSettings: {},
 			messages,
 			message: message1,
-			rules: [emptyPatternRule],
+			lintRules: [emptyPatternRule],
 		})
 
 		expect(result.errors).toHaveLength(0)
@@ -97,7 +98,7 @@ describe("reported by missingTranslationRule", () => {
 			lintRuleSettings: {},
 			messages,
 			message: message1,
-			rules: [emptyPatternRule],
+			lintRules: [emptyPatternRule],
 		})
 
 		expect(result.errors).toHaveLength(0)

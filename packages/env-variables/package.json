@@ -2,6 +2,7 @@
 	"name": "@inlang/env-variables",
 	"type": "module",
 	"private": true,
+	"version": "0.0.0",
 	"exports": {
 		".": "./dist/index.js"
 	},
@@ -10,7 +11,6 @@
 		"./src"
 	],
 	"scripts": {
-		"- CAREFUL build can have caching issues. Resolve the issue by running npm run clean in the root of the repo": "",
 		"build": "tsx ./build.ts",
 		"dev": "DEV=true npm run build",
 		"---- TEST ----------------------------------------------------------": "",
@@ -24,17 +24,14 @@
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
-	"dependencies": {
-		"@inlang/core": "^0.9.0",
-		"dotenv": "^16.0.3",
-		"zod": "^3.21.4"
-	},
 	"devDependencies": {
-		"esbuild": "^0.17.15",
+		"@inlang/core": "*",
+		"dotenv": "^16.3.1",
+		"esbuild": "^0.19.2",
 		"esbuild-plugin-d.ts": "^1.1.0",
-		"esbuild-plugin-glob": "^2.2.1",
-		"tsx": "^3.12.6"
+		"esbuild-plugin-glob": "^2.2.2",
+		"tsx": "^3.12.7",
+		"zod": "^3.22.2"
 	},
-	"license": "Apache-2.0",
-	"version": null
+	"license": "Apache-2.0"
 }

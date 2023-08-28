@@ -1,15 +1,15 @@
 import type { InlangProject } from "../api.js"
-import { observable, type from as solidFrom } from "../solid.js"
-import type { MessageQueryApi } from "@inlang/app"
+import { createSignal, observable, type from as solidFrom } from "../solid.js"
+import type { Message, MessageQueryApi } from "@inlang/app"
 
-export const withSolidReactivity = (
+export const solidAdapter = (
 	project: InlangProject,
-	args: {
+	arg: {
 		from: typeof solidFrom
 	},
-): SolidInlangProject => {
+): InlangProjectWithSolidAdapter => {
 	const convert = <T>(signal: () => T): (() => T) => {
-		return args.from(observable(signal)) as () => T
+		return arg.from(observable(signal)) as () => T
 	}
 
 	return {
@@ -32,13 +32,19 @@ export const withSolidReactivity = (
 				delete: project.query.messages.delete,
 				upsert: project.query.messages.upsert,
 				get: project.query.messages.get,
+				// get: (args) => {
+				// 	const [message, setMessage] = createSignal<Message | undefined>()
+				// 	project.query.messages.get.subscribe(args, setMessage)
+				// 	return message()
+				// },
 				getAll: convert(project.query.messages.getAll),
+				includedMessageIds: convert(project.query.messages.includedMessageIds),
 			},
 		},
-	} satisfies SolidInlangProject
+	} satisfies InlangProjectWithSolidAdapter
 }
 
-export type SolidInlangProject = {
+export type InlangProjectWithSolidAdapter = {
 	appSpecificApi: () => ReturnType<InlangProject["appSpecificApi"]>
 	installed: {
 		plugins: () => ReturnType<InlangProject["installed"]["plugins"]>
@@ -54,7 +60,9 @@ export type SolidInlangProject = {
 			delete: MessageQueryApi["delete"]
 			upsert: MessageQueryApi["upsert"]
 			get: MessageQueryApi["get"]
+			//get: (args: Parameters<MessageQueryApi["get"]>[0]) => ReturnType<MessageQueryApi["get"]>
 			getAll: () => ReturnType<MessageQueryApi["getAll"]>
+			includedMessageIds: () => ReturnType<MessageQueryApi["includedMessageIds"]>
 		}
 	}
 	lint: {

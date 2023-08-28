@@ -1,15 +1,15 @@
-import type { LanguageTag, WithLanguageTags } from "./schema.js"
+import type { LanguageTag, Translatable } from "./schema.js"
 import { expectType } from "tsd"
 
 const tag: LanguageTag = "en"
 
-const translations: WithLanguageTags<string> = {
+const translations: Translatable<string> = {
 	en: "Hello world",
 	de: "Hallo Welt",
 }
 
 expectType<LanguageTag>(tag)
-expectType<WithLanguageTags<string>>(translations)
+expectType<Translatable<string>>(translations)
 
 expectType<string | undefined>(translations[tag])
 

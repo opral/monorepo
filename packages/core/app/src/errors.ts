@@ -5,10 +5,10 @@ export class InvalidConfigError extends Error {
 	}
 }
 
-export class ConfigSyntaxError extends Error {
+export class ConfigJSONSyntaxError extends Error {
 	constructor(message: string, options: ErrorOptions) {
 		super(message, options)
-		this.name = "ConfigSyntaxError"
+		this.name = "ConfigJSONSyntaxError"
 	}
 }
 
@@ -36,11 +36,11 @@ export class PluginLoadMessagesError extends Error {
 /**
  * Error when no module provides the API to handle messages.
  */
-export class NoMessagesPluginError extends Error {
+export class NoPluginProvidesLoadOrSaveMessagesError extends Error {
 	constructor() {
 		super(
 			"It seems you did not install any plugin that handles messages. Please add one to make inlang work. See https://inlang.com/documentation/plugins/registry.",
 		) // TODO: check if link is correct
-		this.name = "NoMessagesPluginError"
+		this.name = "NoPluginProvidesLoadOrSaveMessagesError"
 	}
 }

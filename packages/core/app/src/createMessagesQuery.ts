@@ -1,13 +1,13 @@
 import type { Message } from "@inlang/messages"
 import { ReactiveMap } from "@solid-primitives/map"
-import { createEffect, createMemo } from "./solid.js"
+import { createEffect } from "./solid.js"
 import { createSubscribable } from "./openInlangProject.js"
-import type { InlangProject } from "./api.js"
+import type { InlangProject, MessageQueryApi } from "./api.js"
 
 /**
  * Creates a reactive query API for messages.
  */
-export function createReactiveQuery(
+export function createMessagesQuery(
 	messages: () => Array<Message>,
 ): InlangProject["query"]["messages"] {
 	const index = new ReactiveMap<string, Message>()
@@ -19,27 +19,27 @@ export function createReactiveQuery(
 		}
 	})
 
+	const get = (args: Parameters<MessageQueryApi["get"]>[0]) =>
+		structuredClone(index.get(args.where.id))
+
 	return {
 		create: ({ data }): boolean => {
 			if (index.has(data.id)) return false
 			index.set(data.id, data)
 			return true
 		},
-		get: createSubscribable(({ where }) => {
-			return structuredClone(index.get(where.id))
+		get: Object.assign(get, {
+			subscribe: (
+				args: Parameters<MessageQueryApi["get"]["subscribe"]>[0],
+				callback: Parameters<MessageQueryApi["get"]["subscribe"]>[1],
+			) => createSubscribable(() => get(args)).subscribe(callback),
+		}) as any,
+		includedMessageIds: createSubscribable(() => {
+			return structuredClone([...index.keys()])
 		}),
-		getAll: createSubscribable(
-			createMemo(() => {
-				const result: {
-					[id: string]: Message
-				} = {}
-				for (const message of structuredClone([...index.values()])) {
-					result[message.id] = message
-				}
-				return result
-			}),
-			//return structuredClone([...index.values()])
-		),
+		getAll: createSubscribable(() => {
+			return structuredClone([...index.values()])
+		}),
 		update: ({ where, data }): boolean => {
 			const message = index.get(where.id)
 			if (message === undefined) return false
