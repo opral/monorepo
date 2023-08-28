@@ -80,12 +80,12 @@
 		"link": {
 			"blog": "Blog",
 			"marketplace": "Marktplatz",
-			"docs": "Dokumentation",
+			"documentation": "Dokumentation",
 			"feedback": "Feedback"
 		}
 	},
 	"footer": {
-		"docs": {
+		"documentation": {
 			"title": "Dokumentation",
 			"gettingStarted": "Loslegen",
 			"whyInlang": "Warum inlang?",
