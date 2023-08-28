@@ -25,9 +25,9 @@ caption="Sketch about the concept of one configuration file that powers all tool
 
 /%}
 
-### Version control and automations
+### Version control and automation via CI/CD
 
-Inlang apps are built on lix, a git-compatible version control application framework. Using lix allows for automations via CI/CD and collaboration between developers, translators, and designers on one common source of truth: your repository and your data.
+Inlang apps are built on lix. Lix is a git-compatible version control backend for applications. Using lix provides inlang with CI/CD for globalization and collaboration between developers, translators, and designers on one common source of truth: your repository and your data.
 
 {% Figure
 
