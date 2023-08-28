@@ -1,4 +1,4 @@
 {
-	"Overview": ["./introduction.md"],
-	"Concepts": ["./concepts/config-file.md"]
+	"Overview": ["./introduction.md", "./getting-started.md"],
+	"Concepts": ["./concepts/project.md"]
 }
