@@ -58,7 +58,7 @@
 		}
 	},
 	"scripts": {
-		"_build": "node ./build.js",
+		"build": "node ./build.js",
 		"dev": "DEV=true node ./build.js",
 		"package": "npx @vscode/vsce package",
 		"---- TEST ----------------------------------------------------------": "",
@@ -103,7 +103,7 @@
 		"typescript": "^5.0.4"
 	},
 	"activationEvents": [
-		"workspaceContains:**/inlang.config.js",
+		"workspaceContains:**/inlang.config.json",
 		"onStartupFinished"
 	],
 	"license": "Apache-2.0"

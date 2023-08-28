@@ -11,10 +11,10 @@ import { version } from "../package.json"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
 import { promptToReloadWindow } from "./utilities/promptToReload.js"
 import { recommendation, isDisabledRecommendation } from "./utilities/recommendation.js"
-import {
-	createInlangConfigFile,
-	isDisabledConfigFileCreation,
-} from "./utilities/createInlangConfigFile.js"
+// import {
+// 	createInlangConfigFile,
+// 	isDisabledConfigFileCreation,
+// } from "./utilities/createInlangConfigFile.js"
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 import { openInEditorCommand } from "./commands/openInEditor.js"
 import { editMessageCommand } from "./commands/editMessage.js"
@@ -31,7 +31,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 				vscode_version: vscode.version,
 				version: version,
 				workspaceRecommendation: !(await isDisabledRecommendation()),
-				autoConfigFileCreation: !(await isDisabledConfigFileCreation()),
+				// autoConfigFileCreation: !(await isDisabledConfigFileCreation()),
 			},
 		})
 		const gitOrigin = await getGitOrigin()
@@ -75,7 +75,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 			console.warn("No workspace folder found.")
 		} else {
 			console.info("Creating inlang.config.json file.")
-			await createInlangConfigFile({ workspaceFolder: _workspaceFolder })
+			// await createInlangConfigFile({ workspaceFolder: _workspaceFolder })
 		}
 		return
 	}
@@ -119,6 +119,9 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
 	await loadMessages()
 
+	console.log("inlang", state().inlang.appSpecificApi()["inlang.app.ideExtension"])
+	
+
 	// debounce future loading of resources
 	const debouncedLoadMessages = debounce(1000, loadMessages)
 
@@ -144,7 +147,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
 	const documentSelectors: vscode.DocumentSelector = [
 		{ language: "javascript", pattern: "!inlang.config.json" },
-		...(state().inlang.appSpecificApi()["inlang.app.ideExtension"].documentSelectors || undefined),
+		...(state().inlang.appSpecificApi()["inlang.app.ideExtension"]?.documentSelectors || []),
 	]
 	// register source actions
 	args.context.subscriptions.push(
@@ -152,6 +155,8 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 			providedCodeActionKinds: ExtractMessage.providedCodeActionKinds,
 		}),
 	)
+
+	console.log("inlang", state().inlang)
 
 	// register decorations
 	messagePreview(args)
