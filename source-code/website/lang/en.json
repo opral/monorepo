@@ -80,13 +80,13 @@
 		"link": {
 			"blog": "Blog",
 			"marketplace": "Marketplace",
-			"docs": "Docs",
+			"documentation": "Documentation",
 			"feedback": "Feedback"
 		}
 	},
 	"footer": {
-		"docs": {
-			"title": "Docs",
+		"documentation": {
+			"title": "Documentation",
 			"gettingStarted": "Getting Started",
 			"whyInlang": "Why inlang?",
 			"contribute": "Contribute"
