@@ -83,8 +83,8 @@ describe("main workflow", () => {
 
 		// TODO: migrate to exact object validation when we have the git proxy and can test local frozen repos
 		expect(log.length).toBe(1)
-		expect(log[0].oid).toBeTypeOf("string")
-		expect(log[0].commit.message).toBeTypeOf("string")
+		expect(log[0]?.oid).toBeTypeOf("string")
+		expect(log[0]?.commit?.message).toBeTypeOf("string")
 	})
 
 	it.todo("returns collaborator information", async () => {
