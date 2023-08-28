@@ -100,6 +100,9 @@ export const openInlangProject = async (args: {
 
 		const [messages, setMessages] = createSignal<Message[]>()
 		createEffect(() => {
+			const conf = config()
+			if (!conf) return
+
 			const _resolvedModules = resolvedModules()
 			if (!_resolvedModules) return
 
@@ -124,8 +127,9 @@ export const openInlangProject = async (args: {
 
 		// -- installed items ----------------------------------------------------
 
-		const installedLintRules = () =>
-			resolvedModules()!.lintRules.map(
+		const installedLintRules = () => {
+			if (!resolvedModules()) return []
+			return resolvedModules()!.lintRules.map(
 				(rule) =>
 					({
 						meta: rule.meta,
@@ -137,14 +141,17 @@ export const openInlangProject = async (args: {
 						disabled: configValue.settings["project.disabled"]?.includes(rule.meta.id) ?? false,
 					} satisfies InstalledLintRule),
 			) satisfies Array<InstalledLintRule>
+		}
 
-		const installedPlugins = () =>
-			resolvedModules()!.plugins.map((plugin) => ({
+		const installedPlugins = () => {
+			if (!resolvedModules()) return []
+			return resolvedModules()!.plugins.map((plugin) => ({
 				meta: plugin.meta,
 				module:
 					resolvedModules()?.meta.find((m) => m.plugins.includes(plugin.meta.id))?.module ??
 					"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
 			})) satisfies Array<InstalledPlugin>
+		}
 
 		// -- lint --------------------------------------------------------------
 
@@ -240,7 +247,9 @@ export const openInlangProject = async (args: {
 					return reports
 				}),
 			},
-			appSpecificApi: createSubscribable(() => resolvedModules()!.resolvedPluginApi.appSpecificApi),
+			appSpecificApi: createSubscribable(
+				() => resolvedModules()?.resolvedPluginApi.appSpecificApi || {},
+			),
 			query: {
 				messages: query,
 			},

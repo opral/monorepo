@@ -21,7 +21,7 @@ interface Filter {
 export function Layout(props: { children: JSXElement }) {
 	const {
 		inlang,
-		repositoryIsCloned,
+		lixErrors,
 		setTextSearch,
 		filteredLintRules,
 		setFilteredLintRules,
@@ -80,19 +80,18 @@ export function Layout(props: { children: JSXElement }) {
 		),
 	)
 
-	function isLessThanHalfASecondAgo(timeString: Date) {
-		const time = new Date(timeString)
-		const currentTime = new Date().getTime()
-		const timeDifference = Math.abs(currentTime - time.getTime())
-		return timeDifference < 500
-	}
+	// function isLessThanHalfASecondAgo(timeString: Date) {
+	// 	const time = new Date(timeString)
+	// 	const currentTime = new Date().getTime()
+	// 	const timeDifference = Math.abs(currentTime - time.getTime())
+	// 	return timeDifference < 500
+	// }
 
 	//add initial language filter
 	createEffect(() => {
 		if (
-			repositoryIsCloned.error === undefined &&
-			repositoryIsCloned.loading === false &&
-			isLessThanHalfASecondAgo(repositoryIsCloned()!) &&
+			lixErrors().length === 0 &&
+			//isLessThanHalfASecondAgo(repositoryIsCloned()!) &&
 			inlang()
 		) {
 			if (filteredLanguageTags().length > 0) {
@@ -106,9 +105,8 @@ export function Layout(props: { children: JSXElement }) {
 	//add initial lintRule filter
 	createEffect(() => {
 		if (
-			repositoryIsCloned.error === undefined &&
-			repositoryIsCloned.loading === false &&
-			isLessThanHalfASecondAgo(repositoryIsCloned()!) &&
+			lixErrors().length === 0 &&
+			//isLessThanHalfASecondAgo(repositoryIsCloned()!) &&
 			filteredLintRules().length > 0
 		) {
 			addFilter("Linting")

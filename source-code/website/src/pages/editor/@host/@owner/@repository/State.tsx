@@ -13,10 +13,8 @@ import {
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
 import type { LocalStorageSchema } from "#src/services/local-storage/index.js"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
-import { github } from "#src/services/github/index.js"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
-import { telemetryBrowser, parseOrigin } from "@inlang/telemetry"
 import type { NodeishFilesystem } from "@inlang-git/fs"
 import { openRepository, createNodeishMemoryFs, Repository } from "@lix-js/client"
 import { http, raw } from "@inlang-git/client/raw"
@@ -35,14 +33,7 @@ type EditorStateSchema = {
 	 * Returns a repository object
 	 */
 	repo: Repository
-	/**
-	 * Whether a repository is cloned and when it was cloned.
-	 *
-	 * The value is `false` if the repository is not cloned. Otherwise,
-	 * a Date is provided that reflects the time of when the repository
-	 * was cloned.
-	 */
-	repositoryIsCloned: Resource<undefined | Date>
+
 	/**
 	 * The current branch.
 	 */
@@ -113,6 +104,11 @@ type EditorStateSchema = {
 	 */
 	filteredLintRules: () => LintRule["meta"]["id"][]
 	setFilteredLintRules: Setter<LintRule["meta"]["id"][]>
+
+	/**
+	 * Expose lix errors that happen wihle opening the repository
+	 */
+	lixErrors: () => ReturnType<Repository["errors"]>
 
 	/**
 	 * Unpushed changes in the repository.
@@ -208,18 +204,30 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
 	})
 
+	// get lix errors
+	const [lixErrors, setLixErrors] = createSignal<ReturnType<Repository["errors"]>>([])
+	createEffect(() => {
+		repo.errors.subscribe((errors) => {
+			setLixErrors(errors)
+		})
+	})
+
 	// open the inlang project and store it in a resource
-	const [inlang] = createResource(async () => {
-		const inlang = solidAdapter(
-			await openInlangProject({
-				nodeishFs: repo.nodeishFs,
-				configPath: "/inlang.config.json"
-			}),
-			{ from },
-		)
-		//initialize lint to get reports
-		await inlang.lint.init()
-		return inlang
+	const [inlang] = createResource(lixErrors, async () => {
+		if (lixErrors().length === 0) {
+			const inlang = solidAdapter(
+				await openInlangProject({
+					nodeishFs: repo.nodeishFs,
+					configPath: "/inlang.config.json",
+				}),
+				{ from },
+			)
+			//initialize lint to get reports
+			await inlang.lint.init()
+			return inlang
+		} else {
+			return undefined
+		}
 	})
 
 	// DERIVED when config exists
@@ -255,63 +263,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}, 100)
 		}
 	})
-
-	// re-fetched if currentPageContext changes
-	const [repositoryIsCloned] = createResource(
-		() => {
-			// re-initialize fs on every cloneRepository call
-			// until subdirectories are supported
-			return {
-				fs: repo.nodeishFs,
-				routeParams: currentPageContext.routeParams as EditorRouteParams,
-				user: localStorage?.user,
-				setFsChange,
-			}
-		},
-		async (args) => {
-			const result = await cloneRepository(args)
-			// not blocking the execution by using the callback pattern
-			// the user does not need to wait for the response
-			// checks whether the gitOrigin corresponds to the pattern.
-
-			const gitOrigin = await repo.getOrigin()
-			//You must include at least one group property for a group to be visible in the "Persons & Groups" tab
-			//https://posthog.com/docs/product-analytics/group-analytics#setting-and-updating-group-properties
-			telemetryBrowser.group("repository", gitOrigin, {
-				name: gitOrigin,
-			})
-			github
-				.request("GET /repos/{owner}/{repo}", {
-					owner: args.routeParams.owner,
-					repo: args.routeParams.repository,
-				})
-				.then((response) => {
-					telemetryBrowser.group("repository", gitOrigin, {
-						visibility: response.data.private ? "Private" : "Public",
-						isFork: response.data.fork ? "Fork" : "isNotFork",
-						// parseOrgin requiers a "remote"="origing" to transform the url in the git origin
-						parentGitOrigin: response.data.parent?.git_url
-							? parseOrigin({ remotes: [{ remote: "origin", url: response.data.parent.git_url }] })
-							: "",
-					})
-					telemetryBrowser.capture("EDITOR cloned repository", {
-						owner: args.routeParams.owner,
-						repository: args.routeParams.repository,
-						userPermission: userIsCollaborator() ? "iscollaborator" : "isNotCollaborator",
-					})
-				})
-				.catch((error) => {
-					telemetryBrowser.capture("EDITOR cloned repository", {
-						owner: args.routeParams.owner,
-						repository: args.routeParams.repository,
-						errorDuringIsPrivateRequest: error,
-						userPermission: userIsCollaborator() ? "collaborator" : "contributor",
-					})
-				})
-
-			return result
-		},
-	)
 
 	const [userIsCollaborator] = createResource(
 		/**
@@ -365,11 +316,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [currentBranch] = createResource(
 		() => {
-			if (
-				repositoryIsCloned.error ||
-				repositoryIsCloned.loading ||
-				repositoryIsCloned() === undefined
-			) {
+			if (lixErrors().length > 0) {
 				return false
 			}
 			return true
@@ -384,7 +331,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			value={
 				{
 					repo,
-					repositoryIsCloned,
 					currentBranch,
 					githubRepositoryInformation,
 					routeParams,
@@ -410,6 +356,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					userIsCollaborator,
 					lastPullTime,
 					setLastPullTime,
+					lixErrors,
 				} satisfies EditorStateSchema
 			}
 		>
