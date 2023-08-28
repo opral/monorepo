@@ -1,0 +1,32 @@
+{
+	"name": "@lix-js/client",
+	"version": "0.0.1",
+	"type": "module",
+	"publishConfig": {
+		"access": "public"
+	},
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"files": [
+		"./dist",
+		"./src"
+	],
+	"scripts": {
+		"build": "tsc --build ./tsconfig.build.json",
+		"dev": "tsc --watch",
+		"---- TEST ----------------------------------------------------------": "",
+		"test": "vitest run --coverage --test-timeout 60000",
+		"bench": "vitest bench --watch=false",
+		"---- OTHER ---------------------------------------------------------": "",
+		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
+	},
+	"dependencies": {
+		"@inlang-git/fs": "*",
+		"@inlang/app": "*",
+		"@octokit/types": "11.1.0",
+		"isomorphic-git": "1.24.5",
+		"octokit": "3.1.0"
+	},
+	"license": "Apache-2.0"
+}

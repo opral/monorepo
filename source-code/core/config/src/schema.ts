@@ -1,7 +1,7 @@
 import { Static, TLiteral, TTemplateLiteral, Type } from "@sinclair/typebox"
 import { LanguageTag } from "@inlang/language-tag"
 import { LintLevel, LintRule } from "@inlang/lint"
-import { JSONObject } from "@inlang/json-types"
+import { JSON, JSONObject } from "@inlang/json-types"
 
 /**
  * ---------------- UTILITY TYPES ----------------
@@ -63,7 +63,8 @@ const ExternalSettings = Type.Record(
 	}) as unknown as TTemplateLiteral<
 		[TLiteral<`${string}.${"app" | "plugin" | "lintRule"}.${string}`>]
 	>,
-	JSONObject,
+	// workaround to make the intersection between `ProjectSettings` and `ExternalSettings` possible
+	JSON as unknown as typeof JSONObject,
 	{ additionalProperties: false },
 )
 

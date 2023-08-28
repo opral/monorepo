@@ -8,9 +8,9 @@ import type { LintRule } from "@inlang/lint"
 import type { ImportFunction, InlangModule } from "@inlang/module"
 import {
 	ConfigPathNotFoundError,
-	ConfigSyntaxError,
+	ConfigJSONSyntaxError,
 	InvalidConfigError,
-	NoMessagesPluginError,
+	NoPluginProvidesLoadOrSaveMessagesError,
 } from "./errors.js"
 
 // ------------------------------------------------------------------------------------------------
@@ -45,7 +45,7 @@ const mockPlugin: Plugin = {
 	loadMessages: () => exampleMessages,
 	saveMessages: () => undefined as any,
 	addAppSpecificApi: () => ({
-		"inlang.app.ide-extension": {
+		"inlang.app.ideExtension": {
 			messageReferenceMatcher: (text: string) => text as any,
 		},
 	}),
@@ -131,7 +131,7 @@ describe("initialization", () => {
 				_import,
 			})
 
-			expect(inlang.errors()![0]).toBeInstanceOf(ConfigSyntaxError)
+			expect(inlang.errors()![0]).toBeInstanceOf(ConfigJSONSyntaxError)
 		})
 
 		it("should return an error if config file is does not match schema", async () => {
@@ -158,6 +158,28 @@ describe("initialization", () => {
 
 			expect(getValue(inlang.config)).toStrictEqual(config)
 		})
+
+		it("should not re-write the config to disk when initializing", async () => {
+			const fs = await createMockNodeishFs()
+			const configWithDeifferentFormatting = JSON.stringify(config, undefined, 4)
+			await fs.writeFile("./inlang.config.json", configWithDeifferentFormatting)
+
+			const inlang = await openInlangProject({
+				configPath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import,
+			})
+
+			const configOnDisk = await fs.readFile("./inlang.config.json", { encoding: "utf-8" })
+			expect(configOnDisk).toBe(configWithDeifferentFormatting)
+
+			inlang.setConfig(inlang.config())
+			// TODO: how can we await `setConfig` correctly
+			await new Promise((resolve) => setTimeout(resolve, 0))
+
+			const newConfigOnDisk = await fs.readFile("./inlang.config.json", { encoding: "utf-8" })
+			expect(newConfigOnDisk).not.toBe(configWithDeifferentFormatting)
+		})
 	})
 
 	describe("modules", () => {
@@ -177,7 +199,7 @@ describe("initialization", () => {
 				_import: $badImport,
 			})
 
-			expect(inlang.errors()![0]).toBeInstanceOf(NoMessagesPluginError)
+			expect(inlang.errors()![0]).toBeInstanceOf(NoPluginProvidesLoadOrSaveMessagesError)
 		})
 
 		it("should return an error if no plugin defines writeMessages", async () => {
@@ -196,7 +218,7 @@ describe("initialization", () => {
 				_import: $badImport,
 			})
 
-			expect(inlang.errors()![0]).toBeInstanceOf(NoMessagesPluginError)
+			expect(inlang.errors()![0]).toBeInstanceOf(NoPluginProvidesLoadOrSaveMessagesError)
 		})
 
 		it("should return an error if an error occurs while resolving a plugin", async () => {
@@ -539,7 +561,7 @@ describe("functionality", () => {
 			})
 
 			inlang.appSpecificApi.subscribe((api) => {
-				expect(api["inlang.app.ide-extension"]).toBeDefined()
+				expect(api["inlang.app.ideExtension"]).toBeDefined()
 			})
 		})
 	})

@@ -10,7 +10,7 @@ import { Feedback } from "./Feedback.jsx"
 import { EditButton } from "./EditButton.jsx"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
-import { tableOfContents } from "../../../../../documentation/tableOfContents.js"
+import tableOfContents from "../../../../../documentation/tableOfContents.json"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -31,7 +31,7 @@ export function Page(props: PageProps) {
 
 			const files: Record<string, string[]> = {}
 			for (const [category, documentsArray] of Object.entries(tableOfContents)) {
-				const rawPaths = documentsArray.map((document) => document.raw)
+				const rawPaths = documentsArray.map((document) => document)
 				files[category] = rawPaths
 			}
 
@@ -60,7 +60,8 @@ export function Page(props: PageProps) {
 
 		if (!props.markdown?.renderableTree) return
 
-		for (const heading of props.markdown.renderableTree.children) {
+		// @ts-expect-error - some type mismatch
+		for (const heading of props.markdown.renderableTree.children ?? []) {
 			if (heading.name === "Heading") {
 				if (heading.children[0].name) {
 					setHeadings((prev) => [...prev, heading.children[0].children[0]])
@@ -205,11 +206,11 @@ function NavbarCommon(props: {
 	})
 
 	return (
-		<ul role="list" class="w-full">
+		<ul role="list" class="w-full space-y-3">
 			<For each={Object.keys(props.processedTableOfContents)}>
 				{(section) => (
-					<li class="py-3">
-						<h2 class="tracking-wide pt-2 text-sm font-semibold text-on-surface pb-2">{section}</h2>
+					<li class="">
+						<h2 class="tracking-wide pt-2 text font-semibold text-on-surface pb-2">{section}</h2>
 						<ul class="space-y-2" role="list">
 							<For
 								each={
@@ -230,7 +231,7 @@ function NavbarCommon(props: {
 											}
 											href={getLocale() + document.frontmatter.href}
 										>
-											{document.frontmatter.shortTitle}
+											{document.frontmatter.title}
 										</a>
 										{props.headings &&
 											props.headings.length > 1 &&
@@ -239,7 +240,7 @@ function NavbarCommon(props: {
 													<For each={props.headings}>
 														{(heading) =>
 															heading !== undefined &&
-															heading !== document.frontmatter.shortTitle &&
+															heading !== document.frontmatter.title &&
 															props.headings.filter((h: any) => h === heading).length < 2 && (
 																<li>
 																	<a

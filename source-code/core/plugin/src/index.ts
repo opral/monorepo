@@ -1,6 +1,6 @@
 export type {
 	Plugin,
-	RuntimePluginApi,
+	ResolvedPluginApi,
 	ResolvePluginsFunction,
 	NodeishFilesystemSubset,
 } from "./api.js"
@@ -13,6 +13,11 @@ export {
 	PluginHasInvalidSchemaError,
 	PluginUsesReservedNamespaceError,
 } from "./errors.js"
+
+/**
+ * -------- APP-SPECIFIC APIS --------
+ */
+export type { IdeExtensionConfig } from "./appSpecificApis/inlang.app.ideExtension.js"
 
 /**
  * -------- RE-EXPORTS --------

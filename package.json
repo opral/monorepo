@@ -6,7 +6,7 @@
 		"source-code/core/*",
 		"source-code/plugins/*",
 		"source-code-git/*",
-		"project-lisa/source-code/*"
+		"lix/*"
 	],
 	"scripts": {
 		"build": "turbo run build",

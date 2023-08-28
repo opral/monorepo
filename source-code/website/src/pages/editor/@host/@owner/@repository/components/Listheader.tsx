@@ -3,10 +3,10 @@ import { For, Show } from "solid-js"
 import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
-import type { LintRule, Message, MessageLintReport } from "@inlang/app"
+import type { LintRule, MessageLintReport } from "@inlang/app"
 
 interface ListHeaderProps {
-	messages: Message[]
+	ids: string[]
 }
 
 type RuleSummaryItem = {
@@ -15,10 +15,11 @@ type RuleSummaryItem = {
 	level: "error" | "warning"
 }
 
-export const messageCount = (messages: Message[]) => {
+export const messageCount = (ids: string[]) => {
+	const { inlang } = useEditorState()
 	let counter = 0
-	for (const message of messages) {
-		if (showFilteredMessage(message)) counter++
+	for (const id of ids) {
+		if (showFilteredMessage(inlang()?.query.messages.get({ where: { id: id } }))) counter++
 	}
 	return counter
 }
@@ -26,6 +27,7 @@ export const messageCount = (messages: Message[]) => {
 export const ListHeader = (props: ListHeaderProps) => {
 	const {
 		inlang,
+		filteredLanguageTags,
 		setFilteredLintRules,
 		filteredLintRules,
 		filteredId,
@@ -45,13 +47,17 @@ export const ListHeader = (props: ListHeaderProps) => {
 				const filteredReports = reports?.filter(
 					(report: MessageLintReport) => report.ruleId === lintRule.meta.id,
 				)
-				const filteredMessages = filteredReports?.filter((report: MessageLintReport) => {
+				let counter = 0
+				filteredReports?.filter((report: MessageLintReport) => {
 					level = report.level
-					return showFilteredMessage(
-						inlang()?.query.messages.get({ where: { id: report.messageId } }),
-					)
+					if (
+						showFilteredMessage(
+							inlang()?.query.messages.get({ where: { id: report.messageId } }),
+						)
+					) {
+						counter++
+					}
 				})
-				const counter = filteredMessages?.length || 0
 
 				if (
 					lintRule &&
@@ -82,7 +88,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 					</div>
 				}
 			>
-				<div class="font-medium text-on-surface">{messageCount(props.messages) + " Messages"}</div>
+				<div class="font-medium text-on-surface">{messageCount(props.ids) + " Messages"}</div>
 			</Show>
 
 			<div class="flex gap-2">

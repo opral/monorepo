@@ -1,5 +1,5 @@
 import satori from "satori"
-import { openRepository, createNodeishMemoryFs } from "@project-lisa/client"
+import { openRepository, createNodeishMemoryFs } from "@lix-js/client"
 import { markup } from "./helper/markup.js"
 import { readFileSync } from "node:fs"
 import { telemetryNode } from "@inlang/telemetry"
@@ -39,7 +39,7 @@ export const badge = async (url: string) => {
 	})
 
 	// access all messages via inlang instance query
-	const messages = inlang.query.messages.getAll()
+	const messageIds = inlang.query.messages.includedMessageIds()
 
 	// throw if no sourceLanguageTag is found
 	if (!inlang.config().sourceLanguageTag) {
@@ -52,7 +52,7 @@ export const badge = async (url: string) => {
 	const { percentage, errors, warnings, numberOfMissingVariants } = calculateSummary({
 		reports: inlang.lint.reports(),
 		languageTags: inlang.config().languageTags,
-		messages: Object.values(messages),
+		messageIds: messageIds,
 	})
 
 	const vdom = removeCommas(markup(percentage, errors, warnings, numberOfMissingVariants))

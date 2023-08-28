@@ -6,15 +6,15 @@ import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
 import {
 	ConfigPathNotFoundError,
-	ConfigSyntaxError,
+	ConfigJSONSyntaxError,
 	InvalidConfigError,
-	NoMessagesPluginError,
+	NoPluginProvidesLoadOrSaveMessagesError,
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
 } from "./errors.js"
 import { LintRuleThrowedError, LintReport, lintMessages } from "@inlang/lint"
 import { createRoot, createSignal, createEffect } from "./solid.js"
-import { createReactiveQuery } from "./createReactiveQuery.js"
+import { createMessagesQuery } from "./createMessagesQuery.js"
 import { InlangConfig } from "@inlang/config"
 import { debounce } from "throttle-debounce"
 
@@ -49,12 +49,16 @@ export const openInlangProject = async (args: {
 		})
 		// TODO: create FS watcher and update config on change
 
+		const writeConfigToDisk = skipFirst((config: InlangConfig) =>
+			_writeConfigToDisk({ nodeishFs: args.nodeishFs, config }),
+		)
+
 		const setConfig = (config: InlangConfig): Result<void, InvalidConfigError> => {
 			try {
 				const validatedConfig = validateConfig(config)
 				_setConfig(validatedConfig)
 
-				writeConfigToDisk({ nodeishFs: args.nodeishFs, config: validatedConfig })
+				writeConfigToDisk(validatedConfig)
 				return { data: undefined }
 			} catch (error: unknown) {
 				if (error instanceof InvalidConfigError) {
@@ -77,10 +81,10 @@ export const openInlangProject = async (args: {
 			loadModules({ config: conf, nodeishFs: args.nodeishFs, _import: args._import })
 				.then((resolvedModules) => {
 					if (
-						!resolvedModules.runtimePluginApi.loadMessages ||
-						!resolvedModules.runtimePluginApi.saveMessages
+						!resolvedModules.resolvedPluginApi.loadMessages ||
+						!resolvedModules.resolvedPluginApi.saveMessages
 					) {
-						throw new NoMessagesPluginError()
+						throw new NoPluginProvidesLoadOrSaveMessagesError()
 					}
 					setResolvedModules(resolvedModules)
 
@@ -99,13 +103,13 @@ export const openInlangProject = async (args: {
 			const _resolvedModules = resolvedModules()
 			if (!_resolvedModules) return
 
-			if (!_resolvedModules.runtimePluginApi.loadMessages) {
+			if (!_resolvedModules.resolvedPluginApi.loadMessages) {
 				markInitAsFailed(undefined)
 				return
 			}
 
 			makeTrulyAsync(
-				_resolvedModules.runtimePluginApi.loadMessages({
+				_resolvedModules.resolvedPluginApi.loadMessages({
 					languageTags: configValue!.languageTags,
 				}),
 			)
@@ -156,7 +160,6 @@ export const openInlangProject = async (args: {
 		createEffect(() => {
 			const msgs = messages()
 			if (!msgs || !lintInitialized()) return
-
 			// TODO: only lint changed messages and update arrays selectively
 			lintMessages({
 				sourceLanguageTag: configValue!.sourceLanguageTag,
@@ -169,7 +172,7 @@ export const openInlangProject = async (args: {
 					installedLintRules().map((rule) => [rule.meta.id, rule.lintLevel]),
 				),
 				messages: msgs,
-				rules:
+				lintRules:
 					configValue.settings["project.disabled"] !== undefined
 						? resolvedModules()!.lintRules.filter(
 								(rule) =>
@@ -188,18 +191,24 @@ export const openInlangProject = async (args: {
 
 		const initializeError: Error | undefined = await initialized.catch((error) => error)
 
-		const query = createReactiveQuery(() => messages() || [])
+		const query = createMessagesQuery(() => messages() || [])
 
 		const debouncedSave = skipFirst(
 			debounce(
 				500,
 				async (newMessages) => {
 					try {
-						await resolvedModules()!.runtimePluginApi.saveMessages({ messages: newMessages })
+						await resolvedModules()!.resolvedPluginApi.saveMessages({ messages: newMessages })
 					} catch (err) {
 						throw new PluginSaveMessagesError("Error in saving messages", {
 							cause: err,
 						})
+					}
+					if (
+						newMessages.length !== 0 &&
+						JSON.stringify(newMessages) !== JSON.stringify(messages())
+					) {
+						setMessages(newMessages)
 					}
 				},
 				{ atBegin: false },
@@ -207,7 +216,7 @@ export const openInlangProject = async (args: {
 		)
 
 		createEffect(() => {
-			debouncedSave(Object.values(query.getAll()))
+			debouncedSave(query.getAll())
 		})
 
 		return {
@@ -231,7 +240,7 @@ export const openInlangProject = async (args: {
 					return reports
 				}),
 			},
-			appSpecificApi: createSubscribable(() => resolvedModules()!.runtimePluginApi.appSpecificApi),
+			appSpecificApi: createSubscribable(() => resolvedModules()!.resolvedPluginApi.appSpecificApi),
 			query: {
 				messages: query,
 			},
@@ -257,7 +266,7 @@ const loadConfig = async (args: { configPath: string; nodeishFs: NodeishFilesyst
 
 		const { data: parsedConfig, error: parseConfigError } = tryCatch(() => JSON.parse(configFile!))
 		if (parseConfigError)
-			throw new ConfigSyntaxError(`The config is not a valid JSON file.`, {
+			throw new ConfigJSONSyntaxError(`The config is not a valid JSON file.`, {
 				cause: parseConfigError,
 			})
 
@@ -278,7 +287,7 @@ const validateConfig = (config: unknown) => {
 	return Value.Cast(InlangConfig, config)
 }
 
-const writeConfigToDisk = async (args: {
+const _writeConfigToDisk = async (args: {
 	nodeishFs: NodeishFilesystemSubset
 	config: InlangConfig
 }) => {
@@ -342,14 +351,12 @@ function skipFirst(func: (args: any) => any) {
 	}
 }
 
-export function createSubscribable<R = unknown, T extends (...args: any[]) => R = () => R>(
-	signal: T,
-): Subscribable<T> {
+export function createSubscribable<T>(signal: () => T): Subscribable<T> {
 	return Object.assign(signal, {
-		subscribe: (callback: any) => {
+		subscribe: (callback: (value: T) => void) => {
 			createEffect(() => {
 				callback(signal())
 			})
 		},
-	}) as Subscribable<T>
+	})
 }

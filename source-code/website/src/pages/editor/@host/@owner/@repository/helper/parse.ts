@@ -16,30 +16,34 @@ export const getTextValue = (editor: Accessor<EditorRef>) => {
 				.flat()
 
 			const patterns: Array<any> = []
-			tiptap_nodes.map((tiptap_node: any) => {
-				switch (tiptap_node.type) {
-					case "text":
-						if (patterns.at(-1)?.type === "Text") {
-							patterns.at(-1).value += tiptap_node.text
-						} else {
-							patterns.push({ type: "Text", value: tiptap_node.text } as ast.Text)
-						}
-						break
-					case "placeholderNode":
-						patterns.push({
-							type: "VariableReference",
-							name: tiptap_node.attrs.id,
-						} as VariableReference)
-						break
-					case "hardBreak":
-						if (patterns.at(-1)?.type === "Text") {
-							patterns.at(-1).value += "\n"
-						} else {
-							patterns.push({ type: "Text", value: "\n" } as Text)
-						}
-						break
-				}
-			})
+			if (tiptap_nodes.length === 0) {
+				patterns.push({ type: "Text", value: "" } as Text)
+			} else {
+				tiptap_nodes.map((tiptap_node: any) => {
+					switch (tiptap_node.type) {
+						case "text":
+							if (patterns.at(-1)?.type === "Text") {
+								patterns.at(-1).value += tiptap_node.text
+							} else {
+								patterns.push({ type: "Text", value: tiptap_node.text } as ast.Text)
+							}
+							break
+						case "placeholderNode":
+							patterns.push({
+								type: "VariableReference",
+								name: tiptap_node.attrs.id,
+							} as VariableReference)
+							break
+						case "hardBreak":
+							if (patterns.at(-1)?.type === "Text") {
+								patterns.at(-1).value += "\n"
+							} else {
+								patterns.push({ type: "Text", value: "\n" } as Text)
+							}
+							break
+					}
+				})
+			}
 			return patterns
 		}
 	}

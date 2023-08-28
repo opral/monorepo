@@ -42,8 +42,8 @@ been translated for this languageTag yet.
 						en: `Message with id '${id}' has a missing variant for language tag '${translatedLanguageTag}'.`,
 					},
 				})
-				return
 			}
 		}
+		return
 	},
 }

@@ -7,7 +7,8 @@
 	},
 	"exports": {
 		".": "./dist/index.js",
-		"./test": "./dist/test/index.js"
+		"./test": "./dist/test/index.js",
+		"./solid": "./dist/solid.js"
 	},
 	"files": [
 		"./dist",
@@ -38,6 +39,7 @@
 		"@inlang/module": "*",
 		"@inlang/plugin": "*",
 		"@inlang/result": "*",
+		"@inlang/test": "*",
 		"@sinclair/typebox": "^0.18.0",
 		"@solid-primitives/map": "^0.4.7",
 		"deepmerge-ts": "^5.1.0",

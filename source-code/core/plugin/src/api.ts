@@ -1,4 +1,4 @@
-import { LanguageTag, WithLanguageTags } from "@inlang/language-tag"
+import { LanguageTag, Translatable } from "@inlang/language-tag"
 import { Static, Type, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
 import type { NodeishFilesystem as LisaNodeishFilesystem } from "@inlang-git/fs"
 import type {
@@ -11,6 +11,7 @@ import type {
 } from "./errors.js"
 import type { Message } from "@inlang/messages"
 import type { JSONObject } from "@inlang/json-types"
+import type { IdeExtensionConfig } from "./index.js"
 
 /**
  * The filesystem is a subset of project lisa's nodeish filesystem.
@@ -30,7 +31,7 @@ export type ResolvePluginsFunction = (args: {
 	settings: Record<Plugin["meta"]["id"], JSONObject>
 	nodeishFs: NodeishFilesystemSubset
 }) => Promise<{
-	data: RuntimePluginApi
+	data: ResolvedPluginApi
 	errors: Array<
 		| PluginReturnedInvalidAppSpecificApiError
 		| PluginLoadMessagesFunctionAlreadyDefinedError
@@ -44,7 +45,7 @@ export type ResolvePluginsFunction = (args: {
 /**
  * The API after resolving the plugins.
  */
-export type RuntimePluginApi = {
+export type ResolvedPluginApi = {
 	loadMessages: (args: { languageTags: LanguageTag[] }) => Promise<Message[]> | Message[]
 	saveMessages: (args: { messages: Message[] }) => Promise<void> | void
 	/**
@@ -66,9 +67,11 @@ export type RuntimePluginApi = {
 	 * 	 }
 	 *  })
 	 *  // use
-	 *  appSpecificApi['inlang.ideExtension'].messageReferenceMatcher()
+	 *  appSpecificApi['inlang.app.ide-extension'].messageReferenceMatcher()
 	 */
-	appSpecificApi: ReturnType<NonNullable<Plugin["addAppSpecificApi"]>>
+	appSpecificApi: Record<`${string}.app.${string}`, unknown> & {
+		"inlang.app.ideExtension"?: IdeExtensionConfig
+	}
 }
 
 // ---------------------------- RUNTIME VALIDATION TYPES ---------------------------------------------
@@ -117,7 +120,11 @@ export type Plugin<Settings extends JSONObject | unknown = unknown> = Omit<
 	 * 	 }
 	 *  })
 	 */
-	addAppSpecificApi?: (args: { settings: Settings }) => Record<`${string}.app.${string}`, any>
+	addAppSpecificApi?: (args: {
+		settings: Settings
+	}) =>
+		| Record<`${string}.app.${string}`, unknown>
+		| { "inlang.app.ideExtension": IdeExtensionConfig }
 }
 
 export const Plugin = Type.Object(
@@ -127,13 +134,13 @@ export const Plugin = Type.Object(
 				pattern: "^(?!system\\.)([a-z]+)\\.(plugin)\\.([a-z][a-zA-Z0-9]*)$",
 				examples: ["namespace.plugin.example"],
 			}) as unknown as TTemplateLiteral<[TLiteral<`${string}.plugin.${string}`>]>,
-			displayName: WithLanguageTags(Type.String()),
-			description: WithLanguageTags(Type.String()),
+			displayName: Translatable(Type.String()),
+			description: Translatable(Type.String()),
 			/* This is used for the marketplace, required if you want to publish your plugin to the marketplace */
 			marketplace: Type.Optional(
 				Type.Object({
 					icon: Type.String(),
-					linkToReadme: WithLanguageTags(Type.String()),
+					linkToReadme: Translatable(Type.String()),
 					keywords: Type.Array(Type.String()),
 					publisherName: Type.String(),
 					publisherIcon: Type.String(),

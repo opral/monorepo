@@ -1,6 +1,5 @@
-import type { LanguageTag } from "@inlang/app"
+import type { IdeExtensionConfig, LanguageTag } from "@inlang/app"
 import { MarkdownString, Uri } from "vscode"
-import type { MessageReferenceMatch } from "../api.js"
 import { state } from "../state.js"
 import { getStringFromPattern } from "../utilities/query.js"
 
@@ -24,7 +23,11 @@ function renderTranslationRow(row: ContextTableRow) {
 	return `<tr>${messageListing}${editCommandCell}${openInEditorCell}</tr>`
 }
 
-export function contextTooltip(referenceMessage: MessageReferenceMatch) {
+export function contextTooltip(
+	referenceMessage: Awaited<
+		ReturnType<IdeExtensionConfig["messageReferenceMatchers"][number]>
+	>[number],
+) {
 	const message = state().inlang.query.messages.get({
 		where: { id: referenceMessage.messageId },
 	})

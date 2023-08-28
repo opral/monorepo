@@ -5,6 +5,7 @@ import { telefunc } from "telefunc/vite"
 import { fileURLToPath, URL } from "node:url"
 import Icons from "unplugin-icons/vite"
 import { nodePolyfills } from "vite-plugin-node-polyfills"
+import devtools from "solid-devtools/vite"
 
 const isProduction = process.env.NODE_ENV === "production"
 
@@ -13,6 +14,10 @@ export default defineConfig({
 	plugins: [
 		nodePolyfills({
 			protocolImports: true,
+		}),
+		devtools({
+			/* features options - all disabled by default */
+			autoname: true, // e.g. enable autoname
 		}),
 		solid({ ssr: true }),
 		// ordering matters. telefunc must be before ssr

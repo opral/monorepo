@@ -14,12 +14,11 @@ import type { EditorRouteParams, EditorSearchParams } from "./types.js"
 import type { LocalStorageSchema } from "#src/services/local-storage/index.js"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { github } from "#src/services/github/index.js"
-import { showToast } from "#src/components/Toast.jsx"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
 import { telemetryBrowser, parseOrigin } from "@inlang/telemetry"
 import type { NodeishFilesystem } from "@inlang-git/fs"
-import { openRepository, createNodeishMemoryFs, Repository } from "@project-lisa/client"
+import { openRepository, createNodeishMemoryFs, Repository } from "@lix-js/client"
 import { http, raw } from "@inlang-git/client/raw"
 import { publicEnv } from "@inlang/env-variables"
 import {
@@ -27,12 +26,9 @@ import {
 	LintRule,
 	Result,
 	openInlangProject,
-	withSolidReactivity,
-	type SolidInlangProject,
+	solidAdapter,
+	type InlangProjectWithSolidAdapter,
 } from "@inlang/app"
-import type { InlangModule } from "@inlang/module"
-import pluginJson from "../../../../../../../plugins/json/dist/index.js"
-import pluginLint from "../../../../../../../plugins/standard-lint-rules/dist/index.js"
 
 type EditorStateSchema = {
 	/**
@@ -95,7 +91,7 @@ type EditorStateSchema = {
 	 *
 	 * Undefined if no inlang config exists/has been found.
 	 */
-	inlang: Resource<SolidInlangProject | undefined>
+	inlang: Resource<InlangProjectWithSolidAdapter | undefined>
 
 	doesInlangConfigExist: () => boolean
 
@@ -214,19 +210,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	// open the inlang project and store it in a resource
 	const [inlang] = createResource(async () => {
-		const inlang = withSolidReactivity(
+		const inlang = solidAdapter(
 			await openInlangProject({
 				nodeishFs: repo.nodeishFs,
-				configPath: "/inlang.config.json",
-				_import: async () =>
-					({
-						default: {
-							// @ts-ignore
-							plugins: [...pluginJson.plugins],
-							// @ts-ignore
-							lintRules: [...pluginLint.lintRules],
-						},
-					} satisfies InlangModule),
+				configPath: "/inlang.config.json"
 			}),
 			{ from },
 		)
@@ -499,7 +486,6 @@ export async function pushChanges(args: {
 	setFsChange: (date: Date) => void
 	setLastPullTime: (date: Date) => void
 }): Promise<Result<true, PushException | PullException>> {
-	console.log("try to push")
 	// stage all changes
 	const status = await args.repo.statusMatrix({
 		filter: (f: any) =>
@@ -510,7 +496,6 @@ export async function pushChanges(args: {
 			f.endsWith(".js") ||
 			f.endsWith(".ts"),
 	})
-	console.log("status", status)
 	const filesWithUncommittedChanges = status.filter(
 		(row: any) =>
 			// files with unstaged and uncommitted changes
@@ -518,7 +503,6 @@ export async function pushChanges(args: {
 			// added files
 			(row[2] === 2 && row[3] === 0),
 	)
-	console.log("filesWithUncommittedChanges", filesWithUncommittedChanges)
 	if (filesWithUncommittedChanges.length === 0) {
 		return { error: new PushException("No changes to push.") }
 	}

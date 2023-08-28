@@ -1,17 +1,22 @@
-export type { InlangProject, InstalledLintRule, InstalledPlugin, MessageQueryApi } from "./api.js"
+export type {
+	InlangProject,
+	InstalledLintRule,
+	InstalledPlugin,
+	MessageQueryApi,
+	Subscribable,
+} from "./api.js"
 export { openInlangProject } from "./openInlangProject.js"
-export { withSolidReactivity, SolidInlangProject } from "./wrappers/withSolidReactivity.js"
+export { solidAdapter, InlangProjectWithSolidAdapter } from "./adapter/solidAdapter.js"
 export { tryAutoGenerateInlangConfig } from "./tryAutoGenerateConfig.js"
-export { parseConfig } from "./parseConfig.js"
+export { createMessagesQuery } from "./createMessagesQuery.js"
 export {
 	ConfigPathNotFoundError,
-	ConfigSyntaxError,
+	ConfigJSONSyntaxError,
 	InvalidConfigError,
-	NoMessagesPluginError,
+	NoPluginProvidesLoadOrSaveMessagesError,
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
 } from "./errors.js"
-export { createReactiveQuery } from "./createReactiveQuery.js"
 
 /**
  * -------- RE-EXPORTS --------

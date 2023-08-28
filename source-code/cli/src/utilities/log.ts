@@ -1,4 +1,4 @@
-import consola, { Consola } from "consola"
+import consola from "consola"
 
 /**
  * The logger that is used throughout the CLI.
@@ -8,4 +8,4 @@ import consola, { Consola } from "consola"
  * @example
  *   log.success("Success")
  */
-export const log = consola as unknown as Consola
+export const log = consola
