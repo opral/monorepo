@@ -27,9 +27,6 @@
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
-	"engines": {
-		"node": ">=16.15.0"
-	},
 	"dependencies": {
 		"@inlang-git/fs": "*",
 		"@inlang/json-types": "*",
