@@ -17,12 +17,14 @@ import { SelectRepo } from "../SelectRepo.jsx"
 export type PageProps = {
 	processedTableOfContents: ProcessedTableOfContents
 	markdown: Awaited<ReturnType<typeof parseMarkdown>>
+	urlPathname: string
 }
 
 export function Page(props: PageProps) {
 	const [item, setItem] = createSignal<MarketplaceItem | undefined>(undefined)
 	const [readmore, setReadmore] = createSignal<boolean>(false)
 
+	/* Automatically sets the fitting item */
 	createEffect(() => {
 		setItem(
 			marketplaceItems.find(
@@ -57,6 +59,7 @@ export function Page(props: PageProps) {
 											<p class={!readmore() ? "lg:line-clamp-2" : ""}>
 												{item()?.meta.description.en}
 											</p>
+											{/* @ts-ignore */}
 											<Show when={item()?.meta?.description?.en?.length > 205}>
 												<p
 													onClick={() => setReadmore((prev) => !prev)}
@@ -73,14 +76,17 @@ export function Page(props: PageProps) {
 									<Show
 										when={item()?.type !== "app"}
 										fallback={
+											/* @ts-ignore */
 											<Button type="primary" href={item()?.linkToApp}>
 												Open App
 											</Button>
 										}
 									>
 										<div class="flex items-center gap-2">
+											{/* @ts-ignore */}
 											<Button type="primary" href={`/install?module=${item()?.module}`}>
 												Install Module
+												{/* @ts-ignore */}
 												<SelectRepo size="medium" modules={[item()?.module]} />
 											</Button>
 										</div>
@@ -132,10 +138,12 @@ export function Page(props: PageProps) {
 											</For>
 										</div>
 									</div>
+									{/* @ts-ignore */}
 									<Show when={item()?.moduleItems && item()?.moduleItems.length > 1}>
 										<div class="flex flex-col gap-3">
 											<h3 class="text-sm text-surface-400">Bundled with</h3>
 											<div class="flex flex-col items-start">
+												{/* @ts-ignore */}
 												<For each={item()?.moduleItems}>
 													{(moduleItem) => (
 														<Show when={moduleItem !== item()?.meta.id}>

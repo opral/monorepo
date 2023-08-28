@@ -1,10 +1,8 @@
-import type { OnBeforeRender } from "#src/renderer/types.js"
 import type { PageProps } from "./index.page.jsx"
 import { marketplaceItems } from "@inlang/marketplace"
 import { MarketplaceFrontmatterSchema } from "./frontmatterSchema.js"
 import { parseMarkdown } from "#src/services/markdown/index.js"
-
-// const FrontmatterSchema = RequiredFrontmatter
+import { RenderErrorPage } from "vite-plugin-ssr/RenderErrorPage"
 
 const fetchReadmeContents = async () => {
 	const readmeContents = [] as string[]
@@ -76,7 +74,7 @@ const index: Record<string, Awaited<ReturnType<typeof parseMarkdown>>> = {}
  */
 const processedTableOfContents: ProcessedTableOfContents = {}
 
-;;(async () => {
+;(async () => {
 	const contents = await fetchReadmeContents()
 
 	for (const document of contents) {
@@ -90,11 +88,16 @@ const processedTableOfContents: ProcessedTableOfContents = {}
 	}
 })()
 
+await generateIndexAndTableOfContents()
+
 // should only run server side
-export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => {
+export async function onBeforeRender(pageContext: PageProps) {
 	// dirty way to get reload of markdown (not hot reload though)
 	if (import.meta.env.DEV) {
 		await generateIndexAndTableOfContents()
+	}
+	if (!Object.keys(index).includes(pageContext.urlPathname)) {
+		throw RenderErrorPage({ pageContext: { is404: true } })
 	}
 	return {
 		pageContext: {
