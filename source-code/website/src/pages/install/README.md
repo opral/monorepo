@@ -2,7 +2,10 @@ Source code for the install app.
 
 ### Why is the install app in the website?
 
-The install app can be found under `@inlang/website` to be reachable via `https://inlang.com/install`.
+It lives under `@inlang/website` to be reachable via `https://inlang.com/install`.
+
+## How to use the install app
+The install app is usable in the browser and is flexible to handle different kinds of queries.
 
 ### Valid links
 

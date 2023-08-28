@@ -6,11 +6,8 @@ import { Chip } from "#src/components/Chip.jsx"
 import { SearchIcon } from "../editor/@host/@owner/@repository/components/SearchInput.jsx"
 import { Button } from "../index/components/Button.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
-import { useLocalStorage } from "#src/services/local-storage/index.js"
 import Plus from "~icons/material-symbols/add-rounded"
 import Package from "~icons/material-symbols/package-2"
-import ArrowDown from "~icons/material-symbols/expand-more"
-import { SelectRepo } from "./SelectRepo.jsx"
 
 type Category = "app" | "plugin" | "lintrule"
 

@@ -43,14 +43,12 @@ export function InstallationProvider(props: {
 				message: "No modules provided. You can find modules in the marketplace.",
 				error: true,
 			})
-			// ToDo: Enable this when the marketplace is ready
-			// } else if (!validateModules(props.modules)) {
-			// 	props.setStep({
-			// 		type: "invalid-modules",
-			// 		message: "Invalid modules provided.",
-			// 		error: true,
-			// 	})
-			// }
+		} else if (!validateModules(props.modules)) {
+			props.setStep({
+				type: "invalid-modules",
+				message: "Invalid modules provided.",
+				error: true,
+			})
 		} else if (!props.optIn.optIn()) {
 			props.setStep({
 				type: "opt-in",
@@ -114,12 +112,12 @@ async function initializeRepo(
 ) {
 	modulesURL = modulesURL.filter((module, index) => modulesURL.indexOf(module) === index)
 
+	/* Opens the repository with lix */
 	const repo = openRepository(repoURL, {
 		nodeishFs: createNodeishMemoryFs(),
 		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
 	})
 
-	// check if user is collaborator
 	const isCollaborator = await repo.isCollaborator({
 		username: user.username,
 	})
@@ -175,6 +173,7 @@ async function initializeRepo(
 
 	const inlangConfig = parseConfigResult.data as InlangConfig
 
+	/* Look if the modules were already installed */
 	for (const module of inlangConfig.modules) {
 		const installedModules = modulesURL.every((moduleURL) => module.includes(moduleURL))
 		if (installedModules) {
@@ -186,6 +185,7 @@ async function initializeRepo(
 		}
 	}
 
+	/* If no modules where found in the config, create an empty array */
 	if (!inlangConfig.modules) inlangConfig.modules = []
 
 	const modulesToInstall = modulesURL.filter((moduleURL) => {
@@ -200,9 +200,10 @@ async function initializeRepo(
 
 	await repo.nodeishFs.writeFile("./inlang.config.json", generatedInlangConfig)
 
-	/* If any error gets unreturned before, stop the process here */
+	/* If any error has gone through, stop the installation here */
 	if (step().error) return
 
+	/* Otherwise, change the repo and finishd the process */
 	setStep({
 		type: "installing",
 		message: "Comitting changes...",
@@ -237,21 +238,6 @@ async function initializeRepo(
 			".",
 		error: false,
 	})
-}
-
-function createInlangConfig(modules: string[]) {
-	// ToDo: Implement for future purposes
-	const inlangConfig = {
-		sourceLanguageTags: ["en"],
-		languageTags: ["en"],
-		modules: modules,
-	}
-
-	return inlangConfig
-}
-
-function sendSuccessResponseToSource(response: string, source: Window) {
-	// ToDo: send the response to the source window e.g. CLI
 }
 
 /**

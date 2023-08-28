@@ -1,4 +1,3 @@
-import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { onMount } from "solid-js"
 import IconGithub from "~icons/cib/github"
 import type { SlDialog } from "@shoelace-style/shoelace"
@@ -6,8 +5,6 @@ import { SignInDialog } from "#src/services/auth/index.js"
 import { publicEnv } from "@inlang/env-variables"
 
 export const Gitlogin = () => {
-	const [localStorage] = useLocalStorage()
-
 	let signInDialog: SlDialog | undefined
 
 	function onSignIn() {
