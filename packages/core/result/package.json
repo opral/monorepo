@@ -26,9 +26,6 @@
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
-	"engines": {
-		"node": ">=16.15.0"
-	},
 	"license": "Apache-2.0",
 	"devDependencies": {
 		"tsd": "^0.28.1"

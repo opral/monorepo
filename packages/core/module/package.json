@@ -26,9 +26,6 @@
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
-	"engines": {
-		"node": ">=18.0.0"
-	},
 	"dependencies": {
 		"@inlang/config": "*",
 		"@inlang-git/fs": "*",
