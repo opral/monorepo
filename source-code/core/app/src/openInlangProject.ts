@@ -236,7 +236,7 @@ export const openInlangProject = async (args: {
 				...(resolvedModules() ? resolvedModules()!.errors : []),
 				...(lintErrors() ?? []),
 			]),
-			config: createSubscribable(() => config()!),
+			config: createSubscribable(() => config() || undefined),
 			setConfig,
 			lint: {
 				init: initLint,

@@ -95,25 +95,6 @@ function TheActualPage() {
 						)}
 					</ul>
 				</Match>
-				<Match when={inlang()?.errors().length !== 0 && inlang()}>
-					<p class="text-danger pb-2">An error occurred while initializing the config:</p>
-					<ul class="text-danger">
-						{inlang()?.errors().length !== 0 && (
-							<For each={inlang()?.errors()}>
-								{(error) => {
-									return (
-										<li class="pt-2">
-											<span class="font-semibold">{error.name}: </span>
-											<br />
-											{error.message} <br />
-											{error.stack && <p>{error.stack}</p>}
-										</li>
-									)
-								}}
-							</For>
-						)}
-					</ul>
-				</Match>
 				<Match when={inlang() === undefined}>
 					<div class="flex flex-col grow justify-center items-center min-w-full gap-2">
 						{/* sl-spinner need a own div otherwise the spinner has a bug. The wheel is rendered on the outer div  */}
@@ -150,6 +131,25 @@ function TheActualPage() {
 				</Match>
 				<Match when={!doesInlangConfigExist()}>
 					<NoInlangConfigFoundCard />
+				</Match>
+				<Match when={inlang()?.errors().length !== 0 && inlang()}>
+					<p class="text-danger pb-2">An error occurred while initializing the config:</p>
+					<ul class="text-danger">
+						{inlang()?.errors().length !== 0 && (
+							<For each={inlang()?.errors()}>
+								{(error) => {
+									return (
+										<li class="pt-2">
+											<span class="font-semibold">{error.name}: </span>
+											<br />
+											{error.message} <br />
+											{error.stack && <p>{error.stack}</p>}
+										</li>
+									)
+								}}
+							</For>
+						)}
+					</ul>
 				</Match>
 				<Match
 					when={
