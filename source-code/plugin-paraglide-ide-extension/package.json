@@ -1,6 +1,5 @@
 {
-	"name": "@inlang/sdk-js-plugin",
-	"description": "Inlang SDK-JS Plugin",
+	"name": "@inlang/plugin-paraglide-ide-extension",
 	"keywords": [
 		"inlang",
 		"i18n",

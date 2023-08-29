@@ -2,13 +2,13 @@ name: Publish @inlang/sdk-js to NPM
 
 on:
   # manually triggering the workflow if desired
-  workflow_dispatch:
+  # workflow_dispatch:
 
-  push:
-    paths:
-      - "source-code/sdk-js/package.json"
-    branches:
-      - main
+  # push:
+  #   paths:
+  #     - "source-code/sdk-js/package.json"
+  #   branches:
+  #     - main
 
 jobs:
   publish:
