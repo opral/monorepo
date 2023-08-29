@@ -114,7 +114,7 @@ function validateRepo(
 }
 
 /**
- * This function initializes the repository by adding the modules to the inlang.config.js file and pushing the changes to the repository.
+ * This function initializes the repository by adding the modules to the project.inlang.json file and pushing the changes to the repository.
  * If there are any errors, the error will be displayed in the UI.
  */
 async function initializeRepo(
@@ -151,44 +151,44 @@ async function initializeRepo(
 		message: "Cloning Repository...",
 	})
 
-	const configResult = await tryCatch(async () => {
-		const inlangConfigString = (await repo.nodeishFs.readFile("./inlang.config.json", {
+	const projectResult = await tryCatch(async () => {
+		const inlangProjectString = (await repo.nodeishFs.readFile("./project.inlang.json", {
 			encoding: "utf-8",
 		})) as string
 
-		return inlangConfigString
+		return inlangProjectString
 	})
 
-	if (configResult.error) {
+	if (projectResult.error) {
 		setStep({
-			type: "no-inlang-config",
-			message: "No inlang.config.json file found in the repository.",
+			type: "no-inlang-project",
+			message: "No project.inlang.json file found in the repository.",
 			error: true,
 		})
 
 		return
 	}
 
-	const inlangConfigString = configResult.data
+	const inlangProjectString = projectResult.data
 
-	const parseConfigResult = tryCatch(() => {
-		return JSON.parse(inlangConfigString)
+	const parseProjectResult = tryCatch(() => {
+		return JSON.parse(inlangProjectString)
 	})
 
-	if (parseConfigResult.error) {
+	if (parseProjectResult.error) {
 		setStep({
 			type: "error",
-			message: "Error parsing inlang.config.js: " + parseConfigResult.error,
+			message: "Error parsing project.inlang.json: " + parseProjectResult.error,
 			error: true,
 		})
 
 		return
 	}
 
-	const inlangConfig = parseConfigResult.data as InlangConfig
+	const inlangProject = parseProjectResult.data as InlangConfig
 
 	/* Look if the modules were already installed */
-	for (const module of inlangConfig.modules) {
+	for (const module of inlangProject.modules) {
 		const installedModules = modulesURL.every((moduleURL) => module.includes(moduleURL))
 		if (installedModules) {
 			setStep({
@@ -199,20 +199,20 @@ async function initializeRepo(
 		}
 	}
 
-	/* If no modules where found in the config, create an empty array */
-	if (!inlangConfig.modules) inlangConfig.modules = []
+	/* If no modules where found in the project, create an empty array */
+	if (!inlangProject.modules) inlangProject.modules = []
 
 	const modulesToInstall = modulesURL.filter((moduleURL) => {
-		if (inlangConfig.modules.length === 0) return true
+		if (inlangProject.modules.length === 0) return true
 
-		const installedModules = inlangConfig.modules.every((module) => module.includes(moduleURL))
+		const installedModules = inlangProject.modules.every((module) => module.includes(moduleURL))
 		return !installedModules
 	})
-	inlangConfig.modules.push(...modulesToInstall)
+	inlangProject.modules.push(...modulesToInstall)
 
-	const generatedInlangConfig = JSON.stringify(inlangConfig, undefined, 2)
+	const generatedInlangProject = JSON.stringify(inlangProject, undefined, 2)
 
-	await repo.nodeishFs.writeFile("./inlang.config.json", generatedInlangConfig)
+	await repo.nodeishFs.writeFile("./project.inlang.json", generatedInlangProject)
 
 	/* If any error has gone through, stop the installation here */
 	if (step().error) return
@@ -224,7 +224,7 @@ async function initializeRepo(
 	})
 
 	await repo.add({
-		filepath: "inlang.config.json",
+		filepath: "project.inlang.json",
 	})
 
 	await repo.commit({
