@@ -1,6 +1,6 @@
 ---
 title: Language tag
-href: /documentation/concepts/language-tag
+href: /documentation/language-tag
 description: TODO TODO TODO TODO TODO
 ---
 

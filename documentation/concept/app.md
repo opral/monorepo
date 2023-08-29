@@ -1,7 +1,7 @@
 ---
 title: App
-href: /documentation/concepts/app
-description: An inlang app provides functionality and services for globalization.
+href: /documentation/app
+description: An inlang app provides a user interface for a project.
 ---
 
 # {% $frontmatter.title %}

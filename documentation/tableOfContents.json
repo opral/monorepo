@@ -1,13 +1,23 @@
 {
-	"Overview": ["./introduction.md"],
-	"Guides": ["./manually-create-project.md"],
-	"Concepts": [
-		"./concepts/app.md",
-		"./concepts/project.md",
-		"./concepts/message.md",
-		"./concepts/package.md",
-		"./concepts/plugin.md",
-		"./concepts/lint-rule.md",
-		"./concepts/language-tag.md"
+	"Overview": [
+		"./overview/introduction.md",
+		"./overview/architecture.md",
+		"./overview/manually-create-project.md"
+	],
+	"Guide": [
+		"./guide/develop-app.md",
+		"./guide/develop-plugin.md",
+		"./guide/develop-lint-rule.md",
+		"./guide/publish-marketplace.md"
+	],
+	"Reference": ["./reference/sdk.md"],
+	"Concept": [
+		"./concept/app.md",
+		"./concept/project.md",
+		"./concept/message.md",
+		"./concept/package.md",
+		"./concept/plugin.md",
+		"./concept/lint-rule.md",
+		"./concept/language-tag.md"
 	]
 }

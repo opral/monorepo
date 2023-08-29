@@ -64,8 +64,7 @@ export const registry = [
 			},
 		},
 		type: "app",
-		linkToApp:
-			"https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension&ssr=false#review-details",
+		linkToApp: "vscode:extension/inlang.vs-code-extension",
 	},
 	{
 		meta: {
