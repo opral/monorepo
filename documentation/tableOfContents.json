@@ -18,6 +18,7 @@
 		"./concept/package.md",
 		"./concept/plugin.md",
 		"./concept/lint-rule.md",
+		"./concept/library.md",
 		"./concept/language-tag.md"
 	]
 }
