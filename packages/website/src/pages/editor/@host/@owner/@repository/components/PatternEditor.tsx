@@ -420,7 +420,10 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 						</sl-button>
 					</Show>
 				</div>
-				<Show when={!isLineItemFocused() && hasChanges()}>
+				<Show when={!isLineItemFocused() && hasChanges() &&
+					!(getTextValue(editor) === undefined
+						|| JSON.stringify(getTextValue(editor)) === "[]"
+						|| JSON.stringify(getTextValue(editor)) === `[{"type":"Text","value":""}]`)}>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						width="24"
