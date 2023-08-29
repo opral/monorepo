@@ -6,7 +6,7 @@ description: TODO TODO TODO TODO TODO
 
 # {% $frontmatter.title %}
 
-An inlang project is a file that is named `project.inlang.json`. It contains the configuration for a project and is the entrypoint for all applications, plugins, and tools in the inlang ecosystem. 
+An inlang project is defined by file that is named `project.inlang.json`. It contains the configuration for a project and is the entrypoint for all applications, plugins, and tools in the inlang ecosystem. 
 
 Visit the [getting started](/documentation/getting-started) page to learn how to create a new project.
 
