@@ -37,7 +37,6 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 				documentText: activeTextEditor.document.getText(),
 			})
 			for (const message of messages) {
-				// TODO: Can be improved with lintReport exposing the messageId
 				const matchingLintReports = reports.filter(
 					(report) => (report.messageId = message.messageId),
 				)
