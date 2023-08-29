@@ -12,8 +12,8 @@
 		"access": "public"
 	},
 	"scripts": {
-		"dev": "inlang module build --entry ./src/index.ts --outdir ./dist --watch",
-		"build": "inlang module build --entry ./src/index.ts --outdir ./dist",
+		"dev": "inlang package build --entry ./src/index.ts --outdir ./dist --watch",
+		"build": "inlang package build --entry ./src/index.ts --outdir ./dist",
 		"--- TEST -----------------------------------------------------------": "",
 		"pretest": "npm run build",
 		"test": "vitest run --coverage",
