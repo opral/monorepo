@@ -9,10 +9,10 @@ export async function getInlangProject(): Promise<Result<InlangProject, Error>> 
 	if (cached) return cached
 
 	const baseDirectory = process.cwd()
-	const configPath = resolve(baseDirectory, "project.inlang.json")
+	const projectFilePath = resolve(baseDirectory, "project.inlang.json")
 
 	const configExists = await fs
-		.access(configPath)
+		.access(projectFilePath)
 		.then(() => true)
 		.catch(() => false)
 
@@ -22,7 +22,7 @@ export async function getInlangProject(): Promise<Result<InlangProject, Error>> 
 
 	cached = await tryCatch(() =>
 		openInlangProject({
-			configPath,
+			projectFilePath,
 			nodeishFs: fs,
 		}),
 	)

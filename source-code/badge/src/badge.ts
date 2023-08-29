@@ -34,7 +34,7 @@ export const badge = async (url: string) => {
 	})
 
 	const inlang = await openInlangProject({
-		configPath: "./project.inlang.json",
+		projectFilePath: "./project.inlang.json",
 		nodeishFs: repo.nodeishFs,
 	})
 

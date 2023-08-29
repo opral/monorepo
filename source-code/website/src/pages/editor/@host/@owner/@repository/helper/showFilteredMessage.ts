@@ -3,21 +3,37 @@ import { useEditorState } from "../State.jsx"
 export const showFilteredMessage = (message: Message | undefined) => {
 	const { filteredLintRules, filteredLanguageTags, filteredId, textSearch, inlang } =
 		useEditorState()
+
+	// Early exit if variants are empty
+	if (!message?.variants.length) {
+		return false
+	}
+
+	const languageTagsSet = new Set(filteredLanguageTags())
+	const lintRulesSet = new Set(filteredLintRules())
+	const searchLower = textSearch().toLowerCase()
+
+	// Map and join patterns
+	const patternsLower = message?.variants
+		.flatMap((variant) =>
+			variant.pattern.map((pattern) => {
+				if (pattern.type === "Text") {
+					return pattern.value.toLowerCase()
+				} else if (pattern.type === "VariableReference") {
+					return pattern.name.toLowerCase()
+				}
+				return ""
+			}),
+		)
+		.join("")
+
 	// filteredByLanguage
 	const filteredByLanguage = {
 		...message,
-		variants: message?.variants.filter((variant) => {
-			if (filteredLanguageTags().length === 0) {
-				return true
-			} else {
-				if (message !== undefined && filteredLanguageTags().includes(variant.languageTag)) {
-					return true
-				}
-			}
-			return false
-		}),
-	} as Message
-	if (filteredByLanguage.variants.length === 0) return false
+		variants: message.variants.filter(
+			(variant) => languageTagsSet.size === 0 || languageTagsSet.has(variant.languageTag),
+		),
+	}
 
 	// filteredById
 	const filteredById =
@@ -27,46 +43,26 @@ export const showFilteredMessage = (message: Message | undefined) => {
 
 	// filteredBySearch
 	const filteredBySearch =
-		textSearch().length === 0 ||
+		searchLower.length === 0 ||
 		(message !== undefined &&
-			(message?.id.toLowerCase().includes(textSearch().toLowerCase()) ||
-				message.variants.some((variant) => {
-					variant.pattern
-						.map((pattern) => {
-							if (pattern.type === "Text") {
-								return pattern.value.toLocaleLowerCase()
-							} else if (pattern.type === "VariableReference") {
-								return pattern.name.toLowerCase()
-							} else {
-								return false
-							}
-						})
-						.join("")
-						.includes(textSearch().toLowerCase())
-				})))
+			(message.id.toLowerCase().includes(searchLower) || patternsLower.includes(searchLower)))
 			? filteredById
 			: false
 
 	// filteredByLintRules
 	const filteredByLintRules =
-		filteredLintRules().length === 0 ||
+		lintRulesSet.size === 0 ||
 		(message !== undefined &&
-			// filtered report includes messageId and lintRuleId
 			inlang()
 				?.lint.reports()
-				.some((report: LintReport) => {
-					if (
-						filteredLintRules().includes(report.ruleId) &&
-						filteredLanguageTags().includes(report.languageTag) &&
-						report.messageId === message?.id
-					) {
-						return true
-					}
-					return false
-				}))
+				.some(
+					(report: LintReport) =>
+						lintRulesSet.has(report.ruleId) &&
+						languageTagsSet.has(report.languageTag) &&
+						report.messageId === message.id,
+				))
 			? filteredBySearch
 			: false
 
-	// return matches all filters
 	return filteredByLintRules
 }

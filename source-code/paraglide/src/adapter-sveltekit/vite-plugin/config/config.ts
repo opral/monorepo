@@ -1,4 +1,4 @@
-import { ConfigPathNotFoundError, openInlangProject, LanguageTag, Message } from "@inlang/app"
+import { ProjectFilePathNotFoundError, openInlangProject, LanguageTag, Message } from "@inlang/app"
 import { InlangSdkException } from "../exceptions.js"
 import path, { resolve } from "node:path"
 import type { Config as SvelteConfig } from "@sveltejs/kit"
@@ -55,13 +55,13 @@ export const initTransformConfig = async (): Promise<TransformConfig> => {
 
 	// eslint-disable-next-line no-async-promise-executor
 	return (transformConfig = new Promise<TransformConfig>(async (resolve, reject) => {
-		const inlang = await openInlangProject({ nodeishFs, configPath: PATH_TO_INLANG_CONFIG })
+		const inlang = await openInlangProject({ nodeishFs, projectFilePath: PATH_TO_INLANG_CONFIG })
 
 		const errors = inlang.errors()
 		if (errors.length) {
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			const error = errors[0]!
-			if (error instanceof ConfigPathNotFoundError) {
+			if (error instanceof ProjectFilePathNotFoundError) {
 				await createBasicInlangConfig(nodeishFs)
 				resetTransformConfig()
 				return resolve(initTransformConfig())

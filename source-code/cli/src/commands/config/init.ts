@@ -18,10 +18,10 @@ export const init = new Command()
 export async function initCommandAction() {
 	// Check if config file already exists
 	const packageJsonPath = "./package.json"
-	const inlangConfigPath = "./project.inlang.json"
+	const inlangProjectFilePath = "./project.inlang.json"
 	const rootDir = "./"
 
-	if (fs.existsSync(inlangConfigPath)) {
+	if (fs.existsSync(inlangProjectFilePath)) {
 		log.error("⏸️  Config file already exists.")
 		const answer = await prompts({
 			type: "confirm",
@@ -95,7 +95,7 @@ export async function initCommandAction() {
 	// })
 
 	// // Write the config file
-	// fs.writeFileSync(inlangConfigPath, configContent)
+	// fs.writeFileSync(inlangProjectFilePath, configContent)
 
 	// // validate the config file
 	// const [, error] = await getInlang({ options: cli.opts() })

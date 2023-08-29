@@ -5,8 +5,8 @@ import { NodeishFilesystemSubset, Message, tryCatch, Result, JSONObject } from "
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
 import {
-	ConfigPathNotFoundError,
-	ConfigJSONSyntaxError,
+	ProjectFilePathNotFoundError,
+	ProjectFileJSONSyntaxError,
 	InvalidConfigError,
 	NoPluginProvidesLoadOrSaveMessagesError,
 	PluginLoadMessagesError,
@@ -28,7 +28,7 @@ const ConfigCompiler = TypeCompiler.Compile(InlangConfig)
  *
  */
 export const openInlangProject = async (args: {
-	configPath: string
+	projectFilePath: string
 	nodeishFs: NodeishFilesystemSubset
 	_import?: ImportFunction
 }): Promise<InlangProject> => {
@@ -39,7 +39,7 @@ export const openInlangProject = async (args: {
 
 		const [config, _setConfig] = createSignal<InlangConfig>()
 		createEffect(() => {
-			loadConfig({ configPath: args.configPath, nodeishFs: args.nodeishFs })
+			loadConfig({ projectFilePath: args.projectFilePath, nodeishFs: args.nodeishFs })
 				.then((config) => {
 					setConfig(config)
 				})
@@ -125,6 +125,8 @@ export const openInlangProject = async (args: {
 				)
 		})
 
+		const query = createMessagesQuery(() => messages() || [])
+
 		// -- installed items ----------------------------------------------------
 
 		const installedLintRules = () => {
@@ -165,7 +167,7 @@ export const openInlangProject = async (args: {
 		const [lintReports, setLintReports] = createSignal<LintReport[]>()
 		const [lintErrors, setLintErrors] = createSignal<LintRuleThrowedError[]>([])
 		createEffect(() => {
-			const msgs = messages()
+			const msgs = query.getAll()
 			if (!msgs || !lintInitialized()) return
 			// TODO: only lint changed messages and update arrays selectively
 			lintMessages({
@@ -198,8 +200,6 @@ export const openInlangProject = async (args: {
 
 		const initializeError: Error | undefined = await initialized.catch((error) => error)
 
-		const query = createMessagesQuery(() => messages() || [])
-
 		const debouncedSave = skipFirst(
 			debounce(
 				500,
@@ -210,12 +210,6 @@ export const openInlangProject = async (args: {
 						throw new PluginSaveMessagesError("Error in saving messages", {
 							cause: err,
 						})
-					}
-					if (
-						newMessages.length !== 0 &&
-						JSON.stringify(newMessages) !== JSON.stringify(messages())
-					) {
-						setMessages(newMessages)
 					}
 				},
 				{ atBegin: false },
@@ -259,23 +253,29 @@ export const openInlangProject = async (args: {
 
 // ------------------------------------------------------------------------------------------------
 
-const loadConfig = async (args: { configPath: string; nodeishFs: NodeishFilesystemSubset }) => {
+const loadConfig = async (args: {
+	projectFilePath: string
+	nodeishFs: NodeishFilesystemSubset
+}) => {
 	let json: JSON
-	if (args.configPath.startsWith("data:")) {
-		json = (await import(/* @vite-ignore */ args.configPath)).default
+	if (args.projectFilePath.startsWith("data:")) {
+		json = (await import(/* @vite-ignore */ args.projectFilePath)).default
 		// TODO: add error handling
 	} else {
 		const { data: configFile, error: configFileError } = await tryCatch(
-			async () => await args.nodeishFs.readFile(args.configPath, { encoding: "utf-8" }),
+			async () => await args.nodeishFs.readFile(args.projectFilePath, { encoding: "utf-8" }),
 		)
 		if (configFileError)
-			throw new ConfigPathNotFoundError(`Could not locate config file in (${args.configPath}).`, {
-				cause: configFileError,
-			})
+			throw new ProjectFilePathNotFoundError(
+				`Could not locate config file in (${args.projectFilePath}).`,
+				{
+					cause: configFileError,
+				},
+			)
 
 		const { data: parsedConfig, error: parseConfigError } = tryCatch(() => JSON.parse(configFile!))
 		if (parseConfigError)
-			throw new ConfigJSONSyntaxError(`The config is not a valid JSON file.`, {
+			throw new ProjectFileJSONSyntaxError(`The config is not a valid JSON file.`, {
 				cause: parseConfigError,
 			})
 
