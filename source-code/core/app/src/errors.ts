@@ -12,10 +12,10 @@ export class ConfigJSONSyntaxError extends Error {
 	}
 }
 
-export class ConfigPathNotFoundError extends Error {
+export class ProjectFilePathNotFoundError extends Error {
 	constructor(message: string, options: ErrorOptions) {
 		super(message, options)
-		this.name = "ConfigPathNotFoundError"
+		this.name = "ProjectFilePathNotFoundError"
 	}
 }
 

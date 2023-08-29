@@ -10,7 +10,7 @@ import {
 import {
 	openInlangProject,
 	type InlangProject,
-	ConfigPathNotFoundError,
+	ProjectFilePathNotFoundError,
 	createMessagesQuery,
 } from "@inlang/app"
 import * as createBasicInlangConfigModule from "./utils/createBasicInlangConfig.js"
@@ -73,7 +73,7 @@ it("should create an inlang config file if no config is present yet", async () =
 	vi.mocked(openInlangProject).mockImplementationOnce(
 		async () =>
 			({
-				errors: () => [new ConfigPathNotFoundError("", {})],
+				errors: () => [new ProjectFilePathNotFoundError("", {})],
 			} as unknown as InlangProject),
 	)
 

@@ -41,7 +41,7 @@ export const updateSdkModuleVersion = async (inlang: InlangProject): Promise<boo
 export const standaloneUpdateSdkModuleVersion = async () => {
 	const inlang = await openInlangProject({
 		nodeishFs: await getNodeishFs(),
-		configPath: PATH_TO_INLANG_CONFIG,
+		projectFilePath: PATH_TO_INLANG_CONFIG,
 	})
 
 	return await updateSdkModuleVersion(inlang)
