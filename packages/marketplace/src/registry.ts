@@ -13,7 +13,7 @@ export const registry = [
 			marketplace: {
 				icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 				linkToReadme: {
-					en: "https://inlang.com/editor",
+					en: "https://github.com/inlang/inlang/blob/main/source-code/website/src/pages/editor/README.md",
 				},
 				keywords: ["web", "editor", "no-code"],
 				publisherName: "inlang",
@@ -21,6 +21,7 @@ export const registry = [
 			},
 		},
 		type: "app",
+		linkToApp: "/editor",
 	},
 	{
 		meta: {
@@ -34,7 +35,7 @@ export const registry = [
 			marketplace: {
 				icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 				linkToReadme: {
-					en: "https://github.com/inlang/inlang/tree/main/source-code/cli",
+					en: "https://github.com/inlang/inlang/blob/main/source-code/cli/README.md",
 				},
 				keywords: ["cli", "automation"],
 				publisherName: "inlang",
@@ -55,7 +56,7 @@ export const registry = [
 			marketplace: {
 				icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 				linkToReadme: {
-					en: "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
+					en: "https://github.com/inlang/inlang/blob/main/source-code/ide-extension/README.md",
 				},
 				keywords: ["vscode", "efficiency", "extension"],
 				publisherName: "inlang",
@@ -63,6 +64,8 @@ export const registry = [
 			},
 		},
 		type: "app",
+		linkToApp:
+			"https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension&ssr=false#review-details",
 	},
 	{
 		meta: {
@@ -76,7 +79,7 @@ export const registry = [
 			marketplace: {
 				icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 				linkToReadme: {
-					en: "#",
+					en: "https://github.com/inlang/inlang/blob/main/source-code/badge/README.md",
 				},
 				keywords: ["badge", "embed"],
 				publisherName: "inlang",

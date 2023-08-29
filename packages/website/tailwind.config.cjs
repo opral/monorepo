@@ -48,6 +48,10 @@ module.exports = {
 						"stroke-dasharray": "100% 100%",
 					},
 				},
+				spin: {
+					"0%": { transform: "rotate(0deg)" },
+					"100%": { transform: "rotate(360deg)" },
+				},
 			},
 			animation: {
 				slideIn: "slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1",
@@ -56,6 +60,7 @@ module.exports = {
 				fadeInBottom: "fadeInBottom 0.3s ease-out 1",
 				ripple: "ripple 2s linear infinite",
 				draw: "draw 0.3s cubic-bezier(0.650, 0.000, 0.450, 1.000) forwards",
+				spin: "spin 0.8s ease-in-out infinite",
 			},
 		},
 		// no tailwind colors. use color system colors only. see below
