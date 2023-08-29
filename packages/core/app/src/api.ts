@@ -23,23 +23,23 @@ import type {
 	PluginUsesReservedNamespaceError,
 	ResolvedPluginApi,
 } from "@inlang/plugin"
-import type { ModuleImportError, ModuleError } from "@inlang/module"
+import type { PackageImportError, PackageError } from "@inlang/package"
 
 export type InstalledPlugin = {
 	meta: Plugin["meta"]
 	/**
-	 * The module which the plugin is installed from.
+	 * The package which the plugin is installed from.
 	 */
-	module: string
+	package: string
 	// disabled: boolean
 }
 
 export type InstalledLintRule = {
 	meta: LintRule["meta"]
 	/**
-	 * The module which the lint rule is installed from.
+	 * The package which the lint rule is installed from.
 	 */
-	module: string
+	package: string
 	lintLevel: LintLevel
 	disabled: boolean
 }
@@ -51,8 +51,8 @@ export type InlangProject = {
 	}
 	errors: Subscribable<
 		(
-			| ModuleImportError
-			| ModuleError
+			| PackageImportError
+			| PackageError
 			| PluginReturnedInvalidAppSpecificApiError
 			| PluginLoadMessagesFunctionAlreadyDefinedError
 			| PluginSaveMessagesFunctionAlreadyDefinedError

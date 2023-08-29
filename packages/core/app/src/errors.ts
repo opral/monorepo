@@ -34,7 +34,7 @@ export class PluginLoadMessagesError extends Error {
 }
 
 /**
- * Error when no module provides the API to handle messages.
+ * Error when no package provides the API to handle messages.
  */
 export class NoPluginProvidesLoadOrSaveMessagesError extends Error {
 	constructor() {

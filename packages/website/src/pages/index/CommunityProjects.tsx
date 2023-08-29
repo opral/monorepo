@@ -83,7 +83,7 @@ export function RepositoryCard(props: {
 		lastOpened?: number
 	}
 	install?: boolean
-	modules?: string[]
+	packages?: string[]
 }) {
 	const getRelativeTime = (timestamp: number) => {
 		// Calculate the time difference

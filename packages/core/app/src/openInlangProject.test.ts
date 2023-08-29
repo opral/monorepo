@@ -5,7 +5,7 @@ import { createMockNodeishFs } from "@inlang/plugin/test"
 import type { InlangConfig } from "@inlang/config"
 import type { Message, Plugin } from "@inlang/plugin"
 import type { LintRule } from "@inlang/lint"
-import type { ImportFunction, InlangModule } from "@inlang/module"
+import type { ImportFunction, InlangPackage } from "@inlang/package"
 import {
 	ConfigPathNotFoundError,
 	ConfigJSONSyntaxError,
@@ -24,7 +24,7 @@ const getValue = <T>(subscribable: { subscribe: (subscriber: (value: T) => void)
 const config: InlangConfig = {
 	sourceLanguageTag: "en",
 	languageTags: ["en"],
-	modules: ["./dist/index.js"],
+	packages: ["./dist/index.js"],
 	settings: {
 		"project.lintRuleLevels": {
 			"inlang.lintRule.missingTranslation": "error",
@@ -103,7 +103,7 @@ const _import: ImportFunction = async () =>
 			plugins: [mockPlugin],
 			lintRules: [mockLintRule],
 		},
-	} satisfies InlangModule)
+	} satisfies InlangPackage)
 
 // ------------------------------------------------------------------------------------------------
 
@@ -182,14 +182,14 @@ describe("initialization", () => {
 		})
 	})
 
-	describe("modules", () => {
+	describe("packages", () => {
 		it("should return an error if no plugin defines readMessages", async () => {
 			const $badImport: ImportFunction = async () =>
 				({
 					default: {
 						plugins: [{ ...mockPlugin, loadMessages: undefined as any } as Plugin],
 					},
-				} satisfies InlangModule)
+				} satisfies InlangPackage)
 
 			const fs = await createMockNodeishFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
@@ -208,7 +208,7 @@ describe("initialization", () => {
 					default: {
 						plugins: [{ ...mockPlugin, writeMessages: undefined as any } as Plugin],
 					},
-				} satisfies InlangModule)
+				} satisfies InlangPackage)
 
 			const fs = await createMockNodeishFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
@@ -227,7 +227,7 @@ describe("initialization", () => {
 					default: {
 						plugins: [{} as Plugin],
 					},
-				} satisfies InlangModule)
+				} satisfies InlangPackage)
 
 			const fs = await createMockNodeishFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
@@ -248,7 +248,7 @@ describe("initialization", () => {
 
 	describe("flow", () => {
 		it.todo("should not call functions multiple times")
-		it.todo("should load modules after config")
+		it.todo("should load packages after config")
 		it.todo("should not load messages")
 		it.todo("should not call lint")
 	})
@@ -345,12 +345,12 @@ describe("functionality", () => {
 
 			expect(inlang.installed.plugins()[0]).toStrictEqual({
 				meta: mockPlugin.meta,
-				module: config.modules[0],
+				package: config.packages[0],
 			})
 
 			expect(inlang.installed.lintRules()[0]).toEqual({
 				meta: mockLintRule.meta,
-				module: config.modules[0],
+				package: config.packages[0],
 				lintLevel: "warning",
 				disabled: false,
 			})
@@ -363,7 +363,7 @@ describe("functionality", () => {
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
-					modules: ["./dist/index.js"],
+					packages: ["./dist/index.js"],
 					settings: {
 						"project.lintRuleLevels": {},
 					},
@@ -385,7 +385,7 @@ describe("functionality", () => {
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
-					modules: ["./dist/index.js"],
+					packages: ["./dist/index.js"],
 					settings: {
 						"project.disabled": [mockLintRule.meta.id],
 					},
@@ -446,7 +446,7 @@ describe("functionality", () => {
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
-					modules: ["some-module.js"],
+					packages: ["some-package.js"],
 					settings: {
 						"project.disabled": [disabledLintRule.meta.id],
 					},
@@ -458,7 +458,7 @@ describe("functionality", () => {
 						plugins: [_mockPlugin],
 						lintRules: [enabledLintRule, disabledLintRule],
 					},
-				} satisfies InlangModule
+				} satisfies InlangPackage
 			}
 			const inlang = await openInlangProject({
 				configPath: "./project.inlang.json",
@@ -510,7 +510,7 @@ describe("functionality", () => {
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
-					modules: ["some-module.js"],
+					packages: ["some-package.js"],
 					settings: {},
 				} satisfies InlangConfig),
 			)
@@ -520,7 +520,7 @@ describe("functionality", () => {
 						plugins: [_mockPlugin],
 						lintRules: [_mockLintRule],
 					},
-				} satisfies InlangModule
+				} satisfies InlangPackage
 			}
 			const inlang = await openInlangProject({
 				configPath: "./project.inlang.json",
@@ -589,7 +589,7 @@ describe("functionality", () => {
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en", "de"],
-					modules: [""],
+					packages: [""],
 					settings: {
 						"inlang.plugin.json": {
 							pathPattern: "./resources/{languageTag}.json",
@@ -617,7 +617,7 @@ describe("functionality", () => {
 					default: {
 						plugins: [_mockPlugin],
 					},
-				} satisfies InlangModule
+				} satisfies InlangPackage
 			}
 
 			const inlang = await openInlangProject({
