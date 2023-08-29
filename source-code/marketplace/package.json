@@ -27,7 +27,7 @@
 		"node": ">=16.15.0"
 	},
 	"dependencies": {
-		"@inlang/module": "*",
+		"@inlang/package": "*",
 		"@inlang/language-tag": "*",
 		"@sinclair/typebox": "^0.30.0"
 	},
