@@ -285,11 +285,11 @@ describe("functionality", () => {
 
 			inlang.setConfig({ ...config, languageTags: ["en", "de"] })
 			expect(getValue(inlang.config)).toStrictEqual({ ...config, languageTags: ["en", "de"] })
-			expect(inlang.config().languageTags).toStrictEqual(["en", "de"])
+			expect(inlang.config()?.languageTags).toStrictEqual(["en", "de"])
 
 			inlang.setConfig({ ...config, languageTags: ["en", "de", "fr"] })
 			expect(getValue(inlang.config)).toStrictEqual({ ...config, languageTags: ["en", "de", "fr"] })
-			expect(inlang.config().languageTags).toStrictEqual(["en", "de", "fr"])
+			expect(inlang.config()?.languageTags).toStrictEqual(["en", "de", "fr"])
 		})
 	})
 

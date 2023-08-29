@@ -1,14 +1,14 @@
 {
 	"sourceLanguageTag": "en",
 	"languageTags": ["en", "de"],
-	"modules": ["i18nextPlugin.js", "lintPlugin.js"],
+	"modules": ["./../../plugins/i18next/dist/index.js", "./lintPlugin.js"],
 	"settings": {
 		"inlang.plugin.i18next": {
 			"pathPattern": {
-				"client-page": "app/i18n/locales/{language}/client-page.json",
-				"footer": "app/i18n/locales/{language}/footer.json",
-				"second-page": "app/i18n/locales/{language}/second-page.json",
-				"translation": "app/i18n/locales/{language}/translation.json"
+				"client-page": "app/i18n/locales/{languageTag}/client-page.json",
+				"footer": "app/i18n/locales/{languageTag}/footer.json",
+				"second-page": "app/i18n/locales/{languageTag}/second-page.json",
+				"translation": "app/i18n/locales/{languageTag}/translation.json"
 			}
 		}
 	}

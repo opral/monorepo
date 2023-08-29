@@ -4,6 +4,7 @@ export class ModuleError extends Error {
 		super(message)
 		this.name = "ModuleError"
 		this.module = options.module
+		this.cause = options.cause
 	}
 }
 

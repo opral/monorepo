@@ -14,6 +14,7 @@ export const extractMessageCommand = {
 		const ideExtension = state().inlang.appSpecificApi()["inlang.app.ideExtension"] as
 			| IdeExtensionConfig
 			| undefined
+
 		// guards
 		if (!ideExtension) {
 			return msg(
@@ -29,7 +30,7 @@ export const extractMessageCommand = {
 				"notification",
 			)
 		}
-		if (state().inlang.config().sourceLanguageTag === undefined) {
+		if (state().inlang.config()?.sourceLanguageTag === undefined) {
 			return msg(
 				"The `sourceLanguageTag` is not defined in the project.inlang.json but required to extract a message.",
 				"warn",
@@ -85,7 +86,7 @@ export const extractMessageCommand = {
 			selectors: [],
 			variants: [
 				{
-					languageTag: state().inlang.config().sourceLanguageTag as string,
+					languageTag: state().inlang.config()?.sourceLanguageTag as string,
 					match: {},
 					pattern: [
 						{
