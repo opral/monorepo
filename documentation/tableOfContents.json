@@ -1,11 +1,11 @@
 {
-	"Overview": ["./introduction.md", "./inlang-libraries.md"],
+	"Overview": ["./introduction.md"],
 	"Guides": ["./manually-create-project.md"],
 	"Concepts": [
 		"./concepts/app.md",
 		"./concepts/project.md",
 		"./concepts/message.md",
-		"./concepts/module.md",
+		"./concepts/package.md",
 		"./concepts/plugin.md",
 		"./concepts/lint-rule.md",
 		"./concepts/language-tag.md"

@@ -17,3 +17,20 @@ Visit the [getting started](/documentation/getting-started) page to learn how to
   alt="A `project.inlang.json` file configures every app, plugins, and tool in the inlang ecosystem."
   caption="A `project.inlang.json` file configures every app, plugins, and tool in the inlang ecosystem."
 /%}
+
+## Project configuration file schema
+
+The `project.inlang.json` file must contain the following JSON:
+
+```ts
+{
+  // the "source" language tag that is used in your project  
+  "sourceLanguageTag": string,
+  // all the language tags you want to support in your project
+  "languageTags": Array<string>,
+  // the packages that are used in the project
+  "packages": Array<string>,
+  // settings for the project and package items
+  "settings": {}
+}
+```
