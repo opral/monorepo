@@ -21,19 +21,13 @@ export type PageProps = {
 }
 
 export function Page(props: PageProps) {
-	const [item, setItem] = createSignal<MarketplaceItem | undefined>(undefined)
 	const [readmore, setReadmore] = createSignal<boolean>(false)
-
-	/* Automatically sets the fitting item e.g. when changing bundle */
-	createEffect(() => {
-		setItem(
-			marketplaceItems.find(
-				(item) =>
-					item.meta.displayName.en?.toLowerCase().replaceAll(" ", "-") ===
-					props.markdown?.frontmatter?.title?.toLowerCase().replaceAll(" ", "-"),
-			),
+	const item = () =>
+		marketplaceItems.find(
+			(item) =>
+				item.meta.displayName.en?.toLowerCase().replaceAll(" ", "-") ===
+				props.markdown?.frontmatter?.title?.toLowerCase().replaceAll(" ", "-"),
 		)
-	})
 
 	return (
 		<>

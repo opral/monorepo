@@ -22,48 +22,8 @@ export function InstallationProvider(props: {
 	const [localStorage, setLocalStorage] = useLocalStorage() ?? []
 	const user = localStorage?.user
 
-	/**
-	 * This function checks for common errors before repo initialization (to be more performant) and sets the step accordingly.
-	 */
 	createEffect(() => {
-		if (!user && getLocalStorage()) {
-			props.setStep({
-				type: "github-login",
-				error: false,
-			})
-		} else if (!props.repo) {
-			props.setStep({
-				type: "no-repo",
-				message: "No repository URL provided.",
-				error: true,
-			})
-		} else if (!props.modules || props.modules.length === 0 || props.modules[0] === "") {
-			props.setStep({
-				type: "no-modules",
-				message: "No modules provided. You can find modules in the marketplace.",
-				error: true,
-			})
-		} else if (!validateModules(props.modules)) {
-			props.setStep({
-				type: "invalid-modules",
-				message: "Invalid modules provided.",
-				error: true,
-			})
-		} else if (!props.optIn.optIn()) {
-			props.setStep({
-				type: "opt-in",
-				message: "Please opt-in to the installation.",
-			})
-		} else {
-			props.setStep({
-				type: "installing",
-				message: "Starting installation...",
-				error: false,
-			})
-
-			setRecentProject()
-			initializeRepo(props.repo, props.modules, user!, props.step, props.setStep)
-		}
+		validateRepo(user, setRecentProject, props)
 	})
 
 	/* Set recent project into local storage */
@@ -97,6 +57,60 @@ export function InstallationProvider(props: {
 	}
 
 	return <LocalStorageProvider>{props.children}</LocalStorageProvider>
+}
+
+/**
+ * This function checks for common errors before repo initialization (to be more performant) and sets the step accordingly.
+ */
+function validateRepo(
+	user: { username: string; email: string } | undefined,
+	setRecentProject: () => void,
+	props: {
+		repo: string
+		modules: string[]
+		step: () => Step
+		setStep: (step: Step) => void
+		optIn: Record<string, any>
+	},
+) {
+	if (!user && getLocalStorage()) {
+		props.setStep({
+			type: "github-login",
+			error: false,
+		})
+	} else if (!props.repo) {
+		props.setStep({
+			type: "no-repo",
+			message: "No repository URL provided.",
+			error: true,
+		})
+	} else if (!props.modules || props.modules.length === 0 || props.modules[0] === "") {
+		props.setStep({
+			type: "no-modules",
+			message: "No modules provided. You can find modules in the marketplace.",
+			error: true,
+		})
+	} else if (!validateModules(props.modules)) {
+		props.setStep({
+			type: "invalid-modules",
+			message: "Invalid modules provided.",
+			error: true,
+		})
+	} else if (!props.optIn.optIn()) {
+		props.setStep({
+			type: "opt-in",
+			message: "We need your consent to install the modules.",
+		})
+	} else {
+		props.setStep({
+			type: "installing",
+			message: "Starting installation...",
+			error: false,
+		})
+
+		setRecentProject()
+		initializeRepo(props.repo, props.modules, user!, props.step, props.setStep)
+	}
 }
 
 /**
