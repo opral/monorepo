@@ -224,7 +224,7 @@ function ChooseRepo(props: { modules?: string[] }) {
 }
 
 /* Lets the user opt-in before making changes to the repository */
-function OptIn(props: { modules?: string[] }) {
+function OptIn(props: { modules: string[] }) {
 	return (
 		<SetupCard>
 			<div class="flex flex-col justify-center gap-4 items-center mb-2">
