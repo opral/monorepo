@@ -1,7 +1,7 @@
 ---
 title: Lint rule
 href: /documentation/concepts/lint-rule
-description: Lint rules validate content like messages and report issues in an inlang project.
+description: Lint rules validate messages and other types of content in an inlang project.
 ---
 
 # {% $frontmatter.title %}
