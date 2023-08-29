@@ -1,5 +1,6 @@
-import * as vscode from "vscode"
 import type { NodeishFilesystemSubset } from "@inlang/app"
+import fs from "node:fs/promises"
+import { default as _path } from "node:path"
 
 /**
  * Creates a new mapper between vscode and inlang file systems.
@@ -7,35 +8,42 @@ import type { NodeishFilesystemSubset } from "@inlang/app"
  * @param base uri for relative paths
  * @returns file system mapper
  */
-export function createFileSystemMapper(base: vscode.Uri): NodeishFilesystemSubset {
+export function createFileSystemMapper(base: string): NodeishFilesystemSubset {
 	return {
-		readdir: async (path: Parameters<NodeishFilesystemSubset["readdir"]>[0]) => {
-			return (await vscode.workspace.fs.readDirectory(vscode.Uri.joinPath(base, path))).map(
-				(dir) => dir[0],
-			)
-		},
+		// @ts-expect-error
 		readFile: async (
 			path: Parameters<NodeishFilesystemSubset["readFile"]>[0],
-			options?: Parameters<NodeishFilesystemSubset["readFile"]>[1],
-		) => {
-			const joinedPath = vscode.Uri.joinPath(base, path)
-			const rawFile = await vscode.workspace.fs.readFile(joinedPath)
-			if (options?.encoding === "utf-8") return new TextDecoder(options.encoding).decode(rawFile)
-			return rawFile
+			options: Parameters<NodeishFilesystemSubset["readFile"]>[1],
+		): Promise<string> => {
+			const fileData = await fs.readFile(
+				path.startsWith(base) ? _path.normalize(path) : _path.normalize(base + "/" + path),
+				options,
+			)
+			if (typeof fileData === "string") {
+				return fileData
+			} else {
+				return new TextDecoder().decode(fileData)
+			}
 		},
 		writeFile: async (
-			file: Parameters<NodeishFilesystemSubset["writeFile"]>[0],
+			path: Parameters<NodeishFilesystemSubset["writeFile"]>[0],
 			data: Parameters<NodeishFilesystemSubset["writeFile"]>[1],
 		) => {
-			return vscode.workspace.fs.writeFile(
-				vscode.Uri.joinPath(base, file),
-				typeof data === "string" ? new TextEncoder().encode(data) : data,
+			await fs.writeFile(
+				path.startsWith(base) ? _path.normalize(path) : _path.normalize(base + "/" + path),
+				data,
 			)
 		},
 		mkdir: async (path: Parameters<NodeishFilesystemSubset["mkdir"]>[0]) => {
-			return vscode.workspace.fs.createDirectory(vscode.Uri.joinPath(base, path)) as unknown as
-				| undefined
-				| string
+			await fs.mkdir(
+				path.startsWith(base) ? _path.normalize(path) : _path.normalize(base + "/" + path),
+			)
+			return path
+		},
+		readdir: async (path: Parameters<NodeishFilesystemSubset["readdir"]>[0]) => {
+			return fs.readdir(
+				path.startsWith(base) ? _path.normalize(path) : _path.normalize(base + "/" + path),
+			)
 		},
 	}
 }

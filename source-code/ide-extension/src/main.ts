@@ -21,7 +21,6 @@ import { editMessageCommand } from "./commands/editMessage.js"
 import { openInlangProject, tryCatch } from "@inlang/app"
 import { createFileSystemMapper } from "./utilities/createFileSystemMapper.js"
 import { _import } from "./utilities/import/_import.js"
-import { promises as fs } from "node:fs"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
@@ -101,8 +100,8 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	const { data: inlang, error } = await tryCatch(() =>
 		openInlangProject({
 			configPath: closestConfigPathUri.fsPath,
-			nodeishFs: fs,
-			_import: _import(closestConfigPathUri.fsPath),
+			nodeishFs: createFileSystemMapper(workspaceFolder.uri.fsPath),
+			_import: _import(workspaceFolder.uri.fsPath),
 		}),
 	)
 

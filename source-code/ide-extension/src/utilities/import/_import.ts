@@ -1,9 +1,9 @@
 import { normalizePath } from "@inlang-git/fs"
 import fetch from "node-fetch"
-import fs from "node:fs/promises"
 import ts from "typescript"
 import requireFromString from "require-from-string"
 import type { ImportFunction } from "@inlang/app"
+import fs from "node:fs/promises"
 
 /**
  * Wraps the import function to inject the base path.
@@ -11,6 +11,8 @@ import type { ImportFunction } from "@inlang/app"
  * The wrapping is necessary to resolve relative imports.
  */
 export function _import(basePath: string): ImportFunction {
+	console.log("_import", basePath)
+
 	return (uri: string) => {
 		if (uri.startsWith("./")) {
 			return createImport(normalizePath(basePath + "/" + uri.slice(2)))
@@ -20,11 +22,14 @@ export function _import(basePath: string): ImportFunction {
 }
 
 const createImport: ImportFunction = async (uri: string) => {
+	console.log("createImport", uri)
 	// polyfill for environments that don't support dynamic
 	// http imports yet like VSCode.
+
 	const moduleAsText = uri.startsWith("http")
-		? await (await fetch(uri)).text()
-		: ((await fs.readFile(normalizePath(uri), { encoding: "utf-8" })) as string)
+		? await(await fetch(uri)).text()
+		: await fs.readFile(uri, { encoding: "utf-8" })
+
 	try {
 		const asCjs = transpileToCjs(moduleAsText)
 		const module = requireFromString(asCjs)

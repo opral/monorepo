@@ -53,7 +53,7 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 						new vscode.Position(message.position.end.line - 1, message.position.end.character - 1),
 					)
 
-					const sourceLanguageTag = state().inlang.config().sourceLanguageTag
+					const sourceLanguageTag = state().inlang.config()?.sourceLanguageTag
 
 					// Get the lint message for the source language tag or fallback to "en"
 					// @ts-ignore // TODO: Fix this with proper type
