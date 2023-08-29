@@ -1,6 +1,6 @@
 import type { BuildOptions, Plugin } from "esbuild-wasm"
 
-export const moduleBuildOptions = (args: {
+export const packageBuildOptions = (args: {
 	entry: string
 	outdir: string
 	minify: boolean
