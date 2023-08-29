@@ -1,4 +1,5 @@
 {
-	"Overview": ["./introduction.md", "./getting-started.md"],
+	"Overview": ["./introduction.md"],
+	"Guides": ["./manually-create-project.md"],
 	"Concepts": ["./concepts/project.md"]
 }
