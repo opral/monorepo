@@ -15,3 +15,6 @@ Add your module to [this file](https://github.com/inlang/inlang/blob/main/source
 ### 3️⃣ Create a pull request and wait for approval
 
 Create a pull request with your changes and wait for approval. After that, your plugin or lint rule will be available in the marketplace.
+
+## How to write your Readme
+You can write your readme in markdown. We strongly recommend to align your readme with the other apps and modules in the marketplace to ensure a consistent user experience.

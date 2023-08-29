@@ -12,7 +12,6 @@ import Package from "~icons/material-symbols/package-2"
 type Category = "app" | "plugin" | "lintrule"
 
 const [searchValue, setSearchValue] = createSignal<string>("")
-
 const [selectedCategories, setSelectedCategories] = createSignal<Category[]>([
 	"app",
 	"plugin",
@@ -23,6 +22,29 @@ const filteredItems = () =>
 	marketplaceItems.filter((item: Record<string, any>) => {
 		return filterItem(item, selectedCategories(), searchValue())
 	})
+
+function filterItem(
+	item: Record<string, any>,
+	selectedCategories: Category[],
+	searchValue: string,
+) {
+	if (!selectedCategories.includes(item.type.toLowerCase())) {
+		return false
+	}
+
+	const isSearchMatch =
+		item.meta.displayName.en?.toLowerCase().includes(searchValue.toLowerCase()) ||
+		item.meta.marketplace.publisherName.toLowerCase().includes(searchValue.toLowerCase()) ||
+		item.meta.marketplace.keywords.some((keyword: string) =>
+			keyword.toLowerCase().includes(searchValue.toLowerCase()),
+		) ||
+		item.meta.marketplace.bundleName?.toLowerCase().includes(searchValue.toLowerCase()) ||
+		item.meta.id.split(".")[1]?.toLowerCase().includes(searchValue.toLowerCase()) ||
+		item.meta.id.toLowerCase().includes(searchValue.toLowerCase()) ||
+		item.module?.toLowerCase() === searchValue.toLowerCase()
+
+	return isSearchMatch
+}
 
 export function Page() {
 	return (
@@ -35,10 +57,13 @@ export function Page() {
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<Layout>
 				<div class="py-16 md:py-20 min-h-screen relative">
-					<div class="grid xl:grid-cols-3 pb-8">
+					<div class="grid xl:grid-cols-3 pb-8 gap-8">
 						<h1 class="xl:col-span-2 text-[40px] md:text-5xl font-bold text-left leading-tight">
 							Explore the marketplace
 						</h1>
+						<div class="w-full h-full flex xl:justify-end items-center">
+							{/* <SelectRepo size="medium" /> */}
+						</div>
 					</div>
 					<div class="w-full top-16 sticky bg-background pb-4 pt-8 z-10 border-b border-surface-2 flex flex-col gap-5">
 						<Search
@@ -65,29 +90,6 @@ export function Page() {
 	)
 }
 
-function filterItem(
-	item: Record<string, any>,
-	selectedCategories: Category[],
-	searchValue: string,
-) {
-	if (!selectedCategories.includes(item.type.toLowerCase())) {
-		return false
-	}
-
-	const isSearchMatch =
-		item.meta.displayName.en?.toLowerCase().includes(searchValue.toLowerCase()) ||
-		item.meta.marketplace.publisherName.toLowerCase().includes(searchValue.toLowerCase()) ||
-		item.meta.marketplace.keywords.some((keyword: string) =>
-			keyword.toLowerCase().includes(searchValue.toLowerCase()),
-		) ||
-		item.meta.marketplace.bundleName?.toLowerCase().includes(searchValue.toLowerCase()) ||
-		item.meta.id.split(".")[1]?.toLowerCase().includes(searchValue.toLowerCase()) ||
-		item.meta.id.toLowerCase().includes(searchValue.toLowerCase()) ||
-		item.module?.toLowerCase() === searchValue.toLowerCase()
-
-	return isSearchMatch
-}
-
 const Gallery = () => {
 	return (
 		<>
@@ -95,7 +97,7 @@ const Gallery = () => {
 				{(item) => {
 					return (
 						<a
-							href={item.meta.marketplace.linkToReadme.en}
+							href={`/marketplace/${item.meta.displayName.en?.toLowerCase().replaceAll(" ", "-")}`}
 							target="_blanc"
 							class="relative no-underline h-64"
 						>
@@ -136,7 +138,6 @@ const Gallery = () => {
 											>
 												<div
 													onClick={(e) => {
-														e.preventDefault()
 														e.stopPropagation()
 														setSearchValue(`${item.module ?? item.meta.id}`)
 														window.scrollTo({ top: 0 })

@@ -19,7 +19,7 @@ have not been updated accordingly.
 		marketplace: {
 			icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
 			linkToReadme: {
-				en: "https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules",
+				en: "https://github.com/inlang/inlang/blob/main/source-code/plugins/standard-lint-rules/README.md",
 			},
 			keywords: ["lint-rule", "standard", "message-without-source"],
 			publisherName: "inlang",
