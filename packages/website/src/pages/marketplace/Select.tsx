@@ -59,6 +59,10 @@ export function SelectionWrapper(props: {
 	setSelectedModules: (items: string[]) => void
 	children: JSXElement
 }) {
+	function removeDuplicates(array: string[]) {
+		return array.filter((item, index) => array.indexOf(item) === index)
+	}
+
 	return (
 		<>
 			{props.select() ? (
@@ -79,18 +83,17 @@ export function SelectionWrapper(props: {
 						e.stopPropagation()
 
 						if (props.item.type !== "app") {
-							if (props.selectedModules().length > 0) {
-								for (const module of props.selectedModules()) {
-									if (props.item.module === module) {
-										props.setSelectedModules(
-											props.selectedModules().filter((item) => item !== module),
-										)
-									} else {
-										props.setSelectedModules([...props.selectedModules(), props.item.module])
-									}
-								}
+							const moduleToRemove = props.item.module
+							const isSelected = props.selectedModules().includes(moduleToRemove)
+
+							if (isSelected) {
+								props.setSelectedModules(
+									props.selectedModules().filter((item) => item !== moduleToRemove),
+								)
 							} else {
-								props.setSelectedModules([...props.selectedModules(), props.item.module])
+								props.setSelectedModules(
+									removeDuplicates([...props.selectedModules(), moduleToRemove]),
+								)
 							}
 						}
 					}}
