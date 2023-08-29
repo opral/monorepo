@@ -7,7 +7,7 @@ import {
 	solidAdapter,
 	InlangProjectWithSolidAdapter,
 } from "@inlang/app"
-import type { ImportFunction, InlangModule } from "@inlang/module"
+import type { ImportFunction, InlangModule } from "@inlang/package"
 import {
 	createEffect,
 	Show,

@@ -36,7 +36,7 @@
 		"@inlang/language-tag": "*",
 		"@inlang/lint": "*",
 		"@inlang/messages": "*",
-		"@inlang/module": "*",
+		"@inlang/package": "*",
 		"@inlang/plugin": "*",
 		"@inlang/result": "*",
 		"@inlang/test": "*",
