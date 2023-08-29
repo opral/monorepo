@@ -125,6 +125,8 @@ export const openInlangProject = async (args: {
 				)
 		})
 
+		const query = createMessagesQuery(() => messages() || [])
+
 		// -- installed items ----------------------------------------------------
 
 		const installedLintRules = () => {
@@ -165,7 +167,7 @@ export const openInlangProject = async (args: {
 		const [lintReports, setLintReports] = createSignal<LintReport[]>()
 		const [lintErrors, setLintErrors] = createSignal<LintRuleThrowedError[]>([])
 		createEffect(() => {
-			const msgs = messages()
+			const msgs = query.getAll()
 			if (!msgs || !lintInitialized()) return
 			// TODO: only lint changed messages and update arrays selectively
 			lintMessages({
@@ -198,8 +200,6 @@ export const openInlangProject = async (args: {
 
 		const initializeError: Error | undefined = await initialized.catch((error) => error)
 
-		const query = createMessagesQuery(() => messages() || [])
-
 		const debouncedSave = skipFirst(
 			debounce(
 				500,
@@ -210,12 +210,6 @@ export const openInlangProject = async (args: {
 						throw new PluginSaveMessagesError("Error in saving messages", {
 							cause: err,
 						})
-					}
-					if (
-						newMessages.length !== 0 &&
-						JSON.stringify(newMessages) !== JSON.stringify(messages())
-					) {
-						setMessages(newMessages)
 					}
 				},
 				{ atBegin: false },
