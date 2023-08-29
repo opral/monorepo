@@ -10,8 +10,8 @@ export { solidAdapter, InlangProjectWithSolidAdapter } from "./adapter/solidAdap
 export { tryAutoGenerateInlangConfig } from "./tryAutoGenerateConfig.js"
 export { createMessagesQuery } from "./createMessagesQuery.js"
 export {
-	ConfigPathNotFoundError,
-	ConfigJSONSyntaxError,
+	ProjectFilePathNotFoundError,
+	ProjectFileJSONSyntaxError,
 	InvalidConfigError,
 	NoPluginProvidesLoadOrSaveMessagesError,
 	PluginLoadMessagesError,

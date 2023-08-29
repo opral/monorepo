@@ -5,17 +5,17 @@ export class InvalidConfigError extends Error {
 	}
 }
 
-export class ConfigJSONSyntaxError extends Error {
+export class ProjectFileJSONSyntaxError extends Error {
 	constructor(message: string, options: ErrorOptions) {
 		super(message, options)
-		this.name = "ConfigJSONSyntaxError"
+		this.name = "ProjectFileJSONSyntaxError"
 	}
 }
 
-export class ConfigPathNotFoundError extends Error {
+export class ProjectFilePathNotFoundError extends Error {
 	constructor(message: string, options: ErrorOptions) {
 		super(message, options)
-		this.name = "ConfigPathNotFoundError"
+		this.name = "ProjectFilePathNotFoundError"
 	}
 }
 

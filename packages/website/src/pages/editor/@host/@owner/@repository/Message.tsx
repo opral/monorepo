@@ -73,7 +73,7 @@ export function Message(props: { id: string }) {
 			</div>
 			<div>
 				{/* eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain */}
-				<For each={sortLanguageTags(inlang()?.config().languageTags || [], inlang()?.config().sourceLanguageTag!)}>
+				<For each={sortLanguageTags(inlang()?.config()?.languageTags || [], inlang()?.config()?.sourceLanguageTag!)}>
 					{(languageTag) => {
 						return (
 							<>

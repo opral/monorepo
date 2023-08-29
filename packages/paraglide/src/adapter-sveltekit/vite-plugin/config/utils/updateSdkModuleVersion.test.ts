@@ -45,7 +45,7 @@ const openMockedInlangProject = async (fs: NodeishFilesystemSubset): Promise<Inl
 
 	return await openInlangProject({
 		nodeishFs: fs,
-		configPath: "./project.inlang.json",
+		projectFilePath: "./project.inlang.json",
 		_import: async (url) =>
 			({
 				default: url === "plugin-json-mock" ? { plugins: [mockPlugin] } : {},

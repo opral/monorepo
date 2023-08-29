@@ -97,7 +97,7 @@ describe("config", () => {
 		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 		const inlang = solidAdapter(
 			await openInlangProject({
-				configPath: "./project.inlang.json",
+				projectFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
 			}),
@@ -127,7 +127,7 @@ describe("installed", () => {
 		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 		const inlang = solidAdapter(
 			await openInlangProject({
-				configPath: "./project.inlang.json",
+				projectFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
 			}),
@@ -185,7 +185,7 @@ describe("messages", () => {
 		await fs.writeFile("./project.inlang.json", JSON.stringify(mockConfig))
 		const inlang = solidAdapter(
 			await openInlangProject({
-				configPath: "./project.inlang.json",
+				projectFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: mockImport,
 			}),
@@ -214,7 +214,7 @@ describe("messages", () => {
 		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 		const inlang = solidAdapter(
 			await openInlangProject({
-				configPath: "./project.inlang.json",
+				projectFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
 			}),
@@ -274,7 +274,7 @@ describe("lint", () => {
 		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 		const inlang = solidAdapter(
 			await openInlangProject({
-				configPath: "./project.inlang.json",
+				projectFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
 			}),
@@ -299,7 +299,7 @@ describe("lint", () => {
 		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 		const inlang = solidAdapter(
 			await openInlangProject({
-				configPath: "./project.inlang.json",
+				projectFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
 			}),
