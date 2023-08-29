@@ -11,7 +11,7 @@ export { tryAutoGenerateInlangConfig } from "./tryAutoGenerateConfig.js"
 export { createMessagesQuery } from "./createMessagesQuery.js"
 export {
 	ProjectFilePathNotFoundError,
-	ConfigJSONSyntaxError,
+	ProjectFileJSONSyntaxError,
 	InvalidConfigError,
 	NoPluginProvidesLoadOrSaveMessagesError,
 	PluginLoadMessagesError,

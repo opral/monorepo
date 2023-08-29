@@ -6,7 +6,7 @@ import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
 import {
 	ProjectFilePathNotFoundError,
-	ConfigJSONSyntaxError,
+	ProjectFileJSONSyntaxError,
 	InvalidConfigError,
 	NoPluginProvidesLoadOrSaveMessagesError,
 	PluginLoadMessagesError,
@@ -281,7 +281,7 @@ const loadConfig = async (args: {
 
 		const { data: parsedConfig, error: parseConfigError } = tryCatch(() => JSON.parse(configFile!))
 		if (parseConfigError)
-			throw new ConfigJSONSyntaxError(`The config is not a valid JSON file.`, {
+			throw new ProjectFileJSONSyntaxError(`The config is not a valid JSON file.`, {
 				cause: parseConfigError,
 			})
 
