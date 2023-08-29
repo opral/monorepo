@@ -1,5 +1,13 @@
 {
-	"Overview": ["./introduction.md"],
-	"Guides": ["./manually-create-project.md", "./inlang-libraries.md"],
-	"Concepts": ["./concepts/project.md", "./concepts/language-tag.md"]
+	"Overview": ["./introduction.md", "./inlang-libraries.md"],
+	"Guides": ["./manually-create-project.md"],
+	"Concepts": [
+		"./concepts/app.md",
+		"./concepts/project.md",
+		"./concepts/message.md",
+		"./concepts/module.md",
+		"./concepts/plugin.md",
+		"./concepts/lint-rule.md",
+		"./concepts/language-tag.md"
+	]
 }
