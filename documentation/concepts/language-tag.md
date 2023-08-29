@@ -22,6 +22,3 @@ en-US // English (United States)
 en-GB // English (Great Britain)
 ```
 
-## The `@inlang/language-tag` library 
-
-You can use the `@inlang/language-tag` library to parse and validate language tags in your own projects. Visit [inlang libraries](/documentation/inlang-libraries) for more information.
