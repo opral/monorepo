@@ -49,7 +49,7 @@ export function Page() {
 						<p class="text-xl text-surface-600 w-full md:w-[600px] text-center leading-relaxed">
 							To access the editor, you must have the{" "}
 							<span class="text-base font-mono py-[5px] px-2 bg-surface-100 rounded-lg text-surface-600">
-								inlang.config.js
+								project.inlang.json
 							</span>{" "}
 							file in your repository. Use the{" "}
 							<span
@@ -68,7 +68,7 @@ export function Page() {
 					>
 						<div class="pl-5 pr-2 gap-2 relative z-10 flex items-center w-full border border-surface-200 bg-background rounded-lg focus-within:border-primary transition-all ">
 							<input
-								class="active:outline-0 focus:outline-0 h-14 grow placeholder:text-surface-500 placeholder:font-normal placeholder:text-base"
+								class="active:outline-0 focus:outline-0 focus:ring-0 border-0 h-14 grow placeholder:text-surface-500 placeholder:font-normal placeholder:text-base"
 								placeholder="Enter repository url ..."
 								onInput={(event) => {
 									// @ts-ignore
