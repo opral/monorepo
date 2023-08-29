@@ -102,7 +102,7 @@ export function Page() {
 								</SetupCard>
 							</Show>
 							<Show when={step().type === "opt-in"}>
-								<OptIn />
+								<OptIn modules={modules} />
 							</Show>
 							<Show when={step().type === "installing"}>
 								<ShowProgress />
@@ -224,17 +224,29 @@ function ChooseRepo(props: { modules?: string[] }) {
 }
 
 /* Lets the user opt-in before making changes to the repository */
-function OptIn() {
+function OptIn(props: { modules?: string[] }) {
 	return (
 		<SetupCard>
 			<div class="flex flex-col justify-center gap-4 items-center mb-2">
-				<Icon name="warning" class="w-20 h-20 text-primary-500 mb-2 text-warning" />
+				<Icon name="info" class="w-20 h-20 text-primary-500 mb-2 text-primary" />
 				<h2 class="text-[24px] leading-tight md:text-2xl font-semibold text-center">
 					{step().message}
 				</h2>
 				<p class="text-surface-500 text-center">
-					The config in your repository will be updated to include the modules you selected.
+					The config in your repository will be updated to include the modules you selected:
 				</p>
+				<ul class="font-medium font-mono text-sm bg-surface-100 p-2 rounded-md">
+					"modules": [
+					<For each={props.modules}>
+						{(module) => (
+							<li>
+								"{module}"
+								<Show when={props.modules?.indexOf(module) !== props.modules.length - 1}>,</Show>
+							</li>
+						)}
+					</For>
+					]
+				</ul>
 			</div>
 			<div class="flex items-center gap-6">
 				<Button
@@ -245,7 +257,7 @@ function OptIn() {
 					type="primary"
 					ref={optInButton}
 				>
-					Understand
+					Install modules
 				</Button>
 				<Button
 					// eslint-disable-next-line solid/reactivity
