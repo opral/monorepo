@@ -1,4 +1,4 @@
-import { For, Show, createRenderEffect, createEffect, createSignal, onMount } from "solid-js"
+import { For, Show, createEffect, createSignal, onMount } from "solid-js"
 import { Layout as RootLayout } from "#src/pages/Layout.jsx"
 import { Markdown, parseMarkdown } from "#src/services/markdown/index.js"
 import type { ProcessedTableOfContents } from "./index.page.server.jsx"
@@ -22,7 +22,6 @@ export type PageProps = {
 
 export function Page(props: PageProps) {
 	let mobileDetailMenu: SlDetails | undefined
-	const [headings, setHeadings] = createSignal<any[]>([])
 	const [editLink, setEditLink] = createSignal<string | undefined>("")
 
 	createEffect(() => {
@@ -55,22 +54,17 @@ export function Page(props: PageProps) {
 		}
 	})
 
-	createRenderEffect(() => {
-		setHeadings([])
-
-		if (!props.markdown?.renderableTree) return
-
-		// @ts-expect-error - some type mismatch
-		for (const heading of props.markdown.renderableTree.children ?? []) {
-			if (heading.name === "Heading") {
-				if (heading.children[0].name) {
-					setHeadings((prev) => [...prev, heading.children[0].children[0]])
-				} else {
-					setHeadings((prev) => [...prev, heading.children[0]])
-				}
+	const h2Headlines = () => {
+		const result: string[] = []
+		// @ts-expect-error - some type mismatch in the markdown parser
+		for (const child of props.markdown.renderableTree.children ?? []) {
+			// only render h2 as sub headlines
+			if (child.name === "Heading" && child.attributes.level === 2) {
+				result.push(child.children[0])
 			}
 		}
-	})
+		return result
+	}
 
 	return (
 		<>
@@ -93,7 +87,7 @@ export function Page(props: PageProps) {
 							 */}
 							<div class="py-14 pr-8">
 								<Show when={props.processedTableOfContents}>
-									<NavbarCommon {...props} headings={headings()} />
+									<NavbarCommon {...props} h2Headlines={h2Headlines()} />
 								</Show>
 							</div>
 						</nav>
@@ -110,7 +104,7 @@ export function Page(props: PageProps) {
 							<Show when={props.processedTableOfContents}>
 								<NavbarCommon
 									{...props}
-									headings={headings()}
+									h2Headlines={h2Headlines()}
 									onLinkClick={() => {
 										mobileDetailMenu?.hide()
 									}}
@@ -156,14 +150,14 @@ export function Page(props: PageProps) {
 
 function NavbarCommon(props: {
 	processedTableOfContents: PageProps["processedTableOfContents"]
-	headings: any[]
+	h2Headlines: string[]
 	onLinkClick?: () => void
 }) {
 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
 	const [, { locale }] = useI18n()
 
 	const getLocale = () => {
-		const language = locale() || defaultLanguage
+		const language = locale() ?? defaultLanguage
 		return language !== defaultLanguage ? "/" + language : ""
 	}
 
@@ -182,7 +176,7 @@ function NavbarCommon(props: {
 	onMount(() => {
 		if (
 			currentPageContext.urlParsed.hash &&
-			props.headings
+			props.h2Headlines
 				.toString()
 				.toLowerCase()
 				.replaceAll(" ", "-")
@@ -233,44 +227,40 @@ function NavbarCommon(props: {
 										>
 											{document.frontmatter.title}
 										</a>
-										{props.headings &&
-											props.headings.length > 1 &&
-											isSelected(document.frontmatter.href) && (
-												<ul class="my-2">
-													<For each={props.headings}>
-														{(heading) =>
-															heading !== undefined &&
-															heading !== document.frontmatter.title &&
-															props.headings.filter((h: any) => h === heading).length < 2 && (
-																<li>
-																	<a
-																		onClick={() => {
-																			onAnchorClick(
-																				heading.toString().toLowerCase().replaceAll(" ", "-"),
-																			)
-																			props.onLinkClick?.()
-																		}}
-																		class={
-																			"text-sm tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
-																			(highlightedAnchor() ===
-																			heading.toString().toLowerCase().replaceAll(" ", "-")
-																				? "font-medium text-on-background border-l-text-on-background "
-																				: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
-																		}
-																		href={`#${heading
-																			.toString()
-																			.toLowerCase()
-																			.replaceAll(" ", "-")
-																			.replaceAll("/", "")}`}
-																	>
-																		{heading}
-																	</a>
-																</li>
-															)
-														}
-													</For>
-												</ul>
-											)}
+										<Show
+											when={props.h2Headlines.length > 0 && isSelected(document.frontmatter.href)}
+										>
+											<ul class="my-2">
+												<For each={props.h2Headlines}>
+													{(heading) => (
+														<li>
+															<a
+																onClick={() => {
+																	onAnchorClick(
+																		heading.toString().toLowerCase().replaceAll(" ", "-"),
+																	)
+																	props.onLinkClick?.()
+																}}
+																class={
+																	"text-sm tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
+																	(highlightedAnchor() ===
+																	heading.toString().toLowerCase().replaceAll(" ", "-")
+																		? "font-medium text-on-background border-l-text-on-background "
+																		: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
+																}
+																href={`#${heading
+																	.toString()
+																	.toLowerCase()
+																	.replaceAll(" ", "-")
+																	.replaceAll("/", "")}`}
+															>
+																{heading}
+															</a>
+														</li>
+													)}
+												</For>
+											</ul>
+										</Show>
 									</li>
 								)}
 							</For>
