@@ -43,7 +43,7 @@ export type TransformConfig = {
 }
 
 export const PATH_TO_CWD = process.cwd()
-export const PATH_TO_INLANG_CONFIG = resolve(PATH_TO_CWD, "./inlang.config.json")
+export const PATH_TO_INLANG_CONFIG = resolve(PATH_TO_CWD, "./project.inlang.json")
 export const PATH_TO_SVELTE_CONFIG = resolve(PATH_TO_CWD, "./svelte.config.js")
 
 let transformConfig: Promise<TransformConfig> | undefined = undefined

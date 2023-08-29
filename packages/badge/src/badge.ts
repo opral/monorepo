@@ -34,7 +34,7 @@ export const badge = async (url: string) => {
 	})
 
 	const inlang = await openInlangProject({
-		configPath: "./inlang.config.json",
+		configPath: "./project.inlang.json",
 		nodeishFs: repo.nodeishFs,
 	})
 
@@ -43,7 +43,7 @@ export const badge = async (url: string) => {
 
 	// throw if no sourceLanguageTag is found
 	if (!inlang.config().sourceLanguageTag) {
-		throw new Error("No sourceLanguageTag found, please add one to your inlang.config.json")
+		throw new Error("No sourceLanguageTag found, please add one to your project.inlang.json")
 	}
 
 	// initialize lint to access reports

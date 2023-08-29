@@ -103,7 +103,7 @@
 		"typescript": "^5.0.4"
 	},
 	"activationEvents": [
-		"workspaceContains:**/inlang.config.json",
+		"workspaceContains:**/project.inlang.json",
 		"onStartupFinished"
 	],
 	"license": "Apache-2.0"

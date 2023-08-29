@@ -37,7 +37,7 @@ export const cli = new Command()
 	.addCommand(open)
 	.addCommand(module)
 	// Global options
-	// .option("-c, --config <value>", "Path to the inlang.config.json file.")
+	// .option("-c, --config <value>", "Path to the project.inlang.json file.")
 	// Hooks
 	.hook("postAction", (command) => {
 		// name enables better grouping in the telemetry dashboard

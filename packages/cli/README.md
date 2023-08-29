@@ -16,7 +16,7 @@ description: The inlang Command Line Interface (CLI) automates globalization pro
 - 🔍 **Lint** your translations
 - 🤖 **Machine translate** your resources
 - 🖊️ Open the web editor right from the command line
-- ✅ Validate your `inlang.config.json` configuration file
+- ✅ Validate your `project.inlang.json` configuration file
 
 ## Installation
 
@@ -72,7 +72,7 @@ The following commands are available with the inlang CLI:
 
 ### `config`
 
-The config command is used to interactively configure and create the inlang.config.json file.
+The config command is used to interactively configure and create the project.inlang.json file.
 
 #### `config init`
 
@@ -89,9 +89,9 @@ This will launch an interactive prompt that will guide you through the process o
 
 #### `config validate`
 
-This command validates the `inlang.config.json` file in the current directory. It checks if the file is valid JSON and if it contains **all required fields**. It also checks if the specified resources exist and performs a _dry run of the translation process_.
+This command validates the `project.inlang.json` file in the current directory. It checks if the file is valid JSON and if it contains **all required fields**. It also checks if the specified resources exist and performs a _dry run of the translation process_.
 
-To validate the `inlang.config.json` file, run the following command:
+To validate the `project.inlang.json` file, run the following command:
 
 ```sh
 npx @inlang/cli config validate
@@ -99,11 +99,11 @@ npx @inlang/cli config validate
 
 #### `config update`
 
-This command updates the `inlang.config.json` file with the latest versions of the plugins used. This is helpful if you want to **update your plugins** to the latest major version and don't want to look them up manually.
+This command updates the `project.inlang.json` file with the latest versions of the plugins used. This is helpful if you want to **update your plugins** to the latest major version and don't want to look them up manually.
 
 Keep in mind updating to a new major version might break your configuration. _We recommend always checking the changelog of the plugin before updating._
 
-To update the `inlang.config.json` file, run the following command:
+To update the `project.inlang.json` file, run the following command:
 
 ```sh
 npx @inlang/cli config update
@@ -129,11 +129,11 @@ The translate command has the following options:
 
 - `-f, --force`: If this option is set, the command will not prompt confirmation. This is useful for CI/CD build pipelines. **We advise you to only use `machine translate` in build pipelines to avoid out-of-context/wrong translations.**
 
-This command reads the inlang.config.json file in the repository and retrieves the resources and reference language specified in the configuration. It then translates all messages from the reference language to other languages defined in the configuration.
+This command reads the project.inlang.json file in the repository and retrieves the resources and reference language specified in the configuration. It then translates all messages from the reference language to other languages defined in the configuration.
 
 The translations are performed using machine translation services. The translated messages are added to the respective language resources. Finally, the updated resources are written back to the file system.
 
-> Note: The inlang.config.json file must be present in the repository for the translation to work.
+> Note: The project.inlang.json file must be present in the repository for the translation to work.
 
 ### `lint`
 

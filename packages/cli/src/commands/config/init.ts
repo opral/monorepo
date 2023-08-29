@@ -5,7 +5,7 @@ import { log } from "../../utilities/log.js"
 
 export const init = new Command()
 	.command("init")
-	.description("Initialize the inlang.config.json file.")
+	.description("Initialize the project.inlang.json file.")
 	.action(initCommandAction)
 
 /**
@@ -18,7 +18,7 @@ export const init = new Command()
 export async function initCommandAction() {
 	// Check if config file already exists
 	const packageJsonPath = "./package.json"
-	const inlangConfigPath = "./inlang.config.json"
+	const inlangConfigPath = "./project.inlang.json"
 	const rootDir = "./"
 
 	if (fs.existsSync(inlangConfigPath)) {
@@ -84,7 +84,7 @@ export async function initCommandAction() {
 	// 	} else {
 	// 		log.info(`🗂️  Found language folder path: ${italic(pathPattern)}`)
 	// 		log.info(
-	// 			`🗂️  Please adjust the ${`pathPattern`} in the inlang.config.json manually if it is not parsed correctly.`,
+	// 			`🗂️  Please adjust the ${`pathPattern`} in the project.inlang.json manually if it is not parsed correctly.`,
 	// 		)
 	// 	}
 	// }
@@ -104,5 +104,5 @@ export async function initCommandAction() {
 	// 	return
 	// }
 
-	// log.success(`🎉 inlang.config.json file created successfully.`)
+	// log.success(`🎉 project.inlang.json file created successfully.`)
 }

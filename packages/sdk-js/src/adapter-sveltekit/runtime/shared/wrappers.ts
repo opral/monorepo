@@ -55,7 +55,7 @@ const initRuntime = async (
 			(import.meta.env.DEV &&
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				console.warn(
-					"inlang was not correctly set up on this page. Please check the `routing.exclude` settings in your `inlang.config.json` file.",
+					"inlang was not correctly set up on this page. Please check the `routing.exclude` settings in your `project.inlang.json` file.",
 				)!) ||
 			defaultValue
 		return {

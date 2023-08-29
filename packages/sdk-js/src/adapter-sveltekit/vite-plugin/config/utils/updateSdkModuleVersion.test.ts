@@ -45,7 +45,7 @@ const openMockedInlangProject = async (fs: NodeishFilesystemSubset): Promise<Inl
 
 	return await openInlangProject({
 		nodeishFs: fs,
-		configPath: "./inlang.config.json",
+		configPath: "./project.inlang.json",
 		_import: async (url) =>
 			({
 				default: url === "plugin-json-mock" ? { plugins: [mockPlugin] } : {},
@@ -69,7 +69,7 @@ describe("updateSdkModuleVersion", () => {
 
 	it("should not do anything if module is not defined", async () => {
 		const fs = await createMockNodeishFs()
-		await fs.writeFile("./inlang.config.json", JSON.stringify(getMockedConfig()))
+		await fs.writeFile("./project.inlang.json", JSON.stringify(getMockedConfig()))
 		const inlang = await openMockedInlangProject(fs)
 
 		const updated = await updateSdkModuleVersion(inlang)
@@ -79,7 +79,7 @@ describe("updateSdkModuleVersion", () => {
 	it("should not do anything if version is already identical", async () => {
 		const fs = await createMockNodeishFs()
 		await fs.writeFile(
-			"./inlang.config.json",
+			"./project.inlang.json",
 			JSON.stringify(getMockedConfig(`https://cdn.com/@inlang/sdk-js-plugin@${version}/index.js`)),
 		)
 		const inlang = await openMockedInlangProject(fs)
@@ -92,7 +92,7 @@ describe("updateSdkModuleVersion", () => {
 		it("no version set", async () => {
 			const fs = await createMockNodeishFs()
 			await fs.writeFile(
-				"./inlang.config.json",
+				"./project.inlang.json",
 				JSON.stringify(getMockedConfig("https://cdn.com/@inlang/sdk-js-plugin/index.js")),
 			)
 			const inlang = await openMockedInlangProject(fs)
@@ -100,14 +100,14 @@ describe("updateSdkModuleVersion", () => {
 			const updated = await updateSdkModuleVersion(inlang)
 			expect(updated).toBe(true)
 
-			const configFile = await fs.readFile("./inlang.config.json", { encoding: "utf-8" })
+			const configFile = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
 			expect(configFile).includes(`@inlang/sdk-js-plugin@${version}`)
 		})
 
 		it("@x.x.x", async () => {
 			const fs = await createMockNodeishFs()
 			await fs.writeFile(
-				"./inlang.config.json",
+				"./project.inlang.json",
 				JSON.stringify(getMockedConfig("https://cdn.com/@inlang/sdk-js-plugin@0.0.0/index.js")),
 			)
 			const inlang = await openMockedInlangProject(fs)
@@ -115,14 +115,14 @@ describe("updateSdkModuleVersion", () => {
 			const updated = await updateSdkModuleVersion(inlang)
 			expect(updated).toBe(true)
 
-			const configFile = await fs.readFile("./inlang.config.json", { encoding: "utf-8" })
+			const configFile = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
 			expect(configFile).includes(`@inlang/sdk-js-plugin@${version}`)
 		})
 
 		it("@x.x", async () => {
 			const fs = await createMockNodeishFs()
 			await fs.writeFile(
-				"./inlang.config.json",
+				"./project.inlang.json",
 				JSON.stringify(getMockedConfig("https://cdn.com/@inlang/sdk-js-plugin@0.0/index.js")),
 			)
 			const inlang = await openMockedInlangProject(fs)
@@ -130,14 +130,14 @@ describe("updateSdkModuleVersion", () => {
 			const updated = await updateSdkModuleVersion(inlang)
 			expect(updated).toBe(true)
 
-			const configFile = await fs.readFile("./inlang.config.json", { encoding: "utf-8" })
+			const configFile = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
 			expect(configFile).includes(`@inlang/sdk-js-plugin@${version}`)
 		})
 
 		it("@x", async () => {
 			const fs = await createMockNodeishFs()
 			await fs.writeFile(
-				"./inlang.config.json",
+				"./project.inlang.json",
 				JSON.stringify(getMockedConfig("https://cdn.com/@inlang/sdk-js-plugin@0/index.js")),
 			)
 			const inlang = await openMockedInlangProject(fs)
@@ -145,7 +145,7 @@ describe("updateSdkModuleVersion", () => {
 			const updated = await updateSdkModuleVersion(inlang)
 			expect(updated).toBe(true)
 
-			const configFile = await fs.readFile("./inlang.config.json", { encoding: "utf-8" })
+			const configFile = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
 			expect(configFile).includes(`@inlang/sdk-js-plugin@${version}`)
 		})
 	})

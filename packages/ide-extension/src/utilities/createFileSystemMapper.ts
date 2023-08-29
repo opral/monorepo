@@ -20,12 +20,8 @@ export function createFileSystemMapper(base: vscode.Uri): NodeishFilesystemSubse
 		) => {
 			const joinedPath = vscode.Uri.joinPath(base, path)
 			const rawFile = await vscode.workspace.fs.readFile(joinedPath)
-			return new Promise((resolve) => {
-				// @ts-expect-error
-				//   Typescript can't derive that the return type is either
-				//   a string or a Uint8Array based on the options.
-				resolve(new TextDecoder(options?.encoding).decode(rawFile))
-			})
+			if (options?.encoding === "utf-8") return new TextDecoder(options.encoding).decode(rawFile)
+			return rawFile
 		},
 		writeFile: async (
 			file: Parameters<NodeishFilesystemSubset["writeFile"]>[0],

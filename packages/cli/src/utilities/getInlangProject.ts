@@ -9,7 +9,7 @@ export async function getInlangProject(): Promise<Result<InlangProject, Error>> 
 	if (cached) return cached
 
 	const baseDirectory = process.cwd()
-	const configPath = resolve(baseDirectory, "inlang.config.json")
+	const configPath = resolve(baseDirectory, "project.inlang.json")
 
 	const configExists = await fs
 		.access(configPath)
@@ -17,7 +17,7 @@ export async function getInlangProject(): Promise<Result<InlangProject, Error>> 
 		.catch(() => false)
 
 	if (configExists === false) {
-		return { error: new Error("No inlang.config.json file found in the repository.") }
+		return { error: new Error("No project.inlang.json file found in the repository.") }
 	}
 
 	cached = await tryCatch(() =>
