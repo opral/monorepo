@@ -1,4 +1,4 @@
-import { Show, For, JSXElement } from "solid-js"
+import { Show, For, JSXElement, Accessor } from "solid-js"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import ArrowDown from "~icons/material-symbols/expand-more"
 import { setSearchParams } from "../install/helper/setSearchParams.js"
@@ -53,19 +53,46 @@ export function SelectRepo(props: { size: "small" | "medium"; modules: any[] }) 
 }
 
 export function SelectionWrapper(props: {
-	select: boolean
+	select: Accessor<boolean>
 	item: MarketplaceItem
-	selectedItems: MarketplaceItem[]
+	selectedModules: Accessor<string[]>
+	setSelectedModules: (items: string[]) => void
 	children: JSXElement
 }) {
 	return (
 		<>
-			{props.select ? (
+			{props.select() ? (
 				<div
-					class="cursor-pointer outline outline-0 outline-primary hover:outline-2 transition-all duration-75 rounded-xl h-64"
+					class={
+						"outline outline-0 transition-all duration-75 rounded-xl h-64 " +
+						(props.item.type !== "app"
+							? "cursor-pointer " +
+							  (props
+									.selectedModules()
+									.some((module) => props.item.type !== "app" && module === props.item.module)
+									? "outline-4"
+									: "outline-transparent hover:outline-4") +
+							  (props.item.type === "plugin" ? " outline-[#BF7CE4]" : " outline-[#06B6D4]")
+							: "opacity-75 cursor-not-allowed")
+					}
 					onClick={(e) => {
 						e.stopPropagation()
-						props.selectedItems.push(props.item)
+
+						if (props.item.type !== "app") {
+							if (props.selectedModules().length > 0) {
+								for (const module of props.selectedModules()) {
+									if (props.item.module === module) {
+										props.setSelectedModules(
+											props.selectedModules().filter((item) => item !== module),
+										)
+									} else {
+										props.setSelectedModules([...props.selectedModules(), props.item.module])
+									}
+								}
+							} else {
+								props.setSelectedModules([...props.selectedModules(), props.item.module])
+							}
+						}
 					}}
 				>
 					<div class="pointer-events-none h-full">{props.children}</div>

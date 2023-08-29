@@ -20,7 +20,7 @@ const [selectedCategories, setSelectedCategories] = createSignal<Category[]>([
 ])
 
 const [select, setSelect] = createSignal<boolean>(false)
-const selectedItems = () => []
+const [selectedModules, setSelectedModules] = createSignal<string[]>([])
 
 const filteredItems = () =>
 	marketplaceItems.filter((item: Record<string, any>) => {
@@ -79,20 +79,23 @@ export function Page() {
 									</Button>
 								}
 							>
-								<div class={selectedItems().length === 0 ? "opacity-25 pointer-events-none" : ""}>
+								<div class={selectedModules().length === 0 ? "opacity-25 pointer-events-none" : ""}>
 									<Button
 										type="primary"
-										href={selectedItems().length > 0 ? `/install?module=${selectedItems()}` : ""}
+										href={
+											selectedModules().length > 0 ? `/install?module=${selectedModules()}` : ""
+										}
 									>
-										{selectedItems().length === 0 ? "Select items first" : "Install Modules"}
+										{selectedModules().length === 0 ? "Select items first" : "Install Modules"}
 										{/* @ts-ignore */}
-										<SelectRepo size="medium" modules={selectedItems()} />
+										<SelectRepo size="medium" modules={selectedModules()} />
 									</Button>
 								</div>
 								<Button
 									type="text"
 									function={() => {
 										setSelect(false)
+										setSelectedModules([])
 									}}
 								>
 									Cancel
@@ -132,13 +135,21 @@ const Gallery = () => {
 				{(item) => {
 					return (
 						<>
-							<SelectionWrapper select={select()} item={item} selectedItems={selectedItems()}>
+							<SelectionWrapper
+								select={select}
+								item={item}
+								selectedModules={selectedModules}
+								setSelectedModules={setSelectedModules}
+							>
 								<a
 									href={`/marketplace/${item.meta.displayName.en
 										?.toLowerCase()
 										.replaceAll(" ", "-")}`}
 									target="_blanc"
-									class="relative no-underline h-64"
+									class={
+										"relative no-underline h-64 " +
+										(select() && item.type === "app" ? "opacity-25" : "")
+									}
 								>
 									<div class="flex flex-col relative justify-between gap-4 bg-surface-100 h-full hover:bg-surface-200 p-6 rounded-xl border border-surface-2 cursor-pointer">
 										<div class="flex flex-col gap-4">
