@@ -1,5 +1,5 @@
 import { Command } from "commander"
-import { moduleBuildOptions } from "./moduleBuildOptions.js"
+import { packageBuildOptions } from "./packageBuildOptions.js"
 /**
  * The build command uses `esbuild-wasm` because platform interop is valued higher than speed.
  *
@@ -10,12 +10,12 @@ import { context } from "esbuild-wasm"
 
 export const build = new Command()
 	.command("build")
-	.description("build an inlang module.")
+	.description("build an inlang package.")
 	// not using shorthand flags to be as explicit as possible
 	// and increase discoverability "what is -c again?"
 	.requiredOption(
 		"--entry <entry>",
-		"The path to the entry of the module. Usually src/index.{js|ts}.",
+		"The path to the entry of the package. Usually src/index.{js|ts}.",
 	)
 	// using outdir in anticipation that multiple output file are required in the future
 	// such as manifest.json, code-splitting, json schema etc.
@@ -26,7 +26,7 @@ export const build = new Command()
 export async function buildCommandAction(args: { entry: string; outdir: string; watch: boolean }) {
 	try {
 		const ctx = await context(
-			moduleBuildOptions({
+			packageBuildOptions({
 				...args,
 				// increase debugging experience by not minifying
 				// in assumed dev mode
@@ -49,7 +49,7 @@ export async function buildCommandAction(args: { entry: string; outdir: string; 
 			await ctx.dispose()
 		}
 	} catch (e) {
-		console.error("An error occurred while building the module:")
+		console.error("An error occurred while building the package:")
 		console.error(e)
 		process.exit(1)
 	}
