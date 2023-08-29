@@ -1,5 +1,5 @@
 {
 	"Overview": ["./introduction.md"],
-	"Guides": ["./manually-create-project.md"],
+	"Guides": ["./manually-create-project.md", "./inlang-libraries.md"],
 	"Concepts": ["./concepts/project.md", "./concepts/language-tag.md"]
 }
