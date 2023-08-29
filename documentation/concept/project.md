@@ -1,6 +1,6 @@
 ---
 title: Project
-href: /documentation/concepts/project
+href: /documentation/project
 description: TODO TODO TODO TODO TODO
 ---
 

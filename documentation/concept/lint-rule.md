@@ -1,6 +1,6 @@
 ---
 title: Lint rule
-href: /documentation/concepts/lint-rule
+href: /documentation/lint-rule
 description: Lint rules validate messages and other types of content in an inlang project.
 ---
 

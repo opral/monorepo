@@ -1,6 +1,6 @@
 ---
 title: Message
-href: /documentation/concepts/message
+href: /documentation/message
 description: TODO TODO TODO TODO TODO
 ---
 
@@ -9,6 +9,8 @@ description: TODO TODO TODO TODO TODO
 A message is a piece of text that is displayed to the user. Everything within an application like the text on a Button is a Message. A message itself is composed of variants. The user preferences like language or region determine which variant is displayed to the user. 
 
 ## Variant
+
+<!-- TODO @NilsJacobsen can you write the docs given that you implemented variants? -->
 
 TODO
 

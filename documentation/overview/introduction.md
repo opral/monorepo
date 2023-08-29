@@ -12,9 +12,6 @@ description: Inlang is globalization infrastructure that powers an ecosystem of 
 
 <!-- TODO illustration of inlang ecosystem -->
 
-
-
-
 ### Infrastructure approach
 
 For every use case, there is an app, a plugin, a lint rule, or a custom solution that can be built. Inlang's infrastructure powers an ecosystem of tools, applications, best practices, and automations for organizations to go global.
