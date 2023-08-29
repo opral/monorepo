@@ -20,18 +20,18 @@ type MarketplaceItemBase = {
 	}
 }
 
-type ExportedItemFromModule = MarketplaceItemBase & {
+type ExportedItemFromPackage = MarketplaceItemBase & {
 	/**
-	 * The exported items of the module.
+	 * The exported items of the package.
 	 */
-	moduleItems: string[]
+	packageItems: string[]
 	/**
-	 * The link to the module.
+	 * The link to the package.
 	 */
-	module: string
+	package: string
 }
 
-type LintRule = ExportedItemFromModule & {
+type LintRule = ExportedItemFromPackage & {
 	type: "lintRule"
 }
 
@@ -40,7 +40,7 @@ type App = MarketplaceItemBase & {
 	linkToApp: string
 }
 
-type Plugin = ExportedItemFromModule & {
+type Plugin = ExportedItemFromPackage & {
 	type: "plugin"
 }
 

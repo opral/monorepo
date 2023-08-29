@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest"
 import { createMockNodeishFs } from "@inlang/plugin/test"
 import type { InlangConfig } from "@inlang/config"
 import type { Message, Plugin, Text } from "@inlang/plugin"
-import type { ImportFunction, InlangModule } from "@inlang/module"
+import type { ImportFunction, InlangPackage } from "@inlang/package"
 import { createEffect, from } from "../solid.js"
 import { solidAdapter } from "./solidAdapter.js"
 import type { LintRule } from "@inlang/lint"
@@ -13,7 +13,7 @@ import { openInlangProject } from "../openInlangProject.js"
 const config: InlangConfig = {
 	sourceLanguageTag: "en",
 	languageTags: ["en"],
-	modules: ["./dist/index.js"],
+	packages: ["./dist/index.js"],
 	settings: {
 		"project.lintRuleLevels": {
 			"inlang.lintRule.missingTranslation": "error",
@@ -87,7 +87,7 @@ const $import: ImportFunction = async () =>
 			plugins: [mockPlugin],
 			lintRules: [mockLintRule],
 		},
-	} satisfies InlangModule)
+	} satisfies InlangPackage)
 
 // ------------------------------------------------------------------------------------------------
 
@@ -162,7 +162,7 @@ describe("messages", () => {
 		const mockConfig: InlangConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
-			modules: ["./plugin-a.js"],
+			packages: ["./plugin-a.js"],
 			settings: {},
 		}
 		const mockPlugin: Plugin = {
@@ -180,7 +180,7 @@ describe("messages", () => {
 		}
 
 		const mockImport: ImportFunction = async () =>
-			({ default: { plugins: [mockPlugin] } } satisfies InlangModule)
+			({ default: { plugins: [mockPlugin] } } satisfies InlangPackage)
 
 		await fs.writeFile("./project.inlang.json", JSON.stringify(mockConfig))
 		const inlang = solidAdapter(
@@ -322,6 +322,6 @@ describe("lint", () => {
 		expect(counter).toBe(2) // 2 times because effect creation + set
 	})
 
-	it.todo("should react to changes to modules")
+	it.todo("should react to changes to packages")
 	it.todo("should react to changes to messages")
 })

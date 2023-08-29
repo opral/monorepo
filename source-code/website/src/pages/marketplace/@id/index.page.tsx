@@ -69,17 +69,20 @@ export function Page(props: PageProps) {
 										when={item()?.type !== "app"}
 										fallback={
 											/* @ts-ignore */
-											<Button type="primary" href={item()?.linkToApp}>
-												Open App
-											</Button>
+											<Show when={item()?.linkToApp}>
+												{/* @ts-ignore */}
+												<Button type="primary" href={item()?.linkToApp}>
+													Open
+												</Button>
+											</Show>
 										}
 									>
 										<div class="flex items-center gap-2">
 											{/* @ts-ignore */}
-											<Button type="primary" href={`/install?module=${item()?.module}`}>
-												Install Module
+											<Button type="primary" href={`/install?package=${item()?.package}`}>
+												Install Package
 												{/* @ts-ignore */}
-												<SelectRepo size="medium" modules={[item()?.module]} />
+												<SelectRepo size="medium" packages={[item()?.package]} />
 											</Button>
 										</div>
 									</Show>
@@ -131,38 +134,32 @@ export function Page(props: PageProps) {
 										</div>
 									</div>
 									{/* @ts-ignore */}
-									<Show when={item()?.moduleItems && item()?.moduleItems.length > 1}>
+									<Show when={item()?.packageItems && item()?.packageItems.length > 1}>
 										<div class="flex flex-col gap-3">
 											<h3 class="text-sm text-surface-400">Bundled with</h3>
 											<div class="flex flex-col items-start">
 												{/* @ts-ignore */}
-												<For each={item()?.moduleItems}>
-													{(moduleItem) => (
-														<Show when={moduleItem !== item()?.meta.id}>
+												<For each={item()?.packageItems}>
+													{(packageItems) => (
+														<Show when={packageItems !== item()?.meta.id}>
 															<Button
 																type="text"
-																href={`/marketplace/${
-																	// in marketplaceItems, the module.meta.id.toLowerCase() is the same as moduleItem.toLowerCase()
-																	marketplaceItems
-																		.find(
-																			(item) =>
-																				item.meta.id.toLowerCase() === moduleItem.toLowerCase(),
-																		)
-																		?.meta.displayName.en?.toLocaleLowerCase()
-																		.replaceAll(" ", "-")
-																}`}
+																href={`/marketplace/${marketplaceItems
+																	.find(
+																		(item) =>
+																			item.meta.id.toLowerCase() === packageItems.toLowerCase(),
+																	)
+																	?.meta.displayName.en?.toLocaleLowerCase()
+																	.replaceAll(" ", "-")}`}
 															>
 																{" "}
 																<span class="capitalize">
-																	{
-																		// in marketplaceItems, the module.meta.id.toLowerCase() is the same as moduleItem.toLowerCase()
-																		marketplaceItems
-																			.find(
-																				(item) =>
-																					item.meta.id.toLowerCase() === moduleItem.toLowerCase(),
-																			)
-																			?.meta.displayName.en?.toLocaleLowerCase()
-																	}{" "}
+																	{marketplaceItems
+																		.find(
+																			(item) =>
+																				item.meta.id.toLowerCase() === packageItems.toLowerCase(),
+																		)
+																		?.meta.displayName.en?.toLocaleLowerCase()}{" "}
 																</span>
 															</Button>
 														</Show>

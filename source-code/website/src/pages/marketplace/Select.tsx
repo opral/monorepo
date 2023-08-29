@@ -8,7 +8,7 @@ import type { MarketplaceItem } from "@inlang/marketplace"
  * This file provides helper Components for the marketplace pages.
  */
 
-export function SelectRepo(props: { size: "small" | "medium"; modules: any[] }) {
+export function SelectRepo(props: { size: "small" | "medium"; packages: any[] }) {
 	const [store] = useLocalStorage()
 
 	return (
@@ -38,7 +38,7 @@ export function SelectRepo(props: { size: "small" | "medium"; modules: any[] }) 
 									setSearchParams(
 										`/install?repo=github.com/${project.owner}/${
 											project.repository
-										}&module=${props.modules?.join(",")}`,
+										}&package=${props.packages?.join(",")}`,
 									)
 								}}
 							>
@@ -55,8 +55,8 @@ export function SelectRepo(props: { size: "small" | "medium"; modules: any[] }) 
 export function SelectionWrapper(props: {
 	select: Accessor<boolean>
 	item: MarketplaceItem
-	selectedModules: Accessor<string[]>
-	setSelectedModules: (items: string[]) => void
+	selectedPackages: Accessor<string[]>
+	setSelectedPackages: (items: string[]) => void
 	children: JSXElement
 }) {
 	function removeDuplicates(array: string[]) {
@@ -72,8 +72,8 @@ export function SelectionWrapper(props: {
 						(props.item.type !== "app"
 							? "cursor-pointer " +
 							  (props
-									.selectedModules()
-									.some((module) => props.item.type !== "app" && module === props.item.module)
+									.selectedPackages()
+									.some((pkg) => props.item.type !== "app" && pkg === props.item.package)
 									? "outline-4"
 									: "outline-transparent hover:outline-4") +
 							  (props.item.type === "plugin" ? " outline-[#BF7CE4]" : " outline-[#06B6D4]")
@@ -83,16 +83,16 @@ export function SelectionWrapper(props: {
 						e.stopPropagation()
 
 						if (props.item.type !== "app") {
-							const moduleToRemove = props.item.module
-							const isSelected = props.selectedModules().includes(moduleToRemove)
+							const packageToRemove = props.item.package
+							const isSelected = props.selectedPackages().includes(packageToRemove)
 
 							if (isSelected) {
-								props.setSelectedModules(
-									props.selectedModules().filter((item) => item !== moduleToRemove),
+								props.setSelectedPackages(
+									props.selectedPackages().filter((item) => item !== packageToRemove),
 								)
 							} else {
-								props.setSelectedModules(
-									removeDuplicates([...props.selectedModules(), moduleToRemove]),
+								props.setSelectedPackages(
+									removeDuplicates([...props.selectedPackages(), packageToRemove]),
 								)
 							}
 						}

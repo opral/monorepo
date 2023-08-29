@@ -6,13 +6,13 @@ import type {
 	ResolvePluginsFunction,
 	ResolvedPluginApi,
 } from "@inlang/plugin"
-import type { ModuleHasNoExportsError, ModuleImportError } from "./errors.js"
+import type { PackageHasNoExportsError, PackageImportError } from "./errors.js"
 import type { ImportFunction } from "./import.js"
 
 /**
- * The inlang module API.
+ * The inlang package API.
  *
- * An inlang module exports a default object with the following properties:
+ * An inlang package exports a default object with the following properties:
  *
  * - `plugins`: An array of plugins.
  * - `lintRules`: An array of lint rules.
@@ -24,7 +24,7 @@ import type { ImportFunction } from "./import.js"
  *   }
  */
 
-export type InlangModule = {
+export type InlangPackage = {
 	default: {
 		plugins?: Plugin<any>[]
 		lintRules?: LintRule[]
@@ -32,40 +32,40 @@ export type InlangModule = {
 }
 
 /**
- * Function that resolves modules from the config.
+ * Function that resolves packages from the config.
  *
  * Pass a custom `_import` function to override the default import function.
  */
-export type ResolveModulesFunction = (args: {
+export type ResolvePackagesFunction = (args: {
 	config: InlangConfig
 	nodeishFs: NodeishFilesystemSubset
 	_import?: ImportFunction
 }) => Promise<{
 	/**
-	 * Metadata about the resolved modules.
+	 * Metadata about the resolved packages.
 	 *
 	 * @example
 	 * [{
-	 * 	  module: "https://myplugin.com/index.js",
+	 * 	  package: "https://myplugin.com/index.js",
 	 * 	  plugins: ["samuel.plugin.json", "inlang.plugin.yaml"],
 	 * 	  lintRules: ["samuel.lintRule.missingPattern", "inlang.lintRule.missingDescription"],
 	 * }]
 	 */
 	meta: Array<{
 		/**
-		 * The module link.
+		 * The package link.
 		 *
 		 * @example "https://myplugin.com/index.js"
 		 */
-		module: string
+		package: string
 		/**
-		 * The resolved plugin ids of the module.
+		 * The resolved plugin ids of the package.
 		 *
 		 * @example ["samuel.plugin.json", "inlang.plugin.yaml"]
 		 */
 		plugins: Array<Plugin["meta"]["id"]>
 		/**
-		 * The resolved lint rule ids of the module.
+		 * The resolved lint rule ids of the package.
 		 *
 		 * @example ["samuel.lintRule.missingPattern", "inlang.lintRule.missingDescription"]
 		 */
@@ -87,14 +87,14 @@ export type ResolveModulesFunction = (args: {
 	 * Errors during the resolution process.
 	 *
 	 * This includes errors from:
-	 * - importing modules
+	 * - importing packages
 	 * - resolving plugins
 	 * - resolving lint rules
 	 * - resolving the runtime plugin api
 	 */
 	errors: Array<
-		| ModuleHasNoExportsError
-		| ModuleImportError
+		| PackageHasNoExportsError
+		| PackageImportError
 		| Awaited<ReturnType<ResolvePluginsFunction>>["errors"][number]
 		| Awaited<ReturnType<typeof resolveLintRules>>["errors"][number]
 	>

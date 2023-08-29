@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/module",
+	"name": "@inlang/package",
 	"type": "module",
 	"version": "0.0.0",
 	"publishConfig": {

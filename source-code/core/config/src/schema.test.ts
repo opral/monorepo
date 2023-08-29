@@ -7,7 +7,7 @@ describe("config.settings", () => {
 		const mockConfig: InlangConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
-			modules: [],
+			packages: [],
 			settings: {
 				"x.plugin.y": {
 					hello: {
@@ -23,7 +23,7 @@ describe("config.settings", () => {
 		const mockConfig: InlangConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
-			modules: [],
+			packages: [],
 			settings: {},
 		}
 		const passCases = [
@@ -42,7 +42,7 @@ describe("config.settings", () => {
 		const mockConfig: InlangConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
-			modules: [],
+			packages: [],
 			settings: {
 				// @ts-expect-error - Namespace is missing
 				withoutNamespace: {},
@@ -55,7 +55,7 @@ describe("config.settings", () => {
 		const mockConfig: InlangConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
-			modules: [],
+			packages: [],
 			settings: {
 				// @ts-expect-error - unknown type
 				"namespace.unknownType.name": {},
@@ -68,7 +68,7 @@ describe("config.settings", () => {
 		const mockConfig: InlangConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
-			modules: [],
+			packages: [],
 			settings: {},
 		}
 
@@ -90,7 +90,7 @@ describe("config.settings", () => {
 		const mockConfig: InlangConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
-			modules: [],
+			packages: [],
 			settings: {
 				"namespace.app.name": {
 					// @ts-expect-error - Function is not a JSON
@@ -108,7 +108,7 @@ describe("config.settings", () => {
 		const mockConfig: InlangConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
-			modules: [],
+			packages: [],
 			settings: {
 				"namespace.plugin.helloWorld": {
 					hello: "World",
@@ -128,7 +128,7 @@ describe("config.settings", () => {
 		const mockConfig: InlangConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
-			modules: [],
+			packages: [],
 			settings: {
 				// @ts-expect-error - unknown project key
 				"project.unknown.name": {},
@@ -141,7 +141,7 @@ describe("config.settings", () => {
 		const mockConfig: InlangConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
-			modules: [],
+			packages: [],
 			settings: {
 				"project.lintRuleLevels": {
 					"namespace.lintRule.helloWorld": "error",
@@ -155,7 +155,7 @@ describe("config.settings", () => {
 		const mockConfig: InlangConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
-			modules: [],
+			packages: [],
 			settings: {
 				"project.disabled": ["namespace.lintRule.helloWorld"],
 			},

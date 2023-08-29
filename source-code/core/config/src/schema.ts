@@ -81,15 +81,15 @@ export const InlangConfig = Type.Object(
 		sourceLanguageTag: LanguageTag,
 		languageTags: Type.Array(LanguageTag),
 		/**
-		 * The modules to load.
+		 * The packages to load.
 		 *
 		 * @example
-		 *  modules: [
+		 *  packages: [
 		 * 	  "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index.js",
 		 * 	  "https://cdn.jsdelivr.net/npm/@inlang/plugin-csv@1/dist/index.js",
 		 *  ]
 		 */
-		modules: Type.Array(Type.String()),
+		packages: Type.Array(Type.String()),
 		/**
 		 * Settings are key-value pairs.
 		 */

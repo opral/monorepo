@@ -39,7 +39,7 @@ describe("Plugin", () => {
 		const mockConfig: InlangConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
-			modules: [],
+			packages: [],
 			settings: {},
 		}
 		const cases = ["namespace.plugin.helloWorld", "namespace.plugin.i18n"]

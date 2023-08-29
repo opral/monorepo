@@ -1,7 +1,7 @@
 import { dedent } from "ts-dedent"
 import { normalizePath } from "@inlang-git/fs"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
-import { ModuleImportError } from "./errors.js"
+import { PackageImportError } from "./errors.js"
 
 /**
  * Importing ES modules either from a local path, or from a url.
@@ -43,15 +43,15 @@ async function $import(
 		fetch: typeof fetch
 	},
 ): Promise<any> {
-	let moduleAsText: string
+	let packageAsText: string
 
 	if (uri.startsWith("http")) {
-		moduleAsText = await (await options.fetch(uri)).text()
+		packageAsText = await (await options.fetch(uri)).text()
 	} else {
-		moduleAsText = await options.readFile(normalizePath(uri), { encoding: "utf-8" })
+		packageAsText = await options.readFile(normalizePath(uri), { encoding: "utf-8" })
 	}
 
-	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
+	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(packageAsText)
 
 	try {
 		return await import(/* @vite-ignore */ moduleWithMimeType)
@@ -64,6 +64,6 @@ Are you sure that the file exists on JSDelivr?
 The error indicates that the imported file does not exist on JSDelivr. For non-existent files, JSDelivr returns a 404 text that JS cannot parse as a module and throws a SyntaxError.
 			`
 		}
-		throw new ModuleImportError(message, { module: uri, cause: error as Error })
+		throw new PackageImportError(message, { package: uri, cause: error as Error })
 	}
 }

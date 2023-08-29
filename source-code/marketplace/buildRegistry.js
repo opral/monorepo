@@ -5,14 +5,14 @@ async function main() {
 	/** @type {import("./src/schema.js").MarketplaceItem[]} */
 	const items = [...registry.apps]
 
-	for (let module of registry.modules) {
+	for (let pkg of registry.packages) {
 		// ToDo: Activate after plugin registry is live
-		// if (module.includes("jsdelivr") === false) {
+		// if (package.includes("jsdelivr") === false) {
 		// 	throw new Error(
-		// 		`Module ${module} is not hosted on jsdelivr. Please host it there and update the registry.json file.`,
+		// 		`Package ${package} is not hosted on jsdelivr. Please host it there and update the registry.json file.`,
 		// 	)
 		// }
-		items.push(...(await getMarketplaceItems(module)))
+		items.push(...(await getMarketplaceItems(pkg)))
 	}
 
 	await fs.writeFile(
@@ -30,32 +30,32 @@ await main()
 //  * @param {string} path
 //  * @returns {string}
 //  */
-// function getLatestVersion(module) {
+// function getLatestVersion(pkg) {
 // 	return (
-// 		module.slice(0, module.lastIndexOf("@")) +
+// 		pkg.slice(0, pkg.lastIndexOf("@")) +
 // 		"@latest" +
-// 		module.slice(module.indexOf("/", module.lastIndexOf("@")))
+// 		pkg.slice(pkg.indexOf("/", pkg.lastIndexOf("@")))
 // 	)
 // }
 
 /**
- * @param {string} module
+ * @param {string} pkg
  * @returns {Promise<import("./src/schema.js").MarketplaceItem[]>}
  */
-async function getMarketplaceItems(module) {
+async function getMarketplaceItems(pkg) {
 	const result = []
 
-	const inlangModule = await import(module)
+	const inlangPackage = await import(pkg)
 
 	const exportedItems = [
-		...(inlangModule.default.plugins ?? []),
-		...(inlangModule.default.lintRules ?? []),
+		...(inlangPackage.default.plugins ?? []),
+		...(inlangPackage.default.lintRules ?? []),
 	]
 
 	for (const item of exportedItems) {
 		if (item.meta.marketplace === undefined) {
 			throw new Error(
-				`Module ${item.meta.id} has no marketplace metadata. Remove it from the registry.`,
+				`Package ${item.meta.id} has no marketplace metadata. Remove it from the registry.`,
 			)
 		}
 
@@ -65,8 +65,8 @@ async function getMarketplaceItems(module) {
 				...item.meta,
 			},
 			type: item.meta.id.split(".")[1],
-			moduleItems: exportedItems.map((item) => item.meta.id),
-			module,
+			packageItems: exportedItems.map((item) => item.meta.id),
+			package: pkg,
 		}
 
 		result.push(marketplaceItem)

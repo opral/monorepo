@@ -20,7 +20,7 @@ const [selectedCategories, setSelectedCategories] = createSignal<Category[]>([
 ])
 
 const [select, setSelect] = createSignal<boolean>(false)
-const [selectedModules, setSelectedModules] = createSignal<string[]>([])
+const [selectedPackages, setSelectedPackages] = createSignal<string[]>([])
 
 const filteredItems = () =>
 	marketplaceItems.filter((item: Record<string, any>) => {
@@ -45,7 +45,7 @@ function filterItem(
 		item.meta.marketplace.bundleName?.toLowerCase().includes(searchValue.toLowerCase()) ||
 		item.meta.id.split(".")[1]?.toLowerCase().includes(searchValue.toLowerCase()) ||
 		item.meta.id.toLowerCase().includes(searchValue.toLowerCase()) ||
-		item.module?.toLowerCase() === searchValue.toLowerCase()
+		item.package?.toLowerCase() === searchValue.toLowerCase()
 
 	return isSearchMatch
 }
@@ -75,27 +75,31 @@ export function Page() {
 											setSelect(true)
 										}}
 									>
-										Select modules
+										Select Packages
 									</Button>
 								}
 							>
-								<div class={selectedModules().length === 0 ? "opacity-25 pointer-events-none" : ""}>
+								<div
+									class={selectedPackages().length === 0 ? "opacity-25 pointer-events-none" : ""}
+								>
 									<Button
 										type="primary"
 										href={
-											selectedModules().length > 0 ? `/install?module=${selectedModules()}` : ""
+											selectedPackages().length > 0 ? `/install?package=${selectedPackages()}` : ""
 										}
 									>
-										{selectedModules().length === 0 ? "Select items first" : "Install Modules"}
+										{selectedPackages().length === 0
+											? "Select Package"
+											: "Install Package" + (selectedPackages().length > 1 ? "s" : "")}
 										{/* @ts-ignore */}
-										<SelectRepo size="medium" modules={selectedModules()} />
+										<SelectRepo size="medium" packages={selectedPackages()} />
 									</Button>
 								</div>
 								<Button
 									type="text"
 									function={() => {
 										setSelect(false)
-										setSelectedModules([])
+										setSelectedPackages([])
 									}}
 								>
 									Cancel
@@ -138,8 +142,8 @@ const Gallery = () => {
 							<SelectionWrapper
 								select={select}
 								item={item}
-								selectedModules={selectedModules}
-								setSelectedModules={setSelectedModules}
+								selectedPackages={selectedPackages}
+								setSelectedPackages={setSelectedPackages}
 							>
 								<a
 									href={`/marketplace/${item.meta.displayName.en
@@ -181,9 +185,9 @@ const Gallery = () => {
 														{item.meta.marketplace.publisherName}
 													</p>
 												</div>
-												{item.type !== "app" && item.moduleItems.length > 1 && (
+												{item.type !== "app" && item.packageItems.length > 1 && (
 													<sl-tooltip
-														prop:content={`Comes in a bundle of ${item.moduleItems?.length}`}
+														prop:content={`Comes in a bundle of ${item.packageItems?.length}`}
 														prop:distance={16}
 														prop:hoist={true}
 														prop:placement="top"
@@ -191,7 +195,7 @@ const Gallery = () => {
 														<div
 															onClick={(e) => {
 																e.stopPropagation()
-																setSearchValue(`${item.module ?? item.meta.id}`)
+																setSearchValue(`${item.package ?? item.meta.id}`)
 																window.scrollTo({ top: 0 })
 															}}
 															class="text-surface-500 text-xl hover:text-surface-900 transition-all"
