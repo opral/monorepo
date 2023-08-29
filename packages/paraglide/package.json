@@ -1,6 +1,5 @@
 {
-	"name": "@inlang/sdk-js",
-	"description": "The official Inlang SDK",
+	"name": "@inlang/paraglide-js",
 	"keywords": [
 		"inlang",
 		"sveltekit",
