@@ -1,15 +1,14 @@
 import { Meta, Title } from "@solidjs/meta"
 import { Layout } from "#src/pages/Layout.jsx"
 import { Markdown, parseMarkdown } from "#src/services/markdown/index.js"
-import { For, Show, createEffect, createSignal } from "solid-js"
+import { For, Show, createSignal } from "solid-js"
 import type { ProcessedTableOfContents } from "./index.page.server.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import { marketplaceItems } from "@inlang/marketplace"
-import type { MarketplaceItem } from "@inlang/marketplace"
 import { Button } from "#src/pages/index/components/Button.jsx"
 import { Chip } from "#src/components/Chip.jsx"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
-import { SelectRepo } from "../SelectRepo.jsx"
+import { SelectRepo } from "../Select.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.

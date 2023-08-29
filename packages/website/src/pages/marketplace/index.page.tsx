@@ -8,6 +8,7 @@ import { Button } from "../index/components/Button.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import Plus from "~icons/material-symbols/add-rounded"
 import Package from "~icons/material-symbols/package-2"
+import { SelectRepo, SelectionWrapper } from "./Select.jsx"
 
 type Category = "app" | "plugin" | "lintrule"
 
@@ -17,6 +18,9 @@ const [selectedCategories, setSelectedCategories] = createSignal<Category[]>([
 	"plugin",
 	"lintrule",
 ])
+
+const [select, setSelect] = createSignal<boolean>(false)
+const selectedItems = () => []
 
 const filteredItems = () =>
 	marketplaceItems.filter((item: Record<string, any>) => {
@@ -61,8 +65,39 @@ export function Page() {
 						<h1 class="xl:col-span-2 text-[40px] md:text-5xl font-bold text-left leading-tight">
 							Explore the marketplace
 						</h1>
-						<div class="w-full h-full flex xl:justify-end items-center">
-							{/* <SelectRepo size="medium" /> */}
+						<div class="w-full h-full flex xl:justify-end items-center gap-4">
+							<Show
+								when={select()}
+								fallback={
+									<Button
+										type="primary"
+										function={() => {
+											setSelect(true)
+										}}
+									>
+										Select modules
+									</Button>
+								}
+							>
+								<div class={selectedItems().length === 0 ? "opacity-25 pointer-events-none" : ""}>
+									<Button
+										type="primary"
+										href={selectedItems().length > 0 ? `/install?module=${selectedItems()}` : ""}
+									>
+										{selectedItems().length === 0 ? "Select items first" : "Install Modules"}
+										{/* @ts-ignore */}
+										<SelectRepo size="medium" modules={selectedItems()} />
+									</Button>
+								</div>
+								<Button
+									type="text"
+									function={() => {
+										setSelect(false)
+									}}
+								>
+									Cancel
+								</Button>
+							</Show>
 						</div>
 					</div>
 					<div class="w-full top-16 sticky bg-background pb-4 pt-8 z-10 border-b border-surface-2 flex flex-col gap-5">
@@ -96,73 +131,81 @@ const Gallery = () => {
 			<For each={filteredItems()}>
 				{(item) => {
 					return (
-						<a
-							href={`/marketplace/${item.meta.displayName.en?.toLowerCase().replaceAll(" ", "-")}`}
-							target="_blanc"
-							class="relative no-underline h-64"
-						>
-							<div class="flex flex-col relative justify-between gap-4 bg-surface-100 h-full hover:bg-surface-200 p-6 rounded-xl border border-surface-2 cursor-pointer">
-								<div class="flex flex-col gap-4">
-									<div class="flex items-center gap-4">
-										<img
-											class="w-10 h-10 rounded-md m-0 shadow-lg"
-											src={item.meta.marketplace.icon}
-										/>
-										<p class="m-0 text-surface-900 font-semibold text-md">
-											{item.meta.displayName.en}
-										</p>
-									</div>
-									<p class="m-0 font-normal leading-6 text-sm tracking-wide text-surface-500 line-clamp-3">
-										{item.meta.description.en}
-									</p>
-								</div>
-								<Show
-									when={item.meta.marketplace.publisherName && item.meta.marketplace.publisherIcon}
+						<>
+							<SelectionWrapper select={select()} item={item} selectedItems={selectedItems()}>
+								<a
+									href={`/marketplace/${item.meta.displayName.en
+										?.toLowerCase()
+										.replaceAll(" ", "-")}`}
+									target="_blanc"
+									class="relative no-underline h-64"
 								>
-									<div class="w-full flex items-end justify-between">
-										<div class="flex gap-2 items-center pt-6">
-											<img
-												class="w-6 h-6 rounded-full m-0"
-												src={item.meta.marketplace.publisherIcon}
-											/>
-											<p class="m-0 text-surface-600 no-underline hover:text-surface-900 font-medium">
-												{item.meta.marketplace.publisherName}
+									<div class="flex flex-col relative justify-between gap-4 bg-surface-100 h-full hover:bg-surface-200 p-6 rounded-xl border border-surface-2 cursor-pointer">
+										<div class="flex flex-col gap-4">
+											<div class="flex items-center gap-4">
+												<img
+													class="w-10 h-10 rounded-md m-0 shadow-lg"
+													src={item.meta.marketplace.icon}
+												/>
+												<p class="m-0 text-surface-900 font-semibold text-md">
+													{item.meta.displayName.en}
+												</p>
+											</div>
+											<p class="m-0 font-normal leading-6 text-sm tracking-wide text-surface-500 line-clamp-3">
+												{item.meta.description.en}
 											</p>
 										</div>
-										{item.type !== "app" && item.moduleItems.length > 1 && (
-											<sl-tooltip
-												prop:content={`Comes in a bundle of ${item.moduleItems?.length}`}
-												prop:distance={16}
-												prop:hoist={true}
-												prop:placement="top"
-											>
-												<div
-													onClick={(e) => {
-														e.stopPropagation()
-														setSearchValue(`${item.module ?? item.meta.id}`)
-														window.scrollTo({ top: 0 })
-													}}
-													class="text-surface-500 text-xl hover:text-surface-900 transition-all"
-												>
-													<Package />
+										<Show
+											when={
+												item.meta.marketplace.publisherName && item.meta.marketplace.publisherIcon
+											}
+										>
+											<div class="w-full flex items-end justify-between">
+												<div class="flex gap-2 items-center pt-6">
+													<img
+														class="w-6 h-6 rounded-full m-0"
+														src={item.meta.marketplace.publisherIcon}
+													/>
+													<p class="m-0 text-surface-600 no-underline hover:text-surface-900 font-medium">
+														{item.meta.marketplace.publisherName}
+													</p>
 												</div>
-											</sl-tooltip>
-										)}
+												{item.type !== "app" && item.moduleItems.length > 1 && (
+													<sl-tooltip
+														prop:content={`Comes in a bundle of ${item.moduleItems?.length}`}
+														prop:distance={16}
+														prop:hoist={true}
+														prop:placement="top"
+													>
+														<div
+															onClick={(e) => {
+																e.stopPropagation()
+																setSearchValue(`${item.module ?? item.meta.id}`)
+																window.scrollTo({ top: 0 })
+															}}
+															class="text-surface-500 text-xl hover:text-surface-900 transition-all"
+														>
+															<Package />
+														</div>
+													</sl-tooltip>
+												)}
+											</div>
+										</Show>
+										<Chip
+											text={item.type.toLocaleLowerCase() === "lintrule" ? "Lint Rule" : item.type}
+											color={
+												item.meta.id.split(".")[1]?.toLowerCase() === "app"
+													? "#3B82F6"
+													: item.meta.id.split(".")[1]?.toLowerCase() === "plugin"
+													? "#BF7CE4"
+													: "#06B6D4"
+											}
+											customClasses="absolute right-4 top-4 z-5 backdrop-filter backdrop-blur-lg"
+										/>
 									</div>
-								</Show>
-								<Chip
-									text={item.type.toLocaleLowerCase() === "lintrule" ? "Lint Rule" : item.type}
-									color={
-										item.meta.id.split(".")[1]?.toLowerCase() === "app"
-											? "#3B82F6"
-											: item.meta.id.split(".")[1]?.toLowerCase() === "plugin"
-											? "#BF7CE4"
-											: "#06B6D4"
-									}
-									customClasses="absolute right-4 top-4 z-5 backdrop-filter backdrop-blur-lg"
-								/>
-							</div>
-						</a>
+								</a>
+							</SelectionWrapper>
+						</>
 					)
 				}}
 			</For>

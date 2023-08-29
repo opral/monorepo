@@ -1,11 +1,15 @@
-import { Show, For } from "solid-js"
+import { Show, For, JSXElement } from "solid-js"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import ArrowDown from "~icons/material-symbols/expand-more"
 import { setSearchParams } from "../install/helper/setSearchParams.js"
+import type { MarketplaceItem } from "@inlang/marketplace"
+
+/**
+ * This file provides helper Components for the marketplace pages.
+ */
 
 export function SelectRepo(props: { size: "small" | "medium"; modules: any[] }) {
 	const [store] = useLocalStorage()
-	// const [selectedRepo, setSelectedRepo] = createSignal<Repository | undefined>(undefined)
 
 	return (
 		<Show when={store.recentProjects.length > 0}>
@@ -45,5 +49,30 @@ export function SelectRepo(props: { size: "small" | "medium"; modules: any[] }) 
 				</sl-menu>
 			</sl-dropdown>
 		</Show>
+	)
+}
+
+export function SelectionWrapper(props: {
+	select: boolean
+	item: MarketplaceItem
+	selectedItems: MarketplaceItem[]
+	children: JSXElement
+}) {
+	return (
+		<>
+			{props.select ? (
+				<div
+					class="cursor-pointer outline outline-0 outline-primary hover:outline-2 transition-all duration-75 rounded-xl h-64"
+					onClick={(e) => {
+						e.stopPropagation()
+						props.selectedItems.push(props.item)
+					}}
+				>
+					<div class="pointer-events-none h-full">{props.children}</div>
+				</div>
+			) : (
+				props.children
+			)}
+		</>
 	)
 }
