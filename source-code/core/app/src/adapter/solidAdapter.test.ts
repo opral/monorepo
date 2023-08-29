@@ -94,10 +94,10 @@ const $import: ImportFunction = async () =>
 describe("config", () => {
 	it("should react to changes to config", async () => {
 		const fs = await createMockNodeishFs()
-		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 		const inlang = solidAdapter(
 			await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
 			}),
@@ -124,10 +124,10 @@ describe("config", () => {
 describe("installed", () => {
 	it("react to changes that are unrelated to installed items", async () => {
 		const fs = await createMockNodeishFs()
-		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 		const inlang = solidAdapter(
 			await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
 			}),
@@ -182,10 +182,10 @@ describe("messages", () => {
 		const mockImport: ImportFunction = async () =>
 			({ default: { plugins: [mockPlugin] } } satisfies InlangModule)
 
-		await fs.writeFile("./inlang.config.json", JSON.stringify(mockConfig))
+		await fs.writeFile("./project.inlang.json", JSON.stringify(mockConfig))
 		const inlang = solidAdapter(
 			await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: mockImport,
 			}),
@@ -211,10 +211,10 @@ describe("messages", () => {
 
 	it("should react to changes to messages", async () => {
 		const fs = await createMockNodeishFs()
-		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 		const inlang = solidAdapter(
 			await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
 			}),
@@ -271,10 +271,10 @@ describe("messages", () => {
 describe("lint", () => {
 	it("should not react to changes to config if not initialized", async () => {
 		const fs = await createMockNodeishFs()
-		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 		const inlang = solidAdapter(
 			await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
 			}),
@@ -296,10 +296,10 @@ describe("lint", () => {
 
 	it("should react to changes to config", async () => {
 		const fs = await createMockNodeishFs()
-		await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 		const inlang = solidAdapter(
 			await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
 			}),

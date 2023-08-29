@@ -8,7 +8,7 @@ export const createBasicInlangConfig = async (fs: NodeishFilesystemSubset) => {
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
 
 	return fs.writeFile(
-		path.resolve(PATH_TO_CWD, "./inlang.config.json"),
+		path.resolve(PATH_TO_CWD, "./project.inlang.json"),
 		JSON.stringify({
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],

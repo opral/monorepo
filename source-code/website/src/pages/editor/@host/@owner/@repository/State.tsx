@@ -218,7 +218,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			const inlang = solidAdapter(
 				await openInlangProject({
 					nodeishFs: repo.nodeishFs,
-					configPath: "/inlang.config.json",
+					configPath: "/project.inlang.json",
 				}),
 				{ from },
 			)

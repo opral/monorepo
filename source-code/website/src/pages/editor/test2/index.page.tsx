@@ -93,12 +93,12 @@ export const Page = () => {
 
 	const [inlang] = createResource(async () => {
 		const fs = createNodeishMemoryFs()
-		await fs.writeFile("/inlang.config.json", JSON.stringify(config))
+		await fs.writeFile("/project.inlang.json", JSON.stringify(config))
 
 		return solidAdapter(
 			await openInlangProject({
 				nodeishFs: fs,
-				configPath: "/inlang.config.json",
+				configPath: "/project.inlang.json",
 				_import: $import,
 			}),
 			{ from },

@@ -123,10 +123,10 @@ describe("initialization", () => {
 
 		it("should return an error if config file is not a valid JSON", async () => {
 			const fs = await createMockNodeishFs()
-			await fs.writeFile("./inlang.config.json", "invalid json")
+			await fs.writeFile("./project.inlang.json", "invalid json")
 
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -136,10 +136,10 @@ describe("initialization", () => {
 
 		it("should return an error if config file is does not match schema", async () => {
 			const fs = await createMockNodeishFs()
-			await fs.writeFile("./inlang.config.json", JSON.stringify({}))
+			await fs.writeFile("./project.inlang.json", JSON.stringify({}))
 
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -149,9 +149,9 @@ describe("initialization", () => {
 
 		it("should return the parsed config", async () => {
 			const fs = await createMockNodeishFs()
-			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -162,22 +162,22 @@ describe("initialization", () => {
 		it("should not re-write the config to disk when initializing", async () => {
 			const fs = await createMockNodeishFs()
 			const configWithDeifferentFormatting = JSON.stringify(config, undefined, 4)
-			await fs.writeFile("./inlang.config.json", configWithDeifferentFormatting)
+			await fs.writeFile("./project.inlang.json", configWithDeifferentFormatting)
 
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
 
-			const configOnDisk = await fs.readFile("./inlang.config.json", { encoding: "utf-8" })
+			const configOnDisk = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
 			expect(configOnDisk).toBe(configWithDeifferentFormatting)
 
 			inlang.setConfig(inlang.config())
 			// TODO: how can we await `setConfig` correctly
 			await new Promise((resolve) => setTimeout(resolve, 0))
 
-			const newConfigOnDisk = await fs.readFile("./inlang.config.json", { encoding: "utf-8" })
+			const newConfigOnDisk = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
 			expect(newConfigOnDisk).not.toBe(configWithDeifferentFormatting)
 		})
 	})
@@ -192,9 +192,9 @@ describe("initialization", () => {
 				} satisfies InlangModule)
 
 			const fs = await createMockNodeishFs()
-			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: $badImport,
 			})
@@ -211,9 +211,9 @@ describe("initialization", () => {
 				} satisfies InlangModule)
 
 			const fs = await createMockNodeishFs()
-			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: $badImport,
 			})
@@ -230,10 +230,10 @@ describe("initialization", () => {
 				} satisfies InlangModule)
 
 			const fs = await createMockNodeishFs()
-			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: $badImport,
 			})
@@ -262,9 +262,9 @@ describe("functionality", () => {
 	describe("config", () => {
 		it("should return the config", async () => {
 			const fs = await createMockNodeishFs()
-			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -274,9 +274,9 @@ describe("functionality", () => {
 
 		it("should set a new config", async () => {
 			const fs = await createMockNodeishFs()
-			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -296,9 +296,9 @@ describe("functionality", () => {
 	describe("setConfig", () => {
 		it("should fail if config is not valid", async () => {
 			const fs = await createMockNodeishFs()
-			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -310,14 +310,14 @@ describe("functionality", () => {
 
 		it("should write config to disk", async () => {
 			const fs = await createMockNodeishFs()
-			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
 
-			const before = await fs.readFile("./inlang.config.json", { encoding: "utf-8" })
+			const before = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
 			expect(before).toBeDefined()
 
 			const result = inlang.setConfig({ ...config, languageTags: [] })
@@ -327,7 +327,7 @@ describe("functionality", () => {
 			// TODO: how to wait for fs.writeFile to finish?
 			await new Promise((resolve) => setTimeout(resolve, 0))
 
-			const after = await fs.readFile("./inlang.config.json", { encoding: "utf-8" })
+			const after = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
 			expect(after).toBeDefined()
 			expect(after).not.toBe(before)
 		})
@@ -336,9 +336,9 @@ describe("functionality", () => {
 	describe("installed", () => {
 		it("should return the installed items", async () => {
 			const fs = await createMockNodeishFs()
-			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -359,7 +359,7 @@ describe("functionality", () => {
 		it("should apply 'warning' as default lint level to lint rules that have no lint level defined in the config", async () => {
 			const fs = await createMockNodeishFs()
 			await fs.writeFile(
-				"./inlang.config.json",
+				"./project.inlang.json",
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
@@ -370,7 +370,7 @@ describe("functionality", () => {
 				} satisfies InlangConfig),
 			)
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -381,7 +381,7 @@ describe("functionality", () => {
 		it("should apply 'disabled' to lint rules if defined in the project settings", async () => {
 			const fs = await createMockNodeishFs()
 			await fs.writeFile(
-				"./inlang.config.json",
+				"./project.inlang.json",
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
@@ -392,7 +392,7 @@ describe("functionality", () => {
 				} satisfies InlangConfig),
 			)
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -442,7 +442,7 @@ describe("functionality", () => {
 			}
 			const fs = await createMockNodeishFs()
 			await fs.writeFile(
-				"./inlang.config.json",
+				"./project.inlang.json",
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
@@ -461,7 +461,7 @@ describe("functionality", () => {
 				} satisfies InlangModule
 			}
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -506,7 +506,7 @@ describe("functionality", () => {
 			}
 			const fs = await createMockNodeishFs()
 			await fs.writeFile(
-				"./inlang.config.json",
+				"./project.inlang.json",
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
@@ -523,7 +523,7 @@ describe("functionality", () => {
 				} satisfies InlangModule
 			}
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -538,9 +538,9 @@ describe("functionality", () => {
 	describe("errors", () => {
 		it("should return the errors", async () => {
 			const fs = await createMockNodeishFs()
-			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -553,9 +553,9 @@ describe("functionality", () => {
 	describe("appSpecificApi", () => {
 		it("should return the app specific api", async () => {
 			const fs = await createMockNodeishFs()
-			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -569,9 +569,9 @@ describe("functionality", () => {
 	describe("messages", () => {
 		it("should return the messages", async () => {
 			const fs = await createMockNodeishFs()
-			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -585,7 +585,7 @@ describe("functionality", () => {
 			const fs = await createMockNodeishFs()
 
 			await fs.writeFile(
-				"./inlang.config.json",
+				"./project.inlang.json",
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en", "de"],
@@ -621,7 +621,7 @@ describe("functionality", () => {
 			}
 
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -755,9 +755,9 @@ describe("functionality", () => {
 	describe("lint", () => {
 		it.todo("should throw if lint reports are not initialized yet", async () => {
 			const fs = await createMockNodeishFs()
-			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -771,9 +771,9 @@ describe("functionality", () => {
 		})
 		it("should return the lint reports", async () => {
 			const fs = await createMockNodeishFs()
-			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				configPath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})

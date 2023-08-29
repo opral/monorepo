@@ -31,7 +31,7 @@ export const extractMessageCommand = {
 		}
 		if (state().inlang.config().sourceLanguageTag === undefined) {
 			return msg(
-				"The `sourceLanguageTag` is not defined in the inlang.config.json but required to extract a message.",
+				"The `sourceLanguageTag` is not defined in the project.inlang.json but required to extract a message.",
 				"warn",
 				"notification",
 			)

@@ -34,7 +34,7 @@ export const updateSdkModuleVersion = async (inlang: InlangProject): Promise<boo
 }
 
 /**
- * Utility function to update the version of the `@inlang/sdk-js-plugin` module in the `inlang.config.json` file.
+ * Utility function to update the version of the `@inlang/sdk-js-plugin` module in the `project.inlang.json` file.
  * @returns `true` iff the version was updated
  * @returns `false` iff the version is already up2date
  */

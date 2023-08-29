@@ -307,7 +307,7 @@ const _writeConfigToDisk = async (args: {
 	if (serializeConfigError) throw serializeConfigError
 
 	const { error: writeConfigError } = await tryCatch(async () =>
-		args.nodeishFs.writeFile("./inlang.config.json", serializedConfig!),
+		args.nodeishFs.writeFile("./project.inlang.json", serializedConfig!),
 	)
 	if (writeConfigError) throw writeConfigError
 }
