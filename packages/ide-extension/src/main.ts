@@ -79,14 +79,14 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		}
 		return
 	}
-	const closestConfigPath = determineClosestPath({
+	const closestProjectFilePath = determineClosestPath({
 		options: potentialConfigFileUris.map((uri) => uri.path),
 		to: activeTextEditor.document.uri.path,
 	})
-	const closestConfigPathUri = vscode.Uri.parse(closestConfigPath)
+	const closestProjectFilePathUri = vscode.Uri.parse(closestProjectFilePath)
 
 	// get current workspace
-	const workspaceFolder = vscode.workspace.getWorkspaceFolder(closestConfigPathUri)
+	const workspaceFolder = vscode.workspace.getWorkspaceFolder(closestProjectFilePathUri)
 	if (!workspaceFolder) {
 		console.warn("No workspace folder found.")
 		return
@@ -99,7 +99,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
 	const { data: inlang, error } = await tryCatch(() =>
 		openInlangProject({
-			configPath: closestConfigPathUri.fsPath,
+			projectFilePath: closestProjectFilePathUri.fsPath,
 			nodeishFs: createFileSystemMapper(workspaceFolder.uri.fsPath),
 			_import: _import(workspaceFolder.uri.fsPath),
 		}),

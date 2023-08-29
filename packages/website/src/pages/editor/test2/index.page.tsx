@@ -98,7 +98,7 @@ export const Page = () => {
 		return solidAdapter(
 			await openInlangProject({
 				nodeishFs: fs,
-				configPath: "/project.inlang.json",
+				projectFilePath: "/project.inlang.json",
 				_import: $import,
 			}),
 			{ from },
