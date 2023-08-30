@@ -11,8 +11,6 @@ import fs from "node:fs/promises"
  * The wrapping is necessary to resolve relative imports.
  */
 export function _import(basePath: string): ImportFunction {
-	console.log("_import", basePath)
-
 	return (uri: string) => {
 		if (uri.startsWith("./")) {
 			return createImport(normalizePath(basePath + "/" + uri.slice(2)))
@@ -22,12 +20,11 @@ export function _import(basePath: string): ImportFunction {
 }
 
 const createImport: ImportFunction = async (uri: string) => {
-	console.log("createImport", uri)
 	// polyfill for environments that don't support dynamic
 	// http imports yet like VSCode.
 
 	const moduleAsText = uri.startsWith("http")
-		? await(await fetch(uri)).text()
+		? await (await fetch(uri)).text()
 		: await fs.readFile(uri, { encoding: "utf-8" })
 
 	try {
