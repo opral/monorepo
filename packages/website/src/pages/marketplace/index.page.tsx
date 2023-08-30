@@ -76,6 +76,7 @@ export function Page() {
 										type="primary"
 										function={() => {
 											setSelect(true)
+											setSelectedCategories(["plugin", "lintrule"])
 										}}
 									>
 										Select Packages
@@ -103,6 +104,7 @@ export function Page() {
 									function={() => {
 										setSelect(false)
 										setSelectedPackages([])
+										setSelectedCategories(["app", "library", "plugin", "lintrule"])
 									}}
 								>
 									Cancel

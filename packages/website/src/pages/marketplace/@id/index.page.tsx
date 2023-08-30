@@ -44,7 +44,7 @@ export function Page(props: PageProps) {
 							<div class="col-span-1 md:col-span-3 md:pb-16 pb-12 border-b border-surface-2">
 								<div class="flex max-md:flex-col items-start gap-8 mb-10">
 									<img
-										class="w-16 h-16 rounded-md m-0 shadow-lg"
+										class="w-16 h-16 rounded-md m-0 shadow-lg object-cover object-center"
 										src={item()?.meta.marketplace.icon}
 									/>
 									<div class="flex flex-col gap-3">
