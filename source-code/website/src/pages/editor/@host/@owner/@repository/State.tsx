@@ -196,15 +196,20 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [localStorage] = useLocalStorage() ?? []
 
-	// open the repository
-	const { host, owner, repository } = routeParams()
 
 	const [repo] = createResource(
-		async () =>
-			await openRepository(`${host}/${owner}/${repository}`, {
+		() => {
+			return routeParams()
+		},
+		async ({ host, owner, repository }) => {
+			// open the repository
+
+			const newRepo = await openRepository(`${host}/${owner}/${repository}`, {
 				nodeishFs: createNodeishMemoryFs(),
 				corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
-			}),
+			})
+			return newRepo
+		},
 	)
 
 	// get lix errors
@@ -216,21 +221,25 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	})
 
 	// open the inlang project and store it in a resource
-	const [inlang] = createResource(async () => {
-		const newRepo = repo()
-		if (lixErrors().length === 0 && newRepo) {
-			const inlang = solidAdapter(
-				await openInlangProject({
-					nodeishFs: newRepo.nodeishFs,
-					projectFilePath: "/project.inlang.json",
-				}),
-				{ from },
-			)
-			return inlang
-		} else {
-			return undefined
-		}
-	})
+	const [inlang] = createResource(
+		() => {
+			return { newRepo: repo(), lixErrors: lixErrors() }
+		},
+		async ({ newRepo, lixErrors }) => {
+			if (lixErrors.length === 0 && newRepo) {
+				const inlang = solidAdapter(
+					await openInlangProject({
+						nodeishFs: newRepo.nodeishFs,
+						projectFilePath: "/project.inlang.json",
+					}),
+					{ from },
+				)
+				return inlang
+			} else {
+				return undefined
+			}
+		},
+	)
 
 	// DERIVED when config exists
 	const doesInlangConfigExist = () => {
@@ -238,7 +247,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	}
 
 	const [gitOrigin] = createResource(async () => {
-		return parseOrigin({ remotes: await repo.listRemotes() })
+		return parseOrigin({ remotes: await repo()?.listRemotes() })
 	})
 	createEffect(() => {
 		if (doesInlangConfigExist() === true) {
