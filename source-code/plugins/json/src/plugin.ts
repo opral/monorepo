@@ -73,6 +73,7 @@ export const plugin: Plugin<PluginSettings> = {
 			keywords: ["json", "generic"],
 			publisherName: "inlang",
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+			license: "Apache-2.0",
 		},
 	},
 	loadMessages: async ({ languageTags, settings, nodeishFs }) => {

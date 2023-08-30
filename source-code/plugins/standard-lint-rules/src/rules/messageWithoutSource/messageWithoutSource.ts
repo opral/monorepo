@@ -24,6 +24,7 @@ have not been updated accordingly.
 			keywords: ["lint-rule", "standard", "message-without-source"],
 			publisherName: "inlang",
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+			license: "Apache-2.0",
 		},
 	},
 	message: ({ message: { id, variants }, sourceLanguageTag, report }) => {

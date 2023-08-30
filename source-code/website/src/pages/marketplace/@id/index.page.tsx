@@ -144,6 +144,12 @@ export function Page(props: PageProps) {
 											</For>
 										</div>
 									</div>
+									<div class="flex flex-col gap-3 mb-8">
+										<h3 class="text-sm text-surface-400">License</h3>
+										<p class="m-0 text-surface-600 no-underline font-medium">
+											{item()?.meta.marketplace.license}
+										</p>
+									</div>
 									{/* @ts-ignore */}
 									<Show when={item()?.packageItems && item()?.packageItems.length > 1}>
 										<div class="flex flex-col gap-3">
