@@ -9,6 +9,7 @@ import { Button } from "#src/pages/index/components/Button.jsx"
 import { Chip } from "#src/components/Chip.jsx"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 import { SelectRepo } from "../Select.jsx"
+import { setSearchValue } from "../index.page.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -119,16 +120,24 @@ export function Page(props: PageProps) {
 										<div class="flex flex-wrap gap-2 items-center">
 											<For each={item()?.meta.marketplace.keywords}>
 												{(keyword) => (
-													<Chip
-														text={keyword}
-														color={
-															item()?.type === "app"
-																? "#3B82F6"
-																: item()?.type === "plugin"
-																? "#BF7CE4"
-																: "#06B6D4"
-														}
-													/>
+													<a
+														class="transition-opacity hover:opacity-80 cursor-pointer"
+														href="/marketplace"
+														onClick={() => {
+															setSearchValue(keyword)
+														}}
+													>
+														<Chip
+															text={keyword}
+															color={
+																item()?.type === "app"
+																	? "#3B82F6"
+																	: item()?.type === "plugin"
+																	? "#BF7CE4"
+																	: "#06B6D4"
+															}
+														/>
+													</a>
 												)}
 											</For>
 										</div>
@@ -136,7 +145,7 @@ export function Page(props: PageProps) {
 									{/* @ts-ignore */}
 									<Show when={item()?.packageItems && item()?.packageItems.length > 1}>
 										<div class="flex flex-col gap-3">
-											<h3 class="text-sm text-surface-400">Bundled with</h3>
+											<h3 class="text-sm text-surface-400">Packaged with</h3>
 											<div class="flex flex-col items-start">
 												{/* @ts-ignore */}
 												<For each={item()?.packageItems}>

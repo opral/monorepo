@@ -9,10 +9,12 @@ import { GetHelp } from "#src/components/GetHelp.jsx"
 import Plus from "~icons/material-symbols/add-rounded"
 import Package from "~icons/material-symbols/package-2"
 import { SelectRepo, SelectionWrapper } from "./Select.jsx"
+import { setSearchParams } from "../install/helper/setSearchParams.js"
 
 type Category = "app" | "plugin" | "lintrule"
 
-const [searchValue, setSearchValue] = createSignal<string>("")
+/* Export searchValue to make subpages insert search-terms */
+export const [searchValue, setSearchValue] = createSignal<string>("")
 const [selectedCategories, setSelectedCategories] = createSignal<Category[]>([
 	"app",
 	"plugin",
@@ -145,11 +147,14 @@ const Gallery = () => {
 								selectedPackages={selectedPackages}
 								setSelectedPackages={setSelectedPackages}
 							>
-								<a
-									href={`/marketplace/${item.meta.displayName.en
-										?.toLowerCase()
-										.replaceAll(" ", "-")}`}
-									target="_blanc"
+								<div
+									onClick={() => {
+										const path = `/marketplace/${item.meta.displayName.en
+											?.toLowerCase()
+											.replaceAll(" ", "-")}`
+
+										setSearchParams(path)
+									}}
 									class={
 										"relative no-underline h-64 " +
 										(select() && item.type === "app" ? "opacity-25" : "")
@@ -181,13 +186,13 @@ const Gallery = () => {
 														class="w-6 h-6 rounded-full m-0"
 														src={item.meta.marketplace.publisherIcon}
 													/>
-													<p class="m-0 text-surface-600 no-underline hover:text-surface-900 font-medium">
+													<p class="m-0 text-surface-600 no-underline font-medium">
 														{item.meta.marketplace.publisherName}
 													</p>
 												</div>
 												{item.type !== "app" && item.packageItems.length > 1 && (
 													<sl-tooltip
-														prop:content={`Comes in a bundle of ${item.packageItems?.length}`}
+														prop:content={`Comes in a package of ${item.packageItems?.length}`}
 														prop:distance={16}
 														prop:hoist={true}
 														prop:placement="top"
@@ -218,7 +223,7 @@ const Gallery = () => {
 											customClasses="absolute right-4 top-4 z-5 backdrop-filter backdrop-blur-lg"
 										/>
 									</div>
-								</a>
+								</div>
 							</SelectionWrapper>
 						</>
 					)
