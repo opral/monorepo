@@ -27,9 +27,10 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 		}
 
 		// Get the reference language
-		const sourceLanguageTag = state().inlang.config().sourceLanguageTag
-		const messageReferenceMatchers = state().inlang.appSpecificApi()["inlang.app.ideExtension"]
-			.messageReferenceMatchers as IdeExtensionConfig["messageReferenceMatchers"]
+		const sourceLanguageTag = state().inlang.config()?.sourceLanguageTag
+		const ideExtensionConfig = state().inlang.appSpecificApi()?.["inlang.app.ideExtension"]
+
+		const messageReferenceMatchers = ideExtensionConfig?.messageReferenceMatchers
 
 		if (sourceLanguageTag === undefined || messageReferenceMatchers === undefined) {
 			// don't show an error message. See issue:
