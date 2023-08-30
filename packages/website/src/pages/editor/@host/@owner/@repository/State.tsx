@@ -25,7 +25,7 @@ import {
 	solidAdapter,
 	type InlangProjectWithSolidAdapter,
 } from "@inlang/app"
-import { appUsedConfigEvent, telemetryBrowser } from "@inlang/telemetry"
+import { parseOrigin, telemetryBrowser } from "@inlang/telemetry"
 
 type EditorStateSchema = {
 	/**
@@ -196,7 +196,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [localStorage] = useLocalStorage() ?? []
 
-
 	const [repo] = createResource(
 		() => {
 			return routeParams()
@@ -235,9 +234,14 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					await openInlangProject({
 						nodeishFs: newRepo.nodeishFs,
 						projectFilePath: "/project.inlang.json",
+						_captureBrowser: telemetryBrowser,
 					}),
 					{ from },
 				)
+				const gitOrigin = parseOrigin({ remotes: await newRepo.listRemotes() })
+				telemetryBrowser.group("repository", gitOrigin, {
+					name: gitOrigin,
+				})
 				return inlang
 			} else {
 				return undefined
@@ -249,19 +253,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const doesInlangConfigExist = () => {
 		return inlang()?.config() ? true : false
 	}
-
-	const [gitOrigin] = createResource(async () => {
-		return await repo()?.getOrigin()
-	})
-	createEffect(() => {
-		if (doesInlangConfigExist() === true) {
-			//Non-null assertion operator because gitOrigin/parseOrign always returns a string.
-			//Even if there is no origin, "unknown" is returned as a string.
-			telemetryBrowser.group("repository", gitOrigin()!, {
-				name: gitOrigin(),
-			})
-		}
-	})
 
 	// DERIVED source language tag from inlang config
 	const sourceLanguageTag = () => {
