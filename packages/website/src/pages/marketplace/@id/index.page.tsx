@@ -130,9 +130,11 @@ export function Page(props: PageProps) {
 														<Chip
 															text={keyword}
 															color={
-																item()?.type === "app"
+																item()?.type.toLowerCase() === "app"
 																	? "#3B82F6"
-																	: item()?.type === "plugin"
+																	: item()?.type.toLowerCase() === "library"
+																	? "#e35473"
+																	: item()?.type.toLowerCase() === "plugin"
 																	? "#BF7CE4"
 																	: "#06B6D4"
 															}

@@ -163,7 +163,9 @@ const Gallery = () => {
 									}}
 									class={
 										"relative no-underline h-64 " +
-										(select() && item.type === "app" ? "opacity-25" : "")
+										((select() && item.type === "app") || (select() && item.type === "library")
+											? "opacity-25"
+											: "")
 									}
 								>
 									<div class="flex flex-col relative justify-between gap-4 bg-surface-100 h-full hover:bg-surface-200 p-6 rounded-xl border border-surface-2 cursor-pointer">
@@ -196,33 +198,37 @@ const Gallery = () => {
 														{item.meta.marketplace.publisherName}
 													</p>
 												</div>
-												{item.type !== "app" && item.packageItems.length > 1 && (
-													<sl-tooltip
-														prop:content={`Comes in a package of ${item.packageItems?.length}`}
-														prop:distance={16}
-														prop:hoist={true}
-														prop:placement="top"
-													>
-														<div
-															onClick={(e) => {
-																e.stopPropagation()
-																setSearchValue(`${item.package ?? item.meta.id}`)
-																window.scrollTo({ top: 0 })
-															}}
-															class="text-surface-500 text-xl hover:text-surface-900 transition-all"
+												{item.type !== "app" &&
+													item.type !== "library" &&
+													item.packageItems.length > 1 && (
+														<sl-tooltip
+															prop:content={`Comes in a package of ${item.packageItems?.length}`}
+															prop:distance={16}
+															prop:hoist={true}
+															prop:placement="top"
 														>
-															<Package />
-														</div>
-													</sl-tooltip>
-												)}
+															<div
+																onClick={(e) => {
+																	e.stopPropagation()
+																	setSearchValue(`${item.package ?? item.meta.id}`)
+																	window.scrollTo({ top: 0 })
+																}}
+																class="text-surface-500 text-xl hover:text-surface-900 transition-all"
+															>
+																<Package />
+															</div>
+														</sl-tooltip>
+													)}
 											</div>
 										</Show>
 										<Chip
 											text={item.type.toLocaleLowerCase() === "lintrule" ? "Lint Rule" : item.type}
 											color={
-												item.meta.id.split(".")[1]?.toLowerCase() === "app"
+												item.type.toLowerCase() === "app"
 													? "#3B82F6"
-													: item.meta.id.split(".")[1]?.toLowerCase() === "plugin"
+													: item.type.toLowerCase() === "library"
+													? "#e35473"
+													: item.type.toLowerCase() === "plugin"
 													? "#BF7CE4"
 													: "#06B6D4"
 											}

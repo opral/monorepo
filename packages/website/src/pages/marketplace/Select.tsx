@@ -1,4 +1,4 @@
-import { Show, For, JSXElement, Accessor, createSignal, onMount, createEffect } from "solid-js"
+import { Show, For, JSXElement, Accessor, createSignal, createEffect } from "solid-js"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import ArrowDown from "~icons/material-symbols/expand-more"
 import { setSearchParams } from "../install/helper/setSearchParams.js"
@@ -68,11 +68,16 @@ export function SelectionWrapper(props: {
 				<div
 					class={
 						"outline outline-0 transition-all duration-75 rounded-xl h-64 " +
-						(props.item.type !== "app"
+						(props.item.type !== "app" && props.item.type !== "library"
 							? "cursor-pointer " +
 							  (props
 									.selectedPackages()
-									.some((pkg) => props.item.type !== "app" && pkg === props.item.package)
+									.some(
+										(pkg) =>
+											props.item.type !== "app" &&
+											props.item.type !== "library" &&
+											pkg === props.item.package,
+									)
 									? "outline-4"
 									: "outline-transparent hover:outline-4") +
 							  (props.item.type === "plugin" ? " outline-[#BF7CE4]" : " outline-[#06B6D4]")
@@ -81,7 +86,7 @@ export function SelectionWrapper(props: {
 					onClick={(e) => {
 						e.stopPropagation()
 
-						if (props.item.type !== "app") {
+						if (props.item.type !== "app" && props.item.type !== "library") {
 							const packageToRemove = props.item.package
 							const isSelected = props.selectedPackages().includes(packageToRemove)
 
@@ -113,22 +118,15 @@ export function ScrollFloat(props: { packages: Accessor<string[]> }) {
 		setScroll(window.scrollY)
 	})
 
-	createEffect(() => {
-		const gitfloat = document.querySelector(".gitfloat")
-
-		if (scroll() > 200 && props.packages().length > 0) {
-			gitfloat?.classList.remove("animate-slideOut")
-			gitfloat?.classList.remove("opacity-0")
-			gitfloat?.classList.add("animate-slideIn")
-		} else {
-			gitfloat?.classList.add("animate-slideOut")
-			gitfloat?.classList.remove("animate-slideIn")
-			gitfloat?.classList.add("opacity-0")
-		}
-	})
-
 	return (
-		<div class="gitfloat z-30 sticky left-1/2 -translate-x-[150px] bottom-8 w-[300px] my-16 opacity-0 transition-all">
+		<div
+			class={
+				"z-30 sticky left-1/2 -translate-x-[150px] bottom-8 w-[300px] my-16 opacity-0 transition-all " +
+				(scroll() > 200 && props.packages().length > 0
+					? "animate-slideIn opacity-100"
+					: "animate-slideOut opacity-0")
+			}
+		>
 			<div class="w-full flex justify-between items-center rounded-lg bg-inverted-surface shadow-xl p-1.5 pl-3 text-background text-xs gap-1.5 font-medium">
 				{props.packages().length > 1 ? "You've choosen packages" : "You've choosen a package"}
 				<sl-button
