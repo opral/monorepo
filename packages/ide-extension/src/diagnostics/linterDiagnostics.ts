@@ -1,12 +1,7 @@
 import * as vscode from "vscode"
 import { state } from "../state.js"
-import structuredClonePolyfill from "@ungap/structured-clone"
 import type { IdeExtensionConfig, MessageLintReport } from "@inlang/app"
 
-// polyfilling node < 17 with structuredClone
-if (typeof structuredClone === "undefined") {
-	;(globalThis as any).structuredClone = structuredClonePolyfill
-}
 
 export async function linterDiagnostics(args: { context: vscode.ExtensionContext }) {
 	const linterDiagnosticCollection = vscode.languages.createDiagnosticCollection("inlang-lint")
