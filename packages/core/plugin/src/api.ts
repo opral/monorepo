@@ -144,6 +144,7 @@ export const Plugin = Type.Object(
 					keywords: Type.Array(Type.String()),
 					publisherName: Type.String(),
 					publisherIcon: Type.String(),
+					license: Type.String(),
 				}),
 			),
 		}),

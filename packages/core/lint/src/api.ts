@@ -42,6 +42,7 @@ export const LintRuleBase = Type.Object({
 				keywords: Type.Array(Type.String()),
 				publisherName: Type.String(),
 				publisherIcon: Type.String(),
+				license: Type.String(),
 			}),
 		),
 	}),

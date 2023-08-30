@@ -24,6 +24,7 @@ been translated yet.
 			keywords: ["lint-rule", "standard", "empty-pattern"],
 			publisherName: "inlang",
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+			license: "Apache-2.0",
 		},
 	},
 	message: ({ message: { id, variants }, languageTags, sourceLanguageTag, report }) => {

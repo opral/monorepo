@@ -29,6 +29,7 @@ message to reduce translation effort.
 			keywords: ["lint-rule", "standard", "identical-pattern"],
 			publisherName: "inlang",
 			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+			license: "Apache-2.0",
 		},
 	},
 	message: ({ message: { id, variants }, sourceLanguageTag, report, settings }) => {

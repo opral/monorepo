@@ -9,6 +9,7 @@ export interface MarketplaceMetadata {
 	keywords: string[]
 	publisherName: string
 	publisherIcon: string
+	license: "Apache-2.0"
 }
 
 type MarketplaceItemBase = {

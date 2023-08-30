@@ -35,7 +35,7 @@ const dynamicTitle = () => {
 	switch (step().type) {
 		case "initial":
 			return "inlang Install"
-		case "github-login":
+		case "github-login" || "opt-in":
 			return "Action required"
 		case "installing":
 			return "Installing packages..."
@@ -44,7 +44,7 @@ const dynamicTitle = () => {
 		case "already-installed":
 			return "Packages already installed"
 		default:
-			return "Something went wrong"
+			return "inlang Install"
 	}
 }
 
