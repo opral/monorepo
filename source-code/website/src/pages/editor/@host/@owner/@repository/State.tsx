@@ -25,7 +25,7 @@ import {
 	solidAdapter,
 	type InlangProjectWithSolidAdapter,
 } from "@inlang/app"
-import { appUsedConfigEvent, telemetryBrowser, parseOrigin } from "@inlang/telemetry"
+import { appUsedConfigEvent, telemetryBrowser } from "@inlang/telemetry"
 
 type EditorStateSchema = {
 	/**
@@ -247,7 +247,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	}
 
 	const [gitOrigin] = createResource(async () => {
-		return parseOrigin({ remotes: await repo()?.listRemotes() })
+		return await repo()?.getOrigin()
 	})
 	createEffect(() => {
 		if (doesInlangConfigExist() === true) {
