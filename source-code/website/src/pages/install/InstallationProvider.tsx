@@ -263,7 +263,9 @@ function validatePackages(packages: string[]) {
 		if (
 			!marketplaceItems.some(
 				(marketplaceItem) =>
-					marketplaceItem.type !== "app" && marketplaceItem.package.includes(pkg),
+					marketplaceItem.type !== "app" &&
+					marketplaceItem.type !== "library" &&
+					marketplaceItem.package.includes(pkg),
 			)
 		) {
 			check = false
