@@ -43,12 +43,18 @@ export const translate = new Command()
 
 export async function translateCommandAction(args: { inlang: InlangProject }) {
 	try {
-		const sourceLanguageTag = args.inlang.config().sourceLanguageTag
+		const inlangConfig = args.inlang.config()
+
+		if (!inlangConfig) {
+			log.error(`❌ No inlang config found, please add a project.inlang.json file`)
+			return
+		}
+		const sourceLanguageTag = inlangConfig.sourceLanguageTag
 		// Get languages to translate to with the reference language removed
 
-		const languagesTagsToTranslateTo = args.inlang
-			.config()
-			.languageTags.filter((tag) => tag !== sourceLanguageTag)
+		const languagesTagsToTranslateTo = inlangConfig.languageTags.filter(
+			(tag) => tag !== sourceLanguageTag,
+		)
 
 		log.info(`📝 Translating to ${languagesTagsToTranslateTo.length} languages.`)
 

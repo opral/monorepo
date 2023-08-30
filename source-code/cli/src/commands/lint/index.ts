@@ -18,6 +18,7 @@ export const lint = new Command()
 		await lintCommandAction({ inlang, logger: log })
 	})
 
+/* @ts-ignore */
 export async function lintCommandAction(args: { inlang: InlangProject; logger: any }) {
 	try {
 		if (args.inlang.installed.lintRules().length === 0) {
