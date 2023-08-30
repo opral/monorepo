@@ -1,4 +1,4 @@
-import { Show, For, JSXElement, Accessor, createSignal, createEffect } from "solid-js"
+import { Show, For, JSXElement, Accessor, createSignal } from "solid-js"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import ArrowDown from "~icons/material-symbols/expand-more"
 import { setSearchParams } from "../install/helper/setSearchParams.js"
