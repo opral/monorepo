@@ -43,6 +43,7 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 
 				for (const report of matchingLintReports) {
 					const { level } = report
+					console.log(report)
 
 					const diagnosticRange = new vscode.Range(
 						new vscode.Position(
