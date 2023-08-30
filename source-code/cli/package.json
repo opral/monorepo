@@ -54,6 +54,7 @@
 	},
 	"devDependencies": {
 		"@inlang-git/client": "*",
+		"@inlang/package": "*",
 		"@inlang/app": "*",
 		"@inlang/rpc": "*",
 		"@sentry/node": "^7.64.0",

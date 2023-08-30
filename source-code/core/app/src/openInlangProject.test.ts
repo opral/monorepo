@@ -173,7 +173,7 @@ describe("initialization", () => {
 			const configOnDisk = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
 			expect(configOnDisk).toBe(configWithDeifferentFormatting)
 
-			inlang.setConfig(inlang.config())
+			inlang.setConfig(inlang.config()!)
 			// TODO: how can we await `setConfig` correctly
 			await new Promise((resolve) => setTimeout(resolve, 0))
 
