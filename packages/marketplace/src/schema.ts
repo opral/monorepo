@@ -51,4 +51,4 @@ type Plugin = ExportedItemFromPackage & {
 
 export type MarketplaceItem = App | Library | Plugin | LintRule
 
-export const marketplaceItems: MarketplaceItem[] = registry as MarketplaceItem[]
+export const marketplaceItems: MarketplaceItem[] = registry as unknown as MarketplaceItem[]
