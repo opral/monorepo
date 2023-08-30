@@ -139,11 +139,11 @@ export const Plugin = Type.Object(
 			/* This is used for the marketplace, required if you want to publish your plugin to the marketplace */
 			marketplace: Type.Optional(
 				Type.Object({
-					icon: Type.String(),
+					icon: Type.Optional(Type.String()),
 					linkToReadme: Translatable(Type.String()),
 					keywords: Type.Array(Type.String()),
 					publisherName: Type.String(),
-					publisherIcon: Type.String(),
+					publisherIcon: Type.Optional(Type.String()),
 					license: Type.String(),
 				}),
 			),
