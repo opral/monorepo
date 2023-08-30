@@ -172,7 +172,7 @@ const Gallery = () => {
 										<div class="flex flex-col gap-4">
 											<div class="flex items-center gap-4">
 												<img
-													class="w-10 h-10 rounded-md m-0 shadow-lg"
+													class="w-10 h-10 rounded-md m-0 shadow-lg object-cover object-center"
 													src={item.meta.marketplace.icon}
 												/>
 												<p class="m-0 text-surface-900 font-semibold text-md">
