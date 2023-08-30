@@ -53,13 +53,11 @@ export const showFilteredMessage = (message: Message | undefined) => {
 	const filteredByLintRules =
 		lintRulesSet.size === 0 ||
 		(message !== undefined &&
-			inlang()
-				?.query.lintReports.getAll()
-				.some(
+			inlang()!
+				.query.lintReports.get({ where: { messageId: message.id } })
+				?.some(
 					(report: LintReport) =>
-						lintRulesSet.has(report.ruleId) &&
-						languageTagsSet.has(report.languageTag) &&
-						report.messageId === message.id,
+						lintRulesSet.has(report.ruleId) && languageTagsSet.has(report.languageTag),
 				))
 			? filteredBySearch
 			: false
