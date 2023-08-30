@@ -123,7 +123,6 @@ export const registry = [
 				en: "BCP-47 language tags types and validators.",
 			},
 			marketplace: {
-				icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 				linkToReadme: {
 					en: "https://github.com/inlang/inlang/blob/armageddon/source-code/core/language-tag/README.md",
 				},
