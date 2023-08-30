@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { InlangProject, InstalledLintRule, InstalledPlugin, Subscribable } from "./api.js"
-import { ImportFunction, ResolvePackagesFunction, resolvePackages } from "@inlang/package"
-import { NodeishFilesystemSubset, Message, tryCatch, Result, JSONObject } from "@inlang/plugin"
+import { type ImportFunction, type ResolvePackagesFunction, resolvePackages } from "@inlang/package"
+import { NodeishFilesystemSubset, Message, tryCatch, Result } from "@inlang/plugin"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
 import {
@@ -12,11 +12,11 @@ import {
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
 } from "./errors.js"
-import { LintRuleThrowedError, LintReport, lintMessages } from "@inlang/lint"
 import { createRoot, createSignal, createEffect } from "./solid.js"
 import { createMessagesQuery } from "./createMessagesQuery.js"
 import { InlangConfig } from "@inlang/config"
 import { debounce } from "throttle-debounce"
+import { createLintReportsQuery } from "./createLintReportsQuery.js"
 
 const ConfigCompiler = TypeCompiler.Compile(InlangConfig)
 
@@ -125,8 +125,6 @@ export const openInlangProject = async (args: {
 				)
 		})
 
-		const query = createMessagesQuery(() => messages() || [])
-
 		// -- installed items ----------------------------------------------------
 
 		const installedLintRules = () => {
@@ -155,50 +153,17 @@ export const openInlangProject = async (args: {
 			})) satisfies Array<InstalledPlugin>
 		}
 
-		// -- lint --------------------------------------------------------------
-
-		const [lintInitialized, setLintInitialized] = createSignal(false)
-		const [lintReportsInitialized, markLintReportsAsInitialized] = createAwaitable()
-		const initLint = () => {
-			setLintInitialized(true)
-			return lintReportsInitialized
-		}
-
-		const [lintReports, setLintReports] = createSignal<LintReport[]>()
-		const [lintErrors, setLintErrors] = createSignal<LintRuleThrowedError[]>([])
-		createEffect(() => {
-			const msgs = query.getAll()
-			if (!msgs || !lintInitialized()) return
-			// TODO: only lint changed messages and update arrays selectively
-			lintMessages({
-				sourceLanguageTag: configValue!.sourceLanguageTag,
-				languageTags: configValue!.languageTags,
-				lintRuleSettings: configValue!.settings as Record<
-					`${string}.lintRule.${string}`,
-					JSONObject
-				>,
-				lintLevels: Object.fromEntries(
-					installedLintRules().map((rule) => [rule.meta.id, rule.lintLevel]),
-				),
-				messages: msgs,
-				lintRules:
-					configValue.settings["project.disabled"] !== undefined
-						? resolvedPackages()!.lintRules.filter(
-								(rule) =>
-									configValue.settings["project.disabled"]?.includes(rule.meta.id) === false,
-						  )
-						: resolvedPackages()!.lintRules,
-			}).then((report) => {
-				setLintReports(report.data)
-				setLintErrors(report.errors)
-
-				markLintReportsAsInitialized()
-			})
-		})
-
 		// -- app ---------------------------------------------------------------
 
 		const initializeError: Error | undefined = await initialized.catch((error) => error)
+
+		const messagesQuery = createMessagesQuery(() => messages() || [])
+		const lintReportsQuery = createLintReportsQuery(
+			messagesQuery.getAll,
+			config,
+			installedLintRules,
+			resolvedPackages,
+		)
 
 		const debouncedSave = skipFirst(
 			debounce(
@@ -211,13 +176,19 @@ export const openInlangProject = async (args: {
 							cause: err,
 						})
 					}
+					// if (
+					// 	newMessages.length !== 0 &&
+					// 	JSON.stringify(newMessages) !== JSON.stringify(messages())
+					// ) {
+					// 	setMessages(newMessages)
+					// }
 				},
 				{ atBegin: false },
 			),
 		)
 
 		createEffect(() => {
-			debouncedSave(query.getAll())
+			debouncedSave(messagesQuery.getAll())
 		})
 
 		return {
@@ -228,28 +199,23 @@ export const openInlangProject = async (args: {
 			errors: createSubscribable(() => [
 				...(initializeError ? [initializeError] : []),
 				...(resolvedPackages() ? resolvedPackages()!.errors : []),
-				...(lintErrors() ?? []),
+				// have a query error exposed
+				//...(lintErrors() ?? []),
 			]),
-			config: createSubscribable(() => config() || undefined),
+			config: createSubscribable(() => config()),
 			setConfig,
-			lint: {
-				init: initLint,
-				reports: createSubscribable(() => {
-					const reports = lintReports()
-					// TODO: improve error
-					if (!reports) return []
-					return reports
-				}),
-			},
 			appSpecificApi: createSubscribable(
 				() => resolvedPackages()?.resolvedPluginApi.appSpecificApi || {},
 			),
 			query: {
-				messages: query,
+				messages: messagesQuery,
+				lintReports: lintReportsQuery,
 			},
 		} satisfies InlangProject
 	})
 }
+
+//const x = {} as InlangProject
 
 // ------------------------------------------------------------------------------------------------
 
@@ -281,7 +247,6 @@ const loadConfig = async (args: {
 
 		json = parsedConfig
 	}
-
 	return validateConfig(json)
 }
 

@@ -157,7 +157,7 @@ function TheActualPage() {
 					}
 				>
 					<div>
-						<ListHeader ids={inlang()?.query.messages.includedMessageIds() || []} />
+						{/* <ListHeader ids={inlang()?.query.messages.includedMessageIds() || []} /> */}
 						<TourHintWrapper
 							currentId="textfield"
 							position="bottom-left"

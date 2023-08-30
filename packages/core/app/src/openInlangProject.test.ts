@@ -156,7 +156,7 @@ describe("initialization", () => {
 				_import,
 			})
 
-			expect(getValue(inlang.config)).toStrictEqual(config)
+			expect(inlang.config()).toStrictEqual(config)
 		})
 
 		it("should not re-write the config to disk when initializing", async () => {
@@ -285,11 +285,11 @@ describe("functionality", () => {
 
 			inlang.setConfig({ ...config, languageTags: ["en", "de"] })
 			expect(getValue(inlang.config)).toStrictEqual({ ...config, languageTags: ["en", "de"] })
-			expect(inlang.config()?.languageTags).toStrictEqual(["en", "de"])
+			expect(inlang.config()!.languageTags).toStrictEqual(["en", "de"])
 
 			inlang.setConfig({ ...config, languageTags: ["en", "de", "fr"] })
 			expect(getValue(inlang.config)).toStrictEqual({ ...config, languageTags: ["en", "de", "fr"] })
-			expect(inlang.config()?.languageTags).toStrictEqual(["en", "de", "fr"])
+			expect(inlang.config()!.languageTags).toStrictEqual(["en", "de", "fr"])
 		})
 	})
 
@@ -465,9 +465,12 @@ describe("functionality", () => {
 				nodeishFs: fs,
 				_import,
 			})
-			await inlang.lint.init()
-			expect(inlang.lint.reports()).toHaveLength(1)
-			expect(inlang.lint.reports()[0]?.ruleId).toBe(enabledLintRule.meta.id)
+
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			expect(inlang.query.lintReports.getAll()).toHaveLength(1)
+
+			expect(inlang.query.lintReports.getAll()[0]?.ruleId).toBe(enabledLintRule.meta.id)
 			expect(
 				inlang.installed.lintRules().find((rule) => rule.meta.id === disabledLintRule.meta.id)
 					?.disabled,
@@ -527,11 +530,67 @@ describe("functionality", () => {
 				nodeishFs: fs,
 				_import,
 			})
-			await inlang.lint.init()
-			expect(inlang.lint.reports()).toHaveLength(1)
-			expect(inlang.lint.reports()[0]?.ruleId).toBe(_mockLintRule.meta.id)
+
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			expect(inlang.query.lintReports.getAll()).toHaveLength(1)
+			expect(inlang.query.lintReports.getAll()[0]?.ruleId).toBe(_mockLintRule.meta.id)
 			expect(inlang.installed.lintRules()).toHaveLength(1)
 			expect(inlang.installed.lintRules()[0]?.disabled).toBe(false)
+		})
+
+		it("should return lint reports for a single message", async () => {
+			const _mockLintRule: LintRule = {
+				type: "MessageLint",
+				meta: {
+					id: "namespace.lintRule.mock",
+					description: { en: "Mock lint rule description" },
+					displayName: { en: "Mock Lint Rule" },
+				},
+				message: ({ report }) => {
+					report({
+						messageId: "some-message",
+						languageTag: "en",
+						body: { en: "lintrule1" },
+					})
+				},
+			}
+			const _mockPlugin: Plugin = {
+				meta: {
+					id: "inlang.plugin.i18next",
+					description: { en: "Mock plugin description" },
+					displayName: { en: "Mock Plugin" },
+				},
+				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
+				saveMessages: () => undefined,
+			}
+			const fs = await createMockNodeishFs()
+			await fs.writeFile(
+				"./inlang.config.json",
+				JSON.stringify({
+					sourceLanguageTag: "en",
+					languageTags: ["en"],
+					packages: ["some-module.js"],
+					settings: {},
+				} satisfies InlangConfig),
+			)
+			const _import = async () => {
+				return {
+					default: {
+						plugins: [_mockPlugin],
+						lintRules: [_mockLintRule],
+					},
+				} satisfies InlangPackage
+			}
+			const inlang = await openInlangProject({
+				projectFilePath: "./inlang.config.json",
+				nodeishFs: fs,
+				_import,
+			})
+
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			expect(inlang.query.lintReports.get({ where: { messageId: "some-message" } })).toHaveLength(1)
 		})
 	})
 
@@ -763,7 +822,7 @@ describe("functionality", () => {
 			})
 			// TODO: test with real lint rules
 			try {
-				inlang.lint.reports.subscribe((r) => expect(r).toEqual([]))
+				inlang.query.lintReports.getAll.subscribe((r) => expect(r).toEqual([]))
 				throw new Error("Should not reach this")
 			} catch (e) {
 				expect((e as Error).message).toBe("lint not initialized yet")
@@ -777,9 +836,8 @@ describe("functionality", () => {
 				nodeishFs: fs,
 				_import,
 			})
-			await inlang.lint.init()
 			// TODO: test with real lint rules
-			inlang.lint.reports.subscribe((r) => expect(r).toEqual([]))
+			inlang.query.lintReports.getAll.subscribe((r) => expect(r).toEqual([]))
 		})
 	})
 })
