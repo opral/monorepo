@@ -38,7 +38,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 
 	const getLintSummary = () => {
 		const lintSummary: Array<RuleSummaryItem> = []
-		const reports = inlang()?.lint.reports()
+		const reports = inlang()?.query.lintReports.getAll()
 		inlang()
 			?.installed.lintRules()
 			.filter((lintRule) => !lintRule.disabled)

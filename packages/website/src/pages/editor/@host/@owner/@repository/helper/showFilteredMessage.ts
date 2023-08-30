@@ -54,7 +54,7 @@ export const showFilteredMessage = (message: Message | undefined) => {
 		lintRulesSet.size === 0 ||
 		(message !== undefined &&
 			inlang()
-				?.lint.reports()
+				?.query.lintReports.getAll()
 				.some(
 					(report: LintReport) =>
 						lintRulesSet.has(report.ruleId) &&
