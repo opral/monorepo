@@ -36,22 +36,35 @@ export function contextTooltip(
 		return undefined // Return early if message is not found
 	}
 
-	const contextTableRows: ContextTableRow[] = message.variants.map((variant) => {
-		const m = getStringFromPattern({
-			pattern: variant.pattern,
-			languageTag: variant.languageTag,
-			messageId: message.id,
-		})
+	// Get the configured language tags
+	const configuredLanguageTags = state().inlang.config()?.languageTags || []
+
+	// Generate rows for each configured language tag
+	const contextTableRows: ContextTableRow[] = configuredLanguageTags.map((languageTag) => {
+		const variant = message.variants.find((v) => v.languageTag === languageTag)
+
+		let m = MISSING_TRANSLATION_MESSAGE
+
+		if (variant) {
+			m = getStringFromPattern({
+				pattern: variant.pattern,
+				languageTag: variant.languageTag,
+				messageId: message.id,
+			})
+		}
 
 		const args = encodeURIComponent(
-			JSON.stringify([{ messageId: referenceMessage.messageId, languageTag: variant.languageTag }]),
+			JSON.stringify([{ messageId: referenceMessage.messageId, languageTag: languageTag }]),
 		)
 
+		const editCommand = Uri.parse(`command:inlang.editMessage?${args}`)
+		const openInEditorCommand = Uri.parse(`command:inlang.openInEditor?${args}`)
+
 		return {
-			language: variant.languageTag,
-			message: m ?? MISSING_TRANSLATION_MESSAGE,
-			editCommand: Uri.parse(`command:inlang.editMessage?${args}`),
-			openInEditorCommand: Uri.parse(`command:inlang.openInEditor?${args}`),
+			language: languageTag,
+			message: m,
+			editCommand,
+			openInEditorCommand,
 		}
 	})
 

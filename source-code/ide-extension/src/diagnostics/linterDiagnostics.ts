@@ -20,9 +20,6 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 			return
 		}
 
-		// get lint report
-		const reports = state().inlang.query.lintReports.getAll()
-
 		const diagnostics: vscode.Diagnostic[] = []
 
 		const wrappedLints = (ideExtension.messageReferenceMatchers ?? []).map(async (matcher) => {
@@ -30,13 +27,15 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 				documentText: activeTextEditor.document.getText(),
 			})
 			for (const message of messages) {
-				const matchingLintReports = reports.filter(
-					(report) => report.messageId === message.messageId,
-				)
+				const matchingLintReports =
+					state().inlang.query.lintReports.get({
+						where: {
+							messageId: message.messageId,
+						},
+					}) || []
 
 				for (const report of matchingLintReports) {
 					const { level } = report
-					// console.log(report)
 
 					const diagnosticRange = new vscode.Range(
 						new vscode.Position(
