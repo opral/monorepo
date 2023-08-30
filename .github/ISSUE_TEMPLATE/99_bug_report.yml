@@ -30,20 +30,6 @@ body:
     validations:
       required: true
   - type: textarea
-    id: inlang-config-file
-    attributes:
-      label: "`inlang.config.js` file"
-      description: Please include the contents of your `inlang.config.js` file
-      render: JavaScript
-    validations:
-      required: true
-  - type: textarea
-    id: validate-config-output
-    attributes:
-      label: "`npx @inlang/cli@latest config validate` file"
-      description: Please validate the config file with `npx @inlang/cli config validate` and include the output here
-      render: sh
-  - type: textarea
     id: other
     attributes:
       label: "Other information"
