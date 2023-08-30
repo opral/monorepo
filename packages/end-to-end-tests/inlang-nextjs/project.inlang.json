@@ -1,7 +1,10 @@
 {
 	"sourceLanguageTag": "en",
 	"languageTags": ["en", "de"],
-	"packages": ["./../../plugins/i18next/dist/index.js", "./lintPlugin.js"],
+	"packages": [
+		"./../../plugins/i18next/dist/index.js",
+		"./../../plugins/standard-lint-rules/dist/index.js"
+	],
 	"settings": {
 		"inlang.plugin.i18next": {
 			"pathPattern": {
