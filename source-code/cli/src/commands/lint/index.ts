@@ -32,11 +32,8 @@ export async function lintCommandAction(args: { inlang: InlangProject; logger: a
 			return
 		}
 
-		// Init linting
-		await args.inlang.lint.init()
-
 		// Get lint reports
-		const lintReport = await args.inlang.lint.reports()
+		const lintReport = await args.inlang.query.lintReports.getAll()
 
 		if (lintReport.length === 0) {
 			args.logger.success("🎉 Linting successful.")

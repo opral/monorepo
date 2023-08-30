@@ -52,11 +52,8 @@ export const badge = async (url: string) => {
 		throw new Error("No sourceLanguageTag found, please add one to your project.inlang.json")
 	}
 
-	// initialize lint to access reports
-	await inlang.lint.init()
-
 	const { percentage, errors, warnings, numberOfMissingVariants } = calculateSummary({
-		reports: inlang.lint.reports(),
+		reports: inlang.query.lintReports.getAll(),
 		languageTags: inlangConfig.languageTags,
 		messageIds: messageIds,
 	})
