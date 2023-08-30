@@ -17,6 +17,10 @@ module.exports = {
 					"75%": { transform: "translate(-150px, -8px)" },
 					"100%": { transform: "translate(-150px, 0)" },
 				},
+				slideOut: {
+					"0%": { transform: "translate(-150px, 0)" },
+					"100%": { transform: "translate(-150px, 64px)" },
+				},
 				jump: {
 					"0%": { transform: "translate(-150px, 0px)" },
 					"50%": { transform: "translate(-150px, -16px)" },
@@ -55,6 +59,7 @@ module.exports = {
 			},
 			animation: {
 				slideIn: "slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1",
+				slideOut: "slideOut 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1",
 				jump: "jump 0.3s ease 1",
 				fadeInTop: "fadeInTop 0.3s ease-out 1",
 				fadeInBottom: "fadeInBottom 0.3s ease-out 1",

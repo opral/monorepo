@@ -8,15 +8,16 @@ import { Button } from "../index/components/Button.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import Plus from "~icons/material-symbols/add-rounded"
 import Package from "~icons/material-symbols/package-2"
-import { SelectRepo, SelectionWrapper } from "./Select.jsx"
+import { ScrollFloat, SelectRepo, SelectionWrapper } from "./Select.jsx"
 import { setSearchParams } from "../install/helper/setSearchParams.js"
 
-type Category = "app" | "plugin" | "lintrule"
+type Category = "app" | "library" | "plugin" | "lintrule"
 
 /* Export searchValue to make subpages insert search-terms */
 export const [searchValue, setSearchValue] = createSignal<string>("")
 const [selectedCategories, setSelectedCategories] = createSignal<Category[]>([
 	"app",
+	"library",
 	"plugin",
 	"lintrule",
 ])
@@ -109,6 +110,7 @@ export function Page() {
 							</Show>
 						</div>
 					</div>
+
 					<div class="w-full top-16 sticky bg-background pb-4 pt-8 z-10 border-b border-surface-2 flex flex-col gap-5">
 						<Search
 							placeholder={"Search for apps, plugins, lint rules ..."}
@@ -124,10 +126,13 @@ export function Page() {
 							</div>
 						</div>
 					</div>
-					<div class="mb-16 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-center items-stretch">
+					<div class="mb-16 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-center items-stretch relative">
 						<Gallery />
 					</div>
 					<GetHelp text="Need help or have questions? Join our Discord!" />
+					<Show when={select()}>
+						<ScrollFloat packages={selectedPackages} />
+					</Show>
 				</div>
 			</Layout>
 		</>
@@ -311,6 +316,17 @@ const Tags = () => {
 				}
 			>
 				<p class="m-0">Apps</p>
+			</div>
+			<div
+				onClick={() => selectTag("library")}
+				class={
+					"gap-2 px-3 py-1.5 rounded-full cursor-pointer text-sm capitalize hover:opacity-90 transition-all duration-100 " +
+					(selectedCategories().includes("library")
+						? "bg-surface-800 text-background"
+						: "bg-surface-200 text-surface-600")
+				}
+			>
+				<p class="m-0">Libraries</p>
 			</div>
 			<div
 				onClick={() => selectTag("plugin")}
