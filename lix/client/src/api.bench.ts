@@ -2,11 +2,11 @@ import { describe, bench } from "vitest"
 import { openRepository, createNodeishMemoryFs } from "./index.js"
 
 describe("main workflow", () => {
-	let repository: ReturnType<typeof openRepository>
+	let repository: Awaited<ReturnType<typeof openRepository>>
 	bench(
 		"opens a repo url without error and without blocking i",
-		() => {
-			repository = openRepository("github.com/inlang/example.git", {
+		async () => {
+			repository = await openRepository("github.com/inlang/example.git", {
 				nodeishFs: createNodeishMemoryFs(),
 			})
 		},

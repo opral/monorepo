@@ -6,7 +6,19 @@ import http from "isomorphic-git/http/node"
 import { Octokit } from "octokit"
 import { createSignal, createEffect } from "@inlang/app/solid"
 
-export function openRepository(
+const github = new Octokit({
+	request: {
+		fetch: (...args: any) => {
+			// modify the path to be proxied by the server
+			// if (args.corsProxy) {
+			args[0] = "/github-proxy/" + args[0]
+			// @ts-ignore
+			return fetch(...args)
+		},
+	},
+})
+
+export async function openRepository(
 	url: string,
 	args: {
 		nodeishFs: NodeishFilesystem
@@ -14,7 +26,7 @@ export function openRepository(
 		corsProxy?: string
 		auth?: unknown // unimplemented
 	},
-): Repository {
+): Promise<Repository> {
 	const rawFs = args.nodeishFs
 
 	const [errors, setErrors] = createSignal<Error[]>([])
@@ -31,18 +43,6 @@ export function openRepository(
 	if (args.auth) {
 		console.warn("Auth currently not implemented in lisa client")
 	}
-
-	const github = new Octokit({
-		request: {
-			fetch: (...args: any) => {
-				// modify the path to be proxied by the server
-				// if (args.corsProxy) {
-				args[0] = "/github-proxy/" + args[0]
-				// @ts-ignore
-				return fetch(...args)
-			},
-		},
-	})
 
 	const normalizedUrl = `https://${host}/${owner}/${repoName}`
 
@@ -66,6 +66,8 @@ export function openRepository(
 		.catch((newError: Error) => {
 			setErrors((previous) => [...(previous || []), newError])
 		})
+
+	await pending
 
 	// delay all fs and repo operations until the repo clone and checkout have finished, this is preparation for the lazy feature
 	function delayedAction({ execute }: { execute: () => any }) {
@@ -204,7 +206,8 @@ export function openRepository(
 		 * The function ensures that the same orgin is always returned for the same repository.
 		 */
 		async getOrigin(): Promise<string> {
-			const remotes: Array<{ remote: string; url: string }> | undefined = await this.listRemotes()
+			const repo = await this
+			const remotes: Array<{ remote: string; url: string }> | undefined = await repo.listRemotes()
 
 			const origin = remotes?.find((elements) => elements.remote === "origin")
 			if (origin === undefined) {

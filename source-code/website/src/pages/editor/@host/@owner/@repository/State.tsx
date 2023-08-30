@@ -15,9 +15,7 @@ import type { LocalStorageSchema } from "#src/services/local-storage/index.js"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
-import type { NodeishFilesystem } from "@inlang-git/fs"
 import { openRepository, createNodeishMemoryFs, Repository } from "@lix-js/client"
-import { http, raw } from "@inlang-git/client/raw"
 import { publicEnv } from "@inlang/env-variables"
 import {
 	LanguageTag,
@@ -33,7 +31,7 @@ type EditorStateSchema = {
 	/**
 	 * Returns a repository object
 	 */
-	repo: Repository
+	repo: Repository | undefined
 
 	/**
 	 * The current branch.
@@ -42,7 +40,7 @@ type EditorStateSchema = {
 	/**
 	 * Additional information about a repository provided by GitHub.
 	 */
-	githubRepositoryInformation: Resource<Awaited<ReturnType<Repository["getMeta"]>>>
+	githubRepositoryInformation: Resource<Awaited<ReturnType<Repository["getMeta"]>> | undefined>
 	/**
 	 * Route parameters like `/github.com/inlang/website`.
 	 *
@@ -200,25 +198,30 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	// open the repository
 	const { host, owner, repository } = routeParams()
-	const repo = openRepository(`${host}/${owner}/${repository}`, {
-		nodeishFs: createNodeishMemoryFs(),
-		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
-	})
+
+	const [repo] = createResource(
+		async () =>
+			await openRepository(`${host}/${owner}/${repository}`, {
+				nodeishFs: createNodeishMemoryFs(),
+				corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
+			}),
+	)
 
 	// get lix errors
 	const [lixErrors, setLixErrors] = createSignal<ReturnType<Repository["errors"]>>([])
 	createEffect(() => {
-		repo.errors.subscribe((errors) => {
+		repo()?.errors.subscribe((errors) => {
 			setLixErrors(errors)
 		})
 	})
 
 	// open the inlang project and store it in a resource
 	const [inlang] = createResource(async () => {
-		if (lixErrors().length === 0) {
+		const newRepo = repo()
+		if (lixErrors().length === 0 && newRepo) {
 			const inlang = solidAdapter(
 				await openInlangProject({
-					nodeishFs: repo.nodeishFs,
+					nodeishFs: newRepo.nodeishFs,
 					projectFilePath: "/project.inlang.json",
 				}),
 				{ from },
@@ -301,9 +304,14 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				return false
 			}
 			try {
-				return await repo.isCollaborator({ username: args.user.username })
+				const currentRepo = repo()
+				if (currentRepo) {
+					return await currentRepo.isCollaborator({ username: args.user.username })
+				}
+				return false
 			} catch (error) {
-				// the user is not a collaborator, hence the request will fail
+				// the user is not a collaborator, hence the request will fail,
+				// FIXME: is this still required? isCollaborator should now return false instead of failing
 				return false
 			}
 		},
@@ -323,7 +331,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				routeParams: routeParams(),
 			}
 		},
-		async () => await repo.getMeta(),
+		async () => await repo()?.getMeta(),
 	)
 
 	const [currentBranch] = createResource(
@@ -334,7 +342,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			return true
 		},
 		async () => {
-			return await repo.getCurrentBranch()
+			return await repo()?.getCurrentBranch()
 		},
 	)
 
@@ -342,7 +350,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		<EditorStateContext.Provider
 			value={
 				{
-					repo,
+					repo: repo(),
 					currentBranch,
 					githubRepositoryInformation,
 					routeParams,
@@ -378,47 +386,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 }
 
 // ------------------------------------------
-
-async function cloneRepository(args: {
-	fs: NodeishFilesystem
-	routeParams: EditorRouteParams
-	user: LocalStorageSchema["user"]
-	setFsChange: (date: Date) => void
-}): Promise<Date | undefined> {
-	const { host, owner, repository } = args.routeParams
-	if (host === undefined || owner === undefined || repository === undefined) {
-		return undefined
-	}
-
-	// do shallow clone, get first commit and just one branch
-	await raw.clone({
-		fs: args.fs,
-		http,
-		dir: "/",
-		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
-		url: `https://${host}/${owner}/${repository}`,
-		singleBranch: true,
-		depth: 1,
-	})
-
-	// fetch 100 more commits, can get more commits if needed
-	// https://isomorphic-git.org/docs/en/faq#how-to-make-a-shallow-repository-unshallow
-	raw.fetch({
-		fs: args.fs,
-		http,
-		dir: "/",
-		// corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
-		url: `https://${host}/${owner}/${repository}`,
-		depth: 100,
-		relative: true,
-	})
-
-	// triggering a side effect here to trigger a re-render
-	// of components that depends on fs
-	const date = new Date()
-	args.setFsChange(date)
-	return date
-}
 
 export class PullException extends Error {
 	readonly #id = "PullException"

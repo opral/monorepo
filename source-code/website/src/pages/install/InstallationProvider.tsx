@@ -127,7 +127,7 @@ async function initializeRepo(
 	packagesURL = packagesURL.filter((pkg, index) => packagesURL.indexOf(pkg) === index)
 
 	/* Opens the repository with lix */
-	const repo = openRepository(repoURL, {
+	const repo = await openRepository(repoURL, {
 		nodeishFs: createNodeishMemoryFs(),
 		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
 	})

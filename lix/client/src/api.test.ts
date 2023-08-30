@@ -8,11 +8,11 @@ import { openRepository, createNodeishMemoryFs } from "./index.js"
 // - all features we need like lazy fetching, auth, etc.
 
 describe("main workflow", () => {
-	let repository: ReturnType<typeof openRepository>
+	let repository: Awaited<ReturnType<typeof openRepository>>
 
 	it("allows to subscribe to errors", async () => {
 		const errorHandler = vi.fn()
-		repository = openRepository("github.com/inlang/examplX", {
+		repository = await openRepository("github.com/inlang/examplX", {
 			nodeishFs: createNodeishMemoryFs(),
 		})
 
@@ -26,7 +26,7 @@ describe("main workflow", () => {
 
 	it("opens a repo url without error and without blocking io", async () => {
 		// fix normalization of .git
-		repository = openRepository("github.com/inlang/example", {
+		repository = await openRepository("github.com/inlang/example", {
 			nodeishFs: createNodeishMemoryFs(),
 		})
 	})

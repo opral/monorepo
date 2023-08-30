@@ -25,7 +25,7 @@ export const badge = async (url: string) => {
 	}
 
 	// initialize a lisa repo instance on each request to prevent cross request pollution
-	const repo = openRepository(url, { nodeishFs: createNodeishMemoryFs() })
+	const repo = await openRepository(url, { nodeishFs: createNodeishMemoryFs() })
 
 	// Get the content of the inlang.config.js file
 	await repo.nodeishFs.readFile("./inlang.config.js", { encoding: "utf-8" }).catch((e) => {
