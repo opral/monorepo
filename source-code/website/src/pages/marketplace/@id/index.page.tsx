@@ -67,7 +67,7 @@ export function Page(props: PageProps) {
 								</div>
 								<div class="flex gap-4 flex-wrap">
 									<Show
-										when={item()?.type !== "app"}
+										when={item()?.type !== "app" && item()?.type !== "library"}
 										fallback={
 											/* @ts-ignore */
 											<Show when={item()?.linkToApp}>
