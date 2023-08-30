@@ -204,11 +204,15 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		async ({ host, owner, repository }) => {
 			// open the repository
 
-			const newRepo = await openRepository(`${host}/${owner}/${repository}`, {
-				nodeishFs: createNodeishMemoryFs(),
-				corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
-			})
-			return newRepo
+			if (host && owner && repository) {
+				const newRepo = await openRepository(`${host}/${owner}/${repository}`, {
+					nodeishFs: createNodeishMemoryFs(),
+					corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
+				})
+				return newRepo
+			} else {
+				return undefined
+			}
 		},
 	)
 
