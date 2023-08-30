@@ -8,9 +8,7 @@ description: An inlang app provides a user interface for a project.
 
 {% $frontmatter.description %} A wide variety of apps for many different use-cases exists. Go to the [marketplace](/marketplace) to find apps that fit your needs.
 
-
 <!-- TODO visualization of apps for different personas e.g. developers and designers -->
-
 
 ## Develop your own app
 

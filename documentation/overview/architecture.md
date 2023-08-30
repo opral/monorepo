@@ -1,7 +1,7 @@
 ---
 title: Architecture
 href: /documentation/architecture
-description: TODO TODO TODO TODO TODO 
+description: TODO TODO TODO TODO TODO
 ---
 
 # {% $frontmatter.title %}
@@ -17,7 +17,7 @@ Inlang's architecture consists of four main components:
 flowchart BT
     subgraph App[Applications]
         UI[User Interface]
-    end 
+    end
     subgraph SDK
         API
         Query

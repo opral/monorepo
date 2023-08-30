@@ -12,9 +12,9 @@ description: You can manually create a new project if inlang.com/new is not work
 
 - [Node.js](https://nodejs.org/en/) (version 18 or higher)
 
-## Step-by-step 
+## Step-by-step
 
-### 1. Initialize a new plugin package 
+### 1. Initialize a new plugin package
 
 ```bash
 npx @inlang/cli@latest package init --type plugin
