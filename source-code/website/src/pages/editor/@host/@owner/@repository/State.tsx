@@ -222,10 +222,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				}),
 				{ from },
 			)
-			//initialize lint to get reports
-			if (inlang.errors().length === 0) {
-				await inlang.lint.init()
-			}
 			return inlang
 		} else {
 			return undefined

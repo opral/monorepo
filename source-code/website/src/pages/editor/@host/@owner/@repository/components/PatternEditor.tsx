@@ -231,7 +231,7 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 		// check if empty Message is present for message
 		const hasEmptyPattern =
 			inlang()
-				?.lint.reports()
+				?.query.lintReports.getAll()
 				.filter(
 					(report) =>
 						report.messageId === props.message.id &&
@@ -284,7 +284,7 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 	const getNotificationHints = () => {
 		const notifications: Array<Notification> = []
 		inlang()
-			?.lint.reports()
+			?.query.lintReports.getAll()
 			.map((report) => {
 				if (report.messageId === props.message.id && report.languageTag === props.languageTag) {
 					notifications.push({
@@ -386,9 +386,9 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 				<div class="flex items-center justify-end gap-2">
 					<Show
 						when={
-							getTextValue(editor) === undefined
-							|| JSON.stringify(getTextValue(editor)) === "[]"
-							|| JSON.stringify(getTextValue(editor)) === `[{"type":"Text","value":""}]`
+							getTextValue(editor) === undefined ||
+							JSON.stringify(getTextValue(editor)) === "[]" ||
+							JSON.stringify(getTextValue(editor)) === `[{"type":"Text","value":""}]`
 						}
 					>
 						<sl-button
@@ -420,10 +420,17 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 						</sl-button>
 					</Show>
 				</div>
-				<Show when={!isLineItemFocused() && hasChanges() &&
-					!(getTextValue(editor) === undefined
-						|| JSON.stringify(getTextValue(editor)) === "[]"
-						|| JSON.stringify(getTextValue(editor)) === `[{"type":"Text","value":""}]`)}>
+				<Show
+					when={
+						!isLineItemFocused() &&
+						hasChanges() &&
+						!(
+							getTextValue(editor) === undefined ||
+							JSON.stringify(getTextValue(editor)) === "[]" ||
+							JSON.stringify(getTextValue(editor)) === `[{"type":"Text","value":""}]`
+						)
+					}
+				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						width="24"

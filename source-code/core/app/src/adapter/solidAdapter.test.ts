@@ -3,7 +3,7 @@ import { createMockNodeishFs } from "@inlang/plugin/test"
 import type { InlangConfig } from "@inlang/config"
 import type { Message, Plugin, Text } from "@inlang/plugin"
 import type { ImportFunction, InlangPackage } from "@inlang/package"
-import { createEffect, from } from "../solid.js"
+import { createEffect, from, createRoot } from "../solid.js"
 import { solidAdapter } from "./solidAdapter.js"
 import type { LintRule } from "@inlang/lint"
 import { openInlangProject } from "../openInlangProject.js"
@@ -269,59 +269,86 @@ describe("messages", () => {
 })
 
 describe("lint", () => {
-	it("should not react to changes to config if not initialized", async () => {
-		const fs = await createMockNodeishFs()
-		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
-		const inlang = solidAdapter(
-			await openInlangProject({
-				projectFilePath: "./project.inlang.json",
-				nodeishFs: fs,
-				_import: $import,
-			}),
-			{ from },
-		)
+	it.todo("should react to changes to config", async () => {
+		await createRoot(async () => {
+			const fs = await createMockNodeishFs()
+			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			const inlang = solidAdapter(
+				await openInlangProject({
+					projectFilePath: "./inlang.config.json",
+					nodeishFs: fs,
+					_import: $import,
+				}),
+				{ from },
+			)
 
-		let counter = 0
-		createEffect(() => {
-			inlang.lint.reports()
-			counter += 1
+			let counter = 0
+			createEffect(() => {
+				inlang.query.lintReports.getAll()
+				counter += 1
+			})
+
+			const newConfig = { ...inlang.config()!, languageTags: ["en", "de"] }
+			inlang.setConfig(newConfig)
+
+			expect(counter).toBe(1)
+			expect(inlang.query.lintReports.getAll()).toEqual([])
+
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			const newConfig2 = { ...inlang.config()!, languageTags: ["en", "de", "fr"] }
+			inlang.setConfig(newConfig2)
+
+			expect(counter).toBe(9)
+			expect(inlang.query.lintReports.getAll()).toEqual([])
 		})
-
-		const newConfig = { ...inlang.config()!, languageTags: ["en", "de"] }
-		inlang.setConfig(newConfig)
-
-		expect(counter).toBe(1)
-		expect(inlang.lint.reports()).toEqual([])
-	})
-
-	it("should react to changes to config", async () => {
-		const fs = await createMockNodeishFs()
-		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
-		const inlang = solidAdapter(
-			await openInlangProject({
-				projectFilePath: "./project.inlang.json",
-				nodeishFs: fs,
-				_import: $import,
-			}),
-			{ from },
-		)
-		await inlang.lint.init()
-
-		let counter = 0
-		createEffect(() => {
-			inlang.lint.reports()
-			counter += 1
-		})
-
-		const newConfig = { ...inlang.config()!, languageTags: ["en", "de"] }
-		inlang.setConfig(newConfig)
-
-		// TODO: how can we await `setConfig` correctly
-		await new Promise((resolve) => setTimeout(resolve, 0))
-
-		expect(counter).toBe(2) // 2 times because effect creation + set
 	})
 
 	it.todo("should react to changes to packages")
-	it.todo("should react to changes to messages")
+	it.todo("should react to changes to modules")
+
+	it.todo("should react to changes to messages", async () => {
+		await createRoot(async () => {
+			const fs = await createMockNodeishFs()
+			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
+			const inlang = solidAdapter(
+				await openInlangProject({
+					projectFilePath: "./inlang.config.json",
+					nodeishFs: fs,
+					_import: $import,
+				}),
+				{ from },
+			)
+
+			let counter = 0
+			createEffect(() => {
+				inlang.query.lintReports.getAll()
+				counter += 1
+			})
+
+			inlang.query.messages.update({
+				where: { id: "a" },
+				data: {
+					...exampleMessages[0],
+					variants: [{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "new" }] }],
+				},
+			})
+
+			expect(counter).toBe(1)
+			expect(inlang.query.lintReports.getAll()).toEqual([])
+
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			inlang.query.messages.update({
+				where: { id: "a" },
+				data: {
+					...exampleMessages[0],
+					variants: [{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "new" }] }],
+				},
+			})
+
+			expect(counter).toBe(6)
+			expect(inlang.query.lintReports.getAll()).toEqual([])
+		})
+	})
 })

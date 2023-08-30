@@ -1,4 +1,4 @@
-import type { InlangConfig } from "@inlang/config"
+import type { InlangConfig } from "@inlang/app"
 import type {
 	InvalidLintRuleError,
 	LintRuleThrowedError,
@@ -71,17 +71,13 @@ export type InlangProject = {
 	setConfig: (config: InlangConfig) => Result<void, InvalidConfigError>
 	query: {
 		messages: MessageQueryApi
-	}
-	lint: {
-		/**
-		 * Initialize lint.
-		 */
-		init: () => Promise<void>
-		// for now, only simply array that can be improved in the future
-		// see https://github.com/inlang/inlang/issues/1098
-		reports: Subscribable<LintReport[]>
+		lintReports: LintReportsQueryApi
 	}
 }
+
+// const x = {} as InlangProject
+// const l = await x.lint()
+// x.lint.subscribe((m) => console.log(m))
 
 export type Subscribable<Value> = {
 	(): Value
@@ -104,4 +100,14 @@ export type MessageQueryApi = {
 	update: (args: { where: { id: Message["id"] }; data: Partial<Message> }) => boolean
 	upsert: (args: { where: { id: Message["id"] }; data: Message }) => void
 	delete: (args: { where: { id: Message["id"] } }) => boolean
+}
+
+export type LintReportsQueryApi = {
+	getAll: Subscribable<LintReport[]>
+	get: ((args: { where: { messageId: LintReport["messageId"] } }) => LintReport[] | undefined) & {
+		subscribe: (
+			args: { where: { messageId: LintReport["messageId"] } },
+			callback: (lintReports: LintReport[] | undefined) => void,
+		) => void
+	}
 }
