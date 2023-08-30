@@ -20,11 +20,8 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 			return
 		}
 
-		// init lint
-		await state().inlang.lint.init()
-
 		// get lint report
-		const reports = state().inlang.lint.reports()
+		const reports = state().inlang.query.lintReports.getAll()
 		const diagnostics: vscode.Diagnostic[] = []
 
 		const wrappedLints = (ideExtension.messageReferenceMatchers ?? []).map(async (matcher) => {
