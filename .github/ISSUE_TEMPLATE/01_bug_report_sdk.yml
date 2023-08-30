@@ -1,11 +1,10 @@
 name: Bug report for `@inlang/sdk-js`
-description: Something is not working as expected in the `@inlang/sdk-js` package
+description: Something is not working as expected in the `@inlang/sdk-js` library
 title: "[bug] <title>"
 labels:
   - "type: bug"
   - "scope: sdk-js"
-assignees:
-  - ivanhofer
+  - "blocked"
 body:
   - type: markdown
     attributes:
