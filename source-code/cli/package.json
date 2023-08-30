@@ -54,8 +54,8 @@
 	},
 	"devDependencies": {
 		"@inlang-git/client": "*",
-		"@inlang/package": "*",
 		"@inlang/app": "*",
+		"@inlang/package": "*",
 		"@inlang/rpc": "*",
 		"@sentry/node": "^7.64.0",
 		"@sinclair/typebox": "^0.31.3",
@@ -67,7 +67,9 @@
 		"esbuild": "^0.19.2",
 		"node-fetch": "^3.3.2",
 		"posthog-node": "^3.1.2",
-		"prompts": "^2.4.2"
+		"prompts": "^2.4.2",
+		"ts-dedent": "^2.2.0",
+		"typescript": "^4.9.0"
 	},
 	"license": "Apache-2.0",
 	"__comment__": "the esbuild-wasm dependency must be a regular dependency to be resolved by the host system. otherwise, esbuild throws errors",
