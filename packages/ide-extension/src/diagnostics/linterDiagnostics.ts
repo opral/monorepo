@@ -2,7 +2,6 @@ import * as vscode from "vscode"
 import { state } from "../state.js"
 import type { IdeExtensionConfig, MessageLintReport } from "@inlang/app"
 
-
 export async function linterDiagnostics(args: { context: vscode.ExtensionContext }) {
 	const linterDiagnosticCollection = vscode.languages.createDiagnosticCollection("inlang-lint")
 

@@ -49,7 +49,7 @@ export async function editorCommandAction(args: {
 		// macOS
 		command = "open"
 		commandArgs = [inlangEditorUrl]
-	} else if (process.platform === 'linux') {
+	} else if (process.platform === "linux") {
 		// linux
 		command = "xdg-open"
 		commandArgs = [inlangEditorUrl]

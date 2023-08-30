@@ -1,7 +1,7 @@
 ---
 title: SDK
 href: /documentation/sdk
-description: API reference for the inlang SDK. Developers can use the inlang SDK to build inlang applications. 
+description: API reference for the inlang SDK. Developers can use the inlang SDK to build inlang applications.
 ---
 
 # {% $frontmatter.title %}
