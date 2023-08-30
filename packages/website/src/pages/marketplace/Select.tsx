@@ -1,4 +1,4 @@
-import { Show, For, JSXElement, Accessor } from "solid-js"
+import { Show, For, JSXElement, Accessor, createSignal, onMount, createEffect } from "solid-js"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import ArrowDown from "~icons/material-symbols/expand-more"
 import { setSearchParams } from "../install/helper/setSearchParams.js"
@@ -62,7 +62,6 @@ export function SelectionWrapper(props: {
 	function removeDuplicates(array: string[]) {
 		return array.filter((item, index) => array.indexOf(item) === index)
 	}
-
 	return (
 		<>
 			{props.select() ? (
@@ -104,5 +103,43 @@ export function SelectionWrapper(props: {
 				props.children
 			)}
 		</>
+	)
+}
+
+export function ScrollFloat(props: { packages: Accessor<string[]> }) {
+	const [scroll, setScroll] = createSignal(0)
+
+	window.addEventListener("scroll", () => {
+		setScroll(window.scrollY)
+	})
+
+	createEffect(() => {
+		const gitfloat = document.querySelector(".gitfloat")
+
+		if (scroll() > 200 && props.packages().length > 0) {
+			gitfloat?.classList.remove("animate-slideOut")
+			gitfloat?.classList.remove("opacity-0")
+			gitfloat?.classList.add("animate-slideIn")
+		} else {
+			gitfloat?.classList.add("animate-slideOut")
+			gitfloat?.classList.remove("animate-slideIn")
+			gitfloat?.classList.add("opacity-0")
+		}
+	})
+
+	return (
+		<div class="gitfloat z-30 sticky left-1/2 -translate-x-[150px] bottom-8 w-[300px] my-16 opacity-0 transition-all">
+			<div class="w-full flex justify-between items-center rounded-lg bg-inverted-surface shadow-xl p-1.5 pl-3 text-background text-xs gap-1.5 font-medium">
+				{props.packages().length > 1 ? "You've choosen packages" : "You've choosen a package"}
+				<sl-button
+					prop:size="small"
+					prop:target="_blank"
+					class={"on-inverted"}
+					prop:href={`/install?package=${props.packages()}`}
+				>
+					Install
+				</sl-button>
+			</div>
+		</div>
 	)
 }
