@@ -89,7 +89,6 @@
 		"@types/throttle-debounce": "^5.0.0",
 		"@types/ungap__structured-clone": "^0.3.0",
 		"@types/vscode": "^1.75.0",
-		"@ungap/structured-clone": "^1.2.0",
 		"@vscode/test-electron": "^2.3.3",
 		"@vscode/vsce": "^2.18.0",
 		"comment-json": "^4.2.3",
