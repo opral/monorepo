@@ -99,7 +99,7 @@ function validateRepo(
 	} else if (!props.optIn.optIn()) {
 		props.setStep({
 			type: "opt-in",
-			message: "We need your consent to install the packages.",
+			message: "We will update the project file in your repository.",
 		})
 	} else {
 		props.setStep({
