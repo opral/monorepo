@@ -1,6 +1,6 @@
-import type { InlangProject } from "../api.js"
-import { createSignal, observable, type from as solidFrom } from "../solid.js"
-import type { Message, MessageQueryApi } from "@inlang/app"
+import type { InlangProject, LintReportsQueryApi } from "../api.js"
+import { observable, type from as solidFrom } from "../solid.js"
+import type { MessageQueryApi } from "@inlang/app"
 
 export const solidAdapter = (
 	project: InlangProject,
@@ -16,10 +16,6 @@ export const solidAdapter = (
 		appSpecificApi: convert(project.appSpecificApi),
 		config: convert(project.config),
 		errors: convert(project.errors),
-		lint: {
-			init: project.lint.init,
-			reports: convert(project.lint.reports),
-		},
 		installed: {
 			lintRules: convert(project.installed.lintRules),
 			plugins: convert(project.installed.plugins),
@@ -39,6 +35,10 @@ export const solidAdapter = (
 				// },
 				getAll: convert(project.query.messages.getAll),
 				includedMessageIds: convert(project.query.messages.includedMessageIds),
+			},
+			lintReports: {
+				get: project.query.lintReports.get,
+				getAll: convert(project.query.lintReports.getAll),
 			},
 		},
 	} satisfies InlangProjectWithSolidAdapter
@@ -64,14 +64,14 @@ export type InlangProjectWithSolidAdapter = {
 			getAll: () => ReturnType<MessageQueryApi["getAll"]>
 			includedMessageIds: () => ReturnType<MessageQueryApi["includedMessageIds"]>
 		}
-	}
-	lint: {
-		/**
-		 * Initialize lint.
-		 */
-		init: () => ReturnType<InlangProject["lint"]["init"]>
-		// for now, only simply array that can be improved in the future
-		// see https://github.com/inlang/inlang/issues/1098
-		reports: () => ReturnType<InlangProject["lint"]["reports"]>
+		lintReports: {
+			get: LintReportsQueryApi["get"]
+			getAll: () => ReturnType<LintReportsQueryApi["getAll"]>
+		}
 	}
 }
+
+// const x = {} as InlangProjectWithSolidAdapter
+// x.query.lintReports.getAll()
+
+// console.log(await x.lint())

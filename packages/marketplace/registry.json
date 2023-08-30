@@ -16,7 +16,8 @@
 					},
 					"keywords": ["web", "editor", "no-code"],
 					"publisherName": "inlang",
-					"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg"
+					"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+					"license": "Apache-2.0"
 				}
 			},
 			"type": "app",
@@ -38,7 +39,8 @@
 					},
 					"keywords": ["cli", "automation"],
 					"publisherName": "inlang",
-					"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg"
+					"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+					"license": "Apache-2.0"
 				}
 			},
 			"type": "app"
@@ -59,7 +61,8 @@
 					},
 					"keywords": ["vscode", "efficiency", "extension"],
 					"publisherName": "inlang",
-					"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg"
+					"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+					"license": "Apache-2.0"
 				}
 			},
 			"type": "app",
@@ -81,7 +84,8 @@
 					},
 					"keywords": ["badge", "embed"],
 					"publisherName": "inlang",
-					"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg"
+					"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+					"license": "Apache-2.0"
 				}
 			},
 			"type": "app"
@@ -102,7 +106,8 @@
 					},
 					"keywords": ["paraglide", "js", "sdk"],
 					"publisherName": "inlang",
-					"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg"
+					"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+					"license": "Apache-2.0"
 				}
 			},
 			"type": "library"
@@ -117,13 +122,13 @@
 					"en": "BCP-47 language tags types and validators."
 				},
 				"marketplace": {
-					"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 					"linkToReadme": {
 						"en": "https://github.com/inlang/inlang/blob/armageddon/source-code/core/language-tag/README.md"
 					},
 					"keywords": ["language", "tags"],
 					"publisherName": "inlang",
-					"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg"
+					"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+					"license": "Apache-2.0"
 				}
 			},
 			"type": "library"

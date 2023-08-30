@@ -4,14 +4,14 @@ import { expectType } from "tsd"
 
 const inlang: InlangProject = {} as any
 
-expectType<LintReport[]>(inlang.lint.reports())
+expectType<LintReport[]>(inlang.query.lintReports.getAll())
 
-inlang.lint.reports.subscribe((value) => {
+inlang.query.lintReports.getAll.subscribe((value) => {
 	expectType<LintReport[]>(value)
 })
 
-inlang.lint.reports()
-inlang.lint.reports.subscribe(() => undefined)
+inlang.query.lintReports.getAll()
+inlang.query.lintReports.getAll.subscribe(() => undefined)
 
 inlang.installed.lintRules()[0]?.lintLevel
 inlang.installed.lintRules()[0]?.package

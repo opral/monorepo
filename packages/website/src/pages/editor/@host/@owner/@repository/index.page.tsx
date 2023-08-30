@@ -1,4 +1,4 @@
-import { For, Match, Switch, createEffect, createSignal, onMount } from "solid-js"
+import { For, Match, Switch, onMount } from "solid-js"
 import { Layout as EditorLayout } from "./Layout.jsx"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
