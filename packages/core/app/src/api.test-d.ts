@@ -6,7 +6,12 @@ const inlang: InlangProject = {} as any
 
 expectType<LintReport[]>(inlang.query.lintReports.getAll())
 
+inlang.query.lintReports.getAll.subscribe((value) => {
+	expectType<LintReport[]>(value)
+})
+
 inlang.query.lintReports.getAll()
+inlang.query.lintReports.getAll.subscribe(() => undefined)
 
 inlang.installed.lintRules()[0]?.lintLevel
 inlang.installed.lintRules()[0]?.package
