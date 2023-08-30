@@ -23,12 +23,21 @@ export const editMessageCommand = {
 			return msg(`Message with id ${messageId} not found.`)
 		}
 
-		// Find the variant with the specified language tag
-		const variant = message.variants.find((v) => v.languageTag === languageTag)
+		// Find the variant with the specified language tag or create a new one
+		let variant = message.variants.find((v) => v.languageTag === languageTag)
 		if (!variant) {
-			return msg(
-				`Variant with language tag ${languageTag} in message with id ${messageId} not found.`,
-			)
+			// Create a new variant
+			variant = {
+				languageTag,
+				match: {},
+				pattern: [
+					{
+						type: "Text",
+						value: "",
+					},
+				],
+			}
+			message.variants.push(variant)
 		}
 
 		// Construct the complete pattern text
