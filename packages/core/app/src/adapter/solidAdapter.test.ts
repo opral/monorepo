@@ -110,7 +110,7 @@ describe("config", () => {
 			counter += 1
 		})
 
-		const newConfig = { ...inlang.config(), languageTags: ["en", "de"] }
+		const newConfig = { ...inlang.config()!, languageTags: ["en", "de"] }
 		inlang.setConfig(newConfig)
 
 		// TODO: how can we await `setConfig` correctly
@@ -146,7 +146,7 @@ describe("installed", () => {
 			counterLint += 1
 		})
 
-		inlang.setConfig({ ...inlang.config(), languageTags: ["en", "fr"] })
+		inlang.setConfig({ ...inlang.config()!, languageTags: ["en", "fr"] })
 
 		// TODO: how can we await `setConfig` correctly
 		await new Promise((resolve) => setTimeout(resolve, 0))
@@ -200,7 +200,7 @@ describe("messages", () => {
 
 		expect(Object.values(inlang.query.messages.getAll()).length).toBe(2)
 
-		inlang.setConfig({ ...inlang.config(), languageTags: [] })
+		inlang.setConfig({ ...inlang.config()!, languageTags: [] })
 
 		// TODO: how can we await `setConfig` correctly
 		await new Promise((resolve) => setTimeout(resolve, 0))
@@ -287,7 +287,7 @@ describe("lint", () => {
 			counter += 1
 		})
 
-		const newConfig = { ...inlang.config(), languageTags: ["en", "de"] }
+		const newConfig = { ...inlang.config()!, languageTags: ["en", "de"] }
 		inlang.setConfig(newConfig)
 
 		expect(counter).toBe(1)
@@ -313,7 +313,7 @@ describe("lint", () => {
 			counter += 1
 		})
 
-		const newConfig = { ...inlang.config(), languageTags: ["en", "de"] }
+		const newConfig = { ...inlang.config()!, languageTags: ["en", "de"] }
 		inlang.setConfig(newConfig)
 
 		// TODO: how can we await `setConfig` correctly
