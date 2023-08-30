@@ -4,11 +4,12 @@ import { registry } from "./registry.js"
  * Metadata that is specific to the marketplace.
  */
 export interface MarketplaceMetadata {
-	icon: string
+	icon?: string
 	linkToReadme: Record<string, string>
 	keywords: string[]
 	publisherName: string
-	publisherIcon: string
+	publisherIcon?: string
+	license: "Apache-2.0"
 }
 
 type MarketplaceItemBase = {
@@ -50,4 +51,4 @@ type Plugin = ExportedItemFromPackage & {
 
 export type MarketplaceItem = App | Library | Plugin | LintRule
 
-export const marketplaceItems: MarketplaceItem[] = registry as MarketplaceItem[]
+export const marketplaceItems: MarketplaceItem[] = registry as unknown as MarketplaceItem[]

@@ -66,6 +66,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 					(translation.length > (MAXIMUM_PREVIEW_LENGTH || 0)
 						? `${translation.slice(0, MAXIMUM_PREVIEW_LENGTH)}...`
 						: translation)
+
 				const range = new vscode.Range(
 					// VSCode starts to count lines and columns from zero
 					new vscode.Position(
@@ -79,9 +80,9 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 					renderOptions: {
 						after: {
 							contentText:
-								truncatedTranslation !== ""
+								truncatedTranslation === "" || truncatedTranslation === undefined
 									? `ERROR: '${message.messageId}' not found in source with language tag '${sourceLanguageTag}'`
-									: truncatedTranslation, // TODO: Fix pattern type to be always defined either/or Text / VariableReference
+									: translation, // TODO: Fix pattern type to be always defined either/or Text / VariableReference
 							backgroundColor: translation ? "rgb(45 212 191/.15)" : "drgb(244 63 94/.15)",
 							border: translation
 								? "1px solid rgb(45 212 191/.50)"

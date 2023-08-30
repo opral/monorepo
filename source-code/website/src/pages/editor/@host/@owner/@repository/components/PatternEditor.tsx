@@ -19,12 +19,17 @@ import {
 	updateVariantPattern,
 	getVariant,
 	Pattern,
+	LintReport,
 } from "@inlang/app"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
  */
-export function PatternEditor(props: { languageTag: LanguageTag; message: Message }) {
+export function PatternEditor(props: {
+	languageTag: LanguageTag
+	message: Message
+	lintReports: LintReport[]
+}) {
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const {
 		setLocalChanges,
@@ -229,15 +234,12 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 			return machineLearningWarningDialog?.show()
 		}
 		// check if empty Message is present for message
-		const hasEmptyPattern =
-			inlang()
-				?.lint.reports()
-				.filter(
-					(report) =>
-						report.messageId === props.message.id &&
-						report.languageTag === props.languageTag &&
-						report.ruleId === "inlang.lintRule.emptyPattern",
-				).length !== 0
+		const hasEmptyPattern = props.lintReports.some(
+			(report) =>
+				report.messageId === props.message.id &&
+				report.languageTag === props.languageTag &&
+				report.ruleId === "inlang.lintRule.emptyPattern",
+		)
 
 		const newMessage = structuredClone(props.message)
 		if (hasEmptyPattern) {
@@ -283,22 +285,20 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 
 	const getNotificationHints = () => {
 		const notifications: Array<Notification> = []
-		inlang()
-			?.lint.reports()
-			.map((report) => {
-				if (report.messageId === props.message.id && report.languageTag === props.languageTag) {
-					notifications.push({
-						notificationTitle:
-							inlang()
-								?.installed.lintRules()
-								.filter((lintRule) => !lintRule.disabled)
-								.find((rule) => rule.meta.id === report.ruleId)?.meta.displayName["en"] ||
-							report.ruleId,
-						notificationDescription: report.body["en"]!,
-						notificationType: report.level,
-					})
-				}
-			})
+		props.lintReports.map((report) => {
+			if (report.messageId === props.message.id && report.languageTag === props.languageTag) {
+				notifications.push({
+					notificationTitle:
+						inlang()
+							?.installed.lintRules()
+							.filter((lintRule) => !lintRule.disabled)
+							.find((rule) => rule.meta.id === report.ruleId)?.meta.displayName["en"] ||
+						report.ruleId,
+					notificationDescription: report.body["en"]!,
+					notificationType: report.level,
+				})
+			}
+		})
 
 		if (hasChanges() && localStorage.user === undefined) {
 			notifications.push({
@@ -386,9 +386,9 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 				<div class="flex items-center justify-end gap-2">
 					<Show
 						when={
-							getTextValue(editor) === undefined
-							|| JSON.stringify(getTextValue(editor)) === "[]"
-							|| JSON.stringify(getTextValue(editor)) === `[{"type":"Text","value":""}]`
+							getTextValue(editor) === undefined ||
+							JSON.stringify(getTextValue(editor)) === "[]" ||
+							JSON.stringify(getTextValue(editor)) === `[{"type":"Text","value":""}]`
 						}
 					>
 						<sl-button
@@ -420,10 +420,17 @@ export function PatternEditor(props: { languageTag: LanguageTag; message: Messag
 						</sl-button>
 					</Show>
 				</div>
-				<Show when={!isLineItemFocused() && hasChanges() &&
-					!(getTextValue(editor) === undefined
-						|| JSON.stringify(getTextValue(editor)) === "[]"
-						|| JSON.stringify(getTextValue(editor)) === `[{"type":"Text","value":""}]`)}>
+				<Show
+					when={
+						!isLineItemFocused() &&
+						hasChanges() &&
+						!(
+							getTextValue(editor) === undefined ||
+							JSON.stringify(getTextValue(editor)) === "[]" ||
+							JSON.stringify(getTextValue(editor)) === `[{"type":"Text","value":""}]`
+						)
+					}
+				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						width="24"

@@ -6,24 +6,63 @@ import {
 	openInlangProject,
 	solidAdapter,
 	InlangProjectWithSolidAdapter,
+	LintRule,
+	LintReport,
 } from "@inlang/app"
-import type { ImportFunction, InlangModule } from "@inlang/package"
-import {
-	createEffect,
-	Show,
-	createResource,
-	from,
-	observable,
-	For,
-	createSignal,
-	Resource,
-} from "solid-js"
+import type { ImportFunction, InlangPackage } from "@inlang/package"
+import { createEffect, Show, createResource, from, For, createSignal } from "solid-js"
+import lintRuleFile from "./../../../../../plugins/standard-lint-rules/dist/index.js"
+
+const exampleMessages: Message[] = [
+	{
+		id: "a",
+		selectors: [],
+		variants: [
+			{
+				languageTag: "en",
+				match: {},
+				pattern: [
+					{
+						type: "Text",
+						value: "test",
+					},
+				],
+			},
+			{
+				languageTag: "de",
+				match: {},
+				pattern: [
+					{
+						type: "Text",
+						value: "test",
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "b",
+		selectors: [],
+		variants: [
+			{
+				languageTag: "en",
+				match: {},
+				pattern: [
+					{
+						type: "Text",
+						value: "test",
+					},
+				],
+			},
+		],
+	},
+]
 
 export const Page = () => {
 	const config: InlangConfig = {
 		sourceLanguageTag: "en",
 		languageTags: ["en"],
-		modules: ["./dist/index.js"],
+		packages: ["./dist/index.js"],
 		settings: {
 			"inlang.plugin.i18next": {
 				options: {
@@ -49,47 +88,13 @@ export const Page = () => {
 		}),
 	}
 
-	const exampleMessages: Message[] = [
-		{
-			id: "a",
-			selectors: [],
-			variants: [
-				{
-					languageTag: "en",
-					match: {},
-					pattern: [
-						{
-							type: "Text",
-							value: "test",
-						},
-					],
-				},
-			],
-		},
-		{
-			id: "b",
-			selectors: [],
-			variants: [
-				{
-					languageTag: "en",
-					match: {},
-					pattern: [
-						{
-							type: "Text",
-							value: "test",
-						},
-					],
-				},
-			],
-		},
-	]
-
 	const $import: ImportFunction = async () =>
 		({
 			default: {
 				plugins: [mockPlugin],
+				lintRules: lintRuleFile.lintRules as LintRule[],
 			},
-		} satisfies InlangModule)
+		} satisfies InlangPackage)
 
 	const [inlang] = createResource(async () => {
 		const fs = createNodeishMemoryFs()
@@ -122,22 +127,12 @@ export const Page = () => {
 
 	createEffect(() => {
 		if (!inlang.loading) {
-			inlang()!.query.messages.get.subscribe({ where: { id: "d" } }, (message) =>
-				console.debug(message),
-			)
+			console.info("all messages", inlang()!.query.messages.getAll())
 		}
 	})
 
-	// setTimeout(() => {
-	// 	console.info("timeout set config")
-	// 	inlang()?.setConfig({
-	// 		...config,
-	// 		sourceLanguageTag: "fr",
-	// 	})
-	// }, 2000)
-
-	setTimeout(() => {
-		console.info("timeout createMessage")
+	const createMessage = () => {
+		console.info("createMessage")
 		if (!inlang.loading) {
 			inlang()!.query.messages.create({
 				data: {
@@ -146,7 +141,31 @@ export const Page = () => {
 				} as Message,
 			})
 		}
-	}, 4000)
+	}
+
+	const updateMessage = () => {
+		console.info("updateMessage")
+		if (!inlang.loading) {
+			inlang()!.query.messages.update({
+				where: { id: "a" },
+				data: {
+					...exampleMessages[0],
+					variants: [
+						{
+							match: {},
+							languageTag: "en",
+							pattern: [
+								{
+									type: "Text",
+									value: "updated",
+								},
+							],
+						},
+					],
+				} as Message,
+			})
+		}
+	}
 
 	return (
 		<div>
@@ -158,12 +177,15 @@ export const Page = () => {
 					}}
 				</For>
 			</Show>
+			<button onClick={() => createMessage()}>Create message d</button>
+			<button onClick={() => updateMessage()}>Change message a</button>
 		</div>
 	)
 }
 
 const MessageConponent = (args: { id: string; inlang: InlangProjectWithSolidAdapter }) => {
 	const [message, setMessage] = createSignal<Message | undefined>(undefined)
+	const [lintReports, setLintReports] = createSignal<LintReport[]>([])
 
 	createEffect(() => {
 		args.inlang.query.messages.get.subscribe({ where: { id: args.id } }, (message) =>
@@ -172,7 +194,21 @@ const MessageConponent = (args: { id: string; inlang: InlangProjectWithSolidAdap
 	})
 
 	createEffect(() => {
-		console.debug(message())
+		args.inlang.query.lintReports.get.subscribe(
+			{ where: { messageId: args.id } },
+			(lintReports) => {
+				if (lintReports && lintReports.length > 0) {
+					setLintReports(lintReports)
+				}
+			},
+		)
+	})
+
+	createEffect(() => {
+		console.log("message", message())
+	})
+	createEffect(() => {
+		console.log("reports", message()?.id, lintReports())
 	})
 
 	return (

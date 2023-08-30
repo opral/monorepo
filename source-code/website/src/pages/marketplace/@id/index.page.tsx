@@ -43,10 +43,19 @@ export function Page(props: PageProps) {
 						>
 							<div class="col-span-1 md:col-span-3 md:pb-16 pb-12 border-b border-surface-2">
 								<div class="flex max-md:flex-col items-start gap-8 mb-10">
-									<img
-										class="w-16 h-16 rounded-md m-0 shadow-lg object-cover object-center"
-										src={item()?.meta.marketplace.icon}
-									/>
+									<Show
+										when={item()?.meta.marketplace.icon}
+										fallback={
+											<div class="w-16 h-16 font-semibold text-3xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
+												{item()?.meta.displayName.en?.[0]}
+											</div>
+										}
+									>
+										<img
+											class="w-16 h-16 rounded-md m-0 shadow-lg object-cover object-center"
+											src={item()?.meta.marketplace.icon}
+										/>
+									</Show>
 									<div class="flex flex-col gap-3">
 										<h1 class="text-3xl font-bold">{item()?.meta.displayName.en}</h1>
 										<div class="inline-block text-surface-500 ">
@@ -67,7 +76,7 @@ export function Page(props: PageProps) {
 								</div>
 								<div class="flex gap-4 flex-wrap">
 									<Show
-										when={item()?.type !== "app"}
+										when={item()?.type !== "app" && item()?.type !== "library"}
 										fallback={
 											/* @ts-ignore */
 											<Show when={item()?.linkToApp}>
@@ -106,10 +115,23 @@ export function Page(props: PageProps) {
 									<div class="flex flex-col gap-3 mb-8">
 										<h3 class="text-sm text-surface-400">Publisher</h3>
 										<div class="flex gap-2 items-center">
-											<img
-												class="w-6 h-6 rounded-full m-0"
-												src={item()?.meta.marketplace.publisherIcon}
-											/>
+											<Show
+												when={item()?.meta.marketplace.publisherIcon}
+												fallback={
+													<div
+														class={
+															"w-6 h-6 flex items-center justify-center text-background capitalize font-medium rounded-full m-0 bg-surface-900"
+														}
+													>
+														{item()?.meta.marketplace.publisherName[0]}
+													</div>
+												}
+											>
+												<img
+													class="w-6 h-6 rounded-full m-0"
+													src={item()?.meta.marketplace.publisherIcon}
+												/>
+											</Show>
 											<p class="m-0 text-surface-600 no-underline font-medium">
 												{item()?.meta.marketplace.publisherName}
 											</p>
@@ -143,6 +165,12 @@ export function Page(props: PageProps) {
 												)}
 											</For>
 										</div>
+									</div>
+									<div class="flex flex-col gap-3 mb-8">
+										<h3 class="text-sm text-surface-400">License</h3>
+										<p class="m-0 text-surface-600 no-underline font-medium">
+											{item()?.meta.marketplace.license}
+										</p>
 									</div>
 									{/* @ts-ignore */}
 									<Show when={item()?.packageItems && item()?.packageItems.length > 1}>

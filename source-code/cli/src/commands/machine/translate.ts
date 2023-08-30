@@ -3,24 +3,25 @@ import { rpc } from "@inlang/rpc"
 import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { log } from "../../utilities/log.js"
 import type { InlangProject } from "@inlang/app"
+import prompts from "prompts"
 
 export const translate = new Command()
 	.command("translate")
-	.option("-f, --force", "Force machine translation and skip the confirmation prompt.")
+	.option("-f, --force", "Force machine translation and skip the confirmation prompt.", false)
 	.description("Machine translate all resources.")
-	.action(async () => {
-		// Get the options
-		const options = translate.opts()
-
+	.action(async (args: { force: boolean }) => {
 		try {
 			// Prompt the user to confirm
-			if (!options.force) {
-				const promptly = await import("promptly")
+			if (!args.force) {
 				log.warn(
-					"Machine translations are not very accurate. We advise you to only use machine translations in a build step to have them in production but not commit them to your repository. You can use the force flag (-f, --force) to skip this prompt in a build step.",
+					"Human translations are better than machine translations. \n\nWe advise to use machine translations in the build step without commiting them to the repo. By using machine translate in the build step, you avoid missing translations in production while still flagging to human translators that transaltions are missing. You can use the force flag (-f, --force) to skip this prompt warning.",
 				)
-				const answer = await promptly.prompt("Are you sure you want to machine translate? (y/n)")
-				if (answer !== "y") {
+				const response = await prompts({
+					type: "confirm",
+					name: "value",
+					message: "Are you sure you want to machine translate?",
+				})
+				if (!response.value) {
 					log.info("🚫 Aborting machine translation.")
 					return
 				}

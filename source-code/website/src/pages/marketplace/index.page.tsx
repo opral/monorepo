@@ -173,10 +173,19 @@ const Gallery = () => {
 									<div class="flex flex-col relative justify-between gap-4 bg-surface-100 h-full hover:bg-surface-200 p-6 rounded-xl border border-surface-2 cursor-pointer">
 										<div class="flex flex-col gap-4">
 											<div class="flex items-center gap-4">
-												<img
-													class="w-10 h-10 rounded-md m-0 shadow-lg object-cover object-center"
-													src={item.meta.marketplace.icon}
-												/>
+												<Show
+													when={item.meta.marketplace.icon}
+													fallback={
+														<div class="w-10 h-10 font-semibold text-xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
+															{item.meta.displayName.en?.[0]}
+														</div>
+													}
+												>
+													<img
+														class="w-10 h-10 rounded-md m-0 shadow-lg object-cover object-center"
+														src={item.meta.marketplace.icon}
+													/>
+												</Show>
 												<p class="m-0 text-surface-900 font-semibold text-md">
 													{item.meta.displayName.en}
 												</p>
@@ -185,44 +194,47 @@ const Gallery = () => {
 												{item.meta.description.en}
 											</p>
 										</div>
-										<Show
-											when={
-												item.meta.marketplace.publisherName && item.meta.marketplace.publisherIcon
-											}
-										>
-											<div class="w-full flex items-end justify-between">
-												<div class="flex gap-2 items-center pt-6">
+										<div class="w-full flex items-end justify-between">
+											<div class="flex gap-2 items-center pt-6">
+												<Show
+													when={item.meta.marketplace.publisherIcon}
+													fallback={
+														<div class="w-6 h-6 flex items-center justify-center text-background capitalize font-medium rounded-full m-0 bg-surface-900">
+															{item.meta.marketplace.publisherName[0]}
+														</div>
+													}
+												>
 													<img
 														class="w-6 h-6 rounded-full m-0"
 														src={item.meta.marketplace.publisherIcon}
 													/>
-													<p class="m-0 text-surface-600 no-underline font-medium">
-														{item.meta.marketplace.publisherName}
-													</p>
-												</div>
-												{item.type !== "app" &&
-													item.type !== "library" &&
-													item.packageItems.length > 1 && (
-														<sl-tooltip
-															prop:content={`Comes in a package of ${item.packageItems?.length}`}
-															prop:distance={16}
-															prop:hoist={true}
-															prop:placement="top"
-														>
-															<div
-																onClick={(e) => {
-																	e.stopPropagation()
-																	setSearchValue(`${item.package ?? item.meta.id}`)
-																	window.scrollTo({ top: 0 })
-																}}
-																class="text-surface-500 text-xl hover:text-surface-900 transition-all"
-															>
-																<Package />
-															</div>
-														</sl-tooltip>
-													)}
+												</Show>
+												<p class="m-0 text-surface-600 no-underline font-medium">
+													{item.meta.marketplace.publisherName}
+												</p>
 											</div>
-										</Show>
+											{item.type !== "app" &&
+												item.type !== "library" &&
+												item.packageItems.length > 1 && (
+													<sl-tooltip
+														prop:content={`Comes in a package of ${item.packageItems?.length}`}
+														prop:distance={16}
+														prop:hoist={true}
+														prop:placement="top"
+													>
+														<div
+															onClick={(e) => {
+																e.stopPropagation()
+																setSearchValue(`${item.package ?? item.meta.id}`)
+																window.scrollTo({ top: 0 })
+															}}
+															class="text-surface-500 text-xl hover:text-surface-900 transition-all"
+														>
+															<Package />
+														</div>
+													</sl-tooltip>
+												)}
+										</div>
 										<Chip
 											text={item.type.toLocaleLowerCase() === "lintrule" ? "Lint Rule" : item.type}
 											color={
