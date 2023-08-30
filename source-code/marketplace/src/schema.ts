@@ -40,10 +40,14 @@ type App = MarketplaceItemBase & {
 	linkToApp: string
 }
 
+type Library = MarketplaceItemBase & {
+	type: "library"
+}
+
 type Plugin = ExportedItemFromPackage & {
 	type: "plugin"
 }
 
-export type MarketplaceItem = App | Plugin | LintRule
+export type MarketplaceItem = App | Library | Plugin | LintRule
 
 export const marketplaceItems: MarketplaceItem[] = registry as MarketplaceItem[]
