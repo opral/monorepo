@@ -1,7 +1,7 @@
 {
 	"sourceLanguageTag": "en",
 	"languageTags": ["en", "de"],
-	"modules": [
+	"packages": [
 		"../../../../../plugins/json/dist/index.js",
 		"../../../../../sdk-js-plugin/dist/index.js"
 	],
