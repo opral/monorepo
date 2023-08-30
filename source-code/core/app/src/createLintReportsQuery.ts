@@ -46,7 +46,6 @@ export function createLintReportsQuery(
 				}).then((report) => {
 					if (
 						report.errors.length === 0 &&
-						report.data.length > 0 &&
 						JSON.stringify(index.get(message.id)) !== JSON.stringify(report.data)
 					) {
 						// console.log("get index", index.get(message.id))
