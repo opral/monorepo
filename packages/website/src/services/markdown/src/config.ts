@@ -9,7 +9,6 @@ import { QuickLink, QuickLinks } from "./tags/QuickLinks.jsx"
 import { Link } from "./nodes/Link.jsx"
 import { Document } from "./nodes/Document.jsx"
 import { Video } from "./tags/Video.jsx"
-import { Registry } from "./tags/Registry.jsx"
 import { BadgeGenerator } from "./tags/BadgeGenerator.jsx"
 
 /**
@@ -25,7 +24,6 @@ export const components = {
 	Heading,
 	Document,
 	Video,
-	Registry,
 	BadgeGenerator,
 }
 
