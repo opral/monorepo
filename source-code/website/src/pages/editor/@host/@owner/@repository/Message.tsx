@@ -6,12 +6,13 @@ import { showFilteredMessage } from "./helper/showFilteredMessage.js"
 import IconCopy from "~icons/material-symbols/content-copy-outline"
 import copy from "clipboard-copy"
 import { showToast } from "#src/components/Toast.jsx"
-import type { Message as MessageType } from "@inlang/app"
+import type { LintReport, Message as MessageType } from "@inlang/app"
 import { sortLanguageTags } from "./helper/sortLanguageTags.js"
 
 export function Message(props: { id: string }) {
 	const { inlang, filteredLanguageTags } = useEditorState()
 	const [message, setMessage] = createSignal<MessageType>()
+	const [lintReports, setLintReports] = createSignal<LintReport[]>([])
 
 	// performance optimization to only render visible elements
 	// see https://github.com/inlang/inlang/issues/333
@@ -31,6 +32,19 @@ export function Message(props: { id: string }) {
 		if (!inlang.loading) {
 			inlang()!.query.messages.get.subscribe({ where: { id: props.id } }, (message) =>
 				setMessage(message),
+			)
+		}
+	})
+
+	createEffect(() => {
+		if (!inlang.loading && message()?.id) {
+			inlang()!.query.lintReports.get.subscribe(
+				{ where: { messageId: message()!.id } },
+				(report) => {
+					if (report) {
+						setLintReports(report)
+					}
+				},
 			)
 		}
 	})
@@ -91,7 +105,11 @@ export function Message(props: { id: string }) {
 										message()
 									}
 								>
-									<PatternEditor languageTag={languageTag} message={message()!} />
+									<PatternEditor
+										languageTag={languageTag}
+										message={message()!}
+										lintReports={lintReports()}
+									/>
 								</Show>
 							</>
 						)

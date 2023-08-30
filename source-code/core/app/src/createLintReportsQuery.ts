@@ -26,7 +26,7 @@ export function createLintReportsQuery(
 
 		if (msgs && conf && modules) {
 			// console.log("new calculation")
-			index.clear()
+			// index.clear()
 			for (const message of msgs) {
 				// TODO: only lint changed messages and update arrays selectively
 				lintMessages({
@@ -44,7 +44,14 @@ export function createLintReportsQuery(
 							  )
 							: modules.lintRules,
 				}).then((report) => {
-					if (report.errors.length === 0 && report.data.length > 0) {
+					if (
+						report.errors.length === 0 &&
+						report.data.length > 0 &&
+						JSON.stringify(index.get(message.id)) !== JSON.stringify(report.data)
+					) {
+						// console.log("get index", index.get(message.id))
+						// console.log(report.data)
+						// console.log("set index", message.id)
 						index.set(message.id, report.data || [])
 					}
 				})
