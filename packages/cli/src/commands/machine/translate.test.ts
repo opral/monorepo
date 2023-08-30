@@ -4,7 +4,7 @@ import { openInlangProject } from "@inlang/app"
 import { createMockNodeishFs } from "@inlang/plugin/test"
 import { privateEnv } from "@inlang/env-variables"
 import type { InlangConfig } from "@inlang/config"
-import type { InlangModule } from "@inlang/module"
+import type { InlangPackage } from "@inlang/package"
 import type { Plugin } from "@inlang/plugin"
 import type { Message } from "@inlang/messages"
 
@@ -64,7 +64,7 @@ describe("translate command", () => {
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en", "de", "it"],
-					modules: [""],
+					packages: [""],
 					settings: {
 						"project.lintRuleLevels": {},
 					},
@@ -86,11 +86,11 @@ describe("translate command", () => {
 					default: {
 						plugins: [_mockPlugin],
 					},
-				} satisfies InlangModule
+				} satisfies InlangPackage
 			}
 
 			const inlang = await openInlangProject({
-				configPath: "./inlang.config.json",
+				projectFilePath: "./inlang.config.json",
 				nodeishFs: fs,
 				_import,
 			})

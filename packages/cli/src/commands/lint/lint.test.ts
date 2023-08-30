@@ -3,7 +3,7 @@ import { lintCommandAction } from "./index.js"
 import { openInlangProject } from "@inlang/app"
 import { createMockNodeishFs } from "@inlang/plugin/test"
 import type { InlangConfig } from "@inlang/config"
-import type { InlangModule } from "@inlang/module"
+import type { InlangPackage } from "@inlang/package"
 import type { LintRule } from "@inlang/lint"
 import type { Plugin } from "@inlang/plugin"
 import type { Message } from "@inlang/messages"
@@ -57,11 +57,11 @@ async function setupInlang(enabledLintRule?: LintRule) {
 	const fs = await createMockNodeishFs()
 
 	await fs.writeFile(
-		"./inlang.config.json",
+		"./project.inlang.json",
 		JSON.stringify({
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de", "it"],
-			modules: [""],
+			packages: [""],
 			settings: {
 				"project.lintRuleLevels": {},
 			},
@@ -84,11 +84,11 @@ async function setupInlang(enabledLintRule?: LintRule) {
 				plugins: [_mockPlugin],
 				lintRules: enabledLintRule && [enabledLintRule],
 			},
-		} satisfies InlangModule
+		} satisfies InlangPackage
 	}
 
 	return await openInlangProject({
-		configPath: "./inlang.config.json",
+		projectFilePath: "./project.inlang.json",
 		nodeishFs: fs,
 		_import,
 	})
@@ -202,6 +202,6 @@ describe("lint command", () => {
 		expect(logger.log.mock.calls.length).toBe(0)
 
 		// checks for an error message mentioning our config file, this seems good balance to be reliable but test the cli behaviour
-		expect(logger.error.mock.calls[0][0]).toContain("inlang.config.json")
+		expect(logger.error.mock.calls[0][0]).toContain("project.inlang.json")
 	})
 })
