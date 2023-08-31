@@ -1,5 +1,5 @@
 import { expect, it } from "vitest"
-import { createNodeishMemoryFs } from "@inlang-git/fs"
+import { createNodeishMemoryFs } from "@lix-js/fs"
 import { createMockNodeishFs } from "./mockNodeishFs.js"
 
 it("should copy a directory into the environment", async () => {
