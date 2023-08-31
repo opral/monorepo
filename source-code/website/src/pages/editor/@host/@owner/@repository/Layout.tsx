@@ -59,7 +59,7 @@ export function Layout(props: { children: JSXElement }) {
 		if (
 			newFilter !== undefined &&
 			!selectedFilters().some((filter) => filter.name === newFilter.name) &&
-			(newFilter.name !== "Linting" || inlang()?.installed.lintRules)
+			(newFilter.name !== "Linting" || inlang()?.installed.lintRules())
 		) {
 			if (newFilter.name === "Language") {
 				setFilteredLanguageTags(() => inlang()?.config()?.languageTags || [])
@@ -147,7 +147,7 @@ export function Layout(props: { children: JSXElement }) {
 									<Show
 										when={
 											selectedFilters().includes(filter) &&
-											(filter.name !== "Linting" || inlang()?.installed.lintRules)
+											(filter.name !== "Linting" || inlang()?.installed.lintRules())
 										}
 									>
 										{filter.component}
@@ -156,7 +156,7 @@ export function Layout(props: { children: JSXElement }) {
 							</For>
 							<Show
 								when={
-									inlang()?.installed.lintRules
+									inlang()?.installed.lintRules()
 										? selectedFilters().length !== filters.length
 										: selectedFilters().length !== filters.length - 1
 								}
@@ -188,7 +188,7 @@ export function Layout(props: { children: JSXElement }) {
 												<Show
 													when={
 														!selectedFilters().includes(filter) &&
-														(filter.name !== "Linting" || inlang()?.installed.lintRules)
+														(filter.name !== "Linting" || inlang()?.installed.lintRules())
 													}
 												>
 													<sl-menu-item>
