@@ -23,6 +23,10 @@
 					{
 						"patterns": [
 							{
+								"group": ["@inlang/test"],
+								"message": "This is just an internal package that does not get published. You should just use it in test.ts files or for files that get bundled."
+							},
+							{
 								"group": ["node:*"],
 								"message": "Keep in mind that node API's don't work inside the browser"
 							}
