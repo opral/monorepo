@@ -1,0 +1,35 @@
+name: Publish @lix-js/fs to NPM
+
+on:
+  # manually triggering the workflow if desired
+  workflow_dispatch:
+
+  push:
+    paths:
+      - "lix-js/fs/package.json"
+    branches:
+      - main
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: ci-cd
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Doppler CLI for (public) env variables
+        uses: dopplerhq/cli-action@v2
+
+      - run: npm install
+      - run: doppler run -- npm run build
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
+
+      - run: npm run test -w @lix-js/fs
+      - uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_PUBLISH_TOKEN }}
+          package: lix/fs/package.json

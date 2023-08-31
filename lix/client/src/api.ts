@@ -1,4 +1,4 @@
-import type { NodeishFilesystem } from "@inlang-git/fs"
+import type { NodeishFilesystem } from "@lix-js/fs"
 import type raw from "isomorphic-git"
 import type { Endpoints } from "@octokit/types"
 import type { Subscribable } from "@inlang/app"

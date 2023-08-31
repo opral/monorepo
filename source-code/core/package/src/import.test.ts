@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { createNodeishMemoryFs } from "@inlang-git/fs"
+import { createNodeishMemoryFs } from "@lix-js/fs"
 import { describe, expect, it } from "vitest"
 import { createImport } from "./import.js"
 

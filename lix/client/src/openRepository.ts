@@ -1,4 +1,4 @@
-import type { NodeishFilesystem } from "@inlang-git/fs"
+import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Repository } from "./api.js"
 import { transformRemote, withLazyFetching } from "./helpers.js"
 import raw from "isomorphic-git"
