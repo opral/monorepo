@@ -21,8 +21,9 @@ import { _import } from "./utilities/import/_import.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
-		// activation telemetry
 		const gitOrigin = await getGitOrigin()
+
+		// activation telemetry
 		if (gitOrigin) {
 			telemetry.groupIdentify({
 				groupType: "repository",
@@ -39,10 +40,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 				version: version,
 			},
 		})
-
-		msg("Inlang extension activated.", "info")
 		// start the ide extension
-		main({ context, gitOrigin })
+		await main({ context, gitOrigin })
 	} catch (error) {
 		vscode.window.showErrorMessage((error as Error).message)
 		console.error(error)
@@ -114,13 +113,16 @@ async function main(args: {
 			_import: _import(workspaceFolder.uri.fsPath),
 			_capture(id, props) {
 				telemetry.capture({
-					// @ts-ignore the capture events
+					// @ts-ignore the events
 					event: id,
 					properties: props,
 				})
 			},
 		}),
 	)
+	telemetry.capture({
+		event: "IDE-EXTENSION loaded project",
+	})
 
 	if (error) {
 		console.error(error)
