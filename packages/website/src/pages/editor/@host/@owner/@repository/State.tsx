@@ -284,7 +284,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				element !== null ? setTourStep("missing-translation-rule") : setTourStep("textfield")
 			}, 100)
 		}
-		console.log(tourStep())
 	})
 
 	const [userIsCollaborator] = createResource(
