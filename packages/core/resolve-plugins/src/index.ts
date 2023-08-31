@@ -1,8 +1,4 @@
-export type {
-	ResolvedPluginApi,
-	ResolvePluginsFunction,
-	NodeishFilesystemSubset,
-} from "./types.js"
+export type { ResolvedPluginApi, ResolvePluginsFunction, NodeishFilesystemSubset } from "./types.js"
 export { resolvePlugins } from "./resolvePlugins.js"
 export {
 	PluginReturnedInvalidAppSpecificApiError,

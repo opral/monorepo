@@ -14,13 +14,10 @@
 	"scripts": {
 		"dev": "inlang package build --entry ./src/index.ts --outdir ./dist --watch",
 		"build": "inlang package build --entry ./src/index.ts --outdir ./dist",
-		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
-		"test:watch": "npm-run-all --print-label --parallel tsc:watch vitest:watch",
-		"tsc:watch": "tsc --noEmit --watch",
-		"vitest:watch": "vitest watch --passWithNoTests --coverage",
-		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
+		"lint": "eslint ./src",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
 		"@inlang/lint": "*",

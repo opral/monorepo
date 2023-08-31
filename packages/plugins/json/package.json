@@ -14,11 +14,10 @@
 	"scripts": {
 		"dev": "inlang package build --entry ./src/index.ts --outdir ./dist --watch",
 		"build": "inlang package build --entry ./src/index.ts --outdir ./dist",
-		"--- TEST -----------------------------------------------------------": "",
-		"pretest": "npm run build",
-		"test": "vitest run --coverage",
-		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
+		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"lint": "eslint ./src",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"devDependencies": {
 		"@inlang/cli": "*",

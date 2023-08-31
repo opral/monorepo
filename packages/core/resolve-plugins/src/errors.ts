@@ -1,4 +1,4 @@
-import type {Plugin} from "@inlang/plugin"
+import type { Plugin } from "@inlang/plugin"
 
 type PluginErrorOptions = {
 	plugin: Plugin["meta"]["id"]

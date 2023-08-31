@@ -29,7 +29,7 @@ export function Layout(props: { children: JSXElement }) {
 		setFilteredLanguageTags,
 		userIsCollaborator,
 		languageTags,
-		lastPullTime
+		lastPullTime,
 	} = useEditorState()
 
 	const removeFilter = (filterName: string) => {
@@ -82,28 +82,26 @@ export function Layout(props: { children: JSXElement }) {
 	)
 
 	//add initial language filter
-	createEffect(on(inlang, () => {
-		if (
-			lixErrors().length === 0 &&
-			inlang()
-		) {
-			if (filteredLanguageTags().length > 0) {
-				addFilter("Language")
-			} else {
-				if (inlang()!.config()) setFilteredLanguageTags(inlang()!.config()!.languageTags)
+	createEffect(
+		on(inlang, () => {
+			if (lixErrors().length === 0 && inlang()) {
+				if (filteredLanguageTags().length > 0) {
+					addFilter("Language")
+				} else {
+					if (inlang()!.config()) setFilteredLanguageTags(inlang()!.config()!.languageTags)
+				}
 			}
-		}
-	}))
+		}),
+	)
 
 	//add initial lintRule filter
-	createEffect(on(inlang, () => {
-		if (
-			lixErrors().length === 0 &&
-			filteredLintRules().length > 0
-		) {
-			addFilter("Linting")
-		}
-	}))
+	createEffect(
+		on(inlang, () => {
+			if (lixErrors().length === 0 && filteredLintRules().length > 0) {
+				addFilter("Linting")
+			}
+		}),
+	)
 
 	const addLanguageTag = (languageTag: LanguageTag) => {
 		if (languageTags().includes(languageTag)) {
