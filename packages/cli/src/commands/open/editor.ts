@@ -3,7 +3,7 @@ import { Command } from "commander"
 import { parseOrigin } from "@inlang/telemetry"
 import { log } from "../../utilities/log.js"
 import { getGitRemotes } from "../../utilities/getGitRemotes.js"
-import type { NodeishFilesystem } from "@inlang-git/fs"
+import type { NodeishFilesystem } from "@lix-js/fs"
 
 export const editor = new Command()
 	.command("editor")
