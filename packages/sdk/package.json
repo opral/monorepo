@@ -25,7 +25,7 @@
 		"node": ">=18.0.0"
 	},
 	"dependencies": {
-		"@inlang/config": "*",
+		"@inlang/project-config": "*",
 		"@inlang/language-tag": "*",
 		"@inlang/lint": "*",
 		"@inlang/messages": "*",
@@ -33,7 +33,6 @@
 		"@inlang/package": "*",
 		"@inlang/plugin": "*",
 		"@inlang/result": "*",
-		"@inlang/test": "*",
 		"@sinclair/typebox": "^0.31.0",
 		"@solid-primitives/map": "^0.4.7",
 		"deepmerge-ts": "^5.1.0",
