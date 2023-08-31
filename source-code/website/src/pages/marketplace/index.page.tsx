@@ -65,27 +65,27 @@ export function Page() {
 							Explore the marketplace
 						</h1>
 					</div>
-				</div>
-				<div class="w-full top-16 sticky bg-background pb-4 pt-8 z-10 flex flex-col gap-5 outline outline-4 outline-background">
-					<Search
-						placeholder={"Search for apps, plugins, lint rules ..."}
-						textValue={searchValue}
-						setTextValue={setSearchValue}
-					/>
-					<div class="flex justify-between items-center">
-						<Tags />
-						<div class="max-sm:hidden">
-							<Button type="text" href="/documentation">
-								Build your own
-							</Button>
+					<div class="w-full top-16 sticky bg-background pb-4 pt-8 z-10 flex flex-col gap-5 outline outline-4 outline-background">
+						<Search
+							placeholder={"Search for apps, plugins, lint rules ..."}
+							textValue={searchValue}
+							setTextValue={setSearchValue}
+						/>
+						<div class="flex justify-between items-center">
+							<Tags />
+							<div class="max-sm:hidden">
+								<Button type="text" href="/documentation/develop-plugin">
+									Build your own
+								</Button>
+							</div>
 						</div>
+						<div class="h-[1px] w-full bg-surface-2 absolute -bottom-1" />
 					</div>
-					<div class="h-[1px] w-full bg-surface-2 absolute -bottom-1" />
+					<div class="mb-16 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-center items-stretch relative">
+						<Gallery />
+					</div>
+					<GetHelp text="Need help or have questions? Join our Discord!" />
 				</div>
-				<div class="mb-16 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-center items-stretch relative">
-					<Gallery />
-				</div>
-				<GetHelp text="Need help or have questions? Join our Discord!" />
 			</Layout>
 		</>
 	)
@@ -192,7 +192,11 @@ const Gallery = () => {
 					)
 				}}
 			</For>
-			<a href="/documentation" target="" class="relative no-underline xl:col-start-2">
+			<a
+				href="/documentation/develop-plugin"
+				target=""
+				class="relative no-underline xl:col-start-2"
+			>
 				<div class="flex flex-col h-64 text-surface-500 relative justify-center items-center gap-4 bg-surface-100 max-h-full hover:bg-surface-200 p-6 rounded-xl border border-surface-2 cursor-pointer">
 					<Plus class="text-4xl" />
 					<p class="m-0 font-normal leading-6 text-sm tracking-wide line-clamp-3">Build your own</p>
