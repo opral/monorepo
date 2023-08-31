@@ -9,7 +9,6 @@
 		"source-code/interfaces/*"
 	],
 	"scripts": {
-		"install": "turbo run install",
 		"build": "turbo run build",
 		"dev": "turbo run build --no-daemon && turbo run dev --parallel",
 		"---- TEST ----------------------------------------------------------": "",
