@@ -28,9 +28,6 @@ export const TourHintWrapper = (props: TourHintWrapperProps) => {
 				<Show when={props.currentId === "fork-repository"}>
 					<ForkRepository />
 				</Show>
-				<Show when={props.currentId === "missing-message-rule"}>
-					<missingTranslationRule />
-				</Show>
 				<Show when={props.currentId === "textfield"}>
 					<Textfield />
 				</Show>
