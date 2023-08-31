@@ -1,7 +1,7 @@
 import { it, expect } from "vitest"
 import { privateEnv } from "@inlang/env-variables"
 import { machineTranslateMessage } from "./machineTranslateMessage.js"
-import type { Message } from "@inlang/messages"
+import type { Message } from "@inlang/message"
 
 it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 	"should translate multiple target language tags",

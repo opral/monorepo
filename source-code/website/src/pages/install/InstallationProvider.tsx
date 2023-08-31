@@ -6,7 +6,7 @@ import {
 	getLocalStorage,
 	useLocalStorage,
 } from "#src/services/local-storage/index.js"
-import { InlangConfig, tryCatch } from "@inlang/app"
+import { ProjectConfig, tryCatch } from "@inlang/app"
 import type { Step } from "./index.page.jsx"
 import { marketplaceItems } from "@inlang/marketplace"
 import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"
@@ -185,7 +185,7 @@ async function initializeRepo(
 		return
 	}
 
-	const inlangProject = parseProjectResult.data as InlangConfig
+	const inlangProject = parseProjectResult.data as ProjectConfig
 
 	/* Look if the modules were already installed */
 	for (const pkg of inlangProject.packages) {

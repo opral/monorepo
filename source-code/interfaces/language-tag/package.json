@@ -1,0 +1,30 @@
+{
+	"name": "@inlang/language-tag",
+	"type": "module",
+	"version": "0.0.0",
+	"license": "Apache-2.0",
+	"publishConfig": {
+		"access": "public"
+	},
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"files": [
+		"./dist",
+		"./src"
+	],
+	"scripts": {
+		"build": "node ./buildTagRegistry.js && npx prettier ./src --write && tsc --build",
+		"dev": "tsc --watch",
+		"test": "tsc --noEmit",
+		"lint": "eslint ./src",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./.turbo ./node_modules"
+	},
+	"peerDependencies": {
+		"@sinclair/typebox": "^0.31.0"
+	},
+	"devDependencies": {
+		"tsd": "^0.28.1"
+	}
+}

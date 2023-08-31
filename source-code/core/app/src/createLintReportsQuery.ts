@@ -1,19 +1,18 @@
-import type { Message } from "@inlang/messages"
 import { ReactiveMap } from "@solid-primitives/map"
 import { createEffect } from "./solid.js"
 import { createSubscribable } from "./openInlangProject.js"
-import type { InlangProject, InstalledLintRule, LintReportsQueryApi } from "./api.js"
-import type { InlangConfig } from "@inlang/config"
-import { LintReport, lintSingleMessage } from "@inlang/lint"
-import type { JSONObject } from "@inlang/plugin"
+import type { InstalledLintRule, LintReportsQueryApi } from "./api.js"
+import type { ProjectConfig } from "@inlang/project-config"
 import type { ResolvePackagesFunction } from "@inlang/package"
+import type { JSONObject, LintReport, Message } from "./interfaces.js"
+import { lintMessages } from "@inlang/lint"
 
 /**
  * Creates a reactive query API for messages.
  */
 export function createLintReportsQuery(
 	messages: () => Array<Message> | undefined,
-	config: () => InlangConfig | undefined,
+	config: () => ProjectConfig | undefined,
 	installedLintRules: () => Array<InstalledLintRule>,
 	resolvedModules: () => Awaited<ReturnType<ResolvePackagesFunction>> | undefined,
 ): InlangProject["query"]["lintReports"] {

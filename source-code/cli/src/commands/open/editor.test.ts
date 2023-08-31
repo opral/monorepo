@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from "vitest"
 import { editorCommandAction } from "./editor.js"
-import { createMockNodeishFs } from "@inlang/plugin/test"
+import { createNodeishMemoryFs } from "@lix-js/fs"
 
 describe("open editor command", () => {
 	it("opens the inlang editor url for correct repos", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 
 		await fs.mkdir("/.git")
 
@@ -43,7 +43,7 @@ describe("open editor command", () => {
 	})
 
 	it("displays an error for missing git configuration", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 
 		const logger = {
 			log: vi.fn(),

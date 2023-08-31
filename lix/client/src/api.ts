@@ -1,7 +1,6 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type raw from "isomorphic-git"
 import type { Endpoints } from "@octokit/types"
-import type { Subscribable } from "@inlang/app"
 
 type Author = {
 	name?: string
@@ -48,4 +47,9 @@ export type Repository = {
 	// TODO: implement these before publishing api, but not used in badge or editor, depends on strategy for statelessness
 	// currentBranch: () => unknown
 	// changeBranch: () => unknown
+}
+
+export type Subscribable<Value> = {
+	(): Value
+	subscribe: (callback: (value: Value) => void) => void
 }

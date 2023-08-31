@@ -57,6 +57,7 @@
 		"@inlang/app": "*",
 		"@inlang/package": "*",
 		"@inlang/rpc": "*",
+		"@lix-js/fs": "*",
 		"@sentry/node": "^7.64.0",
 		"@sinclair/typebox": "^0.31.3",
 		"@types/promptly": "^3.0.2",

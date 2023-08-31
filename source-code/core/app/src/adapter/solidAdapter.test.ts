@@ -1,16 +1,14 @@
 import { describe, it, expect } from "vitest"
-import { createMockNodeishFs } from "@inlang/plugin/test"
-import type { InlangConfig } from "@inlang/config"
-import type { Message, Plugin, Text } from "@inlang/plugin"
 import type { ImportFunction, InlangPackage } from "@inlang/package"
 import { createEffect, from, createRoot } from "../solid.js"
 import { solidAdapter } from "./solidAdapter.js"
-import type { LintRule } from "@inlang/lint"
 import { openInlangProject } from "../openInlangProject.js"
+import { createNodeishMemoryFs } from "@lix-js/fs"
+import type { Message, ProjectConfig, Plugin, LintRule, Text } from "../interfaces.js"
 
 // ------------------------------------------------------------------------------------------------
 
-const config: InlangConfig = {
+const config: ProjectConfig = {
 	sourceLanguageTag: "en",
 	languageTags: ["en"],
 	packages: ["./dist/index.js"],
@@ -93,7 +91,7 @@ const $import: ImportFunction = async () =>
 
 describe("config", () => {
 	it("should react to changes to config", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 		const inlang = solidAdapter(
 			await openInlangProject({
@@ -123,7 +121,7 @@ describe("config", () => {
 
 describe("installed", () => {
 	it("react to changes that are unrelated to installed items", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 		const inlang = solidAdapter(
 			await openInlangProject({
@@ -158,8 +156,8 @@ describe("installed", () => {
 
 describe("messages", () => {
 	it("should react to changes to config", async () => {
-		const fs = await createMockNodeishFs()
-		const mockConfig: InlangConfig = {
+		const fs = createNodeishMemoryFs()
+		const mockConfig: ProjectConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
 			packages: ["./plugin-a.js"],
@@ -210,7 +208,7 @@ describe("messages", () => {
 	})
 
 	it("should react to changes to messages", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 		const inlang = solidAdapter(
 			await openInlangProject({
@@ -271,7 +269,7 @@ describe("messages", () => {
 describe("lint", () => {
 	it.todo("should react to changes to config", async () => {
 		await createRoot(async () => {
-			const fs = await createMockNodeishFs()
+			const fs = createNodeishMemoryFs()
 			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 			const inlang = solidAdapter(
 				await openInlangProject({
@@ -309,7 +307,7 @@ describe("lint", () => {
 
 	it.todo("should react to changes to messages", async () => {
 		await createRoot(async () => {
-			const fs = await createMockNodeishFs()
+			const fs = createNodeishMemoryFs()
 			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 			const inlang = solidAdapter(
 				await openInlangProject({

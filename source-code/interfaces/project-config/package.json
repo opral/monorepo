@@ -1,0 +1,36 @@
+{
+	"name": "@inlang/project-config",
+	"type": "module",
+	"version": "0.0.0",
+	"license": "Apache-2.0",
+	"publishConfig": {
+		"access": "public"
+	},
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"files": [
+		"./dist",
+		"./src"
+	],
+	"scripts": {
+		"build": "tsc --build",
+		"dev": "tsc --watch",
+		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"lint": "eslint ./src",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./.turbo ./node_modules"
+	},
+	"dependencies": {
+		"@inlang/message": "*",
+		"@inlang/lint-rule": "*",
+		"@inlang/language-tag": "*",
+		"@inlang/translatable": "*"
+	},
+	"peerDependencies": {
+		"@sinclair/typebox": "^0.31.0"
+	},
+	"devDependencies": {
+		"tsd": "^0.28.1"
+	}
+}

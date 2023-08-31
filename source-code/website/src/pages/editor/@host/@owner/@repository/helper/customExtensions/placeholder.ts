@@ -13,6 +13,7 @@ const PlaceholderNode = Mention.extend<PlaceholderNodeOptions>({
 		return {
 			HTMLAttributes: {},
 			renderLabel({ node }: { node: Node }) {
+				// @ts-ignore - fix after refactor
 				return `${node.attrs.label ?? node.attrs.id}`
 			},
 			suggestion: {

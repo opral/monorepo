@@ -27,7 +27,7 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/config": "*",
+		"@inlang/project-config": "*",
 		"@lix-js/fs": "*",
 		"@inlang/lint": "*",
 		"@inlang/plugin": "*",

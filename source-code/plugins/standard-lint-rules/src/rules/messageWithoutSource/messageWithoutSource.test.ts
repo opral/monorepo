@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect, test } from "vitest"
 import { lintSingleMessage } from "@inlang/lint"
-import type { Message } from "@inlang/messages"
+import type { Message } from "@inlang/message"
 import { messageWithoutSourceRule } from "./messageWithoutSource.js"
 
 const message1: Message = {

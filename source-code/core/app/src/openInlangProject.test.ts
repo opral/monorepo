@@ -1,10 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect, vi } from "vitest"
 import { openInlangProject } from "./openInlangProject.js"
-import { createMockNodeishFs } from "@inlang/plugin/test"
-import type { InlangConfig } from "@inlang/config"
-import type { Message, Plugin } from "@inlang/plugin"
-import type { LintRule } from "@inlang/lint"
+import type { ProjectConfig, Plugin, LintRule, Message } from "./interfaces.js"
 import type { ImportFunction, InlangPackage } from "@inlang/package"
 import {
 	ProjectFilePathNotFoundError,
@@ -12,6 +9,7 @@ import {
 	InvalidConfigError,
 	NoPluginProvidesLoadOrSaveMessagesError,
 } from "./errors.js"
+import { createNodeishMemoryFs } from "@lix-js/fs"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -21,7 +19,7 @@ const getValue = <T>(subscribable: { subscribe: (subscriber: (value: T) => void)
 	return value!
 }
 
-const config: InlangConfig = {
+const config: ProjectConfig = {
 	sourceLanguageTag: "en",
 	languageTags: ["en"],
 	packages: ["./dist/index.js"],
@@ -110,7 +108,7 @@ const _import: ImportFunction = async () =>
 describe("initialization", () => {
 	describe("config", () => {
 		it("should return an error if config file is not found", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = createNodeishMemoryFs()
 
 			const inlang = await openInlangProject({
 				projectFilePath: "./test.json",
@@ -122,7 +120,7 @@ describe("initialization", () => {
 		})
 
 		it("should return an error if config file is not a valid JSON", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", "invalid json")
 
 			const inlang = await openInlangProject({
@@ -135,7 +133,7 @@ describe("initialization", () => {
 		})
 
 		it("should return an error if config file is does not match schema", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify({}))
 
 			const inlang = await openInlangProject({
@@ -148,7 +146,7 @@ describe("initialization", () => {
 		})
 
 		it("should return the parsed config", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
@@ -160,7 +158,7 @@ describe("initialization", () => {
 		})
 
 		it("should not re-write the config to disk when initializing", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			const configWithDeifferentFormatting = JSON.stringify(config, undefined, 4)
 			await fs.writeFile("./project.inlang.json", configWithDeifferentFormatting)
 
@@ -191,7 +189,7 @@ describe("initialization", () => {
 					},
 				} satisfies InlangPackage)
 
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
@@ -210,7 +208,7 @@ describe("initialization", () => {
 					},
 				} satisfies InlangPackage)
 
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
@@ -229,7 +227,7 @@ describe("initialization", () => {
 					},
 				} satisfies InlangPackage)
 
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 
 			const inlang = await openInlangProject({
@@ -261,7 +259,7 @@ describe("initialization", () => {
 describe("functionality", () => {
 	describe("config", () => {
 		it("should return the config", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
@@ -273,7 +271,7 @@ describe("functionality", () => {
 		})
 
 		it("should set a new config", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
@@ -295,7 +293,7 @@ describe("functionality", () => {
 
 	describe("setConfig", () => {
 		it("should fail if config is not valid", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
@@ -303,13 +301,13 @@ describe("functionality", () => {
 				_import,
 			})
 
-			const result = inlang.setConfig({} as InlangConfig)
+			const result = inlang.setConfig({} as ProjectConfig)
 			expect(result.data).toBeUndefined()
 			expect(result.error).toBeInstanceOf(InvalidConfigError)
 		})
 
 		it("should write config to disk", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
@@ -335,7 +333,7 @@ describe("functionality", () => {
 
 	describe("installed", () => {
 		it("should return the installed items", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
@@ -357,7 +355,7 @@ describe("functionality", () => {
 		})
 
 		it("should apply 'warning' as default lint level to lint rules that have no lint level defined in the config", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile(
 				"./project.inlang.json",
 				JSON.stringify({
@@ -367,7 +365,7 @@ describe("functionality", () => {
 					settings: {
 						"project.lintRuleLevels": {},
 					},
-				} satisfies InlangConfig),
+				} satisfies ProjectConfig),
 			)
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
@@ -379,7 +377,7 @@ describe("functionality", () => {
 		})
 
 		it("should apply 'disabled' to lint rules if defined in the project settings", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile(
 				"./project.inlang.json",
 				JSON.stringify({
@@ -389,7 +387,7 @@ describe("functionality", () => {
 					settings: {
 						"project.disabled": [mockLintRule.meta.id],
 					},
-				} satisfies InlangConfig),
+				} satisfies ProjectConfig),
 			)
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
@@ -440,7 +438,7 @@ describe("functionality", () => {
 				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
 				saveMessages: () => undefined,
 			}
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile(
 				"./project.inlang.json",
 				JSON.stringify({
@@ -450,7 +448,7 @@ describe("functionality", () => {
 					settings: {
 						"project.disabled": [disabledLintRule.meta.id],
 					},
-				} satisfies InlangConfig),
+				} satisfies ProjectConfig),
 			)
 			const _import = async () => {
 				return {
@@ -470,7 +468,7 @@ describe("functionality", () => {
 
 			expect(inlang.query.lintReports.getAll()).toHaveLength(1)
 
-			expect(inlang.query.lintReports.getAll()[0]?.ruleId).toBe(enabledLintRule.meta.id)
+			expect(inlang.query.lintReports.getAll()?.[0]?.ruleId).toBe(enabledLintRule.meta.id)
 			expect(
 				inlang.installed.lintRules().find((rule) => rule.meta.id === disabledLintRule.meta.id)
 					?.disabled,
@@ -507,7 +505,7 @@ describe("functionality", () => {
 				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
 				saveMessages: () => undefined,
 			}
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile(
 				"./project.inlang.json",
 				JSON.stringify({
@@ -515,7 +513,7 @@ describe("functionality", () => {
 					languageTags: ["en"],
 					packages: ["some-package.js"],
 					settings: {},
-				} satisfies InlangConfig),
+				} satisfies ProjectConfig),
 			)
 			const _import = async () => {
 				return {
@@ -534,7 +532,7 @@ describe("functionality", () => {
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
 			expect(inlang.query.lintReports.getAll()).toHaveLength(1)
-			expect(inlang.query.lintReports.getAll()[0]?.ruleId).toBe(_mockLintRule.meta.id)
+			expect(inlang.query.lintReports.getAll()?.[0]?.ruleId).toBe(_mockLintRule.meta.id)
 			expect(inlang.installed.lintRules()).toHaveLength(1)
 			expect(inlang.installed.lintRules()[0]?.disabled).toBe(false)
 		})
@@ -564,7 +562,7 @@ describe("functionality", () => {
 				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
 				saveMessages: () => undefined,
 			}
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile(
 				"./inlang.config.json",
 				JSON.stringify({
@@ -572,7 +570,7 @@ describe("functionality", () => {
 					languageTags: ["en"],
 					packages: ["some-module.js"],
 					settings: {},
-				} satisfies InlangConfig),
+				} satisfies ProjectConfig),
 			)
 			const _import = async () => {
 				return {
@@ -596,7 +594,7 @@ describe("functionality", () => {
 
 	describe("errors", () => {
 		it("should return the errors", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
@@ -611,7 +609,7 @@ describe("functionality", () => {
 
 	describe("appSpecificApi", () => {
 		it("should return the app specific api", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
@@ -627,7 +625,7 @@ describe("functionality", () => {
 
 	describe("messages", () => {
 		it("should return the messages", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
@@ -641,7 +639,7 @@ describe("functionality", () => {
 
 	describe("query", () => {
 		it("updates should trigger the plugin persistence", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 
 			await fs.writeFile(
 				"./project.inlang.json",
@@ -813,7 +811,7 @@ describe("functionality", () => {
 
 	describe("lint", () => {
 		it.todo("should throw if lint reports are not initialized yet", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
@@ -829,7 +827,7 @@ describe("functionality", () => {
 			}
 		})
 		it("should return the lint reports", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
