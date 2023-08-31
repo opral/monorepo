@@ -149,7 +149,8 @@ export function PatternEditor(props: {
 				autoSave()
 				setPreviousContent(currentJSON().content[0].content)
 				setHasChanges((prev) => {
-					const hasChanged = JSON.stringify(referencePattern()) !== JSON.stringify(newPattern())
+					const hasChanged = JSON.stringify(referencePattern()) !== JSON.stringify(newPattern()) 
+						&& !(referencePattern() === undefined && JSON.stringify(newPattern()) === `[{"type":"Text","value":""}]`)
 					if (prev !== hasChanged && hasChanged) {
 						setLocalChanges((prev) => (prev += 1))
 					} else if (prev !== hasChanged && !hasChanged) {
@@ -163,22 +164,30 @@ export function PatternEditor(props: {
 
 	const autoSave = () => {
 		let newMessage
-		if (variant() === undefined) {
-			newMessage = createVariant(props.message, {
-				data: {
-					languageTag: props.languageTag,
-					match: {},
-					pattern: newPattern(),
-				},
-			})
+		// missingMessage is a better default than emptyPattern
+		if (JSON.stringify(newPattern()) === `[{"type":"Text","value":""}]`) {
+			newMessage = { data: props.message }
+			newMessage.data.variants = props.message.variants.filter(
+				(variant) => variant.languageTag !== props.languageTag,
+			)
 		} else {
-			newMessage = updateVariantPattern(props.message, {
-				where: {
-					languageTag: props.languageTag,
-					selectors: {},
-				},
-				data: newPattern(),
-			})
+			if (variant() === undefined) {
+				newMessage = createVariant(props.message, {
+					data: {
+						languageTag: props.languageTag,
+						match: {},
+						pattern: newPattern(),
+					},
+				})
+			} else {
+				newMessage = updateVariantPattern(props.message, {
+					where: {
+						languageTag: props.languageTag,
+						selectors: {},
+					},
+					data: newPattern(),
+				})
+			}
 		}
 		if (newMessage.data) {
 			const upsertSuccessful = inlang()?.query.messages.upsert({
@@ -349,7 +358,7 @@ export function PatternEditor(props: {
 		<div
 			onClick={() => editor().chain().focus()}
 			onFocusIn={() => setIsLineItemFocused(true)}
-			class="flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border first:mt-0 -mt-[1px] border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus-within:relative focus-within:border-primary focus-within:ring-[3px] focus-within:ring-hover-primary/50"
+			class={"flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border first:mt-0 -mt-[1px] border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus-within:relative focus-within:border-primary focus-within:ring-[3px] focus-within:ring-hover-primary/50 "}
 		>
 			<div class="flex justify-start items-start gap-2 py-[5px]">
 				<div class="flex justify-start items-center flex-grow-0 flex-shrink-0 w-[72px] gap-2 py-0">

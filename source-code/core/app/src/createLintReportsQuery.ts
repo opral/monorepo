@@ -1,7 +1,7 @@
 import { ReactiveMap } from "@solid-primitives/map"
 import { createEffect } from "./solid.js"
 import { createSubscribable } from "./openInlangProject.js"
-import type { InlangProject, InstalledLintRule, LintReportsQueryApi } from "./api.js"
+import type { InstalledLintRule, LintReportsQueryApi } from "./api.js"
 import type { ProjectConfig } from "@inlang/project-config"
 import type { ResolvePackagesFunction } from "@inlang/package"
 import type { JSONObject, LintReport, Message } from "./interfaces.js"
@@ -28,14 +28,16 @@ export function createLintReportsQuery(
 			// index.clear()
 			for (const message of msgs) {
 				// TODO: only lint changed messages and update arrays selectively
-				lintMessages({
+
+				lintSingleMessage({
 					sourceLanguageTag: conf.sourceLanguageTag,
 					languageTags: conf.languageTags,
 					lintRuleSettings: conf.settings as Record<`${string}.lintRule.${string}`, JSONObject>,
 					lintLevels: Object.fromEntries(
 						installedLintRules().map((rule) => [rule.meta.id, rule.lintLevel]),
 					),
-					messages: [message],
+					messages: msgs,
+					message: message,
 					lintRules:
 						conf.settings["project.disabled"] !== undefined
 							? modules.lintRules.filter(
@@ -47,9 +49,6 @@ export function createLintReportsQuery(
 						report.errors.length === 0 &&
 						JSON.stringify(index.get(message.id)) !== JSON.stringify(report.data)
 					) {
-						// console.log("get index", index.get(message.id))
-						// console.log(report.data)
-						// console.log("set index", message.id)
 						index.set(message.id, report.data || [])
 					}
 				})

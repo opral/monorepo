@@ -36,6 +36,13 @@ export const badge = async (url: string) => {
 	const inlang = await openInlangProject({
 		projectFilePath: "./project.inlang.json",
 		nodeishFs: repo.nodeishFs,
+		_capture(id, props) {
+			telemetryNode.capture({
+				event: id,
+				properties: props,
+				distinctId: "unknown",
+			})
+		},
 	})
 
 	// access all messages via inlang instance query

@@ -61,7 +61,7 @@ export function Layout(props: { children: JSXElement }) {
 			!selectedFilters().some((filter) => filter.name === newFilter.name) &&
 			(newFilter.name !== "Linting" || inlang()?.installed.lintRules())
 		) {
-			if (newFilter.name === "Language") {
+			if (newFilter.name === "Language" && filteredLanguageTags().length === 0) {
 				setFilteredLanguageTags(() => inlang()?.config()?.languageTags || [])
 			}
 			setSelectedFilters([...selectedFilters(), newFilter])
@@ -81,38 +81,29 @@ export function Layout(props: { children: JSXElement }) {
 		),
 	)
 
-	function isLessThanHalfASecondAgo(timeString: Date) {
-		const time = new Date(timeString)
-		const currentTime = new Date().getTime()
-		const timeDifference = Math.abs(currentTime - time.getTime())
-		return timeDifference < 500
-	}
-
 	//add initial language filter
-	createEffect(() => {
+	createEffect(on(inlang, () => {
 		if (
 			lixErrors().length === 0 &&
-			isLessThanHalfASecondAgo(lastPullTime()!) &&
 			inlang()
 		) {
 			if (filteredLanguageTags().length > 0) {
 				addFilter("Language")
 			} else {
-				if (inlang()?.config()) setFilteredLanguageTags(inlang()!.config()!.languageTags)
+				if (inlang()!.config()) setFilteredLanguageTags(inlang()!.config()!.languageTags)
 			}
 		}
-	})
+	}))
 
 	//add initial lintRule filter
-	createEffect(() => {
+	createEffect(on(inlang, () => {
 		if (
 			lixErrors().length === 0 &&
-			isLessThanHalfASecondAgo(lastPullTime()!) &&
 			filteredLintRules().length > 0
 		) {
 			addFilter("Linting")
 		}
-	})
+	}))
 
 	const addLanguageTag = (languageTag: LanguageTag) => {
 		if (languageTags().includes(languageTag)) {

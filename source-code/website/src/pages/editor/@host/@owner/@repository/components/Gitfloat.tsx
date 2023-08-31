@@ -100,14 +100,14 @@ export const Gitfloat = () => {
 		setIsLoading(true)
 
 		// commit & push
-		if (!repo)
+		if (!repo())
 			return showToast({
 				title: "Failed to push changes",
 				message: "Please try again or file a bug.",
 				variant: "danger",
 			})
 		const push = await pushChanges({
-			repo: repo,
+			repo: repo()!,
 			user: localStorage.user,
 			setFsChange,
 			setLastPullTime,
@@ -119,6 +119,7 @@ export const Gitfloat = () => {
 			sucess: push.error === undefined,
 		})
 		if (push.error) {
+			if (push.error.message.includes("No changes to push.")) setLocalChanges(0)
 			return showToast({
 				title: "Failed to push changes",
 				message: "Please try again or file a bug. " + push.error.message,

@@ -2,6 +2,7 @@ import { currentPageContext } from "#src/renderer/state.js"
 import {
 	createContext,
 	createEffect,
+	createMemo,
 	createResource,
 	createSignal,
 	from,
@@ -31,7 +32,7 @@ type EditorStateSchema = {
 	/**
 	 * Returns a repository object
 	 */
-	repo: Repository | undefined
+	repo: () => Repository | undefined
 
 	/**
 	 * The current branch.
@@ -208,6 +209,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					nodeishFs: createNodeishMemoryFs(),
 					corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
 				})
+				setLastPullTime(new Date())
 				return newRepo
 			} else {
 				return undefined
@@ -252,19 +254,19 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	)
 
 	// DERIVED when config exists
-	const doesInlangConfigExist = () => {
+	const doesInlangConfigExist = createMemo(() => {
 		return inlang()?.config() ? true : false
-	}
+	})
 
 	// DERIVED source language tag from inlang config
-	const sourceLanguageTag = () => {
+	const sourceLanguageTag = createMemo(() => {
 		return inlang()?.config()?.sourceLanguageTag
-	}
+	})
 
 	// DERIVED language tags from inlang config
-	const languageTags = () => {
+	const languageTags = createMemo(() => {
 		return inlang()?.config()?.languageTags ?? []
-	}
+	})
 
 	//the effect should skip tour guide steps if not needed
 	createEffect(() => {
@@ -275,12 +277,12 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		} else if (tourStep() === "fork-repository" && inlang()) {
 			setTimeout(() => {
 				const element = document.getElementById("missingTranslation-summary")
-				element !== null ? setTourStep("missing-message-rule") : setTourStep("textfield")
+				element !== null ? setTourStep("missing-translation-rule") : setTourStep("textfield")
 			}, 100)
-		} else if (tourStep() === "missing-message-rule" && inlang()) {
+		} else if (tourStep() === "missing-translation-rule" && inlang()) {
 			setTimeout(() => {
 				const element = document.getElementById("missingTranslation-summary")
-				element !== null ? setTourStep("missing-message-rule") : setTourStep("textfield")
+				element !== null ? setTourStep("missing-translation-rule") : setTourStep("textfield")
 			}, 100)
 		}
 	})
@@ -357,7 +359,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		<EditorStateContext.Provider
 			value={
 				{
-					repo: repo(),
+					repo: repo,
 					currentBranch,
 					githubRepositoryInformation,
 					routeParams,
