@@ -25,7 +25,7 @@ import {
 	openInlangProject,
 	solidAdapter,
 	type InlangProjectWithSolidAdapter,
-} from "@inlang/app"
+} from "@inlang/sdk"
 import { parseOrigin, telemetryBrowser } from "@inlang/telemetry"
 
 type EditorStateSchema = {

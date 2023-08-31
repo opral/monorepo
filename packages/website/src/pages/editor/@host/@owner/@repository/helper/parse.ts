@@ -2,7 +2,7 @@ import type { Accessor } from "solid-js"
 import { useEditorJSON } from "solid-tiptap"
 import type { EditorRef } from "solid-tiptap"
 import type * as ast from "@inlang/core/ast"
-import type { VariableReference, Pattern, Text } from "@inlang/app"
+import type { VariableReference, Pattern, Text } from "@inlang/sdk"
 
 // access tiptap json
 export const getTextValue = (editor: Accessor<EditorRef>) => {

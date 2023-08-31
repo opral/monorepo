@@ -3,7 +3,7 @@ import {
 	createInlangFunction,
 	type InlangFunction,
 } from "./inlang-function.js"
-import type { LanguageTag as LanguageTagBase, Message } from "@inlang/app"
+import type { LanguageTag as LanguageTagBase, Message } from "@inlang/sdk"
 import { logDeprecation } from "../utils.js"
 
 export const isAsync = <T>(p: unknown): p is Promise<T> =>

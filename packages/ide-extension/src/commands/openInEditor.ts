@@ -1,6 +1,6 @@
 import { getGitOrigin } from "../services/telemetry/implementation.js"
 import * as vscode from "vscode"
-import type { Message } from "@inlang/app"
+import type { Message } from "@inlang/sdk"
 
 const EDITOR_BASE_PATH = "https://inlang.com/editor/"
 

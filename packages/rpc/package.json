@@ -21,7 +21,7 @@
 	},
 	"dependencies": {
 		"@inlang/env-variables": "*",
-		"@inlang/app": "*",
+		"@inlang/sdk": "*",
 		"@inlang/result": "*",
 		"body-parser": "^1.20.2",
 		"ts-dedent": "^2.2.0",

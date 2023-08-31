@@ -3,21 +3,21 @@ import {
 	standaloneUpdateSdkModuleVersion,
 	updateSdkModuleVersion,
 } from "./updateSdkModuleVersion.js"
-import { createMockNodeishFs } from "@inlang/app/test"
+import { createMockNodeishFs } from "@inlang/sdk/test"
 import {
 	InlangConfig,
 	openInlangProject,
 	type Plugin,
 	type InlangProject,
 	type NodeishFilesystemSubset,
-} from "@inlang/app"
+} from "@inlang/sdk"
 import type { InlangPackage } from "@inlang/package"
 // @ts-ignore
 import { version } from "../../../../../package.json"
 import { PATH_TO_CWD, PATH_TO_INLANG_CONFIG } from "../config.js"
 
-vi.mock("@inlang/app", async () => ({
-	...(await vi.importActual<typeof import("@inlang/app")>("@inlang/app")),
+vi.mock("@inlang/sdk", async () => ({
+	...(await vi.importActual<typeof import("@inlang/sdk")>("@inlang/sdk")),
 	openInlangProject: vi.fn(),
 }))
 
@@ -58,8 +58,8 @@ describe("updateSdkModuleVersion", () => {
 		vi.resetAllMocks()
 		vi.mocked(openInlangProject).mockImplementation(
 			async (...args: Parameters<typeof openInlangProject>) => {
-				const { openInlangProject } = await vi.importActual<typeof import("@inlang/app")>(
-					"@inlang/app",
+				const { openInlangProject } = await vi.importActual<typeof import("@inlang/sdk")>(
+					"@inlang/sdk",
 				)
 
 				return openInlangProject(...args)

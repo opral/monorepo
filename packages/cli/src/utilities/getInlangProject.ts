@@ -1,6 +1,6 @@
 import fs from "node:fs/promises"
 import { resolve } from "node:path"
-import { openInlangProject, InlangProject, Result, tryCatch } from "@inlang/app"
+import { openInlangProject, InlangProject, Result, tryCatch } from "@inlang/sdk"
 import { telemetry } from "../services/telemetry/implementation.js"
 
 // in case multiple commands run getInlang in the same process

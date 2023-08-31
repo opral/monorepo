@@ -1,14 +1,13 @@
 {
-	"name": "@inlang/app",
+	"name": "@inlang/sdk",
 	"type": "module",
 	"version": "0.0.0",
+	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"
 	},
 	"exports": {
-		".": "./dist/index.js",
-		"./test": "./dist/test/index.js",
-		"./solid": "./dist/solid.js"
+		".": "./dist/index.js"
 	},
 	"files": [
 		"./dist",
@@ -52,6 +51,5 @@
 		"@lix-js/fs": "*",
 		"tsd": "^0.25.0",
 		"vitest": "^0.33.0"
-	},
-	"license": "Apache-2.0"
+	}
 }

@@ -1,4 +1,4 @@
-import type { InlangProject } from "@inlang/app"
+import type { InlangProject } from "@inlang/sdk"
 // eslint-disable-next-line no-restricted-imports
 import { createMessage } from "@inlang/test"
 

@@ -2,7 +2,7 @@ import type { RequestEvent } from "@sveltejs/kit"
 import type { TransformConfig } from "../../vite-plugin/config/index.js"
 import { inlangSymbol } from "../shared/utils.js"
 import type { SvelteKitServerRuntime } from "./runtime.js"
-import type { LanguageTag } from "@inlang/app"
+import type { LanguageTag } from "@inlang/sdk"
 
 type State = Pick<TransformConfig, "sourceLanguageTag" | "languageTags" | "messages">
 

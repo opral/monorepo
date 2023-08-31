@@ -6,7 +6,7 @@ import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/
 import type * as Runtime from "../../../../runtime/index.js"
 import { goto } from "$app/navigation"
 import { page } from "$app/stores"
-import type { LanguageTag as LanguageTagBase } from "@inlang/app"
+import type { LanguageTag as LanguageTagBase } from "@inlang/sdk"
 import { logDeprecation } from "../../../../utils.js"
 import { inlangSymbol } from "../../shared/utils.js"
 import { setContext } from "svelte"

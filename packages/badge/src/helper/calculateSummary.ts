@@ -1,4 +1,4 @@
-import type { LanguageTag, LintReport } from "@inlang/app"
+import type { LanguageTag, LintReport } from "@inlang/sdk"
 
 /**
  * Get the percentage of translated messages.

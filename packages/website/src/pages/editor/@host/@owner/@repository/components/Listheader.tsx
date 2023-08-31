@@ -3,7 +3,7 @@ import { For, Show, createMemo } from "solid-js"
 import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
-import type { InstalledLintRule, LintRule } from "@inlang/app"
+import type { InstalledLintRule, LintRule } from "@inlang/sdk"
 
 interface ListHeaderProps {
 	ids: string[]

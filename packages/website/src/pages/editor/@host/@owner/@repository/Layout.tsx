@@ -8,7 +8,7 @@ import IconClose from "~icons/material-symbols/close"
 import IconTranslate from "~icons/material-symbols/translate"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { showToast } from "#src/components/Toast.jsx"
-import type { LanguageTag } from "@inlang/app"
+import type { LanguageTag } from "@inlang/sdk"
 import { sortLanguageTags } from "./helper/sortLanguageTags.js"
 
 interface Filter {

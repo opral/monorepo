@@ -1,6 +1,6 @@
 import { it, expect } from "vitest"
 import { calculateSummary } from "./calculateSummary.js"
-import type { LanguageTag, LintReport, Message, Pattern } from "@inlang/app"
+import type { LanguageTag, LintReport, Message, Pattern } from "@inlang/sdk"
 
 it("should return 100% when no translation are missing", () => {
 	const messages: Message[] = [createMessage("test", { en: "test", de: "test" })]

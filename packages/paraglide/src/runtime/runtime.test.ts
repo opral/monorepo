@@ -7,7 +7,7 @@ import {
 	type RuntimeContext,
 	type RuntimeState,
 } from "./runtime.js"
-import type { Message } from "@inlang/app"
+import type { Message } from "@inlang/sdk"
 import { createMessage } from "@inlang/test"
 
 // --------------------------------------------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 declare module "virtual:inlang-static" {
-	export const sourceLanguageTag: import("@inlang/app").LanguageTag
-	export const languageTags: import("@inlang/app").LanguageTag[]
-	export const messages: import("@inlang/app").Message[]
+	export const sourceLanguageTag: import("@inlang/sdk").LanguageTag
+	export const languageTags: import("@inlang/sdk").LanguageTag[]
+	export const messages: import("@inlang/sdk").Message[]
 }

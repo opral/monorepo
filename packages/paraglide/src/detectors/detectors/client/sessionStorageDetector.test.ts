@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vitest"
 import { initSessionStorageDetector, sessionStorageDetector } from "./sessionStorageDetector.js"
-import type { LanguageTag } from "@inlang/app"
+import type { LanguageTag } from "@inlang/sdk"
 
 const languageTag = "fr" satisfies LanguageTag
 

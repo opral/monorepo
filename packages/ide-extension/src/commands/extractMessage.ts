@@ -2,7 +2,7 @@ import * as vscode from "vscode"
 import { state } from "../state.js"
 import { msg } from "../utilities/message.js"
 import { telemetry } from "../services/telemetry/index.js"
-import type { IdeExtensionConfig, Message } from "@inlang/app"
+import type { IdeExtensionConfig, Message } from "@inlang/sdk"
 
 /**
  * Helps the user to extract messages from the active text editor.

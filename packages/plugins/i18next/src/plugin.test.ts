@@ -2,7 +2,7 @@
 import { expect, it, describe } from "vitest"
 import type { PluginSettings } from "./settings.js"
 import type { Message, Variant } from "@inlang/message"
-import { createVariant, getVariant } from "@inlang/app"
+import { createVariant, getVariant } from "@inlang/sdk"
 import { plugin } from "./plugin.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 

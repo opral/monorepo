@@ -15,7 +15,7 @@ import { recommendation, isInWorkspaceRecommendation } from "./utilities/recomme
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 import { openInEditorCommand } from "./commands/openInEditor.js"
 import { editMessageCommand } from "./commands/editMessage.js"
-import { openInlangProject, tryCatch } from "@inlang/app"
+import { openInlangProject, tryCatch } from "@inlang/sdk"
 import { createFileSystemMapper } from "./utilities/createFileSystemMapper.js"
 import { _import } from "./utilities/import/_import.js"
 

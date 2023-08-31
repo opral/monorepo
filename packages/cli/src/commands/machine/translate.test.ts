@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { translateCommandAction } from "./translate.js"
-import { Message, ProjectConfig, openInlangProject, Plugin } from "@inlang/app"
+import { Message, ProjectConfig, openInlangProject, Plugin } from "@inlang/sdk"
 import { privateEnv } from "@inlang/env-variables"
 import type { InlangPackage } from "@inlang/package"
 import { createNodeishMemoryFs } from "@lix-js/fs"

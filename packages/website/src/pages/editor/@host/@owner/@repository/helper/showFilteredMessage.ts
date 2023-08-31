@@ -1,4 +1,4 @@
-import type { LintReport, Message } from "@inlang/app"
+import type { LintReport, Message } from "@inlang/sdk"
 import { useEditorState } from "../State.jsx"
 export const showFilteredMessage = (message: Message | undefined) => {
 	const { filteredLintRules, filteredLanguageTags, filteredId, textSearch, inlang } =

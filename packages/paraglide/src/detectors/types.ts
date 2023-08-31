@@ -1,4 +1,4 @@
-import type { LanguageTag } from "@inlang/app"
+import type { LanguageTag } from "@inlang/sdk"
 
 type MaybePromise<T> = T | Promise<T>
 
