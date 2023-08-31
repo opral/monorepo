@@ -9,7 +9,7 @@ import { open } from "./commands/open/index.js"
 import { gitOrigin, telemetry } from "./services/telemetry/implementation.js"
 import fetchPolyfill from "node-fetch"
 import { lint } from "./commands/lint/index.js"
-import { getInlangProject } from "./utilities/getInlangProject.js"
+import { project } from "./commands/project/index.js"
 // --------------- INIT ---------------
 
 // polyfilling node < 18 with fetch
@@ -32,6 +32,7 @@ export const cli = new Command()
 	.description("CLI for inlang.")
 	// Commands
 	.addCommand(config)
+	.addCommand(project)
 	.addCommand(lint)
 	.addCommand(machine)
 	.addCommand(open)
