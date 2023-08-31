@@ -68,8 +68,6 @@ export function PatternEditor(props: {
 		}
 	}
 
-	createEffect(() => { console.log(props.message.id, props.languageTag, props.hidden) })
-
 	createEffect(() => {
 		props.setMessageIsFocused(isLineItemFocused())
 	})
