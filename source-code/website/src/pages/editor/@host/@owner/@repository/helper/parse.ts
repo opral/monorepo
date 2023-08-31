@@ -54,7 +54,7 @@ export const getTextValue = (editor: Accessor<EditorRef>) => {
 
 export const setTipTapMessage = (patterns: Pattern) => {
 	// if no elements in ast message, don't put any nodes in tiptap object
-	if (patterns?.length === 0) return undefined
+	if (patterns?.length === 0 || patterns === undefined) return undefined
 	const tiptap_nodes: any = []
 
 	patterns.map((pattern) => {
