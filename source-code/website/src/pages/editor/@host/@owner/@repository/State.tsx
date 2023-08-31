@@ -32,7 +32,7 @@ type EditorStateSchema = {
 	/**
 	 * Returns a repository object
 	 */
-	repo: Repository | undefined
+	repo: () => Repository | undefined
 
 	/**
 	 * The current branch.
@@ -358,7 +358,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		<EditorStateContext.Provider
 			value={
 				{
-					repo: repo(),
+					repo: repo,
 					currentBranch,
 					githubRepositoryInformation,
 					routeParams,
