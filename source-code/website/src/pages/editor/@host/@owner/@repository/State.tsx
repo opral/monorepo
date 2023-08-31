@@ -209,6 +209,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					nodeishFs: createNodeishMemoryFs(),
 					corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
 				})
+				setLastPullTime(new Date())
 				return newRepo
 			} else {
 				return undefined
