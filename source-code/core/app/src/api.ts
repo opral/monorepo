@@ -103,7 +103,7 @@ export type MessageQueryApi = {
 }
 
 export type LintReportsQueryApi = {
-	getAll: Subscribable<LintReport[]>
+	getAll: Subscribable<LintReport[] | undefined>
 	get: ((args: { where: { messageId: LintReport["messageId"] } }) => LintReport[] | undefined) & {
 		subscribe: (
 			args: { where: { messageId: LintReport["messageId"] } },

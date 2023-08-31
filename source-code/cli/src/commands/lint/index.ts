@@ -3,7 +3,7 @@ import Table from "cli-table3"
 import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { bold, italic } from "../../utilities/format.js"
 import { log } from "../../utilities/log.js"
-import type { InlangProject } from "@inlang/app"
+import type { InlangProject, LintReport } from "@inlang/app"
 
 export const lint = new Command()
 	.command("lint")
@@ -32,10 +32,36 @@ export async function lintCommandAction(args: { inlang: InlangProject; logger: a
 			return
 		}
 
-		// Get lint reports
-		const lintReport = await args.inlang.query.lintReports.getAll()
+		// TODO: async reports
+		const LintReportsAwaitable = (): Promise<LintReport[]> => {
+			return new Promise((resolve) => {
+				let reports = args.inlang.query.lintReports.getAll()
 
-		if (lintReport.length === 0) {
+				if (reports) {
+					// reports where loaded
+					setTimeout(() => {
+						// this is a workaround. We do not know when the report changed. Normally this shouldn't be a issue for cli
+						const newReports = args.inlang.query.lintReports.getAll()
+						if (newReports) {
+							resolve(newReports)
+						}
+					}, 200)
+				} else {
+					const interval = setInterval(() => {
+						reports = args.inlang.query.lintReports.getAll()
+
+						if (reports) {
+							clearInterval(interval)
+							resolve(reports)
+						}
+					}, 200)
+				}
+			})
+		}
+
+		const reports = await LintReportsAwaitable()
+
+		if (reports.length === 0) {
 			args.logger.success("🎉 Linting successful.")
 			return
 		}
@@ -49,7 +75,7 @@ export async function lintCommandAction(args: { inlang: InlangProject; logger: a
 
 		let hasError = false
 
-		for (const lint of lintReport) {
+		for (const lint of reports) {
 			if (lint.level === "error") {
 				hasError = true
 				lintTable.push(["Error", lint.ruleId, lint.body.en])
@@ -67,8 +93,8 @@ export async function lintCommandAction(args: { inlang: InlangProject; logger: a
 			head: ["Level", "Count"],
 		})
 
-		summaryTable.push(["Error", lintReport.filter((lint) => lint.level === "error").length])
-		summaryTable.push(["Warning", lintReport.filter((lint) => lint.level === "warning").length])
+		summaryTable.push(["Error", reports.filter((lint) => lint.level === "error").length])
+		summaryTable.push(["Warning", reports.filter((lint) => lint.level === "warning").length])
 
 		args.logger.log("") // spacer line
 		args.logger.log("📊 Summary")
