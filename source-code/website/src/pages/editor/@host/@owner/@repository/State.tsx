@@ -276,14 +276,15 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		} else if (tourStep() === "fork-repository" && inlang()) {
 			setTimeout(() => {
 				const element = document.getElementById("missingTranslation-summary")
-				element !== null ? setTourStep("missing-message-rule") : setTourStep("textfield")
+				element !== null ? setTourStep("missing-translation-rule") : setTourStep("textfield")
 			}, 100)
-		} else if (tourStep() === "missing-message-rule" && inlang()) {
+		} else if (tourStep() === "missing-translation-rule" && inlang()) {
 			setTimeout(() => {
 				const element = document.getElementById("missingTranslation-summary")
-				element !== null ? setTourStep("missing-message-rule") : setTourStep("textfield")
+				element !== null ? setTourStep("missing-translation-rule") : setTourStep("textfield")
 			}, 100)
 		}
+		console.log(tourStep())
 	})
 
 	const [userIsCollaborator] = createResource(

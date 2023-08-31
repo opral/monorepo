@@ -1,5 +1,5 @@
 import { useEditorState } from "../State.jsx"
-import { For, Show, createEffect, createMemo } from "solid-js"
+import { For, Show, createMemo } from "solid-js"
 import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
@@ -69,12 +69,12 @@ export const ListHeader = (props: ListHeaderProps) => {
 					{(lintRule) => (
 						<Show when={getLintSummary()[lintRule] !== 0}>
 							<TourHintWrapper
-								currentId="missing-message-rule"
+								currentId="missing-translation-rule"
 								position="bottom-right"
 								offset={{ x: 0, y: 40 }}
 								isVisible={
-									lintRule === "inlang.lintRule.mis0ingTranslation" &&
-									tourStep() === "missing-message-rule"
+									lintRule === "inlang.lintRule.missingTranslation" &&
+									tourStep() === "missing-translation-rule"
 								}
 							>
 								<sl-tooltip
