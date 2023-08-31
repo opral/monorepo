@@ -12,6 +12,7 @@
 		"access": "public"
 	},
 	"scripts": {
+		"postinstall": "patch-package",
 		"dev": "inlang package build --entry ./src/index.ts --outdir ./dist --watch",
 		"build": "inlang package build --entry ./src/index.ts --outdir ./dist",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
@@ -22,19 +23,13 @@
 	"devDependencies": {
 		"@inlang/cli": "*",
 		"@inlang/plugin": "*",
-		"@size-limit/preset-small-lib": "^8.2.4",
 		"@types/flat": "^5.0.2",
-		"@types/lodash.merge": "^4.6.7",
-		"@types/parsimmon": "^1.10.6",
+		"@types/lodash.merge": "4.6.7",
+		"@types/parsimmon": "1.10.6",
 		"flat": "^5.0.2",
-		"lodash.merge": "^4.6.2",
-		"parsimmon": "^1.18.1",
-		"size-limit": "^8.2.4",
-		"typescript": "^5.1.3"
-	},
-	"size-limit": [
-		{
-			"path": "dist/*.js"
-		}
-	]
+		"lodash.merge": "4.6.2",
+		"parsimmon": "1.18.1",
+		"typescript": "5.1.3",
+		"patch-package": "6.4.7"
+	}
 }

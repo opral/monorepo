@@ -19,8 +19,7 @@
 		"format": "turbo run format",
 		"---- OTHER ---------------------------------------------------------": "",
 		"release": "changeset publish",
-		"clean": "npm run clean -ws --if-present && rm -rf ./.env ./node_modules",
-		"postinstall": "patch-package"
+		"clean": "npm run clean -ws --if-present && rm -rf ./.env ./node_modules"
 	},
 	"engines": {
 		"npm": ">=8.0.0",
@@ -40,7 +39,6 @@
 		"eslint-plugin-unicorn": "^45.0.2",
 		"istanbul-lib-source-maps": "^4.0.1",
 		"lint-staged": "^13.1.2",
-		"patch-package": "^6.5.1",
 		"prettier": "2.8.3",
 		"turbo": "^1.10.13",
 		"jsdom": "^22.1.0"
