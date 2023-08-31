@@ -1,5 +1,5 @@
 import { useEditorState } from "../State.jsx"
-import { For, Show, createEffect } from "solid-js"
+import { For, Show, createEffect, createMemo } from "solid-js"
 import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
@@ -29,19 +29,15 @@ export const ListHeader = (props: ListHeaderProps) => {
 		tourStep,
 	} = useEditorState()
 
-	let lintSummary: Record<LintRule["meta"]["id"], number> = {}
-
-	const getLintSummary = () => {
-		lintSummary = {}
+	const getLintSummary = createMemo(() => {
+		const summary: Record<LintRule["meta"]["id"], number> = {}
 		for (const report of inlang()?.query.lintReports.getAll() || []) {
 			if (filteredLintRules().length === 0 || filteredLintRules().includes(report.ruleId)) {
-				lintSummary[report.ruleId] = lintSummary[report.ruleId]
-					? (lintSummary[report.ruleId] += 1)
-					: 1
+				summary[report.ruleId] = (summary[report.ruleId] || 0) + 1
 			}
 		}
-		return lintSummary
-	}
+		return summary
+	})
 
 	const getLintRule = (lintRuleId: LintRule["meta"]["id"]): InstalledLintRule | undefined =>
 		inlang()
@@ -71,7 +67,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 			<div class="flex gap-2">
 				<For each={Object.keys(getLintSummary()) as LintRule["meta"]["id"][]}>
 					{(lintRule) => (
-						<Show when={lintSummary[lintRule] !== 0}>
+						<Show when={getLintSummary()[lintRule] !== 0}>
 							<TourHintWrapper
 								currentId="missing-message-rule"
 								position="bottom-right"

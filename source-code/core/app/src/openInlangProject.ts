@@ -17,6 +17,7 @@ import { createMessagesQuery } from "./createMessagesQuery.js"
 import { InlangConfig } from "@inlang/config"
 import { debounce } from "throttle-debounce"
 import { createLintReportsQuery } from "./createLintReportsQuery.js"
+import type { LintReport } from "@inlang/lint"
 
 const ConfigCompiler = TypeCompiler.Compile(InlangConfig)
 
@@ -161,7 +162,7 @@ export const openInlangProject = async (args: {
 
 		const messagesQuery = createMessagesQuery(() => messages() || [])
 		const lintReportsQuery = createLintReportsQuery(
-			messagesQuery.getAll,
+			messages,
 			config,
 			installedLintRules,
 			resolvedPackages,
@@ -178,12 +179,12 @@ export const openInlangProject = async (args: {
 							cause: err,
 						})
 					}
-					// if (
-					// 	newMessages.length !== 0 &&
-					// 	JSON.stringify(newMessages) !== JSON.stringify(messages())
-					// ) {
-					// 	setMessages(newMessages)
-					// }
+					if (
+						newMessages.length !== 0 &&
+						JSON.stringify(newMessages) !== JSON.stringify(messages())
+					) {
+						setMessages(newMessages)
+					}
 				},
 				{ atBegin: false },
 			),

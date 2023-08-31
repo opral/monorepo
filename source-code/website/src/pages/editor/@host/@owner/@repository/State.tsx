@@ -2,6 +2,7 @@ import { currentPageContext } from "#src/renderer/state.js"
 import {
 	createContext,
 	createEffect,
+	createMemo,
 	createResource,
 	createSignal,
 	from,
@@ -252,19 +253,19 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	)
 
 	// DERIVED when config exists
-	const doesInlangConfigExist = () => {
+	const doesInlangConfigExist = createMemo(() => {
 		return inlang()?.config() ? true : false
-	}
+	})
 
 	// DERIVED source language tag from inlang config
-	const sourceLanguageTag = () => {
+	const sourceLanguageTag = createMemo(() => {
 		return inlang()?.config()?.sourceLanguageTag
-	}
+	})
 
 	// DERIVED language tags from inlang config
-	const languageTags = () => {
+	const languageTags = createMemo(() => {
 		return inlang()?.config()?.languageTags ?? []
-	}
+	})
 
 	//the effect should skip tour guide steps if not needed
 	createEffect(() => {
