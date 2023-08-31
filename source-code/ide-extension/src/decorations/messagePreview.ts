@@ -3,7 +3,6 @@ import { state } from "../state.js"
 import { contextTooltip } from "./contextTooltip.js"
 import { onDidEditMessage } from "../commands/editMessage.js"
 import { getStringFromPattern } from "../utilities/query.js"
-import type { IdeExtensionConfig } from "@inlang/app"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
