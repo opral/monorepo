@@ -31,7 +31,6 @@ export function PatternEditor(props: {
 	lintReports: LintReport[]
 	setMessageIsFocused: Setter<boolean>
 	messageIsFocused: Accessor<boolean>
-	hidden?: boolean
 }) {
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const {
@@ -350,7 +349,7 @@ export function PatternEditor(props: {
 		<div
 			onClick={() => editor().chain().focus()}
 			onFocusIn={() => setIsLineItemFocused(true)}
-			class={"flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border first:mt-0 -mt-[1px] border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus-within:relative focus-within:border-primary focus-within:ring-[3px] focus-within:ring-hover-primary/50 " + (props.hidden && "hidden")}
+			class={"flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border first:mt-0 -mt-[1px] border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus-within:relative focus-within:border-primary focus-within:ring-[3px] focus-within:ring-hover-primary/50 "}
 		>
 			<div class="flex justify-start items-start gap-2 py-[5px]">
 				<div class="flex justify-start items-center flex-grow-0 flex-shrink-0 w-[72px] gap-2 py-0">
