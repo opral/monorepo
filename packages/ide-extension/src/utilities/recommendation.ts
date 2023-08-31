@@ -17,6 +17,26 @@ type ExtensionsJson = {
  * @param {vscode.WorkspaceFolder} args.workspaceFolder - The workspace folder.
  * @returns {Promise<void>} - A Promise that resolves once the recommendation process is completed.
  */
+export async function isInWorkspaceRecommendation(args: {
+	workspaceFolder: vscode.WorkspaceFolder
+}) {
+	const vscodeFolderPath = path.join(args.workspaceFolder.uri.fsPath, ".vscode")
+	const extensionsJsonPath = path.join(vscodeFolderPath, "extensions.json")
+
+	let extensions: { recommendations: string[] } | undefined
+	// Read the extensions.json file
+	if (fs.existsSync(extensionsJsonPath) && fs.existsSync(vscodeFolderPath)) {
+		extensions = JSON.parse(fs.readFileSync(extensionsJsonPath, "utf8"))
+	}
+	const extensionsResult =
+		extensions?.recommendations?.includes("inlang.vs-code-extension") || false
+
+	if (extensionsResult === true) {
+		return true
+	} else {
+		return false
+	}
+}
 export const recommendation = async (args: {
 	workspaceFolder: vscode.WorkspaceFolder
 }): Promise<void> => {
@@ -24,18 +44,11 @@ export const recommendation = async (args: {
 	if (await isDisabledRecommendation()) {
 		return
 	}
-
 	const vscodeFolderPath = path.join(args.workspaceFolder.uri.fsPath, ".vscode")
 	const extensionsJsonPath = path.join(vscodeFolderPath, "extensions.json")
 
-	let extensions: ExtensionsJson | undefined
-	// Read the extensions.json file
-	if (fs.existsSync(extensionsJsonPath) && fs.existsSync(vscodeFolderPath)) {
-		extensions = parse(fs.readFileSync(extensionsJsonPath, "utf8")) as any
-	}
-
 	// If not already recommended
-	if (!extensions || !extensions.recommendations.includes("inlang.vs-code-extension")) {
+	if ((await isInWorkspaceRecommendation({ workspaceFolder: args.workspaceFolder })) === false) {
 		// Prompt the user to install the Inlang extension
 		const installInlangExtension = await vscode.window.showInformationMessage(
 			"The Inlang extension is recommended for this project. Do you want to add it to your recommendations?",
