@@ -29,6 +29,7 @@ export function Layout(props: { children: JSXElement }) {
 		setFilteredLanguageTags,
 		userIsCollaborator,
 		languageTags,
+		lastPullTime
 	} = useEditorState()
 
 	const removeFilter = (filterName: string) => {
@@ -58,7 +59,7 @@ export function Layout(props: { children: JSXElement }) {
 		if (
 			newFilter !== undefined &&
 			!selectedFilters().some((filter) => filter.name === newFilter.name) &&
-			(newFilter.name !== "Linting" || inlang()?.lint?.reports)
+			(newFilter.name !== "Linting" || inlang()?.installed.lintRules)
 		) {
 			if (newFilter.name === "Language") {
 				setFilteredLanguageTags(() => inlang()?.config()?.languageTags || [])
@@ -80,18 +81,18 @@ export function Layout(props: { children: JSXElement }) {
 		),
 	)
 
-	// function isLessThanHalfASecondAgo(timeString: Date) {
-	// 	const time = new Date(timeString)
-	// 	const currentTime = new Date().getTime()
-	// 	const timeDifference = Math.abs(currentTime - time.getTime())
-	// 	return timeDifference < 500
-	// }
+	function isLessThanHalfASecondAgo(timeString: Date) {
+		const time = new Date(timeString)
+		const currentTime = new Date().getTime()
+		const timeDifference = Math.abs(currentTime - time.getTime())
+		return timeDifference < 500
+	}
 
 	//add initial language filter
 	createEffect(() => {
 		if (
 			lixErrors().length === 0 &&
-			//isLessThanHalfASecondAgo(repositoryIsCloned()!) &&
+			isLessThanHalfASecondAgo(lastPullTime()!) &&
 			inlang()
 		) {
 			if (filteredLanguageTags().length > 0) {
@@ -106,7 +107,7 @@ export function Layout(props: { children: JSXElement }) {
 	createEffect(() => {
 		if (
 			lixErrors().length === 0 &&
-			//isLessThanHalfASecondAgo(repositoryIsCloned()!) &&
+			isLessThanHalfASecondAgo(lastPullTime()!) &&
 			filteredLintRules().length > 0
 		) {
 			addFilter("Linting")
@@ -146,7 +147,7 @@ export function Layout(props: { children: JSXElement }) {
 									<Show
 										when={
 											selectedFilters().includes(filter) &&
-											(filter.name !== "Linting" || inlang()?.lint?.reports())
+											(filter.name !== "Linting" || inlang()?.installed.lintRules)
 										}
 									>
 										{filter.component}
@@ -155,7 +156,7 @@ export function Layout(props: { children: JSXElement }) {
 							</For>
 							<Show
 								when={
-									inlang()?.lint?.reports()
+									inlang()?.installed.lintRules
 										? selectedFilters().length !== filters.length
 										: selectedFilters().length !== filters.length - 1
 								}
@@ -187,7 +188,7 @@ export function Layout(props: { children: JSXElement }) {
 												<Show
 													when={
 														!selectedFilters().includes(filter) &&
-														(filter.name !== "Linting" || inlang()?.lint?.reports())
+														(filter.name !== "Linting" || inlang()?.installed.lintRules)
 													}
 												>
 													<sl-menu-item>
