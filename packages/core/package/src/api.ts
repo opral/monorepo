@@ -1,13 +1,14 @@
-import type { InlangConfig } from "@inlang/config"
-import type { LintRule, resolveLintRules } from "@inlang/lint"
+import type { ProjectConfig } from "@inlang/project-config"
+import type { LintRule } from "@inlang/lint-rule"
+import type { Plugin } from "@inlang/plugin"
 import type {
 	NodeishFilesystemSubset,
-	Plugin,
 	ResolvePluginsFunction,
 	ResolvedPluginApi,
-} from "@inlang/plugin"
+} from "@inlang/resolve-plugins"
 import type { PackageHasNoExportsError, PackageImportError } from "./errors.js"
 import type { ImportFunction } from "./import.js"
+import type { resolveLintRules } from "@inlang/lint"
 
 /**
  * The inlang package API.
@@ -37,7 +38,7 @@ export type InlangPackage = {
  * Pass a custom `_import` function to override the default import function.
  */
 export type ResolvePackagesFunction = (args: {
-	config: InlangConfig
+	config: ProjectConfig
 	nodeishFs: NodeishFilesystemSubset
 	_import?: ImportFunction
 }) => Promise<{

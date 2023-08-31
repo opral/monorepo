@@ -1,5 +1,5 @@
-import type { LintLevel, LintRule, MessageLintReport } from "./api.js"
-import type { Message } from "@inlang/messages"
+import type { LintLevel, LintRule, MessageLintReport } from "@inlang/lint-rule"
+import type { Message } from "@inlang/message"
 import { LintRuleThrowedError } from "./errors.js"
 import type { LanguageTag } from "@inlang/language-tag"
 import type { JSONObject } from "@inlang/json-types"

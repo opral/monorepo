@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type { LintRule } from "@inlang/lint"
+import type { LintRule } from "@inlang/lint-rule"
 import type { Plugin } from "@inlang/plugin"
 import { describe, expect, it } from "vitest"
 import type { InlangPackage } from "./api.js"
 import { PackageError, PackageHasNoExportsError, PackageImportError } from "./errors.js"
 import { resolvePackages } from "./resolvePackages.js"
-import type { InlangConfig } from "@inlang/config"
+import type { ProjectConfig } from "@inlang/project-config"
 
 describe("generally", () => {
 	it("should return an error if a plugin cannot be imported", async () => {
-		const config: InlangConfig = {
+		const config: ProjectConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
 			packages: ["https://myplugin.com/index.js"],
@@ -59,7 +59,7 @@ describe("resolvePackages", () => {
 			message: () => undefined,
 		}
 
-		const config: InlangConfig = {
+		const config: ProjectConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
 			packages: ["https://myplugin.com/index.js"],
@@ -88,7 +88,7 @@ describe("resolvePackages", () => {
 	})
 
 	it("should return an error if a plugin cannot be imported", async () => {
-		const config: InlangConfig = {
+		const config: ProjectConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
 			packages: ["https://myplugin.com/index.js"],
@@ -110,7 +110,7 @@ describe("resolvePackages", () => {
 	})
 
 	it("should return an error if a plugin does not export any plugins or lint rules", async () => {
-		const config: InlangConfig = {
+		const config: ProjectConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
 			packages: ["https://myplugin.com/index.js"],
@@ -130,7 +130,7 @@ describe("resolvePackages", () => {
 
 	it("should handle other unhandled errors during plugin resolution", async () => {
 		const errorMessage = "Unhandled error during plugin resolution"
-		const config: InlangConfig = {
+		const config: ProjectConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
 			packages: ["https://myplugin.com/index.js"],

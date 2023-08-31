@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { lintSingleMessage } from "./lintSingleMessage.js"
-import type { MessageLintReport, MessageLintRule } from "./api.js"
-import type { Message } from "@inlang/messages"
+import type { MessageLintReport, MessageLintRule } from "@inlang/lint-rule"
+import type { Message } from "@inlang/message"
 import { tryCatch } from "@inlang/result"
 
 const lintRule1 = {

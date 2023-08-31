@@ -1,12 +1,9 @@
 import { describe, it, expect } from "vitest"
 import { translateCommandAction } from "./translate.js"
-import { openInlangProject } from "@inlang/app"
-import { createMockNodeishFs } from "@inlang/plugin/test"
+import { Message, ProjectConfig, openInlangProject, Plugin } from "@inlang/app"
 import { privateEnv } from "@inlang/env-variables"
-import type { InlangConfig } from "@inlang/config"
 import type { InlangPackage } from "@inlang/package"
-import type { Plugin } from "@inlang/plugin"
-import type { Message } from "@inlang/messages"
+import { createNodeishMemoryFs } from "@lix-js/fs"
 
 const exampleMessages: Message[] = [
 	{
@@ -57,7 +54,7 @@ describe("translate command", () => {
 	it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 		"should tanslate the missing languages",
 		async () => {
-			const fs = await createMockNodeishFs()
+			const fs = createNodeishMemoryFs()
 
 			await fs.writeFile(
 				"./inlang.config.json",
@@ -68,7 +65,7 @@ describe("translate command", () => {
 					settings: {
 						"project.lintRuleLevels": {},
 					},
-				} satisfies InlangConfig),
+				} satisfies ProjectConfig),
 			)
 
 			const _mockPlugin: Plugin = {
@@ -103,6 +100,7 @@ describe("translate command", () => {
 			expect(messages[1]?.variants.length).toBe(3)
 
 			for (const message of messages) {
+				// @ts-ignore - type mismatch error - fix after refactor
 				expect(message.variants.map((variant) => variant.languageTag).sort()).toStrictEqual([
 					"de",
 					"en",

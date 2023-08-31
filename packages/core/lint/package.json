@@ -29,6 +29,7 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
+		"@inlang/lint-rule": "*",
 		"@inlang/language-tag": "*",
 		"@inlang/messages": "*",
 		"@inlang/json-types": "*"

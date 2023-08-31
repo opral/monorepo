@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect, it, describe } from "vitest"
 import type { PluginSettings } from "./settings.js"
-import type { Message, Variant } from "@inlang/plugin"
-import { createVariant, getVariant } from "@inlang/plugin"
-import { createMockNodeishFs } from "@inlang/plugin/test"
+import type { Message, Variant } from "@inlang/message"
+import { createVariant, getVariant } from "@inlang/app"
 import { plugin } from "./plugin.js"
+import { createNodeishMemoryFs } from "@lix-js/fs"
 
 describe("option pathPattern", () => {
 	it("should throw if the path pattern does not include the {languageTag} variable reference", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", "{}")
 		try {
 			await plugin.loadMessages!({
@@ -23,7 +23,7 @@ describe("option pathPattern", () => {
 	})
 
 	it("should throw if the path pattern uses double curly brackets for {languageTag} variable reference", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", "{}")
 		try {
 			await plugin.loadMessages!({
@@ -38,7 +38,7 @@ describe("option pathPattern", () => {
 	})
 
 	it("should throw if the path pattern string does not end with '.json'", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", "{}")
 		try {
 			await plugin.loadMessages!({
@@ -53,7 +53,7 @@ describe("option pathPattern", () => {
 	})
 
 	it("should throw if the path pattern with namespaces does not include the {languageTag} variable reference", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", "{}")
 		try {
 			await plugin.loadMessages!({
@@ -72,7 +72,7 @@ describe("option pathPattern", () => {
 	})
 
 	it("should throw if the path pattern with namespaces uses double curly brackets for {languageTag} variable reference", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", "{}")
 		try {
 			await plugin.loadMessages!({
@@ -91,7 +91,7 @@ describe("option pathPattern", () => {
 	})
 
 	it("should throw if the path pattern with namespaces does not end with '.json'", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", "{}")
 		try {
 			await plugin.loadMessages!({
@@ -110,7 +110,7 @@ describe("option pathPattern", () => {
 	})
 
 	it("should throw if the path pattern with namespaces has a namespace with a dot", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", "{}")
 		try {
 			await plugin.loadMessages!({
@@ -129,7 +129,7 @@ describe("option pathPattern", () => {
 	})
 
 	it("should throw if the path pattern includes wildcard", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", "{}")
 		try {
 			await plugin.loadMessages!({
@@ -148,7 +148,7 @@ describe("option pathPattern", () => {
 
 describe("loadMessage", () => {
 	it("should return messages if the path pattern is valid", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", JSON.stringify({ test: "Hello world" }))
 		const languageTags = ["en"]
 		const settings: PluginSettings = {
@@ -161,7 +161,7 @@ describe("loadMessage", () => {
 	})
 
 	it("should work with empty json files", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", JSON.stringify({}))
 		const languageTags = ["en"]
 		const settings: PluginSettings = {
@@ -172,7 +172,7 @@ describe("loadMessage", () => {
 	})
 
 	it("should work with not yet existing files", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", JSON.stringify({ test: "Hello world" }))
 		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
@@ -183,7 +183,7 @@ describe("loadMessage", () => {
 	})
 
 	it("should add multible variants to the same message", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", JSON.stringify({ test: "Hello world" }))
 		await fs.writeFile("./de.json", JSON.stringify({ test: "Hallo welt" }))
 		const settings: PluginSettings = {
@@ -198,7 +198,7 @@ describe("loadMessage", () => {
 
 	// namespaces
 	it("should return messages if the path pattern is valid (namespace)", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.mkdir("./en")
 		await fs.writeFile("./en/common.json", JSON.stringify({ test: "Hello world" }))
 		const languageTags = ["en"]
@@ -214,7 +214,7 @@ describe("loadMessage", () => {
 	})
 
 	it("should work with empty json files (namespace)", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.mkdir("./en")
 		await fs.writeFile("./en/common.json", JSON.stringify({}))
 		const languageTags = ["en"]
@@ -228,7 +228,7 @@ describe("loadMessage", () => {
 	})
 
 	it("should work with not yet existing files (namespace)", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.mkdir("./en")
 		await fs.writeFile("./en/common.json", JSON.stringify({ test: "Hello world" }))
 		const settings: PluginSettings = {
@@ -242,7 +242,7 @@ describe("loadMessage", () => {
 	})
 
 	it("should add multible variants to the same message (namespace)", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.mkdir("./en")
 		await fs.mkdir("./de")
 		await fs.writeFile("./en/common.json", JSON.stringify({ test: "Hello world" }))
@@ -262,7 +262,7 @@ describe("loadMessage", () => {
 		const test = JSON.stringify({
 			test: "test",
 		})
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.mkdir("./en")
 		await fs.mkdir("./de")
 		await fs.writeFile("./en/common.json", test)
@@ -292,7 +292,7 @@ describe("loadMessage", () => {
 		const test = JSON.stringify({
 			test: "test",
 		})
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.mkdir("./en")
 		await fs.mkdir("./de")
 		await fs.writeFile("./en/common.json", test)
@@ -317,7 +317,7 @@ describe("loadMessage", () => {
 	})
 
 	it("should not throw an error when the path to the resources is not present", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		const settings: PluginSettings = {
 			pathPattern: {
 				pathPattern: ".lang/{languageTag}.json",
@@ -340,7 +340,7 @@ describe("loadMessage", () => {
 
 describe("saveMessage", () => {
 	it("test string pathPattern", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", JSON.stringify({}))
 		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
@@ -367,7 +367,7 @@ describe("saveMessage", () => {
 	})
 
 	it("test object pathPattern", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", JSON.stringify({}))
 		const settings: PluginSettings = {
 			pathPattern: {
@@ -414,7 +414,7 @@ describe("saveMessage", () => {
 
 describe("variable reference", () => {
 	it("should correctly identify variable reference (at the end)", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", JSON.stringify({ test: "Hello {{username}}" }))
 		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
@@ -431,7 +431,7 @@ describe("variable reference", () => {
 	})
 
 	it("should correctly identify variable reference (at the beginning)", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", JSON.stringify({ test: "{{username}} the great" }))
 		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
@@ -448,7 +448,7 @@ describe("variable reference", () => {
 	})
 
 	it("should correctly apply the variableReferencePattern", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", JSON.stringify({ test: "Hello @username" }))
 		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
@@ -477,7 +477,7 @@ describe("formatting", () => {
 	"test": "test"
 }`
 
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", with4Spaces)
 		await fs.writeFile("./fr.json", with4Spaces)
 		await fs.writeFile("./de.json", withTabs)
@@ -529,7 +529,7 @@ describe("formatting", () => {
 	"test": "test"
 }`
 
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", withNewLine)
 		await fs.writeFile("./fr.json", withoutNewLine)
 		const settings: PluginSettings = {
@@ -554,7 +554,7 @@ describe("formatting", () => {
 	"test.test": "test"
 }`
 
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.mkdir("./en")
 		await fs.writeFile("./en/common.json", enResource)
 		const settings: PluginSettings = {
@@ -614,7 +614,7 @@ describe("formatting", () => {
 	"c.": "test"
 }`
 
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.mkdir("./en")
 		await fs.writeFile("./en/common.json", enResource)
 		const settings: PluginSettings = {
@@ -693,7 +693,7 @@ describe("formatting", () => {
 			4,
 		)
 
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 
 		await fs.writeFile("./en.json", withNesting)
 		await fs.writeFile("./fr.json", withNesting)
@@ -752,7 +752,7 @@ describe("roundTrip", () => {
 	"test": "{{username}}"
 }`
 
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", enResource)
 		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
@@ -796,7 +796,7 @@ describe("roundTrip", () => {
 	"test": "test"
 }`
 
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.mkdir("./en")
 		await fs.writeFile("./en/common.json", testResource)
 		const settings: PluginSettings = {
@@ -846,7 +846,7 @@ describe("roundTrip", () => {
 			undefined,
 			4,
 		)
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", complexContent)
 		const languageTags = ["en"]
 		const settings: PluginSettings = {
@@ -864,7 +864,7 @@ describe("roundTrip", () => {
 		const test = JSON.stringify({
 			test: "",
 		})
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", test)
 		const languageTags = ["en"]
 		const settings: PluginSettings = {
@@ -881,7 +881,7 @@ describe("roundTrip", () => {
 
 describe("detectedLanguageTags", () => {
 	it("get correct LanguageTags with string pathPattern", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", "{}")
 		await fs.writeFile("./de.json", "{}")
 		await fs.writeFile("./fr.json", "{}")
@@ -893,7 +893,7 @@ describe("detectedLanguageTags", () => {
 	})
 
 	it("get correct LanguageTags with object pathPattern", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.mkdir("./en")
 		await fs.writeFile("./en/common.json", "{}")
 		await fs.mkdir("./de")
@@ -908,7 +908,7 @@ describe("detectedLanguageTags", () => {
 	})
 
 	it("get correct LanguageTags with ignore", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", "{}")
 		await fs.writeFile("./de.json", "{}")
 		await fs.writeFile("./package.json", "{}")
