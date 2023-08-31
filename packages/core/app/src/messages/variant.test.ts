@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { createVariant, getVariant, updateVariantPattern } from "./variant.js"
 import { describe, test, expect } from "vitest"
-import type { Message, Variant } from "@inlang/message"
+import type { Message, Variant } from "./schema.js"
 import {
 	MessagePatternsForLanguageTagDoNotExistError,
 	MessageVariantAlreadyExistsError,

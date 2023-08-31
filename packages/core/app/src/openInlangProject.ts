@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { InlangProject, InstalledLintRule, InstalledPlugin, Subscribable } from "./api.js"
 import { type ImportFunction, type ResolvePackagesFunction, resolvePackages } from "@inlang/package"
-import { NodeishFilesystemSubset, Message, tryCatch, Result } from "@inlang/plugin"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
 import {
@@ -14,11 +13,13 @@ import {
 } from "./errors.js"
 import { createRoot, createSignal, createEffect } from "./solid.js"
 import { createMessagesQuery } from "./createMessagesQuery.js"
-import { InlangConfig } from "@inlang/config"
 import { debounce } from "throttle-debounce"
 import { createLintReportsQuery } from "./createLintReportsQuery.js"
+import { ProjectConfig, Message, NodeishFilesystemSubset } from "#src/interfaces.js"
+import { tryCatch, type Result } from "@inlang/result"
 
-const ConfigCompiler = TypeCompiler.Compile(InlangConfig)
+// @ts-ignore - type mismatch error
+const ConfigCompiler = TypeCompiler.Compile(ProjectConfig)
 
 /**
  * Creates an inlang instance.
@@ -38,11 +39,13 @@ export const openInlangProject = async (args: {
 
 		// -- config ------------------------------------------------------------
 
-		const [config, _setConfig] = createSignal<InlangConfig>()
+		const [config, _setConfig] = createSignal<ProjectConfig>()
 		createEffect(() => {
 			loadConfig({ projectFilePath: args.projectFilePath, nodeishFs: args.nodeishFs })
 				.then((config) => {
+					// @ts-ignore - fix after refactor
 					setConfig(config)
+					// @ts-ignore - fix after refactor
 					args._capture?.("SDK used config", config)
 				})
 				.catch((err) => {
@@ -51,13 +54,14 @@ export const openInlangProject = async (args: {
 		})
 		// TODO: create FS watcher and update config on change
 
-		const writeConfigToDisk = skipFirst((config: InlangConfig) =>
+		const writeConfigToDisk = skipFirst((config: ProjectConfig) =>
 			_writeConfigToDisk({ nodeishFs: args.nodeishFs, config }),
 		)
 
-		const setConfig = (config: InlangConfig): Result<void, InvalidConfigError> => {
+		const setConfig = (config: ProjectConfig): Result<void, InvalidConfigError> => {
 			try {
 				const validatedConfig = validateConfig(config)
+				// @ts-ignore - fix after refactor
 				_setConfig(validatedConfig)
 
 				writeConfigToDisk(validatedConfig)
@@ -97,7 +101,7 @@ export const openInlangProject = async (args: {
 
 		// -- messages ----------------------------------------------------------
 
-		let configValue: InlangConfig
+		let configValue: ProjectConfig
 		createEffect(() => (configValue = config()!)) // workaround to not run effects twice (e.g. config change + packages change) (I'm sure there exists a solid way of doing this, but I haven't found it yet)
 
 		const [messages, setMessages] = createSignal<Message[]>()
@@ -260,12 +264,13 @@ const validateConfig = (config: unknown) => {
 		})
 	}
 
-	return Value.Cast(InlangConfig, config)
+	// @ts-ignore - fix after refactor
+	return Value.Cast(ProjectConfig, config)
 }
 
 const _writeConfigToDisk = async (args: {
 	nodeishFs: NodeishFilesystemSubset
-	config: InlangConfig
+	config: ProjectConfig
 }) => {
 	const { data: serializedConfig, error: serializeConfigError } = tryCatch(() =>
 		// TODO: this will probably not match the original formatting
@@ -282,7 +287,7 @@ const _writeConfigToDisk = async (args: {
 // ------------------------------------------------------------------------------------------------
 
 const loadPackages = async (args: {
-	config: InlangConfig
+	config: ProjectConfig
 	nodeishFs: NodeishFilesystemSubset
 	_import?: ImportFunction
 }) =>

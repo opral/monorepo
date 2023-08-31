@@ -1,0 +1,99 @@
+import type { LanguageTag } from "@inlang/language-tag"
+import { Static, Type, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
+import type { NodeishFilesystem as LisaNodeishFilesystem } from "@lix-js/fs"
+import type { Message } from "@inlang/message"
+import type { JSONObject } from "@inlang/json-types"
+import type { AppSpecificInlangIdeExtension } from "./appSpecificApis/inlang.app.ideExtension.js"
+import { Translatable } from "@inlang/translatable"
+
+/**
+ * The filesystem is a subset of project lisa's nodeish filesystem.
+ *
+ * - only uses minimally required functions to decrease the API footprint on the ecosystem.
+ */
+export type NodeishFilesystemSubset = Pick<
+	LisaNodeishFilesystem,
+	"readFile" | "readdir" | "mkdir" | "writeFile"
+>
+
+// ---------------------------- RUNTIME VALIDATION TYPES ---------------------------------------------
+
+/**
+ * The plugin API is used to extend inlang's functionality.
+ */
+export type Plugin<Settings extends JSONObject | unknown = unknown> = Omit<
+	Static<typeof Plugin>,
+	"loadMessages" | "saveMessages" | "detectedLanguageTags" | "addAppSpecificApi"
+> & {
+	/**
+	 * Load messages.
+	 */
+	loadMessages?: (args: {
+		languageTags: LanguageTag[]
+		settings: Settings
+		nodeishFs: NodeishFilesystemSubset
+	}) => Promise<Message[]> | Message[]
+	saveMessages?: (args: {
+		messages: Message[]
+		settings: Settings
+		nodeishFs: NodeishFilesystemSubset
+	}) => Promise<void> | void
+	/**
+	 * Detect language tags in the project.
+	 *
+	 * Some projects use files or another config file as the source
+	 * of truth for the language tags. This function allows plugins
+	 * to detect language tags of those other sources.
+	 *
+	 * Apps use this function to prompt the user to update their
+	 * language tags in the config if additional language tags are detected.
+	 */
+	detectedLanguageTags?: (args: {
+		nodeishFs: NodeishFilesystemSubset
+		settings: Settings
+	}) => Promise<LanguageTag[]> | LanguageTag[]
+	/**
+	 * Define app specific APIs.
+	 *
+	 * @example
+	 * addAppSpecificApi: () => ({
+	 * 	 "inlang.app.ide-extension": {
+	 * 	   messageReferenceMatcher: () => {}
+	 * 	 }
+	 *  })
+	 */
+	addAppSpecificApi?: (args: {
+		settings: Settings
+	}) =>
+		| Record<`${string}.app.${string}`, unknown>
+		| { "inlang.app.ideExtension": AppSpecificInlangIdeExtension }
+}
+
+export const Plugin = Type.Object(
+	{
+		meta: Type.Object({
+			id: Type.String({
+				pattern: "^(?!system\\.)([a-z]+)\\.(plugin)\\.([a-z][a-zA-Z0-9]*)$",
+				examples: ["namespace.plugin.example"],
+			}) as unknown as TTemplateLiteral<[TLiteral<`${string}.plugin.${string}`>]>,
+			displayName: Translatable(Type.String()),
+			description: Translatable(Type.String()),
+			/* This is used for the marketplace, required if you want to publish your plugin to the marketplace */
+			marketplace: Type.Optional(
+				Type.Object({
+					icon: Type.Optional(Type.String()),
+					linkToReadme: Translatable(Type.String()),
+					keywords: Type.Array(Type.String()),
+					publisherName: Type.String(),
+					publisherIcon: Type.Optional(Type.String()),
+					license: Type.String(),
+				}),
+			),
+		}),
+		loadMessages: Type.Optional(Type.Any()),
+		saveMessages: Type.Optional(Type.Any()),
+		detectedLanguageTags: Type.Optional(Type.Any()),
+		addAppSpecificApi: Type.Optional(Type.Any()),
+	},
+	{ additionalProperties: false },
+)

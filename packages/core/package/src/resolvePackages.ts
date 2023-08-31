@@ -1,9 +1,11 @@
 import type { InlangPackage, ResolvePackagesFunction } from "./api.js"
 import { PackageError, PackageImportError, PackageHasNoExportsError } from "./errors.js"
 import { tryCatch } from "@inlang/result"
-import { LintRule, resolveLintRules } from "@inlang/lint"
-import { resolvePlugins, type Plugin } from "@inlang/plugin"
+import { resolveLintRules } from "@inlang/lint"
+import type { Plugin } from "@inlang/plugin"
 import { createImport } from "./import.js"
+import type { LintRule } from "@inlang/lint-rule"
+import { resolvePlugins } from "@inlang/resolve-plugins"
 
 export const resolvePackages: ResolvePackagesFunction = async (args) => {
 	const _import = args._import ?? createImport({ readFile: args.nodeishFs.readFile, fetch })

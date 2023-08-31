@@ -1,1 +1,0 @@
-(User) config for inlang.

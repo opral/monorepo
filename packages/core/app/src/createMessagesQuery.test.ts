@@ -2,8 +2,8 @@
 import { describe, it, expect } from "vitest"
 import { createMessagesQuery } from "./createMessagesQuery.js"
 import { createEffect, createRoot, createSignal } from "./solid.js"
-import type { Message, Text } from "@inlang/plugin"
-import { createMessage } from "@inlang/test"
+import type { Message, Text } from "@inlang/message"
+import { createMessage } from "./test-utilities/createMessage.js"
 
 const createChangeListener = async (cb: () => void) => createEffect(cb)
 

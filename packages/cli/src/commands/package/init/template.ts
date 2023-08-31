@@ -1,6 +1,6 @@
 import type { PackageInitOptions } from "./command.js"
 import cliPkg from "../../../../package.json"
-import pluginPkg from "../../../../../core/plugin/package.json"
+import pluginPkg from "../../../../../public-interfaces/plugin/package.json"
 import lintPkg from "../../../../../core/lint/package.json"
 import { dedent } from "ts-dedent"
 
