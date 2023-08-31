@@ -1,8 +1,6 @@
 import { Command } from "commander"
-import { cli } from "../../main.js"
 import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { log } from "../../utilities/log.js"
-import { Value } from "@sinclair/typebox/value"
 
 export const validate = new Command()
 	.command("validate")

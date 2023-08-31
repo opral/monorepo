@@ -50,6 +50,8 @@
 		"@inlang/package": "*",
 		"@inlang/rpc": "*",
 		"@inlang/sdk": "*",
+		"@inlang/create-project": "*",
+		"@inlang/language-tag": "*",
 		"@lix-js/fs": "*",
 		"@sentry/node": "^7.64.0",
 		"@sinclair/typebox": "^0.31.3",
