@@ -234,7 +234,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					await openInlangProject({
 						nodeishFs: newRepo.nodeishFs,
 						projectFilePath: "/project.inlang.json",
-						_captureBrowser: telemetryBrowser,
+						_capture(id, props) {
+							telemetryBrowser.capture(id, props)
+						},
 					}),
 					{ from },
 				)
