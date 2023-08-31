@@ -10,11 +10,8 @@ import { getGitOrigin, telemetry } from "./services/telemetry/index.js"
 import { version } from "../package.json"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
 import { promptToReloadWindow } from "./utilities/promptToReload.js"
-import { recommendation, isDisabledRecommendation } from "./utilities/recommendation.js"
-// import {
-// 	createInlangConfigFile,
-// 	isDisabledConfigFileCreation,
-// } from "./utilities/createInlangConfigFile.js"
+import { recommendation, isInWorkspaceRecommendation } from "./utilities/recommendation.js"
+
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 import { openInEditorCommand } from "./commands/openInEditor.js"
 import { editMessageCommand } from "./commands/editMessage.js"
@@ -40,14 +37,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			properties: {
 				vscode_version: vscode.version,
 				version: version,
-				workspaceRecommendation: !(await isDisabledRecommendation()),
-				// autoConfigFileCreation: !(await isDisabledConfigFileCreation()),
 			},
 		})
 
 		msg("Inlang extension activated.", "info")
 		// start the ide extension
-		main({ context })
+		main({ context, gitOrigin })
 	} catch (error) {
 		vscode.window.showErrorMessage((error as Error).message)
 		console.error(error)
@@ -59,7 +54,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
  *
  * This function registers all commands, actions, loads the config etc.
  */
-async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
+async function main(args: {
+	context: vscode.ExtensionContext
+	gitOrigin: string | undefined
+}): Promise<void> {
 	// if no active text editor -> no window is open -> hence dont activate the extension
 	const activeTextEditor = vscode.window.activeTextEditor
 	if (activeTextEditor === undefined) {
@@ -91,6 +89,17 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	if (!workspaceFolder) {
 		console.warn("No workspace folder found.")
 		return
+	}
+
+	if (args.gitOrigin) {
+		telemetry.groupIdentify({
+			groupType: "repository",
+			groupKey: args.gitOrigin,
+			properties: {
+				name: args.gitOrigin,
+				isInWorkspaceRecommendation: await isInWorkspaceRecommendation({ workspaceFolder }),
+			},
+		})
 	}
 
 	// watch for changes in the config file
