@@ -1,4 +1,4 @@
-import type { Message } from "@inlang/messages"
+import type { Message } from "@inlang/message"
 import { ReactiveMap } from "@solid-primitives/map"
 import { createEffect } from "./solid.js"
 import { createSubscribable } from "./openInlangProject.js"

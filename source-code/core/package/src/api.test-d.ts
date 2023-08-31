@@ -1,5 +1,5 @@
 import type { Plugin } from "@inlang/plugin"
-import type { LintRule } from "@inlang/lint"
+import type { LintRule } from "@inlang/lint-rule"
 import type { InlangPackage } from "./api.js"
 
 const plugin1 = {} as Plugin

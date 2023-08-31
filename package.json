@@ -2,11 +2,11 @@
 	"private": true,
 	"type": "module",
 	"workspaces": [
+		"lix/*",
 		"source-code/*",
 		"source-code/core/*",
 		"source-code/plugins/*",
-		"source-code/interface/*",
-		"lix/*"
+		"source-code/public-interfaces/*"
 	],
 	"scripts": {
 		"build": "turbo run build",

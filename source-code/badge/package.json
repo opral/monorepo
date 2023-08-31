@@ -29,9 +29,7 @@
 		"satori": "^0.10.3",
 		"satori-html": "^0.3.2"
 	},
-	"devDependencies": {
-		"@inlang/test": "*"
-	},
+	"devDependencies": {},
 	"peerDependencies": {
 		"express": "^4.18.2"
 	},

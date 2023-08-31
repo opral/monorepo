@@ -1,12 +1,4 @@
-import type { InlangConfig } from "@inlang/app"
-import type {
-	InvalidLintRuleError,
-	LintRuleThrowedError,
-	LintReport,
-	LintRule,
-	LintLevel,
-} from "@inlang/lint"
-import type { Message } from "@inlang/messages"
+import type { InvalidLintRuleError, LintRuleThrowedError } from "@inlang/lint"
 import type { Result } from "@inlang/result"
 import type {
 	InvalidConfigError,
@@ -14,7 +6,6 @@ import type {
 	PluginSaveMessagesError,
 } from "./errors.js"
 import type {
-	Plugin,
 	PluginReturnedInvalidAppSpecificApiError,
 	PluginLoadMessagesFunctionAlreadyDefinedError,
 	PluginSaveMessagesFunctionAlreadyDefinedError,
@@ -22,8 +13,16 @@ import type {
 	PluginHasInvalidSchemaError,
 	PluginUsesReservedNamespaceError,
 	ResolvedPluginApi,
-} from "@inlang/plugin"
+} from "@inlang/resolve-plugins"
 import type { PackageImportError, PackageError } from "@inlang/package"
+import type {
+	LintLevel,
+	LintReport,
+	LintRule,
+	Message,
+	Plugin,
+	ProjectConfig,
+} from "#src/interfaces.js"
 
 export type InstalledPlugin = {
 	meta: Plugin["meta"]
@@ -67,8 +66,8 @@ export type InlangProject = {
 		)[]
 	>
 	appSpecificApi: Subscribable<ResolvedPluginApi["appSpecificApi"]>
-	config: Subscribable<InlangConfig | undefined>
-	setConfig: (config: InlangConfig) => Result<void, InvalidConfigError>
+	config: Subscribable<ProjectConfig | undefined>
+	setConfig: (config: ProjectConfig) => Result<void, InvalidConfigError>
 	query: {
 		messages: MessageQueryApi
 		lintReports: LintReportsQueryApi

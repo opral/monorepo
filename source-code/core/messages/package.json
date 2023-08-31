@@ -28,6 +28,8 @@
 	},
 	"dependencies": {
 		"@inlang/language-tag": "*",
+		"@inlang/message": "*",
+		"@inlang/result": "*",
 		"@sinclair/typebox": "^0.30.0"
 	},
 	"devDependencies": {

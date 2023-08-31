@@ -1,12 +1,9 @@
 import { describe, it, expect, vi } from "vitest"
 import { lintCommandAction } from "./index.js"
-import { openInlangProject } from "@inlang/app"
-import { createMockNodeishFs } from "@inlang/plugin/test"
-import type { InlangConfig } from "@inlang/config"
+import { LintRule, Message, ProjectConfig, openInlangProject, Plugin } from "@inlang/app"
+
 import type { InlangPackage } from "@inlang/package"
-import type { LintRule } from "@inlang/lint"
-import type { Plugin } from "@inlang/plugin"
-import type { Message } from "@inlang/messages"
+import { createNodeishMemoryFs } from "@lix-js/fs"
 
 const exampleMessages: Message[] = [
 	{
@@ -54,7 +51,7 @@ const exampleMessages: Message[] = [
 ]
 
 async function setupInlang(enabledLintRule?: LintRule) {
-	const fs = await createMockNodeishFs()
+	const fs = createNodeishMemoryFs()
 
 	await fs.writeFile(
 		"./project.inlang.json",
@@ -65,7 +62,7 @@ async function setupInlang(enabledLintRule?: LintRule) {
 			settings: {
 				"project.lintRuleLevels": {},
 			},
-		} satisfies InlangConfig),
+		} satisfies ProjectConfig),
 	)
 
 	const _mockPlugin: Plugin = {

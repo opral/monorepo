@@ -1,12 +1,10 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type { LanguageTag } from "../../../public-interfaces/language-tag/dist/index.js"
-import type { Message, Variant } from "@inlang/message"
+import type { LanguageTag, Message, Variant } from "#src/interfaces.js"
 import type { Result } from "@inlang/result"
 import {
 	MessagePatternsForLanguageTagDoNotExistError,
 	MessageVariantAlreadyExistsError,
 	MessageVariantDoesNotExistError,
-} from "./errors.js"
+} from "@inlang/messages"
 
 /**
  * Tries to match the most specific variant of a message.
