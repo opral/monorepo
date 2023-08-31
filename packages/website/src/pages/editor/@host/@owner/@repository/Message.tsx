@@ -103,7 +103,7 @@ export function Message(props: { id: string }) {
 						inlang()?.config()?.sourceLanguageTag!,
 					)}
 				>
-					{(languageTag) => {
+					{(languageTag, index) => {
 						return (
 							<>
 								<Show
@@ -113,6 +113,29 @@ export function Message(props: { id: string }) {
 										// only render if visible or has been rendered before
 										(elementIsVisible() || hasBeenRendered()) &&
 										message()
+									}
+									fallback={
+										<div
+											class="h-[46px] flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border first:mt-0 -mt-[1px] border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus-within:relative focus-within:border-primary focus-within:ring-[3px] focus-within:ring-hover-primary/50"
+										>
+											<div class="flex justify-start items-start gap-2 py-[5px]">
+												<div class="flex justify-start items-center flex-grow-0 flex-shrink-0 w-[72px] gap-2 py-0">
+													<div class="flex justify-start items-start flex-grow-0 flex-shrink-0 relative gap-2">
+														<p class="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left text-on-surface-variant()">
+															{languageTag}
+														</p>
+													</div>
+													{index() === 0 && (
+														<sl-badge prop:variant="neutral">ref</sl-badge>
+													)}
+												</div>
+												<div class="w-full px-[6px] py-[2px] focus-within:border-none focus-within:ring-0 focus-within:outline-none">
+													<div class={"animate-pulse rounded-sm bg-surface-2 h-5 " +
+														(index() % 3 === 0 ? " w-32" : index() % 3 === 1 ? " w-24" : " w-28")
+													} />
+												</div>
+											</div>
+										</div>
 									}
 								>
 									<PatternEditor
