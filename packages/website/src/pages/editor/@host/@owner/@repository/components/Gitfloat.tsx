@@ -29,10 +29,6 @@ export const Gitfloat = () => {
 	} = useEditorState()
 	const [localStorage] = useLocalStorage()
 
-	createEffect(() => {
-		console.log(userIsCollaborator())
-	})
-
 	// ui states
 	const gitState: () => "login" | "fork" | "pullrequest" | "hasChanges" = () => {
 		if (localStorage?.user === undefined) {

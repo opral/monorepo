@@ -28,7 +28,7 @@
 	},
 	"dependencies": {
 		"@inlang/config": "*",
-		"@inlang-git/fs": "*",
+		"@lix-js/fs": "*",
 		"@inlang/lint": "*",
 		"@inlang/plugin": "*",
 		"just-extend": "^6.2.0"

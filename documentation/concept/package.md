@@ -13,7 +13,7 @@ An app imports and uses the items of the packages that are defined in the [inlan
 - [Plugins](/documentation/plugin)
 - [Lint rules](/documentation/lint-rule)
 
-<!-- TODO visualization of a package that contains N items -->
+![inlang package](https://cdn.jsdelivr.net/gh/inlang/inlang/documentation/assets/package.jpg)
 
 ## Package schema
 

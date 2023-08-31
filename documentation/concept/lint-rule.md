@@ -10,7 +10,7 @@ description: Lint rules validate messages and other types of content in an inlan
 
 For example, the [missing translation lint rule](TODO-link-to-marketplace) reports an issue if a message is missing a translation for a specified [language tag](/documentation/concepts/language-tag). Inlang applications use lint rules to validate content and report issues to the user.
 
-<!-- TODO visualization of different apps showing lint reports -->
+![inlang empty-pattern lint rule](https://cdn.jsdelivr.net/gh/inlang/inlang/documentation/assets/lintrule.jpg)
 
 ## Types of lint rules
 

@@ -6,7 +6,7 @@ import { telemetryNode } from "@inlang/telemetry"
 import { removeCommas } from "./helper/removeCommas.js"
 import { calculateSummary } from "./helper/calculateSummary.js"
 import { caching } from "cache-manager"
-import { openInlangProject } from "@inlang/app"
+import { LintReport, openInlangProject } from "@inlang/app"
 
 const fontMedium = readFileSync(new URL("./assets/static/Inter-Medium.ttf", import.meta.url))
 const fontBold = readFileSync(new URL("./assets/static/Inter-Bold.ttf", import.meta.url))
@@ -52,8 +52,37 @@ export const badge = async (url: string) => {
 		throw new Error("No sourceLanguageTag found, please add one to your project.inlang.json")
 	}
 
+	// TODO: return undefined until u get the first report in lintReport Query
+	const LintReportsAwaitable = (): Promise<LintReport[]> => {
+		return new Promise((resolve) => {
+			let reports = inlang.query.lintReports.getAll()
+
+			if (reports.length !== 0) {
+				resolve(reports)
+			} else {
+				let counter = 0
+				const interval = setInterval(() => {
+					reports = inlang.query.lintReports.getAll()
+
+					if (reports.length !== 0) {
+						clearInterval(interval)
+						resolve(reports)
+					} else {
+						counter += 1
+					}
+
+					if (counter === 10) {
+						resolve([])
+					}
+				}, 1000)
+			}
+		})
+	}
+
+	const reports = await LintReportsAwaitable()
+
 	const { percentage, errors, warnings, numberOfMissingVariants } = calculateSummary({
-		reports: inlang.query.lintReports.getAll(),
+		reports: reports,
 		languageTags: inlangConfig.languageTags,
 		messageIds: messageIds,
 	})

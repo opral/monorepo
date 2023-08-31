@@ -10,7 +10,7 @@ description: Inlang is globalization infrastructure that powers an ecosystem of 
 
 {% $frontmatter.description %}
 
-<!-- TODO illustration of inlang ecosystem -->
+![inlang ecosystem](https://cdn.jsdelivr.net/gh/inlang/inlang/documentation/assets/ecosystem.jpg)
 
 ### Infrastructure approach
 

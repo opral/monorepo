@@ -1,4 +1,4 @@
-import { normalizePath } from "@inlang-git/fs"
+import { normalizePath } from "@lix-js/fs"
 import fetch from "node-fetch"
 import ts from "typescript"
 import requireFromString from "require-from-string"

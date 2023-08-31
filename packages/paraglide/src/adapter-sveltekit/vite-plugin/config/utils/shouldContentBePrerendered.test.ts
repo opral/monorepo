@@ -1,4 +1,4 @@
-import { createNodeishMemoryFs } from "@inlang-git/fs"
+import { createNodeishMemoryFs } from "@lix-js/fs"
 import { describe, it, expect } from "vitest"
 import { shouldContentBePrerendered } from "./shouldContentBePrerendered.js"
 import dedent from "dedent"

@@ -1,9 +1,9 @@
 import { parseOrigin, telemetryNode } from "@inlang/telemetry"
-import { raw } from "@inlang-git/client/raw"
 import fs from "node:fs"
 import * as vscode from "vscode"
 import type { TelemetryEvents } from "./events.js"
 import { getUserId } from "../../utilities/settings/getUserId.js"
+import { listRemotes, findRoot } from "isomorphic-git"
 
 export const telemetry: Omit<typeof telemetryNode, "capture"> & { capture: typeof capture } =
 	new Proxy(telemetryNode, {
@@ -55,9 +55,9 @@ async function capture(args: CaptureEventArguments) {
 export async function getGitOrigin() {
 	try {
 		const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
-		const remotes = await raw.listRemotes({
+		const remotes = await listRemotes({
 			fs,
-			dir: await raw.findRoot({
+			dir: await findRoot({
 				fs,
 				filepath: workspaceRoot ?? process.cwd(),
 			}),

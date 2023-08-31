@@ -1,4 +1,4 @@
-import { NodeishFilesystem, createNodeishMemoryFs, normalizePath } from "@inlang-git/fs"
+import { NodeishFilesystem, createNodeishMemoryFs, normalizePath } from "@lix-js/fs"
 import { dedent } from "ts-dedent"
 import type { NodeishFilesystemSubset } from "../api.js"
 

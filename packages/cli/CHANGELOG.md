@@ -184,7 +184,7 @@
 ### Patch Changes
 
 - Updated dependencies [98b140f1]
-  - @inlang-git/fs@0.0.3
+  - @lix-js/fs@0.0.3
 
 ## 0.9.0
 
@@ -214,7 +214,7 @@
 
 ### Minor Changes
 
-- 270088f7: initial release of @inlang-git/fs
+- 270088f7: initial release of @lix-js/fs
 
 ## 0.5.5
 
