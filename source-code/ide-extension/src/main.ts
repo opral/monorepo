@@ -25,15 +25,6 @@ import { _import } from "./utilities/import/_import.js"
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
 		// activation telemetry
-		await telemetry.capture({
-			event: "IDE-EXTENSION activated",
-			properties: {
-				vscode_version: vscode.version,
-				version: version,
-				workspaceRecommendation: !(await isDisabledRecommendation()),
-				// autoConfigFileCreation: !(await isDisabledConfigFileCreation()),
-			},
-		})
 		const gitOrigin = await getGitOrigin()
 		if (gitOrigin) {
 			telemetry.groupIdentify({
@@ -44,6 +35,16 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 				},
 			})
 		}
+		await telemetry.capture({
+			event: "IDE-EXTENSION activated",
+			properties: {
+				vscode_version: vscode.version,
+				version: version,
+				workspaceRecommendation: !(await isDisabledRecommendation()),
+				// autoConfigFileCreation: !(await isDisabledConfigFileCreation()),
+			},
+		})
+
 		msg("Inlang extension activated.", "info")
 		// start the ide extension
 		main({ context })
@@ -102,6 +103,13 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 			projectFilePath: closestProjectFilePathUri.fsPath,
 			nodeishFs: createFileSystemMapper(workspaceFolder.uri.fsPath),
 			_import: _import(workspaceFolder.uri.fsPath),
+			_capture(id, props) {
+				telemetry.capture({
+					// @ts-ignore the capture events
+					event: id,
+					properties: props,
+				})
+			},
 		}),
 	)
 
