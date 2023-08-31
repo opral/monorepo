@@ -49,11 +49,11 @@ export const ListHeader = (props: ListHeaderProps) => {
 				let counter = 0
 				filteredReports?.filter((report: MessageLintReport) => {
 					level = report.level
-					if (
-						showFilteredMessage(inlang()?.query.messages.get({ where: { id: report.messageId } }))
-					) {
+					// if (
+					// 	showFilteredMessage(inlang()?.query.messages.get({ where: { id: report.messageId } }))
+					// ) {
 						counter++
-					}
+					// }
 				})
 
 				if (
