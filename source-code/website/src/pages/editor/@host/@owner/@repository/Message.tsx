@@ -108,8 +108,6 @@ export function Message(props: { id: string }) {
 							<>
 								<Show
 									when={
-										(filteredLanguageTags().includes(languageTag) ||
-											filteredLanguageTags().length === 0) &&
 										// only render if visible or has been rendered before
 										(elementIsVisible() || hasBeenRendered()) &&
 										message()
@@ -144,6 +142,7 @@ export function Message(props: { id: string }) {
 										lintReports={lintReports()}
 										setMessageIsFocused={setMessageIsFocused}
 										messageIsFocused={messageIsFocused}
+										hidden={!(filteredLanguageTags().includes(languageTag) || filteredLanguageTags().length === 0)}
 									/>
 								</Show>
 							</>
