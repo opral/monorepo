@@ -1,4 +1,4 @@
-import type { MessageLintRule } from "@inlang/lint"
+import type { MessageLintRule } from "@inlang/lint-rule"
 
 export const messageWithoutSourceRule: MessageLintRule = {
 	type: "MessageLint",

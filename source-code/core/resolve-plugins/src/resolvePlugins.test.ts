@@ -8,7 +8,7 @@ import {
 	PluginReturnedInvalidAppSpecificApiError,
 	PluginHasInvalidSchemaError,
 } from "./errors.js"
-import type { Plugin } from "./types.js"
+import type { Plugin } from "@inlang/plugin"
 
 describe("generally", () => {
 	it("should return an error if a plugin uses an invalid id", async () => {
