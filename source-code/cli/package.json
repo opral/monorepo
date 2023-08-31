@@ -41,16 +41,10 @@
 	"scripts": {
 		"dev": "node ./build.js",
 		"build": "cross-env NODE_ENV=production node ./build.js",
-		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage --test-timeout=10000",
-		"test:watch": "vitest watch --passWithNoTests --coverage --test-timeout=10000",
-		"---- LINT ----------------------------------------------------------": "",
-		"lint": "cd ../.. && npm run lint:base ./source-code/core",
-		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/core",
-		"format": "cd ../.. && npm run format:base ./source-code/core",
-		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/core",
-		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
+		"lint": "eslint ./src",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"devDependencies": {
 		"isomorphic-git": "1.24.5",

@@ -12,16 +12,10 @@
 	"scripts": {
 		"build": "tsc --build ./tsconfig.build.json",
 		"dev": "tsc --watch",
-		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
-		"test:watch": "vitest watch --passWithNoTests --coverage",
-		"---- LINT ----------------------------------------------------------": "",
-		"lint": "cd .. && npm run lint:base ./lix/server",
-		"lint:fix": "cd .. && npm run lint:fix:base ./lix/server",
-		"format": "cd .. && npm run format:base ./lix/server",
-		"format:fix": "cd .. && npm run format:fix:base ./lix/server",
-		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
+		"lint": "eslint ./src",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {},
 	"peerDependencies": {},

@@ -17,9 +17,7 @@ export const init = new Command()
 
 export async function initCommandAction() {
 	// Check if config file already exists
-	const packageJsonPath = "./package.json"
 	const inlangProjectFilePath = "./project.inlang.json"
-	const rootDir = "./"
 
 	if (fs.existsSync(inlangProjectFilePath)) {
 		log.error("⏸️  Config file already exists.")

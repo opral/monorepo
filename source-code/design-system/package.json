@@ -16,15 +16,10 @@
 	"scripts": {
 		"build": "tsc --build ./tsconfig.build.json",
 		"dev": "tsc -p ./tsconfig.build.json --watch",
-		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit",
-		"---- LINT ----------------------------------------------------------": "",
-		"lint": "cd ../.. && npm run lint:base ./source-code/design-system",
-		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/design-system",
-		"format": "cd ../.. && npm run format:base ./source-code/design-system",
-		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/design-system",
-		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
+		"lint": "eslint ./src",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
 		"@ctrl/tinycolor": "^4.0.1"

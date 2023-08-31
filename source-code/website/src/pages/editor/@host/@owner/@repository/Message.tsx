@@ -108,7 +108,8 @@ export function Message(props: { id: string }) {
 							<>
 								<Show
 									when={
-										(filteredLanguageTags().includes(languageTag) || filteredLanguageTags().length === 0) &&
+										(filteredLanguageTags().includes(languageTag) ||
+											filteredLanguageTags().length === 0) &&
 										// only render if visible or has been rendered before
 										(elementIsVisible() || hasBeenRendered()) &&
 										message()

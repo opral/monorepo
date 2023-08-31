@@ -66,12 +66,11 @@
 		"_test": "vitest run --coverage",
 		"test:e2e": "TEST=true npm run pretest && node ./dist/test.cjs",
 		"---- LINT ----------------------------------------------------------": "",
-		"lint": "cd ../.. && npm run lint:base ./source-code/ide-extension",
-		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/ide-extension",
-		"format": "cd ../.. && npm run format:base ./source-code/ide-extension",
-		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/ide-extension",
-		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
+		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"lint": "eslint ./src",
+		"format": "prettier ./src --write",
+		"---- OTHER ----------------------------------------------------------": "",
+		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
 		"@inlang/core": "*",

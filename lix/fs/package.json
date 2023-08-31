@@ -15,16 +15,10 @@
 	"scripts": {
 		"build": "tsc --build ./tsconfig.build.json",
 		"dev": "tsc --watch",
-		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
-		"test:watch": "vitest watch --passWithNoTests --coverage",
-		"---- LINT ----------------------------------------------------------": "",
-		"lint": "cd ../.. && npm run lint:base ./source-code/core",
-		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/core",
-		"format": "cd ../.. && npm run format:base ./source-code/core",
-		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/core",
-		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
+		"lint": "eslint ./src",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
 		"js-base64": "^3.7.5"
