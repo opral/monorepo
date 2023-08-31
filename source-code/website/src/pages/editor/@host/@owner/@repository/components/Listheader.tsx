@@ -1,5 +1,5 @@
 import { useEditorState } from "../State.jsx"
-import { For, Show } from "solid-js"
+import { For, Show, createEffect } from "solid-js"
 import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
@@ -40,34 +40,6 @@ export const ListHeader = (props: ListHeaderProps) => {
 					: 1
 			}
 		}
-
-		// inlang()
-		// 	?.installed.lintRules()
-		// 	.filter((lintRule) => !lintRule.disabled)
-		// 	.map((lintRule) => {
-		// 		let level: "error" | "warning"
-		// 		const filteredReports = reports?.filter(
-		// 			(report: MessageLintReport) => report.ruleId === lintRule.meta.id,
-		// 		)
-		// 		let counter = 0
-		// 		filteredReports?.filter((report: MessageLintReport) => {
-		// 			level = report.level
-		// 			if (
-		// 				showFilteredMessage(inlang()?.query.messages.get({ where: { id: report.messageId } }))
-		// 			) {
-		// 				counter++
-		// 			}
-		// 		})
-
-		// 		if (
-		// 			lintRule &&
-		// 			counter !== 0 &&
-		// 			(filteredLintRules().length === 0 || filteredLintRules().includes(lintRule.meta.id))
-		// 		) {
-		// 			lintSummary.push({ rule: lintRule.meta, amount: counter, level: level! })
-		// 		}
-		// 	})
-
 		return lintSummary
 	}
 
