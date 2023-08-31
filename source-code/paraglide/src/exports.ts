@@ -2,7 +2,7 @@ import type { InlangFunction } from "./runtime/inlang-function.js"
 import type { Runtime } from "./runtime/runtime.js"
 import type { RelativeUrl } from "./types.js"
 import { InlangException } from "./exceptions.js"
-import type { LanguageTag } from "@inlang/app"
+import type { LanguageTag } from "@inlang/sdk"
 
 const error = new InlangException(
 	"You need to use the Inlang plugin to be able to use those imports. See https://inlang.com/documentation/sdk/overview",

@@ -1,5 +1,5 @@
 import { createInlangFunction } from "./inlang-function.js"
-import type { Message } from "@inlang/app"
+import type { Message } from "@inlang/sdk"
 
 const messages = [] as Message[]
 

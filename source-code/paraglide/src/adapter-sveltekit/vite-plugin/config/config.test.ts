@@ -1,4 +1,4 @@
-import { createMockNodeishFs } from "@inlang/app/test"
+import { createMockNodeishFs } from "@inlang/sdk/test"
 import { it, beforeEach, vi, expect } from "vitest"
 import {
 	PATH_TO_CWD,
@@ -12,7 +12,7 @@ import {
 	type InlangProject,
 	ProjectFilePathNotFoundError,
 	createMessagesQuery,
-} from "@inlang/app"
+} from "@inlang/sdk"
 import * as createBasicInlangConfigModule from "./utils/createBasicInlangConfig.js"
 import { getNodeishFs } from "./utils/getNodeishFs.js"
 import { version } from "../../../../package.json"
@@ -21,8 +21,8 @@ import { validateSdkConfig, type SdkConfig } from "@inlang/sdk-js-plugin"
 import { createMessage } from "@inlang/test"
 
 vi.mock("./utils/getNodeishFs.js")
-vi.mock("@inlang/app", async () => ({
-	...(await vi.importActual<typeof import("@inlang/app")>("@inlang/app")),
+vi.mock("@inlang/sdk", async () => ({
+	...(await vi.importActual<typeof import("@inlang/sdk")>("@inlang/sdk")),
 	openInlangProject: vi.fn(),
 }))
 

@@ -1,4 +1,4 @@
-import type { IdeExtensionConfig, LanguageTag } from "@inlang/app"
+import type { IdeExtensionConfig, LanguageTag } from "@inlang/sdk"
 import { MarkdownString, Uri } from "vscode"
 import { state } from "../state.js"
 import { getStringFromPattern } from "../utilities/query.js"

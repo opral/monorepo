@@ -1,4 +1,4 @@
-import type { NodeishFilesystemSubset } from "@inlang/app"
+import type { NodeishFilesystemSubset } from "@inlang/sdk"
 import fs from "node:fs/promises"
 import { default as _path } from "node:path"
 

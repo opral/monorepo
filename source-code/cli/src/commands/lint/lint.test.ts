@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest"
 import { lintCommandAction } from "./index.js"
-import { LintRule, Message, ProjectConfig, openInlangProject, Plugin } from "@inlang/app"
+import { LintRule, Message, ProjectConfig, openInlangProject, Plugin } from "@inlang/sdk"
 
 import type { InlangPackage } from "@inlang/package"
 import { createNodeishMemoryFs } from "@lix-js/fs"

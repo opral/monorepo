@@ -5,7 +5,7 @@ import type { Detector } from "../../../detectors/types.js"
 import { initSvelteKitServerRuntime, type SvelteKitServerRuntime } from "./runtime.js"
 import { addRuntimeToLocals, getRuntimeFromLocals, initState } from "./state.js"
 import { sequence } from "@sveltejs/kit/hooks"
-import type { LanguageTag } from "@inlang/app"
+import type { LanguageTag } from "@inlang/sdk"
 
 // ------------------------------------------------------------------------------------------------
 

@@ -7,7 +7,7 @@ import HardBreak from "@tiptap/extension-hard-break"
 import FloatingMenu from "@tiptap/extension-floating-menu"
 import { setTipTapMessage } from "./parse.js"
 import PlaceholderNode from "./customExtensions/placeholder.js"
-import type { Variant, VariableReference } from "@inlang/app"
+import type { Variant, VariableReference } from "@inlang/sdk"
 
 export const getEditorConfig = (
 	ref: HTMLDivElement,

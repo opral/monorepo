@@ -1,8 +1,8 @@
 import type { LoadEvent } from "@sveltejs/kit"
 import { base } from "$app/paths"
 import { initRuntimeWithLanguageInformation } from "../../../runtime/index.js"
-import type { Message } from "@inlang/app"
-import type { LanguageTag } from "@inlang/app"
+import type { Message } from "@inlang/sdk"
+import type { LanguageTag } from "@inlang/sdk"
 import { browser } from "$app/environment"
 
 type InitSvelteKitClientRuntimeArgs = {

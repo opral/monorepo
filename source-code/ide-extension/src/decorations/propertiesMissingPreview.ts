@@ -1,6 +1,6 @@
 import { state } from "../state.js"
 import * as vscode from "vscode"
-import type { IdeExtensionConfig } from "@inlang/app"
+import type { IdeExtensionConfig } from "@inlang/sdk"
 
 export const propertiesMissingPreview = () => {
 	const ideExtension = state().inlang.appSpecificApi()["inlang.app.ideExtension"] as

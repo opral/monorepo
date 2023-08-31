@@ -20,7 +20,7 @@ import {
 	getVariant,
 	Pattern,
 	LintReport,
-} from "@inlang/app"
+} from "@inlang/sdk"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.

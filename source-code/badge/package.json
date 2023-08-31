@@ -22,7 +22,7 @@
 	},
 	"dependencies": {
 		"@lix-js/client": "*",
-		"@inlang/app": "*",
+		"@inlang/sdk": "*",
 		"@inlang/telemetry": "*",
 		"@resvg/resvg-js": "^2.4.1",
 		"cache-manager": "^5.2.3",

@@ -9,7 +9,7 @@ import {
 	getRuntimePromiseFromEvent,
 	wait,
 } from "./utils.js"
-import type { LanguageTag, Message } from "@inlang/app"
+import type { LanguageTag, Message } from "@inlang/sdk"
 import type { LayoutServerDataPayload } from "../server/wrappers.js"
 
 // ------------------------------------------------------------------------------------------------

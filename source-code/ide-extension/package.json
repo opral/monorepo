@@ -81,7 +81,7 @@
 	},
 	"devDependencies": {
 		"isomorphic-git": "1.24.5",
-		"@inlang/app": "*",
+		"@inlang/sdk": "*",
 		"@types/fs-extra": "^11.0.1",
 		"@types/glob": "^8.1.0",
 		"@types/mocha": "^10.0.1",

@@ -3,7 +3,7 @@ import Table from "cli-table3"
 import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { bold, italic } from "../../utilities/format.js"
 import { log } from "../../utilities/log.js"
-import type { InlangProject, LintReport } from "@inlang/app"
+import type { InlangProject, LintReport } from "@inlang/sdk"
 
 export const lint = new Command()
 	.command("lint")

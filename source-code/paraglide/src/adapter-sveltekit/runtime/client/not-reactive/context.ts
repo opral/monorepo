@@ -6,7 +6,7 @@ import { get } from "svelte/store"
 import type * as Runtime from "../../../../runtime/index.js"
 import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/context.js"
 import type { RelativeUrl } from "../../../../types.js"
-import type { LanguageTag as LanguageTagBase } from "@inlang/app"
+import type { LanguageTag as LanguageTagBase } from "@inlang/sdk"
 import { logDeprecation } from "../../../../utils.js"
 import { setContext } from "svelte"
 

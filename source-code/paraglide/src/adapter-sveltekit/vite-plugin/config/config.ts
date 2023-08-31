@@ -1,4 +1,4 @@
-import { ProjectFilePathNotFoundError, openInlangProject, LanguageTag, Message } from "@inlang/app"
+import { ProjectFilePathNotFoundError, openInlangProject, LanguageTag, Message } from "@inlang/sdk"
 import { InlangSdkException } from "../exceptions.js"
 import path, { resolve } from "node:path"
 import type { Config as SvelteConfig } from "@sveltejs/kit"

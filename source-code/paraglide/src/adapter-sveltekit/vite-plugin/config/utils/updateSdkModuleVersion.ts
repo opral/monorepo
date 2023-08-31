@@ -1,4 +1,4 @@
-import { openInlangProject, type InlangProject } from "@inlang/app"
+import { openInlangProject, type InlangProject } from "@inlang/sdk"
 import { getNodeishFs } from "./getNodeishFs.js"
 import { PATH_TO_INLANG_CONFIG } from "../config.js"
 // @ts-ignore

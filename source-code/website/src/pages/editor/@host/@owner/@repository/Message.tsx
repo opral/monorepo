@@ -6,7 +6,7 @@ import { showFilteredMessage } from "./helper/showFilteredMessage.js"
 import IconCopy from "~icons/material-symbols/content-copy-outline"
 import copy from "clipboard-copy"
 import { showToast } from "#src/components/Toast.jsx"
-import type { LintReport, Message as MessageType } from "@inlang/app"
+import type { LintReport, Message as MessageType } from "@inlang/sdk"
 import { sortLanguageTags } from "./helper/sortLanguageTags.js"
 
 export function Message(props: { id: string }) {

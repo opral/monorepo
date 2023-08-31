@@ -1,4 +1,4 @@
-import type { LanguageTag } from "@inlang/app"
+import type { LanguageTag } from "@inlang/sdk"
 import { initRuntimeWithLanguageInformation } from "../../../runtime/index.js"
 import { loadMessages } from "./state.js"
 

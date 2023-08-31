@@ -1,4 +1,4 @@
-import { IdeExtensionConfig } from "@inlang/app"
+import { IdeExtensionConfig } from "@inlang/sdk"
 
 // TODO: import type from ide-extension package
 export const ideExtensionDefaultConfig: IdeExtensionConfig = {

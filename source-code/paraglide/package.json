@@ -33,7 +33,7 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/app": "*",
+		"@inlang/sdk": "*",
 		"ts-morph": "^19.0.0",
 		"typescript": "^5.1.6"
 	},

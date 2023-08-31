@@ -1,4 +1,4 @@
-import type { InlangProject } from "@inlang/app"
+import type { InlangProject } from "@inlang/sdk"
 import { validateSdkConfig, type SdkConfig, type SdkConfigInput } from "@inlang/sdk-js-plugin"
 import { InlangSdkException } from "../../exceptions.js"
 

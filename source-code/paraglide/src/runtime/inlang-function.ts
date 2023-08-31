@@ -4,7 +4,7 @@ import {
 	type Message,
 	type Pattern,
 	type VariableReference,
-} from "@inlang/app"
+} from "@inlang/sdk"
 
 type BaseArgs = Record<string, unknown> | never
 

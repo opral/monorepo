@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vitest"
 import { navigatorDetector } from "./navigatorDetector.js"
-import type { LanguageTag } from "@inlang/app"
+import type { LanguageTag } from "@inlang/sdk"
 
 const languageTags = ["en", "de", "en-GB"] satisfies LanguageTag[]
 

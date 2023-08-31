@@ -6,7 +6,7 @@ import {
 	getLocalStorage,
 	useLocalStorage,
 } from "#src/services/local-storage/index.js"
-import { ProjectConfig, tryCatch } from "@inlang/app"
+import { ProjectConfig, tryCatch } from "@inlang/sdk"
 import type { Step } from "./index.page.jsx"
 import { marketplaceItems } from "@inlang/marketplace"
 import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"

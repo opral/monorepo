@@ -2,7 +2,7 @@ import { Command } from "commander"
 import { rpc } from "@inlang/rpc"
 import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { log } from "../../utilities/log.js"
-import type { InlangProject } from "@inlang/app"
+import type { InlangProject } from "@inlang/sdk"
 import prompts from "prompts"
 
 export const translate = new Command()

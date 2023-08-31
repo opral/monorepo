@@ -1,4 +1,4 @@
-import type { LanguageTag, Message, Pattern } from "@inlang/app"
+import type { LanguageTag, Message, Pattern } from "@inlang/sdk"
 import { msg } from "./message.js"
 
 // get string from Pattern
