@@ -1,4 +1,4 @@
-import type { LanguageTag, Message, Variant } from "#src/interfaces.js"
+import type { LanguageTag, Message, Variant } from "../interfaces.js"
 import type { Result } from "@inlang/result"
 import {
 	MessagePatternsForLanguageTagDoNotExistError,

@@ -1,6 +1,6 @@
 import { privateEnv } from "@inlang/env-variables"
 import type { LanguageTag } from "@inlang/language-tag"
-import { getVariant, Text, type Message, VariableReference } from "@inlang/messages"
+import { getVariant, Text, type Message, VariableReference } from "@inlang/app"
 import type { Result } from "@inlang/result"
 
 export async function machineTranslateMessage(args: {

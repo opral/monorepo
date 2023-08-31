@@ -1,8 +1,8 @@
-import { InlangConfig } from "@inlang/config"
+import { ProjectConfig } from "@inlang/project-config"
 import { Value } from "@sinclair/typebox/value"
 import { describe, test, expect } from "vitest"
 import { expectType } from "tsd"
-import { Plugin } from "./types.js"
+import { Plugin } from "@inlang/plugin"
 
 describe("Plugin", () => {
 	test("meta.id should enforce namespace.plugin.* patterns", () => {
@@ -26,17 +26,19 @@ describe("Plugin", () => {
 		for (const pass of passCases) {
 			mockPlugin.meta.id = pass as any
 
+			// @ts-ignore - type mismatch error. fix after refactor
 			expect(Value.Check(Plugin, mockPlugin)).toBe(true)
 		}
 
 		for (const fail of failCases) {
 			mockPlugin.meta.id = fail as any
+			// @ts-ignore - type mismatch error. fix after refactor
 			expect(Value.Check(Plugin, mockPlugin)).toBe(false)
 		}
 	})
 
 	test("meta.id should be a valid inlang.config.setting key", () => {
-		const mockConfig: InlangConfig = {
+		const mockConfig: ProjectConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
 			packages: [],
@@ -46,7 +48,9 @@ describe("Plugin", () => {
 
 		for (const _case of cases) {
 			const config = { ...mockConfig, settings: { [_case]: {} } }
-			expect(Value.Check(InlangConfig, config)).toBe(true)
+			// @ts-ignore - type mismatch error. fix after refactor
+			expect(Value.Check(ProjectConfig, config)).toBe(true)
+			// @ts-ignore - type mismatch error. fix after refactor
 			expect(Value.Check(Plugin["properties"]["meta"]["properties"]["id"], _case)).toBe(true)
 		}
 	})

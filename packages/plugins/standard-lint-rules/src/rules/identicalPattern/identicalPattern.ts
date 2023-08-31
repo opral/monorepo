@@ -1,5 +1,5 @@
-import type { Text, Variant } from "@inlang/messages"
-import type { MessageLintRule } from "@inlang/lint"
+import type { Text, Variant } from "@inlang/message"
+import type { MessageLintRule } from "@inlang/lint-rule"
 
 type Settings = {
 	ignore?: string[]

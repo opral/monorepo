@@ -4,7 +4,7 @@ import { createSubscribable } from "./openInlangProject.js"
 import type { InlangProject, InstalledLintRule, LintReportsQueryApi } from "./api.js"
 import type { ProjectConfig } from "@inlang/project-config"
 import type { ResolvePackagesFunction } from "@inlang/package"
-import type { JSONObject, LintReport, Message } from "#src/interfaces.js"
+import type { JSONObject, LintReport, Message } from "./interfaces.js"
 import { lintMessages } from "@inlang/lint"
 
 /**

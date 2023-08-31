@@ -15,7 +15,7 @@ import { createRoot, createSignal, createEffect } from "./solid.js"
 import { createMessagesQuery } from "./createMessagesQuery.js"
 import { debounce } from "throttle-debounce"
 import { createLintReportsQuery } from "./createLintReportsQuery.js"
-import { ProjectConfig, Message, NodeishFilesystemSubset } from "#src/interfaces.js"
+import { ProjectConfig, Message, NodeishFilesystemSubset } from "./interfaces.js"
 import { tryCatch, type Result } from "@inlang/result"
 
 // @ts-ignore - type mismatch error

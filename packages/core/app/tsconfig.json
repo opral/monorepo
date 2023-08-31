@@ -7,10 +7,6 @@
 		"lib": ["ESNext", "DOM"],
 		"types": [],
 		"outDir": "./dist",
-		"rootDir": "./src",
-		"paths": {
-			// resemble a direct import but without ../../../../
-			"#src/*": ["./src/*"]
-		}
+		"rootDir": "./src"
 	}
 }

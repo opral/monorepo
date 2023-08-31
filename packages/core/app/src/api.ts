@@ -22,7 +22,7 @@ import type {
 	Message,
 	Plugin,
 	ProjectConfig,
-} from "#src/interfaces.js"
+} from "./interfaces.js"
 
 export type InstalledPlugin = {
 	meta: Plugin["meta"]

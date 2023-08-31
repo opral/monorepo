@@ -16,6 +16,7 @@ export {
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
 } from "./errors.js"
+export * from "./messages/variant.js"
 
 /**
  * -------- RE-EXPORTS --------

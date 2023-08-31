@@ -1,13 +1,13 @@
-import type { LintReport } from "@inlang/lint"
 import type { InlangProject } from "./api.js"
 import { expectType } from "tsd"
+import type { LintReport } from "./interfaces.js"
 
 const inlang: InlangProject = {} as any
 
-expectType<LintReport[]>(inlang.query.lintReports.getAll())
+expectType<LintReport[] | undefined>(inlang.query.lintReports.getAll())
 
 inlang.query.lintReports.getAll.subscribe((value) => {
-	expectType<LintReport[]>(value)
+	expectType<LintReport[] | undefined>(value)
 })
 
 inlang.query.lintReports.getAll()

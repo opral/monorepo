@@ -54,6 +54,7 @@ export async function translateCommandAction(args: { inlang: InlangProject }) {
 		// Get languages to translate to with the reference language removed
 
 		const languagesTagsToTranslateTo = inlangConfig.languageTags.filter(
+			// @ts-ignore - type mismtach - fix after refactor
 			(tag) => tag !== sourceLanguageTag,
 		)
 
