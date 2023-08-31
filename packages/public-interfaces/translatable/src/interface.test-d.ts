@@ -1,4 +1,5 @@
-import type { LanguageTag, Translatable } from "./interface.js"
+import type { LanguageTag } from "@inlang/language-tag"
+import type { Translatable } from "./interface.js"
 import { expectType } from "tsd"
 
 const tag: LanguageTag = "en"
@@ -10,7 +11,5 @@ const translations: Translatable<string> = {
 
 expectType<LanguageTag>(tag)
 expectType<Translatable<string>>(translations)
-
 expectType<string | undefined>(translations[tag])
-
 expectType<string>(translations[tag] ?? translations.en)
