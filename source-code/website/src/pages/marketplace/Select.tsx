@@ -52,6 +52,7 @@ export function SelectRepo(props: { size: "small" | "medium"; packages: any[] })
 	)
 }
 
+/* Deprecated */
 export function SelectionWrapper(props: {
 	select: Accessor<boolean>
 	item: MarketplaceItem
