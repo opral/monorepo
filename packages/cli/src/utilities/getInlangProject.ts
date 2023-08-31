@@ -1,6 +1,7 @@
 import fs from "node:fs/promises"
 import { resolve } from "node:path"
 import { openInlangProject, InlangProject, Result, tryCatch } from "@inlang/app"
+import { telemetry } from "../services/telemetry/implementation.js"
 
 // in case multiple commands run getInlang in the same process
 let cached: Awaited<ReturnType<typeof getInlangProject>> | undefined = undefined
@@ -24,8 +25,14 @@ export async function getInlangProject(): Promise<Result<InlangProject, Error>> 
 		openInlangProject({
 			projectFilePath,
 			nodeishFs: fs,
+			_capture(id, props) {
+				telemetry.capture({
+					// @ts-ignore the event types
+					event: id,
+					properties: props,
+				})
+			},
 		}),
 	)
-
 	return cached
 }
