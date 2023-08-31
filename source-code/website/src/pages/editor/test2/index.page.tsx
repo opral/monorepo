@@ -1,4 +1,4 @@
-import { createNodeishMemoryFs } from "@inlang-git/fs"
+import { createNodeishMemoryFs } from "@lix-js/fs"
 import {
 	InlangConfig,
 	Message,

@@ -1,5 +1,5 @@
 import { dedent } from "ts-dedent"
-import { normalizePath } from "@inlang-git/fs"
+import { normalizePath } from "@lix-js/fs"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import { PackageImportError } from "./errors.js"
 

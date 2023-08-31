@@ -80,7 +80,7 @@
 		"throttle-debounce": "^5.0.0"
 	},
 	"devDependencies": {
-		"@inlang-git/client": "*",
+		"isomorphic-git": "1.24.5",
 		"@inlang/app": "*",
 		"@types/fs-extra": "^11.0.1",
 		"@types/glob": "^8.1.0",

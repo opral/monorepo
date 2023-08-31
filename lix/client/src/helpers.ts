@@ -1,4 +1,4 @@
-import type { NodeishFilesystem } from "@inlang-git/fs"
+import type { NodeishFilesystem } from "@lix-js/fs"
 
 /**
  * Wraps a nodeishFs implementation with a js proxy for detailed logging, debugging and transparently replacing the file access behaviour.

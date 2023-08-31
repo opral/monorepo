@@ -5,7 +5,6 @@
 		"source-code/*",
 		"source-code/core/*",
 		"source-code/plugins/*",
-		"source-code-git/*",
 		"lix/*"
 	],
 	"scripts": {

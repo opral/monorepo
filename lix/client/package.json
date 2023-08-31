@@ -22,7 +22,7 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"@inlang-git/fs": "*",
+		"@lix-js/fs": "*",
 		"@inlang/app": "*",
 		"@octokit/types": "11.1.0",
 		"isomorphic-git": "1.24.5",
