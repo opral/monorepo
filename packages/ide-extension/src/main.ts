@@ -10,11 +10,8 @@ import { getGitOrigin, telemetry } from "./services/telemetry/index.js"
 import { version } from "../package.json"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
 import { promptToReloadWindow } from "./utilities/promptToReload.js"
-import { recommendation, isDisabledRecommendation } from "./utilities/recommendation.js"
-// import {
-// 	createInlangConfigFile,
-// 	isDisabledConfigFileCreation,
-// } from "./utilities/createInlangConfigFile.js"
+import { recommendation, isInWorkspaceRecommendation } from "./utilities/recommendation.js"
+
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 import { openInEditorCommand } from "./commands/openInEditor.js"
 import { editMessageCommand } from "./commands/editMessage.js"
@@ -24,17 +21,9 @@ import { _import } from "./utilities/import/_import.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
-		// activation telemetry
-		await telemetry.capture({
-			event: "IDE-EXTENSION activated",
-			properties: {
-				vscode_version: vscode.version,
-				version: version,
-				workspaceRecommendation: !(await isDisabledRecommendation()),
-				// autoConfigFileCreation: !(await isDisabledConfigFileCreation()),
-			},
-		})
 		const gitOrigin = await getGitOrigin()
+
+		// activation telemetry
 		if (gitOrigin) {
 			telemetry.groupIdentify({
 				groupType: "repository",
@@ -44,9 +33,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 				},
 			})
 		}
-		msg("Inlang extension activated.", "info")
+		await telemetry.capture({
+			event: "IDE-EXTENSION activated",
+			properties: {
+				vscode_version: vscode.version,
+				version: version,
+			},
+		})
 		// start the ide extension
-		main({ context })
+		await main({ context, gitOrigin })
 	} catch (error) {
 		vscode.window.showErrorMessage((error as Error).message)
 		console.error(error)
@@ -58,7 +53,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
  *
  * This function registers all commands, actions, loads the config etc.
  */
-async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
+async function main(args: {
+	context: vscode.ExtensionContext
+	gitOrigin: string | undefined
+}): Promise<void> {
 	// if no active text editor -> no window is open -> hence dont activate the extension
 	const activeTextEditor = vscode.window.activeTextEditor
 	if (activeTextEditor === undefined) {
@@ -92,6 +90,17 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		return
 	}
 
+	if (args.gitOrigin) {
+		telemetry.groupIdentify({
+			groupType: "repository",
+			groupKey: args.gitOrigin,
+			properties: {
+				name: args.gitOrigin,
+				isInWorkspaceRecommendation: await isInWorkspaceRecommendation({ workspaceFolder }),
+			},
+		})
+	}
+
 	// watch for changes in the config file
 	const watcher = vscode.workspace.createFileSystemWatcher(
 		new vscode.RelativePattern(workspaceFolder, "project.inlang.json"),
@@ -102,8 +111,18 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 			projectFilePath: closestProjectFilePathUri.fsPath,
 			nodeishFs: createFileSystemMapper(workspaceFolder.uri.fsPath),
 			_import: _import(workspaceFolder.uri.fsPath),
+			_capture(id, props) {
+				telemetry.capture({
+					// @ts-ignore the events
+					event: id,
+					properties: props,
+				})
+			},
 		}),
 	)
+	telemetry.capture({
+		event: "IDE-EXTENSION loaded project",
+	})
 
 	if (error) {
 		console.error(error)

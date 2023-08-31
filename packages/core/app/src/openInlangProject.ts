@@ -15,7 +15,7 @@ import { createRoot, createSignal, createEffect } from "./solid.js"
 import { createMessagesQuery } from "./createMessagesQuery.js"
 import { debounce } from "throttle-debounce"
 import { createLintReportsQuery } from "./createLintReportsQuery.js"
-import { ProjectConfig, Message, NodeishFilesystemSubset } from "./interfaces.js"
+import { ProjectConfig, Message, NodeishFilesystemSubset, LintReport } from "./interfaces.js"
 import { tryCatch, type Result } from "@inlang/result"
 
 // @ts-ignore - type mismatch error
@@ -165,7 +165,7 @@ export const openInlangProject = async (args: {
 
 		const messagesQuery = createMessagesQuery(() => messages() || [])
 		const lintReportsQuery = createLintReportsQuery(
-			messagesQuery.getAll,
+			messages,
 			config,
 			installedLintRules,
 			resolvedPackages,
@@ -182,12 +182,12 @@ export const openInlangProject = async (args: {
 							cause: err,
 						})
 					}
-					// if (
-					// 	newMessages.length !== 0 &&
-					// 	JSON.stringify(newMessages) !== JSON.stringify(messages())
-					// ) {
-					// 	setMessages(newMessages)
-					// }
+					if (
+						newMessages.length !== 0 &&
+						JSON.stringify(newMessages) !== JSON.stringify(messages())
+					) {
+						setMessages(newMessages)
+					}
 				},
 				{ atBegin: false },
 			),

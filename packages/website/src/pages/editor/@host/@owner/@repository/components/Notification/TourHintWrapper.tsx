@@ -1,7 +1,7 @@
 import { JSXElement, JSX, Show } from "solid-js"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 
-export type TourStepId = "github-login" | "fork-repository" | "missing-message-rule" | "textfield"
+export type TourStepId = "github-login" | "fork-repository" | "missing-translation-rule" | "textfield"
 
 export type Position = "top-right" | "top-left" | "bottom-right" | "bottom-left"
 
@@ -27,6 +27,9 @@ export const TourHintWrapper = (props: TourHintWrapperProps) => {
 				</Show>
 				<Show when={props.currentId === "fork-repository"}>
 					<ForkRepository />
+				</Show>
+				<Show when={props.currentId === "missing-translation-rule"}>
+					<MissingTranslationRule />
 				</Show>
 				<Show when={props.currentId === "textfield"}>
 					<Textfield />
@@ -166,7 +169,7 @@ const ForkRepository = () => {
 	)
 }
 
-const missingTranslationRule = () => {
+const MissingTranslationRule = () => {
 	return (
 		<div class="w-full flex flex-col gap-2">
 			<div class="w-full overflow-hidden">
@@ -181,7 +184,7 @@ const missingTranslationRule = () => {
 				<p class="text-sm font-medium text-info-on-inverted-container">
 					<span class="text-primary-on-inverted-container">Click</span> to see what’s missing
 				</p>
-				<p>Filter by missing message lint rule.</p>
+				<p>Filter by missing translation lint rule.</p>
 			</div>
 		</div>
 	)
