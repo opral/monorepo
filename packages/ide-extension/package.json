@@ -98,7 +98,7 @@
 		"node-fetch": "^3.3.1",
 		"ovsx": "^0.8.0",
 		"posthog-node": "^3.1.1",
-		"typescript": "5.0.4"
+		"typescript": "^5.0.4"
 	},
 	"activationEvents": [
 		"workspaceContains:**/project.inlang.json",
