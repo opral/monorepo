@@ -4,7 +4,7 @@ import { transformRemote, withLazyFetching } from "./helpers.js"
 import raw from "isomorphic-git"
 import http from "isomorphic-git/http/node"
 import { Octokit } from "octokit"
-import { createSignal, createEffect } from "@inlang/app/solid"
+import { createSignal, createEffect } from "./solid.js"
 
 const github = new Octokit({
 	request: {
