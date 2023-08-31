@@ -32,6 +32,7 @@ export const getEditorConfig = (
 					class:
 						"bg-primary/10 py-[3px] px-[1px] rounded-sm text-on-primary-container text-sm pointer-events-none",
 				},
+				// @ts-ignore - fix after refactor
 				renderLabel({ node }: any) {
 					return `${node.attrs.label ?? node.attrs.id}`
 				},
@@ -44,6 +45,7 @@ export const getEditorConfig = (
 				depth: 10,
 			}),
 			FloatingMenu.configure({
+				//@ts-ignore
 				element: document.querySelector(".variableReference"),
 				//@ts-ignore
 				shouldShow: ({ editor }) => {
