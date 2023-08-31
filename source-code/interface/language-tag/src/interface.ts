@@ -1,5 +1,5 @@
 import { Type, Static, TSchema } from "@sinclair/typebox"
-import { languageTagRegex } from "./registry.js"
+import { languageTagRegex } from "./internal_registry.js"
 
 /**
  * Follows the IETF BCP 47 language tag schema.

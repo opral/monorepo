@@ -1,4 +1,4 @@
-import type { LanguageTag, Translatable } from "./schema.js"
+import type { LanguageTag, Translatable } from "./interface.js"
 import { expectType } from "tsd"
 
 const tag: LanguageTag = "en"
