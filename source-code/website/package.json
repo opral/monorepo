@@ -23,8 +23,8 @@
 		"node": ">=18.0.0"
 	},
 	"dependencies": {
-		"@inlang-git/client": "*",
-		"@inlang-git/fs": "*",
+		"@lix-js/client": "*",
+		"@lix-js/fs": "*",
 		"@inlang/app": "*",
 		"@inlang/marketplace": "*",
 		"@inlang/telemetry": "*",

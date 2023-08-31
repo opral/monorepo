@@ -235,7 +235,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						nodeishFs: newRepo.nodeishFs,
 						projectFilePath: "/project.inlang.json",
 						_capture(id, props) {
-							telemetryBrowser.capture(id, { props })
+							telemetryBrowser.capture(id, props)
 						},
 					}),
 					{ from },

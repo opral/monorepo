@@ -1,6 +1,6 @@
-import { raw } from "@inlang-git/client/raw"
+import { findRoot, listRemotes } from "isomorphic-git"
 import fs from "node:fs"
-import type { NodeishFilesystem } from "@inlang-git/fs"
+import type { NodeishFilesystem } from "@lix-js/fs"
 
 // TODO: move to lix api when local repos supported
 /**
@@ -15,9 +15,9 @@ export async function getGitRemotes(
 ) {
 	try {
 		const usedFs = args.nodeishFs || fs
-		const root = await raw.findRoot({ fs: usedFs, filepath: args.filepath || process.cwd() })
+		const root = await findRoot({ fs: usedFs, filepath: args.filepath || process.cwd() })
 
-		const remotes = await raw.listRemotes({
+		const remotes = await listRemotes({
 			fs: usedFs,
 			dir: root,
 		})

@@ -13,6 +13,8 @@ export function Message(props: { id: string }) {
 	const { inlang, filteredLanguageTags } = useEditorState()
 	const [message, setMessage] = createSignal<MessageType>()
 	const [lintReports, setLintReports] = createSignal<LintReport[]>([])
+	const [messageIsFocused, setMessageIsFocused] = createSignal<boolean>(false)
+	// const [blockChangeMessageIsFocused, setBlockChangeMessageIsFocused]  = createSignal<Date>(new Date())
 
 	// performance optimization to only render visible elements
 	// see https://github.com/inlang/inlang/issues/333
@@ -49,6 +51,14 @@ export function Message(props: { id: string }) {
 		}
 	})
 
+	const shouldMessageBeShown = () => {
+		if (!messageIsFocused()) {
+			return !showFilteredMessage(message())
+		} else {
+			return false
+		}
+	}
+
 	return (
 		<div
 			ref={patternListElement}
@@ -58,7 +68,7 @@ export function Message(props: { id: string }) {
 			// Using a <Show> would re-trigger the render of all pattern and
 			// web components. See https://github.com/inlang/inlang/pull/555
 			classList={{
-				["hidden"]: message() ? !showFilteredMessage(message()) : true,
+				["hidden"]: message() ? shouldMessageBeShown() : true,
 			}}
 		>
 			<div class="flex gap-2 items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 border-x border-b-0 border-surface-2">
@@ -109,6 +119,8 @@ export function Message(props: { id: string }) {
 										languageTag={languageTag}
 										message={message()!}
 										lintReports={lintReports()}
+										setMessageIsFocused={setMessageIsFocused}
+										messageIsFocused={messageIsFocused}
 									/>
 								</Show>
 							</>

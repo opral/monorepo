@@ -1,4 +1,4 @@
-import { createEffect, createSignal, on, onMount, Show } from "solid-js"
+import { Accessor, createEffect, createSignal, on, onMount, Setter, Show } from "solid-js"
 import { createTiptapEditor, useEditorJSON } from "solid-tiptap"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
@@ -29,6 +29,8 @@ export function PatternEditor(props: {
 	languageTag: LanguageTag
 	message: Message
 	lintReports: LintReport[]
+	setMessageIsFocused: Setter<boolean>
+	messageIsFocused: Accessor<boolean>
 }) {
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const {
@@ -64,6 +66,10 @@ export function PatternEditor(props: {
 			}
 		}
 	}
+
+	createEffect(() => {
+		props.setMessageIsFocused(isLineItemFocused())
+	})
 
 	const sourceVariant = () =>
 		getVariant(props.message, { where: { languageTag: sourceLanguageTag()! } })

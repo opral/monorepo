@@ -1,8 +1,0 @@
-<<<<<<< ours
-modified
-=======
->>>>>>> theirs
-text
-file
-was
-modified
