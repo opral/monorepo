@@ -53,10 +53,10 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"devDependencies": {
-		"isomorphic-git": "1.24.5",
 		"@inlang/app": "*",
 		"@inlang/package": "*",
 		"@inlang/rpc": "*",
+		"@lix-js/fs": "^0.0.4",
 		"@sentry/node": "^7.64.0",
 		"@sinclair/typebox": "^0.31.3",
 		"@types/promptly": "^3.0.2",
@@ -65,6 +65,7 @@
 		"consola": "^3.2.3",
 		"cross-env": "^7.0.3",
 		"esbuild": "^0.19.2",
+		"isomorphic-git": "1.24.5",
 		"node-fetch": "^3.3.2",
 		"posthog-node": "^3.1.2",
 		"prompts": "^2.4.2",
