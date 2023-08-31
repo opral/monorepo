@@ -64,7 +64,9 @@ export function createLintReportsQuery(
 
 	return {
 		getAll: createSubscribable(() => {
-			return structuredClone([...index.values()].flat())
+			return structuredClone(
+				[...index.values()].flat().length === 0 ? undefined : [...index.values()].flat(),
+			)
 		}),
 		get: Object.assign(get, {
 			subscribe: (

@@ -52,29 +52,29 @@ export const badge = async (url: string) => {
 		throw new Error("No sourceLanguageTag found, please add one to your project.inlang.json")
 	}
 
-	// TODO: return undefined until u get the first report in lintReport Query
+	// TODO: async reports
 	const LintReportsAwaitable = (): Promise<LintReport[]> => {
 		return new Promise((resolve) => {
 			let reports = inlang.query.lintReports.getAll()
 
-			if (reports.length !== 0) {
-				resolve(reports)
+			if (reports) {
+				// reports where loaded
+				setTimeout(() => {
+					// this is a workaround. We do not know when the report changed. Normally this shouldn't be a issue for cli
+					const newReports = inlang.query.lintReports.getAll()
+					if (newReports) {
+						resolve(newReports)
+					}
+				}, 200)
 			} else {
-				let counter = 0
 				const interval = setInterval(() => {
 					reports = inlang.query.lintReports.getAll()
 
-					if (reports.length !== 0) {
+					if (reports) {
 						clearInterval(interval)
 						resolve(reports)
-					} else {
-						counter += 1
 					}
-
-					if (counter === 10) {
-						resolve([])
-					}
-				}, 1000)
+				}, 200)
 			}
 		})
 	}
