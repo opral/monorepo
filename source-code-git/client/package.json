@@ -35,7 +35,7 @@
 	},
 	"dependencies": {
 		"@inlang-git/fs": "^0.0.4",
-		"isomorphic-git": "github:inlang/isomorphic-git"
+		"isomorphic-git": "^1.24.5"
 	},
 	"license": "Apache-2.0",
 	"devDependencies": {
