@@ -29,6 +29,10 @@ export const Gitfloat = () => {
 	} = useEditorState()
 	const [localStorage] = useLocalStorage()
 
+	createEffect(() => {
+		console.log(userIsCollaborator())
+	})
+
 	// ui states
 	const gitState: () => "login" | "fork" | "pullrequest" | "hasChanges" = () => {
 		if (localStorage?.user === undefined) {
@@ -100,6 +104,12 @@ export const Gitfloat = () => {
 		setIsLoading(true)
 
 		// commit & push
+		if (!repo)
+			return showToast({
+				title: "Failed to push changes",
+				message: "Please try again or file a bug.",
+				variant: "danger",
+			})
 		const push = await pushChanges({
 			repo: repo,
 			user: localStorage.user,
