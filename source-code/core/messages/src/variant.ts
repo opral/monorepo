@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type { LanguageTag } from "../../../public-interfaces/language-tag/dist/index.js"
+import type { LanguageTag } from "@inlang/language-tag"
 import type { Message, Variant } from "@inlang/message"
 import type { Result } from "@inlang/result"
 import {
