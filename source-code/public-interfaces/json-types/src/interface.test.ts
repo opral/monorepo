@@ -1,5 +1,5 @@
 import { Value } from "@sinclair/typebox/value"
-import { JSONObject } from "./schema.js"
+import { JSONObject } from "./interface.js"
 import { it, expect, describe } from "vitest"
 
 describe("JSONObject", () => {

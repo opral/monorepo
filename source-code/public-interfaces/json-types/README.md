@@ -1,4 +1,4 @@
-JSON serializable utility type that is used across inlang's codebase (and hopefully useful to external developers as well!).
+JSON types that are used across inlang's codebase (and hopefully useful to external developers as well!).
 
 ### Usage
 

@@ -1,4 +1,4 @@
-import { Type, Static, TSchema } from "@sinclair/typebox"
+import { Type, Static } from "@sinclair/typebox"
 import { languageTagRegex } from "./internal_registry.js"
 
 /**
@@ -11,17 +11,3 @@ import { languageTagRegex } from "./internal_registry.js"
  */
 export type LanguageTag = Static<typeof LanguageTag>
 export const LanguageTag = Type.String({ pattern: languageTagRegex })
-
-/**
- * Translatable type.
- *
- * The language tag `en` is always required. Other language
- * tags are optional. Hence the name "translatable" and not
- * "translated".
- */
-export type Translatable<T> = {
-	en: T
-	[languageTag: LanguageTag]: T
-}
-export const Translatable = <T extends TSchema>(type: T) =>
-	Type.Intersect([Type.Object({ en: type }), Type.Record(LanguageTag, type)])
