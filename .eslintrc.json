@@ -62,24 +62,5 @@
 		],
 		// multiple bugs because of non null assertions. set to error in the future.
 		"@typescript-eslint/no-non-null-assertion": "warn"
-	},
-	"overrides": [
-		{
-			"files": ["**/*.ts"],
-			"excludedFiles": ["**/*.test.ts"],
-			"rules": {
-				"no-restricted-imports": [
-					"error",
-					{
-						"patterns": [
-							{
-								"group": ["@inlang/test"],
-								"message": "This is just an internal package that does not get published. You should just use it in test.ts files or for files that get bundled."
-							}
-						]
-					}
-				]
-			}
-		}
-	]
+	}
 }
