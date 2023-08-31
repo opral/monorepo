@@ -300,6 +300,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			return {
 				user: localStorage?.user ?? "not logged in",
 				routeParams: currentPageContext.routeParams as EditorRouteParams,
+				currentRepo: repo(),
 			}
 		},
 		async (args) => {
@@ -308,11 +309,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				return false
 			}
 			try {
-				const currentRepo = repo()
-				if (currentRepo) {
-					return await currentRepo.isCollaborator({ username: args.user.username })
+				if (args.currentRepo) {
+					return await args.currentRepo.isCollaborator({ username: args.user.username })
+				} else {
+					return false
 				}
-				return false
 			} catch (error) {
 				// the user is not a collaborator, hence the request will fail,
 				// FIXME: is this still required? isCollaborator should now return false instead of failing
