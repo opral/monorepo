@@ -31,6 +31,7 @@ export const openInlangProject = async (args: {
 	projectFilePath: string
 	nodeishFs: NodeishFilesystemSubset
 	_import?: ImportFunction
+	_capture?: (id: string, props: Record<string, unknown>) => void
 }): Promise<InlangProject> => {
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
@@ -42,6 +43,7 @@ export const openInlangProject = async (args: {
 			loadConfig({ projectFilePath: args.projectFilePath, nodeishFs: args.nodeishFs })
 				.then((config) => {
 					setConfig(config)
+					args._capture?.("SDK used config", config)
 				})
 				.catch((err) => {
 					markInitAsFailed(err)
