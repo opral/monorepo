@@ -106,8 +106,8 @@ You can read more here: inlang.com/documentation/language-tag`,
 	}
 
 	await createProjectConfig({
-		sourceLanguagetag,
 		tryAutoGen: autoConfig,
+		sourceLanguagetag,
 		languageTags: [...new Set(languageTags as string[])],
 		nodeishFs: args.nodeishFs,
 	})
