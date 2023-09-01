@@ -2,15 +2,15 @@
 	"type": "app",
 	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"displayName": {
-		"en": "CLI"
+		"en": "Web Editor"
 	},
 	"description": {
-		"en": "Official inlang CLI"
+		"en": "inlang's Web Editor"
 	},
 	"linkToReadme": {
-		"en": "https://github.com/inlang/inlang/blob/main/source-code/cli/README.md"
+		"en": "https://github.com/inlang/inlang/blob/main/source-code/editor/README.md"
 	},
-	"keywords": ["cli", "commands"],
+	"keywords": ["web", "editor", "visual"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0"

@@ -1,5 +1,10 @@
 {
 	"manifests": [
-		"../../plugins/json/marketplace-manifest.json"
+		"../../cli/marketplace-manifest.json",
+		"../../badge/marketplace-manifest.json",
+		"../../editor/marketplace-manifest.json",
+		"../../ide-extension/marketplace-manifest.json",
+		"../../plugins/json/marketplace-manifest.json",
+		"../../plugins/i18next/marketplace-manifest.json"
 	]
 }

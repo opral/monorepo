@@ -1,6 +1,6 @@
 {
 	"type": "plugin",
-	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"icon": "https://github.com/inlang/inlang/blob/main/source-code/plugins/i18next/assets/icon.png?raw=true",
 	"displayName": {
 		"en": "i18next"
 	},
@@ -8,11 +8,11 @@
 		"en": "i18next plugin for inlang"
 	},
 	"linkToReadme": {
-		"en": "hhttps://github.com/inlang/inlang/blob/main/source-code/plugins/i18next/README.md"
+		"en": "https://github.com/inlang/inlang/blob/main/source-code/plugins/json/README.md"
 	},
 	"keywords": ["i18next", "react", "nextjs"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0",
-	"module": "../../plugins/json/dist/index.js"
+	"module": "../../plugins/i18next/dist/index.js"
 }

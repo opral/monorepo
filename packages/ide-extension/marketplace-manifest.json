@@ -2,15 +2,15 @@
 	"type": "app",
 	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"displayName": {
-		"en": "CLI"
+		"en": "IDE Extension"
 	},
 	"description": {
-		"en": "Official inlang CLI"
+		"en": "IDE Extension for inlang projects"
 	},
 	"linkToReadme": {
-		"en": "https://github.com/inlang/inlang/blob/main/source-code/cli/README.md"
+		"en": "https://github.com/inlang/inlang/blob/main/source-code/ide-extension/README.md"
 	},
-	"keywords": ["cli", "commands"],
+	"keywords": ["ide", "extension", "vscode"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0"
