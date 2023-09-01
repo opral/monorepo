@@ -184,6 +184,12 @@ async function main(args: {
 
 	// linter diagnostics
 	linterDiagnostics(args)
+
+	// log inlang errors in the debugging console
+	const inlangErrors = state().inlang.errors()
+	if (inlangErrors.length > 0) {
+		console.error("Inlang VSCode Extension errors:", inlangErrors)
+	}
 }
 
 // this method is called when your extension is deactivated

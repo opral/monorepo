@@ -14,7 +14,7 @@ export const propertiesMissingPreview = () => {
 		const decorationType = vscode.window.createTextEditorDecorationType({
 			after: {
 				contentText:
-					"Warning: The VS Code extension is not working because no plugin defines the ide extension properties.",
+					"Warning: The VS Code extension is not working because no module defines the ide extension `appSpecificApi['inlang.app.ideExtension']`.",
 				margin: "0 0.5rem",
 				color: "white",
 				backgroundColor: "rgb(255, 140, 0, 0.15)",
