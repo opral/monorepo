@@ -20,8 +20,7 @@ export function createMessagesQuery(
 		}
 	})
 
-	const get = (args: Parameters<MessageQueryApi["get"]>[0]) =>
-		structuredClone(index.get(args.where.id))
+	const get = (args: Parameters<MessageQueryApi["get"]>[0]) => index.get(args.where.id)
 
 	return {
 		create: ({ data }): boolean => {
@@ -36,10 +35,10 @@ export function createMessagesQuery(
 			) => createSubscribable(() => get(args)).subscribe(callback),
 		}) as any,
 		includedMessageIds: createSubscribable(() => {
-			return structuredClone([...index.keys()])
+			return [...index.keys()]
 		}),
 		getAll: createSubscribable(() => {
-			return structuredClone([...index.values()])
+			return [...index.values()]
 		}),
 		update: ({ where, data }): boolean => {
 			const message = index.get(where.id)
