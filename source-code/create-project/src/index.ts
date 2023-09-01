@@ -1,7 +1,7 @@
 import type { InlangConfig } from "@inlang/sdk"
 import type { NodeishFilesystem } from "@lix-js/fs"
 
-export async function tryAutoGenModuleConfig(args: { baseConfig: InlangConfig }): any {
+export async function tryAutoGenModuleConfig(args: { baseConfig: InlangConfig }): Promise<any> {
 	// Maybe<ProjectConfigFile>
 	// TODO: enrich baseConfic
 
