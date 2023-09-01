@@ -1,5 +1,5 @@
 import type { InlangProject, LintReportsQueryApi } from "../api.js"
-import { observable, type from as solidFrom } from "../solid.js"
+import { observable, type from as solidFrom } from "../reactivity/solid.js"
 import type { MessageQueryApi } from "@inlang/sdk"
 
 export const solidAdapter = (

@@ -1,6 +1,6 @@
 import type { Message } from "@inlang/message"
-import { ReactiveMap } from "@solid-primitives/map"
-import { createEffect } from "./solid.js"
+import { ReactiveMap } from "./reactivity/map.js"
+import { createEffect } from "./reactivity/solid.js"
 import { createSubscribable } from "./openInlangProject.js"
 import type { InlangProject, MessageQueryApi } from "./api.js"
 
@@ -10,6 +10,7 @@ import type { InlangProject, MessageQueryApi } from "./api.js"
 export function createMessagesQuery(
 	messages: () => Array<Message>,
 ): InlangProject["query"]["messages"] {
+	// @ts-expect-error
 	const index = new ReactiveMap<string, Message>()
 
 	createEffect(() => {
