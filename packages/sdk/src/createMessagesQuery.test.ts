@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect } from "vitest"
 import { createMessagesQuery } from "./createMessagesQuery.js"
-import { createEffect, createRoot, createSignal } from "./solid.js"
+import { createEffect, createRoot, createSignal } from "./reactivity/solid.js"
 import type { Message, Text } from "@inlang/message"
 import { createMessage } from "./test-utilities/createMessage.js"
 
@@ -273,7 +273,7 @@ describe("reactivity", () => {
 			await createRoot(async () => {
 				const query = createMessagesQuery(() => [])
 
-				let messages: Message[] | undefined = undefined
+				let messages: Readonly<Message[]> | undefined = undefined
 				await createChangeListener(() => (messages = query.getAll()))
 				expect(Object.values(messages!)).toHaveLength(0)
 
@@ -292,7 +292,7 @@ describe("reactivity", () => {
 			await createRoot(async () => {
 				const query = createMessagesQuery(() => [createMessage("1", { en: "before" })])
 
-				let messages: Message[] | undefined = undefined
+				let messages: Readonly<Message[]> | undefined = undefined
 				await createChangeListener(() => (messages = query.getAll()))
 				expect(Object.values(messages!)).toHaveLength(1)
 				expect(
@@ -317,7 +317,7 @@ describe("reactivity", () => {
 			await createRoot(async () => {
 				const query = createMessagesQuery(() => [])
 
-				let messages: Message[] | undefined = undefined
+				let messages: Readonly<Message[]> | undefined = undefined
 				await createChangeListener(() => (messages = query.getAll()))
 				expect(Object.values(messages!)).toHaveLength(0)
 
@@ -348,7 +348,7 @@ describe("reactivity", () => {
 					createMessage("3", { en: "" }),
 				])
 
-				let messages: Message[] | undefined = undefined
+				let messages: Readonly<Message[]> | undefined = undefined
 				await createChangeListener(() => (messages = query.getAll()))
 				expect(Object.values(messages!)).toHaveLength(3)
 
@@ -373,7 +373,7 @@ describe("reactivity", () => {
 			])
 			const query = createMessagesQuery(inputMessages)
 
-			let messages: Message[] | undefined = undefined
+			let messages: Readonly<Message[]> | undefined = undefined
 			await createChangeListener(() => (messages = query.getAll()))
 			expect(Object.values(messages!)).toHaveLength(1)
 

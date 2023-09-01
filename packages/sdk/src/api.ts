@@ -85,7 +85,7 @@ export type Subscribable<Value> = {
 
 export type MessageQueryApi = {
 	create: (args: { data: Message }) => boolean
-	get: ((args: { where: { id: Message["id"] } }) => Message | undefined) & {
+	get: ((args: { where: { id: Message["id"] } }) => Readonly<Message> | undefined) & {
 		subscribe: (
 			args: { where: { id: Message["id"] } },
 			callback: (message: Message | undefined) => void,
@@ -95,7 +95,7 @@ export type MessageQueryApi = {
 	/*
 	 * getAll is depricated do not use it
 	 */
-	getAll: Subscribable<Message[]>
+	getAll: Subscribable<Readonly<Message[]>>
 	update: (args: { where: { id: Message["id"] }; data: Partial<Message> }) => boolean
 	upsert: (args: { where: { id: Message["id"] }; data: Message }) => void
 	delete: (args: { where: { id: Message["id"] } }) => boolean
@@ -103,10 +103,12 @@ export type MessageQueryApi = {
 
 export type LintReportsQueryApi = {
 	getAll: Subscribable<LintReport[] | undefined>
-	get: ((args: { where: { messageId: LintReport["messageId"] } }) => LintReport[] | undefined) & {
+	get: ((args: {
+		where: { messageId: LintReport["messageId"] }
+	}) => Readonly<LintReport[]> | undefined) & {
 		subscribe: (
 			args: { where: { messageId: LintReport["messageId"] } },
-			callback: (lintReports: LintReport[] | undefined) => void,
+			callback: (lintReports: Readonly<LintReport[]> | undefined) => void,
 		) => void
 	}
 }
