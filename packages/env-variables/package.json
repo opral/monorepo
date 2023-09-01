@@ -18,6 +18,9 @@
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
+	"dependencies": {
+		"@inlang/result": "*"
+	},
 	"devDependencies": {
 		"dotenv": "^16.3.1",
 		"esbuild": "^0.19.2",
