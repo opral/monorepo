@@ -74,12 +74,19 @@ export const badge = async (url: string) => {
 					}
 				}, 200)
 			} else {
+				let counter = 0
 				const interval = setInterval(() => {
 					reports = inlang.query.lintReports.getAll()
-
 					if (reports) {
 						clearInterval(interval)
 						resolve(reports)
+					} else {
+						counter += 1
+					}
+
+					if (counter > 30) {
+						clearInterval(interval)
+						resolve([])
 					}
 				}, 200)
 			}

@@ -47,12 +47,19 @@ export async function lintCommandAction(args: { inlang: InlangProject; logger: a
 						}
 					}, 200)
 				} else {
+					let counter = 0
 					const interval = setInterval(() => {
 						reports = args.inlang.query.lintReports.getAll()
-
 						if (reports) {
 							clearInterval(interval)
 							resolve(reports)
+						} else {
+							counter += 1
+						}
+
+						if (counter > 10) {
+							clearInterval(interval)
+							resolve([])
 						}
 					}, 200)
 				}
