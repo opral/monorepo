@@ -12,7 +12,7 @@
 		"access": "public"
 	},
 	"scripts": {
-		"postinstall": "patch-package",
+		"postinstall": "patch-package --error-on-fail",
 		"dev": "inlang module build --entry ./src/index.ts --outdir ./dist --watch",
 		"build": "inlang module build --entry ./src/index.ts --outdir ./dist",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
