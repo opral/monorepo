@@ -87,10 +87,12 @@ export function Page(props: PageProps) {
 									>
 										<div class="flex items-center gap-2">
 											{/* @ts-ignore */}
-											<Button type="primary" href={`/install?package=${item()?.package}`}>
-												Install {item()?.type}
+											<Button type="primary" href={`/install?module=${item()?.module}`}>
+												<span class="capitalize">
+													Install {item()?.type === "lintRule" ? "lint rule" : item()?.type}
+												</span>
 												{/* @ts-ignore */}
-												<SelectRepo size="medium" packages={[item()?.package]} />
+												<SelectRepo size="medium" modules={[item()?.module]} />
 											</Button>
 										</div>
 									</Show>

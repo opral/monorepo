@@ -8,7 +8,7 @@ import type { MarketplaceItem } from "@inlang/marketplace"
  * This file provides helper Components for the marketplace pages.
  */
 
-export function SelectRepo(props: { size: "small" | "medium"; packages: any[] }) {
+export function SelectRepo(props: { size: "small" | "medium"; modules: any[] }) {
 	const [store] = useLocalStorage()
 
 	return (
@@ -38,7 +38,7 @@ export function SelectRepo(props: { size: "small" | "medium"; packages: any[] })
 									setSearchParams(
 										`/install?repo=github.com/${project.owner}/${
 											project.repository
-										}&package=${props.packages?.join(",")}`,
+										}&module=${props.modules?.join(",")}`,
 									)
 								}}
 							>
@@ -134,7 +134,7 @@ export function ScrollFloat(props: { packages: Accessor<string[]> }) {
 					prop:size="small"
 					prop:target="_blank"
 					class={"on-inverted"}
-					prop:href={`/install?package=${props.packages()}`}
+					prop:href={`/install?module=${props.packages()}`}
 				>
 					Install
 				</sl-button>
