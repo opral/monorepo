@@ -58,6 +58,7 @@ export async function initCommandAction(args: {
 	// Value.Check(Type.String({ pattern: LanguageTag.pattern }), "as3df"),
 	const languageTagRegex = new RegExp(`^(${LanguageTag.pattern})$`, "g")
 
+	// FIXME: cli hangs after finishing
 	const { sourceLanguagetag } = await prompts({
 		type: "text",
 		name: "sourceLanguagetag",
@@ -65,34 +66,30 @@ export async function initCommandAction(args: {
 Inlang uses the web standard BCP 47 language tags to refer to human languages, regions, and locales.
 You can read more here: inlang.com/documentation/language-tag`,
 		initial: "en",
+		validate: (value) =>
+			!value.match(languageTagRegex)
+				? "Not a valid BCP 47 language tag. You can read more here: inlang.com/documentation/language-tag "
+				: true,
 	})
-
-	if (!sourceLanguagetag.match(languageTagRegex)) {
-		args.logger.error(
-			"Not a valid BCP 47 language tag. You can read more here: inlang.com/documentation/language-tag ",
-		)
-		return
-	}
 
 	const { languageTags } = await prompts({
 		type: "list",
 		name: "languageTags",
 		message: "What other languages do you want to add? example input: de, it",
 		initial: "",
+		validate: (value) => {
+			const badLanuageTags = []
+			for (const languageTag of value.replaceAll(" ", "").split(",")) {
+				if (!languageTag.match(languageTagRegex)) {
+					badLanuageTags.push(languageTag)
+				}
+			}
+			if (badLanuageTags.length) {
+				return `These entries are not a valid BCP 47 language tag: "${badLanuageTags}" You can read more here: inlang.com/documentation/language-tag`
+			}
+			return true
+		},
 	})
-
-	const badLanuageTags = []
-	for (const languageTag of languageTags) {
-		if (!languageTag.match(languageTagRegex)) {
-			badLanuageTags.push(languageTag)
-		}
-	}
-	if (badLanuageTags.length) {
-		args.logger.error(
-			`These entries are not a valid BCP 47 language tag: "${badLanuageTags}" You can read more here: inlang.com/documentation/language-tag`,
-		)
-		return
-	}
 
 	const { autoConfig } = await prompts({
 		type: "confirm",
