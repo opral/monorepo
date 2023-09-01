@@ -1,5 +1,5 @@
 import { ReactiveMap } from "@solid-primitives/map"
-import { createEffect } from "./solid.js"
+import { createEffect } from "./reactivity/solid.js"
 import { createSubscribable } from "./openInlangProject.js"
 import type { InlangProject, InstalledLintRule, LintReportsQueryApi } from "./api.js"
 import type { ProjectConfig } from "@inlang/project-config"

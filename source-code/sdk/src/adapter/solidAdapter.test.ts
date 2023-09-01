@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 import type { ImportFunction, InlangModule } from "@inlang/module"
-import { createEffect, from, createRoot } from "../solid.js"
+import { createEffect, from, createRoot } from "../reactivity/solid.js"
 import { solidAdapter } from "./solidAdapter.js"
 import { openInlangProject } from "../openInlangProject.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
