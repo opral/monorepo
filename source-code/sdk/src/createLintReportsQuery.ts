@@ -1,4 +1,3 @@
-import { ReactiveMap } from "@solid-primitives/map"
 import { createEffect } from "./reactivity/solid.js"
 import { createSubscribable } from "./openInlangProject.js"
 import type { InlangProject, InstalledLintRule, LintReportsQueryApi } from "./api.js"
@@ -6,6 +5,7 @@ import type { ProjectConfig } from "@inlang/project-config"
 import type { ResolveModuleFunction } from "@inlang/module"
 import type { JSONObject, LintReport, Message } from "./interfaces.js"
 import { lintSingleMessage } from "@inlang/lint"
+import { ReactiveMap } from "./reactivity/map.js"
 
 /**
  * Creates a reactive query API for messages.
@@ -16,6 +16,7 @@ export function createLintReportsQuery(
 	installedLintRules: () => Array<InstalledLintRule>,
 	resolvedModules: () => Awaited<ReturnType<ResolveModuleFunction>> | undefined,
 ): InlangProject["query"]["lintReports"] {
+	// @ts-expect-error
 	const index = new ReactiveMap<LintReport["messageId"], LintReport[]>()
 
 	createEffect(() => {
