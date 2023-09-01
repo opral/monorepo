@@ -12,6 +12,7 @@ export default defineConfig({
 	envPrefix: "PUBLIC_",
 	plugins: [
 		nodePolyfills({
+			include: ["buffer", "path"],
 			protocolImports: true,
 		}),
 		solid({ ssr: true }),
