@@ -19,29 +19,29 @@ const fetchReadmeContents = async () => {
 
 	for (const item of marketplaceItems) {
 		if (
-			!item.meta.marketplace.linkToReadme.en ||
-			!item.meta.displayName.en ||
-			!item.meta.marketplace.linkToReadme.en.includes("README.md") ||
-			readmeContents.includes(item.meta.marketplace.linkToReadme.en)
+			!item.linkToReadme.en ||
+			!item.displayName.en ||
+			!item.linkToReadme.en.includes("README.md") ||
+			readmeContents.includes(item.linkToReadme.en)
 		) {
 			continue
 		}
-		const rawReadmeLink = rawLink(item.meta.marketplace.linkToReadme.en)
+		const rawReadmeLink = rawLink(item.linkToReadme.en)
 		const response = await fetch(rawReadmeLink)
 		const readmeText = await response.text()
 
 		generateFrontmatter(
-			item.meta.displayName.en,
-			`/marketplace/${item.meta.displayName.en?.toLowerCase().replaceAll(" ", "-")}`,
+			item.displayName.en,
+			`/marketplace/${item.displayName.en?.toLowerCase().replaceAll(" ", "-")}`,
 			readmeText,
 		)
 
 		readmeContents.push(
 			generateFrontmatter(
-				item.meta.displayName.en,
-				`/marketplace/${item.meta.displayName.en?.toLowerCase().replaceAll(" ", "-")}`,
+				item.displayName.en,
+				`/marketplace/${item.displayName.en?.toLowerCase().replaceAll(" ", "-")}`,
 				readmeText,
-				item.meta.description.en?.replace("@", "").replace(/(\r\n|\n|\r)/gm, " "),
+				item.description.en?.replace("@", "").replace(/(\r\n|\n|\r)/gm, " "),
 			),
 		)
 	}

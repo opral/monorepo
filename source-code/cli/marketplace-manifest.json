@@ -1,0 +1,17 @@
+{
+	"type": "app",
+	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"displayName": {
+		"en": "CLI"
+	},
+	"description": {
+		"en": "Official inlang CLI"
+	},
+	"linkToReadme": {
+		"en": "test.com"
+	},
+	"keywords": ["test"],
+	"publisherName": "test",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"license": "Apache-2.0"
+}
