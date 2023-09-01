@@ -23,6 +23,7 @@
 	"dependencies": {
 		"@inlang/language-tag": "*",
 		"@inlang/module": "*",
+		"@inlang/translatable": "*",
 		"@sinclair/typebox": "^0.30.0"
 	},
 	"devDependencies": {

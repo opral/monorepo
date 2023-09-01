@@ -25,7 +25,7 @@ export function Page(props: PageProps) {
 	const item = () =>
 		marketplaceItems.find(
 			(item) =>
-				item.meta.displayName.en?.toLowerCase().replaceAll(" ", "-") ===
+				item.displayName.en?.toLowerCase().replaceAll(" ", "-") ===
 				props.markdown?.frontmatter?.title?.toLowerCase().replaceAll(" ", "-"),
 		)
 
@@ -44,24 +44,22 @@ export function Page(props: PageProps) {
 							<div class="col-span-1 md:col-span-3 md:pb-16 pb-12 border-b border-surface-2">
 								<div class="flex max-md:flex-col items-start gap-8 mb-10">
 									<Show
-										when={item()?.meta.marketplace.icon}
+										when={item()?.icon}
 										fallback={
 											<div class="w-16 h-16 font-semibold text-3xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
-												{item()?.meta.displayName.en?.[0]}
+												{item()?.displayName.en?.[0]}
 											</div>
 										}
 									>
 										<img
 											class="w-16 h-16 rounded-md m-0 shadow-lg object-cover object-center"
-											src={item()?.meta.marketplace.icon}
+											src={item()?.icon}
 										/>
 									</Show>
 									<div class="flex flex-col gap-3">
-										<h1 class="text-3xl font-bold">{item()?.meta.displayName.en}</h1>
+										<h1 class="text-3xl font-bold">{item()?.displayName.en}</h1>
 										<div class="inline-block text-surface-500 ">
-											<p class={!readmore() ? "lg:line-clamp-2" : ""}>
-												{item()?.meta.description.en}
-											</p>
+											<p class={!readmore() ? "lg:line-clamp-2" : ""}>{item()?.description.en}</p>
 											{/* @ts-ignore */}
 											<Show when={item()?.meta?.description?.en?.length > 205}>
 												<p
@@ -96,10 +94,7 @@ export function Page(props: PageProps) {
 											</Button>
 										</div>
 									</Show>
-									<Button
-										type="secondary"
-										href={item()?.meta.marketplace.linkToReadme.en?.replace("README.md", "")}
-									>
+									<Button type="secondary" href={item()?.linkToReadme.en?.replace("README.md", "")}>
 										GitHub
 										<MaterialSymbolsArrowOutward
 											// @ts-ignore
@@ -116,31 +111,28 @@ export function Page(props: PageProps) {
 										<h3 class="text-sm text-surface-400">Publisher</h3>
 										<div class="flex gap-2 items-center">
 											<Show
-												when={item()?.meta.marketplace.publisherIcon}
+												when={item()?.publisherIcon}
 												fallback={
 													<div
 														class={
 															"w-6 h-6 flex items-center justify-center text-background capitalize font-medium rounded-full m-0 bg-surface-900"
 														}
 													>
-														{item()?.meta.marketplace.publisherName[0]}
+														{item()?.publisherName[0]}
 													</div>
 												}
 											>
-												<img
-													class="w-6 h-6 rounded-full m-0"
-													src={item()?.meta.marketplace.publisherIcon}
-												/>
+												<img class="w-6 h-6 rounded-full m-0" src={item()?.publisherIcon} />
 											</Show>
 											<p class="m-0 text-surface-600 no-underline font-medium">
-												{item()?.meta.marketplace.publisherName}
+												{item()?.publisherName}
 											</p>
 										</div>
 									</div>
 									<div class="flex flex-col gap-3 mb-8">
 										<h3 class="text-sm text-surface-400">Keywords</h3>
 										<div class="flex flex-wrap gap-2 items-center">
-											<For each={item()?.meta.marketplace.keywords}>
+											<For each={item()?.keywords}>
 												{(keyword) => (
 													<a
 														class="transition-opacity hover:opacity-80 cursor-pointer"
@@ -168,45 +160,8 @@ export function Page(props: PageProps) {
 									</div>
 									<div class="flex flex-col gap-3 mb-8">
 										<h3 class="text-sm text-surface-400">License</h3>
-										<p class="m-0 text-surface-600 no-underline font-medium">
-											{item()?.meta.marketplace.license}
-										</p>
+										<p class="m-0 text-surface-600 no-underline font-medium">{item()?.license}</p>
 									</div>
-									{/* @ts-ignore */}
-									<Show when={item()?.packageItems && item()?.packageItems.length > 1}>
-										<div class="flex flex-col gap-3">
-											<h3 class="text-sm text-surface-400">Packaged with</h3>
-											<div class="flex flex-col items-start">
-												{/* @ts-ignore */}
-												<For each={item()?.packageItems}>
-													{(packageItems) => (
-														<Show when={packageItems !== item()?.meta.id}>
-															<Button
-																type="text"
-																href={`/marketplace/${marketplaceItems
-																	.find(
-																		(item) =>
-																			item.meta.id.toLowerCase() === packageItems.toLowerCase(),
-																	)
-																	?.meta.displayName.en?.toLocaleLowerCase()
-																	.replaceAll(" ", "-")}`}
-															>
-																{" "}
-																<span class="capitalize">
-																	{marketplaceItems
-																		.find(
-																			(item) =>
-																				item.meta.id.toLowerCase() === packageItems.toLowerCase(),
-																		)
-																		?.meta.displayName.en?.toLocaleLowerCase()}{" "}
-																</span>
-															</Button>
-														</Show>
-													)}
-												</For>
-											</div>
-										</div>
-									</Show>
 								</div>
 							</div>
 							<div class="w-full col-span-1 md:col-span-3 rounded-lg">

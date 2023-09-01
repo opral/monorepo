@@ -7,7 +7,6 @@ import { SearchIcon } from "../editor/@host/@owner/@repository/components/Search
 import { Button } from "../index/components/Button.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import Plus from "~icons/material-symbols/add-rounded"
-import Package from "~icons/material-symbols/package-2"
 import { setSearchParams } from "../install/helper/setSearchParams.js"
 
 type Category = "app" | "library" | "plugin" | "lintrule"
@@ -36,15 +35,14 @@ function filterItem(
 	}
 
 	const isSearchMatch =
-		item.meta.displayName.en?.toLowerCase().includes(searchValue.toLowerCase()) ||
-		item.meta.marketplace.publisherName.toLowerCase().includes(searchValue.toLowerCase()) ||
-		item.meta.marketplace.keywords.some((keyword: string) =>
+		item.displayName.en?.toLowerCase().includes(searchValue.toLowerCase()) ||
+		item.publisherName.toLowerCase().includes(searchValue.toLowerCase()) ||
+		item.keywords.some((keyword: string) =>
 			keyword.toLowerCase().includes(searchValue.toLowerCase()),
 		) ||
-		item.meta.marketplace.bundleName?.toLowerCase().includes(searchValue.toLowerCase()) ||
-		item.meta.id.split(".")[1]?.toLowerCase().includes(searchValue.toLowerCase()) ||
-		item.meta.id.toLowerCase().includes(searchValue.toLowerCase()) ||
-		item.package?.toLowerCase() === searchValue.toLowerCase()
+		item.bundleName?.toLowerCase().includes(searchValue.toLowerCase()) ||
+		item.id.split(".")[1]?.toLowerCase().includes(searchValue.toLowerCase()) ||
+		item.id.toLowerCase().includes(searchValue.toLowerCase())
 
 	return isSearchMatch
 }
@@ -100,7 +98,7 @@ const Gallery = () => {
 						<>
 							<div
 								onClick={() => {
-									const path = `/marketplace/${item.meta.displayName.en
+									const path = `/marketplace/${item.displayName.en
 										?.toLowerCase()
 										.replaceAll(" ", "-")}`
 
@@ -112,66 +110,42 @@ const Gallery = () => {
 									<div class="flex flex-col gap-4">
 										<div class="flex items-center gap-4">
 											<Show
-												when={item.meta.marketplace.icon}
+												when={item.icon}
 												fallback={
 													<div class="w-10 h-10 font-semibold text-xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
-														{item.meta.displayName.en?.[0]}
+														{item.displayName.en?.[0]}
 													</div>
 												}
 											>
 												<img
 													class="w-10 h-10 rounded-md m-0 shadow-lg object-cover object-center"
-													src={item.meta.marketplace.icon}
+													src={item.icon}
 												/>
 											</Show>
 											<p class="m-0 text-surface-900 font-semibold text-md">
-												{item.meta.displayName.en}
+												{item.displayName.en}
 											</p>
 										</div>
 										<p class="m-0 font-normal leading-6 text-sm tracking-wide text-surface-500 line-clamp-3">
-											{item.meta.description.en}
+											{item.description.en}
 										</p>
 									</div>
 									<div class="w-full flex items-end justify-between">
 										<div class="flex gap-2 items-center pt-6">
 											<Show
-												when={item.meta.marketplace.publisherIcon}
+												when={item.publisherIcon}
 												fallback={
 													<div class="w-6 h-6 flex items-center justify-center text-background capitalize font-medium rounded-full m-0 bg-surface-900">
-														{item.meta.marketplace.publisherName[0]}
+														{item.publisherName[0]}
 													</div>
 												}
 											>
-												<img
-													class="w-6 h-6 rounded-full m-0"
-													src={item.meta.marketplace.publisherIcon}
-												/>
+												<img class="w-6 h-6 rounded-full m-0" src={item.publisherIcon} />
 											</Show>
 											<p class="m-0 text-surface-600 no-underline font-medium">
-												{item.meta.marketplace.publisherName}
+												{item.publisherName}
 											</p>
 										</div>
-										{item.type !== "app" &&
-											item.type !== "library" &&
-											item.packageItems.length > 1 && (
-												<sl-tooltip
-													prop:content={`Comes in a package of ${item.packageItems?.length}`}
-													prop:distance={16}
-													prop:hoist={true}
-													prop:placement="top"
-												>
-													<div
-														onClick={(e) => {
-															e.stopPropagation()
-															setSearchValue(`${item.package ?? item.meta.id}`)
-															window.scrollTo({ top: 0 })
-														}}
-														class="text-surface-500 text-xl hover:text-surface-900 transition-all"
-													>
-														<Package />
-													</div>
-												</sl-tooltip>
-											)}
 									</div>
 									<Chip
 										text={item.type.toLocaleLowerCase() === "lintrule" ? "Lint Rule" : item.type}
