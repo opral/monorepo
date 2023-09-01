@@ -11,7 +11,7 @@ import {
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
 } from "./errors.js"
-import { createRoot, createSignal, createEffect } from "./solid.js"
+import { createRoot, createSignal, createEffect } from "./reactivity/solid.js"
 import { createMessagesQuery } from "./createMessagesQuery.js"
 import { debounce } from "throttle-debounce"
 import { createLintReportsQuery } from "./createLintReportsQuery.js"
