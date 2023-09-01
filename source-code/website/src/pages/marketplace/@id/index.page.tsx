@@ -88,7 +88,7 @@ export function Page(props: PageProps) {
 										<div class="flex items-center gap-2">
 											{/* @ts-ignore */}
 											<Button type="primary" href={`/install?package=${item()?.package}`}>
-												Install Package
+												Install {item()?.type}
 												{/* @ts-ignore */}
 												<SelectRepo size="medium" packages={[item()?.package]} />
 											</Button>

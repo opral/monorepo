@@ -65,16 +65,6 @@ export const plugin: Plugin<PluginSettings> = {
 		id: "inlang.plugin.json",
 		displayName: { en: "Plugin JSON" },
 		description: { en: "JSON plugin for inlang" },
-		marketplace: {
-			icon: "https://github.com/inlang/inlang/blob/main/source-code/plugins/json/assets/icon.png?raw=true",
-			linkToReadme: {
-				en: "https://github.com/inlang/inlang/blob/main/source-code/plugins/json/README.md",
-			},
-			keywords: ["json", "generic"],
-			publisherName: "inlang",
-			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-			license: "Apache-2.0",
-		},
 	},
 	loadMessages: async ({ languageTags, settings, nodeishFs }) => {
 		settings.variableReferencePattern = settings.variableReferencePattern || ["{", "}"]

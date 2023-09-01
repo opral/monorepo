@@ -13,5 +13,6 @@
 	"keywords": ["web", "editor", "visual"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-	"license": "Apache-2.0"
+	"license": "Apache-2.0",
+	"linkToApp": "/editor"
 }
