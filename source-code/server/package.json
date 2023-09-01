@@ -14,6 +14,7 @@
 		"@inlang/badge": "*",
 		"@inlang/env-variables": "*",
 		"@inlang/rpc": "*",
+		"@inlang/marketplace": "*",
 		"@inlang/telemetry": "*",
 		"@inlang/website": "*",
 		"@sentry/node": "^7.47.0",
