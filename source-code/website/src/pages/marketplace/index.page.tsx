@@ -40,9 +40,7 @@ function filterItem(
 		item.keywords.some((keyword: string) =>
 			keyword.toLowerCase().includes(searchValue.toLowerCase()),
 		) ||
-		item.bundleName?.toLowerCase().includes(searchValue.toLowerCase()) ||
-		item.id.split(".")[1]?.toLowerCase().includes(searchValue.toLowerCase()) ||
-		item.id.toLowerCase().includes(searchValue.toLowerCase())
+		item.bundleName?.toLowerCase().includes(searchValue.toLowerCase())
 
 	return isSearchMatch
 }
