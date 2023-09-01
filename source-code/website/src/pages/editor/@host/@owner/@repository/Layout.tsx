@@ -29,7 +29,6 @@ export function Layout(props: { children: JSXElement }) {
 		setFilteredLanguageTags,
 		userIsCollaborator,
 		languageTags,
-		lastPullTime,
 	} = useEditorState()
 
 	const removeFilter = (filterName: string) => {
