@@ -1,10 +1,21 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Repository } from "./api.js"
 import { transformRemote, withLazyFetching } from "./helpers.js"
-import raw from "isomorphic-git"
 import http from "isomorphic-git/http/node"
 import { Octokit } from "octokit"
 import { createSignal, createEffect } from "./solid.js"
+import {
+	clone,
+	listRemotes,
+	status,
+	statusMatrix,
+	push,
+	pull,
+	commit,
+	currentBranch,
+	add,
+	log,
+} from "isomorphic-git"
 
 const github = new Octokit({
 	request: {
@@ -49,17 +60,16 @@ export async function openRepository(
 	// the directory we use for all git operations
 	const dir = "/"
 
-	let pending: Promise<void | { error: Error }> | undefined = raw
-		.clone({
-			fs: withLazyFetching(rawFs, "clone"),
-			http,
-			dir,
-			corsProxy: args?.corsProxy,
-			url: normalizedUrl,
-			singleBranch: true,
-			depth: 1,
-			noTags: true,
-		})
+	let pending: Promise<void | { error: Error }> | undefined = clone({
+		fs: withLazyFetching(rawFs, "clone"),
+		http,
+		dir,
+		corsProxy: args?.corsProxy,
+		url: normalizedUrl,
+		singleBranch: true,
+		depth: 1,
+		noTags: true,
+	})
 		.finally(() => {
 			pending = undefined
 		})
@@ -90,7 +100,7 @@ export async function openRepository(
 			try {
 				const withLazyFetchingpedFS = withLazyFetching(rawFs, "listRemotes", delayedAction)
 
-				const remotes = await raw.listRemotes({
+				const remotes = await listRemotes({
 					fs: withLazyFetchingpedFS,
 					dir,
 				})
@@ -102,7 +112,7 @@ export async function openRepository(
 		},
 
 		status(cmdArgs) {
-			return raw.status({
+			return status({
 				fs: withLazyFetching(rawFs, "statusMatrix", delayedAction),
 				dir,
 				filepath: cmdArgs.filepath,
@@ -110,7 +120,7 @@ export async function openRepository(
 		},
 
 		statusMatrix(cmdArgs) {
-			return raw.statusMatrix({
+			return statusMatrix({
 				fs: withLazyFetching(rawFs, "statusMatrix", delayedAction),
 				dir,
 				filter: cmdArgs.filter,
@@ -118,7 +128,7 @@ export async function openRepository(
 		},
 
 		add(cmdArgs) {
-			return raw.add({
+			return add({
 				fs: withLazyFetching(rawFs, "add", delayedAction),
 				dir,
 				filepath: cmdArgs.filepath,
@@ -126,7 +136,7 @@ export async function openRepository(
 		},
 
 		commit(cmdArgs) {
-			return raw.commit({
+			return commit({
 				fs: withLazyFetching(rawFs, "commit", delayedAction),
 				dir,
 				author: cmdArgs.author,
@@ -135,7 +145,7 @@ export async function openRepository(
 		},
 
 		push() {
-			return raw.push({
+			return push({
 				fs: withLazyFetching(rawFs, "push", delayedAction),
 				url: normalizedUrl,
 				corsProxy: args?.corsProxy,
@@ -145,7 +155,7 @@ export async function openRepository(
 		},
 
 		pull(cmdArgs) {
-			return raw.pull({
+			return pull({
 				fs: withLazyFetching(rawFs, "pull", delayedAction),
 				url: normalizedUrl,
 				corsProxy: args?.corsProxy,
@@ -158,7 +168,7 @@ export async function openRepository(
 		},
 
 		log(cmdArgs) {
-			return raw.log({
+			return log({
 				fs: withLazyFetching(rawFs, "log", delayedAction),
 				depth: cmdArgs?.depth,
 				dir,
@@ -225,7 +235,7 @@ export async function openRepository(
 		async getCurrentBranch() {
 			// TODO: make stateless
 			return (
-				(await raw.currentBranch({
+				(await currentBranch({
 					fs: withLazyFetching(rawFs, "getCurrentBranch", delayedAction),
 					dir,
 				})) || undefined
