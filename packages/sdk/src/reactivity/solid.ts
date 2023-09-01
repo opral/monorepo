@@ -12,9 +12,6 @@ import {
 	// @ts-ignore
 } from "solid-js/dist/solid.js"
 
-// @ts-ignore
-import { createStore as _createStore } from "solid-js/store/dist/store.js"
-
 const createSignal = _createSignal as typeof import("solid-js")["createSignal"]
 const createMemo = _createMemo as typeof import("solid-js")["createMemo"]
 const createRoot = _createRoot as typeof import("solid-js")["createRoot"]
@@ -25,7 +22,6 @@ const batch = _batch as typeof import("solid-js")["batch"]
 const getListener = _getListener as typeof import("solid-js")["getListener"]
 const onCleanup = _onCleanup as typeof import("solid-js")["onCleanup"]
 
-const createStore = _createStore as typeof import("solid-js/store")["createStore"]
 
 export {
 	createSignal,

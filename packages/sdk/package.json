@@ -14,7 +14,6 @@
 		"./src"
 	],
 	"scripts": {
-		"postinstall": "patch-package",
 		"build": "tsc --build",
 		"dev": "tsc --watch",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
@@ -35,7 +34,6 @@
 		"@inlang/project-config": "*",
 		"@inlang/result": "*",
 		"@sinclair/typebox": "^0.31.0",
-		"@solid-primitives/map": "0.4.7",
 		"deepmerge-ts": "^5.1.0",
 		"solid-js": "1.6.12",
 		"throttle-debounce": "5.0.0",
