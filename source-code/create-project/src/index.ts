@@ -1,7 +1,7 @@
-import type { InlangConfig } from "@inlang/sdk"
+import type { ProjectConfig } from "@inlang/project-config"
 import type { NodeishFilesystem } from "@lix-js/fs"
 
-export async function tryAutoGenModuleConfig(args: { baseConfig: InlangConfig }): Promise<any> {
+export async function tryAutoGenModuleConfig(args: { baseConfig: ProjectConfig }): Promise<any> {
 	// Maybe<ProjectConfigFile>
 	// TODO: enrich baseConfic
 
@@ -12,18 +12,18 @@ export async function createProjectConfig(args: {
 	nodeishFs: NodeishFilesystem
 	filePath?: string
 	tryAutoGen?: boolean
-	sourceLanguagetag: InlangConfig["sourceLanguageTag"]
-	languageTags: InlangConfig["languageTags"]
+	sourceLanguagetag: ProjectConfig["sourceLanguageTag"]
+	languageTags: ProjectConfig["languageTags"]
 }): Promise<void> {
-	const newConfig: InlangConfig = {
+	const newConfig: ProjectConfig = {
 		sourceLanguageTag: args.sourceLanguagetag,
 		languageTags: args.languageTags,
-		modules: [],
+		packages: [],
 		settings: {},
 	}
 
 	const configString = JSON.stringify(
-		args.tryAutoGen ? tryAutoGenModuleConfig(newConfig) : newConfig,
+		args.tryAutoGen ? tryAutoGenModuleConfig({ baseConfig: newConfig }) : newConfig,
 		undefined,
 		4,
 	)
