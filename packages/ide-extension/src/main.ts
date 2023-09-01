@@ -42,6 +42,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		})
 		// start the ide extension
 		await main({ context, gitOrigin })
+		msg("IDE extension activated", "info")
 	} catch (error) {
 		vscode.window.showErrorMessage((error as Error).message)
 		console.error(error)
