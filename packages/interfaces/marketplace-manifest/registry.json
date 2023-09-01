@@ -6,9 +6,9 @@
 		"../../ide-extension/marketplace-manifest.json",
 		"../../plugins/json/marketplace-manifest.json",
 		"../../plugins/i18next/marketplace-manifest.json",
-		"../../plugins/emptyPattern/marketplace-manifest.json",
-		"../../plugins/identicalPattern/marketplace-manifest.json",
-		"../../plugins/messageWithoutSource/marketplace-manifest.json",
-		"../../plugins/missingTranslation/marketplace-manifest.json"
+		"../../lint-rules/emptyPattern/marketplace-manifest.json",
+		"../../lint-rules/identicalPattern/marketplace-manifest.json",
+		"../../lint-rules/messageWithoutSource/marketplace-manifest.json",
+		"../../lint-rules/missingTranslation/marketplace-manifest.json"
 	]
 }
