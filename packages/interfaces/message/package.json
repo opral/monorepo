@@ -27,5 +27,7 @@
 	"peerDependencies": {
 		"@sinclair/typebox": "^0.31.0"
 	},
-	"devDependencies": {}
+	"devDependencies": {
+		"typescript": "5.2.2"
+	}
 }

@@ -1,4 +1,4 @@
-import type { IdeExtensionConfig, LanguageTag } from "@inlang/sdk"
+import type { AppSpecificApiInlangIdeExtension, LanguageTag } from "@inlang/sdk"
 import { MarkdownString, Uri } from "vscode"
 import { state } from "../state.js"
 import { getStringFromPattern } from "../utilities/query.js"
@@ -25,7 +25,7 @@ function renderTranslationRow(row: ContextTableRow) {
 
 export function contextTooltip(
 	referenceMessage: Awaited<
-		ReturnType<IdeExtensionConfig["messageReferenceMatchers"][number]>
+		ReturnType<AppSpecificApiInlangIdeExtension["messageReferenceMatchers"][number]>
 	>[number],
 ) {
 	const message = state().inlang.query.messages.get({

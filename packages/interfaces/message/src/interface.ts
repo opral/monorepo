@@ -1,5 +1,5 @@
 import { LanguageTag } from "@inlang/language-tag"
-import { Type, Static } from "@sinclair/typebox"
+import { Type, type Static } from "@sinclair/typebox"
 
 /**
  * A (text) element that is translatable and rendered to the UI.

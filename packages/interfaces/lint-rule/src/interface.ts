@@ -1,7 +1,7 @@
 import type { Message } from "@inlang/message"
 import type { LanguageTag } from "@inlang/language-tag"
 import { Translatable } from "@inlang/translatable"
-import { Type, type Static, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
+import { Type, type Static, type TTemplateLiteral, type TLiteral } from "@sinclair/typebox"
 import type { JSONObject } from "@inlang/json-types"
 
 /**

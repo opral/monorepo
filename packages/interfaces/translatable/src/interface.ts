@@ -1,5 +1,5 @@
 import { LanguageTag } from "@inlang/language-tag"
-import { Type, TSchema } from "@sinclair/typebox"
+import { Type, type TSchema } from "@sinclair/typebox"
 
 /**
  * Translatable type.

@@ -11,7 +11,7 @@
 		"./src"
 	],
 	"scripts": {
-		"build": "tsx ./build.ts",
+		"build": "tsx ./build.ts && tsc --emitDeclarationOnly",
 		"dev": "DEV=true npm run build",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"lint": "eslint ./src",
@@ -19,13 +19,13 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"devDependencies": {
-		"@inlang/core": "*",
 		"dotenv": "^16.3.1",
 		"esbuild": "^0.19.2",
-		"esbuild-plugin-d.ts": "^1.1.0",
-		"esbuild-plugin-glob": "^2.2.2",
 		"tsx": "^3.12.7",
-		"zod": "^3.22.2"
+		"zod": "^3.22.2",
+		"@vitest/coverage-v8": "0.34.3",
+		"typescript": "5.2.2",
+		"vitest": "0.34.3"
 	},
 	"license": "Apache-2.0"
 }

@@ -1,6 +1,6 @@
 import {
-	Accessor,
-	Component,
+	type Accessor,
+	type Component,
 	createEffect,
 	createSignal,
 	ErrorBoundary,

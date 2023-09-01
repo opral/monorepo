@@ -1,5 +1,5 @@
 {
-	"name": "lang-in-slug",
+	"name": "lang-in-slug-static",
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
@@ -11,7 +11,6 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
 	},
 	"devDependencies": {
-		"@inlang/core": "file:../../../../../core",
 		"@inlang/sdk-js": "file:../../../..",
 		"@playwright/test": "^1.36.1",
 		"@sveltejs/adapter-static": "^2.0.2",

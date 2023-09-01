@@ -11,7 +11,7 @@ import { router as badgeRouter } from "@inlang/badge/router"
 
 // --------------- SETUP -----------------
 
-const [, errors] = validateEnvVariables({ forProduction: isProduction })
+const { error: errors } = validateEnvVariables({ forProduction: isProduction })
 
 if (errors) {
 	throw Error(

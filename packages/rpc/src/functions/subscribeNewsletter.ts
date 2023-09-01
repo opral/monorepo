@@ -1,4 +1,4 @@
-import type { Result } from "@inlang/core/utilities"
+import type { Result } from "@inlang/result"
 
 export async function subscribeNewsletter(args: { email: string }): Promise<Result<string, Error>> {
 	try {
@@ -11,14 +11,14 @@ export async function subscribeNewsletter(args: { email: string }): Promise<Resu
 		})
 		if (!response.ok) {
 			if (response.status === 409) {
-				return ["already subscribed"]
+				return { data: "already subscribed" }
 			} else {
-				return [undefined, new Error(response.statusText)]
+				return { error: new Error(response.statusText) }
 			}
 		} else {
-			return ["success"]
+			return { data: "success" }
 		}
 	} catch (error) {
-		return [undefined, error as Error]
+		return { error: error as Error }
 	}
 }

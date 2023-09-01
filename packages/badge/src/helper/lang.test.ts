@@ -1,6 +1,6 @@
 import { expect, it } from "vitest"
 import {
-	LanguagePriority,
+	type LanguagePriority,
 	getPreferredLanguage,
 	parseAcceptLanguageHeader,
 } from "../helper/lang.js"

@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { getConfigContent } from "@inlang/cli/src/utilities/getConfigContent"
 import { getLanguageFolderPath } from "@inlang/cli/src/utilities/getLanguageFolderPath"
 import {

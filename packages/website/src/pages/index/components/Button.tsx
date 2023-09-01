@@ -1,6 +1,6 @@
 import { useI18n } from "@solid-primitives/i18n"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
-import { JSXElement, Show } from "solid-js"
+import { type JSXElement, Show } from "solid-js"
 import { navigate } from "vite-plugin-ssr/client/router"
 
 export type buttonType = "primary" | "secondary" | "secondaryOnGray" | "text" | "textPrimary"

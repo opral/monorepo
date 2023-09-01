@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, JSXElement, on, onMount, Show } from "solid-js"
+import { createEffect, createSignal, For, type JSXElement, on, onMount, Show } from "solid-js"
 import { useEditorState } from "./State.jsx"
 import { Layout as RootLayout } from "#src/pages/Layout.jsx"
 import { SearchInput } from "./components/SearchInput.jsx"

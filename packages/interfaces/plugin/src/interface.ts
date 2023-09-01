@@ -1,9 +1,9 @@
 import type { LanguageTag } from "@inlang/language-tag"
-import { Static, Type, TTemplateLiteral, TLiteral } from "@sinclair/typebox"
+import { type Static, Type, type TTemplateLiteral, type TLiteral } from "@sinclair/typebox"
 import type { NodeishFilesystem as LisaNodeishFilesystem } from "@lix-js/fs"
 import type { Message } from "@inlang/message"
 import type { JSONObject } from "@inlang/json-types"
-import type { AppSpecificInlangIdeExtension } from "./appSpecificApis/inlang.app.ideExtension.js"
+import type { AppSpecificApiInlangIdeExtension } from "./appSpecificApis/inlang.app.ideExtension.js"
 import { Translatable } from "@inlang/translatable"
 
 /**
@@ -66,7 +66,7 @@ export type Plugin<Settings extends JSONObject | unknown = unknown> = Omit<
 		settings: Settings
 	}) =>
 		| Record<`${string}.app.${string}`, unknown>
-		| { "inlang.app.ideExtension": AppSpecificInlangIdeExtension }
+		| { "inlang.app.ideExtension": AppSpecificApiInlangIdeExtension }
 }
 
 export const Plugin = Type.Object(

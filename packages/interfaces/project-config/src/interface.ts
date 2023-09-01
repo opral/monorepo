@@ -1,4 +1,4 @@
-import { Static, TLiteral, TTemplateLiteral, Type } from "@sinclair/typebox"
+import { type Static, type TLiteral, type TTemplateLiteral, Type } from "@sinclair/typebox"
 import { LanguageTag } from "@inlang/language-tag"
 import { LintLevel, LintRule } from "@inlang/lint-rule"
 import { JSON, JSONObject } from "@inlang/json-types"

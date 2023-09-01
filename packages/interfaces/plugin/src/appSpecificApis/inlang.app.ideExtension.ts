@@ -1,4 +1,4 @@
-import { Static, Type } from "@sinclair/typebox"
+import { type Static, Type } from "@sinclair/typebox"
 
 /**
  * The result of a message reference matcher.
@@ -86,4 +86,4 @@ export const IdeExtensionConfigSchema = Type.Object({
 	),
 })
 
-export type AppSpecificInlangIdeExtension = Static<typeof IdeExtensionConfigSchema>
+export type AppSpecificApiInlangIdeExtension = Static<typeof IdeExtensionConfigSchema>

@@ -1,4 +1,4 @@
-import { JSXElement, JSX, Show } from "solid-js"
+import { type JSXElement, type JSX, Show } from "solid-js"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 
 export type TourStepId =

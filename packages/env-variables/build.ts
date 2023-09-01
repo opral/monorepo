@@ -1,6 +1,4 @@
 import { context } from "esbuild"
-import { globPlugin } from "esbuild-plugin-glob"
-import { dtsPlugin } from "esbuild-plugin-d.ts"
 import { buildStepVariables, rootEnvFilePath } from "./src/build/buildStepVariables.js"
 import { validateEnvVariables } from "./src/validateEnvVariables.js"
 import { fetchPublicEnv } from "./src/build/fetchPublicEnv.js"
@@ -15,14 +13,14 @@ config({ path: rootEnvFilePath, override: true })
 // this module can't know if a dependency requires all production env variables.
 //
 // Instead, apps need to validate for production themselves.
-const [, errors] = validateEnvVariables({ forProduction: false })
+const { error: errors } = validateEnvVariables({ forProduction: false })
 
 if (errors) {
 	console.error("💡 Some env variables are not defined. Fetching public env variables remotely...")
 	console.error(errors)
 	// some required env variables are missing. fetch public env variables from the server
 	await fetchPublicEnv()
-	const [, stillErrors] = validateEnvVariables({ forProduction: false })
+	const { error: stillErrors } = validateEnvVariables({ forProduction: false })
 	if (stillErrors) {
 		console.error("🚨 Some env variables are still not defined, even after fetching. Exiting...")
 		console.error(stillErrors)
@@ -30,10 +28,8 @@ if (errors) {
 	}
 }
 
-// @ts-expect-error - esbuild plugin types are wrong
 const ctx = await context({
-	entryPoints: ["./src/**/*.ts", "env.ts"],
-	plugins: [globPlugin({ ignore: ["**/*.test.ts"] }), dtsPlugin()],
+	entryPoints: ["./src/**/*.ts"],
 	outdir: "./dist",
 	bundle: false,
 	platform: "neutral",
