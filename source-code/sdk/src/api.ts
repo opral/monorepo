@@ -1,20 +1,6 @@
-import type { InvalidLintRuleError, LintRuleThrowedError } from "@inlang/lint"
 import type { Result } from "@inlang/result"
-import type {
-	InvalidConfigError,
-	NoPluginProvidesLoadOrSaveMessagesError,
-	PluginSaveMessagesError,
-} from "./errors.js"
-import type {
-	PluginReturnedInvalidAppSpecificApiError,
-	PluginLoadMessagesFunctionAlreadyDefinedError,
-	PluginSaveMessagesFunctionAlreadyDefinedError,
-	PluginHasInvalidIdError,
-	PluginHasInvalidSchemaError,
-	PluginUsesReservedNamespaceError,
-	ResolvedPluginApi,
-} from "@inlang/resolve-plugins"
-import type { ModuleImportError, ModuleError } from "@inlang/module"
+import type * as RuntimeError from "./errors.js"
+import type * as ModuleResolutionError from "./resolve-modules/errors.js"
 import type {
 	LintLevel,
 	LintReport,
@@ -23,6 +9,7 @@ import type {
 	Plugin,
 	ProjectConfig,
 } from "./interfaces.js"
+import type { ResolvedPluginApi } from "./resolve-modules/plugins/types.js"
 
 export type InstalledPlugin = {
 	meta: Plugin["meta"]
@@ -49,25 +36,11 @@ export type InlangProject = {
 		lintRules: Subscribable<InstalledLintRule[]>
 	}
 	errors: Subscribable<
-		(
-			| ModuleImportError
-			| ModuleError
-			| PluginReturnedInvalidAppSpecificApiError
-			| PluginLoadMessagesFunctionAlreadyDefinedError
-			| PluginSaveMessagesFunctionAlreadyDefinedError
-			| PluginHasInvalidIdError
-			| PluginHasInvalidSchemaError
-			| PluginUsesReservedNamespaceError
-			| InvalidLintRuleError
-			| LintRuleThrowedError
-			| PluginSaveMessagesError
-			| NoPluginProvidesLoadOrSaveMessagesError
-			| Error
-		)[]
+		((typeof ModuleResolutionError)[keyof typeof ModuleResolutionError] | Error)[]
 	>
 	appSpecificApi: Subscribable<ResolvedPluginApi["appSpecificApi"]>
 	config: Subscribable<ProjectConfig | undefined>
-	setConfig: (config: ProjectConfig) => Result<void, InvalidConfigError>
+	setConfig: (config: ProjectConfig) => Result<void, RuntimeError.InvalidConfigError>
 	query: {
 		messages: MessageQueryApi
 		lintReports: LintReportsQueryApi
@@ -91,7 +64,7 @@ export type MessageQueryApi = {
 			callback: (message: Message | undefined) => void,
 		) => void
 	}
-	includedMessageIds: Subscribable<string[]>
+	includedMessageIds: Subscribable<Message["id"][]>
 	/*
 	 * getAll is depricated do not use it
 	 */

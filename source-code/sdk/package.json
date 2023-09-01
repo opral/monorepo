@@ -7,7 +7,10 @@
 		"access": "public"
 	},
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/index.js",
+		"./test-utilities": "./dist/test-utilities/index.js",
+		"./lint": "./dist/lint/index.js",
+		"./messages": "./dist/messages/index.js"
 	},
 	"files": [
 		"./dist",
@@ -26,10 +29,7 @@
 	},
 	"dependencies": {
 		"@inlang/language-tag": "*",
-		"@inlang/lint": "*",
 		"@inlang/message": "*",
-		"@inlang/messages": "*",
-		"@inlang/module": "*",
 		"@inlang/plugin": "*",
 		"@inlang/project-config": "*",
 		"@inlang/result": "*",
@@ -37,7 +37,8 @@
 		"deepmerge-ts": "^5.1.0",
 		"solid-js": "1.6.12",
 		"throttle-debounce": "5.0.0",
-		"ts-dedent": "2.2.0"
+		"ts-dedent": "2.2.0",
+		"@lix-js/fs": "*"
 	},
 	"devDependencies": {
 		"@lix-js/fs": "*",

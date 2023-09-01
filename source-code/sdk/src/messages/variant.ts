@@ -4,7 +4,7 @@ import {
 	MessagePatternsForLanguageTagDoNotExistError,
 	MessageVariantAlreadyExistsError,
 	MessageVariantDoesNotExistError,
-} from "@inlang/messages"
+} from "./errors.js"
 
 /**
  * Tries to match the most specific variant of a message.

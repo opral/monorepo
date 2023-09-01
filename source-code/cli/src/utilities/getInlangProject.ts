@@ -1,7 +1,8 @@
 import fs from "node:fs/promises"
 import { resolve } from "node:path"
-import { openInlangProject, type InlangProject, type Result, tryCatch } from "@inlang/sdk"
+import { openInlangProject, type InlangProject } from "@inlang/sdk"
 import { telemetry } from "../services/telemetry/implementation.js"
+import { tryCatch, type Result } from "@inlang/result"
 
 // in case multiple commands run getInlang in the same process
 let cached: Awaited<ReturnType<typeof getInlangProject>> | undefined = undefined

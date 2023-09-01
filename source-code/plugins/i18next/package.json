@@ -20,9 +20,12 @@
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
+	"dependencies": {
+		"@inlang/plugin": "*"
+	},
 	"devDependencies": {
 		"@inlang/cli": "*",
-		"@inlang/plugin": "*",
+		"@inlang/sdk": "*",
 		"@size-limit/preset-small-lib": "^8.2.4",
 		"@types/flat": "^5.0.2",
 		"@types/lodash.merge": "^4.6.7",

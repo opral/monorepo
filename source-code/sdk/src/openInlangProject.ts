@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { InlangProject, InstalledLintRule, InstalledPlugin, Subscribable } from "./api.js"
-import { type ImportFunction, type ResolveModuleFunction, resolveModules } from "@inlang/module"
+import {
+	type ImportFunction,
+	type ResolveModuleFunction,
+	resolveModules,
+} from "./resolve-modules/index.js"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
 import {
@@ -86,6 +90,7 @@ export const openInlangProject = async (args: {
 
 			loadModules({ config: conf, nodeishFs: args.nodeishFs, _import: args._import })
 				.then((resolvedModules) => {
+					// TODO move to resolveModules
 					if (
 						!resolvedModules.resolvedPluginApi.loadMessages ||
 						!resolvedModules.resolvedPluginApi.saveMessages
@@ -141,7 +146,7 @@ export const openInlangProject = async (args: {
 					({
 						meta: rule.meta,
 						module:
-							resolvedModules()?.meta.find((m) => m.lintRules.includes(rule.meta.id))?.module ??
+							resolvedModules()?.meta.find((m) => m.id.includes(rule.meta.id))?.module ??
 							"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
 						// default to warning, see https://github.com/inlang/inlang/issues/1254
 						lintLevel: configValue.settings["project.lintRuleLevels"]?.[rule.meta.id] ?? "warning",
@@ -155,7 +160,7 @@ export const openInlangProject = async (args: {
 			return resolvedModules()!.plugins.map((plugin) => ({
 				meta: plugin.meta,
 				module:
-					resolvedModules()?.meta.find((m) => m.plugins.includes(plugin.meta.id))?.module ??
+					resolvedModules()?.meta.find((m) => m.id.includes(plugin.meta.id))?.module ??
 					"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
 			})) satisfies Array<InstalledPlugin>
 		}

@@ -5,10 +5,10 @@ import type {
 	NodeishFilesystemSubset,
 	ResolvePluginsFunction,
 	ResolvedPluginApi,
-} from "@inlang/resolve-plugins"
+} from "./plugins/types.js"
 import type { ModuleHasNoExportsError, ModuleImportError } from "./errors.js"
 import type { ImportFunction } from "./import.js"
-import type { resolveLintRules } from "@inlang/lint"
+import type { resolveMessageLintRules } from "./message-lint-rules/resolveMessageLintRules.js"
 
 /**
  * The inlang module API.
@@ -26,10 +26,7 @@ import type { resolveLintRules } from "@inlang/lint"
  */
 
 export type InlangModule = {
-	default: {
-		plugins?: Plugin<any>[]
-		lintRules?: LintRule[]
-	}
+	default: Plugin<any> | LintRule<any>
 }
 
 /**
@@ -47,9 +44,8 @@ export type ResolveModuleFunction = (args: {
 	 *
 	 * @example
 	 * [{
-	 * 	  module: "https://myplugin.com/index.js",
-	 * 	  plugins: ["samuel.plugin.json", "inlang.plugin.yaml"],
-	 * 	  lintRules: ["samuel.lintRule.missingPattern", "inlang.lintRule.missingDescription"],
+	 * 	  id: "plugin.inlang.json",
+	 * 	  module: "https://myplugin.com/index.js"
 	 * }]
 	 */
 	meta: Array<{
@@ -60,17 +56,9 @@ export type ResolveModuleFunction = (args: {
 		 */
 		module: string
 		/**
-		 * The resolved plugin ids of the module.
-		 *
-		 * @example ["samuel.plugin.json", "inlang.plugin.yaml"]
+		 * The resolved item id of the module.
 		 */
-		plugins: Array<Plugin["meta"]["id"]>
-		/**
-		 * The resolved lint rule ids of the module.
-		 *
-		 * @example ["samuel.lintRule.missingPattern", "inlang.lintRule.missingDescription"]
-		 */
-		lintRules: Array<LintRule["meta"]["id"]>
+		id: Plugin["meta"]["id"] | LintRule["meta"]["id"]
 	}>
 	/**
 	 * The resolved plugins.
@@ -97,6 +85,6 @@ export type ResolveModuleFunction = (args: {
 		| ModuleHasNoExportsError
 		| ModuleImportError
 		| Awaited<ReturnType<ResolvePluginsFunction>>["errors"][number]
-		| Awaited<ReturnType<typeof resolveLintRules>>["errors"][number]
+		| Awaited<ReturnType<typeof resolveMessageLintRules>>["errors"][number]
 	>
 }>

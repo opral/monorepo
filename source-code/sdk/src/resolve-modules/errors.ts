@@ -1,3 +1,6 @@
+export * from "./plugins/errors.js"
+export * from "./message-lint-rules/errors.js"
+
 export class ModuleError extends Error {
 	public readonly Module: string
 	constructor(message: string, options: { module: string; cause?: Error }) {
@@ -25,5 +28,15 @@ export class ModuleImportError extends ModuleError {
 	constructor(message: string, options: { module: string; cause: Error }) {
 		super(message, options)
 		this.name = "ModuleImportError"
+	}
+}
+
+/**
+ * Error when a module export has an unknown id type.
+ */
+export class ModuleExportHasInvalidIdError extends ModuleError {
+	constructor(message: string, options: { module: string; cause?: Error }) {
+		super(message, options)
+		this.name = "ModuleExportHasInvalidIdError"
 	}
 }

@@ -1,8 +1,13 @@
 import { describe, it, expect, vi } from "vitest"
 import { lintCommandAction } from "./index.js"
-import { LintRule, Message, ProjectConfig, openInlangProject, Plugin } from "@inlang/sdk"
-
-import type { InlangModule } from "@inlang/module"
+import {
+	LintRule,
+	Message,
+	ProjectConfig,
+	openInlangProject,
+	Plugin,
+	type InlangModule,
+} from "@inlang/sdk"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 
 const exampleMessages: Message[] = [
@@ -76,12 +81,10 @@ async function setupInlang(enabledLintRule?: LintRule) {
 	}
 
 	const _import = async () => {
-		return {
-			default: {
-				plugins: [_mockPlugin],
-				lintRules: enabledLintRule && [enabledLintRule],
-			},
-		} satisfies InlangModule
+		if (enabledLintRule) {
+			return { default: enabledLintRule } satisfies InlangModule
+		}
+		return
 	}
 
 	return await openInlangProject({

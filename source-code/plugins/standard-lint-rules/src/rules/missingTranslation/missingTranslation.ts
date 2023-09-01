@@ -16,16 +16,6 @@ for a listed languageTag, it is likely that the message has not
 been translated for this languageTag yet.
 `,
 		},
-		marketplace: {
-			icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
-			linkToReadme: {
-				en: "https://github.com/inlang/inlang/blob/main/source-code/plugins/standard-lint-rules/README.md",
-			},
-			keywords: ["lint-rule", "standard", "missing-translation"],
-			publisherName: "inlang",
-			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-			license: "Apache-2.0",
-		},
 	},
 	message: ({ message: { id, variants }, languageTags, sourceLanguageTag, report }) => {
 		const translatedLanguageTags = languageTags.filter(

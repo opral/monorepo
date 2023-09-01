@@ -15,9 +15,10 @@ import { recommendation, isInWorkspaceRecommendation } from "./utilities/recomme
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 import { openInEditorCommand } from "./commands/openInEditor.js"
 import { editMessageCommand } from "./commands/editMessage.js"
-import { openInlangProject, tryCatch } from "@inlang/sdk"
+import { openInlangProject } from "@inlang/sdk"
 import { createFileSystemMapper } from "./utilities/createFileSystemMapper.js"
 import { _import } from "./utilities/import/_import.js"
+import { tryCatch } from "@inlang/result"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
