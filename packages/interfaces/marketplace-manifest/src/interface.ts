@@ -20,16 +20,16 @@ const MarketplaceSchemaBase = Type.Object({
 })
 
 const MarketplaceApp = Type.Object({
-	MarketplaceSchemaBase,
+	...MarketplaceSchemaBase.props,
 	linkToApp: Type.String(),
 })
 
 const MarketplaceLibrary = Type.Object({
-	MarketplaceSchemaBase,
+	...MarketplaceSchemaBase.props,
 })
 
 const MarketplaceModule = Type.Object({
-	MarketplaceSchemaBase,
+	...MarketplaceSchemaBase.props,
 	module: Type.String(),
 })
 

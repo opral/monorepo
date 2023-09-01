@@ -38,11 +38,11 @@ const dynamicTitle = () => {
 		case "github-login" || "opt-in":
 			return "Action required"
 		case "installing":
-			return "Installing packages..."
+			return "Installing modules..."
 		case "success":
 			return "Installation successful"
 		case "already-installed":
-			return "Packages already installed"
+			return "Modules already installed"
 		default:
 			return "inlang Install"
 	}
@@ -53,7 +53,7 @@ export function Page() {
 
 	const url = new URLSearchParams(window.location.search)
 	const repo = url.get("repo") || ""
-	const packages = url.get("package")?.split(",") || []
+	const modules = url.get("module")?.split(",") || []
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const getLocale = () => {
@@ -73,7 +73,7 @@ export function Page() {
 				<div class="h-screen flex flex-col items-center justify-center pb-32">
 					<InstallationProvider
 						repo={repo}
-						packages={packages}
+						modules={modules}
 						step={step}
 						setStep={setStep}
 						optIn={{
@@ -95,14 +95,14 @@ export function Page() {
 											Please authorize to continue
 										</h2>
 										<p class="text-surface-500">
-											We need your authorization to install packages in your repository.
+											We need your authorization to install modules in your repository.
 										</p>
 									</div>
 									<Gitlogin />
 								</SetupCard>
 							</Show>
 							<Show when={step().type === "opt-in"}>
-								<OptIn packages={packages} />
+								<OptIn modules={modules} />
 							</Show>
 							<Show when={step().type === "installing"}>
 								<ShowProgress />
@@ -112,12 +112,12 @@ export function Page() {
 							</Show>
 							<Show when={step().error}>
 								<Show when={step().type === "no-repo"} fallback={<ShowError />}>
-									<ChooseRepo packages={packages} />
+									<ChooseRepo modules={modules} />
 								</Show>
 							</Show>
 						</div>
 					</InstallationProvider>
-					<GetHelp text="Need help installing packages?" />
+					<GetHelp text="Need help installing modules?" />
 				</div>
 			</RootLayout>
 		</>
@@ -125,7 +125,7 @@ export function Page() {
 }
 
 /* This Component uses a lot of logic from the editor, it lets the user select a repository */
-function ChooseRepo(props: { packages?: string[] }) {
+function ChooseRepo(props: { modules?: string[] }) {
 	const [input, setInput] = createSignal("")
 	const [store] = useLocalStorage()
 
@@ -141,7 +141,7 @@ function ChooseRepo(props: { packages?: string[] }) {
 		return `/install?repo=${url.host}${url.pathname
 			.split("/")
 			.slice(0, 3)
-			.join("/")}&package=${props.packages?.join(",")}`
+			.join("/")}&module=${props.modules?.join(",")}`
 	}
 
 	return (
@@ -151,8 +151,7 @@ function ChooseRepo(props: { packages?: string[] }) {
 					No valid repository URL provided.
 				</h2>
 				<p class="text-surface-500 text-center">
-					You can install packages into your repository <br /> by providing the repository URL
-					below.
+					You can install modules into your repository <br /> by providing the repository URL below.
 				</p>
 			</div>
 			<div class="flex flex-col p-2 md:p-10 items-center tracking-tight">
@@ -209,11 +208,11 @@ function ChooseRepo(props: { packages?: string[] }) {
 										setSearchParams(
 											`/install?repo=github.com/${recentProject.owner}/${
 												recentProject.repository
-											}&package=${props.packages?.join(",")}`,
+											}&module=${props.modules?.join(",")}`,
 										)
 									}
 								>
-									<RepositoryCard repository={recentProject} install packages={props.packages} />
+									<RepositoryCard repository={recentProject} install modules={props.modules} />
 								</div>
 							)}
 						</For>
@@ -225,7 +224,7 @@ function ChooseRepo(props: { packages?: string[] }) {
 }
 
 /* Lets the user opt-in before making changes to the repository */
-function OptIn(props: { packages: string[] }) {
+function OptIn(props: { modules: string[] }) {
 	return (
 		<SetupCard>
 			<div class="flex flex-col justify-center gap-4 items-center mb-2">
@@ -234,15 +233,15 @@ function OptIn(props: { packages: string[] }) {
 					{step().message}
 				</h2>
 				<p class="text-surface-500 text-center">
-					The config in your repository will be updated to include the packages you selected:
+					The config in your repository will be updated to include the modules you selected:
 				</p>
 				<ul class="font-medium font-mono text-sm bg-surface-100 p-2 rounded-md">
-					"packages": [
-					<For each={props.packages}>
+					"modules": [
+					<For each={props.modules}>
 						{(pkg) => (
 							<li>
 								"{pkg}"
-								<Show when={props.packages?.indexOf(pkg) !== props.packages.length - 1}>,</Show>
+								<Show when={props.modules?.indexOf(pkg) !== props.modules.length - 1}>,</Show>
 							</li>
 						)}
 					</For>
@@ -258,7 +257,7 @@ function OptIn(props: { packages: string[] }) {
 					type="primary"
 					ref={optInButton}
 				>
-					Install packages
+					Install modules
 				</Button>
 				<Button
 					// eslint-disable-next-line solid/reactivity
@@ -285,7 +284,7 @@ function ShowProgress() {
 			</div>
 			<div class="flex flex-col justify-center gap-4 items-center">
 				<h2 class="text-[24px] leading-tight md:text-2xl font-semibold text-center">
-					Installing your packages…
+					Installing your modules…
 				</h2>
 				<p class="text-surface-500">{step().message}</p>
 			</div>
@@ -332,11 +331,13 @@ function ShowError() {
 				<Button
 					// eslint-disable-next-line solid/reactivity
 					function={() => {
-						step().type === "no-packages" ? navigate("/marketplace") : window.location.reload()
+						step().type === "no-modules"
+							? setSearchParams("/marketplace")
+							: window.location.reload()
 					}}
 					type="secondary"
 				>
-					{step().type === "no-packages" ? "Browse packages" : "Try again"}
+					{step().type === "no-modules" ? "Browse modules" : "Try again"}
 				</Button>
 			</div>
 		</SetupCard>

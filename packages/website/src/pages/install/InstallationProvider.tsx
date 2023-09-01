@@ -6,14 +6,15 @@ import {
 	getLocalStorage,
 	useLocalStorage,
 } from "#src/services/local-storage/index.js"
-import { ProjectConfig, tryCatch } from "@inlang/sdk"
+import { ProjectConfig } from "@inlang/sdk"
+import { tryCatch } from "@inlang/result"
 import type { Step } from "./index.page.jsx"
 import { marketplaceItems } from "@inlang/marketplace"
 import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"
 
 export function InstallationProvider(props: {
 	repo: string
-	packages: string[]
+	modules: string[]
 	step: () => Step
 	setStep: (step: Step) => void
 	optIn: Record<string, any>
@@ -67,7 +68,7 @@ function validateRepo(
 	setRecentProject: () => void,
 	props: {
 		repo: string
-		packages: string[]
+		modules: string[]
 		step: () => Step
 		setStep: (step: Step) => void
 		optIn: Record<string, any>
@@ -84,16 +85,16 @@ function validateRepo(
 			message: "No repository URL provided.",
 			error: true,
 		})
-	} else if (!props.packages || props.packages.length === 0 || props.packages[0] === "") {
+	} else if (!props.modules || props.modules.length === 0 || props.modules[0] === "") {
 		props.setStep({
-			type: "no-packages",
-			message: "No packages provided. You can find packages in the marketplace.",
+			type: "no-modules",
+			message: "No modules provided. You can find modules in the marketplace.",
 			error: true,
 		})
-	} else if (!validatePackages(props.packages)) {
+	} else if (!validatePackages(props.modules)) {
 		props.setStep({
-			type: "invalid-packages",
-			message: "Invalid packages provided.",
+			type: "invalid-modules",
+			message: "Invalid modules provided.",
 			error: true,
 		})
 	} else if (!props.optIn.optIn()) {
@@ -109,22 +110,22 @@ function validateRepo(
 		})
 
 		setRecentProject()
-		initializeRepo(props.repo, props.packages, user!, props.step, props.setStep)
+		initializeRepo(props.repo, props.modules, user!, props.step, props.setStep)
 	}
 }
 
 /**
- * This function initializes the repository by adding the packages to the project.inlang.json file and pushing the changes to the repository.
+ * This function initializes the repository by adding the modules to the project.inlang.json file and pushing the changes to the repository.
  * If there are any errors, the error will be displayed in the UI.
  */
 async function initializeRepo(
 	repoURL: string,
-	packagesURL: string[],
+	modulesURL: string[],
 	user: { username: string; email: string },
 	step: () => Step,
 	setStep: (step: Step) => void,
 ) {
-	packagesURL = packagesURL.filter((pkg, index) => packagesURL.indexOf(pkg) === index)
+	modulesURL = modulesURL.filter((pkg, index) => modulesURL.indexOf(pkg) === index)
 
 	/* Opens the repository with lix */
 	const repo = await openRepository(repoURL, {
@@ -188,27 +189,27 @@ async function initializeRepo(
 	const inlangProject = parseProjectResult.data as ProjectConfig
 
 	/* Look if the modules were already installed */
-	for (const pkg of inlangProject.packages) {
-		const installedPackages = packagesURL.every((packageURL) => pkg.includes(packageURL))
+	for (const pkg of inlangProject.modules) {
+		const installedPackages = modulesURL.every((moduleURL) => pkg.includes(moduleURL))
 		if (installedPackages) {
 			setStep({
 				type: "already-installed",
-				message: "The packages are already installed in your repository.",
+				message: "The modules are already installed in your repository.",
 				error: true,
 			})
 		}
 	}
 
 	/* If no modules where found in the project, create an empty array */
-	if (!inlangProject.packages) inlangProject.packages = []
+	if (!inlangProject.modules) inlangProject.modules = []
 
-	const packagesToInstall = packagesURL.filter((packageURL) => {
-		if (inlangProject.packages.length === 0) return true
+	const modulesToInstall = modulesURL.filter((moduleURL) => {
+		if (inlangProject.modules.length === 0) return true
 
-		const installedPackages = inlangProject.packages.every((pkg) => pkg.includes(packageURL))
+		const installedPackages = inlangProject.modules.every((pkg) => pkg.includes(moduleURL))
 		return !installedPackages
 	})
-	inlangProject.packages.push(...packagesToInstall)
+	inlangProject.modules.push(...modulesToInstall)
 
 	const generatedInlangProject = JSON.stringify(inlangProject, undefined, 2)
 
@@ -228,7 +229,7 @@ async function initializeRepo(
 	})
 
 	await repo.commit({
-		message: "inlang: install package",
+		message: "inlang: install module",
 		author: {
 			name: user.username,
 			email: user.email,
@@ -245,8 +246,8 @@ async function initializeRepo(
 	setStep({
 		type: "success",
 		message:
-			"Successfully installed the packages: " +
-			packagesURL.join(", ") +
+			"Successfully installed the modules: " +
+			modulesURL.join(", ") +
 			" in your repository: " +
 			repoURL +
 			".",
@@ -255,17 +256,17 @@ async function initializeRepo(
 }
 
 /**
- * This function checks if the packages provided in the URL are in the marketplace registry.
+ * This function checks if the modules provided in the URL are in the marketplace registry.
  */
-function validatePackages(packages: string[]) {
+function validatePackages(modules: string[]) {
 	let check = true
-	for (const pkg of packages) {
+	for (const pkg of modules) {
 		if (
 			!marketplaceItems.some(
 				(marketplaceItem) =>
 					marketplaceItem.type !== "app" &&
 					marketplaceItem.type !== "library" &&
-					marketplaceItem.package.includes(pkg),
+					marketplaceItem.module.includes(pkg),
 			)
 		) {
 			check = false
