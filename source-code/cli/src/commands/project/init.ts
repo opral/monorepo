@@ -22,7 +22,7 @@ export async function initCommandAction(args: {
 	filepath?: string
 	logger: any
 }) {
-	const inlangConfigFilePath = "./project.inlang.test.json3"
+	const inlangConfigFilePath = "./project.inlang.json"
 
 	try {
 		const newProjFileStat = await fs.stat(inlangConfigFilePath)
@@ -54,11 +54,10 @@ export async function initCommandAction(args: {
 		}
 	}
 
-	// FIXME: we should use typebox native checks but this seems to always be true even for wrong input
+	// FIXME: we should use typebox native checks but the follwing check seems to always be true even for wrong input
 	// Value.Check(Type.String({ pattern: LanguageTag.pattern }), "as3df"),
 	const languageTagRegex = new RegExp(`^(${LanguageTag.pattern})$`, "g")
 
-	// FIXME: cli hangs after finishing
 	const { sourceLanguagetag } = await prompts({
 		type: "text",
 		name: "sourceLanguagetag",
