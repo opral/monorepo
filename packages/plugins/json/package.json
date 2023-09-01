@@ -13,8 +13,8 @@
 	},
 	"scripts": {
 		"postinstall": "patch-package",
-		"dev": "inlang package build --entry ./src/index.ts --outdir ./dist --watch",
-		"build": "inlang package build --entry ./src/index.ts --outdir ./dist",
+		"dev": "inlang module build --entry ./src/index.ts --outdir ./dist --watch",
+		"build": "inlang module build --entry ./src/index.ts --outdir ./dist",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"lint": "eslint ./src",
 		"format": "prettier ./src --write",

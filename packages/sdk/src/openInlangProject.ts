@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { InlangProject, InstalledLintRule, InstalledPlugin, Subscribable } from "./api.js"
-import { type ImportFunction, type ResolvePackagesFunction, resolvePackages } from "@inlang/package"
+import { type ImportFunction, type ResolveModuleFunction, resolveModules } from "@inlang/module"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
 import {
@@ -25,7 +25,7 @@ const ConfigCompiler = TypeCompiler.Compile(ProjectConfig)
  * Creates an inlang instance.
  *
  * - Use `_import` to pass a custom import function for testing,
- *   and supporting legacy resolvedPackages such as CJS.
+ *   and supporting legacy resolvedModules such as CJS.
  *
  */
 export const openInlangProject = async (args: {
@@ -75,24 +75,24 @@ export const openInlangProject = async (args: {
 			}
 		}
 
-		// -- resolvedPackages -----------------------------------------------------------
+		// -- resolvedModules -----------------------------------------------------------
 
-		const [resolvedPackages, setResolvedPackages] =
-			createSignal<Awaited<ReturnType<ResolvePackagesFunction>>>()
+		const [resolvedModules, setResolvedModules] =
+			createSignal<Awaited<ReturnType<ResolveModuleFunction>>>()
 
 		createEffect(() => {
 			const conf = config()
 			if (!conf) return
 
-			loadPackages({ config: conf, nodeishFs: args.nodeishFs, _import: args._import })
-				.then((resolvedPackages) => {
+			loadModules({ config: conf, nodeishFs: args.nodeishFs, _import: args._import })
+				.then((resolvedModules) => {
 					if (
-						!resolvedPackages.resolvedPluginApi.loadMessages ||
-						!resolvedPackages.resolvedPluginApi.saveMessages
+						!resolvedModules.resolvedPluginApi.loadMessages ||
+						!resolvedModules.resolvedPluginApi.saveMessages
 					) {
 						throw new NoPluginProvidesLoadOrSaveMessagesError()
 					}
-					setResolvedPackages(resolvedPackages)
+					setResolvedModules(resolvedModules)
 
 					// TODO: handle `detectedLanguageTags`
 				})
@@ -102,23 +102,23 @@ export const openInlangProject = async (args: {
 		// -- messages ----------------------------------------------------------
 
 		let configValue: ProjectConfig
-		createEffect(() => (configValue = config()!)) // workaround to not run effects twice (e.g. config change + packages change) (I'm sure there exists a solid way of doing this, but I haven't found it yet)
+		createEffect(() => (configValue = config()!)) // workaround to not run effects twice (e.g. config change + modules change) (I'm sure there exists a solid way of doing this, but I haven't found it yet)
 
 		const [messages, setMessages] = createSignal<Message[]>()
 		createEffect(() => {
 			const conf = config()
 			if (!conf) return
 
-			const _resolvedPackages = resolvedPackages()
-			if (!_resolvedPackages) return
+			const _resolvedModules = resolvedModules()
+			if (!_resolvedModules) return
 
-			if (!_resolvedPackages.resolvedPluginApi.loadMessages) {
+			if (!_resolvedModules.resolvedPluginApi.loadMessages) {
 				markInitAsFailed(undefined)
 				return
 			}
 
 			makeTrulyAsync(
-				_resolvedPackages.resolvedPluginApi.loadMessages({
+				_resolvedModules.resolvedPluginApi.loadMessages({
 					languageTags: configValue!.languageTags,
 				}),
 			)
@@ -134,14 +134,14 @@ export const openInlangProject = async (args: {
 		// -- installed items ----------------------------------------------------
 
 		const installedLintRules = () => {
-			if (!resolvedPackages()) return []
-			return resolvedPackages()!.lintRules.map(
+			if (!resolvedModules()) return []
+			return resolvedModules()!.lintRules.map(
 				(rule) =>
 					({
 						meta: rule.meta,
-						package:
-							resolvedPackages()?.meta.find((m) => m.lintRules.includes(rule.meta.id))?.package ??
-							"Unknown package. You stumbled on a bug in inlang's source code. Please open an issue.",
+						module:
+							resolvedModules()?.meta.find((m) => m.lintRules.includes(rule.meta.id))?.module ??
+							"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
 						// default to warning, see https://github.com/inlang/inlang/issues/1254
 						lintLevel: configValue.settings["project.lintRuleLevels"]?.[rule.meta.id] ?? "warning",
 						disabled: configValue.settings["project.disabled"]?.includes(rule.meta.id) ?? false,
@@ -150,12 +150,12 @@ export const openInlangProject = async (args: {
 		}
 
 		const installedPlugins = () => {
-			if (!resolvedPackages()) return []
-			return resolvedPackages()!.plugins.map((plugin) => ({
+			if (!resolvedModules()) return []
+			return resolvedModules()!.plugins.map((plugin) => ({
 				meta: plugin.meta,
-				package:
-					resolvedPackages()?.meta.find((m) => m.plugins.includes(plugin.meta.id))?.package ??
-					"Unknown package. You stumbled on a bug in inlang's source code. Please open an issue.",
+				module:
+					resolvedModules()?.meta.find((m) => m.plugins.includes(plugin.meta.id))?.module ??
+					"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
 			})) satisfies Array<InstalledPlugin>
 		}
 
@@ -168,7 +168,7 @@ export const openInlangProject = async (args: {
 			messages,
 			config,
 			installedLintRules,
-			resolvedPackages,
+			resolvedModules,
 		)
 
 		const debouncedSave = skipFirst(
@@ -176,7 +176,7 @@ export const openInlangProject = async (args: {
 				500,
 				async (newMessages) => {
 					try {
-						await resolvedPackages()!.resolvedPluginApi.saveMessages({ messages: newMessages })
+						await resolvedModules()!.resolvedPluginApi.saveMessages({ messages: newMessages })
 					} catch (err) {
 						throw new PluginSaveMessagesError("Error in saving messages", {
 							cause: err,
@@ -204,14 +204,14 @@ export const openInlangProject = async (args: {
 			},
 			errors: createSubscribable(() => [
 				...(initializeError ? [initializeError] : []),
-				...(resolvedPackages() ? resolvedPackages()!.errors : []),
+				...(resolvedModules() ? resolvedModules()!.errors : []),
 				// have a query error exposed
 				//...(lintErrors() ?? []),
 			]),
 			config: createSubscribable(() => config()),
 			setConfig,
 			appSpecificApi: createSubscribable(
-				() => resolvedPackages()?.resolvedPluginApi.appSpecificApi || {},
+				() => resolvedModules()?.resolvedPluginApi.appSpecificApi || {},
 			),
 			query: {
 				messages: messagesQuery,
@@ -286,12 +286,12 @@ const _writeConfigToDisk = async (args: {
 
 // ------------------------------------------------------------------------------------------------
 
-const loadPackages = async (args: {
+const loadModules = async (args: {
 	config: ProjectConfig
 	nodeishFs: NodeishFilesystemSubset
 	_import?: ImportFunction
 }) =>
-	resolvePackages({
+	resolveModules({
 		config: args.config,
 		nodeishFs: args.nodeishFs,
 		_import: args._import,

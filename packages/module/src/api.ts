@@ -6,14 +6,14 @@ import type {
 	ResolvePluginsFunction,
 	ResolvedPluginApi,
 } from "@inlang/resolve-plugins"
-import type { PackageHasNoExportsError, PackageImportError } from "./errors.js"
+import type { ModuleHasNoExportsError, ModuleImportError } from "./errors.js"
 import type { ImportFunction } from "./import.js"
 import type { resolveLintRules } from "@inlang/lint"
 
 /**
- * The inlang package API.
+ * The inlang module API.
  *
- * An inlang package exports a default object with the following properties:
+ * An inlang module exports a default object with the following properties:
  *
  * - `plugins`: An array of plugins.
  * - `lintRules`: An array of lint rules.
@@ -25,7 +25,7 @@ import type { resolveLintRules } from "@inlang/lint"
  *   }
  */
 
-export type InlangPackage = {
+export type InlangModule = {
 	default: {
 		plugins?: Plugin<any>[]
 		lintRules?: LintRule[]
@@ -33,40 +33,40 @@ export type InlangPackage = {
 }
 
 /**
- * Function that resolves packages from the config.
+ * Function that resolves modules from the config.
  *
  * Pass a custom `_import` function to override the default import function.
  */
-export type ResolvePackagesFunction = (args: {
+export type ResolveModuleFunction = (args: {
 	config: ProjectConfig
 	nodeishFs: NodeishFilesystemSubset
 	_import?: ImportFunction
 }) => Promise<{
 	/**
-	 * Metadata about the resolved packages.
+	 * Metadata about the resolved module.
 	 *
 	 * @example
 	 * [{
-	 * 	  package: "https://myplugin.com/index.js",
+	 * 	  module: "https://myplugin.com/index.js",
 	 * 	  plugins: ["samuel.plugin.json", "inlang.plugin.yaml"],
 	 * 	  lintRules: ["samuel.lintRule.missingPattern", "inlang.lintRule.missingDescription"],
 	 * }]
 	 */
 	meta: Array<{
 		/**
-		 * The package link.
+		 * The module link.
 		 *
 		 * @example "https://myplugin.com/index.js"
 		 */
-		package: string
+		module: string
 		/**
-		 * The resolved plugin ids of the package.
+		 * The resolved plugin ids of the module.
 		 *
 		 * @example ["samuel.plugin.json", "inlang.plugin.yaml"]
 		 */
 		plugins: Array<Plugin["meta"]["id"]>
 		/**
-		 * The resolved lint rule ids of the package.
+		 * The resolved lint rule ids of the module.
 		 *
 		 * @example ["samuel.lintRule.missingPattern", "inlang.lintRule.missingDescription"]
 		 */
@@ -88,14 +88,14 @@ export type ResolvePackagesFunction = (args: {
 	 * Errors during the resolution process.
 	 *
 	 * This includes errors from:
-	 * - importing packages
+	 * - importing module
 	 * - resolving plugins
 	 * - resolving lint rules
 	 * - resolving the runtime plugin api
 	 */
 	errors: Array<
-		| PackageHasNoExportsError
-		| PackageImportError
+		| ModuleHasNoExportsError
+		| ModuleImportError
 		| Awaited<ReturnType<ResolvePluginsFunction>>["errors"][number]
 		| Awaited<ReturnType<typeof resolveLintRules>>["errors"][number]
 	>

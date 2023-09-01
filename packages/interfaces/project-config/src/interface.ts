@@ -81,15 +81,15 @@ export const ProjectConfig = Type.Object(
 		sourceLanguageTag: LanguageTag,
 		languageTags: Type.Array(LanguageTag),
 		/**
-		 * The packages to load.
+		 * The modules to load.
 		 *
 		 * @example
-		 *  packages: [
+		 *  modules: [
 		 * 	  "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index.js",
 		 * 	  "https://cdn.jsdelivr.net/npm/@inlang/plugin-csv@1/dist/index.js",
 		 *  ]
 		 */
-		packages: Type.Array(Type.String()),
+		modules: Type.Array(Type.String()),
 		/**
 		 * Settings are key-value pairs.
 		 */

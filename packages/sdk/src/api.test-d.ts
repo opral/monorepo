@@ -14,5 +14,5 @@ inlang.query.lintReports.getAll()
 inlang.query.lintReports.getAll.subscribe(() => undefined)
 
 inlang.installed.lintRules()[0]?.lintLevel
-inlang.installed.lintRules()[0]?.package
+inlang.installed.lintRules()[0]?.module
 inlang.installed.lintRules()[0]?.meta

@@ -1,5 +1,5 @@
-import type { InlangPackage, ResolvePackagesFunction } from "./api.js"
-import { PackageError, PackageImportError, PackageHasNoExportsError } from "./errors.js"
+import type { InlangModule, ResolveModuleFunction } from "./api.js"
+import { ModuleError, ModuleImportError, ModuleHasNoExportsError } from "./errors.js"
 import { tryCatch } from "@inlang/result"
 import { resolveLintRules } from "@inlang/lint"
 import type { Plugin } from "@inlang/plugin"
@@ -7,27 +7,27 @@ import { createImport } from "./import.js"
 import type { LintRule } from "@inlang/lint-rule"
 import { resolvePlugins } from "@inlang/resolve-plugins"
 
-export const resolvePackages: ResolvePackagesFunction = async (args) => {
+export const resolveModules: ResolveModuleFunction = async (args) => {
 	const _import = args._import ?? createImport({ readFile: args.nodeishFs.readFile, fetch })
-	const packageErrors: Array<PackageError> = []
+	const moduleErrors: Array<ModuleError> = []
 
 	let allPlugins: Array<Plugin> = []
 	let allLintRules: Array<LintRule> = []
 
-	const meta: Awaited<ReturnType<ResolvePackagesFunction>>["meta"] = []
+	const meta: Awaited<ReturnType<ResolveModuleFunction>>["meta"] = []
 
-	for (const module of args.config.packages) {
+	for (const module of args.config.modules) {
 		/**
 		 * -------------- BEGIN SETUP --------------
 		 */
 
-		const importedModule = await tryCatch<InlangPackage>(() => _import(module))
+		const importedModule = await tryCatch<InlangModule>(() => _import(module))
 
 		// -- IMPORT MODULE --
 		if (importedModule.error) {
-			packageErrors.push(
-				new PackageImportError(`Couldn't import the plugin "${module}"`, {
-					package: module,
+			moduleErrors.push(
+				new ModuleImportError(`Couldn't import the plugin "${module}"`, {
+					module: module,
 					cause: importedModule.error as Error,
 				}),
 			)
@@ -36,11 +36,11 @@ export const resolvePackages: ResolvePackagesFunction = async (args) => {
 
 		// -- MODULE DOES NOT EXPORT PLUGINS OR LINT RULES --
 		if (!importedModule.data?.default?.plugins && !importedModule.data?.default?.lintRules) {
-			packageErrors.push(
-				new PackageHasNoExportsError(
+			moduleErrors.push(
+				new ModuleHasNoExportsError(
 					`Module "${module}" does not export any plugins or lintRules.`,
 					{
-						package: module,
+						module: module,
 					},
 				),
 			)
@@ -53,7 +53,7 @@ export const resolvePackages: ResolvePackagesFunction = async (args) => {
 		const lintRules = importedModule.data.default.lintRules ?? []
 
 		meta.push({
-			package: module,
+			module: module,
 			plugins: plugins.map((plugin) => plugin.meta.id) ?? [],
 			lintRules: lintRules.map((lintRule) => lintRule.meta.id) ?? [],
 		})
@@ -75,6 +75,6 @@ export const resolvePackages: ResolvePackagesFunction = async (args) => {
 		lintRules: allLintRules,
 		plugins: allPlugins,
 		resolvedPluginApi: resolvedPlugins.data,
-		errors: [...packageErrors, ...resolvedLintRules.errors, ...resolvedPlugins.errors],
+		errors: [...moduleErrors, ...resolvedLintRules.errors, ...resolvedPlugins.errors],
 	}
 }

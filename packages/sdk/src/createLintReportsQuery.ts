@@ -3,7 +3,7 @@ import { createEffect } from "./solid.js"
 import { createSubscribable } from "./openInlangProject.js"
 import type { InlangProject, InstalledLintRule, LintReportsQueryApi } from "./api.js"
 import type { ProjectConfig } from "@inlang/project-config"
-import type { ResolvePackagesFunction } from "@inlang/package"
+import type { ResolveModuleFunction } from "@inlang/module"
 import type { JSONObject, LintReport, Message } from "./interfaces.js"
 import { lintSingleMessage } from "@inlang/lint"
 
@@ -14,7 +14,7 @@ export function createLintReportsQuery(
 	messages: () => Array<Message> | undefined,
 	config: () => ProjectConfig | undefined,
 	installedLintRules: () => Array<InstalledLintRule>,
-	resolvedModules: () => Awaited<ReturnType<ResolvePackagesFunction>> | undefined,
+	resolvedModules: () => Awaited<ReturnType<ResolveModuleFunction>> | undefined,
 ): InlangProject["query"]["lintReports"] {
 	const index = new ReactiveMap<LintReport["messageId"], LintReport[]>()
 

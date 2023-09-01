@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest"
 import { translateCommandAction } from "./translate.js"
 import { Message, ProjectConfig, openInlangProject, Plugin } from "@inlang/sdk"
 import { privateEnv } from "@inlang/env-variables"
-import type { InlangPackage } from "@inlang/package"
+import type { InlangModule } from "@inlang/module"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 
 const exampleMessages: Message[] = [
@@ -61,7 +61,7 @@ describe("translate command", () => {
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en", "de", "it"],
-					packages: [""],
+					modules: [""],
 					settings: {
 						"project.lintRuleLevels": {},
 					},
@@ -83,7 +83,7 @@ describe("translate command", () => {
 					default: {
 						plugins: [_mockPlugin],
 					},
-				} satisfies InlangPackage
+				} satisfies InlangModule
 			}
 
 			const inlang = await openInlangProject({
