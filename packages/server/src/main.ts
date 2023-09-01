@@ -8,6 +8,7 @@ import { router as websiteRouter } from "@inlang/website/router"
 import { router as telemetryRouter } from "@inlang/telemetry/router"
 import { router as rpcRouter } from "@inlang/rpc/router"
 import { router as badgeRouter } from "@inlang/badge/router"
+import { router as marketplaceSchemaRouter } from "@inlang/marketplace/router"
 
 // --------------- SETUP -----------------
 
@@ -52,6 +53,8 @@ app.use(telemetryRouter)
 app.use(rpcRouter)
 
 app.use(badgeRouter)
+
+app.use(marketplaceSchemaRouter)
 
 // ! website comes last in the routes because it uses the wildcard `*` to catch all routes
 app.use(websiteRouter)
