@@ -65,7 +65,7 @@ export const plugin: Plugin<PluginSettings> = {
 		displayName: { en: "i18next" },
 		description: { en: "i18next plugin for inlang" },
 	},
-	loadMessages: async ({ languageTags, settings, nodeishFs }) => {
+	loadMessages: async ({ languageTags, sourceLanguageTag, settings, nodeishFs }) => {
 		settings.variableReferencePattern = settings.variableReferencePattern || ["{{", "}}"]
 		throwIfInvalidSettings(settings)
 		SPACING = {}
@@ -75,6 +75,7 @@ export const plugin: Plugin<PluginSettings> = {
 			nodeishFs,
 			settings,
 			languageTags,
+			sourceLanguageTag,
 		})
 	},
 	saveMessages: async ({ messages, settings, nodeishFs }) => {
@@ -105,9 +106,10 @@ async function loadMessages(args: {
 	nodeishFs: NodeishFilesystemSubset
 	settings: PluginSettings
 	languageTags: Readonly<LanguageTag[]>
+	sourceLanguageTag: LanguageTag
 }): Promise<Message[]> {
 	const messages: Message[] = []
-	for (const languageTag of args.languageTags) {
+	for (const languageTag of resolveOrderOfLanguageTags(args.languageTags, args.sourceLanguageTag)) {
 		if (typeof args.settings.pathPattern !== "string") {
 			for (const [prefix, path] of Object.entries(args.settings.pathPattern)) {
 				const messagesFromFile = await getFileToParse(path, languageTag, args.nodeishFs)
@@ -173,6 +175,18 @@ async function getFileToParse(
 		}
 		throw e
 	}
+}
+
+/**
+ * Resolve order of languageTags, move sourceLanguage to the first spot
+ */
+const resolveOrderOfLanguageTags = (
+	languageTags: Readonly<LanguageTag[]>,
+	sourceLanguageTag: LanguageTag,
+): LanguageTag[] => {
+	const filteredTags = languageTags.filter((t) => t !== sourceLanguageTag) // Remove sourceLanguageTag
+	filteredTags.unshift(sourceLanguageTag) // Add sourceLanguageTag to the beginning of the filtered array
+	return filteredTags
 }
 
 /**

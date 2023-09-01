@@ -120,6 +120,7 @@ export const openInlangProject = async (args: {
 			makeTrulyAsync(
 				_resolvedModules.resolvedPluginApi.loadMessages({
 					languageTags: configValue!.languageTags,
+					sourceLanguageTag: configValue!.sourceLanguageTag,
 				}),
 			)
 				.then((messages) => {

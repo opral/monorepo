@@ -45,7 +45,10 @@ export type ResolvePluginsFunction = (args: {
  * The API after resolving the plugins.
  */
 export type ResolvedPluginApi = {
-	loadMessages: (args: { languageTags: LanguageTag[] }) => Promise<Message[]> | Message[]
+	loadMessages: (args: {
+		languageTags: LanguageTag[]
+		sourceLanguageTag: LanguageTag
+	}) => Promise<Message[]> | Message[]
 	saveMessages: (args: { messages: Message[] }) => Promise<void> | void
 	/**
 	 * Detect language tags in the project provided plugins.

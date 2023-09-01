@@ -30,6 +30,7 @@ export type Plugin<Settings extends JSONObject | unknown = unknown> = Omit<
 	 */
 	loadMessages?: (args: {
 		languageTags: LanguageTag[]
+		sourceLanguageTag: LanguageTag
 		settings: Settings
 		nodeishFs: NodeishFilesystemSubset
 	}) => Promise<Message[]> | Message[]

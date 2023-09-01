@@ -101,6 +101,7 @@ describe("loadMessages", () => {
 		expect(
 			await resolved.data.loadMessages!({
 				languageTags: ["en"],
+				sourceLanguageTag: "en",
 			}),
 		).toEqual([{ id: "test", expressions: [], selectors: [], variants: [] }])
 	})

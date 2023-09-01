@@ -12,6 +12,7 @@ describe("option pathPattern", () => {
 		try {
 			await plugin.loadMessages!({
 				languageTags: ["en"],
+				sourceLanguageTag: "en",
 				settings: { pathPattern: "./resources/" },
 				nodeishFs: fs,
 			})
@@ -27,6 +28,7 @@ describe("option pathPattern", () => {
 		try {
 			await plugin.loadMessages!({
 				languageTags: ["en"],
+				sourceLanguageTag: "en",
 				settings: { pathPattern: "./{{languageTag}}.json" },
 				nodeishFs: fs,
 			})
@@ -42,6 +44,7 @@ describe("option pathPattern", () => {
 		try {
 			await plugin.loadMessages!({
 				languageTags: ["en"],
+				sourceLanguageTag: "en",
 				settings: { pathPattern: "./resources/" },
 				nodeishFs: fs,
 			})
@@ -57,6 +60,7 @@ describe("option pathPattern", () => {
 		try {
 			await plugin.loadMessages!({
 				languageTags: ["en"],
+				sourceLanguageTag: "en",
 				settings: {
 					pathPattern: {
 						common: "./common.json",
@@ -76,6 +80,7 @@ describe("option pathPattern", () => {
 		try {
 			await plugin.loadMessages!({
 				languageTags: ["en"],
+				sourceLanguageTag: "en",
 				settings: {
 					pathPattern: {
 						common: "./{{languageTag}}.json",
@@ -95,6 +100,7 @@ describe("option pathPattern", () => {
 		try {
 			await plugin.loadMessages!({
 				languageTags: ["en"],
+				sourceLanguageTag: "en",
 				settings: {
 					pathPattern: {
 						common: "./{languageTag}/common",
@@ -114,6 +120,7 @@ describe("option pathPattern", () => {
 		try {
 			await plugin.loadMessages!({
 				languageTags: ["en"],
+				sourceLanguageTag: "en",
 				settings: {
 					pathPattern: {
 						"namespaceWith.dot": "./{languageTag}/common.json",
@@ -133,6 +140,7 @@ describe("option pathPattern", () => {
 		try {
 			await plugin.loadMessages!({
 				languageTags: ["en"],
+				sourceLanguageTag: "en",
 				settings: {
 					pathPattern: "./{languageTag}/*.json",
 				},
@@ -153,8 +161,14 @@ describe("loadMessage", () => {
 		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
+		const sourceLanguageTag = "en"
 
-		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
+		const messages = await plugin.loadMessages!({
+			languageTags,
+			sourceLanguageTag,
+			settings,
+			nodeishFs: fs,
+		})
 		const variant = getVariant(messages[0]!, { where: { languageTag: "en" } })
 		expect(variant?.pattern[0]?.type).toBe("Text")
 	})
@@ -166,8 +180,11 @@ describe("loadMessage", () => {
 		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
+		const sourceLanguageTag = "en"
 
-		expect(plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })).resolves.toBeTruthy()
+		expect(
+			plugin.loadMessages!({ languageTags, sourceLanguageTag, settings, nodeishFs: fs }),
+		).resolves.toBeTruthy()
 	})
 
 	it("should work with not yet existing files", async () => {
@@ -176,9 +193,12 @@ describe("loadMessage", () => {
 		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
+		const sourceLanguageTag = "en"
 
 		const languageTags = ["en", "de"]
-		expect(plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })).resolves.toBeTruthy()
+		expect(
+			plugin.loadMessages!({ languageTags, sourceLanguageTag, settings, nodeishFs: fs }),
+		).resolves.toBeTruthy()
 	})
 
 	it("should add multible variants to the same message", async () => {
@@ -188,9 +208,15 @@ describe("loadMessage", () => {
 		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
+		const sourceLanguageTag = "en"
 
 		const languageTags = ["en", "de"]
-		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
+		const messages = await plugin.loadMessages!({
+			languageTags,
+			sourceLanguageTag,
+			settings,
+			nodeishFs: fs,
+		})
 		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })).toBeTruthy()
 		expect(getVariant(messages[0]!, { where: { languageTag: "de" } })).toBeTruthy()
 	})
@@ -206,8 +232,14 @@ describe("loadMessage", () => {
 				common: "./{languageTag}/common.json",
 			},
 		}
+		const sourceLanguageTag = "en"
 
-		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
+		const messages = await plugin.loadMessages!({
+			languageTags,
+			sourceLanguageTag,
+			settings,
+			nodeishFs: fs,
+		})
 		const variant = getVariant(messages[0]!, { where: { languageTag: "en" } })
 		expect(variant?.pattern[0]?.type).toBe("Text")
 	})
@@ -222,8 +254,11 @@ describe("loadMessage", () => {
 				common: "./{languageTag}/common.json",
 			},
 		}
+		const sourceLanguageTag = "en"
 
-		expect(plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })).resolves.toBeTruthy()
+		expect(
+			plugin.loadMessages!({ languageTags, sourceLanguageTag, settings, nodeishFs: fs }),
+		).resolves.toBeTruthy()
 	})
 
 	it("should work with not yet existing files (namespace)", async () => {
@@ -235,9 +270,12 @@ describe("loadMessage", () => {
 				common: "./{languageTag}/common.json",
 			},
 		}
+		const sourceLanguageTag = "en"
 
 		const languageTags = ["en", "de"]
-		expect(plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })).resolves.toBeTruthy()
+		expect(
+			plugin.loadMessages!({ languageTags, sourceLanguageTag, settings, nodeishFs: fs }),
+		).resolves.toBeTruthy()
 	})
 
 	it("should add multible variants to the same message (namespace)", async () => {
@@ -251,8 +289,14 @@ describe("loadMessage", () => {
 				common: "./{languageTag}/common.json",
 			},
 		}
+		const sourceLanguageTag = "en"
 		const languageTags = ["en", "de"]
-		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
+		const messages = await plugin.loadMessages!({
+			languageTags,
+			sourceLanguageTag,
+			settings,
+			nodeishFs: fs,
+		})
 		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })).toBeTruthy()
 		expect(getVariant(messages[0]!, { where: { languageTag: "de" } })).toBeTruthy()
 	})
@@ -273,11 +317,13 @@ describe("loadMessage", () => {
 				vital: "./{languageTag}/vital.json",
 			},
 		}
+		const sourceLanguageTag = "en"
 		const languageTags = ["en", "de"]
 		let isThrown = false
 		try {
 			await plugin.loadMessages!({
 				languageTags,
+				sourceLanguageTag,
 				settings,
 				nodeishFs: fs,
 			})
@@ -301,11 +347,13 @@ describe("loadMessage", () => {
 				pathPattern: "./{languageTag}/common.json",
 			},
 		}
+		const sourceLanguageTag = "en"
 		const languageTags = ["en", "de"]
 		let isThrown = false
 		try {
 			await plugin.loadMessages!({
 				languageTags,
+				sourceLanguageTag,
 				settings,
 				nodeishFs: fs,
 			})
@@ -322,11 +370,13 @@ describe("loadMessage", () => {
 				pathPattern: ".lang/{languageTag}.json",
 			},
 		}
+		const sourceLanguageTag = "en"
 		const languageTags = ["en"]
 		let isThrown = false
 		try {
 			await plugin.loadMessages!({
 				languageTags,
+				sourceLanguageTag,
 				settings,
 				nodeishFs: fs,
 			})
@@ -419,7 +469,13 @@ describe("variable reference", () => {
 			pathPattern: "./{languageTag}.json",
 		}
 		const languageTags = ["en"]
-		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
+		const sourceLanguageTag = "en"
+		const messages = await plugin.loadMessages!({
+			languageTags,
+			sourceLanguageTag,
+			settings,
+			nodeishFs: fs,
+		})
 		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern.length).toBe(2)
 		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern[0]?.type).toBe(
 			"Text",
@@ -435,8 +491,14 @@ describe("variable reference", () => {
 		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
+		const sourceLanguageTag = "en"
 		const languageTags = ["en"]
-		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
+		const messages = await plugin.loadMessages!({
+			languageTags,
+			sourceLanguageTag,
+			settings,
+			nodeishFs: fs,
+		})
 		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern.length).toBe(2)
 		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern[0]?.type).toBe(
 			"VariableReference",
@@ -453,8 +515,14 @@ describe("variable reference", () => {
 			pathPattern: "./{languageTag}.json",
 			variableReferencePattern: ["@"],
 		}
+		const sourceLanguageTag = "en"
 		const languageTags = ["en"]
-		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
+		const messages = await plugin.loadMessages!({
+			languageTags,
+			sourceLanguageTag,
+			settings,
+			nodeishFs: fs,
+		})
 		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern[0]?.type).toBe(
 			"Text",
 		)
@@ -483,8 +551,10 @@ describe("formatting", () => {
 		const settings: PluginSettings = {
 			pathPattern: "./{languageTag}.json",
 		}
+		const sourceLanguageTag = "en"
 		const languageTags = ["en", "de", "fr"]
 		const messages = await plugin.loadMessages!({
+			sourceLanguageTag,
 			languageTags,
 			settings,
 			nodeishFs: fs,
@@ -534,7 +604,9 @@ describe("formatting", () => {
 			pathPattern: "./{languageTag}.json",
 		}
 		const languageTags = ["en", "de", "fr"]
+		const sourceLanguageTag = "en"
 		const messages = await plugin.loadMessages!({
+			sourceLanguageTag,
 			languageTags,
 			settings,
 			nodeishFs: fs,
@@ -561,7 +633,9 @@ describe("formatting", () => {
 			},
 		}
 		const languageTags = ["en"]
+		const sourceLanguageTag = "en"
 		const messages = await plugin.loadMessages!({
+			sourceLanguageTag,
 			languageTags,
 			settings,
 			nodeishFs: fs,
@@ -621,7 +695,9 @@ describe("formatting", () => {
 			},
 		}
 		const languageTags = ["en"]
+		const sourceLanguageTag = "en"
 		const messages = await plugin.loadMessages!({
+			sourceLanguageTag,
 			languageTags,
 			settings,
 			nodeishFs: fs,
@@ -702,8 +778,9 @@ describe("formatting", () => {
 		}
 
 		const languageTags = ["en", "de", "fr"]
-
+		const sourceLanguageTag = "en"
 		const messages = await plugin.loadMessages!({
+			sourceLanguageTag,
 			languageTags,
 			settings,
 			nodeishFs: fs,
@@ -757,7 +834,9 @@ describe("roundTrip", () => {
 		}
 
 		const languageTags = ["en"]
+		const sourceLanguageTag = "en"
 		const messages = await plugin.loadMessages!({
+			sourceLanguageTag,
 			languageTags,
 			settings,
 			nodeishFs: fs,
@@ -803,7 +882,9 @@ describe("roundTrip", () => {
 			},
 		}
 		const languageTags = ["en"]
+		const sourceLanguageTag = "en"
 		const messages = await plugin.loadMessages!({
+			sourceLanguageTag,
 			languageTags,
 			settings,
 			nodeishFs: fs,
@@ -852,9 +933,20 @@ describe("roundTrip", () => {
 				common: "./{languageTag}.json",
 			},
 		}
-		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
+		const sourceLanguageTag = "en"
+		const messages = await plugin.loadMessages!({
+			languageTags,
+			sourceLanguageTag,
+			settings,
+			nodeishFs: fs,
+		})
 		plugin.saveMessages!({ messages, settings, nodeishFs: fs })
-		const newMessage = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
+		const newMessage = await plugin.loadMessages!({
+			languageTags,
+			sourceLanguageTag,
+			settings,
+			nodeishFs: fs,
+		})
 		expect(newMessage).toStrictEqual(messages)
 	})
 
@@ -870,9 +962,20 @@ describe("roundTrip", () => {
 				common: "./{languageTag}.json",
 			},
 		}
-		const messages = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
+		const sourceLanguageTag = "en"
+		const messages = await plugin.loadMessages!({
+			languageTags,
+			sourceLanguageTag,
+			settings,
+			nodeishFs: fs,
+		})
 		plugin.saveMessages!({ messages, settings, nodeishFs: fs })
-		const newMessage = await plugin.loadMessages!({ languageTags, settings, nodeishFs: fs })
+		const newMessage = await plugin.loadMessages!({
+			languageTags,
+			sourceLanguageTag,
+			settings,
+			nodeishFs: fs,
+		})
 		expect(newMessage).toStrictEqual(messages)
 	})
 })
