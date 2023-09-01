@@ -5,8 +5,6 @@ import fs from "node:fs/promises"
 import prompts from "prompts"
 import { createProjectConfig } from "@inlang/create-project"
 import { LanguageTag } from "@inlang/language-tag"
-// import { Value } from "@sinclair/typebox/value"
-// import { Type } from "@sinclair/typebox"
 
 export const init = new Command()
 	.command("init")
@@ -55,6 +53,8 @@ export async function initCommandAction(args: {
 	}
 
 	// FIXME: we should use typebox native checks but the follwing check seems to always be true even for wrong input
+	// import { Value } from "@sinclair/typebox/value"
+	// import { Type } from "@sinclair/typebox"
 	// Value.Check(Type.String({ pattern: LanguageTag.pattern }), "as3df"),
 	const languageTagRegex = new RegExp(`^(${LanguageTag.pattern})$`, "g")
 
@@ -108,5 +108,5 @@ You can read more here: inlang.com/documentation/language-tag`,
 		nodeishFs: args.nodeishFs,
 	})
 
-	args.logger.info(`✅ Created your inlang configuration at: ${inlangConfigFilePath}`)
+	args.logger.info(`✅ Successfully created your inlang configuration at: ${inlangConfigFilePath}`)
 }
