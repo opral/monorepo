@@ -466,6 +466,91 @@ describe("variable reference", () => {
 })
 
 describe("formatting", () => {
+	it("should preserve the order of ids for pathPattern string", async () => {
+		const content = JSON.stringify({ a: "test", z: "test", b: "test" }, undefined, 2)
+		const fs = createNodeishMemoryFs()
+		await fs.writeFile("./en.json", content)
+
+		const settings: PluginSettings = {
+			pathPattern: "./{languageTag}.json",
+		}
+
+		const languageTags = ["en"]
+
+		const messages = await plugin.loadMessages!({
+			languageTags,
+			settings,
+			nodeishFs: fs,
+		})
+
+		await plugin.saveMessages!({ messages: messages, settings, nodeishFs: fs })
+
+		const newContent = await fs.readFile("./en.json", { encoding: "utf-8" })
+
+		expect(content).toStrictEqual(newContent)
+	})
+
+	it("should preserve the order of ids for pathPattern with namespaces", async () => {
+		const content = JSON.stringify({ a: "test", z: "test", b: "test" }, undefined, 2)
+		const fs = createNodeishMemoryFs()
+		await fs.mkdir("./common")
+		await fs.writeFile("./common/en.json", content)
+
+		const settings: PluginSettings = {
+			pathPattern: {
+				common: "./{languageTag}/common.json",
+			},
+		}
+
+		const languageTags = ["en"]
+
+		const messages = await plugin.loadMessages!({
+			languageTags,
+			settings,
+			nodeishFs: fs,
+		})
+
+		await plugin.saveMessages!({ messages: messages, settings, nodeishFs: fs })
+
+		const newContent = await fs.readFile("./common/en.json", { encoding: "utf-8" })
+
+		expect(content).toStrictEqual(newContent)
+	})
+
+	it("should preserve the order of ids for pathPattern with namespaces and nested keys", async () => {
+		const content = JSON.stringify(
+			{
+				z: { a: "test", z: "test", b: "test" },
+				a: { a: "test", z: "test", b: "test" },
+			},
+			undefined,
+			2,
+		)
+		const fs = createNodeishMemoryFs()
+		await fs.mkdir("./common")
+		await fs.writeFile("./common/en.json", content)
+
+		const settings: PluginSettings = {
+			pathPattern: {
+				common: "./{languageTag}/common.json",
+			},
+		}
+
+		const languageTags = ["en"]
+
+		const messages = await plugin.loadMessages!({
+			languageTags,
+			settings,
+			nodeishFs: fs,
+		})
+
+		await plugin.saveMessages!({ messages: messages, settings, nodeishFs: fs })
+
+		const newContent = await fs.readFile("./common/en.json", { encoding: "utf-8" })
+
+		expect(content).toStrictEqual(newContent)
+	})
+
 	it("should preserve the spacing resources and determine a default based on the majority for newly added resources", async () => {
 		// @prettier-ignore
 		const with4Spaces = `{
