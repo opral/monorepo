@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest"
 import { lintCommandAction } from "./index.js"
 import { LintRule, Message, ProjectConfig, openInlangProject, Plugin } from "@inlang/sdk"
 
-import type { InlangPackage } from "@inlang/package"
+import type { InlangModule } from "@inlang/module"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 
 const exampleMessages: Message[] = [
@@ -58,7 +58,7 @@ async function setupInlang(enabledLintRule?: LintRule) {
 		JSON.stringify({
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de", "it"],
-			packages: [""],
+			modules: [""],
 			settings: {
 				"project.lintRuleLevels": {},
 			},
@@ -81,7 +81,7 @@ async function setupInlang(enabledLintRule?: LintRule) {
 				plugins: [_mockPlugin],
 				lintRules: enabledLintRule && [enabledLintRule],
 			},
-		} satisfies InlangPackage
+		} satisfies InlangModule
 	}
 
 	return await openInlangProject({

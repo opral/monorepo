@@ -13,7 +13,7 @@ export const registry = [
 			marketplace: {
 				icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 				linkToReadme: {
-					en: "https://github.com/inlang/inlang/blob/main/source-code/website/src/pages/editor/README.md",
+					en: "https://github.com/floriandwt/inlang-readme-adjustments/blob/main/apps/editor/README.md",
 				},
 				keywords: ["web", "editor", "no-code"],
 				publisherName: "inlang",
@@ -36,7 +36,7 @@ export const registry = [
 			marketplace: {
 				icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 				linkToReadme: {
-					en: "https://github.com/inlang/inlang/blob/main/source-code/cli/README.md",
+					en: "https://github.com/floriandwt/inlang-readme-adjustments/blob/main/apps/cli/README.md",
 				},
 				keywords: ["cli", "automation"],
 				publisherName: "inlang",
@@ -58,7 +58,7 @@ export const registry = [
 			marketplace: {
 				icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 				linkToReadme: {
-					en: "https://github.com/inlang/inlang/blob/main/source-code/ide-extension/README.md",
+					en: "https://github.com/floriandwt/inlang-readme-adjustments/blob/main/apps/ide-extension/README.md",
 				},
 				keywords: ["vscode", "efficiency", "extension"],
 				publisherName: "inlang",
@@ -81,7 +81,7 @@ export const registry = [
 			marketplace: {
 				icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 				linkToReadme: {
-					en: "https://github.com/inlang/inlang/blob/main/source-code/badge/README.md",
+					en: "https://github.com/floriandwt/inlang-readme-adjustments/blob/main/apps/badge/README.md",
 				},
 				keywords: ["badge", "embed"],
 				publisherName: "inlang",
@@ -103,7 +103,7 @@ export const registry = [
 			marketplace: {
 				icon: "https://emojis.wiki/thumbs/emojis/parachute.webp",
 				linkToReadme: {
-					en: "https://github.com/inlang/inlang/blob/armageddon/source-code/paraglide/README.md",
+					en: "https://github.com/floriandwt/inlang-readme-adjustments/blob/main/libraries/paraglide/README.md",
 				},
 				keywords: ["paraglide", "js", "sdk"],
 				publisherName: "inlang",
@@ -124,7 +124,7 @@ export const registry = [
 			},
 			marketplace: {
 				linkToReadme: {
-					en: "https://github.com/inlang/inlang/blob/armageddon/source-code/core/language-tag/README.md",
+					en: "https://github.com/floriandwt/inlang-readme-adjustments/blob/main/libraries/language-tag/README.md",
 				},
 				keywords: ["language", "tags"],
 				publisherName: "inlang",

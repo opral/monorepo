@@ -47,7 +47,7 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"devDependencies": {
-		"@inlang/package": "*",
+		"@inlang/module": "*",
 		"@inlang/rpc": "*",
 		"@inlang/sdk": "*",
 		"@inlang/create-project": "*",

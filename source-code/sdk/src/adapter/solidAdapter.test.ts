@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import type { ImportFunction, InlangPackage } from "@inlang/package"
+import type { ImportFunction, InlangModule } from "@inlang/module"
 import { createEffect, from, createRoot } from "../solid.js"
 import { solidAdapter } from "./solidAdapter.js"
 import { openInlangProject } from "../openInlangProject.js"
@@ -11,7 +11,7 @@ import type { Message, ProjectConfig, Plugin, LintRule, Text } from "../interfac
 const config: ProjectConfig = {
 	sourceLanguageTag: "en",
 	languageTags: ["en"],
-	packages: ["./dist/index.js"],
+	modules: ["./dist/index.js"],
 	settings: {
 		"project.lintRuleLevels": {
 			"inlang.lintRule.missingTranslation": "error",
@@ -85,7 +85,7 @@ const $import: ImportFunction = async () =>
 			plugins: [mockPlugin],
 			lintRules: [mockLintRule],
 		},
-	} satisfies InlangPackage)
+	} satisfies InlangModule)
 
 // ------------------------------------------------------------------------------------------------
 
@@ -160,7 +160,7 @@ describe("messages", () => {
 		const mockConfig: ProjectConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
-			packages: ["./plugin-a.js"],
+			modules: ["./plugin-a.js"],
 			settings: {},
 		}
 		const mockPlugin: Plugin = {
@@ -178,7 +178,7 @@ describe("messages", () => {
 		}
 
 		const mockImport: ImportFunction = async () =>
-			({ default: { plugins: [mockPlugin] } } satisfies InlangPackage)
+			({ default: { plugins: [mockPlugin] } } satisfies InlangModule)
 
 		await fs.writeFile("./project.inlang.json", JSON.stringify(mockConfig))
 		const inlang = solidAdapter(

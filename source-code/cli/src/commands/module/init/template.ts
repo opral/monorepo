@@ -1,10 +1,10 @@
-import type { PackageInitOptions } from "./command.js"
+import type { ModuleInitOptions } from "./command.js"
 import cliPkg from "../../../../package.json"
 import pluginPkg from "../../../../../interfaces/plugin/package.json"
 import lintPkg from "../../../../../interfaces/lint-rule/package.json"
 import { dedent } from "ts-dedent"
 
-export function getTemplate(options: { type: PackageInitOptions["type"] }) {
+export function getTemplate(options: { type: ModuleInitOptions["type"] }) {
 	const mergeWith = options.type === "lintRule" ? lintRuleTemplate : pluginTemplate
 	return {
 		...mergeWith,
@@ -25,8 +25,8 @@ export function getTemplate(options: { type: PackageInitOptions["type"] }) {
         "./dist"
       ],
       "scripts": {
-        "build": "inlang package build --entry ./src/index.ts",
-        "dev": "inlang package build --entry ./src/index.ts --watch"
+        "build": "inlang module build --entry ./src/index.ts",
+        "dev": "inlang module build --entry ./src/index.ts --watch"
       },
       "devDependencies": {
         "typescript": "^${cliPkg.devDependencies.typescript}",

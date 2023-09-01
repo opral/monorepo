@@ -11,7 +11,7 @@ import {
 	type InlangProject,
 	type NodeishFilesystemSubset,
 } from "@inlang/sdk"
-import type { InlangPackage } from "@inlang/package"
+import type { InlangModule } from "@inlang/module"
 // @ts-ignore
 import { version } from "../../../../../package.json"
 import { PATH_TO_CWD, PATH_TO_INLANG_CONFIG } from "../config.js"
@@ -49,7 +49,7 @@ const openMockedInlangProject = async (fs: NodeishFilesystemSubset): Promise<Inl
 		_import: async (url) =>
 			({
 				default: url === "plugin-json-mock" ? { plugins: [mockPlugin] } : {},
-			} satisfies InlangPackage),
+			} satisfies InlangModule),
 	})
 }
 

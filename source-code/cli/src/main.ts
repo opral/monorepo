@@ -1,7 +1,7 @@
 import { Command } from "commander"
 import { config } from "./commands/config/index.js"
 import { machine } from "./commands/machine/index.js"
-import { module } from "./commands/package/index.js"
+import { module } from "./commands/module/index.js"
 import { version } from "../package.json"
 import consola, { Consola } from "consola"
 import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"

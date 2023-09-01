@@ -30,7 +30,7 @@
 		"@inlang/lint": "*",
 		"@inlang/message": "*",
 		"@inlang/messages": "*",
-		"@inlang/package": "*",
+		"@inlang/module": "*",
 		"@inlang/plugin": "*",
 		"@inlang/project-config": "*",
 		"@inlang/result": "*",

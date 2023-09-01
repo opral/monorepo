@@ -18,7 +18,7 @@ export async function createProjectConfig(args: {
 	const newConfig: ProjectConfig = {
 		sourceLanguageTag: args.sourceLanguagetag,
 		languageTags: args.languageTags,
-		packages: [],
+		modules: [],
 		settings: {},
 	}
 

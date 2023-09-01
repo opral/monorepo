@@ -2,9 +2,9 @@
 import type { LintRule } from "@inlang/lint-rule"
 import type { Plugin } from "@inlang/plugin"
 import { describe, expect, it } from "vitest"
-import type { InlangPackage } from "./api.js"
-import { PackageError, PackageHasNoExportsError, PackageImportError } from "./errors.js"
-import { resolvePackages } from "./resolvePackages.js"
+import type { InlangModule } from "./api.js"
+import { ModuleError, ModuleHasNoExportsError, ModuleImportError } from "./errors.js"
+import { resolveModules } from "./resolveModules.js"
 import type { ProjectConfig } from "@inlang/project-config"
 
 describe("generally", () => {
@@ -12,26 +12,26 @@ describe("generally", () => {
 		const config: ProjectConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
-			packages: ["https://myplugin.com/index.js"],
+			modules: ["https://myplugin.com/index.js"],
 			settings: {},
 		}
 
-		const resolved = await resolvePackages({
+		const resolved = await resolveModules({
 			config,
 			nodeishFs: {} as any,
 			_import: () => {
-				throw new PackageImportError("Could not import", {
-					package: config.packages[0]!,
+				throw new ModuleImportError("Could not import", {
+					module: config.modules[0]!,
 					cause: new Error("Could not import"),
 				})
 			},
 		})
 
-		expect(resolved.errors[0]).toBeInstanceOf(PackageImportError)
+		expect(resolved.errors[0]).toBeInstanceOf(ModuleImportError)
 	})
 })
 
-describe("resolvePackages", () => {
+describe("resolveModules", () => {
 	it("should resolve plugins and lint rules successfully", async () => {
 		// Define mock data
 		const mockPlugin: Plugin = {
@@ -62,7 +62,7 @@ describe("resolvePackages", () => {
 		const config: ProjectConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
-			packages: ["https://myplugin.com/index.js"],
+			modules: ["https://myplugin.com/index.js"],
 			settings: {},
 		}
 
@@ -72,15 +72,15 @@ describe("resolvePackages", () => {
 					plugins: [mockPlugin],
 					lintRules: [mockLintRule],
 				},
-			} satisfies InlangPackage)
+			} satisfies InlangModule)
 
 		// Call the function
-		const resolved = await resolvePackages({ config, _import, nodeishFs: {} as any })
+		const resolved = await resolveModules({ config, _import, nodeishFs: {} as any })
 
 		// Assert results
 		expect(resolved.errors).toHaveLength(0)
 		// Check for the meta data of the plugin
-		expect(resolved.plugins.some((plugin) => plugin.meta.id === mockPlugin.meta.id)).toBeDefined()
+		expect(resolved.plugins.some((module) => module.meta.id === mockPlugin.meta.id)).toBeDefined()
 		// Check for the app specific api
 		expect(resolved.resolvedPluginApi["appSpecificApi"]?.["inlang.app.ideExtension"]).toBeDefined()
 		// Check for the lint rule
@@ -91,29 +91,29 @@ describe("resolvePackages", () => {
 		const config: ProjectConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
-			packages: ["https://myplugin.com/index.js"],
+			modules: ["https://myplugin.com/index.js"],
 			settings: {},
 		}
 
 		const _import = async () => {
-			throw new PackageImportError("Could not import", {
-				package: config.packages[0]!,
+			throw new ModuleImportError("Could not import", {
+				module: config.modules[0]!,
 				cause: new Error(),
 			})
 		}
 
 		// Call the function
-		const resolved = await resolvePackages({ config, _import, nodeishFs: {} as any })
+		const resolved = await resolveModules({ config, _import, nodeishFs: {} as any })
 
 		// Assert results
-		expect(resolved.errors[0]).toBeInstanceOf(PackageImportError)
+		expect(resolved.errors[0]).toBeInstanceOf(ModuleImportError)
 	})
 
 	it("should return an error if a plugin does not export any plugins or lint rules", async () => {
 		const config: ProjectConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
-			packages: ["https://myplugin.com/index.js"],
+			modules: ["https://myplugin.com/index.js"],
 			settings: {},
 		}
 
@@ -122,10 +122,10 @@ describe("resolvePackages", () => {
 		})
 
 		// Call the function
-		const resolved = await resolvePackages({ config, _import, nodeishFs: {} as any })
+		const resolved = await resolveModules({ config, _import, nodeishFs: {} as any })
 
 		// Assert results
-		expect(resolved.errors[0]).toBeInstanceOf(PackageHasNoExportsError)
+		expect(resolved.errors[0]).toBeInstanceOf(ModuleHasNoExportsError)
 	})
 
 	it("should handle other unhandled errors during plugin resolution", async () => {
@@ -133,7 +133,7 @@ describe("resolvePackages", () => {
 		const config: ProjectConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
-			packages: ["https://myplugin.com/index.js"],
+			modules: ["https://myplugin.com/index.js"],
 			settings: {},
 		}
 
@@ -142,9 +142,9 @@ describe("resolvePackages", () => {
 		}
 
 		// Call the function
-		const resolved = await resolvePackages({ config, _import, nodeishFs: {} as any })
+		const resolved = await resolveModules({ config, _import, nodeishFs: {} as any })
 
 		// Assert results
-		expect(resolved.errors[0]).toBeInstanceOf(PackageError)
+		expect(resolved.errors[0]).toBeInstanceOf(ModuleError)
 	})
 })

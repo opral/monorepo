@@ -14,7 +14,7 @@ import type {
 	PluginUsesReservedNamespaceError,
 	ResolvedPluginApi,
 } from "@inlang/resolve-plugins"
-import type { PackageImportError, PackageError } from "@inlang/package"
+import type { ModuleImportError, ModuleError } from "@inlang/module"
 import type {
 	LintLevel,
 	LintReport,
@@ -27,18 +27,18 @@ import type {
 export type InstalledPlugin = {
 	meta: Plugin["meta"]
 	/**
-	 * The package which the plugin is installed from.
+	 * The module which the plugin is installed from.
 	 */
-	package: string
+	module: string
 	// disabled: boolean
 }
 
 export type InstalledLintRule = {
 	meta: LintRule["meta"]
 	/**
-	 * The package which the lint rule is installed from.
+	 * The module which the lint rule is installed from.
 	 */
-	package: string
+	module: string
 	lintLevel: LintLevel
 	disabled: boolean
 }
@@ -50,8 +50,8 @@ export type InlangProject = {
 	}
 	errors: Subscribable<
 		(
-			| PackageImportError
-			| PackageError
+			| ModuleImportError
+			| ModuleError
 			| PluginReturnedInvalidAppSpecificApiError
 			| PluginLoadMessagesFunctionAlreadyDefinedError
 			| PluginSaveMessagesFunctionAlreadyDefinedError

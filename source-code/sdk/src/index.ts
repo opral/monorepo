@@ -26,4 +26,4 @@ export * from "./messages/variant.js"
 
 export * from "./interfaces.js"
 export * from "@inlang/result"
-export * from "@inlang/package"
+export * from "@inlang/module"

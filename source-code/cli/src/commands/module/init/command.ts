@@ -7,21 +7,21 @@ import { getTemplate } from "./template.js"
 
 const typeOptions = ["lintRule", "plugin"] as const
 
-export type PackageInitOptions = {
+export type ModuleInitOptions = {
 	type: (typeof typeOptions)[number]
 }
 
 export const init = new Command()
 	.command("init")
-	.description("Initialize a new inlang package codebase.")
-	.option(`--type <type>", "The type of the package which can be (${typeOptions.join(" | ")})`)
-	.action(async (options: PackageInitOptions) => {
+	.description("Initialize a new inlang module codebase.")
+	.option(`--type <type>", "The type of the module which can be (${typeOptions.join(" | ")})`)
+	.action(async (options: ModuleInitOptions) => {
 		let type = options.type
 		if (options.type === undefined) {
 			const response = await prompts({
 				type: "select",
 				name: "value",
-				message: "What type of package do you want to create?",
+				message: "What type of module do you want to create?",
 				choices: typeOptions.map((type) => ({ title: type, value: type })),
 			})
 			if (!response.value) {
@@ -30,16 +30,16 @@ export const init = new Command()
 			type = response.value
 		}
 		try {
-			log.log(`📦 Initializing a new ${type} package.`)
+			log.log(`📦 Initializing a new ${type} module.`)
 			await execute({ fs, type })
-			log.success(`Successfully initialized a new ${type} package.`)
+			log.success(`Successfully initialized a new ${type} module.`)
 			log.info(`Don't forget to run 'npm install' to install the dependencies.`)
 		} catch (e) {
 			log.error(e)
 		}
 	})
 
-export async function execute(args: { fs: typeof fs; type: PackageInitOptions["type"] }) {
+export async function execute(args: { fs: typeof fs; type: ModuleInitOptions["type"] }) {
 	const filesInDir = await args.fs.readdir("./")
 	if (filesInDir.length !== 0) {
 		log.error(
