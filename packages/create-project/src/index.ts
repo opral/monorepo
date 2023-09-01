@@ -1,4 +1,4 @@
-import type { InlangConfig } from "@inlang/config"
+import type { InlangConfig } from "@inlang/sdk"
 import type { NodeishFilesystem } from "@lix-js/fs"
 
 export async function tryAutoGenModuleConfig(args: { baseConfig: InlangConfig }): any {

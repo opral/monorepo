@@ -27,7 +27,7 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/config": "*",
+		"@inlang/sdk": "*",
 		"@lix-js/fs": "*"
 	},
 	"license": "Apache-2.0",
