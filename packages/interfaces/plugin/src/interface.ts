@@ -78,17 +78,6 @@ export const Plugin = Type.Object(
 			}) as unknown as TTemplateLiteral<[TLiteral<`${string}.plugin.${string}`>]>,
 			displayName: Translatable(Type.String()),
 			description: Translatable(Type.String()),
-			/* This is used for the marketplace, required if you want to publish your plugin to the marketplace */
-			marketplace: Type.Optional(
-				Type.Object({
-					icon: Type.Optional(Type.String()),
-					linkToReadme: Translatable(Type.String()),
-					keywords: Type.Array(Type.String()),
-					publisherName: Type.String(),
-					publisherIcon: Type.Optional(Type.String()),
-					license: Type.String(),
-				}),
-			),
 		}),
 		loadMessages: Type.Optional(Type.Any()),
 		saveMessages: Type.Optional(Type.Any()),

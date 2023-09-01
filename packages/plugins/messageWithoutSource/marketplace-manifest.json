@@ -1,0 +1,18 @@
+{
+	"type": "lintRule",
+	"icon": "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
+	"displayName": {
+		"en": "Message without Source"
+	},
+	"description": {
+		"en": "Checks for likely outdated messages.  A message with a missing source is usually an indication that the message (id) is no longer used in source code, but messages have not been updated accordingly."
+	},
+	"linkToReadme": {
+		"en": "https://github.com/inlang/inlang/blob/main/source-code/plugins/standard-lint-rules/README.md"
+	},
+	"keywords": ["lint rule", "source"],
+	"publisherName": "inlang",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"license": "Apache-2.0",
+	"module": "../../plugins/messageWithoutSource/messageWithoutSource.js"
+}

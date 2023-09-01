@@ -51,6 +51,7 @@ export const registry = [
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
+		linkToApp: "/editor",
 	},
 	{
 		type: "app",
@@ -104,5 +105,77 @@ export const registry = [
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
 		module: "../../plugins/i18next/dist/index.js",
+	},
+	{
+		type: "lintRule",
+		icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
+		displayName: {
+			en: "Empty Pattern",
+		},
+		description: {
+			en: "Checks for empty pattern in a language tag. If a message exists in the reference resource but the pattern in a target resource is empty, it is likely that the message has not been translated yet.",
+		},
+		linkToReadme: {
+			en: "https://github.com/inlang/inlang/blob/main/source-code/plugins/standard-lint-rules/README.md",
+		},
+		keywords: ["lint rule", "empty pattern"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		license: "Apache-2.0",
+		module: "../../plugins/emptyPattern/emptyPattern.js",
+	},
+	{
+		type: "lintRule",
+		icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
+		displayName: {
+			en: "Identical Pattern",
+		},
+		description: {
+			en: "Checks for identical patterns in different languages.  A message with identical wording in multiple languages can indicate that the translations are redundant or can be combined into a single message to reduce translation effort.",
+		},
+		linkToReadme: {
+			en: "https://github.com/inlang/inlang/blob/main/source-code/plugins/standard-lint-rules/README.md",
+		},
+		keywords: ["lint rule", "itentical pattern"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		license: "Apache-2.0",
+		module: "../../plugins/identicalPattern/identicalPattern.js",
+	},
+	{
+		type: "lintRule",
+		icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
+		displayName: {
+			en: "Message without Source",
+		},
+		description: {
+			en: "Checks for likely outdated messages.  A message with a missing source is usually an indication that the message (id) is no longer used in source code, but messages have not been updated accordingly.",
+		},
+		linkToReadme: {
+			en: "https://github.com/inlang/inlang/blob/main/source-code/plugins/standard-lint-rules/README.md",
+		},
+		keywords: ["lint rule", "source"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		license: "Apache-2.0",
+		module: "../../plugins/messageWithoutSource/messageWithoutSource.js",
+	},
+	{
+		type: "lintRule",
+		icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
+		displayName: {
+			en: "Missing Translation",
+		},
+		description: {
+			en: "Checks for missing variants for a specific languageTag.  If a variant exists for the sourceLanguageTag but is missing for a listed languageTag, it is likely that the message has not been translated for this languageTag yet.",
+		},
+		linkToReadme: {
+			en: "https://github.com/inlang/inlang/blob/main/source-code/plugins/standard-lint-rules/README.md",
+		},
+		keywords: ["lint rule", "missing"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		license: "Apache-2.0",
+		module: "../../plugins/missingTranslation/missingTranslation.js",
 	},
 ]

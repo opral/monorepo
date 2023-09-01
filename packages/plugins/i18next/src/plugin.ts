@@ -64,16 +64,6 @@ export const plugin: Plugin<PluginSettings> = {
 		id: "inlang.plugin.i18next",
 		displayName: { en: "i18next" },
 		description: { en: "i18next plugin for inlang" },
-		marketplace: {
-			icon: "https://github.com/inlang/inlang/blob/main/source-code/plugins/i18next/assets/icon.png?raw=true",
-			linkToReadme: {
-				en: "https://github.com/inlang/inlang/blob/main/source-code/plugins/i18next/README.md",
-			},
-			keywords: ["i18next", "react", "nextjs"],
-			publisherName: "inlang",
-			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-			license: "Apache-2.0",
-		},
 	},
 	loadMessages: async ({ languageTags, settings, nodeishFs }) => {
 		settings.variableReferencePattern = settings.variableReferencePattern || ["{{", "}}"]
