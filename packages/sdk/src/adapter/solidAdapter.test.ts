@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import type { ImportFunction, InlangModule } from "@inlang/module"
+import type { ImportFunction } from "../resolve-modules/index.js"
 import { createEffect, from, createRoot } from "../reactivity/solid.js"
 import { solidAdapter } from "./solidAdapter.js"
 import { openInlangProject } from "../openInlangProject.js"
@@ -11,7 +11,7 @@ import type { Message, ProjectConfig, Plugin, LintRule, Text } from "../interfac
 const config: ProjectConfig = {
 	sourceLanguageTag: "en",
 	languageTags: ["en"],
-	modules: ["./dist/index.js"],
+	modules: ["plugin.js", "plugin.js"],
 	settings: {
 		"project.lintRuleLevels": {
 			"inlang.lintRule.missingTranslation": "error",
@@ -79,13 +79,9 @@ const mockLintRule: LintRule = {
 	message: () => undefined,
 }
 
-const $import: ImportFunction = async () =>
-	({
-		default: {
-			plugins: [mockPlugin],
-			lintRules: [mockLintRule],
-		},
-	} satisfies InlangModule)
+const $import: ImportFunction = async (name) => ({
+	default: name === "plugin.js" ? mockPlugin : mockLintRule,
+})
 
 // ------------------------------------------------------------------------------------------------
 
@@ -177,8 +173,7 @@ describe("messages", () => {
 			saveMessages: () => undefined,
 		}
 
-		const mockImport: ImportFunction = async () =>
-			({ default: { plugins: [mockPlugin] } } satisfies InlangModule)
+		const mockImport: ImportFunction = async () => ({ default: mockPlugin })
 
 		await fs.writeFile("./project.inlang.json", JSON.stringify(mockConfig))
 		const inlang = solidAdapter(

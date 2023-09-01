@@ -2,9 +2,9 @@ import { createEffect } from "./reactivity/solid.js"
 import { createSubscribable } from "./openInlangProject.js"
 import type { InlangProject, InstalledLintRule, LintReportsQueryApi } from "./api.js"
 import type { ProjectConfig } from "@inlang/project-config"
-import type { ResolveModuleFunction } from "@inlang/module"
+import type { ResolveModuleFunction } from "./resolve-modules/index.js"
 import type { JSONObject, LintReport, Message } from "./interfaces.js"
-import { lintSingleMessage } from "@inlang/lint"
+import { lintSingleMessage } from "./lint/index.js"
 import { ReactiveMap } from "./reactivity/map.js"
 
 /**

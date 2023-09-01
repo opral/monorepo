@@ -16,16 +16,6 @@ in a target resource is empty, it is likely that the message has not
 been translated yet.
 `,
 		},
-		marketplace: {
-			icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
-			linkToReadme: {
-				en: "https://github.com/inlang/inlang/blob/main/source-code/plugins/standard-lint-rules/README.md",
-			},
-			keywords: ["lint-rule", "standard", "empty-pattern"],
-			publisherName: "inlang",
-			publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-			license: "Apache-2.0",
-		},
 	},
 	message: ({ message: { id, variants }, languageTags, sourceLanguageTag, report }) => {
 		const translatedLanguageTags = languageTags.filter(

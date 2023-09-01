@@ -1,6 +1,6 @@
 import type { LintLevel, LintRule, MessageLintReport } from "@inlang/lint-rule"
 import type { Message } from "@inlang/message"
-import { LintRuleThrowedError } from "./errors.js"
+import { MessagedLintRuleThrowedError } from "./errors.js"
 import type { LanguageTag } from "@inlang/language-tag"
 import type { JSONObject } from "@inlang/json-types"
 
@@ -17,9 +17,9 @@ export const lintSingleMessage = async (args: {
 	lintRules: LintRule[]
 	messages: Message[]
 	message: Message
-}): Promise<{ data: MessageLintReport[]; errors: LintRuleThrowedError[] }> => {
+}): Promise<{ data: MessageLintReport[]; errors: MessagedLintRuleThrowedError[] }> => {
 	const reports: MessageLintReport[] = []
-	const errors: LintRuleThrowedError[] = []
+	const errors: MessagedLintRuleThrowedError[] = []
 
 	const promises = args.lintRules
 		.filter((rule) => rule.type === "MessageLint")
@@ -47,7 +47,7 @@ export const lintSingleMessage = async (args: {
 				})
 			} catch (error) {
 				errors.push(
-					new LintRuleThrowedError(
+					new MessagedLintRuleThrowedError(
 						`Lint rule '${ruleId}' throwed while linting message "${args.message.id}".`,
 						{ cause: error },
 					),

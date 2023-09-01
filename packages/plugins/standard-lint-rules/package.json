@@ -20,10 +20,10 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/lint": "*",
 		"@inlang/plugin": "*"
 	},
 	"devDependencies": {
+		"@inlang/sdk": "*"	,
 		"@inlang/cli": "*",
 		"concurrently": "^8.0.1",
 		"tsd": "0.28.1",

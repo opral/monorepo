@@ -5,7 +5,7 @@ import {
 	MessagePatternsForLanguageTagDoNotExistError,
 	MessageVariantAlreadyExistsError,
 	MessageVariantDoesNotExistError,
-} from "@inlang/messages"
+} from "./errors.js"
 import type { Message, Variant } from "../interfaces.js"
 
 describe("getVariant", () => {

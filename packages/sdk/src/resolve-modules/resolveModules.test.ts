@@ -2,7 +2,7 @@
 import type { LintRule } from "@inlang/lint-rule"
 import type { Plugin } from "@inlang/plugin"
 import { describe, expect, it } from "vitest"
-import type { InlangModule } from "./api.js"
+import type { InlangModule } from "./types.js"
 import { ModuleError, ModuleHasNoExportsError, ModuleImportError } from "./errors.js"
 import { resolveModules } from "./resolveModules.js"
 import type { ProjectConfig } from "@inlang/project-config"
@@ -62,17 +62,21 @@ describe("resolveModules", () => {
 		const config: ProjectConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
-			modules: ["https://myplugin.com/index.js"],
+			modules: ["lint-rule.js", "plugin.js"],
 			settings: {},
 		}
 
-		const _import = async () =>
-			({
-				default: {
-					plugins: [mockPlugin],
-					lintRules: [mockLintRule],
-				},
-			} satisfies InlangModule)
+		const _import = async (name: string) => {
+			if (name === "lint-rule.js") {
+				return {
+					default: mockLintRule,
+				}
+			} else {
+				return {
+					default: mockPlugin,
+				}
+			}
+		}
 
 		// Call the function
 		const resolved = await resolveModules({ config, _import, nodeishFs: {} as any })

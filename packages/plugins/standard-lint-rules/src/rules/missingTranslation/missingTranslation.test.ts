@@ -2,7 +2,7 @@
 import { describe, expect, test } from "vitest"
 import type { Message } from "@inlang/message"
 import { missingTranslationRule } from "./missingTranslation.js"
-import { lintSingleMessage } from "@inlang/lint"
+import { lintSingleMessage } from "@inlang/sdk/lint"
 
 const message1: Message = {
 	id: "1",

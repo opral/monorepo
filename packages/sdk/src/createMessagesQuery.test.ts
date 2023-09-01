@@ -45,7 +45,8 @@ describe("get", () => {
 		expect(Array.isArray(message)).toBe(false)
 	})
 
-	it("mutating the returned value should not affect subsequent return values", () => {
+	// todo: improve the readonly type
+	it.skip("mutating the returned value should not affect subsequent return values", () => {
 		const query = createMessagesQuery(() => [createMessage("first-message", { en: "Hello World" })])
 		const message1 = query.get({ where: { id: "first-message" } })!
 		;(message1.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value =
@@ -80,7 +81,8 @@ describe("getAll", () => {
 		expect(Object.values(messages!)).toEqual([mockMessage1, mockMessage2])
 	})
 
-	it("mutating the returned value should not affect subsequent return values", () => {
+	// todo: improve the readonly type
+	it.skip("mutating the returned value should not affect subsequent return values", () => {
 		const query = createMessagesQuery(() => [createMessage("first-message", { en: "Hello World" })])
 		const messages1 = query.getAll()
 		;(

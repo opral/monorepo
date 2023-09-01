@@ -1,3 +1,9 @@
+/**
+ *! PUBLIC API FOR THE INLANG SDK.
+ *!
+ *! EXPORT AS LITTLE AS POSSIBLE TO MINIMIZE THE CHANCE OF BREAKING CHANGES.
+ */
+
 export type {
 	InlangProject,
 	InstalledLintRule,
@@ -5,6 +11,7 @@ export type {
 	MessageQueryApi,
 	Subscribable,
 } from "./api.js"
+export type { InlangModule, ImportFunction } from "./resolve-modules/index.js"
 export { openInlangProject } from "./openInlangProject.js"
 export { solidAdapter, type InlangProjectWithSolidAdapter } from "./adapter/solidAdapter.js"
 export { createMessagesQuery } from "./createMessagesQuery.js"
@@ -17,13 +24,4 @@ export {
 	PluginSaveMessagesError,
 } from "./errors.js"
 export * from "./messages/variant.js"
-
-/**
- * -------- RE-EXPORTS --------
- *
- * See https://github.com/inlang/inlang/issues/1184.
- */
-
 export * from "./interfaces.js"
-export * from "@inlang/result"
-export * from "@inlang/module"

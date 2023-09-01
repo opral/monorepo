@@ -2,7 +2,7 @@
 import { describe, it, expect, vi } from "vitest"
 import { openInlangProject } from "./openInlangProject.js"
 import type { ProjectConfig, Plugin, LintRule, Message } from "./interfaces.js"
-import type { ImportFunction, InlangModule } from "@inlang/module"
+import type { ImportFunction, InlangModule } from "./resolve-modules/index.js"
 import {
 	ProjectFilePathNotFoundError,
 	ProjectFileJSONSyntaxError,
@@ -22,7 +22,7 @@ const getValue = <T>(subscribable: { subscribe: (subscriber: (value: T) => void)
 const config: ProjectConfig = {
 	sourceLanguageTag: "en",
 	languageTags: ["en"],
-	modules: ["./dist/index.js"],
+	modules: ["plugin.js", "lintRule.js"],
 	settings: {
 		"project.lintRuleLevels": {
 			"inlang.lintRule.missingTranslation": "error",
@@ -95,12 +95,9 @@ const mockLintRule: LintRule = {
 	message: () => undefined,
 }
 
-const _import: ImportFunction = async () =>
+const _import: ImportFunction = async (name) =>
 	({
-		default: {
-			plugins: [mockPlugin],
-			lintRules: [mockLintRule],
-		},
+		default: name === "plugin.js" ? mockPlugin : mockLintRule,
 	} satisfies InlangModule)
 
 // ------------------------------------------------------------------------------------------------
@@ -184,9 +181,7 @@ describe("initialization", () => {
 		it("should return an error if no plugin defines readMessages", async () => {
 			const $badImport: ImportFunction = async () =>
 				({
-					default: {
-						plugins: [{ ...mockPlugin, loadMessages: undefined as any } as Plugin],
-					},
+					default: { ...mockPlugin, loadMessages: undefined as any } as Plugin,
 				} satisfies InlangModule)
 
 			const fs = await createNodeishMemoryFs()
@@ -203,12 +198,10 @@ describe("initialization", () => {
 		it("should return an error if no plugin defines writeMessages", async () => {
 			const $badImport: ImportFunction = async () =>
 				({
-					default: {
-						plugins: [{ ...mockPlugin, writeMessages: undefined as any } as Plugin],
-					},
+					default: { ...mockPlugin, writeMessages: undefined as any } as Plugin,
 				} satisfies InlangModule)
 
-			const fs = await createNodeishMemoryFs()
+			const fs = createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
@@ -222,12 +215,10 @@ describe("initialization", () => {
 		it("should return an error if an error occurs while resolving a plugin", async () => {
 			const $badImport: ImportFunction = async () =>
 				({
-					default: {
-						plugins: [{} as Plugin],
-					},
+					default: {} as Plugin,
 				} satisfies InlangModule)
 
-			const fs = await createNodeishMemoryFs()
+			const fs = createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 
 			const inlang = await openInlangProject({
@@ -333,7 +324,13 @@ describe("functionality", () => {
 
 	describe("installed", () => {
 		it("should return the installed items", async () => {
-			const fs = await createNodeishMemoryFs()
+			const fs = createNodeishMemoryFs()
+			const config: ProjectConfig = {
+				sourceLanguageTag: "en",
+				languageTags: ["en"],
+				modules: ["plugin.js", "lintRule.js"],
+				settings: {},
+			}
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
@@ -348,25 +345,24 @@ describe("functionality", () => {
 
 			expect(inlang.installed.lintRules()[0]).toEqual({
 				meta: mockLintRule.meta,
-				module: config.modules[0],
+				module: config.modules[1],
 				lintLevel: "warning",
 				disabled: false,
 			})
 		})
 
 		it("should apply 'warning' as default lint level to lint rules that have no lint level defined in the config", async () => {
-			const fs = await createNodeishMemoryFs()
-			await fs.writeFile(
-				"./project.inlang.json",
-				JSON.stringify({
-					sourceLanguageTag: "en",
-					languageTags: ["en"],
-					modules: ["./dist/index.js"],
-					settings: {
-						"project.lintRuleLevels": {},
-					},
-				} satisfies ProjectConfig),
-			)
+			const fs = createNodeishMemoryFs()
+
+			const config: ProjectConfig = {
+				sourceLanguageTag: "en",
+				languageTags: ["en"],
+				modules: ["plugin.js", "lintRule.js"],
+				settings: {},
+			}
+
+			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
+
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
 				nodeishFs: fs,
@@ -377,22 +373,23 @@ describe("functionality", () => {
 		})
 
 		it("should apply 'disabled' to lint rules if defined in the project settings", async () => {
-			const fs = await createNodeishMemoryFs()
-			await fs.writeFile(
-				"./project.inlang.json",
-				JSON.stringify({
-					sourceLanguageTag: "en",
-					languageTags: ["en"],
-					modules: ["./dist/index.js"],
-					settings: {
-						"project.disabled": [mockLintRule.meta.id],
-					},
-				} satisfies ProjectConfig),
-			)
+			const fs = createNodeishMemoryFs()
+
+			const config: ProjectConfig = {
+				sourceLanguageTag: "en",
+				languageTags: ["en"],
+				modules: ["plugin.js", "lintRule.js"],
+				settings: {
+					"project.disabled": [mockLintRule.meta.id],
+				},
+			}
+
+			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
+
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
 				nodeishFs: fs,
-				_import,
+				_import: async () => ({ default: mockLintRule }),
 			})
 
 			expect(inlang.installed.lintRules()[0]?.disabled).toBe(true)
@@ -444,20 +441,29 @@ describe("functionality", () => {
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
-					modules: ["some-module.js"],
+					modules: ["plugin.js", "enabledLintRule.js", "disabledLintRule.js"],
 					settings: {
 						"project.disabled": [disabledLintRule.meta.id],
 					},
 				} satisfies ProjectConfig),
 			)
-			const _import = async () => {
-				return {
-					default: {
-						plugins: [_mockPlugin],
-						lintRules: [enabledLintRule, disabledLintRule],
-					},
-				} satisfies InlangModule
+			const _import: ImportFunction = async (name) => {
+				if (name === "plugin.js") {
+					return {
+						default: _mockPlugin,
+					} satisfies InlangModule
+				} else if (name === "enabledLintRule.js") {
+					return {
+						default: enabledLintRule,
+					} satisfies InlangModule
+				} else if (name === "disabledLintRule.js") {
+					return {
+						default: disabledLintRule,
+					} satisfies InlangModule
+				}
+				throw Error("Unknown module name")
 			}
+
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
 				nodeishFs: fs,
@@ -511,16 +517,14 @@ describe("functionality", () => {
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
-					modules: ["some-module.js"],
+					modules: ["plugin.js", "lintRule.js"],
 					settings: {},
 				} satisfies ProjectConfig),
 			)
-			const _import = async () => {
+
+			const _import: ImportFunction = async (name) => {
 				return {
-					default: {
-						plugins: [_mockPlugin],
-						lintRules: [_mockLintRule],
-					},
+					default: name === "plugin.js" ? _mockPlugin : _mockLintRule,
 				} satisfies InlangModule
 			}
 			const inlang = await openInlangProject({
@@ -568,18 +572,16 @@ describe("functionality", () => {
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
-					modules: ["some-module.js"],
+					modules: ["plugin.js", "lintRule.js"],
 					settings: {},
 				} satisfies ProjectConfig),
 			)
-			const _import = async () => {
+			const _import: ImportFunction = async (name) => {
 				return {
-					default: {
-						plugins: [_mockPlugin],
-						lintRules: [_mockLintRule],
-					},
+					default: name === "plugin.js" ? _mockPlugin : _mockLintRule,
 				} satisfies InlangModule
 			}
+
 			const inlang = await openInlangProject({
 				projectFilePath: "./inlang.config.json",
 				nodeishFs: fs,
@@ -646,7 +648,7 @@ describe("functionality", () => {
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en", "de"],
-					modules: [""],
+					modules: ["plugin.js"],
 					settings: {
 						"inlang.plugin.json": {
 							pathPattern: "./resources/{languageTag}.json",
@@ -671,9 +673,7 @@ describe("functionality", () => {
 
 			const _import = async () => {
 				return {
-					default: {
-						plugins: [_mockPlugin],
-					},
+					default: _mockPlugin,
 				} satisfies InlangModule
 			}
 
@@ -827,12 +827,20 @@ describe("functionality", () => {
 			}
 		})
 		it("should return the lint reports", async () => {
-			const fs = await createNodeishMemoryFs()
+			const config: ProjectConfig = {
+				sourceLanguageTag: "en",
+				languageTags: ["en"],
+				modules: ["lintRule.js"],
+				settings: {},
+			}
+			const fs = createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
 				projectFilePath: "./project.inlang.json",
 				nodeishFs: fs,
-				_import,
+				_import: async () => ({
+					default: mockLintRule,
+				}),
 			})
 			// TODO: test with real lint rules
 			inlang.query.lintReports.getAll.subscribe((r) => expect(r).toEqual([]))

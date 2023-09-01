@@ -1,8 +1,7 @@
 import { describe, it, expect } from "vitest"
 import { translateCommandAction } from "./translate.js"
-import { Message, ProjectConfig, openInlangProject, Plugin } from "@inlang/sdk"
+import { Message, ProjectConfig, openInlangProject, Plugin, type InlangModule } from "@inlang/sdk"
 import { privateEnv } from "@inlang/env-variables"
-import type { InlangModule } from "@inlang/module"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 
 const exampleMessages: Message[] = [
@@ -80,9 +79,7 @@ describe("translate command", () => {
 
 			const _import = async () => {
 				return {
-					default: {
-						plugins: [_mockPlugin],
-					},
+					default: _mockPlugin,
 				} satisfies InlangModule
 			}
 
