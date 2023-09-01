@@ -30,9 +30,11 @@ export const Gitfloat = () => {
 	const [localStorage] = useLocalStorage()
 
 	// ui states
-	const gitState: () => "login" | "fork" | "pullrequest" | "hasChanges" = () => {
+	const gitState: () => "login" | "loading" | "fork" | "pullrequest" | "hasChanges" = () => {
 		if (localStorage?.user === undefined) {
 			return "login"
+		} else if (userIsCollaborator.loading || !inlang()) {
+			return "loading"
 		} else if (userIsCollaborator() === false) {
 			return "fork"
 		}
@@ -119,7 +121,6 @@ export const Gitfloat = () => {
 			sucess: push.error === undefined,
 		})
 		if (push.error) {
-			if (push.error.message.includes("No changes to push.")) setLocalChanges(0)
 			return showToast({
 				title: "Failed to push changes",
 				message: "Please try again or file a bug. " + push.error.message,
@@ -155,7 +156,7 @@ export const Gitfloat = () => {
 	}
 
 	type GitFloatArray = {
-		[state in "login" | "fork" | "hasChanges" | "pullrequest"]: GitfloatData
+		[state in "login" | "loading" | "fork" | "hasChanges" | "pullrequest"]: GitfloatData
 	}
 
 	const data: GitFloatArray = {
@@ -167,6 +168,16 @@ export const Gitfloat = () => {
 			},
 			onClick: onSignIn,
 			tourStepId: "github-login",
+		},
+		loading: {
+			text: "Loading...",
+			buttontext: "",
+			icon: () => {
+				return <IconGithub />
+			},
+			onClick: () => {
+				// do nothing
+			}
 		},
 		fork: {
 			text: "Fork to make changes",
@@ -262,7 +273,7 @@ export const Gitfloat = () => {
 								onClick={() => data[gitState()].onClick()}
 								prop:href={data[gitState()].href === "pullrequest" ? pullrequestUrl() : undefined}
 								prop:target="_blank"
-								prop:loading={isLoading()}
+								prop: loading={isLoading() || gitState() === "loading"}
 								prop:disabled={localChanges() === 0 && gitState() === "hasChanges"}
 								class={"on-inverted " + (gitState() === "pullrequest" && "grow")}
 							>
