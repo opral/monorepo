@@ -6,9 +6,9 @@ import {
 	createResource,
 	createSignal,
 	from,
-	JSXElement,
-	Resource,
-	Setter,
+	type JSXElement,
+	type Resource,
+	type Setter,
 	useContext,
 } from "solid-js"
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
@@ -16,12 +16,12 @@ import type { LocalStorageSchema } from "#src/services/local-storage/index.js"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
-import { openRepository, createNodeishMemoryFs, Repository } from "@lix-js/client"
+import { openRepository, createNodeishMemoryFs, type Repository } from "@lix-js/client"
 import { publicEnv } from "@inlang/env-variables"
 import {
 	LanguageTag,
 	LintRule,
-	Result,
+	type Result,
 	openInlangProject,
 	solidAdapter,
 	type InlangProjectWithSolidAdapter,

@@ -1,5 +1,5 @@
 {
-	"name": "test-app",
+	"name": "test-app-sveltekit",
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {

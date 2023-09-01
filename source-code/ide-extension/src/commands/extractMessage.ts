@@ -2,7 +2,7 @@ import * as vscode from "vscode"
 import { state } from "../state.js"
 import { msg } from "../utilities/message.js"
 import { telemetry } from "../services/telemetry/index.js"
-import type { IdeExtensionConfig, Message } from "@inlang/sdk"
+import type { Message } from "@inlang/sdk"
 
 /**
  * Helps the user to extract messages from the active text editor.
@@ -11,9 +11,7 @@ export const extractMessageCommand = {
 	id: "inlang.extractMessage",
 	title: "Inlang: Extract Message",
 	callback: async function (textEditor: vscode.TextEditor) {
-		const ideExtension = state().inlang.appSpecificApi()["inlang.app.ideExtension"] as
-			| IdeExtensionConfig
-			| undefined
+		const ideExtension = state().inlang.appSpecificApi()["inlang.app.ideExtension"]
 
 		// guards
 		if (!ideExtension) {

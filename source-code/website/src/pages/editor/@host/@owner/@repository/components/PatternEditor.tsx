@@ -1,11 +1,11 @@
-import { Accessor, createEffect, createSignal, on, onMount, Setter, Show } from "solid-js"
+import { type Accessor, createEffect, createSignal, on, onMount, type Setter, Show } from "solid-js"
 import { createTiptapEditor, useEditorJSON } from "solid-tiptap"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
 import { showToast } from "#src/components/Toast.jsx"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
-import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
+import { type Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { getTextValue, setTipTapMessage } from "../helper/parse.js"
 import { getEditorConfig } from "../helper/editorSetup.js"
@@ -19,7 +19,7 @@ import {
 	updateVariantPattern,
 	getVariant,
 	Pattern,
-	LintReport,
+	type LintReport,
 } from "@inlang/sdk"
 
 /**

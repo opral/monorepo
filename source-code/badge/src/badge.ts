@@ -6,10 +6,10 @@ import { telemetryNode } from "@inlang/telemetry"
 import { removeCommas } from "./helper/removeCommas.js"
 import { calculateSummary } from "./helper/calculateSummary.js"
 import { caching } from "cache-manager"
-import { LintReport, openInlangProject } from "@inlang/sdk"
+import { type LintReport, openInlangProject } from "@inlang/sdk"
 
-const fontMedium = readFileSync(new URL("./assets/static/Inter-Medium.ttf", import.meta.url))
-const fontBold = readFileSync(new URL("./assets/static/Inter-Bold.ttf", import.meta.url))
+const fontMedium = readFileSync(new URL("../assets/static/Inter-Medium.ttf", import.meta.url))
+const fontBold = readFileSync(new URL("../assets/static/Inter-Bold.ttf", import.meta.url))
 
 const cache = await caching("memory", {
 	ttl: 60 * 60 * 24 * 1, // 1 day,

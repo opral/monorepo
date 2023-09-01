@@ -10,7 +10,7 @@ import type {
 } from "./errors.js"
 import type { Message } from "@inlang/message"
 import type { JSONObject } from "@inlang/json-types"
-import type { AppSpecificInlangIdeExtension, Plugin } from "@inlang/plugin"
+import type { AppSpecificApiInlangIdeExtension, Plugin } from "@inlang/plugin"
 
 /**
  * The filesystem is a subset of project lisa's nodeish filesystem.
@@ -69,6 +69,6 @@ export type ResolvedPluginApi = {
 	 *  appSpecificApi['inlang.app.ide-extension'].messageReferenceMatcher()
 	 */
 	appSpecificApi: Record<`${string}.app.${string}`, unknown> & {
-		"inlang.app.ideExtension"?: AppSpecificInlangIdeExtension
+		"inlang.app.ideExtension"?: AppSpecificApiInlangIdeExtension
 	}
 }

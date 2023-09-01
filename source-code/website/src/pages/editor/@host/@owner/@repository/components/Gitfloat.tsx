@@ -1,5 +1,5 @@
 import { useLocalStorage } from "#src/services/local-storage/index.js"
-import { createEffect, createSignal, JSXElement, onMount, Show } from "solid-js"
+import { createEffect, createSignal, type JSXElement, onMount, Show } from "solid-js"
 import IconGithub from "~icons/cib/github"
 import { pushChanges, useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
@@ -11,7 +11,7 @@ import type { EditorRouteParams } from "../types.js"
 import { SignInDialog } from "#src/services/auth/index.js"
 import { publicEnv } from "@inlang/env-variables"
 import { telemetryBrowser } from "@inlang/telemetry"
-import { TourHintWrapper, TourStepId } from "./Notification/TourHintWrapper.jsx"
+import { TourHintWrapper, type TourStepId } from "./Notification/TourHintWrapper.jsx"
 
 export const Gitfloat = () => {
 	const {

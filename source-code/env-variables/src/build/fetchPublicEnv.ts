@@ -33,7 +33,7 @@ export async function fetchPublicEnv() {
 					.map(([key, value]) => `${key}="${(value as any).raw}"`)
 					.join("\n"),
 			)
-			const [, errors] = validateEnvVariables({ forProduction: false })
+			const { error: errors } = validateEnvVariables({ forProduction: false })
 			if (errors === undefined) {
 				console.info("✅ Fetched public env variables remotely.")
 			} else {

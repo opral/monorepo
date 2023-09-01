@@ -1,5 +1,5 @@
 import { showToast } from "#src/components/Toast.jsx"
-import { Accessor, createSignal } from "solid-js"
+import { type Accessor, createSignal } from "solid-js"
 import copy from "clipboard-copy"
 
 export function BadgeGenerator() {

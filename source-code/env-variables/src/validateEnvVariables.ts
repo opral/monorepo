@@ -1,4 +1,4 @@
-import type { Result } from "@inlang/core/utilities"
+import type { Result } from "@inlang/result"
 import { privateEnvVariablesSchema, publicEnvVariablesSchema } from "./api.js"
 
 /**
@@ -21,7 +21,7 @@ export function validateEnvVariables(args: {
 			key: issue.path[0] as string,
 			errorMessage: issue.message,
 		}))
-		return [undefined, errors]
+		return { error: errors }
 	}
-	return [true]
+	return { data: true }
 }

@@ -4,7 +4,7 @@ import Svelte from "#src/pages/index/sections/02-integration/assets/svelte.jsx"
 import Vuejs from "#src/pages/index/sections/02-integration/assets/vuejs.jsx"
 import Reactjs from "#src/pages/index/sections/02-integration/assets/reactjs.jsx"
 import Nuxt from "#src/pages/index/sections/02-integration/assets/nuxt.jsx"
-import { JSXElement, Show } from "solid-js"
+import { type JSXElement, Show } from "solid-js"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
 

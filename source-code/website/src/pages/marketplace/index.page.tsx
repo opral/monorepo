@@ -1,7 +1,7 @@
 import { Layout } from "../Layout.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import { marketplaceItems } from "@inlang/marketplace"
-import { For, Show, Accessor, createSignal, createEffect } from "solid-js"
+import { For, Show, type Accessor, createSignal, createEffect } from "solid-js"
 import { Chip } from "#src/components/Chip.jsx"
 import { SearchIcon } from "../editor/@host/@owner/@repository/components/SearchInput.jsx"
 import { Button } from "../index/components/Button.jsx"

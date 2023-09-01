@@ -1,6 +1,6 @@
 import { createResource, Match, onMount, Suspense, Switch } from "solid-js"
 import mermaid from "mermaid"
-import { getHighlighter, Highlighter, Lang, setCDN } from "shiki"
+import { getHighlighter, type Highlighter, type Lang, setCDN } from "shiki"
 import copy from "clipboard-copy"
 import { showToast } from "#src/components/Toast.jsx"
 

@@ -1,4 +1,4 @@
-import { ComponentProps, lazy, Suspense } from "solid-js"
+import { type ComponentProps, lazy, Suspense } from "solid-js"
 
 /**
  * Icons helper component when static imports are unavailable (for example markdown).

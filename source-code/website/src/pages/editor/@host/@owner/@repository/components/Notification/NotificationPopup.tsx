@@ -1,6 +1,6 @@
 import type { Accessor } from "solid-js"
 import { For } from "solid-js"
-import { Notification, WarningIcon } from "./NotificationHint.jsx"
+import { type Notification, WarningIcon } from "./NotificationHint.jsx"
 
 interface NotificationPopupProps {
 	notifications: Array<Notification>

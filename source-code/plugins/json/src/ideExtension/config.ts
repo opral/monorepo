@@ -1,5 +1,5 @@
 import { parse } from "./messageReferenceMatchers.js"
-import type { IdeExtensionConfig, Plugin } from "@inlang/sdk"
+import type { AppSpecificApiInlangIdeExtension, Plugin } from "@inlang/sdk"
 
 export const ideExtensionConfig = (): Plugin["addAppSpecificApi"] => () => ({
 	"inlang.app.ideExtension": {
@@ -24,5 +24,5 @@ export const ideExtensionConfig = (): Plugin["addAppSpecificApi"] => () => ({
 				language: "svelte",
 			},
 		],
-	} satisfies IdeExtensionConfig,
+	} satisfies AppSpecificApiInlangIdeExtension,
 })

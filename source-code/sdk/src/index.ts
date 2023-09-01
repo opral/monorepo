@@ -6,7 +6,7 @@ export type {
 	Subscribable,
 } from "./api.js"
 export { openInlangProject } from "./openInlangProject.js"
-export { solidAdapter, InlangProjectWithSolidAdapter } from "./adapter/solidAdapter.js"
+export { solidAdapter, type InlangProjectWithSolidAdapter } from "./adapter/solidAdapter.js"
 export { createMessagesQuery } from "./createMessagesQuery.js"
 export {
 	ProjectFilePathNotFoundError,
@@ -26,3 +26,4 @@ export * from "./messages/variant.js"
 
 export * from "./interfaces.js"
 export * from "@inlang/result"
+export * from "@inlang/package"

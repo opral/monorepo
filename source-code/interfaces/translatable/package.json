@@ -28,6 +28,7 @@
 		"@sinclair/typebox": "^0.31.0"
 	},
 	"devDependencies": {
-		"tsd": "^0.28.1"
+		"tsd": "0.28.1",
+		"typescript": "5.2.2"
 	}
 }

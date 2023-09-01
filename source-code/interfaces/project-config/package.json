@@ -16,7 +16,7 @@
 	"scripts": {
 		"build": "tsc --build",
 		"dev": "tsc --watch",
-		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"test": "tsc --noEmit && vitest run",
 		"lint": "eslint ./src",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
@@ -27,10 +27,12 @@
 		"@inlang/language-tag": "*",
 		"@inlang/translatable": "*"
 	},
+	"devDependencies": {
+		"tsd": "0.28.1",
+		"typescript": "5.2.2",
+		"vitest": "0.34.3"
+	},
 	"peerDependencies": {
 		"@sinclair/typebox": "^0.31.0"
-	},
-	"devDependencies": {
-		"tsd": "^0.28.1"
 	}
 }
