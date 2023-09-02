@@ -13,7 +13,7 @@ const LintRuleId = LintRule["allOf"][0]["properties"]["meta"]["properties"]["id"
 export const Disabled = Type.Array(Type.Union([LintRuleId]), {
 	// in the future plugins too
 	description: "The lint rules that should be disabled.",
-	examples: [["inlang.lintRule.missingTranslation", "inlang.lintRule.patternInvalid"]],
+	examples: [["lintRule.inlang.missingTranslation", "lintRule.inlang.patternInvalid"]],
 })
 
 /**
@@ -26,7 +26,7 @@ export const ProjectSettings = Type.Object({
 		Type.Array(Type.Union([Type.String()]), {
 			// in the future plugins too
 			description: "The lint rules that should be disabled.",
-			examples: ["inlang.lintRule.missingTranslation", "inlang.lintRule.patternInvalid"],
+			examples: ["lintRule.inlang.missingTranslation", "lintRule.inlang.patternInvalid"],
 		}),
 	),
 	"project.lintRuleLevels": Type.Optional(
@@ -34,8 +34,8 @@ export const ProjectSettings = Type.Object({
 			description: "The lint rule levels. To disable a lint rule, use `system.disabled`.",
 			examples: [
 				{
-					"inlang.lintRule.missingTranslation": "error",
-					"inlang.lintRule.patternInvalid": "warning",
+					"lintRule.inlang.missingTranslation": "error",
+					"lintRule.inlang.patternInvalid": "warning",
 				},
 			],
 		}),
@@ -52,18 +52,20 @@ export const ProjectSettings = Type.Object({
 const ExternalSettings = Type.Record(
 	Type.String({
 		// pattern includes ProjectSettings keys
-		pattern: `^((?!project\\.)([a-z]+)\\.(app|plugin|lintRule)\\.([a-z][a-zA-Z0-9]*)|${Object.keys(
+		pattern: `^((lintRule|plugin|app)\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)|${Object.keys(
 			ProjectSettings.properties,
 		)
 			.map((key) => key.replaceAll(".", "\\."))
 			.join("|")})$`,
 		description:
-			"The key must be conform to `{namespace:string}.{type:app|plugin|lintRule}.{name:string}`. The namespace `project` namespace is reserved and can't be used.",
-		examples: ["example.plugin.sqlite", "example.lintRule.missingTranslation"],
+			"The key must be conform to `{type:app|plugin|lintRule}.{namespace:string}.{id:string}`.",
+		examples: ["plugin.publisher.sqlite", "lintRule.inlang.missingTranslation"],
 	}) as unknown as TTemplateLiteral<
-		[TLiteral<`${string}.${"app" | "plugin" | "lintRule"}.${string}`>]
+		[TLiteral<`${"app" | "plugin" | "lintRule"}.${string}.${string}`>]
 	>,
-	// workaround to make the intersection between `ProjectSettings` and `ExternalSettings` possible
+	// Using JSON (array and object) as a workaround to make the
+	// intersection between `ProjectSettings`, which contains an array,
+	// and `ExternalSettings` which are objects possible
 	JSON as unknown as typeof JSONObject,
 	{ additionalProperties: false },
 )

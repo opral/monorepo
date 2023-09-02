@@ -5,22 +5,22 @@ import { expectType } from "tsd"
 import { Plugin } from "@inlang/plugin"
 
 describe("Plugin", () => {
-	test("meta.id should enforce namespace.plugin.* patterns", () => {
-		expectType<`${string}.plugin.${string}`>("" as Plugin["meta"]["id"])
+	test("meta.id should enforce plugin.namespace.* patterns", () => {
+		expectType<`plugin.${string}.${string}`>("" as Plugin["meta"]["id"])
 
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "namespace.plugin.placeholder",
+				id: "plugin.namespace.placeholder",
 				displayName: { en: "" },
 				description: { en: "" },
 			},
 		}
 
-		const passCases = ["namespace.plugin.helloWorld", "namespace.plugin.i18n"]
+		const passCases = ["plugin.namespace.helloWorld", "plugin.namespace.i18n"]
 		const failCases = [
 			"namespace.hello_World",
-			"namespace.plugin-HelloWorld",
-			"namespace.lintRule.coolPlugin",
+			"plugin.namespace-HelloWorld",
+			"lintRule.namespace.coolPlugin",
 		]
 
 		for (const pass of passCases) {
@@ -44,7 +44,7 @@ describe("Plugin", () => {
 			modules: [],
 			settings: {},
 		}
-		const cases = ["namespace.plugin.helloWorld", "namespace.plugin.i18n"]
+		const cases = ["plugin.namespace.helloWorld", "plugin.namespace.i18n"]
 
 		for (const _case of cases) {
 			const config = { ...mockConfig, settings: { [_case]: {} } }

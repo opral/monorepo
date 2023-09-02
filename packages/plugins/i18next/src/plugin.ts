@@ -61,7 +61,7 @@ function defaultNesting() {
 
 export const plugin: Plugin<PluginSettings> = {
 	meta: {
-		id: "inlang.plugin.i18next",
+		id: "plugin.inlang.i18next",
 		displayName: { en: "i18next" },
 		description: { en: "i18next plugin for inlang" },
 	},

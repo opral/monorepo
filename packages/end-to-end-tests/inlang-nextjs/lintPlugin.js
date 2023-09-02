@@ -2,7 +2,7 @@
 var emptyPatternRule = {
 	type: "MessageLint",
 	meta: {
-		id: "inlang.lintRule.emptyPattern",
+		id: "lintRule.namespace.emptyPattern",
 		displayName: {
 			en: "Empty Pattern",
 		},
@@ -63,7 +63,7 @@ been translated yet.
 var identicalPatternRule = {
 	type: "MessageLint",
 	meta: {
-		id: "inlang.lintRule.identicalPattern",
+		id: "lintRule.namespace.identicalPattern",
 		displayName: {
 			en: "Identical Pattern",
 		},
@@ -122,7 +122,7 @@ var patternToString = (pattern) =>
 var messageWithoutSourceRule = {
 	type: "MessageLint",
 	meta: {
-		id: "inlang.lintRule.messageWithoutSource",
+		id: "lintRule.namespace.messageWithoutSource",
 		displayName: {
 			en: "Message Without Source",
 		},
@@ -162,7 +162,7 @@ have not been updated accordingly.
 var missingTranslationRule = {
 	type: "MessageLint",
 	meta: {
-		id: "inlang.lintRule.missingTranslation",
+		id: "lintRule.namespace.missingTranslation",
 		displayName: {
 			en: "Missing Translation",
 		},

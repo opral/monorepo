@@ -5,7 +5,7 @@ import type { Message } from "@inlang/message"
 
 const lintRule1 = {
 	meta: {
-		id: "x.lintRule.1",
+		id: "lintRule.x.1",
 		displayName: { en: "" },
 		description: { en: "" },
 	},
@@ -15,7 +15,7 @@ const lintRule1 = {
 
 const lintRule2 = {
 	meta: {
-		id: "x.lintRule.2",
+		id: "lintRule.x.2",
 		displayName: { en: "" },
 		description: { en: "" },
 	},

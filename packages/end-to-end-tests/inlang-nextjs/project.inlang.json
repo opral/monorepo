@@ -6,7 +6,7 @@
 		"./../../plugins/standard-lint-rules/dist/index.js"
 	],
 	"settings": {
-		"inlang.plugin.i18next": {
+		"plugin.inlang.i18next": {
 			"pathPattern": {
 				"client-page": "app/i18n/locales/{languageTag}/client-page.json",
 				"footer": "app/i18n/locales/{languageTag}/footer.json",

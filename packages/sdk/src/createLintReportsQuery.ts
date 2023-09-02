@@ -3,7 +3,7 @@ import { createSubscribable } from "./openInlangProject.js"
 import type { InlangProject, InstalledLintRule, LintReportsQueryApi } from "./api.js"
 import type { ProjectConfig } from "@inlang/project-config"
 import type { ResolveModuleFunction } from "./resolve-modules/index.js"
-import type { JSONObject, LintReport, Message } from "./interfaces.js"
+import type { JSONObject, LintReport, LintRule, Message } from "./interfaces.js"
 import { lintSingleMessage } from "./lint/index.js"
 import { ReactiveMap } from "./reactivity/map.js"
 
@@ -33,7 +33,7 @@ export function createLintReportsQuery(
 				lintSingleMessage({
 					sourceLanguageTag: conf.sourceLanguageTag,
 					languageTags: conf.languageTags,
-					lintRuleSettings: conf.settings as Record<`${string}.lintRule.${string}`, JSONObject>,
+					lintRuleSettings: conf.settings as Record<LintRule["meta"]["id"], JSONObject>,
 					lintLevels: Object.fromEntries(
 						installedLintRules().map((rule) => [rule.meta.id, rule.lintLevel]),
 					),

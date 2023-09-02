@@ -2,7 +2,7 @@ import { parse } from "./messageReferenceMatchers.js"
 import type { AppSpecificApiInlangIdeExtension, Plugin } from "@inlang/sdk"
 
 export const ideExtensionConfig = (): Plugin["addAppSpecificApi"] => () => ({
-	"inlang.app.ideExtension": {
+	"app.inlang.ideExtension": {
 		messageReferenceMatchers: [
 			async (args: { documentText: string }) => {
 				return parse(args.documentText)

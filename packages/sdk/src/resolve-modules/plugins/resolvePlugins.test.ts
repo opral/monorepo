@@ -38,7 +38,7 @@ describe("generally", () => {
 	it("should return an error if a plugin uses APIs that are not available", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "namespace.plugin.undefinedApi",
+				id: "plugin.namespace.undefinedApi",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 			},
@@ -63,7 +63,7 @@ describe("generally", () => {
 	it("should not initialize a plugin that uses the 'inlang' namespace except for inlang whitelisted plugins", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "inlang.plugin.notWhitelisted",
+				id: "plugin.inlang.notWhitelisted",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 			},
@@ -85,7 +85,7 @@ describe("loadMessages", () => {
 	it("should load messages from a local source", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "namespace.plugin.placeholder",
+				id: "plugin.namespace.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 			},
@@ -109,7 +109,7 @@ describe("loadMessages", () => {
 	it("should collect an error if function is defined twice in multiple plugins", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.plugin.loadMessagesFirst",
+				id: "plugin.namepsace.loadMessagesFirst",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 			},
@@ -117,7 +117,7 @@ describe("loadMessages", () => {
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
-				id: "plugin.plugin.loadMessagesSecond",
+				id: "plugin.namepsace.loadMessagesSecond",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 			},
@@ -139,7 +139,7 @@ describe("saveMessages", () => {
 	it("should save messages to a local source", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "namespace.plugin.placeholder",
+				id: "plugin.namespace.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 			},
@@ -158,7 +158,7 @@ describe("saveMessages", () => {
 	it("should collect an error if function is defined twice in multiple plugins", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.plugin.saveMessages",
+				id: "plugin.namepsace.saveMessages",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 			},
@@ -166,7 +166,7 @@ describe("saveMessages", () => {
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
-				id: "plugin.plugin.saveMessages2",
+				id: "plugin.namepsace.saveMessages2",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 			},
@@ -189,7 +189,7 @@ describe("detectedLanguageTags", () => {
 	it("should merge language tags from plugins", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "plugin.plugin.detectedLanguageTags",
+				id: "plugin.namepsace.detectedLanguageTags",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 			},
@@ -200,7 +200,7 @@ describe("detectedLanguageTags", () => {
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
-				id: "plugin.plugin.detectedLanguageTags2",
+				id: "plugin.namepsace.detectedLanguageTags2",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 			},
@@ -224,7 +224,7 @@ describe("addAppSpecificApi", () => {
 	it("it should resolve app specific api", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "namespace.plugin.placeholder",
+				id: "plugin.namespace.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 			},
@@ -248,7 +248,7 @@ describe("addAppSpecificApi", () => {
 	it("it should resolve multiple app specific apis", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "namespace.plugin.placeholder",
+				id: "plugin.namespace.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 			},
@@ -263,7 +263,7 @@ describe("addAppSpecificApi", () => {
 		}
 		const mockPlugin2: Plugin = {
 			meta: {
-				id: "namespace.plugin.placeholder2",
+				id: "plugin.namespace.placeholder2",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 			},
@@ -289,7 +289,7 @@ describe("addAppSpecificApi", () => {
 	it("it should throw an error if return value is not an object", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "namespace.plugin.placeholder",
+				id: "plugin.namespace.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 			},
@@ -310,12 +310,12 @@ describe("addAppSpecificApi", () => {
 	it("it should throw an error if the passed options are not defined inside appSpecificApi", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "namespace.plugin.placeholder",
+				id: "plugin.namepsace.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 			},
 			addAppSpecificApi: () => ({
-				"namespace.app.placeholder": {
+				"app.inlang.placeholder": {
 					messageReferenceMatcher: () => {
 						return { hello: "world" }
 					},
@@ -329,11 +329,9 @@ describe("addAppSpecificApi", () => {
 			nodeishFs: {} as any,
 		})
 
-		expect(resolved.data.appSpecificApi).toHaveProperty("namespace.app.placeholder")
+		expect(resolved.data.appSpecificApi).toHaveProperty("app.inlang.placeholder")
 		expect(
-			(
-				resolved.data.appSpecificApi?.["namespace.app.placeholder"] as any
-			).messageReferenceMatcher(),
+			(resolved.data.appSpecificApi?.["app.inlang.placeholder"] as any).messageReferenceMatcher(),
 		).toEqual({
 			hello: "world",
 		})

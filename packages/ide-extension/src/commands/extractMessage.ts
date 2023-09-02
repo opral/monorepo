@@ -11,19 +11,19 @@ export const extractMessageCommand = {
 	id: "inlang.extractMessage",
 	title: "Inlang: Extract Message",
 	callback: async function (textEditor: vscode.TextEditor) {
-		const ideExtension = state().inlang.appSpecificApi()["inlang.app.ideExtension"]
+		const ideExtension = state().inlang.appSpecificApi()["app.inlang.ideExtension"]
 
 		// guards
 		if (!ideExtension) {
 			return msg(
-				"There is no `plugin` configuration for the inlang extension. One of the `modules` should expose a `plugin` which has `appSpecificApi` containing `inlang.app.ideExtension`",
+				"There is no `plugin` configuration for the inlang extension. One of the `modules` should expose a `plugin` which has `appSpecificApi` containing `app.inlang.ideExtension`",
 				"warn",
 				"notification",
 			)
 		}
 		if (ideExtension.extractMessageOptions === undefined) {
 			return msg(
-				"The `extractMessageOptions` are not defined in `inlang.app.ideExtension` but required to extract a message.",
+				"The `extractMessageOptions` are not defined in `app.inlang.ideExtension` but required to extract a message.",
 				"warn",
 				"notification",
 			)

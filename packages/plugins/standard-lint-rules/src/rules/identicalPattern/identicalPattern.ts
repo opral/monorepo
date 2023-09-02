@@ -8,7 +8,7 @@ type Settings = {
 export const identicalPatternRule: MessageLintRule<Settings> = {
 	type: "MessageLint",
 	meta: {
-		id: "inlang.lintRule.identicalPattern",
+		id: "lintRule.inlang.identicalPattern",
 		displayName: {
 			en: "Identical Pattern",
 		},

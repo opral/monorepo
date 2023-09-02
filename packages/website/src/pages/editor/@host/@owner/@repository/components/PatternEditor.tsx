@@ -257,7 +257,7 @@ export function PatternEditor(props: {
 			(report) =>
 				report.messageId === props.message.id &&
 				report.languageTag === props.languageTag &&
-				report.ruleId === "inlang.lintRule.emptyPattern",
+				report.ruleId === "lintRule.inlang.emptyPattern",
 		)
 
 		const newMessage = structuredClone(props.message)

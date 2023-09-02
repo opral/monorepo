@@ -73,7 +73,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 								position="bottom-right"
 								offset={{ x: 0, y: 40 }}
 								isVisible={
-									lintRule === "inlang.lintRule.missingTranslation" &&
+									lintRule === "lintRule.inlang.missingTranslation" &&
 									tourStep() === "missing-translation-rule"
 								}
 							>
@@ -105,7 +105,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 										<div
 											class="flex gap-2 items-center h-7"
 											id={
-												lintRule === "inlang.lintRule.missingTranslation"
+												lintRule === "lintRule.inlang.missingTranslation"
 													? "missingTranslation-summary"
 													: "lint-summary"
 											}

@@ -27,7 +27,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 
 		// Get the reference language
 		const sourceLanguageTag = state().inlang.config()?.sourceLanguageTag
-		const ideExtensionConfig = state().inlang.appSpecificApi()?.["inlang.app.ideExtension"]
+		const ideExtensionConfig = state().inlang.appSpecificApi()?.["app.inlang.ideExtension"]
 
 		const messageReferenceMatchers = ideExtensionConfig?.messageReferenceMatchers
 
