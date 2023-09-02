@@ -4,7 +4,7 @@ import { Markdown, parseMarkdown } from "#src/services/markdown/index.js"
 import { For, Show, createSignal } from "solid-js"
 import type { ProcessedTableOfContents } from "./index.page.server.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
-import { marketplaceItems } from "@inlang/marketplace"
+import { registry } from "@inlang/marketplace-registry"
 import { Button } from "#src/pages/index/components/Button.jsx"
 import { Chip } from "#src/components/Chip.jsx"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
@@ -23,9 +23,9 @@ export type PageProps = {
 export function Page(props: PageProps) {
 	const [readmore, setReadmore] = createSignal<boolean>(false)
 	const item = () =>
-		marketplaceItems.find(
+		registry.find(
 			(item) =>
-				item.displayName.en?.toLowerCase().replaceAll(" ", "-") ===
+				item.name.en?.toLowerCase().replaceAll(" ", "-") ===
 				props.markdown?.frontmatter?.title?.toLowerCase().replaceAll(" ", "-"),
 		)
 
@@ -47,7 +47,7 @@ export function Page(props: PageProps) {
 										when={item()?.icon}
 										fallback={
 											<div class="w-16 h-16 font-semibold text-3xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
-												{item()?.displayName.en?.[0]}
+												{item()?.name.en?.[0]}
 											</div>
 										}
 									>
@@ -57,7 +57,7 @@ export function Page(props: PageProps) {
 										/>
 									</Show>
 									<div class="flex flex-col gap-3">
-										<h1 class="text-3xl font-bold">{item()?.displayName.en}</h1>
+										<h1 class="text-3xl font-bold">{item()?.name.en}</h1>
 										<div class="inline-block text-surface-500 ">
 											<p class={!readmore() ? "lg:line-clamp-2" : ""}>{item()?.description.en}</p>
 											{/* @ts-ignore */}
@@ -96,7 +96,7 @@ export function Page(props: PageProps) {
 											</Button>
 										</div>
 									</Show>
-									<Button type="secondary" href={item()?.linkToReadme.en?.replace("README.md", "")}>
+									<Button type="secondary" href={item()?.readme.en?.replace("README.md", "")}>
 										GitHub
 										<MaterialSymbolsArrowOutward
 											// @ts-ignore

@@ -2,7 +2,7 @@ import { Show, For, type JSXElement, type Accessor, createSignal } from "solid-j
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import ArrowDown from "~icons/material-symbols/expand-more"
 import { setSearchParams } from "../install/helper/setSearchParams.js"
-import type { MarketplaceItem } from "@inlang/marketplace"
+import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 
 /**
  * This file provides helper Components for the marketplace pages.
@@ -55,7 +55,7 @@ export function SelectRepo(props: { size: "small" | "medium"; modules: any[] }) 
 /* Deprecated */
 export function SelectionWrapper(props: {
 	select: Accessor<boolean>
-	item: MarketplaceItem
+	item: MarketplaceManifest
 	selectedPackages: Accessor<string[]>
 	setSelectedPackages: (items: string[]) => void
 	children: JSXElement
@@ -77,7 +77,7 @@ export function SelectionWrapper(props: {
 										(pkg) =>
 											props.item.type !== "app" &&
 											props.item.type !== "library" &&
-											pkg === props.item.package,
+											pkg === props.item.module,
 									)
 									? "outline-4"
 									: "outline-transparent hover:outline-4") +
@@ -88,7 +88,7 @@ export function SelectionWrapper(props: {
 						e.stopPropagation()
 
 						if (props.item.type !== "app" && props.item.type !== "library") {
-							const packageToRemove = props.item.package
+							const packageToRemove = props.item.module
 							const isSelected = props.selectedPackages().includes(packageToRemove)
 
 							if (isSelected) {

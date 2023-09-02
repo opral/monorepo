@@ -9,7 +9,7 @@ import {
 import { ProjectConfig } from "@inlang/sdk"
 import { tryCatch } from "@inlang/result"
 import type { Step } from "./index.page.jsx"
-import { marketplaceItems } from "@inlang/marketplace"
+import { registry } from "@inlang/marketplace-registry"
 import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"
 
 export function InstallationProvider(props: {
@@ -262,7 +262,7 @@ function validatePackages(modules: string[]) {
 	let check = true
 	for (const pkg of modules) {
 		if (
-			!marketplaceItems.some(
+			!registry.some(
 				(marketplaceItem) =>
 					marketplaceItem.type !== "app" &&
 					marketplaceItem.type !== "library" &&

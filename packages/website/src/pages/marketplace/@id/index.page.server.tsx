@@ -1,5 +1,5 @@
 import type { PageProps } from "./index.page.jsx"
-import { marketplaceItems } from "@inlang/marketplace"
+import { registry } from "@inlang/marketplace-registry"
 import { MarketplaceFrontmatterSchema } from "./frontmatterSchema.js"
 import { parseMarkdown } from "#src/services/markdown/index.js"
 import { RenderErrorPage } from "vite-plugin-ssr/RenderErrorPage"
@@ -17,29 +17,29 @@ const fetchReadmeContents = async () => {
 		return `https://raw.githubusercontent.com/${username}/${repository}/${branch}/${filePath}`
 	}
 
-	for (const item of marketplaceItems) {
+	for (const item of registry) {
 		if (
-			!item.linkToReadme.en ||
-			!item.displayName.en ||
-			!item.linkToReadme.en.includes("README.md") ||
-			readmeContents.includes(item.linkToReadme.en)
+			!item.readme.en ||
+			!item.name.en ||
+			!item.readme.en.includes("README.md") ||
+			readmeContents.includes(item.readme.en)
 		) {
 			continue
 		}
-		const rawReadmeLink = rawLink(item.linkToReadme.en)
+		const rawReadmeLink = rawLink(item.readme.en)
 		const response = await fetch(rawReadmeLink)
 		const readmeText = await response.text()
 
 		generateFrontmatter(
-			item.displayName.en,
-			`/marketplace/${item.displayName.en?.toLowerCase().replaceAll(" ", "-")}`,
+			item.readme.en,
+			`/marketplace/${item.name.en?.toLowerCase().replaceAll(" ", "-")}`,
 			readmeText,
 		)
 
 		readmeContents.push(
 			generateFrontmatter(
-				item.displayName.en,
-				`/marketplace/${item.displayName.en?.toLowerCase().replaceAll(" ", "-")}`,
+				item.name.en,
+				`/marketplace/${item.name.en?.toLowerCase().replaceAll(" ", "-")}`,
 				readmeText,
 				item.description.en?.replace("@", "").replace(/(\r\n|\n|\r)/gm, " "),
 			),
