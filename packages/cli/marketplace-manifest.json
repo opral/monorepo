@@ -1,13 +1,13 @@
 {
 	"type": "app",
 	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-	"displayName": {
+	"name": {
 		"en": "CLI"
 	},
 	"description": {
 		"en": "Official inlang CLI"
 	},
-	"linkToReadme": {
+	"readme": {
 		"en": "https://github.com/inlang/inlang/blob/main/source-code/cli/README.md"
 	},
 	"keywords": ["cli", "commands"],
