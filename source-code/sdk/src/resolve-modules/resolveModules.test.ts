@@ -36,14 +36,14 @@ describe("resolveModules", () => {
 		// Define mock data
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "namepsace.plugin.mock",
+				id: "plugin.namespace.mock",
 				description: { en: "Mock plugin description" },
 				displayName: { en: "Mock Plugin" },
 			},
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
 			addAppSpecificApi: () => ({
-				"inlang.app.ideExtension": {
+				"app.inlang.ideExtension": {
 					messageReferenceMatcher: () => undefined as any,
 				},
 			}),
@@ -52,7 +52,7 @@ describe("resolveModules", () => {
 		const mockLintRule: LintRule = {
 			type: "MessageLint",
 			meta: {
-				id: "namepsace.lintRule.mock",
+				id: "lintRule.namespace.mock",
 				description: { en: "Mock lint rule description" },
 				displayName: { en: "Mock Lint Rule" },
 			},
@@ -86,7 +86,7 @@ describe("resolveModules", () => {
 		// Check for the meta data of the plugin
 		expect(resolved.plugins.some((module) => module.meta.id === mockPlugin.meta.id)).toBeDefined()
 		// Check for the app specific api
-		expect(resolved.resolvedPluginApi["appSpecificApi"]?.["inlang.app.ideExtension"]).toBeDefined()
+		expect(resolved.resolvedPluginApi["appSpecificApi"]?.["app.inlang.ideExtension"]).toBeDefined()
 		// Check for the lint rule
 		expect(resolved.lintRules[0]?.meta.id).toBe(mockLintRule.meta.id)
 	})

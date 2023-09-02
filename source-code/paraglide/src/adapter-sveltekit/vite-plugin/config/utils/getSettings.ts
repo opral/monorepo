@@ -15,7 +15,7 @@ export const defaultSdkPluginSettings = {
 }
 
 export function getSettings(inlang: InlangProject) {
-	const settings = inlang.appSpecificApi()["inlang.app.sdkJs"] as SdkConfig | undefined
+	const settings = inlang.appSpecificApi()["app.inlang.paraglideJs"] as SdkConfig | undefined
 	if (!settings) {
 		// automatically add module if missing
 		const config = inlang.config()
@@ -29,7 +29,7 @@ export function getSettings(inlang: InlangProject) {
 		})
 
 		console.info(
-			"Adding missing `inlang.app.sdkJs` module to `project.inlang.json` and applying default settings.",
+			"Adding missing `app.sdkJs` module to `project.inlang.json` and applying default settings.",
 		)
 		return undefined
 	}
@@ -39,6 +39,6 @@ export function getSettings(inlang: InlangProject) {
 		// to be on the safe side, we check again here
 		return validateSdkConfig(settings)
 	} catch (error) {
-		return new InlangSdkException(`Invalid \`inlang.app.sdkJs\` config`, error as Error)
+		return new InlangSdkException(`Invalid \`app.inlang.sdkJs\` config`, error as Error)
 	}
 }

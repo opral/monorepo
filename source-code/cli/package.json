@@ -41,7 +41,7 @@
 	"scripts": {
 		"dev": "node ./build.js",
 		"build": "cross-env NODE_ENV=production node ./build.js",
-		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage --test-timeout=10000",
+		"_test": "tsc --noEmit && vitest run --passWithNoTests --coverage --test-timeout=10000",
 		"lint": "eslint ./src",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"

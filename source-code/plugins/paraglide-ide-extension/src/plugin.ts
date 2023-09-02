@@ -6,7 +6,7 @@ import { ideExtensionDefaultConfig } from "./ideExtension/config.js"
 
 export const sdkPlugin: Plugin<SdkConfigInput> = {
 	meta: {
-		id: "inlang.plugin.sdkJs",
+		id: "plugin.inlang.paraglideJsIdeExtension",
 		displayName: { en: "Inlang SDK for JavaScript" },
 		description: { en: "Plugin for the Inlang SDK for JavaScript" },
 		// marketplace: {
@@ -27,8 +27,8 @@ export const sdkPlugin: Plugin<SdkConfigInput> = {
 		const parsedConfig = validateSdkConfig(settings)
 
 		return {
-			"inlang.app.sdkJs": parsedConfig,
-			"inlang.app.ideExtension": ideExtensionDefaultConfig,
+			"app.inlang.sdkJs": parsedConfig,
+			"app.inlang.ideExtension": ideExtensionDefaultConfig,
 		}
 	},
 }

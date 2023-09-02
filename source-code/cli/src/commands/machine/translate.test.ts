@@ -69,7 +69,7 @@ describe("translate command", () => {
 
 			const _mockPlugin: Plugin = {
 				meta: {
-					id: "inlang.plugin.json",
+					id: "plugin.inlang.json",
 					description: { en: "Mock plugin description" },
 					displayName: { en: "Mock Plugin" },
 				},

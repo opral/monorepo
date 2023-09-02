@@ -1641,7 +1641,7 @@ function parse(sourceCode, settings) {
 
 // src/ideExtension/config.ts
 var ideExtensionConfig = (settings) => () => ({
-	"inlang.app.ideExtension": {
+	"app.inlang.ideExtension": {
 		messageReferenceMatchers: [
 			async (args) => {
 				return parse(args.documentText, settings)
@@ -1689,7 +1689,7 @@ function defaultNesting() {
 }
 var plugin = {
 	meta: {
-		id: "inlang.plugin.i18next",
+		id: "plugin.inlang.i18next",
 		displayName: { en: "i18next" },
 		description: { en: "i18next plugin for inlang" },
 		marketplace: {

@@ -3,7 +3,7 @@
 	"languageTags": ["de", "en", "zh"],
 	"packages": [""],
 	"settings": {
-		"inlang.plugin.json": {
+		"plugin.inlang.json": {
 			"pathPattern": "./source-code/website/lang/{language}.json"
 		}
 	}

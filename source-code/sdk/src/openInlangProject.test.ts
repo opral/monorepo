@@ -25,9 +25,9 @@ const config: ProjectConfig = {
 	modules: ["plugin.js", "lintRule.js"],
 	settings: {
 		"project.lintRuleLevels": {
-			"inlang.lintRule.missingTranslation": "error",
+			"lintRule.inlang.missingTranslation": "error",
 		},
-		"inlang.plugin.i18next": {
+		"plugin.inlang.i18next": {
 			pathPattern: "./examples/example01/{languageTag}.json",
 			variableReferencePattern: ["{", "}"],
 		},
@@ -36,14 +36,14 @@ const config: ProjectConfig = {
 
 const mockPlugin: Plugin = {
 	meta: {
-		id: "inlang.plugin.i18next",
+		id: "plugin.inlang.i18next",
 		description: { en: "Mock plugin description" },
 		displayName: { en: "Mock Plugin" },
 	},
 	loadMessages: () => exampleMessages,
 	saveMessages: () => undefined as any,
 	addAppSpecificApi: () => ({
-		"inlang.app.ideExtension": {
+		"app.inlang.ideExtension": {
 			messageReferenceMatcher: (text: string) => text as any,
 		},
 	}),
@@ -88,7 +88,7 @@ const exampleMessages: Message[] = [
 const mockLintRule: LintRule = {
 	type: "MessageLint",
 	meta: {
-		id: "namespace.lintRule.mock",
+		id: "lintRule.inlang.mock",
 		description: { en: "Mock lint rule description" },
 		displayName: { en: "Mock Lint Rule" },
 	},
@@ -399,7 +399,7 @@ describe("functionality", () => {
 			const enabledLintRule: LintRule = {
 				type: "MessageLint",
 				meta: {
-					id: "namespace.lintRule.enabled",
+					id: "lintRule.namespace.enabled",
 					description: { en: "Mock lint rule description" },
 					displayName: { en: "Mock Lint Rule" },
 				},
@@ -414,7 +414,7 @@ describe("functionality", () => {
 			const disabledLintRule: LintRule = {
 				type: "MessageLint",
 				meta: {
-					id: "namespace.lintRule.disabled",
+					id: "lintRule.namespace.disabled",
 					description: { en: "" },
 					displayName: { en: "" },
 				},
@@ -428,7 +428,7 @@ describe("functionality", () => {
 			}
 			const _mockPlugin: Plugin = {
 				meta: {
-					id: "inlang.plugin.i18next",
+					id: "plugin.inlang.i18next",
 					description: { en: "Mock plugin description" },
 					displayName: { en: "Mock Plugin" },
 				},
@@ -490,7 +490,7 @@ describe("functionality", () => {
 			const _mockLintRule: LintRule = {
 				type: "MessageLint",
 				meta: {
-					id: "namespace.lintRule.mock",
+					id: "lintRule.namespace.mock",
 					description: { en: "Mock lint rule description" },
 					displayName: { en: "Mock Lint Rule" },
 				},
@@ -504,7 +504,7 @@ describe("functionality", () => {
 			}
 			const _mockPlugin: Plugin = {
 				meta: {
-					id: "inlang.plugin.i18next",
+					id: "plugin.inlang.i18next",
 					description: { en: "Mock plugin description" },
 					displayName: { en: "Mock Plugin" },
 				},
@@ -545,7 +545,7 @@ describe("functionality", () => {
 			const _mockLintRule: LintRule = {
 				type: "MessageLint",
 				meta: {
-					id: "namespace.lintRule.mock",
+					id: "lintRule.namepsace.mock",
 					description: { en: "Mock lint rule description" },
 					displayName: { en: "Mock Lint Rule" },
 				},
@@ -559,7 +559,7 @@ describe("functionality", () => {
 			}
 			const _mockPlugin: Plugin = {
 				meta: {
-					id: "inlang.plugin.i18next",
+					id: "plugin.inlang.i18next",
 					description: { en: "Mock plugin description" },
 					displayName: { en: "Mock Plugin" },
 				},
@@ -620,7 +620,7 @@ describe("functionality", () => {
 			})
 
 			inlang.appSpecificApi.subscribe((api) => {
-				expect(api["inlang.app.ideExtension"]).toBeDefined()
+				expect(api["app.inlang.ideExtension"]).toBeDefined()
 			})
 		})
 	})
@@ -650,7 +650,7 @@ describe("functionality", () => {
 					languageTags: ["en", "de"],
 					modules: ["plugin.js"],
 					settings: {
-						"inlang.plugin.json": {
+						"plugin.inlang.json": {
 							pathPattern: "./resources/{languageTag}.json",
 						},
 					},
@@ -663,7 +663,7 @@ describe("functionality", () => {
 
 			const _mockPlugin: Plugin = {
 				meta: {
-					id: "inlang.plugin.json",
+					id: "plugin.inlang.json",
 					description: { en: "Mock plugin description" },
 					displayName: { en: "Mock Plugin" },
 				},

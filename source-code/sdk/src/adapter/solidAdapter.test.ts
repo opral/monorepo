@@ -14,9 +14,9 @@ const config: ProjectConfig = {
 	modules: ["plugin.js", "plugin.js"],
 	settings: {
 		"project.lintRuleLevels": {
-			"inlang.lintRule.missingTranslation": "error",
+			"lintRule.inlang.missingTranslation": "error",
 		},
-		"inlang.plugin.i18next": {
+		"plugin.inlang.i18next": {
 			pathPattern: "./examples/example01/{languageTag}.json",
 			variableReferencePattern: ["{", "}"],
 		},
@@ -25,7 +25,7 @@ const config: ProjectConfig = {
 
 const mockPlugin: Plugin = {
 	meta: {
-		id: "inlang.plugin.i18next",
+		id: "plugin.inlang.i18next",
 		description: { en: "Mock plugin description" },
 		displayName: { en: "Mock Plugin" },
 	},
@@ -72,7 +72,7 @@ const exampleMessages: Message[] = [
 const mockLintRule: LintRule = {
 	type: "MessageLint",
 	meta: {
-		id: "namespace.lintRule.mock",
+		id: "lintRule.namespace.mock",
 		description: { en: "Mock lint rule description" },
 		displayName: { en: "Mock Lint Rule" },
 	},
@@ -161,7 +161,7 @@ describe("messages", () => {
 		}
 		const mockPlugin: Plugin = {
 			meta: {
-				id: "mock.plugin.name",
+				id: "plugin.mock.id",
 				displayName: {
 					en: "hello",
 				},

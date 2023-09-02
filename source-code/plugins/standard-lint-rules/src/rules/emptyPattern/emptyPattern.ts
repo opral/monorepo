@@ -3,7 +3,7 @@ import type { MessageLintRule } from "@inlang/lint-rule"
 export const emptyPatternRule: MessageLintRule = {
 	type: "MessageLint",
 	meta: {
-		id: "inlang.lintRule.emptyPattern",
+		id: "lintRule.inlang.emptyPattern",
 		displayName: {
 			en: "Empty Pattern",
 		},

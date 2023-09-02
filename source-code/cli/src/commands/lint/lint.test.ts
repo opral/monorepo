@@ -72,7 +72,7 @@ async function setupInlang(enabledLintRule?: LintRule) {
 
 	const _mockPlugin: Plugin = {
 		meta: {
-			id: "inlang.plugin.json",
+			id: "plugin.inlang.json",
 			description: { en: "Mock plugin description" },
 			displayName: { en: "Mock Plugin" },
 		},
@@ -99,7 +99,7 @@ describe("lint command", () => {
 		const enabledLintRule: LintRule = {
 			type: "MessageLint",
 			meta: {
-				id: "namespace.lintRule.enabled",
+				id: "lintRule.namespace.enabled",
 				description: { en: "Mock lint rule description" },
 				displayName: { en: "Mock Lint Rule" },
 			},
@@ -137,7 +137,7 @@ describe("lint command", () => {
 		const enabledLintRule: LintRule = {
 			type: "MessageLint",
 			meta: {
-				id: "namespace.lintRule.enabled",
+				id: "lintRule.namespace.enabled",
 				description: { en: "Mock lint rule description" },
 				displayName: { en: "Mock Lint Rule" },
 			},

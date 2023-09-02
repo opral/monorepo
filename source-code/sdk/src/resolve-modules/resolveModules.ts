@@ -56,9 +56,9 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 			id: importedModule.data.default.meta.id,
 		})
 
-		if (importedModule.data.default.meta.id.includes(".plugin.")) {
+		if (importedModule.data.default.meta.id.startsWith("plugin.")) {
 			allPlugins.push(importedModule.data.default as Plugin)
-		} else if (importedModule.data.default.meta.id.includes(".lintRule.")) {
+		} else if (importedModule.data.default.meta.id.startsWith("lintRule.")) {
 			allLintRules.push(importedModule.data.default as LintRule)
 		} else {
 			moduleErrors.push(

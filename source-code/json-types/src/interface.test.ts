@@ -13,7 +13,7 @@ describe("JSONObject", () => {
 
 	it("should be possible to have one nested object layer", () => {
 		const mockJson: JSONObject = {
-			"x.plugin.y": {},
+			"plugin.x.y": {},
 		}
 		expect(Value.Check(JSONObject, mockJson)).toBe(true)
 	})

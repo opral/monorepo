@@ -27,7 +27,7 @@ it("should return 50% when half of the messages are missing", () => {
 			messageId: "message-2",
 			languageTag: "de",
 			level: "warning",
-			ruleId: "inlang.lintRule.missingTranslation",
+			ruleId: "lintRule.inlang.missingTranslation",
 			body: {
 				en: "test",
 			},
@@ -55,7 +55,7 @@ it("should round the percentages", () => {
 			messageId: "message-2",
 			languageTag: "de",
 			level: "warning",
-			ruleId: "inlang.lintRule.missingTranslation",
+			ruleId: "lintRule.inlang.missingTranslation",
 			body: {
 				en: "test",
 			},
@@ -65,7 +65,7 @@ it("should round the percentages", () => {
 			messageId: "message-3",
 			languageTag: "de",
 			level: "warning",
-			ruleId: "inlang.lintRule.missingTranslation",
+			ruleId: "lintRule.inlang.missingTranslation",
 			body: {
 				en: "test",
 			},
@@ -93,7 +93,7 @@ it("should work with multiple resources", () => {
 			messageId: "message-1",
 			languageTag: "fr",
 			level: "warning",
-			ruleId: "inlang.lintRule.missingTranslation",
+			ruleId: "lintRule.inlang.missingTranslation",
 			body: {
 				en: "test",
 			},
@@ -103,7 +103,7 @@ it("should work with multiple resources", () => {
 			messageId: "message-2",
 			languageTag: "de",
 			level: "warning",
-			ruleId: "inlang.lintRule.missingTranslation",
+			ruleId: "lintRule.inlang.missingTranslation",
 			body: {
 				en: "test",
 			},
@@ -113,7 +113,7 @@ it("should work with multiple resources", () => {
 			messageId: "message-3",
 			languageTag: "fr",
 			level: "warning",
-			ruleId: "inlang.lintRule.missingTranslation",
+			ruleId: "lintRule.inlang.missingTranslation",
 			body: {
 				en: "test",
 			},
@@ -123,7 +123,7 @@ it("should work with multiple resources", () => {
 			messageId: "message-3",
 			languageTag: "de",
 			level: "warning",
-			ruleId: "inlang.lintRule.missingTranslation",
+			ruleId: "lintRule.inlang.missingTranslation",
 			body: {
 				en: "test",
 			},

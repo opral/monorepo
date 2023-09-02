@@ -3,7 +3,7 @@ import { type Static, Type, type TTemplateLiteral, type TLiteral } from "@sincla
 import type { NodeishFilesystem as LisaNodeishFilesystem } from "@lix-js/fs"
 import type { Message } from "@inlang/message"
 import type { JSONObject } from "@inlang/json-types"
-import type { AppSpecificApiInlangIdeExtension } from "./appSpecificApis/inlang.app.ideExtension.js"
+import type { AppSpecificApiInlangIdeExtension } from "./appSpecificApis/app.inlang.ideExtension.js"
 import { Translatable } from "@inlang/translatable"
 
 /**
@@ -58,7 +58,7 @@ export type Plugin<Settings extends JSONObject | unknown = unknown> = Omit<
 	 *
 	 * @example
 	 * addAppSpecificApi: () => ({
-	 * 	 "inlang.app.ide-extension": {
+	 * 	 "app.inlang.ide-extension": {
 	 * 	   messageReferenceMatcher: () => {}
 	 * 	 }
 	 *  })
@@ -66,17 +66,17 @@ export type Plugin<Settings extends JSONObject | unknown = unknown> = Omit<
 	addAppSpecificApi?: (args: {
 		settings: Settings
 	}) =>
-		| Record<`${string}.app.${string}`, unknown>
-		| { "inlang.app.ideExtension": AppSpecificApiInlangIdeExtension }
+		| Record<`app.${string}.${string}`, unknown>
+		| { "app.inlang.ideExtension": AppSpecificApiInlangIdeExtension }
 }
 
 export const Plugin = Type.Object(
 	{
 		meta: Type.Object({
 			id: Type.String({
-				pattern: "^(?!system\\.)([a-z]+)\\.(plugin)\\.([a-z][a-zA-Z0-9]*)$",
-				examples: ["namespace.plugin.example"],
-			}) as unknown as TTemplateLiteral<[TLiteral<`${string}.plugin.${string}`>]>,
+				pattern: "^plugin\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)$",
+				examples: ["plugin.namespace.id"],
+			}) as unknown as TTemplateLiteral<[TLiteral<`plugin.${string}.${string}`>]>,
 			displayName: Translatable(Type.String()),
 			description: Translatable(Type.String()),
 		}),

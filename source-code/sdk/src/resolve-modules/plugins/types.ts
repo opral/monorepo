@@ -60,7 +60,7 @@ export type ResolvedPluginApi = {
 	 * @example
 	 *  // define
 	 *  appSpecificApi: ({ settings }) => ({
-	 * 	 "inlang.app.ide-extension": {
+	 * 	 "app.inlang.ide-extension": {
 	 * 	   messageReferenceMatcher: () => {
 	 * 		 // use settings
 	 * 		 settings.pathPattern
@@ -69,9 +69,9 @@ export type ResolvedPluginApi = {
 	 * 	 }
 	 *  })
 	 *  // use
-	 *  appSpecificApi['inlang.app.ide-extension'].messageReferenceMatcher()
+	 *  appSpecificApi['app.inlang.ide-extension'].messageReferenceMatcher()
 	 */
-	appSpecificApi: Record<`${string}.app.${string}`, unknown> & {
-		"inlang.app.ideExtension"?: AppSpecificApiInlangIdeExtension
+	appSpecificApi: Record<`app.${string}.${string}`, unknown> & {
+		"app.inlang.ideExtension"?: AppSpecificApiInlangIdeExtension
 	}
 }

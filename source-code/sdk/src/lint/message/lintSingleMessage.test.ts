@@ -6,7 +6,7 @@ import { tryCatch } from "@inlang/result"
 
 const lintRule1 = {
 	meta: {
-		id: "r.lintRule.1",
+		id: "lintRule.r.1",
 		displayName: { en: "" },
 		description: { en: "" },
 	},
@@ -16,7 +16,7 @@ const lintRule1 = {
 
 const lintRule2 = {
 	meta: {
-		id: "r.lintRule.2",
+		id: "lintRule.r.2",
 		displayName: { en: "" },
 		description: { en: "" },
 	},

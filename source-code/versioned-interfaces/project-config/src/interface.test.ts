@@ -9,7 +9,7 @@ describe("config.settings", () => {
 			languageTags: ["en", "de"],
 			modules: [],
 			settings: {
-				"x.plugin.y": {
+				"plugin.x.y": {
 					hello: {
 						world: 4,
 					},
@@ -27,9 +27,9 @@ describe("config.settings", () => {
 			settings: {},
 		}
 		const passCases = [
-			"namespace.lintRule.helloWorld",
-			"namespace.plugin.i18n",
-			"namespace.app.ideExtension",
+			"app.namespace.ideExtension",
+			"plugin.namespace.i18n",
+			"lintRule.namespace.helloWorld",
 		]
 
 		for (const passCase of passCases) {
@@ -73,11 +73,11 @@ describe("config.settings", () => {
 		}
 
 		const failCases = [
-			"namespace.plugin.hello-World",
-			"namespace.plugin.HelloWorld",
-			"namespace.plugin.hello_world",
-			"namespace.plugin.hello world",
-			"namespace.plugin.hello-worlD",
+			"plugin.namepsace.hello-World",
+			"plugin.namepsace.HelloWorld",
+			"plugin.namepsace.hello_world",
+			"plugin.namepsace.hello world",
+			"plugin.namepsace.hello-worlD",
 		]
 
 		for (const failCase of failCases) {
@@ -92,7 +92,7 @@ describe("config.settings", () => {
 			languageTags: ["en", "de"],
 			modules: [],
 			settings: {
-				"namespace.app.name": {
+				"app.namespace.id": {
 					// @ts-expect-error - Function is not a JSON
 					myFunction: () => {
 						return "Hello World"
@@ -110,7 +110,7 @@ describe("config.settings", () => {
 			languageTags: ["en", "de"],
 			modules: [],
 			settings: {
-				"namespace.plugin.helloWorld": {
+				"plugin.namespace.helloWorld": {
 					hello: "World",
 					bool: true,
 					// eslint-disable-next-line unicorn/no-null
@@ -144,7 +144,7 @@ describe("config.settings", () => {
 			modules: [],
 			settings: {
 				"project.lintRuleLevels": {
-					"namespace.lintRule.helloWorld": "error",
+					"lintRule.namespace.helloWorld": "error",
 				},
 			},
 		}
@@ -157,7 +157,7 @@ describe("config.settings", () => {
 			languageTags: ["en", "de"],
 			modules: [],
 			settings: {
-				"project.disabled": ["namespace.lintRule.helloWorld"],
+				"project.disabled": ["lintRule.namespace.helloWorld"],
 			},
 		}
 

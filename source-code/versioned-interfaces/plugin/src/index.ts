@@ -1,4 +1,4 @@
-export { type AppSpecificApiInlangIdeExtension } from "./appSpecificApis/inlang.app.ideExtension.js"
+export { type AppSpecificApiInlangIdeExtension } from "./appSpecificApis/app.inlang.ideExtension.js"
 export { Plugin, type NodeishFilesystemSubset } from "./interface.js"
 
 /**

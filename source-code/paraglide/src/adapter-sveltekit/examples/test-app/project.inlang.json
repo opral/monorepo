@@ -6,10 +6,10 @@
 		"../../../../../sdk-js-plugin/dist/index.js"
 	],
 	"settings": {
-		"inlang.plugin.json": {
+		"plugin.inlang.json": {
 			"pathPattern": "./languages/{languageTag}.json"
 		},
-		"inlang.plugin.sdkJs": {
+		"plugin.inlang.paraglideJs": {
 			"languageNegotiation": {
 				"strategies": [
 					{
