@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/marketplace-manifest",
+	"name": "@inlang/marketplace-registry",
 	"type": "module",
 	"version": "1.0.0",
 	"exports": {
@@ -10,23 +10,22 @@
 		"./src"
 	],
 	"scripts": {
-		"build": "tsc --build",
+		"build": "node ./buildRegistry.js && npx prettier ./src --write && tsc --build",
 		"dev": "tsc --watch",
-		"test": "tsc --noEmit && vitest run",
+		"test": "tsc --noEmit",
 		"lint": "eslint ./src",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
+	"engines": {
+		"node": ">=16.15.0"
+	},
 	"dependencies": {
-		"@inlang/translatable": "*"
+		"@sinclair/typebox": "0.31.8",
+		"@inlang/marketplace-manifest": "*"
 	},
 	"devDependencies": {
-		"@sinclair/typebox": "^0.31.0",
-		"typescript": "5.2.2",
-		"vitest": "0.34.3"
-	},
-	"peerDependencies": {
-		"@sinclair/typebox": "^0.31.0"
+		"typescript": "5.2.2"
 	},
 	"license": "Apache-2.0"
 }

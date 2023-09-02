@@ -20,7 +20,7 @@
 		"node": ">=18.0.0"
 	},
 	"dependencies": {
-		"@inlang/marketplace": "*",
+		"@inlang/marketplace-registry": "*",
 		"@inlang/sdk": "*",
 		"@inlang/telemetry": "*",
 		"@isomorphic-git/cors-proxy": "^2.7.1",

@@ -1,6 +1,6 @@
 import { Layout } from "../Layout.jsx"
 import { Meta, Title } from "@solidjs/meta"
-import { marketplaceItems } from "@inlang/marketplace"
+import { registry } from "@inlang/marketplace-registry"
 import { For, Show, type Accessor, createSignal, createEffect } from "solid-js"
 import { Chip } from "#src/components/Chip.jsx"
 import { SearchIcon } from "../editor/@host/@owner/@repository/components/SearchInput.jsx"
@@ -21,7 +21,7 @@ const [selectedCategories, setSelectedCategories] = createSignal<Category[]>([
 ])
 
 const filteredItems = () =>
-	marketplaceItems.filter((item: Record<string, any>) => {
+	registry.filter((item: Record<string, any>) => {
 		return filterItem(item, selectedCategories(), searchValue())
 	})
 
@@ -35,7 +35,7 @@ function filterItem(
 	}
 
 	const isSearchMatch =
-		item.displayName.en?.toLowerCase().includes(searchValue.toLowerCase()) ||
+		item.name.en?.toLowerCase().includes(searchValue.toLowerCase()) ||
 		item.publisherName.toLowerCase().includes(searchValue.toLowerCase()) ||
 		item.keywords.some((keyword: string) =>
 			keyword.toLowerCase().includes(searchValue.toLowerCase()),
@@ -96,9 +96,7 @@ const Gallery = () => {
 						<>
 							<div
 								onClick={() => {
-									const path = `/marketplace/${item.displayName.en
-										?.toLowerCase()
-										.replaceAll(" ", "-")}`
+									const path = `/marketplace/${item.name.en?.toLowerCase().replaceAll(" ", "-")}`
 
 									setSearchParams(path)
 								}}
@@ -111,7 +109,7 @@ const Gallery = () => {
 												when={item.icon}
 												fallback={
 													<div class="w-10 h-10 font-semibold text-xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
-														{item.displayName.en?.[0]}
+														{item.name.en?.[0]}
 													</div>
 												}
 											>
@@ -120,9 +118,7 @@ const Gallery = () => {
 													src={item.icon}
 												/>
 											</Show>
-											<p class="m-0 text-surface-900 font-semibold text-md">
-												{item.displayName.en}
-											</p>
+											<p class="m-0 text-surface-900 font-semibold text-md">{item.name.en}</p>
 										</div>
 										<p class="m-0 font-normal leading-6 text-sm tracking-wide text-surface-500 line-clamp-3">
 											{item.description.en}

@@ -8,7 +8,7 @@ import { router as websiteRouter } from "@inlang/website/router"
 import { router as telemetryRouter } from "@inlang/telemetry/router"
 import { router as rpcRouter } from "@inlang/rpc/router"
 import { router as badgeRouter } from "@inlang/badge/router"
-import { router as marketplaceSchemaRouter } from "@inlang/marketplace/router"
+import { MarketplaceManifest } from "@inlang/marketplace-manifest"
 
 // --------------- SETUP -----------------
 
@@ -48,13 +48,18 @@ if (isProduction) {
 
 // ----------------- ROUTES ----------------------
 
+const serializedMarketplaceManifest = JSON.stringify(MarketplaceManifest)
+
+app.get("/marketplace-manifest-schema.json", (_, response) => {
+	response.header("Content-Type", "text/xml")
+	response.send(serializedMarketplaceManifest)
+})
+
 app.use(telemetryRouter)
 
 app.use(rpcRouter)
 
 app.use(badgeRouter)
-
-app.use(marketplaceSchemaRouter)
 
 // ! website comes last in the routes because it uses the wildcard `*` to catch all routes
 app.use(websiteRouter)
