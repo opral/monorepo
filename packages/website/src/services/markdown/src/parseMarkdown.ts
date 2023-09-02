@@ -22,7 +22,7 @@ import { config } from "./config.js"
  */
 export function parseMarkdown<FrontmatterSchema extends TSchema>(args: {
 	text: string
-	frontmatterSchema: FrontmatterSchema
+	frontmatterSchema?: FrontmatterSchema
 }): {
 	frontmatter: FrontmatterSchema
 	renderableTree?: Markdoc.RenderableTreeNode
@@ -30,7 +30,7 @@ export function parseMarkdown<FrontmatterSchema extends TSchema>(args: {
 } {
 	const ast = Markdoc.parse(args.text)
 	const frontmatter = parseYaml(ast.attributes.frontmatter ?? "")
-	if (Value.Check(args.frontmatterSchema, frontmatter) === false) {
+	if (args.frontmatterSchema && Value.Check(args.frontmatterSchema, frontmatter) === false) {
 		const errors = [...Value.Errors(args.frontmatterSchema, frontmatter)]
 		throw Error(`Invalid frontmatter for ${args.text.slice(0, 100)}...` + errors.map(beautifyError))
 	}

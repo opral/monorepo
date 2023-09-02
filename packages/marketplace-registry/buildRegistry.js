@@ -17,6 +17,13 @@ for (const link of manifestLinks) {
 	manifests.push(json)
 }
 
+// sort the manifests by id
+manifests.sort((a, b) => {
+	if (a.id.toUpperCase() < b.id.toUpperCase()) return -1
+	if (a.id.toUpperCase() > b.id.toUpperCase()) return 1
+	return 0
+})
+
 await fs.writeFile(
 	"./src/registry.ts",
 	`

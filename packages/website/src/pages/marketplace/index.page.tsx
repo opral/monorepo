@@ -8,8 +8,10 @@ import { Button } from "../index/components/Button.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import Plus from "~icons/material-symbols/add-rounded"
 import { setSearchParams } from "../install/helper/setSearchParams.js"
+import { colorForTypeOf, typeOfIdToTitle } from "./utilities.js"
+import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 
-type Category = "app" | "library" | "plugin" | "lintrule"
+type Category = "app" | "library" | "plugin" | "lintRule"
 
 /* Export searchValue to make subpages insert search-terms */
 export const [searchValue, setSearchValue] = createSignal<string>("")
@@ -17,33 +19,27 @@ const [selectedCategories, setSelectedCategories] = createSignal<Category[]>([
 	"app",
 	"library",
 	"plugin",
-	"lintrule",
+	"lintRule",
 ])
 
 const filteredItems = () =>
-	registry.filter((item: Record<string, any>) => {
-		return filterItem(item, selectedCategories(), searchValue())
+	registry.filter((item: MarketplaceManifest) => {
+		// slice to the first dot yields the category
+		const category = item.id.slice(0, item.id.indexOf(".")) as Category
+
+		if (!selectedCategories().includes(category)) {
+			return false
+		}
+
+		const search = searchValue().toLowerCase()
+
+		const isSearchMatch =
+			item.name.en?.toLowerCase().includes(search) ||
+			item.publisherName.toLowerCase().includes(search) ||
+			item.keywords.some((keyword: string) => keyword.toLowerCase().includes(search))
+
+		return isSearchMatch
 	})
-
-function filterItem(
-	item: Record<string, any>,
-	selectedCategories: Category[],
-	searchValue: string,
-) {
-	if (!selectedCategories.includes(item.type.toLowerCase())) {
-		return false
-	}
-
-	const isSearchMatch =
-		item.name.en?.toLowerCase().includes(searchValue.toLowerCase()) ||
-		item.publisherName.toLowerCase().includes(searchValue.toLowerCase()) ||
-		item.keywords.some((keyword: string) =>
-			keyword.toLowerCase().includes(searchValue.toLowerCase()),
-		) ||
-		item.bundleName?.toLowerCase().includes(searchValue.toLowerCase())
-
-	return isSearchMatch
-}
 
 export function Page() {
 	return (
@@ -94,14 +90,7 @@ const Gallery = () => {
 				{(item) => {
 					return (
 						<>
-							<div
-								onClick={() => {
-									const path = `/marketplace/${item.name.en?.toLowerCase().replaceAll(" ", "-")}`
-
-									setSearchParams(path)
-								}}
-								class="relative no-underline h-64"
-							>
+							<a href={`/marketplace/${item.id}`} class="relative no-underline h-64">
 								<div class="flex flex-col relative justify-between gap-4 bg-surface-100 h-full hover:bg-surface-200 p-6 rounded-xl border border-surface-2 cursor-pointer">
 									<div class="flex flex-col gap-4">
 										<div class="flex items-center gap-4">
@@ -142,20 +131,12 @@ const Gallery = () => {
 										</div>
 									</div>
 									<Chip
-										text={item.type.toLocaleLowerCase() === "lintrule" ? "Lint Rule" : item.type}
-										color={
-											item.type.toLowerCase() === "app"
-												? "#3B82F6"
-												: item.type.toLowerCase() === "library"
-												? "#e35473"
-												: item.type.toLowerCase() === "plugin"
-												? "#BF7CE4"
-												: "#06B6D4"
-										}
+										text={typeOfIdToTitle(item.id)}
+										color={colorForTypeOf(item.id)}
 										customClasses="absolute right-4 top-4 z-5 backdrop-filter backdrop-blur-lg"
 									/>
 								</div>
-							</div>
+							</a>
 						</>
 					)
 				}}
@@ -270,10 +251,10 @@ const Tags = () => {
 				<p class="m-0">Plugins</p>
 			</div>
 			<div
-				onClick={() => selectTag("lintrule")}
+				onClick={() => selectTag("lintRule")}
 				class={
 					"gap-2 px-3 py-1.5 rounded-full cursor-pointer text-sm capitalize hover:opacity-90 transition-all duration-100 " +
-					(selectedCategories().includes("lintrule")
+					(selectedCategories().includes("lintRule")
 						? "bg-surface-800 text-background"
 						: "bg-surface-200 text-surface-600")
 				}

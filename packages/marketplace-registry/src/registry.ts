@@ -3,7 +3,7 @@
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 export const registry: MarketplaceManifest[] = [
 	{
-		type: "app",
+		id: "app.inlang.cli",
 		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		name: {
 			en: "CLI",
@@ -12,7 +12,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "Official inlang CLI",
 		},
 		readme: {
-			en: "https://github.com/inlang/inlang/blob/main/source-code/cli/README.md",
+			en: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/cli/README.md",
 		},
 		keywords: ["cli", "commands"],
 		publisherName: "inlang",
