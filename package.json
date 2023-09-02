@@ -6,7 +6,7 @@
 		"source-code/*",
 		"source-code/core/*",
 		"source-code/plugins/*",
-		"source-code/interfaces/*"
+		"source-code/versioned-interfaces/*"
 	],
 	"scripts": {
 		"build": "turbo run build",
