@@ -1,5 +1,5 @@
 {
-	"type": "app",
+	"id": "app.inlang.cli",
 	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"name": {
 		"en": "CLI"
