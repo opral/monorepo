@@ -1,7 +1,7 @@
 import type { ModuleInitOptions } from "./command.js"
 import cliPkg from "../../../../package.json"
-import pluginPkg from "../../../../../interfaces/plugin/package.json"
-import lintPkg from "../../../../../interfaces/lint-rule/package.json"
+import pluginPkg from "../../../../../versioned-interfaces/plugin/package.json"
+import lintPkg from "../../../../../versioned-interfaces/lint-rule/package.json"
 import { dedent } from "ts-dedent"
 
 export function getTemplate(options: { type: ModuleInitOptions["type"] }) {
