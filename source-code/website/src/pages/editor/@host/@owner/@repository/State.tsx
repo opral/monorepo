@@ -21,12 +21,12 @@ import { publicEnv } from "@inlang/env-variables"
 import {
 	LanguageTag,
 	LintRule,
-	type Result,
 	openInlangProject,
 	solidAdapter,
 	type InlangProjectWithSolidAdapter,
 } from "@inlang/sdk"
 import { parseOrigin, telemetryBrowser } from "@inlang/telemetry"
+import type { Result } from "@inlang/result"
 
 type EditorStateSchema = {
 	/**
