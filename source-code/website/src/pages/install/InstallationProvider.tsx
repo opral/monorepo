@@ -261,14 +261,7 @@ async function initializeRepo(
 function validatePackages(modules: string[]) {
 	let check = true
 	for (const pkg of modules) {
-		if (
-			!registry.some(
-				(marketplaceItem) =>
-					marketplaceItem.type !== "app" &&
-					marketplaceItem.type !== "library" &&
-					marketplaceItem.module.includes(pkg),
-			)
-		) {
+		if (!registry.some((marketplaceItem) => (marketplaceItem as any).module.includes(pkg))) {
 			check = false
 		} else {
 			check = true

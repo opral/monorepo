@@ -3,6 +3,7 @@ import { useLocalStorage } from "#src/services/local-storage/index.js"
 import ArrowDown from "~icons/material-symbols/expand-more"
 import { setSearchParams } from "../install/helper/setSearchParams.js"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
+import { isModule } from "@inlang/marketplace-registry"
 
 /**
  * This file provides helper Components for the marketplace pages.
@@ -69,26 +70,21 @@ export function SelectionWrapper(props: {
 				<div
 					class={
 						"outline outline-0 transition-all duration-75 rounded-xl h-64 " +
-						(props.item.type !== "app" && props.item.type !== "library"
+						(isModule(props.item)
 							? "cursor-pointer " +
 							  (props
 									.selectedPackages()
-									.some(
-										(pkg) =>
-											props.item.type !== "app" &&
-											props.item.type !== "library" &&
-											pkg === props.item.module,
-									)
+									.some((pkg) => isModule(props.item) && pkg === (props.item as any)?.module)
 									? "outline-4"
 									: "outline-transparent hover:outline-4") +
-							  (props.item.type === "plugin" ? " outline-[#BF7CE4]" : " outline-[#06B6D4]")
+							  (props.item.id.startsWith("plugin.") ? " outline-[#BF7CE4]" : " outline-[#06B6D4]")
 							: "opacity-75 cursor-not-allowed")
 					}
 					onClick={(e) => {
 						e.stopPropagation()
 
-						if (props.item.type !== "app" && props.item.type !== "library") {
-							const packageToRemove = props.item.module
+						if (isModule(props.item)) {
+							const packageToRemove = (props.item as any)?.module
 							const isSelected = props.selectedPackages().includes(packageToRemove)
 
 							if (isSelected) {

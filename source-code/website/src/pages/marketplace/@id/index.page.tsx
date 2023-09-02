@@ -2,38 +2,31 @@ import { Meta, Title } from "@solidjs/meta"
 import { Layout } from "#src/pages/Layout.jsx"
 import { Markdown, parseMarkdown } from "#src/services/markdown/index.js"
 import { For, Show, createSignal } from "solid-js"
-import type { ProcessedTableOfContents } from "./index.page.server.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
-import { registry } from "@inlang/marketplace-registry"
+import { isModule, registry } from "@inlang/marketplace-registry"
 import { Button } from "#src/pages/index/components/Button.jsx"
 import { Chip } from "#src/components/Chip.jsx"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 import { SelectRepo } from "../Select.jsx"
 import { setSearchValue } from "../index.page.jsx"
+import { colorForTypeOf, typeOfIdToTitle } from "../utilities.js"
+import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
  */
 export type PageProps = {
-	processedTableOfContents: ProcessedTableOfContents
 	markdown: Awaited<ReturnType<typeof parseMarkdown>>
-	urlPathname: string
+	manifest: MarketplaceManifest
 }
 
 export function Page(props: PageProps) {
 	const [readmore, setReadmore] = createSignal<boolean>(false)
-	const item = () =>
-		registry.find(
-			(item) =>
-				item.name.en?.toLowerCase().replaceAll(" ", "-") ===
-				props.markdown?.frontmatter?.title?.toLowerCase().replaceAll(" ", "-"),
-		)
 
 	return (
 		<>
-			{/* frontmatter is undefined on first client side nav  */}
-			<Title>{props.markdown?.frontmatter?.title}</Title>
-			<Meta name="description" content={props.markdown?.frontmatter?.description} />
+			<Title>{props.manifest.name.en}</Title>
+			<Meta name="description" content={props.manifest.description.en} />
 			<Layout>
 				<div class="md:py-28 py-16">
 					<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-40 md:gap-16 gap-6">
@@ -44,24 +37,26 @@ export function Page(props: PageProps) {
 							<div class="col-span-1 md:col-span-3 md:pb-16 pb-12 border-b border-surface-2">
 								<div class="flex max-md:flex-col items-start gap-8 mb-10">
 									<Show
-										when={item()?.icon}
+										when={props.manifest.icon}
 										fallback={
 											<div class="w-16 h-16 font-semibold text-3xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
-												{item()?.name.en?.[0]}
+												{props.manifest.name.en?.[0]}
 											</div>
 										}
 									>
 										<img
 											class="w-16 h-16 rounded-md m-0 shadow-lg object-cover object-center"
-											src={item()?.icon}
+											src={props.manifest.icon}
 										/>
 									</Show>
 									<div class="flex flex-col gap-3">
-										<h1 class="text-3xl font-bold">{item()?.name.en}</h1>
+										<h1 class="text-3xl font-bold">{props.manifest.name.en}</h1>
 										<div class="inline-block text-surface-500 ">
-											<p class={!readmore() ? "lg:line-clamp-2" : ""}>{item()?.description.en}</p>
+											<p class={!readmore() ? "lg:line-clamp-2" : ""}>
+												{props.manifest.description.en}
+											</p>
 											{/* @ts-ignore */}
-											<Show when={item()?.meta?.description?.en?.length > 205}>
+											<Show when={props.manifest.meta?.description?.en?.length > 205}>
 												<p
 													onClick={() => setReadmore((prev) => !prev)}
 													class="cursor-pointer hover:text-surface-700 transition-all duration-150 font-medium max-lg:hidden"
@@ -74,12 +69,12 @@ export function Page(props: PageProps) {
 								</div>
 								<div class="flex gap-4 flex-wrap">
 									<Show
-										when={item()?.type !== "app" && item()?.type !== "library"}
+										when={isModule(props.manifest)}
 										fallback={
 											/* @ts-ignore */
-											<Show when={item()?.linkToApp}>
+											<Show when={props.manifest.linkToApp}>
 												{/* @ts-ignore */}
-												<Button type="primary" href={item()?.linkToApp}>
+												<Button type="primary" href={props.manifest.linkToApp}>
 													Open
 												</Button>
 											</Show>
@@ -87,16 +82,17 @@ export function Page(props: PageProps) {
 									>
 										<div class="flex items-center gap-2">
 											{/* @ts-ignore */}
-											<Button type="primary" href={`/install?module=${item()?.module}`}>
-												<span class="capitalize">
-													Install {item()?.type === "lintRule" ? "lint rule" : item()?.type}
-												</span>
+											<Button type="primary" href={`/install?module=${props.manifest.module}`}>
+												<span class="capitalize">Install {typeOfIdToTitle(props.manifest.id)}</span>
 												{/* @ts-ignore */}
-												<SelectRepo size="medium" modules={[item()?.module]} />
+												<SelectRepo size="medium" modules={[props.manifest.module]} />
 											</Button>
 										</div>
 									</Show>
-									<Button type="secondary" href={item()?.readme.en?.replace("README.md", "")}>
+									<Button
+										type="secondary"
+										href={props.manifest.readme.en?.replace("README.md", "")}
+									>
 										GitHub
 										<MaterialSymbolsArrowOutward
 											// @ts-ignore
@@ -113,28 +109,28 @@ export function Page(props: PageProps) {
 										<h3 class="text-sm text-surface-400">Publisher</h3>
 										<div class="flex gap-2 items-center">
 											<Show
-												when={item()?.publisherIcon}
+												when={props.manifest.publisherIcon}
 												fallback={
 													<div
 														class={
 															"w-6 h-6 flex items-center justify-center text-background capitalize font-medium rounded-full m-0 bg-surface-900"
 														}
 													>
-														{item()?.publisherName[0]}
+														{props.manifest.publisherName[0]}
 													</div>
 												}
 											>
-												<img class="w-6 h-6 rounded-full m-0" src={item()?.publisherIcon} />
+												<img class="w-6 h-6 rounded-full m-0" src={props.manifest.publisherIcon} />
 											</Show>
 											<p class="m-0 text-surface-600 no-underline font-medium">
-												{item()?.publisherName}
+												{props.manifest.publisherName}
 											</p>
 										</div>
 									</div>
 									<div class="flex flex-col gap-3 mb-8">
 										<h3 class="text-sm text-surface-400">Keywords</h3>
 										<div class="flex flex-wrap gap-2 items-center">
-											<For each={item()?.keywords}>
+											<For each={props.manifest.keywords}>
 												{(keyword) => (
 													<a
 														class="transition-opacity hover:opacity-80 cursor-pointer"
@@ -143,18 +139,7 @@ export function Page(props: PageProps) {
 															setSearchValue(keyword)
 														}}
 													>
-														<Chip
-															text={keyword}
-															color={
-																item()?.type.toLowerCase() === "app"
-																	? "#3B82F6"
-																	: item()?.type.toLowerCase() === "library"
-																	? "#e35473"
-																	: item()?.type.toLowerCase() === "plugin"
-																	? "#BF7CE4"
-																	: "#06B6D4"
-															}
-														/>
+														<Chip text={keyword} color={colorForTypeOf(props.manifest.id)} />
 													</a>
 												)}
 											</For>
@@ -162,7 +147,9 @@ export function Page(props: PageProps) {
 									</div>
 									<div class="flex flex-col gap-3 mb-8">
 										<h3 class="text-sm text-surface-400">License</h3>
-										<p class="m-0 text-surface-600 no-underline font-medium">{item()?.license}</p>
+										<p class="m-0 text-surface-600 no-underline font-medium">
+											{props.manifest.license}
+										</p>
 									</div>
 								</div>
 							</div>
