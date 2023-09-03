@@ -1,5 +1,5 @@
 {
-	"type": "plugin.inlang.i18next",
+	"id": "plugin.inlang.i18next",
 	"icon": "https://github.com/inlang/inlang/blob/main/source-code/plugins/i18next/assets/icon.png?raw=true",
 	"displayName": {
 		"en": "i18next"

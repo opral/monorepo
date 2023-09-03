@@ -1,5 +1,5 @@
 import type { Message, Variant, LanguageTag, Plugin, NodeishFilesystemSubset } from "@inlang/plugin"
-
+import { id, displayName, description } from "../marketplace-manifest.json"
 import { throwIfInvalidSettings, type PluginSettings } from "./settings.js"
 import { detectJsonSpacing, detectIsNested, replaceAll } from "./utilities.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
@@ -62,9 +62,9 @@ function defaultNesting() {
 
 export const plugin: Plugin<PluginSettings> = {
 	meta: {
-		id: "plugin.inlang.json",
-		displayName: { en: "Plugin JSON" },
-		description: { en: "JSON plugin for inlang" },
+		id: id as Plugin["meta"]["id"],
+		displayName,
+		description,
 	},
 	loadMessages: async ({ languageTags, sourceLanguageTag, settings, nodeishFs }) => {
 		settings.variableReferencePattern = settings.variableReferencePattern || ["{", "}"]
