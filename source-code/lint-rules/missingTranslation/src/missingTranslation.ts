@@ -3,7 +3,7 @@ import type { MessageLintRule } from "@inlang/lint-rule"
 export const missingTranslationRule: MessageLintRule = {
 	type: "MessageLint",
 	meta: {
-		id: "inlang.lintRule.missingTranslation",
+		id: "lintRule.inlang.missingTranslation",
 		displayName: {
 			en: "Missing Translation",
 		},

@@ -8,7 +8,7 @@
 		"en": "Checks for missing variants for a specific languageTag.  If a variant exists for the sourceLanguageTag but is missing for a listed languageTag, it is likely that the message has not been translated for this languageTag yet."
 	},
 	"linkToReadme": {
-		"en": "https://github.com/inlang/inlang/blob/main/source-code/plugins/standard-lint-rules/README.md"
+		"en": "https://github.com/inlang/inlang/blob/main/source-code/lint-rules/missingTranslation/README.md"
 	},
 	"keywords": ["lint rule", "missing"],
 	"publisherName": "inlang",
