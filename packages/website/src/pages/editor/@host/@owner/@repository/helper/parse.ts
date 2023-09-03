@@ -1,7 +1,6 @@
 import type { Accessor } from "solid-js"
 import { useEditorJSON } from "solid-tiptap"
 import type { EditorRef } from "solid-tiptap"
-import type * as ast from "@inlang/core/ast"
 import type { VariableReference, Pattern, Text } from "@inlang/sdk"
 
 // access tiptap json
@@ -25,7 +24,7 @@ export const getTextValue = (editor: Accessor<EditorRef>) => {
 							if (patterns.at(-1)?.type === "Text") {
 								patterns.at(-1).value += tiptap_node.text
 							} else {
-								patterns.push({ type: "Text", value: tiptap_node.text } as ast.Text)
+								patterns.push({ type: "Text", value: tiptap_node.text } as Text)
 							}
 							break
 						case "placeholderNode":
