@@ -3,6 +3,7 @@ import { throwIfInvalidSettings, type PluginSettings } from "./settings.js"
 import { detectJsonSpacing, detectIsNested, replaceAll } from "./utilities.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
 import { flatten, unflatten } from "flat"
+import { id, displayName, description } from "../marketplace-manifest.json"
 
 /**
  * The spacing of the JSON files in this repository.
@@ -61,9 +62,9 @@ function defaultNesting() {
 
 export const plugin: Plugin<PluginSettings> = {
 	meta: {
-		id: "plugin.inlang.i18next",
-		displayName: { en: "i18next" },
-		description: { en: "i18next plugin for inlang" },
+		id: id as Plugin["meta"]["id"],
+		displayName,
+		description,
 	},
 	loadMessages: async ({ languageTags, sourceLanguageTag, settings, nodeishFs }) => {
 		settings.variableReferencePattern = settings.variableReferencePattern || ["{{", "}}"]

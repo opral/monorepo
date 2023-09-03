@@ -1,20 +1,11 @@
 import type { MessageLintRule } from "@inlang/message-lint-rule"
+import { id, displayName, description } from "../marketplace-manifest.json"
 
 export const messageWithoutSourceRule: MessageLintRule = {
 	meta: {
-		id: "messageLintRule.inlang.messageWithoutSource",
-		displayName: {
-			en: "Message Without Source",
-		},
-		description: {
-			en: `
-Checks for likely outdated messages.
-
-A message with a missing source is usually an indication that
-the message (id) is no longer used in source code, but messages
-have not been updated accordingly.
-`,
-		},
+		id: id as MessageLintRule["meta"]["id"],
+		displayName,
+		description,
 	},
 	message: ({ message: { id, variants }, sourceLanguageTag, report }) => {
 		if (!variants.some((variant) => variant.languageTag === sourceLanguageTag)) {

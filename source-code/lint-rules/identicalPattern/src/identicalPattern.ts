@@ -1,5 +1,6 @@
 import type { Text, Variant } from "@inlang/message"
 import type { MessageLintRule } from "@inlang/message-lint-rule"
+import { id, displayName, description } from "../marketplace-manifest.json"
 
 type Settings = {
 	ignore?: string[]
@@ -7,19 +8,9 @@ type Settings = {
 
 export const identicalPatternRule: MessageLintRule<Settings> = {
 	meta: {
-		id: "messageLintRule.inlang.identicalPattern",
-		displayName: {
-			en: "Identical Pattern",
-		},
-		description: {
-			en: `
-Checks for identical patterns in different languages.
-
-A message with identical wording in multiple languages can indicate
-that the translations are redundant or can be combined into a single
-message to reduce translation effort.
-`,
-		},
+		id: id as MessageLintRule["meta"]["id"],
+		displayName,
+		description,
 	},
 	message: ({ message: { id, variants }, sourceLanguageTag, report, settings }) => {
 		const referenceVariant = variants.find((variant) => variant.languageTag === sourceLanguageTag)
