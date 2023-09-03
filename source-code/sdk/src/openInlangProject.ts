@@ -150,7 +150,6 @@ export const openInlangProject = async (args: {
 							"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
 						// default to warning, see https://github.com/inlang/inlang/issues/1254
 						lintLevel: configValue.settings["project.lintRuleLevels"]?.[rule.meta.id] ?? "warning",
-						disabled: configValue.settings["project.disabled"]?.includes(rule.meta.id) ?? false,
 					} satisfies InstalledLintRule),
 			) satisfies Array<InstalledLintRule>
 		}
@@ -216,9 +215,7 @@ export const openInlangProject = async (args: {
 			]),
 			config: createSubscribable(() => config()),
 			setConfig,
-			appSpecificApi: createSubscribable(
-				() => resolvedModules()?.resolvedPluginApi.appSpecificApi || {},
-			),
+			customApi: createSubscribable(() => resolvedModules()?.resolvedPluginApi.customApi || {}),
 			query: {
 				messages: messagesQuery,
 				lintReports: lintReportsQuery,

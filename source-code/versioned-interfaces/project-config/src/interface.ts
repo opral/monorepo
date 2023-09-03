@@ -22,16 +22,9 @@ export const Disabled = Type.Array(Type.Union([LintRuleId]), {
 
 export type ProjectSettings = Static<typeof ProjectSettings>
 export const ProjectSettings = Type.Object({
-	"project.disabled": Type.Optional(
-		Type.Array(Type.Union([Type.String()]), {
-			// in the future plugins too
-			description: "The lint rules that should be disabled.",
-			examples: ["lintRule.inlang.missingTranslation", "lintRule.inlang.patternInvalid"],
-		}),
-	),
 	"project.lintRuleLevels": Type.Optional(
 		Type.Record(LintRuleId, LintLevel, {
-			description: "The lint rule levels. To disable a lint rule, use `system.disabled`.",
+			description: "The lint rule levels.",
 			examples: [
 				{
 					"lintRule.inlang.missingTranslation": "error",
