@@ -80,6 +80,7 @@ export const Gitfloat = () => {
 				owner: routeParams().owner,
 				repo: routeParams().repository,
 			})
+			// @ts-expect-error - type mismatch fix after refactoring
 			return navigate(`/editor/github.com/${response.data.full_name}`)
 		} else {
 			showToast({

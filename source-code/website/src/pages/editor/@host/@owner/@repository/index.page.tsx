@@ -142,8 +142,15 @@ function TheActualPage() {
 										<li class="pt-2">
 											<span class="font-semibold">{error.name}: </span>
 											<br />
-											{error.message} <br />
-											{error.stack && <p>{error.stack}</p>}
+											{
+												// @ts-ignore
+												error?.message
+											}{" "}
+											<br />
+											{
+												// @ts-ignore
+												error?.stack && <p>{error?.stack}</p>
+											}
 										</li>
 									)
 								}}
