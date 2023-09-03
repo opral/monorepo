@@ -83,7 +83,7 @@ export function RepositoryCard(props: {
 		lastOpened?: number
 	}
 	install?: boolean
-	packages?: string[]
+	modules?: string[]
 }) {
 	const getRelativeTime = (timestamp: number) => {
 		// Calculate the time difference
@@ -124,7 +124,7 @@ export function RepositoryCard(props: {
 				props.install
 					? `/install?repo=github.com/${props.repository.owner}/${
 							props.repository.repository
-					  }&module=${props.packages?.join(",")}`
+					  }&module=${props.modules?.join(",")}`
 					: `/editor/github.com/${props.repository.owner}/${props.repository.repository}`
 			}
 			class="rounded-xl bg-surface-100 hover:bg-surface-200 border border-surface-2 p-6 flex flex-col justify-between gap-5"
