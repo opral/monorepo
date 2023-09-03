@@ -1,6 +1,6 @@
 import { type Static, type TLiteral, type TTemplateLiteral, Type } from "@sinclair/typebox"
 import { LanguageTag } from "@inlang/language-tag"
-import { LintLevel, LintRule } from "@inlang/lint-rule"
+import { MessageLintLevel, MessageLintRule } from "@inlang/message-lint-rule"
 import { JSON, JSONObject } from "@inlang/json-types"
 
 /**
@@ -8,9 +8,9 @@ import { JSON, JSONObject } from "@inlang/json-types"
  */
 
 // workaround to get the id from a union type
-const LintRuleId = LintRule["allOf"][0]["properties"]["meta"]["properties"]["id"]
+const MessageLintRuleId = MessageLintRule["properties"]["meta"]["properties"]["id"]
 
-export const Disabled = Type.Array(Type.Union([LintRuleId]), {
+export const Disabled = Type.Array(Type.Union([MessageLintRuleId]), {
 	// in the future plugins too
 	description: "The lint rules that should be disabled.",
 	examples: [["lintRule.inlang.missingTranslation", "lintRule.inlang.patternInvalid"]],
@@ -22,13 +22,13 @@ export const Disabled = Type.Array(Type.Union([LintRuleId]), {
 
 export type ProjectSettings = Static<typeof ProjectSettings>
 export const ProjectSettings = Type.Object({
-	"project.lintRuleLevels": Type.Optional(
-		Type.Record(LintRuleId, LintLevel, {
-			description: "The lint rule levels.",
+	"project.messageLintRuleLevels": Type.Optional(
+		Type.Record(MessageLintRuleId, MessageLintLevel, {
+			description: "The lint rule levels for messages.",
 			examples: [
 				{
-					"lintRule.inlang.missingTranslation": "error",
-					"lintRule.inlang.patternInvalid": "warning",
+					"messageLintRule.inlang.missingTranslation": "error",
+					"messageLintRule.inlang.patternInvalid": "warning",
 				},
 			],
 		}),
@@ -45,16 +45,16 @@ export const ProjectSettings = Type.Object({
 const ExternalSettings = Type.Record(
 	Type.String({
 		// pattern includes ProjectSettings keys
-		pattern: `^((lintRule|plugin|app)\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)|${Object.keys(
+		pattern: `^((messageLintRule|plugin|app)\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)|${Object.keys(
 			ProjectSettings.properties,
 		)
 			.map((key) => key.replaceAll(".", "\\."))
 			.join("|")})$`,
 		description:
-			"The key must be conform to `{type:app|plugin|lintRule}.{namespace:string}.{id:string}`.",
-		examples: ["plugin.publisher.sqlite", "lintRule.inlang.missingTranslation"],
+			"The key must be conform to `{type:app|plugin|messageLintRule}.{namespace:string}.{id:string}`.",
+		examples: ["plugin.publisher.sqlite", "messageLintRule.inlang.missingTranslation"],
 	}) as unknown as TTemplateLiteral<
-		[TLiteral<`${"app" | "plugin" | "lintRule"}.${string}.${string}`>]
+		[TLiteral<`${"app" | "plugin" | "messageLintRule"}.${string}.${string}`>]
 	>,
 	// Using JSON (array and object) as a workaround to make the
 	// intersection between `ProjectSettings`, which contains an array,

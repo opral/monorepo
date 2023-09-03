@@ -25,7 +25,7 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 			})
 			for (const message of messages) {
 				const matchingLintReports =
-					state().inlang.query.lintReports.get({
+					state().inlang.query.messageLintReports.get({
 						where: {
 							messageId: message.messageId,
 						},

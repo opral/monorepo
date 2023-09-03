@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type { LintRule } from "@inlang/lint-rule"
+import type { MessageLintRule } from "@inlang/message-lint-rule"
 import type { Plugin } from "@inlang/plugin"
 import { describe, expect, it } from "vitest"
 import type { InlangModule } from "./types.js"
@@ -32,7 +32,7 @@ describe("generally", () => {
 })
 
 describe("resolveModules", () => {
-	it("should resolve plugins and lint rules successfully", async () => {
+	it("should resolve plugins and message lint rules successfully", async () => {
 		// Define mock data
 		const mockPlugin: Plugin = {
 			meta: {
@@ -49,10 +49,9 @@ describe("resolveModules", () => {
 			}),
 		}
 
-		const mockLintRule: LintRule = {
-			type: "MessageLint",
+		const mockMessageLintRule: MessageLintRule = {
 			meta: {
-				id: "lintRule.namespace.mock",
+				id: "messageLintRule.namespace.mock",
 				description: { en: "Mock lint rule description" },
 				displayName: { en: "Mock Lint Rule" },
 			},
@@ -69,7 +68,7 @@ describe("resolveModules", () => {
 		const _import = async (name: string) => {
 			if (name === "lint-rule.js") {
 				return {
-					default: mockLintRule,
+					default: mockMessageLintRule,
 				}
 			} else {
 				return {
@@ -88,7 +87,7 @@ describe("resolveModules", () => {
 		// Check for the app specific api
 		expect(resolved.resolvedPluginApi["customApi"]?.["app.inlang.ideExtension"]).toBeDefined()
 		// Check for the lint rule
-		expect(resolved.lintRules[0]?.meta.id).toBe(mockLintRule.meta.id)
+		expect(resolved.messageLintRules[0]?.meta.id).toBe(mockMessageLintRule.meta.id)
 	})
 
 	it("should return an error if a plugin cannot be imported", async () => {

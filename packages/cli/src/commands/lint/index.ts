@@ -3,7 +3,7 @@ import Table from "cli-table3"
 import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { bold, italic } from "../../utilities/format.js"
 import { log } from "../../utilities/log.js"
-import type { InlangProject, LintReport } from "@inlang/sdk"
+import type { InlangProject, MessageLintReport } from "@inlang/sdk"
 
 export const lint = new Command()
 	.command("lint")
@@ -21,27 +21,23 @@ export const lint = new Command()
 /* @ts-ignore */
 export async function lintCommandAction(args: { inlang: InlangProject; logger: any }) {
 	try {
-		if (args.inlang.installed.lintRules().length === 0) {
+		if (args.inlang.installed.messageLintRules().length === 0) {
 			args.logger.error(
-				`🚫 For this command to work, you need lint rules configured in your project.inlang.json – for example, the ${bold(
-					"@inlang/plugin-standard-lint-rule",
-				)} plugin: https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules. ${italic(
-					"Learn more about lints here:",
-				)} https://inlang.com/documentation/lint`,
+				`No message lint rules are installed. Visit the marketplace to install lint rules https://inlang.com/marketplace .`,
 			)
 			return
 		}
 
 		// TODO: async reports
-		const LintReportsAwaitable = (): Promise<LintReport[]> => {
+		const MessageLintReportsAwaitable = (): Promise<MessageLintReport[]> => {
 			return new Promise((resolve) => {
-				let reports = args.inlang.query.lintReports.getAll()
+				let reports = args.inlang.query.messageLintReports.getAll()
 
 				if (reports) {
 					// reports where loaded
 					setTimeout(() => {
 						// this is a workaround. We do not know when the report changed. Normally this shouldn't be a issue for cli
-						const newReports = args.inlang.query.lintReports.getAll()
+						const newReports = args.inlang.query.messageLintReports.getAll()
 						if (newReports) {
 							resolve(newReports)
 						}
@@ -49,7 +45,7 @@ export async function lintCommandAction(args: { inlang: InlangProject; logger: a
 				} else {
 					let counter = 0
 					const interval = setInterval(() => {
-						reports = args.inlang.query.lintReports.getAll()
+						reports = args.inlang.query.messageLintReports.getAll()
 						if (reports) {
 							clearInterval(interval)
 							resolve(reports)
@@ -66,7 +62,7 @@ export async function lintCommandAction(args: { inlang: InlangProject; logger: a
 			})
 		}
 
-		const reports = await LintReportsAwaitable()
+		const reports = await MessageLintReportsAwaitable()
 
 		if (reports.length === 0) {
 			args.logger.success("🎉 Linting successful.")

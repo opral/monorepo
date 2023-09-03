@@ -20,7 +20,7 @@ import { openRepository, createNodeishMemoryFs, type Repository } from "@lix-js/
 import { publicEnv } from "@inlang/env-variables"
 import {
 	LanguageTag,
-	LintRule,
+	MessageLintRule,
 	openInlangProject,
 	solidAdapter,
 	type InlangProjectWithSolidAdapter,
@@ -102,8 +102,8 @@ type EditorStateSchema = {
 	/**
 	 * Filtered lint rules.
 	 */
-	filteredLintRules: () => LintRule["meta"]["id"][]
-	setFilteredLintRules: Setter<LintRule["meta"]["id"][]>
+	filteredMessageLintRules: () => MessageLintRule["meta"]["id"][]
+	setFilteredMessageLintRules: Setter<MessageLintRule["meta"]["id"][]>
 
 	/**
 	 * Expose lix errors that happen wihle opening the repository
@@ -188,11 +188,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		setSearchParams({ key: "lang", value: filteredLanguageTags() })
 	})
 
-	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["meta"]["id"][]>(
-		params.getAll("lint") as LintRule["meta"]["id"][],
-	)
+	const [filteredMessageLintRules, setFilteredMessageLintRules] = createSignal<
+		MessageLintRule["meta"]["id"][]
+	>(params.getAll("lint") as MessageLintRule["meta"]["id"][])
 	createEffect(() => {
-		setSearchParams({ key: "lint", value: filteredLintRules() })
+		setSearchParams({ key: "lint", value: filteredMessageLintRules() })
 	})
 
 	const [localStorage] = useLocalStorage() ?? []
@@ -378,8 +378,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setTourStep,
 					filteredLanguageTags,
 					setFilteredLanguageTags,
-					filteredLintRules,
-					setFilteredLintRules,
+					filteredMessageLintRules,
+					setFilteredMessageLintRules,
 					localChanges,
 					setLocalChanges,
 					userIsCollaborator,

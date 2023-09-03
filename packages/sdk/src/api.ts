@@ -2,12 +2,12 @@ import type { Result } from "@inlang/result"
 import type * as RuntimeError from "./errors.js"
 import type * as ModuleResolutionError from "./resolve-modules/errors.js"
 import type {
-	LintLevel,
-	LintReport,
-	LintRule,
+	MessageLintLevel,
+	MessageLintRule,
 	Message,
 	Plugin,
 	ProjectConfig,
+	MessageLintReport,
 } from "./interfaces.js"
 import type { ResolvedPluginApi } from "./resolve-modules/plugins/types.js"
 
@@ -20,19 +20,19 @@ export type InstalledPlugin = {
 	// disabled: boolean
 }
 
-export type InstalledLintRule = {
-	meta: LintRule["meta"]
+export type InstalledMessageLintRule = {
+	meta: MessageLintRule["meta"]
 	/**
 	 * The module which the lint rule is installed from.
 	 */
 	module: string
-	lintLevel: LintLevel
+	lintLevel: MessageLintLevel
 }
 
 export type InlangProject = {
 	installed: {
 		plugins: Subscribable<InstalledPlugin[]>
-		lintRules: Subscribable<InstalledLintRule[]>
+		messageLintRules: Subscribable<InstalledMessageLintRule[]>
 	}
 	errors: Subscribable<
 		((typeof ModuleResolutionError)[keyof typeof ModuleResolutionError] | Error)[]
@@ -42,7 +42,7 @@ export type InlangProject = {
 	setConfig: (config: ProjectConfig) => Result<void, RuntimeError.InvalidConfigError>
 	query: {
 		messages: MessageQueryApi
-		lintReports: LintReportsQueryApi
+		messageLintReports: MessageLintReportsQueryApi
 	}
 }
 
@@ -57,10 +57,10 @@ export type Subscribable<Value> = {
 
 export type MessageQueryApi = {
 	create: (args: { data: Message }) => boolean
-	get: ((args: { where: { id: Message["id"] } }) => Readonly<Message> | undefined) & {
+	get: ((args: { where: { id: Message["id"] } }) => Readonly<Message>) & {
 		subscribe: (
 			args: { where: { id: Message["id"] } },
-			callback: (message: Message | undefined) => void,
+			callback: (message: Message) => void,
 		) => void
 	}
 	includedMessageIds: Subscribable<Message["id"][]>
@@ -73,14 +73,14 @@ export type MessageQueryApi = {
 	delete: (args: { where: { id: Message["id"] } }) => boolean
 }
 
-export type LintReportsQueryApi = {
-	getAll: Subscribable<LintReport[] | undefined>
+export type MessageLintReportsQueryApi = {
+	getAll: Subscribable<MessageLintReport[]>
 	get: ((args: {
-		where: { messageId: LintReport["messageId"] }
-	}) => Readonly<LintReport[]> | undefined) & {
+		where: { messageId: MessageLintReport["messageId"] }
+	}) => Readonly<MessageLintReport[]>) & {
 		subscribe: (
-			args: { where: { messageId: LintReport["messageId"] } },
-			callback: (lintReports: Readonly<LintReport[]> | undefined) => void,
+			args: { where: { messageId: MessageLintReport["messageId"] } },
+			callback: (MessageLintRules: Readonly<MessageLintReport[]>) => void,
 		) => void
 	}
 }

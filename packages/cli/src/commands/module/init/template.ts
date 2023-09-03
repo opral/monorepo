@@ -1,7 +1,7 @@
 import type { ModuleInitOptions } from "./command.js"
 import cliPkg from "../../../../package.json"
 import pluginPkg from "../../../../../versioned-interfaces/plugin/package.json"
-import lintPkg from "../../../../../versioned-interfaces/lint-rule/package.json"
+import lintPkg from "../../../../../versioned-interfaces/message-lint-rule/package.json"
 import { dedent } from "ts-dedent"
 
 export function getTemplate(options: { type: ModuleInitOptions["type"] }) {
@@ -33,7 +33,7 @@ export function getTemplate(options: { type: ModuleInitOptions["type"] }) {
         "@inlang/cli": "^${cliPkg.version}",
         ${
 					options.type === "lintRule"
-						? `"@inlang/lint-rule": "^${lintPkg.version}"`
+						? `"@inlang/message-lint-rule": "^${lintPkg.version}"`
 						: `"@inlang/plugin": "^${pluginPkg.version}"`
 				}
       }

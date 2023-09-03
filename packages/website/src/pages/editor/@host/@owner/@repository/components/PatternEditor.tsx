@@ -19,7 +19,7 @@ import {
 	updateVariantPattern,
 	getVariant,
 	Pattern,
-	type LintReport,
+	type MessageLintReport,
 } from "@inlang/sdk"
 
 /**
@@ -28,7 +28,7 @@ import {
 export function PatternEditor(props: {
 	languageTag: LanguageTag
 	message: Message
-	lintReports: LintReport[]
+	lintReports: MessageLintReport[]
 	setMessageIsFocused: Setter<boolean>
 	messageIsFocused: Accessor<boolean>
 }) {
@@ -257,7 +257,7 @@ export function PatternEditor(props: {
 			(report) =>
 				report.messageId === props.message.id &&
 				report.languageTag === props.languageTag &&
-				report.ruleId === "lintRule.inlang.emptyPattern",
+				report.ruleId === "messageLintRule.inlang.emptyPattern",
 		)
 
 		const newMessage = structuredClone(props.message)
@@ -309,7 +309,7 @@ export function PatternEditor(props: {
 				notifications.push({
 					notificationTitle:
 						inlang()
-							?.installed.lintRules()
+							?.installed.messageLintRules()
 							.find((rule) => rule.meta.id === report.ruleId)?.meta.displayName["en"] ||
 						report.ruleId,
 					notificationDescription: report.body["en"]!,

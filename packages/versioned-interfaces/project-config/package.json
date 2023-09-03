@@ -23,7 +23,7 @@
 	},
 	"dependencies": {
 		"@inlang/message": "*",
-		"@inlang/lint-rule": "*",
+		"@inlang/message-lint-rule": "*",
 		"@inlang/language-tag": "*",
 		"@inlang/translatable": "*"
 	},

@@ -23,8 +23,8 @@ export function Layout(props: { children: JSXElement }) {
 		inlang,
 		lixErrors,
 		setTextSearch,
-		filteredLintRules,
-		setFilteredLintRules,
+		filteredMessageLintRules,
+		setFilteredMessageLintRules,
 		filteredLanguageTags,
 		setFilteredLanguageTags,
 		userIsCollaborator,
@@ -58,7 +58,7 @@ export function Layout(props: { children: JSXElement }) {
 		if (
 			newFilter !== undefined &&
 			!selectedFilters().some((filter) => filter.name === newFilter.name) &&
-			(newFilter.name !== "Linting" || inlang()?.installed.lintRules())
+			(newFilter.name !== "Linting" || inlang()?.installed.messageLintRules())
 		) {
 			if (newFilter.name === "Language" && filteredLanguageTags().length === 0) {
 				setFilteredLanguageTags(() => inlang()?.config()?.languageTags || [])
@@ -70,7 +70,7 @@ export function Layout(props: { children: JSXElement }) {
 	//add linting rule to filter
 	createEffect(
 		on(
-			filteredLintRules,
+			filteredMessageLintRules,
 			(rules) => {
 				if (rules.length === 1 && !selectedFilters().some((filter) => filter.name === "Linting")) {
 					addFilter("Linting")
@@ -96,7 +96,7 @@ export function Layout(props: { children: JSXElement }) {
 	//add initial lintRule filter
 	createEffect(
 		on(inlang, () => {
-			if (lixErrors().length === 0 && filteredLintRules().length > 0) {
+			if (lixErrors().length === 0 && filteredMessageLintRules().length > 0) {
 				addFilter("Linting")
 			}
 		}),
@@ -135,7 +135,7 @@ export function Layout(props: { children: JSXElement }) {
 									<Show
 										when={
 											selectedFilters().includes(filter) &&
-											(filter.name !== "Linting" || inlang()?.installed.lintRules())
+											(filter.name !== "Linting" || inlang()?.installed.messageLintRules())
 										}
 									>
 										{filter.component}
@@ -144,7 +144,7 @@ export function Layout(props: { children: JSXElement }) {
 							</For>
 							<Show
 								when={
-									inlang()?.installed.lintRules()
+									inlang()?.installed.messageLintRules()
 										? selectedFilters().length !== filters.length
 										: selectedFilters().length !== filters.length - 1
 								}
@@ -155,7 +155,7 @@ export function Layout(props: { children: JSXElement }) {
 											setFilteredLanguageTags(
 												setFilteredLanguageTags(inlang()?.config()?.languageTags || []),
 											)
-											setFilteredLintRules([])
+											setFilteredMessageLintRules([])
 											setSelectedFilters([])
 										}}
 									>
@@ -176,16 +176,19 @@ export function Layout(props: { children: JSXElement }) {
 												<Show
 													when={
 														!selectedFilters().includes(filter) &&
-														(filter.name !== "Linting" || inlang()?.installed.lintRules())
+														(filter.name !== "Linting" || inlang()?.installed.messageLintRules())
 													}
 												>
 													<sl-menu-item>
 														<button
 															onClick={() => {
-																if (filter.name === "Linting" && filteredLintRules.length === 0) {
-																	setFilteredLintRules(
+																if (
+																	filter.name === "Linting" &&
+																	filteredMessageLintRules.length === 0
+																) {
+																	setFilteredMessageLintRules(
 																		inlang()
-																			?.installed.lintRules()
+																			?.installed.messageLintRules()
 																			.map((lintRule) => lintRule.meta.id) ?? [],
 																	)
 																}
@@ -430,7 +433,7 @@ function LanguageFilter(props: { clearFunction: any }) {
 }
 
 function LintFilter(props: { clearFunction: any }) {
-	const { inlang, filteredLintRules, setFilteredLintRules } = useEditorState()
+	const { inlang, filteredMessageLintRules, setFilteredMessageLintRules } = useEditorState()
 	return (
 		<sl-select
 			prop:name="Lint Filter Select"
@@ -438,9 +441,9 @@ function LintFilter(props: { clearFunction: any }) {
 			prop:multiple={true}
 			prop:maxOptionsVisible={2}
 			prop:clearable={true}
-			prop:value={filteredLintRules()}
+			prop:value={filteredMessageLintRules()}
 			on:sl-change={(event: any) => {
-				setFilteredLintRules(event.target.value ?? [])
+				setFilteredMessageLintRules(event.target.value ?? [])
 			}}
 			on:sl-clear={() => {
 				props.clearFunction
@@ -454,14 +457,14 @@ function LintFilter(props: { clearFunction: any }) {
 				<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant/60">
 					is
 				</p>
-				<Show when={filteredLintRules().length === 0} fallback={<div />}>
+				<Show when={filteredMessageLintRules().length === 0} fallback={<div />}>
 					<sl-tag prop:size="small" class="font-medium text-sm">
 						everyMessage
 					</sl-tag>
 					<button
 						class="hover:text-on-surface hover:bg-surface-variant rounded-sm"
 						onClick={() => {
-							setFilteredLintRules([])
+							setFilteredMessageLintRules([])
 							props.clearFunction
 						}}
 					>
@@ -478,9 +481,9 @@ function LintFilter(props: { clearFunction: any }) {
 				<a
 					class="cursor-pointer link link-primary opacity-75"
 					onClick={() =>
-						setFilteredLintRules(
+						setFilteredMessageLintRules(
 							inlang()
-								?.installed.lintRules()
+								?.installed.messageLintRules()
 								.map((lintRule) => lintRule.meta.id) ?? [],
 						)
 					}
@@ -489,7 +492,7 @@ function LintFilter(props: { clearFunction: any }) {
 				</a>
 				<a
 					class="cursor-pointer link link-primary opacity-75"
-					onClick={() => setFilteredLintRules([])}
+					onClick={() => setFilteredMessageLintRules([])}
 				>
 					None
 				</a>
@@ -499,7 +502,7 @@ function LintFilter(props: { clearFunction: any }) {
 				<For
 					each={
 						inlang()
-							?.installed.lintRules()
+							?.installed.messageLintRules()
 							.map((lintRule) => lintRule) ?? []
 					}
 				>

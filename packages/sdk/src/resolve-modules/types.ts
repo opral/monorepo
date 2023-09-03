@@ -1,5 +1,5 @@
 import type { ProjectConfig } from "@inlang/project-config"
-import type { LintRule } from "@inlang/lint-rule"
+import type { MessageLintRule } from "@inlang/message-lint-rule"
 import type { Plugin } from "@inlang/plugin"
 import type {
 	NodeishFilesystemSubset,
@@ -26,7 +26,7 @@ import type { resolveMessageLintRules } from "./message-lint-rules/resolveMessag
  */
 
 export type InlangModule = {
-	default: Plugin | LintRule
+	default: Plugin | MessageLintRule
 }
 
 /**
@@ -58,16 +58,16 @@ export type ResolveModuleFunction = (args: {
 		/**
 		 * The resolved item id of the module.
 		 */
-		id: Plugin["meta"]["id"] | LintRule["meta"]["id"]
+		id: Plugin["meta"]["id"] | MessageLintRule["meta"]["id"]
 	}>
 	/**
 	 * The resolved plugins.
 	 */
 	plugins: Array<Plugin>
 	/**
-	 * The resolved lint rules.
+	 * The resolved message lint rules.
 	 */
-	lintRules: Array<LintRule>
+	messageLintRules: Array<MessageLintRule>
 	/**
 	 * The resolved api provided by plugins.
 	 */

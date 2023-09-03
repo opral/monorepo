@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect, vi } from "vitest"
 import { openInlangProject } from "./openInlangProject.js"
-import type { ProjectConfig, Plugin, LintRule, Message } from "./interfaces.js"
+import type { ProjectConfig, Plugin, MessageLintRule, Message } from "./interfaces.js"
 import type { ImportFunction, InlangModule } from "./resolve-modules/index.js"
 import {
 	ProjectFilePathNotFoundError,
@@ -24,8 +24,8 @@ const config: ProjectConfig = {
 	languageTags: ["en"],
 	modules: ["plugin.js", "lintRule.js"],
 	settings: {
-		"project.lintRuleLevels": {
-			"lintRule.inlang.missingTranslation": "error",
+		"project.messageLintRuleLevels": {
+			"messageLintRule.inlang.missingTranslation": "error",
 		},
 		"plugin.inlang.i18next": {
 			pathPattern: "./examples/example01/{languageTag}.json",
@@ -85,10 +85,9 @@ const exampleMessages: Message[] = [
 	},
 ]
 
-const mockLintRule: LintRule = {
-	type: "MessageLint",
+const mockMessageLintRule: MessageLintRule = {
 	meta: {
-		id: "lintRule.inlang.mock",
+		id: "messageLintRule.inlang.mock",
 		description: { en: "Mock lint rule description" },
 		displayName: { en: "Mock Lint Rule" },
 	},
@@ -97,7 +96,7 @@ const mockLintRule: LintRule = {
 
 const _import: ImportFunction = async (name) =>
 	({
-		default: name === "plugin.js" ? mockPlugin : mockLintRule,
+		default: name === "plugin.js" ? mockPlugin : mockMessageLintRule,
 	} satisfies InlangModule)
 
 // ------------------------------------------------------------------------------------------------
@@ -343,8 +342,8 @@ describe("functionality", () => {
 				module: config.modules[0],
 			})
 
-			expect(inlang.installed.lintRules()[0]).toEqual({
-				meta: mockLintRule.meta,
+			expect(inlang.installed.messageLintRules()[0]).toEqual({
+				meta: mockMessageLintRule.meta,
 				module: config.modules[1],
 				lintLevel: "warning",
 			})
@@ -368,15 +367,14 @@ describe("functionality", () => {
 				_import,
 			})
 
-			expect(inlang.installed.lintRules()[0]?.lintLevel).toBe("warning")
+			expect(inlang.installed.messageLintRules()[0]?.lintLevel).toBe("warning")
 		})
 
 		// yep, this is a typical "hm, we have a bug here, let's write a test for it" test
 		it("should return lint reports if disabled is not set", async () => {
-			const _mockLintRule: LintRule = {
-				type: "MessageLint",
+			const _mockLintRule: MessageLintRule = {
 				meta: {
-					id: "lintRule.namespace.mock",
+					id: "messageLintRule.namespace.mock",
 					description: { en: "Mock lint rule description" },
 					displayName: { en: "Mock Lint Rule" },
 				},
@@ -421,16 +419,15 @@ describe("functionality", () => {
 
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
-			expect(inlang.query.lintReports.getAll()).toHaveLength(1)
-			expect(inlang.query.lintReports.getAll()?.[0]?.ruleId).toBe(_mockLintRule.meta.id)
-			expect(inlang.installed.lintRules()).toHaveLength(1)
+			expect(inlang.query.messageLintReports.getAll()).toHaveLength(1)
+			expect(inlang.query.messageLintReports.getAll()?.[0]?.ruleId).toBe(_mockLintRule.meta.id)
+			expect(inlang.installed.messageLintRules()).toHaveLength(1)
 		})
 
 		it("should return lint reports for a single message", async () => {
-			const _mockLintRule: LintRule = {
-				type: "MessageLint",
+			const _mockLintRule: MessageLintRule = {
 				meta: {
-					id: "lintRule.namepsace.mock",
+					id: "messageLintRule.namepsace.mock",
 					description: { en: "Mock lint rule description" },
 					displayName: { en: "Mock Lint Rule" },
 				},
@@ -475,7 +472,9 @@ describe("functionality", () => {
 
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
-			expect(inlang.query.lintReports.get({ where: { messageId: "some-message" } })).toHaveLength(1)
+			expect(
+				inlang.query.messageLintReports.get({ where: { messageId: "some-message" } }),
+			).toHaveLength(1)
 		})
 	})
 
@@ -705,13 +704,13 @@ describe("functionality", () => {
 			})
 			// TODO: test with real lint rules
 			try {
-				inlang.query.lintReports.getAll.subscribe((r) => expect(r).toEqual(undefined))
+				inlang.query.messageLintReports.getAll.subscribe((r) => expect(r).toEqual(undefined))
 				throw new Error("Should not reach this")
 			} catch (e) {
 				expect((e as Error).message).toBe("lint not initialized yet")
 			}
 		})
-		it("should return the lint reports", async () => {
+		it("should return the message lint reports", async () => {
 			const config: ProjectConfig = {
 				sourceLanguageTag: "en",
 				languageTags: ["en"],
@@ -724,11 +723,11 @@ describe("functionality", () => {
 				projectFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: async () => ({
-					default: mockLintRule,
+					default: mockMessageLintRule,
 				}),
 			})
 			// TODO: test with real lint rules
-			inlang.query.lintReports.getAll.subscribe((r) => expect(r).toEqual(undefined))
+			inlang.query.messageLintReports.getAll.subscribe((r) => expect(r).toEqual([]))
 		})
 	})
 })

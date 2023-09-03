@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest"
 import { lintCommandAction } from "./index.js"
 import {
-	LintRule,
+	MessageLintRule,
 	Message,
 	ProjectConfig,
 	openInlangProject,
@@ -55,7 +55,7 @@ const exampleMessages: Message[] = [
 	},
 ]
 
-async function setupInlang(enabledLintRule?: LintRule) {
+async function setupInlang(enabledLintRule?: MessageLintRule) {
 	const fs = createNodeishMemoryFs()
 
 	await fs.writeFile(
@@ -65,7 +65,7 @@ async function setupInlang(enabledLintRule?: LintRule) {
 			languageTags: ["en", "de", "it"],
 			modules: [""],
 			settings: {
-				"project.lintRuleLevels": {},
+				"project.messageLintRuleLevels": {},
 			},
 		} satisfies ProjectConfig),
 	)
@@ -84,7 +84,9 @@ async function setupInlang(enabledLintRule?: LintRule) {
 		if (enabledLintRule) {
 			return { default: enabledLintRule } satisfies InlangModule
 		}
-		return
+		return {
+			default: _mockPlugin,
+		}
 	}
 
 	return await openInlangProject({
@@ -96,10 +98,9 @@ async function setupInlang(enabledLintRule?: LintRule) {
 
 describe("lint command", () => {
 	it("succeed on lint success", async () => {
-		const enabledLintRule: LintRule = {
-			type: "MessageLint",
+		const enabledLintRule: MessageLintRule = {
 			meta: {
-				id: "lintRule.namespace.enabled",
+				id: "messageLintRule.namespace.enabled",
 				description: { en: "Mock lint rule description" },
 				displayName: { en: "Mock Lint Rule" },
 			},
@@ -134,10 +135,9 @@ describe("lint command", () => {
 	})
 
 	it("show lint reports", async () => {
-		const enabledLintRule: LintRule = {
-			type: "MessageLint",
+		const enabledLintRule: MessageLintRule = {
 			meta: {
-				id: "lintRule.namespace.enabled",
+				id: "messageLintRule.namespace.enabled",
 				description: { en: "Mock lint rule description" },
 				displayName: { en: "Mock Lint Rule" },
 			},

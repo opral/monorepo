@@ -1,25 +1,23 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { lintMessages } from "./lintMessages.js"
-import type { MessageLintReport, MessageLintRule } from "@inlang/lint-rule"
+import type { MessageLintReport, MessageLintRule } from "@inlang/message-lint-rule"
 import type { Message } from "@inlang/message"
 
 const lintRule1 = {
 	meta: {
-		id: "lintRule.x.1",
+		id: "messageLintRule.x.1",
 		displayName: { en: "" },
 		description: { en: "" },
 	},
-	type: "MessageLint",
 	message: vi.fn(),
 } satisfies MessageLintRule
 
 const lintRule2 = {
 	meta: {
-		id: "lintRule.x.2",
+		id: "messageLintRule.x.2",
 		displayName: { en: "" },
 		description: { en: "" },
 	},
-	type: "MessageLint",
 	message: vi.fn(),
 } satisfies MessageLintRule
 
@@ -42,15 +40,15 @@ describe("lintMessages", async () => {
 		})
 
 		await lintMessages({
-			lintLevels: {
+			ruleLevels: {
 				[lintRule1.meta.id]: "warning",
 				[lintRule2.meta.id]: "warning",
 			},
-			lintRuleSettings: {},
+			ruleSettings: {},
 			sourceLanguageTag: "en",
 			languageTags: [],
 			messages,
-			lintRules: [lintRule1, lintRule2],
+			rules: [lintRule1, lintRule2],
 		})
 
 		expect(lintRule1.message).toHaveBeenCalledTimes(3)
@@ -72,15 +70,15 @@ describe("lintMessages", async () => {
 		})
 
 		await lintMessages({
-			lintLevels: {
+			ruleLevels: {
 				[lintRule1.meta.id]: "warning",
 				[lintRule2.meta.id]: "warning",
 			},
-			lintRuleSettings: {},
+			ruleSettings: {},
+			rules: [lintRule1, lintRule2],
 			sourceLanguageTag: "en",
 			languageTags: [],
 			messages,
-			lintRules: [lintRule1, lintRule2],
 		})
 
 		expect(fn).toHaveBeenCalledTimes(12)
@@ -107,15 +105,15 @@ describe("lintMessages", async () => {
 		})
 
 		const { data, errors } = await lintMessages({
-			lintLevels: {
+			ruleLevels: {
 				[lintRule1.meta.id]: "warning",
 				[lintRule2.meta.id]: "warning",
 			},
-			lintRuleSettings: {},
+			ruleSettings: {},
 			sourceLanguageTag: "en",
 			languageTags: [],
 			messages,
-			lintRules: [lintRule1, lintRule2],
+			rules: [lintRule1, lintRule2],
 		})
 
 		expect(data).toHaveLength(3)

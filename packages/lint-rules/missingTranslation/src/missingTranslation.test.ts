@@ -21,13 +21,13 @@ test("should not report if all messages are present", async () => {
 	const result = await lintSingleMessage({
 		sourceLanguageTag: "en",
 		languageTags: ["en", "de"],
-		lintLevels: {
+		ruleLevels: {
 			[missingTranslationRule.meta.id]: "warning",
 		},
-		lintRuleSettings: {},
+		ruleSettings: {},
 		messages,
 		message: message1,
-		lintRules: [missingTranslationRule],
+		rules: [missingTranslationRule],
 	})
 
 	expect(result.errors).toHaveLength(0)
@@ -38,13 +38,13 @@ test("should report if a languageTag is not present", async () => {
 	const result = await lintSingleMessage({
 		sourceLanguageTag: "en",
 		languageTags: ["en", "it"],
-		lintLevels: {
+		ruleLevels: {
 			[missingTranslationRule.meta.id]: "warning",
 		},
-		lintRuleSettings: {},
+		ruleSettings: {},
 		messages,
 		message: message1,
-		lintRules: [missingTranslationRule],
+		rules: [missingTranslationRule],
 	})
 
 	expect(result.errors).toHaveLength(0)
@@ -56,13 +56,13 @@ test("should report if no variants are defined", async () => {
 	const result = await lintSingleMessage({
 		sourceLanguageTag: "en",
 		languageTags: ["en", "fr"],
-		lintLevels: {
+		ruleLevels: {
 			[missingTranslationRule.meta.id]: "warning",
 		},
-		lintRuleSettings: {},
+		ruleSettings: {},
 		messages,
 		message: message1,
-		lintRules: [missingTranslationRule],
+		rules: [missingTranslationRule],
 	})
 
 	expect(result.errors).toHaveLength(0)
@@ -75,13 +75,13 @@ describe("reported by emptyPattern lintRule", () => {
 		const result = await lintSingleMessage({
 			sourceLanguageTag: "en",
 			languageTags: ["en", "es"],
-			lintLevels: {
+			ruleLevels: {
 				[missingTranslationRule.meta.id]: "warning",
 			},
-			lintRuleSettings: {},
+			ruleSettings: {},
 			messages,
 			message: message1,
-			lintRules: [missingTranslationRule],
+			rules: [missingTranslationRule],
 		})
 
 		expect(result.errors).toHaveLength(0)
@@ -92,13 +92,13 @@ describe("reported by emptyPattern lintRule", () => {
 		const result = await lintSingleMessage({
 			sourceLanguageTag: "en",
 			languageTags: ["en", "cn"],
-			lintLevels: {
+			ruleLevels: {
 				[missingTranslationRule.meta.id]: "warning",
 			},
-			lintRuleSettings: {},
+			ruleSettings: {},
 			messages,
 			message: message1,
-			lintRules: [missingTranslationRule],
+			rules: [missingTranslationRule],
 		})
 
 		expect(result.errors).toHaveLength(0)

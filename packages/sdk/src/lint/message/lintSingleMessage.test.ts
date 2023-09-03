@@ -1,26 +1,24 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { lintSingleMessage } from "./lintSingleMessage.js"
-import type { MessageLintReport, MessageLintRule } from "@inlang/lint-rule"
+import type { MessageLintReport, MessageLintRule } from "@inlang/message-lint-rule"
 import type { Message } from "@inlang/message"
 import { tryCatch } from "@inlang/result"
 
 const lintRule1 = {
 	meta: {
-		id: "lintRule.r.1",
+		id: "messageLintRule.r.1",
 		displayName: { en: "" },
 		description: { en: "" },
 	},
-	type: "MessageLint",
 	message: vi.fn(),
 } satisfies MessageLintRule
 
 const lintRule2 = {
 	meta: {
-		id: "lintRule.r.2",
+		id: "messageLintRule.r.2",
 		displayName: { en: "" },
 		description: { en: "" },
 	},
-	type: "MessageLint",
 	message: vi.fn(),
 } satisfies MessageLintRule
 
@@ -41,13 +39,13 @@ describe("lintSingleMessage", async () => {
 
 			const result = await tryCatch(() =>
 				lintSingleMessage({
-					lintLevels: {},
-					lintRuleSettings: {},
+					ruleLevels: {},
+					ruleSettings: {},
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
 					messages,
 					message: message1,
-					lintRules: [lintRule1],
+					rules: [lintRule1],
 				}),
 			)
 			expect(result.error).toBeDefined()
@@ -58,15 +56,15 @@ describe("lintSingleMessage", async () => {
 			lintRule1.message.mockImplementation(({ report }) => report({} as MessageLintReport))
 
 			const reports = await lintSingleMessage({
-				lintLevels: {
+				ruleLevels: {
 					[lintRule1.meta.id]: "error",
 				},
-				lintRuleSettings: {},
+				ruleSettings: {},
 				sourceLanguageTag: "en",
 				languageTags: ["en"],
 				messages,
 				message: message1,
-				lintRules: [lintRule1],
+				rules: [lintRule1],
 			})
 			expect(reports.data[0]?.level).toBe("error")
 		})
@@ -78,17 +76,17 @@ describe("lintSingleMessage", async () => {
 			lintRule1.message.mockImplementation(({ settings }) => fn(settings))
 
 			await lintSingleMessage({
-				lintLevels: {
+				ruleLevels: {
 					[lintRule1.meta.id]: "warning",
 				},
-				lintRuleSettings: {
+				ruleSettings: {
 					[lintRule1.meta.id]: settings,
 				},
 				sourceLanguageTag: "en",
 				languageTags: ["en"],
 				messages,
 				message: message1,
-				lintRules: [lintRule1],
+				rules: [lintRule1],
 			})
 
 			expect(fn).toHaveBeenCalledWith(settings)
@@ -107,16 +105,16 @@ describe("lintSingleMessage", async () => {
 		})
 
 		await lintSingleMessage({
-			lintLevels: {
+			ruleLevels: {
 				[lintRule1.meta.id]: "warning",
 				[lintRule2.meta.id]: "warning",
 			},
-			lintRuleSettings: {},
+			ruleSettings: {},
 			sourceLanguageTag: "en",
 			languageTags: ["en"],
 			messages,
 			message: message1,
-			lintRules: [lintRule1, lintRule2],
+			rules: [lintRule1, lintRule2],
 		})
 
 		expect(m1Called).toBe(true)
@@ -138,16 +136,16 @@ describe("lintSingleMessage", async () => {
 		})
 
 		await lintSingleMessage({
-			lintLevels: {
+			ruleLevels: {
 				[lintRule1.meta.id]: "warning",
 				[lintRule2.meta.id]: "warning",
 			},
-			lintRuleSettings: {},
+			ruleSettings: {},
 			sourceLanguageTag: "en",
 			languageTags: ["en"],
 			messages,
 			message: message1,
-			lintRules: [lintRule1, lintRule2],
+			rules: [lintRule1, lintRule2],
 		})
 
 		expect(fn).toHaveBeenCalledTimes(4)
@@ -167,16 +165,16 @@ describe("lintSingleMessage", async () => {
 		})
 
 		const result = await lintSingleMessage({
-			lintLevels: {
+			ruleLevels: {
 				[lintRule1.meta.id]: "warning",
 				[lintRule2.meta.id]: "warning",
 			},
-			lintRuleSettings: {},
+			ruleSettings: {},
 			sourceLanguageTag: "en",
 			languageTags: ["en"],
 			messages,
 			message: message1,
-			lintRules: [lintRule1, lintRule2],
+			rules: [lintRule1, lintRule2],
 		})
 
 		expect(result.data).length(1)

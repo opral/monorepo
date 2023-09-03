@@ -3,7 +3,7 @@ import { For, Show, createMemo } from "solid-js"
 import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
-import type { InstalledLintRule, LintRule } from "@inlang/sdk"
+import type { InstalledMessageLintRule, MessageLintRule } from "@inlang/sdk"
 
 interface ListHeaderProps {
 	ids: string[]
@@ -21,8 +21,8 @@ export const messageCount = (ids: string[]) => {
 export const ListHeader = (props: ListHeaderProps) => {
 	const {
 		inlang,
-		setFilteredLintRules,
-		filteredLintRules,
+		setFilteredMessageLintRules,
+		filteredMessageLintRules,
 		filteredId,
 		setFilteredId,
 		setTourStep,
@@ -30,18 +30,23 @@ export const ListHeader = (props: ListHeaderProps) => {
 	} = useEditorState()
 
 	const getLintSummary = createMemo(() => {
-		const summary: Record<LintRule["meta"]["id"], number> = {}
-		for (const report of inlang()?.query.lintReports.getAll() || []) {
-			if (filteredLintRules().length === 0 || filteredLintRules().includes(report.ruleId)) {
+		const summary: Record<MessageLintRule["meta"]["id"], number> = {}
+		for (const report of inlang()?.query.messageLintReports.getAll() || []) {
+			if (
+				filteredMessageLintRules().length === 0 ||
+				filteredMessageLintRules().includes(report.ruleId)
+			) {
 				summary[report.ruleId] = (summary[report.ruleId] || 0) + 1
 			}
 		}
 		return summary
 	})
 
-	const getLintRule = (lintRuleId: LintRule["meta"]["id"]): InstalledLintRule | undefined =>
+	const getLintRule = (
+		lintRuleId: MessageLintRule["meta"]["id"],
+	): InstalledMessageLintRule | undefined =>
 		inlang()
-			?.installed.lintRules()
+			?.installed.messageLintRules()
 			.find((rule) => rule.meta.id === lintRuleId)
 
 	return (
@@ -65,7 +70,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 			</Show>
 
 			<div class="flex gap-2">
-				<For each={Object.keys(getLintSummary()) as LintRule["meta"]["id"][]}>
+				<For each={Object.keys(getLintSummary()) as MessageLintRule["meta"]["id"][]}>
 					{(lintRule) => (
 						<Show when={getLintSummary()[lintRule] !== 0}>
 							<TourHintWrapper
@@ -73,7 +78,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 								position="bottom-right"
 								offset={{ x: 0, y: 40 }}
 								isVisible={
-									lintRule === "lintRule.inlang.missingTranslation" &&
+									lintRule === "messageLintRule.inlang.missingTranslation" &&
 									tourStep() === "missing-translation-rule"
 								}
 							>
@@ -87,17 +92,19 @@ export const ListHeader = (props: ListHeaderProps) => {
 									<sl-button
 										prop:size="small"
 										class={
-											filteredLintRules()?.includes(lintRule || "")
+											filteredMessageLintRules()?.includes(lintRule || "")
 												? getLintRule(lintRule)!.lintLevel === "warning"
 													? "ring-warning/20 ring-1 rounded"
 													: "ring-danger/20 ring-1 rounded"
 												: ""
 										}
 										onClick={() => {
-											if (filteredLintRules().includes(lintRule)) {
-												setFilteredLintRules(filteredLintRules().filter((id) => id !== lintRule))
+											if (filteredMessageLintRules().includes(lintRule)) {
+												setFilteredMessageLintRules(
+													filteredMessageLintRules().filter((id) => id !== lintRule),
+												)
 											} else {
-												setFilteredLintRules([lintRule])
+												setFilteredMessageLintRules([lintRule])
 												setTourStep("textfield")
 											}
 										}}
@@ -105,7 +112,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 										<div
 											class="flex gap-2 items-center h-7"
 											id={
-												lintRule === "lintRule.inlang.missingTranslation"
+												lintRule === "messageLintRule.inlang.missingTranslation"
 													? "missingTranslation-summary"
 													: "lint-summary"
 											}

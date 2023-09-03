@@ -1,5 +1,5 @@
 {
-	"type": "lintRule",
+	"type": "messageLintRule",
 	"icon": "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
 	"displayName": {
 		"en": "Message without Source"

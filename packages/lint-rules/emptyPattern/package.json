@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/lint-rule-empty-pattern",
+	"name": "@inlang/message-lint-rule-empty-pattern",
 	"version": "0.0.1",
 	"type": "module",
 	"exports": {
@@ -21,7 +21,7 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/lint-rule": "*"
+		"@inlang/message-lint-rule": "*"
 	},
 	"devDependencies": {
 		"@inlang/message": "*",

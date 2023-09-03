@@ -19,13 +19,13 @@ test("should not report if source message present", async () => {
 	const result = await lintSingleMessage({
 		sourceLanguageTag: "en",
 		languageTags: ["en"],
-		lintLevels: {
+		ruleLevels: {
 			[messageWithoutSourceRule.meta.id]: "warning",
 		},
-		lintRuleSettings: {},
+		ruleSettings: {},
 		messages,
 		message: message1,
-		lintRules: [messageWithoutSourceRule],
+		rules: [messageWithoutSourceRule],
 	})
 
 	expect(result.errors).toHaveLength(0)
@@ -36,13 +36,13 @@ test("should report if source message is missing", async () => {
 	const result = await lintSingleMessage({
 		sourceLanguageTag: "it",
 		languageTags: ["it"],
-		lintLevels: {
+		ruleLevels: {
 			[messageWithoutSourceRule.meta.id]: "warning",
 		},
-		lintRuleSettings: {},
+		ruleSettings: {},
 		messages,
 		message: message1,
-		lintRules: [messageWithoutSourceRule],
+		rules: [messageWithoutSourceRule],
 	})
 
 	expect(result.errors).toHaveLength(0)

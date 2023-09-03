@@ -6,7 +6,7 @@ import { telemetryNode } from "@inlang/telemetry"
 import { removeCommas } from "./helper/removeCommas.js"
 import { calculateSummary } from "./helper/calculateSummary.js"
 import { caching } from "cache-manager"
-import { type LintReport, openInlangProject } from "@inlang/sdk"
+import { type MessageLintReport, openInlangProject } from "@inlang/sdk"
 
 const fontMedium = readFileSync(new URL("../assets/static/Inter-Medium.ttf", import.meta.url))
 const fontBold = readFileSync(new URL("../assets/static/Inter-Bold.ttf", import.meta.url))
@@ -60,15 +60,15 @@ export const badge = async (url: string) => {
 	}
 
 	// TODO: async reports
-	const LintReportsAwaitable = (): Promise<LintReport[]> => {
+	const MessageLintReportsAwaitable = (): Promise<MessageLintReport[]> => {
 		return new Promise((resolve) => {
-			let reports = inlang.query.lintReports.getAll()
+			let reports = inlang.query.messageLintReports.getAll()
 
 			if (reports) {
 				// reports where loaded
 				setTimeout(() => {
 					// this is a workaround. We do not know when the report changed. Normally this shouldn't be a issue for cli
-					const newReports = inlang.query.lintReports.getAll()
+					const newReports = inlang.query.messageLintReports.getAll()
 					if (newReports) {
 						resolve(newReports)
 					}
@@ -76,7 +76,7 @@ export const badge = async (url: string) => {
 			} else {
 				let counter = 0
 				const interval = setInterval(() => {
-					reports = inlang.query.lintReports.getAll()
+					reports = inlang.query.messageLintReports.getAll()
 					if (reports) {
 						clearInterval(interval)
 						resolve(reports)
@@ -93,7 +93,7 @@ export const badge = async (url: string) => {
 		})
 	}
 
-	const reports = await LintReportsAwaitable()
+	const reports = await MessageLintReportsAwaitable()
 
 	const { percentage, errors, warnings, numberOfMissingVariants } = calculateSummary({
 		reports: reports,

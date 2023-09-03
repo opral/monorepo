@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type { InlangProject, InstalledLintRule, InstalledPlugin, Subscribable } from "./api.js"
+import type {
+	InlangProject,
+	InstalledMessageLintRule,
+	InstalledPlugin,
+	Subscribable,
+} from "./api.js"
 import {
 	type ImportFunction,
 	type ResolveModuleFunction,
@@ -18,7 +23,7 @@ import {
 import { createRoot, createSignal, createEffect } from "./reactivity/solid.js"
 import { createMessagesQuery } from "./createMessagesQuery.js"
 import { debounce } from "throttle-debounce"
-import { createLintReportsQuery } from "./createLintReportsQuery.js"
+import { createMessageLintReportsQuery } from "./createMessageLintReportsQuery.js"
 import { ProjectConfig, Message, type NodeishFilesystemSubset } from "./interfaces.js"
 import { tryCatch, type Result } from "@inlang/result"
 
@@ -139,19 +144,21 @@ export const openInlangProject = async (args: {
 
 		// -- installed items ----------------------------------------------------
 
-		const installedLintRules = () => {
+		const InstalledMessageLintRules = () => {
 			if (!resolvedModules()) return []
-			return resolvedModules()!.lintRules.map(
+			return resolvedModules()!.messageLintRules.map(
 				(rule) =>
 					({
 						meta: rule.meta,
 						module:
 							resolvedModules()?.meta.find((m) => m.id.includes(rule.meta.id))?.module ??
 							"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
+
 						// default to warning, see https://github.com/inlang/inlang/issues/1254
-						lintLevel: configValue.settings["project.lintRuleLevels"]?.[rule.meta.id] ?? "warning",
-					} satisfies InstalledLintRule),
-			) satisfies Array<InstalledLintRule>
+						lintLevel:
+							configValue.settings["project.messageLintRuleLevels"]?.[rule.meta.id] ?? "warning",
+					} satisfies InstalledMessageLintRule),
+			) satisfies Array<InstalledMessageLintRule>
 		}
 
 		const installedPlugins = () => {
@@ -169,10 +176,10 @@ export const openInlangProject = async (args: {
 		const initializeError: Error | undefined = await initialized.catch((error) => error)
 
 		const messagesQuery = createMessagesQuery(() => messages() || [])
-		const lintReportsQuery = createLintReportsQuery(
+		const lintReportsQuery = createMessageLintReportsQuery(
 			messages,
 			config,
-			installedLintRules,
+			InstalledMessageLintRules,
 			resolvedModules,
 		)
 
@@ -205,7 +212,7 @@ export const openInlangProject = async (args: {
 		return {
 			installed: {
 				plugins: createSubscribable(() => installedPlugins()),
-				lintRules: createSubscribable(() => installedLintRules()),
+				messageLintRules: createSubscribable(() => InstalledMessageLintRules()),
 			},
 			errors: createSubscribable(() => [
 				...(initializeError ? [initializeError] : []),
@@ -218,7 +225,7 @@ export const openInlangProject = async (args: {
 			customApi: createSubscribable(() => resolvedModules()?.resolvedPluginApi.customApi || {}),
 			query: {
 				messages: messagesQuery,
-				lintReports: lintReportsQuery,
+				messageLintReports: lintReportsQuery,
 			},
 		} satisfies InlangProject
 	})

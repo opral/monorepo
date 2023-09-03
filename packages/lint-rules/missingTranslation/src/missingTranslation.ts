@@ -1,9 +1,8 @@
-import type { MessageLintRule } from "@inlang/lint-rule"
+import type { MessageLintRule } from "@inlang/message-lint-rule"
 
 export const missingTranslationRule: MessageLintRule = {
-	type: "MessageLint",
 	meta: {
-		id: "lintRule.inlang.missingTranslation",
+		id: "messageLintRule.inlang.missingTranslation",
 		displayName: {
 			en: "Missing Translation",
 		},

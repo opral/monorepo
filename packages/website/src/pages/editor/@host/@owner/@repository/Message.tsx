@@ -6,13 +6,13 @@ import { showFilteredMessage } from "./helper/showFilteredMessage.js"
 import IconCopy from "~icons/material-symbols/content-copy-outline"
 import copy from "clipboard-copy"
 import { showToast } from "#src/components/Toast.jsx"
-import type { LintReport, Message as MessageType } from "@inlang/sdk"
+import type { MessageLintReport, Message as MessageType } from "@inlang/sdk"
 import { sortLanguageTags } from "./helper/sortLanguageTags.js"
 
 export function Message(props: { id: string }) {
 	const { inlang, filteredLanguageTags } = useEditorState()
 	const [message, setMessage] = createSignal<MessageType>()
-	const [lintReports, setLintReports] = createSignal<Readonly<LintReport[]>>([])
+	const [lintReports, setLintReports] = createSignal<Readonly<MessageLintReport[]>>([])
 	const [messageIsFocused, setMessageIsFocused] = createSignal<boolean>(false)
 	// const [blockChangeMessageIsFocused, setBlockChangeMessageIsFocused]  = createSignal<Date>(new Date())
 
@@ -40,11 +40,11 @@ export function Message(props: { id: string }) {
 
 	createEffect(() => {
 		if (!inlang.loading && message()?.id) {
-			inlang()!.query.lintReports.get.subscribe(
+			inlang()!.query.messageLintReports.get.subscribe(
 				{ where: { messageId: message()!.id } },
 				(report) => {
 					if (report) {
-						setLintReports(report!)
+						setLintReports(report)
 					}
 				},
 			)
@@ -141,7 +141,7 @@ export function Message(props: { id: string }) {
 									<PatternEditor
 										languageTag={languageTag}
 										message={message()!}
-										lintReports={lintReports() as LintReport[]}
+										lintReports={lintReports() as MessageLintReport[]}
 										setMessageIsFocused={setMessageIsFocused}
 										messageIsFocused={messageIsFocused}
 										// hidden={!(filteredLanguageTags().includes(languageTag) || filteredLanguageTags().length === 0)}
