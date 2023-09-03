@@ -4,7 +4,7 @@ import type { Plugin } from "@inlang/sdk"
 
 export const ideExtensionConfig = (
 	settings: PluginSettings,
-): ReturnType<Exclude<Plugin["addAppSpecificApi"], undefined>> => ({
+): ReturnType<Exclude<Plugin["addCustomApi"], undefined>> => ({
 	"app.inlang.ideExtension": {
 		messageReferenceMatchers: [
 			async (args: { documentText: string }) => {

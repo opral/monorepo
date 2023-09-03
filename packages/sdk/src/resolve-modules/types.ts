@@ -26,7 +26,7 @@ import type { resolveMessageLintRules } from "./message-lint-rules/resolveMessag
  */
 
 export type InlangModule = {
-	default: Plugin<any> | LintRule<any>
+	default: Plugin | LintRule
 }
 
 /**

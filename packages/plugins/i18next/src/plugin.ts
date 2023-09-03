@@ -94,7 +94,7 @@ export const plugin: Plugin<PluginSettings> = {
 			settings,
 		})
 	},
-	addAppSpecificApi: ({ settings }) => ideExtensionConfig(settings),
+	addCustomApi: ({ settings }) => ideExtensionConfig(settings),
 }
 
 /**

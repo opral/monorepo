@@ -42,7 +42,7 @@ const mockPlugin: Plugin = {
 	},
 	loadMessages: () => exampleMessages,
 	saveMessages: () => undefined as any,
-	addAppSpecificApi: () => ({
+	addCustomApi: () => ({
 		"app.inlang.ideExtension": {
 			messageReferenceMatcher: (text: string) => text as any,
 		},
@@ -347,7 +347,6 @@ describe("functionality", () => {
 				meta: mockLintRule.meta,
 				module: config.modules[1],
 				lintLevel: "warning",
-				disabled: false,
 			})
 		})
 
@@ -370,119 +369,6 @@ describe("functionality", () => {
 			})
 
 			expect(inlang.installed.lintRules()[0]?.lintLevel).toBe("warning")
-		})
-
-		it("should apply 'disabled' to lint rules if defined in the project settings", async () => {
-			const fs = createNodeishMemoryFs()
-
-			const config: ProjectConfig = {
-				sourceLanguageTag: "en",
-				languageTags: ["en"],
-				modules: ["plugin.js", "lintRule.js"],
-				settings: {
-					"project.disabled": [mockLintRule.meta.id],
-				},
-			}
-
-			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
-
-			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
-				nodeishFs: fs,
-				_import: async () => ({ default: mockLintRule }),
-			})
-
-			expect(inlang.installed.lintRules()[0]?.disabled).toBe(true)
-		})
-
-		it("should return lint reports for non-disabled lint rules ", async () => {
-			const enabledLintRule: LintRule = {
-				type: "MessageLint",
-				meta: {
-					id: "lintRule.namespace.enabled",
-					description: { en: "Mock lint rule description" },
-					displayName: { en: "Mock Lint Rule" },
-				},
-				message: ({ report }) => {
-					report({
-						messageId: "some-message-1",
-						languageTag: "en",
-						body: { en: "lintrule1" },
-					})
-				},
-			}
-			const disabledLintRule: LintRule = {
-				type: "MessageLint",
-				meta: {
-					id: "lintRule.namespace.disabled",
-					description: { en: "" },
-					displayName: { en: "" },
-				},
-				message: ({ report }) => {
-					report({
-						messageId: "some-message-2",
-						languageTag: "en",
-						body: { en: "lintrule2" },
-					})
-				},
-			}
-			const _mockPlugin: Plugin = {
-				meta: {
-					id: "plugin.inlang.i18next",
-					description: { en: "Mock plugin description" },
-					displayName: { en: "Mock Plugin" },
-				},
-				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
-				saveMessages: () => undefined,
-			}
-			const fs = await createNodeishMemoryFs()
-			await fs.writeFile(
-				"./project.inlang.json",
-				JSON.stringify({
-					sourceLanguageTag: "en",
-					languageTags: ["en"],
-					modules: ["plugin.js", "enabledLintRule.js", "disabledLintRule.js"],
-					settings: {
-						"project.disabled": [disabledLintRule.meta.id],
-					},
-				} satisfies ProjectConfig),
-			)
-			const _import: ImportFunction = async (name) => {
-				if (name === "plugin.js") {
-					return {
-						default: _mockPlugin,
-					} satisfies InlangModule
-				} else if (name === "enabledLintRule.js") {
-					return {
-						default: enabledLintRule,
-					} satisfies InlangModule
-				} else if (name === "disabledLintRule.js") {
-					return {
-						default: disabledLintRule,
-					} satisfies InlangModule
-				}
-				throw Error("Unknown module name")
-			}
-
-			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
-				nodeishFs: fs,
-				_import,
-			})
-
-			await new Promise((resolve) => setTimeout(resolve, 510))
-
-			expect(inlang.query.lintReports.getAll()).toHaveLength(1)
-
-			expect(inlang.query.lintReports.getAll()?.[0]?.ruleId).toBe(enabledLintRule.meta.id)
-			expect(
-				inlang.installed.lintRules().find((rule) => rule.meta.id === disabledLintRule.meta.id)
-					?.disabled,
-			).toBe(true)
-			expect(
-				inlang.installed.lintRules().find((rule) => rule.meta.id === enabledLintRule.meta.id)
-					?.disabled,
-			).toBe(false)
 		})
 
 		// yep, this is a typical "hm, we have a bug here, let's write a test for it" test
@@ -538,7 +424,6 @@ describe("functionality", () => {
 			expect(inlang.query.lintReports.getAll()).toHaveLength(1)
 			expect(inlang.query.lintReports.getAll()?.[0]?.ruleId).toBe(_mockLintRule.meta.id)
 			expect(inlang.installed.lintRules()).toHaveLength(1)
-			expect(inlang.installed.lintRules()[0]?.disabled).toBe(false)
 		})
 
 		it("should return lint reports for a single message", async () => {
@@ -609,7 +494,7 @@ describe("functionality", () => {
 		})
 	})
 
-	describe("appSpecificApi", () => {
+	describe("customApi", () => {
 		it("should return the app specific api", async () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
@@ -619,7 +504,7 @@ describe("functionality", () => {
 				_import,
 			})
 
-			inlang.appSpecificApi.subscribe((api) => {
+			inlang.customApi.subscribe((api) => {
 				expect(api["app.inlang.ideExtension"]).toBeDefined()
 			})
 		})
@@ -820,7 +705,7 @@ describe("functionality", () => {
 			})
 			// TODO: test with real lint rules
 			try {
-				inlang.query.lintReports.getAll.subscribe((r) => expect(r).toEqual([]))
+				inlang.query.lintReports.getAll.subscribe((r) => expect(r).toEqual(undefined))
 				throw new Error("Should not reach this")
 			} catch (e) {
 				expect((e as Error).message).toBe("lint not initialized yet")
@@ -843,7 +728,7 @@ describe("functionality", () => {
 				}),
 			})
 			// TODO: test with real lint rules
-			inlang.query.lintReports.getAll.subscribe((r) => expect(r).toEqual([]))
+			inlang.query.lintReports.getAll.subscribe((r) => expect(r).toEqual(undefined))
 		})
 	})
 })

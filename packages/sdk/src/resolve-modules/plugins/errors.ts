@@ -49,9 +49,9 @@ export class PluginSaveMessagesFunctionAlreadyDefinedError extends PluginError {
 	}
 }
 
-export class PluginReturnedInvalidAppSpecificApiError extends PluginError {
+export class PluginReturnedInvalidCustomApiError extends PluginError {
 	constructor(message: string, options: PluginErrorOptions) {
 		super(message, options)
-		this.name = "PluginReturnedInvalidAppSpecificApiError"
+		this.name = "PluginReturnedInvalidCustomApiError"
 	}
 }

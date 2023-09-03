@@ -1,7 +1,7 @@
 import type { LanguageTag } from "@inlang/language-tag"
 import type { NodeishFilesystem as LisaNodeishFilesystem } from "@lix-js/fs"
 import type {
-	PluginReturnedInvalidAppSpecificApiError,
+	PluginReturnedInvalidCustomApiError,
 	PluginLoadMessagesFunctionAlreadyDefinedError,
 	PluginSaveMessagesFunctionAlreadyDefinedError,
 	PluginHasInvalidIdError,
@@ -10,7 +10,7 @@ import type {
 } from "./errors.js"
 import type { Message } from "@inlang/message"
 import type { JSONObject } from "@inlang/json-types"
-import type { AppSpecificApiInlangIdeExtension, Plugin } from "@inlang/plugin"
+import type { CustomApiInlangIdeExtension, Plugin } from "@inlang/plugin"
 
 /**
  * The filesystem is a subset of project lisa's nodeish filesystem.
@@ -32,7 +32,7 @@ export type ResolvePluginsFunction = (args: {
 }) => Promise<{
 	data: ResolvedPluginApi
 	errors: Array<
-		| PluginReturnedInvalidAppSpecificApiError
+		| PluginReturnedInvalidCustomApiError
 		| PluginLoadMessagesFunctionAlreadyDefinedError
 		| PluginSaveMessagesFunctionAlreadyDefinedError
 		| PluginHasInvalidIdError
@@ -59,7 +59,7 @@ export type ResolvedPluginApi = {
 	 *
 	 * @example
 	 *  // define
-	 *  appSpecificApi: ({ settings }) => ({
+	 *  customApi: ({ settings }) => ({
 	 * 	 "app.inlang.ide-extension": {
 	 * 	   messageReferenceMatcher: () => {
 	 * 		 // use settings
@@ -69,9 +69,9 @@ export type ResolvedPluginApi = {
 	 * 	 }
 	 *  })
 	 *  // use
-	 *  appSpecificApi['app.inlang.ide-extension'].messageReferenceMatcher()
+	 *  customApi['app.inlang.ide-extension'].messageReferenceMatcher()
 	 */
-	appSpecificApi: Record<`app.${string}.${string}`, unknown> & {
-		"app.inlang.ideExtension"?: AppSpecificApiInlangIdeExtension
+	customApi: Record<`app.${string}.${string}` | `library.${string}.${string}`, unknown> & {
+		"app.inlang.ideExtension"?: CustomApiInlangIdeExtension
 	}
 }

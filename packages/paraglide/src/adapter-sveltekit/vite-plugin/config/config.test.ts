@@ -44,7 +44,7 @@ it("should cache config creation", async () => {
 				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
 				setConfig: () => undefined,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
-				appSpecificApi: () => ({
+				customApi: () => ({
 					"inlang.app.sdkJs": validateSdkConfig({
 						languageNegotiation: { strategies: [{ type: "url" }] },
 					}),
@@ -84,7 +84,7 @@ it("should create an inlang config file if no config is present yet", async () =
 				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
 				setConfig: () => undefined,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
-				appSpecificApi: () => ({
+				customApi: () => ({
 					"inlang.app.sdkJs": validateSdkConfig({
 						languageNegotiation: { strategies: [{ type: "url" }] },
 					}),
@@ -116,7 +116,7 @@ it("should update the sdk module version", async () => {
 				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
 				setConfig,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
-				appSpecificApi: () => ({
+				customApi: () => ({
 					"inlang.app.sdkJs": validateSdkConfig({
 						languageNegotiation: { strategies: [{ type: "url" }] },
 					}),
@@ -146,7 +146,7 @@ it("should not update the sdk module version if already up2date", async () => {
 				config: () => ({ modules: [`@inlang/sdk-js-plugin@${version}`] }),
 				setConfig,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
-				appSpecificApi: () => ({
+				customApi: () => ({
 					"inlang.app.sdkJs": validateSdkConfig({
 						languageNegotiation: { strategies: [{ type: "url" }] },
 					}),
@@ -173,7 +173,7 @@ it("should create demo resources if none are present yet", async () => {
 				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
 				setConfig: () => undefined,
 				query: { messages: { getAll: () => [], create } },
-				appSpecificApi: () => ({
+				customApi: () => ({
 					"inlang.app.sdkJs": validateSdkConfig({
 						languageNegotiation: { strategies: [{ type: "url" }] },
 					}),
@@ -200,7 +200,7 @@ it("should add the sdk plugin module if not present yet", async () => {
 				config: () => ({ modules: [] }),
 				setConfig,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
-				appSpecificApi: () => ({}),
+				customApi: () => ({}),
 			} as unknown as InlangProject),
 	)
 	vi.mocked(openInlangProject).mockImplementationOnce(
@@ -210,7 +210,7 @@ it("should add the sdk plugin module if not present yet", async () => {
 				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
 				setConfig: () => undefined,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
-				appSpecificApi: () => ({
+				customApi: () => ({
 					"inlang.app.sdkJs": validateSdkConfig({
 						languageNegotiation: { strategies: [{ type: "url" }] },
 					}),
@@ -250,7 +250,7 @@ it("should throw if the SDK is not configured properly", async () => {
 				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
 				setConfig: () => undefined,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
-				appSpecificApi: () => ({ "inlang.app.sdkJs": {} as SdkConfig }),
+				customApi: () => ({ "inlang.app.sdkJs": {} as SdkConfig }),
 			} as unknown as InlangProject),
 	)
 
@@ -268,7 +268,7 @@ it("should throw if no svelte.config.js file is found", async () => {
 				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
 				setConfig: () => undefined,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
-				appSpecificApi: () => ({
+				customApi: () => ({
 					"inlang.app.sdkJs": validateSdkConfig({
 						languageNegotiation: { strategies: [{ type: "url" }] },
 					}),
@@ -298,7 +298,7 @@ it("should correctly resolve the config", async () => {
 				}),
 				setConfig,
 				query: { messages: { getAll: () => [createMessage("hi", { en: "hello" })], create } },
-				appSpecificApi: () => ({
+				customApi: () => ({
 					"inlang.app.sdkJs": validateSdkConfig({
 						languageNegotiation: { strategies: [{ type: "url" }] },
 					}),

@@ -165,7 +165,7 @@ async function main(args: {
 
 	const documentSelectors: vscode.DocumentSelector = [
 		{ language: "javascript", pattern: "!project.inlang.json" },
-		...(state().inlang.appSpecificApi()["app.inlang.ideExtension"]?.documentSelectors || []),
+		...(state().inlang.customApi()["app.inlang.ideExtension"]?.documentSelectors || []),
 	]
 	// register source actions
 	args.context.subscriptions.push(

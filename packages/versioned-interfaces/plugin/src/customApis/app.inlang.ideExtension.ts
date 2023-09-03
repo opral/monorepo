@@ -86,4 +86,4 @@ export const IdeExtensionConfigSchema = Type.Object({
 	),
 })
 
-export type AppSpecificApiInlangIdeExtension = Static<typeof IdeExtensionConfigSchema>
+export type CustomApiInlangIdeExtension = Static<typeof IdeExtensionConfigSchema>
