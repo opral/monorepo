@@ -3,7 +3,7 @@
 	"include": ["src/**/*"],
 	"compilerOptions": {
 		"lib": ["ESNext"],
-		"types": ["node"],
+		"types": [],
 		"outDir": "./dist",
 		"rootDir": "./src"
 	}
