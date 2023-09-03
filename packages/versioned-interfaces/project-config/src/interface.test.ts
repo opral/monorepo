@@ -150,17 +150,4 @@ describe("config.settings", () => {
 		}
 		expect(Value.Check(ProjectConfig, mockConfig)).toBe(true)
 	})
-
-	it("should be possible to disable lint rules", () => {
-		const mockConfig: ProjectConfig = {
-			sourceLanguageTag: "en",
-			languageTags: ["en", "de"],
-			modules: [],
-			settings: {
-				"project.disabled": ["lintRule.namespace.helloWorld"],
-			},
-		}
-
-		expect(Value.Check(ProjectConfig, mockConfig)).toBe(true)
-	})
 })

@@ -27,7 +27,6 @@ export type InstalledLintRule = {
 	 */
 	module: string
 	lintLevel: LintLevel
-	disabled: boolean
 }
 
 export type InlangProject = {
@@ -38,7 +37,7 @@ export type InlangProject = {
 	errors: Subscribable<
 		((typeof ModuleResolutionError)[keyof typeof ModuleResolutionError] | Error)[]
 	>
-	appSpecificApi: Subscribable<ResolvedPluginApi["appSpecificApi"]>
+	customApi: Subscribable<ResolvedPluginApi["customApi"]>
 	config: Subscribable<ProjectConfig | undefined>
 	setConfig: (config: ProjectConfig) => Result<void, RuntimeError.InvalidConfigError>
 	query: {

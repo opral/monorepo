@@ -39,12 +39,7 @@ export function createLintReportsQuery(
 					),
 					messages: msgs,
 					message: message,
-					lintRules:
-						conf.settings["project.disabled"] !== undefined
-							? modules.lintRules.filter(
-									(rule) => conf.settings["project.disabled"]?.includes(rule.meta.id) === false,
-							  )
-							: modules.lintRules,
+					lintRules: modules.lintRules,
 				}).then((report) => {
 					if (
 						report.errors.length === 0 &&
