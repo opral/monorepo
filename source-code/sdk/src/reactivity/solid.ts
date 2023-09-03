@@ -22,7 +22,6 @@ const batch = _batch as typeof import("solid-js")["batch"]
 const getListener = _getListener as typeof import("solid-js")["getListener"]
 const onCleanup = _onCleanup as typeof import("solid-js")["onCleanup"]
 
-
 export {
 	createSignal,
 	createMemo,

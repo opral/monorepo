@@ -9,7 +9,7 @@ export async function onBeforeRender(pageContext: PageContext) {
 		(item) => item.id === pageContext.routeParams.id,
 	) as MarketplaceManifest
 
-	const text = await(await fetch(item.readme.en)).text()
+	const text = await (await fetch(item.readme.en)).text()
 	const markdown = parseMarkdown({
 		text: text,
 	})
