@@ -74,7 +74,7 @@ You can read more here: inlang.com/documentation/language-tag`,
 	const { languageTags } = await prompts({
 		type: "list",
 		name: "languageTags",
-		message: "What other languages do you want to add? example input: de, it",
+		message: "What other languages do you want to add? Example input: de, it",
 		initial: "",
 		validate: (value) => {
 			const badLanuageTags = []
