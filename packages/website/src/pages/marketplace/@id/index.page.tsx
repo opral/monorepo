@@ -3,7 +3,7 @@ import { Layout } from "#src/pages/Layout.jsx"
 import { Markdown, parseMarkdown } from "#src/services/markdown/index.js"
 import { For, Show, createSignal } from "solid-js"
 import { GetHelp } from "#src/components/GetHelp.jsx"
-import { isModule, registry } from "@inlang/marketplace-registry"
+import { isModule } from "@inlang/marketplace-registry"
 import { Button } from "#src/pages/index/components/Button.jsx"
 import { Chip } from "#src/components/Chip.jsx"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
@@ -25,7 +25,7 @@ export function Page(props: PageProps) {
 
 	return (
 		<>
-			<Title>{props.manifest.name.en}</Title>
+			<Title>{props.manifest.displayName.en}</Title>
 			<Meta name="description" content={props.manifest.description.en} />
 			<Layout>
 				<div class="md:py-28 py-16">
@@ -40,7 +40,7 @@ export function Page(props: PageProps) {
 										when={props.manifest.icon}
 										fallback={
 											<div class="w-16 h-16 font-semibold text-3xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
-												{props.manifest.name.en?.[0]}
+												{props.manifest.displayName.en?.[0]}
 											</div>
 										}
 									>
@@ -50,7 +50,7 @@ export function Page(props: PageProps) {
 										/>
 									</Show>
 									<div class="flex flex-col gap-3">
-										<h1 class="text-3xl font-bold">{props.manifest.name.en}</h1>
+										<h1 class="text-3xl font-bold">{props.manifest.displayName.en}</h1>
 										<div class="inline-block text-surface-500 ">
 											<p class={!readmore() ? "lg:line-clamp-2" : ""}>
 												{props.manifest.description.en}

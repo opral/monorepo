@@ -5,7 +5,7 @@ import { Value } from "@sinclair/typebox/value"
 test("a valid app manifest should pass validation", () => {
 	const app: MarketplaceManifest = {
 		id: "library.inlang.paraglideJs",
-		name: { en: "My App" },
+		displayName: { en: "My App" },
 		publisherName: "inlang",
 		description: { en: "My App is the best app." },
 		keywords: ["app", "best"],

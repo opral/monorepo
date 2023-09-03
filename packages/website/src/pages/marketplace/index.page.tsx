@@ -33,7 +33,7 @@ const filteredItems = () =>
 		const search = searchValue().toLowerCase()
 
 		const isSearchMatch =
-			item.name.en?.toLowerCase().includes(search) ||
+			item.displayName.en?.toLowerCase().includes(search) ||
 			item.publisherName.toLowerCase().includes(search) ||
 			item.keywords.some((keyword: string) => keyword.toLowerCase().includes(search))
 
@@ -97,7 +97,7 @@ const Gallery = () => {
 												when={item.icon}
 												fallback={
 													<div class="w-10 h-10 font-semibold text-xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
-														{item.name.en?.[0]}
+														{item.displayName.en?.[0]}
 													</div>
 												}
 											>
@@ -106,7 +106,9 @@ const Gallery = () => {
 													src={item.icon}
 												/>
 											</Show>
-											<p class="m-0 text-surface-900 font-semibold text-md">{item.name.en}</p>
+											<p class="m-0 text-surface-900 font-semibold text-md">
+												{item.displayName.en}
+											</p>
 										</div>
 										<p class="m-0 font-normal leading-6 text-sm tracking-wide text-surface-500 line-clamp-3">
 											{item.description.en}
