@@ -27,7 +27,7 @@ export async function initCommandAction(args: {
 	try {
 		const newProjFileStat = await fs.stat(inlangConfigFilePath)
 		if (newProjFileStat) {
-			args.logger.error("Aborting project intialization: Found exisitng inlang configuration.")
+			args.logger.error("Aborting project intialization: Found existing inlang configuration.")
 		}
 
 		return
@@ -42,7 +42,7 @@ export async function initCommandAction(args: {
 		const oldProjFileStat = await fs.stat("./inlang.config.jsD")
 		if (oldProjFileStat) {
 			args.logger.error(
-				"Found an existing inlang configuration int the legacy format, please run the migration command instead.",
+				"Found an existing inlang configuration in the legacy format, please run the migration command instead.",
 			)
 		}
 
@@ -98,7 +98,7 @@ You can read more here: inlang.com/documentation/language-tag`,
 	})
 
 	if (autoConfig === true) {
-		args.logger.warn("autoconfig is not suppored yet, just creating base configuration")
+		args.logger.warn("Auto-config is not suppored yet, just creating base configuration")
 	}
 
 	await createProjectConfig({
