@@ -97,11 +97,7 @@ You can read more here: inlang.com/documentation/language-tag`,
 		initial: true,
 	})
 
-	if (autoConfig === true) {
-		args.logger.warn("Auto-config is not suppored yet, just creating base configuration")
-	}
-
-	await createProjectConfig({
+	const result = await createProjectConfig({
 		tryAutoGen: autoConfig,
 		sourceLanguagetag,
 		languageTags: [...new Set(languageTags as string[])],
