@@ -2,7 +2,7 @@ import { Type, type Static } from "@sinclair/typebox"
 import { Translatable } from "@inlang/translatable"
 
 /**
- * 
+ *
  * ---------------- BASE INTERFACES ----------------
  */
 
@@ -63,4 +63,3 @@ export type MarketplaceManifest = Static<typeof MarketplaceManifest>
 export const MarketplaceManifest = Type.Union([App, Library, Plugin, MessageLintRule], {
 	description: "The manifest of a marketplace item.",
 })
-
