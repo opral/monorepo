@@ -5,8 +5,8 @@ export const registry: MarketplaceManifest[] = [
 	{
 		id: "app.inlang.cli",
 		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		name: {
-			en: "CLI",
+		displayName: {
+			en: "inlang CLI",
 		},
 		description: {
 			en: "Official inlang CLI",

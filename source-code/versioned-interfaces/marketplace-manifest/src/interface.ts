@@ -8,7 +8,7 @@ import { Translatable } from "@inlang/translatable"
 
 const MarketplaceManifestBase = Type.Object({
 	icon: Type.Optional(Type.String()),
-	name: Translatable(Type.String()),
+	displayName: Translatable(Type.String()),
 	description: Translatable(Type.String()),
 	publisherName: Type.String(),
 	publisherIcon: Type.Optional(Type.String()),
