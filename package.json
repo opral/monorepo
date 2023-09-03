@@ -6,6 +6,7 @@
 		"source-code/*",
 		"source-code/core/*",
 		"source-code/plugins/*",
+		"source-code/lint-rules/*",
 		"source-code/versioned-interfaces/*"
 	],
 	"scripts": {
