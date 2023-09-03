@@ -61,9 +61,7 @@ describe("translate command", () => {
 					sourceLanguageTag: "en",
 					languageTags: ["en", "de", "it"],
 					modules: [""],
-					settings: {
-						"project.lintRuleLevels": {},
-					},
+					settings: {},
 				} satisfies ProjectConfig),
 			)
 

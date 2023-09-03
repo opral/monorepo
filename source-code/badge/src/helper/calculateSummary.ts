@@ -1,11 +1,11 @@
-import type { LanguageTag, LintReport } from "@inlang/sdk"
+import type { LanguageTag, MessageLintReport } from "@inlang/sdk"
 
 /**
  * Get the percentage of translated messages.
  *
  */
 export function calculateSummary(args: {
-	reports: LintReport[]
+	reports: MessageLintReport[]
 	languageTags: LanguageTag[]
 	messageIds: string[]
 }): {
@@ -17,8 +17,8 @@ export function calculateSummary(args: {
 	// get lintedVariants
 	const lintedVariantNumber = args.reports.filter(
 		(r) =>
-			r.ruleId === "lintRule.inlang.missingTranslation" ||
-			r.ruleId === "lintRule.inlang.emptyPattern",
+			r.ruleId === "messageLintRule.inlang.missingTranslation" ||
+			r.ruleId === "messageLintRule.inlang.emptyPattern",
 	).length
 
 	// only works with no specified selectors

@@ -6,7 +6,7 @@
 
 export type {
 	InlangProject,
-	InstalledLintRule,
+	InstalledMessageLintRule,
 	InstalledPlugin,
 	MessageQueryApi,
 	Subscribable,
@@ -23,5 +23,6 @@ export {
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
 } from "./errors.js"
+
 export * from "./messages/variant.js"
 export * from "./interfaces.js"

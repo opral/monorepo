@@ -1,11 +1,11 @@
 import { it, expect } from "vitest"
 import { calculateSummary } from "./calculateSummary.js"
-import type { LanguageTag, LintReport, Message, Pattern } from "@inlang/sdk"
+import type { LanguageTag, MessageLintReport, Message, Pattern } from "@inlang/sdk"
 
 it("should return 100% when no translation are missing", () => {
 	const messages: Message[] = [createMessage("test", { en: "test", de: "test" })]
 	const languageTags: LanguageTag[] = ["en", "de"]
-	const reports: LintReport[] = []
+	const reports: MessageLintReport[] = []
 	const result = calculateSummary({
 		reports,
 		languageTags,
@@ -21,13 +21,12 @@ it("should return 50% when half of the messages are missing", () => {
 		createMessage("message-2", { en: "test" }),
 	]
 	const languageTags: LanguageTag[] = ["en", "de"]
-	const reports: LintReport[] = [
+	const reports: MessageLintReport[] = [
 		{
-			type: "MessageLint",
 			messageId: "message-2",
 			languageTag: "de",
 			level: "warning",
-			ruleId: "lintRule.inlang.missingTranslation",
+			ruleId: "messageLintRule.inlang.missingTranslation",
 			body: {
 				en: "test",
 			},
@@ -49,23 +48,21 @@ it("should round the percentages", () => {
 		createMessage("message-3", { en: "test" }),
 	]
 	const languageTags: LanguageTag[] = ["en", "de"]
-	const reports: LintReport[] = [
+	const reports: MessageLintReport[] = [
 		{
-			type: "MessageLint",
 			messageId: "message-2",
 			languageTag: "de",
 			level: "warning",
-			ruleId: "lintRule.inlang.missingTranslation",
+			ruleId: "messageLintRule.inlang.missingTranslation",
 			body: {
 				en: "test",
 			},
 		},
 		{
-			type: "MessageLint",
 			messageId: "message-3",
 			languageTag: "de",
 			level: "warning",
-			ruleId: "lintRule.inlang.missingTranslation",
+			ruleId: "messageLintRule.inlang.missingTranslation",
 			body: {
 				en: "test",
 			},
@@ -87,43 +84,39 @@ it("should work with multiple resources", () => {
 		createMessage("message-3", { en: "test" }),
 	]
 	const languageTags: LanguageTag[] = ["en", "de", "fr"]
-	const reports: LintReport[] = [
+	const reports: MessageLintReport[] = [
 		{
-			type: "MessageLint",
 			messageId: "message-1",
 			languageTag: "fr",
 			level: "warning",
-			ruleId: "lintRule.inlang.missingTranslation",
+			ruleId: "messageLintRule.inlang.missingTranslation",
 			body: {
 				en: "test",
 			},
 		},
 		{
-			type: "MessageLint",
 			messageId: "message-2",
 			languageTag: "de",
 			level: "warning",
-			ruleId: "lintRule.inlang.missingTranslation",
+			ruleId: "messageLintRule.inlang.missingTranslation",
 			body: {
 				en: "test",
 			},
 		},
 		{
-			type: "MessageLint",
 			messageId: "message-3",
 			languageTag: "fr",
 			level: "warning",
-			ruleId: "lintRule.inlang.missingTranslation",
+			ruleId: "messageLintRule.inlang.missingTranslation",
 			body: {
 				en: "test",
 			},
 		},
 		{
-			type: "MessageLint",
 			messageId: "message-3",
 			languageTag: "de",
 			level: "warning",
-			ruleId: "lintRule.inlang.missingTranslation",
+			ruleId: "messageLintRule.inlang.missingTranslation",
 			body: {
 				en: "test",
 			},

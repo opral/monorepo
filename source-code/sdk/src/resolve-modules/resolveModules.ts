@@ -9,7 +9,7 @@ import { tryCatch } from "@inlang/result"
 import { resolveMessageLintRules } from "./message-lint-rules/resolveMessageLintRules.js"
 import type { Plugin } from "@inlang/plugin"
 import { createImport } from "./import.js"
-import type { LintRule } from "@inlang/lint-rule"
+import type { MessageLintRule } from "@inlang/message-lint-rule"
 import { resolvePlugins } from "./plugins/resolvePlugins.js"
 
 export const resolveModules: ResolveModuleFunction = async (args) => {
@@ -17,7 +17,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 	const moduleErrors: Array<ModuleError> = []
 
 	let allPlugins: Array<Plugin> = []
-	let allLintRules: Array<LintRule> = []
+	let allMessageLintRules: Array<MessageLintRule> = []
 
 	const meta: Awaited<ReturnType<ResolveModuleFunction>>["meta"] = []
 
@@ -58,8 +58,8 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 
 		if (importedModule.data.default.meta.id.startsWith("plugin.")) {
 			allPlugins.push(importedModule.data.default as Plugin)
-		} else if (importedModule.data.default.meta.id.startsWith("lintRule.")) {
-			allLintRules.push(importedModule.data.default as LintRule)
+		} else if (importedModule.data.default.meta.id.startsWith("messageLintRule.")) {
+			allMessageLintRules.push(importedModule.data.default as MessageLintRule)
 		} else {
 			moduleErrors.push(
 				new ModuleExportHasInvalidIdError(`Module "${module}" has an invalid id.`, {
@@ -75,11 +75,11 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 		nodeishFs: args.nodeishFs,
 	})
 
-	const resolvedLintRules = resolveMessageLintRules({ lintRules: allLintRules })
+	const resolvedLintRules = resolveMessageLintRules({ messageLintRules: allMessageLintRules })
 
 	return {
 		meta,
-		lintRules: allLintRules,
+		messageLintRules: allMessageLintRules,
 		plugins: allPlugins,
 		resolvedPluginApi: resolvedPlugins.data,
 		errors: [...moduleErrors, ...resolvedLintRules.errors, ...resolvedPlugins.errors],

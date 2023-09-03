@@ -1,23 +1,23 @@
 import { createEffect } from "./reactivity/solid.js"
 import { createSubscribable } from "./openInlangProject.js"
-import type { InlangProject, InstalledLintRule, LintReportsQueryApi } from "./api.js"
+import type { InlangProject, InstalledMessageLintRule, MessageLintReportsQueryApi } from "./api.js"
 import type { ProjectConfig } from "@inlang/project-config"
 import type { ResolveModuleFunction } from "./resolve-modules/index.js"
-import type { JSONObject, LintReport, LintRule, Message } from "./interfaces.js"
+import type { JSONObject, MessageLintReport, MessageLintRule, Message } from "./interfaces.js"
 import { lintSingleMessage } from "./lint/index.js"
 import { ReactiveMap } from "./reactivity/map.js"
 
 /**
  * Creates a reactive query API for messages.
  */
-export function createLintReportsQuery(
+export function createMessageLintReportsQuery(
 	messages: () => Array<Message> | undefined,
 	config: () => ProjectConfig | undefined,
-	installedLintRules: () => Array<InstalledLintRule>,
+	installedMessageLintRules: () => Array<InstalledMessageLintRule>,
 	resolvedModules: () => Awaited<ReturnType<ResolveModuleFunction>> | undefined,
-): InlangProject["query"]["lintReports"] {
+): InlangProject["query"]["messageLintReports"] {
 	// @ts-expect-error
-	const index = new ReactiveMap<LintReport["messageId"], LintReport[]>()
+	const index = new ReactiveMap<MessageLintReport["messageId"], MessageLintReport[]>()
 
 	createEffect(() => {
 		const msgs = messages()
@@ -31,15 +31,15 @@ export function createLintReportsQuery(
 				// TODO: only lint changed messages and update arrays selectively
 
 				lintSingleMessage({
+					rules: modules.messageLintRules,
+					ruleSettings: conf.settings as Record<MessageLintRule["meta"]["id"], JSONObject>,
+					ruleLevels: Object.fromEntries(
+						installedMessageLintRules().map((rule) => [rule.meta.id, rule.lintLevel]),
+					),
 					sourceLanguageTag: conf.sourceLanguageTag,
 					languageTags: conf.languageTags,
-					lintRuleSettings: conf.settings as Record<LintRule["meta"]["id"], JSONObject>,
-					lintLevels: Object.fromEntries(
-						installedLintRules().map((rule) => [rule.meta.id, rule.lintLevel]),
-					),
 					messages: msgs,
 					message: message,
-					lintRules: modules.lintRules,
 				}).then((report) => {
 					if (
 						report.errors.length === 0 &&
@@ -52,20 +52,20 @@ export function createLintReportsQuery(
 		}
 	})
 
-	const get = (args: Parameters<LintReportsQueryApi["get"]>[0]) => {
+	const get = (args: Parameters<MessageLintReportsQueryApi["get"]>[0]) => {
 		return structuredClone(index.get(args.where.messageId))
 	}
 
 	return {
 		getAll: createSubscribable(() => {
 			return structuredClone(
-				[...index.values()].flat().length === 0 ? undefined : [...index.values()].flat(),
+				[...index.values()].flat().length === 0 ? [] : [...index.values()].flat(),
 			)
 		}),
 		get: Object.assign(get, {
 			subscribe: (
-				args: Parameters<LintReportsQueryApi["get"]["subscribe"]>[0],
-				callback: Parameters<LintReportsQueryApi["get"]["subscribe"]>[1],
+				args: Parameters<MessageLintReportsQueryApi["get"]["subscribe"]>[0],
+				callback: Parameters<MessageLintReportsQueryApi["get"]["subscribe"]>[1],
 			) => createSubscribable(() => get(args)).subscribe(callback),
 		}) as any,
 	}

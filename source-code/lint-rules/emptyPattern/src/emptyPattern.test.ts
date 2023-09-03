@@ -21,13 +21,13 @@ test("should not report if all messages are present", async () => {
 	const result = await lintSingleMessage({
 		sourceLanguageTag: "en",
 		languageTags: ["en", "de"],
-		lintLevels: {
+		ruleLevels: {
 			[emptyPatternRule.meta.id]: "warning",
 		},
-		lintRuleSettings: {},
+		ruleSettings: {},
 		messages,
 		message: message1,
-		lintRules: [emptyPatternRule],
+		rules: [emptyPatternRule],
 	})
 
 	expect(result.errors).toHaveLength(0)
@@ -38,13 +38,13 @@ test("should report if no patterns are defined", async () => {
 	const result = await lintSingleMessage({
 		sourceLanguageTag: "en",
 		languageTags: ["en", "es"],
-		lintLevels: {
+		ruleLevels: {
 			[emptyPatternRule.meta.id]: "warning",
 		},
-		lintRuleSettings: {},
+		ruleSettings: {},
 		messages,
 		message: message1,
-		lintRules: [emptyPatternRule],
+		rules: [emptyPatternRule],
 	})
 
 	expect(result.errors).toHaveLength(0)
@@ -56,13 +56,13 @@ test("should report if a message has a pattern with only one text element that i
 	const result = await lintSingleMessage({
 		sourceLanguageTag: "en",
 		languageTags: ["en", "cn"],
-		lintLevels: {
+		ruleLevels: {
 			[emptyPatternRule.meta.id]: "warning",
 		},
-		lintRuleSettings: {},
+		ruleSettings: {},
 		messages,
 		message: message1,
-		lintRules: [emptyPatternRule],
+		rules: [emptyPatternRule],
 	})
 
 	expect(result.errors).toHaveLength(0)
@@ -75,13 +75,13 @@ describe("reported by missingTranslationRule", () => {
 		const result = await lintSingleMessage({
 			sourceLanguageTag: "en",
 			languageTags: ["en", "it"],
-			lintLevels: {
+			ruleLevels: {
 				[emptyPatternRule.meta.id]: "warning",
 			},
-			lintRuleSettings: {},
+			ruleSettings: {},
 			messages,
 			message: message1,
-			lintRules: [emptyPatternRule],
+			rules: [emptyPatternRule],
 		})
 
 		expect(result.errors).toHaveLength(0)
@@ -92,13 +92,13 @@ describe("reported by missingTranslationRule", () => {
 		const result = await lintSingleMessage({
 			sourceLanguageTag: "en",
 			languageTags: ["en", "fr"],
-			lintLevels: {
+			ruleLevels: {
 				[emptyPatternRule.meta.id]: "warning",
 			},
-			lintRuleSettings: {},
+			ruleSettings: {},
 			messages,
 			message: message1,
-			lintRules: [emptyPatternRule],
+			rules: [emptyPatternRule],
 		})
 
 		expect(result.errors).toHaveLength(0)

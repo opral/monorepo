@@ -1,4 +1,4 @@
-import type { InlangProject, LintReportsQueryApi } from "../api.js"
+import type { InlangProject, MessageLintReportsQueryApi } from "../api.js"
 import { observable, type from as solidFrom } from "../reactivity/solid.js"
 import type { MessageQueryApi } from "@inlang/sdk"
 
@@ -17,7 +17,7 @@ export const solidAdapter = (
 		config: convert(project.config),
 		errors: convert(project.errors),
 		installed: {
-			lintRules: convert(project.installed.lintRules),
+			messageLintRules: convert(project.installed.messageLintRules),
 			plugins: convert(project.installed.plugins),
 		},
 		setConfig: project.setConfig,
@@ -36,9 +36,9 @@ export const solidAdapter = (
 				getAll: convert(project.query.messages.getAll),
 				includedMessageIds: convert(project.query.messages.includedMessageIds),
 			},
-			lintReports: {
-				get: project.query.lintReports.get,
-				getAll: convert(project.query.lintReports.getAll),
+			messageLintReports: {
+				get: project.query.messageLintReports.get,
+				getAll: convert(project.query.messageLintReports.getAll),
 			},
 		},
 	} satisfies InlangProjectWithSolidAdapter
@@ -48,7 +48,7 @@ export type InlangProjectWithSolidAdapter = {
 	customApi: () => ReturnType<InlangProject["customApi"]>
 	installed: {
 		plugins: () => ReturnType<InlangProject["installed"]["plugins"]>
-		lintRules: () => ReturnType<InlangProject["installed"]["lintRules"]>
+		messageLintRules: () => ReturnType<InlangProject["installed"]["messageLintRules"]>
 	}
 	errors: () => ReturnType<InlangProject["errors"]>
 	config: () => ReturnType<InlangProject["config"]>
@@ -64,9 +64,9 @@ export type InlangProjectWithSolidAdapter = {
 			getAll: () => ReturnType<MessageQueryApi["getAll"]>
 			includedMessageIds: () => ReturnType<MessageQueryApi["includedMessageIds"]>
 		}
-		lintReports: {
-			get: LintReportsQueryApi["get"]
-			getAll: () => ReturnType<LintReportsQueryApi["getAll"]>
+		messageLintReports: {
+			get: MessageLintReportsQueryApi["get"]
+			getAll: () => ReturnType<MessageLintReportsQueryApi["getAll"]>
 		}
 	}
 }

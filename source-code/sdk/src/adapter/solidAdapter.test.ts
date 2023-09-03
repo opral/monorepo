@@ -4,7 +4,7 @@ import { createEffect, from, createRoot } from "../reactivity/solid.js"
 import { solidAdapter } from "./solidAdapter.js"
 import { openInlangProject } from "../openInlangProject.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
-import type { Message, ProjectConfig, Plugin, LintRule, Text } from "../interfaces.js"
+import type { Message, ProjectConfig, Plugin, MessageLintRule, Text } from "../interfaces.js"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -13,8 +13,8 @@ const config: ProjectConfig = {
 	languageTags: ["en"],
 	modules: ["plugin.js", "plugin.js"],
 	settings: {
-		"project.lintRuleLevels": {
-			"lintRule.inlang.missingTranslation": "error",
+		"project.messageLintRuleLevels": {
+			"messageLintRule.inlang.missingTranslation": "error",
 		},
 		"plugin.inlang.i18next": {
 			pathPattern: "./examples/example01/{languageTag}.json",
@@ -69,10 +69,9 @@ const exampleMessages: Message[] = [
 	},
 ]
 
-const mockLintRule: LintRule = {
-	type: "MessageLint",
+const mockLintRule: MessageLintRule = {
 	meta: {
-		id: "lintRule.namespace.mock",
+		id: "messageLintRule.namespace.mock",
 		description: { en: "Mock lint rule description" },
 		displayName: { en: "Mock Lint Rule" },
 	},
@@ -136,7 +135,7 @@ describe("installed", () => {
 		})
 
 		createEffect(() => {
-			inlang.installed.lintRules()
+			inlang.installed.messageLintRules()
 			counterLint += 1
 		})
 
@@ -277,7 +276,7 @@ describe("lint", () => {
 
 			let counter = 0
 			createEffect(() => {
-				inlang.query.lintReports.getAll()
+				inlang.query.messageLintReports.getAll()
 				counter += 1
 			})
 
@@ -285,7 +284,7 @@ describe("lint", () => {
 			inlang.setConfig(newConfig)
 
 			expect(counter).toBe(1)
-			expect(inlang.query.lintReports.getAll()).toEqual([])
+			expect(inlang.query.messageLintReports.getAll()).toEqual([])
 
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
@@ -293,7 +292,7 @@ describe("lint", () => {
 			inlang.setConfig(newConfig2)
 
 			expect(counter).toBe(9)
-			expect(inlang.query.lintReports.getAll()).toEqual([])
+			expect(inlang.query.messageLintReports.getAll()).toEqual([])
 		})
 	})
 
@@ -315,7 +314,7 @@ describe("lint", () => {
 
 			let counter = 0
 			createEffect(() => {
-				inlang.query.lintReports.getAll()
+				inlang.query.messageLintReports.getAll()
 				counter += 1
 			})
 
@@ -328,7 +327,7 @@ describe("lint", () => {
 			})
 
 			expect(counter).toBe(1)
-			expect(inlang.query.lintReports.getAll()).toEqual([])
+			expect(inlang.query.messageLintReports.getAll()).toEqual([])
 
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
@@ -341,7 +340,7 @@ describe("lint", () => {
 			})
 
 			expect(counter).toBe(6)
-			expect(inlang.query.lintReports.getAll()).toEqual([])
+			expect(inlang.query.messageLintReports.getAll()).toEqual([])
 		})
 	})
 })

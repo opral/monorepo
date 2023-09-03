@@ -1,14 +1,13 @@
 import type { Text, Variant } from "@inlang/message"
-import type { MessageLintRule } from "@inlang/lint-rule"
+import type { MessageLintRule } from "@inlang/message-lint-rule"
 
 type Settings = {
 	ignore?: string[]
 }
 
 export const identicalPatternRule: MessageLintRule<Settings> = {
-	type: "MessageLint",
 	meta: {
-		id: "lintRule.inlang.identicalPattern",
+		id: "messageLintRule.inlang.identicalPattern",
 		displayName: {
 			en: "Identical Pattern",
 		},

@@ -19,7 +19,7 @@ describe("config.settings", () => {
 		expect(Value.Check(ProjectConfig, mockConfig)).toBe(true)
 	})
 
-	it("should pass lintRule|plugin|app keys", () => {
+	it("should pass messageLintRule|plugin|app keys", () => {
 		const mockConfig: ProjectConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
@@ -29,7 +29,7 @@ describe("config.settings", () => {
 		const passCases = [
 			"app.namespace.ideExtension",
 			"plugin.namespace.i18n",
-			"lintRule.namespace.helloWorld",
+			"messageLintRule.namespace.helloWorld",
 		]
 
 		for (const passCase of passCases) {
@@ -143,8 +143,8 @@ describe("config.settings", () => {
 			languageTags: ["en", "de"],
 			modules: [],
 			settings: {
-				"project.lintRuleLevels": {
-					"lintRule.namespace.helloWorld": "error",
+				"project.messageLintRuleLevels": {
+					"messageLintRule.namespace.helloWorld": "error",
 				},
 			},
 		}

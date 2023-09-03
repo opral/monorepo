@@ -1,9 +1,8 @@
-import type { MessageLintRule } from "@inlang/lint-rule"
+import type { MessageLintRule } from "@inlang/message-lint-rule"
 
 export const emptyPatternRule: MessageLintRule = {
-	type: "MessageLint",
 	meta: {
-		id: "lintRule.inlang.emptyPattern",
+		id: "messageLintRule.inlang.emptyPattern",
 		displayName: {
 			en: "Empty Pattern",
 		},

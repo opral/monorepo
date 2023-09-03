@@ -7,7 +7,6 @@ import { SearchIcon } from "../editor/@host/@owner/@repository/components/Search
 import { Button } from "../index/components/Button.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import Plus from "~icons/material-symbols/add-rounded"
-import { setSearchParams } from "../install/helper/setSearchParams.js"
 import { colorForTypeOf, typeOfIdToTitle } from "./utilities.js"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 

@@ -1,15 +1,14 @@
 import { Value } from "@sinclair/typebox/value"
-import { LintRule } from "@inlang/lint-rule"
+import { MessageLintRule } from "@inlang/message-lint-rule"
 import { MessageLintRuleIsInvalidError } from "./errors.js"
 
-export const resolveMessageLintRules = (args: { lintRules: Array<LintRule> }) => {
+export const resolveMessageLintRules = (args: { messageLintRules: Array<MessageLintRule> }) => {
 	const result = {
-		data: [] as Array<LintRule>,
+		data: [] as Array<MessageLintRule>,
 		errors: [] as MessageLintRuleIsInvalidError[],
 	}
-	for (const rule of args.lintRules) {
-		// @ts-ignore - type mismatch error
-		if (Value.Check(LintRule, rule) === false) {
+	for (const rule of args.messageLintRules) {
+		if (Value.Check(MessageLintRule, rule) === false) {
 			result.errors.push(
 				new MessageLintRuleIsInvalidError(`Couldn't parse lint rule "${rule.meta.id}"`, {
 					module: "not implemented",
