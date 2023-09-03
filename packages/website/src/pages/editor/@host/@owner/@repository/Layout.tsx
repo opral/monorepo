@@ -186,7 +186,6 @@ export function Layout(props: { children: JSXElement }) {
 																	setFilteredLintRules(
 																		inlang()
 																			?.installed.lintRules()
-																			.filter((lintRule) => !lintRule.disabled)
 																			.map((lintRule) => lintRule.meta.id) ?? [],
 																	)
 																}
@@ -482,7 +481,6 @@ function LintFilter(props: { clearFunction: any }) {
 						setFilteredLintRules(
 							inlang()
 								?.installed.lintRules()
-								.filter((lintRule) => !lintRule.disabled)
 								.map((lintRule) => lintRule.meta.id) ?? [],
 						)
 					}
@@ -502,7 +500,6 @@ function LintFilter(props: { clearFunction: any }) {
 					each={
 						inlang()
 							?.installed.lintRules()
-							.filter((lintRule) => !lintRule.disabled)
 							.map((lintRule) => lintRule) ?? []
 					}
 				>
