@@ -12,7 +12,7 @@ import { sortLanguageTags } from "./helper/sortLanguageTags.js"
 export function Message(props: { id: string }) {
 	const { inlang, filteredLanguageTags } = useEditorState()
 	const [message, setMessage] = createSignal<MessageType>()
-	const [lintReports, setLintReports] = createSignal<LintReport[]>([])
+	const [lintReports, setLintReports] = createSignal<Readonly<LintReport[]>>([])
 	const [messageIsFocused, setMessageIsFocused] = createSignal<boolean>(false)
 	// const [blockChangeMessageIsFocused, setBlockChangeMessageIsFocused]  = createSignal<Date>(new Date())
 
@@ -44,7 +44,7 @@ export function Message(props: { id: string }) {
 				{ where: { messageId: message()!.id } },
 				(report) => {
 					if (report) {
-						setLintReports(report)
+						setLintReports(report!)
 					}
 				},
 			)
@@ -141,7 +141,7 @@ export function Message(props: { id: string }) {
 									<PatternEditor
 										languageTag={languageTag}
 										message={message()!}
-										lintReports={lintReports()}
+										lintReports={lintReports() as LintReport[]}
 										setMessageIsFocused={setMessageIsFocused}
 										messageIsFocused={messageIsFocused}
 										// hidden={!(filteredLanguageTags().includes(languageTag) || filteredLanguageTags().length === 0)}

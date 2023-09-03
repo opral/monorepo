@@ -43,6 +43,7 @@ export const Button = (props: ButtonProps) => {
 			<Show when={props?.href?.startsWith("/") && !props.function}>
 				<button
 					onClick={() => {
+						// @ts-ignore - https://github.com/brillout/vite-plugin-ssr/issues/1106
 						props.href && navigate(getLocale() + props.href)
 					}}
 					class={

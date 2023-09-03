@@ -27,6 +27,7 @@ export function Page() {
 	function navigateToEditor(event: Event) {
 		event.preventDefault()
 		const url = new URL(input())
+		// @ts-ignore - https://github.com/brillout/vite-plugin-ssr/issues/1106
 		return navigate(`/editor/${url.host}${url.pathname}`)
 	}
 
@@ -54,7 +55,10 @@ export function Page() {
 							file in your repository. Use the{" "}
 							<span
 								class="text-hover-primary hover:opacity-70 cursor-pointer"
-								onClick={() => navigate(getLocale() + "/documentation/quick-start")}
+								onClick={
+									// @ts-ignore https://github.com/brillout/vite-plugin-ssr/issues/1106
+									() => navigate(getLocale() + "/documentation/quick-start")
+								}
 							>
 								inlang CLI
 							</span>{" "}

@@ -180,12 +180,15 @@ function NavbarCommon(props: {
 				.toString()
 				.toLowerCase()
 				.replaceAll(" ", "-")
-				.includes(currentPageContext.urlParsed.hash.replace("#", ""))
+				// @ts-expect-error - fix after refactoring
+				.includes(currentPageContext.urlParsed.hash?.replace("#", ""))
 		) {
-			setHighlightedAnchor(currentPageContext.urlParsed.hash.replace("#", ""))
+			// @ts-expect-error - fix after refactoring
+			setHighlightedAnchor(currentPageContext.urlParsed.hash?.replace("#", ""))
 
 			const targetElement = document.getElementById(
-				currentPageContext.urlParsed.hash.replace("#", ""),
+				// @ts-expect-error - fix after refactoring
+				currentPageContext.urlParsed.hash?.replace("#", ""),
 			)
 
 			checkLoadedImgs(() => {
