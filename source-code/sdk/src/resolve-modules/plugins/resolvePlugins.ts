@@ -1,7 +1,7 @@
 import type { ResolvePluginsFunction } from "./types.js"
 import { Plugin } from "@inlang/plugin"
 import {
-	PluginReturnedInvalidAppSpecificApiError,
+	PluginReturnedInvalidCustomApiError,
 	PluginLoadMessagesFunctionAlreadyDefinedError,
 	PluginSaveMessagesFunctionAlreadyDefinedError,
 	PluginHasInvalidIdError,
@@ -26,7 +26,7 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 			loadMessages: undefined as any,
 			saveMessages: undefined as any,
 			detectedLanguageTags: [],
-			appSpecificApi: {},
+			customApi: {},
 		},
 		errors: [],
 	}
@@ -94,10 +94,10 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 		}
 
 		// --- ADD APP SPECIFIC API ---
-		if (typeof plugin.addAppSpecificApi === "function") {
+		if (typeof plugin.addCustomApi === "function") {
 			// TODO: why do we call this function 2 times (here for validation and later for retrieving the actual value)?
-			const { data: appSpecificApi, error } = tryCatch(() =>
-				plugin.addAppSpecificApi!({
+			const { data: customApi, error } = tryCatch(() =>
+				plugin.addCustomApi!({
 					settings: args.settings?.[plugin.meta.id] ?? {},
 				}),
 			)
@@ -106,10 +106,10 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 				delete error.stack
 				result.errors.push(error as any) // TODO: add correct error type
 			}
-			if (typeof appSpecificApi !== "object") {
+			if (typeof customApi !== "object") {
 				result.errors.push(
-					new PluginReturnedInvalidAppSpecificApiError(
-						`Plugin ${plugin.meta.id} defines the addAppSpecificApi function, but it does not return an object.`,
+					new PluginReturnedInvalidCustomApiError(
+						`Plugin ${plugin.meta.id} defines the addCustomApi function, but it does not return an object.`,
 						{ plugin: plugin.meta.id, cause: error },
 					),
 				)
@@ -153,14 +153,14 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 			]
 		}
 
-		if (typeof plugin.addAppSpecificApi === "function") {
-			const { data: appSpecificApi } = tryCatch(() =>
-				plugin.addAppSpecificApi!({
+		if (typeof plugin.addCustomApi === "function") {
+			const { data: customApi } = tryCatch(() =>
+				plugin.addCustomApi!({
 					settings: args.settings?.[plugin.meta.id] ?? {},
 				}),
 			)
-			if (appSpecificApi) {
-				result.data.appSpecificApi = deepmerge(result.data.appSpecificApi, appSpecificApi)
+			if (customApi) {
+				result.data.customApi = deepmerge(result.data.customApi, customApi)
 			}
 		}
 	}

@@ -11,7 +11,7 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 			return
 		}
 
-		const ideExtension = state().inlang.appSpecificApi()["app.inlang.ideExtension"]
+		const ideExtension = state().inlang.customApi()["app.inlang.ideExtension"]
 
 		if (!ideExtension) {
 			return

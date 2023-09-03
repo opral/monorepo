@@ -2,7 +2,7 @@ import { state } from "../state.js"
 import * as vscode from "vscode"
 
 export const propertiesMissingPreview = () => {
-	const ideExtension = state().inlang.appSpecificApi()["app.inlang.ideExtension"]
+	const ideExtension = state().inlang.customApi()["app.inlang.ideExtension"]
 
 	const activeTextEditor = vscode.window.activeTextEditor
 	if (!activeTextEditor) {
@@ -14,7 +14,7 @@ export const propertiesMissingPreview = () => {
 		const decorationType = vscode.window.createTextEditorDecorationType({
 			after: {
 				contentText:
-					"Warning: The VS Code extension is not working because no module defines the ide extension `appSpecificApi['app.inlang.ideExtension']`.",
+					"Warning: The VS Code extension is not working because no module defines the ide extension `customApi['app.inlang.ideExtension']`.",
 				margin: "0 0.5rem",
 				color: "white",
 				backgroundColor: "rgb(255, 140, 0, 0.15)",

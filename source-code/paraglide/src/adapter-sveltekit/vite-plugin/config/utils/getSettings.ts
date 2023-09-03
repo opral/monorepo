@@ -15,7 +15,7 @@ export const defaultSdkPluginSettings = {
 }
 
 export function getSettings(inlang: InlangProject) {
-	const settings = inlang.appSpecificApi()["app.inlang.paraglideJs"] as SdkConfig | undefined
+	const settings = inlang.customApi()["library.inlang.paraglideJs"] as SdkConfig | undefined
 	if (!settings) {
 		// automatically add module if missing
 		const config = inlang.config()

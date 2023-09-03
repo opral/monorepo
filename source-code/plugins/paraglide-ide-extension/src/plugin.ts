@@ -23,7 +23,7 @@ export const sdkPlugin: Plugin<SdkConfigInput> = {
 		// 	],
 		// },
 	},
-	addAppSpecificApi({ settings }) {
+	addCustomApi({ settings }) {
 		const parsedConfig = validateSdkConfig(settings)
 
 		return {

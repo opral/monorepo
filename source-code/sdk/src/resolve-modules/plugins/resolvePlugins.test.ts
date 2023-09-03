@@ -5,7 +5,7 @@ import {
 	PluginSaveMessagesFunctionAlreadyDefinedError,
 	PluginHasInvalidIdError,
 	PluginUsesReservedNamespaceError,
-	PluginReturnedInvalidAppSpecificApiError,
+	PluginReturnedInvalidCustomApiError,
 	PluginHasInvalidSchemaError,
 } from "./errors.js"
 import type { Plugin } from "@inlang/plugin"
@@ -21,7 +21,7 @@ describe("generally", () => {
 			},
 			loadMessages: () => undefined as any,
 			saveMessages: () => undefined as any,
-			addAppSpecificApi() {
+			addCustomApi() {
 				return {}
 			},
 		}
@@ -194,7 +194,7 @@ describe("detectedLanguageTags", () => {
 				displayName: { en: "My plugin" },
 			},
 			detectedLanguageTags: async () => ["de", "en"],
-			addAppSpecificApi: () => {
+			addCustomApi: () => {
 				return {}
 			},
 		}
@@ -204,7 +204,7 @@ describe("detectedLanguageTags", () => {
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 			},
-			addAppSpecificApi: () => {
+			addCustomApi: () => {
 				return {}
 			},
 			detectedLanguageTags: async () => ["de", "fr"],
@@ -220,7 +220,7 @@ describe("detectedLanguageTags", () => {
 	})
 })
 
-describe("addAppSpecificApi", () => {
+describe("addCustomApi", () => {
 	it("it should resolve app specific api", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
@@ -229,7 +229,7 @@ describe("addAppSpecificApi", () => {
 				displayName: { en: "My plugin" },
 			},
 
-			addAppSpecificApi: () => ({
+			addCustomApi: () => ({
 				"my-app": {
 					messageReferenceMatcher: () => undefined as any,
 				},
@@ -242,7 +242,7 @@ describe("addAppSpecificApi", () => {
 			nodeishFs: {} as any,
 		})
 
-		expect(resolved.data.appSpecificApi).toHaveProperty("my-app")
+		expect(resolved.data.customApi).toHaveProperty("my-app")
 	})
 
 	it("it should resolve multiple app specific apis", async () => {
@@ -252,7 +252,7 @@ describe("addAppSpecificApi", () => {
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 			},
-			addAppSpecificApi: () => ({
+			addCustomApi: () => ({
 				"my-app-1": {
 					functionOfMyApp1: () => undefined as any,
 				},
@@ -268,7 +268,7 @@ describe("addAppSpecificApi", () => {
 				displayName: { en: "My plugin" },
 			},
 
-			addAppSpecificApi: () => ({
+			addCustomApi: () => ({
 				"my-app-3": {
 					functionOfMyApp3: () => undefined as any,
 				},
@@ -281,9 +281,9 @@ describe("addAppSpecificApi", () => {
 			nodeishFs: {} as any,
 		})
 
-		expect(resolved.data.appSpecificApi).toHaveProperty("my-app-1")
-		expect(resolved.data.appSpecificApi).toHaveProperty("my-app-2")
-		expect(resolved.data.appSpecificApi).toHaveProperty("my-app-3")
+		expect(resolved.data.customApi).toHaveProperty("my-app-1")
+		expect(resolved.data.customApi).toHaveProperty("my-app-2")
+		expect(resolved.data.customApi).toHaveProperty("my-app-3")
 	})
 
 	it("it should throw an error if return value is not an object", async () => {
@@ -294,7 +294,7 @@ describe("addAppSpecificApi", () => {
 				displayName: { en: "My plugin" },
 			},
 			// @ts-expect-error - invalid return type
-			addAppSpecificApi: () => undefined,
+			addCustomApi: () => undefined,
 		}
 
 		const resolved = await resolvePlugins({
@@ -304,17 +304,17 @@ describe("addAppSpecificApi", () => {
 		})
 
 		expect(resolved.errors).toHaveLength(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginReturnedInvalidAppSpecificApiError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginReturnedInvalidCustomApiError)
 	})
 
-	it("it should throw an error if the passed options are not defined inside appSpecificApi", async () => {
+	it("it should throw an error if the passed options are not defined inside customApi", async () => {
 		const mockPlugin: Plugin = {
 			meta: {
 				id: "plugin.namepsace.placeholder",
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 			},
-			addAppSpecificApi: () => ({
+			addCustomApi: () => ({
 				"app.inlang.placeholder": {
 					messageReferenceMatcher: () => {
 						return { hello: "world" }
@@ -329,9 +329,9 @@ describe("addAppSpecificApi", () => {
 			nodeishFs: {} as any,
 		})
 
-		expect(resolved.data.appSpecificApi).toHaveProperty("app.inlang.placeholder")
+		expect(resolved.data.customApi).toHaveProperty("app.inlang.placeholder")
 		expect(
-			(resolved.data.appSpecificApi?.["app.inlang.placeholder"] as any).messageReferenceMatcher(),
+			(resolved.data.customApi?.["app.inlang.placeholder"] as any).messageReferenceMatcher(),
 		).toEqual({
 			hello: "world",
 		})
