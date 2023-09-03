@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect, test } from "vitest"
-import { lintSingleMessage } from "@inlang/lint"
+import { lintSingleMessage } from "@inlang/sdk/lint"
 import type { Message } from "@inlang/message"
 import { identicalPatternRule } from "./identicalPattern.js"
 
