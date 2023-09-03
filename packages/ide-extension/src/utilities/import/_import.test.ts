@@ -39,13 +39,13 @@ it("should throw if the imported file is invalid", async () => {
 })
 
 it("should be able to import an inlang plugin from a relative path", async () => {
-	const module = await _import(`./$import.test.plugin.js`)
+	const module = await _import(`./_import.test.plugin.js`)
 	const pluginAfterSetup = module.default()()
 	expect(pluginAfterSetup.id).toBe("samuelstroschein.inlangPluginJson")
 })
 
 it("should be able to import an inlang plugin from an absolute path", async () => {
-	const module = await _import(`${currentDirectoryPath}/$import.test.plugin.js`)
+	const module = await _import(`${currentDirectoryPath}/_import.test.plugin.js`)
 	const pluginAfterSetup = module.default()()
 	expect(pluginAfterSetup.id).toBe("samuelstroschein.inlangPluginJson")
 })
