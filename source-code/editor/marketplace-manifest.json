@@ -1,11 +1,11 @@
 {
-	"type": "app",
+	"id": "app.inlang.editor",
 	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"displayName": {
-		"en": "Web Editor"
+		"en": "inlang Editor"
 	},
 	"description": {
-		"en": "inlang's Web Editor"
+		"en": "Manage messages (translations) with a visual editor."
 	},
 	"linkToReadme": {
 		"en": "https://github.com/inlang/inlang/blob/main/source-code/editor/README.md"
