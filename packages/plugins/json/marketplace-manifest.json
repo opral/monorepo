@@ -1,8 +1,8 @@
 {
-	"type": "plugin",
+	"id": "plugin.inlang.json",
 	"icon": "https://github.com/inlang/inlang/blob/main/source-code/plugins/json/assets/icon.png?raw=true",
 	"displayName": {
-		"en": "Plugin JSON"
+		"en": "JSON translation files"
 	},
 	"description": {
 		"en": "JSON plugin for inlang"

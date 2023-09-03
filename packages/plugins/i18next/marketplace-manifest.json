@@ -1,5 +1,5 @@
 {
-	"type": "plugin",
+	"type": "plugin.inlang.i18next",
 	"icon": "https://github.com/inlang/inlang/blob/main/source-code/plugins/i18next/assets/icon.png?raw=true",
 	"displayName": {
 		"en": "i18next"
@@ -14,5 +14,5 @@
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0",
-	"module": "../../plugins/i18next/dist/index.js"
+	"module": "./i18next/dist/index.js"
 }

@@ -1,8 +1,8 @@
 {
-	"type": "app",
+	"id": "app.inlang.badge",
 	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"displayName": {
-		"en": "Badge"
+		"en": "Translation status badge"
 	},
 	"description": {
 		"en": "Badge showing missing messages and more"

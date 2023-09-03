@@ -1,5 +1,5 @@
 {
-	"type": "messageLintRule",
+	"id": "messageLintRule.inlang.identicalPattern",
 	"icon": "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
 	"displayName": {
 		"en": "Identical Pattern"
