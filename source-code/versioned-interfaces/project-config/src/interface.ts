@@ -88,11 +88,22 @@ export const ProjectConfig = Type.Object(
 		 *  ]
 		 */
 		modules: Type.Array(
-			Type.String({
-				// uri format according to RFC 3986
-				pattern:
-					"(?:[A-Za-z][A-Za-z0-9+.-]*:/{2})?(?:(?:[A-Za-z0-9-._~]|%[A-Fa-f0-9]{2})+(?::([A-Za-z0-9-._~]?|[%][A-Fa-f0-9]{2})+)?@)?(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\\.){1,126}[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?::[0-9]+)?(?:/(?:[A-Za-z0-9-._~]|%[A-Fa-f0-9]{2})*)*(?:\\?(?:[A-Za-z0-9-._~]+(?:=(?:[A-Za-z0-9-._~+]|%[A-Fa-f0-9]{2})+)?)(?:&|;[A-Za-z0-9-._~]+(?:=(?:[A-Za-z0-9-._~+]|%[A-Fa-f0-9]{2})+)?)*)?",
-			}),
+			Type.Intersect([
+				Type.String({
+					pattern:
+						"(?:[A-Za-z][A-Za-z0-9+.-]*:/{2})?(?:(?:[A-Za-z0-9-._~]|%[A-Fa-f0-9]{2})+(?::([A-Za-z0-9-._~]?|[%][A-Fa-f0-9]{2})+)?@)?(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\\.){1,126}[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?::[0-9]+)?(?:/(?:[A-Za-z0-9-._~]|%[A-Fa-f0-9]{2})*)*(?:\\?(?:[A-Za-z0-9-._~]+(?:=(?:[A-Za-z0-9-._~+]|%[A-Fa-f0-9]{2})+)?)(?:&|;[A-Za-z0-9-._~]+(?:=(?:[A-Za-z0-9-._~+]|%[A-Fa-f0-9]{2})+)?)*)?",
+					description: "The module must be a valid URI according to RFC 3986.",
+				}),
+				Type.String({
+					pattern: ".*\\.js$",
+					description: "The module must end with `.js`.",
+				}),
+				Type.String({
+					pattern: "^(?!.*@\\d\\.)[^]*$",
+					description:
+						"The module can only contain a major version number (ComVer, not SemVer). See https://inlang.com/documentation/comver",
+				}),
+			]),
 			{
 				uniqueItems: true,
 				description: "The modules to load. Must be a valid URI but can be relative.",

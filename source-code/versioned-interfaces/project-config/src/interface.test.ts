@@ -51,7 +51,7 @@ describe("config.modules", () => {
 		expect(Value.Check(ProjectConfig, mockConfig)).toBe(false)
 	})
 
-	it.skip("must enforce a .js ending for modules", () => {
+	it("must enforce a .js ending for modules", () => {
 		const mockConfig: ProjectConfig = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
@@ -59,6 +59,35 @@ describe("config.modules", () => {
 			settings: {},
 		}
 		expect(Value.Check(ProjectConfig, mockConfig)).toBe(false)
+	})
+
+	it("should enforce backwards compatible versioning (not SemVer)", () => {
+		const mockConfig: ProjectConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "de"],
+			modules: ["https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@4/dist/index"],
+			settings: {},
+		}
+
+		const passCases = [
+			"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index.js",
+			"https://cdn.jsdelivr.net/@3/dist/index.js",
+		]
+
+		const failCases = [
+			"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@5.1/dist/index.js",
+			"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@5.1.2/dist/index.js",
+		]
+
+		for (const passCase of passCases) {
+			const config = { ...mockConfig, modules: [passCase] }
+			expect(Value.Check(ProjectConfig, config)).toBe(true)
+		}
+
+		for (const failCase of failCases) {
+			const config = { ...mockConfig, modules: [failCase] }
+			expect(Value.Check(ProjectConfig, config)).toBe(false)
+		}
 	})
 })
 
