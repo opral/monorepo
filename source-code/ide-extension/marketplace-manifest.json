@@ -1,5 +1,5 @@
 {
-	"type": "app",
+	"id": "app.inlang.ideExtension",
 	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"displayName": {
 		"en": "IDE Extension"
@@ -7,11 +7,12 @@
 	"description": {
 		"en": "IDE Extension for inlang projects"
 	},
-	"linkToReadme": {
+	"readme": {
 		"en": "https://github.com/inlang/inlang/blob/main/source-code/ide-extension/README.md"
 	},
 	"keywords": ["ide", "extension", "vscode"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"linkToApp": "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
 	"license": "Apache-2.0"
 }
