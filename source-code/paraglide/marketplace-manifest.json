@@ -1,0 +1,17 @@
+{
+	"id": "library.inlang.paraglide",
+	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"displayName": {
+		"en": "paraglideJS"
+	},
+	"description": {
+		"en": "inlang's SDK library for the web."
+	},
+	"readme": {
+		"en": "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/paraglide/README.md"
+	},
+	"keywords": ["sdk", "paraglide"],
+	"publisherName": "inlang",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"license": "Apache-2.0"
+}
