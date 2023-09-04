@@ -6,7 +6,7 @@ description: You can manually create a new project if inlang.com/new is not work
 
 # {% $frontmatter.title %}
 
-Publishing your own plugin or lint rule to the [marketplace](/marketplace) is straight forward, as the only thing you have to add to our item registry, is the URL of your package.
+Publishing your own plugin or lint rule to the [marketplace](/marketplace) is straight forward, as the only thing you have to add to our item registry, is the URL of your `marketplace-manifest.json`.
 
 ## Pre-requisites
 
@@ -14,34 +14,36 @@ Publishing your own plugin or lint rule to the [marketplace](/marketplace) is st
 
 ## Step-by-step
 
-### 1. Add the necessary marketplace property to your plugin or lint-rule.
-Adding the marketplace information is necessary for the marketplace to display your item correctly.
+### 1. Add the information to your marketplace manifest
+Adding the marketplace information is necessary for the marketplace to display your item correctly. You can use this template for doing that:
 
-```ts
-meta: {
-		// ...
-		marketplace: {
-			icon: // Optional: URL to your icon,
-			linkToReadme: {
-				en: // Link to your readme in English with markdown syntax,
-			},
-			keywords: [
-                // An array of keywords that describe your package
-            ],
-			publisherName: // Your name or the name of your organization,
-			publisherIcon: // Optional: URL to your icon or avatar,
-			license: "Apache-2.0",
-		},
-        // ...
+```json
+{
+	"id": "type.publisher_name.item_name",
+	"icon": "Link to items icon (not required)",
+	"displayName": {
+		"en": "english display name"
 	},
+	"description": {
+		"en": "english description"
+	},
+	"readme": {
+		"en": "raw markdown readme"
+	},
+	"keywords": ["keyword1", "keyword2"],
+	"publisherName": "your publisher name",
+	"publisherIcon": "Link to your icon / avatar (not required)",
+	"license": "Apache-2.0"
+}
+
 ```
 
-### 2. Add the link to your plugin or lint-rule package to the registry
+### 2. Add the link to your marketplace manifest to the registry
 
-Add your package to [this file](https://github.com/inlang/inlang/blob/main/source-code/marketplace/registry.json). You can fork the repository for doing so.
+Add the raw link of your manifest to [this file](https://github.com/inlang/inlang/blob/main/source-code/marketplace/registry.json). You can fork the repository for doing so.
 
 ### 3. Create a pull request and wait for approval
 
-Create a pull request with your changes and wait for approval from our team. Usually, this will take less than 24 hours. After that, your plugin or lint rule will be available in the marketplace.
+Create a pull request with your changes and wait for approval from our team. Usually, this will take less than 24 hours. After that, your item will be available in the marketplace.
 
 Feel free to [join our Discord](https://discord.gg/gdMPPWy57R) if you have any questions or need help with publishing your item.
