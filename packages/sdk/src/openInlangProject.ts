@@ -46,17 +46,13 @@ export const openInlangProject = async (args: {
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
 
-		console.log("hello")
-
 		// -- config ------------------------------------------------------------
 
 		const [config, _setConfig] = createSignal<ProjectConfig>()
 		createEffect(() => {
 			loadConfig({ projectFilePath: args.projectFilePath, nodeishFs: args.nodeishFs })
 				.then((config) => {
-					// @ts-ignore - fix after refactor
 					setConfig(config)
-					// @ts-ignore - fix after refactor
 					args._capture?.("SDK used config", config)
 				})
 				.catch((err) => {
@@ -71,8 +67,6 @@ export const openInlangProject = async (args: {
 
 		const setConfig = (config: ProjectConfig): Result<void, InvalidConfigError> => {
 			try {
-				debugger
-				console.log("hello")
 				const validatedConfig = validateConfig(config)
 				_setConfig(validatedConfig)
 
@@ -148,7 +142,7 @@ export const openInlangProject = async (args: {
 
 		// -- installed items ----------------------------------------------------
 
-		const InstalledMessageLintRules = () => {
+		const installedMessageLintRules = () => {
 			if (!resolvedModules()) return []
 			return resolvedModules()!.messageLintRules.map(
 				(rule) =>
@@ -183,7 +177,7 @@ export const openInlangProject = async (args: {
 		const lintReportsQuery = createMessageLintReportsQuery(
 			messages,
 			config,
-			InstalledMessageLintRules,
+			installedMessageLintRules,
 			resolvedModules,
 		)
 
@@ -216,7 +210,7 @@ export const openInlangProject = async (args: {
 		return {
 			installed: {
 				plugins: createSubscribable(() => installedPlugins()),
-				messageLintRules: createSubscribable(() => InstalledMessageLintRules()),
+				messageLintRules: createSubscribable(() => installedMessageLintRules()),
 			},
 			errors: createSubscribable(() => [
 				...(initializeError ? [initializeError] : []),
