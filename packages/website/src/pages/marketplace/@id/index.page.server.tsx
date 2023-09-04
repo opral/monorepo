@@ -11,7 +11,8 @@ export async function onBeforeRender(pageContext: PageContext) {
 
 	const text = await (await fetch(item.readme.en)).text()
 	const markdown = parseMarkdown({
-		text: text,
+		/* Remove HTML tags from markdown */
+		text: text.replace(/<[^>]*>?/gm, ""),
 	})
 
 	return {
