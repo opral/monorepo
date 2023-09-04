@@ -64,7 +64,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "IDE Extension for inlang projects",
 		},
 		readme: {
-			en: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/ide-extension/README.md",
+			en: "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/ide-extension/README.md",
 		},
 		keywords: ["ide", "extension", "vscode"],
 		publisherName: "inlang",
@@ -74,7 +74,7 @@ export const registry: MarketplaceManifest[] = [
 	},
 	{
 		id: "library.inlang.languageTag",
-		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		icon: "https://images.emojiterra.com/google/android-12l/512px/1f4db.png",
 		displayName: {
 			en: "Language Tag",
 		},
@@ -91,7 +91,7 @@ export const registry: MarketplaceManifest[] = [
 	},
 	{
 		id: "library.inlang.paraglide",
-		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		icon: "https://emojis.wiki/thumbs/emojis/parachute.webp",
 		displayName: {
 			en: "paraglideJS",
 		},
