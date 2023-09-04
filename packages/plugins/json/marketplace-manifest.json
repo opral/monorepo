@@ -7,7 +7,7 @@
 	"description": {
 		"en": "JSON plugin for inlang"
 	},
-	"linkToReadme": {
+	"readme": {
 		"en": "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/json/README.md"
 	},
 	"keywords": ["json", "generic"],

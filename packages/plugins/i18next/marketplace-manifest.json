@@ -7,7 +7,7 @@
 	"description": {
 		"en": "i18next plugin for inlang"
 	},
-	"linkToReadme": {
+	"readme": {
 		"en": "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/json/README.md"
 	},
 	"keywords": ["i18next", "react", "nextjs"],
