@@ -13,6 +13,6 @@
 	"keywords": ["ide", "extension", "vscode"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-	"linkToApp": "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
+	"website": "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
 	"license": "Apache-2.0"
 }
