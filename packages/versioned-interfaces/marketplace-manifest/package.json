@@ -18,7 +18,8 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/translatable": "*"
+		"@inlang/translatable": "*",
+		"@inlang/project-config": "*"
 	},
 	"devDependencies": {
 		"@sinclair/typebox": "^0.31.0",

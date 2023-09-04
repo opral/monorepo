@@ -1,5 +1,6 @@
 import { Type, type Static } from "@sinclair/typebox"
 import { Translatable } from "@inlang/translatable"
+import { ProjectConfig } from "@inlang/project-config"
 
 /**
  *
@@ -18,7 +19,11 @@ const MarketplaceManifestBase = Type.Object({
 	),
 	publisherName: Type.String(),
 	publisherIcon: Type.Optional(Type.String()),
-	readme: Translatable(Type.TemplateLiteral("${string}.md")),
+	readme: Translatable(
+		Type.TemplateLiteral("${string}.md", {
+			description: "The link must be a valid markdown file.",
+		}),
+	),
 	keywords: Type.Array(Type.String()),
 	license: Type.Literal("Apache-2.0"),
 	website: Type.Optional(
@@ -29,7 +34,7 @@ const MarketplaceManifestBase = Type.Object({
 const ModuleBase = Type.Intersect([
 	MarketplaceManifestBase,
 	Type.Object({
-		module: Type.String({ description: "The link to the module" }),
+		module: ProjectConfig["properties"]["modules"]["items"],
 	}),
 ])
 

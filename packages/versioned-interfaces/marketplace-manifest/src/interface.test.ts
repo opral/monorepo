@@ -19,3 +19,21 @@ test("a valid app manifest should pass validation", () => {
 	}
 	expect(Value.Check(MarketplaceManifest, app)).toBe(true)
 })
+
+test("should pass a valid plugin manifest", () => {
+	const plugin: MarketplaceManifest = {
+		id: "plugin.inlang.example",
+		displayName: { en: "My App" },
+		description: { en: "Hello" },
+		keywords: [],
+		license: "Apache-2.0",
+		readme: { en: "https://my-app.com/readme.md" },
+		publisherName: "inlang",
+		module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next/dist/index.js",
+	}
+	const errors = [...Value.Errors(MarketplaceManifest, plugin)]
+	if (errors.length > 0) {
+		console.error(errors)
+	}
+	expect(Value.Check(MarketplaceManifest, plugin)).toBe(true)
+})
