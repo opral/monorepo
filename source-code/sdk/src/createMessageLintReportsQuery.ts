@@ -3,7 +3,12 @@ import { createSubscribable } from "./openInlangProject.js"
 import type { InlangProject, InstalledMessageLintRule, MessageLintReportsQueryApi } from "./api.js"
 import type { ProjectConfig } from "@inlang/project-config"
 import type { resolveModules } from "./resolve-modules/index.js"
-import type { JSONObject, MessageLintReport, MessageLintRule, Message } from "./versionedInterfaces.js"
+import type {
+	JSONObject,
+	MessageLintReport,
+	MessageLintRule,
+	Message,
+} from "./versionedInterfaces.js"
 import { lintSingleMessage } from "./lint/index.js"
 import { ReactiveMap } from "./reactivity/map.js"
 

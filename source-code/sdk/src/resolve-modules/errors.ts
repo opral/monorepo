@@ -31,8 +31,6 @@ export class ModuleImportError extends ModuleError {
 	}
 }
 
-
-
 export class ModuleExportIsInvalidError extends ModuleError {
 	constructor(message: string, options: { module: string; cause?: Error }) {
 		super(message, options)
