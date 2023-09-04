@@ -5,11 +5,7 @@ import type {
 	InstalledPlugin,
 	Subscribable,
 } from "./api.js"
-import {
-	type ImportFunction,
-	type ResolveModuleFunction,
-	resolveModules,
-} from "./resolve-modules/index.js"
+import { type ImportFunction, resolveModules } from "./resolve-modules/index.js"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { Value } from "@sinclair/typebox/value"
 import {
@@ -24,10 +20,9 @@ import { createRoot, createSignal, createEffect } from "./reactivity/solid.js"
 import { createMessagesQuery } from "./createMessagesQuery.js"
 import { debounce } from "throttle-debounce"
 import { createMessageLintReportsQuery } from "./createMessageLintReportsQuery.js"
-import { ProjectConfig, Message, type NodeishFilesystemSubset } from "./interfaces.js"
+import { ProjectConfig, Message, type NodeishFilesystemSubset } from "./versionedInterfaces.js"
 import { tryCatch, type Result } from "@inlang/result"
 
-// @ts-ignore - type mismatch error
 const ConfigCompiler = TypeCompiler.Compile(ProjectConfig)
 
 /**
@@ -84,7 +79,7 @@ export const openInlangProject = async (args: {
 		// -- resolvedModules -----------------------------------------------------------
 
 		const [resolvedModules, setResolvedModules] =
-			createSignal<Awaited<ReturnType<ResolveModuleFunction>>>()
+			createSignal<Awaited<ReturnType<typeof resolveModules>>>()
 
 		createEffect(() => {
 			const conf = config()

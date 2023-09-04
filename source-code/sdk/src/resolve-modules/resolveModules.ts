@@ -1,9 +1,10 @@
-import type { InlangModule, ResolveModuleFunction } from "./types.js"
+import type { ResolveModuleFunction } from "./types.js"
+import { InlangModule } from "@inlang/module"
 import {
 	ModuleError,
 	ModuleImportError,
 	ModuleHasNoExportsError,
-	ModuleExportHasInvalidIdError,
+	ModuleExportIsInvalidError,
 } from "./errors.js"
 import { tryCatch } from "@inlang/result"
 import { resolveMessageLintRules } from "./message-lint-rules/resolveMessageLintRules.js"
@@ -11,6 +12,9 @@ import type { Plugin } from "@inlang/plugin"
 import { createImport } from "./import.js"
 import type { MessageLintRule } from "@inlang/message-lint-rule"
 import { resolvePlugins } from "./plugins/resolvePlugins.js"
+import { TypeCompiler } from "@sinclair/typebox/compiler"
+
+const ModuleCompiler = TypeCompiler.Compile(InlangModule)
 
 export const resolveModules: ResolveModuleFunction = async (args) => {
 	const _import = args._import ?? createImport({ readFile: args.nodeishFs.readFile, fetch })
@@ -49,7 +53,17 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 			continue
 		}
 
-		// TODO: check if module is valid using typebox
+		const isValidModule = ModuleCompiler.Check(importedModule.data)
+
+		if (isValidModule === false) {
+			const errors = [...ModuleCompiler.Errors(importedModule.data)]
+			moduleErrors.push(
+				new ModuleExportIsInvalidError(`Module "${module}" is invalid: ` + errors, {
+					module: module,
+				}),
+			)
+			continue
+		}
 
 		meta.push({
 			module: module,
@@ -61,11 +75,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 		} else if (importedModule.data.default.meta.id.startsWith("messageLintRule.")) {
 			allMessageLintRules.push(importedModule.data.default as MessageLintRule)
 		} else {
-			moduleErrors.push(
-				new ModuleExportHasInvalidIdError(`Module "${module}" has an invalid id.`, {
-					module: module,
-				}),
-			)
+			throw new Error(`Unimplemented module type. Must start with "plugin." or "messageLintRule.`)
 		}
 	}
 
