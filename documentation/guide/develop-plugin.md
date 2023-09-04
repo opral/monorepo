@@ -18,25 +18,7 @@ description: You can manually create a new project if inlang.com/new is not work
 npx @inlang/cli@latest module init --type plugin
 ```
 
-### 2. Configure your plugin
-
-In your lint rule's `marketplace-manifest.json` make sure to define the following information:
-
-| **Parameter**        | **Description**                                               |
-|----------------------|---------------------------------------------------------------|
-| `id`                 | Unique identifier for your lint rule.                         |
-| `displayName`        | A user-friendly display name for your lint rule.              |
-| `description`        | Briefly describe what your lint rule checks for.              |
-| `readme`             | Link to the README documentation for your lint rule.          |
-| `keywords`           | Keywords that describe your lint rule.                        |
-| `publisherName`      | Your publisher name.                                          |
-| `publisherIcon`      | Link to your publisher's icon or avatar (optional).           |
-| `license`            | The license under which your lint rule is distributed.        |
-| `module`             | The path to your lint rule's JavaScript module.               |
-
-Make sure these settings accurately represent your plugin's purpose and functionality.
-
-### 3. Implement Plugin Logic
+### 2. Implement Plugin Logic
 
 Each of the following functions in the code represents a key aspect of your plugin's functionality:
 
@@ -71,6 +53,24 @@ export const plugin: Plugin<PluginSettings> = {
 
 Implement the logic for each function according to your plugin's requirements.
 **Example implementation** of plugins can be found [here](https://github.com/inlang/inlang/tree/armageddon/source-code/plugins).
+
+### 3. Configure your plugin
+
+In your lint rule's `marketplace-manifest.json` make sure to define the following information:
+
+| **Parameter**        | **Description**                                               |
+|----------------------|---------------------------------------------------------------|
+| `id`                 | Unique identifier for your lint rule.                         |
+| `displayName`        | A user-friendly display name for your lint rule.              |
+| `description`        | Briefly describe what your lint rule checks for.              |
+| `readme`             | Link to the README documentation for your lint rule.          |
+| `keywords`           | Keywords that describe your lint rule.                        |
+| `publisherName`      | Your publisher name.                                          |
+| `publisherIcon`      | Link to your publisher's icon or avatar (optional).           |
+| `license`            | The license under which your lint rule is distributed.        |
+| `module`             | The path to your lint rule's JavaScript module.               |
+
+Make sure these settings accurately represent your plugin's purpose and functionality.
 
 ### 4. Test your plugin
 
