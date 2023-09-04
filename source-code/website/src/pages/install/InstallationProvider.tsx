@@ -91,12 +91,6 @@ function validateRepo(
 			message: "No modules provided. You can find modules in the marketplace.",
 			error: true,
 		})
-	} else if (!validatePackages(props.modules)) {
-		props.setStep({
-			type: "invalid-modules",
-			message: "Invalid modules provided.",
-			error: true,
-		})
 	} else if (!props.optIn.optIn()) {
 		props.setStep({
 			type: "opt-in",
@@ -120,12 +114,17 @@ function validateRepo(
  */
 async function initializeRepo(
 	repoURL: string,
-	modulesURL: string[],
+	modulesID: string[],
 	user: { username: string; email: string },
 	step: () => Step,
 	setStep: (step: Step) => void,
 ) {
-	modulesURL = modulesURL.filter((pkg, index) => modulesURL.indexOf(pkg) === index)
+	const modulesURL = modulesID.map((url) => {
+		const module = registry.find((marketplaceItem) => (marketplaceItem as any).module.includes(url))
+		console.log(module)
+
+		return module?.url
+	})
 
 	/* Opens the repository with lix */
 	const repo = await openRepository(repoURL, {

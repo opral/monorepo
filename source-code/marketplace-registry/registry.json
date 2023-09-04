@@ -1,3 +1,4 @@
 [
-	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/cli/marketplace-manifest.json"
+	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/cli/marketplace-manifest.json",
+	"https://raw.githubusercontent.com/inlang/inlang/e3f9bb7576dfd61a9fd4ce9c647c9f3ed36f0acf/source-code/lint-rules/emptyPattern/marketplace-manifest.json"
 ]
