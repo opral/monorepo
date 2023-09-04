@@ -87,7 +87,6 @@ export const openInlangProject = async (args: {
 
 			loadModules({ config: conf, nodeishFs: args.nodeishFs, _import: args._import })
 				.then((resolvedModules) => {
-					debugger
 					// TODO move to resolveModules
 					if (
 						!resolvedModules.resolvedPluginApi.loadMessages ||

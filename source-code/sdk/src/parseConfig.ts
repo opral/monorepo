@@ -1,4 +1,4 @@
-import { ProjectConfig } from "./interfaces.js"
+import { ProjectConfig } from "./versionedInterfaces.js"
 import type { Result } from "@inlang/result"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 
