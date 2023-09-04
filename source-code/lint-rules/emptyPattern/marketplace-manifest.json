@@ -1,5 +1,5 @@
 {
-	"id": "messageLintRule.inlang.emptyPattern",
+	"id": "lintRule.inlang.emptyPattern",
 	"icon": "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
 	"displayName": {
 		"en": "Empty Pattern"
