@@ -71,12 +71,12 @@ export const plugin: Plugin<PluginSettings> = {
 
 Implement the logic for each function according to your plugin's requirements.
 
-### 4. Test Your Plugin
+### 4. Test your plugin
 
-Before proceeding, thoroughly test your plugin to ensure it functions correctly and extends inlang.com's functionality as intended.
+Before publishing your plugin to the marketplace, thoroughly test it to ensure it functions correctly and detects issues as intended.
 
-### 5. Save and Use Your Plugin
+### 5. Publish your plugin
 
-Once you've completed and tested your plugin, save your changes. You can then use your custom plugin to enhance inlang.com's capabilities.
+To make your plugin available in the inlang.com marketplace, see [Publish on marketplace](/documentation/publish-marketplace).
 
 Feel free to customize your plugin further to meet your specific needs and requirements.
