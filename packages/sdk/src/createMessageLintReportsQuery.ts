@@ -2,8 +2,8 @@ import { createEffect } from "./reactivity/solid.js"
 import { createSubscribable } from "./openInlangProject.js"
 import type { InlangProject, InstalledMessageLintRule, MessageLintReportsQueryApi } from "./api.js"
 import type { ProjectConfig } from "@inlang/project-config"
-import type { ResolveModuleFunction } from "./resolve-modules/index.js"
-import type { JSONObject, MessageLintReport, MessageLintRule, Message } from "./interfaces.js"
+import type { resolveModules } from "./resolve-modules/index.js"
+import type { JSONObject, MessageLintReport, MessageLintRule, Message } from "./versionedInterfaces.js"
 import { lintSingleMessage } from "./lint/index.js"
 import { ReactiveMap } from "./reactivity/map.js"
 
@@ -14,7 +14,7 @@ export function createMessageLintReportsQuery(
 	messages: () => Array<Message> | undefined,
 	config: () => ProjectConfig | undefined,
 	installedMessageLintRules: () => Array<InstalledMessageLintRule>,
-	resolvedModules: () => Awaited<ReturnType<ResolveModuleFunction>> | undefined,
+	resolvedModules: () => Awaited<ReturnType<typeof resolveModules>> | undefined,
 ): InlangProject["query"]["messageLintReports"] {
 	// @ts-expect-error
 	const index = new ReactiveMap<MessageLintReport["messageId"], MessageLintReport[]>()

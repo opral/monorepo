@@ -31,12 +31,11 @@ export class ModuleImportError extends ModuleError {
 	}
 }
 
-/**
- * Error when a module export has an unknown id type.
- */
-export class ModuleExportHasInvalidIdError extends ModuleError {
+
+
+export class ModuleExportIsInvalidError extends ModuleError {
 	constructor(message: string, options: { module: string; cause?: Error }) {
 		super(message, options)
-		this.name = "ModuleExportHasInvalidIdError"
+		this.name = "ModuleExportIsInvalidError"
 	}
 }

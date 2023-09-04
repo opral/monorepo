@@ -4,7 +4,13 @@ import { createEffect, from, createRoot } from "../reactivity/solid.js"
 import { solidAdapter } from "./solidAdapter.js"
 import { openInlangProject } from "../openInlangProject.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
-import type { Message, ProjectConfig, Plugin, MessageLintRule, Text } from "../interfaces.js"
+import type {
+	Message,
+	ProjectConfig,
+	Plugin,
+	MessageLintRule,
+	Text,
+} from "../versionedInterfaces.js"
 
 // ------------------------------------------------------------------------------------------------
 

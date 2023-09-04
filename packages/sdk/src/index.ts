@@ -11,7 +11,7 @@ export type {
 	MessageQueryApi,
 	Subscribable,
 } from "./api.js"
-export type { InlangModule, ImportFunction } from "./resolve-modules/index.js"
+export type { ImportFunction } from "./resolve-modules/index.js"
 export { openInlangProject } from "./openInlangProject.js"
 export { solidAdapter, type InlangProjectWithSolidAdapter } from "./adapter/solidAdapter.js"
 export { createMessagesQuery } from "./createMessagesQuery.js"
@@ -25,4 +25,4 @@ export {
 } from "./errors.js"
 
 export * from "./messages/variant.js"
-export * from "./interfaces.js"
+export * from "./versionedInterfaces.js"

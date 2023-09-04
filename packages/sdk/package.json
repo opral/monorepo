@@ -28,6 +28,7 @@
 		"node": ">=18.0.0"
 	},
 	"dependencies": {
+		"@inlang/module": "*",
 		"@inlang/language-tag": "*",
 		"@inlang/message": "*",
 		"@inlang/plugin": "*",

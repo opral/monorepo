@@ -8,7 +8,7 @@ import type {
 	Plugin,
 	ProjectConfig,
 	MessageLintReport,
-} from "./interfaces.js"
+} from "./versionedInterfaces.js"
 import type { ResolvedPluginApi } from "./resolve-modules/plugins/types.js"
 
 export type InstalledPlugin = {

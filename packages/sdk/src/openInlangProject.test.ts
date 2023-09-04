@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect, vi } from "vitest"
 import { openInlangProject } from "./openInlangProject.js"
-import type { ProjectConfig, Plugin, MessageLintRule, Message } from "./interfaces.js"
-import type { ImportFunction, InlangModule } from "./resolve-modules/index.js"
+import type { ProjectConfig, Plugin, MessageLintRule, Message } from "./versionedInterfaces.js"
+import type { ImportFunction } from "./resolve-modules/index.js"
+import type { InlangModule } from "@inlang/module"
 import {
 	ProjectFilePathNotFoundError,
 	ProjectFileJSONSyntaxError,
