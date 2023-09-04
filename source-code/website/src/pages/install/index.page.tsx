@@ -234,12 +234,12 @@ function OptIn(props: { modules: string[] }) {
 				<p class="text-surface-500 text-center">
 					The config in your repository will be updated to include the modules you selected:
 				</p>
-				<ul class="font-medium font-mono text-sm  bg-tertiary/10 p-2 rounded-md">
+				<ul class="font-medium font-mono text-sm  bg-success/10 p-2 rounded-md">
 					<For each={props.modules}>
-						{(pkg) => (
-							<li class="text-tertiary truncate">
-								+ "{pkg}"
-								<Show when={props.modules?.indexOf(pkg) !== props.modules.length - 1}>,</Show>
+						{(module) => (
+							<li class="truncate text-success">
+								+ "{module}"
+								<Show when={props.modules?.indexOf(module) !== props.modules.length - 1}>,</Show>
 							</li>
 						)}
 					</For>
