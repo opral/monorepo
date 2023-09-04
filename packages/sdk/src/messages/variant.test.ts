@@ -6,7 +6,7 @@ import {
 	MessageVariantAlreadyExistsError,
 	MessageVariantDoesNotExistError,
 } from "./errors.js"
-import type { Message, Variant } from "../interfaces.js"
+import type { Message, Variant } from "../versionedInterfaces.js"
 
 describe("getVariant", () => {
 	test("should return the correct variant of a message", () => {
