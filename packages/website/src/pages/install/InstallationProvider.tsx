@@ -120,10 +120,8 @@ async function initializeRepo(
 	setStep: (step: Step) => void,
 ) {
 	const modulesURL = modulesID.map((url) => {
-		const module = registry.find((marketplaceItem) => (marketplaceItem as any).module.includes(url))
-		console.log(module)
-
-		return module?.url
+		const module = registry.find((module) => module.id.includes(url))
+		return module?.module
 	})
 
 	/* Opens the repository with lix */
@@ -205,7 +203,7 @@ async function initializeRepo(
 	const modulesToInstall = modulesURL.filter((moduleURL) => {
 		if (inlangProject.modules.length === 0) return true
 
-		const installedPackages = inlangProject.modules.every((pkg) => pkg.includes(moduleURL))
+		const installedPackages = inlangProject.modules.every((module) => module.includes(moduleURL))
 		return !installedPackages
 	})
 	inlangProject.modules.push(...modulesToInstall)
