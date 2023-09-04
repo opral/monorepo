@@ -17,5 +17,5 @@ description: You can manually create a new project if inlang.com/new is not work
 ### 1. Initialize a new plugin package
 
 ```bash
-npx @inlang/cli@latest package init --type plugin
+npx @inlang/cli@latest module init --type plugin
 ```

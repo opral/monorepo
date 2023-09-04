@@ -21,7 +21,7 @@ Before you begin developing a lint rule, make sure you have the following pre-re
 You need to initialize a new lint rule package using the inlang CLI to get started. Open your terminal and run the following command:
 
 ```bash
-npx @inlang/cli@latest package init --type lintRule
+npx @inlang/cli@latest module init --type lintRule
 ```
 
 This command will create a new lint rule project with the necessary files and directory structure.
