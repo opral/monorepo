@@ -7,7 +7,7 @@
 	"description": {
 		"en": "Checks for identical patterns in different languages.  A message with identical wording in multiple languages can indicate that the translations are redundant or can be combined into a single message to reduce translation effort."
 	},
-	"linkToReadme": {
+	"readme": {
 		"en": "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/lint-rules/identicalPattern/README.md"
 	},
 	"keywords": ["lint rule", "itentical pattern"],
