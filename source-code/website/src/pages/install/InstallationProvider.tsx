@@ -187,8 +187,8 @@ async function initializeRepo(
 
 	/* Look if the modules were already installed */
 	for (const pkg of inlangProject.modules) {
-		const installedPackages = modulesURL.every((moduleURL) => pkg.includes(moduleURL))
-		if (installedPackages) {
+		const installedModules = modulesURL.every((moduleURL) => pkg.includes(moduleURL))
+		if (installedModules) {
 			setStep({
 				type: "already-installed",
 				message: "The modules are already installed in your repository.",
@@ -203,8 +203,8 @@ async function initializeRepo(
 	const modulesToInstall = modulesURL.filter((moduleURL) => {
 		if (inlangProject.modules.length === 0) return true
 
-		const installedPackages = inlangProject.modules.every((module) => module.includes(moduleURL))
-		return !installedPackages
+		const installedModules = inlangProject.modules.every((module) => module.includes(moduleURL))
+		return !installedModules
 	})
 	inlangProject.modules.push(...modulesToInstall)
 

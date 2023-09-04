@@ -10,7 +10,7 @@ import Plus from "~icons/material-symbols/add-rounded"
 import { colorForTypeOf, typeOfIdToTitle } from "./utilities.js"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 
-type Category = "app" | "library" | "plugin" | "lintRule"
+type Category = "app" | "library" | "plugin" | "messageLintRule"
 
 /* Export searchValue to make subpages insert search-terms */
 export const [searchValue, setSearchValue] = createSignal<string>("")
@@ -18,7 +18,7 @@ const [selectedCategories, setSelectedCategories] = createSignal<Category[]>([
 	"app",
 	"library",
 	"plugin",
-	"lintRule",
+	"messageLintRule",
 ])
 
 const filteredItems = () =>
@@ -132,7 +132,7 @@ const Gallery = () => {
 										</div>
 									</div>
 									<Chip
-										text={typeOfIdToTitle(item.id)}
+										text={typeOfIdToTitle(item.id).replace("Message", "")}
 										color={colorForTypeOf(item.id)}
 										customClasses="absolute right-4 top-4 z-5 backdrop-filter backdrop-blur-lg"
 									/>
@@ -252,10 +252,10 @@ const Tags = () => {
 				<p class="m-0">Plugins</p>
 			</div>
 			<div
-				onClick={() => selectTag("lintRule")}
+				onClick={() => selectTag("messageLintRule")}
 				class={
 					"gap-2 px-3 py-1.5 rounded-full cursor-pointer text-sm capitalize hover:opacity-90 transition-all duration-100 " +
-					(selectedCategories().includes("lintRule")
+					(selectedCategories().includes("messageLintRule")
 						? "bg-surface-800 text-background"
 						: "bg-surface-200 text-surface-600")
 				}
