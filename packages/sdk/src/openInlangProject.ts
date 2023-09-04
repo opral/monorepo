@@ -130,7 +130,9 @@ export const openInlangProject = async (args: {
 					markInitAsComplete()
 				})
 				.catch((err) =>
-					markInitAsFailed(new PluginLoadMessagesError("Error in load messages", { cause: err })),
+					markInitAsFailed(
+						new PluginLoadMessagesError("Error in load messages", { cause: err.message }),
+					),
 				)
 		})
 

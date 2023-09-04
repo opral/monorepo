@@ -142,17 +142,16 @@ function TheActualPage() {
 										<li class="pt-2 md:w-[600px]">
 											<span class="font-semibold">{error.name}: </span>
 											<br />
-											{
-												// @ts-ignore
-												error?.message
-											}{" "}
-											{/* @ts-ignore */}
+											{error?.message}
 											{error.cause && <p>({error.cause})</p>}
+											{error?.stack && (
+												<div class="text-sm">
+													<br />
+													<span class="font-semibold">Stack trace: </span>
+													<p>{error?.stack}</p>
+												</div>
+											)}
 											<br />
-											{
-												// @ts-ignore
-												error?.stack && <p>{error?.stack}</p>
-											}
 										</li>
 									)
 								}}
