@@ -67,6 +67,9 @@ const ExternalSettings = Type.Record(
  * ---------------- CONFIG ----------------
  */
 
+const uriReferenceRegex =
+	"(?:[A-Za-z][A-Za-z0-9+.-]*:/{2})?(?:(?:[A-Za-z0-9-._~]|%[A-Fa-f0-9]{2})+(?::([A-Za-z0-9-._~]?|[%][A-Fa-f0-9]{2})+)?@)?(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\\.){1,126}[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?::[0-9]+)?(?:/(?:[A-Za-z0-9-._~]|%[A-Fa-f0-9]{2})*)*(?:\\?(?:[A-Za-z0-9-._~]+(?:=(?:[A-Za-z0-9-._~+]|%[A-Fa-f0-9]{2})+)?)(?:&|;[A-Za-z0-9-._~]+(?:=(?:[A-Za-z0-9-._~+]|%[A-Fa-f0-9]{2})+)?)*)?"
+
 /**
  * The inlang config.
  */
@@ -74,7 +77,7 @@ export type ProjectConfig = Static<typeof ProjectConfig>
 export const ProjectConfig = Type.Object(
 	{
 		sourceLanguageTag: LanguageTag,
-		languageTags: Type.Array(LanguageTag),
+		languageTags: Type.Array(LanguageTag, { uniqueItems: true }),
 		/**
 		 * The modules to load.
 		 *
@@ -84,7 +87,22 @@ export const ProjectConfig = Type.Object(
 		 * 	  "https://cdn.jsdelivr.net/npm/@inlang/plugin-csv@1/dist/index.js",
 		 *  ]
 		 */
-		modules: Type.Array(Type.String()),
+		modules: Type.Array(
+			Type.String({
+				// uri format according to RFC 3986
+				pattern:
+					"(?:[A-Za-z][A-Za-z0-9+.-]*:/{2})?(?:(?:[A-Za-z0-9-._~]|%[A-Fa-f0-9]{2})+(?::([A-Za-z0-9-._~]?|[%][A-Fa-f0-9]{2})+)?@)?(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\\.){1,126}[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?::[0-9]+)?(?:/(?:[A-Za-z0-9-._~]|%[A-Fa-f0-9]{2})*)*(?:\\?(?:[A-Za-z0-9-._~]+(?:=(?:[A-Za-z0-9-._~+]|%[A-Fa-f0-9]{2})+)?)(?:&|;[A-Za-z0-9-._~]+(?:=(?:[A-Za-z0-9-._~+]|%[A-Fa-f0-9]{2})+)?)*)?",
+			}),
+			{
+				uniqueItems: true,
+				description: "The modules to load. Must be a valid URI but can be relative.",
+				examples: [
+					"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index.js",
+					"https://cdn.jsdelivr.net/npm/@inlang/plugin-csv@1/dist/index.js",
+					"./local-testing-plugin.js",
+				],
+			},
+		),
 		/**
 		 * Settings are key-value pairs.
 		 */
