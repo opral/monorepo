@@ -10,8 +10,6 @@ import type { ModuleHasNoExportsError, ModuleImportError } from "./errors.js"
 import type { ImportFunction } from "./import.js"
 import type { resolveMessageLintRules } from "./message-lint-rules/resolveMessageLintRules.js"
 
-
-
 /**
  * Function that resolves modules from the config.
  *
