@@ -18,17 +18,25 @@ description: You can manually create a new project if inlang.com/new is not work
 npx @inlang/cli@latest module init --type plugin
 ```
 
-### 3. Configure Plugin Settings
+### 2. Configure your plugin
 
-Ensure that you configure the plugin settings appropriately within the code. Pay attention to the following settings:
+In your lint rule's `marketplace-manifest.json` make sure to define the following information:
 
-- `id`: Unique identifier for your plugin.
-- `displayName`: User-friendly display name for your plugin.
-- `description`: A brief description of what your plugin does.
+| **Parameter**        | **Description**                                               |
+|----------------------|---------------------------------------------------------------|
+| `id`                 | Unique identifier for your lint rule.                         |
+| `displayName`        | A user-friendly display name for your lint rule.              |
+| `description`        | Briefly describe what your lint rule checks for.              |
+| `readme`             | Link to the README documentation for your lint rule.          |
+| `keywords`           | Keywords that describe your lint rule.                        |
+| `publisherName`      | Your publisher name.                                          |
+| `publisherIcon`      | Link to your publisher's icon or avatar (optional).           |
+| `license`            | The license under which your lint rule is distributed.        |
+| `module`             | The path to your lint rule's JavaScript module.               |
 
 Make sure these settings accurately represent your plugin's purpose and functionality.
 
-### 4. Implement Plugin Logic
+### 3. Implement Plugin Logic
 
 Each of the following functions in the code represents a key aspect of your plugin's functionality:
 
