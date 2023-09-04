@@ -46,6 +46,8 @@ export const openInlangProject = async (args: {
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
 
+		console.log("hello")
+
 		// -- config ------------------------------------------------------------
 
 		const [config, _setConfig] = createSignal<ProjectConfig>()
@@ -69,8 +71,9 @@ export const openInlangProject = async (args: {
 
 		const setConfig = (config: ProjectConfig): Result<void, InvalidConfigError> => {
 			try {
+				debugger
+				console.log("hello")
 				const validatedConfig = validateConfig(config)
-				// @ts-ignore - fix after refactor
 				_setConfig(validatedConfig)
 
 				writeConfigToDisk(validatedConfig)
@@ -95,6 +98,7 @@ export const openInlangProject = async (args: {
 
 			loadModules({ config: conf, nodeishFs: args.nodeishFs, _import: args._import })
 				.then((resolvedModules) => {
+					debugger
 					// TODO move to resolveModules
 					if (
 						!resolvedModules.resolvedPluginApi.loadMessages ||
@@ -239,31 +243,23 @@ const loadConfig = async (args: {
 	projectFilePath: string
 	nodeishFs: NodeishFilesystemSubset
 }) => {
-	let json: JSON
-	if (args.projectFilePath.startsWith("data:")) {
-		json = (await import(/* @vite-ignore */ args.projectFilePath)).default
-		// TODO: add error handling
-	} else {
-		const { data: configFile, error: configFileError } = await tryCatch(
-			async () => await args.nodeishFs.readFile(args.projectFilePath, { encoding: "utf-8" }),
+	const { data: configFile, error: configFileError } = await tryCatch(
+		async () => await args.nodeishFs.readFile(args.projectFilePath, { encoding: "utf-8" }),
+	)
+	if (configFileError)
+		throw new ProjectFilePathNotFoundError(
+			`Could not locate config file in (${args.projectFilePath}).`,
+			{
+				cause: configFileError,
+			},
 		)
-		if (configFileError)
-			throw new ProjectFilePathNotFoundError(
-				`Could not locate config file in (${args.projectFilePath}).`,
-				{
-					cause: configFileError,
-				},
-			)
 
-		const { data: parsedConfig, error: parseConfigError } = tryCatch(() => JSON.parse(configFile!))
-		if (parseConfigError)
-			throw new ProjectFileJSONSyntaxError(`The config is not a valid JSON file.`, {
-				cause: parseConfigError,
-			})
-
-		json = parsedConfig
-	}
-	return validateConfig(json)
+	const { data: parsedConfig, error: parseConfigError } = tryCatch(() => JSON.parse(configFile!))
+	if (parseConfigError)
+		throw new ProjectFileJSONSyntaxError(`The config is not a valid JSON file.`, {
+			cause: parseConfigError,
+		})
+	return validateConfig(parsedConfig)
 }
 
 const validateConfig = (config: unknown) => {
