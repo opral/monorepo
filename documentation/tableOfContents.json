@@ -10,7 +10,7 @@
 		"./guide/develop-lint-rule.md",
 		"./guide/publish-marketplace.md"
 	],
-	"Reference": ["./reference/sdk.md"],
+	"Reference": ["./reference/sdk.md", "./reference/comver.md"],
 	"Concept": [
 		"./concept/app.md",
 		"./concept/project.md",
