@@ -64,7 +64,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "IDE Extension for inlang projects",
 		},
 		readme: {
-			en: "https://github.com/inlang/inlang/blob/main/source-code/ide-extension/README.md",
+			en: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/ide-extension/README.md",
 		},
 		keywords: ["ide", "extension", "vscode"],
 		publisherName: "inlang",
