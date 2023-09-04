@@ -99,7 +99,7 @@ async function tryAutoGenModuleConfig(args: {
 	let pathPattern = `''`
 	if (pluginName === "typesafe-i18n") {
 		warnings.push(
-			"Found typesafe-i18n, but it is not supported anymore, please migrate to @inlang/paraglide",
+			"Found typesafe-i18n, but it is not supported anymore, please migrate to @inlang/paraglide.",
 		)
 	} else {
 		const languageFolderPath = await getLanguageFolderPath({
