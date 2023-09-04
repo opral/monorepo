@@ -3,6 +3,23 @@
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 export const registry: MarketplaceManifest[] = [
 	{
+		id: "app.inlang.badge",
+		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		displayName: {
+			en: "Translation status badge",
+		},
+		description: {
+			en: "Badge showing missing messages and more",
+		},
+		readme: {
+			en: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/badge/README.md",
+		},
+		keywords: ["badge"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		license: "Apache-2.0",
+	},
+	{
 		id: "app.inlang.cli",
 		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		displayName: {
