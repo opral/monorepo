@@ -25,8 +25,8 @@ export function Page(props: PageProps) {
 
 	return (
 		<>
-			<Title>{props.manifest.displayName.en}</Title>
-			<Meta name="description" content={props.manifest.description.en} />
+			<Title>{props?.manifest?.displayName?.en}</Title>
+			<Meta name="description" content={props?.manifest?.description?.en} />
 			<Layout>
 				<div class="md:py-28 py-16">
 					<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-40 md:gap-16 gap-6">
@@ -72,9 +72,9 @@ export function Page(props: PageProps) {
 										when={isModule(props.manifest)}
 										fallback={
 											/* @ts-ignore */
-											<Show when={props.manifest.linkToApp}>
+											<Show when={props.manifest.website}>
 												{/* @ts-ignore */}
-												<Button type="primary" href={props.manifest.linkToApp}>
+												<Button type="primary" href={props.manifest.website}>
 													Open
 												</Button>
 											</Show>
