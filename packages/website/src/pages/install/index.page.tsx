@@ -237,7 +237,7 @@ function OptIn(props: { modules: string[] }) {
 				<ul class="font-medium font-mono text-sm  bg-tertiary/10 p-2 rounded-md">
 					<For each={props.modules}>
 						{(pkg) => (
-							<li class="text-tertiary">
+							<li class="text-tertiary truncate">
 								+ "{pkg}"
 								<Show when={props.modules?.indexOf(pkg) !== props.modules.length - 1}>,</Show>
 							</li>

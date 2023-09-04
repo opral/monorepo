@@ -120,9 +120,19 @@ async function initializeRepo(
 	setStep: (step: Step) => void,
 ) {
 	const modulesURL = modulesID.map((url) => {
-		const module = registry.find((module) => module.id.includes(url))
+		const module = registry.find((module) => module.id.toLowerCase() === url.toLowerCase())
 		return module?.module
 	})
+
+	if (modulesURL.some((module) => module === undefined)) {
+		setStep({
+			type: "error",
+			message: "The id of the module is not valid.",
+			error: true,
+		})
+
+		return
+	}
 
 	/* Opens the repository with lix */
 	const repo = await openRepository(repoURL, {
@@ -250,19 +260,4 @@ async function initializeRepo(
 			".",
 		error: false,
 	})
-}
-
-/**
- * This function checks if the modules provided in the URL are in the marketplace registry.
- */
-function validatePackages(modules: string[]) {
-	let check = true
-	for (const pkg of modules) {
-		if (!registry.some((marketplaceItem) => (marketplaceItem as any).module.includes(pkg))) {
-			check = false
-		} else {
-			check = true
-		}
-	}
-	return check
 }
