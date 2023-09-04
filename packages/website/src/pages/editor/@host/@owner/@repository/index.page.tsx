@@ -133,7 +133,7 @@ function TheActualPage() {
 					<NoInlangConfigFoundCard />
 				</Match>
 				<Match when={inlang()?.errors().length !== 0 && inlang()}>
-					<p class="text-danger pb-2">An error occurred while initializing the config:</p>
+					<p class="text-danger pb-2">An error occurred while initializing the project file:</p>
 					<ul class="text-danger">
 						{inlang()?.errors().length !== 0 && (
 							<For each={inlang()?.errors()}>
