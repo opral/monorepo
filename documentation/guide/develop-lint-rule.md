@@ -49,7 +49,7 @@ export const yourLintRule: MessageLintRule = {
 
 Replace `yourLintRule` with a meaningful name for your lint rule.
 
-Helpful example implementations of lint rules can be found [here](https://github.com/inlang/inlang/tree/armageddon/source-code/lint-rules).
+Helpful **example implementations** of lint rules can be found [here](https://github.com/inlang/inlang/tree/armageddon/source-code/lint-rules).
 
 ### 3. Configure your lint rule
 
