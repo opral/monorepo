@@ -37,4 +37,76 @@ export const registry: MarketplaceManifest[] = [
 		license: "Apache-2.0",
 		module: "../../plugins/emptyPattern/emptyPattern.js",
 	},
+	{
+		id: "lintRule.inlang.identicalPattern",
+		icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
+		displayName: {
+			en: "Identical Pattern",
+		},
+		description: {
+			en: "Checks for identical patterns in different languages.  A message with identical wording in multiple languages can indicate that the translations are redundant or can be combined into a single message to reduce translation effort.",
+		},
+		readme: {
+			en: "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/lint-rules/identicalPattern/README.md",
+		},
+		keywords: ["lint rule", "itentical pattern"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		license: "Apache-2.0",
+		module: "../../plugins/identicalPattern/identicalPattern.js",
+	},
+	{
+		id: "lintRule.inlang.messageWithoutSource",
+		icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
+		displayName: {
+			en: "Message without source",
+		},
+		description: {
+			en: "Checks for likely outdated messages.  A message with a missing source is usually an indication that the message (id) is no longer used in source code, but messages have not been updated accordingly.",
+		},
+		readme: {
+			en: "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/lint-rules/messageWithoutSource/README.md",
+		},
+		keywords: ["lint rule", "source"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		license: "Apache-2.0",
+		module: "../../plugins/messageWithoutSource/messageWithoutSource.js",
+	},
+	{
+		id: "plugin.inlang.i18next",
+		icon: "https://github.com/inlang/inlang/blob/main/source-code/plugins/i18next/assets/icon.png?raw=true",
+		displayName: {
+			en: "i18next",
+		},
+		description: {
+			en: "i18next plugin for inlang",
+		},
+		readme: {
+			en: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/json/README.md",
+		},
+		keywords: ["i18next", "react", "nextjs"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		license: "Apache-2.0",
+		module: "./i18next/dist/index.js",
+	},
+	{
+		id: "plugin.inlang.json",
+		icon: "https://github.com/inlang/inlang/blob/main/source-code/plugins/json/assets/icon.png?raw=true",
+		displayName: {
+			en: "JSON translation files",
+		},
+		description: {
+			en: "JSON plugin for inlang",
+		},
+		readme: {
+			en: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/json/README.md",
+		},
+		keywords: ["json", "generic"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		license: "Apache-2.0",
+		module: "../../plugins/json/dist/index.js",
+	},
 ]
