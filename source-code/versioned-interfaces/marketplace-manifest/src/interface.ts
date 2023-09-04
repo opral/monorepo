@@ -18,7 +18,7 @@ const MarketplaceManifestBase = Type.Object({
 	),
 	publisherName: Type.String(),
 	publisherIcon: Type.Optional(Type.String()),
-	readme: Translatable(Type.String()),
+	readme: Translatable(Type.TemplateLiteral("${string}.md")),
 	keywords: Type.Array(Type.String()),
 	license: Type.Literal("Apache-2.0"),
 	website: Type.Optional(
