@@ -5,6 +5,7 @@ import fs from "node:fs/promises"
 import prompts from "prompts"
 import { createProjectConfig } from "@inlang/create-project"
 import { LanguageTag } from "@inlang/language-tag"
+import path from "node:path"
 
 export const init = new Command()
 	.command("init")
@@ -97,12 +98,15 @@ You can read more here: inlang.com/documentation/language-tag`,
 		initial: true,
 	})
 
-	const result = await createProjectConfig({
+	const { warnings } = await createProjectConfig({
 		tryAutoGen: autoConfig,
 		sourceLanguagetag,
 		languageTags: [...new Set(languageTags as string[])],
 		nodeishFs: args.nodeishFs,
+		pathJoin: path.join,
 	})
+
+	warnings.forEach((warning) => args.logger.warn(warning))
 
 	args.logger.info(`✅ Successfully created your inlang configuration at: ${inlangConfigFilePath}`)
 }

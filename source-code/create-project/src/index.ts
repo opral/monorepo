@@ -1,6 +1,5 @@
 import type { ProjectConfig } from "@inlang/project-config"
 import type { NodeishFilesystem } from "@lix-js/fs"
-import { join } from "node:path"
 
 const potentialFolders = [
 	"language",
@@ -15,17 +14,25 @@ const potentialFolders = [
 	// Add other potential folder names here
 ]
 
-const pluginIds: Record<string, string> = {
-	"@inlang/sdk-js": "inlang.plugin.sdkJs",
-	i18next: "inlang.plugin.i18next",
-	"typesafe-i18n": "inlang.plugin.typesafeI18n",
-	json: "inlang.plugin.json",
+const pluginUrls: Record<string, string> = {
+	sdkJs: "https://cdn.jsdelivr.net/npm/@inlang/plugin-json@3/dist/index.js",
+	i18next: "https://cdn.jsdelivr.net/npm/@inlang/i18next@3/dist/index.js",
+	typesafeI18n: "",
+	json: "https://cdn.jsdelivr.net/npm/@inlang/plugin-json@3/dist/index.js",
 }
 
-type SupportedLibrary = "@inlang/sdk-js" | "i18next" | "typesafe-i18n" | "json"
+const standardLintRules = [
+	"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@1/dist/index.js",
+	"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@1/dist/index.js",
+	"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@1/dist/index.js",
+	"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@1/dist/index.js",
+]
+
+type SupportedLibrary = keyof typeof pluginUrls
 
 export async function createProjectConfig(args: {
 	nodeishFs: NodeishFilesystem
+	pathJoin: (...args: string[]) => string
 	filePath?: string
 	tryAutoGen?: boolean
 	sourceLanguagetag: ProjectConfig["sourceLanguageTag"]
@@ -34,7 +41,7 @@ export async function createProjectConfig(args: {
 	const minimalConfig: ProjectConfig = {
 		sourceLanguageTag: args.sourceLanguagetag,
 		languageTags: args.languageTags,
-		modules: [],
+		modules: [...standardLintRules],
 		settings: {},
 	}
 
@@ -44,6 +51,7 @@ export async function createProjectConfig(args: {
 		const autoGenResult = await tryAutoGenModuleConfig({
 			baseConfig: minimalConfig,
 			nodeishFs: args.nodeishFs,
+			pathJoin: args.pathJoin,
 		})
 		newConfig = autoGenResult.config
 		warnings = autoGenResult.warnings
@@ -55,13 +63,13 @@ export async function createProjectConfig(args: {
 
 	await args.nodeishFs.writeFile(args.filePath || "./project.inlang.json", configString + "\n")
 
-	console.log(warnings)
 	return { warnings, config: newConfig }
 }
 
 async function tryAutoGenModuleConfig(args: {
 	baseConfig: ProjectConfig
 	nodeishFs: NodeishFilesystem
+	pathJoin: (...args: string[]) => string
 }): Promise<{ config: ProjectConfig; warnings: string[] }> {
 	const packageJsonPath = "./package.json"
 	const rootDir = "./"
@@ -78,7 +86,7 @@ async function tryAutoGenModuleConfig(args: {
 		// Plugin specific logs
 		if (pluginName === "@inlang/sdk-js") {
 			warnings.push(
-				"📦 Using plugin: @inlang/sdk-js. You have to add a plugin which reads and writes resources e.g. the @inlang/plugin-json. See: https://inlang.com/documentation/plugins/registry",
+				"📦 Using plugin: @inlang/sdk-js.\nYou have to add a plugin which reads and writes resources e.g. the @inlang/plugin-json. See: https://inlang.com/documentation/plugins/registry",
 			)
 		}
 	} else {
@@ -90,10 +98,18 @@ async function tryAutoGenModuleConfig(args: {
 	// Generate the config file content
 	let pathPattern = `''`
 	if (pluginName === "typesafe-i18n") {
-		warnings.push("Found typesafe-i18n, but it is not supported anymore, please migrate to...")
+		warnings.push(
+			"Found typesafe-i18n, but it is not supported anymore, please migrate to @inlang/paraglide",
+		)
 	} else {
-		const languageFolderPath = await getLanguageFolderPath({ nodeishFs: args.nodeishFs, rootDir })
-		const pathPatternRaw = languageFolderPath ? join(languageFolderPath, "{language}.json") : ""
+		const languageFolderPath = await getLanguageFolderPath({
+			nodeishFs: args.nodeishFs,
+			pathJoin: args.pathJoin,
+			rootDir,
+		})
+		const pathPatternRaw = languageFolderPath
+			? args.pathJoin(languageFolderPath, "{language}.json")
+			: ""
 
 		// Windows: Replace backward slashes with forward slashes
 		pathPattern = pathPatternRaw.replace(/\\/g, "/")
@@ -102,19 +118,19 @@ async function tryAutoGenModuleConfig(args: {
 				"Could not find a language folder in the project. You have to enter the path to your language files (pathPattern) manually.",
 			)
 		} else {
-			warnings.push(`🗂️  Found language folder path: '${pathPattern}'`)
 			warnings.push(
-				`🗂️  Please adjust the ${`pathPattern`} in the project.inlang.json manually if it is not parsed correctly.`,
+				`🗂️  Found language folder path: '${pathPattern}', please adjust the ${`pathPattern`}\nin the project.inlang.json manually if it is not parsed correctly.`,
 			)
 		}
+
+		args.baseConfig.modules = [pluginUrls[pluginName]!, ...args.baseConfig.modules]
+		const pluginId = "inlang.plugin." + pluginName
+
+		args.baseConfig.settings = {
+			[pluginId!]: { pathPattern },
+			...args.baseConfig.settings,
+		} as ProjectConfig["settings"]
 	}
-
-	args.baseConfig.modules = [pluginName]
-	const pluginId = pluginIds[pluginName]
-
-	args.baseConfig.settings = {
-		[pluginId!]: { pathPattern },
-	} as ProjectConfig["settings"]
 
 	return { warnings, config: { ...args.baseConfig } }
 }
@@ -146,7 +162,7 @@ export const getSupportedLibrary = (args: { packageJson: any }): SupportedLibrar
 	} else if (isI18nextInstalled) {
 		return "i18next"
 	} else if (isTypesafeI18nInstalled) {
-		return "typesafe-i18n"
+		return "typesafeI18n"
 	} else {
 		// Fallback, remove this someday
 		return "json"
@@ -156,6 +172,7 @@ export const getSupportedLibrary = (args: { packageJson: any }): SupportedLibrar
 export const getLanguageFolderPath = async (args: {
 	rootDir: string
 	nodeishFs: NodeishFilesystem
+	pathJoin: (...args: string[]) => string
 }): Promise<string | undefined> => {
 	console.info("Searching for language folder in", args.rootDir)
 	try {
@@ -165,7 +182,7 @@ export const getLanguageFolderPath = async (args: {
 		): Promise<string | undefined> => {
 			const files = await args.nodeishFs.readdir(dir)
 
-			const gitignorePath = join(dir, ".gitignore")
+			const gitignorePath = args.pathJoin(dir, ".gitignore")
 			let subIgnoredPaths: string[] = []
 			if (await args.nodeishFs.stat(gitignorePath).catch(() => false)) {
 				const gitignoreContent = await args.nodeishFs.readFile(gitignorePath, { encoding: "utf-8" })
@@ -176,7 +193,7 @@ export const getLanguageFolderPath = async (args: {
 			}
 
 			for (const file of files) {
-				const filePath = join(dir, file)
+				const filePath = args.pathJoin(dir, file)
 				const stat = await args.nodeishFs.stat(filePath).catch((error) => ({
 					error,
 				}))
