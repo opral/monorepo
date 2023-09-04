@@ -73,6 +73,6 @@ Before publishing your lint rule to the marketplace, thoroughly test it to ensur
 
 ### 5. Publish your lint rule
 
-To make your lint rule available in the inlang.com marketplace, see the [Publish on marketplace – Guide](/documentation/publish-marketplace)
+To make your lint rule available in the inlang.com marketplace, see [Publish on marketplace](/documentation/publish-marketplace).
 
 Feel free to [join our Discord](https://discord.gg/gdMPPWy57R) if you have any questions or need assistance developing and publishing your lint rule.
