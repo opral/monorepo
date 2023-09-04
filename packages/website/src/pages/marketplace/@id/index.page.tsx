@@ -82,10 +82,10 @@ export function Page(props: PageProps) {
 									>
 										<div class="flex items-center gap-2">
 											{/* @ts-ignore */}
-											<Button type="primary" href={`/install?module=${props.manifest.module}`}>
+											<Button type="primary" href={`/install?module=${props.manifest.id}`}>
 												<span class="capitalize">Install {typeOfIdToTitle(props.manifest.id)}</span>
 												{/* @ts-ignore */}
-												<SelectRepo size="medium" modules={[props.manifest.module]} />
+												<SelectRepo size="medium" modules={[props.manifest.id]} />
 											</Button>
 										</div>
 									</Show>

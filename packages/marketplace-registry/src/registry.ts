@@ -19,4 +19,22 @@ export const registry: MarketplaceManifest[] = [
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
 	},
+	{
+		id: "lintRule.inlang.emptyPattern",
+		icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
+		displayName: {
+			en: "Empty Pattern",
+		},
+		description: {
+			en: "Checks for empty pattern in a language tag. If a message exists in the reference resource but the pattern in a target resource is empty, it is likely that the message has not been translated yet.",
+		},
+		readme: {
+			en: "https://github.com/inlang/inlang/blob/main/source-code/lint-rules/emptyPattern/README.md",
+		},
+		keywords: ["lint rule", "empty pattern"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		license: "Apache-2.0",
+		module: "../../plugins/emptyPattern/emptyPattern.js",
+	},
 ]
