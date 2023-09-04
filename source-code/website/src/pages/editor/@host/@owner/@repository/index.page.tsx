@@ -139,13 +139,15 @@ function TheActualPage() {
 							<For each={inlang()?.errors()}>
 								{(error) => {
 									return (
-										<li class="pt-2">
+										<li class="pt-2 md:w-[600px]">
 											<span class="font-semibold">{error.name}: </span>
 											<br />
 											{
 												// @ts-ignore
 												error?.message
 											}{" "}
+											{/* @ts-ignore */}
+											{error.cause && <p>({error.cause})</p>}
 											<br />
 											{
 												// @ts-ignore
