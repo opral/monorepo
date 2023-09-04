@@ -11,7 +11,7 @@ test("a valid app manifest should pass validation", () => {
 		keywords: ["app", "best"],
 		license: "Apache-2.0",
 		website: "https://my-app.com",
-		readme: { en: "https://my-app.com/readme" },
+		readme: { en: "https://my-app.com/readme.md" },
 	}
 	const errors = [...Value.Errors(MarketplaceManifest, app)]
 	if (errors.length > 0) {
