@@ -2,17 +2,17 @@
 	"id": "app.inlang.editor",
 	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"displayName": {
-		"en": "inlang Editor"
+		"en": "inlang Web Editor"
 	},
 	"description": {
-		"en": "Manage messages (translations) with a visual editor."
+		"en": "The inlang Web Editor is a browser-based editor for globalized codebases."
 	},
-	"linkToReadme": {
-		"en": "https://github.com/inlang/inlang/blob/main/source-code/editor/README.md"
+	"readme": {
+		"en": "https://raw.githubusercontent.com/inlang/inlang/main/source-code/editor/README.md"
 	},
-	"keywords": ["web", "editor", "visual"],
+	"keywords": ["editor", "web"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-	"license": "Apache-2.0",
-	"linkToApp": "/editor"
+	"linkToApp": "/editor",
+	"license": "Apache-2.0"
 }
