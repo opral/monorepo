@@ -73,13 +73,6 @@ Before publishing your lint rule to the marketplace, thoroughly test it to ensur
 
 ### 5. Publish your lint rule
 
-To make your lint rule available in the inlang.com marketplace, you'll need to follow these steps:
-
-- Add the information about your lint rule to your marketplace manifest (Step 3).
-- Add the link to your marketplace manifest to the [registry file](https://github.com/inlang/inlang/tree/armageddon/source-code/lint-rules).
-- Create a pull request with your changes to the [inlang repository](https://github.com/inlang/inlang).
-- Wait for approval from the inlang team, which typically takes less than 24 hours.
-
-Once approved, your lint rule will be available for users in the inlang.com marketplace.
+To make your lint rule available in the inlang.com marketplace, see the [Publish on marketplace – Guide](/documentation/publish-marketplace)
 
 Feel free to [join our Discord](https://discord.gg/gdMPPWy57R) if you have any questions or need assistance developing and publishing your lint rule.
