@@ -246,6 +246,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				telemetryBrowser.group("repository", gitOrigin, {
 					name: gitOrigin,
 				})
+				telemetryBrowser.capture("EDITOR cloned repository", {
+					userPermission: userIsCollaborator() ? "iscollaborator" : "isNotCollaborator",
+				})
 				return inlang
 			} else {
 				return undefined
