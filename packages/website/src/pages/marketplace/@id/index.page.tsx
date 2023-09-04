@@ -83,7 +83,12 @@ export function Page(props: PageProps) {
 										<div class="flex items-center gap-2">
 											{/* @ts-ignore */}
 											<Button type="primary" href={`/install?module=${props.manifest.id}`}>
-												<span class="capitalize">Install {typeOfIdToTitle(props.manifest.id)}</span>
+												<span class="capitalize">
+													Install{" "}
+													{props.manifest.id.includes("messageLintRule")
+														? "Lint Rule"
+														: typeOfIdToTitle(props.manifest.id)}
+												</span>
 												{/* @ts-ignore */}
 												<SelectRepo size="medium" modules={[props.manifest.id]} />
 											</Button>

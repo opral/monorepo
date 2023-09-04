@@ -1,7 +1,6 @@
 import { createSignal, For, Show } from "solid-js"
 import { Layout as RootLayout } from "../Layout.jsx"
 import { Meta, Title } from "@solidjs/meta"
-import { navigate } from "vite-plugin-ssr/client/router"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { Button } from "../index/components/Button.jsx"
 import { z } from "zod"
@@ -322,7 +321,7 @@ function ShowError() {
 			<div class="flex flex-col justify-center gap-2 items-center">
 				<h2 class="text-[24px] leading-tight md:text-2xl font-semibold text-center">
 					{step().type === "already-installed"
-						? "Packages already installed"
+						? "Module already installed"
 						: "Something went wrong"}
 				</h2>
 				<p class="text-surface-500 text-center mb-4">{step().message}</p>
