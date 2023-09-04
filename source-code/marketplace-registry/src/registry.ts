@@ -20,7 +20,7 @@ export const registry: MarketplaceManifest[] = [
 		license: "Apache-2.0",
 	},
 	{
-		id: "lintRule.inlang.emptyPattern",
+		id: "messageLintRule.inlang.emptyPattern",
 		icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
 		displayName: {
 			en: "Empty Pattern",
@@ -29,7 +29,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "Checks for empty pattern in a language tag. If a message exists in the reference resource but the pattern in a target resource is empty, it is likely that the message has not been translated yet.",
 		},
 		readme: {
-			en: "https://github.com/inlang/inlang/blob/main/source-code/lint-rules/emptyPattern/README.md",
+			en: "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/lint-rules/emptyPattern/README.md",
 		},
 		keywords: ["lint rule", "empty pattern"],
 		publisherName: "inlang",
@@ -38,7 +38,7 @@ export const registry: MarketplaceManifest[] = [
 		module: "../../plugins/emptyPattern/emptyPattern.js",
 	},
 	{
-		id: "lintRule.inlang.identicalPattern",
+		id: "messageLintRule.inlang.identicalPattern",
 		icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
 		displayName: {
 			en: "Identical Pattern",
@@ -56,7 +56,7 @@ export const registry: MarketplaceManifest[] = [
 		module: "../../plugins/identicalPattern/identicalPattern.js",
 	},
 	{
-		id: "lintRule.inlang.messageWithoutSource",
+		id: "messageLintRule.inlang.messageWithoutSource",
 		icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
 		displayName: {
 			en: "Message without source",
