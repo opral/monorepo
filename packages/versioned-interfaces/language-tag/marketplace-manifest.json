@@ -1,0 +1,17 @@
+{
+	"id": "library.inlang.languageTag",
+	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"displayName": {
+		"en": "Language Tag"
+	},
+	"description": {
+		"en": "inlang's language tag library."
+	},
+	"readme": {
+		"en": "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/versioned-interfaces/language-tag/README.md"
+	},
+	"keywords": ["lang", "language tag"],
+	"publisherName": "inlang",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"license": "Apache-2.0"
+}
