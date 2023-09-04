@@ -2,6 +2,66 @@ import { ProjectConfig } from "./interface.js"
 import { Value } from "@sinclair/typebox/value"
 import { describe, it, expect } from "vitest"
 
+describe("config.languageTags", () => {
+	it("should enforce unique language tags", () => {
+		const mockConfig: ProjectConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "en"],
+			modules: [],
+			settings: {},
+		}
+		expect(Value.Check(ProjectConfig, mockConfig)).toBe(false)
+	})
+})
+
+describe("config.modules", () => {
+	it("should be possible to use a jsdelivr uri", () => {
+		const mockConfig: ProjectConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
+			modules: ["https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index.js"],
+			settings: {},
+		}
+		const errors = [...Value.Errors(ProjectConfig, mockConfig)]
+		if (errors.length > 0) {
+			console.log(errors)
+		}
+		expect(Value.Check(ProjectConfig, mockConfig)).toBe(true)
+	})
+	it("should be possible to reference a local module", () => {
+		const mockConfig: ProjectConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
+			modules: ["./my-module.js"],
+			settings: {},
+		}
+		expect(Value.Check(ProjectConfig, mockConfig)).toBe(true)
+	})
+
+	it("must enforce unique modules", () => {
+		const mockConfig: ProjectConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "de"],
+			modules: [
+				"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index.js",
+				"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index.js",
+			],
+			settings: {},
+		}
+		expect(Value.Check(ProjectConfig, mockConfig)).toBe(false)
+	})
+
+	it.skip("must enforce a .js ending for modules", () => {
+		const mockConfig: ProjectConfig = {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "de"],
+			modules: ["https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index"],
+			settings: {},
+		}
+		expect(Value.Check(ProjectConfig, mockConfig)).toBe(false)
+	})
+})
+
 describe("config.settings", () => {
 	it("should be possible to have one nested object layer", () => {
 		const mockConfig: ProjectConfig = {
