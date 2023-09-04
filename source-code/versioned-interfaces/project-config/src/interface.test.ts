@@ -24,7 +24,7 @@ describe("config.modules", () => {
 		}
 		const errors = [...Value.Errors(ProjectConfig, mockConfig)]
 		if (errors.length > 0) {
-			console.log(errors)
+			console.error(errors)
 		}
 		expect(Value.Check(ProjectConfig, mockConfig)).toBe(true)
 	})

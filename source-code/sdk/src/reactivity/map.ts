@@ -1,4 +1,5 @@
 // @ts-nocheck
+/* eslint-disable */
 
 import { batch } from "./solid.js"
 import { TriggerCache } from "./trigger.js"

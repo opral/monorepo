@@ -15,7 +15,7 @@ test("a valid app manifest should pass validation", () => {
 	}
 	const errors = [...Value.Errors(MarketplaceManifest, app)]
 	if (errors.length > 0) {
-		console.log(errors)
+		console.error(errors)
 	}
 	expect(Value.Check(MarketplaceManifest, app)).toBe(true)
 })

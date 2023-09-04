@@ -1,4 +1,5 @@
 // @ts-nocheck
+/* eslint-disable */
 
 import { createSignal, getListener, onCleanup, DEV } from "./solid.js"
 
