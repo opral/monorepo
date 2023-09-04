@@ -8,6 +8,16 @@ import fs from "node:fs/promises"
  * @property {string} Added - The date when the language was added.
  */
 
+/**
+ * Exceptional language tags that must be included for adoption purposes.
+ */
+const whitelistedLanguageTags = [
+	// https://github.com/LAION-AI/Open-Assistant/tree/main/website/public/locales
+	"bar", 
+	// https://github.com/LAION-AI/Open-Assistant/tree/main/website/public/locales
+	"swg"
+]
+
 async function main() {
 	const response = await fetch(
 		"https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry",
@@ -17,6 +27,8 @@ async function main() {
 		.filter((tag) => tag.Subtag.length <= 2)
 
 	const languageSubtags = tags.filter((tag) => tag.Type === "language").map((tag) => tag.Subtag)
+
+	const withWhitelist = [...new Set([...languageSubtags, ...whitelistedLanguageTags])]
 
 	await fs.writeFile(
 		"./src/internal_registry.ts",
@@ -32,7 +44,7 @@ async function main() {
 		 * 
 		 * For now, this list only includes languages, not scripts or regions. 
 		 */
-		export const languageTags = ${JSON.stringify(languageSubtags, undefined, 2)} as const
+		export const languageTags = ${JSON.stringify(withWhitelist, undefined, 2)} as const
 		
 		/**
 		 * A regular expression that matches any language tag.
@@ -41,7 +53,7 @@ async function main() {
 		 * 
 		 * For now, this list only includes languages, not scripts or regions. 
 		 */
-		export const languageTagRegex = "${languageSubtags.join("|")}"
+		export const languageTagRegex = "${withWhitelist.join("|")}"
 
 		`,
 	)
