@@ -20,6 +20,76 @@ export const registry: MarketplaceManifest[] = [
 		license: "Apache-2.0",
 	},
 	{
+		id: "app.inlang.editor",
+		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		displayName: {
+			en: "inlang Web Editor",
+		},
+		description: {
+			en: "The inlang Web Editor is a browser-based editor for globalized codebases.",
+		},
+		readme: {
+			en: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/editor/README.md",
+		},
+		keywords: ["editor", "web"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		website: "/editor",
+		license: "Apache-2.0",
+	},
+	{
+		id: "app.inlang.ideExtension",
+		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		displayName: {
+			en: "IDE Extension",
+		},
+		description: {
+			en: "IDE Extension for inlang projects",
+		},
+		readme: {
+			en: "https://github.com/inlang/inlang/blob/main/source-code/ide-extension/README.md",
+		},
+		keywords: ["ide", "extension", "vscode"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		website: "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
+		license: "Apache-2.0",
+	},
+	{
+		id: "library.inlang.languageTag",
+		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		displayName: {
+			en: "Language Tag",
+		},
+		description: {
+			en: "inlang's language tag library.",
+		},
+		readme: {
+			en: "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/versioned-interfaces/language-tag/README.md",
+		},
+		keywords: ["lang", "language tag"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		license: "Apache-2.0",
+	},
+	{
+		id: "library.inlang.paraglide",
+		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		displayName: {
+			en: "paraglideJS",
+		},
+		description: {
+			en: "inlang's SDK library for the web.",
+		},
+		readme: {
+			en: "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/paraglide/README.md",
+		},
+		keywords: ["sdk", "paraglide"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		license: "Apache-2.0",
+	},
+	{
 		id: "messageLintRule.inlang.emptyPattern",
 		icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
 		displayName: {
@@ -72,6 +142,24 @@ export const registry: MarketplaceManifest[] = [
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
 		module: "../../plugins/messageWithoutSource/messageWithoutSource.js",
+	},
+	{
+		id: "messageLintRule.inlang.missingTranslation",
+		icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
+		displayName: {
+			en: "Missing Translation",
+		},
+		description: {
+			en: "Checks for missing variants for a specific languageTag.  If a variant exists for the sourceLanguageTag but is missing for a listed languageTag, it is likely that the message has not been translated for this languageTag yet.",
+		},
+		readme: {
+			en: "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/lint-rules/messageLintRule/README.md",
+		},
+		keywords: ["lint rule", "missing"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		license: "Apache-2.0",
+		module: "../../plugins/missingTranslation/missingTranslation.js",
 	},
 	{
 		id: "plugin.inlang.i18next",

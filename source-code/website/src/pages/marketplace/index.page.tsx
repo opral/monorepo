@@ -241,17 +241,6 @@ const Tags = () => {
 				<p class="m-0">Libraries</p>
 			</div>
 			<div
-				onClick={() => selectTag("plugin")}
-				class={
-					"gap-2 px-3 py-1.5 rounded-full cursor-pointer text-sm capitalize hover:opacity-90 transition-all duration-100 " +
-					(selectedCategories().includes("plugin")
-						? "bg-surface-800 text-background"
-						: "bg-surface-200 text-surface-600")
-				}
-			>
-				<p class="m-0">Plugins</p>
-			</div>
-			<div
 				onClick={() => selectTag("messageLintRule")}
 				class={
 					"gap-2 px-3 py-1.5 rounded-full cursor-pointer text-sm capitalize hover:opacity-90 transition-all duration-100 " +
@@ -261,6 +250,17 @@ const Tags = () => {
 				}
 			>
 				<p class="m-0">Lint Rules</p>
+			</div>
+			<div
+				onClick={() => selectTag("plugin")}
+				class={
+					"gap-2 px-3 py-1.5 rounded-full cursor-pointer text-sm capitalize hover:opacity-90 transition-all duration-100 " +
+					(selectedCategories().includes("plugin")
+						? "bg-surface-800 text-background"
+						: "bg-surface-200 text-surface-600")
+				}
+			>
+				<p class="m-0">Plugins</p>
 			</div>
 		</div>
 	)

@@ -7,8 +7,8 @@
 	"description": {
 		"en": "Badge showing missing messages and more"
 	},
-	"linkToReadme": {
-		"en": "https://github.com/inlang/inlang/blob/main/source-code/badge/README.md"
+	"readme": {
+		"en": "https://raw.githubusercontent.com/inlang/inlang/main/source-code/badge/README.md"
 	},
 	"keywords": ["badge"],
 	"publisherName": "inlang",
