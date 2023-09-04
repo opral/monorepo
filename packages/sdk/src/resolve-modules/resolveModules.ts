@@ -16,8 +16,8 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 	const _import = args._import ?? createImport({ readFile: args.nodeishFs.readFile, fetch })
 	const moduleErrors: Array<ModuleError> = []
 
-	let allPlugins: Array<Plugin> = []
-	let allMessageLintRules: Array<MessageLintRule> = []
+	const allPlugins: Array<Plugin> = []
+	const allMessageLintRules: Array<MessageLintRule> = []
 
 	const meta: Awaited<ReturnType<ResolveModuleFunction>>["meta"] = []
 
