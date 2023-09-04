@@ -9,5 +9,5 @@ const app: MarketplaceManifest = {
 	publisherName: "My Company",
 	license: "Apache-2.0",
 	website: "https://my-app.com",
-	readme: { en: "https://my-app.com/readme" },
+	readme: { en: "https://my-app.com/readme.md" },
 }
