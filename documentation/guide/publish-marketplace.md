@@ -6,7 +6,7 @@ description: You can manually create a new project if inlang.com/new is not work
 
 # {% $frontmatter.title %}
 
-Publishing your own plugin or lint rule to the [marketplace](/marketplace) is straight forward, as the only thing you have to add to our item registry, is the URL of your `marketplace-manifest.json`.
+Publishing your own plugin or lint rule to the [marketplace](/marketplace) is straightforward, as the only thing you have to add to our item registry is the URL of your `marketplace-manifest.json`.
 
 ## Pre-requisites
 
@@ -15,7 +15,7 @@ Publishing your own plugin or lint rule to the [marketplace](/marketplace) is st
 ## Step-by-step
 
 ### 1. Add the information to your marketplace manifest
-Adding the marketplace information is necessary for the marketplace to display your item correctly. You can use this template for doing that:
+Adding the marketplace information is necessary for the marketplace to display your item correctly. You can use this template to do that:
 
 ```json
 {
@@ -40,7 +40,7 @@ Adding the marketplace information is necessary for the marketplace to display y
 
 ### 2. Add the link to your marketplace manifest to the registry
 
-Add the raw link of your manifest to [this file](https://github.com/inlang/inlang/blob/main/source-code/marketplace/registry.json). You can fork the repository for doing so.
+Add the raw link of your manifest to [this file](https://github.com/inlang/inlang/blob/main/source-code/marketplace/registry.json). You can fork the repository to do so.
 
 ### 3. Create a pull request and wait for approval
 
