@@ -70,6 +70,7 @@ export const plugin: Plugin<PluginSettings> = {
 ```
 
 Implement the logic for each function according to your plugin's requirements.
+**Example implementation** of plugins can be found [here](https://github.com/inlang/inlang/tree/armageddon/source-code/plugins).
 
 ### 4. Test your plugin
 
