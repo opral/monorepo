@@ -61,7 +61,7 @@ const Plugin = Type.Intersect([
 const MessageLintRule = Type.Intersect([
 	ModuleBase,
 	Type.Object({
-		id: Type.TemplateLiteral("lintRule.${string}.${string}"),
+		id: Type.TemplateLiteral("messageLintRule.${string}.${string}"),
 	}),
 ])
 
