@@ -5,7 +5,7 @@
 		"en": "Language Tag"
 	},
 	"description": {
-		"en": "inlang's language tag library."
+		"en": "A library containing BCP-47 language tags types and validators, used by inlang."
 	},
 	"readme": {
 		"en": "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/versioned-interfaces/language-tag/README.md"

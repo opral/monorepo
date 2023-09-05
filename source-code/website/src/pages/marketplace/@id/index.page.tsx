@@ -55,8 +55,7 @@ export function Page(props: PageProps) {
 											<p class={!readmore() ? "lg:line-clamp-2" : ""}>
 												{props.manifest.description.en}
 											</p>
-											{/* @ts-ignore */}
-											<Show when={props.manifest.meta?.description?.en?.length > 205}>
+											<Show when={props.manifest.description?.en?.length > 205}>
 												<p
 													onClick={() => setReadmore((prev) => !prev)}
 													class="cursor-pointer hover:text-surface-700 transition-all duration-150 font-medium max-lg:hidden"

@@ -5,7 +5,7 @@
 		"en": "paraglideJS"
 	},
 	"description": {
-		"en": "inlang's SDK library for the web."
+		"en": "A fully configurable JavaScript SDK that integrates within your framework."
 	},
 	"readme": {
 		"en": "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/paraglide/README.md"

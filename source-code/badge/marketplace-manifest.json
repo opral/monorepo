@@ -5,7 +5,7 @@
 		"en": "Translation status badge"
 	},
 	"description": {
-		"en": "Badge showing missing messages and more"
+		"en": "Badge showing missing messages in your codebase. Perfect for your README.md file."
 	},
 	"readme": {
 		"en": "https://raw.githubusercontent.com/inlang/inlang/main/source-code/badge/README.md"

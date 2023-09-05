@@ -2,10 +2,10 @@
 	"id": "app.inlang.editor",
 	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"displayName": {
-		"en": "inlang Web Editor"
+		"en": "Web Editor"
 	},
 	"description": {
-		"en": "The inlang Web Editor is a browser-based editor for globalized codebases."
+		"en": "The inlang Web Editor enables you to work with globalized codebases in your browser, without having to touch code but still being able to have a git-based workflow."
 	},
 	"readme": {
 		"en": "https://raw.githubusercontent.com/inlang/inlang/main/source-code/editor/README.md"
