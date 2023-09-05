@@ -224,7 +224,7 @@ it("should add the sdk plugin module if not present yet", async () => {
 	expect(setConfig).toHaveBeenNthCalledWith(1, {
 		modules: ["../../../../../sdk-js-plugin/dist/index.js"],
 		settings: {
-			"plugin.inlang.sdkJs": {
+			"library.inlang.paraglideJs": {
 				languageNegotiation: {
 					strategies: [
 						{
