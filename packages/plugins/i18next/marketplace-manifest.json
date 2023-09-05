@@ -5,10 +5,10 @@
 		"en": "i18next"
 	},
 	"description": {
-		"en": "i18next plugin for inlang"
+		"en": "A plugin for inlang projects that works with i18next and reads / writes resources."
 	},
 	"readme": {
-		"en": "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/json/README.md"
+		"en": "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/i18next/README.md"
 	},
 	"keywords": ["i18next", "react", "nextjs"],
 	"publisherName": "inlang",

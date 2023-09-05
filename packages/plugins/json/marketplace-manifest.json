@@ -5,7 +5,7 @@
 		"en": "JSON translation files"
 	},
 	"description": {
-		"en": "JSON plugin for inlang"
+		"en": "This plugin enables using JSON files for messages. It is not library specific and can be used with any framework."
 	},
 	"readme": {
 		"en": "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/json/README.md"
