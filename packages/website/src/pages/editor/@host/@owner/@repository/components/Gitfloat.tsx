@@ -178,7 +178,7 @@ export const Gitfloat = () => {
 			},
 			onClick: () => {
 				// do nothing
-			}
+			},
 		},
 		fork: {
 			text: "Fork to make changes",
@@ -274,7 +274,7 @@ export const Gitfloat = () => {
 								onClick={() => data[gitState()].onClick()}
 								prop:href={data[gitState()].href === "pullrequest" ? pullrequestUrl() : undefined}
 								prop:target="_blank"
-								prop: loading={isLoading() || gitState() === "loading"}
+								prop:loading={isLoading() || gitState() === "loading"}
 								prop:disabled={localChanges() === 0 && gitState() === "hasChanges"}
 								class={"on-inverted " + (gitState() === "pullrequest" && "grow")}
 							>
