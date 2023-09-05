@@ -1,8 +1,11 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import { ProjectConfig } from "@inlang/project-config"
 import { pluginUrls, standardLintRules, type PluginId } from "./tryAutoGenModuleConfig.js"
+// @ts-ignore
 import { format } from "prettier/standalone.mjs"
+// @ts-ignore
 import prettierPluginTS from "prettier/plugins/typescript.mjs"
+// @ts-ignore
 import prettierPluginEsTree from "prettier/plugins/estree.mjs"
 
 function parseDirtyValue(jsString: string) {
