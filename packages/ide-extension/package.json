@@ -67,7 +67,7 @@
 		"test:e2e": "TEST=true npm run pretest && node ./dist/test.cjs",
 		"---- LINT ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
-		"lint": "eslint ./src",
+		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"---- OTHER ----------------------------------------------------------": "",
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"

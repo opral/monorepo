@@ -25,7 +25,7 @@
 		"tsc:watch:plugin": "tsc -p tsconfig.build.plugin.json --watch",
 		"vitest:watch": "vitest watch --passWithNoTests --coverage",
 		"---- LINT ----------------------------------------------------------": "",
-		"_lint": "eslint ./src",
+		"_lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},

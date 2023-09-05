@@ -6,7 +6,7 @@
 		"dev": "node --loader tsx ./src/main.ts",
 		"production": "NODE_ENV=production tsx ./src/main.ts",
 		"test": "tsc --noEmit",
-		"lint": "eslint ./src",
+		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
