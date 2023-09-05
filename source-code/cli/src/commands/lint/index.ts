@@ -79,11 +79,12 @@ export async function lintCommandAction(args: { inlang: InlangProject; logger: a
 		let hasError = false
 
 		for (const lint of reports) {
+			const message = typeof lint.body === "object" ? lint.body.en : lint.body
 			if (lint.level === "error") {
 				hasError = true
-				lintTable.push(["Error", lint.ruleId, lint.body.en])
+				lintTable.push(["Error", lint.ruleId, message])
 			} else if (lint.level === "warning") {
-				lintTable.push(["Warning", lint.ruleId, lint.body.en])
+				lintTable.push(["Warning", lint.ruleId, message])
 			}
 		}
 

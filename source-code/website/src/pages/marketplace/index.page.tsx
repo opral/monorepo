@@ -32,8 +32,11 @@ const filteredItems = () =>
 
 		const search = searchValue().toLowerCase()
 
+		const displayName =
+			typeof item.displayName === "object" ? item.displayName.en : item.displayName
+
 		const isSearchMatch =
-			item.displayName.en?.toLowerCase().includes(search) ||
+			displayName.toLowerCase().includes(search) ||
 			item.publisherName.toLowerCase().includes(search) ||
 			item.keywords.some((keyword: string) => keyword.toLowerCase().includes(search))
 
@@ -87,6 +90,11 @@ const Gallery = () => {
 		<>
 			<For each={filteredItems()}>
 				{(item) => {
+					const displayName =
+						typeof item.displayName === "object" ? item.displayName.en : item.displayName
+					const description =
+						typeof item.description === "object" ? item.description.en : item.description
+
 					return (
 						<>
 							<a href={`/marketplace/${item.id}`} class="relative no-underline h-64">
@@ -97,7 +105,7 @@ const Gallery = () => {
 												when={item.icon}
 												fallback={
 													<div class="w-10 h-10 font-semibold text-xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
-														{item.displayName.en?.[0]}
+														{displayName[0]}
 													</div>
 												}
 											>
@@ -106,12 +114,10 @@ const Gallery = () => {
 													src={item.icon}
 												/>
 											</Show>
-											<p class="m-0 text-surface-900 font-semibold text-md">
-												{item.displayName.en}
-											</p>
+											<p class="m-0 text-surface-900 font-semibold text-md">{displayName}</p>
 										</div>
 										<p class="m-0 font-normal leading-6 text-sm tracking-wide text-surface-500 line-clamp-3">
-											{item.description.en}
+											{description}
 										</p>
 									</div>
 									<div class="w-full flex items-end justify-between">
