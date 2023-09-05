@@ -16,7 +16,7 @@
 		"build": "tsc --build ./tsconfig.build.json",
 		"dev": "tsc -p ./tsconfig.build.json --watch",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
-		"lint": "eslint ./src",
+		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"test:watch": "vitest watch --passWithNoTests --coverage",
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
