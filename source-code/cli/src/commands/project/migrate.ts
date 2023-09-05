@@ -4,6 +4,7 @@ import type { NodeishFilesystem } from "@lix-js/fs"
 import fs from "node:fs/promises"
 import { migrateProjectConfig } from "@inlang/create-project"
 import path from "node:path"
+import prompts from "prompts"
 
 export const migrate = new Command()
 	.command("migrate")
@@ -34,6 +35,14 @@ export async function migrateCommandAction(args: {
 			return
 		}
 	}
+
+	await prompts({
+		type: "confirm",
+		name: "autoConfig",
+		message:
+			"Whe try a best effort migration for your old inlang configuration, this works best if the old file has standard formatting.",
+		initial: true,
+	})
 
 	const { warnings } = await migrateProjectConfig({
 		nodeishFs: args.nodeishFs,

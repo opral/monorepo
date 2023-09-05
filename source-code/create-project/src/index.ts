@@ -1,14 +1,14 @@
 export { migrateProjectConfig } from "./migrate.js"
 export { createProjectConfig } from "./create.js"
+export { getLanguageFolderPath } from "./getLanguageFolderPath.js"
+export { getSupportedLibrary } from "./tryAutoGenModuleConfig.js"
 
 // TODO:
-// -handle auto get versions, fetch, join functions
+// - handle auto get versions, fetch, join functions
 // - abort if git not clean?
 // - rework warnigns and message formatting
 // - check and implement config options for other plugins
 // - check and implement other lint rules?
-// - cli: prompt with instructions eg format to standard and its just best effort
-// - only export from index file
 // - inject logger instead of returning warnings?
 // Support pathPattern object format
 // 		"pathPattern": {
