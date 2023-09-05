@@ -1,7 +1,6 @@
 import { Command } from "commander"
 import Table from "cli-table3"
 import { getInlangProject } from "../../utilities/getInlangProject.js"
-import { bold, italic } from "../../utilities/format.js"
 import { log } from "../../utilities/log.js"
 import type { InlangProject, MessageLintReport } from "@inlang/sdk"
 
