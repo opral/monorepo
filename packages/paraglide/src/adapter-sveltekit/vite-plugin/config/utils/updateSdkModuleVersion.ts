@@ -9,8 +9,7 @@ import { version } from "../../../../../package.json"
  * @returns `false` iff the version is already up2date
  */
 export const updateSdkModuleVersion = async (inlang: InlangProject): Promise<boolean> => {
-	const config = inlang.config()
-	if (!config) return false
+	const config = inlang.config()!
 	const paraglidePluginModule = config.modules.find((module) =>
 		module.includes("plugin.inlang.paraglideJs"),
 	)
