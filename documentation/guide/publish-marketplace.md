@@ -11,6 +11,7 @@ Publishing your own plugin or lint rule to the [marketplace](/marketplace) is st
 ## Pre-requisites
 
 - [jsdelivr URL](https://www.jsdelivr.com/github) (other CDN's are not supported)
+- A developed [app](/documentation/develop-app), [plugin](/documentation/develop-plugin), or [lint rule](/documentation/develop-lint-rule)
 
 ## Step-by-step
 
