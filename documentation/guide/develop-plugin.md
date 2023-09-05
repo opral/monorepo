@@ -14,7 +14,7 @@ Plugins are a powerful way to extend the functionality of inlang applications. T
 
 ## Step-by-step
 
-### 1. Initialize a new plugin package
+### 1. Initialize a new plugin module
 
 ```bash
 npx @inlang/cli@latest module init --type plugin
