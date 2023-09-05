@@ -5,7 +5,7 @@
 		"en": "IDE Extension"
 	},
 	"description": {
-		"en": "IDE Extension for inlang projects"
+		"en": "This extension allows you to use inlang in your IDE, enabling translating content directly in your code."
 	},
 	"readme": {
 		"en": "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/ide-extension/README.md"
