@@ -1,6 +1,5 @@
 import { deepmerge } from "deepmerge-ts"
 import type { TransformConfig } from "../vite-plugin/config/index.js"
-import type { Message } from "@inlang/sdk"
 
 type DeepPartial<T> = T extends Record<PropertyKey, unknown>
 	? {
@@ -15,7 +14,7 @@ export const initTestApp = (overrides: DeepPartial<TransformConfig> = {}): Trans
 
 			sourceLanguageTag: "en",
 			languageTags: ["en"],
-			messages: () => [],
+			messages: [],
 
 			cwdFolderPath: "",
 			options: {
