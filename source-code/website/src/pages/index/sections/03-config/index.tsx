@@ -267,7 +267,7 @@ const ConfigPage = () => {
 						<div class="w-3 h-3 bg-surface-600 rounded-full" />
 					</div>
 					<pre class="text-surface-400 leading-relaxed pl-12 sm:pl-0 w-full text-center transition duration-200 group-hover:text-primary-on-inverted-container">
-						inlang.config.js
+						project.inlang.json
 					</pre>
 					<div class="flex flex-col gap-1 px-8 py-4 pr-16">
 						<For each={code}>

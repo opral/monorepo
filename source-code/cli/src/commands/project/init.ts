@@ -38,7 +38,7 @@ export async function initCommandAction(args: {
 	}
 
 	try {
-		const oldProjFileStat = await fs.stat("./inlang.config.jsD")
+		const oldProjFileStat = await fs.stat("./inlang.config.js")
 		if (oldProjFileStat) {
 			args.logger.error(
 				"Found an existing inlang configuration in the legacy format, please run the migration command instead.",
@@ -106,9 +106,7 @@ You can read more here: inlang.com/documentation/language-tag`,
 		pathJoin: path.join,
 	})
 
-	for (const warning of warnings) {
-		args.logger.warn(warning)
-	}
+	for (const warning of warnings) args.logger.warn(warning)
 
 	args.logger.info(`✅ Successfully created your inlang configuration at: ${inlangConfigFilePath}`)
 }

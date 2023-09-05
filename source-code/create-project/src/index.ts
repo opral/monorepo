@@ -28,7 +28,7 @@ const standardLintRules = [
 	"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@1/dist/index.js",
 ]
 
-type SupportedLibrary = keyof typeof pluginUrls
+export type SupportedLibrary = keyof typeof pluginUrls
 
 export async function createProjectConfig(args: {
 	nodeishFs: NodeishFilesystem

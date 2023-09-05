@@ -27,10 +27,10 @@ export const badge = async (url: string) => {
 	// initialize a lisa repo instance on each request to prevent cross request pollution
 	const repo = await openRepository(url, { nodeishFs: createNodeishMemoryFs() })
 
-	// Get the content of the inlang.config.js file
-	await repo.nodeishFs.readFile("./inlang.config.js", { encoding: "utf-8" }).catch((e) => {
+	// Get the content of the project.inlang.json file
+	await repo.nodeishFs.readFile("./project.inlang.json", { encoding: "utf-8" }).catch((e) => {
 		if (e.code !== "ENOENT") throw e
-		throw new Error("No inlang.config.js file found in the repository.")
+		throw new Error("No project.inlang.json file found in the repository.")
 	})
 
 	const inlang = await openInlangProject({

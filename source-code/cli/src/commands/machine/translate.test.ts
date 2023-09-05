@@ -56,7 +56,7 @@ describe("translate command", () => {
 			const fs = createNodeishMemoryFs()
 
 			await fs.writeFile(
-				"./inlang.config.json",
+				"./project.inlang.json",
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en", "de", "it"],
@@ -82,7 +82,7 @@ describe("translate command", () => {
 			}
 
 			const inlang = await openInlangProject({
-				projectFilePath: "./inlang.config.json",
+				projectFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
