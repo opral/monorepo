@@ -1,9 +1,12 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import { ProjectConfig } from "@inlang/project-config"
-import { tryAutoGenModuleConfig } from "./tryAutoGenModuleConfig.js"
+import { pluginUrls, standardLintRules, type PluginId } from "./tryAutoGenModuleConfig.js"
+import { format } from "prettier/standalone.mjs"
+import prettierPluginTS from "prettier/plugins/typescript.mjs"
+import prettierPluginEsTree from "prettier/plugins/estree.mjs"
 
 function parseDirtyValue(jsString: string) {
-	let normalized = jsString.trim().replaceAll("'", `"`)
+	let normalized = jsString.trim().replaceAll(`'`, `"`)
 	if (normalized.endsWith(",")) {
 		normalized = normalized.slice(0, -1)
 	}
@@ -15,7 +18,7 @@ export async function migrateProjectConfig(args: {
 	pathJoin: (...args: string[]) => string
 	filePath?: string
 }): Promise<{ warnings: string[]; config?: ProjectConfig }> {
-	const minimalConfig: ProjectConfig = {
+	const config: ProjectConfig = {
 		sourceLanguageTag: "",
 		languageTags: [],
 		modules: [],
@@ -24,9 +27,13 @@ export async function migrateProjectConfig(args: {
 
 	let warnings: string[] = []
 
-	const legacyConfig = await args.nodeishFs
-		.readFile("./inlang.config.js", { encoding: "utf-8" })
-		.catch(() => "")
+	const legacyConfig = await format(
+		await args.nodeishFs.readFile("./inlang.config.js", { encoding: "utf-8" }).catch(() => ""),
+		{
+			parser: "typescript",
+			plugins: [prettierPluginTS, prettierPluginEsTree],
+		},
+	)
 
 	if (!legacyConfig) {
 		warnings.push("Could not read valid legacy configuration file ./inlang.config.js.")
@@ -63,41 +70,43 @@ export async function migrateProjectConfig(args: {
 		}
 	}
 
-	// First use auto module config generation
-	const autoGenResult = await tryAutoGenModuleConfig({
-		baseConfig: minimalConfig,
-		nodeishFs: args.nodeishFs,
-		pathJoin: args.pathJoin,
-		legacyConfig,
-	})
-
-	const newConfig = autoGenResult.config
-	warnings = [...autoGenResult.warnings, ...parseErrors]
-
-	if (!newConfig || !autoGenResult.pluginId) {
-		return { warnings }
-	}
-
-	// Then Override the aut generation whith what we could extract from the old config format
-	newConfig.sourceLanguageTag = extractions.sourceLanguageTag || ""
-	newConfig.languageTags = extractions.languageTags || []
-
-	if (autoGenResult.pluginId in newConfig.settings) {
-		if (extractions.pathPattern) {
-			// FIXME: type
-			// @ts-ignore
-			newConfig.settings[autoGenResult.pluginId].pathPattern = extractions.pathPattern
-		}
-		if (extractions.variableReferencePattern) {
-			// FIXME: type
-			// @ts-ignore
-			newConfig.settings[autoGenResult.pluginId].variableReferencePattern =
-				extractions.variableReferencePattern
+	const moduleDetections: Set<string> = new Set()
+	const lintRuleDetections: Set<string> = new Set()
+	const matches = legacyConfig.matchAll(
+		/(plugin-json)|(i18next)|(typesafe-i18n)|(sdk-js)|(standard-lint-rules)/g,
+	)
+	for (const [matched] of matches) {
+		if (matched === "plugin-json") {
+			moduleDetections.add("json")
+		} else if (matched === "i18next") {
+			moduleDetections.add("i18next")
+		} else if (matched === "typesafe-i18n") {
+			moduleDetections.add("typesafeI18n")
+		} else if (matched === "sdk-js") {
+			moduleDetections.add("sdkJs")
+		} else if (matched === "standard-lint-rules") {
+			lintRuleDetections.add("standardLintRules")
 		}
 	}
 
-	const configString = JSON.stringify(newConfig, undefined, 4)
+	const pluginName: string = moduleDetections.values().next().value as string
+	const pluginId: PluginId = ("inlang.plugin." + pluginName) as PluginId
+
+	config.modules = [pluginUrls[pluginName]!, ...standardLintRules]
+
+	config.settings = {
+		[pluginId!]: {
+			pathPattern: extractions.pathPattern || "",
+			variableReferencePattern: extractions.variableReferencePattern || undefined,
+		},
+		...config.settings,
+	} as ProjectConfig["settings"]
+
+	config.sourceLanguageTag = extractions.sourceLanguageTag || ""
+	config.languageTags = extractions.languageTags || []
+
+	const configString = JSON.stringify(config, undefined, 4)
 	await args.nodeishFs.writeFile(args.filePath || "./project.inlang.json", configString + "\n")
 
-	return { warnings, config: newConfig }
+	return { warnings: [...warnings, ...parseErrors], config }
 }

@@ -25,9 +25,11 @@ export async function migrateCommandAction(args: {
 	try {
 		const newProjFileStat = await fs.stat(inlangConfigFilePath)
 		if (newProjFileStat) {
-			args.logger.error("Aborting project intialization: Found existing inlang configuration.")
+			args.logger.error(
+				"Aborting project intialization: Found existing new inlang configuration at " +
+					inlangConfigFilePath,
+			)
 		}
-
 		return
 	} catch (error: any) {
 		if (error.code !== "ENOENT") {
@@ -40,7 +42,7 @@ export async function migrateCommandAction(args: {
 		type: "confirm",
 		name: "autoConfig",
 		message:
-			"Whe try a best effort migration for your old inlang configuration, this works best if the old file has standard formatting.",
+			"Whe try a best effort migration for your old inlang configuration, please double check the result and manually fix what could not be auto-migrated, then delete the old file.",
 		initial: true,
 	})
 
