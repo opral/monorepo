@@ -19,6 +19,8 @@ import { openInlangProject } from "@inlang/sdk"
 import { createFileSystemMapper } from "./utilities/createFileSystemMapper.js"
 import { _import } from "./utilities/import/_import.js"
 import { tryCatch } from "@inlang/result"
+import { createInlangConfigFile } from "./utilities/createInlangConfigFile.js"
+import { deleteOldConfigFile } from "./utilities/deleteOldConfigFile.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
@@ -75,7 +77,7 @@ async function main(args: {
 			console.warn("No workspace folder found.")
 		} else {
 			console.info("Creating project.inlang.json file.")
-			// await createInlangConfigFile({ workspaceFolder: _workspaceFolder })
+			await createInlangConfigFile({ workspaceFolder: _workspaceFolder })
 		}
 		return
 	}
@@ -185,6 +187,10 @@ async function main(args: {
 
 	// linter diagnostics
 	linterDiagnostics(args)
+
+	// try to delete old config file (inlang.config.js)
+	// TODO: remove this in the future (Nov/Dec 2023)
+	await deleteOldConfigFile()
 
 	// log inlang errors in the debugging console
 	const inlangErrors = state().inlang.errors()
