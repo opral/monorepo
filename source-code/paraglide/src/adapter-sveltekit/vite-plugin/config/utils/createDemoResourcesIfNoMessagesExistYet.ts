@@ -1,6 +1,5 @@
 import type { InlangProject } from "@inlang/sdk"
-// eslint-disable-next-line no-restricted-imports
-import { createMessage } from "@inlang/test"
+import { createMessage } from "../../../../../../sdk/dist/test-utilities/createMessage.js"
 
 export const createDemoResourcesIfNoMessagesExistYet = async (inlang: InlangProject) => {
 	const messages = inlang.query.messages.getAll()
