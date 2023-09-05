@@ -11,7 +11,7 @@ import { createBasicInlangConfig } from "./utils/createBasicInlangConfig.js"
 import { createDemoResourcesIfNoMessagesExistYet } from "./utils/createDemoResourcesIfNoMessagesExistYet.js"
 import { doesPathExist } from "./utils/utils.js"
 import { getNodeishFs } from "./utils/getNodeishFs.js"
-import { createImport } from "@inlang/module"
+import { createImport } from "../../../../../sdk/dist/resolve-modules/import.js"
 
 type VersionString = `${number}.${number}.${number}${string}`
 
@@ -20,7 +20,7 @@ export type TransformConfig = {
 
 	sourceLanguageTag: LanguageTag
 	languageTags: LanguageTag[]
-	messages: () => Message[]
+	messages: ReadonlyArray<Message>
 
 	cwdFolderPath: string
 	options: {
