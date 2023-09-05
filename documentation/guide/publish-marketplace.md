@@ -1,7 +1,7 @@
 ---
 title: Publish to the marketplace
 href: /documentation/publish-marketplace
-description: You can manually create a new project if inlang.com/new is not working for you.
+description: Reach more of your target audience by publishing your app, plugin, or lint rule to the marketplace.
 ---
 
 # {% $frontmatter.title %}
@@ -10,7 +10,7 @@ Publishing your own plugin or lint rule to the [marketplace](/marketplace) is st
 
 ## Pre-requisites
 
-- [jsdelivr URL](http://localhost:3000/documentation/publish-marketplace#pre-requisites) (other CDN's are not supported)
+- [jsdelivr URL](https://www.jsdelivr.com/github) (other CDN's are not supported)
 
 ## Step-by-step
 

@@ -1,7 +1,7 @@
 ---
 title: Develop a plugin
 href: /documentation/develop-plugin
-description: You can manually create a new project if inlang.com/new is not working for you.
+description: Learn how easy it is to write your own plugin for inlang projects.
 ---
 
 # {% $frontmatter.title %}
