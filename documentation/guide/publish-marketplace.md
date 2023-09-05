@@ -15,27 +15,17 @@ Publishing your own plugin or lint rule to the [marketplace](/marketplace) is st
 ## Step-by-step
 
 ### 1. Add the information to your marketplace manifest
-Adding the marketplace information is necessary for the marketplace to display your item correctly. You can use this template to do that:
+Adding the marketplace information is necessary for the marketplace to display your item correctly. You can use these category-specific templates:
+- [Manifest template for apps](/documentation/develop-app#3.-configure-your-app)
+- [Manifest template for lint rules](/documentation/develop-lint-rule#3.-configure-your-lint-rule)
+- [Manifest template for plugins](/documentation/develop-plugin#3.-configure-your-plugin)
 
-```json
-{
-	"id": "type.publisher_name.item_name",
-	"icon": "Link to items icon (not required)",
-	"displayName": {
-		"en": "english display name"
-	},
-	"description": {
-		"en": "english description"
-	},
-	"readme": {
-		"en": "raw markdown readme"
-	},
-	"keywords": ["keyword1", "keyword2"],
-	"publisherName": "your publisher name",
-	"publisherIcon": "Link to your icon / avatar (not required)",
-	"license": "Apache-2.0"
-}
+#### Official JSON schema
 
+You can ensure that your manifest is valid by loading the following schema. 
+
+``` json
+"$schema": "https://inlang.com/marketplace-manifest-schema"
 ```
 
 ### 2. Add the link to your marketplace manifest to the registry

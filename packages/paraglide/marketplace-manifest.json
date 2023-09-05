@@ -5,7 +5,7 @@
 		"en": "paraglideJS"
 	},
 	"description": {
-		"en": "A fully configurable JavaScript SDK that integrates within your framework."
+		"en": "A fully configurable JavaScript library that integrates within your framework."
 	},
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/paraglide/README.md"
