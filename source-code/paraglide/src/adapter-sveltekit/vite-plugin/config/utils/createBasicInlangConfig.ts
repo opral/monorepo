@@ -14,7 +14,7 @@ export const createBasicInlangConfig = async (fs: NodeishFilesystemSubset) => {
 			languageTags: ["en", "de"],
 			modules: [
 				"../../../../../plugins/json/dist/index.js",
-				"../../../../../sdk-js-plugin/dist/index.js",
+				"../../../../../plugins/paraglide-js/dist/index.js",
 			],
 			settings: {
 				"plugin.inlang.json": {

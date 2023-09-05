@@ -10,21 +10,21 @@ import { version } from "../../../../../package.json"
  */
 export const updateSdkModuleVersion = async (inlang: InlangProject): Promise<boolean> => {
 	const config = inlang.config()
-	const sdkJSPluginModule = config.modules.find((module) =>
-		module.includes("@inlang/sdk-js-plugin"),
+	const sdkJSPluginModule = config!.modules.find((module) =>
+		module.includes("library.inlang.paraglideJs"),
 	)
 	if (!sdkJSPluginModule) return false
 
-	const usedVersion = (sdkJSPluginModule.match(/@inlang\/sdk-js-plugin@(.*)/) || [])[1]?.split(
+	const usedVersion = (sdkJSPluginModule.match(/@inlang\/paraglide-js@(.*)/) || [])[1]?.split(
 		"/",
 	)[0]
 	if (usedVersion === version) return false
 
 	// TODO: check for correct link
-	const newModule = `https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin@${version}/dist/index.js`
+	const newModule = `https://cdn.jsdelivr.net/npm/@inlang/paraglide-js@${version}/dist/index.js`
 	inlang.setConfig({
-		...config,
-		modules: config.modules.map((module) => (module === sdkJSPluginModule ? newModule : module)),
+		...config!,
+		modules: config!.modules.map((module) => (module === sdkJSPluginModule ? newModule : module)),
 	})
 
 	// TODO: how to actually wait for the config to be written?

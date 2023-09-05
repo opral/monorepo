@@ -133,9 +133,9 @@ export const initTransformConfig = async (): Promise<TransformConfig> => {
 		resolve({
 			debug: settings.debug,
 
-			sourceLanguageTag: inlang.config().sourceLanguageTag,
-			languageTags: inlang.config().languageTags,
-			messages: () => inlang.query.messages.getAll(),
+			sourceLanguageTag: inlang.config()!.sourceLanguageTag,
+			languageTags: inlang.config()!.languageTags,
+			messages: inlang.query.messages.getAll(),
 
 			cwdFolderPath: PATH_TO_CWD,
 			options: {
