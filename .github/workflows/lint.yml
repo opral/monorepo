@@ -28,10 +28,10 @@ jobs:
       - run: npm install
 
       - name: run formatters
-        run: npm run format:fix
+        run: npm run format
 
       - name: run linters
-        run: npm run lint:fix
+        run: npm run lint
 
       - name: run link checker
         uses: lycheeverse/lychee-action@v1.8.0

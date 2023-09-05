@@ -9,9 +9,7 @@
 			"cache": false
 		},
 		"lint": {},
-		"lint:fix": {},
 		"format": {},
-		"format:fix": {},
 		"test": {
 			"dependsOn": ["^build"]
 		}
