@@ -1,28 +1,26 @@
-// @ts-nocheck
-
-import { getConfigContent } from "@inlang/cli/src/utilities/getConfigContent"
-import { getLanguageFolderPath } from "@inlang/cli/src/utilities/getLanguageFolderPath"
-import {
-	getSupportedLibrary,
-	SupportedLibrary,
-} from "@inlang/cli/src/utilities/getSupportedLibrary"
 import { italic } from "@inlang/cli/src/utlilities/format"
 import path from "node:path"
 import * as vscode from "vscode"
-import { createFileSystemMapper } from "../services/inlang-environment/src/createFileSystemMapper.js"
 import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js"
 import { msg } from "./message.js"
 import { getSetting, updateSetting } from "./settings/index.js"
+import {
+	createProjectConfig,
+	getLanguageFolderPath,
+	getSupportedLibrary,
+	type SupportedLibrary,
+} from "@inlang/create-project"
+import { createFileSystemMapper } from "./createFileSystemMapper.js"
 
 /**
  * Creates an Inlang config file if it doesn't already exist and the user approves it.
  * @param args - An object containing the workspace folder.
  */
 export const createInlangConfigFile = async (args: { workspaceFolder: vscode.WorkspaceFolder }) => {
-	// Check if inlang.config.js already exists
-	const configFiles = await vscode.workspace.findFiles("inlang.config.js")
+	// Check if project.inlang.json already exists
+	const configFiles = await vscode.workspace.findFiles("project.inlang.json")
 	if (configFiles.length > 0) {
-		console.warn("📄 inlang.config.js already exists")
+		console.warn("📄 project.inlang.json already exists")
 		return
 	}
 
@@ -50,14 +48,37 @@ export const createInlangConfigFile = async (args: { workspaceFolder: vscode.Wor
 		} else {
 			console.info(`🗂️ Found language folder path: ${italic(pathPattern)}`)
 			console.info(
-				`🗂️ Please adjust the 'pathPattern' in the inlang.config.js manually if it is not parsed correctly.`,
+				`🗂️ Please adjust the 'pathPattern' in the project.inlang.json manually if it is not parsed correctly.`,
 			)
 		}
 
 		// Generate config file content
-		msg("Creating inlang.config.js ...", "info", "statusBar", vscode.StatusBarAlignment.Left, 5000)
-		const configContent = await getConfigContent({ plugin, pathPattern })
-		await writeConfigFile(configContent, args.workspaceFolder)
+		msg(
+			"Creating project.inlang.json ...",
+			"info",
+			"statusBar",
+			vscode.StatusBarAlignment.Left,
+			5000,
+		)
+		const { warnings } = await createProjectConfig({
+			nodeishFs: createFileSystemMapper(args.workspaceFolder.uri.fsPath),
+			pathJoin: path.join,
+			filePath: args.workspaceFolder.uri.fsPath + "/project.inlang.json",
+			tryAutoGen: true,
+			sourceLanguagetag: "en-US",
+			languageTags: ["en-US", "de-DE", "fr-FR", "es-ES", "zh-CN", "ja-JP"],
+		})
+
+		for (const warning of warnings) console.warn(warning)
+
+		// if no warnings, show success message
+		if (warnings.length === 0) {
+			console.info(
+				`🎉 Created project.inlang.json file at ${
+					args.workspaceFolder.uri.fsPath + "/project.inlang.json"
+				}`,
+			)
+		}
 	} else if (createConfigFile === "Reject") {
 		// Disable config file creation
 		disableConfigFileCreation()
@@ -142,7 +163,8 @@ const getLanguageFolderPathRelativeToWorkspace = async (
 	workspaceFolder: vscode.WorkspaceFolder,
 ): Promise<string | undefined> => {
 	const languageFolderPath = await getLanguageFolderPath({
-		fs: createFileSystemMapper(workspaceFolder.uri),
+		nodeishFs: createFileSystemMapper(workspaceFolder.uri.fsPath),
+		pathJoin: path.join,
 		rootDir: workspaceFolder.uri.fsPath,
 	})
 	if (languageFolderPath) {
@@ -162,22 +184,6 @@ const generatePathPattern = (languageFolderPath: string | undefined): string => 
 		return languageFolderPath.replace(/\\/g, "/")
 	}
 	return ""
-}
-
-/**
- * Writes the config file to the workspace folder.
- * @param configContent - The config file content.
- * @param workspaceFolder - The workspace folder.
- */
-const writeConfigFile = async (configContent: string, workspaceFolder: vscode.WorkspaceFolder) => {
-	const configFilePath = vscode.Uri.joinPath(workspaceFolder.uri, "inlang.config.js")
-	try {
-		await vscode.workspace.fs.writeFile(configFilePath, Buffer.from(configContent))
-		console.info(`🎉 Created inlang.config.js file at ${italic(configFilePath.fsPath)}`)
-	} catch (error) {
-		console.error(`📄 Could not create inlang.config.js file at ${italic(configFilePath.fsPath)}`)
-		console.error(error)
-	}
 }
 
 /**

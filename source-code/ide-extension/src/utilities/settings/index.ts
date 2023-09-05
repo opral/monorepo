@@ -1,6 +1,10 @@
 import * as vscode from "vscode"
 
-type SettingsProperty = "userId" | "disableRecommendation" | "disableConfigFileCreation"
+type SettingsProperty =
+	| "userId"
+	| "disableRecommendation"
+	| "disableConfigFileCreation"
+	| "disableConfigFileDeletion"
 
 /**
  * Updates a configuration setting with the specified value.
