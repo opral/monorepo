@@ -66,7 +66,7 @@ In your lint rule's `marketplace-manifest.json` make sure to define the followin
 | `publisherName`      | Your publisher name.                                          |
 | `publisherIcon`      | Link to your publisher's icon or avatar (optional).           |
 | `license`            | The license under which your lint rule is distributed.        |
-| `module`             | The path to your lint rule's JavaScript module.               |
+| `module`             | The path to your lint rule's JavaScript module (Please use [jsDelivr](https://www.jsdelivr.com/)).               |
 
 ### 4. Test your lint rule
 
