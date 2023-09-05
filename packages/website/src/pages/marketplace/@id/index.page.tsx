@@ -9,7 +9,7 @@ import { Chip } from "#src/components/Chip.jsx"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 import { SelectRepo } from "../Select.jsx"
 import { setSearchValue } from "../index.page.jsx"
-import { colorForTypeOf, typeOfIdToTitle } from "../utilities.js"
+import { colorForTypeOf, convertLinkToGithub, typeOfIdToTitle } from "../utilities.js"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 
 /**
@@ -106,7 +106,10 @@ export function Page(props: PageProps) {
 												</Button>
 											</div>
 										</Show>
-										<Button type="secondary" href={readme().replace("README.md", "")}>
+										<Button
+											type="secondary"
+											href={convertLinkToGithub(readme())?.replace("README.md", "")}
+										>
 											GitHub
 											<MaterialSymbolsArrowOutward
 												// @ts-ignore
