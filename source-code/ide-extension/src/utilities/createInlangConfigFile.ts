@@ -24,12 +24,15 @@ export const createInlangConfigFile = async (args: { workspaceFolder: vscode.Wor
 		return
 	}
 
+	// check if supported library is in project
+	const { modules } = await getSupportedLibraryInProject(args.workspaceFolder)
+	if (modules.length === 0) {
+		console.warn("📦 No supported internationalization library found in this project.")
+		return
+	}
+
 	// Check if prompt is disabled
 	if (await isDisabledConfigFileCreation()) return
-
-	// Check for supported library
-	const plugin = await getSupportedLibraryInProject(args.workspaceFolder)
-	if (plugin === "json") return
 
 	// Prompt user to create config file
 	const createConfigFile = await promptUserToCreateConfigFile()
@@ -120,13 +123,13 @@ const disableConfigFileCreation = async (): Promise<void> => {
  */
 const getSupportedLibraryInProject = async (
 	workspaceFolder: vscode.WorkspaceFolder,
-): Promise<SupportedLibrary> => {
+): Promise<{ modules: SupportedLibrary[] }> => {
 	if (await vscode.workspace.findFiles("package.json")) {
 		const packageJson = await readPackageJson(workspaceFolder)
 		return getSupportedLibrary({ packageJson })
 	} else {
 		console.warn("📦 No package.json found in this directory. Using fallback plugin: json")
-		return "json"
+		return { modules: ["json"] }
 	}
 }
 
