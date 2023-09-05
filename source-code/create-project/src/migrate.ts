@@ -16,6 +16,14 @@ function parseDirtyValue(jsString: string) {
 	return JSON.parse(normalized)
 }
 
+/**
+ * Migrates an old inlang.config.js config file to the new project.inlang.json format.
+ *
+ * @params args.nodeishFs a nodeishFs implementation, in node this is fs:promieses
+ * @params args.pathJoin implementation for joing paths, in node this should be {join} from 'path'
+ * @params args.filePath optional location of your inlang config file, should be used only for testing as we hard code filepaths at lots of places
+ * @returns The warnings and if successfully generated the config object, the file is also saved to the filesystem in the current path
+ */
 export async function migrateProjectConfig(args: {
 	nodeishFs: NodeishFilesystem
 	pathJoin: (...args: string[]) => string
