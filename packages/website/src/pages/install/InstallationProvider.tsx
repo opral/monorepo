@@ -156,7 +156,7 @@ async function initializeRepo(
 
 	setStep({
 		type: "installing",
-		message: "Cloning Repository...",
+		message: "Opening Repository...",
 	})
 
 	const projectResult = await tryCatch(async () => {

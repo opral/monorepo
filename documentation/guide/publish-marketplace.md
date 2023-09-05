@@ -16,7 +16,7 @@ Publishing your own plugin or lint rule to the [marketplace](/marketplace) is st
 
 ### 1. Add the information to your marketplace manifest
 Adding the marketplace information is necessary for the marketplace to display your item correctly. You can use these category-specific templates:
-- [Manifest template for apps](/documentation/develop-app#3.-configure-your-app)
+- [Manifest template for apps](/documentation/develop-app#4.-configure-your-app)
 - [Manifest template for lint rules](/documentation/develop-lint-rule#3.-configure-your-lint-rule)
 - [Manifest template for plugins](/documentation/develop-plugin#3.-configure-your-plugin)
 
