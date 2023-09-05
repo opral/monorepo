@@ -6,4 +6,4 @@ description: API reference for the inlang SDK. Developers can use the inlang SDK
 
 # {% $frontmatter.title %}
 
-<!-- TODO it would be great if we can leverage the typescript types and comments to be auto displayed here like https://deno.land/api@v1.36.3?s=AbortController -->
+The documentation for the inlang SDK is currently under construction and coming soon. In the meantime, please refer to the [inlang SDK on GitHub](https://github.com/inlang/inlang/blob/main/source-code/sdk/src/index.ts) or [join our Discord](https://discord.gg/gdMPPWy57R) to get help from our team.
