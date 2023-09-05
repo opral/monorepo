@@ -1,24 +1,22 @@
 # inlang-plugin-i18next
 
-This plugin works with i18next to read and write resources. It also determines how translation functions and namespaces are parsed and handled by the IDE extension.
+This plugin works with i18next to read and write messages. It also determines how translation functions and namespaces are parsed and handled by inlang apps including the IDE extension.
 
 ## Usage
 
 ```js
-// filename: inlang.config.js
+// filename: project.inlang.json
 
-export async function defineConfig(env) {
-	const { default: i18nextPlugin } = await env.$import(
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index.js",
-	)
-
-	return {
-		sourceLanguageTag: "en",
-		plugins: [
-			i18nextPlugin({
-				pathPattern: "./resources/{language}.json",
-			}),
-		],
+{
+	"sourceLanguageTag": "en",
+	"languageTags": ["en", "de", "it"],
+	"modules": [
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@4/dist/index.js"
+	],
+	"settings": {
+		"plugin.inlang.i18next": {
+			"pathPattern": "./resources/{language}.json"
+		}
 	}
 }
 ```
@@ -79,7 +77,7 @@ ignore: ["languages.json"]
 
 ## IDE-extension usage
 
-The plugin automatically informs the [IDE extension](https://inlang.com/documentation/apps/ide-extension) how to extract keys and namespaces from your code in order to display inline annotations.
+The plugin automatically informs the [IDE extension](https:inlang.com/marketplace/app.inlang.ideExtension) how to extract keys and namespaces from your code in order to display inline annotations.
 
 ### In-code usage
 
