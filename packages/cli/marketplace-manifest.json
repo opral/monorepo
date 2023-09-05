@@ -8,7 +8,7 @@
 		"en": "Command line interface for inlang projects. Many commands and the possibility to do automation."
 	},
 	"readme": {
-		"en": "https://raw.githubusercontent.com/inlang/inlang/main/source-code/cli/README.md"
+		"en": "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/cli/README.md"
 	},
 	"keywords": ["cli", "commands"],
 	"publisherName": "inlang",
