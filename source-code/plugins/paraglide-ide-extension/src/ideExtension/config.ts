@@ -55,7 +55,7 @@ export const ideExtensionDefaultConfig: IdeExtensionConfig = {
 }
 
 //* Prep for using chevrotain after build step issues have been resolved
-// const ideExtensionDefaultConfig: InlangConfig["ideExtension"] = {
+// const ideExtensionDefaultConfig: ProjectConfig["ideExtension"] = {
 // 	messageReferenceMatchers: [
 // 		async (args) => {
 // 			return messageReferenceMatcher(args.documentText)

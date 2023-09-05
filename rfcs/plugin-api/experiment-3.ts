@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { InlangConfig } from "@inlang/core/src/config"
+import { ProjectConfig } from "@inlang/core/src/config"
 import { InlangEnvironment } from "@inlang/core/src/environment/types"
 
 function readResources(args: any): any {}
@@ -38,7 +38,7 @@ type InitPluginFunction<PluginSettings> = (settings: PluginSettings) => Plugin
 
 type Plugin = {
 	id: string
-	defineConfig(args: { config: Readonly<Partial<InlangConfig>>; env: InlangEnvironment }): void
+	defineConfig(args: { config: Readonly<Partial<ProjectConfig>>; env: InlangEnvironment }): void
 }
 
 function createPlugin<PluginSettings>(

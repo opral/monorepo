@@ -48,14 +48,14 @@ export const badge = async (url: string) => {
 	// access all messages via inlang instance query
 	const messageIds = inlang.query.messages.includedMessageIds()
 
-	const inlangConfig = inlang.config()
+	const projectConfig = inlang.config()
 	// throw if no config is present
-	if (!inlangConfig) {
+	if (!projectConfig) {
 		throw new Error("No inlang config found, please add a project.inlang.json")
 	}
 
 	// throw if no sourceLanguageTag is found
-	if (!inlangConfig.sourceLanguageTag) {
+	if (!projectConfig.sourceLanguageTag) {
 		throw new Error("No sourceLanguageTag found, please add one to your project.inlang.json")
 	}
 
@@ -97,7 +97,7 @@ export const badge = async (url: string) => {
 
 	const { percentage, errors, warnings, numberOfMissingVariants } = calculateSummary({
 		reports: reports,
-		languageTags: inlangConfig.languageTags,
+		languageTags: projectConfig.languageTags,
 		messageIds: messageIds,
 	})
 
