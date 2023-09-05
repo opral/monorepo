@@ -11,7 +11,7 @@ for (const link of manifestLinks) {
 	const json = JSON.parse(await (await fetch(link)).text())
 	if (Value.Check(MarketplaceManifest, json) === false) {
 		const errors = [...Value.Errors(MarketplaceManifest, json)]
-		console.log(errors)
+		console.error(errors)
 		throw new Error(`Manifest '${link}' is invalid.`)
 	}
 	manifests.push(json)
