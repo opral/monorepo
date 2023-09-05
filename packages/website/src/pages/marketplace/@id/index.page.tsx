@@ -23,10 +23,24 @@ export type PageProps = {
 export function Page(props: PageProps) {
 	const [readmore, setReadmore] = createSignal<boolean>(false)
 
+	// mapping translatable types
+	const displayName = () =>
+		typeof props.manifest.displayName === "object"
+			? props.manifest.displayName.en
+			: props.manifest.displayName
+
+	const description = () =>
+		typeof props.manifest.description === "object"
+			? props.manifest.description.en
+			: props.manifest.description
+
+	const readme = () =>
+		typeof props.manifest.readme === "object" ? props.manifest.readme.en : props.manifest.readme
+
 	return (
 		<>
-			<Title>{props?.manifest?.displayName?.en}</Title>
-			<Meta name="description" content={props?.manifest?.description?.en} />
+			<Title>{displayName()}</Title>
+			<Meta name="description" content={description()} />
 			<Layout>
 				<div class="md:py-28 py-16">
 					<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-40 md:gap-16 gap-6">
@@ -40,7 +54,7 @@ export function Page(props: PageProps) {
 										when={props.manifest.icon}
 										fallback={
 											<div class="w-16 h-16 font-semibold text-3xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
-												{props.manifest.displayName.en?.[0]}
+												{displayName()[0]}
 											</div>
 										}
 									>
@@ -50,12 +64,10 @@ export function Page(props: PageProps) {
 										/>
 									</Show>
 									<div class="flex flex-col gap-3">
-										<h1 class="text-3xl font-bold">{props.manifest.displayName.en}</h1>
+										<h1 class="text-3xl font-bold">{displayName()}</h1>
 										<div class="inline-block text-surface-500 ">
-											<p class={!readmore() ? "lg:line-clamp-2" : ""}>
-												{props.manifest.description.en}
-											</p>
-											<Show when={props.manifest.description?.en?.length > 205}>
+											<p class={!readmore() ? "lg:line-clamp-2" : ""}>{description()}</p>
+											<Show when={description}>
 												<p
 													onClick={() => setReadmore((prev) => !prev)}
 													class="cursor-pointer hover:text-surface-700 transition-all duration-150 font-medium max-lg:hidden"
@@ -93,10 +105,7 @@ export function Page(props: PageProps) {
 											</Button>
 										</div>
 									</Show>
-									<Button
-										type="secondary"
-										href={props.manifest.readme.en?.replace("README.md", "")}
-									>
+									<Button type="secondary" href={readme().replace("README.md", "")}>
 										GitHub
 										<MaterialSymbolsArrowOutward
 											// @ts-ignore
