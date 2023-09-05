@@ -95,9 +95,7 @@ export const plugin: Plugin<PluginSettings> = {
 			settings,
 		})
 	},
-	addCustomApi: () => {
-		return { ...ideExtensionConfig() }
-	},
+	addCustomApi: () => ideExtensionConfig(),
 }
 
 /**
