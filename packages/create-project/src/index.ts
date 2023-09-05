@@ -124,7 +124,7 @@ async function tryAutoGenModuleConfig(args: {
 		}
 
 		args.baseConfig.modules = [pluginUrls[pluginName]!, ...args.baseConfig.modules]
-		const pluginId = "inlang.plugin." + pluginName
+		const pluginId = "plugin.inlang." + pluginName
 
 		args.baseConfig.settings = {
 			[pluginId!]: { pathPattern },

@@ -3,7 +3,7 @@ import { validateSdkConfig, type SdkConfig, type SdkConfigInput } from "@inlang/
 import { InlangSdkException } from "../../exceptions.js"
 
 export const defaultSdkPluginSettings = {
-	"inlang.plugin.sdkJs": {
+	"plugin.inlang.sdkJs": {
 		languageNegotiation: {
 			strategies: [
 				{

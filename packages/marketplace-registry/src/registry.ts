@@ -12,7 +12,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "Badge showing missing messages in your codebase. Perfect for your README.md file.",
 		},
 		readme: {
-			en: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/badge/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/badge/README.md",
 		},
 		keywords: ["badge"],
 		publisherName: "inlang",
@@ -29,7 +29,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "Command line interface for inlang projects. Many commands and the possibility to do automation.",
 		},
 		readme: {
-			en: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/cli/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/cli/README.md",
 		},
 		keywords: ["cli", "commands"],
 		publisherName: "inlang",
@@ -46,7 +46,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "The inlang Web Editor enables you to work with globalized codebases in your browser, without having to touch code but still being able to have a git-based workflow.",
 		},
 		readme: {
-			en: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/editor/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/editor/README.md",
 		},
 		keywords: ["editor", "web"],
 		publisherName: "inlang",
@@ -61,10 +61,10 @@ export const registry: MarketplaceManifest[] = [
 			en: "IDE Extension",
 		},
 		description: {
-			en: "IDE Extension for inlang projects",
+			en: "This extension allows you to use inlang in your IDE, enabling translating content directly in your code.",
 		},
 		readme: {
-			en: "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/ide-extension/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/ide-extension/README.md",
 		},
 		keywords: ["ide", "extension", "vscode"],
 		publisherName: "inlang",
@@ -82,7 +82,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "A library containing BCP-47 language tags types and validators, used by inlang.",
 		},
 		readme: {
-			en: "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/versioned-interfaces/language-tag/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/versioned-interfaces/language-tag/README.md",
 		},
 		keywords: ["lang", "language tag"],
 		publisherName: "inlang",
@@ -96,10 +96,10 @@ export const registry: MarketplaceManifest[] = [
 			en: "paraglideJS",
 		},
 		description: {
-			en: "A fully configurable JavaScript SDK that integrates within your framework.",
+			en: "A fully configurable JavaScript library that integrates within your framework.",
 		},
 		readme: {
-			en: "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/paraglide/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/paraglide/README.md",
 		},
 		keywords: ["sdk", "paraglide"],
 		publisherName: "inlang",
@@ -116,7 +116,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "Checks for empty pattern in a language tag. If a message exists in the reference resource but the pattern in a target resource is empty, it is likely that the message has not been translated yet.",
 		},
 		readme: {
-			en: "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/lint-rules/emptyPattern/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/lint-rules/emptyPattern/README.md",
 		},
 		keywords: ["lint rule", "empty pattern"],
 		publisherName: "inlang",
@@ -134,7 +134,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "Checks for identical patterns in different languages.  A message with identical wording in multiple languages can indicate that the translations are redundant or can be combined into a single message to reduce translation effort.",
 		},
 		readme: {
-			en: "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/lint-rules/identicalPattern/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/lint-rules/identicalPattern/README.md",
 		},
 		keywords: ["lint rule", "itentical pattern"],
 		publisherName: "inlang",
@@ -152,7 +152,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "Checks for likely outdated messages.  A message with a missing source is usually an indication that the message (id) is no longer used in source code, but messages have not been updated accordingly.",
 		},
 		readme: {
-			en: "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/lint-rules/messageWithoutSource/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/lint-rules/messageWithoutSource/README.md",
 		},
 		keywords: ["lint rule", "source"],
 		publisherName: "inlang",
@@ -170,7 +170,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "Checks for missing variants for a specific languageTag.  If a variant exists for the sourceLanguageTag but is missing for a listed languageTag, it is likely that the message has not been translated for this languageTag yet.",
 		},
 		readme: {
-			en: "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/lint-rules/messageLintRule/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/lint-rules/missingTranslation/README.md",
 		},
 		keywords: ["lint rule", "missing"],
 		publisherName: "inlang",
@@ -188,7 +188,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "A plugin for inlang projects that works with i18next and reads / writes resources.",
 		},
 		readme: {
-			en: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/i18next/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/plugins/i18next/README.md",
 		},
 		keywords: ["i18next", "react", "nextjs"],
 		publisherName: "inlang",
@@ -206,7 +206,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "This plugin enables using JSON files for messages. It is not library specific and can be used with any framework.",
 		},
 		readme: {
-			en: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/json/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/plugins/json/README.md",
 		},
 		keywords: ["json", "generic"],
 		publisherName: "inlang",
