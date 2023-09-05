@@ -1,7 +1,7 @@
-// pluginOptions for i18next plugin
+// pluginOptions for json plugin
 export type PluginSettings = {
 	pathPattern: string | Record<string, string>
-	variableReferencePattern?: string[] //default is ["{{", "}}"]
+	variableReferencePattern?: string[] //default is ["{", "}"]
 	ignore?: string[] // default is []
 }
 
@@ -26,7 +26,7 @@ export function throwIfInvalidSettings(settings: PluginSettings) {
 			)
 		} else if (settings.pathPattern.includes("*")) {
 			throw new Error(
-				"The pathPattern includes a '*' wildcard. This was depricated in version 3.0.0. Check https://github.com/inlang/inlang/tree/main/source-code/plugins/i18next/ for how to use PluginOptions",
+				"The pathPattern includes a '*' wildcard. This was depricated in version 3.0.0. Check https://inlang.com/marketplace/plugin.inlang.json for how to use PluginOptions",
 			)
 		}
 	} else {

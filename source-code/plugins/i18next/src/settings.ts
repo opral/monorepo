@@ -26,7 +26,7 @@ export function throwIfInvalidSettings(settings: PluginSettings) {
 			)
 		} else if (settings.pathPattern.includes("*")) {
 			throw new Error(
-				"The pathPattern includes a '*' wildcard. This was depricated in version 3.0.0. Check https://github.com/inlang/inlang/tree/main/source-code/plugins/i18next/ for how to use Pluginsettings",
+				"The pathPattern includes a '*' wildcard. This was depricated in version 3.0.0. Check https://inlang.com/marketplace/plugin.inlang.i18next for how to use Pluginsettings",
 			)
 		}
 	} else {
