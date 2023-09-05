@@ -224,7 +224,7 @@ it("should add the sdk plugin module if not present yet", async () => {
 	expect(setConfig).toHaveBeenNthCalledWith(1, {
 		modules: ["../../../../../sdk-js-plugin/dist/index.js"],
 		settings: {
-			"inlang.plugin.sdkJs": {
+			"plugin.inlang.sdkJs": {
 				languageNegotiation: {
 					strategies: [
 						{

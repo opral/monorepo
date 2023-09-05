@@ -24,7 +24,7 @@ vi.mock("@inlang/sdk", async () => ({
 const getMockedConfig = (...modules: string[]): InlangConfig => ({
 	sourceLanguageTag: "en",
 	languageTags: ["en"],
-	settings: { "inlang.plugin.json": { pathPattern: "{languageTag}.json" } },
+	settings: { "plugin.inlang.json": { pathPattern: "{languageTag}.json" } },
 	modules: ["plugin-json-mock", ...modules],
 })
 

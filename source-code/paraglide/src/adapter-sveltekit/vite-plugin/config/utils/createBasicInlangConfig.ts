@@ -17,7 +17,7 @@ export const createBasicInlangConfig = async (fs: NodeishFilesystemSubset) => {
 				"../../../../../sdk-js-plugin/dist/index.js",
 			],
 			settings: {
-				"inlang.plugin.json": {
+				"plugin.inlang.json": {
 					pathPattern: "./languages/{languageTag}.json",
 				},
 				...defaultSdkPluginSettings,
