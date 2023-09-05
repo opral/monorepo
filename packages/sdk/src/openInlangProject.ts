@@ -130,9 +130,7 @@ export const openInlangProject = async (args: {
 					markInitAsComplete()
 				})
 				.catch((err) =>
-					markInitAsFailed(
-						new PluginLoadMessagesError("Error in load messages", { cause: err.message }),
-					),
+					markInitAsFailed(new PluginLoadMessagesError("Error in load messages", { cause: err })),
 				)
 		})
 
@@ -247,7 +245,7 @@ const loadConfig = async (args: {
 	const { data: parsedConfig, error: parseConfigError } = tryCatch(() => JSON.parse(configFile!))
 	if (parseConfigError)
 		throw new ProjectFileJSONSyntaxError(`The config is not a valid JSON file.`, {
-			cause: parseConfigError.message,
+			cause: parseConfigError,
 		})
 	return validateConfig(parsedConfig)
 }

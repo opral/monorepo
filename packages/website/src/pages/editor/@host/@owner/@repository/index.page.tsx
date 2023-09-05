@@ -140,7 +140,7 @@ function TheActualPage() {
 											<span class="font-semibold">{error.name}: </span>
 											<br />
 											{error?.message}
-											{error.cause && <p>({error.cause})</p>}
+											{error.cause.message && <p>({error.cause.message})</p>}
 											{error?.stack && (
 												<div class="text-sm">
 													<br />
