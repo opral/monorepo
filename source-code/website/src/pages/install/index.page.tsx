@@ -232,7 +232,7 @@ function OptIn(props: { modules: string[] }) {
 					{step().message}
 				</h2>
 				<p class="text-surface-500 text-center">
-					The config in your repository will be updated to include the modules you selected:
+					The config in your repository will be updated to include the module you selected:
 				</p>
 				<ul class="font-medium font-mono text-sm  bg-success/10 p-2 rounded-md">
 					<For each={props.modules}>
@@ -254,7 +254,7 @@ function OptIn(props: { modules: string[] }) {
 					type="primary"
 					ref={optInButton}
 				>
-					Install modules
+					Install module
 				</Button>
 				<Button
 					// eslint-disable-next-line solid/reactivity

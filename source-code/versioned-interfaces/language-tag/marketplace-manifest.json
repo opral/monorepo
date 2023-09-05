@@ -8,7 +8,7 @@
 		"en": "A library containing BCP-47 language tags types and validators, used by inlang."
 	},
 	"readme": {
-		"en": "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/versioned-interfaces/language-tag/README.md"
+		"en": "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/versioned-interfaces/language-tag/README.md"
 	},
 	"keywords": ["lang", "language tag"],
 	"publisherName": "inlang",
