@@ -10,12 +10,13 @@ import { version } from "../../../../../package.json"
  */
 export const updateSdkModuleVersion = async (inlang: InlangProject): Promise<boolean> => {
 	const config = inlang.config()
-	const sdkJSPluginModule = config!.modules.find((module) =>
-		module.includes("library.inlang.paraglideJs"),
+	if (!config) return false
+	const paraglidePluginModule = config.modules.find((module) =>
+		module.includes("plugin.inlang.paraglideJs"),
 	)
-	if (!sdkJSPluginModule) return false
+	if (!paraglidePluginModule) return false
 
-	const usedVersion = (sdkJSPluginModule.match(/@inlang\/paraglide-js@(.*)/) || [])[1]?.split(
+	const usedVersion = (paraglidePluginModule.match(/@inlang\/paraglide-js@(.*)/) || [])[1]?.split(
 		"/",
 	)[0]
 	if (usedVersion === version) return false
@@ -23,8 +24,10 @@ export const updateSdkModuleVersion = async (inlang: InlangProject): Promise<boo
 	// TODO: check for correct link
 	const newModule = `https://cdn.jsdelivr.net/npm/@inlang/paraglide-js@${version}/dist/index.js`
 	inlang.setConfig({
-		...config!,
-		modules: config!.modules.map((module) => (module === sdkJSPluginModule ? newModule : module)),
+		...config,
+		modules: config.modules.map((module) =>
+			module === paraglidePluginModule ? newModule : module,
+		),
 	})
 
 	// TODO: how to actually wait for the config to be written?
@@ -34,7 +37,7 @@ export const updateSdkModuleVersion = async (inlang: InlangProject): Promise<boo
 }
 
 /**
- * Utility function to update the version of the `@inlang/sdk-js-plugin` module in the `project.inlang.json` file.
+ * Utility function to update the version of the `@inlang/plugin-paraglide` module in the `project.inlang.json` file.
  * @returns `true` iff the version was updated
  * @returns `false` iff the version is already up2date
  */

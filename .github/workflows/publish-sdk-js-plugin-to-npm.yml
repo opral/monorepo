@@ -1,4 +1,4 @@
-name: Publish @inlang/sdk-js-plugin to NPM
+name: Publish @inlang/plugin-paraglide to NPM
 
 on:
   # manually triggering the workflow if desired
@@ -26,12 +26,12 @@ jobs:
       - run: npm install
 
       - name: build
-        run: doppler run -- node_modules/.bin/turbo run build --filter @inlang/sdk-js-plugin
+        run: doppler run -- node_modules/.bin/turbo run build --filter @inlang/plugin-paraglide
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
-      - run: node_modules/.bin/turbo run test --filter @inlang/sdk-js-plugin
+      - run: node_modules/.bin/turbo run test --filter @inlang/plugin-paraglide
       - uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_PUBLISH_TOKEN }}
-          package: source-code/sdk-js-plugin/package.json
+          package: source-code/plugins/paraglide/package.json
