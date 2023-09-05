@@ -43,7 +43,7 @@ export async function migrateProjectConfig(args: {
 	const parseErrors: string[] = []
 	const extractions: Record<string, any> = {}
 
-	legacyConfig.split("\n").forEach((curLine, index) => {
+	for (const [index, curLine] of legacyConfig.split("\n").entries()) {
 		const line: string = curLine || ""
 		for (const searchKey of Object.keys(searchMapping)) {
 			if (line.includes(searchKey)) {
@@ -61,7 +61,7 @@ export async function migrateProjectConfig(args: {
 				}
 			}
 		}
-	})
+	}
 
 	// First use auto module config generation
 	const autoGenResult = await tryAutoGenModuleConfig({
