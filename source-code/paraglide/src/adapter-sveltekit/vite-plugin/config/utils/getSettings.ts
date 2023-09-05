@@ -3,7 +3,7 @@ import {
 	validateSdkConfig,
 	type SdkConfig,
 	type SdkConfigInput,
-} from "../../../../../../plugins/paraglide/src/index.js"
+} from "../../../../../../plugins/paraglide/dist/index.js"
 import { InlangSdkException } from "../../exceptions.js"
 
 export const defaultSdkPluginSettings = {

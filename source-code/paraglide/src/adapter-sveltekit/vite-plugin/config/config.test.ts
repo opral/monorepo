@@ -16,7 +16,7 @@ import * as createBasicInlangConfigModule from "./utils/createBasicInlangConfig.
 import { getNodeishFs } from "./utils/getNodeishFs.js"
 import { version } from "../../../../package.json"
 import { InlangSdkException } from "../exceptions.js"
-import { validateSdkConfig, type SdkConfig } from "@inlang/sdk-js-plugin"
+import { validateSdkConfig, type SdkConfig } from "../../../../../plugins/paraglide/dist/index.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 import { createMessage } from "@inlang/sdk/test-utilities"
 

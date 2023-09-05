@@ -38,6 +38,7 @@
 		"@inlang/sdk-js-plugin": "*",
 		"@sveltejs/kit": "1.24.0",
 		"@types/node": "20.5.9",
+		"@vitest/coverage-v8": "0.34.3",
 		"dedent": "^1.5.1",
 		"deepmerge-ts": "^5.1.0",
 		"esbuild": "^0.18.11",
@@ -47,8 +48,7 @@
 		"solid-js": "^1.7.11",
 		"svelte": "3.54.0",
 		"tsd": "0.29.0",
-		"vitefu": "^0.2.4",
-		"vitest": "0.34.3"
+		"vitefu": "^0.2.4"
 	},
 	"peerDependencies": {
 		"@sveltejs/kit": "^1.0.0",
