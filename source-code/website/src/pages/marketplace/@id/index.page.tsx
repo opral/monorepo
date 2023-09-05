@@ -134,7 +134,7 @@ export function Page(props: PageProps) {
 									<div class="flex flex-col gap-3 mb-8">
 										<h3 class="text-sm text-surface-400">Keywords</h3>
 										<div class="flex flex-wrap gap-2 items-center">
-											<For each={props.manifest.keywords}>
+											<For each={props?.manifest?.keywords}>
 												{(keyword) => (
 													<a
 														class="transition-opacity hover:opacity-80 cursor-pointer"
@@ -152,7 +152,7 @@ export function Page(props: PageProps) {
 									<div class="flex flex-col gap-3 mb-8">
 										<h3 class="text-sm text-surface-400">License</h3>
 										<p class="m-0 text-surface-600 no-underline font-medium">
-											{props.manifest.license}
+											{props?.manifest?.license}
 										</p>
 									</div>
 								</div>
