@@ -113,7 +113,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "Translatable",
 		},
 		description: {
-			en: "This library allows you to add translation logic to your application without having to rewrite large parts of your application.",
+			en: "This library allows you to add translation logic to your application without having to rewrite large parts.",
 		},
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@armageddon/source-code/versioned-interfaces/translatable/README.md",

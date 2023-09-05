@@ -247,7 +247,7 @@ const loadConfig = async (args: {
 	const { data: parsedConfig, error: parseConfigError } = tryCatch(() => JSON.parse(configFile!))
 	if (parseConfigError)
 		throw new ProjectFileJSONSyntaxError(`The config is not a valid JSON file.`, {
-			cause: parseConfigError,
+			cause: parseConfigError.message,
 		})
 	return validateConfig(parsedConfig)
 }
