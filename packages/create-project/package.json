@@ -22,7 +22,8 @@
 	},
 	"dependencies": {
 		"@inlang/project-config": "*",
-		"@lix-js/fs": "*"
+		"@lix-js/fs": "*",
+		"prettier": "3.0.3"
 	},
 	"license": "Apache-2.0",
 	"devDependencies": {
