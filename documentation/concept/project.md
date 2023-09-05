@@ -28,9 +28,9 @@ The `project.inlang.json` file must contain the following JSON:
   "sourceLanguageTag": string,
   // all the language tags you want to support in your project
   "languageTags": Array<string>,
-  // the packages that are used in the project
-  "packages": Array<string>,
-  // settings for the project and package items
+  // the modules that are used in the project
+  "modules": Array<string>,
+  // settings for the project and module items
   "settings": {}
 }
 ```
