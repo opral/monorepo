@@ -9,6 +9,7 @@ import { router as telemetryRouter } from "@inlang/telemetry/router"
 import { router as rpcRouter } from "@inlang/rpc/router"
 import { router as badgeRouter } from "@inlang/badge/router"
 import { MarketplaceManifest } from "@inlang/marketplace-manifest"
+import { ProjectConfig } from "@inlang/project-config"
 
 // --------------- SETUP -----------------
 
@@ -50,9 +51,16 @@ if (isProduction) {
 
 const serializedMarketplaceManifest = JSON.stringify(MarketplaceManifest)
 
-app.get("/marketplace-manifest-schema.json", (_, response) => {
-	response.header("Content-Type", "text/xml")
+app.get("/marketplace-manifest-schema", (_, response) => {
+	response.header("Content-Type", "application/json")
 	response.send(serializedMarketplaceManifest)
+})
+
+const serializedProjectConfig = JSON.stringify(ProjectConfig)
+
+app.get("/project-config-schema", (_, response) => {
+	response.header("Content-Type", "application/json")
+	response.send(serializedProjectConfig)
 })
 
 app.use(telemetryRouter)
