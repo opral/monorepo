@@ -6,6 +6,8 @@ description: Learn how easy it is to write your own plugin for inlang projects.
 
 # {% $frontmatter.title %}
 
+Plugins are a powerful way to extend the functionality of inlang applications. This documentation provides you with the information you need to develop your own plugin.
+
 ## Pre-requisites
 
 - [Node.js](https://nodejs.org/en/) (version 18 or higher)
@@ -61,6 +63,7 @@ In your lint rule's `marketplace-manifest.json` make sure to define the followin
 | **Parameter**        | **Description**                                               |
 |----------------------|---------------------------------------------------------------|
 | `id`                 | Unique identifier for your lint rule.                         |
+| `icon`        | Link to the icon of your plugin (optional).              |
 | `displayName`        | A user-friendly display name for your lint rule.              |
 | `description`        | Briefly describe what your lint rule checks for.              |
 | `readme`             | Link to the README documentation for your lint rule.          |
