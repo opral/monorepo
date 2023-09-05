@@ -21,6 +21,9 @@ import { _import } from "./utilities/import/_import.js"
 import { tryCatch } from "@inlang/result"
 import { createInlangConfigFile } from "./utilities/createInlangConfigFile.js"
 import { deleteOldConfigFile } from "./utilities/deleteOldConfigFile.js"
+import { migrateProjectConfig } from "@inlang/create-project"
+import path from "node:path"
+import { migrateConfigFile } from "./utilities/migrateConfigFile.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
@@ -191,6 +194,9 @@ async function main(args: {
 	// try to delete old config file (inlang.config.js)
 	// TODO: remove this in the future (Nov/Dec 2023)
 	await deleteOldConfigFile()
+
+	// migrate project config from inlang.config.js to project.inlang.json
+	await migrateConfigFile(workspaceFolder, closestProjectFilePathUri)
 
 	// log inlang errors in the debugging console
 	const inlangErrors = state().inlang.errors()
