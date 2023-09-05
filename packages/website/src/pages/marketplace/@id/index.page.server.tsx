@@ -12,7 +12,11 @@ export async function onBeforeRender(pageContext: PageContext) {
 	const text = await (await fetch(item.readme.en)).text()
 	const markdown = parseMarkdown({
 		/* Remove HTML tags from markdown */
-		text: text.replace(/<[^>]*>?/gm, ""),
+		text: text
+			.replace(/<[^>]*>?/gm, "")
+			.replaceAll("1️⃣", "1.")
+			.replaceAll("2️⃣", "2.")
+			.replaceAll("3️⃣", "3."),
 	})
 
 	return {
