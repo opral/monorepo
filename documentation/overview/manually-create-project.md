@@ -30,7 +30,7 @@ Alternatively, you can create a new project file manually.
 	"sourceLanguageTag": "en",
 	// all the language tags you want to support in your project
 	"languageTags": ["en", "de"],
-	"packages": [],
+	"modules": [],
 	"settings": {}
 }
 ```
