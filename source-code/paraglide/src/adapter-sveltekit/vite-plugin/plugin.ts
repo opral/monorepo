@@ -64,7 +64,7 @@ export const plugin = async () => {
 				return dedent`
 					export const sourceLanguageTag = ${JSON.stringify(config.sourceLanguageTag)}
 					export const languageTags = ${JSON.stringify(config.languageTags)}
-					export const messages = ${JSON.stringify(config.messages())}
+					export const messages = ${JSON.stringify(config.messages)}
 				`
 			}
 
@@ -100,7 +100,7 @@ export const plugin = async () => {
 			}
 
 			createEffect(() => {
-				config.messages()
+				config.messages
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				viteServer?.ws.send({
 					type: "custom",
