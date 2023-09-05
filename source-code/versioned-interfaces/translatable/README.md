@@ -2,18 +2,16 @@
 
 This library provides an interface for externally provided translations.
 
-## About this library
-
 ### Design goals
 
 - **Incrementally adoptable.** Most applications start without any translation logic and suddenly find themselves in need of translation logic. This library allows you to add translation logic to your application without having to rewrite large parts of your application.
 - **A stable (data) interface with no implementation logic** This library only defines a (data) interface to exchange translations between internal and external parties. This library does not include implementation logic to reduce the risk of breaking changes. 
 
-### When to use this library
+#### When to use this library
 
 - Translations are outside of your control (e.g. provided by a third party like a user, customer, or plugin developer).
 
-### When not to use this library
+#### When not to use this library
 
 - You are the only one providing translations for your application. Use an i18n library instead.
 
