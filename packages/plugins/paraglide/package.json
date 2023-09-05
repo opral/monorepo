@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/plugin-paraglide-ide-extension",
+	"name": "@inlang/plugin-paraglide",
 	"keywords": [
 		"inlang",
 		"i18n",
@@ -26,8 +26,8 @@
 	},
 	"scripts": {
 		"_dev": "npm-run-all --print-label --parallel dev:watch tsc:watch",
-		"dev:watch": "inlang module build --entry ./src/index.ts --outdir ./dist --watch",
-		"_build": "inlang module build --entry ./src/index.ts --outdir ./dist && tsc -p tsconfig.build.json",
+		"dev:watch": "../../cli/src/main.js module build --entry ./src/index.ts --outdir ./dist --watch",
+		"_build": "../../cli/src/main.js module build --entry ./src/index.ts --outdir ./dist && tsc -p tsconfig.build.json",
 		"---- TEST ----------------------------------------------------------": "",
 		"_test": "tsc --noEmit --emitDeclarationOnly false && vitest run --passWithNoTests --coverage",
 		"test:watch": "npm-run-all --print-label --parallel tsc:watch vitest:watch tsc:watch:plugin",
