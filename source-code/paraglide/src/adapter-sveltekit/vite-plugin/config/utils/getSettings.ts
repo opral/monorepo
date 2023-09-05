@@ -1,9 +1,5 @@
 import type { InlangProject } from "@inlang/sdk"
-import {
-	validateSdkConfig,
-	type SdkConfig,
-	type SdkConfigInput,
-} from "../../../../../../plugins/paraglide/dist/index.js"
+import { validateSdkConfig, type SdkConfig, type SdkConfigInput } from "@inlang/plugin-paraglide"
 import { InlangSdkException } from "../../exceptions.js"
 
 export const defaultSdkPluginSettings = {
@@ -43,6 +39,6 @@ export function getSettings(inlang: InlangProject) {
 		// to be on the safe side, we check again here
 		return validateSdkConfig(settings)
 	} catch (error) {
-		return new InlangSdkException(`Invalid \`app.inlang.paraglideJs\` config`, error as Error)
+		return new InlangSdkException(`Invalid \`app.inlang.sdkJs\` config`, error as Error)
 	}
 }

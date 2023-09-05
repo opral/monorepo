@@ -2,7 +2,7 @@ import { ProjectFilePathNotFoundError, openInlangProject, LanguageTag, Message }
 import { InlangSdkException } from "../exceptions.js"
 import path, { resolve } from "node:path"
 import type { Config as SvelteConfig } from "@sveltejs/kit"
-import type { SdkConfig } from "../../../../../plugins/paraglide/dist/index.js"
+import type { SdkConfig } from "@inlang/plugin-paraglide"
 import { getSvelteKitVersion } from "./utils/getSvelteKitVersion.js"
 import { shouldContentBePrerendered } from "./utils/shouldContentBePrerendered.js"
 import { updateSdkModuleVersion } from "./utils/updateSdkModuleVersion.js"
