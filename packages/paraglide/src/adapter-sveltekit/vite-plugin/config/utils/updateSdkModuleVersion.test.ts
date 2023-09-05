@@ -3,7 +3,7 @@ import {
 	standaloneUpdateSdkModuleVersion,
 	updateSdkModuleVersion,
 } from "./updateSdkModuleVersion.js"
-import { createMockNodeishFs } from "@inlang/sdk/test"
+import { createNodeishMemoryFs } from "@lix-js/fs"
 import {
 	ProjectConfig,
 	openInlangProject,
@@ -48,7 +48,7 @@ const openMockedInlangProject = async (fs: NodeishFilesystemSubset): Promise<Inl
 		projectFilePath: "./project.inlang.json",
 		_import: async (url) =>
 			({
-				default: url === "plugin-json-mock" ? { plugins: [mockPlugin] } : {},
+				default: url === "plugin-json-mock" ? mockPlugin : ({} as Plugin),
 			} satisfies InlangModule),
 	})
 }
@@ -68,7 +68,7 @@ describe("updateSdkModuleVersion", () => {
 	})
 
 	it("should not do anything if module is not defined", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./project.inlang.json", JSON.stringify(getMockedConfig()))
 		const inlang = await openMockedInlangProject(fs)
 
@@ -77,7 +77,7 @@ describe("updateSdkModuleVersion", () => {
 	})
 
 	it("should not do anything if version is already identical", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.writeFile(
 			"./project.inlang.json",
 			JSON.stringify(getMockedConfig(`https://cdn.com/@inlang/sdk-js-plugin@${version}/index.js`)),
@@ -90,7 +90,7 @@ describe("updateSdkModuleVersion", () => {
 
 	describe("should update the version in the config file if it is not identical", () => {
 		it("no version set", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = createNodeishMemoryFs()
 			await fs.writeFile(
 				"./project.inlang.json",
 				JSON.stringify(getMockedConfig("https://cdn.com/@inlang/sdk-js-plugin/index.js")),
@@ -105,7 +105,7 @@ describe("updateSdkModuleVersion", () => {
 		})
 
 		it("@x.x.x", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = createNodeishMemoryFs()
 			await fs.writeFile(
 				"./project.inlang.json",
 				JSON.stringify(getMockedConfig("https://cdn.com/@inlang/sdk-js-plugin@0.0.0/index.js")),
@@ -120,7 +120,7 @@ describe("updateSdkModuleVersion", () => {
 		})
 
 		it("@x.x", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = createNodeishMemoryFs()
 			await fs.writeFile(
 				"./project.inlang.json",
 				JSON.stringify(getMockedConfig("https://cdn.com/@inlang/sdk-js-plugin@0.0/index.js")),
@@ -135,7 +135,7 @@ describe("updateSdkModuleVersion", () => {
 		})
 
 		it("@x", async () => {
-			const fs = await createMockNodeishFs()
+			const fs = createNodeishMemoryFs()
 			await fs.writeFile(
 				"./project.inlang.json",
 				JSON.stringify(getMockedConfig("https://cdn.com/@inlang/sdk-js-plugin@0/index.js")),
@@ -161,7 +161,7 @@ describe("standaloneUpdateSdkModuleVersion", () => {
 	})
 
 	it("should not do anything if version is already identical", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.mkdir(PATH_TO_INLANG_CONFIG, { recursive: true })
 		const config = getMockedConfig(`https://cdn.com/@inlang/sdk-js-plugin@${version}/index.js`)
 		await fs.writeFile(PATH_TO_INLANG_CONFIG, JSON.stringify(config))
@@ -175,7 +175,7 @@ describe("standaloneUpdateSdkModuleVersion", () => {
 	})
 
 	it("should update the version in the config file if it is not identical", async () => {
-		const fs = await createMockNodeishFs()
+		const fs = createNodeishMemoryFs()
 		await fs.mkdir(PATH_TO_CWD, { recursive: true })
 		const config = getMockedConfig(`https://cdn.com/@inlang/sdk-js-plugin@0/index.js`)
 		await fs.writeFile(PATH_TO_INLANG_CONFIG, JSON.stringify(config))

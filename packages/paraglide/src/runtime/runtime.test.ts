@@ -8,7 +8,7 @@ import {
 	type RuntimeState,
 } from "./runtime.js"
 import type { Message } from "@inlang/sdk"
-import { createMessage } from "@inlang/test"
+import { createMessage } from "@inlang/sdk/test-utilities"
 
 // --------------------------------------------------------------------------------------------------------------------
 

@@ -1,4 +1,3 @@
-import { createMockNodeishFs } from "@inlang/sdk/test"
 import { it, beforeEach, vi, expect } from "vitest"
 import {
 	PATH_TO_CWD,
@@ -18,7 +17,8 @@ import { getNodeishFs } from "./utils/getNodeishFs.js"
 import { version } from "../../../../package.json"
 import { InlangSdkException } from "../exceptions.js"
 import { validateSdkConfig, type SdkConfig } from "@inlang/sdk-js-plugin"
-import { createMessage } from "@inlang/test"
+import { createNodeishMemoryFs } from "@lix-js/fs"
+import { createMessage } from "@inlang/sdk/test-utilities"
 
 vi.mock("./utils/getNodeishFs.js")
 vi.mock("@inlang/sdk", async () => ({
@@ -32,7 +32,7 @@ beforeEach(() => {
 })
 
 it("should cache config creation", async () => {
-	const fs = await createMockNodeishFs()
+	const fs = createNodeishMemoryFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
 	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
 
@@ -65,7 +65,7 @@ it("should cache config creation", async () => {
 })
 
 it("should create an inlang config file if no config is present yet", async () => {
-	const fs = await createMockNodeishFs()
+	const fs = createNodeishMemoryFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
 	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
 
@@ -103,7 +103,7 @@ it("should create an inlang config file if no config is present yet", async () =
 })
 
 it("should update the sdk module version", async () => {
-	const fs = await createMockNodeishFs()
+	const fs = createNodeishMemoryFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
 	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
 
@@ -133,7 +133,7 @@ it("should update the sdk module version", async () => {
 })
 
 it("should not update the sdk module version if already up2date", async () => {
-	const fs = await createMockNodeishFs()
+	const fs = createNodeishMemoryFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
 	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
 
@@ -160,7 +160,7 @@ it("should not update the sdk module version if already up2date", async () => {
 })
 
 it("should create demo resources if none are present yet", async () => {
-	const fs = await createMockNodeishFs()
+	const fs = createNodeishMemoryFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
 	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
 
@@ -187,7 +187,7 @@ it("should create demo resources if none are present yet", async () => {
 })
 
 it("should add the sdk plugin module if not present yet", async () => {
-	const fs = await createMockNodeishFs()
+	const fs = createNodeishMemoryFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
 	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
 
@@ -238,7 +238,7 @@ it("should add the sdk plugin module if not present yet", async () => {
 })
 
 it("should throw if the SDK is not configured properly", async () => {
-	const fs = await createMockNodeishFs()
+	const fs = createNodeishMemoryFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
 	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
 
@@ -258,7 +258,7 @@ it("should throw if the SDK is not configured properly", async () => {
 })
 
 it("should throw if no svelte.config.js file is found", async () => {
-	const fs = await createMockNodeishFs()
+	const fs = await createNodeishMemoryFs()
 
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
 	vi.mocked(openInlangProject).mockImplementationOnce(
@@ -280,7 +280,7 @@ it("should throw if no svelte.config.js file is found", async () => {
 })
 
 it("should correctly resolve the config", async () => {
-	const fs = await createMockNodeishFs()
+	const fs = createNodeishMemoryFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
 	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
 
