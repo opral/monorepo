@@ -5,7 +5,7 @@ import {
 } from "./updateSdkModuleVersion.js"
 import { createMockNodeishFs } from "@inlang/sdk/test"
 import {
-	InlangConfig,
+	ProjectConfig,
 	openInlangProject,
 	type Plugin,
 	type InlangProject,
@@ -21,7 +21,7 @@ vi.mock("@inlang/sdk", async () => ({
 	openInlangProject: vi.fn(),
 }))
 
-const getMockedConfig = (...modules: string[]): InlangConfig => ({
+const getMockedConfig = (...modules: string[]): ProjectConfig => ({
 	sourceLanguageTag: "en",
 	languageTags: ["en"],
 	settings: { "plugin.inlang.json": { pathPattern: "{languageTag}.json" } },
@@ -31,7 +31,7 @@ const getMockedConfig = (...modules: string[]): InlangConfig => ({
 const openMockedInlangProject = async (fs: NodeishFilesystemSubset): Promise<InlangProject> => {
 	const mockPlugin: Plugin = {
 		meta: {
-			id: "mock.plugin.name",
+			id: "plugin.mock.name",
 			displayName: {
 				en: "hello",
 			},

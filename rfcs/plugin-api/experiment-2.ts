@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { InlangConfig } from "@inlang/core/src/config"
+import { ProjectConfig } from "@inlang/core/src/config"
 import { InlangEnvironment } from "@inlang/core/src/environment/types"
 
 export const myPlugin = createPlugin<{ pathPattern: string }>(({ pluginConfig, env }) => {
@@ -32,7 +32,7 @@ type PluginConfigFunction<PluginConfig> = (
 
 type Plugin = {
 	id: string
-	defineConfig(config: Partial<InlangConfig>): void
+	defineConfig(config: Partial<ProjectConfig>): void
 }
 
 function createPlugin<PluginConfig>(

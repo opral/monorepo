@@ -1,6 +1,6 @@
 import path from "node:path"
 import { PATH_TO_CWD } from "../config.js"
-import type { InlangConfig, NodeishFilesystemSubset } from "@inlang/sdk"
+import type { NodeishFilesystemSubset, ProjectConfig } from "@inlang/sdk"
 import { defaultSdkPluginSettings } from "./getSettings.js"
 
 // TODO: use correct modules links
@@ -22,6 +22,6 @@ export const createBasicInlangConfig = async (fs: NodeishFilesystemSubset) => {
 				},
 				...defaultSdkPluginSettings,
 			},
-		} satisfies InlangConfig),
+		} satisfies ProjectConfig),
 	)
 }
