@@ -62,16 +62,16 @@ In your lint rule's `marketplace-manifest.json` make sure to define the followin
 
 | **Parameter**        | **Description**                                               |
 |----------------------|---------------------------------------------------------------|
-| `id`                 | Unique identifier for your lint rule.                         |
+| `id`                 | Unique identifier for your plugin.                         |
 | `icon`        | Link to the icon of your plugin (optional).              |
-| `displayName`        | A user-friendly display name for your lint rule.              |
-| `description`        | Briefly describe what your lint rule checks for.              |
-| `readme`             | Link to the README documentation for your lint rule.          |
-| `keywords`           | Keywords that describe your lint rule.                        |
+| `displayName`        | A user-friendly display name for your plugin.              |
+| `description`        | Briefly describe what your plugin does.              |
+| `readme`             | Link to the README documentation for your plugin.          |
+| `keywords`           | Keywords that describe your plugin.                        |
 | `publisherName`      | Your publisher name.                                          |
 | `publisherIcon`      | Link to your publisher's icon or avatar (optional).           |
-| `license`            | The license under which your lint rule is distributed.        |
-| `module`             | The path to your lint rule's JavaScript module.               |
+| `license`            | The license under which your plugin is distributed.        |
+| `module`             | The path to your plugin's JavaScript module (Please use [jsDelivr](https://www.jsdelivr.com/)).               |
 
 Make sure these settings accurately represent your plugin's purpose and functionality.
 
