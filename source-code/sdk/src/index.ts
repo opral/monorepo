@@ -26,3 +26,4 @@ export {
 
 export * from "./messages/variant.js"
 export * from "./versionedInterfaces.js"
+export { InlangModule } from "@inlang/module"
