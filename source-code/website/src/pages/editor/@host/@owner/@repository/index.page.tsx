@@ -129,9 +129,6 @@ function TheActualPage() {
 						</p>
 					</div>
 				</Match>
-				<Match when={!doesInlangConfigExist()}>
-					<NoInlangConfigFoundCard />
-				</Match>
 				<Match when={inlang()?.errors().length !== 0 && inlang()}>
 					<p class="text-danger pb-2">An error occurred while initializing the project file:</p>
 					<ul class="text-danger">
@@ -158,6 +155,9 @@ function TheActualPage() {
 							</For>
 						)}
 					</ul>
+				</Match>
+				<Match when={!doesInlangConfigExist()}>
+					<NoInlangConfigFoundCard />
 				</Match>
 				<Match
 					when={
