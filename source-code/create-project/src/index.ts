@@ -1,6 +1,14 @@
 import type { ProjectConfig } from "@inlang/project-config"
 import type { NodeishFilesystem } from "@lix-js/fs"
 
+// TODO: @janfjohannes @felixhaeberle 
+// TODO: 1. I would move implemntation code from index. It is unclear what 
+// TODO:    APIs this file exports on a glance. 
+// TODO: 2. You need to remove console.log statements. 
+// TODO:		- The library's runtime environment is unknown. 
+// TODO:    - An an example, VSCode users won't see the logs ;) 
+// TODO:    - Let the consumer pass a logger. 
+
 const potentialFolders = [
 	"language",
 	"languages",

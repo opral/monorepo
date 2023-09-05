@@ -65,7 +65,7 @@ export function Page() {
 						<div class="flex justify-between items-center">
 							<Tags />
 							<div class="max-sm:hidden">
-								<Button type="text" href="/documentation/develop-plugin">
+								<Button type="text" href="/documentation/publish-marketplace">
 									Build your own
 								</Button>
 							</div>
@@ -143,7 +143,7 @@ const Gallery = () => {
 				}}
 			</For>
 			<a
-				href="/documentation/develop-plugin"
+				href="/documentation/publish-marketplace"
 				target=""
 				class="relative no-underline xl:col-start-2"
 			>

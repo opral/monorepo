@@ -20,8 +20,8 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 			return
 		}
 
-		// TODO: this is a hack to prevent the message preview from showing up in the inlang.config.js file
-		if (activeTextEditor.document.fileName.includes("inlang.config.js")) {
+		// TODO: this is a hack to prevent the message preview from showing up in the project.inlang.json file
+		if (activeTextEditor.document.fileName.includes("project.inlang.json")) {
 			return activeTextEditor.setDecorations(messagePreview, [])
 		}
 
