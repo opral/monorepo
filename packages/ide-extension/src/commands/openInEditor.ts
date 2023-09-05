@@ -1,4 +1,4 @@
-import { getGitOrigin } from "../services/telemetry/implementation.js"
+import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js"
 import * as vscode from "vscode"
 import type { Message } from "@inlang/sdk"
 
@@ -15,6 +15,9 @@ export const openInEditorCommand = {
 			: `${EDITOR_BASE_PATH}${origin}`
 
 		vscode.env.openExternal(vscode.Uri.parse(uri))
+		telemetry.capture({
+			event: "IDE-EXTENSION Editor opned via tooltip",
+		})
 		return undefined
 	},
 }
