@@ -80,7 +80,9 @@ describe("updateSdkModuleVersion", () => {
 		const fs = createNodeishMemoryFs()
 		await fs.writeFile(
 			"./project.inlang.json",
-			JSON.stringify(getMockedConfig(`https://cdn.com/@inlang/sdk-js-plugin@${version}/index.js`)),
+			JSON.stringify(
+				getMockedConfig(`https://cdn.com/@inlang/plugin-paraglide@${version}/index.js`),
+			),
 		)
 		const inlang = await openMockedInlangProject(fs)
 
@@ -93,7 +95,7 @@ describe("updateSdkModuleVersion", () => {
 			const fs = createNodeishMemoryFs()
 			await fs.writeFile(
 				"./project.inlang.json",
-				JSON.stringify(getMockedConfig("https://cdn.com/@inlang/sdk-js-plugin/index.js")),
+				JSON.stringify(getMockedConfig("https://cdn.com/@inlang/plugin-paraglide/index.js")),
 			)
 			const inlang = await openMockedInlangProject(fs)
 
@@ -101,14 +103,14 @@ describe("updateSdkModuleVersion", () => {
 			expect(updated).toBe(true)
 
 			const configFile = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
-			expect(configFile).includes(`@inlang/sdk-js-plugin@${version}`)
+			expect(configFile).includes(`@inlang/plugin-paraglide@${version}`)
 		})
 
 		it("@x.x.x", async () => {
 			const fs = createNodeishMemoryFs()
 			await fs.writeFile(
 				"./project.inlang.json",
-				JSON.stringify(getMockedConfig("https://cdn.com/@inlang/sdk-js-plugin@0.0.0/index.js")),
+				JSON.stringify(getMockedConfig("https://cdn.com/@inlang/plugin-paraglide@0.0.0/index.js")),
 			)
 			const inlang = await openMockedInlangProject(fs)
 
@@ -116,14 +118,14 @@ describe("updateSdkModuleVersion", () => {
 			expect(updated).toBe(true)
 
 			const configFile = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
-			expect(configFile).includes(`@inlang/sdk-js-plugin@${version}`)
+			expect(configFile).includes(`@inlang/plugin-paraglide@${version}`)
 		})
 
 		it("@x.x", async () => {
 			const fs = createNodeishMemoryFs()
 			await fs.writeFile(
 				"./project.inlang.json",
-				JSON.stringify(getMockedConfig("https://cdn.com/@inlang/sdk-js-plugin@0.0/index.js")),
+				JSON.stringify(getMockedConfig("https://cdn.com/@inlang/plugin-paraglide@0.0/index.js")),
 			)
 			const inlang = await openMockedInlangProject(fs)
 
@@ -131,14 +133,14 @@ describe("updateSdkModuleVersion", () => {
 			expect(updated).toBe(true)
 
 			const configFile = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
-			expect(configFile).includes(`@inlang/sdk-js-plugin@${version}`)
+			expect(configFile).includes(`@inlang/plugin-paraglide@${version}`)
 		})
 
 		it("@x", async () => {
 			const fs = createNodeishMemoryFs()
 			await fs.writeFile(
 				"./project.inlang.json",
-				JSON.stringify(getMockedConfig("https://cdn.com/@inlang/sdk-js-plugin@0/index.js")),
+				JSON.stringify(getMockedConfig("https://cdn.com/@inlang/plugin-paraglide@0/index.js")),
 			)
 			const inlang = await openMockedInlangProject(fs)
 
@@ -146,7 +148,7 @@ describe("updateSdkModuleVersion", () => {
 			expect(updated).toBe(true)
 
 			const configFile = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
-			expect(configFile).includes(`@inlang/sdk-js-plugin@${version}`)
+			expect(configFile).includes(`@inlang/plugin-paraglide@${version}`)
 		})
 	})
 })
@@ -163,7 +165,7 @@ describe("standaloneUpdateSdkModuleVersion", () => {
 	it("should not do anything if version is already identical", async () => {
 		const fs = createNodeishMemoryFs()
 		await fs.mkdir(PATH_TO_INLANG_CONFIG, { recursive: true })
-		const config = getMockedConfig(`https://cdn.com/@inlang/sdk-js-plugin@${version}/index.js`)
+		const config = getMockedConfig(`https://cdn.com/@inlang/plugin-paraglide@${version}/index.js`)
 		await fs.writeFile(PATH_TO_INLANG_CONFIG, JSON.stringify(config))
 
 		vi.mocked(openInlangProject).mockImplementationOnce(
@@ -177,7 +179,7 @@ describe("standaloneUpdateSdkModuleVersion", () => {
 	it("should update the version in the config file if it is not identical", async () => {
 		const fs = createNodeishMemoryFs()
 		await fs.mkdir(PATH_TO_CWD, { recursive: true })
-		const config = getMockedConfig(`https://cdn.com/@inlang/sdk-js-plugin@0/index.js`)
+		const config = getMockedConfig(`https://cdn.com/@inlang/plugin-paraglide@0/index.js`)
 		await fs.writeFile(PATH_TO_INLANG_CONFIG, JSON.stringify(config))
 
 		vi.mocked(openInlangProject).mockImplementationOnce(
@@ -194,6 +196,6 @@ describe("standaloneUpdateSdkModuleVersion", () => {
 		expect(updated).toBe(true)
 
 		const configFile = await fs.readFile(PATH_TO_INLANG_CONFIG, { encoding: "utf-8" })
-		expect(configFile).includes(`@inlang/sdk-js-plugin@${version}`)
+		expect(configFile).includes(`@inlang/plugin-paraglide@${version}`)
 	})
 })

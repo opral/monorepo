@@ -1,6 +1,7 @@
 import type { InlangProject } from "@inlang/sdk"
 import { validateSdkConfig, type SdkConfig, type SdkConfigInput } from "@inlang/plugin-paraglide"
 import { InlangSdkException } from "../../exceptions.js"
+import {} from "../../../../../../plugins/paraglide/dist/index.js"
 
 export const defaultSdkPluginSettings = {
 	"library.inlang.paraglideJs": {
@@ -21,7 +22,7 @@ export function getSettings(inlang: InlangProject) {
 		const config = inlang.config()
 		inlang.setConfig({
 			...config!,
-			modules: [...config!.modules, "../../../../../../paraglide/dist/index.js"],
+			modules: [...config!.modules, "../../../../../../plugins/paraglide/dist/index.js"],
 			settings: {
 				...config!.settings,
 				...defaultSdkPluginSettings,

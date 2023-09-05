@@ -41,7 +41,7 @@ it("should cache config creation", async () => {
 		async () =>
 			({
 				errors: () => [],
-				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+				config: () => ({ modules: ["@inlang/plugin-paraglide"] }),
 				setConfig: () => undefined,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
 				customApi: () => ({
@@ -81,7 +81,7 @@ it("should create an inlang config file if no config is present yet", async () =
 		async () =>
 			({
 				errors: () => [],
-				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+				config: () => ({ modules: ["@inlang/plugin-paraglide"] }),
 				setConfig: () => undefined,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
 				customApi: () => ({
@@ -113,7 +113,7 @@ it("should update the sdk module version", async () => {
 		async () =>
 			({
 				errors: () => [],
-				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+				config: () => ({ modules: ["@inlang/plugin-paraglide"] }),
 				setConfig,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
 				customApi: () => ({
@@ -128,7 +128,7 @@ it("should update the sdk module version", async () => {
 
 	expect(setConfig).toHaveBeenCalledOnce()
 	expect(setConfig).toHaveBeenNthCalledWith(1, {
-		modules: [`https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin@${version}/dist/index.js`],
+		modules: [`https://cdn.jsdelivr.net/npm/@inlang/plugin-paraglide@${version}/dist/index.js`],
 	})
 })
 
@@ -143,7 +143,7 @@ it("should not update the sdk module version if already up2date", async () => {
 		async () =>
 			({
 				errors: () => [],
-				config: () => ({ modules: [`@inlang/sdk-js-plugin@${version}`] }),
+				config: () => ({ modules: [`@inlang/plugin-paraglide@${version}`] }),
 				setConfig,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
 				customApi: () => ({
@@ -170,7 +170,7 @@ it("should create demo resources if none are present yet", async () => {
 		async () =>
 			({
 				errors: () => [],
-				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+				config: () => ({ modules: ["@inlang/plugin-paraglide"] }),
 				setConfig: () => undefined,
 				query: { messages: { getAll: () => [], create } },
 				customApi: () => ({
@@ -207,7 +207,7 @@ it("should add the sdk plugin module if not present yet", async () => {
 		async () =>
 			({
 				errors: () => [],
-				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+				config: () => ({ modules: ["@inlang/plugin-paraglide"] }),
 				setConfig: () => undefined,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
 				customApi: () => ({
@@ -222,7 +222,7 @@ it("should add the sdk plugin module if not present yet", async () => {
 
 	expect(setConfig).toHaveBeenCalledOnce()
 	expect(setConfig).toHaveBeenNthCalledWith(1, {
-		modules: ["../../../../../sdk-js-plugin/dist/index.js"],
+		modules: ["../../../../../paraglide-plugin/dist/index.js"],
 		settings: {
 			"library.inlang.paraglideJs": {
 				languageNegotiation: {
@@ -247,7 +247,7 @@ it("should throw if the SDK is not configured properly", async () => {
 		async () =>
 			({
 				errors: () => [],
-				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+				config: () => ({ modules: ["@inlang/plugin-paraglide"] }),
 				setConfig: () => undefined,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
 				customApi: () => ({ "inlang.app.sdkJs": {} as SdkConfig }),
@@ -265,7 +265,7 @@ it("should throw if no svelte.config.js file is found", async () => {
 		async () =>
 			({
 				errors: () => [],
-				config: () => ({ modules: ["@inlang/sdk-js-plugin"] }),
+				config: () => ({ modules: ["@inlang/plugin-paraglide"] }),
 				setConfig: () => undefined,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
 				customApi: () => ({
@@ -294,7 +294,7 @@ it("should correctly resolve the config", async () => {
 				config: () => ({
 					sourceLanguageTag: "en",
 					languageTags: ["en", "de"],
-					modules: [`@inlang/sdk-js-plugin@${version}`],
+					modules: [`@inlang/plugin-paraglide@${version}`],
 				}),
 				setConfig,
 				query: { messages: { getAll: () => [createMessage("hi", { en: "hello" })], create } },

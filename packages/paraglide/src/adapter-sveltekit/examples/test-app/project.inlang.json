@@ -3,7 +3,7 @@
 	"languageTags": ["en", "de"],
 	"packages": [
 		"../../../../../plugins/json/dist/index.js",
-		"../../../../../sdk-js-plugin/dist/index.js"
+		"../../../../../plugins/paraglide/dist/index.js"
 	],
 	"settings": {
 		"plugin.inlang.json": {
