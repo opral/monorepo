@@ -28,7 +28,7 @@ export async function migrateProjectConfig(args: {
 		settings: {},
 	}
 
-	let warnings: string[] = []
+	const warnings: string[] = []
 
 	const legacyConfig = await format(
 		await args.nodeishFs.readFile("./inlang.config.js", { encoding: "utf-8" }).catch(() => ""),
