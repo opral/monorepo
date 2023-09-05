@@ -8,6 +8,8 @@ import {
 	ExportSpecifier,
 	ArrowFunction,
 	FunctionExpression,
+	Expression,
+	type CallLikeExpression,
 } from "ts-morph"
 import { codeToNode, nodeToCode } from "./js.util.js"
 import { findOrCreateExport } from "./exports.js"
@@ -39,7 +41,7 @@ export function wrapWithPlaceholder(node: Node): CallExpression {
 
 // ------------------------------------------------------------------------------------------------
 
-export const createWrapperAst = (name: string, options = "") =>
+export const createWrapperAst = (name: string, options = ""): CallExpression =>
 	codeToNode(`
 	const x = ${name}(${options}).use(${WRAP_IDENTIFIER})
 `) as CallExpression
