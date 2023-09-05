@@ -22,10 +22,10 @@ npx @inlang/cli@latest module init --type plugin
 
 Each of the following functions in the code represents a key aspect of your plugin's functionality:
 
-- `loadMessages`: Load messages.
-- `saveMessages`: Save messages.
-- `detectedLanguageTags`: Detect language tags in the project.
-- `addCustomApi`: Define app-specific APIs.
+- `loadMessages`: Load messages
+- `saveMessages`: Save messages
+- `detectedLanguageTags`: Detect language tags in the project
+- `addCustomApi`: Define app-specific APIs
 
 
 ```typescript
