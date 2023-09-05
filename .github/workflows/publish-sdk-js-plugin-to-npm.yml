@@ -4,11 +4,11 @@ on:
   # manually triggering the workflow if desired
   # workflow_dispatch:
 
-  # push:
-  #   paths:
-  #     - "source-code/sdk-js-plugin/package.json"
-  #   branches:
-  #     - main
+  push:
+    paths:
+      - "source-code/plugins/paraglide/package.json"
+    branches:
+      - main
 
 jobs:
   publish:

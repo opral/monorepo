@@ -1,14 +1,14 @@
 import { type SdkConfigInput, validateSdkConfig } from "./api.js"
 import type { Plugin } from "@inlang/plugin"
-import { ideExtensionDefaultConfig } from "./ideExtension/config.js"
+import { ideExtensionConfig } from "./ideExtension/config.js"
 
 // ------------------------------------------------------------------------------------------------
 
-export const sdkPlugin: Plugin<SdkConfigInput> = {
+export const plugin: Plugin<SdkConfigInput> = {
 	meta: {
-		id: "plugin.inlang.paraglideJsIdeExtension",
-		displayName: { en: "Inlang SDK for JavaScript" },
-		description: { en: "Plugin for the Inlang SDK for JavaScript" },
+		id: "plugin.inlang.paraglide",
+		displayName: { en: "Inlang Paraglide Plugin" },
+		description: { en: "Inlang Paraglide Plugin" },
 		// marketplace: {
 		// 	keywords: [
 		// 		"inlang",
@@ -27,8 +27,8 @@ export const sdkPlugin: Plugin<SdkConfigInput> = {
 		const parsedConfig = validateSdkConfig(settings)
 
 		return {
-			"app.inlang.sdkJs": parsedConfig,
-			"app.inlang.ideExtension": ideExtensionDefaultConfig,
+			"app.inlang.paraglideJs": parsedConfig,
+			"app.inlang.ideExtension": ideExtensionConfig(),
 		}
 	},
 }
