@@ -1,7 +1,7 @@
 {
 	"sourceLanguageTag": "en",
 	"languageTags": ["de", "en", "zh"],
-	"packages": [""],
+	"modules": [""],
 	"settings": {
 		"plugin.inlang.json": {
 			"pathPattern": "./source-code/website/lang/{language}.json"
