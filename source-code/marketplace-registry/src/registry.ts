@@ -9,7 +9,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "Translation status badge",
 		},
 		description: {
-			en: "Badge showing missing messages and more",
+			en: "Badge showing missing messages in your codebase. Perfect for your README.md file.",
 		},
 		readme: {
 			en: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/badge/README.md",
@@ -23,10 +23,10 @@ export const registry: MarketplaceManifest[] = [
 		id: "app.inlang.cli",
 		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		displayName: {
-			en: "inlang CLI",
+			en: "CLI",
 		},
 		description: {
-			en: "Official inlang CLI",
+			en: "Command line interface for inlang projects. Many commands and the possibility to do automation.",
 		},
 		readme: {
 			en: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/cli/README.md",
@@ -40,10 +40,10 @@ export const registry: MarketplaceManifest[] = [
 		id: "app.inlang.editor",
 		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		displayName: {
-			en: "inlang Web Editor",
+			en: "Web Editor",
 		},
 		description: {
-			en: "The inlang Web Editor is a browser-based editor for globalized codebases.",
+			en: "The inlang Web Editor enables you to work with globalized codebases in your browser, without having to touch code but still being able to have a git-based workflow.",
 		},
 		readme: {
 			en: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/editor/README.md",
@@ -79,7 +79,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "Language Tag",
 		},
 		description: {
-			en: "inlang's language tag library.",
+			en: "A library containing BCP-47 language tags types and validators, used by inlang.",
 		},
 		readme: {
 			en: "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/versioned-interfaces/language-tag/README.md",
@@ -96,7 +96,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "paraglideJS",
 		},
 		description: {
-			en: "inlang's SDK library for the web.",
+			en: "A fully configurable JavaScript SDK that integrates within your framework.",
 		},
 		readme: {
 			en: "https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/paraglide/README.md",
@@ -185,10 +185,10 @@ export const registry: MarketplaceManifest[] = [
 			en: "i18next",
 		},
 		description: {
-			en: "i18next plugin for inlang",
+			en: "A plugin for inlang projects that works with i18next and reads / writes resources.",
 		},
 		readme: {
-			en: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/json/README.md",
+			en: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/i18next/README.md",
 		},
 		keywords: ["i18next", "react", "nextjs"],
 		publisherName: "inlang",
@@ -203,7 +203,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "JSON translation files",
 		},
 		description: {
-			en: "JSON plugin for inlang",
+			en: "This plugin enables using JSON files for messages. It is not library specific and can be used with any framework.",
 		},
 		readme: {
 			en: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/json/README.md",
