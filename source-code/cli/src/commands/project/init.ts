@@ -106,7 +106,9 @@ You can read more here: inlang.com/documentation/language-tag`,
 		pathJoin: path.join,
 	})
 
-	warnings.forEach((warning) => args.logger.warn(warning))
+	for (const warning of warnings) {
+		args.logger.warn(warning)
+	}
 
 	args.logger.info(`✅ Successfully created your inlang configuration at: ${inlangConfigFilePath}`)
 }

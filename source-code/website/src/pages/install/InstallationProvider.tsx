@@ -124,7 +124,7 @@ async function initializeRepo(
 		return module?.module
 	})
 
-	if (modulesURL.some((module) => module === undefined)) {
+	if (modulesURL.includes(undefined)) {
 		setStep({
 			type: "error",
 			message: "The id of the module is not valid.",
