@@ -26,19 +26,19 @@ import { Type, type TString, type TTemplateLiteral } from "@sinclair/typebox"
  *   }
  *
  *   // "Hello world"
- *   typeof translatable1 === "object" 
- *      ? translatable1['de'] ?? translatable.en 
- *      : translatable1 
- *   
+ *   typeof translatable1 === "object"
+ *      ? translatable1['de'] ?? translatable.en
+ *      : translatable1
+ *
  *   // "Hello world"
- *   typeof translatable2 === "object" 
- *      ? translatable2.en 
- *      : translatable2 
- * 
+ *   typeof translatable2 === "object"
+ *      ? translatable2.en
+ *      : translatable2
+ *
  *   // "Hallo Welt"
- *   typeof translatable2 === "object" 
- *      ? translatable2['de'] ?? translatable2.en 
- *      : translatable2 
+ *   typeof translatable2 === "object"
+ *      ? translatable2['de'] ?? translatable2.en
+ *      : translatable2
  *
  */
 export type Translatable<T extends string> =
