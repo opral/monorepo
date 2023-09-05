@@ -37,6 +37,7 @@
 	"devDependencies": {
 		"@inlang/sdk-js-plugin": "*",
 		"@sveltejs/kit": "1.24.0",
+		"@types/node": "20.5.9",
 		"dedent": "^1.5.1",
 		"deepmerge-ts": "^5.1.0",
 		"esbuild": "^0.18.11",
