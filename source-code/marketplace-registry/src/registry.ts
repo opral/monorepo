@@ -90,7 +90,7 @@ export const registry: MarketplaceManifest[] = [
 		license: "Apache-2.0",
 	},
 	{
-		id: "library.inlang.paraglide",
+		id: "library.inlang.paraglideJs",
 		icon: "https://emojis.wiki/thumbs/emojis/parachute.webp",
 		displayName: {
 			en: "paraglideJS",
