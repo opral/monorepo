@@ -148,11 +148,7 @@ const Gallery = () => {
 					)
 				}}
 			</For>
-			<a
-				href="/documentation/publish-marketplace"
-				target=""
-				class="relative no-underline xl:col-start-2"
-			>
+			<a href="/documentation/publish-marketplace" class="relative no-underline">
 				<div class="flex flex-col h-64 text-surface-500 relative justify-center items-center gap-4 bg-surface-100 max-h-full hover:bg-surface-200 p-6 rounded-xl border border-surface-2 cursor-pointer">
 					<Plus class="text-4xl" />
 					<p class="m-0 font-normal leading-6 text-sm tracking-wide line-clamp-3">Build your own</p>
