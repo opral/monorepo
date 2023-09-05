@@ -39,8 +39,8 @@ export function Page(props: PageProps) {
 
 	return (
 		<>
-			<Title>{displayName()}</Title>
-			<Meta name="description" content={description()} />
+			<Title>{props.manifest && displayName()}</Title>
+			<Meta name="description" content={props.manifest && description()} />
 			<Layout>
 				<Show when={props.markdown && props.manifest}>
 					<div class="md:py-28 py-16">
