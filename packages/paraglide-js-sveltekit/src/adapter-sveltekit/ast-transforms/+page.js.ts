@@ -66,7 +66,12 @@ export const _FOR_TESTING = {
 
 // ------------------------------------------------------------------------------------------------
 
-export const transformPageJs = (filePath: string, config: VirtualModule, code: string, root: boolean) => {
+export const transformPageJs = (
+	filePath: string,
+	config: VirtualModule,
+	code: string,
+	root: boolean,
+) => {
 	const sourceFile = codeToSourceFile(code, filePath)
 
 	if (isOptOutImportPresent(sourceFile)) return code
