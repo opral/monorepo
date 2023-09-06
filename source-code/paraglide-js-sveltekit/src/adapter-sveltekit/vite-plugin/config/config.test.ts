@@ -14,9 +14,8 @@ import {
 } from "@inlang/sdk"
 import * as createBasicInlangConfigModule from "./utils/createBasicInlangConfig.js"
 import { getNodeishFs } from "./utils/getNodeishFs.js"
-import { version } from "../../../../package.json"
 import { InlangSdkException } from "../exceptions.js"
-import { validateSdkConfig, type SdkConfig } from "../../../../../plugins/paraglide/dist/index.js"
+import { validateSdkConfig, type SdkConfig } from "../../../settings.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 import { createMessage } from "@inlang/sdk/test-utilities"
 
@@ -45,7 +44,7 @@ it("should cache config creation", async () => {
 				setConfig: () => undefined,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
 				customApi: () => ({
-					"inlang.app.sdkJs": validateSdkConfig({
+					"plugin.inlang.paraglideJs": validateSdkConfig({
 						languageNegotiation: { strategies: [{ type: "url" }] },
 					}),
 				}),
@@ -85,7 +84,7 @@ it("should create an inlang config file if no config is present yet", async () =
 				setConfig: () => undefined,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
 				customApi: () => ({
-					"inlang.app.sdkJs": validateSdkConfig({
+					"plugin.inlang.paraglideJs": validateSdkConfig({
 						languageNegotiation: { strategies: [{ type: "url" }] },
 					}),
 				}),
@@ -100,63 +99,6 @@ it("should create an inlang config file if no config is present yet", async () =
 
 	expect(spy).toHaveBeenCalledOnce()
 	expect(await fs.readFile(PATH_TO_INLANG_CONFIG, { encoding: "utf-8" })).toBeDefined()
-})
-
-it("should update the sdk module version", async () => {
-	const fs = createNodeishMemoryFs()
-	await fs.mkdir(PATH_TO_CWD, { recursive: true })
-	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
-
-	const setConfig = vi.fn()
-	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
-	vi.mocked(openInlangProject).mockImplementationOnce(
-		async () =>
-			({
-				errors: () => [],
-				config: () => ({ modules: ["@inlang/plugin-paraglide"] }),
-				setConfig,
-				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
-				customApi: () => ({
-					"inlang.app.sdkJs": validateSdkConfig({
-						languageNegotiation: { strategies: [{ type: "url" }] },
-					}),
-				}),
-			} as unknown as InlangProject),
-	)
-
-	await initTransformConfig()
-
-	expect(setConfig).toHaveBeenCalledOnce()
-	expect(setConfig).toHaveBeenNthCalledWith(1, {
-		modules: [`https://cdn.jsdelivr.net/npm/@inlang/plugin-paraglide@${version}/dist/index.js`],
-	})
-})
-
-it("should not update the sdk module version if already up2date", async () => {
-	const fs = createNodeishMemoryFs()
-	await fs.mkdir(PATH_TO_CWD, { recursive: true })
-	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
-
-	const setConfig = vi.fn()
-	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
-	vi.mocked(openInlangProject).mockImplementationOnce(
-		async () =>
-			({
-				errors: () => [],
-				config: () => ({ modules: [`@inlang/plugin-paraglide@${version}`] }),
-				setConfig,
-				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
-				customApi: () => ({
-					"inlang.app.sdkJs": validateSdkConfig({
-						languageNegotiation: { strategies: [{ type: "url" }] },
-					}),
-				}),
-			} as unknown as InlangProject),
-	)
-
-	await initTransformConfig()
-
-	expect(setConfig).not.toHaveBeenCalled()
 })
 
 it("should create demo resources if none are present yet", async () => {
@@ -174,7 +116,7 @@ it("should create demo resources if none are present yet", async () => {
 				setConfig: () => undefined,
 				query: { messages: { getAll: () => [], create } },
 				customApi: () => ({
-					"inlang.app.sdkJs": validateSdkConfig({
+					"plugin.inlang.paraglideJs": validateSdkConfig({
 						languageNegotiation: { strategies: [{ type: "url" }] },
 					}),
 				}),
@@ -211,7 +153,7 @@ it("should add the sdk plugin module if not present yet", async () => {
 				setConfig: () => undefined,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
 				customApi: () => ({
-					"inlang.app.sdkJs": validateSdkConfig({
+					"plugin.inlang.paraglideJs": validateSdkConfig({
 						languageNegotiation: { strategies: [{ type: "url" }] },
 					}),
 				}),
@@ -222,9 +164,9 @@ it("should add the sdk plugin module if not present yet", async () => {
 
 	expect(setConfig).toHaveBeenCalledOnce()
 	expect(setConfig).toHaveBeenNthCalledWith(1, {
-		modules: ["../../../../../paraglide-plugin/dist/index.js"],
+		modules: ["../../../../../../plugins/paraglide/dist/index.js"],
 		settings: {
-			"library.inlang.paraglideJs": {
+			"library.inlang.paraglide": {
 				languageNegotiation: {
 					strategies: [
 						{
@@ -250,7 +192,7 @@ it("should throw if the SDK is not configured properly", async () => {
 				config: () => ({ modules: ["@inlang/plugin-paraglide"] }),
 				setConfig: () => undefined,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
-				customApi: () => ({ "inlang.app.sdkJs": {} as SdkConfig }),
+				customApi: () => ({ "plugin.inlang.paraglideJs": {} as SdkConfig }),
 			} as unknown as InlangProject),
 	)
 
@@ -258,7 +200,7 @@ it("should throw if the SDK is not configured properly", async () => {
 })
 
 it("should throw if no svelte.config.js file is found", async () => {
-	const fs = await createNodeishMemoryFs()
+	const fs = createNodeishMemoryFs()
 
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
 	vi.mocked(openInlangProject).mockImplementationOnce(
@@ -269,7 +211,7 @@ it("should throw if no svelte.config.js file is found", async () => {
 				setConfig: () => undefined,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
 				customApi: () => ({
-					"inlang.app.sdkJs": validateSdkConfig({
+					"plugin.inlang.paraglideJs": validateSdkConfig({
 						languageNegotiation: { strategies: [{ type: "url" }] },
 					}),
 				}),
@@ -283,7 +225,6 @@ it("should correctly resolve the config", async () => {
 	const fs = createNodeishMemoryFs()
 	await fs.mkdir(PATH_TO_CWD, { recursive: true })
 	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
-
 	const create = vi.fn()
 	const setConfig = vi.fn()
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
@@ -294,12 +235,12 @@ it("should correctly resolve the config", async () => {
 				config: () => ({
 					sourceLanguageTag: "en",
 					languageTags: ["en", "de"],
-					modules: [`@inlang/plugin-paraglide@${version}`],
+					modules: [`@inlang/plugin-paraglide`],
 				}),
 				setConfig,
 				query: { messages: { getAll: () => [createMessage("hi", { en: "hello" })], create } },
 				customApi: () => ({
-					"inlang.app.sdkJs": validateSdkConfig({
+					"plugin.inlang.paraglideJs": validateSdkConfig({
 						languageNegotiation: { strategies: [{ type: "url" }] },
 					}),
 				}),
