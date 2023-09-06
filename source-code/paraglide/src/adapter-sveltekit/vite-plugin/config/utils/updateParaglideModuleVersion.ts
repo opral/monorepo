@@ -41,7 +41,7 @@ export const updateParaglideModuleVersion = async (inlang: InlangProject): Promi
  * @returns `true` iff the version was updated
  * @returns `false` iff the version is already up2date
  */
-export const standaloneupdateParaglideModuleVersion = async () => {
+export const standaloneUpdateParaglideModuleVersion = async () => {
 	const inlang = await openInlangProject({
 		nodeishFs: await getNodeishFs(),
 		projectFilePath: PATH_TO_INLANG_CONFIG,

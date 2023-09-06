@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import {
-	standaloneupdateParaglideModuleVersion,
+	standaloneUpdateParaglideModuleVersion,
 	updateParaglideModuleVersion,
 } from "./updateParaglideModuleVersion.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
@@ -156,13 +156,13 @@ describe("updateParaglideModuleVersion", () => {
 	})
 })
 
-describe("standaloneupdateParaglideModuleVersion", () => {
+describe("standaloneUpdateParaglideModuleVersion", () => {
 	beforeEach(() => {
 		vi.resetAllMocks()
 	})
 
 	it("should throw if inlang could not be setup correctly", async () => {
-		expect(() => standaloneupdateParaglideModuleVersion()).rejects.toThrow()
+		expect(() => standaloneUpdateParaglideModuleVersion()).rejects.toThrow()
 	})
 
 	it("should not do anything if version is already identical", async () => {
@@ -175,7 +175,7 @@ describe("standaloneupdateParaglideModuleVersion", () => {
 			async () => ({ config: () => config } as InlangProject),
 		)
 
-		const updated = await standaloneupdateParaglideModuleVersion()
+		const updated = await standaloneUpdateParaglideModuleVersion()
 		expect(updated).toBe(false)
 	})
 
@@ -195,7 +195,7 @@ describe("standaloneupdateParaglideModuleVersion", () => {
 				} as InlangProject),
 		)
 
-		const updated = await standaloneupdateParaglideModuleVersion()
+		const updated = await standaloneUpdateParaglideModuleVersion()
 		expect(updated).toBe(true)
 
 		const configFile = await fs.readFile(PATH_TO_INLANG_CONFIG, { encoding: "utf-8" })
