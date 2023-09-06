@@ -1,8 +1,14 @@
-import { ProjectFilePathNotFoundError, openInlangProject, LanguageTag, Message } from "@inlang/sdk"
+import {
+	ProjectFilePathNotFoundError,
+	openInlangProject,
+	LanguageTag,
+	Message,
+	createImport,
+} from "@inlang/sdk"
 import { InlangSdkException } from "../exceptions.js"
 import path, { resolve } from "node:path"
 import type { Config as SvelteConfig } from "@sveltejs/kit"
-import type { SdkConfig } from "@inlang/plugin-paraglide"
+import type { SdkConfig } from "../../../settings.js"
 import { getSvelteKitVersion } from "./utils/getSvelteKitVersion.js"
 import { shouldContentBePrerendered } from "./utils/shouldContentBePrerendered.js"
 import { updateParaglideModuleVersion } from "./utils/updateParaglideModuleVersion.js"
@@ -11,7 +17,6 @@ import { createBasicInlangConfig } from "./utils/createBasicInlangConfig.js"
 import { createDemoResourcesIfNoMessagesExistYet } from "./utils/createDemoResourcesIfNoMessagesExistYet.js"
 import { doesPathExist } from "./utils/utils.js"
 import { getNodeishFs } from "./utils/getNodeishFs.js"
-import { createImport } from "../../../../../sdk/dist/resolve-modules/import.js"
 
 type VersionString = `${number}.${number}.${number}${string}`
 

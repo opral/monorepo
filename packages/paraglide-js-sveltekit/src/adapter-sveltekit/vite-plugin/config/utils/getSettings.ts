@@ -1,7 +1,6 @@
 import type { InlangProject } from "@inlang/sdk"
-import { validateSdkConfig, type SdkConfig, type SdkConfigInput } from "@inlang/plugin-paraglide"
+import { validateSdkConfig, type SdkConfig, type SdkConfigInput } from "../../../../settings.js"
 import { InlangSdkException } from "../../exceptions.js"
-import {} from "../../../../../../plugins/paraglide/dist/index.js"
 
 export const defaultSdkPluginSettings = {
 	"library.inlang.paraglideJs": {
