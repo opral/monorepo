@@ -87,8 +87,8 @@ function validateRepo(
 		})
 	} else if (!props.modules || props.modules.length === 0 || props.modules[0] === "") {
 		props.setStep({
-			type: "no-modules",
-			message: "No modules provided. You can find modules in the marketplace.",
+			type: "no-module",
+			message: "No module provided. You can find modules in the marketplace.",
 			error: true,
 		})
 	} else if (!props.optIn.optIn()) {
