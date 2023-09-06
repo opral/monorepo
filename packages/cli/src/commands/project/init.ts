@@ -10,7 +10,7 @@ import path from "node:path"
 export const init = new Command()
 	.command("init")
 	.description(
-		"Initialize a new inlang project in project.inlang.json with optional module configuration.",
+		"Initialize a new inlang project at project.inlang.json with optional module configuration.",
 	)
 	.action(async () => {
 		await initCommandAction({ logger: log, nodeishFs: fs })
