@@ -326,7 +326,7 @@ function ShowError() {
 				</h2>
 				<p class="text-surface-500 text-center mb-6">{step().message}</p>
 				<Show
-					when={step().type === "already-installed"}
+					when={step().type !== "no-module"}
 					fallback={
 						<Button
 							// eslint-disable-next-line solid/reactivity
