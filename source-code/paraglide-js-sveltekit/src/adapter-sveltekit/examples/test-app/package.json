@@ -10,7 +10,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch"
 	},
 	"devDependencies": {
-		"@inlang/sdk-js": "file:../../../..",
+		"@inlang/paraglide-js-sveltekit": "file:../../../..",
 		"@sveltejs/adapter-auto": "^2.1.0",
 		"@sveltejs/adapter-static": "^2.0.2",
 		"@sveltejs/adapter-vercel": "^3.0.2",

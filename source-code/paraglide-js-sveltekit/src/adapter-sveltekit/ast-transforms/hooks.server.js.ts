@@ -85,7 +85,7 @@ export const transformHooksServerJs = (filePath: string, config: VirtualModule, 
 		"handle",
 		"({ resolve, event }) => resolve(event)",
 	)
-	removeImport(sourceFile, "@inlang/sdk-js")
+	removeImport(sourceFile, "@inlang/paraglide-js-sveltekit")
 
 	return nodeToCode(sourceFile)
 }

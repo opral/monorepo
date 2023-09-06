@@ -8,7 +8,7 @@ describe("transformPageSvelte", () => {
 	test("should call transformSvelte", async () => {
 		const code = dedent`
 			<script>
-				import { i } from '@inlang/sdk-js'
+				import { i } from '@inlang/paraglide-js-sveltekit'
 				console.info('hello world')
 			</script>
 

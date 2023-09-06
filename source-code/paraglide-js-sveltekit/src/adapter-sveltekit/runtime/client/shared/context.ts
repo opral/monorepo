@@ -10,7 +10,7 @@ export const getRuntimeFromContext = () => {
 			return getContext(inlangSymbol)
 		} catch (error) {
 			throw new InlangSdkException(
-				`You cannot directly access any '@inlang/sdk-js' imports in this scope.
+				`You cannot directly access any '@inlang/paraglide-js-sveltekit' imports in this scope.
 Please read the docs for more information on how to workaround this temporary limitation:
 https://inlang.com/documentation/sdk/sveltekit/advanced`,
 				error as Error,

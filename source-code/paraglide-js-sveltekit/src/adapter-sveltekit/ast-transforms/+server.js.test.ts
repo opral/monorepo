@@ -20,12 +20,12 @@ describe("transformServerRequestJs", () => {
 		expect(transformed).toEqual(code)
 	})
 
-	test("should transform '@inlang/sdk-js' imports correctly", () => {
+	test("should transform '@inlang/paraglide-js-sveltekit' imports correctly", () => {
 		const transformed = transformServerRequestJs(
 			"",
 			initTestApp(),
 			dedent`
-				import { i } from '@inlang/sdk-js'
+				import { i } from '@inlang/paraglide-js-sveltekit'
 
 				export const GET = () => new Repsonse(i('hi'))
 			`,
@@ -42,7 +42,7 @@ describe("transformServerRequestJs", () => {
 			"",
 			initTestApp(),
 			dedent`
-				import { languages } from '@inlang/sdk-js'
+				import { languages } from '@inlang/paraglide-js-sveltekit'
 
 				export async function POST() {
 					return { languages }
@@ -58,13 +58,13 @@ describe("transformServerRequestJs", () => {
 		`)
 	})
 
-	test("should transform multiple '@inlang/sdk-js' imports correctly", () => {
+	test("should transform multiple '@inlang/paraglide-js-sveltekit' imports correctly", () => {
 		const transformed = transformServerRequestJs(
 			"",
 			initTestApp(),
 			dedent`
 				import { json } from '@sveltejs/kit'
-				import { i, language } from '@inlang/sdk-js'
+				import { i, language } from '@inlang/paraglide-js-sveltekit'
 
 				export const GET = () => new Repsonse(i('hi'))
 

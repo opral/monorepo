@@ -15,7 +15,7 @@ export const assertNodeInsideFunctionScope = (
 		nodeToCheck = nodeToCheck.getParent()
 	}
 
-	throw new InlangSdkException(`You cannot directly access any '@inlang/sdk-js' imports in outside a function scope in this file (${filePathForOutput(
+	throw new InlangSdkException(`You cannot directly access any '@inlang/paraglide-js-sveltekit' imports in outside a function scope in this file (${filePathForOutput(
 		config,
 		filePath,
 	)}).

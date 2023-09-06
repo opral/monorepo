@@ -9,7 +9,7 @@ export const getRuntimeFromGlobalThis = (): SvelteKitClientRuntime => {
 		const runtime = (globalThis as unknown as ObjectWithClientRuntime)[inlangSymbol]
 		if (!runtime) {
 			throw new InlangSdkException(
-				`You cannot directly access any '@inlang/sdk-js' imports in this scope.
+				`You cannot directly access any '@inlang/paraglide-js-sveltekit' imports in this scope.
 Please read the docs for more information on how to workaround this temporary limitation:
 https://inlang.com/documentation/sdk/sveltekit/advanced`,
 			)

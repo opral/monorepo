@@ -15,13 +15,16 @@ export const transformJs = (filePath: string, config: VirtualModule, code: strin
 	if (isOptOutImportPresent(sourceFile)) return code
 	if (!isSdkImportPresent(sourceFile)) return code
 
-	const identifiers = findAllIdentifiersComingFromAnImport(sourceFile, "@inlang/sdk-js")
+	const identifiers = findAllIdentifiersComingFromAnImport(
+		sourceFile,
+		"@inlang/paraglide-js-sveltekit",
+	)
 	for (const identifier of identifiers) {
 		assertNodeInsideFunctionScope(config, filePath, identifier)
 		identifier.replaceWithText(`getRuntimeFromGlobalThis().${identifier.getText()}`)
 	}
 
-	removeImport(sourceFile, "@inlang/sdk-js")
+	removeImport(sourceFile, "@inlang/paraglide-js-sveltekit")
 	addImport(
 		sourceFile,
 		"@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/shared",

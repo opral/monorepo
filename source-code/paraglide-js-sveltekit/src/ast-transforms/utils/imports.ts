@@ -120,4 +120,4 @@ export const isOptOutImportPresent = (sourceFile: SourceFile) =>
 
 // TODO: test
 export const isSdkImportPresent = (sourceFile: SourceFile) =>
-	!!findImportDeclarations(sourceFile, "@inlang/sdk-js").length
+	!!findImportDeclarations(sourceFile, "@inlang/paraglide-js-sveltekit").length

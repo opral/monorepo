@@ -13,11 +13,11 @@ describe("transformSvelte", () => {
 		})
 	})
 
-	describe("'@inlang/sdk-js' imports", () => {
+	describe("'@inlang/paraglide-js-sveltekit' imports", () => {
 		test("should transform imports", () => {
 			const code = dedent`
 				<script>
-					import { i } from "@inlang/sdk-js"
+					import { i } from "@inlang/paraglide-js-sveltekit"
 				</script>
 
 				<h1>{i('hello')}</h1>
@@ -37,7 +37,7 @@ describe("transformSvelte", () => {
 		test("should resolve aliases", () => {
 			const code = dedent`
 				<script>
-					import { i as u } from "@inlang/sdk-js"
+					import { i as u } from "@inlang/paraglide-js-sveltekit"
 				</script>
 			`
 			const config = initTestApp()
@@ -53,8 +53,8 @@ describe("transformSvelte", () => {
 		test("should support multiple imports", () => {
 			const code = dedent`
 				<script>
-					import { i as u } from "@inlang/sdk-js"
-					import { languageTags, i } from "@inlang/sdk-js"
+					import { i as u } from "@inlang/paraglide-js-sveltekit"
+					import { languageTags, i } from "@inlang/paraglide-js-sveltekit"
 				</script>
 			`
 			const config = initTestApp()
@@ -70,8 +70,8 @@ describe("transformSvelte", () => {
 		test("should work on module script", () => {
 			const code = dedent`
 				<script context="module">
-					import { i as u } from "@inlang/sdk-js"
-					import { languageTags, i } from "@inlang/sdk-js"
+					import { i as u } from "@inlang/paraglide-js-sveltekit"
+					import { languageTags, i } from "@inlang/paraglide-js-sveltekit"
 				</script>
 			`
 			const config = initTestApp()
@@ -87,8 +87,8 @@ describe("transformSvelte", () => {
 		test("languageInUrl", () => {
 			const code = dedent`
 				<script context="module">
-					import { i as u } from "@inlang/sdk-js"
-					import { languageTags, i } from "@inlang/sdk-js"
+					import { i as u } from "@inlang/paraglide-js-sveltekit"
+					import { languageTags, i } from "@inlang/paraglide-js-sveltekit"
 				</script>
 			`
 			const config = initTestApp({ options: { languageInUrl: true } })
@@ -118,10 +118,10 @@ describe("transformSvelte", () => {
 	test.todo("should not generate duplicated import and variable declaration", () => {
 		const code = dedent`
 			<script context="module">
-				import { languageTags } from "@inlang/sdk-js"
+				import { languageTags } from "@inlang/paraglide-js-sveltekit"
 			</script>
 			<script>
-				import { i } from "@inlang/sdk-js"
+				import { i } from "@inlang/paraglide-js-sveltekit"
 			</script>
 		`
 		const config = initTestApp()

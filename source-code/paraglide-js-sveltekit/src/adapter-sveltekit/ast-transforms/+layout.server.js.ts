@@ -28,7 +28,7 @@ export const transformLayoutServerJs = (
 	)
 
 	wrapExportedFunction(sourceFile, undefined, wrapperFunctionName, "load")
-	removeImport(sourceFile, "@inlang/sdk-js")
+	removeImport(sourceFile, "@inlang/paraglide-js-sveltekit")
 
 	return nodeToCode(sourceFile)
 }

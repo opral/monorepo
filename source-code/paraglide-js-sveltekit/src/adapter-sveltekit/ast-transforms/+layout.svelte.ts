@@ -58,7 +58,13 @@ const transformScript = (filePath: string, config: VirtualModule, code: string) 
 	addImport(sourceFile, "$app/environment", "browser")
 
 	// remove imports to avoid conflicts, those imports get added in a reactive way
-	removeImport(sourceFile, "@inlang/sdk-js", "i", "languageTag", "sourceLanguageTag")
+	removeImport(
+		sourceFile,
+		"@inlang/paraglide-js-sveltekit",
+		"i",
+		"languageTag",
+		"sourceLanguageTag",
+	)
 
 	const index = addOrMoveDataExportAndReturnIndex(sourceFile)
 
@@ -85,8 +91,8 @@ const transformScript = (filePath: string, config: VirtualModule, code: string) 
 		`,
 	)
 
-	// move @inlang/sdk-js import declarations below inserted code
-	const imports = findImportDeclarations(sourceFile, "@inlang/sdk-js")
+	// move @inlang/paraglide-js-sveltekit import declarations below inserted code
+	const imports = findImportDeclarations(sourceFile, "@inlang/paraglide-js-sveltekit")
 	for (const importDeclaration of imports) {
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		importDeclaration.setOrder(insertedStatements.at(-1)!.getChildIndex() + 1)

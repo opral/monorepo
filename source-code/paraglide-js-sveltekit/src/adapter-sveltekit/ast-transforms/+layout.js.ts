@@ -77,7 +77,7 @@ export const transformLayoutJs = (
 
 	const options = root ? getOptions(config, root) : undefined
 	wrapExportedFunction(sourceFile, options, wrapperFunctionName, "load")
-	removeImport(sourceFile, "@inlang/sdk-js")
+	removeImport(sourceFile, "@inlang/paraglide-js-sveltekit")
 
 	return nodeToCode(sourceFile)
 }
@@ -85,7 +85,7 @@ export const transformLayoutJs = (
 // ------------------------------------------------------------------------------------------------
 
 const injectHotReloadCode = (sourceFile: SourceFile) => {
-	// addImport(sourceFile, "@inlang/sdk-js", "language")
+	// addImport(sourceFile, "@inlang/paraglide-js-sveltekit", "language")
 
 	// sourceFile.addVariableStatement({
 	// 	declarations: [{

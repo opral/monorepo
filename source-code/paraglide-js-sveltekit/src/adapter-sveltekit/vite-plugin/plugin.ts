@@ -39,7 +39,7 @@ export const plugin = async () => {
 		config() {
 			return {
 				ssr: {
-					// makes sure that `@inlang/sdk-js` get's transformed by vite in order
+					// makes sure that `@inlang/paraglide-js-sveltekit` get's transformed by vite in order
 					// to be able to use `SvelteKit`'s `$app` aliases
 					noExternal: ["@inlang/paraglide-js-sveltekit"],
 				},

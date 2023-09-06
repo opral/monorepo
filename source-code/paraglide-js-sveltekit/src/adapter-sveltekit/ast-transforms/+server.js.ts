@@ -30,7 +30,7 @@ export const transformServerRequestJs = (filePath: string, config: VirtualModule
 			wrapExportedFunction(sourceFile, undefined, wrapperFunctionName, exportName)
 		}
 	}
-	removeImport(sourceFile, "@inlang/sdk-js")
+	removeImport(sourceFile, "@inlang/paraglide-js-sveltekit")
 
 	return nodeToCode(sourceFile)
 }

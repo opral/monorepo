@@ -47,13 +47,13 @@ const transformSdkImports = (config: VirtualModule, sourceFile: SourceFile) => {
 		"getRuntimeFromContext",
 	)
 
-	const imports = getImportSpecifiersAsStrings(sourceFile, "@inlang/sdk-js")
+	const imports = getImportSpecifiersAsStrings(sourceFile, "@inlang/paraglide-js-sveltekit")
 
-	const importDeclarations = findImportDeclarations(sourceFile, "@inlang/sdk-js")
+	const importDeclarations = findImportDeclarations(sourceFile, "@inlang/paraglide-js-sveltekit")
 
 	importDeclarations[0]!.replaceWithText(dedent`
 		const { ${imports} } = getRuntimeFromContext()
 	`)
 
-	removeImport(sourceFile, "@inlang/sdk-js")
+	removeImport(sourceFile, "@inlang/paraglide-js-sveltekit")
 }
