@@ -4,6 +4,8 @@ import { pluginUrls, standardLintRules, type PluginId } from "./tryAutoGenModule
 // @ts-ignore
 import { minify } from "terser"
 
+const okEval = eval
+
 function parseDirtyValue(jsString: string) {
 	let normalized = jsString.trim()
 	if (normalized.endsWith(",")) {
@@ -89,7 +91,7 @@ export async function migrateProjectConfig(args: {
 	}
 	if (!legacyConfigFun) {
 		// fallback to eval if we cannot use the current directory dynamic import in node (eg. if we use this in the editor)
-		legacyConfigFun = eval(legacyConfig!.replace("export ", "(") + ")")
+		legacyConfigFun = okEval(legacyConfig!.replace("export ", "(") + ")")
 	}
 
 	const pluginSettings: Record<string, any> = {}
