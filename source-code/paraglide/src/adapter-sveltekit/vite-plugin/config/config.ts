@@ -5,7 +5,7 @@ import type { Config as SvelteConfig } from "@sveltejs/kit"
 import type { SdkConfig } from "@inlang/plugin-paraglide"
 import { getSvelteKitVersion } from "./utils/getSvelteKitVersion.js"
 import { shouldContentBePrerendered } from "./utils/shouldContentBePrerendered.js"
-import { updateSdkModuleVersion } from "./utils/updateSdkModuleVersion.js"
+import { updateParaglideModuleVersion } from "./utils/updateParaglideModuleVersion.js"
 import { getSettings } from "./utils/getSettings.js"
 import { createBasicInlangConfig } from "./utils/createBasicInlangConfig.js"
 import { createDemoResourcesIfNoMessagesExistYet } from "./utils/createDemoResourcesIfNoMessagesExistYet.js"
@@ -71,7 +71,7 @@ export const initTransformConfig = async (): Promise<TransformConfig> => {
 			return reject(error)
 		}
 
-		await updateSdkModuleVersion(inlang)
+		await updateParaglideModuleVersion(inlang)
 		await createDemoResourcesIfNoMessagesExistYet(inlang)
 
 		const settings = getSettings(inlang)
