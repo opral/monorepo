@@ -82,12 +82,12 @@ describe("transformLayoutJs", () => {
 		expect(transformed).toEqual(code)
 	})
 
-	test("should transform '@inlang/sdk-js' imports correctly", () => {
+	test("should transform '@inlang/paraglide-js-sveltekit' imports correctly", () => {
 		const transformed = transformLayoutJs(
 			"",
 			initTestApp(),
 			dedent`
-				import { languages } from '@inlang/sdk-js'
+				import { languages } from '@inlang/paraglide-js-sveltekit'
 				import type { LayoutLoad } from '@sveltejs/kit'
 
 				export const load = async (() => {

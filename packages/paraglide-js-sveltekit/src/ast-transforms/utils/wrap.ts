@@ -153,7 +153,7 @@ export const wrapExportedFunction = (
 	}
 
 	// inject SDK imports as parameters
-	const imports = getImportSpecifiersAsStrings(sourceFile, "@inlang/sdk-js")
+	const imports = getImportSpecifiersAsStrings(sourceFile, "@inlang/paraglide-js-sveltekit")
 	if (imports.length) {
 		const func = findFunction(fn)
 		if (!func.getParameters().length) {

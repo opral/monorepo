@@ -1,5 +1,5 @@
 <script>
-	import { i, languageTags, changeLanguageTag } from "@inlang/sdk-js"
+	import { i, languageTags, changeLanguageTag } from "@inlang/paraglide-js-sveltekit"
 	import { onMount } from "svelte"
 	import { test } from "./test.js"
 

@@ -20,12 +20,12 @@ describe("transformPageServerJs", () => {
 		expect(transformed).toEqual(code)
 	})
 
-	test("should transform '@inlang/sdk-js' imports correctly", () => {
+	test("should transform '@inlang/paraglide-js-sveltekit' imports correctly", () => {
 		const transformed = transformPageServerJs(
 			"",
 			initTestApp(),
 			dedent`
-				import { i } from '@inlang/sdk-js'
+				import { i } from '@inlang/paraglide-js-sveltekit'
 
 				export const load: PageServerLoad = ({ params }) => {
 					return { title: i(params.slug) }

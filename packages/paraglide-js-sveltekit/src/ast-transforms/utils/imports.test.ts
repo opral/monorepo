@@ -13,13 +13,13 @@ describe("removeImport", () => {
 	describe("no modifications", () => {
 		test("should not fail if node is not a SourceFile", () => {
 			const node = codeToNode(`const x = 0`)
-			removeImport(node as any, "@inlang/sdk-js", "i")
+			removeImport(node as any, "@inlang/paraglide-js-sveltekit", "i")
 		})
 
 		test("should not fail if file is empty", () => {
 			const node = codeToSourceFile(``)
 
-			removeImport(node, "@inlang/sdk-js", "i")
+			removeImport(node, "@inlang/paraglide-js-sveltekit", "i")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot('""')
 		})
@@ -29,7 +29,7 @@ describe("removeImport", () => {
 				const a = 0
 			`)
 
-			removeImport(node, "@inlang/sdk-js", "i")
+			removeImport(node, "@inlang/paraglide-js-sveltekit", "i")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot('"const a = 0;"')
 		})
@@ -39,20 +39,20 @@ describe("removeImport", () => {
 				import { get } from 'svelte/store'
 			`)
 
-			removeImport(node, "@inlang/sdk-js", "i")
+			removeImport(node, "@inlang/paraglide-js-sveltekit", "i")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot("\"import { get } from 'svelte/store';\"")
 		})
 
 		test("should not remove import with another name from the same package", () => {
 			const node = codeToSourceFile(`
-				import { languageTags } from '@inlang/sdk-js'
+				import { languageTags } from '@inlang/paraglide-js-sveltekit'
 			`)
 
-			removeImport(node, "@inlang/sdk-js", "i")
+			removeImport(node, "@inlang/paraglide-js-sveltekit", "i")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot(
-				"\"import { languageTags } from '@inlang/sdk-js';\"",
+				"\"import { languageTags } from '@inlang/paraglide-js-sveltekit';\"",
 			)
 		})
 	})
@@ -60,22 +60,22 @@ describe("removeImport", () => {
 	describe("modifications", () => {
 		test("should remove named import from a package", () => {
 			const node = codeToSourceFile(`
-				import { i, languageTags } from '@inlang/sdk-js'
+				import { i, languageTags } from '@inlang/paraglide-js-sveltekit'
 			`)
 
-			removeImport(node, "@inlang/sdk-js", "i")
+			removeImport(node, "@inlang/paraglide-js-sveltekit", "i")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot(`
-				"import { languageTags } from '@inlang/sdk-js';"
+				"import { languageTags } from '@inlang/paraglide-js-sveltekit';"
 			`)
 		})
 
 		test("should remove the import completely if no named import is left", () => {
 			const node = codeToSourceFile(`
-				import { i } from '@inlang/sdk-js'
+				import { i } from '@inlang/paraglide-js-sveltekit'
 			`)
 
-			removeImport(node, "@inlang/sdk-js", "i")
+			removeImport(node, "@inlang/paraglide-js-sveltekit", "i")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot(`
 				""
@@ -84,26 +84,26 @@ describe("removeImport", () => {
 
 		test("should remove the import correcltly if multiple imports from the same package are present", () => {
 			const node = codeToSourceFile(`
-				import { languageTags } from '@inlang/sdk-js'
-				import { i } from '@inlang/sdk-js'
-				import '@inlang/sdk-js'
+				import { languageTags } from '@inlang/paraglide-js-sveltekit'
+				import { i } from '@inlang/paraglide-js-sveltekit'
+				import '@inlang/paraglide-js-sveltekit'
 			`)
 
-			removeImport(node, "@inlang/sdk-js", "i")
+			removeImport(node, "@inlang/paraglide-js-sveltekit", "i")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot(`
-				"import { languageTags } from '@inlang/sdk-js';
-				import '@inlang/sdk-js';"
+				"import { languageTags } from '@inlang/paraglide-js-sveltekit';
+				import '@inlang/paraglide-js-sveltekit';"
 			`)
 		})
 
 		test("should remove all imports if no names are passed", () => {
 			const node = codeToSourceFile(`
-				import { i } from '@inlang/sdk-js'
-				import { languageTags, sourceLanguageTag } from '@inlang/sdk-js'
+				import { i } from '@inlang/paraglide-js-sveltekit'
+				import { languageTags, sourceLanguageTag } from '@inlang/paraglide-js-sveltekit'
 			`)
 
-			removeImport(node, "@inlang/sdk-js")
+			removeImport(node, "@inlang/paraglide-js-sveltekit")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot(`
 				""
@@ -117,43 +117,45 @@ describe("removeImport", () => {
 describe("addImport", () => {
 	test("should not fail if node is not a SourceFile", () => {
 		const node = codeToNode(`const x = 0`)
-		addImport(node as any, "@inlang/sdk-js", "i")
+		addImport(node as any, "@inlang/paraglide-js-sveltekit", "i")
 	})
 
 	test("should not fail if no names get passed", () => {
 		const node = codeToSourceFile(``)
-		addImport(node as any, "@inlang/sdk-js", ...([] as unknown as [""]))
+		addImport(node as any, "@inlang/paraglide-js-sveltekit", ...([] as unknown as [""]))
 	})
 
 	test("should not add if import is already present", () => {
 		const node = codeToSourceFile(`
-			import { i } from '@inlang/sdk-js'
+			import { i } from '@inlang/paraglide-js-sveltekit'
 		`)
 
-		addImport(node, "@inlang/sdk-js", "i")
+		addImport(node, "@inlang/paraglide-js-sveltekit", "i")
 
-		expect(nodeToCode(node)).toMatchInlineSnapshot("\"import { i } from '@inlang/sdk-js';\"")
+		expect(nodeToCode(node)).toMatchInlineSnapshot(
+			"\"import { i } from '@inlang/paraglide-js-sveltekit';\"",
+		)
 	})
 
 	test("should add multiple imports", () => {
 		const node = codeToSourceFile(``)
 
-		addImport(node, "@inlang/sdk-js", "i", "languageTag")
+		addImport(node, "@inlang/paraglide-js-sveltekit", "i", "languageTag")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(
-			"\"import { i, languageTag } from '@inlang/sdk-js';\"",
+			"\"import { i, languageTag } from '@inlang/paraglide-js-sveltekit';\"",
 		)
 	})
 
 	test("should add multiple imports to existing import", () => {
 		const node = codeToSourceFile(`
-			import { languageTags } from '@inlang/sdk-js'
+			import { languageTags } from '@inlang/paraglide-js-sveltekit'
 		`)
 
-		addImport(node, "@inlang/sdk-js", "languageTag", "i")
+		addImport(node, "@inlang/paraglide-js-sveltekit", "languageTag", "i")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"import { languageTags, languageTag, i } from '@inlang/sdk-js';"
+			"import { languageTags, languageTag, i } from '@inlang/paraglide-js-sveltekit';"
 		`)
 	})
 
@@ -165,10 +167,10 @@ describe("addImport", () => {
 
 		`)
 
-		addImport(node, "@inlang/sdk-js", "languageTag")
+		addImport(node, "@inlang/paraglide-js-sveltekit", "languageTag")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"import { languageTag } from '@inlang/sdk-js';
+			"import { languageTag } from '@inlang/paraglide-js-sveltekit';
 			console.info(1234);
 			import './app.css';"
 		`)
@@ -176,13 +178,13 @@ describe("addImport", () => {
 
 	test("should also add import if aliased import is already present", () => {
 		const node = codeToSourceFile(`
-			import { languageTags as langs } from '@inlang/sdk-js'
+			import { languageTags as langs } from '@inlang/paraglide-js-sveltekit'
 		`)
 
-		addImport(node, "@inlang/sdk-js", "languageTags")
+		addImport(node, "@inlang/paraglide-js-sveltekit", "languageTags")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(
-			"\"import { languageTags as langs, languageTags } from '@inlang/sdk-js';\"",
+			"\"import { languageTags as langs, languageTags } from '@inlang/paraglide-js-sveltekit';\"",
 		)
 	})
 
@@ -203,28 +205,28 @@ describe("addImport", () => {
 
 	test("should check multiple import statements", () => {
 		const node = codeToSourceFile(`
-			import { i } from '@inlang/sdk-js'
-			import { languageTags } from '@inlang/sdk-js'
+			import { i } from '@inlang/paraglide-js-sveltekit'
+			import { languageTags } from '@inlang/paraglide-js-sveltekit'
 		`)
 
-		addImport(node, "@inlang/sdk-js", "languageTags")
+		addImport(node, "@inlang/paraglide-js-sveltekit", "languageTags")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"import { i } from '@inlang/sdk-js';
-			import { languageTags } from '@inlang/sdk-js';"
+			"import { i } from '@inlang/paraglide-js-sveltekit';
+			import { languageTags } from '@inlang/paraglide-js-sveltekit';"
 		`)
 	})
 
 	test("should leave module import intact", () => {
 		const node = codeToSourceFile(`
-			import '@inlang/sdk-js'
+			import '@inlang/paraglide-js-sveltekit'
 		`)
 
-		addImport(node, "@inlang/sdk-js", "i")
+		addImport(node, "@inlang/paraglide-js-sveltekit", "i")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"import { i } from '@inlang/sdk-js';
-			import '@inlang/sdk-js';"
+			"import { i } from '@inlang/paraglide-js-sveltekit';
+			import '@inlang/paraglide-js-sveltekit';"
 		`)
 	})
 })
@@ -242,17 +244,17 @@ describe("findImportDeclarations", () => {
 		const node = codeToSourceFile(`
 			import { i } from '@inlang/paraglide-js-sveltekit/ignore'
 		`)
-		const result = findImportDeclarations(node, "@inlang/sdk-js")
+		const result = findImportDeclarations(node, "@inlang/paraglide-js-sveltekit")
 		expect(result).toHaveLength(0)
 	})
 
 	test("should return an array containing all import declarations", () => {
 		const node = codeToSourceFile(`
-			import { i } from '@inlang/sdk-js'
+			import { i } from '@inlang/paraglide-js-sveltekit'
 			const x = false
-			import { languageTags } from '@inlang/sdk-js'
+			import { languageTags } from '@inlang/paraglide-js-sveltekit'
 		`)
-		const result = findImportDeclarations(node, "@inlang/sdk-js")
+		const result = findImportDeclarations(node, "@inlang/paraglide-js-sveltekit")
 		expect(result).toHaveLength(2)
 	})
 })
@@ -262,18 +264,18 @@ describe("findImportDeclarations", () => {
 describe("findNamedImportSpecifier", () => {
 	test("should return undefined if the named import specifier was not found", () => {
 		const node = codeToSourceFile(`
-			import '@inlang/sdk-js'
+			import '@inlang/paraglide-js-sveltekit'
 		`)
-		const importDeclaration = findImportDeclarations(node, "@inlang/sdk-js")
+		const importDeclaration = findImportDeclarations(node, "@inlang/paraglide-js-sveltekit")
 		const result = findNamedImportSpecifier(importDeclaration[0]!, "i")
 		expect(result).toBeUndefined()
 	})
 
 	test("should find a named import specifier if present", () => {
 		const node = codeToSourceFile(`
-			import { i } from '@inlang/sdk-js'
+			import { i } from '@inlang/paraglide-js-sveltekit'
 		`)
-		const importDeclaration = findImportDeclarations(node, "@inlang/sdk-js")
+		const importDeclaration = findImportDeclarations(node, "@inlang/paraglide-js-sveltekit")
 		const result = findNamedImportSpecifier(importDeclaration[0]!, "i")
 		expect(Node.isImportSpecifier(result)).toBe(true)
 	})
@@ -284,7 +286,7 @@ describe("findNamedImportSpecifier", () => {
 describe("isOptOutImportPresent", () => {
 	test("should return false if the opt-out import specifier was was not found", () => {
 		const node = codeToSourceFile(`
-			import '@inlang/sdk-js'
+			import '@inlang/paraglide-js-sveltekit'
 		`)
 		const result = isOptOutImportPresent(node)
 		expect(result).toBe(false)

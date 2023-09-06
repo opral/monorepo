@@ -130,7 +130,7 @@ describe("transformLayoutSvelte", () => {
 		test.todo("should wrap code inside special svelte elements", () => {
 			const code = dedent`
 				<script>
-					import { i } from '@inlang/sdk-js'
+					import { i } from '@inlang/paraglide-js-sveltekit'
 				</script>
 
 				<svelte:head>
@@ -159,10 +159,10 @@ describe("transformLayoutSvelte", () => {
 			`)
 		})
 
-		test("should remove @inlang/sdk-js imports that are used reactively", () => {
+		test("should remove @inlang/paraglide-js-sveltekit imports that are used reactively", () => {
 			const code = dedent`
 				<script>
-					import { languageTag } from '@inlang/sdk-js'
+					import { languageTag } from '@inlang/paraglide-js-sveltekit'
 				</script>
 
 				{languageTag}
@@ -195,7 +195,7 @@ describe("transformLayoutSvelte", () => {
 		test("should insert data export right after first import statements", () => {
 			const code = dedent`
 				<script>
-					import { i } from "@inlang/sdk-js"
+					import { i } from "@inlang/paraglide-js-sveltekit"
 					console.info(i("welcome"))
 				</script>
 
@@ -230,7 +230,7 @@ describe("transformLayoutSvelte", () => {
 		test("should insert code snippets right after data export", () => {
 			const code = dedent`
 				<script>
-					import { i } from "@inlang/sdk-js"
+					import { i } from "@inlang/paraglide-js-sveltekit"
 					console.info(123)
 
 					export let data
@@ -330,7 +330,7 @@ describe("transformLayoutSvelte", () => {
 			const code = dedent`
 				<script lang="ts">
 					import { browser } from '$app/environment'
-					import { languages } from '@inlang/sdk-js'
+					import { languages } from '@inlang/paraglide-js-sveltekit'
 
 					console.log(languages)
 				</script>
@@ -363,8 +363,8 @@ describe("transformLayoutSvelte", () => {
 		test("multiple imports", () => {
 			const code = dedent`
 				<script lang="ts">
-					import { languages } from '@inlang/sdk-js'
-					import { switchLanguage } from '@inlang/sdk-js'
+					import { languages } from '@inlang/paraglide-js-sveltekit'
+					import { switchLanguage } from '@inlang/paraglide-js-sveltekit'
 					import { browser } from '$app/environment'
 
 					const doSomething = () => console.log(languages)
@@ -406,7 +406,7 @@ describe("transformLayoutSvelte", () => {
 		test("data export already defined", () => {
 			const code = dedent`
 				<script lang="ts">
-					import { languages } from '@inlang/sdk-js'
+					import { languages } from '@inlang/paraglide-js-sveltekit'
 
 					console.log(languages)
 
@@ -443,14 +443,14 @@ describe("transformLayoutSvelte", () => {
 describe.skip("transformLayoutSvelte", () => {
 	describe("basics", () => {
 		describe("root=true", () => {
-			describe("transform @inlang/sdk-js", () => {
+			describe("transform @inlang/paraglide-js-sveltekit", () => {
 				it("resolves imports correctly", async () => {
 					const transformed = transformLayoutSvelte(
 						"",
 						initTestApp(),
 						dedent`
 							<script>
-								import { languageTags, i } from "@inlang/sdk-js"
+								import { languageTags, i } from "@inlang/paraglide-js-sveltekit"
 
 								console.info(languageTags)
 							</script>
@@ -493,7 +493,7 @@ describe.skip("transformLayoutSvelte", () => {
 						}),
 						dedent`
 							<script>
-								import { languageTags, i } from "@inlang/sdk-js"
+								import { languageTags, i } from "@inlang/paraglide-js-sveltekit"
 
 								console.info(languageTags)
 							</script>
@@ -541,7 +541,7 @@ describe.skip("transformLayoutSvelte", () => {
 				// const config = initVirtualModule()
 				// const input = dedent`
 				// 	<script>
-				// 		import { languageTag } from '@inlang/sdk-js'
+				// 		import { languageTag } from '@inlang/paraglide-js-sveltekit'
 				// 		export let data
 				// 	</script>
 				// 	<h1>Hello {data.name}!</h1>

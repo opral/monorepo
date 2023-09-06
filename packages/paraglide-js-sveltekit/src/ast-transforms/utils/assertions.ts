@@ -13,7 +13,7 @@ export const assertNoImportsFromSdkJs = (
 ) => {
 	if (isSdkImportPresent(sourceFile)) {
 		throw new InlangSdkException(dedent`
-			It is currently not supported to import something from '@inlang/sdk-js' in this file (${filePath}).
+			It is currently not supported to import something from '@inlang/paraglide-js-sveltekit' in this file (${filePath}).
 			Please read the docs for more information on how to workaround this temporary limitation:
 			https://inlang.com/documentation/sdk/sveltekit/advanced${getSection(type, root)}
 		`)

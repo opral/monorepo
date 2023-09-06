@@ -78,7 +78,7 @@ export const transformPageJs = (filePath: string, config: VirtualModule, code: s
 
 	const options = root ? getOptions(config, root) : undefined
 	wrapExportedFunction(sourceFile, options, wrapperFunctionName, "load")
-	removeImport(sourceFile, "@inlang/sdk-js")
+	removeImport(sourceFile, "@inlang/paraglide-js-sveltekit")
 
 	return nodeToCode(sourceFile)
 }

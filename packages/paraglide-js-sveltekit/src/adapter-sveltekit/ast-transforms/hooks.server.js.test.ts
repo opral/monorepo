@@ -169,13 +169,13 @@ describe("transformHooksServerJs", () => {
 		expect(transformed).toEqual(code)
 	})
 
-	describe("'@inlang/sdk-js' imports", () => {
+	describe("'@inlang/paraglide-js-sveltekit' imports", () => {
 		test("should transform imports correctly", () => {
 			const transformed = transformHooksServerJs(
 				"",
 				initTestApp(),
 				dedent`
-					import { i } from '@inlang/sdk-js'
+					import { i } from '@inlang/paraglide-js-sveltekit'
 
 					export const handle = ({ event, resolve }) => {
 						console.info(i('hi'))
