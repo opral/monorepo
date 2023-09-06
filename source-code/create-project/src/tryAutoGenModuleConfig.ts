@@ -3,7 +3,7 @@ import type { ProjectConfig } from "@inlang/project-config"
 import { getLanguageFolderPath } from "./getLanguageFolderPath.js"
 
 export const pluginUrls: Record<string, string> = {
-	sdkJs: "https://cdn.jsdelivr.net/npm/@inlang/plugin-json@3/dist/index.js",
+	sdkJs: "https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin@3/dist/index.js",
 	i18next: "https://cdn.jsdelivr.net/npm/@inlang/i18next@3/dist/index.js",
 	typesafeI18n: "",
 	json: "https://cdn.jsdelivr.net/npm/@inlang/plugin-json@3/dist/index.js",
@@ -46,11 +46,11 @@ export async function tryAutoGenModuleConfig(args: {
 		pluginName = modules[0]!
 	}
 
-	if (pluginName === "@inlang/sdk-js") {
+	if (pluginName === "sdkJs") {
 		warnings.push(
 			"📦 Using plugin: @inlang/sdk-js.\nYou have to add a plugin which reads and writes resources e.g. the @inlang/plugin-json. See: https://inlang.com/documentation/plugins/registry",
 		)
-	} else if (pluginName === "typesafe-i18n") {
+	} else if (pluginName === "typesafeI18n") {
 		warnings.push("Found typesafe-i18n, but it is not supported anymore.")
 		return { warnings }
 	}

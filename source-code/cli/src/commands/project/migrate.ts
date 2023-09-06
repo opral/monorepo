@@ -8,9 +8,7 @@ import prompts from "prompts"
 
 export const migrate = new Command()
 	.command("migrate")
-	.description(
-		"Migrate a legacy inlang.config.js inlang configuration to the new project.inlang.json.",
-	)
+	.description("Migrate a legacy inlang.config.js configuration to the new project.inlang.json.")
 	.action(async () => {
 		await migrateCommandAction({ logger: log, nodeishFs: fs })
 	})
@@ -38,7 +36,7 @@ export async function migrateCommandAction(args: {
 		}
 	}
 
-  args.logger.info(`Trying a best effort migration for your old inlang configuration...`)
+	args.logger.info(`Trying a best effort migration for your old inlang configuration...`)
 
 	const { warnings } = await migrateProjectConfig({
 		nodeishFs: args.nodeishFs,
