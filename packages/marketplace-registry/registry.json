@@ -5,6 +5,7 @@
 	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/badge/marketplace-manifest.json",
 	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/plugins/i18next/marketplace-manifest.json",
 	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/plugins/json/marketplace-manifest.json",
+	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/plugins/paraglide/marketplace-manifest.json",
 	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/lint-rules/emptyPattern/marketplace-manifest.json",
 	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/lint-rules/identicalPattern/marketplace-manifest.json",
 	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/lint-rules/messageWithoutSource/marketplace-manifest.json",
