@@ -52,40 +52,40 @@ describe("initBaseRuntime", () => {
 
 	describe("loadMessages", () => {
 		test("it should load messages for a language", async () => {
-			const state = {
+			const VirtualModule = {
 				languageTag: "en",
 				messages: [],
 				i: undefined,
 			} as RuntimeState
 
-			const runtime = initBaseRuntime(context, state)
-			expect(state.messages).toHaveLength(0)
+			const runtime = initBaseRuntime(context, VirtualModule)
+			expect(VirtualModule.messages).toHaveLength(0)
 
 			await runtime.loadMessages("en")
-			expect(state.messages[0]!.variants).toMatchObject(messageMap.en[0]!.variants)
-			expect(state.messages[0]!.variants).toHaveLength(1)
+			expect(VirtualModule.messages[0]!.variants).toMatchObject(messageMap.en[0]!.variants)
+			expect(VirtualModule.messages[0]!.variants).toHaveLength(1)
 
 			await runtime.loadMessages("de")
 
-			expect(state.messages[0]!.variants).toMatchObject([
+			expect(VirtualModule.messages[0]!.variants).toMatchObject([
 				...messageMap.en[0]!.variants,
 				...messageMap.de[0]!.variants,
 			])
-			expect(Object.keys(state.messages[0]!.variants)).toHaveLength(2)
+			expect(Object.keys(VirtualModule.messages[0]!.variants)).toHaveLength(2)
 		})
 
 		test("it should not fail if messages were not found", async () => {
-			const state = {
+			const VirtualModule = {
 				languageTag: "en",
 				messages: [],
 				i: undefined,
 			} satisfies RuntimeState
 
-			const runtime = initBaseRuntime(context, state)
+			const runtime = initBaseRuntime(context, VirtualModule)
 
 			await runtime.loadMessages("it")
 
-			expect(state.messages).toHaveLength(0)
+			expect(VirtualModule.messages).toHaveLength(0)
 		})
 
 		test("it should be able to load messages sync", async () => {
@@ -93,18 +93,18 @@ describe("initBaseRuntime", () => {
 				loadMessages: (languageTag) => messageMap[languageTag as keyof typeof messageMap],
 			}
 
-			const state = {
+			const VirtualModule = {
 				languageTag: "en",
 				messages: [],
 				i: undefined,
 			} satisfies RuntimeState
 
-			const runtime = initBaseRuntime(context, state)
+			const runtime = initBaseRuntime(context, VirtualModule)
 
 			runtime.loadMessages("fr")
 
-			expect(state.messages).toBeDefined()
-			expect(state.messages).toHaveLength(1)
+			expect(VirtualModule.messages).toBeDefined()
+			expect(VirtualModule.messages).toHaveLength(1)
 		})
 
 		test("it should allow to call loadMessages multiple times", async () => {
@@ -132,36 +132,36 @@ describe("initBaseRuntime", () => {
 			const context: RuntimeContext<string, Message[] | undefined> = {
 				loadMessages: (languageTag) => messageMap[languageTag as keyof typeof messageMap],
 			}
-			const state = {
+			const VirtualModule = {
 				languageTag: "en",
 				messages: [],
 				i: undefined,
 			} satisfies RuntimeState
 
-			const runtime = initBaseRuntime(context, state)
-			expect(state.messages).toHaveLength(0)
+			const runtime = initBaseRuntime(context, VirtualModule)
+			expect(VirtualModule.messages).toHaveLength(0)
 			runtime.loadMessages("de")
-			expect(state.messages).toHaveLength(1)
+			expect(VirtualModule.messages).toHaveLength(1)
 			runtime.loadMessages("de")
-			expect(state.messages).toHaveLength(1)
+			expect(VirtualModule.messages).toHaveLength(1)
 		})
 	})
 
 	describe("changeLanguageTag", () => {
 		test("it should switch the languageTag", () => {
-			const state = {
+			const VirtualModule = {
 				languageTag: "en",
 				messages: [],
 				i: undefined,
 			} satisfies RuntimeState
 
-			const runtime = initBaseRuntime(context, state)
+			const runtime = initBaseRuntime(context, VirtualModule)
 
-			expect(state.languageTag).toBe("en")
+			expect(VirtualModule.languageTag).toBe("en")
 
 			runtime.changeLanguageTag("fr")
 
-			expect(state.languageTag).toBe("fr")
+			expect(VirtualModule.languageTag).toBe("fr")
 		})
 	})
 
@@ -173,15 +173,15 @@ describe("initBaseRuntime", () => {
 		})
 
 		test("it should return the current languageTag", () => {
-			const state = {
+			const VirtualModule = {
 				languageTag: "en",
 				messages: [],
 				i: undefined,
 			} satisfies RuntimeState
 
-			const runtime = initBaseRuntime(context, state)
+			const runtime = initBaseRuntime(context, VirtualModule)
 
-			state.languageTag = "de"
+			VirtualModule.languageTag = "de"
 
 			expect(runtime.languageTag).toBe("de")
 		})
@@ -205,12 +205,12 @@ describe("initBaseRuntime", () => {
 		})
 
 		test("it should return the inlang function for the current languageTag", async () => {
-			const state = {
+			const VirtualModule = {
 				languageTag: "en",
 				messages: [],
 				i: undefined,
 			}
-			const runtime = initBaseRuntime(context, state)
+			const runtime = initBaseRuntime(context, VirtualModule)
 
 			await runtime.loadMessages("en")
 			runtime.changeLanguageTag("en")
@@ -219,7 +219,7 @@ describe("initBaseRuntime", () => {
 		})
 	})
 
-	describe("should not share state between instances", () => {
+	describe("should not share VirtualModule between instances", () => {
 		test("languageTag", () => {
 			const runtime1 = initBaseRuntime(context)
 			const runtime2 = initBaseRuntime(context)

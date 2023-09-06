@@ -1,18 +1,18 @@
 import type { RequestEvent } from "@sveltejs/kit"
-import type { TransformConfig } from "../../vite-plugin/config/index.js"
+import type { VirtualModule } from "../../vite-plugin/config/index.js"
 import { inlangSymbol } from "../shared/utils.js"
 import type { SvelteKitServerRuntime } from "./runtime.js"
 import type { LanguageTag } from "@inlang/sdk"
 
-type State = Pick<TransformConfig, "sourceLanguageTag" | "languageTags" | "messages">
+type State = Pick<VirtualModule, "sourceLanguageTag" | "languageTags" | "messages">
 
 let state: State
 
 export const initState = async () => {
 	if (!state) {
 		if (import.meta.env.DEV) {
-			const { initTransformConfig } = await import("../../vite-plugin/config/index.js")
-			const config = await initTransformConfig()
+			const { initVirtualModule } = await import("../../vite-plugin/config/index.js")
+			const config = await initVirtualModule()
 			state = {
 				sourceLanguageTag: config.sourceLanguageTag,
 				languageTags: config.languageTags,

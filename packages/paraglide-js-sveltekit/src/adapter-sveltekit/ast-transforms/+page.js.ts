@@ -8,25 +8,29 @@ import {
 } from "../../ast-transforms/utils/imports.js"
 import { wrapExportedFunction } from "../../ast-transforms/utils/wrap.js"
 import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
-import type { TransformConfig } from "../vite-plugin/config/index.js"
+import type { VirtualModule } from "../vite-plugin/config/index.js"
 
 // ------------------------------------------------------------------------------------------------
 
 // TODO: test
 const addImports = (
 	ast: SourceFile,
-	config: TransformConfig,
+	config: VirtualModule,
 	root: boolean,
 	wrapperFunctionName: string,
 ) => {
 	addImport(ast, "$app/environment", "browser")
-	addImport(ast, "@inlang/sdk-js/adapter-sveltekit/shared", wrapperFunctionName)
+	addImport(ast, "@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared", wrapperFunctionName)
 
 	if (config.options.languageInUrl && config.options.isStatic) {
-		addImport(ast, "@inlang/sdk-js/adapter-sveltekit/shared", "replaceLanguageInUrl")
 		addImport(
 			ast,
-			"@inlang/sdk-js/detectors/client",
+			"@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared",
+			"replaceLanguageInUrl",
+		)
+		addImport(
+			ast,
+			"@inlang/paraglide-js-sveltekit/detectors/client",
 			"initLocalStorageDetector",
 			"navigatorDetector",
 		)
@@ -37,7 +41,7 @@ const addImports = (
 // ------------------------------------------------------------------------------------------------
 
 // TODO: test
-const getOptions = (config: TransformConfig, root: boolean) =>
+const getOptions = (config: VirtualModule, root: boolean) =>
 	config.options.languageInUrl && config.options.isStatic
 		? dedent`
 			{
@@ -62,12 +66,7 @@ export const _FOR_TESTING = {
 
 // ------------------------------------------------------------------------------------------------
 
-export const transformPageJs = (
-	filePath: string,
-	config: TransformConfig,
-	code: string,
-	root: boolean,
-) => {
+export const transformPageJs = (filePath: string, config: VirtualModule, code: string, root: boolean) => {
 	const sourceFile = codeToSourceFile(code, filePath)
 
 	if (isOptOutImportPresent(sourceFile)) return code

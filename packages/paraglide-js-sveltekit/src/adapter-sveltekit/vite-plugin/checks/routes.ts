@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises"
 import path, { dirname } from "node:path"
 import dedent from "dedent"
-import type { TransformConfig } from "../config/index.js"
+import type { VirtualModule } from "../config/index.js"
 import type { FileType } from "../fileInformation.js"
 import { InlangException } from "../../../exceptions.js"
 import { InlangSdkException } from "../exceptions.js"
@@ -10,7 +10,7 @@ import type { NodeishFilesystem } from "@lix-js/fs"
 
 export const assertRoutesFolderPathExists = async (
 	nodeishFs: NodeishFilesystem,
-	config: TransformConfig,
+	config: VirtualModule,
 ) => {
 	if (!(await doesPathExist(nodeishFs, config.options.rootRoutesFolder))) {
 		throw new InlangException(dedent`
@@ -27,7 +27,7 @@ export const assertRoutesFolderPathExists = async (
 
 export const assertNecessaryFilesArePresent = async (
 	nodeishFs: NodeishFilesystem,
-	config: TransformConfig,
+	config: VirtualModule,
 ) => {
 	const preferredFileEnding = config.svelteKit.usesTypeScript ? "ts" : "js"
 

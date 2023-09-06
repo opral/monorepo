@@ -1,1 +1,1 @@
-export { type TransformConfig, initTransformConfig, resetTransformConfig } from "./config.js"
+export { type VirtualModule, initVirtualModule, resetTransformConfig } from "./virtualModule.js"

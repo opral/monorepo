@@ -8,23 +8,27 @@ import {
 } from "../../ast-transforms/utils/imports.js"
 import { wrapExportedFunction } from "../../ast-transforms/utils/wrap.js"
 import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
-import type { TransformConfig } from "../vite-plugin/config/index.js"
+import type { VirtualModule } from "../vite-plugin/config/index.js"
 
 // ------------------------------------------------------------------------------------------------
 
 // TODO: test
 const addImports = (
 	sourceFile: SourceFile,
-	config: TransformConfig,
+	config: VirtualModule,
 	root: boolean,
 	wrapperFunctionName: string,
 ) => {
-	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/shared", wrapperFunctionName)
+	addImport(
+		sourceFile,
+		"@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared",
+		wrapperFunctionName,
+	)
 	if (root && !config.options.languageInUrl) {
 		addImport(sourceFile, "$app/environment", "browser")
 		addImport(
 			sourceFile,
-			"@inlang/sdk-js/detectors/client",
+			"@inlang/paraglide-js-sveltekit/detectors/client",
 			"initLocalStorageDetector",
 			"navigatorDetector",
 		)
@@ -35,7 +39,7 @@ const addImports = (
 
 // TODO: use ast transformation instead of string manipulation
 // TODO: test
-const getOptions = (config: TransformConfig, root: boolean) =>
+const getOptions = (config: VirtualModule, root: boolean) =>
 	config.options.languageInUrl
 		? "{}"
 		: dedent`
@@ -56,7 +60,7 @@ export const _FOR_TESTING = {
 
 export const transformLayoutJs = (
 	filePath: string,
-	config: TransformConfig,
+	config: VirtualModule,
 	code: string,
 	root: boolean,
 ) => {

@@ -1,5 +1,5 @@
 import dedent from "dedent"
-import type { TransformConfig } from "../vite-plugin/config/index.js"
+import type { VirtualModule } from "../vite-plugin/config/index.js"
 import { InlangSdkException } from "../vite-plugin/exceptions.js"
 import type { FileInformation } from "../vite-plugin/fileInformation.js"
 import { transformLayoutJs } from "./+layout.js.js"
@@ -17,7 +17,7 @@ import { transformHooksServerJs } from "./hooks.server.js.js"
 
 export const transformCode = (
 	filePath: string,
-	config: TransformConfig,
+	config: VirtualModule,
 	code: string,
 	{ type, root }: FileInformation,
 ) => {

@@ -1,7 +1,7 @@
 import { test } from "@playwright/test"
 import { baseURL } from "./index.js"
 
-test("should keep state consistent throughout navigation", async ({ page }) => {
+test("should keep VirtualModule consistent throughout navigation", async ({ page }) => {
 	await page.goto(`${baseURL}/en`)
 
 	// TODO: test if all logs are executed (server and client)

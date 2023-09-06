@@ -19,7 +19,7 @@ describe("transformLayoutJs", () => {
 					        location.reload();
 					    });
 					}
-					import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
+					import { initRootLayoutLoadWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared';
 					export const load = initRootLayoutLoadWrapper({}).use(() => { });"
 				`)
 			})
@@ -35,9 +35,9 @@ describe("transformLayoutJs", () => {
 					        location.reload();
 					    });
 					}
-					import { initLocalStorageDetector, navigatorDetector } from '@inlang/sdk-js/detectors/client';
+					import { initLocalStorageDetector, navigatorDetector } from '@inlang/paraglide-js-sveltekit/detectors/client';
 					import { browser } from '$app/environment';
-					import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
+					import { initRootLayoutLoadWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared';
 					export const load = initRootLayoutLoadWrapper({
 					    initDetectors: browser
 					        ? () => [initLocalStorageDetector(), navigatorDetector]
@@ -60,7 +60,7 @@ describe("transformLayoutJs", () => {
 				        location.reload();
 				    });
 				}
-				import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
+				import { initRootLayoutLoadWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared';
 				export const load = initRootLayoutLoadWrapper({}).use(async () => { });"
 			`)
 		})
@@ -75,8 +75,8 @@ describe("transformLayoutJs", () => {
 		})
 	})
 
-	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
-		const code = "import '@inlang/sdk-js/no-transforms'"
+	test("should not do anything if '@inlang/paraglide-js-sveltekit/no-transforms' import is detected", () => {
+		const code = "import '@inlang/paraglide-js-sveltekit/no-transforms'"
 		const config = initTestApp()
 		const transformed = transformLayoutJs("", config, code, true)
 		expect(transformed).toEqual(code)
@@ -103,7 +103,7 @@ describe("transformLayoutJs", () => {
 			        location.reload();
 			    });
 			}
-			import { initLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
+			import { initLoadWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared';
 			import type { LayoutLoad } from '@sveltejs/kit';
 			export const load = initLoadWrapper().use(async((_, { languages }) => {
 			    return { languages };

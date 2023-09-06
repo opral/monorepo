@@ -56,7 +56,7 @@ export const initBaseRuntime = <
 	InlangFunctionArgs extends InlangFunctionBaseArgs = InlangFunctionBaseArgs,
 >(
 	{ loadMessages }: RuntimeContext<LanguageTag, LoadMessagesMaybePromise>,
-	state: RuntimeState<LanguageTag> = {
+	VirtualModule: RuntimeState<LanguageTag> = {
 		messages: [],
 		languageTag: undefined,
 		i: undefined,
@@ -77,7 +77,7 @@ export const initBaseRuntime = <
 
 		const setMessages = (messages: Message[] | undefined) => {
 			if (!messages) return
-			state.messages = mergeMessages(state.messages, messages)
+			VirtualModule.messages = mergeMessages(VirtualModule.messages, messages)
 			loadedLanguageTags.push(languageTag)
 		}
 
@@ -104,21 +104,24 @@ export const initBaseRuntime = <
 	}
 
 	const changeLanguageTag = (languageTag: LanguageTag) => {
-		state.languageTag = languageTag
-		state.i = undefined
+		VirtualModule.languageTag = languageTag
+		VirtualModule.i = undefined
 	}
 
 	const getInlangFunction = () => {
-		if (state.i) return state.i
+		if (VirtualModule.i) return VirtualModule.i
 
-		return (state.i = createInlangFunction<InlangFunctionArgs>(state.messages, state.languageTag!))
+		return (VirtualModule.i = createInlangFunction<InlangFunctionArgs>(
+			VirtualModule.messages,
+			VirtualModule.languageTag!,
+		))
 	}
 
 	return {
 		loadMessages: _loadMessages,
 		changeLanguageTag,
 		get languageTag() {
-			return state.languageTag
+			return VirtualModule.languageTag
 		},
 		get i() {
 			return getInlangFunction()

@@ -3,16 +3,15 @@ import {
 	PATH_TO_CWD,
 	PATH_TO_INLANG_CONFIG,
 	PATH_TO_SVELTE_CONFIG,
-	initTransformConfig,
+	initVirtualModule,
 	resetTransformConfig,
-} from "./config.js"
+} from "./virtualModule.js"
 import {
 	openInlangProject,
 	type InlangProject,
 	ProjectFilePathNotFoundError,
 	createMessagesQuery,
 } from "@inlang/sdk"
-import * as createBasicInlangConfigModule from "./utils/createBasicInlangConfig.js"
 import { getNodeishFs } from "./utils/getNodeishFs.js"
 import { InlangSdkException } from "../exceptions.js"
 import { validateSdkConfig, type SdkConfig } from "../../../settings.js"
@@ -44,61 +43,23 @@ it("should cache config creation", async () => {
 				setConfig: () => undefined,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
 				customApi: () => ({
-					"plugin.inlang.paraglide": validateSdkConfig({
+					"plugin.inlang.paraglideJs": validateSdkConfig({
 						languageNegotiation: { strategies: [{ type: "url" }] },
 					}),
 				}),
 			} as unknown as InlangProject),
 	)
 
-	const config1 = await initTransformConfig()
+	const config1 = await initVirtualModule()
 	expect(config1).toBeDefined()
 
-	const config2 = await initTransformConfig()
+	const config2 = await initVirtualModule()
 	expect(config2).toBeDefined()
 	expect(config2).toBe(config1)
 
 	resetTransformConfig()
-	const config3 = await initTransformConfig()
+	const config3 = await initVirtualModule()
 	expect(config3).not.toBe(config1)
-})
-
-it("should create an inlang config file if no config is present yet", async () => {
-	const fs = createNodeishMemoryFs()
-	await fs.mkdir(PATH_TO_CWD, { recursive: true })
-	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
-
-	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
-	vi.mocked(openInlangProject).mockImplementationOnce(
-		async () =>
-			({
-				errors: () => [new ProjectFilePathNotFoundError("", {})],
-			} as unknown as InlangProject),
-	)
-
-	vi.mocked(openInlangProject).mockImplementationOnce(
-		async () =>
-			({
-				errors: () => [],
-				config: () => ({ modules: ["@inlang/plugin-paraglide"] }),
-				setConfig: () => undefined,
-				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
-				customApi: () => ({
-					"plugin.inlang.paraglide": validateSdkConfig({
-						languageNegotiation: { strategies: [{ type: "url" }] },
-					}),
-				}),
-			} as unknown as InlangProject),
-	)
-
-	const spy = vi.spyOn(createBasicInlangConfigModule, "createBasicInlangConfig")
-
-	await expect(() => fs.readFile(PATH_TO_INLANG_CONFIG, { encoding: "utf-8" })).rejects.toThrow()
-
-	await initTransformConfig()
-
-	expect(spy).toHaveBeenCalledOnce()
-	expect(await fs.readFile(PATH_TO_INLANG_CONFIG, { encoding: "utf-8" })).toBeDefined()
 })
 
 it("should create demo resources if none are present yet", async () => {
@@ -123,7 +84,7 @@ it("should create demo resources if none are present yet", async () => {
 			} as unknown as InlangProject),
 	)
 
-	await initTransformConfig()
+	await initVirtualModule()
 
 	expect(create).toHaveBeenCalledOnce()
 })
@@ -160,13 +121,13 @@ it("should add the sdk plugin module if not present yet", async () => {
 			} as unknown as InlangProject),
 	)
 
-	await initTransformConfig()
+	await initVirtualModule()
 
 	expect(setConfig).toHaveBeenCalledOnce()
 	expect(setConfig).toHaveBeenNthCalledWith(1, {
 		modules: ["../../../../../../plugins/paraglide/dist/index.js"],
 		settings: {
-			"library.inlang.paraglideJs": {
+			"library.inlang.paraglideJsSveltekit": {
 				languageNegotiation: {
 					strategies: [
 						{
@@ -196,7 +157,7 @@ it("should throw if the SDK is not configured properly", async () => {
 			} as unknown as InlangProject),
 	)
 
-	await expect(async () => initTransformConfig()).rejects.toThrow(InlangSdkException)
+	await expect(async () => initVirtualModule()).rejects.toThrow(InlangSdkException)
 })
 
 it("should throw if no svelte.config.js file is found", async () => {
@@ -218,7 +179,7 @@ it("should throw if no svelte.config.js file is found", async () => {
 			} as unknown as InlangProject),
 	)
 
-	await expect(async () => initTransformConfig()).rejects.toThrow(InlangSdkException)
+	await expect(async () => initVirtualModule()).rejects.toThrow(InlangSdkException)
 })
 
 it("should correctly resolve the config", async () => {
@@ -246,11 +207,8 @@ it("should correctly resolve the config", async () => {
 				}),
 			} as unknown as InlangProject),
 	)
-	const spy = vi.spyOn(createBasicInlangConfigModule, "createBasicInlangConfig")
+	const config = await initVirtualModule()
 
-	const config = await initTransformConfig()
-
-	expect(spy).not.toHaveBeenCalled()
 	expect(setConfig).not.toHaveBeenCalled()
 	expect(create).not.toHaveBeenCalled()
 

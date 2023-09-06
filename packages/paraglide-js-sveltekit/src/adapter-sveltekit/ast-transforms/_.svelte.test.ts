@@ -26,7 +26,7 @@ describe("transformSvelte", () => {
 			const transformed = transformSvelte("", config, code)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
-					import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
+					import { getRuntimeFromContext } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/reactive-workaround';
 				const { i } = getRuntimeFromContext();
 				</script>
 
@@ -44,7 +44,7 @@ describe("transformSvelte", () => {
 			const transformed = transformSvelte("", config, code)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
-					import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
+					import { getRuntimeFromContext } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/reactive-workaround';
 				const { i: u } = getRuntimeFromContext();
 				</script>"
 			`)
@@ -61,7 +61,7 @@ describe("transformSvelte", () => {
 			const transformed = transformSvelte("", config, code)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
-					import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
+					import { getRuntimeFromContext } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/reactive-workaround';
 				const { i: u, languageTags, i } = getRuntimeFromContext();
 				</script>"
 			`)
@@ -78,7 +78,7 @@ describe("transformSvelte", () => {
 			const transformed = transformSvelte("", config, code)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script context=\\"module\\">
-					import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
+					import { getRuntimeFromContext } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/reactive-workaround';
 				const { i: u, languageTags, i } = getRuntimeFromContext();
 				</script>"
 			`)
@@ -95,17 +95,17 @@ describe("transformSvelte", () => {
 			const transformed = transformSvelte("", config, code)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script context=\\"module\\">
-					import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+					import { getRuntimeFromContext } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/not-reactive';
 				const { i: u, languageTags, i } = getRuntimeFromContext();
 				</script>"
 			`)
 		})
 	})
 
-	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
+	test("should not do anything if '@inlang/paraglide-js-sveltekit/no-transforms' import is detected", () => {
 		const code = dedent`
 			<script>
-				import '@inlang/sdk-js/no-transforms'
+				import '@inlang/paraglide-js-sveltekit/no-transforms'
 			</script>
 
 			<h1>hello</h1>
@@ -128,7 +128,7 @@ describe("transformSvelte", () => {
 		const transformed = transformSvelte("", config, code)
 		expect(transformed).toMatchInlineSnapshot(`
 			"<script context=\\"module\\">
-				import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+				import { getRuntimeFromContext } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/not-reactive';
 			const { languageTags, i } = getRuntimeFromContext();
 			</script>
 			<script>

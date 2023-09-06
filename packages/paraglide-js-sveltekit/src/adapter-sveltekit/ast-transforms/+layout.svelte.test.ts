@@ -12,9 +12,9 @@ describe("transformLayoutSvelte", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
 				import { browser } from '$app/environment';
-				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
-				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
-				import { addRuntimeToGlobalThis } from '@inlang/sdk-js/adapter-sveltekit/client/shared';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/reactive-workaround';
+				import { getRuntimeFromData } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared';
+				import { addRuntimeToGlobalThis } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/shared';
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
 				addRuntimeToContext(getRuntimeFromData(data));
@@ -48,9 +48,9 @@ describe("transformLayoutSvelte", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
 					import { browser } from '$app/environment';
-				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
-				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
-				import { addRuntimeToGlobalThis } from '@inlang/sdk-js/adapter-sveltekit/client/shared';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/reactive-workaround';
+				import { getRuntimeFromData } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared';
+				import { addRuntimeToGlobalThis } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/shared';
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
 				addRuntimeToContext(getRuntimeFromData(data));
@@ -94,9 +94,9 @@ describe("transformLayoutSvelte", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
 				import { browser } from '$app/environment';
-				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
-				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
-				import { addRuntimeToGlobalThis } from '@inlang/sdk-js/adapter-sveltekit/client/shared';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/reactive-workaround';
+				import { getRuntimeFromData } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared';
+				import { addRuntimeToGlobalThis } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/shared';
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
 				addRuntimeToContext(getRuntimeFromData(data));
@@ -142,8 +142,8 @@ describe("transformLayoutSvelte", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
 					import { browser } from '$app/environment';
-				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
-				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/not-reactive';
+				import { getRuntimeFromData } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared';
 				export let data;
 				addRuntimeToContext(getRuntimeFromData(data));
 				let { i, languageTag } = getRuntimeFromContext();
@@ -172,9 +172,9 @@ describe("transformLayoutSvelte", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
 					import { browser } from '$app/environment';
-				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
-				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
-				import { addRuntimeToGlobalThis } from '@inlang/sdk-js/adapter-sveltekit/client/shared';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/reactive-workaround';
+				import { getRuntimeFromData } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared';
+				import { addRuntimeToGlobalThis } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/shared';
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
 				addRuntimeToContext(getRuntimeFromData(data));
@@ -206,9 +206,9 @@ describe("transformLayoutSvelte", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
 					import { browser } from '$app/environment';
-				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
-				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
-				import { addRuntimeToGlobalThis } from '@inlang/sdk-js/adapter-sveltekit/client/shared';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/reactive-workaround';
+				import { getRuntimeFromData } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared';
+				import { addRuntimeToGlobalThis } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/shared';
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
 				addRuntimeToContext(getRuntimeFromData(data));
@@ -245,9 +245,9 @@ describe("transformLayoutSvelte", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
 					import { browser } from '$app/environment';
-				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
-				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
-				import { addRuntimeToGlobalThis } from '@inlang/sdk-js/adapter-sveltekit/client/shared';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/reactive-workaround';
+				import { getRuntimeFromData } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared';
+				import { addRuntimeToGlobalThis } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/shared';
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
 				addRuntimeToContext(getRuntimeFromData(data));
@@ -274,9 +274,9 @@ describe("transformLayoutSvelte", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
 				import { browser } from '$app/environment';
-				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
-				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
-				import { addRuntimeToGlobalThis } from '@inlang/sdk-js/adapter-sveltekit/client/shared';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/not-reactive';
+				import { getRuntimeFromData } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared';
+				import { addRuntimeToGlobalThis } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/shared';
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
 				addRuntimeToContext(getRuntimeFromData(data));
@@ -303,11 +303,11 @@ describe("transformLayoutSvelte", () => {
 		})
 	})
 
-	describe("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
+	describe("should not do anything if '@inlang/paraglide-js-sveltekit/no-transforms' import is detected", () => {
 		test("in context script tag", () => {
 			const code = dedent`
 				<script context>
-					import '@inlang/sdk-js/no-transforms';
+					import '@inlang/paraglide-js-sveltekit/no-transforms';
 				</script>`
 			const config = initTestApp()
 			const transformed = transformLayoutSvelte("", config, code, true)
@@ -317,7 +317,7 @@ describe("transformLayoutSvelte", () => {
 		test("in script tag", () => {
 			const code = dedent`
 				<script>
-					import '@inlang/sdk-js/no-transforms';
+					import '@inlang/paraglide-js-sveltekit/no-transforms';
 				</script>`
 			const config = initTestApp()
 			const transformed = transformLayoutSvelte("", config, code, true)
@@ -339,9 +339,9 @@ describe("transformLayoutSvelte", () => {
 			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script lang=\\"ts\\">
-					import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
-				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
-				import { addRuntimeToGlobalThis } from '@inlang/sdk-js/adapter-sveltekit/client/shared';
+					import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/reactive-workaround';
+				import { getRuntimeFromData } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared';
+				import { addRuntimeToGlobalThis } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/shared';
 				import { browser } from '$app/environment';
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
@@ -378,9 +378,9 @@ describe("transformLayoutSvelte", () => {
 			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script lang=\\"ts\\">
-					import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
-				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
-				import { addRuntimeToGlobalThis } from '@inlang/sdk-js/adapter-sveltekit/client/shared';
+					import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/reactive-workaround';
+				import { getRuntimeFromData } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared';
+				import { addRuntimeToGlobalThis } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/shared';
 				import { browser } from '$app/environment';
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
@@ -418,9 +418,9 @@ describe("transformLayoutSvelte", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script lang=\\"ts\\">
 					import { browser } from '$app/environment';
-				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
-				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
-				import { addRuntimeToGlobalThis } from '@inlang/sdk-js/adapter-sveltekit/client/shared';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/reactive-workaround';
+				import { getRuntimeFromData } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared';
+				import { addRuntimeToGlobalThis } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/shared';
 				export let data;
 				addRuntimeToGlobalThis(getRuntimeFromData(data));
 				addRuntimeToContext(getRuntimeFromData(data));
@@ -461,8 +461,8 @@ describe.skip("transformLayoutSvelte", () => {
 					)
 					expect(transformed).toMatchInlineSnapshot(`
 						"<script>import { browser } from \\"$app/environment\\";
-						import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-						import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+						import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/reactive\\";
+						import { getRuntimeFromData } from \\"@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared\\";
 						export let data;
 						let languageTag, i, languageTags;
 						addRuntimeToContext(getRuntimeFromData(data));
@@ -504,8 +504,8 @@ describe.skip("transformLayoutSvelte", () => {
 					)
 					expect(transformed).toMatchInlineSnapshot(`
 						"<script>import { browser } from \\"$app/environment\\";
-						import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/not-reactive\\";
-						import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+						import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/not-reactive\\";
+						import { getRuntimeFromData } from \\"@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared\\";
 						export let data;
 						let languageTag, i, languageTags;
 						addRuntimeToContext(getRuntimeFromData(data));
@@ -538,7 +538,7 @@ describe.skip("transformLayoutSvelte", () => {
 
 		describe("root=false", () => {
 			it("is a proxy for transformSvelte", async () => {
-				// const config = initTransformConfig()
+				// const config = initVirtualModule()
 				// const input = dedent`
 				// 	<script>
 				// 		import { languageTag } from '@inlang/sdk-js'

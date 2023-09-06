@@ -1,7 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises"
-import type { TransformConfig } from "../config/index.js"
+import type { VirtualModule } from "../config/index.js"
 
-export const assertAppTemplateIsCorrect = async ({ svelteKit, cwdFolderPath }: TransformConfig) => {
+export const assertAppTemplateIsCorrect = async ({ svelteKit, cwdFolderPath }: VirtualModule) => {
 	const appTemplatePath = svelteKit.files.appTemplate
 	const markup = await readFile(appTemplatePath, { encoding: "utf-8" })
 

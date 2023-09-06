@@ -1,10 +1,10 @@
 import { Node } from "ts-morph"
-import type { TransformConfig } from "../../vite-plugin/config/index.js"
+import type { VirtualModule } from "../../vite-plugin/config/index.js"
 import { InlangSdkException } from "../../vite-plugin/exceptions.js"
 import { filePathForOutput } from "../../vite-plugin/fileInformation.js"
 
 export const assertNodeInsideFunctionScope = (
-	config: TransformConfig,
+	config: VirtualModule,
 	filePath: string,
 	node: Node,
 ) => {
