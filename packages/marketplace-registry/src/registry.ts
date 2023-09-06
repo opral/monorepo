@@ -231,4 +231,33 @@ export const registry: MarketplaceManifest[] = [
 		license: "Apache-2.0",
 		module: "../../plugins/json/dist/index.js",
 	},
+	{
+		id: "plugin.inlang.paraglide",
+		icon: "https://github.com/inlang/inlang/blob/main/source-code/plugins/paraglide/assets/icon.png?raw=true",
+		displayName: {
+			en: "Paraglide plugin",
+		},
+		description: {
+			en: "A plugin for inlang projects that works with paraglide.js and reads / writes resources.",
+		},
+		readme: {
+			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/plugins/paraglide/README.md",
+		},
+		keywords: [
+			"inlang",
+			"paraglide",
+			"paraglide.js",
+			"runtime",
+			"plugin",
+			"transform",
+			"javascript",
+			"typescript",
+			"svelte",
+			"sveltekit",
+		],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		license: "Apache-2.0",
+		module: "../../plugins/paraglide/dist/index.js",
+	},
 ]
