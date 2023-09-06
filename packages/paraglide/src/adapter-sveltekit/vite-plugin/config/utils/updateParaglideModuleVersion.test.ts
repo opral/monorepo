@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import {
-	standaloneUpdateSdkModuleVersion,
-	updateSdkModuleVersion,
-} from "./updateSdkModuleVersion.js"
+	standaloneupdateParaglideModuleVersion,
+	updateParaglideModuleVersion,
+} from "./updateParaglideModuleVersion.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 import {
 	ProjectConfig,
@@ -54,7 +54,7 @@ const openMockedInlangProject = async (fs: NodeishFilesystemSubset): Promise<Inl
 	})
 }
 
-describe("updateSdkModuleVersion", () => {
+describe("updateParaglideModuleVersion", () => {
 	beforeEach(() => {
 		vi.resetAllMocks()
 		vi.mocked(openInlangProject).mockImplementation(
@@ -73,7 +73,7 @@ describe("updateSdkModuleVersion", () => {
 		await fs.writeFile("./project.inlang.json", JSON.stringify(getMockedConfig()))
 		const inlang = await openMockedInlangProject(fs)
 
-		const updated = await updateSdkModuleVersion(inlang)
+		const updated = await updateParaglideModuleVersion(inlang)
 		expect(updated).toBe(false)
 	})
 
@@ -86,15 +86,7 @@ describe("updateSdkModuleVersion", () => {
 
 		const inlang = await openMockedInlangProject(fs)
 
-		// @ts-ignore
-		console.log("errors", inlang.errors()[0].cause)
-
-		for (const error of inlang.errors()) {
-			// @ts-ignore
-			console.log("error", error.cause.message)
-		}
-
-		const updated = await updateSdkModuleVersion(inlang)
+		const updated = await updateParaglideModuleVersion(inlang)
 		expect(updated).toBe(false)
 	})
 
@@ -107,7 +99,10 @@ describe("updateSdkModuleVersion", () => {
 			)
 			const inlang = await openMockedInlangProject(fs)
 
-			const updated = await updateSdkModuleVersion(inlang)
+			// @ts-ignore
+			console.log("errors", inlang.errors()[0].cause)
+
+			const updated = await updateParaglideModuleVersion(inlang)
 			expect(updated).toBe(true)
 
 			const configFile = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
@@ -122,7 +117,7 @@ describe("updateSdkModuleVersion", () => {
 			)
 			const inlang = await openMockedInlangProject(fs)
 
-			const updated = await updateSdkModuleVersion(inlang)
+			const updated = await updateParaglideModuleVersion(inlang)
 			expect(updated).toBe(true)
 
 			const configFile = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
@@ -137,7 +132,7 @@ describe("updateSdkModuleVersion", () => {
 			)
 			const inlang = await openMockedInlangProject(fs)
 
-			const updated = await updateSdkModuleVersion(inlang)
+			const updated = await updateParaglideModuleVersion(inlang)
 			expect(updated).toBe(true)
 
 			const configFile = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
@@ -152,7 +147,7 @@ describe("updateSdkModuleVersion", () => {
 			)
 			const inlang = await openMockedInlangProject(fs)
 
-			const updated = await updateSdkModuleVersion(inlang)
+			const updated = await updateParaglideModuleVersion(inlang)
 			expect(updated).toBe(true)
 
 			const configFile = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
@@ -161,13 +156,13 @@ describe("updateSdkModuleVersion", () => {
 	})
 })
 
-describe("standaloneUpdateSdkModuleVersion", () => {
+describe("standaloneupdateParaglideModuleVersion", () => {
 	beforeEach(() => {
 		vi.resetAllMocks()
 	})
 
 	it("should throw if inlang could not be setup correctly", async () => {
-		expect(() => standaloneUpdateSdkModuleVersion()).rejects.toThrow()
+		expect(() => standaloneupdateParaglideModuleVersion()).rejects.toThrow()
 	})
 
 	it("should not do anything if version is already identical", async () => {
@@ -180,7 +175,7 @@ describe("standaloneUpdateSdkModuleVersion", () => {
 			async () => ({ config: () => config } as InlangProject),
 		)
 
-		const updated = await standaloneUpdateSdkModuleVersion()
+		const updated = await standaloneupdateParaglideModuleVersion()
 		expect(updated).toBe(false)
 	})
 
@@ -200,7 +195,7 @@ describe("standaloneUpdateSdkModuleVersion", () => {
 				} as InlangProject),
 		)
 
-		const updated = await standaloneUpdateSdkModuleVersion()
+		const updated = await standaloneupdateParaglideModuleVersion()
 		expect(updated).toBe(true)
 
 		const configFile = await fs.readFile(PATH_TO_INLANG_CONFIG, { encoding: "utf-8" })

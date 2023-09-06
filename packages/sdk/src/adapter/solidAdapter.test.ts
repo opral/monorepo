@@ -162,7 +162,17 @@ describe("messages", () => {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
 			modules: ["./plugin-a.js"],
-			settings: {},
+			settings: {
+				"library.inlang.paraglideJs": {
+					languageNegotiation: {
+						strategies: [
+							{
+								type: "localStorage",
+							} as any,
+						],
+					},
+				},
+			},
 		}
 		const mockPlugin: Plugin = {
 			meta: {

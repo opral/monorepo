@@ -45,7 +45,7 @@ export const ProjectSettings = Type.Object({
 const ExternalSettings = Type.Record(
 	Type.String({
 		// pattern includes ProjectSettings keys
-		pattern: `^((messageLintRule|plugin|app)\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)|${Object.keys(
+		pattern: `^((messageLintRule|plugin|app|library)\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)|${Object.keys(
 			ProjectSettings.properties,
 		)
 			.map((key) => key.replaceAll(".", "\\."))
@@ -54,7 +54,7 @@ const ExternalSettings = Type.Record(
 			"The key must be conform to `{type:app|plugin|messageLintRule}.{namespace:string}.{id:string}`.",
 		examples: ["plugin.publisher.sqlite", "messageLintRule.inlang.missingTranslation"],
 	}) as unknown as TTemplateLiteral<
-		[TLiteral<`${"app" | "plugin" | "messageLintRule"}.${string}.${string}`>]
+		[TLiteral<`${"app" | "plugin" | "library" | "messageLintRule"}.${string}.${string}`>]
 	>,
 	// Using JSON (array and object) as a workaround to make the
 	// intersection between `ProjectSettings`, which contains an array,
