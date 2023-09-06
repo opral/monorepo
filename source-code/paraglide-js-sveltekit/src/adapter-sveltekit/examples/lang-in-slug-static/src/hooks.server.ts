@@ -1,4 +1,4 @@
-import { initHandleWrapper } from "@inlang/sdk-js/adapter-sveltekit/server"
+import { initHandleWrapper } from "@inlang/paraglide-js-sveltekit/adapter-sveltekit/server"
 import { serverFn } from "./utils/server.js"
 
 export const handle = initHandleWrapper({

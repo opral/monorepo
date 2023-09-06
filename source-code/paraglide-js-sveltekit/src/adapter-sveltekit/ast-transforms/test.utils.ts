@@ -1,5 +1,5 @@
 import { deepmerge } from "deepmerge-ts"
-import type { TransformConfig } from "../vite-plugin/config/index.js"
+import type { VirtualModule } from "../vite-plugin/config/index.js"
 
 type DeepPartial<T> = T extends Record<PropertyKey, unknown>
 	? {
@@ -7,7 +7,7 @@ type DeepPartial<T> = T extends Record<PropertyKey, unknown>
 	  }
 	: T
 
-export const initTestApp = (overrides: DeepPartial<TransformConfig> = {}): TransformConfig =>
+export const initTestApp = (overrides: DeepPartial<VirtualModule> = {}): VirtualModule =>
 	deepmerge(
 		{
 			debug: false,
@@ -34,6 +34,6 @@ export const initTestApp = (overrides: DeepPartial<TransformConfig> = {}): Trans
 					serverHooks: "src/hooks.server",
 				},
 			},
-		} satisfies TransformConfig,
+		} satisfies VirtualModule,
 		overrides as any,
 	)

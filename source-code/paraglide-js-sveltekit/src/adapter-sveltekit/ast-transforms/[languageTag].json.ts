@@ -2,12 +2,12 @@ import dedent from "dedent"
 import { findExport } from "../../ast-transforms/utils/exports.js"
 import { addImport, isOptOutImportPresent } from "../../ast-transforms/utils/imports.js"
 import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
-import type { TransformConfig } from "../vite-plugin/config/index.js"
+import type { VirtualModule } from "../vite-plugin/config/index.js"
 import { InlangSdkException } from "../vite-plugin/exceptions.js"
 import { filePathForOutput } from "../vite-plugin/fileInformation.js"
 import { transformServerRequestJs } from "./+server.js.js"
 
-export const transformLanguageJson = (filePath: string, config: TransformConfig, code: string) => {
+export const transformLanguageJson = (filePath: string, config: VirtualModule, code: string) => {
 	const sourceFile = codeToSourceFile(code, filePath)
 
 	if (isOptOutImportPresent(sourceFile)) return code
@@ -39,7 +39,7 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 	)
 
 	if (config.svelteKit.version || "" >= "1.16.3") {
-		addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/server", "initState")
+		addImport(sourceFile, "@inlang/paraglide-js-sveltekit/adapter-sveltekit/server", "initState")
 
 		sourceFile.insertText(
 			index,
@@ -53,7 +53,7 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 		)
 	}
 
-	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/server", "loadMessages")
+	addImport(sourceFile, "@inlang/paraglide-js-sveltekit/adapter-sveltekit/server", "loadMessages")
 	addImport(sourceFile, "@sveltejs/kit", "json")
 
 	return transformServerRequestJs(filePath, config, nodeToCode(sourceFile))

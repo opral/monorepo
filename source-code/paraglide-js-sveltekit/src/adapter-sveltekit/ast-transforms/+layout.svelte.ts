@@ -5,7 +5,7 @@ import {
 	removeImport,
 } from "../../ast-transforms/utils/imports.js"
 import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
-import type { TransformConfig } from "../vite-plugin/config/index.js"
+import type { VirtualModule } from "../vite-plugin/config/index.js"
 import { transformSvelte } from "./_.svelte.js"
 import dedent from "dedent"
 import { isOptOutImportPresent } from "./utils/imports.js"
@@ -16,7 +16,7 @@ import { MagicString } from "../magic-string.js"
 
 export const transformLayoutSvelte = (
 	filePath: string,
-	config: TransformConfig,
+	config: VirtualModule,
 	code: string,
 	root: boolean,
 ) => {
@@ -34,14 +34,22 @@ export const transformLayoutSvelte = (
 
 // ------------------------------------------------------------------------------------------------
 
-const transformScript = (filePath: string, config: TransformConfig, code: string) => {
+const transformScript = (filePath: string, config: VirtualModule, code: string) => {
 	const sourceFile = codeToSourceFile(code, filePath)
 
-	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/client/shared", "addRuntimeToGlobalThis")
-	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/shared", "getRuntimeFromData")
 	addImport(
 		sourceFile,
-		`@inlang/sdk-js/adapter-sveltekit/client/${
+		"@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/shared",
+		"addRuntimeToGlobalThis",
+	)
+	addImport(
+		sourceFile,
+		"@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared",
+		"getRuntimeFromData",
+	)
+	addImport(
+		sourceFile,
+		`@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/${
 			config.options.languageInUrl ? "not-reactive" : "reactive-workaround"
 		}`,
 		"addRuntimeToContext",
@@ -89,7 +97,7 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 
 // ------------------------------------------------------------------------------------------------
 
-const transformMarkup = (config: TransformConfig, markup: string): string => {
+const transformMarkup = (config: VirtualModule, markup: string): string => {
 	const s = new MagicString(markup)
 	const ast = markupToAst(markup)
 

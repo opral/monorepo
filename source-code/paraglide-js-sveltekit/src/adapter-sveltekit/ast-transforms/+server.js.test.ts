@@ -13,8 +13,8 @@ describe("transformServerRequestJs", () => {
 		expect(transformed).toEqual(code)
 	})
 
-	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
-		const code = "import '@inlang/sdk-js/no-transforms'"
+	test("should not do anything if '@inlang/paraglide-js-sveltekit/no-transforms' import is detected", () => {
+		const code = "import '@inlang/paraglide-js-sveltekit/no-transforms'"
 		const config = initTestApp()
 		const transformed = transformServerRequestJs("", config, code)
 		expect(transformed).toEqual(code)
@@ -32,7 +32,7 @@ describe("transformServerRequestJs", () => {
 		)
 
 		expect(transformed).toMatchInlineSnapshot(`
-			"import { initRequestHandlerWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+			"import { initRequestHandlerWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/server';
 			export const GET = initRequestHandlerWrapper().use((_, { i }) => new Repsonse(i('hi')));"
 		`)
 	})
@@ -51,7 +51,7 @@ describe("transformServerRequestJs", () => {
 		)
 
 		expect(transformed).toMatchInlineSnapshot(`
-			"import { initRequestHandlerWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+			"import { initRequestHandlerWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/server';
 			export const POST = initRequestHandlerWrapper().use(async function POST(_, { languages }) {
 			    return { languages };
 			});"
@@ -73,7 +73,7 @@ describe("transformServerRequestJs", () => {
 		)
 
 		expect(transformed).toMatchInlineSnapshot(`
-			"import { initRequestHandlerWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+			"import { initRequestHandlerWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/server';
 			import { json } from '@sveltejs/kit';
 			export const GET = initRequestHandlerWrapper().use((_, { i, language }) => new Repsonse(i('hi')));
 			export const PATCH = initRequestHandlerWrapper().use((_, { i, language }) => json(JSON.stringify({ language })));"

@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { getRuntimeFromData } from "@inlang/sdk-js/adapter-sveltekit/shared"
+	import { getRuntimeFromData } from "@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared"
 	import {
 		getRuntimeFromContext,
 		addRuntimeToContext,
-	} from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
+	} from "@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/reactive"
 	import type { LayoutData } from "./$types.js"
 	import { browser } from "$app/environment"
 

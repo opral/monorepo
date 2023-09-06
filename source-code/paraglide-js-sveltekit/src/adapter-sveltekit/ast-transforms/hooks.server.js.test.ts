@@ -14,10 +14,10 @@ describe("transformHooksServerJs", () => {
 				const transformed = transformHooksServerJs("", config, code)
 
 				expect(transformed).toMatchInlineSnapshot(`
-					"import { replaceLanguageInUrl } from '@inlang/sdk-js/adapter-sveltekit/shared';
-					import { initAcceptLanguageHeaderDetector } from '@inlang/sdk-js/detectors/server';
+					"import { replaceLanguageInUrl } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared';
+					import { initAcceptLanguageHeaderDetector } from '@inlang/paraglide-js-sveltekit/detectors/server';
 					import { redirect } from '@sveltejs/kit';
-					import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+					import { initHandleWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/server';
 					export const handle = initHandleWrapper({
 					    excludedRoutes: [],
 					    parseLanguageTag: ({ url }) => url.pathname.split(\\"/\\")[1],
@@ -36,7 +36,7 @@ describe("transformHooksServerJs", () => {
 				const transformed = transformHooksServerJs("", config, code)
 
 				expect(transformed).toMatchInlineSnapshot(`
-					"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+					"import { initHandleWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/server';
 					export const handle = initHandleWrapper({
 					    excludedRoutes: [],
 					    parseLanguageTag: ({ url }) => url.pathname.split(\\"/\\")[1],
@@ -52,7 +52,7 @@ describe("transformHooksServerJs", () => {
 				const transformed = transformHooksServerJs("", config, code)
 
 				expect(transformed).toMatchInlineSnapshot(`
-					"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+					"import { initHandleWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/server';
 					export const handle = initHandleWrapper({
 					    excludedRoutes: [],
 					    parseLanguageTag: () => undefined,
@@ -84,7 +84,7 @@ describe("transformHooksServerJs", () => {
 		const config = initTestApp()
 		const transformed = transformHooksServerJs("", config, code)
 		expect(transformed).toMatchInlineSnapshot(`
-			"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+			"import { initHandleWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/server';
 			import * as Sentry from '@sentry/node';
 			import crypto from 'crypto';
 			Sentry.init.skip({ /*...*/});
@@ -118,7 +118,7 @@ describe("transformHooksServerJs", () => {
 		)
 
 		expect(transformed).toMatchInlineSnapshot(`
-			"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+			"import { initHandleWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/server';
 			export const handle = initHandleWrapper({
 			    excludedRoutes: [],
 			    parseLanguageTag: () => undefined,
@@ -148,7 +148,7 @@ describe("transformHooksServerJs", () => {
 		)
 
 		expect(transformed).toMatchInlineSnapshot(`
-			"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+			"import { initHandleWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/server';
 			import { sequence } from '@sveltejs/kit';
 			const handle1 = ({ resolve, event }) => resolve(event);
 			function handle2({ resolve, event }) {
@@ -162,8 +162,8 @@ describe("transformHooksServerJs", () => {
 		`)
 	})
 
-	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
-		const code = "import '@inlang/sdk-js/no-transforms'"
+	test("should not do anything if '@inlang/paraglide-js-sveltekit/no-transforms' import is detected", () => {
+		const code = "import '@inlang/paraglide-js-sveltekit/no-transforms'"
 		const config = initTestApp()
 		const transformed = transformHooksServerJs("", config, code)
 		expect(transformed).toEqual(code)
@@ -185,7 +185,7 @@ describe("transformHooksServerJs", () => {
 			)
 
 			expect(transformed).toMatchInlineSnapshot(`
-				"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+				"import { initHandleWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/server';
 				export const handle = initHandleWrapper({
 				    excludedRoutes: [],
 				    parseLanguageTag: () => undefined,

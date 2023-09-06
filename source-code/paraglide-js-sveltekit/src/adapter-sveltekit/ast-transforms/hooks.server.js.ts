@@ -7,20 +7,28 @@ import {
 } from "../../ast-transforms/utils/imports.js"
 import { wrapExportedFunction } from "../../ast-transforms/utils/wrap.js"
 import { nodeToCode, codeToNode, codeToSourceFile } from "../../ast-transforms/utils/js.util.js"
-import type { TransformConfig } from "../vite-plugin/config/index.js"
+import type { VirtualModule } from "../vite-plugin/config/index.js"
 
 // TODO: test
-const addImports = (
-	sourceFile: SourceFile,
-	config: TransformConfig,
-	wrapperFunctionName: string,
-) => {
-	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/server", wrapperFunctionName)
+const addImports = (sourceFile: SourceFile, config: VirtualModule, wrapperFunctionName: string) => {
+	addImport(
+		sourceFile,
+		"@inlang/paraglide-js-sveltekit/adapter-sveltekit/server",
+		wrapperFunctionName,
+	)
 
 	if (!config.options.isStatic && config.options.languageInUrl) {
 		addImport(sourceFile, "@sveltejs/kit", "redirect")
-		addImport(sourceFile, "@inlang/sdk-js/detectors/server", "initAcceptLanguageHeaderDetector")
-		addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/shared", "replaceLanguageInUrl")
+		addImport(
+			sourceFile,
+			"@inlang/paraglide-js-sveltekit/detectors/server",
+			"initAcceptLanguageHeaderDetector",
+		)
+		addImport(
+			sourceFile,
+			"@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared",
+			"replaceLanguageInUrl",
+		)
 	}
 }
 
@@ -28,7 +36,7 @@ const addImports = (
 
 // TODO: use ast transformation instead of string manipulation
 // TODO: test
-const getOptions = (config: TransformConfig) => {
+const getOptions = (config: VirtualModule) => {
 	const options = dedent`
 	{
 		excludedRoutes: ${JSON.stringify(config.options.excludedRoutes)},
@@ -60,7 +68,7 @@ export const _FOR_TESTING = {
 
 // ------------------------------------------------------------------------------------------------
 
-export const transformHooksServerJs = (filePath: string, config: TransformConfig, code: string) => {
+export const transformHooksServerJs = (filePath: string, config: VirtualModule, code: string) => {
 	const sourceFile = codeToSourceFile(code, filePath)
 
 	if (isOptOutImportPresent(sourceFile)) return code

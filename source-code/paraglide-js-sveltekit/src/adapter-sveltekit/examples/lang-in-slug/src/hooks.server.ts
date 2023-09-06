@@ -1,8 +1,8 @@
-import { initHandleWrapper } from "@inlang/sdk-js/adapter-sveltekit/server"
+import { initHandleWrapper } from "@inlang/paraglide-js-sveltekit/adapter-sveltekit/server"
 import { serverFn } from "./utils/server.js"
-import { initAcceptLanguageHeaderDetector } from "@inlang/sdk-js/detectors/server"
+import { initAcceptLanguageHeaderDetector } from "@inlang/paraglide-js-sveltekit/detectors/server"
 import { redirect } from "@sveltejs/kit"
-import { replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared"
+import { replaceLanguageInUrl } from "@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared"
 
 export const handle = initHandleWrapper({
 	parseLanguageTag: ({ url }) => url.pathname.split("/")[1],

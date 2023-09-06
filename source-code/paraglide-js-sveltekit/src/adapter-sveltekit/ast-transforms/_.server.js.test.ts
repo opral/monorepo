@@ -10,7 +10,8 @@ describe("'@inlang/sdk-js' imports", () => {
 	})
 
 	test("should not thorw an error if an import from a suppath of '@inlang/sdk-js' gets detected", () => {
-		const code = "import { initServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';"
+		const code =
+			"import { initServerLoadWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/server';"
 		const config = initTestApp()
 		expect(() => transformServerJs("", config, code)).not.toThrow()
 	})

@@ -15,7 +15,7 @@ describe("transformPageJs", () => {
 					const transformed = transformPageJs("", config, code, true)
 
 					expect(transformed).toMatchInlineSnapshot(`
-						"import { initRootPageLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
+						"import { initRootPageLoadWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared';
 						import { browser } from '$app/environment';
 						export const load = initRootPageLoadWrapper({
 						    browser
@@ -35,8 +35,8 @@ describe("transformPageJs", () => {
 
 					expect(transformed).toMatchInlineSnapshot(`
 						"import { redirect } from '@sveltejs/kit';
-						import { initLocalStorageDetector, navigatorDetector } from '@inlang/sdk-js/detectors/client';
-						import { initRootPageLoadWrapper, replaceLanguageInUrl } from '@inlang/sdk-js/adapter-sveltekit/shared';
+						import { initLocalStorageDetector, navigatorDetector } from '@inlang/paraglide-js-sveltekit/detectors/client';
+						import { initRootPageLoadWrapper, replaceLanguageInUrl } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared';
 						import { browser } from '$app/environment';
 						export const load = initRootPageLoadWrapper({
 						    browser,
@@ -59,7 +59,7 @@ describe("transformPageJs", () => {
 			const transformed = transformPageJs("", config, code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`
-				"import { initRootPageLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
+				"import { initRootPageLoadWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared';
 				import { browser } from '$app/environment';
 				export const load = initRootPageLoadWrapper({
 				    browser
@@ -77,8 +77,8 @@ describe("transformPageJs", () => {
 		})
 	})
 
-	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
-		const code = "import '@inlang/sdk-js/no-transforms'"
+	test("should not do anything if '@inlang/paraglide-js-sveltekit/no-transforms' import is detected", () => {
+		const code = "import '@inlang/paraglide-js-sveltekit/no-transforms'"
 		const config = initTestApp()
 		const transformed = transformPageJs("", config, code, true)
 		expect(transformed).toEqual(code)
@@ -99,7 +99,7 @@ describe("transformPageJs", () => {
 		)
 
 		expect(transformed).toMatchInlineSnapshot(`
-			"import { initRootPageLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
+			"import { initRootPageLoadWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/shared';
 			import { browser } from '$app/environment';
 			export const load = initRootPageLoadWrapper({
 			    browser

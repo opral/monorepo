@@ -2,7 +2,7 @@ import dedent from "dedent"
 import type { ViteDevServer, Plugin as VitePlugin } from "vite"
 import { assertAppTemplateIsCorrect } from "./checks/appTemplate.js"
 import { assertRoutesFolderPathExists, assertNecessaryFilesArePresent } from "./checks/routes.js"
-import { initTransformConfig, resetTransformConfig, type TransformConfig } from "./config/index.js"
+import { initVirtualModule, resetTransformConfig, type VirtualModule } from "./config/index.js"
 import { filePathForOutput, getFileInformation } from "./fileInformation.js"
 import { transformCode } from "../ast-transforms/index.js"
 import { InlangSdkException } from "./exceptions.js"
@@ -28,7 +28,7 @@ export const plugin = async () => {
 	const fs = await getNodeishFs()
 
 	return {
-		name: "vite-plugin-inlang-sdk-js-sveltekit",
+		name: "vite-plugin-inlang-paraglide-js-sveltekit",
 		// makes sure we run before vite-plugin-svelte
 		enforce: "pre",
 
@@ -41,10 +41,10 @@ export const plugin = async () => {
 				ssr: {
 					// makes sure that `@inlang/sdk-js` get's transformed by vite in order
 					// to be able to use `SvelteKit`'s `$app` aliases
-					noExternal: ["@inlang/sdk-js"],
+					noExternal: ["@inlang/paraglide-js-sveltekit"],
 				},
 				optimizeDeps: {
-					include: ["@inlang/sdk-js/**/*"],
+					include: ["@inlang/paraglide-js-sveltekit/**/*"],
 					exclude: ["vitefu"],
 				},
 			}
@@ -60,7 +60,7 @@ export const plugin = async () => {
 
 		async load(id) {
 			if (id === resolvedVirtualModuleId) {
-				const config = await initTransformConfig()
+				const config = await initVirtualModule()
 				return dedent`
 					export const sourceLanguageTag = ${JSON.stringify(config.sourceLanguageTag)}
 					export const languageTags = ${JSON.stringify(config.languageTags)}
@@ -72,7 +72,7 @@ export const plugin = async () => {
 		},
 
 		async buildStart() {
-			const config = await initTransformConfig().catch((error) => {
+			const config = await initVirtualModule().catch((error) => {
 				throw new Error(error)
 			})
 
@@ -111,7 +111,7 @@ export const plugin = async () => {
 		},
 
 		async transform(code, id) {
-			const config = await initTransformConfig()
+			const config = await initVirtualModule()
 			const fileInformation = getFileInformation(config, id)
 			// eslint-disable-next-line unicorn/no-null
 			if (!fileInformation) return null
@@ -151,7 +151,7 @@ export const plugin = async () => {
 }
 
 let configLogged = false
-const logConfig = (config: TransformConfig) => {
+const logConfig = (config: VirtualModule) => {
 	if (configLogged) return
 
 	const { messages: _, ...configToLog } = config

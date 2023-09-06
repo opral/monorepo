@@ -116,7 +116,7 @@ export const getImportSpecifiersAsStrings = (sourceFile: SourceFile, path: strin
 // ------------------------------------------------------------------------------------------------
 
 export const isOptOutImportPresent = (sourceFile: SourceFile) =>
-	!!findImportDeclarations(sourceFile, "@inlang/sdk-js/no-transforms").length
+	!!findImportDeclarations(sourceFile, "@inlang/paraglide-js-sveltekit/no-transforms").length
 
 // TODO: test
 export const isSdkImportPresent = (sourceFile: SourceFile) =>

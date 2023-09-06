@@ -1,4 +1,4 @@
-import { initRootLayoutServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server"
+import { initRootLayoutServerLoadWrapper } from "@inlang/paraglide-js-sveltekit/adapter-sveltekit/server"
 import type { LayoutServerLoad } from "./$types.js"
 
 export const prerender = true

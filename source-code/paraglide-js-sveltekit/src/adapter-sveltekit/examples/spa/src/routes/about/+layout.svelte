@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
+	import { getRuntimeFromContext } from "@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/reactive"
 
 	const { i } = getRuntimeFromContext()
 

@@ -10,7 +10,7 @@ describe("transformLayoutServerJs", () => {
 			const transformed = transformLayoutServerJs("", initTestApp(), code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`
-				"import { initRootLayoutServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+				"import { initRootLayoutServerLoadWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/server';
 				export const load = initRootLayoutServerLoadWrapper().use(() => { });"
 			`)
 		})
@@ -22,7 +22,7 @@ describe("transformLayoutServerJs", () => {
 			const transformed = transformLayoutServerJs("", initTestApp(), code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`
-				"import { initRootLayoutServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+				"import { initRootLayoutServerLoadWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/server';
 				export const load = initRootLayoutServerLoadWrapper().use(async () => { });"
 			`)
 		})
@@ -37,8 +37,8 @@ describe("transformLayoutServerJs", () => {
 		})
 	})
 
-	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
-		const code = "import '@inlang/sdk-js/no-transforms'"
+	test("should not do anything if '@inlang/paraglide-js-sveltekit/no-transforms' import is detected", () => {
+		const code = "import '@inlang/paraglide-js-sveltekit/no-transforms'"
 		const config = initTestApp()
 		const transformed = transformLayoutServerJs("", config, code, true)
 		expect(transformed).toEqual(code)
@@ -60,7 +60,7 @@ describe("transformLayoutServerJs", () => {
 		)
 
 		expect(transformed).toMatchInlineSnapshot(`
-			"import { initServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+			"import { initServerLoadWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/server';
 			import type { LayoutServerLoad } from '@sveltejs/kit';
 			export const load: LayoutServerLoad = initServerLoadWrapper().use((async((_, { language }) => {
 			    return { language };

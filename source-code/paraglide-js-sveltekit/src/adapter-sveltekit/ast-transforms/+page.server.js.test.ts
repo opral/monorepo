@@ -13,8 +13,8 @@ describe("transformPageServerJs", () => {
 		expect(transformed).toEqual(code)
 	})
 
-	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
-		const code = "import '@inlang/sdk-js/no-transforms'"
+	test("should not do anything if '@inlang/paraglide-js-sveltekit/no-transforms' import is detected", () => {
+		const code = "import '@inlang/paraglide-js-sveltekit/no-transforms'"
 		const config = initTestApp()
 		const transformed = transformPageServerJs("", config, code)
 		expect(transformed).toEqual(code)
@@ -34,7 +34,7 @@ describe("transformPageServerJs", () => {
 		)
 
 		expect(transformed).toMatchInlineSnapshot(`
-			"import { initServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+			"import { initServerLoadWrapper } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/server';
 			export const load: PageServerLoad = initServerLoadWrapper().use(({ params }, { i }) => {
 			    return { title: i(params.slug) };
 			});"

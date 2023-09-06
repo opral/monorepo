@@ -233,7 +233,7 @@ export const registry: MarketplaceManifest[] = [
 	},
 	{
 		id: "plugin.inlang.paraglide",
-		icon: "https://github.com/inlang/inlang/blob/main/source-code/plugins/paraglide/assets/icon.png?raw=true",
+		icon: "https://emojis.wiki/thumbs/emojis/parachute.webp",
 		displayName: {
 			en: "Paraglide plugin",
 		},
@@ -241,7 +241,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "A plugin for inlang projects that works with paraglide.js and reads / writes resources.",
 		},
 		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/plugins/paraglide/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@armageddon/source-code/plugins/paraglide/README.md",
 		},
 		keywords: [
 			"inlang",

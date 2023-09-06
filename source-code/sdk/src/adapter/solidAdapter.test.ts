@@ -163,7 +163,7 @@ describe("messages", () => {
 			languageTags: ["en", "de"],
 			modules: ["./plugin-a.js"],
 			settings: {
-				"library.inlang.paraglideJs": {
+				"library.inlang.paraglideJsSveltekit": {
 					languageNegotiation: {
 						strategies: [
 							{

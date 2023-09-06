@@ -3,7 +3,7 @@ import { validateSdkConfig, type SdkConfig, type SdkConfigInput } from "../../..
 import { InlangSdkException } from "../../exceptions.js"
 
 export const defaultSdkPluginSettings = {
-	"library.inlang.paraglideJs": {
+	"library.inlang.paraglideJsSveltekit": {
 		languageNegotiation: {
 			strategies: [
 				{
@@ -15,7 +15,9 @@ export const defaultSdkPluginSettings = {
 }
 
 export function getSettings(inlang: InlangProject) {
-	const settings = inlang.customApi()["library.inlang.paraglideJs"] as SdkConfig | undefined
+	const settings = inlang.customApi()["library.inlang.paraglideJsSveltekit"] as
+		| SdkConfig
+		| undefined
 	if (!settings) {
 		// automatically add module if missing
 		const config = inlang.config()

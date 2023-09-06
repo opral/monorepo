@@ -240,7 +240,7 @@ describe("findImportDeclarations", () => {
 
 	test("should return an empty array if no import declarations with a given path were found", () => {
 		const node = codeToSourceFile(`
-			import { i } from '@inlang/sdk-js/ignore'
+			import { i } from '@inlang/paraglide-js-sveltekit/ignore'
 		`)
 		const result = findImportDeclarations(node, "@inlang/sdk-js")
 		expect(result).toHaveLength(0)
@@ -292,7 +292,7 @@ describe("isOptOutImportPresent", () => {
 
 	test("should return false if the opt-out import specifier was was not found", () => {
 		const node = codeToSourceFile(`
-			import '@inlang/sdk-js/no-transforms'
+			import '@inlang/paraglide-js-sveltekit/no-transforms'
 		`)
 		const result = isOptOutImportPresent(node)
 		expect(result).toBe(true)

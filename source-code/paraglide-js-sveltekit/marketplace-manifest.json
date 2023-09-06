@@ -1,5 +1,5 @@
 {
-	"id": "library.inlang.paraglideJs",
+	"id": "library.inlang.paraglideJsSveltekit",
 	"icon": "https://emojis.wiki/thumbs/emojis/parachute.webp",
 	"displayName": {
 		"en": "paraglideJS"

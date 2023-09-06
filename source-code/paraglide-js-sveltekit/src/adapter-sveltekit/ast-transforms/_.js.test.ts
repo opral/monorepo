@@ -11,8 +11,8 @@ describe("transformJs", () => {
 		expect(transformed).toEqual(code)
 	})
 
-	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
-		const code = "import '@inlang/sdk-js/no-transforms'"
+	test("should not do anything if '@inlang/paraglide-js-sveltekit/no-transforms' import is detected", () => {
+		const code = "import '@inlang/paraglide-js-sveltekit/no-transforms'"
 		const config = initTestApp()
 		const transformed = transformJs("", config, code)
 		expect(transformed).toEqual(code)
@@ -30,7 +30,7 @@ describe("transformJs", () => {
 		)
 
 		expect(transformed).toMatchInlineSnapshot(`
-			"import { getRuntimeFromGlobalThis } from '@inlang/sdk-js/adapter-sveltekit/client/shared';
+			"import { getRuntimeFromGlobalThis } from '@inlang/paraglide-js-sveltekit/adapter-sveltekit/client/shared';
 			export const test = () => console.info(getRuntimeFromGlobalThis().i('hi'));"
 		`)
 	})

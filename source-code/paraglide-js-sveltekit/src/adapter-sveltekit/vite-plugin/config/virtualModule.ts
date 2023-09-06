@@ -12,14 +12,12 @@ import type { SdkConfig } from "../../../settings.js"
 import { getSvelteKitVersion } from "./utils/getSvelteKitVersion.js"
 import { shouldContentBePrerendered } from "./utils/shouldContentBePrerendered.js"
 import { getSettings } from "./utils/getSettings.js"
-import { createBasicInlangConfig } from "./utils/createBasicInlangConfig.js"
-import { createDemoResourcesIfNoMessagesExistYet } from "./utils/createDemoResourcesIfNoMessagesExistYet.js"
 import { doesPathExist } from "./utils/utils.js"
 import { getNodeishFs } from "./utils/getNodeishFs.js"
 
 type VersionString = `${number}.${number}.${number}${string}`
 
-export type TransformConfig = {
+export type VirtualModule = {
 	debug: boolean
 
 	sourceLanguageTag: LanguageTag
@@ -50,15 +48,15 @@ export const PATH_TO_CWD = process.cwd()
 export const PATH_TO_INLANG_CONFIG = resolve(PATH_TO_CWD, "./project.inlang.json")
 export const PATH_TO_SVELTE_CONFIG = resolve(PATH_TO_CWD, "./svelte.config.js")
 
-let transformConfig: Promise<TransformConfig> | undefined = undefined
+let VirtualModule: Promise<VirtualModule> | undefined = undefined
 
-export const initTransformConfig = async (): Promise<TransformConfig> => {
-	if (transformConfig) return transformConfig
+export const initVirtualModule = async (): Promise<VirtualModule> => {
+	if (VirtualModule) return VirtualModule
 
 	const nodeishFs = await getNodeishFs()
 
 	// eslint-disable-next-line no-async-promise-executor
-	return (transformConfig = new Promise<TransformConfig>(async (resolve, reject) => {
+	return (VirtualModule = new Promise<VirtualModule>(async (resolve, reject) => {
 		const inlang = await openInlangProject({ nodeishFs, projectFilePath: PATH_TO_INLANG_CONFIG })
 
 		const errors = inlang.errors()
@@ -66,21 +64,18 @@ export const initTransformConfig = async (): Promise<TransformConfig> => {
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			const error = errors[0]!
 			if (error instanceof ProjectFilePathNotFoundError) {
-				await createBasicInlangConfig(nodeishFs)
 				resetTransformConfig()
-				return resolve(initTransformConfig())
+				return resolve(initVirtualModule())
 			}
 
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			return reject(error)
 		}
 
-		await createDemoResourcesIfNoMessagesExistYet(inlang)
-
 		const settings = getSettings(inlang)
 		if (!settings) {
 			resetTransformConfig()
-			return resolve(initTransformConfig())
+			return resolve(initVirtualModule())
 		}
 		if (settings instanceof InlangSdkException) {
 			return reject(settings)
@@ -158,4 +153,4 @@ export const initTransformConfig = async (): Promise<TransformConfig> => {
 	}))
 }
 
-export const resetTransformConfig = () => (transformConfig = undefined)
+export const resetTransformConfig = () => (VirtualModule = undefined)

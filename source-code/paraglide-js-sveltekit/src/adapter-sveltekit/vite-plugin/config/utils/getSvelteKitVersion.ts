@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises"
-import { PATH_TO_CWD } from "../config.js"
+import { PATH_TO_CWD } from "../virtualModule.js"
 
 export const getSvelteKitVersion = async () => {
 	const packageName = "@sveltejs/kit"

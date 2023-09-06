@@ -1,5 +1,5 @@
 import path, { normalize } from "node:path"
-import type { TransformConfig } from "./config/index.js"
+import type { VirtualModule } from "./config/index.js"
 
 export type FileType =
 	| "hooks.server.js"
@@ -23,7 +23,7 @@ export type FileInformation = {
 const scriptExtensions = [".js", ".ts"]
 
 export const getFileInformation = (
-	config: TransformConfig,
+	config: VirtualModule,
 	rawId: string,
 ): FileInformation | undefined => {
 	const id = normalize(rawId)
@@ -127,7 +127,7 @@ export const getFileInformation = (
 
 // ------------------------------------------------------------------------------------------------
 
-export const filePathForOutput = (config: TransformConfig, path: string) => {
+export const filePathForOutput = (config: VirtualModule, path: string) => {
 	const relativePath = path.replace(config.cwdFolderPath, "")
 	return relativePath.startsWith("/") ? relativePath.slice(1) : relativePath
 }
