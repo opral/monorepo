@@ -1,14 +1,14 @@
-import { validateSdkConfig } from "./api.js"
 import type { Plugin } from "@inlang/plugin"
 import { ideExtensionConfig } from "./ideExtension/config.js"
+import { id, displayName, description } from "../marketplace-manifest.json"
 
 // ------------------------------------------------------------------------------------------------
 
 export const plugin: Plugin<{}> = {
 	meta: {
-		id: "plugin.inlang.paraglide",
-		displayName: { en: "Inlang Paraglide Plugin" },
-		description: { en: "Inlang Paraglide Plugin" },
+		id: id,
+		displayName,
+		description,
 	},
 	addCustomApi({ settings }) {
 		return {
