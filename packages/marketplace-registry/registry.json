@@ -11,6 +11,6 @@
 	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/lint-rules/messageWithoutSource/marketplace-manifest.json",
 	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/lint-rules/missingTranslation/marketplace-manifest.json",
 	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/versioned-interfaces/language-tag/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/paraglide/marketplace-manifest.json",
+	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/paraglide-js-sveltekit/marketplace-manifest.json",
 	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/versioned-interfaces/translatable/marketplace-manifest.json"
 ]
