@@ -10,6 +10,7 @@ import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"
 import { Message } from "./Message.jsx"
+import { Icon } from "#src/components/Icon.jsx"
 
 export function Page() {
 	return (
@@ -130,31 +131,50 @@ function TheActualPage() {
 					</div>
 				</Match>
 				<Match when={inlang()?.errors().length !== 0 && inlang()}>
-					<p class="text-danger pb-2">An error occurred while initializing the project file:</p>
-					<ul class="text-danger">
-						{inlang()?.errors().length !== 0 && (
-							<For each={inlang()?.errors()}>
-								{(error) => {
-									return (
-										<li class="pt-2 md:w-[600px]">
-											<span class="font-semibold">{error.name}: </span>
-											<br />
-											{error?.message}
-											{error.cause.message && <p>({error.cause.message})</p>}
-											{error?.stack && (
-												<div class="text-sm">
+					<div class="w-full h-full flex flex-col items-center justify-center gap-16">
+						<div class="pt-24">
+							<p class="pb-2 text-lg font-medium">
+								An error occurred while initializing the project file:
+							</p>
+							<ul>
+								{inlang()?.errors().length !== 0 && (
+									<For each={inlang()?.errors()}>
+										{(error) => {
+											console.log(error.cause)
+											return (
+												<li class="pt-2 md:w-[600px]">
+													<div class="bg-danger text-background p-4 rounded-md flex items-center gap-4 mb-8">
+														<Icon name="danger" class="w-7 h-7" />
+														<div>
+															<span class="font-semibold">{error.name}: </span>
+															<br />
+															{error?.message}
+														</div>
+													</div>
+													{error.cause.message && (
+														<>
+															<p class="text-surface-500 text-sm mb-1">Error cause</p>
+															<div class="font-mono p-4 bg-surface-800 text-background rounded-md text-sm mb-8">
+																<p><span class="font-semibold text-hover-danger">> </span>({error.cause.message})</p>
+															</div>
+														</>
+													)}
+													{error?.stack && (
+														<div class="text-sm text-danger">
+															<br />
+															<span class="font-semibold">Stack trace: </span>
+															<p>{error?.stack}</p>
+														</div>
+													)}
 													<br />
-													<span class="font-semibold">Stack trace: </span>
-													<p>{error?.stack}</p>
-												</div>
-											)}
-											<br />
-										</li>
-									)
-								}}
-							</For>
-						)}
-					</ul>
+												</li>
+											)
+										}}
+									</For>
+								)}
+							</ul>
+						</div>
+					</div>
 				</Match>
 				<Match when={!doesInlangConfigExist()}>
 					<NoInlangConfigFoundCard />
