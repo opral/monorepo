@@ -9,10 +9,11 @@ import prettierPluginTS from "prettier/plugins/typescript.mjs"
 import prettierPluginEsTree from "prettier/plugins/estree.mjs"
 
 function parseDirtyValue(jsString: string) {
-	let normalized = jsString.trim().replaceAll(`'`, `"`)
+	let normalized = jsString.trim()
 	if (normalized.endsWith(",")) {
 		normalized = normalized.slice(0, -1)
 	}
+
 	return JSON.parse(normalized)
 }
 
@@ -66,7 +67,8 @@ export async function migrateProjectConfig(args: {
 		for (const searchKey of Object.keys(searchMapping)) {
 			if (line.includes(searchKey)) {
 				try {
-					const [_, dirtyValue] = line.split(":")
+					const [_, ...rest] = line.split(":")
+					const dirtyValue = rest.join(":")
 					if (dirtyValue) {
 						const extracted = parseDirtyValue(dirtyValue)
 						const newKey = searchMapping[searchKey]

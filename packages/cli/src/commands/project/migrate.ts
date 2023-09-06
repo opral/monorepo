@@ -38,13 +38,7 @@ export async function migrateCommandAction(args: {
 		}
 	}
 
-	await prompts({
-		type: "confirm",
-		name: "autoConfig",
-		message:
-			"Whe try a best effort migration for your old inlang configuration, please double check the result and manually fix what could not be auto-migrated, then delete the old file.",
-		initial: true,
-	})
+  args.logger.info(`Trying a best effort migration for your old inlang configuration...`)
 
 	const { warnings } = await migrateProjectConfig({
 		nodeishFs: args.nodeishFs,
@@ -53,5 +47,7 @@ export async function migrateCommandAction(args: {
 
 	for (const warning of warnings) args.logger.warn(warning)
 
-	args.logger.info(`✅ Successfully created your inlang configuration at: ${inlangConfigFilePath}`)
+	args.logger.info(
+		`✅ Successfully created your inlang configuration at: ${inlangConfigFilePath},\nplease double check the result and manually fix what could not be auto-migrated, then delete the old file.`,
+	)
 }
