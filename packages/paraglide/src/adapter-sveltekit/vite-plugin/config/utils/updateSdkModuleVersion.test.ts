@@ -25,7 +25,7 @@ const getMockedConfig = (...modules: string[]): ProjectConfig => ({
 	sourceLanguageTag: "en",
 	languageTags: ["en"],
 	settings: { "plugin.inlang.json": { pathPattern: "{languageTag}.json" } },
-	modules: ["plugin-json-mock", ...modules],
+	modules: ["https://cdn.com/@inlang/plugin-json@3/index.js", ...modules],
 })
 
 const openMockedInlangProject = async (fs: NodeishFilesystemSubset): Promise<InlangProject> => {
@@ -48,7 +48,8 @@ const openMockedInlangProject = async (fs: NodeishFilesystemSubset): Promise<Inl
 		projectFilePath: "./project.inlang.json",
 		_import: async (url) =>
 			({
-				default: url === "plugin-json-mock" ? mockPlugin : ({} as Plugin),
+				default:
+					url === "https://cdn.com/@inlang/plugin-json@3/index.js" ? mockPlugin : ({} as Plugin),
 			} satisfies InlangModule),
 	})
 }
@@ -80,11 +81,18 @@ describe("updateSdkModuleVersion", () => {
 		const fs = createNodeishMemoryFs()
 		await fs.writeFile(
 			"./project.inlang.json",
-			JSON.stringify(
-				getMockedConfig(`https://cdn.com/@inlang/plugin-paraglide@${version}/index.js`),
-			),
+			JSON.stringify(getMockedConfig(`https://cdn.com/@inlang/plugin-paraglide@0/index.js`)),
 		)
+
 		const inlang = await openMockedInlangProject(fs)
+
+		// @ts-ignore
+		console.log("errors", inlang.errors()[0].cause)
+
+		for (const error of inlang.errors()) {
+			// @ts-ignore
+			console.log("error", error.cause.message)
+		}
 
 		const updated = await updateSdkModuleVersion(inlang)
 		expect(updated).toBe(false)
@@ -165,7 +173,7 @@ describe("standaloneUpdateSdkModuleVersion", () => {
 	it("should not do anything if version is already identical", async () => {
 		const fs = createNodeishMemoryFs()
 		await fs.mkdir(PATH_TO_INLANG_CONFIG, { recursive: true })
-		const config = getMockedConfig(`https://cdn.com/@inlang/plugin-paraglide@${version}/index.js`)
+		const config = getMockedConfig(`https://cdn.com/@inlang/plugin-paraglide@0/index.js`)
 		await fs.writeFile(PATH_TO_INLANG_CONFIG, JSON.stringify(config))
 
 		vi.mocked(openInlangProject).mockImplementationOnce(

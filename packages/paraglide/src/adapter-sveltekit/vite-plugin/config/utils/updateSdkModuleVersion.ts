@@ -10,6 +10,8 @@ import { version } from "../../../../../package.json"
  */
 export const updateSdkModuleVersion = async (inlang: InlangProject): Promise<boolean> => {
 	const config = inlang.config()!
+	console.log("config", config)
+
 	const paraglidePluginModule = config.modules.find((module) =>
 		module.includes("plugin.inlang.paraglideJs"),
 	)
@@ -21,7 +23,7 @@ export const updateSdkModuleVersion = async (inlang: InlangProject): Promise<boo
 	if (usedVersion === version) return false
 
 	// TODO: check for correct link
-	const newModule = `https://cdn.jsdelivr.net/npm/@inlang/paraglide-js@${version}/dist/index.js`
+	const newModule = `https://cdn.jsdelivr.net/npm/@inlang/paraglide-js/dist/index.js`
 	inlang.setConfig({
 		...config,
 		modules: config.modules.map((module) =>
