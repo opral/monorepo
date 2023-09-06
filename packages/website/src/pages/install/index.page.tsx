@@ -234,7 +234,7 @@ function OptIn(props: { modules: string[] }) {
 				<p class="text-surface-500 text-center">
 					The config in your repository will be updated to include the module you selected:
 				</p>
-				<ul class="font-medium font-mono text-sm  bg-success/10 p-2 rounded-md">
+				<ul class="font-medium font-mono text-sm bg-success/10 p-2 rounded-md">
 					<For each={props.modules}>
 						{(module) => (
 							<li class="truncate text-success">
@@ -324,18 +324,40 @@ function ShowError() {
 						? "Module already installed"
 						: "Something went wrong"}
 				</h2>
-				<p class="text-surface-500 text-center mb-4">{step().message}</p>
-				<Button
-					// eslint-disable-next-line solid/reactivity
-					function={() => {
-						step().type === "no-modules"
-							? setSearchParams("/marketplace")
-							: window.location.reload()
-					}}
-					type="secondary"
+				<p class="text-surface-500 text-center mb-6">{step().message}</p>
+				<Show
+					when={step().type === "already-installed"}
+					fallback={
+						<Button
+							// eslint-disable-next-line solid/reactivity
+							function={() => {
+								setSearchParams("/marketplace")
+							}}
+							type="primary"
+						>
+							Browse modules
+						</Button>
+					}
 				>
-					{step().type === "no-modules" ? "Browse modules" : "Try again"}
-				</Button>
+					<div class="flex items-center gap-6">
+						<Button
+							function={() => {
+								window.location.reload()
+							}}
+							type="primary"
+						>
+							Try again
+						</Button>
+						<Button
+							function={() => {
+								setSearchParams(`/marketplace`)
+							}}
+							type="text"
+						>
+							Cancel
+						</Button>
+					</div>
+				</Show>
 			</div>
 		</SetupCard>
 	)
