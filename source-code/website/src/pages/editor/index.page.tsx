@@ -70,9 +70,19 @@ export function Page() {
 						class="relative w-full md:w-[600px] flex items-center group mt-4"
 						onSubmit={(event) => navigateToEditor(event)}
 					>
-						<div class="pl-5 pr-2 gap-2 relative z-10 flex items-center w-full border border-surface-200 bg-background rounded-lg focus-within:border-primary transition-all ">
+						<div
+							class={
+								"pl-5 pr-2 gap-2 relative z-10 flex items-center w-full border border-surface-200 bg-background rounded-lg transition-all " +
+								(!isValidUrl() && input().length > 0
+									? "focus-within:border-danger"
+									: "focus-within:border-primary")
+							}
+						>
 							<input
-								class="active:outline-0 focus:outline-0 focus:ring-0 border-0 h-14 grow placeholder:text-surface-500 placeholder:font-normal placeholder:text-base"
+								class={
+									"active:outline-0 focus:outline-0 focus:ring-0 border-0 h-14 grow placeholder:text-surface-500 placeholder:font-normal placeholder:text-base " +
+									(!isValidUrl() && input().length > 0 ? "text-danger" : "text-surface-800")
+								}
 								placeholder="Enter repository url ..."
 								onInput={(event) => {
 									// @ts-ignore
@@ -84,6 +94,11 @@ export function Page() {
 								}}
 								on:sl-change={() => (isValidUrl() ? navigateToEditor : undefined)}
 							/>
+							{!isValidUrl() && input().length > 0 && (
+								<p class="text-xs text-danger font-medium pr-1 max-sm:hidden">
+									Please enter a valid URL
+								</p>
+							)}
 							<button
 								disabled={isValidUrl() === false}
 								onClick={(event) => navigateToEditor(event)}
@@ -91,6 +106,7 @@ export function Page() {
 									(isValidUrl()
 										? "bg-surface-800 text-background hover:bg-on-background"
 										: "bg-background text-surface-600 border") +
+									(!isValidUrl() && input().length > 0 ? " cursor-not-allowed" : "") +
 									" flex justify-center items-center h-10 relative rounded-md px-4 border-surface-200 transition-all duration-100 text-sm font-medium"
 								}
 							>
