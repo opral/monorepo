@@ -192,8 +192,8 @@ async function main(args: {
 	linterDiagnostics(args)
 
 	// try to delete old config file (inlang.config.js)
-	// TODO: remove this in the future (Nov/Dec 2023)
-	await deleteOldConfigFile()
+	// TODO: use this function in a few months (Nov/Dec 2023)
+	// await deleteOldConfigFile()
 
 	// migrate project config from inlang.config.js to project.inlang.json
 	await migrateConfigFile(workspaceFolder, closestProjectFilePathUri)
