@@ -15,7 +15,7 @@ import { tryCatch } from "@inlang/result"
 const whitelistedPlugins = [
 	"plugin.inlang.json",
 	"plugin.inlang.i18next",
-	"plugin.inlang.paraglideJs",
+	"plugin.inlang.paraglide",
 ]
 // @ts-ignore - type mismatch error
 const PluginCompiler = TypeCompiler.Compile(Plugin)

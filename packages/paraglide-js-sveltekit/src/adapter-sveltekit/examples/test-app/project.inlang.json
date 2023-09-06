@@ -9,7 +9,7 @@
 		"plugin.inlang.json": {
 			"pathPattern": "./languages/{languageTag}.json"
 		},
-		"plugin.inlang.paraglideJs": {
+		"library.inlang.paraglideJs": {
 			"languageNegotiation": {
 				"strategies": [
 					{
