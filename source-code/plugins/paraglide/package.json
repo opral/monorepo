@@ -19,9 +19,10 @@
 	"scripts": {
 		"dev": "inlang module build --entry ./src/index.ts --outdir ./dist --watch",
 		"build": "inlang module build --entry ./src/index.ts --outdir ./dist",
-		"---- TEST ----------------------------------------------------------": "",
-		"test": "tsc --noEmit --emitDeclarationOnly false && vitest run --passWithNoTests --coverage",
-		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
+		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"lint": "eslint ./src --fix",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"devDependencies": {
 		"@inlang/cli": "*",
