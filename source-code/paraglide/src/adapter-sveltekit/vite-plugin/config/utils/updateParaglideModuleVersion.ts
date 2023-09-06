@@ -22,7 +22,7 @@ export const updateParaglideModuleVersion = async (inlang: InlangProject): Promi
 	if (usedVersion === version) return false
 
 	// TODO: check for correct link
-	const newModule = `https://cdn.jsdelivr.net/npm/@inlang/paraglide-js/dist/index.js`
+	const newModule = `https://cdn.jsdelivr.net/npm/@inlang/plugin-paraglide/dist/index.js`
 	inlang.setConfig({
 		...config,
 		modules: config.modules.map((module) =>
