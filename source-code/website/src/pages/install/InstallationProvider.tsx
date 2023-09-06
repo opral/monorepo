@@ -201,7 +201,7 @@ async function initializeRepo(
 		if (installedModules) {
 			setStep({
 				type: "already-installed",
-				message: "The modules are already installed in your repository.",
+				message: "The module is already installed in your repository.",
 				error: true,
 			})
 		}
