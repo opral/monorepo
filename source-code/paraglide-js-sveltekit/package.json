@@ -30,7 +30,7 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/sdk": "*",
+		"@inlang/sdk": "0.0.0",
 		"ts-morph": "^19.0.0",
 		"typescript": "^5.1.6"
 	},
@@ -48,6 +48,7 @@
 		"solid-js": "^1.7.11",
 		"svelte": "3.54.0",
 		"tsd": "0.29.0",
+		"valibot": "0.13.1",
 		"vitefu": "^0.2.4"
 	},
 	"peerDependencies": {
