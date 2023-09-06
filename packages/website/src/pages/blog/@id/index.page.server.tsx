@@ -45,7 +45,10 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => 
 	if (import.meta.env.DEV) {
 		await generateIndexAndTableOfContents()
 	}
-	if (!Object.keys(index).includes(pageContext.urlPathname)) {
+	if (
+		!Object.keys(index).includes(pageContext.urlPathname) &&
+		pageContext.urlPathname !== "/blog"
+	) {
 		throw RenderErrorPage({ pageContext: { is404: true } })
 	}
 	return {
