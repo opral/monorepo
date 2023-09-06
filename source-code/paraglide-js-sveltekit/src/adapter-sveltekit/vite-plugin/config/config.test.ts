@@ -44,7 +44,7 @@ it("should cache config creation", async () => {
 				setConfig: () => undefined,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
 				customApi: () => ({
-					"plugin.inlang.paraglideJs": validateSdkConfig({
+					"plugin.inlang.paraglide": validateSdkConfig({
 						languageNegotiation: { strategies: [{ type: "url" }] },
 					}),
 				}),
@@ -84,7 +84,7 @@ it("should create an inlang config file if no config is present yet", async () =
 				setConfig: () => undefined,
 				query: { messages: createMessagesQuery(() => [createMessage("hi", { en: "hello" })]) },
 				customApi: () => ({
-					"plugin.inlang.paraglideJs": validateSdkConfig({
+					"plugin.inlang.paraglide": validateSdkConfig({
 						languageNegotiation: { strategies: [{ type: "url" }] },
 					}),
 				}),
@@ -166,7 +166,7 @@ it("should add the sdk plugin module if not present yet", async () => {
 	expect(setConfig).toHaveBeenNthCalledWith(1, {
 		modules: ["../../../../../../plugins/paraglide/dist/index.js"],
 		settings: {
-			"library.inlang.paraglide": {
+			"library.inlang.paraglideJs": {
 				languageNegotiation: {
 					strategies: [
 						{
