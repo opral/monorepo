@@ -169,7 +169,7 @@ function TheActualPage() {
 																	<span class="font-semibold text-hover-danger">{"> "}</span>
 																	{error?.stack}
 																</p>
-														</div>
+															</div>
 														</>
 													)}
 													<br />
