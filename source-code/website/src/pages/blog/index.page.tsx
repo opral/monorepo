@@ -15,10 +15,10 @@ export function Page(props: PageProps) {
 
 	return (
 		<>
-			<Title>inlang Blog - Developer-first localization infrastructure.</Title>
+			<Title>inlang Blog - Globalization infrastructure for software</Title>
 			<Meta
 				name="description"
-				content="Posts that revolve around inlang, git, and localization (i18n)."
+				content="Posts that revolve around inlang, git, and globalization (i18n)."
 			/>
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<Layout>
