@@ -1,5 +1,6 @@
 import type { MarketplaceManifest } from "./interface.js"
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const app: MarketplaceManifest = {
 	// @ts-expect-error - if wrong type is used
 	type: "package",

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, expect, it } from "vitest"
 import { resolvePlugins } from "./resolvePlugins.js"
 import {

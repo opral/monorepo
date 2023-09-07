@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect } from "vitest"
 import type { ImportFunction } from "../resolve-modules/index.js"
 import { createEffect, from, createRoot } from "../reactivity/solid.js"
@@ -109,6 +110,7 @@ describe("config", () => {
 			counter += 1
 		})
 
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const newConfig = { ...inlang.config()!, languageTags: ["en", "de"] }
 
 		inlang.setConfig(newConfig)

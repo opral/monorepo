@@ -12,6 +12,7 @@ export function Icon(
 			slot?: string
 		},
 ) {
+	// eslint-disable-next-line solid/reactivity
 	const ICON = lazy(() => icons[props.name])
 	return (
 		// Suspense is required since the icons are lazy loaded.

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest"
+import { describe, it } from "vitest"
 
 describe("init a new project configuration", () => {
 	it("fails on existing", () => {

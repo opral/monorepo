@@ -1,4 +1,4 @@
-import Markdoc, { type ValidationError } from "@markdoc/markdoc"
+import Markdoc from "@markdoc/markdoc"
 import type { TSchema } from "@sinclair/typebox"
 import { Value } from "@sinclair/typebox/value"
 import { parse as parseYaml } from "yaml"

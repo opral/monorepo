@@ -10,7 +10,7 @@ export const plugin: Plugin = {
 		displayName,
 		description,
 	},
-	addCustomApi({ settings }) {
+	addCustomApi() {
 		return {
 			"app.inlang.ideExtension": ideExtensionConfig(),
 		}

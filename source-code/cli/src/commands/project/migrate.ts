@@ -4,7 +4,6 @@ import type { NodeishFilesystem } from "@lix-js/fs"
 import fs from "node:fs/promises"
 import { migrateProjectConfig } from "@inlang/create-project"
 import path from "node:path"
-import prompts from "prompts"
 
 export const migrate = new Command()
 	.command("migrate")

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Command } from "commander"
 import { rpc } from "@inlang/rpc"
 import { getInlangProject } from "../../utilities/getInlangProject.js"

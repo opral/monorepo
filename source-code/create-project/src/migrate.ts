@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { NodeishFilesystem } from "@lix-js/fs"
 import { ProjectConfig } from "@inlang/project-config"
 import { pluginUrls, standardLintRules, type PluginId } from "./tryAutoGenModuleConfig.js"
@@ -85,14 +86,14 @@ export async function migrateProjectConfig(args: {
 	let legacyConfigFun
 	if (typeof process !== "undefined") {
 		legacyConfigFun = (
-			await import(args.pathJoin(process.cwd(), "./inlang.config.js")).catch((err) => {
-				return { defineConfig: null }
+			await import(args.pathJoin(process.cwd(), "./inlang.config.js")).catch(() => {
+				return { defineConfig: undefined }
 			})
 		).defineConfig
 	}
 	if (!legacyConfigFun) {
 		// fallback to eval if we cannot use the current directory dynamic import in node (eg. if we use this in the editor)
-		legacyConfigFun = okEval(legacyConfig!.replace("export ", "(") + ")")
+		legacyConfigFun = okEval(legacyConfig?.replace("export ", "(") + ")")
 	}
 
 	const pluginSettings: Record<string, any> = {}
@@ -169,7 +170,10 @@ function lineParsing(
 					if (dirtyValue) {
 						const extracted = parseDirtyValue(dirtyValue)
 						const newKey = searchMapping[searchKey]
-						extractions[newKey!] = extracted
+						if (newKey === undefined) {
+							throw Error("Could not auto migrate line " + index + ": " + line)
+						}
+						extractions[newKey] = extracted
 					} else {
 						parseErrors.push(`Could not auto migrate line ${index}: "${line}"`)
 					}

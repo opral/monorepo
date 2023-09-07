@@ -44,7 +44,7 @@ function capture(args: CaptureEventArguments) {
 		...args,
 		distinctId: "unknown",
 		groups: {
-			repository: gitOrigin!,
+			repository: gitOrigin,
 		},
 	})
 }

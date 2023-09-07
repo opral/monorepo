@@ -13,11 +13,10 @@ describe("main workflow", () => {
 		{ time: 50 },
 	)
 
-	let file
 	bench(
 		"file is lazy fetched upon first access",
 		async () => {
-			file = await repository.nodeishFs.readFile("./inlang.config.js", { encoding: "utf-8" })
+			await repository.nodeishFs.readFile("./inlang.config.js", { encoding: "utf-8" })
 		},
 		{ time: 100 },
 	)

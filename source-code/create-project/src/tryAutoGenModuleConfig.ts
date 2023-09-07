@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { ProjectConfig } from "@inlang/project-config"
 import { getLanguageFolderPath } from "./getLanguageFolderPath.js"
