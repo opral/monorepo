@@ -4,7 +4,7 @@ import { id, displayName, description } from "../marketplace-manifest.json"
 
 // ------------------------------------------------------------------------------------------------
 
-export const plugin: Plugin<{}> = {
+export const plugin: Plugin = {
 	meta: {
 		id: id,
 		displayName,
