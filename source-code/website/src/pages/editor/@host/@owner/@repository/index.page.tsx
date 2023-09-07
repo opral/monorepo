@@ -155,18 +155,22 @@ function TheActualPage() {
 															<p class="text-surface-500 text-sm mb-1">Error cause</p>
 															<div class="font-mono p-4 bg-surface-800 text-background rounded-md text-sm mb-8">
 																<p>
-																	<span class="font-semibold text-hover-danger">{"> "}</span>(
-																	{error.cause.message})
+																	<span class="font-semibold text-hover-danger">{"> "}</span>
+																	{error.cause.message}
 																</p>
 															</div>
 														</>
 													)}
 													{error?.stack && (
-														<div class="text-sm text-danger">
-															<br />
-															<span class="font-semibold">Stack trace: </span>
-															<p>{error?.stack}</p>
+														<>
+															<p class="text-surface-500 text-sm mb-1">Stack trace</p>
+															<div class="font-mono p-4 bg-surface-800 text-background rounded-md text-sm mb-8 break-words">
+																<p>
+																	<span class="font-semibold text-hover-danger">{"> "}</span>
+																	{error?.stack}
+																</p>
 														</div>
+														</>
 													)}
 													<br />
 												</li>
