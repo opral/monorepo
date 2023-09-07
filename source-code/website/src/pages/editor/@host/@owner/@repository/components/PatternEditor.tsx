@@ -306,12 +306,13 @@ export function PatternEditor(props: {
 		const notifications: Array<Notification> = []
 		props.lintReports.map((report) => {
 			if (report.messageId === props.message.id && report.languageTag === props.languageTag) {
+				const messageLintRuleName = inlang()?.installed.messageLintRules()
+					.find((rule) => rule.meta.id === report.ruleId)?.meta.displayName
 				notifications.push({
 					notificationTitle:
-						inlang()
-							?.installed.messageLintRules()
-							.find((rule) => rule.meta.id === report.ruleId)?.meta.displayName.en || report.ruleId,
-					notificationDescription: report.body.en,
+						typeof messageLintRuleName === "object" ?
+							messageLintRuleName.en : messageLintRuleName || report.ruleId,
+					notificationDescription: typeof report.body === "object" ? report.body.en : report.body,
 					notificationType: report.level,
 				})
 			}

@@ -83,7 +83,12 @@ export const ListHeader = (props: ListHeaderProps) => {
 								}
 							>
 								<sl-tooltip
-									prop:content={getLintRule(lintRule)?.meta.description.en}
+									prop: content={
+										typeof getLintRule(lintRule)?.meta.description === "object" ?
+											// @ts-ignore
+											getLintRule(lintRule)?.meta.description.en :
+											getLintRule(lintRule)?.meta.description
+									}
 									prop:placement="bottom"
 									prop:trigger="hover"
 									class="small"
@@ -130,8 +135,10 @@ export const ListHeader = (props: ListHeaderProps) => {
 											</div>
 
 											<div class="text-xs text-on-surface-variant font-medium">
-												{getLintRule(lintRule)?.meta.displayName.en ||
-													getLintRule(lintRule)?.meta.id}
+												{typeof getLintRule(lintRule)?.meta.displayName === "object" ?
+													// @ts-ignore
+													getLintRule(lintRule)?.meta.displayName.en :
+													getLintRule(lintRule)?.meta.displayName}
 											</div>
 										</div>
 									</sl-button>

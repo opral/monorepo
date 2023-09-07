@@ -508,7 +508,8 @@ function LintFilter(props: { clearFunction: any }) {
 				>
 					{(lintRule) => (
 						<sl-option prop:value={lintRule.meta.id}>
-							{lintRule.meta.displayName.en || lintRule.meta.id}
+							{typeof lintRule.meta.displayName === "object" ?
+								lintRule.meta.displayName.en : lintRule.meta.displayName}
 						</sl-option>
 					)}
 				</For>

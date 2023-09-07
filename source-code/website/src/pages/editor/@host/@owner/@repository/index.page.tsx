@@ -139,7 +139,7 @@ function TheActualPage() {
 							<ul>
 								{inlang()?.errors().length !== 0 && (
 									<For each={inlang()?.errors()}>
-										{(error) => {
+										{(error: any) => {
 											return (
 												<li class="pt-2 md:w-[600px]">
 													<div class="bg-danger text-background p-4 rounded-md flex items-center gap-4 mb-8">
@@ -154,7 +154,12 @@ function TheActualPage() {
 														<>
 															<p class="text-surface-500 text-sm mb-1">Error cause</p>
 															<div class="font-mono p-4 bg-surface-800 text-background rounded-md text-sm mb-8">
-																<p>({error.cause.message})</p>
+																<p>
+																	<span class="font-semibold text-hover-danger">
+																		{"> "}
+																	</span>
+																	({error.cause.message})
+																</p>
 															</div>
 														</>
 													)}
