@@ -17,7 +17,7 @@ import type {
 const config: ProjectConfig = {
 	sourceLanguageTag: "en",
 	languageTags: ["en"],
-	modules: ["plugin.js", "plugin.js"],
+	modules: ["plugin.js", "plugin2.js"],
 	settings: {
 		"project.messageLintRuleLevels": {
 			"messageLintRule.inlang.missingTranslation": "error",
@@ -91,7 +91,7 @@ const $import: ImportFunction = async (name) => ({
 // ------------------------------------------------------------------------------------------------
 
 describe("config", () => {
-	it("should react to changes to config", async () => {
+	it("should react to changes in config", async () => {
 		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 		const inlang = solidAdapter(
@@ -102,6 +102,7 @@ describe("config", () => {
 			}),
 			{ from },
 		)
+		console.log(await fs.readFile("./project.inlang.json", { encoding: "utf-8" }))
 
 		let counter = 0
 		createEffect(() => {
@@ -110,11 +111,12 @@ describe("config", () => {
 		})
 
 		const newConfig = { ...inlang.config()!, languageTags: ["en", "de"] }
-		inlang.setConfig(newConfig)
+		console.log(newConfig)
 
+		inlang.setConfig(newConfig)
+		console.log(inlang.config())
 		// TODO: how can we await `setConfig` correctly
 		await new Promise((resolve) => setTimeout(resolve, 0))
-
 		expect(counter).toBe(2) // 2 times because effect creation + set
 		expect(inlang.config()).toStrictEqual(newConfig)
 	})
@@ -156,7 +158,7 @@ describe("installed", () => {
 })
 
 describe("messages", () => {
-	it("should react to changes to config", async () => {
+	it("should react to changes in config", async () => {
 		const fs = createNodeishMemoryFs()
 		const mockConfig: ProjectConfig = {
 			sourceLanguageTag: "en",
@@ -217,7 +219,7 @@ describe("messages", () => {
 		expect(Object.values(inlang.query.messages.getAll()).length).toBe(0)
 	})
 
-	it("should react to changes to messages", async () => {
+	it("should react to changes in messages", async () => {
 		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 		const inlang = solidAdapter(
@@ -277,7 +279,7 @@ describe("messages", () => {
 })
 
 describe("lint", () => {
-	it.todo("should react to changes to config", async () => {
+	it.todo("should react to changes in config", async () => {
 		await createRoot(async () => {
 			const fs = createNodeishMemoryFs()
 			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
