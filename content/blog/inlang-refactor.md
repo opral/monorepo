@@ -6,7 +6,7 @@ description: We're thrilled to introduce the Inlang refactor, a major milestone 
 
 # Refactoring Inlang: Elevating Localization to New Heights
 
-The world of software development is constantly evolving, and so is Inlang. Over the last couple of months we talked to you, our early users, very carefully – and you told us about your challenges with i18n & globalization. And we heard you! We're thrilled to introduce the Inlang refactor, a major milestone in our journey towards making localization simpler, more powerful, and more accessible than ever before. In this blog post, we'll take a deep dive into the exciting changes and enhancements that Inlang 2.0 brings to the table.
+The world of software development is constantly evolving, and so is Inlang. Over the last couple of months we talked to you, our early users, very carefully – and you told us about your challenges with i18n & globalization. And we heard you! We're thrilled to introduce the Inlang refactor, a major milestone in our journey towards making localization simpler, more powerful, and more accessible than ever before. In this blog post, we'll take a deep dive into the exciting changes and enhancements that the new Inlang architecture brings to the table.
 
 ## **Revamped Architecture: More Customizable, More Reactive**
 
