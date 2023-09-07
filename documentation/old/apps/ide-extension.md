@@ -62,7 +62,7 @@ Translations from the resource files are automatically updated when you change t
 
 ## Installation
 
-Create a `inlang.config.js` in the **root** of your project. You can use the following template when using json files as translation files; if not, please look for other [supported resource file types](https://github.com/inlang/ecosystem#resources):
+Create a `inlang.config.js` in the **root** of your project. You can use the following template when using json files as translation files; if not, please look for other [supported resource file types](https://inlang.com/marketplace):
 
 ```js
 export async function defineConfig(env) {
