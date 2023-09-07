@@ -102,7 +102,6 @@ describe("config", () => {
 			}),
 			{ from },
 		)
-		console.log(await fs.readFile("./project.inlang.json", { encoding: "utf-8" }))
 
 		let counter = 0
 		createEffect(() => {
@@ -111,10 +110,8 @@ describe("config", () => {
 		})
 
 		const newConfig = { ...inlang.config()!, languageTags: ["en", "de"] }
-		console.log(newConfig)
 
 		inlang.setConfig(newConfig)
-		console.log(inlang.config())
 		// TODO: how can we await `setConfig` correctly
 		await new Promise((resolve) => setTimeout(resolve, 0))
 		expect(counter).toBe(2) // 2 times because effect creation + set
