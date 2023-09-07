@@ -1,9 +1,6 @@
-name: Lint Code
+name: Auto format code to avoid merge conflicts
 
 on:
-  pull_request:
-    branches:
-      - "main"
   push:
     branches:
       - "main"
@@ -25,24 +22,9 @@ jobs:
           node-version: 18
           cache: "npm"
 
-      - run: npm install
+      - run: npm ci
 
-      - name: run formatters
-        run: npm run format
-
-      - name: run linters
-        run: npm run lint
-
-      # - name: run link checker
-      #   uses: lycheeverse/lychee-action@v1.8.0
-      #   with:
-      #     args: --verbose --no-progress './documentation/**/*.md' './README.md'
-      #     fail: true
-      #   env:
-      #     GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-      - name: run inlang lint
-        run: npx @inlang/cli@latest lint
+      - run: npm run format
 
       - name: commit & push changes
         uses: stefanzweifel/git-auto-commit-action@v4
