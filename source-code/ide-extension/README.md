@@ -48,7 +48,7 @@ Translations from the resource files are automatically updated when you change t
 
 ## 1️⃣ Setup
 
-Create a `project.inlang.json` in the **root** of your project. You can use the following template when using json files as translation files, if not, please look for other [supported resource file types](https://github.com/inlang/ecosystem#resources):
+Create a `project.inlang.json` in the **root** of your project. You can use the following template when using json files as translation files, if not, please look for other [supported resource file types](https://inlang.com/marketplace):
 
 ```js
 export async function defineConfig(env) {

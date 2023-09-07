@@ -23,8 +23,8 @@ export async function defineConfig(env) {
 	return {
 		sourceLanguageTag: "en",
 		plugins: [
-			// ... other plugins e.g. to read and write Resources
-			// see https://github.com/inlang/ecosystem#resources
+			// ... other plugins e.g. to read and write messages
+			// see https://inlang.com/marketplace
 			sdkPlugin({
 				languageNegotiation: {
 					strategies: [{ type: "localStorage" }],
