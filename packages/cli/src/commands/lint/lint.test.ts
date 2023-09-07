@@ -82,7 +82,7 @@ async function setupInlang(enabledLintRule?: MessageLintRule) {
 
 	const _import = async (name: string) => {
 		if (name === "lintRule.js") {
-			return { default: enabledLintRule! } satisfies InlangModule
+			return { default: enabledLintRule as MessageLintRule } satisfies InlangModule
 		}
 		return {
 			default: _mockPlugin,

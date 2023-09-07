@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { ResolvePluginsFunction } from "./types.js"
 import { Plugin } from "@inlang/plugin"
 import {

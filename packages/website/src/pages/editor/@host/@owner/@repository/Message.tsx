@@ -103,7 +103,7 @@ export function Message(props: { id: string }) {
 						inlang()?.config()?.sourceLanguageTag!,
 					)}
 				>
-					{(languageTag, index) => {
+					{(languageTag) => {
 						return (
 							<>
 								<Show

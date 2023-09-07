@@ -54,7 +54,7 @@ Promise<Result<Message, string>> {
 				copy.variants.push({
 					languageTag: targetLanguageTag,
 					match: variant.match,
-					pattern: deserializePattern(translation, placeholderMetadata),
+					pattern: deserializePattern(translation),
 				})
 			}
 		}
@@ -106,10 +106,7 @@ function serializePattern(
 	return result
 }
 
-function deserializePattern(
-	text: string,
-	placeholderMetadata: PlaceholderMetadata,
-): Message["variants"][number]["pattern"] {
+function deserializePattern(text: string): Message["variants"][number]["pattern"] {
 	const result: Message["variants"][number]["pattern"] = []
 	// google translate espaces quotes, need to replace the escaped stuff
 	const unescapedText = text.replaceAll("&quot;", '"').replaceAll("&#39;", "'")

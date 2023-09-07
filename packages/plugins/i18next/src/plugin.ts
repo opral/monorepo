@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { Message, Variant, LanguageTag, Plugin, NodeishFilesystemSubset } from "@inlang/plugin"
 import { throwIfInvalidSettings, type PluginSettings } from "./settings.js"
 import { detectJsonSpacing, detectIsNested, replaceAll } from "./utilities.js"

@@ -8,7 +8,7 @@ export function NewsletterForm() {
 	const [email, setEmail] = createSignal("")
 	const [loading, setLoading] = createSignal(false)
 
-	const fetchSubscriber = async (email: any) => {
+	const fetchSubscriber = async () => {
 		setLoading(true)
 		const response = {} as any
 		if (response === "already subscribed") {
@@ -67,7 +67,7 @@ export function NewsletterForm() {
 			return
 		}
 
-		fetchSubscriber(emailValue)
+		fetchSubscriber()
 	}
 
 	return (

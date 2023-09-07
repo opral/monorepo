@@ -1,4 +1,4 @@
-import { CustomApiInlangIdeExtension, Plugin } from "@inlang/plugin"
+import { CustomApiInlangIdeExtension } from "@inlang/plugin"
 
 export const ideExtensionConfig = () =>
 	({
@@ -19,6 +19,7 @@ export const ideExtensionConfig = () =>
 
 					if (match.groups && "messageId" in match.groups) {
 						result.push({
+							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 							messageId: match.groups["messageId"]!,
 							position: {
 								start: {

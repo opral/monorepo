@@ -1,4 +1,4 @@
-import { MessageReferenceMatch } from "@inlang/core/config"
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { createToken, Lexer, EmbeddedActionsParser } from "chevrotain"
 
 /**
@@ -69,7 +69,7 @@ class Parser extends EmbeddedActionsParser {
 		 * Aggregates all matches and returns them.
 		 */
 		this.RULE("result", () => {
-			const result: MessageReferenceMatch[] = []
+			const result: any[] = []
 
 			this.MANY(() => {
 				this.OR([
@@ -79,7 +79,7 @@ class Parser extends EmbeddedActionsParser {
 								// @ts-expect-error - The parser is only partially typesafe.
 								this.tFunction,
 							)
-							result.push(match as MessageReferenceMatch)
+							result.push(match as any)
 						},
 					},
 					{
@@ -180,7 +180,7 @@ class Parser extends EmbeddedActionsParser {
 						character: endOfMessageId.endOffset!,
 					},
 				},
-			} satisfies MessageReferenceMatch
+			}
 		})
 
 		this.performSelfAnalysis()

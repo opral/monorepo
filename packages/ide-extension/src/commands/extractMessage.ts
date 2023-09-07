@@ -46,12 +46,7 @@ export const extractMessageCommand = {
 		const messageValue = textEditor.document.getText(textEditor.selection)
 
 		const preparedExtractOptions = ideExtension.extractMessageOptions.reduce((acc, option) => {
-			// eslint-disable-next-line
-			if (
-				acc.find(
-					(accOption) => accOption === option.callback({ messageId, selection: messageValue }),
-				)
-			) {
+			if (acc.includes(option.callback({ messageId, selection: messageValue }))) {
 				return acc
 			}
 			return [...acc, option.callback({ messageId, selection: messageValue })]

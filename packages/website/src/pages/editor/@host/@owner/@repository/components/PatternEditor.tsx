@@ -89,8 +89,8 @@ export function PatternEditor(props: {
 		- should initialize editor if not created
 		- should only rerender editor if variant pattern from query message is different to current editor content
 	*/
-	// eslint-disable-next-line solid/reactivity
 	const [currentPattern, setCurrentPattern] = createSignal<Variant["pattern"]>(
+		// eslint-disable-next-line solid/reactivity
 		variant()?.pattern || [],
 	)
 

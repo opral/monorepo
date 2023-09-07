@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import plugin from "tailwindcss/plugin"
 import link from "./link/index.cjs"
 

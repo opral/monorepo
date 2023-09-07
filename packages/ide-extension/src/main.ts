@@ -20,9 +20,6 @@ import { createFileSystemMapper } from "./utilities/createFileSystemMapper.js"
 import { _import } from "./utilities/import/_import.js"
 import { tryCatch } from "@inlang/result"
 import { createInlangConfigFile } from "./utilities/createInlangConfigFile.js"
-import { deleteOldConfigFile } from "./utilities/deleteOldConfigFile.js"
-import { migrateProjectConfig } from "@inlang/create-project"
-import path from "node:path"
 import { migrateConfigFile } from "./utilities/migrateConfigFile.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {

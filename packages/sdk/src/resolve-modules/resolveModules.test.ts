@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { MessageLintRule } from "@inlang/message-lint-rule"
 import type { Plugin } from "@inlang/plugin"
-import { describe, expect, it } from "vitest"
+import { expect, it } from "vitest"
 import {
 	ModuleError,
 	ModuleExportIsInvalidError,
