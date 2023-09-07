@@ -4,6 +4,7 @@ import { pluginUrls, standardLintRules, type PluginId } from "./tryAutoGenModule
 // @ts-ignore
 import { minify } from "terser"
 
+// we need to alias eval to supress esbuild warnigns
 const okEval = eval
 
 function parseDirtyValue(jsString: string) {
