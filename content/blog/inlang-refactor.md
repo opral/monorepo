@@ -1,10 +1,12 @@
 ---
 title: Refactoring Inlang
 href: /blog/refactoring-inlang
-description: We're thrilled to introduce the Inlang refactor, a major milestone in our journey towards making localization simpler, more powerful, and more accessible than ever before.
+description: inlang got a major refactor bringing new capabilities to the ecosystem.
 ---
 
 # {% $frontmatter.title %}
+
+![architecture inlang new]("https://cdn.jsdelivr.net/gh/inlang/inlang/documentation/assets/architecture.jpg")
 
 ## Architecture
 
@@ -37,6 +39,8 @@ description: We're thrilled to introduce the Inlang refactor, a major milestone 
 - Better error handling
 
 ## Marketplace
+
+![inlang marketplace]("https://cdn.jsdelivr.net/gh/inlang/inlang/documentation/assets/marketplace.jpg")
 
 - Find apps, libraries and modules for your project
 - Have the opportunity to distribute your own inlang-based product
