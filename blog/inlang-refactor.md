@@ -16,7 +16,7 @@ Reactivity is a core feature of the new Inlang architecture. As new messages are
 
 We've also revamped the module structure, making it more intuitive and developer-friendly. Whether you're working on plugins or lint rules, you'll find the development process more straightforward than ever before.
 
-![architecture inlang new]("https://cdn.jsdelivr.net/gh/inlang/inlang/documentation/assets/architecture.jpeg")
+![architecture inlang new]("https://cdn.jsdelivr.net/gh/inlang/inlang/documentation/assets/architecture.jpg")
 
 **New Message Format for Greater Flexibility**
 
@@ -64,11 +64,17 @@ The new Inlang architecture takes your editor experience to the next level. Real
 
 Autosaving is now part of the package, making your workflows faster and more efficient. Focus on your code, and let Inlang handle the rest.
 
+[The Web Editor on the marketplace](https://inlang.com/marketplace/app.inlang.editor)
+
 ## **VS Code Extension: Faster and Smarter**
 
 Our VS Code extension has received a significant boost. It now starts up faster, allowing you to jump into localization tasks without delay. Real-time linting and message updates keep you in the loop, ensuring that your translations are always on point.
 
 But that's not all. The extension now offers automatic migration from `inlang.config.js` to `project.inlang.json`. This streamlined process makes transitioning to the new Inlang project file a breeze. Plus, we've improved error handling to provide a smoother developer experience.
+
+[Find the extension on the marketplace](https://inlang.com/marketplace/app.inlang.ideExtension)
+
+![inlang marketplace]("https://cdn.jsdelivr.net/gh/inlang/inlang/documentation/assets/marketplace.jpg")
 
 ## **Discover the Inlang Marketplace**
 
@@ -77,6 +83,8 @@ The Inlang Marketplace is your go-to destination for finding apps, libraries, an
 ## **CLI: Streamlined Development**
 
 The new Inlang CLI comes with a range of performance improvements. We've updated the `config init` command to `project init` for clarity. Additionally, we've introduced a new `project migrate` command to simplify the process of migrating your config files to JSON. And for those working on modules, the new `module init` and `module build` commands will simplify your development workflow.
+
+[inlang CLI on the marketplace](https://inlang.com/marketplace/app.inlang.cli)
 
 ## **Meet Lix: The Future of Version Control for Inlang Apps**
 
