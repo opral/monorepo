@@ -23,6 +23,7 @@
 	"dependencies": {
 		"@inlang/project-config": "*",
 		"@lix-js/fs": "*",
+		"@types/node": "20.5.9",
 		"terser": "5.19.4"
 	},
 	"license": "Apache-2.0",
