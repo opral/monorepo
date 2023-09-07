@@ -20,7 +20,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.version }}
-          # cache: "npm"
+          cache: "npm"
+
+      - name: remove cache folder on windows
+        if: matrix.os == 'windows-latest'
+        run: Remove-Item C:\npm\cache\* -Recurse -Force || true
 
       - name: Install dependencies
         run: npm ci
