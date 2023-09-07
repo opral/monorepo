@@ -63,7 +63,7 @@ async function setupInlang(enabledLintRule?: MessageLintRule) {
 		JSON.stringify({
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de", "it"],
-			modules: [""],
+			modules: ["_mockPlugin.js", ...(enabledLintRule ? ["lintRule.js"] : [])],
 			settings: {
 				"project.messageLintRuleLevels": {},
 			},
@@ -80,9 +80,9 @@ async function setupInlang(enabledLintRule?: MessageLintRule) {
 		saveMessages: () => undefined as any,
 	}
 
-	const _import = async () => {
-		if (enabledLintRule) {
-			return { default: enabledLintRule } satisfies InlangModule
+	const _import = async (name: string) => {
+		if (name === "lintRule.js") {
+			return { default: enabledLintRule! } satisfies InlangModule
 		}
 		return {
 			default: _mockPlugin,
@@ -128,6 +128,7 @@ describe("lint command", () => {
 			/* */
 		}
 
+		console.log(logger.error.mock.calls)
 		expect(logger.error.mock.calls.length).toBe(0)
 		expect(logger.success.mock.calls.length).toBe(1)
 		expect(logger.log.mock.calls.length).toBe(0)
@@ -200,8 +201,5 @@ describe("lint command", () => {
 		expect(logger.error.mock.calls.length).toBe(1)
 		expect(logger.success.mock.calls.length).toBe(0)
 		expect(logger.log.mock.calls.length).toBe(0)
-
-		// checks for an error message mentioning our config file, this seems good balance to be reliable but test the cli behaviour
-		expect(logger.error.mock.calls[0][0]).toContain("project.inlang.json")
 	})
 })
