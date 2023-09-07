@@ -6,7 +6,7 @@ description: You can manually create a new project if inlang.com/new is not work
 
 # {% $frontmatter.title %}
 
-In case that [inlang.com/new](https://inlang.com/new) does not work for you ([please let us know!](https://github.com/inlang/inlang/discussions/categories/feedback)), you can manually create a new project via the CLI or by creating an inlang project file.
+You can manually create a new project via the CLI or by creating an inlang project file.
 
 ## Using the CLI (recommended)
 

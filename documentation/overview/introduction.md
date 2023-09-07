@@ -42,7 +42,7 @@ Inlang apps are built on lix. Lix is a git-compatible version control backend fo
     {% QuickLink
         title="Getting started"
         icon="fast"
-        href="https://inlang.com/new"
+        href="/documentation/manually-create-project"
         description="Create a new project."
     /%}
 
