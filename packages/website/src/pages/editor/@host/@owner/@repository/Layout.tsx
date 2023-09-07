@@ -507,7 +507,9 @@ function LintFilter(props: { clearFunction: any }) {
 					}
 				>
 					{(lintRule) => (
-						<sl-option prop:value={lintRule.meta.id}>{lintRule.meta.displayName["en"]}</sl-option>
+						<sl-option prop:value={lintRule.meta.id}>
+							{lintRule.meta.displayName.en || lintRule.meta.id}
+						</sl-option>
 					)}
 				</For>
 			</div>

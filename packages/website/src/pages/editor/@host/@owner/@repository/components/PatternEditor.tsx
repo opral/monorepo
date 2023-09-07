@@ -310,9 +310,8 @@ export function PatternEditor(props: {
 					notificationTitle:
 						inlang()
 							?.installed.messageLintRules()
-							.find((rule) => rule.meta.id === report.ruleId)?.meta.displayName["en"] ||
-						report.ruleId,
-					notificationDescription: report.body["en"]!,
+							.find((rule) => rule.meta.id === report.ruleId)?.meta.displayName.en || report.ruleId,
+					notificationDescription: report.body.en,
 					notificationType: report.level,
 				})
 			}

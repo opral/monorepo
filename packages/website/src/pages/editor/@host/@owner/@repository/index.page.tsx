@@ -154,7 +154,7 @@ function TheActualPage() {
 														<>
 															<p class="text-surface-500 text-sm mb-1">Error cause</p>
 															<div class="font-mono p-4 bg-surface-800 text-background rounded-md text-sm mb-8">
-																<p><span class="font-semibold text-hover-danger">> </span>({error.cause.message})</p>
+																<p>({error.cause.message})</p>
 															</div>
 														</>
 													)}
