@@ -128,7 +128,6 @@ describe("lint command", () => {
 			/* */
 		}
 
-		console.log(logger.error.mock.calls)
 		expect(logger.error.mock.calls.length).toBe(0)
 		expect(logger.success.mock.calls.length).toBe(1)
 		expect(logger.log.mock.calls.length).toBe(0)
