@@ -22,8 +22,6 @@ jobs:
           node-version: ${{ matrix.version }}
           cache: "npm"
 
-      - run: npm install
-
       - name: remove cache folder on windows
         if: matrix.os == 'windows-latest'
         run: Remove-Item C:\npm\cache\* -Recurse -Force; npm ci
