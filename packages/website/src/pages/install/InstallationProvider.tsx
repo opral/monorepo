@@ -121,6 +121,7 @@ async function initializeRepo(
 ) {
 	const modulesURL = modulesID.map((url) => {
 		const module = registry.find((module) => module.id.toLowerCase() === url.toLowerCase())
+		//@ts-ignore
 		return module?.module
 	})
 
