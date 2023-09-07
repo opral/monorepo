@@ -10,14 +10,14 @@
 		"source-code/versioned-interfaces/*"
 	],
 	"scripts": {
-		"build": "nx run-many --target=build --all --parallel",
-		"dev": "nx run-many --target=dev --all --parallel",
+		"build": "npx nx run-many --target=build --all --parallel",
+		"dev": "npx nx run-many --target=dev --all --parallel",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "nx run-many --target=test --all --parallel",
-		"_test:windows": "nx run-many --target=test --filter=./source-code/ide-extension --filter=./source-code/core --filter=./source-code/env-variables --filter=./source-code/telemetry --filter=\"./source-code/plugins/*\"",
+		"test": "npx nx run-many --target=test --all --parallel",
+		"_test:windows": "npx nx run-many --target=test --filter=./source-code/ide-extension --filter=./source-code/core --filter=./source-code/env-variables --filter=./source-code/telemetry --filter=\"./source-code/plugins/*\"",
 		"---- LINT ----------------------------------------------------------": "",
-		"lint": "nx run-many --target=lint --all --parallel",
-		"format": "nx run-many --target=format --all --parallel",
+		"lint": "npx nx run-many --target=lint --all --parallel",
+		"format": "npx nx run-many --target=format --all --parallel",
 		"---- OTHER ---------------------------------------------------------": "",
 		"release": "changeset publish",
 		"clean": "npm run clean -ws --if-present && rm -rf ./.env ./node_modules"
