@@ -90,7 +90,7 @@ export const registry: MarketplaceManifest[] = [
 		license: "Apache-2.0",
 	},
 	{
-		id: "library.inlang.paraglideJs",
+		id: "library.inlang.paraglideJsSveltekit",
 		icon: "https://emojis.wiki/thumbs/emojis/parachute.webp",
 		displayName: {
 			en: "paraglideJS",
@@ -127,7 +127,7 @@ export const registry: MarketplaceManifest[] = [
 		id: "messageLintRule.inlang.emptyPattern",
 		icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
 		displayName: {
-			en: "Empty Pattern",
+			en: "Empty pattern",
 		},
 		description: {
 			en: "Checks for empty pattern in a language tag. If a message exists in the reference resource but the pattern in a target resource is empty, it is likely that the message has not been translated yet.",
@@ -145,7 +145,7 @@ export const registry: MarketplaceManifest[] = [
 		id: "messageLintRule.inlang.identicalPattern",
 		icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
 		displayName: {
-			en: "Identical Pattern",
+			en: "Identical pattern",
 		},
 		description: {
 			en: "Checks for identical patterns in different languages.  A message with identical wording in multiple languages can indicate that the translations are redundant or can be combined into a single message to reduce translation effort.",
@@ -181,7 +181,7 @@ export const registry: MarketplaceManifest[] = [
 		id: "messageLintRule.inlang.missingTranslation",
 		icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
 		displayName: {
-			en: "Missing Translation",
+			en: "Missing translation",
 		},
 		description: {
 			en: "Checks for missing variants for a specific languageTag.  If a variant exists for the sourceLanguageTag but is missing for a listed languageTag, it is likely that the message has not been translated for this languageTag yet.",
@@ -232,7 +232,7 @@ export const registry: MarketplaceManifest[] = [
 		module: "../../plugins/json/dist/index.js",
 	},
 	{
-		id: "plugin.inlang.paraglide",
+		id: "plugin.inlang.paraglideJs",
 		icon: "https://emojis.wiki/thumbs/emojis/parachute.webp",
 		displayName: {
 			en: "Paraglide plugin",
