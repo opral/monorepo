@@ -20,18 +20,25 @@ jobs:
         with:
           node-version: 18
 
-      - run: npm install
+      - run: npm ci
 
       - name: Install Doppler CLI for env variables
         uses: dopplerhq/cli-action@v2
 
-      - run: doppler run -- node_modules/.bin/turbo run build --filter @inlang/cli
+      - run: doppler run -- npm run test
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
-      - run: node_modules/.bin/turbo run test --filter @inlang/cli
+      - run: doppler run -- npm run build
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
       - uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_PUBLISH_TOKEN }}
           package: source-code/cli/package.json
+
+      # - uses: JS-DevTools/npm-publish@v1
+      #   with:
+      #     token: ${{ secrets.NPM_PUBLISH_TOKEN }}
+      #     package: source-code/cli/package.json

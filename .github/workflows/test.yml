@@ -23,10 +23,9 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm install --no-save
+        run: npm ci
 
-      - name: run build
-        run: npm run build
+      - run: npm run build
 
       - name: Run all tests
         if: startsWith(matrix.os, 'windows') == false
