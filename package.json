@@ -14,7 +14,6 @@
 		"dev": "npx nx run-many --target=dev --all --parallel",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "npx nx run-many --target=test --all --parallel",
-		"_test:windows": "npx nx run-many --target=test --filter=./source-code/ide-extension --filter=./source-code/core --filter=./source-code/env-variables --filter=./source-code/telemetry --filter=\"./source-code/plugins/*\"",
 		"---- LINT ----------------------------------------------------------": "",
 		"lint": "npx nx run-many --target=lint --all --parallel",
 		"format": "npx nx run-many --target=format --all --parallel",

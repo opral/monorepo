@@ -27,10 +27,5 @@ jobs:
 
       - run: npm run build
 
-      - name: Run all tests
-        if: startsWith(matrix.os, 'windows') == false
-        run: npm run test
+      - run: npm run test
 
-      - name: Run tests relevant to the Windows platform
-        if: startsWith(matrix.os, 'windows')
-        run: npm run test:windows
