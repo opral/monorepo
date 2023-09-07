@@ -10,14 +10,14 @@
 		"source-code/versioned-interfaces/*"
 	],
 	"scripts": {
-		"build": "turbo run build",
-		"dev": "turbo run build --no-daemon && turbo run dev --parallel",
+		"build": "nx run-many --target=build --all --parallel",
+		"dev": "nx run-many --target=dev --all --parallel",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "turbo run test --log-order=grouped",
-		"test:windows": "turbo run test --log-order=grouped --filter=./source-code/ide-extension --filter=./source-code/core --filter=./source-code/env-variables --filter=./source-code/telemetry --filter=\"./source-code/plugins/*\"",
+		"test": "nx run-many --target=test --all --parallel",
+		"_test:windows": "nx run-many --target=test --filter=./source-code/ide-extension --filter=./source-code/core --filter=./source-code/env-variables --filter=./source-code/telemetry --filter=\"./source-code/plugins/*\"",
 		"---- LINT ----------------------------------------------------------": "",
-		"lint": "turbo run lint",
-		"format": "turbo run format",
+		"lint": "nx run-many --target=lint --all --parallel",
+		"format": "nx run-many --target=format --all --parallel",
 		"---- OTHER ---------------------------------------------------------": "",
 		"release": "changeset publish",
 		"clean": "npm run clean -ws --if-present && rm -rf ./.env ./node_modules"
@@ -27,7 +27,6 @@
 		"node": ">=18.0.0 <19.0.0"
 	},
 	"devDependencies": {
-		"typescript": "5.2.2",
 		"@changesets/cli": "^2.26.0",
 		"@typescript-eslint/eslint-plugin": "^5.48.2",
 		"@typescript-eslint/parser": "^5.48.2",
@@ -35,7 +34,8 @@
 		"eslint-config-prettier": "^8.6.0",
 		"eslint-plugin-solid": "^0.9.3",
 		"eslint-plugin-unicorn": "^45.0.2",
+		"nx": "16.8.0",
 		"prettier": "2.8.3",
-		"turbo": "^1.10.13"
+		"typescript": "5.2.2"
 	}
 }
