@@ -29,6 +29,15 @@ You can ensure that your manifest is valid by loading the following schema.
 "$schema": "https://inlang.com/marketplace-manifest-schema"
 ```
 
+#### Naming your item
+| **Parameter**        | **Convention**                                               |
+|----------------------|---------------------------------------------------------------|
+| `id`                 | The unique identifier should always be written in camelCase like this: `camelCase.camelCase.camelCase`                         |
+| `displayName`                 | Please follow the [Apple Style Guide](https://support.apple.com/de-de/guide/applestyleguide/apsgb744e4a3/web) and write the first letter of a new word in the title always in uppercase, e.g. `Language Tag`. **Rule of thumb:** The first letter of the first word always has to be uppercase, except your displayName is a name written in lowercase letters everywhere else like `npm` for example.                       |
+| `description`                 | Please make sure to describe your item as simple as possible. It is best practice to write 100 to 200 characters.                         |
+`readme`                 | The readme acts as documentation for your item and is written in markdown.                         |
+`keywords`                 | Keywords are always written in lowercase e.g. `i18n`, `adoptable` …                          |
+
 ### 2. Add the link to your marketplace manifest to the registry
 
 Add the raw link of your manifest to [this file](https://github.com/inlang/inlang/blob/main/source-code/marketplace/registry.json). You can fork the repository to do so.
