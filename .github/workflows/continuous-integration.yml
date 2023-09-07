@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install node
-        uses: actions/setup-node@v3.8.1
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.version }}
           # cache: "npm"
@@ -27,7 +27,7 @@ jobs:
       #   run: Remove-Item C:\npm\cache\* -Recurse -Force; npm ci
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - run: npm run lint
 
