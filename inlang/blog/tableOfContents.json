@@ -3,6 +3,6 @@
 	"./the-next-git.md",
 	"./git-as-sdk.md",
 	"./notes-on-git-based-architecture.md",
-	"../../rfcs/tech-stack/RFC.md",
-	"../../rfcs/core-architecture/RFC.md"
+	"../../inlang/rfcs/tech-stack/RFC.md",
+	"../../inlang/rfcs/core-architecture/RFC.md"
 ]
