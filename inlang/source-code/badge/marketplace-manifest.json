@@ -8,7 +8,7 @@
 		"en": "Badge showing missing messages in your codebase. Perfect for your README.md file."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/badge/README.md"
+		"en": "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/badge/README.md"
 	},
 	"keywords": ["badge"],
 	"publisherName": "inlang",

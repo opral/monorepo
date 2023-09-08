@@ -8,7 +8,7 @@
 		"en": "Checks for identical patterns in different languages.  A message with identical wording in multiple languages can indicate that the translations are redundant or can be combined into a single message to reduce translation effort."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/lint-rules/identicalPattern/README.md"
+		"en": "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/lint-rules/identicalPattern/README.md"
 	},
 	"keywords": ["lint rule", "itentical pattern"],
 	"publisherName": "inlang",
