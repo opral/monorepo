@@ -2,12 +2,12 @@
 	"private": true,
 	"type": "module",
 	"workspaces": [
-		"lix/*",
-		"source-code/*",
-		"source-code/core/*",
-		"source-code/plugins/*",
-		"source-code/lint-rules/*",
-		"source-code/versioned-interfaces/*"
+		"lix/source-code/*",
+		"inlang/source-code/*",
+		"inlang/source-code/plugins/*",
+		"inlang/source-code/message-lint-rules/*",
+		"inlang/source-code/versioned-interfaces/*",
+		"placeholder-company/source-code/*"
 	],
 	"scripts": {
 		"build": "npx nx run-many --target=build --all --parallel",
@@ -23,7 +23,7 @@
 	},
 	"engines": {
 		"npm": ">=8.0.0",
-		"node": ">=18.0.0 <19.0.0"
+		"node": ">=18.0.0"
 	},
 	"devDependencies": {
 		"@changesets/cli": "^2.26.0",
@@ -34,7 +34,6 @@
 		"eslint-plugin-solid": "^0.9.3",
 		"eslint-plugin-unicorn": "^45.0.2",
 		"nx": "16.8.0",
-		"prettier": "2.8.3",
-		"typescript": "5.2.2"
+		"prettier": "2.8.3"
 	}
 }
