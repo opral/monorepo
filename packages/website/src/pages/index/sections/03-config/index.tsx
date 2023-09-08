@@ -7,22 +7,19 @@ import { useI18n } from "@solid-primitives/i18n"
 const code = [
 	<p class="text-surface-500">...</p>,
 	<p>
-		<span class="text-primary-on-inverted-container">plugins</span>: [
+		<span class="text-primary-on-inverted-container">modules</span>: [
 	</p>,
 	<p>
-		<span class="text-primary-on-inverted-container">{"\tstandardLintRules"}</span>
-		{"(),"}
+		<span class="text-primary-on-inverted-container">
+			{'\t"...plugin-i18next@latest/dist/index.js"'}
+		</span>
+		,
 	</p>,
 	<p>
-		<span class="text-primary-on-inverted-container">{"\ti18next"}</span>
-		{"({ "}
+		<span class="text-primary-on-inverted-container">
+			{'\t"...message-lint-rule-empty-pattern@latest/dist/index.js"'}
+		</span>
 	</p>,
-	<p>
-		<span class="text-surface-300">{"\t\tpathPattern"}</span>
-		{": "}
-		<span class="text-surface-400">{"'./resources/{language}.json'"}</span>
-	</p>,
-	<p>{"\t}),"}</p>,
 
 	<p>]</p>,
 ]
@@ -99,25 +96,19 @@ const ConfigPage = () => {
 			<div class="flex flex-col items-center gap-8 pt-12 sm:pt-20 px-8 lg:px-0">
 				<h2 class="text-center text-3xl font-semibold text-on-background w-full lg:w-1/2 leading-tight md:leading-relaxed tracking-tight">
 					{t("landing.config.title.multiple")}{" "}
-					<a
-						href={getLocale() + "/documentation/apps/web-editor"}
-						class="underline transition link-primary"
-					>
+					<a href={getLocale() + "/documentation/app"} class="underline transition link-primary">
 						{t("landing.config.title.apps")}
 					</a>
 					{t("landing.config.title.endless")}{" "}
-					<a
-						href={getLocale() + "/documentation/plugins/registry"}
-						class="underline transition link-primary"
-					>
-						{t("landing.config.title.plugins")}
+					<a href={getLocale() + "/marketplace"} class="underline transition link-primary">
+						{t("landing.config.title.modules")}
 					</a>
 					{t("landing.config.title.one")}{" "}
 					<a
-						href={getLocale() + "/documentation/quick-start"}
+						href={getLocale() + "/documentation/manually-create-project"}
 						class="underline transition link-primary"
 					>
-						{t("landing.config.title.config")}
+						{t("landing.config.title.project")}
 					</a>
 				</h2>
 			</div>
@@ -195,7 +186,7 @@ const ConfigPage = () => {
 				>
 					<div class="relative z-10 bg-background border border-background rounded-lg overflow-hidden">
 						<pre class="h-14 w-32 flex flex-col justify-center items-center bg-surface-1 text-lg font-medium text-surface-700 transition duration-200 group-hover:text-primary">
-							{t("landing.config.title.plugins")}
+							{t("landing.config.title.modules")}
 						</pre>
 					</div>
 					<div

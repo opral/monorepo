@@ -44,9 +44,11 @@
 				"multiple": "多种",
 				"apps": "应用",
 				"plugins": "插件",
+				"modules": "模块",
 				"config": "配置。",
 				"endless": "，无尽",
-				"one": "，单一"
+				"one": "，单一",
+				"project": "项目"
 			}
 		},
 		"pricing": {

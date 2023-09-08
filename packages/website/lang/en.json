@@ -44,9 +44,11 @@
 				"multiple": "Multiple",
 				"apps": "apps",
 				"plugins": "plugins",
+				"modules": "modules",
 				"config": "config.",
 				"endless": ", endless",
-				"one": ", one"
+				"one": ", one",
+				"project": "project."
 			}
 		},
 		"pricing": {
