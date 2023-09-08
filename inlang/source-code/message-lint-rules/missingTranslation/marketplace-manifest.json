@@ -1,6 +1,6 @@
 {
 	"id": "messageLintRule.inlang.missingTranslation",
-	"icon": "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/message-lint-rules/missingTranslation/assets/icon.png",
 	"displayName": {
 		"en": "Missing translation"
 	},

@@ -12,12 +12,6 @@ Visit the [getting started](/documentation/getting-started) page to learn how to
 
 ![inlang project](https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/documentation/assets/project.jpg)
 
-{% Figure
-  src="https://github.com/inlang/inlang/assets/58360188/55c61841-ab73-4fa8-a828-3c2016ced872"
-  alt="A `project.inlang.json` file configures every app, plugins, and tool in the inlang ecosystem."
-  caption="A `project.inlang.json` file configures every app, plugins, and tool in the inlang ecosystem."
-/%}
-
 ## Project configuration file schema
 
 The `project.inlang.json` file must contain the following JSON:
