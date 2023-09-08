@@ -7,7 +7,8 @@
 		"./markdown": "./src/services/markdown/index.js"
 	},
 	"scripts": {
-		"build": "vite build",
+		"_build_COMMENT": "Build of the website is very slow. To speed up development and CI/CD, _build is only executed on deployment.",
+		"_build": "vite build",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit",
 		"lint": "eslint ./src --fix",
