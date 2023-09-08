@@ -1,6 +1,6 @@
 import type { PluginSettings } from "../settings.js"
 import { parse } from "./messageReferenceMatchers.js"
-import type { Plugin } from "@inlang/sdk"
+import type { Plugin } from "@inlang/plugin"
 
 export const ideExtensionConfig = (
 	settings: PluginSettings,

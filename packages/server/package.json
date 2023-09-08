@@ -17,6 +17,7 @@
 		"@inlang/marketplace-manifest": "workspace:*",
 		"@inlang/telemetry": "workspace:*",
 		"@inlang/website": "workspace:*",
+		"@inlang/project-config": "workspace:*",
 		"@sentry/node": "^7.47.0",
 		"@sentry/tracing": "^7.47.0",
 		"compression": "^1.7.4",

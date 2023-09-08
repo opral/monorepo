@@ -1,4 +1,3 @@
-import { italic } from "@inlang/cli/src/utlilities/format"
 import path from "node:path"
 import * as vscode from "vscode"
 import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js"
@@ -49,7 +48,7 @@ export const createInlangConfigFile = async (args: { workspaceFolder: vscode.Wor
 				"Could not find a language folder in the project. You have to enter the path to your language files (pathPattern) manually.",
 			)
 		} else {
-			console.info(`🗂️ Found language folder path: ${italic(pathPattern)}`)
+			console.info(`🗂️ Found language folder path: ${pathPattern}`)
 			console.info(
 				`🗂️ Please adjust the 'pathPattern' in the project.inlang.json manually if it is not parsed correctly.`,
 			)

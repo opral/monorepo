@@ -1,5 +1,5 @@
 import { parse } from "./messageReferenceMatchers.js"
-import type { CustomApiInlangIdeExtension, Plugin } from "@inlang/sdk"
+import type { CustomApiInlangIdeExtension, Plugin } from "@inlang/plugin"
 
 export const ideExtensionConfig = (): ReturnType<Exclude<Plugin["addCustomApi"], undefined>> => ({
 	"app.inlang.ideExtension": {

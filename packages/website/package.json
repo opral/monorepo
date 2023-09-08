@@ -20,9 +20,6 @@
 		"node": ">=18.0.0"
 	},
 	"dependencies": {
-		"@inlang/marketplace-registry": "workspace:*",
-		"@inlang/sdk": "workspace:*",
-		"@inlang/telemetry": "workspace:*",
 		"@isomorphic-git/cors-proxy": "^2.7.1",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
@@ -76,6 +73,13 @@
 		"@iconify-json/material-symbols": "^1.1.26",
 		"@tailwindcss/aspect-ratio": "^0.4.2",
 		"@tailwindcss/forms": "^0.5.3",
+		"@inlang/marketplace-registry": "workspace:*",
+		"@inlang/sdk": "workspace:*",
+		"@inlang/rpc": "workspace:*",
+		"@inlang/result": "workspace:*",
+		"@inlang/marketplace-manifest": "workspace:*",
+		"@inlang/telemetry": "workspace:*",
+		"@inlang/env-variables": "workspace:*",
 		"@tailwindcss/typography": "^0.5.7",
 		"@types/cookie-session": "^2.0.44",
 		"@types/express": "^4.17.14",

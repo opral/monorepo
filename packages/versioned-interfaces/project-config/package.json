@@ -22,6 +22,7 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
+		"@inlang/json-types": "workspace:*",
 		"@inlang/message": "workspace:*",
 		"@inlang/message-lint-rule": "workspace:*",
 		"@inlang/language-tag": "workspace:*",
