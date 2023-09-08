@@ -8,7 +8,7 @@
 		"en": "A fully configurable JavaScript library that integrates within your framework."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/paraglide/README.md"
+		"en": "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/paraglide-js-sveltekit/README.md"
 	},
 	"keywords": ["sdk", "paraglide"],
 	"publisherName": "inlang",
