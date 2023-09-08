@@ -18,7 +18,7 @@ For example, the [missing translation lint rule](TODO-link-to-marketplace) repor
 
 A message lint rule validates a message. For example, the [missing translation lint rule](TODO-link-to-marketplace) validates that a message has a translation for a specified [language tag](/documentation/concepts/language-tag).
 
-![inlang code lints](https://cdn.jsdelivr.net/gh/inlang/inlang/documentation/assets/lintrule-codelints.jpg)
+![inlang code lints](https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/documentation/assets/lintrule-codelints.jpg)
 
 ### More soon...
 
