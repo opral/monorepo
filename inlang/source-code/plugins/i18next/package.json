@@ -24,6 +24,8 @@
 		"@inlang/plugin": "workspace:*"
 	},
 	"devDependencies": {
+		"@lix-js/fs": "workspace:*",
+		"@placeholder-company/js-code-style": "workspace:*",
 		"@inlang/cli": "workspace:*",
 		"@inlang/sdk": "workspace:*",
 		"@size-limit/preset-small-lib": "^8.2.4",
@@ -34,6 +36,7 @@
 		"patch-package": "6.5.1",
 		"flat": "^5.0.2",
 		"parsimmon": "^1.18.1",
-		"typescript": "^5.1.3"
+		"typescript": "^5.1.3",
+		"vitest": "0.33.0"
 	}
 }

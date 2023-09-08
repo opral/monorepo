@@ -20,9 +20,14 @@
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
+	"dependencies": {
+		"@inlang/plugin": "workspace:*"
+	},
 	"devDependencies": {
+		"@placeholder-company/js-code-style": "workspace:*",
+		"@inlang/sdk": "workspace:*",
+		"@lix-js/fs": "workspace:*",
 		"@inlang/cli": "workspace:*",
-		"@inlang/plugin": "workspace:*",
 		"@types/flat": "^5.0.2",
 		"@types/lodash.merge": "4.6.7",
 		"@types/parsimmon": "1.10.6",

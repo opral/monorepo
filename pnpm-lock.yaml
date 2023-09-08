@@ -88,6 +88,9 @@ importers:
       '@inlang/create-project':
         specifier: workspace:*
         version: link:../create-project
+      '@inlang/env-variables':
+        specifier: workspace:*
+        version: link:../env-variables
       '@inlang/language-tag':
         specifier: workspace:*
         version: link:../versioned-interfaces/language-tag
@@ -100,6 +103,9 @@ importers:
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../sdk
+      '@inlang/telemetry':
+        specifier: workspace:*
+        version: link:../telemetry
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../lix/source-code/fs
@@ -250,6 +256,9 @@ importers:
       '@inlang/telemetry':
         specifier: workspace:*
         version: link:../telemetry
+      '@lix-js/fs':
+        specifier: workspace:*
+        version: link:../../../lix/source-code/fs
       '@vitest/coverage-v8':
         specifier: 0.34.3
         version: 0.34.3(vitest@0.34.3)
@@ -384,14 +393,17 @@ importers:
         specifier: workspace:*
         version: link:../../../../placeholder-company/source-code/js-code-style
       '@vitest/coverage-v8':
-        specifier: ^0.33.0
-        version: 0.33.0(vitest@0.34.3)
+        specifier: 0.33.0
+        version: 0.33.0(vitest@0.33.0)
       patch-package:
         specifier: 6.5.1
         version: 6.5.1
       typescript:
         specifier: ^5.1.3
         version: 5.2.2
+      vitest:
+        specifier: 0.33.0
+        version: 0.33.0(jsdom@22.1.0)
 
   inlang/source-code/message-lint-rules/identicalPattern:
     dependencies:
@@ -412,14 +424,17 @@ importers:
         specifier: workspace:*
         version: link:../../../../placeholder-company/source-code/js-code-style
       '@vitest/coverage-v8':
-        specifier: ^0.33.0
-        version: 0.33.0(vitest@0.34.3)
+        specifier: 0.33.0
+        version: 0.33.0(vitest@0.33.0)
       patch-package:
         specifier: 6.5.1
         version: 6.5.1
       typescript:
         specifier: ^5.1.3
         version: 5.2.2
+      vitest:
+        specifier: 0.33.0
+        version: 0.33.0(jsdom@22.1.0)
 
   inlang/source-code/message-lint-rules/messageWithoutSource:
     dependencies:
@@ -440,14 +455,17 @@ importers:
         specifier: workspace:*
         version: link:../../../../placeholder-company/source-code/js-code-style
       '@vitest/coverage-v8':
-        specifier: ^0.33.0
-        version: 0.33.0(vitest@0.34.3)
+        specifier: 0.33.0
+        version: 0.33.0(vitest@0.33.0)
       patch-package:
         specifier: 6.5.1
         version: 6.5.1
       typescript:
         specifier: ^5.1.3
         version: 5.2.2
+      vitest:
+        specifier: 0.33.0
+        version: 0.33.0(jsdom@22.1.0)
 
   inlang/source-code/message-lint-rules/missingTranslation:
     dependencies:
@@ -468,14 +486,17 @@ importers:
         specifier: workspace:*
         version: link:../../../../placeholder-company/source-code/js-code-style
       '@vitest/coverage-v8':
-        specifier: ^0.33.0
-        version: 0.33.0(vitest@0.34.3)
+        specifier: 0.33.0
+        version: 0.33.0(vitest@0.33.0)
       patch-package:
         specifier: 6.5.1
         version: 6.5.1
       typescript:
         specifier: ^5.1.3
         version: 5.2.2
+      vitest:
+        specifier: 0.33.0
+        version: 0.33.0(jsdom@22.1.0)
 
   inlang/source-code/paraglide-js-sveltekit:
     dependencies:
@@ -550,6 +571,12 @@ importers:
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../../sdk
+      '@lix-js/fs':
+        specifier: workspace:*
+        version: link:../../../../lix/source-code/fs
+      '@placeholder-company/js-code-style':
+        specifier: workspace:*
+        version: link:../../../../placeholder-company/source-code/js-code-style
       '@size-limit/preset-small-lib':
         specifier: ^8.2.4
         version: 8.2.6(size-limit@8.2.6)
@@ -564,7 +591,7 @@ importers:
         version: 1.10.6
       '@vitest/coverage-v8':
         specifier: ^0.33.0
-        version: 0.33.0(vitest@0.34.3)
+        version: 0.33.0(vitest@0.33.0)
       flat:
         specifier: ^5.0.2
         version: 5.0.2
@@ -577,15 +604,28 @@ importers:
       typescript:
         specifier: ^5.1.3
         version: 5.2.2
+      vitest:
+        specifier: 0.33.0
+        version: 0.33.0(jsdom@22.1.0)
 
   inlang/source-code/plugins/json:
+    dependencies:
+      '@inlang/plugin':
+        specifier: workspace:*
+        version: link:../../versioned-interfaces/plugin
     devDependencies:
       '@inlang/cli':
         specifier: workspace:*
         version: link:../../cli
-      '@inlang/plugin':
+      '@inlang/sdk':
         specifier: workspace:*
-        version: link:../../versioned-interfaces/plugin
+        version: link:../../sdk
+      '@lix-js/fs':
+        specifier: workspace:*
+        version: link:../../../../lix/source-code/fs
+      '@placeholder-company/js-code-style':
+        specifier: workspace:*
+        version: link:../../../../placeholder-company/source-code/js-code-style
       '@types/flat':
         specifier: ^5.0.2
         version: 5.0.2
@@ -658,6 +698,12 @@ importers:
       '@inlang/env-variables':
         specifier: workspace:*
         version: link:../env-variables
+      '@inlang/language-tag':
+        specifier: workspace:*
+        version: link:../versioned-interfaces/language-tag
+      '@inlang/message':
+        specifier: workspace:*
+        version: link:../versioned-interfaces/message
       '@inlang/result':
         specifier: workspace:*
         version: link:../result
@@ -698,12 +744,18 @@ importers:
 
   inlang/source-code/sdk:
     dependencies:
+      '@inlang/json-types':
+        specifier: workspace:*
+        version: link:../json-types
       '@inlang/language-tag':
         specifier: workspace:*
         version: link:../versioned-interfaces/language-tag
       '@inlang/message':
         specifier: workspace:*
         version: link:../versioned-interfaces/message
+      '@inlang/message-lint-rule':
+        specifier: workspace:*
+        version: link:../versioned-interfaces/message-lint-rule
       '@inlang/module':
         specifier: workspace:*
         version: link:../versioned-interfaces/module
@@ -716,6 +768,9 @@ importers:
       '@inlang/result':
         specifier: workspace:*
         version: link:../result
+      '@inlang/translatable':
+        specifier: workspace:*
+        version: link:../versioned-interfaces/translatable
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../lix/source-code/fs
@@ -771,6 +826,9 @@ importers:
       '@inlang/marketplace-manifest':
         specifier: workspace:*
         version: link:../versioned-interfaces/marketplace-manifest
+      '@inlang/project-config':
+        specifier: workspace:*
+        version: link:../versioned-interfaces/project-config
       '@inlang/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -964,6 +1022,9 @@ importers:
       '@inlang/translatable':
         specifier: workspace:*
         version: link:../translatable
+      '@lix-js/fs':
+        specifier: workspace:*
+        version: link:../../../../lix/source-code/fs
       '@sinclair/typebox':
         specifier: ^0.31.0
         version: 0.31.8
@@ -980,6 +1041,9 @@ importers:
 
   inlang/source-code/versioned-interfaces/project-config:
     dependencies:
+      '@inlang/json-types':
+        specifier: workspace:*
+        version: link:../../json-types
       '@inlang/language-tag':
         specifier: workspace:*
         version: link:../language-tag
@@ -1033,15 +1097,6 @@ importers:
 
   inlang/source-code/website:
     dependencies:
-      '@inlang/marketplace-registry':
-        specifier: workspace:*
-        version: link:../marketplace-registry
-      '@inlang/sdk':
-        specifier: workspace:*
-        version: link:../sdk
-      '@inlang/telemetry':
-        specifier: workspace:*
-        version: link:../telemetry
       '@isomorphic-git/cors-proxy':
         specifier: ^2.7.1
         version: 2.7.1
@@ -1187,6 +1242,27 @@ importers:
       '@iconify-json/material-symbols':
         specifier: ^1.1.26
         version: 1.1.58
+      '@inlang/env-variables':
+        specifier: workspace:*
+        version: link:../env-variables
+      '@inlang/marketplace-manifest':
+        specifier: workspace:*
+        version: link:../versioned-interfaces/marketplace-manifest
+      '@inlang/marketplace-registry':
+        specifier: workspace:*
+        version: link:../marketplace-registry
+      '@inlang/result':
+        specifier: workspace:*
+        version: link:../result
+      '@inlang/rpc':
+        specifier: workspace:*
+        version: link:../rpc
+      '@inlang/sdk':
+        specifier: workspace:*
+        version: link:../sdk
+      '@inlang/telemetry':
+        specifier: workspace:*
+        version: link:../telemetry
       '@placeholder-company/js-code-style':
         specifier: workspace:*
         version: link:../../../placeholder-company/source-code/js-code-style
@@ -7982,7 +8058,7 @@ packages:
       fs.realpath: 1.0.0
       inflight: 1.0.6
       inherits: 2.0.4
-      minimatch: 3.0.5
+      minimatch: 3.1.2
       once: 1.4.0
       path-is-absolute: 1.0.1
     dev: true

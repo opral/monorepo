@@ -28,6 +28,9 @@
 		"node": ">=18.0.0"
 	},
 	"dependencies": {
+		"@inlang/json-types": "workspace:*",
+		"@inlang/translatable": "workspace:*",
+		"@inlang/message-lint-rule": "workspace:*",
 		"@inlang/module": "workspace:*",
 		"@inlang/language-tag": "workspace:*",
 		"@inlang/message": "workspace:*",
