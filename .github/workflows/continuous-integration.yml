@@ -9,7 +9,7 @@ jobs:
   ci:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-32gb, macos-latest]
         version: [18]
     runs-on: ${{ matrix.os }}
     steps:
