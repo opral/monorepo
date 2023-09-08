@@ -60,7 +60,7 @@ describe("translate command", () => {
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en", "de", "it"],
-					modules: [""],
+					modules: ["./plugin.js"],
 					settings: {},
 				} satisfies ProjectConfig),
 			)
