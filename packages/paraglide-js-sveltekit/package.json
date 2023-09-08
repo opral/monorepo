@@ -52,6 +52,7 @@
 		"vitefu": "^0.2.4"
 	},
 	"peerDependencies": {
+		"@placeholder-company/js-code-style": "*",
 		"@sveltejs/kit": "^1.0.0",
 		"svelte": "^3.54.0 || ^4.0.0"
 	},

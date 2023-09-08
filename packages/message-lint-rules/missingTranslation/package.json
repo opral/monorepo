@@ -24,6 +24,7 @@
 		"@inlang/message-lint-rule": "*"
 	},
 	"devDependencies": {
+		"@placeholder-company/js-code-style": "*",
 		"@inlang/message": "*",
 		"@inlang/cli": "*",
 		"@inlang/sdk": "*",

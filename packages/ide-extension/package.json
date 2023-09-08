@@ -85,6 +85,7 @@
 		"vitest": "0.34.3"
 	},
 	"devDependencies": {
+		"@placeholder-company/js-code-style": "*",
 		"isomorphic-git": "1.24.5",
 		"@inlang/sdk": "*",
 		"@inlang/create-project": "*",
