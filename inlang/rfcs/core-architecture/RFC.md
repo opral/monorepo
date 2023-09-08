@@ -64,24 +64,6 @@ flowchart BT
 
 ```
 
-<!-- ```mermaid
-flowchart BT
-    subgraph Components
-      Syntax[Human Language Syntax]
-      Library
-      DT[Dev Tools]
-      CICD[CI/CD]
-      Editor
-    end
-
-    Developer---Library
-    Developer---DT
-    Developer---Syntax
-    Developer---CICD
-    Translator---Editor
-    Translator---CICD
-``` -->
-
 ### Human Language Syntax
 
 Expressing plurals, gender, displaying different formats, etc. requires a dedicated syntax to express human languages. Below is an example from Mozilla's Fluent project:
@@ -257,29 +239,25 @@ import Translated from 'i18n-library';
 
 Develop a CLI and VSCode extension to extract and validate resources and messages.
 
-<br/>
-<figure>
-  <img src="./assets/001-ide-extension.gif" alt="Localization IDE extension">
-  <figcaption>
-    <small>
-      An IDE extension speeds up development by providing message extraction, linting, and more.
-    </small>
-  </figcaption>
-</figure>
-<img>
+{% Figure
+    src="https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/rfcs/core-architecture/assets/001-ide-extension.gif"
+
+    alt="Localization IDE extension"
+    
+    caption="An IDE extension speeds up development by providing message extraction, linting, and more."
+/%}
 
 ### Editor
 
-<br/>
-<figure>
-  <img src="./assets/001-editor.png" alt="Proof of concept translation editor CAT">
-  <figcaption>
-    <small>
-      Early iteration of the inlang editor from December 2021.
-    </small>
-  </figcaption>
-</figure>
-<img>
+{% Figure
+
+    src="https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/rfcs/core-architecture/assets/001-editor.png"
+
+    alt="Proof of concept translation editor CAT"
+
+    caption="Early iteration of the inlang editor from December 2021."
+/%}
+
 
 Translators need a dedicated editor to manage translations. Those editors exist and are called CAT (Computer Assisted Translation) editors. There are two types of editors:
 

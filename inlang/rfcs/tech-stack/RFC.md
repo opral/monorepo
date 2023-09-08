@@ -62,30 +62,35 @@ Reasons against embeddability include runtime-dependent features like networking
 | Separated  | o                 | o                  | o                   |
 | Embeddable | -                 | o                  | +                   |
 
-<figure>
-    <img src="./assets/002-embedded-separated-legend.png" alt="Legend"/>
-</figure>
+{% Figure
+    src="https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/rfcs/tech-stack/assets/002-embedded-separated-legend.png"
+    
+    alt="Legend"
+/%}
 
-<figure>
-    <img src="./assets/002-monolith-architecture.png"/>
-    <figcaption>
-        (a) Monolith architecture. Non-editor related and editor related elements are co-developed in one application/source code.
-    </figcaption>
-</figure>
+{% Figure
+    src="https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/rfcs/tech-stack/assets/002-monolith-architecture.png"
 
-<figure>
-    <img src="./assets/002-separated-architecture.png"/>
-    <figcaption>
-        (b) Separated architecture. A website or app links to a separate application: <i>inlang.com</i> -> <i>editor.inlang.com</i>. Similar to clicking on a document in Google Drive. The click forwards from <i>drive.google.com</i> to another app <i>docs.google.com</i>. 
-    </figcaption>
-</figure>
+    alt="Monolith architecture"
+    
+    caption="(a) Monolith architecture. Non-editor related and editor related elements are co-developed in one application/source code."
+/%}
 
-<figure>
-    <img src="./assets/002-embedded-architecture.png"/>
-    <figcaption>
-        (c) Embedded architecture. Host applications like inlang.com or VSCode embed the editor. 
-    </figcaption>
-</figure>
+{% Figure
+    src="https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/rfcs/tech-stack/assets/002-separated-architecture.png"
+
+    alt="Separated architecture"
+    
+    caption="(b) Separated architecture. A website or app links to a separate application: inlang.com -> editor.inlang.com. Similar to clicking on a document in Google Drive. The click forwards from drive.google.com to another app docs.google.com."
+/%}
+
+{% Figure
+    src="https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/rfcs/tech-stack/assets/002-embedded-architecture.png"
+
+    alt="Embedded architecture"
+    
+    caption="(c) Embedded architecture. Host applications like inlang.com or VS Code embed the editor."
+/%}
 
 - SPA, SSR, MPA, (PWA)
 
