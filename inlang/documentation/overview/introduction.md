@@ -17,7 +17,7 @@ description: Inlang is globalization infrastructure that powers an ecosystem of 
 For every use case, there is an app, a plugin, a lint rule, or a custom solution that can be built. Inlang's infrastructure powers an ecosystem of tools, applications, best practices, and automations for organizations to go global.
 
 {% Figure
-src="https://github.com/inlang/inlang/inlang/assets/58360188/55c61841-ab73-4fa8-a828-3c2016ced872"
+src="https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/documentation/assets/project.jpg"
 alt="one config file to power all infrastructure tools"
 caption="Sketch about the concept of one configuration file that powers all tools, automation, and applications for globalization that developers build on top of."
 
@@ -29,7 +29,7 @@ Inlang apps are built on lix. Lix is a git-compatible version control backend fo
 
 {% Figure
 
-    src="https://github.com/inlang/inlang/inlang/assets/58360188/917cc987-669d-4203-a2ed-8184087fd070"
+    src="https://github.com/inlang/inlang/assets/58360188/917cc987-669d-4203-a2ed-8184087fd070"
 
     alt="lix-based globalization infrastructure"
 
