@@ -1,12 +1,10 @@
-import type { JSXElement, JSX } from "solid-js"
-import { useEditorState } from "../../State.jsx"
-import { useLocalStorage } from "@src/services/local-storage/index.js"
+import { type JSXElement, type JSX, Show } from "solid-js"
+import { useLocalStorage } from "#src/services/local-storage/index.js"
 
 export type TourStepId =
 	| "github-login"
 	| "fork-repository"
-	| "default-languages"
-	| "missing-message-rule"
+	| "missing-translation-rule"
 	| "textfield"
 
 export type Position = "top-right" | "top-left" | "bottom-right" | "bottom-left"
@@ -28,20 +26,18 @@ export const TourHintWrapper = (props: TourHintWrapperProps) => {
 	return (
 		<div class="relative max-content">
 			<TourStepWrapper position={props.position} offset={props.offset} isVisible={props.isVisible}>
-				{() => {
-					switch (props.currentId) {
-						case "github-login":
-							return <GithubLogin />
-						case "fork-repository":
-							return <ForkRepository />
-						case "default-languages":
-							return <DefaultLanguages />
-						case "missing-message-rule":
-							return <MissingMessageRule />
-						case "textfield":
-							return <Textfield />
-					}
-				}}
+				<Show when={props.currentId === "github-login"}>
+					<GithubLogin />
+				</Show>
+				<Show when={props.currentId === "fork-repository"}>
+					<ForkRepository />
+				</Show>
+				<Show when={props.currentId === "missing-translation-rule"}>
+					<MissingTranslationRule />
+				</Show>
+				<Show when={props.currentId === "textfield"}>
+					<Textfield />
+				</Show>
 			</TourStepWrapper>
 			{props.children}
 		</div>
@@ -177,52 +173,7 @@ const ForkRepository = () => {
 	)
 }
 
-const DefaultLanguages = () => {
-	const { setTourStep, filteredLanguages } = useEditorState()
-	return (
-		<div class="w-full flex flex-col gap-2">
-			<div class="w-full overflow-hidden">
-				<img
-					class="rounded"
-					width="100%"
-					src="/images/TourGuideSVGs/default-languages.svg"
-					alt="default-languages"
-				/>
-			</div>
-			<div class="flex items-center justify-between">
-				<div class="pt-2 pb-1 px-1 flex flex-col gap-1">
-					<p class="text-sm font-medium text-info-on-inverted-container">Language detection</p>
-					<p>We filtered by your browser defaults.</p>
-				</div>
-				<div
-					onClick={() =>
-						filteredLanguages().length > 0
-							? setTourStep("missing-message-rule")
-							: setTourStep("textfield")
-					}
-					class="w-8 h-8 flex justify-center items-center bg-background/10 hover:bg-background/20 rounded-md cursor-pointer"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke-width={2}
-						stroke="currentColor"
-						class="w-4 h-4"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-						/>
-					</svg>
-				</div>
-			</div>
-		</div>
-	)
-}
-
-const MissingMessageRule = () => {
+const MissingTranslationRule = () => {
 	return (
 		<div class="w-full flex flex-col gap-2">
 			<div class="w-full overflow-hidden">
@@ -237,7 +188,7 @@ const MissingMessageRule = () => {
 				<p class="text-sm font-medium text-info-on-inverted-container">
 					<span class="text-primary-on-inverted-container">Click</span> to see what’s missing
 				</p>
-				<p>Filter by missing message lint rule.</p>
+				<p>Filter by missing translation lint rule.</p>
 			</div>
 		</div>
 	)

@@ -1,53 +1,70 @@
-import { getLintReports, lint as _lint } from "@inlang/core/lint"
 import { Command } from "commander"
-import { cli } from "../../main.js"
-import { log } from "../../utilities.js"
 import Table from "cli-table3"
-import { getConfig } from "../../utilities/getConfig.js"
-import { bold, italic } from "../../utilities/format.js"
+import { getInlangProject } from "../../utilities/getInlangProject.js"
+import { log } from "../../utilities/log.js"
+import type { InlangProject, MessageLintReport } from "@inlang/sdk"
 
 export const lint = new Command()
 	.command("lint")
 	.description("Commands for linting translations.")
 	.option("--no-fail", "Disable throwing an error if linting fails.") // defaults to false https://github.com/tj/commander.js#other-option-types-negatable-boolean-and-booleanvalue
-	.action(lintCommandAction)
+	.action(async () => {
+		const { data: inlang, error } = await getInlangProject()
+		if (error) {
+			log.error(error)
+			return
+		}
+		await lintCommandAction({ inlang, logger: log })
+	})
 
-async function lintCommandAction() {
+/* @ts-ignore */
+export async function lintCommandAction(args: { inlang: InlangProject; logger: any }) {
 	try {
-		// Get the config
-		const [config, errorMessage] = await getConfig({ options: cli.opts() })
-		if (!config) {
-			log.error(errorMessage)
-			return
-		}
-
-		if (config.lint?.rules === undefined) {
-			log.error(
-				`🚫 For this command to work, you need lint rules configured in your inlang.config.js – for example, the ${bold(
-					"@inlang/plugin-standard-lint-rule",
-				)} plugin: https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules. ${italic(
-					"Learn more about lints here:",
-				)} https://inlang.com/documentation/lint`,
+		if (args.inlang.installed.messageLintRules().length === 0) {
+			args.logger.error(
+				`No message lint rules are installed. Visit the marketplace to install lint rules https://inlang.com/marketplace .`,
 			)
 			return
 		}
 
-		const resources = await config.readResources({ config })
+		// TODO: async reports
+		const MessageLintReportsAwaitable = (): Promise<MessageLintReport[]> => {
+			return new Promise((resolve) => {
+				let reports = args.inlang.query.messageLintReports.getAll()
 
-		// Get resources with lints
-		const [resourcesWithLints, errors] = await _lint({ resources, config })
-		if (errors) {
-			console.error(
-				"🚫 Lints partially failed. Please check if you have your lint rules configured correctly.",
-				errors.length && errors,
-			)
+				if (reports) {
+					// reports where loaded
+					setTimeout(() => {
+						// this is a workaround. We do not know when the report changed. Normally this shouldn't be a issue for cli
+						const newReports = args.inlang.query.messageLintReports.getAll()
+						if (newReports) {
+							resolve(newReports)
+						}
+					}, 200)
+				} else {
+					let counter = 0
+					const interval = setInterval(() => {
+						reports = args.inlang.query.messageLintReports.getAll()
+						if (reports) {
+							clearInterval(interval)
+							resolve(reports)
+						} else {
+							counter += 1
+						}
+
+						if (counter > 10) {
+							clearInterval(interval)
+							resolve([])
+						}
+					}, 200)
+				}
+			})
 		}
 
-		// Get lint report
-		const lints = getLintReports(resourcesWithLints)
+		const reports = await MessageLintReportsAwaitable()
 
-		if (lints.length === 0) {
-			log.success("🎉 Linting successful.")
+		if (reports.length === 0) {
+			args.logger.success("🎉 Linting successful.")
 			return
 		}
 
@@ -60,40 +77,44 @@ async function lintCommandAction() {
 
 		let hasError = false
 
-		for (const lint of lints) {
+		for (const lint of reports) {
+			const message = typeof lint.body === "object" ? lint.body.en : lint.body
 			if (lint.level === "error") {
 				hasError = true
-				lintTable.push(["Error", lint.id, lint.message])
-			} else if (lint.level === "warn") {
-				lintTable.push(["Warning", lint.id, lint.message])
+				lintTable.push(["Error", lint.ruleId, message])
+			} else if (lint.level === "warning") {
+				lintTable.push(["Warning", lint.ruleId, message])
 			}
 		}
 
-		log.log("") // spacer line
-		log.log("🚨 Lint Report")
-		log.log(lintTable.toString())
+		args.logger.log("") // spacer line
+		args.logger.log("🚨 Lint Report")
+		args.logger.log(lintTable.toString())
 
 		// create summary table with total number of errors and warnings
 		const summaryTable = new Table({
 			head: ["Level", "Count"],
 		})
 
-		summaryTable.push(["Error", lints.filter((lint) => lint.level === "error").length])
-		summaryTable.push(["Warning", lints.filter((lint) => lint.level === "warn").length])
+		summaryTable.push(["Error", reports.filter((lint) => lint.level === "error").length])
+		summaryTable.push(["Warning", reports.filter((lint) => lint.level === "warning").length])
 
-		log.log("") // spacer line
-		log.log("📊 Summary")
-		log.log(summaryTable.toString())
+		args.logger.log("") // spacer line
+		args.logger.log("📊 Summary")
+		args.logger.log(summaryTable.toString())
 
 		if (hasError && lint.opts().fail) {
 			// spacer line
-			log.log("")
-			log.info(
+			args.logger.log("")
+			args.logger.info(
 				"ℹ️  You can add the `--no-fail` flag to disable throwing an error if linting fails.",
 			)
-			throw new Error("🚫 Lint failed with errors.")
+			console.error("🚫 Lint failed with errors.")
+			process.exit(1)
 		}
+
+		return { lintTable, summaryTable }
 	} catch (error) {
-		log.error(error)
+		args.logger.error(error)
 	}
 }

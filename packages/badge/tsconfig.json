@@ -1,6 +1,6 @@
 {
-	"extends": "../../tsconfig.base.json",
-	"include": ["src/**/*.ts"],
+	"extends": "@placeholder-company/js-code-style/tsconfig.base.json",
+	"include": ["src/**/*"],
 	"compilerOptions": {
 		// DOM because of fetch. TODO: extract fetch from this package and
 		// let fetch be provided by the environment.

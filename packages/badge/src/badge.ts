@@ -1,19 +1,15 @@
 import satori from "satori"
-import { cloneRespository } from "./repo/clone.js"
-import { getGitRemotes } from "./repo/getGitRemotes.js"
-import { setupConfig } from "@inlang/core/config"
-import { initialize$import, type InlangEnvironment } from "@inlang/core/environment"
-import { getLintReports, lint } from "@inlang/core/lint"
-import { createMemoryFs } from "@inlang-git/fs"
+import { openRepository, createNodeishMemoryFs } from "@lix-js/client"
 import { markup } from "./helper/markup.js"
 import { readFileSync } from "node:fs"
-import { telemetryNode, parseOrigin } from "@inlang/telemetry"
+import { telemetryNode } from "@inlang/telemetry"
 import { removeCommas } from "./helper/removeCommas.js"
-import { missingTranslations } from "./helper/missingTranslations.js"
+import { calculateSummary } from "./helper/calculateSummary.js"
 import { caching } from "cache-manager"
+import { type MessageLintReport, openInlangProject } from "@inlang/sdk"
 
-const fontMedium = readFileSync(new URL("./assets/static/Inter-Medium.ttf", import.meta.url))
-const fontBold = readFileSync(new URL("./assets/static/Inter-Bold.ttf", import.meta.url))
+const fontMedium = readFileSync(new URL("../assets/static/Inter-Medium.ttf", import.meta.url))
+const fontBold = readFileSync(new URL("../assets/static/Inter-Bold.ttf", import.meta.url))
 
 const cache = await caching("memory", {
 	ttl: 60 * 60 * 24 * 1, // 1 day,
@@ -28,55 +24,84 @@ export const badge = async (url: string) => {
 		return fromCache
 	}
 
-	// initialize a new file system on each request to prevent cross request pollution
-	const fs = createMemoryFs()
-	await cloneRespository(url, fs)
+	// initialize a lisa repo instance on each request to prevent cross request pollution
+	const repo = await openRepository(url, { nodeishFs: createNodeishMemoryFs() })
 
-	// Set up the environment functions
-	const env: InlangEnvironment = {
-		$import: initialize$import({
-			fs,
-			fetch,
-		}),
-		$fs: fs,
-	}
-
-	// Get the content of the inlang.config.js file
-	const file = await fs.readFile("/inlang.config.js", { encoding: "utf-8" }).catch((e) => {
+	// Get the content of the project.inlang.json file
+	await repo.nodeishFs.readFile("./project.inlang.json", { encoding: "utf-8" }).catch((e) => {
 		if (e.code !== "ENOENT") throw e
-		throw new Error("No inlang.config.js file found in the repository.")
+		throw new Error("No project.inlang.json file found in the repository.")
 	})
 
-	const base64Data = Buffer.from(file.toString(), "binary").toString("base64")
-	const config = await setupConfig({
-		module: await import("data:application/javascript;base64," + base64Data),
-		env,
+	const inlang = await openInlangProject({
+		projectFilePath: "./project.inlang.json",
+		nodeishFs: repo.nodeishFs,
+		_capture(id, props) {
+			telemetryNode.capture({
+				event: id,
+				properties: props,
+				distinctId: "unknown",
+			})
+		},
 	})
 
-	const resources = await config.readResources({ config })
+	// access all messages via inlang instance query
+	const messageIds = inlang.query.messages.includedMessageIds()
 
-	// Get ressources with lints
-	const [resourcesWithLints, errors] = await lint({ resources, config })
-	if (errors) {
-		console.error("lints partially failed", errors)
+	const projectConfig = inlang.config()
+	// throw if no config is present
+	if (!projectConfig) {
+		throw new Error("No inlang config found, please add a project.inlang.json")
 	}
 
-	const lints = getLintReports(resourcesWithLints)
-
-	// find in resources the resource from the preferredLanguage
-	const referenceResource = resources.find(
-		(resource) => resource.languageTag.name === config.referenceLanguage,
-	)
-	if (!referenceResource) {
-		throw new Error("No referenceLanguage found, please add one to your inlang.config.js")
+	// throw if no sourceLanguageTag is found
+	if (!projectConfig.sourceLanguageTag) {
+		throw new Error("No sourceLanguageTag found, please add one to your project.inlang.json")
 	}
 
-	const { percentage, numberOfMissingTranslations } = missingTranslations({
-		resources,
-		referenceResource,
+	// TODO: async reports
+	const MessageLintReportsAwaitable = (): Promise<MessageLintReport[]> => {
+		return new Promise((resolve) => {
+			let reports = inlang.query.messageLintReports.getAll()
+
+			if (reports) {
+				// reports where loaded
+				setTimeout(() => {
+					// this is a workaround. We do not know when the report changed. Normally this shouldn't be a issue for cli
+					const newReports = inlang.query.messageLintReports.getAll()
+					if (newReports) {
+						resolve(newReports)
+					}
+				}, 200)
+			} else {
+				let counter = 0
+				const interval = setInterval(() => {
+					reports = inlang.query.messageLintReports.getAll()
+					if (reports) {
+						clearInterval(interval)
+						resolve(reports)
+					} else {
+						counter += 1
+					}
+
+					if (counter > 30) {
+						clearInterval(interval)
+						resolve([])
+					}
+				}, 200)
+			}
+		})
+	}
+
+	const reports = await MessageLintReportsAwaitable()
+
+	const { percentage, errors, warnings, numberOfMissingVariants } = calculateSummary({
+		reports: reports,
+		languageTags: projectConfig.languageTags,
+		messageIds: messageIds,
 	})
 
-	const vdom = removeCommas(markup(percentage, numberOfMissingTranslations, lints))
+	const vdom = removeCommas(markup(percentage, errors, warnings, numberOfMissingVariants))
 
 	// render the image
 	const image = await satori(
@@ -101,7 +126,7 @@ export const badge = async (url: string) => {
 	)
 
 	await cache.set(url, image)
-	const gitOrigin = parseOrigin({ remotes: await getGitRemotes({ fs }) })
+	const gitOrigin = await repo.getOrigin()
 
 	telemetryNode.capture({
 		event: "BADGE created",

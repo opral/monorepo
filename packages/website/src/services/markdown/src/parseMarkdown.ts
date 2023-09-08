@@ -1,31 +1,8 @@
-import Markdoc, { type ValidationError } from "@markdoc/markdoc"
+import Markdoc from "@markdoc/markdoc"
+import type { TSchema } from "@sinclair/typebox"
+import { Value } from "@sinclair/typebox/value"
 import { parse as parseYaml } from "yaml"
-import { z } from "zod"
 import { config } from "./config.js"
-
-/**
- * The frontmatter that is required by the markdown service.
- *
- * `href` the url slug e.g. /documentation/intro
- * `title` the title of the document
- *
- * See https://markdoc.dev/docs/frontmatter
- */
-export type RequiredFrontmatter = z.infer<typeof RequiredFrontmatter>
-export const RequiredFrontmatter = z.object({
-	href: z
-		.string({
-			description:
-				"The href is the path where the markdown is rendered e.g. /documentation/intro and simultaneously acts as id.",
-		})
-		.startsWith("/"),
-	title: z.string(),
-	shortTitle: z.string().optional(),
-	description: z
-		.string({ description: "Description for SEO and prerendering purposes." })
-		.min(10)
-		.max(160),
-})
 
 /**
  * Parses a Markdoc document.
@@ -43,20 +20,24 @@ export const RequiredFrontmatter = z.object({
  * 	<Element>
  *
  */
-export function parseMarkdown<FrontmatterSchema extends RequiredFrontmatter>(args: {
+export function parseMarkdown<FrontmatterSchema extends TSchema>(args: {
 	text: string
-	FrontmatterSchema: typeof RequiredFrontmatter
+	frontmatterSchema?: FrontmatterSchema
 }): {
 	frontmatter: FrontmatterSchema
 	renderableTree?: Markdoc.RenderableTreeNode
 	error?: string
 } {
 	const ast = Markdoc.parse(args.text)
-	const frontmatter = args.FrontmatterSchema.parse(parseYaml(ast.attributes.frontmatter ?? ""))
+	const frontmatter = parseYaml(ast.attributes.frontmatter ?? "")
+	if (args.frontmatterSchema && Value.Check(args.frontmatterSchema, frontmatter) === false) {
+		const errors = [...Value.Errors(args.frontmatterSchema, frontmatter)]
+		throw Error(`Invalid frontmatter for ${args.text.slice(0, 100)}...` + errors.map(beautifyError))
+	}
 	const errors = Markdoc.validate(ast, config)
 	if (errors.length > 0) {
 		return {
-			frontmatter: frontmatter as FrontmatterSchema,
+			frontmatter: frontmatter,
 			error: errors.map((object) => beautifyError(object.error)).join("\n"),
 		}
 	}
@@ -69,7 +50,7 @@ export function parseMarkdown<FrontmatterSchema extends RequiredFrontmatter>(arg
 		...config,
 	})
 	return {
-		frontmatter: frontmatter as FrontmatterSchema,
+		frontmatter: frontmatter,
 		renderableTree,
 	}
 }
@@ -81,7 +62,7 @@ export function parseMarkdown<FrontmatterSchema extends RequiredFrontmatter>(arg
  * the object to the console is not very helpful. This
  * function returns a string that is easier to read.
  */
-function beautifyError(error: ValidationError): string {
+function beautifyError(error: object): string {
 	// for now, simply stringify the error
 	// TODO:
 	// - add information about the name and path of the document

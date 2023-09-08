@@ -1,38 +1,26 @@
-import type { InlangConfig } from "@inlang/core/config"
-import type { InlangEnvironment } from "@inlang/core/environment"
-import type * as ast from "@inlang/core/ast"
-import { createPlugin } from "@inlang/core/plugin"
-import {
-	throwIfInvalidSettings,
-	type PluginSettings,
-	type PluginSettingsWithDefaults,
-} from "./settings.js"
-import merge from "lodash.merge"
-import {
-	addNestedKeys,
-	pathIsDirectory,
-	collectNestedSerializedMessages,
-	detectJsonSpacing,
-} from "./utilities.js"
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import type { Message, Variant, LanguageTag, Plugin, NodeishFilesystemSubset } from "@inlang/plugin"
+import { id, displayName, description } from "../marketplace-manifest.json"
+import { throwIfInvalidSettings, type PluginSettings } from "./settings.js"
+import { detectJsonSpacing, detectIsNested, replaceAll } from "./utilities.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
-import type { MessageMetadata, SerializedMessage } from "./types.js"
-
-/**
- * Whether the repository uses the wildcard structure.
- *
- * @example
- *   pathPattern: "/{language}/*.json" -> true
- *   pathPattern: "/{language}/resource.json" -> false
- */
-let REPO_USES_WILDCARD_STRUCTURE: boolean
+import { flatten, unflatten } from "flat"
 
 /**
  * The spacing of the JSON files in this repository.
  *
  * @example
- *  { "/en.json" = 2 }
+ * { "/en.json" = 2 }
  */
-const SPACING: Record<string, ReturnType<typeof detectJsonSpacing>> = {}
+let SPACING: Record<string, ReturnType<typeof detectJsonSpacing>> = {}
+
+/**
+ * The nesting the JSON files in this repository
+ *
+ * @example
+ * { "/en.json" = nested }
+ */
+let NESTED: Record<string, ReturnType<typeof detectIsNested>> = {}
 
 /**
  * Whether a file has a new line at the end.
@@ -41,7 +29,7 @@ const SPACING: Record<string, ReturnType<typeof detectJsonSpacing>> = {}
  * { "/en.json" = true }
  * { "/de.json" = false }
  */
-const FILE_HAS_NEW_LINE: Record<string, boolean> = {}
+let FILE_HAS_NEW_LINE: Record<string, boolean> = {}
 
 /**
  * Defines the default spacing for JSON files.
@@ -58,298 +46,377 @@ function defaultSpacing() {
 	)
 }
 
-export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
-	id: "inlang.plugin-json",
-	async config() {
-		// will throw if the settings are invalid,
-		// leading to better DX because fails fast
-		throwIfInvalidSettings(settings)
-
-		const withDefaultSettings: PluginSettingsWithDefaults = {
-			ignore: [], // ignore no files by default
-			// copied the plugin logic from the i18next plugin. for easy copy & pasting some mock
-			// placeholders are used.
-			variableReferencePattern: ["{", "}"],
-			...settings,
-		}
-
-		REPO_USES_WILDCARD_STRUCTURE = settings.pathPattern.endsWith("/*.json")
-
-		return {
-			languages: await getLanguages({
-				$fs: env.$fs,
-				settings: withDefaultSettings,
-			}),
-			readResources: (args) =>
-				readResources({
-					...args,
-					$fs: env.$fs,
-					settings: withDefaultSettings,
-				}),
-			writeResources: (args) =>
-				writeResources({
-					...args,
-					$fs: env.$fs,
-					settings: withDefaultSettings,
-				}),
-			ideExtension: ideExtensionConfig,
-		} satisfies Partial<InlangConfig>
-	},
-}))
-
 /**
- * Automatically derives the languages in this repository.
+ * Defines the default nesting for JSON files.
+ *
+ * Takes the majority of nested/flatten resource files in this repository to determine
+ * the default spacing.
  */
-async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: PluginSettings }) {
-	// replace the path
-	const [pathBeforeLanguage] = args.settings.pathPattern.split("{language}")
-	if (pathBeforeLanguage === undefined) {
-		throw new Error("pathPattern must contain {language} placeholder")
-	}
-	const parentDirectory = await args.$fs.readdir(pathBeforeLanguage)
-	const languages: string[] = []
+function defaultNesting() {
+	const values = Object.values(NESTED)
+	return (
+		values
+			.sort((a, b) => values.filter((v) => v === a).length - values.filter((v) => v === b).length)
+			.pop() ?? false // if no default has been found -> false -> flatten
+	)
+}
 
-	for (const filePath of parentDirectory) {
-		const isDirectory = await pathIsDirectory({
-			path: pathBeforeLanguage + filePath,
-			$fs: args.$fs,
+export const plugin: Plugin<PluginSettings> = {
+	meta: {
+		id: id as Plugin["meta"]["id"],
+		displayName,
+		description,
+	},
+	loadMessages: async ({ languageTags, sourceLanguageTag, settings, nodeishFs }) => {
+		settings.variableReferencePattern = settings.variableReferencePattern || ["{", "}"]
+		throwIfInvalidSettings(settings)
+		SPACING = {}
+		NESTED = {}
+		FILE_HAS_NEW_LINE = {}
+		return loadMessages({
+			nodeishFs,
+			settings,
+			languageTags,
+			sourceLanguageTag,
 		})
-
-		if (isDirectory && args.settings.ignore?.some((s) => s === filePath) === false) {
-			languages.push(filePath)
-		} else if (
-			filePath.endsWith(".json") &&
-			args.settings.ignore?.some((s) => s === filePath) === false
-		) {
-			languages.push(filePath.replace(".json", ""))
-		}
-	}
-	return languages
+	},
+	saveMessages: async ({ messages, settings, nodeishFs }) => {
+		settings.variableReferencePattern = settings.variableReferencePattern || ["{", "}"]
+		throwIfInvalidSettings(settings)
+		return saveMessages({
+			nodeishFs,
+			settings,
+			messages,
+		})
+	},
+	detectedLanguageTags: async ({ nodeishFs, settings }) => {
+		settings.ignore = settings.ignore || []
+		return detectLanguageTags({
+			nodeishFs,
+			settings,
+		})
+	},
+	addCustomApi: () => ideExtensionConfig(),
 }
 
 /**
- * Reading resources.
+ * Load messages
+ *
+ * @example const messages = await loadMessages({ fs, settings, languageTags })
  */
-async function readResources(
-	args: Parameters<InlangConfig["readResources"]>[0] & {
-		$fs: InlangEnvironment["$fs"]
-		settings: PluginSettingsWithDefaults
-	},
-): ReturnType<InlangConfig["readResources"]> {
-	const result: ast.Resource[] = []
+async function loadMessages(args: {
+	nodeishFs: NodeishFilesystemSubset
+	settings: PluginSettings
+	languageTags: Readonly<LanguageTag[]>
+	sourceLanguageTag: string
+}): Promise<Message[]> {
+	const messages: Message[] = []
+	for (const languageTag of resolveOrderOfLanguageTags(args.languageTags, args.sourceLanguageTag)) {
+		if (typeof args.settings.pathPattern !== "string") {
+			for (const [prefix, path] of Object.entries(args.settings.pathPattern)) {
+				const messagesFromFile = await getFileToParse(path, languageTag, args.nodeishFs)
+				for (const [key, value] of Object.entries(messagesFromFile)) {
+					const prefixedKey = prefix + ":" + replaceAll(key, "u002E", ".")
+					addVariantToMessages(messages, prefixedKey, languageTag, value, args.settings)
+				}
+			}
+		} else {
+			const messagesFromFile = await getFileToParse(
+				args.settings.pathPattern,
+				languageTag,
+				args.nodeishFs,
+			)
+			for (const [key, value] of Object.entries(messagesFromFile)) {
+				addVariantToMessages(
+					messages,
+					replaceAll(key, "u002E", "."),
+					languageTag,
+					value,
+					args.settings,
+				)
+			}
+		}
+	}
+	return messages
+}
 
-	for (const language of args.config.languages) {
-		let serializedMessages: SerializedMessage[] = []
-		const resourcePath = args.settings.pathPattern.replace("{language}", language)
-		try {
-			if (REPO_USES_WILDCARD_STRUCTURE) {
-				const directoryPath = `${resourcePath.replace("/*.json", "")}`
-				const files = await args.$fs.readdir(directoryPath)
-				for (const potentialResourcePath of files) {
-					if (args.settings.ignore?.some((s) => s === potentialResourcePath) === true) {
-						continue
-					}
-					const file = (await args.$fs.readFile(`${directoryPath}/${potentialResourcePath}`, {
-						encoding: "utf-8",
-					})) as string
+/**
+ * Get file to parse
+ *
+ * To get files and throw if files are not there. Also handles the flattening for nested files
+ *
+ * @example const storedMessages = await getFileToParse(path, isNested, languageTag, fs)
+ */
+async function getFileToParse(
+	path: string,
+	languageTag: string,
+	nodeishFs: NodeishFilesystemSubset,
+): Promise<Record<string, string>> {
+	const pathWithLanguage = path.replace("{languageTag}", languageTag)
+	// get file, make sure that is not braking when the namespace doesn't exist in every languageTag dir
+	try {
+		const file = await nodeishFs.readFile(pathWithLanguage, { encoding: "utf-8" })
+		// analyze format of file
+		SPACING[pathWithLanguage] = detectJsonSpacing(file as string)
+		NESTED[pathWithLanguage] = detectIsNested(file as string)
+		FILE_HAS_NEW_LINE[pathWithLanguage] = (file as string).endsWith("\n")
+		const flattenedMessages = NESTED[pathWithLanguage]
+			? flatten(JSON.parse(file as string), {
+					transformKey: function (key) {
+						//replace dots in keys with unicode
+						return replaceAll(key, ".", "u002E")
+					},
+			  })
+			: JSON.parse(file as string)
+		return flattenedMessages
+	} catch (e) {
+		// if the namespace doesn't exist for this dir -> continue
+		if ((e as any).code === "FileNotFound" || (e as any).code === "ENOENT") {
+			// file does not exist yet
+			return {}
+		}
+		throw e
+	}
+}
 
-					FILE_HAS_NEW_LINE[`${directoryPath}/${potentialResourcePath}`] = file.endsWith("\n")
-					SPACING[`${directoryPath}/${potentialResourcePath}`] = detectJsonSpacing(file)
+/**
+ * Resolve order of languageTags, move sourceLanguage to the first spot
+ */
+const resolveOrderOfLanguageTags = (
+	languageTags: Readonly<LanguageTag[]>,
+	sourceLanguageTag: LanguageTag,
+): LanguageTag[] => {
+	const filteredTags = languageTags.filter((t) => t !== sourceLanguageTag) // Remove sourceLanguageTag
+	filteredTags.unshift(sourceLanguageTag) // Add sourceLanguageTag to the beginning of the filtered array
+	return filteredTags
+}
 
-					serializedMessages = [
-						...serializedMessages,
-						...collectNestedSerializedMessages(
-							JSON.parse(file),
-							[],
-							potentialResourcePath.replace(".json", ""),
-						),
-					]
+/**
+ * Add new item (message, variant) to the ast
+ *
+ * @example addVariantToMessages(messages, key, languageTag, value)
+ */
+const addVariantToMessages = (
+	messages: Message[],
+	key: string,
+	languageTag: LanguageTag,
+	value: string,
+	settings: PluginSettings,
+) => {
+	const messageIndex = messages.findIndex((m) => m.id === key)
+	if (messageIndex !== -1) {
+		const variant: Variant = {
+			languageTag,
+			match: {},
+			pattern: parsePattern(value, settings.variableReferencePattern!),
+		}
+
+		//push new variant
+		messages[messageIndex]?.variants.push(variant)
+	} else {
+		// message does not exist
+		const message: Message = {
+			id: key,
+			selectors: [],
+			variants: [],
+		}
+		message.variants = [
+			{
+				languageTag,
+				match: {},
+				pattern: parsePattern(value, settings.variableReferencePattern!),
+			},
+		]
+		messages.push(message)
+	}
+}
+
+/**
+ * Parses a pattern.
+ *
+ * @example parsePattern("Hello {name}!", ["{", "}"])
+ */
+function parsePattern(text: string, variableReferencePattern: string[]): Variant["pattern"] {
+	// dependent on the variableReferencePattern, different regex
+	// expressions are used for matching
+	const expression = variableReferencePattern[1]
+		? new RegExp(
+				`(\\${variableReferencePattern[0]}[^\\${variableReferencePattern[1]}]+\\${variableReferencePattern[1]})`,
+				"g",
+		  )
+		: new RegExp(`(${variableReferencePattern}\\w+)`, "g")
+	const pattern: Variant["pattern"] = text
+		.split(expression)
+		.filter((element) => element !== "")
+		.map((element) => {
+			if (expression.test(element) && variableReferencePattern[0]) {
+				return {
+					type: "VariableReference",
+					name: variableReferencePattern[1]
+						? element.slice(
+								variableReferencePattern[0].length,
+								// negative index, removing the trailing pattern
+								-variableReferencePattern[1].length,
+						  )
+						: element.slice(variableReferencePattern[0].length),
 				}
 			} else {
-				const file = (await args.$fs.readFile(resourcePath, {
-					encoding: "utf-8",
-				})) as string
-
-				FILE_HAS_NEW_LINE[`${resourcePath}`] = file.endsWith("\n")
-				SPACING[`${resourcePath}`] = detectJsonSpacing(file)
-
-				serializedMessages = collectNestedSerializedMessages(JSON.parse(file))
-			}
-			result.push(
-				parseResource(serializedMessages, language, args.settings.variableReferencePattern),
-			)
-		} catch (e) {
-			if ((e as any).code === "ENOENT") {
-				// file does not exist yet
-				continue
-			}
-			throw e
-		}
-	}
-	return result
-}
-
-/**
- * Parses a resource.
- *
- * @example parseResource(resource, en, 2,["{{", "}}"])
- */
-function parseResource(
-	serializedMessages: SerializedMessage[],
-	language: string,
-	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
-): ast.Resource {
-	return {
-		type: "Resource",
-		languageTag: {
-			type: "LanguageTag",
-			name: language,
-		},
-		body: serializedMessages.map((serializedMessage) => {
-			return parseMessage(serializedMessage, variableReferencePattern)
-		}),
-	}
-}
-
-/**
- * Parses a message.
- *
- * @example parseMessage("testId", "test", ["{{", "}}"])
- */
-function parseMessage(
-	serializedMessage: SerializedMessage,
-	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
-): ast.Message {
-	return {
-		type: "Message",
-		metadata: {
-			fileName: serializedMessage.fileName,
-			keyName: serializedMessage.keyName,
-			parentKeys: serializedMessage.parentKeys,
-		} satisfies MessageMetadata,
-		id: {
-			type: "Identifier",
-			name: serializedMessage.id,
-		},
-		pattern: parsePattern(serializedMessage.text, variableReferencePattern),
-	}
-}
-
-/**
- * Writing resources.
- *
- * @example writeResources({resources, settings, $fs})
- */
-async function writeResources(
-	args: Parameters<InlangConfig["writeResources"]>[0] & {
-		settings: PluginSettingsWithDefaults
-		$fs: InlangEnvironment["$fs"]
-	},
-): ReturnType<InlangConfig["writeResources"]> {
-	for (const resource of args.resources) {
-		const resourcePath = args.settings.pathPattern.replace("{language}", resource.languageTag.name)
-
-		if (REPO_USES_WILDCARD_STRUCTURE === false) {
-			await args.$fs.writeFile(
-				resourcePath,
-				serializeResource(
-					resource,
-					SPACING[resourcePath] ?? defaultSpacing(),
-					FILE_HAS_NEW_LINE[resourcePath]!,
-					args.settings.variableReferencePattern,
-				),
-			)
-		} else if (REPO_USES_WILDCARD_STRUCTURE) {
-			// just in case try to create a directory to not make file operations fail
-			const [directoryPath] = resourcePath.split("/*.json")
-			try {
-				await args.$fs.readdir(directoryPath!)
-			} catch {
-				// directory doesn't exists
-				await args.$fs.mkdir(directoryPath!)
-			}
-
-			//* Performance optimization in the future: Only iterate over the resource body once
-			const filePaths = new Set(resource.body.map((message) => message.id.name!.split(".")[0]))
-
-			for (const fileName of filePaths) {
-				const filteredMessages = resource.body
-					.filter((message: ast.Message) => message.id.name.startsWith(fileName!))
-					.map((message: ast.Message) => {
-						return {
-							...message,
-							id: {
-								...message.id,
-								name: message.id.name.replace(`${fileName}.`, ""),
-							},
-						}
-					})
-				const splitedResource: ast.Resource = {
-					type: resource.type,
-					languageTag: resource.languageTag,
-					body: filteredMessages,
+				return {
+					type: "Text",
+					value: element,
 				}
-				const path = resourcePath.replace("*", fileName!)
-				await args.$fs.writeFile(
-					path,
-					serializeResource(
-						splitedResource,
-						SPACING[path] ?? defaultSpacing(),
-						FILE_HAS_NEW_LINE[path]!,
+			}
+		})
+
+	return pattern
+}
+
+/**
+ * Save messages
+ *
+ * @example await saveMessages({ fs, settings, messages })
+ */
+async function saveMessages(args: {
+	nodeishFs: NodeishFilesystemSubset
+	settings: PluginSettings
+	messages: Message[]
+}) {
+	if (typeof args.settings.pathPattern === "object") {
+		// with namespaces
+		const storage: Record<
+			LanguageTag,
+			Record<string, Record<Message["id"], Variant["pattern"]>>
+		> = {}
+		for (const message of args.messages) {
+			for (const variant of message.variants) {
+				const prefix: string = message.id.includes(":")
+					? (message.id.split(":")[0] as string)
+					: (Object.keys(args.settings.pathPattern)[0] as string)
+				const resolvedId = message.id.replace(prefix + ":", "")
+
+				storage[variant.languageTag] ??= {}
+				storage[variant.languageTag]![prefix] ??= {}
+				storage[variant.languageTag]![prefix]![resolvedId] = variant.pattern
+			}
+		}
+		for (const [languageTag, _value] of Object.entries(storage)) {
+			for (const path of Object.values(args.settings.pathPattern)) {
+				// check if directory exists
+				const directoryPath = path
+					.replace("{languageTag}", languageTag)
+					.split("/")
+					.slice(0, -1)
+					.join("/")
+				try {
+					await args.nodeishFs.readdir(directoryPath)
+				} catch {
+					await args.nodeishFs.mkdir(directoryPath)
+				}
+			}
+			for (const [prefix, value] of Object.entries(_value)) {
+				const pathWithLanguage = (args.settings.pathPattern[prefix] as string).replace(
+					"{languageTag}",
+					languageTag,
+				)
+				await args.nodeishFs.writeFile(
+					pathWithLanguage,
+					serializeFile(
+						value,
+						SPACING[pathWithLanguage] ?? defaultSpacing(),
+						FILE_HAS_NEW_LINE[pathWithLanguage]!,
+						NESTED[pathWithLanguage] ?? defaultNesting(),
 						args.settings.variableReferencePattern,
 					),
 				)
 			}
-		} else {
-			throw new Error("None-exhaustive if statement in writeResources")
+		}
+	} else {
+		// without namespaces
+		const storage: Record<LanguageTag, Record<Message["id"], Variant["pattern"]>> | undefined = {}
+		for (const message of args.messages) {
+			for (const variant of message.variants) {
+				storage[variant.languageTag] ??= {}
+				storage[variant.languageTag]![message.id] = variant.pattern
+			}
+		}
+		for (const [languageTag, value] of Object.entries(storage)) {
+			const pathWithLanguage = args.settings.pathPattern.replace("{languageTag}", languageTag)
+			try {
+				await args.nodeishFs.readdir(pathWithLanguage.split("/").slice(0, -1).join("/"))
+			} catch {
+				await args.nodeishFs.mkdir(pathWithLanguage.split("/").slice(0, -1).join("/"), {
+					recursive: true,
+				})
+			}
+
+			await args.nodeishFs.writeFile(
+				pathWithLanguage,
+				serializeFile(
+					value,
+					SPACING[pathWithLanguage] ?? defaultSpacing(),
+					FILE_HAS_NEW_LINE[pathWithLanguage]!,
+					NESTED[pathWithLanguage] ?? defaultNesting(),
+					args.settings.variableReferencePattern,
+				),
+			)
 		}
 	}
 }
 
 /**
- * Serializes a resource.
+ * Serializes file
+ *
+ * For all messages that belong in one file.
+ *
+ * @example const serializedFile = serializeFile(messages, space, endsWithNewLine, nested, variableReferencePattern)
  */
-function serializeResource(
-	resource: ast.Resource,
+function serializeFile(
+	messages: Record<Message["id"], Variant["pattern"]>,
 	space: number | string,
-	withNewLine: boolean,
-	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
+	endsWithNewLine: boolean,
+	nested: boolean,
+	variableReferencePattern: PluginSettings["variableReferencePattern"],
 ): string {
-	const result = {}
-	for (const message of resource.body) {
-		const msg: Record<string, string | Record<string, string>> = {}
-		const serializedPattern = serializePattern(message.pattern, variableReferencePattern)
-		if (message.metadata?.keyName) {
-			addNestedKeys(msg, message.metadata.parentKeys, message.metadata.keyName, serializedPattern)
-		} else if (message.metadata?.fileName) {
-			msg[message.id.name.split(".").slice(1).join(".")] = serializedPattern
-		} else {
-			msg[message.id.name] = serializedPattern
+	let result: Record<string, string> = {}
+	for (const [messageId, pattern] of Object.entries(messages)) {
+		//check if there are two dots after each other -> that would brake unflatten -> replace with unicode
+		let id = replaceAll(messageId, "..", "u002E.")
+		//check if the last char is a dot -> that would brake unflatten -> replace with unicode
+		if (id.slice(-1) === ".") {
+			id = id.replace(/.$/, "u002E")
 		}
-		// nested keys
-		merge(result, msg)
+		result[id] = serializePattern(pattern, variableReferencePattern!)
 	}
-	return JSON.stringify(result, undefined, space) + (withNewLine ? "\n" : "")
+	// for nested structures -> unflatten the keys
+	if (nested) {
+		result = unflatten(result, {
+			//prevent numbers from creating arrays automatically
+			object: true,
+		})
+	}
+	return (
+		replaceAll(JSON.stringify(result, undefined, space), "u002E", ".") +
+		(endsWithNewLine ? "\n" : "")
+	)
 }
 
 /**
  * Serializes a pattern.
+ *
+ * @example const serializedPattern = serializePattern(pattern, variableReferencePattern)
  */
-function serializePattern(
-	pattern: ast.Message["pattern"],
-	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
-) {
-	const result = []
-	for (const element of pattern.elements) {
+function serializePattern(pattern: Variant["pattern"], variableReferencePattern: string[]) {
+	const result: string[] = []
+	for (const element of pattern) {
 		switch (element.type) {
 			case "Text":
 				result.push(element.value)
 				break
-			case "Placeholder":
+			case "VariableReference":
 				result.push(
 					variableReferencePattern[1]
-						? `${variableReferencePattern[0]}${element.body.name}${variableReferencePattern[1]}`
-						: `${variableReferencePattern[0]}${element.body.name}`,
+						? `${variableReferencePattern[0]}${element.name}${variableReferencePattern[1]}`
+						: `${variableReferencePattern[0]}${element.name}`,
 				)
 				break
 			default:
@@ -360,51 +427,43 @@ function serializePattern(
 }
 
 /**
- * Parses a message.
+ * Detect languageTags from resources
  *
- * @example parseMessage("testId", "test", ["{{", "}}"])
+ * @example const languageTags = await detectLanguageTags({ fs, settings })
  */
-function parsePattern(
-	text: string,
-	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
-): ast.Pattern {
-	// dependent on the variableReferencePattern, different regex
-	// expressions are used for matching
-	const placeholder = variableReferencePattern[1]
-		? new RegExp(
-				`(\\${variableReferencePattern[0]}[^\\${variableReferencePattern[1]}]+\\${variableReferencePattern[1]})`,
-				"g",
-		  )
-		: new RegExp(`(${variableReferencePattern}\\w+)`, "g")
+async function detectLanguageTags(args: {
+	nodeishFs: NodeishFilesystemSubset
+	settings: PluginSettings
+}): Promise<string[]> {
+	const languages: string[] = []
 
-	const elements: ast.Pattern["elements"] = text
-		.split(placeholder)
-		.filter((element) => element !== "")
-		.map((element) => {
-			if (placeholder.test(element)) {
-				return {
-					type: "Placeholder",
-					body: {
-						type: "VariableReference",
-						name: variableReferencePattern[1]
-							? element.slice(
-									variableReferencePattern[0].length,
-									// negative index, removing the trailing pattern
-									-variableReferencePattern[1].length,
-							  )
-							: element.slice(variableReferencePattern[0].length),
-					},
-				}
-			} else {
-				return {
-					type: "Text",
-					value: element,
-				}
+	// because of duplication of code the pathArray is eather parsed by th epathPattern object or created by the pathPattern string
+	const pathArray: Array<string> =
+		typeof args.settings.pathPattern !== "string"
+			? Object.values(args.settings.pathPattern)
+			: [args.settings.pathPattern]
+
+	// When there are namespaces, this will loop through all namespaces and collect the languages, otherwise it is just one path
+	for (const path of pathArray) {
+		const [pathBeforeLanguage] = path.split("{languageTag}")
+		const parentDirectory = await args.nodeishFs.readdir(pathBeforeLanguage!)
+
+		for (const filePath of parentDirectory) {
+			//check if file really exists in the dir
+			const fileExists = await Promise.resolve(
+				args.nodeishFs
+					.readFile(path.replace("{languageTag}", filePath.replace(".json", "")))
+					.then(() => true)
+					.catch(() => false),
+			)
+			//collect languages for each pathPattern -> so we do not miss any language
+			//It is not enough to just get the prentDirectory -> there could be false directories
+			if (fileExists && args.settings.ignore?.some((s) => s === filePath) === false) {
+				languages.push(filePath.replace(".json", ""))
 			}
-		})
-
-	return {
-		type: "Pattern",
-		elements,
+		}
 	}
+
+	// Using Set(), an instance of unique values will be created, implicitly using this instance will delete the duplicates.
+	return [...new Set(languages)]
 }

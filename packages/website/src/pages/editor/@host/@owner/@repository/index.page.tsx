@@ -1,28 +1,16 @@
-import { query } from "@inlang/core/query"
-import {
-	createMemo,
-	createResource,
-	createSignal,
-	For,
-	Match,
-	Switch,
-	Show,
-	onMount,
-} from "solid-js"
-import { Messages } from "./Messages.jsx"
+import { For, Match, Switch, onMount } from "solid-js"
 import { Layout as EditorLayout } from "./Layout.jsx"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
 import { Meta, Title } from "@solidjs/meta"
 import { EditorStateProvider, useEditorState } from "./State.jsx"
 import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
-import type { Language } from "@inlang/core/ast"
-import type { LintedMessage } from "@inlang/core/lint"
-import { rpc } from "@inlang/rpc"
 import { ListHeader, messageCount } from "./components/Listheader.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
-import { useLocalStorage } from "@src/services/local-storage/index.js"
-import type { RecentProjectType } from "@src/services/local-storage/src/schema.js"
+import { useLocalStorage } from "#src/services/local-storage/index.js"
+import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"
+import { Message } from "./Message.jsx"
+import { Icon } from "#src/components/Icon.jsx"
 
 export function Page() {
 	return (
@@ -41,50 +29,8 @@ export function Page() {
  * is required to use the useEditorState hook.
  */
 function TheActualPage() {
-	const {
-		inlangConfig,
-		resources,
-		routeParams,
-		repositoryIsCloned,
-		doesInlangConfigExist,
-		filteredLanguages,
-		textSearch,
-		filteredId,
-		filteredLintRules,
-		tourStep,
-	} = useEditorState()
+	const { inlang, routeParams, doesInlangConfigExist, tourStep, lixErrors } = useEditorState()
 	const [, setLocalStorage] = useLocalStorage()
-	/**
-	 * Messages for a particular message id in all languages
-	 *
-	 * @example
-	 * 	{
-	 *    "hello.welcome": {
-	 *      "en": { ... },
-	 *      "de": { ... },
-	 *    }
-	 *  }
-	 */
-
-	const messages = createMemo(() => {
-		const result: {
-			[id: string]: {
-				[language: Language]: LintedMessage | undefined
-			}
-		} = {}
-		for (const resource of resources) {
-			for (const id of query(resource).includedMessageIds()) {
-				// defining the initial object, otherwise the following assignment will fail
-				// with "cannot set property 'x' of undefined"
-				if (result[id] === undefined) {
-					result[id] = {}
-				}
-				const message = query(resource).get({ id }) as LintedMessage
-				result[id]![resource.languageTag.name] = message
-			}
-		}
-		return result
-	})
 
 	onMount(() => {
 		setLocalStorage("recentProjects", (prev) => {
@@ -125,30 +71,38 @@ function TheActualPage() {
 					</p>
 				}
 			>
-				<Match when={repositoryIsCloned.error?.message.includes("404")}>
-					<RepositoryDoesNotExistOrNotAuthorizedCard />
+				<Match when={lixErrors().some((e) => e.message.includes("401"))}>
+					<RepositoryDoesNotExistOrNotAuthorizedCard code={401} />
 				</Match>
-				<Match when={repositoryIsCloned.error?.message.includes("401")}>
-					<p class="text-lg font-medium text-center flex justify-center items-center h-full grow">
-						You want to access a private repository, please sign-in at the bottom.
-					</p>
+				<Match when={lixErrors().some((e) => e.message.includes("404"))}>
+					<RepositoryDoesNotExistOrNotAuthorizedCard code={404} />
 				</Match>
-				<Match when={repositoryIsCloned.error}>
-					<p class="text-danger">{repositoryIsCloned.error.message}</p>
+				<Match when={lixErrors().length > 0}>
+					<p class="text-danger pb-2">An error occurred while cloning the repository</p>
+					<ul class="text-danger">
+						{lixErrors().length !== 0 && (
+							<For each={lixErrors()}>
+								{(error) => {
+									return (
+										<li class="pt-2">
+											<span class="font-semibold">{error.name}: </span>
+											<br />
+											{error.message} <br />
+											{error.stack && <p>{error.stack}</p>}
+										</li>
+									)
+								}}
+							</For>
+						)}
+					</ul>
 				</Match>
-				<Match when={inlangConfig.error}>
-					<p class="text-danger">
-						An error occurred while initializing the config: {inlangConfig.error.message}
-					</p>
-				</Match>
-				<Match when={repositoryIsCloned.loading || inlangConfig.loading}>
+				<Match when={inlang() === undefined}>
 					<div class="flex flex-col grow justify-center items-center min-w-full gap-2">
 						{/* sl-spinner need a own div otherwise the spinner has a bug. The wheel is rendered on the outer div  */}
 						<div>
 							{/* use font-size to change the spinner size    */}
 							<sl-spinner class="text-4xl" />
 						</div>
-
 						<p class="text-lg font-medium">Cloning large repositories can take a few minutes...</p>
 						<br />
 						<p class="max-w-lg">
@@ -176,35 +130,84 @@ function TheActualPage() {
 						</p>
 					</div>
 				</Match>
+				<Match when={inlang()?.errors().length !== 0 && inlang()}>
+					<div class="w-full h-full flex flex-col items-center justify-center gap-16">
+						<div class="pt-24">
+							<p class="pb-2 text-lg font-medium">
+								An error occurred while initializing the project file:
+							</p>
+							<ul>
+								{inlang()?.errors().length !== 0 && (
+									<For each={inlang()?.errors()}>
+										{(error: any) => {
+											return (
+												<li class="pt-2 md:w-[600px]">
+													<div class="bg-danger text-background p-4 rounded-md flex items-center gap-4 mb-8">
+														<Icon name="danger" class="w-7 h-7 flex-shrink-0" />
+														<div>
+															<span class="font-semibold">{error.name}: </span>
+															<br />
+															{error?.message}
+														</div>
+													</div>
+													{error.cause && error.cause.message && (
+														<>
+															<p class="text-surface-500 text-sm mb-1">Error cause</p>
+															<div class="font-mono p-4 bg-surface-800 text-background rounded-md text-sm mb-8">
+																<p>
+																	<span class="font-semibold text-hover-danger">{"> "}</span>
+																	{error.cause.message}
+																</p>
+															</div>
+														</>
+													)}
+													{error?.stack && (
+														<>
+															<p class="text-surface-500 text-sm mb-1">Stack trace</p>
+															<div class="font-mono p-4 bg-surface-800 text-background rounded-md text-sm mb-8 break-words">
+																<p>
+																	<span class="font-semibold text-hover-danger">{"> "}</span>
+																	{error?.stack}
+																</p>
+															</div>
+														</>
+													)}
+													<br />
+												</li>
+											)
+										}}
+									</For>
+								)}
+							</ul>
+						</div>
+					</div>
+				</Match>
 				<Match when={!doesInlangConfigExist()}>
 					<NoInlangConfigFoundCard />
 				</Match>
-				<Match when={doesInlangConfigExist()}>
+				<Match
+					when={
+						doesInlangConfigExist() && inlang()?.query.messages.includedMessageIds() !== undefined
+					}
+				>
 					<div>
-						<ListHeader messages={messages} />
+						<ListHeader ids={inlang()?.query.messages.includedMessageIds() || []} />
 						<TourHintWrapper
 							currentId="textfield"
 							position="bottom-left"
 							offset={{ x: 110, y: 144 }}
 							isVisible={tourStep() === "textfield"}
 						>
-							<For each={Object.keys(messages())}>
+							<For each={inlang()!.query.messages.includedMessageIds()}>
 								{(id) => {
-									return <Messages messages={messages()[id]!} />
+									return <Message id={id} />
 								}}
 							</For>
 						</TourHintWrapper>
 						<div
 							class="flex flex-col h-[calc(100vh_-_288px)] grow justify-center items-center min-w-full gap-2"
 							classList={{
-								["hidden"]:
-									messageCount(
-										messages,
-										filteredLanguages(),
-										textSearch(),
-										filteredLintRules(),
-										filteredId(),
-									) !== 0,
+								["hidden"]: messageCount(inlang()?.query.messages.includedMessageIds() || []) !== 0,
 							}}
 						>
 							<NoMatchPlaceholder />
@@ -223,25 +226,6 @@ function TheActualPage() {
 }
 
 function NoInlangConfigFoundCard() {
-	const { fs, setFsChange } = useEditorState()
-
-	const [shouldGenerateConfig, setShouldGenerateConfig] = createSignal(false)
-
-	const [successGeneratingConfig, { refetch }] = createResource(shouldGenerateConfig, async () => {
-		const [configFile, error] = await rpc.generateConfigFile({
-			applicationId: "EDITOR",
-			resolveFrom: "/",
-			fs: fs(),
-		})
-		if (error) {
-			return false
-		} else {
-			await fs().writeFile("/inlang.config.js", configFile)
-			setFsChange(new Date())
-			return true
-		}
-	})
-
 	return (
 		<div class="flex grow items-center justify-center">
 			<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
@@ -253,6 +237,7 @@ function NoInlangConfigFoundCard() {
 				<a class="self-center" href="/documentation" target="_blank">
 					<sl-button prop:variant="text">
 						Take me to the documentation
+						{/* @ts-ignore */}
 						<MaterialSymbolsArrowOutwardRounded slot="suffix" />
 					</sl-button>
 				</a>
@@ -261,103 +246,34 @@ function NoInlangConfigFoundCard() {
 	)
 }
 
-/**
- * Deactivated because bug https://github.com/inlang/inlang/issues/838#issuecomment-1560745678
- */
-function NoInlangConfigFoundCardWithAutoGeneration() {
-	const { fs, setFsChange } = useEditorState()
-
-	const [shouldGenerateConfig, setShouldGenerateConfig] = createSignal(false)
-
-	const [successGeneratingConfig, { refetch }] = createResource(shouldGenerateConfig, async () => {
-		const [configFile, error] = await rpc.generateConfigFile({
-			applicationId: "EDITOR",
-			resolveFrom: "/",
-			fs: fs(),
-		})
-		if (error) {
-			return false
-		} else {
-			await fs().writeFile("/inlang.config.js", configFile)
-			setFsChange(new Date())
-			return true
-		}
-	})
-
-	return (
-		<Show when={successGeneratingConfig() !== false} fallback={<CouldntGenerateConfigCard />}>
-			<div class="flex grow items-center justify-center">
-				<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
-					<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center" />
-					<h1 class="font-semibold pt-5">Inlang has not been set up for this repository yet.</h1>
-					<p class="pt-1.5 pb-8">
-						We can try to automatically the config for you. (The inlang.config.js file has not been
-						found at the root of the repository.)
-					</p>
-					<Switch>
-						<Match when={successGeneratingConfig() === undefined}>
-							<sl-button
-								prop:variant="primary"
-								prop:loading={successGeneratingConfig.loading}
-								onClick={() => {
-									setShouldGenerateConfig(true)
-									refetch()
-								}}
-							>
-								Try to generate config
-							</sl-button>
-						</Match>
-					</Switch>
-				</div>
-			</div>
-		</Show>
-	)
-}
-
-function CouldntGenerateConfigCard() {
-	return (
-		<div class="flex grow items-center justify-center">
-			<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
-				<p class="text-4xl self-center" slot="suffix">
-					😔
-				</p>
-				<h1 class="font-semibold pt-5">Couldn't generate the config file.</h1>
-				<p class="pt-1.5 pb-8">
-					Please refer to the documentation and write the config file manually.
-				</p>
-				<a class="self-center" href="/documentation" target="_blank">
-					<sl-button prop:variant="text">
-						Take me to the documentation
-						<MaterialSymbolsArrowOutwardRounded slot="suffix" />
-					</sl-button>
-				</a>
-			</div>
-		</div>
-	)
-}
-
-function RepositoryDoesNotExistOrNotAuthorizedCard() {
+function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number }) {
 	const { routeParams } = useEditorState()
 
 	return (
 		<div class="flex grow items-center justify-center">
-			<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
-				<h1 class="self-center text-5xl font-light">404</h1>
-				<h2 class="font-semibold pt-5">The repository has not been found.</h2>
-				<p class="pt-1.5">
-					Make sure that you the repository owner{" "}
-					<code class="bg-secondary-container py-1 px-1.5 rounded text-on-secondary-container">
-						{routeParams().owner}
-					</code>{" "}
-					and the repository name{" "}
-					<code class="bg-secondary-container py-1 px-1.5 rounded text-on-secondary-container">
-						{routeParams().repository}
-					</code>{" "}
-					contain no mistake.
-					<span class="pt-2 block">
-						Alternatively, you might not have access to the repository.
-					</span>
-				</p>
+			<div class="border border-outline p-12 rounded-xl flex flex-col max-w-lg">
+				<h1 class="text-5xl font-light pt-2">{args.code}</h1>
+				<h2 class="font-semibold pt-12">
+					Repo does not exist or you don't have sufficient access rights.
+				</h2>
+				<ul class="pt-8 list-disc pl-4">
+					<li>
+						Make sure that you the repository owner{" "}
+						<code class="bg-secondary-container py-1 px-1.5 rounded text-on-secondary-container">
+							{routeParams().owner}
+						</code>{" "}
+						and the repository name{" "}
+						<code class="bg-secondary-container py-1 px-1.5 rounded text-on-secondary-container">
+							{routeParams().repository}
+						</code>{" "}
+						contain no mistake.
+					</li>
+					<li class="pt-2">Alternatively, you might not have access to the repository.</li>
+					<li class="pt-2">
+						If this is a <span class="font-bold">private repository</span> please sign in at the
+						bottom of the page.
+					</li>
+				</ul>
 				<a
 					class="self-end pt-5"
 					href="https://github.com/inlang/inlang/discussions/categories/help-questions-answers"
@@ -365,6 +281,7 @@ function RepositoryDoesNotExistOrNotAuthorizedCard() {
 				>
 					<sl-button prop:variant="text">
 						I need help
+						{/* @ts-ignore */}
 						<MaterialSymbolsArrowOutwardRounded slot="suffix" />
 					</sl-button>
 				</a>

@@ -1,15 +1,15 @@
-import { createEffect, createSignal, For, JSXElement, on, onMount, Show } from "solid-js"
+import { createEffect, createSignal, For, type JSXElement, on, onMount, Show } from "solid-js"
 import { useEditorState } from "./State.jsx"
-import { Layout as RootLayout } from "@src/pages/Layout.jsx"
+import { Layout as RootLayout } from "#src/pages/Layout.jsx"
 import { SearchInput } from "./components/SearchInput.jsx"
 import { Gitfloat } from "./components/Gitfloat.jsx"
 import IconAdd from "~icons/material-symbols/add"
 import IconClose from "~icons/material-symbols/close"
 import IconTranslate from "~icons/material-symbols/translate"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
-import type { Language } from "@inlang/core/ast"
-import { showToast } from "@src/components/Toast.jsx"
-import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
+import { showToast } from "#src/components/Toast.jsx"
+import type { LanguageTag } from "@inlang/sdk"
+import { sortLanguageTags } from "./helper/sortLanguageTags.js"
 
 interface Filter {
 	name: string
@@ -20,41 +20,33 @@ interface Filter {
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	const {
-		inlangConfig,
-		repositoryIsCloned,
+		inlang,
+		lixErrors,
 		setTextSearch,
-		filteredLintRules,
-		setFilteredLintRules,
-		filteredLanguages,
-		setFilteredLanguages,
+		filteredMessageLintRules,
+		setFilteredMessageLintRules,
+		filteredLanguageTags,
+		setFilteredLanguageTags,
 		userIsCollaborator,
-		languages,
-		setLanguages,
-		resources,
-		setResources,
-		tourStep,
+		languageTags,
 	} = useEditorState()
 
-	// const onlyLanguagesTheUserSpeaks = () => {
-	// 	const languages = inlangConfig()?.languages.filter(
-	// 		(language) =>
-	// 			navigator.languages.includes(language) || language === inlangConfig()!.referenceLanguage,
-	// 	)
-	// 	return languages ?? []
-	// }
+	const removeFilter = (filterName: string) => {
+		setSelectedFilters(selectedFilters().filter((filter: Filter) => filter.name !== filterName))
+	}
 
 	const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
 	const [addLanguageText, setAddLanguageText] = createSignal("")
 	const filters: Filter[] = [
 		{
 			name: "Language",
-			icon: () => <IconTranslate class="w-5 h-5" />,
-			component: () => <LanguageFilter clearFunction={removeFilter("Language")} />,
+			icon: <IconTranslate class="w-5 h-5" />,
+			component: <LanguageFilter clearFunction={removeFilter("Language")} />,
 		},
 		{
 			name: "Linting",
-			icon: () => <WarningIcon />,
-			component: () => <LintFilter clearFunction={removeFilter("Linting")} />,
+			icon: <WarningIcon />,
+			component: <LintFilter clearFunction={removeFilter("Linting")} />,
 		},
 	]
 
@@ -66,20 +58,19 @@ export function Layout(props: { children: JSXElement }) {
 		if (
 			newFilter !== undefined &&
 			!selectedFilters().some((filter) => filter.name === newFilter.name) &&
-			(newFilter.name !== "Linting" || inlangConfig()?.lint?.rules)
+			(newFilter.name !== "Linting" || inlang()?.installed.messageLintRules())
 		) {
+			if (newFilter.name === "Language" && filteredLanguageTags().length === 0) {
+				setFilteredLanguageTags(() => inlang()?.config()?.languageTags || [])
+			}
 			setSelectedFilters([...selectedFilters(), newFilter])
 		}
-	}
-
-	const removeFilter = (filterName: string) => {
-		setSelectedFilters(selectedFilters().filter((filter: Filter) => filter.name !== filterName))
 	}
 
 	//add linting rule to filter
 	createEffect(
 		on(
-			filteredLintRules,
+			filteredMessageLintRules,
 			(rules) => {
 				if (rules.length === 1 && !selectedFilters().some((filter) => filter.name === "Linting")) {
 					addFilter("Linting")
@@ -89,74 +80,43 @@ export function Layout(props: { children: JSXElement }) {
 		),
 	)
 
-	function isLessThanHalfASecondAgo(timeString: Date) {
-		const time = new Date(timeString)
-		const currentTime = new Date().getTime()
-		const timeDifference = Math.abs(currentTime - time.getTime())
-		return timeDifference < 500
-	}
-
 	//add initial language filter
-	createEffect(() => {
-		if (
-			repositoryIsCloned.error === undefined &&
-			repositoryIsCloned.loading === false &&
-			isLessThanHalfASecondAgo(repositoryIsCloned()!) &&
-			inlangConfig()
-		) {
-			if (filteredLanguages().length > 0) {
-				addFilter("Language")
-				// } else if (onlyLanguagesTheUserSpeaks().length > 1) {
-				// 	setFilteredLanguages(onlyLanguagesTheUserSpeaks())
-				// 	addFilter("Language")
-			} else {
-				setFilteredLanguages(inlangConfig()!.languages)
+	createEffect(
+		on(inlang, () => {
+			if (lixErrors().length === 0 && inlang()) {
+				if (filteredLanguageTags().length > 0) {
+					addFilter("Language")
+				} else {
+					if (inlang()!.config()) setFilteredLanguageTags(inlang()!.config()!.languageTags)
+				}
 			}
-		}
-	})
+		}),
+	)
 
 	//add initial lintRule filter
-	createEffect(() => {
-		if (
-			repositoryIsCloned.error === undefined &&
-			repositoryIsCloned.loading === false &&
-			isLessThanHalfASecondAgo(repositoryIsCloned()!) &&
-			filteredLintRules().length > 0
-		) {
-			addFilter("Linting")
-		}
-	})
+	createEffect(
+		on(inlang, () => {
+			if (lixErrors().length === 0 && filteredMessageLintRules().length > 0) {
+				addFilter("Linting")
+			}
+		}),
+	)
 
-	const addLanguage = (language: Language) => {
-		if (languages().includes(language)) {
+	const addLanguageTag = (languageTag: LanguageTag) => {
+		if (languageTags().includes(languageTag)) {
 			showToast({
 				variant: "warning",
-				title: "Language already exists",
-				message: "This language is already present in this project. Please choose another name.",
+				title: "Language tag already exists",
+				message:
+					"This language tag is already present in this project. Please choose another name.",
 			})
 			return
 		}
-		setLanguages([...languages(), language])
-		setFilteredLanguages([...filteredLanguages(), language])
-		setResources([
-			...resources,
-			{
-				type: "Resource",
-				languageTag: {
-					type: "LanguageTag",
-					name: language,
-				},
-				body: [],
-			},
-		])
-	}
-
-	const isAddingResourcePossible = () => {
-		if (resources.some((resource) => !resource.metadata || resource.metadata.space)) {
-			return true
-		} else {
-			return false
-		}
+		setFilteredLanguageTags([...filteredLanguageTags(), languageTag])
+		inlang()?.setConfig({
+			...inlang()!.config()!,
+			languageTags: [...inlang()!.config()!.languageTags, languageTag],
+		})
 	}
 
 	return (
@@ -169,29 +129,22 @@ export function Layout(props: { children: JSXElement }) {
 				<div class="flex justify-between gap-2 py-5 sticky top-[72px] z-30 bg-background">
 					<div class="absolute -left-2 w-[calc(100%_+_16px)] h-full -translate-y-5 bg-background" />
 					<div class="flex z-20 justify-between gap-2 items-center">
-						<Show when={inlangConfig()}>
+						<Show when={inlang()}>
 							<For each={filters}>
 								{(filter) => (
 									<Show
 										when={
 											selectedFilters().includes(filter) &&
-											(filter.name !== "Linting" || inlangConfig()?.lint?.rules)
+											(filter.name !== "Linting" || inlang()?.installed.messageLintRules())
 										}
 									>
-										<TourHintWrapper
-											currentId="default-languages"
-											position="bottom-left"
-											offset={{ x: 0, y: 40 }}
-											isVisible={filter.name === "Language" && tourStep() === "default-languages"}
-										>
-											{filter.component}
-										</TourHintWrapper>
+										{filter.component}
 									</Show>
 								)}
 							</For>
 							<Show
 								when={
-									inlangConfig()?.lint?.rules
+									inlang()?.installed.messageLintRules()
 										? selectedFilters().length !== filters.length
 										: selectedFilters().length !== filters.length - 1
 								}
@@ -199,8 +152,10 @@ export function Layout(props: { children: JSXElement }) {
 									<sl-button
 										prop:size="small"
 										onClick={() => {
-											setFilteredLanguages(setFilteredLanguages(() => inlangConfig()!.languages))
-											setFilteredLintRules([])
+											setFilteredLanguageTags(
+												setFilteredLanguageTags(inlang()?.config()?.languageTags || []),
+											)
+											setFilteredMessageLintRules([])
 											setSelectedFilters([])
 										}}
 									>
@@ -221,17 +176,20 @@ export function Layout(props: { children: JSXElement }) {
 												<Show
 													when={
 														!selectedFilters().includes(filter) &&
-														(filter.name !== "Linting" || inlangConfig()?.lint?.rules)
+														(filter.name !== "Linting" || inlang()?.installed.messageLintRules())
 													}
 												>
 													<sl-menu-item>
 														<button
 															onClick={() => {
-																if (filter.name === "Linting" && filteredLintRules.length === 0) {
-																	setFilteredLintRules(
-																		inlangConfig()
-																			?.lint?.rules?.flat()
-																			.map((rule) => rule.id) ?? [],
+																if (
+																	filter.name === "Linting" &&
+																	filteredMessageLintRules.length === 0
+																) {
+																	setFilteredMessageLintRules(
+																		inlang()
+																			?.installed.messageLintRules()
+																			.map((lintRule) => lintRule.meta.id) ?? [],
 																	)
 																}
 																addFilter(filter.name)
@@ -262,15 +220,14 @@ export function Layout(props: { children: JSXElement }) {
 							onClick={() => setAddLanguageModalOpen(true)}
 							prop:disabled={!userIsCollaborator()}
 						>
-							Add language
+							Add language tag
 						</sl-button>
 					</div>
 				</div>
-				{/* <hr class="h-px w-full bg-outline-variant my-2"> </hr> */}
 				{props.children}
 			</div>
 			<sl-dialog
-				prop:label="Add language"
+				prop:label="Add language tag"
 				prop:open={addLanguageModalOpen()}
 				on:sl-after-hide={() => setAddLanguageModalOpen(false)}
 			>
@@ -287,18 +244,12 @@ export function Layout(props: { children: JSXElement }) {
 					prop:value={addLanguageText()}
 					onInput={(e) => setAddLanguageText(e.currentTarget.value)}
 				/>
-				<Show when={!isAddingResourcePossible()}>
-					<p class="text-xs pb-4 -mt-4 pr-8 text-danger">
-						Your plugin is using metadata to parse resources. This is not yet supported.
-					</p>
-				</Show>
 				<sl-button
 					class="w-full"
 					prop:size={"small"}
 					prop:variant={"primary"}
-					prop:disabled={!isAddingResourcePossible()}
 					onClick={() => {
-						addLanguage(addLanguageText())
+						addLanguageTag(addLanguageText())
 						setAddLanguageModalOpen(false)
 					}}
 				>
@@ -390,25 +341,25 @@ function BranchMenu() {
 }
 
 function LanguageFilter(props: { clearFunction: any }) {
-	const { inlangConfig, setFilteredLanguages, filteredLanguages } = useEditorState()
+	const { inlang, setFilteredLanguageTags, filteredLanguageTags } = useEditorState()
 
 	onMount(() => {
-		if (filteredLanguages().length === 0 || filteredLanguages() === undefined) {
-			setFilteredLanguages(() => inlangConfig()!.languages)
+		if (filteredLanguageTags().length === 0 || filteredLanguageTags() === undefined) {
+			setFilteredLanguageTags(() => inlang()?.config()?.languageTags || [])
 		}
 	})
 
 	return (
-		<Show when={inlangConfig() && filteredLanguages() && filteredLanguages().length > 0}>
+		<Show when={inlang()?.config() && filteredLanguageTags() && filteredLanguageTags().length > 0}>
 			<sl-select
 				prop:name="Language Select"
 				prop:placeholder="none"
 				prop:size="small"
 				prop:multiple={true}
 				prop:clearable={true}
-				prop:value={filteredLanguages()}
+				prop:value={filteredLanguageTags()}
 				on:sl-change={(event: any) => {
-					setFilteredLanguages(event.target.value)
+					setFilteredLanguageTags(event.target.value)
 				}}
 				on:sl-clear={() => {
 					props.clearFunction
@@ -431,30 +382,41 @@ function LanguageFilter(props: { clearFunction: any }) {
 					<span class="text-left text-outline-variant grow">Select</span>
 					<a
 						class="cursor-pointer link link-primary opacity-75"
-						onClick={() => setFilteredLanguages(() => inlangConfig()!.languages)}
+						onClick={() => setFilteredLanguageTags(() => inlang()?.config()?.languageTags || [])}
 					>
 						All
 					</a>
 					<a
 						class="cursor-pointer link link-primary opacity-75"
-						// filter all except the reference language
-						onClick={() => setFilteredLanguages([inlangConfig()!.referenceLanguage])}
+						// filter all except the source language
+						onClick={() =>
+							setFilteredLanguageTags(
+								// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+								[inlang()?.config()?.sourceLanguageTag!],
+							)
+						}
 					>
 						None
 					</a>
 				</div>
 				<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
 				<div class="max-h-[300px] overflow-y-auto text-sm">
-					<For each={inlangConfig()?.languages}>
+					{/* eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain */}
+					<For
+						each={sortLanguageTags(
+							inlang()?.config()?.languageTags || [],
+							inlang()?.config()?.sourceLanguageTag || "en",
+						)}
+					>
 						{(language) => (
 							<sl-option
 								prop:value={language}
-								prop:selected={filteredLanguages().includes(language)}
-								prop:disabled={language === inlangConfig()?.referenceLanguage}
-								class={language === inlangConfig()?.referenceLanguage ? "opacity-50" : ""}
+								prop:selected={filteredLanguageTags().includes(language)}
+								prop:disabled={language === inlang()?.config()?.sourceLanguageTag}
+								class={language === inlang()?.config()?.sourceLanguageTag ? "opacity-50" : ""}
 							>
 								{language}
-								{language === inlangConfig()?.referenceLanguage ? (
+								{language === inlang()?.config()?.sourceLanguageTag ? (
 									<sl-badge prop:variant="neutral" class="relative translate-x-3">
 										<span class="after:content-['ref'] after:text-background" />
 									</sl-badge>
@@ -471,13 +433,7 @@ function LanguageFilter(props: { clearFunction: any }) {
 }
 
 function LintFilter(props: { clearFunction: any }) {
-	const { inlangConfig, filteredLintRules, setFilteredLintRules } = useEditorState()
-
-	const lintRuleIds = () =>
-		inlangConfig()
-			?.lint?.rules?.flat()
-			.map((rule) => rule.id) ?? []
-
+	const { inlang, filteredMessageLintRules, setFilteredMessageLintRules } = useEditorState()
 	return (
 		<sl-select
 			prop:name="Lint Filter Select"
@@ -485,9 +441,9 @@ function LintFilter(props: { clearFunction: any }) {
 			prop:multiple={true}
 			prop:maxOptionsVisible={2}
 			prop:clearable={true}
-			prop:value={filteredLintRules()}
+			prop:value={filteredMessageLintRules()}
 			on:sl-change={(event: any) => {
-				setFilteredLintRules(event.target.value ?? [])
+				setFilteredMessageLintRules(event.target.value ?? [])
 			}}
 			on:sl-clear={() => {
 				props.clearFunction
@@ -501,14 +457,14 @@ function LintFilter(props: { clearFunction: any }) {
 				<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant/60">
 					is
 				</p>
-				<Show when={filteredLintRules().length === 0} fallback={<div />}>
+				<Show when={filteredMessageLintRules().length === 0} fallback={<div />}>
 					<sl-tag prop:size="small" class="font-medium text-sm">
 						everyMessage
 					</sl-tag>
 					<button
 						class="hover:text-on-surface hover:bg-surface-variant rounded-sm"
 						onClick={() => {
-							setFilteredLintRules([])
+							setFilteredMessageLintRules([])
 							props.clearFunction
 						}}
 					>
@@ -524,22 +480,38 @@ function LintFilter(props: { clearFunction: any }) {
 				<span class="text-left text-outline-variant grow">Select</span>
 				<a
 					class="cursor-pointer link link-primary opacity-75"
-					onClick={() => setFilteredLintRules(lintRuleIds())}
+					onClick={() =>
+						setFilteredMessageLintRules(
+							inlang()
+								?.installed.messageLintRules()
+								.map((lintRule) => lintRule.meta.id) ?? [],
+						)
+					}
 				>
 					All
 				</a>
 				<a
 					class="cursor-pointer link link-primary opacity-75"
-					onClick={() => setFilteredLintRules([])}
+					onClick={() => setFilteredMessageLintRules([])}
 				>
 					None
 				</a>
 			</div>
 			<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
 			<div class="max-h-[300px] overflow-y-auto">
-				<For each={lintRuleIds()}>
-					{(id) => (
-						<sl-option prop:value={id}>{id.includes(".") ? id.split(".")[1] : id}</sl-option>
+				<For
+					each={
+						inlang()
+							?.installed.messageLintRules()
+							.map((lintRule) => lintRule) ?? []
+					}
+				>
+					{(lintRule) => (
+						<sl-option prop:value={lintRule.meta.id}>
+							{typeof lintRule.meta.displayName === "object"
+								? lintRule.meta.displayName.en
+								: lintRule.meta.displayName}
+						</sl-option>
 					)}
 				</For>
 			</div>

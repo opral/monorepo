@@ -2,6 +2,7 @@
 	"name": "@inlang/env-variables",
 	"type": "module",
 	"private": true,
+	"version": "0.0.0",
 	"exports": {
 		".": "./dist/index.js"
 	},
@@ -10,31 +11,25 @@
 		"./src"
 	],
 	"scripts": {
-		"- CAREFUL build can have caching issues. Resolve the issue by running npm run clean in the root of the repo": "",
-		"build": "tsx ./build.ts",
+		"build": "tsx ./build.ts && tsc --emitDeclarationOnly",
 		"dev": "DEV=true npm run build",
-		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
-		"test:watch": "vitest watch --passWithNoTests --coverage",
-		"---- LINT ----------------------------------------------------------": "",
-		"lint": "cd ../.. && npm run lint:base ./source-code/core",
-		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/core",
-		"format": "cd ../.. && npm run format:base ./source-code/core",
-		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/core",
-		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
+		"lint": "eslint ./src --fix",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/core": "^0.9.0",
-		"dotenv": "^16.0.3",
-		"zod": "^3.21.4"
+		"@inlang/result": "*"
 	},
 	"devDependencies": {
-		"esbuild": "^0.17.15",
-		"esbuild-plugin-d.ts": "^1.1.0",
-		"esbuild-plugin-glob": "^2.2.1",
-		"tsx": "^3.12.6"
+		"@placeholder-company/js-code-style": "*",
+		"dotenv": "^16.3.1",
+		"esbuild": "^0.19.2",
+		"tsx": "^3.12.7",
+		"zod": "^3.22.2",
+		"@vitest/coverage-v8": "0.34.3",
+		"typescript": "5.2.2",
+		"vitest": "0.34.3"
 	},
-	"license": "Apache-2.0",
-	"version": null
+	"license": "Apache-2.0"
 }

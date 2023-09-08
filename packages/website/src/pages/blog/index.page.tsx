@@ -2,7 +2,7 @@ import { Title, Meta } from "@solidjs/meta"
 import { For } from "solid-js"
 import { Layout } from "../Layout.jsx"
 import type { PageProps } from "./@id/index.page.jsx"
-import { defaultLanguage } from "@src/renderer/_default.page.route.js"
+import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
 
 export function Page(props: PageProps) {
@@ -15,10 +15,10 @@ export function Page(props: PageProps) {
 
 	return (
 		<>
-			<Title>inlang Blog - Developer-first localization infrastructure.</Title>
+			<Title>inlang Blog - Globalization infrastructure for software</Title>
 			<Meta
 				name="description"
-				content="Posts that revolve around inlang, git, and localization (i18n)."
+				content="Posts that revolve around inlang, git, and globalization (i18n)."
 			/>
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<Layout>

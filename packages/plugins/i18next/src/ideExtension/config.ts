@@ -1,17 +1,19 @@
-import type { InlangConfig } from "@inlang/core/config"
-import { parse } from "./messageReferenceMatchers.js"
 import type { PluginSettings } from "../settings.js"
+import { parse } from "./messageReferenceMatchers.js"
+import type { Plugin } from "@inlang/plugin"
 
-export const ideExtensionConfig = (settings: PluginSettings): InlangConfig["ideExtension"] => {
-	return {
+export const ideExtensionConfig = (
+	settings: PluginSettings,
+): ReturnType<Exclude<Plugin["addCustomApi"], undefined>> => ({
+	"app.inlang.ideExtension": {
 		messageReferenceMatchers: [
-			async (args) => {
+			async (args: { documentText: string }) => {
 				return parse(args.documentText, settings)
 			},
 		],
 		extractMessageOptions: [
 			{
-				callback: (messageId) => `{t("${messageId}")}`,
+				callback: (args: { messageId: string }) => `{t("${args.messageId}")}`,
 			},
 		],
 		documentSelectors: [
@@ -25,5 +27,5 @@ export const ideExtensionConfig = (settings: PluginSettings): InlangConfig["ideE
 				language: "svelte",
 			},
 		],
-	}
-}
+	},
+})

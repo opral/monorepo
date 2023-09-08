@@ -9,9 +9,7 @@
 
 import type { NextFunction, Request, Response } from "express"
 
-const redirectMap: { [key: string]: string } = {
-	"/documentation/getting-started": "/documentation/quick-start",
-}
+const redirectMap: { [key: string]: string } = {}
 
 export async function redirects(request: Request, response: Response, next: NextFunction) {
 	try {

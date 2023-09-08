@@ -50,12 +50,12 @@
 			}
 		},
 		"pricing": {
-			"title": "Free for individual use and open source",
+			"title": "Free for individual use",
 			"caption": "Pricing",
-			"description": "Inlang is a commercial product. But, individual use and open source stays free. We see individual use as good \"marketing\" that helps us acquiring enterprise customers.",
+			"description": "Inlang is a commercial product. We offer a free tier for individual and non-commercial use. Enterprise pricing will be announced in the future.",
 			"free": {
 				"name": "free",
-				"title": "Individuals and Open Source",
+				"title": "Individual use and dev tools",
 				"amount": "$0"
 			},
 			"paid": {
@@ -79,20 +79,21 @@
 		"openEditor": "Open Editor",
 		"link": {
 			"blog": "Blog",
-			"docs": "Docs",
+			"marketplace": "Marketplace",
+			"documentation": "Documentation",
 			"feedback": "Feedback"
 		}
 	},
 	"footer": {
-		"docs": {
-			"title": "Docs",
+		"documentation": {
+			"title": "Documentation",
 			"gettingStarted": "Getting Started",
 			"whyInlang": "Why inlang?",
 			"contribute": "Contribute"
 		},
 		"resources": {
 			"title": "Resources",
-			"blog": "Blog",
+			"marketplace": "Marketplace",
 			"roadmap": "Roadmap",
 			"github": "GitHub",
 			"twitter": "Twitter",
@@ -102,7 +103,8 @@
 			"title": "Let's talk",
 			"getInTouch": "Get in Touch",
 			"join": "Join the Team",
-			"feedback": "Feedback"
+			"feedback": "Feedback",
+			"blog": "Blog"
 		}
 	},
 	"newsletter": {

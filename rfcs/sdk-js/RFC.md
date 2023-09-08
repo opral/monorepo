@@ -126,7 +126,7 @@ There are many ways how to detect the language that should be used:
 
 We can find better names for those strategies once we implement them.
 
-There is the need to support multiple strategies. If the first one does not match, the next strategies will be tried until a match is found. If nothing matches, the `referenceLanguage` will be used.
+There is the need to support multiple strategies. If the first one does not match, the next strategies will be tried until a match is found. If nothing matches, the `sourceLanguageTag` will be used.
 
 Setting up auto detection is optional. Developers can also just call the `changeLanguage` function directly.
 

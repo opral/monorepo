@@ -1,147 +1,83 @@
-import { query } from "@inlang/core/query"
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Command } from "commander"
-import { countMessagesPerLanguage, getFlag, log } from "../../utilities.js"
-import type { Message } from "@inlang/core/ast"
 import { rpc } from "@inlang/rpc"
-import { getConfig } from "../../utilities/getConfig.js"
-import { cli } from "../../main.js"
-import { bold, italic } from "../../utilities/format.js"
+import { getInlangProject } from "../../utilities/getInlangProject.js"
+import { log } from "../../utilities/log.js"
+import type { InlangProject } from "@inlang/sdk"
+import prompts from "prompts"
 
 export const translate = new Command()
 	.command("translate")
-	.option("-f, --force", "Force machine translation and skip the confirmation prompt.")
+	.option("-f, --force", "Force machine translation and skip the confirmation prompt.", false)
 	.description("Machine translate all resources.")
-	.action(translateCommandAction)
+	.action(async (args: { force: boolean }) => {
+		try {
+			// Prompt the user to confirm
+			if (!args.force) {
+				log.warn(
+					"Human translations are better than machine translations. \n\nWe advise to use machine translations in the build step without commiting them to the repo. By using machine translate in the build step, you avoid missing translations in production while still flagging to human translators that transaltions are missing. You can use the force flag (-f, --force) to skip this prompt warning.",
+				)
+				const response = await prompts({
+					type: "confirm",
+					name: "value",
+					message: "Are you sure you want to machine translate?",
+				})
+				if (!response.value) {
+					log.info("🚫 Aborting machine translation.")
+					return
+				}
+			}
 
-async function translateCommandAction() {
-	try {
-		// Get the options
-		const options = translate.opts()
+			// Get the config
+			const { data: inlang, error } = await getInlangProject()
 
-		// Prompt the user to confirm
-		if (!options.force) {
-			const promptly = await import("promptly")
-			log.warn(
-				"Machine translations are not very accurate. We advise you to only use machine translations in a build step to have them in production but not commit them to your repository. You can use the force flag (-f, --force) to skip this prompt in a build step.",
-			)
-			const answer = await promptly.prompt("Are you sure you want to machine translate? (y/n)")
-			if (answer !== "y") {
-				log.info("🚫 Aborting machine translation.")
+			if (error) {
+				log.error(error)
+				// no message because that's handled in getInlangProject
 				return
 			}
-		}
 
-		// Get the config
-		const [config, errorMessage] = await getConfig({ options: cli.opts() })
-		if (!config) {
-			log.error(errorMessage)
-			// no message because that's handled in getConfig
+			translateCommandAction({ inlang })
+		} catch (error) {
+			log.error(error)
+		}
+	})
+
+export async function translateCommandAction(args: { inlang: InlangProject }) {
+	try {
+		const projectConfig = args.inlang.config()
+
+		if (!projectConfig) {
+			log.error(`❌ No inlang config found, please add a project.inlang.json file`)
 			return
 		}
-
-		// Get all resources
-		let resources = await config.readResources({ config })
-
-		// Get reference language from config
-		const referenceLanguage = config.referenceLanguage
-
-		// Get reference language resource
-		const referenceLanguageResource = resources.find(
-			(resource) => resource.languageTag.name === referenceLanguage,
-		)!
-
-		// Count messages per language
-		const messageCounts = countMessagesPerLanguage(resources)
-		log.info(
-			"🌏 Found " +
-				Object.keys(messageCounts).length +
-				" languages with a total of " +
-				Object.values(messageCounts).reduce((a, b) => a + b, 0) +
-				" messages.",
-		)
-
+		const sourceLanguageTag = projectConfig.sourceLanguageTag
 		// Get languages to translate to with the reference language removed
-		const languagesToTranslateTo = resources.filter(
-			(resource) => resource.languageTag.name !== referenceLanguage,
-		)
-		log.info(
-			"📝 Translating to " +
-				languagesToTranslateTo.length +
-				" languages. [" +
-				[...new Set(languagesToTranslateTo)]
-					.map((language) => language.languageTag.name)
-					.join(", ") +
-				"]",
+
+		const languagesTagsToTranslateTo = projectConfig.languageTags.filter(
+			// @ts-ignore - type mismtach - fix after refactor
+			(tag) => tag !== sourceLanguageTag,
 		)
 
-		// Translate all messages
-		for (const language of languagesToTranslateTo) {
-			for (const message of referenceLanguageResource.body) {
-				// skip if message already exists in language
-				if (language.body.some((langMessage) => langMessage.id.name === message.id.name)) {
-					continue
-				}
+		log.info(`📝 Translating to ${languagesTagsToTranslateTo.length} languages.`)
 
-				// 🌏 Translation
-				const [translation, exception] = await rpc.machineTranslate({
-					referenceLanguage: referenceLanguage,
-					targetLanguage: language.languageTag.name,
-					text: message.pattern.elements[0]!.value as string,
-				})
-				if (exception) {
-					log.error("Couldn't translate message " + message.id.name + ". ", exception.message)
-					continue
-				}
-
-				log.info(
-					getFlag(language.languageTag.name) +
-						" Translated message " +
-						bold(message.id.name) +
-						" to " +
-						italic(translation),
-				)
-
-				const newMessage: Message = {
-					type: "Message",
-					id: { type: "Identifier", name: message.id.name },
-					pattern: {
-						type: "Pattern",
-						elements: [{ type: "Text", value: translation }],
-					},
-				}
-
-				// find language resource to add the new message to
-				const languageResource = resources.find(
-					(resource) => resource.languageTag.name === language.languageTag.name,
-				)
-				if (languageResource) {
-					const [newResource, exception] = query(languageResource).upsert({
-						message: newMessage,
-					})
-
-					if (exception) {
-						log.error("Couldn't upsert new message. ", exception.message)
-					}
-
-					// merge the new resource with the existing resources
-					resources = resources.map((resource) => {
-						if (resource.languageTag.name === language.languageTag.name && newResource) {
-							return newResource
-						}
-						return resource
-					})
-				}
+		// parallelize in the future
+		for (const id of args.inlang.query.messages.includedMessageIds()) {
+			const { data: translatedMessage, error } = await rpc.machineTranslateMessage({
+				message: args.inlang.query.messages.get({ where: { id } })!,
+				sourceLanguageTag: sourceLanguageTag,
+				targetLanguageTags: languagesTagsToTranslateTo,
+			})
+			if (error) {
+				log.error(`❌ Couldn't translate message "${id}": ${error}`)
+				continue
 			}
+
+			args.inlang.query.messages.update({ where: { id: id }, data: translatedMessage! })
+			log.info(`✅ Machine translated message "${id}"`)
 		}
-
-		// write the new resource to the file system
-		await config.writeResources({
-			config,
-			resources: resources,
-		})
-
 		// Log the message counts
-		log.info("✅ Translated all messages.")
+		log.info("Machine translate complete.")
 	} catch (error) {
 		log.error(error)
 	}

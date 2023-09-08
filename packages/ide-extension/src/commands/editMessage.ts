@@ -1,9 +1,8 @@
-import { query } from "@inlang/core/query"
-import { setState, state } from "../state.js"
+import { state } from "../state.js"
 import { msg } from "../utilities/message.js"
 import { EventEmitter, window } from "vscode"
-import type { Message } from "@inlang/core/ast"
-import { getMessageAsString } from "../utilities/query.js"
+import type { LanguageTag, Message } from "@inlang/sdk"
+import { getPatternFromString, getStringFromPattern } from "../utilities/query.js"
 
 const onDidEditMessageEmitter = new EventEmitter<void>()
 export const onDidEditMessage = onDidEditMessageEmitter.event
@@ -11,49 +10,61 @@ export const onDidEditMessage = onDidEditMessageEmitter.event
 export const editMessageCommand = {
 	id: "inlang.editMessage",
 	title: "Inlang: Edit Message",
-	callback: async function ({ messageId, resource }: { messageId: string; resource: string }) {
-		const { writeResources } = state().config
-		const currentResource = state().resources.find((r) => r.languageTag.name === resource)
-		if (!currentResource) {
-			return msg("Couldn't retrieve resource", "warn", "notification")
+	callback: async function ({
+		messageId,
+		languageTag,
+	}: {
+		messageId: Message["id"]
+		languageTag: LanguageTag
+	}) {
+		// Get the message from the state
+		const message = state().inlang.query.messages.get({ where: { id: messageId } })
+		if (!message) {
+			return msg(`Message with id ${messageId} not found.`)
 		}
 
-		const message = getMessageAsString(query(currentResource).get({ id: messageId }))
+		// Find the variant with the specified language tag or create a new one
+		let variant = message.variants.find((v) => v.languageTag === languageTag)
+		if (!variant) {
+			// Create a new variant
+			variant = {
+				languageTag,
+				match: {},
+				pattern: [
+					{
+						type: "Text",
+						value: "",
+					},
+				],
+			}
+			message.variants.push(variant)
+		}
 
+		// Construct the complete pattern text
+		const stringPattern = getStringFromPattern({ pattern: variant.pattern, languageTag, messageId })
+
+		// Show input box with current message content
 		const newValue = await window.showInputBox({
 			title: "Enter new value:",
-			value: message,
+			value: stringPattern,
 		})
-
-		if (newValue === undefined) {
+		if (!newValue) {
 			return
 		}
 
-		const newMessage: Message = {
-			type: "Message",
-			id: { type: "Identifier", name: messageId },
-			pattern: {
-				type: "Pattern",
-				elements: [{ type: "Text", value: newValue }],
-			},
-		}
+		// Update the pattern
+		variant.pattern = getPatternFromString({ string: newValue })
 
-		const [newResource, exception] = query(currentResource).upsert({ message: newMessage })
-
-		if (exception) {
-			return window.showErrorMessage("Couldn't update message. ", exception.message)
-		}
-		const resources = state().resources.map((r) =>
-			r.languageTag.name === resource ? newResource : r,
-		)
-		await writeResources({
-			config: state().config,
-			resources,
+		// Upsert the updated message
+		state().inlang.query.messages.upsert({
+			where: { id: messageId },
+			data: message,
 		})
-		setState({ ...state(), resources })
 
+		// Emit event to notify that a message was edited
 		onDidEditMessageEmitter.fire()
 
+		// Return success message
 		return msg("Message updated.")
 	},
 } as const

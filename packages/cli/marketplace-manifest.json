@@ -1,0 +1,17 @@
+{
+	"id": "app.inlang.cli",
+	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"displayName": {
+		"en": "CLI"
+	},
+	"description": {
+		"en": "Command line interface for inlang projects. Many commands and the possibility to do automation."
+	},
+	"readme": {
+		"en": "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/cli/README.md"
+	},
+	"keywords": ["cli", "commands"],
+	"publisherName": "inlang",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"license": "Apache-2.0"
+}

@@ -1,19 +1,17 @@
-import { useLocalStorage } from "@src/services/local-storage/index.js"
-import { createEffect, createSignal, JSXElement, onMount, Show } from "solid-js"
+import { useLocalStorage } from "#src/services/local-storage/index.js"
+import { createEffect, createSignal, type JSXElement, onMount, Show } from "solid-js"
 import IconGithub from "~icons/cib/github"
 import { pushChanges, useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
-import { showToast } from "@src/components/Toast.jsx"
+import { showToast } from "#src/components/Toast.jsx"
 import { navigate } from "vite-plugin-ssr/client/router"
-import { github } from "@src/services/github/index.js"
-import { currentPageContext } from "@src/renderer/state.js"
+import { github } from "#src/services/github/index.js"
+import { currentPageContext } from "#src/renderer/state.js"
 import type { EditorRouteParams } from "../types.js"
-import { SignInDialog } from "@src/services/auth/index.js"
+import { SignInDialog } from "#src/services/auth/index.js"
 import { publicEnv } from "@inlang/env-variables"
 import { telemetryBrowser } from "@inlang/telemetry"
-import { TourHintWrapper, TourStepId } from "./Notification/TourHintWrapper.jsx"
-import { query } from "@inlang/core/query"
-import type { Resource } from "@inlang/core/ast"
+import { TourHintWrapper, type TourStepId } from "./Notification/TourHintWrapper.jsx"
 
 export const Gitfloat = () => {
 	const {
@@ -22,31 +20,26 @@ export const Gitfloat = () => {
 		currentBranch,
 		localChanges,
 		setLocalChanges,
-		resources,
-		setResources,
 		setFsChange,
-		setLastPush,
 		routeParams,
-		fs,
+		repo,
 		setLastPullTime,
 		tourStep,
-		inlangConfig,
+		inlang,
 	} = useEditorState()
 	const [localStorage] = useLocalStorage()
 
 	// ui states
-	const gitState: () => "login" | "fork" | "pullrequest" | "hasChanges" = () => {
+	const gitState: () => "login" | "loading" | "fork" | "pullrequest" | "hasChanges" = () => {
 		if (localStorage?.user === undefined) {
 			return "login"
+		} else if (userIsCollaborator.loading || !inlang()) {
+			return "loading"
 		} else if (userIsCollaborator() === false) {
 			return "fork"
 		}
 		// if changes exist in a fork, show the pull request button
-		else if (
-			hasPushedChanges() &&
-			localChanges().length === 0 &&
-			githubRepositoryInformation()?.data.fork
-		) {
+		else if (hasPushedChanges() && localChanges() === 0 && githubRepositoryInformation()?.isFork) {
 			return "pullrequest"
 		}
 		// user is logged in and a collaborator, thus show changeStatus
@@ -87,6 +80,7 @@ export const Gitfloat = () => {
 				owner: routeParams().owner,
 				repo: routeParams().repository,
 			})
+			// @ts-expect-error - type mismatch fix after refactoring
 			return navigate(`/editor/github.com/${response.data.full_name}`)
 		} else {
 			showToast({
@@ -107,53 +101,34 @@ export const Gitfloat = () => {
 			})
 		}
 		setIsLoading(true)
-		// write resources to fs
-		/** the resource the message belongs to */
-
-		let _resources = resources.map((resource) => {
-			return { ...resource }
-		})
-
-		for (const change of localChanges()) {
-			const [updatedResource] = query(
-				_resources.find(
-					(resource: Resource) => resource.languageTag.name === change.languageTag.name,
-				)!,
-			).upsert({ message: change.newCopy! })!
-
-			_resources = [
-				...(_resources.filter(
-					(resource) => resource.languageTag.name !== change.languageTag.name,
-				) as Resource[]),
-				updatedResource as Resource,
-			]
-		}
-
-		setResources(_resources)
 
 		// commit & push
-		const [, exception] = await pushChanges({
-			fs: fs(),
-			routeParams: routeParams(),
+		if (!repo())
+			return showToast({
+				title: "Failed to push changes",
+				message: "Please try again or file a bug.",
+				variant: "danger",
+			})
+		const push = await pushChanges({
+			repo: repo()!,
 			user: localStorage.user,
 			setFsChange,
-			setLastPush,
 			setLastPullTime,
 		})
-		setLocalChanges([])
 		setIsLoading(false)
 		telemetryBrowser.capture("EDITOR pushed changes", {
 			owner: routeParams().owner,
 			repository: routeParams().repository,
-			sucess: exception === undefined,
+			sucess: push.error === undefined,
 		})
-		if (exception) {
+		if (push.error) {
 			return showToast({
 				title: "Failed to push changes",
-				message: "Please try again or file a bug. " + exception,
+				message: "Please try again or file a bug. " + push.error.message,
 				variant: "danger",
 			})
 		} else {
+			setLocalChanges(0)
 			setHasPushedChanges(true)
 			return showToast({
 				title: "Changes have been pushed",
@@ -164,9 +139,9 @@ export const Gitfloat = () => {
 
 	const pullrequestUrl = () => {
 		return `https://github.com/${
-			githubRepositoryInformation()?.data.parent?.full_name
-		}/compare/${currentBranch()}...${githubRepositoryInformation()?.data.owner.login}:${
-			githubRepositoryInformation()?.data.name
+			githubRepositoryInformation()?.parent?.fullName
+		}/compare/${currentBranch()}...${githubRepositoryInformation()?.name}:${
+			githubRepositoryInformation()?.owner.name
 		}:${currentBranch()}?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20conducted%20here%0A%0APreview%20the%20messages%20on%20https%3A%2F%2Finlang.com%2Fgithub.com%2F${
 			(currentPageContext.routeParams as EditorRouteParams).owner
 		}%2F${(currentPageContext.routeParams as EditorRouteParams).repository}%20.`
@@ -182,7 +157,7 @@ export const Gitfloat = () => {
 	}
 
 	type GitFloatArray = {
-		[state in "login" | "fork" | "hasChanges" | "pullrequest"]: GitfloatData
+		[state in "login" | "loading" | "fork" | "hasChanges" | "pullrequest"]: GitfloatData
 	}
 
 	const data: GitFloatArray = {
@@ -194,6 +169,16 @@ export const Gitfloat = () => {
 			},
 			onClick: onSignIn,
 			tourStepId: "github-login",
+		},
+		loading: {
+			text: "Loading...",
+			buttontext: "",
+			icon: () => {
+				return <IconGithub />
+			},
+			onClick: () => {
+				// do nothing
+			},
 		},
 		fork: {
 			text: "Fork to make changes",
@@ -232,7 +217,7 @@ export const Gitfloat = () => {
 	})
 
 	createEffect(() => {
-		if (localChanges().length > 0 && localStorage?.user !== undefined) {
+		if (localChanges() > 0 && localStorage?.user !== undefined) {
 			const gitfloat = document.querySelector(".gitfloat")
 			gitfloat?.classList.add("animate-jump")
 			setTimeout(() => {
@@ -250,7 +235,7 @@ export const Gitfloat = () => {
 					offset={{ x: 0, y: 60 }}
 					isVisible={
 						(tourStep() === "github-login" || tourStep() === "fork-repository") &&
-						inlangConfig() !== undefined
+						inlang() !== undefined
 					}
 				>
 					<div class="w-full flex justify-start items-center rounded-lg bg-inverted-surface shadow-xl ">
@@ -278,7 +263,7 @@ export const Gitfloat = () => {
 								<Show when={gitState() === "hasChanges"}>
 									<div class="flex flex-col justify-center items-center flex-grow-0 flex-shrink-0 h-5 w-5 relative gap-2 p-2 rounded bg-info">
 										<p class="flex-grow-0 flex-shrink-0 text-xs font-medium text-left text-slate-100">
-											{localChanges().length}
+											{localChanges()}
 										</p>
 									</div>
 								</Show>
@@ -289,12 +274,12 @@ export const Gitfloat = () => {
 								onClick={() => data[gitState()].onClick()}
 								prop:href={data[gitState()].href === "pullrequest" ? pullrequestUrl() : undefined}
 								prop:target="_blank"
-								prop:loading={isLoading()}
-								prop:disabled={localChanges().length === 0 && gitState() === "hasChanges"}
+								prop:loading={isLoading() || gitState() === "loading"}
+								prop:disabled={localChanges() === 0 && gitState() === "hasChanges"}
 								class={"on-inverted " + (gitState() === "pullrequest" && "grow")}
 							>
 								{data[gitState()].buttontext}
-								<div slot="suffix">{data[gitState()].icon}</div>
+								<div slot="suffix">{data[gitState()].icon()}</div>
 							</sl-button>
 						</div>
 					</div>

@@ -1,14 +1,21 @@
-import type { OnBeforeRender } from "@src/renderer/types.js"
+import type { OnBeforeRender } from "#src/renderer/types.js"
 import type { PageProps } from "./index.page.jsx"
-import {
-	tableOfContents,
-	FrontmatterSchema,
-} from "../../../../../../content/blog/tableOfContents.js"
-import { parseMarkdown } from "@src/services/markdown/index.js"
+import { parseMarkdown } from "#src/services/markdown/index.js"
+import { RenderErrorPage } from "vite-plugin-ssr/RenderErrorPage"
+import fs from "node:fs/promises"
+import { BlogFrontmatterSchema } from "./frontmatterSchema.js"
+import tableOfContents from "../../../../../../blog/tableOfContents.json"
+
+/**
+ * The root of the repository.
+ *
+ * Makes it possible to use absolute paths for rendering markdown.
+ */
+const repositoryRoot = new URL("../../../../../../", import.meta.url)
 
 /**
  * the table of contents without the html for each document
- * saving bandwith and speeding up the site
+ * saving bandwith and speeding up the site)
  */
 export type ProcessedTableOfContents = Record<
 	string,
@@ -24,7 +31,6 @@ export type ProcessedTableOfContents = Record<
  * 	}
  */
 const index: Record<string, Awaited<ReturnType<typeof parseMarkdown>>> = {}
-
 /**
  * the table of contents without the html for each document
  * saving bandwith and speeding up the site)
@@ -39,10 +45,16 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => 
 	if (import.meta.env.DEV) {
 		await generateIndexAndTableOfContents()
 	}
+	if (
+		!Object.keys(index).includes(pageContext.urlPathname) &&
+		pageContext.urlPathname !== "/blog"
+	) {
+		throw RenderErrorPage({ pageContext: { is404: true } })
+	}
 	return {
 		pageContext: {
 			pageProps: {
-				markdown: index[pageContext.urlPathname],
+				markdown: index[pageContext.urlPathname]!,
 				processedTableOfContents: processedTableOfContents,
 			},
 		},
@@ -53,10 +65,11 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => 
  * Generates the index and table of contents.
  */
 async function generateIndexAndTableOfContents() {
-	for (const document of tableOfContents) {
+	for (const path of tableOfContents) {
+		const text = await fs.readFile(new URL(`blog/${path}`, repositoryRoot), "utf-8")
 		const markdown = parseMarkdown({
-			text: document,
-			FrontmatterSchema,
+			text,
+			frontmatterSchema: BlogFrontmatterSchema,
 		})
 		// not pushing to processedTableOfContents directly in case
 		// the category is undefined so far

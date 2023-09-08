@@ -1,0 +1,18 @@
+{
+	"id": "messageLintRule.inlang.identicalPattern",
+	"icon": "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
+	"displayName": {
+		"en": "Identical pattern"
+	},
+	"description": {
+		"en": "Checks for identical patterns in different languages.  A message with identical wording in multiple languages can indicate that the translations are redundant or can be combined into a single message to reduce translation effort."
+	},
+	"readme": {
+		"en": "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/lint-rules/identicalPattern/README.md"
+	},
+	"keywords": ["lint rule", "itentical pattern"],
+	"publisherName": "inlang",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"license": "Apache-2.0",
+	"module": "../../plugins/identicalPattern/identicalPattern.js"
+}

@@ -1,8 +1,6 @@
-import { parseConfig } from "@inlang/core/config"
 import { Command } from "commander"
-import { cli } from "../../main.js"
-import { log } from "../../utilities.js"
-import { getConfig } from "../../utilities/getConfig.js"
+import { getInlangProject } from "../../utilities/getInlangProject.js"
+import { log } from "../../utilities/log.js"
 
 export const validate = new Command()
 	.command("validate")
@@ -11,16 +9,14 @@ export const validate = new Command()
 
 export async function validateCommandAction() {
 	try {
-		// Get the config
-		const [config, errorMessage] = await getConfig({ options: cli.opts() })
-		if (errorMessage) {
-			log.error(errorMessage)
-			return
-		}
-
 		log.info("🔎 Validating the config file...")
 
-		await parseConfig({ config })
+		// Get the config
+		const { error } = await getInlangProject()
+		if (error) {
+			log.error(error)
+			return
+		}
 
 		log.success("🎉 Inlang config is valid!")
 	} catch (error) {

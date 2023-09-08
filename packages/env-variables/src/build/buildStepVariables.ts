@@ -16,6 +16,7 @@ export function buildStepVariables() {
 	}
 	for (const key in process.env) {
 		if (key.startsWith("PUBLIC_")) {
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			publicEnv[key] = process.env[key]!
 		}
 	}

@@ -352,7 +352,7 @@ _Dedicated resource files pattern:_
 │   ├── de.ftl
 │   └── en.ftl
 ├── App.jsx
-└── inlang.config.json
+└── project.inlang.json
 ```
 
 _Exemplary inlang config:_

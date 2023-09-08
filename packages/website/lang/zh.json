@@ -79,12 +79,13 @@
 		"openEditor": "打开编辑器",
 		"link": {
 			"blog": "博客",
-			"docs": "文档",
+			"marketplace": "市场",
+			"documentation": "文档",
 			"feedback": "反馈"
 		}
 	},
 	"footer": {
-		"docs": {
+		"documentation": {
 			"title": "文档",
 			"gettingStarted": "使用入门指南",
 			"whyInlang": "为什么是 inlang？",
@@ -92,7 +93,7 @@
 		},
 		"resources": {
 			"title": "资源",
-			"blog": "博客",
+			"marketplace": "市场",
 			"roadmap": "发展计划",
 			"github": "GitHub",
 			"twitter": "推特",
@@ -102,7 +103,8 @@
 			"title": "联系",
 			"getInTouch": "联系我们",
 			"join": "加入团队",
-			"feedback": "反馈"
+			"feedback": "反馈",
+			"blog": "博客"
 		}
 	},
 	"newsletter": {

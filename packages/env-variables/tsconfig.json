@@ -1,6 +1,6 @@
 {
-	"extends": "../../tsconfig.base.json",
-	"include": ["src/**/*.ts", "src/**/*.ts", "validateEnvVariables.ts"],
+	"extends": "@placeholder-company/js-code-style/tsconfig.base.json",
+	"include": ["src/**/*.ts", "validateEnvVariables.ts"],
 	"compilerOptions": {
 		"lib": ["ESNext", "DOM"],
 		"types": [],

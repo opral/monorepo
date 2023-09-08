@@ -1,6 +1,6 @@
 import type { Accessor } from "solid-js"
 import { For } from "solid-js"
-import { Notification, WarningIcon } from "./NotificationHint.jsx"
+import { type Notification, WarningIcon } from "./NotificationHint.jsx"
 
 interface NotificationPopupProps {
 	notifications: Array<Notification>
@@ -74,8 +74,8 @@ export const NotificationPopup = (props: NotificationPopupProps) => {
 	)
 }
 
-const getTypeBasedColor = (type: "info" | "warn" | "error") => {
-	if (type === "warn") {
+const getTypeBasedColor = (type: "off" | "warning" | "error") => {
+	if (type === "warning") {
 		return "text-warning-on-inverted-container"
 	} else if (type === "error") {
 		return "text-danger-on-inverted-container"

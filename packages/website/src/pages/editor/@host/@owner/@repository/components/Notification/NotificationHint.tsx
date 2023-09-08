@@ -1,7 +1,7 @@
 import { createSignal } from "solid-js"
 import { NotificationPopup } from "./NotificationPopup.jsx"
 
-type NotificationType = "info" | "warn" | "error"
+type NotificationType = "off" | "warning" | "error"
 
 export type Notification = {
 	notificationTitle: string
@@ -45,16 +45,17 @@ export const NotificationHint = (props: NotificationHintProps) => {
 //Functions
 
 const getDominantType = (notifications: Array<Notification>) => {
-	let dominantType: NotificationType = "info"
+	let dominantType: NotificationType = "off"
 	notifications.map((notification) => {
-		if (notification.notificationType === "warn" && dominantType === "info") dominantType = "warn"
+		if (notification.notificationType === "warning" && dominantType === "off")
+			dominantType = "warning"
 		if (notification.notificationType === "error") dominantType = "error"
 	})
 	return dominantType
 }
 
-export const getTypeBasedStyling = (type: "info" | "warn" | "error") => {
-	if (type === "warn") {
+export const getTypeBasedStyling = (type: "off" | "warning" | "error") => {
+	if (type === "warning") {
 		return "hover:bg-warning/10 text-warning"
 	} else if (type === "error") {
 		return "hover:bg-danger/10 text-danger"

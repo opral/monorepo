@@ -2,7 +2,7 @@ import { state } from "../state.js"
 import * as vscode from "vscode"
 
 export const propertiesMissingPreview = () => {
-	const ideExtension = state().config.ideExtension
+	const ideExtension = state().inlang.customApi()["app.inlang.ideExtension"]
 
 	const activeTextEditor = vscode.window.activeTextEditor
 	if (!activeTextEditor) {
@@ -10,11 +10,11 @@ export const propertiesMissingPreview = () => {
 	}
 
 	if (!ideExtension) {
-		// create decoration in inlang.config.js file stating that the ideExtension properties are missing
+		// create decoration in project.inlang.json file stating that the ideExtension properties are missing
 		const decorationType = vscode.window.createTextEditorDecorationType({
 			after: {
 				contentText:
-					"Warning: The VS Code extension is not working because no plugin defines the ide extension properties.",
+					"Warning: The VS Code extension is not working because no module defines the ide extension `customApi['app.inlang.ideExtension']`.",
 				margin: "0 0.5rem",
 				color: "white",
 				backgroundColor: "rgb(255, 140, 0, 0.15)",
@@ -27,8 +27,8 @@ export const propertiesMissingPreview = () => {
 		const firstLine = document.lineAt(0)
 		const range = new vscode.Range(firstLine.range.start, firstLine.range.end)
 
-		// if the file is inlang.config.js -> decorate the first line with the decorationType
-		if (document.fileName.endsWith("inlang.config.js")) {
+		// if the file is project.inlang.json -> decorate the first line with the decorationType
+		if (document.fileName.endsWith("project.inlang.json")) {
 			activeTextEditor.setDecorations(decorationType, [range])
 		}
 	}

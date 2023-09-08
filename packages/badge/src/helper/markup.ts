@@ -1,5 +1,4 @@
 import { html } from "satori-html"
-import type { LintReport } from "@inlang/core/lint"
 
 export interface VNode {
 	type: string
@@ -20,8 +19,9 @@ export interface VNode {
  */
 export const markup = (
 	percentage: number,
-	numberOfMissingMessages: number,
-	lints: LintReport[],
+	errors: number,
+	warnings: number,
+	numberOfmissingTranslations: number,
 ): VNode => {
 	// Get language names
 
@@ -29,7 +29,7 @@ export const markup = (
 		style="display: flex; padding: 5px 20px; flex-direction: column; position: relative; background-color: white;"
 	>
 		<p style="font-size: 18px; font-family: "Inter Bold"; font-weight: 700; margin-bottom: 0x; color: #000">
-			${headerText({ numberOfMissingMessages, lints })}
+			${headerText({ numberOfmissingTranslations, errors })}
 		</p>
 		<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
 			<div style="display: flex; flex-direction: column; align-items: flex-start;">
@@ -42,9 +42,9 @@ export const markup = (
 			</div>
 			<div style="display: flex; flex-direction: column; align-items: flex-start;">
 				<p style="font-size: 20px; font-family: "Inter Bold"; font-weight: 700; margin-bottom: -12px; color: ${
-					lints.some((lint: LintReport) => lint.level === "error") ? "#c40101" : "#000"
+					errors > 0 ? "#c40101" : "#000"
 				}">
-					${lints.filter((lint: LintReport) => lint.level === "error").length}
+					${errors}
 				</p>
 				<p style="font-size: 14px; font-weight: 700; margin-bottom: 0px;">
 					errors
@@ -52,9 +52,9 @@ export const markup = (
 			</div>
 			<div style="display: flex; flex-direction: column; align-items: flex-start;">
 				<p style="font-size: 20px; font-family: "Inter Bold"; font-weight: 700; margin-bottom: -12px; color: ${
-					lints.some((lint: LintReport) => lint.level === "warn") ? "#ffa500" : "#000"
+					warnings ? "#ffa500" : "#000"
 				}">
-				${lints.filter((lint: LintReport) => lint.level === "warn").length}
+				${warnings}
 				</p>
 				<p style="font-size: 14px; font-weight: 700; margin-bottom: 0px;">
 					warnings
@@ -87,10 +87,14 @@ export const markup = (
 	</div>`
 }
 
-function headerText(args: { numberOfMissingMessages: number; lints: LintReport[] }): string {
-	if (args.numberOfMissingMessages > 0) {
-		return `${args.numberOfMissingMessages} messages missing`
-	} else if (args.lints.some((lint: LintReport) => lint.level === "error")) {
+function headerText(args: { numberOfmissingTranslations: number; errors: number }): string {
+	if (args.numberOfmissingTranslations > 0) {
+		if (args.numberOfmissingTranslations === 1) {
+			return `${args.numberOfmissingTranslations} translation missing`
+		} else {
+			return `${args.numberOfmissingTranslations} translations missing`
+		}
+	} else if (args.errors > 0) {
 		return "The project contains errors"
 	} else {
 		return "All messages translated"

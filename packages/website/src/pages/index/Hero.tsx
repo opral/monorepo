@@ -41,6 +41,7 @@ export function Hero() {
 				<div class="mt-8 flex gap-x-4 sm:justify-center">
 					<sl-button prop:href="/documentation" prop:size="large" prop:variant="primary">
 						Get started
+						{/* @ts-ignore */}
 						<MaterialSymbolsArrowRightAltRounded slot="suffix" />
 					</sl-button>
 					<sl-button
@@ -49,6 +50,7 @@ export function Hero() {
 						prop:size="large"
 					>
 						View on GitHub
+						{/* @ts-ignore */}
 						<IconGithub slot="suffix" />
 					</sl-button>
 				</div>

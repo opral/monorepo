@@ -37,8 +37,8 @@ export async function defineConfig(env) {
 	}
 
 	return {
-		referenceLanguage: "en",
-		languages: await pluginJson.getLanguages({ ...env, pluginConfig }),
+		sourceLanguageTag: "en",
+		languageTags: await pluginJson.getLanguages({ ...env, pluginConfig }),
 		readResources: (args) => pluginJson.readResources({ ...args, ...env, pluginConfig }),
 		writeResources: (args) => pluginJson.writeResources({ ...args, ...env, pluginConfig }),
 		// bad. the SDK config shouldn't be defined as part of the core config
@@ -64,7 +64,7 @@ export async function defineConfig(env) {
 	)
 
 	return {
-		referenceLanguage: "en",
+		sourceLanguageTag: "en",
 		...jsonPlugin({
 			pathPattern: "./languages/{language}.json",
 		}),
@@ -104,7 +104,7 @@ export async function defineConfig(env) {
       withSdk(
         withIdeExtension({
           {
-            referenceLanguage: "en",
+            sourceLanguageTag: "en",
             sdk: {
               languageNegotiation: {
                 strategies: [{ type: "localStorage" }, { type: "navigator" }],
@@ -136,7 +136,7 @@ export async function setup({ defineConfig, env }) {
 	const sdk = await env.$import("https://cdn.jsdelivr.net/gh/inlang/inlang@1/dist/sdk-js/index.js")
 
 	return defineConfig({
-		referenceLanguage: "en",
+		sourceLanguageTag: "en",
 	})
 		.use(
 			pluginJson({
@@ -181,7 +181,7 @@ export async function defineConfig(env) {
 	)
 
 	return {
-		referenceLanguage: "en",
+		sourceLanguageTag: "en",
 		plugins: [
 			// @ivanhofer @jannesblobel the "collection" discussion is resolved with this approach.
 			// just use standardLintRules as plugin 🎉
@@ -217,7 +217,7 @@ This proposal is simple and flexible.
 
 ```ts
 return {
-	referenceLanguage: "en",
+	sourceLanguageTag: "en",
 	plugins: [
 		// pluginJson
 		pluginJson({
@@ -237,7 +237,7 @@ Example Input:
 
 ```
 {
-  referenceLanguage: "en",
+  sourceLanguageTag: "en",
   plugins: [
     [Function: myPlugin]
   ]
@@ -251,7 +251,7 @@ _`withPlugins` executes `defineConfig` (which should be executed on loading the 
 
 ```
 {
-  referenceLanguage: "en",
+  sourceLanguageTag: "en",
   languages: ["en", "de"],
   readResources: [Function: readResources],
   writeResources: [Function: writeResources],

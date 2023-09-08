@@ -1,6 +1,6 @@
 import { useI18n } from "@solid-primitives/i18n"
-import { defaultLanguage } from "@src/renderer/_default.page.route.js"
-import { JSXElement, Show } from "solid-js"
+import { defaultLanguage } from "#src/renderer/_default.page.route.js"
+import { type JSXElement, Show } from "solid-js"
 import { navigate } from "vite-plugin-ssr/client/router"
 
 export type buttonType = "primary" | "secondary" | "secondaryOnGray" | "text" | "textPrimary"
@@ -43,6 +43,7 @@ export const Button = (props: ButtonProps) => {
 			<Show when={props?.href?.startsWith("/") && !props.function}>
 				<button
 					onClick={() => {
+						// @ts-ignore - https://github.com/brillout/vite-plugin-ssr/issues/1106
 						props.href && navigate(getLocale() + props.href)
 					}}
 					class={

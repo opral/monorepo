@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /**
  * Using parsimmon because:
  *
@@ -7,7 +8,7 @@
  */
 
 import Parsimmon from "parsimmon"
-import type { MessageReferenceMatch } from "@inlang/core/config"
+// import type { MessageReferenceMatch } from "@inlang/plugin"
 
 const parser = Parsimmon.createLanguage({
 	// The entry point for message reference matching.
@@ -71,14 +72,14 @@ const parser = Parsimmon.createLanguage({
 							character: end.column,
 						},
 					},
-				} satisfies MessageReferenceMatch
+				}
 			},
 		)
 	},
 })
 
 // Parse the expression
-export function parse(sourceCode: string): MessageReferenceMatch[] {
+export function parse(sourceCode: string) {
 	try {
 		return parser.entry!.tryParse(sourceCode)
 	} catch {

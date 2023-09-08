@@ -21,6 +21,7 @@ export function Page(pageContext: PageContextRenderer) {
 
 							<a href="https://inlang.com">
 								<sl-button prop:variant="text">
+									{/* @ts-ignore */}
 									<MaterialSymbolsArrowBackRounded slot="prefix" />
 									Back to inlang.com
 								</sl-button>
@@ -42,6 +43,7 @@ export function Page(pageContext: PageContextRenderer) {
 							>
 								<sl-button prop:variant="text">
 									Report a Bug
+									{/* @ts-ignore */}
 									<MaterialSymbolsArrowOutwardRounded slot="suffix" />
 								</sl-button>
 							</a>

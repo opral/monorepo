@@ -1,56 +1,70 @@
 import { exec } from "node:child_process"
 import { Command } from "commander"
-import { log } from "../../utilities.js"
-import { getGitRemotes } from "../../utilities/getGitRemotes.js"
 import { parseOrigin } from "@inlang/telemetry"
+import { log } from "../../utilities/log.js"
+import { getGitRemotes } from "../../utilities/getGitRemotes.js"
+import type { NodeishFilesystem } from "@lix-js/fs"
 
 export const editor = new Command()
 	.command("editor")
 	.description("Open the Inlang editor for the current repository.")
-	.action(editorCommandAction)
+	.action(async () => {
+		await editorCommandAction({ exec, logger: log })
+	})
 
-async function editorCommandAction() {
-	const gitOrigin = parseOrigin({ remotes: await getGitRemotes() })
+export async function editorCommandAction(args: {
+	exec: any
+	nodeishFs?: NodeishFilesystem
+	filepath?: string
+	logger: any
+}) {
+	const gitOrigin = parseOrigin({
+		remotes: await getGitRemotes({ nodeishFs: args.nodeishFs, filepath: args.filepath }),
+	})
 	if (!gitOrigin) {
-		log.error("Failed to get the git origin.")
+		args.logger.error("Failed to get the git origin.")
 		return
 	}
 
 	// Print out the remote URL
-	log.info(`Origin URL: ${gitOrigin}`)
+	args.logger.info(`Origin URL: ${gitOrigin}`)
 
 	const githubUrl = parseGithubUrl(gitOrigin)
 
 	if (!githubUrl) {
-		log.error("Failed to parse the GitHub URL from the remote URL.")
+		args.logger.error("Failed to parse the GitHub URL from the remote URL.")
 		return
 	}
 
 	const inlangEditorUrl = `https://inlang.com/editor/${githubUrl}`
 
 	let command
-	let args
+	let commandArgs
 
 	if (process.platform === "win32") {
 		// Windows
 		command = "start"
-		args = [inlangEditorUrl]
+		commandArgs = [inlangEditorUrl]
 	} else if (process.platform === "darwin") {
 		// macOS
 		command = "open"
-		args = [inlangEditorUrl]
+		commandArgs = [inlangEditorUrl]
+	} else if (process.platform === "linux") {
+		// linux
+		command = "xdg-open"
+		commandArgs = [inlangEditorUrl]
 	} else {
-		console.error("Unsupported platform.")
+		console.error("Unsupported platform: " + process.platform)
 		return
 	}
 
-	exec(`${command} ${args.join(" ")}`, (error) => {
+	args.exec(`${command} ${commandArgs.join(" ")}`, (error: Error) => {
 		if (error) {
-			log.error("Failed to open the Inlang editor.", error.message)
+			args.logger.error("Failed to open the Inlang editor.", error.message)
 			return
 		}
 
-		log.info("✅ Opened the Inlang editor for the repository.")
+		args.logger.info("✅ Opened the Inlang editor for the repository.")
 	})
 }
 

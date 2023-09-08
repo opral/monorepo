@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { InlangConfig } from "@inlang/core/src/config"
+import { ProjectConfig } from "@inlang/core/src/config"
 import { InlangEnvironment } from "@inlang/core/src/environment/types"
 
 export const myPlugin = createPlugin<{ pathPattern: string }>(({ settings, env }) => {
@@ -34,7 +34,7 @@ type PluginSettingsFunction<PluginSettings> = (
 
 type Plugin = {
 	id: string
-	config(): MaybePromise<Partial<InlangConfig>>
+	config(): MaybePromise<Partial<ProjectConfig>>
 }
 
 function createPlugin<PluginConfig>(

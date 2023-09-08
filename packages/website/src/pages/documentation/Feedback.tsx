@@ -10,7 +10,7 @@ export function Feedback() {
 	}
 
 	//* Only two emojis because of https://github.com/inlang/inlang/pull/910#issuecomment-1584832926
-	const feedbackEmojis: [string, string] = ["🤩", "😥"]
+	const feedbackEmojis: [string, string] = ["👍", "👎"]
 
 	const [submittedFeedback, setSubmittedFeedback] = createSignal<boolean>(false)
 

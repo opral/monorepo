@@ -1,13 +1,13 @@
-import { machineTranslate } from "./machineTranslate.js"
-import { generateConfigFileServer } from "./generateConfigFile.js"
 import { subscribeNewsletter } from "./subscribeNewsletter.js"
-import { getLangResources } from "./getLangResources.js"
+import { machineTranslateMessage } from "./machineTranslateMessage.js"
 
 export const allRpcs = {
-	machineTranslate,
-	generateConfigFileServer,
+	machineTranslateMessage,
+	/**
+	 * @deprecated use machineTranslateMessage instead
+	 */
+	machineTranslate: () => undefined,
 	subscribeNewsletter,
-	getLangResources,
 }
 
 export type AllRpcs = typeof allRpcs

@@ -1,3 +1,10 @@
+// Settings for i18next plugin
+export type PluginSettings = {
+	pathPattern: string | Record<string, string>
+	variableReferencePattern?: string[] //default is ["{{", "}}"]
+	ignore?: string[]
+}
+
 /**
  * Throws an error if the settings are invalid.
  *
@@ -5,28 +12,36 @@
  */
 export function throwIfInvalidSettings(settings: PluginSettings) {
 	if (typeof settings.pathPattern === "string") {
-		if (settings.pathPattern.includes("{language}") === false) {
+		if (settings.pathPattern.includes("{languageTag}") === false) {
 			throw new Error(
-				"The pathPattern setting must be defined and include the {language} placeholder. An example would be './resources/{language}.json'.",
+				"The pathPattern setting must be defined and include the {languageTag} variable reference. An example would be './resources/{languageTag}.json'.",
+			)
+		} else if (settings.pathPattern.includes("{{languageTag}}") === true) {
+			throw new Error(
+				"The pathPattern setting must use single brackets instead of double brackets for the {languageTag} variable reference. An example would be './resources/{languageTag}.json'.",
 			)
 		} else if (settings.pathPattern.endsWith(".json") === false) {
 			throw new Error(
-				"The pathPattern setting must end with '.json'. An example would be './resources/{language}.json'.",
+				"The pathPattern setting must end with '.json'. An example would be './resources/{languageTag}.json'.",
 			)
 		} else if (settings.pathPattern.includes("*")) {
 			throw new Error(
-				"The pathPattern includes a '*' wildcard. This was depricated in version 3.0.0. Check https://github.com/inlang/inlang/tree/main/source-code/plugins/i18next/ for how to use PluginSettings",
+				"The pathPattern includes a '*' wildcard. This was depricated in version 3.0.0. Check https://inlang.com/marketplace/plugin.inlang.i18next for how to use Pluginsettings",
 			)
 		}
 	} else {
 		for (const [prefix, path] of Object.entries(settings.pathPattern)) {
-			if (path === undefined || path.includes("{language}") === false) {
+			if (path === undefined || path.includes("{languageTag}") === false) {
 				throw new Error(
-					"The pathPattern setting must be defined and include the {language} placeholder. An example would be './resources/{language}.json'.",
+					"The pathPattern setting must be defined and include the {languageTag} variable reference. An example would be './resources/{languageTag}.json'.",
+				)
+			} else if (path === undefined || path.includes("{{languageTag}}") === true) {
+				throw new Error(
+					"The pathPattern setting must use single brackets instead of double brackets for the {languageTag} variable reference. An example would be './resources/{languageTag}.json'.",
 				)
 			} else if (path.endsWith(".json") === false) {
 				throw new Error(
-					"The pathPattern setting must end with '.json'. An example would be './resources/{language}.json'.",
+					"The pathPattern setting must end with '.json'. An example would be './resources/{languageTag}.json'.",
 				)
 			} else if (prefix.includes(".")) {
 				throw new Error(
@@ -36,40 +51,3 @@ export function throwIfInvalidSettings(settings: PluginSettings) {
 		}
 	}
 }
-
-export type PluginSettings = {
-	/**
-	 * Defines the path pattern for the resources.
-	 *
-	 * Could be one path or multible namespaces
-	 * Must include the `{language}` placeholder.
-	 *
-	 * @example
-	 *  "./resources/{language}.json"
-	 *
-	 * @example
-	 *  {
-	 * 		"common": "./resources/{language}/common.json"
-	 * 		"card": "./resources/{language}/card.json"
-	 *  }
-	 */
-	pathPattern: string | { [key: string]: string }
-	/**
-	 * Defines the pattern for variable references.
-	 *
-	 * Can be either a single string ("Hello @user") or
-	 * an array of two strings ("Hello {{user}}").
-	 */
-	variableReferencePattern?: [string] | [string, string]
-	/**
-	 * Ignores all files that match the given pattern.
-	 */
-	ignore?: string[]
-}
-
-export type PluginSettingsWithDefaults = WithRequired<
-	PluginSettings,
-	"variableReferencePattern" | "ignore"
->
-
-type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }

@@ -1,8 +1,8 @@
 import { createResource, Match, onMount, Suspense, Switch } from "solid-js"
 import mermaid from "mermaid"
-import { getHighlighter, Highlighter, Lang, setCDN } from "shiki"
+import { getHighlighter, type Highlighter, type Lang, setCDN } from "shiki"
 import copy from "clipboard-copy"
-import { showToast } from "@src/components/Toast.jsx"
+import { showToast } from "#src/components/Toast.jsx"
 
 // importing themes and language colors from a cdn
 setCDN("https://cdn.jsdelivr.net/npm/shiki/")

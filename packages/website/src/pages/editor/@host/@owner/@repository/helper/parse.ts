@@ -1,7 +1,7 @@
 import type { Accessor } from "solid-js"
 import { useEditorJSON } from "solid-tiptap"
 import type { EditorRef } from "solid-tiptap"
-import type * as ast from "@inlang/core/ast"
+import type { VariableReference, Pattern, Text } from "@inlang/sdk"
 
 // access tiptap json
 export const getTextValue = (editor: Accessor<EditorRef>) => {
@@ -14,32 +14,36 @@ export const getTextValue = (editor: Accessor<EditorRef>) => {
 				.map((p: any) => p.content)
 				.flat()
 
-			const ast_elements: Array<any> = []
-			tiptap_nodes.map((tiptap_node: any) => {
-				switch (tiptap_node.type) {
-					case "text":
-						if (ast_elements.at(-1)?.type === "Text") {
-							ast_elements.at(-1).value += tiptap_node.text
-						} else {
-							ast_elements.push({ type: "Text", value: tiptap_node.text } as ast.Text)
-						}
-						break
-					case "placeholderNode":
-						ast_elements.push({
-							type: "Placeholder",
-							body: { type: "VariableReference", name: tiptap_node.attrs.id },
-						} as ast.Placeholder)
-						break
-					case "hardBreak":
-						if (ast_elements.at(-1)?.type === "Text") {
-							ast_elements.at(-1).value += "\n"
-						} else {
-							ast_elements.push({ type: "Text", value: "\n" } as ast.Text)
-						}
-						break
-				}
-			})
-			return ast_elements
+			const patterns: Array<any> = []
+			if (tiptap_nodes.length === 0) {
+				patterns.push({ type: "Text", value: "" } as Text)
+			} else {
+				tiptap_nodes.map((tiptap_node: any) => {
+					switch (tiptap_node.type) {
+						case "text":
+							if (patterns.at(-1)?.type === "Text") {
+								patterns.at(-1).value += tiptap_node.text
+							} else {
+								patterns.push({ type: "Text", value: tiptap_node.text } as Text)
+							}
+							break
+						case "placeholderNode":
+							patterns.push({
+								type: "VariableReference",
+								name: tiptap_node.attrs.id,
+							} as VariableReference)
+							break
+						case "hardBreak":
+							if (patterns.at(-1)?.type === "Text") {
+								patterns.at(-1).value += "\n"
+							} else {
+								patterns.push({ type: "Text", value: "\n" } as Text)
+							}
+							break
+					}
+				})
+			}
+			return patterns
 		}
 	}
 	return undefined
@@ -47,22 +51,20 @@ export const getTextValue = (editor: Accessor<EditorRef>) => {
 
 // setTipTapMessage
 
-export const setTipTapMessage = (ast_message: ast.Message) => {
+export const setTipTapMessage = (patterns: Pattern) => {
 	// if no elements in ast message, don't put any nodes in tiptap object
-	if (ast_message.pattern.elements.length === 0) return undefined
-
-	const ast_elements = ast_message.pattern.elements
+	if (patterns?.length === 0 || patterns === undefined) return undefined
 	const tiptap_nodes: any = []
 
-	ast_elements.map((ast_element) => {
-		switch (ast_element.type) {
+	patterns.map((pattern) => {
+		switch (pattern.type) {
 			case "Text":
-				if (ast_element.value !== "") {
-					tiptap_nodes.push(getTextFromAstElement(ast_element))
+				if (pattern.value !== "") {
+					tiptap_nodes.push(getTextFromAstElement(pattern))
 				}
 				break
-			case "Placeholder":
-				tiptap_nodes.push(getPlaceholderFromAstElement(ast_element))
+			case "VariableReference":
+				tiptap_nodes.push(getPlaceholderFromAstElement(pattern))
 				break
 		}
 	})
@@ -81,21 +83,21 @@ export const setTipTapMessage = (ast_message: ast.Message) => {
 
 // TEXT
 
-const getTextFromAstElement = (ast_element: ast.Text) => {
+const getTextFromAstElement = (pattern: Text) => {
 	return {
 		type: "text",
-		text: (ast_element as ast.Text | undefined)?.value,
+		text: (pattern as Text | undefined)?.value,
 	}
 }
 
-// PLACEHOLDER
+// VARIABLE REFERENCE
 
-const getPlaceholderFromAstElement = (ast_element: ast.Placeholder) => {
+const getPlaceholderFromAstElement = (pattern: VariableReference) => {
 	return {
 		type: "placeholderNode",
 		attrs: {
-			id: (ast_element as ast.Placeholder | undefined)?.body.name,
-			label: (ast_element as ast.Placeholder | undefined)?.body.name,
+			id: (pattern as VariableReference | undefined)?.name,
+			label: (pattern as VariableReference | undefined)?.name,
 		},
 	}
 }

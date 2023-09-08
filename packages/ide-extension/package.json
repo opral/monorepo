@@ -53,6 +53,10 @@
 				"inlang.disableConfigFileCreation": {
 					"type": "array",
 					"default": []
+				},
+				"inlang.disableConfigFileDeletion": {
+					"type": "array",
+					"default": []
 				}
 			}
 		}
@@ -63,24 +67,28 @@
 		"package": "npx @vscode/vsce package",
 		"---- TEST ----------------------------------------------------------": "",
 		"pretest": "node ./build.js",
-		"test": "vitest run --coverage",
+		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"test:e2e": "TEST=true npm run pretest && node ./dist/test.cjs",
 		"---- LINT ----------------------------------------------------------": "",
-		"lint": "cd ../.. && npm run lint:base ./source-code/ide-extension",
-		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/ide-extension",
-		"format": "cd ../.. && npm run format:base ./source-code/ide-extension",
-		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/ide-extension",
-		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
+		"lint": "eslint ./src --fix",
+		"format": "prettier ./src --write",
+		"---- OTHER ----------------------------------------------------------": "",
+		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/core": "*",
+		"@lix-js/fs": "*",
+		"@inlang/result": "*",
 		"@inlang/telemetry": "*",
+		"@vitest/coverage-v8": "0.34.3",
 		"require-from-string": "^2.0.2",
-		"throttle-debounce": "^5.0.0"
+		"throttle-debounce": "^5.0.0",
+		"vitest": "0.34.3"
 	},
 	"devDependencies": {
-		"@inlang-git/client": "*",
+		"@placeholder-company/js-code-style": "*",
+		"isomorphic-git": "1.24.5",
+		"@inlang/sdk": "*",
+		"@inlang/create-project": "*",
 		"@types/fs-extra": "^11.0.1",
 		"@types/glob": "^8.1.0",
 		"@types/mocha": "^10.0.1",
@@ -88,7 +96,6 @@
 		"@types/throttle-debounce": "^5.0.0",
 		"@types/ungap__structured-clone": "^0.3.0",
 		"@types/vscode": "^1.75.0",
-		"@ungap/structured-clone": "^1.2.0",
 		"@vscode/test-electron": "^2.3.3",
 		"@vscode/vsce": "^2.18.0",
 		"comment-json": "^4.2.3",
@@ -99,10 +106,10 @@
 		"node-fetch": "^3.3.1",
 		"ovsx": "^0.8.0",
 		"posthog-node": "^3.1.1",
-		"typescript": "^5.0.4"
+		"typescript": "5.0.4"
 	},
 	"activationEvents": [
-		"workspaceContains:**/inlang.config.js",
+		"workspaceContains:**/project.inlang.json",
 		"onStartupFinished"
 	],
 	"license": "Apache-2.0"

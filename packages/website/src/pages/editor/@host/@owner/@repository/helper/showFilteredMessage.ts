@@ -1,70 +1,68 @@
-import type * as ast from "@inlang/core/ast"
-import { LintedMessage, getLintReports } from "@inlang/core/lint"
-import { handleMissingMessage } from "./handleMissingMessage.js"
+import type { MessageLintReport, Message } from "@inlang/sdk"
+import { useEditorState } from "../State.jsx"
+export const showFilteredMessage = (message: Message | undefined) => {
+	const { filteredMessageLintRules, filteredLanguageTags, filteredId, textSearch, inlang } =
+		useEditorState()
 
-export const showFilteredMessage = (
-	messages: Record<ast.Resource["languageTag"]["name"], LintedMessage | undefined>,
-	filteredLanguages: string[],
-	textSearch: string,
-	filteredLintRules: `${string}.${string}`[],
-	messageId: string,
-) => {
+	// Early exit if variants are empty
+	if (!message?.variants.length) {
+		return false
+	}
+
+	const languageTagsSet = new Set(
+		filteredLanguageTags().length === 0 ? inlang()?.config()?.languageTags : filteredLanguageTags(),
+	)
+	const lintRulesSet = new Set(filteredMessageLintRules())
+	const searchLower = textSearch().toLowerCase()
+
+	// Map and join patterns
+	const patternsLower = message?.variants
+		.flatMap((variant) =>
+			variant.pattern.map((pattern) => {
+				if (pattern.type === "Text") {
+					return pattern.value.toLowerCase()
+				} else if (pattern.type === "VariableReference") {
+					return pattern.name.toLowerCase()
+				}
+				return ""
+			}),
+		)
+		.join("")
+
 	// filteredByLanguage
-	const filteredByLanguage = Object.keys(messages)
-		.filter((key) => filteredLanguages.length === 0 || filteredLanguages.includes(key))
-		.reduce((filteredMessage, key) => {
-			filteredMessage[key] = messages[key]
-			return filteredMessage
-		}, {} as { [key: string]: LintedMessage | undefined })
+	const filteredByLanguage = {
+		...message,
+		variants: message.variants.filter(
+			(variant) => languageTagsSet.size === 0 || languageTagsSet.has(variant.languageTag),
+		),
+	}
 
 	// filteredById
-	const filteredById = Object.values(filteredByLanguage).filter((message) => {
-		if (messageId === "") {
-			return true
-		} else {
-			if (message !== undefined && message.id.name === messageId) {
-				return true
-			}
-		}
-		return false
-	})
+	const filteredById =
+		filteredId() === "" || (message !== undefined && message.id === filteredId())
+			? filteredByLanguage
+			: false
 
 	// filteredBySearch
-	const filteredBySearch = filteredById.filter((message) => {
-		if (textSearch.length === 0) {
-			return true
-		} else {
-			if (
-				message !== undefined &&
-				textSearch.length > 0 &&
-				(message?.id.name.toLowerCase().includes(textSearch.toLowerCase()) ||
-					JSON.stringify(message).toLowerCase().includes(textSearch.toLowerCase()))
-			) {
-				return true
-			}
-		}
-		return false
-	})
+	const filteredBySearch =
+		searchLower.length === 0 ||
+		(message !== undefined &&
+			(message.id.toLowerCase().includes(searchLower) || patternsLower.includes(searchLower)))
+			? filteredById
+			: false
 
 	// filteredByLintRules
-	const filteredByLintRules = filteredBySearch.filter((message) => {
-		if (filteredLintRules.length === 0) {
-			return true
-		} else {
-			for (const report of getLintReports(message!)) {
-				if (
-					filteredLintRules.includes(report.id) &&
-					handleMissingMessage(report, filteredLanguages)
-				) {
-					return true
-				}
-				false
-				continue
-			}
-		}
-		return false
-	})
+	const filteredByLintRules =
+		lintRulesSet.size === 0 ||
+		(message !== undefined &&
+			inlang()!
+				.query.messageLintReports.get({ where: { messageId: message.id } })
+				?.some(
+					(report: MessageLintReport) =>
+						lintRulesSet.has(report.ruleId) && languageTagsSet.has(report.languageTag),
+				))
+			? filteredBySearch
+			: false
 
-	// return if matched
 	return filteredByLintRules
 }

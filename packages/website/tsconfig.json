@@ -1,5 +1,6 @@
 {
-	"extends": "../../tsconfig.base.json",
+	"extends": "@placeholder-company/js-code-style/tsconfig.base.json",
+	"include": ["src/**/*"],
 	"compilerOptions": {
 		"moduleResolution": "Node16",
 		"lib": ["DOM", "DOM.Iterable", "ESNext"],
@@ -7,9 +8,10 @@
 		"jsx": "preserve",
 		"jsxImportSource": "solid-js",
 		"esModuleInterop": true,
+		"resolveJsonModule": true,
 		"paths": {
 			// need to be defined in the vite config too!
-			"@src/*": ["./src/*"]
+			"#src/*": ["./src/*"]
 		}
 	}
 }

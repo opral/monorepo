@@ -1,4 +1,4 @@
-import { Icon } from "@src/components/Icon.jsx"
+import { Icon } from "#src/components/Icon.jsx"
 import type { JSXElement } from "solid-js"
 import type { SemanticColorTokens } from "../../../../../tailwind.config.cjs"
 

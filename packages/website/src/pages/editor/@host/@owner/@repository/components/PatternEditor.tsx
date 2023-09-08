@@ -1,42 +1,50 @@
-import { createSignal, onMount, Show } from "solid-js"
-import { useEditorIsFocused, createTiptapEditor } from "solid-tiptap"
-import type * as ast from "@inlang/core/ast"
-import { useLocalStorage } from "@src/services/local-storage/index.js"
-import { LocalChange, useEditorState } from "../State.jsx"
+import { type Accessor, createEffect, createSignal, on, onMount, type Setter, Show } from "solid-js"
+import { createTiptapEditor, useEditorJSON } from "solid-tiptap"
+import { useLocalStorage } from "#src/services/local-storage/index.js"
+import { useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
-import { showToast } from "@src/components/Toast.jsx"
+import { showToast } from "#src/components/Toast.jsx"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
-import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
-import { getLintReports, LintedMessage } from "@inlang/core/lint"
-import { Shortcut } from "./Shortcut.jsx"
-import { rpc } from "@inlang/rpc"
+import { type Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { getTextValue, setTipTapMessage } from "../helper/parse.js"
 import { getEditorConfig } from "../helper/editorSetup.js"
 import { FloatingMenu } from "./FloatingMenu.jsx"
-import { handleMissingMessage } from "./../helper/handleMissingMessage.js"
+import {
+	Message,
+	VariableReference,
+	LanguageTag,
+	Variant,
+	createVariant,
+	updateVariantPattern,
+	getVariant,
+	Pattern,
+	type MessageLintReport,
+} from "@inlang/sdk"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
  */
 export function PatternEditor(props: {
-	referenceLanguage: ast.Resource["languageTag"]["name"]
-	language: ast.Resource["languageTag"]["name"]
-	id: ast.Message["id"]["name"]
-	referenceMessage?: ast.Message
-	message: ast.Message | undefined
+	languageTag: LanguageTag
+	message: Message
+	lintReports: MessageLintReport[]
+	setMessageIsFocused: Setter<boolean>
+	messageIsFocused: Accessor<boolean>
 }) {
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const {
-		resources,
-		localChanges,
 		setLocalChanges,
-		referenceResource,
 		userIsCollaborator,
 		routeParams,
-		filteredLanguages,
+		inlang,
+		sourceLanguageTag,
+		lastPullTime,
 	} = useEditorState()
-	const [variableReferences, setVariableReferences] = createSignal<ast.VariableReference[]>([])
+
+	const [variableReferences, setVariableReferences] = createSignal<VariableReference[]>([])
+
+	const [hasChanges, setHasChanges] = createSignal(false)
 
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
@@ -59,72 +67,144 @@ export function PatternEditor(props: {
 		}
 	}
 
+	createEffect(() => {
+		props.setMessageIsFocused(isLineItemFocused())
+	})
+
+	const sourceVariant = () =>
+		getVariant(props.message, { where: { languageTag: sourceLanguageTag()! } })
+
+	const variant = () => getVariant(props.message, { where: { languageTag: props.languageTag } })
+
+	const [referencePattern, setReferencePattern] = createSignal<Pattern>()
+
+	const newPattern = () => getTextValue(editor) as Variant["pattern"]
+
+	//create editor
+	let textArea!: HTMLDivElement
+	let editor: any
+
+	/*
+		Needs to be refactored, but it works for now:
+		- should initialize editor if not created
+		- should only rerender editor if variant pattern from query message is different to current editor content
+	*/
+	const [currentPattern, setCurrentPattern] = createSignal<Variant["pattern"]>(
+		// eslint-disable-next-line solid/reactivity
+		variant()?.pattern || [],
+	)
+
+	function createOrUpdateEditor() {
+		const newVariant = variant()
+
+		if (JSON.stringify(currentPattern()) !== JSON.stringify(variant())) {
+			if (editor) {
+				editor.destroy()
+			}
+
+			editor = createTiptapEditor(() => {
+				return getEditorConfig(textArea, newVariant, variableReferences())
+			})
+
+			setCurrentPattern(variant()?.pattern || [])
+		}
+	}
+	// eslint-disable-next-line solid/reactivity
+	createOrUpdateEditor()
+
+	const currentJSON = useEditorJSON(() => editor())
+
+	const [previousContent, setPreviousContent] = createSignal()
+
 	onMount(() => {
-		if (props.referenceMessage) {
+		if (sourceVariant()) {
 			setVariableReferences(
-				props.referenceMessage.pattern.elements
-					.filter((element) => element.type === "Placeholder")
-					.map((element) => element.body) as ast.VariableReference[],
+				sourceVariant()
+					?.pattern.filter((pattern) => pattern.type === "VariableReference")
+					.map((variableReference) => variableReference) as VariableReference[],
 			)
 		}
+		setPreviousContent(currentJSON().content[0].content)
+
 		document.addEventListener("focusin", handleLineItemFocusIn)
 		return () => {
 			document.removeEventListener("focusin", handleLineItemFocusIn)
 		}
 	})
 
-	//create editor
-	let textArea!: HTMLDivElement
-	const editor = createTiptapEditor(() => {
-		if (
-			localChanges().some(
-				(change) =>
-					change.languageTag.name === props.language && change.newCopy.id.name === props.id,
+	createEffect(
+		on(lastPullTime, () => {
+			setReferencePattern(
+				inlang()
+					?.query.messages.get({ where: { id: props.message.id } })
+					?.variants.find((variant) => variant.languageTag === props.languageTag)?.pattern,
 			)
-		) {
-			return getEditorConfig(
-				textArea,
-				localChanges().find(
-					(change) =>
-						change.languageTag.name === props.language && change.newCopy.id.name === props.id,
-				)?.newCopy,
-				variableReferences(),
+			setHasChanges(false)
+		}),
+	)
+
+	createEffect(
+		on(currentJSON, () => {
+			if (JSON.stringify(currentJSON().content[0].content) !== JSON.stringify(previousContent())) {
+				autoSave()
+				setPreviousContent(currentJSON().content[0].content)
+				setHasChanges((prev) => {
+					const hasChanged =
+						JSON.stringify(referencePattern()) !== JSON.stringify(newPattern()) &&
+						!(
+							referencePattern() === undefined &&
+							JSON.stringify(newPattern()) === `[{"type":"Text","value":""}]`
+						)
+					if (prev !== hasChanged && hasChanged) {
+						setLocalChanges((prev) => (prev += 1))
+					} else if (prev !== hasChanged && !hasChanged) {
+						setLocalChanges((prev) => (prev -= 1))
+					}
+					return hasChanged
+				})
+			}
+		}),
+	)
+
+	const autoSave = () => {
+		let newMessage
+		// missingMessage is a better default than emptyPattern
+		if (JSON.stringify(newPattern()) === `[{"type":"Text","value":""}]`) {
+			newMessage = { data: props.message }
+			newMessage.data.variants = props.message.variants.filter(
+				(variant) => variant.languageTag !== props.languageTag,
 			)
 		} else {
-			return getEditorConfig(textArea, props.message, variableReferences())
-		}
-	})
-
-	const getEditorFocus = () => {
-		if (editor()) {
-			const isFocus = useEditorIsFocused(() => editor())
-			if (isFocus() && localStorage.isFirstUse) {
-				setLocalStorage("isFirstUse", false)
+			if (variant() === undefined) {
+				newMessage = createVariant(props.message, {
+					data: {
+						languageTag: props.languageTag,
+						match: {},
+						pattern: newPattern(),
+					},
+				})
+			} else {
+				newMessage = updateVariantPattern(props.message, {
+					where: {
+						languageTag: props.languageTag,
+						selectors: {},
+					},
+					data: newPattern(),
+				})
 			}
-			return isFocus()
+		}
+		if (newMessage.data) {
+			const upsertSuccessful = inlang()?.query.messages.upsert({
+				where: { id: props.message.id },
+				data: newMessage.data,
+			})
+			if (!upsertSuccessful) {
+				throw new Error("Cannot update message")
+			}
+		} else {
+			throw new Error("Cannot update message: ", newMessage.error)
 		}
 	}
-
-	/** the resource the message belongs to */
-	const resource = () => resources.find((resource) => resource.languageTag.name === props.language)!
-
-	/** copy of the message to conduct and track changes */
-	const copy: () => ast.Message | undefined = () =>
-		props.message
-			? // clone message
-			  structuredClone(props.message)
-			: // new message
-			  {
-					type: "Message",
-					id: {
-						type: "Identifier",
-						name: props.id,
-					},
-					pattern: {
-						type: "Pattern",
-						elements: [{ type: "Text", value: "" }],
-					},
-			  }
 
 	// const [_isFork] = createResource(
 	// 	() => localStorage.user,
@@ -143,106 +223,27 @@ export function PatternEditor(props: {
 	// 	}
 	// );
 
-	const hasChanges = () => {
-		const _updatedText =
-			JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
-		let compare_elements
-		if (
-			localChanges().some(
-				(change) =>
-					change.languageTag.name === props.language && change.newCopy.id.name === props.id,
-			)
-		) {
-			compare_elements = localChanges().find(
-				(change) =>
-					change.languageTag.name === props.language && change.newCopy.id.name === props.id,
-			)?.newCopy.pattern.elements
-		} else {
-			compare_elements = props.message?.pattern.elements
-		}
-		if (_updatedText) {
-			if (JSON.stringify(_updatedText) !== JSON.stringify(compare_elements)) {
-				return _updatedText
-			} else {
-				return ""
-			}
-		} else {
-			return false
-		}
-	}
-
-	/**
-	 * Saves the changes of the message.
-	 */
-
-	const handleSave = async () => {
-		const _copy: ast.Message | undefined = copy()
-		const _textValue =
-			JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
-		if (!_textValue || !_copy) {
-			return
-		}
-		_copy.pattern.elements = _textValue as Array<ast.Text | ast.Placeholder>
-
-		setLocalChanges((prev: LocalChange[]) => {
-			if (JSON.stringify(copy()?.pattern.elements) === JSON.stringify(_copy.pattern.elements)) {
-				return [
-					...prev.filter(
-						(change) =>
-							!(
-								change.languageTag === resource().languageTag &&
-								change.newCopy.id.name === _copy.id.name
-							),
-					),
-				]
-			} else {
-				return [
-					...prev.filter(
-						(change) =>
-							!(
-								change.languageTag === resource().languageTag &&
-								change.newCopy.id.name === _copy.id.name
-							),
-					),
-					{
-						languageTag: resource().languageTag,
-						newCopy: _copy,
-					},
-				]
-			}
-		})
-
-		//this is a dirty fix for getting focus back to the editor after save
-		setTimeout(() => {
-			textArea.parentElement?.click()
-		}, 500)
-		telemetryBrowser.capture("EDITOR saved changes", {
-			targetLanguage: props.language,
-			owner: routeParams().owner,
-			repository: routeParams().repository,
-		})
-	}
-
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
 
 	const handleMachineTranslate = async () => {
-		if (props.referenceMessage === undefined) {
+		if (sourceVariant() === undefined) {
 			return showToast({
 				variant: "info",
 				title: "Can't translate if the reference message does not exist.",
 			})
 		}
-		const textArr: Array<string> = []
-		props.referenceMessage.pattern.elements.map((element) => {
-			if (element.type === "Text") {
-				textArr.push(element.value)
-			} else if (element.type === "Placeholder") {
-				textArr.push(element.body.name)
-			}
-		})
-		const text = textArr.join("")
-		//const text = props.referenceMessage.pattern.elements[0]?.value as string
-		if (text === undefined) {
+		const text = sourceVariant()!
+			.pattern.map((pattern) => {
+				if (pattern.type === "Text") {
+					return pattern.value.toLocaleLowerCase()
+				} else if (pattern.type === "VariableReference") {
+					return pattern.name.toLowerCase()
+				} else {
+					return false
+				}
+			})
+			.join("")
+		if (text === "") {
 			return showToast({
 				variant: "info",
 				title: "Can't translate empty text",
@@ -251,74 +252,108 @@ export function PatternEditor(props: {
 			setShowMachineLearningWarningDialog(true)
 			return machineLearningWarningDialog?.show()
 		}
+		// check if empty Message is present for message
+		const hasEmptyPattern = props.lintReports.some(
+			(report) =>
+				report.messageId === props.message.id &&
+				report.languageTag === props.languageTag &&
+				report.ruleId === "messageLintRule.inlang.emptyPattern",
+		)
+
+		const newMessage = structuredClone(props.message)
+		if (hasEmptyPattern) {
+			newMessage.variants = newMessage.variants.filter(
+				(variant) => variant.languageTag !== props.languageTag,
+			)
+		}
+
 		setMachineTranslationIsLoading(true)
-		const [translation, exception] = await rpc.machineTranslate({
-			text,
-			referenceLanguage: referenceResource()!.languageTag.name,
-			targetLanguage: props.language,
+		const { rpc } = await import("@inlang/rpc")
+		const translation = await rpc.machineTranslateMessage({
+			message: newMessage,
+			sourceLanguageTag: inlang()!.config()!.sourceLanguageTag!,
+			targetLanguageTags: [props.languageTag],
 		})
-		if (exception) {
+		if (translation.error !== undefined) {
 			showToast({
 				variant: "warning",
 				title: "Machine translation failed.",
-				message: exception.message,
+				message: translation.error,
 			})
 		} else {
-			const _copy: ast.Message | undefined = copy()
-			if (_copy) {
-				_copy.pattern.elements = [{ type: "Text", value: translation }] as Array<
-					ast.Text | ast.Placeholder
-				>
-				editor().commands.setContent(setTipTapMessage(_copy))
+			const newPattern =
+				getVariant(translation.data, {
+					where: {
+						languageTag: props.languageTag,
+						selectors: {},
+					},
+				})?.pattern || []
+			if (JSON.stringify(newPattern) !== "[]") {
+				editor().commands.setContent(setTipTapMessage(newPattern))
+			} else {
+				showToast({
+					variant: "warning",
+					title: "Machine translation failed.",
+					message: "Empty pattern already exists for this language.",
+				})
 			}
 		}
+
 		setMachineTranslationIsLoading(false)
 	}
 
 	const getNotificationHints = () => {
 		const notifications: Array<Notification> = []
-		if (props.message) {
-			const lintReports = getLintReports(props.message as LintedMessage)
-			const filteredReports = lintReports.filter((report) =>
-				handleMissingMessage(report, filteredLanguages()),
-			)
-			if (filteredReports) {
-				filteredReports.map((lint) => {
-					notifications.push({
-						notificationTitle: lint.id.includes(".") ? lint.id.split(".")[1]! : lint.id,
-						notificationDescription: lint.message,
-						notificationType: lint.level,
-					})
+		props.lintReports.map((report) => {
+			if (report.messageId === props.message.id && report.languageTag === props.languageTag) {
+				const messageLintRuleName = inlang()
+					?.installed.messageLintRules()
+					.find((rule) => rule.meta.id === report.ruleId)?.meta.displayName
+				notifications.push({
+					notificationTitle:
+						typeof messageLintRuleName === "object"
+							? messageLintRuleName.en
+							: messageLintRuleName || report.ruleId,
+					notificationDescription: typeof report.body === "object" ? report.body.en : report.body,
+					notificationType: report.level,
 				})
 			}
-		}
+		})
 
 		if (hasChanges() && localStorage.user === undefined) {
 			notifications.push({
 				notificationTitle: "Access:",
 				notificationDescription: "Sign in to commit changes.",
-				notificationType: "warn",
+				notificationType: "warning",
 			})
 		}
 		if (hasChanges() && userIsCollaborator() === false) {
 			notifications.push({
 				notificationTitle: "Fork:",
 				notificationDescription: "Fork the project to commit changes.",
-				notificationType: "info",
+				notificationType: "warning",
 			})
 		}
 		return notifications
 	}
 
+	let timer: ReturnType<typeof setTimeout>
 	const handleShortcut = (event: KeyboardEvent) => {
+		// @ts-ignore
+		const platform = navigator?.userAgentData?.platform || navigator?.platform
 		if (
-			((event.ctrlKey && event.code === "KeyS" && navigator.platform.includes("Win")) ||
-				(event.metaKey && event.code === "KeyS" && navigator.platform.includes("Mac"))) &&
-			hasChanges() &&
+			((event.ctrlKey && event.code === "KeyS" && platform.toLowerCase().includes("win")) ||
+				(event.metaKey && event.code === "KeyS" && platform.toLowerCase().includes("mac"))) &&
 			userIsCollaborator()
 		) {
 			event.preventDefault()
-			handleSave()
+			clearTimeout(timer)
+			timer = setTimeout(() => {
+				showToast({
+					variant: "info",
+					title: "Inlang saves automatically but make shure to push your changes.",
+				})
+			}, 500)
 		}
 	}
 
@@ -326,24 +361,23 @@ export function PatternEditor(props: {
 		// outer element is needed for clickOutside directive
 		// to close the action bar when clicking outside
 		<div
-			onClick={() => {
-				editor().chain().focus()
-			}}
+			onClick={() => editor().chain().focus()}
 			onFocusIn={() => setIsLineItemFocused(true)}
-			class="flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border first:mt-0 -mt-[1px] border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus-within:relative focus-within:border-primary focus-within:ring-[3px] focus-within:ring-hover-primary/50"
+			class={
+				"flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border first:mt-0 -mt-[1px] border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus-within:relative focus-within:border-primary focus-within:ring-[3px] focus-within:ring-hover-primary/50 "
+			}
 		>
 			<div class="flex justify-start items-start gap-2 py-[5px]">
 				<div class="flex justify-start items-center flex-grow-0 flex-shrink-0 w-[72px] gap-2 py-0">
 					<div class="flex justify-start items-start flex-grow-0 flex-shrink-0 relative gap-2">
-						<p class="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left text-on-surface-variant">
-							{props.language}
+						<p class="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left text-on-surface-variant()">
+							{props.languageTag}
 						</p>
 					</div>
-					{props.referenceLanguage === props.language && (
+					{inlang()?.config()?.sourceLanguageTag === props.languageTag && (
 						<sl-badge prop:variant="neutral">ref</sl-badge>
 					)}
 				</div>
-				{/* TODO: #169 use proper text editor instead of input element */}
 			</div>
 
 			{/* tiptap floating menu */}
@@ -355,12 +389,13 @@ export function PatternEditor(props: {
 
 				{/* tiptap editor */}
 				<div
-					id={props.id + "-" + props.language}
+					id={props.message.id + "-" + props.languageTag}
 					ref={textArea}
 					onKeyDown={(event) => handleShortcut(event)}
 					onFocusIn={() => {
+						setLocalStorage("isFirstUse", false)
 						telemetryBrowser.capture("EDITOR clicked in field", {
-							targetLanguage: props.language,
+							targetLanguage: props.languageTag,
 							owner: routeParams().owner,
 							repository: routeParams().repository,
 						})
@@ -373,12 +408,13 @@ export function PatternEditor(props: {
 				<div class="flex items-center justify-end gap-2">
 					<Show
 						when={
-							JSON.stringify(getTextValue(editor)) === "[]" || getTextValue(editor) === undefined
+							getTextValue(editor) === undefined ||
+							JSON.stringify(getTextValue(editor)) === "[]" ||
+							JSON.stringify(getTextValue(editor)) === `[{"type":"Text","value":""}]`
 						}
 					>
 						<sl-button
 							onClick={handleMachineTranslate}
-							// prop:disabled={true}
 							// prop:disabled={
 							// 	(textValue() !== undefined && textValue() !== "") ||
 							// 	props.referenceMessage === undefined
@@ -387,26 +423,51 @@ export function PatternEditor(props: {
 							prop:variant="neutral"
 							prop:size="small"
 						>
+							{/* @ts-ignore */}
 							<MaterialSymbolsTranslateRounded slot="prefix" />
 							Machine translate
 						</sl-button>
 					</Show>
 					<Show when={hasChanges() && isLineItemFocused()}>
 						<sl-button
-							prop:variant="primary"
+							prop:variant="default"
 							prop:size="small"
 							prop:disabled={hasChanges() === false || userIsCollaborator() === false}
 							onClick={() => {
-								handleSave()
+								editor().commands.setContent(setTipTapMessage(referencePattern()!))
+								textArea.parentElement?.click()
 							}}
 						>
-							<Shortcut slot="suffix" color="primary" codes={["ControlLeft", "s"]} />
-							Save
+							Revert
 						</sl-button>
 					</Show>
 				</div>
-				<Show when={!getEditorFocus() && !isLineItemFocused() && hasChanges()}>
-					<div class="bg-hover-primary w-2 h-2 rounded-full" />
+				<Show
+					when={
+						!isLineItemFocused() &&
+						hasChanges() &&
+						!(
+							getTextValue(editor) === undefined ||
+							JSON.stringify(getTextValue(editor)) === "[]" ||
+							JSON.stringify(getTextValue(editor)) === `[{"type":"Text","value":""}]`
+						)
+					}
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+						class="text-hover-primary mr-1"
+					>
+						<path
+							d="M4 12L9 17L19.5 6.5"
+							stroke="currentColor"
+							stroke-width="2"
+							class="animate-draw"
+						/>
+					</svg>
 				</Show>
 				{getNotificationHints().length !== 0 && (
 					<NotificationHint notifications={getNotificationHints()} />
@@ -441,7 +502,7 @@ export function PatternEditor(props: {
 							onClick={() => {
 								setLocalStorage("showMachineTranslationWarning", false)
 								machineLearningWarningDialog?.hide()
-								//handleMachineTranslate()
+								handleMachineTranslate()
 							}}
 						>
 							Proceed with machine translating

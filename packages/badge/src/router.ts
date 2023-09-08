@@ -1,9 +1,9 @@
-import express, { Request, Response } from "express"
+import express, { Router, type Request, type Response } from "express"
 import { Resvg } from "@resvg/resvg-js"
 import { badge } from "./badge.js"
 
 // Create the express router
-export const router = express.Router()
+export const router: Router = express.Router()
 
 // Route for the /badge endpoint
 router.get(

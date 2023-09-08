@@ -1,47 +1,53 @@
+// pluginOptions for json plugin
+export type PluginSettings = {
+	pathPattern: string | Record<string, string>
+	variableReferencePattern?: string[] //default is ["{", "}"]
+	ignore?: string[] // default is []
+}
+
 /**
- * Throws an error if the settings are invalid.
+ * Throws an error if the options are invalid.
  *
  * Not using zod becaue it's not worth the bundle size (2kb vs 14kb).
  */
 export function throwIfInvalidSettings(settings: PluginSettings) {
-	if (settings.pathPattern === undefined) {
-		throw new Error(
-			"The pathPattern setting must be defined and include the {language} placeholder. An example would be './resources/{language}.json'.",
-		)
-	} else if (settings.pathPattern.includes("{language}") === false) {
-		throw new Error(
-			"The pathPattern setting must be defined and include the {language} placeholder. An example would be './resources/{language}.json'.",
-		)
-	} else if (settings.pathPattern.endsWith(".json") === false) {
-		throw new Error(
-			"The pathPattern setting must end with '.json'. An example would be './resources/{language}.json'.",
-		)
+	if (typeof settings.pathPattern === "string") {
+		if (settings.pathPattern.includes("{languageTag}") === false) {
+			throw new Error(
+				"The pathPattern setting must be defined and include the {languageTag} variable reference. An example would be './resources/{languageTag}.json'.",
+			)
+		} else if (settings.pathPattern.includes("{{languageTag}}") === true) {
+			throw new Error(
+				"The pathPattern setting must use single brackets instead of double brackets for the {languageTag} variable reference. An example would be './resources/{languageTag}.json'.",
+			)
+		} else if (settings.pathPattern.endsWith(".json") === false) {
+			throw new Error(
+				"The pathPattern setting must end with '.json'. An example would be './resources/{languageTag}.json'.",
+			)
+		} else if (settings.pathPattern.includes("*")) {
+			throw new Error(
+				"The pathPattern includes a '*' wildcard. This was depricated in version 3.0.0. Check https://inlang.com/marketplace/plugin.inlang.json for how to use PluginOptions",
+			)
+		}
+	} else {
+		for (const [prefix, path] of Object.entries(settings.pathPattern)) {
+			if (path === undefined || path.includes("{languageTag}") === false) {
+				throw new Error(
+					"The pathPattern setting must be defined and include the {languageTag} variable reference An example would be './resources/{languageTag}.json'.",
+				)
+			} else if (path === undefined || path.includes("{{languageTag}}") === true) {
+				throw new Error(
+					"The pathPattern setting must use single brackets instead of double brackets for the {languageTag} variable reference. An example would be './resources/{languageTag}.json'.",
+				)
+			} else if (path.endsWith(".json") === false) {
+				throw new Error(
+					"The pathPattern setting must end with '.json'. An example would be './resources/{languageTag}.json'.",
+				)
+			} else if (prefix.includes(".")) {
+				throw new Error(
+					"A prefix of pathPattern includes an '.'. Use a string without dot notations. An example would be 'common'.",
+				)
+			}
+		}
 	}
 }
-
-export type PluginSettings = {
-	/**
-	 * Defines the path pattern for the resources.
-	 *
-	 * Must include the `{language}` placeholder.
-	 *
-	 * @example
-	 *  "./resources/{language}.json"
-	 */
-	pathPattern: string
-	/**
-	 * Defines the pattern for variable references.
-	 *
-	 * Can be either a single string ("Hello @user") or
-	 * an array of two strings ("Hello {{user}}").
-	 */
-	variableReferencePattern?: [string, string]
-	ignore?: string[]
-}
-
-export type PluginSettingsWithDefaults = WithRequired<
-	PluginSettings,
-	"variableReferencePattern" | "ignore"
->
-
-type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }

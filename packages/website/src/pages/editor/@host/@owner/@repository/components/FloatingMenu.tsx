@@ -1,11 +1,8 @@
-import type * as ast from "@inlang/core/ast"
 import { For } from "solid-js"
+import type { VariableReference } from "@inlang/sdk"
 
-export const FloatingMenu = (props: {
-	variableReferences: ast.VariableReference[]
-	editor: any
-}) => {
-	const handleClick = (variableReference: ast.VariableReference) => {
+export const FloatingMenu = (props: { variableReferences: VariableReference[]; editor: any }) => {
+	const handleClick = (variableReference: VariableReference) => {
 		props
 			.editor()
 			.chain()

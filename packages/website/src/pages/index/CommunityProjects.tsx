@@ -1,9 +1,9 @@
 import { For, Show } from "solid-js"
 import { repositories } from "./repositories.js"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
-import { useLocalStorage } from "@src/services/local-storage/index.js"
+import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { useI18n } from "@solid-primitives/i18n"
-import { defaultLanguage } from "@src/renderer/_default.page.route.js"
+import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 
 export function CommunityProjects() {
 	const [store] = useLocalStorage()
@@ -82,6 +82,8 @@ export function RepositoryCard(props: {
 		description: string
 		lastOpened?: number
 	}
+	install?: boolean
+	modules?: string[]
 }) {
 	const getRelativeTime = (timestamp: number) => {
 		// Calculate the time difference
@@ -118,12 +120,18 @@ export function RepositoryCard(props: {
 
 	return (
 		<a
-			href={`/editor/github.com/${props.repository.owner}/${props.repository.repository}`}
+			href={
+				props.install
+					? `/install?repo=github.com/${props.repository.owner}/${
+							props.repository.repository
+					  }&module=${props.modules?.join(",")}`
+					: `/editor/github.com/${props.repository.owner}/${props.repository.repository}`
+			}
 			class="rounded-xl bg-surface-100 hover:bg-surface-200 border border-surface-2 p-6 flex flex-col justify-between gap-5"
 		>
 			<div>
 				<div class="flex flex-col">
-					<div class="flex justify-between">
+					<div class="flex justify-between gap-4">
 						<img
 							class="w-10 h-10 rounded-md m-0 shadow-lg"
 							src={`https://github.com/${props.repository.owner}.png?size=40`}

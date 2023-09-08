@@ -1,6 +1,7 @@
 import { Command } from "commander"
 import { config } from "./commands/config/index.js"
 import { machine } from "./commands/machine/index.js"
+import { module } from "./commands/module/index.js"
 import { version } from "../package.json"
 import consola, { Consola } from "consola"
 import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
@@ -8,8 +9,7 @@ import { open } from "./commands/open/index.js"
 import { gitOrigin, telemetry } from "./services/telemetry/implementation.js"
 import fetchPolyfill from "node-fetch"
 import { lint } from "./commands/lint/index.js"
-import { coreUsedConfigEvent } from "@inlang/telemetry"
-import { getConfig } from "./utilities/getConfig.js"
+import { project } from "./commands/project/index.js"
 // --------------- INIT ---------------
 
 // polyfilling node < 18 with fetch
@@ -32,13 +32,15 @@ export const cli = new Command()
 	.description("CLI for inlang.")
 	// Commands
 	.addCommand(config)
+	.addCommand(project)
 	.addCommand(lint)
 	.addCommand(machine)
 	.addCommand(open)
+	.addCommand(module)
 	// Global options
-	.option("-c, --config <value>", "Path to the inlang.config.js file.")
+	// .option("-c, --config <value>", "Path to the project.inlang.json file.")
 	// Hooks
-	.hook("postAction", (command) => {
+	.hook("preAction", (command) => {
 		// name enables better grouping in the telemetry dashboard
 		const name = command.args.filter(
 			// shouldn't start with a flag and the previous arg shouldn't be a flag
@@ -71,16 +73,3 @@ telemetry.groupIdentify({
 		name: gitOrigin,
 	},
 })
-
-try {
-	const [inlangConfig] = await getConfig({ options: cli.opts() })
-
-	if (inlangConfig) {
-		telemetry.capture({
-			event: coreUsedConfigEvent.name,
-			properties: coreUsedConfigEvent.properties(inlangConfig),
-		})
-	}
-} catch (error) {
-	// ignore, because of telemetry usage
-}

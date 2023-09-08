@@ -16,7 +16,7 @@ type LintingConfig =
 	| false
 	| (LintSettings<"missing_property"> & LintSettings<"missing_key", { ignore: Array<string> }>)
 
-type InlangConfig = {
+type ProjectConfig = {
 	// ... all other properties
 	linting?: LintingConfig
 }
@@ -26,14 +26,14 @@ type InlangConfig = {
 
 // to completely disable linting
 {
-	const config: InlangConfig = {
+	const config: ProjectConfig = {
 		linting: false,
 	}
 }
 
 // to disable a specific lint feature
 {
-	const config: InlangConfig = {
+	const config: ProjectConfig = {
 		linting: {
 			missing_property: false,
 		},
@@ -42,7 +42,7 @@ type InlangConfig = {
 
 // to set a specific linting level for a feature
 {
-	const config: InlangConfig = {
+	const config: ProjectConfig = {
 		linting: {
 			missing_property: "warn",
 		},
@@ -51,7 +51,7 @@ type InlangConfig = {
 
 // to configure a specific lint feature
 {
-	const config: InlangConfig = {
+	const config: ProjectConfig = {
 		linting: {
 			missing_key: ["warn", { ignore: ["test-key"] }],
 		},

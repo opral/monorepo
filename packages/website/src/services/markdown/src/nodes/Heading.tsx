@@ -1,6 +1,6 @@
-import { JSXElement, Show, createSignal } from "solid-js"
+import { type JSXElement, Show, createSignal } from "solid-js"
 import copy from "clipboard-copy"
-import { showToast } from "@src/components/Toast.jsx"
+import { showToast } from "#src/components/Toast.jsx"
 
 /**
  * Custom Link nodes.

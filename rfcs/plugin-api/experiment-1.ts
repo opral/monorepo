@@ -4,7 +4,7 @@
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import type { InlangConfig } from "@inlang/core/src/config/index.js"
+import type { ProjectConfig } from "@inlang/core/src/config/index.js"
 import { InlangEnvironment } from "@inlang/core/src/environment/types"
 
 export const myPlugin = ({ pluginConfig }) => {
@@ -22,7 +22,7 @@ export const myPlugin = ({ pluginConfig }) => {
 
 type Plugin = {
 	id: string
-	defineConfig(config: InlangConfig): InlangConfig
+	defineConfig(config: ProjectConfig): ProjectConfig
 }
 
 function readResources(args: any) {}

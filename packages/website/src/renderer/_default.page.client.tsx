@@ -1,4 +1,4 @@
-import { Component, createSignal } from "solid-js"
+import { type Component, createSignal } from "solid-js"
 import { createStore } from "solid-js/store"
 import { hydrate, render as renderApp } from "solid-js/web"
 import { Root } from "./Root.jsx"

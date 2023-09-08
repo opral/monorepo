@@ -43,6 +43,7 @@ export async function render(pageContext: PageContextRenderer): Promise<unknown>
 						page={pageContext.Page}
 						pageProps={pageContext.pageProps}
 						locale={pageContext.locale}
+						isEditor={isEditor}
 					/>
 				</MetaProvider>
 		  ))

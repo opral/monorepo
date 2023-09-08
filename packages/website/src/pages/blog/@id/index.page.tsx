@@ -1,6 +1,6 @@
 import { Meta, Title } from "@solidjs/meta"
-import { Layout } from "@src/pages/Layout.jsx"
-import { Markdown, parseMarkdown } from "@src/services/markdown/index.js"
+import { Layout } from "#src/pages/Layout.jsx"
+import { Markdown, parseMarkdown } from "#src/services/markdown/index.js"
 import { Show } from "solid-js"
 import type { ProcessedTableOfContents } from "./index.page.server.jsx"
 

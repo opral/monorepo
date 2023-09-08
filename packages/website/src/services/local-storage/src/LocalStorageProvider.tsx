@@ -1,7 +1,7 @@
-import { createContext, JSXElement, onCleanup, onMount, useContext } from "solid-js"
-import { createStore, reconcile, SetStoreFunction } from "solid-js/store"
-import { getUserInfo } from "@src/services/auth/index.js"
-import { defaultLocalStorage, LocalStorageSchema } from "./schema.js"
+import { createContext, type JSXElement, onCleanup, onMount, useContext } from "solid-js"
+import { createStore, reconcile, type SetStoreFunction } from "solid-js/store"
+import { getUserInfo } from "#src/services/auth/index.js"
+import { defaultLocalStorage, type LocalStorageSchema } from "./schema.js"
 import { telemetryBrowser } from "@inlang/telemetry"
 
 const LocalStorageContext = createContext()
@@ -67,13 +67,17 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 			// set user to undefined if an error occurs
 			.catch(() => setStore("user", undefined))
 
-		// listen for changes in other windows
-		window.addEventListener("storage", onStorageSetByOtherWindow)
+		if (typeof window !== "undefined") {
+			// listen for changes in other windows
+			window.addEventListener("storage", onStorageSetByOtherWindow)
+		}
 	})
 
 	onCleanup(() => {
 		// remove listener
-		window.removeEventListener("storage", onStorageSetByOtherWindow)
+		if (typeof window !== "undefined") {
+			window.removeEventListener("storage", onStorageSetByOtherWindow)
+		}
 	})
 
 	/** changed in another window should be reflected. thus listen for changes  */
