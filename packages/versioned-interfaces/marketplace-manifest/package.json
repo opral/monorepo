@@ -9,6 +9,9 @@
 		"./dist",
 		"./src"
 	],
+	"publishConfig": {
+		"access": "public"
+	},
 	"scripts": {
 		"build": "tsc --build",
 		"dev": "tsc --watch",
