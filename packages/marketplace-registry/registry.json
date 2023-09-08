@@ -1,16 +1,3 @@
 [
-	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/cli/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/editor/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/ide-extension/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/badge/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/plugins/i18next/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/plugins/json/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/plugins/paraglide/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/lint-rules/emptyPattern/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/lint-rules/identicalPattern/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/lint-rules/messageWithoutSource/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/lint-rules/missingTranslation/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/versioned-interfaces/language-tag/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/paraglide-js-sveltekit/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/inlang/inlang/armageddon/source-code/versioned-interfaces/translatable/marketplace-manifest.json"
+
 ]

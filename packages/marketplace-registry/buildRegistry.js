@@ -8,13 +8,19 @@ const manifestLinks = JSON.parse(await fs.readFile("./registry.json", "utf-8"))
 const manifests = []
 
 for (const link of manifestLinks) {
-	const json = JSON.parse(await (await fetch(link)).text())
-	if (Value.Check(MarketplaceManifest, json) === false) {
-		const errors = [...Value.Errors(MarketplaceManifest, json)]
-		console.error(errors)
+	try {
+		// eslint-disable-next-line no-undef
+		const json = JSON.parse(await (await fetch(link)).text())
+		if (Value.Check(MarketplaceManifest, json) === false) {
+			const errors = [...Value.Errors(MarketplaceManifest, json)]
+			// eslint-disable-next-line no-undef
+			console.error(errors)
+			throw new Error(`Manifest '${link}' is invalid.`)
+		}
+		manifests.push(json)
+	} catch (e) {
 		throw new Error(`Manifest '${link}' is invalid.`)
 	}
-	manifests.push(json)
 }
 
 // sort the manifests by id
