@@ -22,14 +22,14 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/plugin": "workspace:*",
-		"@inlang/message-lint-rule": "workspace:*"
+		"@inlang/plugin": "*",
+		"@inlang/message-lint-rule": "*"
 	},
 	"peerDependencies": {
 		"@sinclair/typebox": "^0.31.0"
 	},
 	"devDependencies": {
-		"@placeholder-company/js-code-style": "workspace:*",
+		"@placeholder-company/js-code-style": "*",
 		"tsd": "^0.28.1",
 		"typescript": "5.2.2"
 	}

@@ -76,19 +76,19 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
-		"@lix-js/fs": "workspace:*",
-		"@inlang/result": "workspace:*",
-		"@inlang/telemetry": "workspace:*",
+		"@lix-js/fs": "*",
+		"@inlang/result": "*",
+		"@inlang/telemetry": "*",
 		"@vitest/coverage-v8": "0.34.3",
 		"require-from-string": "^2.0.2",
 		"throttle-debounce": "^5.0.0",
 		"vitest": "0.34.3"
 	},
 	"devDependencies": {
-		"@placeholder-company/js-code-style": "workspace:*",
+		"@placeholder-company/js-code-style": "*",
 		"isomorphic-git": "1.24.5",
-		"@inlang/sdk": "workspace:*",
-		"@inlang/create-project": "workspace:*",
+		"@inlang/sdk": "*",
+		"@inlang/create-project": "*",
 		"@types/fs-extra": "^11.0.1",
 		"@types/glob": "^8.1.0",
 		"@types/mocha": "^10.0.1",

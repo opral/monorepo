@@ -22,17 +22,17 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
-		"@lix-js/fs": "workspace:*",
-		"@inlang/json-types": "workspace:*",
-		"@inlang/message": "workspace:*",
-		"@inlang/language-tag": "workspace:*",
-		"@inlang/translatable": "workspace:*"
+		"@lix-js/fs": "*",
+		"@inlang/json-types": "*",
+		"@inlang/message": "*",
+		"@inlang/language-tag": "*",
+		"@inlang/translatable": "*"
 	},
 	"peerDependencies": {
 		"@sinclair/typebox": "^0.31.0"
 	},
 	"devDependencies": {
-		"@placeholder-company/js-code-style": "workspace:*",
+		"@placeholder-company/js-code-style": "*",
 		"tsd": "^0.28.1",
 		"typescript": "5.2.2"
 	}
