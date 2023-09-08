@@ -18,7 +18,7 @@
 		"lint": "npx nx run-many --target=lint --all --parallel --output-style stream",
 		"format": "npx nx run-many --target=format --all --parallel",
 		"---- OTHER ---------------------------------------------------------": "",
-		"release": "changeset publish",
+		"changeset": "npx changeset",
 		"clean": "npm run clean -ws --if-present && rm -rf ./.env ./node_modules"
 	},
 	"engines": {
