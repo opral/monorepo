@@ -1,7 +1,7 @@
 ---
 title: Refactoring Inlang
 href: /blog/refactoring-inlang
-description: inlang got a major refactor bringing new capabilities to the ecosystem.
+description: Inlang got a major refactor which brings new capabilities to the ecosystem.
 ---
 
 # {% $frontmatter.title %}
@@ -30,7 +30,7 @@ description: inlang got a major refactor bringing new capabilities to the ecosys
 ## Editor
 
 - Realtime linting and message update
-- Autosaving for a faster workflows
+- Autosaving for faster workflows
 
 ## VS Code Extension
 
