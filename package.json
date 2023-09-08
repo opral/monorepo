@@ -1,6 +1,14 @@
 {
 	"private": true,
 	"type": "module",
+	"workspaces": [
+		"lix/source-code/*",
+		"inlang/source-code/*",
+		"inlang/source-code/plugins/*",
+		"inlang/source-code/message-lint-rules/*",
+		"inlang/source-code/versioned-interfaces/*",
+		"placeholder-company/source-code/*"
+	],
 	"scripts": {
 		"build": "npx nx run-many --target=build --all --parallel",
 		"dev": "npx nx run-many --target=dev --all --parallel 1000 --output-style stream",

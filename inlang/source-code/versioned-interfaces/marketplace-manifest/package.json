@@ -18,11 +18,11 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/translatable": "workspace:*",
-		"@inlang/project-config": "workspace:*"
+		"@inlang/translatable": "*",
+		"@inlang/project-config": "*"
 	},
 	"devDependencies": {
-		"@placeholder-company/js-code-style": "workspace:*",
+		"@placeholder-company/js-code-style": "*",
 		"@sinclair/typebox": "^0.31.0",
 		"typescript": "5.2.2",
 		"vitest": "0.34.3"

@@ -21,13 +21,9 @@ jobs:
         with:
           node-version: 18
 
-      - uses: pnpm/action-setup@v2
-        with:
-            version: 8
+      - run: npm install
 
-      - run: pnpm install
-
-      - run: pnpm run format
+      - run: npm run format
 
       - name: commit & push changes
         uses: stefanzweifel/git-auto-commit-action@v4

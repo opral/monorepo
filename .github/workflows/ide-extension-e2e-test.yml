@@ -21,12 +21,9 @@ jobs:
         with:
           node-version: ${{ matrix.version }}
 
-      - uses: pnpm/action-setup@v2
-        with:
-            version: 8
 
       - name: Install dependencies
-        run: pnpm install
+        run: npm install
 
       - name: Run e2e tests on normal platforms
         if: startsWith(matrix.os, 'ubuntu')

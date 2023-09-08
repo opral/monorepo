@@ -21,13 +21,13 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/plugin": "workspace:*"
+		"@inlang/plugin": "*"
 	},
 	"devDependencies": {
-		"@lix-js/fs": "workspace:*",
-		"@placeholder-company/js-code-style": "workspace:*",
-		"@inlang/cli": "workspace:*",
-		"@inlang/sdk": "workspace:*",
+		"@lix-js/fs": "*",
+		"@placeholder-company/js-code-style": "*",
+		"@inlang/cli": "*",
+		"@inlang/sdk": "*",
 		"@size-limit/preset-small-lib": "^8.2.4",
 		"@types/flat": "^5.0.2",
 		"@types/lodash.merge": "^4.6.7",
