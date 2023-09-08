@@ -10,9 +10,9 @@
 		"url": "https://github.com/inlang/inlang.git"
 	},
 	"icon": "assets/icon.png",
-	"version": "0.9.3",
+	"version": "1.0.0",
 	"engines": {
-		"vscode": "^1.75.0"
+		"vscode": "^1.82.0"
 	},
 	"keywords": [
 		"i18n",

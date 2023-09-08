@@ -1,6 +1,6 @@
 {
 	"id": "plugin.inlang.i18next",
-	"icon": "https://github.com/inlang/inlang/blob/main/source-code/plugins/i18next/assets/icon.png?raw=true",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/plugins/i18next/assets/icon.png",
 	"displayName": {
 		"en": "i18next"
 	},

@@ -66,7 +66,7 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => 
  */
 async function generateIndexAndTableOfContents() {
 	for (const path of tableOfContents) {
-		const text = await fs.readFile(new URL(`blog/${path}`, repositoryRoot), "utf-8")
+		const text = await fs.readFile(new URL(`inlang/blog/${path}`, repositoryRoot), "utf-8")
 		const markdown = parseMarkdown({
 			text,
 			frontmatterSchema: BlogFrontmatterSchema,
