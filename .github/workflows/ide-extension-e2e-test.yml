@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest] # windows-latest is disabled because build.js is not compatible
-        version: [16]
+        version: [18]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout project
