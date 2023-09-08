@@ -21,8 +21,8 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"devDependencies": {
-		"@inlang/cli": "*",
-		"@inlang/plugin": "*",
+		"@inlang/cli": "workspace:*",
+		"@inlang/plugin": "workspace:*",
 		"@types/flat": "^5.0.2",
 		"@types/lodash.merge": "4.6.7",
 		"@types/parsimmon": "1.10.6",

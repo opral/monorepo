@@ -20,12 +20,12 @@
 		"node": ">=18.0.0"
 	},
 	"dependencies": {
-		"@inlang/marketplace-registry": "*",
-		"@inlang/sdk": "*",
-		"@inlang/telemetry": "*",
+		"@inlang/marketplace-registry": "workspace:*",
+		"@inlang/sdk": "workspace:*",
+		"@inlang/telemetry": "workspace:*",
 		"@isomorphic-git/cors-proxy": "^2.7.1",
-		"@lix-js/client": "*",
-		"@lix-js/fs": "*",
+		"@lix-js/client": "workspace:*",
+		"@lix-js/fs": "workspace:*",
 		"@markdoc/markdoc": "^0.1.13",
 		"@sentry/browser": "^7.27.0",
 		"@shoelace-style/shoelace": "2.3.0",
@@ -71,7 +71,7 @@
 	},
 	"devDependencies": {
 		"eslint-plugin-solid": "0.13.0",
-		"@placeholder-company/js-code-style": "*",
+		"@placeholder-company/js-code-style": "workspace:*",
 		"@iconify-json/cib": "^1.1.2",
 		"@iconify-json/material-symbols": "^1.1.26",
 		"@tailwindcss/aspect-ratio": "^0.4.2",
