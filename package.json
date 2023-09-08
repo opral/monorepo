@@ -26,8 +26,12 @@
 		"node": ">=18.0.0"
 	},
 	"devDependencies": {
-		"@placeholder-company/eslint-config": "*",
-		"eslint-plugin-solid": "0.13.0",
+		"eslint": "^8.32.0",
+		"eslint-config-prettier": "^8.6.0",
+		"eslint-plugin-unicorn": "^45.0.2",
+		"@typescript-eslint/eslint-plugin": "^6.6.0",
+		"@typescript-eslint/parser": "^6.6.0",
+		"typescript": "5.2.2",
 		"@changesets/cli": "^2.26.0",
 		"nx": "16.8.0",
 		"prettier": "2.8.3"
