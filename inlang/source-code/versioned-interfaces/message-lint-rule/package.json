@@ -28,6 +28,7 @@
 		"@inlang/translatable": "*"
 	},
 	"peerDependencies": {
+		"@placeholder-company/js-code-style": "*",
 		"@sinclair/typebox": "^0.31.0"
 	},
 	"devDependencies": {

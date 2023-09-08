@@ -26,6 +26,7 @@
 	},
 	"devDependencies": {
 		"tsd": "0.28.1",
-		"typescript": "5.2.2"
+		"typescript": "5.2.2",
+		"@placeholder-company/js-code-style": "*"
 	}
 }

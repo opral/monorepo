@@ -28,6 +28,7 @@
 		"@sinclair/typebox": "^0.31.0"
 	},
 	"devDependencies": {
+		"@placeholder-company/js-code-style": "*",
 		"tsd": "0.28.1",
 		"typescript": "5.2.2",
 		"vitest": "0.34.3"

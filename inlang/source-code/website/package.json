@@ -70,6 +70,7 @@
 		"zod": "^3.19.1"
 	},
 	"devDependencies": {
+		"@placeholder-company/js-code-style": "*",
 		"@iconify-json/cib": "^1.1.2",
 		"@iconify-json/material-symbols": "^1.1.26",
 		"@tailwindcss/aspect-ratio": "^0.4.2",
