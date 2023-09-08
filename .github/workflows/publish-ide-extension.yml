@@ -1,4 +1,4 @@
-name: Publish @inlang/ide-extension to VSCode Marketplace
+name: Publish ide extension
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ on:
       - main
 
 jobs:
-  release:
+  vs-code-marketplace:
     runs-on: ubuntu-latest
     environment: ci-cd
     steps:
