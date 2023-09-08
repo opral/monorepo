@@ -1,5 +1,4 @@
 import { createResource, Match, onMount, Suspense, Switch } from "solid-js"
-import mermaid from "mermaid"
 import { getHighlighter, type Highlighter, type Lang, setCDN } from "shiki"
 import copy from "clipboard-copy"
 import { showToast } from "#src/components/Toast.jsx"
@@ -19,7 +18,9 @@ export function Fence(props: { language?: string; content: string }) {
 	return (
 		<Switch>
 			<Match when={props.language === "mermaid"}>
-				<MermaidDiagram {...props} />
+				Mermaid diagrams are temporarly not rendered until
+				https://github.com/inlang/inlang/issues/1302 is implemented.
+				{/* <MermaidDiagram {...props} /> */}
 			</Match>
 			<Match when={props.language !== "mermaid"}>
 				<SyntaxHighlight {...props} />
@@ -73,14 +74,14 @@ function SyntaxHighlight(props: Parameters<typeof Fence>[0]) {
 	)
 }
 
-function MermaidDiagram(props: Parameters<typeof Fence>[0]) {
-	onMount(() => {
-		// @ts-ignore
-		mermaid.init()
-	})
-	return (
-		<div class="not-prose py-6 bg-surface-1 rounded">
-			<pre class="mermaid flex justify-center">{props.content}</pre>
-		</div>
-	)
-}
+// function MermaidDiagram(props: Parameters<typeof Fence>[0]) {
+// 	onMount(() => {
+// 		// @ts-ignore
+// 		mermaid.init()
+// 	})
+// 	return (
+// 		<div class="not-prose py-6 bg-surface-1 rounded">
+// 			<pre class="mermaid flex justify-center">{props.content}</pre>
+// 		</div>
+// 	)
+// }
