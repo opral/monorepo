@@ -20,7 +20,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.version }}
-          cache: "npm"
+
+      - uses: pnpm/action-setup@v2
+        with:
+            version: 8
 
       - name: Install dependencies
         run: pnpm install
