@@ -67,7 +67,6 @@ const ExternalSettings = Type.Record(
  * ---------------- CONFIG ----------------
  */
 
-
 /**
  * The inlang config.
  */
