@@ -23,7 +23,7 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm install --no-save
+        run: pnpm install
 
       - name: Run e2e tests on normal platforms
         if: startsWith(matrix.os, 'ubuntu')

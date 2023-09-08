@@ -20,11 +20,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: "npm"
+          cache: "pnpm"
 
-      - run: npm ci
+      - run: pnpm install
 
-      - run: npm run format
+      - run: pnpm run format
 
       - name: commit & push changes
         uses: stefanzweifel/git-auto-commit-action@v4
