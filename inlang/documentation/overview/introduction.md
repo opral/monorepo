@@ -29,7 +29,7 @@ Inlang apps are built on lix. Lix is a git-compatible version control backend fo
 
 {% Figure
 
-    src="https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/assets/version-controlled-infrastructure.webp"
+    src="https://github.com/inlang/inlang/assets/58360188/917cc987-669d-4203-a2ed-8184087fd070"
 
     alt="lix-based globalization infrastructure"
 
