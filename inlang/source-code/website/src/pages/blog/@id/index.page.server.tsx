@@ -4,7 +4,7 @@ import { parseMarkdown } from "#src/services/markdown/index.js"
 import { RenderErrorPage } from "vite-plugin-ssr/RenderErrorPage"
 import fs from "node:fs/promises"
 import { BlogFrontmatterSchema } from "./frontmatterSchema.js"
-import tableOfContents from "../../../../../../content/blog/tableOfContents.json"
+import tableOfContents from "../../../../../../blog/tableOfContents.json"
 
 /**
  * The root of the repository.
@@ -66,7 +66,7 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => 
  */
 async function generateIndexAndTableOfContents() {
 	for (const path of tableOfContents) {
-		const text = await fs.readFile(new URL(`content/blog/${path}`, repositoryRoot), "utf-8")
+		const text = await fs.readFile(new URL(`blog/${path}`, repositoryRoot), "utf-8")
 		const markdown = parseMarkdown({
 			text,
 			frontmatterSchema: BlogFrontmatterSchema,
