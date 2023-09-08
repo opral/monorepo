@@ -8,7 +8,7 @@
 		"en": "Checks for likely outdated messages.  A message with a missing source is usually an indication that the message (id) is no longer used in source code, but messages have not been updated accordingly."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/inlang@main/source-code/lint-rules/messageWithoutSource/README.md"
+		"en": "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/lint-rules/messageWithoutSource/README.md"
 	},
 	"keywords": ["lint rule", "source"],
 	"publisherName": "inlang",
