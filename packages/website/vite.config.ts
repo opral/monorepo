@@ -12,7 +12,10 @@ export default defineConfig({
 	envPrefix: "PUBLIC_",
 	plugins: [
 		nodePolyfills({
-			protocolImports: true,
+			// Isomorphic git uses node dependencies in the browser without protocol node:* imports.
+			// other parts of the source code use server side node dependencies with protocol node:* imports.
+			// to not break server side node imports, don't polyfill node:* imports.
+			protocolImports: false,
 		}),
 		solid({ ssr: true }),
 		// ordering matters. telefunc must be before ssr

@@ -12,7 +12,7 @@
  * ------------------------------------
  */
 
-import express from "express"
+import express, { Router } from "express"
 import { createServer as createViteServer } from "vite"
 import { URL } from "node:url"
 import { proxy } from "./git-proxy.js"
@@ -28,7 +28,7 @@ import { redirects } from "./redirects.js"
 /** the root path of the server (website/) */
 const rootPath = new URL("../..", import.meta.url).pathname
 
-export const router = express.Router()
+export const router: Router = express.Router()
 
 router.use(
 	cookieSession({
