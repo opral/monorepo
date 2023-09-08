@@ -12,7 +12,7 @@ For example, the [missing translation lint rule](TODO-link-to-marketplace) repor
 
 ## Types of lint rules
 
-![inlang message lints](https://cdn.jsdelivr.net/gh/inlang/inlang/documentation/assets/lintrule-messagelints.jpg)
+![inlang message lints](https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/documentation/assets/lintrule-messagelints.jpg)
 
 ### Message lint rule
 

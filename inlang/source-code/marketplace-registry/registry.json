@@ -1,3 +1,16 @@
 [
-
+	"https://raw.githubusercontent.com/inlang/inlang/main/inlang/source-code/cli/marketplace-manifest.json",
+	"https://raw.githubusercontent.com/inlang/inlang/main/inlang/source-code/editor/marketplace-manifest.json",
+	"https://raw.githubusercontent.com/inlang/inlang/main/inlang/source-code/ide-extension/marketplace-manifest.json",
+	"https://raw.githubusercontent.com/inlang/inlang/main/inlang/source-code/badge/marketplace-manifest.json",
+	"https://raw.githubusercontent.com/inlang/inlang/main/inlang/source-code/plugins/i18next/marketplace-manifest.json",
+	"https://raw.githubusercontent.com/inlang/inlang/main/inlang/source-code/plugins/json/marketplace-manifest.json",
+	"https://raw.githubusercontent.com/inlang/inlang/main/inlang/source-code/plugins/paraglide/marketplace-manifest.json",
+	"https://raw.githubusercontent.com/inlang/inlang/main/inlang/source-code/lint-rules/emptyPattern/marketplace-manifest.json",
+	"https://raw.githubusercontent.com/inlang/inlang/main/inlang/source-code/lint-rules/identicalPattern/marketplace-manifest.json",
+	"https://raw.githubusercontent.com/inlang/inlang/main/inlang/source-code/lint-rules/messageWithoutSource/marketplace-manifest.json",
+	"https://raw.githubuser4content.com/inlang/inlang/main/inlang/source-code/lint-rules/missingTranslation/marketplace-manifest.json",
+	"https://raw.githubusercontent.com/inlang/inlang/main/inlang/source-code/versioned-interfaces/language-tag/marketplace-manifest.json",
+	"https://raw.githubusercontent.com/inlang/inlang/main/inlang/source-code/paraglide-js-sveltekit/marketplace-manifest.json",
+	"https://raw.githubusercontent.com/inlang/inlang/main/inlang/source-code/versioned-interfaces/translatable/marketplace-manifest.json"
 ]

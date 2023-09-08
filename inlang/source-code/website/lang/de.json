@@ -44,9 +44,11 @@
 				"multiple": "Mehrere",
 				"apps": "Apps",
 				"plugins": "Plugins",
+				"modules": "Module",
 				"config": "Konfiguration.",
 				"endless": ", endlose",
-				"one": ", eine"
+				"one": ", eine",
+				"project": "Projekt"
 			}
 		},
 		"pricing": {
