@@ -1,0 +1,15 @@
+{
+	"name": "@placeholder-company/eslint-config",
+	"version": "1.0.0",
+	"type": "module",
+	"license": "Apache-2.0",
+	"main": "./eslint.base.json",
+	"devDependencies": {
+		"typescript": "5.2.2",
+		"eslint": "^8.32.0",
+		"eslint-config-prettier": "^8.6.0",
+		"eslint-plugin-unicorn": "^45.0.2",
+		"@typescript-eslint/eslint-plugin": "^6.6.0",
+		"@typescript-eslint/parser": "^6.6.0"
+	}
+}
