@@ -10,7 +10,7 @@
 	],
 	"settings": {
 		"plugin.inlang.json": {
-			"pathPattern": "./inlang/source-code/website/lang/{language}.json"
+			"pathPattern": "./inlang/source-code/website/lang/{languageTag}.json"
 		}
 	}
 }
