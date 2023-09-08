@@ -1,5 +1,4 @@
 {
-	"extends": ["../../.eslintrc.json"],
-	"rules": {},
+	"extends": [],
 	"ignorePatterns": ["examples/**/.svelte-kit", "examples/**/build"]
 }
