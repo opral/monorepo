@@ -3,11 +3,12 @@ import type { NodeishFilesystem } from "@lix-js/fs"
 import type { ProjectConfig } from "@inlang/project-config"
 import { getLanguageFolderPath } from "./getLanguageFolderPath.js"
 
+// FIXME: get latest major version instead
 export const pluginUrls: Record<string, string> = {
-	sdkJs: "https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin@3/dist/index.js",
-	i18next: "https://cdn.jsdelivr.net/npm/@inlang/i18next@3/dist/index.js",
+	sdkJs: "https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin@latest/dist/index.js",
+	i18next: "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@4/dist/index.js",
 	typesafeI18n: "",
-	json: "https://cdn.jsdelivr.net/npm/@inlang/plugin-json@3/dist/index.js",
+	json: "https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js",
 }
 
 export type SupportedLibrary = keyof typeof pluginUrls
