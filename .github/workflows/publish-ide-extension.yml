@@ -5,7 +5,7 @@ on:
 
   push:
     paths:
-      - "source-code/ide-extension/package.json"
+      - "inlang/source-code/ide-extension/package.json"
     branches:
       - main
 
