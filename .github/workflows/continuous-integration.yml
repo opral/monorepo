@@ -1,0 +1,31 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches:
+      - "main"
+
+jobs:
+  ci:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        version: [18]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v3
+
+      - name: Install node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.version }}
+
+      - run: npm install
+
+      - run: npm run lint
+
+      - run: npm run build
+
+      - run: npm run test
+

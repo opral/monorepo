@@ -1,9 +1,0 @@
-{
-	"name": "inlang",
-	"type": "module",
-	"version": "0.1.2",
-	"publishConfig": {
-		"access": "public"
-	},
-	"license": "Apache-2.0"
-}

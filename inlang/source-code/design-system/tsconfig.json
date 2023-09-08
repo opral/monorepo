@@ -1,0 +1,10 @@
+// Stencil specific config file.
+{
+	"extends": "@placeholder-company/js-code-style/tsconfig.base.json",
+	"include": ["src/**/*"],
+	"compilerOptions": {
+		"lib": ["ESNext", "DOM"],
+		"outDir": "dist",
+		"verbatimModuleSyntax": false
+	}
+}

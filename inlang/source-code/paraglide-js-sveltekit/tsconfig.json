@@ -1,0 +1,16 @@
+{
+	"extends": "@placeholder-company/js-code-style/tsconfig.base.json",
+	"include": ["src/**/*.ts"],
+	"exclude": ["**/examples/*"],
+	"compilerOptions": {
+		// DOM because of fetch. TODO: extract fetch from this package and
+		// let fetch be provided by the environment.
+		"lib": ["ESNext", "DOM"],
+		"types": [],
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"verbatimModuleSyntax": true,
+		"ignoreDeprecations": "5.0",
+		"resolveJsonModule": true
+	}
+}

@@ -1,0 +1,29 @@
+{
+	"id": "plugin.inlang.paraglideJs",
+	"icon": "https://emojis.wiki/thumbs/emojis/parachute.webp",
+	"displayName": {
+		"en": "Paraglide plugin"
+	},
+	"description": {
+		"en": "A plugin for inlang projects that works with paraglide.js and reads / writes resources."
+	},
+	"readme": {
+		"en": "https://cdn.jsdelivr.net/gh/inlang/inlang@armageddon/source-code/plugins/paraglide/README.md"
+	},
+	"keywords": [
+		"inlang",
+		"paraglide",
+		"paraglide.js",
+		"runtime",
+		"plugin",
+		"transform",
+		"javascript",
+		"typescript",
+		"svelte",
+		"sveltekit"
+	],
+	"publisherName": "inlang",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"license": "Apache-2.0",
+	"module": "../../plugins/paraglide/dist/index.js"
+}

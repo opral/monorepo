@@ -1,0 +1,10 @@
+{
+	"extends": "@placeholder-company/js-code-style/tsconfig.base.json",
+	"include": ["src/**/*"],
+	"compilerOptions": {
+		"lib": ["ESNext", "DOM"],
+		"types": [],
+		"outDir": "./dist",
+		"rootDir": "./src"
+	}
+}

@@ -1,0 +1,21 @@
+{
+	"sourceLanguageTag": "en",
+	"languageTags": ["en", "de"],
+	"modules": [
+		"./../../plugins/i18next/dist/index.js",
+		"./../../lint-rules/emptyPattern/dist/index.js",
+		"./../../lint-rules/identicalPattern/dist/index.js",
+		"./../../lint-rules/missingTranslation/dist/index.js",
+		"./../../lint-rules/messageWithoutSource/dist/index.js"
+	],
+	"settings": {
+		"plugin.inlang.i18next": {
+			"pathPattern": {
+				"client-page": "app/i18n/locales/{languageTag}/client-page.json",
+				"footer": "app/i18n/locales/{languageTag}/footer.json",
+				"second-page": "app/i18n/locales/{languageTag}/second-page.json",
+				"translation": "app/i18n/locales/{languageTag}/translation.json"
+			}
+		}
+	}
+}

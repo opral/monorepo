@@ -1,0 +1,116 @@
+{
+	"name": "vs-code-extension",
+	"private": true,
+	"displayName": "inlang (i18n)",
+	"type": "module",
+	"description": "i18n extension that makes developers more productive.",
+	"publisher": "inlang",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/inlang/inlang.git"
+	},
+	"icon": "assets/icon.png",
+	"version": "0.9.3",
+	"engines": {
+		"vscode": "^1.75.0"
+	},
+	"keywords": [
+		"i18n",
+		"localization",
+		"translation"
+	],
+	"categories": [
+		"Other",
+		"Linters",
+		"Visualization"
+	],
+	"main": "./dist/main.cjs",
+	"contributes": {
+		"commands": [
+			{
+				"command": "inlang.editMessage",
+				"title": "Inlang: Edit a Message"
+			},
+			{
+				"command": "inlang.extractMessage",
+				"title": "Inlang: Extract Message"
+			},
+			{
+				"command": "inlang.openInEditor",
+				"title": "Inlang: Open in Editor"
+			}
+		],
+		"configuration": {
+			"properties": {
+				"inlang.userId": {
+					"type": "string",
+					"default": ""
+				},
+				"inlang.disableRecommendation": {
+					"type": "array",
+					"default": []
+				},
+				"inlang.disableConfigFileCreation": {
+					"type": "array",
+					"default": []
+				},
+				"inlang.disableConfigFileDeletion": {
+					"type": "array",
+					"default": []
+				}
+			}
+		}
+	},
+	"scripts": {
+		"build": "node ./build.js",
+		"dev": "DEV=true node ./build.js",
+		"package": "npx @vscode/vsce package",
+		"---- TEST ----------------------------------------------------------": "",
+		"pretest": "node ./build.js",
+		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"test:e2e": "TEST=true npm run pretest && node ./dist/test.cjs",
+		"---- LINT ----------------------------------------------------------": "",
+		"lint": "eslint ./src --fix",
+		"format": "prettier ./src --write",
+		"---- OTHER ----------------------------------------------------------": "",
+		"clean": "rm -rf ./dist ./.turbo ./node_modules"
+	},
+	"dependencies": {
+		"@lix-js/fs": "*",
+		"@inlang/result": "*",
+		"@inlang/telemetry": "*",
+		"@vitest/coverage-v8": "0.34.3",
+		"require-from-string": "^2.0.2",
+		"throttle-debounce": "^5.0.0",
+		"vitest": "0.34.3"
+	},
+	"devDependencies": {
+		"@placeholder-company/js-code-style": "*",
+		"isomorphic-git": "1.24.5",
+		"@inlang/sdk": "*",
+		"@inlang/create-project": "*",
+		"@types/fs-extra": "^11.0.1",
+		"@types/glob": "^8.1.0",
+		"@types/mocha": "^10.0.1",
+		"@types/require-from-string": "^1.2.1",
+		"@types/throttle-debounce": "^5.0.0",
+		"@types/ungap__structured-clone": "^0.3.0",
+		"@types/vscode": "^1.75.0",
+		"@vscode/test-electron": "^2.3.3",
+		"@vscode/vsce": "^2.18.0",
+		"comment-json": "^4.2.3",
+		"esbuild": "^0.17.18",
+		"fs-extra": "^11.1.1",
+		"glob": "^10.3.3",
+		"mocha": "^10.2.0",
+		"node-fetch": "^3.3.1",
+		"ovsx": "^0.8.0",
+		"posthog-node": "^3.1.1",
+		"typescript": "5.0.4"
+	},
+	"activationEvents": [
+		"workspaceContains:**/project.inlang.json",
+		"onStartupFinished"
+	],
+	"license": "Apache-2.0"
+}

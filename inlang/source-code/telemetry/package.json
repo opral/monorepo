@@ -1,0 +1,36 @@
+{
+	"name": "@inlang/telemetry",
+	"type": "module",
+	"version": "0.1.0",
+	"private": true,
+	"exports": {
+		".": "./dist/index.js",
+		"./router": "./dist/router.js"
+	},
+	"scripts": {
+		"build": "tsc --build",
+		"dev": "tsc --watch",
+		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"lint": "eslint ./src --fix",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./.turbo ./node_modules"
+	},
+	"dependencies": {
+		"@inlang/env-variables": "*",
+		"@inlang/sdk": "*",
+		"http-proxy-middleware": "^2.0.6"
+	},
+	"devDependencies": {
+		"@placeholder-company/js-code-style": "*",
+		"@types/express": "4.17.17",
+		"@vitest/coverage-v8": "0.34.3",
+		"typescript": "5.2.2",
+		"vitest": "0.34.3"
+	},
+	"peerDependencies": {
+		"express": "^4.18.2",
+		"posthog-js": "^1.53.2",
+		"posthog-node": "^3.0.0"
+	},
+	"license": "Apache-2.0"
+}

@@ -1,0 +1,23 @@
+{
+	"Overview": [
+		"./overview/introduction.md",
+		"./overview/architecture.md",
+		"./overview/manually-create-project.md"
+	],
+	"Guide": [
+		"./guide/develop-app.md",
+		"./guide/develop-plugin.md",
+		"./guide/develop-lint-rule.md",
+		"./guide/publish-marketplace.md"
+	],
+	"Reference": ["./reference/sdk.md", "./reference/comver.md"],
+	"Concept": [
+		"./concept/app.md",
+		"./concept/project.md",
+		"./concept/message.md",
+		"./concept/plugin.md",
+		"./concept/lint-rule.md",
+		"./concept/library.md",
+		"./concept/language-tag.md"
+	]
+}

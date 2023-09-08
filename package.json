@@ -2,57 +2,38 @@
 	"private": true,
 	"type": "module",
 	"workspaces": [
-		"source-code/*",
-		"source-code/plugins/*",
-		"source-code-git/*",
-		"project-lisa/source-code/*"
+		"lix/source-code/*",
+		"inlang/source-code/*",
+		"inlang/source-code/plugins/*",
+		"inlang/source-code/message-lint-rules/*",
+		"inlang/source-code/versioned-interfaces/*",
+		"placeholder-company/source-code/*"
 	],
 	"scripts": {
-		"build": "turbo run build",
-		"dev": "turbo run build --no-daemon && turbo run dev --parallel",
+		"build": "npx nx run-many --target=build --all --parallel",
+		"dev": "npx nx run-many --target=dev --all --parallel 1000 --output-style stream",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "turbo run test --log-order=grouped",
-		"test:windows": "turbo run test --log-order=grouped --filter=./source-code/ide-extension --filter=./source-code/core --filter=./source-code/env-variables --filter=./source-code/telemetry --filter=\"./source-code/plugins/*\"",
+		"test": "npx nx run-many --target=test --all --parallel",
 		"---- LINT ----------------------------------------------------------": "",
-		"lint:base": "eslint --ignore-path .gitignore --cache",
-		"lint:fix:base": "npm run lint:base --fix",
-		"lint": "turbo run lint && npm run lint:base .",
-		"lint:fix": "turbo run lint:fix && npm run lint:fix:base .",
-		"format:base": "prettier --ignore-path .gitignore --check",
-		"format:fix:base": "prettier --ignore-path .gitignore --write",
-		"format": "turbo run format && npm run format:base --ignore source-code .",
-		"format:fix": "turbo run format:fix && npm run format:fix:base .",
+		"lint": "npx nx run-many --target=lint --all --parallel --output-style stream",
+		"format": "npx nx run-many --target=format --all --parallel",
 		"---- OTHER ---------------------------------------------------------": "",
 		"release": "changeset publish",
-		"clean": "npm run clean -ws --if-present && rm -rf ./.env ./node_modules",
-		"lint-staged": "lint-staged",
-		"prepare": "husky install",
-		"postinstall": "patch-package"
+		"clean": "npm run clean -ws --if-present && rm -rf ./.env ./node_modules"
 	},
 	"engines": {
 		"npm": ">=8.0.0",
-		"node": ">=18.0.0 <19.0.0"
+		"node": ">=18.0.0"
 	},
 	"devDependencies": {
-		"@changesets/cli": "^2.26.0",
-		"@next/eslint-plugin-next": "^13.4.7",
-		"@rollup/plugin-json": "^6.0.0",
-		"@types/node": "^18.15.11",
-		"@typescript-eslint/eslint-plugin": "^5.48.2",
-		"@typescript-eslint/parser": "^5.48.2",
-		"@vitest/coverage-c8": "^0.29.8",
-		"cli-table3": "^0.6.3",
 		"eslint": "^8.32.0",
 		"eslint-config-prettier": "^8.6.0",
-		"eslint-plugin-solid": "^0.9.3",
 		"eslint-plugin-unicorn": "^45.0.2",
-		"husky": "^8.0.3",
-		"jsdom": "^20.0.3",
-		"lint-staged": "^13.1.2",
-		"patch-package": "^6.5.1",
-		"prettier": "2.8.3",
-		"turbo": "^1.10.7",
-		"typescript": "^4.9.4",
-		"vitest": "^0.29.8"
+		"@typescript-eslint/eslint-plugin": "^6.6.0",
+		"@typescript-eslint/parser": "^6.6.0",
+		"typescript": "5.2.2",
+		"@changesets/cli": "^2.26.0",
+		"nx": "16.8.0",
+		"prettier": "2.8.3"
 	}
 }

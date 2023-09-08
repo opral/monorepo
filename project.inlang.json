@@ -1,0 +1,10 @@
+{
+	"sourceLanguageTag": "en",
+	"languageTags": ["de", "en", "zh"],
+	"modules": [""],
+	"settings": {
+		"plugin.inlang.json": {
+			"pathPattern": "./source-code/website/lang/{language}.json"
+		}
+	}
+}
