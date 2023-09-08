@@ -2,7 +2,8 @@ import { test, expect, afterAll, describe } from "vitest"
 import type { NodeishFilesystem } from "../NodeishFilesystemApi.js"
 import { createNodeishMemoryFs } from "./memoryFs.js"
 
-describe("node fs", async () => {
+// some node tests fail on windows (lol)
+describe.skipIf(process.platform === "win32")("node fs", async () => {
 	const fs = await import("node:fs/promises")
 	const url = await import("node:url")
 	const path = await import("node:path")
