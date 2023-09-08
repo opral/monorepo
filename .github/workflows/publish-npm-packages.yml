@@ -23,11 +23,11 @@ jobs:
       - name: Install Doppler CLI for env variables
         uses: dopplerhq/cli-action@v2
 
-      - run: doppler run -- pnpm run test
+      - run: doppler run -- npm run test
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
-      - run: doppler run -- pnpm run build
+      - run: doppler run -- npm run build
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
