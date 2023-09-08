@@ -30,7 +30,6 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/sdk": "0.0.0",
 		"ts-morph": "^19.0.0",
 		"typescript": "^5.1.6"
 	},
