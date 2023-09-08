@@ -22,13 +22,13 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/language-tag": "*"
+		"@inlang/language-tag": "workspace:*"
 	},
 	"peerDependencies": {
 		"@sinclair/typebox": "^0.31.0"
 	},
 	"devDependencies": {
-		"@placeholder-company/js-code-style": "*",
+		"@placeholder-company/js-code-style": "workspace:*",
 		"tsd": "0.28.1",
 		"typescript": "5.2.2",
 		"vitest": "0.34.3"

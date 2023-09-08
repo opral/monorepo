@@ -22,13 +22,13 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/message": "*",
-		"@inlang/message-lint-rule": "*",
-		"@inlang/language-tag": "*",
-		"@inlang/translatable": "*"
+		"@inlang/message": "workspace:*",
+		"@inlang/message-lint-rule": "workspace:*",
+		"@inlang/language-tag": "workspace:*",
+		"@inlang/translatable": "workspace:*"
 	},
 	"devDependencies": {
-		"@placeholder-company/js-code-style": "*",
+		"@placeholder-company/js-code-style": "workspace:*",
 		"tsd": "0.28.1",
 		"typescript": "5.2.2",
 		"vitest": "0.34.3"

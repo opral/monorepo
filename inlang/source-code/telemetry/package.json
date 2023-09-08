@@ -16,12 +16,12 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/env-variables": "*",
-		"@inlang/sdk": "*",
+		"@inlang/env-variables": "workspace:*",
+		"@inlang/sdk": "workspace:*",
 		"http-proxy-middleware": "^2.0.6"
 	},
 	"devDependencies": {
-		"@placeholder-company/js-code-style": "*",
+		"@placeholder-company/js-code-style": "workspace:*",
 		"@types/express": "4.17.17",
 		"@vitest/coverage-v8": "0.34.3",
 		"typescript": "5.2.2",

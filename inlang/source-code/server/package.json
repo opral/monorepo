@@ -11,12 +11,12 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/badge": "*",
-		"@inlang/env-variables": "*",
-		"@inlang/rpc": "*",
-		"@inlang/marketplace-manifest": "*",
-		"@inlang/telemetry": "*",
-		"@inlang/website": "*",
+		"@inlang/badge": "workspace:*",
+		"@inlang/env-variables": "workspace:*",
+		"@inlang/rpc": "workspace:*",
+		"@inlang/marketplace-manifest": "workspace:*",
+		"@inlang/telemetry": "workspace:*",
+		"@inlang/website": "workspace:*",
 		"@sentry/node": "^7.47.0",
 		"@sentry/tracing": "^7.47.0",
 		"compression": "^1.7.4",
@@ -24,7 +24,7 @@
 		"tsx": "3.12.7"
 	},
 	"devDependencies": {
-		"@placeholder-company/js-code-style": "*",
+		"@placeholder-company/js-code-style": "workspace:*",
 		"@types/compression": "^1.7.2",
 		"@types/express": "^4.17.17",
 		"typescript": "5.2.2"

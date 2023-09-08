@@ -22,10 +22,10 @@
 	},
 	"dependencies": {
 		"@sinclair/typebox": "0.31.8",
-		"@inlang/marketplace-manifest": "*"
+		"@inlang/marketplace-manifest": "workspace:*"
 	},
 	"devDependencies": {
-		"@placeholder-company/js-code-style": "*",
+		"@placeholder-company/js-code-style": "workspace:*",
 		"typescript": "5.2.2"
 	},
 	"license": "Apache-2.0"
