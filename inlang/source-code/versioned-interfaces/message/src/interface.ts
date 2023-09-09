@@ -40,7 +40,7 @@ export type Pattern = Static<typeof Pattern>
 export const Pattern = Type.Array(Type.Union([Text, Expression]))
 
 /**
- * A variant is a pattern that is rendered to the UI.
+ * A variant contains a pattern that is rendered to the UI.
  */
 export type Variant = Static<typeof Variant>
 export const Variant = Type.Object({
