@@ -1,6 +1,6 @@
 <div>
     <p align="center">
-        <img width="300" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/logo-white-background.png"/>
+        <img width="300" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/logo-white-background.png"/>
     </p>
     <h4 align="center">
         <a href="https://inlang.com/documentation" target="_blank">Get Started</a> ·
@@ -12,7 +12,7 @@
 
 This extension provides a seamless integration of the [Inlang](https://inlang.com) localization solution into Visual Studio Code. It allows you to translate your content directly in your IDE.
 
-If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](<[https](https://github.com/inlang/inlang/issues/new/choose)>). We are happy to help!
+If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](<[https](https://github.com/inlang/monorepo/issues/new/choose)>). We are happy to help!
 
 ## Features
 
@@ -20,50 +20,46 @@ If something isn't working as expected or you have a feature suggestion, please 
 
 See translations and edit them directly in your code. No more back-and-forth looking into the translation files themselves.
 
-<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/tooltip.gif"/>
+<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/tooltip.gif"/>
 
 ### ✂️ Extract Messages (translations)
 
 Extract Messages (translations) via the `Inlang: Extract Message` code action.
 
-<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/extract.gif"/>
+<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/extract.gif"/>
 
 ### Message Linting
 
 Get notified about missing translations and other issues directly in your IDE.
 
-<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/lint.gif"/>
+<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/lint.gif"/>
 
 ### 🔎 Inline Annotations
 
 See translations directly in your code. No more back-and-forth looking into the translation files themselves.
 
-<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/inline.gif"/>
+<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/inline.gif"/>
 
 ### 🔁 Update Translations
 
 Translations from the resource files are automatically updated when you change the source text.
 
-<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/update.gif"/>
+<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/update.gif"/>
 
 ## 1️⃣ Setup
 
 Create a `project.inlang.json` in the **root** of your project. You can use the following template when using json files as translation files, if not, please look for other [supported resource file types](https://inlang.com/marketplace):
 
-```js
-export async function defineConfig(env) {
-	const { default: jsonPlugin } = await env.$import(
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@latest/dist/index.js",
-	)
-
-	return {
-		sourceLanguageTag: "en",
-		plugins: [
-			jsonPlugin({
-				pathPattern: "./path/to/languages/{language}.json",
-			}),
-		],
-	}
+```json
+{
+	// official schema ensures that your project file is valid
+	"$schema": "https://inlang.com/project-config-schema",
+	// the "source" language tag that is used in your project
+	"sourceLanguageTag": "en",
+	// all the language tags you want to support in your project
+	"languageTags": ["en", "de"],
+	"modules": [],
+	"settings": {}
 }
 ```
 
@@ -91,26 +87,4 @@ You can configure the extension to your needs by defining the `ideExtension` pro
 | `documentSelectors`        | `Array` | An array of [VS Code DocumentSelectors](https://code.visualstudio.com/api/references/document-selector) that specify for which files/programming languages the extension should be activated. Each document selector is an object with optional properties `language`, `scheme`, `pattern`, and `notebookType`.                                                                                                                                                     |
 
 For this example, the extension parses strings with a `t` translation function & gives the according extract options `{t("messageID")}` & `t("messageID")`.
-You can fully customize this behavior with the example code below.
-
-If you are using a different translation function, you can use the following code as a template:
-
-```js
-export async function defineConfig(env) {
-	const { default: jsonPlugin } = await env.$import(
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@latest/dist/index.js",
-	)
-
-	return {
-		sourceLanguageTag: "en",
-		plugins: [
-			jsonPlugin({
-				pathPattern: "./path/to/languages/{language}.json",
-			}),
-		],
-		ideExtension: {
-			// ... your configuration here
-		},
-	}
-}
-```
+You can fully customize this behavior.
