@@ -30,16 +30,18 @@ jobs:
         uses: dopplerhq/cli-action@v2
 
       - name: Build
-        run: doppler run -- node_modules/.bin/turbo run build --filter vs-code-extension
+        run: doppler run -- npm run build
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
       - name: test the code
         run: npm run test
+
       - name: Build VSCode extension package
-        run: npm run package -w source-code/ide-extension
+        run: npm run package -w inlang/source-code/ide-extension
+
       - name: Publish to VSCode Marketplace
         run: npx vsce publish -p ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
-        working-directory: ./source-code/ide-extension
+        working-directory: ./inlang/source-code/ide-extension
         env:
           VSCE_TOKEN: ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
