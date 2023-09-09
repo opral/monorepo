@@ -154,10 +154,9 @@ const matchMostSpecificVariant = (
 	const resolvedSelectors = resolveSelector(message.selectors, selectors)
 	const index: Record<string, any> = {}
 
-	const languageVariants = message.variants.filter((variant) => variant.languageTag === languageTag)
-	if (languageVariants.length === 0) return undefined
+	for (const variant of message.variants) {
+		if (variant.languageTag !== languageTag) continue
 
-	for (const variant of languageVariants) {
 		let isMatch = true
 
 		//check if variant is a match
