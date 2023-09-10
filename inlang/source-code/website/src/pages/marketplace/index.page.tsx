@@ -199,7 +199,10 @@ const Search = (props: SearchInputProps) => {
 				prop:placeholder={props.placeholder}
 				prop:size={"medium"}
 				prop:value={props.textValue()}
-				onInput={(e) => props.setTextValue(e.currentTarget.value)}
+				onInput={(e) => {
+					window.scrollTo({ top: 170, behavior: "smooth" })
+					props.setTextValue(e.currentTarget.value)
+				}}
 			>
 				<div slot={"suffix"}>
 					<SearchIcon />
