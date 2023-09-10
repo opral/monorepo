@@ -51,14 +51,14 @@ if (isProduction) {
 
 const serializedMarketplaceManifest = JSON.stringify(MarketplaceManifest)
 
-app.get("/marketplace-manifest-schema", (_, response) => {
+app.get("/schema/marketplace-manifest", (_, response) => {
 	response.header("Content-Type", "application/json")
 	response.send(serializedMarketplaceManifest)
 })
 
 const serializedProjectConfig = JSON.stringify(ProjectConfig)
 
-app.get("/project-config-schema", (_, response) => {
+app.get("/schema/project-config", (_, response) => {
 	response.header("Content-Type", "application/json")
 	response.send(serializedProjectConfig)
 })

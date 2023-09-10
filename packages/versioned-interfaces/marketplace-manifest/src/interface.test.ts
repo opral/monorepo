@@ -37,3 +37,34 @@ test("should pass a valid plugin manifest", () => {
 	}
 	expect(Value.Check(MarketplaceManifest, plugin)).toBe(true)
 })
+
+	test("should be possible to define the schema", () => {
+		const plugin: MarketplaceManifest = {
+			$schema: "https://inlang.com/schema/marketplace-manifest",
+			id: "plugin.inlang.example",
+			displayName: { en: "My App" },
+			description: { en: "Hello" },
+			keywords: [],
+			license: "Apache-2.0",
+			readme: { en: "https://my-app.com/readme.md" },
+			publisherName: "inlang",
+			module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next/dist/index.js",
+		}
+		expect(Value.Check(MarketplaceManifest, plugin)).toBe(true)
+	})
+
+	test("should only allow the inlang schema schema", () => {
+		const plugin: MarketplaceManifest = {
+			// @ts-expect-error - should not be possible to define a custom schema
+			$schema: "https://inlang.com/schema/balbal-manifest",
+			id: "plugin.inlang.example",
+			displayName: { en: "My App" },
+			description: { en: "Hello" },
+			keywords: [],
+			license: "Apache-2.0",
+			readme: { en: "https://my-app.com/readme.md" },
+			publisherName: "inlang",
+			module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next/dist/index.js",
+		}
+		expect(Value.Check(MarketplaceManifest, plugin)).toBe(false)
+	})

@@ -265,3 +265,28 @@ it("should pass with valid real world configs", () => {
 		expect(Value.Check(ProjectConfig, config)).toBe(true)
 	}
 })
+
+describe("config.$schema", () => {
+	it("should be possible to define the schema", () => {
+		const mockConfig: ProjectConfig = {
+			$schema: "https://inlang.com/schema/project-config",
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
+			modules: [],
+			settings: {},
+		}
+		expect(Value.Check(ProjectConfig, mockConfig)).toBe(true)
+	})
+
+	it("should only allow the inlang schema schema", () => {
+		const mockConfig: ProjectConfig = {
+			// @ts-expect-error - invalid schema link
+			$schema: "https://inlang.com/schema/unknown",
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
+			modules: [],
+			settings: {},
+		}
+		expect(Value.Check(ProjectConfig, mockConfig)).toBe(false)
+	})
+})

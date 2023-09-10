@@ -1,4 +1,5 @@
 {
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "plugin.inlang.json",
 	"icon": "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/plugins/json/assets/icon.png",
 	"displayName": {
