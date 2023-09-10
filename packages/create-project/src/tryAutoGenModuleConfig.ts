@@ -63,7 +63,7 @@ export async function tryAutoGenModuleConfig(args: {
 		rootDir,
 	})
 	const pathPatternRaw = languageFolderPath
-		? args.pathJoin(languageFolderPath, "{language}.json")
+		? args.pathJoin(languageFolderPath, "{languageTag}.json")
 		: ""
 
 	// Windows: Replace backward slashes with forward slashes
