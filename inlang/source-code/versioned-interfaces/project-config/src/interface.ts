@@ -73,6 +73,7 @@ const ExternalSettings = Type.Record(
 export type ProjectConfig = Static<typeof ProjectConfig>
 export const ProjectConfig = Type.Object(
 	{
+		$schema: Type.Optional(Type.Literal("https://inlang.com/schema/project-config")),
 		sourceLanguageTag: LanguageTag,
 		languageTags: Type.Array(LanguageTag, { uniqueItems: true }),
 		/**

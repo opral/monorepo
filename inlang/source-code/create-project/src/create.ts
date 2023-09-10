@@ -22,6 +22,7 @@ export async function createProjectConfig(args: {
 	languageTags: ProjectConfig["languageTags"]
 }): Promise<{ warnings: string[]; config?: ProjectConfig }> {
 	const minimalConfig: ProjectConfig = {
+		$schema: "https://inlang.com/schema/project-config",
 		sourceLanguageTag: args.sourceLanguagetag,
 		languageTags: args.languageTags,
 		modules: [],

@@ -26,7 +26,7 @@ Adding the marketplace information is necessary for the marketplace to display y
 You can ensure that your manifest is valid by loading the following schema. 
 
 ``` json
-"$schema": "https://inlang.com/marketplace-manifest-schema"
+"$schema": "https://inlang.com/schema/marketplace-manifest"
 ```
 
 #### Naming your item
