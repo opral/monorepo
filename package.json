@@ -1,5 +1,6 @@
 {
 	"private": true,
+	"name": "monorepo",
 	"type": "module",
 	"workspaces": [
 		"lix/source-code/*",
