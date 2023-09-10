@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 1.1.0
+
+### Minor Changes
+
+- 713385d3: add typesafety via JSON schema
+
 ## 0.13.3
 
 ### Patch Changes
