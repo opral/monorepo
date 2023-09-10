@@ -200,6 +200,25 @@ export const registry: MarketplaceManifest[] = [
 			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
 	},
 	{
+		$schema: "https://inlang.com/schema/marketplace-manifest",
+		id: "plugin.inlang.i18next",
+		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/i18next/assets/icon.png",
+		displayName: {
+			en: "i18next",
+		},
+		description: {
+			en: "A plugin for inlang projects that works with i18next and reads + writes resources.",
+		},
+		readme: {
+			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/i18next/README.md",
+		},
+		keywords: ["i18next", "react", "nextjs"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		license: "Apache-2.0",
+		module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@latest/dist/index.js",
+	},
+	{
 		id: "plugin.inlang.json",
 		icon: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/plugins/json/assets/icon.png",
 		displayName: {
