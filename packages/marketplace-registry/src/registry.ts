@@ -12,7 +12,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "Badge showing missing messages in your codebase. Perfect for your README.md file.",
 		},
 		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/badge/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/badge/README.md",
 		},
 		keywords: ["badge"],
 		publisherName: "inlang",
@@ -29,7 +29,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "Command line interface for inlang projects. Many commands and the possibility to do automation.",
 		},
 		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/cli/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/cli/README.md",
 		},
 		keywords: ["cli", "commands"],
 		publisherName: "inlang",
@@ -46,7 +46,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "The inlang Web Editor enables you to work with globalized codebases in your browser, without having to touch code but still being able to have a git-based workflow.",
 		},
 		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/editor/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/editor/README.md",
 		},
 		keywords: ["editor", "web"],
 		publisherName: "inlang",
@@ -64,7 +64,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "This extension allows you to use inlang in your IDE, enabling translating content directly in your code.",
 		},
 		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/ide-extension/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/README.md",
 		},
 		keywords: ["ide", "extension", "vscode"],
 		publisherName: "inlang",
@@ -82,7 +82,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "A library containing BCP-47 language tags types and validators, used by inlang.",
 		},
 		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/versioned-interfaces/language-tag/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/versioned-interfaces/language-tag/README.md",
 		},
 		keywords: ["lang", "language tag"],
 		publisherName: "inlang",
@@ -99,7 +99,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "A fully configurable JavaScript library that integrates within your framework.",
 		},
 		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/paraglide-js-sveltekit/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/paraglide-js-sveltekit/README.md",
 		},
 		keywords: ["sdk", "paraglide"],
 		publisherName: "inlang",
@@ -116,7 +116,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "This library allows you to add translation logic to your application without having to rewrite large parts.",
 		},
 		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@tree/main/inlang/source-code/versioned-interfaces/translatable/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@tree/main/inlang/source-code/versioned-interfaces/translatable/README.md",
 		},
 		keywords: ["translatable", "adoptable"],
 		publisherName: "inlang",
@@ -125,7 +125,7 @@ export const registry: MarketplaceManifest[] = [
 	},
 	{
 		id: "messageLintRule.inlang.emptyPattern",
-		icon: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/message-lint-rules/emptyPattern/assets/icon.png",
+		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/emptyPattern/assets/icon.png",
 		displayName: {
 			en: "Empty pattern",
 		},
@@ -133,7 +133,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "Checks for empty pattern in a language tag. If a message exists in the reference resource but the pattern in a target resource is empty, it is likely that the message has not been translated yet.",
 		},
 		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/lint-rules/emptyPattern/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/emptyPattern/README.md",
 		},
 		keywords: ["lint rule", "empty pattern"],
 		publisherName: "inlang",
@@ -144,7 +144,7 @@ export const registry: MarketplaceManifest[] = [
 	},
 	{
 		id: "messageLintRule.inlang.identicalPattern",
-		icon: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/message-lint-rules/identicalPattern/assets/icon.png",
+		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/identicalPattern/assets/icon.png",
 		displayName: {
 			en: "Identical pattern",
 		},
@@ -152,7 +152,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "Checks for identical patterns in different languages.  A message with identical wording in multiple languages can indicate that the translations are redundant or can be combined into a single message to reduce translation effort.",
 		},
 		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/lint-rules/identicalPattern/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/identicalPattern/README.md",
 		},
 		keywords: ["lint rule", "itentical pattern"],
 		publisherName: "inlang",
@@ -163,7 +163,7 @@ export const registry: MarketplaceManifest[] = [
 	},
 	{
 		id: "messageLintRule.inlang.messageWithoutSource",
-		icon: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/message-lint-rules/messageWithoutSource/assets/icon.png",
+		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/messageWithoutSource/assets/icon.png",
 		displayName: {
 			en: "Message without source",
 		},
@@ -171,7 +171,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "Checks for likely outdated messages.  A message with a missing source is usually an indication that the message (id) is no longer used in source code, but messages have not been updated accordingly.",
 		},
 		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/lint-rules/messageWithoutSource/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/messageWithoutSource/README.md",
 		},
 		keywords: ["lint rule", "source"],
 		publisherName: "inlang",
@@ -182,7 +182,7 @@ export const registry: MarketplaceManifest[] = [
 	},
 	{
 		id: "messageLintRule.inlang.missingTranslation",
-		icon: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/message-lint-rules/missingTranslation/assets/icon.png",
+		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/missingTranslation/assets/icon.png",
 		displayName: {
 			en: "Missing translation",
 		},
@@ -190,7 +190,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "Checks for missing variants for a specific languageTag.  If a variant exists for the sourceLanguageTag but is missing for a listed languageTag, it is likely that the message has not been translated for this languageTag yet.",
 		},
 		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/lint-rules/missingTranslation/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/missingTranslation/README.md",
 		},
 		keywords: ["lint rule", "missing"],
 		publisherName: "inlang",
@@ -209,7 +209,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "This plugin enables using JSON files for messages. It is not library specific and can be used with any framework.",
 		},
 		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/plugins/json/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/json/README.md",
 		},
 		keywords: ["json", "generic"],
 		publisherName: "inlang",
