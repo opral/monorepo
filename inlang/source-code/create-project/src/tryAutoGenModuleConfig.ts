@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { NodeishFilesystem } from "@lix-js/fs"
-import type { ProjectConfig } from "@inlang/project-config"
+import { ProjectConfig } from "@inlang/project-config"
 import { getLanguageFolderPath } from "./getLanguageFolderPath.js"
+import type { Plugin } from "@inlang/plugin"
+import { Value } from "@sinclair/typebox/value"
 
 // FIXME: get latest major version instead
 export const pluginUrls: Record<string, string> = {
-	sdkJs: "https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin@latest/dist/index.js",
 	i18next: "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@4/dist/index.js",
-	typesafeI18n: "",
 	json: "https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js",
 }
 
@@ -20,13 +20,11 @@ export const standardLintRules = [
 	"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@1/dist/index.js",
 ]
 
-export type PluginId = "inlang.plugin.${string}"
-
 export async function tryAutoGenModuleConfig(args: {
 	baseConfig: ProjectConfig
 	nodeishFs: NodeishFilesystem
 	pathJoin: (...args: string[]) => string
-}): Promise<{ config?: ProjectConfig; warnings: string[]; pluginId?: PluginId }> {
+}): Promise<{ config?: ProjectConfig; warnings: string[]; pluginId?: Plugin["meta"]["id"] }> {
 	const rootDir = "./"
 	const warnings: string[] = []
 
@@ -82,14 +80,25 @@ export async function tryAutoGenModuleConfig(args: {
 
 	args.baseConfig.modules = [pluginUrls[pluginName]!, ...standardLintRules]
 
-	const pluginId: PluginId = ("inlang.plugin." + pluginName) as PluginId
+	const pluginId: Plugin["meta"]["id"] = `plugin.inlang.${pluginName}`
 
 	args.baseConfig.settings = {
-		[pluginId!]: { pathPattern },
+		[pluginId]: { pathPattern },
 		...args.baseConfig.settings,
-	} as ProjectConfig["settings"]
+	} satisfies ProjectConfig["settings"]
 
-	return { warnings, config: { ...args.baseConfig }, pluginId }
+	const isValid = Value.Check(ProjectConfig, args.baseConfig)
+	if (isValid) {
+		return { warnings, config: { ...args.baseConfig }, pluginId }
+	} else {
+		const errors = [...Value.Errors(ProjectConfig, args.baseConfig)]
+		warnings.push(
+			`The generated config is not valid. Please adjust the config manually.\nErrors:\n${errors.join(
+				"\n",
+			)}`,
+		)
+		return { warnings }
+	}
 }
 
 export const getSupportedLibrary = (args: {
@@ -103,14 +112,8 @@ export const getSupportedLibrary = (args: {
 	// Determine the plugin based on the installed libraries or fallback to JSON plugin
 	const moduleDetections: Set<string> = new Set()
 
-	if (allDependencies["@inlang/sdk-js"]) {
-		moduleDetections.add("sdkJs")
-	}
 	if (allDependencies["i18next"]) {
 		moduleDetections.add("i18next")
-	}
-	if (allDependencies["typesafe-i18n"]) {
-		moduleDetections.add("typesafeI18n")
 	}
 
 	return {

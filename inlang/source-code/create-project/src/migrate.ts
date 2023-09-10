@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { NodeishFilesystem } from "@lix-js/fs"
 import { ProjectConfig } from "@inlang/project-config"
-import { pluginUrls, standardLintRules, type PluginId } from "./tryAutoGenModuleConfig.js"
+import { pluginUrls, standardLintRules } from "./tryAutoGenModuleConfig.js"
 // @ts-ignore
 import { minify } from "terser"
+import type { Plugin } from "@inlang/plugin"
 
 // we need to alias eval to supress esbuild warnigns
 const okEval = eval
@@ -106,8 +107,8 @@ export async function migrateProjectConfig(args: {
 
 				const pluginName =
 					moduleDetections.values().next().value || lintRuleDetections.values().next().value
-				const pluginId: PluginId = ("inlang.plugin." +
-					(pluginName || `<please add your plugin id for ${url} here>`)) as PluginId
+				const pluginId: Plugin["meta"]["id"] = ("plugin.inlang." +
+					(pluginName || `<please add your plugin id for ${url} here>`)) as Plugin["meta"]["id"]
 
 				return {
 					default: (pluginArg: any) => {
@@ -191,8 +192,8 @@ function lineParsing(
 		moduleDetections.add("<replace with your plugin id>")
 	}
 
-	const pluginName: string = moduleDetections.values().next().value as string
-	const pluginId: PluginId = ("inlang.plugin." + pluginName) as PluginId
+	const pluginName: string = moduleDetections.values().next().value
+	const pluginId: Plugin["meta"]["id"] = `plugin.inlang.${pluginName}`
 
 	config.modules = [
 		pluginUrls[pluginName] || `<please add your missing plugin url here>`,
