@@ -8,7 +8,7 @@
 		"en": "This library allows you to add translation logic to your application without having to rewrite large parts."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@tree/main/inlang/source-code/versioned-interfaces/translatable/README.md"
+		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/versioned-interfaces/translatable/README.md"
 	},
 	"keywords": ["translatable", "adoptable"],
 	"publisherName": "inlang",

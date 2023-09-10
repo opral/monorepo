@@ -6,7 +6,7 @@
 		"en": "i18next"
 	},
 	"description": {
-		"en": "A plugin for inlang projects that works with i18next and reads / writes resources."
+		"en": "A plugin for inlang projects that works with i18next and reads + writes resources."
 	},
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/i18next/README.md"
@@ -15,5 +15,5 @@
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0",
-	"module": "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@4.0.0/dist/index.js"
+	"module": "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@latest/dist/index.js"
 }
