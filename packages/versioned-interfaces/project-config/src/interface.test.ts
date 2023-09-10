@@ -240,3 +240,28 @@ describe("config.settings", () => {
 		expect(Value.Check(ProjectConfig, mockConfig)).toBe(true)
 	})
 })
+
+it("should pass with valid real world configs", () => {
+	const configs: ProjectConfig[] = [
+		{
+			sourceLanguageTag: "en",
+			languageTags: ["en", "de"],
+			modules: [
+				"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js",
+				"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@1/dist/index.js",
+				"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@1/dist/index.js",
+				"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@1/dist/index.js",
+				"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@1/dist/index.js",
+			],
+			settings: {
+				"plugin.inlang.json": {
+					pathPattern: "./resources/{language}.json",
+					variableReferencePattern: ["{", "}"],
+				},
+			},
+		},
+	]
+	for (const config of configs) {
+		expect(Value.Check(ProjectConfig, config)).toBe(true)
+	}
+})
