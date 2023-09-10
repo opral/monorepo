@@ -33,26 +33,28 @@ describe("main workflow", () => {
 
 	let fileContent = ""
 	it("file is lazy fetched upon first access", async () => {
-		fileContent = await repository.nodeishFs.readFile("./inlang.config.js", { encoding: "utf-8" })
+		fileContent = await repository.nodeishFs.readFile("./project.inlang.json", {
+			encoding: "utf-8",
+		})
 	})
 
 	it("modifying the file", async () => {
 		fileContent += "\n// bar"
-		await repository.nodeishFs.writeFile("./inlang.config.js", fileContent)
+		await repository.nodeishFs.writeFile("./project.inlang.json", fileContent)
 	})
 
 	it("can commit local modifications to the repo", async () => {
-		const statusPre = await repository.status({ filepath: "inlang.config.js" })
+		const statusPre = await repository.status({ filepath: "project.inlang.json" })
 
 		expect(statusPre).toBe("*modified")
 
-		await repository.add({ filepath: "inlang.config.js" })
+		await repository.add({ filepath: "project.inlang.json" })
 		await repository.commit({
 			author: { name: "tests", email: "test@inlang.dev" },
 			message: "test changes commit",
 		})
 
-		const statusPost = await repository.status({ filepath: "inlang.config.js" })
+		const statusPost = await repository.status({ filepath: "project.inlang.json" })
 
 		expect(statusPost).toBe("unmodified")
 	})
