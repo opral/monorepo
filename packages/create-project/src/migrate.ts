@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { NodeishFilesystem } from "@lix-js/fs"
 import { ProjectConfig } from "@inlang/project-config"
-import { pluginUrls, standardLintRules } from "./tryAutoGenModuleConfig.js"
+import { pluginUrls, standardLintRules } from "./tryAutoGenProjectConfig.js"
 // @ts-ignore
 import { minify } from "terser"
 import type { Plugin } from "@inlang/plugin"
@@ -83,6 +83,15 @@ export async function migrateProjectConfig(args: {
 		warnings.push("Could not read valid legacy configuration file ./inlang.config.js.")
 		return { warnings }
 	}
+
+	// https://github.com/inlang/monorepo/blob/9352f729317d54a39aba05ec0d671673ad6fb5dd/source-code/cli/src/utilities/getConfig.ts
+	// Look at: Need to manually import the config because CJS projects
+	// might fail otherwise. See https://github.com/inlang/inlang/issues/789
+	// const file = fs.readFileSync(filePath, "utf-8")
+	// const base64Data = Buffer.from(file.toString(), "binary").toString("base64")
+	// const module: InlangConfigModule = await import(
+	// 	"data:application/javascript;base64," + base64Data
+	// )
 
 	let legacyConfigFun
 	if (typeof process !== "undefined") {
