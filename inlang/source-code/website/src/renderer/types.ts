@@ -5,14 +5,15 @@ import type { passToClient } from "./_default.page.server.jsx"
 /**
  * The page context available during rendering.
  */
-export type PageContextRenderer<PageProps = Record<string, unknown>> = PageContextBuiltIn<Component> & {
-	/**
-	 * The properties of a page.
-	 */
-	pageProps: PageProps
-	locale: string
-	meta: any
-}
+export type PageContextRenderer<PageProps = Record<string, unknown>> =
+	PageContextBuiltIn<Component> & {
+		/**
+		 * The properties of a page.
+		 */
+		pageProps: PageProps
+		locale: string
+		meta: any
+	}
 
 /**
  * The page context that is available on the client.
