@@ -17,6 +17,7 @@ import { createI18nContext } from "@solid-primitives/i18n"
 import de from "../../lang/de.json?raw"
 import en from "../../lang/en.json?raw"
 import zh from "../../lang/zh.json?raw"
+import { Meta, Title } from "@solidjs/meta"
 
 export type RootProps = Accessor<{
 	pageContext: PageContextRenderer
@@ -69,7 +70,14 @@ function RootWithProviders(props: {
 
 	return (
 		<>
-			<Show when={localeLoaded()} fallback={<props.page {...props.pageProps} />}>
+			<Show
+				when={localeLoaded()}
+				fallback={
+					<>
+						<Meta name="og:image" content="/images/inlang-social-image.jpg" />
+					</>
+				}
+			>
 				<Dynamic component={props.page} {...props.pageProps} />
 			</Show>
 		</>
