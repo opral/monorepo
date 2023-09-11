@@ -8,7 +8,7 @@ description: Lint rules validate messages and other types of content in an inlan
 
 {% $frontmatter.description %}
 
-For example, the [missing translation lint rule](TODO-link-to-marketplace) reports an issue if a message is missing a translation for a specified [language tag](/documentation/concepts/language-tag). Inlang applications use lint rules to validate content and report issues to the user.
+For example, the [missing translation lint rule](/marketplace/messageLintRule.inlang.missingTranslation) reports an issue if a message is missing a translation for a specified [language tag](/documentation/concepts/language-tag). Inlang applications use lint rules to validate content and report issues to the user.
 
 ## Types of lint rules
 
@@ -16,7 +16,7 @@ For example, the [missing translation lint rule](TODO-link-to-marketplace) repor
 
 ### Message lint rule
 
-A message lint rule validates a message. For example, the [missing translation lint rule](TODO-link-to-marketplace) validates that a message has a translation for a specified [language tag](/documentation/concepts/language-tag).
+A message lint rule validates a message. For example, the [missing translation lint rule](/marketplace/messageLintRule.inlang.missingTranslation) validates that a message has a translation for a specified [language tag](/documentation/language-tag).
 
 ![inlang code lints](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/lintrule-codelints.jpg)
 

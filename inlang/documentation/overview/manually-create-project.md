@@ -35,4 +35,4 @@ Alternatively, you can create a new project file manually.
 }
 ```
 
-2. Head to the [marketplace](/marketplace) to find apps and plugins that fits your needs. You can also create your own [app](/documentation/plugins/registry) or [plugin](TODO) if you want to customize inlang to fit your needs.
+2. Head to the [marketplace](/marketplace) to find apps and plugins that fits your needs. You can also create your own [app](/documentation/develop-app) or [plugin](/documentation/develop-plugin) if you want to customize inlang to fit your needs.
