@@ -1,21 +1,32 @@
 {
-	"tasksRunnerOptions": {
-		"default": {
-			"runner": "nx/tasks-runners/default",
-			"options": {
-				"cacheableOperations": ["build", "test", "lint"]
-			}
-		}
-	},
-	"targetDefaults": {
-		"build": {
-			"dependsOn": ["^build"]
-		},
-		"dev": {
-			"dependsOn": ["^build"]
-		},
-		"test": {
-			"dependsOn": ["^build"]
-		}
-	}
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx-cloud",
+      "options": {
+        "cacheableOperations": [
+          "build",
+          "test",
+          "lint"
+        ],
+        "accessToken": "ODlkYjAwMjYtMGMyMS00YTI3LWIzNTAtN2RhZjgwYzAwZGJifHJlYWQtd3JpdGU="
+      }
+    }
+  },
+  "targetDefaults": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ]
+    },
+    "dev": {
+      "dependsOn": [
+        "^build"
+      ]
+    },
+    "test": {
+      "dependsOn": [
+        "^build"
+      ]
+    }
+  }
 }
