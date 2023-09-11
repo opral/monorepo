@@ -2,7 +2,7 @@ import { Command } from "commander"
 import { log } from "../../utilities/log.js"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import fs from "node:fs/promises"
-import { createProjectConfig } from "@inlang/create-project"
+import { tryAutoGenProjectConfig } from "@inlang/create-project"
 import { ProjectConfig } from "@inlang/project-config"
 import path from "node:path"
 
@@ -52,7 +52,7 @@ export async function initCommandAction(args: {
 		}
 	}
 
-	const { warnings, errors } = await createProjectConfig({
+	const { warnings, errors } = await tryAutoGenProjectConfig({
 		nodeishFs: args.nodeishFs,
 		pathJoin: path.join,
 	})
