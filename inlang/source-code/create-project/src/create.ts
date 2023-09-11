@@ -44,7 +44,7 @@ export async function createProjectConfig(args: {
 	} else {
 		const runtimeErrors = data?.errors()
 		if (runtimeErrors?.length) {
-			errors = errors.concat(runtimeErrors)
+			errors = [...errors, ...runtimeErrors]
 		}
 	}
 
