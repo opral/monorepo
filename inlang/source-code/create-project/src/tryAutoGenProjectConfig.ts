@@ -5,7 +5,7 @@ import { getLanguageFolderPath } from "./getLanguageFolderPath.js"
 import type { Plugin } from "@inlang/plugin"
 import { Value } from "@sinclair/typebox/value"
 
-// FIXME: get latest major version instead
+// FIXME: fetch latest major version instead
 export const pluginUrls: Record<string, string> = {
 	i18next: "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@4/dist/index.js",
 	json: "https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js",
@@ -20,8 +20,7 @@ export const standardLintRules = [
 	"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@1/dist/index.js",
 ]
 
-export async function tryAutoGenModuleConfig(args: {
-	baseConfig: ProjectConfig
+export async function tryAutoGenProjectConfig(args: {
 	nodeishFs: NodeishFilesystem
 	pathJoin: (...args: string[]) => string
 }): Promise<{ config?: ProjectConfig; warnings: string[]; pluginId?: Plugin["meta"]["id"] }> {
@@ -78,20 +77,26 @@ export async function tryAutoGenModuleConfig(args: {
 		)
 	}
 
-	args.baseConfig.modules = [pluginUrls[pluginName]!, ...standardLintRules]
+	const config: ProjectConfig = {
+		$schema: "https://inlang.com/schema/project-config",
+		sourceLanguageTag: "en",
+		languageTags: ["en"],
+		modules: [pluginUrls[pluginName]!, ...standardLintRules],
+		settings: {},
+	}
 
 	const pluginId: Plugin["meta"]["id"] = `plugin.inlang.${pluginName}`
 
-	args.baseConfig.settings = {
+	config.settings = {
 		[pluginId]: { pathPattern },
-		...args.baseConfig.settings,
 	} satisfies ProjectConfig["settings"]
 
-	const isValid = Value.Check(ProjectConfig, args.baseConfig)
+	const isValid = Value.Check(ProjectConfig, config)
+
 	if (isValid) {
-		return { warnings, config: { ...args.baseConfig }, pluginId }
+		return { warnings, config, pluginId }
 	} else {
-		const errors = [...Value.Errors(ProjectConfig, args.baseConfig)]
+		const errors = [...Value.Errors(ProjectConfig, config)]
 		warnings.push(
 			`The generated config is not valid. Please adjust the config manually.\nErrors:\n${errors.join(
 				"\n",
