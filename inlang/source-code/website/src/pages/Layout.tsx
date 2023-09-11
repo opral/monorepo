@@ -16,7 +16,6 @@ import { SectionLayout } from "./index/components/sectionLayout.jsx"
 import { defaultLanguage, extractLocale } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
 import { NewsletterForm } from "#src/components/NewsletterForm.jsx"
-import { localesLoaded } from "#src/renderer/Root.jsx"
 
 /**
  * Ensure that all elements use the same margins.
@@ -31,35 +30,31 @@ const layoutMargins = "max-w-screen-xl w-full mx-auto px-4 sm:px-10 "
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	return (
-		<Show when={localesLoaded()}>
-			<div class="flex flex-col">
-				<Header />
-				{/* the outer div is growing to occupy the entire height and thereby
+		<div class="flex flex-col">
+			<Header />
+			{/* the outer div is growing to occupy the entire height and thereby
 			push the footer to the bottom */}
-				<div class={"grow flex flex-col min-h-screen " + layoutMargins}>
-					{/* the children are wrapped in a div to avoid flex and grow being applied to them from the outer div */}
-					{props.children}
-				</div>
-				<Footer isLandingPage={false} />
+			<div class={"grow flex flex-col min-h-screen " + layoutMargins}>
+				{/* the children are wrapped in a div to avoid flex and grow being applied to them from the outer div */}
+				{props.children}
 			</div>
-		</Show>
+			<Footer isLandingPage={false} />
+		</div>
 	)
 }
 
 export const LandingPageLayout = (props: { children: JSXElement; landingpage?: boolean }) => {
 	return (
-		<Show when={localesLoaded()}>
-			<div class="flex flex-col min-h-screen">
-				<Header landingpage={props.landingpage} />
-				{/* the outer div is growing to occupy the entire height and thereby
+		<div class="flex flex-col min-h-screen">
+			<Header landingpage={props.landingpage} />
+			{/* the outer div is growing to occupy the entire height and thereby
 			push the footer to the bottom */}
-				<div class={"grow flex flex-col "}>
-					{/* the children are wrapped in a div to avoid flex and grow being applied to them from the outer div */}
-					{props.children}
-				</div>
-				<Footer isLandingPage />
+			<div class={"grow flex flex-col "}>
+				{/* the children are wrapped in a div to avoid flex and grow being applied to them from the outer div */}
+				{props.children}
 			</div>
-		</Show>
+			<Footer isLandingPage />
+		</div>
 	)
 }
 
