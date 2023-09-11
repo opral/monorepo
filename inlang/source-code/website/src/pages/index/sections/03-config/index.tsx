@@ -61,7 +61,7 @@ const ConfigPage = () => {
 					`${t("landing.config.editor.benefit2")}`,
 					`${t("landing.config.editor.benefit3")}`,
 				],
-				link: "/documentation/apps/web-editor",
+				link: "/marketplace/app.inlang.editor",
 				image: "/images/AppSVGs/editor.svg",
 			},
 			{
@@ -73,7 +73,7 @@ const ConfigPage = () => {
 					`${t("landing.config.extension.benefit2")}`,
 					`${t("landing.config.extension.benefit3")}`,
 				],
-				link: "/documentation/apps/ide-extension",
+				link: "/marketplace/app.inlang.ideExtension",
 				image: "/images/AppSVGs/ide.svg",
 			},
 			{
@@ -85,7 +85,7 @@ const ConfigPage = () => {
 					`${t("landing.config.cli.benefit2")}`,
 					`${t("landing.config.cli.benefit3")}`,
 				],
-				link: "/documentation/apps/inlang-cli",
+				link: "/marketplace/app.inlang.cli",
 				image: "/images/AppSVGs/cli.svg",
 			},
 		]
@@ -180,7 +180,7 @@ const ConfigPage = () => {
 			</div>
 			<div class="flex flex-col items-center gap-8 px-6 md:px-8 lg:px-0">
 				<a
-					href={getLocale() + "/documentation/plugins/registry"}
+					href={getLocale() + "/marketplace"}
 					class="relative cursor-pointer group"
 					style={{ "box-shadow": "0px 0px 300px 300px #fafafa" }}
 				>
@@ -249,7 +249,7 @@ const ConfigPage = () => {
 			</div>
 			<div class="flex flex-col items-center gap-8 px-6 md:px-10 pb-16 sm:pb-28 lg:px-0">
 				<a
-					href={getLocale() + "/documentation/quick-start"}
+					href={getLocale() + "/documentation/manually-create-project"}
 					class="w-full lg:w-fit overflow-x-scroll sm:overflow-x-hidden relative flex flex-col gap-2 bg-gradient-to-b from-inverted-surface to-surface-700 text-on-inverted-surface py-3 rounded-lg shadow-lg group"
 				>
 					<div class="absolute top-5 left-6 flex gap-2">
