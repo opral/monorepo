@@ -69,12 +69,8 @@
 	"types": "dist/index.d.ts",
 	"typesVersions": {
 		"*": {
-			"adapter-sveltekit": [
-				"./dist/adapter-sveltekit/index.d.ts"
-			],
-			"adapter-sveltekit/client": [
-				"./dist/adapter-sveltekit/runtime/client/index.d.ts"
-			],
+			"adapter-sveltekit": ["./dist/adapter-sveltekit/index.d.ts"],
+			"adapter-sveltekit/client": ["./dist/adapter-sveltekit/runtime/client/index.d.ts"],
 			"adapter-sveltekit/client/not-reactive": [
 				"./dist/adapter-sveltekit/runtime/client/not-reactive/index.d.ts"
 			],
@@ -84,23 +80,13 @@
 			"adapter-sveltekit/client/reactive-workaround": [
 				"./dist/adapter-sveltekit/runtime/client/reactive-workaround/index.d.ts"
 			],
-			"adapter-sveltekit/server": [
-				"./dist/adapter-sveltekit/runtime/server/index.d.ts"
-			],
-			"adapter-sveltekit/shared": [
-				"./dist/adapter-sveltekit/runtime/shared/index.d.ts"
-			],
-			"detectors": [
-				"./dist/detectors/index.d.ts"
-			],
-			"runtime": [
-				"./dist/runtime/index.d.ts"
-			]
+			"adapter-sveltekit/server": ["./dist/adapter-sveltekit/runtime/server/index.d.ts"],
+			"adapter-sveltekit/shared": ["./dist/adapter-sveltekit/runtime/shared/index.d.ts"],
+			"detectors": ["./dist/detectors/index.d.ts"],
+			"runtime": ["./dist/runtime/index.d.ts"]
 		}
 	},
-	"files": [
-		"./dist"
-	],
+	"files": ["./dist"],
 	"type": "module",
 	"engines": {
 		"node": ">=18"
