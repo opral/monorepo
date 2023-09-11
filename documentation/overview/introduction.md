@@ -10,14 +10,14 @@ description: Inlang is globalization infrastructure that powers an ecosystem of 
 
 {% $frontmatter.description %}
 
-![inlang ecosystem](https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/documentation/assets/ecosystem.jpg)
+![inlang ecosystem](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/ecosystem.jpg)
 
 ### Infrastructure approach
 
 For every use case, there is an app, a plugin, a lint rule, or a custom solution that can be built. Inlang's infrastructure powers an ecosystem of tools, applications, best practices, and automations for organizations to go global.
 
 {% Figure
-src="https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/documentation/assets/project.jpg"
+src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/project.jpg"
 alt="one config file to power all infrastructure tools"
 caption="Sketch about the concept of one configuration file that powers all tools, automation, and applications for globalization that developers build on top of."
 

@@ -10,7 +10,7 @@ An inlang project is defined by file that is named `project.inlang.json`. It con
 
 Visit the [getting started](/documentation/getting-started) page to learn how to create a new project.
 
-![inlang project](https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/documentation/assets/project.jpg)
+![inlang project](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/project.jpg)
 
 ## Project configuration file schema
 
