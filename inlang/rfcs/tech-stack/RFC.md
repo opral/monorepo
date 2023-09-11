@@ -63,13 +63,13 @@ Reasons against embeddability include runtime-dependent features like networking
 | Embeddable | -                 | o                  | +                   |
 
 {% Figure
-    src="https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/rfcs/tech-stack/assets/002-embedded-separated-legend.png"
+    src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/rfcs/tech-stack/assets/002-embedded-separated-legend.png"
     
     alt="Legend"
 /%}
 
 {% Figure
-    src="https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/rfcs/tech-stack/assets/002-monolith-architecture.png"
+    src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/rfcs/tech-stack/assets/002-monolith-architecture.png"
 
     alt="Monolith architecture"
     
@@ -77,7 +77,7 @@ Reasons against embeddability include runtime-dependent features like networking
 /%}
 
 {% Figure
-    src="https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/rfcs/tech-stack/assets/002-separated-architecture.png"
+    src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/rfcs/tech-stack/assets/002-separated-architecture.png"
 
     alt="Separated architecture"
     
@@ -85,7 +85,7 @@ Reasons against embeddability include runtime-dependent features like networking
 /%}
 
 {% Figure
-    src="https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/rfcs/tech-stack/assets/002-embedded-architecture.png"
+    src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/rfcs/tech-stack/assets/002-embedded-architecture.png"
 
     alt="Embedded architecture"
     
