@@ -25,7 +25,7 @@ export type RootProps = Accessor<{
 /**
  * The Page that is being rendered.
  *
- * This is the entry point for all pages and acts as wrapper
+ * This is the entry point for all pages and acts as a wrapper
  * to provide the page with the required context and provide
  * error boundaries.
  */
@@ -33,7 +33,6 @@ export function Root(props: {
 	page: Component
 	pageProps: Record<string, unknown>
 	locale: string
-	isEditor: boolean
 }) {
 	const i18nvalue = createI18nContext(
 		{
@@ -48,42 +47,29 @@ export function Root(props: {
 		<ErrorBoundary fallback={(error) => <ErrorMessage error={error} />}>
 			<I18nContext.Provider value={i18nvalue}>
 				<LocalStorageProvider>
-					<RootWithProviders
-						page={props.page}
-						pageProps={props.pageProps}
-						locale={props.locale}
-						isEditor={props.isEditor}
-					/>
+					<RootWithProviders {...props} />
 				</LocalStorageProvider>
 			</I18nContext.Provider>
 		</ErrorBoundary>
 	)
 }
 
-// This signal is used to render the rest of the content after fetching locales data
-export const [localesLoaded, setLocalesLoaded] = createSignal(false)
-
 function RootWithProviders(props: {
 	page: Component
 	pageProps: Record<string, unknown>
 	locale: string
-	isEditor: boolean
 }) {
 	const [, { locale }] = useI18n()
+	const [localeLoaded, setLocaleLoaded] = createSignal(false)
 
 	onMount(() => {
 		locale(props.locale)
-		setLocalesLoaded(true)
+		setLocaleLoaded(true)
 	})
 
 	return (
 		<>
-			{/* Render the rest of the content after fetching locales data */}
-			<Show when={localesLoaded() && props.isEditor}>
-				<Dynamic component={props.page} {...props.pageProps} />
-			</Show>
-			{/* Render differently if it isn't the Editor */}
-			<Show when={!props.isEditor && props.pageProps !== undefined}>
+			<Show when={localeLoaded()} fallback={<props.page {...props.pageProps} />}>
 				<Dynamic component={props.page} {...props.pageProps} />
 			</Show>
 		</>
