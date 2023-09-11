@@ -6,7 +6,7 @@ description: Inlang got a major refactor which brings new capabilities to the ec
 
 # {% $frontmatter.title %}
 
-![architecture inlang new](https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/documentation/assets/architecture.jpg)
+![architecture inlang new](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/architecture.jpg)
 
 ## Architecture
 
@@ -40,7 +40,7 @@ description: Inlang got a major refactor which brings new capabilities to the ec
 
 ## Marketplace
 
-![inlang marketplace](https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/documentation/assets/marketplace.jpg)
+![inlang marketplace](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/marketplace.jpg)
 
 - Find apps, libraries and modules for your project
 - Have the opportunity to distribute your own inlang-based product

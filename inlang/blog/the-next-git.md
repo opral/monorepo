@@ -10,7 +10,7 @@ description: Git, or more generalized version control, seems to be an appropriat
 
 {% Figure
 
-    src="https://cdn.jsdelivr.net/gh/inlang/inlang/inlang/documentation/assets/what-if-1000-artists.jpeg"
+    src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/what-if-1000-artists.jpeg"
     alt="What if 1000s of artists are able to create a song together?"
     caption="A slide from one of the first presentations about inlang being built on git, and the possibilities version control might open. The image has been taken from the iconic iPod campaign."
 
@@ -20,7 +20,7 @@ Inlang is git-based localization infrastructure and, simultaneously, a case stud
 
 Abusing a command line interface (CLI) to run in the browser with a virtual file system is cumbersome. The complexity of git will (likely?) overwhelm (non-technical) users. Yet, that is exactly what we are doing with inlang: The advantages seem to outweigh the costs. _Seem_ because we have to prove it. If inlang makes localization substantially easier, we might lead the path for version control based applications.
 
-We have a module called [git-sdk](https://github.com/inlang/inlang/tree/main/inlang/source-code/git-sdk) that we plan to incrementally develop based on the engineering and user experience requirements of inlang.
+We have a module called [lix](https://github.com/inlang/monorepo/tree/main/lix) that we plan to incrementally develop based on the engineering and user experience requirements of inlang.
 
 **Further read**
 

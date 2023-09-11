@@ -116,7 +116,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "This library allows you to add translation logic to your application without having to rewrite large parts.",
 		},
 		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@tree/main/inlang/source-code/versioned-interfaces/translatable/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/versioned-interfaces/translatable/README.md",
 		},
 		keywords: ["translatable", "adoptable"],
 		publisherName: "inlang",
@@ -124,6 +124,7 @@ export const registry: MarketplaceManifest[] = [
 		license: "Apache-2.0",
 	},
 	{
+		$schema: "https://inlang.com/schema/marketplace-manifest",
 		id: "messageLintRule.inlang.emptyPattern",
 		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/emptyPattern/assets/icon.png",
 		displayName: {
@@ -143,6 +144,7 @@ export const registry: MarketplaceManifest[] = [
 			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
 	},
 	{
+		$schema: "https://inlang.com/schema/marketplace-manifest",
 		id: "messageLintRule.inlang.identicalPattern",
 		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/identicalPattern/assets/icon.png",
 		displayName: {
@@ -162,6 +164,7 @@ export const registry: MarketplaceManifest[] = [
 			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@latest/dist/index.js",
 	},
 	{
+		$schema: "https://inlang.com/schema/marketplace-manifest",
 		id: "messageLintRule.inlang.messageWithoutSource",
 		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/messageWithoutSource/assets/icon.png",
 		displayName: {
@@ -181,6 +184,7 @@ export const registry: MarketplaceManifest[] = [
 			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@latest/dist/index.js",
 	},
 	{
+		$schema: "https://inlang.com/schema/marketplace-manifest",
 		id: "messageLintRule.inlang.missingTranslation",
 		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/missingTranslation/assets/icon.png",
 		displayName: {
@@ -219,8 +223,9 @@ export const registry: MarketplaceManifest[] = [
 		module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@latest/dist/index.js",
 	},
 	{
+		$schema: "https://inlang.com/schema/marketplace-manifest",
 		id: "plugin.inlang.json",
-		icon: "https://cdn.jsdelivr.net/gh/inlang/inlang@main/inlang/source-code/plugins/json/assets/icon.png",
+		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/json/assets/icon.png",
 		displayName: {
 			en: "JSON translation files",
 		},
