@@ -17,7 +17,7 @@ export function Message(props: { id: string }) {
 	// const [blockChangeMessageIsFocused, setBlockChangeMessageIsFocused]  = createSignal<Date>(new Date())
 
 	// performance optimization to only render visible elements
-	// see https://github.com/inlang/inlang/issues/333
+	// see https://github.com/inlang/monorepo/issues/333
 	const useVisibilityObserver = createVisibilityObserver()
 	let patternListElement: HTMLDivElement | undefined
 	const elementIsVisible = useVisibilityObserver(() => patternListElement)
@@ -66,7 +66,7 @@ export function Message(props: { id: string }) {
 			// Classlist "hidden" is a performance optimization to only render visible elements.
 			//
 			// Using a <Show> would re-trigger the render of all pattern and
-			// web components. See https://github.com/inlang/inlang/pull/555
+			// web components. See https://github.com/inlang/monorepo/pull/555
 			classList={{
 				["hidden"]: message() ? shouldMessageBeShown() : true,
 			}}

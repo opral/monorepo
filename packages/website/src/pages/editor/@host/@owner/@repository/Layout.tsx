@@ -316,7 +316,7 @@ function BranchMenu() {
 				<div class="p-4">
 					Branches are not implemented yet. Discussion is on going in{" "}
 					<a
-						href="https://github.com/inlang/inlang/discussions/166"
+						href="https://github.com/inlang/monorepo/discussions/166"
 						class="link link-primary"
 						target="blank"
 					>

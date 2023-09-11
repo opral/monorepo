@@ -5,7 +5,7 @@ href: /blog/rfc-tech-stack
 description: This RFC describes the tech stack of inlang.
 ---
 
-### 💡 Discuss the RFC [here](https://github.com/inlang/inlang/pull/128).
+### 💡 Discuss the RFC [here](https://github.com/inlang/monorepo/pull/128).
 
 # RFC 002: Tech Stack and Architecture of the editor + website
 

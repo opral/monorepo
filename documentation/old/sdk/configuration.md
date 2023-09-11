@@ -77,7 +77,7 @@ The `resources` property defines how to deal with resources read with the resolv
 
 Defines how to cache resources.
 
-> Right now, we only support static Resources. Please open an [Issue](https://github.com/inlang/inlang/issues) if you need to regularly fetch Resources.
+> Right now, we only support static Resources. Please open an [Issue](https://github.com/inlang/monorepo/issues) if you need to regularly fetch Resources.
 
 - build-time (default)
 
@@ -113,4 +113,4 @@ sdkPlugin({
 
 ---
 
-_Is something unclear, or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr) or open a [Discussion](https://github.com/inlang/inlang/discussions) or an [Issue](https://github.com/inlang/inlang/issues) on [Github](https://github.com/inlang/inlang)._
+_Is something unclear, or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr) or open a [Discussion](https://github.com/inlang/monorepo/discussions) or an [Issue](https:github.com/inlang/monorepong/issues) on [Github](httpgithub.com/inlang/monorepolang)._

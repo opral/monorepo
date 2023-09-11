@@ -33,7 +33,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 
 		if (sourceLanguageTag === undefined || messageReferenceMatchers === undefined) {
 			// don't show an error message. See issue:
-			// https://github.com/inlang/inlang/issues/927
+			// https://github.com/inlang/monorepo/issues/927
 			return
 		}
 

@@ -40,7 +40,7 @@ You can ensure that your manifest is valid by loading the following schema.
 
 ### 2. Add the link to your marketplace manifest to the registry
 
-Add the raw link of your manifest to [this file](https://github.com/inlang/inlang/blob/main/inlang/source-code/marketplace-registry/registry.json). You can fork the repository to do so.
+Add the raw link of your manifest to [this file](https://github.com/inlang/monorepo/blob/main/inlang/source-code/marketplace-registry/registry.json). You can fork the repository to do so.
 
 ### 3. Create a pull request and wait for approval
 

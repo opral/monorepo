@@ -19,7 +19,7 @@ export function Fence(props: { language?: string; content: string }) {
 		<Switch>
 			<Match when={props.language === "mermaid"}>
 				Mermaid diagrams are temporarly not rendered until
-				https://github.com/inlang/inlang/issues/1302 is implemented.
+				https://github.com/inlang/monorepo/issues/1302 is implemented.
 				{/* <MermaidDiagram {...props} /> */}
 			</Match>
 			<Match when={props.language !== "mermaid"}>

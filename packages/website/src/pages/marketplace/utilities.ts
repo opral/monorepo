@@ -41,6 +41,6 @@ export const convertLinkToGithub = (link: string) => {
 		const githubLink = `https://github.com/${user}/${repo}/tree/${branch}/${path}`
 		return githubLink
 	} else {
-		return "https://github.com/inlang/inlang"
+		return "https://github.com/inlang/monorepo"
 	}
 }

@@ -21,4 +21,4 @@ Inlang also provides custom solutions that are built specifically for certain Fr
 
 #### Your favorite frameworks are missing?
 
-[Reach out to us](https://github.com/inlang/inlang/discussions), and we develop an SDK for your favorite framework.
+[Reach out to us](https://github.com/inlang/monorepo/discussions), and we develop an SDK for your favorite framework.

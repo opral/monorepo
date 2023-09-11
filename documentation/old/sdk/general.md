@@ -16,14 +16,14 @@ To get started with globalizing your app, you just need to choose an SDK from th
     {% QuickLink
         title="SvelteKit"
         logo="svelte"
-        href="https://github.com/inlang/inlang/tree/main/source-code/starters/inlang-svelte"
+        href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/starters/inlang-svelte"
         description="@inlang/sdk-js"
     /%}
 
     {% QuickLink
         title="Next.js"
         logo="next"
-        href="https://github.com/inlang/inlang/tree/main/source-code/starters/inlang-nextjs"
+        href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/starters/inlang-nextjs"
         description="i18next"
     /%}
 

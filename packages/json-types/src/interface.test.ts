@@ -18,7 +18,7 @@ describe("JSONObject", () => {
 		expect(Value.Check(JSONObject, mockJson)).toBe(true)
 	})
 
-	// from https://github.com/inlang/inlang/pull/1142#discussion_r1300055458
+	// from https://github.com/inlang/monorepo/pull/1142#discussion_r1300055458
 	it("should allow objects in arrays", () => {
 		const mockJson: JSONObject = {
 			languageNegotiation: {

@@ -276,7 +276,7 @@ function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number }) {
 				</ul>
 				<a
 					class="self-end pt-5"
-					href="https://github.com/inlang/inlang/discussions/categories/help-questions-answers"
+					href="https://github.com/inlang/monorepo/discussions/categories/help-questions-answers"
 					target="_blank"
 				>
 					<sl-button prop:variant="text">

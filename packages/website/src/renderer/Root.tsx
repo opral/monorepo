@@ -88,7 +88,7 @@ function ErrorMessage(props: { error: Error }) {
 				<a
 					class="link text-primary"
 					target="_blank"
-					href="https://github.com/inlang/inlang/issues/new/choose"
+					href="https://github.com/inlang/monorepo/issues/new/choose"
 				>
 					report the bug.
 				</a>

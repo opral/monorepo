@@ -146,7 +146,7 @@ export const openInlangProject = async (args: {
 							resolvedModules()?.meta.find((m) => m.id.includes(rule.meta.id))?.module ??
 							"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
 
-						// default to warning, see https://github.com/inlang/inlang/issues/1254
+						// default to warning, see https://github.com/inlang/monorepo/issues/1254
 						lintLevel:
 							configValue.settings["project.messageLintRuleLevels"]?.[rule.meta.id] ?? "warning",
 					} satisfies InstalledMessageLintRule),

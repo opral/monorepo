@@ -50,7 +50,7 @@ export function CommunityProjects() {
 					</p>
 				</div>
 				<a
-					href="https://github.com/inlang/inlang/tree/main/source-code/website/src/pages/index/repositories.ts"
+					href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/website/src/pages/index/repositories.ts"
 					target="_blank"
 					class="w-full md:w-auto"
 				>
@@ -170,7 +170,7 @@ export function RepositoryCard(props: {
 // 			<div />
 // 			<p>Get contributions for your project.</p>
 // 			<a
-// 				href="https://github.com/inlang/inlang/tree/main/source-code/website/src/pages/index/repositories.ts"
+// 				href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/website/src/pages/index/repositories.ts"
 // 				target="_blank"
 // 			>
 // 				{/* @ts-ignore By accident, the button looks really cool without a variant in this case. */}

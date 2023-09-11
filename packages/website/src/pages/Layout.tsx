@@ -67,7 +67,7 @@ const socialMediaLinks = [
 	},
 	{
 		name: "GitHub",
-		href: "https://github.com/inlang/inlang",
+		href: "https://github.com/inlang/monorepo",
 		Icon: IconGithub,
 		screenreader: "GitHub Repository",
 	},
@@ -237,7 +237,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 			},
 			{
 				name: `${t("footer.resources.github")}`,
-				href: "https://github.com/inlang/inlang",
+				href: "https://github.com/inlang/monorepo",
 				type: "text" as buttonType,
 			},
 			{
@@ -266,7 +266,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 			},
 			{
 				name: `${t("footer.contact.feedback")}`,
-				href: "https://github.com/inlang/inlang/discussions/categories/feedback",
+				href: "https://github.com/inlang/monorepo/discussions/categories/feedback",
 				type: "text" as buttonType,
 			},
 			{ name: `${t("footer.contact.blog")}`, href: "/blog", type: "text" as buttonType },
