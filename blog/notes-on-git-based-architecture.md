@@ -8,8 +8,6 @@ description: Internal notes from March 2022 on why a git-based architecture for 
 
 This document has been written by me, [@samuelstroschein](https://twitter.com/samuelstroschei), as a note to myself on why a git-based architecture makes sense.
 
----
-
 ## How exactly does inlang’s architecture work?
 
 Creation Date: March 5, 2022 8:33 PM
