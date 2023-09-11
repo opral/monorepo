@@ -45,7 +45,7 @@ export function Hero() {
 						<MaterialSymbolsArrowRightAltRounded slot="suffix" />
 					</sl-button>
 					<sl-button
-						prop: href="https://github.com/inlang/monorepo"
+						prop:href="https://github.com/inlang/monorepo"
 						prop:target="_blank"
 						prop:size="large"
 					>
