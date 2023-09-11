@@ -44,7 +44,9 @@ export function Page(props: PageProps) {
 							const fileSource = files[section]?.[index] || undefined
 
 							const gitHubLink =
-								"https://github.com/inlang/inlang/edit/main/documentation" + "/" + fileSource
+								"https://github.com/inlang/monorepo/edit/main/inlang/documentation" +
+								"/" +
+								fileSource
 
 							setEditLink(gitHubLink)
 						}
