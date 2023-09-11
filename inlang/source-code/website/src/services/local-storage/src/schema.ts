@@ -10,7 +10,7 @@ export type LocalStorageSchema = {
 	/**
 	 * Whether to show the machine translation warning.
 	 *
-	 * See https://github.com/inlang/inlang/issues/241
+	 * See https://github.com/inlang/monorepo/issues/241
 	 */
 	showMachineTranslationWarning: boolean
 	isFirstUse: boolean

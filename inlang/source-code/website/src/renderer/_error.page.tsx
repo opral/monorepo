@@ -38,7 +38,7 @@ export function Page(pageContext: PageContextRenderer) {
 							</div>
 							<a
 								class="self-end pt-5"
-								href="https://github.com/inlang/inlang/issues/new/choose"
+								href="https://github.com/inlang/monorepo/issues/new/choose"
 								target="_blank"
 							>
 								<sl-button prop:variant="text">

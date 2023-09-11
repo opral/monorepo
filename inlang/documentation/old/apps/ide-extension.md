@@ -34,31 +34,31 @@ The VS Code extension provides seamless integration of Inlang's globalization in
 
 See translations and edit them directly in your code. No more back-and-forth looking into the translation files themselves.
 
-![Context Tooltips](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/tooltip.gif)
+![Context Tooltips](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/tooltip.gif)
 
 ### Extract Messages (translations)
 
 Extract Messages (translations) via the `Inlang: Extract Message` code action.
 
-![Extract Messages](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/extract.gif)
+![Extract Messages](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/extract.gif)
 
 ### Message Linting
 
 Get notified about missing translations and other issues directly in your IDE.
 
-![Message Linting](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/lint.gif)
+![Message Linting](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/lint.gif)
 
 ### Inline Annotations
 
 See translations directly in your code. No more back-and-forth looking into the translation files themselves.
 
-![Inline Annotations](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/inline.gif)
+![Inline Annotations](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/inline.gif)
 
 ### Update Translations
 
 Translations from the resource files are automatically updated when you change the source text.
 
-![Update Translations](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/update.gif)
+![Update Translations](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/update.gif)
 
 ## Installation
 
@@ -92,7 +92,7 @@ Just _highlight/select_ the text you want and hit `cmd .` or `ctrl +` (Quick Fix
 
 Hover over the message to see the tooltip with the translation.
 
-If something isn't working as expected, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](https://github.com/inlang/inlang/issues/new/choose). We are happy to help!
+If something isn't working as expected, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](https://github.com/inlang/monorepo/issues/new/choose). We are happy to help!
 
 ## Configuration
 

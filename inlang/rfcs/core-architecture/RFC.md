@@ -5,7 +5,7 @@ href: /blog/rfc-core-architecture
 description: This RFC describes the architecture of inlang.
 ---
 
-### 💡 Discuss the RFC [here](https://github.com/inlang/inlang/pull/127).
+### 💡 Discuss the RFC [here](https://github.com/inlang/monorepo/pull/127).
 
 # RFC 001: Core Architecture
 

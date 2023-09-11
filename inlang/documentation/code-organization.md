@@ -7,7 +7,7 @@ description: Learn how inlang's code for globalizing apps is organized.
 
 # {% $frontmatter.shortTitle %}
 
-[inlangs repository](https://github.com/inlang/inlang) is organized as a [monorepo](https://monorepo.tools/). It consists of the following packages:
+[inlangs repository](https://github.com/inlang/monorepo) is organized as a [monorepo](https://monorepo.tools/). It consists of the following packages:
 
 - `badge`: Contains badge to display the current state of translations, including linting.
 - `cli`: Contains the inlang command line interface to interact with the inlang ecosystem.

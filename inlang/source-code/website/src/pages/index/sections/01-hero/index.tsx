@@ -31,7 +31,7 @@ const Hero = () => {
 						<Button type="primary" href="/documentation/">
 							{t("landing.hero.cta")}
 						</Button>
-						<Button type="text" href="https://github.com/inlang/inlang" chevron>
+						<Button type="text" href="https://github.com/inlang/monorepo" chevron>
 							{t("landing.hero.githubLink")}
 						</Button>
 					</div>

@@ -20,7 +20,7 @@ describe("memory fs", async () => {
 })
 
 const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesystem) => {
-	// testing characters is important. see bug https://github.com/inlang/inlang/issues/785
+	// testing characters is important. see bug https://github.com/inlang/monorepo/issues/785
 	const textInFirstFile = `
 	  Testing a variety of characters.
 

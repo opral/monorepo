@@ -7,7 +7,7 @@
 	"publisher": "inlang",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/inlang/inlang.git"
+		"url": "https://github.com/inlang/monorepo.git"
 	},
 	"icon": "assets/icon.png",
 	"version": "1.0.0",

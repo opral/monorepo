@@ -1,4 +1,4 @@
-// workaround for https://github.com/inlang/inlang/issues/1091
+// workaround for https://github.com/inlang/monorepo/issues/1091
 import { get } from "svelte/store"
 import type { RelativeUrl } from "../../../../index.js"
 import type { SvelteKitClientRuntime } from "../index.js"

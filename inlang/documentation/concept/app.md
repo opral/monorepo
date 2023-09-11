@@ -12,4 +12,4 @@ description: An inlang app provides a user interface for a project.
 
 ## Develop your own app
 
-Open the [develop an inlang app](/documentation/develop-inlang-app) guide to learn how to build your own inlang app.
+Open the [develop an inlang app](/documentation/develop-app) guide to learn how to build your own inlang app.

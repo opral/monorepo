@@ -3,7 +3,7 @@ export * from "./interface.js"
 /**
  * -------- RE-EXPORTS --------
  *
- * See https://github.com/inlang/inlang/issues/1184.
+ * See https://github.com/inlang/monorepo/issues/1184.
  */
 
 export * from "@inlang/message"

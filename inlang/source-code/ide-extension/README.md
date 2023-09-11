@@ -4,7 +4,7 @@
     </p>
     <h4 align="center">
         <a href="https://inlang.com/documentation" target="_blank">Get Started</a> ·
-        <a href="https://github.com/inlang/inlang/discussions" target="_blank">Discussions</a> · <a href="https://twitter.com/inlangHQ" target="_blank">Twitter</a>
+        <a href="https://github.com/inlang/monorepo/discussions" target="_blank">Discussions</a> · <a href="https://twitter.com/inlangHQ" target="_blank">Twitter</a>
     </h4>
 </div>
 
@@ -74,7 +74,7 @@ Just _highlight/select_ the text you want and hit `cmd .` or `ctrl +` (Quick Fix
 
 Hover over the message to see the tooltip with the translation.
 
-If something isn't working as expected, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](https://github.com/inlang/inlang/issues/new/choose). We are happy to help!
+If something isn't working as expected, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](https://github.com/inlang/monorepo/issues/new/choose). We are happy to help!
 
 ## 3️⃣ Configuration
 

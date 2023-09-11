@@ -27,7 +27,7 @@ export async function render(pageContext: PageContextRenderer): Promise<unknown>
 	// ! important: renderToString is used instead of
 	// ! renderToStringAsync some async resources should
 	// ! not be loaded on the server (the editor for example).
-	// ! see https://github.com/inlang/inlang/issues/247
+	// ! see https://github.com/inlang/monorepo/issues/247
 
 	// from solidjs meta
 	// mutated during render so you can include in server-rendered template later

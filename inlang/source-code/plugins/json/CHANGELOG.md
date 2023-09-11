@@ -46,7 +46,7 @@
 
 ### Patch Changes
 
-- 6326e01e: fix: placeholder matching https://github.com/inlang/inlang/issues/955
+- 6326e01e: fix: placeholder matching https://github.com/inlang/monorepo/issues/955
 
 ## 3.0.4
 
