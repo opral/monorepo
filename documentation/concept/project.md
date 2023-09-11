@@ -8,7 +8,7 @@ description: TODO TODO TODO TODO TODO
 
 An inlang project is defined by file that is named `project.inlang.json`. It contains the configuration for a project and is the entrypoint for all applications, plugins, and tools in the inlang ecosystem.
 
-Visit the [getting started](/documentation/getting-started) page to learn how to create a new project.
+Visit the [getting started](/documentation/manually-create-project) page to learn how to create a new project.
 
 ![inlang project](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/project.jpg)
 
