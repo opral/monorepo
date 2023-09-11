@@ -15,7 +15,9 @@ for (const link of manifestLinks) {
 			const errors = [...Value.Errors(MarketplaceManifest, json)]
 			// eslint-disable-next-line no-undef
 			console.error(errors)
-			throw new Error(`Manifest '${link}' is invalid.`)
+			throw new Error(`Manifest is invalid.`)
+		} else if (json.module && !json.module.toString().includes("jsdelivr")) {
+			throw new Error(`Manifest is invalid. The module field must be a jsdelivr link.`)
 		}
 		manifests.push(json)
 	} catch (e) {

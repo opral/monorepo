@@ -122,7 +122,9 @@ async function initializeRepo(
 	const modulesURL = modulesID.map((url) => {
 		const module = registry.find((module) => module.id.toLowerCase() === url.toLowerCase())
 		//@ts-ignore
-		return module?.module
+		if (module?.module.includes("@latest")) return module?.module
+		//@ts-ignore
+		return getLatestVersion(module?.module)
 	})
 
 	if (modulesURL.includes(undefined)) {
@@ -214,7 +216,9 @@ async function initializeRepo(
 	const modulesToInstall = modulesURL.filter((moduleURL) => {
 		if (inlangProject.modules.length === 0) return true
 
-		const installedModules = inlangProject.modules.every((module) => module.includes(moduleURL))
+		const installedModules = inlangProject.modules.every((module: string) =>
+			module.includes(moduleURL),
+		)
 		return !installedModules
 	})
 	inlangProject.modules.push(...modulesToInstall)
@@ -261,4 +265,12 @@ async function initializeRepo(
 			".",
 		error: false,
 	})
+}
+
+function getLatestVersion(moduleURL: string) {
+	return (
+		moduleURL.slice(0, moduleURL.lastIndexOf("@")) +
+		"@latest" +
+		moduleURL.slice(moduleURL.indexOf("/", moduleURL.lastIndexOf("@")))
+	)
 }
