@@ -7,8 +7,7 @@
 		"inlang/source-code/*",
 		"inlang/source-code/plugins/*",
 		"inlang/source-code/message-lint-rules/*",
-		"inlang/source-code/versioned-interfaces/*",
-		"placeholder-company/source-code/*"
+		"inlang/source-code/versioned-interfaces/*"
 	],
 	"scripts": {
 		"build": "npx nx run-many --target=build --all --parallel",
@@ -20,7 +19,9 @@
 		"format": "npx nx run-many --target=format --all --parallel",
 		"---- OTHER ---------------------------------------------------------": "",
 		"changeset": "npx changeset",
-		"clean": "npm run clean -ws --if-present && rm -rf ./.env ./node_modules"
+		"clean": "npm run clean -ws --if-present && rm -rf ./.env ./node_modules",
+		"----- CI ---- used to test the codebase on every commit": "",
+		"ci": "npm run format && npm run lint && npm run build && npm run test"
 	},
 	"engines": {
 		"npm": ">=8.0.0",
