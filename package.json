@@ -21,7 +21,7 @@
 		"changeset": "npx changeset",
 		"clean": "npm run clean -ws --if-present && rm -rf ./.env ./node_modules",
 		"----- CI ---- used to test the codebase on every commit": "",
-		"ci": "npm run format && npm run lint && npm run build && npm run test"
+		"ci": "npm i && npm run format && npm run lint && npm run build && npm run test"
 	},
 	"engines": {
 		"npm": ">=8.0.0",
