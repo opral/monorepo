@@ -9,4 +9,7 @@ src/**
 **/*.ts
 
 node_modules/**
-example/**
+examples/**
+../../../**
+../../**
+../**
