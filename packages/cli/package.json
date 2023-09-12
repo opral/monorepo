@@ -47,7 +47,6 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"devDependencies": {
-		"@placeholder-company/js-code-style": "*",
 		"@inlang/create-project": "*",
 		"@inlang/language-tag": "*",
 		"@inlang/env-variables": "*",
