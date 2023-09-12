@@ -1,5 +1,18 @@
 # inlang-vs-code-extension
 
+## 1.1.0
+
+### Minor Changes
+
+- 973858c6: chore(fix): remove unpublished dependency which lead to installation failing
+
+### Patch Changes
+
+- Updated dependencies [973858c6]
+  - @inlang/telemetry@0.2.0
+  - @inlang/result@1.1.0
+  - @lix-js/fs@0.2.0
+
 ## 0.9.3
 
 ### Patch Changes
