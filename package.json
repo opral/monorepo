@@ -10,8 +10,8 @@
 		"inlang/source-code/versioned-interfaces/*"
 	],
 	"scripts": {
-		"build": "npx nx run @inlang/env-variables:build --skip-nx-cache; npx nx run-many --target=build --all --parallel --exclude @inlang/env-variables",
-		"dev": "npx nx run @inlang/env-variables:build --skip-nx-cache; npx nx run-many --target=dev --all --parallel 1000 --output-style stream --exclude @inlang/env-variables",
+		"build": "npx nx run-many --target=build --all --parallel",
+		"dev": "npx nx run-many --target=dev --all --parallel 1000 --output-style stream",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "npx nx run-many --target=test --all --parallel",
 		"---- LINT ----------------------------------------------------------": "",
