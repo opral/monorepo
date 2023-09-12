@@ -9,20 +9,14 @@
     }
   },
   "targetDefaults": {
-    "build": {
-      "dependsOn": [
-        "^build"
-      ]
-    },
-    "dev": {
-      "dependsOn": [
-        "^build"
-      ]
-    },
-    "test": {
-      "dependsOn": [
-        "^build"
-      ]
-    }
-  }
+		"build": {
+			"dependsOn": ["^build"]
+		},
+		"dev": {
+			"dependsOn": ["^build"]
+		},
+		"test": {
+			"dependsOn": ["^build"]
+		}
+	}
 }
