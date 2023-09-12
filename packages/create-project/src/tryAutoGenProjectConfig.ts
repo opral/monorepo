@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { NodeishFilesystem } from "@lix-js/fs"
-import { ProjectConfig } from "@inlang/project-config"
 import { getLanguageFolderPath } from "./getLanguageFolderPath.js"
 import type { Plugin } from "@inlang/plugin"
 import { Value } from "@sinclair/typebox/value"
+import { ProjectConfig } from "@inlang/project-config"
+import { openInlangProject } from "@inlang/sdk"
+import { tryCatch } from "@inlang/result"
 
-// FIXME: get latest major version instead
+// FIXME: fetch latest major version instead
 export const pluginUrls: Record<string, string> = {
 	i18next: "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@4/dist/index.js",
 	json: "https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js",
@@ -20,8 +22,64 @@ export const standardLintRules = [
 	"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@1/dist/index.js",
 ]
 
-export async function tryAutoGenModuleConfig(args: {
-	baseConfig: ProjectConfig
+/**
+ * Creates a new project.inlang.json file by trying to auto generate the project configuration
+ *
+ * @params args.nodeishFs a nodeishFs implementation, in node this is fs:promieses
+ * @params args.pathJoin implementation for joing paths, in node this should be {join} from 'path'
+ * @params args.filePath optional location of your inlang config file, should be used only for testing as we hard code filepaths at lots of places
+ * @returns The warnings and if successfully generated the config object, the file is also saved to the filesystem in the current path
+ */
+export async function tryAutoGenProjectConfig(args: {
+	nodeishFs: NodeishFilesystem
+	pathJoin: (...args: string[]) => string
+	filePath?: string
+}): Promise<{ warnings: string[]; errors?: any[]; config?: ProjectConfig }> {
+	const { config, warnings } = await autoGenProject({
+		nodeishFs: args.nodeishFs,
+		pathJoin: args.pathJoin,
+	})
+
+	const projectFilePath = args.filePath || "./project.inlang.json"
+
+	if (config) {
+		const configString = JSON.stringify(config, undefined, 4)
+		await args.nodeishFs.writeFile(projectFilePath, configString + "\n")
+	} else {
+		return { warnings: ["Could not auto generate project configuration."] }
+	}
+
+	const { data, error } = await tryCatch(() =>
+		openInlangProject({
+			projectFilePath: projectFilePath,
+			nodeishFs: args.nodeishFs,
+		}),
+	)
+
+	let errors: any[] = []
+	if (error) {
+		errors = [error]
+	} else {
+		const runtimeErrors = data?.errors()
+		if (runtimeErrors?.length) {
+			errors = [...errors, ...runtimeErrors]
+		}
+	}
+
+	if (errors.length > 0) {
+		try {
+			await args.nodeishFs.rm(projectFilePath)
+		} catch {
+			/* ignore failing file removal */
+		}
+
+		return { warnings, errors }
+	}
+
+	return { warnings, errors, config }
+}
+
+export async function autoGenProject(args: {
 	nodeishFs: NodeishFilesystem
 	pathJoin: (...args: string[]) => string
 }): Promise<{ config?: ProjectConfig; warnings: string[]; pluginId?: Plugin["meta"]["id"] }> {
@@ -78,20 +136,24 @@ export async function tryAutoGenModuleConfig(args: {
 		)
 	}
 
-	args.baseConfig.modules = [pluginUrls[pluginName]!, ...standardLintRules]
-
 	const pluginId: Plugin["meta"]["id"] = `plugin.inlang.${pluginName}`
 
-	args.baseConfig.settings = {
-		[pluginId]: { pathPattern },
-		...args.baseConfig.settings,
-	} satisfies ProjectConfig["settings"]
+	const config: ProjectConfig = {
+		$schema: "https://inlang.com/schema/project-config",
+		sourceLanguageTag: "en",
+		languageTags: ["en"],
+		modules: [pluginUrls[pluginName]!, ...standardLintRules],
+		settings: {
+			[pluginId]: { pathPattern },
+		} satisfies ProjectConfig["settings"],
+	}
 
-	const isValid = Value.Check(ProjectConfig, args.baseConfig)
+	const isValid = Value.Check(ProjectConfig, config)
+
 	if (isValid) {
-		return { warnings, config: { ...args.baseConfig }, pluginId }
+		return { warnings, config, pluginId }
 	} else {
-		const errors = [...Value.Errors(ProjectConfig, args.baseConfig)]
+		const errors = [...Value.Errors(ProjectConfig, config)]
 		warnings.push(
 			`The generated config is not valid. Please adjust the config manually.\nErrors:\n${errors.join(
 				"\n",

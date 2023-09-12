@@ -2,9 +2,8 @@ import { Command } from "commander"
 import { log } from "../../utilities/log.js"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import fs from "node:fs/promises"
-import prompts from "prompts"
-import { createProjectConfig } from "@inlang/create-project"
-import { LanguageTag } from "@inlang/language-tag"
+import { tryAutoGenProjectConfig } from "@inlang/create-project"
+import { ProjectConfig } from "@inlang/project-config"
 import path from "node:path"
 
 export const init = new Command()
@@ -53,60 +52,29 @@ export async function initCommandAction(args: {
 		}
 	}
 
-	// FIXME: we should use typebox native checks but the follwing check seems to always be true even for wrong input
-	// import { Value } from "@sinclair/typebox/value"
-	// import { Type } from "@sinclair/typebox"
-	// Value.Check(Type.String({ pattern: LanguageTag.pattern }), "as3df"),
-	const languageTagRegex = new RegExp(`^(${LanguageTag.pattern})$`, "g")
-
-	const { sourceLanguagetag } = await prompts({
-		type: "text",
-		name: "sourceLanguagetag",
-		message: `What is the source language tag?
-Inlang uses the web standard BCP 47 language tags to refer to human languages, regions, and locales.
-You can read more here: inlang.com/documentation/language-tag`,
-		initial: "en",
-		validate: (value) =>
-			!value.match(languageTagRegex)
-				? "Not a valid BCP 47 language tag. You can read more here: inlang.com/documentation/language-tag "
-				: true,
-	})
-
-	const { languageTags } = await prompts({
-		type: "list",
-		name: "languageTags",
-		message: "What other languages do you want to add? Example input: de, it",
-		initial: "",
-		validate: (value) => {
-			const badLanuageTags = []
-			for (const languageTag of value.replaceAll(" ", "").split(",")) {
-				if (!languageTag.match(languageTagRegex)) {
-					badLanuageTags.push(languageTag)
-				}
-			}
-			if (badLanuageTags.length) {
-				return `These entries are not a valid BCP 47 language tag: "${badLanuageTags}" You can read more here: inlang.com/documentation/language-tag`
-			}
-			return true
-		},
-	})
-
-	const { autoConfig } = await prompts({
-		type: "confirm",
-		name: "autoConfig",
-		message: "Should I try to install suitable modules?",
-		initial: true,
-	})
-
-	const { warnings } = await createProjectConfig({
-		tryAutoGen: autoConfig,
-		sourceLanguagetag,
-		languageTags: [...new Set(languageTags as string[])],
+	const { warnings, errors } = await tryAutoGenProjectConfig({
 		nodeishFs: args.nodeishFs,
 		pathJoin: path.join,
 	})
 
-	for (const warning of warnings) args.logger.warn(warning)
+	if (!errors?.length) {
+		for (const warning of warnings) args.logger.warn(warning)
+	} else {
+		const config: ProjectConfig = {
+			$schema: "https://inlang.com/schema/project-config",
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
+			modules: [],
+			settings: {},
+		}
+
+		const configString = JSON.stringify(config, undefined, 4)
+		await args.nodeishFs.writeFile(inlangConfigFilePath, configString + "\n")
+
+		args.logger.warn(
+			`Could not auto generate a project configuration, falling back to a minimal base configuration. Please manually setup your inlang project.`,
+		)
+	}
 
 	args.logger.info(`✅ Successfully created your inlang configuration at: ${inlangConfigFilePath}`)
 }

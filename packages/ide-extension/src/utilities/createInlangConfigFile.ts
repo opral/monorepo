@@ -4,7 +4,7 @@ import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js
 import { msg } from "./message.js"
 import { getSetting, updateSetting } from "./settings/index.js"
 import {
-	createProjectConfig,
+	tryAutoGenProjectConfig,
 	getLanguageFolderPath,
 	getSupportedLibrary,
 	type SupportedLibrary,
@@ -62,19 +62,19 @@ export const createInlangConfigFile = async (args: { workspaceFolder: vscode.Wor
 			vscode.StatusBarAlignment.Left,
 			5000,
 		)
-		const { warnings } = await createProjectConfig({
+		const { warnings, errors } = await tryAutoGenProjectConfig({
 			nodeishFs: createFileSystemMapper(args.workspaceFolder.uri.fsPath),
 			pathJoin: path.join,
 			filePath: args.workspaceFolder.uri.fsPath + "/project.inlang.json",
-			tryAutoGen: true,
-			sourceLanguagetag: "en-US",
-			languageTags: ["en-US", "de-DE", "fr-FR", "es-ES", "zh-CN", "ja-JP"],
 		})
 
 		for (const warning of warnings) console.warn(warning)
+		if (errors) {
+			for (const error of errors) console.error(error)
+		}
 
 		// if no warnings, show success message
-		if (warnings.length === 0) {
+		if (warnings.length === 0 && errors?.length === 0) {
 			console.info(
 				`🎉 Created project.inlang.json file at ${
 					args.workspaceFolder.uri.fsPath + "/project.inlang.json"
