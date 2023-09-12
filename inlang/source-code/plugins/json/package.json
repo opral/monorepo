@@ -24,7 +24,6 @@
 		"@inlang/plugin": "*"
 	},
 	"devDependencies": {
-		"@placeholder-company/js-code-style": "*",
 		"@inlang/sdk": "*",
 		"@lix-js/fs": "*",
 		"@inlang/cli": "*",

@@ -1,5 +1,5 @@
 {
-	"extends": "@placeholder-company/js-code-style/tsconfig.base.json",
+	"extends": "../tsconfig.base.json",
 	"include": ["src/**/*.ts"],
 	"compilerOptions": {
 		"lib": ["ESNext", "DOM"],
