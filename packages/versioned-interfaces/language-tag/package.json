@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/language-tag",
 	"type": "module",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"
@@ -26,7 +26,6 @@
 	},
 	"devDependencies": {
 		"tsd": "0.28.1",
-		"typescript": "5.2.2",
-		"@placeholder-company/js-code-style": "*"
+		"typescript": "5.2.2"
 	}
 }
