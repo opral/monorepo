@@ -2,7 +2,7 @@
 	"name": "@inlang/env-variables",
 	"type": "module",
 	"private": true,
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"exports": {
 		".": "./dist/index.js"
 	},
@@ -22,7 +22,6 @@
 		"@inlang/result": "*"
 	},
 	"devDependencies": {
-		"@placeholder-company/js-code-style": "*",
 		"dotenv": "^16.3.1",
 		"esbuild": "^0.19.2",
 		"tsx": "^3.12.7",

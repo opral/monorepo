@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/telemetry",
 	"type": "module",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"private": true,
 	"exports": {
 		".": "./dist/index.js",
@@ -21,7 +21,6 @@
 		"http-proxy-middleware": "^2.0.6"
 	},
 	"devDependencies": {
-		"@placeholder-company/js-code-style": "*",
 		"@types/express": "4.17.17",
 		"@vitest/coverage-v8": "0.34.3",
 		"typescript": "5.2.2",

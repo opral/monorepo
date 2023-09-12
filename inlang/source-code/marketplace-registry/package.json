@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/marketplace-registry",
 	"type": "module",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"exports": {
 		".": "./dist/index.js"
 	},
@@ -25,7 +25,6 @@
 		"@inlang/marketplace-manifest": "*"
 	},
 	"devDependencies": {
-		"@placeholder-company/js-code-style": "*",
 		"typescript": "5.2.2"
 	},
 	"license": "Apache-2.0"

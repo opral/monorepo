@@ -1,5 +1,16 @@
 # @inlang/plugin-json
 
+## 4.1.0
+
+### Minor Changes
+
+- 973858c6: chore(fix): remove unpublished dependency which lead to installation failing
+
+### Patch Changes
+
+- Updated dependencies [973858c6]
+  - @inlang/plugin@1.1.0
+
 ## 3.0.12
 
 ### Patch Changes

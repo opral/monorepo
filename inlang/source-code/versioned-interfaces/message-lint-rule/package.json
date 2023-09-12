@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/message-lint-rule",
 	"type": "module",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"
@@ -28,7 +28,6 @@
 		"@inlang/translatable": "*"
 	},
 	"peerDependencies": {
-		"@placeholder-company/js-code-style": "*",
 		"@sinclair/typebox": "^0.31.0"
 	},
 	"devDependencies": {

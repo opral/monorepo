@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/plugin-json",
-	"version": "4.0.0",
+	"version": "4.1.0",
 	"type": "module",
 	"exports": {
 		".": "./dist/index.js"
@@ -24,7 +24,6 @@
 		"@inlang/plugin": "*"
 	},
 	"devDependencies": {
-		"@placeholder-company/js-code-style": "*",
 		"@inlang/sdk": "*",
 		"@lix-js/fs": "*",
 		"@inlang/cli": "*",

@@ -6,18 +6,18 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}/source-code/ide-extension",
+				"--extensionDevelopmentPath=${workspaceFolder}/inlang/source-code/ide-extension",
 				// change this path to specify what folder should be opened upon running this configuration
-				"${workspaceFolder}/source-code/end-to-end-tests/inlang-nextjs"
+				"${workspaceFolder}/inlang/source-code/end-to-end-tests/inlang-nextjs"
 			],
-			"outFiles": ["${workspaceFolder}/source-code/ide-extension/dist/**/*.cjs"]
+			"outFiles": ["${workspaceFolder}/inlang/source-code/ide-extension/dist/**/*.cjs"]
 		},
 		{
 			"name": "debug @inlang/website",
 			"port": 3000,
 			"request": "launch",
 			"type": "chrome",
-			"webRoot": "${workspaceFolder}/source-code/website"
+			"webRoot": "${workspaceFolder}/inlang/source-code/website"
 		}
 	]
 }

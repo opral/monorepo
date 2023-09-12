@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/badge",
 	"type": "module",
-	"version": "0.2.4",
+	"version": "0.3.0",
 	"private": true,
 	"exports": {
 		".": "./dist/index.js",
@@ -25,7 +25,6 @@
 		"satori-html": "^0.3.2"
 	},
 	"devDependencies": {
-		"@placeholder-company/js-code-style": "*",
 		"@vitest/coverage-v8": "^0.33.0",
 		"@types/express": "4.17.17",
 		"typescript": "5.2.2",

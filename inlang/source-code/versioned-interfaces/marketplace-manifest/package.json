@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/marketplace-manifest",
 	"type": "module",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"exports": {
 		".": "./dist/index.js"
 	},
@@ -25,7 +25,6 @@
 		"@inlang/project-config": "*"
 	},
 	"devDependencies": {
-		"@placeholder-company/js-code-style": "*",
 		"@sinclair/typebox": "^0.31.0",
 		"typescript": "5.2.2",
 		"vitest": "0.34.3"

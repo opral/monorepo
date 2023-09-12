@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/project-config",
 	"type": "module",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"
@@ -29,7 +29,6 @@
 		"@inlang/translatable": "*"
 	},
 	"devDependencies": {
-		"@placeholder-company/js-code-style": "*",
 		"tsd": "0.28.1",
 		"typescript": "5.2.2",
 		"vitest": "0.34.3"
