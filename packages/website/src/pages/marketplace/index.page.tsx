@@ -97,7 +97,9 @@ const Gallery = () => {
 								href={`/marketplace/${item.id}`}
 								class="relative no-underline h-72 flex flex-col gap-2 group"
 							>
-								<div class="w-full h-full bg-surface-50 rounded-lg relative">
+								<div
+									class={`w-full h-full bg-surface-50 rounded-lg relative bg-[url('${item.displayImage}')] bg-cover bg-center border border-surface-100`}
+								>
 									<Chip
 										text={typeOfIdToTitle(item.id).replace("Message", "")}
 										color={colorForTypeOf(item.id)}
