@@ -1,6 +1,5 @@
 import { Meta, Title } from "@solidjs/meta"
 import { Layout } from "#src/pages/Layout.jsx"
-import { Markdown, parseMarkdown } from "#src/services/markdown/index.js"
 import { For, Show, createSignal } from "solid-js"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import { isModule } from "@inlang/marketplace-registry"
@@ -16,12 +15,14 @@ import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
  * The page props are undefined if an error occurred during parsing of the markdown.
  */
 export type PageProps = {
-	markdown: Awaited<ReturnType<typeof parseMarkdown>>
+	markdown: any
 	manifest: MarketplaceManifest
 }
 
 export function Page(props: PageProps) {
 	const [readmore, setReadmore] = createSignal<boolean>(false)
+
+	console.log(props.markdown)
 
 	// mapping translatable types
 	const displayName = () =>
@@ -174,7 +175,8 @@ export function Page(props: PageProps) {
 									</div>
 								</div>
 								<div class="w-full col-span-1 md:col-span-3 rounded-lg">
-									<Markdown renderableTree={props.markdown.renderableTree!} />
+									{/* <Markdown renderableTree={props.markdown.renderableTree!} /> */}
+									{props.markdown}
 								</div>
 							</Show>
 						</div>
