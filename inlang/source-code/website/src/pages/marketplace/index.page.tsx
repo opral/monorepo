@@ -8,6 +8,7 @@ import { Button } from "../index/components/Button.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import Plus from "~icons/material-symbols/add-rounded"
 import Check from "~icons/material-symbols/check"
+import Install from "~icons/material-symbols/download"
 import { colorForTypeOf, scrollToTop, typeOfIdToTitle } from "./utilities.js"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 
@@ -70,7 +71,7 @@ export function Page() {
 							</div>
 						</div>
 					</div>
-					<div class="mb-32 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-center items-stretch relative">
+					<div class="mb-32 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 gap-y-8 justify-center items-stretch relative">
 						<Gallery />
 					</div>
 					<GetHelp text="Need help or have questions? Join our Discord!" />
@@ -87,20 +88,18 @@ const Gallery = () => {
 				{(item) => {
 					const displayName =
 						typeof item.displayName === "object" ? item.displayName.en : item.displayName
-					const description =
-						typeof item.description === "object" ? item.description.en : item.description
 
 					return (
 						<>
 							<a
 								href={`/marketplace/${item.id}`}
-								class="relative no-underline h-72 flex flex-col gap-2 group"
+								class="relative no-underline h-72 flex flex-col gap-4 group"
 							>
 								<div
 									style={{ "--image-url": `url(${item.coverImage})` }}
 									class={`w-full h-full flex items-center justify-center bg-surface-50 rounded-lg relative ${
 										item.coverImage && `bg-[image:var(--image-url)]`
-									} bg-cover bg-center border border-surface-100`}
+									} bg-cover bg-center border border-surface-200`}
 								>
 									<Chip
 										text={typeOfIdToTitle(item.id).replace("Message", "")}
@@ -113,34 +112,61 @@ const Gallery = () => {
 											src={item.icon}
 										/>
 									</Show>
-									<Show when={item.icon && item.coverImage}>
-										<img
-											class="w-8 h-8 rounded-md m-0 shadow-lg object-cover object-center absolute left-4 bottom-4 opacity-0 group-hover:opacity-100 transition-opacity"
-											src={item.icon}
-										/>
-									</Show>
 								</div>
-								<div class="w-full flex justify-between gap-6">
-									<div class="flex flex-col gap-0.5">
-										<p class="m-0 text-surface-600 no-underline font-medium group-hover:text-surface-900 transition-colors">
-											{displayName}
-										</p>
-										<p class="m-0 text-surface-400 text-sm no-underline line-clamp-1 group-hover:text-surface-500 transition-colors">
-											{description}
-										</p>
+								<div class="w-full flex gap-6 justify-between">
+									<div class="w-full flex gap-3 items-center">
+										<div class="flex items-center gap-2 flex-shrink-0 group/avatar">
+											<Show when={item.publisherIcon} fallback={item.publisherName}>
+												<sl-tooltip prop:content={item.publisherName}>
+													<Show when={item.publisherIcon}>
+														<img
+															class="w-9 h-9 rounded-full m-0 group-hover/avatar:opacity-60 transition-opacity duration-500"
+															src={item.publisherIcon}
+														/>
+													</Show>
+												</sl-tooltip>
+											</Show>
+										</div>
+										<div class="flex flex-col justify-between gap-0.5">
+											<p class="m-0 text-surface-600 leading-none no-underline font-medium group-hover:text-surface-900 transition-colors">
+												{displayName}
+											</p>
+											<p class="m-0 text-surface-400 leading-tight text-sm no-underline line-clamp-1 group-hover:text-surface-500 transition-colors">
+												{item.publisherName}
+											</p>
+										</div>
 									</div>
-									<div class="flex items-center gap-2 flex-shrink-0 group/avatar">
-										<Show when={item.publisherIcon} fallback={item.publisherName}>
-											<sl-tooltip content={item.publisherName}>
-												<Show when={item.publisherIcon}>
-													<img
-														class="w-6 h-6 rounded-full m-0 group-hover/avatar:opacity-60 transition-opacity duration-500"
-														src={item.publisherIcon}
+									<Show
+										when={
+											item.id.split(".")[0] === "plugin" ||
+											item.id.split(".")[0] === "messageLintRule"
+										}
+									>
+										<sl-tooltip prop:content="Install">
+											<a
+												onClick={(e) => {
+													e.stopPropagation()
+												}}
+												href={`/install?module=${item.id}`}
+												class="text-surface-400 flex-shrink-0 rounded-md p-1.5 w-8 h-8 flex items-center justify-center hover:text-surface-900 hover:bg-surface-100 transition-all"
+											>
+												<svg
+													width="100%"
+													height="100%"
+													viewBox="0 0 16 16"
+													fill="none"
+													xmlns="http://www.w3.org/2000/svg"
+												>
+													<path
+														d="M3.21029 6.99816L4.40188 5.76401L6.89393 8.25607L7.15 8.51213V8.15V0.15H8.85V8.15V8.51213L9.10607 8.25607L11.5981 5.76401L12.7897 6.99816L8 11.7879L3.21029 6.99816ZM14.15 14V11.15H15.85V14C15.85 14.5099 15.6702 14.9427 15.3064 15.3064C14.9427 15.6702 14.5099 15.85 14 15.85H2C1.4901 15.85 1.05733 15.6702 0.693566 15.3064C0.329805 14.9427 0.15 14.5099 0.15 14V11.15H1.85V14V14.15H2H14H14.15V14Z"
+														fill="currentColor"
+														stroke="white"
+														stroke-width="0.3"
 													/>
-												</Show>
-											</sl-tooltip>
-										</Show>
-									</div>
+												</svg>
+											</a>
+										</sl-tooltip>
+									</Show>
 								</div>
 							</a>
 						</>
@@ -151,15 +177,15 @@ const Gallery = () => {
 				href="/documentation/publish-marketplace"
 				class="relative no-underline h-72 flex flex-col gap-2 group"
 			>
-				<div class="w-full h-full bg-surface-50 text-surface-500 rounded-lg flex justify-center items-center">
+				<div class="w-full h-full bg-surface-50 text-surface-500 rounded-lg flex justify-center items-center border border-surface-200">
 					<Plus class="text-4xl" />
 				</div>
 				<div class="w-full">
 					<div class="flex flex-col gap-1">
-						<p class="m-0 text-surface-600 no-underline font-medium group-hover:text-surface-900 transition-colors">
+						<p class="m-0 text-surface-600 leading-none no-underline font-medium group-hover:text-surface-900 transition-colors">
 							Build your own solution
 						</p>
-						<p class="m-0 text-surface-400 text-sm no-underline line-clamp-1 group-hover:text-surface-500 transition-colors">
+						<p class="m-0 text-surface-400 text-sm leading-tight no-underline line-clamp-1 group-hover:text-surface-500 transition-colors">
 							Can't find what you search for? Build your own solution!
 						</p>
 					</div>

@@ -187,8 +187,6 @@ export const registry: MarketplaceManifest[] = [
 		$schema: "https://inlang.com/schema/marketplace-manifest",
 		id: "plugin.inlang.i18next",
 		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/i18next/assets/icon.png",
-		coverImage:
-			"https://raw.githubusercontent.com/inlang/monorepo/marketplace-enhancement/inlang/assets/marketplace/i18next-marketplace-cover.jpg",
 		displayName: {
 			en: "i18next",
 		},
@@ -208,8 +206,6 @@ export const registry: MarketplaceManifest[] = [
 		$schema: "https://inlang.com/schema/marketplace-manifest",
 		id: "plugin.inlang.json",
 		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/json/assets/icon.png",
-		coverImage:
-			"https://raw.githubusercontent.com/inlang/monorepo/marketplace-enhancement/inlang/assets/marketplace/json-marketplace-cover.jpg",
 		displayName: {
 			en: "JSON translation files",
 		},
