@@ -6,7 +6,7 @@ export const registry: MarketplaceManifest[] = [
 		id: "app.inlang.cli",
 		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		coverImage:
-			"https://raw.githubusercontent.com/inlang/monorepo/marketplace-enhancement/inlang/assets/marketplace/cli-marketplace-cover.jpg",
+			"https://cdn.jsdelivr.net/gh/inlang/monorepo@marketplace-enhancement/inlang/assets/marketplace/cli-marketplace-cover.jpg",
 		displayName: {
 			en: "CLI",
 		},
@@ -25,7 +25,7 @@ export const registry: MarketplaceManifest[] = [
 		id: "app.inlang.editor",
 		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		coverImage:
-			"https://raw.githubusercontent.com/inlang/monorepo/marketplace-enhancement/inlang/assets/marketplace/editor-marketplace-cover.jpg",
+			"https://cdn.jsdelivr.net/gh/inlang/monorepo@marketplace-enhancement/inlang/assets/marketplace/editor-marketplace-cover.jpg",
 		displayName: {
 			en: "Web Editor",
 		},
@@ -45,7 +45,7 @@ export const registry: MarketplaceManifest[] = [
 		id: "app.inlang.ideExtension",
 		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		coverImage:
-			"https://raw.githubusercontent.com/inlang/monorepo/marketplace-enhancement/inlang/assets/marketplace/ide_extension-marketplace-cover.jpg",
+			"https://cdn.jsdelivr.net/gh/inlang/monorepo@marketplace-enhancement/inlang/assets/marketplace/ide_extension-marketplace-cover.jpg",
 		displayName: {
 			en: "IDE Extension",
 		},
@@ -62,6 +62,23 @@ export const registry: MarketplaceManifest[] = [
 		license: "Apache-2.0",
 	},
 	{
+		id: "library.inlang.languageTag",
+		icon: "https://images.emojiterra.com/google/android-12l/512px/1f4db.png",
+		displayName: {
+			en: "Language Tag",
+		},
+		description: {
+			en: "A library containing BCP-47 language tags types and validators, used by inlang.",
+		},
+		readme: {
+			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/versioned-interfaces/language-tag/README.md",
+		},
+		keywords: ["lang", "language tag"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		license: "Apache-2.0",
+	},
+	{
 		id: "library.inlang.paraglideJsSveltekit",
 		icon: "https://emojis.wiki/thumbs/emojis/parachute.webp",
 		displayName: {
@@ -74,23 +91,6 @@ export const registry: MarketplaceManifest[] = [
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/paraglide-js-sveltekit/README.md",
 		},
 		keywords: ["sdk", "paraglide"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-	},
-	{
-		id: "library.inlang.translatable",
-		icon: "https://images.emojiterra.com/google/noto-emoji/unicode-15/color/svg/1f310.svg",
-		displayName: {
-			en: "Translatable",
-		},
-		description: {
-			en: "This library allows you to add translation logic to your application without having to rewrite large parts.",
-		},
-		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/versioned-interfaces/translatable/README.md",
-		},
-		keywords: ["translatable", "adoptable"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
