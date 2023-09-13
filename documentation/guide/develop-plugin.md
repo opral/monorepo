@@ -64,6 +64,7 @@ In your lint rule's `marketplace-manifest.json` make sure to define the followin
 |----------------------|---------------------------------------------------------------|
 | `id`                 | Unique identifier for your plugin.                         |
 | `icon`        | Link to the icon of your plugin (optional).              |
+| `coverImage`        | Optional cover image acting as preview of your plugin.              |
 | `displayName`        | A user-friendly display name for your plugin.              |
 | `description`        | Briefly describe what your plugin does.              |
 | `readme`             | Link to the README documentation for your plugin.          |
