@@ -105,7 +105,7 @@ const Gallery = () => {
 									/>
 									<Show when={item.icon}>
 										<img
-											class="w-10 h-10 rounded-md m-0 shadow-lg object-cover object-center absolute left-4 bottom-4"
+											class="w-10 h-10 rounded-md m-0 shadow-lg object-cover object-center absolute left-4 bottom-4 opacity-0 group-hover:opacity-100 transition-opacity"
 											src={item.icon}
 										/>
 									</Show>
@@ -133,10 +133,26 @@ const Gallery = () => {
 					)
 				}}
 			</For>
-			<a href="/documentation/publish-marketplace" class="relative no-underline">
-				<div class="flex flex-col h-64 text-surface-500 relative justify-center items-center gap-4 bg-surface-100 max-h-full hover:bg-surface-200 p-6 rounded-xl border border-surface-2 cursor-pointer">
+			<a
+				href="/documentation/publish-marketplace"
+				class="relative no-underline h-72 flex flex-col gap-2 group"
+			>
+				{/* <div class="flex flex-col h-72 text-surface-500 relative justify-center items-center gap-4 bg-surface-50 max-h-full hover:bg-surface-100 p-6 rounded-lg cursor-pointer">
 					<Plus class="text-4xl" />
 					<p class="m-0 font-normal leading-6 text-sm tracking-wide line-clamp-3">Build your own</p>
+				</div> */}
+				<div class="w-full h-full bg-surface-50 text-surface-500 rounded-lg flex justify-center items-center">
+					<Plus class="text-4xl" />
+				</div>
+				<div class="w-full">
+					<div class="flex flex-col gap-1">
+						<p class="m-0 text-surface-600 no-underline font-medium group-hover:text-surface-900 transition-colors">
+							Build your own solution
+						</p>
+						<p class="m-0 text-surface-400 text-sm no-underline line-clamp-1 group-hover:text-surface-500 transition-colors">
+							Can't find what you search for? Build your own solution!
+						</p>
+					</div>
 				</div>
 			</a>
 		</>
