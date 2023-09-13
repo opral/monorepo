@@ -105,13 +105,13 @@ const Gallery = () => {
 									/>
 									<Show when={item.icon}>
 										<img
-											class="w-10 h-10 rounded-md m-0 shadow-lg object-cover object-center absolute left-4 bottom-4 opacity-0 group-hover:opacity-100 transition-opacity"
+											class="w-8 h-8 rounded-md m-0 shadow-lg object-cover object-center absolute left-4 bottom-4 opacity-0 group-hover:opacity-100 transition-opacity"
 											src={item.icon}
 										/>
 									</Show>
 								</div>
 								<div class="w-full flex justify-between gap-6">
-									<div class="flex flex-col gap-1">
+									<div class="flex flex-col gap-0.5">
 										<p class="m-0 text-surface-600 no-underline font-medium group-hover:text-surface-900 transition-colors">
 											{displayName}
 										</p>
