@@ -19,7 +19,6 @@ export {
 	ProjectFilePathNotFoundError,
 	ProjectFileJSONSyntaxError,
 	InvalidConfigError,
-	NoPluginProvidesLoadOrSaveMessagesError,
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
 } from "./errors.js"

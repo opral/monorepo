@@ -5,6 +5,7 @@ import {
 	PluginReturnedInvalidCustomApiError,
 	PluginLoadMessagesFunctionAlreadyDefinedError,
 	PluginSaveMessagesFunctionAlreadyDefinedError,
+	PluginsDoNotProvideLoadOrSaveMessagesError,
 	PluginHasInvalidIdError,
 	PluginHasInvalidSchemaError,
 	PluginUsesReservedNamespaceError,
@@ -164,6 +165,19 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 				result.data.customApi = deepmerge(result.data.customApi, customApi)
 			}
 		}
+	}
+
+	// --- LOADMESSAGE / SAVEMESSAGE NOT DEFINED ---
+	if (
+		typeof result.data.loadMessages !== "function" ||
+		typeof result.data.saveMessages !== "function"
+	) {
+		result.errors.push(
+			new PluginsDoNotProvideLoadOrSaveMessagesError(
+				"It seems you did not install any plugin that handles messages. Please add one to make inlang work. See https://inlang.com/documentation/plugins/registry.",
+				{ plugin: "plugin.inlang.missing" },
+			),
+		)
 	}
 
 	return result
