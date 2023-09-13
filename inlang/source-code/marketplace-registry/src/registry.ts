@@ -5,7 +5,7 @@ export const registry: MarketplaceManifest[] = [
 	{
 		id: "app.inlang.cli",
 		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		displayImage:
+		coverImage:
 			"https://raw.githubusercontent.com/inlang/monorepo/marketplace-enhancement/inlang/assets/marketplace/cli-marketplace-cover.jpg",
 		displayName: {
 			en: "CLI",
@@ -24,7 +24,7 @@ export const registry: MarketplaceManifest[] = [
 	{
 		id: "app.inlang.editor",
 		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		displayImage:
+		coverImage:
 			"https://raw.githubusercontent.com/inlang/monorepo/marketplace-enhancement/inlang/assets/marketplace/editor-marketplace-cover.jpg",
 		displayName: {
 			en: "Web Editor",
@@ -44,7 +44,7 @@ export const registry: MarketplaceManifest[] = [
 	{
 		id: "app.inlang.ideExtension",
 		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		displayImage:
+		coverImage:
 			"https://raw.githubusercontent.com/inlang/monorepo/marketplace-enhancement/inlang/assets/marketplace/ide_extension-marketplace-cover.jpg",
 		displayName: {
 			en: "IDE Extension",
@@ -99,7 +99,7 @@ export const registry: MarketplaceManifest[] = [
 		$schema: "https://inlang.com/schema/marketplace-manifest",
 		id: "messageLintRule.inlang.emptyPattern",
 		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/emptyPattern/assets/icon.png",
-		displayImage:
+		coverImage:
 			"https://cdn.jsdelivr.net/gh/inlang/monorepo@marketplace-enhancement/inlang/assets/marketplace/empty_pattern-marketplace-cover.jpg",
 		displayName: {
 			en: "Empty pattern",
@@ -121,7 +121,7 @@ export const registry: MarketplaceManifest[] = [
 		$schema: "https://inlang.com/schema/marketplace-manifest",
 		id: "messageLintRule.inlang.identicalPattern",
 		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/identicalPattern/assets/icon.png",
-		displayImage:
+		coverImage:
 			"https://cdn.jsdelivr.net/gh/inlang/monorepo@marketplace-enhancement/inlang/assets/marketplace/identical_pattern-marketplace-cover.jpg",
 		displayName: {
 			en: "Identical pattern",
@@ -143,7 +143,7 @@ export const registry: MarketplaceManifest[] = [
 		$schema: "https://inlang.com/schema/marketplace-manifest",
 		id: "messageLintRule.inlang.messageWithoutSource",
 		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/messageWithoutSource/assets/icon.png",
-		displayImage:
+		coverImage:
 			"https://cdn.jsdelivr.net/gh/inlang/monorepo@marketplace-enhancement/inlang/assets/marketplace/without_source-marketplace-cover.jpg",
 		displayName: {
 			en: "Message without source",
@@ -165,7 +165,7 @@ export const registry: MarketplaceManifest[] = [
 		$schema: "https://inlang.com/schema/marketplace-manifest",
 		id: "messageLintRule.inlang.missingTranslation",
 		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/missingTranslation/assets/icon.png",
-		displayImage:
+		coverImage:
 			"https://cdn.jsdelivr.net/gh/inlang/monorepo@marketplace-enhancement/inlang/assets/marketplace/missing_translation-marketplace-cover.jpg",
 		displayName: {
 			en: "Missing translation",
@@ -187,7 +187,7 @@ export const registry: MarketplaceManifest[] = [
 		$schema: "https://inlang.com/schema/marketplace-manifest",
 		id: "plugin.inlang.i18next",
 		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/i18next/assets/icon.png",
-		displayImage:
+		coverImage:
 			"https://raw.githubusercontent.com/inlang/monorepo/marketplace-enhancement/inlang/assets/marketplace/i18next-marketplace-cover.jpg",
 		displayName: {
 			en: "i18next",
@@ -208,7 +208,7 @@ export const registry: MarketplaceManifest[] = [
 		$schema: "https://inlang.com/schema/marketplace-manifest",
 		id: "plugin.inlang.json",
 		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/json/assets/icon.png",
-		displayImage:
+		coverImage:
 			"https://raw.githubusercontent.com/inlang/monorepo/marketplace-enhancement/inlang/assets/marketplace/json-marketplace-cover.jpg",
 		displayName: {
 			en: "JSON translation files",
