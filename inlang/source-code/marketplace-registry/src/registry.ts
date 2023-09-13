@@ -6,7 +6,7 @@ export const registry: MarketplaceManifest[] = [
 		id: "app.inlang.cli",
 		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		displayImage:
-			"https://cdn.jsdelivr.net/gh/inlang/monorepo@marketplace-enhancement/inlang/assets/marketplace/cli-marketplace-cover.jpg",
+			"https://raw.githubusercontent.com/inlang/monorepo/marketplace-enhancement/inlang/assets/marketplace/cli-marketplace-cover.jpg",
 		displayName: {
 			en: "CLI",
 		},
@@ -25,7 +25,7 @@ export const registry: MarketplaceManifest[] = [
 		id: "app.inlang.editor",
 		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		displayImage:
-			"https://cdn.jsdelivr.net/gh/inlang/monorepo@marketplace-enhancement/inlang/assets/marketplace/editor-marketplace-cover.jpg",
+			"https://raw.githubusercontent.com/inlang/monorepo/marketplace-enhancement/inlang/assets/marketplace/editor-marketplace-cover.jpg",
 		displayName: {
 			en: "Web Editor",
 		},
@@ -45,7 +45,7 @@ export const registry: MarketplaceManifest[] = [
 		id: "app.inlang.ideExtension",
 		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		displayImage:
-			"https://cdn.jsdelivr.net/gh/inlang/monorepo@marketplace-enhancement/inlang/assets/marketplace/ide_extension-marketplace-cover.jpg",
+			"https://raw.githubusercontent.com/inlang/monorepo/marketplace-enhancement/inlang/assets/marketplace/ide_extension-marketplace-cover.jpg",
 		displayName: {
 			en: "IDE Extension",
 		},
@@ -188,7 +188,7 @@ export const registry: MarketplaceManifest[] = [
 		id: "plugin.inlang.i18next",
 		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/i18next/assets/icon.png",
 		displayImage:
-			"https://cdn.jsdelivr.net/gh/inlang/monorepo@marketplace-enhancement/inlang/assets/marketplace/i18next-marketplace-cover.jpg",
+			"https://raw.githubusercontent.com/inlang/monorepo/marketplace-enhancement/inlang/assets/marketplace/i18next-marketplace-cover.jpg",
 		displayName: {
 			en: "i18next",
 		},
@@ -209,7 +209,7 @@ export const registry: MarketplaceManifest[] = [
 		id: "plugin.inlang.json",
 		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/json/assets/icon.png",
 		displayImage:
-			"https://cdn.jsdelivr.net/gh/inlang/monorepo@marketplace-enhancement/inlang/assets/marketplace/json-marketplace-cover.jpg",
+			"https://raw.githubusercontent.com/inlang/monorepo/marketplace-enhancement/inlang/assets/marketplace/json-marketplace-cover.jpg",
 		displayName: {
 			en: "JSON translation files",
 		},

@@ -130,13 +130,17 @@ const Gallery = () => {
 											{description}
 										</p>
 									</div>
-									<div class="flex items-center gap-2 flex-shrink-0">
-										<Show when={item.publisherIcon}>
-											<img class="w-5 h-5 rounded-full m-0" src={item.publisherIcon} />
+									<div class="flex items-center gap-2 flex-shrink-0 group/avatar">
+										<Show when={item.publisherIcon} fallback={item.publisherName}>
+											<sl-tooltip content={item.publisherName}>
+												<Show when={item.publisherIcon}>
+													<img
+														class="w-6 h-6 rounded-full m-0 group-hover/avatar:opacity-60 transition-opacity duration-500"
+														src={item.publisherIcon}
+													/>
+												</Show>
+											</sl-tooltip>
 										</Show>
-										<p class="m-0 text-surface-600 text-sm no-underline font-medium">
-											{item.publisherName}
-										</p>
 									</div>
 								</div>
 							</a>
