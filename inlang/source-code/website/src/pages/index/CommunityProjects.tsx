@@ -127,7 +127,7 @@ export function RepositoryCard(props: {
 					  }&module=${props.modules?.join(",")}`
 					: `/editor/github.com/${props.repository.owner}/${props.repository.repository}`
 			}
-			class="rounded-xl bg-surface-100 hover:bg-surface-200 border border-surface-2 p-6 flex flex-col justify-between gap-5"
+			class="rounded-xl bg-surface-50 hover:bg-surface-100 transition-colors border border-surface-2 p-6 flex flex-col justify-between gap-5"
 		>
 			<div>
 				<div class="flex flex-col">
@@ -141,10 +141,10 @@ export function RepositoryCard(props: {
 						</span>
 					</div>
 					<p class="m-0 text-surface-900 font-semibold text-lg break-all pt-4">
-						{props.repository.owner}
+						{props.repository.repository}
 					</p>
 					<p class="m-0 text-surface-500 font-normal text-sm break-all leading-6 tracking-wide">
-						{props.repository.repository}
+						{props.repository.owner}
 					</p>
 				</div>
 				{/* break all in case the repository name is too long */}

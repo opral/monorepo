@@ -8,7 +8,6 @@ import { Button } from "../index/components/Button.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import Plus from "~icons/material-symbols/add-rounded"
 import Check from "~icons/material-symbols/check"
-import Install from "~icons/material-symbols/download"
 import { colorForTypeOf, scrollToTop, typeOfIdToTitle } from "./utilities.js"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 
@@ -97,9 +96,9 @@ const Gallery = () => {
 							>
 								<div
 									style={{ "--image-url": `url(${item.coverImage})` }}
-									class={`w-full h-full flex items-center justify-center bg-surface-50 rounded-lg relative ${
+									class={`w-full h-full flex items-center justify-center bg-surface-50 group-hover:bg-surface-100 transition-colors rounded-lg relative ${
 										item.coverImage && `bg-[image:var(--image-url)]`
-									} bg-cover bg-center border border-surface-200`}
+									} bg-cover bg-center border border-surface-2`}
 								>
 									<Chip
 										text={typeOfIdToTitle(item.id).replace("Message", "")}
@@ -175,9 +174,9 @@ const Gallery = () => {
 			</For>
 			<a
 				href="/documentation/publish-marketplace"
-				class="relative no-underline h-72 flex flex-col gap-2 group"
+				class="relative no-underline h-72 flex flex-col gap-3.5 group"
 			>
-				<div class="w-full h-full bg-surface-50 text-surface-500 rounded-lg flex justify-center items-center border border-surface-200">
+				<div class="w-full h-full bg-surface-50 group-hover:bg-surface-100 transition-colors text-surface-500 rounded-lg flex justify-center items-center border border-surface-2">
 					<Plus class="text-4xl" />
 				</div>
 				<div class="w-full">

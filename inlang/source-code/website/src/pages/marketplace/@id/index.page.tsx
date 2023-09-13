@@ -156,7 +156,7 @@ export function Page(props: PageProps) {
 															class="transition-opacity hover:opacity-80 cursor-pointer"
 															href="/marketplace"
 															onClick={() => {
-																setSearchValue(keyword)
+																setSearchValue(keyword.toString())
 															}}
 														>
 															<Chip text={keyword} color={colorForTypeOf(props.manifest.id)} />
