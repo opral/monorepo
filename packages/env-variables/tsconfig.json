@@ -3,7 +3,7 @@
 	"include": ["src/**/*.ts", "validateEnvVariables.ts"],
 	"compilerOptions": {
 		"lib": ["ESNext", "DOM"],
-		"types": [],
+		"types": ["node"],
 		"outDir": "./dist",
 		// this module is not bundling. thus, set to esnext
 		"target": "ESNext"

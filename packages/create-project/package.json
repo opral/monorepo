@@ -22,6 +22,7 @@
 	},
 	"dependencies": {
 		"@inlang/plugin": "*",
+		"@inlang/sdk": "*",
 		"@inlang/project-config": "*",
 		"@lix-js/fs": "*",
 		"@sinclair/typebox": "0.31.14",
