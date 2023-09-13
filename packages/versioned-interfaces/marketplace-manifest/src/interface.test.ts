@@ -15,6 +15,7 @@ test("a valid app manifest should pass validation", () => {
 	}
 	const errors = [...Value.Errors(MarketplaceManifest, app)]
 	if (errors.length > 0) {
+		// @ts-ignore
 		console.error(errors)
 	}
 	expect(Value.Check(MarketplaceManifest, app)).toBe(true)
@@ -33,6 +34,7 @@ test("should pass a valid plugin manifest", () => {
 	}
 	const errors = [...Value.Errors(MarketplaceManifest, plugin)]
 	if (errors.length > 0) {
+		// @ts-ignore
 		console.error(errors)
 	}
 	expect(Value.Check(MarketplaceManifest, plugin)).toBe(true)
