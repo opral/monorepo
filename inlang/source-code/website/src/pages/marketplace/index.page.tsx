@@ -71,7 +71,7 @@ export function Page() {
 						</div>
 						<div class="h-[1px] w-full bg-surface-2 absolute -bottom-1" />
 					</div>
-					<div class="mb-16 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-center items-stretch relative">
+					<div class="mb-32 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-center items-stretch relative">
 						<Gallery />
 					</div>
 					<GetHelp text="Need help or have questions? Join our Discord!" />
@@ -106,7 +106,7 @@ const Gallery = () => {
 									<Chip
 										text={typeOfIdToTitle(item.id).replace("Message", "")}
 										color={colorForTypeOf(item.id)}
-										customClasses="absolute right-4 top-4 z-5 backdrop-filter backdrop-blur-lg text-xs"
+										customClasses="absolute right-4 top-4 z-5 backdrop-filter backdrop-blur-sm text-xs"
 									/>
 									<Show when={!item.displayImage}>
 										<img
