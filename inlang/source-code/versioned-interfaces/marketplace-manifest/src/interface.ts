@@ -10,7 +10,7 @@ import { ProjectConfig } from "@inlang/project-config"
 const MarketplaceManifestBase = Type.Object({
 	$schema: Type.Optional(Type.Literal("https://inlang.com/schema/marketplace-manifest")),
 	icon: Type.Optional(Type.String()),
-	displayImage: Type.Optional(
+	coverImage: Type.Optional(
 		Type.String({ description: "The cover displayed in the marketplace." }),
 	),
 	displayName: Translatable(
