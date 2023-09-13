@@ -7,6 +7,7 @@ import type {
 	PluginHasInvalidIdError,
 	PluginHasInvalidSchemaError,
 	PluginUsesReservedNamespaceError,
+	PluginsDoNotProvideLoadOrSaveMessagesError,
 } from "./errors.js"
 import type { Message } from "@inlang/message"
 import type { JSONObject } from "@inlang/json-types"
@@ -38,6 +39,7 @@ export type ResolvePluginsFunction = (args: {
 		| PluginHasInvalidIdError
 		| PluginHasInvalidSchemaError
 		| PluginUsesReservedNamespaceError
+		| PluginsDoNotProvideLoadOrSaveMessagesError
 	>
 }>
 
