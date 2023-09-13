@@ -12,7 +12,6 @@ import {
 	ProjectFilePathNotFoundError,
 	ProjectFileJSONSyntaxError,
 	InvalidConfigError,
-	NoPluginProvidesLoadOrSaveMessagesError,
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
 } from "./errors.js"
@@ -87,13 +86,6 @@ export const openInlangProject = async (args: {
 
 			loadModules({ config: conf, nodeishFs: args.nodeishFs, _import: args._import })
 				.then((resolvedModules) => {
-					// TODO move to resolveModules
-					if (
-						!resolvedModules.resolvedPluginApi.loadMessages ||
-						!resolvedModules.resolvedPluginApi.saveMessages
-					) {
-						throw new NoPluginProvidesLoadOrSaveMessagesError()
-					}
 					setResolvedModules(resolvedModules)
 
 					// TODO: handle `detectedLanguageTags`

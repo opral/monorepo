@@ -55,3 +55,11 @@ export class PluginReturnedInvalidCustomApiError extends PluginError {
 		this.name = "PluginReturnedInvalidCustomApiError"
 	}
 }
+
+export class PluginsDoNotProvideLoadOrSaveMessagesError extends PluginError {
+	constructor(message: string, options: PluginErrorOptions) {
+		super(message, options)
+		this.name = "PluginsDoNotProvideLoadOrSaveMessagesError"
+		options.plugin = "plugin.inlang.missing"
+	}
+}

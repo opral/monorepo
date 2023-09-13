@@ -8,6 +8,7 @@ import {
 	PluginUsesReservedNamespaceError,
 	PluginReturnedInvalidCustomApiError,
 	PluginHasInvalidSchemaError,
+	PluginsDoNotProvideLoadOrSaveMessagesError,
 } from "./errors.js"
 import type { Plugin } from "@inlang/plugin"
 
@@ -57,7 +58,6 @@ describe("generally", () => {
 			nodeishFs: {} as any,
 		})
 
-		expect(resolved.errors.length).toBe(1)
 		expect(resolved.errors[0]).toBeInstanceOf(PluginHasInvalidSchemaError)
 	})
 
@@ -77,7 +77,6 @@ describe("generally", () => {
 			nodeishFs: {} as any,
 		})
 
-		expect(resolved.errors.length).toBe(1)
 		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesReservedNamespaceError)
 	})
 })
@@ -131,8 +130,27 @@ describe("loadMessages", () => {
 			settings: {},
 		})
 
-		expect(resolved.errors).toHaveLength(1)
 		expect(resolved.errors[0]).toBeInstanceOf(PluginLoadMessagesFunctionAlreadyDefinedError)
+	})
+
+	it("should return an error if no plugin defines loadMessages", async () => {
+		const mockPlugin: Plugin = {
+			meta: {
+				id: "plugin.namepsace.loadMessagesFirst",
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+			},
+			saveMessages: async () => undefined as any,
+		}
+
+		const resolved = await resolvePlugins({
+			plugins: [mockPlugin],
+			nodeishFs: {} as any,
+			settings: {},
+		})
+
+		expect(resolved.errors).toHaveLength(1)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginsDoNotProvideLoadOrSaveMessagesError)
 	})
 })
 
@@ -144,6 +162,7 @@ describe("saveMessages", () => {
 				description: { en: "My plugin description" },
 				displayName: { en: "My plugin" },
 			},
+			loadMessages: async () => undefined as any,
 			saveMessages: async () => undefined as any,
 		}
 
@@ -181,8 +200,26 @@ describe("saveMessages", () => {
 			nodeishFs: {} as any,
 		})
 
-		expect(resolved.errors).toHaveLength(1)
 		expect(resolved.errors[0]).toBeInstanceOf(PluginSaveMessagesFunctionAlreadyDefinedError)
+	})
+
+	it("should return an error if no plugin defines saveMessages", async () => {
+		const mockPlugin: Plugin = {
+			meta: {
+				id: "plugin.namepsace.loadMessagesFirst",
+				description: { en: "My plugin description" },
+				displayName: { en: "My plugin" },
+			},
+			loadMessages: async () => undefined as any,
+		}
+
+		const resolved = await resolvePlugins({
+			plugins: [mockPlugin],
+			nodeishFs: {} as any,
+			settings: {},
+		})
+		expect(resolved.errors).toHaveLength(1)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginsDoNotProvideLoadOrSaveMessagesError)
 	})
 })
 
@@ -304,7 +341,6 @@ describe("addCustomApi", () => {
 			nodeishFs: {} as any,
 		})
 
-		expect(resolved.errors).toHaveLength(1)
 		expect(resolved.errors[0]).toBeInstanceOf(PluginReturnedInvalidCustomApiError)
 	})
 
