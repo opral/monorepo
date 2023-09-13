@@ -81,7 +81,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 
 	const resolvedPlugins = await resolvePlugins({
 		plugins: allPlugins,
-		settings: args.config.settings as any, // TODO: fix type
+		settings: args.config.settings,
 		nodeishFs: args.nodeishFs,
 	})
 
