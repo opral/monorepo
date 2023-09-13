@@ -8,7 +8,7 @@ import { Button } from "../index/components/Button.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import Plus from "~icons/material-symbols/add-rounded"
 import Check from "~icons/material-symbols/check"
-import { colorForTypeOf, typeOfIdToTitle } from "./utilities.js"
+import { colorForTypeOf, scrollToTop, typeOfIdToTitle } from "./utilities.js"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 
 type Category = "app" | "library" | "plugin" | "messageLintRule"
@@ -55,7 +55,7 @@ export function Page() {
 							Explore the marketplace
 						</h1>
 					</div>
-					<div class="w-full top-16 sticky bg-background pb-4 pt-8 z-10 flex flex-col gap-5 outline outline-4 outline-background">
+					<div class="w-full top-16 sticky bg-background/90 backdrop-blur-xl pb-4 pt-8 z-10 flex flex-col gap-5">
 						<Search
 							placeholder={"Search for apps, plugins, lint rules ..."}
 							textValue={searchValue}
@@ -69,7 +69,6 @@ export function Page() {
 								</Button>
 							</div>
 						</div>
-						<div class="h-[1px] w-full bg-surface-2 absolute -bottom-1" />
 					</div>
 					<div class="mb-32 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-center items-stretch relative">
 						<Gallery />
@@ -98,9 +97,9 @@ const Gallery = () => {
 								class="relative no-underline h-72 flex flex-col gap-2 group"
 							>
 								<div
-									style={{ "--image-url": `url(${item.displayImage})` }}
+									style={{ "--image-url": `url(${item.coverImage})` }}
 									class={`w-full h-full flex items-center justify-center bg-surface-50 rounded-lg relative ${
-										item.displayImage && `bg-[image:var(--image-url)]`
+										item.coverImage && `bg-[image:var(--image-url)]`
 									} bg-cover bg-center border border-surface-100`}
 								>
 									<Chip
@@ -108,13 +107,13 @@ const Gallery = () => {
 										color={colorForTypeOf(item.id)}
 										customClasses="absolute right-4 top-4 z-5 backdrop-filter backdrop-blur-sm text-xs"
 									/>
-									<Show when={!item.displayImage}>
+									<Show when={!item.coverImage}>
 										<img
 											class="w-14 h-14 rounded-md m-0 shadow-lg object-cover object-center"
 											src={item.icon}
 										/>
 									</Show>
-									<Show when={item.icon && item.displayImage}>
+									<Show when={item.icon && item.coverImage}>
 										<img
 											class="w-8 h-8 rounded-md m-0 shadow-lg object-cover object-center absolute left-4 bottom-4 opacity-0 group-hover:opacity-100 transition-opacity"
 											src={item.icon}
@@ -152,10 +151,6 @@ const Gallery = () => {
 				href="/documentation/publish-marketplace"
 				class="relative no-underline h-72 flex flex-col gap-2 group"
 			>
-				{/* <div class="flex flex-col h-72 text-surface-500 relative justify-center items-center gap-4 bg-surface-50 max-h-full hover:bg-surface-100 p-6 rounded-lg cursor-pointer">
-					<Plus class="text-4xl" />
-					<p class="m-0 font-normal leading-6 text-sm tracking-wide line-clamp-3">Build your own</p>
-				</div> */}
 				<div class="w-full h-full bg-surface-50 text-surface-500 rounded-lg flex justify-center items-center">
 					<Plus class="text-4xl" />
 				</div>
@@ -216,7 +211,7 @@ const Search = (props: SearchInputProps) => {
 				prop:size={"medium"}
 				prop:value={props.textValue()}
 				onInput={(e) => {
-					window.scrollTo({ top: 170, behavior: "smooth" })
+					scrollToTop()
 					props.setTextValue(e.currentTarget.value)
 				}}
 			>
@@ -235,6 +230,8 @@ const Tags = () => {
 		} else {
 			setSelectedCategories([...selectedCategories(), tag])
 		}
+
+		scrollToTop()
 	}
 
 	return (
