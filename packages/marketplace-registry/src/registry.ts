@@ -73,23 +73,6 @@ export const registry: MarketplaceManifest[] = [
 		license: "Apache-2.0",
 	},
 	{
-		id: "library.inlang.languageTag",
-		icon: "https://images.emojiterra.com/google/android-12l/512px/1f4db.png",
-		displayName: {
-			en: "Language Tag",
-		},
-		description: {
-			en: "A library containing BCP-47 language tags types and validators, used by inlang.",
-		},
-		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/versioned-interfaces/language-tag/README.md",
-		},
-		keywords: ["lang", "language tag"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-	},
-	{
 		id: "library.inlang.paraglideJsSveltekit",
 		icon: "https://emojis.wiki/thumbs/emojis/parachute.webp",
 		displayName: {
