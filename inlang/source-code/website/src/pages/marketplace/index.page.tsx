@@ -7,6 +7,7 @@ import { SearchIcon } from "../editor/@host/@owner/@repository/components/Search
 import { Button } from "../index/components/Button.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import Plus from "~icons/material-symbols/add-rounded"
+import Check from "~icons/material-symbols/check"
 import { colorForTypeOf, typeOfIdToTitle } from "./utilities.js"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 
@@ -14,19 +15,14 @@ type Category = "app" | "library" | "plugin" | "messageLintRule"
 
 /* Export searchValue to make subpages insert search-terms */
 export const [searchValue, setSearchValue] = createSignal<string>("")
-const [selectedCategories, setSelectedCategories] = createSignal<Category[]>([
-	"app",
-	"library",
-	"plugin",
-	"messageLintRule",
-])
+const [selectedCategories, setSelectedCategories] = createSignal<Category[]>([])
 
 const filteredItems = () =>
 	registry.filter((item: MarketplaceManifest) => {
 		// slice to the first dot yields the category
 		const category = item.id.slice(0, item.id.indexOf(".")) as Category
 
-		if (!selectedCategories().includes(category)) {
+		if (selectedCategories().length > 0 && !selectedCategories().includes(category)) {
 			return false
 		}
 
@@ -97,51 +93,40 @@ const Gallery = () => {
 
 					return (
 						<>
-							<a href={`/marketplace/${item.id}`} class="relative no-underline h-64">
-								<div class="flex flex-col relative justify-between gap-4 bg-surface-100 h-full hover:bg-surface-200 p-6 rounded-xl border border-surface-2 cursor-pointer">
-									<div class="flex flex-col gap-4">
-										<div class="flex items-center gap-4">
-											<Show
-												when={item.icon}
-												fallback={
-													<div class="w-10 h-10 font-semibold text-xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
-														{displayName[0]}
-													</div>
-												}
-											>
-												<img
-													class="w-10 h-10 rounded-md m-0 shadow-lg object-cover object-center"
-													src={item.icon}
-												/>
-											</Show>
-											<p class="m-0 text-surface-900 font-semibold text-md">{displayName}</p>
-										</div>
-										<p class="m-0 font-normal leading-6 text-sm tracking-wide text-surface-500 line-clamp-3">
-											{description}
-										</p>
-									</div>
-									<div class="w-full flex items-end justify-between">
-										<div class="flex gap-2 items-center pt-6">
-											<Show
-												when={item.publisherIcon}
-												fallback={
-													<div class="w-6 h-6 flex items-center justify-center text-background capitalize font-medium rounded-full m-0 bg-surface-900">
-														{item.publisherName[0]}
-													</div>
-												}
-											>
-												<img class="w-6 h-6 rounded-full m-0" src={item.publisherIcon} />
-											</Show>
-											<p class="m-0 text-surface-600 no-underline font-medium">
-												{item.publisherName}
-											</p>
-										</div>
-									</div>
+							<a
+								href={`/marketplace/${item.id}`}
+								class="relative no-underline h-72 flex flex-col gap-2 group"
+							>
+								<div class="w-full h-full bg-surface-50 rounded-lg relative">
 									<Chip
 										text={typeOfIdToTitle(item.id).replace("Message", "")}
 										color={colorForTypeOf(item.id)}
-										customClasses="absolute right-4 top-4 z-5 backdrop-filter backdrop-blur-lg"
+										customClasses="absolute right-4 top-4 z-5 backdrop-filter backdrop-blur-lg text-xs"
 									/>
+									<Show when={item.icon}>
+										<img
+											class="w-10 h-10 rounded-md m-0 shadow-lg object-cover object-center absolute left-4 bottom-4"
+											src={item.icon}
+										/>
+									</Show>
+								</div>
+								<div class="w-full flex justify-between gap-6">
+									<div class="flex flex-col gap-1">
+										<p class="m-0 text-surface-600 no-underline font-medium group-hover:text-surface-900 transition-colors">
+											{displayName}
+										</p>
+										<p class="m-0 text-surface-400 text-sm no-underline line-clamp-1 group-hover:text-surface-500 transition-colors">
+											{description}
+										</p>
+									</div>
+									<div class="flex items-center gap-2 flex-shrink-0">
+										<Show when={item.publisherIcon}>
+											<img class="w-5 h-5 rounded-full m-0" src={item.publisherIcon} />
+										</Show>
+										<p class="m-0 text-surface-600 text-sm no-underline font-medium">
+											{item.publisherName}
+										</p>
+									</div>
 								</div>
 							</a>
 						</>
@@ -222,49 +207,61 @@ const Tags = () => {
 	}
 
 	return (
-		<div class="flex gap-3">
+		<div class="flex gap-2">
 			<div
 				onClick={() => selectTag("app")}
 				class={
-					"gap-2 px-3 py-1.5 rounded-full cursor-pointer text-sm capitalize hover:opacity-90 transition-all duration-100 " +
+					"gap-2 relative py-1.5 rounded-full cursor-pointer border border-solid text-sm capitalize hover:opacity-90 transition-all duration-100 flex items-center " +
 					(selectedCategories().includes("app")
-						? "bg-surface-800 text-background"
-						: "bg-surface-200 text-surface-600")
+						? "bg-surface-800 text-background border-surface-800 pl-7 pr-3"
+						: "bg-background text-surface-600 border-surface-200 px-5 hover:border-surface-400")
 				}
 			>
+				<Show when={selectedCategories().includes("app")}>
+					<Check class="w-4 h-4 absolute left-2" />
+				</Show>
 				<p class="m-0">Apps</p>
 			</div>
 			<div
 				onClick={() => selectTag("library")}
 				class={
-					"gap-2 px-3 py-1.5 rounded-full cursor-pointer text-sm capitalize hover:opacity-90 transition-all duration-100 " +
+					"gap-2 relative py-1.5 rounded-full cursor-pointer border border-solid text-sm capitalize hover:opacity-90 transition-all duration-100 flex items-center " +
 					(selectedCategories().includes("library")
-						? "bg-surface-800 text-background"
-						: "bg-surface-200 text-surface-600")
+						? "bg-surface-800 text-background border-surface-800 pl-7 pr-3"
+						: "bg-background text-surface-600 border-surface-200 px-5 hover:border-surface-400")
 				}
 			>
+				<Show when={selectedCategories().includes("library")}>
+					<Check class="w-4 h-4 absolute left-2" />
+				</Show>
 				<p class="m-0">Libraries</p>
 			</div>
 			<div
 				onClick={() => selectTag("messageLintRule")}
 				class={
-					"gap-2 px-3 py-1.5 rounded-full cursor-pointer text-sm capitalize hover:opacity-90 transition-all duration-100 " +
+					"gap-2 relative py-1.5 rounded-full cursor-pointer border border-solid text-sm capitalize hover:opacity-90 transition-all duration-100 flex items-center " +
 					(selectedCategories().includes("messageLintRule")
-						? "bg-surface-800 text-background"
-						: "bg-surface-200 text-surface-600")
+						? "bg-surface-800 text-background border-surface-800 pl-7 pr-3"
+						: "bg-background text-surface-600 border-surface-200 px-5 hover:border-surface-400")
 				}
 			>
+				<Show when={selectedCategories().includes("messageLintRule")}>
+					<Check class="w-4 h-4 absolute left-2" />
+				</Show>
 				<p class="m-0">Lint Rules</p>
 			</div>
 			<div
 				onClick={() => selectTag("plugin")}
 				class={
-					"gap-2 px-3 py-1.5 rounded-full cursor-pointer text-sm capitalize hover:opacity-90 transition-all duration-100 " +
+					"gap-2 relative py-1.5 rounded-full cursor-pointer border border-solid text-sm capitalize hover:opacity-90 transition-all duration-100 flex items-center " +
 					(selectedCategories().includes("plugin")
-						? "bg-surface-800 text-background"
-						: "bg-surface-200 text-surface-600")
+						? "bg-surface-800 text-background border-surface-800 pl-7 pr-3"
+						: "bg-background text-surface-600 border-surface-200 px-5 hover:border-surface-400")
 				}
 			>
+				<Show when={selectedCategories().includes("plugin")}>
+					<Check class="w-4 h-4 absolute left-2" />
+				</Show>
 				<p class="m-0">Plugins</p>
 			</div>
 		</div>
