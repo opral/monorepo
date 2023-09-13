@@ -106,24 +106,24 @@ const Gallery = () => {
 										customClasses="absolute right-4 top-4 z-5 backdrop-filter backdrop-blur-sm text-xs"
 									/>
 									<Show when={!item.coverImage}>
-										<img
-											class="w-14 h-14 rounded-md m-0 shadow-lg object-cover object-center"
-											src={item.icon}
-										/>
+										<Show
+											when={item.icon}
+											fallback={
+												<p class="font-mono font-semibold text-surface-500">{displayName}</p>
+											}
+										>
+											<img
+												class="w-14 h-14 rounded-md m-0 shadow-lg object-cover object-center"
+												src={item.icon}
+											/>
+										</Show>
 									</Show>
 								</div>
 								<div class="w-full flex gap-6 justify-between">
 									<div class="w-full flex gap-3 items-center">
-										<div class="flex items-center gap-2 flex-shrink-0 group/avatar">
-											<Show when={item.publisherIcon} fallback={item.publisherName}>
-												<sl-tooltip prop:content={item.publisherName}>
-													<Show when={item.publisherIcon}>
-														<img
-															class="w-9 h-9 rounded-full m-0 group-hover/avatar:opacity-60 transition-opacity duration-500"
-															src={item.publisherIcon}
-														/>
-													</Show>
-												</sl-tooltip>
+										<div class="flex items-center gap-2 flex-shrink-0">
+											<Show when={item.publisherIcon}>
+												<img class="w-9 h-9 rounded-full m-0" src={item.publisherIcon} />
 											</Show>
 										</div>
 										<div class="flex flex-col justify-between gap-0.5">
