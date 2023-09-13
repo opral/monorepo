@@ -3,23 +3,6 @@
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 export const registry: MarketplaceManifest[] = [
 	{
-		id: "app.inlang.badge",
-		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		displayName: {
-			en: "Translation status badge",
-		},
-		description: {
-			en: "Badge showing missing messages in your codebase. Perfect for your README.md file.",
-		},
-		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/badge/README.md",
-		},
-		keywords: ["badge"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-	},
-	{
 		id: "app.inlang.cli",
 		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		displayImage:
@@ -41,6 +24,8 @@ export const registry: MarketplaceManifest[] = [
 	{
 		id: "app.inlang.editor",
 		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		displayImage:
+			"https://cdn.jsdelivr.net/gh/inlang/monorepo@marketplace-enhancement/inlang/assets/marketplace/editor-marketplace-cover.jpg",
 		displayName: {
 			en: "Web Editor",
 		},
@@ -59,6 +44,8 @@ export const registry: MarketplaceManifest[] = [
 	{
 		id: "app.inlang.ideExtension",
 		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		displayImage:
+			"https://cdn.jsdelivr.net/gh/inlang/monorepo@marketplace-enhancement/inlang/assets/marketplace/ide_extension-marketplace-cover.jpg",
 		displayName: {
 			en: "IDE Extension",
 		},
@@ -72,23 +59,6 @@ export const registry: MarketplaceManifest[] = [
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		website: "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
-		license: "Apache-2.0",
-	},
-	{
-		id: "library.inlang.languageTag",
-		icon: "https://images.emojiterra.com/google/android-12l/512px/1f4db.png",
-		displayName: {
-			en: "Language Tag",
-		},
-		description: {
-			en: "A library containing BCP-47 language tags types and validators, used by inlang.",
-		},
-		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/versioned-interfaces/language-tag/README.md",
-		},
-		keywords: ["lang", "language tag"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
 	},
 	{
