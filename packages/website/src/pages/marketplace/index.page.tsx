@@ -241,7 +241,7 @@ const Tags = () => {
 					"gap-2 relative py-1.5 rounded-full cursor-pointer border border-solid text-sm capitalize hover:opacity-90 transition-all duration-100 flex items-center " +
 					(selectedCategories().includes("app")
 						? "bg-surface-800 text-background border-surface-800 pl-7 pr-3"
-						: "bg-background text-surface-600 border-surface-200 px-5 hover:border-surface-400")
+						: "bg-background text-surface-600 border-surface-200 px-3 hover:border-surface-400")
 				}
 			>
 				<Show when={selectedCategories().includes("app")}>
@@ -255,7 +255,7 @@ const Tags = () => {
 					"gap-2 relative py-1.5 rounded-full cursor-pointer border border-solid text-sm capitalize hover:opacity-90 transition-all duration-100 flex items-center " +
 					(selectedCategories().includes("library")
 						? "bg-surface-800 text-background border-surface-800 pl-7 pr-3"
-						: "bg-background text-surface-600 border-surface-200 px-5 hover:border-surface-400")
+						: "bg-background text-surface-600 border-surface-200 px-3 hover:border-surface-400")
 				}
 			>
 				<Show when={selectedCategories().includes("library")}>
@@ -269,7 +269,7 @@ const Tags = () => {
 					"gap-2 relative py-1.5 rounded-full cursor-pointer border border-solid text-sm capitalize hover:opacity-90 transition-all duration-100 flex items-center " +
 					(selectedCategories().includes("messageLintRule")
 						? "bg-surface-800 text-background border-surface-800 pl-7 pr-3"
-						: "bg-background text-surface-600 border-surface-200 px-5 hover:border-surface-400")
+						: "bg-background text-surface-600 border-surface-200 px-3 hover:border-surface-400")
 				}
 			>
 				<Show when={selectedCategories().includes("messageLintRule")}>
@@ -283,7 +283,7 @@ const Tags = () => {
 					"gap-2 relative py-1.5 rounded-full cursor-pointer border border-solid text-sm capitalize hover:opacity-90 transition-all duration-100 flex items-center " +
 					(selectedCategories().includes("plugin")
 						? "bg-surface-800 text-background border-surface-800 pl-7 pr-3"
-						: "bg-background text-surface-600 border-surface-200 px-5 hover:border-surface-400")
+						: "bg-background text-surface-600 border-surface-200 px-3 hover:border-surface-400")
 				}
 			>
 				<Show when={selectedCategories().includes("plugin")}>
