@@ -32,15 +32,3 @@ export class PluginLoadMessagesError extends Error {
 		this.name = "PluginLoadMessagesError"
 	}
 }
-
-/**
- * Error when no package provides the API to handle messages.
- */
-export class NoPluginProvidesLoadOrSaveMessagesError extends Error {
-	constructor() {
-		super(
-			"It seems you did not install any plugin that handles messages. Please add one to make inlang work. See https://inlang.com/documentation/plugins/registry.",
-		) // TODO: check if link is correct
-		this.name = "NoPluginProvidesLoadOrSaveMessagesError"
-	}
-}

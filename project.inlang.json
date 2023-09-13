@@ -1,4 +1,5 @@
 {
+	"$schema": "https://inlang.com/schema/project-config",
 	"sourceLanguageTag": "en",
 	"languageTags": ["de", "en", "zh"],
 	"modules": [

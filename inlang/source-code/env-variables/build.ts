@@ -7,7 +7,8 @@ import { config } from "dotenv"
 const isDevelopment = process.env.DEV ? true : false
 
 // load env files from the root of the project (if exist)
-config({ path: rootEnvFilePath, override: true })
+// but never override env variables loaded via process.env!
+config({ path: rootEnvFilePath, override: false })
 
 // Not validating for production under any circumstances, because
 // this module can't know if a dependency requires all production env variables.
