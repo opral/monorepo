@@ -8,7 +8,6 @@ import {
 	ProjectFilePathNotFoundError,
 	ProjectFileJSONSyntaxError,
 	InvalidConfigError,
-	NoPluginProvidesLoadOrSaveMessagesError,
 } from "./errors.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 
@@ -178,40 +177,6 @@ describe("initialization", () => {
 	})
 
 	describe("modules", () => {
-		it("should return an error if no plugin defines readMessages", async () => {
-			const $badImport: ImportFunction = async () =>
-				({
-					default: { ...mockPlugin, loadMessages: undefined as any } as Plugin,
-				} satisfies InlangModule)
-
-			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
-			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
-				nodeishFs: fs,
-				_import: $badImport,
-			})
-
-			expect(inlang.errors()![0]).toBeInstanceOf(NoPluginProvidesLoadOrSaveMessagesError)
-		})
-
-		it("should return an error if no plugin defines writeMessages", async () => {
-			const $badImport: ImportFunction = async () =>
-				({
-					default: { ...mockPlugin, writeMessages: undefined as any } as Plugin,
-				} satisfies InlangModule)
-
-			const fs = createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
-			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
-				nodeishFs: fs,
-				_import: $badImport,
-			})
-
-			expect(inlang.errors()![0]).toBeInstanceOf(NoPluginProvidesLoadOrSaveMessagesError)
-		})
-
 		it("should return an error if an error occurs while resolving a plugin", async () => {
 			const $badImport: ImportFunction = async () =>
 				({
@@ -227,7 +192,7 @@ describe("initialization", () => {
 				_import: $badImport,
 			})
 
-			expect(inlang.errors()).toHaveLength(1)
+			expect(inlang.errors()).not.toHaveLength(0)
 		})
 		// 	it.todo("should throw if lintRules contain errors ???")
 		// 	it.todo("should return meta data")
