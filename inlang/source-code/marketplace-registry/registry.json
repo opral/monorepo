@@ -2,7 +2,7 @@
 	"https://raw.githubusercontent.com/floriandwt/inlang-marketplace-manifests/main/cli-manifest.json",
 	"https://raw.githubusercontent.com/floriandwt/inlang-marketplace-manifests/main/editor-manifest.json",
 	"https://raw.githubusercontent.com/floriandwt/inlang-marketplace-manifests/main/ide-manifest.json",
-	"https://cdn.jsdelivr.net/gh/floriandwt/inlang-marketplace-manifests@main/json-manifest.json",
+	"https://raw.githubusercontent.com/floriandwt/inlang-marketplace-manifests/main/json-manifest.json",
 	"https://raw.githubusercontent.com/floriandwt/inlang-marketplace-manifests/main/i18next-manifest.json",
 	"https://raw.githubusercontent.com/floriandwt/inlang-marketplace-manifests/main/empty-pattern-manifest.json",
 	"https://raw.githubusercontent.com/floriandwt/inlang-marketplace-manifests/main/identical-pattern-manifest.json",
