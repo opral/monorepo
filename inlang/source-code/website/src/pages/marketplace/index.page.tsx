@@ -47,7 +47,7 @@ export function Page() {
 				name="description"
 				content="Find apps, plugins and lint rules for inlang's ecosystem."
 			/>
-			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
+			<Meta name="og:image" content="/images/inlang-marketplace-image.jpg" />
 			<Layout>
 				<div class="py-16 md:py-20 min-h-screen relative">
 					<div class="grid xl:grid-cols-3 pb-8 gap-8">
