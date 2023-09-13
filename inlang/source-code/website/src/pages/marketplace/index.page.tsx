@@ -98,14 +98,23 @@ const Gallery = () => {
 								class="relative no-underline h-72 flex flex-col gap-2 group"
 							>
 								<div
-									class={`w-full h-full bg-surface-50 rounded-lg relative bg-[url('${item.displayImage}')] bg-cover bg-center border border-surface-100`}
+									style={{ "--image-url": `url(${item.displayImage})` }}
+									class={`w-full h-full flex items-center justify-center bg-surface-50 rounded-lg relative ${
+										item.displayImage && `bg-[image:var(--image-url)]`
+									} bg-cover bg-center border border-surface-100`}
 								>
 									<Chip
 										text={typeOfIdToTitle(item.id).replace("Message", "")}
 										color={colorForTypeOf(item.id)}
 										customClasses="absolute right-4 top-4 z-5 backdrop-filter backdrop-blur-lg text-xs"
 									/>
-									<Show when={item.icon}>
+									<Show when={!item.displayImage}>
+										<img
+											class="w-14 h-14 rounded-md m-0 shadow-lg object-cover object-center"
+											src={item.icon}
+										/>
+									</Show>
+									<Show when={item.icon && item.displayImage}>
 										<img
 											class="w-8 h-8 rounded-md m-0 shadow-lg object-cover object-center absolute left-4 bottom-4 opacity-0 group-hover:opacity-100 transition-opacity"
 											src={item.icon}
