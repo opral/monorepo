@@ -10,7 +10,7 @@ import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"
 import { Message } from "./Message.jsx"
-import { Icon } from "#src/components/Icon.jsx"
+import { Errors } from "./components/Errors.jsx"
 
 export function Page() {
 	return (
@@ -78,23 +78,11 @@ function TheActualPage() {
 					<RepositoryDoesNotExistOrNotAuthorizedCard code={404} />
 				</Match>
 				<Match when={lixErrors().length > 0}>
-					<p class="text-danger pb-2">An error occurred while cloning the repository</p>
-					<ul class="text-danger">
-						{lixErrors().length !== 0 && (
-							<For each={lixErrors()}>
-								{(error) => {
-									return (
-										<li class="pt-2">
-											<span class="font-semibold">{error.name}: </span>
-											<br />
-											{error.message} <br />
-											{error.stack && <p>{error.stack}</p>}
-										</li>
-									)
-								}}
-							</For>
-						)}
-					</ul>
+					<Errors
+						errors={lixErrors()}
+						message="An error occurred while cloning the repository:"
+						messagePlural="errors occurred while cloning the repository:"
+					/>
 				</Match>
 				<Match when={inlang() === undefined}>
 					<div class="flex flex-col grow justify-center items-center min-w-full gap-2">
@@ -131,56 +119,11 @@ function TheActualPage() {
 					</div>
 				</Match>
 				<Match when={inlang()?.errors().length !== 0 && inlang()}>
-					<div class="w-full h-full flex flex-col items-center justify-center gap-16">
-						<div class="pt-24">
-							<p class="pb-2 text-lg font-medium">
-								An error occurred while initializing the project file:
-							</p>
-							<ul>
-								{inlang()?.errors().length !== 0 && (
-									<For each={inlang()?.errors()}>
-										{(error: any) => {
-											return (
-												<li class="pt-2 md:w-[600px]">
-													<div class="bg-danger text-background p-4 rounded-md flex items-center gap-4 mb-8">
-														<Icon name="danger" class="w-7 h-7 flex-shrink-0" />
-														<div>
-															<span class="font-semibold">{error.name}: </span>
-															<br />
-															{error?.message}
-														</div>
-													</div>
-													{error.cause && error.cause.message && (
-														<>
-															<p class="text-surface-500 text-sm mb-1">Error cause</p>
-															<div class="font-mono p-4 bg-surface-800 text-background rounded-md text-sm mb-8">
-																<p>
-																	<span class="font-semibold text-hover-danger">{"> "}</span>
-																	{error.cause.message}
-																</p>
-															</div>
-														</>
-													)}
-													{error?.stack && (
-														<>
-															<p class="text-surface-500 text-sm mb-1">Stack trace</p>
-															<div class="font-mono p-4 bg-surface-800 text-background rounded-md text-sm mb-8 break-words">
-																<p>
-																	<span class="font-semibold text-hover-danger">{"> "}</span>
-																	{error?.stack}
-																</p>
-															</div>
-														</>
-													)}
-													<br />
-												</li>
-											)
-										}}
-									</For>
-								)}
-							</ul>
-						</div>
-					</div>
+					<Errors
+						errors={inlang()?.errors() || []}
+						message="An error occurred while initializing the project file:"
+						messagePlural="errors occurred while initializing the project file:"
+					/>
 				</Match>
 				<Match when={!doesInlangConfigExist()}>
 					<NoInlangConfigFoundCard />
