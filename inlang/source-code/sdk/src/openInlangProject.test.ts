@@ -695,5 +695,102 @@ describe("functionality", () => {
 			// TODO: test with real lint rules
 			inlang.query.messageLintReports.getAll.subscribe((r) => expect(r).toEqual([]))
 		})
+		it("should update the message lint reports when a message is updated", async () => {
+			const config: ProjectConfig = {
+				sourceLanguageTag: "en",
+				languageTags: ["en", "de"],
+				modules: ["lintRule.js", "plugin.js"],
+				settings: {},
+			}
+			const fs = createNodeishMemoryFs()
+			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
+			const inlang = await openInlangProject({
+				projectFilePath: "./project.inlang.json",
+				nodeishFs: fs,
+				_import: async (name) => {
+					return name === "plugin.js"
+						? {
+								default: mockPlugin,
+						  }
+						: {
+								default: mockMessageLintRule,
+						  }
+				},
+			})
+
+			// wait for the lint reports to be updated
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			// expect the lint report to be there
+			expect(inlang.query.messageLintReports.getAll()).toHaveLength(2)
+
+			// upsert the missing variant for a
+			inlang.query.messages.upsert({
+				where: { id: "a" },
+				data: {
+					id: "a",
+					selectors: [],
+					variants: [
+						{
+							languageTag: "en",
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "this is a test",
+								},
+							],
+						},
+						{
+							languageTag: "de",
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "das ist ein test",
+								},
+							],
+						},
+					],
+				},
+			})
+
+			// upsert the missing variant for b
+			inlang.query.messages.upsert({
+				where: { id: "b" },
+				data: {
+					id: "b",
+					selectors: [],
+					variants: [
+						{
+							languageTag: "en",
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "this is a test",
+								},
+							],
+						},
+						{
+							languageTag: "de",
+							match: {},
+							pattern: [
+								{
+									type: "Text",
+									value: "das ist ein test",
+								},
+							],
+						},
+					],
+				},
+			})
+
+			// wait for the lint reports to be updated
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			// expect the lint report to be gone
+			expect(inlang.query.messageLintReports.getAll()).toHaveLength(0)
+		})
 	})
 })
