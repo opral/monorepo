@@ -28,7 +28,6 @@ describe("$import", async () => {
 
 	const _import = createImport({
 		readFile: fs.readFile,
-		fetch,
 	})
 
 	it("should import a module from a local path", async () => {
