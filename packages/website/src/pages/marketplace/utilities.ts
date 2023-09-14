@@ -5,7 +5,9 @@ import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
  */
 export const typeOfIdToTitle = (id: MarketplaceManifest["id"]) => {
 	const type = id.slice(0, id.indexOf("."))
-	return type.charAt(0).toUpperCase() + type.slice(1)
+	return type.includes("message")
+		? "Message Lint Rule"
+		: type.charAt(0).toUpperCase() + type.slice(1)
 }
 
 /**
