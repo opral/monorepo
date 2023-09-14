@@ -32,8 +32,9 @@ export async function convert(markdown: string): Promise<string> {
 			pre: "p-4 bg-surface-100 rounded text-sm font-mono text-surface-700 my-4 overflow-x-auto",
 			ul: "list-disc list-inside",
 			ol: "list-decimal list-inside",
+			li: "my-2",
 			table: "table-auto w-full my-6",
-			th: "bg-surface-100 p-2 rounded text-sm text-surface-700 font-medium",
+			th: "p-2 rounded text-sm text-surface-700 font-medium",
 			td: "p-2 leading-7",
 			hr: "my-4 border-b border-surface-200",
 		})
