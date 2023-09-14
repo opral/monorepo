@@ -5,6 +5,6 @@ import { migrate } from "./migrate.js"
 export const project = new Command()
 	.command("project")
 	.description("Commands for managing your inlang project")
-	.argument("<command>")
+	.argument("[command]")
 	.addCommand(init)
 	.addCommand(migrate)

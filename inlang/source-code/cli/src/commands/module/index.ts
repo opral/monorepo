@@ -4,7 +4,7 @@ import { init } from "./init/command.js"
 
 export const module = new Command()
 	.command("module")
-	.description("init and build inlang modules")
-	.argument("<command>")
+	.description("Commands for build inlang modules.")
+	.argument("[command]")
 	.addCommand(init)
 	.addCommand(build)
