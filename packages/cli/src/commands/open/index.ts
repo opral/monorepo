@@ -4,5 +4,5 @@ import { editor } from "./editor.js"
 export const open = new Command()
 	.command("open")
 	.description("Commands for open parts of the inlang ecosystem.")
-	.argument("<command>")
+	.argument("[command]")
 	.addCommand(editor)
