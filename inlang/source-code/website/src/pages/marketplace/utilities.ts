@@ -6,7 +6,7 @@ import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 export const typeOfIdToTitle = (id: MarketplaceManifest["id"]) => {
 	const type = id.slice(0, id.indexOf("."))
 	// replace camelCase with spaces
-	const removeCamelcase = type.replace(/([A-Z])/g, " $1").trim()
+	const removeCamelcase = type.replace(/([a-z])([A-Z])/g, "$1 $2").trim()
 	// capitalize first letter
 	return removeCamelcase.charAt(0).toUpperCase() + removeCamelcase.slice(1)
 }
@@ -43,4 +43,11 @@ export const convertLinkToGithub = (link: string) => {
 	} else {
 		return "https://github.com/inlang/monorepo"
 	}
+}
+
+/**
+ * Scrolls to the top of the content.
+ */
+export const scrollToTop = () => {
+	window.scrollTo({ top: 170, behavior: "smooth" })
 }

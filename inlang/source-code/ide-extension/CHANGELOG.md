@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.2.0
+
+### Minor Changes
+
+- 0f925704: fix env
+
 ## 1.1.0
 
 ### Minor Changes
