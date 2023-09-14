@@ -99,7 +99,7 @@ const Gallery = () => {
 									class="w-full h-full flex items-center justify-center bg-surface-50 group-hover:bg-surface-100 transition-colors rounded-lg relative bg-cover bg-center border border-surface-2"
 								>
 									<Chip
-										text={typeOfIdToTitle(item.id).replace("Message", "")}
+										text={typeOfIdToTitle(item.id)}
 										color={colorForTypeOf(item.id)}
 										customClasses="absolute right-4 top-4 z-5 backdrop-filter backdrop-blur-sm text-xs"
 									/>
