@@ -1,10 +1,4 @@
----
-title: Develop a lint rule
-href: /documentation/develop-lint-rule
-description: Create an own lint rule for inlang projects.
----
-
-# {% $frontmatter.title %}
+# Develop a lint rule
 
 This documentation provides step-by-step instructions on developing a lint rule for the inlang ecosystem. Lint rules are used to check for specific patterns or issues in translated messages to ensure high-quality translations. Follow the guide below to create your own custom lint rule.
 

@@ -1,10 +1,4 @@
----
-title: Develop an app
-href: /documentation/develop-app
-description: How to develop an inlang-based app.
----
-
-# {% $frontmatter.title %}
+# Develop an app
 
 There are many ways users interact with inlang. This documentation gives you information on how to develop your own inlang-based app.
 

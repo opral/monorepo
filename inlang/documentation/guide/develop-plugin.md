@@ -1,10 +1,4 @@
----
-title: Develop a plugin
-href: /documentation/develop-plugin
-description: Learn how easy it is to write your own plugin for inlang projects.
----
-
-# {% $frontmatter.title %}
+# Develop a plugin
 
 Plugins are a powerful way to extend the functionality of inlang applications. This documentation provides you with the information you need to develop your own plugin.
 

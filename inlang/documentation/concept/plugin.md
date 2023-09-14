@@ -1,10 +1,4 @@
----
-title: Plugin
-href: /documentation/plugin
-description: An inlang plugin defines and extend how an inlang app should behave.
----
-
-# {% $frontmatter.title %}
+# Plugin
 
 {% $frontmatter.description %}
 

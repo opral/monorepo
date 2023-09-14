@@ -102,6 +102,8 @@ const processedTableOfContents: ProcessedTableOfContents = {}
 await generateIndexAndTableOfContents()
 
 async function generateIndexAndTableOfContents() {
+	const titles: Record<string, string[]> = {}
+
 	for (const [category, documents] of Object.entries(tableOfContents)) {
 		if (category === "Startpage") {
 			index["/documentation"] = await convert(
@@ -117,17 +119,26 @@ async function generateIndexAndTableOfContents() {
 			const raw = await fs.readFile(new URL(`documentation/${document}`, repositoryRoot), {
 				encoding: "utf-8",
 			})
+
+			/* Searches for the first title in the markdown file like that and push it like index does it: raw.match(/(?<=#)(.*)(?=\n)/)?.[0] ?? raw.match(/(?<=#)(.*)/)?.[0] ?? "##" ?? "###",
+			 */
+			const title =
+				raw.match(/(?<=#)(.*)(?=\n)/)?.[0] ?? raw.match(/(?<=#)(.*)/)?.[0] ?? "##" ?? "###"
+			if (titles[category] === undefined) {
+				titles[category] = []
+			}
+			titles[category].push(title)
+
 			const markdown = await convert(raw)
 
 			index[`/documentation/${slug.replace("-", "/")}`] = markdown
 		}
 
-		// same as documents but for every document there is a slug and a title, the title is the first title in the document
-		processedTableOfContents[category] = documents.map((document) => {
+		processedTableOfContents[category] = documents.map((document: string) => {
 			const slug = document.replace(/\.md$/, "").replace("./", "").replace("/", "-").toLowerCase()
 			return {
 				slug,
-				title: index[`/documentation/${slug.replace("-", "/")}`],
+				title: titles[category].shift()!,
 			}
 		})
 	}

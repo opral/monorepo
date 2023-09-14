@@ -229,7 +229,7 @@ function NavbarCommon(props: {
 											// href={getLocale() + document.frontmatter.href}
 										>
 											{/* Remove everything and just write the string between the .md and the last - */}
-											{props.markdown}
+											{document.title}
 										</a>
 										{/* <Show
 											when={props.h2Headlines.length > 0 && isSelected(document.frontmatter.href)}

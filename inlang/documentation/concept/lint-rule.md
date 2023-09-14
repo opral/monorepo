@@ -1,10 +1,4 @@
----
-title: Lint rule
-href: /documentation/lint-rule
-description: Lint rules validate messages and other types of content in an inlang project.
----
-
-# {% $frontmatter.title %}
+# Lint rule
 
 {% $frontmatter.description %}
 
