@@ -10,19 +10,13 @@ import addClasses from "rehype-add-classes"
 import { rehypeAccessibleEmojis } from "rehype-accessible-emojis"
 import { visit } from "unist-util-visit"
 
-const testMarkdown = `
-# Cat videos
-
-::youtube-video[Video of a cat in a box]{#01ab2cd3efg}
-`
-
 export async function convert(markdown: string): Promise<string> {
 	const content = await unified()
 		.use(remarkParse)
 		.use(remarkGfm)
 		.use(remarkRehype)
 		.use(remarkDirective)
-		.use(inlangRemarkDirectives)
+		// .use(inlangRemarkDirectives)
 		.use(rehypeSlug)
 		.use(addClasses, {
 			"h1,h2,h3,h4,h5,h6": "font-semibold leading-relaxed my-5 cursor-pointer",
@@ -46,40 +40,41 @@ export async function convert(markdown: string): Promise<string> {
 		.use(rehypeAutolinkHeadings)
 		.use(rehypeAccessibleEmojis)
 		.use(rehypeStringify)
-		.process(testMarkdown)
+		.process(markdown)
 
 	return String(content)
 }
 
 /** @type {import('unified').Plugin<[], import('mdast').Root>} */
-function inlangRemarkDirectives() {
-	return (tree, file) => {
-		visit(tree, (node) => {
-			if (
-				node.type === "textDirective" ||
-				node.type === "leafDirective" ||
-				node.type === "containerDirective"
-			) {
-				if (node.name !== "youtube") return
+// function inlangRemarkDirectives() {
+// 	return (tree, file) => {
+// 		visit(tree, (node) => {
+// 			if (
+// 				node.type === "textDirective" ||
+// 				node.type === "leafDirective" ||
+// 				node.type === "containerDirective"
+// 			) {
+// 				if (node.name !== "test") return
 
-				const data = node.data || (node.data = {})
-				const attributes = node.attributes || {}
-				const id = attributes.id
+// 				const data = node.data || (node.data = {})
+// 				const attributes = node.attributes || {}
+// 				const id = attributes.id
 
-				if (node.type === "textDirective")
-					file.fail("Text directives for `youtube` not supported", node)
-				if (!id) file.fail("Missing video id", node)
+// 				if (node.type === "textDirective")
+// 					file.fail("Text directives for `youtube` not supported", node)
+// 				if (!id) file.fail("Missing video id", node)
 
-				data.hName = "iframe"
-				data.hProperties = {
-					src: "https://www.youtube.com/embed/" + id,
-					width: 200,
-					height: 200,
-					frameBorder: 0,
-					allow: "picture-in-picture",
-					allowFullScreen: true,
-				}
-			}
-		})
-	}
-}
+// 				data.hName = "iframe"
+// 				data.hProperties = {
+// 					src: "https://www.youtube.com/embed/" + id,
+// 					width: 200,
+// 					style: "background: red;",
+// 					height: 200,
+// 					frameBorder: 0,
+// 					allow: "picture-in-picture",
+// 					allowFullScreen: true,
+// 				}
+// 			}
+// 		})
+// 	}
+// }

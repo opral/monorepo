@@ -144,7 +144,7 @@ export const registry: MarketplaceManifest[] = [
 		id: "messageLintRule.inlang.messageWithoutSource",
 		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/messageWithoutSource/assets/icon.png",
 		coverImage:
-			"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/without_source-marketplace-cover.jpg",
+			"https://cdn.jsdelivr.net/gh/inlang/monorepo@marketplace-enhancement/inlang/assets/marketplace/without_source-marketplace-cover.jpg",
 		displayName: {
 			en: "Message without source",
 		},
