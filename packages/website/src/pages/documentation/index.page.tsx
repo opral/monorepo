@@ -23,15 +23,19 @@ export function Page(props: PageProps) {
 	const [editLink, setEditLink] = createSignal<string | undefined>("")
 
 	const title = () => {
-		for (const section of Object.keys(props.processedTableOfContents)) {
-			for (const document of props.processedTableOfContents[section]) {
-				if (
-					`/documentation/${document.slug.replace("-", "/")}` ===
-					currentPageContext.urlParsed.pathname
-				) {
-					return document.title
+		if (props.processedTableOfContents) {
+			for (const section of Object.keys(props.processedTableOfContents)) {
+				for (const document of props.processedTableOfContents[section]) {
+					if (
+						`/documentation/${document.slug.replace("-", "/")}` ===
+						currentPageContext.urlParsed.pathname
+					) {
+						return document.title
+					}
 				}
 			}
+		} else {
+			return "inlang Documentation"
 		}
 	}
 
@@ -82,7 +86,7 @@ export function Page(props: PageProps) {
 	return (
 		<>
 			{/* frontmatter is undefined on first client side nav  */}
-			<Title>{title()} - inlang Documentation</Title>
+			<Title>{title()}</Title>
 			<Meta name="description" content={props.markdown?.frontmatter?.description} />
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<RootLayout>
