@@ -235,7 +235,8 @@ export const Gitfloat = () => {
 					offset={{ x: 0, y: 60 }}
 					isVisible={
 						(tourStep() === "github-login" || tourStep() === "fork-repository") &&
-						inlang() !== undefined
+						inlang() !== undefined &&
+						gitState() !== "loading"
 					}
 				>
 					<div class="w-full flex justify-start items-center rounded-lg bg-inverted-surface shadow-xl ">
