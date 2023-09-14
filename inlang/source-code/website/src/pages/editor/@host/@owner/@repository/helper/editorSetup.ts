@@ -12,7 +12,7 @@ import type { Variant, VariableReference } from "@inlang/sdk"
 export const getEditorConfig = (
 	ref: HTMLDivElement,
 	variant: Variant | undefined,
-	variableReferences: VariableReference[],
+	variableReferences: () => VariableReference[],
 ) => {
 	return {
 		element: ref!,
@@ -50,7 +50,7 @@ export const getEditorConfig = (
 				//@ts-ignore
 				shouldShow: ({ editor }) => {
 					// show the floating within any paragraph
-					if (variableReferences.length > 0) {
+					if (variableReferences().length > 0) {
 						return editor.isActive("paragraph")
 					} else {
 						return false
