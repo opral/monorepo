@@ -334,7 +334,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			if (
 				localStorage?.user === undefined ||
 				routeParams().owner === undefined ||
-				routeParams().repository === undefined
+				routeParams().repository === undefined ||
+				repo() === undefined
 			) {
 				return false
 			}
@@ -348,7 +349,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [currentBranch] = createResource(
 		() => {
-			if (lixErrors().length > 0) {
+			if (lixErrors().length > 0 ||
+				repo() === undefined
+			) {
 				return false
 			}
 			return true
