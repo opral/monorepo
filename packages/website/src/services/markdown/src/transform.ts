@@ -1,7 +1,7 @@
 import { remark } from "remark"
-import remarkHTML from "remark-html"
+import html from "remark-html"
 
-export async function convert(markdownContent: string): Promise<string> {
-	const content = await remark().use(remarkHTML).process(markdownContent)
+export async function convert(markdown: string): Promise<string> {
+	const content = await remark().use(html).process(markdown)
 	return content.toString()
 }

@@ -15,14 +15,12 @@ import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
  * The page props are undefined if an error occurred during parsing of the markdown.
  */
 export type PageProps = {
-	markdown: any
+	markdown: Awaited<ReturnType<any>>
 	manifest: MarketplaceManifest
 }
 
 export function Page(props: PageProps) {
 	const [readmore, setReadmore] = createSignal<boolean>(false)
-
-	console.log(props.markdown)
 
 	// mapping translatable types
 	const displayName = () =>
@@ -47,7 +45,7 @@ export function Page(props: PageProps) {
 					<div class="md:py-28 py-16">
 						<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-40 md:gap-16 gap-6">
 							<Show
-								when={props.markdown?.renderableTree}
+								when={props.markdown}
 								fallback={<p class="text-danger">{props.markdown?.error}</p>}
 							>
 								<div class="col-span-1 md:col-span-3 md:pb-16 pb-12 border-b border-surface-2">
@@ -174,10 +172,11 @@ export function Page(props: PageProps) {
 										</div>
 									</div>
 								</div>
-								<div class="w-full col-span-1 md:col-span-3 rounded-lg">
-									{/* <Markdown renderableTree={props.markdown.renderableTree!} /> */}
-									{props.markdown}
-								</div>
+								<div
+									class="w-full col-span-1 md:col-span-3 rounded-lg"
+									// eslint-disable-next-line solid/no-innerhtml
+									innerHTML={props.markdown}
+								/>
 							</Show>
 						</div>
 						<GetHelp text="Do you have questions?" />
