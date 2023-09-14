@@ -95,10 +95,8 @@ const Gallery = () => {
 								class="relative no-underline h-72 flex flex-col gap-4 group"
 							>
 								<div
-									style={{ "--image-url": `url(${item.coverImage})` }}
-									class={`w-full h-full flex items-center justify-center bg-surface-50 group-hover:bg-surface-100 transition-colors rounded-lg relative ${
-										item.coverImage && `bg-[image:var(--image-url)]`
-									} bg-cover bg-center border border-surface-2`}
+									style={{ "background-image": `url(${item.coverImage})` }}
+									class="w-full h-full flex items-center justify-center bg-surface-50 group-hover:bg-surface-100 transition-colors rounded-lg relative bg-cover bg-center border border-surface-2"
 								>
 									<Chip
 										text={typeOfIdToTitle(item.id).replace("Message", "")}
