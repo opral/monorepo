@@ -1,9 +1,6 @@
 {
-	"Overview": [
-		"./overview/introduction.md",
-		"./overview/architecture.md",
-		"./overview/manually-create-project.md"
-	],
+	"Startpage": "./overview/introduction.md",
+	"Overview": ["./overview/architecture.md", "./overview/manually-create-project.md"],
 	"Guide": [
 		"./guide/develop-app.md",
 		"./guide/develop-plugin.md",

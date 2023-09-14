@@ -1,9 +1,7 @@
 import { For, Show, createEffect, createSignal, onMount } from "solid-js"
 import { Layout as RootLayout } from "#src/pages/Layout.jsx"
-import { Markdown, parseMarkdown } from "#src/services/markdown/index.js"
 import type { ProcessedTableOfContents } from "./index.page.server.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
-import { Callout } from "#src/services/markdown/src/tags/Callout.jsx"
 import type SlDetails from "@shoelace-style/shoelace/dist/components/details/details.js"
 import { Meta, Title } from "@solidjs/meta"
 import { Feedback } from "./Feedback.jsx"
@@ -17,56 +15,56 @@ import tableOfContents from "../../../../../documentation/tableOfContents.json"
  */
 export type PageProps = {
 	processedTableOfContents: ProcessedTableOfContents
-	markdown: Awaited<ReturnType<typeof parseMarkdown>>
+	markdown: Awaited<ReturnType<any>>
 }
 
 export function Page(props: PageProps) {
 	let mobileDetailMenu: SlDetails | undefined
 	const [editLink, setEditLink] = createSignal<string | undefined>("")
 
-	createEffect(() => {
-		if (props.markdown && props.markdown.frontmatter) {
-			const markdownHref = props.markdown.frontmatter.href
+	// createEffect(() => {
+	// 	if (props.markdown && props.markdown.frontmatter) {
+	// 		const markdownHref = props.markdown.frontmatter.href
 
-			const files: Record<string, string[]> = {}
-			for (const [category, documentsArray] of Object.entries(tableOfContents)) {
-				const rawPaths = documentsArray.map((document) => document)
-				files[category] = rawPaths
-			}
+	// 		const files: Record<string, string[]> = {}
+	// 		for (const [category, documentsArray] of Object.entries(tableOfContents)) {
+	// 			const rawPaths = documentsArray.map((document) => document)
+	// 			files[category] = rawPaths
+	// 		}
 
-			for (const section of Object.keys(props.processedTableOfContents)) {
-				const documents = props.processedTableOfContents[section]
+	// 		for (const section of Object.keys(props.processedTableOfContents)) {
+	// 			const documents = props.processedTableOfContents[section]
 
-				if (documents) {
-					for (const document of documents) {
-						if (document.frontmatter && document.frontmatter.href === markdownHref) {
-							const index = documents.indexOf(document)
-							const fileSource = files[section]?.[index] || undefined
+	// 			if (documents) {
+	// 				for (const document of documents) {
+	// 					if (document.frontmatter && document.frontmatter.href === markdownHref) {
+	// 						const index = documents.indexOf(document)
+	// 						const fileSource = files[section]?.[index] || undefined
 
-							const gitHubLink =
-								"https://github.com/inlang/monorepo/edit/main/inlang/documentation" +
-								"/" +
-								fileSource
+	// 						const gitHubLink =
+	// 							"https://github.com/inlang/monorepo/edit/main/inlang/documentation" +
+	// 							"/" +
+	// 							fileSource
 
-							setEditLink(gitHubLink)
-						}
-					}
-				}
-			}
-		}
-	})
+	// 						setEditLink(gitHubLink)
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// })
 
-	const h2Headlines = () => {
-		const result: string[] = []
-		// @ts-expect-error - some type mismatch in the markdown parser
-		for (const child of props.markdown.renderableTree.children ?? []) {
-			// only render h2 as sub headlines
-			if (child.name === "Heading" && child.attributes.level === 2) {
-				result.push(child.children[0])
-			}
-		}
-		return result
-	}
+	// const h2Headlines = () => {
+	// 	const result: string[] = []
+	// 	// @ts-expect-error - some type mismatch in the markdown parser
+	// 	for (const child of props.markdown.renderableTree.children ?? []) {
+	// 		// only render h2 as sub headlines
+	// 		if (child.name === "Heading" && child.attributes.level === 2) {
+	// 			result.push(child.children[0])
+	// 		}
+	// 	}
+	// 	return result
+	// }
 
 	return (
 		<>
@@ -89,7 +87,10 @@ export function Page(props: PageProps) {
 							 */}
 							<div class="py-14 pr-8">
 								<Show when={props.processedTableOfContents}>
-									<NavbarCommon {...props} h2Headlines={h2Headlines()} />
+									<NavbarCommon
+										{...props}
+										// h2Headlines={h2Headlines()}
+									/>
 								</Show>
 							</div>
 						</nav>
@@ -106,7 +107,7 @@ export function Page(props: PageProps) {
 							<Show when={props.processedTableOfContents}>
 								<NavbarCommon
 									{...props}
-									h2Headlines={h2Headlines()}
+									// h2Headlines={h2Headlines()}
 									onLinkClick={() => {
 										mobileDetailMenu?.hide()
 									}}
@@ -114,10 +115,7 @@ export function Page(props: PageProps) {
 							</Show>
 						</sl-details>
 					</nav>
-					<Show
-						when={props.markdown?.renderableTree}
-						fallback={<p class="text-danger">{props.markdown?.error}</p>}
-					>
+					<Show when={props.markdown} fallback={<p class="text-danger">{props.markdown?.error}</p>}>
 						{/* 
             rendering on the website is broken due to relative paths and 
             the escaping of html. it is better to show the RFC's on the website
@@ -125,20 +123,20 @@ export function Page(props: PageProps) {
           */}
 						<div class="w-full justify-self-center mb-8 md:p-6 md:col-span-3">
 							<Show when={currentPageContext.urlParsed.pathname.includes("rfc")}>
-								<Callout variant="warning">
+								{/* <Callout variant="warning">
 									<p>
 										The rendering of RFCs on the website might be broken.{" "}
 										<a href="https://github.com/inlang/inlang/tree/main/rfcs" target="_blank">
 											Read the RFC on GitHub instead.
 										</a>
 									</p>
-								</Callout>
+								</Callout> */}
 							</Show>
 							<div
 								// change the col-span to 2 if a right side nav bar should be rendered
 								class="w-full justify-self-center md:col-span-3"
 							>
-								<Markdown renderableTree={props.markdown.renderableTree!} />
+								<div innerHTML={props.markdown} />
 								<EditButton href={editLink()} />
 								<Feedback />
 							</div>
@@ -152,7 +150,7 @@ export function Page(props: PageProps) {
 
 function NavbarCommon(props: {
 	processedTableOfContents: PageProps["processedTableOfContents"]
-	h2Headlines: string[]
+	// h2Headlines: string[]
 	onLinkClick?: () => void
 }) {
 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
@@ -175,34 +173,34 @@ function NavbarCommon(props: {
 		setHighlightedAnchor(anchor)
 	}
 
-	onMount(() => {
-		if (
-			currentPageContext.urlParsed.hash &&
-			props.h2Headlines
-				.toString()
-				.toLowerCase()
-				.replaceAll(" ", "-")
-				// @ts-expect-error - fix after refactoring
-				.includes(currentPageContext.urlParsed.hash?.replace("#", ""))
-		) {
-			// @ts-expect-error - fix after refactoring
-			setHighlightedAnchor(currentPageContext.urlParsed.hash?.replace("#", ""))
+	// onMount(() => {
+	// 	if (
+	// 		currentPageContext.urlParsed.hash &&
+	// 		props.h2Headlines
+	// 			.toString()
+	// 			.toLowerCase()
+	// 			.replaceAll(" ", "-")
+	// 			// @ts-expect-error - fix after refactoring
+	// 			.includes(currentPageContext.urlParsed.hash?.replace("#", ""))
+	// 	) {
+	// 		// @ts-expect-error - fix after refactoring
+	// 		setHighlightedAnchor(currentPageContext.urlParsed.hash?.replace("#", ""))
 
-			const targetElement = document.getElementById(
-				// @ts-expect-error - fix after refactoring
-				currentPageContext.urlParsed.hash?.replace("#", ""),
-			)
+	// 		const targetElement = document.getElementById(
+	// 			// @ts-expect-error - fix after refactoring
+	// 			currentPageContext.urlParsed.hash?.replace("#", ""),
+	// 		)
 
-			checkLoadedImgs(() => {
-				const elementRect = targetElement!.getBoundingClientRect()
-				const offsetPosition = elementRect.top - 96 // The offset because of the fixed navbar
+	// 		checkLoadedImgs(() => {
+	// 			const elementRect = targetElement!.getBoundingClientRect()
+	// 			const offsetPosition = elementRect.top - 96 // The offset because of the fixed navbar
 
-				window.scrollBy({
-					top: offsetPosition,
-				})
-			})
-		}
-	})
+	// 			window.scrollBy({
+	// 				top: offsetPosition,
+	// 			})
+	// 		})
+	// 	}
+	// })
 
 	return (
 		<ul role="list" class="w-full space-y-3">
@@ -223,16 +221,17 @@ function NavbarCommon(props: {
 										<a
 											onClick={props.onLinkClick}
 											class={
-												(isSelected(document.frontmatter.href)
-													? "text-primary font-semibold "
-													: "text-info/80 hover:text-on-background ") +
+												// (isSelected(document.frontmatter.href)
+												// 	? "text-primary font-semibold "
+												// 	: "text-info/80 hover:text-on-background ") +
 												"tracking-wide text-sm block w-full font-normal"
 											}
-											href={getLocale() + document.frontmatter.href}
+											// href={getLocale() + document.frontmatter.href}
 										>
-											{document.frontmatter.title}
+											{/* Remove everything and just write the string between the .md and the last - */}
+											{props.markdown}
 										</a>
-										<Show
+										{/* <Show
 											when={props.h2Headlines.length > 0 && isSelected(document.frontmatter.href)}
 										>
 											<ul class="my-2">
@@ -265,7 +264,7 @@ function NavbarCommon(props: {
 													)}
 												</For>
 											</ul>
-										</Show>
+										</Show> */}
 									</li>
 								)}
 							</For>
