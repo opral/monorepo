@@ -226,7 +226,7 @@ function NavbarCommon(props: {
 												// 	: "text-info/80 hover:text-on-background ") +
 												"tracking-wide text-sm block w-full font-normal"
 											}
-											// href={getLocale() + document.frontmatter.href}
+											href={getLocale() + `/documentation/${document.slug.replace("-", "/")}`}
 										>
 											{/* Remove everything and just write the string between the .md and the last - */}
 											{document.title}
