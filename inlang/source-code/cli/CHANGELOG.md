@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 1.3.0
+
+### Minor Changes
+
+- 6ace5de0: update README of CLI to provide new commands `module` and `project`
+
 ## 1.2.0
 
 ### Minor Changes
