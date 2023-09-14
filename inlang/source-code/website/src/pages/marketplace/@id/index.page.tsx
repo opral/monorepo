@@ -172,11 +172,7 @@ export function Page(props: PageProps) {
 										</div>
 									</div>
 								</div>
-								<div
-									class="w-full col-span-1 md:col-span-3 rounded-lg"
-									// eslint-disable-next-line solid/no-innerhtml
-									innerHTML={props.markdown}
-								/>
+								<Markdown markdown={props.markdown} />
 							</Show>
 						</div>
 						<GetHelp text="Do you have questions?" />
@@ -184,5 +180,15 @@ export function Page(props: PageProps) {
 				</Show>
 			</Layout>
 		</>
+	)
+}
+
+function Markdown(props: { markdown: string }) {
+	return (
+		<div
+			class="w-full col-span-1 md:col-span-3 rounded-lg"
+			// eslint-disable-next-line solid/no-innerhtml
+			innerHTML={props.markdown}
+		/>
 	)
 }
