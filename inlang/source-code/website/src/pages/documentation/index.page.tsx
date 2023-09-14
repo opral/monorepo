@@ -22,6 +22,19 @@ export function Page(props: PageProps) {
 	let mobileDetailMenu: SlDetails | undefined
 	const [editLink, setEditLink] = createSignal<string | undefined>("")
 
+	const title = () => {
+		for (const section of Object.keys(props.processedTableOfContents)) {
+			for (const document of props.processedTableOfContents[section]) {
+				if (
+					`/documentation/${document.slug.replace("-", "/")}` ===
+					currentPageContext.urlParsed.pathname
+				) {
+					return document.title
+				}
+			}
+		}
+	}
+
 	// createEffect(() => {
 	// 	if (props.markdown && props.markdown.frontmatter) {
 	// 		const markdownHref = props.markdown.frontmatter.href
@@ -69,7 +82,7 @@ export function Page(props: PageProps) {
 	return (
 		<>
 			{/* frontmatter is undefined on first client side nav  */}
-			<Title>{props.markdown?.frontmatter?.title}</Title>
+			<Title>{title()} - inlang Documentation</Title>
 			<Meta name="description" content={props.markdown?.frontmatter?.description} />
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<RootLayout>
@@ -161,8 +174,11 @@ function NavbarCommon(props: {
 		return language !== defaultLanguage ? "/" + language : ""
 	}
 
-	const isSelected = (href: string) => {
-		if (href === currentPageContext.urlParsed.pathname.replace(getLocale(), "")) {
+	const isSelected = (slug: string) => {
+		if (
+			`/documentation/${slug.replace("-", "/")}` ===
+			currentPageContext.urlParsed.pathname.replace(getLocale(), "")
+		) {
 			return true
 		} else {
 			return false
@@ -221,14 +237,13 @@ function NavbarCommon(props: {
 										<a
 											onClick={props.onLinkClick}
 											class={
-												// (isSelected(document.frontmatter.href)
-												// 	? "text-primary font-semibold "
-												// 	: "text-info/80 hover:text-on-background ") +
+												(isSelected(document.slug)
+													? "text-primary font-semibold "
+													: "text-info/80 hover:text-on-background ") +
 												"tracking-wide text-sm block w-full font-normal"
 											}
 											href={getLocale() + `/documentation/${document.slug.replace("-", "/")}`}
 										>
-											{/* Remove everything and just write the string between the .md and the last - */}
 											{document.title}
 										</a>
 										{/* <Show

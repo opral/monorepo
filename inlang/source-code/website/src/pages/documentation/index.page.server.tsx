@@ -93,7 +93,7 @@ import type { PageProps } from "./index.page.jsx"
 
 const repositoryRoot = new URL("../../../../../", import.meta.url)
 
-export type ProcessedTableOfContents = Record<string, Omit<(typeof index)[keyof typeof index], "html">[]>
+export type ProcessedTableOfContents = Record<string, { slug: string; title: string }[]>
 
 const index: Record<string, Awaited<ReturnType<typeof convert>>> = {}
 
