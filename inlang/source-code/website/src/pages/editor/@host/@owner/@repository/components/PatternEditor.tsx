@@ -103,7 +103,7 @@ export function PatternEditor(props: {
 			}
 
 			editor = createTiptapEditor(() => {
-				return getEditorConfig(textArea, newVariant, variableReferences())
+				return getEditorConfig(textArea, newVariant, variableReferences)
 			})
 
 			setCurrentPattern(variant()?.pattern || [])
