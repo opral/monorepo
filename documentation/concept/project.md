@@ -1,10 +1,4 @@
----
-title: Project
-href: /documentation/project
-description: TODO TODO TODO TODO TODO
----
-
-# {% $frontmatter.title %}
+# Project
 
 An inlang project is defined by file that is named `project.inlang.json`. It contains the configuration for a project and is the entrypoint for all applications, plugins, and tools in the inlang ecosystem.
 

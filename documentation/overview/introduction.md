@@ -1,10 +1,4 @@
----
-title: Introduction
-href: /documentation
-description: Inlang is globalization infrastructure that powers an ecosystem of apps, plugins, and solutions that make globalization simple.
----
-
-# {% $frontmatter.title %}
+# Introduction
 
 ## What is inlang?
 

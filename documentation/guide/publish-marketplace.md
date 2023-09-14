@@ -1,10 +1,4 @@
----
-title: Publish to the marketplace
-href: /documentation/publish-marketplace
-description: Reach more of your target audience by publishing your app, plugin, or lint rule to the marketplace.
----
-
-# {% $frontmatter.title %}
+# Publish to the marketplace
 
 Publishing your own plugin or lint rule to the [marketplace](/marketplace) is straightforward, as the only thing you have to add to our item registry is the URL of your `marketplace-manifest.json`.
 
