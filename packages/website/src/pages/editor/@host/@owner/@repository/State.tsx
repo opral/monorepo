@@ -349,9 +349,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [currentBranch] = createResource(
 		() => {
-			if (lixErrors().length > 0 ||
-				repo() === undefined
-			) {
+			if (lixErrors().length > 0 || repo() === undefined) {
 				return false
 			}
 			return true
