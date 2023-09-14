@@ -2,6 +2,7 @@
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "messageLintRule.inlang.identicalPattern",
 	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/identicalPattern/assets/icon.png",
+	"coverImage": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/identical_pattern-marketplace-cover.jpg",
 	"displayName": {
 		"en": "Identical pattern"
 	},

@@ -1,6 +1,7 @@
 {
 	"id": "app.inlang.cli",
 	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"coverImage": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/cli-marketplace-cover.jpg",
 	"displayName": {
 		"en": "CLI"
 	},
