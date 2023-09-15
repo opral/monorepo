@@ -72,18 +72,9 @@ const pluginTemplate = {
         id: "plugin.yourHandle.templatePlugin",
         displayName: { en: "Choose your name" },
         description: { en: "Describe your plugin" },
-        // if you want to pubish your pugin to the marketplace, fill out the marketplace field
-        // marketplace: {
-        // 	icon: "",
-        // 	publisherName: "",
-        // 	publisherIcon: "",
-        // 	linkToReadme: {
-        // 		en: "",
-        // 	},
-        // 	keywords: [],
-        // },
       },
       // APIs
+      loadMessages: async (args) => {}
     }  
   `,
 }
@@ -102,16 +93,6 @@ const lintRuleTemplate = {
         id: "lintRule.yourHandle.templateLintRule",
         displayName: { en: "Choose your name" },
         description: { en: "Describe your lint rule" },
-        // if you want to pubish your pugin to the marketplace, fill out the marketplace field
-        // marketplace: {
-        // 	icon: "",
-        // 	publisherName: "",
-        // 	publisherIcon: "",
-        // 	linkToReadme: {
-        // 		en: "",
-        // 	},
-        // 	keywords: [],
-        // },
       },
       type: "MessageLint",
       message: ({ message }) => {
