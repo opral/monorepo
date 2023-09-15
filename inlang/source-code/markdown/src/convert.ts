@@ -38,7 +38,6 @@ export async function convert(markdown: string): Promise<string> {
 			p: "text-base text-surface-600 my-1 leading-relaxed",
 			a: "text-primary font-medium hover:text-hover-primary",
 			code: "p-1 bg-surface-100 rounded text-sm font-mono text-surface-700",
-			pre: "p-4 bg-surface-100 rounded text-sm font-mono text-surface-700 my-4 overflow-x-auto",
 			ul: "list-disc list-inside",
 			ol: "list-decimal list-inside",
 			li: "my-2",
@@ -53,5 +52,6 @@ export async function convert(markdown: string): Promise<string> {
 		.use(rehypeStringify)
 		.process(markdown)
 
-	return String(content)
+	return String(`<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+	${content}`)
 }

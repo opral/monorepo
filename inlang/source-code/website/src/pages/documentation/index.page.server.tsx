@@ -9,7 +9,7 @@ const repositoryRoot = new URL("../../../../../", import.meta.url)
 
 export type ProcessedTableOfContents = Record<
 	string,
-	{ slug: string; title: string; anchors: string[] }[]
+	{ slug: string; pageTitle: string; anchors: string[] }[]
 >
 
 const index: Record<string, Awaited<ReturnType<typeof convert>>> = {}
@@ -38,7 +38,7 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => 
 
 /* Generates the content and the tableOfContents as object for the navigation */
 async function generateIndexAndTableOfContents() {
-	const titles: Record<string, string[]> = {}
+	const pageTitles: Record<string, string[]> = {}
 	const anchors: Record<string, string[]> = {}
 
 	for (const [category, documents] of Object.entries(tableOfContents)) {
@@ -52,11 +52,11 @@ async function generateIndexAndTableOfContents() {
 			processedTableOfContents[category] = [
 				{
 					slug: "",
-					title:
+					pageTitle:
 						raw.match(/(?<=#)(.*)(?=\n)/)?.[0] ?? raw.match(/(?<=#)(.*)/)?.[0] ?? "##" ?? "###",
+					anchors: [],
 				},
 			]
-
 			continue
 		}
 
@@ -70,19 +70,23 @@ async function generateIndexAndTableOfContents() {
 
 			/* Searches for the first title in the markdown file like that and push it like index does it: raw.match(/(?<=#)(.*)(?=\n)/)?.[0] ?? raw.match(/(?<=#)(.*)/)?.[0] ?? "##" ?? "###",
 			 */
-			const title =
+			const pageTitle =
 				raw.match(/(?<=#)(.*)(?=\n)/)?.[0] ?? raw.match(/(?<=#)(.*)/)?.[0] ?? "##" ?? "###"
-			if (titles[category] === undefined) {
-				titles[category] = []
+			if (pageTitles[category] === undefined) {
+				pageTitles[category] = []
 			}
-			titles[category]?.push(title)
+			pageTitles[category]?.push(pageTitle)
 
 			/* Searches for all h1, h2, h3 titles in the markdown file and pushs it to anchors for them to be clickable */
-			const anchor = raw.match(/(?<=#)(.*)(?=\n)/g)?.map((anchor) => anchor.trim()) ?? []
+			const headings =
+				raw
+					.match(/^(#{1,3})\s+(.*?)(?=\n)/gm)
+					?.map((heading) => heading.replace(/#/g, "").trim().replaceAll(".", "")) || []
+
 			if (anchors[category] === undefined) {
-				anchors[category] = []
+				anchors[category] = {}
 			}
-			anchors[category]?.push(...anchor)
+			anchors[category][slug] = headings
 
 			const markdown = await convert(raw)
 
@@ -93,8 +97,8 @@ async function generateIndexAndTableOfContents() {
 			const slug = document.replace(/\.md$/, "").replace("./", "").replace("/", "-").toLowerCase()
 			return {
 				slug,
-				title: titles[category]!.shift()!,
-				anchors: anchors[category]!,
+				pageTitle: pageTitles[category]!.shift()!,
+				anchors: anchors[category][slug],
 			}
 		})
 	}

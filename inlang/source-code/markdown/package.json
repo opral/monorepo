@@ -13,8 +13,8 @@
 		"./css": "./css/index.js"
 	},
 	"scripts": {
-		"build": "tsc --build",
-		"dev": "tsc --watch",
+		"build": "npx tailwindcss -i ./src/style.css -o ./dist/style.css --watch && tsc --build",
+		"dev": "npx tailwindcss -i ./src/style.css -o ./dist/style.css --watch && && tsc --watch",
 		"test": "tsc --noEmit && vitest run",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
@@ -39,6 +39,7 @@
 		"unist-util-visit": "5.0.0"
 	},
 	"devDependencies": {
+		"tailwindcss": "3.3.3",
 		"typescript": "5.2.2",
 		"vitest": "0.34.3"
 	},

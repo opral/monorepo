@@ -30,7 +30,7 @@ export function Page(props: PageProps) {
 						`/documentation/${document.slug.replace("-", "/")}` ===
 						currentPageContext.urlParsed.pathname
 					) {
-						return document.title
+						return document.pageTitle
 					}
 				}
 			}
@@ -153,7 +153,9 @@ export function Page(props: PageProps) {
 								// change the col-span to 2 if a right side nav bar should be rendered
 								class="w-full justify-self-center md:col-span-3"
 							>
-								<div innerHTML={props.markdown} />
+								<article>
+									<div innerHTML={props.markdown} />
+								</article>
 								<EditButton href={editLink()} />
 								<Feedback />
 							</div>
@@ -222,6 +224,8 @@ function NavbarCommon(props: {
 	// 	}
 	// })
 
+	console.log(props.processedTableOfContents.Guide[0])
+
 	return (
 		<ul role="list" class="w-full space-y-3">
 			<For each={Object.keys(props.processedTableOfContents)}>
@@ -248,7 +252,7 @@ function NavbarCommon(props: {
 											}
 											href={getLocale() + `/documentation/${document.slug.replace("-", "/")}`}
 										>
-											{document.title}
+											{document.pageTitle}
 										</a>
 										<Show
 											when={
