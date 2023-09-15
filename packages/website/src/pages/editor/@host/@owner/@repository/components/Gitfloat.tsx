@@ -1,5 +1,5 @@
 import { useLocalStorage } from "#src/services/local-storage/index.js"
-import { createEffect, createSignal, type JSXElement, onMount, Show } from "solid-js"
+import { createEffect, createSignal, type JSXElement, onMount, Show, on } from "solid-js"
 import IconGithub from "~icons/cib/github"
 import { pushChanges, useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
@@ -33,7 +33,7 @@ export const Gitfloat = () => {
 	const gitState: () => "login" | "loading" | "fork" | "pullrequest" | "hasChanges" = () => {
 		if (localStorage?.user === undefined) {
 			return "login"
-		} else if (userIsCollaborator.loading || !inlang()) {
+		} else if (userIsCollaborator.loading || !inlang() || isForking()) {
 			return "loading"
 		} else if (userIsCollaborator() === false) {
 			return "fork"
@@ -47,6 +47,7 @@ export const Gitfloat = () => {
 	}
 
 	const [isLoading, setIsLoading] = createSignal(false)
+	const [isForking, setIsForking] = createSignal(false)
 	const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 
 	let signInDialog: SlDialog | undefined
@@ -56,7 +57,7 @@ export const Gitfloat = () => {
 	}
 
 	async function handleFork() {
-		setIsLoading(true)
+		setIsForking(true)
 		if (localStorage.user === undefined) {
 			return
 		}
@@ -75,13 +76,15 @@ export const Gitfloat = () => {
 				title: "The Fork has been created.",
 				message: `Don't forget to open a pull request`,
 			})
-			setIsLoading(false)
 			await github.rest.repos.get({
 				owner: routeParams().owner,
 				repo: routeParams().repository,
 			})
-			// @ts-expect-error - type mismatch fix after refactoring
-			return navigate(`/editor/github.com/${response.data.full_name}`)
+			setTimeout(() => {
+				// @ts-expect-error - type mismatch fix after refactoring
+				navigate(`/editor/github.com/${response.data.full_name}`)
+			}, 1000)
+			return
 		} else {
 			showToast({
 				variant: "danger",
@@ -225,6 +228,15 @@ export const Gitfloat = () => {
 			}, 1000)
 		}
 	})
+
+	// wait until fork fetch is done
+	createEffect(
+		on(userIsCollaborator, () => {
+			if (userIsCollaborator()) {
+				setIsForking(false)
+			}
+		}),
+	)
 
 	return (
 		<>
