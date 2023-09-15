@@ -1,5 +1,4 @@
 import { Command } from "commander"
-import { config } from "./commands/config/index.js"
 import { machine } from "./commands/machine/index.js"
 import { module } from "./commands/module/index.js"
 import { version } from "../package.json"
@@ -31,7 +30,6 @@ export const cli = new Command()
 	.version(version)
 	.description("CLI for inlang.")
 	// Commands
-	.addCommand(config)
 	.addCommand(project)
 	.addCommand(lint)
 	.addCommand(machine)
