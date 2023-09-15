@@ -96,6 +96,23 @@ export const registry: MarketplaceManifest[] = [
 		license: "Apache-2.0",
 	},
 	{
+		id: "library.inlang.translatable",
+		icon: "https://images.emojiterra.com/google/noto-emoji/unicode-15/color/svg/1f310.svg",
+		displayName: {
+			en: "Translatable",
+		},
+		description: {
+			en: "This library allows you to add translation logic to your application without having to rewrite large parts.",
+		},
+		readme: {
+			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/versioned-interfaces/translatable/README.md",
+		},
+		keywords: ["translatable", "adoptable"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		license: "Apache-2.0",
+	},
+	{
 		$schema: "https://inlang.com/schema/marketplace-manifest",
 		id: "messageLintRule.inlang.emptyPattern",
 		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/emptyPattern/assets/icon.png",
