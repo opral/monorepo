@@ -4,12 +4,17 @@
 	"version": "0.0.0",
 	"private": true,
 	"files": [
-		"./src"
+		"./src",
+		"./dist"
 	],
 	"exports": {
-		".": "./index.js"
+		".": "./index.js",
+		"./custom-elements": "./custom-elements/index.js",
+		"./css": "./css/index.js"
 	},
 	"scripts": {
+		"build": "tsc --build",
+		"dev": "tsc --watch",
 		"test": "tsc --noEmit && vitest run",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
@@ -20,15 +25,18 @@
 	},
 	"dependencies": {
 		"rehype-accessible-emojis": "0.3.2",
+		"rehype-add-classes": "1.0.0",
 		"rehype-autolink-headings": "7.0.0",
 		"rehype-class-names": "1.0.14",
+		"rehype-highlight": "7.0.0",
+		"rehype-raw": "7.0.0",
+		"rehype-sanitize": "6.0.0",
 		"rehype-slug": "6.0.0",
 		"rehype-stringify": "10.0.0",
-		"remark-directive": "2.0.1",
-		"remark-gfm": "3.0.1",
 		"remark-parse": "10.0.2",
 		"remark-rehype": "10.1.0",
-		"unified": "11.0.3"
+		"unified": "11.0.3",
+		"unist-util-visit": "5.0.0"
 	},
 	"devDependencies": {
 		"typescript": "5.2.2",
