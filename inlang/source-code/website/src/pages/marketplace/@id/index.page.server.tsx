@@ -1,5 +1,5 @@
 import { registry } from "@inlang/marketplace-registry"
-import { convert } from "#src/services/markdown/index.js"
+import { convert } from "@inlang/markdown"
 import type { PageContext } from "#src/renderer/types.js"
 import type { PageProps } from "./index.page.jsx"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
