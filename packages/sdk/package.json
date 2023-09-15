@@ -42,7 +42,7 @@
 		"deepmerge-ts": "^5.1.0",
 		"solid-js": "1.6.12",
 		"throttle-debounce": "5.0.0",
-		"ts-dedent": "2.2.0"
+		"dedent": "1.5.1"
 	},
 	"devDependencies": {
 		"@lix-js/fs": "*",
