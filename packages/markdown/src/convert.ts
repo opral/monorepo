@@ -1,13 +1,15 @@
 import { unified } from "unified"
 import remarkParse from "remark-parse"
 import remarkRehype from "remark-rehype"
-import remarkGfm from "remark-gfm"
-import remarkDirective from "remark-directive"
+import rehypeRaw from "rehype-raw"
 import rehypeStringify from "rehype-stringify"
+import rehypeSanitize from "rehype-sanitize"
 import rehypeSlug from "rehype-slug"
+import rehypeHighlight from "rehype-highlight"
 import rehypeAutolinkHeadings from "rehype-autolink-headings"
 import addClasses from "rehype-class-names"
 import { rehypeAccessibleEmojis } from "rehype-accessible-emojis"
+import defaultTags from "./default-tags.json"
 
 /* Converts the markdown with remark and the html with rehype to be suitable for being rendered */
 export async function convert(markdown: string): Promise<string> {
@@ -15,12 +17,14 @@ export async function convert(markdown: string): Promise<string> {
 		/* @ts-ignore */
 		.use(remarkParse)
 		/* @ts-ignore */
-		.use(remarkGfm)
+		.use(remarkRehype, { allowDangerousHtml: true })
 		/* @ts-ignore */
-		.use(remarkRehype)
+		.use(rehypeRaw)
 		/* @ts-ignore */
-		.use(remarkDirective)
-		// .use(inlangRemarkDirectives)
+		.use(rehypeSanitize, {
+			tagNames: ["doc-figure", ...defaultTags],
+		})
+		.use(rehypeHighlight)
 		.use(rehypeSlug)
 		/* @ts-ignore */
 		.use(addClasses, {
@@ -51,37 +55,3 @@ export async function convert(markdown: string): Promise<string> {
 
 	return String(content)
 }
-
-/** @type {import('unified').Plugin<[], import('mdast').Root>} */
-// function inlangRemarkDirectives() {
-// 	return (tree, file) => {
-// 		visit(tree, (node) => {
-// 			if (
-// 				node.type === "textDirective" ||
-// 				node.type === "leafDirective" ||
-// 				node.type === "containerDirective"
-// 			) {
-// 				if (node.name !== "test") return
-
-// 				const data = node.data || (node.data = {})
-// 				const attributes = node.attributes || {}
-// 				const id = attributes.id
-
-// 				if (node.type === "textDirective")
-// 					file.fail("Text directives for `youtube` not supported", node)
-// 				if (!id) file.fail("Missing video id", node)
-
-// 				data.hName = "iframe"
-// 				data.hProperties = {
-// 					src: "https://www.youtube.com/embed/" + id,
-// 					width: 200,
-// 					style: "background: red;",
-// 					height: 200,
-// 					frameBorder: 0,
-// 					allow: "picture-in-picture",
-// 					allowFullScreen: true,
-// 				}
-// 			}
-// 		})
-// 	}
-// }

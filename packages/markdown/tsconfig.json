@@ -4,7 +4,8 @@
 	"compilerOptions": {
 		"lib": ["ESNext"],
 		"types": [],
-		// "outDir": "./dist",
-		"rootDir": "./src"
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"resolveJsonModule": true
 	}
 }

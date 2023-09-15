@@ -2,7 +2,7 @@
 
 ## What is inlang?
 
-TODO: <figure> </figure> as lit component
+TODO: <doc-figure label="test" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/project.jpg"></doc-figure> as lit component
 
 {% $frontmatter.description %}
 
