@@ -1,4 +1,4 @@
-import { convert } from "#src/services/markdown/index.js"
+import { convert } from "@inlang/markdown"
 import { RenderErrorPage } from "vite-plugin-ssr/RenderErrorPage"
 import fs from "node:fs/promises"
 import tableOfContents from "../../../../../documentation/tableOfContents.json"
