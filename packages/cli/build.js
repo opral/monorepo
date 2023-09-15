@@ -1,4 +1,11 @@
 import { context } from "esbuild"
+import path from "node:path"
+import fs from "fs-extra"
+import { fileURLToPath } from "node:url"
+import { dirname } from "node:path"
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 // eslint-disable-next-line no-undef
 const isProduction = process.env.NODE_ENV === "production"
@@ -37,10 +44,19 @@ const __dirname = pathPolyfill123.dirname(__filename)
 	external: ["esbuild-wasm"],
 })
 
+// copying templates to dist folder to bundle them in the cli and avoid having to install them separately
+// eslint-disable-next-line no-undef
+fs.copySync(path.join(__dirname, "../templates"), path.join(__dirname, "./dist/templates"), {
+	overwrite: true,
+	filter: (src) => src.includes("node_modules") === false,
+})
+
 if (isProduction === false) {
 	await ctx.watch()
+	// eslint-disable-next-line no-undef
 	console.info("Watching for changes...")
 } else {
 	await ctx.rebuild()
 	await ctx.dispose()
 }
+
