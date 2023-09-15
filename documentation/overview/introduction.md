@@ -2,6 +2,8 @@
 
 ## What is inlang?
 
+TODO: <figure> </figure> as lit component
+
 {% $frontmatter.description %}
 
 ![inlang ecosystem](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/ecosystem.jpg)
