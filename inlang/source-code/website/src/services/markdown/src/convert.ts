@@ -8,13 +8,17 @@ import rehypeSlug from "rehype-slug"
 import rehypeAutolinkHeadings from "rehype-autolink-headings"
 import addClasses from "rehype-add-classes"
 import { rehypeAccessibleEmojis } from "rehype-accessible-emojis"
-import { visit } from "unist-util-visit"
 
+/* Converts the markdown with remark and the html with rehype to be suitable for being rendered */
 export async function convert(markdown: string): Promise<string> {
 	const content = await unified()
+		/* @ts-ignore */
 		.use(remarkParse)
+		/* @ts-ignore */
 		.use(remarkGfm)
+		/* @ts-ignore */
 		.use(remarkRehype)
+		/* @ts-ignore */
 		.use(remarkDirective)
 		// .use(inlangRemarkDirectives)
 		.use(rehypeSlug)
@@ -40,6 +44,7 @@ export async function convert(markdown: string): Promise<string> {
 		})
 		.use(rehypeAutolinkHeadings)
 		.use(rehypeAccessibleEmojis)
+		/* @ts-ignore */
 		.use(rehypeStringify)
 		.process(markdown)
 
