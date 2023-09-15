@@ -140,7 +140,8 @@ export const Gitfloat = () => {
 	const pullrequestUrl = () => {
 		return `https://github.com/${
 			githubRepositoryInformation()?.parent?.fullName
-			}/compare/${currentBranch()}...${routeParams().owner}:${routeParams().repository
+		}/compare/${currentBranch()}...${routeParams().owner}:${
+			routeParams().repository
 		}:${currentBranch()}?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20conducted%20here%0A%0APreview%20the%20messages%20on%20https%3A%2F%2Finlang.com%2Fgithub.com%2F${
 			(currentPageContext.routeParams as EditorRouteParams).owner
 		}%2F${(currentPageContext.routeParams as EditorRouteParams).repository}%20.`
