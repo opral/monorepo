@@ -225,14 +225,14 @@ function NavbarCommon(props: {
 	return (
 		<ul role="list" class="w-full space-y-3">
 			<For each={Object.keys(props.processedTableOfContents)}>
-				{(section) => (
+				{(category) => (
 					<li class="">
-						<h2 class="tracking-wide pt-2 text font-semibold text-on-surface pb-2">{section}</h2>
+						<h2 class="tracking-wide pt-2 text font-semibold text-on-surface pb-2">{category}</h2>
 						<ul class="space-y-2" role="list">
 							<For
 								each={
 									props.processedTableOfContents[
-										section as keyof typeof props.processedTableOfContents
+										category as keyof typeof props.processedTableOfContents
 									]
 								}
 							>
@@ -250,11 +250,15 @@ function NavbarCommon(props: {
 										>
 											{document.title}
 										</a>
-										{/* <Show
-											when={props.h2Headlines.length > 0 && isSelected(document.frontmatter.href)}
+										<Show
+											when={
+												category !== "Startpage" &&
+												document.anchors.length > 0 &&
+												isSelected(document.slug)
+											}
 										>
 											<ul class="my-2">
-												<For each={props.h2Headlines}>
+												<For each={document.anchors}>
 													{(heading) => (
 														<li>
 															<a
@@ -283,7 +287,7 @@ function NavbarCommon(props: {
 													)}
 												</For>
 											</ul>
-										</Show> */}
+										</Show>
 									</li>
 								)}
 							</For>

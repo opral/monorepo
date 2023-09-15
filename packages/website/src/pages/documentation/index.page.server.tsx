@@ -7,7 +7,10 @@ import type { PageProps } from "./index.page.jsx"
 
 const repositoryRoot = new URL("../../../../../", import.meta.url)
 
-export type ProcessedTableOfContents = Record<string, { slug: string; title: string }[]>
+export type ProcessedTableOfContents = Record<
+	string,
+	{ slug: string; title: string; anchors: string[] }[]
+>
 
 const index: Record<string, Awaited<ReturnType<typeof convert>>> = {}
 const processedTableOfContents: ProcessedTableOfContents = {}
@@ -36,6 +39,7 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => 
 /* Generates the content and the tableOfContents as object for the navigation */
 async function generateIndexAndTableOfContents() {
 	const titles: Record<string, string[]> = {}
+	const anchors: Record<string, string[]> = {}
 
 	for (const [category, documents] of Object.entries(tableOfContents)) {
 		/* Render the startpage of the document */
@@ -52,6 +56,7 @@ async function generateIndexAndTableOfContents() {
 						raw.match(/(?<=#)(.*)(?=\n)/)?.[0] ?? raw.match(/(?<=#)(.*)/)?.[0] ?? "##" ?? "###",
 				},
 			]
+
 			continue
 		}
 
@@ -72,6 +77,13 @@ async function generateIndexAndTableOfContents() {
 			}
 			titles[category]?.push(title)
 
+			/* Searches for all h1, h2, h3 titles in the markdown file and pushs it to anchors for them to be clickable */
+			const anchor = raw.match(/(?<=#)(.*)(?=\n)/g)?.map((anchor) => anchor.trim()) ?? []
+			if (anchors[category] === undefined) {
+				anchors[category] = []
+			}
+			anchors[category]?.push(...anchor)
+
 			const markdown = await convert(raw)
 
 			index[`/documentation/${slug.replace("-", "/")}`] = markdown
@@ -81,7 +93,8 @@ async function generateIndexAndTableOfContents() {
 			const slug = document.replace(/\.md$/, "").replace("./", "").replace("/", "-").toLowerCase()
 			return {
 				slug,
-				title: titles[category].shift()!,
+				title: titles[category]!.shift()!,
+				anchors: anchors[category]!,
 			}
 		})
 	}
