@@ -1,5 +1,12 @@
 # @inlang/cli
 
+## 1.4.0
+
+### Minor Changes
+
+- 81b9d741: refactor: move 'config validate' command to 'project validate'
+- d0592709: improve: simplify init template
+
 ## 1.3.0
 
 ### Minor Changes
