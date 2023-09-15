@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.4.0
+
+### Minor Changes
+
+- 071cac4a: fix: use ESM compatible ddent library
+
 ## 0.3.0
 
 ### Minor Changes
