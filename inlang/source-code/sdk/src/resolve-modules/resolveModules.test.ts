@@ -114,9 +114,7 @@ it("should return an error if a module does not export anything", async () => {
 		modules: ["https://myplugin.com/index.js"],
 	}
 
-	const _import = async () => ({
-		default: {},
-	})
+	const _import = async () => ({})
 
 	// Call the function
 	const resolved = await resolveModules({ settings, _import, nodeishFs: {} as any })
