@@ -69,11 +69,9 @@ async function setupProject(enabledLintRule?: MessageLintRule) {
 	)
 
 	const _mockPlugin: Plugin = {
-		meta: {
-			id: "plugin.inlang.json",
-			description: { en: "Mock plugin description" },
-			displayName: { en: "Mock Plugin" },
-		},
+		id: "plugin.inlang.json",
+		description: { en: "Mock plugin description" },
+		displayName: { en: "Mock Plugin" },
 		loadMessages: () => exampleMessages,
 		saveMessages: () => undefined as any,
 	}
@@ -97,12 +95,10 @@ async function setupProject(enabledLintRule?: MessageLintRule) {
 describe("lint command", () => {
 	it("succeed on lint success", async () => {
 		const enabledLintRule: MessageLintRule = {
-			meta: {
-				id: "messageLintRule.namespace.enabled",
-				description: { en: "Mock lint rule description" },
-				displayName: { en: "Mock Lint Rule" },
-			},
-			message: () => {
+			id: "messageLintRule.namespace.enabled",
+			description: { en: "Mock lint rule description" },
+			displayName: { en: "Mock Lint Rule" },
+			run: () => {
 				;/ * no lint reports for this test case * /
 			},
 		}
@@ -134,12 +130,10 @@ describe("lint command", () => {
 
 	it("show lint reports", async () => {
 		const enabledLintRule: MessageLintRule = {
-			meta: {
-				id: "messageLintRule.namespace.enabled",
-				description: { en: "Mock lint rule description" },
-				displayName: { en: "Mock Lint Rule" },
-			},
-			message: ({ report }) => {
+			id: "messageLintRule.namespace.enabled",
+			description: { en: "Mock lint rule description" },
+			displayName: { en: "Mock Lint Rule" },
+			run: ({ report }) => {
 				report({
 					messageId: "some-message-1",
 					languageTag: "en",

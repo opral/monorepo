@@ -29,11 +29,9 @@ const config: ProjectSettings = {
 }
 
 const mockPlugin: Plugin = {
-	meta: {
-		id: "plugin.project.i18next",
-		description: { en: "Mock plugin description" },
-		displayName: { en: "Mock Plugin" },
-	},
+	id: "plugin.project.i18next",
+	description: { en: "Mock plugin description" },
+	displayName: { en: "Mock Plugin" },
 	loadMessages: () => exampleMessages,
 	saveMessages: () => undefined,
 }
@@ -75,12 +73,10 @@ const exampleMessages: Message[] = [
 ]
 
 const mockLintRule: MessageLintRule = {
-	meta: {
-		id: "messageLintRule.namespace.mock",
-		description: { en: "Mock lint rule description" },
-		displayName: { en: "Mock Lint Rule" },
-	},
-	message: () => undefined,
+	id: "messageLintRule.namespace.mock",
+	description: { en: "Mock lint rule description" },
+	displayName: { en: "Mock Lint Rule" },
+	run: () => undefined,
 }
 
 const $import: ImportFunction = async (name) => ({
@@ -172,14 +168,12 @@ describe("messages", () => {
 			},
 		}
 		const mockPlugin: Plugin = {
-			meta: {
-				id: "plugin.mock.id",
-				displayName: {
-					en: "hello",
-				},
-				description: {
-					en: "wo",
-				},
+			id: "plugin.mock.id",
+			displayName: {
+				en: "hello",
+			},
+			description: {
+				en: "wo",
 			},
 			loadMessages: ({ languageTags }) => (languageTags.length ? exampleMessages : []),
 			saveMessages: () => undefined,

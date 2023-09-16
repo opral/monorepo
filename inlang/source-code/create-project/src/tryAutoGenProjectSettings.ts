@@ -82,7 +82,7 @@ export async function tryAutoGenProjectSettings(args: {
 export async function autoGenProject(args: {
 	nodeishFs: NodeishFilesystem
 	pathJoin: (...args: string[]) => string
-}): Promise<{ settings?: ProjectSettings; warnings: string[]; pluginId?: Plugin["meta"]["id"] }> {
+}): Promise<{ settings?: ProjectSettings; warnings: string[]; pluginId?: Plugin["id"] }> {
 	const rootDir = "./"
 	const warnings: string[] = []
 
@@ -136,7 +136,7 @@ export async function autoGenProject(args: {
 		)
 	}
 
-	const pluginId: Plugin["meta"]["id"] = `plugin.inlang.${pluginName}`
+	const pluginId: Plugin["id"] = `plugin.inlang.${pluginName}`
 
 	const settings: ProjectSettings = {
 		$schema: "https://inlang.com/schema/project-settings",

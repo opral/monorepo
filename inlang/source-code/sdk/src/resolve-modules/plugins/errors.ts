@@ -1,7 +1,7 @@
 import type { Plugin } from "@inlang/plugin"
 
 type PluginErrorOptions = {
-	plugin: Plugin["meta"]["id"]
+	plugin: Plugin["id"]
 } & Partial<Error>
 
 class PluginError extends Error {

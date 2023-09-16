@@ -1,12 +1,7 @@
-import type {
-	MessageLintLevel,
-	MessageLintRule,
-	MessageLintReport,
-} from "@inlang/message-lint-rule"
+import type { MessageLintRule, MessageLintReport } from "@inlang/message-lint-rule"
 import type { Message } from "@inlang/message"
 import { MessagedLintRuleThrowedError } from "./errors.js"
-import type { LanguageTag } from "@inlang/language-tag"
-import type { JSONObject } from "@inlang/json-types"
+import type { ProjectSettings } from "@inlang/project-settings"
 
 /**
  * Lint a single message.
@@ -14,10 +9,7 @@ import type { JSONObject } from "@inlang/json-types"
  * - the lint rule levels defaults to `warning`.
  */
 export const lintSingleMessage = async (args: {
-	sourceLanguageTag: LanguageTag
-	languageTags: LanguageTag[]
-	ruleSettings: Record<MessageLintRule["meta"]["id"], JSONObject>
-	ruleLevels: Record<MessageLintRule["meta"]["id"], MessageLintLevel>
+	settings: ProjectSettings & Required<Pick<ProjectSettings, "messageLintRuleLevels">>
 	rules: MessageLintRule[]
 	messages: Message[]
 	message: Message
@@ -26,30 +18,30 @@ export const lintSingleMessage = async (args: {
 	const errors: MessagedLintRuleThrowedError[] = []
 
 	const promises = args.rules.map(async (rule) => {
-		const ruleId = rule.meta.id
-		const settings = args.ruleSettings?.[ruleId] ?? {}
-		const level = args.ruleLevels?.[ruleId]
+		const level = args.settings.messageLintRuleLevels?.[rule.id]
 
 		if (level === undefined) {
-			throw Error("No lint level provided for lint rule: " + ruleId)
+			throw Error("No lint level provided for lint rule: " + rule.id)
 		}
 
 		try {
-			await rule.message({
-				...args,
-				settings,
+			await rule.run({
+				message: args.message,
+				settings: args.settings,
 				report: (reportArgs) => {
 					reports.push({
-						ruleId,
+						ruleId: rule.id,
 						level,
-						...reportArgs,
+						messageId: reportArgs.messageId,
+						languageTag: reportArgs.languageTag,
+						body: reportArgs.body,
 					})
 				},
 			})
 		} catch (error) {
 			errors.push(
 				new MessagedLintRuleThrowedError(
-					`Lint rule '${ruleId}' throwed while linting message "${args.message.id}".`,
+					`Lint rule '${rule.id}' throwed while linting message "${args.message.id}".`,
 					{ cause: error },
 				),
 			)
