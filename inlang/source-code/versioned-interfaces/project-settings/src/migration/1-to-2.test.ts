@@ -1,11 +1,10 @@
 import { it, expect } from "vitest"
 import { migrate1to2 } from "./1-to-2.js"
-import type { ProjectConfigV1 } from "../interface.v1.js"
 import { Value } from "@sinclair/typebox/value"
 import { ProjectSettings } from "../index.js"
 
 it("should migrate $schema", () => {
-	const config: ProjectConfigV1 = {
+	const config = {
 		$schema: "https://inlang.com/schema/project-config",
 		sourceLanguageTag: "en",
 		languageTags: ["en", "de"],
@@ -18,7 +17,7 @@ it("should migrate $schema", () => {
 })
 
 it("should migrate messageLintRuleLevels", () => {
-	const config: ProjectConfigV1 = {
+	const config = {
 		sourceLanguageTag: "en",
 		languageTags: ["en", "de"],
 		modules: [],
@@ -36,7 +35,7 @@ it("should migrate messageLintRuleLevels", () => {
 })
 
 it("should migrate settings to the root level", () => {
-	const config: ProjectConfigV1 = {
+	const config = {
 		sourceLanguageTag: "en",
 		languageTags: ["en", "de"],
 		modules: [],
