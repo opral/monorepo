@@ -24,10 +24,8 @@
 	},
 	"dependencies": {
 		"@inlang/json-types": "*",
-		"@inlang/message": "*",
 		"@inlang/message-lint-rule": "*",
-		"@inlang/language-tag": "*",
-		"@inlang/translatable": "*"
+		"@inlang/language-tag": "*"
 	},
 	"devDependencies": {
 		"tsd": "0.28.1",
