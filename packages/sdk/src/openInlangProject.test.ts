@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect, vi } from "vitest"
 import { openInlangProject } from "./openInlangProject.js"
-import type { ProjectConfig, Plugin, MessageLintRule, Message } from "./versionedInterfaces.js"
+import type { ProjectSettings, Plugin, MessageLintRule, Message } from "./versionedInterfaces.js"
 import type { ImportFunction } from "./resolve-modules/index.js"
 import type { InlangModule } from "@inlang/module"
 import {
@@ -19,18 +19,16 @@ const getValue = <T>(subscribable: { subscribe: (subscriber: (value: T) => void)
 	return value!
 }
 
-const config: ProjectConfig = {
+const config: ProjectSettings = {
 	sourceLanguageTag: "en",
 	languageTags: ["en"],
 	modules: ["plugin.js", "lintRule.js"],
-	settings: {
-		"project.messageLintRuleLevels": {
-			"messageLintRule.inlang.missingTranslation": "error",
-		},
-		"plugin.inlang.i18next": {
-			pathPattern: "./examples/example01/{languageTag}.json",
-			variableReferencePattern: ["{", "}"],
-		},
+	messageLintRuleLevels: {
+		"messageLintRule.inlang.missingTranslation": "error",
+	},
+	"plugin.inlang.i18next": {
+		pathPattern: "./examples/example01/{languageTag}.json",
+		variableReferencePattern: ["{", "}"],
 	},
 }
 
@@ -257,7 +255,7 @@ describe("functionality", () => {
 				_import,
 			})
 
-			const result = inlang.setConfig({} as ProjectConfig)
+			const result = inlang.setConfig({} as ProjectSettings)
 			expect(result.data).toBeUndefined()
 			expect(result.error).toBeInstanceOf(InvalidConfigError)
 		})
@@ -290,11 +288,10 @@ describe("functionality", () => {
 	describe("installed", () => {
 		it("should return the installed items", async () => {
 			const fs = createNodeishMemoryFs()
-			const config: ProjectConfig = {
+			const config: ProjectSettings = {
 				sourceLanguageTag: "en",
 				languageTags: ["en"],
 				modules: ["plugin.js", "lintRule.js"],
-				settings: {},
 			}
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
@@ -318,11 +315,10 @@ describe("functionality", () => {
 		it("should apply 'warning' as default lint level to lint rules that have no lint level defined in the config", async () => {
 			const fs = createNodeishMemoryFs()
 
-			const config: ProjectConfig = {
+			const config: ProjectSettings = {
 				sourceLanguageTag: "en",
 				languageTags: ["en"],
 				modules: ["plugin.js", "lintRule.js"],
-				settings: {},
 			}
 
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
@@ -368,8 +364,7 @@ describe("functionality", () => {
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
 					modules: ["plugin.js", "lintRule.js"],
-					settings: {},
-				} satisfies ProjectConfig),
+				} satisfies ProjectSettings),
 			)
 
 			const _import: ImportFunction = async (name) => {
@@ -421,8 +416,7 @@ describe("functionality", () => {
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
 					modules: ["plugin.js", "lintRule.js"],
-					settings: {},
-				} satisfies ProjectConfig),
+				} satisfies ProjectSettings),
 			)
 			const _import: ImportFunction = async (name) => {
 				return {
@@ -490,8 +484,8 @@ describe("functionality", () => {
 	})
 
 	describe("query", () => {
-		it("updates should trigger the plugin persistence", async () => {
-			const fs = await createNodeishMemoryFs()
+		it("should call saveMessages() on updates", async () => {
+			const fs = createNodeishMemoryFs()
 
 			await fs.writeFile(
 				"./project.inlang.json",
@@ -499,10 +493,8 @@ describe("functionality", () => {
 					sourceLanguageTag: "en",
 					languageTags: ["en", "de"],
 					modules: ["plugin.js"],
-					settings: {
-						"plugin.inlang.json": {
-							pathPattern: "./resources/{languageTag}.json",
-						},
+					"plugin.inlang.json": {
+						pathPattern: "./resources/{languageTag}.json",
 					},
 				}),
 			)
@@ -677,11 +669,10 @@ describe("functionality", () => {
 			}
 		})
 		it("should return the message lint reports", async () => {
-			const config: ProjectConfig = {
+			const config: ProjectSettings = {
 				sourceLanguageTag: "en",
 				languageTags: ["en"],
 				modules: ["lintRule.js"],
-				settings: {},
 			}
 			const fs = createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))

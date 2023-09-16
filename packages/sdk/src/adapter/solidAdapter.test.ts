@@ -7,7 +7,7 @@ import { openInlangProject } from "../openInlangProject.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 import type {
 	Message,
-	ProjectConfig,
+	ProjectSettings,
 	Plugin,
 	MessageLintRule,
 	Text,
@@ -15,18 +15,16 @@ import type {
 
 // ------------------------------------------------------------------------------------------------
 
-const config: ProjectConfig = {
+const config: ProjectSettings = {
 	sourceLanguageTag: "en",
 	languageTags: ["en"],
 	modules: ["plugin.js", "plugin2.js"],
-	settings: {
-		"project.messageLintRuleLevels": {
-			"messageLintRule.inlang.missingTranslation": "error",
-		},
-		"plugin.inlang.i18next": {
-			pathPattern: "./examples/example01/{languageTag}.json",
-			variableReferencePattern: ["{", "}"],
-		},
+	messageLintRuleLevels: {
+		"messageLintRule.inlang.missingTranslation": "error",
+	},
+	"plugin.inlang.i18next": {
+		pathPattern: "./examples/example01/{languageTag}.json",
+		variableReferencePattern: ["{", "}"],
 	},
 }
 
@@ -159,19 +157,17 @@ describe("installed", () => {
 describe("messages", () => {
 	it("should react to changes in config", async () => {
 		const fs = createNodeishMemoryFs()
-		const mockConfig: ProjectConfig = {
+		const mockConfig: ProjectSettings = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
 			modules: ["./plugin-a.js"],
-			settings: {
-				"library.inlang.paraglideJsSveltekit": {
-					languageNegotiation: {
-						strategies: [
-							{
-								type: "localStorage",
-							} as any,
-						],
-					},
+			"library.inlang.paraglideJsSveltekit": {
+				languageNegotiation: {
+					strategies: [
+						{
+							type: "localStorage",
+						} as any,
+					],
 				},
 			},
 		}

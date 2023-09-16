@@ -25,7 +25,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 
 	const meta: Awaited<ReturnType<ResolveModuleFunction>>["meta"] = []
 
-	for (const module of args.config.modules) {
+	for (const module of args.settings.modules) {
 		/**
 		 * -------------- BEGIN SETUP --------------
 		 */
@@ -81,7 +81,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 
 	const resolvedPlugins = await resolvePlugins({
 		plugins: allPlugins,
-		settings: args.config.settings,
+		settings: args.settings,
 		nodeishFs: args.nodeishFs,
 	})
 

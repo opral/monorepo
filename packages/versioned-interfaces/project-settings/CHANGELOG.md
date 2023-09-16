@@ -1,4 +1,4 @@
-# @inlang/project-config
+# @inlang/project-settings
 
 ## 1.2.0
 

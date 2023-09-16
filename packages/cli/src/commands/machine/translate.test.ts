@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { translateCommandAction } from "./translate.js"
-import { Message, ProjectConfig, openInlangProject, Plugin, type InlangModule } from "@inlang/sdk"
+import { Message, ProjectSettings, openInlangProject, Plugin, type InlangModule } from "@inlang/sdk"
 import { privateEnv } from "@inlang/env-variables"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 
@@ -61,8 +61,7 @@ describe("translate command", () => {
 					sourceLanguageTag: "en",
 					languageTags: ["en", "de", "it"],
 					modules: ["./plugin.js"],
-					settings: {},
-				} satisfies ProjectConfig),
+				} satisfies ProjectSettings),
 			)
 
 			const _mockPlugin: Plugin = {

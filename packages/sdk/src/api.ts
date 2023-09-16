@@ -6,7 +6,7 @@ import type {
 	MessageLintRule,
 	Message,
 	Plugin,
-	ProjectConfig,
+	ProjectSettings,
 	MessageLintReport,
 } from "./versionedInterfaces.js"
 import type { ResolvedPluginApi } from "./resolve-modules/plugins/types.js"
@@ -38,8 +38,8 @@ export type InlangProject = {
 		((typeof ModuleResolutionError)[keyof typeof ModuleResolutionError] | Error)[]
 	>
 	customApi: Subscribable<ResolvedPluginApi["customApi"]>
-	config: Subscribable<ProjectConfig | undefined>
-	setConfig: (config: ProjectConfig) => Result<void, RuntimeError.InvalidConfigError>
+	config: Subscribable<ProjectSettings | undefined>
+	setConfig: (config: ProjectSettings) => Result<void, RuntimeError.InvalidConfigError>
 	query: {
 		messages: MessageQueryApi
 		messageLintReports: MessageLintReportsQueryApi
