@@ -131,8 +131,8 @@ export const initVirtualModule = async (): Promise<VirtualModule> => {
 		resolve({
 			debug: settings.debug,
 
-			sourceLanguageTag: inlang.config()!.sourceLanguageTag,
-			languageTags: inlang.config()!.languageTags,
+			sourceLanguageTag: inlang.settings()!.sourceLanguageTag,
+			languageTags: inlang.settings()!.languageTags,
 			messages: inlang.query.messages.getAll(),
 
 			cwdFolderPath: PATH_TO_CWD,

@@ -98,9 +98,9 @@ export function Message(props: { id: string }) {
 			<div>
 				<For
 					each={sortLanguageTags(
-						inlang()?.config()?.languageTags || [],
+						inlang()?.settings()?.languageTags || [],
 						// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-						inlang()?.config()?.sourceLanguageTag!,
+						inlang()?.settings()?.sourceLanguageTag!,
 					)}
 				>
 					{(languageTag) => {

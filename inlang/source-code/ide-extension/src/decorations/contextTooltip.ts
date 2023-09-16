@@ -37,7 +37,7 @@ export function contextTooltip(
 	}
 
 	// Get the configured language tags
-	const configuredLanguageTags = state().inlang.config()?.languageTags || []
+	const configuredLanguageTags = state().inlang.settings()?.languageTags || []
 
 	// Generate rows for each configured language tag
 	const contextTableRows: ContextTableRow[] = configuredLanguageTags.map((languageTag) => {

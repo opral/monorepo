@@ -28,7 +28,7 @@ export const extractMessageCommand = {
 				"notification",
 			)
 		}
-		if (state().inlang.config()?.sourceLanguageTag === undefined) {
+		if (state().inlang.settings()?.sourceLanguageTag === undefined) {
 			return msg(
 				"The `sourceLanguageTag` is not defined in the project.inlang.json but required to extract a message.",
 				"warn",
@@ -79,7 +79,7 @@ export const extractMessageCommand = {
 			selectors: [],
 			variants: [
 				{
-					languageTag: state().inlang.config()?.sourceLanguageTag as string,
+					languageTag: state().inlang.settings()?.sourceLanguageTag as string,
 					match: {},
 					pattern: [
 						{

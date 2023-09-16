@@ -18,7 +18,7 @@ export { createMessagesQuery } from "./createMessagesQuery.js"
 export {
 	ProjectSettingsFileJSONSyntaxError,
 	ProjectSettingsFileNotFoundError,
-	InvalidConfigError,
+	ProjectSettingsInvalidError,
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
 } from "./errors.js"
@@ -26,4 +26,3 @@ export {
 export * from "./messages/variant.js"
 export * from "./versionedInterfaces.js"
 export { InlangModule } from "@inlang/module"
-

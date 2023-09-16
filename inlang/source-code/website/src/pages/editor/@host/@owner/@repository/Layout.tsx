@@ -61,7 +61,7 @@ export function Layout(props: { children: JSXElement }) {
 			(newFilter.name !== "Linting" || inlang()?.installed.messageLintRules())
 		) {
 			if (newFilter.name === "Language" && filteredLanguageTags().length === 0) {
-				setFilteredLanguageTags(() => inlang()?.config()?.languageTags || [])
+				setFilteredLanguageTags(() => inlang()?.settings()?.languageTags || [])
 			}
 			setSelectedFilters([...selectedFilters(), newFilter])
 		}
@@ -87,7 +87,7 @@ export function Layout(props: { children: JSXElement }) {
 				if (filteredLanguageTags().length > 0) {
 					addFilter("Language")
 				} else {
-					if (inlang()!.config()) setFilteredLanguageTags(inlang()!.config()!.languageTags)
+					if (inlang()!.settings()) setFilteredLanguageTags(inlang()!.settings()!.languageTags)
 				}
 			}
 		}),
@@ -113,9 +113,9 @@ export function Layout(props: { children: JSXElement }) {
 			return
 		}
 		setFilteredLanguageTags([...filteredLanguageTags(), languageTag])
-		inlang()?.setConfig({
-			...inlang()!.config()!,
-			languageTags: [...inlang()!.config()!.languageTags, languageTag],
+		inlang()?.setSettings({
+			...inlang()!.settings()!,
+			languageTags: [...inlang()!.settings()!.languageTags, languageTag],
 		})
 	}
 
@@ -153,7 +153,7 @@ export function Layout(props: { children: JSXElement }) {
 										prop:size="small"
 										onClick={() => {
 											setFilteredLanguageTags(
-												setFilteredLanguageTags(inlang()?.config()?.languageTags || []),
+												setFilteredLanguageTags(inlang()?.settings()?.languageTags || []),
 											)
 											setFilteredMessageLintRules([])
 											setSelectedFilters([])
@@ -345,12 +345,14 @@ function LanguageFilter(props: { clearFunction: any }) {
 
 	onMount(() => {
 		if (filteredLanguageTags().length === 0 || filteredLanguageTags() === undefined) {
-			setFilteredLanguageTags(() => inlang()?.config()?.languageTags || [])
+			setFilteredLanguageTags(() => inlang()?.settings()?.languageTags || [])
 		}
 	})
 
 	return (
-		<Show when={inlang()?.config() && filteredLanguageTags() && filteredLanguageTags().length > 0}>
+		<Show
+			when={inlang()?.settings() && filteredLanguageTags() && filteredLanguageTags().length > 0}
+		>
 			<sl-select
 				prop:name="Language Select"
 				prop:placeholder="none"
@@ -382,7 +384,7 @@ function LanguageFilter(props: { clearFunction: any }) {
 					<span class="text-left text-outline-variant grow">Select</span>
 					<a
 						class="cursor-pointer link link-primary opacity-75"
-						onClick={() => setFilteredLanguageTags(() => inlang()?.config()?.languageTags || [])}
+						onClick={() => setFilteredLanguageTags(() => inlang()?.settings()?.languageTags || [])}
 					>
 						All
 					</a>
@@ -392,7 +394,7 @@ function LanguageFilter(props: { clearFunction: any }) {
 						onClick={() =>
 							setFilteredLanguageTags(
 								// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-								[inlang()?.config()?.sourceLanguageTag!],
+								[inlang()?.settings()?.sourceLanguageTag!],
 							)
 						}
 					>
@@ -404,19 +406,19 @@ function LanguageFilter(props: { clearFunction: any }) {
 					{/* eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain */}
 					<For
 						each={sortLanguageTags(
-							inlang()?.config()?.languageTags || [],
-							inlang()?.config()?.sourceLanguageTag || "en",
+							inlang()?.settings()?.languageTags || [],
+							inlang()?.settings()?.sourceLanguageTag || "en",
 						)}
 					>
 						{(language) => (
 							<sl-option
 								prop:value={language}
 								prop:selected={filteredLanguageTags().includes(language)}
-								prop:disabled={language === inlang()?.config()?.sourceLanguageTag}
-								class={language === inlang()?.config()?.sourceLanguageTag ? "opacity-50" : ""}
+								prop:disabled={language === inlang()?.settings()?.sourceLanguageTag}
+								class={language === inlang()?.settings()?.sourceLanguageTag ? "opacity-50" : ""}
 							>
 								{language}
-								{language === inlang()?.config()?.sourceLanguageTag ? (
+								{language === inlang()?.settings()?.sourceLanguageTag ? (
 									<sl-badge prop:variant="neutral" class="relative translate-x-3">
 										<span class="after:content-['ref'] after:text-background" />
 									</sl-badge>

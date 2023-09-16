@@ -45,7 +45,7 @@ export const translate = new Command()
 
 export async function translateCommandAction(args: { inlang: InlangProject }) {
 	try {
-		const projectConfig = args.inlang.config()
+		const projectConfig = args.inlang.settings()
 
 		if (!projectConfig) {
 			log.error(`❌ No inlang config found, please add a project.inlang.json file`)

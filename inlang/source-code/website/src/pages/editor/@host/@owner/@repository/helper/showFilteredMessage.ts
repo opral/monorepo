@@ -10,7 +10,9 @@ export const showFilteredMessage = (message: Message | undefined) => {
 	}
 
 	const languageTagsSet = new Set(
-		filteredLanguageTags().length === 0 ? inlang()?.config()?.languageTags : filteredLanguageTags(),
+		filteredLanguageTags().length === 0
+			? inlang()?.settings()?.languageTags
+			: filteredLanguageTags(),
 	)
 	const lintRulesSet = new Set(filteredMessageLintRules())
 	const searchLower = textSearch().toLowerCase()

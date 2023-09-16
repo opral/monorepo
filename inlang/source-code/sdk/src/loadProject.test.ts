@@ -7,7 +7,7 @@ import type { InlangModule } from "@inlang/module"
 import {
 	ProjectSettingsFileJSONSyntaxError,
 	ProjectSettingsFileNotFoundError,
-	InvalidConfigError,
+	ProjectSettingsInvalidError,
 } from "./errors.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 
@@ -19,7 +19,7 @@ const getValue = <T>(subscribable: { subscribe: (subscriber: (value: T) => void)
 	return value!
 }
 
-const config: ProjectSettings = {
+const settings: ProjectSettings = {
 	sourceLanguageTag: "en",
 	languageTags: ["en"],
 	modules: ["plugin.js", "lintRule.js"],
@@ -100,8 +100,8 @@ const _import: ImportFunction = async (name) =>
 // ------------------------------------------------------------------------------------------------
 
 describe("initialization", () => {
-	describe("config", () => {
-		it("should return an error if config file is not found", async () => {
+	describe("settings", () => {
+		it("should return an error if settings file is not found", async () => {
 			const fs = createNodeishMemoryFs()
 
 			const inlang = await loadProject({
@@ -113,7 +113,7 @@ describe("initialization", () => {
 			expect(inlang.errors()![0]).toBeInstanceOf(ProjectSettingsFileNotFoundError)
 		})
 
-		it("should return an error if config file is not a valid JSON", async () => {
+		it("should return an error if settings file is not a valid JSON", async () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", "invalid json")
 
@@ -126,7 +126,7 @@ describe("initialization", () => {
 			expect(inlang.errors()![0]).toBeInstanceOf(ProjectSettingsFileJSONSyntaxError)
 		})
 
-		it("should return an error if config file is does not match schema", async () => {
+		it("should return an error if settings file is does not match schema", async () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify({}))
 
@@ -136,25 +136,25 @@ describe("initialization", () => {
 				_import,
 			})
 
-			expect(inlang.errors()![0]).toBeInstanceOf(InvalidConfigError)
+			expect(inlang.errors()![0]).toBeInstanceOf(ProjectSettingsInvalidError)
 		})
 
-		it("should return the parsed config", async () => {
+		it("should return the parsed settings", async () => {
 			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
 			const inlang = await loadProject({
 				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
 
-			expect(inlang.config()).toStrictEqual(config)
+			expect(inlang.settings()).toStrictEqual(settings)
 		})
 
-		it("should not re-write the config to disk when initializing", async () => {
+		it("should not re-write the settings to disk when initializing", async () => {
 			const fs = await createNodeishMemoryFs()
-			const configWithDeifferentFormatting = JSON.stringify(config, undefined, 4)
-			await fs.writeFile("./project.inlang.json", configWithDeifferentFormatting)
+			const settingsWithDeifferentFormatting = JSON.stringify(settings, undefined, 4)
+			await fs.writeFile("./project.inlang.json", settingsWithDeifferentFormatting)
 
 			const inlang = await loadProject({
 				settingsFilePath: "./project.inlang.json",
@@ -162,15 +162,15 @@ describe("initialization", () => {
 				_import,
 			})
 
-			const configOnDisk = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
-			expect(configOnDisk).toBe(configWithDeifferentFormatting)
+			const settingsOnDisk = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
+			expect(settingsOnDisk).toBe(settingsWithDeifferentFormatting)
 
-			inlang.setConfig(inlang.config()!)
-			// TODO: how can we await `setConfig` correctly
+			inlang.setSettings(inlang.settings()!)
+			// TODO: how can we await `setsettings` correctly
 			await new Promise((resolve) => setTimeout(resolve, 0))
 
-			const newConfigOnDisk = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
-			expect(newConfigOnDisk).not.toBe(configWithDeifferentFormatting)
+			const newsettingsOnDisk = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
+			expect(newsettingsOnDisk).not.toBe(settingsWithDeifferentFormatting)
 		})
 	})
 
@@ -182,7 +182,7 @@ describe("initialization", () => {
 				} satisfies InlangModule)
 
 			const fs = createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
 
 			const inlang = await loadProject({
 				settingsFilePath: "./project.inlang.json",
@@ -200,7 +200,7 @@ describe("initialization", () => {
 
 	describe("flow", () => {
 		it.todo("should not call functions multiple times")
-		it.todo("should load modules after config")
+		it.todo("should load modules after settings")
 		it.todo("should not load messages")
 		it.todo("should not call lint")
 	})
@@ -211,58 +211,61 @@ describe("initialization", () => {
 })
 
 describe("functionality", () => {
-	describe("config", () => {
-		it("should return the config", async () => {
+	describe("settings", () => {
+		it("should return the settings", async () => {
 			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
 			const inlang = await loadProject({
 				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
 
-			expect(getValue(inlang.config)).toStrictEqual(config)
+			expect(getValue(inlang.settings)).toStrictEqual(settings)
 		})
 
-		it("should set a new config", async () => {
+		it("should set a new settings", async () => {
 			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
 			const inlang = await loadProject({
 				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
 
-			expect(inlang.config()).toStrictEqual(config)
+			expect(inlang.settings()).toStrictEqual(settings)
 
-			inlang.setConfig({ ...config, languageTags: ["en", "de"] })
-			expect(getValue(inlang.config)).toStrictEqual({ ...config, languageTags: ["en", "de"] })
-			expect(inlang.config()!.languageTags).toStrictEqual(["en", "de"])
+			inlang.setSettings({ ...settings, languageTags: ["en", "de"] })
+			expect(getValue(inlang.settings)).toStrictEqual({ ...settings, languageTags: ["en", "de"] })
+			expect(inlang.settings()!.languageTags).toStrictEqual(["en", "de"])
 
-			inlang.setConfig({ ...config, languageTags: ["en", "de", "fr"] })
-			expect(getValue(inlang.config)).toStrictEqual({ ...config, languageTags: ["en", "de", "fr"] })
-			expect(inlang.config()!.languageTags).toStrictEqual(["en", "de", "fr"])
+			inlang.setSettings({ ...settings, languageTags: ["en", "de", "fr"] })
+			expect(getValue(inlang.settings)).toStrictEqual({
+				...settings,
+				languageTags: ["en", "de", "fr"],
+			})
+			expect(inlang.settings()!.languageTags).toStrictEqual(["en", "de", "fr"])
 		})
 	})
 
-	describe("setConfig", () => {
-		it("should fail if config is not valid", async () => {
+	describe("setSettings", () => {
+		it("should fail if settings is not valid", async () => {
 			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
 			const inlang = await loadProject({
 				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
 
-			const result = inlang.setConfig({} as ProjectSettings)
+			const result = inlang.setSettings({} as ProjectSettings)
 			expect(result.data).toBeUndefined()
-			expect(result.error).toBeInstanceOf(InvalidConfigError)
+			expect(result.error).toBeInstanceOf(ProjectSettingsInvalidError)
 		})
 
-		it("should write config to disk", async () => {
+		it("should write settings to disk", async () => {
 			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
 			const inlang = await loadProject({
 				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
@@ -272,7 +275,7 @@ describe("functionality", () => {
 			const before = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
 			expect(before).toBeDefined()
 
-			const result = inlang.setConfig({ ...config, languageTags: [] })
+			const result = inlang.setSettings({ ...settings, languageTags: [] })
 			expect(result.data).toBeUndefined()
 			expect(result.error).toBeUndefined()
 
@@ -288,12 +291,12 @@ describe("functionality", () => {
 	describe("installed", () => {
 		it("should return the installed items", async () => {
 			const fs = createNodeishMemoryFs()
-			const config: ProjectSettings = {
+			const settings: ProjectSettings = {
 				sourceLanguageTag: "en",
 				languageTags: ["en"],
 				modules: ["plugin.js", "lintRule.js"],
 			}
-			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
 			const inlang = await loadProject({
 				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
@@ -302,26 +305,26 @@ describe("functionality", () => {
 
 			expect(inlang.installed.plugins()[0]).toStrictEqual({
 				meta: mockPlugin.meta,
-				module: config.modules[0],
+				module: settings.modules[0],
 			})
 
 			expect(inlang.installed.messageLintRules()[0]).toEqual({
 				meta: mockMessageLintRule.meta,
-				module: config.modules[1],
+				module: settings.modules[1],
 				lintLevel: "warning",
 			})
 		})
 
-		it("should apply 'warning' as default lint level to lint rules that have no lint level defined in the config", async () => {
+		it("should apply 'warning' as default lint level to lint rules that have no lint level defined in the settings", async () => {
 			const fs = createNodeishMemoryFs()
 
-			const config: ProjectSettings = {
+			const settings: ProjectSettings = {
 				sourceLanguageTag: "en",
 				languageTags: ["en"],
 				modules: ["plugin.js", "lintRule.js"],
 			}
 
-			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
 
 			const inlang = await loadProject({
 				settingsFilePath: "./project.inlang.json",
@@ -411,7 +414,7 @@ describe("functionality", () => {
 			}
 			const fs = await createNodeishMemoryFs()
 			await fs.writeFile(
-				"./inlang.config.json",
+				"./inlang.settings.json",
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
@@ -425,7 +428,7 @@ describe("functionality", () => {
 			}
 
 			const inlang = await loadProject({
-				settingsFilePath: "./inlang.config.json",
+				settingsFilePath: "./inlang.settings.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -441,7 +444,7 @@ describe("functionality", () => {
 	describe("errors", () => {
 		it("should return the errors", async () => {
 			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
 			const inlang = await loadProject({
 				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
@@ -456,7 +459,7 @@ describe("functionality", () => {
 	describe("customApi", () => {
 		it("should return the app specific api", async () => {
 			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
 			const inlang = await loadProject({
 				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
@@ -472,7 +475,7 @@ describe("functionality", () => {
 	describe("messages", () => {
 		it("should return the messages", async () => {
 			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
 			const inlang = await loadProject({
 				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
@@ -654,7 +657,7 @@ describe("functionality", () => {
 	describe("lint", () => {
 		it.todo("should throw if lint reports are not initialized yet", async () => {
 			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
 			const inlang = await loadProject({
 				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
@@ -669,13 +672,13 @@ describe("functionality", () => {
 			}
 		})
 		it("should return the message lint reports", async () => {
-			const config: ProjectSettings = {
+			const settings: ProjectSettings = {
 				sourceLanguageTag: "en",
 				languageTags: ["en"],
 				modules: ["lintRule.js"],
 			}
 			const fs = createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
 			const inlang = await loadProject({
 				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
