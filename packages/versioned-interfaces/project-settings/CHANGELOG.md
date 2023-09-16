@@ -1,5 +1,15 @@
 # @inlang/project-settings
 
+## 2.0.0
+
+The project settings schema is now a flat key-value pair data structure to simplify application logic and the concept of config is consolidated to settings alone.
+
+### Breaking Changes
+
+- `$schema` must point to `"https://inlang.com/schema/project-settings"`
+- `settings.*` is now part of the root object
+- `project.messageLintRuleLevels` is not part of the root object
+
 ## 1.2.0
 
 ### Minor Changes
