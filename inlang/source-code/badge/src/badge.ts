@@ -33,7 +33,7 @@ export const badge = async (url: string) => {
 		throw new Error("No project.inlang.json file found in the repository.")
 	})
 
-	const inlang = await loadProject({
+	const project = await loadProject({
 		settingsFilePath: "./project.inlang.json",
 		nodeishFs: repo.nodeishFs,
 		_capture(id, props) {
@@ -46,20 +46,20 @@ export const badge = async (url: string) => {
 	})
 
 	// access all messages via inlang instance query
-	const messageIds = inlang.query.messages.includedMessageIds()
+	const messageIds = project.query.messages.includedMessageIds()
 
-	const settings = inlang.settings()
+	const settings = project.settings()
 
 	// TODO: async reports
 	const MessageLintReportsAwaitable = (): Promise<MessageLintReport[]> => {
 		return new Promise((resolve) => {
-			let reports = inlang.query.messageLintReports.getAll()
+			let reports = project.query.messageLintReports.getAll()
 
 			if (reports) {
 				// reports where loaded
 				setTimeout(() => {
 					// this is a workaround. We do not know when the report changed. Normally this shouldn't be a issue for cli
-					const newReports = inlang.query.messageLintReports.getAll()
+					const newReports = project.query.messageLintReports.getAll()
 					if (newReports) {
 						resolve(newReports)
 					}
@@ -67,7 +67,7 @@ export const badge = async (url: string) => {
 			} else {
 				let counter = 0
 				const interval = setInterval(() => {
-					reports = inlang.query.messageLintReports.getAll()
+					reports = project.query.messageLintReports.getAll()
 					if (reports) {
 						clearInterval(interval)
 						resolve(reports)

@@ -55,16 +55,16 @@ export const loadProject = async (args: {
 		})
 		// TODO: create FS watcher and update settings on change
 
-		const writesettingsToDisk = skipFirst((settings: ProjectSettings) =>
-			_writesettingsToDisk({ nodeishFs: args.nodeishFs, settings }),
+		const writeSettingsToDisk = skipFirst((settings: ProjectSettings) =>
+			_writeSettingsToDisk({ nodeishFs: args.nodeishFs, settings }),
 		)
 
 		const setSettings = (settings: ProjectSettings): Result<void, ProjectSettingsInvalidError> => {
 			try {
-				const validatedsettings = parsesettings(settings)
-				_setSettings(validatedsettings)
+				const validatedSettings = parseSettings(settings)
+				_setSettings(validatedSettings)
 
-				writesettingsToDisk(validatedsettings)
+				writeSettingsToDisk(validatedSettings)
 				return { data: undefined }
 			} catch (error: unknown) {
 				if (error instanceof ProjectSettingsInvalidError) {
@@ -240,10 +240,10 @@ const loadSettings = async (args: {
 			cause: json.error,
 		})
 	}
-	return parsesettings(json.data)
+	return parseSettings(json.data)
 }
 
-const parsesettings = (settings: unknown) => {
+const parseSettings = (settings: unknown) => {
 	const withMigration = migrateIfOutdated(settings as any)
 	if (settingsCompiler.Check(withMigration) === false) {
 		const typeErrors = [...settingsCompiler.Errors(settings)]
@@ -256,20 +256,25 @@ const parsesettings = (settings: unknown) => {
 	return withMigration
 }
 
-const _writesettingsToDisk = async (args: {
+const _writeSettingsToDisk = async (args: {
 	nodeishFs: NodeishFilesystemSubset
 	settings: ProjectSettings
 }) => {
-	const { data: serializedsettings, error: serializesettingsError } = tryCatch(() =>
+	const { data: serializedSettings, error: serializeSettingsError } = tryCatch(() =>
 		// TODO: this will probably not match the original formatting
 		JSON.stringify(args.settings, undefined, 2),
 	)
-	if (serializesettingsError) throw serializesettingsError
+	if (serializeSettingsError) {
+		throw serializeSettingsError
+	}
 
-	const { error: writesettingsError } = await tryCatch(async () =>
-		args.nodeishFs.writeFile("./project.inlang.json", serializedsettings!),
+	const { error: writeSettingsError } = await tryCatch(async () =>
+		args.nodeishFs.writeFile("./project.inlang.json", serializedSettings),
 	)
-	if (writesettingsError) throw writesettingsError
+
+	if (writeSettingsError) {
+		throw writeSettingsError
+	}
 }
 
 // ------------------------------------------------------------------------------------------------

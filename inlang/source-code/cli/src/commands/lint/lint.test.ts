@@ -55,7 +55,7 @@ const exampleMessages: Message[] = [
 	},
 ]
 
-async function setupInlang(enabledLintRule?: MessageLintRule) {
+async function setupProject(enabledLintRule?: MessageLintRule) {
 	const fs = createNodeishMemoryFs()
 
 	await fs.writeFile(
@@ -107,7 +107,7 @@ describe("lint command", () => {
 			},
 		}
 
-		const inlang = await setupInlang(enabledLintRule)
+		const project = await setupProject(enabledLintRule)
 
 		const logger = {
 			log: vi.fn(),
@@ -118,7 +118,7 @@ describe("lint command", () => {
 		let lintResult
 		try {
 			lintResult = await lintCommandAction({
-				inlang,
+				project,
 				logger,
 			})
 		} catch (err) {
@@ -148,7 +148,7 @@ describe("lint command", () => {
 			},
 		}
 
-		const inlang = await setupInlang(enabledLintRule)
+		const project = await setupProject(enabledLintRule)
 
 		const logger = {
 			log: vi.fn(),
@@ -159,7 +159,7 @@ describe("lint command", () => {
 		let lintResult
 		try {
 			lintResult = await lintCommandAction({
-				inlang,
+				project,
 				logger,
 			})
 		} catch (err) {
@@ -175,7 +175,7 @@ describe("lint command", () => {
 	})
 
 	it("error on missing lint rules", async () => {
-		const inlang = await setupInlang()
+		const project = await setupProject()
 
 		const logger = {
 			log: vi.fn(),
@@ -186,7 +186,7 @@ describe("lint command", () => {
 		let lintResult
 		try {
 			lintResult = await lintCommandAction({
-				inlang,
+				project,
 				logger,
 			})
 		} catch (err) {

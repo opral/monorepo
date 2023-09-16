@@ -80,15 +80,15 @@ describe("translate command", () => {
 				} satisfies InlangModule
 			}
 
-			const inlang = await loadProject({
+			const project = await loadProject({
 				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
 
-			await translateCommandAction({ inlang })
+			await translateCommandAction({ project })
 
-			const messages = inlang.query.messages.getAll()
+			const messages = project.query.messages.getAll()
 
 			expect(messages[0]?.variants.length).toBe(3)
 			expect(messages[1]?.variants.length).toBe(3)
