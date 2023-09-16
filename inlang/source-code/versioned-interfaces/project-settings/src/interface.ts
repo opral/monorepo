@@ -1,14 +1,25 @@
 import { type Static, type TLiteral, type TTemplateLiteral, Type } from "@sinclair/typebox"
 import { LanguageTag } from "@inlang/language-tag"
-import { MessageLintLevel, MessageLintRule } from "@inlang/message-lint-rule"
-import { JSON, JSONObject } from "@inlang/json-types"
+import { JSON, type JSONObject } from "@inlang/json-types"
 
 /**
- * ---------------- UTILITY TYPES ----------------
+ * ---------------- AVOIDING CIRCULAR DEPENDENCIES ----------------
+ *
+ * The types beneath belong to other packages that depent on project settings
+ * and must therefore be declared here to avoid circular dependencies.
+ *
  */
 
-// workaround to get the id from a union type
-const MessageLintRuleId = MessageLintRule["properties"]["meta"]["properties"]["id"]
+export const _MessageLintRuleId = Type.String({
+	pattern: "^messageLintRule\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)$",
+	description: "The key must be conform to `messageLintRule.{namespace}.{id}` pattern.",
+	examples: [
+		"messageLintRule.namespace.patternInvalid",
+		"messageLintRule.namespace.missingTranslation",
+	],
+}) as unknown as TTemplateLiteral<[TLiteral<`messageLintRule.${string}.${string}`>]>
+
+export const _MessageLintRuleLevel = Type.Union([Type.Literal("error"), Type.Literal("warning")])
 
 /**
  * ---------------- Settings ----------------
@@ -55,7 +66,7 @@ const InternalSettings = Type.Object({
 		},
 	),
 	messageLintRuleLevels: Type.Optional(
-		Type.Record(MessageLintRuleId, MessageLintLevel, {
+		Type.Record(_MessageLintRuleId, _MessageLintRuleLevel, {
 			description: "The lint rule levels for messages.",
 			examples: [
 				{

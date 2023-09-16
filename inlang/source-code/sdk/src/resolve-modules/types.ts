@@ -39,7 +39,7 @@ export type ResolveModuleFunction = (args: {
 		/**
 		 * The resolved item id of the module.
 		 */
-		id: Plugin["meta"]["id"] | MessageLintRule["meta"]["id"]
+		id: Plugin["id"] | MessageLintRule["id"]
 	}>
 	/**
 	 * The resolved plugins.

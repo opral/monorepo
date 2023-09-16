@@ -133,13 +133,14 @@ export const loadProject = async (args: {
 			return resolvedModules()!.messageLintRules.map(
 				(rule) =>
 					({
-						meta: rule.meta,
+						id: rule.id,
+						displayName: rule.displayName,
+						description: rule.description,
 						module:
-							resolvedModules()?.meta.find((m) => m.id.includes(rule.meta.id))?.module ??
+							resolvedModules()?.meta.find((m) => m.id.includes(rule.id))?.module ??
 							"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
-
 						// default to warning, see https://github.com/inlang/monorepo/issues/1254
-						lintLevel: settingsValue["messageLintRuleLevels"]?.[rule.meta.id] ?? "warning",
+						level: settingsValue["messageLintRuleLevels"]?.[rule.id] ?? "warning",
 					} satisfies InstalledMessageLintRule),
 			) satisfies Array<InstalledMessageLintRule>
 		}
@@ -147,9 +148,11 @@ export const loadProject = async (args: {
 		const installedPlugins = () => {
 			if (!resolvedModules()) return []
 			return resolvedModules()!.plugins.map((plugin) => ({
-				meta: plugin.meta,
+				id: plugin.id,
+				displayName: plugin.displayName,
+				description: plugin.description,
 				module:
-					resolvedModules()?.meta.find((m) => m.id.includes(plugin.meta.id))?.module ??
+					resolvedModules()?.meta.find((m) => m.id.includes(plugin.id))?.module ??
 					"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
 			})) satisfies Array<InstalledPlugin>
 		}
@@ -161,7 +164,7 @@ export const loadProject = async (args: {
 		const messagesQuery = createMessagesQuery(() => messages() || [])
 		const lintReportsQuery = createMessageLintReportsQuery(
 			messages,
-			settings,
+			settings as () => ProjectSettings,
 			installedMessageLintRules,
 			resolvedModules,
 		)

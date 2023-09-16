@@ -22,11 +22,12 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
-		"@lix-js/fs": "*",
 		"@inlang/json-types": "*",
-		"@inlang/message": "*",
 		"@inlang/language-tag": "*",
-		"@inlang/translatable": "*"
+		"@inlang/message": "*",
+		"@inlang/project-settings": "2.0.0",
+		"@inlang/translatable": "*",
+		"@lix-js/fs": "*"
 	},
 	"peerDependencies": {
 		"@sinclair/typebox": "^0.31.0"
