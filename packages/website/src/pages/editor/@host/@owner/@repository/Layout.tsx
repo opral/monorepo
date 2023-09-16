@@ -189,7 +189,7 @@ export function Layout(props: { children: JSXElement }) {
 																	setFilteredMessageLintRules(
 																		project()
 																			?.installed.messageLintRules()
-																			.map((lintRule) => lintRule.meta.id) ?? [],
+																			.map((lintRule) => lintRule.id) ?? [],
 																	)
 																}
 																addFilter(filter.name)
@@ -486,7 +486,7 @@ function LintFilter(props: { clearFunction: any }) {
 						setFilteredMessageLintRules(
 							project()
 								?.installed.messageLintRules()
-								.map((lintRule) => lintRule.meta.id) ?? [],
+								.map((lintRule) => lintRule.id) ?? [],
 						)
 					}
 				>
@@ -509,10 +509,10 @@ function LintFilter(props: { clearFunction: any }) {
 					}
 				>
 					{(lintRule) => (
-						<sl-option prop:value={lintRule.meta.id}>
-							{typeof lintRule.meta.displayName === "object"
-								? lintRule.meta.displayName.en
-								: lintRule.meta.displayName}
+						<sl-option prop:value={lintRule.id}>
+							{typeof lintRule.displayName === "object"
+								? lintRule.displayName.en
+								: lintRule.displayName}
 						</sl-option>
 					)}
 				</For>

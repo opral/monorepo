@@ -308,7 +308,7 @@ export function PatternEditor(props: {
 			if (report.messageId === props.message.id && report.languageTag === props.languageTag) {
 				const messageLintRuleName = project()
 					?.installed.messageLintRules()
-					.find((rule) => rule.meta.id === report.ruleId)?.meta.displayName
+					.find((rule) => rule.id === report.ruleId)?.displayName
 				notifications.push({
 					notificationTitle:
 						typeof messageLintRuleName === "object"

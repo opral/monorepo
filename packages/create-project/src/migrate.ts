@@ -116,8 +116,8 @@ export async function migrateProjectSettings(args: {
 
 				const pluginName =
 					moduleDetections.values().next().value || lintRuleDetections.values().next().value
-				const pluginId: Plugin["meta"]["id"] = ("plugin.inlang." +
-					(pluginName || `<please add your plugin id for ${url} here>`)) as Plugin["meta"]["id"]
+				const pluginId: Plugin["id"] = ("plugin.inlang." +
+					(pluginName || `<please add your plugin id for ${url} here>`)) as Plugin["id"]
 
 				return {
 					default: (pluginArg: any) => {
@@ -202,7 +202,7 @@ function lineParsing(
 	}
 
 	const pluginName: string = moduleDetections.values().next().value
-	const pluginId: Plugin["meta"]["id"] = `plugin.inlang.${pluginName}`
+	const pluginId: Plugin["id"] = `plugin.inlang.${pluginName}`
 
 	config.modules = [
 		pluginUrls[pluginName] || `<please add your missing plugin url here>`,
