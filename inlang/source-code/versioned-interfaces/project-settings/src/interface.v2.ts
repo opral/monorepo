@@ -91,5 +91,5 @@ const ExternalSettings = Type.Record(
 	{ additionalProperties: false, description: "Settings defined by apps, plugins, etc." },
 )
 
-export type ProjectSettings = Static<typeof ProjectSettings>
-export const ProjectSettings = Type.Intersect([InternalSettings, ExternalSettings])
+export type ProjectSettingsV2 = Static<typeof ProjectSettingsV2>
+export const ProjectSettingsV2 = Type.Intersect([InternalSettings, ExternalSettings])

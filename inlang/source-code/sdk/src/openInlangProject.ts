@@ -20,6 +20,7 @@ import { debounce } from "throttle-debounce"
 import { createMessageLintReportsQuery } from "./createMessageLintReportsQuery.js"
 import { ProjectSettings, Message, type NodeishFilesystemSubset } from "./versionedInterfaces.js"
 import { tryCatch, type Result } from "@inlang/result"
+import { migrateIfOutdated } from "@inlang/project-settings/migration"
 
 const ConfigCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -243,7 +244,8 @@ const loadConfig = async (args: {
 }
 
 const parseConfig = (config: unknown) => {
-	if (ConfigCompiler.Check(config) === false) {
+	const withMigration = migrateIfOutdated(config as any)
+	if (ConfigCompiler.Check(withMigration) === false) {
 		const typeErrors = [...ConfigCompiler.Errors(config)]
 		if (typeErrors.length > 0) {
 			throw new InvalidConfigError(`The config is invalid according to the schema.`, {
@@ -251,7 +253,7 @@ const parseConfig = (config: unknown) => {
 			})
 		}
 	}
-	return config as ProjectSettings
+	return withMigration
 }
 
 const _writeConfigToDisk = async (args: {

@@ -1,43 +1,43 @@
 import { TypeCompiler } from "@sinclair/typebox/compiler"
-import { ProjectSettings } from "./interface.js"
+import { ProjectSettingsV2 } from "./interface.v2.js"
 import { Value } from "@sinclair/typebox/value"
 import { describe, it, expect } from "vitest"
 
 describe("settings.languageTags", () => {
 	it("should enforce unique language tags", () => {
-		const settings: ProjectSettings = {
+		const settings: ProjectSettingsV2 = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "en"],
 			modules: [],
 		}
-		expect(Value.Check(ProjectSettings, settings)).toBe(false)
+		expect(Value.Check(ProjectSettingsV2, settings)).toBe(false)
 	})
 })
 
 describe("settings.modules", () => {
 	it("should be possible to use a jsdelivr uri", () => {
-		const settings: ProjectSettings = {
+		const settings: ProjectSettingsV2 = {
 			sourceLanguageTag: "en",
 			languageTags: ["en"],
 			modules: ["https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index.js"],
 		}
-		const errors = [...Value.Errors(ProjectSettings, settings)]
+		const errors = [...Value.Errors(ProjectSettingsV2, settings)]
 		if (errors.length > 0) {
 			console.error(errors)
 		}
-		expect(Value.Check(ProjectSettings, settings)).toBe(true)
+		expect(Value.Check(ProjectSettingsV2, settings)).toBe(true)
 	})
 	it("should be possible to reference a local module", () => {
-		const settings: ProjectSettings = {
+		const settings: ProjectSettingsV2 = {
 			sourceLanguageTag: "en",
 			languageTags: ["en"],
 			modules: ["./my-module.js"],
 		}
-		expect(Value.Check(ProjectSettings, settings)).toBe(true)
+		expect(Value.Check(ProjectSettingsV2, settings)).toBe(true)
 	})
 
 	it("must enforce unique modules", () => {
-		const settings: ProjectSettings = {
+		const settings: ProjectSettingsV2 = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
 			modules: [
@@ -45,20 +45,20 @@ describe("settings.modules", () => {
 				"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index.js",
 			],
 		}
-		expect(Value.Check(ProjectSettings, settings)).toBe(false)
+		expect(Value.Check(ProjectSettingsV2, settings)).toBe(false)
 	})
 
 	it("must enforce a .js ending for modules", () => {
-		const settings: ProjectSettings = {
+		const settings: ProjectSettingsV2 = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
 			modules: ["https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index"],
 		}
-		expect(Value.Check(ProjectSettings, settings)).toBe(false)
+		expect(Value.Check(ProjectSettingsV2, settings)).toBe(false)
 	})
 
 	it("should enforce backwards compatible versioning (not SemVer)", () => {
-		const settings: ProjectSettings = {
+		const settings: ProjectSettingsV2 = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
 			modules: ["https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@4/dist/index"],
@@ -76,19 +76,19 @@ describe("settings.modules", () => {
 
 		for (const passCase of passCases) {
 			const config = { ...settings, modules: [passCase] }
-			expect(Value.Check(ProjectSettings, config)).toBe(true)
+			expect(Value.Check(ProjectSettingsV2, config)).toBe(true)
 		}
 
 		for (const failCase of failCases) {
 			const config = { ...settings, modules: [failCase] }
-			expect(Value.Check(ProjectSettings, config)).toBe(false)
+			expect(Value.Check(ProjectSettingsV2, config)).toBe(false)
 		}
 	})
 })
 
 describe("settings.* (external settings)", () => {
 	it("should be possible to have one nested object layer", () => {
-		const settings: ProjectSettings = {
+		const settings: ProjectSettingsV2 = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
 			modules: [],
@@ -98,11 +98,11 @@ describe("settings.* (external settings)", () => {
 				},
 			},
 		}
-		expect(Value.Check(ProjectSettings, settings)).toBe(true)
+		expect(Value.Check(ProjectSettingsV2, settings)).toBe(true)
 	})
 
 	it("should pass messageLintRule|plugin|app|library keys", () => {
-		const settings: ProjectSettings = {
+		const settings: ProjectSettingsV2 = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
 			modules: [],
@@ -116,34 +116,34 @@ describe("settings.* (external settings)", () => {
 
 		for (const passCase of passCases) {
 			const config = { ...settings, [passCase]: {} }
-			expect(Value.Check(ProjectSettings, config)).toBe(true)
+			expect(Value.Check(ProjectSettingsV2, config)).toBe(true)
 		}
 	})
 
 	it("should enforce namespaces", () => {
-		const settings: ProjectSettings = {
+		const settings: ProjectSettingsV2 = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
 			modules: [],
 			// @ts-expect-error - Namespace is missing
 			withoutNamespace: {},
 		}
-		expect(Value.Check(ProjectSettings, settings)).toBe(false)
+		expect(Value.Check(ProjectSettingsV2, settings)).toBe(false)
 	})
 
 	it("should fail on unknown types", () => {
-		const settings: ProjectSettings = {
+		const settings: ProjectSettingsV2 = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
 			modules: [],
 			// @ts-expect-error - unknown type
 			"namespace.unknownType.name": {},
 		}
-		expect(Value.Check(ProjectSettings, settings)).toBe(false)
+		expect(Value.Check(ProjectSettingsV2, settings)).toBe(false)
 	})
 
 	it("should enforce camelCase", () => {
-		const settings: ProjectSettings = {
+		const settings: ProjectSettingsV2 = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
 			modules: [],
@@ -159,12 +159,12 @@ describe("settings.* (external settings)", () => {
 
 		for (const failCase of failCases) {
 			const config = { ...settings, settings: { [failCase]: {} } }
-			expect(Value.Check(ProjectSettings, config)).toBe(false)
+			expect(Value.Check(ProjectSettingsV2, config)).toBe(false)
 		}
 	})
 
 	it("should not be possible to use non-JSON values", () => {
-		const settings: ProjectSettings = {
+		const settings: ProjectSettingsV2 = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
 			modules: [],
@@ -176,11 +176,11 @@ describe("settings.* (external settings)", () => {
 				hello: "World",
 			},
 		}
-		expect(Value.Check(ProjectSettings, settings)).toBe(false)
+		expect(Value.Check(ProjectSettingsV2, settings)).toBe(false)
 	})
 
 	it("should be possible to use JSON values", () => {
-		const settings: ProjectSettings = {
+		const settings: ProjectSettingsV2 = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
 			modules: [],
@@ -193,23 +193,23 @@ describe("settings.* (external settings)", () => {
 				array: [1, 2, 3],
 			},
 		}
-		expect(Value.Check(ProjectSettings, settings)).toBe(true)
+		expect(Value.Check(ProjectSettingsV2, settings)).toBe(true)
 	})
 
 	// (reserving project namespace for internal use only)
 	it("should not be possible to define unknown project settings", () => {
-		const settings: ProjectSettings = {
+		const settings: ProjectSettingsV2 = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
 			modules: [],
 			// @ts-expect-error - unknown project key
 			"project.unknown.name": {},
 		}
-		expect(Value.Check(ProjectSettings, settings)).toBe(false)
+		expect(Value.Check(ProjectSettingsV2, settings)).toBe(false)
 	})
 
 	it("should be possible to define known project settings", () => {
-		const settings: ProjectSettings = {
+		const settings: ProjectSettingsV2 = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
 			modules: [],
@@ -217,14 +217,14 @@ describe("settings.* (external settings)", () => {
 				"messageLintRule.namespace.helloWorld": "error",
 			},
 		}
-		expect(Value.Check(ProjectSettings, settings)).toBe(true)
+		expect(Value.Check(ProjectSettingsV2, settings)).toBe(true)
 	})
 })
 
 it("should pass with valid real world configs and the typecompiler", () => {
-	const SettingsParser = TypeCompiler.Compile(ProjectSettings)
+	const SettingsParser = TypeCompiler.Compile(ProjectSettingsV2)
 
-	const configs: ProjectSettings[] = [
+	const configs: ProjectSettingsV2[] = [
 		{
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
@@ -246,23 +246,23 @@ it("should pass with valid real world configs and the typecompiler", () => {
 	]
 	for (const config of configs) {
 		expect(SettingsParser.Check(config)).toBe(true)
-		expect(Value.Check(ProjectSettings, config)).toBe(true)
+		expect(Value.Check(ProjectSettingsV2, config)).toBe(true)
 	}
 })
 
 describe("settings.$schema", () => {
 	it("should be possible to define the schema", () => {
-		const settings: ProjectSettings = {
+		const settings: ProjectSettingsV2 = {
 			$schema: "https://inlang.com/schema/project-settings",
 			sourceLanguageTag: "en",
 			languageTags: ["en"],
 			modules: [],
 		}
-		expect(Value.Check(ProjectSettings, settings)).toBe(true)
+		expect(Value.Check(ProjectSettingsV2, settings)).toBe(true)
 	})
 
 	it("should only allow the inlang schema schema", () => {
-		const settings: ProjectSettings = {
+		const settings: ProjectSettingsV2 = {
 			// @ts-expect-error - invalid schema link
 			$schema: "https://inlang.com/schema/unknown",
 			sourceLanguageTag: "en",
@@ -270,6 +270,6 @@ describe("settings.$schema", () => {
 			modules: [],
 			settings: {},
 		}
-		expect(Value.Check(ProjectSettings, settings)).toBe(false)
+		expect(Value.Check(ProjectSettingsV2, settings)).toBe(false)
 	})
 })
