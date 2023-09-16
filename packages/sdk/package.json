@@ -35,7 +35,7 @@
 		"@inlang/language-tag": "*",
 		"@inlang/message": "*",
 		"@inlang/plugin": "*",
-		"@inlang/project-config": "*",
+		"@inlang/project-settings": "*",
 		"@inlang/result": "*",
 		"@lix-js/fs": "*",
 		"@sinclair/typebox": "^0.31.0",

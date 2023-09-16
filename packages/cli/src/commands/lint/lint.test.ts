@@ -3,8 +3,8 @@ import { lintCommandAction } from "./index.js"
 import {
 	MessageLintRule,
 	Message,
-	ProjectConfig,
-	openInlangProject,
+	ProjectSettings,
+	loadProject,
 	Plugin,
 	type InlangModule,
 } from "@inlang/sdk"
@@ -55,7 +55,7 @@ const exampleMessages: Message[] = [
 	},
 ]
 
-async function setupInlang(enabledLintRule?: MessageLintRule) {
+async function setupProject(enabledLintRule?: MessageLintRule) {
 	const fs = createNodeishMemoryFs()
 
 	await fs.writeFile(
@@ -64,10 +64,8 @@ async function setupInlang(enabledLintRule?: MessageLintRule) {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de", "it"],
 			modules: ["_mockPlugin.js", ...(enabledLintRule ? ["lintRule.js"] : [])],
-			settings: {
-				"project.messageLintRuleLevels": {},
-			},
-		} satisfies ProjectConfig),
+			messageLintRuleLevels: {},
+		} satisfies ProjectSettings),
 	)
 
 	const _mockPlugin: Plugin = {
@@ -89,8 +87,8 @@ async function setupInlang(enabledLintRule?: MessageLintRule) {
 		}
 	}
 
-	return await openInlangProject({
-		projectFilePath: "./project.inlang.json",
+	return await loadProject({
+		settingsFilePath: "./project.inlang.json",
 		nodeishFs: fs,
 		_import,
 	})
@@ -109,7 +107,7 @@ describe("lint command", () => {
 			},
 		}
 
-		const inlang = await setupInlang(enabledLintRule)
+		const project = await setupProject(enabledLintRule)
 
 		const logger = {
 			log: vi.fn(),
@@ -120,7 +118,7 @@ describe("lint command", () => {
 		let lintResult
 		try {
 			lintResult = await lintCommandAction({
-				inlang,
+				project,
 				logger,
 			})
 		} catch (err) {
@@ -150,7 +148,7 @@ describe("lint command", () => {
 			},
 		}
 
-		const inlang = await setupInlang(enabledLintRule)
+		const project = await setupProject(enabledLintRule)
 
 		const logger = {
 			log: vi.fn(),
@@ -161,7 +159,7 @@ describe("lint command", () => {
 		let lintResult
 		try {
 			lintResult = await lintCommandAction({
-				inlang,
+				project,
 				logger,
 			})
 		} catch (err) {
@@ -177,7 +175,7 @@ describe("lint command", () => {
 	})
 
 	it("error on missing lint rules", async () => {
-		const inlang = await setupInlang()
+		const project = await setupProject()
 
 		const logger = {
 			log: vi.fn(),
@@ -188,7 +186,7 @@ describe("lint command", () => {
 		let lintResult
 		try {
 			lintResult = await lintCommandAction({
-				inlang,
+				project,
 				logger,
 			})
 		} catch (err) {

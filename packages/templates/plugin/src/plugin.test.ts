@@ -1,5 +1,5 @@
 import { it, expect } from "vitest"
-import { ProjectConfig, openInlangProject } from "@inlang/sdk"
+import { ProjectSettings, loadProject } from "@inlang/sdk"
 import { createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
 import { id as pluginId } from "../marketplace-manifest.json"
 
@@ -8,28 +8,27 @@ it("should return fake messages to illustrate how a plugin works", async () => {
 	const fs = createNodeishMemoryFs()
 
 	// creating a project file
-	const config = {
+	const settings = {
 		sourceLanguageTag: "en",
 		modules: ["./plugin.js"],
 		languageTags: ["en", "de"],
-		settings: {},
-	} satisfies ProjectConfig
+	} satisfies ProjectSettings
 
 	// writing the project file to the virtual filesystem
-	await fs.writeFile("/project.inlang.json", JSON.stringify(config))
+	await fs.writeFile("/project.inlang.json", JSON.stringify(settings))
 
 	// opening the project file and loading the plugin
-	const inlang = await openInlangProject({
+	const project = await loadProject({
 		nodeishFs: fs,
-		projectFilePath: "/project.inlang.json",
+		settingsFilePath: "/project.inlang.json",
 		// simulate the import function that the SDK uses
 		// to inject the plugin into the project
 		_import: async () => import("./index.js"),
 	})
 
-	expect(inlang.errors()).toEqual([])
+	expect(project.errors()).toEqual([])
 
-	expect(inlang.installed.plugins()[0]?.meta.id).toBe(pluginId)
+	expect(project.installed.plugins()[0]?.meta.id).toBe(pluginId)
 
-	expect(inlang.query.messages.get({ where: { id: "this-is-a-test-message" } })).toBeDefined()
+	expect(project.query.messages.get({ where: { id: "this-is-a-test-message" } })).toBeDefined()
 })

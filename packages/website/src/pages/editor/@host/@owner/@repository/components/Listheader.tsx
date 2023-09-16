@@ -10,17 +10,17 @@ interface ListHeaderProps {
 }
 
 export const messageCount = (ids: string[]) => {
-	const { inlang } = useEditorState()
+	const { project } = useEditorState()
 	let counter = 0
 	for (const id of ids) {
-		if (showFilteredMessage(inlang()?.query.messages.get({ where: { id: id } }))) counter++
+		if (showFilteredMessage(project()?.query.messages.get({ where: { id: id } }))) counter++
 	}
 	return counter
 }
 
 export const ListHeader = (props: ListHeaderProps) => {
 	const {
-		inlang,
+		project,
 		setFilteredMessageLintRules,
 		filteredMessageLintRules,
 		filteredId,
@@ -31,7 +31,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 
 	const getLintSummary = createMemo(() => {
 		const summary: Record<MessageLintRule["meta"]["id"], number> = {}
-		for (const report of inlang()?.query.messageLintReports.getAll() || []) {
+		for (const report of project()?.query.messageLintReports.getAll() || []) {
 			if (
 				filteredMessageLintRules().length === 0 ||
 				filteredMessageLintRules().includes(report.ruleId)
@@ -45,7 +45,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 	const getLintRule = (
 		lintRuleId: MessageLintRule["meta"]["id"],
 	): InstalledMessageLintRule | undefined =>
-		inlang()
+		project()
 			?.installed.messageLintRules()
 			.find((rule) => rule.meta.id === lintRuleId)
 

@@ -17,7 +17,7 @@
 		"@inlang/marketplace-manifest": "*",
 		"@inlang/telemetry": "*",
 		"@inlang/website": "*",
-		"@inlang/project-config": "*",
+		"@inlang/project-settings": "*",
 		"@sentry/node": "^7.47.0",
 		"@sentry/tracing": "^7.47.0",
 		"compression": "^1.7.4",

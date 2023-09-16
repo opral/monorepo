@@ -6,7 +6,7 @@ import { telemetryNode } from "@inlang/telemetry"
 import { removeCommas } from "./helper/removeCommas.js"
 import { calculateSummary } from "./helper/calculateSummary.js"
 import { caching } from "cache-manager"
-import { type MessageLintReport, openInlangProject } from "@inlang/sdk"
+import { type MessageLintReport, loadProject } from "@inlang/sdk"
 
 const fontMedium = readFileSync(new URL("../assets/static/Inter-Medium.ttf", import.meta.url))
 const fontBold = readFileSync(new URL("../assets/static/Inter-Bold.ttf", import.meta.url))
@@ -33,8 +33,8 @@ export const badge = async (url: string) => {
 		throw new Error("No project.inlang.json file found in the repository.")
 	})
 
-	const inlang = await openInlangProject({
-		projectFilePath: "./project.inlang.json",
+	const project = await loadProject({
+		settingsFilePath: "./project.inlang.json",
 		nodeishFs: repo.nodeishFs,
 		_capture(id, props) {
 			telemetryNode.capture({
@@ -46,29 +46,20 @@ export const badge = async (url: string) => {
 	})
 
 	// access all messages via inlang instance query
-	const messageIds = inlang.query.messages.includedMessageIds()
+	const messageIds = project.query.messages.includedMessageIds()
 
-	const projectConfig = inlang.config()
-	// throw if no config is present
-	if (!projectConfig) {
-		throw new Error("No inlang config found, please add a project.inlang.json")
-	}
-
-	// throw if no sourceLanguageTag is found
-	if (!projectConfig.sourceLanguageTag) {
-		throw new Error("No sourceLanguageTag found, please add one to your project.inlang.json")
-	}
+	const settings = project.settings()
 
 	// TODO: async reports
 	const MessageLintReportsAwaitable = (): Promise<MessageLintReport[]> => {
 		return new Promise((resolve) => {
-			let reports = inlang.query.messageLintReports.getAll()
+			let reports = project.query.messageLintReports.getAll()
 
 			if (reports) {
 				// reports where loaded
 				setTimeout(() => {
 					// this is a workaround. We do not know when the report changed. Normally this shouldn't be a issue for cli
-					const newReports = inlang.query.messageLintReports.getAll()
+					const newReports = project.query.messageLintReports.getAll()
 					if (newReports) {
 						resolve(newReports)
 					}
@@ -76,7 +67,7 @@ export const badge = async (url: string) => {
 			} else {
 				let counter = 0
 				const interval = setInterval(() => {
-					reports = inlang.query.messageLintReports.getAll()
+					reports = project.query.messageLintReports.getAll()
 					if (reports) {
 						clearInterval(interval)
 						resolve(reports)
@@ -97,7 +88,7 @@ export const badge = async (url: string) => {
 
 	const { percentage, errors, warnings, numberOfMissingVariants } = calculateSummary({
 		reports: reports,
-		languageTags: projectConfig.languageTags,
+		languageTags: settings.languageTags,
 		messageIds: messageIds,
 	})
 
