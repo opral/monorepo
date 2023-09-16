@@ -1,5 +1,11 @@
 # @inlang/project-settings
 
+## 2.1.0
+
+### Minor Changes
+
+- 25fe8502: refactor: remove plugin.meta and messageLintRule.meta nesting
+
 ## 2.0.0
 
 The project settings schema is now a flat key-value pair data structure to simplify application logic and the concept of config is consolidated to settings alone.
