@@ -1,4 +1,4 @@
-export { migrateProjectConfig } from "./migrate.js"
+export { migrateProjectSettings } from "./migrate.js"
 export { getLanguageFolderPath } from "./getLanguageFolderPath.js"
-export { getSupportedLibrary, tryAutoGenProjectConfig } from "./tryAutoGenProjectConfig.js"
-export type { SupportedLibrary } from "./tryAutoGenProjectConfig.js"
+export { getSupportedLibrary, tryAutoGenProjectSettings } from "./tryAutoGenProjectSettings.js"
+export type { SupportedLibrary } from "./tryAutoGenProjectSettings.js"

@@ -6,7 +6,7 @@ import {
 	getLocalStorage,
 	useLocalStorage,
 } from "#src/services/local-storage/index.js"
-import { ProjectConfig } from "@inlang/sdk"
+import { ProjectSettings } from "@inlang/sdk"
 import { tryCatch } from "@inlang/result"
 import type { Step } from "./index.page.jsx"
 import { registry } from "@inlang/marketplace-registry"
@@ -196,7 +196,7 @@ async function initializeRepo(
 		return
 	}
 
-	const inlangProject = parseProjectResult.data as ProjectConfig
+	const inlangProject = parseProjectResult.data as ProjectSettings
 
 	/* Look if the modules were already installed */
 	for (const pkg of inlangProject.modules) {

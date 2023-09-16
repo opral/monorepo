@@ -9,23 +9,22 @@ import {
 	ModuleImportError,
 } from "./errors.js"
 import { resolveModules } from "./resolveModules.js"
-import type { ProjectConfig } from "@inlang/project-config"
+import type { ProjectSettings } from "@inlang/project-settings"
 import type { InlangModule } from "@inlang/module"
 
 it("should return an error if a plugin cannot be imported", async () => {
-	const config: ProjectConfig = {
+	const settings: ProjectSettings = {
 		sourceLanguageTag: "en",
 		languageTags: ["de", "en"],
 		modules: ["https://myplugin.com/index.js"],
-		settings: {},
 	}
 
 	const resolved = await resolveModules({
-		config,
+		settings,
 		nodeishFs: {} as any,
 		_import: () => {
 			throw new ModuleImportError("Could not import", {
-				module: config.modules[0]!,
+				module: settings.modules[0]!,
 				cause: new Error("Could not import"),
 			})
 		},
@@ -60,11 +59,10 @@ it("should resolve plugins and message lint rules successfully", async () => {
 		message: () => undefined,
 	}
 
-	const config: ProjectConfig = {
+	const settings: ProjectSettings = {
 		sourceLanguageTag: "en",
 		languageTags: ["de", "en"],
 		modules: ["lint-rule.js", "plugin.js"],
-		settings: {},
 	}
 
 	const _import = async (name: string) => {
@@ -80,7 +78,7 @@ it("should resolve plugins and message lint rules successfully", async () => {
 	}
 
 	// Call the function
-	const resolved = await resolveModules({ config, _import, nodeishFs: {} as any })
+	const resolved = await resolveModules({ settings, _import, nodeishFs: {} as any })
 
 	// Assert results
 	expect(resolved.errors).toHaveLength(0)
@@ -93,33 +91,31 @@ it("should resolve plugins and message lint rules successfully", async () => {
 })
 
 it("should return an error if a module cannot be imported", async () => {
-	const config: ProjectConfig = {
+	const settings: ProjectSettings = {
 		sourceLanguageTag: "en",
 		languageTags: ["de", "en"],
 		modules: ["https://myplugin.com/index.js"],
-		settings: {},
 	}
 
 	const _import = async () => {
 		throw new ModuleImportError("Could not import", {
-			module: config.modules[0]!,
+			module: settings.modules[0]!,
 			cause: new Error(),
 		})
 	}
 
 	// Call the function
-	const resolved = await resolveModules({ config, _import, nodeishFs: {} as any })
+	const resolved = await resolveModules({ settings, _import, nodeishFs: {} as any })
 
 	// Assert results
 	expect(resolved.errors[0]).toBeInstanceOf(ModuleImportError)
 })
 
 it("should return an error if a module does not export any plugins or lint rules", async () => {
-	const config: ProjectConfig = {
+	const settings: ProjectSettings = {
 		sourceLanguageTag: "en",
 		languageTags: ["de", "en"],
 		modules: ["https://myplugin.com/index.js"],
-		settings: {},
 	}
 
 	const _import = async () => ({
@@ -127,18 +123,17 @@ it("should return an error if a module does not export any plugins or lint rules
 	})
 
 	// Call the function
-	const resolved = await resolveModules({ config, _import, nodeishFs: {} as any })
+	const resolved = await resolveModules({ settings, _import, nodeishFs: {} as any })
 
 	// Assert results
 	expect(resolved.errors[0]).toBeInstanceOf(ModuleHasNoExportsError)
 })
 
 it("should return an error if a module exports an invalid plugin or lint rule", async () => {
-	const config: ProjectConfig = {
+	const settings: ProjectSettings = {
 		sourceLanguageTag: "en",
 		languageTags: ["de", "en"],
 		modules: ["https://myplugin.com/index.js"],
-		settings: {},
 	}
 	const _import = async () =>
 		({
@@ -151,17 +146,16 @@ it("should return an error if a module exports an invalid plugin or lint rule", 
 			},
 		} satisfies InlangModule)
 
-	const resolved = await resolveModules({ config, _import, nodeishFs: {} as any })
+	const resolved = await resolveModules({ settings, _import, nodeishFs: {} as any })
 	expect(resolved.errors[0]).toBeInstanceOf(ModuleExportIsInvalidError)
 })
 
 it("should handle other unhandled errors during plugin resolution", async () => {
 	const errorMessage = "Unhandled error during plugin resolution"
-	const config: ProjectConfig = {
+	const settings: ProjectSettings = {
 		sourceLanguageTag: "en",
 		languageTags: ["de", "en"],
 		modules: ["https://myplugin.com/index.js"],
-		settings: {},
 	}
 
 	const _import = async () => {
@@ -169,7 +163,7 @@ it("should handle other unhandled errors during plugin resolution", async () => 
 	}
 
 	// Call the function
-	const resolved = await resolveModules({ config, _import, nodeishFs: {} as any })
+	const resolved = await resolveModules({ settings, _import, nodeishFs: {} as any })
 
 	// Assert results
 	expect(resolved.errors[0]).toBeInstanceOf(ModuleError)

@@ -1,5 +1,5 @@
 import { it, expect } from "vitest"
-import { ProjectConfig, openInlangProject } from "@inlang/sdk"
+import { ProjectSettings, openInlangProject } from "@inlang/sdk"
 import { createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
 import { id as pluginId } from "../marketplace-manifest.json"
 
@@ -8,15 +8,14 @@ it("should return fake messages to illustrate how a plugin works", async () => {
 	const fs = createNodeishMemoryFs()
 
 	// creating a project file
-	const config = {
+	const settings = {
 		sourceLanguageTag: "en",
 		modules: ["./plugin.js"],
 		languageTags: ["en", "de"],
-		settings: {},
-	} satisfies ProjectConfig
+	} satisfies ProjectSettings
 
 	// writing the project file to the virtual filesystem
-	await fs.writeFile("/project.inlang.json", JSON.stringify(config))
+	await fs.writeFile("/project.inlang.json", JSON.stringify(settings))
 
 	// opening the project file and loading the plugin
 	const inlang = await openInlangProject({

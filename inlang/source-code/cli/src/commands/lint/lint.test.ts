@@ -3,7 +3,7 @@ import { lintCommandAction } from "./index.js"
 import {
 	MessageLintRule,
 	Message,
-	ProjectConfig,
+	ProjectSettings,
 	openInlangProject,
 	Plugin,
 	type InlangModule,
@@ -64,10 +64,8 @@ async function setupInlang(enabledLintRule?: MessageLintRule) {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de", "it"],
 			modules: ["_mockPlugin.js", ...(enabledLintRule ? ["lintRule.js"] : [])],
-			settings: {
-				"project.messageLintRuleLevels": {},
-			},
-		} satisfies ProjectConfig),
+			messageLintRuleLevels: {},
+		} satisfies ProjectSettings),
 	)
 
 	const _mockPlugin: Plugin = {
