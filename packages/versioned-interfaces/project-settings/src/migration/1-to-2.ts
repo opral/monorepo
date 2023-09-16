@@ -1,8 +1,7 @@
-import type { ProjectSettingsV2 } from "../interface.v2.js"
-import type { ProjectConfigV1 } from "../interface.v1.js"
+import type { ProjectSettings } from "../interface.js"
 
-export const migrate1to2 = (config: ProjectConfigV1): ProjectSettingsV2 => {
-	const migrated: ProjectSettingsV2 = {
+export const migrate1to2 = (config: any): ProjectSettings => {
+	const migrated: ProjectSettings = {
 		$schema: "https://inlang.com/schema/project-settings",
 		sourceLanguageTag: config.sourceLanguageTag,
 		languageTags: config.languageTags,
