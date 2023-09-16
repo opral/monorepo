@@ -1,5 +1,5 @@
 import { it, expect } from "vitest"
-import { ProjectSettings, openInlangProject } from "@inlang/sdk"
+import { ProjectSettings, loadProject } from "@inlang/sdk"
 import { createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
 import { id as pluginId } from "../marketplace-manifest.json"
 
@@ -18,7 +18,7 @@ it("should return fake messages to illustrate how a plugin works", async () => {
 	await fs.writeFile("/project.inlang.json", JSON.stringify(settings))
 
 	// opening the project file and loading the plugin
-	const inlang = await openInlangProject({
+	const inlang = await loadProject({
 		nodeishFs: fs,
 		settingsFilePath: "/project.inlang.json",
 		// simulate the import function that the SDK uses

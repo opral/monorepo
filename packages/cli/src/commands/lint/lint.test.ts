@@ -4,7 +4,7 @@ import {
 	MessageLintRule,
 	Message,
 	ProjectSettings,
-	openInlangProject,
+	loadProject,
 	Plugin,
 	type InlangModule,
 } from "@inlang/sdk"
@@ -87,7 +87,7 @@ async function setupInlang(enabledLintRule?: MessageLintRule) {
 		}
 	}
 
-	return await openInlangProject({
+	return await loadProject({
 		settingsFilePath: "./project.inlang.json",
 		nodeishFs: fs,
 		_import,

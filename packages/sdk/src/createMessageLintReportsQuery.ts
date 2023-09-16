@@ -1,5 +1,5 @@
 import { createEffect } from "./reactivity/solid.js"
-import { createSubscribable } from "./openInlangProject.js"
+import { createSubscribable } from "./loadProject.js"
 import type { InlangProject, InstalledMessageLintRule, MessageLintReportsQueryApi } from "./api.js"
 import type { ProjectSettings } from "@inlang/project-settings"
 import type { resolveModules } from "./resolve-modules/index.js"

@@ -31,7 +31,7 @@ const ConfigCompiler = TypeCompiler.Compile(ProjectSettings)
  *   and supporting legacy resolvedModules such as CJS.
  *
  */
-export const openInlangProject = async (args: {
+export const loadProject = async (args: {
 	settingsFilePath: string
 	nodeishFs: NodeishFilesystemSubset
 	_import?: ImportFunction

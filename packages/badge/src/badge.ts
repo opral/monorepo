@@ -6,7 +6,7 @@ import { telemetryNode } from "@inlang/telemetry"
 import { removeCommas } from "./helper/removeCommas.js"
 import { calculateSummary } from "./helper/calculateSummary.js"
 import { caching } from "cache-manager"
-import { type MessageLintReport, openInlangProject } from "@inlang/sdk"
+import { type MessageLintReport, loadProject } from "@inlang/sdk"
 
 const fontMedium = readFileSync(new URL("../assets/static/Inter-Medium.ttf", import.meta.url))
 const fontBold = readFileSync(new URL("../assets/static/Inter-Bold.ttf", import.meta.url))
@@ -33,7 +33,7 @@ export const badge = async (url: string) => {
 		throw new Error("No project.inlang.json file found in the repository.")
 	})
 
-	const inlang = await openInlangProject({
+	const inlang = await loadProject({
 		settingsFilePath: "./project.inlang.json",
 		nodeishFs: repo.nodeishFs,
 		_capture(id, props) {
