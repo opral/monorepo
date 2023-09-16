@@ -235,7 +235,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				const inlang = solidAdapter(
 					await openInlangProject({
 						nodeishFs: newRepo.nodeishFs,
-						projectFilePath: "/project.inlang.json",
+						settingsFilePath: "/project.inlang.json",
 						_capture(id, props) {
 							telemetryBrowser.capture(id, props)
 						},

@@ -8,8 +8,8 @@ import type {
 import { type ImportFunction, resolveModules } from "./resolve-modules/index.js"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import {
-	ProjectFilePathNotFoundError,
-	ProjectFileJSONSyntaxError,
+	ProjectSettingsFileJSONSyntaxError,
+	ProjectSettingsFileNotFoundError,
 	InvalidConfigError,
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
@@ -31,7 +31,7 @@ const ConfigCompiler = TypeCompiler.Compile(ProjectSettings)
  *
  */
 export const openInlangProject = async (args: {
-	projectFilePath: string
+	settingsFilePath: string
 	nodeishFs: NodeishFilesystemSubset
 	_import?: ImportFunction
 	_capture?: (id: string, props: Record<string, unknown>) => void
@@ -43,7 +43,7 @@ export const openInlangProject = async (args: {
 
 		const [config, _setConfig] = createSignal<ProjectSettings>()
 		createEffect(() => {
-			loadConfig({ projectFilePath: args.projectFilePath, nodeishFs: args.nodeishFs })
+			loadConfig({ settingsFilePath: args.settingsFilePath, nodeishFs: args.nodeishFs })
 				.then((config) => {
 					setConfig(config)
 					args._capture?.("SDK used config", config)
@@ -218,15 +218,15 @@ export const openInlangProject = async (args: {
 // ------------------------------------------------------------------------------------------------
 
 const loadConfig = async (args: {
-	projectFilePath: string
+	settingsFilePath: string
 	nodeishFs: NodeishFilesystemSubset
 }) => {
 	const { data: configFile, error: configFileError } = await tryCatch(
-		async () => await args.nodeishFs.readFile(args.projectFilePath, { encoding: "utf-8" }),
+		async () => await args.nodeishFs.readFile(args.settingsFilePath, { encoding: "utf-8" }),
 	)
 	if (configFileError)
-		throw new ProjectFilePathNotFoundError(
-			`Could not locate config file in (${args.projectFilePath}).`,
+		throw new ProjectSettingsFileNotFoundError(
+			`Could not locate config file in (${args.settingsFilePath}).`,
 			{
 				cause: configFileError,
 			},
@@ -235,7 +235,7 @@ const loadConfig = async (args: {
 	const json = tryCatch(() => JSON.parse(configFile!))
 
 	if (json.error) {
-		throw new ProjectFileJSONSyntaxError(`The config is not a valid JSON file.`, {
+		throw new ProjectSettingsFileJSONSyntaxError(`The config is not a valid JSON file.`, {
 			cause: json.error,
 		})
 	}

@@ -5,8 +5,8 @@ import type { ProjectSettings, Plugin, MessageLintRule, Message } from "./versio
 import type { ImportFunction } from "./resolve-modules/index.js"
 import type { InlangModule } from "@inlang/module"
 import {
-	ProjectFilePathNotFoundError,
-	ProjectFileJSONSyntaxError,
+	ProjectSettingsFileJSONSyntaxError,
+	ProjectSettingsFileNotFoundError,
 	InvalidConfigError,
 } from "./errors.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
@@ -105,12 +105,12 @@ describe("initialization", () => {
 			const fs = createNodeishMemoryFs()
 
 			const inlang = await openInlangProject({
-				projectFilePath: "./test.json",
+				settingsFilePath: "./test.json",
 				nodeishFs: fs,
 				_import,
 			})
 
-			expect(inlang.errors()![0]).toBeInstanceOf(ProjectFilePathNotFoundError)
+			expect(inlang.errors()![0]).toBeInstanceOf(ProjectSettingsFileNotFoundError)
 		})
 
 		it("should return an error if config file is not a valid JSON", async () => {
@@ -118,12 +118,12 @@ describe("initialization", () => {
 			await fs.writeFile("./project.inlang.json", "invalid json")
 
 			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
 
-			expect(inlang.errors()![0]).toBeInstanceOf(ProjectFileJSONSyntaxError)
+			expect(inlang.errors()![0]).toBeInstanceOf(ProjectSettingsFileJSONSyntaxError)
 		})
 
 		it("should return an error if config file is does not match schema", async () => {
@@ -131,7 +131,7 @@ describe("initialization", () => {
 			await fs.writeFile("./project.inlang.json", JSON.stringify({}))
 
 			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -143,7 +143,7 @@ describe("initialization", () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -157,7 +157,7 @@ describe("initialization", () => {
 			await fs.writeFile("./project.inlang.json", configWithDeifferentFormatting)
 
 			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -185,7 +185,7 @@ describe("initialization", () => {
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 
 			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: $badImport,
 			})
@@ -216,7 +216,7 @@ describe("functionality", () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -228,7 +228,7 @@ describe("functionality", () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -250,7 +250,7 @@ describe("functionality", () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -264,7 +264,7 @@ describe("functionality", () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -295,7 +295,7 @@ describe("functionality", () => {
 			}
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -324,7 +324,7 @@ describe("functionality", () => {
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 
 			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -373,7 +373,7 @@ describe("functionality", () => {
 				} satisfies InlangModule
 			}
 			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -425,7 +425,7 @@ describe("functionality", () => {
 			}
 
 			const inlang = await openInlangProject({
-				projectFilePath: "./inlang.config.json",
+				settingsFilePath: "./inlang.config.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -443,7 +443,7 @@ describe("functionality", () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -458,7 +458,7 @@ describe("functionality", () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -474,7 +474,7 @@ describe("functionality", () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -520,7 +520,7 @@ describe("functionality", () => {
 			}
 
 			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -656,7 +656,7 @@ describe("functionality", () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -677,7 +677,7 @@ describe("functionality", () => {
 			const fs = createNodeishMemoryFs()
 			await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: async () => ({
 					default: mockMessageLintRule,

@@ -34,7 +34,7 @@ export const badge = async (url: string) => {
 	})
 
 	const inlang = await openInlangProject({
-		projectFilePath: "./project.inlang.json",
+		settingsFilePath: "./project.inlang.json",
 		nodeishFs: repo.nodeishFs,
 		_capture(id, props) {
 			telemetryNode.capture({
