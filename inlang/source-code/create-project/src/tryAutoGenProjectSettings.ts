@@ -51,7 +51,7 @@ export async function tryAutoGenProjectSettings(args: {
 
 	const { data, error } = await tryCatch(() =>
 		openInlangProject({
-			projectFilePath: projectFilePath,
+			settingsFilePath: projectFilePath,
 			nodeishFs: args.nodeishFs,
 		}),
 	)

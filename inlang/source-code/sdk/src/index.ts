@@ -16,8 +16,8 @@ export { openInlangProject } from "./openInlangProject.js"
 export { solidAdapter, type InlangProjectWithSolidAdapter } from "./adapter/solidAdapter.js"
 export { createMessagesQuery } from "./createMessagesQuery.js"
 export {
-	ProjectFilePathNotFoundError,
-	ProjectFileJSONSyntaxError,
+	ProjectSettingsFileJSONSyntaxError,
+	ProjectSettingsFileNotFoundError,
 	InvalidConfigError,
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,

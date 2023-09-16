@@ -88,7 +88,7 @@ async function setupInlang(enabledLintRule?: MessageLintRule) {
 	}
 
 	return await openInlangProject({
-		projectFilePath: "./project.inlang.json",
+		settingsFilePath: "./project.inlang.json",
 		nodeishFs: fs,
 		_import,
 	})

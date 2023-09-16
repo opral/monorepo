@@ -112,7 +112,7 @@ async function main(args: {
 
 	const { data: inlang, error } = await tryCatch(() =>
 		openInlangProject({
-			projectFilePath: closestProjectFilePathUri.fsPath,
+			settingsFilePath: closestProjectFilePathUri.fsPath,
 			nodeishFs: createFileSystemMapper(workspaceFolder.uri.fsPath),
 			_import: _import(workspaceFolder.uri.fsPath),
 			_capture(id, props) {

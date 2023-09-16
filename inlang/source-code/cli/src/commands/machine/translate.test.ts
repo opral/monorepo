@@ -81,7 +81,7 @@ describe("translate command", () => {
 			}
 
 			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
