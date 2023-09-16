@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 1.6.0
+
+### Minor Changes
+
+- 25fe8502: refactor: remove plugin.meta and messageLintRule.meta nesting
+
 ## 1.5.0
 
 ### Minor Changes
