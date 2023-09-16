@@ -110,7 +110,7 @@ async function main(args: {
 		new vscode.RelativePattern(workspaceFolder, "project.inlang.json"),
 	)
 
-	const { data: inlang, error } = await tryCatch(() =>
+	const { data: project, error } = await tryCatch(() =>
 		loadProject({
 			settingsFilePath: closestProjectFilePathUri.fsPath,
 			nodeishFs: createFileSystemMapper(workspaceFolder.uri.fsPath),
@@ -136,7 +136,7 @@ async function main(args: {
 
 	const loadMessages = async () => {
 		setState({
-			inlang,
+			project,
 		})
 	}
 
@@ -167,7 +167,7 @@ async function main(args: {
 
 	const documentSelectors: vscode.DocumentSelector = [
 		{ language: "javascript", pattern: "!project.inlang.json" },
-		...(state().inlang.customApi()["app.inlang.ideExtension"]?.documentSelectors || []),
+		...(state().project.customApi()["app.inlang.ideExtension"]?.documentSelectors || []),
 	]
 	// register source actions
 	args.context.subscriptions.push(
@@ -196,7 +196,7 @@ async function main(args: {
 	await migrateConfigFile(workspaceFolder, closestProjectFilePathUri)
 
 	// log inlang errors in the debugging console
-	const inlangErrors = state().inlang.errors()
+	const inlangErrors = state().project.errors()
 	if (inlangErrors.length > 0) {
 		console.error("Inlang VSCode Extension errors:", inlangErrors)
 	}
