@@ -21,7 +21,7 @@ import { publicEnv } from "@inlang/env-variables"
 import {
 	LanguageTag,
 	MessageLintRule,
-	openInlangProject,
+	loadProject,
 	solidAdapter,
 	type InlangProjectWithSolidAdapter,
 } from "@inlang/sdk"
@@ -233,7 +233,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		async ({ newRepo, lixErrors }) => {
 			if (lixErrors.length === 0 && newRepo) {
 				const inlang = solidAdapter(
-					await openInlangProject({
+					await loadProject({
 						nodeishFs: newRepo.nodeishFs,
 						settingsFilePath: "/project.inlang.json",
 						_capture(id, props) {

@@ -4,7 +4,7 @@ import { getLanguageFolderPath } from "./getLanguageFolderPath.js"
 import type { Plugin } from "@inlang/plugin"
 import { Value } from "@sinclair/typebox/value"
 import { ProjectSettings } from "@inlang/project-settings"
-import { openInlangProject } from "@inlang/sdk"
+import { loadProject } from "@inlang/sdk"
 import { tryCatch } from "@inlang/result"
 
 // FIXME: fetch latest major version instead
@@ -50,7 +50,7 @@ export async function tryAutoGenProjectSettings(args: {
 	}
 
 	const { data, error } = await tryCatch(() =>
-		openInlangProject({
+		loadProject({
 			settingsFilePath: projectFilePath,
 			nodeishFs: args.nodeishFs,
 		}),

@@ -1,6 +1,6 @@
 import fs from "node:fs/promises"
 import { resolve } from "node:path"
-import { openInlangProject, type InlangProject } from "@inlang/sdk"
+import { loadProject, type InlangProject } from "@inlang/sdk"
 import { telemetry } from "../services/telemetry/implementation.js"
 import { tryCatch, type Result } from "@inlang/result"
 
@@ -23,7 +23,7 @@ export async function getInlangProject(): Promise<Result<InlangProject, Error>> 
 	}
 
 	cached = await tryCatch(() =>
-		openInlangProject({
+		loadProject({
 			settingsFilePath,
 			nodeishFs: fs,
 			_capture(id, props) {

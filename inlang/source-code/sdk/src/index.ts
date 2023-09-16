@@ -12,7 +12,7 @@ export type {
 	Subscribable,
 } from "./api.js"
 export { type ImportFunction, createImport } from "./resolve-modules/index.js"
-export { openInlangProject } from "./openInlangProject.js"
+export { loadProject } from "./loadProject.js"
 export { solidAdapter, type InlangProjectWithSolidAdapter } from "./adapter/solidAdapter.js"
 export { createMessagesQuery } from "./createMessagesQuery.js"
 export {
@@ -26,3 +26,4 @@ export {
 export * from "./messages/variant.js"
 export * from "./versionedInterfaces.js"
 export { InlangModule } from "@inlang/module"
+

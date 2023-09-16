@@ -3,7 +3,7 @@ import { describe, it, expect } from "vitest"
 import type { ImportFunction } from "../resolve-modules/index.js"
 import { createEffect, from, createRoot } from "../reactivity/solid.js"
 import { solidAdapter } from "./solidAdapter.js"
-import { openInlangProject } from "../openInlangProject.js"
+import { loadProject } from "../loadProject.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 import type {
 	Message,
@@ -94,7 +94,7 @@ describe("config", () => {
 		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 		const inlang = solidAdapter(
-			await openInlangProject({
+			await loadProject({
 				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
@@ -124,7 +124,7 @@ describe("installed", () => {
 		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 		const inlang = solidAdapter(
-			await openInlangProject({
+			await loadProject({
 				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
@@ -189,7 +189,7 @@ describe("messages", () => {
 
 		await fs.writeFile("./project.inlang.json", JSON.stringify(mockConfig))
 		const inlang = solidAdapter(
-			await openInlangProject({
+			await loadProject({
 				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: mockImport,
@@ -218,7 +218,7 @@ describe("messages", () => {
 		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
 		const inlang = solidAdapter(
-			await openInlangProject({
+			await loadProject({
 				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
@@ -279,7 +279,7 @@ describe("lint", () => {
 			const fs = createNodeishMemoryFs()
 			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 			const inlang = solidAdapter(
-				await openInlangProject({
+				await loadProject({
 					settingsFilePath: "./inlang.config.json",
 					nodeishFs: fs,
 					_import: $import,
@@ -317,7 +317,7 @@ describe("lint", () => {
 			const fs = createNodeishMemoryFs()
 			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
 			const inlang = solidAdapter(
-				await openInlangProject({
+				await loadProject({
 					settingsFilePath: "./inlang.config.json",
 					nodeishFs: fs,
 					_import: $import,

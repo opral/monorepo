@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { translateCommandAction } from "./translate.js"
-import { Message, ProjectSettings, openInlangProject, Plugin, type InlangModule } from "@inlang/sdk"
+import { Message, ProjectSettings, loadProject, Plugin, type InlangModule } from "@inlang/sdk"
 import { privateEnv } from "@inlang/env-variables"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 
@@ -80,7 +80,7 @@ describe("translate command", () => {
 				} satisfies InlangModule
 			}
 
-			const inlang = await openInlangProject({
+			const inlang = await loadProject({
 				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
