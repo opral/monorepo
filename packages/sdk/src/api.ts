@@ -38,8 +38,8 @@ export type InlangProject = {
 		((typeof ModuleResolutionError)[keyof typeof ModuleResolutionError] | Error)[]
 	>
 	customApi: Subscribable<ResolvedPluginApi["customApi"]>
-	config: Subscribable<ProjectSettings | undefined>
-	setConfig: (config: ProjectSettings) => Result<void, RuntimeError.InvalidConfigError>
+	settings: Subscribable<ProjectSettings>
+	setSettings: (config: ProjectSettings) => Result<void, RuntimeError.ProjectSettingsInvalidError>
 	query: {
 		messages: MessageQueryApi
 		messageLintReports: MessageLintReportsQueryApi

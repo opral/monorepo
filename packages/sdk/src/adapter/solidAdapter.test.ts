@@ -104,18 +104,18 @@ describe("config", () => {
 
 		let counter = 0
 		createEffect(() => {
-			inlang.config()
+			inlang.settings()
 			counter += 1
 		})
 
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		const newConfig = { ...inlang.config()!, languageTags: ["en", "de"] }
+		const newConfig = { ...inlang.settings()!, languageTags: ["en", "de"] }
 
-		inlang.setConfig(newConfig)
+		inlang.setSettings(newConfig)
 		// TODO: how can we await `setConfig` correctly
 		await new Promise((resolve) => setTimeout(resolve, 0))
 		expect(counter).toBe(2) // 2 times because effect creation + set
-		expect(inlang.config()).toStrictEqual(newConfig)
+		expect(inlang.settings()).toStrictEqual(newConfig)
 	})
 })
 
@@ -144,7 +144,7 @@ describe("installed", () => {
 			counterLint += 1
 		})
 
-		inlang.setConfig({ ...inlang.config()!, languageTags: ["en", "fr"] })
+		inlang.setSettings({ ...inlang.settings()!, languageTags: ["en", "fr"] })
 
 		// TODO: how can we await `setConfig` correctly
 		await new Promise((resolve) => setTimeout(resolve, 0))
@@ -205,7 +205,7 @@ describe("messages", () => {
 
 		expect(Object.values(inlang.query.messages.getAll()).length).toBe(2)
 
-		inlang.setConfig({ ...inlang.config()!, languageTags: [] })
+		inlang.setSettings({ ...inlang.settings()!, languageTags: [] })
 
 		// TODO: how can we await `setConfig` correctly
 		await new Promise((resolve) => setTimeout(resolve, 0))
@@ -293,16 +293,16 @@ describe("lint", () => {
 				counter += 1
 			})
 
-			const newConfig = { ...inlang.config()!, languageTags: ["en", "de"] }
-			inlang.setConfig(newConfig)
+			const newConfig = { ...inlang.settings()!, languageTags: ["en", "de"] }
+			inlang.setSettings(newConfig)
 
 			expect(counter).toBe(1)
 			expect(inlang.query.messageLintReports.getAll()).toEqual([])
 
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
-			const newConfig2 = { ...inlang.config()!, languageTags: ["en", "de", "fr"] }
-			inlang.setConfig(newConfig2)
+			const newConfig2 = { ...inlang.settings()!, languageTags: ["en", "de", "fr"] }
+			inlang.setSettings(newConfig2)
 
 			expect(counter).toBe(9)
 			expect(inlang.query.messageLintReports.getAll()).toEqual([])

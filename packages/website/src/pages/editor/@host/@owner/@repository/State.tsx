@@ -258,17 +258,17 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	// DERIVED when config exists
 	const doesInlangConfigExist = createMemo(() => {
-		return inlang()?.config() ? true : false
+		return inlang()?.settings() ? true : false
 	})
 
 	// DERIVED source language tag from inlang config
 	const sourceLanguageTag = createMemo(() => {
-		return inlang()?.config()?.sourceLanguageTag
+		return inlang()?.settings()?.sourceLanguageTag
 	})
 
 	// DERIVED language tags from inlang config
 	const languageTags = createMemo(() => {
-		return inlang()?.config()?.languageTags ?? []
+		return inlang()?.settings()?.languageTags ?? []
 	})
 
 	//the effect should skip tour guide steps if not needed
