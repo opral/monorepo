@@ -25,7 +25,7 @@ export const Gitfloat = () => {
 		repo,
 		setLastPullTime,
 		tourStep,
-		inlang,
+		project,
 	} = useEditorState()
 	const [localStorage] = useLocalStorage()
 
@@ -33,7 +33,7 @@ export const Gitfloat = () => {
 	const gitState: () => "login" | "loading" | "fork" | "pullrequest" | "hasChanges" = () => {
 		if (localStorage?.user === undefined) {
 			return "login"
-		} else if (userIsCollaborator.loading || !inlang() || isForking()) {
+		} else if (userIsCollaborator.loading || !project() || isForking()) {
 			return "loading"
 		} else if (userIsCollaborator() === false) {
 			return "fork"
@@ -247,7 +247,7 @@ export const Gitfloat = () => {
 					offset={{ x: 0, y: 60 }}
 					isVisible={
 						(tourStep() === "github-login" || tourStep() === "fork-repository") &&
-						inlang() !== undefined &&
+						project() !== undefined &&
 						gitState() !== "loading"
 					}
 				>

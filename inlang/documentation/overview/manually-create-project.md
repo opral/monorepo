@@ -13,7 +13,7 @@ You can manually create a new project via the CLI or by creating an inlang proje
 The easiest way to create a new project is to use the CLI. The CLI will guide you through the process of creating a new project. Be aware that Node.js must be installed on your machine.
 
 ```bash
-npx @inlang/cli project init
+npx @inlang/cli@latest project init
 ```
 
 ## Manually create a project file
@@ -31,7 +31,6 @@ Alternatively, you can create a new project file manually.
 	// all the language tags you want to support in your project
 	"languageTags": ["en", "de"],
 	"modules": [],
-	"settings": {}
 }
 ```
 

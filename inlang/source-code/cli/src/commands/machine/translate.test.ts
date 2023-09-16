@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { translateCommandAction } from "./translate.js"
-import { Message, ProjectConfig, openInlangProject, Plugin, type InlangModule } from "@inlang/sdk"
+import { Message, ProjectSettings, loadProject, Plugin, type InlangModule } from "@inlang/sdk"
 import { privateEnv } from "@inlang/env-variables"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 
@@ -61,8 +61,7 @@ describe("translate command", () => {
 					sourceLanguageTag: "en",
 					languageTags: ["en", "de", "it"],
 					modules: ["./plugin.js"],
-					settings: {},
-				} satisfies ProjectConfig),
+				} satisfies ProjectSettings),
 			)
 
 			const _mockPlugin: Plugin = {
@@ -81,15 +80,15 @@ describe("translate command", () => {
 				} satisfies InlangModule
 			}
 
-			const inlang = await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+			const project = await loadProject({
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
 
-			await translateCommandAction({ inlang })
+			await translateCommandAction({ project })
 
-			const messages = inlang.query.messages.getAll()
+			const messages = project.query.messages.getAll()
 
 			expect(messages[0]?.variants.length).toBe(3)
 			expect(messages[1]?.variants.length).toBe(3)

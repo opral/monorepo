@@ -20,8 +20,8 @@ export function getSettings(inlang: InlangProject) {
 		| undefined
 	if (!settings) {
 		// automatically add module if missing
-		const config = inlang.config()
-		inlang.setConfig({
+		const config = inlang.settings()
+		inlang.setSettings({
 			...config!,
 			modules: [...config!.modules, "../../../../../../plugins/paraglide/dist/index.js"],
 			settings: {

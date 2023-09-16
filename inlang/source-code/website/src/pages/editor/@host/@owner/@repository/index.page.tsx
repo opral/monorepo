@@ -29,7 +29,7 @@ export function Page() {
  * is required to use the useEditorState hook.
  */
 function TheActualPage() {
-	const { inlang, routeParams, doesInlangConfigExist, tourStep, lixErrors } = useEditorState()
+	const { project, routeParams, doesInlangConfigExist, tourStep, lixErrors } = useEditorState()
 	const [, setLocalStorage] = useLocalStorage()
 
 	onMount(() => {
@@ -84,7 +84,7 @@ function TheActualPage() {
 						messagePlural="errors occurred while cloning the repository:"
 					/>
 				</Match>
-				<Match when={inlang() === undefined}>
+				<Match when={project() === undefined}>
 					<div class="flex flex-col grow justify-center items-center min-w-full gap-2">
 						{/* sl-spinner need a own div otherwise the spinner has a bug. The wheel is rendered on the outer div  */}
 						<div>
@@ -118,9 +118,9 @@ function TheActualPage() {
 						</p>
 					</div>
 				</Match>
-				<Match when={inlang()?.errors().length !== 0 && inlang()}>
+				<Match when={project()?.errors().length !== 0 && project()}>
 					<Errors
-						errors={inlang()?.errors() || []}
+						errors={project()?.errors() || []}
 						message="An error occurred while initializing the project file:"
 						messagePlural="errors occurred while initializing the project file:"
 					/>
@@ -130,18 +130,18 @@ function TheActualPage() {
 				</Match>
 				<Match
 					when={
-						doesInlangConfigExist() && inlang()?.query.messages.includedMessageIds() !== undefined
+						doesInlangConfigExist() && project()?.query.messages.includedMessageIds() !== undefined
 					}
 				>
 					<div>
-						<ListHeader ids={inlang()?.query.messages.includedMessageIds() || []} />
+						<ListHeader ids={project()?.query.messages.includedMessageIds() || []} />
 						<TourHintWrapper
 							currentId="textfield"
 							position="bottom-left"
 							offset={{ x: 110, y: 144 }}
 							isVisible={tourStep() === "textfield"}
 						>
-							<For each={inlang()!.query.messages.includedMessageIds()}>
+							<For each={project()!.query.messages.includedMessageIds()}>
 								{(id) => {
 									return <Message id={id} />
 								}}
@@ -150,7 +150,8 @@ function TheActualPage() {
 						<div
 							class="flex flex-col h-[calc(100vh_-_288px)] grow justify-center items-center min-w-full gap-2"
 							classList={{
-								["hidden"]: messageCount(inlang()?.query.messages.includedMessageIds() || []) !== 0,
+								["hidden"]:
+									messageCount(project()?.query.messages.includedMessageIds() || []) !== 0,
 							}}
 						>
 							<NoMatchPlaceholder />

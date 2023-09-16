@@ -1,7 +1,7 @@
 import { createEffect } from "./reactivity/solid.js"
-import { createSubscribable } from "./openInlangProject.js"
+import { createSubscribable } from "./loadProject.js"
 import type { InlangProject, InstalledMessageLintRule, MessageLintReportsQueryApi } from "./api.js"
-import type { ProjectConfig } from "@inlang/project-config"
+import type { ProjectSettings } from "@inlang/project-settings"
 import type { resolveModules } from "./resolve-modules/index.js"
 import type {
 	JSONObject,
@@ -17,7 +17,7 @@ import { ReactiveMap } from "./reactivity/map.js"
  */
 export function createMessageLintReportsQuery(
 	messages: () => Array<Message> | undefined,
-	config: () => ProjectConfig | undefined,
+	config: () => ProjectSettings | undefined,
 	installedMessageLintRules: () => Array<InstalledMessageLintRule>,
 	resolvedModules: () => Awaited<ReturnType<typeof resolveModules>> | undefined,
 ): InlangProject["query"]["messageLintReports"] {
@@ -37,7 +37,7 @@ export function createMessageLintReportsQuery(
 
 				lintSingleMessage({
 					rules: modules.messageLintRules,
-					ruleSettings: conf.settings as Record<MessageLintRule["meta"]["id"], JSONObject>,
+					ruleSettings: conf as Record<MessageLintRule["meta"]["id"], JSONObject>,
 					ruleLevels: Object.fromEntries(
 						installedMessageLintRules().map((rule) => [rule.meta.id, rule.lintLevel]),
 					),

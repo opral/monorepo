@@ -23,7 +23,7 @@
 	"dependencies": {
 		"@inlang/plugin": "*",
 		"@inlang/sdk": "*",
-		"@inlang/project-config": "*",
+		"@inlang/project-settings": "*",
 		"@lix-js/fs": "*",
 		"@sinclair/typebox": "0.31.14",
 		"terser": "5.19.4"
