@@ -36,7 +36,7 @@ import { id, displayName, description } from "../marketplace-manifest.json";
 
 export const yourLintRule: MessageLintRule = {
   meta: {
-    id: id as MessageLintRule["meta"]["id"],
+    id: id as MessageLintRule["id"],
     displayName,
     description,
   },

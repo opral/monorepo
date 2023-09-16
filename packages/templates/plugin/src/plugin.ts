@@ -3,11 +3,9 @@ import { id, displayName, description } from "../marketplace-manifest.json"
 import { createMessage } from "@inlang/sdk/test-utilities"
 
 export const plugin: Plugin = {
-	meta: {
-		id: id as Plugin["meta"]["id"],
-		displayName,
-		description,
-	},
+	id: id as Plugin["id"],
+	displayName,
+	description,
 	loadMessages: async () => {
 		console.info("loadMessages called")
 		const fakeMessages = [

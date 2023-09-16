@@ -33,11 +33,9 @@ const settings: ProjectSettings = {
 }
 
 const mockPlugin: Plugin = {
-	meta: {
-		id: "plugin.project.i18next",
-		description: { en: "Mock plugin description" },
-		displayName: { en: "Mock Plugin" },
-	},
+	id: "plugin.project.i18next",
+	description: { en: "Mock plugin description" },
+	displayName: { en: "Mock Plugin" },
 	loadMessages: () => exampleMessages,
 	saveMessages: () => undefined as any,
 	addCustomApi: () => ({
@@ -84,12 +82,10 @@ const exampleMessages: Message[] = [
 ]
 
 const mockMessageLintRule: MessageLintRule = {
-	meta: {
-		id: "messageLintRule.project.mock",
-		description: { en: "Mock lint rule description" },
-		displayName: { en: "Mock Lint Rule" },
-	},
-	message: () => undefined,
+	id: "messageLintRule.project.mock",
+	description: { en: "Mock lint rule description" },
+	displayName: { en: "Mock Lint Rule" },
+	run: () => undefined,
 }
 
 const _import: ImportFunction = async (name) =>
@@ -304,14 +300,18 @@ describe("functionality", () => {
 			})
 
 			expect(project.installed.plugins()[0]).toStrictEqual({
-				meta: mockPlugin.meta,
+				id: mockPlugin.id,
+				description: mockPlugin.description,
+				displayName: mockPlugin.displayName,
 				module: settings.modules[0],
 			})
 
 			expect(project.installed.messageLintRules()[0]).toEqual({
-				meta: mockMessageLintRule.meta,
+				id: mockMessageLintRule.id,
+				description: mockMessageLintRule.description,
+				displayName: mockMessageLintRule.displayName,
 				module: settings.modules[1],
-				lintLevel: "warning",
+				level: "warning",
 			})
 		})
 
@@ -332,18 +332,16 @@ describe("functionality", () => {
 				_import,
 			})
 
-			expect(project.installed.messageLintRules()[0]?.lintLevel).toBe("warning")
+			expect(project.installed.messageLintRules()[0]?.level).toBe("warning")
 		})
 
 		// yep, this is a typical "hm, we have a bug here, let's write a test for it" test
 		it("should return lint reports if disabled is not set", async () => {
 			const _mockLintRule: MessageLintRule = {
-				meta: {
-					id: "messageLintRule.namespace.mock",
-					description: { en: "Mock lint rule description" },
-					displayName: { en: "Mock Lint Rule" },
-				},
-				message: ({ report }) => {
+				id: "messageLintRule.namespace.mock",
+				description: { en: "Mock lint rule description" },
+				displayName: { en: "Mock Lint Rule" },
+				run: ({ report }) => {
 					report({
 						messageId: "some-message-1",
 						languageTag: "en",
@@ -352,11 +350,9 @@ describe("functionality", () => {
 				},
 			}
 			const _mockPlugin: Plugin = {
-				meta: {
-					id: "plugin.project.i18next",
-					description: { en: "Mock plugin description" },
-					displayName: { en: "Mock Plugin" },
-				},
+				id: "plugin.project.i18next",
+				description: { en: "Mock plugin description" },
+				displayName: { en: "Mock Plugin" },
 				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
 				saveMessages: () => undefined,
 			}
@@ -384,18 +380,16 @@ describe("functionality", () => {
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
 			expect(project.query.messageLintReports.getAll()).toHaveLength(1)
-			expect(project.query.messageLintReports.getAll()?.[0]?.ruleId).toBe(_mockLintRule.meta.id)
+			expect(project.query.messageLintReports.getAll()?.[0]?.ruleId).toBe(_mockLintRule.id)
 			expect(project.installed.messageLintRules()).toHaveLength(1)
 		})
 
 		it("should return lint reports for a single message", async () => {
 			const _mockLintRule: MessageLintRule = {
-				meta: {
-					id: "messageLintRule.namepsace.mock",
-					description: { en: "Mock lint rule description" },
-					displayName: { en: "Mock Lint Rule" },
-				},
-				message: ({ report }) => {
+				id: "messageLintRule.namepsace.mock",
+				description: { en: "Mock lint rule description" },
+				displayName: { en: "Mock Lint Rule" },
+				run: ({ report }) => {
 					report({
 						messageId: "some-message",
 						languageTag: "en",
@@ -404,11 +398,9 @@ describe("functionality", () => {
 				},
 			}
 			const _mockPlugin: Plugin = {
-				meta: {
-					id: "plugin.project.i18next",
-					description: { en: "Mock plugin description" },
-					displayName: { en: "Mock Plugin" },
-				},
+				id: "plugin.project.i18next",
+				description: { en: "Mock plugin description" },
+				displayName: { en: "Mock Plugin" },
 				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
 				saveMessages: () => undefined,
 			}
@@ -507,11 +499,9 @@ describe("functionality", () => {
 			const mockSaveFn = vi.fn()
 
 			const _mockPlugin: Plugin = {
-				meta: {
-					id: "plugin.project.json",
-					description: { en: "Mock plugin description" },
-					displayName: { en: "Mock Plugin" },
-				},
+				id: "plugin.project.json",
+				description: { en: "Mock plugin description" },
+				displayName: { en: "Mock Plugin" },
 				loadMessages: () => exampleMessages,
 				saveMessages: mockSaveFn,
 			}

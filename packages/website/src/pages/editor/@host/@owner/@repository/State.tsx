@@ -102,8 +102,8 @@ type EditorStateSchema = {
 	/**
 	 * Filtered lint rules.
 	 */
-	filteredMessageLintRules: () => MessageLintRule["meta"]["id"][]
-	setFilteredMessageLintRules: Setter<MessageLintRule["meta"]["id"][]>
+	filteredMessageLintRules: () => MessageLintRule["id"][]
+	setFilteredMessageLintRules: Setter<MessageLintRule["id"][]>
 
 	/**
 	 * Expose lix errors that happen wihle opening the repository
@@ -189,8 +189,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	})
 
 	const [filteredMessageLintRules, setFilteredMessageLintRules] = createSignal<
-		MessageLintRule["meta"]["id"][]
-	>(params.getAll("lint") as MessageLintRule["meta"]["id"][])
+		MessageLintRule["id"][]
+	>(params.getAll("lint") as MessageLintRule["id"][])
 	createEffect(() => {
 		setSearchParams({ key: "lint", value: filteredMessageLintRules() })
 	})

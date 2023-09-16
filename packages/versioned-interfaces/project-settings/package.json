@@ -24,7 +24,6 @@
 	},
 	"dependencies": {
 		"@inlang/json-types": "*",
-		"@inlang/message-lint-rule": "*",
 		"@inlang/language-tag": "*"
 	},
 	"devDependencies": {

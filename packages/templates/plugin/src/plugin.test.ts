@@ -28,7 +28,7 @@ it("should return fake messages to illustrate how a plugin works", async () => {
 
 	expect(project.errors()).toEqual([])
 
-	expect(project.installed.plugins()[0]?.meta.id).toBe(pluginId)
+	expect(project.installed.plugins()[0]?.id).toBe(pluginId)
 
 	expect(project.query.messages.get({ where: { id: "this-is-a-test-message" } })).toBeDefined()
 })

@@ -36,7 +36,7 @@ import { id, displayName, description } from "../marketplace-manifest.json"
 
 export const plugin: Plugin<PluginSettings> = {
 	meta: {
-		id: id as Plugin["meta"]["id"],
+		id: id as Plugin["id"],
 		displayName,
 		description,
 	},
