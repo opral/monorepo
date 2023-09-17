@@ -261,7 +261,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 			},
 			{
 				name: `${t("footer.contact.join")}`,
-				href: "https://inlang.notion.site/Careers-82277169d07a4d30b9c9b5a625a6a0ef",
+				href: "https://github.com/inlang/monorepo/tree/main/careers",
 				type: "text" as buttonType,
 			},
 			{
