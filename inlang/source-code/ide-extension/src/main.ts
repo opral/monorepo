@@ -66,33 +66,47 @@ async function main(args: {
 	if (activeTextEditor === undefined) {
 		return
 	}
-	// checking whether a config file exists -> if not dont start the extension
-	const potentialConfigFileUris = await vscode.workspace.findFiles("project.inlang.json")
-	if (potentialConfigFileUris.length === 0) {
-		console.warn("No project.inlang.json file found.")
 
-		// get workspace folder
-		const _workspaceFolder = vscode.workspace.getWorkspaceFolder(activeTextEditor.document.uri)
-		if (!_workspaceFolder) {
-			console.warn("No workspace folder found.")
-		} else {
-			console.info("Creating project.inlang.json file.")
-			await createInlangConfigFile({ workspaceFolder: _workspaceFolder })
-		}
+	const workspaceFolder = vscode.workspace.getWorkspaceFolder(activeTextEditor.document.uri)
+	if (!workspaceFolder) {
+		console.warn("No workspace folder found.")
 		return
 	}
+
+	// if inlang.config.js is there but no project.inlang.json -> migrate config file
+	if (
+		(await vscode.workspace.findFiles("inlang.config.js")) &&
+		(await vscode.workspace.findFiles("project.inlang.json")).length === 0
+	) {
+		// get vs code uri of inlang.config.js
+		const inlangConfigFileUri = await vscode.workspace.findFiles("inlang.config.js")
+
+		await migrateConfigFile(
+			workspaceFolder,
+			(workspaceFolder + "project.inlang.json") as unknown as vscode.Uri,
+		)
+		return
+	}
+
+	// if no project.inlang.json file found, try to create one
+	if (!(await vscode.workspace.findFiles("project.inlang.json"))) {
+		const workspaceFolder = vscode.workspace.getWorkspaceFolder(activeTextEditor.document.uri)
+		if (!workspaceFolder) {
+			console.warn("No workspace folder found.")
+			return
+		}
+		await createInlangConfigFile({ workspaceFolder })
+		return
+	}
+
+	// checking whether a config file exists -> if not dont start the extension
+	const potentialConfigFileUris = await vscode.workspace.findFiles("project.inlang.json")
+
 	const closestProjectFilePath = determineClosestPath({
 		options: potentialConfigFileUris.map((uri) => uri.path),
 		to: activeTextEditor.document.uri.path,
 	})
 	const closestProjectFilePathUri = vscode.Uri.parse(closestProjectFilePath)
-
-	// get current workspace
-	const workspaceFolder = vscode.workspace.getWorkspaceFolder(closestProjectFilePathUri)
-	if (!workspaceFolder) {
-		console.warn("No workspace folder found.")
-		return
-	}
 
 	if (args.gitOrigin) {
 		telemetry.groupIdentify({
@@ -191,9 +205,6 @@ async function main(args: {
 	// try to delete old config file (inlang.config.js)
 	// TODO: use this function in a few months (Nov/Dec 2023)
 	// await deleteOldConfigFile()
-
-	// migrate project config from inlang.config.js to project.inlang.json
-	await migrateConfigFile(workspaceFolder, closestProjectFilePathUri)
 
 	// log inlang errors in the debugging console
 	const inlangErrors = state().project.errors()

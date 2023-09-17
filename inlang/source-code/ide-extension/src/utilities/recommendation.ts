@@ -3,7 +3,7 @@ import * as vscode from "vscode"
 import * as path from "node:path"
 import * as fs from "node:fs"
 import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js"
-import { parse, stringify } from "comment-json"
+import { parse, stringify, type CommentJSONValue } from "comment-json"
 
 /**
  * Defines the structure of the extensions.json file.
@@ -23,12 +23,13 @@ export async function isInWorkspaceRecommendation(args: {
 	const vscodeFolderPath = path.join(args.workspaceFolder.uri.fsPath, ".vscode")
 	const extensionsJsonPath = path.join(vscodeFolderPath, "extensions.json")
 
-	let extensions: { recommendations: string[] } | undefined
+	let extensions: CommentJSONValue | { recommendations: string[] } | undefined
 	// Read the extensions.json file
 	if (fs.existsSync(extensionsJsonPath) && fs.existsSync(vscodeFolderPath)) {
-		extensions = JSON.parse(fs.readFileSync(extensionsJsonPath, "utf8"))
+		extensions = parse(fs.readFileSync(extensionsJsonPath, "utf8"))
 	}
 	const extensionsResult =
+		// @ts-ignore
 		extensions?.recommendations?.includes("inlang.vs-code-extension") || false
 
 	if (extensionsResult === true) {
