@@ -1,6 +1,6 @@
 > write `hello@inlang.com` to apply
 
-**Inlang - Technical i18n lead**
+**Inlang - i18n library lead + dev rel**
 
 Develop the standard i18n library for the web platform. 
 
