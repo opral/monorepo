@@ -3,9 +3,8 @@ import type { NodeishFilesystem } from "@lix-js/fs"
 import { getLanguageFolderPath } from "./getLanguageFolderPath.js"
 import type { Plugin } from "@inlang/plugin"
 import { Value } from "@sinclair/typebox/value"
-import { ProjectSettings } from "@inlang/project-settings"
-import { loadProject } from "@inlang/sdk"
 import { tryCatch } from "@inlang/result"
+import { ProjectSettings, loadProject } from "@inlang/sdk"
 
 // FIXME: fetch latest major version instead
 export const pluginUrls: Record<string, string> = {
@@ -43,8 +42,8 @@ export async function tryAutoGenProjectSettings(args: {
 	const projectFilePath = args.filePath || "./project.inlang.json"
 
 	if (settings) {
-		const configString = JSON.stringify(settings, undefined, 4)
-		await args.nodeishFs.writeFile(projectFilePath, configString + "\n")
+		const settingString = JSON.stringify(settings, undefined, 4)
+		await args.nodeishFs.writeFile(projectFilePath, settingString + "\n")
 	} else {
 		return { warnings: ["Could not auto generate project configuration."] }
 	}
@@ -64,16 +63,6 @@ export async function tryAutoGenProjectSettings(args: {
 		if (runtimeErrors?.length) {
 			errors = [...errors, ...runtimeErrors]
 		}
-	}
-
-	if (errors.length > 0) {
-		try {
-			await args.nodeishFs.rm(projectFilePath)
-		} catch {
-			/* ignore failing file removal */
-		}
-
-		return { warnings, errors }
 	}
 
 	return { warnings, errors, settings }
