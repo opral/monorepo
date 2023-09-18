@@ -10,8 +10,8 @@ See [How to publish to the Marketplace](https://inlang.com/documentation/publish
 
 ## Manually update the CDN
 
-A bash script is provided to update the CDN. It will automatically build the project and upload the files to the CDN.
+A node script is provided to update the CDN. It will automatically build the project and upload the files to the CDN.
 
-```bash purge.sh```
+You can run the script with:
 
-jq is required for the script to work. You can install it with `brew install jq` on macOS.
+```node purge.js```
