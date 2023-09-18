@@ -1,5 +1,11 @@
 # @inlang/language-tag
 
+## 1.1.1
+
+### Patch Changes
+
+- 836b4057: fix: remove validation via regex which forced projects to use the subset we provide
+
 ## 1.1.0
 
 ### Minor Changes
