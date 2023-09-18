@@ -324,6 +324,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 							if (err.status === 401) {
 								onSignOut({ setLocalStorage })
 							}
+							return false
 						})
 				} else {
 					return false
