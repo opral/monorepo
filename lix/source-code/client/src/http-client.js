@@ -81,6 +81,7 @@ function getIterator(iterable) {
 // Currently 'for await' upsets my linters.
 async function forAwait(iterable, cb) {
 	const iter = getIterator(iterable)
+	// @ts-ignore
 	while (true) {
 		const { value, done } = await iter.next()
 		if (value) await cb(value)
@@ -134,7 +135,8 @@ function fromStream(stream) {
  * @param {GitHttpRequest} request
  * @returns {Promise<GitHttpResponse>}
  */
-async function request({ onProgress, url, method = "GET", headers = {}, body }) {
+async function request({ url, method = "GET", headers = {}, body }) {
+	// onProgress param not used
 	// streaming uploads aren't possible yet in the browser
 	if (body) {
 		body = await collect(body)
