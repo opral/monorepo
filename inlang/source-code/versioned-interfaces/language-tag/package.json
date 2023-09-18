@@ -14,9 +14,9 @@
 		"./src"
 	],
 	"scripts": {
-		"build": "node ./buildTagRegistry.js && npx prettier ./src --write && tsc --build",
+		"build": "tsc --build",
 		"dev": "tsc --watch",
-		"test": "tsc --noEmit",
+		"test": "tsc --noEmit && vitest run --passWithNoTests",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
@@ -26,6 +26,7 @@
 	},
 	"devDependencies": {
 		"tsd": "0.28.1",
-		"typescript": "5.2.2"
+		"typescript": "5.2.2",
+		"vitest": "0.34.4"
 	}
 }
