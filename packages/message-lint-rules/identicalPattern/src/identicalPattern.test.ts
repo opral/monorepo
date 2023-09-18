@@ -18,12 +18,14 @@ const messages = [message1]
 
 test("should report if identical message found in another language", async () => {
 	const result = await lintSingleMessage({
-		sourceLanguageTag: "en",
-		languageTags: ["en"],
-		ruleLevels: {
-			[identicalPatternRule.meta.id]: "warning",
+		settings: {
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
+			modules: [],
+			messageLintRuleLevels: {
+				[identicalPatternRule.id]: "warning",
+			},
 		},
-		ruleSettings: {},
 		messages,
 		message: message1,
 		rules: [identicalPatternRule],
@@ -36,13 +38,14 @@ test("should report if identical message found in another language", async () =>
 
 test("should not report if pattern is present in 'ignore'", async () => {
 	const result = await lintSingleMessage({
-		sourceLanguageTag: "en",
-		languageTags: ["en"],
-		ruleLevels: {
-			[identicalPatternRule.meta.id]: "warning",
-		},
-		ruleSettings: {
-			[identicalPatternRule.meta.id]: {
+		settings: {
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
+			modules: [],
+			messageLintRuleLevels: {
+				[identicalPatternRule.id]: "warning",
+			},
+			[identicalPatternRule.id as any]: {
 				ignore: ["This is Inlang"],
 			},
 		},

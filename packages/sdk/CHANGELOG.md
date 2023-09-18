@@ -1,5 +1,31 @@
 # @inlang/sdk
 
+## 0.5.0
+
+### Minor Changes
+
+- 25fe8502: refactor: remove plugin.meta and messageLintRule.meta nesting
+- 0a2114d4: refactor: rename `config` to `settings` and `setConfig` to `setSettings` respectively
+
+### Patch Changes
+
+- Updated dependencies [25fe8502]
+  - @inlang/message-lint-rule@1.2.0
+  - @inlang/project-settings@2.1.0
+  - @inlang/plugin@1.2.0
+
+## 0.4.0
+
+### Minor Changes
+
+- 071cac4a: fix: use ESM compatible ddent library
+
+## 0.3.0
+
+### Minor Changes
+
+- 73f7a0bf: add: createNodeishMemoryFs for easier testing
+
 ## 0.2.0
 
 ### Minor Changes
@@ -10,7 +36,7 @@
 
 - Updated dependencies [973858c6]
   - @inlang/message-lint-rule@1.1.0
-  - @inlang/project-config@1.2.0
+  - @inlang/project-settings@1.2.0
   - @inlang/language-tag@1.1.0
   - @inlang/translatable@1.1.0
   - @inlang/message@1.1.0

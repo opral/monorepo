@@ -10,7 +10,7 @@ import type { MessageLintReport, Message as MessageType } from "@inlang/sdk"
 import { sortLanguageTags } from "./helper/sortLanguageTags.js"
 
 export function Message(props: { id: string }) {
-	const { inlang, filteredLanguageTags } = useEditorState()
+	const { project, filteredLanguageTags } = useEditorState()
 	const [message, setMessage] = createSignal<MessageType>()
 	const [lintReports, setLintReports] = createSignal<Readonly<MessageLintReport[]>>([])
 	const [messageIsFocused, setMessageIsFocused] = createSignal<boolean>(false)
@@ -31,16 +31,16 @@ export function Message(props: { id: string }) {
 	})
 
 	createEffect(() => {
-		if (!inlang.loading) {
-			inlang()!.query.messages.get.subscribe({ where: { id: props.id } }, (message) =>
+		if (!project.loading) {
+			project()!.query.messages.get.subscribe({ where: { id: props.id } }, (message) =>
 				setMessage(message),
 			)
 		}
 	})
 
 	createEffect(() => {
-		if (!inlang.loading && message()?.id) {
-			inlang()!.query.messageLintReports.get.subscribe(
+		if (!project.loading && message()?.id) {
+			project()!.query.messageLintReports.get.subscribe(
 				{ where: { messageId: message()!.id } },
 				(report) => {
 					if (report) {
@@ -98,9 +98,9 @@ export function Message(props: { id: string }) {
 			<div>
 				<For
 					each={sortLanguageTags(
-						inlang()?.config()?.languageTags || [],
+						project()?.settings()?.languageTags || [],
 						// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-						inlang()?.config()?.sourceLanguageTag!,
+						project()?.settings()?.sourceLanguageTag!,
 					)}
 				>
 					{(languageTag) => {

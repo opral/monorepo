@@ -21,7 +21,7 @@ import { publicEnv } from "@inlang/env-variables"
 import {
 	LanguageTag,
 	MessageLintRule,
-	openInlangProject,
+	loadProject,
 	solidAdapter,
 	type InlangProjectWithSolidAdapter,
 } from "@inlang/sdk"
@@ -82,7 +82,7 @@ type EditorStateSchema = {
 	 *
 	 * Undefined if no inlang config exists/has been found.
 	 */
-	inlang: Resource<InlangProjectWithSolidAdapter | undefined>
+	project: Resource<InlangProjectWithSolidAdapter | undefined>
 
 	doesInlangConfigExist: () => boolean
 
@@ -102,8 +102,8 @@ type EditorStateSchema = {
 	/**
 	 * Filtered lint rules.
 	 */
-	filteredMessageLintRules: () => MessageLintRule["meta"]["id"][]
-	setFilteredMessageLintRules: Setter<MessageLintRule["meta"]["id"][]>
+	filteredMessageLintRules: () => MessageLintRule["id"][]
+	setFilteredMessageLintRules: Setter<MessageLintRule["id"][]>
 
 	/**
 	 * Expose lix errors that happen wihle opening the repository
@@ -189,8 +189,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	})
 
 	const [filteredMessageLintRules, setFilteredMessageLintRules] = createSignal<
-		MessageLintRule["meta"]["id"][]
-	>(params.getAll("lint") as MessageLintRule["meta"]["id"][])
+		MessageLintRule["id"][]
+	>(params.getAll("lint") as MessageLintRule["id"][])
 	createEffect(() => {
 		setSearchParams({ key: "lint", value: filteredMessageLintRules() })
 	})
@@ -226,16 +226,16 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	})
 
 	// open the inlang project and store it in a resource
-	const [inlang] = createResource(
+	const [project] = createResource(
 		() => {
 			return { newRepo: repo(), lixErrors: lixErrors() }
 		},
 		async ({ newRepo, lixErrors }) => {
 			if (lixErrors.length === 0 && newRepo) {
-				const inlang = solidAdapter(
-					await openInlangProject({
+				const project = solidAdapter(
+					await loadProject({
 						nodeishFs: newRepo.nodeishFs,
-						projectFilePath: "/project.inlang.json",
+						settingsFilePath: "/project.inlang.json",
 						_capture(id, props) {
 							telemetryBrowser.capture(id, props)
 						},
@@ -249,7 +249,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				telemetryBrowser.capture("EDITOR cloned repository", {
 					userPermission: userIsCollaborator() ? "iscollaborator" : "isNotCollaborator",
 				})
-				return inlang
+				return project
 			} else {
 				return undefined
 			}
@@ -258,17 +258,17 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	// DERIVED when config exists
 	const doesInlangConfigExist = createMemo(() => {
-		return inlang()?.config() ? true : false
+		return project()?.settings() ? true : false
 	})
 
 	// DERIVED source language tag from inlang config
 	const sourceLanguageTag = createMemo(() => {
-		return inlang()?.config()?.sourceLanguageTag
+		return project()?.settings()?.sourceLanguageTag
 	})
 
 	// DERIVED language tags from inlang config
 	const languageTags = createMemo(() => {
-		return inlang()?.config()?.languageTags ?? []
+		return project()?.settings()?.languageTags ?? []
 	})
 
 	//the effect should skip tour guide steps if not needed
@@ -277,12 +277,12 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			setTourStep("github-login")
 		} else if (!userIsCollaborator()) {
 			setTourStep("fork-repository")
-		} else if (tourStep() === "fork-repository" && inlang()) {
+		} else if (tourStep() === "fork-repository" && project()) {
 			setTimeout(() => {
 				const element = document.getElementById("missingTranslation-summary")
 				element !== null ? setTourStep("missing-translation-rule") : setTourStep("textfield")
 			}, 100)
-		} else if (tourStep() === "missing-translation-rule" && inlang()) {
+		} else if (tourStep() === "missing-translation-rule" && project()) {
 			setTimeout(() => {
 				const element = document.getElementById("missingTranslation-summary")
 				element !== null ? setTourStep("missing-translation-rule") : setTourStep("textfield")
@@ -334,7 +334,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			if (
 				localStorage?.user === undefined ||
 				routeParams().owner === undefined ||
-				routeParams().repository === undefined
+				routeParams().repository === undefined ||
+				repo() === undefined
 			) {
 				return false
 			}
@@ -348,7 +349,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [currentBranch] = createResource(
 		() => {
-			if (lixErrors().length > 0) {
+			if (lixErrors().length > 0 || repo() === undefined) {
 				return false
 			}
 			return true
@@ -373,7 +374,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setTextSearch,
 					fsChange,
 					setFsChange,
-					inlang,
+					project,
 					doesInlangConfigExist,
 					sourceLanguageTag,
 					languageTags,

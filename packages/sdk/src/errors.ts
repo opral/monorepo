@@ -1,21 +1,21 @@
-export class InvalidConfigError extends Error {
+export class ProjectSettingsInvalidError extends Error {
 	constructor(message: string, options: ErrorOptions) {
 		super(message, options)
-		this.name = "InvalidConfigError"
+		this.name = "ProjectSettingsInvalidError"
 	}
 }
 
-export class ProjectFileJSONSyntaxError extends Error {
+export class ProjectSettingsFileJSONSyntaxError extends Error {
 	constructor(message: string, options: ErrorOptions) {
 		super(message, options)
-		this.name = "ProjectFileJSONSyntaxError"
+		this.name = "ProjectSettingsFileJSONSyntaxError"
 	}
 }
 
-export class ProjectFilePathNotFoundError extends Error {
+export class ProjectSettingsFileNotFoundError extends Error {
 	constructor(message: string, options: ErrorOptions) {
 		super(message, options)
-		this.name = "ProjectFilePathNotFoundError"
+		this.name = "ProjectSettingsFileNotFoundError"
 	}
 }
 

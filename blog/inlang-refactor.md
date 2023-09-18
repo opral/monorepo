@@ -16,7 +16,7 @@ description: Inlang got a major refactor which brings new capabilities to the ec
     - Everything inlang related like messages, lints, installed plugins, etc. is now bundled in a project. 
     - Foundation to support multiple projects like iOS and Android apps in one repository in the future. 
 - Building inlang apps got substantially easier with a new inlang SDK. 
-    - `openInlangProject` is the new entry point that bundles query, linting, module resolution, and more in one function.
+    - `loadProject` is the new entry point that bundles query, linting, module resolution, and more in one function.
     - Reactive by default, which auto updates your apps. 
 - New message format with variants that enable any advanced use case. 
     - Pluralization 

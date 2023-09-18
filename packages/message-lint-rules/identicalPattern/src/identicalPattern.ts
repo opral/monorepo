@@ -2,28 +2,32 @@ import type { Text, Variant } from "@inlang/message"
 import type { MessageLintRule } from "@inlang/message-lint-rule"
 import { id, displayName, description } from "../marketplace-manifest.json"
 
-type Settings = {
+type RuleSettings = {
 	ignore?: string[]
 }
 
-export const identicalPatternRule: MessageLintRule<Settings> = {
-	meta: {
-		id: id as MessageLintRule["meta"]["id"],
-		displayName,
-		description,
-	},
-	message: ({ message: { id, variants }, sourceLanguageTag, report, settings }) => {
-		const referenceVariant = variants.find((variant) => variant.languageTag === sourceLanguageTag)
+export const identicalPatternRule: MessageLintRule = {
+	id: id as MessageLintRule["id"],
+	displayName,
+	description,
+	run: ({ message, report, settings }) => {
+		const ruleSettings = settings[id as keyof typeof settings] as RuleSettings | undefined
+
+		const referenceVariant = message.variants.find(
+			(variant) => variant.languageTag === settings.sourceLanguageTag,
+		)
 		if (referenceVariant === undefined) return
 
-		const translatedVariants = variants.filter(
-			(variant) => variant.languageTag !== sourceLanguageTag,
+		const translatedVariants = message.variants.filter(
+			(variant) => variant.languageTag !== settings.sourceLanguageTag,
 		)
 
 		for (const variant of translatedVariants) {
 			const isMessageIdentical =
 				messageVariantToString(referenceVariant) === messageVariantToString(variant)
-			const shouldBeIgnored = settings.ignore?.includes(patternToString(referenceVariant.pattern))
+			const shouldBeIgnored = ruleSettings?.ignore?.includes(
+				patternToString(referenceVariant.pattern),
+			)
 
 			if (isMessageIdentical && !shouldBeIgnored) {
 				report({

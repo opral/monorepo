@@ -1,4 +1,4 @@
-import type { ProjectConfig } from "@inlang/project-config"
+import type { ProjectSettings } from "@inlang/project-settings"
 import type { MessageLintRule } from "@inlang/message-lint-rule"
 import type { Plugin } from "@inlang/plugin"
 import type {
@@ -16,7 +16,7 @@ import type { resolveMessageLintRules } from "./message-lint-rules/resolveMessag
  * Pass a custom `_import` function to override the default import function.
  */
 export type ResolveModuleFunction = (args: {
-	config: ProjectConfig
+	settings: ProjectSettings
 	nodeishFs: NodeishFilesystemSubset
 	_import?: ImportFunction
 }) => Promise<{
@@ -39,7 +39,7 @@ export type ResolveModuleFunction = (args: {
 		/**
 		 * The resolved item id of the module.
 		 */
-		id: Plugin["meta"]["id"] | MessageLintRule["meta"]["id"]
+		id: Plugin["id"] | MessageLintRule["id"]
 	}>
 	/**
 	 * The resolved plugins.

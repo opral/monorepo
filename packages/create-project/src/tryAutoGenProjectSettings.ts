@@ -3,8 +3,8 @@ import type { NodeishFilesystem } from "@lix-js/fs"
 import { getLanguageFolderPath } from "./getLanguageFolderPath.js"
 import type { Plugin } from "@inlang/plugin"
 import { Value } from "@sinclair/typebox/value"
-import { ProjectConfig } from "@inlang/project-config"
-import { openInlangProject } from "@inlang/sdk"
+import { ProjectSettings } from "@inlang/project-settings"
+import { loadProject } from "@inlang/sdk"
 import { tryCatch } from "@inlang/result"
 
 // FIXME: fetch latest major version instead
@@ -30,28 +30,28 @@ export const standardLintRules = [
  * @params args.filePath optional location of your inlang config file, should be used only for testing as we hard code filepaths at lots of places
  * @returns The warnings and if successfully generated the config object, the file is also saved to the filesystem in the current path
  */
-export async function tryAutoGenProjectConfig(args: {
+export async function tryAutoGenProjectSettings(args: {
 	nodeishFs: NodeishFilesystem
 	pathJoin: (...args: string[]) => string
 	filePath?: string
-}): Promise<{ warnings: string[]; errors?: any[]; config?: ProjectConfig }> {
-	const { config, warnings } = await autoGenProject({
+}): Promise<{ warnings: string[]; errors?: any[]; settings?: ProjectSettings }> {
+	const { settings, warnings } = await autoGenProject({
 		nodeishFs: args.nodeishFs,
 		pathJoin: args.pathJoin,
 	})
 
 	const projectFilePath = args.filePath || "./project.inlang.json"
 
-	if (config) {
-		const configString = JSON.stringify(config, undefined, 4)
+	if (settings) {
+		const configString = JSON.stringify(settings, undefined, 4)
 		await args.nodeishFs.writeFile(projectFilePath, configString + "\n")
 	} else {
 		return { warnings: ["Could not auto generate project configuration."] }
 	}
 
 	const { data, error } = await tryCatch(() =>
-		openInlangProject({
-			projectFilePath: projectFilePath,
+		loadProject({
+			settingsFilePath: projectFilePath,
 			nodeishFs: args.nodeishFs,
 		}),
 	)
@@ -76,13 +76,13 @@ export async function tryAutoGenProjectConfig(args: {
 		return { warnings, errors }
 	}
 
-	return { warnings, errors, config }
+	return { warnings, errors, settings }
 }
 
 export async function autoGenProject(args: {
 	nodeishFs: NodeishFilesystem
 	pathJoin: (...args: string[]) => string
-}): Promise<{ config?: ProjectConfig; warnings: string[]; pluginId?: Plugin["meta"]["id"] }> {
+}): Promise<{ settings?: ProjectSettings; warnings: string[]; pluginId?: Plugin["id"] }> {
 	const rootDir = "./"
 	const warnings: string[] = []
 
@@ -136,24 +136,23 @@ export async function autoGenProject(args: {
 		)
 	}
 
-	const pluginId: Plugin["meta"]["id"] = `plugin.inlang.${pluginName}`
+	const pluginId: Plugin["id"] = `plugin.inlang.${pluginName}`
 
-	const config: ProjectConfig = {
-		$schema: "https://inlang.com/schema/project-config",
+	const settings: ProjectSettings = {
+		$schema: "https://inlang.com/schema/project-settings",
 		sourceLanguageTag: "en",
 		languageTags: ["en"],
 		modules: [pluginUrls[pluginName]!, ...standardLintRules],
-		settings: {
-			[pluginId]: { pathPattern },
-		} satisfies ProjectConfig["settings"],
 	}
 
-	const isValid = Value.Check(ProjectConfig, config)
+	settings[pluginId] = { pathPattern }
+
+	const isValid = Value.Check(ProjectSettings, settings)
 
 	if (isValid) {
-		return { warnings, config, pluginId }
+		return { warnings, settings, pluginId }
 	} else {
-		const errors = [...Value.Errors(ProjectConfig, config)]
+		const errors = [...Value.Errors(ProjectSettings, settings)]
 		warnings.push(
 			`The generated config is not valid. Please adjust the config manually.\nErrors:\n${errors.join(
 				"\n",

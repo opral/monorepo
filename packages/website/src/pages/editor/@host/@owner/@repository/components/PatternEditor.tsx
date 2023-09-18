@@ -37,7 +37,7 @@ export function PatternEditor(props: {
 		setLocalChanges,
 		userIsCollaborator,
 		routeParams,
-		inlang,
+		project,
 		sourceLanguageTag,
 		lastPullTime,
 	} = useEditorState()
@@ -103,7 +103,7 @@ export function PatternEditor(props: {
 			}
 
 			editor = createTiptapEditor(() => {
-				return getEditorConfig(textArea, newVariant, variableReferences())
+				return getEditorConfig(textArea, newVariant, variableReferences)
 			})
 
 			setCurrentPattern(variant()?.pattern || [])
@@ -135,7 +135,7 @@ export function PatternEditor(props: {
 	createEffect(
 		on(lastPullTime, () => {
 			setReferencePattern(
-				inlang()
+				project()
 					?.query.messages.get({ where: { id: props.message.id } })
 					?.variants.find((variant) => variant.languageTag === props.languageTag)?.pattern,
 			)
@@ -194,7 +194,7 @@ export function PatternEditor(props: {
 			}
 		}
 		if (newMessage.data) {
-			const upsertSuccessful = inlang()?.query.messages.upsert({
+			const upsertSuccessful = project()?.query.messages.upsert({
 				where: { id: props.message.id },
 				data: newMessage.data,
 			})
@@ -271,7 +271,7 @@ export function PatternEditor(props: {
 		const { rpc } = await import("@inlang/rpc")
 		const translation = await rpc.machineTranslateMessage({
 			message: newMessage,
-			sourceLanguageTag: inlang()!.config()!.sourceLanguageTag!,
+			sourceLanguageTag: project()!.settings()!.sourceLanguageTag!,
 			targetLanguageTags: [props.languageTag],
 		})
 		if (translation.error !== undefined) {
@@ -306,9 +306,9 @@ export function PatternEditor(props: {
 		const notifications: Array<Notification> = []
 		props.lintReports.map((report) => {
 			if (report.messageId === props.message.id && report.languageTag === props.languageTag) {
-				const messageLintRuleName = inlang()
+				const messageLintRuleName = project()
 					?.installed.messageLintRules()
-					.find((rule) => rule.meta.id === report.ruleId)?.meta.displayName
+					.find((rule) => rule.id === report.ruleId)?.displayName
 				notifications.push({
 					notificationTitle:
 						typeof messageLintRuleName === "object"
@@ -374,7 +374,7 @@ export function PatternEditor(props: {
 							{props.languageTag}
 						</p>
 					</div>
-					{inlang()?.config()?.sourceLanguageTag === props.languageTag && (
+					{project()?.settings()?.sourceLanguageTag === props.languageTag && (
 						<sl-badge prop:variant="neutral">ref</sl-badge>
 					)}
 				</div>

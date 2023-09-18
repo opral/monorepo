@@ -29,7 +29,7 @@ export const translate = new Command()
 			}
 
 			// Get the config
-			const { data: inlang, error } = await getInlangProject()
+			const { data: project, error } = await getInlangProject()
 
 			if (error) {
 				log.error(error)
@@ -37,15 +37,15 @@ export const translate = new Command()
 				return
 			}
 
-			translateCommandAction({ inlang })
+			translateCommandAction({ project })
 		} catch (error) {
 			log.error(error)
 		}
 	})
 
-export async function translateCommandAction(args: { inlang: InlangProject }) {
+export async function translateCommandAction(args: { project: InlangProject }) {
 	try {
-		const projectConfig = args.inlang.config()
+		const projectConfig = args.project.settings()
 
 		if (!projectConfig) {
 			log.error(`❌ No inlang config found, please add a project.inlang.json file`)
@@ -62,9 +62,9 @@ export async function translateCommandAction(args: { inlang: InlangProject }) {
 		log.info(`📝 Translating to ${languagesTagsToTranslateTo.length} languages.`)
 
 		// parallelize in the future
-		for (const id of args.inlang.query.messages.includedMessageIds()) {
+		for (const id of args.project.query.messages.includedMessageIds()) {
 			const { data: translatedMessage, error } = await rpc.machineTranslateMessage({
-				message: args.inlang.query.messages.get({ where: { id } })!,
+				message: args.project.query.messages.get({ where: { id } })!,
 				sourceLanguageTag: sourceLanguageTag,
 				targetLanguageTags: languagesTagsToTranslateTo,
 			})
@@ -73,7 +73,7 @@ export async function translateCommandAction(args: { inlang: InlangProject }) {
 				continue
 			}
 
-			args.inlang.query.messages.update({ where: { id: id }, data: translatedMessage! })
+			args.project.query.messages.update({ where: { id: id }, data: translatedMessage! })
 			log.info(`✅ Machine translated message "${id}"`)
 		}
 		// Log the message counts

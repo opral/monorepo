@@ -1,0 +1,19 @@
+{
+	"name": "template-plugin",
+	"version": "0.1.0",
+	"type": "module",
+	"files": [
+		"./dist"
+	],
+	"scripts": {
+		"build": "inlang module build --entry ./src/index.ts",
+		"dev": "inlang module build --entry ./src/index.ts --watch",
+		"test": "tsc --noEmit && vitest run"
+	},
+	"devDependencies": {
+		"@inlang/sdk": "*",
+		"@inlang/cli": "*",
+		"typescript": "^5.2.2",
+		"vitest": "^0.34.4"
+	}
+}

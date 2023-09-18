@@ -1,5 +1,5 @@
 import { useLocalStorage } from "#src/services/local-storage/index.js"
-import { createEffect, createSignal, type JSXElement, onMount, Show } from "solid-js"
+import { createEffect, createSignal, type JSXElement, onMount, Show, on } from "solid-js"
 import IconGithub from "~icons/cib/github"
 import { pushChanges, useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
@@ -25,7 +25,7 @@ export const Gitfloat = () => {
 		repo,
 		setLastPullTime,
 		tourStep,
-		inlang,
+		project,
 	} = useEditorState()
 	const [localStorage] = useLocalStorage()
 
@@ -33,7 +33,7 @@ export const Gitfloat = () => {
 	const gitState: () => "login" | "loading" | "fork" | "pullrequest" | "hasChanges" = () => {
 		if (localStorage?.user === undefined) {
 			return "login"
-		} else if (userIsCollaborator.loading || !inlang()) {
+		} else if (userIsCollaborator.loading || !project() || isForking()) {
 			return "loading"
 		} else if (userIsCollaborator() === false) {
 			return "fork"
@@ -47,6 +47,7 @@ export const Gitfloat = () => {
 	}
 
 	const [isLoading, setIsLoading] = createSignal(false)
+	const [isForking, setIsForking] = createSignal(false)
 	const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 
 	let signInDialog: SlDialog | undefined
@@ -56,7 +57,7 @@ export const Gitfloat = () => {
 	}
 
 	async function handleFork() {
-		setIsLoading(true)
+		setIsForking(true)
 		if (localStorage.user === undefined) {
 			return
 		}
@@ -75,13 +76,15 @@ export const Gitfloat = () => {
 				title: "The Fork has been created.",
 				message: `Don't forget to open a pull request`,
 			})
-			setIsLoading(false)
 			await github.rest.repos.get({
 				owner: routeParams().owner,
 				repo: routeParams().repository,
 			})
-			// @ts-expect-error - type mismatch fix after refactoring
-			return navigate(`/editor/github.com/${response.data.full_name}`)
+			setTimeout(() => {
+				// @ts-expect-error - type mismatch fix after refactoring
+				navigate(`/editor/github.com/${response.data.full_name}`)
+			}, 1000)
+			return
 		} else {
 			showToast({
 				variant: "danger",
@@ -140,8 +143,8 @@ export const Gitfloat = () => {
 	const pullrequestUrl = () => {
 		return `https://github.com/${
 			githubRepositoryInformation()?.parent?.fullName
-		}/compare/${currentBranch()}...${githubRepositoryInformation()?.name}:${
-			githubRepositoryInformation()?.owner.name
+		}/compare/${currentBranch()}...${routeParams().owner}:${
+			routeParams().repository
 		}:${currentBranch()}?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20conducted%20here%0A%0APreview%20the%20messages%20on%20https%3A%2F%2Finlang.com%2Fgithub.com%2F${
 			(currentPageContext.routeParams as EditorRouteParams).owner
 		}%2F${(currentPageContext.routeParams as EditorRouteParams).repository}%20.`
@@ -226,6 +229,15 @@ export const Gitfloat = () => {
 		}
 	})
 
+	// wait until fork fetch is done
+	createEffect(
+		on(userIsCollaborator, () => {
+			if (userIsCollaborator()) {
+				setIsForking(false)
+			}
+		}),
+	)
+
 	return (
 		<>
 			<div class="gitfloat z-30 sticky left-1/2 -translate-x-[150px] bottom-8 w-[300px] my-16 animate-slideIn">
@@ -235,7 +247,8 @@ export const Gitfloat = () => {
 					offset={{ x: 0, y: 60 }}
 					isVisible={
 						(tourStep() === "github-login" || tourStep() === "fork-repository") &&
-						inlang() !== undefined
+						project() !== undefined &&
+						gitState() !== "loading"
 					}
 				>
 					<div class="w-full flex justify-start items-center rounded-lg bg-inverted-surface shadow-xl ">

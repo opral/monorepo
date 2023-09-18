@@ -1,31 +1,31 @@
 import type { Message } from "@inlang/message"
 import type { LanguageTag } from "@inlang/language-tag"
 import { Translatable } from "@inlang/translatable"
-import { Type, type Static, type TTemplateLiteral, type TLiteral } from "@sinclair/typebox"
-import type { JSONObject } from "@inlang/json-types"
+import { Type, type Static } from "@sinclair/typebox"
+import {
+	_MessageLintRuleId,
+	_MessageLintRuleLevel,
+	type ProjectSettings,
+} from "@inlang/project-settings"
 
 export type MessageLintLevel = Static<typeof MessageLintLevel>
-export const MessageLintLevel = Type.Union([Type.Literal("error"), Type.Literal("warning")])
+export const MessageLintLevel = _MessageLintRuleLevel
 
 /**
  * The basis of a lint report (required to contruct a lint report union type)
  */
 export type MessageLintReport = {
-	ruleId: MessageLintRule["meta"]["id"]
+	ruleId: MessageLintRule["id"]
 	messageId: Message["id"]
 	languageTag: LanguageTag
 	level: MessageLintLevel
 	body: Translatable<string>
 }
 
-export type MessageLintRule<LintRuleSettings extends JSONObject | any = any> = Static<
-	typeof MessageLintRule
-> & {
-	message: (args: {
+export type MessageLintRule = Static<typeof MessageLintRule> & {
+	run: (args: {
 		message: Message
-		sourceLanguageTag: LanguageTag
-		languageTags: LanguageTag[]
-		settings: LintRuleSettings
+		settings: ProjectSettings
 		report: (args: {
 			messageId: Message["id"]
 			languageTag: LanguageTag
@@ -34,18 +34,9 @@ export type MessageLintRule<LintRuleSettings extends JSONObject | any = any> = S
 	}) => MaybePromise<void>
 }
 export const MessageLintRule = Type.Object({
-	meta: Type.Object({
-		id: Type.String({
-			pattern: "^messageLintRule\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)$",
-			description: "The key must be conform to `messageLintRule.{namespace}.{id}` pattern.",
-			examples: [
-				"messageLintRule.namespace.patternInvalid",
-				"messageLintRule.namespace.missingTranslation",
-			],
-		}) as unknown as TTemplateLiteral<[TLiteral<`messageLintRule.${string}.${string}`>]>,
-		displayName: Translatable(Type.String()),
-		description: Translatable(Type.String()),
-	}),
+	id: _MessageLintRuleId,
+	displayName: Translatable(Type.String()),
+	description: Translatable(Type.String()),
 })
 
 /**

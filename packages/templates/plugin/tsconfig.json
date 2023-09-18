@@ -1,0 +1,19 @@
+{
+	"include": ["src/**/*"],
+	"compilerOptions": {
+		// strict ES module
+		"module": "Node16",
+		// strict ES module
+		"moduleResolution": "node16",
+		// enables importing from marketplace-manifest.json
+		"resolveJsonModule": true,
+		// enable strict type checking (recommended, reduces bugs)
+		"strict": true,
+		// to improve bundling, types should explicitly importes as types
+		"verbatimModuleSyntax": true,
+		// in case you write JS, JS files should be checked for errors too
+		"checkJs": true,
+		// don't check dependencies for type errors
+		"skipLibCheck": true
+	}
+}
