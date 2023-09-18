@@ -48,9 +48,10 @@ async function main(args: {
 	// initate project
 	const { project, error } = await initProject({ workspaceFolder, gitOrigin: args.gitOrigin })
 
-	// if both is undefined, the project got migrated / newly created and we need to restart the extension
-	if (project === undefined && error === undefined) {
+	// if project is undefined but the files exists, the project got migrated / newly created and we need to restart the extension
+	if (!project && (await vscode.workspace.findFiles(CONFIG_FILE_NAME)).length !== 0) {
 		main(args)
+		return
 	}
 
 	if (error) {
