@@ -23,13 +23,13 @@ export async function isInWorkspaceRecommendation(args: {
 	const vscodeFolderPath = path.join(args.workspaceFolder.uri.fsPath, ".vscode")
 	const extensionsJsonPath = path.join(vscodeFolderPath, "extensions.json")
 
-	let extensions: CommentJSONValue | { recommendations: string[] } | undefined
+	let extensions: CommentJSONValue | undefined
 	// Read the extensions.json file
 	if (fs.existsSync(extensionsJsonPath) && fs.existsSync(vscodeFolderPath)) {
 		extensions = parse(fs.readFileSync(extensionsJsonPath, "utf8"))
 	}
 	const extensionsResult =
-		// @ts-ignore
+		// @ts-expect-error
 		extensions?.recommendations?.includes("inlang.vs-code-extension") || false
 
 	if (extensionsResult === true) {
@@ -38,6 +38,12 @@ export async function isInWorkspaceRecommendation(args: {
 		return false
 	}
 }
+
+/**
+ * Displays an popup to add the Inlang extension to your recommendation.
+ * @param {vscode.WorkspaceFolder} args.workspaceFolder - The workspace folder.
+ * @returns {Promise<void>} - A Promise that resolves once the recommendation process is completed.
+ */
 export const recommendation = async (args: {
 	workspaceFolder: vscode.WorkspaceFolder
 }): Promise<void> => {
