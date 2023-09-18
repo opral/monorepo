@@ -46,7 +46,7 @@ export async function openRepository(
 	}
 
 	let gitHubProxyBaseUrl = ""
-	let gitProxyUrl = args?.corsProxy
+	const gitProxyUrl = args?.corsProxy
 
 	// Git cors proxy and github cors proxy have to be on the same server and will be unified further
 	if (gitProxyUrl && gitProxyUrl?.startsWith("http")) {
