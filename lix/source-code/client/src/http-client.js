@@ -161,4 +161,4 @@ async function request({ url, method = "GET", headers = {}, body }) {
 	}
 }
 
-export { request }
+export default { request }
