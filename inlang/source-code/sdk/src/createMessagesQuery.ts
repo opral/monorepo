@@ -1,7 +1,7 @@
 import type { Message } from "@inlang/message"
 import { ReactiveMap } from "./reactivity/map.js"
 import { createEffect } from "./reactivity/solid.js"
-import { createSubscribable } from "./openInlangProject.js"
+import { createSubscribable } from "./loadProject.js"
 import type { InlangProject, MessageQueryApi } from "./api.js"
 
 /**

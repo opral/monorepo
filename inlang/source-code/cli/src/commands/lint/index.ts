@@ -9,18 +9,18 @@ export const lint = new Command()
 	.description("Commands for linting translations.")
 	.option("--no-fail", "Disable throwing an error if linting fails.") // defaults to false https://github.com/tj/commander.js#other-option-types-negatable-boolean-and-booleanvalue
 	.action(async () => {
-		const { data: inlang, error } = await getInlangProject()
+		const { data: project, error } = await getInlangProject()
 		if (error) {
 			log.error(error)
 			return
 		}
-		await lintCommandAction({ inlang, logger: log })
+		await lintCommandAction({ project, logger: log })
 	})
 
 /* @ts-ignore */
-export async function lintCommandAction(args: { inlang: InlangProject; logger: any }) {
+export async function lintCommandAction(args: { project: InlangProject; logger: any }) {
 	try {
-		if (args.inlang.installed.messageLintRules().length === 0) {
+		if (args.project.installed.messageLintRules().length === 0) {
 			args.logger.error(
 				`No message lint rules are installed. Visit the marketplace to install lint rules https://inlang.com/marketplace .`,
 			)
@@ -30,13 +30,13 @@ export async function lintCommandAction(args: { inlang: InlangProject; logger: a
 		// TODO: async reports
 		const MessageLintReportsAwaitable = (): Promise<MessageLintReport[]> => {
 			return new Promise((resolve) => {
-				let reports = args.inlang.query.messageLintReports.getAll()
+				let reports = args.project.query.messageLintReports.getAll()
 
 				if (reports) {
 					// reports where loaded
 					setTimeout(() => {
 						// this is a workaround. We do not know when the report changed. Normally this shouldn't be a issue for cli
-						const newReports = args.inlang.query.messageLintReports.getAll()
+						const newReports = args.project.query.messageLintReports.getAll()
 						if (newReports) {
 							resolve(newReports)
 						}
@@ -44,7 +44,7 @@ export async function lintCommandAction(args: { inlang: InlangProject; logger: a
 				} else {
 					let counter = 0
 					const interval = setInterval(() => {
-						reports = args.inlang.query.messageLintReports.getAll()
+						reports = args.project.query.messageLintReports.getAll()
 						if (reports) {
 							clearInterval(interval)
 							resolve(reports)

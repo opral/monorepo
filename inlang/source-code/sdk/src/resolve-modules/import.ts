@@ -1,4 +1,4 @@
-import { dedent } from "ts-dedent"
+import dedent from "dedent"
 import { normalizePath } from "@lix-js/fs"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import { ModuleImportError } from "./errors.js"
@@ -23,8 +23,6 @@ export type ImportFunction = (uri: string) => Promise<any>
 export function createImport(args: {
 	/** the fs from which the file can be read */
 	readFile: NodeishFilesystemSubset["readFile"]
-	/** http client implementation */
-	fetch: typeof fetch
 }): (uri: string) => ReturnType<typeof $import> {
 	// resembles a native import api
 	return (uri: string) => $import(uri, args)
@@ -37,16 +35,12 @@ async function $import(
 		 * Required to import from a local path.
 		 */
 		readFile: NodeishFilesystemSubset["readFile"]
-		/**
-		 * Required to import via network.
-		 */
-		fetch: typeof fetch
 	},
 ): Promise<any> {
 	let moduleAsText: string
 
 	if (uri.startsWith("http")) {
-		moduleAsText = await (await options.fetch(uri)).text()
+		moduleAsText = await (await fetch(uri)).text()
 	} else {
 		moduleAsText = await options.readFile(normalizePath(uri), { encoding: "utf-8" })
 	}

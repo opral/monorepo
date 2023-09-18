@@ -28,7 +28,7 @@ export type NodeishFilesystemSubset = Pick<
  */
 export type ResolvePluginsFunction = (args: {
 	plugins: Array<Plugin>
-	settings: Record<Plugin["meta"]["id"], JSONObject>
+	settings: Record<Plugin["id"], JSONObject>
 	nodeishFs: NodeishFilesystemSubset
 }) => Promise<{
 	data: ResolvedPluginApi

@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/sdk",
 	"type": "module",
-	"version": "0.2.0",
+	"version": "0.5.0",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"
@@ -35,14 +35,14 @@
 		"@inlang/language-tag": "*",
 		"@inlang/message": "*",
 		"@inlang/plugin": "*",
-		"@inlang/project-config": "*",
+		"@inlang/project-settings": "*",
 		"@inlang/result": "*",
 		"@lix-js/fs": "*",
 		"@sinclair/typebox": "^0.31.0",
 		"deepmerge-ts": "^5.1.0",
 		"solid-js": "1.6.12",
 		"throttle-debounce": "5.0.0",
-		"ts-dedent": "2.2.0"
+		"dedent": "1.5.1"
 	},
 	"devDependencies": {
 		"@lix-js/fs": "*",

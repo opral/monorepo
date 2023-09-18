@@ -35,7 +35,7 @@ export type Repository = {
 		name: string
 		isPrivate: boolean
 		isFork: boolean
-		owner: { name?: string; email?: string }
+		owner: { name?: string; email?: string; login: string }
 		parent:
 			| {
 					url: string

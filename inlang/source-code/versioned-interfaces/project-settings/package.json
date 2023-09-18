@@ -1,13 +1,14 @@
 {
-	"name": "@inlang/project-config",
+	"name": "@inlang/project-settings",
 	"type": "module",
-	"version": "1.2.0",
+	"version": "2.1.0",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"
 	},
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/index.js",
+		"./migration": "./dist/migration/index.js"
 	},
 	"files": [
 		"./dist",
@@ -23,10 +24,7 @@
 	},
 	"dependencies": {
 		"@inlang/json-types": "*",
-		"@inlang/message": "*",
-		"@inlang/message-lint-rule": "*",
-		"@inlang/language-tag": "*",
-		"@inlang/translatable": "*"
+		"@inlang/language-tag": "*"
 	},
 	"devDependencies": {
 		"tsd": "0.28.1",

@@ -271,7 +271,11 @@ export async function openRepository(
 				name,
 				isPrivate,
 				isFork,
-				owner: { name: ownerMetaData.name || undefined, email: ownerMetaData.email || undefined },
+				owner: {
+					name: ownerMetaData.name || undefined,
+					email: ownerMetaData.email || undefined,
+					login: ownerMetaData.login,
+				},
 				parent: parent
 					? {
 							url: transformRemote(parent.git_url),

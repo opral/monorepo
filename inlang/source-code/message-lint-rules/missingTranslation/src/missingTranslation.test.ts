@@ -19,12 +19,14 @@ const messages = [message1]
 
 test("should not report if all messages are present", async () => {
 	const result = await lintSingleMessage({
-		sourceLanguageTag: "en",
-		languageTags: ["en", "de"],
-		ruleLevels: {
-			[missingTranslationRule.meta.id]: "warning",
+		settings: {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "de"],
+			modules: [],
+			messageLintRuleLevels: {
+				[missingTranslationRule.id]: "warning",
+			},
 		},
-		ruleSettings: {},
 		messages,
 		message: message1,
 		rules: [missingTranslationRule],
@@ -36,12 +38,14 @@ test("should not report if all messages are present", async () => {
 
 test("should report if a languageTag is not present", async () => {
 	const result = await lintSingleMessage({
-		sourceLanguageTag: "en",
-		languageTags: ["en", "it"],
-		ruleLevels: {
-			[missingTranslationRule.meta.id]: "warning",
+		settings: {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "it"],
+			modules: [],
+			messageLintRuleLevels: {
+				[missingTranslationRule.id]: "warning",
+			},
 		},
-		ruleSettings: {},
 		messages,
 		message: message1,
 		rules: [missingTranslationRule],
@@ -54,12 +58,14 @@ test("should report if a languageTag is not present", async () => {
 
 test("should report if no variants are defined", async () => {
 	const result = await lintSingleMessage({
-		sourceLanguageTag: "en",
-		languageTags: ["en", "fr"],
-		ruleLevels: {
-			[missingTranslationRule.meta.id]: "warning",
+		settings: {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "fr"],
+			modules: [],
+			messageLintRuleLevels: {
+				[missingTranslationRule.id]: "warning",
+			},
 		},
-		ruleSettings: {},
 		messages,
 		message: message1,
 		rules: [missingTranslationRule],
@@ -73,12 +79,14 @@ test("should report if no variants are defined", async () => {
 describe("reported by emptyPattern lintRule", () => {
 	test("should not report if no patterns are defined", async () => {
 		const result = await lintSingleMessage({
-			sourceLanguageTag: "en",
-			languageTags: ["en", "es"],
-			ruleLevels: {
-				[missingTranslationRule.meta.id]: "warning",
+			settings: {
+				sourceLanguageTag: "en",
+				languageTags: ["en", "es"],
+				modules: [],
+				messageLintRuleLevels: {
+					[missingTranslationRule.id]: "warning",
+				},
 			},
-			ruleSettings: {},
 			messages,
 			message: message1,
 			rules: [missingTranslationRule],
@@ -90,12 +98,14 @@ describe("reported by emptyPattern lintRule", () => {
 
 	test("should not report if a message has a pattern with only one text element that is an empty string", async () => {
 		const result = await lintSingleMessage({
-			sourceLanguageTag: "en",
-			languageTags: ["en", "cn"],
-			ruleLevels: {
-				[missingTranslationRule.meta.id]: "warning",
+			settings: {
+				sourceLanguageTag: "en",
+				languageTags: ["en", "cn"],
+				modules: [],
+				messageLintRuleLevels: {
+					[missingTranslationRule.id]: "warning",
+				},
 			},
-			ruleSettings: {},
 			messages,
 			message: message1,
 			rules: [missingTranslationRule],

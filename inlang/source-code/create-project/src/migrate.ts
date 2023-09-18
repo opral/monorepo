@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { NodeishFilesystem } from "@lix-js/fs"
-import { ProjectConfig } from "@inlang/project-config"
-import { pluginUrls, standardLintRules } from "./tryAutoGenProjectConfig.js"
+import { ProjectSettings } from "@inlang/project-settings"
+import { pluginUrls, standardLintRules } from "./tryAutoGenProjectSettings.js"
 // @ts-ignore
 import { minify } from "terser"
 import type { Plugin } from "@inlang/plugin"
@@ -54,11 +54,11 @@ function detectPlugins(url: string) {
  * @params args.filePath optional location of your inlang config file, should be used only for testing as we hard code filepaths at lots of places
  * @returns The warnings and if successfully generated the config object, the file is also saved to the filesystem in the current path
  */
-export async function migrateProjectConfig(args: {
+export async function migrateProjectSettings(args: {
 	nodeishFs: NodeishFilesystem
 	pathJoin: (...args: string[]) => string
 	filePath?: string
-}): Promise<{ warnings: string[]; config?: ProjectConfig }> {
+}): Promise<{ warnings: string[]; config?: ProjectSettings }> {
 	let warnings: string[] = []
 
 	const fileString = await args.nodeishFs
@@ -116,8 +116,8 @@ export async function migrateProjectConfig(args: {
 
 				const pluginName =
 					moduleDetections.values().next().value || lintRuleDetections.values().next().value
-				const pluginId: Plugin["meta"]["id"] = ("plugin.inlang." +
-					(pluginName || `<please add your plugin id for ${url} here>`)) as Plugin["meta"]["id"]
+				const pluginId: Plugin["id"] = ("plugin.inlang." +
+					(pluginName || `<please add your plugin id for ${url} here>`)) as Plugin["id"]
 
 				return {
 					default: (pluginArg: any) => {
@@ -133,11 +133,11 @@ export async function migrateProjectConfig(args: {
 		// ignore the error
 	}
 
-	let config: ProjectConfig = {
+	let config: ProjectSettings = {
 		sourceLanguageTag: legacyConfigBuild?.referenceLanguage || "",
 		languageTags: legacyConfigBuild?.languages || [],
 		modules: legacyConfigBuild?.plugins?.flatMap((entry: any) => entry) || [],
-		settings: pluginSettings,
+		...pluginSettings,
 	}
 
 	if (!legacyConfigBuild) {
@@ -156,8 +156,8 @@ export async function migrateProjectConfig(args: {
 
 function lineParsing(
 	legacyConfig: string,
-	config: ProjectConfig,
-): { extractedConfig: ProjectConfig; parseErrors: string[] } {
+	config: ProjectSettings,
+): { extractedConfig: ProjectSettings; parseErrors: string[] } {
 	const searchMapping: Record<string, string> = {
 		languages: "languageTags",
 		variableReferencePattern: "variableReferencePattern",
@@ -202,7 +202,7 @@ function lineParsing(
 	}
 
 	const pluginName: string = moduleDetections.values().next().value
-	const pluginId: Plugin["meta"]["id"] = `plugin.inlang.${pluginName}`
+	const pluginId: Plugin["id"] = `plugin.inlang.${pluginName}`
 
 	config.modules = [
 		pluginUrls[pluginName] || `<please add your missing plugin url here>`,
@@ -212,14 +212,14 @@ function lineParsing(
 	config.sourceLanguageTag = extractions.sourceLanguageTag || ""
 	config.languageTags = extractions.languageTags || []
 
-	config.settings = {
+	config = {
 		[pluginId!]: {
 			pathPattern: extractions.pathPattern || "",
 			variableReferencePattern: extractions.variableReferencePattern || undefined,
 			referenceResourcePath: extractions.referenceResourcePath || undefined,
 		},
-		...config.settings,
-	} as ProjectConfig["settings"]
+		...config,
+	} as ProjectSettings
 
 	return { extractedConfig: config, parseErrors }
 }

@@ -1,6 +1,6 @@
 import fs from "node:fs/promises"
 import { resolve } from "node:path"
-import { openInlangProject, type InlangProject } from "@inlang/sdk"
+import { loadProject, type InlangProject } from "@inlang/sdk"
 import { telemetry } from "../services/telemetry/implementation.js"
 import { tryCatch, type Result } from "@inlang/result"
 
@@ -11,10 +11,10 @@ export async function getInlangProject(): Promise<Result<InlangProject, Error>> 
 	if (cached) return cached
 
 	const baseDirectory = process.cwd()
-	const projectFilePath = resolve(baseDirectory, "project.inlang.json")
+	const settingsFilePath = resolve(baseDirectory, "project.inlang.json")
 
 	const configExists = await fs
-		.access(projectFilePath)
+		.access(settingsFilePath)
 		.then(() => true)
 		.catch(() => false)
 
@@ -23,8 +23,8 @@ export async function getInlangProject(): Promise<Result<InlangProject, Error>> 
 	}
 
 	cached = await tryCatch(() =>
-		openInlangProject({
-			projectFilePath,
+		loadProject({
+			settingsFilePath,
 			nodeishFs: fs,
 			_capture(id, props) {
 				telemetry.capture({

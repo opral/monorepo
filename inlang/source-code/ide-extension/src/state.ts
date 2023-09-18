@@ -7,7 +7,7 @@ type State = {
 	/**
 	 * Inlang project
 	 */
-	inlang: InlangProject
+	project: InlangProject
 }
 
 let _state: State

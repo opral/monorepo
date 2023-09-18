@@ -11,7 +11,7 @@ export const extractMessageCommand = {
 	id: "inlang.extractMessage",
 	title: "Inlang: Extract Message",
 	callback: async function (textEditor: vscode.TextEditor) {
-		const ideExtension = state().inlang.customApi()["app.inlang.ideExtension"]
+		const ideExtension = state().project.customApi()["app.inlang.ideExtension"]
 
 		// guards
 		if (!ideExtension) {
@@ -28,7 +28,7 @@ export const extractMessageCommand = {
 				"notification",
 			)
 		}
-		if (state().inlang.config()?.sourceLanguageTag === undefined) {
+		if (state().project.settings()?.sourceLanguageTag === undefined) {
 			return msg(
 				"The `sourceLanguageTag` is not defined in the project.inlang.json but required to extract a message.",
 				"warn",
@@ -79,7 +79,7 @@ export const extractMessageCommand = {
 			selectors: [],
 			variants: [
 				{
-					languageTag: state().inlang.config()?.sourceLanguageTag as string,
+					languageTag: state().project.settings()?.sourceLanguageTag as string,
 					match: {},
 					pattern: [
 						{
@@ -92,7 +92,7 @@ export const extractMessageCommand = {
 		}
 
 		// create message
-		const success = state().inlang.query.messages.create({
+		const success = state().project.query.messages.create({
 			data: message,
 		})
 

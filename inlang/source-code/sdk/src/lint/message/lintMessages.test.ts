@@ -4,21 +4,17 @@ import type { MessageLintReport, MessageLintRule } from "@inlang/message-lint-ru
 import type { Message } from "@inlang/message"
 
 const lintRule1 = {
-	meta: {
-		id: "messageLintRule.x.1",
-		displayName: { en: "" },
-		description: { en: "" },
-	},
-	message: vi.fn(),
+	id: "messageLintRule.x.1",
+	displayName: { en: "" },
+	description: { en: "" },
+	run: vi.fn(),
 } satisfies MessageLintRule
 
 const lintRule2 = {
-	meta: {
-		id: "messageLintRule.x.2",
-		displayName: { en: "" },
-		description: { en: "" },
-	},
-	message: vi.fn(),
+	id: "messageLintRule.x.2",
+	displayName: { en: "" },
+	description: { en: "" },
+	run: vi.fn(),
 } satisfies MessageLintRule
 
 const message1 = { id: "m1" } as Message
@@ -34,50 +30,54 @@ describe("lintMessages", async () => {
 
 	test("it should await all messages", async () => {
 		let called = 0
-		lintRule2.message.mockImplementation(async () => {
+		lintRule2.run.mockImplementation(async () => {
 			await new Promise((resolve) => setTimeout(resolve, 0))
 			called++
 		})
 
 		await lintMessages({
-			ruleLevels: {
-				[lintRule1.meta.id]: "warning",
-				[lintRule2.meta.id]: "warning",
+			settings: {
+				sourceLanguageTag: "en",
+				languageTags: [],
+				modules: [],
+				messageLintRuleLevels: {
+					[lintRule1.id]: "warning",
+					[lintRule2.id]: "warning",
+				},
 			},
-			ruleSettings: {},
-			sourceLanguageTag: "en",
-			languageTags: [],
 			messages,
 			rules: [lintRule1, lintRule2],
 		})
 
-		expect(lintRule1.message).toHaveBeenCalledTimes(3)
+		expect(lintRule1.run).toHaveBeenCalledTimes(3)
 		expect(called).toBe(3)
 	})
 
 	test("it should process all messages and rules in parallel", async () => {
 		const fn = vi.fn()
 
-		lintRule1.message.mockImplementation(async ({ message }) => {
+		lintRule1.run.mockImplementation(async ({ message }) => {
 			fn("r1", "before", message.id)
 			await new Promise((resolve) => setTimeout(resolve, 0))
 			fn("r1", "after", message.id)
 		})
-		lintRule2.message.mockImplementation(async ({ message }) => {
+		lintRule2.run.mockImplementation(async ({ message }) => {
 			fn("r2", "before", message.id)
 			await new Promise((resolve) => setTimeout(resolve, 0))
 			fn("r2", "after", message.id)
 		})
 
 		await lintMessages({
-			ruleLevels: {
-				[lintRule1.meta.id]: "warning",
-				[lintRule2.meta.id]: "warning",
+			settings: {
+				sourceLanguageTag: "en",
+				languageTags: [],
+				modules: [],
+				messageLintRuleLevels: {
+					[lintRule1.id]: "warning",
+					[lintRule2.id]: "warning",
+				},
 			},
-			ruleSettings: {},
 			rules: [lintRule1, lintRule2],
-			sourceLanguageTag: "en",
-			languageTags: [],
 			messages,
 		})
 
@@ -97,21 +97,23 @@ describe("lintMessages", async () => {
 	})
 
 	test("it should not abort the linting process when errors occur", async () => {
-		lintRule1.message.mockImplementation(({ report }) => {
+		lintRule1.run.mockImplementation(({ report }) => {
 			report({} as MessageLintReport)
 		})
-		lintRule2.message.mockImplementation(() => {
+		lintRule2.run.mockImplementation(() => {
 			throw new Error("error")
 		})
 
 		const { data, errors } = await lintMessages({
-			ruleLevels: {
-				[lintRule1.meta.id]: "warning",
-				[lintRule2.meta.id]: "warning",
+			settings: {
+				sourceLanguageTag: "en",
+				languageTags: [],
+				modules: [],
+				messageLintRuleLevels: {
+					[lintRule1.id]: "warning",
+					[lintRule2.id]: "warning",
+				},
 			},
-			ruleSettings: {},
-			sourceLanguageTag: "en",
-			languageTags: [],
 			messages,
 			rules: [lintRule1, lintRule2],
 		})

@@ -14,13 +14,13 @@ export const solidAdapter = (
 
 	return {
 		customApi: convert(project.customApi),
-		config: convert(project.config),
+		settings: convert(project.settings),
 		errors: convert(project.errors),
 		installed: {
 			messageLintRules: convert(project.installed.messageLintRules),
 			plugins: convert(project.installed.plugins),
 		},
-		setConfig: project.setConfig,
+		setSettings: project.setSettings,
 		query: {
 			messages: {
 				create: project.query.messages.create,
@@ -51,8 +51,8 @@ export type InlangProjectWithSolidAdapter = {
 		messageLintRules: () => ReturnType<InlangProject["installed"]["messageLintRules"]>
 	}
 	errors: () => ReturnType<InlangProject["errors"]>
-	config: () => ReturnType<InlangProject["config"]>
-	setConfig: InlangProject["setConfig"]
+	settings: () => ReturnType<InlangProject["settings"]>
+	setSettings: InlangProject["setSettings"]
 	query: {
 		messages: {
 			create: MessageQueryApi["create"]
