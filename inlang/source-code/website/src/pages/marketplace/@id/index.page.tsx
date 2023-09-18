@@ -9,6 +9,7 @@ import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 import { SelectRepo } from "../Select.jsx"
 import { setSearchValue } from "../index.page.jsx"
 import { colorForTypeOf, convertLinkToGithub, typeOfIdToTitle } from "../utilities.js"
+import "@inlang/markdown/css"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 
 /**

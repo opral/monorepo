@@ -8,12 +8,12 @@
 		"./dist"
 	],
 	"exports": {
-		".": "./index.js",
-		"./custom-elements": "./custom-elements/index.js",
-		"./css": "./css/index.js"
+		".": "./dist/index.js",
+		"./custom-elements": "./dist/custom-elements/index.js",
+		"./css": "./dist/css/index.js"
 	},
 	"scripts": {
-		"build": "npx tailwindcss -i ./src/style.css -o ./dist/style.css && npx prettier ./src --write && tsc --build",
+		"build": "npx tailwindcss -i ./src/css/style.css -o ./dist/css/style.css && npx prettier ./src --write && tsc --build",
 		"dev": "tsc --watch",
 		"test": "tsc --noEmit && vitest run",
 		"lint": "eslint ./src --fix",
