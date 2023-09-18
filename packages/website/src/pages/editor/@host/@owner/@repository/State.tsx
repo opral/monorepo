@@ -207,7 +207,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			if (host && owner && repository) {
 				const newRepo = await openRepository(`${host}/${owner}/${repository}`, {
 					nodeishFs: createNodeishMemoryFs(),
-					corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
+					corsProxy: publicEnv.PUBLIC_GIT_PROXY_BASE_URL + publicEnv.PUBLIC_GIT_PROXY_PATH,
 				})
 				setLastPullTime(new Date())
 				return newRepo

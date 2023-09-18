@@ -8,6 +8,11 @@ export type AllEnvVariables = PublicEnvVariables & PrivateEnvVariables
 
 export const publicEnvVariablesSchema = z.object({
 	PUBLIC_GITHUB_APP_CLIENT_ID: z.string(),
+	PUBLIC_GIT_PROXY_BASE_URL: z
+		.string()
+		.startsWith("http")
+		.regex(/^(?!.*\/$).+$/, "Must not end with a slash")
+		.describe(`Must be a url including protocol`),
 	PUBLIC_GIT_PROXY_PATH: z
 		.string()
 		.startsWith("/")
