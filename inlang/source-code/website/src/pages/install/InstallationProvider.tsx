@@ -140,12 +140,23 @@ async function initializeRepo(
 	/* Opens the repository with lix */
 	const repo = await openRepository(repoURL, {
 		nodeishFs: createNodeishMemoryFs(),
-		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
+		corsProxy: publicEnv.PUBLIC_GIT_PROXY_BASE_URL + publicEnv.PUBLIC_GIT_PROXY_PATH,
 	})
 
-	const isCollaborator = await repo.isCollaborator({
-		username: user.username,
-	})
+	const isCollaborator = await repo
+		.isCollaborator({
+			username: user.username,
+		})
+		.catch((err: any) => {
+			if (err.status === 401) {
+				setStep({
+					type: "github-login",
+					error: false,
+				})
+
+				return
+			}
+		})
 
 	if (!isCollaborator) {
 		setStep({
