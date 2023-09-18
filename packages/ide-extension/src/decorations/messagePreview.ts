@@ -3,6 +3,7 @@ import { state } from "../state.js"
 import { contextTooltip } from "./contextTooltip.js"
 import { onDidEditMessage } from "../commands/editMessage.js"
 import { getStringFromPattern } from "../utilities/query.js"
+import { getActiveTextEditor } from "../utilities/initProject.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -14,7 +15,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 	})
 
 	async function updateDecorations() {
-		const activeTextEditor = vscode.window.activeTextEditor
+		const activeTextEditor = getActiveTextEditor()
 
 		if (!activeTextEditor) {
 			return
