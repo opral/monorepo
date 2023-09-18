@@ -16,10 +16,10 @@ export const emptyPatternRule: MessageLintRule = {
 			const patterns = filteredVariants.flatMap(({ pattern }) => pattern)
 			if (!patterns.length) {
 				report({
-					messageId: id,
+					messageId: message.id,
 					languageTag: translatedLanguageTag,
 					body: {
-						en: `Message with id '${id}' has no patterns for language tag '${translatedLanguageTag}'.`,
+						en: `Message with id '${message.id}' has no patterns for language tag '${translatedLanguageTag}'.`,
 					},
 				})
 			} else if (
@@ -28,10 +28,10 @@ export const emptyPatternRule: MessageLintRule = {
 				patterns[0]?.value === ""
 			) {
 				report({
-					messageId: id,
+					messageId: message.id,
 					languageTag: translatedLanguageTag,
 					body: {
-						en: `Message with id '${id}' has no content for language tag '${translatedLanguageTag}'.`,
+						en: `Message with id '${message.id}' has no content for language tag '${translatedLanguageTag}'.`,
 					},
 				})
 			}

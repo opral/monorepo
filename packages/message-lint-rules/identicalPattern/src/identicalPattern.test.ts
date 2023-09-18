@@ -34,6 +34,10 @@ test("should report if identical message found in another language", async () =>
 	expect(result.errors).toHaveLength(0)
 	expect(result.data).toHaveLength(1)
 	expect(result.data[0]!.languageTag).toBe("fr")
+	expect(result.data[0]!.messageId).toBe(message1.id)
+	expect(
+		typeof result.data[0]!.body === "object" ? result.data[0]!.body.en : result.data[0]!.body,
+	).toContain(message1.id)
 })
 
 test("should not report if pattern is present in 'ignore'", async () => {

@@ -31,10 +31,10 @@ export const identicalPatternRule: MessageLintRule = {
 
 			if (isMessageIdentical && !shouldBeIgnored) {
 				report({
-					messageId: id,
+					messageId: message.id,
 					languageTag: variant.languageTag,
 					body: {
-						en: `Identical content found in language '${variant.languageTag}' with message ID '${id}'.`,
+						en: `Identical content found in language '${variant.languageTag}' with message ID '${message.id}'.`,
 					},
 				})
 			}

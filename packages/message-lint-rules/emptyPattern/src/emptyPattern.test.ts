@@ -54,6 +54,10 @@ test("should report if no patterns are defined", async () => {
 	expect(result.errors).toHaveLength(0)
 	expect(result.data).toHaveLength(1)
 	expect(result.data[0]!.languageTag).toBe("es")
+	expect(result.data[0]!.messageId).toBe(message1.id)
+	expect(
+		typeof result.data[0]!.body === "object" ? result.data[0]!.body.en : result.data[0]!.body,
+	).toContain(message1.id)
 })
 
 test("should report if a message has a pattern with only one text element that is an empty string", async () => {
