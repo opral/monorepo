@@ -24,6 +24,7 @@
 		"node": ">=16.15.0"
 	},
 	"dependencies": {
+		"lit": "2.8.0",
 		"rehype-accessible-emojis": "0.3.2",
 		"rehype-add-classes": "1.0.0",
 		"rehype-autolink-headings": "7.0.0",

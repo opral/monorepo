@@ -9,6 +9,7 @@ import { EditButton } from "./EditButton.jsx"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
 import "@inlang/markdown/css"
+import "@inlang/markdown/custom-elements"
 import tableOfContents from "../../../../../documentation/tableOfContents.json"
 
 /**
