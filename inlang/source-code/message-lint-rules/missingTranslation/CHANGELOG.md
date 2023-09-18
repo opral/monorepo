@@ -1,5 +1,11 @@
 # @inlang/message-lint-rule-missing-translation
 
+## 1.3.0
+
+### Minor Changes
+
+- a63de47e: fix: messageId
+
 ## 1.2.0
 
 ### Minor Changes
