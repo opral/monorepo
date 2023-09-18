@@ -1,9 +1,14 @@
 {
 	"extends": "../tsconfig.base.json",
 	"include": ["src/**/*"],
+	"exclude": ["src/auth/**", "src/github/**"],
 	"compilerOptions": {
-		"lib": ["ESNext", "DOM"],
-		"types": [],
+		"lib": ["DOM", "DOM.Iterable", "ESNext"],
+		"types": ["vite/client"],
+		"jsx": "preserve",
+		"jsxImportSource": "solid-js",
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
 		"outDir": "./dist",
 		"rootDir": "./src"
 	}
