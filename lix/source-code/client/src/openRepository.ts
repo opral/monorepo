@@ -205,8 +205,14 @@ export async function openRepository(
 					repo: repoName,
 					username: cmdArgs.username,
 				})
-			} catch (_err) {
-				/*  throws on non collaborator access */
+			} catch (err: any) {
+				/*  throws on non collaborator access, 403 on non collaborator, 401 for current user not authenticated correctly
+						TODO: move to consistent error classes everywhere when hiding git api more
+				*/
+				if (err.status === 401) {
+					// if we are logged out rethrow the error
+					throw err
+				}
 			}
 
 			return response?.status === 204 ? true : false
