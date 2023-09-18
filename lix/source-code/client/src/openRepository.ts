@@ -1,7 +1,9 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Repository } from "./api.js"
 import { transformRemote, withLazyFetching } from "./helpers.js"
-import http from "isomorphic-git/http/node"
+// @ts-ignore
+import http from "./http-client.js"
+
 import { Octokit } from "octokit"
 import { createSignal, createEffect } from "./solid.js"
 import {
