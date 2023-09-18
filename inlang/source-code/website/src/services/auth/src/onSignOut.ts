@@ -1,6 +1,6 @@
 import type { SetStoreFunction } from "solid-js/store"
 import type { LocalStorageSchema } from "../../../services/local-storage/index.js"
-import { privateEnv } from "@inlang/env-variables"
+import { publicEnv } from "@inlang/env-variables"
 import { telemetryBrowser } from "@inlang/telemetry"
 
 /**
@@ -9,12 +9,12 @@ import { telemetryBrowser } from "@inlang/telemetry"
 export async function onSignOut(args: { setLocalStorage: SetStoreFunction<LocalStorageSchema> }) {
 	// sign out on the server
 	const hasExternalGitProxy =
-		privateEnv.PUBLIC_SERVER_BASE_URL !== privateEnv.PUBLIC_GIT_PROXY_BASE_URL
+		publicEnv.PUBLIC_SERVER_BASE_URL !== publicEnv.PUBLIC_GIT_PROXY_BASE_URL
 
 	if (hasExternalGitProxy) {
 		await Promise.allSettled([
 			fetch("/services/auth/sign-out", { method: "POST" }),
-			fetch(`${privateEnv.PUBLIC_GIT_PROXY_BASE_URL}/services/auth/sign-out`, {
+			fetch(`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/services/auth/sign-out`, {
 				method: "POST",
 				credentials: "include",
 			}),
