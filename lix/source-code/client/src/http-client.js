@@ -161,7 +161,4 @@ async function request({ url, method = "GET", headers = {}, body }) {
 	}
 }
 
-var index = { request }
-
-export default index
 export { request }
