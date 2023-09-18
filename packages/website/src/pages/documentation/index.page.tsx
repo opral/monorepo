@@ -264,30 +264,32 @@ function NavbarCommon(props: {
 											<ul class="my-2">
 												<For each={document.anchors}>
 													{(heading) => (
-														<li>
-															<a
-																onClick={() => {
-																	onAnchorClick(
-																		heading.toString().toLowerCase().replaceAll(" ", "-"),
-																	)
-																	props.onLinkClick?.()
-																}}
-																class={
-																	"text-sm tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
-																	(highlightedAnchor() ===
-																	heading.toString().toLowerCase().replaceAll(" ", "-")
-																		? "font-medium text-on-background border-l-text-on-background "
-																		: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
-																}
-																href={`#${heading
-																	.toString()
-																	.toLowerCase()
-																	.replaceAll(" ", "-")
-																	.replaceAll("/", "")}`}
-															>
-																{heading}
-															</a>
-														</li>
+														<Show when={!heading.includes(document.pageTitle)}>
+															<li>
+																<a
+																	onClick={() => {
+																		onAnchorClick(
+																			heading.toString().toLowerCase().replaceAll(" ", "-"),
+																		)
+																		props.onLinkClick?.()
+																	}}
+																	class={
+																		"text-sm tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
+																		(highlightedAnchor() ===
+																		heading.toString().toLowerCase().replaceAll(" ", "-")
+																			? "font-medium text-on-background border-l-text-on-background "
+																			: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
+																	}
+																	href={`#${heading
+																		.toString()
+																		.toLowerCase()
+																		.replaceAll(" ", "-")
+																		.replaceAll("/", "")}`}
+																>
+																	{heading}
+																</a>
+															</li>
+														</Show>
 													)}
 												</For>
 											</ul>
