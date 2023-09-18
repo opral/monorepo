@@ -2,6 +2,7 @@ import { createEffect, createResource, Match, Switch } from "solid-js"
 import MaterialSymbolsCheckCircleRounded from "~icons/material-symbols/check-circle-rounded"
 import MaterialSymbolsArrowBackRounded from "~icons/material-symbols/arrow-back-rounded"
 import { getUserInfo } from "../implementation.telefunc.js"
+import { useLocalStorage } from "#src/services/local-storage/index.js"
 
 /**
  * The GitHub web application flow redirects to this page.
@@ -15,9 +16,10 @@ export function Page() {
 	// ! Extremely important to wrap the get user function
 	// ! see https://github.com/brillout/telefunc/issues/56#issuecomment-1397929356
 	const [userInfo] = createResource(async () => await getUserInfo())
+	const [localStorage] = useLocalStorage()
 
 	createEffect(() => {
-		if (userInfo() && userInfo.loading === false && !userInfo.error) {
+		if (localStorage.user?.username) {
 			window.close()
 		}
 	})
