@@ -25,9 +25,8 @@ export function Page() {
 								Item not found
 							</h1>
 							<p class="text-lg text-surface-600 leading-relaxed mx-auto text-center mb-4">
-								Seems like the item you are looking for does not exist
-								<br />
-								This is a bug? Please report it on our
+								Seems like the item you are looking for does not exist. This is a bug? Please report
+								it on our
 								<a
 									class="text-primary hover:text-hover-primary font-semibold ml-1.5"
 									href="https://discord.gg/gdMPPWy57R"
