@@ -21,9 +21,9 @@ export async function convert(markdown: string): Promise<string> {
 		/* @ts-ignore */
 		.use(rehypeRaw)
 		/* @ts-ignore */
-		.use(rehypeSanitize, {
-			tagNames: ["doc-figure", ...defaultTags],
-		})
+		// .use(rehypeSanitize, {
+		// 	tagNames: ["doc-figure", "quick-link", ...defaultTags],
+		// })
 		.use(rehypeHighlight)
 		.use(rehypeSlug)
 		/* @ts-ignore */
