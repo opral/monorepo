@@ -14,4 +14,4 @@ A node script is provided to update the CDN. It will automatically build the pro
 
 You can run the script with:
 
-```node purge.js```
+```node purgeRegistry.js```
