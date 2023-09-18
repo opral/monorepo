@@ -21,16 +21,20 @@ export class DocFigure extends LitElement {
 		}
 	`
 	@property({ type: String })
-	src = ""
+	override title = ""
 	@property({ type: String })
-	alt = ""
+	icon = ""
 	@property({ type: String })
-	caption = ""
+	href = ""
+	@property({ type: String })
+	description = ""
 
 	override render() {
-		return html`<figure>
-			<img src="${this.src}" alt="${this.alt}" />
-			<figcaption>${this.caption}</figcaption>
-		</figure>`
+		return html`<a>
+			<div>
+				<h4>${this.title}</h4>
+				<p>${this.description}</p>
+			</div>
+		</a>`
 	}
 }
