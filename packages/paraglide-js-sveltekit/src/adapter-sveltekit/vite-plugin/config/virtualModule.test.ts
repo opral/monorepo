@@ -7,7 +7,7 @@ import {
 	resetTransformConfig,
 } from "./virtualModule.js"
 import {
-	openInlangProject,
+	loadProject,
 	type InlangProject,
 	ProjectFilePathNotFoundError,
 	createMessagesQuery,
@@ -21,7 +21,7 @@ import { createMessage } from "@inlang/sdk/test-utilities"
 vi.mock("./utils/getNodeishFs.js")
 vi.mock("@inlang/sdk", async () => ({
 	...(await vi.importActual<typeof import("@inlang/sdk")>("@inlang/sdk")),
-	openInlangProject: vi.fn(),
+	loadProject: vi.fn(),
 }))
 
 beforeEach(() => {
@@ -35,7 +35,7 @@ it("should cache config creation", async () => {
 	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
 
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
-	vi.mocked(openInlangProject).mockImplementation(
+	vi.mocked(loadProject).mockImplementation(
 		async () =>
 			({
 				errors: () => [],
@@ -69,7 +69,7 @@ it("should create demo resources if none are present yet", async () => {
 
 	const create = vi.fn()
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
-	vi.mocked(openInlangProject).mockImplementationOnce(
+	vi.mocked(loadProject).mockImplementationOnce(
 		async () =>
 			({
 				errors: () => [],
@@ -96,7 +96,7 @@ it("should add the sdk plugin module if not present yet", async () => {
 
 	const setConfig = vi.fn()
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
-	vi.mocked(openInlangProject).mockImplementationOnce(
+	vi.mocked(loadProject).mockImplementationOnce(
 		async () =>
 			({
 				errors: () => [],
@@ -106,7 +106,7 @@ it("should add the sdk plugin module if not present yet", async () => {
 				customApi: () => ({}),
 			} as unknown as InlangProject),
 	)
-	vi.mocked(openInlangProject).mockImplementationOnce(
+	vi.mocked(loadProject).mockImplementationOnce(
 		async () =>
 			({
 				errors: () => [],
@@ -146,7 +146,7 @@ it("should throw if the SDK is not configured properly", async () => {
 	await fs.writeFile(PATH_TO_SVELTE_CONFIG, "export default {}")
 
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
-	vi.mocked(openInlangProject).mockImplementationOnce(
+	vi.mocked(loadProject).mockImplementationOnce(
 		async () =>
 			({
 				errors: () => [],
@@ -164,7 +164,7 @@ it("should throw if no svelte.config.js file is found", async () => {
 	const fs = createNodeishMemoryFs()
 
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
-	vi.mocked(openInlangProject).mockImplementationOnce(
+	vi.mocked(loadProject).mockImplementationOnce(
 		async () =>
 			({
 				errors: () => [],
@@ -189,7 +189,7 @@ it("should correctly resolve the config", async () => {
 	const create = vi.fn()
 	const setConfig = vi.fn()
 	vi.mocked(getNodeishFs).mockImplementation(async () => fs)
-	vi.mocked(openInlangProject).mockImplementationOnce(
+	vi.mocked(loadProject).mockImplementationOnce(
 		async () =>
 			({
 				errors: () => [],

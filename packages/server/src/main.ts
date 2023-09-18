@@ -9,7 +9,7 @@ import { router as telemetryRouter } from "@inlang/telemetry/router"
 import { router as rpcRouter } from "@inlang/rpc/router"
 import { router as badgeRouter } from "@inlang/badge/router"
 import { MarketplaceManifest } from "@inlang/marketplace-manifest"
-import { ProjectConfig } from "@inlang/project-config"
+import { ProjectSettings } from "@inlang/project-settings"
 
 // --------------- SETUP -----------------
 
@@ -56,11 +56,11 @@ app.get("/schema/marketplace-manifest", (_, response) => {
 	response.send(serializedMarketplaceManifest)
 })
 
-const serializedProjectConfig = JSON.stringify(ProjectConfig)
+const serializedProjectSettings = JSON.stringify(ProjectSettings)
 
-app.get("/schema/project-config", (_, response) => {
+app.get("/schema/project-settings", (_, response) => {
 	response.header("Content-Type", "application/json")
-	response.send(serializedProjectConfig)
+	response.send(serializedProjectSettings)
 })
 
 app.use(telemetryRouter)

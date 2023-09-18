@@ -62,11 +62,9 @@ function defaultNesting() {
 }
 
 export const plugin: Plugin<PluginSettings> = {
-	meta: {
-		id: id as Plugin["meta"]["id"],
-		displayName,
-		description,
-	},
+	id: id as Plugin["id"],
+	displayName,
+	description,
 	loadMessages: async ({ languageTags, sourceLanguageTag, settings, nodeishFs }) => {
 		settings.variableReferencePattern = settings.variableReferencePattern || ["{{", "}}"]
 		throwIfInvalidSettings(settings)

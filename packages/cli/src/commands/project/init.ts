@@ -2,8 +2,8 @@ import { Command } from "commander"
 import { log } from "../../utilities/log.js"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import fs from "node:fs/promises"
-import { tryAutoGenProjectConfig } from "@inlang/create-project"
-import { ProjectConfig } from "@inlang/project-config"
+import { tryAutoGenProjectSettings } from "@inlang/create-project"
+import { ProjectSettings } from "@inlang/project-settings"
 import path from "node:path"
 
 export const init = new Command()
@@ -52,7 +52,7 @@ export async function initCommandAction(args: {
 		}
 	}
 
-	const { warnings, errors } = await tryAutoGenProjectConfig({
+	const { warnings, errors } = await tryAutoGenProjectSettings({
 		nodeishFs: args.nodeishFs,
 		pathJoin: path.join,
 	})
@@ -60,15 +60,14 @@ export async function initCommandAction(args: {
 	if (!errors?.length) {
 		for (const warning of warnings) args.logger.warn(warning)
 	} else {
-		const config: ProjectConfig = {
-			$schema: "https://inlang.com/schema/project-config",
+		const settings: ProjectSettings = {
+			$schema: "https://inlang.com/schema/project-settings",
 			sourceLanguageTag: "en",
 			languageTags: ["en"],
 			modules: [],
-			settings: {},
 		}
 
-		const configString = JSON.stringify(config, undefined, 4)
+		const configString = JSON.stringify(settings, undefined, 4)
 		await args.nodeishFs.writeFile(inlangConfigFilePath, configString + "\n")
 
 		args.logger.warn(

@@ -1,14 +1,9 @@
 import { createEffect } from "./reactivity/solid.js"
-import { createSubscribable } from "./openInlangProject.js"
+import { createSubscribable } from "./loadProject.js"
 import type { InlangProject, InstalledMessageLintRule, MessageLintReportsQueryApi } from "./api.js"
-import type { ProjectConfig } from "@inlang/project-config"
+import type { ProjectSettings } from "@inlang/project-settings"
 import type { resolveModules } from "./resolve-modules/index.js"
-import type {
-	JSONObject,
-	MessageLintReport,
-	MessageLintRule,
-	Message,
-} from "./versionedInterfaces.js"
+import type { MessageLintReport, Message } from "./versionedInterfaces.js"
 import { lintSingleMessage } from "./lint/index.js"
 import { ReactiveMap } from "./reactivity/map.js"
 
@@ -17,7 +12,7 @@ import { ReactiveMap } from "./reactivity/map.js"
  */
 export function createMessageLintReportsQuery(
 	messages: () => Array<Message> | undefined,
-	config: () => ProjectConfig | undefined,
+	settings: () => ProjectSettings,
 	installedMessageLintRules: () => Array<InstalledMessageLintRule>,
 	resolvedModules: () => Awaited<ReturnType<typeof resolveModules>> | undefined,
 ): InlangProject["query"]["messageLintReports"] {
@@ -25,25 +20,25 @@ export function createMessageLintReportsQuery(
 	const index = new ReactiveMap<MessageLintReport["messageId"], MessageLintReport[]>()
 
 	createEffect(() => {
-		const msgs = messages()
-		const conf = config()
 		const modules = resolvedModules()
+		const _messages = messages()
+		const _settings = settings()
 
-		if (msgs && conf && modules) {
+		if (_messages && _settings && modules) {
 			// console.log("new calculation")
 			// index.clear()
-			for (const message of msgs) {
+			for (const message of _messages) {
 				// TODO: only lint changed messages and update arrays selectively
 
 				lintSingleMessage({
 					rules: modules.messageLintRules,
-					ruleSettings: conf.settings as Record<MessageLintRule["meta"]["id"], JSONObject>,
-					ruleLevels: Object.fromEntries(
-						installedMessageLintRules().map((rule) => [rule.meta.id, rule.lintLevel]),
-					),
-					sourceLanguageTag: conf.sourceLanguageTag,
-					languageTags: conf.languageTags,
-					messages: msgs,
+					settings: {
+						..._settings,
+						messageLintRuleLevels: Object.fromEntries(
+							installedMessageLintRules().map((rule) => [rule.id, rule.level]),
+						),
+					},
+					messages: _messages,
 					message: message,
 				}).then((report) => {
 					if (

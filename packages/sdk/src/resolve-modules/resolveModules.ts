@@ -25,7 +25,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 
 	const meta: Awaited<ReturnType<ResolveModuleFunction>>["meta"] = []
 
-	for (const module of args.config.modules) {
+	for (const module of args.settings.modules) {
 		/**
 		 * -------------- BEGIN SETUP --------------
 		 */
@@ -43,8 +43,8 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 			continue
 		}
 
-		// -- MODULE DOES NOT EXPORT PLUGINS OR LINT RULES --
-		if (importedModule.data?.default?.meta?.id === undefined) {
+		// -- MODULE DOES NOT EXPORT ANYTHING --
+		if (importedModule.data?.default === undefined) {
 			moduleErrors.push(
 				new ModuleHasNoExportsError(`Module "${module}" has no exports.`, {
 					module: module,
@@ -56,9 +56,11 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 		const isValidModule = ModuleCompiler.Check(importedModule.data)
 
 		if (isValidModule === false) {
-			const errors = [...ModuleCompiler.Errors(importedModule.data)]
+			const errors = [...ModuleCompiler.Errors(importedModule.data)].map(
+				(e) => `${e.path} ${e.message}`,
+			)
 			moduleErrors.push(
-				new ModuleExportIsInvalidError(`Module "${module}" is invalid: ` + errors, {
+				new ModuleExportIsInvalidError(`Module "${module}" is invalid: ` + errors.join("\n"), {
 					module: module,
 				}),
 			)
@@ -67,12 +69,12 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 
 		meta.push({
 			module: module,
-			id: importedModule.data.default.meta.id,
+			id: importedModule.data.default.id,
 		})
 
-		if (importedModule.data.default.meta.id.startsWith("plugin.")) {
+		if (importedModule.data.default.id.startsWith("plugin.")) {
 			allPlugins.push(importedModule.data.default as Plugin)
-		} else if (importedModule.data.default.meta.id.startsWith("messageLintRule.")) {
+		} else if (importedModule.data.default.id.startsWith("messageLintRule.")) {
 			allMessageLintRules.push(importedModule.data.default as MessageLintRule)
 		} else {
 			throw new Error(`Unimplemented module type. Must start with "plugin." or "messageLintRule.`)
@@ -81,7 +83,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 
 	const resolvedPlugins = await resolvePlugins({
 		plugins: allPlugins,
-		settings: args.config.settings,
+		settings: args.settings,
 		nodeishFs: args.nodeishFs,
 	})
 

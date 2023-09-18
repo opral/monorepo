@@ -14,10 +14,10 @@ import { getUserInfo } from "../implementation.telefunc.js"
 export function Page() {
 	// ! Extremely important to wrap the get user function
 	// ! see https://github.com/brillout/telefunc/issues/56#issuecomment-1397929356
-	const [userInfo] = createResource(() => getUserInfo())
+	const [userInfo] = createResource(async () => await getUserInfo())
 
 	createEffect(() => {
-		if (userInfo()) {
+		if (userInfo() && userInfo.loading === false && !userInfo.error) {
 			window.close()
 		}
 	})

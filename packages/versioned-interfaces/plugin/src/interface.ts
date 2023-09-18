@@ -72,14 +72,12 @@ export type Plugin<Settings extends JSONObject | unknown = unknown> = Omit<
 
 export const Plugin = Type.Object(
 	{
-		meta: Type.Object({
-			id: Type.String({
-				pattern: "^plugin\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)$",
-				examples: ["plugin.namespace.id"],
-			}) as unknown as TTemplateLiteral<[TLiteral<`plugin.${string}.${string}`>]>,
-			displayName: Translatable(Type.String()),
-			description: Translatable(Type.String()),
-		}),
+		id: Type.String({
+			pattern: "^plugin\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)$",
+			examples: ["plugin.namespace.id"],
+		}) as unknown as TTemplateLiteral<[TLiteral<`plugin.${string}.${string}`>]>,
+		displayName: Translatable(Type.String()),
+		description: Translatable(Type.String()),
 		loadMessages: Type.Optional(Type.Any()),
 		saveMessages: Type.Optional(Type.Any()),
 		detectedLanguageTags: Type.Optional(Type.Any()),

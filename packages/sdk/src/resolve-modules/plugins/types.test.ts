@@ -1,4 +1,4 @@
-import { ProjectConfig } from "@inlang/project-config"
+import { ProjectSettings } from "@inlang/project-settings"
 import { Value } from "@sinclair/typebox/value"
 import { describe, test, expect } from "vitest"
 import { expectType } from "tsd"
@@ -6,14 +6,12 @@ import { Plugin } from "@inlang/plugin"
 
 describe("Plugin", () => {
 	test("meta.id should enforce plugin.namespace.* patterns", () => {
-		expectType<`plugin.${string}.${string}`>("" as Plugin["meta"]["id"])
+		expectType<`plugin.${string}.${string}`>("" as Plugin["id"])
 
 		const mockPlugin: Plugin = {
-			meta: {
-				id: "plugin.namespace.placeholder",
-				displayName: { en: "" },
-				description: { en: "" },
-			},
+			id: "plugin.namespace.placeholder",
+			displayName: { en: "" },
+			description: { en: "" },
 		}
 
 		const passCases = ["plugin.namespace.helloWorld", "plugin.namespace.i18n"]
@@ -24,34 +22,32 @@ describe("Plugin", () => {
 		]
 
 		for (const pass of passCases) {
-			mockPlugin.meta.id = pass as any
+			mockPlugin.id = pass as any
 
 			// @ts-ignore - type mismatch error. fix after refactor
 			expect(Value.Check(Plugin, mockPlugin)).toBe(true)
 		}
 
 		for (const fail of failCases) {
-			mockPlugin.meta.id = fail as any
+			mockPlugin.id = fail as any
 			// @ts-ignore - type mismatch error. fix after refactor
 			expect(Value.Check(Plugin, mockPlugin)).toBe(false)
 		}
 	})
 
 	test("meta.id should be a valid inlang.config.setting key", () => {
-		const mockConfig: ProjectConfig = {
+		const settings: ProjectSettings = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
 			modules: [],
-			settings: {},
 		}
 		const cases = ["plugin.namespace.helloWorld", "plugin.namespace.i18n"]
 
 		for (const _case of cases) {
-			const config = { ...mockConfig, settings: { [_case]: {} } }
+			const mergedSettings = { ...settings, [_case]: {} }
+			expect(Value.Check(ProjectSettings, mergedSettings)).toBe(true)
 			// @ts-ignore - type mismatch error. fix after refactor
-			expect(Value.Check(ProjectConfig, config)).toBe(true)
-			// @ts-ignore - type mismatch error. fix after refactor
-			expect(Value.Check(Plugin["properties"]["meta"]["properties"]["id"], _case)).toBe(true)
+			expect(Value.Check(Plugin["properties"]["id"], _case)).toBe(true)
 		}
 	})
 })
