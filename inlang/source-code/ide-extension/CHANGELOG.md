@@ -1,5 +1,9 @@
 # inlang-vs-code-extension
 
+## 1.3.0
+
+- updated dependencies
+
 ## 1.2.0
 
 ### Minor Changes
