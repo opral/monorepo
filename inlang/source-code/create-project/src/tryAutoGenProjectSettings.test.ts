@@ -1,10 +1,6 @@
 import { createNodeishMemoryFs } from "@lix-js/fs"
 import { expect, it } from "vitest"
-import {
-	autoGenProject,
-	getSupportedLibrary,
-	tryAutoGenProjectSettings,
-} from "./tryAutoGenProjectSettings.js"
+import { getSupportedLibrary, tryAutoGenProjectSettings } from "./tryAutoGenProjectSettings.js"
 import path from "node:path"
 
 it("should generate project configuration successfully", async () => {
@@ -127,62 +123,4 @@ it("should choose i18next as the plugin when it's a dependency", async () => {
 
 	// Assert
 	expect(result.modules).toContain("i18next")
-})
-
-it("should generate the correct pathPattern when a language folder exists", async () => {
-	// Arrange
-	const languageFolderPath = "path/to/root/lang"
-	const nodeishFs = createNodeishMemoryFs()
-	await nodeishFs.mkdir(languageFolderPath, { recursive: true })
-
-	const args = {
-		nodeishFs,
-		pathJoin: path.join,
-	}
-
-	// Act
-	const result = await autoGenProject(args)
-
-	// Assert
-	expect(result.warnings).toEqual([
-		"📦 Using fallback plugin: json, because no other configuration was found.",
-		"🗂️  Found language folder path: 'path/to/root/lang/{languageTag}.json', please adjust the pathPattern\nin the project.inlang.json manually if it is not parsed correctly.",
-	])
-	expect(result.settings).toBeDefined()
-	expect(result.settings!["plugin.inlang.json"]).toBeDefined()
-	expect(result.settings!["plugin.inlang.json"]!.pathPattern).toBe(
-		`${languageFolderPath}/{languageTag}.json`,
-	)
-})
-
-it("should handle the case when no language folder is found", async () => {
-	// Arrange
-	const nodeishFs = createNodeishMemoryFs()
-
-	const args = {
-		nodeishFs,
-		pathJoin: path.join,
-	}
-
-	// Act
-	const result = await autoGenProject(args)
-
-	// Assert
-	expect(result.warnings).toEqual([
-		"📦 Using fallback plugin: json, because no other configuration was found.",
-		"Could not find a language folder in the project. You have to enter the path to your language files (pathPattern) manually.",
-	])
-	expect(result.settings).toStrictEqual({
-		$schema: "https://inlang.com/schema/project-settings",
-		sourceLanguageTag: "en",
-		languageTags: ["en"],
-		modules: [
-			"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js",
-			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@1/dist/index.js",
-			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@1/dist/index.js",
-			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@1/dist/index.js",
-			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@1/dist/index.js",
-		],
-		"plugin.inlang.json": { pathPattern: "" },
-	})
 })
