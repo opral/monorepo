@@ -1,5 +1,16 @@
 # @inlang/sdk
 
+## 0.6.0
+
+### Minor Changes
+
+- 84ed67f2: Update @inlang/language-tag dependency which removes the language tag validation, unblocking several users of inlang.
+
+### Patch Changes
+
+- Updated dependencies [84ed67f2]
+  - @inlang/translatable@1.2.0
+
 ## 0.5.0
 
 ### Minor Changes
