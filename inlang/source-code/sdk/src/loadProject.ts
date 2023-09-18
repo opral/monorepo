@@ -7,11 +7,10 @@ import type {
 } from "./api.js"
 import { type ImportFunction, resolveModules } from "./resolve-modules/index.js"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
-import { Value } from "@sinclair/typebox/value"
 import {
-	ProjectFilePathNotFoundError,
-	ProjectFileJSONSyntaxError,
-	InvalidConfigError,
+	ProjectSettingsFileJSONSyntaxError,
+	ProjectSettingsFileNotFoundError,
+	ProjectSettingsInvalidError,
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
 } from "./errors.js"
@@ -19,10 +18,11 @@ import { createRoot, createSignal, createEffect } from "./reactivity/solid.js"
 import { createMessagesQuery } from "./createMessagesQuery.js"
 import { debounce } from "throttle-debounce"
 import { createMessageLintReportsQuery } from "./createMessageLintReportsQuery.js"
-import { ProjectConfig, Message, type NodeishFilesystemSubset } from "./versionedInterfaces.js"
+import { ProjectSettings, Message, type NodeishFilesystemSubset } from "./versionedInterfaces.js"
 import { tryCatch, type Result } from "@inlang/result"
+import { migrateIfOutdated } from "@inlang/project-settings/migration"
 
-const ConfigCompiler = TypeCompiler.Compile(ProjectConfig)
+const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
 /**
  * Creates an inlang instance.
@@ -31,8 +31,8 @@ const ConfigCompiler = TypeCompiler.Compile(ProjectConfig)
  *   and supporting legacy resolvedModules such as CJS.
  *
  */
-export const openInlangProject = async (args: {
-	projectFilePath: string
+export const loadProject = async (args: {
+	settingsFilePath: string
 	nodeishFs: NodeishFilesystemSubset
 	_import?: ImportFunction
 	_capture?: (id: string, props: Record<string, unknown>) => void
@@ -40,34 +40,34 @@ export const openInlangProject = async (args: {
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
 
-		// -- config ------------------------------------------------------------
+		// -- settings ------------------------------------------------------------
 
-		const [config, _setConfig] = createSignal<ProjectConfig>()
+		const [settings, _setSettings] = createSignal<ProjectSettings>()
 		createEffect(() => {
-			loadConfig({ projectFilePath: args.projectFilePath, nodeishFs: args.nodeishFs })
-				.then((config) => {
-					setConfig(config)
-					args._capture?.("SDK used config", config)
+			loadSettings({ settingsFilePath: args.settingsFilePath, nodeishFs: args.nodeishFs })
+				.then((settings) => {
+					setSettings(settings)
+					args._capture?.("SDK used settings", settings)
 				})
 				.catch((err) => {
 					markInitAsFailed(err)
 				})
 		})
-		// TODO: create FS watcher and update config on change
+		// TODO: create FS watcher and update settings on change
 
-		const writeConfigToDisk = skipFirst((config: ProjectConfig) =>
-			_writeConfigToDisk({ nodeishFs: args.nodeishFs, config }),
+		const writeSettingsToDisk = skipFirst((settings: ProjectSettings) =>
+			_writeSettingsToDisk({ nodeishFs: args.nodeishFs, settings }),
 		)
 
-		const setConfig = (config: ProjectConfig): Result<void, InvalidConfigError> => {
+		const setSettings = (settings: ProjectSettings): Result<void, ProjectSettingsInvalidError> => {
 			try {
-				const validatedConfig = validateConfig(config)
-				_setConfig(validatedConfig)
+				const validatedSettings = parseSettings(settings)
+				_setSettings(validatedSettings)
 
-				writeConfigToDisk(validatedConfig)
+				writeSettingsToDisk(validatedSettings)
 				return { data: undefined }
 			} catch (error: unknown) {
-				if (error instanceof InvalidConfigError) {
+				if (error instanceof ProjectSettingsInvalidError) {
 					return { error }
 				}
 
@@ -81,10 +81,10 @@ export const openInlangProject = async (args: {
 			createSignal<Awaited<ReturnType<typeof resolveModules>>>()
 
 		createEffect(() => {
-			const conf = config()
-			if (!conf) return
+			const _settings = settings()
+			if (!_settings) return
 
-			loadModules({ config: conf, nodeishFs: args.nodeishFs, _import: args._import })
+			resolveModules({ settings: _settings, nodeishFs: args.nodeishFs, _import: args._import })
 				.then((resolvedModules) => {
 					setResolvedModules(resolvedModules)
 
@@ -95,12 +95,12 @@ export const openInlangProject = async (args: {
 
 		// -- messages ----------------------------------------------------------
 
-		let configValue: ProjectConfig
-		createEffect(() => (configValue = config()!)) // workaround to not run effects twice (e.g. config change + modules change) (I'm sure there exists a solid way of doing this, but I haven't found it yet)
+		let settingsValue: ProjectSettings
+		createEffect(() => (settingsValue = settings()!)) // workaround to not run effects twice (e.g. settings change + modules change) (I'm sure there exists a solid way of doing this, but I haven't found it yet)
 
 		const [messages, setMessages] = createSignal<Message[]>()
 		createEffect(() => {
-			const conf = config()
+			const conf = settings()
 			if (!conf) return
 
 			const _resolvedModules = resolvedModules()
@@ -113,8 +113,8 @@ export const openInlangProject = async (args: {
 
 			makeTrulyAsync(
 				_resolvedModules.resolvedPluginApi.loadMessages({
-					languageTags: configValue!.languageTags,
-					sourceLanguageTag: configValue!.sourceLanguageTag,
+					languageTags: settingsValue!.languageTags,
+					sourceLanguageTag: settingsValue!.sourceLanguageTag,
 				}),
 			)
 				.then((messages) => {
@@ -133,14 +133,14 @@ export const openInlangProject = async (args: {
 			return resolvedModules()!.messageLintRules.map(
 				(rule) =>
 					({
-						meta: rule.meta,
+						id: rule.id,
+						displayName: rule.displayName,
+						description: rule.description,
 						module:
-							resolvedModules()?.meta.find((m) => m.id.includes(rule.meta.id))?.module ??
+							resolvedModules()?.meta.find((m) => m.id.includes(rule.id))?.module ??
 							"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
-
 						// default to warning, see https://github.com/inlang/monorepo/issues/1254
-						lintLevel:
-							configValue.settings["project.messageLintRuleLevels"]?.[rule.meta.id] ?? "warning",
+						level: settingsValue["messageLintRuleLevels"]?.[rule.id] ?? "warning",
 					} satisfies InstalledMessageLintRule),
 			) satisfies Array<InstalledMessageLintRule>
 		}
@@ -148,9 +148,11 @@ export const openInlangProject = async (args: {
 		const installedPlugins = () => {
 			if (!resolvedModules()) return []
 			return resolvedModules()!.plugins.map((plugin) => ({
-				meta: plugin.meta,
+				id: plugin.id,
+				displayName: plugin.displayName,
+				description: plugin.description,
 				module:
-					resolvedModules()?.meta.find((m) => m.id.includes(plugin.meta.id))?.module ??
+					resolvedModules()?.meta.find((m) => m.id.includes(plugin.id))?.module ??
 					"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
 			})) satisfies Array<InstalledPlugin>
 		}
@@ -162,7 +164,7 @@ export const openInlangProject = async (args: {
 		const messagesQuery = createMessagesQuery(() => messages() || [])
 		const lintReportsQuery = createMessageLintReportsQuery(
 			messages,
-			config,
+			settings as () => ProjectSettings,
 			installedMessageLintRules,
 			resolvedModules,
 		)
@@ -172,7 +174,7 @@ export const openInlangProject = async (args: {
 				500,
 				async (newMessages) => {
 					try {
-						await resolvedModules()!.resolvedPluginApi.saveMessages({ messages: newMessages })
+						await resolvedModules()?.resolvedPluginApi.saveMessages({ messages: newMessages })
 					} catch (err) {
 						throw new PluginSaveMessagesError("Error in saving messages", {
 							cause: err,
@@ -204,8 +206,8 @@ export const openInlangProject = async (args: {
 				// have a query error exposed
 				//...(lintErrors() ?? []),
 			]),
-			config: createSubscribable(() => config()),
-			setConfig,
+			settings: createSubscribable(() => settings() as ProjectSettings),
+			setSettings,
 			customApi: createSubscribable(() => resolvedModules()?.resolvedPluginApi.customApi || {}),
 			query: {
 				messages: messagesQuery,
@@ -219,69 +221,66 @@ export const openInlangProject = async (args: {
 
 // ------------------------------------------------------------------------------------------------
 
-const loadConfig = async (args: {
-	projectFilePath: string
+const loadSettings = async (args: {
+	settingsFilePath: string
 	nodeishFs: NodeishFilesystemSubset
 }) => {
-	const { data: configFile, error: configFileError } = await tryCatch(
-		async () => await args.nodeishFs.readFile(args.projectFilePath, { encoding: "utf-8" }),
+	const { data: settingsFile, error: settingsFileError } = await tryCatch(
+		async () => await args.nodeishFs.readFile(args.settingsFilePath, { encoding: "utf-8" }),
 	)
-	if (configFileError)
-		throw new ProjectFilePathNotFoundError(
-			`Could not locate config file in (${args.projectFilePath}).`,
+	if (settingsFileError)
+		throw new ProjectSettingsFileNotFoundError(
+			`Could not locate settings file in (${args.settingsFilePath}).`,
 			{
-				cause: configFileError,
+				cause: settingsFileError,
 			},
 		)
 
-	const { data: parsedConfig, error: parseConfigError } = tryCatch(() => JSON.parse(configFile!))
-	if (parseConfigError)
-		throw new ProjectFileJSONSyntaxError(`The config is not a valid JSON file.`, {
-			cause: parseConfigError,
-		})
-	return validateConfig(parsedConfig)
-}
+	const json = tryCatch(() => JSON.parse(settingsFile!))
 
-const validateConfig = (config: unknown) => {
-	const typeErrors = [...ConfigCompiler.Errors(config)]
-	if (typeErrors.length > 0) {
-		throw new InvalidConfigError(`The config is invalid according to the schema.`, {
-			cause: typeErrors,
+	if (json.error) {
+		throw new ProjectSettingsFileJSONSyntaxError(`The settings is not a valid JSON file.`, {
+			cause: json.error,
 		})
 	}
-
-	// @ts-ignore - fix after refactor
-	return Value.Cast(ProjectConfig, config)
+	return parseSettings(json.data)
 }
 
-const _writeConfigToDisk = async (args: {
-	nodeishFs: NodeishFilesystemSubset
-	config: ProjectConfig
-}) => {
-	const { data: serializedConfig, error: serializeConfigError } = tryCatch(() =>
-		// TODO: this will probably not match the original formatting
-		JSON.stringify(args.config, undefined, 2),
-	)
-	if (serializeConfigError) throw serializeConfigError
+const parseSettings = (settings: unknown) => {
+	const withMigration = migrateIfOutdated(settings as any)
+	if (settingsCompiler.Check(withMigration) === false) {
+		const typeErrors = [...settingsCompiler.Errors(settings)]
+		if (typeErrors.length > 0) {
+			throw new ProjectSettingsInvalidError(`The settings is invalid according to the schema.`, {
+				cause: typeErrors,
+			})
+		}
+	}
+	return withMigration
+}
 
-	const { error: writeConfigError } = await tryCatch(async () =>
-		args.nodeishFs.writeFile("./project.inlang.json", serializedConfig!),
+const _writeSettingsToDisk = async (args: {
+	nodeishFs: NodeishFilesystemSubset
+	settings: ProjectSettings
+}) => {
+	const { data: serializedSettings, error: serializeSettingsError } = tryCatch(() =>
+		// TODO: this will probably not match the original formatting
+		JSON.stringify(args.settings, undefined, 2),
 	)
-	if (writeConfigError) throw writeConfigError
+	if (serializeSettingsError) {
+		throw serializeSettingsError
+	}
+
+	const { error: writeSettingsError } = await tryCatch(async () =>
+		args.nodeishFs.writeFile("./project.inlang.json", serializedSettings),
+	)
+
+	if (writeSettingsError) {
+		throw writeSettingsError
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
-
-const loadModules = async (args: {
-	config: ProjectConfig
-	nodeishFs: NodeishFilesystemSubset
-	_import?: ImportFunction
-}) =>
-	resolveModules({
-		config: args.config,
-		nodeishFs: args.nodeishFs,
-		_import: args._import,
-	})
 
 const createAwaitable = () => {
 	let resolve: () => void

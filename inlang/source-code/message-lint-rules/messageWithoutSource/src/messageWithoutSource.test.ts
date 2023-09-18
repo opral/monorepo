@@ -17,12 +17,14 @@ const messages = [message1]
 
 test("should not report if source message present", async () => {
 	const result = await lintSingleMessage({
-		sourceLanguageTag: "en",
-		languageTags: ["en"],
-		ruleLevels: {
-			[messageWithoutSourceRule.meta.id]: "warning",
+		settings: {
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
+			modules: [],
+			messageLintRuleLevels: {
+				[messageWithoutSourceRule.id]: "warning",
+			},
 		},
-		ruleSettings: {},
 		messages,
 		message: message1,
 		rules: [messageWithoutSourceRule],
@@ -34,12 +36,14 @@ test("should not report if source message present", async () => {
 
 test("should report if source message is missing", async () => {
 	const result = await lintSingleMessage({
-		sourceLanguageTag: "it",
-		languageTags: ["it"],
-		ruleLevels: {
-			[messageWithoutSourceRule.meta.id]: "warning",
+		settings: {
+			sourceLanguageTag: "it",
+			languageTags: ["it"],
+			modules: [],
+			messageLintRuleLevels: {
+				[messageWithoutSourceRule.id]: "warning",
+			},
 		},
-		ruleSettings: {},
 		messages,
 		message: message1,
 		rules: [messageWithoutSourceRule],

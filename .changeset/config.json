@@ -5,5 +5,5 @@
 	"access": "restricted",
 	"baseBranch": "main",
 	"updateInternalDependencies": "minor",
-	"ignore": []
+	"ignore": ["template-*"]
 }

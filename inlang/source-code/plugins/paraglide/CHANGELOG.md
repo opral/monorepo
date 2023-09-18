@@ -1,5 +1,11 @@
 # @inlang/sdk-js-plugin
 
+## 0.12.0
+
+### Minor Changes
+
+- 25fe8502: refactor: remove plugin.meta and messageLintRule.meta nesting
+
 ## 0.11.8
 
 ## 0.11.7

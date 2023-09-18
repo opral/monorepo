@@ -1,11 +1,11 @@
 import { Command } from "commander"
 import prompts from "prompts"
 import { log } from "../../../utilities/log.js"
-import fs from "node:fs/promises"
-import nodepath from "node:path"
-import { getTemplate } from "./template.js"
+import fs from "fs-extra"
+import { fileURLToPath } from "node:url"
+import { dirname } from "node:path"
 
-const typeOptions = ["lintRule", "plugin"] as const
+const typeOptions = ["messageLintRule", "plugin"] as const
 
 export type ModuleInitOptions = {
 	type: (typeof typeOptions)[number]
@@ -31,7 +31,7 @@ export const init = new Command()
 		}
 		try {
 			log.log(`📦 Initializing a new ${type} module.`)
-			await execute({ fs, type })
+			await execute({ type })
 			log.success(`Successfully initialized a new ${type} module.`)
 			log.info(`Don't forget to run 'npm install' to install the dependencies.`)
 		} catch (e) {
@@ -39,18 +39,25 @@ export const init = new Command()
 		}
 	})
 
-export async function execute(args: { fs: typeof fs; type: ModuleInitOptions["type"] }) {
-	const filesInDir = await args.fs.readdir("./")
+export async function execute(args: { type: ModuleInitOptions["type"] }) {
+	const filesInDir = fs.readdirSync("./")
+
 	if (filesInDir.length !== 0) {
 		log.error(
 			"The current working directory is not empty. Please run this command in an empty directory.",
 		)
 		return
 	}
-	const files = getTemplate(args)
-	for (const path in files) {
-		// create the directory if not exists
-		await args.fs.mkdir(nodepath.parse(path).dir, { recursive: true })
-		await args.fs.writeFile(path, files[path as keyof typeof files], { encoding: "utf-8" })
+
+	// the dist output directory
+	const dist = dirname(fileURLToPath(import.meta.url))
+
+	switch (args.type) {
+		case "messageLintRule":
+			return fs.copySync(`${dist}/templates/message-lint-rule`, "./")
+		case "plugin":
+			return fs.copySync(`${dist}/templates/plugin`, "./")
+		default:
+			throw new Error(`Unknown module type: ${args.type}`)
 	}
 }

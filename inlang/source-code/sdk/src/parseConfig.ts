@@ -1,4 +1,4 @@
-import { ProjectConfig } from "./versionedInterfaces.js"
+import { ProjectSettings } from "./versionedInterfaces.js"
 import type { Result } from "@inlang/result"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 
@@ -13,9 +13,11 @@ export class ParseConfigError extends Error {
 }
 
 // @ts-ignore - fix after refactor
-const ConfigCompiler = TypeCompiler.Compile(ProjectConfig)
+const ConfigCompiler = TypeCompiler.Compile(ProjectSettings)
 
-export const parseConfig = (config: ProjectConfig): Result<ProjectConfig, ParseConfigError> => {
+export const parseSettings = (
+	config: ProjectSettings,
+): Result<ProjectSettings, ParseConfigError> => {
 	if (ConfigCompiler.Check(config)) {
 		return {
 			data: config,
