@@ -29,7 +29,7 @@ export function Page() {
 							<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
 						</div>
 					</div>
-					<div class="w-full flex pt-12 flex-col gap-16">
+					<div class="w-full h-screen flex pt-12 flex-col gap-16">
 						<div class="w-full flex flex-col gap-6 h-full mx-auto justify-center max-w-lg mt-32 mb-8 px-6 relative z-10">
 							<h1 class="text-[40px] text-center leading-tight md:text-5xl font-bold text-surface-900 tracking-tight">
 								{t("newsletter.unsubscribed.title")}
@@ -46,7 +46,7 @@ export function Page() {
 								.
 							</p>
 						</div>
-						<div class="w-full h-96 relative">
+						<div class="w-full h-screen relative">
 							<div class="flex flex-col w-full h-full justify-end items-center">
 								<div class="h-full w-[2px] bg-gradient-to-t from-surface-100 to-hover-primary relative z-0">
 									<div class="w-full flex justify-center h-full z-3 ml-0">
