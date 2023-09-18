@@ -13,8 +13,8 @@
 		"./css": "./css/index.js"
 	},
 	"scripts": {
-		"build": "npx tailwindcss -i ./src/style.css -o ./dist/style.css --watch && tsc --build",
-		"dev": "npx tailwindcss -i ./src/style.css -o ./dist/style.css --watch && && tsc --watch",
+		"build": "npx tailwindcss -i ./src/style.css -o ./dist/style.css && npx prettier ./src --write && tsc --build",
+		"dev": "tsc --watch",
 		"test": "tsc --noEmit && vitest run",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
