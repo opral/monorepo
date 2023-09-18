@@ -10,8 +10,6 @@ See [How to publish to the Marketplace](https://inlang.com/documentation/publish
 
 ## Manually update the CDN
 
-A node script is provided to update the CDN. It will automatically build the project and upload the files to the CDN.
-
-You can run the script with:
+A node script is provided to update the CDN. You can run the script with:
 
 ```node purgeRegistry.js```
