@@ -15,10 +15,10 @@ export const missingTranslationRule: MessageLintRule = {
 				message.variants.filter((variant) => variant.languageTag === translatedLanguageTag) ?? []
 			if (!filteredVariants.length) {
 				report({
-					messageId: id,
+					messageId: message.id,
 					languageTag: translatedLanguageTag,
 					body: {
-						en: `Message with id '${id}' has a missing variant for language tag '${translatedLanguageTag}'.`,
+						en: `Message with id '${message.id}' has a missing variant for language tag '${translatedLanguageTag}'.`,
 					},
 				})
 			}
