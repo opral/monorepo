@@ -1,5 +1,11 @@
 # @inlang/translatable
 
+## 1.2.0
+
+### Minor Changes
+
+- 84ed67f2: Update @inlang/language-tag dependency which removes the language tag validation, unblocking several users of inlang.
+
 ## 1.1.0
 
 ### Minor Changes
