@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, Show } from "solid-js"
+import { createEffect, createSignal, For, on, Show } from "solid-js"
 import { useEditorState } from "./State.jsx"
 import { createVisibilityObserver } from "@solid-primitives/intersection-observer"
 import { PatternEditor } from "./components/PatternEditor.jsx"
@@ -10,10 +10,11 @@ import type { MessageLintReport, Message as MessageType } from "@inlang/sdk"
 import { sortLanguageTags } from "./helper/sortLanguageTags.js"
 
 export function Message(props: { id: string }) {
-	const { project, filteredLanguageTags } = useEditorState()
+	const { project, filteredLanguageTags, filteredId, filteredMessageLintRules, textSearch } =
+		useEditorState()
 	const [message, setMessage] = createSignal<MessageType>()
 	const [lintReports, setLintReports] = createSignal<Readonly<MessageLintReport[]>>([])
-	const [messageIsFocused, setMessageIsFocused] = createSignal<boolean>(false)
+	const [shouldMessageBeShown, setShouldMessageBeShown] = createSignal(true)
 	// const [blockChangeMessageIsFocused, setBlockChangeMessageIsFocused]  = createSignal<Date>(new Date())
 
 	// performance optimization to only render visible elements
@@ -51,13 +52,11 @@ export function Message(props: { id: string }) {
 		}
 	})
 
-	const shouldMessageBeShown = () => {
-		if (!messageIsFocused()) {
-			return !showFilteredMessage(message())
-		} else {
-			return false
-		}
-	}
+	createEffect(
+		on([filteredLanguageTags, filteredMessageLintRules, filteredId, textSearch], () => {
+			setShouldMessageBeShown(!showFilteredMessage(message()))
+		}),
+	)
 
 	return (
 		<div
@@ -142,8 +141,6 @@ export function Message(props: { id: string }) {
 										languageTag={languageTag}
 										message={message()!}
 										lintReports={lintReports() as MessageLintReport[]}
-										setMessageIsFocused={setMessageIsFocused}
-										messageIsFocused={messageIsFocused}
 										// hidden={!(filteredLanguageTags().includes(languageTag) || filteredLanguageTags().length === 0)}
 									/>
 								</Show>
