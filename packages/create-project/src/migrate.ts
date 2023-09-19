@@ -194,6 +194,11 @@ export async function migrateProjectSettings(args: {
 		config.languageTags = languageTags
 	}
 
+	// remove standard lint rules
+	if (config["plugin.inlang.standardLintRules"]) {
+		delete config["plugin.inlang.standardLintRules"]
+	}
+
 	const configString = JSON.stringify(config, undefined, 4)
 	await args.nodeishFs.writeFile(args.filePath || "./project.inlang.json", configString + "\n")
 	return { warnings, config }
