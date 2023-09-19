@@ -13,7 +13,7 @@ export const createInlangConfigFile = async (args: { workspaceFolder: vscode.Wor
 	// Check if project.inlang.json already exists
 	const configFiles = await vscode.workspace.findFiles("project.inlang.json")
 	if (configFiles.length > 0) {
-		console.warn("📄 project.inlang.json already exists")
+		// skip
 		return
 	}
 

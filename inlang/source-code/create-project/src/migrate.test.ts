@@ -147,4 +147,20 @@ describe("lineParsing", () => {
 		expect(parseErrors).toStrictEqual([])
 		// Add more assertions as needed for the extracted config.
 	})
+
+	// return a warning if project.inlang.json already exists
+	it("should return a warning if project.inlang.json already exists", async () => {
+		// Arrange
+		const nodeishFs = createNodeishMemoryFs()
+		await nodeishFs.writeFile("/project.inlang.json", "{}")
+
+		// Act
+		const result = await migrateProjectSettings({
+			nodeishFs,
+			pathJoin: path.join,
+		})
+
+		// Assert
+		expect(result.warnings).toEqual(["Found project.inlang.json, skipping migration."])
+	})
 })
