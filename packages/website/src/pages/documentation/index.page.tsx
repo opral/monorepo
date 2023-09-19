@@ -23,6 +23,12 @@ export type PageProps = {
 export function Page(props: PageProps) {
 	let mobileDetailMenu: SlDetails | undefined
 	const [editLink, setEditLink] = createSignal<string | undefined>("")
+	const [, { locale }] = useI18n()
+
+	const getLocale = () => {
+		const language = locale() ?? defaultLanguage
+		return language !== defaultLanguage ? "/" + language : ""
+	}
 
 	// const title = () => {
 	// 	if (props.processedTableOfContents) {
@@ -40,6 +46,20 @@ export function Page(props: PageProps) {
 	// 		return "inlang Documentation"
 	// 	}
 	// }
+
+	const getMetaData = (property: string) => {
+		const currentPage = currentPageContext.urlParsed.pathname
+			.replace(getLocale(), "")
+			.replace("/documentation/", "")
+
+		for (const section of Object.keys(props.processedTableOfContents)) {
+			for (const page of props.processedTableOfContents[section]) {
+				if (page.slug === currentPage || page.slug === currentPage + "/") {
+					return property === "title" ? page.title : page.description
+				}
+			}
+		}
+	}
 
 	// createEffect(() => {
 	// 	if (props.markdown && props.markdown.frontmatter) {
@@ -88,8 +108,8 @@ export function Page(props: PageProps) {
 	return (
 		<>
 			{/* frontmatter is undefined on first client side nav  */}
-			{/* <Title>{props.processedTableOfContents */}
-			<Meta name="description" content={props.markdown?.frontmatter?.description} />
+			<Title>{getMetaData("title")}</Title>
+			<Meta name="description" content={getMetaData("description")} />
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<RootLayout>
 				{/* important: the responsive breakpoints must align throughout the markup! */}
@@ -109,6 +129,7 @@ export function Page(props: PageProps) {
 									<NavbarCommon
 										{...props}
 										// h2Headlines={h2Headlines()}
+										getLocale={getLocale}
 									/>
 								</Show>
 							</div>
@@ -130,6 +151,7 @@ export function Page(props: PageProps) {
 									onLinkClick={() => {
 										mobileDetailMenu?.hide()
 									}}
+									getLocale={getLocale}
 								/>
 							</Show>
 						</sl-details>
@@ -173,20 +195,16 @@ function NavbarCommon(props: {
 	processedTableOfContents: PageProps["processedTableOfContents"]
 	// h2Headlines: string[]
 	onLinkClick?: () => void
+	getLocale?: () => string
 }) {
 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
-	const [, { locale }] = useI18n()
-
-	const getLocale = () => {
-		const language = locale() ?? defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
-	}
 
 	const isSelected = (slug: string) => {
 		if (
-			`/documentation/${slug}` === currentPageContext.urlParsed.pathname.replace(getLocale(), "") ||
 			`/documentation/${slug}` ===
-				currentPageContext.urlParsed.pathname.replace(getLocale(), "") + "/"
+				currentPageContext.urlParsed.pathname.replace(props.getLocale(), "") ||
+			`/documentation/${slug}` ===
+				currentPageContext.urlParsed.pathname.replace(props.getLocale(), "") + "/"
 		) {
 			return true
 		} else {
@@ -251,7 +269,7 @@ function NavbarCommon(props: {
 													: "text-info/80 hover:text-on-background ") +
 												"tracking-wide text-sm block w-full font-normal"
 											}
-											href={getLocale() + `/documentation/${page.slug}`}
+											href={props.getLocale() + `/documentation/${page.slug}`}
 										>
 											{page.title}
 										</a>
