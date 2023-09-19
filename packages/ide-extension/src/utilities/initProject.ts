@@ -14,7 +14,7 @@ import type { TelemetryEvents } from "../services/telemetry/events.js"
 import { tryCatch } from "@inlang/result"
 
 // Constants
-export const CONFIG_FILE_NAME = "project.inlang.json"
+export const SETTINGS_FILE_NAME = "project.inlang.json"
 
 // Helper Functions
 export function getActiveTextEditor(): vscode.TextEditor | undefined {
@@ -25,37 +25,16 @@ export async function initProject(args: {
 	workspaceFolder: vscode.WorkspaceFolder
 	gitOrigin: string | undefined
 }): Promise<{ project?: InlangProject; error?: Error }> {
-	const potentialConfigFileUris = await vscode.workspace.findFiles(CONFIG_FILE_NAME)
-
-	// Migrate
-	if (
-		potentialConfigFileUris.length === 0 &&
-		(await vscode.workspace.findFiles("inlang.config.js")).length !== 0
-	) {
+	// if no settings file is found
+	if ((await vscode.workspace.findFiles(SETTINGS_FILE_NAME)).length === 0) {
+		// Try to migrate
 		await migrateConfigFile(
 			args.workspaceFolder,
 			(args.workspaceFolder + "project.inlang.json") as unknown as vscode.Uri,
 		)
-		return { project: undefined, error: undefined }
-	}
 
-	// Auto Config
-	if (
-		potentialConfigFileUris.length === 0 &&
-		(await vscode.workspace.findFiles("inlang.config.js")).length === 0
-	) {
-		const activeTextEditor = getActiveTextEditor()
-		if (!activeTextEditor) {
-			return { project: undefined, error: new Error("No active test editor found – aborting.") }
-		}
-
-		const workspaceFolder = vscode.workspace.getWorkspaceFolder(activeTextEditor.document.uri)
-		if (!workspaceFolder) {
-			console.warn("No workspace folder found.")
-			return { project: undefined, error: undefined }
-		}
-		await createInlangConfigFile({ workspaceFolder })
-		return { project: undefined, error: undefined }
+		// Try to auto config
+		await createInlangConfigFile({ workspaceFolder: args.workspaceFolder })
 	}
 
 	// Load project
@@ -65,7 +44,7 @@ export async function initProject(args: {
 	}
 
 	const closestProjectFilePath = determineClosestPath({
-		options: potentialConfigFileUris.map((uri) => uri.path),
+		options: (await vscode.workspace.findFiles(SETTINGS_FILE_NAME)).map((uri) => uri.path),
 		to: activeTextEditor.document.uri.path,
 	})
 	const closestProjectFilePathUri = vscode.Uri.parse(closestProjectFilePath)

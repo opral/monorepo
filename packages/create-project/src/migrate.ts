@@ -60,6 +60,15 @@ export async function migrateProjectSettings(args: {
 	filePath?: string
 }): Promise<{ warnings: string[]; config?: ProjectSettings }> {
 	let warnings: string[] = []
+	// check if no project.inlang.json exists
+	const newSettingsFile = await args.nodeishFs
+		.readFile("./project.inlang.json", { encoding: "utf-8" })
+		.catch(() => "")
+
+	if (newSettingsFile) {
+		warnings.push("Found project.inlang.json, skipping migration.")
+		return { warnings }
+	}
 
 	const fileString = await args.nodeishFs
 		.readFile("./inlang.config.js", { encoding: "utf-8" })
