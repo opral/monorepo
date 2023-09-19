@@ -15,7 +15,7 @@ This plugin works with i18next to read and write messages. It also determines ho
 	],
 	"settings": {
 		"plugin.inlang.i18next": {
-			"pathPattern": "./resources/{language}.json"
+			"pathPattern": "./resources/{languageTag}.json"
 		}
 	}
 }
@@ -49,8 +49,8 @@ To use our plugin, you need to provide a path to the directory where your langua
 
 ```json
 "pathPattern": {
-	"common": "./resources/{language}/common.json",
-	"vital": "./resources/{language}/vital.json"
+	"common": "./resources/{languageTag}/common.json",
+	"vital": "./resources/{languageTag}/vital.json"
 }
 ```
 
