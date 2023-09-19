@@ -8,42 +8,44 @@
  * ------------------------------------
  */
 
-// import { assert } from "#src/services/assert/index.js";
 import type { NextFunction, Request, Response } from "express"
 // @ts-ignore
 import createMiddleware from "@isomorphic-git/cors-proxy/middleware.js"
-import { decryptAccessToken } from "./auth/index.server.js"
+import { decryptAccessToken } from "./auth/implementation.js"
 import { privateEnv } from "@inlang/env-variables"
 
 const middleware = createMiddleware({
-	// FIXME: set explicit dev vs prod
-	origin: "http://localhost:3000",
-	// authorization: (req, res, next) => void
+	// This is the cors allowed origin:
+	origin: privateEnv.PUBLIC_SERVER_BASE_URL,
+
+	authorization: async (request: Request, _response: Response, next: NextFunction) => {
+		try {
+			const encryptedAccessToken = request.session?.encryptedAccessToken
+
+			if (encryptedAccessToken) {
+				const decryptedAccessToken = await decryptAccessToken({
+					JWE_SECRET_KEY: privateEnv.JWE_SECRET,
+					jwe: encryptedAccessToken,
+				})
+
+				request.headers["authorization"] = `Basic ${btoa(decryptedAccessToken)}`
+			}
+
+			return next()
+		} catch (err) {
+			next(err)
+		}
+	},
 })
 
 export async function proxy(request: Request, response: Response, next: NextFunction) {
-	// TODO enable after https://github.com/brillout/vite-plugin-ssr/discussions/560#discussioncomment-4420315
-	// TODO currently not using vite to bundle this file, hence the call below will not be pruned
-	// assert(request.url.startsWith(env.VITE_GIT_REQUEST_PROXY_PATH));
 	if (request.path.includes("github") === false) {
 		response.status(500).send("Unsupported git hosting provider.")
 	}
 	try {
-		// decrypt the access token
-		// @ts-ignore
-		const encryptedAccessToken = request.session?.encryptedAccessToken
-		if (encryptedAccessToken) {
-			const decryptedAccessToken = await decryptAccessToken({
-				JWE_SECRET_KEY: privateEnv.JWE_SECRET,
-				jwe: encryptedAccessToken,
-			})
-			// set the authorization header (must be base64 encoded)
-			request.headers["authorization"] = `Basic ${btoa(decryptedAccessToken)}`
-		}
 		// remove the proxy path from the url
-		request.url = request.url.slice(privateEnv.PUBLIC_GIT_PROXY_PATH.length)
+		request.url = request.url.split(privateEnv.PUBLIC_GIT_PROXY_PATH)[1]!
 
-		response.set("Access-Control-Allow-Origin", "http://localhost:3000")
 		response.set("Access-Control-Allow-Credentials", "true")
 
 		middleware(request, response, next)
