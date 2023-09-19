@@ -3,9 +3,8 @@ import type { NodeishFilesystem } from "@lix-js/fs"
 import { getLanguageFolderPath } from "./getLanguageFolderPath.js"
 import type { Plugin } from "@inlang/plugin"
 import { Value } from "@sinclair/typebox/value"
-import { ProjectSettings } from "@inlang/project-settings"
-import { loadProject } from "@inlang/sdk"
 import { tryCatch } from "@inlang/result"
+import { ProjectSettings, loadProject } from "@inlang/sdk"
 
 // FIXME: fetch latest major version instead
 export const pluginUrls: Record<string, string> = {
@@ -35,54 +34,6 @@ export async function tryAutoGenProjectSettings(args: {
 	pathJoin: (...args: string[]) => string
 	filePath?: string
 }): Promise<{ warnings: string[]; errors?: any[]; settings?: ProjectSettings }> {
-	const { settings, warnings } = await autoGenProject({
-		nodeishFs: args.nodeishFs,
-		pathJoin: args.pathJoin,
-	})
-
-	const projectFilePath = args.filePath || "./project.inlang.json"
-
-	if (settings) {
-		const configString = JSON.stringify(settings, undefined, 4)
-		await args.nodeishFs.writeFile(projectFilePath, configString + "\n")
-	} else {
-		return { warnings: ["Could not auto generate project configuration."] }
-	}
-
-	const { data, error } = await tryCatch(() =>
-		loadProject({
-			settingsFilePath: projectFilePath,
-			nodeishFs: args.nodeishFs,
-		}),
-	)
-
-	let errors: any[] = []
-	if (error) {
-		errors = [error]
-	} else {
-		const runtimeErrors = data?.errors()
-		if (runtimeErrors?.length) {
-			errors = [...errors, ...runtimeErrors]
-		}
-	}
-
-	if (errors.length > 0) {
-		try {
-			await args.nodeishFs.rm(projectFilePath)
-		} catch {
-			/* ignore failing file removal */
-		}
-
-		return { warnings, errors }
-	}
-
-	return { warnings, errors, settings }
-}
-
-export async function autoGenProject(args: {
-	nodeishFs: NodeishFilesystem
-	pathJoin: (...args: string[]) => string
-}): Promise<{ settings?: ProjectSettings; warnings: string[]; pluginId?: Plugin["id"] }> {
 	const rootDir = "./"
 	const warnings: string[] = []
 
@@ -147,19 +98,39 @@ export async function autoGenProject(args: {
 
 	settings[pluginId] = { pathPattern }
 
-	const isValid = Value.Check(ProjectSettings, settings)
+	let errors: any[] = [...Value.Errors(ProjectSettings, settings)]
+	errors.push(
+		`The generated config is not valid. Please adjust the config manually.\nErrors:\n${errors.join(
+			"\n",
+		)}`,
+	)
 
-	if (isValid) {
-		return { warnings, settings, pluginId }
+	const projectFilePath = args.filePath || "./project.inlang.json"
+
+	if (settings) {
+		const settingString = JSON.stringify(settings, undefined, 4)
+		await args.nodeishFs.writeFile(projectFilePath, settingString + "\n")
 	} else {
-		const errors = [...Value.Errors(ProjectSettings, settings)]
-		warnings.push(
-			`The generated config is not valid. Please adjust the config manually.\nErrors:\n${errors.join(
-				"\n",
-			)}`,
-		)
-		return { warnings }
+		return { warnings: ["Could not auto generate project configuration."] }
 	}
+
+	const { data, error } = await tryCatch(() =>
+		loadProject({
+			settingsFilePath: projectFilePath,
+			nodeishFs: args.nodeishFs,
+		}),
+	)
+
+	if (error) {
+		errors = [error]
+	} else {
+		const runtimeErrors = data?.errors()
+		if (runtimeErrors?.length) {
+			errors = [...errors, ...runtimeErrors]
+		}
+	}
+
+	return { warnings, errors, settings }
 }
 
 export const getSupportedLibrary = (args: {
