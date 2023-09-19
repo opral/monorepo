@@ -1,15 +1,16 @@
-import { decryptAccessToken } from "../../auth/index.server.js"
-import { PATH } from "./implementation.js"
 import express from "express"
-import { privateEnv } from "@inlang/env-variables"
 import type { IRouter } from "express/node_modules/@types/express-serve-static-core"
-// @ts-nocheck
+
+import { decryptAccessToken } from "./auth/implementation.js"
+import { privateEnv } from "@inlang/env-variables"
+
+const PATH = "/github-proxy/"
+
 /**
  * Routes for the GitHub service.
  *
  * Proxies requests and adds the authorization header.
  */
-// @ts-ignore
 export const router: IRouter = express.Router()
 
 // matching all routes after the path with '*'
@@ -46,8 +47,7 @@ router.all(
 					request.method === "GET" ? undefined : JSON.stringify(request.body),
 			})
 
-			// FIXME: set explicit dev vs prod
-			response.set("Access-Control-Allow-Origin", "http://localhost:3000")
+			response.set("Access-Control-Allow-Origin", privateEnv.PUBLIC_SERVER_BASE_URL)
 			response.set("Access-Control-Allow-Credentials", "true")
 
 			if (res.headers.get("content-type")?.includes("json")) {

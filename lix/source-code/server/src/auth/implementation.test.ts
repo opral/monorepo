@@ -20,12 +20,12 @@ describe("auth service", () => {
 			accessToken: "test",
 			JWE_SECRET_KEY: mockSecret,
 		})
-		expect(
+		expect(() =>
 			auth.decryptAccessToken({
 				// changing the last character of the secret
 				JWE_SECRET_KEY: mockSecret.slice(0, -2) + "s",
 				jwe,
 			}),
-		).toThrow()
+		).rejects.toThrowError()
 	})
 })

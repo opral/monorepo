@@ -1,11 +1,10 @@
-// import { privateEnv } from "@inlang/env-variables"
-import express from "express"
-// import { encryptAccessToken, exchangeInterimCodeForAccessToken } from "./implementation.js"
-import type { IRouter } from "express/node_modules/@types/express-serve-static-core"
 // @ts-nocheck
-/**
- * Routes for the auth service
- */
+
+import { privateEnv } from "@inlang/env-variables"
+import express from "express"
+// TODO: move here: import { encryptAccessToken, exchangeInterimCodeForAccessToken } from "./implementation.js"
+import type { IRouter } from "express/node_modules/@types/express-serve-static-core"
+
 // @ts-ignore
 export const router: IRouter = express.Router()
 
@@ -33,7 +32,7 @@ router.get("/github-forwarded-oauth-callback", async (request, response, next) =
  * FIXME: hanlde logout!
  */
 router.post("/sign-out", (request, response) => {
-	response.set("Access-Control-Allow-Origin", "http://localhost:3000")
+	response.set("Access-Control-Allow-Origin", privateEnv.PUBLIC_SERVER_BASE_URL)
 	response.set("Access-Control-Allow-Credentials", "true")
 
 	// @ts-ignore
