@@ -7,8 +7,7 @@ import type { PageProps } from "./index.page.jsx"
 
 const repositoryRoot = new URL("../../../../../", import.meta.url)
 
-const index: Record<string, Awaited<ReturnType<any>>> = {}
-const generatedTableOfContents = {} as Record<
+export type GeneratedTableOfContents = Record<
 	string,
 	{
 		title: string
@@ -16,6 +15,9 @@ const generatedTableOfContents = {} as Record<
 		href: string
 	}[]
 >
+
+const index: Record<string, Awaited<ReturnType<any>>> = {}
+const generatedTableOfContents = {} as GeneratedTableOfContents
 
 await generateIndexAndTableOfContents()
 
@@ -52,7 +54,6 @@ async function generateIndexAndTableOfContents() {
 
 			index["/documentation/" + content.slug] = markdown
 
-			// fill table of contents with the correct hrefs
 			if (!generatedTableOfContents[categories[0]]) {
 				generatedTableOfContents[categories[0]] = [
 					...tableOfContents[categories[0]].map((content: Record<string, any>) => ({
@@ -63,5 +64,4 @@ async function generateIndexAndTableOfContents() {
 			}
 		}
 	}
-	console.log(generatedTableOfContents)
 }

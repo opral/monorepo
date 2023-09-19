@@ -1,6 +1,6 @@
 import { For, Show, createEffect, createSignal, onMount } from "solid-js"
 import { Layout as RootLayout } from "#src/pages/Layout.jsx"
-import type { ProcessedTableOfContents } from "./index.page.server.jsx"
+import type { GeneratedTableOfContents } from "./index.page.server.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 import type SlDetails from "@shoelace-style/shoelace/dist/components/details/details.js"
 import { Meta, Title } from "@solidjs/meta"
@@ -11,12 +11,13 @@ import { useI18n } from "@solid-primitives/i18n"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import tableOfContents from "../../../../../documentation/tableOfContents.json"
+import { extractedHeadings } from "./utilities.js"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
  */
 export type PageProps = {
-	processedTableOfContents: ProcessedTableOfContents
+	processedTableOfContents: GeneratedTableOfContents
 	markdown: Awaited<ReturnType<any>>
 }
 
@@ -24,28 +25,12 @@ export function Page(props: PageProps) {
 	let mobileDetailMenu: SlDetails | undefined
 	const [editLink, setEditLink] = createSignal<string | undefined>("")
 	const [, { locale }] = useI18n()
+	const headings = extractedHeadings(props.markdown)
 
 	const getLocale = () => {
 		const language = locale() ?? defaultLanguage
 		return language !== defaultLanguage ? "/" + language : ""
 	}
-
-	// const title = () => {
-	// 	if (props.processedTableOfContents) {
-	// 		for (const section of Object.keys(props.processedTableOfContents)) {
-	// 			for (const document of props.processedTableOfContents[section]) {
-	// 				if (
-	// 					`/documentation/${document.slug.replace("-", "/")}` ===
-	// 					currentPageContext.urlParsed.pathname
-	// 				) {
-	// 					return document.pageTitle
-	// 				}
-	// 			}
-	// 		}
-	// 	} else {
-	// 		return "inlang Documentation"
-	// 	}
-	// }
 
 	const getMetaData = (property: string) => {
 		const currentPage = currentPageContext.urlParsed.pathname
@@ -128,8 +113,12 @@ export function Page(props: PageProps) {
 								<Show when={props.processedTableOfContents}>
 									<NavbarCommon
 										{...props}
-										// h2Headlines={h2Headlines()}
 										getLocale={getLocale}
+										headings={props.markdown
+											.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
+											.map((heading: string) => {
+												return heading.replace(/(<([^>]+)>)/gi, "")
+											})}
 									/>
 								</Show>
 							</div>
@@ -147,11 +136,15 @@ export function Page(props: PageProps) {
 							<Show when={props.processedTableOfContents}>
 								<NavbarCommon
 									{...props}
-									// h2Headlines={h2Headlines()}
 									onLinkClick={() => {
 										mobileDetailMenu?.hide()
 									}}
 									getLocale={getLocale}
+									headings={props.markdown
+										.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
+										.map((heading: string) => {
+											return heading.replace(/(<([^>]+)>)/gi, "")
+										})}
 								/>
 							</Show>
 						</sl-details>
@@ -193,7 +186,7 @@ export function Page(props: PageProps) {
 
 function NavbarCommon(props: {
 	processedTableOfContents: PageProps["processedTableOfContents"]
-	// h2Headlines: string[]
+	headings: string[]
 	onLinkClick?: () => void
 	getLocale?: () => string
 }) {
@@ -259,65 +252,26 @@ function NavbarCommon(props: {
 									]
 								}
 							>
-								{(page) => (
-									<li>
-										<a
-											onClick={props.onLinkClick}
-											class={
-												(isSelected(page.slug)
-													? "text-primary font-semibold "
-													: "text-info/80 hover:text-on-background ") +
-												"tracking-wide text-sm block w-full font-normal"
-											}
-											href={props.getLocale() + `/documentation/${page.slug}`}
-										>
-											{page.title}
-										</a>
-									</li>
-								)}
-							</For>
-						</ul>
-					</li>
-				)}
-			</For>
-
-			{/* <For each={Object.keys(props.processedTableOfContents)}>
-				{(category) => (
-					<li class="">
-						<h2 class="tracking-wide pt-2 text font-semibold text-on-surface pb-2">{category}</h2>
-						<ul class="space-y-2" role="list">
-							<For
-								each={
-									props.processedTableOfContents[
-										category as keyof typeof props.processedTableOfContents
-									]
-								}
-							>
-								{(document) => (
-									<li>
-										<a
-											onClick={props.onLinkClick}
-											class={
-												(isSelected(document.slug)
-													? "text-primary font-semibold "
-													: "text-info/80 hover:text-on-background ") +
-												"tracking-wide text-sm block w-full font-normal"
-											}
-											href={getLocale() + `/documentation/${document.slug.replace("-", "/")}`}
-										>
-											{document.pageTitle}
-										</a>
-										<Show
-											when={
-												category !== "Startpage" &&
-												document.anchors.length > 0 &&
-												isSelected(document.slug)
-											}
-										>
-											<ul class="my-2">
-												<For each={document.anchors}>
+								{(page) => {
+									const slug = page.href.replace("/documentation/", "")
+									return (
+										<li>
+											<a
+												onClick={props.onLinkClick}
+												class={
+													(isSelected(page.slug)
+														? "text-primary font-semibold "
+														: "text-info/80 hover:text-on-background ") +
+													"tracking-wide text-sm block w-full font-normal"
+												}
+												href={props.getLocale() + `/documentation/${slug}`}
+											>
+												{page.title}
+											</a>
+											<Show when={props.headings.length > 0 && isSelected(slug)}>
+												<For each={props.headings}>
 													{(heading) => (
-														<Show when={!heading.includes(document.pageTitle)}>
+														<Show when={!heading.includes(page.title)}>
 															<li>
 																<a
 																	onClick={() => {
@@ -345,41 +299,15 @@ function NavbarCommon(props: {
 														</Show>
 													)}
 												</For>
-											</ul>
-										</Show>
-									</li>
-								)}
+											</Show>
+										</li>
+									)
+								}}
 							</For>
 						</ul>
 					</li>
 				)}
-			</For> */}
+			</For>
 		</ul>
 	)
-}
-
-function checkLoadedImgs(anchorScroll: () => void) {
-	let imgElementsLoaded = 0
-	const imgElements = document.querySelectorAll("img")
-	const imgElementsLength = imgElements.length
-
-	if (imgElementsLength === 0) {
-		anchorScroll()
-	} else {
-		for (const img of imgElements) {
-			if (img.complete) {
-				imgElementsLoaded++
-				if (imgElementsLoaded === imgElementsLength) {
-					anchorScroll()
-				}
-			} else {
-				img.addEventListener("load", () => {
-					imgElementsLoaded++
-					if (imgElementsLoaded === imgElementsLength) {
-						anchorScroll()
-					}
-				})
-			}
-		}
-	}
 }
