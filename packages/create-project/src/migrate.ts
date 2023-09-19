@@ -5,6 +5,7 @@ import { pluginUrls, standardLintRules } from "./tryAutoGenProjectSettings.js"
 // @ts-ignore
 import { minify } from "terser"
 import type { Plugin } from "@inlang/plugin"
+import { detectLanguageTags } from "./detectLanguageTags.js"
 
 // we need to alias eval to supress esbuild warnigns
 const okEval = eval
@@ -16,6 +17,28 @@ export function parseDirtyValue(jsString: string) {
 	}
 
 	return JSON.parse(normalized)
+}
+
+function updatePathPattern(obj: any): string | undefined {
+	if (typeof obj === "object" && obj !== null) {
+		for (const key in obj) {
+			if (key === "pathPattern") {
+				if (typeof obj[key] === "string") {
+					const updatedPathPattern = obj[key].replace(/{language}/g, "{languageTag}")
+					if (updatedPathPattern !== obj[key]) {
+						obj[key] = updatedPathPattern
+						return updatedPathPattern
+					}
+				}
+			} else {
+				const result = updatePathPattern(obj[key])
+				if (result) {
+					return result
+				}
+			}
+		}
+	}
+	return undefined
 }
 
 export function getCurrentPluginUrls(pluginName: string) {
@@ -155,7 +178,19 @@ export async function migrateProjectSettings(args: {
 		const lineParsingWarning =
 			"Could not execute the inlang configuration and falling back to line based parsing, which can be unreliable for more complex setups."
 		warnings = [...warnings, lineParsingWarning, ...parseErrors]
+
 		config = extractedConfig
+	}
+
+	const pathPattern = updatePathPattern(config)
+
+	// detect language tags
+	if (!config.languageTags.length && pathPattern) {
+		const languageTags = await detectLanguageTags({
+			nodeishFs: args.nodeishFs,
+			pathPattern,
+		})
+		config.languageTags = languageTags
 	}
 
 	const configString = JSON.stringify(config, undefined, 4)

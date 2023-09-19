@@ -27,7 +27,6 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 		data: {
 			loadMessages: undefined as any,
 			saveMessages: undefined as any,
-			detectedLanguageTags: [],
 			customApi: {},
 		},
 		errors: [],
@@ -143,16 +142,6 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 					settings: args.settings?.[plugin.id] ?? {},
 					nodeishFs: args.nodeishFs,
 				})
-		}
-
-		if (typeof plugin.detectedLanguageTags === "function") {
-			const detectedLangugeTags = await plugin.detectedLanguageTags!({
-				settings: args.settings?.[plugin.id] ?? {},
-				nodeishFs: args.nodeishFs,
-			})
-			result.data.detectedLanguageTags = [
-				...new Set([...result.data.detectedLanguageTags, ...detectedLangugeTags]),
-			]
 		}
 
 		if (typeof plugin.addCustomApi === "function") {
