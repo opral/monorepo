@@ -1,12 +1,8 @@
-// @ts-nocheck
-
 import { privateEnv } from "@inlang/env-variables"
-import express from "express"
-// TODO: move here: import { encryptAccessToken, exchangeInterimCodeForAccessToken } from "./implementation.js"
-import type { IRouter } from "express/node_modules/@types/express-serve-static-core"
+import { Router } from "express"
 
 // @ts-ignore
-export const router: IRouter = express.Router()
+export const router: Router = Router()
 
 /**
  * OAuth flow for forwarding the encrypted token from the webiste to the lix server, this will be reversed  once the setup runs smoothly
