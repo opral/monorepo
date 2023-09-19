@@ -3,10 +3,10 @@
 	"languageTags": ["en", "de"],
 	"modules": [
 		"./../../plugins/i18next/dist/index.js",
-		"./../../lint-rules/emptyPattern/dist/index.js",
-		"./../../lint-rules/identicalPattern/dist/index.js",
-		"./../../lint-rules/missingTranslation/dist/index.js",
-		"./../../lint-rules/messageWithoutSource/dist/index.js"
+		"./../../message-lint-rules/emptyPattern/dist/index.js",
+		"./../../message-lint-rules/identicalPattern/dist/index.js",
+		"./../../message-lint-rules/missingTranslation/dist/index.js",
+		"./../../message-lint-rules/messageWithoutSource/dist/index.js"
 	],
 	"settings": {
 		"plugin.inlang.i18next": {

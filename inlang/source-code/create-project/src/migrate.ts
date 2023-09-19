@@ -9,7 +9,7 @@ import type { Plugin } from "@inlang/plugin"
 // we need to alias eval to supress esbuild warnigns
 const okEval = eval
 
-function parseDirtyValue(jsString: string) {
+export function parseDirtyValue(jsString: string) {
 	let normalized = jsString.trim()
 	if (normalized.endsWith(",")) {
 		normalized = normalized.slice(0, -1)
@@ -18,11 +18,11 @@ function parseDirtyValue(jsString: string) {
 	return JSON.parse(normalized)
 }
 
-function getCurrentPluginUrls(pluginName: string) {
+export function getCurrentPluginUrls(pluginName: string) {
 	return pluginUrls[pluginName]
 }
 
-function detectPlugins(url: string) {
+export function detectPlugins(url: string) {
 	const moduleDetections: Set<string> = new Set()
 	const lintRuleDetections: Set<string> = new Set()
 	const matches = url.matchAll(
@@ -60,6 +60,15 @@ export async function migrateProjectSettings(args: {
 	filePath?: string
 }): Promise<{ warnings: string[]; config?: ProjectSettings }> {
 	let warnings: string[] = []
+	// check if no project.inlang.json exists
+	const newSettingsFile = await args.nodeishFs
+		.readFile("./project.inlang.json", { encoding: "utf-8" })
+		.catch(() => "")
+
+	if (newSettingsFile) {
+		warnings.push("Found project.inlang.json, skipping migration.")
+		return { warnings }
+	}
 
 	const fileString = await args.nodeishFs
 		.readFile("./inlang.config.js", { encoding: "utf-8" })
@@ -154,7 +163,7 @@ export async function migrateProjectSettings(args: {
 	return { warnings, config }
 }
 
-function lineParsing(
+export function lineParsing(
 	legacyConfig: string,
 	config: ProjectSettings,
 ): { extractedConfig: ProjectSettings; parseErrors: string[] } {

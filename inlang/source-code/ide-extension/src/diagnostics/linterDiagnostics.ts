@@ -1,12 +1,13 @@
 import * as vscode from "vscode"
 import { state } from "../state.js"
 import type { MessageLintReport } from "@inlang/sdk"
+import { getActiveTextEditor } from "../utilities/initProject.js"
 
 export async function linterDiagnostics(args: { context: vscode.ExtensionContext }) {
 	const linterDiagnosticCollection = vscode.languages.createDiagnosticCollection("inlang-lint")
 
 	async function updateLintDiagnostics() {
-		const activeTextEditor = vscode.window.activeTextEditor
+		const activeTextEditor = getActiveTextEditor()
 		if (!activeTextEditor) {
 			return
 		}
@@ -85,7 +86,7 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 	// update lints when the text changes in a document
 	vscode.workspace.onDidChangeTextDocument(
 		(event) => {
-			if (event.document === vscode.window.activeTextEditor?.document) {
+			if (event.document === getActiveTextEditor()?.document) {
 				updateLintDiagnostics()
 			}
 		},
