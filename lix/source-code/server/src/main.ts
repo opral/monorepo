@@ -4,10 +4,13 @@ import { validateEnvVariables, privateEnv } from "@inlang/env-variables"
 import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
 import cookieSession from "cookie-session"
-import { isProduction } from "./env.js"
+
+const isProduction = process.env.NODE_ENV === "production"
+
+import { router as authService } from "./auth/router.js"
+
 import { proxy as gitProxy } from "./git-proxy.js"
-import { router as githubProxy } from "./github/index.server.js"
-import { router as authService } from "./auth/index.server.js"
+import { router as githubProxy } from "./github-proxy.js"
 
 // --- Basic setup ---
 const { error: errors } = validateEnvVariables({ forProduction: isProduction })
@@ -15,7 +18,7 @@ const { error: errors } = validateEnvVariables({ forProduction: isProduction })
 if (errors) {
 	throw Error(
 		"Production env variables are missing:\n\n" +
-			errors.map((e) => `${e.key}: ${e.errorMessage}`).join("\n"),
+			errors.map((e: any) => `${e.key}: ${e.errorMessage}`).join("\n"),
 	)
 }
 
