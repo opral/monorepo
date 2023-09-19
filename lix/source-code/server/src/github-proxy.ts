@@ -20,7 +20,6 @@ router.all(
 	express.json(),
 	async (request, response, next) => {
 		try {
-			// @ts-ignore
 			const encryptedAccessToken = request.session?.encryptedAccessToken as string | undefined
 			const decryptedAccessToken = encryptedAccessToken
 				? await decryptAccessToken({
@@ -40,7 +39,6 @@ router.all(
 				},
 				// fetch throws an error if a method is GET and a body is attached
 				// the body comes from the express.text() middleware
-				// @ts-ignore
 				body:
 					// need to stringify otherwise github's api returns an error
 					request.method === "GET" ? undefined : JSON.stringify(request.body),
