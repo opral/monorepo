@@ -166,6 +166,7 @@ export async function migrateProjectSettings(args: {
 	}
 
 	let config: ProjectSettings = {
+		$schema: "https://inlang.com/schema/project-settings",
 		sourceLanguageTag: legacyConfigBuild?.referenceLanguage || "",
 		languageTags: legacyConfigBuild?.languages || [],
 		modules: legacyConfigBuild?.plugins?.flatMap((entry: any) => entry) || [],
