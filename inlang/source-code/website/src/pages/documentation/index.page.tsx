@@ -24,22 +24,22 @@ export function Page(props: PageProps) {
 	let mobileDetailMenu: SlDetails | undefined
 	const [editLink, setEditLink] = createSignal<string | undefined>("")
 
-	const title = () => {
-		if (props.processedTableOfContents) {
-			for (const section of Object.keys(props.processedTableOfContents)) {
-				for (const document of props.processedTableOfContents[section]) {
-					if (
-						`/documentation/${document.slug.replace("-", "/")}` ===
-						currentPageContext.urlParsed.pathname
-					) {
-						return document.pageTitle
-					}
-				}
-			}
-		} else {
-			return "inlang Documentation"
-		}
-	}
+	// const title = () => {
+	// 	if (props.processedTableOfContents) {
+	// 		for (const section of Object.keys(props.processedTableOfContents)) {
+	// 			for (const document of props.processedTableOfContents[section]) {
+	// 				if (
+	// 					`/documentation/${document.slug.replace("-", "/")}` ===
+	// 					currentPageContext.urlParsed.pathname
+	// 				) {
+	// 					return document.pageTitle
+	// 				}
+	// 			}
+	// 		}
+	// 	} else {
+	// 		return "inlang Documentation"
+	// 	}
+	// }
 
 	// createEffect(() => {
 	// 	if (props.markdown && props.markdown.frontmatter) {
@@ -88,7 +88,7 @@ export function Page(props: PageProps) {
 	return (
 		<>
 			{/* frontmatter is undefined on first client side nav  */}
-			<Title>{title()}</Title>
+			{/* <Title>{props.processedTableOfContents */}
 			<Meta name="description" content={props.markdown?.frontmatter?.description} />
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<RootLayout>
@@ -184,8 +184,9 @@ function NavbarCommon(props: {
 
 	const isSelected = (slug: string) => {
 		if (
-			`/documentation/${slug.replace("-", "/")}` ===
-			currentPageContext.urlParsed.pathname.replace(getLocale(), "")
+			`/documentation/${slug}` === currentPageContext.urlParsed.pathname.replace(getLocale(), "") ||
+			`/documentation/${slug}` ===
+				currentPageContext.urlParsed.pathname.replace(getLocale(), "") + "/"
 		) {
 			return true
 		} else {
@@ -226,11 +227,43 @@ function NavbarCommon(props: {
 	// 	}
 	// })
 
-	console.log(props.processedTableOfContents.Guide[0])
-
 	return (
 		<ul role="list" class="w-full space-y-3">
 			<For each={Object.keys(props.processedTableOfContents)}>
+				{(category) => (
+					<li>
+						<h2 class="tracking-wide pt-2 text font-semibold text-on-surface pb-2">{category}</h2>
+						<ul class="space-y-2" role="list">
+							<For
+								each={
+									props.processedTableOfContents[
+										category as keyof typeof props.processedTableOfContents
+									]
+								}
+							>
+								{(page) => (
+									<li>
+										<a
+											onClick={props.onLinkClick}
+											class={
+												(isSelected(page.slug)
+													? "text-primary font-semibold "
+													: "text-info/80 hover:text-on-background ") +
+												"tracking-wide text-sm block w-full font-normal"
+											}
+											href={getLocale() + `/documentation/${page.slug}`}
+										>
+											{page.title}
+										</a>
+									</li>
+								)}
+							</For>
+						</ul>
+					</li>
+				)}
+			</For>
+
+			{/* <For each={Object.keys(props.processedTableOfContents)}>
 				{(category) => (
 					<li class="">
 						<h2 class="tracking-wide pt-2 text font-semibold text-on-surface pb-2">{category}</h2>
@@ -302,7 +335,7 @@ function NavbarCommon(props: {
 						</ul>
 					</li>
 				)}
-			</For>
+			</For> */}
 		</ul>
 	)
 }

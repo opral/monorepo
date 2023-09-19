@@ -1,20 +1,107 @@
 {
-	"Startpage": "./overview/introduction.md",
-	"Overview": ["./overview/architecture.md", "./overview/manually-create-project.md"],
-	"Guide": [
-		"./guide/develop-app.md",
-		"./guide/develop-plugin.md",
-		"./guide/develop-lint-rule.md",
-		"./guide/publish-marketplace.md"
+	"Overview": [
+		{
+			"startpage": true,
+			"path": "./overview/introduction.md",
+			"slug": "",
+			"title": "Introduction",
+			"description": "Introduction to inlang"
+		},
+		{
+			"path": "./overview/architecture.md",
+			"slug": "architecture",
+			"title": "Architecture",
+			"description": "Architecture of inlang"
+		},
+		{
+			"path": "./overview/manually-create-project.md",
+			"slug": "manually-create-project",
+			"title": "Manually Create Project",
+			"description": "Manually create a project"
+		}
 	],
-	"Reference": ["./reference/sdk.md", "./reference/comver.md"],
+	"Guide": [
+		{
+			"path": "./guide/develop-app.md",
+			"slug": "develop-app",
+			"title": "Develop App",
+			"description": "Develop an app"
+		},
+		{
+			"path": "./guide/develop-plugin.md",
+			"slug": "develop-plugin",
+			"title": "Develop Plugin",
+			"description": "Develop a plugin"
+		},
+		{
+			"path": "./guide/develop-lint-rule.md",
+			"slug": "develop-lint-rule",
+			"title": "Develop Lint Rule",
+			"description": "Develop a lint rule"
+		},
+		{
+			"path": "./guide/publish-marketplace.md",
+			"slug": "publish-marketplace",
+			"title": "Publish Marketplace",
+			"description": "Publish a marketplace"
+		}
+	],
+	"Reference": [
+		{
+			"path": "./reference/sdk.md",
+			"slug": "sdk",
+			"title": "SDK",
+			"description": "SDK reference"
+		},
+		{
+			"path": "./reference/comver.md",
+			"slug": "comver",
+			"title": "Comver",
+			"description": "Comver reference"
+		}
+	],
 	"Concept": [
-		"./concept/app.md",
-		"./concept/project.md",
-		"./concept/message.md",
-		"./concept/plugin.md",
-		"./concept/lint-rule.md",
-		"./concept/library.md",
-		"./concept/language-tag.md"
+		{
+			"path": "./concept/app.md",
+			"slug": "app",
+			"title": "App",
+			"description": "App concept"
+		},
+		{
+			"path": "./concept/project.md",
+			"slug": "project",
+			"title": "Project",
+			"description": "Project concept"
+		},
+		{
+			"path": "./concept/message.md",
+			"slug": "message",
+			"title": "Message",
+			"description": "Message concept"
+		},
+		{
+			"path": "./concept/plugin.md",
+			"slug": "plugin",
+			"title": "Plugin",
+			"description": "Plugin concept"
+		},
+		{
+			"path": "./concept/lint-rule.md",
+			"slug": "lint-rule",
+			"title": "Lint Rule",
+			"description": "Lint Rule concept"
+		},
+		{
+			"path": "./concept/library.md",
+			"slug": "library",
+			"title": "Library",
+			"description": "Library concept"
+		},
+		{
+			"path": "./concept/language-tag.md",
+			"slug": "language-tag",
+			"title": "Language Tag",
+			"description": "Language Tag concept"
+		}
 	]
 }
