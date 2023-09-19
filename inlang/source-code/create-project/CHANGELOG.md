@@ -1,5 +1,11 @@
 # @inlang/create-project
 
+## 0.4.0
+
+### Minor Changes
+
+- 1df3ba43: improve auto settings & ide extension structure
+
 ## 0.3.0
 
 ### Minor Changes
