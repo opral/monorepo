@@ -82,6 +82,14 @@ describe("migrateProjectSettings", () => {
 			};
 		  }`,
 		)
+		// create en, de and fr folders at /apps/web/public/static/locales/ recursively
+		await nodeishFs.mkdir("/apps/web/public/static/locales/en", { recursive: true })
+		await nodeishFs.mkdir("/apps/web/public/static/locales/de", { recursive: true })
+		await nodeishFs.mkdir("/apps/web/public/static/locales/fr", { recursive: true })
+		// create common.json files in each folder
+		await nodeishFs.writeFile("/apps/web/public/static/locales/en/common.json", "{}")
+		await nodeishFs.writeFile("/apps/web/public/static/locales/de/common.json", "{}")
+		await nodeishFs.writeFile("/apps/web/public/static/locales/fr/common.json", "{}")
 
 		// Act
 		const result = await migrateProjectSettings({
@@ -94,7 +102,7 @@ describe("migrateProjectSettings", () => {
 
 		expect(result.config).toStrictEqual({
 			sourceLanguageTag: "en",
-			languageTags: [],
+			languageTags: ["en", "de", "fr"],
 			modules: [
 				"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@4/dist/index.js",
 				"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@1/dist/index.js",
@@ -103,7 +111,7 @@ describe("migrateProjectSettings", () => {
 				"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@1/dist/index.js",
 			],
 			"plugin.inlang.i18next": {
-				pathPattern: "./apps/web/public/static/locales/{language}/common.json",
+				pathPattern: "./apps/web/public/static/locales/{languageTag}/common.json",
 			},
 			"plugin.inlang.standardLintRules": { identicalPattern: "off" },
 		})
