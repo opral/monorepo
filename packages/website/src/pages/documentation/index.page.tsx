@@ -209,34 +209,21 @@ function NavbarCommon(props: {
 		setHighlightedAnchor(anchor)
 	}
 
-	// onMount(() => {
-	// 	if (
-	// 		currentPageContext.urlParsed.hash &&
-	// 		props.h2Headlines
-	// 			.toString()
-	// 			.toLowerCase()
-	// 			.replaceAll(" ", "-")
-	// 			// @ts-expect-error - fix after refactoring
-	// 			.includes(currentPageContext.urlParsed.hash?.replace("#", ""))
-	// 	) {
-	// 		// @ts-expect-error - fix after refactoring
-	// 		setHighlightedAnchor(currentPageContext.urlParsed.hash?.replace("#", ""))
+	onMount(() => {
+		console.log(currentPageContext.urlParsed.hash?.replace("#", "").toString())
+		console.log(props.headings.toString().toLowerCase().replaceAll(" ", "-").replaceAll("/", ""))
 
-	// 		const targetElement = document.getElementById(
-	// 			// @ts-expect-error - fix after refactoring
-	// 			currentPageContext.urlParsed.hash?.replace("#", ""),
-	// 		)
-
-	// 		checkLoadedImgs(() => {
-	// 			const elementRect = targetElement!.getBoundingClientRect()
-	// 			const offsetPosition = elementRect.top - 96 // The offset because of the fixed navbar
-
-	// 			window.scrollBy({
-	// 				top: offsetPosition,
-	// 			})
-	// 		})
-	// 	}
-	// })
+		for (const heading of props.headings) {
+			if (
+				currentPageContext.urlParsed.hash?.replace("#", "").toString() ===
+				heading.toString().toLowerCase().replaceAll(" ", "-").replaceAll("/", "")
+			) {
+				setHighlightedAnchor(
+					heading.toString().toLowerCase().replaceAll(" ", "-").replaceAll("/", ""),
+				)
+			}
+		}
+	})
 
 	return (
 		<ul role="list" class="w-full space-y-3">
@@ -259,7 +246,7 @@ function NavbarCommon(props: {
 											<a
 												onClick={props.onLinkClick}
 												class={
-													(isSelected(page.slug)
+													(isSelected(slug)
 														? "text-primary font-semibold "
 														: "text-info/80 hover:text-on-background ") +
 													"tracking-wide text-sm block w-full font-normal"
@@ -276,15 +263,23 @@ function NavbarCommon(props: {
 																<a
 																	onClick={() => {
 																		onAnchorClick(
-																			heading.toString().toLowerCase().replaceAll(" ", "-"),
+																			heading
+																				.toString()
+																				.toLowerCase()
+																				.replaceAll(" ", "-")
+																				.replaceAll("/", ""),
 																		)
 																		props.onLinkClick?.()
 																	}}
 																	class={
 																		"text-sm tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
 																		(highlightedAnchor() ===
-																		heading.toString().toLowerCase().replaceAll(" ", "-")
-																			? "font-medium text-on-background border-l-text-on-background "
+																		heading
+																			.toString()
+																			.toLowerCase()
+																			.replaceAll(" ", "-")
+																			.replaceAll("/", "")
+																			? "font-medium text-on-background border-l-on-background "
 																			: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
 																	}
 																	href={`#${heading
