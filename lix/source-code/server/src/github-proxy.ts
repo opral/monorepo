@@ -1,5 +1,4 @@
-import express from "express"
-import type { IRouter } from "express/node_modules/@types/express-serve-static-core"
+import express, { Router } from "express"
 
 import { decryptAccessToken } from "./auth/implementation.js"
 import { privateEnv } from "@inlang/env-variables"
@@ -11,7 +10,7 @@ const PATH = "/github-proxy/"
  *
  * Proxies requests and adds the authorization header.
  */
-export const router: IRouter = express.Router()
+export const router: Router = Router()
 
 // matching all routes after the path with '*'
 // and proxying the request to the GitHub API
