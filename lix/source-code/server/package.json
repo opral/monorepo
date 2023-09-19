@@ -32,10 +32,12 @@
 		"jose": "4.14.6",
 		"octokit": "3.1.0",
 		"telefunc": "0.1.60",
-		"tsx": "3.12.8"
+		"tsx": "3.12.8",
+		"vite": "4.4.9"
 	},
 	"devDependencies": {
 		"@types/compression": "^1.7.2",
+		"@types/cookie-session": "2.0.45",
 		"@types/express": "^4.17.17",
 		"@vitest/coverage-v8": "0.34.3",
 		"typescript": "5.2.2",
