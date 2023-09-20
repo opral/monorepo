@@ -7,6 +7,7 @@ import rehypeSanitize, { defaultSchema } from "rehype-sanitize"
 import rehypeSlug from "rehype-slug"
 import rehypeHighlight from "rehype-highlight"
 import rehypeAutolinkHeadings from "rehype-autolink-headings"
+import rehypeMermaid from "rehype-mermaidjs"
 import addClasses from "rehype-class-names"
 import { rehypeAccessibleEmojis } from "rehype-accessible-emojis"
 
@@ -15,13 +16,14 @@ export async function convert(markdown: string): Promise<string> {
 	const content = await unified()
 		/* @ts-ignore */
 		.use(remarkParse)
+		// .use(remarkGfm)
 		/* @ts-ignore */
 		.use(remarkRehype, { allowDangerousHtml: true })
 		/* @ts-ignore */
 		.use(rehypeRaw)
 		/* @ts-ignore */
 		.use(rehypeSanitize, {
-			tagNames: ["doc-figure", "quick-link", "quick-links", ...defaultSchema.tagNames!],
+			tagNames: ["doc-figure", "quick-link", "quick-links", "style", ...defaultSchema.tagNames!],
 			attributes: {
 				"doc-figure": ["src", "alt", "caption"],
 				"quick-link": ["href", "description", "title", "icon"],
@@ -53,6 +55,8 @@ export async function convert(markdown: string): Promise<string> {
 		})
 		.use(rehypeAutolinkHeadings)
 		.use(rehypeAccessibleEmojis)
+		/* @ts-ignore */
+		.use(rehypeMermaid)
 		/* @ts-ignore */
 		.use(rehypeStringify)
 		.process(markdown)
