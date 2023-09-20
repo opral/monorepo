@@ -58,6 +58,12 @@
 			"slug": "comver",
 			"title": "Comver",
 			"description": "Comver reference"
+		},
+		{
+			"path": "./reference/tableOfContents.md",
+			"slug": "table-of-contents",
+			"title": "Table of Contents",
+			"description": "Table of Contents reference"
 		}
 	],
 	"Concept": [
