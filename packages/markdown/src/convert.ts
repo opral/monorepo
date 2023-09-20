@@ -40,15 +40,16 @@ export async function convert(markdown: string): Promise<string> {
 			h5: "im-text-lg",
 			h6: "im-text-base",
 			p: "im-text-base im-text-surface-600 im-my-1 im-leading-relaxed",
-			a: "im-text-primary im-font-medium hover:im-text-hover-primary",
-			code: "im-p-1 im-bg-surface-100 im-rounded im-text-sm im-font-mono im-text-surface-700",
+			a: "text-primary im-font-medium hover:text-hover-primary",
+			code: "im-p-1 im-bg-surface-100 im-rounded-xl im-my-4 im-text-sm im-font-mono im-text-surface-700",
 			ul: "im-list-disc im-list-inside",
 			ol: "im-list-decimal im-list-inside",
 			li: "im-my-2",
 			table: "im-table-auto im-w-full im-my-6",
-			th: "im-p-2 im-rounded im-text-sm im-text-surface-700 im-font-medium",
+			th: "im-p-2 im-rounded-xl im-text-sm im-text-surface-700 im-font-medium",
 			td: "im-p-2 im-leading-7",
 			hr: "im-my-4 im-border-b im-border-surface-200",
+			img: "im-mx-auto im-my-4 im-rounded-2xl border border-surface-2",
 		})
 		.use(rehypeAutolinkHeadings)
 		.use(rehypeAccessibleEmojis)

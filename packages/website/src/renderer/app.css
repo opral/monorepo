@@ -67,7 +67,7 @@
 
 /* Scroll Offset for Anchor Links */
 article :target {
-	scroll-margin-top: 512px;
+	scroll-margin-top: -256px;
 }
 
 .tree-with-lines {

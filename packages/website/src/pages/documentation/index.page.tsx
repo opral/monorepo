@@ -11,11 +11,7 @@ import { useI18n } from "@solid-primitives/i18n"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import tableOfContents from "../../../../../documentation/tableOfContents.json"
-import { extractedHeadings } from "./utilities.js"
 
-/**
- * The page props are undefined if an error occurred during parsing of the markdown.
- */
 export type PageProps = {
 	processedTableOfContents: GeneratedTableOfContents
 	markdown: Awaited<ReturnType<any>>
@@ -25,76 +21,47 @@ export function Page(props: PageProps) {
 	let mobileDetailMenu: SlDetails | undefined
 	const [editLink, setEditLink] = createSignal<string | undefined>("")
 	const [, { locale }] = useI18n()
-	const headings = extractedHeadings(props.markdown)
 
 	const getLocale = () => {
 		const language = locale() ?? defaultLanguage
 		return language !== defaultLanguage ? "/" + language : ""
 	}
 
-	const getMetaData = (property: string) => {
-		const currentPage = currentPageContext.urlParsed.pathname
-			.replace(getLocale(), "")
-			.replace("/documentation/", "")
-
-		for (const section of Object.keys(props.processedTableOfContents)) {
-			for (const page of props.processedTableOfContents[section]) {
-				if (page.slug === currentPage || page.slug === currentPage + "/") {
-					return property === "title" ? page.title : page.description
-				}
-			}
+	createEffect(() => {
+		if (currentPageContext) {
+			setEditLink(
+				"https://github.com/inlang/monorepo/edit/main/inlang/documentation" +
+					"/" +
+					findPageBySlug(
+						currentPageContext.urlParsed.pathname
+							.replace(getLocale(), "")
+							.replace("/documentation/", ""),
+					)?.path,
+			)
 		}
-	}
-
-	// createEffect(() => {
-	// 	if (props.markdown && props.markdown.frontmatter) {
-	// 		const markdownHref = props.markdown.frontmatter.href
-
-	// 		const files: Record<string, string[]> = {}
-	// 		for (const [category, documentsArray] of Object.entries(tableOfContents)) {
-	// 			const rawPaths = documentsArray.map((document) => document)
-	// 			files[category] = rawPaths
-	// 		}
-
-	// 		for (const section of Object.keys(props.processedTableOfContents)) {
-	// 			const documents = props.processedTableOfContents[section]
-
-	// 			if (documents) {
-	// 				for (const document of documents) {
-	// 					if (document.frontmatter && document.frontmatter.href === markdownHref) {
-	// 						const index = documents.indexOf(document)
-	// 						const fileSource = files[section]?.[index] || undefined
-
-	// 						const gitHubLink =
-	// 							"https://github.com/inlang/monorepo/edit/main/inlang/documentation" +
-	// 							"/" +
-	// 							fileSource
-
-	// 						setEditLink(gitHubLink)
-	// 					}
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// })
-
-	// const h2Headlines = () => {
-	// 	const result: string[] = []
-	// 	// @ts-expect-error - some type mismatch in the markdown parser
-	// 	for (const child of props.markdown.renderableTree.children ?? []) {
-	// 		// only render h2 as sub headlines
-	// 		if (child.name === "Heading" && child.attributes.level === 2) {
-	// 			result.push(child.children[0])
-	// 		}
-	// 	}
-	// 	return result
-	// }
+	})
 
 	return (
 		<>
-			{/* frontmatter is undefined on first client side nav  */}
-			<Title>{getMetaData("title")}</Title>
-			<Meta name="description" content={getMetaData("description")} />
+			<Title>
+				{
+					findPageBySlug(
+						currentPageContext.urlParsed.pathname
+							.replace(getLocale(), "")
+							.replace("/documentation/", ""),
+					)?.title
+				}
+			</Title>
+			<Meta
+				name="description"
+				content={
+					findPageBySlug(
+						currentPageContext.urlParsed.pathname
+							.replace(getLocale(), "")
+							.replace("/documentation/", ""),
+					)?.description
+				}
+			/>
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<RootLayout>
 				{/* important: the responsive breakpoints must align throughout the markup! */}
@@ -171,6 +138,7 @@ export function Page(props: PageProps) {
 								class="w-full justify-self-center md:col-span-3"
 							>
 								<article>
+									{/* eslint-disable-next-line solid/no-innerhtml */}
 									<div innerHTML={props.markdown} />
 								</article>
 								<EditButton href={editLink()} />
@@ -188,7 +156,7 @@ function NavbarCommon(props: {
 	processedTableOfContents: PageProps["processedTableOfContents"]
 	headings: string[]
 	onLinkClick?: () => void
-	getLocale?: () => string
+	getLocale: () => string
 }) {
 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
 
@@ -210,9 +178,6 @@ function NavbarCommon(props: {
 	}
 
 	onMount(() => {
-		console.log(currentPageContext.urlParsed.hash?.replace("#", "").toString())
-		console.log(props.headings.toString().toLowerCase().replaceAll(" ", "-").replaceAll("/", ""))
-
 		for (const heading of props.headings) {
 			if (
 				currentPageContext.urlParsed.hash?.replace("#", "").toString() ===
@@ -249,7 +214,7 @@ function NavbarCommon(props: {
 													(isSelected(slug)
 														? "text-primary font-semibold "
 														: "text-info/80 hover:text-on-background ") +
-													"tracking-wide text-sm block w-full font-normal"
+													"tracking-wide text-sm block w-full font-normal mb-2"
 												}
 												href={props.getLocale() + `/documentation/${slug}`}
 											>
@@ -305,4 +270,15 @@ function NavbarCommon(props: {
 			</For>
 		</ul>
 	)
+}
+
+function findPageBySlug(slug: string) {
+	for (const [, pageArray] of Object.entries(tableOfContents)) {
+		for (const page of pageArray) {
+			if (page.slug === slug) {
+				return page
+			}
+		}
+	}
+	return undefined
 }
