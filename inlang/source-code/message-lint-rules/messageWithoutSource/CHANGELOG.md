@@ -1,5 +1,22 @@
 # @inlang/message-lint-rule-without-source
 
+## 1.3.0
+
+### Minor Changes
+
+- a63de47e: fix: messageId
+
+## 1.2.0
+
+### Minor Changes
+
+- 25fe8502: refactor: remove plugin.meta and messageLintRule.meta nesting
+
+### Patch Changes
+
+- Updated dependencies [25fe8502]
+  - @inlang/message-lint-rule@1.2.0
+
 ## 1.1.0
 
 ### Minor Changes

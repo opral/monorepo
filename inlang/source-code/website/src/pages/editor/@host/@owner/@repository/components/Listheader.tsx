@@ -10,17 +10,17 @@ interface ListHeaderProps {
 }
 
 export const messageCount = (ids: string[]) => {
-	const { inlang } = useEditorState()
+	const { project } = useEditorState()
 	let counter = 0
 	for (const id of ids) {
-		if (showFilteredMessage(inlang()?.query.messages.get({ where: { id: id } }))) counter++
+		if (showFilteredMessage(project()?.query.messages.get({ where: { id: id } }))) counter++
 	}
 	return counter
 }
 
 export const ListHeader = (props: ListHeaderProps) => {
 	const {
-		inlang,
+		project,
 		setFilteredMessageLintRules,
 		filteredMessageLintRules,
 		filteredId,
@@ -30,8 +30,8 @@ export const ListHeader = (props: ListHeaderProps) => {
 	} = useEditorState()
 
 	const getLintSummary = createMemo(() => {
-		const summary: Record<MessageLintRule["meta"]["id"], number> = {}
-		for (const report of inlang()?.query.messageLintReports.getAll() || []) {
+		const summary: Record<MessageLintRule["id"], number> = {}
+		for (const report of project()?.query.messageLintReports.getAll() || []) {
 			if (
 				filteredMessageLintRules().length === 0 ||
 				filteredMessageLintRules().includes(report.ruleId)
@@ -42,12 +42,10 @@ export const ListHeader = (props: ListHeaderProps) => {
 		return summary
 	})
 
-	const getLintRule = (
-		lintRuleId: MessageLintRule["meta"]["id"],
-	): InstalledMessageLintRule | undefined =>
-		inlang()
+	const getLintRule = (lintRuleId: MessageLintRule["id"]): InstalledMessageLintRule | undefined =>
+		project()
 			?.installed.messageLintRules()
-			.find((rule) => rule.meta.id === lintRuleId)
+			.find((rule) => rule.id === lintRuleId)
 
 	return (
 		<div class="h-14 w-full bg-background border border-surface-3 rounded-t-md flex items-center px-4 justify-between">
@@ -70,7 +68,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 			</Show>
 
 			<div class="flex gap-2">
-				<For each={Object.keys(getLintSummary()) as MessageLintRule["meta"]["id"][]}>
+				<For each={Object.keys(getLintSummary()) as MessageLintRule["id"][]}>
 					{(lintRule) => (
 						<Show when={getLintSummary()[lintRule] !== 0}>
 							<TourHintWrapper
@@ -84,10 +82,10 @@ export const ListHeader = (props: ListHeaderProps) => {
 							>
 								<sl-tooltip
 									prop:content={
-										typeof getLintRule(lintRule)?.meta.description === "object"
+										typeof getLintRule(lintRule)?.description === "object"
 											? // @ts-ignore
-											  getLintRule(lintRule)?.meta.description.en
-											: getLintRule(lintRule)?.meta.description
+											  getLintRule(lintRule)?.description.en
+											: getLintRule(lintRule)?.description
 									}
 									prop:placement="bottom"
 									prop:trigger="hover"
@@ -98,7 +96,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 										prop:size="small"
 										class={
 											filteredMessageLintRules()?.includes(lintRule || "")
-												? getLintRule(lintRule)!.lintLevel === "warning"
+												? getLintRule(lintRule)!.level === "warning"
 													? "ring-warning/20 ring-1 rounded"
 													: "ring-danger/20 ring-1 rounded"
 												: ""
@@ -125,7 +123,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 											<div class="-ml-[4px] h-5 rounded">
 												<div
 													class={
-														getLintRule(lintRule)?.lintLevel === "warning"
+														getLintRule(lintRule)?.level === "warning"
 															? " text-focus-warning bg-warning/20 h-full px-2 rounded flex items-center justify-center"
 															: "text-focus-danger bg-danger/20 h-full px-2 rounded flex items-center justify-center"
 													}
@@ -135,10 +133,10 @@ export const ListHeader = (props: ListHeaderProps) => {
 											</div>
 
 											<div class="text-xs text-on-surface-variant font-medium">
-												{typeof getLintRule(lintRule)?.meta.displayName === "object"
+												{typeof getLintRule(lintRule)?.displayName === "object"
 													? // @ts-ignore
-													  getLintRule(lintRule)?.meta.displayName.en
-													: getLintRule(lintRule)?.meta.displayName}
+													  getLintRule(lintRule)?.displayName.en
+													: getLintRule(lintRule)?.displayName}
 											</div>
 										</div>
 									</sl-button>

@@ -3,11 +3,17 @@ import { parseMarkdown } from "#src/services/markdown/index.js"
 import type { PageContext } from "#src/renderer/types.js"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import type { PageProps } from "./index.page.jsx"
+import { redirect } from "vite-plugin-ssr/abort"
 
 export async function onBeforeRender(pageContext: PageContext) {
 	const item = registry.find(
 		(item) => item.id === pageContext.routeParams.id,
 	) as MarketplaceManifest
+
+	if (!item) {
+		console.error("Item not found")
+		throw redirect("/marketplace/404")
+	}
 
 	const text = await (
 		await fetch(typeof item.readme === "object" ? item.readme.en : item.readme)

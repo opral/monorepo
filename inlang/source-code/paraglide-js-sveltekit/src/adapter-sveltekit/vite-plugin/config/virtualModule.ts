@@ -1,6 +1,6 @@
 import {
 	ProjectFilePathNotFoundError,
-	openInlangProject,
+	loadProject,
 	LanguageTag,
 	Message,
 	createImport,
@@ -57,7 +57,7 @@ export const initVirtualModule = async (): Promise<VirtualModule> => {
 
 	// eslint-disable-next-line no-async-promise-executor
 	return (VirtualModule = new Promise<VirtualModule>(async (resolve, reject) => {
-		const inlang = await openInlangProject({ nodeishFs, projectFilePath: PATH_TO_INLANG_CONFIG })
+		const inlang = await loadProject({ nodeishFs, settingsFilePath: PATH_TO_INLANG_CONFIG })
 
 		const errors = inlang.errors()
 		if (errors.length) {
@@ -131,8 +131,8 @@ export const initVirtualModule = async (): Promise<VirtualModule> => {
 		resolve({
 			debug: settings.debug,
 
-			sourceLanguageTag: inlang.config()!.sourceLanguageTag,
-			languageTags: inlang.config()!.languageTags,
+			sourceLanguageTag: inlang.settings()!.sourceLanguageTag,
+			languageTags: inlang.settings()!.languageTags,
 			messages: inlang.query.messages.getAll(),
 
 			cwdFolderPath: PATH_TO_CWD,

@@ -2,25 +2,23 @@ import type { MessageLintRule } from "@inlang/message-lint-rule"
 import { id, displayName, description } from "../marketplace-manifest.json"
 
 export const missingTranslationRule: MessageLintRule = {
-	meta: {
-		id: id as MessageLintRule["meta"]["id"],
-		displayName,
-		description,
-	},
-	message: ({ message: { id, variants }, languageTags, sourceLanguageTag, report }) => {
-		const translatedLanguageTags = languageTags.filter(
-			(languageTag) => languageTag !== sourceLanguageTag,
+	id: id as MessageLintRule["id"],
+	displayName,
+	description,
+	run: ({ message, settings, report }) => {
+		const translatedLanguageTags = settings.languageTags.filter(
+			(languageTag) => languageTag !== settings.sourceLanguageTag,
 		)
 
 		for (const translatedLanguageTag of translatedLanguageTags) {
 			const filteredVariants =
-				variants.filter((variant) => variant.languageTag === translatedLanguageTag) ?? []
+				message.variants.filter((variant) => variant.languageTag === translatedLanguageTag) ?? []
 			if (!filteredVariants.length) {
 				report({
-					messageId: id,
+					messageId: message.id,
 					languageTag: translatedLanguageTag,
 					body: {
-						en: `Message with id '${id}' has a missing variant for language tag '${translatedLanguageTag}'.`,
+						en: `Message with id '${message.id}' has a missing variant for language tag '${translatedLanguageTag}'.`,
 					},
 				})
 			}

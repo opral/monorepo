@@ -19,12 +19,14 @@ const messages = [message1]
 
 test("should not report if all messages are present", async () => {
 	const result = await lintSingleMessage({
-		sourceLanguageTag: "en",
-		languageTags: ["en", "de"],
-		ruleLevels: {
-			[emptyPatternRule.meta.id]: "warning",
+		settings: {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "de"],
+			modules: [],
+			messageLintRuleLevels: {
+				[emptyPatternRule.id]: "warning",
+			},
 		},
-		ruleSettings: {},
 		messages,
 		message: message1,
 		rules: [emptyPatternRule],
@@ -36,12 +38,14 @@ test("should not report if all messages are present", async () => {
 
 test("should report if no patterns are defined", async () => {
 	const result = await lintSingleMessage({
-		sourceLanguageTag: "en",
-		languageTags: ["en", "es"],
-		ruleLevels: {
-			[emptyPatternRule.meta.id]: "warning",
+		settings: {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "es"],
+			modules: [],
+			messageLintRuleLevels: {
+				[emptyPatternRule.id]: "warning",
+			},
 		},
-		ruleSettings: {},
 		messages,
 		message: message1,
 		rules: [emptyPatternRule],
@@ -50,16 +54,22 @@ test("should report if no patterns are defined", async () => {
 	expect(result.errors).toHaveLength(0)
 	expect(result.data).toHaveLength(1)
 	expect(result.data[0]!.languageTag).toBe("es")
+	expect(result.data[0]!.messageId).toBe(message1.id)
+	expect(
+		typeof result.data[0]!.body === "object" ? result.data[0]!.body.en : result.data[0]!.body,
+	).toContain(message1.id)
 })
 
 test("should report if a message has a pattern with only one text element that is an empty string", async () => {
 	const result = await lintSingleMessage({
-		sourceLanguageTag: "en",
-		languageTags: ["en", "cn"],
-		ruleLevels: {
-			[emptyPatternRule.meta.id]: "warning",
+		settings: {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "cn"],
+			modules: [],
+			messageLintRuleLevels: {
+				[emptyPatternRule.id]: "warning",
+			},
 		},
-		ruleSettings: {},
 		messages,
 		message: message1,
 		rules: [emptyPatternRule],
@@ -73,12 +83,14 @@ test("should report if a message has a pattern with only one text element that i
 describe("reported by missingTranslationRule", () => {
 	test("should not report if a languageTag is not present", async () => {
 		const result = await lintSingleMessage({
-			sourceLanguageTag: "en",
-			languageTags: ["en", "it"],
-			ruleLevels: {
-				[emptyPatternRule.meta.id]: "warning",
+			settings: {
+				sourceLanguageTag: "en",
+				languageTags: ["en", "it"],
+				modules: [],
+				messageLintRuleLevels: {
+					[emptyPatternRule.id]: "warning",
+				},
 			},
-			ruleSettings: {},
 			messages,
 			message: message1,
 			rules: [emptyPatternRule],
@@ -90,12 +102,14 @@ describe("reported by missingTranslationRule", () => {
 
 	test("should not report if no variants are defined", async () => {
 		const result = await lintSingleMessage({
-			sourceLanguageTag: "en",
-			languageTags: ["en", "fr"],
-			ruleLevels: {
-				[emptyPatternRule.meta.id]: "warning",
+			settings: {
+				sourceLanguageTag: "en",
+				languageTags: ["en", "fr"],
+				modules: [],
+				messageLintRuleLevels: {
+					[emptyPatternRule.id]: "warning",
+				},
 			},
-			ruleSettings: {},
 			messages,
 			message: message1,
 			rules: [emptyPatternRule],

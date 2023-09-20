@@ -6,7 +6,7 @@ import {
 	getLocalStorage,
 	useLocalStorage,
 } from "#src/services/local-storage/index.js"
-import { ProjectConfig } from "@inlang/sdk"
+import { ProjectSettings } from "@inlang/sdk"
 import { tryCatch } from "@inlang/result"
 import type { Step } from "./index.page.jsx"
 import { registry } from "@inlang/marketplace-registry"
@@ -140,12 +140,23 @@ async function initializeRepo(
 	/* Opens the repository with lix */
 	const repo = await openRepository(repoURL, {
 		nodeishFs: createNodeishMemoryFs(),
-		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
+		corsProxy: publicEnv.PUBLIC_GIT_PROXY_BASE_URL + publicEnv.PUBLIC_GIT_PROXY_PATH,
 	})
 
-	const isCollaborator = await repo.isCollaborator({
-		username: user.username,
-	})
+	const isCollaborator = await repo
+		.isCollaborator({
+			username: user.username,
+		})
+		.catch((err: any) => {
+			if (err.status === 401) {
+				setStep({
+					type: "github-login",
+					error: false,
+				})
+
+				return
+			}
+		})
 
 	if (!isCollaborator) {
 		setStep({
@@ -196,7 +207,7 @@ async function initializeRepo(
 		return
 	}
 
-	const inlangProject = parseProjectResult.data as ProjectConfig
+	const inlangProject = parseProjectResult.data as ProjectSettings
 
 	/* Look if the modules were already installed */
 	for (const pkg of inlangProject.modules) {

@@ -2,26 +2,24 @@ import type { MessageLintRule } from "@inlang/message-lint-rule"
 import { id, displayName, description } from "../marketplace-manifest.json"
 
 export const emptyPatternRule: MessageLintRule = {
-	meta: {
-		id: id as MessageLintRule["meta"]["id"],
-		displayName,
-		description,
-	},
-	message: ({ message: { id, variants }, languageTags, sourceLanguageTag, report }) => {
-		const translatedLanguageTags = languageTags.filter(
-			(languageTag) => languageTag !== sourceLanguageTag,
+	id: id as MessageLintRule["id"],
+	displayName,
+	description,
+	run: ({ message, settings, report }) => {
+		const translatedLanguageTags = settings.languageTags.filter(
+			(languageTag) => languageTag !== settings.sourceLanguageTag,
 		)
 		for (const translatedLanguageTag of translatedLanguageTags) {
 			const filteredVariants =
-				variants.filter((variant) => variant.languageTag === translatedLanguageTag) ?? []
+				message.variants.filter((variant) => variant.languageTag === translatedLanguageTag) ?? []
 			if (filteredVariants.length === 0) return
 			const patterns = filteredVariants.flatMap(({ pattern }) => pattern)
 			if (!patterns.length) {
 				report({
-					messageId: id,
+					messageId: message.id,
 					languageTag: translatedLanguageTag,
 					body: {
-						en: `Message with id '${id}' has no patterns for language tag '${translatedLanguageTag}'.`,
+						en: `Message with id '${message.id}' has no patterns for language tag '${translatedLanguageTag}'.`,
 					},
 				})
 			} else if (
@@ -30,10 +28,10 @@ export const emptyPatternRule: MessageLintRule = {
 				patterns[0]?.value === ""
 			) {
 				report({
-					messageId: id,
+					messageId: message.id,
 					languageTag: translatedLanguageTag,
 					body: {
-						en: `Message with id '${id}' has no content for language tag '${translatedLanguageTag}'.`,
+						en: `Message with id '${message.id}' has no content for language tag '${translatedLanguageTag}'.`,
 					},
 				})
 			}

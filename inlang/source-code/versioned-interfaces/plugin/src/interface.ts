@@ -23,7 +23,7 @@ export type NodeishFilesystemSubset = Pick<
  */
 export type Plugin<Settings extends JSONObject | unknown = unknown> = Omit<
 	Static<typeof Plugin>,
-	"loadMessages" | "saveMessages" | "detectedLanguageTags" | "addCustomApi"
+	"loadMessages" | "saveMessages" | "addCustomApi"
 > & {
 	/**
 	 * Load messages.
@@ -39,20 +39,6 @@ export type Plugin<Settings extends JSONObject | unknown = unknown> = Omit<
 		settings: Settings
 		nodeishFs: NodeishFilesystemSubset
 	}) => Promise<void> | void
-	/**
-	 * Detect language tags in the project.
-	 *
-	 * Some projects use files or another config file as the source
-	 * of truth for the language tags. This function allows plugins
-	 * to detect language tags of those other sources.
-	 *
-	 * Apps use this function to prompt the user to update their
-	 * language tags in the config if additional language tags are detected.
-	 */
-	detectedLanguageTags?: (args: {
-		nodeishFs: NodeishFilesystemSubset
-		settings: Settings
-	}) => Promise<LanguageTag[]> | LanguageTag[]
 	/**
 	 * Define app specific APIs.
 	 *
@@ -72,17 +58,14 @@ export type Plugin<Settings extends JSONObject | unknown = unknown> = Omit<
 
 export const Plugin = Type.Object(
 	{
-		meta: Type.Object({
-			id: Type.String({
-				pattern: "^plugin\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)$",
-				examples: ["plugin.namespace.id"],
-			}) as unknown as TTemplateLiteral<[TLiteral<`plugin.${string}.${string}`>]>,
-			displayName: Translatable(Type.String()),
-			description: Translatable(Type.String()),
-		}),
+		id: Type.String({
+			pattern: "^plugin\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)$",
+			examples: ["plugin.namespace.id"],
+		}) as unknown as TTemplateLiteral<[TLiteral<`plugin.${string}.${string}`>]>,
+		displayName: Translatable(Type.String()),
+		description: Translatable(Type.String()),
 		loadMessages: Type.Optional(Type.Any()),
 		saveMessages: Type.Optional(Type.Any()),
-		detectedLanguageTags: Type.Optional(Type.Any()),
 		addCustomApi: Type.Optional(Type.Any()),
 	},
 	{ additionalProperties: false },

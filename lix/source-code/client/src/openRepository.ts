@@ -1,7 +1,9 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Repository } from "./api.js"
 import { transformRemote, withLazyFetching } from "./helpers.js"
-import http from "isomorphic-git/http/node"
+// @ts-ignore
+import http from "./http-client.js"
+
 import { Octokit } from "octokit"
 import { createSignal, createEffect } from "./solid.js"
 import {
@@ -16,18 +18,6 @@ import {
 	add,
 	log,
 } from "isomorphic-git"
-
-const github = new Octokit({
-	request: {
-		fetch: (...args: any) => {
-			// modify the path to be proxied by the server
-			// if (args.corsProxy) {
-			args[0] = "/github-proxy/" + args[0]
-			// @ts-ignore
-			return fetch(...args)
-		},
-	},
-})
 
 export async function openRepository(
 	url: string,
@@ -55,6 +45,34 @@ export async function openRepository(
 		console.warn("Auth currently not implemented in lisa client")
 	}
 
+	let gitHubProxyBaseUrl = ""
+	const gitProxyUrl = args?.corsProxy
+
+	// Git cors proxy and github cors proxy have to be on the same server and will be unified further
+	if (gitProxyUrl && gitProxyUrl?.startsWith("http")) {
+		const { origin } = new URL(gitProxyUrl)
+		gitHubProxyBaseUrl = origin
+	}
+
+	const github = new Octokit({
+		request: {
+			fetch: (...ghArgs: any) => {
+				ghArgs[0] = gitHubProxyBaseUrl + "/github-proxy/" + ghArgs[0]
+				if (!ghArgs[1]) {
+					ghArgs[1] = {}
+				}
+
+				if (gitHubProxyBaseUrl) {
+					// required for authenticated cors requests
+					ghArgs[1].credentials = "include"
+				}
+
+				// @ts-ignore
+				return fetch(...ghArgs)
+			},
+		},
+	})
+
 	const normalizedUrl = `https://${host}/${owner}/${repoName}`
 
 	// the directory we use for all git operations
@@ -64,7 +82,7 @@ export async function openRepository(
 		fs: withLazyFetching(rawFs, "clone"),
 		http,
 		dir,
-		corsProxy: args?.corsProxy,
+		corsProxy: gitProxyUrl,
 		url: normalizedUrl,
 		singleBranch: true,
 		depth: 1,
@@ -148,7 +166,7 @@ export async function openRepository(
 			return push({
 				fs: withLazyFetching(rawFs, "push", delayedAction),
 				url: normalizedUrl,
-				corsProxy: args?.corsProxy,
+				corsProxy: gitProxyUrl,
 				http,
 				dir,
 			})
@@ -158,7 +176,7 @@ export async function openRepository(
 			return pull({
 				fs: withLazyFetching(rawFs, "pull", delayedAction),
 				url: normalizedUrl,
-				corsProxy: args?.corsProxy,
+				corsProxy: gitProxyUrl,
 				http,
 				dir,
 				fastForward: cmdArgs.fastForward,
@@ -203,8 +221,14 @@ export async function openRepository(
 					repo: repoName,
 					username: cmdArgs.username,
 				})
-			} catch (_err) {
-				/*  throws on non collaborator access */
+			} catch (err: any) {
+				/*  throws on non collaborator access, 403 on non collaborator, 401 for current user not authenticated correctly
+						TODO: move to consistent error classes everywhere when hiding git api more
+				*/
+				if (err.status === 401) {
+					// if we are logged out rethrow the error
+					throw err
+				}
 			}
 
 			return response?.status === 204 ? true : false
@@ -271,7 +295,11 @@ export async function openRepository(
 				name,
 				isPrivate,
 				isFork,
-				owner: { name: ownerMetaData.name || undefined, email: ownerMetaData.email || undefined },
+				owner: {
+					name: ownerMetaData.name || undefined,
+					email: ownerMetaData.email || undefined,
+					login: ownerMetaData.login,
+				},
 				parent: parent
 					? {
 							url: transformRemote(parent.git_url),

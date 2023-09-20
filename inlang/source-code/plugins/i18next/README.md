@@ -15,7 +15,7 @@ This plugin works with i18next to read and write messages. It also determines ho
 	],
 	"settings": {
 		"plugin.inlang.i18next": {
-			"pathPattern": "./resources/{language}.json"
+			"pathPattern": "./resources/{languageTag}.json"
 		}
 	}
 }
@@ -29,18 +29,18 @@ The plugin offers further configuration options that can be passed as arguments.
 type PluginSettings = {
 	pathPattern: string | { [key: string]: string }
 	variableReferencePattern?: [string] | [string, string]
-	ignore?: [string]
+	sourceLanguageFilePath?: string
 }
 ```
 
 ### `pathPattern`
 
-To use our plugin, you need to provide a path to the directory where your language-specific files are stored. Use the dynamic path syntax `{language}` to specify the language name.
+To use our plugin, you need to provide a path to the directory where your language-specific files are stored. Use the dynamic path syntax `{languageTag}` to specify the language name.
 
 #### Without namespaces
 
 ```json
-"pathPattern": "./resources/{language}.json"
+"pathPattern": "./resources/{languageTag}.json"
 ```
 
 #### With namespaces
@@ -49,8 +49,8 @@ To use our plugin, you need to provide a path to the directory where your langua
 
 ```json
 "pathPattern": {
-	"common": "./resources/{language}/common.json",
-	"vital": "./resources/{language}/vital.json"
+	"common": "./resources/{languageTag}/common.json",
+	"vital": "./resources/{languageTag}/vital.json"
 }
 ```
 
@@ -65,14 +65,6 @@ default:
 
 ```json
 "variableReferencePattern": ["{{", "}}"]
-```
-
-### `ignore`
-
-When you want to ignore files like `languages.json` that are on the same level as your language files, you can ignore them to not brake the `getLanguages` function.
-
-```json
-"ignore": ["languages.json"]
 ```
 
 ## IDE-extension usage

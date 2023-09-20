@@ -3,11 +3,11 @@ import { describe, it, expect } from "vitest"
 import type { ImportFunction } from "../resolve-modules/index.js"
 import { createEffect, from, createRoot } from "../reactivity/solid.js"
 import { solidAdapter } from "./solidAdapter.js"
-import { openInlangProject } from "../openInlangProject.js"
+import { loadProject } from "../loadProject.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 import type {
 	Message,
-	ProjectConfig,
+	ProjectSettings,
 	Plugin,
 	MessageLintRule,
 	Text,
@@ -15,27 +15,23 @@ import type {
 
 // ------------------------------------------------------------------------------------------------
 
-const config: ProjectConfig = {
+const config: ProjectSettings = {
 	sourceLanguageTag: "en",
 	languageTags: ["en"],
 	modules: ["plugin.js", "plugin2.js"],
-	settings: {
-		"project.messageLintRuleLevels": {
-			"messageLintRule.inlang.missingTranslation": "error",
-		},
-		"plugin.inlang.i18next": {
-			pathPattern: "./examples/example01/{languageTag}.json",
-			variableReferencePattern: ["{", "}"],
-		},
+	messageLintRuleLevels: {
+		"messageLintRule.project.missingTranslation": "error",
+	},
+	"plugin.project.i18next": {
+		pathPattern: "./examples/example01/{languageTag}.json",
+		variableReferencePattern: ["{", "}"],
 	},
 }
 
 const mockPlugin: Plugin = {
-	meta: {
-		id: "plugin.inlang.i18next",
-		description: { en: "Mock plugin description" },
-		displayName: { en: "Mock Plugin" },
-	},
+	id: "plugin.project.i18next",
+	description: { en: "Mock plugin description" },
+	displayName: { en: "Mock Plugin" },
 	loadMessages: () => exampleMessages,
 	saveMessages: () => undefined,
 }
@@ -77,12 +73,10 @@ const exampleMessages: Message[] = [
 ]
 
 const mockLintRule: MessageLintRule = {
-	meta: {
-		id: "messageLintRule.namespace.mock",
-		description: { en: "Mock lint rule description" },
-		displayName: { en: "Mock Lint Rule" },
-	},
-	message: () => undefined,
+	id: "messageLintRule.namespace.mock",
+	description: { en: "Mock lint rule description" },
+	displayName: { en: "Mock Lint Rule" },
+	run: () => undefined,
 }
 
 const $import: ImportFunction = async (name) => ({
@@ -95,9 +89,9 @@ describe("config", () => {
 	it("should react to changes in config", async () => {
 		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
-		const inlang = solidAdapter(
-			await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+		const project = solidAdapter(
+			await loadProject({
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
 			}),
@@ -106,18 +100,18 @@ describe("config", () => {
 
 		let counter = 0
 		createEffect(() => {
-			inlang.config()
+			project.settings()
 			counter += 1
 		})
 
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		const newConfig = { ...inlang.config()!, languageTags: ["en", "de"] }
+		const newConfig = { ...project.settings()!, languageTags: ["en", "de"] }
 
-		inlang.setConfig(newConfig)
+		project.setSettings(newConfig)
 		// TODO: how can we await `setConfig` correctly
 		await new Promise((resolve) => setTimeout(resolve, 0))
 		expect(counter).toBe(2) // 2 times because effect creation + set
-		expect(inlang.config()).toStrictEqual(newConfig)
+		expect(project.settings()).toStrictEqual(newConfig)
 	})
 })
 
@@ -125,9 +119,9 @@ describe("installed", () => {
 	it("react to changes that are unrelated to installed items", async () => {
 		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
-		const inlang = solidAdapter(
-			await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+		const project = solidAdapter(
+			await loadProject({
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
 			}),
@@ -137,16 +131,16 @@ describe("installed", () => {
 		let counterLint = 0
 
 		createEffect(() => {
-			inlang.installed.plugins()
+			project.installed.plugins()
 			counterPlugins += 1
 		})
 
 		createEffect(() => {
-			inlang.installed.messageLintRules()
+			project.installed.messageLintRules()
 			counterLint += 1
 		})
 
-		inlang.setConfig({ ...inlang.config()!, languageTags: ["en", "fr"] })
+		project.setSettings({ ...project.settings()!, languageTags: ["en", "fr"] })
 
 		// TODO: how can we await `setConfig` correctly
 		await new Promise((resolve) => setTimeout(resolve, 0))
@@ -159,31 +153,27 @@ describe("installed", () => {
 describe("messages", () => {
 	it("should react to changes in config", async () => {
 		const fs = createNodeishMemoryFs()
-		const mockConfig: ProjectConfig = {
+		const mockConfig: ProjectSettings = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
 			modules: ["./plugin-a.js"],
-			settings: {
-				"library.inlang.paraglideJsSveltekit": {
-					languageNegotiation: {
-						strategies: [
-							{
-								type: "localStorage",
-							} as any,
-						],
-					},
+			"library.project.paraglideJsSveltekit": {
+				languageNegotiation: {
+					strategies: [
+						{
+							type: "localStorage",
+						} as any,
+					],
 				},
 			},
 		}
 		const mockPlugin: Plugin = {
-			meta: {
-				id: "plugin.mock.id",
-				displayName: {
-					en: "hello",
-				},
-				description: {
-					en: "wo",
-				},
+			id: "plugin.mock.id",
+			displayName: {
+				en: "hello",
+			},
+			description: {
+				en: "wo",
 			},
 			loadMessages: ({ languageTags }) => (languageTags.length ? exampleMessages : []),
 			saveMessages: () => undefined,
@@ -192,9 +182,9 @@ describe("messages", () => {
 		const mockImport: ImportFunction = async () => ({ default: mockPlugin })
 
 		await fs.writeFile("./project.inlang.json", JSON.stringify(mockConfig))
-		const inlang = solidAdapter(
-			await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+		const project = solidAdapter(
+			await loadProject({
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: mockImport,
 			}),
@@ -203,27 +193,27 @@ describe("messages", () => {
 
 		let counter = 0
 		createEffect(() => {
-			inlang.query.messages.getAll()
+			project.query.messages.getAll()
 			counter += 1
 		})
 
-		expect(Object.values(inlang.query.messages.getAll()).length).toBe(2)
+		expect(Object.values(project.query.messages.getAll()).length).toBe(2)
 
-		inlang.setConfig({ ...inlang.config()!, languageTags: [] })
+		project.setSettings({ ...project.settings()!, languageTags: [] })
 
 		// TODO: how can we await `setConfig` correctly
 		await new Promise((resolve) => setTimeout(resolve, 0))
 
 		expect(counter).toBe(2) // 2 times because effect creation + set
-		expect(Object.values(inlang.query.messages.getAll()).length).toBe(0)
+		expect(Object.values(project.query.messages.getAll()).length).toBe(0)
 	})
 
 	it("should react to changes in messages", async () => {
 		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
-		const inlang = solidAdapter(
-			await openInlangProject({
-				projectFilePath: "./project.inlang.json",
+		const project = solidAdapter(
+			await loadProject({
+				settingsFilePath: "./project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
 			}),
@@ -232,11 +222,11 @@ describe("messages", () => {
 
 		let counter = 0
 		createEffect(() => {
-			inlang.query.messages.getAll()
+			project.query.messages.getAll()
 			counter += 1
 		})
 
-		const messagesBefore = inlang.query.messages.getAll
+		const messagesBefore = project.query.messages.getAll
 		expect(Object.values(messagesBefore()).length).toBe(2)
 		expect(
 			(
@@ -245,7 +235,7 @@ describe("messages", () => {
 			).value,
 		).toBe("test")
 
-		inlang.query.messages.update({
+		project.query.messages.update({
 			where: { id: "a" },
 			// TODO: use `createMessage` utility
 			data: {
@@ -266,7 +256,7 @@ describe("messages", () => {
 		})
 
 		expect(counter).toBe(2) // 2 times because effect creation + set
-		const messagesAfter = inlang.query.messages.getAll
+		const messagesAfter = project.query.messages.getAll
 		expect(Object.values(messagesAfter()).length).toBe(2)
 		expect(
 			(
@@ -281,10 +271,10 @@ describe("lint", () => {
 	it.todo("should react to changes in config", async () => {
 		await createRoot(async () => {
 			const fs = createNodeishMemoryFs()
-			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
-			const inlang = solidAdapter(
-				await openInlangProject({
-					projectFilePath: "./inlang.config.json",
+			await fs.writeFile("./project.config.json", JSON.stringify(config))
+			const project = solidAdapter(
+				await loadProject({
+					settingsFilePath: "./project.config.json",
 					nodeishFs: fs,
 					_import: $import,
 				}),
@@ -293,23 +283,23 @@ describe("lint", () => {
 
 			let counter = 0
 			createEffect(() => {
-				inlang.query.messageLintReports.getAll()
+				project.query.messageLintReports.getAll()
 				counter += 1
 			})
 
-			const newConfig = { ...inlang.config()!, languageTags: ["en", "de"] }
-			inlang.setConfig(newConfig)
+			const newConfig = { ...project.settings()!, languageTags: ["en", "de"] }
+			project.setSettings(newConfig)
 
 			expect(counter).toBe(1)
-			expect(inlang.query.messageLintReports.getAll()).toEqual([])
+			expect(project.query.messageLintReports.getAll()).toEqual([])
 
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
-			const newConfig2 = { ...inlang.config()!, languageTags: ["en", "de", "fr"] }
-			inlang.setConfig(newConfig2)
+			const newConfig2 = { ...project.settings()!, languageTags: ["en", "de", "fr"] }
+			project.setSettings(newConfig2)
 
 			expect(counter).toBe(9)
-			expect(inlang.query.messageLintReports.getAll()).toEqual([])
+			expect(project.query.messageLintReports.getAll()).toEqual([])
 		})
 	})
 
@@ -319,10 +309,10 @@ describe("lint", () => {
 	it.todo("should react to changes to messages", async () => {
 		await createRoot(async () => {
 			const fs = createNodeishMemoryFs()
-			await fs.writeFile("./inlang.config.json", JSON.stringify(config))
-			const inlang = solidAdapter(
-				await openInlangProject({
-					projectFilePath: "./inlang.config.json",
+			await fs.writeFile("./project.config.json", JSON.stringify(config))
+			const project = solidAdapter(
+				await loadProject({
+					settingsFilePath: "./project.config.json",
 					nodeishFs: fs,
 					_import: $import,
 				}),
@@ -331,11 +321,11 @@ describe("lint", () => {
 
 			let counter = 0
 			createEffect(() => {
-				inlang.query.messageLintReports.getAll()
+				project.query.messageLintReports.getAll()
 				counter += 1
 			})
 
-			inlang.query.messages.update({
+			project.query.messages.update({
 				where: { id: "a" },
 				data: {
 					...exampleMessages[0],
@@ -344,11 +334,11 @@ describe("lint", () => {
 			})
 
 			expect(counter).toBe(1)
-			expect(inlang.query.messageLintReports.getAll()).toEqual([])
+			expect(project.query.messageLintReports.getAll()).toEqual([])
 
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
-			inlang.query.messages.update({
+			project.query.messages.update({
 				where: { id: "a" },
 				data: {
 					...exampleMessages[0],
@@ -357,7 +347,7 @@ describe("lint", () => {
 			})
 
 			expect(counter).toBe(6)
-			expect(inlang.query.messageLintReports.getAll()).toEqual([])
+			expect(project.query.messageLintReports.getAll()).toEqual([])
 		})
 	})
 })

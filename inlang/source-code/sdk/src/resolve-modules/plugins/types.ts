@@ -28,7 +28,7 @@ export type NodeishFilesystemSubset = Pick<
  */
 export type ResolvePluginsFunction = (args: {
 	plugins: Array<Plugin>
-	settings: Record<Plugin["meta"]["id"], JSONObject>
+	settings: Record<Plugin["id"], JSONObject>
 	nodeishFs: NodeishFilesystemSubset
 }) => Promise<{
 	data: ResolvedPluginApi
@@ -52,10 +52,6 @@ export type ResolvedPluginApi = {
 		sourceLanguageTag: LanguageTag
 	}) => Promise<Message[]> | Message[]
 	saveMessages: (args: { messages: Message[] }) => Promise<void> | void
-	/**
-	 * Detect language tags in the project provided plugins.
-	 */
-	detectedLanguageTags: LanguageTag[]
 	/**
 	 * App specific APIs.
 	 *

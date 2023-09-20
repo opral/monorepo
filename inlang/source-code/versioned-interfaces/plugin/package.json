@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/plugin",
 	"type": "module",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"
@@ -22,11 +22,12 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
-		"@lix-js/fs": "*",
 		"@inlang/json-types": "*",
-		"@inlang/message": "*",
 		"@inlang/language-tag": "*",
-		"@inlang/translatable": "*"
+		"@inlang/message": "*",
+		"@inlang/project-settings": "2.1.0",
+		"@inlang/translatable": "*",
+		"@lix-js/fs": "*"
 	},
 	"peerDependencies": {
 		"@sinclair/typebox": "^0.31.0"

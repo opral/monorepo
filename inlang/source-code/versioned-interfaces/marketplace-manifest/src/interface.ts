@@ -1,6 +1,6 @@
 import { Type, type Static } from "@sinclair/typebox"
 import { Translatable } from "@inlang/translatable"
-import { ProjectConfig } from "@inlang/project-config"
+import { ProjectSettings } from "@inlang/project-settings"
 
 /**
  *
@@ -38,7 +38,7 @@ const MarketplaceManifestBase = Type.Object({
 const ModuleBase = Type.Intersect([
 	MarketplaceManifestBase,
 	Type.Object({
-		module: ProjectConfig["properties"]["modules"]["items"],
+		module: ProjectSettings["allOf"][0]["properties"]["modules"]["items"],
 	}),
 ])
 

@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { NodeishFilesystem } from "@lix-js/fs"
-import { ProjectConfig } from "@inlang/project-config"
-import { pluginUrls, standardLintRules } from "./tryAutoGenProjectConfig.js"
+import { ProjectSettings } from "@inlang/project-settings"
+import { pluginUrls, standardLintRules } from "./tryAutoGenProjectSettings.js"
 // @ts-ignore
 import { minify } from "terser"
 import type { Plugin } from "@inlang/plugin"
+import { detectLanguageTags } from "./detectLanguageTags.js"
 
 // we need to alias eval to supress esbuild warnigns
 const okEval = eval
 
-function parseDirtyValue(jsString: string) {
+export function parseDirtyValue(jsString: string) {
 	let normalized = jsString.trim()
 	if (normalized.endsWith(",")) {
 		normalized = normalized.slice(0, -1)
@@ -18,11 +19,33 @@ function parseDirtyValue(jsString: string) {
 	return JSON.parse(normalized)
 }
 
-function getCurrentPluginUrls(pluginName: string) {
+function updatePathPattern(obj: any): string | undefined {
+	if (typeof obj === "object" && obj !== null) {
+		for (const key in obj) {
+			if (key === "pathPattern") {
+				if (typeof obj[key] === "string") {
+					const updatedPathPattern = obj[key].replace(/{language}/g, "{languageTag}")
+					if (updatedPathPattern !== obj[key]) {
+						obj[key] = updatedPathPattern
+						return updatedPathPattern
+					}
+				}
+			} else {
+				const result = updatePathPattern(obj[key])
+				if (result) {
+					return result
+				}
+			}
+		}
+	}
+	return undefined
+}
+
+export function getCurrentPluginUrls(pluginName: string) {
 	return pluginUrls[pluginName]
 }
 
-function detectPlugins(url: string) {
+export function detectPlugins(url: string) {
 	const moduleDetections: Set<string> = new Set()
 	const lintRuleDetections: Set<string> = new Set()
 	const matches = url.matchAll(
@@ -54,12 +77,21 @@ function detectPlugins(url: string) {
  * @params args.filePath optional location of your inlang config file, should be used only for testing as we hard code filepaths at lots of places
  * @returns The warnings and if successfully generated the config object, the file is also saved to the filesystem in the current path
  */
-export async function migrateProjectConfig(args: {
+export async function migrateProjectSettings(args: {
 	nodeishFs: NodeishFilesystem
 	pathJoin: (...args: string[]) => string
 	filePath?: string
-}): Promise<{ warnings: string[]; config?: ProjectConfig }> {
+}): Promise<{ warnings: string[]; config?: ProjectSettings }> {
 	let warnings: string[] = []
+	// check if no project.inlang.json exists
+	const newSettingsFile = await args.nodeishFs
+		.readFile("./project.inlang.json", { encoding: "utf-8" })
+		.catch(() => "")
+
+	if (newSettingsFile) {
+		warnings.push("Found project.inlang.json, skipping migration.")
+		return { warnings }
+	}
 
 	const fileString = await args.nodeishFs
 		.readFile("./inlang.config.js", { encoding: "utf-8" })
@@ -116,8 +148,8 @@ export async function migrateProjectConfig(args: {
 
 				const pluginName =
 					moduleDetections.values().next().value || lintRuleDetections.values().next().value
-				const pluginId: Plugin["meta"]["id"] = ("plugin.inlang." +
-					(pluginName || `<please add your plugin id for ${url} here>`)) as Plugin["meta"]["id"]
+				const pluginId: Plugin["id"] = ("plugin.inlang." +
+					(pluginName || `<please add your plugin id for ${url} here>`)) as Plugin["id"]
 
 				return {
 					default: (pluginArg: any) => {
@@ -133,11 +165,12 @@ export async function migrateProjectConfig(args: {
 		// ignore the error
 	}
 
-	let config: ProjectConfig = {
+	let config: ProjectSettings = {
+		$schema: "https://inlang.com/schema/project-settings",
 		sourceLanguageTag: legacyConfigBuild?.referenceLanguage || "",
 		languageTags: legacyConfigBuild?.languages || [],
 		modules: legacyConfigBuild?.plugins?.flatMap((entry: any) => entry) || [],
-		settings: pluginSettings,
+		...pluginSettings,
 	}
 
 	if (!legacyConfigBuild) {
@@ -146,7 +179,24 @@ export async function migrateProjectConfig(args: {
 		const lineParsingWarning =
 			"Could not execute the inlang configuration and falling back to line based parsing, which can be unreliable for more complex setups."
 		warnings = [...warnings, lineParsingWarning, ...parseErrors]
+
 		config = extractedConfig
+	}
+
+	const pathPattern = updatePathPattern(config)
+
+	// detect language tags
+	if (!config.languageTags.length && pathPattern) {
+		const languageTags = await detectLanguageTags({
+			nodeishFs: args.nodeishFs,
+			pathPattern,
+		})
+		config.languageTags = languageTags
+	}
+
+	// remove standard lint rules
+	if (config["plugin.inlang.standardLintRules"]) {
+		delete config["plugin.inlang.standardLintRules"]
 	}
 
 	const configString = JSON.stringify(config, undefined, 4)
@@ -154,10 +204,10 @@ export async function migrateProjectConfig(args: {
 	return { warnings, config }
 }
 
-function lineParsing(
+export function lineParsing(
 	legacyConfig: string,
-	config: ProjectConfig,
-): { extractedConfig: ProjectConfig; parseErrors: string[] } {
+	config: ProjectSettings,
+): { extractedConfig: ProjectSettings; parseErrors: string[] } {
 	const searchMapping: Record<string, string> = {
 		languages: "languageTags",
 		variableReferencePattern: "variableReferencePattern",
@@ -202,7 +252,7 @@ function lineParsing(
 	}
 
 	const pluginName: string = moduleDetections.values().next().value
-	const pluginId: Plugin["meta"]["id"] = `plugin.inlang.${pluginName}`
+	const pluginId: Plugin["id"] = `plugin.inlang.${pluginName}`
 
 	config.modules = [
 		pluginUrls[pluginName] || `<please add your missing plugin url here>`,
@@ -212,14 +262,14 @@ function lineParsing(
 	config.sourceLanguageTag = extractions.sourceLanguageTag || ""
 	config.languageTags = extractions.languageTags || []
 
-	config.settings = {
+	config = {
 		[pluginId!]: {
 			pathPattern: extractions.pathPattern || "",
 			variableReferencePattern: extractions.variableReferencePattern || undefined,
 			referenceResourcePath: extractions.referenceResourcePath || undefined,
 		},
-		...config.settings,
-	} as ProjectConfig["settings"]
+		...config,
+	} as ProjectSettings
 
 	return { extractedConfig: config, parseErrors }
 }

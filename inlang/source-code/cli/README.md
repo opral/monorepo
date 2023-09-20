@@ -62,9 +62,11 @@ Options:
 
 Commands:
   config [command]   Commands for managing the config file.
-  lint               Commands for linting translations.
+  project [command]  Commands for managing your inlang project
+  lint [options]     Commands for linting translations.
   machine [command]  Commands for automating translations.
-  open [command]     Commands to open parts of the inlang ecosystem.
+  open [command]     Commands for open parts of the inlang ecosystem.
+  module [command]   Commands for build inlang modules.
   help [command]     display help for command
 ```
 
@@ -135,6 +137,34 @@ The translations are performed using machine translation services. The translate
 
 > Note: The project.inlang.json file must be present in the repository for the translation to work.
 
+### `project`
+
+The project command is used to interact with the Inlang project. It allows to create a new project or migrate an existing project to the new `project.inlang.json`.
+
+#### `project init`
+
+The init command initialize a new Inlang project at `./project.inlang.json` with optional module configuration.
+
+To initialize a new project, run the following command:
+
+```sh
+npx @inlang/cli project init
+```
+
+This will launch an interactive prompt that will guide you through the process of creating the inlang configuration file.
+
+#### `project migrate`
+
+The migrate command migrates an existing Inlang project from the old `inlang.config.js` to the new `project.inlang.json` format.
+
+To migrate an existing project, run the following command:
+
+```sh
+npx @inlang/cli project migrate
+```
+
+This will launch an interactive prompt that will guide you through the process of migrating the inlang configuration file.
+
 ### `lint`
 
 The lint command lints the translation with the configured lint rules, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/monorepo/tree/main/inlang/source-code/message-lint-rules).
@@ -164,3 +194,43 @@ npx @inlang/cli open editor
 ```
 
 This command retrieves the remote URL of the repository and constructs the URL for the Inlang editor by appending the GitHub user and repository to https://inlang.com/editor/. The editor will be opened in your default browser.
+
+### `module`
+
+The module command is used to interact with the Inlang module. It allows to initialize a new module or run the modules build commands.
+
+#### `module init`
+
+The `module init` command initialize a new Inlang module in the current directory. This works only if the current directory is empty, so make sure to create a new folder.
+
+To initialize a new module, run the following command:
+
+```sh
+npx @inlang/cli module init
+```
+
+**Options**
+
+The init command has the following options:
+`--type <type>`: The type of the module. Currently, `lintRule` or `plugin` is supported.
+
+#### `module build`
+
+If you are developing an inlang module, the `module build` command builds your Inlang module for development & in production.
+
+To build a module, run the following command:
+
+```sh
+npx @inlang/cli module build --entry ./path/to/index.ts --outdir ./path/to/dist
+```
+
+**Options**
+
+`--entry <entry>`: Specifies the path to the entry point of the module, typically src/index.js or src/index.ts.
+`--outdir <path>`: Specifies the output directory for the build files. The default output directory is "./dist."
+`--watch`: An optional flag that, when provided, enables a watch mode to monitor for changes and automatically rebuild the module when changes are detected.
+
+See how there is also a `--watch` flag, which enables a watch mode to monitor for changes and automatically rebuild the module when changes are detected. This command runs with `esbuild` under the hood.
+
+
+

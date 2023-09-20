@@ -1,7 +1,7 @@
 import path from "node:path"
 import * as vscode from "vscode"
 import { createFileSystemMapper } from "./createFileSystemMapper.js"
-import { migrateProjectConfig } from "@inlang/create-project"
+import { migrateProjectSettings } from "@inlang/create-project"
 import { msg } from "./message.js"
 
 /**
@@ -14,7 +14,7 @@ export const migrateConfigFile = async (
 	closestProjectFilePathUri: vscode.Uri,
 ) => {
 	// try to migrate project config
-	const { warnings } = await migrateProjectConfig({
+	const { warnings } = await migrateProjectSettings({
 		filePath: closestProjectFilePathUri.fsPath,
 		nodeishFs: createFileSystemMapper(workspaceFolder.uri.fsPath),
 		pathJoin: path.join,

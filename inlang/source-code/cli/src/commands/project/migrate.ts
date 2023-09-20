@@ -2,7 +2,7 @@ import { Command } from "commander"
 import { log } from "../../utilities/log.js"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import fs from "node:fs/promises"
-import { migrateProjectConfig } from "@inlang/create-project"
+import { migrateProjectSettings } from "@inlang/create-project"
 import path from "node:path"
 
 export const migrate = new Command()
@@ -37,7 +37,7 @@ export async function migrateCommandAction(args: {
 
 	args.logger.info(`Trying a best effort migration for your old inlang configuration...`)
 
-	const { warnings } = await migrateProjectConfig({
+	const { warnings } = await migrateProjectSettings({
 		nodeishFs: args.nodeishFs,
 		pathJoin: path.join,
 	})

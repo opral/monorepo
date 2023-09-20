@@ -6,6 +6,7 @@
 		"lix/source-code/*",
 		"inlang/source-code/*",
 		"inlang/source-code/plugins/*",
+		"inlang/source-code/templates/*",
 		"inlang/source-code/message-lint-rules/*",
 		"inlang/source-code/versioned-interfaces/*"
 	],
@@ -15,7 +16,7 @@
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "npx nx run-many --target=test --all --parallel",
 		"---- LINT ----------------------------------------------------------": "",
-		"lint": "npx nx run-many --target=lint --all --parallel --output-style stream",
+		"lint": "npx nx run-many --target=lint --all --parallel",
 		"format": "npx nx run-many --target=format --all --parallel",
 		"---- OTHER ---------------------------------------------------------": "",
 		"changeset": "npx changeset",

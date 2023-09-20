@@ -3,6 +3,7 @@ import { state } from "../state.js"
 import { contextTooltip } from "./contextTooltip.js"
 import { onDidEditMessage } from "../commands/editMessage.js"
 import { getStringFromPattern } from "../utilities/query.js"
+import { getActiveTextEditor } from "../utilities/initProject.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -14,7 +15,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 	})
 
 	async function updateDecorations() {
-		const activeTextEditor = vscode.window.activeTextEditor
+		const activeTextEditor = getActiveTextEditor()
 
 		if (!activeTextEditor) {
 			return
@@ -26,8 +27,8 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 		}
 
 		// Get the reference language
-		const sourceLanguageTag = state().inlang.config()?.sourceLanguageTag
-		const ideExtensionConfig = state().inlang.customApi()?.["app.inlang.ideExtension"]
+		const sourceLanguageTag = state().project.settings()?.sourceLanguageTag
+		const ideExtensionConfig = state().project.customApi()?.["app.inlang.ideExtension"]
 
 		const messageReferenceMatchers = ideExtensionConfig?.messageReferenceMatchers
 
@@ -43,7 +44,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 				documentText: activeTextEditor.document.getText(),
 			})
 			return messages.map((message) => {
-				const _message = state().inlang.query.messages.get({
+				const _message = state().project.query.messages.get({
 					where: { id: message.messageId },
 				})
 

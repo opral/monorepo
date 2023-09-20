@@ -22,7 +22,7 @@
 	},
 	"dependencies": {
 		"@inlang/translatable": "*",
-		"@inlang/project-config": "*"
+		"@inlang/project-settings": "*"
 	},
 	"devDependencies": {
 		"@sinclair/typebox": "^0.31.0",

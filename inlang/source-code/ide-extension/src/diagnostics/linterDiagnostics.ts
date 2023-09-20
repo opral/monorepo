@@ -1,22 +1,18 @@
 import * as vscode from "vscode"
 import { state } from "../state.js"
 import type { MessageLintReport } from "@inlang/sdk"
-import { onDidEditMessage } from "../commands/editMessage.js"
+import { getActiveTextEditor } from "../utilities/initProject.js"
 
 export async function linterDiagnostics(args: { context: vscode.ExtensionContext }) {
 	const linterDiagnosticCollection = vscode.languages.createDiagnosticCollection("inlang-lint")
 
 	async function updateLintDiagnostics() {
-		// clean up the diagnostic collection
-		linterDiagnosticCollection.clear()
-
-		// get the active text editor
-		const activeTextEditor = vscode.window.activeTextEditor
+		const activeTextEditor = getActiveTextEditor()
 		if (!activeTextEditor) {
 			return
 		}
 
-		const ideExtension = state().inlang.customApi()["app.inlang.ideExtension"]
+		const ideExtension = state().project.customApi()["app.inlang.ideExtension"]
 
 		if (!ideExtension) {
 			return
@@ -29,7 +25,7 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 				documentText: activeTextEditor.document.getText(),
 			})
 			for (const message of messages) {
-				state().inlang.query.messageLintReports.get.subscribe(
+				const matchingLintReports = state().project.query.messageLintReports.get.subscribe(
 					{
 						where: {
 							messageId: message.messageId,
@@ -104,7 +100,7 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 	// update lints when the text changes in a document
 	vscode.workspace.onDidChangeTextDocument(
 		(event) => {
-			if (event.document === vscode.window.activeTextEditor?.document) {
+			if (event.document === getActiveTextEditor()?.document) {
 				updateLintDiagnostics()
 			}
 		},
