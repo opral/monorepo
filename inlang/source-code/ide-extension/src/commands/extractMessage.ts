@@ -84,7 +84,7 @@ export const extractMessageCommand = {
 					pattern: [
 						{
 							type: "Text",
-							value: preparedExtractOption,
+							value: messageValue,
 						},
 					],
 				},
