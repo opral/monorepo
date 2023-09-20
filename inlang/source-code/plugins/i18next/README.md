@@ -29,7 +29,6 @@ The plugin offers further configuration options that can be passed as arguments.
 type PluginSettings = {
 	pathPattern: string | { [key: string]: string }
 	variableReferencePattern?: [string] | [string, string]
-	ignore?: [string]
 }
 ```
 
@@ -65,14 +64,6 @@ default:
 
 ```json
 "variableReferencePattern": ["{{", "}}"]
-```
-
-### `ignore`
-
-When you want to ignore files like `languages.json` that are on the same level as your language files, you can ignore them to not brake the `getLanguages` function.
-
-```json
-"ignore": ["languages.json"]
 ```
 
 ## IDE-extension usage

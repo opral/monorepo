@@ -31,7 +31,6 @@ Here is the syntax for the PluginSettings object in TypeScript:
 type PluginSettings = {
 	pathPattern: string | { [key: string]: string }
 	variableReferencePattern?: [string] | [string, string]
-	ignore?: string[] 
 }
 ```
 
@@ -78,14 +77,6 @@ default:
 | `:placeholder`    | `[":"]`        |
 
 <br>
-
-### `ignore`
-
-When you want to ignore files like `languages.json` that are on the same level as your language files, you can ignore them to not brake the `getLanguages` function.
-
-```json
-"ignore": ["languages.json"]
-```
 
 ## Expected behavior
 
