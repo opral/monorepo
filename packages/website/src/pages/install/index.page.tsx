@@ -147,7 +147,7 @@ function ChooseRepo(props: { modules?: string[] }) {
 		<div class="w-full flex flex-col items-center">
 			<div class="flex flex-col justify-center gap-4 items-center">
 				<h2 class="text-[24px] leading-tight md:text-2xl font-semibold text-center">
-					No valid repository URL provided.
+					Insert your repository link
 				</h2>
 				<p class="text-surface-500 text-center">
 					You can install modules into your repository <br /> by providing the repository URL below.
@@ -164,7 +164,7 @@ function ChooseRepo(props: { modules?: string[] }) {
 					<div class="px-2 gap-2 relative z-10 flex items-center w-full border border-surface-200 bg-background rounded-lg focus-within:border-primary transition-all ">
 						<input
 							class="active:outline-0 focus:outline-0 focus:ring-0 border-0 h-14 grow placeholder:text-surface-500 placeholder:font-normal placeholder:text-base"
-							placeholder="Enter repository url ..."
+							placeholder="https://github.com/user/example"
 							onInput={(event) => {
 								// @ts-ignore
 								setInput(event.target.value)
