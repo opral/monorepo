@@ -1,6 +1,6 @@
 # Lint rule
 
-{% $frontmatter.description %}
+Lint rules validate messages and other types of content in an inlang project.
 
 For example, the [missing translation lint rule](/marketplace/messageLintRule.inlang.missingTranslation) reports an issue if a message is missing a translation for a specified [language tag](/documentation/concepts/language-tag). Inlang applications use lint rules to validate content and report issues to the user.
 
