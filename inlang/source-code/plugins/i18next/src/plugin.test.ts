@@ -114,6 +114,105 @@ describe("option pathPattern", () => {
 		}
 	})
 
+	describe("option sourceLanguageFilePath", () => {
+		it("should throw if pathPattern and sourceLanguageFilePath are not of the same type", async () => {
+			const fs = createNodeishMemoryFs()
+			await fs.writeFile("./en.json", JSON.stringify({ test: "Hello world" }))
+			const settings: PluginSettings = {
+				pathPattern: {
+					common: "./{languageTag}/common.json",
+				},
+				sourceLanguageFilePath: "./{languageTag}.json",
+			}
+			const languageTags = ["en"]
+			const sourceLanguageTag = "en"
+			try {
+				await plugin.loadMessages!({
+					languageTags,
+					sourceLanguageTag,
+					settings,
+					nodeishFs: fs,
+				})
+				throw new Error("should not reach this")
+			} catch (e) {
+				expect((e as Error).message).toContain("sourceLanguageFilePath")
+			}
+		})
+
+		it("should throw if pathPattern and sourceLanguageFilePath have not the same length of keys", async () => {
+			const fs = createNodeishMemoryFs()
+			await fs.writeFile("./en.json", JSON.stringify({ test: "Hello world" }))
+			const settings: PluginSettings = {
+				pathPattern: {
+					common: "./{languageTag}/common.json",
+					vital: "./{languageTag}/vital.json",
+				},
+				sourceLanguageFilePath: {
+					common: "./main/common.json",
+				},
+			}
+			const languageTags = ["en"]
+			const sourceLanguageTag = "en"
+			try {
+				await plugin.loadMessages!({
+					languageTags,
+					sourceLanguageTag,
+					settings,
+					nodeishFs: fs,
+				})
+				throw new Error("should not reach this")
+			} catch (e) {
+				expect((e as Error).message).toContain("sourceLanguageFilePath")
+			}
+		})
+
+		it("should throw if pathPattern and sourceLanguageFilePath have not the same keys (namespaces)", async () => {
+			const fs = createNodeishMemoryFs()
+			await fs.writeFile("./en.json", JSON.stringify({ test: "Hello world" }))
+			const settings: PluginSettings = {
+				pathPattern: {
+					common: "./{languageTag}/common.json",
+					vital: "./{languageTag}/vital.json",
+				},
+				sourceLanguageFilePath: {
+					common: "./main/common.json",
+					nonvital: "./{languageTag}/nonvital.json",
+				},
+			}
+			const languageTags = ["en"]
+			const sourceLanguageTag = "en"
+			try {
+				await plugin.loadMessages!({
+					languageTags,
+					sourceLanguageTag,
+					settings,
+					nodeishFs: fs,
+				})
+				throw new Error("should not reach this")
+			} catch (e) {
+				expect((e as Error).message).toContain("sourceLanguageFilePath")
+			}
+		})
+
+		it("should not throw if pathPattern and sourceLanguageFilePath are of the same type", async () => {
+			const fs = createNodeishMemoryFs()
+			await fs.writeFile("./en.json", JSON.stringify({ test: "Hello world" }))
+			const settings: PluginSettings = {
+				pathPattern: {
+					common: "./{languageTag}/common.json",
+				},
+				sourceLanguageFilePath: {
+					common: "./main/common.json",
+				},
+			}
+			const languageTags = ["en"]
+			const sourceLanguageTag = "en"
+			expect(
+				plugin.loadMessages!({ languageTags, sourceLanguageTag, settings, nodeishFs: fs }),
+			).resolves.toBeTruthy()
+		})
+	})
+
 	it("should throw if the path pattern with namespaces has a namespace with a dot", async () => {
 		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", "{}")
@@ -524,6 +623,56 @@ describe("variable reference", () => {
 		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern[1]?.type).toBe(
 			"VariableReference",
 		)
+	})
+})
+
+describe("sourceLanguageFilePath", () => {
+	it("should resolve the sourceLanguageFilePath", async () => {
+		const fs = createNodeishMemoryFs()
+		await fs.writeFile("./main.json", JSON.stringify({ test: "Hello world" }))
+		await fs.writeFile("./de.json", JSON.stringify({ test: "Hallo Welt" }))
+
+		const settings: PluginSettings = {
+			pathPattern: "./{languageTag}.json",
+			sourceLanguageFilePath: "./main.json",
+		}
+
+		const languageTags = ["en", "de"]
+		const sourceLanguageTag = "en"
+		const messages = await plugin.loadMessages!({
+			languageTags,
+			sourceLanguageTag,
+			settings,
+			nodeishFs: fs,
+		})
+		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })).toBeTruthy()
+		expect(getVariant(messages[0]!, { where: { languageTag: "de" } })).toBeTruthy()
+	})
+
+	it("should resolve the sourceLanguageFilePath (namespace)", async () => {
+		const fs = createNodeishMemoryFs()
+		await fs.mkdir("./main")
+		await fs.mkdir("./de")
+		await fs.writeFile("./main/common.json", JSON.stringify({ test: "Hello world" }))
+		await fs.writeFile("./de/common.json", JSON.stringify({ test: "Hallo welt" }))
+		const settings: PluginSettings = {
+			pathPattern: {
+				common: "./{languageTag}/common.json",
+			},
+			sourceLanguageFilePath: {
+				common: "./main/common.json",
+			},
+		}
+		const languageTags = ["en", "de"]
+		const sourceLanguageTag = "en"
+		const messages = await plugin.loadMessages!({
+			languageTags,
+			sourceLanguageTag,
+			settings,
+			nodeishFs: fs,
+		})
+		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })).toBeTruthy()
+		expect(getVariant(messages[0]!, { where: { languageTag: "de" } })).toBeTruthy()
 	})
 })
 
@@ -1060,6 +1209,68 @@ describe("roundTrip", () => {
 			settings,
 			nodeishFs: fs,
 		})
+		expect(newMessage).toStrictEqual(messages)
+	})
+
+	it("should successfully do a roundtrip using sourceLanguageFilePath", async () => {
+		const fs = createNodeishMemoryFs()
+		await fs.writeFile("./main.json", JSON.stringify({ test: "Hello world" }))
+		await fs.writeFile("./de.json", JSON.stringify({ test: "Hallo Welt" }))
+
+		const settings: PluginSettings = {
+			pathPattern: "./{languageTag}.json",
+			sourceLanguageFilePath: "./main.json",
+		}
+
+		const languageTags = ["de", "en"]
+		const sourceLanguageTag = "en"
+		const messages = await plugin.loadMessages!({
+			languageTags,
+			sourceLanguageTag,
+			settings,
+			nodeishFs: fs,
+		})
+		plugin.saveMessages!({ messages, settings, nodeishFs: fs })
+		const newMessage = await plugin.loadMessages!({
+			languageTags,
+			sourceLanguageTag,
+			settings,
+			nodeishFs: fs,
+		})
+		expect(await fs.readdir("./")).toStrictEqual(["main.json", "de.json"])
+		expect(newMessage).toStrictEqual(messages)
+	})
+
+	it("should successfully do a roundtrip using sourceLanguageFilePath (namespace)", async () => {
+		const fs = createNodeishMemoryFs()
+		await fs.mkdir("./main")
+		await fs.mkdir("./de")
+		await fs.writeFile("./main/common.json", JSON.stringify({ test: "Hello world" }))
+		await fs.writeFile("./de/common.json", JSON.stringify({ test: "Hallo welt" }))
+		const settings: PluginSettings = {
+			pathPattern: {
+				common: "./{languageTag}/common.json",
+			},
+			sourceLanguageFilePath: {
+				common: "./main/common.json",
+			},
+		}
+		const languageTags = ["en", "de"]
+		const sourceLanguageTag = "en"
+		const messages = await plugin.loadMessages!({
+			languageTags,
+			sourceLanguageTag,
+			settings,
+			nodeishFs: fs,
+		})
+		plugin.saveMessages!({ messages, settings, nodeishFs: fs })
+		const newMessage = await plugin.loadMessages!({
+			languageTags,
+			sourceLanguageTag,
+			settings,
+			nodeishFs: fs,
+		})
+		expect(await fs.readdir("./")).toStrictEqual(["main", "de"])
 		expect(newMessage).toStrictEqual(messages)
 	})
 })

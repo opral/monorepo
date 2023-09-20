@@ -2,6 +2,7 @@
 export type PluginSettings = {
 	pathPattern: string | Record<string, string>
 	variableReferencePattern?: string[] //default is ["{{", "}}"]
+	sourceLanguageFilePath?: string | Record<string, string>
 	ignore?: string[]
 }
 
@@ -48,6 +49,25 @@ export function throwIfInvalidSettings(settings: PluginSettings) {
 					"A prefix of pathPattern includes an '.'. Use a string without dot notations. An example would be 'common'.",
 				)
 			}
+		}
+	}
+	if (settings.sourceLanguageFilePath) {
+		if (typeof settings.pathPattern !== typeof settings.sourceLanguageFilePath) {
+			throw new Error(
+				"The sourceLanguageFilePath setting must have the same structure as the pathPattern setting. Either both are strings or both have the object structure of namespaces.",
+			)
+		} else if (
+			typeof settings.sourceLanguageFilePath === "object" &&
+			(Object.keys(settings.pathPattern).length !==
+				Object.keys(settings.sourceLanguageFilePath).length ||
+				!Object.keys(settings.pathPattern).every((key) =>
+					// @ts-ignore
+					Object.keys(settings.sourceLanguageFilePath).includes(key),
+				))
+		) {
+			throw new Error(
+				"The sourceLanguageFilePath setting must have the same namespaces as the pathPattern setting.",
+			)
 		}
 	}
 }
