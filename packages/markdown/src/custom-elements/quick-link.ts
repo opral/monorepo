@@ -1,6 +1,5 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
-// import { WebIcon } from "./web-icon.js"
 
 @customElement("quick-link")
 export class QuickLink extends LitElement {
