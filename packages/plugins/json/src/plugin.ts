@@ -2,64 +2,19 @@
 import type { Message, Variant, LanguageTag, Plugin, NodeishFilesystemSubset } from "@inlang/plugin"
 import { id, displayName, description } from "../marketplace-manifest.json"
 import { throwIfInvalidSettings, type PluginSettings } from "./settings.js"
-import { detectJsonSpacing, detectIsNested, replaceAll } from "./utilities.js"
+import { replaceAll } from "./utilities.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
 import { flatten, unflatten } from "flat"
+import { detectFormatting, type DetectFormattingApi } from "@inlang/detect-formatting"
 
 /**
- * The spacing of the JSON files in this repository.
+ * Detect formatting
  *
- * @example
- * { "/en.json" = 2 }
+ * @example const DETECTFORMATING = detectFormatting(file)
+ * const file = DETECTFORMATTING.serialize(json) // get a serializer that wraps 'JSON.serialize()' and applies format
+ * const values = DETECTFORMATTING.values(json) // get raw formatting values
  */
-let SPACING: Record<string, ReturnType<typeof detectJsonSpacing>> = {}
-
-/**
- * The nesting the JSON files in this repository
- *
- * @example
- * { "/en.json" = nested }
- */
-let NESTED: Record<string, ReturnType<typeof detectIsNested>> = {}
-
-/**
- * Whether a file has a new line at the end.
- *
- * @example
- * { "/en.json" = true }
- * { "/de.json" = false }
- */
-let FILE_HAS_NEW_LINE: Record<string, boolean> = {}
-
-/**
- * Defines the default spacing for JSON files.
- *
- * Takes the majority spacing of resource files in this repository to determine
- * the default spacing.
- */
-function defaultSpacing() {
-	const values = Object.values(SPACING)
-	return (
-		values
-			.sort((a, b) => values.filter((v) => v === a).length - values.filter((v) => v === b).length)
-			.pop() ?? 2 // if no default has been found -> 2
-	)
-}
-
-/**
- * Defines the default nesting for JSON files.
- *
- * Takes the majority of nested/flatten resource files in this repository to determine
- * the default spacing.
- */
-function defaultNesting() {
-	const values = Object.values(NESTED)
-	return (
-		values
-			.sort((a, b) => values.filter((v) => v === a).length - values.filter((v) => v === b).length)
-			.pop() ?? false // if no default has been found -> false -> flatten
-	)
-}
+let DETECTFORMATTING: DetectFormattingApi = detectFormatting()
 
 export const plugin: Plugin<PluginSettings> = {
 	id: id as Plugin["id"],
@@ -68,9 +23,6 @@ export const plugin: Plugin<PluginSettings> = {
 	loadMessages: async ({ languageTags, sourceLanguageTag, settings, nodeishFs }) => {
 		settings.variableReferencePattern = settings.variableReferencePattern || ["{", "}"]
 		throwIfInvalidSettings(settings)
-		SPACING = {}
-		NESTED = {}
-		FILE_HAS_NEW_LINE = {}
 		return loadMessages({
 			nodeishFs,
 			settings,
@@ -112,7 +64,12 @@ async function loadMessages(args: {
 	for (const languageTag of resolveOrderOfLanguageTags(args.languageTags, args.sourceLanguageTag)) {
 		if (typeof args.settings.pathPattern !== "string") {
 			for (const [prefix, path] of Object.entries(args.settings.pathPattern)) {
-				const messagesFromFile = await getFileToParse(path, languageTag, args.nodeishFs)
+				const messagesFromFile = await getFileToParse(
+					path,
+					languageTag,
+					args.sourceLanguageTag,
+					args.nodeishFs,
+				)
 				for (const [key, value] of Object.entries(messagesFromFile)) {
 					const prefixedKey = prefix + ":" + replaceAll(key, "u002E", ".")
 					addVariantToMessages(messages, prefixedKey, languageTag, value, args.settings)
@@ -122,6 +79,7 @@ async function loadMessages(args: {
 			const messagesFromFile = await getFileToParse(
 				args.settings.pathPattern,
 				languageTag,
+				args.sourceLanguageTag,
 				args.nodeishFs,
 			)
 			for (const [key, value] of Object.entries(messagesFromFile)) {
@@ -148,6 +106,7 @@ async function loadMessages(args: {
 async function getFileToParse(
 	path: string,
 	languageTag: string,
+	sourceLanguageTag: string,
 	nodeishFs: NodeishFilesystemSubset,
 ): Promise<Record<string, string>> {
 	const pathWithLanguage = path.replace("{languageTag}", languageTag)
@@ -155,10 +114,11 @@ async function getFileToParse(
 	try {
 		const file = await nodeishFs.readFile(pathWithLanguage, { encoding: "utf-8" })
 		// analyze format of file
-		SPACING[pathWithLanguage] = detectJsonSpacing(file as string)
-		NESTED[pathWithLanguage] = detectIsNested(file as string)
-		FILE_HAS_NEW_LINE[pathWithLanguage] = (file as string).endsWith("\n")
-		const flattenedMessages = NESTED[pathWithLanguage]
+		if (sourceLanguageTag === languageTag) {
+			DETECTFORMATTING = detectFormatting(file)
+		}
+
+		const flattenedMessages = DETECTFORMATTING.values.nestedKeys
 			? flatten(JSON.parse(file as string), {
 					transformKey: function (key) {
 						//replace dots in keys with unicode
@@ -318,13 +278,7 @@ async function saveMessages(args: {
 				)
 				await args.nodeishFs.writeFile(
 					pathWithLanguage,
-					serializeFile(
-						value,
-						SPACING[pathWithLanguage] ?? defaultSpacing(),
-						FILE_HAS_NEW_LINE[pathWithLanguage]!,
-						NESTED[pathWithLanguage] ?? defaultNesting(),
-						args.settings.variableReferencePattern,
-					),
+					serializeFile(value, args.settings.variableReferencePattern),
 				)
 			}
 		}
@@ -349,13 +303,7 @@ async function saveMessages(args: {
 
 			await args.nodeishFs.writeFile(
 				pathWithLanguage,
-				serializeFile(
-					value,
-					SPACING[pathWithLanguage] ?? defaultSpacing(),
-					FILE_HAS_NEW_LINE[pathWithLanguage]!,
-					NESTED[pathWithLanguage] ?? defaultNesting(),
-					args.settings.variableReferencePattern,
-				),
+				serializeFile(value, args.settings.variableReferencePattern),
 			)
 		}
 	}
@@ -370,9 +318,6 @@ async function saveMessages(args: {
  */
 function serializeFile(
 	messages: Record<Message["id"], Variant["pattern"]>,
-	space: number | string,
-	endsWithNewLine: boolean,
-	nested: boolean,
 	variableReferencePattern: PluginSettings["variableReferencePattern"],
 ): string {
 	let result: Record<string, string> = {}
@@ -386,16 +331,13 @@ function serializeFile(
 		result[id] = serializePattern(pattern, variableReferencePattern!)
 	}
 	// for nested structures -> unflatten the keys
-	if (nested) {
+	if (DETECTFORMATTING.values.nestedKeys) {
 		result = unflatten(result, {
 			//prevent numbers from creating arrays automatically
 			object: true,
 		})
 	}
-	return (
-		replaceAll(JSON.stringify(result, undefined, space), "u002E", ".") +
-		(endsWithNewLine ? "\n" : "")
-	)
+	return replaceAll(DETECTFORMATTING.serialize(result), "u002E", ".")
 }
 
 /**
