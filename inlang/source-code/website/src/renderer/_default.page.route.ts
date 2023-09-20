@@ -3,7 +3,7 @@ import type { PageContextRenderer } from "./types.js"
 export { onBeforeRoute }
 
 export const defaultLanguage = "en"
-export const languages = ["en", "de", "zh"]
+export const languages = ["en", "de", "zh", "sk"]
 
 function onBeforeRoute(pageContext: PageContextRenderer) {
 	const { urlWithoutLocale, locale } = extractLocale(pageContext.urlOriginal)
