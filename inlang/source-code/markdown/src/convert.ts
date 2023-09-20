@@ -1,5 +1,6 @@
 import { unified } from "unified"
 import remarkParse from "remark-parse"
+import remarkGfm from "remark-gfm"
 import remarkRehype from "remark-rehype"
 import rehypeRaw from "rehype-raw"
 import rehypeStringify from "rehype-stringify"
@@ -16,6 +17,8 @@ export async function convert(markdown: string): Promise<string> {
 	const content = await unified()
 		/* @ts-ignore */
 		.use(remarkParse)
+		/* @ts-ignore */
+		// .use(remarkGfm)
 		/* @ts-ignore */
 		.use(remarkRehype, { allowDangerousHtml: true })
 		/* @ts-ignore */
@@ -56,7 +59,7 @@ export async function convert(markdown: string): Promise<string> {
 			th: "im-p-2 im-rounded-xl im-text-sm im-text-surface-700 im-font-medium",
 			td: "im-p-2 im-leading-7",
 			hr: "im-my-4 im-border-b im-border-surface-200",
-			img: "im-mx-auto im-my-4 im-rounded-2xl border border-surface-2",
+			img: "im-mx-auto im-my-4 im-rounded-2xl im-border im-border-surface-2",
 		})
 		.use(rehypeAutolinkHeadings)
 		.use(rehypeAccessibleEmojis)
