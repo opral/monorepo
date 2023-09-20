@@ -29,8 +29,7 @@
 		"express": "^4.18.2",
 		"jose": "4.14.6",
 		"octokit": "3.1.0",
-		"tsx": "3.12.8",
-		"vite": "4.4.9"
+		"tsx": "3.12.8"
 	},
 	"devDependencies": {
 		"@types/compression": "^1.7.2",
