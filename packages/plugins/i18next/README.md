@@ -67,6 +67,25 @@ default:
 "variableReferencePattern": ["{{", "}}"]
 ```
 
+### `sourceLanguageFilePath`
+
+This setting is optional and should only be used if the file name of your sourceLanguageTag does not match your pathPattern structure. For example, if your sourceLanguageTag is `en` but your sourceLanguage file is called `main.json`, you can use this setting to specify the path to the sourceLanguage file. Our recommendation is to rename the file to `en.json` and not use this setting.
+
+#### Without namespaces
+
+```json
+"sourceLanguageFilePath": "./resources/main.json"
+```
+
+#### With namespaces
+
+```json
+"sourceLanguageFilePath": {
+	"common": "./resources/main/common.json",
+	"vital": "./resources/main/vital.json"
+}
+```
+
 ## IDE-extension usage
 
 The plugin automatically informs the [IDE extension](https://inlang.com/marketplace/app.inlang.ideExtension) how to extract keys and namespaces from your code in order to display inline annotations.

@@ -105,7 +105,15 @@ async function loadMessages(args: {
 	for (const languageTag of resolveOrderOfLanguageTags(args.languageTags, args.sourceLanguageTag)) {
 		if (typeof args.settings.pathPattern !== "string") {
 			for (const [prefix, path] of Object.entries(args.settings.pathPattern)) {
-				const messagesFromFile = await getFileToParse(path, languageTag, args.nodeishFs)
+				const messagesFromFile = await getFileToParse(
+					path,
+					languageTag,
+					args.nodeishFs,
+					typeof args.settings.sourceLanguageFilePath === "object" &&
+						languageTag === args.sourceLanguageTag
+						? args.settings.sourceLanguageFilePath[prefix]
+						: undefined,
+				)
 				for (const [key, value] of Object.entries(messagesFromFile)) {
 					const prefixedKey = prefix + ":" + replaceAll(key, "u002E", ".")
 					addVariantToMessages(messages, prefixedKey, languageTag, value, args.settings)
@@ -116,6 +124,10 @@ async function loadMessages(args: {
 				args.settings.pathPattern,
 				languageTag,
 				args.nodeishFs,
+				typeof args.settings.sourceLanguageFilePath === "string" &&
+					languageTag === args.sourceLanguageTag
+					? args.settings.sourceLanguageFilePath
+					: undefined,
 			)
 			for (const [key, value] of Object.entries(messagesFromFile)) {
 				addVariantToMessages(
@@ -142,8 +154,11 @@ async function getFileToParse(
 	path: string,
 	languageTag: string,
 	nodeishFs: NodeishFilesystemSubset,
+	pathWithLanguage?: string,
 ): Promise<Record<string, string>> {
-	const pathWithLanguage = path.replace("{languageTag}", languageTag)
+	if (typeof pathWithLanguage === "undefined") {
+		pathWithLanguage = path.replace("{languageTag}", languageTag)
+	}
 	// get file, make sure that is not braking when the namespace doesn't exist in every languageTag dir
 	try {
 		const file = await nodeishFs.readFile(pathWithLanguage, { encoding: "utf-8" })
@@ -293,13 +308,13 @@ async function saveMessages(args: {
 			}
 		}
 		for (const [languageTag, _value] of Object.entries(storage)) {
-			for (const path of Object.values(args.settings.pathPattern)) {
+			for (const [prefix, path] of Object.entries(args.settings.pathPattern)) {
 				// check if directory exists
-				const directoryPath = path
-					.replace("{languageTag}", languageTag)
-					.split("/")
-					.slice(0, -1)
-					.join("/")
+				const directoryPath =
+					typeof args.settings.sourceLanguageFilePath === "object" &&
+					languageTag === Object.keys(storage)[0] // sourceLanguage is always the first languageTag
+						? args.settings.sourceLanguageFilePath[prefix]!.split("/").slice(0, -1).join("/")
+						: path.replace("{languageTag}", languageTag).split("/").slice(0, -1).join("/")
 				try {
 					await args.nodeishFs.readdir(directoryPath)
 				} catch {
@@ -307,10 +322,11 @@ async function saveMessages(args: {
 				}
 			}
 			for (const [prefix, value] of Object.entries(_value)) {
-				const pathWithLanguage = (args.settings.pathPattern[prefix] as string).replace(
-					"{languageTag}",
-					languageTag,
-				)
+				const pathWithLanguage =
+					typeof args.settings.sourceLanguageFilePath === "object" &&
+					languageTag === Object.keys(storage)[0] // sourceLanguage is always the first languageTag
+						? args.settings.sourceLanguageFilePath[prefix]!
+						: (args.settings.pathPattern[prefix] as string).replace("{languageTag}", languageTag)
 				await args.nodeishFs.writeFile(
 					pathWithLanguage,
 					serializeFile(
@@ -333,7 +349,11 @@ async function saveMessages(args: {
 			}
 		}
 		for (const [languageTag, value] of Object.entries(storage)) {
-			const pathWithLanguage = args.settings.pathPattern.replace("{languageTag}", languageTag)
+			const pathWithLanguage =
+				typeof args.settings.sourceLanguageFilePath === "string" &&
+				languageTag === Object.keys(storage)[0] // sourceLanguage is always the first languageTag
+					? args.settings.sourceLanguageFilePath
+					: args.settings.pathPattern.replace("{languageTag}", languageTag)
 			try {
 				await args.nodeishFs.readdir(pathWithLanguage.split("/").slice(0, -1).join("/"))
 			} catch {
