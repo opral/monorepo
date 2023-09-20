@@ -275,7 +275,7 @@ function NavbarCommon(props: {
 function findPageBySlug(slug: string) {
 	for (const [, pageArray] of Object.entries(tableOfContents)) {
 		for (const page of pageArray) {
-			if (page.slug === slug) {
+			if (page.slug === slug || page.slug === slug.replace("/documentation", "")) {
 				return page
 			}
 		}
