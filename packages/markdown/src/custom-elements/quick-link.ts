@@ -57,9 +57,6 @@ export class QuickLink extends LitElement {
 
 	override render() {
 		return html`<a href="${this.href}">
-			${this.icon !== ""
-				? html`<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>`
-				: ""}
 			<div class="quick-link">
 				<div class="icons">
 					<div class="icon">
