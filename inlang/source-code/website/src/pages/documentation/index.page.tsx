@@ -77,7 +77,7 @@ export function Page(props: PageProps) {
 							 * filteredTableContents is not available on the client.
 							 */}
 							<div class="py-14 pr-8">
-								<Show when={props.processedTableOfContents}>
+								<Show when={props.processedTableOfContents && props.markdown}>
 									<NavbarCommon
 										{...props}
 										getLocale={getLocale}
@@ -100,7 +100,7 @@ export function Page(props: PageProps) {
 							{/* `Show` is a hotfix when client side rendering loaded this page
 							 * filteredTableContents is not available on the client.
 							 */}
-							<Show when={props.processedTableOfContents}>
+							<Show when={props.processedTableOfContents && props.markdown}>
 								<NavbarCommon
 									{...props}
 									onLinkClick={() => {
