@@ -25,6 +25,7 @@
 	},
 	"dependencies": {
 		"@playwright/test": "1.38.0",
+		"iconify-icon": "1.0.8",
 		"install": "0.13.0",
 		"lit": "2.8.0",
 		"npm": "10.1.0",

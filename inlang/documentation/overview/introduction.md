@@ -21,5 +21,5 @@ Inlang apps are built on lix. Lix is a git-compatible version control backend fo
 
 <quick-links>
     <quick-link title="Getting started" icon="material-symbols:fast-forward-outline-rounded" href="/documentation/manually-create-project" description="Create a new project."></quick-link>
-    <quick-link title="Marketplace" icon="add-plugin" href="/marketplace" description="Find apps, plugins, and lint rules."></quick-link>
+    <quick-link title="Marketplace" icon="material-symbols:code-blocks-rounded" href="/marketplace" description="Find apps, plugins, and lint rules."></quick-link>
 </quick-links>
