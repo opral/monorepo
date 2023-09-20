@@ -22,9 +22,15 @@ export async function convert(markdown: string): Promise<string> {
 		.use(rehypeRaw)
 		/* @ts-ignore */
 		.use(rehypeSanitize, {
-			tagNames: ["doc-figure", "quick-link", "quick-links", "web-icon", ...defaultSchema.tagNames!],
+			tagNames: [
+				"display-figure",
+				"quick-link",
+				"quick-links",
+				"web-icon",
+				...defaultSchema.tagNames!,
+			],
 			attributes: {
-				"doc-figure": ["src", "alt", "caption"],
+				"display-figure": ["src", "alt", "caption"],
 				"quick-link": ["href", "description", "title", "icon"],
 				...defaultSchema.attributes,
 			},

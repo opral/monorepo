@@ -23,18 +23,14 @@ export function Page(props: PageProps) {
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<Layout>
 				<div class="flex-row min-h-full w-full items-center justify-center mx-auto md:max-w-2xl divide-y divide-solid divide-outline">
-					<For each={Object.entries(props.processedTableOfContents ?? {})}>
-						{([href, frontmatter]) => (
+					<For each={Object.entries(props.processedTableOfContents)}>
+						{([, page]) => (
 							<div class="py-12">
-								<a href={getLocale() + href} class="text-ellipsis space-y-4">
+								<a href={getLocale() + page.href} class="text-ellipsis space-y-4">
 									<h2 class="text-xl font-bold tracking-tight text-on-backround truncate">
-										{frontmatter.title}
+										{page.title}
 									</h2>
-									<p>{frontmatter.description}</p>
-									{/* <img
-									class="object-contain w-full rounded"
-									src={section.previewImageSrc}
-								/> */}
+									<p>{page.description}</p>
 									{/* using link-primary and text-primary to render the link color by default in primary 
 							but also get hover effects from link-primary */}
 									<p class="link text-primary link-primary">Read more…</p>
