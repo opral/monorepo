@@ -18,7 +18,7 @@ export async function convert(markdown: string): Promise<string> {
 		/* @ts-ignore */
 		.use(remarkParse)
 		/* @ts-ignore */
-		// .use(remarkGfm)
+		.use(remarkGfm)
 		/* @ts-ignore */
 		.use(remarkRehype, { allowDangerousHtml: true })
 		/* @ts-ignore */
@@ -55,7 +55,8 @@ export async function convert(markdown: string): Promise<string> {
 			ul: "im-list-disc im-list-inside",
 			ol: "im-list-decimal im-list-inside",
 			li: "im-my-2",
-			table: "im-table-auto im-w-full im-my-6",
+			table: "im-table-auto im-w-full im-my-6 im-rounded-xl",
+			thead: "bg-surface-100 im-text-surface-700 im-font-medium im-text-sm im-p-2",
 			th: "im-p-2 im-rounded-xl im-text-sm im-text-surface-700 im-font-medium",
 			td: "im-p-2 im-leading-7",
 			hr: "im-my-4 im-border-b im-border-surface-200",
