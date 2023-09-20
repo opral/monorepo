@@ -16,14 +16,13 @@ export async function convert(markdown: string): Promise<string> {
 	const content = await unified()
 		/* @ts-ignore */
 		.use(remarkParse)
-		// .use(remarkGfm)
 		/* @ts-ignore */
 		.use(remarkRehype, { allowDangerousHtml: true })
 		/* @ts-ignore */
 		.use(rehypeRaw)
 		/* @ts-ignore */
 		.use(rehypeSanitize, {
-			tagNames: ["doc-figure", "quick-link", "quick-links", "style", ...defaultSchema.tagNames!],
+			tagNames: ["doc-figure", "quick-link", "quick-links", "web-icon", ...defaultSchema.tagNames!],
 			attributes: {
 				"doc-figure": ["src", "alt", "caption"],
 				"quick-link": ["href", "description", "title", "icon"],
