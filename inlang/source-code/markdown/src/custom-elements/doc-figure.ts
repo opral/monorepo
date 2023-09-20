@@ -20,12 +20,12 @@ export class DocFigure extends LitElement {
 			padding-right: 16px;
 		}
 	`
-	@property({ type: String })
-	src = ""
-	@property({ type: String })
-	alt = ""
-	@property({ type: String })
-	caption = ""
+	@property()
+	src: string = ""
+	@property()
+	alt: string = ""
+	@property()
+	caption: string = ""
 
 	override render() {
 		return html`<figure>
