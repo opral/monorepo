@@ -23,11 +23,26 @@ const MarketplaceManifestBase = Type.Object({
 	),
 	publisherName: Type.String(),
 	publisherIcon: Type.Optional(Type.String()),
-	readme: Translatable(
-		Type.TemplateLiteral("${string}.md", {
-			description: "The link must be a valid markdown file.",
+	tableOfContents: Type.Union([
+		Type.Object({
+			path: Translatable(
+				Type.TemplateLiteral("${string}.md", {
+					description: "The link must be a valid markdown file.",
+				}),
+			),
 		}),
-	),
+		Type.Array(
+			Type.Object({
+				path: Translatable(
+					Type.TemplateLiteral("${string}.md", {
+						description: "The link must be a valid markdown file.",
+					}),
+				),
+				slug: Type.String(),
+				title: Translatable(Type.String()),
+			}),
+		),
+	]),
 	keywords: Type.Array(Type.String()),
 	license: Type.Literal("Apache-2.0"),
 	website: Type.Optional(
