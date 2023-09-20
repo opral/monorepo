@@ -26,6 +26,7 @@ export const Gitfloat = () => {
 		setLastPullTime,
 		tourStep,
 		project,
+		lixErrors,
 	} = useEditorState()
 	const [localStorage] = useLocalStorage()
 
@@ -248,7 +249,9 @@ export const Gitfloat = () => {
 					isVisible={
 						(tourStep() === "github-login" || tourStep() === "fork-repository") &&
 						project() !== undefined &&
-						gitState() !== "loading"
+						gitState() !== "loading" &&
+						project()?.errors().length === 0 &&
+						lixErrors().length === 0
 					}
 				>
 					<div class="w-full flex justify-start items-center rounded-lg bg-inverted-surface shadow-xl ">
