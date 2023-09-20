@@ -101,6 +101,7 @@ describe("migrateProjectSettings", () => {
 		expect(result.warnings).toEqual([])
 
 		expect(result.config).toStrictEqual({
+			$schema: "https://inlang.com/schema/project-settings",
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de", "fr"],
 			modules: [
@@ -113,7 +114,6 @@ describe("migrateProjectSettings", () => {
 			"plugin.inlang.i18next": {
 				pathPattern: "./apps/web/public/static/locales/{languageTag}/common.json",
 			},
-			"plugin.inlang.standardLintRules": { identicalPattern: "off" },
 		})
 	})
 })
