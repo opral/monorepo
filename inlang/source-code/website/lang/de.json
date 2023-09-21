@@ -3,12 +3,12 @@
 		"hero": {
 			"keyword": "Globalisierungs-",
 			"title": "Infrastruktur für Software",
+			"cta": "Loslegen",
 			"description": {
 				"inlangs": "inlangs",
 				"ecosystem": "Ökosystem",
 				"benefit": "vereinfacht die Anpassung deiner Anwendung an verschiedene Märkte."
 			},
-			"cta": "Loslegen",
 			"githubLink": "Auf GitHub anzeigen",
 			"usedBy": "Verwendet von Entwicklern bei"
 		},
@@ -98,7 +98,7 @@
 			"marketplace": "Marktplatz",
 			"roadmap": "Produktplan",
 			"github": "GitHub",
-			"twitter": "Twitter",
+			"twitter": "X",
 			"discord": "Discord"
 		},
 		"contact": {
