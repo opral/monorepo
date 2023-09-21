@@ -164,7 +164,7 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 		result.errors.push(
 			new PluginsDoNotProvideLoadOrSaveMessagesError(
 				"It seems you did not install any plugin that handles messages. Please add one to make inlang work. See https://inlang.com/documentation/plugins/registry.",
-				{ plugin: "plugin.inlang.missing" },
+				{ plugin: undefined },
 			),
 		)
 	}
