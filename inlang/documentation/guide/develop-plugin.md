@@ -26,7 +26,6 @@ Each of the following functions in the code represents a key aspect of your plug
 
 - `loadMessages`: Load messages
 - `saveMessages`: Save messages
-- `detectedLanguageTags`: Detect language tags in the project
 - `addCustomApi`: Define app-specific APIs
 
 
@@ -45,9 +44,6 @@ export const plugin: Plugin<PluginSettings> = {
 	},
 	saveMessages: async ({ messages, settings, nodeishFs }) => {
 		// Plugin's saveMessages logic
-	},
-	detectedLanguageTags: async ({ nodeishFs, settings }) => {
-		// Plugin's detectedLanguageTags logic
 	},
 	addCustomApi: ({ settings }) => {},
 }

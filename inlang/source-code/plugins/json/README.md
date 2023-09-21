@@ -15,7 +15,7 @@ This plugin is a general purpose plugin to read and write messages of json files
 	],
 	"settings": {
 		"plugin.inlang.json": {
-			"pathPattern": "./resources/{language}.json"
+			"pathPattern": "./resources/{languageTag}.json"
 		}
 	}
 }
@@ -31,18 +31,17 @@ Here is the syntax for the PluginSettings object in TypeScript:
 type PluginSettings = {
 	pathPattern: string | { [key: string]: string }
 	variableReferencePattern?: [string] | [string, string]
-	ignore?: string[] 
 }
 ```
 
 ### `pathPattern`
 
-To use our plugin, you need to provide a path to the directory where your language-specific files are stored. Use the dynamic path syntax `{language}` to specify the language name.
+To use our plugin, you need to provide a path to the directory where your language-specific files are stored. Use the dynamic path syntax `{languageTag}` to specify the language name.
 
 #### Without namespaces
 
 ```json
-"pathPattern": "./resources/{language}.json"
+"pathPattern": "./resources/{languageTag}.json"
 ```
 
 #### With namespaces
@@ -51,8 +50,8 @@ To use our plugin, you need to provide a path to the directory where your langua
 
 ```json
 "pathPattern": {
-	"website": "./resources/{language}/website.json",
-	"app": "./resources/{language}/app.json"
+	"website": "./resources/{languageTag}/website.json",
+	"app": "./resources/{languageTag}/app.json"
 }
 ```
 
@@ -78,14 +77,6 @@ default:
 | `:placeholder`    | `[":"]`        |
 
 <br>
-
-### `ignore`
-
-When you want to ignore files like `languages.json` that are on the same level as your language files, you can ignore them to not brake the `getLanguages` function.
-
-```json
-"ignore": ["languages.json"]
-```
 
 ## Expected behavior
 
