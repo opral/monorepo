@@ -19,7 +19,7 @@ Promise<Result<Message, string>> {
 				!args.sourceLanguageTag ||
 				!args.message.variants.some((variant) => variant.languageTag === args.sourceLanguageTag)
 			) {
-				throw new Error("Source Language configuration missing")
+				throw new Error("Source language configuration missing")
 			}
 			for (const variant of args.message.variants.filter(
 				(variant) => variant.languageTag === args.sourceLanguageTag,
