@@ -15,7 +15,7 @@ export function createMessagesQuery(
 
 	createEffect(() => {
 		index.clear()
-		for (const message of messages()) {
+		for (const message of structuredClone(messages())) {
 			index.set(message.id, message)
 		}
 	})

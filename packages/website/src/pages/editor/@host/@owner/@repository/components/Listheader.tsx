@@ -4,6 +4,7 @@ import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
 import type { InstalledMessageLintRule, MessageLintRule } from "@inlang/sdk"
+import { navigate } from "vite-plugin-ssr/client/router"
 
 interface ListHeaderProps {
 	ids: string[]
@@ -145,6 +146,24 @@ export const ListHeader = (props: ListHeaderProps) => {
 						</Show>
 					)}
 				</For>
+				<Show when={project()?.installed.messageLintRules().length === 0}>
+					<sl-tooltip
+						prop:content={
+							"Install lint rules from the marketplace. They will help you write better translations."
+						}
+						prop:placement="bottom"
+						prop:trigger="hover"
+						style={{ "--show-delay": "1s" }}
+					>
+						<sl-button
+							prop:size="small"
+							// @ts-ignore
+							onClick={() => navigate("/marketplace")}
+						>
+							Install lint rules
+						</sl-button>
+					</sl-tooltip>
+				</Show>
 			</div>
 		</div>
 	)

@@ -1,5 +1,11 @@
 # @inlang/plugin
 
+## 1.3.0
+
+### Minor Changes
+
+- 0d0502f4: deprecate detectedLanguageTags
+
 ## 1.2.0
 
 ### Minor Changes

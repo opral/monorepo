@@ -37,23 +37,18 @@ export function Layout(props: { children: JSXElement }) {
 
 	const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
 	const [addLanguageText, setAddLanguageText] = createSignal("")
-	const filters: Filter[] = [
+	const [filterOptions, setFilterOptions] = createSignal<Filter[]>([
 		{
 			name: "Language",
 			icon: <IconTranslate class="w-5 h-5" />,
 			component: <LanguageFilter clearFunction={removeFilter("Language")} />,
 		},
-		{
-			name: "Linting",
-			icon: <WarningIcon />,
-			component: <LintFilter clearFunction={removeFilter("Linting")} />,
-		},
-	]
+	])
 
 	const [selectedFilters, setSelectedFilters] = createSignal<Filter[]>([])
 
 	const addFilter = (filterName: string) => {
-		const newFilter = filters.find((filter) => filter.name === filterName)
+		const newFilter = filterOptions().find((filter) => filter.name === filterName)
 		// check if filter is in selectedFilters
 		if (
 			newFilter !== undefined &&
@@ -96,6 +91,18 @@ export function Layout(props: { children: JSXElement }) {
 	//add initial lintRule filter
 	createEffect(
 		on(project, () => {
+			// add filter option, if lintRules are installed
+			if (project() && project()?.installed.messageLintRules().length !== 0) {
+				setFilterOptions((prev: Filter[]) => [
+					...prev,
+					{
+						name: "Linting",
+						icon: <WarningIcon />,
+						component: <LintFilter clearFunction={removeFilter("Linting")} />,
+					},
+				])
+			}
+
 			if (lixErrors().length === 0 && filteredMessageLintRules().length > 0) {
 				addFilter("Linting")
 			}
@@ -130,7 +137,7 @@ export function Layout(props: { children: JSXElement }) {
 					<div class="absolute -left-2 w-[calc(100%_+_16px)] h-full -translate-y-5 bg-background" />
 					<div class="flex z-20 justify-between gap-2 items-center">
 						<Show when={project()}>
-							<For each={filters}>
+							<For each={filterOptions()}>
 								{(filter) => (
 									<Show
 										when={
@@ -145,8 +152,8 @@ export function Layout(props: { children: JSXElement }) {
 							<Show
 								when={
 									project()?.installed.messageLintRules()
-										? selectedFilters().length !== filters.length
-										: selectedFilters().length !== filters.length - 1
+										? selectedFilters().length !== filterOptions().length
+										: selectedFilters().length !== filterOptions().length - 1
 								}
 								fallback={
 									<sl-button
@@ -171,7 +178,7 @@ export function Layout(props: { children: JSXElement }) {
 										Filter
 									</sl-button>
 									<sl-menu>
-										<For each={filters}>
+										<For each={filterOptions()}>
 											{(filter) => (
 												<Show
 													when={
