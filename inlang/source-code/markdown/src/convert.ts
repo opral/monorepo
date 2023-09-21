@@ -61,9 +61,7 @@ export async function convert(markdown: string): Promise<string> {
 			img: "doc-mx-auto doc-my-4 doc-rounded-2xl doc-border border-surface-2",
 		})
 		/* @ts-ignore */
-		.use(rehypeAutolinkHeadings, {
-			behavior: "wrap",
-		})
+		.use(rehypeAutolinkHeadings)
 		/* @ts-ignore */
 		.use(rehypeRewrite, {
 			rewrite: (node) => {
@@ -79,11 +77,15 @@ export async function convert(markdown: string): Promise<string> {
 						node.properties = {
 							...node.properties,
 							onclick:
-								// copy link to clipboard
-								"navigator.clipboard.writeText(window.location.href.split('#')[0] + '#" +
+								"var newHash = '" +
 								node.properties.id +
-								"');",
+								"';" +
+								"var currentURL = window.location.href;" +
+								"var baseURL = currentURL.split('#')[0];" +
+								"history.pushState(null, null, baseURL + '#' + newHash);" +
+								"navigator.clipboard.writeText(baseURL + '#' + newHash);",
 						}
+
 						node.children = [
 							{
 								type: "element",
