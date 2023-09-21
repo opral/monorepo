@@ -7,28 +7,6 @@ import { ProjectSettings } from "@inlang/project-settings"
  * ---------------- BASE INTERFACES ----------------
  */
 
-const tableOfContentsStartpage = Type.Object({
-	startpage: Type.Literal(true),
-	path: Translatable(
-		Type.TemplateLiteral("${string}.md", {
-			description: "The path to the markdown file.",
-		}),
-	),
-	slug: Type.Literal(""),
-	title: Translatable(Type.String()),
-})
-
-const tableOfContentsItem = Type.Object({
-	startpage: Type.Optional(Type.Literal(false)),
-	path: Translatable(
-		Type.TemplateLiteral("${string}/${string}.md", {
-			description: "The path to the markdown file.",
-		}),
-	),
-	slug: Type.String(),
-	title: Translatable(Type.String()),
-})
-
 const MarketplaceManifestBase = Type.Object({
 	$schema: Type.Optional(Type.Literal("https://inlang.com/schema/marketplace-manifest")),
 	icon: Type.Optional(Type.String()),
@@ -45,7 +23,9 @@ const MarketplaceManifestBase = Type.Object({
 	),
 	publisherName: Type.String(),
 	publisherIcon: Type.Optional(Type.String()),
-	tableOfContents: Type.Array(Type.Union([tableOfContentsStartpage, tableOfContentsItem])),
+	readme: Translatable(
+		Type.TemplateLiteral("${string}.md", { description: "The path to the readme file." }),
+	),
 	keywords: Type.Array(Type.String()),
 	license: Type.Literal("Apache-2.0"),
 	website: Type.Optional(

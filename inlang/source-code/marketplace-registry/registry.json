@@ -1,3 +1,14 @@
 [
-	"https://raw.githubusercontent.com/floriandwt/inlang-marketplace-test/main/cli-manifest.json"
+	"https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/source-code/cli/marketplace-manifest.json",
+	"https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/source-code/editor/marketplace-manifest.json",
+	"https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/source-code/ide-extension/marketplace-manifest.json",
+	"https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/source-code/plugins/json/marketplace-manifest.json",
+	"https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/source-code/plugins/i18next/marketplace-manifest.json",
+	"https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/source-code/message-lint-rules/emptyPattern/marketplace-manifest.json",
+	"https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/source-code/message-lint-rules/identicalPattern/marketplace-manifest.json",
+	"https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/source-code/message-lint-rules/messageWithoutSource/marketplace-manifest.json",
+	"https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/source-code/message-lint-rules/missingTranslation/marketplace-manifest.json",
+	"https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/source-code/versioned-interfaces/language-tag/marketplace-manifest.json",
+	"https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/source-code/versioned-interfaces/translatable/marketplace-manifest.json",
+	"https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/source-code/paraglide-js-sveltekit/marketplace-manifest.json"
 ]
