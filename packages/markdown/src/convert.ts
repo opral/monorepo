@@ -9,6 +9,7 @@ import rehypeSlug from "rehype-slug"
 import rehypeHighlight from "rehype-highlight"
 import rehypeAutolinkHeadings from "rehype-autolink-headings"
 import rehypeMermaid from "rehype-mermaidjs"
+import rehypeRewrite from "rehype-rewrite"
 import addClasses from "rehype-class-names"
 import { rehypeAccessibleEmojis } from "rehype-accessible-emojis"
 
@@ -36,7 +37,8 @@ export async function convert(markdown: string): Promise<string> {
 		.use(rehypeSlug)
 		/* @ts-ignore */
 		.use(addClasses, {
-			"h1,h2,h3,h4,h5,h6": "doc-font-semibold doc-leading-relaxed doc-my-6 doc-cursor-pointer",
+			"h1,h2,h3,h4,h5,h6":
+				"doc-font-semibold doc-leading-relaxed doc-relative doc-my-6 doc-cursor-pointer doc-group/heading",
 			h1: "doc-text-3xl doc-pb-3 doc-mb-2",
 			h2: "doc-text-2xl doc-pb-3 doc-mb-1",
 			h3: "doc-text-xl",
@@ -57,7 +59,38 @@ export async function convert(markdown: string): Promise<string> {
 			hr: "doc-my-6 doc-border-b doc-border-surface-200",
 			img: "doc-mx-auto doc-my-4 doc-rounded-2xl doc-border border-surface-2",
 		})
-		.use(rehypeAutolinkHeadings)
+		/* @ts-ignore */
+		.use(rehypeAutolinkHeadings, {
+			behavior: "wrap",
+		})
+		/* @ts-ignore */
+		.use(rehypeRewrite, {
+			selector: "h1, h2, h3, h4, h5, h6",
+			rewrite: (node) => {
+				if (node.type === "element") {
+					node.children = [
+						{
+							type: "element",
+							tagName: "span",
+							properties: {
+								className:
+									"doc-font-medium doc-mr-2 text-primary doc-opacity-0 group-hover/heading:doc-opacity-100 transition-opacity doc-absolute " +
+									(node.tagName === "h1"
+										? "-doc-left-6"
+										: node.tagName === "h2"
+										? "-doc-left-5"
+										: node.tagName === "h3"
+										? "-doc-left-4"
+										: "-doc-left-3"),
+							},
+							children: [{ type: "text", value: "#" }],
+						},
+						...node.children,
+					]
+				}
+			},
+		})
+		/* @ts-ignore */
 		.use(rehypeAccessibleEmojis)
 		/* @ts-ignore */
 		.use(rehypeMermaid)
