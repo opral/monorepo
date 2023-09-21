@@ -3,7 +3,7 @@ import { For, Show, createMemo } from "solid-js"
 import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
-import type { InstalledMessageLintRule, MessageLintRule } from "@inlang/sdk"
+import { type InstalledMessageLintRule, type MessageLintRule } from "@inlang/sdk"
 import { navigate } from "vite-plugin-ssr/client/router"
 
 interface ListHeaderProps {
@@ -24,6 +24,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 		project,
 		setFilteredMessageLintRules,
 		filteredMessageLintRules,
+		filteredLanguageTags,
 		filteredId,
 		setFilteredId,
 		setTourStep,
@@ -34,8 +35,11 @@ export const ListHeader = (props: ListHeaderProps) => {
 		const summary: Record<MessageLintRule["id"], number> = {}
 		for (const report of project()?.query.messageLintReports.getAll() || []) {
 			if (
-				filteredMessageLintRules().length === 0 ||
-				filteredMessageLintRules().includes(report.ruleId)
+				((filteredMessageLintRules().length === 0 ||
+					filteredMessageLintRules().includes(report.ruleId)) &&
+					filteredLanguageTags().includes(report.languageTag) &&
+					filteredId() === "") ||
+				filteredId() === report.messageId
 			) {
 				summary[report.ruleId] = (summary[report.ruleId] || 0) + 1
 			}
