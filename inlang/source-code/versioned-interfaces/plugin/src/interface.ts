@@ -66,6 +66,10 @@ export const Plugin = Type.Object(
 		description: Translatable(Type.String()),
 		loadMessages: Type.Optional(Type.Any()),
 		saveMessages: Type.Optional(Type.Any()),
+		/**
+		 * @deprecated removed
+		 */
+		detectedLanguageTags: Type.Optional(Type.Any()),
 		addCustomApi: Type.Optional(Type.Any()),
 	},
 	{ additionalProperties: false },
