@@ -5,7 +5,10 @@ import { replaceAll } from "./utilities.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
 import { flatten, unflatten } from "flat"
 import { id, displayName, description } from "../marketplace-manifest.json"
-import { detectFormatting, type DetectFormattingApi } from "@inlang/detect-json-formatting"
+import {
+	detectJsonFormatting,
+	type DetectJsonFormattingApi,
+} from "../../../detect-json-formatting/dist/index.js"
 
 /**
  * Detect formatting
@@ -14,7 +17,7 @@ import { detectFormatting, type DetectFormattingApi } from "@inlang/detect-json-
  * const file = DETECTFORMATTING.serialize(json) // get a serializer that wraps 'JSON.serialize()' and applies format
  * const values = DETECTFORMATTING.values(json) // get raw formatting values
  */
-let DETECTFORMATTING: DetectFormattingApi = detectFormatting()
+let DETECTFORMATTING: DetectJsonFormattingApi = detectJsonFormatting()
 
 export const plugin: Plugin<PluginSettings> = {
 	id: id as Plugin["id"],
@@ -119,7 +122,7 @@ async function getFileToParse(
 		const file = await nodeishFs.readFile(pathWithLanguage, { encoding: "utf-8" })
 		//analyse format of file
 		if (sourceLanguageTag === languageTag) {
-			DETECTFORMATTING = detectFormatting(file)
+			DETECTFORMATTING = detectJsonFormatting(file)
 		}
 
 		const flattenedMessages = DETECTFORMATTING.values.nestedKeys
