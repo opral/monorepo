@@ -37,8 +37,8 @@ export async function convert(markdown: string): Promise<string> {
 		/* @ts-ignore */
 		.use(addClasses, {
 			"h1,h2,h3,h4,h5,h6": "doc-font-semibold doc-leading-relaxed doc-my-6 doc-cursor-pointer",
-			h1: "doc-text-3xl doc-pb-3 doc-border-b border-surface-2 doc-mb-3",
-			h2: "doc-text-2xl doc-pb-3 doc-border-b border-surface-2 doc-mb-3",
+			h1: "doc-text-3xl doc-pb-3 doc-mb-2",
+			h2: "doc-text-2xl doc-pb-3 doc-mb-1",
 			h3: "doc-text-xl",
 			h4: "doc-text-lg",
 			h5: "doc-text-lg",
@@ -51,7 +51,7 @@ export async function convert(markdown: string): Promise<string> {
 			li: "doc-my-3",
 			table: "doc-table-auto doc-w-full doc-my-6 doc-rounded-xl doc-text-left",
 			thead: "doc-font-medium pb-2 doc-border-b border-surface-4 doc-text-left",
-			th: "doc-p-2 doc-font-medium doc-border-b border-surface-2",
+			th: "doc-py-2 doc-font-medium doc-border-b border-surface-2",
 			tr: "doc-py-2 doc-border-b border-surface-2",
 			td: "doc-py-2 doc-leading-7",
 			hr: "doc-my-6 doc-border-b doc-border-surface-200",
