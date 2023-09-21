@@ -53,10 +53,6 @@ export type ResolvedPluginApi = {
 	}) => Promise<Message[]> | Message[]
 	saveMessages: (args: { messages: Message[] }) => Promise<void> | void
 	/**
-	 * Detect language tags in the project provided plugins.
-	 */
-	detectedLanguageTags: LanguageTag[]
-	/**
 	 * App specific APIs.
 	 *
 	 * @example

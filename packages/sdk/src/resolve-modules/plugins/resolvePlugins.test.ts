@@ -198,37 +198,6 @@ describe("saveMessages", () => {
 	})
 })
 
-describe("detectedLanguageTags", () => {
-	it("should merge language tags from plugins", async () => {
-		const mockPlugin: Plugin = {
-			id: "plugin.namepsace.detectedLanguageTags",
-			description: { en: "My plugin description" },
-			displayName: { en: "My plugin" },
-			detectedLanguageTags: async () => ["de", "en"],
-			addCustomApi: () => {
-				return {}
-			},
-		}
-		const mockPlugin2: Plugin = {
-			id: "plugin.namepsace.detectedLanguageTags2",
-			description: { en: "My plugin description" },
-			displayName: { en: "My plugin" },
-			addCustomApi: () => {
-				return {}
-			},
-			detectedLanguageTags: async () => ["de", "fr"],
-		}
-
-		const resolved = await resolvePlugins({
-			plugins: [mockPlugin, mockPlugin2],
-			settings: {},
-			nodeishFs: {} as any,
-		})
-
-		expect(resolved.data.detectedLanguageTags).toEqual(["de", "en", "fr"])
-	})
-})
-
 describe("addCustomApi", () => {
 	it("it should resolve app specific api", async () => {
 		const mockPlugin: Plugin = {

@@ -27,7 +27,6 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 		data: {
 			loadMessages: undefined as any,
 			saveMessages: undefined as any,
-			detectedLanguageTags: [],
 			customApi: {},
 		},
 		errors: [],
@@ -145,16 +144,6 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 				})
 		}
 
-		if (typeof plugin.detectedLanguageTags === "function") {
-			const detectedLangugeTags = await plugin.detectedLanguageTags!({
-				settings: args.settings?.[plugin.id] ?? {},
-				nodeishFs: args.nodeishFs,
-			})
-			result.data.detectedLanguageTags = [
-				...new Set([...result.data.detectedLanguageTags, ...detectedLangugeTags]),
-			]
-		}
-
 		if (typeof plugin.addCustomApi === "function") {
 			const { data: customApi } = tryCatch(() =>
 				plugin.addCustomApi!({
@@ -175,7 +164,7 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 		result.errors.push(
 			new PluginsDoNotProvideLoadOrSaveMessagesError(
 				"It seems you did not install any plugin that handles messages. Please add one to make inlang work. See https://inlang.com/documentation/plugins/registry.",
-				{ plugin: "plugin.inlang.missing" },
+				{ plugin: undefined },
 			),
 		)
 	}
