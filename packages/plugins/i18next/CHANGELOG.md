@@ -1,5 +1,16 @@
 # @inlang/plugin-i18next
 
+## 4.4.0
+
+### Minor Changes
+
+- 7e112af9: isolated detect formating function for plugins
+
+### Patch Changes
+
+- Updated dependencies [7e112af9]
+  - @inlang/detect-formatting@0.2.0
+
 ## 4.3.0
 
 ### Minor Changes
