@@ -25,7 +25,6 @@ export function createMessageLintReportsQuery(
 		const _settings = settings()
 
 		if (_messages && _settings && modules) {
-
 			// index.clear()
 			for (const message of _messages) {
 				// TODO: only lint changed messages and update arrays selectively
