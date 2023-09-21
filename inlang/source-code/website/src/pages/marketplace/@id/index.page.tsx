@@ -121,15 +121,6 @@ export function Page(props: PageProps) {
 								</div>
 								<div class="col-span-1 row-span-2 p-4 relative">
 									<div class="sticky top-28">
-										<Show when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}>
-											<SubNavigation
-												headings={props.markdown
-													.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
-													.map((heading: string) => {
-														return heading.replace(/(<([^>]+)>)/gi, "")
-													})}
-											/>
-										</Show>
 										<h2 class="text-xl font-semibold mb-6">Information</h2>
 										<div class="flex flex-col gap-3 mb-8">
 											<h3 class="text-sm text-surface-400">Publisher</h3>
@@ -182,7 +173,19 @@ export function Page(props: PageProps) {
 										</div>
 									</div>
 								</div>
-								<Markdown markdown={props.markdown} />
+								<div class="grid grid-cols-3 md:col-span-3 col-span-1">
+									<Show when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}>
+										<SubNavigation
+											headings={props.markdown
+												.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
+												.map((heading: string) => {
+													return heading.replace(/(<([^>]+)>)/gi, "")
+												})}
+										/>
+
+										<Markdown markdown={props.markdown} />
+									</Show>
+								</div>
 							</Show>
 						</div>
 						<GetHelp text="Do you have questions?" />
@@ -196,7 +199,7 @@ export function Page(props: PageProps) {
 function Markdown(props: { markdown: string }) {
 	return (
 		<div
-			class="w-full col-span-1 md:col-span-3 rounded-lg"
+			class="w-full md:col-span-2 rounded-lg col-span-1"
 			// eslint-disable-next-line solid/no-innerhtml
 			innerHTML={props.markdown}
 		/>
@@ -216,7 +219,7 @@ function SubNavigation(props: { headings: string[] }) {
 	}
 
 	return (
-		<div class="mb-12">
+		<div class="mb-12 col-span-1">
 			<h2 class="text-xl font-semibold mb-4">Content</h2>
 			<div class="flex flex-col gap-2">
 				<For each={props.headings}>
