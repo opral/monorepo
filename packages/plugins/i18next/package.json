@@ -21,7 +21,8 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/plugin": "*"
+		"@inlang/sdk": "*",
+		"@inlang/detect-formatting": "*"
 	},
 	"devDependencies": {
 		"@lix-js/fs": "*",

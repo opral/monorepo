@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type { Message, Variant, LanguageTag, Plugin, NodeishFilesystemSubset } from "@inlang/plugin"
+import type { Message, Variant, LanguageTag, Plugin, NodeishFilesystemSubset } from "@inlang/sdk"
 import { throwIfInvalidSettings, type PluginSettings } from "./settings.js"
 import { replaceAll } from "./utilities.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
