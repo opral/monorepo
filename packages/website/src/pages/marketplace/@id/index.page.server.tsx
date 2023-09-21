@@ -9,15 +9,22 @@ export async function onBeforeRender(pageContext: PageContext) {
 		(item) => item.id === pageContext.routeParams.id,
 	) as MarketplaceManifest
 
-	const text = await (
-		await fetch(typeof item.readme === "object" ? item.readme.en : item.readme)
-	).text()
-	const markdown = await convert(text)
+	const contents = [] as any[]
+
+	for (const content of item.tableOfContents) {
+		// @ts-ignore
+		const raw = await fetch(content.path.en).then((res) => res.text())
+		const markdown = await convert(raw)
+		contents.push({
+			...content,
+			markdown,
+		})
+	}
 
 	return {
 		pageContext: {
 			pageProps: {
-				markdown: markdown,
+				contents: contents,
 				manifest: item,
 			} satisfies PageProps,
 		},
