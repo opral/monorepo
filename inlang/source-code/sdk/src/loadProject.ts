@@ -47,7 +47,9 @@ export const loadProject = async (args: {
 			loadSettings({ settingsFilePath: args.settingsFilePath, nodeishFs: args.nodeishFs })
 				.then((settings) => {
 					setSettings(settings)
-					args._capture?.("SDK used settings", settings)
+					// rename settings to get a convenient access to the data in Posthog
+					const project_settings = settings
+					args._capture?.("SDK used settings", { project_settings })
 				})
 				.catch((err) => {
 					markInitAsFailed(err)
