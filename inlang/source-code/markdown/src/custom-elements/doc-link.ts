@@ -2,7 +2,7 @@ import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 
 @customElement("quick-link")
-export class QuickLink extends LitElement {
+export class DocLink extends LitElement {
 	static override styles = css`
 		a {
 			text-decoration: none;
@@ -71,7 +71,7 @@ export class QuickLink extends LitElement {
 
 // takes the inner elements and just renders them with custom styles around them
 @customElement("quick-links")
-export class QuickLinks extends LitElement {
+export class DocLinks extends LitElement {
 	static override styles = css`
 		.quick-link-grid {
 			display: grid;
