@@ -25,16 +25,10 @@ export async function convert(markdown: string): Promise<string> {
 		.use(rehypeRaw)
 		/* @ts-ignore */
 		.use(rehypeSanitize, {
-			tagNames: [
-				"display-figure",
-				"quick-link",
-				"quick-links",
-				"web-icon",
-				...defaultSchema.tagNames!,
-			],
+			tagNames: ["doc-figure", "doc-link", "doc-links", "doc-icon", ...defaultSchema.tagNames!],
 			attributes: {
-				"display-figure": ["src", "alt", "caption"],
-				"quick-link": ["href", "description", "title", "icon"],
+				"doc-figure": ["src", "alt", "caption"],
+				"doc-link": ["href", "description", "title", "icon"],
 				...defaultSchema.attributes,
 			},
 		})
@@ -42,25 +36,26 @@ export async function convert(markdown: string): Promise<string> {
 		.use(rehypeSlug)
 		/* @ts-ignore */
 		.use(addClasses, {
-			"h1,h2,h3,h4,h5,h6": "im-font-semibold im-leading-relaxed im-my-5 im-cursor-pointer",
-			h1: "im-text-3xl",
-			h2: "im-text-2xl",
-			h3: "im-text-xl",
-			h4: "im-text-lg",
-			h5: "im-text-lg",
-			h6: "im-text-base",
-			p: "im-text-base im-text-surface-600 im-my-1 im-leading-relaxed",
-			a: "text-primary im-font-medium hover:text-hover-primary",
-			code: "im-p-1 im-bg-surface-100 im-rounded-xl im-my-4 im-text-sm im-font-mono im-text-surface-700",
-			ul: "im-list-disc im-list-inside",
-			ol: "im-list-decimal im-list-inside",
-			li: "im-my-2",
-			table: "im-table-auto im-w-full im-my-6 im-rounded-xl",
-			thead: "bg-surface-100 im-text-surface-700 im-font-medium im-text-sm im-p-2",
-			th: "im-p-2 im-rounded-xl im-text-sm im-text-surface-700 im-font-medium",
-			td: "im-p-2 im-leading-7",
-			hr: "im-my-4 im-border-b im-border-surface-200",
-			img: "im-mx-auto im-my-4 im-rounded-2xl im-border im-border-surface-2",
+			"h1,h2,h3,h4,h5,h6": "doc-font-semibold doc-leading-relaxed doc-my-6 doc-cursor-pointer",
+			h1: "doc-text-3xl doc-pb-3 doc-border-b border-surface-2 doc-mb-3",
+			h2: "doc-text-2xl doc-pb-3 doc-border-b border-surface-2 doc-mb-3",
+			h3: "doc-text-xl",
+			h4: "doc-text-lg",
+			h5: "doc-text-lg",
+			h6: "doc-text-base",
+			p: "doc-text-base text-surface-600 doc-my-4 doc-leading-relaxed",
+			a: "text-primary doc-font-medium hover:text-hover-primary",
+			code: "doc-px-1 doc-py-0.5 doc-bg-surface-100 doc-rounded-lg bg-surface-200 doc-my-6 doc-text-sm doc-font-mono text-surface-900",
+			ul: "doc-list-disc doc-list-inside",
+			ol: "doc-list-decimal doc-list-inside",
+			li: "doc-my-3",
+			table: "doc-table-auto doc-w-full doc-my-6 doc-rounded-xl doc-text-left",
+			thead: "doc-font-medium pb-2 doc-border-b border-surface-4 doc-text-left",
+			th: "doc-p-2 doc-font-medium doc-border-b border-surface-2",
+			tr: "doc-py-2 doc-border-b border-surface-2",
+			td: "doc-py-2 doc-leading-7",
+			hr: "doc-my-6 doc-border-b doc-border-surface-200",
+			img: "doc-mx-auto doc-my-4 doc-rounded-2xl doc-border border-surface-2",
 		})
 		.use(rehypeAutolinkHeadings)
 		.use(rehypeAccessibleEmojis)
@@ -68,8 +63,14 @@ export async function convert(markdown: string): Promise<string> {
 		.use(rehypeMermaid)
 		/* @ts-ignore */
 		.use(rehypeStringify)
-		.process(markdown)
+		.process(preSanitize(markdown))
 
 	return String(`<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark-dimmed.min.css">
 	${content}`)
+}
+
+/* Some emojis can't be rendered in the font the website provides, therefore presanitization is needed */
+function preSanitize(markdown: string): string {
+	markdown = markdown.replaceAll("1️⃣", "1").replaceAll("2️⃣", "2").replaceAll("3️⃣", "3")
+	return markdown
 }

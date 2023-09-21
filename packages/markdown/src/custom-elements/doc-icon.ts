@@ -1,8 +1,8 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 
-@customElement("web-icon")
-export class WebIcon extends LitElement {
+@customElement("doc-icon")
+export class DocIcon extends LitElement {
 	static override styles = css`
         :host {
             display: inline-flex;
