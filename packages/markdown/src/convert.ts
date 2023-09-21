@@ -128,7 +128,11 @@ export async function convert(markdown: string): Promise<string> {
 						},
 						...node.children,
 					]
-				} else if (node.tagName === "a" && node.properties.href.startsWith("http")) {
+				} else if (
+					node.tagName === "a" &&
+					node.properties.href &&
+					node.properties.href.startsWith("http")
+				) {
 					;(node.children = [
 						...node.children,
 						{
