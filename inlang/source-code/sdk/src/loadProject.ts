@@ -87,8 +87,6 @@ export const loadProject = async (args: {
 			resolveModules({ settings: _settings, nodeishFs: args.nodeishFs, _import: args._import })
 				.then((resolvedModules) => {
 					setResolvedModules(resolvedModules)
-
-					// TODO: handle `detectedLanguageTags`
 				})
 				.catch((err) => markInitAsFailed(err))
 		})
