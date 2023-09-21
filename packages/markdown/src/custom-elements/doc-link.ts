@@ -1,7 +1,7 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 
-@customElement("quick-link")
+@customElement("doc-link")
 export class DocLink extends LitElement {
 	static override styles = css`
 		a {
@@ -10,7 +10,7 @@ export class DocLink extends LitElement {
 			display: inner-block;
 			margin: 0;
 		}
-		.quick-link {
+		.doc-link {
 			padding: 1rem;
 			border-radius: 0.5rem;
 			background-color: #f1f5f9;
@@ -19,13 +19,13 @@ export class DocLink extends LitElement {
 			flex-direction: column;
 			gap: 0.5rem;
 		}
-		.quick-link:hover {
+		.doc-link:hover {
 			background-color: #e1e7f0;
 		}
-		.quick-link > * {
+		.doc-link > * {
 			margin: 0;
 		}
-		.quick-link > h4 {
+		.doc-link > h4 {
 			font-weight: 600;
 		}
 		.icons {
@@ -56,10 +56,10 @@ export class DocLink extends LitElement {
 
 	override render() {
 		return html`<a href="${this.href}">
-			<div class="quick-link">
+			<div class="doc-link">
 				<div class="icons">
 					<div class="icon">
-						<web-icon icon=${this.icon}></web-icon>
+						<doc-icon icon=${this.icon}></doc-icon>
 					</div>
 				</div>
 				<h4>${this.title}</h4>
@@ -70,10 +70,10 @@ export class DocLink extends LitElement {
 }
 
 // takes the inner elements and just renders them with custom styles around them
-@customElement("quick-links")
+@customElement("doc-links")
 export class DocLinks extends LitElement {
 	static override styles = css`
-		.quick-link-grid {
+		.doc-link-grid {
 			display: grid;
 			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 			grid-gap: 1rem;
@@ -81,7 +81,7 @@ export class DocLinks extends LitElement {
 	`
 
 	override render() {
-		return html`<div class="quick-link-grid">
+		return html`<div class="doc-link-grid">
 			<slot></slot>
 		</div>`
 	}
