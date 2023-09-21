@@ -1,6 +1,6 @@
 import { Meta, Title } from "@solidjs/meta"
 import { Layout } from "#src/pages/Layout.jsx"
-import { For, Show, createSignal } from "solid-js"
+import { For, Show, createEffect, createSignal } from "solid-js"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import { isModule } from "@inlang/marketplace-registry"
 import { Button } from "#src/pages/index/components/Button.jsx"
@@ -121,6 +121,15 @@ export function Page(props: PageProps) {
 								</div>
 								<div class="col-span-1 row-span-2 p-4 relative">
 									<div class="sticky top-28">
+										<Show when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}>
+											<SubNavigation
+												headings={props.markdown
+													.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
+													.map((heading: string) => {
+														return heading.replace(/(<([^>]+)>)/gi, "")
+													})}
+											/>
+										</Show>
 										<h2 class="text-xl font-semibold mb-6">Information</h2>
 										<div class="flex flex-col gap-3 mb-8">
 											<h3 class="text-sm text-surface-400">Publisher</h3>
@@ -191,5 +200,36 @@ function Markdown(props: { markdown: string }) {
 			// eslint-disable-next-line solid/no-innerhtml
 			innerHTML={props.markdown}
 		/>
+	)
+}
+
+function SubNavigation(props: { headings: string[] }) {
+	const replaceChars = (str: string) => {
+		return str
+			.replaceAll(" ", "-")
+			.replaceAll("/", "")
+			.replace("#", "")
+			.replaceAll("(", "")
+			.replaceAll(")", "")
+			.replaceAll("?", "")
+			.replaceAll(".", "")
+	}
+
+	return (
+		<div class="mb-12">
+			<h2 class="text-xl font-semibold mb-4">Content</h2>
+			<div class="flex flex-col gap-2">
+				<For each={props.headings}>
+					{(heading) => (
+						<a
+							href={`#${replaceChars(heading.toLowerCase())}`}
+							class="text-surface-600 hover:text-surface-500 transition-all duration-150"
+						>
+							{replaceChars(heading)}
+						</a>
+					)}
+				</For>
+			</div>
+		</div>
 	)
 }
