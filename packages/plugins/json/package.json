@@ -22,7 +22,7 @@
 	},
 	"dependencies": {
 		"@inlang/sdk": "*",
-		"@inlang/detect-formatting": "*"
+		"@inlang/detect-json-formatting": "*"
 	},
 	"devDependencies": {
 		"@inlang/sdk": "*",
