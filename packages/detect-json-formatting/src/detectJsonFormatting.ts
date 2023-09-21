@@ -1,5 +1,5 @@
-export const detectFormatting = (file?: string): DetectFormattingApi => {
-	const formatting: DetectFormattingApi["values"] = {
+export const detectJsonFormatting = (file?: string): DetectJsonFormattingApi => {
+	const formatting: DetectJsonFormattingApi["values"] = {
 		endWithNewLine: true,
 		nestedKeys: false,
 		spacing: 2,
@@ -71,7 +71,7 @@ export const detectFormatting = (file?: string): DetectFormattingApi => {
 
 // types
 
-export type DetectFormattingApi = {
+export type DetectJsonFormattingApi = {
 	values: FormattingValues
 	serialize: (json: Record<string, unknown>) => string
 }

@@ -1,18 +1,18 @@
 import { expect, it, describe } from "vitest"
-import { detectFormatting } from "./detectFormatting.js"
+import { detectJsonFormatting } from "./detectJsonFormatting.js"
 
 describe("defaults", () => {
 	it("should return formatting values", () => {
-		expect(detectFormatting().values.endWithNewLine).toBeTruthy()
-		expect(detectFormatting().values.nestedKeys).toBeFalsy()
-		expect(detectFormatting().values.spacing).toBe(2)
+		expect(detectJsonFormatting().values.endWithNewLine).toBeTruthy()
+		expect(detectJsonFormatting().values.nestedKeys).toBeFalsy()
+		expect(detectJsonFormatting().values.spacing).toBe(2)
 	})
 	it("should serialize a file according to defaults"),
 		() => {
 			const json = {
 				test: "a",
 			}
-			const serialize = detectFormatting().serialize
+			const serialize = detectJsonFormatting().serialize
 			const newFile = serialize(json)
 
 			expect(newFile.endsWith("\n")).toBeTruthy()
@@ -32,8 +32,8 @@ describe("detect formatting values", () => {
 		const withoutNewLine = `{
 	"test": "test"
 }`
-		expect(detectFormatting(withNewLine).values.endWithNewLine).toBeTruthy()
-		expect(detectFormatting(withoutNewLine).values.endWithNewLine).toBeFalsy()
+		expect(detectJsonFormatting(withNewLine).values.endWithNewLine).toBeTruthy()
+		expect(detectJsonFormatting(withoutNewLine).values.endWithNewLine).toBeFalsy()
 	})
 
 	it("should detect spacing", () => {
@@ -47,8 +47,8 @@ describe("detect formatting values", () => {
 	"test": "test"
 }`
 
-		expect(detectFormatting(with4Spaces).values.spacing).toBe(4)
-		expect(detectFormatting(withTabs).values.spacing).toBe("\t")
+		expect(detectJsonFormatting(with4Spaces).values.spacing).toBe(4)
+		expect(detectJsonFormatting(withTabs).values.spacing).toBe("\t")
 	})
 
 	it("should correctly detect the key nesting", () => {
@@ -70,8 +70,8 @@ describe("detect formatting values", () => {
 			4,
 		)
 
-		expect(detectFormatting(withNesting).values.nestedKeys).toBeTruthy()
-		expect(detectFormatting(withoutNesting).values.nestedKeys).toBeFalsy()
+		expect(detectJsonFormatting(withNesting).values.nestedKeys).toBeTruthy()
+		expect(detectJsonFormatting(withoutNesting).values.nestedKeys).toBeFalsy()
 	})
 })
 
@@ -86,11 +86,11 @@ describe("return serializer that applies correct formatting", () => {
 		const withoutNewLineAndTabs = `{
 	"test": "test"
 }`
-		const serialize1 = detectFormatting(withNewLineAnd4Spaces).serialize
-		const values1 = detectFormatting(withNewLineAnd4Spaces).values
+		const serialize1 = detectJsonFormatting(withNewLineAnd4Spaces).serialize
+		const values1 = detectJsonFormatting(withNewLineAnd4Spaces).values
 
-		const serialize2 = detectFormatting(withoutNewLineAndTabs).serialize
-		const values2 = detectFormatting(withoutNewLineAndTabs).values
+		const serialize2 = detectJsonFormatting(withoutNewLineAndTabs).serialize
+		const values2 = detectJsonFormatting(withoutNewLineAndTabs).values
 
 		const json = {
 			test: "test",
