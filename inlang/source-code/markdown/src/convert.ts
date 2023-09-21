@@ -128,6 +128,20 @@ export async function convert(markdown: string): Promise<string> {
 						},
 						...node.children,
 					]
+				} else if (node.tagName === "a" && node.properties.href.startsWith("http")) {
+					;(node.children = [
+						...node.children,
+						{
+							type: "element",
+							tagName: "doc-icon",
+							properties: {
+								className: "relative doc-ml-1 doc-top-[3px]",
+								icon: "material-symbols:arrow-outward",
+								size: "1.2em",
+							},
+						},
+					]),
+						(node.properties.target = "_blank")
 				}
 			},
 		})

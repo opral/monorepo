@@ -59,7 +59,7 @@ export class DocLink extends LitElement {
 			<div class="doc-link">
 				<div class="icons">
 					<div class="icon">
-						<doc-icon icon=${this.icon}></doc-icon>
+						<doc-icon icon=${this.icon} size="1.5em"></doc-icon>
 					</div>
 				</div>
 				<h4>${this.title}</h4>

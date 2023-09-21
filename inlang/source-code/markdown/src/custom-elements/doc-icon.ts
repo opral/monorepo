@@ -10,8 +10,10 @@ export class DocIcon extends LitElement {
     `
 	@property()
 	icon: string = ""
+	@property()
+	size: string = ""
 
 	override render() {
-		return html` <iconify-icon height="1.7em" icon=${this.icon}></iconify-icon> `
+		return html` <iconify-icon height=${this.size} icon=${this.icon}></iconify-icon> `
 	}
 }
