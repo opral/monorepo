@@ -23,7 +23,7 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 				documentText: activeTextEditor.document.getText(),
 			})
 
-			const diagnosticsIndex: Record<string, vscode.Diagnostic[]> = {}
+			const diagnosticsIndex: Record<string, Record<string, vscode.Diagnostic[]>> = {}
 
 			for (const message of messages) {
 				state().project.query.messageLintReports.get.subscribe(
@@ -62,13 +62,18 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 								`[${message.messageId}] – ${lintMessage}`,
 								mapLintLevelToSeverity(level),
 							)
+							if (!diagnosticsIndex[message.messageId]) diagnosticsIndex[message.messageId] = {}
+							diagnosticsIndex[message.messageId]![getRangeIndex(diagnostic.range)] = diagnostics
 							diagnostics.push(diagnostic)
 						}
 
-						diagnosticsIndex[message.messageId] = diagnostics
+						if (reports.length === 0) {
+							diagnosticsIndex[message.messageId] = {}
+						}
+
 						linterDiagnosticCollection.set(
 							activeTextEditor.document.uri,
-							Object.values(diagnosticsIndex).flat(),
+							flattenDiagnostics(diagnosticsIndex),
 						)
 					},
 				)
@@ -109,4 +114,22 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 		undefined,
 		args.context.subscriptions,
 	)
+}
+
+function getRangeIndex(range: vscode.Diagnostic["range"]) {
+	return `${range.start.line}${range.start.character}${range.end.line}${range.end.character}`
+}
+
+function flattenDiagnostics(
+	index: Record<string, Record<string, vscode.Diagnostic[]>>,
+): vscode.Diagnostic[] {
+	let result: vscode.Diagnostic[] = []
+
+	const messageIds = Object.keys(index)
+
+	for (const messageId of messageIds) {
+		result = [...result, ...Object.values(index[messageId]!).flat()]
+	}
+
+	return result
 }
