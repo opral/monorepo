@@ -48,6 +48,7 @@ export async function convert(markdown: string): Promise<string> {
 			p: "doc-text-base text-surface-600 doc-my-4 doc-leading-relaxed",
 			a: "text-primary doc-font-medium hover:text-hover-primary",
 			code: "doc-px-1 doc-py-0.5 doc-bg-surface-100 doc-rounded-lg bg-surface-200 doc-my-6 doc-text-sm doc-font-mono text-surface-900",
+			pre: "doc-relative",
 			ul: "doc-list-disc doc-list-inside",
 			ol: "doc-list-decimal doc-list-inside",
 			li: "doc-my-3",
@@ -65,25 +66,65 @@ export async function convert(markdown: string): Promise<string> {
 		})
 		/* @ts-ignore */
 		.use(rehypeRewrite, {
-			selector: "h1, h2, h3, h4, h5, h6",
 			rewrite: (node) => {
-				if (node.type === "element") {
+				if (
+					node.tagName === "h1" ||
+					node.tagName === "h2" ||
+					node.tagName === "h3" ||
+					node.tagName === "h4" ||
+					node.tagName === "h5" ||
+					node.tagName === "h6"
+				) {
+					if (node.type === "element") {
+						node.properties = {
+							...node.properties,
+							onclick:
+								// copy link to clipboard
+								"navigator.clipboard.writeText(window.location.href.split('#')[0] + '#" +
+								node.properties.id +
+								"');",
+						}
+						node.children = [
+							{
+								type: "element",
+								tagName: "span",
+								properties: {
+									className:
+										"doc-font-medium doc-mr-2 text-primary doc-opacity-0 group-hover/heading:doc-opacity-100 transition-opacity doc-absolute " +
+										(node.tagName === "h1"
+											? "-doc-left-6"
+											: node.tagName === "h2"
+											? "-doc-left-5"
+											: node.tagName === "h3"
+											? "-doc-left-4"
+											: "-doc-left-3"),
+								},
+								children: [{ type: "text", value: "#" }],
+							},
+							...node.children,
+						]
+					}
+				} else if (node.tagName === "pre") {
 					node.children = [
 						{
 							type: "element",
-							tagName: "span",
+							tagName: "button",
 							properties: {
 								className:
-									"doc-font-medium doc-mr-2 text-primary doc-opacity-0 group-hover/heading:doc-opacity-100 transition-opacity doc-absolute " +
-									(node.tagName === "h1"
-										? "-doc-left-6"
-										: node.tagName === "h2"
-										? "-doc-left-5"
-										: node.tagName === "h3"
-										? "-doc-left-4"
-										: "-doc-left-3"),
+									"doc-absolute doc-right-3 doc-top-2.5 doc-p-1 doc-rounded-md doc-bg-surface-100 doc-font-sans doc-opacity-70 doc-transition-opacity hover:doc-opacity-50",
+								style: "z-index: 1; color: white;",
+								onclick: `navigator.clipboard.writeText(this.parentElement.innerText.replace("Copy", ""));`,
 							},
-							children: [{ type: "text", value: "#" }],
+							children: [
+								{
+									type: "element",
+									tagName: "p",
+									properties: {
+										className: "doc-text-sm",
+									},
+									children: [{ type: "text", value: "Copy" }],
+								},
+							],
 						},
 						...node.children,
 					]

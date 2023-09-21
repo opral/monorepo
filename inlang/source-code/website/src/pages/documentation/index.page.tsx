@@ -159,6 +159,16 @@ function NavbarCommon(props: {
 	getLocale: () => string
 }) {
 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
+	const replaceChars = (str: string) => {
+		return str
+			.replaceAll(" ", "-")
+			.replaceAll("/", "")
+			.replace("#", "")
+			.replaceAll("(", "")
+			.replaceAll(")", "")
+			.replaceAll("?", "")
+			.replaceAll(".", "")
+	}
 
 	const isSelected = (slug: string) => {
 		if (
@@ -181,16 +191,9 @@ function NavbarCommon(props: {
 		for (const heading of props.headings) {
 			if (
 				currentPageContext.urlParsed.hash?.replace("#", "").toString() ===
-				heading.toString().toLowerCase().replaceAll(" ", "-").replaceAll("/", "").replace("#", "")
+				replaceChars(heading.toString().toLowerCase())
 			) {
-				setHighlightedAnchor(
-					heading
-						.toString()
-						.toLowerCase()
-						.replaceAll(" ", "-")
-						.replaceAll("/", "")
-						.replace("#", ""),
-				)
+				setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
 			}
 		}
 	})
@@ -232,34 +235,17 @@ function NavbarCommon(props: {
 															<li>
 																<a
 																	onClick={() => {
-																		onAnchorClick(
-																			heading
-																				.toString()
-																				.toLowerCase()
-																				.replaceAll(" ", "-")
-																				.replace("#", "")
-																				.replaceAll("/", ""),
-																		)
+																		onAnchorClick(replaceChars(heading.toString().toLowerCase()))
 																		props.onLinkClick?.()
 																	}}
 																	class={
 																		"text-sm tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
 																		(highlightedAnchor() ===
-																		heading
-																			.toString()
-																			.toLowerCase()
-																			.replaceAll(" ", "-")
-																			.replace("#", "")
-																			.replaceAll("/", "")
+																		replaceChars(heading.toString().toLowerCase())
 																			? "font-medium text-on-background border-l-on-background "
 																			: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
 																	}
-																	href={`#${heading
-																		.toString()
-																		.toLowerCase()
-																		.replaceAll(" ", "-")
-																		.replace("#", "")
-																		.replaceAll("/", "")}`}
+																	href={`#${replaceChars(heading.toString().toLowerCase())}`}
 																>
 																	{heading.replace("#", "")}
 																</a>
