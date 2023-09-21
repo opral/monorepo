@@ -5,7 +5,7 @@ import { replaceAll } from "./utilities.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
 import { flatten, unflatten } from "flat"
 import { id, displayName, description } from "../marketplace-manifest.json"
-import { detectFormatting, type DetectFormattingApi } from "@inlang/detect-formatting"
+import { detectFormatting, type DetectFormattingApi } from "@inlang/detect-json-formatting"
 
 /**
  * Detect formatting

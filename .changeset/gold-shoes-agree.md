@@ -1,5 +1,5 @@
 ---
-"@inlang/detect-formatting": minor
+"@inlang/detect-json-formatting": minor
 "@inlang/plugin-i18next": minor
 "@inlang/plugin-json": minor
 ---
