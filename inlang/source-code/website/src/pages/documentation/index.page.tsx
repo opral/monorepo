@@ -181,10 +181,15 @@ function NavbarCommon(props: {
 		for (const heading of props.headings) {
 			if (
 				currentPageContext.urlParsed.hash?.replace("#", "").toString() ===
-				heading.toString().toLowerCase().replaceAll(" ", "-").replaceAll("/", "")
+				heading.toString().toLowerCase().replaceAll(" ", "-").replaceAll("/", "").replace("#", "")
 			) {
 				setHighlightedAnchor(
-					heading.toString().toLowerCase().replaceAll(" ", "-").replaceAll("/", ""),
+					heading
+						.toString()
+						.toLowerCase()
+						.replaceAll(" ", "-")
+						.replaceAll("/", "")
+						.replace("#", ""),
 				)
 			}
 		}
@@ -232,6 +237,7 @@ function NavbarCommon(props: {
 																				.toString()
 																				.toLowerCase()
 																				.replaceAll(" ", "-")
+																				.replace("#", "")
 																				.replaceAll("/", ""),
 																		)
 																		props.onLinkClick?.()
@@ -243,6 +249,7 @@ function NavbarCommon(props: {
 																			.toString()
 																			.toLowerCase()
 																			.replaceAll(" ", "-")
+																			.replace("#", "")
 																			.replaceAll("/", "")
 																			? "font-medium text-on-background border-l-on-background "
 																			: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
@@ -251,9 +258,10 @@ function NavbarCommon(props: {
 																		.toString()
 																		.toLowerCase()
 																		.replaceAll(" ", "-")
+																		.replace("#", "")
 																		.replaceAll("/", "")}`}
 																>
-																	{heading}
+																	{heading.replace("#", "")}
 																</a>
 															</li>
 														</Show>
