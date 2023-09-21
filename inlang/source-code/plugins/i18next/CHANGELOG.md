@@ -1,5 +1,16 @@
 # @inlang/plugin-i18next
 
+## 4.3.0
+
+### Minor Changes
+
+- 0d0502f4: deprecate detectedLanguageTags
+
+### Patch Changes
+
+- Updated dependencies [0d0502f4]
+  - @inlang/plugin@1.3.0
+
 ## 4.2.0
 
 ### Minor Changes
