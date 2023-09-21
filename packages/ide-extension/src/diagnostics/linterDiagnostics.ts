@@ -18,50 +18,66 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 			return
 		}
 
-		const diagnostics: vscode.Diagnostic[] = []
-
 		const wrappedLints = (ideExtension.messageReferenceMatchers ?? []).map(async (matcher) => {
 			const messages = await matcher({
 				documentText: activeTextEditor.document.getText(),
 			})
+
+			const diagnosticsIndex: Record<string, vscode.Diagnostic[]> = {}
+
 			for (const message of messages) {
-				const matchingLintReports =
-					state().project.query.messageLintReports.get({
+				state().project.query.messageLintReports.get.subscribe(
+					{
 						where: {
 							messageId: message.messageId,
 						},
-					}) || []
+					},
+					(reports) => {
+						const diagnostics: vscode.Diagnostic[] = []
 
-				for (const report of matchingLintReports) {
-					const { level } = report
+						if (!reports) {
+							return
+						}
 
-					const diagnosticRange = new vscode.Range(
-						new vscode.Position(
-							message.position.start.line - 1,
-							message.position.start.character - 1,
-						),
-						new vscode.Position(message.position.end.line - 1, message.position.end.character - 1),
-					)
+						for (const report of reports) {
+							const { level } = report
 
-					// Get the lint message for the source language tag or fallback to "en"
+							const diagnosticRange = new vscode.Range(
+								new vscode.Position(
+									message.position.start.line - 1,
+									message.position.start.character - 1,
+								),
+								new vscode.Position(
+									message.position.end.line - 1,
+									message.position.end.character - 1,
+								),
+							)
 
-					const lintMessage = typeof report.body === "object" ? report.body.en : report.body
+							// Get the lint message for the source language tag or fallback to "en"
 
-					const diagnostic = new vscode.Diagnostic(
-						diagnosticRange,
-						`[${message.messageId}] – ${lintMessage}`,
-						mapLintLevelToSeverity(level),
-					)
+							const lintMessage = typeof report.body === "object" ? report.body.en : report.body
 
-					diagnostics.push(diagnostic)
-				}
+							const diagnostic = new vscode.Diagnostic(
+								diagnosticRange,
+								`[${message.messageId}] – ${lintMessage}`,
+								mapLintLevelToSeverity(level),
+							)
+							diagnostics.push(diagnostic)
+						}
+
+						diagnosticsIndex[message.messageId] = diagnostics
+						linterDiagnosticCollection.set(
+							activeTextEditor.document.uri,
+							Object.values(diagnosticsIndex).flat(),
+						)
+					},
+				)
 			}
 		})
 
 		await Promise.all(wrappedLints || [])
 
 		// Set all the collected diagnostics at once
-		linterDiagnosticCollection.set(activeTextEditor.document.uri, diagnostics)
 	}
 
 	function mapLintLevelToSeverity(level: MessageLintReport["level"]): vscode.DiagnosticSeverity {
