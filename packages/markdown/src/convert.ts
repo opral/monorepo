@@ -83,7 +83,16 @@ export async function convert(markdown: string): Promise<string> {
 								"var currentURL = window.location.href;" +
 								"var baseURL = currentURL.split('#')[0];" +
 								"history.pushState(null, null, baseURL + '#' + newHash);" +
-								"navigator.clipboard.writeText(baseURL + '#' + newHash);",
+								"navigator.clipboard.writeText(baseURL + '#' + newHash);" +
+								"var toast = document.createElement('sl-alert');" +
+								"toast.variant = 'success';" +
+								"toast.closable = false;" +
+								"toast.duration = 1000;" +
+								"toast.innerHTML = `<doc-icon slot='icon' icon='material-symbols:check-circle-outline-rounded' size='1.2em'></doc-icon>" +
+								"Copied link to clipboard`;" +
+								"document.body.append(toast);" +
+								"toast.toast();" +
+								"notify('Copied to clipboard', 'success', 'clipboard-check', 1000);",
 						}
 						node.children = [
 							{
@@ -117,7 +126,17 @@ export async function convert(markdown: string): Promise<string> {
 								className:
 									"doc-absolute doc-right-3 doc-top-2.5 doc-p-1 doc-rounded-md doc-bg-surface-100 doc-font-sans doc-opacity-70 doc-transition-opacity hover:doc-opacity-50",
 								style: "z-index: 1; color: white;",
-								onclick: `navigator.clipboard.writeText(this.parentElement.innerText.replace("Copy", ""));`,
+								onclick:
+									`navigator.clipboard.writeText(this.parentElement.innerText.replace("Copy", ""));` +
+									"var toast = document.createElement('sl-alert');" +
+									"toast.variant = 'success';" +
+									"toast.closable = false;" +
+									"toast.duration = 1000;" +
+									"toast.innerHTML = `<doc-icon slot='icon' icon='material-symbols:check-circle-outline-rounded' size='1.2em'></doc-icon>" +
+									"Copied code to clipboard`;" +
+									"document.body.append(toast);" +
+									"toast.toast();" +
+									"notify('Copied to clipboard', 'success', 'clipboard-check', 1000);",
 							},
 							children: [
 								{

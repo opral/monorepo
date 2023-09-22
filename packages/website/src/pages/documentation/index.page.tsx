@@ -35,8 +35,8 @@ export function Page(props: PageProps) {
 					findPageBySlug(
 						currentPageContext.urlParsed.pathname
 							.replace(getLocale(), "")
-							.replace("/documentation/", ""),
-					)?.path,
+							.replace("/documentation/", "")
+					)?.path
 			)
 		}
 	})
@@ -84,7 +84,12 @@ export function Page(props: PageProps) {
 										headings={props.markdown
 											.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
 											.map((heading: string) => {
-												return heading.replace(/(<([^>]+)>)/gi, "")
+												// We have to use DOMParser to parse the heading string to a HTML element
+												const parser = new DOMParser()
+												const doc = parser.parseFromString(heading, "text/html")
+												const node = doc.body.firstChild as HTMLElement
+
+												return node.innerText.replace(/(<([^>]+)>)/gi, "").toString()
 											})}
 									/>
 								</Show>
@@ -110,7 +115,12 @@ export function Page(props: PageProps) {
 									headings={props.markdown
 										.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
 										.map((heading: string) => {
-											return heading.replace(/(<([^>]+)>)/gi, "")
+											// We have to use DOMParser to parse the heading string to a HTML element
+											const parser = new DOMParser()
+											const doc = parser.parseFromString(heading, "text/html")
+											const node = doc.body.firstChild as HTMLElement
+
+											return node.innerText.replace(/(<([^>]+)>)/gi, "").toString()
 										})}
 								/>
 							</Show>
@@ -256,7 +266,7 @@ function NavbarCommon(props: {
 											>
 												{page.title}
 											</a>
-											<Show when={props.headings.length > 0 && isSelected(slug)}>
+											<Show when={props.headings && props.headings.length > 0 && isSelected(slug)}>
 												<For each={props.headings}>
 													{(heading) => (
 														<Show when={!heading.includes(page.title)}>
