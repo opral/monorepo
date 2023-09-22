@@ -97,9 +97,9 @@ export function Page(props: PageProps) {
 						</nav>
 					</div>
 					{/* Mobile navbar */}
-					<nav class="fixed min-w-full z-10 -translate-x-4 sm:-translate-x-10 sm:px-6 md:hidden overflow-y-scroll overflow-auto backdrop-blur-sm">
+					<nav class="sticky top-[69px] w-screen z-10 -translate-x-4 sm:-translate-x-10 md:hidden overflow-y-scroll overflow-auto backdrop-blur-sm">
 						<sl-details ref={mobileDetailMenu}>
-							<h3 slot="summary" class="font-medium">
+							<h3 slot="summary" class="font-medium sm:pl-6">
 								Menu
 							</h3>
 							{/* `Show` is a hotfix when client side rendering loaded this page
@@ -237,7 +237,7 @@ function NavbarCommon(props: {
 	})
 
 	return (
-		<ul role="list" class="w-full space-y-3">
+		<ul role="list" class="w-full space-y-3 sm:pl-6">
 			<For each={Object.keys(props.processedTableOfContents)}>
 				{(category) => (
 					<li>

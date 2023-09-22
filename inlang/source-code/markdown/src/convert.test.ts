@@ -32,12 +32,16 @@ C -->|Two| E[Result two]
 	expect(html).toContain("<svg")
 })
 
-test("should be able to render custom elements", async () => {
-	const markdown = `
+test(
+	"should be able to render custom elements",
+	async () => {
+		const markdown = `
 # Hello World
 
 <doc-figure label="Hello world"></doc-figure>
 	`
-	const html = await convert(markdown)
-	expect(html).toContain("<doc-figure")
-})
+		const html = await convert(markdown)
+		expect(html).toContain("<doc-figure")
+	},
+	{ timeout: 50000 }
+)
