@@ -1,12 +1,7 @@
 {
-	"README": {
-		"path": "./overview/introduction.md",
-		"slug": "",
-		"title": "Introduction",
-		"description": "Introduction to inlang"
-	},
 	"Overview": [
 		{
+			"startpage": true,
 			"path": "./overview/introduction.md",
 			"slug": "",
 			"title": "Introduction",
@@ -63,12 +58,6 @@
 			"slug": "comver",
 			"title": "Comver",
 			"description": "Comver reference"
-		},
-		{
-			"path": "./reference/tableOfContents.md",
-			"slug": "table-of-contents",
-			"title": "Table of Contents",
-			"description": "Table of Contents reference"
 		}
 	],
 	"Concept": [
