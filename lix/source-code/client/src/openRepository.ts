@@ -4,7 +4,6 @@ import { transformRemote, withLazyFetching } from "./helpers.js"
 // @ts-ignore
 import http from "./http-client.js"
 
-import { Octokit } from "octokit"
 import { createSignal, createEffect } from "./solid.js"
 import {
 	clone,
@@ -53,25 +52,6 @@ export async function openRepository(
 		const { origin } = new URL(gitProxyUrl)
 		gitHubProxyBaseUrl = origin
 	}
-
-	const github = new Octokit({
-		request: {
-			fetch: (...ghArgs: any) => {
-				ghArgs[0] = gitHubProxyBaseUrl + "/github-proxy/" + ghArgs[0]
-				if (!ghArgs[1]) {
-					ghArgs[1] = {}
-				}
-
-				if (gitHubProxyBaseUrl) {
-					// required for authenticated cors requests
-					ghArgs[1].credentials = "include"
-				}
-
-				// @ts-ignore
-				return fetch(...ghArgs)
-			},
-		},
-	})
 
 	const normalizedUrl = `https://${host}/${owner}/${repoName}`
 
