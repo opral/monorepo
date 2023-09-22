@@ -15,7 +15,7 @@
 	"scripts": {
 		"build": "npx tailwindcss -i ./src/css/style.css -o ./dist/css/style.css && npx prettier ./src --write && tsc --build",
 		"dev": "tsc --watch",
-		"test": "npx playwright install && tsc --noEmit && vitest run",
+		"test": "tsc --noEmit && vitest run",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
@@ -46,8 +46,6 @@
 		"unist-util-visit": "5.0.0"
 	},
 	"devDependencies": {
-		"playwright": "1.38.1",
-		"@playwright/test": "1.38.0",
 		"tailwindcss": "3.3.3",
 		"typescript": "5.2.2",
 		"vitest": "0.34.3"
