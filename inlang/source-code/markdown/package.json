@@ -20,14 +20,9 @@
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
-	"engines": {
-		"node": ">=16.15.0"
-	},
 	"dependencies": {
 		"iconify-icon": "1.0.8",
-		"install": "0.13.0",
 		"lit": "2.8.0",
-		"npm": "10.1.0",
 		"rehype-accessible-emojis": "0.3.2",
 		"rehype-add-classes": "1.0.0",
 		"rehype-autolink-headings": "7.0.0",
