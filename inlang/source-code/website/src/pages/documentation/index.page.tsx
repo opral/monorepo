@@ -183,8 +183,20 @@ function NavbarCommon(props: {
 		}
 	}
 
+	const scrollToAnchor = (anchor: string) => {
+		const element = document.getElementById(anchor)
+		if (element) {
+			element.scrollIntoView({
+				behavior: "instant",
+				block: "start",
+			})
+		}
+		window.history.pushState({}, "", `${currentPageContext.urlParsed.pathname}#${anchor}`)
+	}
+
 	const onAnchorClick = (anchor: string) => {
 		setHighlightedAnchor(anchor)
+		scrollToAnchor(anchor)
 	}
 
 	onMount(() => {
@@ -234,7 +246,8 @@ function NavbarCommon(props: {
 														<Show when={!heading.includes(page.title)}>
 															<li>
 																<a
-																	onClick={() => {
+																	onClick={(e) => {
+																		e.preventDefault()
 																		onAnchorClick(replaceChars(heading.toString().toLowerCase()))
 																		props.onLinkClick?.()
 																	}}

@@ -12,6 +12,7 @@ import { colorForTypeOf, convertLinkToGithub, typeOfIdToTitle } from "../utiliti
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
 import "@inlang/markdown/css"
+import "@inlang/markdown/custom-elements"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { currentPageContext } from "#src/renderer/state.js"
 
@@ -58,7 +59,7 @@ export function Page(props: PageProps) {
 								when={props.markdown}
 								fallback={<p class="text-danger">{props.markdown?.error}</p>}
 							>
-								<div class="col-span-1 md:col-span-4 md:pb-10 pb-16 mb-16 md:mb-0 border-b border-surface-2 grid md:grid-cols-4 grid-cols-1 gap-16">
+								<div class="col-span-1 md:col-span-4 md:pb-10 pb-12 mb-12 md:mb-0 border-b border-surface-2 grid md:grid-cols-4 grid-cols-1 gap-16">
 									<div class="flex-col h-full justify-between md:col-span-3">
 										<div class="flex max-md:flex-col items-start gap-8 mb-12">
 											<Show
@@ -178,6 +179,7 @@ export function Page(props: PageProps) {
 								<Show when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}>
 									<div class="relative col-span-1">
 										<NavbarCommon
+											displayName={displayName}
 											getLocale={getLocale}
 											headings={props.markdown
 												.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
@@ -201,7 +203,10 @@ export function Page(props: PageProps) {
 
 function Markdown(props: { markdown: string }) {
 	return (
-		<div
+		<article
+			style={{
+				"scroll-margin-top": "-48px",
+			}}
 			class="w-full md:col-span-3 rounded-lg col-span-1"
 			// eslint-disable-next-line solid/no-innerhtml
 			innerHTML={props.markdown}
@@ -209,7 +214,11 @@ function Markdown(props: { markdown: string }) {
 	)
 }
 
-function NavbarCommon(props: { headings: string[]; getLocale: () => string }) {
+function NavbarCommon(props: {
+	headings: string[]
+	getLocale: () => string
+	displayName: () => string
+}) {
 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
 
 	const replaceChars = (str: string) => {
@@ -232,12 +241,24 @@ function NavbarCommon(props: { headings: string[]; getLocale: () => string }) {
 		}
 	}
 
+	const scrollToAnchor = (anchor: string) => {
+		const element = document.getElementById(anchor)
+		if (element) {
+			element.scrollIntoView({
+				behavior: "instant",
+				block: "start",
+			})
+		}
+		window.history.pushState({}, "", `${currentPageContext.urlParsed.pathname}#${anchor}`)
+	}
+
 	onMount(() => {
 		for (const heading of props.headings) {
 			if (
 				currentPageContext.urlParsed.hash?.replace("#", "").toString() ===
 				replaceChars(heading.toString().toLowerCase())
 			) {
+				scrollToAnchor(replaceChars(heading.toString().toLowerCase()))
 				setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
 			}
 		}
@@ -249,22 +270,26 @@ function NavbarCommon(props: { headings: string[]; getLocale: () => string }) {
 			<ul class="space-y-2" role="list">
 				<For each={props.headings}>
 					{(heading) => (
-						<li>
-							<a
-								onClick={() => {
-									setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
-								}}
-								class={
-									(isSelected(replaceChars(heading.toString().toLowerCase()))
-										? "text-primary font-semibold "
-										: "text-info/80 hover:text-on-background ") +
-									"tracking-wide text-sm block w-full font-normal mb-2"
-								}
-								href={`#${replaceChars(heading.toString().toLowerCase())}`}
-							>
-								{heading.replace("#", "")}
-							</a>
-						</li>
+						<Show when={!heading.includes(props.displayName())}>
+							<li>
+								<a
+									onClick={(e) => {
+										e.preventDefault()
+										scrollToAnchor(replaceChars(heading.toString().toLowerCase()))
+										setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
+									}}
+									class={
+										(isSelected(replaceChars(heading.toString().toLowerCase()))
+											? "text-primary font-semibold "
+											: "text-info/80 hover:text-on-background ") +
+										"tracking-wide text-sm block w-full font-normal mb-2"
+									}
+									href={`#${replaceChars(heading.toString().toLowerCase())}`}
+								>
+									{heading.replace("#", "")}
+								</a>
+							</li>
+						</Show>
 					)}
 				</For>
 			</ul>
