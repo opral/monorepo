@@ -1,6 +1,6 @@
 import { Meta, Title } from "@solidjs/meta"
 import { Layout } from "#src/pages/Layout.jsx"
-import { For, Show, createEffect, createSignal } from "solid-js"
+import { For, Show, createSignal } from "solid-js"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import { isModule } from "@inlang/marketplace-registry"
 import { Button } from "#src/pages/index/components/Button.jsx"
@@ -49,82 +49,80 @@ export function Page(props: PageProps) {
 								when={props.markdown}
 								fallback={<p class="text-danger">{props.markdown?.error}</p>}
 							>
-								<div class="col-span-1 md:col-span-3 md:pb-16 pb-12 border-b border-surface-2">
-									<div class="flex max-md:flex-col items-start gap-8 mb-10">
-										<Show
-											when={props.manifest.icon}
-											fallback={
-												<div class="w-16 h-16 font-semibold text-3xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
-													{displayName()[0]}
+								<div class="col-span-1 md:col-span-4 md:pb-10 pb-16 mb-16 md:mb-0 border-b border-surface-2 grid md:grid-cols-4 grid-cols-1 gap-16">
+									<div class="flex-col h-full justify-between md:col-span-3">
+										<div class="flex max-md:flex-col items-start gap-8 mb-12">
+											<Show
+												when={props.manifest.icon}
+												fallback={
+													<div class="w-16 h-16 font-semibold text-3xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
+														{displayName()[0]}
+													</div>
+												}
+											>
+												<img
+													class="w-16 h-16 rounded-md m-0 shadow-lg object-cover object-center"
+													src={props.manifest.icon}
+												/>
+											</Show>
+											<div class="flex flex-col gap-3">
+												<h1 class="text-3xl font-bold">{displayName()}</h1>
+												<div class="inline-block text-surface-500 ">
+													<p class={!readmore() ? "lg:line-clamp-2" : ""}>{description()}</p>
+													<Show when={description().length > 205}>
+														<p
+															onClick={() => setReadmore((prev) => !prev)}
+															class="cursor-pointer hover:text-surface-700 transition-all duration-150 font-medium max-lg:hidden"
+														>
+															{readmore() ? "Minimize" : "Read more"}
+														</p>
+													</Show>
 												</div>
-											}
-										>
-											<img
-												class="w-16 h-16 rounded-md m-0 shadow-lg object-cover object-center"
-												src={props.manifest.icon}
-											/>
-										</Show>
-										<div class="flex flex-col gap-3">
-											<h1 class="text-3xl font-bold">{displayName()}</h1>
-											<div class="inline-block text-surface-500 ">
-												<p class={!readmore() ? "lg:line-clamp-2" : ""}>{description()}</p>
-												<Show when={description().length > 205}>
-													<p
-														onClick={() => setReadmore((prev) => !prev)}
-														class="cursor-pointer hover:text-surface-700 transition-all duration-150 font-medium max-lg:hidden"
-													>
-														{readmore() ? "Minimize" : "Read more"}
-													</p>
-												</Show>
 											</div>
 										</div>
-									</div>
-									<div class="flex gap-4 flex-wrap">
-										<Show
-											when={isModule(props.manifest)}
-											fallback={
-												/* @ts-ignore */
-												<Show when={props.manifest.website}>
+										<div class="flex gap-4 flex-wrap">
+											<Show
+												when={isModule(props.manifest)}
+												fallback={
+													/* @ts-ignore */
+													<Show when={props.manifest.website}>
+														{/* @ts-ignore */}
+														<Button type="primary" href={props.manifest.website}>
+															Open
+														</Button>
+													</Show>
+												}
+											>
+												<div class="flex items-center gap-2">
 													{/* @ts-ignore */}
-													<Button type="primary" href={props.manifest.website}>
-														Open
+													<Button type="primary" href={`/install?module=${props.manifest.id}`}>
+														<span class="capitalize">
+															Install{" "}
+															{props.manifest.id.includes("messageLintRule")
+																? "Lint Rule"
+																: typeOfIdToTitle(props.manifest.id)}
+														</span>
+														{/* @ts-ignore */}
+														<SelectRepo size="medium" modules={[props.manifest.id]} />
 													</Button>
-												</Show>
-											}
-										>
-											<div class="flex items-center gap-2">
-												{/* @ts-ignore */}
-												<Button type="primary" href={`/install?module=${props.manifest.id}`}>
-													<span class="capitalize">
-														Install{" "}
-														{props.manifest.id.includes("messageLintRule")
-															? "Lint Rule"
-															: typeOfIdToTitle(props.manifest.id)}
-													</span>
-													{/* @ts-ignore */}
-													<SelectRepo size="medium" modules={[props.manifest.id]} />
-												</Button>
-											</div>
-										</Show>
-										<Button
-											type="secondary"
-											href={convertLinkToGithub(readme())?.replace("README.md", "")}
-										>
-											GitHub
-											<MaterialSymbolsArrowOutward
-												// @ts-ignore
-												slot="suffix"
-											/>
-										</Button>
+												</div>
+											</Show>
+											<Button
+												type="secondary"
+												href={convertLinkToGithub(readme())?.replace("README.md", "")}
+											>
+												GitHub
+												<MaterialSymbolsArrowOutward
+													// @ts-ignore
+													slot="suffix"
+												/>
+											</Button>
+										</div>
 									</div>
-									{/* </div> */}
-								</div>
-								<div class="col-span-1 row-span-2 p-4 relative">
-									<div class="sticky top-28">
-										<h2 class="text-xl font-semibold mb-6">Information</h2>
-										<div class="flex flex-col gap-3 mb-8">
-											<h3 class="text-sm text-surface-400">Publisher</h3>
-											<div class="flex gap-2 items-center">
+									<div class="w-full flex md:justify-end">
+										<div class="flex flex-col gap-6 items-col flex-shrink-0">
+											<h2 class="font-semibold mb-2 text-lg">Information</h2>
+											<div class="flex items-center gap-2">
 												<Show
 													when={props.manifest.publisherIcon}
 													fallback={
@@ -146,9 +144,6 @@ export function Page(props: PageProps) {
 													{props.manifest.publisherName}
 												</p>
 											</div>
-										</div>
-										<div class="flex flex-col gap-3 mb-8">
-											<h3 class="text-sm text-surface-400">Keywords</h3>
 											<div class="flex flex-wrap gap-2 items-center">
 												<For each={props?.manifest?.keywords}>
 													{(keyword) => (
@@ -164,17 +159,15 @@ export function Page(props: PageProps) {
 													)}
 												</For>
 											</div>
-										</div>
-										<div class="flex flex-col gap-3 mb-8">
-											<h3 class="text-sm text-surface-400">License</h3>
 											<p class="m-0 text-surface-600 no-underline font-medium">
 												{props?.manifest?.license}
 											</p>
 										</div>
 									</div>
 								</div>
-								<div class="grid grid-cols-3 md:col-span-3 col-span-1">
-									<Show when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}>
+								{/* <div class="grid grid-cols-5 md:col-span-3 col-span-1"> */}
+								<Show when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}>
+									<div class="relative col-span-1">
 										<SubNavigation
 											headings={props.markdown
 												.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
@@ -182,10 +175,10 @@ export function Page(props: PageProps) {
 													return heading.replace(/(<([^>]+)>)/gi, "")
 												})}
 										/>
-
-										<Markdown markdown={props.markdown} />
-									</Show>
-								</div>
+									</div>
+									<Markdown markdown={props.markdown} />
+								</Show>
+								{/* </div> */}
 							</Show>
 						</div>
 						<GetHelp text="Do you have questions?" />
@@ -199,7 +192,7 @@ export function Page(props: PageProps) {
 function Markdown(props: { markdown: string }) {
 	return (
 		<div
-			class="w-full md:col-span-2 rounded-lg col-span-1"
+			class="w-full md:col-span-3 rounded-lg col-span-1"
 			// eslint-disable-next-line solid/no-innerhtml
 			innerHTML={props.markdown}
 		/>
@@ -219,8 +212,8 @@ function SubNavigation(props: { headings: string[] }) {
 	}
 
 	return (
-		<div class="mb-12 col-span-1">
-			<h2 class="text-xl font-semibold mb-4">Content</h2>
+		<div class="mb-12 sticky top-28">
+			<h2 class="text-lg font-semibold mb-6">Documentation</h2>
 			<div class="flex flex-col gap-2">
 				<For each={props.headings}>
 					{(heading) => (
