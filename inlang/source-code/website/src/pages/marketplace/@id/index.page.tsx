@@ -59,7 +59,7 @@ export function Page(props: PageProps) {
 								when={props.markdown}
 								fallback={<p class="text-danger">{props.markdown?.error}</p>}
 							>
-								<div class="col-span-1 md:col-span-4 md:pb-10 pb-12 mb-12 md:mb-0 border-b border-surface-2 grid md:grid-cols-4 grid-cols-1 gap-16">
+								<div class="col-span-1 md:col-span-4 md:pb-14 pb-12 mb-12 md:mb-8 border-b border-surface-2 grid md:grid-cols-4 grid-cols-1 gap-16">
 									<div class="flex-col h-full justify-between md:col-span-3">
 										<div class="flex max-md:flex-col items-start gap-8 mb-12">
 											<Show
@@ -130,67 +130,77 @@ export function Page(props: PageProps) {
 										</div>
 									</div>
 									<div class="w-full flex md:justify-end">
-										<div class="flex flex-col gap-6 items-col flex-shrink-0">
-											<h2 class="font-semibold mb-2 text-lg">Information</h2>
-											<div class="flex items-center gap-2">
-												<Show
-													when={props.manifest.publisherIcon}
-													fallback={
-														<div
-															class={
-																"w-6 h-6 flex items-center justify-center text-background capitalize font-medium rounded-full m-0 bg-surface-900"
-															}
-														>
-															{props.manifest.publisherName[0]}
-														</div>
-													}
-												>
-													<img
-														class="w-6 h-6 rounded-full m-0"
-														src={props.manifest.publisherIcon}
-													/>
-												</Show>
+										<div class="flex flex-col gap-4 items-col flex-shrink-0">
+											<h2 class="font-semibold text-lg">Information</h2>
+											<div>
+												<h3 class="text-surface-400 text-sm mb-2">Publisher</h3>
+												<div class="flex items-center gap-2">
+													<Show
+														when={props.manifest.publisherIcon}
+														fallback={
+															<div
+																class={
+																	"w-6 h-6 flex items-center justify-center text-background capitalize font-medium rounded-full m-0 bg-surface-900"
+																}
+															>
+																{props.manifest.publisherName[0]}
+															</div>
+														}
+													>
+														<img
+															class="w-6 h-6 rounded-full m-0"
+															src={props.manifest.publisherIcon}
+														/>
+													</Show>
+													<p class="m-0 text-surface-600 no-underline font-medium">
+														{props.manifest.publisherName}
+													</p>
+												</div>
+											</div>
+											<div>
+												<h3 class="text-surface-400 text-sm mb-2">Keywords</h3>
+												<div class="flex flex-wrap gap-2 items-center">
+													<For each={props?.manifest?.keywords}>
+														{(keyword) => (
+															<a
+																class="transition-opacity hover:opacity-80 cursor-pointer"
+																href="/marketplace"
+																onClick={() => {
+																	setSearchValue(keyword.toString())
+																}}
+															>
+																<Chip text={keyword} color={colorForTypeOf(props.manifest.id)} />
+															</a>
+														)}
+													</For>
+												</div>
+											</div>
+											<div>
+												<h3 class="text-surface-400 text-sm mb-2">License</h3>
 												<p class="m-0 text-surface-600 no-underline font-medium">
-													{props.manifest.publisherName}
+													{props?.manifest?.license}
 												</p>
 											</div>
-											<div class="flex flex-wrap gap-2 items-center">
-												<For each={props?.manifest?.keywords}>
-													{(keyword) => (
-														<a
-															class="transition-opacity hover:opacity-80 cursor-pointer"
-															href="/marketplace"
-															onClick={() => {
-																setSearchValue(keyword.toString())
-															}}
-														>
-															<Chip text={keyword} color={colorForTypeOf(props.manifest.id)} />
-														</a>
-													)}
-												</For>
-											</div>
-											<p class="m-0 text-surface-600 no-underline font-medium">
-												{props?.manifest?.license}
-											</p>
 										</div>
 									</div>
 								</div>
-								{/* <div class="grid grid-cols-5 md:col-span-3 col-span-1"> */}
 								<Show when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}>
-									<div class="relative col-span-1">
-										<NavbarCommon
-											displayName={displayName}
-											getLocale={getLocale}
-											headings={props.markdown
-												.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
-												.map((heading: string) => {
-													return heading.replace(/(<([^>]+)>)/gi, "")
-												})}
-										/>
+									<div class="grid md:grid-cols-4 grid-cols-1 col-span-1 md:col-span-4">
+										{/* Classes to be added: sticky z-10 top-16 pt-8 md:pt-0 md:static bg-background */}
+										<div class="col-span-1">
+											<NavbarCommon
+												displayName={displayName}
+												getLocale={getLocale}
+												headings={props.markdown
+													.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
+													.map((heading: string) => {
+														return heading.replace(/(<([^>]+)>)/gi, "")
+													})}
+											/>
+										</div>
+										<Markdown markdown={props.markdown} />
 									</div>
-									<Markdown markdown={props.markdown} />
 								</Show>
-								{/* </div> */}
 							</Show>
 						</div>
 						<GetHelp text="Do you have questions?" />
@@ -204,9 +214,6 @@ export function Page(props: PageProps) {
 function Markdown(props: { markdown: string }) {
 	return (
 		<article
-			style={{
-				"scroll-margin-top": "-48px",
-			}}
 			class="w-full md:col-span-3 rounded-lg col-span-1"
 			// eslint-disable-next-line solid/no-innerhtml
 			innerHTML={props.markdown}

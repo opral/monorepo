@@ -85,7 +85,6 @@ export async function convert(markdown: string): Promise<string> {
 								"history.pushState(null, null, baseURL + '#' + newHash);" +
 								"navigator.clipboard.writeText(baseURL + '#' + newHash);",
 						}
-
 						node.children = [
 							{
 								type: "element",
@@ -106,7 +105,10 @@ export async function convert(markdown: string): Promise<string> {
 							...node.children,
 						]
 					}
-				} else if (node.tagName === "pre") {
+				} else if (
+					node.tagName === "pre" &&
+					!node.children[0].properties.className.includes("language-mermaid")
+				) {
 					node.children = [
 						{
 							type: "element",

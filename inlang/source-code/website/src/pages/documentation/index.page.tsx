@@ -48,7 +48,7 @@ export function Page(props: PageProps) {
 					findPageBySlug(
 						currentPageContext.urlParsed.pathname
 							.replace(getLocale(), "")
-							.replace("/documentation/", ""),
+							.replace("/documentation/", "")
 					)?.title
 				}
 			</Title>
@@ -58,7 +58,7 @@ export function Page(props: PageProps) {
 					findPageBySlug(
 						currentPageContext.urlParsed.pathname
 							.replace(getLocale(), "")
-							.replace("/documentation/", ""),
+							.replace("/documentation/", "")
 					)?.description
 				}
 			/>
@@ -137,10 +137,7 @@ export function Page(props: PageProps) {
 								// change the col-span to 2 if a right side nav bar should be rendered
 								class="w-full justify-self-center md:col-span-3"
 							>
-								<article>
-									{/* eslint-disable-next-line solid/no-innerhtml */}
-									<div innerHTML={props.markdown} />
-								</article>
+								<Markdown markdown={props.markdown} />
 								<EditButton href={editLink()} />
 								<Feedback />
 							</div>
@@ -149,6 +146,15 @@ export function Page(props: PageProps) {
 				</div>
 			</RootLayout>
 		</>
+	)
+}
+
+function Markdown(props: { markdown: string }) {
+	return (
+		<article
+			// eslint-disable-next-line solid/no-innerhtml
+			innerHTML={props.markdown}
+		/>
 	)
 }
 
