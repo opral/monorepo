@@ -13,7 +13,7 @@
 		"./css": "./dist/css/index.js"
 	},
 	"scripts": {
-		"build": "npx tailwindcss -i ./src/css/style.css -o ./dist/css/style.css && npx prettier ./src --write && tsc --build",
+		"build": "npx playwright install --with-deps chromium && npx tailwindcss -i ./src/css/style.css -o ./dist/css/style.css && npx prettier ./src --write && tsc --build",
 		"dev": "tsc --watch",
 		"test": "tsc --noEmit && vitest run",
 		"lint": "eslint ./src --fix",
