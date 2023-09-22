@@ -12,14 +12,7 @@ test("a valid app manifest should pass validation", () => {
 		keywords: ["app", "best"],
 		license: "Apache-2.0",
 		website: "https://my-app.com",
-		tableOfContents: [
-			{
-				startpage: true,
-				path: { en: "https://my-app.com/readme.md" },
-				slug: "",
-				title: { en: "Hello" },
-			},
-		],
+		readme: { en: "https://my-app.com/readme.md" },
 	}
 	const errors = [...Value.Errors(MarketplaceManifest, app)]
 	if (errors.length > 0) {
@@ -37,14 +30,7 @@ test("should pass a valid plugin manifest", () => {
 		description: { en: "Hello" },
 		keywords: [],
 		license: "Apache-2.0",
-		tableOfContents: [
-			{
-				startpage: true,
-				path: { en: "https://my-app.com/readme.md" },
-				slug: "",
-				title: { en: "Hello" },
-			},
-		],
+		readme: { en: "https://my-app.com/readme.md" },
 		publisherName: "inlang",
 		module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next/dist/index.js",
 	}
@@ -65,14 +51,7 @@ test("should be possible to define the schema", () => {
 		description: { en: "Hello" },
 		keywords: [],
 		license: "Apache-2.0",
-		tableOfContents: [
-			{
-				startpage: true,
-				path: { en: "https://my-app.com/readme.md" },
-				slug: "",
-				title: { en: "Hello" },
-			},
-		],
+		readme: { en: "https://my-app.com/readme.md" },
 		publisherName: "inlang",
 		module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next/dist/index.js",
 	}
@@ -89,14 +68,7 @@ test("should only allow the inlang schema schema", () => {
 		description: { en: "Hello" },
 		keywords: [],
 		license: "Apache-2.0",
-		tableOfContents: [
-			{
-				startpage: true,
-				path: { en: "https://my-app.com/readme.md" },
-				slug: "",
-				title: { en: "Hello" },
-			},
-		],
+		readme: { en: "https://my-app.com/readme.md" },
 		publisherName: "inlang",
 		module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next/dist/index.js",
 	}
