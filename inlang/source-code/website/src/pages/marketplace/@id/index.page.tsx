@@ -241,24 +241,33 @@ function NavbarCommon(props: {
 		}
 	}
 
-	const scrollToAnchor = (anchor: string) => {
+	const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
 		const element = document.getElementById(anchor)
 		if (element && window) {
 			window.scrollTo({
 				top: element.offsetTop - 96,
-				behavior: "instant",
+				behavior: behavior ?? "instant",
 			})
 		}
 		window.history.pushState({}, "", `${currentPageContext.urlParsed.pathname}#${anchor}`)
 	}
 
-	onMount(() => {
+	onMount(async () => {
 		for (const heading of props.headings) {
 			if (
 				currentPageContext.urlParsed.hash?.replace("#", "").toString() ===
 				replaceChars(heading.toString().toLowerCase())
 			) {
-				scrollToAnchor(replaceChars(heading.toString().toLowerCase()))
+				/* Wait for all images to load before scrolling to anchor */
+				await Promise.all(
+					[...document.querySelectorAll("img")].map((img) =>
+						img.complete
+							? Promise.resolve()
+							: new Promise((resolve) => img.addEventListener("load", resolve))
+					)
+				)
+
+				scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
 				setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
 			}
 		}
