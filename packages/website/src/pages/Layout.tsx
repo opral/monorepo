@@ -422,6 +422,10 @@ function LanguagePicker() {
 			code: "sk",
 			name: "Slovak",
 		},
+		{
+			code: "pt_BR",
+			name: "Portuguese Brazil",
+		},
 	]
 
 	const handleSwitchTranslation = (language: { code: string; name: string }) => {
