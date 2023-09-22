@@ -194,7 +194,12 @@ export function Page(props: PageProps) {
 												headings={props.markdown
 													.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
 													.map((heading: string) => {
-														return heading.replace(/(<([^>]+)>)/gi, "")
+														// We have to use DOMParser to parse the heading string to a HTML element
+														const parser = new DOMParser()
+														const doc = parser.parseFromString(heading, "text/html")
+														const node = doc.body.firstChild as HTMLElement
+
+														return node.innerText.replace(/(<([^>]+)>)/gi, "").toString()
 													})}
 											/>
 										</div>
