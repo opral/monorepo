@@ -1,6 +1,6 @@
 import { Meta, Title } from "@solidjs/meta"
 import { Layout } from "#src/pages/Layout.jsx"
-import { For, Show, createSignal } from "solid-js"
+import { For, Show, createSignal, onMount } from "solid-js"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import { isModule } from "@inlang/marketplace-registry"
 import { Button } from "#src/pages/index/components/Button.jsx"
@@ -9,8 +9,11 @@ import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 import { SelectRepo } from "../Select.jsx"
 import { setSearchValue } from "../index.page.jsx"
 import { colorForTypeOf, convertLinkToGithub, typeOfIdToTitle } from "../utilities.js"
+import { defaultLanguage } from "#src/renderer/_default.page.route.js"
+import { useI18n } from "@solid-primitives/i18n"
 import "@inlang/markdown/css"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
+import { currentPageContext } from "#src/renderer/state.js"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -22,6 +25,12 @@ export type PageProps = {
 
 export function Page(props: PageProps) {
 	const [readmore, setReadmore] = createSignal<boolean>(false)
+	const [, { locale }] = useI18n()
+
+	const getLocale = () => {
+		const language = locale() ?? defaultLanguage
+		return language !== defaultLanguage ? "/" + language : ""
+	}
 
 	// mapping translatable types
 	const displayName = () =>
@@ -44,7 +53,7 @@ export function Page(props: PageProps) {
 			<Layout>
 				<Show when={props.markdown && props.manifest}>
 					<div class="md:py-28 py-16">
-						<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-40 md:gap-16 gap-6">
+						<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-40 md:gap-8 gap-6">
 							<Show
 								when={props.markdown}
 								fallback={<p class="text-danger">{props.markdown?.error}</p>}
@@ -168,7 +177,8 @@ export function Page(props: PageProps) {
 								{/* <div class="grid grid-cols-5 md:col-span-3 col-span-1"> */}
 								<Show when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}>
 									<div class="relative col-span-1">
-										<SubNavigation
+										<NavbarCommon
+											getLocale={getLocale}
 											headings={props.markdown
 												.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
 												.map((heading: string) => {
@@ -199,7 +209,9 @@ function Markdown(props: { markdown: string }) {
 	)
 }
 
-function SubNavigation(props: { headings: string[] }) {
+function NavbarCommon(props: { headings: string[]; getLocale: () => string }) {
+	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
+
 	const replaceChars = (str: string) => {
 		return str
 			.replaceAll(" ", "-")
@@ -209,23 +221,53 @@ function SubNavigation(props: { headings: string[] }) {
 			.replaceAll(")", "")
 			.replaceAll("?", "")
 			.replaceAll(".", "")
+			.replaceAll("@", "")
 	}
+
+	const isSelected = (heading: string) => {
+		if (heading === highlightedAnchor()) {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	onMount(() => {
+		for (const heading of props.headings) {
+			if (
+				currentPageContext.urlParsed.hash?.replace("#", "").toString() ===
+				replaceChars(heading.toString().toLowerCase())
+			) {
+				setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
+			}
+		}
+	})
 
 	return (
 		<div class="mb-12 sticky top-28">
 			<h2 class="text-lg font-semibold mb-6">Documentation</h2>
-			<div class="flex flex-col gap-2">
+			<ul class="space-y-2" role="list">
 				<For each={props.headings}>
 					{(heading) => (
-						<a
-							href={`#${replaceChars(heading.toLowerCase())}`}
-							class="text-surface-600 hover:text-surface-500 transition-all duration-150"
-						>
-							{replaceChars(heading)}
-						</a>
+						<li>
+							<a
+								onClick={() => {
+									setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
+								}}
+								class={
+									(isSelected(replaceChars(heading.toString().toLowerCase()))
+										? "text-primary font-semibold "
+										: "text-info/80 hover:text-on-background ") +
+									"tracking-wide text-sm block w-full font-normal mb-2"
+								}
+								href={`#${replaceChars(heading.toString().toLowerCase())}`}
+							>
+								{heading.replace("#", "")}
+							</a>
+						</li>
 					)}
 				</For>
-			</div>
+			</ul>
 		</div>
 	)
 }
