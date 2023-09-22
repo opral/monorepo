@@ -289,7 +289,7 @@ function NavbarCommon(props: {
 
 	return (
 		<div class="mb-12 sticky top-28">
-			<h2 class="text-lg font-semibold mb-6">Documentation</h2>
+			<h2 class="text-lg font-semibold mb-4">Documentation</h2>
 			<ul class="space-y-2" role="list">
 				<For each={props.headings}>
 					{(heading) => (
