@@ -243,10 +243,10 @@ function NavbarCommon(props: {
 
 	const scrollToAnchor = (anchor: string) => {
 		const element = document.getElementById(anchor)
-		if (element) {
-			element.scrollIntoView({
+		if (element && window) {
+			window.scrollTo({
+				top: element.offsetTop - 96,
 				behavior: "instant",
-				block: "start",
 			})
 		}
 		window.history.pushState({}, "", `${currentPageContext.urlParsed.pathname}#${anchor}`)

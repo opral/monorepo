@@ -40,10 +40,11 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => 
 
 async function generateIndexAndTableOfContents() {
 	for (const categories of Object.entries(tableOfContents)) {
+		// @ts-ignore
 		for (const content of tableOfContents[categories[0]]) {
 			const raw = await fs.readFile(
 				new URL(`documentation/${content.path}`, repositoryRoot),
-				"utf-8",
+				"utf-8"
 			)
 			const markdown = await convert(raw)
 
@@ -56,6 +57,7 @@ async function generateIndexAndTableOfContents() {
 
 			if (!generatedTableOfContents[categories[0]]) {
 				generatedTableOfContents[categories[0]] = [
+					// @ts-ignore
 					...tableOfContents[categories[0]].map((content: Record<string, any>) => ({
 						...content,
 						href: "/documentation/" + content.slug,
