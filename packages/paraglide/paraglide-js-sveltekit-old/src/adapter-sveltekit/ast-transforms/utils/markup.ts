@@ -1,7 +1,4 @@
-import type {
-	Ast,
-	TemplateNode,
-} from "../../../../node_modules/svelte/types/compiler/interfaces.js"
+import type { Ast, TemplateNode } from "svelte/types/compiler/interfaces.js"
 import type { MagicStringType } from "../../magic-string.js"
 import { InlangSdkException } from "../../vite-plugin/exceptions.js"
 
