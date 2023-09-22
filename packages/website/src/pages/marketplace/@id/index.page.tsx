@@ -184,7 +184,10 @@ export function Page(props: PageProps) {
 										</div>
 									</div>
 								</div>
-								<Show when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}>
+								<Show
+									when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}
+									fallback={<Markdown markdown={props.markdown} fullWidth />}
+								>
 									<div class="grid md:grid-cols-4 grid-cols-1 col-span-1 md:col-span-4">
 										{/* Classes to be added: sticky z-10 top-16 pt-8 md:pt-0 md:static bg-background */}
 										<div class="col-span-1">
@@ -216,10 +219,12 @@ export function Page(props: PageProps) {
 	)
 }
 
-function Markdown(props: { markdown: string }) {
+function Markdown(props: { markdown: string; fullWidth?: boolean }) {
 	return (
 		<article
-			class="w-full md:col-span-3 rounded-lg col-span-1"
+			class={
+				"w-full rounded-lg col-span-1 " + (props.fullWidth ? "md:col-span-4" : "md:col-span-3")
+			}
 			// eslint-disable-next-line solid/no-innerhtml
 			innerHTML={props.markdown}
 		/>
