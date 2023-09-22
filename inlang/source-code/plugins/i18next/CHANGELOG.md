@@ -1,5 +1,27 @@
 # @inlang/plugin-i18next
 
+## 4.4.0
+
+### Minor Changes
+
+- 7e112af9: isolated detect formating function for plugins
+
+### Patch Changes
+
+- Updated dependencies [7e112af9]
+  - @inlang/detect-formatting@0.2.0
+
+## 4.3.0
+
+### Minor Changes
+
+- 0d0502f4: deprecate detectedLanguageTags
+
+### Patch Changes
+
+- Updated dependencies [0d0502f4]
+  - @inlang/plugin@1.3.0
+
 ## 4.2.0
 
 ### Minor Changes

@@ -1,5 +1,21 @@
 # inlang-vs-code-extension
 
+## 1.5.0
+
+### Minor Changes
+
+- 8bf4c07a: fix lint reactivity bug & migrate
+
+## 1.4.0
+
+### Minor Changes
+
+- 1df3ba43: improve auto settings & ide extension structure
+
+## 1.3.0
+
+- updated dependencies
+
 ## 1.2.0
 
 ### Minor Changes

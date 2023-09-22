@@ -397,6 +397,19 @@ describe("reactivity", () => {
 				).value,
 			).toBe("after")
 		})
+
+		it("should not mutate messages signal outside the query when using the query", async () => {
+			const [inputMessages] = createSignal<Message[]>([createMessage("1", { en: "before" })])
+			const query = createMessagesQuery(inputMessages)
+
+			let messages: Readonly<Message[]> | undefined = undefined
+			await createChangeListener(() => (messages = query.getAll()))
+			expect(Object.values(messages!)).toHaveLength(1)
+
+			query.create({ data: createMessage("2", { en: "" }) })
+
+			expect(inputMessages().length).toBe(1)
+		})
 	})
 })
 

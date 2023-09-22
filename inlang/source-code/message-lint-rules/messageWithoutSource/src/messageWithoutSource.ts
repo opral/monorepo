@@ -8,10 +8,10 @@ export const messageWithoutSourceRule: MessageLintRule = {
 	run: ({ message, settings, report }) => {
 		if (!message.variants.some((variant) => variant.languageTag === settings.sourceLanguageTag)) {
 			report({
-				messageId: id,
+				messageId: message.id,
 				languageTag: settings.sourceLanguageTag,
 				body: {
-					en: `Message with id '${id}' is specified, but missing in the source.`,
+					en: `Message with id '${message.id}' is specified, but missing in the source.`,
 				},
 			})
 		}

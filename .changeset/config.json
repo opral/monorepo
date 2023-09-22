@@ -4,6 +4,5 @@
 	"commit": false,
 	"access": "restricted",
 	"baseBranch": "main",
-	"updateInternalDependencies": "minor",
 	"ignore": ["template-*"]
 }

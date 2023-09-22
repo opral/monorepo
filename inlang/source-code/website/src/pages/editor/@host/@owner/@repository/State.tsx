@@ -27,6 +27,7 @@ import {
 } from "@inlang/sdk"
 import { parseOrigin, telemetryBrowser } from "@inlang/telemetry"
 import type { Result } from "@inlang/result"
+import { onSignOut } from "#src/services/auth/index.js"
 
 type EditorStateSchema = {
 	/**
@@ -195,7 +196,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		setSearchParams({ key: "lint", value: filteredMessageLintRules() })
 	})
 
-	const [localStorage] = useLocalStorage() ?? []
+	const [localStorage, setLocalStorage] = useLocalStorage() ?? []
 
 	const [repo] = createResource(
 		() => {
@@ -207,7 +208,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			if (host && owner && repository) {
 				const newRepo = await openRepository(`${host}/${owner}/${repository}`, {
 					nodeishFs: createNodeishMemoryFs(),
-					corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
+					corsProxy: publicEnv.PUBLIC_GIT_PROXY_BASE_URL + publicEnv.PUBLIC_GIT_PROXY_PATH,
 				})
 				setLastPullTime(new Date())
 				return newRepo
@@ -317,7 +318,14 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}
 			try {
 				if (args.currentRepo) {
-					return await args.currentRepo.isCollaborator({ username: args.user.username })
+					return await args.currentRepo
+						.isCollaborator({ username: args.user.username })
+						.catch((err: any) => {
+							if (err.status === 401) {
+								onSignOut({ setLocalStorage })
+							}
+							return false
+						})
 				} else {
 					return false
 				}

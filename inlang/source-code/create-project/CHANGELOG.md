@@ -1,5 +1,23 @@
 # @inlang/create-project
 
+## 0.5.0
+
+### Minor Changes
+
+- 0d0502f4: deprecate detectedLanguageTags
+
+### Patch Changes
+
+- Updated dependencies [0d0502f4]
+  - @inlang/plugin@1.3.0
+  - @inlang/sdk@0.7.0
+
+## 0.4.0
+
+### Minor Changes
+
+- 1df3ba43: improve auto settings & ide extension structure
+
 ## 0.3.0
 
 ### Minor Changes

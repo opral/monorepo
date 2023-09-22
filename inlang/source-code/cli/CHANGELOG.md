@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 1.7.0
+
+### Minor Changes
+
+- aaf2c7e4: chore: update dependencies
+
 ## 1.6.0
 
 ### Minor Changes

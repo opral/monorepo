@@ -1,5 +1,27 @@
 # @inlang/sdk
 
+## 0.7.0
+
+### Minor Changes
+
+- 0d0502f4: deprecate detectedLanguageTags
+
+### Patch Changes
+
+- Updated dependencies [0d0502f4]
+  - @inlang/plugin@1.3.0
+
+## 0.6.0
+
+### Minor Changes
+
+- 84ed67f2: Update @inlang/language-tag dependency which removes the language tag validation, unblocking several users of inlang.
+
+### Patch Changes
+
+- Updated dependencies [84ed67f2]
+  - @inlang/translatable@1.2.0
+
 ## 0.5.0
 
 ### Minor Changes
