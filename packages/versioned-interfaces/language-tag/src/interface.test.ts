@@ -10,7 +10,7 @@ describe("verify language tags", () => {
 			"de",
 			"agy",
 			"en-US",
-			"zh-Latn",
+			"zh-Hans",
 			"de-agy",
 			"es-417",
 			"sgn-US",
