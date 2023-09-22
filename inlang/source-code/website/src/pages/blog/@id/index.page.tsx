@@ -1,6 +1,6 @@
 import { Meta, Title } from "@solidjs/meta"
 import { Layout } from "#src/pages/Layout.jsx"
-import { Show } from "solid-js"
+import { Show, onMount } from "solid-js"
 import type { GeneratedTableOfContents as ProcessedTableOfContents } from "./index.page.server.jsx"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
@@ -24,6 +24,60 @@ export function Page(props: PageProps) {
 		const language = locale() ?? defaultLanguage
 		return language !== defaultLanguage ? "/" + language : ""
 	}
+
+	const replaceChars = (str: string) => {
+		return str
+			.replaceAll(" ", "-")
+			.replaceAll("/", "")
+			.replace("#", "")
+			.replaceAll("(", "")
+			.replaceAll(")", "")
+			.replaceAll("?", "")
+			.replaceAll(".", "")
+			.replaceAll("@", "")
+			.replaceAll(/([\uE000-\uF8FF]|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDDFF])/g, "")
+			.replaceAll("✂", "")
+	}
+
+	const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
+		const element = document.getElementById(anchor)
+		if (element && window) {
+			window.scrollTo({
+				top: element.offsetTop - 96,
+				behavior: behavior ?? "instant",
+			})
+		}
+		window.history.pushState({}, "", `${currentPageContext.urlParsed.pathname}#${anchor}`)
+	}
+
+	onMount(async () => {
+		for (const heading of props.markdown
+			.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
+			.map((heading: string) => {
+				// We have to use DOMParser to parse the heading string to a HTML element
+				const parser = new DOMParser()
+				const doc = parser.parseFromString(heading, "text/html")
+				const node = doc.body.firstChild as HTMLElement
+
+				return node.innerText.replace(/(<([^>]+)>)/gi, "").toString()
+			})) {
+			if (
+				currentPageContext.urlParsed.hash?.replace("#", "").toString() ===
+				replaceChars(heading.toString().toLowerCase())
+			) {
+				/* Wait for all images to load before scrolling to anchor */
+				await Promise.all(
+					[...document.querySelectorAll("img")].map((img) =>
+						img.complete
+							? Promise.resolve()
+							: new Promise((resolve) => img.addEventListener("load", resolve))
+					)
+				)
+
+				scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
+			}
+		}
+	})
 
 	return (
 		<>
