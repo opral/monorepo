@@ -3,12 +3,12 @@
 		"hero": {
 			"keyword": "Globalisierungs-",
 			"title": "Infrastruktur für Software",
+			"cta": "Loslegen",
 			"description": {
 				"inlangs": "inlangs",
 				"ecosystem": "Ökosystem",
 				"benefit": "vereinfacht die Anpassung deiner Anwendung an verschiedene Märkte."
 			},
-			"cta": "Loslegen",
 			"githubLink": "Auf GitHub anzeigen",
 			"usedBy": "Verwendet von Entwicklern bei"
 		},
@@ -28,7 +28,7 @@
 			},
 			"extension": {
 				"title": "IDE-Extension",
-				"description": "Behandeln Sie Übersetzungen direkt in VSCode über eine Extension.",
+				"description": "Verwalten Sie Übersetzungen direkt in VSCode über eine Extension.",
 				"benefit1": "Extrahieren Sie Nachrichten aus Code",
 				"benefit2": "Inline-Anmerkungen hinter dem Key",
 				"benefit3": "Automatische Aktualisierung für synchronisierte Ressourcen"
@@ -98,7 +98,7 @@
 			"marketplace": "Marktplatz",
 			"roadmap": "Produktplan",
 			"github": "GitHub",
-			"twitter": "Twitter",
+			"twitter": "X",
 			"discord": "Discord"
 		},
 		"contact": {

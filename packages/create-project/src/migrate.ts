@@ -5,11 +5,12 @@ import { pluginUrls, standardLintRules } from "./tryAutoGenProjectSettings.js"
 // @ts-ignore
 import { minify } from "terser"
 import type { Plugin } from "@inlang/plugin"
+import { detectLanguageTags } from "./detectLanguageTags.js"
 
 // we need to alias eval to supress esbuild warnigns
 const okEval = eval
 
-function parseDirtyValue(jsString: string) {
+export function parseDirtyValue(jsString: string) {
 	let normalized = jsString.trim()
 	if (normalized.endsWith(",")) {
 		normalized = normalized.slice(0, -1)
@@ -18,11 +19,33 @@ function parseDirtyValue(jsString: string) {
 	return JSON.parse(normalized)
 }
 
-function getCurrentPluginUrls(pluginName: string) {
+function updatePathPattern(obj: any): string | undefined {
+	if (typeof obj === "object" && obj !== null) {
+		for (const key in obj) {
+			if (key === "pathPattern") {
+				if (typeof obj[key] === "string") {
+					const updatedPathPattern = obj[key].replace(/{language}/g, "{languageTag}")
+					if (updatedPathPattern !== obj[key]) {
+						obj[key] = updatedPathPattern
+						return updatedPathPattern
+					}
+				}
+			} else {
+				const result = updatePathPattern(obj[key])
+				if (result) {
+					return result
+				}
+			}
+		}
+	}
+	return undefined
+}
+
+export function getCurrentPluginUrls(pluginName: string) {
 	return pluginUrls[pluginName]
 }
 
-function detectPlugins(url: string) {
+export function detectPlugins(url: string) {
 	const moduleDetections: Set<string> = new Set()
 	const lintRuleDetections: Set<string> = new Set()
 	const matches = url.matchAll(
@@ -60,6 +83,15 @@ export async function migrateProjectSettings(args: {
 	filePath?: string
 }): Promise<{ warnings: string[]; config?: ProjectSettings }> {
 	let warnings: string[] = []
+	// check if no project.inlang.json exists
+	const newSettingsFile = await args.nodeishFs
+		.readFile("./project.inlang.json", { encoding: "utf-8" })
+		.catch(() => "")
+
+	if (newSettingsFile) {
+		warnings.push("Found project.inlang.json, skipping migration.")
+		return { warnings }
+	}
 
 	const fileString = await args.nodeishFs
 		.readFile("./inlang.config.js", { encoding: "utf-8" })
@@ -134,6 +166,7 @@ export async function migrateProjectSettings(args: {
 	}
 
 	let config: ProjectSettings = {
+		$schema: "https://inlang.com/schema/project-settings",
 		sourceLanguageTag: legacyConfigBuild?.referenceLanguage || "",
 		languageTags: legacyConfigBuild?.languages || [],
 		modules: legacyConfigBuild?.plugins?.flatMap((entry: any) => entry) || [],
@@ -146,7 +179,24 @@ export async function migrateProjectSettings(args: {
 		const lineParsingWarning =
 			"Could not execute the inlang configuration and falling back to line based parsing, which can be unreliable for more complex setups."
 		warnings = [...warnings, lineParsingWarning, ...parseErrors]
+
 		config = extractedConfig
+	}
+
+	const pathPattern = updatePathPattern(config)
+
+	// detect language tags
+	if (!config.languageTags.length && pathPattern) {
+		const languageTags = await detectLanguageTags({
+			nodeishFs: args.nodeishFs,
+			pathPattern,
+		})
+		config.languageTags = languageTags
+	}
+
+	// remove standard lint rules
+	if (config["plugin.inlang.standardLintRules"]) {
+		delete config["plugin.inlang.standardLintRules"]
 	}
 
 	const configString = JSON.stringify(config, undefined, 4)
@@ -154,7 +204,7 @@ export async function migrateProjectSettings(args: {
 	return { warnings, config }
 }
 
-function lineParsing(
+export function lineParsing(
 	legacyConfig: string,
 	config: ProjectSettings,
 ): { extractedConfig: ProjectSettings; parseErrors: string[] } {

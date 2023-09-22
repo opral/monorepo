@@ -418,6 +418,14 @@ function LanguagePicker() {
 			code: "zh",
 			name: "中文",
 		},
+		{
+			code: "sk",
+			name: "Slovak",
+		},
+		{
+			code: "pt_BR",
+			name: "Portuguese Brazil",
+		},
 	]
 
 	const handleSwitchTranslation = (language: { code: string; name: string }) => {

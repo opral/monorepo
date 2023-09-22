@@ -1,7 +1,7 @@
 import type { Plugin } from "@inlang/plugin"
 
 type PluginErrorOptions = {
-	plugin: Plugin["id"]
+	plugin: Plugin["id"] | undefined
 } & Partial<Error>
 
 class PluginError extends Error {
@@ -10,7 +10,7 @@ class PluginError extends Error {
 	constructor(message: string, options: PluginErrorOptions) {
 		super(message)
 		this.name = "PluginError"
-		this.plugin = options.plugin
+		this.plugin = options.plugin ?? "unknown"
 	}
 }
 

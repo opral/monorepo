@@ -1,4 +1,4 @@
-import { type Accessor, createEffect, createSignal, on, onMount, type Setter, Show } from "solid-js"
+import { createEffect, createSignal, on, onMount, Show } from "solid-js"
 import { createTiptapEditor, useEditorJSON } from "solid-tiptap"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
@@ -29,8 +29,6 @@ export function PatternEditor(props: {
 	languageTag: LanguageTag
 	message: Message
 	lintReports: MessageLintReport[]
-	setMessageIsFocused: Setter<boolean>
-	messageIsFocused: Accessor<boolean>
 }) {
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const {
@@ -54,7 +52,10 @@ export function PatternEditor(props: {
 	const [isLineItemFocused, setIsLineItemFocused] = createSignal(false)
 
 	const handleLineItemFocusIn = () => {
-		if (document.activeElement?.tagName !== "SL-BUTTON") {
+		if (
+			!document.activeElement?.classList.contains("PatternEditor") &&
+			!document.activeElement?.classList.contains("tippy-box")
+		) {
 			if (document.activeElement !== textArea.children[0]) {
 				setIsLineItemFocused(false)
 			}
@@ -66,10 +67,6 @@ export function PatternEditor(props: {
 			}
 		}
 	}
-
-	createEffect(() => {
-		props.setMessageIsFocused(isLineItemFocused())
-	})
 
 	const sourceVariant = () =>
 		getVariant(props.message, { where: { languageTag: sourceLanguageTag()! } })
@@ -422,6 +419,7 @@ export function PatternEditor(props: {
 							prop:loading={machineTranslationIsLoading()}
 							prop:variant="neutral"
 							prop:size="small"
+							class="PatternEditor"
 						>
 							{/* @ts-ignore */}
 							<MaterialSymbolsTranslateRounded slot="prefix" />
@@ -437,6 +435,7 @@ export function PatternEditor(props: {
 								editor().commands.setContent(setTipTapMessage(referencePattern()!))
 								textArea.parentElement?.click()
 							}}
+							class="PatternEditor"
 						>
 							Revert
 						</sl-button>

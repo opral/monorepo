@@ -533,7 +533,7 @@ describe("variable reference", () => {
 })
 
 describe("formatting", () => {
-	it("should preserve the spacing resources and determine a default based on the majority for newly added resources", async () => {
+	it("should preserve the spacing of the source language and determine the spacing for new language resources", async () => {
 		// @prettier-ignore
 		const with4Spaces = `{
     "test": "test"
@@ -581,11 +581,11 @@ describe("formatting", () => {
 
 		expect(file1).toBe(with4Spaces)
 		expect(file2).toBe(with4Spaces)
-		expect(file3).toBe(withTabs)
+		expect(file3).toBe(with4Spaces)
 		expect(file4).toBe(with4Spaces)
 	})
 
-	it("should remember if a file has a new line at the end or not", async () => {
+	it("should preserve the 'ends with new line' of the source language and determine it for new language resources", async () => {
 		// @prettier-ignore
 		const withNewLine = `{
 	"test": "test"
@@ -615,7 +615,7 @@ describe("formatting", () => {
 		const file1 = await fs.readFile("./en.json", { encoding: "utf-8" })
 		const file2 = await fs.readFile("./fr.json", { encoding: "utf-8" })
 		expect(file1).toBe(withNewLine)
-		expect(file2).toBe(withoutNewLine)
+		expect(file2).toBe(withNewLine)
 	})
 
 	it("should escape `.` in flattened json structures", async () => {
@@ -748,7 +748,7 @@ describe("formatting", () => {
 		expect(json["c."]).toStrictEqual("test")
 	})
 
-	it("should correctly detect the nesting in a file and determine a default based on the majority for newly added resources", async () => {
+	it("should correctly detect the nesting in the source file and determine for new ones", async () => {
 		const withNesting = JSON.stringify(
 			{
 				test: {
@@ -816,7 +816,7 @@ describe("formatting", () => {
 
 		expect(file1).toBe(withNesting)
 		expect(file2).toBe(withNesting)
-		expect(file3).toBe(withoutNesting)
+		expect(file3).toBe(withNesting)
 		expect(file4).toBe(withNesting)
 	})
 })
@@ -977,47 +977,5 @@ describe("roundTrip", () => {
 			nodeishFs: fs,
 		})
 		expect(newMessage).toStrictEqual(messages)
-	})
-})
-
-describe("detectedLanguageTags", () => {
-	it("get correct LanguageTags with string pathPattern", async () => {
-		const fs = createNodeishMemoryFs()
-		await fs.writeFile("./en.json", "{}")
-		await fs.writeFile("./de.json", "{}")
-		await fs.writeFile("./fr.json", "{}")
-		const settings: PluginSettings = {
-			pathPattern: "./{languageTag}.json",
-		}
-		const detectedLanguages = await plugin.detectedLanguageTags!({ settings, nodeishFs: fs })
-		expect(detectedLanguages).toStrictEqual(["en", "de", "fr"])
-	})
-
-	it("get correct LanguageTags with object pathPattern", async () => {
-		const fs = createNodeishMemoryFs()
-		await fs.mkdir("./en")
-		await fs.writeFile("./en/common.json", "{}")
-		await fs.mkdir("./de")
-		await fs.writeFile("./de/common.json", "{}")
-		const settings: PluginSettings = {
-			pathPattern: {
-				common: "./{languageTag}/common.json",
-			},
-		}
-		const detectedLanguages = await plugin.detectedLanguageTags!({ settings, nodeishFs: fs })
-		expect(detectedLanguages).toStrictEqual(["en", "de"])
-	})
-
-	it("get correct LanguageTags with ignore", async () => {
-		const fs = createNodeishMemoryFs()
-		await fs.writeFile("./en.json", "{}")
-		await fs.writeFile("./de.json", "{}")
-		await fs.writeFile("./package.json", "{}")
-		const settings: PluginSettings = {
-			pathPattern: "./{languageTag}.json",
-			ignore: ["package.json"],
-		}
-		const detectedLanguages = await plugin.detectedLanguageTags!({ settings, nodeishFs: fs })
-		expect(detectedLanguages).toStrictEqual(["en", "de"])
 	})
 })

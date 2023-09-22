@@ -17,6 +17,9 @@ import { createI18nContext } from "@solid-primitives/i18n"
 import de from "../../lang/de.json?raw"
 import en from "../../lang/en.json?raw"
 import zh from "../../lang/zh.json?raw"
+import sk from "../../lang/sk.json?raw"
+import pt_BR from "../../lang/pt_BR.json?raw"
+
 import { Meta } from "@solidjs/meta"
 
 export type RootProps = Accessor<{
@@ -40,6 +43,8 @@ export function Root(props: {
 			de: JSON.parse(de),
 			en: JSON.parse(en),
 			zh: JSON.parse(zh),
+			sk: JSON.parse(sk),
+			pt_BR: JSON.parse(pt_BR),
 		},
 		"en",
 	)

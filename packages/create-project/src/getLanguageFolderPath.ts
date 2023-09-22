@@ -17,7 +17,6 @@ export const getLanguageFolderPath = async (args: {
 	nodeishFs: NodeishFilesystem
 	pathJoin: (...args: string[]) => string
 }): Promise<string | undefined> => {
-	console.info("Searching for language folder in", args.rootDir)
 	try {
 		const searchForLanguageFolder = async (
 			dir: string,
@@ -48,6 +47,7 @@ export const getLanguageFolderPath = async (args: {
 					!ignoredPaths.some((ignoredPath) => filePath.includes(ignoredPath))
 				) {
 					const folderName = file.toLowerCase()
+
 					if (potentialFolders.includes(folderName)) {
 						return filePath
 					}
