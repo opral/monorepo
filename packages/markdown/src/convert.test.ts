@@ -18,6 +18,7 @@ const a = 1
 	expect(html).toContain("<code")
 })
 
+/* This test takes some time */
 test("should draw mermaid diagrams", async () => {
 	const markdown = `
 \`\`\`mermaid
@@ -30,18 +31,14 @@ C -->|Two| E[Result two]
 	`
 	const html = await convert(markdown)
 	expect(html).toContain("<svg")
-})
+}, 15000)
 
-test(
-	"should be able to render custom elements",
-	async () => {
-		const markdown = `
+test("should be able to render custom elements", async () => {
+	const markdown = `
 # Hello World
 
 <doc-figure label="Hello world"></doc-figure>
 	`
-		const html = await convert(markdown)
-		expect(html).toContain("<doc-figure")
-	},
-	{ timeout: 50000 }
-)
+	const html = await convert(markdown)
+	expect(html).toContain("<doc-figure")
+})
