@@ -1,8 +1,7 @@
-import type { AllEnvVariables } from "@inlang/env-variables"
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js"
 import { createSignal, Show } from "solid-js"
 import IconGithub from "~icons/cib/github"
-import { githubAuthUrl } from "../implementation.js"
+import { login } from "@lix-js/client"
 
 /**
  * A dialog that prompts the user to login with GitHub.
@@ -17,7 +16,6 @@ import { githubAuthUrl } from "../implementation.js"
 export function SignInDialog(props: {
 	/** forwarding the ref */
 	ref: SlDialog
-	githubAppClientId: AllEnvVariables["PUBLIC_GITHUB_APP_CLIENT_ID"]
 	onClickOnSignInButton: () => void
 }) {
 	// web component slots load eagarly. applying manual conditional rendering
@@ -37,7 +35,7 @@ export function SignInDialog(props: {
 					prop:variant="primary"
 					onClick={() => {
 						props.onClickOnSignInButton()
-						window.open(githubAuthUrl(props.githubAppClientId), "_blank")
+						login()
 					}}
 				>
 					{/* @ts-ignore */}
