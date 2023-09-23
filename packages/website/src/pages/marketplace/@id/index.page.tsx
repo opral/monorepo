@@ -47,6 +47,46 @@ export function Page(props: PageProps) {
 	const readme = () =>
 		typeof props.manifest.readme === "object" ? props.manifest.readme.en : props.manifest.readme
 
+	const tableOfContents = () => {
+		const tableOfContents = {}
+
+		if (props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)) {
+			props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g).map((heading: string) => {
+				// We have to use DOMParser to parse the heading string to a HTML element
+				const parser = new DOMParser()
+				const doc = parser.parseFromString(heading, "text/html")
+				const node = doc.body.firstChild as HTMLElement
+
+				let lastH1Key = ""
+
+				if (node.tagName === "H1") {
+					// @ts-ignore
+					tableOfContents[node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")] = []
+				} else {
+					// @ts-ignore
+					if (!tableOfContents[lastH1Key]) {
+						const h1Keys = Object.keys(tableOfContents)
+						// @ts-ignore
+						lastH1Key = h1Keys.at(-1)
+						// @ts-ignore
+						tableOfContents[lastH1Key].push(
+							node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")
+						)
+					} else {
+						// @ts-ignore
+						tableOfContents[lastH1Key].push(
+							node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")
+						)
+					}
+				}
+
+				return node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")
+			})
+		}
+
+		return tableOfContents
+	}
+
 	return (
 		<>
 			<Title>{props.manifest && displayName()}</Title>
@@ -194,16 +234,7 @@ export function Page(props: PageProps) {
 											<NavbarCommon
 												displayName={displayName}
 												getLocale={getLocale}
-												headings={props.markdown
-													.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
-													.map((heading: string) => {
-														// We have to use DOMParser to parse the heading string to a HTML element
-														const parser = new DOMParser()
-														const doc = parser.parseFromString(heading, "text/html")
-														const node = doc.body.firstChild as HTMLElement
-
-														return node.innerText.replace(/(<([^>]+)>)/gi, "").toString()
-													})}
+												tableOfContents={tableOfContents}
 											/>
 										</div>
 										<Markdown markdown={props.markdown} />
@@ -232,9 +263,9 @@ function Markdown(props: { markdown: string; fullWidth?: boolean }) {
 }
 
 function NavbarCommon(props: {
-	headings: string[]
 	getLocale: () => string
 	displayName: () => string
+	tableOfContents: () => Record<string, string[]>
 }) {
 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
 
@@ -272,10 +303,10 @@ function NavbarCommon(props: {
 	}
 
 	onMount(async () => {
-		for (const heading of props.headings) {
+		for (const sectionTitle of Object.keys(props.tableOfContents())) {
 			if (
 				currentPageContext.urlParsed.hash?.replace("#", "").toString() ===
-				replaceChars(heading.toString().toLowerCase())
+				replaceChars(sectionTitle.toString().toLowerCase())
 			) {
 				/* Wait for all images to load before scrolling to anchor */
 				await Promise.all(
@@ -286,38 +317,78 @@ function NavbarCommon(props: {
 					)
 				)
 
-				scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
-				setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
+				scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
+				setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
+			} else {
+				for (const heading of props.tableOfContents()[sectionTitle]!) {
+					if (
+						currentPageContext.urlParsed.hash?.replace("#", "").toString() ===
+						replaceChars(heading.toString().toLowerCase())
+					) {
+						/* Wait for all images to load before scrolling to anchor */
+						await Promise.all(
+							[...document.querySelectorAll("img")].map((img) =>
+								img.complete
+									? Promise.resolve()
+									: new Promise((resolve) => img.addEventListener("load", resolve))
+							)
+						)
+
+						scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
+						setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
+					}
+				}
 			}
 		}
 	})
 
 	return (
 		<div class="mb-12 sticky top-28">
-			<h2 class="text-lg font-semibold mb-4">Documentation</h2>
-			<ul class="space-y-2" role="list">
-				<For each={props.headings}>
-					{(heading) => (
-						<Show when={!heading.includes(props.displayName())}>
-							<li>
-								<a
-									onClick={(e) => {
-										e.preventDefault()
-										scrollToAnchor(replaceChars(heading.toString().toLowerCase()))
-										setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
-									}}
-									class={
-										(isSelected(replaceChars(heading.toString().toLowerCase()))
-											? "text-primary font-semibold "
-											: "text-info/80 hover:text-on-background ") +
-										"tracking-wide text-sm block w-full font-normal mb-2"
-									}
-									href={`#${replaceChars(heading.toString().toLowerCase())}`}
-								>
-									{heading.replace("#", "")}
-								</a>
-							</li>
-						</Show>
+			<ul class="space-y-2 flex items-start" role="list">
+				<For each={Object.keys(props.tableOfContents())}>
+					{(sectionTitle) => (
+						<li>
+							<a
+								onClick={(e) => {
+									e.preventDefault()
+									scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
+									setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
+								}}
+								class={
+									(isSelected(replaceChars(sectionTitle.toString().toLowerCase()))
+										? "text-on-background font-semibold "
+										: "text-info/80 hover:text-on-background ") +
+									"tracking-wide block w-full font-normal pb-2 mb-2 border-b border-b-surface-2"
+								}
+								href={`#${replaceChars(sectionTitle.toString().toLowerCase())}`}
+							>
+								{sectionTitle.replace("#", "")}
+							</a>
+							<ul class="space-y-2 mb-8" role="list">
+								<For each={props.tableOfContents()[sectionTitle]}>
+									{(heading) => (
+										<li>
+											<a
+												onClick={(e) => {
+													e.preventDefault()
+													scrollToAnchor(replaceChars(heading.toString().toLowerCase()))
+													setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
+												}}
+												class={
+													(isSelected(replaceChars(heading.toString().toLowerCase()))
+														? "text-primary font-semibold "
+														: "text-info/80 hover:text-on-background ") +
+													"tracking-wide text-sm block w-full font-normal mb-2"
+												}
+												href={`#${replaceChars(heading.toString().toLowerCase())}`}
+											>
+												{heading.replace("#", "")}
+											</a>
+										</li>
+									)}
+								</For>
+							</ul>
+						</li>
 					)}
 				</For>
 			</ul>
