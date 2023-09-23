@@ -26,7 +26,14 @@ export async function convert(markdown: string): Promise<string> {
 		.use(rehypeRaw)
 		/* @ts-ignore */
 		.use(rehypeSanitize, {
-			tagNames: ["doc-figure", "doc-link", "doc-links", "doc-icon", ...defaultSchema.tagNames!],
+			tagNames: [
+				"doc-figure",
+				"doc-link",
+				"doc-copy",
+				"doc-links",
+				"doc-icon",
+				...defaultSchema.tagNames!,
+			],
 			attributes: {
 				"doc-figure": ["src", "alt", "caption"],
 				"doc-link": ["href", "description", "title", "icon"],
@@ -52,7 +59,8 @@ export async function convert(markdown: string): Promise<string> {
 			ul: "doc-list-disc doc-list-inside",
 			ol: "doc-list-decimal doc-list-inside",
 			li: "doc-my-3",
-			table: "doc-table-auto doc-w-full doc-my-6 doc-rounded-xl doc-text-left",
+			table:
+				"doc-table-auto doc-w-full doc-my-6 doc-rounded-xl doc-text-left max-w-full overflow-x-scroll",
 			thead: "doc-font-medium pb-2 doc-border-b border-surface-4 doc-text-left",
 			th: "doc-py-2 doc-font-medium doc-border-b border-surface-2",
 			tr: "doc-py-2 doc-border-b border-surface-2",
@@ -63,6 +71,9 @@ export async function convert(markdown: string): Promise<string> {
 		/* @ts-ignore */
 		.use(rehypeAutolinkHeadings, {
 			behavior: "wrap",
+			properties: {
+				onclick: `event.preventDefault(); window.scrollTo({top: document.getElementById(event.target.hash.substring(1)).offsetTop - 96, behavior: "smooth"}); window.history.pushState(null, null, event.target.hash);`,
+			},
 		})
 		/* @ts-ignore */
 		.use(rehypeRewrite, {
@@ -97,30 +108,16 @@ export async function convert(markdown: string): Promise<string> {
 						]
 					}
 				} else if (
-					// !TODO: Lit Element for that, H1 Section, H2 Mini Überschrift, Richtiges Springen, Gallery bei Marketplace
 					node.tagName === "pre" &&
 					!node.children[0].properties.className.includes("language-mermaid")
 				) {
 					node.children = [
 						{
 							type: "element",
-							tagName: "button",
+							tagName: "doc-copy",
 							properties: {
-								className:
-									"doc-absolute doc-right-3 doc-top-2.5 doc-p-1 doc-rounded-md doc-bg-surface-100 doc-font-sans doc-opacity-70 doc-transition-opacity hover:doc-opacity-50",
-								style: "z-index: 1; color: white;",
-								onclick: `navigator.clipboard.writeText(this.parentElement.innerText.replace("Copy", ""));`,
+								className: "doc-absolute doc-right-3 doc-top-3 doc-font-sans text-sm",
 							},
-							children: [
-								{
-									type: "element",
-									tagName: "p",
-									properties: {
-										className: "doc-text-sm",
-									},
-									children: [{ type: "text", value: "Copy" }],
-								},
-							],
 						},
 						...node.children,
 					]

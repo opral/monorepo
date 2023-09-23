@@ -169,9 +169,8 @@ export function Page(props: PageProps) {
 											</Button>
 										</div>
 									</div>
-									<div class="w-full flex md:justify-end">
+									<div class="w-full">
 										<div class="flex flex-col gap-4 items-col flex-shrink-0">
-											<h2 class="font-semibold text-lg">Information</h2>
 											<div>
 												<h3 class="text-surface-400 text-sm mb-2">Publisher</h3>
 												<div class="flex items-center gap-2">
@@ -228,16 +227,16 @@ export function Page(props: PageProps) {
 									when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}
 									fallback={<Markdown markdown={props.markdown} fullWidth />}
 								>
-									<div class="grid md:grid-cols-4 grid-cols-1 col-span-1 md:col-span-4">
+									<div class="grid md:grid-cols-4 grid-cols-1 col-span-1 md:col-span-4 gap-16">
+										<Markdown markdown={props.markdown} />
 										{/* Classes to be added: sticky z-10 top-16 pt-8 md:pt-0 md:static bg-background */}
-										<div class="col-span-1">
+										<div class="col-span-1 md:order-1 -order-1">
 											<NavbarCommon
 												displayName={displayName}
 												getLocale={getLocale}
 												tableOfContents={tableOfContents}
 											/>
 										</div>
-										<Markdown markdown={props.markdown} />
 									</div>
 								</Show>
 							</Show>
