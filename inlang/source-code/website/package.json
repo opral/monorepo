@@ -88,7 +88,6 @@
 		"fast-glob": "^3.2.12",
 		"patch-package": "8.0.0",
 		"postcss": "^8.4.18",
-		"rehype-accessible-emojis": "0.3.2",
 		"tailwindcss": "^3.3.0",
 		"typescript": "5.2.2",
 		"unplugin-icons": "^0.15.0",
@@ -101,10 +100,5 @@
 	"peerDependencies": {
 		"express": "^4.18.2"
 	},
-	"license": "Apache-2.0",
-	"description": "This module is a monolith that contains inlang's website and editor to manage translations.",
-	"version": "1.0.0",
-	"main": "index.js",
-	"keywords": [],
-	"author": ""
+	"license": "Apache-2.0"
 }
