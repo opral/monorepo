@@ -61,7 +61,9 @@ export async function convert(markdown: string): Promise<string> {
 			img: "doc-mx-auto doc-my-4 doc-rounded-2xl doc-border border-surface-2",
 		})
 		/* @ts-ignore */
-		.use(rehypeAutolinkHeadings)
+		.use(rehypeAutolinkHeadings, {
+			behavior: "wrap",
+		})
 		/* @ts-ignore */
 		.use(rehypeRewrite, {
 			rewrite: (node) => {
@@ -74,26 +76,6 @@ export async function convert(markdown: string): Promise<string> {
 					node.tagName === "h6"
 				) {
 					if (node.type === "element") {
-						node.properties = {
-							...node.properties,
-							onclick:
-								"var newHash = '" +
-								node.properties.id +
-								"';" +
-								"var currentURL = window.location.href;" +
-								"var baseURL = currentURL.split('#')[0];" +
-								"history.pushState(null, null, baseURL + '#' + newHash);" +
-								"navigator.clipboard.writeText(baseURL + '#' + newHash);" +
-								"var toast = document.createElement('sl-alert');" +
-								"toast.variant = 'success';" +
-								"toast.closable = false;" +
-								"toast.duration = 1000;" +
-								"toast.innerHTML = `<doc-icon slot='icon' icon='material-symbols:check-circle-outline-rounded' size='1.2em'></doc-icon>" +
-								"Copied link to clipboard`;" +
-								"document.body.append(toast);" +
-								"toast.toast();" +
-								"notify('Copied to clipboard', 'success', 'clipboard-check', 1000);",
-						}
 						node.children = [
 							{
 								type: "element",
@@ -115,6 +97,7 @@ export async function convert(markdown: string): Promise<string> {
 						]
 					}
 				} else if (
+					// !TODO: Lit Element for that, H1 Section, H2 Mini Überschrift, Richtiges Springen, Gallery bei Marketplace
 					node.tagName === "pre" &&
 					!node.children[0].properties.className.includes("language-mermaid")
 				) {
@@ -126,17 +109,7 @@ export async function convert(markdown: string): Promise<string> {
 								className:
 									"doc-absolute doc-right-3 doc-top-2.5 doc-p-1 doc-rounded-md doc-bg-surface-100 doc-font-sans doc-opacity-70 doc-transition-opacity hover:doc-opacity-50",
 								style: "z-index: 1; color: white;",
-								onclick:
-									`navigator.clipboard.writeText(this.parentElement.innerText.replace("Copy", ""));` +
-									"var toast = document.createElement('sl-alert');" +
-									"toast.variant = 'success';" +
-									"toast.closable = false;" +
-									"toast.duration = 1000;" +
-									"toast.innerHTML = `<doc-icon slot='icon' icon='material-symbols:check-circle-outline-rounded' size='1.2em'></doc-icon>" +
-									"Copied code to clipboard`;" +
-									"document.body.append(toast);" +
-									"toast.toast();" +
-									"notify('Copied to clipboard', 'success', 'clipboard-check', 1000);",
+								onclick: `navigator.clipboard.writeText(this.parentElement.innerText.replace("Copy", ""));`,
 							},
 							children: [
 								{
