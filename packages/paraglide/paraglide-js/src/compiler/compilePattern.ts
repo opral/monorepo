@@ -1,11 +1,20 @@
-import type { Expression, Pattern } from "@inlang/sdk"
+import type { Pattern } from "@inlang/sdk"
 
-export const compilePattern = (pattern: Pattern): string => {
+/**
+ * Compiles a pattern into a template literal string.
+ *
+ * @example
+ *  const { compiled, params } = compilePattern([{ type: "Text", value: "Hello " }, { type: "VariableReference", name: "name" }])
+ *  >> compiled === "`Hello ${params.name}`"
+ */
+export const compilePattern = (
+	pattern: Pattern,
+): {
+	params: Record<string, "NonNullable<unknown>">
+	compiled: string
+} => {
 	let result = ""
-	// parameter names and TypeScript types
-	// only allowing types that JS transpiles to strings under the hood like string and number.
-	// the pattern nodes must be extended to hold type information in the future.
-	const params: Array<{ name: Expression["name"]; type: "NonNullable<unknown>" }> = []
+	const params: Record<string, "NonNullable<unknown>"> = {}
 	for (const element of pattern) {
 		switch (element.type) {
 			case "Text":
@@ -13,19 +22,14 @@ export const compilePattern = (pattern: Pattern): string => {
 				break
 			case "VariableReference":
 				result += "${params." + element.name + "}"
-				params.push({ name: element.name, type: "NonNullable<unknown>" })
+				params[element.name] = "NonNullable<unknown>"
 				break
 			default:
 				throw new Error("Unknown pattern element type: " + element)
 		}
 	}
-	if (params.length > 0) {
-		// construct JSDoc comment for typesafe params
-		result = `/** @param {{ ${params
-			.map((p) => p.name + ": " + p.type)
-			.join(", ")} }} params */(params) => \`${result}\``
-	} else {
-		result = `() => \`${result}\``
+	return {
+		params,
+		compiled: "`" + result + "`",
 	}
-	return result
 }

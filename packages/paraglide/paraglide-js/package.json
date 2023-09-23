@@ -23,7 +23,7 @@
 	},
 	"dependencies": {
 		"@inlang/sdk": "*",
-		"ts-dedent": "2.2.0"
+		"dedent": "1.5.1"
 	},
 	"devDependencies": {
 		"@rollup/plugin-terser": "0.4.3",

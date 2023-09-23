@@ -1,6 +1,5 @@
 import { expectType } from "tsd"
-
-const runtime = await import("./runtime.js")
+import * as runtime from "./runtime.js"
 
 // --------- sourceLanguageTag ---------
 
