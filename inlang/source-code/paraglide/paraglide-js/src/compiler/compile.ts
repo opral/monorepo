@@ -1,4 +1,4 @@
-import type { Message } from "@inlang/sdk"
+import type { Message, ProjectSettings } from "@inlang/sdk"
 import { compileMessage } from "./compileMessage.js"
 import dedent from "dedent"
 
@@ -7,6 +7,7 @@ import dedent from "dedent"
  */
 export const compile = (args: {
 	messages: Message[]
+	settings: ProjectSettings
 }): {
 	"index.js": string
 	"messages.js": string
@@ -26,12 +27,12 @@ ${compiledMessages}
 /**
  * The project's source language tag.
  */
-export const sourceLanguageTag = "en"
+export const sourceLanguageTag = "${args.settings.sourceLanguageTag}"
 
 /**
  * The project's language tags.
  */
-export const languageTags = /** @type {const} */ (["en", "de"])
+export const languageTags = /** @type {const} */ (${JSON.stringify(args.settings.languageTags)})
 
 /**
  * @type {typeof languageTags[number]}
@@ -53,7 +54,6 @@ export const languageTag = () => {
 export const setLanguageTag = (tag) => {
 	_currentLanguageTag = tag
 }
-
 `,
 	}
 }
