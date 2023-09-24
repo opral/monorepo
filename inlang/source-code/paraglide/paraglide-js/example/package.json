@@ -1,0 +1,11 @@
+{
+	"name": "@inlang/paraglide-js-example",
+	"type": "module",
+	"scripts": {
+		"build": "paraglide-js compile",
+		"start": "node ./src/main.js"
+	},
+	"dependencies": {
+		"@inlang/paraglide-js": "*"
+	}
+}
