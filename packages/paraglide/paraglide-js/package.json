@@ -7,11 +7,15 @@
 		"access": "public"
 	},
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/index.js",
+		"./m": "./dist/messages.js"
+	},
+	"bin": {
+		"paraglide-js": "echo 'This is a library, not a CLI tool."
 	},
 	"files": [
 		"./dist",
-		"./src"
+		"./bin"
 	],
 	"scripts": {
 		"build": "tsc --build",
