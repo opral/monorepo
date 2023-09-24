@@ -3,7 +3,7 @@
 Paraglide JS is the i18n library for inlang projects. 
 
 - [x] plug & play with the [inlang ecosystem](https://inlang.com/marketplace)
-- [x] storage agnostic: use any message format you want (JSON, YAML, TOML, ...) via inlang plugins
+- [x] storage agnostic: use any message format you want (JSON, PO, ICU, ...) via inlang plugins
 - [x] compiler-based: efficient, typesafe and tiny (less than 1kb gzipped)
 - [x] tree-shaking: only bundles the messages that are used
 - [x] no async: SSR, SEO and instant loading
