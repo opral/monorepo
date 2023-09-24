@@ -2,13 +2,14 @@
 
 Paraglide JS is the i18n library for inlang projects. 
 
-Under the hood, Paraglide JS compiles an inlang project into a use-case optimized i18n library. The keyword is "compiles". By leveraging a compiler, Paraglide JS eliminates a class of edge cases while also being simpler, faster, and more reliable than other i18n libraries. Oh, and it's also typesafe :) 
-
 - [x] plug & play with the [inlang ecosystem](https://inlang.com/marketplace)
 - [x] storage agnostic: use any message format you want (JSON, YAML, TOML, ...) via inlang plugins
 - [x] compiler-based: efficient, typesafe and tiny (less than 1kb gzipped)
 - [x] tree-shaking: only bundles the messages that are used
-- [x] no async: SSR, SEO and instant loading 
+- [x] no async: SSR, SEO and instant loading
+
+Paraglide JS compiles an inlang project into a use-case optimized i18n library. The keyword is "compiles". By leveraging a compiler, Paraglide JS eliminates a class of edge cases while also being simpler, faster, and more reliable than other i18n libraries. Oh, and it's also typesafe out of the box :) 
+
 
 ## Usage
 
