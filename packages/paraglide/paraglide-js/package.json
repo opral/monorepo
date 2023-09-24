@@ -31,7 +31,6 @@
 		"@ts-morph/bootstrap": "0.20.0",
 		"@vitest/coverage-v8": "0.34.3",
 		"rollup": "3.29.1",
-		"tsd": "0.29.0",
 		"typescript": "5.2.2",
 		"vitest": "0.34.3"
 	}
