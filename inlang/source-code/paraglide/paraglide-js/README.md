@@ -53,7 +53,7 @@ npm install @inlang/paraglide-js
 ```diff
 {
   "scripts": {
-+    "build": "paraglide-js"
++    "build": "paraglide-js compile"
   }
 }
 ```
