@@ -8,13 +8,12 @@ describe("verify language tags", () => {
 		const validLanguageTags: string[] = [
 			"en",
 			"de",
-			"agy",
+			"pt-BR",
 			"en-US",
 			"zh-Hans",
-			"de-agy",
-			"es-417",
-			"sgn-US",
-			"sgn-DE-variant",
+			"de-DE",
+			"es-419",
+			"de-DE-1991",
 			"i-default",
 		]
 
