@@ -10,6 +10,7 @@ import { ProjectSettings } from "@inlang/sdk"
 import { tryCatch } from "@inlang/result"
 import type { Step } from "./index.page.jsx"
 import { registry } from "@inlang/marketplace-registry"
+import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"
 
 export function InstallationProvider(props: {
@@ -191,6 +192,8 @@ async function initializeRepo(
 		return
 	}
 
+	const formatting = detectJsonFormatting(projectResult.data).serialize
+
 	const inlangProjectString = projectResult.data
 
 	const parseProjectResult = tryCatch(() => {
@@ -234,7 +237,7 @@ async function initializeRepo(
 	})
 	inlangProject.modules.push(...modulesToInstall)
 
-	const generatedInlangProject = JSON.stringify(inlangProject, undefined, 2)
+	const generatedInlangProject = formatting(inlangProject)
 
 	await repo.nodeishFs.writeFile("./project.inlang.json", generatedInlangProject)
 

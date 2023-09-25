@@ -70,6 +70,7 @@
 		"@iconify-json/cib": "^1.1.2",
 		"@iconify-json/material-symbols": "^1.1.26",
 		"@inlang/env-variables": "*",
+		"@inlang/detect-json-formatting": "*",
 		"@inlang/marketplace-manifest": "*",
 		"@inlang/marketplace-registry": "*",
 		"@inlang/result": "*",
