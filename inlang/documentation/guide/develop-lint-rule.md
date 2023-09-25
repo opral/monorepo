@@ -53,7 +53,7 @@ In your lint rule's `marketplace-manifest.json` make sure to define the followin
 |----------------------|---------------------------------------------------------------|
 | `id`                 | Unique identifier for your lint rule.                         |
 | `icon`        | Link to the icon of your lint rule (optional).              |
-| `coverImage`        | Optional cover image acting as preview of your lint rule.              |
+| `gallery`        | Optional gallery, the first image acts as coverImage for your lint rule.              |
 | `displayName`        | A user-friendly display name for your lint rule.              |
 | `description`        | Briefly describe what your lint rule checks for.              |
 | `readme`             | Link to the README documentation for your lint rule.          |

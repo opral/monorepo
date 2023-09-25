@@ -48,7 +48,7 @@ export class DocLink extends LitElement {
 	@property()
 	override title: string = ""
 	@property()
-	icon: "fast" | "add-plugin" | "" = ""
+	icon: string = ""
 	@property()
 	href: string = ""
 	@property()
