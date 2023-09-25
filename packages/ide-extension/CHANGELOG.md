@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.6.0
+
+### Minor Changes
+
+- 564a2df5: improved the wording of the automatic settings file prompt
+
 ## 1.5.0
 
 ### Minor Changes
