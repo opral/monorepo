@@ -33,6 +33,10 @@
 	}
 }
 
+.break-word {
+	word-break: break-word;
+}
+
 /* Overwriting the toast positioning. Read https://shoelace.style/components/alert?id=the-toast-stack */
 .sl-toast-stack {
 	right: 0;
