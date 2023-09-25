@@ -36,7 +36,7 @@ export const NotificationPopup = (props: NotificationPopupProps) => {
 						{(notification) => (
 							<div
 								class={
-									"grow flex gap-3 px-4 py-3 items-center border-b border-info last:border-none " +
+									"max-w-[300px] flex gap-3 px-4 py-3 items-center border-b border-info last:border-none " +
 									getTypeBasedColor(notification.notificationType)
 								}
 							>
@@ -47,7 +47,7 @@ export const NotificationPopup = (props: NotificationPopupProps) => {
 								)}
 								<div class="flex flex-col gap-1 grow border-b border-background/10 text-sm last:border-b-0">
 									<p>{notification.notificationTitle + "  "}</p>
-									<p class="text-on-inverted-surface text-xs">
+									<p class="text-on-inverted-surface text-xs break-word">
 										{notification.notificationDescription}
 									</p>
 								</div>
