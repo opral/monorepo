@@ -1,57 +1,29 @@
-import { convert } from "@inlang/markdown"
-import { RenderErrorPage } from "vite-plugin-ssr/RenderErrorPage"
 import fs from "node:fs/promises"
 import tableOfContents from "../../../../../../blog/tableOfContents.json"
-import type { OnBeforeRender } from "#src/renderer/types.js"
-import type { PageProps } from "./index.page.jsx"
+import { convert } from "@inlang/markdown"
+import { render } from "vite-plugin-ssr/abort"
 
+const renderedMarkdown = {} as Record<string, string>
 const repositoryRoot = new URL("../../../../../../", import.meta.url)
 
-export type GeneratedTableOfContents = Record<
-	string,
-	{
-		title: string
-		description: string
-		href: string
+export async function onBeforeRender(pageContext: any) {
+	const slug = pageContext.urlPathname.slice(`/blog/`.length)
+	if (renderedMarkdown[slug] === undefined) {
+		const content = tableOfContents.find((content) => content.slug === slug)
+
+		if (!content) {
+			throw render(404)
+		}
+
+		const text = await fs.readFile(new URL(`blog/${content.path}`, repositoryRoot), "utf-8")
+		const markdown = await convert(text)
+		renderedMarkdown[slug] = markdown
 	}
->
-
-const index: Record<string, Awaited<ReturnType<any>>> = {}
-const generatedTableOfContents = {} as GeneratedTableOfContents
-
-await generateIndexAndTableOfContents()
-
-export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => {
-	if (import.meta.env.DEV) {
-		await generateIndexAndTableOfContents()
-	}
-	if (
-		!Object.keys(index).includes(pageContext.urlPathname.replace("/blog/", "")) &&
-		pageContext.urlPathname !== "/blog"
-	) {
-		throw RenderErrorPage({ pageContext: { is404: true } })
-	}
-
 	return {
 		pageContext: {
 			pageProps: {
-				markdown: index[pageContext.urlPathname.replace("/blog/", "")]!,
-				meta: generatedTableOfContents[pageContext.urlPathname.replace("/blog/", "")]!,
-				processedTableOfContents: generatedTableOfContents,
+				markdown: renderedMarkdown[slug],
 			},
 		},
-	}
-}
-
-async function generateIndexAndTableOfContents() {
-	for (const content of tableOfContents) {
-		const raw = await fs.readFile(new URL(`blog/${content.path}`, repositoryRoot), "utf-8")
-		const markdown = await convert(raw)
-
-		index[content.slug] = markdown
-		generatedTableOfContents[content.slug] = {
-			...content,
-			href: "/blog/" + content.slug,
-		}
 	}
 }
