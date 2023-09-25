@@ -51,6 +51,18 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 			log.error(`❌ No inlang config found, please add a project.inlang.json file`)
 			return
 		}
+
+		for (const error of args.project.errors()) {
+			// @ts-ignore
+			if (error.cause) {
+				// @ts-ignore
+				log.error(`❌ ${error} (${error.cause})`)
+			} else {
+				log.error(`❌ ${error}`)
+			}
+			return
+		}
+
 		const sourceLanguageTag = projectConfig.sourceLanguageTag
 		// Get languages to translate to with the reference language removed
 
