@@ -279,10 +279,14 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		} else if (!userIsCollaborator()) {
 			setTourStep("fork-repository")
 		} else if (tourStep() === "fork-repository" && project()) {
-			setTimeout(() => {
-				const element = document.getElementById("missingTranslation-summary")
-				element !== null ? setTourStep("missing-translation-rule") : setTourStep("textfield")
-			}, 100)
+			if (project()?.installed.messageLintRules().length === 0) {
+				setTourStep("missing-lint-rules")
+			} else {
+				setTimeout(() => {
+					const element = document.getElementById("missingTranslation-summary")
+					element !== null ? setTourStep("missing-translation-rule") : setTourStep("textfield")
+				}, 100)
+			}
 		} else if (tourStep() === "missing-translation-rule" && project()) {
 			setTimeout(() => {
 				const element = document.getElementById("missingTranslation-summary")

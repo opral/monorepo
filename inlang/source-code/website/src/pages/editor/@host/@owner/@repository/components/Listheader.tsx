@@ -152,22 +152,29 @@ export const ListHeader = (props: ListHeaderProps) => {
 					)}
 				</For>
 				<Show when={project()?.installed.messageLintRules().length === 0}>
-					<sl-tooltip
-						prop:content={
-							"Install lint rules from the marketplace. They will help you write better translations."
-						}
-						prop:placement="bottom"
-						prop:trigger="hover"
-						style={{ "--show-delay": "1s" }}
+					<TourHintWrapper
+						currentId="missing-lint-rules"
+						position="bottom-right"
+						offset={{ x: 0, y: 40 }}
+						isVisible={tourStep() === "missing-lint-rules"}
 					>
-						<sl-button
-							prop:size="small"
-							// @ts-ignore
-							onClick={() => navigate("/marketplace")}
+						<sl-tooltip
+							prop:content={
+								"Install lint rules from the marketplace. They will help you write better translations."
+							}
+							prop:placement="bottom"
+							prop:trigger="hover"
+							style={{ "--show-delay": "1s" }}
 						>
-							Install lint rules
-						</sl-button>
-					</sl-tooltip>
+							<sl-button
+								prop:size="small"
+								// @ts-ignore
+								onClick={() => navigate("/marketplace")}
+							>
+								Install lint rules
+							</sl-button>
+						</sl-tooltip>
+					</TourHintWrapper>
 				</Show>
 			</div>
 		</div>
