@@ -40,8 +40,6 @@ const filteredItems = () =>
 	})
 
 export function Page() {
-	console.log(filteredItems())
-
 	return (
 		<>
 			<Title>inlang Marketplace</Title>

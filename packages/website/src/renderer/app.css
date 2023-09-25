@@ -45,6 +45,10 @@
 	width: 8px;
 }
 
+.overflow-scrollbar-x::-webkit-scrollbar {
+	height: 8px;
+}
+
 /* Track */
 .overflow-scrollbar::-webkit-scrollbar-track {
 	background: transparent;

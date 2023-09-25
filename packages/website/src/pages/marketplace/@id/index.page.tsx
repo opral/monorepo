@@ -99,7 +99,7 @@ export function Page(props: PageProps) {
 								when={props.markdown}
 								fallback={<p class="text-danger">{props.markdown?.error}</p>}
 							>
-								<div class="col-span-1 md:col-span-4 md:pb-14 pb-12 mb-12 md:mb-8 border-b border-surface-2 grid md:grid-cols-4 grid-cols-1 gap-16">
+								<div class="col-span-1 md:col-span-4 md:pb-10 pb-8 mb-12 md:mb-8 border-b border-surface-2 grid md:grid-cols-4 grid-cols-1 gap-16">
 									<div class="flex-col h-full justify-between md:col-span-3">
 										<div class="flex max-md:flex-col items-start gap-8 mb-12">
 											<Show
@@ -168,6 +168,15 @@ export function Page(props: PageProps) {
 												/>
 											</Button>
 										</div>
+										<Show when={props.manifest.gallery && props.manifest.gallery.length > 1}>
+											<For each={props.manifest.gallery}>
+												{(image) => (
+													<div class="flex gap-4 mt-10 overflow-x-auto overflow-scrollbar">
+														<img class="rounded-md w-80" src={image} />
+													</div>
+												)}
+											</For>
+										</Show>
 									</div>
 									<div class="w-full">
 										<div class="flex flex-col gap-4 items-col flex-shrink-0">
