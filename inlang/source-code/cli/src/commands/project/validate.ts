@@ -14,12 +14,12 @@ export async function validateCommandAction() {
 		// Get the config
 		const { error } = await getInlangProject()
 		if (error) {
-			log.error(error)
+			log.error(`❌ ${error} (${error.message})`)
 			return
 		}
 
 		log.success("🎉 Inlang config is valid!")
 	} catch (error) {
-		log.error(error)
+		log.error(`❌ ${error}`)
 	}
 }

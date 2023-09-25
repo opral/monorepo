@@ -20,9 +20,20 @@ export const lint = new Command()
 /* @ts-ignore */
 export async function lintCommandAction(args: { project: InlangProject; logger: any }) {
 	try {
+		for (const error of args.project.errors()) {
+			// @ts-ignore
+			if (error.cause) {
+				// @ts-ignore
+				log.error(`❌ ${error} (${error.cause})`)
+			} else {
+				log.error(`❌ ${error}`)
+			}
+			return
+		}
+
 		if (args.project.installed.messageLintRules().length === 0) {
 			args.logger.error(
-				`No message lint rules are installed. Visit the marketplace to install lint rules https://inlang.com/marketplace .`,
+				`❌ No message lint rules are installed. Visit the marketplace to install lint rules https://inlang.com/marketplace .`,
 			)
 			return
 		}
