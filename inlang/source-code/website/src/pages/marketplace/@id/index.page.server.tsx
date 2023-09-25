@@ -7,7 +7,7 @@ import { redirect } from "vite-plugin-ssr/abort"
 
 export async function onBeforeRender(pageContext: PageContext) {
 	const item = registry.find(
-		(item: Record<string, string>) => item.id === pageContext.routeParams.id
+		(item: any) => item.id === pageContext.routeParams.id
 	) as MarketplaceManifest
 
 	if (!item) {
