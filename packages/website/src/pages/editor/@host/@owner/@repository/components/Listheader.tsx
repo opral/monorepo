@@ -37,7 +37,8 @@ export const ListHeader = (props: ListHeaderProps) => {
 			if (
 				((filteredMessageLintRules().length === 0 ||
 					filteredMessageLintRules().includes(report.ruleId)) &&
-					filteredLanguageTags().includes(report.languageTag) &&
+					(filteredLanguageTags().length === 0 ||
+						filteredLanguageTags().includes(report.languageTag)) &&
 					filteredId() === "") ||
 				filteredId() === report.messageId
 			) {
