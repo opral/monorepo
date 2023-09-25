@@ -1,10 +1,10 @@
 import { Meta, Title } from "@solidjs/meta"
 import { Layout } from "#src/pages/Layout.jsx"
 import { Show, onMount } from "solid-js"
-import type { GeneratedTableOfContents as ProcessedTableOfContents } from "./index.page.server.jsx"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
 import { currentPageContext } from "#src/renderer/state.js"
+import tableOfContents from "../../../../../../blog/tableOfContents.json"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 
@@ -12,8 +12,6 @@ import "@inlang/markdown/custom-elements"
  * The page props are undefined if an error occurred during parsing of the markdown.
  */
 export type PageProps = {
-	processedTableOfContents: ProcessedTableOfContents
-	meta: ProcessedTableOfContents[string]
 	markdown: Awaited<ReturnType<any>>
 }
 
@@ -86,7 +84,7 @@ export function Page(props: PageProps) {
 				{
 					findPageBySlug(
 						currentPageContext.urlParsed.pathname.replace(getLocale(), "").replace("/blog/", ""),
-						props.processedTableOfContents
+						tableOfContents
 					)?.title
 				}
 			</Title>
@@ -95,7 +93,7 @@ export function Page(props: PageProps) {
 				content={
 					findPageBySlug(
 						currentPageContext.urlParsed.pathname.replace(getLocale(), "").replace("/blog/", ""),
-						props.processedTableOfContents
+						tableOfContents
 					)?.description
 				}
 			/>
@@ -128,11 +126,14 @@ function Markdown(props: { markdown: string }) {
 	)
 }
 
-function findPageBySlug(slug: string, tableOfContents: ProcessedTableOfContents) {
-	for (const category of Object.entries(tableOfContents)) {
-		if (category[1].href.replace("/blog/", "") === slug) {
-			return category[1]
-		}
+function findPageBySlug(slug: string, tableOfContents: any[]) {
+	const description = tableOfContents.find(
+		(content: Record<string, string>) => content.slug === slug
+	)
+
+	if (description) {
+		return description
+	} else {
+		return undefined
 	}
-	return undefined
 }
