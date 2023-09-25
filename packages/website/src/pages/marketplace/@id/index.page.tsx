@@ -357,7 +357,7 @@ function NavbarCommon(props: {
 									(isSelected(replaceChars(sectionTitle.toString().toLowerCase()))
 										? "text-on-background font-semibold "
 										: "text-info/80 hover:text-on-background ") +
-									"tracking-wide block w-full font-normal pb-2 mb-2 border-b border-b-surface-2"
+									"tracking-wide block w-full font-normal pb-3 mb-3 border-b border-b-surface-2"
 								}
 								href={`#${replaceChars(sectionTitle.toString().toLowerCase())}`}
 							>
@@ -377,7 +377,7 @@ function NavbarCommon(props: {
 													(isSelected(replaceChars(heading.toString().toLowerCase()))
 														? "text-primary font-semibold "
 														: "text-info/80 hover:text-on-background ") +
-													"tracking-wide text-sm block w-full font-normal mb-2"
+													"tracking-wide text-sm block w-full font-normal mb-3"
 												}
 												href={`#${replaceChars(heading.toString().toLowerCase())}`}
 											>
