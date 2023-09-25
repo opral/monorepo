@@ -1,6 +1,5 @@
 import { For, Show, createEffect, createSignal, onMount } from "solid-js"
 import { Layout as RootLayout } from "#src/pages/Layout.jsx"
-import type { GeneratedTableOfContents } from "./index.page.server.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 import type SlDetails from "@shoelace-style/shoelace/dist/components/details/details.js"
 import { Meta, Title } from "@solidjs/meta"
@@ -13,7 +12,6 @@ import "@inlang/markdown/custom-elements"
 import tableOfContents from "../../../../../documentation/tableOfContents.json"
 
 export type PageProps = {
-	processedTableOfContents: GeneratedTableOfContents
 	markdown: Awaited<ReturnType<any>>
 }
 
@@ -77,9 +75,9 @@ export function Page(props: PageProps) {
 							 * filteredTableContents is not available on the client.
 							 */}
 							<div class="py-14 pr-8">
-								<Show when={props.processedTableOfContents && props.markdown}>
+								<Show when={tableOfContents && props.markdown}>
 									<NavbarCommon
-										{...props}
+										tableOfContents={tableOfContents}
 										getLocale={getLocale}
 										headings={props.markdown
 											.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
@@ -105,9 +103,9 @@ export function Page(props: PageProps) {
 							{/* `Show` is a hotfix when client side rendering loaded this page
 							 * filteredTableContents is not available on the client.
 							 */}
-							<Show when={props.processedTableOfContents && props.markdown}>
+							<Show when={tableOfContents && props.markdown}>
 								<NavbarCommon
-									{...props}
+									tableOfContents={tableOfContents}
 									onLinkClick={() => {
 										mobileDetailMenu?.hide()
 									}}
@@ -169,7 +167,7 @@ function Markdown(props: { markdown: string }) {
 }
 
 function NavbarCommon(props: {
-	processedTableOfContents: PageProps["processedTableOfContents"]
+	tableOfContents: typeof tableOfContents
 	headings: string[]
 	onLinkClick?: () => void
 	getLocale: () => string
@@ -238,20 +236,14 @@ function NavbarCommon(props: {
 
 	return (
 		<ul role="list" class="w-full space-y-3 sm:pl-6">
-			<For each={Object.keys(props.processedTableOfContents)}>
+			<For each={Object.keys(props.tableOfContents)}>
 				{(category) => (
 					<li>
 						<h2 class="tracking-wide pt-2 text font-semibold text-on-surface pb-2">{category}</h2>
 						<ul class="space-y-2" role="list">
-							<For
-								each={
-									props.processedTableOfContents[
-										category as keyof typeof props.processedTableOfContents
-									]
-								}
-							>
+							<For each={props.tableOfContents[category as keyof typeof props.tableOfContents]}>
 								{(page) => {
-									const slug = page.href.replace("/documentation/", "")
+									const slug = page.slug
 									return (
 										<li>
 											<a
