@@ -19,7 +19,7 @@ const a = 1
 })
 
 /* This test takes some time */
-test("should draw mermaid diagrams", async () => {
+test.skip("should draw mermaid diagrams", async () => {
 	const markdown = `
 \`\`\`mermaid
 graph TD
@@ -31,7 +31,7 @@ C -->|Two| E[Result two]
 	`
 	const html = await convert(markdown)
 	expect(html).toContain("<svg")
-}, 15000)
+})
 
 test("should be able to render custom elements", async () => {
 	const markdown = `

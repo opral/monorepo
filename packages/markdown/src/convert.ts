@@ -8,7 +8,6 @@ import rehypeSanitize, { defaultSchema } from "rehype-sanitize"
 import rehypeSlug from "rehype-slug"
 import rehypeHighlight from "rehype-highlight"
 import rehypeAutolinkHeadings from "rehype-autolink-headings"
-import rehypeMermaid from "rehype-mermaidjs"
 import rehypeRewrite from "rehype-rewrite"
 import addClasses from "rehype-class-names"
 import { rehypeAccessibleEmojis } from "rehype-accessible-emojis"
@@ -45,7 +44,7 @@ export async function convert(markdown: string): Promise<string> {
 		/* @ts-ignore */
 		.use(addClasses, {
 			"h1,h2,h3,h4,h5,h6":
-				"doc-font-semibold doc-leading-relaxed doc-relative doc-my-6 doc-cursor-pointer doc-group/heading",
+				"doc-font-semibold doc-leading-relaxed doc-relative doc-my-6 doc-cursor-pointer doc-group/heading doc-no-underline",
 			h1: "doc-text-3xl doc-pb-3 doc-mb-2",
 			h2: "doc-text-2xl doc-pb-3 doc-mb-1",
 			h3: "doc-text-xl",
@@ -53,7 +52,7 @@ export async function convert(markdown: string): Promise<string> {
 			h5: "doc-text-lg",
 			h6: "doc-text-base",
 			p: "doc-text-base text-surface-600 doc-my-4 doc-leading-relaxed",
-			a: "text-primary doc-font-medium hover:text-hover-primary",
+			a: "text-primary doc-font-medium hover:text-hover-primary doc-no-underline",
 			code: "doc-px-1 doc-py-0.5 doc-bg-surface-100 doc-rounded-lg bg-surface-200 doc-my-6 doc-text-sm doc-font-mono text-surface-900",
 			pre: "doc-relative",
 			ul: "doc-list-disc doc-list-inside",
@@ -122,6 +121,13 @@ export async function convert(markdown: string): Promise<string> {
 						...node.children,
 					]
 				} else if (
+					node.tagName === "pre" &&
+					node.children[0].properties.className.includes("language-mermaid")
+				) {
+					// delete node
+					node.tagName = "div"
+					node.children = []
+				} else if (
 					node.tagName === "a" &&
 					node.properties.href &&
 					node.properties.href.startsWith("http")
@@ -144,8 +150,6 @@ export async function convert(markdown: string): Promise<string> {
 		})
 		/* @ts-ignore */
 		.use(rehypeAccessibleEmojis)
-		/* @ts-ignore */
-		.use(rehypeMermaid)
 		/* @ts-ignore */
 		.use(rehypeStringify)
 		.process(preSanitize(markdown))
