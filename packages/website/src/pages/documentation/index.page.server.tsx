@@ -1,69 +1,42 @@
-import { convert } from "@inlang/markdown"
-import { RenderErrorPage } from "vite-plugin-ssr/RenderErrorPage"
 import fs from "node:fs/promises"
 import tableOfContents from "../../../../../documentation/tableOfContents.json"
-import type { OnBeforeRender } from "#src/renderer/types.js"
-import type { PageProps } from "./index.page.jsx"
+import { convert } from "@inlang/markdown"
+import { render } from "vite-plugin-ssr/abort"
 
+const renderedMarkdown = {} as Record<string, string>
 const repositoryRoot = new URL("../../../../../", import.meta.url)
 
-export type GeneratedTableOfContents = Record<
-	string,
-	{
-		title: string
-		description: string
-		href: string
-	}[]
->
+export async function onBeforeRender(pageContext: any) {
+	const slug =
+		pageContext.urlPathname === "/documentation"
+			? ""
+			: pageContext.urlPathname.replace("/documentation/", "")
 
-const index: Record<string, Awaited<ReturnType<any>>> = {}
-const generatedTableOfContents = {} as GeneratedTableOfContents
+	if (renderedMarkdown[slug] === undefined) {
+		for (const categories of Object.entries(tableOfContents)) {
+			const [, pages] = categories
+			for (const page of pages) {
+				const text = await fs.readFile(
+					new URL(`documentation/${page.path}`, repositoryRoot),
+					"utf-8"
+				)
 
-await generateIndexAndTableOfContents()
+				const markdown = await convert(text)
 
-export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => {
-	if (import.meta.env.DEV) {
-		await generateIndexAndTableOfContents()
+				renderedMarkdown[page.slug] = markdown
+			}
+		}
 	}
-	if (!Object.keys(index).includes(pageContext.urlPathname)) {
-		throw RenderErrorPage({ pageContext: { is404: true } })
+
+	if (renderedMarkdown[slug] === undefined) {
+		throw render(404)
 	}
+
 	return {
 		pageContext: {
 			pageProps: {
-				markdown: index[pageContext.urlPathname]!,
-				processedTableOfContents: generatedTableOfContents,
+				markdown: renderedMarkdown[slug],
 			},
 		},
-	}
-}
-
-async function generateIndexAndTableOfContents() {
-	for (const categories of Object.entries(tableOfContents)) {
-		// @ts-ignore
-		for (const content of tableOfContents[categories[0]]) {
-			const raw = await fs.readFile(
-				new URL(`documentation/${content.path}`, repositoryRoot),
-				"utf-8"
-			)
-			const markdown = await convert(raw)
-
-			if (content.startpage) {
-				index["/documentation"] = markdown
-				continue
-			}
-
-			index["/documentation/" + content.slug] = markdown
-
-			if (!generatedTableOfContents[categories[0]]) {
-				generatedTableOfContents[categories[0]] = [
-					// @ts-ignore
-					...tableOfContents[categories[0]].map((content: Record<string, any>) => ({
-						...content,
-						href: "/documentation/" + content.slug,
-					})),
-				]
-			}
-		}
 	}
 }
