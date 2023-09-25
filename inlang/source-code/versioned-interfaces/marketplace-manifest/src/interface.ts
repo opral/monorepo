@@ -13,6 +13,13 @@ const MarketplaceManifestBase = Type.Object({
 	coverImage: Type.Optional(
 		Type.String({ description: "The cover displayed in the marketplace." }),
 	),
+	gallery: Type.Optional(
+		Type.Array(
+			Type.String({
+				description: "The images displayed in the marketplace. The first image is the cover.",
+			}),
+		),
+	),
 	displayName: Translatable(
 		Type.String({ description: "The name which is displayed in the marketplace." }),
 	),
