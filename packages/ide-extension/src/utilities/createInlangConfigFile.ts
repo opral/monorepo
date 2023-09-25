@@ -93,7 +93,7 @@ const disableConfigFileCreation = async (): Promise<void> => {
  */
 const promptUserToCreateConfigFile = async (): Promise<string | undefined> => {
 	return await vscode.window.showInformationMessage(
-		"Improve your i18n experience with Inlang. Do you want to create a config file?",
+		"Inlang can be automatically setup for this project. Should the settings file be created?",
 		"Accept",
 		"Reject",
 	)
