@@ -25,7 +25,7 @@ In your app's `marketplace-manifest.json` make sure to define the following info
 |----------------------|---------------------------------------------------------------|
 | `id`                 | Unique identifier for your app.                         |
 | `icon`        | Link to the icon of your app (optional).              |
-| `coverImage`        | Optional cover image acting as preview of your app.              |
+| `gallery`        | Optional gallery, the first image acts as coverImage for your app.              |
 | `displayName`        | A user-friendly display name for your app.              |
 | `description`        | Briefly describe what your app does.              |
 | `readme`             | Link to the README documentation for your app.          |
