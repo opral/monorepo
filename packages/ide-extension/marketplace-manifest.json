@@ -1,7 +1,9 @@
 {
 	"id": "app.inlang.ideExtension",
 	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-	"coverImage": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/ide_extension-marketplace-cover.jpg",
+	"gallery": [
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/ide_extension-marketplace-cover.jpg"
+	],
 	"displayName": {
 		"en": "IDE Extension"
 	},
