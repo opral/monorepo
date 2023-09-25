@@ -24,8 +24,9 @@ export const registry: MarketplaceManifest[] = [
 	{
 		id: "app.inlang.editor",
 		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		coverImage:
+		gallery: [
 			"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-marketplace-cover.jpg",
+		],
 		displayName: {
 			en: "Web Editor",
 		},
@@ -116,8 +117,9 @@ export const registry: MarketplaceManifest[] = [
 		$schema: "https://inlang.com/schema/marketplace-manifest",
 		id: "messageLintRule.inlang.emptyPattern",
 		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/emptyPattern/assets/icon.png",
-		coverImage:
+		gallery: [
 			"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/empty_pattern-marketplace-cover.jpg",
+		],
 		displayName: {
 			en: "Empty pattern",
 		},
@@ -182,8 +184,9 @@ export const registry: MarketplaceManifest[] = [
 		$schema: "https://inlang.com/schema/marketplace-manifest",
 		id: "messageLintRule.inlang.missingTranslation",
 		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/missingTranslation/assets/icon.png",
-		coverImage:
+		gallery: [
 			"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/missing_translation-marketplace-cover.jpg",
+		],
 		displayName: {
 			en: "Missing translation",
 		},
