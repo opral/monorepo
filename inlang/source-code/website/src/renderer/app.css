@@ -70,6 +70,12 @@ article :target {
 	scroll-margin-top: -256px;
 }
 
+/* Scroll Offset for Anchor Links */
+.prose :where(a):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+	text-decoration: none;
+	font-weight: 600;
+}
+
 .tree-with-lines {
 	--indent-guide-width: 2px;
 }
