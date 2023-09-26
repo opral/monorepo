@@ -79,7 +79,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 						<Show when={getLintSummary()[lintRule] !== 0}>
 							<TourHintWrapper
 								currentId="missing-translation-rule"
-								position="bottom-right"
+								position="bottom-end"
 								offset={{ x: 0, y: 40 }}
 								isVisible={
 									lintRule === "messageLintRule.inlang.missingTranslation" &&
@@ -110,7 +110,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 										onClick={() => {
 											if (filteredMessageLintRules().includes(lintRule)) {
 												setFilteredMessageLintRules(
-													filteredMessageLintRules().filter((id) => id !== lintRule),
+													filteredMessageLintRules().filter((id) => id !== lintRule)
 												)
 											} else {
 												setFilteredMessageLintRules([lintRule])
@@ -154,7 +154,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 				<Show when={project()?.installed.messageLintRules().length === 0}>
 					<TourHintWrapper
 						currentId="missing-lint-rules"
-						position="bottom-right"
+						position="bottom-end"
 						offset={{ x: 0, y: 40 }}
 						isVisible={tourStep() === "missing-lint-rules"}
 					>

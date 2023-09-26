@@ -137,7 +137,7 @@ function TheActualPage() {
 						<ListHeader ids={project()?.query.messages.includedMessageIds() || []} />
 						<TourHintWrapper
 							currentId="textfield"
-							position="bottom-left"
+							position="bottom-start"
 							offset={{ x: 110, y: 144 }}
 							isVisible={tourStep() === "textfield"}
 						>
