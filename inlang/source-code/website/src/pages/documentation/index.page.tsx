@@ -69,12 +69,12 @@ export function Page(props: PageProps) {
           hacking the left margins to apply bg-surface-2 with 100rem 
               (tested on an ultrawide monitor, works!) 
           */}
-					<div class="hidden md:block h-full -ml-[100rem] pl-[100rem] border-r-[1px] border-surface-2">
+					<div class="hidden md:block h-full -ms-[100rem] ps-[100rem] border-e-[1px] border-surface-2">
 						<nav class="sticky top-12 max-h-[96vh] overflow-y-scroll overflow-scrollbar">
 							{/* `Show` is a hotfix when client side rendering loaded this page
 							 * filteredTableContents is not available on the client.
 							 */}
-							<div class="py-14 pr-8">
+							<div class="py-14 pe-8">
 								<Show when={tableOfContents && props.markdown}>
 									<NavbarCommon
 										tableOfContents={tableOfContents}

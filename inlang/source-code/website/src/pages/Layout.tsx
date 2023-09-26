@@ -112,7 +112,7 @@ function Header(props: { landingpage?: boolean }) {
 						<div class="flex">
 							<a href={getLocale() + "/"} class="flex items-center w-fit">
 								<img class="h-9 w-9" src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
-								<span class="self-center pl-2 text-left font-semibold text-surface-900">
+								<span class="self-center ps-2 text-left font-semibold text-surface-900">
 									inlang
 								</span>
 							</a>
@@ -182,7 +182,7 @@ function Header(props: { landingpage?: boolean }) {
 						</div>
 						{/* MobileNavbar includes the Navigation for the Documentations sites  */}
 						<Show when={mobileMenuIsOpen()}>
-							<ol class="space-y-1 relativ w-full min-h-full pt-3 pl-[10px] overflow">
+							<ol class="space-y-1 relativ w-full min-h-full pt-3 ps-[10px] overflow">
 								<For each={getLinks()}>
 									{(link) => (
 										<sl-tree>
@@ -280,7 +280,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 					<div class="w-full md:w-1/4 xl:px-10 flex flex-row items-center sm:items-start md:flex-col justify-between">
 						<a href="/" class="flex items-center w-fit">
 							<img class="h-9 w-9" src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
-							<span class="self-center pl-2 text-left font-semibold text-surface-900">inlang</span>
+							<span class="self-center ps-2 text-left font-semibold text-surface-900">inlang</span>
 						</a>
 					</div>
 					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-10 flex flex-col pt-2">

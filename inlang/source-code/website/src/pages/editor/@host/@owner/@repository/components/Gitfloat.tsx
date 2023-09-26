@@ -241,7 +241,7 @@ export const Gitfloat = () => {
 
 	return (
 		<>
-			<div class="gitfloat z-30 sticky left-1/2 -translate-x-[150px] bottom-8 w-[300px] my-16 animate-slideIn">
+			<div class="gitfloat z-30 sticky start-1/2 -translate-x-[150px] bottom-8 w-[300px] my-16 animate-slideIn">
 				<TourHintWrapper
 					currentId={tourStep()}
 					position="top-right"
@@ -256,7 +256,7 @@ export const Gitfloat = () => {
 				>
 					<div class="w-full flex justify-start items-center rounded-lg bg-inverted-surface shadow-xl ">
 						<Show when={localStorage.user}>
-							<div class="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2 p-1.5 rounded-tl-lg rounded-bl-lg border-t-0 border-r border-b-0 border-l-0 border-background/10">
+							<div class="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2 p-1.5 rounded-se--lg rounded-es-lg border-t-0 border-r border-b-0 border-s-0 border-background/10">
 								<img
 									src={localStorage.user?.avatarUrl}
 									alt="user avatar"
@@ -266,8 +266,8 @@ export const Gitfloat = () => {
 						</Show>
 						<div
 							class={
-								"flex justify-start items-center self-stretch flex-grow relative gap-2 pr-1.5 py-1.5 " +
-								(gitState() === "pullrequest" ? "pl-1.5" : "pl-3")
+								"flex justify-start items-center self-stretch flex-grow relative gap-2 pe-1.5 py-1.5 " +
+								(gitState() === "pullrequest" ? "ps-1.5" : "ps-3")
 							}
 						>
 							<p

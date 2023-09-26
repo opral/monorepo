@@ -134,7 +134,7 @@ export function Layout(props: { children: JSXElement }) {
 					<BranchMenu />
 				</div>
 				<div class="flex justify-between gap-2 py-5 sticky top-[72px] z-30 bg-background">
-					<div class="absolute -left-2 w-[calc(100%_+_16px)] h-full -translate-y-5 bg-background" />
+					<div class="absolute -start-2 w-[calc(100%_+_16px)] h-full -translate-y-5 bg-background" />
 					<div class="flex z-20 justify-between gap-2 items-center">
 						<Show when={project()}>
 							<For each={filterOptions()}>
@@ -160,7 +160,7 @@ export function Layout(props: { children: JSXElement }) {
 										prop:size="small"
 										onClick={() => {
 											setFilteredLanguageTags(
-												setFilteredLanguageTags(project()?.settings()?.languageTags || []),
+												setFilteredLanguageTags(project()?.settings()?.languageTags || [])
 											)
 											setFilteredMessageLintRules([])
 											setSelectedFilters([])
@@ -196,14 +196,14 @@ export function Layout(props: { children: JSXElement }) {
 																	setFilteredMessageLintRules(
 																		project()
 																			?.installed.messageLintRules()
-																			.map((lintRule) => lintRule.id) ?? [],
+																			.map((lintRule) => lintRule.id) ?? []
 																	)
 																}
 																addFilter(filter.name)
 															}}
 															class="flex gap-2 items-center w-full"
 														>
-															<div slot="prefix" class="-ml-2 mr-2">
+															<div slot="prefix" class="-ms-2 me-2">
 																{filter.icon}
 															</div>
 															{filter.name}
@@ -219,7 +219,7 @@ export function Layout(props: { children: JSXElement }) {
 					</div>
 					<div class="flex gap-2">
 						<SearchInput
-							placeholder="Search ..."
+							placeholder="Search all messages"
 							handleChange={(text: string) => setTextSearch(text)}
 						/>
 						<sl-button
@@ -238,7 +238,7 @@ export function Layout(props: { children: JSXElement }) {
 				prop:open={addLanguageModalOpen()}
 				on:sl-after-hide={() => setAddLanguageModalOpen(false)}
 			>
-				<p class="text-xs pb-4 -mt-4 pr-8">
+				<p class="text-xs pb-4 -mt-4 pe-8">
 					You can add a language to the ressource, by providing a unique tag. By doing that inlang
 					is creating a new language file and commits it to the local repository instance.
 				</p>
@@ -375,7 +375,7 @@ function LanguageFilter(props: { clearFunction: any }) {
 				}}
 				class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
 			>
-				<div class="flex items-center gap-2 ml-1" slot="prefix">
+				<div class="flex items-center gap-2 ms-1" slot="prefix">
 					<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant">
 						Language
 					</p>
@@ -459,7 +459,7 @@ function LintFilter(props: { clearFunction: any }) {
 			}}
 			class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
 		>
-			<div class={"flex items-center gap-2 ml-1 mr-0"} slot="prefix">
+			<div class={"flex items-center gap-2 ms-1 me-0"} slot="prefix">
 				<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant">
 					Lint
 				</p>

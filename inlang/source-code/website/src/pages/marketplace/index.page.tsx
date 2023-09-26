@@ -103,7 +103,7 @@ const Gallery = () => {
 									<Chip
 										text={typeOfIdToTitle(item.id)}
 										color={colorForTypeOf(item.id)}
-										customClasses="absolute right-4 top-4 z-5 backdrop-filter backdrop-blur-sm text-xs"
+										customClasses="absolute end-4 top-4 z-5 backdrop-filter backdrop-blur-sm text-xs"
 									/>
 									<Show when={!item.gallery}>
 										<Show
@@ -266,12 +266,12 @@ const Tags = () => {
 				class={
 					"gap-2 relative py-1.5 rounded-full cursor-pointer border border-solid text-sm capitalize hover:opacity-90 transition-all duration-100 flex items-center " +
 					(selectedCategories().includes("app")
-						? "bg-surface-800 text-background border-surface-800 pl-7 pr-3"
+						? "bg-surface-800 text-background border-surface-800 ps-7 pe-3"
 						: "bg-background text-surface-600 border-surface-200 px-3 hover:border-surface-400")
 				}
 			>
 				<Show when={selectedCategories().includes("app")}>
-					<Check class="w-4 h-4 absolute left-2" />
+					<Check class="w-4 h-4 absolute start-2" />
 				</Show>
 				<p class="m-0">Apps</p>
 			</div>
@@ -280,12 +280,12 @@ const Tags = () => {
 				class={
 					"gap-2 relative py-1.5 rounded-full cursor-pointer border border-solid text-sm capitalize hover:opacity-90 transition-all duration-100 flex items-center " +
 					(selectedCategories().includes("library")
-						? "bg-surface-800 text-background border-surface-800 pl-7 pr-3"
+						? "bg-surface-800 text-background border-surface-800 ps-7 pe-3"
 						: "bg-background text-surface-600 border-surface-200 px-3 hover:border-surface-400")
 				}
 			>
 				<Show when={selectedCategories().includes("library")}>
-					<Check class="w-4 h-4 absolute left-2" />
+					<Check class="w-4 h-4 absolute start-2" />
 				</Show>
 				<p class="m-0">Libraries</p>
 			</div>
@@ -294,12 +294,12 @@ const Tags = () => {
 				class={
 					"gap-2 relative py-1.5 rounded-full cursor-pointer border border-solid text-sm capitalize hover:opacity-90 transition-all duration-100 flex items-center " +
 					(selectedCategories().includes("messageLintRule")
-						? "bg-surface-800 text-background border-surface-800 pl-7 pr-3"
+						? "bg-surface-800 text-background border-surface-800 ps-7 pe-3"
 						: "bg-background text-surface-600 border-surface-200 px-3 hover:border-surface-400")
 				}
 			>
 				<Show when={selectedCategories().includes("messageLintRule")}>
-					<Check class="w-4 h-4 absolute left-2" />
+					<Check class="w-4 h-4 absolute start-2" />
 				</Show>
 				<p class="m-0">Lint Rules</p>
 			</div>
@@ -308,12 +308,12 @@ const Tags = () => {
 				class={
 					"gap-2 relative py-1.5 rounded-full cursor-pointer border border-solid text-sm capitalize hover:opacity-90 transition-all duration-100 flex items-center " +
 					(selectedCategories().includes("plugin")
-						? "bg-surface-800 text-background border-surface-800 pl-7 pr-3"
+						? "bg-surface-800 text-background border-surface-800 ps-7 pe-3"
 						: "bg-background text-surface-600 border-surface-200 px-3 hover:border-surface-400")
 				}
 			>
 				<Show when={selectedCategories().includes("plugin")}>
-					<Check class="w-4 h-4 absolute left-2" />
+					<Check class="w-4 h-4 absolute start-2" />
 				</Show>
 				<p class="m-0">Plugins</p>
 			</div>

@@ -14,7 +14,7 @@ const Hero = () => {
 		<SectionLayout showLines={true} type="lightGrey">
 			<div class="w-full flex pt-4 md:pt-16 flex-col xl:flex-row">
 				<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-10 py-16 md:pt-16 md:pb-32">
-					<h1 class="text-[40px] leading-tight md:text-6xl font-bold text-surface-900 pr-16 tracking-tight">
+					<h1 class="text-[40px] leading-tight md:text-6xl font-bold text-surface-900 pe-16 tracking-tight">
 						<p class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-[#F1D9FF] via-hover-primary to-[#3B82F6]">
 							{`${t("landing.hero.keyword")} `}
 						</p>
@@ -56,9 +56,9 @@ const Hero = () => {
 						</div>
 					</div>
 				</div>
-				<div class="relative w-full xl:w-1/2 xl:-ml-[8px]">
+				<div class="relative w-full xl:w-1/2 xl:-ms-[8px]">
 					<div class="w-[2px] h-full absolute bg-hover-primary mx-10 xl:mx-[7px] z-2" />
-					<div class="w-auto h-full relative z-3 ml-[35px] xl:ml-0">
+					<div class="w-auto h-full relative z-3 ms-[35px] xl:ms-0">
 						<KeyVisual />
 					</div>
 				</div>

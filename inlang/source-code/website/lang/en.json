@@ -119,7 +119,7 @@
 			"description": "We're sad to see you go. If you have any feedback, please let us know on our"
 		},
 		"title": "Newsletter",
-		"placeholder": "Enter your email ...",
+		"placeholder": "Enter your email",
 		"button": "Subscribe",
 		"error": {
 			"invalidEmail": "Please enter a valid email address.",

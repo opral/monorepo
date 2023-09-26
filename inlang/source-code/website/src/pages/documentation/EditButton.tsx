@@ -12,7 +12,7 @@ export function EditButton(props: EditButtonProps) {
 				class="text-info/80 hover:text-info/100 text-sm font-semibold flex items-center"
 				target="_blank"
 			>
-				<EditOutline class="inline-block mr-2" />
+				<EditOutline class="inline-block me-2" />
 				Edit on GitHub
 			</a>
 		</div>

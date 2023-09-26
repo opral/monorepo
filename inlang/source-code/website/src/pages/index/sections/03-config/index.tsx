@@ -131,7 +131,7 @@ const ConfigPage = () => {
 									</Show>
 								</div>
 								<p class="text-md text-outline-variant sm:leading-7">{card.description}</p>
-								<ul class="items-center list-disc pl-4 pt-2">
+								<ul class="items-center list-disc ps-4 pt-2">
 									<For each={card.benefit}>
 										{(benefit) => <li class="text-sm text-outline-variant pt-2">{benefit}</li>}
 									</For>
@@ -194,21 +194,21 @@ const ConfigPage = () => {
 							background:
 								"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
 						}}
-						class="absolute bg-on-background top-0 left-0 w-full h-full opacity-100 blur-3xl"
+						class="absolute bg-on-background top-0 start-0 w-full h-full opacity-100 blur-3xl"
 					/>
 					<div
 						style={{
 							background:
 								"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
 						}}
-						class="absolute bg-on-background top-0 left-0 w-full h-full opacity-30 blur-xl"
+						class="absolute bg-on-background top-0 start-0 w-full h-full opacity-30 blur-xl"
 					/>
 					<div
 						style={{
 							background:
 								"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
 						}}
-						class="absolute bg-on-background top-0 left-0 w-full h-full opacity-50 blur-sm"
+						class="absolute bg-on-background top-0 start-0 w-full h-full opacity-50 blur-sm"
 					/>
 				</a>
 			</div>
@@ -252,15 +252,15 @@ const ConfigPage = () => {
 					href={getLocale() + "/documentation/manually-create-project"}
 					class="w-full lg:w-fit overflow-x-scroll sm:overflow-x-hidden relative flex flex-col gap-2 bg-gradient-to-b from-inverted-surface to-surface-700 text-on-inverted-surface py-3 rounded-lg shadow-lg group"
 				>
-					<div class="absolute top-5 left-6 flex gap-2">
+					<div class="absolute top-5 start-6 flex gap-2">
 						<div class="w-3 h-3 bg-surface-600 rounded-full" />
 						<div class="w-3 h-3 bg-surface-600 rounded-full" />
 						<div class="w-3 h-3 bg-surface-600 rounded-full" />
 					</div>
-					<pre class="text-surface-400 leading-relaxed pl-12 sm:pl-0 w-full text-center transition duration-200 group-hover:text-primary-on-inverted-container">
+					<pre class="text-surface-400 leading-relaxed ps-12 sm:ps-0 w-full text-center transition duration-200 group-hover:text-primary-on-inverted-container">
 						project.inlang.json
 					</pre>
-					<div class="flex flex-col gap-1 px-8 py-4 pr-16">
+					<div class="flex flex-col gap-1 px-8 py-4 pe-16">
 						<For each={code}>
 							{(line, index) => (
 								<div class="flex gap-8 items-center text-xs sm:text-sm">

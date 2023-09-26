@@ -9,7 +9,7 @@
 // }) {
 // 	return (
 // 		<nav class="sticky top-[3.5rem] h-[calc(100vh-4.5rem)] overflow-y-auto  md:block w-full hidden">
-// 			<ul role="list" class="divide-y divide-outline pr-4 min-h-full ">
+// 			<ul role="list" class="divide-y divide-outline pe-4 min-h-full ">
 // 				<For each={tablesections}>
 // 					{(section) => (
 // 						<li class="py-3">

@@ -200,7 +200,7 @@ function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number }) {
 				<h2 class="font-semibold pt-12">
 					Repo does not exist or you don't have sufficient access rights.
 				</h2>
-				<ul class="pt-8 list-disc pl-4">
+				<ul class="pt-8 list-disc ps-4">
 					<li>
 						Make sure that you the repository owner{" "}
 						<code class="bg-secondary-container py-1 px-1.5 rounded text-on-secondary-container">

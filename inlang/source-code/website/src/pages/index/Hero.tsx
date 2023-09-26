@@ -1,6 +1,6 @@
 import IconGithub from "~icons/cib/github"
 import CibGit from "~icons/cib/git"
-import MaterialSymbolsArrowRightAltRounded from "~icons/material-symbols/arrow-right-alt-rounded"
+import MaterialSymbolsArrowRightAltRounded from "~icons/material-symbols/arrow-end-alt-rounded"
 
 export function Hero() {
 	return (
@@ -29,7 +29,7 @@ export function Hero() {
 							<span class="inline-block">
 								git
 								{/* custom git color */}
-								<CibGit class="text-[#F54D27] inline pl-2 md:pl-3" />
+								<CibGit class="text-[#F54D27] inline ps-2 md:ps-3" />
 							</span>
 						</span>
 					</span>

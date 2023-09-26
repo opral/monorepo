@@ -21,7 +21,7 @@ export function Page() {
 			<Meta name="robots" content="noindex" />
 			<Layout>
 				<div class="relative max-w-screen-xl w-full mx-auto bg-background">
-					<div class="invisible xl:visible absolute top-0 left-0 h-full w-full z-0">
+					<div class="invisible xl:visible absolute top-0 start-0 h-full w-full z-0">
 						<div class="flex w-full h-full justify-between mx-auto items-end">
 							<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
 							<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />

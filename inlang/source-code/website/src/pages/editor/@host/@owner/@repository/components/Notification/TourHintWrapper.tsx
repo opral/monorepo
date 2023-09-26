@@ -8,7 +8,7 @@ export type TourStepId =
 	| "missing-translation-rule"
 	| "textfield"
 
-export type Position = "top-right" | "top-left" | "bottom-right" | "bottom-left"
+export type Position = "top-end" | "top-start" | "bottom-end" | "bottom-start"
 
 type OffsetType = { x: number; y: number }
 
@@ -56,33 +56,33 @@ const TourStepWrapper = (props: {
 }) => {
 	const getPosition = (position: Position, offset: OffsetType) => {
 		switch (position) {
-			case "top-right":
+			case "top-end":
 				return {
-					top: "unset",
-					right: offset.x.toString() + "px",
+					insetBlockStart: "unset",
+					insetInlineEnd: offset.x.toString() + "px",
 					bottom: offset.y.toString() + "px",
-					left: "unset",
+					insetInlineStart: "unset",
 				}
-			case "top-left":
+			case "top-start":
 				return {
-					top: "unset",
-					right: "unset",
-					bottom: offset.y.toString() + "px",
-					left: offset.x.toString() + "px",
+					insetBlockStart: "unset",
+					insetInlineEnd: "unset",
+					insetBlockEnd: offset.y.toString() + "px",
+					insetInlineStart: offset.x.toString() + "px",
 				}
-			case "bottom-right":
+			case "bottom-end":
 				return {
-					top: offset.y.toString() + "px",
-					right: offset.x.toString() + "px",
-					buttom: "unset",
-					left: "unset",
+					insetBlockStart: offset.y.toString() + "px",
+					insetInlineEnd: offset.x.toString() + "px",
+					insetBlockEnd: "unset",
+					insetInlineStart: "unset",
 				}
-			case "bottom-left":
+			case "bottom-start":
 				return {
-					top: offset.y.toString() + "px",
-					right: "unset",
-					bottom: "unset",
-					left: offset.x.toString() + "px",
+					insetBlockStart: offset.y.toString() + "px",
+					insetInlineEnd: "unset",
+					insetBlockEnd: "unset",
+					insetInlineStart: offset.x.toString() + "px",
 				}
 		}
 	}
@@ -92,28 +92,28 @@ const TourStepWrapper = (props: {
 			class={
 				"absolute p-3 w-[300px] z-20 rounded-lg bg-inverted-surface shadow-xl text-on-inverted-surface text-xs  " +
 				(props.isVisible && localStorage.isFirstUse ? "" : " hidden") +
-				(props.position === "top-right" || props.position === "top-left"
+				(props.position === "top-end" || props.position === "top-start"
 					? " animate-fadeInTop"
 					: " animate-fadeInBottom")
 			}
 			style={getPosition(props.position, props.offset) as JSX.CSSProperties}
 		>
-			{(props.position === "bottom-right" || props.position === "bottom-left") && (
+			{(props.position === "bottom-end" || props.position === "bottom-start") && (
 				<div class="relative w-full h-0 text-inverted-surface">
 					<div
 						class={
-							(props.position === "bottom-left" ? "justify-start" : "justify-end") +
+							(props.position === "bottom-start" ? "justify-start" : "justify-end") +
 							" before:content-['▲'] h-2 flex items-center px-2 -translate-y-5 "
 						}
 					/>
 				</div>
 			)}
 			{props.children}
-			{(props.position === "top-right" || props.position === "top-left") && (
+			{(props.position === "top-end" || props.position === "top-start") && (
 				<div class="relative w-full h-0 text-inverted-surface">
 					<div
 						class={
-							(props.position === "top-left" ? "justify-start" : "justify-end") +
+							(props.position === "top-start" ? "justify-start" : "justify-end") +
 							" before:content-['▼'] h-2 flex items-center px-2 translate-y-3"
 						}
 					/>

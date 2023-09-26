@@ -39,7 +39,7 @@ export const getEditorConfig = (
 			}),
 			Placeholder.configure({
 				emptyEditorClass: "is-editor-empty",
-				placeholder: "Enter translation...",
+				placeholder: "Enter translation",
 			}),
 			History.configure({
 				depth: 10,

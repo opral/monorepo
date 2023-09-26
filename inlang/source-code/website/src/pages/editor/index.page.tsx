@@ -72,7 +72,7 @@ export function Page() {
 					>
 						<div
 							class={
-								"pl-5 pr-2 gap-2 relative z-10 flex items-center w-full border border-surface-200 bg-background rounded-lg transition-all " +
+								"ps-5 pe-2 gap-2 relative z-10 flex items-center w-full border border-surface-200 bg-background rounded-lg transition-all " +
 								(!isValidUrl() && input().length > 0
 									? "focus-within:border-danger"
 									: "focus-within:border-primary")
@@ -83,7 +83,7 @@ export function Page() {
 									"active:outline-0 focus:outline-0 focus:ring-0 border-0 h-14 grow placeholder:text-surface-500 placeholder:font-normal placeholder:text-base " +
 									(!isValidUrl() && input().length > 0 ? "text-danger" : "text-surface-800")
 								}
-								placeholder="Enter repository url ..."
+								placeholder="Enter repository url"
 								onInput={(event) => {
 									// @ts-ignore
 									setInput(event.target.value)
@@ -95,7 +95,7 @@ export function Page() {
 								on:sl-change={() => (isValidUrl() ? navigateToEditor : undefined)}
 							/>
 							{!isValidUrl() && input().length > 0 && (
-								<p class="text-xs text-danger font-medium pr-1 max-sm:hidden">
+								<p class="text-xs text-danger font-medium pe-1 max-sm:hidden">
 									Please enter a valid URL
 								</p>
 							)}
@@ -119,7 +119,7 @@ export function Page() {
 									"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
 								transition: "all .3s ease-in-out",
 							}}
-							class="absolute bg-on-background top-0 left-0 w-full h-full opacity-10 blur-3xl group-hover:opacity-50 group-focus-within:opacity-50"
+							class="absolute bg-on-background top-0 start-0 w-full h-full opacity-10 blur-3xl group-hover:opacity-50 group-focus-within:opacity-50"
 						/>
 						<div
 							style={{
@@ -127,7 +127,7 @@ export function Page() {
 									"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
 								transition: "all .3s ease-in-out",
 							}}
-							class="absolute bg-on-background top-0 left-0 w-full h-full opacity-5 blur-xl group-hover:opacity-15 group-focus-within:opacity-15"
+							class="absolute bg-on-background top-0 start-0 w-full h-full opacity-5 blur-xl group-hover:opacity-15 group-focus-within:opacity-15"
 						/>
 						<div
 							style={{
@@ -135,7 +135,7 @@ export function Page() {
 									"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
 								transition: "all .3s ease-in-out",
 							}}
-							class="absolute bg-on-background top-0 left-0 w-full h-full opacity-10 blur-sm group-hover:opacity-25 group-focus-within:opacity-25"
+							class="absolute bg-on-background top-0 start-0 w-full h-full opacity-10 blur-sm group-hover:opacity-25 group-focus-within:opacity-25"
 						/>
 					</form>
 

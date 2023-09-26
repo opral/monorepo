@@ -126,7 +126,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 													: "lint-summary"
 											}
 										>
-											<div class="-ml-[4px] h-5 rounded">
+											<div class="-ms-[4px] h-5 rounded">
 												<div
 													class={
 														getLintRule(lintRule)?.level === "warning"

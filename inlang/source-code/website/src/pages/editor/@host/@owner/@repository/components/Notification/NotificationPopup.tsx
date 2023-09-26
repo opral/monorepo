@@ -16,7 +16,7 @@ export const NotificationPopup = (props: NotificationPopupProps) => {
 		<div
 			class={
 				"z-30 absolute w-[300px] bg-inverted-surface rounded shadow-xl transition duration-20 " +
-				(props.position === "bottom-right" ? "right-0 pointer-events-none " : "left-0 ") +
+				(props.position === "bottom-right" ? "end-0 pointer-events-none " : "start-0 ") +
 				(props.open() ? "opacity-100" : "translate-y-0.5 opacity-0")
 			}
 			style={
@@ -58,7 +58,7 @@ export const NotificationPopup = (props: NotificationPopupProps) => {
 				{props.handleClose && (
 					<button
 						onClick={() => props.handleClose && props.handleClose()}
-						class="flex justify-center items-center h-8 w-8 mr-4 hover:bg-background/10 text-on-inverted-surface rounded-md"
+						class="flex justify-center items-center h-8 w-8 me-4 hover:bg-background/10 text-on-inverted-surface rounded-md"
 					>
 						<CloseIcon />
 					</button>

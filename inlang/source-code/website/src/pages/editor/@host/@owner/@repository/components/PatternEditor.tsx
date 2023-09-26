@@ -458,7 +458,7 @@ export function PatternEditor(props: {
 						height="24"
 						viewBox="0 0 24 24"
 						fill="none"
-						class="text-hover-primary mr-1"
+						class="text-hover-primary me-1"
 					>
 						<path
 							d="M4 12L9 17L19.5 6.5"

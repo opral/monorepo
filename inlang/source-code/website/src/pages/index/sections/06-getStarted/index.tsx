@@ -41,21 +41,21 @@ const GetStarted = () => {
 										background:
 											"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
 									}}
-									class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-60 blur-3xl"
+									class="absolute z-0 bg-on-background top-0 start-0 w-full h-full opacity-60 blur-3xl"
 								/>
 								<div
 									style={{
 										background:
 											"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
 									}}
-									class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-40 blur-xl"
+									class="absolute z-0 bg-on-background top-0 start-0 w-full h-full opacity-40 blur-xl"
 								/>
 								<div
 									style={{
 										background:
 											"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
 									}}
-									class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-80 blur-sm"
+									class="absolute z-0 bg-on-background top-0 start-0 w-full h-full opacity-80 blur-sm"
 								/>
 							</button>
 						</a>

@@ -23,7 +23,7 @@ const Integration = () => {
 	return (
 		<SectionLayout showLines={true} type="white">
 			<div class="relative">
-				<div class="hidden xl:block absolute w-[2px] bg-gradient-to-b from-hover-primary to-transparent h-24 left-1/2 -translate-x-1/2" />
+				<div class="hidden xl:block absolute w-[2px] bg-gradient-to-b from-hover-primary to-transparent h-24 start-1/2 -translate-x-1/2" />
 				<div class="flex flex-col items-center gap-12 py-16 overflow-hidden">
 					<div class="relative flex flex-row items-center gap-1 lg:gap-4 py-16">
 						<div class="z-10 opacity-40 w-16 h-16 flex justify-center items-center bg-surface-1 rounded-full border border-surface-2">
@@ -49,7 +49,7 @@ const Integration = () => {
 									stroke="currentColor"
 									xmlns="http://www.w3.org/2000/svg"
 									preserveAspectRatio="none"
-									class="absolute center-x -mt-[1px] left-1/2 transform -translate-x-1/2 top-full text-surface-800"
+									class="absolute center-x -mt-[1px] start-1/2 transform -translate-x-1/2 top-full text-surface-800"
 								>
 									<path d="M7 6L2 1H12L7 6Z" />
 								</svg>
@@ -62,7 +62,7 @@ const Integration = () => {
 						<div class="z-10 opacity-40 w-16 h-16 flex justify-center items-center bg-surface-1 rounded-full border border-surface-2">
 							<Vuejs size={28} startColor="#434343" endColor="#959595" />
 						</div>
-						<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+						<div class="absolute top-1/2 start-1/2 -translate-x-1/2 -translate-y-1/2">
 							<div class="animate-ripple w-32 h-32 bg-primary-on-inverted-container/50 border border-primary/5 rounded-full" />
 						</div>
 					</div>

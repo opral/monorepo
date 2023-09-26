@@ -175,7 +175,7 @@ sl-select::part(tags) {
 	font-size: 12px;
 	line-height: 140%;
 	font-weight: 500;
-	margin-left: 0;
+	margin-inline-start: 0;
 }
 
 sl-select::part(tags) {
@@ -186,13 +186,13 @@ sl-select::part(tags) {
 }
 
 sl-select::part(expand-icon) {
-	margin-left: 8px;
+	margin-inline-start: 8px;
 	width: 9px;
 	height: 9px;
 }
 
 sl-option::part(checked-icon) {
-	padding-right: 12px;
+	padding-inline-end: 12px;
 }
 
 sl-option::part(base) {
@@ -263,7 +263,6 @@ sl-menu {
 .ProseMirror p.is-editor-empty:first-child::before {
 	color: #adb5bd;
 	content: attr(data-placeholder);
-	float: left;
 	height: 0;
 	pointer-events: none;
 }

@@ -18,8 +18,8 @@ const Pricing = () => {
 						{t("landing.pricing.description")}
 					</p>
 				</div>
-				<div class="w-full lg:w-[calc((100%_-_40px)_/_2)] flex items-end lg:pl-4">
-					<div class="h-full w-[55%] rounded-2xl rounded-br-none flex flex-col p-6 lg:p-8 gap-4 bg-gradient-to-b from-hover-primary/70 to-hover-primary/30">
+				<div class="w-full lg:w-[calc((100%_-_40px)_/_2)] flex items-end lg:ps-4">
+					<div class="h-full w-[55%] rounded-2xl rounded-ee-none flex flex-col p-6 lg:p-8 gap-4 bg-gradient-to-b from-hover-primary/70 to-hover-primary/30">
 						<p class="h-7 flex items-center px-3 rounded-full bg-background/50 w-fit text-surface-600 text-sm">
 							{t("landing.pricing.free.name")}
 						</p>
@@ -30,7 +30,7 @@ const Pricing = () => {
 							{t("landing.pricing.free.amount")}
 						</p>
 					</div>
-					<div class="h-[80%] w-[45%] rounded-2xl rounded-l-none flex flex-col p-6 lg:p-8 gap-4 bg-surface-1 border border-surface-2">
+					<div class="h-[80%] w-[45%] rounded-2xl rounded-s-none flex flex-col p-6 lg:p-8 gap-4 bg-surface-1 border border-surface-2">
 						<p class="h-7 flex items-center px-3 rounded-full bg-surface-500/10 w-fit text-surface-600 text-sm">
 							{t("landing.pricing.paid.name")}
 						</p>

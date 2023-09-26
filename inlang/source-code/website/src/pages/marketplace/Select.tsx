@@ -118,13 +118,13 @@ export function ScrollFloat(props: { packages: Accessor<string[]> }) {
 	return (
 		<div
 			class={
-				"z-30 sticky left-1/2 -translate-x-[150px] bottom-8 w-[300px] my-16 opacity-0 transition-all " +
+				"z-30 sticky start-1/2 -translate-x-[150px] bottom-8 w-[300px] my-16 opacity-0 transition-all " +
 				(scroll() > 200 && props.packages().length > 0
 					? "animate-slideIn opacity-100"
 					: "animate-slideOut opacity-0")
 			}
 		>
-			<div class="w-full flex justify-between items-center rounded-lg bg-inverted-surface shadow-xl p-1.5 pl-3 text-background text-xs gap-1.5 font-medium">
+			<div class="w-full flex justify-between items-center rounded-lg bg-inverted-surface shadow-xl p-1.5 ps-3 text-background text-xs gap-1.5 font-medium">
 				{props.packages().length > 1 ? "You've choosen packages" : "You've choosen a package"}
 				<sl-button
 					prop:size="small"
