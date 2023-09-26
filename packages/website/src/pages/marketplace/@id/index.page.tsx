@@ -386,7 +386,7 @@ function NavbarCommon(props: {
 													(isSelected(replaceChars(heading.toString().toLowerCase()))
 														? "text-primary font-semibold "
 														: "text-info/80 hover:text-on-background ") +
-													"tracking-wide text-sm block w-full font-normal mb-3"
+													"tracking-wide text-sm block w-full font-normal mb-2.5"
 												}
 												href={`#${replaceChars(heading.toString().toLowerCase())}`}
 											>

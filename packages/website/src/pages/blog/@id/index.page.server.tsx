@@ -7,7 +7,7 @@ const renderedMarkdown = {} as Record<string, string>
 const repositoryRoot = new URL("../../../../../../", import.meta.url)
 
 export async function onBeforeRender(pageContext: any) {
-	const slug = pageContext.urlPathname.slice(`/blog/`.length)
+	const slug = pageContext.urlPathname.replace("/blog/", "")
 	if (renderedMarkdown[slug] === undefined) {
 		const content = tableOfContents.find((content) => content.slug === slug)
 
