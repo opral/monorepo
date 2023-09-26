@@ -92,7 +92,7 @@ export async function convert(markdown: string): Promise<string> {
 								tagName: "span",
 								properties: {
 									className:
-										"doc-font-medium hidden doc-md:block doc-mr-2 text-primary doc-opacity-0 group-hover/heading:doc-opacity-100 transition-opacity doc-absolute " +
+										"doc-font-medium doc-hidden md:doc-block doc-mr-2 text-primary doc-opacity-0 group-hover/heading:doc-opacity-100 transition-opacity doc-absolute " +
 										(node.tagName === "h1"
 											? "-doc-left-6"
 											: node.tagName === "h2"
