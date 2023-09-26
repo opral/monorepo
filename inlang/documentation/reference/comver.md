@@ -1,10 +1,4 @@
----
-title: Backwards compatible versioning
-href: /documentation/comver
-description: You can manually create a new project if inlang.com/new is not working for you.
----
-
-# {% $frontmatter.title %}
+# Backwards compatible versioning
 
 > Is this update backwards compatible? 
 

@@ -31,9 +31,7 @@ const MarketplaceManifestBase = Type.Object({
 	publisherName: Type.String(),
 	publisherIcon: Type.Optional(Type.String()),
 	readme: Translatable(
-		Type.TemplateLiteral("${string}.md", {
-			description: "The link must be a valid markdown file.",
-		}),
+		Type.TemplateLiteral("${string}.md", { description: "The path to the readme file." }),
 	),
 	keywords: Type.Array(Type.String()),
 	license: Type.Literal("Apache-2.0"),

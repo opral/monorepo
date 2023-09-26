@@ -1,10 +1,4 @@
----
-title: Develop an app
-href: /documentation/develop-app
-description: How to develop an inlang-based app.
----
-
-# {% $frontmatter.title %}
+# Develop an app
 
 There are many ways users interact with inlang. This documentation gives you information on how to develop your own inlang-based app.
 
@@ -31,7 +25,7 @@ In your app's `marketplace-manifest.json` make sure to define the following info
 |----------------------|---------------------------------------------------------------|
 | `id`                 | Unique identifier for your app.                         |
 | `icon`        | Link to the icon of your app (optional).              |
-| `coverImage`        | Optional cover image acting as preview of your app.              |
+| `gallery`        | Optional gallery, the first image acts as coverImage for your app.              |
 | `displayName`        | A user-friendly display name for your app.              |
 | `description`        | Briefly describe what your app does.              |
 | `readme`             | Link to the README documentation for your app.          |

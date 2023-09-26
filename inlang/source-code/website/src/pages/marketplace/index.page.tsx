@@ -95,7 +95,9 @@ const Gallery = () => {
 								class="relative no-underline h-72 flex flex-col gap-4 group"
 							>
 								<div
-									style={{ "background-image": `url(${item.coverImage})` }}
+									style={{
+										"background-image": `url(${item.gallery?.[0]})`,
+									}}
 									class="w-full h-full flex items-center justify-center bg-surface-50 group-hover:bg-surface-100 transition-colors rounded-lg relative bg-cover bg-center border border-surface-2"
 								>
 									<Chip
@@ -103,7 +105,7 @@ const Gallery = () => {
 										color={colorForTypeOf(item.id)}
 										customClasses="absolute right-4 top-4 z-5 backdrop-filter backdrop-blur-sm text-xs"
 									/>
-									<Show when={!item.coverImage}>
+									<Show when={!item.gallery}>
 										<Show
 											when={item.icon}
 											fallback={
