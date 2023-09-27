@@ -1,50 +1,42 @@
-<div>
-    <p align="center">
-        <img width="300" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/logo-white-background.png"/>
-    </p>
-    <h4 align="center">
-        <a href="https://inlang.com/documentation" target="_blank">Get Started</a> ·
-        <a href="https://github.com/inlang/monorepo/discussions" target="_blank">Discussions</a> · <a href="https://twitter.com/inlangHQ" target="_blank">X</a>
-    </h4>
-</div>
-
-# inlang IDE Code Extension
+# Introduction: inlang IDE Code Extension
 
 This extension provides a seamless integration of the [Inlang](https://inlang.com) localization solution into Visual Studio Code. It allows you to translate your content directly in your IDE.
 
 If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](<[https](https://github.com/inlang/monorepo/issues/new/choose)>). We are happy to help!
 
-## Features
+# Features
 
-### Context Tooltips
+## Context Tooltips
 
 See translations and edit them directly in your code. No more back-and-forth looking into the translation files themselves.
 
 <img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/tooltip.gif"/>
 
-### ✂️ Extract Messages (translations)
+## ✂️ Extract Messages (translations)
 
 Extract Messages (translations) via the `Inlang: Extract Message` code action.
 
 <img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/extract.gif"/>
 
-### Message Linting
+## Message Linting
 
 Get notified about missing translations and other issues directly in your IDE.
 
 <img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/lint.gif"/>
 
-### 🔎 Inline Annotations
+## 🔎 Inline Annotations
 
 See translations directly in your code. No more back-and-forth looking into the translation files themselves.
 
 <img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/inline.gif"/>
 
-### 🔁 Update Translations
+## 🔁 Update Translations
 
 Translations from the resource files are automatically updated when you change the source text.
 
 <img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/update.gif"/>
+
+# How to use
 
 ## 1️⃣ Setup
 
