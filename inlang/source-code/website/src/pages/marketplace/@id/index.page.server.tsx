@@ -15,7 +15,7 @@ export async function onBeforeRender(pageContext: PageContext) {
 		throw redirect("/marketplace/404")
 	}
 
-	const text = await (
+	const text = await(
 		await fetch(typeof item.readme === "object" ? item.readme.en : item.readme)
 	).text()
 	const markdown = await convert(text)
