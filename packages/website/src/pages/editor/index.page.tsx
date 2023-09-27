@@ -140,7 +140,7 @@ export function Page() {
 					</form>
 
 					<div class="pt-3">
-						<Button type="text" href="/documentation">
+						<Button type="text" href="/marketplace/app.inlang.editor">
 							How to get started?
 						</Button>
 					</div>

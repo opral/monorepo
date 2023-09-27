@@ -1,4 +1,5 @@
 import fs from "node:fs/promises"
+import fetch from "node-fetch"
 
 const registryData = await fs.readFile("registry.json", "utf8")
 const registry = JSON.parse(registryData)
@@ -10,10 +11,22 @@ for (const line of registry) {
 		// Remove "https://cdn.jsdelivr.net" from the line and add to purgeArray
 		const lineWithoutCDN = line.replace("https://cdn.jsdelivr.net", "")
 		purgeArray.push(lineWithoutCDN)
+
+		// Add other CDN files to purgeArray
+		const manifestFile = await fetch(line)
+		const manifest = await manifestFile.json()
+		purgeArray.push(manifest.readme.en.replace("https://cdn.jsdelivr.net", ""))
+
+		if (manifest.gallery) {
+			for (const image of manifest.gallery) {
+				if (image) purgeArray.push(image.replace("https://cdn.jsdelivr.net", ""))
+			}
+		}
 	}
 }
 
 const jsonString = JSON.stringify(purgeArray)
+
 
 const apiUrl = "https://purge.jsdelivr.net/"
 const requestData = JSON.stringify({ path: JSON.parse(jsonString) })
