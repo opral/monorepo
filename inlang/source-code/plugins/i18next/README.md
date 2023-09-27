@@ -39,13 +39,13 @@ type PluginSettings = {
 
 To use our plugin, you need to provide a path to the directory where your language-specific files are stored. Use the dynamic path syntax `{languageTag}` to specify the language name.
 
-### Without namespaces
+### pathPattern without namespaces
 
 ```json
 "pathPattern": "./resources/{languageTag}.json"
 ```
 
-### With namespaces
+### pathPattern with namespaces
 
 > Does not get created by 'npx @inlang/cli config init'
 

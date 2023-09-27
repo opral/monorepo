@@ -351,8 +351,8 @@ function NavbarCommon(props: {
 	})
 
 	return (
-		<div class="mb-12 sticky top-28">
-			<ul class="space-y-2 flex items-start" role="list">
+		<div class="mb-12 sticky top-28 max-h-[96vh] overflow-y-scroll overflow-scrollbar">
+			<ul role="list" class="w-full space-y-3 sm:pl-6">
 				<For each={Object.keys(props.tableOfContents())}>
 					{(sectionTitle) => (
 						<li>
@@ -364,38 +364,36 @@ function NavbarCommon(props: {
 								}}
 								class={
 									(isSelected(replaceChars(sectionTitle.toString().toLowerCase()))
-										? "text-on-background font-semibold "
+										? "text-primary font-semibold "
 										: "text-info/80 hover:text-on-background ") +
-									"tracking-wide block w-full font-normal pb-3 mb-3 border-b border-b-surface-2"
+									"tracking-wide text-sm block w-full font-normal mb-2"
 								}
 								href={`#${replaceChars(sectionTitle.toString().toLowerCase())}`}
 							>
 								{sectionTitle.replace("#", "")}
 							</a>
-							<ul class="space-y-2 mb-8" role="list">
-								<For each={props.tableOfContents()[sectionTitle]}>
-									{(heading) => (
-										<li>
-											<a
-												onClick={(e) => {
-													e.preventDefault()
-													scrollToAnchor(replaceChars(heading.toString().toLowerCase()))
-													setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
-												}}
-												class={
-													(isSelected(replaceChars(heading.toString().toLowerCase()))
-														? "text-primary font-semibold "
-														: "text-info/80 hover:text-on-background ") +
-													"tracking-wide text-sm block w-full font-normal mb-2.5"
-												}
-												href={`#${replaceChars(heading.toString().toLowerCase())}`}
-											>
-												{heading.replace("#", "")}
-											</a>
-										</li>
-									)}
-								</For>
-							</ul>
+							<For each={props.tableOfContents()[sectionTitle]}>
+								{(heading) => (
+									<li>
+										<a
+											onClick={(e) => {
+												e.preventDefault()
+												scrollToAnchor(replaceChars(heading.toString().toLowerCase()))
+												setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
+											}}
+											class={
+												"text-sm tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
+												(highlightedAnchor() === replaceChars(heading.toString().toLowerCase())
+													? "font-medium text-on-background border-l-on-background "
+													: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
+											}
+											href={`#${replaceChars(heading.toString().toLowerCase())}`}
+										>
+											{heading.replace("#", "")}
+										</a>
+									</li>
+								)}
+							</For>
 						</li>
 					)}
 				</For>
