@@ -12,7 +12,12 @@
 	},
 	"customizations": {
 		"vscode": {
-			"extensions": ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint", "inlang.vs-code-extension"]
+			"extensions": [
+				"esbenp.prettier-vscode",
+				"dbaeumer.vscode-eslint",
+				"inlang.vs-code-extension",
+				"redhat.vscode-yaml"
+			]
 		}
 	}
 }
