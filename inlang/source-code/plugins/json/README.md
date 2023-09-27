@@ -1,8 +1,8 @@
-# @inlang/plugin-json
+#  What does this plugin do?
 
 This plugin is a general purpose plugin to read and write messages of json files. It also determines how translation functions and namespaces are parsed and handled by the IDE extension.
 
-## Usage
+# How to use
 
 ```json
 // filename: project.inlang.json
@@ -21,7 +21,7 @@ This plugin is a general purpose plugin to read and write messages of json files
 }
 ```
 
-## Settings
+# Settings
 
 The plugin offers further configuration options that can be passed as arguments. The following settings exist:
 
@@ -34,17 +34,17 @@ type PluginSettings = {
 }
 ```
 
-### `pathPattern`
+## `pathPattern`
 
 To use our plugin, you need to provide a path to the directory where your language-specific files are stored. Use the dynamic path syntax `{languageTag}` to specify the language name.
 
-#### Without namespaces
+### Without namespaces
 
 ```json
 "pathPattern": "./resources/{languageTag}.json"
 ```
 
-#### With namespaces
+### With namespaces
 
 > Does not get created by 'npx @inlang/cli config init'
 
@@ -55,7 +55,7 @@ To use our plugin, you need to provide a path to the directory where your langua
 }
 ```
 
-### `variableReferencePattern`
+## `variableReferencePattern`
 
 Defines the pattern for variable references. The default is how i18next suggests the usage of placeholders.
 
@@ -78,13 +78,13 @@ default:
 
 <br>
 
-## Expected behavior
+# Expected behavior
 
 The message IDs are sorted in the order in which they appear in the sourceLanguage file. The nesting or flattening of IDs is detected on a file-by-file basis. If the sourceLanguage file contains nested IDs, the plugin will also create nested IDs in the targetLanguage files. If the sourceLanguage file contains flattened IDs, the plugin will also create flattened IDs in the targetLanguage files.
 
-## Contributing
+# Contributing
 
-### Getting started
+## Getting started
 
 Run the following commands in your terminal (node and npm must be installed):
 
@@ -93,7 +93,7 @@ Run the following commands in your terminal (node and npm must be installed):
 
 `npm run dev` will start the development environment which automatically compiles the [src/index.ts](./src/index.ts) files to JavaScript ([dist/index.js](dist/index.js)), runs tests defined in `*.test.ts` files and watches changes.
 
-### Publishing
+## Publishing
 
 Run `npm run build` to generate a build.
 
