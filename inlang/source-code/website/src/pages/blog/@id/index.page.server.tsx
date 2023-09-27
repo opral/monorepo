@@ -8,17 +8,19 @@ const repositoryRoot = new URL("../../../../../../", import.meta.url)
 
 export async function onBeforeRender(pageContext: any) {
 	const slug = pageContext.urlPathname.replace("/blog/", "")
+
 	if (renderedMarkdown[slug] === undefined) {
-		const content = tableOfContents.find((content) => content.slug === slug)
-
-		if (!content) {
-			throw render(404)
+		for (const content of tableOfContents) {
+			const text = await fs.readFile(new URL(`blog/${content.path}`, repositoryRoot), "utf-8")
+			const markdown = await convert(text)
+			renderedMarkdown[content.slug] = markdown
 		}
-
-		const text = await fs.readFile(new URL(`blog/${content.path}`, repositoryRoot), "utf-8")
-		const markdown = await convert(text)
-		renderedMarkdown[slug] = markdown
 	}
+
+	if (renderedMarkdown[slug] === undefined) {
+		throw render(404)
+	}
+
 	return {
 		pageContext: {
 			pageProps: {
