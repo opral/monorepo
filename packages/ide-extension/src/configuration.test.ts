@@ -2,7 +2,7 @@ import { it, expect, vi } from "vitest"
 import packageJson from "../package.json"
 import { CONFIGURATION } from "./configuration.js"
 
-vi.mock("vscode", async () => {
+vi.mock("vscode", () => {
 	return {
 		commands: vi.fn(),
 		EventEmitter: vi.fn(),
