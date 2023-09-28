@@ -1,7 +1,9 @@
 {
 	"id": "app.inlang.ideExtension",
 	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-	"coverImage": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/ide_extension-marketplace-cover.jpg",
+	"gallery": [
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/ide_extension-marketplace-cover.jpg"
+	],
 	"displayName": {
 		"en": "IDE Extension"
 	},
@@ -9,7 +11,7 @@
 		"en": "This extension allows you to use inlang in your IDE, enabling translating content directly in your code."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/README.md"
+		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/MARKETPLACE.md"
 	},
 	"keywords": ["ide", "extension", "vscode"],
 	"publisherName": "inlang",

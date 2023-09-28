@@ -13,6 +13,13 @@ const MarketplaceManifestBase = Type.Object({
 	coverImage: Type.Optional(
 		Type.String({ description: "The cover displayed in the marketplace." }),
 	),
+	gallery: Type.Optional(
+		Type.Array(
+			Type.String({
+				description: "The images displayed in the marketplace. The first image is the cover.",
+			}),
+		),
+	),
 	displayName: Translatable(
 		Type.String({ description: "The name which is displayed in the marketplace." }),
 	),
@@ -24,9 +31,7 @@ const MarketplaceManifestBase = Type.Object({
 	publisherName: Type.String(),
 	publisherIcon: Type.Optional(Type.String()),
 	readme: Translatable(
-		Type.TemplateLiteral("${string}.md", {
-			description: "The link must be a valid markdown file.",
-		}),
+		Type.TemplateLiteral("${string}.md", { description: "The path to the readme file." }),
 	),
 	keywords: Type.Array(Type.String()),
 	license: Type.Literal("Apache-2.0"),
