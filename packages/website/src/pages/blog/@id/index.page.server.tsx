@@ -1,4 +1,4 @@
-import fs from "node:fs/promises"
+import fs from "node:fs"
 import tableOfContents from "../../../../../../blog/tableOfContents.json"
 import { convert } from "@inlang/markdown"
 import { render } from "vite-plugin-ssr/abort"
@@ -12,7 +12,7 @@ export async function onBeforeRender(pageContext: any) {
 	const path = tableOfContents.find((page) => page.slug === id)?.path
 	if (!path) throw render(404)
 
-	const content = await convert(await fs.readFile(new URL(`blog/${path}`, repositoryRoot), "utf-8"))
+	const content = await convert(fs.readFileSync(new URL(`blog/${path}`, repositoryRoot), "utf-8"))
 	renderedMarkdown[id] = content
 
 	return {
