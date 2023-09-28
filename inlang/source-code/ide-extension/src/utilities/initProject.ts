@@ -12,9 +12,7 @@ import { createFileSystemMapper } from "./createFileSystemMapper.js"
 import { _import } from "./import/_import.js"
 import type { TelemetryEvents } from "../services/telemetry/events.js"
 import { tryCatch } from "@inlang/result"
-
-// Constants
-export const SETTINGS_FILE_NAME = "project.inlang.json"
+import { CONFIGURATION } from "../configuration.js"
 
 // Helper Functions
 export function getActiveTextEditor(): vscode.TextEditor | undefined {
@@ -26,11 +24,11 @@ export async function initProject(args: {
 	gitOrigin: string | undefined
 }): Promise<{ project?: InlangProject; error?: Error }> {
 	// if no settings file is found
-	if ((await vscode.workspace.findFiles(SETTINGS_FILE_NAME)).length === 0) {
+	if ((await vscode.workspace.findFiles(CONFIGURATION.FILES.PROJECT)).length === 0) {
 		// Try to migrate
 		await migrateConfigFile(
 			args.workspaceFolder,
-			(args.workspaceFolder + "project.inlang.json") as unknown as vscode.Uri,
+			(args.workspaceFolder + CONFIGURATION.FILES.PROJECT) as unknown as vscode.Uri
 		)
 
 		// Try to auto config
@@ -44,7 +42,7 @@ export async function initProject(args: {
 	}
 
 	const closestProjectFilePath = determineClosestPath({
-		options: (await vscode.workspace.findFiles(SETTINGS_FILE_NAME)).map((uri) => uri.path),
+		options: (await vscode.workspace.findFiles(CONFIGURATION.FILES.PROJECT)).map((uri) => uri.path),
 		to: activeTextEditor.document.uri.path,
 	})
 	const closestProjectFilePathUri = vscode.Uri.parse(closestProjectFilePath)
@@ -73,7 +71,7 @@ export async function initProject(args: {
 					properties: props,
 				})
 			},
-		}),
+		})
 	)
 	telemetry.capture({
 		event: "IDE-EXTENSION loaded project",
@@ -103,7 +101,7 @@ export async function initProject(args: {
 
 	// Watch for changes in the config file
 	const watcher = vscode.workspace.createFileSystemWatcher(
-		new vscode.RelativePattern(args.workspaceFolder, "project.inlang.json"),
+		new vscode.RelativePattern(args.workspaceFolder, CONFIGURATION.FILES.PROJECT)
 	)
 	// Listen for changes in the config file
 	watcher.onDidChange(() => {

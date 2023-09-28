@@ -1,6 +1,5 @@
 import * as vscode from "vscode"
 import { state } from "./state.js"
-import { extractMessageCommand } from "./commands/extractMessage.js"
 import { messagePreview } from "./decorations/messagePreview.js"
 import { ExtractMessage } from "./actions/extractMessage.js"
 import { msg } from "./utilities/message.js"
@@ -8,10 +7,9 @@ import { getGitOrigin } from "./services/telemetry/index.js"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
 import { recommendation } from "./utilities/recommendation.js"
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
-import { openInEditorCommand } from "./commands/openInEditor.js"
-import { editMessageCommand } from "./commands/editMessage.js"
-import { SETTINGS_FILE_NAME, getActiveTextEditor, initProject } from "./utilities/initProject.js"
+import { getActiveTextEditor, initProject } from "./utilities/initProject.js"
 import { handleError, telemetryCapture } from "./utilities/utils.js"
+import { CONFIGURATION } from "./configuration.js"
 
 // Entry Point
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -49,7 +47,7 @@ async function main(args: {
 	const { project, error } = await initProject({ workspaceFolder, gitOrigin: args.gitOrigin })
 
 	// if project is undefined but the files exists, the project got migrated / newly created and we need to restart the extension
-	if (!project && (await vscode.workspace.findFiles(SETTINGS_FILE_NAME)).length !== 0) {
+	if (!project && (await vscode.workspace.findFiles(CONFIGURATION.FILES.PROJECT)).length !== 0) {
 		main(args)
 		return
 	}
@@ -61,16 +59,11 @@ async function main(args: {
 
 	// Register commands and other extension functionality
 	args.context.subscriptions.push(
-		vscode.commands.registerCommand(editMessageCommand.id, editMessageCommand.callback),
-		vscode.commands.registerTextEditorCommand(
-			extractMessageCommand.id,
-			extractMessageCommand.callback,
-		),
-		vscode.commands.registerCommand(openInEditorCommand.id, openInEditorCommand.callback),
+		...Object.values(CONFIGURATION.COMMANDS).map((c) => c.register(c.command, c.callback as any))
 	)
 
 	const documentSelectors: vscode.DocumentSelector = [
-		{ language: "javascript", pattern: `!${SETTINGS_FILE_NAME}` },
+		{ language: "javascript", pattern: `!${CONFIGURATION.FILES.PROJECT}` },
 		...(state().project.customApi()["app.inlang.ideExtension"]?.documentSelectors || []),
 	]
 
@@ -78,7 +71,7 @@ async function main(args: {
 	args.context.subscriptions.push(
 		vscode.languages.registerCodeActionsProvider(documentSelectors, new ExtractMessage(), {
 			providedCodeActionKinds: ExtractMessage.providedCodeActionKinds,
-		}),
+		})
 	)
 
 	// Register decorations

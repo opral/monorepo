@@ -24,7 +24,7 @@ it("should transpile esm to cjs code which can then be imported with require", a
       return "Hello " + x
     }
   `,
-		{ encoding: "utf8" },
+		{ encoding: "utf8" }
 	)
 	const module = await _import(`${tempdir}/testfile1.js`)
 	expect(module.default()).toBe("Inlang")
@@ -53,7 +53,7 @@ it("should be able to import an inlang plugin from an absolute path", async () =
 it("should be able to import an inlang plugin from http", async () => {
 	// using a permalink to an inlang plugin
 	const module = await _import(
-		"https://raw.githubusercontent.com/samuelstroschein/inlang-plugin-json/3e322bf01763fc6d8c9f9f9489be889ae96ca6f2/dist/index.js",
+		"https://raw.githubusercontent.com/samuelstroschein/inlang-plugin-json/3e322bf01763fc6d8c9f9f9489be889ae96ca6f2/dist/index.js"
 	)
 	const pluginAfterSetup = module.default()()
 	expect(pluginAfterSetup.id).toBe("samuelstroschein.inlangPluginJson")
