@@ -4,7 +4,6 @@ import { convert } from "@inlang/markdown"
 import { render } from "vite-plugin-ssr/abort"
 
 const renderedMarkdown = {} as Record<string, string>
-const repositoryRoot = new URL("../../../../../../", import.meta.url)
 
 export async function onBeforeRender(pageContext: any) {
 	const { id } = pageContext.routeParams
@@ -12,7 +11,7 @@ export async function onBeforeRender(pageContext: any) {
 	if (renderedMarkdown[id] === undefined) {
 		for (const content of tableOfContents) {
 			const text = await fs.readFile(
-				new URL(`inlang/blog/${content.path}`, repositoryRoot),
+				new URL(`../../../../../../blog/${content.path}`, import.meta.url),
 				"utf-8"
 			)
 			const markdown = await convert(text)
