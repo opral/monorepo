@@ -56,7 +56,7 @@ export const registry: MarketplaceManifest[] = [
 			en: "This extension allows you to use inlang in your IDE, enabling translating content directly in your code.",
 		},
 		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/README.md",
+			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/MARKETPLACE.md",
 		},
 		keywords: ["ide", "extension", "vscode"],
 		publisherName: "inlang",
@@ -85,7 +85,7 @@ export const registry: MarketplaceManifest[] = [
 		id: "library.inlang.paraglideJsSveltekit",
 		icon: "https://emojis.wiki/thumbs/emojis/parachute.webp",
 		displayName: {
-			en: "paraglideJS",
+			en: "paraglideJS (former SDK-JS)",
 		},
 		description: {
 			en: "A fully configurable JavaScript library that integrates within your framework.",
@@ -93,7 +93,7 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/paraglide-js-sveltekit/README.md",
 		},
-		keywords: ["sdk", "paraglide"],
+		keywords: ["sdk", "paraglide", "sdk-js", "sveltekit", "svelte"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
