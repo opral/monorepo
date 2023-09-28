@@ -32,20 +32,32 @@ export const ListHeader = (props: ListHeaderProps) => {
 	} = useEditorState()
 
 	const getLintSummary = createMemo(() => {
-		const summary: Record<MessageLintRule["id"], number> = {}
+		const summary = new Map<string, number>() // Use a Map with explicit types for better performance
+		const filteredRules = new Set<string>(filteredMessageLintRules())
+		const filteredTags = new Set<string>(filteredLanguageTags())
+		const filteredIdValue = filteredId()
+
 		for (const report of project()?.query.messageLintReports.getAll() || []) {
+			const ruleId = report.ruleId
+			const languageTag = report.languageTag
+			const messageId = report.messageId
+
 			if (
-				((filteredMessageLintRules().length === 0 ||
-					filteredMessageLintRules().includes(report.ruleId)) &&
-					(filteredLanguageTags().length === 0 ||
-						filteredLanguageTags().includes(report.languageTag)) &&
-					filteredId() === "") ||
-				filteredId() === report.messageId
+				(filteredRules.size === 0 || filteredRules.has(ruleId)) &&
+				(filteredTags.size === 0 || filteredTags.has(languageTag)) &&
+				(filteredIdValue === "" || filteredIdValue === messageId)
 			) {
-				summary[report.ruleId] = (summary[report.ruleId] || 0) + 1
+				summary.set(ruleId, (summary.get(ruleId) || 0) + 1)
 			}
 		}
-		return summary
+
+		// Convert the Map to a plain object before returning
+		const summaryObject: { [key: string]: number } = {}
+		for (const [ruleId, count] of summary) {
+			summaryObject[ruleId] = count
+		}
+
+		return summaryObject
 	})
 
 	const getLintRule = (lintRuleId: MessageLintRule["id"]): InstalledMessageLintRule | undefined =>
@@ -110,7 +122,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 										onClick={() => {
 											if (filteredMessageLintRules().includes(lintRule)) {
 												setFilteredMessageLintRules(
-													filteredMessageLintRules().filter((id) => id !== lintRule),
+													filteredMessageLintRules().filter((id) => id !== lintRule)
 												)
 											} else {
 												setFilteredMessageLintRules([lintRule])
