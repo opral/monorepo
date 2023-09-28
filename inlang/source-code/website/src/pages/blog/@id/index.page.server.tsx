@@ -10,17 +10,21 @@ export async function onBeforeRender(pageContext: any) {
 
 	if (renderedMarkdown[id] === undefined) {
 		for (const content of tableOfContents) {
-			const text = await fs.readFile(
-				new URL(`../../../../../../blog/${content.path}`, import.meta.url),
-				"utf-8"
-			)
+			let text
+
+			try {
+				text = await fs.readFile(
+					new URL(`../../../../../../blog/${content.path}`, import.meta.url),
+					"utf-8"
+				)
+			} catch (error) {
+				console.error(error)
+				throw render(404)
+			}
+
 			const markdown = await convert(text)
 			renderedMarkdown[content.slug] = markdown
 		}
-	}
-
-	if (renderedMarkdown[id] === undefined) {
-		throw render(404)
 	}
 
 	return {
