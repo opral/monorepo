@@ -1,6 +1,7 @@
 import * as vscode from "vscode"
 import { getGitOrigin } from "../services/telemetry/implementation.js"
 import { getSetting, updateSetting } from "./settings/index.js"
+import { CONFIGURATION } from "../configuration.js"
 
 /**
  * Delete old inlang.config.js config file if new project.inlang.json exists.
@@ -8,7 +9,7 @@ import { getSetting, updateSetting } from "./settings/index.js"
 export const deleteOldConfigFile = async () => {
 	// Check if old config file exists
 	const oldConfigFiles = await vscode.workspace.findFiles("inlang.config.js")
-	const newConfigFiles = await vscode.workspace.findFiles("project.inlang.json")
+	const newConfigFiles = await vscode.workspace.findFiles(CONFIGURATION.FILES.PROJECT)
 	if (oldConfigFiles[0] && newConfigFiles[0]) {
 		// Check if prompt is disabled
 		if (await isDisabledConfigFileDeletion()) return

@@ -1,6 +1,6 @@
 import { state } from "../state.js"
 import { msg } from "../utilities/message.js"
-import { EventEmitter, window } from "vscode"
+import { EventEmitter, commands, window } from "vscode"
 import type { LanguageTag, Message } from "@inlang/sdk"
 import { getPatternFromString, getStringFromPattern } from "../utilities/query.js"
 
@@ -8,8 +8,9 @@ const onDidEditMessageEmitter = new EventEmitter<void>()
 export const onDidEditMessage = onDidEditMessageEmitter.event
 
 export const editMessageCommand = {
-	id: "inlang.editMessage",
-	title: "Inlang: Edit Message",
+	command: "inlang.editMessage",
+	title: "Inlang: Edit a Message",
+	register: commands.registerCommand,
 	callback: async function ({
 		messageId,
 		languageTag,
