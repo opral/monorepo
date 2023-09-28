@@ -1,33 +1,19 @@
 import fs from "node:fs/promises"
-import path from "node:path"
 import tableOfContents from "../../../../../../blog/tableOfContents.json"
 import { convert } from "@inlang/markdown"
 import { render } from "vite-plugin-ssr/abort"
 
 const renderedMarkdown = {} as Record<string, string>
+const repositoryRoot = new URL("../../../../../../", import.meta.url)
 
 export async function onBeforeRender(pageContext: any) {
 	const { id } = pageContext.routeParams
 
-	if (renderedMarkdown[id] === undefined) {
-		const promises = tableOfContents.map(async (content) => {
-			const filePath = path.normalize(
-				new URL(`../../../../../../../inlang/blog/${content.path}`, import.meta.url).pathname
-			)
+	const path = tableOfContents.find((page) => page.slug === id)?.path
+	if (!path) throw render(404)
 
-			try {
-				const text = await fs.readFile(filePath, "utf-8")
-
-				const markdown = await convert(text)
-				renderedMarkdown[content.slug] = markdown
-			} catch (error) {
-				console.error(error)
-				throw render(404)
-			}
-		})
-
-		await Promise.all(promises)
-	}
+	const content = await convert(await fs.readFile(new URL(`blog/${path}`, repositoryRoot), "utf-8"))
+	renderedMarkdown[id] = content
 
 	return {
 		pageContext: {
