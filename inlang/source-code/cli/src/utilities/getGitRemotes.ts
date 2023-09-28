@@ -11,7 +11,7 @@ import type { NodeishFilesystem } from "@lix-js/fs"
  * @returns The git origin url or undefined if it could not be found.
  */
 export async function getGitRemotes(
-	args: { filepath?: string; nodeishFs?: NodeishFilesystem } = {},
+	args: { filepath?: string; nodeishFs?: NodeishFilesystem } = {}
 ) {
 	try {
 		const usedFs = args.nodeishFs || fs

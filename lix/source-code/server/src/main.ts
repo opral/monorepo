@@ -18,7 +18,7 @@ const { error: errors } = validateEnvVariables({ forProduction: isProduction })
 if (errors) {
 	throw Error(
 		"Production env variables are missing:\n\n" +
-			errors.map((e: any) => `${e.key}: ${e.errorMessage}`).join("\n"),
+			errors.map((e: any) => `${e.key}: ${e.errorMessage}`).join("\n")
 	)
 }
 
@@ -58,7 +58,7 @@ router.use(
 		sameSite: "strict",
 		secret: privateEnv.SESSION_COOKIE_SECRET,
 		maxAge: 7 * 24 * 3600 * 1000, // 1 week
-	}),
+	})
 )
 
 router.use("/services/auth", authService)

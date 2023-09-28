@@ -44,7 +44,7 @@ describe("lintSingleMessage", async () => {
 					messages,
 					message: message1,
 					rules: [lintRule1],
-				}),
+				})
 			)
 			expect(result.error).toBeDefined()
 			expect(result.data).toBeUndefined()

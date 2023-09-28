@@ -59,5 +59,5 @@ router.all(
 			console.error("ERROR in github service: ", error)
 			next(error)
 		}
-	},
+	}
 )

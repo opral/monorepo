@@ -29,7 +29,7 @@ export async function detectLanguageTags(args: {
 				args.nodeishFs
 					.readFile(path.replace("{languageTag}", filePath.replace(".json", "")))
 					.then(() => true)
-					.catch(() => false),
+					.catch(() => false)
 			)
 
 			if (fileExists && !args.ignore?.includes(filePath)) {

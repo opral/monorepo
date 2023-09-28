@@ -18,7 +18,7 @@ const { error: errors } = validateEnvVariables({ forProduction: isProduction })
 if (errors) {
 	throw Error(
 		"Production env variables are missing:\n\n" +
-			errors.map((e) => `${e.key}: ${e.errorMessage}`).join("\n"),
+			errors.map((e) => `${e.key}: ${e.errorMessage}`).join("\n")
 	)
 }
 

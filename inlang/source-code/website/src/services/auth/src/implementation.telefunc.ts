@@ -10,7 +10,7 @@ interface Email {
 
 const getGithubNoReplyEmail = (emails: Email[]): string | undefined => {
 	const githubNoReplyEmail = emails.find((email) =>
-		email.email.endsWith("@users.noreply.github.com"),
+		email.email.endsWith("@users.noreply.github.com")
 	)
 	return githubNoReplyEmail?.email
 }

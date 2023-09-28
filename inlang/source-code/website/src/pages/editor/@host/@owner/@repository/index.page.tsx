@@ -40,7 +40,7 @@ function TheActualPage() {
 				(project) =>
 					!(
 						project.owner === routeParams().owner && project.repository === routeParams().repository
-					),
+					)
 			)
 
 			const newProject: RecentProjectType = {

@@ -91,7 +91,7 @@ describe("loadMessages", () => {
 			await resolved.data.loadMessages!({
 				languageTags: ["en"],
 				sourceLanguageTag: "en",
-			}),
+			})
 		).toEqual([{ id: "test", expressions: [], selectors: [], variants: [] }])
 	})
 
@@ -298,7 +298,7 @@ describe("addCustomApi", () => {
 
 		expect(resolved.data.customApi).toHaveProperty("app.inlang.placeholder")
 		expect(
-			(resolved.data.customApi?.["app.inlang.placeholder"] as any).messageReferenceMatcher(),
+			(resolved.data.customApi?.["app.inlang.placeholder"] as any).messageReferenceMatcher()
 		).toEqual({
 			hello: "world",
 		})

@@ -21,11 +21,11 @@ export const telemetryBrowser = new Proxy(posthog, {
 
 function initWrapper(
 	config?: Parameters<typeof posthog.init>[1],
-	name?: Parameters<typeof posthog.init>[2],
+	name?: Parameters<typeof posthog.init>[2]
 ): ReturnType<typeof posthog.init> {
 	if (window === undefined) {
 		return console.warn(
-			"You are likely trying to use this in a Node.js environment. Use telemetryNode instead.",
+			"You are likely trying to use this in a Node.js environment. Use telemetryNode instead."
 		)
 	} else if (config?.api_host) {
 		return console.warn("The api_host is set by the telemetry module.")
@@ -39,6 +39,6 @@ function initWrapper(
 			capture_performance: false,
 			...config,
 		},
-		name,
+		name
 	)
 }

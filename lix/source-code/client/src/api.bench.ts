@@ -10,7 +10,7 @@ describe("main workflow", () => {
 				nodeishFs: createNodeishMemoryFs(),
 			})
 		},
-		{ time: 50 },
+		{ time: 50 }
 	)
 
 	bench(
@@ -18,6 +18,6 @@ describe("main workflow", () => {
 		async () => {
 			await repository.nodeishFs.readFile("./inlang.config.js", { encoding: "utf-8" })
 		},
-		{ time: 100 },
+		{ time: 100 }
 	)
 })

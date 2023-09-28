@@ -80,7 +80,7 @@ describe("migrateProjectSettings", () => {
 				}),
 			  ],
 			};
-		  }`,
+		  }`
 		)
 		// create en, de and fr folders at /apps/web/public/static/locales/ recursively
 		await nodeishFs.mkdir("/apps/web/public/static/locales/en", { recursive: true })

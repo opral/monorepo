@@ -3,7 +3,7 @@ import { parse } from "./messageReferenceMatchers.js"
 import type { Plugin } from "@inlang/plugin"
 
 export const ideExtensionConfig = (
-	settings: PluginSettings,
+	settings: PluginSettings
 ): ReturnType<Exclude<Plugin["addCustomApi"], undefined>> => ({
 	"app.inlang.ideExtension": {
 		messageReferenceMatchers: [

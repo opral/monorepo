@@ -33,7 +33,7 @@ export async function lintCommandAction(args: { project: InlangProject; logger: 
 
 		if (args.project.installed.messageLintRules().length === 0) {
 			args.logger.error(
-				`❌ No message lint rules are installed. Visit the marketplace to install lint rules https://inlang.com/marketplace .`,
+				`❌ No message lint rules are installed. Visit the marketplace to install lint rules https://inlang.com/marketplace .`
 			)
 			return
 		}
@@ -118,7 +118,7 @@ export async function lintCommandAction(args: { project: InlangProject; logger: 
 			// spacer line
 			args.logger.log("")
 			args.logger.info(
-				"ℹ️  You can add the `--no-fail` flag to disable throwing an error if linting fails.",
+				"ℹ️  You can add the `--no-fail` flag to disable throwing an error if linting fails."
 			)
 			console.error("🚫 Lint failed with errors.")
 			process.exit(1)

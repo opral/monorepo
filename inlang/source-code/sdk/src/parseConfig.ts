@@ -16,7 +16,7 @@ export class ParseConfigError extends Error {
 const ConfigCompiler = TypeCompiler.Compile(ProjectSettings)
 
 export const parseSettings = (
-	config: ProjectSettings,
+	config: ProjectSettings
 ): Result<ProjectSettings, ParseConfigError> => {
 	if (ConfigCompiler.Check(config)) {
 		return {
@@ -27,7 +27,7 @@ export const parseSettings = (
 		return {
 			error: new ParseConfigError(
 				"The inlang config is not valid.",
-				[...ConfigCompiler.Errors(config)].toString(),
+				[...ConfigCompiler.Errors(config)].toString()
 			),
 			data: undefined as never,
 		}

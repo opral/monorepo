@@ -37,11 +37,11 @@ export function InstallationProvider(props: {
 			const newProject: RecentProjectType = {
 				owner: props.repo.slice(
 					props.repo.indexOf("/") + 1,
-					props.repo.indexOf("/", props.repo.indexOf("/") + 1),
+					props.repo.indexOf("/", props.repo.indexOf("/") + 1)
 				),
 				repository: props.repo.slice(
 					props.repo.indexOf("/", props.repo.indexOf("/") + 1) + 1,
-					props.repo.length,
+					props.repo.length
 				),
 				description: "",
 				lastOpened: new Date().getTime(),
@@ -49,7 +49,7 @@ export function InstallationProvider(props: {
 
 			recentProjects = recentProjects.filter(
 				(project) =>
-					!(project.owner === newProject.owner && project.repository === newProject.repository),
+					!(project.owner === newProject.owner && project.repository === newProject.repository)
 			)
 
 			recentProjects.push(newProject)
@@ -73,7 +73,7 @@ function validateRepo(
 		step: () => Step
 		setStep: (step: Step) => void
 		optIn: Record<string, any>
-	},
+	}
 ) {
 	if (!user && getLocalStorage()) {
 		props.setStep({
@@ -118,7 +118,7 @@ async function initializeRepo(
 	modulesID: string[],
 	user: { username: string; email: string },
 	step: () => Step,
-	setStep: (step: Step) => void,
+	setStep: (step: Step) => void
 ) {
 	const modulesURL = modulesID.map((url) => {
 		const module = registry.find((module) => module.id.toLowerCase() === url.toLowerCase())
@@ -231,7 +231,7 @@ async function initializeRepo(
 		if (inlangProject.modules.length === 0) return true
 
 		const installedModules = inlangProject.modules.every((module: string) =>
-			module.includes(moduleURL),
+			module.includes(moduleURL)
 		)
 		return !installedModules
 	})
