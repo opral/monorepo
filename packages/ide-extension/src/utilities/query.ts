@@ -15,7 +15,7 @@ export const getStringFromPattern = (args: {
 				return `{${element.name}}` // TODO: Use framework specific placeholder indication
 			} else {
 				return msg(
-					`Unknown pattern element type in message with id ${args.messageId} for languageTag ${args.languageTag}.`,
+					`Unknown pattern element type in message with id ${args.messageId} for languageTag ${args.languageTag}.`
 				)
 			}
 		})

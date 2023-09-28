@@ -44,13 +44,13 @@ export const createInlangConfigFile = async (args: { workspaceFolder: vscode.Wor
 			// create config file at root of workspace
 			await nodeishFs.writeFile(
 				"./project.inlang.json",
-				JSON.stringify(settings, undefined, 4) + "\n",
+				JSON.stringify(settings, undefined, 4) + "\n"
 			)
 
 			console.info(
 				`🎉 Created project.inlang.json file at ${
 					args.workspaceFolder.uri.fsPath + "/project.inlang.json"
-				}`,
+				}`
 			)
 		} else if (createConfigFile === "Reject") {
 			// Disable config file creation
@@ -95,7 +95,7 @@ const promptUserToCreateConfigFile = async (): Promise<string | undefined> => {
 	return await vscode.window.showInformationMessage(
 		"Inlang can be automatically setup for this project. Should the settings file be created?",
 		"Accept",
-		"Reject",
+		"Reject"
 	)
 }
 

@@ -27,7 +27,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 				{ languageTag: "fr", match: {}, pattern: [{ type: "Text", value: "Bonjour le monde" }] },
 			],
 		})
-	},
+	}
 )
 
 it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
@@ -83,7 +83,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 				},
 			],
 		} satisfies Message)
-	},
+	}
 )
 
 it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
@@ -131,7 +131,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 				},
 			],
 		})
-	},
+	}
 )
 
 it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
@@ -181,5 +181,5 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 				},
 			],
 		})
-	},
+	}
 )

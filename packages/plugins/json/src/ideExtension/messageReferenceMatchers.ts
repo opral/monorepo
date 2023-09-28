@@ -73,7 +73,7 @@ const parser = Parsimmon.createLanguage({
 						},
 					},
 				}
-			},
+			}
 		)
 	},
 })

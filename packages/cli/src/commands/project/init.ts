@@ -9,7 +9,7 @@ import path from "node:path"
 export const init = new Command()
 	.command("init")
 	.description(
-		"Initialize a new inlang project at project.inlang.json with optional module configuration.",
+		"Initialize a new inlang project at project.inlang.json with optional module configuration."
 	)
 	.action(async () => {
 		await initCommandAction({ logger: log, nodeishFs: fs })
@@ -40,7 +40,7 @@ export async function initCommandAction(args: {
 		const oldProjFileStat = await fs.stat("./inlang.config.js")
 		if (oldProjFileStat) {
 			args.logger.error(
-				"Found an existing inlang configuration in the legacy format, please run the migration command instead.",
+				"Found an existing inlang configuration in the legacy format, please run the migration command instead."
 			)
 		}
 
@@ -71,7 +71,7 @@ export async function initCommandAction(args: {
 		await args.nodeishFs.writeFile(inlangConfigFilePath, configString + "\n")
 
 		args.logger.warn(
-			`Could not auto generate a project configuration, falling back to a minimal base configuration. Please manually setup your inlang project.`,
+			`Could not auto generate a project configuration, falling back to a minimal base configuration. Please manually setup your inlang project.`
 		)
 	}
 

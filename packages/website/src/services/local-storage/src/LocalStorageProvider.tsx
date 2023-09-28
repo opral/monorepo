@@ -33,7 +33,7 @@ export function getLocalStorage(): LocalStorageSchema | undefined {
  */
 export function useLocalStorage(): [
 	get: LocalStorageSchema,
-	set: SetStoreFunction<LocalStorageSchema>,
+	set: SetStoreFunction<LocalStorageSchema>
 ] {
 	return useContext(LocalStorageContext as any)
 }

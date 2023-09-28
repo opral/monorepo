@@ -128,7 +128,7 @@ describe("getVariant", () => {
 		const mockMessage: Message = getMockMessage()
 		mockMessage.variants = [
 			...mockMessage.variants!.filter(
-				(v) => v.languageTag === "en" && (v.match.gender !== "*" || v.match.guestOther !== "*"),
+				(v) => v.languageTag === "en" && (v.match.gender !== "*" || v.match.guestOther !== "*")
 			),
 		]
 
@@ -197,8 +197,8 @@ describe("createVariant", () => {
 		// should return the female variant
 		expect(
 			message.data!.variants.find(
-				(v) => v.languageTag === "en" && v.match.gender === "female" && v.match.guestOther === "0",
-			)?.pattern,
+				(v) => v.languageTag === "en" && v.match.gender === "female" && v.match.guestOther === "0"
+			)?.pattern
 		).toStrictEqual([])
 	})
 
@@ -206,7 +206,7 @@ describe("createVariant", () => {
 		const mockMessage: Message = getMockMessage()
 		mockMessage.variants = [
 			...mockMessage.variants!.filter(
-				(v) => v.languageTag === "en" && (v.match.gender !== "*" || v.match.guestOther !== "*"),
+				(v) => v.languageTag === "en" && (v.match.gender !== "*" || v.match.guestOther !== "*")
 			),
 		]
 
@@ -220,8 +220,8 @@ describe("createVariant", () => {
 		// should return the female variant
 		expect(
 			message.data!.variants.find(
-				(v) => v.languageTag === "en" && v.match.gender === "*" && v.match.guestOther === "*",
-			)?.pattern,
+				(v) => v.languageTag === "en" && v.match.gender === "*" && v.match.guestOther === "*"
+			)?.pattern
 		).toStrictEqual([])
 	})
 
@@ -270,8 +270,8 @@ describe("updateVariant", () => {
 		// should return the female variant
 		expect(
 			message.data!.variants.find(
-				(v) => v.languageTag === "en" && v.match.gender === "female" && v.match.guestOther === "1",
-			)?.pattern,
+				(v) => v.languageTag === "en" && v.match.gender === "female" && v.match.guestOther === "1"
+			)?.pattern
 		).toStrictEqual([])
 	})
 
@@ -288,8 +288,8 @@ describe("updateVariant", () => {
 		// should return the female variant
 		expect(
 			message.data!.variants.find(
-				(v) => v.languageTag === "en" && v.match.gender === "*" && v.match.guestOther === "*",
-			)?.pattern,
+				(v) => v.languageTag === "en" && v.match.gender === "*" && v.match.guestOther === "*"
+			)?.pattern
 		).toStrictEqual([])
 	})
 
@@ -298,7 +298,7 @@ describe("updateVariant", () => {
 
 		mockMessage.variants = [
 			...mockMessage.variants!.filter(
-				(v) => v.languageTag === "en" && (v.match.gender !== "*" || v.match.guestOther !== "*"),
+				(v) => v.languageTag === "en" && (v.match.gender !== "*" || v.match.guestOther !== "*")
 			),
 		]
 

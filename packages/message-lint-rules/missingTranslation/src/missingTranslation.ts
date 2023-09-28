@@ -7,7 +7,7 @@ export const missingTranslationRule: MessageLintRule = {
 	description,
 	run: ({ message, settings, report }) => {
 		const translatedLanguageTags = settings.languageTags.filter(
-			(languageTag) => languageTag !== settings.sourceLanguageTag,
+			(languageTag) => languageTag !== settings.sourceLanguageTag
 		)
 
 		for (const translatedLanguageTag of translatedLanguageTags) {

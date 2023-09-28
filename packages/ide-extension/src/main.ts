@@ -64,9 +64,9 @@ async function main(args: {
 		vscode.commands.registerCommand(editMessageCommand.id, editMessageCommand.callback),
 		vscode.commands.registerTextEditorCommand(
 			extractMessageCommand.id,
-			extractMessageCommand.callback,
+			extractMessageCommand.callback
 		),
-		vscode.commands.registerCommand(openInEditorCommand.id, openInEditorCommand.callback),
+		vscode.commands.registerCommand(openInEditorCommand.id, openInEditorCommand.callback)
 	)
 
 	const documentSelectors: vscode.DocumentSelector = [
@@ -78,7 +78,7 @@ async function main(args: {
 	args.context.subscriptions.push(
 		vscode.languages.registerCodeActionsProvider(documentSelectors, new ExtractMessage(), {
 			providedCodeActionKinds: ExtractMessage.providedCodeActionKinds,
-		}),
+		})
 	)
 
 	// Register decorations

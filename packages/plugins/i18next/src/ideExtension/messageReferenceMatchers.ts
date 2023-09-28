@@ -70,7 +70,7 @@ const createParser = (settings: PluginSettings) => {
 			return Parsimmon.seq(
 				r.whitespace!,
 				Parsimmon.string("ns").trim(r.whitespace!).skip(r.colon!), // namespace key parser
-				r.stringLiteral!.trim(r.whitespace!),
+				r.stringLiteral!.trim(r.whitespace!)
 			).map(([, , val]) => `${val}`)
 		},
 
@@ -124,7 +124,7 @@ const createParser = (settings: PluginSettings) => {
 							},
 						},
 					} // satisfies MessageReferenceMatch
-				},
+				}
 			)
 		},
 	})

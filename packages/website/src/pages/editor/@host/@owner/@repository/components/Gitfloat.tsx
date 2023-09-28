@@ -236,7 +236,7 @@ export const Gitfloat = () => {
 			if (userIsCollaborator()) {
 				setIsForking(false)
 			}
-		}),
+		})
 	)
 
 	return (

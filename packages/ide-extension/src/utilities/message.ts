@@ -5,7 +5,7 @@ export const msg = (
 	type?: "info" | "warn" | "error",
 	position?: "statusBar" | "notification",
 	alignment?: vscode.StatusBarAlignment,
-	duration?: number,
+	duration?: number
 ) => {
 	// Set default values for alignment and duration
 	type = type || "info"

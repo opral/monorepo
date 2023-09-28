@@ -42,7 +42,7 @@ export const cli = new Command()
 		// name enables better grouping in the telemetry dashboard
 		const name = command.args.filter(
 			// shouldn't start with a flag and the previous arg shouldn't be a flag
-			(arg, i) => !arg.startsWith("-") && !command.args[i - 1]?.startsWith("-"),
+			(arg, i) => !arg.startsWith("-") && !command.args[i - 1]?.startsWith("-")
 		)
 
 		telemetry.capture({

@@ -22,21 +22,21 @@ export const extractMessageCommand = {
 			return msg(
 				"There is no `plugin` configuration for the inlang extension. One of the `modules` should expose a `plugin` which has `customApi` containing `app.inlang.ideExtension`",
 				"warn",
-				"notification",
+				"notification"
 			)
 		}
 		if (ideExtension.extractMessageOptions === undefined) {
 			return msg(
 				"The `extractMessageOptions` are not defined in `app.inlang.ideExtension` but required to extract a message.",
 				"warn",
-				"notification",
+				"notification"
 			)
 		}
 		if (state().project.settings()?.sourceLanguageTag === undefined) {
 			return msg(
 				"The `sourceLanguageTag` is not defined in the project.inlang.json but required to extract a message.",
 				"warn",
-				"notification",
+				"notification"
 			)
 		}
 
@@ -58,7 +58,7 @@ export const extractMessageCommand = {
 
 		const preparedExtractOption = await vscode.window.showQuickPick(
 			[...preparedExtractOptions, "How to edit these replacement options?"],
-			{ title: "Replace highlighted text with:" },
+			{ title: "Replace highlighted text with:" }
 		)
 		if (preparedExtractOption === undefined) {
 			return
@@ -69,8 +69,8 @@ export const extractMessageCommand = {
 			// TODO #152
 			return vscode.env.openExternal(
 				vscode.Uri.parse(
-					"https://github.com/inlang/monorepo/tree/main/inlang/source-code/ide-extension#3%EF%B8%8F%E2%83%A3-configuration",
-				),
+					"https://github.com/inlang/monorepo/tree/main/inlang/source-code/ide-extension#3%EF%B8%8F%E2%83%A3-configuration"
+				)
 			)
 		}
 

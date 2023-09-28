@@ -49,7 +49,7 @@ export function detectPlugins(url: string) {
 	const moduleDetections: Set<string> = new Set()
 	const lintRuleDetections: Set<string> = new Set()
 	const matches = url.matchAll(
-		/(plugin-json)|(i18next)|(typesafe-i18n)|(sdk-js)|(standard-lint-rules)/g,
+		/(plugin-json)|(i18next)|(typesafe-i18n)|(sdk-js)|(standard-lint-rules)/g
 	)
 
 	for (const [matched] of matches) {
@@ -206,7 +206,7 @@ export async function migrateProjectSettings(args: {
 
 export function lineParsing(
 	legacyConfig: string,
-	config: ProjectSettings,
+	config: ProjectSettings
 ): { extractedConfig: ProjectSettings; parseErrors: string[] } {
 	const searchMapping: Record<string, string> = {
 		languages: "languageTags",

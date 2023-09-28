@@ -22,7 +22,7 @@ Promise<Result<Message, string>> {
 				throw new Error("Source language configuration missing")
 			}
 			for (const variant of args.message.variants.filter(
-				(variant) => variant.languageTag === args.sourceLanguageTag,
+				(variant) => variant.languageTag === args.sourceLanguageTag
 			)) {
 				const targetVariant = getVariant(args.message, {
 					where: {
@@ -44,7 +44,7 @@ Promise<Result<Message, string>> {
 							format: "html",
 							key: privateEnv.GOOGLE_TRANSLATE_API_KEY,
 						}),
-					{ method: "POST" },
+					{ method: "POST" }
 				)
 				if (!response.ok) {
 					return { error: response.statusText }
@@ -84,7 +84,7 @@ const escapeEnd = "</span>"
 
 function serializePattern(
 	pattern: Message["variants"][number]["pattern"],
-	placeholderMetadata: PlaceholderMetadata,
+	placeholderMetadata: PlaceholderMetadata
 ) {
 	let result = ""
 	for (const [i, element] of pattern.entries()) {

@@ -12,7 +12,7 @@ import type { Variant, VariableReference } from "@inlang/sdk"
 export const getEditorConfig = (
 	ref: HTMLDivElement,
 	variant: Variant | undefined,
-	variableReferences: () => VariableReference[],
+	variableReferences: () => VariableReference[]
 ) => {
 	return {
 		element: ref!,

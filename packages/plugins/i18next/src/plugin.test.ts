@@ -208,7 +208,7 @@ describe("option pathPattern", () => {
 			const languageTags = ["en"]
 			const sourceLanguageTag = "en"
 			expect(
-				plugin.loadMessages!({ languageTags, sourceLanguageTag, settings, nodeishFs: fs }),
+				plugin.loadMessages!({ languageTags, sourceLanguageTag, settings, nodeishFs: fs })
 			).resolves.toBeTruthy()
 		})
 	})
@@ -282,7 +282,7 @@ describe("loadMessage", () => {
 		const sourceLanguageTag = "en"
 
 		expect(
-			plugin.loadMessages!({ languageTags, sourceLanguageTag, settings, nodeishFs: fs }),
+			plugin.loadMessages!({ languageTags, sourceLanguageTag, settings, nodeishFs: fs })
 		).resolves.toBeTruthy()
 	})
 
@@ -295,7 +295,7 @@ describe("loadMessage", () => {
 		const sourceLanguageTag = "en"
 		const languageTags = ["en", "de"]
 		expect(
-			plugin.loadMessages!({ languageTags, sourceLanguageTag, settings, nodeishFs: fs }),
+			plugin.loadMessages!({ languageTags, sourceLanguageTag, settings, nodeishFs: fs })
 		).resolves.toBeTruthy()
 	})
 
@@ -352,7 +352,7 @@ describe("loadMessage", () => {
 		}
 		const sourceLanguageTag = "en"
 		expect(
-			plugin.loadMessages!({ languageTags, sourceLanguageTag, settings, nodeishFs: fs }),
+			plugin.loadMessages!({ languageTags, sourceLanguageTag, settings, nodeishFs: fs })
 		).resolves.toBeTruthy()
 	})
 
@@ -368,7 +368,7 @@ describe("loadMessage", () => {
 		const sourceLanguageTag = "en"
 		const languageTags = ["en", "de"]
 		expect(
-			plugin.loadMessages!({ languageTags, sourceLanguageTag, settings, nodeishFs: fs }),
+			plugin.loadMessages!({ languageTags, sourceLanguageTag, settings, nodeishFs: fs })
 		).resolves.toBeTruthy()
 	})
 
@@ -572,10 +572,10 @@ describe("variable reference", () => {
 		})
 		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern.length).toBe(2)
 		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern[0]?.type).toBe(
-			"Text",
+			"Text"
 		)
 		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern[1]?.type).toBe(
-			"VariableReference",
+			"VariableReference"
 		)
 	})
 
@@ -595,10 +595,10 @@ describe("variable reference", () => {
 		})
 		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern.length).toBe(2)
 		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern[0]?.type).toBe(
-			"VariableReference",
+			"VariableReference"
 		)
 		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern[1]?.type).toBe(
-			"Text",
+			"Text"
 		)
 	})
 
@@ -618,10 +618,10 @@ describe("variable reference", () => {
 			nodeishFs: fs,
 		})
 		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern[0]?.type).toBe(
-			"Text",
+			"Text"
 		)
 		expect(getVariant(messages[0]!, { where: { languageTag: "en" } })?.pattern[1]?.type).toBe(
-			"VariableReference",
+			"VariableReference"
 		)
 	})
 })
@@ -737,7 +737,7 @@ describe("formatting", () => {
 				a: { a: "test", z: "test", b: "test" },
 			},
 			undefined,
-			2,
+			2
 		)
 		const fs = createNodeishMemoryFs()
 		await fs.mkdir("./common")
@@ -989,7 +989,7 @@ describe("formatting", () => {
 				},
 			},
 			undefined,
-			2,
+			2
 		)
 
 		const withoutNesting = JSON.stringify(
@@ -997,7 +997,7 @@ describe("formatting", () => {
 				"test.test": "test",
 			},
 			undefined,
-			4,
+			4
 		)
 
 		const fs = createNodeishMemoryFs()
@@ -1156,7 +1156,7 @@ describe("roundTrip", () => {
 				test: 'Single "quote" test',
 			},
 			undefined,
-			4,
+			4
 		)
 		const fs = createNodeishMemoryFs()
 		await fs.writeFile("./en.json", complexContent)

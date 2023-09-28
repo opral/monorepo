@@ -73,7 +73,7 @@ export function render(pageContext: PageContextRenderer) {
 						<Root page={currentPage()!} pageProps={currentPageProps} locale={pageContext.locale} />
 					</MetaProvider>
 				),
-				rootElement,
+				rootElement
 			)
 			isFirstRender = false
 		}
