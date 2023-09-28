@@ -1,10 +1,4 @@
----
-title: Message
-href: /documentation/message
-description: TODO TODO TODO TODO TODO
----
-
-# {% $frontmatter.title %}
+# Message
 
 A message is a piece of text that is displayed to the user. Everything within an application, like the text on a button, is a message. A message itself is composed of variants. User preferences like language or region determine which variant is displayed. Inlang's message handling is based on the [ICU Message Format 2.0](https://github.com/unicode-org/message-format-wg/blob/main/spec/syntax.md).
 

@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 1.8.0
+
+### Minor Changes
+
+- e5ae186f: add better error handling
+
 ## 1.7.0
 
 ### Minor Changes

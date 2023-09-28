@@ -1,4 +1,4 @@
-# Inlang CLI
+# Basic introduction: inlang Command Line Interface (CLI)
 
 [@inlang/cli](https://github.com/inlang/monorepo/tree/main/inlang/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infrastructure. It can be used to automate localization tasks, such as machine translation, lining, and more.
 
@@ -11,7 +11,9 @@
 - 🖊️ Open the web editor right from the command line
 - ✅ Validate your `project.inlang.json` configuration file
 
-## Installation
+# Installation
+
+## Install with package manager
 
 You can install the @inlang/cli with this command:
 
@@ -31,11 +33,13 @@ best
 npx @inlang/cli [command]
 ```
 
+## Minimum requirements
+
 Minimum node version: `v18.0.0`
 
 If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx @inlang/cli@latest [command]`.
 
-## Commands
+# Commands
 
 We recommend using the CLI with `npx` to avoid installing the CLI globally. Not installing the CLI globally has the following advantages:
 
@@ -65,11 +69,11 @@ Commands:
 
 The following commands are available with the inlang CLI:
 
-### `config`
+## `config`
 
 The config command is used to interactively configure and create the project.inlang.json file.
 
-#### `config init`
+### `config init`
 
 This command scans your file system hierarchy and finds out how your localization files are setup.
 It returns a complete config for you to use in your project, which you can modify to your needs.
@@ -82,7 +86,7 @@ npx @inlang/cli config init
 
 This will launch an interactive prompt that will guide you through the process of creating the inlang configuration file.
 
-#### `config validate`
+### `config validate`
 
 This command validates the `project.inlang.json` file in the current directory. It checks if the file is valid JSON and if it contains **all required fields**. It also checks if the specified resources exist and performs a _dry run of the translation process_.
 
@@ -92,7 +96,7 @@ To validate the `project.inlang.json` file, run the following command:
 npx @inlang/cli config validate
 ```
 
-#### `config update`
+### `config update`
 
 This command updates the `project.inlang.json` file with the latest versions of the plugins used. This is helpful if you want to **update your plugins** to the latest major version and don't want to look them up manually.
 
@@ -104,11 +108,11 @@ To update the `project.inlang.json` file, run the following command:
 npx @inlang/cli config update
 ```
 
-### `machine`
+## `machine`
 
 The machine command is used to automate localization processes.
 
-#### `machine translate`
+### `machine translate`
 
 The translate command machine translates all resources.
 
@@ -130,11 +134,11 @@ The translations are performed using machine translation services. The translate
 
 > Note: The project.inlang.json file must be present in the repository for the translation to work.
 
-### `project`
+## `project`
 
 The project command is used to interact with the Inlang project. It allows to create a new project or migrate an existing project to the new `project.inlang.json`.
 
-#### `project init`
+### `project init`
 
 The init command initialize a new Inlang project at `./project.inlang.json` with optional module configuration.
 
@@ -146,7 +150,7 @@ npx @inlang/cli project init
 
 This will launch an interactive prompt that will guide you through the process of creating the inlang configuration file.
 
-#### `project migrate`
+### `project migrate`
 
 The migrate command migrates an existing Inlang project from the old `inlang.config.js` to the new `project.inlang.json` format.
 
@@ -158,7 +162,7 @@ npx @inlang/cli project migrate
 
 This will launch an interactive prompt that will guide you through the process of migrating the inlang configuration file.
 
-### `lint`
+## `lint`
 
 The lint command lints the translation with the configured lint rules, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/monorepo/tree/main/inlang/source-code/message-lint-rules).
 
@@ -172,11 +176,11 @@ The `lint` command is provided with an optional `--no-fail` flag, which will not
 
 However, it's totally up to you how you configure your lints. _You can build your own plugin with your customized set of lints_ with the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/monorepo/tree/main/inlang/source-code/message-lint-rules) as a starter template.
 
-### `open`
+## `open`
 
 The open command opens parts of the Inlang infrastructure in your default browser.
 
-#### `open editor`
+### `open editor`
 
 The editor command opens the Inlang editor for the current repository.
 
@@ -188,11 +192,11 @@ npx @inlang/cli open editor
 
 This command retrieves the remote URL of the repository and constructs the URL for the Inlang editor by appending the GitHub user and repository to https://inlang.com/editor/. The editor will be opened in your default browser.
 
-### `module`
+## `module`
 
 The module command is used to interact with the Inlang module. It allows to initialize a new module or run the modules build commands.
 
-#### `module init`
+### `module init`
 
 The `module init` command initialize a new Inlang module in the current directory. This works only if the current directory is empty, so make sure to create a new folder.
 
@@ -207,7 +211,7 @@ npx @inlang/cli module init
 The init command has the following options:
 `--type <type>`: The type of the module. Currently, `lintRule` or `plugin` is supported.
 
-#### `module build`
+### `module build`
 
 If you are developing an inlang module, the `module build` command builds your Inlang module for development & in production.
 
@@ -224,6 +228,3 @@ npx @inlang/cli module build --entry ./path/to/index.ts --outdir ./path/to/dist
 `--watch`: An optional flag that, when provided, enables a watch mode to monitor for changes and automatically rebuild the module when changes are detected.
 
 See how there is also a `--watch` flag, which enables a watch mode to monitor for changes and automatically rebuild the module when changes are detected. This command runs with `esbuild` under the hood.
-
-
-
