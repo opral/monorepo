@@ -192,7 +192,7 @@ export const Gitfloat = () => {
 			tourStepId: "fork-repository",
 		},
 		hasChanges: {
-			text: "local changes",
+			text: "changes",
 			buttontext: "Push",
 			icon: IconPush,
 			onClick: triggerPushChanges,
