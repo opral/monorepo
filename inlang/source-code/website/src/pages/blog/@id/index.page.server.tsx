@@ -1,4 +1,5 @@
 import fs from "node:fs/promises"
+import path from "node:path"
 import tableOfContents from "../../../../../../blog/tableOfContents.json"
 import { convert } from "@inlang/markdown"
 import { render } from "vite-plugin-ssr/abort"
@@ -9,22 +10,23 @@ export async function onBeforeRender(pageContext: any) {
 	const { id } = pageContext.routeParams
 
 	if (renderedMarkdown[id] === undefined) {
-		for (const content of tableOfContents) {
-			let text
+		const promises = tableOfContents.map(async (content) => {
+			const filePath = path.normalize(
+				new URL(`../../../../../../../inlang/blog/${content.path}`, import.meta.url).pathname
+			)
 
 			try {
-				text = await fs.readFile(
-					new URL(`../../../../../../../inlang/blog/${content.path}`, import.meta.url),
-					"utf-8"
-				)
+				const text = await fs.readFile(filePath, "utf-8")
+
+				const markdown = await convert(text)
+				renderedMarkdown[content.slug] = markdown
 			} catch (error) {
 				console.error(error)
 				throw render(404)
 			}
+		})
 
-			const markdown = await convert(text)
-			renderedMarkdown[content.slug] = markdown
-		}
+		await Promise.all(promises)
 	}
 
 	return {
