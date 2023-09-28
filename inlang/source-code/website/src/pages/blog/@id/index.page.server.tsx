@@ -14,7 +14,7 @@ export async function onBeforeRender(pageContext: any) {
 
 			try {
 				text = await fs.readFile(
-					new URL(`../../../../../../blog/${content.path}`, import.meta.url),
+					new URL(`../../../../../../../inlang/blog/${content.path}`, import.meta.url),
 					"utf-8"
 				)
 			} catch (error) {
