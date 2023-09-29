@@ -21,11 +21,11 @@ export function getVariant(
 	args: {
 		where: {
 			languageTag: LanguageTag
-			selectors?: Variant["match"]
+			match?: Variant["match"]
 		}
 	}
 ): Variant | undefined {
-	const variant = matchMostSpecificVariant(message, args.where.languageTag, args.where.selectors)
+	const variant = matchMostSpecificVariant(message, args.where.languageTag, args.where.match)
 	if (variant) {
 		//! do not return a reference to the message in a resource
 		//! modifications to the returned message will leak into the
@@ -56,10 +56,9 @@ export function createVariant(
 		return { error: new MessageVariantAlreadyExistsError(message.id, args.data.languageTag) }
 	}
 
-	// need to resolve selectors to match length and order of message selectors
 	copy.variants.push({
 		...args.data,
-		match: resolveSelector(copy.selectors, args.data.match),
+		match: args.data.match,
 	})
 	return { data: copy }
 }
@@ -77,7 +76,7 @@ export function updateVariantPattern(
 	args: {
 		where: {
 			languageTag: LanguageTag
-			selectors: Record<string, string>
+			match: Array<string>
 		}
 		data: Variant["pattern"]
 	}
@@ -93,7 +92,7 @@ export function updateVariantPattern(
 		}
 	}
 
-	const variant = matchVariant(copy, args.where.languageTag, args.where.selectors)
+	const variant = matchVariant(copy, args.where.languageTag, args.where.match)
 	if (variant === undefined) {
 		return { error: new MessageVariantDoesNotExistError(message.id, args.where.languageTag) }
 	}
@@ -113,22 +112,19 @@ export function updateVariantPattern(
 const matchVariant = (
 	message: Message,
 	languageTag: LanguageTag,
-	selectors: Record<string, string>
+	match: Variant["match"]
 ): Variant | undefined => {
-	// resolve preferenceSelectors to match length and order of message selectors
-	const resolvedSelectors = resolveSelector(message.selectors, selectors)
-
 	const languageVariants = message.variants.filter((variant) => variant.languageTag === languageTag)
 	if (languageVariants.length === 0) return undefined
 
 	for (const variant of languageVariants) {
 		let isMatch = true
 		//check if vaiant is a match
-		for (const [key, value] of Object.entries(variant.match)) {
-			if (resolvedSelectors[key] !== value) {
+		variant.match.map((value, index) => {
+			if (match && match[index] !== value) {
 				isMatch = false
 			}
-		}
+		})
 		if (isMatch) {
 			return variant
 		}
@@ -145,13 +141,9 @@ const matchVariant = (
 const matchMostSpecificVariant = (
 	message: Message,
 	languageTag: LanguageTag,
-	selectors?: Record<string, string>
+	match?: Variant["match"]
 ): Variant | undefined => {
-	// make selector undefined if empty object
-	selectors = JSON.stringify(selectors) === "{}" ? undefined : selectors
-
 	// resolve preferenceSelectors to match length and order of message selectors
-	const resolvedSelectors = resolveSelector(message.selectors, selectors)
 	const index: Record<string, any> = {}
 
 	for (const variant of message.variants) {
@@ -160,35 +152,33 @@ const matchMostSpecificVariant = (
 		let isMatch = true
 
 		//check if variant is a match
-		for (const [key, value] of Object.entries(variant.match)) {
-			if (resolvedSelectors[key] !== value && value !== "*") {
+		variant.match.map((value, index) => {
+			if (match && match[index] !== value && value !== "*") {
 				isMatch = false
 			}
-		}
-		if (isMatch && selectors) {
-			// add variant to nested index
+		})
+		if (isMatch && match && match.length > 0) {
 			// eslint-disable-next-line no-inner-declarations
 			function recursiveAddToIndex(
 				currentIndex: Record<string, any>,
-				currentKeys: Message["selectors"],
+				selectorIndex: number,
+				selectorLength: number,
 				variant: Variant
 			) {
-				if (currentKeys[0]?.name) {
-					const key = variant.match[currentKeys[0].name]
-					if (key) {
-						if (currentKeys.length === 1) {
-							currentIndex[key] = variant
-						} else {
-							if (!currentIndex[key]) {
-								currentIndex[key] = {}
-							}
-							recursiveAddToIndex(currentIndex[key], currentKeys.slice(1), variant)
+				const key = variant.match[selectorIndex]
+				if (key) {
+					if (selectorIndex === 1) {
+						currentIndex[key] = variant
+					} else {
+						if (!currentIndex[key]) {
+							currentIndex[key] = {}
 						}
+						recursiveAddToIndex(currentIndex[key], selectorIndex + 1, selectorLength, variant)
 					}
 				}
 			}
-			recursiveAddToIndex(index, message.selectors, variant)
-		} else if (isMatch && !selectors) {
+			recursiveAddToIndex(index, 0, message.selectors ? message.selectors.length - 1 : 0, variant)
+		} else if (isMatch && !match) {
 			return variant
 		}
 	}
@@ -218,24 +208,5 @@ const matchMostSpecificVariant = (
 		return undefined
 	}
 
-	return findOptimalMatch(index, Object.values(resolvedSelectors))
-}
-
-/**
- * Returns resolved selector.
- * -> Adds all possible selectors, if not defined it adds '*'. Order is determined by messageSelectors
- *
- * @example
- *  const variant = resolveSelector(["gender","count"], selector: {count: "2"})
- */
-const resolveSelector = (
-	messageSelectors: Message["selectors"],
-	selectors?: Record<string, string>
-): Record<string, string> => {
-	const resolvedSelectors: Record<string, string> = {}
-	if (!selectors) return {}
-	for (const messageSelector of messageSelectors) {
-		resolvedSelectors[messageSelector.name] = selectors[messageSelector.name] ?? "*"
-	}
-	return resolvedSelectors
+	return findOptimalMatch(index, match || [])
 }

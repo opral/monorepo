@@ -8,9 +8,9 @@ const message1: Message = {
 	id: "1",
 	selectors: [],
 	variants: [
-		{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "This is Inlang" }] },
-		{ languageTag: "de", match: {}, pattern: [{ type: "Text", value: "Das ist Inlang" }] },
-		{ languageTag: "fr", match: {}, pattern: [{ type: "Text", value: "This is Inlang" }] },
+		{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "This is Inlang" }] },
+		{ languageTag: "de", match: [], pattern: [{ type: "Text", value: "Das ist Inlang" }] },
+		{ languageTag: "fr", match: [], pattern: [{ type: "Text", value: "This is Inlang" }] },
 	],
 }
 

@@ -11,7 +11,7 @@ const exampleMessages: Message[] = [
 		variants: [
 			{
 				languageTag: "en",
-				match: {},
+				match: [],
 				pattern: [
 					{
 						type: "Text",
@@ -27,7 +27,7 @@ const exampleMessages: Message[] = [
 		variants: [
 			{
 				languageTag: "en",
-				match: {},
+				match: [],
 				pattern: [
 					{
 						type: "Text",
@@ -37,7 +37,7 @@ const exampleMessages: Message[] = [
 			},
 			{
 				languageTag: "de",
-				match: {},
+				match: [],
 				pattern: [
 					{
 						type: "Text",
