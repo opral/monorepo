@@ -51,7 +51,7 @@ export const Variant = Type.Object({
 	 * Inspired by: https://github.com/unicode-org/message-format-wg/blob/main/spec/formatting.md#pattern-selection
 	 */
 	// a match can always only be string-based because a string is what is rendered to the UI
-	match: Type.Record(Type.String(), Type.String()),
+	match: Type.Array(Type.String()),
 	pattern: Pattern,
 })
 

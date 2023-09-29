@@ -137,7 +137,7 @@ export const createMessage = (id: string, patterns: Record<string, Pattern | str
 		selectors: [],
 		variants: Object.entries(patterns).map(([languageTag, patterns]) => ({
 			languageTag,
-			match: {},
+			match: [],
 			pattern:
 				typeof patterns === "string"
 					? [
