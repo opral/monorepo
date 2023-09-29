@@ -120,11 +120,14 @@ const matchVariant = (
 	for (const variant of languageVariants) {
 		let isMatch = true
 		//check if vaiant is a match
-		variant.match.map((value, index) => {
-			if (match && match[index] !== value) {
-				isMatch = false
-			}
-		})
+		if (variant.match.length > 0) {
+			variant.match.map((value, index) => {
+				if (match && match[index] !== value) {
+					isMatch = false
+				}
+			})
+		}
+
 		if (isMatch) {
 			return variant
 		}
@@ -152,11 +155,13 @@ const matchMostSpecificVariant = (
 		let isMatch = true
 
 		//check if variant is a match
-		variant.match.map((value, index) => {
-			if (match && match[index] !== value && value !== "*") {
-				isMatch = false
-			}
-		})
+		if (variant.match.length > 0) {
+			variant.match.map((value, index) => {
+				if (match && match[index] !== value && value !== "*") {
+					isMatch = false
+				}
+			})
+		}
 		if (isMatch && match && match.length > 0) {
 			// eslint-disable-next-line no-inner-declarations
 			function recursiveAddToIndex(
