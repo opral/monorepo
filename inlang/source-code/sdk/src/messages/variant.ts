@@ -14,7 +14,7 @@ import {
  * (if it exists).
  *
  * @example
- * 	const variant = getVariant(message, { where: { languageTag: "en", selectors: { gender: "male" }}});
+ * 	const variant = getVariant(message, { where: { languageTag: "en", match: ["male"]}});
  */
 export function getVariant(
 	message: Message,
@@ -69,14 +69,14 @@ export function createVariant(
  * All actions are immutable.
  *
  * @example
- *  const message = updateVariant(message, { languageTag: "en", selectors: { gender: "male" }, pattern: []})
+ *  const message = updateVariant(message, { languageTag: "en", match: ["male"], pattern: []})
  */
 export function updateVariantPattern(
 	message: Message,
 	args: {
 		where: {
 			languageTag: LanguageTag
-			match: Array<string>
+			match: Variant["match"]
 		}
 		data: Variant["pattern"]
 	}
@@ -107,7 +107,7 @@ export function updateVariantPattern(
  * Returns the specific variant defined by selectors or undefined
  *
  * @example
- *  const variant = matchVariant(message, languageTag: "en", selectors: { gender: "male" })
+ *  const variant = matchVariant(message, languageTag: "en", match: ["male"])
  */
 const matchVariant = (
 	message: Message,
