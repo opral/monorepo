@@ -17,7 +17,7 @@ export const openInEditorCommand = {
 
 		env.openExternal(Uri.parse(uri))
 		telemetry.capture({
-			event: "IDE-EXTENSION Editor opned via tooltip",
+			event: "IDE-EXTENSION Editor opened via tooltip",
 		})
 		return undefined
 	},
