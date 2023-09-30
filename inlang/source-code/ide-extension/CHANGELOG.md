@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.7.0
+
+### Minor Changes
+
+- 9df069d11: quickfix: vs code extension config create
+
 ## 1.6.0
 
 ### Minor Changes
