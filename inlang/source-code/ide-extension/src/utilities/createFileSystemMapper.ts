@@ -13,11 +13,11 @@ export function createFileSystemMapper(base: string): NodeishFilesystem {
 		// @ts-expect-error
 		readFile: async (
 			path: Parameters<NodeishFilesystem["readFile"]>[0],
-			options: Parameters<NodeishFilesystem["readFile"]>[1],
+			options: Parameters<NodeishFilesystem["readFile"]>[1]
 		): Promise<string> => {
 			const fileData = await fs.readFile(
 				path.startsWith(base) ? _path.normalize(path) : _path.normalize(base + "/" + path),
-				options,
+				options
 			)
 			if (typeof fileData === "string") {
 				return fileData
@@ -27,27 +27,27 @@ export function createFileSystemMapper(base: string): NodeishFilesystem {
 		},
 		writeFile: async (
 			path: Parameters<NodeishFilesystem["writeFile"]>[0],
-			data: Parameters<NodeishFilesystem["writeFile"]>[1],
+			data: Parameters<NodeishFilesystem["writeFile"]>[1]
 		) => {
 			await fs.writeFile(
 				path.startsWith(base) ? _path.normalize(path) : _path.normalize(base + "/" + path),
-				data,
+				data
 			)
 		},
 		mkdir: async (path: Parameters<NodeishFilesystem["mkdir"]>[0]) => {
 			await fs.mkdir(
-				path.startsWith(base) ? _path.normalize(path) : _path.normalize(base + "/" + path),
+				path.startsWith(base) ? _path.normalize(path) : _path.normalize(base + "/" + path)
 			)
 			return path
 		},
 		readdir: async (path: Parameters<NodeishFilesystem["readdir"]>[0]) => {
 			return fs.readdir(
-				path.startsWith(base) ? _path.normalize(path) : _path.normalize(base + "/" + path),
+				path.startsWith(base) ? _path.normalize(path) : _path.normalize(base + "/" + path)
 			)
 		},
 		stat: async (path: Parameters<NodeishFilesystem["stat"]>[0]) => {
 			return fs.stat(
-				path.startsWith(base) ? _path.normalize(path) : _path.normalize(base + "/" + path),
+				path.startsWith(base) ? _path.normalize(path) : _path.normalize(base + "/" + path)
 			)
 		},
 	}

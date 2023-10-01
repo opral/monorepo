@@ -14,19 +14,19 @@ export const identicalPatternRule: MessageLintRule = {
 		const ruleSettings = settings[id as keyof typeof settings] as RuleSettings | undefined
 
 		const referenceVariant = message.variants.find(
-			(variant) => variant.languageTag === settings.sourceLanguageTag,
+			(variant) => variant.languageTag === settings.sourceLanguageTag
 		)
 		if (referenceVariant === undefined) return
 
 		const translatedVariants = message.variants.filter(
-			(variant) => variant.languageTag !== settings.sourceLanguageTag,
+			(variant) => variant.languageTag !== settings.sourceLanguageTag
 		)
 
 		for (const variant of translatedVariants) {
 			const isMessageIdentical =
 				messageVariantToString(referenceVariant) === messageVariantToString(variant)
 			const shouldBeIgnored = ruleSettings?.ignore?.includes(
-				patternToString(referenceVariant.pattern),
+				patternToString(referenceVariant.pattern)
 			)
 
 			if (isMessageIdentical && !shouldBeIgnored) {

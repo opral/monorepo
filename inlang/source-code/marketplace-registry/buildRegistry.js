@@ -16,9 +16,10 @@ for (const link of manifestLinks) {
 			// eslint-disable-next-line no-undef
 			console.error(errors)
 			throw new Error(`Manifest is invalid.`)
-		} else if (json.module && !json.module.toString().includes("jsdelivr")) {
-			throw new Error(`Manifest is invalid. The module field must be a jsdelivr link.`)
 		}
+		// else if (json.module && !json.module.toString().includes("jsdelivr")) {
+		// 	throw new Error(`Manifest is invalid. The module field must be a jsdelivr link.`)
+		// }
 		manifests.push(json)
 	} catch (e) {
 		throw new Error(`Manifest '${link}' is invalid.`)

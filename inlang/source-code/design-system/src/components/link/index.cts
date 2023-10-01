@@ -19,7 +19,7 @@ export default function (): CSSRuleObject[] {
 			".link-${token}": {
 				"@apply hover:text-hover-${token}": "true",
 			},
-		},
+		}
 	)
 	return [base, color]
 }

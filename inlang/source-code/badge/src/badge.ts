@@ -113,7 +113,7 @@ export const badge = async (url: string) => {
 					data: fontBold,
 				},
 			],
-		},
+		}
 	)
 
 	await cache.set(url, image)

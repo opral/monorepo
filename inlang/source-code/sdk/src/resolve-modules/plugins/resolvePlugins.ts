@@ -45,8 +45,8 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 			result.errors.push(
 				new PluginHasInvalidIdError(
 					`Plugin ${plugin.id} has an invalid id "${plugin.id}". It must be kebap-case and contain a namespace like project.my-plugin.`,
-					{ plugin: plugin.id },
-				),
+					{ plugin: plugin.id }
+				)
 			)
 		}
 
@@ -57,8 +57,8 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 					`Plugin ${plugin.id} uses reserved namespace 'inlang'.`,
 					{
 						plugin: plugin.id,
-					},
-				),
+					}
+				)
 			)
 		}
 
@@ -70,8 +70,8 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 					{
 						plugin: plugin.id,
 						cause: errors,
-					},
-				),
+					}
+				)
 			)
 		}
 
@@ -80,8 +80,8 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 			result.errors.push(
 				new PluginLoadMessagesFunctionAlreadyDefinedError(
 					`Plugin ${plugin.id} defines the loadMessages function, but it was already defined by another plugin.`,
-					{ plugin: plugin.id },
-				),
+					{ plugin: plugin.id }
+				)
 			)
 		}
 
@@ -89,8 +89,8 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 			result.errors.push(
 				new PluginSaveMessagesFunctionAlreadyDefinedError(
 					`Plugin ${plugin.id} defines the saveMessages function, but it was already defined by another plugin.`,
-					{ plugin: plugin.id },
-				),
+					{ plugin: plugin.id }
+				)
 			)
 		}
 
@@ -100,7 +100,7 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 			const { data: customApi, error } = tryCatch(() =>
 				plugin.addCustomApi!({
 					settings: args.settings?.[plugin.id] ?? {},
-				}),
+				})
 			)
 			if (error) {
 				// @ts-ignore
@@ -111,8 +111,8 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 				result.errors.push(
 					new PluginReturnedInvalidCustomApiError(
 						`Plugin ${plugin.id} defines the addCustomApi function, but it does not return an object.`,
-						{ plugin: plugin.id, cause: error },
-					),
+						{ plugin: plugin.id, cause: error }
+					)
 				)
 			}
 		}
@@ -148,7 +148,7 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 			const { data: customApi } = tryCatch(() =>
 				plugin.addCustomApi!({
 					settings: args.settings?.[plugin.id] ?? {},
-				}),
+				})
 			)
 			if (customApi) {
 				result.data.customApi = deepmerge(result.data.customApi, customApi)
@@ -164,8 +164,8 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 		result.errors.push(
 			new PluginsDoNotProvideLoadOrSaveMessagesError(
 				"It seems you did not install any plugin that handles messages. Please add one to make inlang work. See https://inlang.com/documentation/plugins/registry.",
-				{ plugin: undefined },
-			),
+				{ plugin: undefined }
+			)
 		)
 	}
 

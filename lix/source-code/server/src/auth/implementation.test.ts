@@ -25,7 +25,7 @@ describe("auth service", () => {
 				// changing the last character of the secret
 				JWE_SECRET_KEY: mockSecret.slice(0, -2) + "s",
 				jwe,
-			}),
+			})
 		).rejects.toThrowError()
 	})
 })

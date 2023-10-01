@@ -15,7 +15,7 @@ export const build = new Command()
 	// and increase discoverability "what is -c again?"
 	.requiredOption(
 		"--entry <entry>",
-		"The path to the entry of the module. Usually src/index.{js|ts}.",
+		"The path to the entry of the module. Usually src/index.{js|ts}."
 	)
 	// using outdir in anticipation that multiple output file are required in the future
 	// such as manifest.json, code-splitting, json schema etc.
@@ -37,7 +37,7 @@ export async function buildCommandAction(args: { entry: string; outdir: string; 
 						setup: ({ onEnd }) => onEnd(() => console.info("🎉 changes processed")),
 					},
 				],
-			}),
+			})
 		)
 
 		if (args.watch) {

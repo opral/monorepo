@@ -30,7 +30,7 @@ export async function initProject(args: {
 		// Try to migrate
 		await migrateConfigFile(
 			args.workspaceFolder,
-			(args.workspaceFolder + "project.inlang.json") as unknown as vscode.Uri,
+			(args.workspaceFolder + "project.inlang.json") as unknown as vscode.Uri
 		)
 
 		// Try to auto config
@@ -73,7 +73,7 @@ export async function initProject(args: {
 					properties: props,
 				})
 			},
-		}),
+		})
 	)
 	telemetry.capture({
 		event: "IDE-EXTENSION loaded project",
@@ -103,7 +103,7 @@ export async function initProject(args: {
 
 	// Watch for changes in the config file
 	const watcher = vscode.workspace.createFileSystemWatcher(
-		new vscode.RelativePattern(args.workspaceFolder, "project.inlang.json"),
+		new vscode.RelativePattern(args.workspaceFolder, "project.inlang.json")
 	)
 	// Listen for changes in the config file
 	watcher.onDidChange(() => {

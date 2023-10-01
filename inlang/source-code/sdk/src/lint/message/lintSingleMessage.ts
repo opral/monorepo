@@ -42,8 +42,8 @@ export const lintSingleMessage = async (args: {
 			errors.push(
 				new MessagedLintRuleThrowedError(
 					`Lint rule '${rule.id}' throwed while linting message "${args.message.id}".`,
-					{ cause: error },
-				),
+					{ cause: error }
+				)
 			)
 		}
 	})

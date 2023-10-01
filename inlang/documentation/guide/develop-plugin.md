@@ -1,10 +1,4 @@
----
-title: Develop a plugin
-href: /documentation/develop-plugin
-description: Learn how easy it is to write your own plugin for inlang projects.
----
-
-# {% $frontmatter.title %}
+# Develop a plugin
 
 Plugins are a powerful way to extend the functionality of inlang applications. This documentation provides you with the information you need to develop your own plugin.
 
@@ -60,7 +54,7 @@ In your lint rule's `marketplace-manifest.json` make sure to define the followin
 |----------------------|---------------------------------------------------------------|
 | `id`                 | Unique identifier for your plugin.                         |
 | `icon`        | Link to the icon of your plugin (optional).              |
-| `coverImage`        | Optional cover image acting as preview of your plugin.              |
+| `gallery`        | Optional gallery, the first image acts as coverImage for your plugin.              |
 | `displayName`        | A user-friendly display name for your plugin.              |
 | `description`        | Briefly describe what your plugin does.              |
 | `readme`             | Link to the README documentation for your plugin.          |

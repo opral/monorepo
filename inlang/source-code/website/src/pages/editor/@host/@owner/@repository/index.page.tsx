@@ -40,7 +40,7 @@ function TheActualPage() {
 				(project) =>
 					!(
 						project.owner === routeParams().owner && project.repository === routeParams().repository
-					),
+					)
 			)
 
 			const newProject: RecentProjectType = {
@@ -91,7 +91,7 @@ function TheActualPage() {
 							{/* use font-size to change the spinner size    */}
 							<sl-spinner class="text-4xl" />
 						</div>
-						<p class="text-lg font-medium">Cloning large repositories can take a few minutes...</p>
+						<p class="text-lg font-medium">Cloning large repositories can take a few seconds...</p>
 						<br />
 						<p class="max-w-lg">
 							TL;DR you are currently cloning a real git repo, in the browser, on top of a virtual

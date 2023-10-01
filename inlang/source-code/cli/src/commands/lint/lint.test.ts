@@ -65,7 +65,7 @@ async function setupProject(enabledLintRule?: MessageLintRule) {
 			languageTags: ["en", "de", "it"],
 			modules: ["_mockPlugin.js", ...(enabledLintRule ? ["lintRule.js"] : [])],
 			messageLintRuleLevels: {},
-		} satisfies ProjectSettings),
+		} satisfies ProjectSettings)
 	)
 
 	const _mockPlugin: Plugin = {

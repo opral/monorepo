@@ -14,7 +14,7 @@ router.get(
 			const { url } = req.query
 			if (!url) {
 				res.send(
-					"No url provided, please provide a url like this: https://inlang.com/badge?url=github.com/inlang/example",
+					"No url provided, please provide a url like this: https://inlang.com/badge?url=github.com/inlang/example"
 				)
 				return
 			}
@@ -32,5 +32,5 @@ router.get(
 			console.error(error)
 			res.status(500).send("Error generating badge image")
 		}
-	},
+	}
 )

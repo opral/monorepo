@@ -1,10 +1,4 @@
----
-title: Language tag
-href: /documentation/language-tag
-description: TODO TODO TODO TODO TODO
----
-
-# {% $frontmatter.title %}
+# Language tag
 
 A language tag is a standardized code or tag that is used to identify human languages and regions.
 
