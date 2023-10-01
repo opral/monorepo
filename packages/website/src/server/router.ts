@@ -39,7 +39,7 @@ router.use(
 		sameSite: "strict",
 		secret: privateEnv.SESSION_COOKIE_SECRET,
 		maxAge: 7 * 24 * 3600 * 1000, // 1 week
-	}),
+	})
 )
 
 if (process.env.NODE_ENV === "production") {

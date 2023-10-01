@@ -5,7 +5,7 @@ import { Value } from "@sinclair/typebox/value"
 test("a valid app manifest should pass validation", () => {
 	const app: MarketplaceManifest = {
 		id: "library.inlang.paraglideJsSveltekit",
-		coverImage: "https://inlang.com/images/paraglidejs.png",
+		gallery: ["https://inlang.com/images/paraglidejs.png"],
 		displayName: { en: "My App" },
 		publisherName: "inlang",
 		description: { en: "My App is the best app." },
@@ -25,7 +25,7 @@ test("a valid app manifest should pass validation", () => {
 test("should pass a valid plugin manifest", () => {
 	const plugin: MarketplaceManifest = {
 		id: "plugin.inlang.example",
-		coverImage: "https://inlang.com/images/paraglidejs.png",
+		gallery: ["https://inlang.com/images/paraglidejs.png"],
 		displayName: { en: "My App" },
 		description: { en: "Hello" },
 		keywords: [],
@@ -46,7 +46,7 @@ test("should be possible to define the schema", () => {
 	const plugin: MarketplaceManifest = {
 		$schema: "https://inlang.com/schema/marketplace-manifest",
 		id: "plugin.inlang.example",
-		coverImage: "https://inlang.com/images/paraglidejs.png",
+		gallery: ["https://inlang.com/images/paraglidejs.png"],
 		displayName: { en: "My App" },
 		description: { en: "Hello" },
 		keywords: [],
@@ -63,7 +63,7 @@ test("should only allow the inlang schema schema", () => {
 		// @ts-expect-error - should not be possible to define a custom schema
 		$schema: "https://inlang.com/schema/balbal-manifest",
 		id: "plugin.inlang.example",
-		coverImage: "https://inlang.com/images/paraglidejs.png",
+		gallery: ["https://inlang.com/images/paraglidejs.png"],
 		displayName: { en: "My App" },
 		description: { en: "Hello" },
 		keywords: [],

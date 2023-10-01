@@ -17,10 +17,10 @@ function getPrivateEnvVariables(): AllEnvVariables {
 			{
 				get: () => {
 					throw Error(
-						"`process.env` is undefined. You are accessing private env variables in a non-node environment, likely the browser. Private env variables should never be exposed to the client. Use `publicEnv` instead.",
+						"`process.env` is undefined. You are accessing private env variables in a non-node environment, likely the browser. Private env variables should never be exposed to the client. Use `publicEnv` instead."
 					)
 				},
-			},
+			}
 		) as unknown as AllEnvVariables
 	}
 	// @ts-expect-error - ROOT_ENV_FILE_PATH is defined in build step

@@ -64,7 +64,7 @@ export type MessageQueryApi = {
 	get: ((args: { where: { id: Message["id"] } }) => Readonly<Message>) & {
 		subscribe: (
 			args: { where: { id: Message["id"] } },
-			callback: (message: Message) => void,
+			callback: (message: Message) => void
 		) => void
 	}
 	includedMessageIds: Subscribable<Message["id"][]>
@@ -84,7 +84,7 @@ export type MessageLintReportsQueryApi = {
 	}) => Readonly<MessageLintReport[]>) & {
 		subscribe: (
 			args: { where: { messageId: MessageLintReport["messageId"] } },
-			callback: (MessageLintRules: Readonly<MessageLintReport[]>) => void,
+			callback: (MessageLintRules: Readonly<MessageLintReport[]>) => void
 		) => void
 	}
 }

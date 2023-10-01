@@ -63,7 +63,7 @@ const InternalSettings = Type.Object({
 				"https://cdn.jsdelivr.net/npm/@inlang/plugin-csv@1/dist/index.js",
 				"./local-testing-plugin.js",
 			],
-		},
+		}
 	),
 	messageLintRuleLevels: Type.Optional(
 		Type.Record(_MessageLintRuleId, _MessageLintRuleLevel, {
@@ -74,7 +74,7 @@ const InternalSettings = Type.Object({
 					"messageLintRule.inlang.patternInvalid": "warning",
 				},
 			],
-		}),
+		})
 	),
 })
 
@@ -85,7 +85,7 @@ const ExternalSettings = Type.Record(
 	Type.String({
 		// pattern includes ProjectSettings keys
 		pattern: `^((messageLintRule|plugin|app|library)\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)|\\$schema|${Object.keys(
-			InternalSettings.properties,
+			InternalSettings.properties
 		)
 			.map((key) => key.replaceAll(".", "\\."))
 			.join("|")})$`,
@@ -99,7 +99,7 @@ const ExternalSettings = Type.Record(
 	// intersection between `InternalSettings`, which contains an array,
 	// and `ExternalSettings` which are objects possible
 	JSON as unknown as typeof JSONObject,
-	{ additionalProperties: false, description: "Settings defined by apps, plugins, etc." },
+	{ additionalProperties: false, description: "Settings defined by apps, plugins, etc." }
 )
 
 export type ProjectSettings = Static<typeof ProjectSettings>

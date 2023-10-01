@@ -26,7 +26,7 @@ function renderTranslationRow(row: ContextTableRow) {
 export function contextTooltip(
 	referenceMessage: Awaited<
 		ReturnType<CustomApiInlangIdeExtension["messageReferenceMatchers"][number]>
-	>[number],
+	>[number]
 ) {
 	const message = state().project.query.messages.get({
 		where: { id: referenceMessage.messageId },
@@ -54,7 +54,7 @@ export function contextTooltip(
 		}
 
 		const args = encodeURIComponent(
-			JSON.stringify([{ messageId: referenceMessage.messageId, languageTag: languageTag }]),
+			JSON.stringify([{ messageId: referenceMessage.messageId, languageTag: languageTag }])
 		)
 
 		const editCommand = Uri.parse(`command:inlang.editMessage?${args}`)

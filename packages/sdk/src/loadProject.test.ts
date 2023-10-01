@@ -363,7 +363,7 @@ describe("functionality", () => {
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
 					modules: ["plugin.js", "lintRule.js"],
-				} satisfies ProjectSettings),
+				} satisfies ProjectSettings)
 			)
 
 			const _import: ImportFunction = async (name) => {
@@ -411,7 +411,7 @@ describe("functionality", () => {
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
 					modules: ["plugin.js", "lintRule.js"],
-				} satisfies ProjectSettings),
+				} satisfies ProjectSettings)
 			)
 			const _import: ImportFunction = async (name) => {
 				return {
@@ -428,7 +428,7 @@ describe("functionality", () => {
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
 			expect(
-				project.query.messageLintReports.get({ where: { messageId: "some-message" } }),
+				project.query.messageLintReports.get({ where: { messageId: "some-message" } })
 			).toHaveLength(1)
 		})
 	})
@@ -491,7 +491,7 @@ describe("functionality", () => {
 					"plugin.project.json": {
 						pathPattern: "./resources/{languageTag}.json",
 					},
-				}),
+				})
 			)
 
 			await fs.mkdir("./resources")

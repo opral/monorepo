@@ -77,7 +77,7 @@ class Parser extends EmbeddedActionsParser {
 						ALT: () => {
 							const match = this.SUBRULE(
 								// @ts-expect-error - The parser is only partially typesafe.
-								this.tFunction,
+								this.tFunction
 							)
 							result.push(match as any)
 						},
@@ -163,7 +163,7 @@ class Parser extends EmbeddedActionsParser {
 					{
 						ALT: () => this.CONSUME4(TemplateLiteral),
 					},
-				]),
+				])
 			)
 			// but at one point, a closing parenthesis (end of the function) must exist
 			this.CONSUME5(ClosingParenthesis)

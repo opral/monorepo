@@ -95,7 +95,7 @@ describe("config", () => {
 				nodeishFs: fs,
 				_import: $import,
 			}),
-			{ from },
+			{ from }
 		)
 
 		let counter = 0
@@ -125,7 +125,7 @@ describe("installed", () => {
 				nodeishFs: fs,
 				_import: $import,
 			}),
-			{ from },
+			{ from }
 		)
 		let counterPlugins = 0
 		let counterLint = 0
@@ -188,7 +188,7 @@ describe("messages", () => {
 				nodeishFs: fs,
 				_import: mockImport,
 			}),
-			{ from },
+			{ from }
 		)
 
 		let counter = 0
@@ -217,7 +217,7 @@ describe("messages", () => {
 				nodeishFs: fs,
 				_import: $import,
 			}),
-			{ from },
+			{ from }
 		)
 
 		let counter = 0
@@ -232,7 +232,7 @@ describe("messages", () => {
 			(
 				Object.values(messagesBefore())[0]?.variants.find((variant) => variant.languageTag === "en")
 					?.pattern[0] as Text
-			).value,
+			).value
 		).toBe("test")
 
 		project.query.messages.update({
@@ -262,7 +262,7 @@ describe("messages", () => {
 			(
 				Object.values(messagesAfter())[0]?.variants.find((variant) => variant.languageTag === "en")
 					?.pattern[0] as Text
-			).value,
+			).value
 		).toBe("test2")
 	})
 })
@@ -278,7 +278,7 @@ describe("lint", () => {
 					nodeishFs: fs,
 					_import: $import,
 				}),
-				{ from },
+				{ from }
 			)
 
 			let counter = 0
@@ -316,7 +316,7 @@ describe("lint", () => {
 					nodeishFs: fs,
 					_import: $import,
 				}),
-				{ from },
+				{ from }
 			)
 
 			let counter = 0

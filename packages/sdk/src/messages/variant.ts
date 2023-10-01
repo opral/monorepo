@@ -23,7 +23,7 @@ export function getVariant(
 			languageTag: LanguageTag
 			selectors?: Variant["match"]
 		}
-	},
+	}
 ): Variant | undefined {
 	const variant = matchMostSpecificVariant(message, args.where.languageTag, args.where.selectors)
 	if (variant) {
@@ -47,7 +47,7 @@ export function createVariant(
 	message: Message,
 	args: {
 		data: Variant
-	},
+	}
 ): Result<Message, MessageVariantAlreadyExistsError> {
 	const copy = structuredClone(message)
 
@@ -80,12 +80,12 @@ export function updateVariantPattern(
 			selectors: Record<string, string>
 		}
 		data: Variant["pattern"]
-	},
+	}
 ): Result<Message, MessageVariantDoesNotExistError | MessagePatternsForLanguageTagDoNotExistError> {
 	const copy = structuredClone(message)
 
 	const containsLanguageTag = message.variants.some(
-		(variant) => variant.languageTag === args.where.languageTag,
+		(variant) => variant.languageTag === args.where.languageTag
 	)
 	if (!containsLanguageTag) {
 		return {
@@ -113,7 +113,7 @@ export function updateVariantPattern(
 const matchVariant = (
 	message: Message,
 	languageTag: LanguageTag,
-	selectors: Record<string, string>,
+	selectors: Record<string, string>
 ): Variant | undefined => {
 	// resolve preferenceSelectors to match length and order of message selectors
 	const resolvedSelectors = resolveSelector(message.selectors, selectors)
@@ -145,7 +145,7 @@ const matchVariant = (
 const matchMostSpecificVariant = (
 	message: Message,
 	languageTag: LanguageTag,
-	selectors?: Record<string, string>,
+	selectors?: Record<string, string>
 ): Variant | undefined => {
 	// make selector undefined if empty object
 	selectors = JSON.stringify(selectors) === "{}" ? undefined : selectors
@@ -171,7 +171,7 @@ const matchMostSpecificVariant = (
 			function recursiveAddToIndex(
 				currentIndex: Record<string, any>,
 				currentKeys: Message["selectors"],
-				variant: Variant,
+				variant: Variant
 			) {
 				if (currentKeys[0]?.name) {
 					const key = variant.match[currentKeys[0].name]
@@ -196,7 +196,7 @@ const matchMostSpecificVariant = (
 	//find the most specific variant
 	const findOptimalMatch = (
 		index: Record<string, any>,
-		selectors: string[],
+		selectors: string[]
 	): Variant | undefined => {
 		const keys = Object.keys(index)
 
@@ -230,7 +230,7 @@ const matchMostSpecificVariant = (
  */
 const resolveSelector = (
 	messageSelectors: Message["selectors"],
-	selectors?: Record<string, string>,
+	selectors?: Record<string, string>
 ): Record<string, string> => {
 	const resolvedSelectors: Record<string, string> = {}
 	if (!selectors) return {}

@@ -39,7 +39,7 @@ const createImport: ImportFunction = async (uri: string) => {
 	} catch (error) {
 		throw new Error(
 			`Error while importing ${uri}: ${(error as Error)?.message ?? "Unknown error"}`,
-			{ cause: error },
+			{ cause: error }
 		)
 	}
 }

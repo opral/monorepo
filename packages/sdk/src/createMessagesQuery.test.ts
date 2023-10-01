@@ -54,10 +54,10 @@ describe("get", () => {
 		const message2 = query.get({ where: { id: "first-message" } })!
 
 		expect(
-			(message1.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value,
+			(message1.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value
 		).toBe("Hello World 2")
 		expect(
-			(message2.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value,
+			(message2.variants.find((v) => v.languageTag === "en")!.pattern![0]! as Text).value
 		).toBe("Hello World")
 	})
 })
@@ -94,7 +94,7 @@ describe("getAll", () => {
 			(
 				Object.values(query.getAll()!)[0]!.variants.find((v) => v.languageTag === "en")!
 					.pattern![0]! as Text
-			).value,
+			).value
 		).toBe("Hello World")
 	})
 })
@@ -194,13 +194,13 @@ describe("reactivity", () => {
 				expect(message).toBeDefined()
 				expect(
 					(message?.variants.find((variant) => variant.languageTag === "en")?.pattern[0] as Text)
-						.value,
+						.value
 				).toBe("before")
 
 				query.update({ where: { id: "1" }, data: createMessage("1", { en: "after" }) })
 				expect(
 					(message?.variants.find((variant) => variant.languageTag === "en")?.pattern[0] as Text)
-						.value,
+						.value
 				).toBe("after")
 			})
 		})
@@ -217,13 +217,13 @@ describe("reactivity", () => {
 				expect(message).toBeDefined()
 				expect(
 					(message?.variants.find((variant) => variant.languageTag === "en")?.pattern[0] as Text)
-						.value,
+						.value
 				).toBe("before")
 
 				query.upsert({ where: { id: "1" }, data: createMessage("1", { en: "after" }) })
 				expect(
 					(message?.variants.find((variant) => variant.languageTag === "en")?.pattern[0] as Text)
-						.value,
+						.value
 				).toBe("after")
 			})
 		})
@@ -254,14 +254,14 @@ describe("reactivity", () => {
 			expect(message).toBeDefined()
 			expect(
 				(message!.variants.find((variant) => variant.languageTag === "en")?.pattern[0] as Text)
-					.value,
+					.value
 			).toBe("before")
 
 			setMessages([createMessage("1", { en: "after" })])
 			expect(message).toBeDefined()
 			expect(
 				(message!.variants.find((variant) => variant.languageTag === "en")?.pattern[0] as Text)
-					.value,
+					.value
 			).toBe("after")
 		})
 	})
@@ -301,7 +301,7 @@ describe("reactivity", () => {
 					(
 						Object.values(messages!)![0]!.variants.find((variant) => variant.languageTag === "en")!
 							.pattern[0]! as Text
-					).value,
+					).value
 				).toBe("before")
 
 				query.update({ where: { id: "1" }, data: createMessage("1", { en: "after" }) })
@@ -310,7 +310,7 @@ describe("reactivity", () => {
 					(
 						Object.values(messages!)![0]!.variants.find((variant) => variant.languageTag === "en")!
 							.pattern[0]! as Text
-					).value,
+					).value
 				).toBe("after")
 			})
 		})
@@ -329,7 +329,7 @@ describe("reactivity", () => {
 					(
 						Object.values(messages!)![0]!.variants.find((variant) => variant.languageTag === "en")!
 							.pattern[0]! as Text
-					).value,
+					).value
 				).toBe("before")
 
 				query.upsert({ where: { id: "1" }, data: createMessage("1", { en: "after" }) })
@@ -337,7 +337,7 @@ describe("reactivity", () => {
 					(
 						Object.values(messages!)![0]!.variants.find((variant) => variant.languageTag === "en")!
 							.pattern[0]! as Text
-					).value,
+					).value
 				).toBe("after")
 			})
 		})
@@ -385,7 +385,7 @@ describe("reactivity", () => {
 				(
 					Object.values(messages!)![0]!.variants.find((variant) => variant.languageTag === "en")!
 						.pattern[0]! as Text
-				).value,
+				).value
 			).toBe("before")
 
 			setMessages([createMessage("1", { en: "after" })])
@@ -394,8 +394,21 @@ describe("reactivity", () => {
 				(
 					Object.values(messages!)![0]!.variants.find((variant) => variant.languageTag === "en")!
 						.pattern[0]! as Text
-				).value,
+				).value
 			).toBe("after")
+		})
+
+		it("should not mutate messages signal outside the query when using the query", async () => {
+			const [inputMessages] = createSignal<Message[]>([createMessage("1", { en: "before" })])
+			const query = createMessagesQuery(inputMessages)
+
+			let messages: Readonly<Message[]> | undefined = undefined
+			await createChangeListener(() => (messages = query.getAll()))
+			expect(Object.values(messages!)).toHaveLength(1)
+
+			query.create({ data: createMessage("2", { en: "" }) })
+
+			expect(inputMessages().length).toBe(1)
 		})
 	})
 })
@@ -421,11 +434,11 @@ it("instances should not share state", async () => {
 		query1.update({ where: { id: "1" }, data: createMessage("1", { en: "after" }) })
 		expect(
 			(message1!.variants.find((variant) => variant.languageTag === "en")!.pattern[0]! as Text)
-				.value,
+				.value
 		).toBe("after")
 		expect(
 			(message2!.variants.find((variant) => variant.languageTag === "en")!.pattern[0]! as Text)
-				.value,
+				.value
 		).toBe("before")
 
 		query1.delete({ where: { id: "1" } })

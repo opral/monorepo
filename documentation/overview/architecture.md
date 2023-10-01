@@ -1,10 +1,4 @@
----
-title: Architecture
-href: /documentation/architecture
-description: TODO TODO TODO TODO TODO
----
-
-# {% $frontmatter.title %}
+# Architecture
 
 Inlang's architecture consists of four main components:
 

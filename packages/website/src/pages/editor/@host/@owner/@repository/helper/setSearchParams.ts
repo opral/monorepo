@@ -79,5 +79,7 @@ export const setSearchParams = ({ key, value }: SearchParamsType) => {
 	}
 
 	newUrl.search = currentParams.toString()
-	window.history.pushState({}, "", newUrl)
+	if (window.location.href !== newUrl.href) {
+		window.history.pushState({}, "", newUrl)
+	}
 }

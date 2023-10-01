@@ -34,7 +34,7 @@ export function Message(props: { id: string }) {
 	createEffect(() => {
 		if (!project.loading) {
 			project()!.query.messages.get.subscribe({ where: { id: props.id } }, (message) =>
-				setMessage(message),
+				setMessage(message)
 			)
 		}
 	})
@@ -47,7 +47,7 @@ export function Message(props: { id: string }) {
 					if (report) {
 						setLintReports(report)
 					}
-				},
+				}
 			)
 		}
 	})
@@ -55,7 +55,7 @@ export function Message(props: { id: string }) {
 	createEffect(
 		on([filteredLanguageTags, filteredMessageLintRules, filteredId, textSearch], () => {
 			setShouldMessageBeShown(!showFilteredMessage(message()))
-		}),
+		})
 	)
 
 	return (
@@ -85,7 +85,7 @@ export function Message(props: { id: string }) {
 								document.location.host +
 								document.location.pathname +
 								"?id=" +
-								message()?.id,
+								message()?.id
 						),
 							showToast({ variant: "success", title: "Copy to clipboard", duration: 3000 })
 					}}
@@ -99,7 +99,7 @@ export function Message(props: { id: string }) {
 					each={sortLanguageTags(
 						project()?.settings()?.languageTags || [],
 						// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-						project()?.settings()?.sourceLanguageTag!,
+						project()?.settings()?.sourceLanguageTag!
 					)}
 				>
 					{(languageTag) => {

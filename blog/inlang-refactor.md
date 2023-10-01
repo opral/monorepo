@@ -1,10 +1,4 @@
----
-title: Refactoring Inlang
-href: /blog/refactoring-inlang
-description: Inlang got a major refactor which brings new capabilities to the ecosystem.
----
-
-# {% $frontmatter.title %}
+# Refactoring Inlang
 
 ![architecture inlang new](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/architecture.jpg)
 

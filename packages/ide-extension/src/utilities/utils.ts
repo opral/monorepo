@@ -16,6 +16,5 @@ export function telemetryCapture(event: TelemetryEvents, properties?: Record<str
 }
 
 export function handleError(error: any) {
-	vscode.window.showErrorMessage((error as Error).message)
 	console.error(error)
 }

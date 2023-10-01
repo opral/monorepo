@@ -68,7 +68,7 @@ async function loadMessages(args: {
 					typeof args.settings.sourceLanguageFilePath === "object" &&
 						languageTag === args.sourceLanguageTag
 						? args.settings.sourceLanguageFilePath[prefix]
-						: undefined,
+						: undefined
 				)
 				for (const [key, value] of Object.entries(messagesFromFile)) {
 					const prefixedKey = prefix + ":" + replaceAll(key, "u002E", ".")
@@ -84,7 +84,7 @@ async function loadMessages(args: {
 				typeof args.settings.sourceLanguageFilePath === "string" &&
 					languageTag === args.sourceLanguageTag
 					? args.settings.sourceLanguageFilePath
-					: undefined,
+					: undefined
 			)
 			for (const [key, value] of Object.entries(messagesFromFile)) {
 				addVariantToMessages(
@@ -92,7 +92,7 @@ async function loadMessages(args: {
 					replaceAll(key, "u002E", "."),
 					languageTag,
 					value,
-					args.settings,
+					args.settings
 				)
 			}
 		}
@@ -112,7 +112,7 @@ async function getFileToParse(
 	languageTag: string,
 	sourceLanguageTag: string,
 	nodeishFs: NodeishFilesystemSubset,
-	pathWithLanguage?: string,
+	pathWithLanguage?: string
 ): Promise<Record<string, string>> {
 	if (typeof pathWithLanguage === "undefined") {
 		pathWithLanguage = path.replace("{languageTag}", languageTag)
@@ -149,7 +149,7 @@ async function getFileToParse(
  */
 const resolveOrderOfLanguageTags = (
 	languageTags: Readonly<LanguageTag[]>,
-	sourceLanguageTag: LanguageTag,
+	sourceLanguageTag: LanguageTag
 ): LanguageTag[] => {
 	const filteredTags = languageTags.filter((t) => t !== sourceLanguageTag) // Remove sourceLanguageTag
 	filteredTags.unshift(sourceLanguageTag) // Add sourceLanguageTag to the beginning of the filtered array
@@ -166,7 +166,7 @@ const addVariantToMessages = (
 	key: string,
 	languageTag: LanguageTag,
 	value: string,
-	settings: PluginSettings,
+	settings: PluginSettings
 ) => {
 	const messageIndex = messages.findIndex((m) => m.id === key)
 	if (messageIndex !== -1) {
@@ -208,7 +208,7 @@ function parsePattern(text: string, variableReferencePattern: string[]): Variant
 	const expression = variableReferencePattern[1]
 		? new RegExp(
 				`(\\${variableReferencePattern[0]}[^\\${variableReferencePattern[1]}]+\\${variableReferencePattern[1]})`,
-				"g",
+				"g"
 		  )
 		: new RegExp(`(${variableReferencePattern}\\w+)`, "g")
 
@@ -223,7 +223,7 @@ function parsePattern(text: string, variableReferencePattern: string[]): Variant
 						? element.slice(
 								variableReferencePattern[0].length,
 								// negative index, removing the trailing pattern
-								-variableReferencePattern[1].length,
+								-variableReferencePattern[1].length
 						  )
 						: element.slice(variableReferencePattern[0].length),
 				}
@@ -288,7 +288,7 @@ async function saveMessages(args: {
 						: (args.settings.pathPattern[prefix] as string).replace("{languageTag}", languageTag)
 				await args.nodeishFs.writeFile(
 					pathWithLanguage,
-					serializeFile(value, args.settings.variableReferencePattern),
+					serializeFile(value, args.settings.variableReferencePattern)
 				)
 			}
 		}
@@ -316,7 +316,7 @@ async function saveMessages(args: {
 			}
 			await args.nodeishFs.writeFile(
 				pathWithLanguage,
-				serializeFile(value, args.settings.variableReferencePattern),
+				serializeFile(value, args.settings.variableReferencePattern)
 			)
 		}
 	}
@@ -331,7 +331,7 @@ async function saveMessages(args: {
  */
 function serializeFile(
 	messages: Record<Message["id"], Variant["pattern"]>,
-	variableReferencePattern: PluginSettings["variableReferencePattern"],
+	variableReferencePattern: PluginSettings["variableReferencePattern"]
 ): string {
 	let result: Record<string, string> = {}
 	for (const [messageId, pattern] of Object.entries(messages)) {
@@ -369,7 +369,7 @@ function serializePattern(pattern: Variant["pattern"], variableReferencePattern:
 				result.push(
 					variableReferencePattern[1]
 						? `${variableReferencePattern[0]}${element.name}${variableReferencePattern[1]}`
-						: `${variableReferencePattern[0]}${element.name}`,
+						: `${variableReferencePattern[0]}${element.name}`
 				)
 				break
 			default:

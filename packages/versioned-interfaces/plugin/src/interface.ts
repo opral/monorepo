@@ -72,5 +72,5 @@ export const Plugin = Type.Object(
 		detectedLanguageTags: Type.Optional(Type.Any()),
 		addCustomApi: Type.Optional(Type.Any()),
 	},
-	{ additionalProperties: false },
+	{ additionalProperties: false }
 )

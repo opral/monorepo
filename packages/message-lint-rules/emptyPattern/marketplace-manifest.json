@@ -2,7 +2,9 @@
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "messageLintRule.inlang.emptyPattern",
 	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/emptyPattern/assets/icon.png",
-	"coverImage": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/empty_pattern-marketplace-cover.jpg",
+	"gallery": [
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/empty_pattern-marketplace-cover.jpg"
+	],
 	"displayName": {
 		"en": "Empty pattern"
 	},

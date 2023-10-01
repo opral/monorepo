@@ -43,8 +43,8 @@ export const IdeExtensionConfigSchema = Type.Object({
 					documentText: Type.String(),
 				}),
 			],
-			Type.Promise(Type.Array(MessageReferenceMatch)),
-		),
+			Type.Promise(Type.Array(MessageReferenceMatch))
+		)
 	),
 	/**
 	 * Defines the options to extract messages.
@@ -65,9 +65,9 @@ export const IdeExtensionConfigSchema = Type.Object({
 						selection: Type.String(),
 					}),
 				],
-				Type.String(),
+				Type.String()
 			),
-		}),
+		})
 	),
 	/**
 	 * An array of VSCode DocumentSelectors.
@@ -81,8 +81,8 @@ export const IdeExtensionConfigSchema = Type.Object({
 		Type.Array(
 			Type.Object({
 				language: Type.Optional(Type.String()),
-			}),
-		),
+			})
+		)
 	),
 })
 
