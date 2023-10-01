@@ -11,7 +11,7 @@
 		"./m": "./dist/messages.js"
 	},
 	"bin": {
-		"paraglide-js": "echo 'This is a library, not a CLI tool."
+		"paraglide-js": "./bin/run.js"
 	},
 	"files": [
 		"./dist",
