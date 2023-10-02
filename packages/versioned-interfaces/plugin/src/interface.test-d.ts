@@ -27,3 +27,7 @@ const plugin: Plugin<{
 		return {}
 	},
 }
+
+// -- it should be possible to use a plugin without a generic --
+
+const plugin2: Plugin = {} as any
