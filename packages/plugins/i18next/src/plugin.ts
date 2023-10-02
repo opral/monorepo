@@ -172,7 +172,7 @@ const addVariantToMessages = (
 	if (messageIndex !== -1) {
 		const variant: Variant = {
 			languageTag,
-			match: {},
+			match: [],
 			pattern: parsePattern(value, settings.variableReferencePattern!),
 		}
 
@@ -188,7 +188,7 @@ const addVariantToMessages = (
 		message.variants = [
 			{
 				languageTag,
-				match: {},
+				match: [],
 				pattern: parsePattern(value, settings.variableReferencePattern!),
 			},
 		]
