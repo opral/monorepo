@@ -31,7 +31,7 @@ export async function convert(markdown: string): Promise<string> {
 				"doc-copy",
 				"doc-links",
 				"doc-icon",
-				"badge-generator",
+				"inlang-badge-generator",
 				...defaultSchema.tagNames!,
 			],
 			attributes: {

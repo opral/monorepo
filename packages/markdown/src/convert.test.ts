@@ -43,10 +43,10 @@ test("should be able to render custom elements", async () => {
 	expect(html).toContain("<doc-figure")
 })
 
-test.skip("should be able to provide a badge generator", async () => {
+test("should be able to provide a badge generator", async () => {
 	const markdown = `
-<badge-generator></badge-generator>
+<inlang-badge-generator></inlang-badge-generator>
 	`
 	const html = await convert(markdown)
-	expect(html).toContain("<div")
+	expect(html).toContain("<inlang-badge-generator></inlang-badge-generator>")
 })
