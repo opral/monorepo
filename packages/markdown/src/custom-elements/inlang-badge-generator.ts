@@ -95,10 +95,20 @@ export class InlangBadgeGenerator extends LitElement {
 		.copy-badge:hover {
 			color: #7689a6;
 		}
+		.error-message {
+			position: absolute;
+			right: 1.5rem;
+			bottom: 5rem;
+			font-size: 0.75rem;
+			color: #ff4d4f;
+			margin-top: 0.5rem;
+			font-weight: 400;
+		}
 	`
 
 	@property() badgeURL: string = ""
 	@property() loading: boolean = false
+	@property() error: boolean = false
 
 	@query("input", true) _input!: HTMLInputElement
 
@@ -123,6 +133,17 @@ export class InlangBadgeGenerator extends LitElement {
 		}
 	}
 
+	private checkForError() {
+		const value = this._input.value
+
+		if (!value.includes("github") && value !== "") {
+			this.error = true
+			return
+		} else if (this.error) {
+			this.error = false
+		}
+	}
+
 	private copied = false
 	@property()
 	text: string = "Copy as Markdown"
@@ -131,7 +152,14 @@ export class InlangBadgeGenerator extends LitElement {
 		if (!this.copied) {
 			this.text = "Successfully copied!"
 			this.copied = true
-			navigator.clipboard.writeText(`![inlang](${this.badgeURL})`)
+			navigator.clipboard.writeText(
+				`[![inlang status badge](${
+					this.badgeURL
+				})](https://inlang.com/editor/${this.badgeURL.replace(
+					"https://inlang.com/badge?url=",
+					""
+				)})`
+			)
 
 			setTimeout(() => {
 				this.text = "Copy as Markdown"
@@ -156,8 +184,23 @@ export class InlangBadgeGenerator extends LitElement {
 					: html`<img src=${this.badgeURL} />`}
 			</div>
 			<div class="options-wrapper">
+				${this.error
+					? html`<div class="error-message">Please enter a valid GitHub repository link</div>`
+					: ""}
 				<div class="options">
-					<input @onchange type="text" placeholder="Link to your repository" />
+					<input
+						@change=${() => this.checkForError()}
+						@keydown=${(e: KeyboardEvent) => {
+							if (e.key === "Enter") {
+								this._generateBadge()
+							}
+						}}
+						type="text"
+						placeholder="Link to your repository"
+						style=${this.error
+							? "border: 1px solid #ff4d4f; color: #ff4d4f; outline-color: rgba(255, 77, 79, 0.1);"
+							: ""}
+					/>
 					<sl-button @click=${this._generateBadge} variant="primary" size="small"
 						>Generate</sl-button
 					>
