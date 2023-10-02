@@ -10,12 +10,20 @@ jobs:
     strategy:
       matrix:
         browser: [chrome, firefox]
+        version: [18]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        name: Checkout
-      - uses: cypress-io/github-action@v6
-        name: Cypress run
+      - name: Checkout
+        uses: actions/checkout@v4  
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.version }}
+          cache: "npm"
+          
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
         with:
           browser: ${{ matrix.browser }}
           start: npm run production
