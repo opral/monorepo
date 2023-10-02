@@ -158,7 +158,7 @@ export class InlangBadgeGenerator extends LitElement {
 				})](https://inlang.com/editor/${this.badgeURL.replace(
 					"https://inlang.com/badge?url=",
 					""
-				)})`
+				)}?ref=badge)`
 			)
 
 			setTimeout(() => {
