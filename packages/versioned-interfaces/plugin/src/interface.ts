@@ -4,7 +4,7 @@ import type { Message } from "@inlang/message"
 import type { JSONObject } from "@inlang/json-types"
 import type { CustomApiInlangIdeExtension } from "./customApis/app.inlang.ideExtension.js"
 import { Translatable } from "@inlang/translatable"
-import type { ProjectSettings } from "@inlang/project-settings"
+import type { ExternalProjectSettings, ProjectSettings } from "@inlang/project-settings"
 
 /**
  * The filesystem is a subset of project lisa's nodeish filesystem.
@@ -33,10 +33,9 @@ export type NodeishFilesystemSubset = Pick<
  * 	}>
  * ```
  */
-export type Plugin<ExternalSettings extends Record<string, JSONObject> | unknown = unknown> = Omit<
-	Static<typeof Plugin>,
-	"loadMessages" | "saveMessages" | "addCustomApi"
-> & {
+export type Plugin<
+	ExternalSettings extends Record<keyof ExternalProjectSettings, JSONObject> | unknown = unknown
+> = Omit<Static<typeof Plugin>, "loadMessages" | "saveMessages" | "addCustomApi"> & {
 	/**
 	 * Load messages.
 	 */
