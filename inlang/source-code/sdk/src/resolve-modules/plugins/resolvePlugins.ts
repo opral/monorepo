@@ -44,7 +44,7 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 		if (hasInvalidId) {
 			result.errors.push(
 				new PluginHasInvalidIdError(
-					`Plugin ${plugin.id} has an invalid id "${plugin.id}". It must be kebap-case and contain a namespace like project.my-plugin.`,
+					`Plugin ${plugin.id} has an invalid id "${plugin.id}". It must be camelCase and contain a namespace like plugin.namespace.myPlugin.`,
 					{ plugin: plugin.id }
 				)
 			)
