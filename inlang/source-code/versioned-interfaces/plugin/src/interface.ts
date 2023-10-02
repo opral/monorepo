@@ -1,10 +1,10 @@
-import type { LanguageTag } from "@inlang/language-tag"
 import { type Static, Type, type TTemplateLiteral, type TLiteral } from "@sinclair/typebox"
 import type { NodeishFilesystem as LisaNodeishFilesystem } from "@lix-js/fs"
 import type { Message } from "@inlang/message"
 import type { JSONObject } from "@inlang/json-types"
 import type { CustomApiInlangIdeExtension } from "./customApis/app.inlang.ideExtension.js"
 import { Translatable } from "@inlang/translatable"
+import type { ProjectSettings } from "@inlang/project-settings"
 
 /**
  * The filesystem is a subset of project lisa's nodeish filesystem.
@@ -21,7 +21,7 @@ export type NodeishFilesystemSubset = Pick<
 /**
  * The plugin API is used to extend inlang's functionality.
  */
-export type Plugin<Settings extends JSONObject | unknown = unknown> = Omit<
+export type Plugin<ExternalSettings extends Record<string, JSONObject>> = Omit<
 	Static<typeof Plugin>,
 	"loadMessages" | "saveMessages" | "addCustomApi"
 > & {
@@ -29,14 +29,12 @@ export type Plugin<Settings extends JSONObject | unknown = unknown> = Omit<
 	 * Load messages.
 	 */
 	loadMessages?: (args: {
-		languageTags: LanguageTag[]
-		sourceLanguageTag: LanguageTag
-		settings: Settings
+		settings: ProjectSettings & ExternalSettings
 		nodeishFs: NodeishFilesystemSubset
 	}) => Promise<Message[]> | Message[]
 	saveMessages?: (args: {
 		messages: Message[]
-		settings: Settings
+		settings: ProjectSettings & ExternalSettings
 		nodeishFs: NodeishFilesystemSubset
 	}) => Promise<void> | void
 	/**
@@ -50,7 +48,7 @@ export type Plugin<Settings extends JSONObject | unknown = unknown> = Omit<
 	 *  })
 	 */
 	addCustomApi?: (args: {
-		settings: Settings
+		settings: ProjectSettings & ExternalSettings
 	}) =>
 		| Record<`app.${string}.${string}`, unknown>
 		| { "app.inlang.ideExtension": CustomApiInlangIdeExtension }
