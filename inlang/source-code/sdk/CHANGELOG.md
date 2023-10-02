@@ -1,5 +1,16 @@
 # @inlang/sdk
 
+## 0.8.0
+
+### Minor Changes
+
+- b7dfc781e: change message format match from object to array
+
+### Patch Changes
+
+- Updated dependencies [b7dfc781e]
+  - @inlang/message@2.0.0
+
 ## 0.7.0
 
 ### Minor Changes
