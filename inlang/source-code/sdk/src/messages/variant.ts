@@ -128,6 +128,10 @@ const matchVariant = (
 			})
 		}
 
+		if (!message.selectors || !match || match.length !== message.selectors.length) {
+			isMatch = false
+		}
+
 		if (isMatch) {
 			return variant
 		}
@@ -153,6 +157,11 @@ const matchMostSpecificVariant = (
 		if (variant.languageTag !== languageTag) continue
 
 		let isMatch = true
+
+		// if slector and stored match are not the same throw error
+		if (variant.match.length !== message.selectors.length) {
+			return undefined
+		}
 
 		//check if variant is a match
 		if (variant.match.length > 0) {
@@ -186,6 +195,27 @@ const matchMostSpecificVariant = (
 		} else if (isMatch && !match) {
 			return variant
 		}
+	}
+
+	// if number of selectors and numver of required match is not the same match catch all
+	if (!message.selectors || !match || match.length !== message.selectors.length) {
+		const catchAllMatcher: Array<string> = []
+		const selectorCount = message.selectors.length
+		catchAllMatcher.push("*")
+		for (let i = 0; i < selectorCount - 1; i++) {
+			catchAllMatcher.push("*")
+		}
+		return message.variants.find(
+			(v) =>
+				v.languageTag === languageTag && JSON.stringify(v.match) === JSON.stringify(catchAllMatcher)
+		)
+	}
+
+	// if selector is empty match empty variant match
+	if (message.selectors && message.selectors.length === 0) {
+		return message.variants.find(
+			(v) => v.languageTag === languageTag && JSON.stringify(v.match) === "[]"
+		)
 	}
 
 	//find the most specific variant
