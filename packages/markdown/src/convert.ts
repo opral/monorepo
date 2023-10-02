@@ -31,6 +31,7 @@ export async function convert(markdown: string): Promise<string> {
 				"doc-copy",
 				"doc-links",
 				"doc-icon",
+				"badge-generator",
 				...defaultSchema.tagNames!,
 			],
 			attributes: {
@@ -57,7 +58,7 @@ export async function convert(markdown: string): Promise<string> {
 			pre: "doc-relative",
 			ul: "doc-list-disc doc-list-inside",
 			ol: "doc-list-decimal doc-list-inside",
-			li: "doc-my-3",
+			li: "doc-my-3 doc-list-inside doc-flex doc-items-center",
 			table:
 				"doc-table-auto doc-w-full doc-my-6 doc-rounded-xl doc-text-left max-w-full overflow-x-scroll",
 			thead: "doc-font-medium pb-2 doc-border-b border-surface-4 doc-text-left",
