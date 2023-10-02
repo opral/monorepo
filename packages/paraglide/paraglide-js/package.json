@@ -27,12 +27,15 @@
 	},
 	"dependencies": {
 		"@inlang/sdk": "*",
-		"dedent": "1.5.1"
+		"consola": "3.2.3",
+		"dedent": "1.5.1",
+		"minimist": "1.2.8"
 	},
 	"devDependencies": {
 		"@rollup/plugin-terser": "0.4.3",
 		"@rollup/plugin-virtual": "3.0.1",
 		"@ts-morph/bootstrap": "0.20.0",
+		"@types/minimist": "1.2.3",
 		"@vitest/coverage-v8": "0.34.3",
 		"rollup": "3.29.1",
 		"typescript": "5.2.2",
