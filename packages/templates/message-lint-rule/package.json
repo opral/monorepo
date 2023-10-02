@@ -11,7 +11,7 @@
 		"test": "tsc --noEmit && vitest run --passWithNoTests"
 	},
 	"dependencies": {
-		"@inlang/sdk": "^0.7.0"
+		"@inlang/sdk": "^0.8.0"
 	},
 	"devDependencies": {
 		"@inlang/cli": "^1.8.0",
