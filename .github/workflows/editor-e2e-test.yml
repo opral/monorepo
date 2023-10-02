@@ -13,14 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: "npm"
+        name: Checkout
       - uses: cypress-io/github-action@v6
+        name: Cypress run
         with:
           browser: ${{ matrix.browser }}
-          install: npm install
           start: npm run production
           wait-on: 'http://localhost:3000'
           parallel: true
