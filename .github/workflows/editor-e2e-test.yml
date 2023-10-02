@@ -1,0 +1,23 @@
+name: Test editor with E2E tests
+
+on:
+  pull_request:
+    branches:
+      - "main"
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        browser: [chrome, firefox]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cypress-io/github-action@v6
+        with:
+          browser: ${{ matrix.browser }}
+          start: npm run production
+          wait-on: 'http://localhost:3000'
+          parallel: true
+          
+

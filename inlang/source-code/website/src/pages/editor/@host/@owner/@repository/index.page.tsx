@@ -133,7 +133,7 @@ function TheActualPage() {
 						doesInlangConfigExist() && project()?.query.messages.includedMessageIds() !== undefined
 					}
 				>
-					<div>
+					<div id="messageList">
 						<ListHeader ids={project()?.query.messages.includedMessageIds() || []} />
 						<TourHintWrapper
 							currentId="textfield"

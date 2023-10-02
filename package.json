@@ -13,8 +13,10 @@
 	"scripts": {
 		"build": "npx nx run-many --target=build --all --parallel",
 		"dev": "npx nx run-many --target=dev --all --parallel 1000 --output-style stream",
+		"production": "npx nx run @inlang/website:_build && npx nx run @inlang/server:production",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "npx nx run-many --target=test --all --parallel",
+		"test:e2e": "npx nx run-many --target=test:e2e --all --parallel",
 		"---- LINT ----------------------------------------------------------": "",
 		"lint": "npx nx run-many --target=lint --all --parallel",
 		"format": "npx nx run-many --target=format --all --parallel",
