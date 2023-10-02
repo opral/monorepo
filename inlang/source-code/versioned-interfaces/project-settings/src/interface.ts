@@ -25,7 +25,7 @@ export const _MessageLintRuleLevel = Type.Union([Type.Literal("error"), Type.Lit
  * ---------------- Settings ----------------
  */
 
-const InternalSettings = Type.Object({
+const InternalProjectSettings = Type.Object({
 	$schema: Type.Optional(Type.Literal("https://inlang.com/schema/project-settings")),
 	sourceLanguageTag: LanguageTag,
 	languageTags: Type.Array(LanguageTag, { uniqueItems: true }),
@@ -81,11 +81,12 @@ const InternalSettings = Type.Object({
 /**
  * Settings defined via apps, plugins, lint rules, etc.
  */
-const ExternalSettings = Type.Record(
+export type ExternalProjectSettings = Static<typeof ExternalProjectSettings>
+export const ExternalProjectSettings = Type.Record(
 	Type.String({
 		// pattern includes ProjectSettings keys
 		pattern: `^((messageLintRule|plugin|app|library)\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)|\\$schema|${Object.keys(
-			InternalSettings.properties
+			InternalProjectSettings.properties
 		)
 			.map((key) => key.replaceAll(".", "\\."))
 			.join("|")})$`,
@@ -103,4 +104,4 @@ const ExternalSettings = Type.Record(
 )
 
 export type ProjectSettings = Static<typeof ProjectSettings>
-export const ProjectSettings = Type.Intersect([InternalSettings, ExternalSettings])
+export const ProjectSettings = Type.Intersect([InternalProjectSettings, ExternalProjectSettings])
