@@ -20,8 +20,20 @@ export type NodeishFilesystemSubset = Pick<
 
 /**
  * The plugin API is used to extend inlang's functionality.
+ * 
+ * You can use your own settings by extending the plugin with a generic: 
+ * 
+ * ```ts
+ * 	type PluginSettings = {
+ *  	storagePath: string
+ * 	}
+ * 
+ * 	const plugin: Plugin<{
+ * 		"plugin.your.id": PluginSettings
+ * 	}>
+ * ```
  */
-export type Plugin<ExternalSettings extends Record<string, JSONObject>> = Omit<
+export type Plugin<ExternalSettings extends Record<string, JSONObject> | unknown = unknown> = Omit<
 	Static<typeof Plugin>,
 	"loadMessages" | "saveMessages" | "addCustomApi"
 > & {
