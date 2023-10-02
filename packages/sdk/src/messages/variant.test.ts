@@ -40,7 +40,33 @@ describe("getVariant", () => {
 		})
 	})
 
-	test("it should return undefined (but never throw an error) if selectors is an empty array", () => {
+	test("it should not throw error if selector is empty and match", () => {
+		const mockMessage: Message = {
+			id: "mockMessage",
+			selectors: [],
+			variants: [
+				{
+					languageTag: "en",
+					pattern: [{ type: "Text", value: "Gender male" }],
+					match: [],
+				},
+				{
+					languageTag: "de",
+					pattern: [{ type: "Text", value: "Veraltete Übersetzung" }],
+					match: [],
+				},
+			],
+		}
+		const variant = getVariant(mockMessage, {
+			where: {
+				languageTag: "en",
+				match: [],
+			},
+		})
+		expect(variant).toBeDefined()
+	})
+
+	test("it should not throw error if selector is empty, return undefined", () => {
 		const mockMessage: Message = {
 			id: "mockMessage",
 			selectors: [],
@@ -151,8 +177,9 @@ describe("getVariant", () => {
 		expect(variant).toBeUndefined()
 	})
 
-	test("should return the catch all variant if no selector defined", () => {
+	test("should return undefined variant if no selector defined", () => {
 		const mockMessage: Message = {} as any
+		mockMessage.selectors = []
 		mockMessage.variants = [
 			{
 				languageTag: "en",
@@ -172,11 +199,49 @@ describe("getVariant", () => {
 				match: ["*", "*"],
 			},
 		})
+		// should return undefined
+		expect(variant).toBeUndefined()
+	})
 
-		// should return the female variant
-		expect(variant?.pattern[0]).toStrictEqual({
+	test("should match catch all if the number of matches and selectors do not match", () => {
+		const mockMessage: Message = getMockMessage()
+
+		const variant1 = getVariant(mockMessage, {
+			where: {
+				languageTag: "en",
+				match: ["12"],
+			},
+		})
+
+		// should return catch all
+		expect(variant1?.pattern[0]).toStrictEqual({
 			type: "Text",
-			value: "test",
+			value: "{$hostName} invites {$guestName} and {$guestsOther} other people to their party.",
+		})
+
+		const variant2 = getVariant(mockMessage, {
+			where: {
+				languageTag: "en",
+				match: ["12", "*", "23"],
+			},
+		})
+
+		// should return catch all
+		expect(variant2?.pattern[0]).toStrictEqual({
+			type: "Text",
+			value: "{$hostName} invites {$guestName} and {$guestsOther} other people to their party.",
+		})
+		const variant3 = getVariant(mockMessage, {
+			where: {
+				languageTag: "en",
+				match: [],
+			},
+		})
+
+		// should return catch all
+		expect(variant3?.pattern[0]).toStrictEqual({
+			type: "Text",
+			value: "{$hostName} invites {$guestName} and {$guestsOther} other people to their party.",
 		})
 	})
 })
