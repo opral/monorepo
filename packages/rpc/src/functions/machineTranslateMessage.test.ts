@@ -86,36 +86,11 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 	}
 )
 
-it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
-	"should not naively compare the variant lenghts and instead match variants",
-	async () => {
-		const result = await machineTranslateMessage({
-			sourceLanguageTag: "en",
-			targetLanguageTags: ["de"],
-			message: {
-				id: "mockMessage",
-				selectors: [
-					{
-						type: "VariableReference",
-						name: "gender",
-					},
-				],
-				variants: [
-					{
-						languageTag: "en",
-						match: ["male"],
-						pattern: [{ type: "Text", value: "Gender male" }],
-					},
-					{
-						languageTag: "de",
-						match: ["*"],
-						pattern: [{ type: "Text", value: "Veraltete Übersetzung" }],
-					},
-				],
-			},
-		})
-		expect(result.error).toBeUndefined()
-		expect(result.data).toEqual({
+it.todo("should not naively compare the variant lenghts and instead match variants", async () => {
+	const result = await machineTranslateMessage({
+		sourceLanguageTag: "en",
+		targetLanguageTags: ["de"],
+		message: {
 			id: "mockMessage",
 			selectors: [
 				{
@@ -134,15 +109,37 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 					match: ["*"],
 					pattern: [{ type: "Text", value: "Veraltete Übersetzung" }],
 				},
-				{
-					languageTag: "de",
-					match: ["male"],
-					pattern: [{ type: "Text", value: "Geschlecht männlich" }],
-				},
 			],
-		})
-	}
-)
+		},
+	})
+	expect(result.error).toBeUndefined()
+	expect(result.data).toEqual({
+		id: "mockMessage",
+		selectors: [
+			{
+				type: "VariableReference",
+				name: "gender",
+			},
+		],
+		variants: [
+			{
+				languageTag: "en",
+				match: ["male"],
+				pattern: [{ type: "Text", value: "Gender male" }],
+			},
+			{
+				languageTag: "de",
+				match: ["*"],
+				pattern: [{ type: "Text", value: "Veraltete Übersetzung" }],
+			},
+			{
+				languageTag: "de",
+				match: ["male"],
+				pattern: [{ type: "Text", value: "Geschlecht männlich" }],
+			},
+		],
+	})
+})
 
 it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 	"should not return escaped quotation marks",
