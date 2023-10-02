@@ -401,7 +401,7 @@ describe("saveMessage", () => {
 				variants: [
 					{
 						languageTag: "en",
-						match: {},
+						match: [],
 						pattern: [
 							{
 								type: "Text",
@@ -430,7 +430,7 @@ describe("saveMessage", () => {
 				variants: [
 					{
 						languageTag: "en",
-						match: {},
+						match: [],
 						pattern: [
 							{
 								type: "Text",
@@ -446,7 +446,7 @@ describe("saveMessage", () => {
 				variants: [
 					{
 						languageTag: "en",
-						match: {},
+						match: [],
 						pattern: [
 							{
 								type: "Text",
@@ -561,7 +561,7 @@ describe("formatting", () => {
 		})
 		const variant: Variant = {
 			languageTag: "es",
-			match: {},
+			match: [],
 			pattern: [
 				{
 					type: "Text",
@@ -647,7 +647,7 @@ describe("formatting", () => {
 				variants: [
 					{
 						languageTag: "en",
-						match: {},
+						match: [],
 						pattern: [
 							{
 								type: "Text",
@@ -663,7 +663,7 @@ describe("formatting", () => {
 				variants: [
 					{
 						languageTag: "en",
-						match: {},
+						match: [],
 						pattern: [
 							{
 								type: "Text",
@@ -709,7 +709,7 @@ describe("formatting", () => {
 				variants: [
 					{
 						languageTag: "en",
-						match: {},
+						match: [],
 						pattern: [
 							{
 								type: "Text",
@@ -725,7 +725,7 @@ describe("formatting", () => {
 				variants: [
 					{
 						languageTag: "en",
-						match: {},
+						match: [],
 						pattern: [
 							{
 								type: "Text",
@@ -792,7 +792,7 @@ describe("formatting", () => {
 			variants: [
 				{
 					languageTag: "es",
-					match: {},
+					match: [],
 					pattern: [
 						{
 							type: "Text",
@@ -843,7 +843,7 @@ describe("roundTrip", () => {
 		})
 		const variant: Variant = {
 			languageTag: "en",
-			match: {},
+			match: [],
 			pattern: [
 				{
 					type: "Text",
@@ -896,7 +896,7 @@ describe("roundTrip", () => {
 				variants: [
 					{
 						languageTag: "en",
-						match: {},
+						match: [],
 						pattern: [
 							{
 								type: "Text",

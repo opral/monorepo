@@ -176,7 +176,7 @@ export function PatternEditor(props: {
 				newMessage = createVariant(props.message, {
 					data: {
 						languageTag: props.languageTag,
-						match: {},
+						match: [],
 						pattern: newPattern(),
 					},
 				})
@@ -184,7 +184,7 @@ export function PatternEditor(props: {
 				newMessage = updateVariantPattern(props.message, {
 					where: {
 						languageTag: props.languageTag,
-						selectors: {},
+						match: [],
 					},
 					data: newPattern(),
 				})
@@ -282,7 +282,7 @@ export function PatternEditor(props: {
 				getVariant(translation.data, {
 					where: {
 						languageTag: props.languageTag,
-						selectors: {},
+						match: [],
 					},
 				})?.pattern || []
 			if (JSON.stringify(newPattern) !== "[]") {
