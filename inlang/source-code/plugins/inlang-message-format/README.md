@@ -3,7 +3,7 @@
 This plugin stores messages in the inlang message format. 
 
 - [x] supports all inlang messages features (variants, markup, etc.)
-- [x] the simplest and best inlang storage plugin (because it stores messages in the inlang format) 
+- [x] the simplest inlang storage plugin (because the messages are stored in the inlang format)
 
 # Settings
 
