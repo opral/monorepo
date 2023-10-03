@@ -7,7 +7,7 @@ it.skip("should compile a message", () => {
 		selectors: [],
 		variants: [
 			{
-				match: {},
+				match: [],
 				languageTag: "en",
 				pattern: [
 					{
@@ -33,7 +33,7 @@ it.skip("should compile a message", () => {
 				],
 			},
 			{
-				match: {},
+				match: [],
 				languageTag: "de",
 				pattern: [
 					{
