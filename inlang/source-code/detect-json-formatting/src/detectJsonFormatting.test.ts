@@ -3,13 +3,22 @@ import { detectJsonFormatting } from "./detectJsonFormatting.js"
 
 it("should detect spacing", () => {
 	// test all possible spacings
-	for (const spacing of [1, 2, 3, 4, 6, 8, "\t"]) {
-		const withSpacing = `{\n${
-			spacing === "\t" ? "\t" : " ".repeat(spacing as number)
-		}"test": "test"\n}`
-		const serialize = detectJsonFormatting(withSpacing)
-		expect(serialize(JSON.parse(withSpacing))).toBe(withSpacing)
+	for (const value of [1, 2, 3, 4, 6, 8, "\t"]) {
+		const spacing = value === "\t" ? "\t" : " ".repeat(value as number)
+		const objectWithSpacing = `{\n${spacing}"test": "test"\n}`
+
+		const serialize = detectJsonFormatting(objectWithSpacing)
+		expect(serialize(JSON.parse(objectWithSpacing))).toBe(objectWithSpacing)
 	}
+})
+
+it("should detect spacing if the json is an array", () => {
+	// testing with one element only because dynamic generation of
+	// arrays with different spacings is too complex
+	const objectWithSpacing = `[\n\t"test",\n\t"test"\n]`
+
+	const serialize = detectJsonFormatting(objectWithSpacing)
+	expect(serialize(JSON.parse(objectWithSpacing))).toBe(objectWithSpacing)
 })
 
 it("should detect new lines correctly", () => {
