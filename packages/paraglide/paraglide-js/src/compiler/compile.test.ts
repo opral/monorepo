@@ -39,7 +39,7 @@ describe("usage", async () => {
 		expect(m.onlyText()).toBe("A simple message.")
 		expect(m.oneParam({ name: "Samuel" })).toBe("Good morning Samuel!")
 		expect(m.multipleParams({ name: "Samuel", count: 5 })).toBe(
-			"Hello Samuel! You have 5 messages.",
+			"Hello Samuel! You have 5 messages."
 		)
 
 		runtime.setLanguageTag("de")
@@ -47,7 +47,7 @@ describe("usage", async () => {
 		expect(m.onlyText()).toBe("Eine einfache Nachricht.")
 		expect(m.oneParam({ name: "Samuel" })).toBe("Guten Morgen Samuel!")
 		expect(m.multipleParams({ name: "Samuel", count: 5 })).toBe(
-			"Hallo Samuel! Du hast 5 Nachrichten.",
+			"Hallo Samuel! Du hast 5 Nachrichten."
 		)
 	})
 
@@ -95,7 +95,7 @@ describe("tree-shaking", () => {
 		// all required code for the message to be rendered is included like sourceLanguageTag.
 		// but, all other messages except of 'onlyText' are tree-shaken away.
 		expect(compiled.output[0].code).toBe(
-			'const sourceLanguageTag="en";let _currentLanguageTag=sourceLanguageTag;const languageTag=()=>_currentLanguageTag;const onlyText=()=>{const contents={en:`A simple message.`,de:`Eine einfache Nachricht.`};return contents[languageTag()]};console.log(onlyText());\n',
+			'const sourceLanguageTag="en";let _currentLanguageTag=sourceLanguageTag;const languageTag=()=>_currentLanguageTag;const onlyText=()=>{const contents={en:`A simple message.`,de:`Eine einfache Nachricht.`};return contents[languageTag()]};console.log(onlyText());\n'
 		)
 		eval(compiled.output[0].code)
 		expect(log).toHaveBeenCalledWith("A simple message.")
@@ -127,13 +127,13 @@ describe("tree-shaking", () => {
 		const result = await bundle.generate({ format: "esm" })
 		const log = vi.spyOn(console, "log").mockImplementation(() => {})
 		expect(result.output[0].code).toBe(
-			'const sourceLanguageTag="en";let _currentLanguageTag=sourceLanguageTag;const languageTag=()=>_currentLanguageTag;const onlyText=()=>{const contents={en:`A simple message.`,de:`Eine einfache Nachricht.`};return contents[languageTag()]};const oneParam=params=>{const contents={en:`Good morning ${params.name}!`,de:`Guten Morgen ${params.name}!`};return contents[languageTag()]??"oneParam"};const multipleParams=params=>{const contents={en:`Hello ${params.name}! You have ${params.count} messages.`,de:`Hallo ${params.name}! Du hast ${params.count} Nachrichten.`};return contents[languageTag()]??"multipleParams"};console.log(onlyText(),oneParam({name:"Samuel"}),multipleParams({name:"Samuel",count:5}));\n',
+			'const sourceLanguageTag="en";let _currentLanguageTag=sourceLanguageTag;const languageTag=()=>_currentLanguageTag;const onlyText=()=>{const contents={en:`A simple message.`,de:`Eine einfache Nachricht.`};return contents[languageTag()]};const oneParam=params=>{const contents={en:`Good morning ${params.name}!`,de:`Guten Morgen ${params.name}!`};return contents[languageTag()]??"oneParam"};const multipleParams=params=>{const contents={en:`Hello ${params.name}! You have ${params.count} messages.`,de:`Hallo ${params.name}! Du hast ${params.count} Nachrichten.`};return contents[languageTag()]??"multipleParams"};console.log(onlyText(),oneParam({name:"Samuel"}),multipleParams({name:"Samuel",count:5}));\n'
 		)
 		eval(result.output[0].code)
 		expect(log).toHaveBeenCalledWith(
 			"A simple message.",
 			"Good morning Samuel!",
-			"Hello Samuel! You have 5 messages.",
+			"Hello Samuel! You have 5 messages."
 		)
 	})
 })
@@ -192,7 +192,7 @@ test("typesafety", async () => {
 
     // a message without params shouldn't require params
     m.onlyText() satisfies string
-  `,
+  `
 	)
 
 	const program = project.createProgram()
@@ -209,12 +209,12 @@ const mockMessages: Message[] = [
 		selectors: [],
 		variants: [
 			{
-				match: {},
+				match: [],
 				languageTag: "en",
 				pattern: [{ type: "Text", value: "A simple message." }],
 			},
 			{
-				match: {},
+				match: [],
 				languageTag: "de",
 				pattern: [{ type: "Text", value: "Eine einfache Nachricht." }],
 			},
@@ -225,7 +225,7 @@ const mockMessages: Message[] = [
 		selectors: [],
 		variants: [
 			{
-				match: {},
+				match: [],
 				languageTag: "en",
 				pattern: [
 					{ type: "Text", value: "Good morning " },
@@ -234,7 +234,7 @@ const mockMessages: Message[] = [
 				],
 			},
 			{
-				match: {},
+				match: [],
 				languageTag: "de",
 				pattern: [
 					{ type: "Text", value: "Guten Morgen " },
@@ -249,7 +249,7 @@ const mockMessages: Message[] = [
 		selectors: [],
 		variants: [
 			{
-				match: {},
+				match: [],
 				languageTag: "en",
 				pattern: [
 					{ type: "Text", value: "Hello " },
@@ -260,7 +260,7 @@ const mockMessages: Message[] = [
 				],
 			},
 			{
-				match: {},
+				match: [],
 				languageTag: "de",
 				pattern: [
 					{ type: "Text", value: "Hallo " },
