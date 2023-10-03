@@ -25,7 +25,7 @@ export const compileMessage = (message: Message): string => {
     const contents = {
       ${Object.entries(contents)
 				.map(
-					([languageTag, templateLiteralPattern]) => `"${languageTag}": ${templateLiteralPattern}`,
+					([languageTag, templateLiteralPattern]) => `"${languageTag}": ${templateLiteralPattern}`
 				)
 				.join(",\n  ")}
   }
