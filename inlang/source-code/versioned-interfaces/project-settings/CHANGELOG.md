@@ -1,5 +1,11 @@
 # @inlang/project-settings
 
+## 2.2.0
+
+### Minor Changes
+
+- d57b1a2ce: add: expose external project settings to ease type definitions
+
 ## 2.1.0
 
 ### Minor Changes
