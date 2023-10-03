@@ -1,1 +1,1 @@
-# @inlang/detectFormatting
+# @inlang/detect-json-formatting
