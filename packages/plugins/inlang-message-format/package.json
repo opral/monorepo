@@ -1,5 +1,5 @@
 {
-	"name": "plugin.inlang.message-format",
+	"name": "@inlang/plugin-message-format",
 	"version": "1.0.0",
 	"type": "module",
 	"exports": {
