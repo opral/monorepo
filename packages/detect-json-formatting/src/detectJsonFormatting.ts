@@ -1,23 +1,25 @@
-export const detectJsonFormatting = (file?: string): DetectJsonFormattingApi => {
-	const formatting: DetectJsonFormattingApi["values"] = {
-		endWithNewLine: true,
-		nestedKeys: false,
-		spacing: 2,
-	}
+/**
+ * Detects the formatting of a JSON file and returns a function
+ * that can be used to stringify JSON with the same formatting.
+ *
+ * @example
+ *   const file = await fs.readFile("./messages.json", { encoding: "utf-8" })
+ *   const stringify = detectJsonFormatting(file)
+ *   const newFile = stringify(json)
+ */
+export const detectJsonFormatting = (
+	file: string
+): ((
+	value: Parameters<typeof JSON.stringify>[0],
+	replacer?: Parameters<typeof JSON.stringify>[1]
+	// space is provided by the function
+) => string) => {
+	let endsWithNewLine: boolean | undefined
+	let spacing: string | number | undefined
 
 	// check end with new line
-	if (file && !file.endsWith("\n")) {
-		formatting["endWithNewLine"] = false
-	}
-
-	// check nested or flattend keys
-	if (file) {
-		const json = JSON.parse(file)
-		for (const value of Object.values(json)) {
-			if (typeof value === "object") {
-				formatting["nestedKeys"] = true
-			}
-		}
+	if (file.endsWith("\n")) {
+		endsWithNewLine = true
 	}
 
 	//check spacing
@@ -53,31 +55,12 @@ export const detectJsonFormatting = (file?: string): DetectJsonFormattingApi => 
 		},
 	]
 
-	if (file) {
-		for (const { spacing, regex } of patterns) {
-			if (regex.test(file)) {
-				formatting["spacing"] = spacing
-			}
+	for (const value of patterns) {
+		if (value.regex.test(file)) {
+			spacing = value.spacing
 		}
 	}
 
-	return {
-		values: formatting,
-		serialize: (json: Record<string, unknown>) =>
-			JSON.stringify(json, undefined, formatting["spacing"]) +
-			(formatting["endWithNewLine"] ? "\n" : ""),
-	}
-}
-
-// types
-
-export type DetectJsonFormattingApi = {
-	values: FormattingValues
-	serialize: (json: Record<string, unknown>) => string
-}
-
-type FormattingValues = {
-	endWithNewLine: boolean
-	nestedKeys: boolean
-	spacing: string | number
+	return (value, replacer) =>
+		JSON.stringify(value, replacer, spacing) + (endsWithNewLine ? "\n" : "")
 }
