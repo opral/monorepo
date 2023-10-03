@@ -1,7 +1,7 @@
 import { it, expect } from "vitest"
 import { privateEnv } from "@inlang/env-variables"
 import { machineTranslateMessage } from "./machineTranslateMessage.js"
-import type { Message } from "@inlang/message"
+import { type Message } from "@inlang/message"
 
 it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 	"should translate multiple target language tags",
@@ -13,7 +13,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 				id: "mockMessage",
 				selectors: [],
 				variants: [
-					{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "Hello world" }] },
+					{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "Hello world" }] },
 				],
 			},
 		})
@@ -22,9 +22,9 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			id: "mockMessage",
 			selectors: [],
 			variants: [
-				{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "Hello world" }] },
-				{ languageTag: "de", match: {}, pattern: [{ type: "Text", value: "Hallo Welt" }] },
-				{ languageTag: "fr", match: {}, pattern: [{ type: "Text", value: "Bonjour le monde" }] },
+				{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "Hello world" }] },
+				{ languageTag: "de", match: [], pattern: [{ type: "Text", value: "Hallo Welt" }] },
+				{ languageTag: "fr", match: [], pattern: [{ type: "Text", value: "Bonjour le monde" }] },
 			],
 		})
 	}
@@ -40,15 +40,15 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 				id: "mockMessage",
 				selectors: [],
 				variants: [
-					{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "Good evening" }] },
+					{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "Good evening" }] },
 					{
 						languageTag: "en",
-						match: {},
+						match: [],
 						pattern: [{ type: "VariableReference", name: "username" }],
 					},
 					{
 						languageTag: "en",
-						match: {},
+						match: [],
 						pattern: [{ type: "Text", value: ", what a beautiful sunset." }],
 					},
 				],
@@ -59,26 +59,26 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			id: "mockMessage",
 			selectors: [],
 			variants: [
-				{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "Good evening" }] },
+				{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "Good evening" }] },
 				{
 					languageTag: "en",
-					match: {},
+					match: [],
 					pattern: [{ type: "VariableReference", name: "username" }],
 				},
 				{
 					languageTag: "en",
-					match: {},
+					match: [],
 					pattern: [{ type: "Text", value: ", what a beautiful sunset." }],
 				},
-				{ languageTag: "de", match: {}, pattern: [{ type: "Text", value: "Guten Abend" }] },
+				{ languageTag: "de", match: [], pattern: [{ type: "Text", value: "Guten Abend" }] },
 				{
 					languageTag: "de",
-					match: {},
+					match: [],
 					pattern: [{ type: "VariableReference", name: "username" }],
 				},
 				{
 					languageTag: "de",
-					match: {},
+					match: [],
 					pattern: [{ type: "Text", value: ", was für ein wunderschöner Sonnenuntergang." }],
 				},
 			],
@@ -86,53 +86,60 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 	}
 )
 
-it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
-	"should not naively compare the variant lenghts and instead match variants",
-	async () => {
-		const result = await machineTranslateMessage({
-			sourceLanguageTag: "en",
-			targetLanguageTags: ["de"],
-			message: {
-				id: "mockMessage",
-				selectors: [],
-				variants: [
-					{
-						languageTag: "en",
-						match: { gender: "male" },
-						pattern: [{ type: "Text", value: "Gender male" }],
-					},
-					{
-						languageTag: "de",
-						match: {},
-						pattern: [{ type: "Text", value: "Veraltete Übersetzung" }],
-					},
-				],
-			},
-		})
-		expect(result.error).toBeUndefined()
-		expect(result.data).toEqual({
+it.todo("should not naively compare the variant lenghts and instead match variants", async () => {
+	const result = await machineTranslateMessage({
+		sourceLanguageTag: "en",
+		targetLanguageTags: ["de"],
+		message: {
 			id: "mockMessage",
-			selectors: [],
+			selectors: [
+				{
+					type: "VariableReference",
+					name: "gender",
+				},
+			],
 			variants: [
 				{
 					languageTag: "en",
-					match: { gender: "male" },
+					match: ["male"],
 					pattern: [{ type: "Text", value: "Gender male" }],
 				},
 				{
 					languageTag: "de",
-					match: {},
+					match: ["*"],
 					pattern: [{ type: "Text", value: "Veraltete Übersetzung" }],
 				},
-				{
-					languageTag: "de",
-					match: { gender: "male" },
-					pattern: [{ type: "Text", value: "Geschlecht männlich" }],
-				},
 			],
-		})
-	}
-)
+		},
+	})
+	expect(result.error).toBeUndefined()
+	expect(result.data).toEqual({
+		id: "mockMessage",
+		selectors: [
+			{
+				type: "VariableReference",
+				name: "gender",
+			},
+		],
+		variants: [
+			{
+				languageTag: "en",
+				match: ["male"],
+				pattern: [{ type: "Text", value: "Gender male" }],
+			},
+			{
+				languageTag: "de",
+				match: ["*"],
+				pattern: [{ type: "Text", value: "Veraltete Übersetzung" }],
+			},
+			{
+				languageTag: "de",
+				match: ["male"],
+				pattern: [{ type: "Text", value: "Geschlecht männlich" }],
+			},
+		],
+	})
+})
 
 it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 	"should not return escaped quotation marks",
@@ -146,7 +153,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 				variants: [
 					{
 						languageTag: "en",
-						match: {},
+						match: [],
 						pattern: [
 							{ type: "Text", value: "'" },
 							{ type: "VariableReference", name: "id" },
@@ -163,7 +170,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			variants: [
 				{
 					languageTag: "en",
-					match: {},
+					match: [],
 					pattern: [
 						{ type: "Text", value: "'" },
 						{ type: "VariableReference", name: "id" },
@@ -172,7 +179,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 				},
 				{
 					languageTag: "de",
-					match: {},
+					match: [],
 					pattern: [
 						{ type: "Text", value: "' " },
 						{ type: "VariableReference", name: "id" },

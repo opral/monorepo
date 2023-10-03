@@ -1,5 +1,16 @@
 # @inlang/plugin-json
 
+## 4.5.0
+
+### Minor Changes
+
+- b7dfc781e: change message format match from object to array
+
+### Patch Changes
+
+- Updated dependencies [b7dfc781e]
+  - @inlang/sdk@0.8.0
+
 ## 4.4.0
 
 ### Minor Changes

@@ -13,7 +13,7 @@ test("should create a simple message", () => {
 		  "variants": [
 		    {
 		      "languageTag": "de",
-		      "match": {},
+		      "match": [],
 		      "pattern": [
 		        {
 		          "type": "Text",
@@ -42,7 +42,7 @@ test("should create a message with pattern", () => {
 			  "variants": [
 			    {
 			      "languageTag": "en",
-			      "match": {},
+			      "match": [],
 			      "pattern": [
 			        {
 			          "type": "Text",
@@ -76,7 +76,7 @@ test("should create a message with a pattern", () => {
 			  "variants": [
 			    {
 			      "languageTag": "en",
-			      "match": {},
+			      "match": [],
 			      "pattern": [
 			        {
 			          "type": "Text",
@@ -86,7 +86,7 @@ test("should create a message with a pattern", () => {
 			    },
 			    {
 			      "languageTag": "de",
-			      "match": {},
+			      "match": [],
 			      "pattern": [
 			        {
 			          "type": "Text",

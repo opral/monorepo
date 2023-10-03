@@ -113,8 +113,7 @@ export const loadProject = async (args: {
 
 			makeTrulyAsync(
 				_resolvedModules.resolvedPluginApi.loadMessages({
-					languageTags: settingsValue!.languageTags,
-					sourceLanguageTag: settingsValue!.sourceLanguageTag,
+					settings: settingsValue,
 				})
 			)
 				.then((messages) => {
@@ -174,7 +173,10 @@ export const loadProject = async (args: {
 				500,
 				async (newMessages) => {
 					try {
-						await resolvedModules()?.resolvedPluginApi.saveMessages({ messages: newMessages })
+						await resolvedModules()?.resolvedPluginApi.saveMessages({
+							settings: settingsValue,
+							messages: newMessages,
+						})
 					} catch (err) {
 						throw new PluginSaveMessagesError("Error in saving messages", {
 							cause: err,

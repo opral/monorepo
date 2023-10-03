@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.8.0
+
+### Minor Changes
+
+- b7dfc781e: change message format match from object to array
+
 ## 1.7.0
 
 ### Minor Changes
