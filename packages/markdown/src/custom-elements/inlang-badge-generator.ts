@@ -115,7 +115,7 @@ export class InlangBadgeGenerator extends LitElement {
 	private _generateBadge() {
 		const value = this._input.value
 
-		if (!value.includes("github")) return
+		if (!value.includes("github") || value.length < 20) return
 
 		this.loading = true
 
@@ -136,7 +136,7 @@ export class InlangBadgeGenerator extends LitElement {
 	private checkForError() {
 		const value = this._input.value
 
-		if (!value.includes("github") && value !== "") {
+		if ((!value.includes("github") && value !== "") || (value.length < 20 && value !== "")) {
 			this.error = true
 			return
 		} else if (this.error) {
@@ -189,6 +189,7 @@ export class InlangBadgeGenerator extends LitElement {
 					: ""}
 				<div class="options">
 					<input
+						${this.loading ? "disabled" : ""}
 						@change=${() => this.checkForError()}
 						@keydown=${(e: KeyboardEvent) => {
 							if (e.key === "Enter") {
