@@ -179,7 +179,7 @@ export class InlangBadgeGenerator extends LitElement {
 					: ""}
 				${this.badgeURL === ""
 					? html`<div class="empty-card">
-							<img width="56px" src="http://localhost:3000/favicon/safari-pinned-tab.svg" />
+							<img width="56px" src="http://inlang.com/favicon/safari-pinned-tab.svg" />
 					  </div>`
 					: html`<img src=${this.badgeURL} />`}
 			</div>
