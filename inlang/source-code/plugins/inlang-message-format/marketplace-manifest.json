@@ -9,11 +9,11 @@
 		"en": "inlang message format"
 	},
 	"description": {
-		"en": "Stores messages in the inlang message format"
+		"en": "The simplest storage plugin for inlang."
 	},
 	"keywords": [],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0",
-	"module": "https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/dist/index.js"
+	"module": "https://cdn.jsdelivr.net/npm/plugin.inlang.message-format@latest/dist/index.js"
 }
