@@ -8,7 +8,7 @@ import type { Pattern } from "@inlang/sdk"
  *  >> compiled === "`Hello ${params.name}`"
  */
 export const compilePattern = (
-	pattern: Pattern,
+	pattern: Pattern
 ): {
 	params: Record<string, "NonNullable<unknown>">
 	compiled: string
