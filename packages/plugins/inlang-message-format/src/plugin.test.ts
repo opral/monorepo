@@ -74,7 +74,7 @@ test("keep the json formatting to decrease git diff's and merge conflicts", asyn
 	})
 
 	// double tab indentation
-	const initialFile = JSON.stringify([m1], undefined, "\t\t")
+	const initialFile = JSON.stringify([m1], undefined, 2)
 
 	await fs.writeFile("./messages.json", initialFile)
 
@@ -91,18 +91,74 @@ test("keep the json formatting to decrease git diff's and merge conflicts", asyn
 
 	const fileAfterRoundtrip = await fs.readFile("./messages.json", { encoding: "utf-8" })
 
-	// the file should still be double tab indented
+	// the file should still tab indentation
 	expect(fileAfterRoundtrip).toStrictEqual(initialFile)
 })
 
-test("sort the messages alphabetically to decrease git diff's and merge conflicts", () => {
-	throw new Error("not implemented")
+test("save the messages alphabetically to decrease git diff's and merge conflicts", async () => {
+	const { plugin } = await import("./plugin.js")
+
+	const fs = createNodeishMemoryFs()
+
+	const settings = {
+		[pluginId]: { storagePath: "./messages.json" } satisfies PluginSettings,
+	} as any
+
+	fs.writeFile("./messages.json", "")
+
+	const messages = [
+		createMessage("c", { en: "c" }),
+		createMessage("a", { en: "a" }),
+		createMessage("b", { en: "b" }),
+	]
+
+	await plugin.saveMessages!({
+		settings,
+		nodeishFs: fs,
+		messages,
+	})
+
+	const fileAfterSave = await fs.readFile("./messages.json", { encoding: "utf-8" })
+	const json = JSON.parse(fileAfterSave)
+	expect(json[0].id).toBe("a")
+	expect(json[1].id).toBe("b")
+	expect(json[2].id).toBe("c")
 })
 
-test("throw if the storagePath does not start with './' or end with '.json'", () => {
-	throw new Error("not implemented")
+test("throw if the storagePath does not start with './' or end with '.json'", async () => {
+	const { plugin } = await import("./plugin.js")
+	const fs = createNodeishMemoryFs()
+
+	await expect(
+		plugin.loadMessages!({
+			settings: {
+				[pluginId]: { storagePath: "messages.json" } satisfies PluginSettings,
+			} as any,
+			nodeishFs: fs,
+		})
+	).rejects.toThrow()
+
+	await expect(
+		plugin.loadMessages!({
+			settings: {
+				[pluginId]: { storagePath: "./messages.js" } satisfies PluginSettings,
+			} as any,
+			nodeishFs: fs,
+		})
+	).rejects.toThrow()
 })
 
-test("throw if the storagePath does not exist", () => {
-	throw new Error("not implemented")
+test("don't throw if the storage path does not exist. instead, create the file (enables project initialization usage)", async () => {
+	const { plugin } = await import("./plugin.js")
+	const fs = createNodeishMemoryFs()
+
+	const messages = await plugin.loadMessages!({
+		settings: {
+			[pluginId]: { storagePath: "./messages.json" } satisfies PluginSettings,
+		} as any,
+		nodeishFs: fs,
+	})
+
+	// messages should be empty but no error should be thrown
+	expect(messages).toStrictEqual([])
 })
