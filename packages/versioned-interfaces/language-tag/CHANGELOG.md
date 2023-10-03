@@ -1,5 +1,11 @@
 # @inlang/language-tag
 
+## 1.2.0
+
+### Minor Changes
+
+- b3a55c883: add regex for language tag validation
+
 ## 1.1.1
 
 ### Patch Changes
