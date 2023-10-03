@@ -46,7 +46,7 @@ export function Root(props: {
 			sk: JSON.parse(sk),
 			pt_BR: JSON.parse(pt_BR),
 		},
-		"en",
+		"en"
 	)
 
 	return (

@@ -145,7 +145,7 @@ var $e = ze((S, w) => {
 				N.call(g)
 					.replace(ht, "\\$&")
 					.replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, "$1.*?") +
-				"$",
+				"$"
 		),
 		j = pe ? A.Buffer : void 0,
 		ee = A.Symbol,
@@ -381,7 +381,7 @@ var $e = ze((S, w) => {
 						o === void 0 && (o = a), L(e, s, o)
 					}
 				},
-				xe,
+				xe
 			)
 	}
 	function sn(e, t, n, r, i, a, s) {
@@ -581,7 +581,7 @@ var $e = ze((S, w) => {
 	var J = ae(
 			(function () {
 				return arguments
-			})(),
+			})()
 		)
 			? ae
 			: function (e) {
@@ -646,15 +646,15 @@ function z(e) {
 function Y(e) {
 	if (e.pathPattern === void 0)
 		throw new Error(
-			"The pathPattern setting must be defined and include the {language} placeholder. An example would be './resources/{language}.json'.",
+			"The pathPattern setting must be defined and include the {language} placeholder. An example would be './resources/{language}.json'."
 		)
 	if (e.pathPattern.includes("{language}") === !1)
 		throw new Error(
-			"The pathPattern setting must be defined and include the {language} placeholder. An example would be './resources/{language}.json'.",
+			"The pathPattern setting must be defined and include the {language} placeholder. An example would be './resources/{language}.json'."
 		)
 	if (e.pathPattern.endsWith(".json") === !1)
 		throw new Error(
-			"The pathPattern setting must end with '.json'. An example would be './resources/{language}.json'.",
+			"The pathPattern setting must end with '.json'. An example would be './resources/{language}.json'."
 		)
 }
 var je = De($e(), 1),

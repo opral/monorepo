@@ -1,8 +1,13 @@
+
 [BCP-47 language tags](https://en.wikipedia.org/wiki/IETF_language_tag) types and validators.
 
 > Always bear in mind that the golden rule is to keep your language tag as short as possible. Only add further subtags to your language tag if they are needed to distinguish the language from something else in the context where your content is used.
 
-## Language tags
+## What is a language tag?
+
+A language tag is a code that represents a language. It is used to identify the language of a text or other content. Language tags are defined by the [IETF](https://en.wikipedia.org/wiki/IETF_language_tag) in [BCP-47](https://www.rfc-editor.org/info/bcp47).
+
+## Validation
 
 Further information on choosing the language tag for your content can be found in the [W3C article on choosing language tags](https://www.w3.org/International/questions/qa-choosing-language-tags).
 
@@ -30,3 +35,29 @@ Further information on choosing the language tag for your content can be found i
 )$/;
 ```
 
+## How to use
+
+Use this library to validate language tags in your application.
+
+You can import the types to validate language tags in your application:
+
+```ts
+import { LanguageTag } from "@inlang/language-tag"
+
+
+myLanguageTag = exampleTag as LanguageTag
+```
+
+## Install
+
+You can install the @inlang/cli with this command:
+
+```sh
+npm install @inlang/language-tag
+```
+
+or
+
+```sh
+yarn add @inlang/language-tag
+```

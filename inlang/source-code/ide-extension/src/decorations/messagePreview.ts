@@ -72,9 +72,9 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 					// VSCode starts to count lines and columns from zero
 					new vscode.Position(
 						message.position.start.line - 1,
-						message.position.start.character - 1,
+						message.position.start.character - 1
 					),
-					new vscode.Position(message.position.end.line - 1, message.position.end.character - 1),
+					new vscode.Position(message.position.end.line - 1, message.position.end.character - 1)
 				)
 				const decoration: vscode.DecorationOptions = {
 					range,
@@ -106,7 +106,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 	vscode.window.onDidChangeActiveTextEditor(
 		() => updateDecorations(),
 		undefined,
-		args.context.subscriptions,
+		args.context.subscriptions
 	)
 
 	// update decorations when the text changes in a document
@@ -117,7 +117,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 			}
 		},
 		undefined,
-		args.context.subscriptions,
+		args.context.subscriptions
 	)
 
 	// update decorations, when message was edited / extracted

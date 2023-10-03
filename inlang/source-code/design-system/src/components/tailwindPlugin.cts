@@ -62,7 +62,7 @@ type ParsedConfig = {
 	 * ```
 	 */
 	borderRadius: (
-		size: "sm" | "DEFAULT" | "lg",
+		size: "sm" | "DEFAULT" | "lg"
 	) => (typeof tailwindThemeTokens)["borderRadius"][number]
 }
 
@@ -103,7 +103,7 @@ function mapBorderRadius(args: {
 		return "full"
 	}
 	const indexOfBase = tailwindThemeTokens["borderRadius"].findIndex(
-		(value) => value === args.config.borderRadius,
+		(value) => value === args.config.borderRadius
 	)
 	switch (args.size) {
 		case "sm":

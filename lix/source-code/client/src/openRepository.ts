@@ -26,7 +26,7 @@ export async function openRepository(
 		workingDirectory?: string
 		corsProxy?: string
 		auth?: unknown // unimplemented
-	},
+	}
 ): Promise<Repository> {
 	const rawFs = args.nodeishFs
 
@@ -38,7 +38,7 @@ export async function openRepository(
 	// check if all 3 parts are present, if not, return an error
 	if (!host || !owner || !repoName) {
 		throw new Error(
-			`Invalid url format for '${url}' for cloning repository, please use the format of github.com/inlang/example.`,
+			`Invalid url format for '${url}' for cloning repository, please use the format of github.com/inlang/example.`
 		)
 	}
 	if (args.auth) {

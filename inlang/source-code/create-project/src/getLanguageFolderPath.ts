@@ -20,7 +20,7 @@ export const getLanguageFolderPath = async (args: {
 	try {
 		const searchForLanguageFolder = async (
 			dir: string,
-			ignoredPaths: string[],
+			ignoredPaths: string[]
 		): Promise<string | undefined> => {
 			const files = await args.nodeishFs.readdir(dir)
 

@@ -7,7 +7,7 @@ export const promptToReloadWindow = () => {
 	vscode.window
 		.showInformationMessage(
 			`To apply changes to the inlang configuration, please reload the window.`,
-			action,
+			action
 		)
 		.then((selectedAction) => {
 			if (selectedAction === action) {

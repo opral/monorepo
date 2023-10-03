@@ -4,6 +4,7 @@ import { useLocalStorage } from "#src/services/local-storage/index.js"
 export type TourStepId =
 	| "github-login"
 	| "fork-repository"
+	| "missing-lint-rules"
 	| "missing-translation-rule"
 	| "textfield"
 
@@ -31,6 +32,9 @@ export const TourHintWrapper = (props: TourHintWrapperProps) => {
 				</Show>
 				<Show when={props.currentId === "fork-repository"}>
 					<ForkRepository />
+				</Show>
+				<Show when={props.currentId === "missing-lint-rules"}>
+					<MissingLintRules />
 				</Show>
 				<Show when={props.currentId === "missing-translation-rule"}>
 					<MissingTranslationRule />
@@ -134,8 +138,8 @@ const GithubLogin = () => {
 				/>
 			</div>
 			<div class="pt-2 pb-1 px-1 flex flex-col gap-1">
-				<p class="text-sm font-medium text-info-on-inverted-container">Github login</p>
-				<p>Login to Github to commit and push.</p>
+				<p class="text-sm font-medium text-info-on-inverted-container">GitHub login</p>
+				<p>Login to GitHub to commit and push.</p>
 				<p
 					onClick={() => setLocalStorage("isFirstUse", false)}
 					class="cursor-pointer pt-2 text-primary-on-inverted-container"
@@ -168,6 +172,28 @@ const ForkRepository = () => {
 				>
 					Stay in preview
 				</p>
+			</div>
+		</div>
+	)
+}
+
+const MissingLintRules = () => {
+	return (
+		<div class="w-full flex flex-col gap-2">
+			<div class="w-full overflow-hidden">
+				<img
+					class="rounded"
+					width="100%"
+					src="/images/TourGuideSVGs/missing-lint-rules.svg"
+					alt="missing-message-rule"
+				/>
+			</div>
+			<div class="pt-2 pb-1 px-1 flex flex-col gap-1">
+				<p class="text-sm font-medium text-info-on-inverted-container">
+					<span class="text-primary-on-inverted-container">Add</span> lint rules to see what’s
+					missing
+				</p>
+				<p>Go to the inlang marketplace and add lint rules.</p>
 			</div>
 		</div>
 	)

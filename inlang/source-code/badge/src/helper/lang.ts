@@ -22,7 +22,7 @@ export const parseAcceptLanguageHeader = (acceptLanguageHeader: string): Languag
 }
 
 export const getPreferredLanguage = (
-	languagePriorities: LanguagePriority[],
+	languagePriorities: LanguagePriority[]
 ): string | undefined => {
 	let preferredLanguage: string | undefined
 	let highestPriority = 0

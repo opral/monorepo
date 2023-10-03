@@ -5,7 +5,7 @@ test("should create a simple message", () => {
 	expect(
 		createMessage("welcome", {
 			de: "Hallo inlang",
-		}),
+		})
 	).toMatchInlineSnapshot(`
 		{
 		  "id": "welcome",
@@ -13,7 +13,7 @@ test("should create a simple message", () => {
 		  "variants": [
 		    {
 		      "languageTag": "de",
-		      "match": {},
+		      "match": [],
 		      "pattern": [
 		        {
 		          "type": "Text",
@@ -34,7 +34,7 @@ test("should create a message with pattern", () => {
 				{ type: "VariableReference", name: "name" },
 				{ type: "Text", value: '"' },
 			],
-		}),
+		})
 	).toMatchInlineSnapshot(`
 			{
 			  "id": "greeting",
@@ -42,7 +42,7 @@ test("should create a message with pattern", () => {
 			  "variants": [
 			    {
 			      "languageTag": "en",
-			      "match": {},
+			      "match": [],
 			      "pattern": [
 			        {
 			          "type": "Text",
@@ -68,7 +68,7 @@ test("should create a message with a pattern", () => {
 		createMessage("welcome", {
 			en: "hello inlang",
 			de: [{ type: "Text", value: "Hallo inlang" }],
-		}),
+		})
 	).toMatchInlineSnapshot(`
 			{
 			  "id": "welcome",
@@ -76,7 +76,7 @@ test("should create a message with a pattern", () => {
 			  "variants": [
 			    {
 			      "languageTag": "en",
-			      "match": {},
+			      "match": [],
 			      "pattern": [
 			        {
 			          "type": "Text",
@@ -86,7 +86,7 @@ test("should create a message with a pattern", () => {
 			    },
 			    {
 			      "languageTag": "de",
-			      "match": {},
+			      "match": [],
 			      "pattern": [
 			        {
 			          "type": "Text",

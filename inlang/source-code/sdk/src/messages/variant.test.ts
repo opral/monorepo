@@ -15,7 +15,7 @@ describe("getVariant", () => {
 		const variant = getVariant(mockMessage, {
 			where: {
 				languageTag: "en",
-				selectors: { gender: "female", guestOther: "1" },
+				match: ["female", "1"],
 			},
 		})
 
@@ -31,7 +31,7 @@ describe("getVariant", () => {
 		const variant = getVariant(mockMessage, {
 			where: {
 				languageTag: "en",
-				selectors: { gender: "female", guestOther: "0" },
+				match: ["female", "0"],
 			},
 		})
 		expect(variant?.pattern[0]).toStrictEqual({
@@ -40,7 +40,7 @@ describe("getVariant", () => {
 		})
 	})
 
-	test("it should return undefined (but never throw an error) if selectors is an empty array", () => {
+	test("it should not throw error if selector is empty and match", () => {
 		const mockMessage: Message = {
 			id: "mockMessage",
 			selectors: [],
@@ -48,21 +48,45 @@ describe("getVariant", () => {
 				{
 					languageTag: "en",
 					pattern: [{ type: "Text", value: "Gender male" }],
-					match: {
-						gender: "male",
-					},
+					match: [],
 				},
 				{
 					languageTag: "de",
 					pattern: [{ type: "Text", value: "Veraltete Übersetzung" }],
-					match: {},
+					match: [],
+				},
+			],
+		}
+		const variant = getVariant(mockMessage, {
+			where: {
+				languageTag: "en",
+				match: [],
+			},
+		})
+		expect(variant).toBeDefined()
+	})
+
+	test("it should not throw error if selector is empty, return undefined", () => {
+		const mockMessage: Message = {
+			id: "mockMessage",
+			selectors: [],
+			variants: [
+				{
+					languageTag: "en",
+					pattern: [{ type: "Text", value: "Gender male" }],
+					match: ["male", "*"],
+				},
+				{
+					languageTag: "de",
+					pattern: [{ type: "Text", value: "Veraltete Übersetzung" }],
+					match: ["*", "*"],
 				},
 			],
 		}
 		const variant = getVariant(mockMessage, {
 			where: {
 				languageTag: "fr",
-				selectors: {},
+				match: ["*", "*"],
 			},
 		})
 		expect(variant).toBeUndefined()
@@ -74,7 +98,7 @@ describe("getVariant", () => {
 		const variant = getVariant(mockMessage, {
 			where: {
 				languageTag: "en",
-				selectors: { guestOther: "0" },
+				match: ["*", "0"],
 			},
 		})
 		expect(variant?.pattern[0]).toStrictEqual({
@@ -89,7 +113,7 @@ describe("getVariant", () => {
 		const variant = getVariant(mockMessage, {
 			where: {
 				languageTag: "en",
-				selectors: {},
+				match: ["*", "*"],
 			},
 		})
 		expect(variant?.pattern[0]).toStrictEqual({
@@ -104,7 +128,7 @@ describe("getVariant", () => {
 		const variant = getVariant(mockMessage, {
 			where: {
 				languageTag: "en",
-				selectors: { gender: "trans", guestOther: "2" },
+				match: ["trans", "2"],
 			},
 		})
 		expect(variant?.pattern[0]).toStrictEqual({
@@ -115,7 +139,7 @@ describe("getVariant", () => {
 		const variant2 = getVariant(mockMessage, {
 			where: {
 				languageTag: "en",
-				selectors: { gender: "male", guestOther: "8" },
+				match: ["male", "8"],
 			},
 		})
 		expect(variant2?.pattern[0]).toStrictEqual({
@@ -128,14 +152,14 @@ describe("getVariant", () => {
 		const mockMessage: Message = getMockMessage()
 		mockMessage.variants = [
 			...mockMessage.variants!.filter(
-				(v) => v.languageTag === "en" && (v.match.gender !== "*" || v.match.guestOther !== "*"),
+				(v) => v.languageTag === "en" && (v.match[0] !== "*" || v.match[1] !== "*")
 			),
 		]
 
 		const variant = getVariant(mockMessage, {
 			where: {
 				languageTag: "en",
-				selectors: {},
+				match: ["*", "*"],
 			},
 		})
 		expect(variant).toBeUndefined()
@@ -147,18 +171,19 @@ describe("getVariant", () => {
 		const variant = getVariant(mockMessage, {
 			where: {
 				languageTag: "de",
-				selectors: { gender: "female", guestOther: "1" },
+				match: ["female", "1"],
 			},
 		})
 		expect(variant).toBeUndefined()
 	})
 
-	test("should return the catch all variant if no selector defined", () => {
+	test("should return undefined variant if no selector defined", () => {
 		const mockMessage: Message = {} as any
+		mockMessage.selectors = []
 		mockMessage.variants = [
 			{
 				languageTag: "en",
-				match: {},
+				match: ["*", "*"],
 				pattern: [
 					{
 						type: "Text",
@@ -171,13 +196,52 @@ describe("getVariant", () => {
 		const variant = getVariant(mockMessage, {
 			where: {
 				languageTag: "en",
-				selectors: {},
+				match: ["*", "*"],
 			},
 		})
-		// should return the female variant
-		expect(variant?.pattern[0]).toStrictEqual({
+		// should return undefined
+		expect(variant).toBeUndefined()
+	})
+
+	test("should match catch all if the number of matches and selectors do not match", () => {
+		const mockMessage: Message = getMockMessage()
+
+		const variant1 = getVariant(mockMessage, {
+			where: {
+				languageTag: "en",
+				match: ["12"],
+			},
+		})
+
+		// should return catch all
+		expect(variant1?.pattern[0]).toStrictEqual({
 			type: "Text",
-			value: "test",
+			value: "{$hostName} invites {$guestName} and {$guestsOther} other people to their party.",
+		})
+
+		const variant2 = getVariant(mockMessage, {
+			where: {
+				languageTag: "en",
+				match: ["12", "*", "23"],
+			},
+		})
+
+		// should return catch all
+		expect(variant2?.pattern[0]).toStrictEqual({
+			type: "Text",
+			value: "{$hostName} invites {$guestName} and {$guestsOther} other people to their party.",
+		})
+		const variant3 = getVariant(mockMessage, {
+			where: {
+				languageTag: "en",
+				match: [],
+			},
+		})
+
+		// should return catch all
+		expect(variant3?.pattern[0]).toStrictEqual({
+			type: "Text",
+			value: "{$hostName} invites {$guestName} and {$guestsOther} other people to their party.",
 		})
 	})
 })
@@ -188,7 +252,7 @@ describe("createVariant", () => {
 
 		const newVariant: Variant = {
 			languageTag: "en",
-			match: { gender: "female", guestOther: "0" },
+			match: ["female", "0"],
 			pattern: [],
 		}
 		const message = createVariant(mockMessage, {
@@ -197,8 +261,8 @@ describe("createVariant", () => {
 		// should return the female variant
 		expect(
 			message.data!.variants.find(
-				(v) => v.languageTag === "en" && v.match.gender === "female" && v.match.guestOther === "0",
-			)?.pattern,
+				(v) => v.languageTag === "en" && v.match[0] === "female" && v.match[1] === "0"
+			)?.pattern
 		).toStrictEqual([])
 	})
 
@@ -206,22 +270,22 @@ describe("createVariant", () => {
 		const mockMessage: Message = getMockMessage()
 		mockMessage.variants = [
 			...mockMessage.variants!.filter(
-				(v) => v.languageTag === "en" && (v.match.gender !== "*" || v.match.guestOther !== "*"),
+				(v) => v.languageTag === "en" && (v.match[0] !== "*" || v.match[1] !== "*")
 			),
 		]
 
 		const message = createVariant(mockMessage, {
 			data: {
 				languageTag: "en",
-				match: {},
+				match: ["*", "*"],
 				pattern: [],
 			},
 		})
 		// should return the female variant
 		expect(
 			message.data!.variants.find(
-				(v) => v.languageTag === "en" && v.match.gender === "*" && v.match.guestOther === "*",
-			)?.pattern,
+				(v) => v.languageTag === "en" && v.match[0] === "*" && v.match[1] === "*"
+			)?.pattern
 		).toStrictEqual([])
 	})
 
@@ -231,7 +295,7 @@ describe("createVariant", () => {
 		const variant = createVariant(mockMessage, {
 			data: {
 				languageTag: "en",
-				match: { gender: "male", guestOther: "1" },
+				match: ["male", "1"],
 				pattern: [],
 			},
 		})
@@ -246,7 +310,7 @@ describe("createVariant", () => {
 		const variant = createVariant(mockMessage, {
 			data: {
 				languageTag: "de",
-				match: { gender: "female", guestOther: "1" },
+				match: ["female", "1"],
 				pattern: [],
 			},
 		})
@@ -263,15 +327,15 @@ describe("updateVariant", () => {
 		const message = updateVariantPattern(mockMessage, {
 			where: {
 				languageTag: "en",
-				selectors: { gender: "female", guestOther: "1" },
+				match: ["female", "1"],
 			},
 			data: [],
 		})
 		// should return the female variant
 		expect(
 			message.data!.variants.find(
-				(v) => v.languageTag === "en" && v.match.gender === "female" && v.match.guestOther === "1",
-			)?.pattern,
+				(v) => v.languageTag === "en" && v.match[0] === "female" && v.match[1] === "1"
+			)?.pattern
 		).toStrictEqual([])
 	})
 
@@ -281,15 +345,15 @@ describe("updateVariant", () => {
 		const message = updateVariantPattern(mockMessage, {
 			where: {
 				languageTag: "en",
-				selectors: {},
+				match: ["*", "*"],
 			},
 			data: [],
 		})
 		// should return the female variant
 		expect(
 			message.data!.variants.find(
-				(v) => v.languageTag === "en" && v.match.gender === "*" && v.match.guestOther === "*",
-			)?.pattern,
+				(v) => v.languageTag === "en" && v.match[0] === "*" && v.match[1] === "*"
+			)?.pattern
 		).toStrictEqual([])
 	})
 
@@ -298,14 +362,14 @@ describe("updateVariant", () => {
 
 		mockMessage.variants = [
 			...mockMessage.variants!.filter(
-				(v) => v.languageTag === "en" && (v.match.gender !== "*" || v.match.guestOther !== "*"),
+				(v) => v.languageTag === "en" && (v.match[0] !== "*" || v.match[1] !== "*")
 			),
 		]
 
 		const variant = updateVariantPattern(mockMessage, {
 			where: {
 				languageTag: "en",
-				selectors: {},
+				match: ["*", "*"],
 			},
 			data: [],
 		})
@@ -320,7 +384,7 @@ describe("updateVariant", () => {
 		const variant = updateVariantPattern(mockMessage, {
 			where: {
 				languageTag: "de",
-				selectors: {},
+				match: ["*", "*"],
 			},
 			data: [],
 		})
@@ -340,7 +404,7 @@ const getMockMessage = (): Message => {
 		variants: [
 			{
 				languageTag: "en",
-				match: { gender: "female", guestOther: "1" },
+				match: ["female", "1"],
 				pattern: [
 					{
 						type: "Text",
@@ -350,7 +414,7 @@ const getMockMessage = (): Message => {
 			},
 			{
 				languageTag: "en",
-				match: { gender: "female", guestOther: "2" },
+				match: ["female", "2"],
 				pattern: [
 					{
 						type: "Text",
@@ -360,7 +424,7 @@ const getMockMessage = (): Message => {
 			},
 			{
 				languageTag: "en",
-				match: { gender: "female", guestOther: "*" },
+				match: ["female", "*"],
 				pattern: [
 					{
 						type: "Text",
@@ -370,7 +434,7 @@ const getMockMessage = (): Message => {
 			},
 			{
 				languageTag: "en",
-				match: { gender: "male", guestOther: "1" },
+				match: ["male", "1"],
 				pattern: [
 					{
 						type: "Text",
@@ -380,7 +444,7 @@ const getMockMessage = (): Message => {
 			},
 			{
 				languageTag: "en",
-				match: { gender: "male", guestOther: "2" },
+				match: ["male", "2"],
 				pattern: [
 					{
 						type: "Text",
@@ -390,7 +454,7 @@ const getMockMessage = (): Message => {
 			},
 			{
 				languageTag: "en",
-				match: { gender: "male", guestOther: "*" },
+				match: ["male", "*"],
 				pattern: [
 					{
 						type: "Text",
@@ -400,7 +464,7 @@ const getMockMessage = (): Message => {
 			},
 			{
 				languageTag: "en",
-				match: { gender: "*", guestOther: "0" },
+				match: ["*", "0"],
 				pattern: [
 					{
 						type: "Text",
@@ -410,7 +474,7 @@ const getMockMessage = (): Message => {
 			},
 			{
 				languageTag: "en",
-				match: { gender: "*", guestOther: "1" },
+				match: ["*", "1"],
 				pattern: [
 					{
 						type: "Text",
@@ -420,7 +484,7 @@ const getMockMessage = (): Message => {
 			},
 			{
 				languageTag: "en",
-				match: { gender: "*", guestOther: "2" },
+				match: ["*", "2"],
 				pattern: [
 					{
 						type: "Text",
@@ -430,7 +494,7 @@ const getMockMessage = (): Message => {
 			},
 			{
 				languageTag: "en",
-				match: { gender: "*", guestOther: "*" },
+				match: ["*", "*"],
 				pattern: [
 					{
 						type: "Text",

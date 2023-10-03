@@ -7,7 +7,7 @@ import type { NodeishFilesystem } from "@lix-js/fs"
 export const withLazyFetching = (
 	targetRoot: NodeishFilesystem,
 	_module: string,
-	fn?: (args: { prop: keyof typeof targetRoot; execute: () => any }) => any,
+	fn?: (args: { prop: keyof typeof targetRoot; execute: () => any }) => any
 ): NodeishFilesystem => {
 	return new Proxy(targetRoot, {
 		get(getTarget: typeof targetRoot, prop, receiver) {

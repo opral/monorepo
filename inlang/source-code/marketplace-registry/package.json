@@ -22,8 +22,9 @@
 		"node": ">=16.15.0"
 	},
 	"dependencies": {
+		"@inlang/marketplace-manifest": "*",
 		"@sinclair/typebox": "0.31.8",
-		"@inlang/marketplace-manifest": "*"
+		"node-fetch": "3.3.2"
 	},
 	"devDependencies": {
 		"typescript": "5.2.2"

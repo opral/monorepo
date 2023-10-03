@@ -433,7 +433,7 @@ function LanguagePicker() {
 			{},
 			"",
 			(language.code !== defaultLanguage ? "/" + language.code : "") +
-				extractLocale(currentPageContext.urlParsed.pathname).urlWithoutLocale,
+				extractLocale(currentPageContext.urlParsed.pathname).urlWithoutLocale
 		)
 		locale(language.code)
 	}

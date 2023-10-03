@@ -38,7 +38,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 				new ModuleImportError(`Couldn't import the plugin "${module}"`, {
 					module: module,
 					cause: importedModule.error as Error,
-				}),
+				})
 			)
 			continue
 		}
@@ -48,7 +48,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 			moduleErrors.push(
 				new ModuleHasNoExportsError(`Module "${module}" has no exports.`, {
 					module: module,
-				}),
+				})
 			)
 			continue
 		}
@@ -57,12 +57,12 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 
 		if (isValidModule === false) {
 			const errors = [...ModuleCompiler.Errors(importedModule.data)].map(
-				(e) => `${e.path} ${e.message}`,
+				(e) => `${e.path} ${e.message}`
 			)
 			moduleErrors.push(
 				new ModuleExportIsInvalidError(`Module "${module}" is invalid: ` + errors.join("\n"), {
 					module: module,
-				}),
+				})
 			)
 			continue
 		}

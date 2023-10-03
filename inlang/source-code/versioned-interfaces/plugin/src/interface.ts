@@ -1,10 +1,10 @@
-import type { LanguageTag } from "@inlang/language-tag"
 import { type Static, Type, type TTemplateLiteral, type TLiteral } from "@sinclair/typebox"
 import type { NodeishFilesystem as LisaNodeishFilesystem } from "@lix-js/fs"
 import type { Message } from "@inlang/message"
 import type { JSONObject } from "@inlang/json-types"
 import type { CustomApiInlangIdeExtension } from "./customApis/app.inlang.ideExtension.js"
 import { Translatable } from "@inlang/translatable"
+import type { ExternalProjectSettings, ProjectSettings } from "@inlang/project-settings"
 
 /**
  * The filesystem is a subset of project lisa's nodeish filesystem.
@@ -20,23 +20,32 @@ export type NodeishFilesystemSubset = Pick<
 
 /**
  * The plugin API is used to extend inlang's functionality.
+ *
+ * You can use your own settings by extending the plugin with a generic:
+ *
+ * ```ts
+ * 	type PluginSettings = {
+ *  	storagePath: string
+ * 	}
+ *
+ * 	const plugin: Plugin<{
+ * 		"plugin.your.id": PluginSettings
+ * 	}>
+ * ```
  */
-export type Plugin<Settings extends JSONObject | unknown = unknown> = Omit<
-	Static<typeof Plugin>,
-	"loadMessages" | "saveMessages" | "addCustomApi"
-> & {
+export type Plugin<
+	ExternalSettings extends Record<keyof ExternalProjectSettings, JSONObject> | unknown = unknown
+> = Omit<Static<typeof Plugin>, "loadMessages" | "saveMessages" | "addCustomApi"> & {
 	/**
 	 * Load messages.
 	 */
 	loadMessages?: (args: {
-		languageTags: LanguageTag[]
-		sourceLanguageTag: LanguageTag
-		settings: Settings
+		settings: ProjectSettings & ExternalSettings
 		nodeishFs: NodeishFilesystemSubset
 	}) => Promise<Message[]> | Message[]
 	saveMessages?: (args: {
 		messages: Message[]
-		settings: Settings
+		settings: ProjectSettings & ExternalSettings
 		nodeishFs: NodeishFilesystemSubset
 	}) => Promise<void> | void
 	/**
@@ -50,7 +59,7 @@ export type Plugin<Settings extends JSONObject | unknown = unknown> = Omit<
 	 *  })
 	 */
 	addCustomApi?: (args: {
-		settings: Settings
+		settings: ProjectSettings & ExternalSettings
 	}) =>
 		| Record<`app.${string}.${string}`, unknown>
 		| { "app.inlang.ideExtension": CustomApiInlangIdeExtension }
@@ -72,5 +81,5 @@ export const Plugin = Type.Object(
 		detectedLanguageTags: Type.Optional(Type.Any()),
 		addCustomApi: Type.Optional(Type.Any()),
 	},
-	{ additionalProperties: false },
+	{ additionalProperties: false }
 )

@@ -8,9 +8,9 @@ const message1: Message = {
 	id: "1",
 	selectors: [],
 	variants: [
-		{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "This is Inlang" }] },
-		{ languageTag: "de", match: {}, pattern: [{ type: "Text", value: "Das ist Inlang" }] },
-		{ languageTag: "fr", match: {}, pattern: [{ type: "Text", value: "This is Inlang" }] },
+		{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "This is Inlang" }] },
+		{ languageTag: "de", match: [], pattern: [{ type: "Text", value: "Das ist Inlang" }] },
+		{ languageTag: "fr", match: [], pattern: [{ type: "Text", value: "This is Inlang" }] },
 	],
 }
 
@@ -36,7 +36,7 @@ test("should report if identical message found in another language", async () =>
 	expect(result.data[0]!.languageTag).toBe("fr")
 	expect(result.data[0]!.messageId).toBe(message1.id)
 	expect(
-		typeof result.data[0]!.body === "object" ? result.data[0]!.body.en : result.data[0]!.body,
+		typeof result.data[0]!.body === "object" ? result.data[0]!.body.en : result.data[0]!.body
 	).toContain(message1.id)
 })
 

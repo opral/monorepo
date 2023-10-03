@@ -1,10 +1,4 @@
----
-title: Manually creating a new project
-href: /documentation/manually-create-project
-description: You can manually create a new project if inlang.com/new is not working for you.
----
-
-# {% $frontmatter.title %}
+# Manually creating a new project
 
 You can manually create a new project via the CLI or by creating an inlang project file.
 

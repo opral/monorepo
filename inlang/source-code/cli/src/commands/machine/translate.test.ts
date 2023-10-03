@@ -11,7 +11,7 @@ const exampleMessages: Message[] = [
 		variants: [
 			{
 				languageTag: "en",
-				match: {},
+				match: [],
 				pattern: [
 					{
 						type: "Text",
@@ -27,7 +27,7 @@ const exampleMessages: Message[] = [
 		variants: [
 			{
 				languageTag: "en",
-				match: {},
+				match: [],
 				pattern: [
 					{
 						type: "Text",
@@ -37,7 +37,7 @@ const exampleMessages: Message[] = [
 			},
 			{
 				languageTag: "de",
-				match: {},
+				match: [],
 				pattern: [
 					{
 						type: "Text",
@@ -61,7 +61,7 @@ describe("translate command", () => {
 					sourceLanguageTag: "en",
 					languageTags: ["en", "de", "it"],
 					modules: ["./plugin.js"],
-				} satisfies ProjectSettings),
+				} satisfies ProjectSettings)
 			)
 
 			const _mockPlugin: Plugin = {
@@ -107,6 +107,6 @@ describe("translate command", () => {
 					}
 				}
 			}
-		},
+		}
 	)
 })

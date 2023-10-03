@@ -60,7 +60,7 @@ export const recommendation = async (args: {
 		const installInlangExtension = await vscode.window.showInformationMessage(
 			"The Inlang extension is recommended for this project. Do you want to add it to your recommendations?",
 			"Accept",
-			"Reject",
+			"Reject"
 		)
 
 		if (installInlangExtension === "Accept") {
@@ -77,7 +77,7 @@ export const recommendation = async (args: {
 
 			// Add the Inlang extension to the recommendations object
 			const newExtensions: ExtensionsJson = parse(
-				fs.readFileSync(extensionsJsonPath, "utf8"),
+				fs.readFileSync(extensionsJsonPath, "utf8")
 			) as any
 			newExtensions.recommendations.push("inlang.vs-code-extension")
 

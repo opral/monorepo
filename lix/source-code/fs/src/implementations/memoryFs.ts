@@ -32,7 +32,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 		writeFile: async function (
 			path: Parameters<NodeishFilesystem["writeFile"]>[0],
 			data: Parameters<NodeishFilesystem["writeFile"]>[1],
-			options?: Parameters<NodeishFilesystem["writeFile"]>[2],
+			options?: Parameters<NodeishFilesystem["writeFile"]>[2]
 		) {
 			const encoder = new TextEncoder()
 
@@ -55,7 +55,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 		//   a string or a Uint8Array based on the options.
 		readFile: async function (
 			path: Parameters<NodeishFilesystem["readFile"]>[0],
-			options?: Parameters<NodeishFilesystem["readFile"]>[1],
+			options?: Parameters<NodeishFilesystem["readFile"]>[1]
 		) {
 			const decoder = new TextDecoder()
 
@@ -79,7 +79,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 		mkdir: async function mkdir(
 			path: Parameters<NodeishFilesystem["mkdir"]>[0],
-			options: Parameters<NodeishFilesystem["mkdir"]>[1],
+			options: Parameters<NodeishFilesystem["mkdir"]>[1]
 		): Promise<string | undefined> {
 			path = normalPath(path)
 			const parentDir: Inode | undefined = fsMap.get(getDirname(path))
@@ -104,7 +104,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 		rm: async function rm(
 			path: Parameters<NodeishFilesystem["rm"]>[0],
-			options: Parameters<NodeishFilesystem["rm"]>[1],
+			options: Parameters<NodeishFilesystem["rm"]>[1]
 		) {
 			path = normalPath(path)
 			const target: Inode | undefined = fsMap.get(path)
@@ -126,7 +126,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 				await Promise.all(
 					[...target.keys()].map(async (child) => {
 						await rm(`${path}/${child}`, { recursive: true })
-					}),
+					})
 				)
 				parentDir.delete(getBasename(path))
 				fsStats.delete(path)
@@ -157,7 +157,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 		symlink: async function (
 			target: Parameters<NodeishFilesystem["symlink"]>[0],
-			path: Parameters<NodeishFilesystem["symlink"]>[1],
+			path: Parameters<NodeishFilesystem["symlink"]>[1]
 		) {
 			path = normalPath(path)
 			target = target.startsWith("/") ? target : `${path}/../${target}`
@@ -222,7 +222,7 @@ function newStatEntry(
 	stats: Map<string, NodeishStats>,
 	kind: number,
 	modeBits: number,
-	target?: string,
+	target?: string
 ) {
 	const cdateMs: number = Date.now()
 	stats.set(normalPath(path), {
@@ -248,7 +248,7 @@ function getDirname(path: string): string {
 			.split("/")
 			.filter((x) => x)
 			.slice(0, -1)
-			.join("/") ?? path,
+			.join("/") ?? path
 	)
 }
 
