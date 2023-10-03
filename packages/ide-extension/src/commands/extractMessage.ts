@@ -84,7 +84,7 @@ export const extractMessageCommand = {
 			variants: [
 				{
 					languageTag: state().project.settings()?.sourceLanguageTag as string,
-					match: {},
+					match: [],
 					pattern: [
 						{
 							type: "Text",

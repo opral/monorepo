@@ -44,7 +44,7 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 		if (hasInvalidId) {
 			result.errors.push(
 				new PluginHasInvalidIdError(
-					`Plugin ${plugin.id} has an invalid id "${plugin.id}". It must be kebap-case and contain a namespace like project.my-plugin.`,
+					`Plugin ${plugin.id} has an invalid id "${plugin.id}". It must be camelCase and contain a namespace like plugin.namespace.myPlugin.`,
 					{ plugin: plugin.id }
 				)
 			)
@@ -99,7 +99,7 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 			// TODO: why do we call this function 2 times (here for validation and later for retrieving the actual value)?
 			const { data: customApi, error } = tryCatch(() =>
 				plugin.addCustomApi!({
-					settings: args.settings?.[plugin.id] ?? {},
+					settings: args.settings,
 				})
 			)
 			if (error) {
@@ -130,7 +130,6 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 			result.data.loadMessages = (_args) =>
 				plugin.loadMessages!({
 					..._args,
-					settings: args.settings?.[plugin.id] ?? {},
 					nodeishFs: args.nodeishFs,
 				})
 		}
@@ -139,7 +138,6 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 			result.data.saveMessages = (_args) =>
 				plugin.saveMessages!({
 					..._args,
-					settings: args.settings?.[plugin.id] ?? {},
 					nodeishFs: args.nodeishFs,
 				})
 		}
@@ -147,7 +145,7 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 		if (typeof plugin.addCustomApi === "function") {
 			const { data: customApi } = tryCatch(() =>
 				plugin.addCustomApi!({
-					settings: args.settings?.[plugin.id] ?? {},
+					settings: args.settings,
 				})
 			)
 			if (customApi) {

@@ -27,7 +27,7 @@ Promise<Result<Message, string>> {
 				const targetVariant = getVariant(args.message, {
 					where: {
 						languageTag: targetLanguageTag,
-						selectors: variant.match,
+						match: variant.match,
 					},
 				})
 				if (targetVariant) {

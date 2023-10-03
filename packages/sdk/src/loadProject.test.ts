@@ -53,7 +53,7 @@ const exampleMessages: Message[] = [
 		variants: [
 			{
 				languageTag: "en",
-				match: {},
+				match: [],
 				pattern: [
 					{
 						type: "Text",
@@ -69,7 +69,7 @@ const exampleMessages: Message[] = [
 		variants: [
 			{
 				languageTag: "en",
-				match: {},
+				match: [],
 				pattern: [
 					{
 						type: "Text",
@@ -482,17 +482,16 @@ describe("functionality", () => {
 		it("should call saveMessages() on updates", async () => {
 			const fs = createNodeishMemoryFs()
 
-			await fs.writeFile(
-				"./project.inlang.json",
-				JSON.stringify({
-					sourceLanguageTag: "en",
-					languageTags: ["en", "de"],
-					modules: ["plugin.js"],
-					"plugin.project.json": {
-						pathPattern: "./resources/{languageTag}.json",
-					},
-				})
-			)
+			const settings: ProjectSettings = {
+				sourceLanguageTag: "en",
+				languageTags: ["en", "de"],
+				modules: ["plugin.js"],
+				"plugin.project.json": {
+					pathPattern: "./resources/{languageTag}.json",
+				},
+			}
+
+			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
 
 			await fs.mkdir("./resources")
 
@@ -526,7 +525,7 @@ describe("functionality", () => {
 					variants: [
 						{
 							languageTag: "en",
-							match: {},
+							match: [],
 							pattern: [
 								{
 									type: "Text",
@@ -536,7 +535,7 @@ describe("functionality", () => {
 						},
 						{
 							languageTag: "de",
-							match: {},
+							match: [],
 							pattern: [
 								{
 									type: "Text",
@@ -556,7 +555,7 @@ describe("functionality", () => {
 					variants: [
 						{
 							languageTag: "en",
-							match: {},
+							match: [],
 							pattern: [
 								{
 									type: "Text",
@@ -567,7 +566,7 @@ describe("functionality", () => {
 
 						{
 							languageTag: "de",
-							match: {},
+							match: [],
 							pattern: [
 								{
 									type: "Text",
@@ -583,9 +582,7 @@ describe("functionality", () => {
 
 			expect(mockSaveFn.mock.calls.length).toBe(1)
 
-			expect(mockSaveFn.mock.calls[0][0].settings).toStrictEqual({
-				pathPattern: "./resources/{languageTag}.json",
-			})
+			expect(mockSaveFn.mock.calls[0][0].settings).toStrictEqual(settings)
 
 			expect(Object.values(mockSaveFn.mock.calls[0][0].messages)).toStrictEqual([
 				{
@@ -594,7 +591,7 @@ describe("functionality", () => {
 					variants: [
 						{
 							languageTag: "en",
-							match: {},
+							match: [],
 							pattern: [
 								{
 									type: "Text",
@@ -604,7 +601,7 @@ describe("functionality", () => {
 						},
 						{
 							languageTag: "de",
-							match: {},
+							match: [],
 							pattern: [
 								{
 									type: "Text",
@@ -620,7 +617,7 @@ describe("functionality", () => {
 					variants: [
 						{
 							languageTag: "en",
-							match: {},
+							match: [],
 							pattern: [
 								{
 									type: "Text",
@@ -630,7 +627,7 @@ describe("functionality", () => {
 						},
 						{
 							languageTag: "de",
-							match: {},
+							match: [],
 							pattern: [
 								{
 									type: "Text",

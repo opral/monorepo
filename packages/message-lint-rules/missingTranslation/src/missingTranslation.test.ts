@@ -8,10 +8,10 @@ const message1: Message = {
 	id: "1",
 	selectors: [],
 	variants: [
-		{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "Inlang" }] },
-		{ languageTag: "de", match: {}, pattern: [{ type: "Text", value: "Inlang" }] },
-		{ languageTag: "es", match: {}, pattern: [] },
-		{ languageTag: "cn", match: {}, pattern: [{ type: "Text", value: "" }] },
+		{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "Inlang" }] },
+		{ languageTag: "de", match: [], pattern: [{ type: "Text", value: "Inlang" }] },
+		{ languageTag: "es", match: [], pattern: [] },
+		{ languageTag: "cn", match: [], pattern: [{ type: "Text", value: "" }] },
 	],
 }
 

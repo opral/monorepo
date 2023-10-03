@@ -44,7 +44,7 @@ const exampleMessages: Message[] = [
 		variants: [
 			{
 				languageTag: "en",
-				match: {},
+				match: [],
 				pattern: [
 					{
 						type: "Text",
@@ -60,7 +60,7 @@ const exampleMessages: Message[] = [
 		variants: [
 			{
 				languageTag: "en",
-				match: {},
+				match: [],
 				pattern: [
 					{
 						type: "Text",
@@ -175,7 +175,7 @@ describe("messages", () => {
 			description: {
 				en: "wo",
 			},
-			loadMessages: ({ languageTags }) => (languageTags.length ? exampleMessages : []),
+			loadMessages: ({ settings }) => (settings.languageTags.length ? exampleMessages : []),
 			saveMessages: () => undefined,
 		}
 
@@ -243,7 +243,7 @@ describe("messages", () => {
 				variants: [
 					{
 						languageTag: "en",
-						match: {},
+						match: [],
 						pattern: [
 							{
 								type: "Text",
@@ -329,7 +329,7 @@ describe("lint", () => {
 				where: { id: "a" },
 				data: {
 					...exampleMessages[0],
-					variants: [{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "new" }] }],
+					variants: [{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "new" }] }],
 				},
 			})
 
@@ -342,7 +342,7 @@ describe("lint", () => {
 				where: { id: "a" },
 				data: {
 					...exampleMessages[0],
-					variants: [{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "new" }] }],
+					variants: [{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "new" }] }],
 				},
 			})
 
