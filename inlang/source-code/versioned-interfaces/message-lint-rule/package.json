@@ -22,9 +22,10 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
+		"@inlang/json-types": "*",
 		"@inlang/language-tag": "*",
 		"@inlang/message": "*",
-		"@inlang/project-settings": "2.1.0",
+		"@inlang/project-settings": "*",
 		"@inlang/translatable": "*"
 	},
 	"peerDependencies": {

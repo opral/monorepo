@@ -175,7 +175,7 @@ describe("messages", () => {
 			description: {
 				en: "wo",
 			},
-			loadMessages: ({ languageTags }) => (languageTags.length ? exampleMessages : []),
+			loadMessages: ({ settings }) => (settings.languageTags.length ? exampleMessages : []),
 			saveMessages: () => undefined,
 		}
 
