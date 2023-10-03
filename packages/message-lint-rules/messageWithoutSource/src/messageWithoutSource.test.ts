@@ -8,8 +8,8 @@ const message1: Message = {
 	id: "1",
 	selectors: [],
 	variants: [
-		{ languageTag: "en", match: {}, pattern: [] },
-		{ languageTag: "de", match: {}, pattern: [] },
+		{ languageTag: "en", match: [], pattern: [] },
+		{ languageTag: "de", match: [], pattern: [] },
 	],
 }
 
@@ -54,6 +54,6 @@ test("should report if source message is missing", async () => {
 	expect(result.data[0]!.languageTag).toBe("it")
 	expect(result.data[0]!.messageId).toBe(message1.id)
 	expect(
-		typeof result.data[0]!.body === "object" ? result.data[0]!.body.en : result.data[0]!.body,
+		typeof result.data[0]!.body === "object" ? result.data[0]!.body.en : result.data[0]!.body
 	).toContain(message1.id)
 })

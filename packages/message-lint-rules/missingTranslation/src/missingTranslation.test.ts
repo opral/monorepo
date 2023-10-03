@@ -8,10 +8,10 @@ const message1: Message = {
 	id: "1",
 	selectors: [],
 	variants: [
-		{ languageTag: "en", match: {}, pattern: [{ type: "Text", value: "Inlang" }] },
-		{ languageTag: "de", match: {}, pattern: [{ type: "Text", value: "Inlang" }] },
-		{ languageTag: "es", match: {}, pattern: [] },
-		{ languageTag: "cn", match: {}, pattern: [{ type: "Text", value: "" }] },
+		{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "Inlang" }] },
+		{ languageTag: "de", match: [], pattern: [{ type: "Text", value: "Inlang" }] },
+		{ languageTag: "es", match: [], pattern: [] },
+		{ languageTag: "cn", match: [], pattern: [{ type: "Text", value: "" }] },
 	],
 }
 
@@ -76,7 +76,7 @@ test("should report if no variants are defined", async () => {
 	expect(result.data[0]!.languageTag).toBe("fr")
 	expect(result.data[0]!.messageId).toBe(message1.id)
 	expect(
-		typeof result.data[0]!.body === "object" ? result.data[0]!.body.en : result.data[0]!.body,
+		typeof result.data[0]!.body === "object" ? result.data[0]!.body.en : result.data[0]!.body
 	).toContain(message1.id)
 })
 

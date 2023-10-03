@@ -19,7 +19,7 @@ export async function fetchPublicEnv() {
 					accept: "application/json",
 					authorization: `Bearer ${publicServiceKey}`,
 				},
-			},
+			}
 		)
 		const data = await response.json()
 		if (data.success) {
@@ -31,14 +31,14 @@ export async function fetchPublicEnv() {
 				rootEnvFilePath,
 				Object.entries(data.secrets)
 					.map(([key, value]) => `${key}="${(value as any).raw}"`)
-					.join("\n"),
+					.join("\n")
 			)
 			const { error: errors } = validateEnvVariables({ forProduction: false })
 			if (errors === undefined) {
 				console.info("✅ Fetched public env variables remotely.")
 			} else {
 				console.warn(
-					"⚠️ Fetched public env variables remotely but some are missing or invalid. Contact the maintainers.",
+					"⚠️ Fetched public env variables remotely but some are missing or invalid. Contact the maintainers."
 				)
 				console.error(errors)
 			}

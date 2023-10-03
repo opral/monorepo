@@ -1,5 +1,23 @@
 # inlang-vs-code-extension
 
+## 1.8.0
+
+### Minor Changes
+
+- b7dfc781e: change message format match from object to array
+
+## 1.7.0
+
+### Minor Changes
+
+- 9df069d11: quickfix: vs code extension config create
+
+## 1.6.0
+
+### Minor Changes
+
+- 564a2df5: improved the wording of the automatic settings file prompt
+
 ## 1.5.0
 
 ### Minor Changes

@@ -12,7 +12,7 @@ export const showFilteredMessage = (message: Message | undefined) => {
 	const languageTagsSet = new Set(
 		filteredLanguageTags().length === 0
 			? project()?.settings()?.languageTags
-			: filteredLanguageTags(),
+			: filteredLanguageTags()
 	)
 	const lintRulesSet = new Set(filteredMessageLintRules())
 	const searchLower = textSearch().toLowerCase()
@@ -27,7 +27,7 @@ export const showFilteredMessage = (message: Message | undefined) => {
 					return pattern.name.toLowerCase()
 				}
 				return ""
-			}),
+			})
 		)
 		.join("")
 
@@ -35,7 +35,7 @@ export const showFilteredMessage = (message: Message | undefined) => {
 	const filteredByLanguage = {
 		...message,
 		variants: message.variants.filter(
-			(variant) => languageTagsSet.size === 0 || languageTagsSet.has(variant.languageTag),
+			(variant) => languageTagsSet.size === 0 || languageTagsSet.has(variant.languageTag)
 		),
 	}
 
@@ -61,7 +61,7 @@ export const showFilteredMessage = (message: Message | undefined) => {
 				.query.messageLintReports.get({ where: { messageId: message.id } })
 				?.some(
 					(report: MessageLintReport) =>
-						lintRulesSet.has(report.ruleId) && languageTagsSet.has(report.languageTag),
+						lintRulesSet.has(report.ruleId) && languageTagsSet.has(report.languageTag)
 				))
 			? filteredBySearch
 			: false

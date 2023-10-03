@@ -10,7 +10,7 @@ export class ExtractMessage implements vscode.CodeActionProvider {
 
 	public async provideCodeActions(
 		_document: vscode.TextDocument,
-		range: vscode.Range,
+		range: vscode.Range
 	): Promise<vscode.CodeAction[] | undefined> {
 		// return if no text is selected
 		if (range.isEmpty) {
@@ -34,7 +34,7 @@ export class ExtractMessage implements vscode.CodeActionProvider {
 		// Replace the following line with your code logic
 		const codeAction: vscode.CodeAction = new vscode.CodeAction(
 			"Code action resolved",
-			vscode.CodeActionKind.Refactor,
+			vscode.CodeActionKind.Refactor
 		)
 
 		return codeAction

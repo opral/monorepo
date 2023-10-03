@@ -13,7 +13,7 @@ import type { Result } from "./api.js"
 export function tryCatch<Data>(callback: () => Promise<Data>): Promise<Result<Data, Error>>
 export function tryCatch<Data>(callback: () => Data): Result<Data, Error>
 export function tryCatch<Data>(
-	callback: () => Data | Promise<Data>,
+	callback: () => Data | Promise<Data>
 ): Promise<Result<Data, Error>> | Result<Data, Error> {
 	try {
 		const callbackResult = callback() as Data | Promise<Data>

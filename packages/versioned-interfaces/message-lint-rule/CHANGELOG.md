@@ -1,5 +1,16 @@
 # @inlang/message-lint-rule
 
+## 1.3.0
+
+### Minor Changes
+
+- e56bcdd4e: add: possibility to define external settings
+
+### Patch Changes
+
+- Updated dependencies [d57b1a2ce]
+  - @inlang/project-settings@2.2.0
+
 ## 1.2.0
 
 ### Minor Changes

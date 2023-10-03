@@ -11,7 +11,7 @@ assert calls are removed and, therefore, have no performance error error implica
 function x(argument: string) {
 	assertUsage(
 		argument.startsWith("hello"),
-		"The argument must start with 'hello'. Otherwise, the function crashes.",
+		"The argument must start with 'hello'. Otherwise, the function crashes."
 	)
 }
 ```

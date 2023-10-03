@@ -72,7 +72,7 @@ export async function exchangeInterimCodeForAccessToken(args: {
 			headers: {
 				Accept: "application/json",
 			},
-		},
+		}
 	)
 	if (request.ok === false) {
 		throw Error("exchanging the interim token failed", {

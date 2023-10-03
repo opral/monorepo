@@ -1,80 +1,36 @@
-import type { OnBeforeRender } from "#src/renderer/types.js"
-import type { PageProps } from "./index.page.jsx"
-import { parseMarkdown } from "#src/services/markdown/index.js"
-import { RenderErrorPage } from "vite-plugin-ssr/RenderErrorPage"
-import fs from "node:fs/promises"
-import { BlogFrontmatterSchema } from "./frontmatterSchema.js"
+import fs from "node:fs"
 import tableOfContents from "../../../../../../blog/tableOfContents.json"
+import { convert } from "@inlang/markdown"
+import { render } from "vite-plugin-ssr/abort"
 
-/**
- * The root of the repository.
- *
- * Makes it possible to use absolute paths for rendering markdown.
- */
-const repositoryRoot = new URL("../../../../../../", import.meta.url)
+const renderedMarkdown = {} as Record<string, string>
 
-/**
- * the table of contents without the html for each document
- * saving bandwith and speeding up the site)
- */
-export type ProcessedTableOfContents = Record<
-	string,
-	Awaited<ReturnType<typeof parseMarkdown>>["frontmatter"]
->
+/* Slices the relative path to the repository, no matter where in the file system the code is executed from.
+This is necessary because the code is executed from the build folder. */
+const repositoryRoot = import.meta.url.slice(0, import.meta.url.lastIndexOf("inlang/source-code"))
 
-/**
- * The index of documentation markdown files. The href's acts as id.
- *
- * @example
- * 	{
- * 		"/documentation/intro": document,
- * 	}
- */
-const index: Record<string, Awaited<ReturnType<typeof parseMarkdown>>> = {}
-/**
- * the table of contents without the html for each document
- * saving bandwith and speeding up the site)
- */
-const processedTableOfContents: ProcessedTableOfContents = {}
+export async function onBeforeRender(pageContext: any) {
+	const { id } = pageContext.routeParams
 
-await generateIndexAndTableOfContents()
-
-// should only run server side
-export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => {
-	// dirty way to get reload of markdown (not hot reload though)
-	if (import.meta.env.DEV) {
-		await generateIndexAndTableOfContents()
+	const page = tableOfContents.find((page) => page.slug === id)
+	if (!page) {
+		throw render(404)
 	}
-	if (
-		!Object.keys(index).includes(pageContext.urlPathname) &&
-		pageContext.urlPathname !== "/blog"
-	) {
-		throw RenderErrorPage({ pageContext: { is404: true } })
+
+	const markdownFilePath = new URL(`inlang/blog/${page.path}`, repositoryRoot)
+
+	if (!fs.existsSync(markdownFilePath)) {
+		throw render(404)
 	}
+
+	const content = await convert(fs.readFileSync(markdownFilePath, "utf-8"))
+	renderedMarkdown[id] = content
+
 	return {
 		pageContext: {
 			pageProps: {
-				markdown: index[pageContext.urlPathname]!,
-				processedTableOfContents: processedTableOfContents,
+				markdown: renderedMarkdown[id],
 			},
 		},
-	}
-}
-
-/**
- * Generates the index and table of contents.
- */
-async function generateIndexAndTableOfContents() {
-	for (const path of tableOfContents) {
-		const text = await fs.readFile(new URL(`inlang/blog/${path}`, repositoryRoot), "utf-8")
-		const markdown = parseMarkdown({
-			text,
-			frontmatterSchema: BlogFrontmatterSchema,
-		})
-		// not pushing to processedTableOfContents directly in case
-		// the category is undefined so far
-		processedTableOfContents[markdown.frontmatter.href] = markdown.frontmatter
-
-		index[markdown.frontmatter.href] = markdown
 	}
 }

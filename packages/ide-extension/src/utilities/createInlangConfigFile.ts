@@ -20,45 +20,49 @@ export const createInlangConfigFile = async (args: { workspaceFolder: vscode.Wor
 	// Try to auto generate project settings
 	const nodeishFs = createFileSystemMapper(args.workspaceFolder.uri.fsPath)
 
-	const { settings, warnings, errors } = await tryAutoGenProjectSettings({
-		nodeishFs,
-		pathJoin: path.join,
-		filePath: args.workspaceFolder.uri.fsPath + "/project.inlang.json",
-	})
+	// with nodeishFs, read package.json &
+	const packageJson = await nodeishFs.readFile("./package.json", { encoding: "utf-8" })
+	const packageJsonParsed = JSON.parse(packageJson)
 
-	// Log warnings and errors
-	for (const warning of warnings) console.warn(warning)
-	if (errors) {
-		for (const error of errors) console.error(error)
+	// check if i18next dependency exists
+	const i18nextDependency = packageJsonParsed.dependencies.i18next
+
+	if (!i18nextDependency) {
+		// skip
+		return
 	}
 
-	// Check if settings were generated
-	if (settings) {
-		// Check if prompt is disabled
-		if (await isDisabledConfigFileCreation()) return
+	// Check if prompt is disabled
+	if (await isDisabledConfigFileCreation()) return
 
-		// Prompt user to create config file
-		const createConfigFile = await promptUserToCreateConfigFile()
+	// Prompt user to create config file
+	const createConfigFile = await promptUserToCreateConfigFile()
 
-		if (createConfigFile === "Accept") {
-			// create config file at root of workspace
-			await nodeishFs.writeFile(
-				"./project.inlang.json",
-				JSON.stringify(settings, undefined, 4) + "\n",
-			)
+	if (createConfigFile === "Accept") {
+		// create config file at root of workspace
+		const { warnings, errors } = await tryAutoGenProjectSettings({
+			nodeishFs,
+			pathJoin: path.join,
+			filePath: args.workspaceFolder.uri.fsPath + "/project.inlang.json",
+		})
 
-			console.info(
-				`🎉 Created project.inlang.json file at ${
-					args.workspaceFolder.uri.fsPath + "/project.inlang.json"
-				}`,
-			)
-		} else if (createConfigFile === "Reject") {
-			// Disable config file creation
-			disableConfigFileCreation()
+		// Log warnings and errors
+		for (const warning of warnings) console.warn(warning)
+		if (errors) {
+			for (const error of errors) console.error(error)
 		}
 
-		trackOutcome(createConfigFile)
+		console.info(
+			`🎉 Created project.inlang.json file at ${
+				args.workspaceFolder.uri.fsPath + "/project.inlang.json"
+			}`
+		)
+	} else if (createConfigFile === "Reject") {
+		// Disable config file creation
+		disableConfigFileCreation()
 	}
+
+	trackOutcome(createConfigFile)
 }
 
 /**
@@ -93,9 +97,9 @@ const disableConfigFileCreation = async (): Promise<void> => {
  */
 const promptUserToCreateConfigFile = async (): Promise<string | undefined> => {
 	return await vscode.window.showInformationMessage(
-		"Improve your i18n experience with Inlang. Do you want to create a config file?",
+		"Inlang can be automatically setup for this project. Should the settings file be created?",
 		"Accept",
-		"Reject",
+		"Reject"
 	)
 }
 

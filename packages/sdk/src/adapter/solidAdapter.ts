@@ -6,7 +6,7 @@ export const solidAdapter = (
 	project: InlangProject,
 	arg: {
 		from: typeof solidFrom
-	},
+	}
 ): InlangProjectWithSolidAdapter => {
 	const convert = <T>(signal: () => T): (() => T) => {
 		return arg.from(observable(signal)) as () => T

@@ -11,7 +11,7 @@ import { msg } from "./message.js"
  */
 export const migrateConfigFile = async (
 	workspaceFolder: vscode.WorkspaceFolder,
-	closestProjectFilePathUri: vscode.Uri,
+	closestProjectFilePathUri: vscode.Uri
 ) => {
 	// try to migrate project config
 	const { warnings } = await migrateProjectSettings({

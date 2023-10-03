@@ -45,12 +45,12 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 							const diagnosticRange = new vscode.Range(
 								new vscode.Position(
 									message.position.start.line - 1,
-									message.position.start.character - 1,
+									message.position.start.character - 1
 								),
 								new vscode.Position(
 									message.position.end.line - 1,
-									message.position.end.character - 1,
-								),
+									message.position.end.character - 1
+								)
 							)
 
 							// Get the lint message for the source language tag or fallback to "en"
@@ -60,7 +60,7 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 							const diagnostic = new vscode.Diagnostic(
 								diagnosticRange,
 								`[${message.messageId}] – ${lintMessage}`,
-								mapLintLevelToSeverity(level),
+								mapLintLevelToSeverity(level)
 							)
 							if (!diagnosticsIndex[message.messageId]) diagnosticsIndex[message.messageId] = {}
 							diagnosticsIndex[message.messageId]![getRangeIndex(diagnostic.range)] = diagnostics
@@ -73,9 +73,9 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 
 						linterDiagnosticCollection.set(
 							activeTextEditor.document.uri,
-							flattenDiagnostics(diagnosticsIndex),
+							flattenDiagnostics(diagnosticsIndex)
 						)
-					},
+					}
 				)
 			}
 		})
@@ -101,7 +101,7 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 	vscode.window.onDidChangeActiveTextEditor(
 		() => updateLintDiagnostics(),
 		undefined,
-		args.context.subscriptions,
+		args.context.subscriptions
 	)
 
 	// update lints when the text changes in a document
@@ -112,7 +112,7 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 			}
 		},
 		undefined,
-		args.context.subscriptions,
+		args.context.subscriptions
 	)
 }
 
@@ -121,7 +121,7 @@ function getRangeIndex(range: vscode.Diagnostic["range"]) {
 }
 
 function flattenDiagnostics(
-	index: Record<string, Record<string, vscode.Diagnostic[]>>,
+	index: Record<string, Record<string, vscode.Diagnostic[]>>
 ): vscode.Diagnostic[] {
 	let result: vscode.Diagnostic[] = []
 

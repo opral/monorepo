@@ -11,65 +11,98 @@ import {
 	PluginsDoNotProvideLoadOrSaveMessagesError,
 } from "./errors.js"
 import type { Plugin } from "@inlang/plugin"
+import type { ProjectSettings } from "@inlang/project-settings"
 
-describe("generally", () => {
-	it("should return an error if a plugin uses an invalid id", async () => {
-		const mockPlugin: Plugin = {
-			// @ts-expect-error - invalid id
-			id: "no-namespace",
-			description: { en: "My plugin description" },
-			displayName: { en: "My plugin" },
-			loadMessages: () => undefined as any,
-			saveMessages: () => undefined as any,
-		}
+it("should return an error if a plugin uses an invalid id", async () => {
+	const mockPlugin: Plugin = {
+		// @ts-expect-error - invalid id
+		id: "no-namespace",
+		description: { en: "My plugin description" },
+		displayName: { en: "My plugin" },
+		loadMessages: () => undefined as any,
+		saveMessages: () => undefined as any,
+	}
 
-		const resolved = await resolvePlugins({
-			plugins: [mockPlugin],
-			settings: {},
-			nodeishFs: {} as any,
-		})
-
-		expect(resolved.errors[0]).toBeInstanceOf(PluginHasInvalidIdError)
+	const resolved = await resolvePlugins({
+		plugins: [mockPlugin],
+		settings: {} as any as any,
+		nodeishFs: {} as any,
 	})
 
-	it("should return an error if a plugin uses APIs that are not available", async () => {
-		const mockPlugin: Plugin = {
-			id: "plugin.namespace.undefinedApi",
-			description: { en: "My plugin description" },
-			displayName: { en: "My plugin" },
-			// @ts-expect-error the key is not available in type
-			nonExistentKey: {
-				nonexistentOptions: "value",
-			},
-			loadMessages: () => undefined as any,
-			saveMessages: () => undefined as any,
-		}
+	expect(resolved.errors[0]).toBeInstanceOf(PluginHasInvalidIdError)
+})
 
-		const resolved = await resolvePlugins({
-			plugins: [mockPlugin],
-			settings: {},
-			nodeishFs: {} as any,
-		})
+it("should return an error if a plugin uses APIs that are not available", async () => {
+	const mockPlugin: Plugin = {
+		id: "plugin.namespace.undefinedApi",
+		description: { en: "My plugin description" },
+		displayName: { en: "My plugin" },
+		// @ts-expect-error the key is not available in type
+		nonExistentKey: {
+			nonexistentOptions: "value",
+		},
+		loadMessages: () => undefined as any,
+		saveMessages: () => undefined as any,
+	}
 
-		expect(resolved.errors[0]).toBeInstanceOf(PluginHasInvalidSchemaError)
+	const resolved = await resolvePlugins({
+		plugins: [mockPlugin],
+		settings: {} as any,
+		nodeishFs: {} as any,
 	})
 
-	it("should not initialize a plugin that uses the 'inlang' namespace except for inlang whitelisted plugins", async () => {
-		const mockPlugin: Plugin = {
-			id: "plugin.inlang.notWhitelisted",
-			description: { en: "My plugin description" },
-			displayName: { en: "My plugin" },
-			loadMessages: () => undefined as any,
-		}
+	expect(resolved.errors[0]).toBeInstanceOf(PluginHasInvalidSchemaError)
+})
 
-		const resolved = await resolvePlugins({
-			plugins: [mockPlugin],
-			settings: {},
-			nodeishFs: {} as any,
-		})
+it("should not initialize a plugin that uses the 'inlang' namespace except for inlang whitelisted plugins", async () => {
+	const mockPlugin: Plugin = {
+		id: "plugin.inlang.notWhitelisted",
+		description: { en: "My plugin description" },
+		displayName: { en: "My plugin" },
+		loadMessages: () => undefined as any,
+	}
 
-		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesReservedNamespaceError)
+	const resolved = await resolvePlugins({
+		plugins: [mockPlugin],
+		settings: {} as any,
+		nodeishFs: {} as any,
 	})
+
+	expect(resolved.errors[0]).toBeInstanceOf(PluginUsesReservedNamespaceError)
+})
+
+it("should expose the project settings including the plugin settings", async () => {
+	const settings: ProjectSettings = {
+		sourceLanguageTag: "en",
+		languageTags: ["en", "de"],
+		modules: [],
+		"plugin.namespace.placeholder": {
+			myPluginSetting: "value",
+		},
+	}
+	const mockPlugin: Plugin = {
+		id: "plugin.namespace.placeholder",
+		description: { en: "My plugin description" },
+		displayName: { en: "My plugin" },
+		saveMessages: async ({ settings }) => {
+			expect(settings).toStrictEqual(settings)
+		},
+		addCustomApi: ({ settings }) => {
+			expect(settings).toStrictEqual(settings)
+			return {}
+		},
+		loadMessages: async ({ settings }) => {
+			expect(settings).toStrictEqual(settings)
+			return []
+		},
+	}
+	const resolved = await resolvePlugins({
+		plugins: [mockPlugin],
+		settings: settings,
+		nodeishFs: {} as any,
+	})
+	await resolved.data.loadMessages!({ settings })
+	await resolved.data.saveMessages!({ settings, messages: [] })
 })
 
 describe("loadMessages", () => {
@@ -83,15 +116,14 @@ describe("loadMessages", () => {
 
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin],
-			settings: {},
+			settings: {} as any,
 			nodeishFs: {} as any,
 		})
 
 		expect(
 			await resolved.data.loadMessages!({
-				languageTags: ["en"],
-				sourceLanguageTag: "en",
-			}),
+				settings: {} as any,
+			})
 		).toEqual([{ id: "test", expressions: [], selectors: [], variants: [] }])
 	})
 
@@ -112,7 +144,7 @@ describe("loadMessages", () => {
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin, mockPlugin2],
 			nodeishFs: {} as any,
-			settings: {},
+			settings: {} as any,
 		})
 
 		expect(resolved.errors[0]).toBeInstanceOf(PluginLoadMessagesFunctionAlreadyDefinedError)
@@ -129,7 +161,7 @@ describe("loadMessages", () => {
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin],
 			nodeishFs: {} as any,
-			settings: {},
+			settings: {} as any,
 		})
 
 		expect(resolved.errors).toHaveLength(1)
@@ -150,7 +182,7 @@ describe("saveMessages", () => {
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin],
 			nodeishFs: {} as any,
-			settings: {},
+			settings: {} as any,
 		})
 
 		expect(resolved.errors).toHaveLength(0)
@@ -173,7 +205,7 @@ describe("saveMessages", () => {
 
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin, mockPlugin2],
-			settings: {},
+			settings: {} as any,
 			nodeishFs: {} as any,
 		})
 
@@ -191,7 +223,7 @@ describe("saveMessages", () => {
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin],
 			nodeishFs: {} as any,
-			settings: {},
+			settings: {} as any,
 		})
 		expect(resolved.errors).toHaveLength(1)
 		expect(resolved.errors[0]).toBeInstanceOf(PluginsDoNotProvideLoadOrSaveMessagesError)
@@ -214,7 +246,7 @@ describe("addCustomApi", () => {
 
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin],
-			settings: {},
+			settings: {} as any,
 			nodeishFs: {} as any,
 		})
 
@@ -249,7 +281,7 @@ describe("addCustomApi", () => {
 
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin, mockPlugin2],
-			settings: {},
+			settings: {} as any,
 			nodeishFs: {} as any,
 		})
 
@@ -269,7 +301,7 @@ describe("addCustomApi", () => {
 
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin],
-			settings: {},
+			settings: {} as any,
 			nodeishFs: {} as any,
 		})
 
@@ -292,13 +324,13 @@ describe("addCustomApi", () => {
 
 		const resolved = await resolvePlugins({
 			plugins: [mockPlugin],
-			settings: {},
+			settings: {} as any,
 			nodeishFs: {} as any,
 		})
 
 		expect(resolved.data.customApi).toHaveProperty("app.inlang.placeholder")
 		expect(
-			(resolved.data.customApi?.["app.inlang.placeholder"] as any).messageReferenceMatcher(),
+			(resolved.data.customApi?.["app.inlang.placeholder"] as any).messageReferenceMatcher()
 		).toEqual({
 			hello: "world",
 		})

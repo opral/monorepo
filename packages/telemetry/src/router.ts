@@ -13,5 +13,5 @@ router.use(
 			// remove the path from forwarded request
 			req.path = req.path.slice(ROUTE_PATH.length)
 		},
-	}),
+	})
 )
