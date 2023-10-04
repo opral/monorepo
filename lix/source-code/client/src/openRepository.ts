@@ -41,16 +41,13 @@ export async function openRepository(
 	const gitHubProxyUrl = origin + "/github-proxy/"
 
 	// parse url in the format of github.com/inlang/example and split it to host, owner and repo
-	const [namespace, host, owner, repoName] = [...pathname.split("/")]
+	const [_, namespace, host, owner, repoName] = [...pathname.split("/")]
 
 	// check if all 3 parts are present, if not, return an error
 	if (!namespace || !host || !owner || !repoName) {
 		throw new Error(
 			`Invalid url format for '${url}' for cloning repository, please use the format of https://lix.inlang.com/git/github.com/inlang/monorepo.`
 		)
-	}
-	if (args.auth) {
-		console.warn("Auth currently not implemented in lisa client")
 	}
 
 	const github = new Octokit({

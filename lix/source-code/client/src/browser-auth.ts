@@ -5,7 +5,7 @@ const gitHubProxyUrl = publicEnv.PUBLIC_GIT_PROXY_BASE_URL + "/github-proxy/"
 // the authUrl for the oauth app with minimal scopes https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps
 // oauth apps can only require public (public_repo) or private repos but no further repo or org selection
 // email is required to commit with identity of who committed
-const authUrl = `https://github.com/login/oauth/authorize?client_id=${publicEnv.PUBLIC_GITHUB_APP_CLIENT_ID}&scope=repo,public_repo,user:email`
+const authUrl = `https://github.com/login/oauth/authorize?client_id=${publicEnv.PUBLIC_GITHUB_APP_CLIENT_ID}&scope=repo,user:email`
 
 /**
  * Login user in new window.
