@@ -13,10 +13,11 @@ export const pluginId = "plugin.inlang.messageFormat"
  * Pros:
  *   - No need to transform the data (time complexity).
  *   - No need to maintain a separate data structure (space complexity).
+ *   - No need for plugin authors to deal with optimizations (ecosystem complexity).
  *
  * Cons:
  *  - No optimizations but they can be introduced in a non-breaking change manner
- *    in the future.
+ *    in the future, IF REQUIRED.
  */
 type StorageSchema = Message[]
 
