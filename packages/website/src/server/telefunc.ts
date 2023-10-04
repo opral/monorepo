@@ -32,7 +32,7 @@ router.all(
 						url: request.originalUrl,
 						method: request.method,
 						body: request.body,
-					}),
+					})
 				)
 				.then(({ body, statusCode, contentType }) => {
 					response.status(statusCode).type(contentType).send(body)
@@ -50,5 +50,5 @@ router.all(
 				})
 				.catch(next)
 		}
-	},
+	}
 )

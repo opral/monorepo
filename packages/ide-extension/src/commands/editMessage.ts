@@ -30,7 +30,7 @@ export const editMessageCommand = {
 			// Create a new variant
 			variant = {
 				languageTag,
-				match: {},
+				match: [],
 				pattern: [
 					{
 						type: "Text",

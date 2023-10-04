@@ -207,7 +207,7 @@ function ChooseRepo(props: { modules?: string[] }) {
 										setSearchParams(
 											`/install?repo=github.com/${recentProject.owner}/${
 												recentProject.repository
-											}&module=${props.modules?.join(",")}`,
+											}&module=${props.modules?.join(",")}`
 										)
 									}
 								>

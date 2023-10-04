@@ -13,7 +13,7 @@ export const lintMessages = async (args: {
 		lintSingleMessage({
 			...args,
 			message,
-		}),
+		})
 	)
 
 	const results = await Promise.all(promises)

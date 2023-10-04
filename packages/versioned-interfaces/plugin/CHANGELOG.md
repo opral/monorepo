@@ -1,5 +1,16 @@
 # @inlang/plugin
 
+## 2.0.0
+
+### Major Changes
+
+- 404d365b2: BREAKING: The settings are now project settings that include the plugin settings.
+
+### Patch Changes
+
+- Updated dependencies [d57b1a2ce]
+  - @inlang/project-settings@2.2.0
+
 ## 1.3.0
 
 ### Minor Changes

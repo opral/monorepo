@@ -40,7 +40,7 @@ export async function tryAutoGenProjectSettings(args: {
 	let pluginName: SupportedLibrary = "json"
 
 	const packageJson = JSON.parse(
-		await args.nodeishFs.readFile("./package.json", { encoding: "utf-8" }).catch(() => "{}"),
+		await args.nodeishFs.readFile("./package.json", { encoding: "utf-8" }).catch(() => "{}")
 	)
 
 	// Check if popular internationalization libraries are dependencies
@@ -57,7 +57,7 @@ export async function tryAutoGenProjectSettings(args: {
 
 	if (pluginName === "sdkJs") {
 		warnings.push(
-			"📦 Using plugin: @inlang/sdk-js.\nYou have to add a plugin which reads and writes resources e.g. the @inlang/plugin-json. See: https://inlang.com/documentation/plugins/registry",
+			"📦 Using plugin: @inlang/sdk-js.\nYou have to add a plugin which reads and writes resources e.g. the @inlang/plugin-json. See: https://inlang.com/documentation/plugins/registry"
 		)
 	} else if (pluginName === "typesafeI18n") {
 		warnings.push("Found typesafe-i18n, but it is not supported anymore.")
@@ -79,11 +79,11 @@ export async function tryAutoGenProjectSettings(args: {
 	pathPattern = pathPatternRaw.replace(/\\/g, "/")
 	if (pathPattern === "") {
 		warnings.push(
-			"Could not find a language folder in the project. You have to enter the path to your language files (pathPattern) manually.",
+			"Could not find a language folder in the project. You have to enter the path to your language files (pathPattern) manually."
 		)
 	} else {
 		warnings.push(
-			`🗂️  Found language folder path: '${pathPattern}', please adjust the ${`pathPattern`}\nin the project.inlang.json manually if it is not parsed correctly.`,
+			`🗂️  Found language folder path: '${pathPattern}', please adjust the ${`pathPattern`}\nin the project.inlang.json manually if it is not parsed correctly.`
 		)
 	}
 
@@ -101,8 +101,8 @@ export async function tryAutoGenProjectSettings(args: {
 	let errors: any[] = [...Value.Errors(ProjectSettings, settings)]
 	errors.push(
 		`The generated config is not valid. Please adjust the config manually.\nErrors:\n${errors.join(
-			"\n",
-		)}`,
+			"\n"
+		)}`
 	)
 
 	const projectFilePath = args.filePath || "./project.inlang.json"
@@ -118,7 +118,7 @@ export async function tryAutoGenProjectSettings(args: {
 		loadProject({
 			settingsFilePath: projectFilePath,
 			nodeishFs: args.nodeishFs,
-		}),
+		})
 	)
 
 	if (error) {

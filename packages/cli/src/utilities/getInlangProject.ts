@@ -33,7 +33,7 @@ export async function getInlangProject(): Promise<Result<InlangProject, Error>> 
 					properties: props,
 				})
 			},
-		}),
+		})
 	)
 	return cached
 }

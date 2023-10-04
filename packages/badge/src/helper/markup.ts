@@ -21,7 +21,7 @@ export const markup = (
 	percentage: number,
 	errors: number,
 	warnings: number,
-	numberOfmissingTranslations: number,
+	numberOfmissingTranslations: number
 ): VNode => {
 	// Get language names
 

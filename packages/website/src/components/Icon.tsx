@@ -10,7 +10,7 @@ import { type ComponentProps, lazy, Suspense } from "solid-js"
 export function Icon(
 	props: { name: AvailableIcon } & ComponentProps<"svg"> & {
 			slot?: string
-		},
+		}
 ) {
 	// eslint-disable-next-line solid/reactivity
 	const ICON = lazy(() => icons[props.name])

@@ -42,3 +42,11 @@ test("should be able to render custom elements", async () => {
 	const html = await convert(markdown)
 	expect(html).toContain("<doc-figure")
 })
+
+test("should be able to provide a badge generator", async () => {
+	const markdown = `
+<inlang-badge-generator></inlang-badge-generator>
+	`
+	const html = await convert(markdown)
+	expect(html).toContain("<inlang-badge-generator></inlang-badge-generator>")
+})

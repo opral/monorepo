@@ -8,7 +8,7 @@ import type { InlangProject, MessageQueryApi } from "./api.js"
  * Creates a reactive query API for messages.
  */
 export function createMessagesQuery(
-	messages: () => Array<Message>,
+	messages: () => Array<Message>
 ): InlangProject["query"]["messages"] {
 	// @ts-expect-error
 	const index = new ReactiveMap<string, Message>()
@@ -31,7 +31,7 @@ export function createMessagesQuery(
 		get: Object.assign(get, {
 			subscribe: (
 				args: Parameters<MessageQueryApi["get"]["subscribe"]>[0],
-				callback: Parameters<MessageQueryApi["get"]["subscribe"]>[1],
+				callback: Parameters<MessageQueryApi["get"]["subscribe"]>[1]
 			) => createSubscribable(() => get(args)).subscribe(callback),
 		}) as any,
 		includedMessageIds: createSubscribable(() => {

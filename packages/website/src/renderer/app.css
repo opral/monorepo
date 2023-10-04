@@ -79,7 +79,7 @@ article :target {
 }
 
 /* Scroll Offset for Anchor Links */
-.prose :where(a):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+.prose :where(a):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
 	text-decoration: none;
 	font-weight: 600;
 }

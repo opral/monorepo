@@ -71,8 +71,8 @@ export function Layout(props: { children: JSXElement }) {
 					addFilter("Linting")
 				}
 			},
-			{ defer: true },
-		),
+			{ defer: true }
+		)
 	)
 
 	//add initial language filter
@@ -85,7 +85,7 @@ export function Layout(props: { children: JSXElement }) {
 					if (project()!.settings()) setFilteredLanguageTags(project()!.settings()!.languageTags)
 				}
 			}
-		}),
+		})
 	)
 
 	//add initial lintRule filter
@@ -106,7 +106,7 @@ export function Layout(props: { children: JSXElement }) {
 			if (lixErrors().length === 0 && filteredMessageLintRules().length > 0) {
 				addFilter("Linting")
 			}
-		}),
+		})
 	)
 
 	const addLanguageTag = (languageTag: LanguageTag) => {
@@ -160,7 +160,7 @@ export function Layout(props: { children: JSXElement }) {
 										prop:size="small"
 										onClick={() => {
 											setFilteredLanguageTags(
-												setFilteredLanguageTags(project()?.settings()?.languageTags || []),
+												setFilteredLanguageTags(project()?.settings()?.languageTags || [])
 											)
 											setFilteredMessageLintRules([])
 											setSelectedFilters([])
@@ -196,7 +196,7 @@ export function Layout(props: { children: JSXElement }) {
 																	setFilteredMessageLintRules(
 																		project()
 																			?.installed.messageLintRules()
-																			.map((lintRule) => lintRule.id) ?? [],
+																			.map((lintRule) => lintRule.id) ?? []
 																	)
 																}
 																addFilter(filter.name)
@@ -401,7 +401,7 @@ function LanguageFilter(props: { clearFunction: any }) {
 						onClick={() =>
 							setFilteredLanguageTags(
 								// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-								[project()?.settings()?.sourceLanguageTag!],
+								[project()?.settings()?.sourceLanguageTag!]
 							)
 						}
 					>
@@ -414,7 +414,7 @@ function LanguageFilter(props: { clearFunction: any }) {
 					<For
 						each={sortLanguageTags(
 							project()?.settings()?.languageTags || [],
-							project()?.settings()?.sourceLanguageTag || "en",
+							project()?.settings()?.sourceLanguageTag || "en"
 						)}
 					>
 						{(language) => (
@@ -493,7 +493,7 @@ function LintFilter(props: { clearFunction: any }) {
 						setFilteredMessageLintRules(
 							project()
 								?.installed.messageLintRules()
-								.map((lintRule) => lintRule.id) ?? [],
+								.map((lintRule) => lintRule.id) ?? []
 						)
 					}
 				>

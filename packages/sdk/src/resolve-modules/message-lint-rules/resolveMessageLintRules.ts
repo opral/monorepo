@@ -12,7 +12,7 @@ export const resolveMessageLintRules = (args: { messageLintRules: Array<MessageL
 			result.errors.push(
 				new MessageLintRuleIsInvalidError(`Couldn't parse lint rule "${rule.id}"`, {
 					module: "not implemented",
-				}),
+				})
 			)
 			continue
 		} else {

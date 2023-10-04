@@ -35,7 +35,7 @@ async function $import(
 		 * Required to import from a local path.
 		 */
 		readFile: NodeishFilesystemSubset["readFile"]
-	},
+	}
 ): Promise<any> {
 	let moduleAsText: string
 

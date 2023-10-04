@@ -88,7 +88,7 @@ export function PatternEditor(props: {
 	*/
 	const [currentPattern, setCurrentPattern] = createSignal<Variant["pattern"]>(
 		// eslint-disable-next-line solid/reactivity
-		variant()?.pattern || [],
+		variant()?.pattern || []
 	)
 
 	function createOrUpdateEditor() {
@@ -118,7 +118,7 @@ export function PatternEditor(props: {
 			setVariableReferences(
 				sourceVariant()
 					?.pattern.filter((pattern) => pattern.type === "VariableReference")
-					.map((variableReference) => variableReference) as VariableReference[],
+					.map((variableReference) => variableReference) as VariableReference[]
 			)
 		}
 		setPreviousContent(currentJSON().content[0].content)
@@ -134,10 +134,10 @@ export function PatternEditor(props: {
 			setReferencePattern(
 				project()
 					?.query.messages.get({ where: { id: props.message.id } })
-					?.variants.find((variant) => variant.languageTag === props.languageTag)?.pattern,
+					?.variants.find((variant) => variant.languageTag === props.languageTag)?.pattern
 			)
 			setHasChanges(false)
-		}),
+		})
 	)
 
 	createEffect(
@@ -160,7 +160,7 @@ export function PatternEditor(props: {
 					return hasChanged
 				})
 			}
-		}),
+		})
 	)
 
 	const autoSave = () => {
@@ -169,14 +169,14 @@ export function PatternEditor(props: {
 		if (JSON.stringify(newPattern()) === `[{"type":"Text","value":""}]`) {
 			newMessage = { data: props.message }
 			newMessage.data.variants = props.message.variants.filter(
-				(variant) => variant.languageTag !== props.languageTag,
+				(variant) => variant.languageTag !== props.languageTag
 			)
 		} else {
 			if (variant() === undefined) {
 				newMessage = createVariant(props.message, {
 					data: {
 						languageTag: props.languageTag,
-						match: {},
+						match: [],
 						pattern: newPattern(),
 					},
 				})
@@ -184,7 +184,7 @@ export function PatternEditor(props: {
 				newMessage = updateVariantPattern(props.message, {
 					where: {
 						languageTag: props.languageTag,
-						selectors: {},
+						match: [],
 					},
 					data: newPattern(),
 				})
@@ -254,13 +254,13 @@ export function PatternEditor(props: {
 			(report) =>
 				report.messageId === props.message.id &&
 				report.languageTag === props.languageTag &&
-				report.ruleId === "messageLintRule.inlang.emptyPattern",
+				report.ruleId === "messageLintRule.inlang.emptyPattern"
 		)
 
 		const newMessage = structuredClone(props.message)
 		if (hasEmptyPattern) {
 			newMessage.variants = newMessage.variants.filter(
-				(variant) => variant.languageTag !== props.languageTag,
+				(variant) => variant.languageTag !== props.languageTag
 			)
 		}
 
@@ -282,7 +282,7 @@ export function PatternEditor(props: {
 				getVariant(translation.data, {
 					where: {
 						languageTag: props.languageTag,
-						selectors: {},
+						match: [],
 					},
 				})?.pattern || []
 			if (JSON.stringify(newPattern) !== "[]") {

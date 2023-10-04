@@ -15,7 +15,7 @@ export const translate = new Command()
 			// Prompt the user to confirm
 			if (!args.force) {
 				log.warn(
-					"Human translations are better than machine translations. \n\nWe advise to use machine translations in the build step without commiting them to the repo. By using machine translate in the build step, you avoid missing translations in production while still flagging to human translators that transaltions are missing. You can use the force flag (-f, --force) to skip this prompt warning.",
+					"Human translations are better than machine translations. \n\nWe advise to use machine translations in the build step without commiting them to the repo. By using machine translate in the build step, you avoid missing translations in production while still flagging to human translators that transaltions are missing. You can use the force flag (-f, --force) to skip this prompt warning."
 				)
 				const response = await prompts({
 					type: "confirm",
@@ -68,7 +68,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 
 		const languagesTagsToTranslateTo = projectConfig.languageTags.filter(
 			// @ts-ignore - type mismtach - fix after refactor
-			(tag) => tag !== sourceLanguageTag,
+			(tag) => tag !== sourceLanguageTag
 		)
 
 		log.info(`📝 Translating to ${languagesTagsToTranslateTo.length} languages.`)

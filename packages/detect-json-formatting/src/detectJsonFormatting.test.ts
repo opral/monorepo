@@ -59,7 +59,7 @@ describe("detect formatting values", () => {
 				},
 			},
 			undefined,
-			2,
+			2
 		)
 
 		const withoutNesting = JSON.stringify(
@@ -67,7 +67,7 @@ describe("detect formatting values", () => {
 				"test.test": "test",
 			},
 			undefined,
-			4,
+			4
 		)
 
 		expect(detectJsonFormatting(withNesting).values.nestedKeys).toBeTruthy()

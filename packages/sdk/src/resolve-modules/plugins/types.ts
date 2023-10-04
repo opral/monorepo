@@ -1,4 +1,3 @@
-import type { LanguageTag } from "@inlang/language-tag"
 import type { NodeishFilesystem as LisaNodeishFilesystem } from "@lix-js/fs"
 import type {
 	PluginReturnedInvalidCustomApiError,
@@ -10,8 +9,8 @@ import type {
 	PluginsDoNotProvideLoadOrSaveMessagesError,
 } from "./errors.js"
 import type { Message } from "@inlang/message"
-import type { JSONObject } from "@inlang/json-types"
 import type { CustomApiInlangIdeExtension, Plugin } from "@inlang/plugin"
+import type { ProjectSettings } from "@inlang/project-settings"
 
 /**
  * The filesystem is a subset of project lisa's nodeish filesystem.
@@ -28,7 +27,7 @@ export type NodeishFilesystemSubset = Pick<
  */
 export type ResolvePluginsFunction = (args: {
 	plugins: Array<Plugin>
-	settings: Record<Plugin["id"], JSONObject>
+	settings: ProjectSettings
 	nodeishFs: NodeishFilesystemSubset
 }) => Promise<{
 	data: ResolvedPluginApi
@@ -47,11 +46,8 @@ export type ResolvePluginsFunction = (args: {
  * The API after resolving the plugins.
  */
 export type ResolvedPluginApi = {
-	loadMessages: (args: {
-		languageTags: LanguageTag[]
-		sourceLanguageTag: LanguageTag
-	}) => Promise<Message[]> | Message[]
-	saveMessages: (args: { messages: Message[] }) => Promise<void> | void
+	loadMessages: (args: { settings: ProjectSettings }) => Promise<Message[]> | Message[]
+	saveMessages: (args: { settings: ProjectSettings; messages: Message[] }) => Promise<void> | void
 	/**
 	 * App specific APIs.
 	 *
