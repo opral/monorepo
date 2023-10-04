@@ -10,6 +10,7 @@ import {
 	ProjectSettingsInvalidError,
 } from "./errors.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
+import { createMessage } from "./test-utilities/createMessage.js"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -638,6 +639,65 @@ describe("functionality", () => {
 					],
 				},
 			])
+		})
+
+		/*
+		 * Passing all messages to saveMessages() simplifies plugins by an order of magnitude.
+		 *
+		 * Pros:
+		 *   - plugins don't need to transform the data (time complexity).
+		 *   - plugins don't to maintain a separate data structure (space complexity).
+		 *   - plugin authors don't need to deal with optimizations (ecosystem complexity).
+		 *
+		 * Cons:
+		 *  - Might be slow for a large number of messages. The requirement hasn't popped up yet though.
+		 */
+		it("should pass all messages, regardless of which message changed, to saveMessages()", async () => {
+			const fs = createNodeishMemoryFs()
+
+			const settings: ProjectSettings = {
+				sourceLanguageTag: "en",
+				languageTags: ["en", "de"],
+				modules: ["plugin.js"],
+				"plugin.project.json": {
+					pathPattern: "./resources/{languageTag}.json",
+				},
+			}
+
+			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
+
+			const mockSaveFn = vi.fn()
+
+			const _mockPlugin: Plugin = {
+				id: "plugin.project.json",
+				description: "Mock plugin description",
+				displayName: "Mock Plugin",
+				loadMessages: () => [
+					createMessage("first", { en: "first message" }),
+					createMessage("second", { en: "second message" }),
+					createMessage("third", { en: "third message" }),
+				],
+				saveMessages: mockSaveFn,
+			}
+
+			const _import = async () => {
+				return {
+					default: _mockPlugin,
+				} satisfies InlangModule
+			}
+
+			const project = await loadProject({
+				settingsFilePath: "./project.inlang.json",
+				nodeishFs: fs,
+				_import,
+			})
+
+			project.query.messages.create({ data: createMessage("fourth", { en: "fourth message" }) })
+
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			expect(mockSaveFn.mock.calls.length).toBe(1)
+			expect(mockSaveFn.mock.calls[0][0].messages).toHaveLength(4)
 		})
 	})
 
