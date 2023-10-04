@@ -5,6 +5,7 @@ import { vi } from "vitest"
 import { beforeEach } from "node:test"
 import { pluginId } from "./plugin.js"
 import type { PluginSettings } from "./settings.js"
+import type { StorageSchema } from "./storageSchema.js"
 
 beforeEach(() => {
 	// clear plugin state between tests
@@ -32,7 +33,10 @@ test("roundtrip (saving/loading messages)", async () => {
 		de: "Mal sehen ob das funktioniert",
 	})
 
-	const initialFile = JSON.stringify([m1, m2])
+	const initialFile = JSON.stringify({
+		$schema: "https://inlang.com/schema/inlang-message-format",
+		data: [m1, m2],
+	} satisfies StorageSchema)
 
 	await fs.writeFile("./messages.json", initialFile)
 
@@ -74,7 +78,14 @@ test("keep the json formatting to decrease git diff's and merge conflicts", asyn
 	})
 
 	// double tab indentation
-	const initialFile = JSON.stringify([m1], undefined, 2)
+	const initialFile = JSON.stringify(
+		{
+			$schema: "https://inlang.com/schema/inlang-message-format",
+			data: [m1],
+		} satisfies StorageSchema,
+		undefined,
+		2
+	)
 
 	await fs.writeFile("./messages.json", initialFile)
 
@@ -104,8 +115,6 @@ test("save the messages alphabetically to decrease git diff's and merge conflict
 		[pluginId]: { storagePath: "./messages.json" } satisfies PluginSettings,
 	} as any
 
-	fs.writeFile("./messages.json", "")
-
 	const messages = [
 		createMessage("c", { en: "c" }),
 		createMessage("a", { en: "a" }),
@@ -119,10 +128,10 @@ test("save the messages alphabetically to decrease git diff's and merge conflict
 	})
 
 	const fileAfterSave = await fs.readFile("./messages.json", { encoding: "utf-8" })
-	const json = JSON.parse(fileAfterSave)
-	expect(json[0].id).toBe("a")
-	expect(json[1].id).toBe("b")
-	expect(json[2].id).toBe("c")
+	const json = JSON.parse(fileAfterSave) as StorageSchema
+	expect(json.data[0]?.id).toBe("a")
+	expect(json.data[1]?.id).toBe("b")
+	expect(json.data[2]?.id).toBe("c")
 })
 
 test("throw if the storagePath does not start with './' or end with '.json'", async () => {
@@ -161,4 +170,26 @@ test("don't throw if the storage path does not exist. instead, create the file (
 
 	// messages should be empty but no error should be thrown
 	expect(messages).toStrictEqual([])
+})
+
+// adds typesafety in IDEs
+test("it should add the $schema property to the file if it does not exist", async () => {
+	const { plugin } = await import("./plugin.js")
+
+	const fs = createNodeishMemoryFs()
+
+	const settings = {
+		[pluginId]: { storagePath: "./messages.json" } satisfies PluginSettings,
+	} as any
+
+	await plugin.saveMessages!({
+		settings,
+		nodeishFs: fs,
+		messages: [],
+	})
+
+	const fileAfterSave = await fs.readFile("./messages.json", { encoding: "utf-8" })
+	const json = JSON.parse(fileAfterSave) as StorageSchema
+	expect(json.$schema).toBe("https://inlang.com/schema/inlang-message-format")
+	expect(json.data).toStrictEqual([])
 })

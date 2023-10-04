@@ -4,6 +4,11 @@ This plugin stores messages in the inlang message format.
 
 - [x] supports all inlang messages features (variants, markup, etc.)
 - [x] the simplest inlang storage plugin (because the messages are stored in the inlang format)
+- [x] typesafety for the messages file
+
+# When to use
+
+Use the inlang message format plugin if you have no previous translation files, or you want to migrate to the inlang format for a better experience.
 
 # Settings
 
