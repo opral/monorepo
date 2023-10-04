@@ -211,7 +211,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					{
 						nodeishFs: createNodeishMemoryFs(),
 						auth: browserAuth,
-					},
+					}
 				)
 				setLastPullTime(new Date())
 				return newRepo
