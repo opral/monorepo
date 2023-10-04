@@ -207,6 +207,13 @@ export async function openRepository(
 			return response?.data
 		},
 
+		async createFork() {
+			return github.rest.repos.createFork({
+				owner,
+				repo: repoName,
+			})
+		},
+
 		async isCollaborator(cmdArgs) {
 			let response:
 				| Awaited<
