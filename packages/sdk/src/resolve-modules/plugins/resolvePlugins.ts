@@ -8,17 +8,11 @@ import {
 	PluginsDoNotProvideLoadOrSaveMessagesError,
 	PluginHasInvalidIdError,
 	PluginHasInvalidSchemaError,
-	PluginUsesReservedNamespaceError,
 } from "./errors.js"
 import { deepmerge } from "deepmerge-ts"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { tryCatch } from "@inlang/result"
 
-const whitelistedPlugins = [
-	"plugin.inlang.json",
-	"plugin.inlang.i18next",
-	"plugin.inlang.paraglideJs",
-]
 // @ts-ignore - type mismatch error
 const PluginCompiler = TypeCompiler.Compile(Plugin)
 
@@ -46,18 +40,6 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 				new PluginHasInvalidIdError(
 					`Plugin ${plugin.id} has an invalid id "${plugin.id}". It must be camelCase and contain a namespace like plugin.namespace.myPlugin.`,
 					{ plugin: plugin.id }
-				)
-			)
-		}
-
-		// -- USES RESERVED NAMESPACE --
-		if (plugin.id.includes("inlang") && !whitelistedPlugins.includes(plugin.id)) {
-			result.errors.push(
-				new PluginUsesReservedNamespaceError(
-					`Plugin ${plugin.id} uses reserved namespace 'inlang'.`,
-					{
-						plugin: plugin.id,
-					}
 				)
 			)
 		}

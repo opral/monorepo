@@ -21,12 +21,6 @@ export class PluginHasInvalidIdError extends PluginError {
 	}
 }
 
-export class PluginUsesReservedNamespaceError extends PluginError {
-	constructor(message: string, options: PluginErrorOptions) {
-		super(message, options)
-		this.name = "PluginUsesReservedNamespaceError"
-	}
-}
 
 export class PluginHasInvalidSchemaError extends PluginError {
 	constructor(message: string, options: PluginErrorOptions) {

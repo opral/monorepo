@@ -5,7 +5,6 @@ import {
 	PluginLoadMessagesFunctionAlreadyDefinedError,
 	PluginSaveMessagesFunctionAlreadyDefinedError,
 	PluginHasInvalidIdError,
-	PluginUsesReservedNamespaceError,
 	PluginReturnedInvalidCustomApiError,
 	PluginHasInvalidSchemaError,
 	PluginsDoNotProvideLoadOrSaveMessagesError,
@@ -52,23 +51,6 @@ it("should return an error if a plugin uses APIs that are not available", async 
 	})
 
 	expect(resolved.errors[0]).toBeInstanceOf(PluginHasInvalidSchemaError)
-})
-
-it("should not initialize a plugin that uses the 'inlang' namespace except for inlang whitelisted plugins", async () => {
-	const mockPlugin: Plugin = {
-		id: "plugin.inlang.notWhitelisted",
-		description: { en: "My plugin description" },
-		displayName: { en: "My plugin" },
-		loadMessages: () => undefined as any,
-	}
-
-	const resolved = await resolvePlugins({
-		plugins: [mockPlugin],
-		settings: {} as any,
-		nodeishFs: {} as any,
-	})
-
-	expect(resolved.errors[0]).toBeInstanceOf(PluginUsesReservedNamespaceError)
 })
 
 it("should expose the project settings including the plugin settings", async () => {
