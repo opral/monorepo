@@ -67,8 +67,8 @@ export const extractMessageCommand = {
 			"How to edit these replacement options? See `extractMessageOptions`."
 		) {
 			// TODO #152
-			return vscode.env.openExternal(
-				vscode.Uri.parse(
+			return env.openExternal(
+				Uri.parse(
 					"https://github.com/inlang/monorepo/tree/main/inlang/source-code/ide-extension#3%EF%B8%8F%E2%83%A3-configuration"
 				)
 			)
@@ -84,7 +84,7 @@ export const extractMessageCommand = {
 			variants: [
 				{
 					languageTag: state().project.settings()?.sourceLanguageTag as string,
-					match: [],
+					match: {},
 					pattern: [
 						{
 							type: "Text",
