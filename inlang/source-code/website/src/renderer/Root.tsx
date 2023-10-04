@@ -18,7 +18,7 @@ import de from "../../lang/de.json?raw"
 import en from "../../lang/en.json?raw"
 import zh from "../../lang/zh.json?raw"
 import sk from "../../lang/sk.json?raw"
-import pt_BR from "../../lang/pt_BR.json?raw"
+import pt_BR from "../../lang/pt-BR.json?raw"
 
 import { Meta } from "@solidjs/meta"
 
