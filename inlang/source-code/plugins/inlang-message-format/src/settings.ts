@@ -1,5 +1,10 @@
 import { object, string, type Output, startsWith, endsWith } from "valibot"
 
+/**
+ * Using valibot instead of typebox because it is tree-shakable.
+ *
+ * See https://github.com/sinclairzx81/typebox/discussions/614
+ */
 export type PluginSettings = Output<typeof PluginSettings>
 export const PluginSettings = object({
 	/**

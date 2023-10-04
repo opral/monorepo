@@ -21,7 +21,6 @@ export class PluginHasInvalidIdError extends PluginError {
 	}
 }
 
-
 export class PluginHasInvalidSchemaError extends PluginError {
 	constructor(message: string, options: PluginErrorOptions) {
 		super(message, options)
