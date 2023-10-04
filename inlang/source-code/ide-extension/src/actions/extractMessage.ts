@@ -1,6 +1,6 @@
 import * as vscode from "vscode"
-import { extractMessageCommand } from "../commands/extractMessage.js"
 import { telemetry } from "../services/telemetry/index.js"
+import { CONFIGURATION } from "../configuration.js"
 
 /**
  * Show light bulb quick fixes when text is selected, offering message extraction.
@@ -17,10 +17,7 @@ export class ExtractMessage implements vscode.CodeActionProvider {
 			return
 		}
 		const extractMessageAction = new vscode.CodeAction(`Inlang: Extract Message`)
-		extractMessageAction.command = {
-			title: extractMessageCommand.title,
-			command: extractMessageCommand.id,
-		}
+		extractMessageAction.command = CONFIGURATION.COMMANDS.EXTRACT_MESSAGE
 		return [extractMessageAction]
 	}
 

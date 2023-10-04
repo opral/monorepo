@@ -62,6 +62,7 @@
 		}
 	},
 	"scripts": {
+		"check": "tsc --noEmit",
 		"build": "node ./build.js",
 		"dev": "DEV=true node ./build.js",
 		"package": "npx @vscode/vsce package",
