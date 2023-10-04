@@ -18,7 +18,7 @@ export function calculateSummary(args: {
 	const lintedVariantNumber = args.reports.filter(
 		(r) =>
 			r.ruleId === "messageLintRule.inlang.missingTranslation" ||
-			r.ruleId === "messageLintRule.inlang.emptyPattern",
+			r.ruleId === "messageLintRule.inlang.emptyPattern"
 	).length
 
 	// only works with no specified selectors

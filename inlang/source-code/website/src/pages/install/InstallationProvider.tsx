@@ -10,6 +10,7 @@ import { ProjectSettings } from "@inlang/sdk"
 import { tryCatch } from "@inlang/result"
 import type { Step } from "./index.page.jsx"
 import { registry } from "@inlang/marketplace-registry"
+import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"
 
 export function InstallationProvider(props: {
@@ -36,11 +37,11 @@ export function InstallationProvider(props: {
 			const newProject: RecentProjectType = {
 				owner: props.repo.slice(
 					props.repo.indexOf("/") + 1,
-					props.repo.indexOf("/", props.repo.indexOf("/") + 1),
+					props.repo.indexOf("/", props.repo.indexOf("/") + 1)
 				),
 				repository: props.repo.slice(
 					props.repo.indexOf("/", props.repo.indexOf("/") + 1) + 1,
-					props.repo.length,
+					props.repo.length
 				),
 				description: "",
 				lastOpened: new Date().getTime(),
@@ -48,7 +49,7 @@ export function InstallationProvider(props: {
 
 			recentProjects = recentProjects.filter(
 				(project) =>
-					!(project.owner === newProject.owner && project.repository === newProject.repository),
+					!(project.owner === newProject.owner && project.repository === newProject.repository)
 			)
 
 			recentProjects.push(newProject)
@@ -72,7 +73,7 @@ function validateRepo(
 		step: () => Step
 		setStep: (step: Step) => void
 		optIn: Record<string, any>
-	},
+	}
 ) {
 	if (!user && getLocalStorage()) {
 		props.setStep({
@@ -117,7 +118,7 @@ async function initializeRepo(
 	modulesID: string[],
 	user: { username: string; email: string },
 	step: () => Step,
-	setStep: (step: Step) => void,
+	setStep: (step: Step) => void
 ) {
 	const modulesURL = modulesID.map((url) => {
 		const module = registry.find((module) => module.id.toLowerCase() === url.toLowerCase())
@@ -191,6 +192,8 @@ async function initializeRepo(
 		return
 	}
 
+	const formatting = detectJsonFormatting(projectResult.data).serialize
+
 	const inlangProjectString = projectResult.data
 
 	const parseProjectResult = tryCatch(() => {
@@ -228,13 +231,13 @@ async function initializeRepo(
 		if (inlangProject.modules.length === 0) return true
 
 		const installedModules = inlangProject.modules.every((module: string) =>
-			module.includes(moduleURL),
+			module.includes(moduleURL)
 		)
 		return !installedModules
 	})
 	inlangProject.modules.push(...modulesToInstall)
 
-	const generatedInlangProject = JSON.stringify(inlangProject, undefined, 2)
+	const generatedInlangProject = formatting(inlangProject)
 
 	await repo.nodeishFs.writeFile("./project.inlang.json", generatedInlangProject)
 

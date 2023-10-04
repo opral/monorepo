@@ -27,7 +27,7 @@ it('should detect double quotes t("id")', async () => {
 	expect(matches[0]?.position.start.character).toBe(17)
 	expect(matches[0]?.position.end.character).toBe(26)
 	expect(
-		sourceCode.slice(matches[0]?.position.start.character, matches[0]?.position.end.character),
+		sourceCode.slice(matches[0]?.position.start.character, matches[0]?.position.end.character)
 	).toBe('"some-id"')
 })
 
@@ -61,7 +61,7 @@ it("should detect t('id', ...args)", async () => {
 	const matches = parse(sourceCode)
 	expect(matches[0]?.messageId).toBe("some-id")
 	expect(
-		sourceCode.slice(matches[0]?.position.start.character, matches[0]?.position.end.character),
+		sourceCode.slice(matches[0]?.position.start.character, matches[0]?.position.end.character)
 	).toBe("'some-id'")
 })
 
@@ -80,7 +80,7 @@ it.skip("should ignore whitespace", async () => {
 	const matches = parse(sourceCode)
 	expect(matches[0]?.messageId).toBe("some-id")
 	expect(
-		sourceCode.slice(matches[0]?.position.start.character, matches[0]?.position.end.character),
+		sourceCode.slice(matches[0]?.position.start.character, matches[0]?.position.end.character)
 	).toBe('"some-id"')
 })
 

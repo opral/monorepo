@@ -48,6 +48,11 @@ export const repositories: Repositories = [
 		description: "A JSON Web Token authentication plugin for the Django REST Framework.",
 	},
 	{
+		owner: "hecker",
+		repository: "hecker.vc",
+		description: "Personal Website of Jan Hecker.",
+	},
+	{
 		owner: "allinurl",
 		repository: "goaccess",
 		description: "GoAccess is a real-time web log analyzer and interactive viewer",

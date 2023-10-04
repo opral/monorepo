@@ -1,5 +1,11 @@
 # @inlang/message
 
+## 2.0.0
+
+### Major Changes
+
+- b7dfc781e: change message format match from object to array
+
 ## 1.1.0
 
 ### Minor Changes

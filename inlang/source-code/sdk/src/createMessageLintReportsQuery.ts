@@ -14,7 +14,7 @@ export function createMessageLintReportsQuery(
 	messages: () => Array<Message> | undefined,
 	settings: () => ProjectSettings,
 	installedMessageLintRules: () => Array<InstalledMessageLintRule>,
-	resolvedModules: () => Awaited<ReturnType<typeof resolveModules>> | undefined,
+	resolvedModules: () => Awaited<ReturnType<typeof resolveModules>> | undefined
 ): InlangProject["query"]["messageLintReports"] {
 	// @ts-expect-error
 	const index = new ReactiveMap<MessageLintReport["messageId"], MessageLintReport[]>()
@@ -34,7 +34,7 @@ export function createMessageLintReportsQuery(
 					settings: {
 						..._settings,
 						messageLintRuleLevels: Object.fromEntries(
-							installedMessageLintRules().map((rule) => [rule.id, rule.level]),
+							installedMessageLintRules().map((rule) => [rule.id, rule.level])
 						),
 					},
 					messages: _messages,
@@ -58,13 +58,13 @@ export function createMessageLintReportsQuery(
 	return {
 		getAll: createSubscribable(() => {
 			return structuredClone(
-				[...index.values()].flat().length === 0 ? [] : [...index.values()].flat(),
+				[...index.values()].flat().length === 0 ? [] : [...index.values()].flat()
 			)
 		}),
 		get: Object.assign(get, {
 			subscribe: (
 				args: Parameters<MessageLintReportsQueryApi["get"]["subscribe"]>[0],
-				callback: Parameters<MessageLintReportsQueryApi["get"]["subscribe"]>[1],
+				callback: Parameters<MessageLintReportsQueryApi["get"]["subscribe"]>[1]
 			) => createSubscribable(() => get(args)).subscribe(callback),
 		}) as any,
 	}

@@ -39,7 +39,7 @@ export function SelectRepo(props: { size: "small" | "medium"; modules: any[] }) 
 									setSearchParams(
 										`/install?repo=github.com/${project.owner}/${
 											project.repository
-										}&module=${props.modules?.join(",")}`,
+										}&module=${props.modules?.join(",")}`
 									)
 								}}
 							>
@@ -89,11 +89,11 @@ export function SelectionWrapper(props: {
 
 							if (isSelected) {
 								props.setSelectedPackages(
-									props.selectedPackages().filter((item) => item !== packageToRemove),
+									props.selectedPackages().filter((item) => item !== packageToRemove)
 								)
 							} else {
 								props.setSelectedPackages(
-									removeDuplicates([...props.selectedPackages(), packageToRemove]),
+									removeDuplicates([...props.selectedPackages(), packageToRemove])
 								)
 							}
 						}

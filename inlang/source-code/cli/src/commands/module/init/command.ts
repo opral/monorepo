@@ -44,7 +44,7 @@ export async function execute(args: { type: ModuleInitOptions["type"] }) {
 
 	if (filesInDir.length !== 0) {
 		log.error(
-			"The current working directory is not empty. Please run this command in an empty directory.",
+			"The current working directory is not empty. Please run this command in an empty directory."
 		)
 		return
 	}

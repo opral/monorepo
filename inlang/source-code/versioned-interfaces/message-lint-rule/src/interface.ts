@@ -2,9 +2,11 @@ import type { Message } from "@inlang/message"
 import type { LanguageTag } from "@inlang/language-tag"
 import { Translatable } from "@inlang/translatable"
 import { Type, type Static } from "@sinclair/typebox"
+import type { JSONObject } from "@inlang/json-types"
 import {
 	_MessageLintRuleId,
 	_MessageLintRuleLevel,
+	ExternalProjectSettings,
 	type ProjectSettings,
 } from "@inlang/project-settings"
 
@@ -22,10 +24,27 @@ export type MessageLintReport = {
 	body: Translatable<string>
 }
 
-export type MessageLintRule = Static<typeof MessageLintRule> & {
+/**
+ * The message lint rule API.
+ *
+ * You can use your own settings by extending the type with a generic:
+ *
+ * ```ts
+ * 	type RuleSettings = {
+ *  	storagePath: string
+ * 	}
+ *
+ * 	const messageLintRule: MessageLintRule<{
+ * 		"messageLintRule.your.id": RuleSettings
+ * 	}>
+ * ```
+ */
+export type MessageLintRule<
+	ExternalSettings extends Record<keyof ExternalProjectSettings, JSONObject> | unknown = unknown
+> = Static<typeof MessageLintRule> & {
 	run: (args: {
 		message: Message
-		settings: ProjectSettings
+		settings: ProjectSettings & ExternalSettings
 		report: (args: {
 			messageId: Message["id"]
 			languageTag: LanguageTag

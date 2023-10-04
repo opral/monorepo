@@ -4,11 +4,11 @@
     </p>
     <h4 align="center">
         <a href="https://inlang.com/documentation" target="_blank">Get Started</a> ·
-        <a href="https://github.com/inlang/monorepo/discussions" target="_blank">Discussions</a> · <a href="https://twitter.com/inlangHQ" target="_blank">Twitter</a>
+        <a href="https://github.com/inlang/monorepo/discussions" target="_blank">Discussions</a> · <a href="https://twitter.com/inlangHQ" target="_blank">X</a>
     </h4>
 </div>
 
-# Inlang IDE Code Extension
+# inlang IDE Code Extension
 
 This extension provides a seamless integration of the [Inlang](https://inlang.com) localization solution into Visual Studio Code. It allows you to translate your content directly in your IDE.
 

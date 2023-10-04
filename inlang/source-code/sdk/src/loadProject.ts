@@ -58,7 +58,7 @@ export const loadProject = async (args: {
 		// TODO: create FS watcher and update settings on change
 
 		const writeSettingsToDisk = skipFirst((settings: ProjectSettings) =>
-			_writeSettingsToDisk({ nodeishFs: args.nodeishFs, settings }),
+			_writeSettingsToDisk({ nodeishFs: args.nodeishFs, settings })
 		)
 
 		const setSettings = (settings: ProjectSettings): Result<void, ProjectSettingsInvalidError> => {
@@ -113,16 +113,15 @@ export const loadProject = async (args: {
 
 			makeTrulyAsync(
 				_resolvedModules.resolvedPluginApi.loadMessages({
-					languageTags: settingsValue!.languageTags,
-					sourceLanguageTag: settingsValue!.sourceLanguageTag,
-				}),
+					settings: settingsValue,
+				})
 			)
 				.then((messages) => {
 					setMessages(messages)
 					markInitAsComplete()
 				})
 				.catch((err) =>
-					markInitAsFailed(new PluginLoadMessagesError("Error in load messages", { cause: err })),
+					markInitAsFailed(new PluginLoadMessagesError("Error in load messages", { cause: err }))
 				)
 		})
 
@@ -141,7 +140,7 @@ export const loadProject = async (args: {
 							"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
 						// default to warning, see https://github.com/inlang/monorepo/issues/1254
 						level: settingsValue["messageLintRuleLevels"]?.[rule.id] ?? "warning",
-					} satisfies InstalledMessageLintRule),
+					} satisfies InstalledMessageLintRule)
 			) satisfies Array<InstalledMessageLintRule>
 		}
 
@@ -166,7 +165,7 @@ export const loadProject = async (args: {
 			messages,
 			settings as () => ProjectSettings,
 			installedMessageLintRules,
-			resolvedModules,
+			resolvedModules
 		)
 
 		const debouncedSave = skipFirst(
@@ -174,7 +173,10 @@ export const loadProject = async (args: {
 				500,
 				async (newMessages) => {
 					try {
-						await resolvedModules()?.resolvedPluginApi.saveMessages({ messages: newMessages })
+						await resolvedModules()?.resolvedPluginApi.saveMessages({
+							settings: settingsValue,
+							messages: newMessages,
+						})
 					} catch (err) {
 						throw new PluginSaveMessagesError("Error in saving messages", {
 							cause: err,
@@ -187,8 +189,8 @@ export const loadProject = async (args: {
 						setMessages(newMessages)
 					}
 				},
-				{ atBegin: false },
-			),
+				{ atBegin: false }
+			)
 		)
 
 		createEffect(() => {
@@ -226,14 +228,14 @@ const loadSettings = async (args: {
 	nodeishFs: NodeishFilesystemSubset
 }) => {
 	const { data: settingsFile, error: settingsFileError } = await tryCatch(
-		async () => await args.nodeishFs.readFile(args.settingsFilePath, { encoding: "utf-8" }),
+		async () => await args.nodeishFs.readFile(args.settingsFilePath, { encoding: "utf-8" })
 	)
 	if (settingsFileError)
 		throw new ProjectSettingsFileNotFoundError(
 			`Could not locate settings file in (${args.settingsFilePath}).`,
 			{
 				cause: settingsFileError,
-			},
+			}
 		)
 
 	const json = tryCatch(() => JSON.parse(settingsFile!))
@@ -265,14 +267,14 @@ const _writeSettingsToDisk = async (args: {
 }) => {
 	const { data: serializedSettings, error: serializeSettingsError } = tryCatch(() =>
 		// TODO: this will probably not match the original formatting
-		JSON.stringify(args.settings, undefined, 2),
+		JSON.stringify(args.settings, undefined, 2)
 	)
 	if (serializeSettingsError) {
 		throw serializeSettingsError
 	}
 
 	const { error: writeSettingsError } = await tryCatch(async () =>
-		args.nodeishFs.writeFile("./project.inlang.json", serializedSettings),
+		args.nodeishFs.writeFile("./project.inlang.json", serializedSettings)
 	)
 
 	if (writeSettingsError) {
@@ -294,7 +296,7 @@ const createAwaitable = () => {
 	return [promise, resolve!, reject!] as [
 		awaitable: Promise<void>,
 		resolve: () => void,
-		reject: (e: unknown) => void,
+		reject: (e: unknown) => void
 	]
 }
 

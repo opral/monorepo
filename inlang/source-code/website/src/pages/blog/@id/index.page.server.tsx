@@ -1,28 +1,35 @@
-import fs from "node:fs/promises"
+import fs from "node:fs"
 import tableOfContents from "../../../../../../blog/tableOfContents.json"
 import { convert } from "@inlang/markdown"
 import { render } from "vite-plugin-ssr/abort"
 
 const renderedMarkdown = {} as Record<string, string>
-const repositoryRoot = new URL("../../../../../../", import.meta.url)
+
+/* Slices the relative path to the repository, no matter where in the file system the code is executed from.
+This is necessary because the code is executed from the build folder. */
+const repositoryRoot = import.meta.url.slice(0, import.meta.url.lastIndexOf("inlang/source-code"))
 
 export async function onBeforeRender(pageContext: any) {
-	const slug = pageContext.urlPathname.replace("/blog/", "")
-	if (renderedMarkdown[slug] === undefined) {
-		const content = tableOfContents.find((content) => content.slug === slug)
+	const { id } = pageContext.routeParams
 
-		if (!content) {
-			throw render(404)
-		}
-
-		const text = await fs.readFile(new URL(`blog/${content.path}`, repositoryRoot), "utf-8")
-		const markdown = await convert(text)
-		renderedMarkdown[slug] = markdown
+	const page = tableOfContents.find((page) => page.slug === id)
+	if (!page) {
+		throw render(404)
 	}
+
+	const markdownFilePath = new URL(`inlang/blog/${page.path}`, repositoryRoot)
+
+	if (!fs.existsSync(markdownFilePath)) {
+		throw render(404)
+	}
+
+	const content = await convert(fs.readFileSync(markdownFilePath, "utf-8"))
+	renderedMarkdown[id] = content
+
 	return {
 		pageContext: {
 			pageProps: {
-				markdown: renderedMarkdown[slug],
+				markdown: renderedMarkdown[id],
 			},
 		},
 	}

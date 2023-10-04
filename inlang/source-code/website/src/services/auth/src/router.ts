@@ -31,7 +31,7 @@ router.get("/github-oauth-callback", async (request, response, next) => {
 
 		if (hasExternalGitProxy) {
 			response.redirect(
-				`${privateEnv.PUBLIC_GIT_PROXY_BASE_URL}/services/auth/github-forwarded-oauth-callback?encryptedAccessToken=${encryptedAccessToken}&callback=${privateEnv.PUBLIC_SERVER_BASE_URL}/services/auth/oauth-callback`,
+				`${privateEnv.PUBLIC_GIT_PROXY_BASE_URL}/services/auth/github-forwarded-oauth-callback?encryptedAccessToken=${encryptedAccessToken}&callback=${privateEnv.PUBLIC_SERVER_BASE_URL}/services/auth/oauth-callback`
 			)
 		} else {
 			response.redirect("/services/auth/oauth-callback")

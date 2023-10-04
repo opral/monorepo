@@ -11,7 +11,7 @@
 		"en": "This extension allows you to use inlang in your IDE, enabling translating content directly in your code."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/README.md"
+		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/MARKETPLACE.md"
 	},
 	"keywords": ["ide", "extension", "vscode"],
 	"publisherName": "inlang",

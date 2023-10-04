@@ -35,7 +35,7 @@ const promptUserToDeleteConfigFile = async (): Promise<string | undefined> => {
 	return await vscode.window.showInformationMessage(
 		"Found an old inlang.config.js file, but a new project.inlang.json exists. Do you want to delete the inlang.config.js?",
 		"Accept",
-		"Reject",
+		"Reject"
 	)
 }
 

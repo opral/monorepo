@@ -1,8 +1,10 @@
-# inlang-plugin-i18next
+# What does this plugin do?
 
 This plugin works with i18next to read and write messages. It also determines how translation functions and namespaces are parsed and handled by the IDE extension.
 
-## Usage
+# How to use
+
+You can add the plugin to your inlang project like this:
 
 ```json
 // filename: project.inlang.json
@@ -11,7 +13,7 @@ This plugin works with i18next to read and write messages. It also determines ho
 	"sourceLanguageTag": "en",
 	"languageTags": ["en", "de", "it"],
 	"modules": [
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@4/dist/index.js"
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@latest/dist/index.js"
 	],
 	"settings": {
 		"plugin.inlang.i18next": {
@@ -21,7 +23,7 @@ This plugin works with i18next to read and write messages. It also determines ho
 }
 ```
 
-## Settings
+# Settings
 
 The plugin offers further configuration options that can be passed as arguments. The following settings exist:
 
@@ -33,17 +35,17 @@ type PluginSettings = {
 }
 ```
 
-### `pathPattern`
+## `pathPattern`
 
 To use our plugin, you need to provide a path to the directory where your language-specific files are stored. Use the dynamic path syntax `{languageTag}` to specify the language name.
 
-#### Without namespaces
+### pathPattern without namespaces
 
 ```json
 "pathPattern": "./resources/{languageTag}.json"
 ```
 
-#### With namespaces
+### pathPattern with namespaces
 
 > Does not get created by 'npx @inlang/cli config init'
 
@@ -57,7 +59,7 @@ To use our plugin, you need to provide a path to the directory where your langua
 `key` (prefix): is prefixing the key with a colon
 `values` (path): is the path to the namespace resources
 
-### `variableReferencePattern`
+## `variableReferencePattern`
 
 Defines the pattern for variable references. The default is how i18next suggests the usage of placeholders.
 
@@ -67,17 +69,17 @@ default:
 "variableReferencePattern": ["{{", "}}"]
 ```
 
-### `sourceLanguageFilePath`
+## `sourceLanguageFilePath`
 
 This setting is optional and should only be used if the file name of your sourceLanguageTag does not match your pathPattern structure. For example, if your sourceLanguageTag is `en` but your sourceLanguage file is called `main.json`, you can use this setting to specify the path to the sourceLanguage file. Our recommendation is to rename the file to `en.json` and not use this setting.
 
-#### Without namespaces
+### Without namespaces
 
 ```json
 "sourceLanguageFilePath": "./resources/main.json"
 ```
 
-#### With namespaces
+### With namespaces
 
 ```json
 "sourceLanguageFilePath": {
@@ -86,11 +88,11 @@ This setting is optional and should only be used if the file name of your source
 }
 ```
 
-## IDE-extension usage
+# IDE-extension usage
 
 The plugin automatically informs the [IDE extension](https://inlang.com/marketplace/app.inlang.ideExtension) how to extract keys and namespaces from your code in order to display inline annotations.
 
-### In-code usage
+## In-code usage
 
 `t("key")`
 
@@ -100,13 +102,13 @@ With namespaces:
 
 To learn about namespaces and how to use translation functions in your code, you can refer to [i18next documentation](https://www.i18next.com/principles/namespaces). The plugin is capable of parsing the code and providing the IDE-extension with this information.
 
-## Expected behavior
+# Expected behavior
 
 The message IDs are sorted in the order in which they appear in the sourceLanguage file. The nesting or flattening of IDs is detected on a file-by-file basis. If the sourceLanguage file contains nested IDs, the plugin will also create nested IDs in the targetLanguage files. If the sourceLanguage file contains flattened IDs, the plugin will also create flattened IDs in the targetLanguage files.
 
-## Contributing
+# Contributing
 
-### Getting started
+## Getting started
 
 Run the following commands in your terminal (node and npm must be installed):
 
@@ -115,7 +117,7 @@ Run the following commands in your terminal (node and npm must be installed):
 
 `npm run dev` will start the development environment which automatically compiles the [src/index.ts](./src/index.ts) files to JavaScript ([dist/index.js](dist/index.js)), runs tests defined in `*.test.ts` files and watches changes.
 
-### Publishing
+## Publishing
 
 Run `npm run build` to generate a build.
 

@@ -3,7 +3,7 @@ export class MessageVariantDoesNotExistError extends Error {
 
 	constructor(messageId: string, languageTag: string) {
 		super(
-			`For message '${messageId}' and '${languageTag}', there doesn't exist a variant for this specific matchers.`,
+			`For message '${messageId}' and '${languageTag}', there doesn't exist a variant for this specific matchers.`
 		)
 	}
 }
@@ -12,7 +12,7 @@ export class MessageVariantAlreadyExistsError extends Error {
 
 	constructor(messageId: string, languageTag: string) {
 		super(
-			`For message '${messageId}' and '${languageTag}', there already exists a variant for this specific matchers.`,
+			`For message '${messageId}' and '${languageTag}', there already exists a variant for this specific matchers.`
 		)
 	}
 }

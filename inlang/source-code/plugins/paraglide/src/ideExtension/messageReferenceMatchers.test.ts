@@ -67,7 +67,7 @@ describe("tFunction", () => {
 		const matches = parse(sourceCode)
 		expect(matches[0].messageId === "some-id")
 		expect(
-			sourceCode.slice(matches[0].position.start.character, matches[0].position.end.character),
+			sourceCode.slice(matches[0].position.start.character, matches[0].position.end.character)
 		).toBe("some-id")
 	})
 

@@ -142,7 +142,7 @@ export const useEditorState = () => {
 	const context = useContext(EditorStateContext)
 	if (context === undefined) {
 		throw Error(
-			"The EditorStateContext is undefined. useEditorState must be used within a EditorStateProvider",
+			"The EditorStateContext is undefined. useEditorState must be used within a EditorStateProvider"
 		)
 	}
 	return context
@@ -183,7 +183,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	})
 
 	const [filteredLanguageTags, setFilteredLanguageTags] = createSignal<LanguageTag[]>(
-		params.getAll("lang") as string[],
+		params.getAll("lang") as string[]
 	)
 	createEffect(() => {
 		setSearchParams({ key: "lang", value: filteredLanguageTags() })
@@ -215,7 +215,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			} else {
 				return undefined
 			}
-		},
+		}
 	)
 
 	// get lix errors
@@ -241,7 +241,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 							telemetryBrowser.capture(id, props)
 						},
 					}),
-					{ from },
+					{ from }
 				)
 				const gitOrigin = parseOrigin({ remotes: await newRepo.listRemotes() })
 				telemetryBrowser.group("repository", gitOrigin, {
@@ -254,7 +254,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			} else {
 				return undefined
 			}
-		},
+		}
 	)
 
 	// DERIVED when config exists
@@ -338,7 +338,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				// FIXME: is this still required? isCollaborator should now return false instead of failing
 				return false
 			}
-		},
+		}
 	)
 
 	const [githubRepositoryInformation] = createResource(
@@ -356,7 +356,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				routeParams: routeParams(),
 			}
 		},
-		async () => await repo()?.getMeta(),
+		async () => await repo()?.getMeta()
 	)
 
 	const [currentBranch] = createResource(
@@ -368,7 +368,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 		async () => {
 			return await repo()?.getCurrentBranch()
-		},
+		}
 	)
 
 	return (
@@ -452,7 +452,7 @@ export async function pushChanges(args: {
 			// files with unstaged and uncommitted changes
 			(row[2] === 2 && row[3] === 1) ||
 			// added files
-			(row[2] === 2 && row[3] === 0),
+			(row[2] === 2 && row[3] === 0)
 	)
 	if (filesWithUncommittedChanges.length === 0) {
 		return { error: new PushException("No changes to push.") }
