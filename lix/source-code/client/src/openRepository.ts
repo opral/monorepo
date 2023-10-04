@@ -41,6 +41,7 @@ export async function openRepository(
 	const gitHubProxyUrl = origin + "/github-proxy/"
 
 	// parse url in the format of github.com/inlang/example and split it to host, owner and repo
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [_, namespace, host, owner, repoName] = [...pathname.split("/")]
 
 	// check if all 3 parts are present, if not, return an error
