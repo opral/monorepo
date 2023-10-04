@@ -57,7 +57,7 @@ export async function tryAutoGenProjectSettings(args: {
 
 	if (pluginName === "sdkJs") {
 		warnings.push(
-			"📦 Using plugin: @inlang/sdk-js.\nYou have to add a plugin which reads and writes resources e.g. the @inlang/plugin-json. See: https://inlang.com/documentation/plugins/registry"
+			"📦 Using plugin: @inlang/sdk-js.\nYou have to add a plugin which reads and writes resources e.g. the @inlang/plugin-json. See: https://inlang.com/marketplace"
 		)
 	} else if (pluginName === "typesafeI18n") {
 		warnings.push("Found typesafe-i18n, but it is not supported anymore.")
