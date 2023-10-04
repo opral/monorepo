@@ -3,6 +3,7 @@ import type { Repository } from "./api.js"
 import { transformRemote, withLazyFetching } from "./helpers.js"
 // @ts-ignore
 import http from "./http-client.js"
+import { Octokit } from "octokit"
 
 import { createSignal, createEffect } from "./solid.js"
 import {
@@ -23,7 +24,6 @@ export async function openRepository(
 	args: {
 		nodeishFs: NodeishFilesystem
 		workingDirectory?: string
-		corsProxy?: string
 		auth?: unknown // unimplemented
 	}
 ): Promise<Repository> {
@@ -31,29 +31,47 @@ export async function openRepository(
 
 	const [errors, setErrors] = createSignal<Error[]>([])
 
+	// the url format is
+	// https://lix.inlang.com/git/github.com/inlang/monorepo
+	// proto:// lixDomain / namespace / repoHost / owner / repoName
+	// namespace is ignored until switching from git.inlang.com to lix.inlang.com and can eveolve in future to be used for repoType, api type or feature group
+
+	const { origin, pathname } = new URL(url)
+	const gitProxyUrl = origin + "/git-proxy/"
+	const gitHubProxyUrl = origin + "/github-proxy/"
+
 	// parse url in the format of github.com/inlang/example and split it to host, owner and repo
-	const [host, owner, repoName] = [...url.split("/")]
+	const [namespace, host, owner, repoName] = [...pathname.split("/")]
 
 	// check if all 3 parts are present, if not, return an error
-	if (!host || !owner || !repoName) {
+	if (!namespace || !host || !owner || !repoName) {
 		throw new Error(
-			`Invalid url format for '${url}' for cloning repository, please use the format of github.com/inlang/example.`
+			`Invalid url format for '${url}' for cloning repository, please use the format of https://lix.inlang.com/git/github.com/inlang/monorepo.`
 		)
 	}
 	if (args.auth) {
 		console.warn("Auth currently not implemented in lisa client")
 	}
 
-	let gitHubProxyBaseUrl = ""
-	const gitProxyUrl = args?.corsProxy
+	const github = new Octokit({
+		request: {
+			fetch: (...ghArgs: any) => {
+				ghArgs[0] = gitHubProxyUrl + ghArgs[0]
+				if (!ghArgs[1]) {
+					ghArgs[1] = {}
+				}
 
-	// Git cors proxy and github cors proxy have to be on the same server and will be unified further
-	if (gitProxyUrl && gitProxyUrl?.startsWith("http")) {
-		const { origin } = new URL(gitProxyUrl)
-		gitHubProxyBaseUrl = origin
-	}
+				// required for authenticated cors requests
+				ghArgs[1].credentials = "include"
 
-	const normalizedUrl = `https://${host}/${owner}/${repoName}`
+				// @ts-ignore
+				return fetch(...ghArgs)
+			},
+		},
+	})
+
+	// TODO: clean way to use local repo allready in the fs
+	const gitUrl = `https://${host}/${owner}/${repoName}`
 
 	// the directory we use for all git operations
 	const dir = "/"
@@ -63,7 +81,7 @@ export async function openRepository(
 		http,
 		dir,
 		corsProxy: gitProxyUrl,
-		url: normalizedUrl,
+		url: gitUrl,
 		singleBranch: true,
 		depth: 1,
 		noTags: true,
@@ -145,7 +163,7 @@ export async function openRepository(
 		push() {
 			return push({
 				fs: withLazyFetching(rawFs, "push", delayedAction),
-				url: normalizedUrl,
+				url: gitUrl,
 				corsProxy: gitProxyUrl,
 				http,
 				dir,
@@ -155,7 +173,7 @@ export async function openRepository(
 		pull(cmdArgs) {
 			return pull({
 				fs: withLazyFetching(rawFs, "pull", delayedAction),
-				url: normalizedUrl,
+				url: gitUrl,
 				corsProxy: gitProxyUrl,
 				http,
 				dir,

@@ -139,9 +139,8 @@ async function initializeRepo(
 	}
 
 	/* Opens the repository with lix */
-	const repo = await openRepository(repoURL, {
+	const repo = await openRepository(`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${repoURL}`, {
 		nodeishFs: createNodeishMemoryFs(),
-		corsProxy: publicEnv.PUBLIC_GIT_PROXY_BASE_URL + publicEnv.PUBLIC_GIT_PROXY_PATH,
 	})
 
 	const isCollaborator = await repo

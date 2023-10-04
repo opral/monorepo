@@ -12,7 +12,7 @@ describe("main workflow", () => {
 
 	it("allows to subscribe to errors", async () => {
 		const errorHandler = vi.fn()
-		repository = await openRepository("github.com/inlang/examplX", {
+		repository = await openRepository("https://github.com/inlang/examplX", {
 			nodeishFs: createNodeishMemoryFs(),
 		})
 
@@ -26,7 +26,7 @@ describe("main workflow", () => {
 
 	it("opens a repo url without error and without blocking io", async () => {
 		// fix normalization of .git
-		repository = await openRepository("github.com/inlang/example", {
+		repository = await openRepository("https://github.com/inlang/example", {
 			nodeishFs: createNodeishMemoryFs(),
 		})
 	})
