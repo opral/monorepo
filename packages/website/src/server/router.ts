@@ -5,7 +5,6 @@
  * Multiple things come together here:
  *  - express.js that powers the server https://expressjs.com/
  *  - vite-plugin-ssr that powers routing and rendering https://vite-plugin-ssr.com/
- *  - telefunc that powers RPCs https://telefunc.com/
  *
  * !Note: This file has not hot module reload. If you change code, you need to restart the server
  * !      by re-running `npm run dev`.
