@@ -30,9 +30,9 @@ export const cli = async (args: { compile: typeof compile; name: string }) => {
 		process.exit(1)
 	}
 
-	consola.info(`Compiling inlang project "${argv.project}"...`)
+	consola.info(`Compiling inlang project at "${projectPath}".`)
 
-	const project = await loadProject({ settingsFilePath: argv.project, nodeishFs: fs })
+	const project = await loadProject({ settingsFilePath: projectPath, nodeishFs: fs })
 
 	if (project.errors().length > 0) {
 		consola.error(dedent`
@@ -42,4 +42,6 @@ export const cli = async (args: { compile: typeof compile; name: string }) => {
     `)
 		process.exit(1)
 	}
+
+	consola.success("Successfully compiled the project.")
 }
