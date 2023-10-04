@@ -206,10 +206,13 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			// open the repository
 
 			if (host && owner && repository) {
-				const newRepo = await openRepository(`${host}/${owner}/${repository}`, {
+				const newRepo = await openRepository(
+					`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${host}/${owner}/${repository}`,
+					{
 					nodeishFs: createNodeishMemoryFs(),
-					corsProxy: publicEnv.PUBLIC_GIT_PROXY_BASE_URL + publicEnv.PUBLIC_GIT_PROXY_PATH,
-				})
+						auth: browserAuth,
+					},
+				)
 				setLastPullTime(new Date())
 				return newRepo
 			} else {
