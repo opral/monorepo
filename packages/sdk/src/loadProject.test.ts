@@ -644,6 +644,10 @@ describe("functionality", () => {
 		/*
 		 * Passing all messages to saveMessages() simplifies plugins by an order of magnitude.
 		 *
+		 * The alternative would be to pass only the messages that changed to saveMessages().
+		 * But, this would require plugins to maintain a separate data structure of messages
+		 * and create optimizations, leading to (unjustified) complexity for plugin authors.
+		 *
 		 * Pros:
 		 *   - plugins don't need to transform the data (time complexity).
 		 *   - plugins don't to maintain a separate data structure (space complexity).
