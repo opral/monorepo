@@ -232,7 +232,7 @@ const loadSettings = async (args: {
 	)
 	if (settingsFileError)
 		throw new ProjectSettingsFileNotFoundError(
-			`Could not locate settings file in (${args.settingsFilePath}).`,
+			`Could not locate the project settings file (usually named "project.inlang.json"). The provided path was "${args.settingsFilePath}".`,
 			{
 				cause: settingsFileError,
 			}
