@@ -66,9 +66,9 @@ export const Gitfloat = () => {
 		telemetryBrowser.capture("EDITOR created fork", {
 			owner: routeParams().owner,
 			repository: routeParams().repository,
-			sucess: response.status === 202,
+			sucess: response?.status === 202,
 		})
-		if (response.status === 202) {
+		if (response?.status === 202) {
 			showToast({
 				variant: "success",
 				title: "The Fork has been created.",
