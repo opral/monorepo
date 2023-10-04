@@ -3,7 +3,6 @@
 		"ms-vscode-remote.remote-containers",
 		"dbaeumer.vscode-eslint",
 		"esbenp.prettier-vscode",
-		"inlang.vs-code-extension",
-		"redhat.vscode-yaml"
+		"inlang.vs-code-extension"
 	]
 }
