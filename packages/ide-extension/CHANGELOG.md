@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.9.0
+
+### Minor Changes
+
+- e336aa227: clean up command configuration
+
 ## 1.8.0
 
 ### Minor Changes
