@@ -38,7 +38,7 @@
 		"@inlang/project-settings": "*",
 		"@inlang/result": "*",
 		"@lix-js/fs": "*",
-		"@sinclair/typebox": "^0.31.0",
+		"@sinclair/typebox": "^0.31.17",
 		"deepmerge-ts": "^5.1.0",
 		"solid-js": "1.6.12",
 		"throttle-debounce": "5.0.0",
