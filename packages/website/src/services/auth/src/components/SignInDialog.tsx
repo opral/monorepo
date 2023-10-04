@@ -1,7 +1,6 @@
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js"
 import { createSignal, Show } from "solid-js"
 import IconGithub from "~icons/cib/github"
-import { login } from "@lix-js/client"
 
 /**
  * A dialog that prompts the user to login with GitHub.
@@ -35,7 +34,6 @@ export function SignInDialog(props: {
 					prop:variant="primary"
 					onClick={() => {
 						props.onClickOnSignInButton()
-						login()
 					}}
 				>
 					{/* @ts-ignore */}

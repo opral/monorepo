@@ -16,7 +16,7 @@ import type { LocalStorageSchema } from "#src/services/local-storage/index.js"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
-import { openRepository, createNodeishMemoryFs, type Repository } from "@lix-js/client"
+import { openRepository, createNodeishMemoryFs, type Repository, browserAuth } from "@lix-js/client"
 import { publicEnv } from "@inlang/env-variables"
 import {
 	LanguageTag,
@@ -209,7 +209,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				const newRepo = await openRepository(
 					`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${host}/${owner}/${repository}`,
 					{
-					nodeishFs: createNodeishMemoryFs(),
+						nodeishFs: createNodeishMemoryFs(),
 						auth: browserAuth,
 					},
 				)

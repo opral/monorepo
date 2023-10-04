@@ -1,7 +1,7 @@
 import { createEffect, createResource, Match, Switch } from "solid-js"
 import MaterialSymbolsCheckCircleRounded from "~icons/material-symbols/check-circle-rounded"
 import MaterialSymbolsArrowBackRounded from "~icons/material-symbols/arrow-back-rounded"
-import { getUser } from "@lix-js/client"
+import { browserAuth } from "@lix-js/client"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 
 /**
@@ -15,7 +15,7 @@ import { useLocalStorage } from "#src/services/local-storage/index.js"
 export function Page() {
 	// ! Extremely important to wrap the get user function
 	// ! see https://github.com/brillout/telefunc/issues/56#issuecomment-1397929356
-	const [userInfo] = createResource(async () => await getUser())
+	const [userInfo] = createResource(async () => await browserAuth.getUser())
 	const [localStorage] = useLocalStorage()
 
 	createEffect(() => {
