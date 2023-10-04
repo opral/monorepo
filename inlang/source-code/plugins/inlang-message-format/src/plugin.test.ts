@@ -5,7 +5,8 @@ import { vi } from "vitest"
 import { beforeEach } from "node:test"
 import { pluginId } from "./plugin.js"
 import type { PluginSettings } from "./settings.js"
-import type { StorageSchema } from "./storageSchema.js"
+import { StorageSchema } from "./storageSchema.js"
+import { Value } from "@sinclair/typebox/value"
 
 beforeEach(() => {
 	// clear plugin state between tests
@@ -56,6 +57,7 @@ test("roundtrip (saving/loading messages)", async () => {
 	const fileAfterRoundtrip = await fs.readFile("./messages.json", { encoding: "utf-8" })
 
 	expect(fileAfterRoundtrip).toStrictEqual(initialFile)
+	expect(Value.Check(StorageSchema, JSON.parse(fileAfterRoundtrip))).toBe(true)
 
 	const messagesAfterRoundtrip = await plugin.loadMessages!({
 		settings,
@@ -104,6 +106,7 @@ test("keep the json formatting to decrease git diff's and merge conflicts", asyn
 
 	// the file should still tab indentation
 	expect(fileAfterRoundtrip).toStrictEqual(initialFile)
+	expect(Value.Check(StorageSchema, JSON.parse(fileAfterRoundtrip))).toBe(true)
 })
 
 test("save the messages alphabetically to decrease git diff's and merge conflicts", async () => {
@@ -129,6 +132,7 @@ test("save the messages alphabetically to decrease git diff's and merge conflict
 
 	const fileAfterSave = await fs.readFile("./messages.json", { encoding: "utf-8" })
 	const json = JSON.parse(fileAfterSave) as StorageSchema
+	expect(Value.Check(StorageSchema, json)).toBe(true)
 	expect(json.data[0]?.id).toBe("a")
 	expect(json.data[1]?.id).toBe("b")
 	expect(json.data[2]?.id).toBe("c")
@@ -168,8 +172,11 @@ test("don't throw if the storage path does not exist. instead, create the file (
 		nodeishFs: fs,
 	})
 
+	const createdFile = await fs.readFile("./messages.json", { encoding: "utf-8" })
+	const parsedFile = JSON.parse(createdFile)
 	// messages should be empty but no error should be thrown
 	expect(messages).toStrictEqual([])
+	expect(Value.Check(StorageSchema, parsedFile)).toBe(true)
 })
 
 // adds typesafety in IDEs
@@ -192,4 +199,5 @@ test("it should add the $schema property to the file if it does not exist", asyn
 	const json = JSON.parse(fileAfterSave) as StorageSchema
 	expect(json.$schema).toBe("https://inlang.com/schema/inlang-message-format")
 	expect(json.data).toStrictEqual([])
+	expect(Value.Check(StorageSchema, json)).toBe(true)
 })

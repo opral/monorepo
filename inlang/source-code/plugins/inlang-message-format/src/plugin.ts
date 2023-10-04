@@ -27,7 +27,18 @@ export const plugin: Plugin<{
 		} catch (error) {
 			// file does not exist. create it.
 			if ((error as any)?.code === "ENOENT") {
-				await nodeishFs.writeFile(settings["plugin.inlang.messageFormat"].storagePath, "[]\n")
+				await nodeishFs.writeFile(
+					settings["plugin.inlang.messageFormat"].storagePath,
+					JSON.stringify(
+						{
+							$schema: "https://inlang.com/schema/inlang-message-format",
+							data: [],
+						} satisfies StorageSchema,
+						undefined,
+						// beautify the file
+						"\t"
+					)
+				)
 				return []
 			}
 			// unknown error
