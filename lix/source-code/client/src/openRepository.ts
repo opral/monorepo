@@ -31,24 +31,52 @@ export async function openRepository(
 
 	const [errors, setErrors] = createSignal<Error[]>([])
 
-	// the url format is
+	// the url format for lix urls is
 	// https://lix.inlang.com/git/github.com/inlang/monorepo
 	// proto:// lixDomain / namespace / repoHost / owner / repoName
 	// namespace is ignored until switching from git.inlang.com to lix.inlang.com and can eveolve in future to be used for repoType, api type or feature group
+	// the url format for direct github urls without a lix server is https://github.com/inlang/examplX (only per domain-enabled git hosters will be supported, currently just gitub)
+	// the url for opening a local repo allready in the fs provider is file://path/to/repo (not implemented yet)
 
 	const { origin, pathname } = new URL(url)
-	const gitProxyUrl = origin + "/git-proxy/"
-	const gitHubProxyUrl = origin + "/github-proxy/"
+	let gitProxyUrl = ""
+	let gitHubProxyUrl = ""
 
-	// parse url in the format of github.com/inlang/example and split it to host, owner and repo
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [_, namespace, host, owner, repoName] = [...pathname.split("/")]
+	let namespace = ""
+	let host = ""
+	let owner = ""
+	let repoName = ""
 
-	// check if all 3 parts are present, if not, return an error
-	if (!namespace || !host || !owner || !repoName) {
-		throw new Error(
-			`Invalid url format for '${url}' for cloning repository, please use the format of https://lix.inlang.com/git/github.com/inlang/monorepo.`
-		)
+	if (origin === "https://github.com") {
+		// parse url in the format of github.com/inlang/example and split it to host, owner and repo
+		const pathParts = pathname.split("/")
+
+		host = "github.com"
+		owner = pathParts[1] || ""
+		repoName = pathParts[2] || ""
+		// check if all 3 parts are present, if not, return an error
+		if (!host || !owner || !repoName) {
+			throw new Error(
+				`Invalid url format for '${url}' for direct cloning repository from github, please use the format of https://github.com/inlang/monorepo.`
+			)
+		}
+	} else {
+		const pathParts = pathname.split("/")
+
+		gitProxyUrl = origin + "/git-proxy/"
+		gitHubProxyUrl = origin + "/github-proxy/"
+
+		namespace = pathParts[1] || ""
+		host = pathParts[2] || ""
+		owner = pathParts[3] || ""
+		repoName = pathParts[4] || ""
+
+		// check if all 3 parts are present, if not, return an error
+		if (!namespace || !host || !owner || !repoName) {
+			throw new Error(
+				`Invalid url format for '${url}' for cloning repository, please use the format of https://lix.inlang.com/git/github.com/inlang/monorepo.`
+			)
+		}
 	}
 
 	const github = new Octokit({
