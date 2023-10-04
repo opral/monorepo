@@ -32,6 +32,6 @@
 		"vitest": "0.34.3"
 	},
 	"peerDependencies": {
-		"@sinclair/typebox": "^0.31.0"
+		"@sinclair/typebox": "^0.31.17"
 	}
 }

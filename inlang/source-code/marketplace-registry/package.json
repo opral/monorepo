@@ -23,7 +23,7 @@
 	},
 	"dependencies": {
 		"@inlang/marketplace-manifest": "*",
-		"@sinclair/typebox": "0.31.8",
+		"@sinclair/typebox": "^0.31.17",
 		"node-fetch": "3.3.2"
 	},
 	"devDependencies": {
