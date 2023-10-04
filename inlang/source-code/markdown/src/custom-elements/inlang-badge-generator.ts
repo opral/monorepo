@@ -1,4 +1,4 @@
-import { LitElement, css, html } from "lit"
+import { LitElement, css, html, type TemplateResult } from "lit"
 import { customElement, property, query } from "lit/decorators.js"
 
 @customElement("inlang-badge-generator")
@@ -86,6 +86,9 @@ export class InlangBadgeGenerator extends LitElement {
 		}
 		.copy-badge {
 			position: absolute;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
 			right: 32px;
 			top: 24px;
 			text-align: right;
@@ -103,6 +106,10 @@ export class InlangBadgeGenerator extends LitElement {
 			color: #ff4d4f;
 			margin-top: 0.5rem;
 			font-weight: 400;
+		}
+		.image {
+			right: 32px;
+			top: 60px;
 		}
 	`
 
@@ -144,14 +151,16 @@ export class InlangBadgeGenerator extends LitElement {
 		}
 	}
 
-	private copied = false
+	private markdownCopied = false
 	@property()
-	text: string = "Copy as Markdown"
+	copyMarkdownText: TemplateResult = html`<doc-icon size="1.6em" icon="mdi:markdown"></doc-icon>
+		Copy as Markdown`
 
-	private handleCopy() {
-		if (!this.copied) {
-			this.text = "Successfully copied!"
-			this.copied = true
+	private handleCopyMarkdown() {
+		if (!this.markdownCopied) {
+			this.copyMarkdownText = html`<doc-icon size="1.6em" icon="mdi:markdown"></doc-icon>
+				Successfully copied!`
+			this.markdownCopied = true
 			navigator.clipboard.writeText(
 				`[![inlang status badge](${
 					this.badgeURL
@@ -162,8 +171,29 @@ export class InlangBadgeGenerator extends LitElement {
 			)
 
 			setTimeout(() => {
-				this.text = "Copy as Markdown"
-				this.copied = false
+				this.copyMarkdownText = html`<doc-icon size="1.6em" icon="mdi:markdown"></doc-icon> Copy as
+					Markdown`
+				this.markdownCopied = false
+			}, 3000)
+		}
+	}
+
+	private imageCopied = false
+	@property()
+	copyImageText: TemplateResult = html`<doc-icon size="1.4em" icon="mdi:image"></doc-icon> Copy
+		image source`
+
+	private handleCopyImage() {
+		if (!this.imageCopied) {
+			this.copyImageText = html`<doc-icon size="1.4em" icon="mdi:image"></doc-icon> Successfully
+				copied!`
+			this.imageCopied = true
+			navigator.clipboard.writeText(this.badgeURL)
+
+			setTimeout(() => {
+				this.copyImageText = html`<doc-icon size="1.4em" icon="mdi:image"></doc-icon> Copy image
+					source`
+				this.imageCopied = false
 			}, 3000)
 		}
 	}
@@ -175,7 +205,14 @@ export class InlangBadgeGenerator extends LitElement {
 				: ""}
 			<div class="badge-showcase">
 				${this.badgeURL !== "" && this.loading === false
-					? html`<span @click=${() => this.handleCopy()} class="copy-badge"> ${this.text} </span>`
+					? html`<span @click=${() => this.handleCopyMarkdown()} class="copy-badge">
+							${this.copyMarkdownText}
+					  </span>`
+					: ""}
+				${this.badgeURL !== "" && this.loading === false
+					? html`<div @click=${() => this.handleCopyImage()} class="copy-badge image">
+							${this.copyImageText}
+					  </div>`
 					: ""}
 				${this.badgeURL === ""
 					? html`<div class="empty-card">
