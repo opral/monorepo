@@ -169,13 +169,22 @@ export function Page(props: PageProps) {
 											</Button>
 										</div>
 										<Show when={props.manifest.gallery && props.manifest.gallery.length > 1}>
-											<For each={props.manifest.gallery}>
-												{(image) => (
-													<div class="flex gap-4 mt-10 overflow-x-auto overflow-scrollbar">
-														<img class="rounded-md w-80" src={image} />
-													</div>
-												)}
-											</For>
+											<div class="flex gap-8 mt-16 overflow-x-auto overflow-scrollbar overflow-scrollbar-x">
+												<For each={props.manifest.gallery}>
+													{(image) => (
+														<Show when={props.manifest.gallery?.indexOf(image) !== 0}>
+															<a
+																href={image}
+																target="_blank"
+																rel="noopener noreferrer"
+																class="transition-opacity hover:opacity-80 cursor-pointer w-80 flex-shrink-0"
+															>
+																<img class="rounded-md w-80" src={image} />
+															</a>
+														</Show>
+													)}
+												</For>
+											</div>
 										</Show>
 									</div>
 									<div class="w-full">
