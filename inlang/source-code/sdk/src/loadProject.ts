@@ -73,7 +73,9 @@ export const loadProject = async (args: {
 					return { error }
 				}
 
-				throw new Error("unhandled")
+				throw new Error(
+					"Unhandled error in setSettings. This is an internal bug. Please file an issue."
+				)
 			}
 		}
 
@@ -120,9 +122,7 @@ export const loadProject = async (args: {
 					setMessages(messages)
 					markInitAsComplete()
 				})
-				.catch((err) =>
-					markInitAsFailed(new PluginLoadMessagesError("Error in load messages", { cause: err }))
-				)
+				.catch((err) => markInitAsFailed(new PluginLoadMessagesError({ cause: err })))
 		})
 
 		// -- installed items ----------------------------------------------------
@@ -178,7 +178,7 @@ export const loadProject = async (args: {
 							messages: newMessages,
 						})
 					} catch (err) {
-						throw new PluginSaveMessagesError("Error in saving messages", {
+						throw new PluginSaveMessagesError({
 							cause: err,
 						})
 					}
@@ -231,18 +231,17 @@ const loadSettings = async (args: {
 		async () => await args.nodeishFs.readFile(args.settingsFilePath, { encoding: "utf-8" })
 	)
 	if (settingsFileError)
-		throw new ProjectSettingsFileNotFoundError(
-			`Could not locate settings file in (${args.settingsFilePath}).`,
-			{
-				cause: settingsFileError,
-			}
-		)
+		throw new ProjectSettingsFileNotFoundError({
+			cause: settingsFileError,
+			path: args.settingsFilePath,
+		})
 
 	const json = tryCatch(() => JSON.parse(settingsFile!))
 
 	if (json.error) {
-		throw new ProjectSettingsFileJSONSyntaxError(`The settings is not a valid JSON file.`, {
+		throw new ProjectSettingsFileJSONSyntaxError({
 			cause: json.error,
+			path: args.settingsFilePath,
 		})
 	}
 	return parseSettings(json.data)
@@ -253,8 +252,8 @@ const parseSettings = (settings: unknown) => {
 	if (settingsCompiler.Check(withMigration) === false) {
 		const typeErrors = [...settingsCompiler.Errors(settings)]
 		if (typeErrors.length > 0) {
-			throw new ProjectSettingsInvalidError(`The settings is invalid according to the schema.`, {
-				cause: typeErrors,
+			throw new ProjectSettingsInvalidError({
+				errors: typeErrors,
 			})
 		}
 	}

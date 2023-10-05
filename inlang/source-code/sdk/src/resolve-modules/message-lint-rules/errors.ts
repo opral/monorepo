@@ -1,9 +1,9 @@
-export class MessageLintRuleIsInvalidError extends Error {
-	public readonly module: string
+import type { MessageLintRule } from "@inlang/message-lint-rule"
+import type { ValueError } from "@sinclair/typebox/errors"
 
-	constructor(message: string, options: { module: string; cause?: Error }) {
-		super(message)
-		this.module = options.module
+export class MessageLintRuleIsInvalidError extends Error {
+	constructor(options: { id: MessageLintRule["id"]; errors: ValueError[] }) {
+		super(`The message lint rule "${options.id}" is invalid:\n\n${options.errors.join("\n")}`)
 		this.name = "MessageLintRuleIsInvalidError"
 	}
 }
