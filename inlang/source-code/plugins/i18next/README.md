@@ -47,7 +47,7 @@ To use our plugin, you need to provide a path to the directory where your langua
 
 ### pathPattern with namespaces
 
-> Does not get created by 'npx @inlang/cli config init'
+> Does not get created by 'npx @inlang/cli@latest project init'
 
 ```json
 "pathPattern": {
