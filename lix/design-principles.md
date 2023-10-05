@@ -1,4 +1,4 @@
-##  Design Principles
+## Lix Design Principles
 
 ### 1. File-based.
 
