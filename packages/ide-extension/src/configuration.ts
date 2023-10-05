@@ -1,8 +1,13 @@
 import { openInEditorCommand } from "./commands/openInEditor.js"
 import { extractMessageCommand } from "./commands/extractMessage.js"
 import { editMessageCommand } from "./commands/editMessage.js"
+import { EventEmitter } from "vscode"
 
 export const CONFIGURATION = {
+	EVENTS: {
+		ON_DID_EDIT_MESSAGE: new EventEmitter<void>(),
+		ON_DID_EXTRACT_MESSAGE: new EventEmitter<void>(),
+	},
 	COMMANDS: {
 		EDIT_MESSAGE: editMessageCommand,
 		EXTRACT_MESSAGE: extractMessageCommand,
