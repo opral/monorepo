@@ -1,11 +1,9 @@
 import { state } from "../state.js"
 import { msg } from "../utilities/message.js"
-import { EventEmitter, commands, type TextEditor, window, env, Uri } from "vscode"
+import { commands, type TextEditor, window, env, Uri } from "vscode"
 import { telemetry } from "../services/telemetry/index.js"
 import type { Message } from "@inlang/sdk"
-
-const onDidExtractMessageEmitter = new EventEmitter<void>()
-export const onDidExtractMessage = onDidExtractMessageEmitter.event
+import { CONFIGURATION } from "../configuration.js"
 
 /**
  * Helps the user to extract messages from the active text editor.
@@ -108,8 +106,8 @@ export const extractMessageCommand = {
 			editor.replace(textEditor.selection, preparedExtractOption)
 		})
 
-		// Emit event to notify that a message was edited
-		onDidExtractMessageEmitter.fire()
+		// Emit event to notify that a message was extracted
+		CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire()
 
 		telemetry.capture({
 			event: "IDE-EXTENSION command executed",
