@@ -96,7 +96,7 @@ export async function openRepository(
 		},
 	})
 
-	// TODO: clean way to use local repo allready in the fs
+	// TODO: support for url scheme to use local repo already in the fs
 	const gitUrl = `https://${host}/${owner}/${repoName}`
 
 	// the directory we use for all git operations
