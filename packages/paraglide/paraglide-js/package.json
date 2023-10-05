@@ -7,8 +7,14 @@
 		"access": "public"
 	},
 	"exports": {
-		".": "./dist/index.js",
-		"./m": "./dist/messages.js"
+		".": {
+			"import": "./dist/compiled-output/runtime.js",
+			"types": "./dist/compiled-output/runtime$.d.ts"
+		},
+		"./messages": {
+			"import": "./dist/compiled-output/messages.js",
+			"types": "./dist/compiled-output/messages$.d.ts"
+		}
 	},
 	"bin": {
 		"paraglide-js": "./bin/run.js"

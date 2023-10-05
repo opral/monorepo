@@ -13,12 +13,11 @@ describe("usage", async () => {
 		plugins: [
 			// @ts-expect-error - rollup types are not up to date
 			virtual({
-				"paraglide/index.js": output["index.js"],
 				"paraglide/messages.js": output["messages.js"],
 				"paraglide/runtime.js": output["runtime.js"],
 				"test.js": `
           export * as m from "./paraglide/messages.js"
-          export * as runtime from "./paraglide/index.js"
+          export * as runtime from "./paraglide/runtime.js"
         `,
 			}),
 		],
@@ -79,7 +78,6 @@ describe("tree-shaking", () => {
 				removeComments(),
 				// @ts-expect-error - rollup types are not up to date
 				virtual({
-					"paraglide/index.js": output["index.js"],
 					"paraglide/messages.js": output["messages.js"],
 					"paraglide/runtime.js": output["runtime.js"],
 					"app.js": `
@@ -108,7 +106,6 @@ describe("tree-shaking", () => {
 				removeComments(),
 				// @ts-expect-error - rollup types are not up to date
 				virtual({
-					"paraglide/index.js": output["index.js"],
 					"paraglide/messages.js": output["messages.js"],
 					"paraglide/runtime.js": output["runtime.js"],
 					"app.js": `
@@ -150,7 +147,6 @@ test("typesafety", async () => {
 			strict: true,
 		},
 	})
-	project.createSourceFile("index.js", output["index.js"])
 	project.createSourceFile("messages.js", output["messages.js"])
 	project.createSourceFile("runtime.js", output["runtime.js"])
 
