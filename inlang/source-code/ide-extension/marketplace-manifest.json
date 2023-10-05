@@ -8,7 +8,7 @@
 		"en": "VS Code Extension"
 	},
 	"description": {
-		"en": "This extension allows you to use inlang in your IDE, enabling translating content directly in your code."
+		"en": "This extension allows you to use inlang in Visual Studio Code, enabling translating content directly in your code."
 	},
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/MARKETPLACE.md"
