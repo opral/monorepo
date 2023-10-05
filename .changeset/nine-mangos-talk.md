@@ -1,5 +1,5 @@
 ---
-"vs-code-extension": patch
+"vs-code-extension": minor
 ---
 
 Refactor event emitters
