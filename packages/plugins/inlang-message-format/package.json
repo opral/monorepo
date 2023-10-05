@@ -3,7 +3,7 @@
 	"version": "1.0.0",
 	"type": "module",
 	"exports": {
-		"./storage-schema": "./src/storageSchema.js"
+		"./storage-schema": "./src/storageSchema.ts"
 	},
 	"files": [
 		"./dist"
