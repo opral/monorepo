@@ -40,27 +40,24 @@ export const sourceLanguageTag = "${args.settings.sourceLanguageTag}"
 /**
  * The project's language tags.
  */
-export const languageTags = /** @type {const} */ (${JSON.stringify(args.settings.languageTags)})
+export const availableLanguageTags = /** @type {const} */ (${JSON.stringify(
+			args.settings.languageTags
+		)})
 
 /**
- * @type {typeof languageTags[number]}
+ * The current language tag.
+ * 
+ * @type {typeof availableLanguageTags[number]}
  */
-let _currentLanguageTag = sourceLanguageTag
+export let languageTag = sourceLanguageTag
 
 /**
- * The currently set language tag.
- */
-export const languageTag = () => {
-	return _currentLanguageTag
-}
-
-/**
- * Set the language tag.
+ * Change the language tag.
  *
- * @param {typeof languageTags[number]} tag
+ * @param {typeof availableLanguageTags[number]} tag
  */
-export const setLanguageTag = (tag) => {
-	_currentLanguageTag = tag
+export const changeLanguageTag = (tag) => {
+	languageTag = tag
 }
 `,
 	}
