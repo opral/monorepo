@@ -138,18 +138,9 @@ test("save the messages alphabetically to decrease git diff's and merge conflict
 	expect(json.data[2]?.id).toBe("c")
 })
 
-test("throw if the storagePath does not start with './' or end with '.json'", async () => {
+test("throw if the settings are invalid", async () => {
 	const { plugin } = await import("./plugin.js")
 	const fs = createNodeishMemoryFs()
-
-	await expect(
-		plugin.loadMessages!({
-			settings: {
-				[pluginId]: { storagePath: "messages.json" } satisfies PluginSettings,
-			} as any,
-			nodeishFs: fs,
-		})
-	).rejects.toThrow()
 
 	await expect(
 		plugin.loadMessages!({

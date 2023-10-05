@@ -1,4 +1,4 @@
-import { object, string, type Output, startsWith, endsWith } from "valibot"
+import { object, string, type Output, endsWith, regex } from "valibot"
 
 /**
  * Using valibot instead of typebox because it is tree-shakable.
@@ -15,6 +15,7 @@ export const PluginSettings = object({
 	 *
 	 * @example "./messages.json"
 	 * @example "./src/messages.json"
+	 * @example "../messages.json"
 	 */
-	storagePath: string([startsWith("./"), endsWith(".json")]),
+	storagePath: string([regex(/^(\.)|(\/)/), endsWith(".json")]),
 })
