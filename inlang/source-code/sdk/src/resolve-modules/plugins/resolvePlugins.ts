@@ -42,56 +42,35 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 		// -- INVALID ID in META --
 		const hasInvalidId = errors.some((error) => error.path === "/id")
 		if (hasInvalidId) {
-			result.errors.push(
-				new PluginHasInvalidIdError(
-					`Plugin ${plugin.id} has an invalid id "${plugin.id}". It must be camelCase and contain a namespace like plugin.namespace.myPlugin.`,
-					{ plugin: plugin.id }
-				)
-			)
+			result.errors.push(new PluginHasInvalidIdError({ id: plugin.id }))
 		}
 
 		// -- USES RESERVED NAMESPACE --
 		if (plugin.id.includes("inlang") && !whitelistedPlugins.includes(plugin.id)) {
 			result.errors.push(
-				new PluginUsesReservedNamespaceError(
-					`Plugin ${plugin.id} uses reserved namespace 'inlang'.`,
-					{
-						plugin: plugin.id,
-					}
-				)
+				new PluginUsesReservedNamespaceError({
+					id: plugin.id,
+				})
 			)
 		}
 
 		// -- USES INVALID SCHEMA --
 		if (errors.length > 0) {
 			result.errors.push(
-				new PluginHasInvalidSchemaError(
-					`Plugin ${plugin.id} uses an invalid schema. Please check the documentation for the correct Plugin type.`,
-					{
-						plugin: plugin.id,
-						cause: errors,
-					}
-				)
+				new PluginHasInvalidSchemaError({
+					id: plugin.id,
+					errors: errors,
+				})
 			)
 		}
 
 		// -- ALREADY DEFINED LOADMESSAGES / SAVEMESSAGES / DETECTEDLANGUAGETAGS --
 		if (typeof plugin.loadMessages === "function" && result.data.loadMessages !== undefined) {
-			result.errors.push(
-				new PluginLoadMessagesFunctionAlreadyDefinedError(
-					`Plugin ${plugin.id} defines the loadMessages function, but it was already defined by another plugin.`,
-					{ plugin: plugin.id }
-				)
-			)
+			result.errors.push(new PluginLoadMessagesFunctionAlreadyDefinedError({ id: plugin.id }))
 		}
 
 		if (typeof plugin.saveMessages === "function" && result.data.saveMessages !== undefined) {
-			result.errors.push(
-				new PluginSaveMessagesFunctionAlreadyDefinedError(
-					`Plugin ${plugin.id} defines the saveMessages function, but it was already defined by another plugin.`,
-					{ plugin: plugin.id }
-				)
-			)
+			result.errors.push(new PluginSaveMessagesFunctionAlreadyDefinedError({ id: plugin.id }))
 		}
 
 		// --- ADD APP SPECIFIC API ---
@@ -103,16 +82,13 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 				})
 			)
 			if (error) {
-				// @ts-ignore
-				delete error.stack
-				result.errors.push(error as any) // TODO: add correct error type
-			}
-			if (typeof customApi !== "object") {
+				result.errors.push(new PluginReturnedInvalidCustomApiError({ id: plugin.id, cause: error }))
+			} else if (typeof customApi !== "object") {
 				result.errors.push(
-					new PluginReturnedInvalidCustomApiError(
-						`Plugin ${plugin.id} defines the addCustomApi function, but it does not return an object.`,
-						{ plugin: plugin.id, cause: error }
-					)
+					new PluginReturnedInvalidCustomApiError({
+						id: plugin.id,
+						cause: new Error(`The return value must be an object. Received "${typeof customApi}".`),
+					})
 				)
 			}
 		}
@@ -159,12 +135,7 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 		typeof result.data.loadMessages !== "function" ||
 		typeof result.data.saveMessages !== "function"
 	) {
-		result.errors.push(
-			new PluginsDoNotProvideLoadOrSaveMessagesError(
-				"It seems you did not install any plugin that handles messages. Please add one to make inlang work. See https://inlang.com/documentation/plugins/registry.",
-				{ plugin: undefined }
-			)
-		)
+		result.errors.push(new PluginsDoNotProvideLoadOrSaveMessagesError())
 	}
 
 	return result

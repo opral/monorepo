@@ -50,14 +50,13 @@ async function $import(
 	try {
 		return await import(/* @vite-ignore */ moduleWithMimeType)
 	} catch (error) {
-		let message = `Error while importing ${uri}: ${(error as Error)?.message ?? "Unknown error"}`
 		if (error instanceof SyntaxError && uri.includes("jsdelivr")) {
-			message += dedent`\n\n
+			error.message += dedent`\n\n
 Are you sure that the file exists on JSDelivr?
 
 The error indicates that the imported file does not exist on JSDelivr. For non-existent files, JSDelivr returns a 404 text that JS cannot parse as a module and throws a SyntaxError.
 			`
 		}
-		throw new ModuleImportError(message, { module: uri, cause: error as Error })
+		throw new ModuleImportError({ module: uri, cause: error as Error })
 	}
 }

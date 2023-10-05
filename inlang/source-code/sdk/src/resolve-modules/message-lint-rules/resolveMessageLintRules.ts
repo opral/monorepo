@@ -9,9 +9,11 @@ export const resolveMessageLintRules = (args: { messageLintRules: Array<MessageL
 	}
 	for (const rule of args.messageLintRules) {
 		if (Value.Check(MessageLintRule, rule) === false) {
+			const errors = [...Value.Errors(MessageLintRule, rule)]
 			result.errors.push(
-				new MessageLintRuleIsInvalidError(`Couldn't parse lint rule "${rule.id}"`, {
-					module: "not implemented",
+				new MessageLintRuleIsInvalidError({
+					id: rule.id,
+					errors,
 				})
 			)
 			continue
