@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.10.0
+
+### Minor Changes
+
+- 241a37328: Refactor event emitters
+
 ## 1.9.0
 
 ### Minor Changes
