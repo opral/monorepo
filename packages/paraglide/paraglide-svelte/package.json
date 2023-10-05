@@ -1,0 +1,42 @@
+{
+	"name": "@inlang/paraglide-svelte",
+	"type": "module",
+	"version": "1.0.0",
+	"license": "Apache-2.0",
+	"publishConfig": {
+		"access": "public"
+	},
+	"exports": {
+		".": {
+			"import": "./dist/compiled-output/runtime.js",
+			"types": "./dist/compiled-output/runtime$.d.ts"
+		},
+		"./messages": {
+			"import": "./dist/compiled-output/messages.js",
+			"types": "./dist/compiled-output/messages$.d.ts"
+		}
+	},
+	"bin": {
+		"paraglide-js": "./bin/run.js"
+	},
+	"files": [
+		"./dist",
+		"./bin"
+	],
+	"scripts": {
+		"build": "tsc --build",
+		"dev": "tsc --watch",
+		"test": "tsc --noEmit && vitest run --coverage",
+		"lint": "eslint ./src --fix",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./.turbo ./node_modules"
+	},
+	"dependencies": {
+		"@inlang/paraglide-js": "*"
+	},
+	"devDependencies": {
+		"@vitest/coverage-v8": "0.34.3",
+		"typescript": "5.2.2",
+		"vitest": "0.34.3"
+	}
+}
