@@ -4,6 +4,6 @@
 	"languageTags": ["en", "de"],
 	"modules": ["../../../plugins/inlang-message-format/dist/index.js"],
 	"plugin.inlang.messageFormat": {
-		"storagePath": "./messages.json"
+		"storagePath": "./src/messages.json"
 	}
 }
