@@ -4,6 +4,7 @@ import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js
 import { getSetting, updateSetting } from "./settings/index.js"
 import { tryAutoGenProjectSettings } from "@inlang/create-project"
 import { createFileSystemMapper } from "./createFileSystemMapper.js"
+import { CONFIGURATION } from "../configuration.js"
 
 /**
  * Creates an Inlang config file if it doesn't already exist and the user approves it.
@@ -11,7 +12,7 @@ import { createFileSystemMapper } from "./createFileSystemMapper.js"
  */
 export const createInlangConfigFile = async (args: { workspaceFolder: vscode.WorkspaceFolder }) => {
 	// Check if project.inlang.json already exists
-	const configFiles = await vscode.workspace.findFiles("project.inlang.json")
+	const configFiles = await vscode.workspace.findFiles(CONFIGURATION.FILES.PROJECT)
 	if (configFiles.length > 0) {
 		// skip
 		return
@@ -19,6 +20,7 @@ export const createInlangConfigFile = async (args: { workspaceFolder: vscode.Wor
 
 	// Try to auto generate project settings
 	const nodeishFs = createFileSystemMapper(args.workspaceFolder.uri.fsPath)
+	const projectFilePath = `${args.workspaceFolder.uri.fsPath}/${CONFIGURATION.FILES.PROJECT}`
 
 	// with nodeishFs, read package.json &
 	const packageJson = await nodeishFs.readFile("./package.json", { encoding: "utf-8" })
@@ -43,7 +45,7 @@ export const createInlangConfigFile = async (args: { workspaceFolder: vscode.Wor
 		const { warnings, errors } = await tryAutoGenProjectSettings({
 			nodeishFs,
 			pathJoin: path.join,
-			filePath: args.workspaceFolder.uri.fsPath + "/project.inlang.json",
+			filePath: projectFilePath,
 		})
 
 		// Log warnings and errors
@@ -52,11 +54,7 @@ export const createInlangConfigFile = async (args: { workspaceFolder: vscode.Wor
 			for (const error of errors) console.error(error)
 		}
 
-		console.info(
-			`🎉 Created project.inlang.json file at ${
-				args.workspaceFolder.uri.fsPath + "/project.inlang.json"
-			}`
-		)
+		console.info(`🎉 Created project.inlang.json file at ${projectFilePath}`)
 	} else if (createConfigFile === "Reject") {
 		// Disable config file creation
 		disableConfigFileCreation()

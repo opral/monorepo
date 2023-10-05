@@ -2,7 +2,11 @@
 	"id": "app.inlang.editor",
 	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"gallery": [
-		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-marketplace-cover.jpg"
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-marketplace-cover.jpg",
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-1.jpg",
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-2.jpg",
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-3.jpg",
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-4.jpg"
 	],
 	"displayName": {
 		"en": "Web Editor"

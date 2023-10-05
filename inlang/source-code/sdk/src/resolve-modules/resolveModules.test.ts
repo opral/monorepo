@@ -23,7 +23,7 @@ it("should return an error if a plugin cannot be imported", async () => {
 		settings,
 		nodeishFs: {} as any,
 		_import: () => {
-			throw new ModuleImportError("Could not import", {
+			throw new ModuleImportError({
 				module: settings.modules[0]!,
 				cause: new Error("Could not import"),
 			})
@@ -94,7 +94,7 @@ it("should return an error if a module cannot be imported", async () => {
 	}
 
 	const _import = async () => {
-		throw new ModuleImportError("Could not import", {
+		throw new ModuleImportError({
 			module: settings.modules[0]!,
 			cause: new Error(),
 		})

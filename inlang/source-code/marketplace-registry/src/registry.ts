@@ -3,6 +3,26 @@
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 export const registry: MarketplaceManifest[] = [
 	{
+		id: "app.inlang.badge",
+		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		gallery: [
+			"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/badge-marketplace-cover.jpg",
+		],
+		displayName: {
+			en: "Translation status badge",
+		},
+		description: {
+			en: "Badge showing missing messages in your codebase. Perfect for your README.md file.",
+		},
+		readme: {
+			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/badge/README.md",
+		},
+		keywords: ["badge"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		license: "Apache-2.0",
+	},
+	{
 		id: "app.inlang.cli",
 		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		gallery: [
@@ -27,6 +47,10 @@ export const registry: MarketplaceManifest[] = [
 		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		gallery: [
 			"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-marketplace-cover.jpg",
+			"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-1.jpg",
+			"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-2.jpg",
+			"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-3.jpg",
+			"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-4.jpg",
 		],
 		displayName: {
 			en: "Web Editor",

@@ -1,5 +1,16 @@
 # @inlang/plugin-json
 
+## 4.6.0
+
+### Minor Changes
+
+- f40ab4ca9: refactor: use plugin api v2
+
+### Patch Changes
+
+- Updated dependencies [0f9dc72b3]
+  - @inlang/sdk@0.9.0
+
 ## 4.5.0
 
 ### Minor Changes

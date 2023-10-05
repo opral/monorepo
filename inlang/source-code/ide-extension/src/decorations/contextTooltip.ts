@@ -2,6 +2,7 @@ import type { CustomApiInlangIdeExtension, LanguageTag } from "@inlang/sdk"
 import { MarkdownString, Uri } from "vscode"
 import { state } from "../state.js"
 import { getStringFromPattern } from "../utilities/query.js"
+import { INTERPOLATE } from "../configuration.js"
 
 const MISSING_TRANSLATION_MESSAGE = "[missing]"
 
@@ -57,8 +58,8 @@ export function contextTooltip(
 			JSON.stringify([{ messageId: referenceMessage.messageId, languageTag: languageTag }])
 		)
 
-		const editCommand = Uri.parse(`command:inlang.editMessage?${args}`)
-		const openInEditorCommand = Uri.parse(`command:inlang.openInEditor?${args}`)
+		const editCommand = Uri.parse(INTERPOLATE.COMMAND_URI("EDIT_MESSAGE", args))
+		const openInEditorCommand = Uri.parse(INTERPOLATE.COMMAND_URI("OPEN_IN_EDITOR", args))
 
 		return {
 			language: languageTag,

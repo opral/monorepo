@@ -50,7 +50,10 @@ export function Page(props: PageProps) {
 	const tableOfContents = () => {
 		const tableOfContents = {}
 
-		if (props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)) {
+		if (
+			props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g) &&
+			props.markdown.match(/<h[1].*?>(.*?)<\/h[1]>/g)
+		) {
 			props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g).map((heading: string) => {
 				// We have to use DOMParser to parse the heading string to a HTML element
 				const parser = new DOMParser()
@@ -169,13 +172,22 @@ export function Page(props: PageProps) {
 											</Button>
 										</div>
 										<Show when={props.manifest.gallery && props.manifest.gallery.length > 1}>
-											<For each={props.manifest.gallery}>
-												{(image) => (
-													<div class="flex gap-4 mt-10 overflow-x-auto overflow-scrollbar">
-														<img class="rounded-md w-80" src={image} />
-													</div>
-												)}
-											</For>
+											<div class="flex gap-8 mt-16 overflow-x-auto overflow-scrollbar overflow-scrollbar-x">
+												<For each={props.manifest.gallery}>
+													{(image) => (
+														<Show when={props.manifest.gallery?.indexOf(image) !== 0}>
+															<a
+																href={image}
+																target="_blank"
+																rel="noopener noreferrer"
+																class="transition-opacity hover:opacity-80 cursor-pointer w-80 flex-shrink-0"
+															>
+																<img class="rounded-md w-80" src={image} />
+															</a>
+														</Show>
+													)}
+												</For>
+											</div>
 										</Show>
 									</div>
 									<div class="w-full">
