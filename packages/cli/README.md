@@ -58,7 +58,6 @@ Options:
   -h, --help            display help for command
 
 Commands:
-  config [command]   Commands for managing the config file.
   project [command]  Commands for managing your inlang project
   lint [options]     Commands for linting translations.
   machine [command]  Commands for automating translations.
@@ -68,45 +67,6 @@ Commands:
 ```
 
 The following commands are available with the inlang CLI:
-
-## `config`
-
-The config command is used to interactively configure and create the project.inlang.json file.
-
-### `config init`
-
-This command scans your file system hierarchy and finds out how your localization files are setup.
-It returns a complete config for you to use in your project, which you can modify to your needs.
-
-To use the `config init` command, simply run the following:
-
-```sh
-npx @inlang/cli config init
-```
-
-This will launch an interactive prompt that will guide you through the process of creating the inlang configuration file.
-
-### `config validate`
-
-This command validates the `project.inlang.json` file in the current directory. It checks if the file is valid JSON and if it contains **all required fields**. It also checks if the specified resources exist and performs a _dry run of the translation process_.
-
-To validate the `project.inlang.json` file, run the following command:
-
-```sh
-npx @inlang/cli config validate
-```
-
-### `config update`
-
-This command updates the `project.inlang.json` file with the latest versions of the plugins used. This is helpful if you want to **update your plugins** to the latest major version and don't want to look them up manually.
-
-Keep in mind updating to a new major version might break your configuration. _We recommend always checking the changelog of the plugin before updating._
-
-To update the `project.inlang.json` file, run the following command:
-
-```sh
-npx @inlang/cli config update
-```
 
 ## `machine`
 
