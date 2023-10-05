@@ -10,13 +10,6 @@ export class PluginHasInvalidIdError extends Error {
 	}
 }
 
-export class PluginUsesReservedNamespaceError extends Error {
-	constructor(options: { id: Plugin["id"] }) {
-		super(`Plugin ${options.id} uses reserved namespace 'inlang'.`)
-		this.name = "PluginUsesReservedNamespaceError"
-	}
-}
-
 export class PluginHasInvalidSchemaError extends Error {
 	constructor(options: { id: Plugin["id"]; errors: ValueError[] }) {
 		super(
