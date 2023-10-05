@@ -6,4 +6,4 @@
 import { cli } from "@inlang/paraglide-js"
 import { compile } from "../dist/compiler/compile.js"
 
-cli({ compile, name: "paraglide-js" })
+cli({ compile, name: "paraglide-svelte" })
