@@ -13,8 +13,7 @@ import { useLocalStorage } from "#src/services/local-storage/index.js"
  * Read more https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow
  */
 export function Page() {
-	// ! Extremely important to wrap the get user function
-	const [userInfo] = createResource(async () => await browserAuth.getUser())
+	const [userInfo] = createResource(browserAuth.getUser)
 	const [localStorage] = useLocalStorage()
 
 	createEffect(() => {
