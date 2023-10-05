@@ -29,11 +29,11 @@ describe("usage", async () => {
 	)
 
 	test("should set the source language tag as default language tag", async () => {
-		expect(runtime.languageTag()).toBe(runtime.sourceLanguageTag)
+		expect(runtime.languageTag).toBe(runtime.sourceLanguageTag)
 	})
 
 	test("should return the correct message for the set language tag", async () => {
-		runtime.setLanguageTag("en")
+		runtime.changeLanguageTag("en")
 
 		expect(m.onlyText()).toBe("A simple message.")
 		expect(m.oneParam({ name: "Samuel" })).toBe("Good morning Samuel!")
@@ -41,7 +41,7 @@ describe("usage", async () => {
 			"Hello Samuel! You have 5 messages."
 		)
 
-		runtime.setLanguageTag("de")
+		runtime.changeLanguageTag("de")
 
 		expect(m.onlyText()).toBe("Eine einfache Nachricht.")
 		expect(m.oneParam({ name: "Samuel" })).toBe("Guten Morgen Samuel!")
@@ -51,7 +51,7 @@ describe("usage", async () => {
 	})
 
 	test("should return the message id if the message is not translated", async () => {
-		runtime.setLanguageTag("fr")
+		runtime.changeLanguageTag("fr")
 
 		expect(m.onlyText()).toBe("onlyText")
 		expect(m.oneParam({ name: "Samuel" })).toBe("oneParam")
@@ -93,7 +93,7 @@ describe("tree-shaking", () => {
 		// all required code for the message to be rendered is included like sourceLanguageTag.
 		// but, all other messages except of 'onlyText' are tree-shaken away.
 		expect(compiled.output[0].code).toBe(
-			'const sourceLanguageTag="en";let _currentLanguageTag=sourceLanguageTag;const languageTag=()=>_currentLanguageTag;const onlyText=()=>{const contents={en:`A simple message.`,de:`Eine einfache Nachricht.`};return contents[languageTag()]};console.log(onlyText());\n'
+			'const sourceLanguageTag="en";let languageTag=sourceLanguageTag;const onlyText=()=>{const contents={en:`A simple message.`,de:`Eine einfache Nachricht.`};return contents[languageTag]};console.log(onlyText());\n'
 		)
 		eval(compiled.output[0].code)
 		expect(log).toHaveBeenCalledWith("A simple message.")
@@ -124,7 +124,7 @@ describe("tree-shaking", () => {
 		const result = await bundle.generate({ format: "esm" })
 		const log = vi.spyOn(console, "log").mockImplementation(() => {})
 		expect(result.output[0].code).toBe(
-			'const sourceLanguageTag="en";let _currentLanguageTag=sourceLanguageTag;const languageTag=()=>_currentLanguageTag;const onlyText=()=>{const contents={en:`A simple message.`,de:`Eine einfache Nachricht.`};return contents[languageTag()]};const oneParam=params=>{const contents={en:`Good morning ${params.name}!`,de:`Guten Morgen ${params.name}!`};return contents[languageTag()]??"oneParam"};const multipleParams=params=>{const contents={en:`Hello ${params.name}! You have ${params.count} messages.`,de:`Hallo ${params.name}! Du hast ${params.count} Nachrichten.`};return contents[languageTag()]??"multipleParams"};console.log(onlyText(),oneParam({name:"Samuel"}),multipleParams({name:"Samuel",count:5}));\n'
+			'const sourceLanguageTag="en";let languageTag=sourceLanguageTag;const onlyText=()=>{const contents={en:`A simple message.`,de:`Eine einfache Nachricht.`};return contents[languageTag]};const oneParam=params=>{const contents={en:`Good morning ${params.name}!`,de:`Guten Morgen ${params.name}!`};return contents[languageTag]??"oneParam"};const multipleParams=params=>{const contents={en:`Hello ${params.name}! You have ${params.count} messages.`,de:`Hallo ${params.name}! Du hast ${params.count} Nachrichten.`};return contents[languageTag]??"multipleParams"};console.log(onlyText(),oneParam({name:"Samuel"}),multipleParams({name:"Samuel",count:5}));\n'
 		)
 		eval(result.output[0].code)
 		expect(log).toHaveBeenCalledWith(
@@ -162,18 +162,18 @@ test("typesafety", async () => {
 
     runtime.sourceLanguageTag satisfies "en"
 
-    // languageTags should have a narrow type, not a generic string
-    runtime.languageTags satisfies Readonly<Array<"de" | "en">>
+    // availableLanguageTags should have a narrow type, not a generic string
+    runtime.availableLanguageTags satisfies Readonly<Array<"de" | "en">>
 
-    // setLanguageTag() should fail if the given language tag is not included in languageTags
+    // changeLanguageTag() should fail if the given language tag is not included in availableLanguageTags
     // @ts-expect-error - 
-    runtime.setLanguageTag("fr")
+    runtime.changeLanguageTag("fr")
 
-    // setLanguageTag() should not fail if the given language tag is included in languageTags
-    runtime.setLanguageTag("de")
+    // changeLanguageTag() should not fail if the given language tag is included in availableLanguageTags
+    runtime.changeLanguageTag("de")
 
-    // languageTag() return type should be a union of language tags, not a generic string
-    runtime.languageTag() satisfies "de" | "en"
+    // languageTag should return type should be a union of language tags, not a generic string
+    runtime.languageTag satisfies "de" | "en"
 
     // --------- MESSAGES ---------
 

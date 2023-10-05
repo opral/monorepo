@@ -21,6 +21,13 @@ export const compileMessage = (message: Message): string => {
 	const jsdoc = jsdocFromParams(params)
 
 	return `
+	//! Don't edit this message manually. 
+	// 
+	// This message has been compiled by inlang paraglide.
+	// Use the inlang ide extension [0] or the web editor [1] instead.
+	// 
+	// [0] https://inlang.com/marketplace/app.inlang.ideExtension
+	// [1] https://inlang.com/marketplace/app.inlang.editor
   export const ${message.id} = ${jsdoc} (${Object.keys(params).length > 0 ? "params" : ""}) => {
     const contents = {
       ${Object.entries(contents)
@@ -29,6 +36,6 @@ export const compileMessage = (message: Message): string => {
 				)
 				.join(",\n  ")}
   }
-  return contents[languageTag()] ?? "${message.id}"
+  return contents[languageTag] ?? "${message.id}"
 }`
 }
