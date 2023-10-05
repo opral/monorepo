@@ -38,7 +38,7 @@ The plugin stores messages as one-to-one mapping in a JSON file.
 
 **Cons**
 
-- storing the pattern as AST leads to more disk space usage than storing the pattern as string. a future optimization, if required (!), could store the pattern as a string but would require a parsing and serialization step for each message.
+- storing the pattern as AST leads to more disk space usage than storing the pattern as string. a future optimization, if required (!), could store the pattern as a string but would require a parsing and serialization step for each message and a custom message type for typesafety.
 
 ---
 
