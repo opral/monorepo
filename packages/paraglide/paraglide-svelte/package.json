@@ -17,7 +17,7 @@
 		}
 	},
 	"bin": {
-		"paraglide-js": "./bin/run.js"
+		"paraglide-svelte": "./bin/run.js"
 	},
 	"files": [
 		"./dist",
