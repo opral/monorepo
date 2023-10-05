@@ -94,6 +94,10 @@ const runCompileCommand = async (args: {
 	})
 
 	for (const [fileName, fileContent] of Object.entries(output)) {
+		// create the compiled-output directory if it doesn't exist
+		await fs.access(`${packageDirectory}/dist/compiled-output`).catch(async () => {
+			await fs.mkdir(`${packageDirectory}/dist/compiled-output`)
+		})
 		await fs.writeFile(`${packageDirectory}/dist/compiled-output/${fileName}`, fileContent, {
 			encoding: "utf-8",
 		})
