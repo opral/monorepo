@@ -27,6 +27,18 @@ const PluginSettings = object({
 })
 ```
 
+# Architecture 
+
+The plugin stores messages as one-to-one mapping in a JSON file. 
+
+**Pros**
+
+- no need to for a parsing or serialization step for messages except for JSON.parse and JSON.stringify
+- automatic support for all inlang features and typesafety 
+
+**Cons**
+
+- storing the pattern as AST leads to more disk space usage than storing the pattern as string. a future optimization, if required (!), could store the pattern as a string but would require a parsing and serialization step for each message.
 
 ---
 
