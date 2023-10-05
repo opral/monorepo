@@ -50,7 +50,10 @@ export function Page(props: PageProps) {
 	const tableOfContents = () => {
 		const tableOfContents = {}
 
-		if (props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)) {
+		if (
+			props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g) &&
+			props.markdown.match(/<h[1].*?>(.*?)<\/h[1]>/g)
+		) {
 			props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g).map((heading: string) => {
 				// We have to use DOMParser to parse the heading string to a HTML element
 				const parser = new DOMParser()
