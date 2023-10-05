@@ -3,6 +3,7 @@
 	"include": ["src/**/*.ts"],
 	"compilerOptions": {
 		"outDir": "./dist",
+		"declaration": true,
 		"rootDir": "./src",
 		"sourceMap": false,
 		"checkJs": true
