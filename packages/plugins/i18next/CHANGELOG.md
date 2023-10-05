@@ -1,5 +1,16 @@
 # @inlang/plugin-i18next
 
+## 4.6.0
+
+### Minor Changes
+
+- 6e4ea967d: refactor: now uses the plugin api v2.0
+
+### Patch Changes
+
+- Updated dependencies [0f9dc72b3]
+  - @inlang/sdk@0.9.0
+
 ## 4.5.0
 
 ### Minor Changes

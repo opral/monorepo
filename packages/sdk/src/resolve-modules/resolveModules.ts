@@ -35,7 +35,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 		// -- IMPORT MODULE --
 		if (importedModule.error) {
 			moduleErrors.push(
-				new ModuleImportError(`Couldn't import the plugin "${module}"`, {
+				new ModuleImportError({
 					module: module,
 					cause: importedModule.error as Error,
 				})
@@ -46,7 +46,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 		// -- MODULE DOES NOT EXPORT ANYTHING --
 		if (importedModule.data?.default === undefined) {
 			moduleErrors.push(
-				new ModuleHasNoExportsError(`Module "${module}" has no exports.`, {
+				new ModuleHasNoExportsError({
 					module: module,
 				})
 			)
@@ -56,12 +56,11 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 		const isValidModule = ModuleCompiler.Check(importedModule.data)
 
 		if (isValidModule === false) {
-			const errors = [...ModuleCompiler.Errors(importedModule.data)].map(
-				(e) => `${e.path} ${e.message}`
-			)
+			const errors = [...ModuleCompiler.Errors(importedModule.data)]
 			moduleErrors.push(
-				new ModuleExportIsInvalidError(`Module "${module}" is invalid: ` + errors.join("\n"), {
+				new ModuleExportIsInvalidError({
 					module: module,
+					errors,
 				})
 			)
 			continue

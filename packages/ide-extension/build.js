@@ -58,9 +58,11 @@ const ctx = await context(buildOptions)
 
 if (isDev) {
 	await ctx.watch()
+	// eslint-disable-next-line no-undef
 	console.info("👀 watching for changes...")
 } else {
 	await ctx.rebuild()
+	// eslint-disable-next-line no-undef
 	console.info("✅ build complete")
 	await ctx.dispose()
 }

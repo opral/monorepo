@@ -1,12 +1,13 @@
+import type { ValueError } from "@sinclair/typebox/errors"
 export * from "./plugins/errors.js"
 export * from "./message-lint-rules/errors.js"
 
 export class ModuleError extends Error {
-	public readonly Module: string
+	public readonly module: string
 	constructor(message: string, options: { module: string; cause?: Error }) {
 		super(message)
 		this.name = "ModuleError"
-		this.Module = options.module
+		this.module = options.module
 		this.cause = options.cause
 	}
 }
@@ -15,8 +16,8 @@ export class ModuleError extends Error {
  * Error when a Module does not export any plugins or lint rules.
  */
 export class ModuleHasNoExportsError extends ModuleError {
-	constructor(message: string, options: { module: string; cause?: Error }) {
-		super(message, options)
+	constructor(options: { module: string; cause?: Error }) {
+		super(`Module "${module}" has no exports. Every module must have an "export default".`, options)
 		this.name = "ModuleHasNoExportsError"
 	}
 }
@@ -25,15 +26,20 @@ export class ModuleHasNoExportsError extends ModuleError {
  * Error when a Module cannot be imported.
  */
 export class ModuleImportError extends ModuleError {
-	constructor(message: string, options: { module: string; cause: Error }) {
-		super(message, options)
+	constructor(options: { module: string; cause: Error }) {
+		super(`Couldn't import the plugin "${module}":\n\n${options.cause}`, options)
 		this.name = "ModuleImportError"
 	}
 }
 
 export class ModuleExportIsInvalidError extends ModuleError {
-	constructor(message: string, options: { module: string; cause?: Error }) {
-		super(message, options)
+	constructor(options: { module: string; errors: ValueError[] }) {
+		super(
+			`The export(s) of "${module}" are invalid:\n\n${options.errors
+				.map((error) => `Path "${error.path}" with value "${error.value}": "${error.message}"`)
+				.join("\n")}`,
+			options
+		)
 		this.name = "ModuleExportIsInvalidError"
 	}
 }

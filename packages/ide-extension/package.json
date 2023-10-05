@@ -10,7 +10,7 @@
 		"url": "https://github.com/inlang/monorepo.git"
 	},
 	"icon": "assets/icon.png",
-	"version": "1.8.0",
+	"version": "1.10.0",
 	"engines": {
 		"vscode": "^1.82.0"
 	},
@@ -62,6 +62,7 @@
 		}
 	},
 	"scripts": {
+		"check": "tsc --noEmit",
 		"build": "node ./build.js",
 		"dev": "DEV=true node ./build.js",
 		"package": "npx @vscode/vsce package",

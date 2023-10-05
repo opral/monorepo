@@ -1,15 +1,14 @@
 import { state } from "../state.js"
 import { msg } from "../utilities/message.js"
-import { EventEmitter, window } from "vscode"
+import { commands, window } from "vscode"
 import type { LanguageTag, Message } from "@inlang/sdk"
 import { getPatternFromString, getStringFromPattern } from "../utilities/query.js"
-
-const onDidEditMessageEmitter = new EventEmitter<void>()
-export const onDidEditMessage = onDidEditMessageEmitter.event
+import { CONFIGURATION } from "../configuration.js"
 
 export const editMessageCommand = {
-	id: "inlang.editMessage",
-	title: "Inlang: Edit Message",
+	command: "inlang.editMessage",
+	title: "Inlang: Edit a Message",
+	register: commands.registerCommand,
 	callback: async function ({
 		messageId,
 		languageTag,
@@ -62,7 +61,7 @@ export const editMessageCommand = {
 		})
 
 		// Emit event to notify that a message was edited
-		onDidEditMessageEmitter.fire()
+		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
 
 		// Return success message
 		return msg("Message updated.")

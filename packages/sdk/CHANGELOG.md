@@ -1,5 +1,20 @@
 # @inlang/sdk
 
+## 0.9.0
+
+### Minor Changes
+
+- 0f9dc72b3: refactor: expose all project settings to modules
+
+### Patch Changes
+
+- Updated dependencies [e56bcdd4e]
+- Updated dependencies [404d365b2]
+- Updated dependencies [d57b1a2ce]
+  - @inlang/message-lint-rule@1.3.0
+  - @inlang/plugin@2.0.0
+  - @inlang/project-settings@2.2.0
+
 ## 0.8.0
 
 ### Minor Changes

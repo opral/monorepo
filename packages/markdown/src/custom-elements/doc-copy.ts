@@ -16,11 +16,10 @@ export class DocCopy extends LitElement {
 	`
 
 	private copied = false
-
 	@property()
 	text: string = "Copy"
 
-	private handleClick() {
+	private handleCopy() {
 		if (!this.copied) {
 			this.text = "Copied!"
 			this.copied = true
@@ -35,6 +34,6 @@ export class DocCopy extends LitElement {
 	}
 
 	override render() {
-		return html` <span @click=${() => this.handleClick()} class="copy-text"> ${this.text} </span> `
+		return html` <span @click=${() => this.handleCopy()} class="copy-text"> ${this.text} </span> `
 	}
 }

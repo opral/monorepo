@@ -1,20 +1,18 @@
-import * as vscode from "vscode"
 import { state } from "../state.js"
 import { msg } from "../utilities/message.js"
-import { EventEmitter } from "vscode"
+import { commands, type TextEditor, window, env, Uri } from "vscode"
 import { telemetry } from "../services/telemetry/index.js"
 import type { Message } from "@inlang/sdk"
-
-const onDidExtractMessageEmitter = new EventEmitter<void>()
-export const onDidExtractMessage = onDidExtractMessageEmitter.event
+import { CONFIGURATION } from "../configuration.js"
 
 /**
  * Helps the user to extract messages from the active text editor.
  */
 export const extractMessageCommand = {
-	id: "inlang.extractMessage",
+	command: "inlang.extractMessage",
 	title: "Inlang: Extract Message",
-	callback: async function (textEditor: vscode.TextEditor) {
+	register: commands.registerTextEditorCommand,
+	callback: async function (textEditor: TextEditor) {
 		const ideExtension = state().project.customApi()["app.inlang.ideExtension"]
 
 		// guards
@@ -40,7 +38,7 @@ export const extractMessageCommand = {
 			)
 		}
 
-		const messageId = await vscode.window.showInputBox({
+		const messageId = await window.showInputBox({
 			title: "Enter the ID:",
 		})
 		if (messageId === undefined) {
@@ -56,7 +54,7 @@ export const extractMessageCommand = {
 			return [...acc, option.callback({ messageId, selection: messageValue })]
 		}, [] as string[])
 
-		const preparedExtractOption = await vscode.window.showQuickPick(
+		const preparedExtractOption = await window.showQuickPick(
 			[...preparedExtractOptions, "How to edit these replacement options?"],
 			{ title: "Replace highlighted text with:" }
 		)
@@ -67,8 +65,8 @@ export const extractMessageCommand = {
 			"How to edit these replacement options? See `extractMessageOptions`."
 		) {
 			// TODO #152
-			return vscode.env.openExternal(
-				vscode.Uri.parse(
+			return env.openExternal(
+				Uri.parse(
 					"https://github.com/inlang/monorepo/tree/main/inlang/source-code/ide-extension#3%EF%B8%8F%E2%83%A3-configuration"
 				)
 			)
@@ -101,15 +99,15 @@ export const extractMessageCommand = {
 		})
 
 		if (!success) {
-			return vscode.window.showErrorMessage(`Couldn't upsert new message with id ${messageId}.`)
+			return window.showErrorMessage(`Couldn't upsert new message with id ${messageId}.`)
 		}
 
 		await textEditor.edit((editor) => {
 			editor.replace(textEditor.selection, preparedExtractOption)
 		})
 
-		// Emit event to notify that a message was edited
-		onDidExtractMessageEmitter.fire()
+		// Emit event to notify that a message was extracted
+		CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire()
 
 		telemetry.capture({
 			event: "IDE-EXTENSION command executed",

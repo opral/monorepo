@@ -1,5 +1,17 @@
 # inlang-vs-code-extension
 
+## 1.10.0
+
+### Minor Changes
+
+- 241a37328: Refactor event emitters
+
+## 1.9.0
+
+### Minor Changes
+
+- e336aa227: clean up command configuration
+
 ## 1.8.0
 
 ### Minor Changes

@@ -1,10 +1,9 @@
 import * as vscode from "vscode"
 import { state } from "../state.js"
 import { contextTooltip } from "./contextTooltip.js"
-import { onDidEditMessage } from "../commands/editMessage.js"
 import { getStringFromPattern } from "../utilities/query.js"
 import { getActiveTextEditor } from "../utilities/initProject.js"
-import { onDidExtractMessage } from "../commands/extractMessage.js"
+import { CONFIGURATION } from "../configuration.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -121,6 +120,6 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 	)
 
 	// update decorations, when message was edited / extracted
-	onDidEditMessage(() => updateDecorations())
-	onDidExtractMessage(() => updateDecorations())
+	CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.event(() => updateDecorations())
+	CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.event(() => updateDecorations())
 }
