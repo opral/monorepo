@@ -1,5 +1,13 @@
 # @inlang/plugin-json
 
+## 4.6.1
+
+### Patch Changes
+
+- 4668f637a: Added test for empty object in nested translation file.
+- Updated dependencies [2976a4b15]
+  - @inlang/sdk@0.10.0
+
 ## 4.6.0
 
 ### Minor Changes
