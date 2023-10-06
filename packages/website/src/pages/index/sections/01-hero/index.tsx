@@ -1,11 +1,16 @@
 import { Button } from "../../components/Button.jsx"
+import { CardTag } from "../../components/CardTag.jsx"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
-import AppFlowy from "./assets/appflowy.jsx"
-import Calcom from "./assets/clacom.jsx"
-import Jitsi from "./assets/jitsi.jsx"
-import Listmonk from "./assets/listmonk.jsx"
-import OpenAssistant from "./assets/openAssistant.jsx"
-import KeyVisual from "./keyVisual.jsx"
+import AppFlowy from "./assets/logos/appflowy.jsx"
+import Calcom from "./assets/logos/clacom.jsx"
+import Jitsi from "./assets/logos/jitsi.jsx"
+import Listmonk from "./assets/logos/listmonk.jsx"
+import OpenAssistant from "./assets/logos/openAssistant.jsx"
+import App from "./assets/categories/app.jsx"
+import Email from "./assets/categories/email.jsx"
+import Payments from "./assets/categories/payments.jsx"
+import Website from "./assets/categories/website.jsx"
+import Documents from "./assets/categories/documents.jsx"
 
 const Hero = () => {
 	return (
@@ -74,12 +79,72 @@ const Hero = () => {
 						</div>
 					</div>
 				</div>
-				<div class="flex items-center justify-center gap-4 overflow-hidden relative">
-					<div class="w-[512px] h-96 bg-surface-700 rounded-3xl flex-shrink-0"></div>
-					<div class="w-[512px] h-96 bg-surface-700 rounded-3xl flex-shrink-0"></div>
-					<div class="w-96 h-96 bg-[#043855] rounded-3xl flex-shrink-0"></div>
-					<div class="w-96 h-96 bg-surface-700 rounded-3xl flex-shrink-0"></div>
-					<div class="w-[512px] h-96 bg-surface-700 rounded-3xl flex-shrink-0"></div>
+				<div class="flex items-center justify-center gap-4 overflow-hidden relative pl-24">
+					<a
+						href="/documents"
+						class="w-96 h-80 bg-[#043855] rounded-3xl flex-shrink-0 relative group"
+					>
+						<div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10 overflow-hidden">
+							<Documents />
+						</div>
+						{/* Used for making blurry hover effects possible  */}
+						<div class="absolute inset-0 blur-3xl transition-all opacity-0 group-hover:opacity-25">
+							<Documents />
+						</div>
+						<CardTag text="Documents" globalPrefix />
+					</a>
+					<a
+						href="/app"
+						class="w-[512px] h-80 bg-surface-700 rounded-3xl flex-shrink-0 relative overflow-hidden group"
+					>
+						<div class="absolute -right-8 bottom-0 z-10">
+							<App />
+						</div>
+						{/* Used for making blurry hover effects possible  */}
+						<div class="absolute inset-0 transition-all blur-md opacity-0 group-hover:opacity-100">
+							<App />
+						</div>
+						<CardTag text="App" globalPrefix />
+					</a>
+					<a
+						href="/email"
+						class="w-96 h-80 bg-[#043855] rounded-3xl flex-shrink-0 relative overflow-hidden group"
+					>
+						<div class="absolute right-0 bottom-0 z-10">
+							<Email />
+						</div>
+						{/* Used for making blurry hover effects possible  */}
+						<div class="absolute inset-0 transition-all blur-2xl opacity-0 group-hover:opacity-25">
+							<Email />
+						</div>
+						<CardTag text="Email" globalPrefix />
+					</a>
+					<a
+						href="/payments"
+						class="w-96 h-80 bg-surface-600 rounded-3xl flex-shrink-0 relative overflow-hidden group"
+					>
+						<div class="absolute left-1/2 -translate-x-1/2 bottom-0 z-10">
+							<Payments />
+						</div>
+						{/* Used for making blurry hover effects possible  */}
+						<div class="absolute inset-0 transition-all blur-2xl opacity-0 group-hover:opacity-25">
+							<Payments />
+						</div>
+						<CardTag text="Payments" globalPrefix />
+					</a>
+					<a
+						href="/website"
+						class="w-[512px] h-80 bg-surface-700 rounded-3xl flex-shrink-0 relative group overflow-hidden"
+					>
+						<div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10">
+							<Website />
+						</div>
+						{/* Used for making blurry hover effects possible  */}
+						<div class="absolute inset-0 blur-3xl transition-all opacity-0 group-hover:opacity-25">
+							<Website />
+						</div>
+						<CardTag text="Website" globalPrefix />
+					</a>
 				</div>
 			</div>
 			<SectionLayout showLines={true} type="dark">
@@ -89,11 +154,41 @@ const Hero = () => {
 					</div>
 					<div class="w-full xl:w-3/4 flex flex-col gap-8 px-6 md:px-10 py-4">
 						<div class="flex gap-8 items-center w-full xl:justify-end text-background flex-wrap">
-							<AppFlowy />
-							<Calcom />
-							<Jitsi />
-							<Listmonk />
-							<OpenAssistant />
+							<a
+								class="transition-opacity hover:opacity-80"
+								href="https://cal.com/"
+								target="_blank"
+							>
+								<Calcom />
+							</a>
+							<a
+								class="transition-opacity hover:opacity-80"
+								href="https://appflowy.io/"
+								target="_blank"
+							>
+								<AppFlowy />
+							</a>
+							<a
+								class="transition-opacity hover:opacity-80"
+								href="https://meet.jit.si/"
+								target="_blank"
+							>
+								<Jitsi />
+							</a>
+							<a
+								class="transition-opacity hover:opacity-80"
+								href="https://listmonk.app/"
+								target="_blank"
+							>
+								<Listmonk />
+							</a>
+							<a
+								class="transition-opacity hover:opacity-80"
+								href="https://open-assistant.io/"
+								target="_blank"
+							>
+								<OpenAssistant />
+							</a>
 						</div>
 					</div>
 				</div>
