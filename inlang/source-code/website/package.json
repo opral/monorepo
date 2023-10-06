@@ -10,7 +10,7 @@
 		"_build": "vite build",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit",
-		"test:e2e": "cypress run",
+		"test:e2e": "npx playwright test",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
@@ -84,7 +84,6 @@
 		"@types/node": "20.5.9",
 		"autoprefixer": "^10.4.12",
 		"babel-preset-solid": "1.7.7",
-		"cypress": "13.3.0",
 		"eslint-plugin-solid": "0.13.0",
 		"fast-glob": "^3.2.12",
 		"patch-package": "8.0.0",
