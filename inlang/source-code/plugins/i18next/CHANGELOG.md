@@ -1,5 +1,17 @@
 # @inlang/plugin-i18next
 
+## 4.7.0
+
+### Minor Changes
+
+- 7bcb365ed: update `config init` deprecation
+
+### Patch Changes
+
+- 4668f637a: Added test for empty object in nested translation file.
+- Updated dependencies [2976a4b15]
+  - @inlang/sdk@0.10.0
+
 ## 4.6.0
 
 ### Minor Changes

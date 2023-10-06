@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.10.0
+
+### Minor Changes
+
+- 2976a4b15: IMPROVE: Better error messages across the SDK.
+
 ## 0.9.0
 
 ### Minor Changes
