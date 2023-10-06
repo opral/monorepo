@@ -1,0 +1,19 @@
+{
+	"name": "@inlang/paraglide-js-svelte-example",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview"
+	},
+	"__ALL DEPENDENCIES MUST BE SET IN THE PARENT PACKAGE.JSON__": "NPM DOESN'T INSTALL THEM OTHERWISE (THIS IS A BUG OF NPM)",
+	"dependencies": {},
+	"devDependencies": {
+		"@sveltejs/vite-plugin-svelte": "^2.4.2",
+		"@inlang/paraglide-js": "*",
+		"svelte": "^4.0.5",
+		"vite": "^4.4.5"
+	}
+}
