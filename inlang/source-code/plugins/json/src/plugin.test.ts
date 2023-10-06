@@ -837,6 +837,43 @@ describe("formatting", () => {
 		expect(json["c."]).toStrictEqual("test")
 	})
 
+	it("should handle empty objects correctly", async () => {
+		const content = JSON.stringify(
+			{
+				a: "test",
+				b: {},
+			},
+			undefined,
+			2
+		)
+		const fs = createNodeishMemoryFs()
+		await fs.writeFile("./en.json", content)
+
+		const settings = {
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
+			modules: [],
+			[pluginId]: {
+				pathPattern: "./{languageTag}.json",
+			} satisfies PluginSettings,
+		} satisfies ProjectSettings
+
+		const messages = await plugin.loadMessages!({
+			settings,
+			nodeishFs: fs,
+		})
+
+		await plugin.saveMessages!({
+			messages: messages,
+			settings,
+			nodeishFs: fs,
+		})
+
+		const newContent = await fs.readFile("./en.json", { encoding: "utf-8" })
+
+		expect(JSON.parse(newContent).b).toBeUndefined()
+	})
+
 	it("should correctly detect the nesting in the source file and determine for new ones", async () => {
 		const withNesting = JSON.stringify(
 			{
