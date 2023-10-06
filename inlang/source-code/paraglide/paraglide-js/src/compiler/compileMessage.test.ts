@@ -1,7 +1,28 @@
 import { it, expect } from "vitest"
 import { compileMessage } from "./compileMessage.js"
 
-it.skip("should compile a message", () => {
+it("should throw an error if a message has multiple variants with the same language tag", () => {
+	expect(() =>
+		compileMessage({
+			id: "duplicateLanguageTag",
+			selectors: [],
+			variants: [
+				{
+					match: [],
+					languageTag: "en",
+					pattern: [],
+				},
+				{
+					match: [],
+					languageTag: "en",
+					pattern: [],
+				},
+			],
+		})
+	).toThrow()
+})
+
+it("should compile a message to a function", async () => {
 	const result = compileMessage({
 		id: "multipleParams",
 		selectors: [],
@@ -60,12 +81,14 @@ it.skip("should compile a message", () => {
 			},
 		],
 	})
-	expect(result)
-		.toBe(`export const multipleParams = /** @param {{ name: NonNullable<unknown>, count: NonNullable<unknown> }} params */ (params) => {
-  const contents = {
-  "en": \`Hello \${params.name}! You have \${params.count} messages.\`,
-  "de": \`Hallo \${params.name}! Du hast \${params.count} Nachrichten.\`
-  }
-  return contents[languageTag()] ?? "multipleParams"
-}`)
+	const de = await import(
+		`data:application/javascript;base64,${btoa("let languageTag = 'de';" + result)}`
+	)
+	const en = await import(
+		`data:application/javascript;base64,${btoa("let languageTag = 'en';" + result)}`
+	)
+	expect(de.multipleParams({ name: "Samuel", count: 5 })).toBe(
+		"Hallo Samuel! Du hast 5 Nachrichten."
+	)
+	expect(en.multipleParams({ name: "Samuel", count: 5 })).toBe("Hello Samuel! You have 5 messages.")
 })
