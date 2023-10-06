@@ -1,10 +1,7 @@
 import { LandingPageLayout as RootLayout } from "../Layout.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import Hero from "./sections/01-hero/index.jsx"
-import Integration from "./sections/02-integration/index.jsx"
-import ConfigPage from "./sections/03-config/index.jsx"
-import Pricing from "./sections/04-pricing/index.jsx"
-import GetStarted from "./sections/06-getStarted/index.jsx"
+import GetStarted from "./sections/05-getStarted/index.jsx"
 
 export type PageProps = {
 	markdown: string
@@ -22,6 +19,7 @@ export function Page() {
 			<RootLayout landingpage>
 				<div>
 					<Hero />
+					<GetStarted />
 				</div>
 			</RootLayout>
 		</>
