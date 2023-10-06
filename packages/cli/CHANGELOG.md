@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 1.9.0
+
+### Minor Changes
+
+- 7bcb365ed: update `config init` deprecation
+
 ## 1.8.0
 
 ### Minor Changes
