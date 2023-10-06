@@ -5,6 +5,12 @@ import { compile } from "./compile.js"
 import { rollup } from "rollup"
 import virtual from "@rollup/plugin-virtual"
 import terser from "@rollup/plugin-terser"
+import { beforeEach } from "node:test"
+
+beforeEach(() => {
+	// reset the imports to make sure that the runtime is reloaded
+	vi.resetModules()
+})
 
 describe("usage", async () => {
 	// The compiled output needs to be bundled into one file to be dynamically imported.
@@ -24,15 +30,19 @@ describe("usage", async () => {
 	})
 	// dynamically import the compiled output
 	const compiledBundle = await bundle.generate({ format: "esm" })
-	const { m, runtime } = await import(
-		`data:application/javascript;base64,${btoa(compiledBundle.output[0].code)}`
-	)
 
 	test("should set the source language tag as default language tag", async () => {
+		const { runtime } = await import(
+			`data:application/javascript;base64,${btoa(compiledBundle.output[0].code)}`
+		)
 		expect(runtime.languageTag).toBe(runtime.sourceLanguageTag)
 	})
 
 	test("should return the correct message for the set language tag", async () => {
+		const { m, runtime } = await import(
+			`data:application/javascript;base64,${btoa(compiledBundle.output[0].code)}`
+		)
+
 		runtime.changeLanguageTag("en")
 
 		expect(m.onlyText()).toBe("A simple message.")
@@ -51,11 +61,51 @@ describe("usage", async () => {
 	})
 
 	test("should return the message id if the message is not translated", async () => {
+		const { m, runtime } = await import(
+			`data:application/javascript;base64,${btoa(compiledBundle.output[0].code)}`
+		)
+
 		runtime.changeLanguageTag("fr")
 
 		expect(m.onlyText()).toBe("onlyText")
 		expect(m.oneParam({ name: "Samuel" })).toBe("oneParam")
 		expect(m.multipleParams({ name: "Samuel", count: 5 })).toBe("multipleParams")
+	})
+
+	test("defining onChangeLanguageTag should be possible and should be called when the language tag changes", async () => {
+		const { runtime } = await import(
+			`data:application/javascript;base64,${btoa(compiledBundle.output[0].code)}`
+		)
+
+		const mockOnChangeLanguageTag = vi.fn().mockImplementation(() => {})
+		runtime.onChangeLanguageTag((tag: any) => {
+			mockOnChangeLanguageTag(tag)
+		})
+
+		runtime.changeLanguageTag("de")
+		expect(mockOnChangeLanguageTag).toHaveBeenLastCalledWith("de")
+
+		runtime.changeLanguageTag("en")
+		expect(mockOnChangeLanguageTag).toHaveBeenLastCalledWith("en")
+
+		expect(mockOnChangeLanguageTag).toHaveBeenCalledTimes(2)
+	})
+
+	test("should throw if the onChangeLanguageTag callback is already called to avoid unexpected behavior", async () => {
+		// appending a random comment to make node treat this as a new module
+		// otherwise, the runtime would be cached and the callback would already be set
+		// from previous tests. using vi.resetModules() doesn't work for unknown reasons.
+		const { runtime } = await import(
+			`data:application/javascript;base64,${btoa(compiledBundle.output[0].code + "// afeqwss")}`
+		)
+
+		expect(() => {
+			runtime.onChangeLanguageTag(() => {})
+		}).not.toThrow()
+
+		expect(() => {
+			runtime.onChangeLanguageTag(() => {})
+		}).toThrow()
 	})
 })
 

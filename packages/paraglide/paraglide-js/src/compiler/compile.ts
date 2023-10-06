@@ -33,6 +33,13 @@ ${compiledMessages}
 ${thisIsACompiledFileComment}
 
 /**
+ * Callback function that is called whenever the language tag changes.
+ * 
+ * @type {((tag: typeof availableLanguageTags[number]) => void) | undefined}
+ */ 
+let _onChangeLanguageTag
+
+/**
  * The project's source language tag.
  */
 export const sourceLanguageTag = "${args.settings.sourceLanguageTag}"
@@ -58,6 +65,30 @@ export let languageTag = sourceLanguageTag
  */
 export const changeLanguageTag = (tag) => {
 	languageTag = tag
+	if (_onChangeLanguageTag !== undefined) {
+		_onChangeLanguageTag(tag)
+	}
+}
+
+/**
+ * Set the \`onChangeLanguageTag()\` callback function.
+ *
+ * The callback function is called whenever the language tag changes
+ * and is typically used to update the UI.
+ * 
+ * @example
+ *   onChangeLanguageTag((tag) => {
+ *     // make a new request to the server with the updated language tag
+ *     window.location.href = \`/\${tag}/\${window.location.pathname}\`
+ *   })
+ *
+ * @param {(tag: typeof availableLanguageTags[number]) => void} fn
+ */
+export const onChangeLanguageTag = (fn) => {
+	if (_onChangeLanguageTag !== undefined) {
+		throw new Error("@inlang/paraglide-js: The \`onChangeLanguageTag()\` callback has already been called.\\n\\nThe \`onChangeLanguageTag()\` callback can only be called once to avoid unexpected behavior. Try searching for \`onChangeLanguageTag()\` in your codebase and remove the duplicate.")
+	}
+	_onChangeLanguageTag = fn
 }
 `,
 	}
