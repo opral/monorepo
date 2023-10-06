@@ -2,6 +2,7 @@ import { LandingPageLayout as RootLayout } from "../Layout.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import { createSignal } from "solid-js"
 import Hero from "./sections/01-hero/index.jsx"
+import Marketplace from "./sections/02-marketplace/index.jsx"
 import GetStarted from "./sections/05-getStarted/index.jsx"
 
 export type PageProps = {
@@ -39,7 +40,7 @@ export function Page() {
 			<RootLayout landingpage darkmode={darkmode()} transparent={transparent()}>
 				<div>
 					<Hero />
-					<div class="h-screen" />
+					<Marketplace />
 					<GetStarted />
 				</div>
 			</RootLayout>
