@@ -148,7 +148,7 @@ const Hero = () => {
 				</div>
 			</div>
 			<SectionLayout showLines={true} type="dark">
-				<div class="w-full flex pt-4 md:pt-16 flex-col xl:flex-row py-16">
+				<div class="w-full flex pt-4 md:pt-16 flex-col xl:flex-row py-32">
 					<div class="w-full xl:w-1/4 flex flex-col gap-8 px-6 md:px-10 py-4">
 						<p class="text-surface-400">Used by global projects:</p>
 					</div>
