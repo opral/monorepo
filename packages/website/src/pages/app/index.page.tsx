@@ -3,7 +3,6 @@ import { Meta, Title } from "@solidjs/meta"
 import Hero from "./sections/01-hero/index.jsx"
 import Integration from "./sections/02-integration/index.jsx"
 import ConfigPage from "./sections/03-config/index.jsx"
-import Pricing from "./sections/04-pricing/index.jsx"
 import GetStarted from "./sections/06-getStarted/index.jsx"
 
 export type PageProps = {
@@ -24,7 +23,6 @@ export function Page() {
 					<Hero />
 					<Integration />
 					<ConfigPage />
-					<Pricing />
 					<GetStarted />
 				</div>
 			</RootLayout>
