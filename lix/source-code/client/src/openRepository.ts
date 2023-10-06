@@ -1,6 +1,6 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Repository } from "./api.js"
-import { transformRemote, withLazyFetching } from "./helpers.js"
+import { transformRemote, withLazyFetching, parseLixUri } from "./helpers.js"
 // @ts-ignore
 import http from "./http-client.js"
 import { Octokit } from "octokit"
@@ -33,51 +33,15 @@ export async function openRepository(
 
 	// the url format for lix urls is
 	// https://lix.inlang.com/git/github.com/inlang/monorepo
-	// proto:// lixDomain / namespace / repoHost / owner / repoName
+	// proto:// lixServer / namespace / repoHost / owner / repoName
 	// namespace is ignored until switching from git.inlang.com to lix.inlang.com and can eveolve in future to be used for repoType, api type or feature group
 	// the url format for direct github urls without a lix server is https://github.com/inlang/examplX (only per domain-enabled git hosters will be supported, currently just gitub)
 	// the url for opening a local repo allready in the fs provider is file://path/to/repo (not implemented yet)
 
-	const { origin, pathname } = new URL(url)
-	let gitProxyUrl = ""
-	let gitHubProxyUrl = ""
+	const { protocol, lixHost, repoHost, owner, repoName } = parseLixUri(url)
 
-	let namespace = ""
-	let host = ""
-	let owner = ""
-	let repoName = ""
-
-	if (origin === "https://github.com") {
-		// parse url in the format of github.com/inlang/example and split it to host, owner and repo
-		const pathParts = pathname.split("/")
-
-		host = "github.com"
-		owner = pathParts[1] || ""
-		repoName = pathParts[2] || ""
-		// check if all 3 parts are present, if not, return an error
-		if (!host || !owner || !repoName) {
-			throw new Error(
-				`Invalid url format for '${url}' for direct cloning repository from github, please use the format of https://github.com/inlang/monorepo.`
-			)
-		}
-	} else {
-		const pathParts = pathname.split("/")
-
-		gitProxyUrl = origin + "/git-proxy/"
-		gitHubProxyUrl = origin + "/github-proxy/"
-
-		namespace = pathParts[1] || ""
-		host = pathParts[2] || ""
-		owner = pathParts[3] || ""
-		repoName = pathParts[4] || ""
-
-		// check if all 3 parts are present, if not, return an error
-		if (!namespace || !host || !owner || !repoName) {
-			throw new Error(
-				`Invalid url format for '${url}' for cloning repository, please use the format of https://lix.inlang.com/git/github.com/inlang/monorepo.`
-			)
-		}
-	}
+	const gitProxyUrl = lixHost ? `${protocol}//${lixHost}/git-proxy/` : ""
+	const gitHubProxyUrl = lixHost ? `${protocol}//${lixHost}/github-proxy/` : ""
 
 	const github = new Octokit({
 		request: {
@@ -87,8 +51,10 @@ export async function openRepository(
 					ghArgs[1] = {}
 				}
 
-				// required for authenticated cors requests
-				ghArgs[1].credentials = "include"
+				if (gitHubProxyUrl) {
+					// required for authenticated cors requests
+					ghArgs[1].credentials = "include"
+				}
 
 				// @ts-ignore
 				return fetch(...ghArgs)
@@ -97,7 +63,7 @@ export async function openRepository(
 	})
 
 	// TODO: support for url scheme to use local repo already in the fs
-	const gitUrl = `https://${host}/${owner}/${repoName}`
+	const gitUrl = `https://${repoHost}/${owner}/${repoName}`
 
 	// the directory we use for all git operations
 	const dir = "/"

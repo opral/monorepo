@@ -24,7 +24,7 @@ export function logout() {
 	})
 }
 
-interface Email {
+type Email = {
 	email: string
 	primary: boolean
 	verified: boolean
