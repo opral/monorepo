@@ -43,10 +43,14 @@ export function Layout(props: { children: JSXElement }) {
 	)
 }
 
-export const LandingPageLayout = (props: { children: JSXElement; landingpage?: boolean }) => {
+export const LandingPageLayout = (props: {
+	children: JSXElement
+	landingpage?: boolean
+	darkmode?: boolean
+}) => {
 	return (
 		<div class="flex flex-col min-h-screen">
-			<Header landingpage={props.landingpage} />
+			<Header landingpage={props.landingpage} darkmode={props.darkmode} />
 			{/* the outer div is growing to occupy the entire height and thereby
 			push the footer to the bottom */}
 			<div class={"grow flex flex-col "}>
@@ -79,16 +83,24 @@ const socialMediaLinks = [
 	},
 ]
 
-function Header(props: { landingpage?: boolean }) {
+function Header(props: { landingpage?: boolean; darkmode?: boolean }) {
 	const getLinks = () => {
 		return [
-			{ name: `${t("header.link.marketplace")}`, href: "/marketplace", type: "text" as buttonType },
+			{
+				name: `${t("header.link.marketplace")}`,
+				href: "/marketplace",
+				type: props.darkmode ? "textBackground" : ("text" as buttonType),
+			},
 			{
 				name: `${t("header.link.documentation")}`,
 				href: "/documentation",
-				type: "text" as buttonType,
+				type: props.darkmode ? "textBackground" : ("text" as buttonType),
 			},
-			{ name: `${t("header.link.blog")}`, href: "/blog", type: "text" as buttonType },
+			{
+				name: `${t("header.link.blog")}`,
+				href: "/blog",
+				type: props.darkmode ? "textBackground" : ("text" as buttonType),
+			},
 		]
 	}
 
@@ -105,14 +117,26 @@ function Header(props: { landingpage?: boolean }) {
 		<>
 			<header
 				// bg-surface-1 is with fixed hex value to avoid transparency with dooms scrolling behaviour
-				class="sticky top-0 z-[9999] w-full bg-background border-b border-surface-2"
+				class={
+					"sticky top-0 z-[9999] w-full border-b border-surface-2 " +
+					(props.darkmode ? "bg-surface-800" : "bg-background")
+				}
 			>
 				<div class={`w-full h-full py-4 px-4 sm:px-10 ${props.landingpage && "px-10"}`}>
 					<nav class={"max-w-screen-xl w-full mx-auto xl:px-10"}>
 						<div class="flex">
 							<a href={getLocale() + "/"} class="flex items-center w-fit">
-								<img class="h-9 w-9" src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
-								<span class="self-center pl-2 text-left font-semibold text-surface-900">
+								<img
+									class={"h-9 w-9 " + (props.darkmode ? "filter invert" : "")}
+									src="/favicon/safari-pinned-tab.svg"
+									alt="Company Logo"
+								/>
+								<span
+									class={
+										"self-center pl-2 text-left font-semibold " +
+										(props.darkmode ? "text-background" : "text-surface-900")
+									}
+								>
 									inlang
 								</span>
 							</a>
@@ -123,7 +147,10 @@ function Header(props: { landingpage?: boolean }) {
 											{(link) => (
 												<a
 													target="_blank"
-													class="link link-primary flex space-x-2 items-center"
+													class={
+														"link link-primary flex space-x-2 items-center " +
+														(props.darkmode ? "text-background" : "")
+													}
 													href={link.href}
 												>
 													<link.Icon class="w-5 h-5" />
@@ -147,7 +174,7 @@ function Header(props: { landingpage?: boolean }) {
 											currentPageContext.urlParsed.pathname.includes("marketplace") === false
 										}
 									>
-										<LanguagePicker />
+										<LanguagePicker darkmode={props.darkmode} />
 									</Show>
 									<Show when={currentPageContext.urlParsed.pathname.includes("editor") === false}>
 										<Button type="secondary" href="/editor">
@@ -397,7 +424,7 @@ function UserDropdown() {
 /**
  * Language picker for the landing page.
  */
-function LanguagePicker() {
+function LanguagePicker(darkmode?: boolean) {
 	const [localeIsLoaded, setLocaleIsLoaded] = createSignal(false)
 	const [, { locale }] = useI18n()
 
@@ -444,7 +471,12 @@ function LanguagePicker() {
 				<sl-dropdown>
 					<div
 						slot="trigger"
-						class="cursor-pointer h-10 flex items-center text-surface-700 font-medium link-primary text-sm"
+						class={
+							"cursor-pointer h-10 flex items-center font-medium text-sm " +
+							(darkmode
+								? "text-background hover:text-surface-300"
+								: "text-surface-700 text-primary")
+						}
 					>
 						<p>{locale().toUpperCase()}</p>
 						<IconExpand class="w-5 h-5 opacity-50" />
