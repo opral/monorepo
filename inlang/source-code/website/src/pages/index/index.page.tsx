@@ -21,9 +21,7 @@ export function Page() {
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<RootLayout landingpage>
 				<div>
-					<h1 class="text-4xl font-semibold text-center text-on-background">
-						The ecosystem to go global
-					</h1>
+					<Hero />
 				</div>
 			</RootLayout>
 		</>
