@@ -3,7 +3,13 @@ import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { type JSXElement, Show } from "solid-js"
 import { navigate } from "vite-plugin-ssr/client/router"
 
-export type buttonType = "primary" | "secondary" | "secondaryOnGray" | "text" | "textPrimary"
+export type buttonType =
+	| "primary"
+	| "secondary"
+	| "secondaryOnGray"
+	| "text"
+	| "textPrimary"
+	| "textBackground"
 
 const bgColor = (type: buttonType) => {
 	switch (type) {
@@ -17,6 +23,8 @@ const bgColor = (type: buttonType) => {
 			return "text-surface-700 hover:text-primary"
 		case "textPrimary":
 			return "text-primary-600 hover:text-primary"
+		case "textBackground":
+			return "text-background hover:text-background/80"
 		default:
 			return "text-surface-700 bg-background hover:text-surface-900 hover:bg-surface-300 px-4"
 	}
