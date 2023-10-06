@@ -1,5 +1,5 @@
-import { Button } from "../../components/Button.jsx"
-import { SectionLayout } from "../../components/sectionLayout.jsx"
+import { Button } from "../../../index/components/Button.jsx"
+import { SectionLayout } from "../../../index/components/sectionLayout.jsx"
 import AppFlowy from "./assets/appflowy.jsx"
 import Calcom from "./assets/clacom.jsx"
 import Jitsi from "./assets/jitsi.jsx"

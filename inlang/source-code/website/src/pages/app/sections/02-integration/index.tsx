@@ -1,5 +1,5 @@
-import { Button } from "../../components/Button.jsx"
-import { SectionLayout } from "../../components/sectionLayout.jsx"
+import { Button } from "../../../index/components/Button.jsx"
+import { SectionLayout } from "../../../index/components/sectionLayout.jsx"
 import Flutter from "./assets/flutter.jsx"
 import InlangWordIcon from "./assets/inlang-word-icon.jsx"
 import Nextjs from "./assets/nextjs.jsx"

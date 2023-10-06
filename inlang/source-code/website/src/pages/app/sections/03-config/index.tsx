@@ -1,5 +1,5 @@
 import { For, Show, createSignal, onMount } from "solid-js"
-import { SectionLayout } from "../../components/sectionLayout.jsx"
+import { SectionLayout } from "../../../index/components/sectionLayout.jsx"
 import SVGConnector from "./assets/connector.jsx"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"

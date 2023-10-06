@@ -1,5 +1,5 @@
 import { useI18n } from "@solid-primitives/i18n"
-import { SectionLayout } from "../../components/sectionLayout.jsx"
+import { SectionLayout } from "../../../index/components/sectionLayout.jsx"
 import { showToast } from "#src/components/Toast.jsx"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import copy from "clipboard-copy"

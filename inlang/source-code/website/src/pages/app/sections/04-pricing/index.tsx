@@ -1,5 +1,5 @@
 import { useI18n } from "@solid-primitives/i18n"
-import { SectionLayout } from "../../components/sectionLayout.jsx"
+import { SectionLayout } from "../../../index/components/sectionLayout.jsx"
 
 const Pricing = () => {
 	const [t] = useI18n()
