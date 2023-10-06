@@ -78,7 +78,7 @@ const GetStarted = () => {
 								}}
 								class="bg-gradient-to-r from-surface-500 via-surface-700 via-40% to-surface-500 p-[1px] rounded-md"
 							>
-								<pre class="z-20 h-10 w-72 flex justify-center items-center bg-surface-800 text-sm text-surface-400 rounded-[5px] hover:text-surface-100">
+								<pre class="z-20 h-10 w-fit px-2 flex justify-center items-center bg-surface-800 text-sm text-surface-400 rounded-[5px] hover:text-surface-100">
 									{"$ npx @inlang/cli@latest project init"}
 								</pre>
 							</button>
