@@ -43,11 +43,15 @@ describe("parse lix uris", () => {
 		})
 	})
 
-	it("throws on misformated uri", () => {
+	it("throws on missing protocol in uri", () => {
 		expect(() => parseLixUri("lix.inlang.com/git/github.com/inlang/monorepo")).toThrowError()
+	})
 
+	it("throws on missing repo name in lix server uri", () => {
 		expect(() => parseLixUri("https://lix.inlang.com/git/github.com/inlang")).toThrowError()
+	})
 
+	it("throws on missing repo name in direct github uri", () => {
 		expect(() => parseLixUri("https://github.com/inlang/")).toThrowError()
 	})
 })
