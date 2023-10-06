@@ -82,7 +82,7 @@ const Hero = () => {
 				<div class="flex items-center justify-center gap-4 overflow-hidden relative pl-24">
 					<a
 						href="/documents"
-						class="w-96 h-80 bg-[#043855] rounded-3xl flex-shrink-0 relative group"
+						class="w-96 h-80 bg-[#043855] rounded-3xl flex-shrink-0 relative group border border-primary/0 hover:border-background/20 transition-all"
 					>
 						<div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10 overflow-hidden">
 							<Documents />
@@ -95,7 +95,7 @@ const Hero = () => {
 					</a>
 					<a
 						href="/app"
-						class="w-[512px] h-80 bg-surface-800 rounded-3xl flex-shrink-0 relative overflow-hidden group"
+						class="w-[512px] h-80 bg-surface-800 rounded-3xl flex-shrink-0 relative overflow-hidden group border border-primary/0 hover:border-background/20 transition-all"
 					>
 						<div class="absolute -right-4 bottom-0 z-10">
 							<App />
@@ -108,7 +108,7 @@ const Hero = () => {
 					</a>
 					<a
 						href="/email"
-						class="w-96 h-80 bg-[#043855] rounded-3xl flex-shrink-0 relative overflow-hidden group"
+						class="w-96 h-80 bg-[#043855] rounded-3xl flex-shrink-0 relative overflow-hidden group border border-primary/0 hover:border-background/20 transition-all"
 					>
 						<div class="absolute right-0 bottom-0 z-10">
 							<Email />
@@ -121,7 +121,7 @@ const Hero = () => {
 					</a>
 					<a
 						href="/payments"
-						class="w-96 h-80 bg-surface-700 rounded-3xl flex-shrink-0 relative overflow-hidden group"
+						class="w-96 h-80 bg-surface-700 rounded-3xl flex-shrink-0 relative overflow-hidden group border border-primary/0 hover:border-background/20 transition-all"
 					>
 						<div class="absolute left-1/2 -translate-x-1/2 bottom-0 z-10">
 							<Payments />
@@ -134,7 +134,7 @@ const Hero = () => {
 					</a>
 					<a
 						href="/website"
-						class="w-[512px] h-80 bg-surface-800 rounded-3xl flex-shrink-0 relative group overflow-hidden"
+						class="w-[512px] h-80 bg-surface-800 rounded-3xl flex-shrink-0 relative group overflow-hidden border border-primary/0 hover:border-background/20 transition-all"
 					>
 						<div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10">
 							<Website />
