@@ -10,6 +10,7 @@ export type PageProps = {
 
 export function Page() {
 	const [darkmode, setDarkmode] = createSignal(true)
+	const [transparent, setTransparent] = createSignal(true)
 
 	if (typeof window !== "undefined") {
 		window.addEventListener("scroll", () => {
@@ -17,6 +18,12 @@ export function Page() {
 				setDarkmode(false)
 			} else {
 				setDarkmode(true)
+			}
+
+			if (window.scrollY > 50) {
+				setTransparent(false)
+			} else {
+				setTransparent(true)
 			}
 		})
 	}
@@ -29,7 +36,7 @@ export function Page() {
 				content="inlang's ecosystem makes adapting your application to different markets easy."
 			/>
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
-			<RootLayout landingpage darkmode={darkmode()}>
+			<RootLayout landingpage darkmode={darkmode()} transparent={transparent()}>
 				<div>
 					<Hero />
 					<div class="h-screen" />

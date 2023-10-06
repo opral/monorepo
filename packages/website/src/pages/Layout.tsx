@@ -47,10 +47,15 @@ export const LandingPageLayout = (props: {
 	children: JSXElement
 	landingpage?: boolean
 	darkmode?: boolean
+	transparent?: boolean
 }) => {
 	return (
 		<div class="flex flex-col min-h-screen">
-			<Header landingpage={props.landingpage} darkmode={props.darkmode} />
+			<Header
+				landingpage={props.landingpage}
+				darkmode={props.darkmode}
+				transparent={props.transparent}
+			/>
 			{/* the outer div is growing to occupy the entire height and thereby
 			push the footer to the bottom */}
 			<div class={"grow flex flex-col "}>
@@ -83,7 +88,7 @@ const socialMediaLinks = [
 	},
 ]
 
-function Header(props: { landingpage?: boolean; darkmode?: boolean }) {
+function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?: boolean }) {
 	const getLinks = () => {
 		return [
 			{
@@ -119,7 +124,12 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean }) {
 				// bg-surface-1 is with fixed hex value to avoid transparency with dooms scrolling behaviour
 				class={
 					"sticky top-0 z-[9999] w-full border-b transition-colors " +
-					(props.darkmode ? "bg-surface-800 border-surface-700" : "bg-background border-surface-2")
+					(!props.transparent && props.darkmode
+						? " bg-surface-900 border-b-surface-800"
+						: !props.transparent && !props.darkmode
+						? "bg-background border-surface-2"
+						: "") +
+					(props.transparent ? "border-none -mt-20 border-surface-800" : "")
 				}
 			>
 				<div class={`w-full h-full py-4 px-4 sm:px-10 ${props.landingpage && "px-10"}`}>

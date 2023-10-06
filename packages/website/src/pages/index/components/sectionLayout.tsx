@@ -10,7 +10,7 @@ const bgColor = (type: sectionType) => {
 		case "lightGrey":
 			return "bg-surface-50"
 		case "dark":
-			return "bg-surface-800"
+			return "bg-surface-900"
 		default:
 			return "bg-background"
 	}

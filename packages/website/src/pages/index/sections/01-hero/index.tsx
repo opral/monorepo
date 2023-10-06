@@ -16,7 +16,7 @@ const Hero = () => {
 	return (
 		<>
 			<SectionLayout showLines={true} type="dark">
-				<div class="w-full flex pt-4 md:pt-16 flex-col xl:flex-row">
+				<div class="w-full flex pt-4 md:pt-40 flex-col xl:flex-row">
 					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-10 xl:py-16 pt-20 py-6">
 						<h1 class="text-[40px] leading-tight md:text-6xl font-bold text-background pr-16 tracking-tight">
 							The ecosystem to go{" "}
@@ -67,7 +67,7 @@ const Hero = () => {
 					</div>
 				</div>
 			</SectionLayout>
-			<div class="w-full bg-surface-800">
+			<div class="w-full bg-surface-900">
 				<div class="absolute left-1/2 -translate-x-1/2 h-full max-w-screen-xl w-full mx-auto">
 					<div class="invisible xl:visible absolute top-0 left-0 h-full w-full z-0 ">
 						<div class="flex w-full h-full justify-between mx-auto">
@@ -95,9 +95,9 @@ const Hero = () => {
 					</a>
 					<a
 						href="/app"
-						class="w-[512px] h-80 bg-surface-700 rounded-3xl flex-shrink-0 relative overflow-hidden group"
+						class="w-[512px] h-80 bg-surface-800 rounded-3xl flex-shrink-0 relative overflow-hidden group"
 					>
-						<div class="absolute -right-8 bottom-0 z-10">
+						<div class="absolute -right-4 bottom-0 z-10">
 							<App />
 						</div>
 						{/* Used for making blurry hover effects possible  */}
@@ -121,7 +121,7 @@ const Hero = () => {
 					</a>
 					<a
 						href="/payments"
-						class="w-96 h-80 bg-surface-600 rounded-3xl flex-shrink-0 relative overflow-hidden group"
+						class="w-96 h-80 bg-surface-700 rounded-3xl flex-shrink-0 relative overflow-hidden group"
 					>
 						<div class="absolute left-1/2 -translate-x-1/2 bottom-0 z-10">
 							<Payments />
@@ -134,7 +134,7 @@ const Hero = () => {
 					</a>
 					<a
 						href="/website"
-						class="w-[512px] h-80 bg-surface-700 rounded-3xl flex-shrink-0 relative group overflow-hidden"
+						class="w-[512px] h-80 bg-surface-800 rounded-3xl flex-shrink-0 relative group overflow-hidden"
 					>
 						<div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10">
 							<Website />
