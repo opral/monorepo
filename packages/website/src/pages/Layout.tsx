@@ -118,8 +118,8 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean }) {
 			<header
 				// bg-surface-1 is with fixed hex value to avoid transparency with dooms scrolling behaviour
 				class={
-					"sticky top-0 z-[9999] w-full border-b border-surface-2 " +
-					(props.darkmode ? "bg-surface-800" : "bg-background")
+					"sticky top-0 z-[9999] w-full border-b transition-colors " +
+					(props.darkmode ? "bg-surface-800 border-surface-700" : "bg-background border-surface-2")
 				}
 			>
 				<div class={`w-full h-full py-4 px-4 sm:px-10 ${props.landingpage && "px-10"}`}>
@@ -424,7 +424,7 @@ function UserDropdown() {
 /**
  * Language picker for the landing page.
  */
-function LanguagePicker(darkmode?: boolean) {
+function LanguagePicker(props: { darkmode?: boolean }) {
 	const [localeIsLoaded, setLocaleIsLoaded] = createSignal(false)
 	const [, { locale }] = useI18n()
 
@@ -473,9 +473,9 @@ function LanguagePicker(darkmode?: boolean) {
 						slot="trigger"
 						class={
 							"cursor-pointer h-10 flex items-center font-medium text-sm " +
-							(darkmode
+							(props.darkmode
 								? "text-background hover:text-surface-300"
-								: "text-surface-700 text-primary")
+								: "text-surface-700 hover:text-primary")
 						}
 					>
 						<p>{locale().toUpperCase()}</p>
