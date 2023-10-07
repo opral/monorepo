@@ -43,7 +43,7 @@ describe("usage", async () => {
 			`data:application/javascript;base64,${btoa(compiledBundle.output[0].code)}`
 		)
 
-		runtime.changeLanguageTag("en")
+		runtime.setLanguageTag("en")
 
 		expect(m.onlyText()).toBe("A simple message.")
 		expect(m.oneParam({ name: "Samuel" })).toBe("Good morning Samuel!")
@@ -51,7 +51,7 @@ describe("usage", async () => {
 			"Hello Samuel! You have 5 messages."
 		)
 
-		runtime.changeLanguageTag("de")
+		runtime.setLanguageTag("de")
 
 		expect(m.onlyText()).toBe("Eine einfache Nachricht.")
 		expect(m.oneParam({ name: "Samuel" })).toBe("Guten Morgen Samuel!")
@@ -65,33 +65,33 @@ describe("usage", async () => {
 			`data:application/javascript;base64,${btoa(compiledBundle.output[0].code)}`
 		)
 
-		runtime.changeLanguageTag("fr")
+		runtime.setLanguageTag("fr")
 
 		expect(m.onlyText()).toBe("onlyText")
 		expect(m.oneParam({ name: "Samuel" })).toBe("oneParam")
 		expect(m.multipleParams({ name: "Samuel", count: 5 })).toBe("multipleParams")
 	})
 
-	test("defining onChangeLanguageTag should be possible and should be called when the language tag changes", async () => {
+	test("defining onSetLanguageTag should be possible and should be called when the language tag changes", async () => {
 		const { runtime } = await import(
 			`data:application/javascript;base64,${btoa(compiledBundle.output[0].code)}`
 		)
 
-		const mockOnChangeLanguageTag = vi.fn().mockImplementation(() => {})
-		runtime.onChangeLanguageTag((tag: any) => {
-			mockOnChangeLanguageTag(tag)
+		const mockOnSetLanguageTag = vi.fn().mockImplementation(() => {})
+		runtime.onSetLanguageTag((tag: any) => {
+			mockOnSetLanguageTag(tag)
 		})
 
-		runtime.changeLanguageTag("de")
-		expect(mockOnChangeLanguageTag).toHaveBeenLastCalledWith("de")
+		runtime.setLanguageTag("de")
+		expect(mockOnSetLanguageTag).toHaveBeenLastCalledWith("de")
 
-		runtime.changeLanguageTag("en")
-		expect(mockOnChangeLanguageTag).toHaveBeenLastCalledWith("en")
+		runtime.setLanguageTag("en")
+		expect(mockOnSetLanguageTag).toHaveBeenLastCalledWith("en")
 
-		expect(mockOnChangeLanguageTag).toHaveBeenCalledTimes(2)
+		expect(mockOnSetLanguageTag).toHaveBeenCalledTimes(2)
 	})
 
-	test("should throw if the onChangeLanguageTag callback is already called to avoid unexpected behavior", async () => {
+	test("should throw if the onSetLanguageTag callback is already called to avoid unexpected behavior", async () => {
 		// appending a random comment to make node treat this as a new module
 		// otherwise, the runtime would be cached and the callback would already be set
 		// from previous tests. using vi.resetModules() doesn't work for unknown reasons.
@@ -100,11 +100,11 @@ describe("usage", async () => {
 		)
 
 		expect(() => {
-			runtime.onChangeLanguageTag(() => {})
+			runtime.onSetLanguageTag(() => {})
 		}).not.toThrow()
 
 		expect(() => {
-			runtime.onChangeLanguageTag(() => {})
+			runtime.onSetLanguageTag(() => {})
 		}).toThrow()
 	})
 })
@@ -215,12 +215,12 @@ test("typesafety", async () => {
     // availableLanguageTags should have a narrow type, not a generic string
     runtime.availableLanguageTags satisfies Readonly<Array<"de" | "en">>
 
-    // changeLanguageTag() should fail if the given language tag is not included in availableLanguageTags
+    // setLanguageTag() should fail if the given language tag is not included in availableLanguageTags
     // @ts-expect-error - 
-    runtime.changeLanguageTag("fr")
+    runtime.setLanguageTag("fr")
 
-    // changeLanguageTag() should not fail if the given language tag is included in availableLanguageTags
-    runtime.changeLanguageTag("de")
+    // setLanguageTag() should not fail if the given language tag is included in availableLanguageTags
+    runtime.setLanguageTag("de")
 
     // languageTag should return type should be a union of language tags, not a generic string
     runtime.languageTag satisfies "de" | "en"
