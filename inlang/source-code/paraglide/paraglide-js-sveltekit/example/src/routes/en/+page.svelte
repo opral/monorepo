@@ -1,6 +1,6 @@
 <script>
   import { changeLanguageTag, languageTag } from '@inlang/paraglide-js';
-  import * as m from "@inlang/paraglide-js/messages"
+  import * as m from "@inlang/paraglide-js/messages/en"
 </script>
 
 
