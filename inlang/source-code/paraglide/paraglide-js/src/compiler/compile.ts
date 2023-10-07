@@ -37,7 +37,7 @@ ${thisIsACompiledFileComment}
  * 
  * @type {((tag: typeof availableLanguageTags[number]) => void) | undefined}
  */ 
-let _onChangeLanguageTag
+let _onSetLanguageTag
 
 /**
  * The project's source language tag.
@@ -59,36 +59,36 @@ export const availableLanguageTags = /** @type {const} */ (${JSON.stringify(
 export let languageTag = sourceLanguageTag
 
 /**
- * Change the language tag.
+ * Set the language tag.
  *
  * @param {typeof availableLanguageTags[number]} tag
  */
-export const changeLanguageTag = (tag) => {
+export const setLanguageTag = (tag) => {
 	languageTag = tag
-	if (_onChangeLanguageTag !== undefined) {
-		_onChangeLanguageTag(tag)
+	if (_onSetLanguageTag !== undefined) {
+		_onSetLanguageTag(tag)
 	}
 }
 
 /**
- * Set the \`onChangeLanguageTag()\` callback function.
+ * Set the \`onSetLanguageTag()\` callback function.
  *
  * The callback function is called whenever the language tag changes
  * and is typically used to update the UI.
  * 
  * @example
- *   onChangeLanguageTag((tag) => {
+ *   onSetLanguageTag((tag) => {
  *     // make a new request to the server with the updated language tag
  *     window.location.href = \`/\${tag}/\${window.location.pathname}\`
  *   })
  *
  * @param {(tag: typeof availableLanguageTags[number]) => void} fn
  */
-export const onChangeLanguageTag = (fn) => {
-	if (_onChangeLanguageTag !== undefined) {
-		throw new Error("@inlang/paraglide-js: The \`onChangeLanguageTag()\` callback has already been called.\\n\\nThe \`onChangeLanguageTag()\` callback can only be called once to avoid unexpected behavior. Try searching for \`onChangeLanguageTag()\` in your codebase and remove the duplicate.")
+export const onSetLanguageTag = (fn) => {
+	if (_onSetLanguageTag !== undefined) {
+		throw new Error("@inlang/paraglide-js: The \`onSetLanguageTag()\` callback has already been defined.\\n\\nThe \`onSetLanguageTag()\` callback can only be defined once to avoid unexpected behavior. Try searching for \`onSetLanguageTag()\` in your codebase and remove the duplicate.")
 	}
-	_onChangeLanguageTag = fn
+	_onSetLanguageTag = fn
 }
 `,
 	}
