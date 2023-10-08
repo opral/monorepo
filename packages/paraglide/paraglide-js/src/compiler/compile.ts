@@ -91,11 +91,12 @@ export const setLanguageTag = (tag) => {
  * Set the \`onSetLanguageTag()\` callback function.
  *
  * The function can be used to trigger side-effects such as 
- * making a new request to the server with the updated language tag.  
+ * making a new request to the server with the updated language tag, 
+ * or re-rendering the UI on the client (SPA apps).  
  * 
  * IMPORTANT: 
- *   The \`onSetLanguageTag()\` callback can only be defined once to avoid unexpected behavior.
- *   If you use inlang paraglide on the server, make sure to not call \`onSetLanguageTag()\` for each request.
+ *   - The \`onSetLanguageTag()\` callback can only be defined once to avoid unexpected behavior.
+ *   - If you use inlang paraglide on the server, make sure to not call \`onSetLanguageTag()\` for each request.
  * 
  * @example
  *   onSetLanguageTag((tag) => {
