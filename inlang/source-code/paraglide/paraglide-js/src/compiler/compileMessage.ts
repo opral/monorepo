@@ -21,13 +21,13 @@ export const compileMessage = (message: Message): string => {
 	const jsdoc = jsdocFromParams(params)
 
 	return `
-	//! Don't edit this message manually. 
-	// 
-	// This message has been compiled by inlang paraglide.
-	// Use the inlang ide extension [0] or the web editor [1] instead.
-	// 
-	// [0] https://inlang.com/marketplace/app.inlang.ideExtension
-	// [1] https://inlang.com/marketplace/app.inlang.editor
+	/**
+	 * This message has been compiled by [inlang paraglide](https://inlang.com/marketplace/library.inlang.paraglideJs).
+	 *
+	 * - Don't edit the message manually. 
+	 * - Use the [inlang ide extension](https://inlang.com/marketplace/app.inlang.ideExtension)
+	 *   or the [web editor](https://inlang.com/marketplace/app.inlang.editor) to edit the message.
+	 */ 
   export const ${message.id} = ${jsdoc} (${Object.keys(params).length > 0 ? "params" : ""}) => {
     const contents = {
       ${Object.entries(contents)
