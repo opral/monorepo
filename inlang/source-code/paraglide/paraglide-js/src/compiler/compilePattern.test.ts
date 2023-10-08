@@ -19,3 +19,12 @@ it("should compile a pattern with multiple VariableReference's", () => {
 	const { compiled } = compilePattern(pattern)
 	expect(compiled).toBe("`Hello ${params.name}! You have ${params.count} messages.`")
 })
+
+it("should throw if an unknown expression is used", () => {
+	const pattern: Pattern = [
+		{ type: "Text", value: "Hello " },
+		// @ts-expect-error - unknown type
+		{ type: "Unknown", value: "unknown" },
+	]
+	expect(() => compilePattern(pattern)).toThrow()
+})
