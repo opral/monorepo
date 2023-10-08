@@ -52,21 +52,38 @@ export const availableLanguageTags = /** @type {const} */ (${JSON.stringify(
 		)})
 
 /**
- * The current language tag.
+ * Get current language tag.
  * 
- * @type {typeof availableLanguageTags[number]}
+ * @type {() => typeof availableLanguageTags[number]}
  */
-export let languageTag = sourceLanguageTag
+export let languageTag = () => sourceLanguageTag
 
 /**
  * Set the language tag.
+ * 
+ * @example 
+ *   setLanguageTag("en")
+ * 
+ *   // passing a getter function also works. 
+ *   // 
+ *   // a getter function is useful for resolving a language tag 
+ *   // from a context like React's context API or retrieving the language tag 
+ *   // from a cookie.
+ *   setLanguageTag(() => {
+ *     return cookies.get("lang")
+ *   }) 
  *
- * @param {typeof availableLanguageTags[number]} tag
+ * @param {typeof availableLanguageTags[number] | typeof languageTag} tag
  */
 export const setLanguageTag = (tag) => {
-	languageTag = tag
+	if (typeof tag === "function") {
+		languageTag = tag
+	} else {
+		languageTag = () => tag
+	}
+	// call the callback function if it has been defined
 	if (_onSetLanguageTag !== undefined) {
-		_onSetLanguageTag(tag)
+		_onSetLanguageTag(languageTag())
 	}
 }
 
