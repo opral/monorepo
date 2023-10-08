@@ -90,8 +90,12 @@ export const setLanguageTag = (tag) => {
 /**
  * Set the \`onSetLanguageTag()\` callback function.
  *
- * The callback function is called whenever the language tag changes
- * and is typically used to update the UI.
+ * The function can be used to trigger side-effects such as 
+ * making a new request to the server with the updated language tag.  
+ * 
+ * IMPORTANT: 
+ *   The \`onSetLanguageTag()\` callback can only be defined once to avoid unexpected behavior.
+ *   If you use inlang paraglide on the server, make sure to not call \`onSetLanguageTag()\` for each request.
  * 
  * @example
  *   onSetLanguageTag((tag) => {
@@ -103,7 +107,7 @@ export const setLanguageTag = (tag) => {
  */
 export const onSetLanguageTag = (fn) => {
 	if (_onSetLanguageTag !== undefined) {
-		throw new Error("@inlang/paraglide-js: The \`onSetLanguageTag()\` callback has already been defined.\\n\\nThe \`onSetLanguageTag()\` callback can only be defined once to avoid unexpected behavior. Try searching for \`onSetLanguageTag()\` in your codebase and remove the duplicate.")
+		throw new Error("@inlang/paraglide-js: The \`onSetLanguageTag()\` callback has already been defined.\\n\\nThe \`onSetLanguageTag()\` callback can only be defined once to avoid unexpected behavior.\\n\\n 1) Try searching for \`onSetLanguageTag()\` in your codebase for potential duplicated.\\n 2) If you use inlang paraglide on the server, make sure to not call \`onSetLanguageTag()\` for each request.")
 	}
 	_onSetLanguageTag = fn
 }
