@@ -35,7 +35,7 @@ describe("usage", async () => {
 		const { runtime } = await import(
 			`data:application/javascript;base64,${btoa(compiledBundle.output[0].code)}`
 		)
-		expect(runtime.languageTag).toBe(runtime.sourceLanguageTag)
+		expect(runtime.languageTag()).toBe(runtime.sourceLanguageTag)
 	})
 
 	test("should return the correct message for the set language tag", async () => {
@@ -58,6 +58,20 @@ describe("usage", async () => {
 		expect(m.multipleParams({ name: "Samuel", count: 5 })).toBe(
 			"Hallo Samuel! Du hast 5 Nachrichten."
 		)
+	})
+
+	test("setting the languageTag as a getter function should be possible", async () => {
+		const { m, runtime } = await import(
+			`data:application/javascript;base64,${btoa(compiledBundle.output[0].code)}`
+		)
+
+		runtime.setLanguageTag(() => "en")
+
+		expect(m.onlyText()).toBe("A simple message.")
+
+		runtime.setLanguageTag(() => "de")
+
+		expect(m.onlyText()).toBe("Eine einfache Nachricht.")
 	})
 
 	test("should return the message id if the message is not translated", async () => {
@@ -142,9 +156,13 @@ describe("tree-shaking", () => {
 		const log = vi.spyOn(console, "log").mockImplementation(() => {})
 		// all required code for the message to be rendered is included like sourceLanguageTag.
 		// but, all other messages except of 'onlyText' are tree-shaken away.
-		expect(compiled.output[0].code).toBe(
-			'const sourceLanguageTag="en";let languageTag=sourceLanguageTag;const onlyText=()=>{const contents={en:`A simple message.`,de:`Eine einfache Nachricht.`};return contents[languageTag]};console.log(onlyText());\n'
-		)
+		for (const id of mockMessages.map((m) => m.id)) {
+			if (id === "onlyText") {
+				expect(compiled.output[0].code).toContain(id)
+			} else {
+				expect(compiled.output[0].code).not.toContain(id)
+			}
+		}
 		eval(compiled.output[0].code)
 		expect(log).toHaveBeenCalledWith("A simple message.")
 	})
@@ -173,9 +191,13 @@ describe("tree-shaking", () => {
 		})
 		const result = await bundle.generate({ format: "esm" })
 		const log = vi.spyOn(console, "log").mockImplementation(() => {})
-		expect(result.output[0].code).toBe(
-			'const sourceLanguageTag="en";let languageTag=sourceLanguageTag;const onlyText=()=>{const contents={en:`A simple message.`,de:`Eine einfache Nachricht.`};return contents[languageTag]};const oneParam=params=>{const contents={en:`Good morning ${params.name}!`,de:`Guten Morgen ${params.name}!`};return contents[languageTag]??"oneParam"};const multipleParams=params=>{const contents={en:`Hello ${params.name}! You have ${params.count} messages.`,de:`Hallo ${params.name}! Du hast ${params.count} Nachrichten.`};return contents[languageTag]??"multipleParams"};console.log(onlyText(),oneParam({name:"Samuel"}),multipleParams({name:"Samuel",count:5}));\n'
-		)
+		for (const id of mockMessages.map((m) => m.id)) {
+			if (["onlyText", "oneParam", "multipleParams"].includes(id)) {
+				expect(result.output[0].code).toContain(id)
+			} else {
+				expect(result.output[0].code).not.toContain(id)
+			}
+		}
 		eval(result.output[0].code)
 		expect(log).toHaveBeenCalledWith(
 			"A simple message.",
@@ -223,7 +245,11 @@ test("typesafety", async () => {
     runtime.setLanguageTag("de")
 
     // languageTag should return type should be a union of language tags, not a generic string
-    runtime.languageTag satisfies "de" | "en"
+    runtime.languageTag() satisfies "de" | "en"
+
+		// setting the language tag as a getter function should be possible
+
+		runtime.setLanguageTag(() => "en")
 
     // --------- MESSAGES ---------
 

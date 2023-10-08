@@ -36,6 +36,6 @@ export const compileMessage = (message: Message): string => {
 				)
 				.join(",\n  ")}
   }
-  return contents[languageTag] ?? "${message.id}"
+  return contents[languageTag()] ?? "${message.id}"
 }`
 }
