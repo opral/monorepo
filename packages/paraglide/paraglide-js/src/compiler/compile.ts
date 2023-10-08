@@ -90,25 +90,30 @@ export const setLanguageTag = (tag) => {
 /**
  * Set the \`onSetLanguageTag()\` callback function.
  *
- * The function can be used to trigger side-effects such as 
+ * The function can be used to trigger client-side side-effects such as 
  * making a new request to the server with the updated language tag, 
  * or re-rendering the UI on the client (SPA apps).  
  * 
- * IMPORTANT: 
- *   - The \`onSetLanguageTag()\` callback can only be defined once to avoid unexpected behavior.
- *   - If you use inlang paraglide on the server, make sure to not call \`onSetLanguageTag()\` for each request.
+ * - Don't use this function on the server (!).
+ *   Triggering a side-effect is only useful on the client because a server-side
+ *   environment doesn't need to re-render the UI. 
+ *     
+ * - The \`onSetLanguageTag()\` callback can only be defined once to avoid unexpected behavior.
  * 
  * @example
- *   onSetLanguageTag((tag) => {
- *     // make a new request to the server with the updated language tag
- *     window.location.href = \`/\${tag}/\${window.location.pathname}\`
- *   })
+ *   // if you use inlang paraglide on the server, make sure to not call \`onSetLanguageTag()\` on the server
+ *   if (isServer === false) {
+ *     onSetLanguageTag((tag) => {
+ *       // (for example) make a new request to the server with the updated language tag
+ *       window.location.href = \`/\${tag}/\${window.location.pathname}\`
+ *     })
+ *   }
  *
  * @param {(tag: typeof availableLanguageTags[number]) => void} fn
  */
 export const onSetLanguageTag = (fn) => {
 	if (_onSetLanguageTag !== undefined) {
-		throw new Error("@inlang/paraglide-js: The \`onSetLanguageTag()\` callback has already been defined.\\n\\nThe \`onSetLanguageTag()\` callback can only be defined once to avoid unexpected behavior.\\n\\n 1) Try searching for \`onSetLanguageTag()\` in your codebase for potential duplicated.\\n 2) If you use inlang paraglide on the server, make sure to not call \`onSetLanguageTag()\` for each request.")
+		throw new Error("@inlang/paraglide-js: The \`onSetLanguageTag()\` callback has already been defined.\\n\\nThe \`onSetLanguageTag()\` callback can only be defined once to avoid unexpected behavior.\\n\\n 1) Try searching for \`onSetLanguageTag()\` in your codebase for potential duplicated.\\n 2) If you use inlang paraglide on the server, make sure to not call \`onSetLanguageTag()\` as onSetLanguageTag is a client only API.")
 	}
 	_onSetLanguageTag = fn
 }
