@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import ParaglideNextAdapter from "@/ParaglideNextAdapter"
 import { languageTag } from "@inlang/paraglide-js"
 
 export const metadata: Metadata = {
@@ -8,8 +9,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang={languageTag}>
-			<body>{children}</body>
-		</html>
+		<ParaglideNextAdapter>
+			<html lang={languageTag()}>
+				<body>{children}</body>
+			</html>
+		</ParaglideNextAdapter>
 	)
 }

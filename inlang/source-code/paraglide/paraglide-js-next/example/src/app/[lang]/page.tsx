@@ -5,7 +5,7 @@ export default function Home() {
 	return (
 		<main>
 			<p>{m.greeting({ name: "Samuel", count: 5 })}</p>
-			<p>{m.currentLanguageTag({ languageTag })}</p>
+			<p>{m.currentLanguageTag({ languageTag: languageTag() })}</p>
 			<a href="/de">
 				<button>change language to "de"</button>
 			</a>
