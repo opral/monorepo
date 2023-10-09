@@ -1,5 +1,6 @@
 import satori from "satori"
 import { openRepository, createNodeishMemoryFs } from "@lix-js/client"
+import { publicEnv } from "@inlang/env-variables"
 import { markup } from "./helper/markup.js"
 import { readFileSync } from "node:fs"
 import { telemetryNode } from "@inlang/telemetry"
@@ -24,8 +25,10 @@ export const badge = async (url: string) => {
 		return fromCache
 	}
 
-	// initialize a lisa repo instance on each request to prevent cross request pollution
-	const repo = await openRepository(url, { nodeishFs: createNodeishMemoryFs() })
+	// initialize a lix repo instance on each request to prevent cross request pollution
+	const repo = await openRepository(`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${url}`, {
+		nodeishFs: createNodeishMemoryFs(),
+	})
 
 	// Get the content of the project.inlang.json file
 	await repo.nodeishFs.readFile("./project.inlang.json", { encoding: "utf-8" }).catch((e) => {
