@@ -1,10 +1,10 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Repository } from "./api.js"
-import { transformRemote, withLazyFetching } from "./helpers.js"
+import { transformRemote, withLazyFetching, parseLixUri } from "./helpers.js"
 // @ts-ignore
 import http from "./http-client.js"
-
 import { Octokit } from "octokit"
+
 import { createSignal, createEffect } from "./solid.js"
 import {
 	clone,
@@ -24,7 +24,6 @@ export async function openRepository(
 	args: {
 		nodeishFs: NodeishFilesystem
 		workingDirectory?: string
-		corsProxy?: string
 		auth?: unknown // unimplemented
 	}
 ): Promise<Repository> {
@@ -32,37 +31,27 @@ export async function openRepository(
 
 	const [errors, setErrors] = createSignal<Error[]>([])
 
-	// parse url in the format of github.com/inlang/example and split it to host, owner and repo
-	const [host, owner, repoName] = [...url.split("/")]
+	// the url format for lix urls is
+	// https://lix.inlang.com/git/github.com/inlang/monorepo
+	// proto:// lixServer / namespace / repoHost / owner / repoName
+	// namespace is ignored until switching from git.inlang.com to lix.inlang.com and can eveolve in future to be used for repoType, api type or feature group
+	// the url format for direct github urls without a lix server is https://github.com/inlang/examplX (only per domain-enabled git hosters will be supported, currently just gitub)
+	// the url for opening a local repo allready in the fs provider is file://path/to/repo (not implemented yet)
 
-	// check if all 3 parts are present, if not, return an error
-	if (!host || !owner || !repoName) {
-		throw new Error(
-			`Invalid url format for '${url}' for cloning repository, please use the format of github.com/inlang/example.`
-		)
-	}
-	if (args.auth) {
-		console.warn("Auth currently not implemented in lisa client")
-	}
+	const { protocol, lixHost, repoHost, owner, repoName } = parseLixUri(url)
 
-	let gitHubProxyBaseUrl = ""
-	const gitProxyUrl = args?.corsProxy
-
-	// Git cors proxy and github cors proxy have to be on the same server and will be unified further
-	if (gitProxyUrl && gitProxyUrl?.startsWith("http")) {
-		const { origin } = new URL(gitProxyUrl)
-		gitHubProxyBaseUrl = origin
-	}
+	const gitProxyUrl = lixHost ? `${protocol}//${lixHost}/git-proxy/` : ""
+	const gitHubProxyUrl = lixHost ? `${protocol}//${lixHost}/github-proxy/` : ""
 
 	const github = new Octokit({
 		request: {
 			fetch: (...ghArgs: any) => {
-				ghArgs[0] = gitHubProxyBaseUrl + "/github-proxy/" + ghArgs[0]
+				ghArgs[0] = gitHubProxyUrl + ghArgs[0]
 				if (!ghArgs[1]) {
 					ghArgs[1] = {}
 				}
 
-				if (gitHubProxyBaseUrl) {
+				if (gitHubProxyUrl) {
 					// required for authenticated cors requests
 					ghArgs[1].credentials = "include"
 				}
@@ -73,7 +62,8 @@ export async function openRepository(
 		},
 	})
 
-	const normalizedUrl = `https://${host}/${owner}/${repoName}`
+	// TODO: support for url scheme to use local repo already in the fs
+	const gitUrl = `https://${repoHost}/${owner}/${repoName}`
 
 	// the directory we use for all git operations
 	const dir = "/"
@@ -83,7 +73,7 @@ export async function openRepository(
 		http,
 		dir,
 		corsProxy: gitProxyUrl,
-		url: normalizedUrl,
+		url: gitUrl,
 		singleBranch: true,
 		depth: 1,
 		noTags: true,
@@ -165,7 +155,7 @@ export async function openRepository(
 		push() {
 			return push({
 				fs: withLazyFetching(rawFs, "push", delayedAction),
-				url: normalizedUrl,
+				url: gitUrl,
 				corsProxy: gitProxyUrl,
 				http,
 				dir,
@@ -175,7 +165,7 @@ export async function openRepository(
 		pull(cmdArgs) {
 			return pull({
 				fs: withLazyFetching(rawFs, "pull", delayedAction),
-				url: normalizedUrl,
+				url: gitUrl,
 				corsProxy: gitProxyUrl,
 				http,
 				dir,
@@ -207,6 +197,13 @@ export async function openRepository(
 			}
 
 			return response?.data
+		},
+
+		async createFork() {
+			return github.rest.repos.createFork({
+				owner,
+				repo: repoName,
+			})
 		},
 
 		async isCollaborator(cmdArgs) {
