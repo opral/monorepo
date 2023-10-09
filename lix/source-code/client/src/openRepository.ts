@@ -38,6 +38,8 @@ export async function openRepository(
 	// the url format for direct github urls without a lix server is https://github.com/inlang/examplX (only per domain-enabled git hosters will be supported, currently just gitub)
 	// the url for opening a local repo allready in the fs provider is file://path/to/repo (not implemented yet)
 
+	// TODO: fork telemetry enable
+
 	const { protocol, lixHost, repoHost, owner, repoName } = parseLixUri(url)
 
 	const gitProxyUrl = lixHost ? `${protocol}//${lixHost}/git-proxy/` : ""
@@ -206,31 +208,6 @@ export async function openRepository(
 			})
 		},
 
-		async isCollaborator(cmdArgs) {
-			let response:
-				| Awaited<
-						ReturnType<typeof github.request<"GET /repos/{owner}/{repo}/collaborators/{username}">>
-				  >
-				| undefined
-			try {
-				response = await github.request("GET /repos/{owner}/{repo}/collaborators/{username}", {
-					owner,
-					repo: repoName,
-					username: cmdArgs.username,
-				})
-			} catch (err: any) {
-				/*  throws on non collaborator access, 403 on non collaborator, 401 for current user not authenticated correctly
-						TODO: move to consistent error classes everywhere when hiding git api more
-				*/
-				if (err.status === 401) {
-					// if we are logged out rethrow the error
-					throw err
-				}
-			}
-
-			return response?.status === 204 ? true : false
-		},
-
 		/**
 		 * Parses the origin from remotes.
 		 *
@@ -280,18 +257,36 @@ export async function openRepository(
 		 * Additional information about a repository provided by GitHub.
 		 */
 		async getMeta() {
-			const {
-				data: { name, private: isPrivate, fork: isFork, parent, owner: ownerMetaData },
-			}: Awaited<ReturnType<typeof github.request<"GET /repos/{owner}/{repo}">>> =
-				await github.request("GET /repos/{owner}/{repo}", {
+			const res: Awaited<
+				ReturnType<typeof github.request<"GET /repos/{owner}/{repo}">> | { error: Error }
+			> = await github
+				.request("GET /repos/{owner}/{repo}", {
 					owner,
 					repo: repoName,
 				})
+				.catch((newError: Error) => {
+					setErrors((previous) => [...(previous || []), newError])
+					return { error: newError }
+				})
 
+			if ("error" in res) {
+				return res.error
+			}
+
+			console.info(res)
+
+			const {
+				data: { name, private: isPrivate, fork: isFork, parent, owner: ownerMetaData, permissions },
+			} = res
 			return {
 				name,
 				isPrivate,
 				isFork,
+				permissions: {
+					admin: permissions?.admin || false,
+					push: permissions?.push || false,
+					pull: permissions?.pull || false,
+				},
 				owner: {
 					name: ownerMetaData.name || undefined,
 					email: ownerMetaData.email || undefined,

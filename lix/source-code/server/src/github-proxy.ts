@@ -48,7 +48,11 @@ router.all(
 			response.set("Access-Control-Allow-Credentials", "true")
 			response.set("Access-Control-Allow-Headers", "x-github-api-version")
 
-			if (res.headers.get("content-type")?.includes("json")) {
+			if (targetUrl!.endsWith("/user/emails") && res.status === 401 && decryptedAccessToken) {
+				response.statusMessage = "token_invalid"
+				response.status(401)
+				response.send("Token invalid")
+			} else if (res.headers.get("content-type")?.includes("json")) {
 				response
 					.status(res.status)
 					.contentType(res.headers.get("content-type")!)

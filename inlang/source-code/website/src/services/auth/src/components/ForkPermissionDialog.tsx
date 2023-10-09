@@ -1,18 +1,20 @@
+import { browserAuth } from "@lix-js/client"
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js"
 import { createSignal, Show } from "solid-js"
 import IconGithub from "~icons/cib/github"
+// import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
 
 /**
- * A dialog that prompts the user to login with GitHub.
+ * A dialog that prompts the user to add missing permissions on GitHub.
  *
  * @example
- * 	let signInDialog: SlDialog | undefined;
+ * 	let PermissionDialog: SlDialog | undefined;
  *
  * 	function onX() {
- * 		signInDialog?.show();
+ * 		PermissionDialog?.show();
  * 	}
  */
-export function SignInDialog(props: {
+export function ForkPermissionDialog(props: {
 	/** forwarding the ref */
 	ref: SlDialog
 	onClick: () => void
@@ -28,8 +30,17 @@ export function SignInDialog(props: {
 			on:sl-after-hide={() => setIsShown(false)}
 		>
 			<Show when={isShown()}>
-				<h3 slot="label">Sign in</h3>
-				<p>To conduct changes, you must sign in with a GitHub account.</p>
+				<h3 slot="label">Add permissions</h3>
+				<p>Creating a fork requires app permissions to "all repositories" on github.</p>
+
+				{/* <p>Alternatively you can create a manual fork on github</p>
+				<a class="self-center" href="/documentation" target="_blank">
+					<sl-button prop:variant="text">
+						Manually create fork on github
+						<MaterialSymbolsArrowOutwardRounded slot="suffix" />
+					</sl-button>
+				</a> */}
+
 				<sl-button
 					slot="footer"
 					prop:variant="primary"
@@ -39,7 +50,7 @@ export function SignInDialog(props: {
 				>
 					{/* @ts-ignore */}
 					<IconGithub slot="prefix" />
-					Sign in with GitHub
+					Enable "all repo" access on GitHub
 				</sl-button>
 			</Show>
 		</sl-dialog>

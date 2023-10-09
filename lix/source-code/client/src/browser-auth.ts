@@ -1,11 +1,7 @@
 import { publicEnv } from "@inlang/env-variables"
 
 const gitHubProxyUrl = publicEnv.PUBLIC_GIT_PROXY_BASE_URL + "/github-proxy/"
-
-// the authUrl for the oauth app with minimal scopes https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps
-// oauth apps can only require public (public_repo) or private repos but no further repo or org selection
-// email is required to commit with identity of who committed
-const authUrl = `https://github.com/login/oauth/authorize?client_id=${publicEnv.PUBLIC_GITHUB_APP_CLIENT_ID}&scope=repo,user:email`
+const githubAppClientId = publicEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID
 
 /**
  * Login user in new window.
@@ -15,10 +11,26 @@ const authUrl = `https://github.com/login/oauth/authorize?client_id=${publicEnv.
  */
 // TODO: later use url with default instead of env var: args: { url?: string }
 export function login() {
-	window.open(authUrl, "_blank")
+	window.open(`https://github.com/login/oauth/authorize?client_id=${githubAppClientId}`, "_blank")
 }
-export function logout() {
-	return fetch(`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/services/auth/sign-out`, {
+
+export async function addPermissions() {
+	const permissionWindow = window.open(
+		`https://github.com/apps/${"lix-test"}/installations/select_target`,
+		"_blank"
+	)
+	await new Promise((resolve) => {
+		const timer = setInterval(() => {
+			if (permissionWindow?.closed) {
+				clearInterval(timer)
+				resolve(true)
+			}
+		}, 700)
+	})
+}
+
+export async function logout() {
+	await fetch(`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/services/auth/sign-out`, {
 		method: "POST",
 		credentials: "include",
 	})
@@ -28,7 +40,7 @@ type Email = {
 	email: string
 	primary: boolean
 	verified: boolean
-	visibility: string | null
+	visibility: string | undefined
 }
 
 /**
@@ -67,7 +79,7 @@ export async function getUser() {
 		},
 	})
 	if (email.ok === false) {
-		throw Error("Failed to get user email " + email.statusText)
+		throw Error(email.statusText)
 	}
 	const emailBody = await email.json()
 
@@ -75,6 +87,18 @@ export async function getUser() {
 		getGithubNoReplyEmail(emailBody) ||
 		getGithubPublicEmail(emailBody) ||
 		getGithubPrimaryEmail(emailBody)
+
+	const installRequest = await fetch(`${gitHubProxyUrl}https://api.github.com/user/installations`, {
+		credentials: "include",
+		headers: {
+			Accept: "application/vnd.github+json",
+			"X-GitHub-Api-Version": "2022-11-28",
+		},
+	})
+	if (installRequest.ok === false) {
+		throw Error("Failed to get user app installations " + installRequest.statusText)
+	}
+	const { installations } = await installRequest.json()
 
 	const request = await fetch(`${gitHubProxyUrl}https://api.github.com/user`, {
 		credentials: "include",
@@ -92,7 +116,8 @@ export async function getUser() {
 		username: requestBody.login,
 		email: userEmail,
 		avatarUrl: requestBody.avatar_url,
+		installations,
 	}
 }
 
-export default { login, logout, getUser }
+export default { login, logout, getUser, addPermissions }
