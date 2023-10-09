@@ -3,8 +3,6 @@ import { Meta, Title } from "@solidjs/meta"
 import { createSignal } from "solid-js"
 import Hero from "./sections/01-hero/index.jsx"
 import Marketplace from "./sections/02-marketplace/index.jsx"
-import GetStarted from "./sections/05-getStarted/index.jsx"
-import QualityChecks from "./sections/04-qualitychecks/index.jsx"
 
 export type PageProps = {
 	markdown: string
@@ -16,7 +14,7 @@ export function Page() {
 
 	if (typeof window !== "undefined") {
 		window.addEventListener("scroll", () => {
-			if (window.scrollY > 1050) {
+			if (window.scrollY > 916) {
 				setDarkmode(false)
 			} else {
 				setDarkmode(true)
@@ -42,8 +40,7 @@ export function Page() {
 				<div>
 					<Hero />
 					<Marketplace />
-					<QualityChecks />
-					<GetStarted />
+					{/* <QualityChecks /> */}
 				</div>
 			</RootLayout>
 		</>
