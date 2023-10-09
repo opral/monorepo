@@ -380,7 +380,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 						</For>
 					</div>
 				</div>
-				<div class="px-6 xl:px-0 flex flex-col xl:flex-row justify-between items-end gap-8 pb-16">
+				<div class="px-6 md:px-10 xl:px-0 flex flex-col xl:flex-row justify-between items-end gap-8 pb-16">
 					<div class="xl:px-10 xl:flex flex-col gap-2 md:gap-4 pt-2 max-xl:w-full">
 						<NewsletterForm />
 					</div>
