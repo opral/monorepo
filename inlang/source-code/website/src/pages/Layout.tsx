@@ -92,11 +92,6 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 	const getLinks = () => {
 		return [
 			{
-				name: `Products`,
-				href: "/products",
-				type: props.darkmode ? "textBackground" : ("text" as buttonType),
-			},
-			{
 				name: `${t("header.link.marketplace")}`,
 				href: "/marketplace",
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
@@ -152,23 +147,7 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 							</a>
 							<div class="w-full content-center">
 								<div class="hidden md:flex justify-end items-center gap-8">
-									<div class="flex gap-8">
-										{/* <For each={socialMediaLinks}>
-											{(link) => (
-												<a
-													target="_blank"
-													class={
-														"link link-primary flex space-x-2 items-center " +
-														(props.darkmode ? "text-background" : "")
-													}
-													href={link.href}
-												>
-													<link.Icon class="w-5 h-5" />
-													<span class="sr-only">{link.name}</span>
-												</a>
-											)}
-										</For> */}
-									</div>
+									<ProductDropdown darkmode={props.darkmode} />
 									<For each={getLinks()}>
 										{(link) => (
 											<Button type={link.type} href={link.href}>
@@ -242,38 +221,41 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 	)
 }
 
+const productsLinks = [
+	{
+		name: `Global Documents`,
+		href: "/documents",
+		type: "text" as buttonType,
+	},
+	{
+		name: `Global App`,
+		href: "/app",
+		type: "text" as buttonType,
+	},
+	{
+		name: `Global Email`,
+		href: "/email",
+		type: "text" as buttonType,
+	},
+	{
+		name: `Global Payments`,
+		href: "/payments",
+		type: "text" as buttonType,
+	},
+	{
+		name: `Global Website`,
+		href: "/website",
+		type: "text" as buttonType,
+	},
+]
+
 const Footer = (props: { isLandingPage: boolean }) => {
 	const [t] = useI18n()
 
 	const getProductsLinks = () => {
-		return [
-			{
-				name: `Global Documents`,
-				href: "/documents",
-				type: "text" as buttonType,
-			},
-			{
-				name: `Global App`,
-				href: "/app",
-				type: "text" as buttonType,
-			},
-			{
-				name: `Global Email`,
-				href: "/email",
-				type: "text" as buttonType,
-			},
-			{
-				name: `Global Payments`,
-				href: "/payments",
-				type: "text" as buttonType,
-			},
-			{
-				name: `Global Website`,
-				href: "/website",
-				type: "text" as buttonType,
-			},
-		]
+		return [...productsLinks]
 	}
+
 	const getDocLinks = () => {
 		return [
 			{
@@ -551,6 +533,64 @@ function LanguagePicker(props: { darkmode?: boolean }) {
 					</sl-menu>
 				</sl-dropdown>
 			</Show>
+		</div>
+	)
+}
+
+/**
+ * Language picker for the landing page.
+ */
+function ProductDropdown(props: { darkmode?: boolean }) {
+	const languages = [
+		{
+			code: "en",
+			name: "English",
+		},
+		{
+			code: "de",
+			name: "Deutsch",
+		},
+		{
+			code: "zh",
+			name: "中文",
+		},
+		{
+			code: "sk",
+			name: "Slovak",
+		},
+		{
+			code: "pt_BR",
+			name: "Portuguese Brazil",
+		},
+	]
+
+	return (
+		<div class="w-fit">
+			<sl-dropdown>
+				<div
+					slot="trigger"
+					class={
+						"cursor-pointer h-10 flex items-center font-medium text-sm " +
+						(props.darkmode
+							? "text-background hover:text-surface-300"
+							: "text-surface-700 hover:text-primary")
+					}
+				>
+					<p>Products</p>
+					<IconExpand class="w-5 h-5 opacity-50" />
+				</div>
+				<sl-menu>
+					<For each={productsLinks}>
+						{(product) => (
+							<sl-menu-item>
+								<a class="w-full block" href={product.href}>
+									{product.name.replace("Global ", "")}
+								</a>
+							</sl-menu-item>
+						)}
+					</For>
+				</sl-menu>
+			</sl-dropdown>
 		</div>
 	)
 }
