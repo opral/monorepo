@@ -7,7 +7,7 @@ export type PrivateEnvVariables = z.infer<typeof privateEnvVariablesSchema>
 export type AllEnvVariables = PublicEnvVariables & PrivateEnvVariables
 
 export const publicEnvVariablesSchema = z.object({
-	PUBLIC_GITHUB_APP_CLIENT_ID: z.string(),
+	PUBLIC_LIX_GITHUB_APP_CLIENT_ID: z.string(),
 	PUBLIC_GIT_PROXY_BASE_URL: z
 		.string()
 		.startsWith("http")
@@ -34,5 +34,5 @@ export const privateEnvVariablesSchema = z.object({
 	GOOGLE_TRANSLATE_API_KEY: z.string().optional(),
 	SERVER_SENTRY_DSN: z.string().optional().describe("DSN for Sentry (on the server)"),
 	// prefixed with INLANG_ because github doesn't allow env vars with GITHUB_ in ci/cd.
-	INLANG_GITHUB_APP_CLIENT_SECRET: z.string(),
+	LIX_GITHUB_APP_CLIENT_SECRET: z.string(),
 })
