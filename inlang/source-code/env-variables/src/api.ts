@@ -7,7 +7,7 @@ export type PrivateEnvVariables = z.infer<typeof privateEnvVariablesSchema>
 export type AllEnvVariables = PublicEnvVariables & PrivateEnvVariables
 
 export const publicEnvVariablesSchema = z.object({
-	PUBLIC_GITHUB_APP_CLIENT_ID: z.string(),
+	PUBLIC_LIX_GITHUB_APP_CLIENT_ID: z.string(),
 	PUBLIC_GIT_PROXY_BASE_URL: z
 		.string()
 		.startsWith("http")
@@ -36,5 +36,5 @@ export const privateEnvVariablesSchema = z.object({
 	ALGOLIA_ADMIN: z.string(),
 	ALGOLIA_APPLICATION: z.string(),
 	// prefixed with INLANG_ because github doesn't allow env vars with GITHUB_ in ci/cd.
-	INLANG_GITHUB_APP_CLIENT_SECRET: z.string(),
+	LIX_GITHUB_APP_CLIENT_SECRET: z.string(),
 })

@@ -7,7 +7,11 @@ import { showToast } from "#src/interface/components/Toast.jsx"
 import { navigate } from "vite-plugin-ssr/client/router"
 import { currentPageContext } from "#src/renderer/state.js"
 import type { EditorRouteParams } from "../types.js"
-import { SignInDialog } from "#src/services/auth/index.js"
+import {
+	SignInDialog,
+	ForkPermissionDialog,
+	PushPermissionDialog,
+} from "#src/services/auth/index.js"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { TourHintWrapper, type TourStepId } from "./Notification/TourHintWrapper.jsx"
 import { browserAuth } from "@lix-js/client"
@@ -51,6 +55,8 @@ export const Gitfloat = () => {
 	const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 
 	let signInDialog: SlDialog | undefined
+	let forkPermissionDialog: SlDialog | undefined
+	let pushPermissionDialog: SlDialog | undefined
 
 	function onSignIn() {
 		signInDialog?.show()
@@ -61,7 +67,9 @@ export const Gitfloat = () => {
 		if (localStorage.user === undefined) {
 			return
 		}
-		const response = await repo()?.createFork()
+		const response = await repo()
+			?.createFork()
+			.catch((err) => err)
 
 		telemetryBrowser.capture("EDITOR created fork", {
 			owner: routeParams().owner,
@@ -80,6 +88,9 @@ export const Gitfloat = () => {
 				navigate(`/editor/github.com/${response.data.full_name}`)
 			}, 1000)
 			return
+		} else if (response?.status === 403) {
+			forkPermissionDialog.show()
+			return
 		} else {
 			showToast({
 				variant: "danger",
@@ -91,6 +102,7 @@ export const Gitfloat = () => {
 	}
 
 	async function triggerPushChanges() {
+		// FIXME: prevent losing stale data
 		if (localStorage?.user === undefined) {
 			return showToast({
 				title: "Failed to push changes",
@@ -101,28 +113,38 @@ export const Gitfloat = () => {
 		setIsLoading(true)
 
 		// commit & push
-		if (!repo())
+		if (!repo()) {
 			return showToast({
 				title: "Failed to push changes",
 				message: "Please try again or file a bug.",
 				variant: "danger",
 			})
-		const push = await pushChanges({
+		}
+
+		const pushResult = await pushChanges({
 			repo: repo()!,
 			user: localStorage.user,
 			setFsChange,
 			setLastPullTime,
 		})
+
 		setIsLoading(false)
+
 		telemetryBrowser.capture("EDITOR pushed changes", {
 			owner: routeParams().owner,
 			repository: routeParams().repository,
-			sucess: push.error === undefined,
+			sucess: pushResult.error === undefined,
 		})
-		if (push.error) {
+
+		if (pushResult.error?.data?.statusCode === 403) {
+			pushPermissionDialog.show()
+			return
+		}
+
+		if (pushResult.error) {
 			return showToast({
 				title: "Failed to push changes",
-				message: "Please try again or file a bug. " + push.error.message,
+				message: "Please try again or file a bug. " + pushResult.error.message,
 				variant: "danger",
 			})
 		} else {
@@ -307,10 +329,27 @@ export const Gitfloat = () => {
 			</div>
 			<SignInDialog
 				ref={signInDialog!}
-				onClickOnSignInButton={() => {
+				onClick={() => {
 					// hide the sign in dialog to increase UX when switching back to this window
 					browserAuth.login()
 					signInDialog?.hide()
+				}}
+			/>
+			<ForkPermissionDialog
+				ref={forkPermissionDialog!}
+				onClick={() => {
+					// hide the sign in dialog to increase UX when switching back to this window
+					browserAuth.addPermissions()
+					forkPermissionDialog?.hide()
+					setIsForking(false)
+				}}
+			/>
+			<PushPermissionDialog
+				ref={pushPermissionDialog!}
+				onClick={() => {
+					// hide the sign in dialog to increase UX when switching back to this window
+					browserAuth.addPermissions()
+					pushPermissionDialog?.hide()
 				}}
 			/>
 		</>

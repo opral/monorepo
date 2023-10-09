@@ -27,23 +27,28 @@ export type Repository = {
 	}) => Promise<
 		Endpoints["POST /repos/{owner}/{repo}/merge-upstream"]["response"]["data"] | undefined
 	>
-	isCollaborator: (args: { username: string }) => Promise<boolean>
 	createFork: () => Promise<Endpoints["POST /repos/{owner}/{repo}/forks"]["response"]>
 	getOrigin: () => Promise<string>
 	getCurrentBranch: () => Promise<string | undefined>
-	errors: Subscribable<Error[]>
-	getMeta: () => Promise<{
-		name: string
-		isPrivate: boolean
-		isFork: boolean
-		owner: { name?: string; email?: string; login: string }
-		parent:
-			| {
+	errors: Subscribable<Error & { response?: { status?: number } }[]>
+	getMeta: () => Promise<
+		| {
+				name: string
+				isPrivate: boolean
+				isFork: boolean
+				owner: { name?: string; email?: string; login: string }
+				permissions: {
+					admin: boolean
+					pull: boolean
+					push: boolean
+				}
+				parent?: {
 					url: string
 					fullName: string
-			  }
-			| undefined
-	}>
+				}
+		  }
+		| Error
+	>
 
 	// TODO: implement these before publishing api, but not used in badge or editor, depends on strategy for statelessness
 	// currentBranch: () => unknown

@@ -14,29 +14,14 @@
 import express, { Router } from "express"
 import { createServer as createViteServer } from "vite"
 import { URL } from "node:url"
-import { privateEnv } from "@inlang/env-variables"
 import sirv from "sirv"
-import cookieSession from "cookie-session"
 import { router as vitePluginSsr } from "./vite-plugin-ssr.js"
-import { router as authService } from "../services/auth/index.server.js"
 import { redirects } from "./redirects.js"
 
 /** the root path of the server (website/) */
 const rootPath = new URL("../..", import.meta.url).pathname
 
 export const router: Router = express.Router()
-
-router.use(
-	cookieSession({
-		name: "inlang-session",
-		httpOnly: true,
-		// secure: isProduction ? true : false,
-		// domain: isProduction ? "inlang.com" : undefined,
-		sameSite: "strict",
-		secret: privateEnv.SESSION_COOKIE_SECRET,
-		maxAge: 7 * 24 * 3600 * 1000, // 1 week
-	})
-)
 
 if (process.env.NODE_ENV === "production") {
 	// import server code https://github.com/brillout/vite-plugin-ssr/issues/403
@@ -54,8 +39,6 @@ if (process.env.NODE_ENV === "production") {
 }
 
 // ------------------------ START ROUTES ------------------------
-
-router.use("/services/auth", authService)
 
 router.use(redirects)
 
