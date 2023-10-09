@@ -4,6 +4,7 @@ import { createSignal } from "solid-js"
 import Hero from "./sections/01-hero/index.jsx"
 import Marketplace from "./sections/02-marketplace/index.jsx"
 import GetStarted from "./sections/05-getStarted/index.jsx"
+import QualityChecks from "./sections/04-qualitychecks/index.jsx"
 
 export type PageProps = {
 	markdown: string
@@ -41,6 +42,7 @@ export function Page() {
 				<div>
 					<Hero />
 					<Marketplace />
+					<QualityChecks />
 					<GetStarted />
 				</div>
 			</RootLayout>
