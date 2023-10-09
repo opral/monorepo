@@ -21,15 +21,15 @@ const Hero = () => {
 						</h1>
 					</div>
 					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-10 xl:pt-16 pt-4 pb-24">
-						<p class="text-surface-300 text-xl">
+						<p class="text-surface-300 text-xl max-w-md">
 							inlang helps businesses in adapting to various markets to attract more customer.
 						</p>
 						<div class="flex md:items-center items-start gap-8">
-							<a href={"/documentation/manually-create-project"} class="-ml-0.5 flex-shrink-0">
+							<a href={"/marketplace"} class="-ml-0.5 flex-shrink-0">
 								<button class="relative bg-surface-800">
 									<div class="relative z-20 bg-surface-200 h-10 px-6 flex justify-center items-center shadow rounded-md hover:shadow-lg hover:bg-background transition-all">
 										<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-surface-900 via-surface-800 to-surface-900 text-sm font-medium">
-											Get started
+											Explore the ecosystem
 										</span>
 									</div>
 									<div
