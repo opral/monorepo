@@ -2,7 +2,8 @@
 
 Lix is a change control system for applications.
 
-We build lix to bring developers and non technical editors together without sacrificing either control about consistency nor forcing many manual steps on editors as in classic git workflows (Eg. checkout, named branching, manual commits with messages, stashing, rebasing, pushing)
+Change control allows tracking and querying changes.
+This allows us to answer questions like how did a function or a specific key in a json file change over time.
 
 Apart from these advantages, we can also improve performance with lazy actions, support more complex formats and derived assets and offer fully integrated review workflows.
 
