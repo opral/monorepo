@@ -92,18 +92,18 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 	const getLinks = () => {
 		return [
 			{
+				name: `Products`,
+				href: "/products",
+				type: props.darkmode ? "textBackground" : ("text" as buttonType),
+			},
+			{
 				name: `${t("header.link.marketplace")}`,
 				href: "/marketplace",
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
 			},
 			{
-				name: `${t("header.link.documentation")}`,
+				name: `Developer`,
 				href: "/documentation",
-				type: props.darkmode ? "textBackground" : ("text" as buttonType),
-			},
-			{
-				name: `${t("header.link.blog")}`,
-				href: "/blog",
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
 			},
 		]
@@ -153,7 +153,7 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 							<div class="w-full content-center">
 								<div class="hidden md:flex justify-end items-center gap-8">
 									<div class="flex gap-8">
-										<For each={socialMediaLinks}>
+										{/* <For each={socialMediaLinks}>
 											{(link) => (
 												<a
 													target="_blank"
@@ -167,7 +167,7 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 													<span class="sr-only">{link.name}</span>
 												</a>
 											)}
-										</For>
+										</For> */}
 									</div>
 									<For each={getLinks()}>
 										{(link) => (
@@ -245,6 +245,35 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 const Footer = (props: { isLandingPage: boolean }) => {
 	const [t] = useI18n()
 
+	const getProductsLinks = () => {
+		return [
+			{
+				name: `Global Documents`,
+				href: "/documents",
+				type: "text" as buttonType,
+			},
+			{
+				name: `Global App`,
+				href: "/app",
+				type: "text" as buttonType,
+			},
+			{
+				name: `Global Email`,
+				href: "/email",
+				type: "text" as buttonType,
+			},
+			{
+				name: `Global Payments`,
+				href: "/payments",
+				type: "text" as buttonType,
+			},
+			{
+				name: `Global Website`,
+				href: "/website",
+				type: "text" as buttonType,
+			},
+		]
+	}
 	const getDocLinks = () => {
 		return [
 			{
@@ -273,18 +302,8 @@ const Footer = (props: { isLandingPage: boolean }) => {
 				type: "text" as buttonType,
 			},
 			{
-				name: `${t("footer.resources.github")}`,
-				href: "https://github.com/inlang/monorepo",
-				type: "text" as buttonType,
-			},
-			{
-				name: `${t("footer.resources.twitter")}`,
-				href: "https://twitter.com/inlangHQ",
-				type: "text" as buttonType,
-			},
-			{
-				name: `${t("footer.resources.discord")}`,
-				href: "https://discord.gg/gdMPPWy57R",
+				name: `Developers`,
+				href: "/documentation",
 				type: "text" as buttonType,
 			},
 		]
@@ -314,15 +333,37 @@ const Footer = (props: { isLandingPage: boolean }) => {
 		<footer class="border-t border-surface-100 overflow-hidden">
 			<SectionLayout showLines={props.isLandingPage} type="lightGrey">
 				<div class="flex flex-row flex-wrap-reverse py-16 px-6 md:px-10 xl:px-0 gap-10 sm:gap-x-0 md:gap-y-10 xl:gap-0">
-					<div class="w-full md:w-1/4 xl:px-10 flex flex-row items-center sm:items-start md:flex-col justify-between">
-						<a href="/" class="flex items-center w-fit">
-							<img class="h-9 w-9" src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
-							<span class="self-center pl-2 text-left font-semibold text-surface-900">inlang</span>
-						</a>
+					<div class="w-full md:w-1/4 xl:px-10 flex flex-row items-center sm:items-start md:flex-col gap-10 md:justify-start justify-between flex-wrap">
+						<div>
+							<a href="/" class="flex items-center w-fit mb-6">
+								<img class="h-9 w-9" src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
+								<span class="self-center pl-2 text-left font-semibold text-surface-900">
+									inlang
+								</span>
+							</a>
+							<p class="text-surface-600 text-sm">The ecosystem to go global</p>
+						</div>
+						<div class="flex gap-4">
+							<For each={socialMediaLinks}>
+								{(link) => (
+									<a
+										target="_blank"
+										class={
+											"link link-primary flex space-x-2 items-center " +
+											(props.darkmode ? "text-background" : "")
+										}
+										href={link.href}
+									>
+										<link.Icon class="w-5 h-5" />
+										<span class="sr-only">{link.name}</span>
+									</a>
+								)}
+							</For>
+						</div>
 					</div>
 					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-10 flex flex-col pt-2">
-						<p class="font-semibold text-surface-900 pb-3">{t("footer.docs.title")}</p>
-						<For each={getDocLinks()}>
+						<p class="font-semibold text-surface-900 pb-3">{t("footer.resources.title")}</p>
+						<For each={getResourceLinks()}>
 							{(link) => (
 								<div class="w-fit opacity-80">
 									<Button type={link.type} href={link.href}>
@@ -333,8 +374,8 @@ const Footer = (props: { isLandingPage: boolean }) => {
 						</For>
 					</div>
 					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-10 flex flex-col pt-2">
-						<p class="font-semibold text-surface-900 pb-3">{t("footer.resources.title")}</p>
-						<For each={getResourceLinks()}>
+						<p class="font-semibold text-surface-900 pb-3">Products</p>
+						<For each={getProductsLinks()}>
 							{(link) => (
 								<div class="w-fit opacity-80">
 									<Button type={link.type} href={link.href}>

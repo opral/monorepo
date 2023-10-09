@@ -1,16 +1,10 @@
 import { Button } from "../../components/Button.jsx"
-import { CardTag } from "../../components/CardTag.jsx"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
 import AppFlowy from "./assets/logos/appflowy.jsx"
 import Calcom from "./assets/logos/clacom.jsx"
 import Jitsi from "./assets/logos/jitsi.jsx"
 import Listmonk from "./assets/logos/listmonk.jsx"
 import OpenAssistant from "./assets/logos/openAssistant.jsx"
-import App from "./assets/categories/app.jsx"
-import Email from "./assets/categories/email.jsx"
-import Payments from "./assets/categories/payments.jsx"
-import Website from "./assets/categories/website.jsx"
-import Documents from "./assets/categories/documents.jsx"
 import CategorieSlider from "./Slider.jsx"
 
 const Hero = () => {
