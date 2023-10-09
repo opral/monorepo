@@ -9,8 +9,8 @@ import AutoResolve from "./assets/autoresolve.jsx"
 const QualityChecks = () => {
 	return (
 		<>
-			<SectionLayout showLines={true}>
-				<div class="w-full flex pt-4 flex-col-reverse xl:flex-row mb-16">
+			<SectionLayout showLines={true} type="lightGrey">
+				<div class="w-full flex pt-4 flex-col-reverse xl:flex-row pb-16">
 					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-10 xl:py-16 pt-8 md:pt-20 mt-8 py-6 items-start">
 						<h3 class="font-semibold text-3xl">Team-wide quality checks</h3>
 						<p>
