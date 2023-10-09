@@ -8,12 +8,11 @@
 
   setLanguageTag(() => getContext("languageTag"))
 
-  // if (import.meta.env.SSR === false){
+  if (import.meta.env.SSR === false){
     onSetLanguageTag((newLanguageTag) => {
-      if (import.meta.env.SSR ) return 
       window.location.href = `/${newLanguageTag}`
     });
-  // }
+  }
   
 </script>
 
