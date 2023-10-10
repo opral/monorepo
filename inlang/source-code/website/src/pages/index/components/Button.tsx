@@ -9,6 +9,7 @@ export type buttonType =
 	| "secondaryOnGray"
 	| "text"
 	| "textPrimary"
+	| "textPrimaryOnDark"
 	| "textBackground"
 
 const bgColor = (type: buttonType) => {
@@ -23,6 +24,8 @@ const bgColor = (type: buttonType) => {
 			return "text-surface-700 hover:text-primary"
 		case "textPrimary":
 			return "text-primary-600 hover:text-primary"
+		case "textPrimaryOnDark":
+			return "text-primary-on-inverted-container hover:text-primary"
 		case "textBackground":
 			return "text-background hover:text-background/80"
 		default:

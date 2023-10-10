@@ -6,7 +6,7 @@ import MissingPart from "./assets/missingpart.jsx"
 const Marketplace = () => {
 	return (
 		<>
-			<SectionLayout showLines={true}>
+			<SectionLayout showLines={true} type="white">
 				<div class="mb-24">
 					<div class="relative w-full pb-2">
 						<img src="/images/landingpage/marketplace_apps.png" class="w-full max-w-5xl mx-auto" />
