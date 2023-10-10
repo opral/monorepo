@@ -123,11 +123,27 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 						? " bg-surface-900 border-b-surface-800"
 						: !props.transparent && !props.darkmode
 						? "bg-background border-surface-2"
-						: "") +
-					(props.transparent ? "border-none -mt-20 border-surface-800" : "")
+						: "" + props.transparent && props.darkmode
+						? "bg-transparent border-transparent bg-surface-900"
+						: "bg-transparent border-transparent bg-background")
 				}
 			>
-				<div class={`w-full h-full py-4 px-6 md:px-10 ${props.landingpage && "px-10"}`}>
+				<Show when={props.transparent}>
+					<div class="absolute left-1/2 -translate-x-1/2 h-full max-w-screen-xl w-full mx-auto">
+						<div class="invisible xl:visible absolute top-0 left-0 h-full w-full z-0 ">
+							<div class="flex w-full h-full justify-between mx-auto">
+								<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
+								<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
+								<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
+								<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
+								<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
+							</div>
+						</div>
+					</div>
+				</Show>
+				<div
+					class={`w-full h-full py-4 px-6 md:px-10 relative z-10 ${props.landingpage && "px-10"}`}
+				>
 					<nav class={"max-w-[1200px] w-full mx-auto"}>
 						<div class="flex">
 							<a href={getLocale() + "/"} class="flex items-center w-fit">
@@ -166,7 +182,7 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 										<LanguagePicker darkmode={props.darkmode} />
 									</Show>
 									<Show when={currentPageContext.urlParsed.pathname.includes("editor") === false}>
-										<Button type="secondary" href="/editor">
+										<Button type={props.darkmode ? "primary" : "secondary"} href="/editor">
 											{t("header.openEditor")}
 										</Button>
 									</Show>
