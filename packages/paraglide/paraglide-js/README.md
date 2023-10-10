@@ -1,17 +1,16 @@
 # @inlang/paraglide-js
 
-Paraglide JS is the i18n library for inlang projects. 
+<doc-gallery>TODO: adapter gallery</doc-gallery>
 
+- [x] small, fast, and typesafe (less than 1kb gzipped)
+- [x] only bundles the messages that are used (tree-shaking)
 - [x] plug & play with the [inlang ecosystem](https://inlang.com/marketplace)
-- [x] storage agnostic: use any message format you want (JSON, PO, ICU, ...) via inlang plugins
-- [x] compiler-based: efficient, typesafe and tiny (less than 1kb gzipped)
-- [x] tree-shaking: only bundles the messages that are used
-- [x] no async: SSR, SEO and instant loading
-
-Paraglide JS compiles an inlang project into a use-case optimized i18n library. The keyword is "compiles". By leveraging a compiler, Paraglide JS eliminates a class of edge cases while also being simpler, faster, and more reliable than other i18n libraries. Oh, and it's also typesafe out of the box :) 
 
 
-## Usage
+
+
+
+# Usage
 
 Messages are imported as a namespace and can be used as follows:
 
@@ -41,7 +40,7 @@ Paraglide JS exports four runtime variables and functions via "@inlang/paraglide
 - `setLanguageTag()`: sets the language tag of the current user
 
 
-## Getting started
+# Getting started
 
 0. Ensure that you have a working inlang project. If you don't, follow the [getting started guide](https://inlang.com/documentation/getting-started).
 
@@ -61,3 +60,45 @@ npm install @inlang/paraglide-js
   }
 }
 ```
+
+# Architecture 
+
+Inlang Paraglide JS leverages a compiler to emit a use-case optimized i18n library. 
+
+By leveraging a compiler, inlang Paraglide JS eliminates a class of edge cases while also being simpler, faster, and more reliable than other i18n libraries. The compiler emits:
+
+1. Tree-shakable message functions that are only bundled if they are used
+2. Adaptable runtime (works for node, browser, react, vue, svelte, etc.)
+
+
+## 1. Tree-shakable message functions (`m.function()`)
+
+The compiler compiles messages (translations) into tree-shakable "message functions". The bundler (rollup, webpack, turbopack, etc.) automatically tree-shakes (removes) the message functions that are not used.
+
+_Input_
+
+```js
+// the namespace import `* as m` is tree-shakable
+import * as m from "@paraglide-js/messages"
+
+console.log(m.hello({ username: "Samuel" }))
+```
+
+_Output_
+
+```js
+function hello({ username }) {
+  return `Hello ${username}!`
+}
+
+console.log(hello({ username: "Samuel"}))
+```
+
+
+## 2. Adaptable runtime
+
+The compiler emits a runtime that is adaptable to any use-case by calling `setLanguageTag()` and `onSetLanguageTag()`.
+
+### `setLanguageTag()`
+
+Message functions 
