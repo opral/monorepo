@@ -1,5 +1,16 @@
 # @inlang/cli
 
+## 1.10.0
+
+### Minor Changes
+
+- 1502c0deb: refactor: removed the project migrate command
+
+  - migration command is not used anymore
+  - removed the command to reduce complexity
+
+  improve: the project init command forward to inlang.com/new
+
 ## 1.9.0
 
 ### Minor Changes

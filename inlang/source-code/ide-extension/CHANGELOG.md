@@ -1,5 +1,15 @@
 # inlang-vs-code-extension
 
+## 1.11.0
+
+### Minor Changes
+
+- a1f3f064b: improve: tryAutoGenProjectSettings
+
+  - Only prompts the user if the settings can actually be generated.
+
+  refactor: remove unused code
+
 ## 1.10.0
 
 ### Minor Changes
