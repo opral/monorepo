@@ -127,8 +127,8 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 					(props.transparent ? "border-none -mt-20 border-surface-800" : "")
 				}
 			>
-				<div class={`w-full h-full py-4 px-4 sm:px-10 ${props.landingpage && "px-10"}`}>
-					<nav class={"max-w-screen-xl w-full mx-auto xl:px-4"}>
+				<div class={`w-full h-full py-4 px-6 md:px-10 ${props.landingpage && "px-10"}`}>
+					<nav class={"max-w-[1200px] w-full mx-auto"}>
 						<div class="flex">
 							<a href={getLocale() + "/"} class="flex items-center w-fit">
 								<img
