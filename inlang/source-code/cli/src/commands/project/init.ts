@@ -3,14 +3,10 @@ import { log } from "../../utilities/log.js"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import fs from "node:fs/promises"
 import { tryAutoGenProjectSettings } from "@inlang/create-project"
-import { ProjectSettings } from "@inlang/project-settings"
-import path from "node:path"
 
 export const init = new Command()
 	.command("init")
-	.description(
-		"Initialize a new inlang project at project.inlang.json with optional module configuration."
-	)
+	.description("Initialize a new inlang project.")
 	.action(async () => {
 		await initCommandAction({ logger: log, nodeishFs: fs })
 	})
@@ -36,44 +32,19 @@ export async function initCommandAction(args: {
 		}
 	}
 
-	try {
-		const oldProjFileStat = await fs.stat("./inlang.config.js")
-		if (oldProjFileStat) {
-			args.logger.error(
-				"Found an existing inlang configuration in the legacy format, please run the migration command instead."
-			)
-		}
-
-		return
-	} catch (error: any) {
-		if (error.code !== "ENOENT") {
-			args.logger.error("unknown read error: " + error)
-			return
-		}
-	}
-
-	const { warnings, errors } = await tryAutoGenProjectSettings({
+	const settings = await tryAutoGenProjectSettings({
 		nodeishFs: args.nodeishFs,
-		pathJoin: path.join,
+		basePath: process.cwd(),
 	})
 
-	if (!errors?.length) {
-		for (const warning of warnings) args.logger.warn(warning)
-	} else {
-		const settings: ProjectSettings = {
-			$schema: "https://inlang.com/schema/project-settings",
-			sourceLanguageTag: "en",
-			languageTags: ["en"],
-			modules: [],
-		}
-
-		const configString = JSON.stringify(settings, undefined, 4)
-		await args.nodeishFs.writeFile(inlangConfigFilePath, configString + "\n")
-
-		args.logger.warn(
-			`Could not auto generate a project configuration, falling back to a minimal base configuration. Please manually setup your inlang project.`
+	if (settings === undefined) {
+		// the site inlang.com/new doesn't exist yet but putting it here
+		// to not forget to add it later
+		args.logger.info(
+			"Could not auto generate project settings. Go to https://inlang.com/new to create a project."
 		)
+		return
 	}
 
-	args.logger.info(`✅ Successfully created your inlang configuration at: ${inlangConfigFilePath}`)
+	args.logger.success(`Successfully created your inlang project at: ${inlangConfigFilePath}`)
 }
