@@ -3,14 +3,13 @@
 	"sourceLanguageTag": "en",
 	"languageTags": ["en", "de", "pt-BR", "sk", "zh"],
 	"modules": [
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js",
+		"/Users/felixhaberle/Desktop/git/monorepo/inlang/source-code/plugins/inlang-message-format/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern/dist/index.js"
 	],
-	"plugin.inlang.json": {
-		"pathPattern": "./inlang/source-code/website/lang/{languageTag}.json",
-		"variableReferencePattern": ["{", "}"]
+	"plugin.inlang.messageFormat": {
+		"storagePath": "/Users/felixhaberle/Desktop/git/monorepo/inlang/source-code/website/lang/messages.json"
 	}
 }

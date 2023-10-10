@@ -1,17 +1,9 @@
-import { useI18n } from "@solid-primitives/i18n"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
 import { showToast } from "#src/components/Toast.jsx"
-import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import copy from "clipboard-copy"
+import * as m from "@inlang/paraglide-js/messages"
 
 const GetStarted = () => {
-	const [t, { locale }] = useI18n()
-
-	const getLocale = () => {
-		const language = locale() || defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
-	}
-
 	return (
 		<SectionLayout showLines={true} type="dark">
 			<div class="relative py-24">
@@ -19,21 +11,21 @@ const GetStarted = () => {
 					<div class="flex flex-col items-center gap-4">
 						<div class="bg-surface-800">
 							<p class="text-sm text-background bg-background/10 h-7 flex items-center px-4 rounded-full w-fit tracking-relaxed">
-								{t("landing.getstarted.caption")}
+								{m.landing_getstarted_caption()}
 							</p>
 						</div>
 
 						<h2 class="text-center text-3xl font-semibold text-background leading-tight md:leading-relaxed tracking-tight">
-							{t("landing.getstarted.title")}
+							{m.landing_getstarted_title()}
 						</h2>
 						<p class="text-normal px-6 md:px-10 md:w-[65%] sm:leading-7 text-center text-surface-400 pb-8">
-							{t("landing.getstarted.description")}
+							{m.landing_getstarted_description()}
 						</p>
-						<a href={getLocale() + "/documentation"}>
+						<a href={"/documentation"}>
 							<button class="relative bg-surface-800">
 								<div class="relative z-20 bg-surface-200 h-10 w-72 flex justify-center items-center shadow rounded-md hover:shadow-lg hover:bg-background transition-all">
 									<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-surface-900 via-surface-800 to-surface-900 text-sm font-medium">
-										{t("landing.getstarted.button")}
+										{m.landing_getstarted_button()}
 									</span>
 								</div>
 								<div
@@ -62,7 +54,7 @@ const GetStarted = () => {
 						<p class="text-surface-300">or</p>
 
 						<sl-tooltip
-							prop:content={t("landing.getstarted.toast.tooltip")}
+							prop:content={m.landing_getstarted_toast_tooltip()}
 							prop:distance={16}
 							prop:hoist={true}
 							prop:placement="top"
@@ -72,7 +64,7 @@ const GetStarted = () => {
 									copy("npx @inlang/cli config init"),
 										showToast({
 											variant: "success",
-											title: t("landing.getstarted.toast.text"),
+											title: m.landing_getstarted_toast_text(),
 											duration: 3000,
 										})
 								}}

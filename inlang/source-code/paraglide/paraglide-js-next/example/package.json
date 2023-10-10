@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "next dev",
+		"dev": "next -p 3005 dev",
 		"build": "paraglide-js compile ./project.inlang.json && next build",
 		"preview": "next start"
 	},

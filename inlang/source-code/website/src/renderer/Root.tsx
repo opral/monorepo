@@ -2,25 +2,17 @@ import {
 	type Accessor,
 	type Component,
 	createEffect,
-	createSignal,
 	ErrorBoundary,
-	onMount,
 	Show,
+	type JSXElement,
 } from "solid-js"
 import type { PageContextRenderer } from "./types.js"
-import { Dynamic } from "solid-js/web"
+import { Dynamic, isServer } from "solid-js/web"
 import { LocalStorageProvider } from "#src/services/local-storage/index.js"
-import { I18nContext, useI18n } from "@solid-primitives/i18n"
-import { createI18nContext } from "@solid-primitives/i18n"
-
-// manually import the translations via vite's file resolver
-import de from "../../lang/de.json?raw"
-import en from "../../lang/en.json?raw"
-import zh from "../../lang/zh.json?raw"
-import sk from "../../lang/sk.json?raw"
-import pt_BR from "../../lang/pt-BR.json?raw"
+import { onSetLanguageTag, setLanguageTag, languageTag } from "@inlang/paraglide-js"
 
 import { Meta } from "@solidjs/meta"
+import { currentPageContext } from "./state.js"
 
 export type RootProps = Accessor<{
 	pageContext: PageContextRenderer
@@ -33,50 +25,23 @@ export type RootProps = Accessor<{
  * to provide the page with the required context and provide
  * error boundaries.
  */
-export function Root(props: {
-	page: Component
-	pageProps: Record<string, unknown>
-	locale: string
-}) {
-	const i18nvalue = createI18nContext(
-		{
-			de: JSON.parse(de),
-			en: JSON.parse(en),
-			zh: JSON.parse(zh),
-			sk: JSON.parse(sk),
-			pt_BR: JSON.parse(pt_BR),
-		},
-		"en"
-	)
-
+export function Root(props: { page: Component; pageProps: Record<string, unknown> }) {
 	return (
 		<ErrorBoundary fallback={(error) => <ErrorMessage error={error} />}>
-			<I18nContext.Provider value={i18nvalue}>
+			<ParaglideSolidAdpater>
 				<LocalStorageProvider>
 					<RootWithProviders {...props} />
 				</LocalStorageProvider>
-			</I18nContext.Provider>
+			</ParaglideSolidAdpater>
 		</ErrorBoundary>
 	)
 }
 
-function RootWithProviders(props: {
-	page: Component
-	pageProps: Record<string, unknown>
-	locale: string
-}) {
-	const [, { locale }] = useI18n()
-	const [localeLoaded, setLocaleLoaded] = createSignal(false)
-
-	onMount(() => {
-		locale(props.locale)
-		setLocaleLoaded(true)
-	})
-
+function RootWithProviders(props: { page: Component; pageProps: Record<string, unknown> }) {
 	return (
 		<>
 			<Show
-				when={localeLoaded()}
+				when={languageTag()}
 				fallback={
 					<>
 						<Meta name="og:image" content="/images/inlang-social-image.jpg" />
@@ -112,3 +77,18 @@ function ErrorMessage(props: { error: Error }) {
 		</>
 	)
 }
+
+export const ParaglideSolidAdpater = (props: { children: JSXElement }) => {
+	if (!isServer) {
+		onSetLanguageTag((tag: string) => {
+			console.log("onSetLanguageTag", tag)
+
+			window.location.href = `/${tag}`
+		})
+	}
+
+	setLanguageTag(() => currentPageContext.languageTag)
+
+	return <>{props.children}</>
+}
+

@@ -2,17 +2,9 @@ import { For, Show } from "solid-js"
 import { repositories } from "./repositories.js"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
-import { useI18n } from "@solid-primitives/i18n"
-import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 
 export function CommunityProjects() {
 	const [store] = useLocalStorage()
-	const [, { locale }] = useI18n()
-
-	const getLocale = () => {
-		const language = locale() || defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
-	}
 
 	return (
 		<div class="pb-16">
@@ -25,7 +17,7 @@ export function CommunityProjects() {
 							Projects that you recently opened with the editor.
 						</p>
 					</div>
-					<a href={getLocale() + "/documentation"} class="w-full md:w-auto">
+					<a href={"/documentation"} class="w-full md:w-auto">
 						<sl-button prop:variant="default" prop:size="medium" class="w-full pt-4 md:pt-0">
 							Get started
 							<MaterialSymbolsArrowOutward
