@@ -40,6 +40,10 @@ const filteredItems = () =>
 	})
 
 export function Page() {
+	const icons = registry
+		.slice(registry.length - 9, registry.length)
+		.map((item: MarketplaceManifest) => item.icon)
+
 	return (
 		<>
 			<Title>inlang Marketplace</Title>
@@ -49,11 +53,41 @@ export function Page() {
 			/>
 			<Meta name="og:image" content="/images/inlang-marketplace-image.jpg" />
 			<Layout>
-				<div class="py-16 md:py-20 min-h-screen relative">
-					<div class="grid xl:grid-cols-3 pb-8 gap-8">
-						<h1 class="xl:col-span-2 text-[40px] md:text-5xl font-bold text-left leading-tight">
-							Explore the marketplace
-						</h1>
+				<div class="pb-16 md:pb-20 min-h-screen relative">
+					<div class="grid xl:grid-cols-3 pb-8 xl:gap-8 grid-flow-row-dense">
+						<div class="relative z-20 xl:mt-0 -mt-12 pb-8 xl:pb-0">
+							<h1 class="xl:col-span-2 md:pt-20 pt-16 text-[40px] md:text-5xl font-bold text-left leading-tight mb-3">
+								Marketplace
+							</h1>
+							<h2 class="text-3xl text-surface-400 font-semibold xl:mb-4">Explore the ecosystem</h2>
+						</div>
+						<div class="xl:col-span-2 max-xl:row-start-1 relative max-xl:max-h-14 xl:blur-0 blur-xl pointer-events-none w-full flex xl:justify-end content-start items-start flex-wrap gap-4 pt-12 justify-start xl:ml-auto max-w-lg">
+							<For each={icons}>
+								{(icon) => (
+									<div
+										style={{
+											"background-image": `url(${icon})`,
+										}}
+										class="w-16 h-16 rounded-lg bg-surface-200 bg-cover bg-center opacity-30 xl:opacity-50 border border-surface-300"
+									/>
+								)}
+							</For>
+							<div class="absolute inset-0 xl:bg-gradient-to-tr bg-gradient-to-tl from-background/0 via-background/25 to-primary/25 blur-2xl z-10" />
+							<div class="absolute inset-0 xl:bg-gradient-to-tr bg-gradient-to-tl from-background/0 via-background/25 to-background" />
+						</div>
+					</div>
+					<div class="flex items-center gap-4 mb-8">
+						<div class="h-96 w-full bg-surface-100 rounded-2xl flex items-end justify-start p-8">
+							<div class="w-full flex justify-between items-center">
+								<div>
+									<h2 class="text-lg font-semibold mb-1">Highlight: ParaglideJS</h2>
+									<p class="text-surface-500">The all new library for all common frameworks.</p>
+								</div>
+								<Button chevron type="primary">
+									Learn more
+								</Button>
+							</div>
+						</div>
 					</div>
 					<div class="w-full top-16 sticky bg-background/90 backdrop-blur-xl pb-4 pt-8 z-10 flex flex-col gap-5">
 						<Search
