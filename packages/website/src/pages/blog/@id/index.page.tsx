@@ -1,8 +1,6 @@
 import { Meta, Title } from "@solidjs/meta"
 import { Layout } from "#src/pages/Layout.jsx"
 import { Show, onMount } from "solid-js"
-import { defaultLanguage } from "#src/renderer/_default.page.route.js"
-import { useI18n } from "@solid-primitives/i18n"
 import { currentPageContext } from "#src/renderer/state.js"
 import tableOfContents from "../../../../../../blog/tableOfContents.json"
 import "@inlang/markdown/css"
@@ -16,13 +14,6 @@ export type PageProps = {
 }
 
 export function Page(props: PageProps) {
-	const [, { locale }] = useI18n()
-
-	const getLocale = () => {
-		const language = locale() ?? defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
-	}
-
 	const replaceChars = (str: string) => {
 		return str
 			.replaceAll(" ", "-")
@@ -83,7 +74,7 @@ export function Page(props: PageProps) {
 			<Title>
 				{
 					findPageBySlug(
-						currentPageContext.urlParsed.pathname.replace(getLocale(), "").replace("/blog/", ""),
+						currentPageContext.urlParsed.pathname.replace("/blog/", ""),
 						tableOfContents
 					)?.title
 				}
@@ -92,7 +83,7 @@ export function Page(props: PageProps) {
 				name="description"
 				content={
 					findPageBySlug(
-						currentPageContext.urlParsed.pathname.replace(getLocale(), "").replace("/blog/", ""),
+						currentPageContext.urlParsed.pathname.replace("/blog/", ""),
 						tableOfContents
 					)?.description
 				}

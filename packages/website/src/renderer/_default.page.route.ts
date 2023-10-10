@@ -1,9 +1,7 @@
 import type { PageContextRenderer } from "./types.js"
+import { sourceLanguageTag, availableLanguageTags } from "@inlang/paraglide-js"
 
 export { onBeforeRoute }
-
-export const defaultLanguage = "en"
-export const languages = ["en", "de", "zh", "sk", "pt_BR"]
 
 function onBeforeRoute(pageContext: PageContextRenderer) {
 	const { urlWithoutLocale, locale } = extractLocale(pageContext.urlOriginal)
@@ -24,11 +22,11 @@ export function extractLocale(url: string) {
 	let urlWithoutLocale
 	// We remove the URL locale, for example `/de-DE/about` => `/about`
 	const firstPath = urlPaths[1]!
-	if (languages.filter((locale) => locale !== defaultLanguage).includes(firstPath)) {
+	if (availableLanguageTags.filter((locale) => locale !== sourceLanguageTag).includes(firstPath)) {
 		locale = firstPath
 		urlWithoutLocale = "/" + urlPaths.slice(2).join("/")
 	} else {
-		locale = defaultLanguage
+		locale = sourceLanguageTag
 		urlWithoutLocale = url
 	}
 

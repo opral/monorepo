@@ -9,8 +9,6 @@ import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 import { SelectRepo } from "../Select.jsx"
 import { setSearchValue } from "../index.page.jsx"
 import { colorForTypeOf, convertLinkToGithub, typeOfIdToTitle } from "../utilities.js"
-import { defaultLanguage } from "#src/renderer/_default.page.route.js"
-import { useI18n } from "@solid-primitives/i18n"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
@@ -26,12 +24,6 @@ export type PageProps = {
 
 export function Page(props: PageProps) {
 	const [readmore, setReadmore] = createSignal<boolean>(false)
-	const [, { locale }] = useI18n()
-
-	const getLocale = () => {
-		const language = locale() ?? defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
-	}
 
 	// mapping translatable types
 	const displayName = () =>
@@ -252,11 +244,7 @@ export function Page(props: PageProps) {
 										<Markdown markdown={props.markdown} />
 										{/* Classes to be added: sticky z-10 top-16 pt-8 md:pt-0 md:static bg-background */}
 										<div class="col-span-1 md:order-1 -order-1">
-											<NavbarCommon
-												displayName={displayName}
-												getLocale={getLocale}
-												tableOfContents={tableOfContents}
-											/>
+											<NavbarCommon displayName={displayName} tableOfContents={tableOfContents} />
 										</div>
 									</div>
 								</Show>
@@ -283,7 +271,6 @@ function Markdown(props: { markdown: string; fullWidth?: boolean }) {
 }
 
 function NavbarCommon(props: {
-	getLocale: () => string
 	displayName: () => string
 	tableOfContents: () => Record<string, string[]>
 }) {

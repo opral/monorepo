@@ -7,7 +7,7 @@
 	},
 	"scripts": {
 		"_build_COMMENT": "To speed up CI/CD, the website is only built in deploy",
-		"_build": "vite build",
+		"_build": "paraglide-js compile ../../../project.inlang.json && vite build",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit",
 		"lint": "eslint ./src --fix",
@@ -73,6 +73,7 @@
 		"@inlang/result": "*",
 		"@inlang/rpc": "*",
 		"@inlang/sdk": "*",
+		"@inlang/paraglide-js": "*",
 		"@inlang/telemetry": "*",
 		"@tailwindcss/aspect-ratio": "^0.4.2",
 		"@tailwindcss/forms": "^0.5.3",

@@ -5,18 +5,11 @@ import { z } from "zod"
 import { Meta, Title } from "@solidjs/meta"
 import { CommunityProjects } from "../index/CommunityProjects.jsx"
 import { Button } from "../index/components/Button.jsx"
-import { useI18n } from "@solid-primitives/i18n"
-import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 
 export function Page() {
 	/** is not reactive because window is not reactive */
 	const [input, setInput] = createSignal("")
-	const [, { locale }] = useI18n()
 
-	const getLocale = () => {
-		const language = locale() || defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
-	}
 	const isValidUrl = () =>
 		z
 			.string()
