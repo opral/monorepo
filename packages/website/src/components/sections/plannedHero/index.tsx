@@ -98,7 +98,7 @@ const PlannedHero = (props: PageProps) => {
 						<p class="text-surface-300 text-xl max-w-sm">{props.content.description}</p>
 						<div
 							class={
-								"flex md:items-center items-start gap-4 md:flex-row flex-col " +
+								"flex md:items-center items-start gap-6 md:flex-row flex-col " +
 								(loading() ? "opacity-70 cursor-not-allowed" : "")
 							}
 						>
@@ -108,7 +108,7 @@ const PlannedHero = (props: PageProps) => {
 								<input
 									type="email"
 									placeholder="Your email"
-									class="relative w-80 max-[350px]:w-full border-0 rounded-md bg-background z-10 placeholder:text-surface-400 font-medium px-4"
+									class="relative w-80 max-[350px]:w-full border-0 rounded-md bg-surface-800 z-20 text-background focus:outline-focus-primary focus:ring-0 placeholder:text-surface-400 font-medium px-4"
 									value={email()}
 									onInput={(event) => {
 										// @ts-ignore
@@ -123,27 +123,6 @@ const PlannedHero = (props: PageProps) => {
 											handleSubscribe()
 										}
 									}}
-								/>
-								<div
-									style={{
-										background:
-											"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
-									}}
-									class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-60 blur-3xl"
-								/>
-								<div
-									style={{
-										background:
-											"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
-									}}
-									class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-40 blur-xl"
-								/>
-								<div
-									style={{
-										background:
-											"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
-									}}
-									class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-80 blur-sm"
 								/>
 							</div>
 							<a
