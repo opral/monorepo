@@ -1,7 +1,5 @@
-import { debounce } from "throttle-debounce"
 import { setState } from "../state.js"
 import { promptToReloadWindow } from "./promptToReload.js"
-import { migrateConfigFile } from "./migrateConfigFile.js"
 import { createInlangConfigFile } from "./createInlangConfigFile.js"
 import { loadProject, type InlangProject } from "@inlang/sdk"
 import * as vscode from "vscode"
@@ -25,12 +23,6 @@ export async function initProject(args: {
 }): Promise<{ project?: InlangProject; error?: Error }> {
 	// if no settings file is found
 	if ((await vscode.workspace.findFiles(CONFIGURATION.FILES.PROJECT)).length === 0) {
-		// Try to migrate
-		await migrateConfigFile(
-			args.workspaceFolder,
-			(args.workspaceFolder + CONFIGURATION.FILES.PROJECT) as unknown as vscode.Uri
-		)
-
 		// Try to auto config
 		await createInlangConfigFile({ workspaceFolder: args.workspaceFolder })
 	}
@@ -75,6 +67,9 @@ export async function initProject(args: {
 	)
 	telemetry.capture({
 		event: "IDE-EXTENSION loaded project",
+		properties: {
+			errors: project?.errors(),
+		},
 	})
 
 	if (error) {
@@ -83,20 +78,8 @@ export async function initProject(args: {
 		return { project: undefined, error }
 	}
 
-	const loadMessages = async () => {
-		setState({
-			project,
-		})
-	}
-
-	await loadMessages()
-
-	// Debounce future loading of resources
-	const debouncedLoadMessages = debounce(1000, loadMessages)
-
-	// Register event listeners
-	vscode.workspace.onDidChangeTextDocument(() => {
-		debouncedLoadMessages()
+	setState({
+		project,
 	})
 
 	// Watch for changes in the config file
