@@ -76,52 +76,44 @@ export function Page(props: PageProps) {
 
 function EmailCard() {
   return (
-    <div
-      class="max-w-sm h-80 bg-[#043855] rounded-3xl flex-shrink-0 relative overflow-hidden group border border-primary/0"
-    >
-      <div class="absolute right-0 bottom-0 z-10">
-        <Email />
-      </div>
-      <CardTag text="Email" globalPrefix noHover />
-    </div>
-  )
+		<div class="max-w-sm h-80 bg-[#043855] rounded-3xl mx-auto flex-shrink-0 relative overflow-hidden group border border-primary/0">
+			<div class="absolute right-0 bottom-0 z-10">
+				<Email />
+			</div>
+			<CardTag text="Email" globalPrefix noHover />
+		</div>
+	)
 }
 
 function PaymentsCard() {
   return (
-    <div
-      class="max-w-sm h-80 bg-surface-700 rounded-3xl flex-shrink-0 relative overflow-hidden group border border-primary/0"
-    >
-      <div class="absolute left-1/2 -translate-x-1/2 bottom-0 z-10">
-        <Payments />
-      </div>
-      <CardTag text="Payments" globalPrefix noHover />
-    </div>
-  )
+		<div class="max-w-sm h-80 bg-surface-700 rounded-3xl mx-auto flex-shrink-0 relative overflow-hidden group border border-primary/0">
+			<div class="absolute left-1/2 -translate-x-1/2 bottom-0 z-10">
+				<Payments />
+			</div>
+			<CardTag text="Payments" globalPrefix noHover />
+		</div>
+	)
 }
 
 function WebsiteCard() {
   return (
-    <div
-      class="max-w-sm md:max-w-[512px] h-80 bg-surface-800 rounded-3xl flex-shrink-0 relative group overflow-hidden border border-primary/0"
-    >
-      <div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10">
-        <Website />
-      </div>
-      <CardTag text="Website" globalPrefix noHover />
-    </div>
-  )
+		<div class="max-w-sm md:max-w-[512px] h-80 bg-surface-800 mx-auto rounded-3xl flex-shrink-0 relative group overflow-hidden border border-primary/0">
+			<div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10">
+				<Website />
+			</div>
+			<CardTag text="Website" globalPrefix noHover />
+		</div>
+	)
 }
 
 function DocumentsCard() {
   return (
-    <div
-      class="max-w-sm h-80 bg-[#043855] rounded-3xl flex-shrink-0 relative group border border-primary/0"
-    >
-      <div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10 overflow-hidden">
-        <Documents />
-      </div>
-      <CardTag text="Documents" globalPrefix noHover />
-    </div>
-  )
+		<div class="max-w-sm h-80 bg-[#043855] mx-auto rounded-3xl flex-shrink-0 relative group border border-primary/0">
+			<div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10 overflow-hidden">
+				<Documents />
+			</div>
+			<CardTag text="Documents" globalPrefix noHover />
+		</div>
+	)
 }
