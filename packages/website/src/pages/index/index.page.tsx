@@ -2,7 +2,8 @@ import { LandingPageLayout as RootLayout } from "../Layout.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import { createSignal } from "solid-js"
 import Hero from "./sections/01-hero/index.jsx"
-import Marketplace from "./sections/02-marketplace/index.jsx"
+import Marketplace from "./sections/03-marketplace/index.jsx"
+import Lix from "./sections/02-lix/index.jsx"
 
 export type PageProps = {
 	markdown: string
@@ -39,6 +40,7 @@ export function Page() {
 			<RootLayout landingpage darkmode={darkmode()} transparent={transparent()}>
 				<div>
 					<Hero />
+					<Lix />
 					<Marketplace />
 					{/* <QualityChecks /> */}
 				</div>
