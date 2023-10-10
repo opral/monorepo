@@ -1,4 +1,6 @@
-import type { NodeishFilesystem } from "@lix-js/fs"
+import { LanguageTag } from "@inlang/sdk"
+import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
+import { Value } from "@sinclair/typebox/value"
 const potentialFolders = [
 	"language",
 	"languages",
@@ -12,11 +14,10 @@ const potentialFolders = [
 	// Add other potential folder names here
 ]
 
-export const getLanguageFolderPath = async (args: {
-	rootDir: string
+export const getLanguageFolder = async (args: {
+	basePath: string
 	nodeishFs: NodeishFilesystem
-	pathJoin: (...args: string[]) => string
-}): Promise<string | undefined> => {
+}): Promise<{ path: string; languageTags: LanguageTag[] } | undefined> => {
 	try {
 		const searchForLanguageFolder = async (
 			dir: string,
@@ -24,7 +25,7 @@ export const getLanguageFolderPath = async (args: {
 		): Promise<string | undefined> => {
 			const files = await args.nodeishFs.readdir(dir)
 
-			const gitignorePath = args.pathJoin(dir, ".gitignore")
+			const gitignorePath = normalizePath(dir + "/.gitignore")
 			let subIgnoredPaths: string[] = []
 			if (await args.nodeishFs.stat(gitignorePath).catch(() => false)) {
 				const gitignoreContent = await args.nodeishFs.readFile(gitignorePath, { encoding: "utf-8" })
@@ -35,7 +36,7 @@ export const getLanguageFolderPath = async (args: {
 			}
 
 			for (const file of files) {
-				const filePath = args.pathJoin(dir, file)
+				const filePath = normalizePath(dir + "/" + file)
 				const stat = await args.nodeishFs.stat(filePath).catch((error) => ({
 					error,
 				}))
@@ -67,7 +68,18 @@ export const getLanguageFolderPath = async (args: {
 			return undefined
 		}
 
-		return await searchForLanguageFolder(args.rootDir, [])
+		const path = await searchForLanguageFolder(args.basePath, [])
+		if (path === undefined) {
+			return undefined
+		}
+		const languageTags = (await args.nodeishFs.readdir(path))
+			// remove file extensions
+			.map((file) => file.split(".")[0] ?? "")
+			.filter((potentialTag) => Value.Check(LanguageTag, potentialTag))
+		return {
+			path,
+			languageTags,
+		}
 	} catch (error) {
 		console.error("Error in getLanguageFolderPath:", error)
 		return undefined
