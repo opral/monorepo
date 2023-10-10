@@ -1,11 +1,13 @@
+import type { PageProps } from "#src/pages/@product/index.page.jsx"
+import { CardTag } from "#src/pages/index/components/CardTag.jsx"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
-import type { JSX } from "solid-js"
+import Documents from "#src/pages/index/sections/01-hero/assets/categories/documents.jsx"
+import Email from "#src/pages/index/sections/01-hero/assets/categories/email.jsx"
+import Payments from "#src/pages/index/sections/01-hero/assets/categories/payments.jsx"
+import Website from "#src/pages/index/sections/01-hero/assets/categories/website.jsx"
+import { Match, Switch } from "solid-js"
 
-const PlannedHero = (props: {
-  title: string,
-  description: string,
-  image: JSX.Element,
-}) => {
+const PlannedHero = (props: PageProps) => {
   return (
     <>
       <SectionLayout showLines={true} type="dark">
@@ -14,11 +16,11 @@ const PlannedHero = (props: {
             <h1 class="text-[40px] leading-tight md:text-6xl font-bold text-background pr-16 tracking-tight">
               inlang <br />
               <span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-[#F1D9FF] via-hover-primary to-[#3B82F6]">
-                {props.title}
+                {props.content.title}
               </span>
             </h1>
             <p class="text-surface-300 text-xl max-w-sm">
-              {props.description}
+              {props.content.description}
             </p>
             <div class="flex md:items-center items-start gap-8">
               <a href={"/"} class="-ml-0.5 flex-shrink-0">
@@ -54,7 +56,20 @@ const PlannedHero = (props: {
             </div>
           </div>
           <div class="w-full lg:w-1/2">
-            {props.image}
+            <Switch fallback={<></>}>
+              <Match when={props.slug === "email"}>
+                <EmailCard />
+              </Match>
+              <Match when={props.slug === "payments"}>
+                <PaymentsCard />
+              </Match>
+              <Match when={props.slug === "website"}>
+                <WebsiteCard />
+              </Match>
+              <Match when={props.slug === "documents"}>
+                <DocumentsCard />
+              </Match>
+            </Switch>
           </div>
         </div>
       </SectionLayout>
@@ -63,3 +78,56 @@ const PlannedHero = (props: {
 }
 
 export default PlannedHero
+
+
+function EmailCard() {
+  return (
+    <div
+      class="max-w-sm h-80 bg-[#043855] rounded-3xl flex-shrink-0 relative overflow-hidden group border border-primary/0"
+    >
+      <div class="absolute right-0 bottom-0 z-10">
+        <Email />
+      </div>
+      <CardTag text="Email" globalPrefix noHover />
+    </div>
+  )
+}
+
+function PaymentsCard() {
+  return (
+    <div
+      class="max-w-sm h-80 bg-surface-700 rounded-3xl flex-shrink-0 relative overflow-hidden group border border-primary/0"
+    >
+      <div class="absolute left-1/2 -translate-x-1/2 bottom-0 z-10">
+        <Payments />
+      </div>
+      <CardTag text="Payments" globalPrefix noHover />
+    </div>
+  )
+}
+
+function WebsiteCard() {
+  return (
+    <div
+      class="max-w-sm md:max-w-[512px] h-80 bg-surface-800 rounded-3xl flex-shrink-0 relative group overflow-hidden border border-primary/0"
+    >
+      <div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10">
+        <Website />
+      </div>
+      <CardTag text="Website" globalPrefix noHover />
+    </div>
+  )
+}
+
+function DocumentsCard() {
+  return (
+    <div
+      class="max-w-sm h-80 bg-[#043855] rounded-3xl flex-shrink-0 relative group border border-primary/0"
+    >
+      <div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10 overflow-hidden">
+        <Documents />
+      </div>
+      <CardTag text="Documents" globalPrefix noHover />
+    </div>
+  )
+}

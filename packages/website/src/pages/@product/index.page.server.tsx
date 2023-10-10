@@ -13,7 +13,7 @@ export async function onBeforeRender(pageContext: any) {
   return {
     pageContext: {
       pageProps: {
-        ...page.content,
+        ...page,
       },
     },
   }
