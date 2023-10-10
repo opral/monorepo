@@ -87,7 +87,7 @@ const PlannedHero = (props: PageProps) => {
 	return (
 		<>
 			<SectionLayout showLines={true} type="dark">
-				<div class="w-full flex px-6 md:px-10 pt-40 lg:pt-60 pb-24 md:pb-24 flex-col-reverse lg:flex-row">
+				<div class="w-full flex px-6 md:px-10 pt-40 lg:pt-32 pb-24 md:pb-24 flex-col-reverse lg:flex-row">
 					<div class="w-full lg:w-1/2 flex flex-col gap-8 pt-20 lg:pt-0">
 						<h1 class="text-[40px] leading-tight md:text-6xl font-bold text-background pr-16 tracking-tight">
 							inlang <br />

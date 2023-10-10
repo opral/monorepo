@@ -11,7 +11,7 @@ const Hero = () => {
 	return (
 		<>
 			<SectionLayout showLines={true} type="dark">
-				<div class="w-full flex pt-4 md:pt-40 flex-col xl:flex-row">
+				<div class="w-full flex pt-4 md:pt-16 flex-col xl:flex-row">
 					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-10 xl:py-16 pt-20 py-6">
 						<h1 class="text-[40px] leading-tight md:text-6xl font-bold text-background pr-16 tracking-tight">
 							The ecosystem to go{" "}
