@@ -1,4 +1,5 @@
 import { showToast } from "#src/components/Toast.jsx"
+import { Icon } from "#src/components/Icon.jsx"
 import type { PageProps } from "#src/pages/@product/index.page.jsx"
 import { CardTag } from "#src/pages/index/components/CardTag.jsx"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
@@ -87,8 +88,12 @@ const PlannedHero = (props: PageProps) => {
 	return (
 		<>
 			<SectionLayout showLines={true} type="dark">
-				<div class="w-full flex px-6 md:px-10 pt-40 lg:pt-32 pb-24 md:pb-24 flex-col-reverse lg:flex-row">
-					<div class="w-full lg:w-1/2 flex flex-col gap-8 pt-20 lg:pt-0">
+				<div class="w-full flex px-6 md:px-10 pt-20 lg:pt-24 pb-20 md:pb-24 flex-col-reverse lg:flex-row">
+					<div class="w-full lg:w-1/2 flex flex-col justify-center gap-8 pt-20 lg:pt-0">
+						<p class="flex items-center bg-surface-800 text-surface-400 text-md w-fit py-2 pr-5 pl-3 rounded-full gap-2">
+							<Icon name={"info"} class="text-surface-400 w-6 h-6" />
+							Planned
+						</p>
 						<h1 class="text-[40px] leading-tight md:text-6xl font-bold text-background pr-16 tracking-tight">
 							inlang <br />
 							<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-[#F1D9FF] via-hover-primary to-[#3B82F6]">
@@ -164,19 +169,23 @@ const PlannedHero = (props: PageProps) => {
 							</a>
 						</div>
 					</div>
-					<div class="w-full lg:w-1/2">
+					<div class="w-full lg:w-1/2 text-surface-400">
 						<Switch fallback={<></>}>
 							<Match when={props.slug === "email"}>
 								<EmailCard />
+								<p class="ml-auto w-[370px] px-6 pt-8">{props.content.description}</p>
 							</Match>
 							<Match when={props.slug === "payments"}>
 								<PaymentsCard />
+								<p class="ml-auto w-[370px] px-6 pt-8">{props.content.description}</p>
 							</Match>
 							<Match when={props.slug === "website"}>
 								<WebsiteCard />
+								<p class="ml-auto w-[495px] px-6 pt-8">{props.content.description}</p>
 							</Match>
 							<Match when={props.slug === "documents"}>
 								<DocumentsCard />
+								<p class="ml-auto w-[370px] px-6 pt-8">{props.content.description}</p>
 							</Match>
 						</Switch>
 					</div>
