@@ -43,51 +43,47 @@ const filteredItems = () =>
 export default function Marketplace(props: { minimal?: boolean; featured?: boolean }) {
 	return (
 		<SectionLayout showLines>
-			<>
-				<div class="pb-16 md:pb-20 min-h-screen relative">
-					<Show when={props.featured}>
-						<div class="flex items-center gap-4 mb-8">
-							<div class="md:h-96 h-[512px] w-full bg-surface-100 bg-[url('https://cdn.jsdelivr.net/gh/inlang/monorepo@website-update/inlang/assets/marketplace/paraglide-artwork.gif')] bg-cover bg-center rounded-2xl flex items-end justify-start relative">
-								<h3 class="font-semibold absolute top-6 left-8 text-background text-3xl">
-									Featured
-								</h3>
-								<div class="w-full flex justify-between md:items-center md:flex-row flex-col bg-warning/40 border-t border-t-hover-warning/50 px-8 py-4 rounded-b-2xl backdrop-blur-lg">
-									<div class="md:mb-0 mb-6">
-										<h2 class="text-lg font-semibold mb-1 text-background">
-											ParaglideJS (former SDK-JS)
-										</h2>
-										<p class="text-background">The all new library for all common frameworks.</p>
-									</div>
-									<Button chevron type="secondaryOnGray">
-										Learn more
-									</Button>
+			<div class="py-16 md:py-20 min-h-screen relative">
+				<Show when={props.featured}>
+					<div class="flex items-center gap-4 mb-8">
+						<div class="md:h-96 h-[512px] w-full bg-surface-100 bg-[url('https://cdn.jsdelivr.net/gh/inlang/monorepo@website-update/inlang/assets/marketplace/paraglide-artwork.gif')] bg-cover bg-center rounded-2xl flex items-end justify-start relative">
+							<h3 class="font-semibold absolute top-6 left-8 text-background text-3xl">Featured</h3>
+							<div class="w-full flex justify-between md:items-center md:flex-row flex-col bg-warning/40 border-t border-t-hover-warning/50 px-8 py-4 rounded-b-2xl backdrop-blur-lg">
+								<div class="md:mb-0 mb-6">
+									<h2 class="text-lg font-semibold mb-1 text-background">
+										ParaglideJS (former SDK-JS)
+									</h2>
+									<p class="text-background">The all new library for all common frameworks.</p>
 								</div>
+								<Button chevron type="secondaryOnGray">
+									Learn more
+								</Button>
 							</div>
 						</div>
-					</Show>
-					<Show when={!props.minimal}>
-						<div class="w-full top-16 sticky bg-background/90 backdrop-blur-xl pb-4 pt-8 z-10 flex flex-col gap-5">
-							<Search
-								placeholder={"Search for apps, plugins, lint rules ..."}
-								textValue={searchValue}
-								setTextValue={setSearchValue}
-							/>
-							<div class="flex justify-between items-center">
-								<Tags />
-								<div class="max-sm:hidden">
-									<Button type="text" href="/documentation/publish-marketplace">
-										Build your own
-									</Button>
-								</div>
-							</div>
-						</div>
-					</Show>
-					<div class="mb-32 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 gap-y-8 justify-center items-stretch relative">
-						<Gallery />
 					</div>
-					<GetHelp text="Need help or have questions? Join our Discord!" />
+				</Show>
+				<Show when={!props.minimal}>
+					<div class="w-full top-16 sticky bg-background/90 backdrop-blur-xl pb-4 pt-8 z-10 flex flex-col gap-5">
+						<Search
+							placeholder={"Search for apps, plugins, lint rules ..."}
+							textValue={searchValue}
+							setTextValue={setSearchValue}
+						/>
+						<div class="flex justify-between items-center">
+							<Tags />
+							<div class="max-sm:hidden">
+								<Button type="text" href="/documentation/publish-marketplace">
+									Build your own
+								</Button>
+							</div>
+						</div>
+					</div>
+				</Show>
+				<div class="mb-32 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 gap-y-8 justify-center items-stretch relative">
+					<Gallery />
 				</div>
-			</>
+				<GetHelp text="Need help or have questions? Join our Discord!" />
+			</div>
 		</SectionLayout>
 	)
 }

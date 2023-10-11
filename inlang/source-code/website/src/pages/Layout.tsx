@@ -144,8 +144,8 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 						: !props.transparent && !props.darkmode
 						? "bg-background border-surface-2"
 						: "" + props.transparent && props.darkmode
-						? "bg-transparent border-transparent bg-surface-900"
-						: "bg-transparent border-transparent bg-background")
+						? "bg-transparent border-b-surface-900 bg-surface-900"
+						: "bg-transparent border-b-background bg-background")
 				}
 			>
 				<Show when={props.transparent}>
