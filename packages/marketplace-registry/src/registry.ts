@@ -17,7 +17,7 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/badge/README.md",
 		},
-		keywords: ["badge"],
+		keywords: ["app", "badge"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
@@ -37,7 +37,7 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/cli/README.md",
 		},
-		keywords: ["cli", "commands"],
+		keywords: ["app", "cli", "commands"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
@@ -61,7 +61,7 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/editor/README.md",
 		},
-		keywords: ["editor", "web"],
+		keywords: ["app", "editor", "web"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		website: "/editor",
@@ -82,10 +82,27 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/MARKETPLACE.md",
 		},
-		keywords: ["ide", "extension", "vscode"],
+		keywords: ["app", "ide", "extension", "vscode"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		website: "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
+		license: "Apache-2.0",
+	},
+	{
+		id: "guide.inlang.example",
+		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		displayName: {
+			en: "Example Guide",
+		},
+		description: {
+			en: "This is an example guide.",
+		},
+		readme: {
+			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/cli/README.md",
+		},
+		keywords: ["app", "email", "website", "payments", "documents"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
 	},
 	{
@@ -100,24 +117,7 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/versioned-interfaces/language-tag/README.md",
 		},
-		keywords: ["lang", "language tag"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-	},
-	{
-		id: "library.inlang.paraglideJsSveltekit",
-		icon: "https://emojis.wiki/thumbs/emojis/parachute.webp",
-		displayName: {
-			en: "paraglideJS (former SDK-JS)",
-		},
-		description: {
-			en: "A fully configurable JavaScript library that integrates within your framework.",
-		},
-		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/paraglide-js-sveltekit/README.md",
-		},
-		keywords: ["sdk", "paraglide", "sdk-js", "sveltekit", "svelte"],
+		keywords: ["app", "lang", "language tag"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
@@ -134,7 +134,7 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/versioned-interfaces/translatable/README.md",
 		},
-		keywords: ["translatable", "adoptable"],
+		keywords: ["app", "translatable", "adoptable"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
@@ -155,7 +155,7 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/emptyPattern/README.md",
 		},
-		keywords: ["lint rule", "empty pattern"],
+		keywords: ["app", "lint rule", "empty pattern"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
@@ -178,7 +178,7 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/identicalPattern/README.md",
 		},
-		keywords: ["lint rule", "itentical pattern"],
+		keywords: ["app", "lint rule", "itentical pattern"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
@@ -201,7 +201,7 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/messageWithoutSource/README.md",
 		},
-		keywords: ["lint rule", "source"],
+		keywords: ["app", "lint rule", "source"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
@@ -224,7 +224,7 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/missingTranslation/README.md",
 		},
-		keywords: ["lint rule", "missing"],
+		keywords: ["app", "lint rule", "missing"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
@@ -244,7 +244,7 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/i18next/README.md",
 		},
-		keywords: ["i18next", "react", "nextjs"],
+		keywords: ["app", "i18next", "react", "nextjs"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
@@ -263,7 +263,7 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/json/README.md",
 		},
-		keywords: ["json", "generic"],
+		keywords: ["app", "json", "generic"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
