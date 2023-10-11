@@ -26,7 +26,7 @@ const Lix = () => {
               With inlang's change control system Lix, you have full control about changes in your system.
             </p>
             <div class="flex md:items-center items-start gap-8">
-              <Button type="textPrimaryOnDark" href="#" chevron>
+              <Button type="textPrimaryOnDark" href="https://github.com/inlang/monorepo/tree/main/lix" chevron>
                 Learn more about Lix
               </Button>
             </div>
@@ -44,7 +44,7 @@ const Lix = () => {
             image={
               <>
                 <div class="h-80" />
-                <Rules class="absolute top-14 right-10" />
+                <Rules class="absolute top-14 right-8" />
               </>
             }
           />
@@ -54,10 +54,13 @@ const Lix = () => {
             description="Include who is needed inside a flexible review workflow."
             icon={<IconCheck />}
             image={
-              <div class="flex justify-center">
-                <div class="h-80" />
-                <Review class="absolute top-0 left-auto right-auto" />
-              </div>
+              <>
+                <div class="flex justify-center">
+                  <div class="absolute h-1/3 w-2/3 rounded-[72px] opacity-40 bg-[#88AEEC] blur-3xl" />
+                  <Review class="z-10" />
+                </div>
+                <div class="z-20 absolute left-0 bottom-36 w-full h-48" style={{ background: "linear-gradient(0deg, #283548 10%, rgba(51, 65, 85, 0.00) 100%)" }} />
+              </>
             }
           />
           <Card
@@ -72,7 +75,13 @@ const Lix = () => {
             title="Automation"
             description="Out of the box automations can transform in highly customizable processes."
             icon={<IconAutomation />}
-            image={<Automation class="absolute right-0 top-6" />}
+            image={
+              <>
+                <div class="absolute top-1/4 left-1/2 h-1/2 w-2/5 rounded-[72px] opacity-40 bg-[#88AEEC] blur-3xl" />
+                <Automation class="absolute right-0 top-6" />
+                <div class="z-20 absolute top-0 right-0 rounded-r-[20px] w-24 h-full" style={{ background: "linear-gradient(-90deg, #283548 10%, rgba(51, 65, 85, 0.00) 100%)" }} />
+              </>
+            }
           />
           <Card
             title="Traceability"
