@@ -59,7 +59,7 @@ export function Page() {
 							<h1 class="xl:col-span-2 md:pt-20 pt-16 text-[40px] md:text-5xl font-bold text-left leading-tight mb-3">
 								Marketplace
 							</h1>
-							<h2 class="text-3xl text-surface-400 font-semibold xl:mb-4">Explore the ecosystem</h2>
+							<h2 class="text-3xl text-surface-500 font-semibold xl:mb-4">Explore the ecosystem</h2>
 						</div>
 						<div class="xl:col-span-2 max-xl:row-start-1 relative max-xl:max-h-14 xl:blur-0 blur-xl pointer-events-none w-full flex xl:justify-end content-start items-start flex-wrap gap-4 pt-12 justify-start xl:ml-auto max-w-lg">
 							<For each={icons}>
@@ -77,13 +77,18 @@ export function Page() {
 						</div>
 					</div>
 					<div class="flex items-center gap-4 mb-8">
-						<div class="h-96 w-full bg-surface-100 rounded-2xl flex items-end justify-start p-8">
-							<div class="w-full flex justify-between items-center">
-								<div>
-									<h2 class="text-lg font-semibold mb-1">Highlight: ParaglideJS</h2>
-									<p class="text-surface-500">The all new library for all common frameworks.</p>
+						<div class="md:h-96 h-[512px] w-full bg-surface-100 bg-[url('https://cdn.jsdelivr.net/gh/inlang/monorepo@website-update/inlang/assets/marketplace/paraglide-artwork.gif')] bg-cover bg-center rounded-2xl flex items-end justify-start relative">
+							<h3 class="font-semibold absolute top-6 left-8 text-background text-3xl">
+								Highlight
+							</h3>
+							<div class="w-full flex justify-between md:items-center md:flex-row flex-col bg-warning/40 border-t border-t-hover-warning/50 px-8 py-4 rounded-b-2xl backdrop-blur-lg">
+								<div class="md:mb-0 mb-6">
+									<h2 class="text-lg font-semibold mb-1 text-background">
+										ParaglideJS (former SDK-JS)
+									</h2>
+									<p class="text-background">The all new library for all common frameworks.</p>
 								</div>
-								<Button chevron type="primary">
+								<Button chevron type="secondaryOnGray">
 									Learn more
 								</Button>
 							</div>
