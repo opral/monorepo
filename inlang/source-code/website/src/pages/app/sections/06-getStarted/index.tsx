@@ -26,7 +26,7 @@ const GetStarted = () => {
 						<h2 class="text-center text-3xl font-semibold text-background leading-tight md:leading-relaxed tracking-tight">
 							{t("landing.getstarted.title")}
 						</h2>
-						<p class="text-normal px-6 md:px-10 md:w-[65%] sm:leading-7 text-center text-surface-400 pb-8">
+						<p class="text-normal px-6 md:px-4 md:w-[65%] sm:leading-7 text-center text-surface-400 pb-8">
 							{t("landing.getstarted.description")}
 						</p>
 						<a href={getLocale() + "/documentation"}>

@@ -25,7 +25,7 @@ import { NewsletterForm } from "#src/components/NewsletterForm.jsx"
  * The dividers of the Header and Footer would not span the
  * entire width of the screen.
  */
-const layoutMargins = "max-w-screen-xl w-full mx-auto px-4 sm:px-10 "
+const layoutMargins = "max-w-screen-xl w-full mx-auto px-4"
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
@@ -142,9 +142,9 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 					</div>
 				</Show>
 				<div
-					class={`w-full h-full py-4 px-6 md:px-10 relative z-10 ${props.landingpage && "px-10"}`}
+					class={`w-full h-full py-4 px-6 md:px-4 relative z-10 ${props.landingpage && "px-6"}`}
 				>
-					<nav class={"max-w-[1200px] w-full mx-auto"}>
+					<nav class={"max-w-[1248px] w-full mx-auto"}>
 						<div class="flex">
 							<a href={getLocale() + "/"} class="flex items-center w-fit">
 								<img
@@ -330,8 +330,8 @@ const Footer = (props: { isLandingPage: boolean }) => {
 	return (
 		<footer class="border-t border-surface-100 overflow-hidden">
 			<SectionLayout showLines={props.isLandingPage} type="lightGrey">
-				<div class="flex flex-row flex-wrap-reverse py-16 px-6 md:px-10 xl:px-0 gap-10 sm:gap-x-0 md:gap-y-10 xl:gap-0">
-					<div class="w-full md:w-1/4 xl:px-10 flex flex-row items-center sm:items-start md:flex-col gap-10 md:justify-start justify-between flex-wrap">
+				<div class="flex flex-row flex-wrap-reverse py-16 px-6 md:px-4 xl:px-0 gap-10 sm:gap-x-0 md:gap-y-10 xl:gap-0">
+					<div class="w-full md:w-1/4 xl:px-4 flex flex-row items-center sm:items-start md:flex-col gap-10 md:justify-start justify-between flex-wrap">
 						<div>
 							<a href="/" class="flex items-center w-fit mb-6">
 								<img class="h-9 w-9" src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
@@ -359,7 +359,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 							</For>
 						</div>
 					</div>
-					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-10 flex flex-col pt-2">
+					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-4 flex flex-col pt-2">
 						<p class="font-semibold text-surface-900 pb-3">{t("footer.resources.title")}</p>
 						<For each={getResourceLinks()}>
 							{(link) => (
@@ -371,7 +371,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 							)}
 						</For>
 					</div>
-					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-10 flex flex-col pt-2">
+					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-4 flex flex-col pt-2">
 						<p class="font-semibold text-surface-900 pb-3">Products</p>
 						<For each={getProductsLinks()}>
 							{(link) => (
@@ -383,7 +383,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 							)}
 						</For>
 					</div>
-					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-10 xl:flex flex-col pt-2">
+					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-4 xl:flex flex-col pt-2">
 						<p class="font-semibold text-surface-900 pb-3">{t("footer.contact.title")}</p>
 						<For each={getContactLinks()}>
 							{(link) => (
@@ -396,11 +396,11 @@ const Footer = (props: { isLandingPage: boolean }) => {
 						</For>
 					</div>
 				</div>
-				<div class="px-6 md:px-10 xl:px-0 flex flex-col xl:flex-row justify-between items-end gap-8 pb-16">
-					<div class="xl:px-10 xl:flex flex-col gap-2 md:gap-4 pt-2 max-xl:w-full">
+				<div class="px-6 md:px-4 xl:px-0 flex flex-col xl:flex-row justify-between items-end gap-8 pb-16">
+					<div class="xl:px-4 xl:flex flex-col gap-2 md:gap-4 pt-2 max-xl:w-full">
 						<NewsletterForm />
 					</div>
-					<div class="xl:w-1/4 xl:px-10 flex items-center justify-between pt-2 max-xl:w-full">
+					<div class="xl:w-1/4 xl:px-4 flex items-center justify-between pt-2 max-xl:w-full">
 						<p class="text-surface-700 font-medium w-fit">© inlang 2023</p>
 						<LanguagePicker />
 					</div>

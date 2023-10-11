@@ -88,7 +88,7 @@ const PlannedHero = (props: PageProps) => {
 	return (
 		<>
 			<SectionLayout showLines={true} type="dark">
-				<div class="w-full flex px-6 md:px-10 pt-20 lg:pt-24 pb-20 md:pb-24 flex-col-reverse lg:flex-row">
+				<div class="w-full flex px-6 md:px-4 pt-20 lg:pt-24 pb-20 md:pb-24 flex-col-reverse lg:flex-row">
 					<div class="w-full lg:w-1/2 flex flex-col justify-center gap-8 pt-20 lg:pt-0">
 						<p class="flex items-center bg-surface-800 text-surface-400 text-md w-fit py-2 pr-5 pl-3 rounded-full gap-2">
 							<Icon name={"info"} class="text-surface-400 w-6 h-6" />

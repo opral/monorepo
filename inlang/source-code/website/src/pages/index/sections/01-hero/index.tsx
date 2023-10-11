@@ -12,7 +12,7 @@ const Hero = () => {
 		<>
 			<SectionLayout showLines={true} type="dark">
 				<div class="w-full flex pt-4 md:pt-16 flex-col xl:flex-row">
-					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-10 xl:py-16 pt-20 py-6">
+					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:py-16 pt-20 py-6">
 						<h1 class="text-[40px] leading-tight md:text-6xl font-bold text-background pr-16 tracking-tight">
 							The ecosystem to go{" "}
 							<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-[#F1D9FF] via-hover-primary to-[#3B82F6]">
@@ -20,7 +20,7 @@ const Hero = () => {
 							</span>
 						</h1>
 					</div>
-					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-10 xl:pt-16 pt-4 pb-24">
+					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:pt-16 pt-4 pb-24">
 						<p class="text-surface-300 text-xl max-w-md">
 							inlang helps businesses in adapting to various markets to attract more customer.
 						</p>
@@ -78,10 +78,10 @@ const Hero = () => {
 			</div>
 			<SectionLayout showLines={true} type="dark">
 				<div class="w-full flex pt-4 md:pt-16 flex-col xl:flex-row py-32">
-					<div class="w-full xl:w-1/4 flex flex-col gap-8 px-6 md:px-10 py-4">
+					<div class="w-full xl:w-1/4 flex flex-col gap-8 px-6 md:px-4 py-4">
 						<p class="text-surface-400">Used by global projects:</p>
 					</div>
-					<div class="w-full xl:w-3/4 flex flex-col gap-8 px-6 md:px-10 py-4">
+					<div class="w-full xl:w-3/4 flex flex-col gap-8 px-6 md:px-4 py-4">
 						<div class="flex gap-8 items-center w-full xl:justify-end text-background flex-wrap">
 							<a
 								class="transition-opacity hover:opacity-80"
