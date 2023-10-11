@@ -7,15 +7,16 @@ import Python from "./assets/python.jsx"
 import Reactjs from "./assets/reactjs.jsx"
 import Svelte from "./assets/svelte.jsx"
 import Vuejs from "./assets/vuejs.jsx"
-import * as m from "@inlang/paraglide-js/messages"
+import { useI18n } from "@solid-primitives/i18n"
 
 const Integration = () => {
+	const [t] = useI18n()
 	const getData = () => {
 		return {
-			caption: `${m.landing_integration_caption()}`,
-			title: `${m.landing_integration_title()}`,
-			description: `${m.landing_integration_description()}`,
-			button: `${m.landing_hero_cta()}`,
+			caption: `${t("landing.integration.caption")}`,
+			title: `${t("landing.integration.title")}`,
+			description: `${t("landing.integration.description")}`,
+			button: `${t("landing.hero.cta")}`,
 			buttonLink: "/documentation/",
 		}
 	}
@@ -39,7 +40,7 @@ const Integration = () => {
 						</div>
 						<div class="relative z-10 w-24 h-24 flex justify-center items-center bg-surface-1 rounded-full border border-surface-2">
 							<div class="rounded bg-surface-800 absolute mb-36 text-background px-2 py-1 -mx-2 text-sm flex flex-col items-center">
-								<p class="text-center mx-auto">{m.landing_integration_tooltip()}</p>
+								<p class="text-center mx-auto">{t("landing.integration.tooltip")}</p>
 								<svg
 									width={14}
 									height={7}

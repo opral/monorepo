@@ -1,12 +1,14 @@
 import { Layout } from "../Layout.jsx"
+import { useI18n } from "@solid-primitives/i18n"
 import { Meta, Title } from "@solidjs/meta"
-import * as m from "@inlang/paraglide-js/messages"
 
 export type PageProps = {
 	markdown: string
 }
 
 export function Page() {
+	const [t] = useI18n()
+
 	return (
 		<>
 			<Title>Successfully Unsubcribed from inlang's Newsletter</Title>
@@ -30,10 +32,10 @@ export function Page() {
 					<div class="w-full h-screen flex pt-12 flex-col gap-16">
 						<div class="w-full flex flex-col gap-6 h-full mx-auto justify-center max-w-lg mt-32 mb-8 px-6 relative z-10">
 							<h1 class="text-[40px] text-center leading-tight md:text-5xl font-bold text-surface-900 tracking-tight">
-								{m.newsletter_unsubscribed_title()}
+								{t("newsletter.unsubscribed.title")}
 							</h1>
 							<p class="text-lg text-surface-600 leading-relaxed mx-auto text-center">
-								{m.newsletter_unsubscribed_description()}
+								{t("newsletter.unsubscribed.description")}
 								<a
 									class="text-primary hover:text-hover-primary font-semibold ml-1.5"
 									href="https://discord.gg/gdMPPWy57R"

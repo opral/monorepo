@@ -1,7 +1,8 @@
 import { For, Show, createSignal, onMount } from "solid-js"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
 import SVGConnector from "./assets/connector.jsx"
-import * as m from "@inlang/paraglide-js/messages"
+import { defaultLanguage } from "#src/renderer/_default.page.route.js"
+import { useI18n } from "@solid-primitives/i18n"
 
 const code = [
 	<p class="text-surface-500">...</p>,
@@ -25,6 +26,7 @@ const code = [
 
 const ConfigPage = () => {
 	const [connectorSizes, setConnectorSizes] = createSignal<Array<number>>([0, 0, 0, 0, 0, 0])
+	const [t, { locale }] = useI18n()
 
 	onMount(() => {
 		const box1 = document.getElementById("connector1")
@@ -43,40 +45,45 @@ const ConfigPage = () => {
 		])
 	})
 
+	const getLocale = () => {
+		const language = locale() || defaultLanguage
+		return language !== defaultLanguage ? "/" + language : ""
+	}
+
 	const getData = () => {
 		return [
 			{
-				title: `${m.landing_config_editor_title()}`,
+				title: `${t("landing.config.editor.title")}`,
 				isSoon: false,
-				description: `${m.landing_config_editor_description()}`,
+				description: `${t("landing.config.editor.description")}`,
 				benefit: [
-					`${m.landing_config_editor_benefit1()}`,
-					`${m.landing_config_editor_benefit2()}`,
-					`${m.landing_config_editor_benefit3()}`,
+					`${t("landing.config.editor.benefit1")}`,
+					`${t("landing.config.editor.benefit2")}`,
+					`${t("landing.config.editor.benefit3")}`,
 				],
 				link: "/marketplace/app.inlang.editor",
 				image: "/images/AppSVGs/editor.svg",
 			},
 			{
-				title: `${m.landing_config_extension_title()}`,
+				title: `${t("landing.config.extension.title")}`,
 				isSoon: false,
-				description: `${m.landing_config_extension_description()}`,
+				description: `${t("landing.config.extension.description")}`,
 				benefit: [
-					`${m.landing_config_extension_benefit1()}`,
-					`${m.landing_config_extension_benefit2()}`,
-					`${m.landing_config_extension_benefit3()}`,
+					`${t("landing.config.extension.benefit1")}`,
+					`${t("landing.config.extension.benefit2")}`,
+					`${t("landing.config.extension.benefit3")}`,
 				],
 				link: "/marketplace/app.inlang.ideExtension",
 				image: "/images/AppSVGs/ide.svg",
 			},
 			{
-				title: `${m.landing_config_cli_title()}`,
+				title: `${t("landing.config.cli.title")}`,
 				isSoon: false,
-				description: `${m.landing_config_cli_description()}`,
+				description: `${t("landing.config.cli.description")}`,
 				benefit: [
-					`${m.landing_config_cli_benefit1()}`,
-					`${m.landing_config_cli_benefit2()}`,
-					`${m.landing_config_cli_benefit3()}`,
+					`${t("landing.config.cli.benefit1")}`,
+					`${t("landing.config.cli.benefit2")}`,
+					`${t("landing.config.cli.benefit3")}`,
 				],
 				link: "/marketplace/app.inlang.cli",
 				image: "/images/AppSVGs/cli.svg",
@@ -88,20 +95,20 @@ const ConfigPage = () => {
 		<SectionLayout showLines={true} type="lightGrey">
 			<div class="flex flex-col items-center gap-8 pt-12 sm:pt-20 px-8 lg:px-0">
 				<h2 class="text-center text-3xl font-semibold text-on-background w-full lg:w-1/2 leading-tight md:leading-relaxed tracking-tight">
-					{m.landing_config_title_multiple()}{" "}
-					<a href={"/documentation/app"} class="underline transition link-primary">
-						{m.landing_config_title_endless()}{" "}
+					{t("landing.config.title.multiple")}{" "}
+					<a href={getLocale() + "/documentation/app"} class="underline transition link-primary">
+						{t("landing.config.title.apps")}
 					</a>
-					{m.landing_config_title_endless()}{" "}
-					<a href={"/marketplace"} class="underline transition link-primary">
-						{m.landing_config_title_modules()}
+					{t("landing.config.title.endless")}{" "}
+					<a href={getLocale() + "/marketplace"} class="underline transition link-primary">
+						{t("landing.config.title.modules")}
 					</a>
-					{m.landing_config_title_one()}{" "}
+					{t("landing.config.title.one")}{" "}
 					<a
-						href={"/documentation/manually-create-project"}
+						href={getLocale() + "/documentation/manually-create-project"}
 						class="underline transition link-primary"
 					>
-						{m.landing_config_title_project()}
+						{t("landing.config.title.project")}
 					</a>
 				</h2>
 			</div>
@@ -110,7 +117,7 @@ const ConfigPage = () => {
 				<For each={getData()}>
 					{(card) => (
 						<a
-							href={card.link}
+							href={getLocale() + card.link}
 							class="bg-background w-full lg:w-[calc((100%_-_80px)_/_3)] rounded-2xl border border-surface-3 shadow-sm overflow-hidden hover:shadow-lg hover:-translate-y-2 transition-all duration-200 hover:text-primary pb-4"
 						>
 							<img width="100%" src={card.image} alt={card.title} />
@@ -173,13 +180,13 @@ const ConfigPage = () => {
 			</div>
 			<div class="flex flex-col items-center gap-8 px-6 md:px-8 lg:px-0">
 				<a
-					href={"/marketplace"}
+					href={getLocale() + "/marketplace"}
 					class="relative cursor-pointer group"
 					style={{ "box-shadow": "0px 0px 300px 300px #fafafa" }}
 				>
 					<div class="relative z-10 bg-background border border-background rounded-lg overflow-hidden">
 						<pre class="h-14 w-32 flex flex-col justify-center items-center bg-surface-1 text-lg font-medium text-surface-700 transition duration-200 group-hover:text-primary">
-							{m.landing_config_title_modules()}
+							{t("landing.config.title.modules")}
 						</pre>
 					</div>
 					<div
@@ -242,7 +249,7 @@ const ConfigPage = () => {
 			</div>
 			<div class="flex flex-col items-center gap-8 px-6 md:px-10 pb-16 sm:pb-28 lg:px-0">
 				<a
-					href={"/documentation/manually-create-project"}
+					href={getLocale() + "/documentation/manually-create-project"}
 					class="w-full lg:w-fit overflow-x-scroll sm:overflow-x-hidden relative flex flex-col gap-2 bg-gradient-to-b from-inverted-surface to-surface-700 text-on-inverted-surface py-3 rounded-lg shadow-lg group"
 				>
 					<div class="absolute top-5 left-6 flex gap-2">

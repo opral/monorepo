@@ -1,9 +1,18 @@
 import { Title, Meta } from "@solidjs/meta"
 import { For } from "solid-js"
 import { Layout } from "../Layout.jsx"
+import { defaultLanguage } from "#src/renderer/_default.page.route.js"
+import { useI18n } from "@solid-primitives/i18n"
 import tableOfContents from "../../../../../blog/tableOfContents.json"
 
 export function Page() {
+	const [, { locale }] = useI18n()
+
+	const getLocale = () => {
+		const language = locale() || defaultLanguage
+		return language !== defaultLanguage ? "/" + language : ""
+	}
+
 	return (
 		<>
 			<Title>inlang Blog - Globalization infrastructure for software</Title>
@@ -17,7 +26,7 @@ export function Page() {
 					<For each={Object.entries(tableOfContents)}>
 						{([, page]) => (
 							<div class="py-12">
-								<a href={"/blog/" + page.slug} class="text-ellipsis space-y-4">
+								<a href={getLocale() + "/blog/" + page.slug} class="text-ellipsis space-y-4">
 									<h2 class="text-xl font-bold tracking-tight text-on-backround truncate">
 										{page.title}
 									</h2>

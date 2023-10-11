@@ -4,6 +4,8 @@ import { Meta, Title } from "@solidjs/meta"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { Button } from "../index/components/Button.jsx"
 import { z } from "zod"
+import { useI18n } from "@solid-primitives/i18n"
+import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { InstallationProvider } from "./InstallationProvider.jsx"
 import { SetupCard } from "./components/SetupCard.jsx"
 import { Gitlogin } from "./components/GitLogin.jsx"
@@ -46,9 +48,17 @@ const dynamicTitle = () => {
 }
 
 export function Page() {
+	const [, { locale }] = useI18n()
+
 	const url = new URLSearchParams(window.location.search)
 	const repo = url.get("repo") || ""
 	const modules = url.get("module")?.split(",") || []
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const getLocale = () => {
+		const language = locale() || defaultLanguage
+		return language !== defaultLanguage ? "/" + language : ""
+	}
 
 	return (
 		<>

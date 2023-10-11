@@ -5,6 +5,8 @@ import type SlDetails from "@shoelace-style/shoelace/dist/components/details/det
 import { Meta, Title } from "@solidjs/meta"
 import { Feedback } from "./Feedback.jsx"
 import { EditButton } from "./EditButton.jsx"
+import { defaultLanguage } from "#src/renderer/_default.page.route.js"
+import { useI18n } from "@solid-primitives/i18n"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import tableOfContents from "../../../../../documentation/tableOfContents.json"
@@ -16,13 +18,23 @@ export type PageProps = {
 export function Page(props: PageProps) {
 	let mobileDetailMenu: SlDetails | undefined
 	const [editLink, setEditLink] = createSignal<string | undefined>("")
+	const [, { locale }] = useI18n()
+
+	const getLocale = () => {
+		const language = locale() ?? defaultLanguage
+		return language !== defaultLanguage ? "/" + language : ""
+	}
 
 	createEffect(() => {
 		if (currentPageContext) {
 			setEditLink(
 				"https://github.com/inlang/monorepo/edit/main/inlang/documentation" +
 					"/" +
-					findPageBySlug(currentPageContext.urlParsed.pathname.replace("/documentation/", ""))?.path
+					findPageBySlug(
+						currentPageContext.urlParsed.pathname
+							.replace(getLocale(), "")
+							.replace("/documentation/", "")
+					)?.path
 			)
 		}
 	})
@@ -31,15 +43,21 @@ export function Page(props: PageProps) {
 		<>
 			<Title>
 				{
-					findPageBySlug(currentPageContext.urlParsed.pathname.replace("/documentation/", ""))
-						?.title
+					findPageBySlug(
+						currentPageContext.urlParsed.pathname
+							.replace(getLocale(), "")
+							.replace("/documentation/", "")
+					)?.title
 				}
 			</Title>
 			<Meta
 				name="description"
 				content={
-					findPageBySlug(currentPageContext.urlParsed.pathname.replace("/documentation/", ""))
-						?.description
+					findPageBySlug(
+						currentPageContext.urlParsed.pathname
+							.replace(getLocale(), "")
+							.replace("/documentation/", "")
+					)?.description
 				}
 			/>
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
@@ -60,6 +78,7 @@ export function Page(props: PageProps) {
 								<Show when={tableOfContents && props.markdown}>
 									<NavbarCommon
 										tableOfContents={tableOfContents}
+										getLocale={getLocale}
 										headings={props.markdown
 											.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
 											.map((heading: string) => {
@@ -90,6 +109,7 @@ export function Page(props: PageProps) {
 									onLinkClick={() => {
 										mobileDetailMenu?.hide()
 									}}
+									getLocale={getLocale}
 									headings={props.markdown
 										.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
 										.map((heading: string) => {
@@ -150,6 +170,7 @@ function NavbarCommon(props: {
 	tableOfContents: typeof tableOfContents
 	headings: string[]
 	onLinkClick?: () => void
+	getLocale: () => string
 }) {
 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
 	const replaceChars = (str: string) => {
@@ -165,8 +186,10 @@ function NavbarCommon(props: {
 
 	const isSelected = (slug: string) => {
 		if (
-			`/documentation/${slug}` === currentPageContext.urlParsed.pathname ||
-			`/documentation/${slug}` === currentPageContext.urlParsed.pathname + "/"
+			`/documentation/${slug}` ===
+				currentPageContext.urlParsed.pathname.replace(props.getLocale(), "") ||
+			`/documentation/${slug}` ===
+				currentPageContext.urlParsed.pathname.replace(props.getLocale(), "") + "/"
 		) {
 			return true
 		} else {
@@ -231,7 +254,7 @@ function NavbarCommon(props: {
 														: "text-info/80 hover:text-on-background ") +
 													"tracking-wide text-sm block w-full font-normal mb-2"
 												}
-												href={`/documentation/${slug}`}
+												href={props.getLocale() + `/documentation/${slug}`}
 											>
 												{page.title}
 											</a>
