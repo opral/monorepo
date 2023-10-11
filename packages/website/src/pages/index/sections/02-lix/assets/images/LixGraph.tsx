@@ -1,7 +1,6 @@
-export default function LixGraph() {
+export default function LixGraph(props: { class?: string }) {
   return (
-    <svg width="1132" height="261" viewBox="0 0 1132 261" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns: xlink="http://www.w3.org/1999/xlink"
-    >
+    <svg width="1132" height="261" viewBox="0 0 1132 261" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns: xlink="http://www.w3.org/1999/xlink" class={props.class}>
       <g opacity="0.1" filter="url(#filter0_f_1396_1551)">
         <rect x="136.992" y="84.2119" width="912.004" height="57.7341" fill="#07B7D5" />
         <rect x="136.992" y="84.2119" width="912.004" height="57.7341" fill="url(#pattern0)" />
