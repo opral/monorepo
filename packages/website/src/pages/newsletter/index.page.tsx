@@ -1,13 +1,15 @@
 import { Layout } from "../Layout.jsx"
+import { useI18n } from "@solid-primitives/i18n"
 import { Meta, Title } from "@solidjs/meta"
 import { NewsletterForm } from "#src/components/NewsletterForm.jsx"
-import * as m from "@inlang/paraglide-js/messages"
 
 export type PageProps = {
 	markdown: string
 }
 
 export function Page() {
+	const [t] = useI18n()
+
 	return (
 		<>
 			<Title>inlang's Newsletter</Title>
@@ -31,10 +33,10 @@ export function Page() {
 					<div class="w-full flex md:pt-12 flex-col gap-16">
 						<div class="w-full flex flex-col gap-6 h-full mx-auto justify-center max-w-lg mt-32 mb-8 px-6 relative z-10">
 							<h1 class="text-[40px] text-center leading-tight md:text-5xl font-bold text-surface-900 tracking-tight">
-								{m.newsletter_subscribe_title()}
+								{t("newsletter.subscribe.title")}
 							</h1>
 							<p class="text-lg text-surface-600 leading-relaxed mx-auto text-center">
-								{m.newsletter_subscribe_description()}
+								{t("newsletter.subscribe.description")}
 							</p>
 						</div>
 						<div class="w-full h-96 relative">

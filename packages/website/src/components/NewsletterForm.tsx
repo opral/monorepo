@@ -1,7 +1,6 @@
 import { createSignal } from "solid-js"
 import { useI18n } from "@solid-primitives/i18n"
 import { showToast } from "#src/components/Toast.jsx"
-import * as m from "@inlang/paraglide-js/messages"
 
 export function NewsletterForm() {
 	const [t] = useI18n()
@@ -16,19 +15,19 @@ export function NewsletterForm() {
 			showToast({
 				title: "Could not subscribe",
 				variant: "success",
-				message: m.newsletter_error_alreadySubscribed(),
+				message: t("newsletter.error.alreadySubscribed"),
 			})
 		} else if (response === "success") {
 			showToast({
 				title: "Success",
 				variant: "success",
-				message: m.newsletter_success(),
+				message: t("newsletter.success"),
 			})
 		} else {
 			showToast({
 				title: "Error",
 				variant: "danger",
-				message: m.newsletter_error_generic(),
+				message: t("newsletter.error.generic"),
 			})
 		}
 
@@ -73,7 +72,7 @@ export function NewsletterForm() {
 
 	return (
 		<div class="flex flex-col items-start justify-center w-full">
-			<p class="text-surface-800 font-semibold mb-3">{}</p>
+			<p class="text-surface-800 font-semibold mb-3">{t("newsletter.title")}</p>
 			<div
 				class={
 					"flex items-start justify-stretch gap-3 w-full md:flex-row flex-col transition-opacity duration-150 " +
@@ -83,7 +82,7 @@ export function NewsletterForm() {
 				<sl-input
 					class={"border-none p-0 md:w-[312px] w-full " + (loading() ? "pointer-events-none" : "")}
 					prop:size={"medium"}
-					prop:placeholder={m.newsletter_placeholder()}
+					prop:placeholder={t("newsletter.placeholder")}
 					// @ts-ignore
 					value={email()}
 					onInput={(event) => {
@@ -107,7 +106,7 @@ export function NewsletterForm() {
 					}
 					onClick={handleSubscribe}
 				>
-					{m.newsletter_button()}
+					{t("newsletter.button")}
 				</button>
 			</div>
 		</div>

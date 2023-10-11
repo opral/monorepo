@@ -1,4 +1,4 @@
-import { createSignal, For, type JSXElement, Match, Show, Switch } from "solid-js"
+import { createSignal, For, type JSXElement, Match, onMount, Show, Switch } from "solid-js"
 import IconTwitter from "~icons/cib/twitter"
 import IconGithub from "~icons/cib/github"
 import IconDiscord from "~icons/cib/discord"
@@ -13,9 +13,9 @@ import { onSignOut } from "#src/services/auth/index.js"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { Button, type buttonType } from "./index/components/Button.jsx"
 import { SectionLayout } from "./index/components/sectionLayout.jsx"
+import { defaultLanguage, extractLocale } from "#src/renderer/_default.page.route.js"
+import { useI18n } from "@solid-primitives/i18n"
 import { NewsletterForm } from "#src/components/NewsletterForm.jsx"
-import { setLanguageTag, languageTag } from "@inlang/paraglide-js"
-import * as m from "@inlang/paraglide-js/messages"
 
 /**
  * Ensure that all elements use the same margins.
@@ -82,18 +82,24 @@ const socialMediaLinks = [
 function Header(props: { landingpage?: boolean }) {
 	const getLinks = () => {
 		return [
-			{ name: `${m.header_link_marketplace()}`, href: "/marketplace", type: "text" as buttonType },
+			{ name: `${t("header.link.marketplace")}`, href: "/marketplace", type: "text" as buttonType },
 			{
-				name: `${m.header_link_documentation()}`,
+				name: `${t("header.link.documentation")}`,
 				href: "/documentation",
 				type: "text" as buttonType,
 			},
-			{ name: `${m.header_link_blog()}`, href: "/blog", type: "text" as buttonType },
+			{ name: `${t("header.link.blog")}`, href: "/blog", type: "text" as buttonType },
 		]
 	}
 
 	const [localStorage] = useLocalStorage()
 	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false)
+	const [t, { locale }] = useI18n()
+
+	const getLocale = () => {
+		const language = locale() || defaultLanguage
+		return language !== defaultLanguage ? "/" + language : ""
+	}
 
 	return (
 		<>
@@ -104,7 +110,7 @@ function Header(props: { landingpage?: boolean }) {
 				<div class={`w-full h-full py-4 px-4 sm:px-10 ${props.landingpage && "px-10"}`}>
 					<nav class={"max-w-screen-xl w-full mx-auto xl:px-10"}>
 						<div class="flex">
-							<a href={"/"} class="flex items-center w-fit">
+							<a href={getLocale() + "/"} class="flex items-center w-fit">
 								<img class="h-9 w-9" src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
 								<span class="self-center pl-2 text-left font-semibold text-surface-900">
 									inlang
@@ -145,7 +151,7 @@ function Header(props: { landingpage?: boolean }) {
 									</Show>
 									<Show when={currentPageContext.urlParsed.pathname.includes("editor") === false}>
 										<Button type="secondary" href="/editor">
-											{m.header_openEditor()}
+											{t("header.openEditor")}
 										</Button>
 									</Show>
 									{/* not overwhelming the user by only showing login button when not on landig page */}
@@ -200,20 +206,18 @@ function Header(props: { landingpage?: boolean }) {
 }
 
 const Footer = (props: { isLandingPage: boolean }) => {
+	const [t] = useI18n()
+
 	const getDocLinks = () => {
 		return [
 			{
-				name: `${m.footer_documentation_gettingStarted()}`,
+				name: `${t("footer.docs.gettingStarted")}`,
 				href: "/documentation/quick-start",
 				type: "text" as buttonType,
 			},
+			{ name: `${t("footer.docs.whyInlang")}`, href: "/documentation", type: "text" as buttonType },
 			{
-				name: `${m.footer_documentation_whyInlang()}`,
-				href: "/documentation",
-				type: "text" as buttonType,
-			},
-			{
-				name: `${m.footer_documentation_contribute()}`,
+				name: `${t("footer.docs.contribute")}`,
 				href: "/documentation/contributing",
 				type: "text" as buttonType,
 			},
@@ -222,27 +226,27 @@ const Footer = (props: { isLandingPage: boolean }) => {
 	const getResourceLinks = () => {
 		return [
 			{
-				name: `${m.footer_resources_marketplace()}`,
+				name: `${t("footer.resources.marketplace")}`,
 				href: "/marketplace",
 				type: "text" as buttonType,
 			},
 			{
-				name: `${m.footer_resources_roadmap()}`,
+				name: `${t("footer.resources.roadmap")}`,
 				href: "https://github.com/orgs/inlang/projects?query=is%3Aopen",
 				type: "text" as buttonType,
 			},
 			{
-				name: `${m.footer_resources_github()}`,
+				name: `${t("footer.resources.github")}`,
 				href: "https://github.com/inlang/monorepo",
 				type: "text" as buttonType,
 			},
 			{
-				name: `${m.footer_resources_twitter()}`,
+				name: `${t("footer.resources.twitter")}`,
 				href: "https://twitter.com/inlangHQ",
 				type: "text" as buttonType,
 			},
 			{
-				name: `${m.footer_resources_discord()}`,
+				name: `${t("footer.resources.discord")}`,
 				href: "https://discord.gg/gdMPPWy57R",
 				type: "text" as buttonType,
 			},
@@ -251,21 +255,21 @@ const Footer = (props: { isLandingPage: boolean }) => {
 	const getContactLinks = () => {
 		return [
 			{
-				name: `${m.footer_contact_getInTouch()}`,
+				name: `${t("footer.contact.getInTouch")}`,
 				href: "mailto:hello@inlang.com",
 				type: "text" as buttonType,
 			},
 			{
-				name: `${m.footer_contact_join()}`,
+				name: `${t("footer.contact.join")}`,
 				href: "https://github.com/inlang/monorepo/tree/main/careers",
 				type: "text" as buttonType,
 			},
 			{
-				name: `${m.footer_contact_feedback()}`,
+				name: `${t("footer.contact.feedback")}`,
 				href: "https://github.com/inlang/monorepo/discussions/categories/feedback",
 				type: "text" as buttonType,
 			},
-			{ name: `${m.footer_contact_blog()}`, href: "/blog", type: "text" as buttonType },
+			{ name: `${t("footer.contact.blog")}`, href: "/blog", type: "text" as buttonType },
 		]
 	}
 
@@ -280,7 +284,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 						</a>
 					</div>
 					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-10 flex flex-col pt-2">
-						<p class="font-semibold text-surface-900 pb-3">{m.footer_documentation_title()}</p>
+						<p class="font-semibold text-surface-900 pb-3">{t("footer.docs.title")}</p>
 						<For each={getDocLinks()}>
 							{(link) => (
 								<div class="w-fit opacity-80">
@@ -292,7 +296,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 						</For>
 					</div>
 					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-10 flex flex-col pt-2">
-						<p class="font-semibold text-surface-900 pb-3">{m.footer_resources_title()}</p>
+						<p class="font-semibold text-surface-900 pb-3">{t("footer.resources.title")}</p>
 						<For each={getResourceLinks()}>
 							{(link) => (
 								<div class="w-fit opacity-80">
@@ -304,7 +308,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 						</For>
 					</div>
 					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-10 xl:flex flex-col pt-2">
-						<p class="font-semibold text-surface-900 pb-3">{m.footer_contact_title()}</p>
+						<p class="font-semibold text-surface-900 pb-3">{t("footer.contact.title")}</p>
 						<For each={getContactLinks()}>
 							{(link) => (
 								<div class="w-fit opacity-80">
@@ -394,6 +398,13 @@ function UserDropdown() {
  * Language picker for the landing page.
  */
 function LanguagePicker() {
+	const [localeIsLoaded, setLocaleIsLoaded] = createSignal(false)
+	const [, { locale }] = useI18n()
+
+	onMount(() => {
+		setLocaleIsLoaded(true)
+	})
+
 	const languages = [
 		{
 			code: "en",
@@ -412,20 +423,30 @@ function LanguagePicker() {
 			name: "Slovak",
 		},
 		{
-			code: "pt-BR",
+			code: "pt_BR",
 			name: "Portuguese Brazil",
 		},
 	]
 
+	const handleSwitchTranslation = (language: { code: string; name: string }) => {
+		window.history.pushState(
+			{},
+			"",
+			(language.code !== defaultLanguage ? "/" + language.code : "") +
+				extractLocale(currentPageContext.urlParsed.pathname).urlWithoutLocale
+		)
+		locale(language.code)
+	}
+
 	return (
 		<div class="w-fit">
-			<Show when={languageTag()}>
+			<Show when={localeIsLoaded()}>
 				<sl-dropdown>
 					<div
 						slot="trigger"
 						class="cursor-pointer h-10 flex items-center text-surface-700 font-medium link-primary text-sm"
 					>
-						<p>{languageTag().toUpperCase()}</p>
+						<p>{locale().toUpperCase()}</p>
 						<IconExpand class="w-5 h-5 opacity-50" />
 					</div>
 					<sl-menu>
@@ -434,8 +455,8 @@ function LanguagePicker() {
 								<sl-menu-item
 									prop:type="checkbox"
 									// @ts-ignore
-									checked={languageTag() === language.code}
-									onClick={() => setLanguageTag(language)}
+									checked={locale() === language.code}
+									onClick={() => handleSwitchTranslation(language)}
 								>
 									{language.name}
 									<p class="opacity-50" slot="suffix">
