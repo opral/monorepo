@@ -91,19 +91,14 @@ const socialMediaLinks = [
 function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?: boolean }) {
 	const getLinks = () => {
 		return [
-			// {
-			// 	name: `${t("header.link.marketplace")}`,
-			// 	href: "/marketplace",
-			// 	type: props.darkmode ? "textBackground" : ("text" as buttonType),
-			// },
-			{
-				name: `Documents`,
-				href: "/documents",
-				type: props.darkmode ? "textBackground" : ("text" as buttonType),
-			},
 			{
 				name: `App`,
 				href: "/app",
+				type: props.darkmode ? "textBackground" : ("text" as buttonType),
+			},
+			{
+				name: `Documents`,
+				href: "/documents",
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
 			},
 			{
@@ -122,7 +117,7 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
 			},
 			{
-				name: `Developer`,
+				name: `Developers`,
 				href: "/documentation",
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
 			},
@@ -186,12 +181,16 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 							</a>
 							<div class="w-full content-center">
 								<div class="hidden md:flex justify-end items-center gap-8">
-									{/* <ProductDropdown darkmode={props.darkmode} /> */}
 									<For each={getLinks()}>
 										{(link) => (
 											<>
-												<Show when={link.name === "Developer"}>
-													<div class="w-[1px] h-6 bg-surface-200" />
+												<Show when={link.name === "Developers"}>
+													<div
+														class={
+															"w-[1px] h-6 " +
+															(props.darkmode ? "bg-surface-700" : "bg-surface-200")
+														}
+													/>
 												</Show>
 												<Button type={link.type} href={link.href}>
 													{link.name}

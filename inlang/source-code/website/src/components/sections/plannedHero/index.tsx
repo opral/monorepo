@@ -7,7 +7,7 @@ import Documents from "#src/pages/index/sections/01-hero/assets/categories/docum
 import Email from "#src/pages/index/sections/01-hero/assets/categories/email.jsx"
 import Payments from "#src/pages/index/sections/01-hero/assets/categories/payments.jsx"
 import Website from "#src/pages/index/sections/01-hero/assets/categories/website.jsx"
-import { Match, Switch, createSignal } from "solid-js"
+import { Match, Show, Switch, createSignal } from "solid-js"
 import { rpc } from "@inlang/rpc"
 
 const PlannedHero = (props: PageProps) => {
