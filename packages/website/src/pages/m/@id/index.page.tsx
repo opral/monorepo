@@ -7,7 +7,7 @@ import { Button } from "#src/pages/index/components/Button.jsx"
 import { Chip } from "#src/components/Chip.jsx"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 import { SelectRepo } from "../Select.jsx"
-import { setSearchValue } from "../index.page.jsx"
+import { setSearchValue } from "#src/components/sections/marketplace/index.jsx"
 import { colorForTypeOf, convertLinkToGithub, typeOfIdToTitle } from "../utilities.js"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
@@ -224,7 +224,7 @@ export function Page(props: PageProps) {
 														{(keyword) => (
 															<a
 																class="transition-opacity hover:opacity-80 cursor-pointer"
-																href="/marketplace"
+																href="/m"
 																onClick={() => {
 																	setSearchValue(keyword.toString())
 																}}
