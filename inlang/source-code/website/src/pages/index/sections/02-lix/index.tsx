@@ -32,30 +32,32 @@ const Lix = () => {
             </div>
           </div>
         </div>
-        <div class="flex justify-center">
-          <LixGraph />
+        <div class="flex mx-6 lg:mx-auto py-4 lg:justify-center overflow-x-scroll lg:overflow-x-hidden">
+          <div class="w-fit h-fit">
+            <LixGraph />
+          </div>
         </div>
-        <div class="grid grid-cols-4 gap-8 pt-16 pb-32 px-6 md:px-4 xl:py-16">
+        <div class="flex flex-col md:grid md:grid-cols-2 xl:grid-cols-4 gap-8 pt-16 pb-32 px-6 md:px-4 xl:py-16">
           <Card
-            class="col-span-2"
+            class="xl:col-span-2"
             title="Rules"
             description="Enable team-wide quality checks that can be resolved automatically."
             icon={<IconError class="w-7 h-7 text-surface-200" />}
             image={
               <>
-                <div class="h-80" />
-                <Rules class="absolute top-14 right-8" />
+                <div class="h-[360px] sm:h-96 lg:h-80" />
+                <Rules class="w-full sm:w-auto absolute top-20 lg:top-14 lg:right-0 xl:right-8" />
               </>
             }
           />
           <Card
-            class="col-span-2"
+            class="xl:col-span-2"
             title="Review"
             description="Include who is needed inside a flexible review workflow."
             icon={<IconCheck />}
             image={
               <>
-                <div class="flex justify-center">
+                <div class="flex justify-center my-6">
                   <div class="absolute h-1/3 w-2/3 rounded-[72px] opacity-40 bg-[#88AEEC] blur-3xl" />
                   <Review class="z-10" />
                 </div>
@@ -64,19 +66,26 @@ const Lix = () => {
             }
           />
           <Card
-            class="col-span-4"
+            class="col-span-2 xl:col-span-4"
             title="Collaboration"
             description="Everyone in the team can work seamlessly together on the same data."
             icon={<IconChat />}
-            image={<Collaboration class="absolute right-0 top-0" />}
-          />
-          <Card
-            class="col-span-2"
-            title="Automation"
-            description="Out of the box automations can transform in highly customizable processes."
-            icon={<IconAutomation />}
             image={
               <>
+                <div class="h-52 sm:hidden" />
+                <Collaboration class="absolute sm:right-0 top-10 sm:top-0" />
+              </>
+            }
+          />
+          <Card
+            class="col-span-2 xl:col-span-2"
+            title="Automation"
+            description="Out of the box automations can transform in highly customizable processes."
+            icon={
+              <IconAutomation />}
+            image={
+              <>
+                <div class="h-48 sm:hidden" />
                 <div class="absolute top-1/4 left-1/2 h-1/2 w-2/5 rounded-[72px] opacity-40 bg-[#88AEEC] blur-3xl" />
                 <Automation class="absolute right-0 top-6" />
                 <div class="z-20 absolute top-0 right-0 rounded-r-[20px] w-24 h-full" style={{ background: "linear-gradient(-90deg, #283548 10%, rgba(51, 65, 85, 0.00) 100%)" }} />
