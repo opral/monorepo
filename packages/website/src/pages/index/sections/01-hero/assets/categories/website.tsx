@@ -1,8 +1,8 @@
 export default function Website() {
 	return (
 		<svg
-			width="390"
-			height="304"
+			width="328"
+			height="256"
 			viewBox="0 0 390 304"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"

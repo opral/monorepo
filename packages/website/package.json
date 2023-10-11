@@ -26,6 +26,7 @@
 		"@sinclair/typebox": "^0.31.3",
 		"@solid-primitives/i18n": "^1.4.0",
 		"@solid-primitives/intersection-observer": "^2.0.5",
+		"@solid-primitives/scroll": "2.0.20",
 		"@solidjs/meta": "0.28.2",
 		"@tiptap/core": "2.0.3",
 		"@tiptap/extension-document": "2.0.3",

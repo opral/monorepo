@@ -1,8 +1,8 @@
 export default function Documents() {
 	return (
 		<svg
-			width="278"
-			height="332"
+			width="214"
+			height="256"
 			viewBox="0 0 278 332"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
