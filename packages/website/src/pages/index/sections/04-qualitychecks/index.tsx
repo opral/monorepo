@@ -1,7 +1,5 @@
 import { Button } from "../../components/Button.jsx"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
-import ItemsList from "./assets/itemslist.jsx"
-import MissingPart from "./assets/missingpart.jsx"
 import Exclamation from "~icons/material-symbols/error-outline"
 import Check from "~icons/material-symbols/check-circle-outline"
 import AutoResolve from "./assets/autoresolve.jsx"
@@ -11,7 +9,7 @@ const QualityChecks = () => {
 		<>
 			<SectionLayout showLines={true} type="lightGrey">
 				<div class="w-full flex pt-4 flex-col-reverse xl:flex-row pb-16">
-					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-10 xl:py-16 pt-8 md:pt-20 mt-8 py-6 items-start">
+					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:py-16 pt-8 md:pt-20 mt-8 py-6 items-start">
 						<h3 class="font-semibold text-3xl">Team-wide quality checks</h3>
 						<p>
 							Quality checks that <b>could</b> be automated, <b>should</b> be automated with rules
@@ -41,7 +39,7 @@ const QualityChecks = () => {
 							</div>
 						</div>
 					</div>
-					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-10 xl:py-16 pt-20 py-6 mx-auto max-w-xl">
+					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:py-16 pt-20 py-6 mx-auto max-w-xl">
 						<AutoResolve />
 					</div>
 				</div>

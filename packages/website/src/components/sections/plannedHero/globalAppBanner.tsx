@@ -5,7 +5,7 @@ import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 const GlobalAppBanner = () => {
 	return (
 		<SectionLayout showLines={true} type="lightGrey">
-			<div class="px-6 md:px-10 pt-16 pb-4">
+			<div class="px-6 md:px-4 pt-16 pb-4">
 				<div class="px-6 py-4 bg-surface-800 rounded-lg flex justify-between items-center text-surface-400">
 					<div class="flex items-center gap-4">
 						<Icon name={"fast"} class="text-surface-400 w-8 h-8" />

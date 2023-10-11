@@ -26,7 +26,7 @@ const Marketplace = () => {
 					</div>
 				</div>
 				<div class="w-full flex pt-4 flex-col xl:flex-row mb-16">
-					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-10 xl:py-16 pt-20 py-6">
+					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:py-16 pt-20 py-6">
 						<div class="flex flex-col items-start">
 							<div class="h-80 w-full rounded-xl bg-surface-100 mb-12 border border-surface-200 relative overflow-hidden">
 								<div class="absolute left-1/2 -translate-x-1/2 -bottom-1">
@@ -44,7 +44,7 @@ const Marketplace = () => {
 							</p>
 						</div>
 					</div>
-					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-10 xl:py-16 pt-20 py-6">
+					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:py-16 pt-20 py-6">
 						<div class="flex flex-col items-start">
 							<div class="h-80 w-full rounded-xl bg-surface-100 mb-12 border border-surface-200 relative overflow-hidden">
 								<div class="absolute left-1/2 -translate-x-1/2 -bottom-1 w-full">
