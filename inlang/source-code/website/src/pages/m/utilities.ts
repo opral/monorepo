@@ -43,10 +43,3 @@ export const convertLinkToGithub = (link: string) => {
 		return "https://github.com/inlang/monorepo"
 	}
 }
-
-/**
- * Scrolls to the top of the content.
- */
-export const scrollToTop = () => {
-	window.scrollTo({ top: 170, behavior: "smooth" })
-}

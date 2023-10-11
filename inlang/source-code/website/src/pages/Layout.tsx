@@ -91,9 +91,34 @@ const socialMediaLinks = [
 function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?: boolean }) {
 	const getLinks = () => {
 		return [
+			// {
+			// 	name: `${t("header.link.marketplace")}`,
+			// 	href: "/marketplace",
+			// 	type: props.darkmode ? "textBackground" : ("text" as buttonType),
+			// },
 			{
-				name: `${t("header.link.marketplace")}`,
-				href: "/marketplace",
+				name: `Documents`,
+				href: "/documents",
+				type: props.darkmode ? "textBackground" : ("text" as buttonType),
+			},
+			{
+				name: `App`,
+				href: "/app",
+				type: props.darkmode ? "textBackground" : ("text" as buttonType),
+			},
+			{
+				name: `Email`,
+				href: "/email",
+				type: props.darkmode ? "textBackground" : ("text" as buttonType),
+			},
+			{
+				name: `Payments`,
+				href: "/payments",
+				type: props.darkmode ? "textBackground" : ("text" as buttonType),
+			},
+			{
+				name: `Website`,
+				href: "/website",
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
 			},
 			{
@@ -141,9 +166,7 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 						</div>
 					</div>
 				</Show>
-				<div
-					class={`w-full h-full py-4 px-6 md:px-4 relative z-10 ${props.landingpage && "px-6"}`}
-				>
+				<div class={`w-full h-full py-4 px-6 md:px-4 relative z-10 ${props.landingpage && "px-6"}`}>
 					<nav class={"max-w-[1248px] w-full mx-auto"}>
 						<div class="flex">
 							<a href={getLocale() + "/"} class="flex items-center w-fit">
@@ -163,12 +186,17 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 							</a>
 							<div class="w-full content-center">
 								<div class="hidden md:flex justify-end items-center gap-8">
-									<ProductDropdown darkmode={props.darkmode} />
+									{/* <ProductDropdown darkmode={props.darkmode} /> */}
 									<For each={getLinks()}>
 										{(link) => (
-											<Button type={link.type} href={link.href}>
-												{link.name}
-											</Button>
+											<>
+												<Show when={link.name === "Developer"}>
+													<div class="w-[1px] h-6 bg-surface-200" />
+												</Show>
+												<Button type={link.type} href={link.href}>
+													{link.name}
+												</Button>
+											</>
 										)}
 									</For>
 									<Show

@@ -8,7 +8,7 @@ import { Button } from "../index/components/Button.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import Plus from "~icons/material-symbols/add-rounded"
 import Check from "~icons/material-symbols/check"
-import { colorForTypeOf, scrollToTop, typeOfIdToTitle } from "./utilities.js"
+import { colorForTypeOf, typeOfIdToTitle } from "./utilities.js"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 
 type Category = "app" | "library" | "plugin" | "messageLintRule"
@@ -57,9 +57,8 @@ export function Page() {
 					<div class="grid xl:grid-cols-3 pb-8 xl:gap-8 grid-flow-row-dense">
 						<div class="relative z-20 xl:mt-0 -mt-12 pb-8 xl:pb-0">
 							<h1 class="xl:col-span-2 md:pt-20 pt-16 text-[40px] md:text-5xl font-bold text-left leading-tight mb-3">
-								Marketplace
+								Explore the ecosystem
 							</h1>
-							<h2 class="text-3xl text-surface-500 font-semibold xl:mb-4">Explore the ecosystem</h2>
 						</div>
 						<div class="xl:col-span-2 max-xl:row-start-1 relative max-xl:max-h-14 xl:blur-0 blur-xl pointer-events-none w-full flex xl:justify-end content-start items-start flex-wrap gap-4 pt-12 justify-start xl:ml-auto max-w-lg">
 							<For each={icons}>
@@ -78,9 +77,7 @@ export function Page() {
 					</div>
 					<div class="flex items-center gap-4 mb-8">
 						<div class="md:h-96 h-[512px] w-full bg-surface-100 bg-[url('https://cdn.jsdelivr.net/gh/inlang/monorepo@website-update/inlang/assets/marketplace/paraglide-artwork.gif')] bg-cover bg-center rounded-2xl flex items-end justify-start relative">
-							<h3 class="font-semibold absolute top-6 left-8 text-background text-3xl">
-								Highlight
-							</h3>
+							<h3 class="font-semibold absolute top-6 left-8 text-background text-3xl">Featured</h3>
 							<div class="w-full flex justify-between md:items-center md:flex-row flex-col bg-warning/40 border-t border-t-hover-warning/50 px-8 py-4 rounded-b-2xl backdrop-blur-lg">
 								<div class="md:mb-0 mb-6">
 									<h2 class="text-lg font-semibold mb-1 text-background">
@@ -130,7 +127,7 @@ const Gallery = () => {
 					return (
 						<>
 							<a
-								href={`/marketplace/${item.id}`}
+								href={`/m/${item.id}`}
 								class="relative no-underline h-72 flex flex-col gap-4 group"
 							>
 								<div
@@ -275,7 +272,6 @@ const Search = (props: SearchInputProps) => {
 				prop:size={"medium"}
 				prop:value={props.textValue()}
 				onInput={(e) => {
-					scrollToTop()
 					props.setTextValue(e.currentTarget.value)
 				}}
 			>
@@ -294,8 +290,6 @@ const Tags = () => {
 		} else {
 			setSelectedCategories([...selectedCategories(), tag])
 		}
-
-		scrollToTop()
 	}
 
 	return (
