@@ -11,9 +11,12 @@ const Hero = () => {
 	return (
 		<>
 			<SectionLayout showLines={true} type="dark">
-				<div class="w-full flex pt-4 md:pt-16 flex-col xl:flex-row">
-					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:py-16 pt-20 py-6">
-						<h1 class="text-[40px] leading-tight md:text-6xl font-bold text-background pr-16 tracking-tight">
+				<div class="w-full flex pt-4 flex-col xl:flex-row">
+					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:pt-16 pt-20 py-6">
+						<h1
+							style={{ "line-height": "68px" }}
+							class="text-[40px] md:text-6xl font-bold text-background pr-32 tracking-snug"
+						>
 							The ecosystem to go{" "}
 							<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-[#F1D9FF] via-hover-primary to-[#3B82F6]">
 								global
@@ -21,7 +24,7 @@ const Hero = () => {
 						</h1>
 					</div>
 					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:pt-16 pt-4 pb-24">
-						<p class="text-surface-300 text-xl max-w-md">
+						<p class="pt-2 text-surface-300 text-xl max-w-md">
 							inlang helps businesses in adapting to various markets to attract more customer.
 						</p>
 						<div class="flex md:items-center items-start gap-8">
@@ -29,7 +32,7 @@ const Hero = () => {
 								<button class="relative bg-surface-800">
 									<div class="relative z-20 bg-surface-200 h-10 px-6 flex justify-center items-center shadow rounded-md hover:shadow-lg hover:bg-background transition-all">
 										<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-surface-900 via-surface-800 to-surface-900 text-sm font-medium">
-											Explore the ecosystem
+											Get started
 										</span>
 									</div>
 									<div
@@ -62,19 +65,10 @@ const Hero = () => {
 					</div>
 				</div>
 			</SectionLayout>
-			<div class="w-full bg-surface-900">
-				<div class="absolute left-1/2 -translate-x-1/2 h-full max-w-screen-xl w-full mx-auto">
-					<div class="invisible xl:visible absolute top-0 left-0 h-full w-full z-0 ">
-						<div class="flex w-full h-full justify-between mx-auto">
-							<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
-							<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
-							<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
-							<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
-							<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
-						</div>
-					</div>
-				</div>
-				<CategorieSlider />
+			<div class="w-full bg-surface-900 overflow-hidden">
+				<SectionLayout showLines={true} type="dark">
+					<CategorieSlider />
+				</SectionLayout>
 			</div>
 			<SectionLayout showLines={true} type="dark">
 				<div class="w-full flex pt-4 md:pt-16 flex-col xl:flex-row py-32">
@@ -82,7 +76,7 @@ const Hero = () => {
 						<p class="text-surface-400">Used by global projects:</p>
 					</div>
 					<div class="w-full xl:w-3/4 flex flex-col gap-8 px-6 md:px-4 py-4">
-						<div class="flex gap-8 items-center w-full xl:justify-end text-background flex-wrap">
+						<div class="flex gap-12 items-center w-full xl:justify-end text-surface-400 flex-wrap">
 							<a
 								class="transition-opacity hover:opacity-80"
 								href="https://cal.com/"

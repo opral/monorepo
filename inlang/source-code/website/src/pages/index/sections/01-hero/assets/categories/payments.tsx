@@ -1,8 +1,8 @@
 export default function Payments() {
 	return (
 		<svg
-			width="328"
-			height="329"
+			width="255"
+			height="256"
 			viewBox="0 0 328 329"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
