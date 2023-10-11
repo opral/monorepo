@@ -3,6 +3,7 @@ import { Meta, Title } from "@solidjs/meta"
 import { createSignal } from "solid-js"
 import { LandingPageLayout as RootLayout } from "../Layout.jsx"
 import GlobalAppBanner from "#src/components/sections/plannedHero/globalAppBanner.jsx"
+import Marketplace from "#src/components/sections/marketplace/index.jsx"
 
 export type PageProps = {
 	slug: string
@@ -18,7 +19,7 @@ export function Page(props: PageProps) {
 
 	if (typeof window !== "undefined") {
 		window.addEventListener("scroll", () => {
-			if (window.scrollY > 916) {
+			if (window.scrollY > 620) {
 				setDarkmode(false)
 			} else {
 				setDarkmode(true)
@@ -39,7 +40,8 @@ export function Page(props: PageProps) {
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<RootLayout landingpage darkmode={darkmode()} transparent={transparent()}>
 				<PlannedHero slug={props.slug} content={props.content} />
-				<GlobalAppBanner />
+				{/* <GlobalAppBanner /> */}
+				<Marketplace minimal />
 			</RootLayout>
 		</>
 	)
