@@ -1,6 +1,16 @@
 import { it, expect } from "vitest"
 import { compileMessage } from "./compileMessage.js"
 
+it("should throw if a message uses `-` because `-` are invalid JS function names", () => {
+	expect(() =>
+		compileMessage({
+			id: "message-with-invalid-js-variable-name",
+			selectors: [],
+			variants: [],
+		})
+	).toThrow()
+})
+
 it("should throw an error if a message has multiple variants with the same language tag", () => {
 	expect(() =>
 		compileMessage({
