@@ -53,7 +53,7 @@ const Lix = () => {
 						image={
 							<>
 								<div class="h-[360px] sm:h-96 lg:h-80" />
-								<Rules class="w-full absolute top-20 sm:top-24 lg:top-14 xl:top-16 lg:right-0 xl:right-8 xl:scale-110" />
+								<Rules class="w-full lg:w-fit absolute top-20 sm:top-24 lg:top-14 xl:top-16 lg:right-0 xl:right-8 xl:scale-110" />
 							</>
 						}
 					/>
