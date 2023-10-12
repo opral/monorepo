@@ -9,6 +9,13 @@ import OpenAssistant from "./assets/logos/openAssistant.jsx"
 import CategorieSlider from "./Slider.jsx"
 
 const Hero = () => {
+	const moveToCategory = () => {
+		const element = document.getElementById("categories")
+		if (element) {
+			element.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })
+		}
+	}
+
 	return (
 		<>
 			<SectionLayout showLines={true} type="dark">
@@ -26,36 +33,34 @@ const Hero = () => {
 							inlang helps businesses in adapting to various markets to attract more customer.
 						</p>
 						<div class="flex md:items-center items-start gap-8">
-							<a href={"#categories"} class="-ml-0.5 flex-shrink-0">
-								<button class="relative bg-surface-800">
-									<div class="relative z-20 bg-surface-200 h-10 px-6 flex justify-center items-center shadow rounded-md hover:shadow-lg hover:bg-background transition-all">
-										<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-surface-900 via-surface-800 to-surface-900 text-sm font-medium">
-											Get started
-										</span>
-									</div>
-									<div
-										style={{
-											background:
-												"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
-										}}
-										class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-60 blur-3xl"
-									/>
-									<div
-										style={{
-											background:
-												"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
-										}}
-										class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-40 blur-xl"
-									/>
-									<div
-										style={{
-											background:
-												"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
-										}}
-										class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-80 blur-sm"
-									/>
-								</button>
-							</a>
+							<button class="relative bg-surface-800" onClick={() => moveToCategory()}>
+								<div class="relative z-20 bg-surface-200 h-10 px-6 flex justify-center items-center shadow rounded-md hover:shadow-lg hover:bg-background transition-all">
+									<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-surface-900 via-surface-800 to-surface-900 text-sm font-medium">
+										Get started
+									</span>
+								</div>
+								<div
+									style={{
+										background:
+											"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
+									}}
+									class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-60 blur-3xl"
+								/>
+								<div
+									style={{
+										background:
+											"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
+									}}
+									class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-40 blur-xl"
+								/>
+								<div
+									style={{
+										background:
+											"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
+									}}
+									class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-80 blur-sm"
+								/>
+							</button>
 							<Button type="textBackground" href="#" chevron>
 								Contact Sales
 							</Button>
