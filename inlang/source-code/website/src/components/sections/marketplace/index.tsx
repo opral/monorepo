@@ -11,13 +11,14 @@ import Left from "~icons/material-symbols/chevron-left"
 import { colorForTypeOf, typeOfIdToTitle } from "./utilities.js"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
+// import { filteredItems } from "./algorithm.js"
 // @ts-ignore
 import { createSlider } from "solid-slider"
 import "solid-slider/slider.css"
 import Highlight from "#src/components/Highlight.jsx"
 
-type Category = "app" | "documents" | "email" | "payments" | "website"
-type SubCategory = "app" | "library" | "plugin" | "messageLintRule"
+export type Category = "app" | "documents" | "email" | "payments" | "website"
+export type SubCategory = "app" | "library" | "plugin" | "messageLintRule"
 
 /* Export searchValue to make subpages insert search-terms */
 export const [searchValue, setSearchValue] = createSignal<string>("")
@@ -45,10 +46,13 @@ const filteredItems = () =>
 		return isSearchMatch
 	})
 
+// filteredItems(selectedCategories(), searchValue())
+
 export default function Marketplace(props: {
 	minimal?: boolean
 	highlights?: Record<string, string>[]
 	category?: Category | undefined
+	slider?: boolean
 }) {
 	const [details, setDetails] = createSignal({})
 	const [slider, { next, prev }] = createSlider({
@@ -65,7 +69,7 @@ export default function Marketplace(props: {
 
 	return (
 		<SectionLayout showLines={false} type="white">
-			<div class="pb-16 md:pb-20 min-h-screen relative">
+			<div class="pb-16 md:pb-20 relative">
 				<Show when={props.highlights}>
 					<Show when={props.highlights && props.highlights.length > 0}>
 						<div class="flex justify-between gap-6 md:flex-row flex-col mb-8">
@@ -101,14 +105,8 @@ export default function Marketplace(props: {
 						</div>
 					</div>
 				</Show>
-				<Show when={props.category && props.category.toLowerCase() !== "global app"}>
-					<h3 class="font-semibold text-2xl mb-4">Guides</h3>
-					{/* <div>
-						<Gallery />
-					</div> */}
-				</Show>
 				<Show
-					when={props.category && props.category.toLowerCase() !== "global app"}
+					when={props.slider}
 					fallback={
 						<div class="mb-32 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 gap-y-8 justify-center items-stretch relative">
 							<Gallery />
@@ -137,7 +135,7 @@ export default function Marketplace(props: {
 					</div>
 				</Show>
 
-				<Show when={!props.category}>
+				<Show when={!props.category && !props.slider && !props.minimal}>
 					<GetHelp text="Need help or have questions? Join our Discord!" />
 				</Show>
 			</div>
@@ -157,7 +155,7 @@ const Gallery = () => {
 						<>
 							<a
 								href={`/m/${item.id}`}
-								class="relative no-underline h-72 flex flex-col gap-4 group active:cursor-grabbing"
+								class="relative no-underline h-72 flex flex-col gap-4 group"
 							>
 								<div
 									style={{

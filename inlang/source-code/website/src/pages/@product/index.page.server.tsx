@@ -6,9 +6,12 @@ export async function onBeforeRender(pageContext: any) {
   const { product } = pageContext.routeParams
 
   const page = products.find((page) => page.slug === product)
+
   if (!page) {
-    throw render(404)
-  }
+		if (product === "documentation") return
+
+		throw render(404)
+	}
 
   return {
     pageContext: {
