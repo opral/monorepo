@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 1.11.0
+
+### Minor Changes
+
+- 6f42758bb: force absolute path for settingsFilePath to intercept nodeishFs with absolute paths
+
 ## 1.10.0
 
 ### Minor Changes

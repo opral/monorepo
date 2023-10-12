@@ -1,5 +1,16 @@
 # inlang-vs-code-extension
 
+## 1.12.0
+
+### Minor Changes
+
+- a3bd1b72f: fix: show inlang logo as extension icon
+
+### Patch Changes
+
+- Updated dependencies [6f42758bb]
+  - @lix-js/fs@0.3.0
+
 ## 1.11.0
 
 ### Minor Changes
