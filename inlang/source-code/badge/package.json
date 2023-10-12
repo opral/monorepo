@@ -11,6 +11,7 @@
 		"build": "tsc --build",
 		"dev": "tsc --watch",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"test:e2e:install": "npx playwright install --with-deps",
 		"test:e2e": "npx playwright test",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",

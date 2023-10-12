@@ -20,7 +20,7 @@ jobs:
     - name: Install dependencies
       run: npm ci
     - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
+      run: npm run test:e2e:install -w @inlang/badge
     - name: Run Playwright tests
       run: npm run test:e2e -w @inlang/badge
     - uses: actions/upload-artifact@v3
