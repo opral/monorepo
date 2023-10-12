@@ -120,19 +120,24 @@ const Card = (props: {
   image?: JSX.Element
 }) => {
   return (
-    <div class={"min-h-[244px] p-6 flex flex-col justify-between rounded-[20px] relative bg-[#283548] " + props.class}>
-      <div class="flex justify-center items-center w-10 h-10 gap-2.5 rounded-lg bg-background/[0.16]">
-        {props.icon}
-      </div>
-      {props.image}
-      <div class="w-fit h-fit">
-        <p class="w-fit text-2xl font-semibold text-left text-background pb-2">{props.title}</p>
-        <p class="min-h-[72px] max-w-[230px] text-base font-medium text-left text-surface-400">
-          {props.description}
-        </p>
-      </div>
-    </div>
-  )
+		<div
+			class={
+				"overflow-hidden min-h-[244px] p-6 flex flex-col justify-between rounded-[20px] relative bg-[#283548] " +
+				props.class
+			}
+		>
+			<div class="flex justify-center items-center w-10 h-10 gap-2.5 rounded-lg bg-background/[0.16]">
+				{props.icon}
+			</div>
+			{props.image}
+			<div class="w-fit h-fit">
+				<p class="w-fit text-2xl font-semibold text-left text-background pb-2">{props.title}</p>
+				<p class="min-h-[72px] max-w-[230px] text-base font-medium text-left text-surface-400">
+					{props.description}
+				</p>
+			</div>
+		</div>
+	)
 }
 
 export const IconCheck = () => {
