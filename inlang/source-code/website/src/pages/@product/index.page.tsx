@@ -42,31 +42,25 @@ export function Page(props: PageProps) {
 			<Layout>
 				<Show when={props.content}>
 					<CategoryHero slug={props.slug} content={props.content} />
-
-					{/* <GlobalAppBanner /> */}
 					<Marketplace
-						minimal={props.content.title !== "Global App"}
-						slider={props.content.title !== "Global App"}
+						minimal={props.content.title !== "Global Application"}
+						slider={props.content.title !== "Global Application"}
 						highlights={
 							props.content.title === "Global Application"
 								? [
 										{
+											type: "banner",
 											color: "#f66900",
 											title: "ParaglideJS (former SDK-JS)",
-											type: "Featured",
+											slogan: "Featured",
 											description: "The all new library for all common frameworks.",
 											link: "/m/library.inlang.paraglideJsSveltekit",
 											image:
 												"https://cdn.jsdelivr.net/gh/inlang/monorepo@website-update/inlang/assets/marketplace/paraglide-artwork.gif",
 										},
 										{
-											color: "#f66900",
-											title: "Test (former SDK-JS)",
-											type: "Featured",
-											description: "The all new library for all common frameworks.",
-											link: "/m/library.inlang.paraglideJsSveltekit",
-											image:
-												"https://cdn.jsdelivr.net/gh/inlang/monorepo@website-update/inlang/assets/marketplace/paraglide-artwork.gif",
+											type: "card",
+											id: "app.inlang.badge",
 										},
 								  ]
 								: []

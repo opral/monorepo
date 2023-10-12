@@ -212,14 +212,14 @@ export function Page(props: PageProps) {
 												<button
 													disabled={details().progress === 0}
 													onClick={prev}
-													class="absolute -left-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-md shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
+													class="absolute -left-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
 												>
 													<Left class="h-8 w-8" />
 												</button>
 												<button
 													disabled={details().progress > 0.99}
 													onClick={next}
-													class="absolute -right-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-md shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
+													class="absolute -right-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
 												>
 													<Right class="h-8 w-8" />
 												</button>

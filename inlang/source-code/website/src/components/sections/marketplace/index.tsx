@@ -1,14 +1,11 @@
 import { registry } from "@inlang/marketplace-registry"
-import { For, Show, type Accessor, createSignal, createEffect, type JSX } from "solid-js"
-import { Chip } from "#src/components/Chip.jsx"
+import { For, Show, type Accessor, createSignal, createEffect } from "solid-js"
 import { SearchIcon } from "#src/pages/editor/@host/@owner/@repository/components/SearchInput.jsx"
 import { Button } from "#src/pages/index/components/Button.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
-import Plus from "~icons/material-symbols/add-rounded"
 import Check from "~icons/material-symbols/check"
 import Right from "~icons/material-symbols/chevron-right"
 import Left from "~icons/material-symbols/chevron-left"
-import { colorForTypeOf, typeOfIdToTitle } from "./utilities.js"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 // import { filteredItems } from "./algorithm.js"
@@ -16,6 +13,7 @@ import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 import { createSlider } from "solid-slider"
 import "solid-slider/slider.css"
 import Highlight from "#src/components/Highlight.jsx"
+import Card, { CardBuildOwn } from "#src/components/Card.jsx"
 
 export type Category = "app" | "documents" | "email" | "payments" | "website"
 export type SubCategory = "app" | "library" | "plugin" | "messageLintRule"
@@ -73,18 +71,7 @@ export default function Marketplace(props: {
 				<Show when={props.highlights}>
 					<Show when={props.highlights && props.highlights.length > 0}>
 						<div class="flex justify-between gap-6 md:flex-row flex-col mb-8">
-							<For each={props.highlights}>
-								{(highlight) => (
-									<Highlight
-										link={highlight.link}
-										type={highlight.type}
-										title={highlight.title}
-										description={highlight.description}
-										image={highlight.image}
-										color={highlight.color}
-									/>
-								)}
-							</For>
+							<For each={props.highlights}>{(highlight) => <Highlight {...highlight} />}</For>
 						</div>
 					</Show>
 				</Show>
@@ -108,7 +95,7 @@ export default function Marketplace(props: {
 				<Show
 					when={props.slider}
 					fallback={
-						<div class="mb-32 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 gap-y-8 justify-center items-stretch relative">
+						<div class="mb-32 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-center items-stretch relative">
 							<Gallery />
 						</div>
 					}
@@ -121,14 +108,14 @@ export default function Marketplace(props: {
 						<button
 							disabled={details().progress === 0}
 							onClick={prev}
-							class="absolute -left-2 top-[40%] -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-md shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
+							class="absolute -left-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
 						>
 							<Left class="h-8 w-8" />
 						</button>
 						<button
 							disabled={details().progress > 0.99}
 							onClick={next}
-							class="absolute -right-2 top-[40%] -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-md shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
+							class="absolute -right-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
 						>
 							<Right class="h-8 w-8" />
 						</button>
@@ -151,108 +138,10 @@ const Gallery = () => {
 					const displayName =
 						typeof item.displayName === "object" ? item.displayName.en : item.displayName
 
-					return (
-						<>
-							<a
-								href={`/m/${item.id}`}
-								class="relative no-underline h-72 flex flex-col gap-4 group"
-							>
-								<div
-									style={{
-										"background-image": `url(${item.gallery?.[0]})`,
-									}}
-									class="w-full h-full flex items-center justify-center bg-surface-50 group-hover:bg-surface-100 transition-colors rounded-lg relative bg-cover bg-center border border-surface-2"
-								>
-									<Chip
-										text={typeOfIdToTitle(item.id)}
-										color={colorForTypeOf(item.id)}
-										customClasses="absolute right-4 top-4 z-5 backdrop-filter backdrop-blur-sm text-xs"
-									/>
-									<Show when={!item.gallery}>
-										<Show
-											when={item.icon}
-											fallback={
-												<p class="font-mono font-semibold text-surface-500">{displayName}</p>
-											}
-										>
-											<img
-												class="w-14 h-14 rounded-md m-0 shadow-lg object-cover object-center"
-												src={item.icon}
-											/>
-										</Show>
-									</Show>
-								</div>
-								<div class="w-full flex gap-6 justify-between">
-									<div class="w-full flex gap-3 items-center">
-										<div class="flex items-center gap-2 flex-shrink-0">
-											<Show when={item.publisherIcon}>
-												<img class="w-9 h-9 rounded-full m-0" src={item.publisherIcon} />
-											</Show>
-										</div>
-										<div class="flex flex-col justify-between gap-0.5">
-											<p class="m-0 text-surface-600 leading-none no-underline font-medium group-hover:text-surface-900 transition-colors">
-												{displayName}
-											</p>
-											<p class="m-0 text-surface-400 leading-tight text-sm no-underline line-clamp-1 group-hover:text-surface-500 transition-colors">
-												{item.publisherName}
-											</p>
-										</div>
-									</div>
-									<Show
-										when={
-											item.id.split(".")[0] === "plugin" ||
-											item.id.split(".")[0] === "messageLintRule"
-										}
-									>
-										<sl-tooltip prop:content="Install">
-											<a
-												onClick={(e) => {
-													e.stopPropagation()
-												}}
-												href={`/install?module=${item.id}`}
-												class="text-surface-400 flex-shrink-0 rounded-md p-1.5 w-8 h-8 flex items-center justify-center hover:text-surface-900 hover:bg-surface-100 transition-all"
-											>
-												<svg
-													width="100%"
-													height="100%"
-													viewBox="0 0 16 16"
-													fill="none"
-													xmlns="http://www.w3.org/2000/svg"
-												>
-													<path
-														fill-rule="evenodd"
-														clip-rule="evenodd"
-														d="M11.6 5.54982L11.6 5.5498L8.99999 8.14981L11.6 5.54982ZM8.69999 8.87407L11.5962 5.97782L12.5794 6.99612L7.99999 11.5755L3.42056 6.99612L4.40374 5.97782L7.29999 8.87407V0.299805H8.69999V8.87407ZM14.3 14.2998V11.2998H15.7V13.9998C15.7 14.4696 15.5362 14.8643 15.2004 15.2002C14.8645 15.536 14.4698 15.6998 14 15.6998H1.99999C1.53019 15.6998 1.13547 15.536 0.79962 15.2002C0.463765 14.8643 0.299988 14.4696 0.299988 13.9998V11.2998H1.69999V14.2998H14.3Z"
-														fill="currentColor"
-													/>
-												</svg>
-											</a>
-										</sl-tooltip>
-									</Show>
-								</div>
-							</a>
-						</>
-					)
+					return <Card item={item} displayName={displayName} />
 				}}
 			</For>
-			<a
-				href="/documentation/publish-marketplace"
-				class="relative no-underline h-72 flex flex-col gap-3.5 group"
-			>
-				<div class="w-full h-full bg-surface-50 group-hover:bg-surface-100 transition-colors text-surface-500 rounded-lg flex justify-center items-center border border-surface-2">
-					<Plus class="text-4xl" />
-				</div>
-				<div class="w-full">
-					<div class="flex flex-col gap-1">
-						<p class="m-0 text-surface-600 leading-none no-underline font-medium group-hover:text-surface-900 transition-colors">
-							Build your own solution
-						</p>
-						<p class="m-0 text-surface-400 text-sm leading-tight no-underline line-clamp-1 group-hover:text-surface-500 transition-colors">
-							Can't find what you search for? Build your own solution!
-						</p>
-					</div>
-				</div>
-			</a>
+			<CardBuildOwn />
 		</>
 	)
 }

@@ -45,9 +45,10 @@ export function Page() {
 					<Marketplace
 						highlights={[
 							{
+								type: "banner",
 								color: "#06B6D4",
 								title: "Develop with inlang",
-								type: "For Developer",
+								slogan: "For Developer",
 								description: "Create your own module.",
 								link: "/documentation",
 								image: "/images/developers-artwork.jpg",
