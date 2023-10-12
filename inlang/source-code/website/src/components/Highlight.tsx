@@ -37,7 +37,7 @@ export default function Highlight(props: BannerProps | CardProps) {
 						class="w-full flex justify-between md:items-center md:flex-row flex-col px-8 py-4 rounded-b-2xl backdrop-blur-lg border-t"
 						style={{
 							background: `${props.color}25`,
-							borderTopColor: `${props.color}30`,
+							"border-top-color": `${props.color}30`,
 						}}
 					>
 						<div class="md:mb-0 mb-6">
