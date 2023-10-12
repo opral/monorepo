@@ -117,6 +117,11 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
 			},
 			{
+				name: `Marketplace`,
+				href: "/marketplace",
+				type: props.darkmode ? "textBackground" : ("text" as buttonType),
+			},
+			{
 				name: `Developers`,
 				href: "/documentation",
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
@@ -184,7 +189,7 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 									<For each={getLinks()}>
 										{(link) => (
 											<>
-												<Show when={link.name === "Developers"}>
+												<Show when={link.name === "Marketplace"}>
 													<div
 														class={
 															"w-[1px] h-6 " +
