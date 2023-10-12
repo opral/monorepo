@@ -10,7 +10,10 @@ export default function Highlight(props: {
 }) {
 	return (
 		<div
-			class={`h-96 w-full bg-surface-100 bg-[url('${props.image}')] bg-cover bg-center rounded-2xl flex items-end justify-start relative`}
+			style={{
+				"background-image": `url(${props.image})`,
+			}}
+			class={`h-96 w-full bg-surface-100 bg-cover bg-center rounded-2xl flex items-end justify-start relative`}
 		>
 			<h3 class="font-semibold absolute top-6 left-8 text-background text-2xl">{props.type}</h3>
 			<div
