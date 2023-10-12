@@ -8,6 +8,9 @@ import { removeCommas } from "./helper/removeCommas.js"
 import { calculateSummary } from "./helper/calculateSummary.js"
 import { caching } from "cache-manager"
 import { type MessageLintReport, loadProject } from "@inlang/sdk"
+import { resolve } from "node:path"
+import { cwd } from "node:process"
+import { normalizePath } from "@lix-js/fs"
 
 const fontMedium = readFileSync(new URL("../assets/static/Inter-Medium.ttf", import.meta.url))
 const fontBold = readFileSync(new URL("../assets/static/Inter-Bold.ttf", import.meta.url))
@@ -30,14 +33,17 @@ export const badge = async (url: string) => {
 		nodeishFs: createNodeishMemoryFs(),
 	})
 
+	// Settings file path has to be absolute
+	const settingsFilePath = "/project.inlang.json"
+
 	// Get the content of the project.inlang.json file
-	await repo.nodeishFs.readFile("./project.inlang.json", { encoding: "utf-8" }).catch((e) => {
+	await repo.nodeishFs.readFile(settingsFilePath, { encoding: "utf-8" }).catch((e) => {
 		if (e.code !== "ENOENT") throw e
 		throw new Error("No project.inlang.json file found in the repository.")
 	})
 
 	const project = await loadProject({
-		settingsFilePath: "./project.inlang.json",
+		settingsFilePath,
 		nodeishFs: repo.nodeishFs,
 		_capture(id, props) {
 			telemetryNode.capture({
