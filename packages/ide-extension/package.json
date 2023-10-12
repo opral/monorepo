@@ -81,6 +81,7 @@
 		"@inlang/telemetry": "*",
 		"@lix-js/fs": "*",
 		"@vitest/coverage-v8": "0.34.6",
+		"https-proxy-agent": "7.0.2",
 		"require-from-string": "^2.0.2",
 		"throttle-debounce": "^5.0.0",
 		"vitest": "0.34.6"

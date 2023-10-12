@@ -4,6 +4,8 @@ import ts from "typescript"
 import requireFromString from "require-from-string"
 import type { ImportFunction } from "@inlang/sdk"
 import fs from "node:fs/promises"
+import { HttpsProxyAgent } from "https-proxy-agent"
+import { workspace } from "vscode"
 
 /**
  * Wraps the import function to inject the base path.
@@ -19,12 +21,16 @@ export function _import(basePath: string): ImportFunction {
 	}
 }
 
+const httpsProxy =
+	process.env.HTTPS_PROXY || workspace.getConfiguration().get("http.proxy") || undefined
+const httpsAgent = httpsProxy ? new HttpsProxyAgent(httpsProxy) : undefined
+
 const createImport: ImportFunction = async (uri: string) => {
 	// polyfill for environments that don't support dynamic
 	// http imports yet like VSCode.
 
 	const moduleAsText = uri.startsWith("http")
-		? await (await fetch(uri)).text()
+		? await (await fetch(uri, { agent: httpsAgent })).text()
 		: await fs.readFile(uri, { encoding: "utf-8" })
 
 	try {
