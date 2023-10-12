@@ -31,7 +31,7 @@ const data: CardType[] = [
 	},
 	{
 		title: "Global Payment",
-		description: "Globalize your application and get a process that suits your needs.",
+		description: "Enable your customers to pay with ease using their favorite method.",
 		soon: true,
 		button: "Start Global Payment",
 		link: "/payments",
@@ -41,7 +41,7 @@ const data: CardType[] = [
 	},
 	{
 		title: "Global Documents",
-		description: "Globalize your application and get a process that suits your needs.",
+		description: "Documents made to collaborate with version control and multi-language support.",
 		soon: true,
 		button: "Start with Global Documents",
 		link: "/documents",
@@ -51,7 +51,7 @@ const data: CardType[] = [
 	},
 	{
 		title: "Global Email",
-		description: "Globalize your application and get a process that suits your needs.",
+		description: "Stay in touch with your customers in their native language.",
 		soon: true,
 		button: "Start a Global Email Campaign",
 		link: "/email",
@@ -61,7 +61,7 @@ const data: CardType[] = [
 	},
 	{
 		title: "Global Website",
-		description: "Globalize your application and get a process that suits your needs.",
+		description: "Let your website speak the language of your customers.",
 		soon: true,
 		button: "Start your Global Website",
 		link: "/website",
@@ -97,8 +97,8 @@ const Marketplace = () => {
 						<For each={data.filter((card) => card.left === true)}>
 							{(card) => {
 								return (
-									<div class="relative col-span-2 bg-background shadow-lg rounded-xl p-2 group lg:h-[400px]">
-										<div class="relative bg-surface-100 rounded-lg h-36 lg:h-56 lg:group-hover:h-44 transition-all duration-800 ease-in-out overflow-hidden">
+									<div class="relative col-span-2 bg-background shadow-lg rounded-[18px] p-2 group lg:h-[390px]">
+										<div class="relative bg-surface-100 rounded-[14px] h-36 lg:h-56 lg:group-hover:h-44 transition-all duration-800 ease-in-out overflow-hidden">
 											<div class="z-20 relative translate-y-0 lg:group-hover:-translate-y-4 transition duration-800 ease-in-out">
 												{card.img}
 											</div>
@@ -138,8 +138,8 @@ const Marketplace = () => {
 						<For each={data.filter((card) => card.left === false)}>
 							{(card) => {
 								return (
-									<div class="relative col-span-2 bg-background shadow-lg rounded-xl p-2 group lg:h-[400px]">
-										<div class="relative bg-surface-100 rounded-lg lg:h-56 h-36 lg:group-hover:h-44 transition-all duration-800 ease-in-out overflow-hidden">
+									<div class="relative col-span-2 bg-background shadow-lg rounded-[18px] p-2 group lg:h-[390px]">
+										<div class="relative bg-surface-100 rounded-[14px] lg:h-56 h-36 lg:group-hover:h-44 transition-all duration-800 ease-in-out overflow-hidden">
 											<div class="z-20 relative translate-y-0 lg:group-hover:-translate-y-4 transition duration-800 ease-in-out">
 												{card.img}
 											</div>
