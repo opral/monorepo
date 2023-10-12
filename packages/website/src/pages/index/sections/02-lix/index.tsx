@@ -46,7 +46,7 @@ const Lix = () => {
             image={
               <>
                 <div class="h-[360px] sm:h-96 lg:h-80" />
-                <Rules class="w-full sm:w-auto absolute top-20 lg:top-14 lg:right-0 xl:right-8" />
+                <Rules class="w-full absolute top-20 sm:top-24 lg:top-14 xl:top-16 lg:right-0 xl:right-8 xl:scale-110" />
               </>
             }
           />
@@ -72,13 +72,15 @@ const Lix = () => {
             icon={<IconChat />}
             image={
               <>
-                <div class="h-52 sm:hidden" />
-                <Collaboration class="absolute sm:right-0 top-10 sm:top-0" />
+                <div class="h-36 sm:h-44 md:hidden" />
+                <div class="absolute overflow-clip w-[calc(100%_-_24px)] sm:w-fit md:w-2/3 lg:w-fit lg:h-fit sm:right-0 top-10 sm:top-0">
+                  <Collaboration class="h-40 sm:h-48 md:h-auto mt-4 sm:mt-12 md:mt-auto -ml-[118px] sm:ml-auto sm:-mr-24 md:mr-auto" />
+                </div>
               </>
             }
           />
           <Card
-            class="col-span-2 xl:col-span-2"
+            class="col-span-1 md:col-span-2 lg:col-span-1 xl:col-span-2"
             title="Automation"
             description="Out of the box automations can transform in highly customizable processes."
             icon={
@@ -86,7 +88,7 @@ const Lix = () => {
             image={
               <>
                 <div class="h-48 sm:hidden" />
-                <div class="absolute top-1/4 left-1/2 h-1/2 w-2/5 rounded-[72px] opacity-40 bg-[#88AEEC] blur-3xl" />
+                <div class="absolute top-6 sm:top-1/4 left-1/2 md:left-2/3 lg:left-1/2 h-1/2 w-2/5 md:w-1/5 lg:w-2/5 rounded-[72px] opacity-40 bg-[#88AEEC] blur-3xl" />
                 <Automation class="absolute right-0 top-6" />
                 <div class="z-20 absolute top-0 right-0 rounded-r-[20px] w-24 h-full" style={{ background: "linear-gradient(-90deg, #283548 10%, rgba(51, 65, 85, 0.00) 100%)" }} />
               </>
