@@ -4,6 +4,7 @@ import { registry } from "@inlang/marketplace-registry"
 import { For } from "solid-js"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import Marketplace from "#src/components/sections/marketplace/index.jsx"
+import { Button } from "../index/components/Button.jsx"
 
 export function Page() {
 	const icons = registry
@@ -20,7 +21,7 @@ export function Page() {
 			<Meta name="og:image" content="/images/inlang-marketplace-image.jpg" />
 			<Layout>
 				<div class="pb-16 md:pb-20 min-h-screen relative">
-					<div class="grid xl:grid-cols-3 xl:gap-8 grid-flow-row-dense mb-10 md:mb-12">
+					<div class="grid xl:grid-cols-3 xl:gap-8 grid-flow-row-dense mb-9 min-h-[198px]">
 						<div class="relative z-20 xl:mt-0 -mt-12 pb-8 xl:pb-0">
 							<h1 class="xl:col-span-2 md:pt-20 pt-16 text-[40px] md:text-5xl font-bold text-left  leading-none md:leading-tight mb-3">
 								Explore the ecosystem
@@ -41,7 +42,18 @@ export function Page() {
 							<div class="absolute inset-0 xl:bg-gradient-to-tr bg-gradient-to-tl from-background/0 via-background/25 to-background" />
 						</div>
 					</div>
-					<Marketplace featured />
+					<Marketplace
+						highlights={[
+							{
+								color: "#06B6D4",
+								title: "Develop with inlang",
+								type: "For Developer",
+								description: "Create your own module.",
+								link: "/documentation",
+								image: "/images/developers-artwork.jpg",
+							},
+						]}
+					/>
 				</div>
 			</Layout>
 		</>

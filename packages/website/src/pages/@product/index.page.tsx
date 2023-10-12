@@ -3,6 +3,8 @@ import { Meta, Title } from "@solidjs/meta"
 import { Show, createSignal } from "solid-js"
 import { Layout, LandingPageLayout as RootLayout } from "../Layout.jsx"
 import Marketplace from "#src/components/sections/marketplace/index.jsx"
+import { Button } from "../index/components/Button.jsx"
+import Highlight from "#src/components/Highlight.jsx"
 
 export type PageProps = {
 	slug: string
@@ -44,7 +46,21 @@ export function Page(props: PageProps) {
 				{/* <GlobalAppBanner /> */}
 				<Marketplace
 					minimal={props.content.title !== "Global App"}
-					featured={props.content.title === "Global App"}
+					highlights={
+						props.content.title === "Global App"
+							? [
+									{
+										color: "#f66900",
+										title: "ParaglideJS (former SDK-JS)",
+										type: "Featured",
+										description: "The all new library for all common frameworks.",
+										link: "/m/library.inlang.paraglideJsSveltekit",
+										image:
+											"https://cdn.jsdelivr.net/gh/inlang/monorepo@website-update/inlang/assets/marketplace/paraglide-artwork.gif",
+									},
+							  ]
+							: []
+					}
 					category={props.content && props.content.title.toLowerCase()}
 				/>
 			</Layout>

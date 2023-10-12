@@ -1,5 +1,5 @@
 import { registry } from "@inlang/marketplace-registry"
-import { For, Show, type Accessor, createSignal, createEffect } from "solid-js"
+import { For, Show, type Accessor, createSignal, createEffect, type JSX } from "solid-js"
 import { Chip } from "#src/components/Chip.jsx"
 import { SearchIcon } from "#src/pages/editor/@host/@owner/@repository/components/SearchInput.jsx"
 import { Button } from "#src/pages/index/components/Button.jsx"
@@ -14,6 +14,7 @@ import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 // @ts-ignore
 import { createSlider } from "solid-slider"
 import "solid-slider/slider.css"
+import Highlight from "#src/components/Highlight.jsx"
 
 type Category = "app" | "documents" | "email" | "payments" | "website"
 type SubCategory = "app" | "library" | "plugin" | "messageLintRule"
@@ -46,13 +47,13 @@ const filteredItems = () =>
 
 export default function Marketplace(props: {
 	minimal?: boolean
-	featured?: boolean
+	highlights?: Record<string, string>[]
 	category?: Category | undefined
 }) {
 	const [details, setDetails] = createSignal({})
 	const [slider, { next, prev }] = createSlider({
 		slides: {
-			number: filteredItems().length,
+			number: filteredItems().length + 1,
 			perView: 3,
 			spacing: 16,
 		},
@@ -65,23 +66,23 @@ export default function Marketplace(props: {
 	return (
 		<SectionLayout showLines={false} type="white">
 			<div class="pb-16 md:pb-20 min-h-screen relative">
-				<Show when={props.featured}>
-					<div class="flex items-center gap-4 mb-8">
-						<div class="md:h-96 h-[512px] w-full bg-surface-100 bg-[url('https://cdn.jsdelivr.net/gh/inlang/monorepo@website-update/inlang/assets/marketplace/paraglide-artwork.gif')] bg-cover bg-center rounded-2xl flex items-end justify-start relative">
-							<h3 class="font-semibold absolute top-6 left-8 text-background text-3xl">Featured</h3>
-							<div class="w-full flex justify-between md:items-center md:flex-row flex-col bg-warning/40 border-t border-t-hover-warning/50 px-8 py-4 rounded-b-2xl backdrop-blur-lg">
-								<div class="md:mb-0 mb-6">
-									<h2 class="text-lg font-semibold mb-1 text-background">
-										ParaglideJS (former SDK-JS)
-									</h2>
-									<p class="text-background">The all new library for all common frameworks.</p>
-								</div>
-								<Button chevron type="secondaryOnGray">
-									Learn more
-								</Button>
-							</div>
+				<Show when={props.highlights}>
+					<Show when={props.highlights && props.highlights.length > 0}>
+						<div class="flex justify-between gap-6 md:flex-row flex-col mb-8">
+							<For each={props.highlights}>
+								{(highlight) => (
+									<Highlight
+										link={highlight.link}
+										type={highlight.type}
+										title={highlight.title}
+										description={highlight.description}
+										image={highlight.image}
+										color={highlight.color}
+									/>
+								)}
+							</For>
 						</div>
-					</div>
+					</Show>
 				</Show>
 				<Show when={!props.minimal}>
 					<div class="w-full top-16 sticky bg-background/90 backdrop-blur-xl pb-4 pt-8 z-10 flex flex-col gap-5">
