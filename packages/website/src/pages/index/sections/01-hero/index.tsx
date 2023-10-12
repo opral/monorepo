@@ -1,3 +1,4 @@
+import { navigate } from "vite-plugin-ssr/client/router"
 import { Button } from "../../components/Button.jsx"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
 import AppFlowy from "./assets/logos/appflowy.jsx"
@@ -13,9 +14,7 @@ const Hero = () => {
 			<SectionLayout showLines={true} type="dark">
 				<div class="w-full flex pt-4 flex-col xl:flex-row">
 					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:pt-16 pt-20 py-6">
-						<h1
-							class="text-[40px] md:text-6xl font-bold text-background pr-12 md:pr-32 tracking-snug leading-none md:leading-tight"
-						>
+						<h1 class="text-[40px] md:text-6xl font-bold text-background pr-12 md:pr-32 tracking-snug leading-none md:leading-tight">
 							The ecosystem to go{" "}
 							<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-[#F1D9FF] via-hover-primary to-[#3B82F6]">
 								global
@@ -27,7 +26,7 @@ const Hero = () => {
 							inlang helps businesses in adapting to various markets to attract more customer.
 						</p>
 						<div class="flex md:items-center items-start gap-8">
-							<a href={"/marketplace"} class="-ml-0.5 flex-shrink-0">
+							<a href={"#categories"} class="-ml-0.5 flex-shrink-0">
 								<button class="relative bg-surface-800">
 									<div class="relative z-20 bg-surface-200 h-10 px-6 flex justify-center items-center shadow rounded-md hover:shadow-lg hover:bg-background transition-all">
 										<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-surface-900 via-surface-800 to-surface-900 text-sm font-medium">
