@@ -41,18 +41,37 @@ let _onSetLanguageTag
 
 /**
  * The project's source language tag.
+ * 
+ * @example
+ *   if (newlySelectedLanguageTag === sourceLanguageTag){
+ *     // do nothing as the source language tag is the default language
+ *     return
+ *   }
  */
 export const sourceLanguageTag = "${args.settings.sourceLanguageTag}"
 
 /**
- * The project's language tags.
+ * The project's available language tags.
+ * 
+ * @example 
+ *   if (availableLanguageTags.includes(userSelectedLanguageTag) === false){
+ *     throw new Error("Language tag not available")
+ *   }
  */
 export const availableLanguageTags = /** @type {const} */ (${JSON.stringify(
 			args.settings.languageTags
 		)})
 
 /**
- * Get current language tag.
+ * Get the current language tag.
+ * 
+ * @example
+ *   if (languageTag === "de"){
+ *     console.log("Germany 🇩🇪")
+ *   } else if (languageTag === "nl"){
+ *     console.log("Netherlands 🇳🇱")
+ *   }
+}
  * 
  * @type {() => typeof availableLanguageTags[number]}
  */
