@@ -21,6 +21,8 @@ jobs:
       run: npm ci
     - name: Install Playwright Browsers
       run: npm run e2e:install -w @inlang/badge
+    - name: Start website
+      run: npm run dev
     - name: Run Playwright tests
       run: npm run e2e -w @inlang/badge
     - uses: actions/upload-artifact@v3
