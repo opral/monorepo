@@ -3,6 +3,14 @@ import { compilePattern } from "./compilePattern.js"
 import { jsdocFromParams, type Params } from "./jsdocFromParams.js"
 
 export const compileMessage = (message: Message): string => {
+	// choosing a regex for valid JS variable names is too long.
+	// (because JS allows almost any function or variable names).
+	if (message.id.includes("-")) {
+		throw new Error(
+			`Message id must not contain dashes because dashes are not a valid JS variable or function name: "${message.id}"`
+		)
+	}
+
 	const contents: Record<LanguageTag, string> = {}
 	// parameter names and TypeScript types
 	// only allowing types that JS transpiles to strings under the hood like string and number.
