@@ -7,6 +7,8 @@ import { Button } from "#src/pages/index/components/Button.jsx"
 import { Chip } from "#src/components/Chip.jsx"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 import { SelectRepo } from "../Select.jsx"
+import Right from "~icons/material-symbols/chevron-right"
+import Left from "~icons/material-symbols/chevron-left"
 import { setSearchValue } from "#src/components/sections/marketplace/index.jsx"
 import { colorForTypeOf, convertLinkToGithub, typeOfIdToTitle } from "../utilities.js"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
@@ -15,6 +17,9 @@ import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { currentPageContext } from "#src/renderer/state.js"
+// @ts-ignore
+import { createSlider } from "solid-slider"
+import "solid-slider/slider.css"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -89,6 +94,19 @@ export function Page(props: PageProps) {
 
 		return tableOfContents
 	}
+
+	const [details, setDetails] = createSignal({})
+	const [slider, { next, prev }] = createSlider({
+		slides: {
+			number: props.manifest.gallery?.length ?? 0,
+			perView: 3,
+			spacing: 8,
+		},
+
+		detailsChanged: (slider: { track: { details: any } }) => {
+			setDetails(slider.track.details)
+		},
+	})
 
 	return (
 		<>
@@ -172,21 +190,37 @@ export function Page(props: PageProps) {
 											</Button>
 										</div>
 										<Show when={props.manifest.gallery && props.manifest.gallery.length > 1}>
-											<div class="flex gap-8 mt-16 overflow-x-auto overflow-scrollbar overflow-scrollbar-x">
-												<For each={props.manifest.gallery}>
-													{(image) => (
-														<Show when={props.manifest.gallery?.indexOf(image) !== 0}>
-															<a
-																href={image}
-																target="_blank"
-																rel="noopener noreferrer"
-																class="transition-opacity hover:opacity-80 cursor-pointer w-80 flex-shrink-0"
-															>
-																<img class="rounded-md w-80" src={image} />
-															</a>
-														</Show>
-													)}
-												</For>
+											<div class="relative">
+												<div use:slider class="mt-16">
+													<For each={props.manifest.gallery}>
+														{(image) => (
+															<Show when={props.manifest.gallery?.indexOf(image) !== 0}>
+																<a
+																	href={image}
+																	target="_blank"
+																	rel="noopener noreferrer"
+																	class="transition-opacity hover:opacity-80 cursor-pointer w-80 flex-shrink-0"
+																>
+																	<img class="rounded-md w-80" src={image} />
+																</a>
+															</Show>
+														)}
+													</For>
+												</div>
+												<button
+													disabled={details().progress === 0}
+													onClick={prev}
+													class="absolute -left-2 top-1/2 -translate-y-1/2 p-1 bg-surface-800 text-background rounded-md shadow-xl shadow-on-background/20 transition-all hover:bg-surface-700 disabled:opacity-0"
+												>
+													<Left class="h-8 w-8" />
+												</button>
+												<button
+													disabled={details().progress > 1}
+													onClick={next}
+													class="absolute -right-2 top-1/2 -translate-y-1/2 p-1 bg-surface-800 text-background rounded-md shadow-xl shadow-on-background/20 transition-all hover:bg-surface-700 disabled:opacity-0"
+												>
+													<Right class="h-8 w-8" />
+												</button>
 											</div>
 										</Show>
 									</div>

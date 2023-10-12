@@ -36,14 +36,14 @@ export function Page(props: PageProps) {
 	return (
 		<>
 			<Title>inlang {props.content && props.content.title}</Title>
-			<Meta name="description" content={props.content && props.content.description!} />
+			<Meta name="description" content={props.content && props.content.description} />
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<RootLayout landingpage darkmode={darkmode()} transparent={transparent()}>
 				<Show when={props.content}>
 					<PlannedHero slug={props.slug} content={props.content} />
 				</Show>
 				{/* <GlobalAppBanner /> */}
-				<Marketplace minimal />
+				<Marketplace minimal category={props.content.title.toLowerCase()} />
 			</RootLayout>
 		</>
 	)

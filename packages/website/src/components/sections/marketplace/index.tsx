@@ -1,5 +1,3 @@
-import { Layout } from "../../../pages/Layout.jsx"
-import { Meta, Title } from "@solidjs/meta"
 import { registry } from "@inlang/marketplace-registry"
 import { For, Show, type Accessor, createSignal, createEffect } from "solid-js"
 import { Chip } from "#src/components/Chip.jsx"
@@ -8,20 +6,26 @@ import { Button } from "#src/pages/index/components/Button.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import Plus from "~icons/material-symbols/add-rounded"
 import Check from "~icons/material-symbols/check"
+import Right from "~icons/material-symbols/chevron-right"
+import Left from "~icons/material-symbols/chevron-left"
 import { colorForTypeOf, typeOfIdToTitle } from "./utilities.js"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
+// @ts-ignore
+import { createSlider } from "solid-slider"
+import "solid-slider/slider.css"
 
-type Category = "app" | "library" | "plugin" | "messageLintRule"
+type Category = "app" | "documents" | "email" | "payments" | "website"
+type SubCategory = "app" | "library" | "plugin" | "messageLintRule"
 
 /* Export searchValue to make subpages insert search-terms */
 export const [searchValue, setSearchValue] = createSignal<string>("")
-const [selectedCategories, setSelectedCategories] = createSignal<Category[]>([])
+const [selectedCategories, setSelectedCategories] = createSignal<SubCategory[]>([])
 
 const filteredItems = () =>
 	registry.filter((item: MarketplaceManifest) => {
 		// slice to the first dot yields the category
-		const category = item.id.slice(0, item.id.indexOf(".")) as Category
+		const category = item.id.slice(0, item.id.indexOf(".")) as SubCategory
 
 		if (selectedCategories().length > 0 && !selectedCategories().includes(category)) {
 			return false
@@ -40,9 +44,26 @@ const filteredItems = () =>
 		return isSearchMatch
 	})
 
-export default function Marketplace(props: { minimal?: boolean; featured?: boolean }) {
+export default function Marketplace(props: {
+	minimal?: boolean
+	featured?: boolean
+	category?: Category
+}) {
+	const [details, setDetails] = createSignal({})
+	const [slider, { next, prev }] = createSlider({
+		slides: {
+			number: filteredItems().length,
+			perView: 3,
+			spacing: 16,
+		},
+
+		detailsChanged: (slider: { track: { details: any } }) => {
+			setDetails(slider.track.details)
+		},
+	})
+
 	return (
-		<SectionLayout showLines>
+		<SectionLayout>
 			<div class="py-16 md:py-20 min-h-screen relative">
 				<Show when={props.featured}>
 					<div class="flex items-center gap-4 mb-8">
@@ -79,10 +100,45 @@ export default function Marketplace(props: { minimal?: boolean; featured?: boole
 						</div>
 					</div>
 				</Show>
-				<div class="mb-32 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 gap-y-8 justify-center items-stretch relative">
-					<Gallery />
-				</div>
-				<GetHelp text="Need help or have questions? Join our Discord!" />
+				<Show when={props.category}>
+					<h3 class="font-semibold text-2xl mb-4">Guides</h3>
+					{/* <div>
+						<Gallery />
+					</div> */}
+				</Show>
+				<Show
+					when={props.category}
+					fallback={
+						<div class="mb-32 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 gap-y-8 justify-center items-stretch relative">
+							<Gallery />
+						</div>
+					}
+				>
+					<h3 class="font-semibold text-2xl mb-4">Related items other people visited</h3>
+					<div class="relative">
+						<div use:slider class="cursor-grab active:cursor-grabbing">
+							<Gallery />
+						</div>
+						<button
+							disabled={details().progress === 0}
+							onClick={prev}
+							class="absolute -left-2 top-1/2 -translate-y-1/2 p-1 bg-surface-800 text-background rounded-md shadow-xl shadow-on-background/20 transition-all hover:bg-surface-700 disabled:opacity-0"
+						>
+							<Left class="h-8 w-8" />
+						</button>
+						<button
+							disabled={details().progress === 1}
+							onClick={next}
+							class="absolute -right-2 top-1/2 -translate-y-1/2 p-1 bg-surface-800 text-background rounded-md shadow-xl shadow-on-background/20 transition-all hover:bg-surface-700 disabled:opacity-0"
+						>
+							<Right class="h-8 w-8" />
+						</button>
+					</div>
+				</Show>
+
+				<Show when={!props.category}>
+					<GetHelp text="Need help or have questions? Join our Discord!" />
+				</Show>
 			</div>
 		</SectionLayout>
 	)
@@ -100,7 +156,7 @@ const Gallery = () => {
 						<>
 							<a
 								href={`/m/${item.id}`}
-								class="relative no-underline h-72 flex flex-col gap-4 group"
+								class="relative no-underline h-72 flex flex-col gap-4 group active:cursor-grabbing"
 							>
 								<div
 									style={{
@@ -256,7 +312,7 @@ const Search = (props: SearchInputProps) => {
 }
 
 const Tags = () => {
-	function selectTag(tag: Category) {
+	function selectTag(tag: SubCategory) {
 		if (selectedCategories().includes(tag)) {
 			setSelectedCategories(selectedCategories().filter((t) => t !== tag))
 		} else {
