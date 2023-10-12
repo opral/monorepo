@@ -43,7 +43,7 @@ export function Page(props: PageProps) {
 					<PlannedHero slug={props.slug} content={props.content} />
 				</Show>
 				{/* <GlobalAppBanner /> */}
-				<Marketplace minimal category={props.content.title.toLowerCase()} />
+				<Marketplace minimal category={props.content && props.content.title.toLowerCase()} />
 			</RootLayout>
 		</>
 	)

@@ -47,7 +47,7 @@ const filteredItems = () =>
 export default function Marketplace(props: {
 	minimal?: boolean
 	featured?: boolean
-	category?: Category
+	category?: Category | undefined
 }) {
 	const [details, setDetails] = createSignal({})
 	const [slider, { next, prev }] = createSlider({
