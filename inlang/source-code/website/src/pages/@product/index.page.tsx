@@ -1,6 +1,6 @@
 import PlannedHero from "#src/components/sections/plannedHero/index.jsx"
 import { Meta, Title } from "@solidjs/meta"
-import { createSignal } from "solid-js"
+import { Show, createSignal } from "solid-js"
 import { LandingPageLayout as RootLayout } from "../Layout.jsx"
 import GlobalAppBanner from "#src/components/sections/plannedHero/globalAppBanner.jsx"
 import Marketplace from "#src/components/sections/marketplace/index.jsx"
@@ -35,11 +35,13 @@ export function Page(props: PageProps) {
 
 	return (
 		<>
-			<Title>inlang {props.content.title}</Title>
-			<Meta name="description" content={props.content.description} />
+			<Title>inlang {props.content && props.content.title}</Title>
+			<Meta name="description" content={props.content && props.content.description!} />
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<RootLayout landingpage darkmode={darkmode()} transparent={transparent()}>
-				<PlannedHero slug={props.slug} content={props.content} />
+				<Show when={props.content}>
+					<PlannedHero slug={props.slug} content={props.content} />
+				</Show>
 				{/* <GlobalAppBanner /> */}
 				<Marketplace minimal />
 			</RootLayout>
