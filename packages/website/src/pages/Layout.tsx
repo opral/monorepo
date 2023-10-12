@@ -97,13 +97,13 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
 			},
 			{
-				name: `App`,
-				href: "/app",
+				name: `Application`,
+				href: "/application",
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
 			},
 			{
-				name: `Documents`,
-				href: "/documents",
+				name: `Document`,
+				href: "/document",
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
 			},
 			{
@@ -112,8 +112,8 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
 			},
 			{
-				name: `Payments`,
-				href: "/payments",
+				name: `Payment`,
+				href: "/payment",
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
 			},
 			{

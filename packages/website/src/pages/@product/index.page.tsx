@@ -46,8 +46,9 @@ export function Page(props: PageProps) {
 					{/* <GlobalAppBanner /> */}
 					<Marketplace
 						minimal={props.content.title !== "Global App"}
+						slider={props.content.title !== "Global App"}
 						highlights={
-							props.content.title === "Global App"
+							props.content.title === "Global Application"
 								? [
 										{
 											color: "#f66900",
