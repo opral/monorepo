@@ -98,7 +98,7 @@ export function Page(props: PageProps) {
 	const [details, setDetails] = createSignal({})
 	const [slider, { next, prev }] = createSlider({
 		slides: {
-			number: props.manifest.gallery?.length ?? 0,
+			number: props.manifest && props.manifest.gallery?.length - 1,
 			perView: 3,
 			spacing: 8,
 		},
@@ -189,9 +189,11 @@ export function Page(props: PageProps) {
 												/>
 											</Button>
 										</div>
-										<Show when={props.manifest.gallery && props.manifest.gallery.length > 1}>
+										<Show
+											when={props.manifest.gallery && props.manifest.gallery.length > 1 && slider}
+										>
 											<div class="relative">
-												<div use:slider class="mt-16">
+												<div use:slider class="mt-16 cursor-grab active:cursor-grabbing">
 													<For each={props.manifest.gallery}>
 														{(image) => (
 															<Show when={props.manifest.gallery?.indexOf(image) !== 0}>
@@ -199,7 +201,7 @@ export function Page(props: PageProps) {
 																	href={image}
 																	target="_blank"
 																	rel="noopener noreferrer"
-																	class="transition-opacity hover:opacity-80 cursor-pointer w-80 flex-shrink-0"
+																	class="transition-opacity hover:opacity-80 cursor-pointer w-80 flex-shrink-0 active:cursor-grabbing"
 																>
 																	<img class="rounded-md w-80" src={image} />
 																</a>
@@ -210,14 +212,14 @@ export function Page(props: PageProps) {
 												<button
 													disabled={details().progress === 0}
 													onClick={prev}
-													class="absolute -left-2 top-1/2 -translate-y-1/2 p-1 bg-surface-800 text-background rounded-md shadow-xl shadow-on-background/20 transition-all hover:bg-surface-700 disabled:opacity-0"
+													class="absolute -left-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-md shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
 												>
 													<Left class="h-8 w-8" />
 												</button>
 												<button
-													disabled={details().progress > 1}
+													disabled={details().progress > 0.99}
 													onClick={next}
-													class="absolute -right-2 top-1/2 -translate-y-1/2 p-1 bg-surface-800 text-background rounded-md shadow-xl shadow-on-background/20 transition-all hover:bg-surface-700 disabled:opacity-0"
+													class="absolute -right-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-md shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
 												>
 													<Right class="h-8 w-8" />
 												</button>
