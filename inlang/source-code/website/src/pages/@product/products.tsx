@@ -1,8 +1,8 @@
 export const products = [
 	{
-		slug: "app",
+		slug: "application",
 		content: {
-			title: "Global App",
+			title: "Global Application",
 			description: "Globalization infrastructure for software",
 		},
 	},
@@ -14,9 +14,9 @@ export const products = [
 		},
 	},
 	{
-		slug: "payments",
+		slug: "payment",
 		content: {
-			title: "Global Payments",
+			title: "Global Payment",
 			description: "Enable your customers to pay with ease using their favorite method.",
 		},
 	},
@@ -28,9 +28,9 @@ export const products = [
 		},
 	},
 	{
-		slug: "documents",
+		slug: "document",
 		content: {
-			title: "Global Documents",
+			title: "Global Document",
 			description: "Documents made to collaborate with version control and multi-language support.",
 		},
 	},

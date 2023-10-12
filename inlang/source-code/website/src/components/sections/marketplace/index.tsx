@@ -113,7 +113,7 @@ export default function Marketplace(props: {
 						</div>
 					}
 				>
-					<h3 class="font-semibold text-2xl mb-4">Related items other people visited</h3>
+					<h3 class="font-semibold text-2xl mb-6">Related items other people visited</h3>
 					<div class="relative">
 						<div use:slider class="cursor-grab active:cursor-grabbing">
 							<Gallery />
