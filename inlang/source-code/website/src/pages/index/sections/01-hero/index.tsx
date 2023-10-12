@@ -14,8 +14,7 @@ const Hero = () => {
 				<div class="w-full flex pt-4 flex-col xl:flex-row">
 					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:pt-16 pt-20 py-6">
 						<h1
-							style={{ "line-height": "68px" }}
-							class="text-[40px] md:text-6xl font-bold text-background pr-32 tracking-snug"
+							class="text-[40px] md:text-6xl font-bold text-background pr-12 md:pr-32 tracking-snug leading-none md:leading-tight"
 						>
 							The ecosystem to go{" "}
 							<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-[#F1D9FF] via-hover-primary to-[#3B82F6]">
