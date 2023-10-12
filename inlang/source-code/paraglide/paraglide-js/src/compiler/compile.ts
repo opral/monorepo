@@ -33,9 +33,18 @@ ${compiledMessages}
 ${thisIsACompiledFileComment}
 
 /**
+ * A language tag that is available in the project.
+ * 
+ * @example
+*    setLanguageTag(request.languageTag as AvailableLanguageTag)
+ * 
+ * @typedef {typeof availableLanguageTags[number]} AvailableLanguageTag
+ */
+
+/**
  * Callback function that is called whenever the language tag changes.
  * 
- * @type {((tag: typeof availableLanguageTags[number]) => void) | undefined}
+ * @type {((tag: AvailableLanguageTag) => void) | undefined}
  */ 
 let _onSetLanguageTag
 
@@ -73,7 +82,7 @@ export const availableLanguageTags = /** @type {const} */ (${JSON.stringify(
  *   }
 }
  * 
- * @type {() => typeof availableLanguageTags[number]}
+ * @type {() => AvailableLanguageTag}
  */
 export let languageTag = () => sourceLanguageTag
 
@@ -89,10 +98,10 @@ export let languageTag = () => sourceLanguageTag
  *   // from a context like React's context API or retrieving the language tag 
  *   // from a cookie.
  *   setLanguageTag(() => {
- *     return cookies.get("lang")
+ *     return request.langaugeTag
  *   }) 
  *
- * @param {typeof availableLanguageTags[number] | typeof languageTag} tag
+ * @param {AvailableLanguageTag | (() => AvailableLanguageTag)} tag
  */
 export const setLanguageTag = (tag) => {
 	if (typeof tag === "function") {
@@ -120,15 +129,17 @@ export const setLanguageTag = (tag) => {
  * - The \`onSetLanguageTag()\` callback can only be defined once to avoid unexpected behavior.
  * 
  * @example
- *   // if you use inlang paraglide on the server, make sure to not call \`onSetLanguageTag()\` on the server
+ *   // if you use inlang paraglide on the server, make sure 
+ *   // to not call \`onSetLanguageTag()\` on the server
  *   if (isServer === false) {
  *     onSetLanguageTag((tag) => {
- *       // (for example) make a new request to the server with the updated language tag
+ *       // (for example) make a new request to the 
+ *       // server with the updated language tag
  *       window.location.href = \`/\${tag}/\${window.location.pathname}\`
  *     })
  *   }
  *
- * @param {(tag: typeof availableLanguageTags[number]) => void} fn
+ * @param {(languageTag: AvailableLanguageTag) => void} fn
  */
 export const onSetLanguageTag = (fn) => {
 	if (_onSetLanguageTag !== undefined) {
