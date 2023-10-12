@@ -6,7 +6,7 @@ test("Check if badge endpoint returns true for the inlang badge", async ({ page 
 		page.waitForResponse(
 			(response) => response.url() === "http://localhost:3000/badge?url=github.com/inlang/monorepo"
 		),
-		page.goto("http://localhost:3000/badge?url=github.com/inlang/monorepo"),
+		page.goto("/badge?url=github.com/inlang/monorepo"),
 	])
 
 	// Get the status code from the response
