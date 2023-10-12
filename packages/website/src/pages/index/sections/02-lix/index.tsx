@@ -10,104 +10,116 @@ import Collaboration from "./assets/images/Collaboration.jsx"
 
 const Lix = () => {
   return (
-    <>
-      <SectionLayout showLines={true} type="blue">
-        <div class="w-full flex pt-4 md:pt-20 flex-col xl:flex-row">
-          <div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:py-16 pt-20 py-6">
-            <h1 class="text-[40px] leading-tight md:text-6xl font-bold text-surface-500 pr-16 tracking-tight">
-              Built-on <br />
-              <span class="text-surface-200">
-                Change Control
-              </span>
-            </h1>
-          </div>
-          <div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:pt-16 pt-4 pb-16">
-            <p class="text-surface-300 text-xl max-w-md">
-              With inlang's change control system Lix, you have full control about changes in your system.
-            </p>
-            <div class="flex md:items-center items-start gap-8">
-              <Button type="textPrimaryOnDark" href="https://github.com/inlang/monorepo/tree/main/lix" chevron>
-                Learn more about Lix
-              </Button>
-            </div>
-          </div>
-        </div>
-        <div class="flex mx-6 lg:mx-auto py-4 lg:justify-center overflow-x-scroll lg:overflow-x-hidden">
-          <div class="w-fit h-fit">
-            <LixGraph />
-          </div>
-        </div>
-        <div class="flex flex-col md:grid md:grid-cols-2 xl:grid-cols-4 gap-8 pt-16 pb-32 px-6 md:px-4 xl:py-16">
-          <Card
-            class="xl:col-span-2"
-            title="Rules"
-            description="Enable team-wide quality checks that can be resolved automatically."
-            icon={<IconError class="w-7 h-7 text-surface-200" />}
-            image={
-              <>
-                <div class="h-[360px] sm:h-96 lg:h-80" />
-                <Rules class="w-full absolute top-20 sm:top-24 lg:top-14 xl:top-16 lg:right-0 xl:right-8 xl:scale-110" />
-              </>
-            }
-          />
-          <Card
-            class="xl:col-span-2"
-            title="Review"
-            description="Include who is needed inside a flexible review workflow."
-            icon={<IconCheck />}
-            image={
-              <>
-                <div class="flex justify-center my-6">
-                  <div class="absolute h-1/3 w-2/3 rounded-[72px] opacity-40 bg-[#88AEEC] blur-3xl" />
-                  <Review class="z-10" />
-                </div>
-                <div class="z-20 absolute left-0 bottom-36 w-full h-48" style={{ background: "linear-gradient(0deg, #283548 10%, rgba(51, 65, 85, 0.00) 100%)" }} />
-              </>
-            }
-          />
-          <Card
-            class="col-span-2 xl:col-span-4"
-            title="Collaboration"
-            description="Everyone in the team can work seamlessly together on the same data."
-            icon={<IconChat />}
-            image={
-              <>
-                <div class="h-36 sm:h-44 md:hidden" />
-                <div class="absolute overflow-clip w-[calc(100%_-_24px)] sm:w-fit md:w-2/3 lg:w-fit lg:h-fit sm:right-0 top-10 sm:top-0">
-                  <Collaboration class="h-40 sm:h-48 md:h-auto mt-4 sm:mt-12 md:mt-auto -ml-[118px] sm:ml-auto sm:-mr-24 md:mr-auto" />
-                </div>
-              </>
-            }
-          />
-          <Card
-            class="col-span-1 md:col-span-2 lg:col-span-1 xl:col-span-2"
-            title="Automation"
-            description="Out of the box automations can transform in highly customizable processes."
-            icon={
-              <IconAutomation />}
-            image={
-              <>
-                <div class="h-48 sm:hidden" />
-                <div class="absolute top-6 sm:top-1/4 left-1/2 md:left-2/3 lg:left-1/2 h-1/2 w-2/5 md:w-1/5 lg:w-2/5 rounded-[72px] opacity-40 bg-[#88AEEC] blur-3xl" />
-                <Automation class="absolute right-0 top-6" />
-                <div class="z-20 absolute top-0 right-0 rounded-r-[20px] w-24 h-full" style={{ background: "linear-gradient(-90deg, #283548 10%, rgba(51, 65, 85, 0.00) 100%)" }} />
-              </>
-            }
-          />
-          <Card
-            title="Traceability"
-            description="Know why a decision was made and how things evolved."
-            icon={<IconTracebility />}
-          />
-          <Card
-            title="Recovery"
-            description="Always go back before things went wrong."
-            icon={<IconRecovery />}
-          />
-        </div>
-      </SectionLayout >
-    </>
-  )
+		<>
+			<SectionLayout showLines={true} type="blue">
+				<div class="w-full flex pt-4 md:pt-20 flex-col xl:flex-row">
+					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:py-16 pt-20 py-6">
+						<h1 class="text-[40px] leading-tight md:text-6xl font-bold text-surface-500 pr-16 tracking-tight">
+							Built-on <br />
+							<span class="text-surface-200">Change Control</span>
+						</h1>
+					</div>
+					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:pt-16 pt-4 pb-16">
+						<p class="text-surface-300 text-xl max-w-md">
+							With inlang's change control system Lix, you have full control about changes in your
+							system.
+						</p>
+						<div class="flex md:items-center items-start gap-8">
+							<Button
+								type="textPrimaryOnDark"
+								href="https://github.com/inlang/monorepo/tree/main/lix"
+								chevron
+							>
+								Learn more about Lix
+							</Button>
+						</div>
+					</div>
+				</div>
+				<div class="flex mx-6 lg:mx-auto py-4 lg:justify-center overflow-x-scroll lg:overflow-x-hidden">
+					<div class="w-fit h-fit">
+						<LixGraph />
+					</div>
+				</div>
+				<div class="flex flex-col md:grid md:grid-cols-2 xl:grid-cols-4 gap-8 pt-16 pb-32 px-6 md:px-4 xl:pt-16 xl:pb-24">
+					<Card
+						class="xl:col-span-2"
+						title="Rules"
+						description="Enable team-wide quality checks that can be resolved automatically."
+						icon={<IconError class="w-7 h-7 text-surface-200" />}
+						image={
+							<>
+								<div class="h-[360px] sm:h-96 lg:h-80" />
+								<Rules class="w-full absolute top-20 sm:top-24 lg:top-14 xl:top-16 lg:right-0 xl:right-8 xl:scale-110" />
+							</>
+						}
+					/>
+					<Card
+						class="xl:col-span-2"
+						title="Review"
+						description="Include who is needed inside a flexible review workflow."
+						icon={<IconCheck />}
+						image={
+							<>
+								<div class="flex justify-center my-6">
+									<div class="absolute h-1/3 w-2/3 rounded-[72px] opacity-40 bg-[#88AEEC] blur-3xl" />
+									<Review class="z-10" />
+								</div>
+								<div
+									class="z-20 absolute left-0 bottom-36 w-full h-48"
+									style={{
+										background: "linear-gradient(0deg, #283548 10%, rgba(51, 65, 85, 0.00) 100%)",
+									}}
+								/>
+							</>
+						}
+					/>
+					<Card
+						class="col-span-2 xl:col-span-4"
+						title="Collaboration"
+						description="Everyone in the team can work seamlessly together on the same data."
+						icon={<IconChat />}
+						image={
+							<>
+								<div class="h-36 sm:h-44 md:hidden" />
+								<div class="absolute overflow-clip w-[calc(100%_-_24px)] sm:w-fit md:w-2/3 lg:w-fit lg:h-fit sm:right-0 top-10 sm:top-0">
+									<Collaboration class="h-40 sm:h-48 md:h-auto mt-4 sm:mt-12 md:mt-auto -ml-[118px] sm:ml-auto sm:-mr-24 md:mr-auto" />
+								</div>
+							</>
+						}
+					/>
+					<Card
+						class="col-span-1 md:col-span-2 lg:col-span-1 xl:col-span-2"
+						title="Automation"
+						description="Out of the box automations can transform in highly customizable processes."
+						icon={<IconAutomation />}
+						image={
+							<>
+								<div class="h-48 sm:hidden" />
+								<div class="absolute top-6 sm:top-1/4 left-1/2 md:left-2/3 lg:left-1/2 h-1/2 w-2/5 md:w-1/5 lg:w-2/5 rounded-[72px] opacity-40 bg-[#88AEEC] blur-3xl" />
+								<Automation class="absolute right-0 top-6" />
+								<div
+									class="z-20 absolute top-0 right-0 rounded-r-[20px] w-24 h-full"
+									style={{
+										background: "linear-gradient(-90deg, #283548 10%, rgba(51, 65, 85, 0.00) 100%)",
+									}}
+								/>
+							</>
+						}
+					/>
+					<Card
+						title="Traceability"
+						description="Know why a decision was made and how things evolved."
+						icon={<IconTracebility />}
+					/>
+					<Card
+						title="Recovery"
+						description="Always go back before things went wrong."
+						icon={<IconRecovery />}
+					/>
+				</div>
+			</SectionLayout>
+		</>
+	)
 }
 
 export default Lix
