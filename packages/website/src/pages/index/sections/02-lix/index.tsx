@@ -7,9 +7,10 @@ import type { JSX } from "solid-js"
 import Review from "./assets/images/Review.jsx"
 import Automation from "./assets/images/Automation.jsx"
 import Collaboration from "./assets/images/Collaboration.jsx"
+import LixGraphMobile from "./assets/images/LixGraphMobile.jsx"
 
 const Lix = () => {
-  return (
+	return (
 		<>
 			<SectionLayout showLines={true} type="blue">
 				<div class="w-full flex pt-4 md:pt-20 flex-col xl:flex-row">
@@ -36,8 +37,11 @@ const Lix = () => {
 					</div>
 				</div>
 				<div class="flex mx-6 lg:mx-auto py-4 lg:justify-center overflow-x-scroll lg:overflow-x-hidden">
-					<div class="w-fit h-fit">
+					<div class="w-fit h-fit hidden md:block">
 						<LixGraph />
+					</div>
+					<div class="w-full h-fit flex justify-center md:hidden">
+						<LixGraphMobile />
 					</div>
 				</div>
 				<div class="flex flex-col md:grid md:grid-cols-2 xl:grid-cols-4 gap-8 pt-16 pb-32 px-6 md:px-4 xl:pt-16 xl:pb-24">
