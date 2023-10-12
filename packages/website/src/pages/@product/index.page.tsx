@@ -58,6 +58,15 @@ export function Page(props: PageProps) {
 											image:
 												"https://cdn.jsdelivr.net/gh/inlang/monorepo@website-update/inlang/assets/marketplace/paraglide-artwork.gif",
 										},
+										{
+											color: "#f66900",
+											title: "Test (former SDK-JS)",
+											type: "Featured",
+											description: "The all new library for all common frameworks.",
+											link: "/m/library.inlang.paraglideJsSveltekit",
+											image:
+												"https://cdn.jsdelivr.net/gh/inlang/monorepo@website-update/inlang/assets/marketplace/paraglide-artwork.gif",
+										},
 								  ]
 								: []
 						}
