@@ -1,8 +1,7 @@
-import PlannedHero from "#src/components/sections/plannedHero/index.jsx"
+import CategoryHero from "#src/components/sections/categoryHero/index.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import { Show, createSignal } from "solid-js"
-import { LandingPageLayout as RootLayout } from "../Layout.jsx"
-import GlobalAppBanner from "#src/components/sections/plannedHero/globalAppBanner.jsx"
+import { Layout, LandingPageLayout as RootLayout } from "../Layout.jsx"
 import Marketplace from "#src/components/sections/marketplace/index.jsx"
 
 export type PageProps = {
@@ -38,13 +37,17 @@ export function Page(props: PageProps) {
 			<Title>inlang {props.content && props.content.title}</Title>
 			<Meta name="description" content={props.content && props.content.description} />
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
-			<RootLayout landingpage darkmode={darkmode()} transparent={transparent()}>
+			<Layout>
 				<Show when={props.content}>
-					<PlannedHero slug={props.slug} content={props.content} />
+					<CategoryHero slug={props.slug} content={props.content} />
 				</Show>
 				{/* <GlobalAppBanner /> */}
-				<Marketplace minimal category={props.content && props.content.title.toLowerCase()} />
-			</RootLayout>
+				<Marketplace
+					minimal={props.content.title !== "Global App"}
+					featured={props.content.title === "Global App"}
+					category={props.content && props.content.title.toLowerCase()}
+				/>
+			</Layout>
 		</>
 	)
 }

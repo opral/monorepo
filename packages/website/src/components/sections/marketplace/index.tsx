@@ -63,8 +63,8 @@ export default function Marketplace(props: {
 	})
 
 	return (
-		<SectionLayout>
-			<div class="py-16 md:py-20 min-h-screen relative">
+		<SectionLayout showLines={false} type="white">
+			<div class="pb-16 md:pb-20 min-h-screen relative">
 				<Show when={props.featured}>
 					<div class="flex items-center gap-4 mb-8">
 						<div class="md:h-96 h-[512px] w-full bg-surface-100 bg-[url('https://cdn.jsdelivr.net/gh/inlang/monorepo@website-update/inlang/assets/marketplace/paraglide-artwork.gif')] bg-cover bg-center rounded-2xl flex items-end justify-start relative">
@@ -100,14 +100,14 @@ export default function Marketplace(props: {
 						</div>
 					</div>
 				</Show>
-				<Show when={props.category}>
+				<Show when={props.category && props.category.toLowerCase() !== "global app"}>
 					<h3 class="font-semibold text-2xl mb-4">Guides</h3>
 					{/* <div>
 						<Gallery />
 					</div> */}
 				</Show>
 				<Show
-					when={props.category}
+					when={props.category && props.category.toLowerCase() !== "global app"}
 					fallback={
 						<div class="mb-32 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 gap-y-8 justify-center items-stretch relative">
 							<Gallery />

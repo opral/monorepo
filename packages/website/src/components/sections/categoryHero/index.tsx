@@ -10,7 +10,7 @@ import Website from "#src/pages/index/sections/01-hero/assets/categories/website
 import { Match, Show, Switch, createSignal } from "solid-js"
 import { rpc } from "@inlang/rpc"
 
-const PlannedHero = (props: PageProps) => {
+const CategoryHero = (props: PageProps) => {
 	const [email, setEmail] = createSignal("")
 	const [loading, setLoading] = createSignal(false)
 
@@ -87,89 +87,20 @@ const PlannedHero = (props: PageProps) => {
 
 	return (
 		<>
-			<SectionLayout showLines={true} type="dark">
-				<div class="w-full flex px-6 md:px-4 pt-20 lg:pt-24 pb-20 md:pb-24 flex-col-reverse lg:flex-row">
-					<div class="w-full lg:w-1/2 flex flex-col justify-center gap-8 pt-20 lg:pt-0">
-						<p class="flex items-center bg-surface-800 text-surface-400 text-md w-fit py-2 pr-5 pl-3 rounded-full gap-2">
-							<Icon name={"info"} class="text-surface-400 w-6 h-6" />
-							Planned
-						</p>
-						<h1 class="text-[40px] leading-tight md:text-6xl font-bold text-background pr-16 tracking-tight">
-							inlang <br />
-							<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-[#F1D9FF] via-hover-primary to-[#3B82F6]">
-								{props.content.title}
-							</span>
-						</h1>
-						<p class="text-surface-300 text-xl max-w-sm">{props.content.description}</p>
-						<div
-							class={
-								"flex md:items-center items-start gap-6 md:flex-row flex-col " +
-								(loading() ? "opacity-70 cursor-not-allowed" : "")
-							}
-						>
-							<div
-								class={"-ml-0.5 flex-shrink-0 relative " + (loading() ? "pointer-events-none" : "")}
-							>
-								<input
-									type="email"
-									placeholder="Your email"
-									class="relative w-80 max-[350px]:w-full border-0 rounded-md bg-surface-800 z-20 text-background focus:outline-focus-primary focus:ring-0 placeholder:text-surface-400 font-medium px-4"
-									value={email()}
-									onInput={(event) => {
-										// @ts-ignore
-										setEmail(event.target.value)
-									}}
-									onPaste={(event) => {
-										// @ts-ignore
-										setEmail(event.target.value)
-									}}
-									onKeyDown={(event) => {
-										if (event.key === "Enter") {
-											handleSubscribe()
-										}
-									}}
-								/>
-							</div>
-							<a
-								href={"#"}
-								class={"-ml-0.5 flex-shrink-0 " + (loading() ? "pointer-events-none" : "")}
-								onClick={(e) => {
-									e.preventDefault()
-									handleSubscribe()
-								}}
-							>
-								<button class="relative bg-surface-800">
-									<div class="relative z-20 bg-surface-200 h-10 px-6 flex justify-center items-center shadow rounded-md hover:shadow-lg hover:bg-background transition-all">
-										<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-surface-900 via-surface-800 to-surface-900 text-sm font-medium">
-											Stay informed
-										</span>
-									</div>
-									<div
-										style={{
-											background:
-												"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
-										}}
-										class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-60 blur-3xl"
-									/>
-									<div
-										style={{
-											background:
-												"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
-										}}
-										class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-40 blur-xl"
-									/>
-									<div
-										style={{
-											background:
-												"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
-										}}
-										class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-80 blur-sm"
-									/>
-								</button>
-							</a>
+			<SectionLayout showLines={false} type="white">
+				<div class="relative">
+					<div class="grid xl:grid-cols-3 xl:gap-8 md:pt-20 pt-16 grid-flow-row-dense mb-10 md:mb-12">
+						<div class="relative col-span-2 z-20 xl:mt-0 xl:pb-0">
+							<h1 class="xl:col-span-2 text-[40px] md:text-5xl font-bold text-left  leading-none md:leading-tight mb-4">
+								<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-[#F1D9FF] via-hover-primary to-[#3B82F6]">
+									{props.content.title.split(" ")[0]}
+								</span>{" "}
+								{props.content.title.split(" ")[1]}
+							</h1>
+							<p class="text-lg text-surface-600">{props.content.description}</p>
 						</div>
 					</div>
-					<div class="w-full lg:w-1/2 text-surface-400">
+					{/* <div class="w-full lg:w-1/2 text-surface-400">
 						<Switch fallback={<></>}>
 							<Match when={props.slug === "email"}>
 								<EmailCard />
@@ -188,14 +119,14 @@ const PlannedHero = (props: PageProps) => {
 								<p class="ml-auto w-[370px] px-6 pt-8">{props.content.description}</p>
 							</Match>
 						</Switch>
-					</div>
+					</div> */}
 				</div>
 			</SectionLayout>
 		</>
 	)
 }
 
-export default PlannedHero
+export default CategoryHero
 
 function EmailCard() {
 	return (
