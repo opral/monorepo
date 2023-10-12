@@ -32,20 +32,8 @@ ${compiledMessages}
 		"runtime.js": dedent`
 ${thisIsACompiledFileComment}
 
-/**
- * A language tag that is available in the project.
- * 
- * @example
-*    setLanguageTag(request.languageTag as AvailableLanguageTag)
- * 
- * @typedef {typeof availableLanguageTags[number]} AvailableLanguageTag
- */
 
-/**
- * Callback function that is called whenever the language tag changes.
- * 
- * @type {((tag: AvailableLanguageTag) => void) | undefined}
- */ 
+/** @type {((tag: AvailableLanguageTag) => void) | undefined} */ 
 let _onSetLanguageTag
 
 /**
@@ -75,9 +63,9 @@ export const availableLanguageTags = /** @type {const} */ (${JSON.stringify(
  * Get the current language tag.
  * 
  * @example
- *   if (languageTag === "de"){
+ *   if (languageTag() === "de"){
  *     console.log("Germany 🇩🇪")
- *   } else if (languageTag === "nl"){
+ *   } else if (languageTag() === "nl"){
  *     console.log("Netherlands 🇳🇱")
  *   }
 }
@@ -90,13 +78,14 @@ export let languageTag = () => sourceLanguageTag
  * Set the language tag.
  * 
  * @example 
+ * 
+ *   // changing to language 
  *   setLanguageTag("en")
  * 
  *   // passing a getter function also works. 
  *   // 
  *   // a getter function is useful for resolving a language tag 
- *   // from a context like React's context API or retrieving the language tag 
- *   // from a cookie.
+ *   // on the server where every request has a different language tag
  *   setLanguageTag(() => {
  *     return request.langaugeTag
  *   }) 
@@ -147,6 +136,17 @@ export const onSetLanguageTag = (fn) => {
 	}
 	_onSetLanguageTag = fn
 }
+
+// ------ TYPES ------
+
+/**
+ * A language tag that is available in the project.
+ * 
+ * @example
+ *   setLanguageTag(request.languageTag as AvailableLanguageTag)
+ * 
+ * @typedef {typeof availableLanguageTags[number]} AvailableLanguageTag
+ */
 `,
 	}
 }
