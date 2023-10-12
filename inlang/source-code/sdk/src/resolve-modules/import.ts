@@ -1,5 +1,4 @@
 import dedent from "dedent"
-import { normalizePath } from "@lix-js/fs"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import { ModuleImportError } from "./errors.js"
 
@@ -42,7 +41,9 @@ async function $import(
 	if (uri.startsWith("http")) {
 		moduleAsText = await (await fetch(uri)).text()
 	} else {
-		moduleAsText = await options.readFile(normalizePath(uri), { encoding: "utf-8" })
+		moduleAsText = await options.readFile(uri, {
+			encoding: "utf-8",
+		})
 	}
 
 	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
