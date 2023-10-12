@@ -92,6 +92,11 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 	const getLinks = () => {
 		return [
 			{
+				name: `All`,
+				href: "/marketplace",
+				type: props.darkmode ? "textBackground" : ("text" as buttonType),
+			},
+			{
 				name: `App`,
 				href: "/app",
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
@@ -114,11 +119,6 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 			{
 				name: `Website`,
 				href: "/website",
-				type: props.darkmode ? "textBackground" : ("text" as buttonType),
-			},
-			{
-				name: `Marketplace`,
-				href: "/marketplace",
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
 			},
 			{
@@ -189,7 +189,7 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 									<For each={getLinks()}>
 										{(link) => (
 											<>
-												<Show when={link.name === "Marketplace"}>
+												<Show when={link.name === "Developers"}>
 													<div
 														class={
 															"w-[1px] h-6 " +
@@ -207,8 +207,7 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 										when={
 											currentPageContext.urlParsed.pathname.includes("editor") === false &&
 											currentPageContext.urlParsed.pathname.includes("documentation") === false &&
-											currentPageContext.urlParsed.pathname.includes("blog") === false &&
-											currentPageContext.urlParsed.pathname.includes("marketplace") === false
+											currentPageContext.urlParsed.pathname.includes("blog") === false
 										}
 									>
 										<LanguagePicker darkmode={props.darkmode} />

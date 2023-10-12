@@ -20,9 +20,9 @@ export function Page() {
 			<Meta name="og:image" content="/images/inlang-marketplace-image.jpg" />
 			<Layout>
 				<div class="pb-16 md:pb-20 min-h-screen relative">
-					<div class="grid xl:grid-cols-3 xl:gap-8 grid-flow-row-dense">
+					<div class="grid xl:grid-cols-3 xl:gap-8 grid-flow-row-dense mb-10 md:mb-12">
 						<div class="relative z-20 xl:mt-0 -mt-12 pb-8 xl:pb-0">
-							<h1 class="xl:col-span-2 md:pt-20 pt-16 text-[40px] md:text-5xl font-bold text-left leading-tight mb-3">
+							<h1 class="xl:col-span-2 md:pt-20 pt-16 text-[40px] md:text-5xl font-bold text-left  leading-none md:leading-tight mb-3">
 								Explore the ecosystem
 							</h1>
 						</div>
