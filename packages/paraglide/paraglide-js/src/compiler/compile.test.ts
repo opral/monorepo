@@ -33,14 +33,20 @@ describe("usage", async () => {
 
 	test("should set the source language tag as default language tag", async () => {
 		const { runtime } = await import(
-			`data:application/javascript;base64,${btoa(compiledBundle.output[0].code)}`
+			`data:application/javascript;base64,${Buffer.from(
+				compiledBundle.output[0].code,
+				"utf8"
+			).toString("base64")}`
 		)
 		expect(runtime.languageTag()).toBe(runtime.sourceLanguageTag)
 	})
 
 	test("should return the correct message for the set language tag", async () => {
 		const { m, runtime } = await import(
-			`data:application/javascript;base64,${btoa(compiledBundle.output[0].code)}`
+			`data:application/javascript;base64,${Buffer.from(
+				compiledBundle.output[0].code,
+				"utf8"
+			).toString("base64")}`
 		)
 
 		runtime.setLanguageTag("en")
@@ -62,7 +68,10 @@ describe("usage", async () => {
 
 	test("setting the languageTag as a getter function should be possible", async () => {
 		const { m, runtime } = await import(
-			`data:application/javascript;base64,${btoa(compiledBundle.output[0].code)}`
+			`data:application/javascript;base64,${Buffer.from(
+				compiledBundle.output[0].code,
+				"utf8"
+			).toString("base64")}`
 		)
 
 		runtime.setLanguageTag(() => "en")
@@ -76,7 +85,10 @@ describe("usage", async () => {
 
 	test("should return the message id if the message is not translated", async () => {
 		const { m, runtime } = await import(
-			`data:application/javascript;base64,${btoa(compiledBundle.output[0].code)}`
+			`data:application/javascript;base64,${Buffer.from(
+				compiledBundle.output[0].code,
+				"utf8"
+			).toString("base64")}`
 		)
 
 		runtime.setLanguageTag("fr")
@@ -88,7 +100,10 @@ describe("usage", async () => {
 
 	test("defining onSetLanguageTag should be possible and should be called when the language tag changes", async () => {
 		const { runtime } = await import(
-			`data:application/javascript;base64,${btoa(compiledBundle.output[0].code)}`
+			`data:application/javascript;base64,${Buffer.from(
+				compiledBundle.output[0].code,
+				"utf8"
+			).toString("base64")}`
 		)
 
 		const mockOnSetLanguageTag = vi.fn().mockImplementation(() => {})
@@ -110,7 +125,10 @@ describe("usage", async () => {
 		// otherwise, the runtime would be cached and the callback would already be set
 		// from previous tests. using vi.resetModules() doesn't work for unknown reasons.
 		const { runtime } = await import(
-			`data:application/javascript;base64,${btoa(compiledBundle.output[0].code + "// afeqwss")}`
+			`data:application/javascript;base64,${Buffer.from(
+				compiledBundle.output[0].code + "//" + Math.random(),
+				"utf8"
+			).toString("base64")}`
 		)
 
 		expect(() => {
