@@ -1,8 +1,18 @@
-import { it, expect, afterAll } from "vitest"
+import { it, expect, afterAll, vi } from "vitest"
 import fs from "node:fs"
 import { fileURLToPath } from "node:url"
 import { dirname } from "node:path"
 import { _import as __import } from "./_import.js"
+
+vi.mock("vscode", () => {
+	return {
+		workspace: {
+			getConfiguration: () => ({
+				get: vi.fn().mockReturnValue(process.env.https_proxy || ""),
+			}),
+		},
+	}
+})
 
 const currentDirectoryPath = dirname(fileURLToPath(import.meta.url))
 const tempdir = fs.mkdtempSync(currentDirectoryPath)
