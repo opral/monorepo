@@ -1,5 +1,5 @@
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
-import type { SubCategory } from "./index.jsx"
+import type { Category, SubCategory } from "./index.jsx"
 import { registry } from "@inlang/marketplace-registry"
 
 export const algorithm = (
@@ -7,33 +7,25 @@ export const algorithm = (
 	searchValue: string,
 	selectedCategory?: string
 ) =>
-	selectedCategory
-		? registry.filter((item: MarketplaceManifest) => {
-				const category = selectedCategory
+	registry.filter((item: MarketplaceManifest) => {
+		const category = selectedCategory?.toLowerCase() as Category
+		const subCategory = item.id.slice(0, item.id.indexOf(".")) as SubCategory
 
-				const isSearchMatch = item.keywords.some((keyword: string) =>
-					keyword.toLowerCase().includes(category)
-				)
+		if (selectedSubCategories.length > 0 && !selectedSubCategories.includes(subCategory)) {
+			return false
+		}
 
-				return isSearchMatch
-		  })
-		: registry.filter((item: MarketplaceManifest) => {
-				// slice to the first dot yields the category
-				const subCategory = item.id.slice(0, item.id.indexOf(".")) as SubCategory
+		const search = searchValue.toLowerCase()
 
-				if (selectedSubCategories.length > 0 && !selectedSubCategories.includes(subCategory)) {
-					return false
-				}
+		const displayName =
+			typeof item.displayName === "object" ? item.displayName.en : item.displayName
 
-				const search = searchValue.toLowerCase()
+		const isMatch = category
+			? item.keywords.some((keyword: string) => keyword.toLowerCase().includes(category)) &&
+			  displayName.toLowerCase().includes(search)
+			: displayName.toLowerCase().includes(search) ||
+			  item.publisherName.toLowerCase().includes(search) ||
+			  item.keywords.some((keyword: string) => keyword.toLowerCase().includes(search))
 
-				const displayName =
-					typeof item.displayName === "object" ? item.displayName.en : item.displayName
-
-				const isSearchMatch =
-					displayName.toLowerCase().includes(search) ||
-					item.publisherName.toLowerCase().includes(search) ||
-					item.keywords.some((keyword: string) => keyword.toLowerCase().includes(search))
-
-				return isSearchMatch
-		  })
+		return isMatch
+	})

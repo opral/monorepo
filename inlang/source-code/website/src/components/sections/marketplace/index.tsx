@@ -1,4 +1,13 @@
-import { For, Show, type Accessor, createSignal, createEffect, Match, Switch } from "solid-js"
+import {
+	For,
+	Show,
+	type Accessor,
+	createSignal,
+	createEffect,
+	Match,
+	Switch,
+	createMemo,
+} from "solid-js"
 import { SearchIcon } from "#src/pages/editor/@host/@owner/@repository/components/SearchInput.jsx"
 import { Button } from "#src/pages/index/components/Button.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
@@ -14,8 +23,10 @@ import "solid-slider/slider.css"
 import Highlight from "#src/components/Highlight.jsx"
 import Card, { CardBuildOwn } from "#src/components/Card.jsx"
 
+type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
+
 export type Category = "app" | "documents" | "email" | "payments" | "website"
-export type SubCategory = "app" | "library" | "plugin" | "messageLintRule"
+export type SubCategory = SubCategoryApplication
 
 /* Export searchValue to make subpages insert search-terms */
 export const [searchValue, setSearchValue] = createSignal<string>("")
@@ -31,6 +42,8 @@ const filteredItems = (slider?: boolean) => {
 		selectedCategory() === "marketplace" || slider ? undefined : selectedCategory()
 	)
 }
+
+const randomizedItems = () => filteredItems(true).reverse()
 
 export default function Marketplace(props: {
 	minimal?: boolean
@@ -125,7 +138,7 @@ export default function Marketplace(props: {
 const Gallery = (props: { randomize?: boolean }) => {
 	return (
 		<>
-			<For each={props.randomize ? filteredItems(props.randomize).reverse() : filteredItems()}>
+			<For each={props.randomize ? randomizedItems() : filteredItems()}>
 				{(item) => {
 					const displayName =
 						typeof item.displayName === "object" ? item.displayName.en : item.displayName
