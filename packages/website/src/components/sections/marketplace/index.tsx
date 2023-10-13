@@ -120,7 +120,7 @@ export default function Marketplace(props: {
 						</div>
 					</Match>
 					<Match when={!props.slider}>
-						<div class="mb-32 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-center items-stretch relative">
+						<div class="mb-32 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
 							<Gallery />
 						</div>
 					</Match>
