@@ -4,20 +4,19 @@ import { fileURLToPath } from "node:url"
 import { dirname } from "node:path"
 import { _import as __import } from "./_import.js"
 
+const currentDirectoryPath = dirname(fileURLToPath(import.meta.url))
+const tempdir = fs.mkdtempSync(currentDirectoryPath)
+const _import = __import(currentDirectoryPath)
+
 vi.mock("vscode", () => {
 	return {
 		workspace: {
 			getConfiguration: () => ({
-				get: vi.fn().mockReturnValue(process.env.https_proxy || ""),
+				get: vi.fn().mockReturnValue(process.env.HTTPS_PROXY || ""),
 			}),
 		},
 	}
 })
-
-const currentDirectoryPath = dirname(fileURLToPath(import.meta.url))
-const tempdir = fs.mkdtempSync(currentDirectoryPath)
-
-const _import = __import(currentDirectoryPath)
 
 afterAll(() => {
 	fs.rmSync(tempdir, { recursive: true, force: true })
@@ -67,4 +66,17 @@ it("should be able to import an inlang plugin from http", async () => {
 	)
 	const pluginAfterSetup = module.default()()
 	expect(pluginAfterSetup.id).toBe("samuelstroschein.inlangPluginJson")
+})
+
+it("shouldn't be able to import an inlang plugin from http without working proxy", async () => {
+	vi.stubEnv("HTTPS_PROXY", "https://inlang-is-not-a-proxy.com:1337")
+
+	// using a permalink to an inlang plugin
+	await expect(
+		_import(
+			"https://raw.githubusercontent.com/samuelstroschein/inlang-plugin-json/3e322bf01763fc6d8c9f9f9489be889ae96ca6f2/dist/index.js"
+		)
+	).rejects.toThrowErrorMatchingInlineSnapshot(
+		'"request to https://raw.githubusercontent.com/samuelstroschein/inlang-plugin-json/3e322bf01763fc6d8c9f9f9489be889ae96ca6f2/dist/index.js failed, reason: getaddrinfo ENOTFOUND inlang-is-not-a-proxy.com"'
+	)
 })
