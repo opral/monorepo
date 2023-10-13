@@ -88,10 +88,11 @@ const $import: ImportFunction = async (name) => ({
 describe("config", () => {
 	it("should react to changes in config", async () => {
 		const fs = createNodeishMemoryFs()
-		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
+		await fs.mkdir("/user/project", { recursive: true })
+		await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(config))
 		const project = solidAdapter(
 			await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
 			}),
@@ -118,10 +119,11 @@ describe("config", () => {
 describe("installed", () => {
 	it("react to changes that are unrelated to installed items", async () => {
 		const fs = createNodeishMemoryFs()
-		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
+		await fs.mkdir("/user/project", { recursive: true })
+		await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(config))
 		const project = solidAdapter(
 			await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
 			}),
@@ -181,10 +183,11 @@ describe("messages", () => {
 
 		const mockImport: ImportFunction = async () => ({ default: mockPlugin })
 
-		await fs.writeFile("./project.inlang.json", JSON.stringify(mockConfig))
+		await fs.mkdir("/user/project", { recursive: true })
+		await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(mockConfig))
 		const project = solidAdapter(
 			await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import: mockImport,
 			}),
@@ -210,10 +213,11 @@ describe("messages", () => {
 
 	it("should react to changes in messages", async () => {
 		const fs = createNodeishMemoryFs()
-		await fs.writeFile("./project.inlang.json", JSON.stringify(config))
+		await fs.mkdir("/user/project", { recursive: true })
+		await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(config))
 		const project = solidAdapter(
 			await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
 			}),

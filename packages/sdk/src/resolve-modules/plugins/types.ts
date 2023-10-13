@@ -1,4 +1,4 @@
-import type { NodeishFilesystem as LisaNodeishFilesystem } from "@lix-js/fs"
+import type { NodeishFilesystem } from "@lix-js/fs"
 import type {
 	PluginReturnedInvalidCustomApiError,
 	PluginLoadMessagesFunctionAlreadyDefinedError,
@@ -18,7 +18,7 @@ import type { ProjectSettings } from "@inlang/project-settings"
  * - only uses minimally required functions to decrease the API footprint on the ecosystem.
  */
 export type NodeishFilesystemSubset = Pick<
-	LisaNodeishFilesystem,
+	NodeishFilesystem,
 	"readFile" | "readdir" | "mkdir" | "writeFile"
 >
 

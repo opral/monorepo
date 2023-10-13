@@ -1,4 +1,3 @@
-import path from "node:path"
 import * as vscode from "vscode"
 import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js"
 import { getSetting, updateSetting } from "./settings/index.js"
@@ -20,47 +19,33 @@ export const createInlangConfigFile = async (args: { workspaceFolder: vscode.Wor
 
 	// Try to auto generate project settings
 	const nodeishFs = createFileSystemMapper(args.workspaceFolder.uri.fsPath)
-	const projectFilePath = `${args.workspaceFolder.uri.fsPath}/${CONFIGURATION.FILES.PROJECT}`
-
-	// with nodeishFs, read package.json &
-	const packageJson = await nodeishFs.readFile("./package.json", { encoding: "utf-8" })
-	const packageJsonParsed = JSON.parse(packageJson)
-
-	// check if i18next dependency exists
-	const i18nextDependency = packageJsonParsed.dependencies.i18next
-
-	if (!i18nextDependency) {
-		// skip
-		return
-	}
 
 	// Check if prompt is disabled
 	if (await isDisabledConfigFileCreation()) return
 
+	const settings = await tryAutoGenProjectSettings({
+		nodeishFs,
+		basePath: args.workspaceFolder.uri.fsPath,
+	})
+
+	if (settings === undefined) {
+		return
+	}
+
 	// Prompt user to create config file
-	const createConfigFile = await promptUserToCreateConfigFile()
+	const createSettingsFile = await promptUserTocreateSettingsFile()
 
-	if (createConfigFile === "Accept") {
+	if (createSettingsFile === "Accept") {
 		// create config file at root of workspace
-		const { warnings, errors } = await tryAutoGenProjectSettings({
-			nodeishFs,
-			pathJoin: path.join,
-			filePath: projectFilePath,
-		})
-
-		// Log warnings and errors
-		for (const warning of warnings) console.warn(warning)
-		if (errors) {
-			for (const error of errors) console.error(error)
-		}
-
-		console.info(`🎉 Created project.inlang.json file at ${projectFilePath}`)
-	} else if (createConfigFile === "Reject") {
+		const settingsFilePath = `${args.workspaceFolder.uri.fsPath}/${CONFIGURATION.FILES.PROJECT}`
+		await nodeishFs.writeFile(settingsFilePath, JSON.stringify(settings, undefined, 2))
+		console.info(`🎉 Created project.inlang.json file at ${settingsFilePath}`)
+	} else if (createSettingsFile === "Reject") {
 		// Disable config file creation
 		disableConfigFileCreation()
 	}
 
-	trackOutcome(createConfigFile)
+	trackOutcome(createSettingsFile)
 }
 
 /**
@@ -93,7 +78,7 @@ const disableConfigFileCreation = async (): Promise<void> => {
  * Prompts the user to create a config file.
  * @returns A promise that resolves to a string representing the user's choice ("Accept" or "Reject").
  */
-const promptUserToCreateConfigFile = async (): Promise<string | undefined> => {
+const promptUserTocreateSettingsFile = async (): Promise<string | undefined> => {
 	return await vscode.window.showInformationMessage(
 		"Inlang can be automatically setup for this project. Should the settings file be created?",
 		"Accept",
@@ -103,11 +88,11 @@ const promptUserToCreateConfigFile = async (): Promise<string | undefined> => {
 
 /**
  * Tracks the outcome of the create config file operation.
- * @param createConfigFile - The user's choice to create the config file.
+ * @param createSettingsFile - The user's choice to create the config file.
  */
-const trackOutcome = (createConfigFile: string | undefined) => {
+const trackOutcome = (createSettingsFile: string | undefined) => {
 	telemetry.capture({
 		event: "IDE-EXTENSION completed create config file",
-		properties: { outcome: createConfigFile ?? "Ignored" },
+		properties: { outcome: createSettingsFile ?? "Ignored" },
 	})
 }

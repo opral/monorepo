@@ -17,19 +17,3 @@ declare module "solid-js" {
 		interface IntrinsicElements extends ElementProps<HTMLElementTagNameMap> {}
 	}
 }
-
-/**
- * Telefunc types.
- *
- * https://telefunc.com/getContext#typescript
- */
-declare module "telefunc" {
-	namespace Telefunc {
-		interface Context {
-			/**
-			 * The github access token is set in the session cookie.
-			 */
-			githubAccessToken?: string
-		}
-	}
-}
