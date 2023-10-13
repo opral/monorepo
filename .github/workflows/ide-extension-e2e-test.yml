@@ -25,11 +25,17 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run e2e tests on normal platforms
+      - name: Run e2e tests on Linux
         if: startsWith(matrix.os, 'ubuntu')
         run: xvfb-run -a npm run test:e2e -w vs-code-extension
 
-      - name: Run e2e tests on alien platforms
-        if: startsWith(matrix.os, 'ubuntu') == false
-        shell: bash
+      - name: Run e2e tests on MacOS
+        if: startsWith(matrix.os, 'macos')
         run: npm run test:e2e -w vs-code-extension
+
+      - name: Run e2e tests on Windows
+        if: startsWith(matrix.os, 'windows')
+        shell: bash
+        run: |
+          npm config set script-shell "$(which bash)"
+          npm run test:e2e -w vs-code-extension
