@@ -21,14 +21,18 @@ import { createMessageLintReportsQuery } from "./createMessageLintReportsQuery.j
 import { ProjectSettings, Message, type NodeishFilesystemSubset } from "./versionedInterfaces.js"
 import { tryCatch, type Result } from "@inlang/result"
 import { migrateIfOutdated } from "@inlang/project-settings/migration"
+import { createNodeishFsWithAbsolutePaths } from "./resolve-modules/createNodeishFsWithAbsolutePaths.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
 /**
  * Creates an inlang instance.
  *
- * - Use `_import` to pass a custom import function for testing,
+ * @param settingsFilePath - Absolute path to the inlang settings file.
+ * @param nodeishFs - Filesystem that implements the NodeishFilesystemSubset interface.
+ * @param _import - Use `_import` to pass a custom import function for testing,
  *   and supporting legacy resolvedModules such as CJS.
+ * @param _capture - Use `_capture` to capture events for analytics.
  *
  */
 export const loadProject = async (args: {
@@ -40,11 +44,18 @@ export const loadProject = async (args: {
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
 
+		// -- absolute path env -----------------------------------------------
+
+		const nodeishFs = createNodeishFsWithAbsolutePaths({
+			nodeishFs: args.nodeishFs,
+			basePath: args.settingsFilePath.replace(/(.*?)[^/]*\..*$/, "$1"), // get directory of settings file
+		})
+
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
 		createEffect(() => {
-			loadSettings({ settingsFilePath: args.settingsFilePath, nodeishFs: args.nodeishFs })
+			loadSettings({ settingsFilePath: args.settingsFilePath, nodeishFs })
 				.then((settings) => {
 					setSettings(settings)
 					// rename settings to get a convenient access to the data in Posthog
@@ -58,7 +69,7 @@ export const loadProject = async (args: {
 		// TODO: create FS watcher and update settings on change
 
 		const writeSettingsToDisk = skipFirst((settings: ProjectSettings) =>
-			_writeSettingsToDisk({ nodeishFs: args.nodeishFs, settings })
+			_writeSettingsToDisk({ nodeishFs, settings })
 		)
 
 		const setSettings = (settings: ProjectSettings): Result<void, ProjectSettingsInvalidError> => {
@@ -88,7 +99,7 @@ export const loadProject = async (args: {
 			const _settings = settings()
 			if (!_settings) return
 
-			resolveModules({ settings: _settings, nodeishFs: args.nodeishFs, _import: args._import })
+			resolveModules({ settings: _settings, nodeishFs, _import: args._import })
 				.then((resolvedModules) => {
 					setResolvedModules(resolvedModules)
 				})
@@ -327,3 +338,5 @@ export function createSubscribable<T>(signal: () => T): Subscribable<T> {
 		},
 	})
 }
+
+

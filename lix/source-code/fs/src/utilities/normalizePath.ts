@@ -4,7 +4,7 @@
  * Copyright (c) 2014-2018, Jon Schlinkert.
  * Released under the MIT License.
  */
-export function normalizePath(path: string): string {
+export function normalizePath(path: string, stripTrailing?: boolean): string {
 	if (path === "\\" || path === "/") return "/"
 
 	const len = path.length
@@ -22,5 +22,19 @@ export function normalizePath(path: string): string {
 		}
 	}
 	const segs = path.split(/[/\\]+/)
-	return prefix + segs.join("/")
+	const stack: string[] = []
+
+	for (const seg of segs) {
+		if (seg === "..") {
+			stack.pop()
+		} else if (seg !== ".") {
+			stack.push(seg)
+		}
+	}
+
+	if (stripTrailing !== false && stack.at(-1) === "") {
+		stack.pop()
+	}
+
+	return prefix + stack.join("/")
 }
