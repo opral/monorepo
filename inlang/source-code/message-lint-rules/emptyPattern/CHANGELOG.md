@@ -1,5 +1,11 @@
 # @inlang/message-lint-rule-empty-pattern
 
+## 1.4.0
+
+### Minor Changes
+
+- 0055f20b1: update README
+
 ## 1.3.0
 
 ### Minor Changes
