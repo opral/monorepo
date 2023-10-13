@@ -29,7 +29,7 @@ const Hero = () => {
 					</div>
 					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:pt-16 pt-4 pb-24">
 						<p class="pt-2 text-surface-300 text-xl max-w-md">
-							inlang helps businesses in adapting to various markets to attract more customer.
+							Expand to new markets and acquire more customers.
 						</p>
 						<div class="flex md:items-center items-start gap-8">
 							<button class="relative bg-surface-800" onClick={() => moveToCategory()}>
@@ -60,7 +60,7 @@ const Hero = () => {
 									class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-80 blur-sm"
 								/>
 							</button>
-							<Button type="textBackground" href="#" chevron>
+							<Button type="textBackground" href="mailto:hello@inlang.com" chevron>
 								Contact Sales
 							</Button>
 						</div>

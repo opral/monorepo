@@ -13,6 +13,7 @@ import {
 	ProjectSettingsInvalidError,
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
+	LoadProjectInvalidArgument,
 } from "./errors.js"
 import { createRoot, createSignal, createEffect } from "./reactivity/solid.js"
 import { createMessagesQuery } from "./createMessagesQuery.js"
@@ -21,7 +22,10 @@ import { createMessageLintReportsQuery } from "./createMessageLintReportsQuery.j
 import { ProjectSettings, Message, type NodeishFilesystemSubset } from "./versionedInterfaces.js"
 import { tryCatch, type Result } from "@inlang/result"
 import { migrateIfOutdated } from "@inlang/project-settings/migration"
-import { createNodeishFsWithAbsolutePaths } from "./resolve-modules/createNodeishFsWithAbsolutePaths.js"
+import {
+	createNodeishFsWithAbsolutePaths,
+	isAbsolutePath,
+} from "./createNodeishFsWithAbsolutePaths.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -41,15 +45,21 @@ export const loadProject = async (args: {
 	_import?: ImportFunction
 	_capture?: (id: string, props: Record<string, unknown>) => void
 }): Promise<InlangProject> => {
+	// -- validation --------------------------------------------------------
+	//! the only place where throwing is acceptable because the project
+	//! won't even be loaded. do not throw anywhere else. otherwise, apps
+	//! can't handle errors gracefully.
+	if (!isAbsolutePath(args.settingsFilePath)) {
+		throw new LoadProjectInvalidArgument(
+			`Expected an absolute path but received "${args.settingsFilePath}".`,
+			{ argument: "settingsFilePath" }
+		)
+	}
+
+	// -- load project ------------------------------------------------------
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
-
-		// -- absolute path env -----------------------------------------------
-
-		const nodeishFs = createNodeishFsWithAbsolutePaths({
-			nodeishFs: args.nodeishFs,
-			basePath: args.settingsFilePath.replace(/(.*?)[^/]*\..*$/, "$1"), // get directory of settings file
-		})
+		const nodeishFs = createNodeishFsWithAbsolutePaths(args)
 
 		// -- settings ------------------------------------------------------------
 

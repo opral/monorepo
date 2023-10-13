@@ -22,7 +22,10 @@ export default function Card(props: { item: any; displayName: string; highlight?
 				<div class="flex flex-col gap-4">
 					<div class="w-full flex gap-4 items-start">
 						<div class="flex items-center gap-8 flex-shrink-0">
-							<img class="w-10 h-10 rounded-lg m-0" src={props.item.icon} />
+							<img
+								class="w-10 h-10 rounded-lg m-0 object-cover object-center"
+								src={props.item.icon}
+							/>
 						</div>
 						<div class="flex flex-col justify-between gap-0.5 items-start">
 							<p class="m-0 mb-2 text-lg text-surface-600 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors">
@@ -54,7 +57,7 @@ export default function Card(props: { item: any; displayName: string; highlight?
 						props.item.id.split(".")[0] === "messageLintRule"
 					}
 				>
-					<sl-tooltip prop:content={`Install ${props.displayName}`}>
+					<sl-tooltip prop:content={`Install`}>
 						<a
 							onClick={(e) => {
 								e.stopPropagation()
@@ -187,7 +190,7 @@ export function NoResultsCard(props: { category: string }) {
 					<NoResultsArtwork />
 				</div>
 			</div>
-			<div class="p-4 w-full h-full flex flex-col justify-center relative z-10 -translate-y-8 -mt-24">
+			<div class="p-4 w-full h-full flex flex-col justify-center relative -translate-y-8 -mt-24">
 				<h2 class="font-medium text-center text-xl mb-4">No results yet</h2>
 				<p class="text-center text-surface-500 mb-12">
 					We will let you know when we get <br class="min-[350px]:block hidden" /> some new results.
