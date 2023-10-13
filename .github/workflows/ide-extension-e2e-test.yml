@@ -31,4 +31,5 @@ jobs:
 
       - name: Run e2e tests on alien platforms
         if: startsWith(matrix.os, 'ubuntu') == false
+        shell: bash
         run: npm run test:e2e -w vs-code-extension
