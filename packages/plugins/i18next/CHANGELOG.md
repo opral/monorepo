@@ -1,5 +1,11 @@
 # @inlang/plugin-i18next
 
+## 4.8.0
+
+### Minor Changes
+
+- 0055f20b1: update README
+
 ## 4.7.0
 
 ### Minor Changes

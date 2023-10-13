@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.13.0
+
+### Minor Changes
+
+- 3bfc38121: Use configured proxy for requests from ide-extension, if available
+
 ## 1.12.0
 
 ### Minor Changes
