@@ -98,7 +98,7 @@ export function Page(props: PageProps) {
 	const [details, setDetails] = createSignal({})
 	const [slider, { next, prev }] = createSlider({
 		slides: {
-			number: props.manifest && props.manifest.gallery?.length - 1,
+			number: props.manifest.gallery && props.manifest.gallery.length - 1,
 			perView: window ? (window.innerWidth > 768 ? 3 : 1) : 1,
 			spacing: 8,
 		},
@@ -193,6 +193,7 @@ export function Page(props: PageProps) {
 											when={props.manifest.gallery && props.manifest.gallery.length > 1 && slider}
 										>
 											<div class="relative">
+												{/* @ts-ignore */}
 												<div use:slider class="mt-16 cursor-grab active:cursor-grabbing">
 													<For each={props.manifest.gallery}>
 														{(image) => (
@@ -208,6 +209,7 @@ export function Page(props: PageProps) {
 													</For>
 												</div>
 												<button
+													// @ts-ignore
 													disabled={details().progress === 0}
 													onClick={prev}
 													class="absolute -left-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
@@ -215,6 +217,7 @@ export function Page(props: PageProps) {
 													<Left class="h-8 w-8" />
 												</button>
 												<button
+													// @ts-ignore
 													disabled={details().progress > 0.99}
 													onClick={next}
 													class="absolute -right-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"

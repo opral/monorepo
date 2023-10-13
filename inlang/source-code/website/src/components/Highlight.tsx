@@ -25,7 +25,7 @@ export default function Highlight(props: BannerProps | CardProps) {
 			<Match when={props.type === "banner"}>
 				<div
 					style={{
-						"background-image": `url(${props.image})`,
+						"background-image": `url(${(props as BannerProps).image})`,
 					}}
 					class={`h-96 w-full bg-surface-100 bg-cover bg-center rounded-2xl flex items-end justify-start relative`}
 				>
@@ -35,15 +35,17 @@ export default function Highlight(props: BannerProps | CardProps) {
 					<div
 						class="w-full flex justify-between md:items-center md:flex-row flex-col px-8 py-4 rounded-b-2xl backdrop-blur-lg border-t"
 						style={{
-							background: `${props.color}25`,
-							"border-top-color": `${props.color}30`,
+							background: `${(props as BannerProps).color}25`,
+							"border-top-color": `${(props as BannerProps).color}30`,
 						}}
 					>
 						<div class="md:mb-0 mb-6">
-							<h2 class="text-lg font-semibold mb-1 text-background">{props.title}</h2>
-							<p class="text-background">{props.description}</p>
+							<h2 class="text-lg font-semibold mb-1 text-background">
+								{(props as BannerProps).title}
+							</h2>
+							<p class="text-background">{(props as BannerProps).description}</p>
 						</div>
-						<Button chevron type="secondaryOnGray" href={props.link}>
+						<Button chevron type="secondaryOnGray" href={(props as BannerProps).link}>
 							Learn more
 						</Button>
 					</div>
@@ -56,9 +58,10 @@ export default function Highlight(props: BannerProps | CardProps) {
 					</h3>
 					<Card
 						highlight
-						item={registry.find((item: { id: string }) => item.id === props.id)}
+						item={registry.find((item: { id: string }) => item.id === (props as CardProps).id)}
 						displayName={
-							registry.find((item: { id: string }) => item.id === props.id).displayName.en
+							// @ts-expect-error !TODO fix later
+							registry.find((item) => item.id === (props as CardProps).id)!.displayName.en
 						}
 					/>{" "}
 				</div>
