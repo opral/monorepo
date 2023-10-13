@@ -1,21 +1,23 @@
 {
-	"id": "app.inlang.ideExtension",
-	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
+	"id": "messageLintRule.inlang.emptyPattern",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/emptyPattern/assets/icon.png",
 	"gallery": [
-		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/ide_extension-marketplace-cover.jpg"
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/empty_pattern-marketplace-cover.jpg"
 	],
 	"displayName": {
-		"en": "IDE Extension"
+		"en": "Empty pattern"
 	},
 	"description": {
-		"en": "This extension allows you to use inlang in your IDE, enabling translating content directly in your code."
+		"en": "Checks for empty pattern in a language tag. If a message exists in the reference resource but the pattern in a target resource is empty, it is likely that the message has not been translated yet."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/MARKETPLACE.md"
+		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/emptyPattern/README.md"
 	},
-	"keywords": ["ide", "extension", "vscode"],
+	"keywords": ["application", "lint rule", "empty pattern"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-	"website": "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
-	"license": "Apache-2.0"
+	"license": "Apache-2.0",
+	"module": "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js"
 }
+  

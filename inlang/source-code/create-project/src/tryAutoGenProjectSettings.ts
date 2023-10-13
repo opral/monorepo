@@ -1,154 +1,106 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type { NodeishFilesystem } from "@lix-js/fs"
-import { getLanguageFolderPath } from "./getLanguageFolderPath.js"
-import type { Plugin } from "@inlang/plugin"
-import { Value } from "@sinclair/typebox/value"
+import { normalizePath, type NodeishFilesystem, type createNodeishMemoryFs } from "@lix-js/fs"
+import { getLanguageFolder } from "./getLanguageFolder.js"
 import { tryCatch } from "@inlang/result"
 import { ProjectSettings, loadProject } from "@inlang/sdk"
-
-// FIXME: fetch latest major version instead
-export const pluginUrls: Record<string, string> = {
-	i18next: "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@4/dist/index.js",
-	json: "https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js",
-}
-
-export type SupportedLibrary = keyof typeof pluginUrls
-
-export const standardLintRules = [
-	"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@1/dist/index.js",
-	"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@1/dist/index.js",
-	"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@1/dist/index.js",
-	"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@1/dist/index.js",
-]
+import { registry } from "@inlang/marketplace-registry"
 
 /**
- * Creates a new project.inlang.json file by trying to auto generate the project configuration
+ * Tries to automatically generate a project.inlang.json file based on the project's dependencies.
  *
- * @params args.nodeishFs a nodeishFs implementation, in node this is fs:promieses
- * @params args.pathJoin implementation for joing paths, in node this should be {join} from 'path'
- * @params args.filePath optional location of your inlang config file, should be used only for testing as we hard code filepaths at lots of places
- * @returns The warnings and if successfully generated the config object, the file is also saved to the filesystem in the current path
+ * - The returned project settings are not written to the filesystem.
+ * - Write the project settings manyally to the filesystem with `basePath` + '/project.inlang.json'
+ *
+ * @param args.basePath The base path to resolve from.
+ *
+ * @returns Generated project settings or undefined if the generation failed
  */
 export async function tryAutoGenProjectSettings(args: {
+	basePath: string
 	nodeishFs: NodeishFilesystem
-	pathJoin: (...args: string[]) => string
-	filePath?: string
-}): Promise<{ warnings: string[]; errors?: any[]; settings?: ProjectSettings }> {
-	const rootDir = "./"
-	const warnings: string[] = []
-
-	let pluginName: SupportedLibrary = "json"
+}): Promise<ProjectSettings | undefined> {
+	const result: ProjectSettings = {
+		$schema: "https://inlang.com/schema/project-settings",
+		// assumes that the source language is English
+		sourceLanguageTag: "en",
+		languageTags: [],
+		modules: [
+			// including the most useful lint rule. additional lint rules can be
+			// added manually later or prompted to be installed in inlang apps.
+			// @ts-expect-error - typescript union is not smart enough to infer the correct type
+			registry.find((item) => item.id === "messageLintRule.inlang.missingTranslation").module,
+		],
+	}
 
 	const packageJson = JSON.parse(
-		await args.nodeishFs.readFile("./package.json", { encoding: "utf-8" }).catch(() => "{}")
+		await args.nodeishFs
+			.readFile(args.basePath + "/package.json", { encoding: "utf-8" })
+			.catch(() => "{}")
 	)
 
-	// Check if popular internationalization libraries are dependencies
-	const { modules } = getSupportedLibrary({
-		packageJson,
-	})
+	const dependencies = Object.keys({ ...packageJson.dependencies, ...packageJson.devDependencies })
 
-	if (!modules.length) {
-		pluginName = "json"
-		warnings.push("📦 Using fallback plugin: json, because no other configuration was found.")
-	} else {
-		pluginName = modules[0]!
-	}
+	/**
+	 * --------------- i18next ---------------
+	 */
 
-	if (pluginName === "sdkJs") {
-		warnings.push(
-			"📦 Using plugin: @inlang/sdk-js.\nYou have to add a plugin which reads and writes resources e.g. the @inlang/plugin-json. See: https://inlang.com/marketplace"
-		)
-	} else if (pluginName === "typesafeI18n") {
-		warnings.push("Found typesafe-i18n, but it is not supported anymore.")
-		return { warnings }
-	}
-
-	// Generate the config file content
-	let pathPattern = `''`
-	const languageFolderPath = await getLanguageFolderPath({
-		nodeishFs: args.nodeishFs,
-		pathJoin: args.pathJoin,
-		rootDir,
-	})
-	const pathPatternRaw = languageFolderPath
-		? args.pathJoin(languageFolderPath, "{languageTag}.json")
-		: ""
-
-	// Windows: Replace backward slashes with forward slashes
-	pathPattern = pathPatternRaw.replace(/\\/g, "/")
-	if (pathPattern === "") {
-		warnings.push(
-			"Could not find a language folder in the project. You have to enter the path to your language files (pathPattern) manually."
-		)
-	} else {
-		warnings.push(
-			`🗂️  Found language folder path: '${pathPattern}', please adjust the ${`pathPattern`}\nin the project.inlang.json manually if it is not parsed correctly.`
-		)
-	}
-
-	const pluginId: Plugin["id"] = `plugin.inlang.${pluginName}`
-
-	const settings: ProjectSettings = {
-		$schema: "https://inlang.com/schema/project-settings",
-		sourceLanguageTag: "en",
-		languageTags: ["en"],
-		modules: [pluginUrls[pluginName]!, ...standardLintRules],
-	}
-
-	settings[pluginId] = { pathPattern }
-
-	let errors: any[] = [...Value.Errors(ProjectSettings, settings)]
-	errors.push(
-		`The generated config is not valid. Please adjust the config manually.\nErrors:\n${errors.join(
-			"\n"
-		)}`
-	)
-
-	const projectFilePath = args.filePath || "./project.inlang.json"
-
-	if (settings) {
-		const settingString = JSON.stringify(settings, undefined, 4)
-		await args.nodeishFs.writeFile(projectFilePath, settingString + "\n")
-	} else {
-		return { warnings: ["Could not auto generate project configuration."] }
-	}
-
-	const { data, error } = await tryCatch(() =>
-		loadProject({
-			settingsFilePath: projectFilePath,
+	if (dependencies.includes("i18next")) {
+		const languageFolder = await getLanguageFolder({
 			nodeishFs: args.nodeishFs,
+			basePath: args.basePath,
 		})
-	)
-
-	if (error) {
-		errors = [error]
-	} else {
-		const runtimeErrors = data?.errors()
-		if (runtimeErrors?.length) {
-			errors = [...errors, ...runtimeErrors]
+		if (!languageFolder) {
+			// can't generate project settings without a language folder
+			return
+		}
+		result.languageTags = languageFolder.languageTags
+		result.modules.push(
+			// @ts-expect-error - typescript union is not smart enough to infer the correct type
+			registry.find((item) => item.id === "plugin.inlang.i18next").module
+		)
+		result["plugin.inlang.i18next"] = {
+			pathPattern: normalizePath(`${languageFolder.path}/{languageTag}.json`),
 		}
 	}
 
-	return { warnings, errors, settings }
-}
+	/**
+	 * --------------- (TODO) react-intl & others ---------------
+	 *
+	 * else if (dependencies.includes("react-intl")) {
+	 *
+	 * }
+	 */
 
-export const getSupportedLibrary = (args: {
-	packageJson: any
-}): { modules: SupportedLibrary[] } => {
-	const allDependencies = {
-		...(args.packageJson.dependencies || {}),
-		...(args.packageJson.devDependencies || {}),
+	const settingsPath = args.basePath + "/project.inlang.json"
+
+	const mockFs = new Proxy(args.nodeishFs, {
+		get: (target, prop) => {
+			if (prop === "readFile") {
+				return (...args: Parameters<ReturnType<typeof createNodeishMemoryFs>["readFile"]>) => {
+					if (args[0] === settingsPath) {
+						return JSON.stringify(result)
+					}
+					// @ts-expect-error
+					return target[prop](args)
+				}
+			} else if (prop === "writeFile") {
+				return () => {
+					throw new Error("Writing to the filesystem is not allowed in tryAutoGenProjectSettings")
+				}
+			}
+			// @ts-expect-error
+			return target[prop]
+		},
+	})
+
+	const { data: project } = await tryCatch(() =>
+		loadProject({
+			settingsFilePath: settingsPath,
+			nodeishFs: mockFs,
+		})
+	)
+
+	if (project?.errors().length === 0) {
+		return result
 	}
-
-	// Determine the plugin based on the installed libraries or fallback to JSON plugin
-	const moduleDetections: Set<string> = new Set()
-
-	if (allDependencies["i18next"]) {
-		moduleDetections.add("i18next")
-	}
-
-	return {
-		modules: [...moduleDetections],
-	}
+	return undefined
 }

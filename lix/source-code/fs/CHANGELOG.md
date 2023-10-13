@@ -1,5 +1,11 @@
 # @lix-js/fs
 
+## 0.3.0
+
+### Minor Changes
+
+- 6f42758bb: force absolute path for settingsFilePath to intercept nodeishFs with absolute paths
+
 ## 0.2.0
 
 ### Minor Changes

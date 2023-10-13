@@ -5,13 +5,12 @@ import { pushChanges, useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
 import { showToast } from "#src/components/Toast.jsx"
 import { navigate } from "vite-plugin-ssr/client/router"
-import { github } from "#src/services/github/index.js"
 import { currentPageContext } from "#src/renderer/state.js"
 import type { EditorRouteParams } from "../types.js"
 import { SignInDialog } from "#src/services/auth/index.js"
-import { publicEnv } from "@inlang/env-variables"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { TourHintWrapper, type TourStepId } from "./Notification/TourHintWrapper.jsx"
+import { browserAuth } from "@lix-js/client"
 
 export const Gitfloat = () => {
 	const {
@@ -62,25 +61,20 @@ export const Gitfloat = () => {
 		if (localStorage.user === undefined) {
 			return
 		}
-		const response = await github.rest.repos.createFork({
-			owner: routeParams().owner,
-			repo: routeParams().repository,
-		})
+		const response = await repo()?.createFork()
+
 		telemetryBrowser.capture("EDITOR created fork", {
 			owner: routeParams().owner,
 			repository: routeParams().repository,
-			sucess: response.status === 202,
+			sucess: response?.status === 202,
 		})
-		if (response.status === 202) {
+		if (response?.status === 202) {
 			showToast({
 				variant: "success",
 				title: "The Fork has been created.",
 				message: `Don't forget to open a pull request`,
 			})
-			await github.rest.repos.get({
-				owner: routeParams().owner,
-				repo: routeParams().repository,
-			})
+
 			setTimeout(() => {
 				// @ts-expect-error - type mismatch fix after refactoring
 				navigate(`/editor/github.com/${response.data.full_name}`)
@@ -302,10 +296,10 @@ export const Gitfloat = () => {
 				</TourHintWrapper>
 			</div>
 			<SignInDialog
-				githubAppClientId={publicEnv.PUBLIC_GITHUB_APP_CLIENT_ID}
 				ref={signInDialog!}
 				onClickOnSignInButton={() => {
 					// hide the sign in dialog to increase UX when switching back to this window
+					browserAuth.login()
 					signInDialog?.hide()
 				}}
 			/>

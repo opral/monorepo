@@ -53,7 +53,7 @@ Create a `project.inlang.json` in the **root** of your project. You can use the 
 ```json
 {
 	// official schema ensures that your project file is valid
-	"$schema": "https://inlang.com/project-config-schema",
+	"$schema": "https://inlang.com/schema/project-settings",
 	// the "source" language tag that is used in your project
 	"sourceLanguageTag": "en",
 	// all the language tags you want to support in your project
