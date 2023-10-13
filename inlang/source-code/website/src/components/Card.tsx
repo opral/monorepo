@@ -22,7 +22,10 @@ export default function Card(props: { item: any; displayName: string; highlight?
 				<div class="flex flex-col gap-4">
 					<div class="w-full flex gap-4 items-start">
 						<div class="flex items-center gap-8 flex-shrink-0">
-							<img class="w-10 h-10 rounded-lg m-0" src={props.item.icon} />
+							<img
+								class="w-10 h-10 rounded-lg m-0 object-cover object-center"
+								src={props.item.icon}
+							/>
 						</div>
 						<div class="flex flex-col justify-between gap-0.5 items-start">
 							<p class="m-0 mb-2 text-lg text-surface-600 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors">
