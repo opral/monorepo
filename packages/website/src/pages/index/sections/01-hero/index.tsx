@@ -1,69 +1,124 @@
 import { Button } from "../../components/Button.jsx"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
-import AppFlowy from "./assets/appflowy.jsx"
-import Calcom from "./assets/clacom.jsx"
-import Jitsi from "./assets/jitsi.jsx"
-import Listmonk from "./assets/listmonk.jsx"
-import OpenAssistant from "./assets/openAssistant.jsx"
-import KeyVisual from "./keyVisual.jsx"
-import { useI18n } from "@solid-primitives/i18n"
+import AppFlowy from "./assets/logos/appflowy.jsx"
+import Calcom from "./assets/logos/clacom.jsx"
+import Jitsi from "./assets/logos/jitsi.jsx"
+import Listmonk from "./assets/logos/listmonk.jsx"
+import OpenAssistant from "./assets/logos/openAssistant.jsx"
+import CategorieSlider from "./Slider.jsx"
 
 const Hero = () => {
-	const [t] = useI18n()
+	const moveToCategory = () => {
+		const element = document.getElementById("categories")
+		if (element) {
+			element.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })
+		}
+	}
+
 	return (
-		<SectionLayout showLines={true} type="lightGrey">
-			<div class="w-full flex pt-4 md:pt-16 flex-col xl:flex-row">
-				<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-10 py-16 md:pt-16 md:pb-32">
-					<h1 class="text-[40px] leading-tight md:text-6xl font-bold text-surface-900 pr-16 tracking-tight">
-						<p class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-[#F1D9FF] via-hover-primary to-[#3B82F6]">
-							{`${t("landing.hero.keyword")} `}
-						</p>
-						{t("landing.hero.title")}
-					</h1>
-					<p class="text-xl text-surface-600 w-min-full md:w-[70%] leading-relaxed">
-						{t("landing.hero.description.inlangs")}{" "}
-						<span class="font-semibold text-surface-800">
-							{t("landing.hero.description.ecosystem")}
-						</span>{" "}
-						{t("landing.hero.description.benefit")}
-					</p>
-					<div class="flex gap-6">
-						<Button type="primary" href="/documentation/">
-							{t("landing.hero.cta")}
-						</Button>
-						<Button type="text" href="https://github.com/inlang/monorepo" chevron>
-							{t("landing.hero.githubLink")}
-						</Button>
+		<>
+			<SectionLayout showLines={true} type="dark">
+				<div class="w-full flex pt-4 flex-col xl:flex-row">
+					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:pt-16 pt-20 py-6">
+						<h1 class="text-[40px] md:text-6xl font-bold text-background pr-12 md:pr-32 tracking-snug leading-none md:leading-tight">
+							The ecosystem to go{" "}
+							<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-[#F1D9FF] via-hover-primary to-[#3B82F6]">
+								global
+							</span>
+						</h1>
 					</div>
-					<div class="flex flex-col gap-6 pt-8">
-						<p class="text-md font-normal text-surface-400">{t("landing.hero.usedBy")}</p>
-						<div class="flex flex-wrap items-center gap-6 xl:w-3/4 opacity-90">
-							<a class="hover:opacity-70" href="https://cal.com" target="_blank">
+					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:pt-16 pt-4 pb-24">
+						<p class="pt-2 text-surface-300 text-xl max-w-md">
+							inlang helps businesses in adapting to various markets to attract more customer.
+						</p>
+						<div class="flex md:items-center items-start gap-8">
+							<button class="relative bg-surface-800" onClick={() => moveToCategory()}>
+								<div class="relative z-20 bg-surface-200 h-10 px-6 flex justify-center items-center shadow rounded-md hover:shadow-lg hover:bg-background transition-all">
+									<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-surface-900 via-surface-800 to-surface-900 text-sm font-medium">
+										Get started
+									</span>
+								</div>
+								<div
+									style={{
+										background:
+											"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
+									}}
+									class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-60 blur-3xl"
+								/>
+								<div
+									style={{
+										background:
+											"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
+									}}
+									class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-40 blur-xl"
+								/>
+								<div
+									style={{
+										background:
+											"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
+									}}
+									class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-80 blur-sm"
+								/>
+							</button>
+							<Button type="textBackground" href="#" chevron>
+								Contact Sales
+							</Button>
+						</div>
+					</div>
+				</div>
+			</SectionLayout>
+			<div class="w-full bg-surface-900 overflow-hidden">
+				<SectionLayout showLines={true} type="dark">
+					<CategorieSlider />
+				</SectionLayout>
+			</div>
+			<SectionLayout showLines={true} type="dark">
+				<div class="w-full flex pt-4 md:pt-16 flex-col xl:flex-row py-32">
+					<div class="w-full xl:w-1/4 flex flex-col gap-8 px-6 md:px-4 py-4">
+						<p class="text-surface-400">Used by global projects:</p>
+					</div>
+					<div class="w-full xl:w-3/4 flex flex-col gap-8 px-6 md:px-4 py-4">
+						<div class="flex gap-12 items-center w-full xl:justify-end text-surface-400 flex-wrap">
+							<a
+								class="transition-opacity hover:opacity-80"
+								href="https://cal.com/"
+								target="_blank"
+							>
 								<Calcom />
 							</a>
-							<a class="hover:opacity-70" href="https://appflowy.io" target="_blank">
+							<a
+								class="transition-opacity hover:opacity-80"
+								href="https://appflowy.io/"
+								target="_blank"
+							>
 								<AppFlowy />
 							</a>
-							<a class="hover:opacity-70" href="https://listmonk.app" target="_blank">
+							<a
+								class="transition-opacity hover:opacity-80"
+								href="https://meet.jit.si/"
+								target="_blank"
+							>
+								<Jitsi />
+							</a>
+							<a
+								class="transition-opacity hover:opacity-80"
+								href="https://listmonk.app/"
+								target="_blank"
+							>
 								<Listmonk />
 							</a>
-							<a class="hover:opacity-70" href="https://open-assistant.io" target="_blank">
+							<a
+								class="transition-opacity hover:opacity-80"
+								href="https://open-assistant.io/"
+								target="_blank"
+							>
 								<OpenAssistant />
-							</a>
-							<a class="hover:opacity-70" href="https://meet.jit.si" target="_blank">
-								<Jitsi />
 							</a>
 						</div>
 					</div>
 				</div>
-				<div class="relative w-full xl:w-1/2 xl:-ml-[8px]">
-					<div class="w-[2px] h-full absolute bg-hover-primary mx-10 xl:mx-[7px] z-2" />
-					<div class="w-auto h-full relative z-3 ml-[35px] xl:ml-0">
-						<KeyVisual />
-					</div>
-				</div>
-			</div>
-		</SectionLayout>
+			</SectionLayout>
+		</>
 	)
 }
 
