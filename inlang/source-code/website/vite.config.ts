@@ -1,7 +1,6 @@
 import { defineConfig } from "vite"
 import solid from "vite-plugin-solid"
 import { ssr as vitePluginSsr } from "vite-plugin-ssr/plugin"
-import { telefunc } from "telefunc/vite"
 import { fileURLToPath, URL } from "node:url"
 import Icons from "unplugin-icons/vite"
 import { nodePolyfills } from "vite-plugin-node-polyfills"
@@ -18,8 +17,6 @@ export default defineConfig({
 			protocolImports: false,
 		}),
 		solid({ ssr: true }),
-		// ordering matters. telefunc must be before ssr
-		telefunc(),
 		// the metaframework https://vite-plugin-ssr.com/
 		vitePluginSsr(),
 		// @ts-ignore

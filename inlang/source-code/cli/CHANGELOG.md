@@ -1,5 +1,36 @@
 # @inlang/cli
 
+## 1.12.0
+
+### Minor Changes
+
+- c3524d113: **removed the command `project init`**
+
+  De-facto can a project not be manually created. The project settings are app/library/plugin specific. Stating that a project can be manually created is misleading. And leadsto reports like #1448.
+
+## 1.11.0
+
+### Minor Changes
+
+- 6f42758bb: force absolute path for settingsFilePath to intercept nodeishFs with absolute paths
+
+## 1.10.0
+
+### Minor Changes
+
+- 1502c0deb: refactor: removed the project migrate command
+
+  - migration command is not used anymore
+  - removed the command to reduce complexity
+
+  improve: the project init command forward to inlang.com/new
+
+## 1.9.0
+
+### Minor Changes
+
+- 7bcb365ed: update `config init` deprecation
+
 ## 1.8.0
 
 ### Minor Changes

@@ -46,6 +46,7 @@ router.all(
 
 			response.set("Access-Control-Allow-Origin", privateEnv.PUBLIC_SERVER_BASE_URL)
 			response.set("Access-Control-Allow-Credentials", "true")
+			response.set("Access-Control-Allow-Headers", "x-github-api-version")
 
 			if (res.headers.get("content-type")?.includes("json")) {
 				response

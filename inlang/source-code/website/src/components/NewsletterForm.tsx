@@ -1,6 +1,7 @@
 import { createSignal } from "solid-js"
 import { useI18n } from "@solid-primitives/i18n"
-import { showToast } from "#src/components/Toast.jsx"
+import { showToast } from "./Toast.jsx"
+import { rpc } from "@inlang/rpc"
 
 export function NewsletterForm() {
 	const [t] = useI18n()
@@ -8,21 +9,29 @@ export function NewsletterForm() {
 	const [email, setEmail] = createSignal("")
 	const [loading, setLoading] = createSignal(false)
 
-	const fetchSubscriber = async () => {
+	const fetchSubscriber = async (email: any) => {
 		setLoading(true)
-		const response = {} as any
-		if (response === "already subscribed") {
-			showToast({
-				title: "Could not subscribe",
-				variant: "success",
-				message: t("newsletter.error.alreadySubscribed"),
-			})
-		} else if (response === "success") {
-			showToast({
-				title: "Success",
-				variant: "success",
-				message: t("newsletter.success"),
-			})
+		const response = await rpc.subscribeNewsletter({ email })
+		if (!response.error) {
+			if (response.data === "already subscribed") {
+				showToast({
+					title: "Could not subscribe",
+					variant: "success",
+					message: t("newsletter.error.alreadySubscribed"),
+				})
+			} else if (response.data === "success") {
+				showToast({
+					title: "Success",
+					variant: "success",
+					message: t("newsletter.success"),
+				})
+			} else {
+				showToast({
+					title: "Error",
+					variant: "danger",
+					message: t("newsletter.error.generic"),
+				})
+			}
 		} else {
 			showToast({
 				title: "Error",
@@ -67,7 +76,7 @@ export function NewsletterForm() {
 			return
 		}
 
-		fetchSubscriber()
+		fetchSubscriber(emailValue)
 	}
 
 	return (
@@ -93,6 +102,7 @@ export function NewsletterForm() {
 						// @ts-ignore
 						setEmail(event.target.value)
 					}}
+					// on enter press
 					onKeyDown={(event) => {
 						if (event.key === "Enter") {
 							handleSubscribe()

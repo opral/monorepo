@@ -12,6 +12,8 @@ The `project.inlang.json` file must contain the following JSON:
 
 ```ts
 {
+  // the schema version of the project file
+  "$schema": "https://inlang.com/schema/project-settings",
   // the "source" language tag that is used in your project
   "sourceLanguageTag": string,
   // all the language tags you want to support in your project

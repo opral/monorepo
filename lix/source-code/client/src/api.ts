@@ -28,6 +28,7 @@ export type Repository = {
 		Endpoints["POST /repos/{owner}/{repo}/merge-upstream"]["response"]["data"] | undefined
 	>
 	isCollaborator: (args: { username: string }) => Promise<boolean>
+	createFork: () => Promise<Endpoints["POST /repos/{owner}/{repo}/forks"]["response"]>
 	getOrigin: () => Promise<string>
 	getCurrentBranch: () => Promise<string | undefined>
 	errors: Subscribable<Error[]>
