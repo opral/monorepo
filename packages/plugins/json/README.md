@@ -8,15 +8,14 @@ This plugin is a general purpose plugin to read and write messages of json files
 // filename: project.inlang.json
 
 {
+	"$schema": "https://inlang.com/schema/project-settings",
 	"sourceLanguageTag": "en",
 	"languageTags": ["en", "de", "it"],
 	"modules": [
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js"
 	],
-	"settings": {
-		"plugin.inlang.json": {
-			"pathPattern": "./resources/{languageTag}.json"
-		}
+	"plugin.inlang.json": {
+		"pathPattern": "./resources/{languageTag}.json"
 	}
 }
 ```

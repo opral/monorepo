@@ -1,8 +1,8 @@
 import { createContext, type JSXElement, onCleanup, onMount, useContext } from "solid-js"
 import { createStore, reconcile, type SetStoreFunction } from "solid-js/store"
-import { getUserInfo } from "#src/services/auth/index.js"
 import { defaultLocalStorage, type LocalStorageSchema } from "./schema.js"
 import { telemetryBrowser } from "@inlang/telemetry"
+import { browserAuth } from "@lix-js/client"
 
 const LocalStorageContext = createContext()
 
@@ -57,7 +57,8 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 			setStore(storage)
 		}
 		// initialize the user in local storage
-		getUserInfo()
+		browserAuth
+			.getUser()
 			.then((userOrUndefined) => {
 				setStore("user", userOrUndefined)
 				if (userOrUndefined) {

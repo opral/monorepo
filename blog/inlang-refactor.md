@@ -43,7 +43,6 @@
 ## CLI
 
 - Performance improvements
-- Updated command: “config init” is now “project init”
 - New command “project migrate” to easily migrate your config file to json.
 - New command “module init” & “module build” to simplify module development
 

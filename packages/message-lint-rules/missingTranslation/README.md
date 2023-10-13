@@ -8,6 +8,7 @@ Add the lint rule to your modules array in your `project.inlang.json` file:
 
 ```json
 {
+  "$schema": "https://inlang.com/schema/project-settings",
   "sourceLanguageTag": "en",
   "languageTags": [
     "en",
@@ -16,9 +17,5 @@ Add the lint rule to your modules array in your `project.inlang.json` file:
   "modules": [
     "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js"
   ],
-  "settings": {
-    /* ... */
-  }
-  }
 }
 ```

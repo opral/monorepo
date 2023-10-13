@@ -63,8 +63,10 @@ async function loadMessages(args: {
 					args.nodeishFs
 				)
 				for (const [key, value] of Object.entries(messagesFromFile)) {
-					const prefixedKey = prefix + ":" + replaceAll(key, "u002E", ".")
-					addVariantToMessages(messages, prefixedKey, languageTag, value, args.pluginSettings)
+					if (Object.keys(value).length !== 0) {
+						const prefixedKey = prefix + ":" + replaceAll(key, "u002E", ".")
+						addVariantToMessages(messages, prefixedKey, languageTag, value, args.pluginSettings)
+					}
 				}
 			}
 		} else {
@@ -75,13 +77,15 @@ async function loadMessages(args: {
 				args.nodeishFs
 			)
 			for (const [key, value] of Object.entries(messagesFromFile)) {
-				addVariantToMessages(
-					messages,
-					replaceAll(key, "u002E", "."),
-					languageTag,
-					value,
-					args.pluginSettings
-				)
+				if (Object.keys(value).length !== 0) {
+					addVariantToMessages(
+						messages,
+						replaceAll(key, "u002E", "."),
+						languageTag,
+						value,
+						args.pluginSettings
+					)
+				}
 			}
 		}
 	}
