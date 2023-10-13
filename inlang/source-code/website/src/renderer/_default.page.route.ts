@@ -6,7 +6,7 @@ export const defaultLanguage = "en"
 export const languages = ["en", "de", "zh", "sk", "pt_BR"]
 
 function onBeforeRoute(pageContext: PageContextRenderer) {
-	console.log(pageContext)
+	//console.log(pageContext)
 	const { urlWithoutLocale, locale } = extractLocale(pageContext.urlOriginal)
 	return {
 		pageContext: {
