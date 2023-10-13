@@ -6,7 +6,7 @@ describe("main workflow", () => {
 	bench(
 		"opens a repo url without error and without blocking i",
 		async () => {
-			repository = await openRepository("github.com/inlang/example.git", {
+			repository = await openRepository("https://github.com/inlang/example.git", {
 				nodeishFs: createNodeishMemoryFs(),
 			})
 		},

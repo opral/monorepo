@@ -1,4 +1,5 @@
 {
+	"$schema": "https://inlang.com/schema/project-settings",
 	"sourceLanguageTag": "en",
 	"languageTags": ["en", "de"],
 	"modules": [
@@ -8,14 +9,12 @@
 		"./../../message-lint-rules/missingTranslation/dist/index.js",
 		"./../../message-lint-rules/messageWithoutSource/dist/index.js"
 	],
-	"settings": {
-		"plugin.inlang.i18next": {
-			"pathPattern": {
-				"client-page": "app/i18n/locales/{languageTag}/client-page.json",
-				"footer": "app/i18n/locales/{languageTag}/footer.json",
-				"second-page": "app/i18n/locales/{languageTag}/second-page.json",
-				"translation": "app/i18n/locales/{languageTag}/translation.json"
-			}
+	"plugin.inlang.i18next": {
+		"pathPattern": {
+			"client-page": "app/i18n/locales/{languageTag}/client-page.json",
+			"footer": "app/i18n/locales/{languageTag}/footer.json",
+			"second-page": "app/i18n/locales/{languageTag}/second-page.json",
+			"translation": "app/i18n/locales/{languageTag}/translation.json"
 		}
 	}
 }

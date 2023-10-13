@@ -1,5 +1,23 @@
 # @inlang/sdk
 
+## 0.11.0
+
+### Minor Changes
+
+- 6f42758bb: force absolute path for settingsFilePath to intercept nodeishFs with absolute paths
+
+### Patch Changes
+
+- Updated dependencies [6f42758bb]
+  - @inlang/plugin@2.1.0
+  - @lix-js/fs@0.3.0
+
+## 0.10.0
+
+### Minor Changes
+
+- 2976a4b15: IMPROVE: Better error messages across the SDK.
+
 ## 0.9.0
 
 ### Minor Changes

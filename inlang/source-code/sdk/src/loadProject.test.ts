@@ -10,6 +10,7 @@ import {
 	ProjectSettingsInvalidError,
 } from "./errors.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
+import { createMessage } from "./test-utilities/createMessage.js"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -99,9 +100,10 @@ describe("initialization", () => {
 	describe("settings", () => {
 		it("should return an error if settings file is not found", async () => {
 			const fs = createNodeishMemoryFs()
+			fs.mkdir("/user/project", { recursive: true })
 
 			const project = await loadProject({
-				settingsFilePath: "./test.json",
+				settingsFilePath: "/user/project/test.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -111,10 +113,11 @@ describe("initialization", () => {
 
 		it("should return an error if settings file is not a valid JSON", async () => {
 			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", "invalid json")
+			await fs.mkdir("/user/project", { recursive: true })
+			await fs.writeFile("/user/project/project.inlang.json", "invalid json")
 
 			const project = await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -124,10 +127,11 @@ describe("initialization", () => {
 
 		it("should return an error if settings file is does not match schema", async () => {
 			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify({}))
+			await fs.mkdir("/user/project", { recursive: true })
+			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify({}))
 
 			const project = await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -137,9 +141,10 @@ describe("initialization", () => {
 
 		it("should return the parsed settings", async () => {
 			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
+			await fs.mkdir("/user/project", { recursive: true })
+			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -150,22 +155,27 @@ describe("initialization", () => {
 		it("should not re-write the settings to disk when initializing", async () => {
 			const fs = await createNodeishMemoryFs()
 			const settingsWithDeifferentFormatting = JSON.stringify(settings, undefined, 4)
-			await fs.writeFile("./project.inlang.json", settingsWithDeifferentFormatting)
+			await fs.mkdir("/user/project", { recursive: true })
+			await fs.writeFile("/user/project/project.inlang.json", settingsWithDeifferentFormatting)
 
 			const project = await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
 
-			const settingsOnDisk = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
+			const settingsOnDisk = await fs.readFile("/user/project/project.inlang.json", {
+				encoding: "utf-8",
+			})
 			expect(settingsOnDisk).toBe(settingsWithDeifferentFormatting)
 
 			project.setSettings(project.settings())
 			// TODO: how can we await `setsettings` correctly
 			await new Promise((resolve) => setTimeout(resolve, 0))
 
-			const newsettingsOnDisk = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
+			const newsettingsOnDisk = await fs.readFile("/user/project/project.inlang.json", {
+				encoding: "utf-8",
+			})
 			expect(newsettingsOnDisk).not.toBe(settingsWithDeifferentFormatting)
 		})
 	})
@@ -178,10 +188,11 @@ describe("initialization", () => {
 				} satisfies InlangModule)
 
 			const fs = createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
+			await fs.mkdir("/user/project", { recursive: true })
+			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 
 			const project = await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import: $badImport,
 			})
@@ -210,9 +221,10 @@ describe("functionality", () => {
 	describe("settings", () => {
 		it("should return the settings", async () => {
 			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
+			await fs.mkdir("/user/project", { recursive: true })
+			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -222,9 +234,10 @@ describe("functionality", () => {
 
 		it("should set a new settings", async () => {
 			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
+			await fs.mkdir("/user/project", { recursive: true })
+			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -247,9 +260,10 @@ describe("functionality", () => {
 	describe("setSettings", () => {
 		it("should fail if settings is not valid", async () => {
 			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
+			await fs.mkdir("/user/project", { recursive: true })
+			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -261,14 +275,15 @@ describe("functionality", () => {
 
 		it("should write settings to disk", async () => {
 			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
+			await fs.mkdir("/user/project", { recursive: true })
+			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
 
-			const before = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
+			const before = await fs.readFile("/user/project/project.inlang.json", { encoding: "utf-8" })
 			expect(before).toBeDefined()
 
 			const result = project.setSettings({ ...settings, languageTags: [] })
@@ -278,7 +293,7 @@ describe("functionality", () => {
 			// TODO: how to wait for fs.writeFile to finish?
 			await new Promise((resolve) => setTimeout(resolve, 0))
 
-			const after = await fs.readFile("./project.inlang.json", { encoding: "utf-8" })
+			const after = await fs.readFile("/user/project/project.inlang.json", { encoding: "utf-8" })
 			expect(after).toBeDefined()
 			expect(after).not.toBe(before)
 		})
@@ -292,9 +307,10 @@ describe("functionality", () => {
 				languageTags: ["en"],
 				modules: ["plugin.js", "lintRule.js"],
 			}
-			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
+			await fs.mkdir("/user/project", { recursive: true })
+			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -324,10 +340,11 @@ describe("functionality", () => {
 				modules: ["plugin.js", "lintRule.js"],
 			}
 
-			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
+			await fs.mkdir("/user/project", { recursive: true })
+			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 
 			const project = await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -357,8 +374,9 @@ describe("functionality", () => {
 				saveMessages: () => undefined,
 			}
 			const fs = await createNodeishMemoryFs()
+			await fs.mkdir("/user/project", { recursive: true })
 			await fs.writeFile(
-				"./project.inlang.json",
+				"/user/project/project.inlang.json",
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
@@ -372,7 +390,7 @@ describe("functionality", () => {
 				} satisfies InlangModule
 			}
 			const project = await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -405,8 +423,9 @@ describe("functionality", () => {
 				saveMessages: () => undefined,
 			}
 			const fs = await createNodeishMemoryFs()
+			await fs.mkdir("/user/project", { recursive: true })
 			await fs.writeFile(
-				"./project.settings.json",
+				"/user/project/project.inlang.json",
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en"],
@@ -420,7 +439,7 @@ describe("functionality", () => {
 			}
 
 			const project = await loadProject({
-				settingsFilePath: "./project.settings.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -436,9 +455,10 @@ describe("functionality", () => {
 	describe("errors", () => {
 		it("should return the errors", async () => {
 			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
+			await fs.mkdir("/user/project", { recursive: true })
+			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -451,9 +471,10 @@ describe("functionality", () => {
 	describe("customApi", () => {
 		it("should return the app specific api", async () => {
 			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
+			await fs.mkdir("/user/project", { recursive: true })
+			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -467,9 +488,10 @@ describe("functionality", () => {
 	describe("messages", () => {
 		it("should return the messages", async () => {
 			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
+			await fs.mkdir("/user/project", { recursive: true })
+			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -491,7 +513,8 @@ describe("functionality", () => {
 				},
 			}
 
-			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
+			await fs.mkdir("/user/project", { recursive: true })
+			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 
 			await fs.mkdir("./resources")
 
@@ -512,7 +535,7 @@ describe("functionality", () => {
 			}
 
 			const project = await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -639,14 +662,79 @@ describe("functionality", () => {
 				},
 			])
 		})
+
+		/*
+		 * Passing all messages to saveMessages() simplifies plugins by an order of magnitude.
+		 *
+		 * The alternative would be to pass only the messages that changed to saveMessages().
+		 * But, this would require plugins to maintain a separate data structure of messages
+		 * and create optimizations, leading to (unjustified) complexity for plugin authors.
+		 *
+		 * Pros:
+		 *   - plugins don't need to transform the data (time complexity).
+		 *   - plugins don't to maintain a separate data structure (space complexity).
+		 *   - plugin authors don't need to deal with optimizations (ecosystem complexity).
+		 *
+		 * Cons:
+		 *  - Might be slow for a large number of messages. The requirement hasn't popped up yet though.
+		 */
+		it("should pass all messages, regardless of which message changed, to saveMessages()", async () => {
+			const fs = createNodeishMemoryFs()
+
+			const settings: ProjectSettings = {
+				sourceLanguageTag: "en",
+				languageTags: ["en", "de"],
+				modules: ["plugin.js"],
+				"plugin.project.json": {
+					pathPattern: "./resources/{languageTag}.json",
+				},
+			}
+
+			await fs.mkdir("/user/project", { recursive: true })
+			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
+
+			const mockSaveFn = vi.fn()
+
+			const _mockPlugin: Plugin = {
+				id: "plugin.project.json",
+				description: "Mock plugin description",
+				displayName: "Mock Plugin",
+				loadMessages: () => [
+					createMessage("first", { en: "first message" }),
+					createMessage("second", { en: "second message" }),
+					createMessage("third", { en: "third message" }),
+				],
+				saveMessages: mockSaveFn,
+			}
+
+			const _import = async () => {
+				return {
+					default: _mockPlugin,
+				} satisfies InlangModule
+			}
+
+			const project = await loadProject({
+				settingsFilePath: "/user/project/project.inlang.json",
+				nodeishFs: fs,
+				_import,
+			})
+
+			project.query.messages.create({ data: createMessage("fourth", { en: "fourth message" }) })
+
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			expect(mockSaveFn.mock.calls.length).toBe(1)
+			expect(mockSaveFn.mock.calls[0][0].messages).toHaveLength(4)
+		})
 	})
 
 	describe("lint", () => {
 		it.todo("should throw if lint reports are not initialized yet", async () => {
 			const fs = await createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
+			await fs.mkdir("/user/project", { recursive: true })
+			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -665,9 +753,10 @@ describe("functionality", () => {
 				modules: ["lintRule.js"],
 			}
 			const fs = createNodeishMemoryFs()
-			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
+			await fs.mkdir("/user/project", { recursive: true })
+			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "./project.inlang.json",
+				settingsFilePath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import: async () => ({
 					default: mockMessageLintRule,

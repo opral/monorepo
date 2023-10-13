@@ -10,15 +10,14 @@ You can add the plugin to your inlang project like this:
 // filename: project.inlang.json
 
 {
+	"$schema": "https://inlang.com/schema/project-settings",
 	"sourceLanguageTag": "en",
 	"languageTags": ["en", "de", "it"],
 	"modules": [
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@latest/dist/index.js"
 	],
-	"settings": {
-		"plugin.inlang.i18next": {
-			"pathPattern": "./resources/{languageTag}.json"
-		}
+	"plugin.inlang.i18next": {
+		"pathPattern": "./resources/{languageTag}.json"
 	}
 }
 ```
@@ -47,7 +46,6 @@ To use our plugin, you need to provide a path to the directory where your langua
 
 ### pathPattern with namespaces
 
-> Does not get created by 'npx @inlang/cli@latest project init'
 
 ```json
 "pathPattern": {
