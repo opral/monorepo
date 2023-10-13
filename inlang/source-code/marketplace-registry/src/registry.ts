@@ -17,7 +17,7 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/badge/README.md",
 		},
-		keywords: ["badge"],
+		keywords: ["application", "badge"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
@@ -61,31 +61,10 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/editor/README.md",
 		},
-		keywords: ["editor", "web"],
+		keywords: ["application", "editor", "web"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		website: "/editor",
-		license: "Apache-2.0",
-	},
-	{
-		id: "app.inlang.ideExtension",
-		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/ide-extension/assets/icon.png",
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/ide_extension-marketplace-cover.jpg",
-		],
-		displayName: {
-			en: "VS Code Extension",
-		},
-		description: {
-			en: "This extension allows you to use inlang in Visual Studio Code, enabling translating content directly in your code.",
-		},
-		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/MARKETPLACE.md",
-		},
-		keywords: ["ide", "extension", "vscode"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		website: "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
 		license: "Apache-2.0",
 	},
 	{
@@ -117,7 +96,7 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/paraglide-js-sveltekit/README.md",
 		},
-		keywords: ["sdk", "paraglide", "sdk-js", "sveltekit", "svelte"],
+		keywords: ["application", "sdk", "paraglide", "sdk-js", "sveltekit", "svelte"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
@@ -155,6 +134,30 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/emptyPattern/README.md",
 		},
+		keywords: ["application", "lint rule", "empty pattern"],
+		publisherName: "inlang",
+		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+		license: "Apache-2.0",
+		module:
+			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
+	},
+	{
+		$schema: "https://inlang.com/schema/marketplace-manifest",
+		id: "messageLintRule.inlang.emptyPattern",
+		icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/emptyPattern/assets/icon.png",
+		gallery: [
+			"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/empty_pattern-marketplace-cover.jpg",
+		],
+		displayName: {
+			en: "Empty pattern",
+		},
+		description: {
+			en: "Checks for empty pattern in a language tag. If a message exists in the reference resource but the pattern in a target resource is empty, it is likely that the message has not been translated yet.",
+		},
+		readme: {
+			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/emptyPattern/README.md",
+		},
+		categories: ["application"],
 		keywords: ["lint rule", "empty pattern"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
@@ -178,7 +181,7 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/identicalPattern/README.md",
 		},
-		keywords: ["lint rule", "itentical pattern"],
+		keywords: ["application", "lint rule", "itentical pattern"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
@@ -201,7 +204,7 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/messageWithoutSource/README.md",
 		},
-		keywords: ["lint rule", "source"],
+		keywords: ["application", "lint rule", "source"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
@@ -224,7 +227,7 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/missingTranslation/README.md",
 		},
-		keywords: ["lint rule", "missing"],
+		keywords: ["application", "lint rule", "missing"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
@@ -244,7 +247,7 @@ export const registry: MarketplaceManifest[] = [
 		readme: {
 			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/i18next/README.md",
 		},
-		keywords: ["i18next", "react", "nextjs"],
+		keywords: ["application", "i18next", "react", "nextjs"],
 		publisherName: "inlang",
 		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
 		license: "Apache-2.0",
