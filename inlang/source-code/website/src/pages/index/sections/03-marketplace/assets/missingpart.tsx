@@ -45,7 +45,7 @@ export default function MissingPart() {
 					stroke="white"
 					stroke-linecap="round"
 					stroke-dasharray="7.36 8.28"
-					style="mix-blend-mode:soft-light"
+					style={{ "mix-blend-mode": "soft-light" }}
 				/>
 			</g>
 			<defs>

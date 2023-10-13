@@ -29,7 +29,7 @@ export default function CategorieSlider() {
 				sliderChild.style.transitionProperty = "none"
 			}
 			// move the first card to the end of the list
-			slider?.appendChild(firstCard);
+			slider?.appendChild(firstCard)
 			firstCard.classList.remove("animate-fadeOut")
 			firstCard.classList.add("animate-fadeIn")
 			// reset transform of all cards and add transition animation

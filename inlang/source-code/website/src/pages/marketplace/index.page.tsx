@@ -4,7 +4,6 @@ import { registry } from "@inlang/marketplace-registry"
 import { For } from "solid-js"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import Marketplace from "#src/components/sections/marketplace/index.jsx"
-import { Button } from "../index/components/Button.jsx"
 
 export function Page() {
 	const icons = registry
