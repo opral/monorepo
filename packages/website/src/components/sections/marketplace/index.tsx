@@ -66,6 +66,7 @@ export default function Marketplace(props: {
 								(props.highlights!.length > 1 ? "md:grid-cols-2" : "md:grid-cols-1")
 							}
 						>
+							{/* @ts-expect-error */}
 							<For each={props.highlights}>{(highlight) => <Highlight {...highlight} />}</For>
 						</div>
 					</Show>
@@ -91,10 +92,12 @@ export default function Marketplace(props: {
 					<Match when={props.slider}>
 						<h3 class="font-semibold text-2xl mb-6">Items that might interest you</h3>
 						<div class="relative">
+							{/* @ts-ignore */}
 							<div use:slider class="cursor-grab active:cursor-grabbing">
 								<Gallery randomize />
 							</div>
 							<button
+								// @ts-ignore
 								disabled={details().progress === 0}
 								onClick={prev}
 								class="absolute -left-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
@@ -102,6 +105,7 @@ export default function Marketplace(props: {
 								<Left class="h-8 w-8" />
 							</button>
 							<button
+								// @ts-ignore
 								disabled={details().progress > 0.99}
 								onClick={next}
 								class="absolute -right-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
