@@ -15,7 +15,7 @@ export default function AutoResolve() {
 					fill="url(#paint0_linear_1320_1276)"
 				/>
 			</g>
-			<g style="mix-blend-mode:color" filter="url(#filter1_f_1320_1276)">
+			<g style={{ "mix-blend-mode": "color" }} filter="url(#filter1_f_1320_1276)">
 				<path
 					fill-rule="evenodd"
 					clip-rule="evenodd"

@@ -1,4 +1,3 @@
-import { JSX } from "solid-js/jsx-runtime"
 import { Button } from "#src/pages/index/components/Button.jsx"
 import { Match, Switch } from "solid-js"
 import { registry } from "@inlang/marketplace-registry"

@@ -1,4 +1,3 @@
-import { navigate } from "vite-plugin-ssr/client/router"
 import { Button } from "../../components/Button.jsx"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
 import AppFlowy from "./assets/logos/appflowy.jsx"
