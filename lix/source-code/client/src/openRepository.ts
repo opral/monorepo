@@ -21,9 +21,13 @@ import {
 	TREE, 
 	WORKDIR,
 	STAGE, 
-	readObject
+	listFiles,
+	readObject,
+	checkout
 } from "isomorphic-git"
 import path from "path"
+import { blobExistsLocaly } from "./helpers/blobExistsLocaly.js"
+import { fetchBlobsFromRemote } from "./helpers/fetchBlobsFromRemote.js"
 
 export async function openRepository(
 	url: string,
@@ -106,6 +110,8 @@ export async function openRepository(
 	// TODO - lazy fetch what shall we use as ref?
 	const ref = 'HEAD';
 
+	const managedFilePaths = [];
+
 	await walk({
         fs: rawFs,
         // cache
@@ -144,6 +150,58 @@ export async function openRepository(
         const filePath = argumentsList[0];
         const { dir, base } = path.parse(filePath);
         const folders = dir.split(path.sep);
+
+		if (!filePath.includes('.git')) { // TODO more solid check for git folder !filePath.startsWith(gitdir)) {
+			// al right - we have a "normal" file not a .git file
+			// first of all we check if it exists - if so just return it - don't manipulate the index here
+			try {
+				await rawFs.stat(filePath);
+				return execute();
+			} catch (e) {
+				// TODO check other exceptions than file does not exists
+			}
+
+			const fileOid = filePathToOid[filePath];
+
+			// if it doesn't exist - check if it is in the git tree, add it to the managed files and do a checkout for this particular file
+			if (fileOid !== undefined) {
+				// check if the file is on the index already (this means it was deleted eventually...)
+				const filesOnIndex = await listFiles({
+					fs: rawFs,
+					gitdir,
+					// cache
+					dir,
+					// ref - we don't set ref because we want the list of files on the index
+				});
+
+				if (filesOnIndex.includes(fileOid)) {
+					execute();
+				} else {
+					const fileExistsLocally = await blobExistsLocaly(rawFs, fileOid, gitdir);
+					if (!fileExistsLocally) {
+						await fetchBlobsFromRemote({
+							fs: rawFs,
+							gitdir,
+							http, 
+							oids: [fileOid],
+							allOids: Object.keys(oidToFilePaths)
+						})
+					}
+					// const wrappedFs = withLazyFetching(fsRaw as unknown as NodeishFilesystem, 'test', cb);
+
+					console.log('\nRepo Checkout');
+					await checkout(
+						{
+							dir,
+							fs: rawFs,
+							filepaths: [filePath],
+						}
+					)
+					return execute();
+				}
+			} 
+		}
+
         // .git/objects/as/asdasdasffasfasdasdasd
         if (folders.length < 3 // TODO also check 
             // || folders[folders.length-3] // TODO check if we are in the git folder
@@ -166,58 +224,26 @@ export async function openRepository(
         // 1. tries to resolve the oid using objects (the call we intercept here)
         // 2. tries to find it in a pack file 
 
-        let objectExists = false;
+        const existsLocaly = await blobExistsLocaly(
+			rawFs, // we use the raw fs since we don't want to endup in the delayed function
+			oid, 
+			gitdir);
 
         // this intercepts 1., checks if the object file or the pack file exists and loads them using fetch by passing all other files as have
-        try {
 
-            // console.log('trying to find hash: ' + oid + ' (files: ' + oidToFilePaths[oid]?.join() + ') locally');
-            // This reads the file - while we acually only want to know if the file exists... a function that gives us the info if a file exist would be better - but the indexf file handling from ismorphic git is not exported...
-            const object = await readObject({
-                // we don't want to intercept calls of read Object 
-                fs: rawFs, 
-                oid,
-                gitdir,
-                format: 'deflated' // NOTE this stops early in _readObject no hashing etc
-            });
-            // const stats: Stats = await fs.stat(filePath); - doesn't work 
-            // object file exists localy... 
-            objectExists = true;
-            // console.log('trying to find hash: ' + oid + ' (files: ' + oidToFilePaths[oid]?.join() + ') locally - found' );
-        } catch (err) {
-            // we only expect "Error NO ENTry" - rethrow on other
-            if ((err as any).code !== 'ENOENT' && (err as any).code !== 'NotFoundError') {
-                throw err;
-            }
-        }
-
-        if (objectExists) {
+        if (existsLocaly) {
             return execute();
         }
 
-        console.log('trying to find hash: ' + oid + ' (files: ' + oidToFilePaths[oid]?.join() + ') locally - not found - fetching it' );
-        try {
-            
-            console.time('Lazy fetching');
-            await git.fetch({
-                fs: fsRaw,
-                gitdir,
-                // this time we fetch with blobs but we skip all objects but the one that was requested by fs
-                http: withLazyInjection(http, { 
-                    noneBlobFilter: false, 
-                    overrideHaves: Object.keys(oidToFilePaths).filter( oneOid => oneOid !== oid )
-                }), // TODO use http with withFetchInjection and add blob = true
-                // http: http,
-                depth: 1, 
-                singleBranch: true, 
-                tags: false,
-            });
-            console.timeEnd('Lazy fetching');
-        } catch (e) {
-            console.log('error when trying to fetch a single file');
-            throw e;
-        }
-
+		console.log('trying to find hash: ' + oid + ' (files: ' + oidToFilePaths[oid]?.join() + ') locally - not found - fetching it' );
+		await fetchBlobsFromRemote({
+			fs: rawFs,
+			gitdir,
+			http: http,
+			oids: [oid],
+			allOids: Object.keys(oidToFilePaths)
+		});
+		
         console.log('done');
 
         // try to resolve the object again (this checks on object and on pack file)
@@ -229,6 +255,8 @@ export async function openRepository(
     
         return execute();
     
+
+		
 	}
 
 	return {
