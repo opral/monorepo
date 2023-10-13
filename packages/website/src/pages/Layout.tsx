@@ -289,7 +289,7 @@ function EditorHeader() {
 			},
 			{
 				name: `Apps`,
-				href: "/app",
+				href: "/application",
 			},
 		]
 	}
