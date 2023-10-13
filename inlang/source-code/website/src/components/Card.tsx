@@ -9,7 +9,7 @@ export default function Card(props: { item: any; displayName: string; highlight?
 			<a
 				href={`/m/${props.item.id}`}
 				class={
-					"relative no-underline flex gap-4 flex-col justify-between group w-auto bg-background hover:bg-surface-50 transition-colors border border-surface-200 rounded-xl p-5 " +
+					"relative no-underline flex gap-4 flex-col justify-between group w-full bg-background hover:bg-surface-50 transition-colors border border-surface-200 rounded-xl p-5 " +
 					(props.highlight ? "h-96" : "h-60")
 				}
 			>
@@ -84,14 +84,14 @@ export function CardBuildOwn() {
 		<>
 			<a
 				href="/documentation/publish-marketplace"
-				class="relative no-underline h-60 flex flex-col justify-center items-center gap-4 group w-full bg-background hover:bg-surface-50 transition-colors border border-surface-200 rounded-xl p-5"
+				class="relative no-underline h-60 flex flex-col justify-center pt-8 items-center gap-4 group w-full bg-background hover:bg-surface-50 transition-colors border border-surface-200 rounded-xl p-5"
 			>
 				<Plus class="w-12 h-12 text-surface-600 group-hover:text-surface-900 transition-colors" />
 				<div class="flex flex-col justify-center items-center">
-					<p class="m-0 mb-2 text-surface-600 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors">
+					<p class="m-0 mb-2 text-surface-600 leading-none no-underline text-center font-semibold group-hover:text-surface-900 transition-colors">
 						Can't find what you are looking for?
 					</p>
-					<p class="line-clamp-3 text-surface-500 transition-colors group-hover:text-surface-600">
+					<p class="line-clamp-3 text-surface-500 transition-colors text-center group-hover:text-surface-600">
 						Build your own solution!
 					</p>
 				</div>
