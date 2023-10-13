@@ -99,7 +99,7 @@ export function Page(props: PageProps) {
 	const [slider, { next, prev }] = createSlider({
 		slides: {
 			number: props.manifest && props.manifest.gallery?.length - 1,
-			perView: 3,
+			perView: window ? (window.innerWidth > 768 ? 3 : 1) : 1,
 			spacing: 8,
 		},
 
@@ -200,7 +200,7 @@ export function Page(props: PageProps) {
 																href={image}
 																target="_blank"
 																rel="noopener noreferrer"
-																class="transition-opacity hover:opacity-80 cursor-pointer w-80 flex-shrink-0 active:cursor-grabbing"
+																class="transition-opacity hover:opacity-80 cursor-pointer w-80 flex-shrink-0 active:cursor-grabbin flex items-center justify-center"
 															>
 																<img class="rounded-md w-80" src={image} />
 															</a>
