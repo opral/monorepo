@@ -22,8 +22,7 @@ const Lix = () => {
 					</div>
 					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:pt-16 pt-4 pb-16">
 						<p class="text-surface-300 text-xl max-w-md">
-							With inlang's change control system Lix, you have full control about changes in your
-							system.
+							Inlang's control system lix provides full control over changes.
 						</p>
 						<div class="flex md:items-center items-start gap-8">
 							<Button
