@@ -42,6 +42,9 @@ export function Page(props: PageProps) {
 			<Layout>
 				<Show when={props.content}>
 					<CategoryHero slug={props.slug} content={props.content} />
+					<Show when={props.content.title !== "Global Application"}>
+						<Marketplace minimal />
+					</Show>
 					<Marketplace
 						minimal={props.content.title !== "Global Application"}
 						slider={props.content.title !== "Global Application"}
