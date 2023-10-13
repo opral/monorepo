@@ -58,7 +58,7 @@ export const Button = (props: ButtonProps) => {
 						props.href && navigate(getLocale() + props.href)
 					}}
 					class={
-						"flex justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200 " +
+						"pointer-events-auto flex justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200 " +
 						bgColor(props.type)
 					}
 				>

@@ -15,7 +15,7 @@ export function Page() {
 
 	if (typeof window !== "undefined") {
 		window.addEventListener("scroll", () => {
-			if (window.scrollY > 925) {
+			if (window.scrollY > 2500) {
 				setDarkmode(false)
 			} else {
 				setDarkmode(true)
