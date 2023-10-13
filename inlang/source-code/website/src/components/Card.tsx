@@ -3,13 +3,19 @@ import { Chip } from "./Chip.jsx"
 import { colorForTypeOf, typeOfIdToTitle } from "./sections/marketplace/utilities.js"
 import Plus from "~icons/material-symbols/add-rounded"
 
-export default function Card(props: { item: any; displayName: string }) {
+export default function Card(props: { item: any; displayName: string; highlight?: boolean }) {
 	return (
 		<>
 			<a
 				href={`/m/${props.item.id}`}
-				class="relative no-underline h-60 flex flex-col justify-between gap-4 group w-full bg-background hover:bg-surface-50 transition-colors border border-surface-200 rounded-xl p-5"
+				class={
+					"relative no-underline flex gap-4 flex-col justify-between group w-full bg-background hover:bg-surface-50 transition-colors border border-surface-200 rounded-xl p-5 " +
+					(props.highlight ? "h-96" : "h-60")
+				}
 			>
+				<Show when={props.highlight}>
+					<img class="h-48 object-cover object-top rounded-lg" src={props.item.gallery[0]} />
+				</Show>
 				<div class="flex flex-col gap-4">
 					<div class="w-full flex gap-4 items-start">
 						<div class="flex items-center gap-8 flex-shrink-0">
@@ -30,11 +36,13 @@ export default function Card(props: { item: any; displayName: string }) {
 						{props.item.description.en}
 					</p>
 				</div>
-				<div>
-					<p class="m-0 mb-2 text-surface-400 group-hover:text-surface-500 transition-colors leading-none no-underline text-sm">
-						{props.item.publisherName}
-					</p>
-				</div>
+				<Show when={!props.highlight}>
+					<div>
+						<p class="m-0 mb-2 text-surface-400 group-hover:text-surface-500 transition-colors leading-none no-underline text-sm">
+							{props.item.publisherName}
+						</p>
+					</div>
+				</Show>
 				<Show
 					when={
 						props.item.id.split(".")[0] === "plugin" ||

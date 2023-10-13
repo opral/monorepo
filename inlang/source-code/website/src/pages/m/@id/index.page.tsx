@@ -196,16 +196,14 @@ export function Page(props: PageProps) {
 												<div use:slider class="mt-16 cursor-grab active:cursor-grabbing">
 													<For each={props.manifest.gallery}>
 														{(image) => (
-															<Show when={props.manifest.gallery?.indexOf(image) !== 0}>
-																<a
-																	href={image}
-																	target="_blank"
-																	rel="noopener noreferrer"
-																	class="transition-opacity hover:opacity-80 cursor-pointer w-80 flex-shrink-0 active:cursor-grabbing"
-																>
-																	<img class="rounded-md w-80" src={image} />
-																</a>
-															</Show>
+															<a
+																href={image}
+																target="_blank"
+																rel="noopener noreferrer"
+																class="transition-opacity hover:opacity-80 cursor-pointer w-80 flex-shrink-0 active:cursor-grabbing"
+															>
+																<img class="rounded-md w-80" src={image} />
+															</a>
 														)}
 													</For>
 												</div>

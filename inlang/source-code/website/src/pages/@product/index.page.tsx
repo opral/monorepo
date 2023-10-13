@@ -60,7 +60,8 @@ export function Page(props: PageProps) {
 										},
 										{
 											type: "card",
-											id: "app.inlang.badge",
+											id: "app.inlang.editor",
+											slogan: "Popular",
 										},
 								  ]
 								: []
