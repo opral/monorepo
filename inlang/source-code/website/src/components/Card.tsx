@@ -57,7 +57,7 @@ export default function Card(props: { item: any; displayName: string; highlight?
 						props.item.id.split(".")[0] === "messageLintRule"
 					}
 				>
-					<sl-tooltip prop:content={`Install ${props.displayName}`}>
+					<sl-tooltip prop:content={`Install`}>
 						<a
 							onClick={(e) => {
 								e.stopPropagation()
