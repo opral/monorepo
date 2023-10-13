@@ -1,5 +1,11 @@
 # @inlang/marketplace-manifest
 
+## 1.3.0
+
+### Minor Changes
+
+- f49fd7027: feat: guide added as template literal
+
 ## 1.2.0
 
 ### Minor Changes
