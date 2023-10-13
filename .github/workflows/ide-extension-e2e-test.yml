@@ -9,7 +9,7 @@ jobs:
   test:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest] # windows-latest is disabled because build.js is not compatible
+        os: [ubuntu-latest, macos-latest, windows-latest]
         version: [18]
     runs-on: ${{ matrix.os }}
     steps:
@@ -21,8 +21,6 @@ jobs:
         with:
           node-version: ${{ matrix.version }}
           cache: "npm"
-
-
 
       - name: Install dependencies
         run: npm install
