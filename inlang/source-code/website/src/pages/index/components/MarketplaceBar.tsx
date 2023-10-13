@@ -17,6 +17,7 @@ const MarketplaceBar = (props: {
 					bgItem: "bg-transparent",
 					bgItemSelected: "bg-surface-200/75",
 					border: "border-surface-200",
+					hover: "hover:bg-surface-200/30",
 			  }
 			: {
 					text: "text-surface-300",
@@ -25,6 +26,7 @@ const MarketplaceBar = (props: {
 					bgItem: "bg-transparent",
 					bgItemSelected: "bg-surface-700",
 					border: "border-surface-700",
+					hover: "hover:bg-surface-700/30",
 			  }
 	}
 
@@ -49,10 +51,10 @@ const MarketplaceBar = (props: {
 					<>
 						<button
 							class={
-								"px-3 py-[6px] rounded-full text-sm " +
-								("/" + currentPageContext.urlParsed.pathname.split("/").pop() === link.href
+								"px-3 py-[6px] rounded-full text-sm transition-colors " +
+								(currentPageContext.urlParsed.pathname.includes(link.href)
 									? getTheme().textSelected + " " + getTheme().bgItemSelected
-									: getTheme().text + " " + getTheme().bgItem)
+									: getTheme().text + " " + getTheme().bgItem + " " + getTheme().hover)
 							}
 							onClick={() => {
 								// @ts-ignore - https://github.com/brillout/vite-plugin-ssr/issues/1106
