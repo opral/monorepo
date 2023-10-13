@@ -50,7 +50,7 @@ const MarketplaceBar = (props: {
 						<button
 							class={
 								"px-3 py-[6px] rounded-full text-sm " +
-								(currentPageContext.urlParsed.pathname.includes(link.href)
+								("/" + currentPageContext.urlParsed.pathname.split("/").pop() === link.href
 									? getTheme().textSelected + " " + getTheme().bgItemSelected
 									: getTheme().text + " " + getTheme().bgItem)
 							}
