@@ -46,8 +46,8 @@ export default function CategorieSlider() {
 	})
 
 	return (
-		<div class="w-[calc(100%_-_24px)] md:w-[calc(100%_-_16px)] h-64 pl-6 md:pl-4 overflow-hidden" >
-			<div ref={slider} class="flex h-full w-max gap-6 md:gap-4" >
+		<div class="w-[calc(100%_-_24px)] md:w-[calc(100%_-_16px)] h-64 pl-6 md:pl-4 overflow-hidden">
+			<div ref={slider} class="flex h-full w-max gap-6 md:gap-4">
 				<div class="w-[416px] h-64 transition-all duration-200">
 					<div class="flex justify-center items-center">
 						<div class="w-full h-64 bg-surface-800 rounded-2xl flex-shrink-0 relative">
@@ -103,13 +103,13 @@ export default function CategorieSlider() {
 						</div>
 					</div>
 				</div>
-			</div >
+			</div>
 			<div
-				class="z-20 absolute top-0 right-0 w-16 h-64 mr-6 md:mr-4"
+				class="z-20 absolute top-0 right-0 w-80 h-64 mr-6 md:mr-4"
 				style={{
-					background: "linear-gradient(270deg, #0F172A 0%, rgba(15, 23, 42, 0.00) 100%)"
+					background: "linear-gradient(270deg, #0F172A 0%, rgba(15, 23, 42, 0.00) 100%)",
 				}}
 			/>
-		</div >
+		</div>
 	)
 }
