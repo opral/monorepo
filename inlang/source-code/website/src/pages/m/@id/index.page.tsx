@@ -98,7 +98,7 @@ export function Page(props: PageProps) {
 	const [details, setDetails] = createSignal({})
 	const [slider, { next, prev }] = createSlider({
 		slides: {
-			number: props.manifest.gallery && props.manifest.gallery.length - 1,
+			number: props.manifest && props.manifest.gallery ? props.manifest.gallery.length - 1 : 0,
 			perView: window ? (window.innerWidth > 768 ? 3 : 1) : 1,
 			spacing: 8,
 		},
@@ -208,22 +208,28 @@ export function Page(props: PageProps) {
 														)}
 													</For>
 												</div>
-												<button
-													// @ts-ignore
-													disabled={details().progress === 0}
-													onClick={prev}
-													class="absolute -left-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
-												>
-													<Left class="h-8 w-8" />
-												</button>
-												<button
-													// @ts-ignore
-													disabled={details().progress > 0.99}
-													onClick={next}
-													class="absolute -right-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
-												>
-													<Right class="h-8 w-8" />
-												</button>
+												<Show when={details()}>
+													<button
+														disabled={
+															// @ts-ignore
+															details() && details().progress ? details().progress === 0 : false
+														}
+														onClick={prev}
+														class="absolute -left-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
+													>
+														<Left class="h-8 w-8" />
+													</button>
+													<button
+														disabled={
+															// @ts-ignore
+															details() && details().progress ? details().progress > 0.99 : false
+														}
+														onClick={next}
+														class="absolute -right-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
+													>
+														<Right class="h-8 w-8" />
+													</button>
+												</Show>
 											</div>
 										</Show>
 									</div>

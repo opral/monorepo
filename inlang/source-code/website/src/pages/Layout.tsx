@@ -176,7 +176,7 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 						</Show>
 						<div class={`w-full h-full relative z-10`}>
 							<nav class={"md:p-0 max-w-[1248px] w-full flex justify-center mx-auto h-full"}>
-								<div class={"md:py-4 md:px-4"}>
+								<div class="md:py-4 md:px-4 max-lg:hidden">
 									<MarketplaceBar
 										links={getMarketplaceLinks()}
 										type={props.darkmode ? "dark" : "light"}
@@ -213,7 +213,7 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 							</nav>
 						</div>
 					</div>
-					<div class="pl-6 md:pl-4 xl:pl-0 absolute z-[90] top-0 h-[72px] left-0 w-full text-surface-200 pointer-events-none">
+					<div class="pl-6 lg:pl-4 xl:pl-0 absolute z-[90] top-0 h-[72px] left-0 w-full text-surface-200 pointer-events-none">
 						<div class="max-w-[1248px] w-full mx-auto">
 							<a
 								href={getLocale() + "/"}
@@ -238,7 +238,7 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 						</div>
 					</div>
 					<div class="absolute pr-4 xl:pr-0 z-[90] top-0 h-[72px] left-0 w-full text-surface-200 pointer-events-none">
-						<div class="max-w-[1248px] w-full mx-auto justify-end hidden md:flex gap-8 items-center pt-[18px]">
+						<div class="max-w-[1248px] w-full mx-auto justify-end hidden lg:flex gap-8 items-center pt-[18px]">
 							<For each={getLinks()}>
 								{(link) => (
 									<>
@@ -263,7 +263,7 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 								</Button>
 							</Show>
 						</div>
-						<div class="md:hidden flex items-center justify-end h-[76px] pr-4">
+						<div class="lg:hidden flex items-center justify-end h-[76px] pr-4">
 							<button
 								onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
 								type="button"
