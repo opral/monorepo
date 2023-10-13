@@ -100,10 +100,10 @@ export default function Marketplace(props: {
 						</div>
 					}
 				>
-					<h3 class="font-semibold text-2xl mb-6">Related items other people visited</h3>
+					<h3 class="font-semibold text-2xl mb-6">Items that might interest you</h3>
 					<div class="relative">
 						<div use:slider class="cursor-grab active:cursor-grabbing">
-							<Gallery />
+							<Gallery randomize />
 						</div>
 						<button
 							disabled={details().progress === 0}
@@ -130,10 +130,12 @@ export default function Marketplace(props: {
 	)
 }
 
-const Gallery = () => {
+const Gallery = (props: { randomize: boolean }) => {
 	return (
 		<>
-			<For each={filteredItems()}>
+			<For
+				each={props.randomize ? filteredItems().sort(() => Math.random() - 0.5) : filteredItems()}
+			>
 				{(item) => {
 					const displayName =
 						typeof item.displayName === "object" ? item.displayName.en : item.displayName

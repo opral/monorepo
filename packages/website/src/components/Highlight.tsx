@@ -17,10 +17,10 @@ type BannerProps = {
 type CardProps = {
 	type: "card"
 	id: string
+	slogan: string
 }
 
 export default function Highlight(props: BannerProps | CardProps) {
-	console.log(props)
 	return (
 		<Switch>
 			<Match when={props.type === "banner"}>
@@ -51,10 +51,16 @@ export default function Highlight(props: BannerProps | CardProps) {
 				</div>
 			</Match>
 			<Match when={props.type === "card"}>
-				<Card
-					item={registry.find((item) => item.id === props.id)}
-					displayName={registry.find((item) => item.id === props.id).displayName.en}
-				/>
+				<div class="relative">
+					<h3 class="font-semibold absolute z-10 top-6 left-8 text-2xl">{props.slogan}</h3>
+					<Card
+						highlight
+						item={registry.find((item: { id: string }) => item.id === props.id)}
+						displayName={
+							registry.find((item: { id: string }) => item.id === props.id).displayName.en
+						}
+					/>{" "}
+				</div>
 			</Match>
 		</Switch>
 	)
