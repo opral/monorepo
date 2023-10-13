@@ -1,5 +1,16 @@
 # @inlang/badge
 
+## 0.4.0
+
+### Minor Changes
+
+- 6f42758bb: force absolute path for settingsFilePath to intercept nodeishFs with absolute paths
+
+### Patch Changes
+
+- Updated dependencies [6f42758bb]
+  - @inlang/sdk@0.11.0
+
 ## 0.3.0
 
 ### Minor Changes
