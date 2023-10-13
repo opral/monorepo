@@ -57,7 +57,6 @@ const [currentPage, setCurrentPage] = createSignal<Component>()
 const [currentPageProps, setCurrentPageProps] = createStore<Record<string, unknown>>({})
 
 export function render(pageContext: PageContextRenderer) {
-	console.log(pageContext)
 	try {
 		const isEditor = pageContext.urlPathname.includes("/editor")
 		setCurrentPageContext(pageContext)
