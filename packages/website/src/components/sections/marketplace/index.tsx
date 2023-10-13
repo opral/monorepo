@@ -24,11 +24,11 @@ const selectedCategory = () => {
 }
 const [selectedSubCategories, setSelectedSubCategories] = createSignal<SubCategory[]>([])
 
-const filteredItems = () => {
+const filteredItems = (slider?: boolean) => {
 	return algorithm(
 		selectedSubCategories(),
 		searchValue(),
-		selectedCategory() === "marketplace" ? undefined : selectedCategory()
+		selectedCategory() === "marketplace" || slider ? undefined : selectedCategory()
 	)
 }
 
@@ -53,7 +53,7 @@ export default function Marketplace(props: {
 
 	return (
 		<SectionLayout showLines={false} type="white">
-			<div class="pb-16 md:pb-20 relative">
+			<div class="relative">
 				<Show when={props.highlights}>
 					<Show when={props.highlights && props.highlights.length > 0}>
 						<div
@@ -125,7 +125,11 @@ const Gallery = (props: { randomize?: boolean }) => {
 	return (
 		<>
 			<For
-				each={props.randomize ? filteredItems().sort(() => Math.random() - 0.5) : filteredItems()}
+				each={
+					props.randomize
+						? filteredItems(props.randomize).sort(() => Math.random() - 0.5)
+						: filteredItems()
+				}
 			>
 				{(item) => {
 					const displayName =
