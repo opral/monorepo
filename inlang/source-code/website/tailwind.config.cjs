@@ -37,12 +37,12 @@ module.exports = {
 					"100%": { opacity: 1, transform: "translateY(0)" },
 				},
 				fadeOut: {
-					"0%": { opacity: 1 },
-					"100%": { opacity: 0 },
+					"0%": { opacity: 1, scale: 1 },
+					"100%": { opacity: 0, scale: 0 },
 				},
 				fadeIn: {
-					"0%": { opacity: 0 },
-					"100%": { opacity: 1 },
+					"0%": { opacity: 0, scale: 0 },
+					"100%": { opacity: 1, scale: 1 },
 				},
 				ripple: {
 					"0%": {
@@ -73,8 +73,8 @@ module.exports = {
 				jump: "jump 0.3s ease 1",
 				fadeInTop: "fadeInTop 0.4s ease-out 1",
 				fadeInBottom: "fadeInBottom 0.4s ease-out 1",
-				fadeIn: "fadeIn 0.5s ease-out forwards 1",
-				fadeOut: "fadeOut 0.5s ease-in forwards 1",
+				fadeIn: "fadeIn 0.3s ease-out forwards 1",
+				fadeOut: "fadeOut 0.3s ease-in forwards 1",
 				ripple: "ripple 2s linear infinite",
 				draw: "draw 0.3s cubic-bezier(0.650, 0.000, 0.450, 1.000) forwards",
 				spin: "spin 0.8s ease-in-out infinite",
