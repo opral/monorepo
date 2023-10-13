@@ -55,7 +55,7 @@ export default function Marketplace(props: {
 	const [slider, { next, prev }] = createSlider({
 		slides: {
 			number: filteredItems(true).length,
-			perView: 3,
+			perView: window ? (window.innerWidth > 768 ? 3 : 1) : 1,
 			spacing: 16,
 		},
 

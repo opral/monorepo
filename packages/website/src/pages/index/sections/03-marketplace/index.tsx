@@ -84,10 +84,10 @@ const Marketplace = () => {
 						<div class="absolute inset-0 z-10 bg-gradient-to-t from-surface-100/0 via-surface-100/0 via-70% to-surface-100/70 mix-blend-lighten" />
 					</div>
 					<div class="flex flex-col items-center px-6">
-						<h1 class="pr-16 md:pr-0 md:pb-6 text-[40px] leading-tight md:text-6xl md:text-center font-bold text-surface-800 tracking-tight">
+						<h1 class="text-center md:pb-6 text-[40px] leading-tight md:text-6xl md:text-center font-bold text-surface-800 tracking-tight">
 							Choose where to start
 						</h1>
-						<p class="text-surface-600 md:text-xl text-xl md:max-w-[500px] md:text-center pt-2">
+						<p class="text-surface-600 text-center md:text-xl text-xl md:max-w-[500px] md:text-center pt-2">
 							Choose a category to get to the building blocks of your globalization strategy.
 						</p>
 					</div>
