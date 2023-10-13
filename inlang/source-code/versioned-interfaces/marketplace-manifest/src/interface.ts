@@ -79,7 +79,14 @@ const MessageLintRule = Type.Intersect([
 	}),
 ])
 
+const Guide = Type.Intersect([
+	MarketplaceManifestBase,
+	Type.Object({
+		id: Type.TemplateLiteral("guide.${string}.${string}"),
+	}),
+])
+
 export type MarketplaceManifest = Static<typeof MarketplaceManifest>
-export const MarketplaceManifest = Type.Union([App, Library, Plugin, MessageLintRule], {
+export const MarketplaceManifest = Type.Union([App, Library, Plugin, MessageLintRule, Guide], {
 	description: "The manifest of a marketplace item.",
 })

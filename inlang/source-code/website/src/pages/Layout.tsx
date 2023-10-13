@@ -16,6 +16,7 @@ import { SectionLayout } from "./index/components/sectionLayout.jsx"
 import { defaultLanguage, extractLocale } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
 import { NewsletterForm } from "#src/components/NewsletterForm.jsx"
+import MarketplaceBar from "./index/components/MarketplaceBar.jsx"
 
 /**
  * Ensure that all elements use the same margins.
@@ -25,12 +26,12 @@ import { NewsletterForm } from "#src/components/NewsletterForm.jsx"
  * The dividers of the Header and Footer would not span the
  * entire width of the screen.
  */
-const layoutMargins = "max-w-screen-xl w-full mx-auto px-4 sm:px-10 "
+const layoutMargins = "max-w-screen-xl w-full mx-auto px-4"
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	return (
-		<div class="flex flex-col">
+		<div class="relative flex flex-col">
 			<Header />
 			{/* the outer div is growing to occupy the entire height and thereby
 			push the footer to the bottom */}
@@ -43,10 +44,19 @@ export function Layout(props: { children: JSXElement }) {
 	)
 }
 
-export const LandingPageLayout = (props: { children: JSXElement; landingpage?: boolean }) => {
+export const LandingPageLayout = (props: {
+	children: JSXElement
+	landingpage?: boolean
+	darkmode?: boolean
+	transparent?: boolean
+}) => {
 	return (
 		<div class="flex flex-col min-h-screen">
-			<Header landingpage={props.landingpage} />
+			<Header
+				landingpage={props.landingpage}
+				darkmode={props.darkmode}
+				transparent={props.transparent}
+			/>
 			{/* the outer div is growing to occupy the entire height and thereby
 			push the footer to the bottom */}
 			<div class={"grow flex flex-col "}>
@@ -79,20 +89,52 @@ const socialMediaLinks = [
 	},
 ]
 
-function Header(props: { landingpage?: boolean }) {
-	const getLinks = () => {
+function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?: boolean }) {
+	const getMarketplaceLinks = () => {
 		return [
-			{ name: `${t("header.link.marketplace")}`, href: "/marketplace", type: "text" as buttonType },
 			{
-				name: `${t("header.link.documentation")}`,
-				href: "/documentation",
-				type: "text" as buttonType,
+				name: `All`,
+				href: "/marketplace",
+				type: props.darkmode ? "textBackground" : ("text" as buttonType),
 			},
-			{ name: `${t("header.link.blog")}`, href: "/blog", type: "text" as buttonType },
+			{
+				name: `Application`,
+				href: "/application",
+				type: props.darkmode ? "textBackground" : ("text" as buttonType),
+			},
+			{
+				name: `Document`,
+				href: "/document",
+				type: props.darkmode ? "textBackground" : ("text" as buttonType),
+			},
+			{
+				name: `Email`,
+				href: "/email",
+				type: props.darkmode ? "textBackground" : ("text" as buttonType),
+			},
+			{
+				name: `Payment`,
+				href: "/payment",
+				type: props.darkmode ? "textBackground" : ("text" as buttonType),
+			},
+			{
+				name: `Website`,
+				href: "/website",
+				type: props.darkmode ? "textBackground" : ("text" as buttonType),
+			},
 		]
 	}
 
-	const [localStorage] = useLocalStorage()
+	const getLinks = () => {
+		return [
+			{
+				name: `Developers`,
+				href: "/documentation",
+				type: props.darkmode ? "textBackground" : ("text" as buttonType),
+			},
+		]
+	}
+
 	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false)
 	const [t, { locale }] = useI18n()
 
@@ -100,61 +142,186 @@ function Header(props: { landingpage?: boolean }) {
 		const language = locale() || defaultLanguage
 		return language !== defaultLanguage ? "/" + language : ""
 	}
-
 	return (
 		<>
-			<header
-				// bg-surface-1 is with fixed hex value to avoid transparency with dooms scrolling behaviour
-				class="sticky top-0 z-[9999] w-full bg-background border-b border-surface-2"
+			<Show
+				when={!currentPageContext.urlParsed.pathname.includes("editor")}
+				fallback={<EditorHeader />}
 			>
-				<div class={`w-full h-full py-4 px-4 sm:px-10 ${props.landingpage && "px-10"}`}>
-					<nav class={"max-w-screen-xl w-full mx-auto xl:px-10"}>
+				<header class="sticky top-0 w-full z-[100]">
+					<div
+						class={
+							"z-[80] w-full border-b transition-colors h-[76px] " +
+							(!props.transparent && props.darkmode
+								? " bg-surface-900 border-b-surface-800"
+								: !props.transparent && !props.darkmode
+								? "bg-background border-surface-2"
+								: "" + props.transparent && props.darkmode
+								? "bg-transparent border-b-surface-900 bg-surface-900"
+								: "bg-transparent border-b-background bg-background")
+						}
+					>
+						<Show when={props.transparent}>
+							<div class="absolute left-1/2 -translate-x-1/2 h-full max-w-screen-xl w-full mx-auto">
+								<div class="invisible xl:visible absolute top-0 left-0 h-full w-full z-0 ">
+									<div class="flex w-full h-full justify-between mx-auto">
+										<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
+										<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
+										<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
+										<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
+										<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
+									</div>
+								</div>
+							</div>
+						</Show>
+						<div class={`w-full h-full relative z-10`}>
+							<nav class={"md:p-0 max-w-[1248px] w-full flex justify-center mx-auto h-full"}>
+								<div class={"md:py-4 md:px-4"}>
+									<MarketplaceBar
+										links={getMarketplaceLinks()}
+										type={props.darkmode ? "dark" : "light"}
+									/>
+								</div>
+
+								<Show when={mobileMenuIsOpen()}>
+									<ol class="pl-8 pb-8 space-y-3 relativ w-full pt-24 overflow text-surface-100 bg-background border border-surface-200 h-[480px]">
+										<For each={[getMarketplaceLinks(), getLinks()].flat()}>
+											{(link) => (
+												<>
+													<Show when={link.name === "Developers"}>
+														<div class="py-4">
+															<div class="w-24 h-[1px] bg-surface-200 ml-8" />
+														</div>
+													</Show>
+													<sl-tree>
+														<a
+															class={
+																(props.darkmode ? "text-surface-100" : "text-on-surface") +
+																" grow min-w-full w-full"
+															}
+															href={link.href}
+															onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
+														>
+															<sl-tree-item>{link.name}</sl-tree-item>
+														</a>
+													</sl-tree>
+												</>
+											)}
+										</For>
+									</ol>
+								</Show>
+							</nav>
+						</div>
+					</div>
+					<div class="pl-6 md:pl-4 xl:pl-0 absolute z-[90] top-0 h-[72px] left-0 w-full text-surface-200 pointer-events-none">
+						<div class="max-w-[1248px] w-full mx-auto">
+							<a
+								href={getLocale() + "/"}
+								class="flex items-center w-fit pt-[18px] pointer-events-auto"
+							>
+								<img
+									class={
+										"h-9 w-9 " + (!mobileMenuIsOpen() && props.darkmode ? "filter invert" : "")
+									}
+									src="/favicon/safari-pinned-tab.svg"
+									alt="Company Logo"
+								/>
+								<span
+									class={
+										"self-center pl-2 text-left font-semibold " +
+										(!mobileMenuIsOpen() && props.darkmode ? "text-background" : "text-surface-900")
+									}
+								>
+									inlang
+								</span>
+							</a>
+						</div>
+					</div>
+					<div class="absolute pr-4 xl:pr-0 z-[90] top-0 h-[72px] left-0 w-full text-surface-200 pointer-events-none">
+						<div class="max-w-[1248px] w-full mx-auto justify-end hidden md:flex gap-8 items-center pt-[18px]">
+							<For each={getLinks()}>
+								{(link) => (
+									<>
+										<Button type={link.type} href={link.href}>
+											{link.name}
+										</Button>
+									</>
+								)}
+							</For>
+							<Show
+								when={
+									currentPageContext.urlParsed.pathname.includes("editor") === false &&
+									currentPageContext.urlParsed.pathname.includes("documentation") === false &&
+									currentPageContext.urlParsed.pathname.includes("blog") === false
+								}
+							>
+								<LanguagePicker darkmode={props.darkmode} />
+							</Show>
+							<Show when={currentPageContext.urlParsed.pathname.includes("editor") === false}>
+								<Button type={props.darkmode ? "primary" : "secondary"} href="/editor">
+									{t("header.openEditor")}
+								</Button>
+							</Show>
+						</div>
+						<div class="md:hidden flex items-center justify-end h-[76px] pr-4">
+							<button
+								onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
+								type="button"
+								class="inline-flex items-center justify-center text-primary pointer-events-auto"
+							>
+								<span class="sr-only">{mobileMenuIsOpen() ? "Close menu" : "Open menu"}</span>
+								{mobileMenuIsOpen() ? <IconClose class="w-6 h-6" /> : <IconMenu class="w-6 h-6" />}
+							</button>
+						</div>
+					</div>
+				</header>
+			</Show>
+		</>
+	)
+}
+
+function EditorHeader() {
+	const getLinks = () => {
+		return [
+			{
+				name: `Editor Projects`,
+				href: "/editor",
+			},
+			{
+				name: `Apps`,
+				href: "/application",
+			},
+		]
+	}
+	const [, { locale }] = useI18n()
+	const getLocale = () => {
+		const language = locale() || defaultLanguage
+		return language !== defaultLanguage ? "/" + language : ""
+	}
+	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false)
+	return (
+		<>
+			<header class="sticky top-0 z-[9999] w-full border-b transition-colors bg-transparent border-b-background bg-background">
+				<div class="`w-full h-full py-4 px-6 md:px-4 relative z-10">
+					<nav class="max-w-[1248px] w-full mx-auto">
 						<div class="flex">
 							<a href={getLocale() + "/"} class="flex items-center w-fit">
-								<img class="h-9 w-9" src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
-								<span class="self-center pl-2 text-left font-semibold text-surface-900">
+								<img class={"h-9 w-9"} src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
+								<span class={"self-center pl-2 text-left font-semibold text-surface-900"}>
 									inlang
 								</span>
 							</a>
 							<div class="w-full content-center">
 								<div class="hidden md:flex justify-end items-center gap-8">
-									<div class="flex gap-8">
-										<For each={socialMediaLinks}>
-											{(link) => (
-												<a
-													target="_blank"
-													class="link link-primary flex space-x-2 items-center"
-													href={link.href}
-												>
-													<link.Icon class="w-5 h-5" />
-													<span class="sr-only">{link.name}</span>
-												</a>
-											)}
-										</For>
-									</div>
 									<For each={getLinks()}>
 										{(link) => (
-											<Button type={link.type} href={link.href}>
-												{link.name}
-											</Button>
+											<>
+												<Button type="text" href={link.href}>
+													{link.name}
+												</Button>
+											</>
 										)}
 									</For>
-									<Show
-										when={
-											currentPageContext.urlParsed.pathname.includes("editor") === false &&
-											currentPageContext.urlParsed.pathname.includes("documentation") === false &&
-											currentPageContext.urlParsed.pathname.includes("blog") === false &&
-											currentPageContext.urlParsed.pathname.includes("marketplace") === false
-										}
-									>
-										<LanguagePicker />
-									</Show>
-									<Show when={currentPageContext.urlParsed.pathname.includes("editor") === false}>
-										<Button type="secondary" href="/editor">
-											{t("header.openEditor")}
-										</Button>
-									</Show>
-									{/* not overwhelming the user by only showing login button when not on landig page */}
 									<Show
 										when={
 											localStorage.user || currentPageContext.urlParsed.pathname.includes("editor")
@@ -205,24 +372,56 @@ function Header(props: { landingpage?: boolean }) {
 	)
 }
 
+const productsLinks = [
+	{
+		name: `Global Document`,
+		href: "/document",
+		type: "text" as buttonType,
+	},
+	{
+		name: `Global Application`,
+		href: "/application",
+		type: "text" as buttonType,
+	},
+	{
+		name: `Global Email`,
+		href: "/email",
+		type: "text" as buttonType,
+	},
+	{
+		name: `Global Payment`,
+		href: "/payment",
+		type: "text" as buttonType,
+	},
+	{
+		name: `Global Website`,
+		href: "/website",
+		type: "text" as buttonType,
+	},
+]
+
 const Footer = (props: { isLandingPage: boolean }) => {
 	const [t] = useI18n()
 
-	const getDocLinks = () => {
-		return [
-			{
-				name: `${t("footer.docs.gettingStarted")}`,
-				href: "/documentation/quick-start",
-				type: "text" as buttonType,
-			},
-			{ name: `${t("footer.docs.whyInlang")}`, href: "/documentation", type: "text" as buttonType },
-			{
-				name: `${t("footer.docs.contribute")}`,
-				href: "/documentation/contributing",
-				type: "text" as buttonType,
-			},
-		]
+	const getProductsLinks = () => {
+		return [...productsLinks]
 	}
+
+	// const getDocLinks = () => {
+	// 	return [
+	// 		{
+	// 			name: `${t("footer.docs.gettingStarted")}`,
+	// 			href: "/documentation/quick-start",
+	// 			type: "text" as buttonType,
+	// 		},
+	// 		{ name: `${t("footer.docs.whyInlang")}`, href: "/documentation", type: "text" as buttonType },
+	// 		{
+	// 			name: `${t("footer.docs.contribute")}`,
+	// 			href: "/documentation/contributing",
+	// 			type: "text" as buttonType,
+	// 		},
+	// 	]
+	// }
 	const getResourceLinks = () => {
 		return [
 			{
@@ -236,18 +435,8 @@ const Footer = (props: { isLandingPage: boolean }) => {
 				type: "text" as buttonType,
 			},
 			{
-				name: `${t("footer.resources.github")}`,
-				href: "https://github.com/inlang/monorepo",
-				type: "text" as buttonType,
-			},
-			{
-				name: `${t("footer.resources.twitter")}`,
-				href: "https://twitter.com/inlangHQ",
-				type: "text" as buttonType,
-			},
-			{
-				name: `${t("footer.resources.discord")}`,
-				href: "https://discord.gg/gdMPPWy57R",
+				name: `Developers`,
+				href: "/documentation",
 				type: "text" as buttonType,
 			},
 		]
@@ -276,26 +465,33 @@ const Footer = (props: { isLandingPage: boolean }) => {
 	return (
 		<footer class="border-t border-surface-100 overflow-hidden">
 			<SectionLayout showLines={props.isLandingPage} type="lightGrey">
-				<div class="flex flex-row flex-wrap-reverse py-16 px-6 md:px-10 xl:px-0 gap-10 sm:gap-x-0 md:gap-y-10 xl:gap-0">
-					<div class="w-full md:w-1/4 xl:px-10 flex flex-row items-center sm:items-start md:flex-col justify-between">
-						<a href="/" class="flex items-center w-fit">
-							<img class="h-9 w-9" src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
-							<span class="self-center pl-2 text-left font-semibold text-surface-900">inlang</span>
-						</a>
+				<div class="flex flex-row flex-wrap-reverse py-16 px-6 md:px-4 xl:px-0 gap-10 sm:gap-x-0 md:gap-y-10 xl:gap-0">
+					<div class="w-full md:w-1/4 xl:px-4 flex flex-row items-center sm:items-start md:flex-col gap-10 md:justify-start justify-between flex-wrap">
+						<div>
+							<a href="/" class="flex items-center w-fit mb-6">
+								<img class="h-9 w-9" src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
+								<span class="self-center pl-2 text-left font-semibold text-surface-900">
+									inlang
+								</span>
+							</a>
+							<p class="text-surface-600 text-sm">The ecosystem to go global</p>
+						</div>
+						<div class="flex gap-4">
+							<For each={socialMediaLinks}>
+								{(link) => (
+									<a
+										target="_blank"
+										class={"link link-primary flex space-x-2 items-center"}
+										href={link.href}
+									>
+										<link.Icon class="w-5 h-5" />
+										<span class="sr-only">{link.name}</span>
+									</a>
+								)}
+							</For>
+						</div>
 					</div>
-					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-10 flex flex-col pt-2">
-						<p class="font-semibold text-surface-900 pb-3">{t("footer.docs.title")}</p>
-						<For each={getDocLinks()}>
-							{(link) => (
-								<div class="w-fit opacity-80">
-									<Button type={link.type} href={link.href}>
-										{link.name}
-									</Button>
-								</div>
-							)}
-						</For>
-					</div>
-					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-10 flex flex-col pt-2">
+					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-4 flex flex-col pt-2">
 						<p class="font-semibold text-surface-900 pb-3">{t("footer.resources.title")}</p>
 						<For each={getResourceLinks()}>
 							{(link) => (
@@ -307,7 +503,19 @@ const Footer = (props: { isLandingPage: boolean }) => {
 							)}
 						</For>
 					</div>
-					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-10 xl:flex flex-col pt-2">
+					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-4 flex flex-col pt-2">
+						<p class="font-semibold text-surface-900 pb-3">Products</p>
+						<For each={getProductsLinks()}>
+							{(link) => (
+								<div class="w-fit opacity-80">
+									<Button type={link.type} href={link.href}>
+										{link.name}
+									</Button>
+								</div>
+							)}
+						</For>
+					</div>
+					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-4 xl:flex flex-col pt-2">
 						<p class="font-semibold text-surface-900 pb-3">{t("footer.contact.title")}</p>
 						<For each={getContactLinks()}>
 							{(link) => (
@@ -320,11 +528,11 @@ const Footer = (props: { isLandingPage: boolean }) => {
 						</For>
 					</div>
 				</div>
-				<div class="px-6 xl:px-0 flex flex-col xl:flex-row justify-between items-end gap-8 pb-16">
-					<div class="xl:px-10 xl:flex flex-col gap-2 md:gap-4 pt-2 max-xl:w-full">
+				<div class="px-6 md:px-4 xl:px-0 flex flex-col xl:flex-row justify-between items-end gap-8 pb-16">
+					<div class="xl:px-4 xl:flex flex-col gap-2 md:gap-4 pt-2 max-xl:w-full">
 						<NewsletterForm />
 					</div>
-					<div class="xl:w-1/4 xl:px-10 flex items-center justify-between pt-2 max-xl:w-full">
+					<div class="xl:w-1/4 xl:px-4 flex items-center justify-between pt-2 max-xl:w-full">
 						<p class="text-surface-700 font-medium w-fit">© inlang 2023</p>
 						<LanguagePicker />
 					</div>
@@ -397,7 +605,7 @@ function UserDropdown() {
 /**
  * Language picker for the landing page.
  */
-function LanguagePicker() {
+function LanguagePicker(props: { darkmode?: boolean }) {
 	const [localeIsLoaded, setLocaleIsLoaded] = createSignal(false)
 	const [, { locale }] = useI18n()
 
@@ -444,7 +652,12 @@ function LanguagePicker() {
 				<sl-dropdown>
 					<div
 						slot="trigger"
-						class="cursor-pointer h-10 flex items-center text-surface-700 font-medium link-primary text-sm"
+						class={
+							"cursor-pointer h-10 flex items-center font-medium text-sm " +
+							(props.darkmode
+								? "text-background hover:text-surface-300"
+								: "text-surface-700 hover:text-primary")
+						}
 					>
 						<p>{locale().toUpperCase()}</p>
 						<IconExpand class="w-5 h-5 opacity-50" />
@@ -471,3 +684,61 @@ function LanguagePicker() {
 		</div>
 	)
 }
+
+/**
+ * Language picker for the landing page.
+ */
+// function ProductDropdown(props: { darkmode?: boolean }) {
+// 	const languages = [
+// 		{
+// 			code: "en",
+// 			name: "English",
+// 		},
+// 		{
+// 			code: "de",
+// 			name: "Deutsch",
+// 		},
+// 		{
+// 			code: "zh",
+// 			name: "中文",
+// 		},
+// 		{
+// 			code: "sk",
+// 			name: "Slovak",
+// 		},
+// 		{
+// 			code: "pt_BR",
+// 			name: "Portuguese Brazil",
+// 		},
+// 	]
+
+// 	return (
+// 		<div class="w-fit">
+// 			<sl-dropdown>
+// 				<div
+// 					slot="trigger"
+// 					class={
+// 						"cursor-pointer h-10 flex items-center font-medium text-sm " +
+// 						(props.darkmode
+// 							? "text-background hover:text-surface-300"
+// 							: "text-surface-700 hover:text-primary")
+// 					}
+// 				>
+// 					<p>Products</p>
+// 					<IconExpand class="w-5 h-5 opacity-50" />
+// 				</div>
+// 				<sl-menu>
+// 					<For each={productsLinks}>
+// 						{(product) => (
+// 							<sl-menu-item>
+// 								<a class="w-full block" href={product.href}>
+// 									{product.name.replace("Global ", "")}
+// 								</a>
+// 							</sl-menu-item>
+// 						)}
+// 					</For>
+// 				</sl-menu>
+// 			</sl-dropdown>
+// 		</div>
+// 	)
+// }
