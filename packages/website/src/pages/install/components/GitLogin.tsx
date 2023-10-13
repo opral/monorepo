@@ -2,7 +2,6 @@ import { onMount } from "solid-js"
 import IconGithub from "~icons/cib/github"
 import type { SlDialog } from "@shoelace-style/shoelace"
 import { SignInDialog } from "#src/services/auth/index.js"
-import { publicEnv } from "@inlang/env-variables"
 
 export const Gitlogin = () => {
 	let signInDialog: SlDialog | undefined
@@ -36,7 +35,6 @@ export const Gitlogin = () => {
 				</sl-button>
 			</div>
 			<SignInDialog
-				githubAppClientId={publicEnv.PUBLIC_GITHUB_APP_CLIENT_ID}
 				ref={signInDialog!}
 				onClickOnSignInButton={() => {
 					signInDialog?.hide()

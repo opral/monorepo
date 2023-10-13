@@ -1,5 +1,5 @@
 import { type Static, Type, type TTemplateLiteral, type TLiteral } from "@sinclair/typebox"
-import type { NodeishFilesystem as LisaNodeishFilesystem } from "@lix-js/fs"
+import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Message } from "@inlang/message"
 import type { JSONObject } from "@inlang/json-types"
 import type { CustomApiInlangIdeExtension } from "./customApis/app.inlang.ideExtension.js"
@@ -12,7 +12,7 @@ import type { ExternalProjectSettings, ProjectSettings } from "@inlang/project-s
  * - only uses minimally required functions to decrease the API footprint on the ecosystem.
  */
 export type NodeishFilesystemSubset = Pick<
-	LisaNodeishFilesystem,
+	NodeishFilesystem,
 	"readFile" | "readdir" | "mkdir" | "writeFile"
 >
 

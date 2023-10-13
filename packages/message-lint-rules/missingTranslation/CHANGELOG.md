@@ -1,5 +1,11 @@
 # @inlang/message-lint-rule-missing-translation
 
+## 1.4.0
+
+### Minor Changes
+
+- 0055f20b1: update README
+
 ## 1.3.0
 
 ### Minor Changes

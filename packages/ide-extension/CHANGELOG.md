@@ -1,5 +1,32 @@
 # inlang-vs-code-extension
 
+## 1.13.0
+
+### Minor Changes
+
+- 3bfc38121: Use configured proxy for requests from ide-extension, if available
+
+## 1.12.0
+
+### Minor Changes
+
+- a3bd1b72f: fix: show inlang logo as extension icon
+
+### Patch Changes
+
+- Updated dependencies [6f42758bb]
+  - @lix-js/fs@0.3.0
+
+## 1.11.0
+
+### Minor Changes
+
+- a1f3f064b: improve: tryAutoGenProjectSettings
+
+  - Only prompts the user if the settings can actually be generated.
+
+  refactor: remove unused code
+
 ## 1.10.0
 
 ### Minor Changes
