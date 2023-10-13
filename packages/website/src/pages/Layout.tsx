@@ -374,13 +374,13 @@ function EditorHeader() {
 
 const productsLinks = [
 	{
-		name: `Global Documents`,
-		href: "/documents",
+		name: `Global Document`,
+		href: "/document",
 		type: "text" as buttonType,
 	},
 	{
-		name: `Global App`,
-		href: "/app",
+		name: `Global Application`,
+		href: "/application",
 		type: "text" as buttonType,
 	},
 	{
@@ -389,8 +389,8 @@ const productsLinks = [
 		type: "text" as buttonType,
 	},
 	{
-		name: `Global Payments`,
-		href: "/payments",
+		name: `Global Payment`,
+		href: "/payment",
 		type: "text" as buttonType,
 	},
 	{
