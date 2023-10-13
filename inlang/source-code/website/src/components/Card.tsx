@@ -13,8 +13,8 @@ export default function Card(props: { item: any; displayName: string; highlight?
 					(props.highlight ? "h-96" : "h-60")
 				}
 			>
-				<Show when={props.highlight}>
-					<img class="h-48 object-cover object-top rounded-lg" src={props.item.gallery[0]} />
+				<Show when={props.highlight && props.item.gallery}>
+					<img class="h-64 object-cover object-top rounded-lg" src={props.item.gallery[0]} />
 				</Show>
 				<div class="flex flex-col gap-4">
 					<div class="w-full flex gap-4 items-start">
@@ -32,9 +32,11 @@ export default function Card(props: { item: any; displayName: string; highlight?
 							/>
 						</div>
 					</div>
-					<p class="line-clamp-2 text-surface-500 transition-colors group-hover:text-surface-600">
-						{props.item.description.en}
-					</p>
+					<Show when={!props.highlight}>
+						<p class="line-clamp-2 text-surface-500 transition-colors group-hover:text-surface-600">
+							{props.item.description.en}
+						</p>
+					</Show>
 				</div>
 				<Show when={!props.highlight}>
 					<div>

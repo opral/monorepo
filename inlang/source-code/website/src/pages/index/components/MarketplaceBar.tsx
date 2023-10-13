@@ -15,8 +15,8 @@ const MarketplaceBar = (props: {
 					textSelected: "text-surface-900",
 					bg: "bg-background",
 					bgItem: "bg-transparent",
-					bgItemSelected: "bg-surface-200",
-					border: "border-surface-300",
+					bgItemSelected: "bg-surface-200/75",
+					border: "border-surface-200",
 			  }
 			: {
 					text: "text-surface-300",
@@ -38,7 +38,7 @@ const MarketplaceBar = (props: {
 	return (
 		<div
 			class={
-				"hidden md:flex justify-center items-center gap-1 border px-2 py-[5px] rounded-full transition-all" +
+				"hidden md:flex justify-center items-center gap-1 border px-1.5 py-[5px] rounded-full transition-all" +
 				getTheme().bg +
 				" " +
 				getTheme().border
