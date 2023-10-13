@@ -89,23 +89,6 @@ export const registry: MarketplaceManifest[] = [
 		license: "Apache-2.0",
 	},
 	{
-		id: "guide.inlang.example",
-		icon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		displayName: {
-			en: "Example Guide",
-		},
-		description: {
-			en: "This is an example guide.",
-		},
-		readme: {
-			en: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/cli/README.md",
-		},
-		keywords: ["application", "email", "website", "payment"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-	},
-	{
 		id: "library.inlang.languageTag",
 		icon: "https://images.emojiterra.com/google/android-12l/512px/1f4db.png",
 		displayName: {

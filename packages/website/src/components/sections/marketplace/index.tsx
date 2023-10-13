@@ -21,7 +21,7 @@ import { currentPageContext } from "#src/renderer/state.js"
 import { createSlider } from "solid-slider"
 import "solid-slider/slider.css"
 import Highlight from "#src/components/Highlight.jsx"
-import Card, { CardBuildOwn } from "#src/components/Card.jsx"
+import Card, { CardBuildOwn, NoResultsCard } from "#src/components/Card.jsx"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -138,15 +138,23 @@ export default function Marketplace(props: {
 const Gallery = (props: { randomize?: boolean }) => {
 	return (
 		<>
-			<For each={props.randomize ? randomizedItems() : filteredItems()}>
-				{(item) => {
-					const displayName =
-						typeof item.displayName === "object" ? item.displayName.en : item.displayName
+			<Show
+				when={filteredItems(props.randomize).length > 0}
+				fallback={<NoResultsCard category={selectedCategory()} />}
+			>
+				<For each={props.randomize ? randomizedItems() : filteredItems()}>
+					{(item) => {
+						const displayName =
+							typeof item.displayName === "object" ? item.displayName.en : item.displayName
 
-					return <Card item={item} displayName={displayName} />
-				}}
-			</For>
-			<CardBuildOwn />
+						return <Card item={item} displayName={displayName} />
+					}}
+				</For>
+				<CardBuildOwn />
+			</Show>
+			{/* <Match when={filteredItems(true).length === 0 && searchValue() !== ""}> */}
+			{/* <NoResultsCard /> */}
+			{/* </Match> */}
 		</>
 	)
 }
