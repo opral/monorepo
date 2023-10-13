@@ -1,8 +1,6 @@
 import { useI18n } from "@solid-primitives/i18n"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
-import { showToast } from "#src/components/Toast.jsx"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
-import copy from "clipboard-copy"
 
 const GetStarted = () => {
 	const [t, { locale }] = useI18n()
@@ -59,30 +57,6 @@ const GetStarted = () => {
 								/>
 							</button>
 						</a>
-						<p class="text-surface-300">or</p>
-
-						<sl-tooltip
-							prop:content={t("landing.getstarted.toast.tooltip")}
-							prop:distance={16}
-							prop:hoist={true}
-							prop:placement="top"
-						>
-							<button
-								onClick={() => {
-									copy("npx @inlang/cli@latest project init"),
-										showToast({
-											variant: "success",
-											title: t("landing.getstarted.toast.text"),
-											duration: 3000,
-										})
-								}}
-								class="bg-gradient-to-r from-surface-500 via-surface-700 via-40% to-surface-500 p-[1px] rounded-md"
-							>
-								<pre class="z-20 h-10 w-fit px-2 flex justify-center items-center bg-surface-800 text-sm text-surface-400 rounded-[5px] hover:text-surface-100">
-									{"$ npx @inlang/cli@latest project init"}
-								</pre>
-							</button>
-						</sl-tooltip>
 					</div>
 				</div>
 			</div>
