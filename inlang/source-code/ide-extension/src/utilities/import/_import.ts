@@ -21,11 +21,11 @@ export function _import(basePath: string): ImportFunction {
 	}
 }
 
-const httpsProxy =
-	process.env.HTTPS_PROXY || workspace.getConfiguration().get("http.proxy") || undefined
-const httpsAgent = httpsProxy ? new HttpsProxyAgent(httpsProxy) : undefined
-
 const createImport: ImportFunction = async (uri: string) => {
+	const httpsProxy =
+		process.env.HTTPS_PROXY || workspace.getConfiguration().get("http.proxy") || undefined
+	const httpsAgent = httpsProxy ? new HttpsProxyAgent(httpsProxy) : undefined
+
 	// polyfill for environments that don't support dynamic
 	// http imports yet like VSCode.
 
