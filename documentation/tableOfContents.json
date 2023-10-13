@@ -12,12 +12,6 @@
 			"slug": "architecture",
 			"title": "Architecture",
 			"description": "Architecture of inlang"
-		},
-		{
-			"path": "./overview/manually-create-project.md",
-			"slug": "manually-create-project",
-			"title": "Manually Create Project",
-			"description": "Manually create a project"
 		}
 	],
 	"Guide": [
