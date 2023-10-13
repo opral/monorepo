@@ -60,7 +60,7 @@ const Hero = () => {
 									class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-80 blur-sm"
 								/>
 							</button>
-							<Button type="textBackground" href="#" chevron>
+							<Button type="textBackground" href="mailto:hello@inlang.com" chevron>
 								Contact Sales
 							</Button>
 						</div>
