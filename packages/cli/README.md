@@ -98,26 +98,14 @@ The translations are performed using machine translation services. The translate
 
 The project command is used to interact with the Inlang project. It allows to create a new project or migrate an existing project to the new `project.inlang.json`.
 
-### `project init`
-
-The init command initialize a new Inlang project at `./project.inlang.json` with optional module configuration.
-
-To initialize a new project, run the following command:
-
-```sh
-npx @inlang/cli project init
-```
-
 This will launch an interactive prompt that will guide you through the process of creating the inlang configuration file.
 
-### `project migrate`
+### `project validate`
 
-The migrate command migrates an existing Inlang project from the old `inlang.config.js` to the new `project.inlang.json` format.
-
-To migrate an existing project, run the following command:
+Validates a project.
 
 ```sh
-npx @inlang/cli project migrate
+npx @inlang/cli project validate
 ```
 
 This will launch an interactive prompt that will guide you through the process of migrating the inlang configuration file.
