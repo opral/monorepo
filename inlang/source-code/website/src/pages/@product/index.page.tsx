@@ -56,16 +56,11 @@ export function Page(props: PageProps) {
 												type: "banner",
 												color: "#f66900",
 												title: "ParaglideJS (former SDK-JS)",
-												slogan: "Featured",
+												slogan: "Coming soon",
 												description: "The all new library for all common frameworks.",
 												link: "/m/library.inlang.paraglideJsSveltekit",
 												image:
 													"https://cdn.jsdelivr.net/gh/inlang/monorepo@website-update/inlang/assets/marketplace/paraglide-artwork.gif",
-											},
-											{
-												type: "card",
-												id: "app.inlang.editor",
-												slogan: "Popular",
 											},
 									  ]
 									: []
