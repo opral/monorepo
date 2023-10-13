@@ -4,6 +4,7 @@ import { colorForTypeOf, typeOfIdToTitle } from "./sections/marketplace/utilitie
 import Plus from "~icons/material-symbols/add-rounded"
 import { showToast } from "./Toast.jsx"
 import { rpc } from "@inlang/rpc"
+import { Button } from "#src/pages/index/components/Button.jsx"
 
 export default function Card(props: { item: any; displayName: string; highlight?: boolean }) {
 	return (
@@ -191,7 +192,7 @@ export function NoResultsCard(props: { category: string }) {
 				<p class="text-center text-surface-500 mb-12">
 					We will let you know when we get <br class="min-[350px]:block hidden" /> some new results.
 				</p>
-				<div class="w-full flex justify-center">
+				<div class="w-full flex justify-center flex-col items-center gap-4">
 					<div
 						class={
 							"flex items-start justify-stretch gap-3 md:flex-row flex-col transition-opacity duration-150 " +
@@ -230,6 +231,9 @@ export function NoResultsCard(props: { category: string }) {
 							Notify me
 						</button>
 					</div>
+					<Button href="/documentation/publish-marketplace" chevron type="textPrimary">
+						Help us build the ecosystem
+					</Button>
 				</div>
 			</div>
 		</div>
