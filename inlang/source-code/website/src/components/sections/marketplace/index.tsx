@@ -1,4 +1,3 @@
-import { registry } from "@inlang/marketplace-registry"
 import { For, Show, type Accessor, createSignal, createEffect } from "solid-js"
 import { SearchIcon } from "#src/pages/editor/@host/@owner/@repository/components/SearchInput.jsx"
 import { Button } from "#src/pages/index/components/Button.jsx"
@@ -6,9 +5,9 @@ import { GetHelp } from "#src/components/GetHelp.jsx"
 import Check from "~icons/material-symbols/check"
 import Right from "~icons/material-symbols/chevron-right"
 import Left from "~icons/material-symbols/chevron-left"
-import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
-// import { filteredItems } from "./algorithm.js"
+import { algorithm } from "./algorithm.js"
+import { currentPageContext } from "#src/renderer/state.js"
 // @ts-ignore
 import { createSlider } from "solid-slider"
 import "solid-slider/slider.css"
@@ -20,31 +19,18 @@ export type SubCategory = "app" | "library" | "plugin" | "messageLintRule"
 
 /* Export searchValue to make subpages insert search-terms */
 export const [searchValue, setSearchValue] = createSignal<string>("")
-const [selectedCategories, setSelectedCategories] = createSignal<SubCategory[]>([])
+const selectedCategory = () => {
+	return currentPageContext.urlParsed.pathname.replace("/", "")
+}
+const [selectedSubCategories, setSelectedSubCategories] = createSignal<SubCategory[]>([])
 
-const filteredItems = () =>
-	registry.filter((item: MarketplaceManifest) => {
-		// slice to the first dot yields the category
-		const category = item.id.slice(0, item.id.indexOf(".")) as SubCategory
-
-		if (selectedCategories().length > 0 && !selectedCategories().includes(category)) {
-			return false
-		}
-
-		const search = searchValue().toLowerCase()
-
-		const displayName =
-			typeof item.displayName === "object" ? item.displayName.en : item.displayName
-
-		const isSearchMatch =
-			displayName.toLowerCase().includes(search) ||
-			item.publisherName.toLowerCase().includes(search) ||
-			item.keywords.some((keyword: string) => keyword.toLowerCase().includes(search))
-
-		return isSearchMatch
-	})
-
-// filteredItems(selectedCategories(), searchValue())
+const filteredItems = () => {
+	return algorithm(
+		selectedSubCategories(),
+		searchValue(),
+		selectedCategory() === "marketplace" ? undefined : selectedCategory()
+	)
+}
 
 export default function Marketplace(props: {
 	minimal?: boolean
@@ -70,7 +56,12 @@ export default function Marketplace(props: {
 			<div class="pb-16 md:pb-20 relative">
 				<Show when={props.highlights}>
 					<Show when={props.highlights && props.highlights.length > 0}>
-						<div class="flex justify-between gap-6 md:flex-row flex-col mb-8">
+						<div
+							class={
+								"flex md:grid justify-between gap-6 md:flex-row flex-col mb-8 " +
+								(props.highlights.length > 1 ? "md:grid-cols-2" : "md:grid-cols-1")
+							}
+						>
 							<For each={props.highlights}>{(highlight) => <Highlight {...highlight} />}</For>
 						</div>
 					</Show>
@@ -130,7 +121,7 @@ export default function Marketplace(props: {
 	)
 }
 
-const Gallery = (props: { randomize: boolean }) => {
+const Gallery = (props: { randomize?: boolean }) => {
 	return (
 		<>
 			<For
@@ -203,10 +194,10 @@ const Search = (props: SearchInputProps) => {
 
 const Tags = () => {
 	function selectTag(tag: SubCategory) {
-		if (selectedCategories().includes(tag)) {
-			setSelectedCategories(selectedCategories().filter((t) => t !== tag))
+		if (selectedSubCategories().includes(tag)) {
+			setSelectedSubCategories(selectedSubCategories().filter((t) => t !== tag))
 		} else {
-			setSelectedCategories([...selectedCategories(), tag])
+			setSelectedSubCategories([...selectedSubCategories(), tag])
 		}
 	}
 
@@ -216,12 +207,12 @@ const Tags = () => {
 				onClick={() => selectTag("app")}
 				class={
 					"gap-2 relative py-1.5 rounded-full cursor-pointer border border-solid text-sm capitalize hover:opacity-90 transition-all duration-100 flex items-center " +
-					(selectedCategories().includes("app")
+					(selectedSubCategories().includes("app")
 						? "bg-surface-800 text-background border-surface-800 pl-7 pr-3"
 						: "bg-background text-surface-600 border-surface-200 px-3 hover:border-surface-400")
 				}
 			>
-				<Show when={selectedCategories().includes("app")}>
+				<Show when={selectedSubCategories().includes("app")}>
 					<Check class="w-4 h-4 absolute left-2" />
 				</Show>
 				<p class="m-0">Apps</p>
@@ -230,12 +221,12 @@ const Tags = () => {
 				onClick={() => selectTag("library")}
 				class={
 					"gap-2 relative py-1.5 rounded-full cursor-pointer border border-solid text-sm capitalize hover:opacity-90 transition-all duration-100 flex items-center " +
-					(selectedCategories().includes("library")
+					(selectedSubCategories().includes("library")
 						? "bg-surface-800 text-background border-surface-800 pl-7 pr-3"
 						: "bg-background text-surface-600 border-surface-200 px-3 hover:border-surface-400")
 				}
 			>
-				<Show when={selectedCategories().includes("library")}>
+				<Show when={selectedSubCategories().includes("library")}>
 					<Check class="w-4 h-4 absolute left-2" />
 				</Show>
 				<p class="m-0">Libraries</p>
@@ -244,12 +235,12 @@ const Tags = () => {
 				onClick={() => selectTag("messageLintRule")}
 				class={
 					"gap-2 relative py-1.5 rounded-full cursor-pointer border border-solid text-sm capitalize hover:opacity-90 transition-all duration-100 flex items-center " +
-					(selectedCategories().includes("messageLintRule")
+					(selectedSubCategories().includes("messageLintRule")
 						? "bg-surface-800 text-background border-surface-800 pl-7 pr-3"
 						: "bg-background text-surface-600 border-surface-200 px-3 hover:border-surface-400")
 				}
 			>
-				<Show when={selectedCategories().includes("messageLintRule")}>
+				<Show when={selectedSubCategories().includes("messageLintRule")}>
 					<Check class="w-4 h-4 absolute left-2" />
 				</Show>
 				<p class="m-0">Lint Rules</p>
@@ -258,12 +249,12 @@ const Tags = () => {
 				onClick={() => selectTag("plugin")}
 				class={
 					"gap-2 relative py-1.5 rounded-full cursor-pointer border border-solid text-sm capitalize hover:opacity-90 transition-all duration-100 flex items-center " +
-					(selectedCategories().includes("plugin")
+					(selectedSubCategories().includes("plugin")
 						? "bg-surface-800 text-background border-surface-800 pl-7 pr-3"
 						: "bg-background text-surface-600 border-surface-200 px-3 hover:border-surface-400")
 				}
 			>
-				<Show when={selectedCategories().includes("plugin")}>
+				<Show when={selectedSubCategories().includes("plugin")}>
 					<Check class="w-4 h-4 absolute left-2" />
 				</Show>
 				<p class="m-0">Plugins</p>

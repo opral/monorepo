@@ -30,7 +30,7 @@ export default function Highlight(props: BannerProps | CardProps) {
 					}}
 					class={`h-96 w-full bg-surface-100 bg-cover bg-center rounded-2xl flex items-end justify-start relative`}
 				>
-					<h3 class="font-semibold absolute top-6 left-8 text-background text-2xl">
+					<h3 class="font-semibold absolute top-6 left-6 text-background text-2xl px-2">
 						{props.slogan}
 					</h3>
 					<div
@@ -52,7 +52,9 @@ export default function Highlight(props: BannerProps | CardProps) {
 			</Match>
 			<Match when={props.type === "card"}>
 				<div class="relative">
-					<h3 class="font-semibold absolute z-10 top-6 left-8 text-2xl">{props.slogan}</h3>
+					<h3 class="font-semibold absolute z-10 top-6 left-6 text-2xl px-2 bg-background/75 backdrop-blur-lg rounded-md">
+						{props.slogan}
+					</h3>
 					<Card
 						highlight
 						item={registry.find((item: { id: string }) => item.id === props.id)}
