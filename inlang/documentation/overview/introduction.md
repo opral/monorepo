@@ -1,6 +1,8 @@
 # Introduction
 
-> ℹ️ These docs guide you on how to build on top of inlang, not how to use inlang.
+<doc-links>
+    <doc-link title="Guides are in the Marketplace" icon="material-symbols:add-business-outline-rounded" href="/marketplace" description="These docs guide you on how to build on top of inlang. You find guides in the marketplace"></doc-link>
+</doc-links>
 
 ## What is inlang?
 
