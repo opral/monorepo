@@ -17,9 +17,10 @@
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/editor/README.md"
 	},
-	"keywords": ["editor", "web"],
+	"keywords": ["application", "editor", "web"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"website": "/editor",
 	"license": "Apache-2.0"
 }
+  

@@ -10,8 +10,9 @@
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/versioned-interfaces/language-tag/README.md"
 	},
-	"keywords": ["lang", "language tag"],
+	"keywords": ["application", "lang", "language tag"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0"
 }
+  

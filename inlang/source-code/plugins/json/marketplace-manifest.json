@@ -11,9 +11,10 @@
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/json/README.md"
 	},
-	"keywords": ["json", "generic"],
+	"keywords": ["application", "json", "generic"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0",
 	"module": "https://cdn.jsdelivr.net/npm/@inlang/plugin-json@latest/dist/index.js"
 }
+  

@@ -74,3 +74,18 @@ test("should only allow the inlang schema schema", () => {
 	}
 	expect(Value.Check(MarketplaceManifest, plugin)).toBe(false)
 })
+
+test("should pass a valid guide", () => {
+	const guide: MarketplaceManifest = {
+		$schema: "https://inlang.com/schema/marketplace-manifest",
+		id: "guide.inlang.example",
+		gallery: ["https://inlang.com/images/paraglidejs.png"],
+		displayName: { en: "My App" },
+		description: { en: "Hello" },
+		keywords: [],
+		license: "Apache-2.0",
+		readme: { en: "https://my-app.com/readme.md" },
+		publisherName: "inlang",
+	}
+	expect(Value.Check(MarketplaceManifest, guide)).toBe(true)
+})
