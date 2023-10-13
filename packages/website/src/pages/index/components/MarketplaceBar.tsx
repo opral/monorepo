@@ -51,7 +51,7 @@ const MarketplaceBar = (props: {
 					<>
 						<button
 							class={
-								"px-3 py-[6px] rounded-full text-sm transition-colors " +
+								"px-3 py-[6px] rounded-full font-medium text-sm transition-colors " +
 								(currentPageContext.urlParsed.pathname.includes(link.href)
 									? getTheme().textSelected + " " + getTheme().bgItemSelected
 									: getTheme().text + " " + getTheme().bgItem + " " + getTheme().hover)
