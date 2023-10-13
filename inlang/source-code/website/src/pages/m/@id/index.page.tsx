@@ -297,7 +297,9 @@ export function Page(props: PageProps) {
 							</Show>
 						</div>
 						<Marketplace slider minimal />
-						<GetHelp text="Do you have questions?" />
+						<div class="mt-20">
+							<GetHelp text="Do you have questions?" />
+						</div>
 					</div>
 				</Show>
 			</Layout>

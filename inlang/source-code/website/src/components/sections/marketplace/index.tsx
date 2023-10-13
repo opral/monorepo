@@ -1,4 +1,4 @@
-import { For, Show, type Accessor, createSignal, createEffect } from "solid-js"
+import { For, Show, type Accessor, createSignal, createEffect, Match, Switch } from "solid-js"
 import { SearchIcon } from "#src/pages/editor/@host/@owner/@repository/components/SearchInput.jsx"
 import { Button } from "#src/pages/index/components/Button.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
@@ -41,7 +41,7 @@ export default function Marketplace(props: {
 	const [details, setDetails] = createSignal({})
 	const [slider, { next, prev }] = createSlider({
 		slides: {
-			number: filteredItems().length + 1,
+			number: filteredItems(true).length,
 			perView: 3,
 			spacing: 16,
 		},
@@ -59,7 +59,7 @@ export default function Marketplace(props: {
 						<div
 							class={
 								"flex md:grid justify-between gap-6 md:flex-row flex-col mb-8 " +
-								(props.highlights.length > 1 ? "md:grid-cols-2" : "md:grid-cols-1")
+								(props.highlights!.length > 1 ? "md:grid-cols-2" : "md:grid-cols-1")
 							}
 						>
 							<For each={props.highlights}>{(highlight) => <Highlight {...highlight} />}</For>
@@ -83,38 +83,39 @@ export default function Marketplace(props: {
 						</div>
 					</div>
 				</Show>
-				<Show
-					when={props.slider}
-					fallback={
+				<Switch>
+					<Match when={props.slider}>
+						<h3 class="font-semibold text-2xl mb-6">Items that might interest you</h3>
+						<div class="relative">
+							<div use:slider class="cursor-grab active:cursor-grabbing">
+								<Gallery randomize />
+							</div>
+							<button
+								disabled={details().progress === 0}
+								onClick={prev}
+								class="absolute -left-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
+							>
+								<Left class="h-8 w-8" />
+							</button>
+							<button
+								disabled={details().progress > 0.99}
+								onClick={next}
+								class="absolute -right-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
+							>
+								<Right class="h-8 w-8" />
+							</button>
+						</div>
+					</Match>
+					<Match when={!props.slider}>
 						<div class="mb-32 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-center items-stretch relative">
 							<Gallery />
 						</div>
-					}
-				>
-					<h3 class="font-semibold text-2xl mb-6">Items that might interest you</h3>
-					<div class="relative">
-						<div use:slider class="cursor-grab active:cursor-grabbing">
-							<Gallery randomize />
-						</div>
-						<button
-							disabled={details().progress === 0}
-							onClick={prev}
-							class="absolute -left-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
-						>
-							<Left class="h-8 w-8" />
-						</button>
-						<button
-							disabled={details().progress > 0.99}
-							onClick={next}
-							class="absolute -right-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
-						>
-							<Right class="h-8 w-8" />
-						</button>
-					</div>
-				</Show>
-
+					</Match>
+				</Switch>
 				<Show when={!props.category && !props.slider && !props.minimal}>
-					<GetHelp text="Need help or have questions? Join our Discord!" />
+					<div class="mt-20">
+						<GetHelp text="Need help or have questions? Join our Discord!" />
+					</div>
 				</Show>
 			</div>
 		</SectionLayout>
@@ -124,13 +125,7 @@ export default function Marketplace(props: {
 const Gallery = (props: { randomize?: boolean }) => {
 	return (
 		<>
-			<For
-				each={
-					props.randomize
-						? filteredItems(props.randomize).sort(() => Math.random() - 0.5)
-						: filteredItems()
-				}
-			>
+			<For each={props.randomize ? filteredItems(props.randomize).reverse() : filteredItems()}>
 				{(item) => {
 					const displayName =
 						typeof item.displayName === "object" ? item.displayName.en : item.displayName
