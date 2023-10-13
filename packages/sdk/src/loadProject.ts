@@ -338,5 +338,3 @@ export function createSubscribable<T>(signal: () => T): Subscribable<T> {
 		},
 	})
 }
-
-
