@@ -16,7 +16,6 @@ export type PageProps = {
 }
 
 export function Page(props: PageProps) {
-	console.log("moin")
 	let mobileDetailMenu: SlDetails | undefined
 	const [editLink, setEditLink] = createSignal<string | undefined>("")
 	const [, { locale }] = useI18n()

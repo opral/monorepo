@@ -129,7 +129,7 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 		return [
 			{
 				name: `Developers`,
-				href: "/marketplace",
+				href: "/documentation",
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
 			},
 		]

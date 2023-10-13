@@ -1,10 +1,8 @@
-import CategoryHero from "#src/components/sections/categoryHero/index.jsx"
+import CategoryHero from "../components/sections/categoryHero/index.jsx"
 import { Meta, Title } from "@solidjs/meta"
-import { Show, createSignal } from "solid-js"
-import { Layout, LandingPageLayout as RootLayout } from "../Layout.jsx"
-import Marketplace from "#src/components/sections/marketplace/index.jsx"
-import { Button } from "../index/components/Button.jsx"
-import Highlight from "#src/components/Highlight.jsx"
+import { Show } from "solid-js"
+import { Layout } from "./Layout.jsx"
+import Marketplace, { type Category } from "../components/sections/marketplace/index.jsx"
 
 export type PageProps = {
 	slug: string
@@ -14,26 +12,7 @@ export type PageProps = {
 	}
 }
 
-export function Page(props: PageProps) {
-	const [darkmode, setDarkmode] = createSignal(true)
-	const [transparent, setTransparent] = createSignal(true)
-
-	if (typeof window !== "undefined") {
-		window.addEventListener("scroll", () => {
-			if (window.scrollY > 620) {
-				setDarkmode(false)
-			} else {
-				setDarkmode(true)
-			}
-
-			if (window.scrollY > 50) {
-				setTransparent(false)
-			} else {
-				setTransparent(true)
-			}
-		})
-	}
-
+export function CategoryPage(props: PageProps) {
 	return (
 		<>
 			<Title>inlang {props.content && props.content.title}</Title>
@@ -65,7 +44,7 @@ export function Page(props: PageProps) {
 									  ]
 									: []
 							}
-							category={props.content && props.content.title.toLowerCase()}
+							category={props.content && (props.content.title.toLowerCase() as Category)}
 						/>
 					</Show>
 				</div>
