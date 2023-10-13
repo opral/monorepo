@@ -76,7 +76,7 @@ const Marketplace = () => {
 		<div id="categories">
 			<SectionLayout showLines={true} type="lightGrey">
 				<div>
-					<div class="relative w-full flex justify-center overflow-hidden -mb-12">
+					<div class="relative w-full flex justify-center overflow-hidden -mb-6">
 						<img
 							src="/images/landingpage/marketplace_apps.png"
 							class="w-[180%] lg:w-full max-w-5xl mx-auto"
