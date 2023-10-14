@@ -8,7 +8,7 @@ import "solid-slider/slider.css"
 import CardGradient from "../../components/CardGradient.jsx"
 import { onMount } from "solid-js"
 
-export default function CategorieSlider() {
+export default function CategorySlider() {
 	let slider: HTMLDivElement | undefined
 
 	const animateCards = () => {
@@ -42,7 +42,7 @@ export default function CategorieSlider() {
 	onMount(() => {
 		setInterval(() => {
 			animateCards()
-		}, 4000)
+		}, 3000)
 	})
 
 	return (
@@ -105,7 +105,7 @@ export default function CategorieSlider() {
 				</div>
 			</div>
 			<div
-				class="z-20 absolute top-0 right-0 w-80 h-64 mr-6 md:mr-4"
+				class="z-20 absolute top-0 right-0 w-32 md:w-80 h-64 mr-6 md:mr-4"
 				style={{
 					background: "linear-gradient(270deg, #0F172A 0%, rgba(15, 23, 42, 0.00) 100%)",
 				}}
