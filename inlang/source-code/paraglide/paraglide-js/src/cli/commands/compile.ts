@@ -53,7 +53,7 @@ const runCompileCommand = async (args: {
 	for (const [fileName, fileContent] of Object.entries(output)) {
 		// create the compiled-output directory if it doesn't exist
 		await fs.access(outputDirectory).catch(async () => {
-			await fs.mkdir(outputDirectory)
+			await fs.mkdir(outputDirectory, { recursive: true })
 		})
 		await fs.writeFile(`${outputDirectory}/${fileName}`, fileContent, {
 			encoding: "utf-8",
