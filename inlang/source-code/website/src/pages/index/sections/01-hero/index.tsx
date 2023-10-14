@@ -61,7 +61,7 @@ const Hero = () => {
 							</button>
 							<a
 								class="flex gap-2 items-center"
-								href="https://github.com/inlang/monorepo"
+								href="https://github.com/inlang/monorepo/tree/main/inlang"
 								target="_blank"
 							>
 								<IconGithub class="text-background" />
