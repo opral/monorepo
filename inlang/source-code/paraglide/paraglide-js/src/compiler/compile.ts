@@ -1,6 +1,6 @@
 import { compileMessage } from "./compileMessage.js"
 import dedent from "dedent"
-import type { CompileFunction } from "../cli/types.js"
+import type { Message, ProjectSettings } from "@inlang/sdk"
 
 /**
  * Heads up for developers that a file is automatically generated.
@@ -12,9 +12,18 @@ const thisIsACompiledFileComment = dedent`
 `
 
 /**
- * Compiles an inlang project into the importable paraglide-js library.
+ * A compile function takes a list of messages and project settings and returns
+ * a map of file names to file contents.
+ *
+ * @example
+ *   const output = compile({ messages, settings })
+ *   console.log(output)
+ *   >> { "index.js": "...", "messages.js": "...", "runtime.js": "..." }
  */
-export const compile: CompileFunction = (args) => {
+export const compile = (args: {
+	messages: Readonly<Message[]>
+	settings: ProjectSettings
+}): Record<string, string> => {
 	const compiledMessages = args.messages.map(compileMessage).join("\n\n")
 
 	return {
