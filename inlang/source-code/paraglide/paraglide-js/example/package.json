@@ -2,7 +2,7 @@
 	"name": "@inlang/paraglide-js-example",
 	"type": "module",
 	"scripts": {
-		"build": "paraglide-js compile",
+		"build": "paraglide-js compile --namespace js-example",
 		"start": "node ./src/main.js"
 	},
 	"dependencies": {

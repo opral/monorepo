@@ -5,6 +5,7 @@ import fs from "node:fs/promises"
 import { resolve } from "node:path"
 import { Command } from "commander"
 import { paraglideDirectory } from "../main.js"
+import dedent from "dedent"
 
 export const compileCommand = new Command()
 	.name("compile")
@@ -14,11 +15,27 @@ export const compileCommand = new Command()
 		"The path to the project settings file.",
 		"./project.inlang.json"
 	)
+	.requiredOption(
+		"--namespace <name>",
+		dedent`
+		The import namespace of the compiled library. 
+		\nExample: --namespace frontend
+		-> import * as m from "@inlang/paraglide-js/frontend/messages"
+		\n`
+	)
 	.action((options) => {
-		runCompileCommand({ projectPath: options.project, paraglideDirectory })
+		runCompileCommand({
+			projectPath: options.project,
+			namespace: options.namespace,
+			paraglideDirectory,
+		})
 	})
 
-const runCompileCommand = async (args: { projectPath: string; paraglideDirectory: string }) => {
+const runCompileCommand = async (args: {
+	projectPath: string
+	paraglideDirectory: string
+	namespace: string
+}) => {
 	consola.info(`Compiling inlang project at "${args.projectPath}".`)
 
 	const project = exitIfErrors(
@@ -30,12 +47,15 @@ const runCompileCommand = async (args: { projectPath: string; paraglideDirectory
 		settings: project.settings(),
 	})
 
+	const outputDirectory =
+		`${args.paraglideDirectory}/dist/compiled-output` + (args.namespace ? `/${args.namespace}` : "")
+
 	for (const [fileName, fileContent] of Object.entries(output)) {
 		// create the compiled-output directory if it doesn't exist
-		await fs.access(`${args.paraglideDirectory}/dist/compiled-output`).catch(async () => {
-			await fs.mkdir(`${args.paraglideDirectory}/dist/compiled-output`)
+		await fs.access(outputDirectory).catch(async () => {
+			await fs.mkdir(outputDirectory)
 		})
-		await fs.writeFile(`${args.paraglideDirectory}/dist/compiled-output/${fileName}`, fileContent, {
+		await fs.writeFile(`${outputDirectory}/${fileName}`, fileContent, {
 			encoding: "utf-8",
 		})
 	}
