@@ -5,7 +5,6 @@ import type {
 	PluginSaveMessagesFunctionAlreadyDefinedError,
 	PluginHasInvalidIdError,
 	PluginHasInvalidSchemaError,
-	PluginUsesReservedNamespaceError,
 	PluginsDoNotProvideLoadOrSaveMessagesError,
 } from "./errors.js"
 import type { Message } from "@inlang/message"
@@ -37,7 +36,6 @@ export type ResolvePluginsFunction = (args: {
 		| PluginSaveMessagesFunctionAlreadyDefinedError
 		| PluginHasInvalidIdError
 		| PluginHasInvalidSchemaError
-		| PluginUsesReservedNamespaceError
 		| PluginsDoNotProvideLoadOrSaveMessagesError
 	>
 }>
