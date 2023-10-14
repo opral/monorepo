@@ -18,7 +18,7 @@ const thisIsACompiledFileComment = dedent`
  * @example
  *   const output = compile({ messages, settings })
  *   console.log(output)
- *   >> { "index.js": "...", "messages.js": "...", "runtime.js": "..." }
+ *   >> { "messages.js": "...", "runtime.js": "..." }
  */
 export const compile = (args: {
 	messages: Readonly<Message[]>

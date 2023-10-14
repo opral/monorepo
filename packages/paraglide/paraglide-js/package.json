@@ -7,17 +7,13 @@
 		"access": "public"
 	},
 	"exports": {
-		".": {
-			"import": "./dist/compiled-output/runtime.js",
-			"types": "./dist/compiled-output/runtime$.d.ts"
+		"./*/runtime": {
+			"import": "./dist/compiled-output/*/runtime.js",
+			"types": "./dist/compiled-output/*/runtime$.d.ts"
 		},
-		"./messages": {
-			"import": "./dist/compiled-output/messages.js",
-			"types": "./dist/compiled-output/messages$.d.ts"
-		},
-		"./messages/*": {
-			"import": "./dist/compiled-output/lang/*.js",
-			"types": "./dist/compiled-output/lang/*$.d.ts"
+		"./*/messages": {
+			"import": "./dist/compiled-output/*/messages.js",
+			"types": "./dist/compiled-output/*/messages$.d.ts"
 		}
 	},
 	"bin": {
