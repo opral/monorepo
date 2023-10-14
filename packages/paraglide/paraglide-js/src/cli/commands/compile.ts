@@ -1,31 +1,28 @@
 import { loadProject, type InlangProject } from "@inlang/sdk"
 import consola from "consola"
-import dedent from "dedent"
-import type minimist from "minimist"
 import { compile } from "../../compiler/compile.js"
 import fs from "node:fs/promises"
 import { resolve } from "node:path"
+import { Command } from "commander"
+import { paraglideDirectory } from "../main.js"
 
-const compileCommandUsage = dedent`
-Usage: paraglide-js compile <project-path>
-Example: paraglide-js compile ./project.inlang.json
-`
+export const compileCommand = new Command()
+	.name("compile")
+	.summary("Compiles an inlang project into an importable library.")
+	.requiredOption(
+		"--project <path>",
+		"The path to the project settings file.",
+		"./project.inlang.json"
+	)
+	.action((options) => {
+		runCompileCommand({ projectPath: options.project, paraglideDirectory })
+	})
 
-export const runCompileCommand = async (args: {
-	argv: minimist.ParsedArgs
-	paraglideDirectory: string
-}) => {
-	const projectPath = args.argv._[1]
-
-	if (projectPath === undefined) {
-		consola.error(`No project path specified.\n\n${compileCommandUsage}`)
-		process.exit(1)
-	}
-
-	consola.info(`Compiling inlang project at "${projectPath}".`)
+const runCompileCommand = async (args: { projectPath: string; paraglideDirectory: string }) => {
+	consola.info(`Compiling inlang project at "${args.projectPath}".`)
 
 	const project = exitIfErrors(
-		await loadProject({ settingsFilePath: resolve(process.cwd(), projectPath), nodeishFs: fs })
+		await loadProject({ settingsFilePath: resolve(process.cwd(), args.projectPath), nodeishFs: fs })
 	)
 
 	const output = compile({

@@ -38,9 +38,9 @@
 	},
 	"dependencies": {
 		"@inlang/sdk": "*",
+		"commander": "11.1.0",
 		"consola": "3.2.3",
-		"dedent": "1.5.1",
-		"minimist": "1.2.8"
+		"dedent": "1.5.1"
 	},
 	"devDependencies": {
 		"@rollup/plugin-terser": "0.4.3",
