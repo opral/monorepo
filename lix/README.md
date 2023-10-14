@@ -1,6 +1,6 @@
 # Lix 
 
-Lix is a change control system.
+Lix is a change control system optimized for running in the browser.
 
 A change control system allows tracking, querying, and reviewing changes on arbirtary data. For example, given a spreadsheet, a change control system allows you to see who changed what and when. It also allows you to query the data at any point in time. For example, you can ask "what was the value of cell A1 on 2021-01-01?". Or given a translation file `en.json`, a query that answers the question "Who changed message with key `login-header`?" can be executed.
 
