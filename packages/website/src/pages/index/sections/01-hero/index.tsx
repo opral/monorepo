@@ -6,7 +6,6 @@ import Listmonk from "./assets/logos/listmonk.jsx"
 import OpenAssistant from "./assets/logos/openAssistant.jsx"
 import CategorySlider from "./Slider.jsx"
 import IconGithub from "~icons/cib/github"
-import IconX from "~icons/cib/x"
 
 const Hero = () => {
 	const moveToCategory = () => {
