@@ -16,7 +16,7 @@ export function login() {
 
 export async function addPermissions() {
 	const permissionWindow = window.open(
-		`https://github.com/apps/${"lix-test"}/installations/select_target`,
+		`https://github.com/apps/${publicEnv.PUBLIC_LIX_GITHUB_APP_NAME}/installations/select_target`,
 		"_blank"
 	)
 	await new Promise((resolve) => {

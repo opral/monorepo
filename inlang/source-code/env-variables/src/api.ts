@@ -8,6 +8,7 @@ export type AllEnvVariables = PublicEnvVariables & PrivateEnvVariables
 
 export const publicEnvVariablesSchema = z.object({
 	PUBLIC_LIX_GITHUB_APP_CLIENT_ID: z.string(),
+	PUBLIC_LIX_GITHUB_APP_NAME: z.string(),
 	PUBLIC_GIT_PROXY_BASE_URL: z
 		.string()
 		.startsWith("http")
