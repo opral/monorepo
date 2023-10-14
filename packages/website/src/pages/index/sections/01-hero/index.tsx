@@ -1,4 +1,3 @@
-import { Button } from "../../components/Button.jsx"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
 import AppFlowy from "./assets/logos/appflowy.jsx"
 import Calcom from "./assets/logos/clacom.jsx"
@@ -6,6 +5,8 @@ import Jitsi from "./assets/logos/jitsi.jsx"
 import Listmonk from "./assets/logos/listmonk.jsx"
 import OpenAssistant from "./assets/logos/openAssistant.jsx"
 import CategorySlider from "./Slider.jsx"
+import IconGithub from "~icons/cib/github"
+import IconX from "~icons/cib/x"
 
 const Hero = () => {
 	const moveToCategory = () => {
@@ -27,11 +28,9 @@ const Hero = () => {
 							</span>
 						</h1>
 					</div>
-					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:pt-16 pt-4 pb-24">
-						<p class="pt-2 text-surface-300 text-xl max-w-md">
-							Expand to new markets and acquire more customers.
-						</p>
-						<div class="flex md:items-center items-start gap-8">
+					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:pt-16 pt-4 pb-24 text-surface-300">
+						<p class="pt-2 text-xl max-w-md">Expand to new markets and acquire more customers.</p>
+						<div class="flex items-center gap-8">
 							<button class="relative bg-surface-800" onClick={() => moveToCategory()}>
 								<div class="relative z-20 bg-surface-200 h-10 px-6 flex justify-center items-center shadow rounded-md hover:shadow-lg hover:bg-background transition-all">
 									<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-surface-900 via-surface-800 to-surface-900 text-sm font-medium">
@@ -60,9 +59,14 @@ const Hero = () => {
 									class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-80 blur-sm"
 								/>
 							</button>
-							<Button type="textBackground" href="mailto:hello@inlang.com" chevron>
-								Contact Sales
-							</Button>
+							<a
+								class="flex gap-2 items-center"
+								href="https://github.com/inlang/inlang"
+								target="_blank"
+							>
+								<IconGithub class="text-background" />
+								<span>GitHub</span>
+							</a>
 						</div>
 					</div>
 				</div>
