@@ -47,22 +47,12 @@ export function Page() {
 						<h2 class="text-[40px] leading-tight md:text-6xl font-bold pb-6 md:pb-8 text-center">
 							Open the Editor
 						</h2>
-						<p class="text-xl text-surface-600 w-full md:w-[600px] text-center leading-relaxed">
-							To access the editor, you must have the{" "}
+						<p class="text-xl text-surface-600 w-full md:w-[400px] text-center leading-relaxed">
+							To access the editor, please create the{" "}
 							<span class="text-base font-mono py-[5px] px-2 bg-surface-100 rounded-lg text-surface-600">
 								project.inlang.json
 							</span>{" "}
-							file in your repository. Use the{" "}
-							<span
-								class="text-hover-primary hover:opacity-70 cursor-pointer"
-								onClick={
-									// @ts-ignore https://github.com/brillout/vite-plugin-ssr/issues/1106
-									() => navigate(getLocale() + "/documentation/quick-start")
-								}
-							>
-								inlang CLI
-							</span>{" "}
-							to create this file.
+							file in your repository.
 						</p>
 					</div>
 					{/* using a column to ease responsive design (mobile would be tricky othersie) */}
