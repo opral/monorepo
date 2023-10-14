@@ -1,6 +1,6 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Repository } from "./api.js"
-import { transformRemote, withLazyFetching, parseLixUri, withLazyInjection } from "./helpers.js"
+import { transformRemote, parseLixUri, withLazyInjection } from "./helpers.js"
 // @ts-ignore
 import http from "./http-client.js"
 import { Octokit } from "octokit"
@@ -21,13 +21,8 @@ import {
 	TREE, 
 	WORKDIR,
 	STAGE, 
-	listFiles,
-	readObject,
-	checkout
 } from "isomorphic-git"
-import path from "path"
-import { blobExistsLocaly } from "./helpers/blobExistsLocaly.js"
-import { fetchBlobsFromRemote } from "./helpers/fetchBlobsFromRemote.js"
+import { withLazyFetching } from "./helpers/withLazyFetching.js"
 
 export async function openRepository(
 	url: string,
@@ -110,7 +105,6 @@ export async function openRepository(
 	// TODO - lazy fetch what shall we use as ref?
 	const ref = 'HEAD';
 
-	const managedFilePaths = [];
 
 	await walk({
         fs: rawFs,
@@ -134,133 +128,10 @@ export async function openRepository(
         }
     });
 	// delay all fs and repo operations until the repo clone and checkout have finished, this is preparation for the lazy feature
-	async function delayedAction({ prop, argumentsList, execute, }: { prop: string | symbol, argumentsList: any[], execute: () => any }) {
-		// if (pending) {
-		// 	return pending.then(execute)
-		// }
-
-		// return execute()
-
-		if (prop !== 'readFile' || argumentsList.length === 0) {
-            // forawrd all non readFiles
-            return execute();
-        }
-
-        // ok we are in the readfile - check if we deal with an object
-        const filePath = argumentsList[0];
-        const { dir, base } = path.parse(filePath);
-        const folders = dir.split(path.sep);
-
-		if (!filePath.includes('.git')) { // TODO more solid check for git folder !filePath.startsWith(gitdir)) {
-			// al right - we have a "normal" file not a .git file
-			// first of all we check if it exists - if so just return it - don't manipulate the index here
-			try {
-				await rawFs.stat(filePath);
-				return execute();
-			} catch (e) {
-				// TODO check other exceptions than file does not exists
-			}
-
-			const fileOid = filePathToOid[filePath];
-
-			// if it doesn't exist - check if it is in the git tree, add it to the managed files and do a checkout for this particular file
-			if (fileOid !== undefined) {
-				// check if the file is on the index already (this means it was deleted eventually...)
-				const filesOnIndex = await listFiles({
-					fs: rawFs,
-					gitdir,
-					// cache
-					dir,
-					// ref - we don't set ref because we want the list of files on the index
-				});
-
-				if (filesOnIndex.includes(fileOid)) {
-					execute();
-				} else {
-					const fileExistsLocally = await blobExistsLocaly(rawFs, fileOid, gitdir);
-					if (!fileExistsLocally) {
-						await fetchBlobsFromRemote({
-							fs: rawFs,
-							gitdir,
-							http, 
-							oids: [fileOid],
-							allOids: Object.keys(oidToFilePaths)
-						})
-					}
-					// const wrappedFs = withLazyFetching(fsRaw as unknown as NodeishFilesystem, 'test', cb);
-
-					console.log('\nRepo Checkout');
-					await checkout(
-						{
-							dir,
-							fs: rawFs,
-							filepaths: [filePath],
-						}
-					)
-					return execute();
-				}
-			} 
-		}
-
-        // .git/objects/as/asdasdasffasfasdasdasd
-        if (folders.length < 3 // TODO also check 
-            // || folders[folders.length-3] // TODO check if we are in the git folder
-            || folders[folders.length-2] !== 'objects' // check if we are in objects folcer
-            || folders[folders.length-1]?.length !== 2 
-            ) {
-            // forward non objects
-            return execute();
-        }
-
-        // check if file exists directly
-        
-        // exxtract the oid from the path and check if we can resolve the object loacly alread
-        const firstTwoCharsOfHash = folders[folders.length-1];
-        const oid = firstTwoCharsOfHash + base;
-
-
-        // if we have an oid request we are comming from _readObject of checkout
-        // checkout->_readObject internally 
-        // 1. tries to resolve the oid using objects (the call we intercept here)
-        // 2. tries to find it in a pack file 
-
-        const existsLocaly = await blobExistsLocaly(
-			rawFs, // we use the raw fs since we don't want to endup in the delayed function
-			oid, 
-			gitdir);
-
-        // this intercepts 1., checks if the object file or the pack file exists and loads them using fetch by passing all other files as have
-
-        if (existsLocaly) {
-            return execute();
-        }
-
-		console.log('trying to find hash: ' + oid + ' (files: ' + oidToFilePaths[oid]?.join() + ') locally - not found - fetching it' );
-		await fetchBlobsFromRemote({
-			fs: rawFs,
-			gitdir,
-			http: http,
-			oids: [oid],
-			allOids: Object.keys(oidToFilePaths)
-		});
-		
-        console.log('done');
-
-        // try to resolve the object again (this checks on object and on pack file)
-        // we hook into this fs again to resolve in case of a pack request since this is pretty isoltated
-        // read object does two calls 
-        
-            
-        // 
-    
-        return execute();
-    
-
-		
-	}
+	
 
 	return {
-		nodeishFs: withLazyFetching(rawFs, "app", delayedAction),
+		nodeishFs: withLazyFetching(rawFs, dir, gitdir, filePathToOid, oidToFilePaths, http, 'nodishfs'),
 
 		/**
 		 * Gets the git origin url of the current repository.
@@ -269,7 +140,7 @@ export async function openRepository(
 		 */
 		async listRemotes() {
 			try {
-				const withLazyFetchingpedFS = withLazyFetching(rawFs, "listRemotes", delayedAction)
+				const withLazyFetchingpedFS = withLazyFetching(rawFs, dir, gitdir, filePathToOid, oidToFilePaths, http, 'listRemotes');
 
 				const remotes = await listRemotes({
 					fs: withLazyFetchingpedFS,
@@ -284,7 +155,7 @@ export async function openRepository(
 
 		status(cmdArgs) {
 			return status({
-				fs: withLazyFetching(rawFs, "statusMatrix", delayedAction),
+				fs: withLazyFetching(rawFs, dir, gitdir, filePathToOid, oidToFilePaths, http, 'status'),
 				dir,
 				filepath: cmdArgs.filepath,
 			})
@@ -292,7 +163,7 @@ export async function openRepository(
 
 		statusMatrix(cmdArgs) {
 			return statusMatrix({
-				fs: withLazyFetching(rawFs, "statusMatrix", delayedAction),
+				fs: withLazyFetching(rawFs, dir, gitdir, filePathToOid, oidToFilePaths, http, 'statusMatrix'),
 				dir,
 				filter: cmdArgs.filter,
 			})
@@ -300,7 +171,7 @@ export async function openRepository(
 
 		add(cmdArgs) {
 			return add({
-				fs: withLazyFetching(rawFs, "add", delayedAction),
+				fs: withLazyFetching(rawFs, dir, gitdir, filePathToOid, oidToFilePaths, http, 'add'),
 				dir,
 				filepath: cmdArgs.filepath,
 			})
@@ -308,7 +179,7 @@ export async function openRepository(
 
 		commit(cmdArgs) {
 			return commit({
-				fs: withLazyFetching(rawFs, "commit", delayedAction),
+				fs: withLazyFetching(rawFs, dir, gitdir, filePathToOid, oidToFilePaths, http, 'commit'),
 				dir,
 				author: cmdArgs.author,
 				message: cmdArgs.message,
@@ -317,7 +188,7 @@ export async function openRepository(
 
 		push() {
 			return push({
-				fs: withLazyFetching(rawFs, "push", delayedAction),
+				fs: withLazyFetching(rawFs, dir, gitdir, filePathToOid, oidToFilePaths, http, 'push'),
 				url: gitUrl,
 				corsProxy: gitProxyUrl,
 				http,
@@ -327,7 +198,7 @@ export async function openRepository(
 
 		pull(cmdArgs) {
 			return pull({
-				fs: withLazyFetching(rawFs, "pull", delayedAction),
+				fs: withLazyFetching(rawFs, dir, gitdir, filePathToOid, oidToFilePaths, http, 'pull'),
 				url: gitUrl,
 				corsProxy: gitProxyUrl,
 				http,
@@ -340,7 +211,7 @@ export async function openRepository(
 
 		log(cmdArgs) {
 			return log({
-				fs: withLazyFetching(rawFs, "log", delayedAction),
+				fs: withLazyFetching(rawFs, dir, gitdir, filePathToOid, oidToFilePaths, http, 'log'),
 				depth: cmdArgs?.depth,
 				dir,
 				since: cmdArgs?.since,
@@ -420,7 +291,7 @@ export async function openRepository(
 			// TODO: make stateless
 			return (
 				(await currentBranch({
-					fs: withLazyFetching(rawFs, "getCurrentBranch", delayedAction),
+					fs: rawFs,
 					dir,
 				})) || undefined
 			)

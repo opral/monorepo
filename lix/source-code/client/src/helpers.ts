@@ -1,35 +1,6 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import { decodeBuffer, encodePkLine } from "./isomorphic-git-forks/git-fetch-request-helpers.js"
 
-/**
- * Wraps a nodeishFs implementation with a js proxy for detailed logging, debugging and transparently replacing the file access behaviour.
- * advantage of using this approach is that the underlying fs can also be swapped to something like lightingfs seamlessly.
- */
-export const withLazyFetching = (
-	targetRoot: NodeishFilesystem,
-	_module: string,
-	fn?: (args: { prop: string | symbol; argumentsList: any[]; fs: NodeishFilesystem, execute: () => any }) => any
-): NodeishFilesystem => {
-	return new Proxy(targetRoot, {
-		get(getTarget: typeof targetRoot, prop, receiver) {
-			if (getTarget[prop as keyof typeof targetRoot]) {
-				return new Proxy(getTarget[prop as keyof typeof getTarget], {
-					apply(callTarget, thisArg, argumentsList) {
-						// console.log(`${_module} fs:`, prop, argumentsList)
-
-						const execute = () => Reflect.apply(callTarget, thisArg, argumentsList);
-
-						return fn
-							? fn({ prop, argumentsList, fs: targetRoot, execute })
-							: execute()
-					},
-				})
-			}
-
-			return Reflect.get(getTarget, prop, receiver)
-		},
-	})
-}
 
 /**
  * Transforms a remote URL to a standard format.
