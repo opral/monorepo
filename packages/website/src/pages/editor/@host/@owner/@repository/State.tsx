@@ -195,7 +195,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		setSearchParams({ key: "lint", value: filteredMessageLintRules() })
 	})
 
-	const [localStorage, setLocalStorage] = useLocalStorage() ?? []
+	const [localStorage] = useLocalStorage() ?? []
 
 	const [repo] = createResource(
 		() => {
