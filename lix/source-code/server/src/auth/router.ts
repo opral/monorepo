@@ -1,10 +1,10 @@
-import { privateEnv } from "@inlang/env-variables"
+import { privateEnv, publicEnv } from "@inlang/env-variables"
 import { encryptAccessToken, exchangeInterimCodeForAccessToken } from "./implementation.js"
 import { Router } from "express"
 
 export const router: Router = Router()
 const githubAppClientId = privateEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID
-const installUrl = `https://github.com/apps/lix-test/installations/new`
+const installUrl = `https://github.com/apps/${publicEnv.PUBLIC_LIX_GITHUB_APP_NAME}/installations/new`
 const callbackUrl = `${privateEnv.PUBLIC_SERVER_BASE_URL}/services/auth/auth-callback`
 /**
  * OAuth flow from GitHub
@@ -32,7 +32,7 @@ router.get("/github-auth-callback", async (request, response, next) => {
 			githubClientSecret: privateEnv.LIX_GITHUB_APP_CLIENT_SECRET,
 		})
 
-		const { installations } = await(
+		const { installations } = await (
 			await fetch(`https://api.github.com/user/installations`, {
 				headers: {
 					Accept: "application/vnd.github+json",
