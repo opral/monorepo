@@ -26,7 +26,6 @@
 	"scripts": {
 		"build": "tsc --build",
 		"dev": "tsc --watch",
-		"pretest": "npm run build && npm run build -w @inlang/paraglide-js-example",
 		"test": "tsc --noEmit && vitest run --coverage",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
