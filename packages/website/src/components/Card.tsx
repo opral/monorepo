@@ -190,7 +190,7 @@ export function NoResultsCard(props: { category: string }) {
 					<NoResultsArtwork />
 				</div>
 			</div>
-			<div class="p-4 w-full h-full flex flex-col justify-center relative z-10 -translate-y-8 -mt-24">
+			<div class="p-4 w-full h-full flex flex-col justify-center relative -translate-y-8 -mt-24">
 				<h2 class="font-medium text-center text-xl mb-4">No results yet</h2>
 				<p class="text-center text-surface-500 mb-12">
 					We will let you know when we get <br class="min-[350px]:block hidden" /> some new results.

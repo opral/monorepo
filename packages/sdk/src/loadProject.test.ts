@@ -5,12 +5,14 @@ import type { ProjectSettings, Plugin, MessageLintRule, Message } from "./versio
 import type { ImportFunction } from "./resolve-modules/index.js"
 import type { InlangModule } from "@inlang/module"
 import {
+	LoadProjectInvalidArgument,
 	ProjectSettingsFileJSONSyntaxError,
 	ProjectSettingsFileNotFoundError,
 	ProjectSettingsInvalidError,
 } from "./errors.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 import { createMessage } from "./test-utilities/createMessage.js"
+import { tryCatch } from "@inlang/result"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -97,6 +99,20 @@ const _import: ImportFunction = async (name) =>
 // ------------------------------------------------------------------------------------------------
 
 describe("initialization", () => {
+	it("should throw if settingsFilePath is not an absolute path", async () => {
+		const fs = createNodeishMemoryFs()
+
+		const result = await tryCatch(() =>
+			loadProject({
+				settingsFilePath: "relative/path",
+				nodeishFs: fs,
+				_import,
+			})
+		)
+		expect(result.error).toBeInstanceOf(LoadProjectInvalidArgument)
+		expect(result.data).toBeUndefined()
+	})
+
 	describe("settings", () => {
 		it("should return an error if settings file is not found", async () => {
 			const fs = createNodeishMemoryFs()
