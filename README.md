@@ -1,4 +1,4 @@
 
-## [inlang - ecosystem to go global [README]](https://github.com/inlang/monorepo/inlang)
+## [inlang - ecosystem to go global [README]](./inlang)
 
-## [lix – change control system [README]](https://github.com/inlang/monorepo/lix)
+## [lix – change control system [README]](./lix)
