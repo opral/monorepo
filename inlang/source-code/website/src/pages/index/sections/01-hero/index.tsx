@@ -5,7 +5,7 @@ import Calcom from "./assets/logos/clacom.jsx"
 import Jitsi from "./assets/logos/jitsi.jsx"
 import Listmonk from "./assets/logos/listmonk.jsx"
 import OpenAssistant from "./assets/logos/openAssistant.jsx"
-import CategorieSlider from "./Slider.jsx"
+import CategorySlider from "./Slider.jsx"
 
 const Hero = () => {
 	const moveToCategory = () => {
@@ -69,7 +69,7 @@ const Hero = () => {
 			</SectionLayout>
 			<div class="w-full bg-surface-900 overflow-hidden">
 				<SectionLayout showLines={true} type="dark">
-					<CategorieSlider />
+					<CategorySlider />
 				</SectionLayout>
 			</div>
 			<SectionLayout showLines={true} type="dark">
