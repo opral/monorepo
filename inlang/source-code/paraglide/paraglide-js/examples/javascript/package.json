@@ -1,0 +1,12 @@
+{
+	"name": "@inlang/paraglide-js-example-javascript",
+	"type": "module",
+	"scripts": {
+		"build": "paraglide-js compile --namespace example-javascript",
+		"pretest": "npm run build",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@inlang/paraglide-js": "*"
+	}
+}

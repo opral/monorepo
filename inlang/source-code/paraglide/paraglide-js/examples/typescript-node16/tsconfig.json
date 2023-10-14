@@ -3,7 +3,8 @@
 	"compilerOptions": {
 		"checkJs": true,
 		"allowJs": true,
+		"outDir": "./irrelevant-because-only-typecheck",
 		"module": "Node16",
-		"outDir": "./irrelevant-because-only-typecheck"
+		"moduleResolution": "node16"
 	}
 }
