@@ -1,9 +1,6 @@
 {
 	"include": ["src/**/*"],
 	"compilerOptions": {
-		"checkJs": true,
-		"allowJs": true,
-		"outDir": "./irrelevant-because-only-typecheck",
 		"module": "Node16",
 		"moduleResolution": "node16"
 	}
