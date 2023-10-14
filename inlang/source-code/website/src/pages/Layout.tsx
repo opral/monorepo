@@ -533,7 +533,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 						<NewsletterForm />
 					</div>
 					<div class="xl:w-1/4 xl:px-4 flex items-center justify-between pt-2 max-xl:w-full">
-						<p class="text-surface-700 font-medium w-fit">© inlang 2023</p>
+						<p class="text-surface-700 text-sm font-medium w-fit">© inlang 2023</p>
 						<LanguagePicker />
 					</div>
 				</div>

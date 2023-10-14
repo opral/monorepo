@@ -21,12 +21,12 @@ export function Page() {
 			<Layout>
 				<div class="pb-16 md:pb-20 min-h-screen relative">
 					<div class="grid xl:grid-cols-3 xl:gap-8 grid-flow-row-dense mb-9 min-h-[198px]">
-						<div class="relative z-20 xl:mt-0 -mt-12 pb-8 xl:pb-0">
-							<h1 class="xl:col-span-2 md:pt-20 pt-16 text-[40px] md:text-5xl font-bold text-left  leading-none md:leading-tight mb-3">
+						<div class="relative z-20 xl:mt-0 -mt-12 pb-8 xl:pb-0 col-span-2">
+							<h1 class="xl:col-span-2 md:pt-20 pt-16 text-[40px] md:text-4xl font-bold text-left leading-none md:leading-tight mb-3">
 								Explore the ecosystem
 							</h1>
 						</div>
-						<div class="xl:col-span-2 max-xl:row-start-1 relative max-xl:max-h-14 xl:blur-0 blur-xl pointer-events-none w-full flex xl:justify-end content-start items-start flex-wrap gap-4 pt-12 justify-start xl:ml-auto max-w-lg">
+						<div class="max-xl:row-start-1 relative max-xl:max-h-14 xl:blur-0 blur-xl pointer-events-none w-full flex xl:justify-end content-start items-start flex-wrap gap-4 pt-12 justify-start xl:ml-auto max-w-lg">
 							<For each={icons}>
 								{(icon) => (
 									<div

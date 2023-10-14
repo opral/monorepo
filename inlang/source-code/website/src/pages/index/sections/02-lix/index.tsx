@@ -15,13 +15,13 @@ const Lix = () => {
 			<SectionLayout showLines={true} type="blue">
 				<div class="w-full flex pt-4 md:pt-20 flex-col xl:flex-row">
 					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:py-16 pt-20 py-6">
-						<h1 class="text-[40px] leading-tight md:text-6xl font-bold text-surface-500 pr-16 tracking-tight">
+						<h1 class="text-[40px] leading-tight md:text-4xl font-bold text-surface-500 pr-16 tracking-tight">
 							Built-on <br />
 							<span class="text-surface-200">Change Control</span>
 						</h1>
 					</div>
-					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:pt-16 pt-4 pb-16">
-						<p class="text-surface-300 text-xl max-w-md">
+					<div class="w-full xl:w-1/2 flex flex-col gap-2 px-6 md:px-4 xl:pt-16 pt-4 pb-16">
+						<p class="text-surface-300 text-lg max-w-md">
 							Inlang's change control system lix provides full control over changes.
 						</p>
 						<div class="flex md:items-center items-start gap-8">
@@ -146,8 +146,8 @@ const Card = (props: {
 			</div>
 			{props.image}
 			<div class="w-fit h-fit">
-				<p class="w-fit text-2xl font-semibold text-left text-background pb-2">{props.title}</p>
-				<p class="min-h-[72px] max-w-[230px] text-base font-medium text-left text-surface-400">
+				<p class="w-fit text-xl font-semibold text-left text-background pb-2">{props.title}</p>
+				<p class="min-h-[72px] max-w-[230px] text-base text-left text-surface-400">
 					{props.description}
 				</p>
 			</div>

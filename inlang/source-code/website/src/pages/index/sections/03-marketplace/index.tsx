@@ -76,18 +76,18 @@ const Marketplace = () => {
 		<div id="categories">
 			<SectionLayout showLines={true} type="lightGrey">
 				<div>
-					<div class="relative w-full flex justify-center overflow-hidden -mb-6">
+					<div class="relative w-full flex justify-center overflow-hidden -mb-12">
 						<img
 							src="/images/landingpage/marketplace_apps.png"
-							class="w-[180%] lg:w-full max-w-5xl mx-auto"
+							class="w-[180%] lg:w-full max-w-3xl mx-auto"
 						/>
 						<div class="absolute inset-0 z-10 bg-gradient-to-t from-surface-100/0 via-surface-100/0 via-70% to-surface-100/70 mix-blend-lighten" />
 					</div>
-					<div class="flex flex-col items-center px-6">
-						<h1 class="text-center md:pb-6 text-[40px] leading-tight md:text-6xl md:text-center font-bold text-surface-800 tracking-tight">
+					<div class="flex flex-col items-center px-6 pt-12">
+						<h1 class="text-center mb-2 text-[40px] leading-tight md:text-4xl md:text-center font-bold text-surface-800 tracking-tight">
 							Choose where to start
 						</h1>
-						<p class="text-surface-600 text-center md:text-xl text-xl md:max-w-[500px] md:text-center pt-2">
+						<p class="text-surface-600 text-center text-lg md:max-w-[500px] md:text-center pt-2">
 							Choose a category to get to the building blocks of your globalization strategy.
 						</p>
 					</div>
@@ -97,8 +97,8 @@ const Marketplace = () => {
 						<For each={data.filter((card) => card.left === true)}>
 							{(card) => {
 								return (
-									<div class="relative col-span-2 bg-background shadow-lg rounded-[18px] p-2 group lg:h-[390px]">
-										<div class="relative bg-surface-100 rounded-[14px] h-36 lg:h-56 lg:group-hover:h-44 transition-all duration-800 ease-in-out overflow-hidden">
+									<div class="relative col-span-2 flex flex-col justify-between border border-surface-200 bg-background shadow-2xl shadow-surface-900/5 rounded-xl p-2 lg:h-[390px]">
+										<div class="relative bg-surface-100 rounded-lg lg:h-56 h-36 lg:group-hover:h-44 transition-all duration-800 ease-in-out overflow-hidden">
 											<div class="z-20 relative translate-y-0 lg:group-hover:-translate-y-4 transition duration-800 ease-in-out">
 												{card.img}
 											</div>
@@ -106,26 +106,16 @@ const Marketplace = () => {
 												class={
 													"z-10 absolute w-1/2 h-1/2 bg-[" +
 													card.color +
-													"] top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 blur-2xl opacity-5 group-hover:opacity-20 transition-all duration-400"
+													"] top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 blur-2xl opacity-5 lg:group-hover:opacity-20 transition-all duration-400"
 												}
 											/>
 										</div>
-										<div class="p-6 flex flex-col gap-4">
-											{/* <p
-												class={
-													(!card.soon
-														? "bg-[#D7F3F8] text-primary"
-														: "bg-surface-100 text-surface-500") +
-													" px-3 py-2 w-fit rounded-md text-sm"
-												}
-											>
-												{card.soon ? "planned" : "try now"}
-											</p> */}
-											<h3 class="text-3xl font-semibold text-surafce-900">{card.title}</h3>
-											<p class="w-full lg:w-[80%] text-surafce-800 text-lg">{card.description}</p>
-											<div class="w-full h-auto lg:h-0 lg:opacity-0 group-hover:opacity-100 transition duration-800">
-												<Button type="textPrimary" href={card.link} chevron>
-													<p class="text-[16px]">{card.button}</p>
+										<div class="px-4 pt-4 pb-2 flex flex-col gap-1.5">
+											<h3 class="text-lg font-semibold text-surafce-900">{card.title}</h3>
+											<p class="w-full lg:w-[80%] text-surafce-500 mb-4">{card.description}</p>
+											<div class="w-full h-auto flex flex-col items-stretch">
+												<Button type="secondary" href={card.link} chevron>
+													{card.button}
 												</Button>
 											</div>
 										</div>
@@ -138,8 +128,8 @@ const Marketplace = () => {
 						<For each={data.filter((card) => card.left === false)}>
 							{(card) => {
 								return (
-									<div class="relative col-span-2 bg-background shadow-lg rounded-[18px] p-2 group lg:h-[390px]">
-										<div class="relative bg-surface-100 rounded-[14px] lg:h-56 h-36 lg:group-hover:h-44 transition-all duration-800 ease-in-out overflow-hidden">
+									<div class="relative col-span-2 flex flex-col justify-between border border-surface-200 bg-background shadow-2xl shadow-surface-900/5 rounded-xl p-2 lg:h-[390px]">
+										<div class="relative bg-surface-100 rounded-lg lg:h-56 h-36 lg:group-hover:h-44 transition-all duration-800 ease-in-out overflow-hidden">
 											<div class="z-20 relative translate-y-0 lg:group-hover:-translate-y-4 transition duration-800 ease-in-out">
 												{card.img}
 											</div>
@@ -151,22 +141,12 @@ const Marketplace = () => {
 												}
 											/>
 										</div>
-										<div class="p-6 flex flex-col gap-4">
-											{/* <p
-												class={
-													(!card.soon
-														? "bg-[#D7F3F8] text-primary"
-														: "bg-surface-100 text-surface-500") +
-													" px-3 py-2 w-fit rounded-md text-sm"
-												}
-											>
-												{card.soon ? "planned" : "try now"}
-											</p> */}
-											<h3 class="text-3xl font-semibold text-surafce-900">{card.title}</h3>
-											<p class="w-full lg:w-[80%] text-surafce-800 text-lg">{card.description}</p>
-											<div class="w-full h-auto lg:h-0 lg:opacity-0 group-hover:opacity-100 transition duration-800">
-												<Button type="textPrimary" href={card.link} chevron>
-													<p class="text-[16px]">{card.button}</p>
+										<div class="px-4 pt-4 pb-2 flex flex-col gap-1.5">
+											<h3 class="text-lg font-semibold text-surafce-900">{card.title}</h3>
+											<p class="w-full lg:w-[80%] text-surafce-500 mb-4">{card.description}</p>
+											<div class="w-full h-auto flex flex-col items-stretch">
+												<Button type="secondary" href={card.link} chevron>
+													{card.button}
 												</Button>
 											</div>
 										</div>

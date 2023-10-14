@@ -20,15 +20,16 @@ const Hero = () => {
 			<SectionLayout showLines={true} type="dark">
 				<div class="w-full flex pt-4 flex-col xl:flex-row">
 					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:pt-16 pt-20 py-6">
-						<h1 class="text-[40px] md:text-6xl font-bold text-background pr-12 md:pr-32 tracking-snug leading-none md:leading-tight">
-							The ecosystem to go{" "}
+						<h1 class="text-[40px] md:text-5xl font-bold text-background pr-12 md:pr-32 tracking-snug leading-none	">
+							The ecosystem
+							<br class="hidden md:block" /> to go{" "}
 							<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-[#F1D9FF] via-hover-primary to-[#3B82F6]">
 								global
 							</span>
 						</h1>
 					</div>
 					<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-4 xl:pt-16 pt-4 pb-24">
-						<p class="pt-2 text-surface-300 text-xl max-w-md">
+						<p class="pt-2 text-surface-300 text-lg max-w-md">
 							Expand to new markets and acquire more customers.
 						</p>
 						<div class="flex md:items-center items-start gap-8">
