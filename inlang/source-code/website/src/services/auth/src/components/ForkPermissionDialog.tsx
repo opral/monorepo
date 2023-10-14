@@ -1,4 +1,3 @@
-import { browserAuth } from "@lix-js/client"
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js"
 import { createSignal, Show } from "solid-js"
 import IconGithub from "~icons/cib/github"
