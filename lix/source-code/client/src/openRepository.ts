@@ -1,5 +1,5 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
-import type { Repository } from "./api.js"
+import type { Repository, LixError } from "./api.js"
 import { transformRemote, withLazyFetching, parseLixUri } from "./helpers.js"
 // @ts-ignore
 import http from "./http-client.js"
@@ -241,7 +241,7 @@ export async function openRepository(
 		},
 
 		errors: Object.assign(errors, {
-			subscribe: (callback: (value: Error[]) => void) => {
+			subscribe: (callback: (value: LixError[]) => void) => {
 				createEffect(() => {
 					// TODO: the subscription should not send the whole array but jsut the new errors
 					// const maybeLastError = errors().at(-1)
