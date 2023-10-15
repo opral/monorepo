@@ -6,7 +6,7 @@ import type {
 	Subscribable,
 } from "./api.js"
 import { type ImportFunction, resolveModules } from "./resolve-modules/index.js"
-import { TypeCompiler } from "@sinclair/typebox/compiler"
+import { TypeCompiler, ValueErrorType } from "@sinclair/typebox/compiler"
 import {
 	ProjectSettingsFileJSONSyntaxError,
 	ProjectSettingsFileNotFoundError,
@@ -278,6 +278,24 @@ const parseSettings = (settings: unknown) => {
 			})
 		}
 	}
+
+	const { sourceLanguageTag, languageTags } = settings as ProjectSettings
+	if (!languageTags.includes(sourceLanguageTag)) {
+		throw new ProjectSettingsInvalidError({
+			errors: [
+				{
+					message: `The sourceLanguageTag "${sourceLanguageTag}" is not included in the languageTags "${languageTags.join(
+						'", "'
+					)}". Please add it to the languageTags.`,
+					type: ValueErrorType.String,
+					schema: ProjectSettings,
+					value: sourceLanguageTag,
+					path: "sourceLanguageTag",
+				},
+			],
+		})
+	}
+
 	return withMigration
 }
 
