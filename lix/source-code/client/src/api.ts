@@ -49,7 +49,7 @@ export type Repository = {
 					fullName: string
 				}
 		  }
-		| Error
+		| { error: Error }
 	>
 
 	// TODO: implement these before publishing api, but not used in badge or editor, depends on strategy for statelessness

@@ -270,10 +270,8 @@ export async function openRepository(
 				})
 
 			if ("error" in res) {
-				return res.error
+				return { error: res.error }
 			}
-
-			console.info(res)
 
 			const {
 				data: { name, private: isPrivate, fork: isFork, parent, owner: ownerMetaData, permissions },
