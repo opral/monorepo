@@ -2,7 +2,7 @@ import type { NodeishFilesystem } from '@lix-js/fs';
 import { checkout, listFiles } from 'isomorphic-git';
 import path from 'path';
 import { blobExistsLocaly } from './blobExistsLocaly.js';
-import { fetchBlobsFromRemote } from './fetchBlobsFromRemote.js';
+import { fetchBlobsFromRemoteThrottled } from './fetchBlobsFromRemoteThrottled.js';
 
 /**
  * Wraps a nodeishFs implementation with a js proxy for detailed logging, debugging and transparently replacing the file access behaviour.
@@ -12,6 +12,7 @@ export const withLazyFetching = (
 	fs: NodeishFilesystem,
 	dir: string,
 	gitdir: string, 
+	ref: string,
 	filePathToOid: any, 
 	oidToFilePaths: any, 
 	http: any,
@@ -70,7 +71,7 @@ export const withLazyFetching = (
 				} else {
 					const fileExistsLocally = await blobExistsLocaly(fs, fileOid, gitdir);
 					if (!fileExistsLocally) {
-						await fetchBlobsFromRemote({
+						await fetchBlobsFromRemoteThrottled({
 							fs: fs,
 							gitdir: gitdir,
 							http: http, 
@@ -87,7 +88,7 @@ export const withLazyFetching = (
 							gitdir: gitdir,
 							fs: fs,
 							filepaths: [gitFilePath],
-							ref: 'head'
+							ref: ref,
 						}
 					)
 					return execute();
@@ -129,7 +130,7 @@ export const withLazyFetching = (
 		}
 
 		console.log('trying to find hash: ' + oid + ' (files: ' + oidToFilePaths[oid]?.join() + ') locally - not found - fetching it' );
-		await fetchBlobsFromRemote({
+		await fetchBlobsFromRemoteThrottled({
 			fs: fs,
 			gitdir,
 			http: http,

@@ -1,6 +1,6 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Repository } from "./api.js"
-import { transformRemote, parseLixUri, withLazyInjection } from "./helpers.js"
+import { transformRemote, parseLixUri, httpWithLazyInjection } from "./helpers.js"
 // @ts-ignore
 import http from "./http-client.js"
 import { Octokit } from "octokit"
@@ -75,10 +75,11 @@ export async function openRepository(
 
 	let pending: Promise<void | { error: Error }> | undefined = clone({
 		fs: rawFs, // withLazyFetching(rawFs, "clone"),
-		// TODO lazy - we add the blob filter here
-		http: withLazyInjection(http, {
+		// to start the repo lazy - we add the blob filter here
+		http: httpWithLazyInjection(http, {
 			noneBlobFilter: true,
 			overrideHaves: undefined,
+			overrideWants: undefined,
 		}),
 		dir,
 		corsProxy: gitProxyUrl,
@@ -101,9 +102,9 @@ export async function openRepository(
     const filePathToOid = {} as { [filePath: string] : string };
 
 	// TODO - lazy fetch use path.join 
-	const gitdir = dir + '/.git';
+	const gitdir = dir.endsWith('/') ?  dir + '.git' : dir + '/.git';
 	// TODO - lazy fetch what shall we use as ref?
-	const ref = 'HEAD';
+	const ref = 'main';
 
 
 	await walk({
@@ -131,7 +132,7 @@ export async function openRepository(
 	
 
 	return {
-		nodeishFs: withLazyFetching(rawFs, dir, gitdir, filePathToOid, oidToFilePaths, http, 'nodishfs'),
+		nodeishFs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'nodishfs'),
 
 		/**
 		 * Gets the git origin url of the current repository.
@@ -140,7 +141,7 @@ export async function openRepository(
 		 */
 		async listRemotes() {
 			try {
-				const withLazyFetchingpedFS = withLazyFetching(rawFs, dir, gitdir, filePathToOid, oidToFilePaths, http, 'listRemotes');
+				const withLazyFetchingpedFS = withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'listRemotes');
 
 				const remotes = await listRemotes({
 					fs: withLazyFetchingpedFS,
@@ -155,7 +156,7 @@ export async function openRepository(
 
 		status(cmdArgs) {
 			return status({
-				fs: withLazyFetching(rawFs, dir, gitdir, filePathToOid, oidToFilePaths, http, 'status'),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'status'),
 				dir,
 				filepath: cmdArgs.filepath,
 			})
@@ -163,7 +164,7 @@ export async function openRepository(
 
 		statusMatrix(cmdArgs) {
 			return statusMatrix({
-				fs: withLazyFetching(rawFs, dir, gitdir, filePathToOid, oidToFilePaths, http, 'statusMatrix'),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'statusMatrix'),
 				dir,
 				filter: cmdArgs.filter,
 			})
@@ -171,7 +172,7 @@ export async function openRepository(
 
 		add(cmdArgs) {
 			return add({
-				fs: withLazyFetching(rawFs, dir, gitdir, filePathToOid, oidToFilePaths, http, 'add'),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'add'),
 				dir,
 				filepath: cmdArgs.filepath,
 			})
@@ -179,7 +180,7 @@ export async function openRepository(
 
 		commit(cmdArgs) {
 			return commit({
-				fs: withLazyFetching(rawFs, dir, gitdir, filePathToOid, oidToFilePaths, http, 'commit'),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'commit'),
 				dir,
 				author: cmdArgs.author,
 				message: cmdArgs.message,
@@ -188,7 +189,7 @@ export async function openRepository(
 
 		push() {
 			return push({
-				fs: withLazyFetching(rawFs, dir, gitdir, filePathToOid, oidToFilePaths, http, 'push'),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'push'),
 				url: gitUrl,
 				corsProxy: gitProxyUrl,
 				http,
@@ -198,7 +199,7 @@ export async function openRepository(
 
 		pull(cmdArgs) {
 			return pull({
-				fs: withLazyFetching(rawFs, dir, gitdir, filePathToOid, oidToFilePaths, http, 'pull'),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'pull'),
 				url: gitUrl,
 				corsProxy: gitProxyUrl,
 				http,
@@ -211,7 +212,7 @@ export async function openRepository(
 
 		log(cmdArgs) {
 			return log({
-				fs: withLazyFetching(rawFs, dir, gitdir, filePathToOid, oidToFilePaths, http, 'log'),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'log'),
 				depth: cmdArgs?.depth,
 				dir,
 				since: cmdArgs?.since,
