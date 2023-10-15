@@ -9,6 +9,8 @@ type Author = {
 	timezoneOffset?: number
 }
 
+export type LixError = Error & { response?: { status?: number } }
+
 export type Repository = {
 	nodeishFs: NodeishFilesystem
 	commit: (args: {
@@ -30,7 +32,7 @@ export type Repository = {
 	createFork: () => Promise<Endpoints["POST /repos/{owner}/{repo}/forks"]["response"]>
 	getOrigin: () => Promise<string>
 	getCurrentBranch: () => Promise<string | undefined>
-	errors: Subscribable<Error & { response?: { status?: number } }[]>
+	errors: Subscribable<LixError[]>
 	getMeta: () => Promise<
 		| {
 				name: string
