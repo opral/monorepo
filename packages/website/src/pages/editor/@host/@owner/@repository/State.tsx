@@ -202,7 +202,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			return routeParams()
 		},
 		async ({ host, owner, repository }) => {
-			// open the repository
 			if (host && owner && repository) {
 				try {
 					const newRepo = await openRepository(
@@ -216,7 +215,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					return newRepo
 				} catch (err) {
 					console.error(err)
+					return
 				}
+			} else {
+				return
 			}
 		}
 	)
@@ -414,6 +416,9 @@ export class PullException extends Error {
 
 export class PushException extends Error {
 	readonly #id = "PushException"
+	data?: {
+		statusCode?: number
+	}
 }
 
 export class UnknownException extends Error {
@@ -432,7 +437,7 @@ export async function pushChanges(args: {
 	user: NonNullable<LocalStorageSchema["user"]>
 	setFsChange: (date: Date) => void
 	setLastPullTime: (date: Date) => void
-}): Promise<Result<true, PushException | PullException>> {
+}): Promise<Result<true, PushException>> {
 	// stage all changes
 	const status = await args.repo.statusMatrix({
 		filter: (f: any) =>
