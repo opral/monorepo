@@ -155,6 +155,10 @@ async function initializeRepo(
 		}
 	})
 
+	if (typeof repoMeta === "undefined" || "error" in repoMeta) {
+		return
+	}
+
 	if (!repoMeta?.permissions.push) {
 		setStep({
 			type: "error",
