@@ -63,7 +63,7 @@ router.use(
 
 router.use("/services/auth", authService)
 router.use(githubProxy)
-router.all(privateEnv.PUBLIC_GIT_PROXY_PATH + "*", gitProxy)
+router.all("/git-proxy/" + "*", gitProxy)
 
 app.use(router)
 
