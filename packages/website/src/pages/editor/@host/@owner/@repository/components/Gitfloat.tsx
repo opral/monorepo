@@ -35,15 +35,22 @@ export const Gitfloat = () => {
 
 	// ui states
 	const gitState: () => "login" | "loading" | "fork" | "pullrequest" | "hasChanges" = () => {
+		const repoInfo = githubRepositoryInformation()
+
 		if (localStorage?.user === undefined) {
 			return "login"
-		} else if (userIsCollaborator.loading || !project() || isForking()) {
+		} else if (
+			typeof repoInfo === "undefined" ||
+			"error" in repoInfo ||
+			userIsCollaborator.loading ||
+			!project() ||
+			isForking()
+		) {
 			return "loading"
 		} else if (userIsCollaborator() === false) {
 			return "fork"
-		}
-		// if changes exist in a fork, show the pull request button
-		else if (hasPushedChanges() && localChanges() === 0 && githubRepositoryInformation()?.isFork) {
+		} else if (hasPushedChanges() && localChanges() === 0 && repoInfo.isFork) {
+			// if changes exist in a fork, show the pull request button
 			return "pullrequest"
 		}
 		// user is logged in and a collaborator, thus show changeStatus

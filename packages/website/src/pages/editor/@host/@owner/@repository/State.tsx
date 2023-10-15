@@ -355,7 +355,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 		(args) => {
 			// user is not logged in, see the returned object above
-			if (typeof args.user === "string") {
+			if (
+				typeof args.repoMeta === "undefined" ||
+				typeof args.user === "string" ||
+				"error" in args.repoMeta
+			) {
 				return false
 			}
 
