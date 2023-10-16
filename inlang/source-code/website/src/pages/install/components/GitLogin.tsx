@@ -36,7 +36,7 @@ export const Gitlogin = () => {
 			</div>
 			<SignInDialog
 				ref={signInDialog!}
-				onClick={() => {
+				onClickOnSignInButton={() => {
 					signInDialog?.hide()
 				}}
 			/>
