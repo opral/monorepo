@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { setLanguageTag, languageTag } from '@inlang/paraglide-js/sveltekit-example/runtime';
+  import { setLanguageTag, languageTag } from '@inlang/paraglide-js/sveltekit-example';
   import * as m from "@inlang/paraglide-js/sveltekit-example/messages"
 </script>
   

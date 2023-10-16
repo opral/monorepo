@@ -1,4 +1,4 @@
-import { setLanguageTag } from "@inlang/paraglide-js"
+import { setLanguageTag } from "@inlang/paraglide-js/nextjs-example"
 import { headers } from "next/headers"
 
 setLanguageTag(() => {

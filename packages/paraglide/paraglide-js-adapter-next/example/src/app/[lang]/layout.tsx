@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import ParaglideNextAdapter from "@/ParaglideNextAdapter"
-import { languageTag } from "@inlang/paraglide-js"
+import { languageTag } from "@inlang/paraglide-js/nextjs-example"
 
 export const metadata: Metadata = {
 	title: "Create Next App",
