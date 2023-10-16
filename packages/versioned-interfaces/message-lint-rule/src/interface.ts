@@ -31,7 +31,7 @@ export type MessageLintReport = {
  *
  * ```ts
  * 	type RuleSettings = {
- *  	storagePath: string
+ *  	filePath: string
  * 	}
  *
  * 	const messageLintRule: MessageLintRule<{

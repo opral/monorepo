@@ -22,7 +22,7 @@ test("roundtrip (saving/loading messages)", async () => {
 	const fs = createNodeishMemoryFs()
 
 	const settings = {
-		[pluginId]: { storagePath: "./messages.json" } satisfies PluginSettings,
+		[pluginId]: { filePath: "./messages.json" } satisfies PluginSettings,
 	} as any
 
 	const m1 = createMessage("first-message", {
@@ -72,7 +72,7 @@ test("keep the json formatting to decrease git diff's and merge conflicts", asyn
 	const fs = createNodeishMemoryFs()
 
 	const settings = {
-		[pluginId]: { storagePath: "./messages.json" } satisfies PluginSettings,
+		[pluginId]: { filePath: "./messages.json" } satisfies PluginSettings,
 	} as any
 
 	const m1 = createMessage("hello-world", {
@@ -115,7 +115,7 @@ test("save the messages alphabetically to decrease git diff's and merge conflict
 	const fs = createNodeishMemoryFs()
 
 	const settings = {
-		[pluginId]: { storagePath: "./messages.json" } satisfies PluginSettings,
+		[pluginId]: { filePath: "./messages.json" } satisfies PluginSettings,
 	} as any
 
 	const messages = [
@@ -145,7 +145,7 @@ test("throw if the settings are invalid", async () => {
 	await expect(
 		plugin.loadMessages!({
 			settings: {
-				[pluginId]: { storagePath: "./messages.js" } satisfies PluginSettings,
+				[pluginId]: { filePath: "./messages.js" } satisfies PluginSettings,
 			} as any,
 			nodeishFs: fs,
 		})
@@ -158,7 +158,7 @@ test("don't throw if the storage path does not exist. instead, create the file (
 
 	const messages = await plugin.loadMessages!({
 		settings: {
-			[pluginId]: { storagePath: "./messages.json" } satisfies PluginSettings,
+			[pluginId]: { filePath: "./messages.json" } satisfies PluginSettings,
 		} as any,
 		nodeishFs: fs,
 	})
@@ -177,7 +177,7 @@ test("it should add the $schema property to the file if it does not exist", asyn
 	const fs = createNodeishMemoryFs()
 
 	const settings = {
-		[pluginId]: { storagePath: "./messages.json" } satisfies PluginSettings,
+		[pluginId]: { filePath: "./messages.json" } satisfies PluginSettings,
 	} as any
 
 	await plugin.saveMessages!({
