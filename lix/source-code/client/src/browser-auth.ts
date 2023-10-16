@@ -88,18 +88,6 @@ export async function getUser() {
 		getGithubPublicEmail(emailBody) ||
 		getGithubPrimaryEmail(emailBody)
 
-	const installRequest = await fetch(`${gitHubProxyUrl}https://api.github.com/user/installations`, {
-		credentials: "include",
-		headers: {
-			Accept: "application/vnd.github+json",
-			"X-GitHub-Api-Version": "2022-11-28",
-		},
-	})
-	if (installRequest.ok === false) {
-		throw Error("Failed to get user app installations " + installRequest.statusText)
-	}
-	const { installations } = await installRequest.json()
-
 	const request = await fetch(`${gitHubProxyUrl}https://api.github.com/user`, {
 		credentials: "include",
 		headers: {
@@ -116,7 +104,6 @@ export async function getUser() {
 		username: requestBody.login,
 		email: userEmail,
 		avatarUrl: requestBody.avatar_url,
-		installations,
 	}
 }
 
