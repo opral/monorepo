@@ -19,7 +19,7 @@ export const plugin: Plugin<{
 		validatePluginSettings(PluginSettings, settings["plugin.inlang.messageFormat"])
 
 		try {
-			const file = await nodeishFs.readFile(settings["plugin.inlang.messageFormat"].storagePath, {
+			const file = await nodeishFs.readFile(settings["plugin.inlang.messageFormat"].filePath, {
 				encoding: "utf-8",
 			})
 			stringifyWithFormatting = detectJsonFormatting(file)
@@ -28,7 +28,7 @@ export const plugin: Plugin<{
 			// file does not exist. create it.
 			if ((error as any)?.code === "ENOENT") {
 				await nodeishFs.writeFile(
-					settings["plugin.inlang.messageFormat"].storagePath,
+					settings["plugin.inlang.messageFormat"].filePath,
 					JSON.stringify(
 						{
 							$schema: "https://inlang.com/schema/inlang-message-format",
@@ -47,7 +47,7 @@ export const plugin: Plugin<{
 	},
 	saveMessages: async ({ settings, nodeishFs, messages }) => {
 		return nodeishFs.writeFile(
-			settings["plugin.inlang.messageFormat"].storagePath,
+			settings["plugin.inlang.messageFormat"].filePath,
 			//! - assumes that all messages are always passed to the plugin
 			//  - sorts alphabetically to minimize git diff's and merge conflicts
 			stringifyWithFormatting({

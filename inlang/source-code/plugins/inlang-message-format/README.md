@@ -23,7 +23,7 @@ const PluginSettings = object({
 	 * @example "./messages.json"
 	 * @example "./src/messages.json"
 	 */
-	storagePath: string([startsWith("./"), endsWith(".json")]),
+	filePath: string([startsWith("./"), endsWith(".json")]),
 })
 ```
 

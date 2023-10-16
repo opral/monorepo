@@ -25,7 +25,7 @@ export type NodeishFilesystemSubset = Pick<
  *
  * ```ts
  * 	type PluginSettings = {
- *  	storagePath: string
+ *  	filePath: string
  * 	}
  *
  * 	const plugin: Plugin<{

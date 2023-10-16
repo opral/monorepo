@@ -17,5 +17,5 @@ export const PluginSettings = object({
 	 * @example "./src/messages.json"
 	 * @example "../messages.json"
 	 */
-	storagePath: string([regex(/^(\.)|(\/)/), endsWith(".json")]),
+	filePath: string([regex(/^(\.)|(\/)/), endsWith(".json")]),
 })
