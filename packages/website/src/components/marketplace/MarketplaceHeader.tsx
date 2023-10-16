@@ -1,7 +1,7 @@
 import { Button } from "#src/pages/index/components/Button.jsx"
 import { For } from "solid-js"
 import { currentPageContext } from "#src/renderer/state.js"
-import MarketplaceBar from "./MarketplaceBar.jsx"
+import MarketplaceSearchBar from "./MarketplaceSearchBar.jsx"
 
 const MarketplaceHeader = () => {
 	const getCategories = () => {
@@ -34,7 +34,7 @@ const MarketplaceHeader = () => {
 					<img class={"h-8 w-8"} src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
 					<span class={"self-center pl-2 text-left font-semibold text-surface-900"}>inlang</span>
 				</a>
-				<MarketplaceBar />
+				<MarketplaceSearchBar />
 				<div class="flex">
 					<Button type="text" href="/developer">
 						Developer
