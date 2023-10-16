@@ -237,8 +237,10 @@ test("typesafety", async () => {
 			strict: true,
 		},
 	})
-	project.createSourceFile("messages.js", output["messages.js"])
-	project.createSourceFile("runtime.js", output["runtime.js"])
+
+	for (const [fileName, code] of Object.entries(output)) {
+		project.createSourceFile(fileName, code)
+	}
 
 	project.createSourceFile(
 		"test.ts",

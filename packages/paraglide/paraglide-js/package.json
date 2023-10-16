@@ -7,14 +7,8 @@
 		"access": "public"
 	},
 	"exports": {
-		"./*/runtime": {
-			"import": "./dist/compiled-output/*/runtime.js",
-			"types": "./dist/compiled-output/*/runtime$.d.ts"
-		},
-		"./*/messages": {
-			"import": "./dist/compiled-output/*/messages.js",
-			"types": "./dist/compiled-output/*/messages$.d.ts"
-		}
+		"./*/runtime": "./dist/compiled-output/*/runtime.js",
+		"./*/messages": "./dist/compiled-output/*/messages.js"
 	},
 	"bin": {
 		"paraglide-js": "./bin/run.js"
@@ -35,7 +29,8 @@
 		"@inlang/sdk": "*",
 		"commander": "11.1.0",
 		"consola": "3.2.3",
-		"dedent": "1.5.1"
+		"dedent": "1.5.1",
+		"typescript": "5.2.2"
 	},
 	"devDependencies": {
 		"@rollup/plugin-terser": "0.4.3",
@@ -44,7 +39,6 @@
 		"@types/minimist": "1.2.3",
 		"@vitest/coverage-v8": "0.34.3",
 		"rollup": "3.29.1",
-		"typescript": "5.2.2",
 		"vitest": "0.34.3"
 	}
 }

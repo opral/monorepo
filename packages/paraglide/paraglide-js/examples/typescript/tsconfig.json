@@ -1,3 +1,7 @@
 {
-	"include": ["src/**/*"]
+	"include": ["src/**/*"],
+	"compilerOptions": {
+		"module": "ES2022",
+		"moduleResolution": "Bundler"
+	}
 }
