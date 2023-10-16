@@ -1,6 +1,6 @@
 import type { LanguageTag, Message } from "@inlang/sdk"
 import { compilePattern } from "./compilePattern.js"
-import { jsdocFromParams, type Params } from "./jsdocFromParams.js"
+import { paramsType, type Params } from "./paramsType.js"
 
 export const compileMessage = (message: Message): string => {
 	// choosing a regex for valid JS variable names is too long.
@@ -26,24 +26,27 @@ export const compileMessage = (message: Message): string => {
 		// set the pattern for the language tag
 		contents[variant.languageTag] = compiled
 	}
-	const jsdoc = jsdocFromParams(params)
 
 	return `
-	/**
-	 * This message has been compiled by [inlang paraglide](https://inlang.com/marketplace/library.inlang.paraglideJs).
-	 *
-	 * - Don't edit the message manually. 
-	 * - Use the [inlang ide extension](https://inlang.com/marketplace/app.inlang.ideExtension)
-	 *   or the [web editor](https://inlang.com/marketplace/app.inlang.editor) to edit the message.
-	 */ 
-  export const ${message.id} = ${jsdoc} (${Object.keys(params).length > 0 ? "params" : ""}) => {
-    const contents = {
+/**
+ * This message has been compiled by [inlang paraglide](https://inlang.com/marketplace/library.inlang.paraglideJs).
+ *
+ * - Don't edit the message manually. Use the [inlang ide extension](https://inlang.com/marketplace/app.inlang.ideExtension)
+ *   or the [web editor](https://inlang.com/marketplace/app.inlang.editor) to edit the message.
+ * 
+ * - The params are NonNullable<unknown> because inlang can't know the value type of a param (yet).
+ * 
+ * ${paramsType(params)}
+ * @returns {string}
+ */
+  export const ${message.id} = (${Object.keys(params).length > 0 ? "params" : ""}) => {
+    const variants = {
       ${Object.entries(contents)
 				.map(
 					([languageTag, templateLiteralPattern]) => `"${languageTag}": ${templateLiteralPattern}`
 				)
 				.join(",\n  ")}
-  }
-  return contents[languageTag()] ?? "${message.id}"
+	}
+	return variants[languageTag()] ?? "${message.id}"
 }`
 }

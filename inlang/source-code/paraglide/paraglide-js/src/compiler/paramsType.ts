@@ -7,13 +7,13 @@ export type Params = Record<string, "NonNullable<unknown>">
  *
  * @example
  *   const jsdoc = jsdocFromParams({ name: "NonNullable<unknown>", count: "NonNullable<unknown>" })
- *   const message = `${jsdoc}(params) => \`Hello ${params.name}! You have ${params.count} messages.\``
+ *   const message = `/** ${paramsType} *\/ const mes2 => \`Hello ${params.name}! You have ${params.count} messages.\``
  */
-export const jsdocFromParams = (params: Params) => {
+export const paramsType = (params: Params) => {
 	if (Object.keys(params).length === 0) {
 		return ""
 	}
-	return `/** @param {{ ${Object.entries(params)
+	return `@param {{ ${Object.entries(params)
 		.map(([name, type]) => name + ": " + type)
-		.join(", ")} }} params */`
+		.join(", ")} }} params`
 }
