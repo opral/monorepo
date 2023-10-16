@@ -199,8 +199,6 @@ function NoInlangConfigFoundCard() {
 }
 
 function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number; user: any }) {
-	// const { routeParams } = useEditorState()
-
 	return (
 		<div class="flex grow items-center justify-center">
 			<div class="border border-outline p-12 rounded-xl flex flex-col max-w-lg">
