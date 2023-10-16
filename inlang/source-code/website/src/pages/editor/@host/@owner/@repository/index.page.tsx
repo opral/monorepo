@@ -209,9 +209,6 @@ function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number; user: a
 				<h2 class="font-semibold pt-12">Cannot access the repository</h2>
 
 				<ul class="pt-8 list-disc pl-4">
-					{/* Repo does not exist, needs permissions or you don't have sufficient access rights. */}
-					{/* <li class="pt-2">Alternatively, you might not have access to the repository.</li> */}
-
 					{args.user ? (
 						<li class="pt-2">
 							If this is a <span class="font-bold">private repository</span> you need need to add it
@@ -227,6 +224,8 @@ function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number; user: a
 					<li class="pt-2">
 						If this is a <span class="font-bold">public repository</span> please check the spelling
 					</li>
+
+					<li class="pt-2">Alternatively, you might not have access to the repository.</li>
 				</ul>
 
 				<Link
