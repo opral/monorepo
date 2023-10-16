@@ -16,7 +16,7 @@ import IconGithub from "~icons/cib/github"
 export function ForkPermissionDialog(props: {
 	/** forwarding the ref */
 	ref: SlDialog
-	onClick: () => void
+	onClickForkPermissionButton: () => void
 }) {
 	// web component slots load eagarly. applying manual conditional rendering
 	// combats flickering on initial render
@@ -44,7 +44,7 @@ export function ForkPermissionDialog(props: {
 					slot="footer"
 					prop:variant="primary"
 					onClick={() => {
-						props.onClick()
+						props.onClickForkPermissionButton()
 					}}
 				>
 					{/* @ts-ignore */}
