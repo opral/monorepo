@@ -1,11 +1,9 @@
 import { Button } from "#src/pages/index/components/Button.jsx"
-import MarketplaceBar from "#src/pages/index/components/MarketplaceBar.jsx"
-import IconClose from "~icons/material-symbols/close-rounded"
-import IconMenu from "~icons/material-symbols/menu-rounded"
-import { Show, For, createSignal } from "solid-js"
+import { For } from "solid-js"
+import { currentPageContext } from "#src/renderer/state.js"
 
 const MarketplaceHeader = () => {
-	const getMarketplaceLinks = () => {
+	const getCategories = () => {
 		return [
 			{
 				name: `Application`,
@@ -26,87 +24,48 @@ const MarketplaceHeader = () => {
 		]
 	}
 
-	const getLinks = () => {
-		return [
-			{
-				name: `Developers`,
-				href: "/documentation",
-			},
-		]
-	}
-
-	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false)
+	console.log(currentPageContext.urlParsed.pathname)
 
 	return (
-		<header class="sticky top-0 w-full z-[100]">
-			<div class={`w-full h-full relative z-10`}>
-				<nav class={"md:p-0 max-w-7xl w-full flex justify-center mx-auto h-full"}>
-					<div class="md:py-4 max-lg:hidden">
-						<MarketplaceBar links={getMarketplaceLinks()} type={"light"} />
-					</div>
-
-					<Show when={mobileMenuIsOpen()}>
-						<ol class="pl-8 pb-8 space-y-3 relativ w-full pt-24 overflow text-surface-100 bg-background border border-surface-200 h-[480px]">
-							<For each={[getMarketplaceLinks(), getLinks()].flat()}>
-								{(link) => (
-									<>
-										<Show when={link.name === "Developers"}>
-											<div class="py-4">
-												<div class="w-24 h-[1px] bg-surface-200 ml-8" />
-											</div>
-										</Show>
-										<sl-tree>
-											<a
-												class="grow min-w-full w-full text-on-surface"
-												href={link.href}
-												onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
-											>
-												<sl-tree-item>{link.name}</sl-tree-item>
-											</a>
-										</sl-tree>
-									</>
-								)}
-							</For>
-						</ol>
-					</Show>
-				</nav>
-			</div>
-
-			<div class="lg:pl-4 xl:pl-0 absolute z-[90] top-0 h-[72px] left-0 w-full text-surface-200 pointer-events-none">
-				<div class="max-w-[1280px] w-full mx-auto">
-					<a href={"/"} class="flex items-center w-fit pt-[18px] pointer-events-auto">
-						<img
-							class={"h-9 w-9 " + !mobileMenuIsOpen()}
-							src="/favicon/safari-pinned-tab.svg"
-							alt="Company Logo"
-						/>
-						<span class={"self-center pl-2 text-left font-semibold text-surface-900"}>inlang</span>
-					</a>
+		<header class="sticky top-0 w-full z-[9999] bg-background border-b border-surface-200">
+			<div class="max-w-7xl mx-auto flex justify-between items-center">
+				<a href={"/"} class="flex items-center w-fit pointer-events-auto py-4">
+					<img class={"h-8 w-8"} src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
+					<span class={"self-center pl-2 text-left font-semibold text-surface-900"}>inlang</span>
+				</a>
+				<div>Search</div>
+				<div class="flex">
+					<Button type="text" href="/developer">
+						Developer
+					</Button>
 				</div>
 			</div>
-			<div class="absolute xl:pr-0 z-[90] top-0 h-[72px] left-0 w-full text-surface-200 pointer-events-none">
-				<div class="max-w-[1280px] w-full mx-auto justify-end hidden lg:flex gap-8 items-center pt-[18px]">
-					<For each={getLinks()}>
-						{(link) => (
-							<>
-								<Button type="text" href={link.href}>
+			<nav class="max-w-7xl mx-auto flex">
+				<For each={getCategories()}>
+					{(link) => (
+						<div
+							class={
+								(currentPageContext.urlParsed.pathname.includes(link.href)
+									? "border-b-[2px] border-hover-primary "
+									: " ") + " py-[4px] text-sm bg-transparent group"
+							}
+						>
+							<a href={link.href}>
+								<div
+									class={
+										(currentPageContext.urlParsed.pathname.includes(link.href)
+											? "text-primary "
+											: "text-surface-600 ") +
+										" px-2 py-[6px] group-hover:bg-surface-100 rounded-md font-medium cursor-pointer "
+									}
+								>
 									{link.name}
-								</Button>
-							</>
-						)}
-					</For>
-				</div>
-				<div class="lg:hidden flex items-center justify-end h-[76px] pr-4">
-					<button
-						onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
-						type="button"
-						class="inline-flex items-center justify-center text-primary pointer-events-auto"
-					>
-						<span class="sr-only">{mobileMenuIsOpen() ? "Close menu" : "Open menu"}</span>
-						{mobileMenuIsOpen() ? <IconClose class="w-6 h-6" /> : <IconMenu class="w-6 h-6" />}
-					</button>
-				</div>
-			</div>
+								</div>
+							</a>
+						</div>
+					)}
+				</For>
+			</nav>
 		</header>
 	)
 }
