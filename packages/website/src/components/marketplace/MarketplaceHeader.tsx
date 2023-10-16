@@ -1,6 +1,8 @@
 import { Button } from "#src/pages/index/components/Button.jsx"
 import MarketplaceSearchBar from "./MarketplaceSearchBar.jsx"
 import CategoryTabs from "./CategoryTabs.jsx"
+import { Show } from "solid-js"
+import { currentPageContext } from "#src/renderer/state.js"
 
 const MarketplaceHeader = () => {
 	return (
@@ -17,7 +19,9 @@ const MarketplaceHeader = () => {
 					</Button>
 				</div>
 			</div>
-			<CategoryTabs />
+			<Show when={!currentPageContext.urlParsed.pathname.includes("/m/")}>
+				<CategoryTabs />
+			</Show>
 		</header>
 	)
 }

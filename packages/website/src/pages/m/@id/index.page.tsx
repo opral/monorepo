@@ -20,6 +20,7 @@ import { currentPageContext } from "#src/renderer/state.js"
 // @ts-ignore
 import { createSlider } from "solid-slider"
 import "solid-slider/slider.css"
+import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -112,7 +113,7 @@ export function Page(props: PageProps) {
 		<>
 			<Title>{props.manifest && displayName()}</Title>
 			<Meta name="description" content={props.manifest && description()} />
-			<Layout>
+			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
 					<div class="md:py-28 py-16">
 						<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-40 md:gap-8 gap-6">
@@ -311,7 +312,7 @@ export function Page(props: PageProps) {
 						</div>
 					</div>
 				</Show>
-			</Layout>
+			</MarketplaceLayout>
 		</>
 	)
 }
