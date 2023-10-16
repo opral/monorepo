@@ -1,7 +1,7 @@
 // import { serialize } from '@shoelace-style/shoelace/dist/utilities/form.js';
 import IconSearch from "~icons/material-symbols/search-rounded"
 
-const MarketplaceBar = () => {
+const MarketplaceSearchBar = () => {
 	return (
 		<form
 			class="flex justify-center items-center gap-2"
@@ -16,4 +16,4 @@ const MarketplaceBar = () => {
 	)
 }
 
-export default MarketplaceBar
+export default MarketplaceSearchBar
