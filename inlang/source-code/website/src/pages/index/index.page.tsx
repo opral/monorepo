@@ -1,4 +1,3 @@
-import { Layout } from "../Layout.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import Marketplace from "#src/components/sections/marketplace/index.jsx"
 import Hero from "./custom_section/Hero.jsx"
