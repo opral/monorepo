@@ -14,4 +14,4 @@ inlang is a whole ecosystem of building blocks for your globalization (internati
 
 ## [lix – change control system](./lix)
 
-lix is a change control system optimized for running in the browser.
+lix is a change control system optimized for running in the browser. [inlang](./inlang) builds on [lix](./lix).
