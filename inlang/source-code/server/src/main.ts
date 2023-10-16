@@ -10,6 +10,7 @@ import { router as rpcRouter } from "@inlang/rpc/router"
 import { router as badgeRouter } from "@inlang/badge/router"
 import { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { ProjectSettings } from "@inlang/project-settings"
+import { StorageSchema } from "@inlang/plugin-message-format/storage-schema"
 
 // --------------- SETUP -----------------
 
@@ -61,6 +62,13 @@ const serializedProjectSettings = JSON.stringify(ProjectSettings)
 app.get("/schema/project-settings", (_, response) => {
 	response.header("Content-Type", "application/json")
 	response.send(serializedProjectSettings)
+})
+
+const serializedMessageStorageFormat = JSON.stringify(StorageSchema)
+
+app.get("/schema/inlang-message-format", (_, response) => {
+	response.header("Content-Type", "application/json")
+	response.send(serializedMessageStorageFormat)
 })
 
 app.use(telemetryRouter)
