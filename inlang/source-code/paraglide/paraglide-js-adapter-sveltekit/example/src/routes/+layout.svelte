@@ -4,6 +4,5 @@
 </script>
 
 <ParaglideJsSvelteKitAdapter>
-
   <slot></slot>
 </ParaglideJsSvelteKitAdapter>

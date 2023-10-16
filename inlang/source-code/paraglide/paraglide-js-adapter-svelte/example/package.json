@@ -1,10 +1,10 @@
 {
-	"name": "@inlang/paraglide-js-svelte-example",
+	"name": "@inlang/paraglide-js-adapter-svelte-example",
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"build": "paraglide-js compile ./project.inlang.json && vite build",
+		"build": "paraglide-js compile --namespace svelte-example && vite build",
 		"preview": "vite preview"
 	},
 	"__ALL DEPENDENCIES MUST BE SET IN THE PARENT PACKAGE.JSON TOO!__": "SEE NPM BUG https://github.com/npm/cli/issues/6874",

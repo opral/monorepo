@@ -7,7 +7,7 @@
 		"forceConsistentCasingInFileNames": true,
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
-		"moduleResolution": "Node16",
+		"moduleResolution": "Bundler",
 		"sourceMap": true,
 		"strict": true
 	}
