@@ -19,14 +19,14 @@ export const createNodeishFsWithAbsolutePaths = (args: {
 
 	// get the base path of the settings file by
 	// removing the file name from the path
-	const bathPath = args.settingsFilePath.split("/").slice(0, -1).join("/")
+	const basePath = args.settingsFilePath.split("/").slice(0, -1).join("/")
 
 	const makeAbsolute = (path: string) => {
 		if (isAbsolutePath(path)) {
-			return path
+			return normalizePath(path)
 		}
 
-		return normalizePath(bathPath + "/" + path)
+		return normalizePath(basePath + "/" + path)
 	}
 
 	return {

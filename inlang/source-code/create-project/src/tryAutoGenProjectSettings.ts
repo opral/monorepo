@@ -70,7 +70,7 @@ export async function tryAutoGenProjectSettings(args: {
 	 * }
 	 */
 
-	const settingsPath = args.basePath + "/project.inlang.json"
+	const settingsPath = normalizePath(args.basePath + "/project.inlang.json")
 
 	const mockFs = new Proxy(args.nodeishFs, {
 		get: (target, prop) => {
