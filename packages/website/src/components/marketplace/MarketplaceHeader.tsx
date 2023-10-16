@@ -1,32 +1,8 @@
 import { Button } from "#src/pages/index/components/Button.jsx"
-import { For } from "solid-js"
-import { currentPageContext } from "#src/renderer/state.js"
 import MarketplaceSearchBar from "./MarketplaceSearchBar.jsx"
+import CategoryTabs from "./CategoryTabs.jsx"
 
 const MarketplaceHeader = () => {
-	const getCategories = () => {
-		return [
-			{
-				name: `Application`,
-				href: "/application",
-			},
-			{
-				name: `Website`,
-				href: "/website",
-			},
-			{
-				name: `Markdown`,
-				href: "/markdown",
-			},
-			{
-				name: `Missing something?`,
-				href: "https://github.com/orgs/inlang/discussions",
-			},
-		]
-	}
-
-	console.log(currentPageContext.urlParsed.pathname)
-
 	return (
 		<header class="sticky top-0 w-full z-[9999] bg-background border-b border-surface-200">
 			<div class="max-w-7xl mx-auto flex justify-between items-center">
@@ -41,32 +17,7 @@ const MarketplaceHeader = () => {
 					</Button>
 				</div>
 			</div>
-			<nav class="max-w-7xl mx-auto flex">
-				<For each={getCategories()}>
-					{(link) => (
-						<div
-							class={
-								(currentPageContext.urlParsed.pathname.includes(link.href)
-									? "border-b-[2px] border-hover-primary "
-									: " ") + " py-[4px] text-sm bg-transparent group"
-							}
-						>
-							<a href={link.href}>
-								<div
-									class={
-										(currentPageContext.urlParsed.pathname.includes(link.href)
-											? "text-primary "
-											: "text-surface-600 ") +
-										" px-2 py-[6px] group-hover:bg-surface-100 rounded-md font-medium cursor-pointer "
-									}
-								>
-									{link.name}
-								</div>
-							</a>
-						</div>
-					)}
-				</For>
-			</nav>
+			<CategoryTabs />
 		</header>
 	)
 }
