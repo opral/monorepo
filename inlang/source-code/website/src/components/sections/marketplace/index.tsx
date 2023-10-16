@@ -71,23 +71,6 @@ export default function Marketplace(props: {
 						</div>
 					</Show>
 				</Show>
-				<Show when={!props.minimal}>
-					<div class="w-full top-16 sticky bg-background/90 backdrop-blur-xl pb-4 pt-8 z-10 flex flex-col gap-5">
-						<Search
-							placeholder={"Search for apps, plugins, lint rules ..."}
-							textValue={searchValue}
-							setTextValue={setSearchValue}
-						/>
-						<div class="flex justify-between items-center">
-							<Tags />
-							<div class="max-sm:hidden">
-								<Button type="text" href="/documentation/publish-marketplace">
-									Build your own
-								</Button>
-							</div>
-						</div>
-					</div>
-				</Show>
 				<Switch>
 					<Match when={props.slider}>
 						<h3 class="font-semibold text-2xl mb-6">Items that might interest you</h3>
@@ -115,7 +98,7 @@ export default function Marketplace(props: {
 						</div>
 					</Match>
 					<Match when={!props.slider}>
-						<div class="mb-32 pt-10 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
+						<div class="mb-32 grid xl:grid-cols-3 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
 							<Gallery />
 						</div>
 					</Match>
