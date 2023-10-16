@@ -1,6 +1,5 @@
 import { createEffect, createSignal, For, type JSXElement, on, onMount, Show } from "solid-js"
 import { useEditorState } from "./State.jsx"
-import { Layout as RootLayout } from "#src/pages/Layout.jsx"
 import { SearchInput } from "./components/SearchInput.jsx"
 import { Gitfloat } from "./components/Gitfloat.jsx"
 import IconAdd from "~icons/material-symbols/add"
@@ -10,6 +9,7 @@ import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { showToast } from "#src/components/Toast.jsx"
 import type { LanguageTag } from "@inlang/sdk"
 import { sortLanguageTags } from "./helper/sortLanguageTags.js"
+import EditorLayout from "#src/components/editor/EditorLayout.jsx"
 
 interface Filter {
 	name: string
@@ -127,7 +127,7 @@ export function Layout(props: { children: JSXElement }) {
 	}
 
 	return (
-		<RootLayout>
+		<EditorLayout>
 			<div class="pt-4 w-full flex flex-col grow">
 				<div class="flex items-center space-x-4 pt-5">
 					<Breadcrumbs />
@@ -264,7 +264,7 @@ export function Layout(props: { children: JSXElement }) {
 				</sl-button>
 			</sl-dialog>
 			<Gitfloat />
-		</RootLayout>
+		</EditorLayout>
 	)
 }
 function Breadcrumbs() {
