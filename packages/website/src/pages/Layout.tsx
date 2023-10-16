@@ -93,28 +93,8 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 	const getMarketplaceLinks = () => {
 		return [
 			{
-				name: `All`,
-				href: "/marketplace",
-				type: props.darkmode ? "textBackground" : ("text" as buttonType),
-			},
-			{
 				name: `Application`,
 				href: "/application",
-				type: props.darkmode ? "textBackground" : ("text" as buttonType),
-			},
-			{
-				name: `Document`,
-				href: "/document",
-				type: props.darkmode ? "textBackground" : ("text" as buttonType),
-			},
-			{
-				name: `Email`,
-				href: "/email",
-				type: props.darkmode ? "textBackground" : ("text" as buttonType),
-			},
-			{
-				name: `Payment`,
-				href: "/payment",
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
 			},
 			{
@@ -122,6 +102,16 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 				href: "/website",
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
 			},
+			{
+				name: `Markdown`,
+				href: "/markdown",
+				type: props.darkmode ? "textBackground" : ("text" as buttonType),
+			},
+			{
+				name: `Missing something?`,
+				href; "https://github.com/orgs/inlang/discussions",
+				type: props.darkmode ? "textBackground" : ("text" as buttonType),
+			}
 		]
 	}
 
