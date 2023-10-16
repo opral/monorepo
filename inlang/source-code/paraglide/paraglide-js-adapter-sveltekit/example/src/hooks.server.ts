@@ -1,4 +1,4 @@
-import { sourceLanguageTag } from "@inlang/paraglide-js/sveltekit-example/runtime"
+import { sourceLanguageTag } from "@inlang/paraglide-js/sveltekit-example"
 import type { Handle } from "@sveltejs/kit"
 import { redirect } from "@sveltejs/kit"
 

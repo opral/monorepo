@@ -7,7 +7,7 @@
 		"access": "public"
 	},
 	"exports": {
-		"./*/runtime": "./dist/compiled-output/*/runtime.js",
+		"./*": "./dist/compiled-output/*/runtime.js",
 		"./*/messages": "./dist/compiled-output/*/messages.js"
 	},
 	"bin": {

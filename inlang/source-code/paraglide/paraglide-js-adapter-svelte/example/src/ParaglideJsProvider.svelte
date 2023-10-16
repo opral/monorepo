@@ -1,5 +1,5 @@
 <script>
-  import { languageTag, onSetLanguageTag } from '@inlang/paraglide-js/svelte-example/runtime';
+  import { languageTag, onSetLanguageTag } from '@inlang/paraglide-js/svelte-example';
 
   // initialize the language tag
   $: _languageTag = languageTag;
