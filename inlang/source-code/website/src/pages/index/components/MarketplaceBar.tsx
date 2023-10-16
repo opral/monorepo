@@ -1,11 +1,10 @@
 import { For } from "solid-js"
-import type { buttonType } from "./Button.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 import { useI18n } from "@solid-primitives/i18n"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { navigate } from "vite-plugin-ssr/client/router"
 const MarketplaceBar = (props: {
-	links: Array<{ name: string; href: string; type: buttonType }>
+	links: Array<{ name: string; href: string }>
 	type: "light" | "dark"
 }) => {
 	const getTheme = () => {
