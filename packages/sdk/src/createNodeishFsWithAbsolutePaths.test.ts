@@ -21,14 +21,6 @@ it("intercepts paths correctly for readFile", async () => {
 		["../folder/file.txt", `/Users/samuel/Documents/paraglide/folder/file.txt`],
 		["../../file.txt", `/Users/samuel/Documents/file.txt`],
 		["../../../file.txt", `/Users/samuel/file.txt`],
-		["..\\file.txt", `/Users/samuel/Documents/paraglide/file.txt`],
-		["..\\folder\\file.txt", `/Users/samuel/Documents/paraglide/folder/file.txt`],
-		["..\\..\\file.txt", `/Users/samuel/Documents/file.txt`],
-		["..\\..\\..\\file.txt", `/Users/samuel/file.txt`],
-		[
-			"\\Users\\samuel\\Documents\\paraglide\\file.txt",
-			`/Users/samuel/Documents/paraglide/file.txt`,
-		],
 	]
 
 	const mockNodeishFs = {

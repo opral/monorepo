@@ -26,6 +26,7 @@ import {
 	createNodeishFsWithAbsolutePaths,
 	isAbsolutePath,
 } from "./createNodeishFsWithAbsolutePaths.js"
+import { normalizePath } from "@lix-js/fs"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -56,16 +57,21 @@ export const loadProject = async (args: {
 		)
 	}
 
+	const settingsFilePath = normalizePath(args.settingsFilePath)
+
 	// -- load project ------------------------------------------------------
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
-		const nodeishFs = createNodeishFsWithAbsolutePaths(args)
+		const nodeishFs = createNodeishFsWithAbsolutePaths({
+			settingsFilePath,
+			nodeishFs: args.nodeishFs,
+		})
 
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
 		createEffect(() => {
-			loadSettings({ settingsFilePath: args.settingsFilePath, nodeishFs })
+			loadSettings({ settingsFilePath, nodeishFs })
 				.then((settings) => {
 					setSettings(settings)
 					// rename settings to get a convenient access to the data in Posthog
