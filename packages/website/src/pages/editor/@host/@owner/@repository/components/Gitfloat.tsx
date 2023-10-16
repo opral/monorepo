@@ -330,7 +330,7 @@ export const Gitfloat = () => {
 			</div>
 			<SignInDialog
 				ref={signInDialog!}
-				onClick={() => {
+				onClickOnSignInButton={() => {
 					// hide the sign in dialog to increase UX when switching back to this window
 					browserAuth.login()
 					signInDialog?.hide()
@@ -338,7 +338,7 @@ export const Gitfloat = () => {
 			/>
 			<ForkPermissionDialog
 				ref={forkPermissionDialog!}
-				onClick={() => {
+				onClickForkPermissionButton={() => {
 					// hide the sign in dialog to increase UX when switching back to this window
 					browserAuth.addPermissions()
 					forkPermissionDialog?.hide()
@@ -347,7 +347,7 @@ export const Gitfloat = () => {
 			/>
 			<PushPermissionDialog
 				ref={pushPermissionDialog!}
-				onClick={() => {
+				onClickPushPermissionButton={() => {
 					// hide the sign in dialog to increase UX when switching back to this window
 					browserAuth.addPermissions()
 					pushPermissionDialog?.hide()
