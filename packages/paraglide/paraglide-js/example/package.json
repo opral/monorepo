@@ -1,0 +1,15 @@
+{
+	"name": "@inlang/paraglide-js-example-typescript",
+	"type": "module",
+	"scripts": {
+		"build": "paraglide-js compile --namespace example-typescript",
+		"pretest": "npm run build",
+		"test": "tsc --noEmit && vitest run"
+	},
+	"dependencies": {
+		"@inlang/paraglide-js": "*"
+	},
+	"devDependencies": {
+		"typescript": "5.2.2"
+	}
+}

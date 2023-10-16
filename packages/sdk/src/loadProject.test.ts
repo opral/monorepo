@@ -723,18 +723,17 @@ describe("functionality", () => {
 				sourceLanguageTag: "en",
 				languageTags: ["en", "de"],
 				modules: ["plugin.js"],
-				"plugin.project.json": {
+				"plugin.placeholder.name": {
 					pathPattern: "./resources/{languageTag}.json",
 				},
 			}
 
-			await fs.mkdir("/user/project", { recursive: true })
-			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
 
 			const mockSaveFn = vi.fn()
 
 			const _mockPlugin: Plugin = {
-				id: "plugin.project.json",
+				id: "plugin.placeholder.name",
 				description: "Mock plugin description",
 				displayName: "Mock Plugin",
 				loadMessages: () => [
@@ -752,7 +751,7 @@ describe("functionality", () => {
 			}
 
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				settingsFilePath: "/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
