@@ -289,6 +289,28 @@ describe("functionality", () => {
 			expect(result.error).toBeInstanceOf(ProjectSettingsInvalidError)
 		})
 
+		it("should throw an error if sourceLanguageTag is not in languageTags", async () => {
+			const fs = await createNodeishMemoryFs()
+			await fs.mkdir("/user/project", { recursive: true })
+
+			const settings: ProjectSettings = {
+				sourceLanguageTag: "en",
+				languageTags: ["de"],
+				modules: [],
+			}
+
+			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
+
+			const project = await loadProject({
+				settingsFilePath: "/user/project/project.inlang.json",
+				nodeishFs: fs,
+				_import,
+			})
+
+			expect(project.errors()).toHaveLength(1)
+			expect(project.errors()![0]).toBeInstanceOf(ProjectSettingsInvalidError)
+		})
+
 		it("should write settings to disk", async () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.mkdir("/user/project", { recursive: true })
@@ -302,7 +324,7 @@ describe("functionality", () => {
 			const before = await fs.readFile("/user/project/project.inlang.json", { encoding: "utf-8" })
 			expect(before).toBeDefined()
 
-			const result = project.setSettings({ ...settings, languageTags: [] })
+			const result = project.setSettings({ ...settings, languageTags: ["en"] })
 			expect(result.data).toBeUndefined()
 			expect(result.error).toBeUndefined()
 
