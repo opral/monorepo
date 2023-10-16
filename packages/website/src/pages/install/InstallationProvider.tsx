@@ -144,7 +144,6 @@ async function initializeRepo(
 	})
 
 	const repoMeta = await repo.getMeta().catch((err: any) => {
-		// FIXME: needs login check
 		if (err.status === 401) {
 			setStep({
 				type: "github-login",
@@ -156,6 +155,11 @@ async function initializeRepo(
 	})
 
 	if (typeof repoMeta === "undefined" || "error" in repoMeta) {
+		setStep({
+			type: "error",
+			message: "Could not load repository information.",
+			error: true,
+		})
 		return
 	}
 
