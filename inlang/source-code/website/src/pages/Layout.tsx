@@ -16,7 +16,6 @@ import { SectionLayout } from "./index/components/sectionLayout.jsx"
 import { defaultLanguage, extractLocale } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
 import { NewsletterForm } from "#src/components/NewsletterForm.jsx"
-import MarketplaceBar from "./index/components/MarketplaceBar.jsx"
 
 /**
  * Ensure that all elements use the same margins.
@@ -166,12 +165,12 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 						</Show>
 						<div class={`w-full h-full relative z-10`}>
 							<nav class={"md:p-0 max-w-[1248px] w-full flex justify-center mx-auto h-full"}>
-								<div class="md:py-4 md:px-4 max-lg:hidden">
+								{/* <div class="md:py-4 md:px-4 max-lg:hidden">
 									<MarketplaceBar
 										links={getMarketplaceLinks()}
 										type={props.darkmode ? "dark" : "light"}
 									/>
-								</div>
+								</div> */}
 
 								<Show when={mobileMenuIsOpen()}>
 									<ol class="pl-8 pb-8 space-y-3 relativ w-full pt-24 overflow text-surface-100 bg-background border border-surface-200 h-[480px]">
