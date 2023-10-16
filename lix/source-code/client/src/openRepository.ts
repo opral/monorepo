@@ -38,8 +38,6 @@ export async function openRepository(
 	// the url format for direct github urls without a lix server is https://github.com/inlang/examplX (only per domain-enabled git hosters will be supported, currently just gitub)
 	// the url for opening a local repo allready in the fs provider is file://path/to/repo (not implemented yet)
 
-	// TODO: fork telemetry enable
-
 	const { protocol, lixHost, repoHost, owner, repoName } = parseLixUri(url)
 
 	const gitProxyUrl = lixHost ? `${protocol}//${lixHost}/git-proxy/` : ""
