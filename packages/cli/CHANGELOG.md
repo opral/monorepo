@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 1.13.0
+
+### Minor Changes
+
+- bf448423f: fix: wording of project validate command
+
 ## 1.12.0
 
 ### Minor Changes
