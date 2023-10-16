@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { setLanguageTag, onSetLanguageTag } from '@inlang/paraglide-js';
+  import { setLanguageTag, onSetLanguageTag } from '@inlang/paraglide-js/sveltekit-example/runtime';
   import { getContext, setContext } from "svelte"
-	import type { PageData } from './$types';
   import { page } from '$app/stores'
 	
   setContext("languageTag", $page.params.lang)

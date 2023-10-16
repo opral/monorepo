@@ -1,6 +1,6 @@
 <script>
-  import { setLanguageTag, languageTag } from '@inlang/paraglide-js';
-  import * as m from "@inlang/paraglide-js/messages"
+  import { setLanguageTag, languageTag } from '@inlang/paraglide-js/svelte-example/runtime';
+  import * as m from "@inlang/paraglide-js/svelte-example/messages"
 	import ParaglideSvelte from './ParaglideJsProvider.svelte'
 </script>
 
