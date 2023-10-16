@@ -1,5 +1,7 @@
 # @inlang/paraglide-js
 
+## ATTENTION: Paraglide is in pre-release mode. Discuss the API at https://github.com/inlang/monorepo/discussions/1464
+
 <doc-gallery>TODO: adapter gallery</doc-gallery>
 
 - [x] the smallest, fastest, and most typesafe i18n library
@@ -58,11 +60,10 @@ npm install @inlang/paraglide-js
 ```diff
 {
   "scripts": {
-+    "build": "paraglide-js compile"
++    "build": "paraglide-js compile --namespace <your project name>"
   }
 }
 ```
-
 
 
 # Architecture 
@@ -127,7 +128,7 @@ The namespace import ensures that bundlers like Rollup, Webpack, or Turbopack ca
 Three compiled message functions exists in an examplary project.
 
 ```js
-// @inlang/paraglide-js/messages
+// @inlang/paraglide-js/<namespace>/messages
 
 
 export function hello(params) {
@@ -149,7 +150,7 @@ Only the message `hello` is used in the source code.
 ```js
 // source/index.js
 
-import * as m from "@paraglide-js/messages"
+import * as m from "@inlang/paraglide-js/<namespace>/messages"
 
 console.log(m.hello({ name: "Samuel" }))
 ```
@@ -169,7 +170,7 @@ console.log(hello({ name: "Samuel"}))
 
 ## RUNTIME
 
-View the source of your imports from `@inlang/paraglide-js/{name}` to find the latest runtime API and documentation. 
+View the source of your imports from `@inlang/paraglide-js/<namespace>` to find the latest runtime API and documentation. 
 
 ## ADAPTER 
 
@@ -194,7 +195,7 @@ The goal is to provide a high-level understanding of how to adapt Paraglide-JS t
 
 
 ```tsx
-import { setLanguageTag, onSetLanguageTag } from "@inlang/paraglide-js/{name}"
+import { setLanguageTag, onSetLanguageTag } from "@inlang/paraglide-js/<namespace>"
 import { isServer, request, render } from "@example/framework"
 
 
