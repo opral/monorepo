@@ -109,7 +109,6 @@ export const Gitfloat = () => {
 	}
 
 	async function triggerPushChanges() {
-		// FIXME: prevent losing stale data
 		if (localStorage?.user === undefined) {
 			return showToast({
 				title: "Failed to push changes",
