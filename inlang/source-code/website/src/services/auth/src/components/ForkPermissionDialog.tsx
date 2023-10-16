@@ -1,7 +1,6 @@
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js"
 import { createSignal, Show } from "solid-js"
 import IconGithub from "~icons/cib/github"
-// import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
 
 /**
  * A dialog that prompts the user to add missing permissions on GitHub.
@@ -18,8 +17,6 @@ export function ForkPermissionDialog(props: {
 	ref: SlDialog
 	onClickForkPermissionButton: () => void
 }) {
-	// web component slots load eagarly. applying manual conditional rendering
-	// combats flickering on initial render
 	const [isShown, setIsShown] = createSignal(false)
 
 	return (
@@ -32,7 +29,7 @@ export function ForkPermissionDialog(props: {
 				<h3 slot="label">Add permissions</h3>
 				<p>Creating a fork requires app permissions to "all repositories" on github.</p>
 
-				{/* <p>Alternatively you can create a manual fork on github</p>
+				{/*<p>Alternatively you can create a manual fork on github</p>
 				<a class="self-center" href="/documentation" target="_blank">
 					<sl-button prop:variant="text">
 						Manually create fork on github
