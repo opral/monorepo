@@ -22,11 +22,9 @@ import { createMessageLintReportsQuery } from "./createMessageLintReportsQuery.j
 import { ProjectSettings, Message, type NodeishFilesystemSubset } from "./versionedInterfaces.js"
 import { tryCatch, type Result } from "@inlang/result"
 import { migrateIfOutdated } from "@inlang/project-settings/migration"
-import {
-	createNodeishFsWithAbsolutePaths,
-	isAbsolutePath,
-} from "./createNodeishFsWithAbsolutePaths.js"
+import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
 import { normalizePath } from "@lix-js/fs"
+import { isAbsolutePath } from "./isAbsolutePath.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
