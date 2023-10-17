@@ -1,14 +1,14 @@
 {
 	"name": "@inlang/paraglide-js",
 	"type": "module",
-	"version": "1.0.0-prerelease.0",
+	"version": "1.0.0-prerelease.1",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"
 	},
 	"exports": {
-		"./*": "./dist/compiled-output/*/runtime.js",
-		"./*/messages": "./dist/compiled-output/*/messages.js"
+		"./*/messages": "./dist/compiled-output/*/messages.js",
+		"./*": "./dist/compiled-output/*/runtime.js"
 	},
 	"bin": {
 		"paraglide-js": "./bin/run.js"
