@@ -22,7 +22,7 @@ const Hero = () => {
 							const m = registry.find((m) => m.id === feature)
 							return (
 								<a href={"/m/" + m?.id}>
-									<div class="flex gap-2 hover:bg-surface-200 px-3 py-[10px] rounded-lg items-center border-b border-surface-200">
+									<div class="flex gap-4 hover:bg-surface-200 px-3 py-[10px] rounded-lg items-center border-b border-surface-200">
 										<img
 											class="w-9 h-9 rounded-md m-0 shadow-lg object-cover object-center"
 											src={m?.icon}
