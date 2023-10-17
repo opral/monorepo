@@ -1,4 +1,5 @@
 import IconSearch from "~icons/material-symbols/search-rounded"
+import { setSearchParams } from "./helper/setSearchParams.js"
 
 const MarketplaceSearchBar = () => {
 	const urlParams = new URLSearchParams(window.location.search)
@@ -6,10 +7,7 @@ const MarketplaceSearchBar = () => {
 
 	const handleSubmit = () => {
 		const search = document.getElementById("search") as HTMLInputElement
-		const currentUrl = new URL(window.location.href)
-		const newUrl = new URL(currentUrl.protocol + "//" + currentUrl.host + search.value)
-		window.location.href = newUrl.href
-		window.history.pushState({}, "", newUrl)
+		setSearchParams(search.value)
 	}
 
 	return (
@@ -22,7 +20,7 @@ const MarketplaceSearchBar = () => {
 				id="search"
 				name="search"
 				class="border-0 focus:ring-0 h-full w-full pl-0 text-sm"
-				value={searchParam?.replace(/%20/g, " ")}
+				value={searchParam ? searchParam.replace(/%20/g, " ") : ""}
 			/>
 			<button
 				type="submit"
