@@ -18,7 +18,7 @@ const CategoryTabs = () => {
 			},
 			{
 				name: `Missing something?`,
-				href: "https://github.com/orgs/inlang/discussions",
+				href: "https://github.com/inlang/monorepo/discussions",
 			},
 		]
 	}
