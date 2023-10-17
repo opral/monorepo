@@ -40,11 +40,4 @@ describe("it should exit if the CLI is not running from the dist folder", () => 
 			expect(exitSpy).toHaveBeenLastCalledWith(1)
 		})
 	}
-
-	// for (const path of shouldFail) {
-	// 	import.meta.url = path
-	// 	const exit = vi.spyOn(process, "exit").mockImplementation(() => undefined as never)
-	// 	await cli.parseAsync([])
-	// 	expect(exit).toHaveBeenCalledWith(1)
-	// }
 })
