@@ -16,7 +16,7 @@ export function Page() {
 				<MarketplaceLayout>
 					<Hero />
 					<div class="pb-16 md:pb-20 min-h-screen relative">
-						<h2 class="text-2xl font-semibold pb-4 pt-8">All Products</h2>
+						<h2 class="text-sm text-surface-500 pb-3 pl-2 pt-4">Products</h2>
 						<Marketplace />
 					</div>
 				</MarketplaceLayout>

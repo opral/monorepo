@@ -8,7 +8,7 @@ export function Chip(props: { text: string | undefined; color: string; customCla
 				color: props.color,
 				background: `${props.color}25`,
 			}}
-			class={`text-sm px-2 py-1 rounded-full ${props.customClasses}`}
+			class={`text-xs px-2 py-[2px] rounded-full ${props.customClasses}`}
 		>
 			{props.text}
 		</div>

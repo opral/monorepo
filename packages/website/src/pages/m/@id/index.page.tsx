@@ -1,5 +1,4 @@
 import { Meta, Title } from "@solidjs/meta"
-import { Layout } from "#src/pages/Layout.jsx"
 import { For, Show, createSignal, onMount } from "solid-js"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import { isModule } from "@inlang/marketplace-registry"
