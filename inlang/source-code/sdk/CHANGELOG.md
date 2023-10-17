@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.14.0
+
+### Minor Changes
+
+- 6fe144640: fix #1478 – loadProject with absolute windows paths
+
 ## 0.13.0
 
 ### Minor Changes
