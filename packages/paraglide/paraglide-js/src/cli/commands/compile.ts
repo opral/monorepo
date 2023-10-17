@@ -4,8 +4,9 @@ import { compile } from "../../compiler/compile.js"
 import fs from "node:fs/promises"
 import { resolve } from "node:path"
 import { Command } from "commander"
-import { paraglideDirectory } from "../main.js"
+import { paraglideDirectory } from "../state.js"
 import dedent from "dedent"
+
 
 export const compileCommand = new Command()
 	.name("compile")
