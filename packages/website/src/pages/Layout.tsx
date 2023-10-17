@@ -108,7 +108,7 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 			},
 			{
 				name: `Missing something?`,
-				href: "https://github.com/orgs/inlang/discussions",
+				href: "https://github.com/inlang/monorepo/discussions",
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
 			},
 		]
