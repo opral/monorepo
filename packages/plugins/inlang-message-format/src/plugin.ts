@@ -16,6 +16,8 @@ export const plugin: Plugin<{
 	displayName,
 	description,
 	loadMessages: async ({ settings, nodeishFs }) => {
+		console.log("settings", settings["plugin.inlang.messageFormat"])
+		
 		validatePluginSettings(PluginSettings, settings["plugin.inlang.messageFormat"])
 
 		try {
