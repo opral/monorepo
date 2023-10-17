@@ -12,7 +12,7 @@ const MarketplaceSearchBar = () => {
 
 	return (
 		<form
-			class="group flex justify-center gap-1 px-3 items-center border h-8 w-80 py-0.5 rounded-full transition-all bg-background border-surface-200 focus-within:border-primary"
+			class="group flex justify-center gap-1 px-3 items-center border h-8 w-80 py-0.5 rounded-full transition-all duration-150 bg-background border-surface-200 focus-within:border-primary"
 			onSubmit={() => handleSubmit()}
 		>
 			<input
@@ -25,7 +25,7 @@ const MarketplaceSearchBar = () => {
 			<button
 				type="submit"
 			>
-				<IconSearch class="ml-1.5 group-focus-within:text-focus-primary" />
+				<IconSearch class="ml-1.5 transition-color duration-150 group-focus-within:text-primary" />
 			</button>
 		</form>
 	)
