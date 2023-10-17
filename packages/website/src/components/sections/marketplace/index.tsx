@@ -33,12 +33,6 @@ const filteredItems = (slider?: boolean) => {
 		selectedCategory() === "marketplace" || slider ? undefined : selectedCategory()
 	)
 }
-onMount(() => {
-	const urlParams = new URLSearchParams(window.location.search)
-	if (urlParams.get("search") !== "" && urlParams.get("search") !== undefined) {
-		setSearchValue(urlParams.get("search")?.replace(/%20/g, " ") || "")
-	}
-})
 
 const randomizedItems = () => filteredItems(true).reverse()
 
@@ -59,6 +53,13 @@ export default function Marketplace(props: {
 		detailsChanged: (slider: { track: { details: any } }) => {
 			setDetails(slider.track.details)
 		},
+	})
+
+	onMount(() => {
+		const urlParams = new URLSearchParams(window.location.search)
+		if (urlParams.get("search") !== "" && urlParams.get("search") !== undefined) {
+			setSearchValue(urlParams.get("search")?.replace(/%20/g, " ") || "")
+		}
 	})
 
 	return (
