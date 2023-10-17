@@ -10,8 +10,20 @@ const githubAppClientId = publicEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID
  * works only in browsers for now, but other methods should be supported in future
  */
 // TODO: later use url with default instead of env var: args: { url?: string }
-export function login() {
-	window.open(`https://github.com/login/oauth/authorize?client_id=${githubAppClientId}`, "_blank")
+export async function login() {
+	const loginWindow = window.open(
+		`https://github.com/login/oauth/authorize?client_id=${githubAppClientId}`,
+		"_blank"
+	)
+
+	await new Promise((resolve) => {
+		const timer = setInterval(() => {
+			if (loginWindow?.closed) {
+				clearInterval(timer)
+				resolve(true)
+			}
+		}, 700)
+	})
 }
 
 export async function addPermissions() {
