@@ -220,8 +220,6 @@ function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number; user: a
 					<li class="pt-2">
 						If this is a <span class="font-bold">public repository</span> please check the spelling
 					</li>
-
-					<li class="pt-2">Alternatively, you might not have access to the repository.</li>
 				</ul>
 
 				<a

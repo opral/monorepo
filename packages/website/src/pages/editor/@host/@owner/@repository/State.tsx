@@ -197,11 +197,22 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [localStorage] = useLocalStorage() ?? []
 
+	// get lix errors
+	const [lixErrors, setLixErrors] = createSignal<ReturnType<Repository["errors"]>>([])
+	createEffect(() => {
+		// reset errors to empty on repo changes
+		setLixErrors([])
+
+		repo()?.errors.subscribe((errors) => {
+			setLixErrors(errors)
+		})
+	})
+
 	const [repo] = createResource(
 		() => {
-			return routeParams()
+			return { routeParams: routeParams(), user: localStorage.user }
 		},
-		async ({ host, owner, repository }) => {
+		async ({ routeParams: { host, owner, repository } }) => {
 			if (host && owner && repository) {
 				try {
 					const newRepo = await openRepository(
@@ -222,14 +233,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}
 		}
 	)
-
-	// get lix errors
-	const [lixErrors, setLixErrors] = createSignal<ReturnType<Repository["errors"]>>([])
-	createEffect(() => {
-		repo()?.errors.subscribe((errors) => {
-			setLixErrors(errors)
-		})
-	})
 
 	// open the inlang project and store it in a resource
 	const [project] = createResource(
