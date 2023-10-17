@@ -1,6 +1,8 @@
 import { For, type JSX } from "solid-js"
 
-const SubcategoryPills = (props: { links: { name: string; param: string; icon?: JSX.Element }[] }) => {
+const SubcategoryPills = (props: {
+	links: { name: string; param: string; icon?: JSX.Element }[]
+}) => {
 	return (
 		<nav class="flex gap-[5px]">
 			<For each={props.links}>
