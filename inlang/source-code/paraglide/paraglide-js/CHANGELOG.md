@@ -1,6 +1,6 @@
 # @inlang/paraglide-js
 
-## 	1.0.0-prerelease.2
+## 	1.0.0-prerelease.3
 
 fix: https://github.com/inlang/monorepo/issues/1478
 
