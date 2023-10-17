@@ -113,6 +113,23 @@ describe("initialization", () => {
 		expect(result.data).toBeUndefined()
 	})
 
+	it("should resolve from a windows path", async () => {
+		const fs = createNodeishMemoryFs()
+		fs.mkdir("C:\\Users\\user\\project", { recursive: true })
+		fs.writeFile("C:\\Users\\user\\project\\project.inlang.json", JSON.stringify(settings))
+
+		const result = await tryCatch(() =>
+			loadProject({
+				settingsFilePath: "C:\\Users\\user\\project\\project.inlang.json",
+				nodeishFs: fs,
+				_import,
+			})
+		)
+
+		expect(result.error).toBeUndefined()
+		expect(result.data).toBeDefined()
+	})
+
 	describe("settings", () => {
 		it("should return an error if settings file is not found", async () => {
 			const fs = createNodeishMemoryFs()
