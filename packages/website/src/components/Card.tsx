@@ -184,7 +184,7 @@ export function NoResultsCard(props: { category: string }) {
 	}
 
 	return (
-		<div class="w-full h-[512px] rounded-3xl md:col-span-3 flex flex-col overflow-hidden justify-start items-stretch bg-gradient-to-t from-background to-surface-50 border border-surface-2">
+		<div class="w-full h-[512px] rounded-3xl md:col-span-4 flex flex-col overflow-hidden justify-start items-stretch bg-gradient-to-t from-background to-surface-50 border border-surface-2">
 			<div class="w-full md:pt-0 pt-16 overflow-hidden h-full">
 				<div class="max-md:scale-[2]">
 					<NoResultsArtwork />
