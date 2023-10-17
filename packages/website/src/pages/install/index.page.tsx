@@ -11,7 +11,7 @@ import { SetupCard } from "./components/SetupCard.jsx"
 import { Gitlogin } from "./components/GitLogin.jsx"
 import { Icon } from "#src/components/Icon.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
-import { RepositoryCard } from "../index/CommunityProjects.jsx"
+import { RepositoryCard } from "#src/components/editor/CommunityProjects.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
 
 export type Step = {
