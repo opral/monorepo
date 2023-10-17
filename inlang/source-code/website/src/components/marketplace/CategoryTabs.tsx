@@ -40,7 +40,7 @@ const CategoryTabs = () => {
 									(currentPageContext.urlParsed.pathname.includes(link.href)
 										? "text-primary "
 										: "text-surface-600 ") +
-									" px-2 py-[6px] group-hover:bg-surface-100 rounded-md font-medium cursor-pointer "
+									" px-2 py-[6px] group-hover:bg-surface-100 rounded-md font-medium cursor-pointer w-max"
 								}
 							>
 								{link.name}
