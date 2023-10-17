@@ -1,5 +1,11 @@
 # @inlang/marketplace-registry
 
+## 1.3.0
+
+### Minor Changes
+
+- 6fe144640: fix #1478 – loadProject with absolute windows paths
+
 ## 1.2.0
 
 ### Minor Changes
