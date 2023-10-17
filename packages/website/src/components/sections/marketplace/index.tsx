@@ -1,8 +1,8 @@
-import { For, Show, type Accessor, createSignal, createEffect, Match, Switch, onMount } from "solid-js"
-import { SearchIcon } from "#src/pages/editor/@host/@owner/@repository/components/SearchInput.jsx"
+import { For, Show, createSignal, Match, Switch, onMount } from "solid-js"
+// import { SearchIcon } from "#src/pages/editor/@host/@owner/@repository/components/SearchInput.jsx"
 // import { Button } from "#src/pages/index/components/Button.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
-import Check from "~icons/material-symbols/check"
+// import Check from "~icons/material-symbols/check"
 import Right from "~icons/material-symbols/chevron-right"
 import Left from "~icons/material-symbols/chevron-left"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
@@ -24,7 +24,7 @@ export const [searchValue, setSearchValue] = createSignal<string>("")
 const selectedCategory = () => {
 	return currentPageContext.urlParsed.pathname.replace("/", "")
 }
-const [selectedSubCategories, setSelectedSubCategories] = createSignal<SubCategory[]>([])
+const [selectedSubCategories,] = createSignal<SubCategory[]>([])
 
 const filteredItems = (slider?: boolean) => {
 	return algorithm(
@@ -33,12 +33,6 @@ const filteredItems = (slider?: boolean) => {
 		selectedCategory() === "marketplace" || slider ? undefined : selectedCategory()
 	)
 }
-onMount(() => {
-	const urlParams = new URLSearchParams(window.location.search)
-	if (urlParams.get("search") !== "" && urlParams.get("search") !== undefined) {
-		setSearchValue(urlParams.get("search")?.replace(/%20/g, " ") || "")
-	}
-})
 
 const randomizedItems = () => filteredItems(true).reverse()
 
@@ -59,6 +53,13 @@ export default function Marketplace(props: {
 		detailsChanged: (slider: { track: { details: any } }) => {
 			setDetails(slider.track.details)
 		},
+	})
+
+	onMount(() => {
+		const urlParams = new URLSearchParams(window.location.search)
+		if (urlParams.get("search") !== "" && urlParams.get("search") !== undefined) {
+			setSearchValue(urlParams.get("search")?.replace(/%20/g, " ") || "")
+		}
 	})
 
 	return (
