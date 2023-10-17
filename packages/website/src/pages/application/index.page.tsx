@@ -45,7 +45,7 @@ export function Page() {
 					</div>
 
 					<div class="pb-16 md:pb-20 min-h-screen relative">
-						<h2 class="text-2xl font-semibold pb-4 pt-8">All Products</h2>
+						<h2 class="text-md text-surface-600 pb-4 pt-8">All Products</h2>
 						<Marketplace />
 					</div>
 				</MarketplaceLayout>
