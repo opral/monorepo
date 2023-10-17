@@ -1,15 +1,19 @@
 import type { NodeishFilesystem } from "@lix-js/fs";
 import { fetchBlobsFromRemote } from "./fetchBlobsFromRemote.js";
 
-let nextFetchOids = undefined as undefined | Set<string>;
+let nextFetchOids = undefined as undefined | Set<string>;
 let requestedFetches = [] as { resolve: (value: unknown) => void, reject: (reason?: any) => void}[];
 
+/**
+ * A throttled variant of fetchBlobsFromRemote. 
+ * This method takes all calls of it happening in the same "tick" (utilizing setTimeout(1) to be browser compatible) and batches 
+ * them to one call of fetchBlobsFromRemote containing all requested oid's.
+ */
 export async function fetchBlobsFromRemoteThrottled(args: {
     fs: NodeishFilesystem, 
     gitdir: string, 
     http: any, 
-    oids: string[], 
-    allOids: string[]
+    oids: string[]
 }) {
     const fetchRequestPromise = new Promise((resolve, reject) => {
         requestedFetches.push({
@@ -19,25 +23,39 @@ export async function fetchBlobsFromRemoteThrottled(args: {
     });
 
     if (nextFetchOids === undefined) {
-        nextFetchOids = new Set<string>;
-        args.oids.forEach(oid => nextFetchOids!.add(oid));
+        nextFetchOids = new Set<string>();
+        
+        for (const oid of args.oids) nextFetchOids.add(oid);
+        // NOTE: there is no nextTick in browser env - we fall back to timeout of 1 ms 
         setTimeout(() => {
-            const oIdsToFetch = [...nextFetchOids!];
+            if (!nextFetchOids) {
+                throw new Error('next nextFetchOids was manipulated somehow from the outside?')
+            }
+            const oIdsToFetch = [...nextFetchOids];
             nextFetchOids = undefined;
-            const requestedFetchesBatch = requestedFetches.slice();
+            const requestedFetchesBatch = [...requestedFetches];
             requestedFetches = [];
             fetchBlobsFromRemote({
                 fs: args.fs,
                 gitdir: args.gitdir,
                 http: args.http,
-                oids: oIdsToFetch,
-                allOids: args.allOids
-            }).then((value) => requestedFetchesBatch.forEach(request => request.resolve(value)))
-            .catch((reason) => requestedFetchesBatch.forEach(request => request.reject(reason)));
+                oids: oIdsToFetch
+            }).then((value) => { 
+                for (const request of requestedFetchesBatch) {
+                    request.resolve(value);
+                }
+            })
+            .catch((reason) => { 
+                for (const request of requestedFetchesBatch) {
+                    request.reject(reason);
+                }
+            });
             
         }, 1);
     } else {
-        args.oids.forEach(oid => nextFetchOids!.add(oid));
+        for (const oid of args.oids) {
+            nextFetchOids.add(oid);
+        };
     }
 
     return fetchRequestPromise;

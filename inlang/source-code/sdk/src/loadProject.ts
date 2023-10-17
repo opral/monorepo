@@ -56,10 +56,23 @@ export const loadProject = async (args: {
 		)
 	}
 
+
 	// -- load project ------------------------------------------------------
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
 		const nodeishFs = createNodeishFsWithAbsolutePaths(args)
+
+
+		// TODO #1459 this was the hack that allowes to preload all files without touching the plugin code using throttlling
+		// // reading each file in one tick - not awaiting the content of the file - this will trigger the download of the file and since it happens in one tick we can batch them
+		// const fileFetchPromises = [] as Promise<any>[];
+
+		// ["ar", "az", "bg", "ca", "cs", "da", "de", "el", "en", "es-419", "es", "eu", "fr", "he", "hr", "hu", "id", "it", "iw", "ja", "ko", "nl", "no", "pl", "pt-BR", "pt", "ro", "ru", "sk", "sr", "sv", "ta", "tr", "uk", "vi", "zh-CN", "zh-TW"].forEach(langTag => {
+		// 	fileFetchPromises.push(nodeishFs.readFile('/apps/web/public/static/locales/'+langTag+"/common.json"));
+		// })
+
+		// await Promise.all(fileFetchPromises);
+		
 
 		// -- settings ------------------------------------------------------------
 

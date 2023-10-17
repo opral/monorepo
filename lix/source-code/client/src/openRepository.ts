@@ -1,6 +1,7 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Repository } from "./api.js"
-import { transformRemote, parseLixUri, httpWithLazyInjection } from "./helpers.js"
+import { transformRemote, parseLixUri } from "./helpers.js"
+import { httpWithLazyInjection } from './helpers/httpWithLazyInjection.js'
 // @ts-ignore
 import http from "./http-client.js"
 import { Octokit } from "octokit"
@@ -75,7 +76,7 @@ export async function openRepository(
 
 	let pending: Promise<void | { error: Error }> | undefined = clone({
 		fs: rawFs, // withLazyFetching(rawFs, "clone"),
-		// to start the repo lazy - we add the blob filter here
+		// to start the repo lazy - we add the blob:none filter here
 		http: httpWithLazyInjection(http, {
 			noneBlobFilter: true,
 			overrideHaves: undefined,
