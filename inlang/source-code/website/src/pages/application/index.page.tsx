@@ -8,27 +8,27 @@ export function Page() {
 		{
 			name: "Svelte",
 			param: "svelte",
-			icon: <IconSvelte class="-ml-1 w-5 h-5" />
+			icon: <IconSvelte class="-ml-1 w-5 h-5" />,
 		},
 		{
 			name: "React",
 			param: "react",
-			icon: <IconReact class="-ml-1 w-5 h-5" />
+			icon: <IconReact class="-ml-1 w-5 h-5" />,
 		},
 		{
 			name: "Next.js",
 			param: "nextjs",
-			icon: <IconNextjs class="-ml-1 w-5 h-5" />
+			icon: <IconNextjs class="-ml-1 w-5 h-5" />,
 		},
 		{
 			name: "Javascript",
 			param: "javascript",
-			icon: <IconJavascript class="-ml-1 w-5 h-5" />
+			icon: <IconJavascript class="-ml-1 w-5 h-5" />,
 		},
 		{
 			name: "Flutter",
 			param: "flutter",
-			icon: <IconFlutter class="-ml-1 w-5 h-5" />
+			icon: <IconFlutter class="-ml-1 w-5 h-5" />,
 		},
 	]
 
@@ -164,7 +164,10 @@ const IconFlutter = (props: { class: string }) => {
 			class={props.class}
 			preserveAspectRatio="none"
 		>
-			<path d="M15.3828 18.316L18.7438 15.042H27.0928L19.6968 22.438L15.3828 18.316Z" fill="#40D0FD" />
+			<path
+				d="M15.3828 18.316L18.7438 15.042H27.0928L19.6968 22.438L15.3828 18.316Z"
+				fill="#40D0FD"
+			/>
 			<path
 				d="M4.90625 16.1251L9.10525 20.4241L27.0923 2.28711H18.7432L4.90625 16.1251Z"
 				fill="#41D0FD"

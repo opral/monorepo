@@ -24,7 +24,7 @@ export const [searchValue, setSearchValue] = createSignal<string>("")
 const selectedCategory = () => {
 	return currentPageContext.urlParsed.pathname.replace("/", "")
 }
-const [selectedSubCategories,] = createSignal<SubCategory[]>([])
+const [selectedSubCategories] = createSignal<SubCategory[]>([])
 
 const filteredItems = (slider?: boolean) => {
 	return algorithm(
