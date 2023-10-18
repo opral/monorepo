@@ -9,7 +9,11 @@ const MarketplaceHeader = () => {
 		<header class="sticky top-0 w-full z-[9999] bg-background border-b border-surface-200 px-4">
 			<div class="max-w-7xl mx-auto flex justify-between items-center relative sm:static mb-10 sm:mb-0">
 				<a
-					href={window.location.origin + "//" + window.location.pathname}
+					href={
+						window.location.pathname === "/"
+							? window.location.origin + "//" + window.location.pathname
+							: "/"
+					}
 					class="flex items-center w-fit pointer-events-auto py-4"
 				>
 					<img class={"h-8 w-8"} src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
