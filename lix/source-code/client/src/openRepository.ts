@@ -17,6 +17,9 @@ import {
 	currentBranch,
 	add,
 	log,
+	listServerRefs,
+	// fetch,
+	// listBranches,
 } from "isomorphic-git"
 
 export async function openRepository(
@@ -24,6 +27,7 @@ export async function openRepository(
 	args: {
 		nodeishFs: NodeishFilesystem
 		workingDirectory?: string
+		branch?: string
 		auth?: unknown // unimplemented
 	}
 ): Promise<Repository> {
@@ -75,6 +79,7 @@ export async function openRepository(
 		corsProxy: gitProxyUrl,
 		url: gitUrl,
 		singleBranch: true,
+		ref: args.branch,
 		depth: 1,
 		noTags: true,
 	})
@@ -235,6 +240,19 @@ export async function openRepository(
 					fs: withLazyFetching(rawFs, "getCurrentBranch", delayedAction),
 					dir,
 				})) || undefined
+			)
+		},
+
+		async getBranches() {
+			return (
+				(
+					await listServerRefs({
+						url: gitUrl,
+						corsProxy: gitProxyUrl,
+						prefix: "refs/heads",
+						http,
+					})
+				).map((ref) => ref.ref.replace("refs/heads/", "")) || undefined
 			)
 		},
 

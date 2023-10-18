@@ -47,6 +47,7 @@ export type Repository = {
 	createFork: () => Promise<Endpoints["POST /repos/{owner}/{repo}/forks"]["response"]>
 	getOrigin: () => Promise<string>
 	getCurrentBranch: () => Promise<string | undefined>
+	getBranches: () => Promise<string[] | undefined>
 	errors: Subscribable<LixError[]>
 	getMeta: () => Promise<
 		| {
