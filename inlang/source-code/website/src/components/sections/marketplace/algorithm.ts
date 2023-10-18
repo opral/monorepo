@@ -21,8 +21,8 @@ export const algorithm = (
 
 		const isMatch = category
 			? item.keywords.some((keyword: string) => keyword.toLowerCase().includes(category)) &&
-			  flatItemContent.toLowerCase().includes(search)
-			: flatItemContent.toLowerCase().includes(search) ||
+			  flatItemContent.includes(search)
+			: flatItemContent.includes(search) ||
 			  item.publisherName.toLowerCase().includes(search) ||
 			  item.keywords.some((keyword: string) => keyword.toLowerCase().includes(search))
 
