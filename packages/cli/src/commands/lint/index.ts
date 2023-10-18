@@ -33,7 +33,7 @@ export async function lintCommandAction(args: { project: InlangProject; logger: 
 
 		if (args.project.installed.messageLintRules().length === 0) {
 			args.logger.error(
-				`❌ No message lint rules are installed. Visit the marketplace to install lint rules https://inlang.com/marketplace .`
+				`❌ No message lint rules are installed. Visit the marketplace to install lint rules https://inlang.com/ .`
 			)
 			return
 		}
