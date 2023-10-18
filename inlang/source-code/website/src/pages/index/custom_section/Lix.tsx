@@ -10,7 +10,7 @@ const Lix = () => {
 					<h1 class="text-md text-surface-700 font-semibold">Lix change control</h1>
 					<p class="text-sm text-surface-500">⏱️ The backbone of the ecosystem</p>
 				</div>
-				<Button type="textPrimary" href="/">
+				<Button type="textPrimary" href="/" class="-mb-[10px]">
 					{"More about Lix >"}
 				</Button>
 			</div>
