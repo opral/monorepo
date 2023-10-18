@@ -8,7 +8,7 @@ import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 import { SelectRepo } from "../Select.jsx"
 import Right from "~icons/material-symbols/chevron-right"
 import Left from "~icons/material-symbols/chevron-left"
-import Marketplace, { setSearchValue } from "#src/components/sections/marketplace/index.jsx"
+import Gridview, { setSearchValue } from "#src/components/marketplace/Gridview.jsx"
 import { colorForTypeOf, convertLinkToGithub, typeOfIdToTitle } from "../utilities.js"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
@@ -305,7 +305,7 @@ export function Page(props: PageProps) {
 								</Show>
 							</Show>
 						</div>
-						<Marketplace slider minimal />
+						<Gridview slider minimal />
 						<div class="mt-20">
 							<GetHelp text="Do you have questions?" />
 						</div>

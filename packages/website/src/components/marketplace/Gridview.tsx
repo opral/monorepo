@@ -1,7 +1,7 @@
 import { For, Show, createSignal, onMount } from "solid-js"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
-import { algorithm } from "./algorithm.js"
+import { algorithm } from "./helper/algorithm.js"
 import { currentPageContext } from "#src/renderer/state.js"
 import Highlight from "#src/components/Highlight.jsx"
 import Card, { CardBuildOwn, NoResultsCard } from "#src/components/Card.jsx"
@@ -28,7 +28,7 @@ const filteredItems = (slider?: boolean) => {
 
 const randomizedItems = () => filteredItems(true).reverse()
 
-export default function Marketplace(props: {
+export default function Gridview(props: {
 	minimal?: boolean
 	highlights?: Record<string, string>[]
 	category?: Category | undefined
