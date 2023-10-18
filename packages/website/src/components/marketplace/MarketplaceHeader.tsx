@@ -17,7 +17,7 @@ const MarketplaceHeader = () => {
 				</div>
 				<div class="flex">
 					<Button type="text" href="/documentation">
-						Developer
+						Developers
 					</Button>
 				</div>
 			</div>
