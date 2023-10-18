@@ -33,7 +33,7 @@ const Stack = () => {
     <div class="w-full flex gap-4 mt-4 md:mt-10 mb-10 flex-col-reverse md:flex-row">
       <div class="w-full">
         <p class="pb-2 text-surface-500 text-sm">Stack</p>
-        <div class="flex gap-2 overflow-x-scroll">
+        <div class="flex gap-2 overflow-x-scroll hide-scrollbar">
           <For each={getSubCategies}>
             {(link) => (
               <a
