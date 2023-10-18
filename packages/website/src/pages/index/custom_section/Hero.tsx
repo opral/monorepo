@@ -62,7 +62,7 @@ const Hero = () => {
 							💡 Expand to new markets and acquire more customers
 						</p>
 					</div>
-					<Button type="textPrimary" href="/">
+					<Button type="textPrimary" href="/" class="-mb-[10px]">
 						{"More about the ecosystem >"}
 					</Button>
 				</div>
