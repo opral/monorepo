@@ -1,7 +1,6 @@
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import { normalizePath } from "@lix-js/fs"
-
-export const isAbsolutePath = (path: string) => /^[/\\]/.test(path)
+import { isAbsolutePath } from "./isAbsolutePath.js"
 
 /**
  * Wraps the nodeish filesystem subset with a function that intercepts paths
@@ -14,19 +13,19 @@ export const createNodeishFsWithAbsolutePaths = (args: {
 	nodeishFs: NodeishFilesystemSubset
 }): NodeishFilesystemSubset => {
 	if (!isAbsolutePath(args.settingsFilePath)) {
-		throw new Error("The argument `settingsFilePath` must be an absolute path.")
+		throw new Error(`Expected an absolute path but received "${args.settingsFilePath}".`)
 	}
 
 	// get the base path of the settings file by
 	// removing the file name from the path
-	const bathPath = args.settingsFilePath.split("/").slice(0, -1).join("/")
+	const basePath = normalizePath(args.settingsFilePath).split("/").slice(0, -1).join("/")
 
 	const makeAbsolute = (path: string) => {
 		if (isAbsolutePath(path)) {
-			return path
+			return normalizePath(path)
 		}
 
-		return normalizePath(bathPath + "/" + path)
+		return normalizePath(basePath + "/" + path)
 	}
 
 	return {

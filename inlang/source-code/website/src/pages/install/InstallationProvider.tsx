@@ -191,7 +191,7 @@ async function initializeRepo(
 		return
 	}
 
-	const formatting = detectJsonFormatting(projectResult.data).serialize
+	const formatting = detectJsonFormatting(projectResult.data)
 
 	const inlangProjectString = projectResult.data
 
