@@ -17,6 +17,10 @@ const CategoryTabs = () => {
 				href: "/markdown",
 			},
 			{
+				name: `Lint Rules`,
+				href: "/lintrules"
+			},
+			{
 				name: `Missing something?`,
 				href: "https://github.com/inlang/monorepo/discussions",
 			},
@@ -34,7 +38,7 @@ const CategoryTabs = () => {
 							" border-b-[2px] py-[4px] text-sm bg-transparent group content-box"
 						}
 					>
-						<a href={link.href}>
+						<a href={link.href} target={link.href.includes("github.com") ? "_blank" : "_default"}>
 							<div
 								class={
 									(currentPageContext.urlParsed.pathname.includes(link.href)

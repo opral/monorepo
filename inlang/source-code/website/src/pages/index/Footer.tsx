@@ -18,6 +18,10 @@ const productsLinks = [
 		name: `Global Markdown`,
 		href: "/markdown",
 	},
+	{
+		name: `Lint Rules`,
+		href: "/lintrules"
+	}
 ]
 
 const Footer = () => {
