@@ -60,7 +60,9 @@ export const Button = (props: ButtonProps) => {
 					}}
 					class={
 						"pointer-events-auto flex justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200 " +
-						bgColor(props.type) + " " + props.class
+						bgColor(props.type) +
+						" " +
+						props.class
 					}
 				>
 					{props.children}
@@ -88,7 +90,9 @@ export const Button = (props: ButtonProps) => {
 					<div
 						class={
 							"flex justify-center items-center h-10 relative gap-2 rounded flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer " +
-							bgColor(props.type) + " " + props.class
+							bgColor(props.type) +
+							" " +
+							props.class
 						}
 					>
 						{props.children}
@@ -119,7 +123,9 @@ export const Button = (props: ButtonProps) => {
 					}}
 					class={
 						"flex justify-center items-center h-10 relative gap-2 rounded flex-grow-0 flex-shrink-0 text-sm font-medium text-left " +
-						bgColor(props.type) + " " + props.class
+						bgColor(props.type) +
+						" " +
+						props.class
 					}
 				>
 					{props.children}

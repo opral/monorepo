@@ -3,13 +3,9 @@ import { For, Show, createSignal, Match, Switch, onMount } from "solid-js"
 // import { Button } from "#src/pages/index/components/Button.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 // import Check from "~icons/material-symbols/check"
-import Right from "~icons/material-symbols/chevron-right"
-import Left from "~icons/material-symbols/chevron-left"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 import { algorithm } from "./algorithm.js"
 import { currentPageContext } from "#src/renderer/state.js"
-// @ts-ignore
-import { createSlider } from "solid-slider"
 import "solid-slider/slider.css"
 import Highlight from "#src/components/Highlight.jsx"
 import Card, { CardBuildOwn, NoResultsCard } from "#src/components/Card.jsx"
@@ -42,18 +38,18 @@ export default function Marketplace(props: {
 	category?: Category | undefined
 	slider?: boolean
 }) {
-	const [details, setDetails] = createSignal({})
-	const [slider, { next, prev }] = createSlider({
-		slides: {
-			number: filteredItems(true).length,
-			perView: window ? (window.innerWidth > 768 ? 3 : 1) : 1,
-			spacing: 16,
-		},
+	// const [details, setDetails] = createSignal({})
+	// const [slider, { next, prev }] = createSlider({
+	// 	slides: {
+	// 		number: filteredItems(true).length,
+	// 		perView: window ? (window.innerWidth > 768 ? 3 : 1) : 1,
+	// 		spacing: 16,
+	// 	},
 
-		detailsChanged: (slider: { track: { details: any } }) => {
-			setDetails(slider.track.details)
-		},
-	})
+	// 	detailsChanged: (slider: { track: { details: any } }) => {
+	// 		setDetails(slider.track.details)
+	// 	},
+	// })
 
 	onMount(() => {
 		const urlParams = new URLSearchParams(window.location.search)
