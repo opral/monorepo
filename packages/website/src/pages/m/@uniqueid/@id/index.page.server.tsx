@@ -11,7 +11,7 @@ export async function onBeforeRender(pageContext: PageContext) {
 			item.uniqueID.replaceAll(".", "-").toLowerCase() === pageContext.routeParams.uniqueid
 	) as MarketplaceManifest
 
-	if (!item) {
+	if (!item || item.id !== pageContext.routeParams.id) {
 		console.error("Item not found")
 		throw redirect("/marketplace/404")
 	}

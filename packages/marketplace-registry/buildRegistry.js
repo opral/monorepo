@@ -58,11 +58,11 @@ const index = client.initIndex("registry")
 
 const objects = await Promise.all(
 	[...registry.values()].map(async (value) => {
-		const { id, readme, ...rest } = value
+		const { uniqueID, readme, ...rest } = value
 
 		const text = { en: await fetch(readme.en).then((res) => res.text()) }
 
-		return { objectID: id, ...rest, readme: text }
+		return { objectID: uniqueID, ...rest, readme: text }
 	})
 )
 
