@@ -1,0 +1,32 @@
+{
+	"name": "@inlang/plugin-message-format",
+	"version": "1.0.0",
+	"type": "module",
+	"exports": {
+		"./storage-schema": "./src/storageSchema.ts"
+	},
+	"files": [
+		"./dist"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"dev": "inlang module build --entry ./src/index.ts --outdir ./dist --watch",
+		"build": "inlang module build --entry ./src/index.ts --outdir ./dist",
+		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"lint": "eslint ./src --fix",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./.turbo ./node_modules"
+	},
+	"devDependencies": {
+		"@inlang/cli": "*",
+		"@inlang/detect-json-formatting": "*",
+		"@inlang/sdk": "*",
+		"@sinclair/typebox": "^0.31.17",
+		"@vitest/coverage-v8": "^0.33.0",
+		"typescript": "^5.1.3",
+		"valibot": "0.18.0",
+		"vitest": "0.33.0"
+	}
+}
