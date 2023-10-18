@@ -20,14 +20,18 @@ for (const link of manifestLinks) {
 			// eslint-disable-next-line no-undef
 			console.error(errors)
 			throw new Error(`Manifest is invalid.`)
-		} else if (json.module && !json.module.toString().includes("jsdelivr")) {
-			throw new Error(`Manifest is invalid. The module field must be a jsdelivr link.`)
 		}
+		// else if (json.module && !json.module.toString().includes("jsdelivr")) {
+		// 	throw new Error(`Manifest is invalid. The module field must be a jsdelivr link.`)
+		// }
 		manifests.push(json)
 	} catch (e) {
 		throw new Error(`Manifest '${link}' is invalid.`)
 	}
 }
+
+// checks if every manifest has a unique id
+checkUniqueIDs(manifests)
 
 // sort the manifests by id
 manifests.sort((a, b) => {
@@ -72,3 +76,15 @@ index
 		// eslint-disable-next-line no-undef
 		console.error(err)
 	})
+
+/* This function checks for uniqueIDs to verify they are not duplicated */
+function checkUniqueIDs(manifests) {
+	const uniqueIDs = new Set()
+
+	for (const manifest of manifests) {
+		if (uniqueIDs.has(manifest.uniqueID)) {
+			throw new Error(`Manifest with unique id '${manifest.uniqueID}' already exists.`)
+		}
+		uniqueIDs.add(manifest.uniqueID)
+	}
+}
