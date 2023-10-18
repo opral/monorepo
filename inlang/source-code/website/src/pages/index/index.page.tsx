@@ -24,7 +24,9 @@ export function Page() {
 						<Lix />
 					</Match>
 					<Match when={urlParams.get("search")}>
-						<Marketplace />
+						<div class="pt-10">
+							<Marketplace />
+						</div>
 					</Match>
 				</Switch>
 			</MarketplaceLayout>
