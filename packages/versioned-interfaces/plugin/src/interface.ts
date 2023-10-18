@@ -73,6 +73,9 @@ export const Plugin = Type.Object(
 		}) as unknown as TTemplateLiteral<[TLiteral<`plugin.${string}.${string}`>]>,
 		displayName: Translatable(Type.String()),
 		description: Translatable(Type.String()),
+		//TODO can we change this into
+		//  		settingSchema:Type.Optional(JSONObject)
+		settingSchema: Type.Optional(Type.Any()),
 		loadMessages: Type.Optional(Type.Any()),
 		saveMessages: Type.Optional(Type.Any()),
 		/**
