@@ -6,13 +6,13 @@ import { GetHelp } from "#src/components/GetHelp.jsx"
 import Right from "~icons/material-symbols/chevron-right"
 import Left from "~icons/material-symbols/chevron-left"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
-import { algorithm } from "./algorithm.js"
 import { currentPageContext } from "#src/renderer/state.js"
 // @ts-ignore
 import { createSlider } from "solid-slider"
 import "solid-slider/slider.css"
 import Highlight from "#src/components/Highlight.jsx"
 import Card, { CardBuildOwn, NoResultsCard } from "#src/components/Card.jsx"
+import { rpc } from "@inlang/rpc"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -26,15 +26,13 @@ const selectedCategory = () => {
 }
 const [selectedSubCategories] = createSignal<SubCategory[]>([])
 
-const filteredItems = (slider?: boolean) => {
-	return algorithm(
-		selectedSubCategories(),
-		searchValue(),
-		selectedCategory() === "marketplace" || slider ? undefined : selectedCategory()
-	)
+const filteredItems = async () => {
+	const items = await rpc.search({ term: selectedCategory() })
+
+	console.log(items.data)
 }
 
-const randomizedItems = () => filteredItems(true).reverse()
+// const randomizedItems = () => filteredItems(true).reverse()
 
 export default function Marketplace(props: {
 	minimal?: boolean
