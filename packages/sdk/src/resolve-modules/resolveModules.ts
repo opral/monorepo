@@ -13,6 +13,7 @@ import { createImport } from "./import.js"
 import type { MessageLintRule } from "@inlang/message-lint-rule"
 import { resolvePlugins } from "./plugins/resolvePlugins.js"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
+import { validatedModuleSettings } from "./validatedModuleSettings.js"
 
 const ModuleCompiler = TypeCompiler.Compile(InlangModule)
 
@@ -31,7 +32,6 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 		 */
 
 		const importedModule = await tryCatch<InlangModule>(() => _import(module))
-
 		// -- IMPORT MODULE --
 		if (importedModule.error) {
 			moduleErrors.push(
@@ -78,6 +78,10 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 		} else {
 			throw new Error(`Unimplemented module type. Must start with "plugin." or "messageLintRule.`)
 		}
+		validatedModuleSettings({
+			resolvedModules: importedModule.data.default,
+			settings: args.settings,
+		})
 	}
 
 	const resolvedPlugins = await resolvePlugins({
