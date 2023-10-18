@@ -27,7 +27,7 @@ const CategoryTabs = () => {
 		]
 	}
 	return (
-		<nav class="max-w-7xl mx-auto flex gap-4 overflow-x-scroll">
+		<nav class="max-w-7xl mx-auto flex gap-4 overflow-x-scroll hide-scrollbar">
 			<For each={getCategories()}>
 				{(link) => (
 					<div
