@@ -18,6 +18,10 @@ const productsLinks = [
 		name: `Global Markdown`,
 		href: "/markdown",
 	},
+	{
+		name: `Lint Rules`,
+		href: "/lintrules"
+	}
 ]
 
 const Footer = () => {
@@ -77,7 +81,7 @@ const Footer = () => {
 	}
 
 	return (
-		<footer class="border-t border-surface-100 overflow-hidden max-w-7xl mx-auto">
+		<footer class="overflow-hidden max-w-7xl mx-auto">
 			<div class="flex flex-row flex-wrap-reverse py-16 px-6 md:px-4 xl:px-0 gap-10 sm:gap-x-0 md:gap-y-10 xl:gap-0">
 				<div class="w-full md:w-1/4 xl:px-4 flex flex-row items-center sm:items-start md:flex-col gap-10 md:justify-start justify-between flex-wrap">
 					<div>
