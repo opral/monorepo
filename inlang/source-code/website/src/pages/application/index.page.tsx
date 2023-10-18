@@ -31,7 +31,6 @@ export function Page() {
 			icon: <IconFlutter class="-ml-1 w-5 h-5" />,
 		},
 	]
-
 	return (
 		<>
 			<Title>Global Application</Title>
@@ -54,7 +53,7 @@ export function Page() {
 	)
 }
 
-const IconSvelte = (props: { class: string }) => {
+export const IconSvelte = (props: { class: string }) => {
 	return (
 		<svg
 			width={32}
@@ -76,7 +75,7 @@ const IconSvelte = (props: { class: string }) => {
 		</svg>
 	)
 }
-const IconReact = (props: { class: string }) => {
+export const IconReact = (props: { class: string }) => {
 	return (
 		<svg
 			width={32}
@@ -107,7 +106,7 @@ const IconReact = (props: { class: string }) => {
 	)
 }
 
-const IconNextjs = (props: { class: string }) => {
+export const IconNextjs = (props: { class: string }) => {
 	return (
 		<svg
 			width={32}
@@ -133,7 +132,7 @@ const IconNextjs = (props: { class: string }) => {
 	)
 }
 
-const IconJavascript = (props: { class: string }) => {
+export const IconJavascript = (props: { class: string }) => {
 	return (
 		<svg
 			width={32}
@@ -153,7 +152,7 @@ const IconJavascript = (props: { class: string }) => {
 	)
 }
 
-const IconFlutter = (props: { class: string }) => {
+export const IconFlutter = (props: { class: string }) => {
 	return (
 		<svg
 			width={32}
