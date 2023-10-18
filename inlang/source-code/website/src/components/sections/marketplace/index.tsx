@@ -79,10 +79,11 @@ export default function Marketplace(props: {
 					</Show>
 				</Show>
 				<Switch>
-					<Match when={props.slider}>
+					{/*
+					 <Match when={props.slider}>
 						<h3 class="font-semibold text-2xl mb-6">Items that might interest you</h3>
 						<div class="relative">
-							{/* @ts-ignore */}
+		
 							<div use:slider class="cursor-grab active:cursor-grabbing">
 								<Gallery randomize />
 							</div>
@@ -103,7 +104,7 @@ export default function Marketplace(props: {
 								<Right class="h-8 w-8" />
 							</button>
 						</div>
-					</Match>
+					</Match>*/}
 					<Match when={!props.slider}>
 						<div class="mb-32 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
 							<Gallery />
