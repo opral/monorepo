@@ -1,9 +1,12 @@
 // pluginOptions for json plugin
-export type PluginSettings = {
-	pathPattern: string | Record<string, string>
-	variableReferencePattern?: string[] //default is ["{", "}"]
-	ignore?: string[] // default is []
-}
+import { Type, type Static } from "@sinclair/typebox"
+
+export type PluginSettings = Static<typeof PluginSettings>
+export const PluginSettings = Type.Object({
+	pathPattern: Type.Union([Type.String(), Type.Record(Type.String(), Type.String())]),
+	variableReferencePattern: Type.Optional(Type.Array(Type.String())),
+	ignore: Type.Optional(Type.Array(Type.String())),
+})
 
 /**
  * Throws an error if the options are invalid.
