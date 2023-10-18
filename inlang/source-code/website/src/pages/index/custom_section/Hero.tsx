@@ -30,8 +30,8 @@ const Hero = () => {
 												src={m?.icon}
 												alt={m?.id}
 											/>
-											<div class="flex flex-1 flex-col gap-1">
-												<h3 class="flex-1 text-sm text-surface-800 font-semibold whitespace-nowrap overflow-hidden">
+											<div class="flex w-full flex-col gap-1">
+												<h3 class="text-sm w-full pr-10 text-surface-800 font-semibold truncate">
 													{(m?.displayName as { en: string }).en}
 												</h3>
 												<Show when={m}>
