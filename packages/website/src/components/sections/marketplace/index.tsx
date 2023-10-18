@@ -13,6 +13,7 @@ import "solid-slider/slider.css"
 import Highlight from "#src/components/Highlight.jsx"
 import Card, { CardBuildOwn, NoResultsCard } from "#src/components/Card.jsx"
 import { rpc } from "@inlang/rpc"
+import { registry } from "@inlang/marketplace-registry"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -29,7 +30,7 @@ const [selectedSubCategories] = createSignal<SubCategory[]>([])
 const filteredItems = async () => {
 	const items = await rpc.search({ term: selectedCategory() })
 
-	console.log(items.data)
+	return registry
 }
 
 // const randomizedItems = () => filteredItems(true).reverse()
