@@ -23,7 +23,9 @@
 	},
 	"dependencies": {
 		"@inlang/marketplace-manifest": "*",
+		"@inlang/env-variables": "*",
 		"@sinclair/typebox": "0.31.8",
+		"algoliasearch": "4.20.0",
 		"node-fetch": "3.3.2"
 	},
 	"devDependencies": {
