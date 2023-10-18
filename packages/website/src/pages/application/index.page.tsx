@@ -47,7 +47,8 @@ export function Page() {
 					<Marketplace />
 				</div>
 			</MarketplaceLayout>
-			´		</>
+			´{" "}
+		</>
 	)
 }
 
