@@ -6,10 +6,10 @@ import { Button } from "../components/Button.jsx"
 
 const featuredArray = [
 	"app.inlang.editor",
-	"library.inlang.paraglideJsSveltekit",
 	"app.inlang.cli",
 	"plugin.inlang.i18next",
 	"library.inlang.languageTag",
+	"messageLintRule.inlang.missingTranslation",
 ]
 
 const Hero = () => {
@@ -22,29 +22,35 @@ const Hero = () => {
 						{(feature) => {
 							const m = registry.find((m) => m.id === feature)
 							return (
-								<li>
-									<a href={"/m/" + m?.id}>
-										<div class="flex gap-4 hover:bg-background px-1 py-[10px] rounded-lg items-center">
-											<img
-												class="w-9 h-9 rounded-md m-0 shadow-lg object-cover object-center"
-												src={m?.icon}
-												alt={m?.id}
-											/>
-											<div class="flex w-full flex-col gap-1">
-												<h3 class="text-sm w-full pr-10 text-surface-800 font-semibold truncate">
-													{(m?.displayName as { en: string }).en}
-												</h3>
-												<Show when={m}>
-													<Chip
-														text={m?.id.split(".")[0]}
-														color={colorForTypeOf(m!.id)}
-														customClasses="w-fit"
-													/>
-												</Show>
+								<Show when={m}>
+									<li>
+										<a href={"/m/" + m?.id}>
+											<div class="flex gap-4 hover:bg-background px-1 py-[10px] rounded-lg items-center">
+												<img
+													class="w-9 h-9 rounded-md m-0 shadow-lg object-cover object-center"
+													src={m?.icon}
+													alt={m?.id}
+												/>
+												<div class="flex w-full flex-col gap-1">
+													<h3 class="text-sm w-full pr-10 text-surface-800 font-semibold truncate">
+														{typeof m?.displayName === "string"
+															? m.displayName
+															: typeof m?.displayName === "object"
+															? (m.displayName as { en: string }).en
+															: "Module"}
+													</h3>
+													<Show when={m}>
+														<Chip
+															text={m?.id.split(".")[0]}
+															color={colorForTypeOf(m!.id)}
+															customClasses="w-fit"
+														/>
+													</Show>
+												</div>
 											</div>
-										</div>
-									</a>
-								</li>
+										</a>
+									</li>
+								</Show>
 							)
 						}}
 					</For>
