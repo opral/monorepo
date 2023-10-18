@@ -108,7 +108,7 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 			},
 			{
 				name: `Lint Rules`,
-				href: "/lintrules",
+				href: "/lint",
 				type: props.darkmode ? "textBackground" : ("text" as buttonType),
 			},
 			{
