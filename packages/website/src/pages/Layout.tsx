@@ -145,7 +145,7 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 				<header class="sticky top-0 w-full z-[100]">
 					<div
 						class={
-							"z-[80] w-full border-b transition-colors h-[76px] " +
+							"z-[80] w-full border-b transition-colors h-16 " +
 							(!props.transparent && props.darkmode
 								? " bg-surface-900 border-b-surface-800"
 								: !props.transparent && !props.darkmode
@@ -207,15 +207,15 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 							</nav>
 						</div>
 					</div>
-					<div class="pl-6 lg:pl-4 xl:pl-0 absolute z-[90] top-0 h-[72px] left-0 w-full text-surface-200 pointer-events-none">
+					<div class="pl-6 lg:pl-4 xl:pl-0 xl:-translate-x-[16px] absolute z-[90] top-0 h-16 left-0 w-full text-surface-200 pointer-events-none">
 						<div class="max-w-[1248px] w-full mx-auto">
 							<a
 								href={getLocale() + "/"}
-								class="flex items-center w-fit pt-[18px] pointer-events-auto"
+								class="flex items-center w-fit pt-[16px] pointer-events-auto"
 							>
 								<img
 									class={
-										"h-9 w-9 " + (!mobileMenuIsOpen() && props.darkmode ? "filter invert" : "")
+										"h-8 w-8 " + (!mobileMenuIsOpen() && props.darkmode ? "filter invert" : "")
 									}
 									src="/favicon/safari-pinned-tab.svg"
 									alt="Company Logo"
@@ -231,8 +231,8 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 							</a>
 						</div>
 					</div>
-					<div class="absolute pr-4 xl:pr-0 z-[90] top-0 h-[72px] left-0 w-full text-surface-200 pointer-events-none">
-						<div class="max-w-[1248px] w-full mx-auto justify-end hidden lg:flex gap-8 items-center pt-[18px]">
+					<div class="absolute pr-4 xl:pr-0 z-[90] top-0 h-16 left-0 w-full text-surface-200 pointer-events-none">
+						<div class="max-w-[1248px] w-full mx-auto justify-end hidden lg:flex gap-8 items-center pt-[12px]">
 							<For each={getLinks()}>
 								{(link) => (
 									<>
@@ -257,7 +257,7 @@ function Header(props: { landingpage?: boolean; darkmode?: boolean; transparent?
 								</Button>
 							</Show>
 						</div>
-						<div class="lg:hidden flex items-center justify-end h-[76px] pr-4">
+						<div class="lg:hidden flex items-center justify-end h-16 pr-4">
 							<button
 								onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
 								type="button"
