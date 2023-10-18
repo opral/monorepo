@@ -2,7 +2,7 @@ import CategoryHero from "../components/sections/categoryHero/index.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import { Show } from "solid-js"
 import { Layout } from "./Layout.jsx"
-import Marketplace, { type Category } from "../components/sections/marketplace/index.jsx"
+import Gridview, { type Category } from "../components/marketplace/Gridview.jsx"
 
 export type PageProps = {
 	slug: string
@@ -23,9 +23,9 @@ export function CategoryPage(props: PageProps) {
 					<Show when={props.content}>
 						<CategoryHero slug={props.slug} content={props.content} />
 						<Show when={props.content.title !== "Global Application"}>
-							<Marketplace minimal />
+							<Gridview minimal />
 						</Show>
-						<Marketplace
+						<Gridview
 							minimal={props.content.title !== "Global Application"}
 							slider={props.content.title !== "Global Application"}
 							highlights={

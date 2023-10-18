@@ -4,7 +4,7 @@ import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx
 import { Match, Switch } from "solid-js"
 import Lix from "./custom_section/Lix.jsx"
 import Stack from "./custom_section/Stack.jsx"
-import Marketplace from "#src/components/sections/marketplace/index.jsx"
+import Gridview from "#src/components/marketplace/Gridview.jsx"
 
 export function Page() {
 	const urlParams = new URLSearchParams(window.location.search)
@@ -25,7 +25,7 @@ export function Page() {
 					</Match>
 					<Match when={urlParams.get("search")}>
 						<div class="pt-10">
-							<Marketplace />
+							<Gridview />
 						</div>
 					</Match>
 				</Switch>

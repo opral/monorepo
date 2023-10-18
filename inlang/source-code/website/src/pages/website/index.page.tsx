@@ -1,5 +1,5 @@
 import { Meta, Title } from "@solidjs/meta"
-import Marketplace from "#src/components/sections/marketplace/index.jsx"
+import Gridview from "#src/components/marketplace/Gridview.jsx"
 import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
 
 export function Page() {
@@ -11,7 +11,7 @@ export function Page() {
 			<MarketplaceLayout>
 				<div class="pb-16 md:pb-20 min-h-screen relative">
 					<h2 class="text-md text-surface-600 pb-4 pt-8">All Products</h2>
-					<Marketplace />
+					<Gridview />
 				</div>
 			</MarketplaceLayout>
 		</>

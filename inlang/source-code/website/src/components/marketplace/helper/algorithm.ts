@@ -1,5 +1,5 @@
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
-import type { Category, SubCategory } from "./index.jsx"
+import type { Category, SubCategory } from "./../Gridview.jsx"
 import { registry } from "@inlang/marketplace-registry"
 
 export const algorithm = (
