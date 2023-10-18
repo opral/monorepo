@@ -20,7 +20,7 @@
 
 **[📝 Documentation](https://inlang.com/documentation)** - Getting started and more.
 
-**[🌱 Ecosystem](https://inlang.com/marketplace)** - Plugins, resources, and more.
+**[🌱 Ecosystem](https://inlang.com)** - Plugins, resources, and more.
 
 **[🛠️ SDKs](https://inlang.com/documentation/sdk)** - Supported SDKs to globalize your app.
 
@@ -45,7 +45,7 @@ Manage translations in a simple web interface and push changes to your repositor
 
 ![the inlang editor to manage translations](https://github.com/inlang/monorepo/assets/59048346/85cfee69-96da-4b2d-8e34-a0b7abc72212)
 
-### [IDE-Extension](https://inlang.com/marketplace/app.inlang.ideExtension)
+### [IDE-Extension](https://inlang.com/m/app.inlang.ideExtension)
 
 The IDE extension allows you to translate your content directly in your IDE.
 

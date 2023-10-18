@@ -1,6 +1,6 @@
 # Publish to the marketplace
 
-Publishing your own plugin or lint rule to the [marketplace](/marketplace) is straightforward, as the only thing you have to add to our item registry is the URL of your `marketplace-manifest.json`.
+Publishing your own plugin or lint rule to the [marketplace](/) is straightforward, as the only thing you have to add to our item registry is the URL of your `marketplace-manifest.json`.
 
 ## Pre-requisites
 
