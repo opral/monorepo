@@ -29,6 +29,8 @@ export function Layout(props: { children: JSXElement }) {
 		setFilteredLanguageTags,
 		userIsCollaborator,
 		languageTags,
+		setActiveBranch,
+		activeBranch,
 	} = useEditorState()
 
 	const removeFilter = (filterName: string) => {
@@ -302,8 +304,7 @@ function Breadcrumbs() {
  * The menu to select the branch.
  */
 function BranchMenu() {
-	const { currentBranch } = useEditorState()
-
+	const { setActiveBranch, branchNames, activeBranch } = useEditorState()
 	return (
 		<sl-dropdown>
 			<sl-button slot="trigger" prop:caret={true} prop:size="small">
@@ -317,31 +318,19 @@ function BranchMenu() {
 						/>
 					</svg>
 				</div>
-				{currentBranch() ?? "branch"}
+				{activeBranch() ?? "branch"}
 			</sl-button>
-			<sl-menu class="w-48 min-w-full">
-				<div class="p-4">
-					Branches are not implemented yet. Discussion is on going in{" "}
-					<a
-						href="https://github.com/inlang/monorepo/discussions/166"
-						class="link link-primary"
-						target="blank"
-					>
-						#166
-					</a>
-					.
-				</div>
-				{/* <For each={branches()}>
+
+			<sl-menu class="w-48 min-w-fit">
+				<For each={branchNames()}>
 					{(branch) => (
-						<a
-						href={`${currentPageContext().urlParsed.pathname}?branch=${branch}`}
-						>
-						<sl-menu-item prop:checked={currentBranch() === branch}>
-						{branch}
-						</sl-menu-item>
-						</a>
-						)}
-					</For> */}
+						<div onClick={() => setActiveBranch(branch)}>
+							<sl-menu-item prop:type="checkbox" prop:checked={activeBranch() === branch}>
+								{branch}
+							</sl-menu-item>
+						</div>
+					)}
+				</For>
 			</sl-menu>
 		</sl-dropdown>
 	)
