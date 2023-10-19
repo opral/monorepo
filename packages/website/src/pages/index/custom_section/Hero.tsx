@@ -57,7 +57,11 @@ const Hero = () => {
 				</ul>
 			</div>
 			<div class="flex-1 flex flex-col gap-4 md:py-0 bg-background rounded-2xl border border-surface-200 overflow-hidden lg:min-h-[375px]">
-				<div class="flex-1 hidden lg:block w-full bg-[url('./images/expandV04.png')] bg-cover bg-center" />
+				<img
+					class="flex-1 hidden lg:block w-full max-h-[260px] object-cover"
+					src="./images/expandV04.png"
+					alt="inlang Ecosystem"
+				/>
 				<img class="lg:hidden" src="./images/expandV04.png" alt="inlang Ecosystem" />
 				<div class="flex flex-col md:flex-row items-start md:items-end px-8 pb-6 pt-3">
 					<div class="flex flex-col gap-2 flex-1">
