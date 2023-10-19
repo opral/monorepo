@@ -1,5 +1,5 @@
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
-import type { Category, SubCategory } from "./index.jsx"
+import type { Category, SubCategory } from "./../Gridview.jsx"
 import { registry } from "@inlang/marketplace-registry"
 
 export const algorithm = (
@@ -17,13 +17,12 @@ export const algorithm = (
 
 		const search = searchValue.toLowerCase()
 
-		const displayName =
-			typeof item.displayName === "object" ? item.displayName.en : item.displayName
+		const flatItemContent = JSON.stringify(item).toLowerCase()
 
 		const isMatch = category
 			? item.keywords.some((keyword: string) => keyword.toLowerCase().includes(category)) &&
-			  displayName.toLowerCase().includes(search)
-			: displayName.toLowerCase().includes(search) ||
+			  flatItemContent.includes(search)
+			: flatItemContent.includes(search) ||
 			  item.publisherName.toLowerCase().includes(search) ||
 			  item.keywords.some((keyword: string) => keyword.toLowerCase().includes(search))
 

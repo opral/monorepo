@@ -10,7 +10,17 @@
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/versioned-interfaces/translatable/README.md"
 	},
-	"keywords": ["application", "translatable", "adoptable"],
+	"keywords": [
+		"application",
+		"website",
+		"developer",
+		"translatable",
+		"adoptable",
+		"interface",
+		"types",
+		"typescript",
+		"library"
+	],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0"

@@ -7,7 +7,6 @@ import { Command } from "commander"
 import { paraglideDirectory } from "../state.js"
 import dedent from "dedent"
 
-
 export const compileCommand = new Command()
 	.name("compile")
 	.summary("Compiles an inlang project into an importable library.")
