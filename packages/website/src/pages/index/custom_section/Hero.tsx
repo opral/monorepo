@@ -7,9 +7,9 @@ import { Button } from "../components/Button.jsx"
 const featuredArray = [
 	"app.inlang.editor",
 	"app.inlang.cli",
+	"app.inlang.ideExtension",
 	"plugin.inlang.i18next",
-	"library.inlang.languageTag",
-	"messageLintRule.inlang.missingTranslation",
+	"library.inlang.paraglideJs",
 ]
 
 const Hero = () => {
