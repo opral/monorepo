@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "next dev",
+		"_dev": "next dev",
 		"build": "paraglide-js compile --namespace nextjs-example && next build",
 		"preview": "next start"
 	},
