@@ -26,10 +26,12 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
+		"@inlang/detect-json-formatting": "1.0.0",
 		"@inlang/sdk": "*",
 		"commander": "11.1.0",
 		"consola": "3.2.3",
 		"dedent": "1.5.1",
+		"json5": "2.2.3",
 		"typescript": "5.2.2"
 	},
 	"devDependencies": {

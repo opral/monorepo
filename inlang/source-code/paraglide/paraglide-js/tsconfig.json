@@ -4,6 +4,7 @@
 	"compilerOptions": {
 		"outDir": "./dist",
 		"declaration": true,
+		"moduleResolution": "",
 		"rootDir": "./src",
 		"sourceMap": false,
 		"checkJs": true

@@ -1,48 +1,62 @@
 import { Command } from "commander"
 import fs from "node:fs/promises"
-import { loadProject, type InlangProject, type ProjectSettings } from "@inlang/sdk"
+import { existsSync } from "node:fs"
+import { loadProject, type ProjectSettings } from "@inlang/sdk"
 import consola from "consola"
+import { resolve } from "node:path"
+import { detectJsonFormatting } from "@inlang/detect-json-formatting"
+import JSON5 from "json5"
+
+const DEFAULT_PROJECT_PATH = "./project.inlang.json"
 
 export const initCommand = new Command()
 	.name("init")
 	.summary("Initializes inlang Paraglide-JS.")
 	.action(async () => {
-		// --- LOAD THE PROJECT ---
+		consola.box("Welcome to inlang Paraglide-JS 🪂")
 
-		consola.log("Welcome to inlang Paraglide-JS 🪂")
+		checkPrerequisites()
+		const projectPath = await initializeInlangProject()
+		const namespace = await promptForNamespace()
+		await addCompileStepToPackageJSON({ projectPath, namespace })
+		await adjustTsConfigIfNecessary()
 
-		const userHasExistingProject = await consola.prompt("Do you have an existing inlang project?", {
-			type: "confirm",
-			default: false,
-		})
-
-		consola.log(userHasExistingProject)
-
-		return
-
-		// const project = await (userHasExistingProject ? findExistingInlangProject : createNewProject())
-
-		// if (project.errors().length > 0) {
-		// 	// log.error("The project has errors:")
-		// 	for (const error of project.errors()) {
-		// 		console.error(error)
-		// 	}
-		// 	console.info
-		// 	return process.exit(1)
-		// }
-
-		// // --- ADD RECOMMENDATIONS ---
-
-		// consola.success(
-		// 	"Complete.\n\nFor questions and feedback, visit https://github.com/inlang/monorepo/discussions."
-		// )
+		consola.success(
+			"Complete.\n\nFor questions and feedback, visit https://github.com/inlang/monorepo/discussions."
+		)
 	})
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const findExistingInlangProject = async (testInput: () => any): Promise<InlangProject> => {
-	let projectPath: string
-	consola.start("Searching for the inlang project file...")
-	// s.start("Searching for the inlang project file...")
+const initializeInlangProject = async () => {
+	const existingProjectPath = await findExistingInlangProjectPath()
+
+	if (existingProjectPath) {
+		await existingProjectFlow({ existingProjectPath })
+		return existingProjectPath
+	} else {
+		await createNewProjectFlow()
+		return DEFAULT_PROJECT_PATH
+	}
+}
+
+const promptForNamespace = async (): Promise<string> => {
+	const directoryName = process.cwd().split("/").pop()
+	const namespace = await consola.prompt(
+		`What should be the name of the project?
+
+The name is used to create an importable 'namespace' to distinguish between multiple projects in the same repository.
+For example, the name 'frontend' will create the following import statement:
+
+import * as m from "@inlang/paraglide-js/frontend/messages"
+`,
+		{
+			type: "text",
+			initial: directoryName,
+		}
+	)
+	return namespace
+}
+
+const findExistingInlangProjectPath = async (): Promise<string | undefined> => {
 	for (const path of [
 		"./project.inlang.json",
 		"../project.inlang.json",
@@ -50,44 +64,67 @@ const findExistingInlangProject = async (testInput: () => any): Promise<InlangPr
 	]) {
 		try {
 			await fs.access(path)
-			consola.success(`Found and using the inlang project file at "${path}".`)
-			projectPath = path
-			break
+			return path
 		} catch {
 			continue
 		}
 	}
-
-	consola.info("No inlang project file found.")
-	projectPath =
-		testInput() ??
-		(await consola.prompt("Please enter the path to the inlang project file:", {
-			default: "./project.inlang.json",
-			type: "text",
-		}))
-	const project = await loadProject({
-		settingsFilePath: projectPath,
-		nodeishFs: fs,
-	})
-	return project
+	return undefined
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const createNewProject = async (): Promise<InlangProject> => {
-	const projectPath = "./project.inlang.json"
-	consola.info(`Creating a new inlang project at ${projectPath}`)
-	await fs.writeFile("./project.inlang.json", JSON.stringify(newProjectTemplate, undefined, 2))
+const existingProjectFlow = async (args: { existingProjectPath: string }) => {
+	const selection = await consola.prompt(
+		`Do you want to use the inlang project at "${args.existingProjectPath}" or create a new project?`,
+		{
+			type: "select",
+			options: [
+				{ label: "Use this project", value: "useExistingProject" },
+				{ label: "Create a new project", value: "newProject" },
+			],
+		}
+	)
+	console.log(selection)
+	if (selection.value === "newProject") {
+		return createNewProjectFlow()
+	}
 	const project = await loadProject({
-		settingsFilePath: projectPath,
+		settingsFilePath: resolve(process.cwd(), args.existingProjectPath),
 		nodeishFs: fs,
 	})
-	return project
+	if (project.errors().length > 0) {
+		consola.error("The project contains errors: ")
+		for (const error of project.errors()) {
+			consola.error(error)
+		}
+		process.exit(1)
+	}
+}
+
+const createNewProjectFlow = async () => {
+	consola.info(`Creating a new inlang project in the current working directory.`)
+	await fs.writeFile(DEFAULT_PROJECT_PATH, JSON.stringify(newProjectTemplate, undefined, 2))
+	const project = await loadProject({
+		settingsFilePath: resolve(process.cwd(), DEFAULT_PROJECT_PATH),
+		nodeishFs: fs,
+	})
+	if (project.errors().length > 0) {
+		consola.error("Failed to create a new inlang project.")
+		consola.log(
+			"This is likely an internal bug. Please file an issue at https://github.com/inlang/monorepo."
+		)
+		for (const error of project.errors()) {
+			consola.error(error)
+		}
+		return process.exit(1)
+	} else {
+		consola.success("Successfully created a new inlang project.")
+	}
 }
 
 const newProjectTemplate: ProjectSettings = {
 	$schema: "https://inlang.com/schema/project-settings",
 	// defaulting to english to not overwhelm new users
-	// with prompts. They can change this later.
+	// with prompts. The user can change this later.
 	sourceLanguageTag: "en",
 	languageTags: ["en"],
 	modules: [
@@ -100,8 +137,118 @@ const newProjectTemplate: ProjectSettings = {
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/dist/index.js",
 	],
 	"plugin.inlang.messageFormat": {
-		// using .paraglide-js as directory to avoid future conflicts when an official .inlang
+		// using .inlang/paraglide-js as directory to avoid future conflicts when an official .inlang
 		// directory is introduced, see https://github.com/inlang/monorepo/discussions/1418
-		filePath: "./.paraglide-js/messages.json",
+		filePath: "./.inlang/paraglide-js/messages.json",
 	},
+}
+
+const checkPrerequisites = () => {
+	if (existsSync("./package.json") === false) {
+		consola.warn(
+			"No package.json found in the current working directory. Please run 'npm init' first."
+		)
+	}
+	// TODO check for uncommited changes
+}
+
+const addCompileStepToPackageJSON = async (args: { projectPath: string; namespace: string }) => {
+	consola.start("Adding the compile command to the build step in package.json.")
+	const file = await fs.readFile("./package.json", { encoding: "utf-8" })
+	const stringify = detectJsonFormatting(file)
+	const pkg = JSON.parse(file)
+	if (pkg?.scripts?.build === undefined) {
+		if (pkg.scripts === undefined) {
+			pkg.scripts = {}
+		}
+		if (args.projectPath !== DEFAULT_PROJECT_PATH) {
+			pkg.scripts.build = `paraglide-js compile --project ${args.projectPath} --namespace ${args.namespace}`
+		}
+	} else if (
+		pkg?.scripts?.build.includes("paraglide-js compile") === false &&
+		args.projectPath !== DEFAULT_PROJECT_PATH
+	) {
+		pkg.scripts.build = `paraglide-js compile --project ${args.projectPath} --namespace ${args.namespace} && ${pkg.scripts.build}`
+	} else if (
+		pkg.scripts.build.includes("paraglide-js compile") === false &&
+		args.projectPath === DEFAULT_PROJECT_PATH
+	) {
+		pkg.scripts.build = `paraglide-js compile --namespace ${args.namespace} && ${pkg.scripts.build}`
+	} else {
+		consola.success("The compile command already exists build step in package.json.")
+		return
+	}
+	await fs.writeFile("./package.json", stringify(pkg))
+	consola.success("Successfully added the compile command to the build step in package.json.")
+}
+
+/**
+ * Ensures that the moduleResolution compiler option is set to "bundler" or similar in the tsconfig.json.
+ *
+ * Otherwise, types defined in `package.exports` are not resolved by TypeScript. Leading to type
+ * errors with Paraglide-JS.
+ */
+const adjustTsConfigIfNecessary = async () => {
+	if (existsSync("./tsconfig.json") === false) {
+		return
+	}
+	consola.info(
+		"Found a tsconfig.json file. The `compilerOptions` must be set to node16, bundler, or higher to resolve package.exports."
+	)
+	consola.start("Checking if the tsconfig.json needs to be adjusted.")
+	const file = await fs.readFile("./tsconfig.json", { encoding: "utf-8" })
+	// tsconfig allows comments ... FML
+	const tsconfig = JSON5.parse(file)
+
+	let parentTsConfig: any | undefined
+
+	if (tsconfig.extends) {
+		try {
+			const parentTsConfigPath = resolve(process.cwd(), tsconfig.extends)
+			const parentTsConfigFile = await fs.readFile(parentTsConfigPath, { encoding: "utf-8" })
+			parentTsConfig = JSON5.parse(parentTsConfigFile)
+		} catch {
+			consola.warn(
+				`The tsconfig.json is extended from a tsconfig that couldn't be read. Maybe the file doesn't exist yet or is a NPM package. Continuing without taking the extended from tsconfig into consideration.`
+			)
+		}
+	}
+
+	// options that don't support package.exports
+	const invalidOptions = ["classic", "node", "node10"]
+	const moduleResolution =
+		tsconfig.compilerOptions?.moduleResolution ?? parentTsConfig?.compilerOptions?.moduleResolution
+
+	if (moduleResolution && invalidOptions.includes(moduleResolution.toLowerCase())) {
+		consola.info(
+			`You need to set the \`compilerOptions.moduleResolution\` to "Bundler" in the tsconfig.json file. Please do so now.`
+		)
+		let isValid = false
+		while (isValid === false) {
+			const response = await consola.prompt(
+				`Did you set the \`compilerOptions.moduleResolution\` to "Bundler"?`,
+				{
+					type: "confirm",
+				}
+			)
+			if (response === false) {
+				return consola.warn(
+					"Continuing without adjusting the tsconfig.json. This may lead to type errors."
+				)
+			}
+			const file = await fs.readFile("./tsconfig.json", { encoding: "utf-8" })
+			const tsconfig = JSON5.parse(file)
+			if (
+				tsconfig?.compilerOptions?.moduleResolution &&
+				tsconfig.compilerOptions.moduleResolution.toLowerCase() === "bundler"
+			) {
+				isValid = true
+				consola.success("Successfully adjusted the tsconfig.json.")
+			} else {
+				consola.error(
+					"The compiler options have not been adjusted. Please set the `compilerOptions.moduleResolution` to `Bundler`."
+				)
+			}
+		}
+	}
 }

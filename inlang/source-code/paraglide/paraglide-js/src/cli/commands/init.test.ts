@@ -75,3 +75,6 @@ const mockUserInput = (testUserInput: any[]) => {
 		return value
 	})
 }
+
+
+test("a tsconfig with comments should be loaded correctly", () => {})
