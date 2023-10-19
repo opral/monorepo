@@ -10,5 +10,6 @@
 	"../plugins/i18next/marketplace-manifest.json",
 	"../plugins/json/marketplace-manifest.json",
 	"../versioned-interfaces/language-tag/marketplace-manifest.json",
-	"../versioned-interfaces/translatable/marketplace-manifest.json"
+	"../versioned-interfaces/translatable/marketplace-manifest.json",
+	"../paraglide/paraglide-js/marketplace-manifest.json"
 ]

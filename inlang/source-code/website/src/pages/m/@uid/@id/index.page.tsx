@@ -5,10 +5,11 @@ import { isModule } from "@inlang/marketplace-registry"
 import { Button } from "#src/pages/index/components/Button.jsx"
 import { Chip } from "#src/components/Chip.jsx"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
-import { SelectRepo } from "../Select.jsx"
+import { SelectRepo } from "../../Select.jsx"
 import Right from "~icons/material-symbols/chevron-right"
 import Left from "~icons/material-symbols/chevron-left"
-import { colorForTypeOf, convertLinkToGithub, typeOfIdToTitle } from "../utilities.js"
+import Gridview, { setSearchValue } from "#src/components/marketplace/Gridview.jsx"
+import { colorForTypeOf, convertLinkToGithub, typeOfIdToTitle } from "../../utilities.js"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
 import "@inlang/markdown/css"
@@ -114,7 +115,7 @@ export function Page(props: PageProps) {
 			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
 					<div class="md:py-28 py-16">
-						<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-40 md:gap-8 gap-6">
+						<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-20 md:gap-8 gap-6">
 							<Show
 								when={props.markdown}
 								fallback={<p class="text-danger">{props.markdown?.error}</p>}
@@ -266,7 +267,10 @@ export function Page(props: PageProps) {
 														{(keyword) => (
 															<a
 																class="transition-opacity hover:opacity-80 cursor-pointer"
-																href={`/?search=${keyword.toString()}`}
+																href="/m"
+																onClick={() => {
+																	setSearchValue(keyword.toString())
+																}}
 															>
 																<Chip text={keyword} color={colorForTypeOf(props.manifest.id)} />
 															</a>
@@ -301,7 +305,6 @@ export function Page(props: PageProps) {
 								</Show>
 							</Show>
 						</div>
-						{/* <Gridview slider minimal /> */}
 						<div class="mt-20">
 							<GetHelp text="Do you have questions?" />
 						</div>
