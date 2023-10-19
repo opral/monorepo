@@ -15,6 +15,7 @@ import { resolvePlugins } from "./plugins/resolvePlugins.js"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { validatedModuleSettings } from "./validatedModuleSettings.js"
 
+
 const ModuleCompiler = TypeCompiler.Compile(InlangModule)
 
 export const resolveModules: ResolveModuleFunction = async (args) => {
@@ -53,6 +54,8 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 			continue
 		}
 
+		// -- CHECK IF MODULE IS SYNTACTIALLY VALID
+
 		const isValidModule = ModuleCompiler.Check(importedModule.data)
 
 		if (isValidModule === false) {
@@ -66,6 +69,18 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 			continue
 		}
 
+		// -- VALIDATE MODULE SETTINGS
+
+		const result = validatedModuleSettings({
+			settingsSchema: importedModule.data.default.settingsSchema,
+			moduleSettings: args.settings[importedModule.data.default.id],
+		})
+
+		if (result !== "isValid") {
+			moduleErrors.push(result)
+			continue
+		}
+
 		meta.push({
 			module: module,
 			id: importedModule.data.default.id,
@@ -76,12 +91,13 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 		} else if (importedModule.data.default.id.startsWith("messageLintRule.")) {
 			allMessageLintRules.push(importedModule.data.default as MessageLintRule)
 		} else {
-			throw new Error(`Unimplemented module type. Must start with "plugin." or "messageLintRule.`)
+			moduleErrors.push(
+				new ModuleError(
+					`Unimplemented module type ${importedModule.data.default.id}.The module has not been installed.`,
+					{ module: module }
+				)
+			)
 		}
-		validatedModuleSettings({
-			resolvedModules: importedModule.data.default,
-			settings: args.settings,
-		})
 	}
 
 	const resolvedPlugins = await resolvePlugins({
