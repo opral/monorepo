@@ -74,8 +74,8 @@ export const Plugin = Type.Object(
 		displayName: Translatable(Type.String()),
 		description: Translatable(Type.String()),
 		//TODO can we change this into
-		//  		settingSchema:Type.Optional(JSONObject)
-		settingSchema: Type.Optional(Type.Any()),
+		//  		settingsSchema:Type.Optional(JSONObject)
+		settingsSchema: Type.Optional(Type.Any()),
 		loadMessages: Type.Optional(Type.Any()),
 		saveMessages: Type.Optional(Type.Any()),
 		/**

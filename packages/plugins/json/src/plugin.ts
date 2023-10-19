@@ -19,7 +19,7 @@ export const plugin: Plugin<{
 	id,
 	displayName,
 	description,
-	settingSchema: PluginSettings,
+	settingsSchema: PluginSettings,
 	loadMessages: async ({ settings, nodeishFs }) => {
 		settings[id].variableReferencePattern = settings[id].variableReferencePattern || ["{", "}"]
 		return loadMessages({
