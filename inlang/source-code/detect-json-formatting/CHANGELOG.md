@@ -1,5 +1,11 @@
 # @inlang/detect-formatting
 
+## 1.0.0
+
+### Major Changes
+
+- 127014069: BREAKING: The API changed from `detectJsonFormatting().serialize` to `const serialize = detectJsonFormatting(file)` as part of https://github.com/inlang/monorepo/pull/1422.
+
 ## 0.3.0
 
 ### Minor Changes

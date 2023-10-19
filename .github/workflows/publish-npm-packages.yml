@@ -82,6 +82,12 @@ jobs:
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/plugins/i18next/package.json
+
+      - name: "@inlang/plugin-message-format" 
+        uses: JS-DevTools/npm-publish@v2
+        with:
+            token: ${{ secrets.NPM_PUBLISH_TOKEN }}
+            package: inlang/source-code/plugins/inlang-message-format/package.json
   
   
       - name: "@inlang/result" 

@@ -1,5 +1,24 @@
 # @inlang/sdk
 
+## 0.14.0
+
+### Minor Changes
+
+- 6fe144640: fix #1478 – loadProject with absolute windows paths
+
+## 0.13.0
+
+### Minor Changes
+
+- 0e0d910b7: check languageTags for sourceLanguageTag
+- 5c443c47a: chore: (again) removed the `PluginUsesReservedNamespaceError` from `loadProject()`. A previous merge conflict seemed to have re-introduced the error.
+- ae752c309: REFACTOR: Removed PluginUsesReservedNamespaceError.
+
+  The feedback loop for causing the error was too long. Creating a new inlang plugin always required adding the plugin to the whitelist, which has been forgotting leading to crashes in production.
+  Furthermore, the sdk should not crash if plugins are valid. The marketplace is the appropriate place to validate namespaces.
+
+- 029d78dc8: #1456 add windows tests & fix tests
+
 ## 0.12.0
 
 ### Minor Changes

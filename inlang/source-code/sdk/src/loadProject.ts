@@ -6,7 +6,7 @@ import type {
 	Subscribable,
 } from "./api.js"
 import { type ImportFunction, resolveModules } from "./resolve-modules/index.js"
-import { TypeCompiler } from "@sinclair/typebox/compiler"
+import { TypeCompiler, ValueErrorType } from "@sinclair/typebox/compiler"
 import {
 	ProjectSettingsFileJSONSyntaxError,
 	ProjectSettingsFileNotFoundError,
@@ -22,10 +22,9 @@ import { createMessageLintReportsQuery } from "./createMessageLintReportsQuery.j
 import { ProjectSettings, Message, type NodeishFilesystemSubset } from "./versionedInterfaces.js"
 import { tryCatch, type Result } from "@inlang/result"
 import { migrateIfOutdated } from "@inlang/project-settings/migration"
-import {
-	createNodeishFsWithAbsolutePaths,
-	isAbsolutePath,
-} from "./createNodeishFsWithAbsolutePaths.js"
+import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
+import { normalizePath } from "@lix-js/fs"
+import { isAbsolutePath } from "./isAbsolutePath.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -56,16 +55,21 @@ export const loadProject = async (args: {
 		)
 	}
 
+	const settingsFilePath = normalizePath(args.settingsFilePath)
+
 	// -- load project ------------------------------------------------------
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
-		const nodeishFs = createNodeishFsWithAbsolutePaths(args)
+		const nodeishFs = createNodeishFsWithAbsolutePaths({
+			settingsFilePath,
+			nodeishFs: args.nodeishFs,
+		})
 
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
 		createEffect(() => {
-			loadSettings({ settingsFilePath: args.settingsFilePath, nodeishFs })
+			loadSettings({ settingsFilePath, nodeishFs })
 				.then((settings) => {
 					setSettings(settings)
 					// rename settings to get a convenient access to the data in Posthog
@@ -278,6 +282,24 @@ const parseSettings = (settings: unknown) => {
 			})
 		}
 	}
+
+	const { sourceLanguageTag, languageTags } = settings as ProjectSettings
+	if (!languageTags.includes(sourceLanguageTag)) {
+		throw new ProjectSettingsInvalidError({
+			errors: [
+				{
+					message: `The sourceLanguageTag "${sourceLanguageTag}" is not included in the languageTags "${languageTags.join(
+						'", "'
+					)}". Please add it to the languageTags.`,
+					type: ValueErrorType.String,
+					schema: ProjectSettings,
+					value: sourceLanguageTag,
+					path: "sourceLanguageTag",
+				},
+			],
+		})
+	}
+
 	return withMigration
 }
 

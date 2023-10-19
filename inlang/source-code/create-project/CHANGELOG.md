@@ -1,5 +1,19 @@
 # @inlang/create-project
 
+## 1.1.0
+
+### Minor Changes
+
+- 029d78dc8: #1456 add windows tests & fix tests
+
+### Patch Changes
+
+- Updated dependencies [0e0d910b7]
+- Updated dependencies [5c443c47a]
+- Updated dependencies [ae752c309]
+- Updated dependencies [029d78dc8]
+  - @inlang/sdk@0.13.0
+
 ## 1.0.0
 
 ### Major Changes

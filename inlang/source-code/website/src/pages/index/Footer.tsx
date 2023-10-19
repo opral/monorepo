@@ -20,8 +20,8 @@ const productsLinks = [
 	},
 	{
 		name: `Lint Rules`,
-		href: "/lintrules"
-	}
+		href: "/lint",
+	},
 ]
 
 const Footer = () => {
