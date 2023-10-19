@@ -22,11 +22,11 @@ function EditorHeader() {
 	return (
 		<>
 			<header class="sticky top-0 z-[9999] w-full border-b transition-colors bg-transparent border-b-background bg-background">
-				<div class="`w-full h-full py-4 px-6 md:px-4 relative z-10">
+				<div class="`w-full h-full py-3 px-6 md:px-4 relative z-10">
 					<nav class="max-w-[1280px] w-full mx-auto">
 						<div class="flex">
 							<a href={"/"} class="flex items-center w-fit">
-								<img class={"h-9 w-9"} src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
+								<img class={"h-8 w-8"} src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
 								<span class={"self-center pl-2 text-left font-semibold text-surface-900"}>
 									inlang
 								</span>

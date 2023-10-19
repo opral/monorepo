@@ -12,19 +12,11 @@ import { replaceAll } from "./utilities.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
 import { flatten, unflatten } from "flat"
 import { displayName, description } from "../marketplace-manifest.json"
-import {
-	detectJsonFormatting,
-	type DetectJsonFormattingApi,
-} from "../../../detect-json-formatting/dist/index.js"
+import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 
-/**
- * Detect formatting
- *
- * @example const DETECTFORMATING = detectFormatting(file)
- * const file = DETECTFORMATTING.serialize(json) // get a serializer that wraps 'JSON.serialize()' and applies format
- * const values = DETECTFORMATTING.values(json) // get raw formatting values
- */
-let DETECTFORMATTING: DetectJsonFormattingApi = detectJsonFormatting()
+// global variable to store the formatting of the file
+let serializeWithFormatting: ReturnType<typeof detectJsonFormatting>
+let hasNestedKeys = false
 
 const id = "plugin.inlang.i18next"
 
@@ -140,17 +132,23 @@ async function getFileToParse(
 		const file = await nodeishFs.readFile(pathWithLanguage, { encoding: "utf-8" })
 		//analyse format of file
 		if (sourceLanguageTag === languageTag) {
-			DETECTFORMATTING = detectJsonFormatting(file)
+			serializeWithFormatting = detectJsonFormatting(file)
 		}
 
-		const flattenedMessages = DETECTFORMATTING.values.nestedKeys
-			? flatten(JSON.parse(file as string), {
+		const json = JSON.parse(file)
+
+		if (Object.values(json).some((value) => typeof value === "object")) {
+			hasNestedKeys = true
+		}
+
+		const flattenedMessages = hasNestedKeys
+			? flatten(json, {
 					transformKey: function (key) {
 						//replace dots in keys with unicode
 						return replaceAll(key, ".", "u002E")
 					},
 			  })
-			: JSON.parse(file as string)
+			: json
 		return flattenedMessages
 	} catch (e) {
 		// if the namespace doesn't exist for this dir -> continue
@@ -365,13 +363,13 @@ function serializeFile(
 		result[id] = serializePattern(pattern, variableReferencePattern!)
 	}
 	// for nested structures -> unflatten the keys
-	if (DETECTFORMATTING.values.nestedKeys) {
+	if (hasNestedKeys) {
 		result = unflatten(result, {
 			//prevent numbers from creating arrays automatically
 			object: true,
 		})
 	}
-	return replaceAll(DETECTFORMATTING.serialize(result), "u002E", ".")
+	return replaceAll(serializeWithFormatting(result), "u002E", ".")
 }
 
 /**

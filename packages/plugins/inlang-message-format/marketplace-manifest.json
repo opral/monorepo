@@ -1,0 +1,18 @@
+{
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
+	"id": "plugin.inlang.messageFormat",
+	"readme": {
+		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/inlang-message-format/README.md"
+	},
+	"displayName": {
+		"en": "inlang message format"
+	},
+	"description": {
+		"en": "The simplest storage plugin for inlang."
+	},
+	"keywords": ["storage"],
+	"publisherName": "inlang",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"license": "Apache-2.0",
+	"module": "https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format/dist/index.js"
+}

@@ -6,7 +6,7 @@ import type { Plugin } from "./interface.js"
 const id = "plugin.placeholder.name"
 
 type PluginSettings = {
-	storagePath: string
+	filePath: string
 }
 
 const plugin: Plugin<{

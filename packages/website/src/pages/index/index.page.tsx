@@ -4,7 +4,7 @@ import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx
 import { Match, Switch } from "solid-js"
 import Lix from "./custom_section/Lix.jsx"
 import Stack from "./custom_section/Stack.jsx"
-import Marketplace from "#src/components/sections/marketplace/index.jsx"
+import Gridview from "#src/components/marketplace/Gridview.jsx"
 
 export function Page() {
 	const urlParams = new URLSearchParams(window.location.search)
@@ -16,20 +16,20 @@ export function Page() {
 				content="Find apps, plugins and lint rules for inlang's ecosystem."
 			/>
 			<Meta name="og:image" content="/images/inlang-marketplace-image.jpg" />
-			<div class="bg-surface-50">
-				<MarketplaceLayout>
-					<Switch>
-						<Match when={!urlParams.get("search")}>
-							<Hero />
-							<Stack />
-							<Lix />
-						</Match>
-						<Match when={urlParams.get("search")}>
-							<Marketplace />
-						</Match>
-					</Switch>
-				</MarketplaceLayout>
-			</div>
+			<MarketplaceLayout>
+				<Switch>
+					<Match when={!urlParams.get("search")}>
+						<Hero />
+						<Stack />
+						<Lix />
+					</Match>
+					<Match when={urlParams.get("search")}>
+						<div class="pt-10">
+							<Gridview />
+						</div>
+					</Match>
+				</Switch>
+			</MarketplaceLayout>
 		</>
 	)
 }
