@@ -7,11 +7,10 @@ import { redirect } from "vite-plugin-ssr/abort"
 
 export async function onBeforeRender(pageContext: PageContext) {
 	const item = registry.find(
-		(item: any) =>
-			item.uniqueID.replaceAll(".", "-").toLowerCase() === pageContext.routeParams.uniqueid
+		(item: any) => item.uniqueID === pageContext.routeParams.uid
 	) as MarketplaceManifest
 
-	if (!item || item.id !== pageContext.routeParams.id) {
+	if (!item || item.id.replaceAll(".", "-").toLowerCase() !== pageContext.routeParams.id) {
 		console.error("Item not found")
 		throw redirect("/m/404")
 	}

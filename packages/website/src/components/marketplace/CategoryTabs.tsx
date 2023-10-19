@@ -6,19 +6,19 @@ const CategoryTabs = () => {
 		return [
 			{
 				name: `Application`,
-				href: "/application",
+				href: "/c/application",
 			},
 			{
 				name: `Website`,
-				href: "/website",
+				href: "/c/website",
 			},
 			{
 				name: `Markdown`,
-				href: "/markdown",
+				href: "/c/markdown",
 			},
 			{
 				name: `Lint Rules`,
-				href: "/lint",
+				href: "/c/lint",
 			},
 			{
 				name: `Missing something?`,
