@@ -5,6 +5,7 @@ import { Value } from "@sinclair/typebox/value"
 test("a valid app manifest should pass validation", () => {
 	const app: MarketplaceManifest = {
 		id: "library.inlang.paraglideJsSveltekit",
+		uniqueID: "12345678",
 		gallery: ["https://inlang.com/images/paraglidejs.png"],
 		displayName: { en: "My App" },
 		publisherName: "inlang",
@@ -25,6 +26,7 @@ test("a valid app manifest should pass validation", () => {
 test("should pass a valid plugin manifest", () => {
 	const plugin: MarketplaceManifest = {
 		id: "plugin.inlang.example",
+		uniqueID: "12345678",
 		gallery: ["https://inlang.com/images/paraglidejs.png"],
 		displayName: { en: "My App" },
 		description: { en: "Hello" },
@@ -45,6 +47,7 @@ test("should pass a valid plugin manifest", () => {
 test("should be possible to define the schema", () => {
 	const plugin: MarketplaceManifest = {
 		$schema: "https://inlang.com/schema/marketplace-manifest",
+		uniqueID: "12345678",
 		id: "plugin.inlang.example",
 		gallery: ["https://inlang.com/images/paraglidejs.png"],
 		displayName: { en: "My App" },
@@ -78,6 +81,7 @@ test("should only allow the inlang schema schema", () => {
 test("should pass a valid guide", () => {
 	const guide: MarketplaceManifest = {
 		$schema: "https://inlang.com/schema/marketplace-manifest",
+		uniqueID: "12345678",
 		id: "guide.inlang.example",
 		gallery: ["https://inlang.com/images/paraglidejs.png"],
 		displayName: { en: "My App" },
@@ -88,4 +92,21 @@ test("should pass a valid guide", () => {
 		publisherName: "inlang",
 	}
 	expect(Value.Check(MarketplaceManifest, guide)).toBe(true)
+})
+
+test("should only allow a unique ID length of 8 characters", () => {
+	const plugin: MarketplaceManifest = {
+		$schema: "https://inlang.com/schema/marketplace-manifest",
+		uniqueID: "1234",
+		id: "plugin.inlang.example",
+		gallery: ["https://inlang.com/images/paraglidejs.png"],
+		displayName: { en: "My App" },
+		description: { en: "Hello" },
+		keywords: [],
+		license: "Apache-2.0",
+		readme: { en: "https://my-app.com/readme.md" },
+		publisherName: "inlang",
+		module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next/dist/index.js",
+	}
+	expect(Value.Check(MarketplaceManifest, plugin)).toBe(false)
 })
