@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 1.14.0
+
+### Minor Changes
+
+- 5d8b3d015: fix headline
+
 ## 1.13.0
 
 ### Minor Changes
