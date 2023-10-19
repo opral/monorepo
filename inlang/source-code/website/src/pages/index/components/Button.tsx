@@ -23,7 +23,7 @@ const bgColor = (type: buttonType) => {
 		case "text":
 			return "text-surface-700 hover:text-primary"
 		case "textPrimary":
-			return "text-hover-primary hover:text-primary"
+			return "text-primary hover:text-hover-primary"
 		case "textPrimaryOnDark":
 			return "text-primary-on-inverted-container hover:text-primary"
 		case "textBackground":

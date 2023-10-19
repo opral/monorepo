@@ -17,12 +17,13 @@ const MarketplaceSearchBar = () => {
 		>
 			<input
 				type="text"
+				aria-label="search input"
 				id="search"
 				name="search"
 				class="border-0 focus:ring-0 h-full w-full pl-0 text-sm"
 				value={searchParam ? searchParam.replace(/%20/g, " ") : ""}
 			/>
-			<button type="submit">
+			<button type="submit" aria-label="submit search">
 				<IconSearch class="ml-1.5 transition-color duration-150 group-focus-within:text-primary" />
 			</button>
 		</form>
