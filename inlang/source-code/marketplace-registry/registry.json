@@ -1,13 +1,14 @@
 [
-	"https://raw.githubusercontent.com/floriandwt/inlang-marketplace-test/main/badge/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/floriandwt/inlang-marketplace-test/main/cli/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/floriandwt/inlang-marketplace-test/main/editor/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/floriandwt/inlang-marketplace-test/main/guide/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/floriandwt/inlang-marketplace-test/main/ide-extension/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/floriandwt/inlang-marketplace-test/main/message-lint-rules/emptyPattern/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/floriandwt/inlang-marketplace-test/main/message-lint-rules/identicalPattern/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/floriandwt/inlang-marketplace-test/main/message-lint-rules/messageWithoutSource/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/floriandwt/inlang-marketplace-test/main/message-lint-rules/missingTranslation/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/floriandwt/inlang-marketplace-test/main/versioned-interfaces/language-tag/marketplace-manifest.json",
-	"https://raw.githubusercontent.com/floriandwt/inlang-marketplace-test/main/versioned-interfaces/translatable/marketplace-manifest.json"
+	"../badge/marketplace-manifest.json",
+	"../cli/marketplace-manifest.json",
+	"../editor/marketplace-manifest.json",
+	"../ide-extension/marketplace-manifest.json",
+	"../message-lint-rules/emptyPattern/marketplace-manifest.json",
+	"../message-lint-rules/identicalPattern/marketplace-manifest.json",
+	"../message-lint-rules/messageWithoutSource/marketplace-manifest.json",
+	"../message-lint-rules/missingTranslation/marketplace-manifest.json",
+	"../plugins/i18next/marketplace-manifest.json",
+	"../plugins/json/marketplace-manifest.json",
+	"../versioned-interfaces/language-tag/marketplace-manifest.json",
+	"../versioned-interfaces/translatable/marketplace-manifest.json"
 ]
