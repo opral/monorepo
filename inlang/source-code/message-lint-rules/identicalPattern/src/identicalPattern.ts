@@ -13,7 +13,7 @@ export const identicalPatternRule: MessageLintRule = {
 	id: id as MessageLintRule["id"],
 	displayName,
 	description,
-	settingSchema: RuleSettings,
+	settingsSchema: RuleSettings,
 	run: ({ message, report, settings }) => {
 		const ruleSettings = settings[id as keyof typeof settings] as RuleSettings | undefined
 

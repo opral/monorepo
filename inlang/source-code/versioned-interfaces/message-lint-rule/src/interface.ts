@@ -56,7 +56,7 @@ export const MessageLintRule = Type.Object({
 	id: _MessageLintRuleId,
 	displayName: Translatable(Type.String()),
 	description: Translatable(Type.String()),
-	settingSchema: Type.Optional(Type.Any()),
+	settingsSchema: Type.Optional(Type.Any()),
 })
 
 /**
