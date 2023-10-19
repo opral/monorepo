@@ -5,10 +5,11 @@ import { search } from "./helper/searchHandler.js"
 import { currentPageContext } from "#src/renderer/state.js"
 import Highlight from "#src/components/Highlight.jsx"
 import Card, { CardBuildOwn, NoResultsCard } from "#src/components/Card.jsx"
+import { rpc } from "@inlang/rpc"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
-export type Category = "app" | "documents" | "email" | "payments" | "website"
+export type Category = "application" | "markdown" | "email" | "payments" | "website"
 export type SubCategory = SubCategoryApplication
 
 /* Export searchValue to make subpages insert search-terms */
@@ -17,13 +18,23 @@ const selectedCategory = () => {
 	return currentPageContext.urlParsed.pathname.replace("/", "")
 }
 const [selectedSubCategories] = createSignal<SubCategory[]>([])
+const [filteredItems, setFilteredItems] = createSignal<any[]>([])
 
-const filteredItems = (slider?: boolean) => {
-	return search(
-		selectedSubCategories(),
-		searchValue(),
-		selectedCategory() === "marketplace" || slider ? undefined : selectedCategory()
-	)
+const filterItems = async () => {
+	let items
+	if (
+		selectedCategory() === "application" ||
+		selectedCategory() === "website" ||
+		selectedCategory() === "email" ||
+		selectedCategory() === "markdown"
+	) {
+		items = await rpc.search({ term: selectedCategory(), category: true })
+	} else {
+		items = await rpc.search({ term: searchValue() })
+	}
+
+	// @ts-expect-error
+	setFilteredItems(JSON.parse(items.data))
 }
 
 export default function Gridview(props: {
@@ -37,6 +48,8 @@ export default function Gridview(props: {
 		if (urlParams.get("search") !== "" && urlParams.get("search") !== undefined) {
 			setSearchValue(urlParams.get("search")?.replace(/%20/g, " ") || "")
 		}
+
+		filterItems()
 	})
 
 	return (
@@ -70,14 +83,11 @@ export default function Gridview(props: {
 	)
 }
 
-const Gallery = (props: { randomize?: boolean }) => {
+const Gallery = () => {
 	return (
 		<>
-			<Show
-				when={filteredItems(props.randomize).length > 0}
-				fallback={<NoResultsCard category={selectedCategory()} />}
-			>
-				<For each={props.randomize ? randomizedItems() : filteredItems()}>
+			<Show when={filteredItems()} fallback={<NoResultsCard category={selectedCategory()} />}>
+				<For each={filteredItems()}>
 					{(item) => {
 						const displayName =
 							typeof item.displayName === "object" ? item.displayName.en : item.displayName
