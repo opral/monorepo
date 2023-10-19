@@ -1,7 +1,7 @@
 import { For, Show } from "solid-js"
 import { registry } from "@inlang/marketplace-registry"
 import { Chip } from "#src/components/Chip.jsx"
-import { colorForTypeOf } from "#src/pages/m/utilities.js"
+import { colorForTypeOf, typeOfIdToTitle } from "#src/pages/m/utilities.js"
 import { Button } from "../components/Button.jsx"
 
 const featuredArray = [
@@ -41,7 +41,7 @@ const Hero = () => {
 													</h3>
 													<Show when={m}>
 														<Chip
-															text={m?.id.split(".")[0]}
+															text={typeOfIdToTitle(m!.id)}
 															color={colorForTypeOf(m!.id)}
 															customClasses="w-fit"
 														/>
