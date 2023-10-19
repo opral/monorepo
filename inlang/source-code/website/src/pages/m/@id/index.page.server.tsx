@@ -12,7 +12,7 @@ export async function onBeforeRender(pageContext: PageContext) {
 
 	if (!item) {
 		console.error("Item not found")
-		throw redirect("/marketplace/404")
+		throw redirect("/m/404")
 	}
 
 	const text = await (

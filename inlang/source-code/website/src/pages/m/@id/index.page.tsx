@@ -267,10 +267,7 @@ export function Page(props: PageProps) {
 														{(keyword) => (
 															<a
 																class="transition-opacity hover:opacity-80 cursor-pointer"
-																href="/m"
-																onClick={() => {
-																	setSearchValue(keyword.toString())
-																}}
+																href={`/?search=${keyword.toString()}`}
 															>
 																<Chip text={keyword} color={colorForTypeOf(props.manifest.id)} />
 															</a>
@@ -305,7 +302,7 @@ export function Page(props: PageProps) {
 								</Show>
 							</Show>
 						</div>
-						<Gridview slider minimal />
+						{/* <Gridview slider minimal /> */}
 						<div class="mt-20">
 							<GetHelp text="Do you have questions?" />
 						</div>
