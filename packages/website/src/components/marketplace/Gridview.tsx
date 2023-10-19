@@ -1,7 +1,7 @@
 import { For, Show, createSignal, onMount } from "solid-js"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
-import { algorithm } from "./helper/algorithm.js"
+import { search } from "./helper/searchHandler.js"
 import { currentPageContext } from "#src/renderer/state.js"
 import Highlight from "#src/components/Highlight.jsx"
 import Card, { CardBuildOwn, NoResultsCard } from "#src/components/Card.jsx"
@@ -19,14 +19,12 @@ const selectedCategory = () => {
 const [selectedSubCategories] = createSignal<SubCategory[]>([])
 
 const filteredItems = (slider?: boolean) => {
-	return algorithm(
+	return search(
 		selectedSubCategories(),
 		searchValue(),
 		selectedCategory() === "marketplace" || slider ? undefined : selectedCategory()
 	)
 }
-
-const randomizedItems = () => filteredItems(true).reverse()
 
 export default function Gridview(props: {
 	minimal?: boolean
