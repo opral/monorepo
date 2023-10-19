@@ -5,6 +5,7 @@
 	"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/badge/marketplace-manifest.json",
 	"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/plugins/json/marketplace-manifest.json",
 	"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/plugins/i18next/marketplace-manifest.json",
+	"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/plugins/inlang-message-format/marketplace-manifest.json",
 	"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/message-lint-rules/emptyPattern/marketplace-manifest.json",
 	"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/message-lint-rules/identicalPattern/marketplace-manifest.json",
 	"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/message-lint-rules/messageWithoutSource/marketplace-manifest.json",

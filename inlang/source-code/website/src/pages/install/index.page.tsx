@@ -1,5 +1,4 @@
 import { createSignal, For, Show } from "solid-js"
-import { Layout as RootLayout } from "../Layout.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { Button } from "../index/components/Button.jsx"
@@ -11,8 +10,9 @@ import { SetupCard } from "./components/SetupCard.jsx"
 import { Gitlogin } from "./components/GitLogin.jsx"
 import { Icon } from "#src/components/Icon.jsx"
 import { GetHelp } from "#src/components/GetHelp.jsx"
-import { RepositoryCard } from "../index/CommunityProjects.jsx"
+import { RepositoryCard } from "#src/components/editor/CommunityProjects.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
+import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
 
 export type Step = {
 	type: string
@@ -68,7 +68,7 @@ export function Page() {
 				content="Contribute to open source projects and manage translations with inlang's editor."
 			/>
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
-			<RootLayout>
+			<MarketplaceLayout>
 				<div class="h-screen flex flex-col items-center justify-center pb-32">
 					<InstallationProvider
 						repo={repo}
@@ -118,7 +118,7 @@ export function Page() {
 					</InstallationProvider>
 					<GetHelp text="Need help installing modules?" />
 				</div>
-			</RootLayout>
+			</MarketplaceLayout>
 		</>
 	)
 }
