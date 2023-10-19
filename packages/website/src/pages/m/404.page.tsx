@@ -36,7 +36,7 @@ export function Page() {
 								</a>
 								.
 							</p>
-							<Button href="/marketplace" type="primary">
+							<Button href="/" type="primary">
 								Back to Marketplace
 							</Button>
 						</div>
