@@ -4,6 +4,7 @@ import {
 	IconNextjs,
 	IconJavascript,
 	IconFlutter,
+	IconVue,
 } from "#src/pages/application/index.page.jsx"
 import { For } from "solid-js"
 
@@ -23,6 +24,11 @@ const Stack = () => {
 			name: "Next.js",
 			param: "nextjs",
 			icon: <IconNextjs class="-ml-1 w-8 h-8" />,
+		},
+		{
+			name: "Vue",
+			param: "vue",
+			icon: <IconVue class="-ml-1 w-8 h-8" />,
 		},
 		{
 			name: "Javascript",
