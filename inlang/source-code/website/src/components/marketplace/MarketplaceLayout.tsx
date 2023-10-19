@@ -6,7 +6,9 @@ const MarketplaceLayout = (props: { children: JSXElement }) => {
 	return (
 		<div class="bg-surface-50">
 			<MarketplaceHeader />
-			<div class="max-w-7xl mx-auto px-4 xl:px-0">{props.children}</div>
+			<div class="w-full px-4">
+				<div class="max-w-7xl mx-auto">{props.children}</div>
+			</div>
 			<Footer />
 		</div>
 	)
