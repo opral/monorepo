@@ -6,55 +6,39 @@ import consola from "consola"
 export const initCommand = new Command()
 	.name("init")
 	.summary("Initializes inlang Paraglide-JS.")
-	.action(() => _runInitCommand())
+	.action(async () => {
+		// --- LOAD THE PROJECT ---
 
-// exported for testing purposes
-export const _runInitCommand = async (mockUserInput?: any[]) => {
-	// --- SETUP TEST INPUT CONSUMER ---
-	const testInput = () => {
-		if (mockUserInput === undefined) return
-		const input = mockUserInput.shift()
-		if (input === undefined) {
-			throw new Error("End of test input")
-		}
-		return input
-	}
+		consola.log("Welcome to inlang Paraglide-JS 🪂")
 
-	// --- LOAD THE PROJECT ---
-
-	consola.log("Welcome to inlang Paraglide-JS 🪂")
-
-	const userHasExistingProject =
-		testInput() ??
-		(await consola.prompt("Do you have an existing inlang project?", {
+		const userHasExistingProject = await consola.prompt("Do you have an existing inlang project?", {
 			type: "confirm",
 			default: false,
-		}))
+		})
 
-	consola.log(userHasExistingProject)
+		consola.log(userHasExistingProject)
 
-	return
+		return
 
-	const project = await(
-		userHasExistingProject ? findExistingInlangProject(testInput) : createNewProject()
-	)
+		// const project = await (userHasExistingProject ? findExistingInlangProject : createNewProject())
 
-	if (project.errors().length > 0) {
-		// log.error("The project has errors:")
-		for (const error of project.errors()) {
-			console.error(error)
-		}
-		console.info
-		return process.exit(1)
-	}
+		// if (project.errors().length > 0) {
+		// 	// log.error("The project has errors:")
+		// 	for (const error of project.errors()) {
+		// 		console.error(error)
+		// 	}
+		// 	console.info
+		// 	return process.exit(1)
+		// }
 
-	// --- ADD RECOMMENDATIONS ---
+		// // --- ADD RECOMMENDATIONS ---
 
-	consola.success(
-		"Complete.\n\nFor questions and feedback, visit https://github.com/inlang/monorepo/discussions."
-	)
-}
+		// consola.success(
+		// 	"Complete.\n\nFor questions and feedback, visit https://github.com/inlang/monorepo/discussions."
+		// )
+	})
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const findExistingInlangProject = async (testInput: () => any): Promise<InlangProject> => {
 	let projectPath: string
 	consola.start("Searching for the inlang project file...")
@@ -88,6 +72,7 @@ const findExistingInlangProject = async (testInput: () => any): Promise<InlangPr
 	return project
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createNewProject = async (): Promise<InlangProject> => {
 	const projectPath = "./project.inlang.json"
 	consola.info(`Creating a new inlang project at ${projectPath}`)
