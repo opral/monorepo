@@ -1,17 +1,29 @@
-import { test, expect, vi } from "vitest"
-import { _runInitCommand } from "./init.js"
+import { test, expect, vi, beforeAll, beforeEach } from "vitest"
+import { initCommand } from "./init.js"
 import consola from "consola"
 
+beforeAll(() => {
+	// Redirect std and console to consola too
+	// Calling this once is sufficient
+	consola.wrapAll()
+})
+
+beforeEach(() => {
+	// Re-mock consola before each test call to remove
+	// calls from before
+	consola.mockTypes(() => vi.fn())
+})
+
 test("it should log true if the user has an existing project", async () => {
-	vi.spyOn(consola, "log").mockImplementation(() => undefined as never)
-	await _runInitCommand([true])
-	expect(consola.log).toHaveBeenCalledWith(true)
+	mockUserInput([true])
+	await initCommand.parseAsync()
+	expect(consola.log).toHaveBeenLastCalledWith(true)
 })
 
 test("it should log false if the user has an existing project", async () => {
-	vi.spyOn(consola, "log").mockImplementation(() => undefined as never)
-	await _runInitCommand([false])
-	expect(consola.log).toHaveBeenCalledWith(false)
+	mockUserInput([false])
+	await initCommand.parseAsync()
+	expect(consola.log).toHaveBeenLastCalledWith(false)
 })
 
 // test("the paraglide plugin for vscode should be installed", () => {
@@ -52,3 +64,14 @@ test("it should log false if the user has an existing project", async () => {
 // test("the user should be prompted for the framework and forwarded to the corresponding guide", () => {
 // 	throw new Error("Not implemented")
 // })
+
+// --- SETUP TEST INPUT CONSUMER ---
+const mockUserInput = (testUserInput: any[]) => {
+	vi.spyOn(consola, "prompt").mockImplementation(() => {
+		const value = testUserInput.shift()
+		if (value === undefined) {
+			throw new Error("End of test input")
+		}
+		return value
+	})
+}
