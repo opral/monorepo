@@ -26,7 +26,6 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
-		"@clack/prompts": "0.7.0",
 		"@inlang/sdk": "*",
 		"commander": "11.1.0",
 		"consola": "3.2.3",

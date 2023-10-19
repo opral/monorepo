@@ -2,7 +2,6 @@ import { Command } from "commander"
 import fs from "node:fs/promises"
 import { loadProject, type InlangProject, type ProjectSettings } from "@inlang/sdk"
 import consola from "consola"
-import { intro, log, outro, spinner, text, confirm } from "@clack/prompts"
 
 export const initCommand = new Command()
 	.name("init")
@@ -23,23 +22,25 @@ export const _runInitCommand = async (mockUserInput?: any[]) => {
 
 	// --- LOAD THE PROJECT ---
 
-	intro("Welcome to inlang Paraglide-JS 🪂")
+	consola.log("Welcome to inlang Paraglide-JS 🪂")
 
 	const userHasExistingProject =
 		testInput() ??
-		(await confirm({
-			message: "Do you have an existing inlang project?",
-			initialValue: false,
+		(await consola.prompt("Do you have an existing inlang project?", {
+			type: "confirm",
+			default: false,
 		}))
 
 	consola.log(userHasExistingProject)
 
-	const project = await (userHasExistingProject
-		? findExistingInlangProject(testInput)
-		: createNewProject())
+	return
+
+	const project = await(
+		userHasExistingProject ? findExistingInlangProject(testInput) : createNewProject()
+	)
 
 	if (project.errors().length > 0) {
-		log.error("The project has errors:")
+		// log.error("The project has errors:")
 		for (const error of project.errors()) {
 			console.error(error)
 		}
@@ -49,15 +50,15 @@ export const _runInitCommand = async (mockUserInput?: any[]) => {
 
 	// --- ADD RECOMMENDATIONS ---
 
-	outro(
+	consola.success(
 		"Complete.\n\nFor questions and feedback, visit https://github.com/inlang/monorepo/discussions."
 	)
 }
 
 const findExistingInlangProject = async (testInput: () => any): Promise<InlangProject> => {
 	let projectPath: string
-	const s = spinner()
-	s.start("Searching for the inlang project file...")
+	consola.start("Searching for the inlang project file...")
+	// s.start("Searching for the inlang project file...")
 	for (const path of [
 		"./project.inlang.json",
 		"../project.inlang.json",
@@ -65,20 +66,21 @@ const findExistingInlangProject = async (testInput: () => any): Promise<InlangPr
 	]) {
 		try {
 			await fs.access(path)
-			s.stop(`Found and using the inlang project file at "${path}".`)
+			consola.success(`Found and using the inlang project file at "${path}".`)
 			projectPath = path
 			break
 		} catch {
 			continue
 		}
 	}
-	s.stop("No inlang project file found.")
+
+	consola.info("No inlang project file found.")
 	projectPath =
 		testInput() ??
-		((await text({
-			message: "Please enter the path to the inlang project file:",
-			placeholder: "./project.inlang.json",
-		})) as string)
+		(await consola.prompt("Please enter the path to the inlang project file:", {
+			default: "./project.inlang.json",
+			type: "text",
+		}))
 	const project = await loadProject({
 		settingsFilePath: projectPath,
 		nodeishFs: fs,
@@ -88,7 +90,7 @@ const findExistingInlangProject = async (testInput: () => any): Promise<InlangPr
 
 const createNewProject = async (): Promise<InlangProject> => {
 	const projectPath = "./project.inlang.json"
-	log.info(`Creating a new inlang project at ${projectPath}`)
+	consola.info(`Creating a new inlang project at ${projectPath}`)
 	await fs.writeFile("./project.inlang.json", JSON.stringify(newProjectTemplate, undefined, 2))
 	const project = await loadProject({
 		settingsFilePath: projectPath,
