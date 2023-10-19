@@ -259,7 +259,7 @@ function OptIn(props: { modules: string[] }) {
 				<Button
 					// eslint-disable-next-line solid/reactivity
 					function={() => {
-						setSearchParams(`/marketplace`)
+						setSearchParams(`/`)
 					}}
 					type="text"
 				>
@@ -331,7 +331,7 @@ function ShowError() {
 						<Button
 							// eslint-disable-next-line solid/reactivity
 							function={() => {
-								setSearchParams("/marketplace")
+								setSearchParams("/")
 							}}
 							type="primary"
 						>
@@ -350,7 +350,7 @@ function ShowError() {
 						</Button>
 						<Button
 							function={() => {
-								setSearchParams(`/marketplace`)
+								setSearchParams(`/`)
 							}}
 							type="text"
 						>

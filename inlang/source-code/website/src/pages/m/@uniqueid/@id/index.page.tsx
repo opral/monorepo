@@ -5,11 +5,10 @@ import { isModule } from "@inlang/marketplace-registry"
 import { Button } from "#src/pages/index/components/Button.jsx"
 import { Chip } from "#src/components/Chip.jsx"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
-import { SelectRepo } from "../../Select.jsx"
+import { SelectRepo } from "../Select.jsx"
 import Right from "~icons/material-symbols/chevron-right"
 import Left from "~icons/material-symbols/chevron-left"
-import Gridview, { setSearchValue } from "#src/components/marketplace/Gridview.jsx"
-import { colorForTypeOf, convertLinkToGithub, typeOfIdToTitle } from "../../utilities.js"
+import { colorForTypeOf, convertLinkToGithub, typeOfIdToTitle } from "../utilities.js"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
 import "@inlang/markdown/css"
@@ -267,10 +266,7 @@ export function Page(props: PageProps) {
 														{(keyword) => (
 															<a
 																class="transition-opacity hover:opacity-80 cursor-pointer"
-																href="/m"
-																onClick={() => {
-																	setSearchValue(keyword.toString())
-																}}
+																href={`/?search=${keyword.toString()}`}
 															>
 																<Chip text={keyword} color={colorForTypeOf(props.manifest.id)} />
 															</a>
@@ -305,7 +301,7 @@ export function Page(props: PageProps) {
 								</Show>
 							</Show>
 						</div>
-						<Gridview slider minimal />
+						{/* <Gridview slider minimal /> */}
 						<div class="mt-20">
 							<GetHelp text="Do you have questions?" />
 						</div>

@@ -21,6 +21,11 @@ export function Page() {
 			icon: <IconNextjs class="-ml-1 w-5 h-5" />,
 		},
 		{
+			name: "Vue",
+			param: "vue",
+			icon: <IconVue class="-ml-1 w-5 h-5" />,
+		},
+		{
 			name: "Javascript",
 			param: "javascript",
 			icon: <IconJavascript class="-ml-1 w-5 h-5" />,
@@ -127,6 +132,30 @@ export const IconNextjs = (props: { class: string }) => {
 					<rect width={32} height={32} fill="white" />
 				</clipPath>
 			</defs>
+		</svg>
+	)
+}
+
+export const IconVue = (props: { class: string }) => {
+	return (
+		<svg
+			width={32}
+			height={32}
+			viewBox="0 0 32 32"
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+			class={props.class}
+			preserveAspectRatio="none"
+		>
+			<path
+				d="M24.4 3.9248H30L16 28.0748L2 3.9248H12.71L16 9.5248L19.22 3.9248H24.4Z"
+				fill="#41B883"
+			/>
+			<path d="M2 3.9248L16 28.0748L30 3.9248H24.4L16 18.4148L7.53 3.9248H2Z" fill="#41B883" />
+			<path
+				d="M7.53125 3.9248L16.0012 18.4848L24.4012 3.9248H19.2212L16.0012 9.5248L12.7112 3.9248H7.53125Z"
+				fill="#35495E"
+			/>
 		</svg>
 	)
 }

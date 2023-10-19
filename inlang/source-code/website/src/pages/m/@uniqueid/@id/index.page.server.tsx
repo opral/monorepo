@@ -13,7 +13,7 @@ export async function onBeforeRender(pageContext: PageContext) {
 
 	if (!item || item.id !== pageContext.routeParams.id) {
 		console.error("Item not found")
-		throw redirect("/marketplace/404")
+		throw redirect("/m/404")
 	}
 
 	const text = await (
