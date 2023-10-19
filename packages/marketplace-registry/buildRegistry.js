@@ -13,17 +13,21 @@ const manifests = []
 
 for (const link of manifestLinks) {
 	try {
-		// eslint-disable-next-line no-undef
-		const json = JSON.parse(await (await fetch(link)).text())
+		let json
+
+		if (link.includes("http")) {
+			json = JSON.parse(await (await fetch(link)).text())
+		} else {
+			json = JSON.parse(await fs.readFile(link, "utf-8"))
+		}
+
 		if (Value.Check(MarketplaceManifest, json) === false) {
 			const errors = [...Value.Errors(MarketplaceManifest, json)]
 			// eslint-disable-next-line no-undef
 			console.error(errors)
 			throw new Error(`Manifest is invalid.`)
 		}
-		// else if (json.module && !json.module.toString().includes("jsdelivr")) {
-		// 	throw new Error(`Manifest is invalid. The module field must be a jsdelivr link.`)
-		// }
+
 		manifests.push(json)
 	} catch (e) {
 		throw new Error(`Manifest '${link}' is invalid.`)

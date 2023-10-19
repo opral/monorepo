@@ -1,5 +1,6 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
+	"uniqueID": "4cxm3eqi",
 	"id": "messageLintRule.inlang.missingTranslation",
 	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/missingTranslation/assets/icon.png",
 	"gallery": [
