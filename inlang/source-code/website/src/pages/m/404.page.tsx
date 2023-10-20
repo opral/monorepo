@@ -1,4 +1,4 @@
-import { Layout } from "#src/pages/Layout.jsx"
+import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
 import { Button } from "#src/pages/index/components/Button.jsx"
 import { Meta, Title } from "@solidjs/meta"
 
@@ -8,7 +8,7 @@ export function Page() {
 			<Title>Item not found</Title>
 			<Meta name="description" content="Marketplace item not found" />
 			<Meta name="robots" content="noindex" />
-			<Layout>
+			<MarketplaceLayout>
 				<div class="relative max-w-screen-xl w-full mx-auto bg-background">
 					<div class="invisible xl:visible absolute top-0 left-0 h-full w-full z-0">
 						<div class="flex w-full h-full justify-between mx-auto items-end">
@@ -36,7 +36,7 @@ export function Page() {
 								</a>
 								.
 							</p>
-							<Button href="/marketplace" type="primary">
+							<Button href="/" type="primary">
 								Back to Marketplace
 							</Button>
 						</div>
@@ -54,7 +54,7 @@ export function Page() {
 						</div>
 					</div>
 				</div>
-			</Layout>
+			</MarketplaceLayout>
 		</>
 	)
 }
