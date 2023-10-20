@@ -10,14 +10,8 @@ export const validate = new Command()
 export async function validateCommandAction() {
 	try {
 		log.info("🔎 Validating the project settings file...")
-
-		// Get the config
-		const { error } = await getInlangProject()
-		if (error) {
-			log.error(`${error} (${error.message})`)
-			return
-		}
-
+		// if `getInlangProject` doesn't return, the project is valid
+		await getInlangProject()
 		log.success("The project settings file is valid!")
 	} catch (error) {
 		log.error(error)
