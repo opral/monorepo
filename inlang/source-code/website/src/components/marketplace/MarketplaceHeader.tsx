@@ -34,8 +34,8 @@ const MarketplaceHeader = () => {
 			<div class="max-w-7xl mx-auto flex justify-between items-center relative sm:static mb-10 sm:mb-0">
 				<a
 					href={
-						window.location.pathname === "/"
-							? window.location.origin + "//" + window.location.pathname
+						currentPageContext.urlParsed.pathname === "/"
+							? currentPageContext.urlParsed.origin + "//" + currentPageContext.urlParsed.pathname
 							: "/"
 					}
 					class="flex items-center w-fit pointer-events-auto py-4"

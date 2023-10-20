@@ -1,5 +1,4 @@
-import { useI18n } from "@solid-primitives/i18n"
-import { defaultLanguage } from "#src/renderer/_default.page.route.js"
+import { languageTag, sourceLanguageTag } from "@inlang/paraglide-js/nextjs-example"
 import { type JSXElement, Show } from "solid-js"
 import { navigate } from "vite-plugin-ssr/client/router"
 
@@ -43,11 +42,9 @@ interface ButtonProps {
 }
 
 export const Button = (props: ButtonProps) => {
-	const [, { locale }] = useI18n()
-
 	const getLocale = () => {
-		const language = locale() || defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
+		const language = languageTag() || sourceLanguageTag
+		return language !== sourceLanguageTag ? "/" + language : ""
 	}
 
 	return (

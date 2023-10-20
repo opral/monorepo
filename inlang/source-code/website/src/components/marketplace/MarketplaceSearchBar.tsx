@@ -1,9 +1,9 @@
 import IconSearch from "~icons/material-symbols/search-rounded"
 import { setSearchParams } from "./helper/setSearchParams.js"
+import { currentPageContext } from "#src/renderer/state.js"
 
 const MarketplaceSearchBar = () => {
-	const urlParams = new URLSearchParams(window.location.search)
-	const searchParam = urlParams.get("search")
+	const searchParam = currentPageContext.urlParsed.search["search"]
 
 	const handleSubmit = () => {
 		const search = document.getElementById("search") as HTMLInputElement

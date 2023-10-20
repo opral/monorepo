@@ -4,8 +4,7 @@ import type SlDetails from "@shoelace-style/shoelace/dist/components/details/det
 import { Meta, Title } from "@solidjs/meta"
 import { Feedback } from "./Feedback.jsx"
 import { EditButton } from "./EditButton.jsx"
-import { defaultLanguage } from "#src/renderer/_default.page.route.js"
-import { useI18n } from "@solid-primitives/i18n"
+import { languageTag, sourceLanguageTag } from "@inlang/paraglide-js/nextjs-example"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import tableOfContents from "../../../../../documentation/tableOfContents.json"
@@ -18,12 +17,27 @@ export type PageProps = {
 export function Page(props: PageProps) {
 	let mobileDetailMenu: SlDetails | undefined
 	const [editLink, setEditLink] = createSignal<string | undefined>("")
-	const [, { locale }] = useI18n()
+	const [markdownHeadings, setMarkdownHeadings] = createSignal<Array<string>>([])
 
 	const getLocale = () => {
-		const language = locale() ?? defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
+		const language = languageTag() || sourceLanguageTag
+		return language !== sourceLanguageTag ? "/" + language : ""
 	}
+
+	onMount(() => {
+		setMarkdownHeadings(
+			props.markdown
+				? props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g).map((heading: string) => {
+						// We have to use DOMParser to parse the heading string to a HTML element
+						const parser = new DOMParser()
+						const doc = parser.parseFromString(heading, "text/html")
+						const node = doc.body.firstChild as HTMLElement
+
+						return node.innerText.replace(/(<([^>]+)>)/gi, "").toString()
+				  })
+				: []
+		)
+	})
 
 	createEffect(() => {
 		if (currentPageContext) {
@@ -79,16 +93,7 @@ export function Page(props: PageProps) {
 									<NavbarCommon
 										tableOfContents={tableOfContents}
 										getLocale={getLocale}
-										headings={props.markdown
-											.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
-											.map((heading: string) => {
-												// We have to use DOMParser to parse the heading string to a HTML element
-												const parser = new DOMParser()
-												const doc = parser.parseFromString(heading, "text/html")
-												const node = doc.body.firstChild as HTMLElement
-
-												return node.innerText.replace(/(<([^>]+)>)/gi, "").toString()
-											})}
+										headings={markdownHeadings()}
 									/>
 								</Show>
 							</div>
@@ -110,16 +115,7 @@ export function Page(props: PageProps) {
 										mobileDetailMenu?.hide()
 									}}
 									getLocale={getLocale}
-									headings={props.markdown
-										.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
-										.map((heading: string) => {
-											// We have to use DOMParser to parse the heading string to a HTML element
-											const parser = new DOMParser()
-											const doc = parser.parseFromString(heading, "text/html")
-											const node = doc.body.firstChild as HTMLElement
-
-											return node.innerText.replace(/(<([^>]+)>)/gi, "").toString()
-										})}
+									headings={markdownHeadings()}
 								/>
 							</Show>
 						</sl-details>

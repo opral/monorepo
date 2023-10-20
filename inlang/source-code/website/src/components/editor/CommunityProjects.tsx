@@ -2,16 +2,14 @@ import { For, Show } from "solid-js"
 import { repositories } from "./../../pages/editor/repositories.js"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
-import { useI18n } from "@solid-primitives/i18n"
-import { defaultLanguage } from "#src/renderer/_default.page.route.js"
+import { sourceLanguageTag, languageTag } from "@inlang/paraglide-js/nextjs-example"
 
 export function CommunityProjects() {
 	const [store] = useLocalStorage()
-	const [, { locale }] = useI18n()
 
 	const getLocale = () => {
-		const language = locale() || defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
+		const language = languageTag() || sourceLanguageTag
+		return language !== sourceLanguageTag ? "/" + language : ""
 	}
 
 	return (

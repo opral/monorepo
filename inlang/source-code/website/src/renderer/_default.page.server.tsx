@@ -2,15 +2,15 @@ import type { PageContextRenderer } from "./types.js"
 import { generateHydrationScript, renderToString } from "solid-js/web"
 import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr/server"
 import { setCurrentPageContext } from "./state.js"
-import { Root } from "./Root.jsx"
+import { Root } from "./_default.root.jsx"
 
 // import the css
 import "./app.css"
 import { MetaProvider, renderTags } from "@solidjs/meta"
-import { defaultLanguage, languages } from "./_default.page.route.js"
+import { sourceLanguageTag, availableLanguageTags } from "@inlang/paraglide-js/nextjs-example"
 
 // See https://vite-plugin-ssr.com/data-fetching
-export const passToClient = ["pageProps", "routeParams", "locale"] as const
+export const passToClient = ["pageProps", "routeParams", "languageTag"] as const
 
 export async function render(pageContext: PageContextRenderer): Promise<unknown> {
 	//! TODO most likely cross request state pollution
@@ -91,17 +91,16 @@ export function onBeforePrerender(prerenderContext: any) {
 	const pageContexts: any = []
 	for (const pageContext of prerenderContext.pageContexts) {
 		// Duplicate pageContext for each locale
-		for (const locale of languages) {
+		for (const languageTag of availableLanguageTags) {
 			// Localize URL
 			let { urlOriginal } = pageContext
-			if (locale !== defaultLanguage) {
-				urlOriginal = `/${locale}${pageContext.urlOriginal}`
+			if (languageTag !== sourceLanguageTag) {
+				urlOriginal = `/${languageTag}${pageContext.urlOriginal}`
 			}
 			pageContexts.push({
 				...pageContext,
 				urlOriginal,
-				// Set pageContext.locale
-				locale,
+				languageTag,
 			})
 		}
 	}
