@@ -1,5 +1,5 @@
 import { For, Show } from "solid-js"
-import { repositories } from "./repositories.js"
+import { repositories } from "./../../pages/editor/repositories.js"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { useI18n } from "@solid-primitives/i18n"
@@ -157,28 +157,3 @@ export function RepositoryCard(props: {
 		</a>
 	)
 }
-
-// /**
-//  * Prompting the user to add their repository.
-//  */
-// function AddRepositoryCard() {
-// 	return (
-// 		<div
-// 			class={`rounded border p-4 flex flex-col justify-between gap-6 border-secondary bg-secondary-container text-on-secondary-container`}
-// 		>
-// 			{/* empty div to achieve justify-between effect whereas the p is centered */}
-// 			<div />
-// 			<p>Get contributions for your project.</p>
-// 			<a
-// 				href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/website/src/pages/index/repositories.ts"
-// 				target="_blank"
-// 			>
-// 				{/* @ts-ignore By accident, the button looks really cool without a variant in this case. */}
-// 				<sl-button class="w-full" prop:variant="neutral">
-// 					Add your repository
-// 					<MaterialSymbolsArrowOutward slot="suffix" />
-// 				</sl-button>
-// 			</a>
-// 		</div>
-// 	)
-// }

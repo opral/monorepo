@@ -1,5 +1,4 @@
 import { For, Match, Switch, onMount } from "solid-js"
-import { Layout as EditorLayout } from "./Layout.jsx"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
 import { Meta, Title } from "@solidjs/meta"
@@ -11,13 +10,14 @@ import { useLocalStorage } from "#src/services/local-storage/index.js"
 import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"
 import { Message } from "./Message.jsx"
 import { Errors } from "./components/Errors.jsx"
+import { Layout } from "./Layout.jsx"
 
 export function Page() {
 	return (
 		<EditorStateProvider>
-			<EditorLayout>
+			<Layout>
 				<TheActualPage />
-			</EditorLayout>
+			</Layout>
 		</EditorStateProvider>
 	)
 }

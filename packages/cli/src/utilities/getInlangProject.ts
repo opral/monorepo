@@ -3,11 +3,10 @@ import { resolve } from "node:path"
 import { loadProject, type InlangProject } from "@inlang/sdk"
 import { telemetry } from "../services/telemetry/implementation.js"
 
-// in case multiple commands run getInlang in the same process
-let cached: Awaited<ReturnType<typeof getInlangProject>> | undefined = undefined
-
+/**
+ * Gets the inlang project and exists if the project contains errors.
+ */
 export async function getInlangProject(): Promise<InlangProject> {
-	if (cached) return cached
 	const baseDirectory = process.cwd()
 	const settingsFilePath = resolve(baseDirectory, "project.inlang.json")
 
@@ -15,11 +14,13 @@ export async function getInlangProject(): Promise<InlangProject> {
 		.access(settingsFilePath)
 		.then(() => true)
 		.catch(() => false)
-	if (configExists) {
+
+	if (configExists === false) {
+		// should throw at this point bceause `loadProject` can't be executed
 		throw new Error("No project.inlang.json file found in the repository.")
 	}
 
-	cached = await loadProject({
+	const project = await loadProject({
 		settingsFilePath,
 		nodeishFs: fs,
 		_capture(id, props) {
@@ -31,5 +32,11 @@ export async function getInlangProject(): Promise<InlangProject> {
 		},
 	})
 
-	return cached
+	if (project.errors().length > 0) {
+		for (const error of project.errors()) {
+			console.error(error)
+		}
+		process.exit(1)
+	}
+	return project
 }

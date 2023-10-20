@@ -1,9 +1,9 @@
 import { Title, Meta } from "@solidjs/meta"
 import { For } from "solid-js"
-import { Layout } from "../Layout.jsx"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
 import tableOfContents from "../../../../../blog/tableOfContents.json"
+import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
 
 export function Page() {
 	const [, { locale }] = useI18n()
@@ -21,7 +21,7 @@ export function Page() {
 				content="Posts that revolve around inlang, git, and globalization (i18n)."
 			/>
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
-			<Layout>
+			<MarketplaceLayout>
 				<div class="flex-row min-h-full w-full items-center justify-center mx-auto md:max-w-2xl divide-y divide-solid divide-outline">
 					<For each={Object.entries(tableOfContents)}>
 						{([, page]) => (
@@ -39,7 +39,7 @@ export function Page() {
 						)}
 					</For>
 				</div>
-			</Layout>
+			</MarketplaceLayout>
 		</>
 	)
 }
