@@ -11,7 +11,6 @@ import {
 } from "./errors.js"
 import type { Plugin } from "@inlang/plugin"
 import type { ProjectSettings } from "@inlang/project-settings"
-import { Type } from "@sinclair/typebox"
 
 it("should return an error if a plugin uses an invalid id", async () => {
 	const mockPlugin: Plugin = {
@@ -67,7 +66,6 @@ it("should expose the project settings including the plugin settings", async () 
 		id: "plugin.namespace.placeholder",
 		description: { en: "My plugin description" },
 		displayName: { en: "My plugin" },
-		settingsSchema: Type.Object({}),
 		saveMessages: async ({ settings }) => {
 			expect(settings).toStrictEqual(settings)
 		},
@@ -95,7 +93,6 @@ describe("loadMessages", () => {
 			id: "plugin.namespace.placeholder",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
-			settingsSchema: Type.Object({}),
 			loadMessages: async () => [{ id: "test", expressions: [], selectors: [], variants: [] }],
 		}
 
@@ -117,7 +114,6 @@ describe("loadMessages", () => {
 			id: "plugin.namepsace.loadMessagesFirst",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
-			settingsSchema: Type.Object({}),
 
 			loadMessages: async () => undefined as any,
 		}
@@ -125,7 +121,6 @@ describe("loadMessages", () => {
 			id: "plugin.namepsace.loadMessagesSecond",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
-			settingsSchema: Type.Object({}),
 
 			loadMessages: async () => undefined as any,
 		}
@@ -144,7 +139,6 @@ describe("loadMessages", () => {
 			id: "plugin.namepsace.loadMessagesFirst",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
-			settingsSchema: Type.Object({}),
 
 			saveMessages: async () => undefined as any,
 		}
@@ -166,7 +160,6 @@ describe("saveMessages", () => {
 			id: "plugin.namespace.placeholder",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
-			settingsSchema: Type.Object({}),
 			loadMessages: async () => undefined as any,
 			saveMessages: async () => undefined as any,
 		}
@@ -185,14 +178,12 @@ describe("saveMessages", () => {
 			id: "plugin.namepsace.saveMessages",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
-			settingsSchema: Type.Object({}),
 			saveMessages: async () => undefined as any,
 		}
 		const mockPlugin2: Plugin = {
 			id: "plugin.namepsace.saveMessages2",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
-			settingsSchema: Type.Object({}),
 			saveMessages: async () => undefined as any,
 		}
 
@@ -210,7 +201,6 @@ describe("saveMessages", () => {
 			id: "plugin.namepsace.loadMessagesFirst",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
-			settingsSchema: Type.Object({}),
 
 			loadMessages: async () => undefined as any,
 		}
@@ -231,7 +221,6 @@ describe("addCustomApi", () => {
 			id: "plugin.namespace.placeholder",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
-			settingsSchema: Type.Object({}),
 			addCustomApi: () => ({
 				"my-app": {
 					messageReferenceMatcher: () => undefined as any,
@@ -253,7 +242,6 @@ describe("addCustomApi", () => {
 			id: "plugin.namespace.placeholder",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
-			settingsSchema: Type.Object({}),
 			addCustomApi: () => ({
 				"my-app-1": {
 					functionOfMyApp1: () => undefined as any,
@@ -267,7 +255,6 @@ describe("addCustomApi", () => {
 			id: "plugin.namespace.placeholder2",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
-			settingsSchema: Type.Object({}),
 			addCustomApi: () => ({
 				"my-app-3": {
 					functionOfMyApp3: () => undefined as any,
@@ -309,7 +296,6 @@ describe("addCustomApi", () => {
 			id: "plugin.namepsace.placeholder",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
-			settingsSchema: Type.Object({}),
 			addCustomApi: () => ({
 				"app.inlang.placeholder": {
 					messageReferenceMatcher: () => {
