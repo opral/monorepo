@@ -95,6 +95,43 @@ describe("Paraglide Message Parser", () => {
 		])
 	})
 
+	it("should match message from multiple namespaces", () => {
+		const namespaces = ["frontend", "backend", "example", "other", "project-1"]
+		for (const namespace of namespaces) {
+			const sourceCode = `
+		import * as m from "@inlang/paraglide-js/${namespace}/messages";
+		m.helloWorld();
+		`
+			const result = parse(sourceCode)
+			expect(result).toEqual([
+				{
+					messageId: "helloWorld",
+					position: {
+						start: { line: 3, character: 5 },
+						end: { line: 3, character: 17 },
+					},
+				},
+			])
+		}
+	})
+
+	it("should match message with no namespace", () => {
+		const sourceCode = `
+		import * as m from "@inlang/paraglide-js/messages";
+		m.helloWorld();
+		`
+		const result = parse(sourceCode)
+		expect(result).toEqual([
+			{
+				messageId: "helloWorld",
+				position: {
+					start: { line: 3, character: 5 },
+					end: { line: 3, character: 17 },
+				},
+			},
+		])
+	})
+
 	it("should match mutiple references to @inlang/paraglide-js", () => {
 		const sourceCode = `
 		import * as m from "@inlang/paraglide-js/example/messages";
