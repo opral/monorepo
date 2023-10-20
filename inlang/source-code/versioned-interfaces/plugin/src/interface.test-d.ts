@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { Type } from "@sinclair/typebox"
 import type { Plugin } from "./interface.js"
 
 // -- it should be possible to extend the settings with the plugin's settings --
@@ -26,6 +27,7 @@ const plugin: Plugin<{
 		settings["plugin.placeholder.name"] satisfies PluginSettings
 		return {}
 	},
+	settingsSchema: Type.Object({}),
 }
 
 // -- it should be possible to use a plugin without a generic --

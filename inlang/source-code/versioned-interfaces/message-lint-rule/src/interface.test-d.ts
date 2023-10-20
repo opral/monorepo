@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { Type } from "@sinclair/typebox"
 import { MessageLintRule } from "./interface.js"
 
 // -- it should be possible to extend the settings with the lint rule's settings --
@@ -18,6 +19,7 @@ const messageLintRule: MessageLintRule<{
 	run: async ({ message, settings, report }) => {
 		settings[id] satisfies Settings
 	},
+	settingsSchema: Type.Object({}),
 }
 
 // -- it should be possible to use a lint rule without a generic --
