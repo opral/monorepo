@@ -5,6 +5,7 @@ import {
 	ModuleImportError,
 	ModuleHasNoExportsError,
 	ModuleExportIsInvalidError,
+	ModuleSettingsAreInvalidError,
 } from "./errors.js"
 import { tryCatch } from "@inlang/result"
 import { resolveMessageLintRules } from "./message-lint-rules/resolveMessageLintRules.js"
@@ -15,12 +16,11 @@ import { resolvePlugins } from "./plugins/resolvePlugins.js"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { validatedModuleSettings } from "./validatedModuleSettings.js"
 
-
 const ModuleCompiler = TypeCompiler.Compile(InlangModule)
 
 export const resolveModules: ResolveModuleFunction = async (args) => {
 	const _import = args._import ?? createImport({ readFile: args.nodeishFs.readFile })
-	const moduleErrors: Array<ModuleError> = []
+	const moduleErrors: Array<any> = []
 
 	const allPlugins: Array<Plugin> = []
 	const allMessageLintRules: Array<MessageLintRule> = []
@@ -28,12 +28,14 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 	const meta: Awaited<ReturnType<ResolveModuleFunction>>["meta"] = []
 
 	for (const module of args.settings.modules) {
+		console.log("module", module)
 		/**
 		 * -------------- BEGIN SETUP --------------
 		 */
 
 		const importedModule = await tryCatch<InlangModule>(() => _import(module))
 		// -- IMPORT MODULE --
+
 		if (importedModule.error) {
 			moduleErrors.push(
 				new ModuleImportError({
@@ -45,6 +47,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 		}
 
 		// -- MODULE DOES NOT EXPORT ANYTHING --
+
 		if (importedModule.data?.default === undefined) {
 			moduleErrors.push(
 				new ModuleHasNoExportsError({
@@ -57,7 +60,6 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 		// -- CHECK IF MODULE IS SYNTACTIALLY VALID
 
 		const isValidModule = ModuleCompiler.Check(importedModule.data)
-
 		if (isValidModule === false) {
 			const errors = [...ModuleCompiler.Errors(importedModule.data)]
 			moduleErrors.push(
@@ -66,18 +68,19 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 					errors,
 				})
 			)
+
 			continue
 		}
 
 		// -- VALIDATE MODULE SETTINGS
+		// console.log(args.settings[importedModule.data.default.id], "gucken wir mal ")
 
 		const result = validatedModuleSettings({
 			settingsSchema: importedModule.data.default.settingsSchema,
 			moduleSettings: args.settings[importedModule.data.default.id],
 		})
-
 		if (result !== "isValid") {
-			moduleErrors.push(result)
+			moduleErrors.push(new ModuleSettingsAreInvalidError({ module: module, errors: result }))
 			continue
 		}
 
@@ -98,8 +101,10 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 				)
 			)
 		}
+		// TODO module is not defined tritt immer da auf, wenn hier ein error auftritt Heißt egal welcher Module error auftritt werfen wir Module is not defined
+		// TODO expecte 4 empty arrays
 	}
-
+	console.log("moduleErrors", moduleErrors)
 	const resolvedPlugins = await resolvePlugins({
 		plugins: allPlugins,
 		settings: args.settings,

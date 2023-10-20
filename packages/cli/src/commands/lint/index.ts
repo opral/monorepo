@@ -10,6 +10,7 @@ export const lint = new Command()
 	.option("--no-fail", "Disable throwing an error if linting fails.") // defaults to false https://github.com/tj/commander.js#other-option-types-negatable-boolean-and-booleanvalue
 	.action(async () => {
 		const { data: project, error } = await getInlangProject()
+		console.log("getInlanroject", error)
 		if (error) {
 			log.error(error)
 			return

@@ -13,7 +13,8 @@ const mockPluginSchema: Plugin["settingsSchema"] = Type.Object({
 			pattern: "^[^*]*\\{languageTag\\}[^*]*\\.json",
 			description: "The PluginSettings must contain `{languageTag}` and end with `.json`.",
 		}),
-		Type.Object(
+		Type.Record(
+			Type.String({}),
 			Type.String({
 				pattern: "^[^*]*\\{languageTag\\}[^*]*\\.json",
 				description: "The PluginSettings must contain `{languageTag}` and end with `.json`.",
@@ -52,6 +53,16 @@ test("should return an error if settings file is does not match plugin Schema", 
 		},
 	})
 
+	// TODO we epect an array like this array with objekts
+	// [ { type: 6,                                                                                                                                                                                                                 11:19:55 PM
+	//     schema:
+	//      { type: 'array',
+	//        items: [Object],
+	//        [Symbol(TypeBox.Kind)]: 'Array',
+	//        [Symbol(TypeBox.Optional)]: 'Optional' },
+	//     path: '/ignore',
+	//     value: 'error',
+	//     message: 'Expected array' } ]
 	expect(isValid).toBeInstanceOf(ModuleSettingsAreInvalidError)
 })
 

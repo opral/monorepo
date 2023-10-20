@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect, test } from "vitest"
-import type { PluginSettings } from "./settings.js"
 // import { Message, ProjectSettings, Variant, createVariant, getVariant } from "@inlang/sdk"
 import { plugin } from "./plugin.js"
 // import { createNodeishMemoryFs } from "@lix-js/fs"
@@ -9,52 +8,82 @@ import { Value } from "@sinclair/typebox/value"
 // const pluginId = "plugin.inlang.json"
 
 test("valid path patterns", async () => {
+	// TODO add test for ./ at the beginning or ../ ( relative path not an absolute path )
 	const validPathPatterns = [
 		"{languageTag}.json",
-		"{languageTag}examplerFolder/ExamplePath.json",
-		"examplerFolder/{languageTag}/ExamplePath.json",
-		"examplerFolder/ExamplePath{languageTag}ExamplePath.json",
-		"examplerFolder/Example{languageTag}Path.json",
+		"{languageTag}examplerFolder/ExampleFile.json",
+		"folder/{languageTag}/ExamplePath.json",
+		"folder/ExamplePath{languageTag}ExamplePath.json",
+		"folder/Example{languageTag}Path.json",
 	]
 
 	for (const pathPattern of validPathPatterns) {
-		const isValid = Value.Check(plugin.settingSchema, {
+		const isValid = Value.Check(plugin.settingsSchema, {
 			pathPattern,
-		} satisfies PluginSettings)
+		})
 		expect(isValid).toBe(true)
 	}
 })
-test("path patter needs to include the word `{languageTag}`", async () => {
-	const validPathPatterns = ["examplePath.json"]
+test("should throw if path patter does not include the word `{languageTag}`", async () => {
+	const pathPattern = "examplePath.json"
 
-	for (const pathPattern of validPathPatterns) {
-		const isValid = Value.Check(plugin.settingSchema, {
-			pathPattern,
-		} satisfies PluginSettings)
-		expect(isValid).toBe(false)
-	}
+	const isValid = Value.Check(plugin.settingsSchema, {
+		pathPattern,
+	})
+	expect(isValid).toBe(false)
 })
-test("path patter need to end with .json ", async () => {
-	const validPathPatterns = ["{languageTag}"]
+test("should throw if path patte end not with .json", async () => {
+	const pathPattern = "{languageTag}."
 
-	for (const pathPattern of validPathPatterns) {
-		const isValid = Value.Check(plugin.settingSchema, {
-			pathPattern,
-		} satisfies PluginSettings)
-		expect(isValid).toBe(false)
-	}
+	const isValid = Value.Check(plugin.settingsSchema, {
+		pathPattern,
+	})
+	expect(isValid).toBe(false)
 })
-test("the {} has to cointain the word `languageTag", async () => {
-	const validPathPatterns = ["{en}"]
+test("should throw if curly brackets {} doesn't to cointain the word languageTag", async () => {
+	const pathPattern = "{en}.json"
 
-	for (const pathPattern of validPathPatterns) {
-		const isValid = Value.Check(plugin.settingSchema, {
-			pathPattern,
-		} satisfies PluginSettings)
-		expect(isValid).toBe(true)
+	const isValid = Value.Check(plugin.settingsSchema, {
+		pathPattern,
+	})
+	expect(isValid).toBe(false)
+})
+test("should throw if pathPattern includes a '*' wildcard. This was depricated in version 3.0.0.", async () => {
+	const pathPattern = "{languageTag}/*.json"
+	const isValid = Value.Check(plugin.settingsSchema, {
+		pathPattern,
+	})
+	expect(isValid).toBe(false)
+})
+test("should throw if namespaces include a incorrect pathpattern", async () => {
+	const pathPattern = {
+		website: "./resources/{}/website/*.json",
+		app: "./resources/{languageTag}/app.json",
+		footer: "./resources/{languageTag}/*.json",
 	}
+	const isValid = Value.Check(plugin.settingsSchema, {
+		pathPattern,
+	})
+	expect(isValid).toBe(true)
 })
 
+test("should throw if a normal JSON Schema is not working", async () => {
+	const jsonSchema = {
+		$schema: "http://json-schema.org/draft-04/schema#",
+		type: "object",
+		properties: {
+			pathpattern: {
+				type: "string",
+			},
+		},
+		required: ["pathpattern"],
+	}
+	// @ts-ignore
+	const isValid = Value.Check(jsonSchema, { pathPattern: "./resources/{}/website.json" })
+	expect(isValid).toBe(true)
+})
+
+// TODO Write test for the namespace/ write the correct type for that
 // describe("")
 // it("should throw if the path pattern uses double curly brackets for {languageTag} variable reference", async () => {
 // 	const fs = createNodeishMemoryFs()
@@ -66,44 +95,6 @@ test("the {} has to cointain the word `languageTag", async () => {
 // 				sourceLanguageTag: "en",
 // 				languageTags: ["en"],
 // 				[pluginId]: { pathPattern: "./{{languageTag}}.json" } satisfies PluginSettings,
-// 			} satisfies ProjectSettings,
-// 			nodeishFs: fs,
-// 		})
-// 		throw new Error("should not reach this")
-// 	} catch (e) {
-// 		expect((e as Error).message).toContain("pathPattern")
-// 	}
-// })
-
-// it("should throw if the path pattern string does not end with '.json'", async () => {
-// 	const fs = createNodeishMemoryFs()
-// 	await fs.writeFile("./en.json", "{}")
-// 	try {
-// 		await plugin.loadMessages!({
-// 			settings: {
-// 				modules: [],
-// 				sourceLanguageTag: "en",
-// 				languageTags: ["en"],
-// 				[pluginId]: { pathPattern: "./{lanugageTag}/resources/" } satisfies PluginSettings,
-// 			} satisfies ProjectSettings,
-// 			nodeishFs: fs,
-// 		})
-// 		throw new Error("should not reach this")
-// 	} catch (e) {
-// 		expect((e as Error).message).toContain("pathPattern")
-// 	}
-// })
-
-// it("should throw if the path pattern with namespaces does not include the {languageTag} variable reference", async () => {
-// 	const fs = createNodeishMemoryFs()
-// 	await fs.writeFile("./en.json", "{}")
-// 	try {
-// 		await plugin.loadMessages!({
-// 			settings: {
-// 				modules: [],
-// 				sourceLanguageTag: "en",
-// 				languageTags: ["en"],
-// 				[pluginId]: { pathPattern: "./common.json" } satisfies PluginSettings,
 // 			} satisfies ProjectSettings,
 // 			nodeishFs: fs,
 // 		})
@@ -180,192 +171,4 @@ test("the {} has to cointain the word `languageTag", async () => {
 // 	} catch (e) {
 // 		expect((e as Error).message).toContain("pathPattern")
 // 	}
-// })
-
-// it("should throw if the path pattern includes wildcard", async () => {
-// 	const fs = createNodeishMemoryFs()
-// 	await fs.writeFile("./en.json", "{}")
-// 	try {
-// 		await plugin.loadMessages!({
-// 			settings: {
-// 				modules: [],
-// 				languageTags: ["en"],
-// 				sourceLanguageTag: "en",
-// 				[pluginId]: {
-// 					pathPattern: "./{languageTag}/*.json",
-// 				} satisfies PluginSettings,
-// 			} satisfies ProjectSettings,
-// 			nodeishFs: fs,
-// 		})
-// 		throw new Error("should not reach this")
-// 	} catch (e) {
-// 		expect((e as Error).message).toContain("pathPattern")
-// 	}
-// })
-// describe("option pathPattern", () => {
-// 	it("should throw if the path pattern does not include the {languageTag} variable reference", async () => {
-// 		const fs = createNodeishMemoryFs()
-// 		await fs.writeFile("./en.json", "{}")
-// 		try {
-// 			await plugin.loadMessages!({
-// 				settings: {
-// 					modules: [],
-// 					sourceLanguageTag: "en",
-// 					languageTags: ["en"],
-// 					[pluginId]: { pathPattern: "./resources/" } satisfies PluginSettings,
-// 				} satisfies ProjectSettings,
-// 				nodeishFs: fs,
-// 			})
-// 			throw new Error("should not reach this")
-// 		} catch (e) {
-// 			expect((e as Error).message).toContain("pathPattern")
-// 		}
-// 	})
-
-// 	it("should throw if the path pattern uses double curly brackets for {languageTag} variable reference", async () => {
-// 		const fs = createNodeishMemoryFs()
-// 		await fs.writeFile("./en.json", "{}")
-// 		try {
-// 			await plugin.loadMessages!({
-// 				settings: {
-// 					modules: [],
-// 					sourceLanguageTag: "en",
-// 					languageTags: ["en"],
-// 					[pluginId]: { pathPattern: "./{{languageTag}}.json" } satisfies PluginSettings,
-// 				} satisfies ProjectSettings,
-// 				nodeishFs: fs,
-// 			})
-// 			throw new Error("should not reach this")
-// 		} catch (e) {
-// 			expect((e as Error).message).toContain("pathPattern")
-// 		}
-// 	})
-
-// 	it("should throw if the path pattern string does not end with '.json'", async () => {
-// 		const fs = createNodeishMemoryFs()
-// 		await fs.writeFile("./en.json", "{}")
-// 		try {
-// 			await plugin.loadMessages!({
-// 				settings: {
-// 					modules: [],
-// 					sourceLanguageTag: "en",
-// 					languageTags: ["en"],
-// 					[pluginId]: { pathPattern: "./{lanugageTag}/resources/" } satisfies PluginSettings,
-// 				} satisfies ProjectSettings,
-// 				nodeishFs: fs,
-// 			})
-// 			throw new Error("should not reach this")
-// 		} catch (e) {
-// 			expect((e as Error).message).toContain("pathPattern")
-// 		}
-// 	})
-
-// 	it("should throw if the path pattern with namespaces does not include the {languageTag} variable reference", async () => {
-// 		const fs = createNodeishMemoryFs()
-// 		await fs.writeFile("./en.json", "{}")
-// 		try {
-// 			await plugin.loadMessages!({
-// 				settings: {
-// 					modules: [],
-// 					sourceLanguageTag: "en",
-// 					languageTags: ["en"],
-// 					[pluginId]: { pathPattern: "./common.json" } satisfies PluginSettings,
-// 				} satisfies ProjectSettings,
-// 				nodeishFs: fs,
-// 			})
-// 			throw new Error("should not reach this")
-// 		} catch (e) {
-// 			expect((e as Error).message).toContain("pathPattern")
-// 		}
-// 	})
-
-// 	it("should throw if the path pattern with namespaces uses double curly brackets for {languageTag} variable reference", async () => {
-// 		const fs = createNodeishMemoryFs()
-// 		await fs.writeFile("./en.json", "{}")
-// 		try {
-// 			await plugin.loadMessages!({
-// 				settings: {
-// 					modules: [],
-// 					languageTags: ["en"],
-// 					sourceLanguageTag: "en",
-// 					[pluginId]: {
-// 						pathPattern: {
-// 							common: "./{{languageTag}}.json",
-// 						},
-// 					} satisfies PluginSettings,
-// 				} satisfies ProjectSettings,
-// 				nodeishFs: fs,
-// 			})
-// 			throw new Error("should not reach this")
-// 		} catch (e) {
-// 			expect((e as Error).message).toContain("pathPattern")
-// 		}
-// 	})
-
-// 	it("should throw if the path pattern with namespaces does not end with '.json'", async () => {
-// 		const fs = createNodeishMemoryFs()
-// 		await fs.writeFile("./en.json", "{}")
-// 		try {
-// 			await plugin.loadMessages!({
-// 				settings: {
-// 					modules: [],
-// 					languageTags: ["en"],
-// 					sourceLanguageTag: "en",
-// 					[pluginId]: {
-// 						pathPattern: {
-// 							common: "./{languageTag}/common",
-// 						},
-// 					} satisfies PluginSettings,
-// 				} satisfies ProjectSettings,
-// 				nodeishFs: fs,
-// 			})
-// 			throw new Error("should not reach this")
-// 		} catch (e) {
-// 			expect((e as Error).message).toContain("pathPattern")
-// 		}
-// 	})
-
-// 	it("should throw if the path pattern with namespaces has a namespace with a dot", async () => {
-// 		const fs = createNodeishMemoryFs()
-// 		await fs.writeFile("./en.json", "{}")
-// 		try {
-// 			await plugin.loadMessages!({
-// 				settings: {
-// 					modules: [],
-// 					languageTags: ["en"],
-// 					sourceLanguageTag: "en",
-// 					[pluginId]: {
-// 						pathPattern: {
-// 							"namespaceWith.dot": "./{languageTag}/common.json",
-// 						},
-// 					} satisfies PluginSettings,
-// 				} satisfies ProjectSettings,
-// 				nodeishFs: fs,
-// 			})
-// 			throw new Error("should not reach this")
-// 		} catch (e) {
-// 			expect((e as Error).message).toContain("pathPattern")
-// 		}
-// 	})
-
-// 	it("should throw if the path pattern includes wildcard", async () => {
-// 		const fs = createNodeishMemoryFs()
-// 		await fs.writeFile("./en.json", "{}")
-// 		try {
-// 			await plugin.loadMessages!({
-// 				settings: {
-// 					modules: [],
-// 					languageTags: ["en"],
-// 					sourceLanguageTag: "en",
-// 					[pluginId]: {
-// 						pathPattern: "./{languageTag}/*.json",
-// 					} satisfies PluginSettings,
-// 				} satisfies ProjectSettings,
-// 				nodeishFs: fs,
-// 			})
-// 			throw new Error("should not reach this")
-// 		} catch (e) {
-// 			expect((e as Error).message).toContain("pathPattern")
-// 		}
-// 	})
 // })
