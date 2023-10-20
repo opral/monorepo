@@ -16,14 +16,14 @@ export class LixError extends Error {
 }
 
 export type lixAuthModule = {
-	login?: () => Promise<any>
-	logout?: () => Promise<any>
-	getUser?: () => Promise<{
+	login: () => Promise<any>
+	logout: () => Promise<any>
+	getUser: () => Promise<{
 		username: string
-		email?: string
+		email: string
 		avatarUrl?: string
 	}>
-	addPermissions?: () => Promise<any>
+	addPermissions: () => Promise<any>
 }
 
 export type Repository = {
