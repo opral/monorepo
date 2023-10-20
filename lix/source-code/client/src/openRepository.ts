@@ -1,8 +1,9 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Repository } from "./api.js"
-import { transformRemote, withLazyFetching, parseLixUri } from "./helpers.js"
+import { transformRemote, parseLixUri } from "./helpers.js"
+import { httpWithLazyInjection } from './helpers/httpWithLazyInjection.js'
 // @ts-ignore
-import http from "./http-client.js"
+import http from "./isomorphic-git-forks/http-client.js"
 import { Octokit } from "octokit"
 
 import { createSignal, createEffect } from "./solid.js"
@@ -16,8 +17,13 @@ import {
 	commit,
 	currentBranch,
 	add,
+	walk,
 	log,
+	TREE, 
+	WORKDIR,
+	STAGE, 
 } from "isomorphic-git"
+import { withLazyFetching } from "./helpers/withLazyFetching.js"
 
 export async function openRepository(
 	url: string,
@@ -69,11 +75,17 @@ export async function openRepository(
 	const dir = "/"
 
 	let pending: Promise<void | { error: Error }> | undefined = clone({
-		fs: withLazyFetching(rawFs, "clone"),
-		http,
+		fs: rawFs, // withLazyFetching(rawFs, "clone"),
+		// to start the repo lazy - we add the blob:none filter here
+		http: httpWithLazyInjection(http, {
+			noneBlobFilter: true,
+			overrideHaves: undefined,
+			overrideWants: undefined,
+		}),
 		dir,
 		corsProxy: gitProxyUrl,
 		url: gitUrl,
+		noCheckout: true,
 		singleBranch: true,
 		depth: 1,
 		noTags: true,
@@ -87,17 +99,41 @@ export async function openRepository(
 
 	await pending
 
-	// delay all fs and repo operations until the repo clone and checkout have finished, this is preparation for the lazy feature
-	function delayedAction({ execute }: { execute: () => any }) {
-		if (pending) {
-			return pending.then(execute)
-		}
+	const oidToFilePaths = {} as { [oid: string] : string[] };
+    const filePathToOid = {} as { [filePath: string] : string };
 
-		return execute()
-	}
+	// TODO - lazy fetch use path.join 
+	const gitdir = dir.endsWith('/') ?  dir + '.git' : dir + '/.git';
+	// TODO - lazy fetch what shall we use as ref?
+	const ref = 'main';
+
+
+	await walk({
+        fs: rawFs,
+        // cache
+        dir,
+        gitdir,
+        trees: [TREE({ ref }), WORKDIR(), STAGE()],
+        map: async function(fullpath, [commit, _workdir, _stage]) {
+            if (fullpath === '.') return;
+
+            const oId = await commit?.oid();
+            if (oId === undefined) {
+				return;
+			}
+            
+			filePathToOid[fullpath] = oId;
+            if (oidToFilePaths[oId] === undefined) {
+                oidToFilePaths[oId] = [] as string[];
+            } 
+            oidToFilePaths[oId]?.push(fullpath);
+        }
+    });
+	// delay all fs and repo operations until the repo clone and checkout have finished, this is preparation for the lazy feature
+	
 
 	return {
-		nodeishFs: withLazyFetching(rawFs, "app", delayedAction),
+		nodeishFs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'nodishfs'),
 
 		/**
 		 * Gets the git origin url of the current repository.
@@ -106,7 +142,7 @@ export async function openRepository(
 		 */
 		async listRemotes() {
 			try {
-				const withLazyFetchingpedFS = withLazyFetching(rawFs, "listRemotes", delayedAction)
+				const withLazyFetchingpedFS = withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'listRemotes');
 
 				const remotes = await listRemotes({
 					fs: withLazyFetchingpedFS,
@@ -121,7 +157,7 @@ export async function openRepository(
 
 		status(cmdArgs) {
 			return status({
-				fs: withLazyFetching(rawFs, "statusMatrix", delayedAction),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'status'),
 				dir,
 				filepath: cmdArgs.filepath,
 			})
@@ -129,7 +165,7 @@ export async function openRepository(
 
 		statusMatrix(cmdArgs) {
 			return statusMatrix({
-				fs: withLazyFetching(rawFs, "statusMatrix", delayedAction),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'statusMatrix'),
 				dir,
 				filter: cmdArgs.filter,
 			})
@@ -137,7 +173,7 @@ export async function openRepository(
 
 		add(cmdArgs) {
 			return add({
-				fs: withLazyFetching(rawFs, "add", delayedAction),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'add'),
 				dir,
 				filepath: cmdArgs.filepath,
 			})
@@ -145,7 +181,7 @@ export async function openRepository(
 
 		commit(cmdArgs) {
 			return commit({
-				fs: withLazyFetching(rawFs, "commit", delayedAction),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'commit'),
 				dir,
 				author: cmdArgs.author,
 				message: cmdArgs.message,
@@ -154,7 +190,7 @@ export async function openRepository(
 
 		push() {
 			return push({
-				fs: withLazyFetching(rawFs, "push", delayedAction),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'push'),
 				url: gitUrl,
 				corsProxy: gitProxyUrl,
 				http,
@@ -164,7 +200,7 @@ export async function openRepository(
 
 		pull(cmdArgs) {
 			return pull({
-				fs: withLazyFetching(rawFs, "pull", delayedAction),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'pull'),
 				url: gitUrl,
 				corsProxy: gitProxyUrl,
 				http,
@@ -177,7 +213,7 @@ export async function openRepository(
 
 		log(cmdArgs) {
 			return log({
-				fs: withLazyFetching(rawFs, "log", delayedAction),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'log'),
 				depth: cmdArgs?.depth,
 				dir,
 				since: cmdArgs?.since,
@@ -257,7 +293,7 @@ export async function openRepository(
 			// TODO: make stateless
 			return (
 				(await currentBranch({
-					fs: withLazyFetching(rawFs, "getCurrentBranch", delayedAction),
+					fs: rawFs,
 					dir,
 				})) || undefined
 			)

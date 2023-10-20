@@ -6,7 +6,7 @@ import type {
 	Subscribable,
 } from "./api.js"
 import { type ImportFunction, resolveModules } from "./resolve-modules/index.js"
-import { TypeCompiler, ValueErrorType } from "@sinclair/typebox/compiler"
+import { TypeCompiler } from "@sinclair/typebox/compiler"
 import {
 	ProjectSettingsFileJSONSyntaxError,
 	ProjectSettingsFileNotFoundError,
@@ -22,8 +22,9 @@ import { createMessageLintReportsQuery } from "./createMessageLintReportsQuery.j
 import { ProjectSettings, Message, type NodeishFilesystemSubset } from "./versionedInterfaces.js"
 import { tryCatch, type Result } from "@inlang/result"
 import { migrateIfOutdated } from "@inlang/project-settings/migration"
-import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
-import { normalizePath } from "@lix-js/fs"
+import {
+	createNodeishFsWithAbsolutePaths,
+} from "./createNodeishFsWithAbsolutePaths.js"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
@@ -55,21 +56,29 @@ export const loadProject = async (args: {
 		)
 	}
 
-	const settingsFilePath = normalizePath(args.settingsFilePath)
 
 	// -- load project ------------------------------------------------------
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
-		const nodeishFs = createNodeishFsWithAbsolutePaths({
-			settingsFilePath,
-			nodeishFs: args.nodeishFs,
-		})
+		const nodeishFs = createNodeishFsWithAbsolutePaths(args)
+
+
+		// TODO #1459 this was the hack that allowes to preload all files without touching the plugin code using throttlling
+		// // reading each file in one tick - not awaiting the content of the file - this will trigger the download of the file and since it happens in one tick we can batch them
+		// const fileFetchPromises = [] as Promise<any>[];
+
+		// ["ar", "az", "bg", "ca", "cs", "da", "de", "el", "en", "es-419", "es", "eu", "fr", "he", "hr", "hu", "id", "it", "iw", "ja", "ko", "nl", "no", "pl", "pt-BR", "pt", "ro", "ru", "sk", "sr", "sv", "ta", "tr", "uk", "vi", "zh-CN", "zh-TW"].forEach(langTag => {
+		// 	fileFetchPromises.push(nodeishFs.readFile('/apps/web/public/static/locales/'+langTag+"/common.json"));
+		// })
+
+		// await Promise.all(fileFetchPromises);
+		
 
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
 		createEffect(() => {
-			loadSettings({ settingsFilePath, nodeishFs })
+			loadSettings({ settingsFilePath: args.settingsFilePath, nodeishFs })
 				.then((settings) => {
 					setSettings(settings)
 					// rename settings to get a convenient access to the data in Posthog
@@ -282,24 +291,6 @@ const parseSettings = (settings: unknown) => {
 			})
 		}
 	}
-
-	const { sourceLanguageTag, languageTags } = settings as ProjectSettings
-	if (!languageTags.includes(sourceLanguageTag)) {
-		throw new ProjectSettingsInvalidError({
-			errors: [
-				{
-					message: `The sourceLanguageTag "${sourceLanguageTag}" is not included in the languageTags "${languageTags.join(
-						'", "'
-					)}". Please add it to the languageTags.`,
-					type: ValueErrorType.String,
-					schema: ProjectSettings,
-					value: sourceLanguageTag,
-					path: "sourceLanguageTag",
-				},
-			],
-		})
-	}
-
 	return withMigration
 }
 

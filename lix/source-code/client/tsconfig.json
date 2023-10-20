@@ -1,7 +1,7 @@
 {
 	"extends": "../tsconfig.base.json",
 	"include": ["src/**/*.ts"],
-	"exclude": ["src/http-client.js"],
+	"exclude": ["src/isomorphic-git-forks/http-client.js"],
 	"compilerOptions": {
 		"lib": ["ESNext", "DOM"],
 		"outDir": "./dist",
