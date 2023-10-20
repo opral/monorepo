@@ -1,7 +1,6 @@
 import { Meta, Title } from "@solidjs/meta"
 import { Show, onMount } from "solid-js"
-import { defaultLanguage } from "#src/renderer/_default.page.route.js"
-import { useI18n } from "@solid-primitives/i18n"
+import { languageTag, sourceLanguageTag } from "@inlang/paraglide-js/nextjs-example"
 import { currentPageContext } from "#src/renderer/state.js"
 import tableOfContents from "../../../../../../blog/tableOfContents.json"
 import "@inlang/markdown/css"
@@ -16,11 +15,9 @@ export type PageProps = {
 }
 
 export function Page(props: PageProps) {
-	const [, { locale }] = useI18n()
-
 	const getLocale = () => {
-		const language = locale() ?? defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
+		const language = languageTag() || sourceLanguageTag
+		return language !== sourceLanguageTag ? "/" + language : ""
 	}
 
 	const replaceChars = (str: string) => {

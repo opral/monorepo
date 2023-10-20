@@ -1,11 +1,8 @@
 import { createSignal } from "solid-js"
-import { useI18n } from "@solid-primitives/i18n"
 import { showToast } from "./Toast.jsx"
 import { rpc } from "@inlang/rpc"
 
 export function NewsletterForm() {
-	const [t] = useI18n()
-
 	const [email, setEmail] = createSignal("")
 	const [loading, setLoading] = createSignal(false)
 
@@ -17,26 +14,26 @@ export function NewsletterForm() {
 				showToast({
 					title: "Could not subscribe",
 					variant: "success",
-					message: t("newsletter.error.alreadySubscribed"),
+					message: "You are already subscribed to our newsletter.", //t("newsletter.error.alreadySubscribed"),
 				})
 			} else if (response.data === "success") {
 				showToast({
 					title: "Success",
 					variant: "success",
-					message: t("newsletter.success"),
+					message: "Thank you for subscribing!", //t("newsletter.success"),
 				})
 			} else {
 				showToast({
 					title: "Error",
 					variant: "danger",
-					message: t("newsletter.error.generic"),
+					message: "Something went wrong. Please try again later.", //t("newsletter.error.generic"),
 				})
 			}
 		} else {
 			showToast({
 				title: "Error",
 				variant: "danger",
-				message: t("newsletter.error.generic"),
+				message: "Something went wrong. Please try again later.", //t("newsletter.error.generic"),
 			})
 		}
 
@@ -64,14 +61,14 @@ export function NewsletterForm() {
 			showToast({
 				title: "Error",
 				variant: "danger",
-				message: t("newsletter.error.emptyEmail"),
+				message: "Please enter your email address.", //t("newsletter.error.emptyEmail"),
 			})
 			return
 		} else if (checkEmail(emailValue) === "invalid") {
 			showToast({
 				title: "Error",
 				variant: "danger",
-				message: t("newsletter.error.invalidEmail"),
+				message: "Please enter a valid email address.", //t("newsletter.error.invalidEmail"),
 			})
 			return
 		}
@@ -81,7 +78,7 @@ export function NewsletterForm() {
 
 	return (
 		<div class="flex flex-col items-start justify-center w-full">
-			<p class="text-surface-800 font-semibold mb-3">{t("newsletter.title")}</p>
+			<p class="text-surface-800 font-semibold mb-3">Newsletter</p>
 			<div
 				class={
 					"flex items-start justify-stretch gap-3 w-full md:flex-row flex-col transition-opacity duration-150 " +
@@ -91,7 +88,7 @@ export function NewsletterForm() {
 				<sl-input
 					class={"border-none p-0 md:w-[312px] w-full " + (loading() ? "pointer-events-none" : "")}
 					prop:size={"medium"}
-					prop:placeholder={t("newsletter.placeholder")}
+					prop:placeholder="Enter your email..."
 					// @ts-ignore
 					value={email()}
 					onInput={(event) => {
@@ -116,7 +113,8 @@ export function NewsletterForm() {
 					}
 					onClick={handleSubscribe}
 				>
-					{t("newsletter.button")}
+					{/* {t("newsletter.button")} */}
+					Subscribe
 				</button>
 			</div>
 		</div>

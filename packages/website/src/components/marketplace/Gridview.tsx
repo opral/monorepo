@@ -1,9 +1,8 @@
-import { For, Show, createSignal, onMount } from "solid-js"
+import { For, Show, createEffect, createSignal } from "solid-js"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 import { algorithm } from "./helper/algorithm.js"
 import { currentPageContext } from "#src/renderer/state.js"
-import Highlight from "#src/components/Highlight.jsx"
 import Card, { CardBuildOwn, NoResultsCard } from "#src/components/Card.jsx"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
@@ -34,30 +33,15 @@ export default function Gridview(props: {
 	category?: Category | undefined
 	slider?: boolean
 }) {
-	onMount(() => {
-		const urlParams = new URLSearchParams(window.location.search)
-		if (urlParams.get("search") !== "" && urlParams.get("search") !== undefined) {
-			setSearchValue(urlParams.get("search")?.replace(/%20/g, " ") || "")
+	createEffect(() => {
+		if (currentPageContext.urlParsed.search["search"]) {
+			setSearchValue(currentPageContext.urlParsed.search["search"]?.replace(/%20/g, " ") || "")
 		}
 	})
 
 	return (
 		<SectionLayout showLines={false} type="white">
 			<div class="relative">
-				<Show when={props.highlights}>
-					<Show when={props.highlights && props.highlights.length > 0}>
-						<div
-							class={
-								"flex md:grid justify-between gap-6 md:flex-row flex-col mb-8 " +
-								(props.highlights!.length > 1 ? "md:grid-cols-2" : "md:grid-cols-1")
-							}
-						>
-							{/* @ts-expect-error */}
-							<For each={props.highlights}>{(highlight) => <Highlight {...highlight} />}</For>
-						</div>
-					</Show>
-				</Show>
-
 				<div class="mb-32 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
 					<Gallery />
 				</div>

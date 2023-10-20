@@ -1,15 +1,12 @@
 import type { LanguageTag } from "@inlang/sdk"
 import type { PageContextRenderer } from "./types.js"
-import { sourceLanguageTag, availableLanguageTags } from "@inlang/paraglide-js"
+import { sourceLanguageTag, availableLanguageTags } from "@inlang/paraglide-js/nextjs-example"
 
 export function onBeforeRoute(pageContext: PageContextRenderer) {
-	//console.log(pageContext)
 	const { url: urlWithoutLanguageTag, languageTag } = i18nRouting(pageContext.urlOriginal)
 	return {
 		pageContext: {
-			// We make `locale` available as `pageContext.locale`. We can then use https://vite-plugin-ssr.com/pageContext-anywhere to access pageContext.locale in any React/Vue component.
 			languageTag,
-			// We overwrite the original URL
 			urlOriginal: urlWithoutLanguageTag,
 		},
 	}

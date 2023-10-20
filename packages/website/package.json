@@ -18,7 +18,6 @@
 		"node": ">=18.0.0"
 	},
 	"dependencies": {
-		"@inlang/paraglide-js": "*",
 		"@isomorphic-git/cors-proxy": "^2.7.1",
 		"@lix-js/client": "*",
 		"@lix-js/fs": "*",
@@ -72,6 +71,7 @@
 		"@inlang/markdown": "*",
 		"@inlang/marketplace-manifest": "*",
 		"@inlang/marketplace-registry": "*",
+		"@inlang/paraglide-js": "*",
 		"@inlang/result": "*",
 		"@inlang/rpc": "*",
 		"@inlang/sdk": "*",

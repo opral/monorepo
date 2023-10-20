@@ -66,30 +66,30 @@ export default function Card(props: { item: any; displayName: string; highlight?
 						props.item.id.split(".")[0] === "messageLintRule"
 					}
 				>
-					<sl-tooltip prop:content={`Install`}>
-						<a
-							onClick={(e) => {
-								e.stopPropagation()
-							}}
-							href={`/install?module=${props.item.id}`}
-							class="absolute top-5 right-5 flex-shrink-0 rounded-full p-2 w-8 h-8 flex items-center justify-center text-background hover:text-background hover:bg-surface-700 bg-surface-900 transition-all"
+					{/* <sl-tooltip prop:content="Install"> */}
+					<a
+						onClick={(e) => {
+							e.stopPropagation()
+						}}
+						href={"/install?module=" + structuredClone(props.item.id)}
+						class="absolute top-5 right-5 flex-shrink-0 rounded-full p-2 w-8 h-8 flex items-center justify-center text-background hover:text-background hover:bg-surface-700 bg-surface-900 transition-all"
+					>
+						<svg
+							width="100%"
+							height="100%"
+							viewBox="0 0 16 16"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
 						>
-							<svg
-								width="100%"
-								height="100%"
-								viewBox="0 0 16 16"
-								fill="none"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									clip-rule="evenodd"
-									d="M11.6 5.54982L11.6 5.5498L8.99999 8.14981L11.6 5.54982ZM8.69999 8.87407L11.5962 5.97782L12.5794 6.99612L7.99999 11.5755L3.42056 6.99612L4.40374 5.97782L7.29999 8.87407V0.299805H8.69999V8.87407ZM14.3 14.2998V11.2998H15.7V13.9998C15.7 14.4696 15.5362 14.8643 15.2004 15.2002C14.8645 15.536 14.4698 15.6998 14 15.6998H1.99999C1.53019 15.6998 1.13547 15.536 0.79962 15.2002C0.463765 14.8643 0.299988 14.4696 0.299988 13.9998V11.2998H1.69999V14.2998H14.3Z"
-									fill="currentColor"
-								/>
-							</svg>
-						</a>
-					</sl-tooltip>
+							<path
+								fill-rule="evenodd"
+								clip-rule="evenodd"
+								d="M11.6 5.54982L11.6 5.5498L8.99999 8.14981L11.6 5.54982ZM8.69999 8.87407L11.5962 5.97782L12.5794 6.99612L7.99999 11.5755L3.42056 6.99612L4.40374 5.97782L7.29999 8.87407V0.299805H8.69999V8.87407ZM14.3 14.2998V11.2998H15.7V13.9998C15.7 14.4696 15.5362 14.8643 15.2004 15.2002C14.8645 15.536 14.4698 15.6998 14 15.6998H1.99999C1.53019 15.6998 1.13547 15.536 0.79962 15.2002C0.463765 14.8643 0.299988 14.4696 0.299988 13.9998V11.2998H1.69999V14.2998H14.3Z"
+								fill="currentColor"
+							/>
+						</svg>
+					</a>
+					{/* </sl-tooltip> */}
 				</Show>
 			</a>
 		</>

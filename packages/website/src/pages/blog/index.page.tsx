@@ -1,16 +1,13 @@
 import { Title, Meta } from "@solidjs/meta"
 import { For } from "solid-js"
-import { defaultLanguage } from "#src/renderer/_default.page.route.js"
-import { useI18n } from "@solid-primitives/i18n"
+import { languageTag, sourceLanguageTag } from "@inlang/paraglide-js/nextjs-example"
 import tableOfContents from "../../../../../blog/tableOfContents.json"
 import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
 
 export function Page() {
-	const [, { locale }] = useI18n()
-
 	const getLocale = () => {
-		const language = locale() || defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
+		const language = languageTag() || sourceLanguageTag
+		return language !== sourceLanguageTag ? "/" + language : ""
 	}
 
 	return (

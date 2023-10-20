@@ -6,6 +6,7 @@ import {
 	IconFlutter,
 	IconVue,
 } from "#src/pages/application/index.page.jsx"
+import { currentPageContext } from "#src/renderer/state.js"
 import { For } from "solid-js"
 
 const Stack = () => {
@@ -50,9 +51,9 @@ const Stack = () => {
 						{(link) => (
 							<a
 								href={
-									window.location.origin +
+									currentPageContext.urlParsed.origin +
 									"//" +
-									window.location.pathname +
+									currentPageContext.urlParsed.pathname +
 									"/?search=" +
 									link.param
 								}
@@ -60,7 +61,7 @@ const Stack = () => {
 							>
 								<div
 									class={
-										(window.location.search.includes(link.param)
+										(currentPageContext.urlParsed.searchOriginal?.includes(link.param)
 											? "bg-primary text-background "
 											: "bg-background text-surface-600 border border-surface-200 hover:border-surface-400") +
 										" px-6 py-3 flex-grow font-medium cursor-pointer rounded-lg flex items-center gap-2"
