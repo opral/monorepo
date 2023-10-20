@@ -11,7 +11,6 @@ import {
 import { resolveModules } from "./resolveModules.js"
 import type { ProjectSettings } from "@inlang/project-settings"
 import type { InlangModule } from "@inlang/module"
-import { Type } from "@sinclair/typebox"
 
 it("should return an error if a plugin cannot be imported", async () => {
 	const settings: ProjectSettings = {
@@ -40,7 +39,6 @@ it("should resolve plugins and message lint rules successfully", async () => {
 		id: "plugin.namespace.mock",
 		description: { en: "Mock plugin description" },
 		displayName: { en: "Mock Plugin" },
-		settingsSchema: Type.Object({}),
 
 		loadMessages: () => undefined as any,
 		saveMessages: () => undefined as any,
@@ -55,7 +53,6 @@ it("should resolve plugins and message lint rules successfully", async () => {
 		id: "messageLintRule.namespace.mock",
 		description: { en: "Mock lint rule description" },
 		displayName: { en: "Mock Lint Rule" },
-		settingsSchema: Type.Object({}),
 
 		run: () => undefined,
 	}

@@ -7,7 +7,6 @@ import { createNodeishMemoryFs } from "@lix-js/fs"
 
 const pluginId = "plugin.inlang.i18next"
 
-
 describe("loadMessage", () => {
 	it("should return messages if the path pattern is valid", async () => {
 		const fs = createNodeishMemoryFs()

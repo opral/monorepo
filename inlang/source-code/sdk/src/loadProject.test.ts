@@ -13,7 +13,6 @@ import {
 import { createNodeishMemoryFs } from "@lix-js/fs"
 import { createMessage } from "./test-utilities/createMessage.js"
 import { tryCatch } from "@inlang/result"
-import { Type } from "@sinclair/typebox"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -40,7 +39,6 @@ const mockPlugin: Plugin = {
 	id: "plugin.project.i18next",
 	description: { en: "Mock plugin description" },
 	displayName: { en: "Mock Plugin" },
-	settingsSchema: Type.Object({}),
 
 	loadMessages: () => exampleMessages,
 	saveMessages: () => undefined as any,
@@ -91,7 +89,6 @@ const mockMessageLintRule: MessageLintRule = {
 	id: "messageLintRule.project.mock",
 	description: { en: "Mock lint rule description" },
 	displayName: { en: "Mock Lint Rule" },
-	settingsSchema: Type.Object({}),
 	run: () => undefined,
 }
 
@@ -417,7 +414,6 @@ describe("functionality", () => {
 				id: "messageLintRule.namespace.mock",
 				description: { en: "Mock lint rule description" },
 				displayName: { en: "Mock Lint Rule" },
-				settingsSchema: Type.Object({}),
 				run: ({ report }) => {
 					report({
 						messageId: "some-message-1",
@@ -430,7 +426,6 @@ describe("functionality", () => {
 				id: "plugin.project.i18next",
 				description: { en: "Mock plugin description" },
 				displayName: { en: "Mock Plugin" },
-				settingsSchema: Type.Object({}),
 
 				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
 				saveMessages: () => undefined,
@@ -469,7 +464,6 @@ describe("functionality", () => {
 				id: "messageLintRule.namepsace.mock",
 				description: { en: "Mock lint rule description" },
 				displayName: { en: "Mock Lint Rule" },
-				settingsSchema: Type.Object({}),
 
 				run: ({ report }) => {
 					report({
@@ -483,7 +477,6 @@ describe("functionality", () => {
 				id: "plugin.project.i18next",
 				description: { en: "Mock plugin description" },
 				displayName: { en: "Mock Plugin" },
-				settingsSchema: Type.Object({}),
 
 				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
 				saveMessages: () => undefined,
@@ -590,7 +583,6 @@ describe("functionality", () => {
 				id: "plugin.project.json",
 				description: { en: "Mock plugin description" },
 				displayName: { en: "Mock Plugin" },
-				settingsSchema: Type.Object({}),
 
 				loadMessages: () => exampleMessages,
 				saveMessages: mockSaveFn,
@@ -766,7 +758,6 @@ describe("functionality", () => {
 				id: "plugin.placeholder.name",
 				description: "Mock plugin description",
 				displayName: "Mock Plugin",
-				settingsSchema: Type.Object({}),
 
 				loadMessages: () => [
 					createMessage("first", { en: "first message" }),
