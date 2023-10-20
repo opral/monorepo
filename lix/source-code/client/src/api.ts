@@ -9,7 +9,11 @@ type Author = {
 	timezoneOffset?: number
 }
 
-export type LixError = Error & { response?: { status?: number } }
+export class LixError extends Error {
+	// we currently mix standard errors with github errors and isomorphic git errors, we will start to transition into a clean lix error class as we replace implementations
+	// the response object is added for transitional compatitbility with github sdk errors
+	response?: { status?: number }
+}
 
 export type Repository = {
 	nodeishFs: NodeishFilesystem
