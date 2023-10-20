@@ -6,7 +6,14 @@ import { Type, type Static } from "@sinclair/typebox"
 
 type RuleSettings = Static<typeof RuleSettings>
 const RuleSettings = Type.Object({
-	ignore: Type.Optional(Type.Array(Type.String())),
+	ignore: Type.Optional(
+		Type.Array(
+			Type.String({
+				pattern: "[^*]",
+				description: "All items in the array need quotaion marks at the end and beginning",
+			})
+		)
+	),
 })
 
 export const identicalPatternRule: MessageLintRule = {

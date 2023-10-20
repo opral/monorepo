@@ -1,39 +1,19 @@
-import { Value } from "@sinclair/typebox/value"
-class ModuleSettingsInvalidError extends Error {
-	constructor(options: { id: any["id"]; cause: ErrorOptions["cause"] }) {
-		super(
-			`The plugin "${options.id}" returned an invalid schema. Please check the ${options.cause}.`
-		)
-		this.name = "ModuleSettingsInvalidError"
-	}
-}
+import type { InlangModule } from "@inlang/module"
+import { Value, type ValueError } from "@sinclair/typebox/value"
+// import { ModuleSettingsAreInvalidError } from "./errors.js"
 
-export const validatedModuleSettings = (args: { resolvedModules: any; settings: any }) => {
-	// console.log(count, "args.settings", args.settings)
-	const result: any = {
-		data: [],
-		errors: [],
-	}
+export const validatedModuleSettings = (args: {
+	settingsSchema: InlangModule["default"]["settingsSchema"]
+	moduleSettings: unknown
+}): "isValid" | ValueError[] => {
+	if (args.settingsSchema && args.moduleSettings) {
+		const hasValidSettings = Value.Check(args.settingsSchema, args.moduleSettings)
 
-	if (args.resolvedModules.settingSchema && args.settings[args.resolvedModules.id]) {
-		const hasValidSettings = Value.Check(
-			args.resolvedModules.settingSchema,
-			args.settings[args.resolvedModules.id]
-		)
 		if (hasValidSettings === false) {
-			const errors = [
-				...Value.Errors(args.resolvedModules.settingSchema, args.settings[args.resolvedModules.id]),
-			]
-			result.errors.push(
-				new ModuleSettingsInvalidError({
-					id: args.resolvedModules.id,
-					cause: JSON.stringify(errors),
-				})
-			)
-		}
+			const errors = [...Value.Errors(args.settingsSchema, args.moduleSettings)]
 
-		if (result.errors != 0) {
-			throw result.errors
+			return errors
 		}
 	}
+	return "isValid"
 }

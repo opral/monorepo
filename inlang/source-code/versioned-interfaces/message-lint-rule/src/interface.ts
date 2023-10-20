@@ -56,6 +56,8 @@ export const MessageLintRule = Type.Object({
 	id: _MessageLintRuleId,
 	displayName: Translatable(Type.String()),
 	description: Translatable(Type.String()),
+	// TODO comment and TSchema <TSchema>
+
 	settingsSchema: Type.Optional(Type.Any()),
 })
 
