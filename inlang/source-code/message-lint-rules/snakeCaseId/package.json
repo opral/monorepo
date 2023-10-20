@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/message-lint-rule-with-snake-case-id",
+	"name": "@inlang/message-lint-rule-snake-case-id",
 	"version": "0.0.0",
 	"type": "module",
 	"exports": {
