@@ -31,5 +31,4 @@ export const cli = new Command()
 		return cli.help()
 	})
 
-
 cli.showHelpAfterError(true)

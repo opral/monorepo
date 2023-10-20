@@ -35,7 +35,7 @@ const Lix = () => {
 						</div>
 					</div>
 				</div>
-				<div class="flex mx-6 lg:mx-auto py-4 lg:justify-center overflow-x-scroll lg:overflow-x-hidden">
+				<div class="flex mx-6 lg:mx-auto py-4 lg:justify-center overflow-x-scroll hide-scrollbar lg:overflow-x-hidden">
 					<div class="w-fit h-fit hidden md:block">
 						<LixGraph />
 					</div>
