@@ -16,14 +16,15 @@ export const initCommand = new Command()
 	.action(async () => {
 		consola.box("Welcome to inlang Paraglide-JS 🪂")
 
-		checkPrerequisites()
+		await checkIfUncommittedChanges()
+		await checkIfPackageJsonExists()
 		const projectPath = await initializeInlangProject()
 		const namespace = await promptForNamespace()
 		await addCompileStepToPackageJSON({ projectPath, namespace })
 		await adjustTsConfigIfNecessary()
 
-		consola.success(
-			"Complete.\n\nFor questions and feedback, visit https://github.com/inlang/monorepo/discussions."
+		consola.box(
+			"✅ inlang Paraglide-JS has been set up sucessfully. Happy paragliding 🪂\n\nFor questions and feedback, visit https://github.com/inlang/monorepo/discussions."
 		)
 	})
 
@@ -41,20 +42,20 @@ const initializeInlangProject = async () => {
 
 const promptForNamespace = async (): Promise<string> => {
 	const directoryName = process.cwd().split("/").pop()
+
 	const namespace = await prompt(
 		`What should be the name of the project?
 
-The name is used to create an importable 'namespace' to distinguish between multiple projects in the same repository.
-For example, the name 'frontend' will create the following import statement:
+The name is used to create an importable 'namespace' to distinguish between multiple projects in the same repository. For example, the name 'frontend' will create the following import statement:
 
-import * as m from "@inlang/paraglide-js/frontend/messages"
+\`import * as m from "@inlang/paraglide-js/frontend/messages"\`
 `,
 		{
 			type: "text",
 			initial: directoryName,
 		}
 	)
-	return namespace
+	return namespace.slice(namespace.indexOf(">>")).trim()
 }
 
 const findExistingInlangProjectPath = async (): Promise<string | undefined> => {
@@ -144,17 +145,33 @@ const newProjectTemplate: ProjectSettings = {
 	},
 }
 
-const checkPrerequisites = () => {
+const checkIfPackageJsonExists = async () => {
 	if (existsSync("./package.json") === false) {
 		consola.warn(
 			"No package.json found in the current working directory. Please run 'npm init' first."
 		)
-	} else if (execSync("git status --porcelain").toString().length > 0) {
-		consola.warn(
-			`You have uncommitted changes. Please commit your changes before initializing inlang Paraglide-JS.
+		process.exit(0)
+	}
+}
 
-Committing outstanding changes ensures that you don't lose any work, and see the changes the paraglide-js init command introduces.`
-		)
+const checkIfUncommittedChanges = async () => {
+	if (execSync("git status --porcelain").toString().length === 0) {
+		return
+	}
+
+	consola.warn(
+		`You have uncommitted changes.\n\nPlease commit your changes before initializing inlang Paraglide-JS. Committing outstanding changes ensures that you don't lose any work, and see the changes the paraglide-js init command introduces.`
+	)
+	const response = await prompt(
+		"Do you want to continue without committing your current changes?",
+		{
+			type: "confirm",
+			initial: false,
+		}
+	)
+	if (response === true) {
+		return
+	} else {
 		process.exit(0)
 	}
 }
