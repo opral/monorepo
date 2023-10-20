@@ -9,7 +9,7 @@
 		"en": "Enables the inlang VSCode extension to work with paraglide"
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/paraglide/plugin-paraglide-js/README.md"
+		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/paraglide/paraglide-js-plugin/README.md"
 	},
 	"keywords": ["application", "website", "vscode", "react", "nextjs", "sveltekit", "svelte", "vue"],
 	"publisherName": "inlang",
