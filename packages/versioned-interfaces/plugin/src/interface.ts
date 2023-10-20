@@ -45,7 +45,7 @@ export type Plugin<
 	Static<typeof Plugin>,
 	"loadMessages" | "saveMessages" | "addCustomApi" | "settingsSchema"
 > & {
-	settingsSchema: TObject
+	settingsSchema?: TObject
 	/**
 	 * Load messages.
 	 */
