@@ -6,9 +6,9 @@ import consola from "consola"
 import { resolve } from "node:path"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import JSON5 from "json5"
+import { execSync } from "node:child_process"
 
 const DEFAULT_PROJECT_PATH = "./project.inlang.json"
-
 
 export const initCommand = new Command()
 	.name("init")
@@ -149,8 +149,14 @@ const checkPrerequisites = () => {
 		consola.warn(
 			"No package.json found in the current working directory. Please run 'npm init' first."
 		)
+	} else if (execSync("git status --porcelain").toString().length > 0) {
+		consola.warn(
+			`You have uncommitted changes. Please commit your changes before initializing inlang Paraglide-JS.
+
+Committing outstanding changes ensures that you don't lose any work, and see the changes the paraglide-js init command introduces.`
+		)
+		process.exit(0)
 	}
-	// TODO check for uncommited changes
 }
 
 const addCompileStepToPackageJSON = async (args: { projectPath: string; namespace: string }) => {
