@@ -10,6 +10,7 @@ import {
 	type Resource,
 	type Setter,
 	useContext,
+	type Accessor,
 } from "solid-js"
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
 import type { LocalStorageSchema } from "#src/services/local-storage/index.js"
@@ -97,8 +98,8 @@ type EditorStateSchema = {
 	tourStep: () => TourStepId
 	setTourStep: Setter<TourStepId>
 
-	setActiveBranch: Setter<string>
-	activeBranch: Resource<string | undefined>
+	setActiveBranch: Setter<string | undefined>
+	activeBranch: Accessor<string | undefined>
 
 	/**
 	 * FilterLanguages show or hide the different messages.
