@@ -344,29 +344,21 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	)
 
-	const [currentBranch] = createResource(
-		() => {
-			if (lixErrors().length > 0 || repo() === undefined) {
-				return false
-			}
-			return true
-		},
-		async () => {
-			return await repo()?.getCurrentBranch()
+	const [currentBranch] = createResource(async () => {
+		if (lixErrors().length > 0 || repo() === undefined) {
+			return undefined
 		}
-	)
 
-	const [branchNames] = createResource(
-		() => {
-			if (lixErrors().length > 0 || repo() === undefined) {
-				return false
-			}
-			return true
-		},
-		async () => {
-			return await repo()?.getBranches()
+		return await repo()?.getCurrentBranch()
+	})
+
+	const [branchNames] = createResource(async () => {
+		if (lixErrors().length > 0 || repo() === undefined) {
+			return undefined
 		}
-	)
+
+		return await repo()?.getBranches()
+	})
 
 	/**
 	 * createResource is not reacting to changes like: "false","Null", or "undefined".
