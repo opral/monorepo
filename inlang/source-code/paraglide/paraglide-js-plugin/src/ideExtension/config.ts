@@ -10,7 +10,26 @@ export const ideExtensionConfig = (): ReturnType<Exclude<Plugin["addCustomApi"],
 		],
 		extractMessageOptions: [
 			{
-				callback: (args: { messageId: string }) => `{m.${args.messageId}()}`,
+				callback: (args: { messageId: string }) =>
+					`{m.${args.messageId
+						.trim()
+						.replace(/\s+(.)/g, (_, match) => match.toUpperCase())
+						.replace(/\s+/g, "")}()}`,
+			},
+			{
+				callback: (args: { messageId: string }) =>
+					`m.${args.messageId
+						.trim()
+						.replace(/\s+(.)/g, (_, match) => match.toUpperCase())
+						.replace(/\s+/g, "")}()`,
+			},
+			{
+				callback: (args: { messageId: string }) =>
+					`{m.${args.messageId.trim().replace(/\s+/g, "_").toLowerCase()}()}`,
+			},
+			{
+				callback: (args: { messageId: string }) =>
+					`m.${args.messageId.trim().replace(/\s+/g, "_").toLowerCase()}()`,
 			},
 		],
 		documentSelectors: [
