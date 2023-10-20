@@ -1,5 +1,11 @@
 # @inlang/message-lint-rule-snake-case-id
 
+## 1.1.0
+
+### Minor Changes
+
+- 37db978e4: change title
+
 ## 1.0.0
 
 ### Major Changes
