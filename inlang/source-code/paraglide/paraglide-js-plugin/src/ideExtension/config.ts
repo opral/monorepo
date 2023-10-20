@@ -10,7 +10,7 @@ export const ideExtensionConfig = (): ReturnType<Exclude<Plugin["addCustomApi"],
 		],
 		extractMessageOptions: [
 			{
-				callback: (args: { messageId: string }) => `{t("${args.messageId}")}`,
+				callback: (args: { messageId: string }) => `{m.${args.messageId}()}`,
 			},
 		],
 		documentSelectors: [
