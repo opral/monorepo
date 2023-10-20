@@ -15,6 +15,17 @@ export class LixError extends Error {
 	response?: { status?: number }
 }
 
+export type lixAuthModule = {
+	login?: () => Promise<any>
+	logout?: () => Promise<any>
+	getUser?: () => Promise<{
+		username: string
+		email?: string
+		avatarUrl?: string
+	}>
+	addPermissions?: () => Promise<any>
+}
+
 export type Repository = {
 	nodeishFs: NodeishFilesystem
 	commit: (args: {
