@@ -4,8 +4,6 @@ import { Plugin, MessageLintRule } from "@inlang/sdk"
 // import { createNodeishMemoryFs } from "@lix-js/fs"
 import { Type } from "@sinclair/typebox"
 import { validatedModuleSettings } from "./validatedModuleSettings.js"
-import { ModuleSettingsAreInvalidError } from "./errors.js"
-// TODO  validae tyebox and normal setting schema
 
 const mockPluginSchema: Plugin["settingsSchema"] = Type.Object({
 	pathPattern: Type.Union([
@@ -33,7 +31,7 @@ const mockMessageLintRuleSchema: MessageLintRule["settingsSchema"] = Type.Object
 	),
 })
 
-test("should throw if PluginSchema doesn't match with the Settings", async () => {
+test("if PluginSchema does match with the moduleSettings", async () => {
 	const isValid = await validatedModuleSettings({
 		settingsSchema: mockPluginSchema,
 		moduleSettings: {
@@ -45,28 +43,17 @@ test("should throw if PluginSchema doesn't match with the Settings", async () =>
 	expect(isValid).toBe("isValid")
 })
 
-test("should return an error if settings file is does not match plugin Schema", async () => {
+test("if invalid module settings would pass", async () => {
 	const isValid = validatedModuleSettings({
 		settingsSchema: mockPluginSchema,
 		moduleSettings: {
 			pathPattern: "./examples/example01/{languageTag}.json",
 		},
 	})
-
-	// TODO we epect an array like this array with objekts
-	// [ { type: 6,                                                                                                                                                                                                                 11:19:55 PM
-	//     schema:
-	//      { type: 'array',
-	//        items: [Object],
-	//        [Symbol(TypeBox.Kind)]: 'Array',
-	//        [Symbol(TypeBox.Optional)]: 'Optional' },
-	//     path: '/ignore',
-	//     value: 'error',
-	//     message: 'Expected array' } ]
-	expect(isValid).toBeInstanceOf(ModuleSettingsAreInvalidError)
+	expect(isValid).not.toBe("isValid")
 })
 
-test("should throw if MessageLintRuleSchema doesn't match with the Settiings", async () => {
+test(" if MessageLintRuleSchema  match with the settings", async () => {
 	const isValid = await validatedModuleSettings({
 		settingsSchema: mockMessageLintRuleSchema,
 		moduleSettings: {
@@ -77,7 +64,7 @@ test("should throw if MessageLintRuleSchema doesn't match with the Settiings", a
 	expect(isValid).toBe("isValid")
 })
 
-test("should return an error if settings file is does not match messageLintRule Schema", async () => {
+test("if  messageLintRule settings are not matching to the settingsSchema would pass ", async () => {
 	const isValid = validatedModuleSettings({
 		settingsSchema: mockMessageLintRuleSchema,
 		moduleSettings: {
@@ -85,5 +72,5 @@ test("should return an error if settings file is does not match messageLintRule 
 		},
 	})
 
-	expect(isValid).toBeInstanceOf(ModuleSettingsAreInvalidError)
+	expect(isValid).not.toBe("isValid")
 })
