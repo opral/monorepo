@@ -28,7 +28,6 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 	const meta: Awaited<ReturnType<ResolveModuleFunction>>["meta"] = []
 
 	for (const module of args.settings.modules) {
-		console.log("module", module)
 		/**
 		 * -------------- BEGIN SETUP --------------
 		 */
@@ -73,7 +72,6 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 		}
 
 		// -- VALIDATE MODULE SETTINGS
-		// console.log(args.settings[importedModule.data.default.id], "gucken wir mal ")
 
 		const result = validatedModuleSettings({
 			settingsSchema: importedModule.data.default.settingsSchema,
@@ -101,10 +99,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 				)
 			)
 		}
-		// TODO module is not defined tritt immer da auf, wenn hier ein error auftritt Heißt egal welcher Module error auftritt werfen wir Module is not defined
-		// TODO expecte 4 empty arrays
 	}
-	console.log("moduleErrors", moduleErrors)
 	const resolvedPlugins = await resolvePlugins({
 		plugins: allPlugins,
 		settings: args.settings,
