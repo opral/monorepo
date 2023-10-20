@@ -9,6 +9,7 @@ import JSON5 from "json5"
 
 const DEFAULT_PROJECT_PATH = "./project.inlang.json"
 
+
 export const initCommand = new Command()
 	.name("init")
 	.summary("Initializes inlang Paraglide-JS.")
@@ -40,7 +41,7 @@ const initializeInlangProject = async () => {
 
 const promptForNamespace = async (): Promise<string> => {
 	const directoryName = process.cwd().split("/").pop()
-	const namespace = await consola.prompt(
+	const namespace = await prompt(
 		`What should be the name of the project?
 
 The name is used to create an importable 'namespace' to distinguish between multiple projects in the same repository.
@@ -73,7 +74,7 @@ const findExistingInlangProjectPath = async (): Promise<string | undefined> => {
 }
 
 const existingProjectFlow = async (args: { existingProjectPath: string }) => {
-	const selection = await consola.prompt(
+	const selection = await prompt(
 		`Do you want to use the inlang project at "${args.existingProjectPath}" or create a new project?`,
 		{
 			type: "select",
@@ -83,7 +84,7 @@ const existingProjectFlow = async (args: { existingProjectPath: string }) => {
 			],
 		}
 	)
-	console.log(selection)
+
 	if (selection.value === "newProject") {
 		return createNewProjectFlow()
 	}
@@ -225,7 +226,7 @@ const adjustTsConfigIfNecessary = async () => {
 		)
 		let isValid = false
 		while (isValid === false) {
-			const response = await consola.prompt(
+			const response = await prompt(
 				`Did you set the \`compilerOptions.moduleResolution\` to "Bundler"?`,
 				{
 					type: "confirm",
@@ -251,4 +252,15 @@ const adjustTsConfigIfNecessary = async () => {
 			}
 		}
 	}
+}
+
+/**
+ * Wrapper to exit the process if the user presses CTRL+C.
+ */
+const prompt: typeof consola.prompt = async (message, options) => {
+	const response = await consola.prompt(message, options)
+	if (response.toString() === "Symbol(clack:cancel)") {
+		process.exit(0)
+	}
+	return response
 }
