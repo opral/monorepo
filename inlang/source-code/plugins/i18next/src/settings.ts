@@ -22,6 +22,6 @@ export type PluginSettings = Static<typeof PluginSettings>
 export const PluginSettings = Type.Object({
 	pathPattern: Type.Union([PathPattern, NameSpacePathPattern]),
 	variableReferencePattern: Type.Optional(Type.Array(Type.String())),
-	sourceLanguageFilePath: Type.Union([PathPattern, NameSpacePathPattern]),
+	sourceLanguageFilePath: Type.Optional(Type.Union([PathPattern, NameSpacePathPattern])),
 	ignore: Type.Optional(Type.Array(Type.String())),
 })
