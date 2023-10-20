@@ -14,5 +14,5 @@
 	"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/versioned-interfaces/language-tag/marketplace-manifest.json",
 	"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/versioned-interfaces/translatable/marketplace-manifest.json",
 	"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/marketplace-manifest.json",
-	"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js-plugin/marketplace-manifest.json"
+	"https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/paraglide/paraglide-js-plugin/marketplace-manifest.json"
 ]
