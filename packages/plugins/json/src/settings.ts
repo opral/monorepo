@@ -25,6 +25,3 @@ export const PluginSettings = Type.Object({
 	variableReferencePattern: Type.Optional(Type.Array(Type.String())),
 	ignore: Type.Optional(Type.Array(Type.String())),
 })
-
-
-

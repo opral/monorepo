@@ -2,11 +2,14 @@ import { beforeEach, describe, expect, test, vi } from "vitest"
 import { lintMessages } from "./lintMessages.js"
 import type { MessageLintReport, MessageLintRule } from "@inlang/message-lint-rule"
 import type { Message } from "@inlang/message"
+import { Type } from "@sinclair/typebox"
 
 const lintRule1 = {
 	id: "messageLintRule.x.1",
 	displayName: { en: "" },
 	description: { en: "" },
+	settingsSchema: Type.Object({}),
+
 	run: vi.fn(),
 } satisfies MessageLintRule
 
@@ -14,6 +17,8 @@ const lintRule2 = {
 	id: "messageLintRule.x.2",
 	displayName: { en: "" },
 	description: { en: "" },
+	settingsSchema: Type.Object({}),
+
 	run: vi.fn(),
 } satisfies MessageLintRule
 

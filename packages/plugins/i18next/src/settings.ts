@@ -25,6 +25,3 @@ export const PluginSettings = Type.Object({
 	sourceLanguageFilePath: Type.Union([PathPattern, NameSpacePathPattern]),
 	ignore: Type.Optional(Type.Array(Type.String())),
 })
-
-
-
