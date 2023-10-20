@@ -2,7 +2,7 @@
 import { expect, test } from "vitest"
 import { lintSingleMessage } from "@inlang/sdk/lint"
 import type { Message } from "@inlang/message"
-import { messageWithSnakeCaseId } from "./messageWithSnakeCaseId.js"
+import { snakeCaseId } from "./snakeCaseId.js"
 
 const messageValid: Message = {
 	id: "message_with_valid_id",
@@ -31,12 +31,12 @@ test("should not report if message id is in snake case format", async () => {
 			languageTags: ["en", "de"],
 			modules: [],
 			messageLintRuleLevels: {
-				[messageWithSnakeCaseId.id]: "error",
+				[snakeCaseId.id]: "error",
 			},
 		},
 		messages,
 		message: messageValid,
-		rules: [messageWithSnakeCaseId],
+		rules: [snakeCaseId],
 	})
 
 	expect(result.errors).toHaveLength(0)
@@ -50,12 +50,12 @@ test("should report if message id is not in the format of snake case", async () 
 			languageTags: ["en", "de"],
 			modules: [],
 			messageLintRuleLevels: {
-				[messageWithSnakeCaseId.id]: "error",
+				[snakeCaseId.id]: "error",
 			},
 		},
 		messages,
 		message: messageInvalid,
-		rules: [messageWithSnakeCaseId],
+		rules: [snakeCaseId],
 	})
 
 	expect(result.errors).toHaveLength(0)

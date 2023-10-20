@@ -1,6 +1,6 @@
 # What does this rule do?
 
-Checks messages to have a snake case message id.
+Checks for messages to have a snake case message id.
 
 # How to use
 
@@ -15,7 +15,7 @@ Add the lint rule to your modules array in your `project.inlang.json` file:
     "de"
   ],
   "modules": [
-    "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-with-snake-case-id@latest/dist/index.js"
+    "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-snake-case-id@latest/dist/index.js"
   ],
 }
 ```
