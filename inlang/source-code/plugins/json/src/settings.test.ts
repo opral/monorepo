@@ -16,7 +16,7 @@ test("valid path patterns", async () => {
 	]
 
 	for (const pathPattern of validPathPatterns) {
-		const isValid = Value.Check(plugin.settingsSchema, {
+		const isValid = Value.Check(plugin.settingsSchema!, {
 			pathPattern,
 		})
 		expect(isValid).toBe(true)
@@ -25,7 +25,7 @@ test("valid path patterns", async () => {
 test("if path patter does starts with a ./ or ../", async () => {
 	const pathPattern = "{languageTag}.json"
 
-	const isValid = Value.Check(plugin.settingsSchema, {
+	const isValid = Value.Check(plugin.settingsSchema!, {
 		pathPattern,
 	})
 	expect(isValid).toBe(false)
@@ -33,7 +33,7 @@ test("if path patter does starts with a ./ or ../", async () => {
 test("if path patter does include the word `{languageTag}`", async () => {
 	const pathPattern = "./examplePath.json"
 
-	const isValid = Value.Check(plugin.settingsSchema, {
+	const isValid = Value.Check(plugin.settingsSchema!, {
 		pathPattern,
 	})
 	expect(isValid).toBe(false)
@@ -41,7 +41,7 @@ test("if path patter does include the word `{languageTag}`", async () => {
 test("if path patte end with .json", async () => {
 	const pathPattern = "./{languageTag}."
 
-	const isValid = Value.Check(plugin.settingsSchema, {
+	const isValid = Value.Check(plugin.settingsSchema!, {
 		pathPattern,
 	})
 	expect(isValid).toBe(false)
@@ -49,14 +49,14 @@ test("if path patte end with .json", async () => {
 test("if curly brackets {} does to cointain the word languageTag", async () => {
 	const pathPattern = "./{en}.json"
 
-	const isValid = Value.Check(plugin.settingsSchema, {
+	const isValid = Value.Check(plugin.settingsSchema!, {
 		pathPattern,
 	})
 	expect(isValid).toBe(false)
 })
 test("if curly brackets {} does to cointain the word languageTag", async () => {
 	const pathPattern = "./{languageTag}/*.json"
-	const isValid = Value.Check(plugin.settingsSchema, {
+	const isValid = Value.Check(plugin.settingsSchema!, {
 		pathPattern,
 	})
 	expect(isValid).toBe(false)
@@ -67,7 +67,7 @@ test("if pathPattern with namespaces include the correct pathpattern schema", as
 		app: "../{languageTag}examplerFolder/ExampleFile.json",
 		footer: "./{languageTag}examplerFolder/ExampleFile.json",
 	}
-	const isValid = Value.Check(plugin.settingsSchema, {
+	const isValid = Value.Check(plugin.settingsSchema!, {
 		pathPattern,
 	})
 	expect(isValid).toBe(true)
@@ -79,7 +79,7 @@ test("if pathPattern with namespaces include a incorrect pathpattern ", async ()
 		app: "../{languageTag}folder/file.json",
 		footer: "./{languageTag}folder/file.json",
 	}
-	const isValid = Value.Check(plugin.settingsSchema, {
+	const isValid = Value.Check(plugin.settingsSchema!, {
 		pathPattern,
 	})
 	expect(isValid).toBe(false)

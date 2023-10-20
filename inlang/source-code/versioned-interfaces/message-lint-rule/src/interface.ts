@@ -43,7 +43,7 @@ export type MessageLintReport = {
 export type MessageLintRule<
 	ExternalSettings extends Record<keyof ExternalProjectSettings, JSONObject> | unknown = unknown
 > = Omit<Static<typeof MessageLintRule>, "settingsSchema"> & {
-	settingsSchema: TObject
+	settingsSchema?: TObject
 
 	run: (args: {
 		message: Message
