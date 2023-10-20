@@ -11,7 +11,19 @@
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/i18next/README.md"
 	},
-	"keywords": ["application", "i18next", "react", "nextjs"],
+	"keywords": [
+		"i18next",
+		"javascript",
+		"react",
+		"nextjs",
+		"application",
+		"website",
+		"load",
+		"save",
+		"import",
+		"export",
+		"messages"
+	],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0",

@@ -1,5 +1,4 @@
 import { For, Show, createEffect, createSignal, onMount } from "solid-js"
-import { Layout as RootLayout } from "#src/pages/Layout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 import type SlDetails from "@shoelace-style/shoelace/dist/components/details/details.js"
 import { Meta, Title } from "@solidjs/meta"
@@ -10,6 +9,7 @@ import { useI18n } from "@solid-primitives/i18n"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import tableOfContents from "../../../../../documentation/tableOfContents.json"
+import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
 
 export type PageProps = {
 	markdown: Awaited<ReturnType<any>>
@@ -61,7 +61,7 @@ export function Page(props: PageProps) {
 				}
 			/>
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
-			<RootLayout>
+			<MarketplaceLayout>
 				{/* important: the responsive breakpoints must align throughout the markup! */}
 				<div class="flex flex-col grow md:grid md:grid-cols-4 gap-10 w-full">
 					{/* desktop navbar */}
@@ -152,7 +152,7 @@ export function Page(props: PageProps) {
 						</div>
 					</Show>
 				</div>
-			</RootLayout>
+			</MarketplaceLayout>
 		</>
 	)
 }

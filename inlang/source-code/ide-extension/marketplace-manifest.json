@@ -1,23 +1,19 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
-	"id": "messageLintRule.inlang.emptyPattern",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/emptyPattern/assets/icon.png",
-	"gallery": [
-		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/empty_pattern-marketplace-cover.jpg"
-	],
+	"id": "app.inlang.ideExtension",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/assets/icon.png",
 	"displayName": {
-		"en": "Empty pattern"
+		"en": "IDE Extension"
 	},
 	"description": {
-		"en": "Checks for empty pattern in a language tag. If a message exists in the reference resource but the pattern in a target resource is empty, it is likely that the message has not been translated yet."
+		"en": "IDE Extension for inlang projects"
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/emptyPattern/README.md"
+		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/README.md"
 	},
-	"keywords": ["application", "lint rule", "empty pattern"],
+	"keywords": ["application", "website", "developer", "vscode", "ide", "extension"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-	"license": "Apache-2.0",
-	"module": "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js"
+	"license": "Apache-2.0"
 }
   

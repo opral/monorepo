@@ -1,10 +1,10 @@
 import { createSignal } from "solid-js"
-import { Layout as RootLayout } from "../Layout.jsx"
 import { navigate } from "vite-plugin-ssr/client/router"
 import { z } from "zod"
 import { Meta, Title } from "@solidjs/meta"
-import { CommunityProjects } from "../index/CommunityProjects.jsx"
+import { CommunityProjects } from "#src/components/editor/CommunityProjects.jsx"
 import { Button } from "../index/components/Button.jsx"
+import EditorLayout from "#src/components/editor/EditorLayout.jsx"
 
 export function Page() {
 	/** is not reactive because window is not reactive */
@@ -32,7 +32,7 @@ export function Page() {
 				content="Contribute to open source projects and manage translations with inlang's editor."
 			/>
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
-			<RootLayout>
+			<EditorLayout>
 				{/* START search bar */}
 				<div class="flex flex-col items-center justify-center py-16 md:py-20">
 					{/* negative margin as a dirty way of centering the search bar */}
@@ -130,7 +130,7 @@ export function Page() {
 				</div>
 				{/* END search bar */}
 				<CommunityProjects />
-			</RootLayout>
+			</EditorLayout>
 		</>
 	)
 }
