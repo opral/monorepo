@@ -99,7 +99,7 @@ jobs:
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
-            package: inlang/source-code/paraglide/plugin-paraglide-js/package.json
+            package: inlang/source-code/paraglide/paraglide-js-plugin/package.json
   
       - name: "@inlang/result" 
         uses: JS-DevTools/npm-publish@v2
