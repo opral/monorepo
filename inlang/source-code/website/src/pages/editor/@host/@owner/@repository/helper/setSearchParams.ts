@@ -81,8 +81,8 @@ export const setSearchParams = ({ key, value }: SearchParamsType) => {
 		} else {
 			// for lint and lang
 			if (value.length > 0) {
-				value.map((val: any) => {
-					currentParams.append(key, val as string)
+				value.map((val: string) => {
+					currentParams.append(key, val)
 				})
 			}
 		}
