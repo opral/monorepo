@@ -19,7 +19,7 @@ const messageLintRule: MessageLintRule<{
 	run: async ({ message, settings, report }) => {
 		settings[id] satisfies Settings
 	},
-	settingsSchema: Type.Object({}),
+	settingsSchema: Type.Optional(Type.Object({})),
 }
 
 // -- it should be possible to use a lint rule without a generic --

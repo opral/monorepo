@@ -12,6 +12,7 @@ import type {
 	MessageLintRule,
 	Text,
 } from "../versionedInterfaces.js"
+import { Type } from "@sinclair/typebox"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -32,6 +33,8 @@ const mockPlugin: Plugin = {
 	id: "plugin.project.i18next",
 	description: { en: "Mock plugin description" },
 	displayName: { en: "Mock Plugin" },
+	settingsSchema: Type.Object({}),
+
 	loadMessages: () => exampleMessages,
 	saveMessages: () => undefined,
 }
@@ -76,6 +79,8 @@ const mockLintRule: MessageLintRule = {
 	id: "messageLintRule.namespace.mock",
 	description: { en: "Mock lint rule description" },
 	displayName: { en: "Mock Lint Rule" },
+	settingsSchema: Type.Object({}),
+
 	run: () => undefined,
 }
 
@@ -179,6 +184,8 @@ describe("messages", () => {
 			description: {
 				en: "wo",
 			},
+			settingsSchema: Type.Object({}),
+
 			loadMessages: ({ settings }) => (settings.languageTags.length ? exampleMessages : []),
 			saveMessages: () => undefined,
 		}

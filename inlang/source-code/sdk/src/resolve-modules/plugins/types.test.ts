@@ -3,6 +3,7 @@ import { Value } from "@sinclair/typebox/value"
 import { describe, test, expect } from "vitest"
 import { expectType } from "tsd"
 import { Plugin } from "@inlang/plugin"
+import { Type } from "@sinclair/typebox"
 
 describe("Plugin", () => {
 	test("meta.id should enforce plugin.namespace.* patterns", () => {
@@ -12,6 +13,7 @@ describe("Plugin", () => {
 			id: "plugin.namespace.placeholder",
 			displayName: { en: "" },
 			description: { en: "" },
+			settingsSchema: Type.Object({}),
 		}
 
 		const passCases = ["plugin.namespace.helloWorld", "plugin.namespace.i18n"]

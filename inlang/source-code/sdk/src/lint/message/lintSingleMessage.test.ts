@@ -3,11 +3,14 @@ import { lintSingleMessage } from "./lintSingleMessage.js"
 import type { MessageLintReport, MessageLintRule } from "@inlang/message-lint-rule"
 import type { Message } from "@inlang/message"
 import { tryCatch } from "@inlang/result"
+import { Type } from "@sinclair/typebox"
 
 const lintRule1 = {
 	id: "messageLintRule.r.1",
 	displayName: "",
 	description: "",
+	settingsSchema: Type.Object({}),
+
 	run: vi.fn(),
 } satisfies MessageLintRule
 
@@ -15,6 +18,8 @@ const lintRule2 = {
 	id: "messageLintRule.r.2",
 	displayName: "",
 	description: "",
+	settingsSchema: Type.Object({}),
+
 	run: vi.fn(),
 } satisfies MessageLintRule
 
