@@ -39,11 +39,7 @@ export async function render(pageContext: PageContextRenderer): Promise<unknown>
 		? undefined
 		: renderToString(() => (
 				<MetaProvider tags={tags}>
-					<Root
-						page={pageContext.Page}
-						pageProps={pageContext.pageProps}
-						locale={pageContext.locale}
-					/>
+					<Root page={pageContext.Page} pageProps={pageContext.pageProps} />
 				</MetaProvider>
 		  ))
 
