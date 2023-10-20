@@ -29,8 +29,6 @@ export function Layout(props: { children: JSXElement }) {
 		setFilteredLanguageTags,
 		userIsCollaborator,
 		languageTags,
-		setActiveBranch,
-		activeBranch,
 	} = useEditorState()
 
 	const removeFilter = (filterName: string) => {
