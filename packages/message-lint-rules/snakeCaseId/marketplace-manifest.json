@@ -6,10 +6,10 @@
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/without_source-marketplace-cover.jpg"
 	],
 	"displayName": {
-		"en": "Message with a snake_case id"
+		"en": "Snake case id"
 	},
 	"description": {
-		"en": "Checks for messages to have a snake_case formatted message id"
+		"en": "Checks for messages to have a snake case formatted message id (e.g. 'my_message_id')."
 	},
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/snakeCaseId/README.md"
