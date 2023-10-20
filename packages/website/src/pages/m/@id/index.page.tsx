@@ -1,5 +1,4 @@
 import { Meta, Title } from "@solidjs/meta"
-import { Layout } from "#src/pages/Layout.jsx"
 import { For, Show, createSignal, onMount } from "solid-js"
 import { GetHelp } from "#src/components/GetHelp.jsx"
 import { isModule } from "@inlang/marketplace-registry"
@@ -9,7 +8,6 @@ import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 import { SelectRepo } from "../Select.jsx"
 import Right from "~icons/material-symbols/chevron-right"
 import Left from "~icons/material-symbols/chevron-left"
-import Marketplace, { setSearchValue } from "#src/components/sections/marketplace/index.jsx"
 import { colorForTypeOf, convertLinkToGithub, typeOfIdToTitle } from "../utilities.js"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
@@ -20,6 +18,7 @@ import { currentPageContext } from "#src/renderer/state.js"
 // @ts-ignore
 import { createSlider } from "solid-slider"
 import "solid-slider/slider.css"
+import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -112,7 +111,7 @@ export function Page(props: PageProps) {
 		<>
 			<Title>{props.manifest && displayName()}</Title>
 			<Meta name="description" content={props.manifest && description()} />
-			<Layout>
+			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
 					<div class="md:py-28 py-16">
 						<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-40 md:gap-8 gap-6">
@@ -267,10 +266,7 @@ export function Page(props: PageProps) {
 														{(keyword) => (
 															<a
 																class="transition-opacity hover:opacity-80 cursor-pointer"
-																href="/m"
-																onClick={() => {
-																	setSearchValue(keyword.toString())
-																}}
+																href={`/?search=${keyword.toString()}`}
 															>
 																<Chip text={keyword} color={colorForTypeOf(props.manifest.id)} />
 															</a>
@@ -305,13 +301,13 @@ export function Page(props: PageProps) {
 								</Show>
 							</Show>
 						</div>
-						<Marketplace slider minimal />
+						{/* <Gridview slider minimal /> */}
 						<div class="mt-20">
 							<GetHelp text="Do you have questions?" />
 						</div>
 					</div>
 				</Show>
-			</Layout>
+			</MarketplaceLayout>
 		</>
 	)
 }

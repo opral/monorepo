@@ -44,6 +44,15 @@
 	top: auto !important;
 }
 
+.hide-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+
+.hide-scrollbar {
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
+}
+
 /* Styling the default scrollbars when overflow is set to auto or scroll */
 .overflow-scrollbar::-webkit-scrollbar {
 	width: 8px;
