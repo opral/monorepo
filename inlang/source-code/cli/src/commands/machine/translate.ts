@@ -23,19 +23,12 @@ export const translate = new Command()
 					message: "Are you sure you want to machine translate?",
 				})
 				if (!response.value) {
-					log.info("🚫 Aborting machine translation.")
+					log.warn("Aborting machine translation.")
 					return
 				}
 			}
 
-			// Get the config
-			const { data: project, error } = await getInlangProject()
-
-			if (error) {
-				log.error(error)
-				// no message because that's handled in getInlangProject
-				return
-			}
+			const project = await getInlangProject()
 
 			translateCommandAction({ project })
 		} catch (error) {
@@ -48,18 +41,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 		const projectConfig = args.project.settings()
 
 		if (!projectConfig) {
-			log.error(`❌ No inlang config found, please add a project.inlang.json file`)
-			return
-		}
-
-		for (const error of args.project.errors()) {
-			// @ts-ignore
-			if (error.cause) {
-				// @ts-ignore
-				log.error(`❌ ${error} (${error.cause})`)
-			} else {
-				log.error(`❌ ${error}`)
-			}
+			log.error(`No inlang config found, please add a project.inlang.json file`)
 			return
 		}
 
@@ -81,15 +63,15 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 				targetLanguageTags: languagesTagsToTranslateTo,
 			})
 			if (error) {
-				log.error(`❌ Couldn't translate message "${id}": ${error}`)
+				log.error(`Couldn't translate message "${id}": ${error}`)
 				continue
 			}
 
 			args.project.query.messages.update({ where: { id: id }, data: translatedMessage! })
-			log.info(`✅ Machine translated message "${id}"`)
+			log.info(`Machine translated message "${id}"`)
 		}
 		// Log the message counts
-		log.info("Machine translate complete.")
+		log.success("Machine translate complete.")
 	} catch (error) {
 		log.error(error)
 	}

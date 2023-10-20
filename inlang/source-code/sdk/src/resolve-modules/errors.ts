@@ -4,6 +4,7 @@ export * from "./message-lint-rules/errors.js"
 
 export class ModuleError extends Error {
 	public readonly module: string
+
 	constructor(message: string, options: { module: string; cause?: Error }) {
 		super(message)
 		this.name = "ModuleError"
@@ -17,7 +18,10 @@ export class ModuleError extends Error {
  */
 export class ModuleHasNoExportsError extends ModuleError {
 	constructor(options: { module: string; cause?: Error }) {
-		super(`Module "${module}" has no exports. Every module must have an "export default".`, options)
+		super(
+			`Module "${options.module}" has no exports. Every module must have an "export default".`,
+			options
+		)
 		this.name = "ModuleHasNoExportsError"
 	}
 }
@@ -27,7 +31,7 @@ export class ModuleHasNoExportsError extends ModuleError {
  */
 export class ModuleImportError extends ModuleError {
 	constructor(options: { module: string; cause: Error }) {
-		super(`Couldn't import the plugin "${module}":\n\n${options.cause}`, options)
+		super(`Couldn't import the plugin "${options.module}":\n\n${options.cause}`, options)
 		this.name = "ModuleImportError"
 	}
 }
@@ -35,8 +39,8 @@ export class ModuleImportError extends ModuleError {
 export class ModuleExportIsInvalidError extends ModuleError {
 	constructor(options: { module: string; errors: ValueError[] }) {
 		super(
-			`The export(s) of "${module}" are invalid:\n\n${options.errors
-				.map((error) => `Path "${error.path}" with value "${error.value}": "${error.message}"`)
+			`The export(s) of "${options.module}" are invalid:\n\n${options.errors
+				.map((error) => `"${error.path}" "${error.value}": "${error.message}"`)
 				.join("\n")}`,
 			options
 		)

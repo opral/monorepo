@@ -7,34 +7,17 @@ import type { InlangProject, MessageLintReport } from "@inlang/sdk"
 export const lint = new Command()
 	.command("lint")
 	.description("Commands for linting translations.")
-	.option("--no-fail", "Disable throwing an error if linting fails.") // defaults to false https://github.com/tj/commander.js#other-option-types-negatable-boolean-and-booleanvalue
+	.option("--no-fail", "Disable throwing an error if linting fails.", false)
 	.action(async () => {
-		const { data: project, error } = await getInlangProject()
-		console.log("getInlanroject", error)
-		if (error) {
-			log.error(error)
-			return
-		}
+		const project = await getInlangProject()
 		await lintCommandAction({ project, logger: log })
 	})
 
-/* @ts-ignore */
 export async function lintCommandAction(args: { project: InlangProject; logger: any }) {
 	try {
-		for (const error of args.project.errors()) {
-			// @ts-ignore
-			if (error.cause) {
-				// @ts-ignore
-				log.error(`❌ ${error} (${error.cause})`)
-			} else {
-				log.error(`❌ ${error}`)
-			}
-			return
-		}
-
 		if (args.project.installed.messageLintRules().length === 0) {
 			args.logger.error(
-				`❌ No message lint rules are installed. Visit the marketplace to install lint rules https://inlang.com/marketplace .`
+				`No message lint rules are installed. Visit the marketplace to install lint rules https://inlang.com/ .`
 			)
 			return
 		}
@@ -76,7 +59,7 @@ export async function lintCommandAction(args: { project: InlangProject; logger: 
 		const reports = await MessageLintReportsAwaitable()
 
 		if (reports.length === 0) {
-			args.logger.success("🎉 Linting successful.")
+			args.logger.success("Linting successful.")
 			return
 		}
 
@@ -128,5 +111,6 @@ export async function lintCommandAction(args: { project: InlangProject; logger: 
 		return { lintTable, summaryTable }
 	} catch (error) {
 		args.logger.error(error)
+		return
 	}
 }
