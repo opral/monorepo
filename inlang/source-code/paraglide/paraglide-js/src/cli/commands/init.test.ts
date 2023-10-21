@@ -1,30 +1,95 @@
 import { test, expect, vi, beforeAll, beforeEach } from "vitest"
-import { initCommand } from "./init.js"
+import { checkIfPackageJsonExists, findExistingInlangProjectPath } from "./init.js"
 import consola from "consola"
+import { describe } from "node:test"
+import fsSync from "node:fs"
+import fs from "node:fs/promises"
+import memfs from "memfs"
 
 beforeAll(() => {
-	// Redirect std and console to consola too
-	// Calling this once is sufficient
-	consola.wrapAll()
+	// spy on commonly used functions to prevent console output
+	// and allow expecations
+	vi.spyOn(consola, "log").mockImplementation(() => undefined as never)
+	vi.spyOn(consola, "info").mockImplementation(() => undefined as never)
+	vi.spyOn(consola, "success").mockImplementation(() => undefined as never)
+	vi.spyOn(consola, "error").mockImplementation(() => undefined as never)
+	vi.spyOn(consola, "warn").mockImplementation(() => undefined as never)
+	vi.spyOn(process, "exit").mockImplementation(() => undefined as never)
 })
 
 beforeEach(() => {
-	// Re-mock consola before each test call to remove
-	// calls from before
+	vi.resetAllMocks()
+	// Re-mock consola before each test call to remove calls from before
 	consola.mockTypes(() => vi.fn())
+
+	// set the current working directory to some mock value to prevent
+	// the tests from failing when running in a different environment
+	process.cwd = () => "/"
 })
 
-test("it should log true if the user has an existing project", async () => {
-	mockUserInput([true])
-	await initCommand.parseAsync()
-	expect(consola.log).toHaveBeenLastCalledWith(true)
+describe("checkIfPackageJsonExists()", () => {
+	test("it should exit if no package.json has been found", async () => {
+		mockFs({})
+		await checkIfPackageJsonExists()
+		expect(consola.warn).toHaveBeenCalledOnce()
+		expect(process.exit).toHaveBeenCalledOnce()
+	})
+
+	test("it should not exit if a package.json exists in the current working directory", async () => {
+		mockFs({ "package.json": "" })
+		await checkIfPackageJsonExists()
+		expect(consola.warn).not.toHaveBeenCalled()
+		expect(process.exit).not.toHaveBeenCalled()
+	})
 })
 
-test("it should log false if the user has an existing project", async () => {
-	mockUserInput([false])
-	await initCommand.parseAsync()
-	expect(consola.log).toHaveBeenLastCalledWith(false)
+describe("findExistingInlangProjectPath()", () => {
+	test("it should return undefined if no project.inlang.json has been found", async () => {
+		mockFs({})
+		const path = await findExistingInlangProjectPath()
+		expect(path).toBeUndefined()
+	})
+
+	test("it find a project in the current working directory", async () => {
+		process.cwd = () => "/"
+		mockFs({ "project.inlang.json": "{}" })
+		const path = await findExistingInlangProjectPath()
+		expect(path).toBe("./project.inlang.json")
+	})
+
+	test("it should find a project in a parent directory", async () => {
+		process.cwd = () => "/nested/"
+
+		mockFs({
+			"/project.inlang.json": "{}",
+			"/nested/": {},
+		})
+		const path = await findExistingInlangProjectPath()
+		expect(path).toBe("../project.inlang.json")
+	})
+
+	test("it should find a project in a parent parent directory", async () => {
+		process.cwd = () => "/nested/nested/"
+		mockFs({
+			"/project.inlang.json": "{}",
+			"/nested/nested/": {},
+		})
+		const path = await findExistingInlangProjectPath()
+		expect(path).toBe("../../project.inlang.json")
+	})
 })
+
+// test("it should log true if the user has an existing project", async () => {
+// 	mockUserInput([true])
+// 	await initCommand.parseAsync()
+// 	expect(consola.log).toHaveBeenLastCalledWith(true)
+// })
+
+// test("it should log false if the user has an existing project", async () => {
+// 	mockUserInput([false])
+// 	await initCommand.parseAsync()
+// 	expect(consola.log).toHaveBeenLastCalledWith(false)
+// })
 
 // test("the paraglide plugin for vscode should be installed", () => {
 // 	throw new Error("Not implemented")
@@ -74,6 +139,17 @@ const mockUserInput = (testUserInput: any[]) => {
 		}
 		return value
 	})
+}
+
+const mockFs = (files: memfs.NestedDirectoryJSON) => {
+	const _memfs = memfs.createFsFromVolume(memfs.Volume.fromNestedJSON(files))
+	vi.spyOn(fsSync, "existsSync").mockImplementation(_memfs.existsSync)
+	for (const prop in fs) {
+		// @ts-ignore - memfs has the same interface as node:fs/promises
+		if (typeof fs[prop] !== "function") continue
+		// @ts-ignore - memfs has the same interface as node:fs/promises
+		vi.spyOn(fs, prop).mockImplementation(_memfs.promises[prop])
+	}
 }
 
 

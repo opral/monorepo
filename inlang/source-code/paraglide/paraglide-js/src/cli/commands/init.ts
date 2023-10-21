@@ -1,17 +1,20 @@
 import { Command } from "commander"
 import fs from "node:fs/promises"
-import { existsSync } from "node:fs"
+import fsSync from "node:fs"
 import { loadProject, type ProjectSettings } from "@inlang/sdk"
-import _consola from "consola"
+import consola from "consola"
 import { resolve } from "node:path"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import JSON5 from "json5"
-import { execSync } from "node:child_process"
+import childProcess from "node:child_process"
+
+consola.options = {
+	...consola.options,
+	// get rid of the date in the logs
+	formatOptions: { date: false },
+}
 
 const DEFAULT_PROJECT_PATH = "./project.inlang.json"
-
-// get rid of the date in the logs
-const consola = _consola.create({ formatOptions: { date: false } })
 
 export const initCommand = new Command()
 	.name("init")
@@ -59,18 +62,16 @@ The name is used to create an importable 'namespace' to distinguish between mult
 	return namespace.trim()
 }
 
-const findExistingInlangProjectPath = async (): Promise<string | undefined> => {
+export const findExistingInlangProjectPath = async (): Promise<string | undefined> => {
 	for (const path of [
 		"./project.inlang.json",
 		"../project.inlang.json",
 		"../../project.inlang.json",
 	]) {
-		try {
-			await fs.access(path)
+		if (fsSync.existsSync(path)) {
 			return path
-		} catch {
-			continue
 		}
+		continue
 	}
 	return undefined
 }
@@ -146,17 +147,17 @@ const newProjectTemplate: ProjectSettings = {
 	},
 }
 
-const checkIfPackageJsonExists = async () => {
-	if (existsSync("./package.json") === false) {
+export const checkIfPackageJsonExists = async () => {
+	if (fsSync.existsSync("./package.json") === false) {
 		consola.warn(
 			"No package.json found in the current working directory. Please run 'npm init' first."
 		)
-		process.exit(0)
+		return process.exit(0)
 	}
 }
 
 const checkIfUncommittedChanges = async () => {
-	if (execSync("git status --porcelain").toString().length === 0) {
+	if (childProcess.execSync("git status --porcelain").toString().length === 0) {
 		return
 	}
 
@@ -231,7 +232,7 @@ Please add the following command to your build script manually:
  * errors with Paraglide-JS.
  */
 const adjustTsConfigIfNecessary = async () => {
-	if (existsSync("./tsconfig.json") === false) {
+	if (fsSync.existsSync("./tsconfig.json") === false) {
 		return
 	}
 	const file = await fs.readFile("./tsconfig.json", { encoding: "utf-8" })
