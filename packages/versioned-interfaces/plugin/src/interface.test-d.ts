@@ -27,7 +27,6 @@ const plugin: Plugin<{
 		settings["plugin.placeholder.name"] satisfies PluginSettings
 		return {}
 	},
-	settingsSchema: Type.Optional(Type.Object({})),
 }
 
 // -- it should be possible to use a plugin without a generic --
