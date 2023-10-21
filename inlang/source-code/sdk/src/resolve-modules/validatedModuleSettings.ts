@@ -1,6 +1,5 @@
 import type { InlangModule } from "@inlang/module"
 import { Value, type ValueError } from "@sinclair/typebox/value"
-// import { ModuleSettingsAreInvalidError } from "./errors.js"
 
 export const validatedModuleSettings = (args: {
 	settingsSchema: InlangModule["default"]["settingsSchema"]
