@@ -2,13 +2,16 @@ import { Command } from "commander"
 import fs from "node:fs/promises"
 import { existsSync } from "node:fs"
 import { loadProject, type ProjectSettings } from "@inlang/sdk"
-import consola from "consola"
+import _consola from "consola"
 import { resolve } from "node:path"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import JSON5 from "json5"
 import { execSync } from "node:child_process"
 
 const DEFAULT_PROJECT_PATH = "./project.inlang.json"
+
+// get rid of the date in the logs
+const consola = _consola.create({ formatOptions: { date: false } })
 
 export const initCommand = new Command()
 	.name("init")
@@ -23,8 +26,8 @@ export const initCommand = new Command()
 		await addCompileStepToPackageJSON({ projectPath, namespace })
 		await adjustTsConfigIfNecessary()
 
-		consola.box(
-			"✅ inlang Paraglide-JS has been set up sucessfully. Happy paragliding 🪂\n\nFor questions and feedback, visit https://github.com/inlang/monorepo/discussions."
+		consola.success(
+			"inlang Paraglide-JS has been set up sucessfully. Happy paragliding 🪂\n\nFor questions and feedback, visit https://github.com/inlang/monorepo/discussions.\n"
 		)
 	})
 
@@ -43,19 +46,17 @@ const initializeInlangProject = async () => {
 const promptForNamespace = async (): Promise<string> => {
 	const directoryName = process.cwd().split("/").pop()
 
-	const namespace = await prompt(
-		`What should be the name of the project?
+	consola.info(`You need to select a name for the project.
 
-The name is used to create an importable 'namespace' to distinguish between multiple projects in the same repository. For example, the name 'frontend' will create the following import statement:
+The name is used to create an importable 'namespace' to distinguish between multiple projects in the same repository. For example, the name \`frontend\` will create the following import statement:
+	
+\`import * as m from "@inlang/paraglide-js/frontend/messages"\``)
 
-\`import * as m from "@inlang/paraglide-js/frontend/messages"\`
-`,
-		{
-			type: "text",
-			initial: directoryName,
-		}
-	)
-	return namespace.slice(namespace.indexOf(">>")).trim()
+	const namespace = await prompt(`What should be the name of the project?`, {
+		type: "text",
+		initial: directoryName,
+	})
+	return namespace.trim()
 }
 
 const findExistingInlangProjectPath = async (): Promise<string | undefined> => {
@@ -75,7 +76,7 @@ const findExistingInlangProjectPath = async (): Promise<string | undefined> => {
 }
 
 const existingProjectFlow = async (args: { existingProjectPath: string }) => {
-	const selection = await prompt(
+	const selection = (await prompt(
 		`Do you want to use the inlang project at "${args.existingProjectPath}" or create a new project?`,
 		{
 			type: "select",
@@ -84,9 +85,9 @@ const existingProjectFlow = async (args: { existingProjectPath: string }) => {
 				{ label: "Create a new project", value: "newProject" },
 			],
 		}
-	)
+	)) as unknown as string // the prompt type is incorrect
 
-	if (selection.value === "newProject") {
+	if (selection === "newProject") {
 		return createNewProjectFlow()
 	}
 	const project = await loadProject({
@@ -141,7 +142,7 @@ const newProjectTemplate: ProjectSettings = {
 	"plugin.inlang.messageFormat": {
 		// using .inlang/paraglide-js as directory to avoid future conflicts when an official .inlang
 		// directory is introduced, see https://github.com/inlang/monorepo/discussions/1418
-		filePath: "./.inlang/paraglide-js/messages.json",
+		filePath: "./.inlang/plugin.inlang.messageFormat/messages.json",
 	},
 }
 
@@ -159,11 +160,11 @@ const checkIfUncommittedChanges = async () => {
 		return
 	}
 
-	consola.warn(
+	consola.info(
 		`You have uncommitted changes.\n\nPlease commit your changes before initializing inlang Paraglide-JS. Committing outstanding changes ensures that you don't lose any work, and see the changes the paraglide-js init command introduces.`
 	)
 	const response = await prompt(
-		"Do you want to continue without committing your current changes?",
+		"Do you want to initialize inlang Paraglide-JS without committing your current changes?",
 		{
 			type: "confirm",
 			initial: false,
@@ -177,7 +178,6 @@ const checkIfUncommittedChanges = async () => {
 }
 
 const addCompileStepToPackageJSON = async (args: { projectPath: string; namespace: string }) => {
-	consola.start("Adding the compile command to the build step in package.json.")
 	const file = await fs.readFile("./package.json", { encoding: "utf-8" })
 	const stringify = detectJsonFormatting(file)
 	const pkg = JSON.parse(file)
@@ -199,8 +199,26 @@ const addCompileStepToPackageJSON = async (args: { projectPath: string; namespac
 	) {
 		pkg.scripts.build = `paraglide-js compile --namespace ${args.namespace} && ${pkg.scripts.build}`
 	} else {
-		consola.success("The compile command already exists build step in package.json.")
-		return
+		consola.warn(`The "build" script in the \`package.json\` already contains a "paraglide-js compile" command.
+
+Please add the following command to your build script manually:
+
+\`paraglide-js compile --project ${args.projectPath} --namespace ${args.namespace}\``)
+		const response = await consola.prompt(
+			"Are you sure that the paraglide-js compile command is working?",
+			{
+				type: "confirm",
+				initial: false,
+			}
+		)
+		if (response === false) {
+			consola.log(
+				"Please remove the paraglide-js compile command from your build script and try again."
+			)
+			return process.exit(0)
+		} else {
+			return
+		}
 	}
 	await fs.writeFile("./package.json", stringify(pkg))
 	consola.success("Successfully added the compile command to the build step in package.json.")
@@ -216,10 +234,6 @@ const adjustTsConfigIfNecessary = async () => {
 	if (existsSync("./tsconfig.json") === false) {
 		return
 	}
-	consola.info(
-		"Found a tsconfig.json file. The `compilerOptions` must be set to node16, bundler, or higher to resolve package.exports."
-	)
-	consola.start("Checking if the tsconfig.json needs to be adjusted.")
 	const file = await fs.readFile("./tsconfig.json", { encoding: "utf-8" })
 	// tsconfig allows comments ... FML
 	const tsconfig = JSON5.parse(file)
@@ -243,9 +257,18 @@ const adjustTsConfigIfNecessary = async () => {
 	const moduleResolution =
 		tsconfig.compilerOptions?.moduleResolution ?? parentTsConfig?.compilerOptions?.moduleResolution
 
-	if (moduleResolution && invalidOptions.includes(moduleResolution.toLowerCase())) {
+	if (
+		moduleResolution === undefined ||
+		(moduleResolution && invalidOptions.includes(moduleResolution.toLowerCase()))
+	) {
 		consola.info(
-			`You need to set the \`compilerOptions.moduleResolution\` to "Bundler" in the tsconfig.json file. Please do so now.`
+			`You need to set the \`compilerOptions.moduleResolution\` to "Bundler" in the \`tsconfig.json\` file:
+
+\`{
+  "compilerOptions": {
+    "moduleResolution": "Bundler"
+  }
+}\``
 		)
 		let isValid = false
 		while (isValid === false) {
@@ -253,6 +276,7 @@ const adjustTsConfigIfNecessary = async () => {
 				`Did you set the \`compilerOptions.moduleResolution\` to "Bundler"?`,
 				{
 					type: "confirm",
+					initial: false,
 				}
 			)
 			if (response === false) {
@@ -267,7 +291,7 @@ const adjustTsConfigIfNecessary = async () => {
 				tsconfig.compilerOptions.moduleResolution.toLowerCase() === "bundler"
 			) {
 				isValid = true
-				consola.success("Successfully adjusted the tsconfig.json.")
+				return
 			} else {
 				consola.error(
 					"The compiler options have not been adjusted. Please set the `compilerOptions.moduleResolution` to `Bundler`."
