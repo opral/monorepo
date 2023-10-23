@@ -6,15 +6,24 @@ import { navigate } from "vite-plugin-ssr/client/router"
 const SearchBar = () => {
 	const [searchInput, setSearchInput] = createSignal<string>("")
 	const { q } = currentPageContext.urlParsed.search
+	const { category } = currentPageContext.routeParams
 
 	return (
 		<form
 			class="group flex justify-center gap-1 px-3 items-center border h-8 w-full py-0.5 rounded-full transition-all duration-150 bg-background border-surface-200 focus-within:border-primary"
 			onSubmit={(e) => {
 				e.preventDefault()
-				window.history.pushState({}, "", "/search?q=" + searchInput())
-				if (searchInput() === "") navigate("/search")
-				else navigate("/search?q=" + searchInput())
+				if (!category) {
+					// !TODO write helper function for that
+					if (searchInput() !== "") window.history.pushState({}, "", "/search?q=" + searchInput())
+					if (searchInput() === "") navigate("/search")
+					else navigate("/search?q=" + searchInput())
+				} else {
+					if (searchInput() !== "")
+						window.history.pushState({}, "", "/c/" + category + "?q=" + searchInput())
+					if (searchInput() === "") navigate("/c/" + category)
+					else navigate("/c/" + category + "?q=" + searchInput())
+				}
 			}}
 		>
 			<input

@@ -10,7 +10,11 @@ export default function Card(props: { item: any; displayName: string; highlight?
 	return (
 		<>
 			<a
-				href={`/m/${props.item.uniqueID}/${props.item.id.replaceAll(".", "-")}`}
+				href={
+					props.item.id.split(".")[0] === "guide"
+						? `/g/${props.item.uniqueID}/${props.item.id.replaceAll(".", "-")}`
+						: `/m/${props.item.uniqueID}/${props.item.id.replaceAll(".", "-")}`
+				}
 				class={
 					"relative no-underline flex gap-4 flex-col justify-between group w-full bg-background hover:bg-surface-50 transition-colors border border-surface-200 rounded-xl p-5 " +
 					(props.highlight ? "h-96" : "h-48")
