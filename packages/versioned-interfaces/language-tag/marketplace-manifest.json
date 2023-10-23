@@ -1,5 +1,4 @@
 {
-	"uniqueID": "8y8sxj09",
 	"id": "library.inlang.languageTag",
 	"icon": "https://images.emojiterra.com/google/android-12l/512px/1f4db.png",
 	"displayName": {
@@ -28,4 +27,3 @@
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0"
 }
-  

@@ -9,11 +9,6 @@ import { ProjectSettings } from "@inlang/project-settings"
 
 const MarketplaceManifestBase = Type.Object({
 	$schema: Type.Optional(Type.Literal("https://inlang.com/schema/marketplace-manifest")),
-	uniqueID: Type.String({
-		description: "A unique identifier for this marketplace item.",
-		minLength: 8,
-		maxLength: 8,
-	}),
 	icon: Type.Optional(Type.String()),
 	coverImage: Type.Optional(
 		Type.String({ description: "The cover displayed in the marketplace." })
