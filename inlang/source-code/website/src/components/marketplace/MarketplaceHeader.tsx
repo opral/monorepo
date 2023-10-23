@@ -71,6 +71,7 @@ const MarketplaceHeader = () => {
 			<Show
 				when={
 					!currentPageContext.urlParsed.pathname.includes("/m/") &&
+					!currentPageContext.urlParsed.pathname.includes("/g/") &&
 					!currentPageContext.urlParsed.pathname.includes("/documentation") &&
 					!currentPageContext.urlParsed.pathname.includes("/install")
 				}
