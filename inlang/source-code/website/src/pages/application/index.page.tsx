@@ -52,7 +52,6 @@ export function Page() {
 					<Gridview />
 				</div>
 			</MarketplaceLayout>
-			´{" "}
 		</>
 	)
 }
