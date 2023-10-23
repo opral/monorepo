@@ -1,6 +1,5 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
-	"uniqueID": "3i8bor92",
 	"id": "plugin.inlang.i18next",
 	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/i18next/assets/icon.png",
 	"displayName": {
