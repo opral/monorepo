@@ -10,6 +10,6 @@
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern/dist/index.js"
 	],
 	"plugin.inlang.messageFormat": {
-		"filePath": "./inlang/source-code/website/messages.json"
+		"filePath": "./messages.json"
 	}
 }

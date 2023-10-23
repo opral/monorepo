@@ -1,4 +1,4 @@
-import { For, Match, Switch, onMount } from "solid-js"
+import { For, Match, Switch, onMount, Show } from "solid-js"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
 import { Meta, Title } from "@solidjs/meta"
@@ -135,18 +135,21 @@ function TheActualPage() {
 				>
 					<div>
 						<ListHeader ids={project()?.query.messages.includedMessageIds() || []} />
-						<TourHintWrapper
-							currentId="textfield"
-							position="bottom-left"
-							offset={{ x: 110, y: 144 }}
-							isVisible={tourStep() === "textfield"}
-						>
-							<For each={project()!.query.messages.includedMessageIds()}>
-								{(id) => {
-									return <Message id={id} />
-								}}
-							</For>
-						</TourHintWrapper>
+						<Show when={window}>
+							<TourHintWrapper
+								currentId="textfield"
+								position="bottom-left"
+								offset={{ x: 110, y: 144 }}
+								isVisible={tourStep() === "textfield"}
+							>
+								<For each={project()!.query.messages.includedMessageIds()}>
+									{(id) => {
+										return <Message id={id} />
+									}}
+								</For>
+							</TourHintWrapper>
+						</Show>
+
 						<div
 							class="flex flex-col h-[calc(100vh_-_288px)] grow justify-center items-center min-w-full gap-2"
 							classList={{
