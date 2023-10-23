@@ -1,4 +1,4 @@
-# Basic introduction: inlang Command Line Interface (CLI)
+# Introduction
 
 [@inlang/cli](https://github.com/inlang/monorepo/tree/main/inlang/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infrastructure. It can be used to automate localization tasks, such as machine translation, lining, and more.
 
