@@ -1,4 +1,4 @@
-import { languageTag, sourceLanguageTag } from "@inlang/paraglide-js/nextjs-example"
+import { languageTag, sourceLanguageTag } from "@inlang/paraglide-js/inlang-marketplace"
 import { type JSXElement, Show } from "solid-js"
 import { navigate } from "vite-plugin-ssr/client/router"
 

@@ -1,6 +1,6 @@
 import { Title, Meta } from "@solidjs/meta"
 import { For } from "solid-js"
-import { languageTag, sourceLanguageTag } from "@inlang/paraglide-js/nextjs-example"
+import { languageTag, sourceLanguageTag } from "@inlang/paraglide-js/inlang-marketplace"
 import tableOfContents from "../../../../../blog/tableOfContents.json"
 import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
 

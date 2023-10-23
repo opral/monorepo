@@ -2,7 +2,7 @@ import { For, Show } from "solid-js"
 import { repositories } from "./../../pages/editor/repositories.js"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
-import { sourceLanguageTag, languageTag } from "@inlang/paraglide-js/nextjs-example"
+import { sourceLanguageTag, languageTag } from "@inlang/paraglide-js/inlang-marketplace"
 
 export function CommunityProjects() {
 	const [store] = useLocalStorage()

@@ -7,7 +7,7 @@ import {
 	onSetLanguageTag,
 	setLanguageTag,
 	sourceLanguageTag,
-} from "@inlang/paraglide-js/nextjs-example"
+} from "@inlang/paraglide-js/inlang-marketplace"
 import { currentPageContext } from "./state.js"
 import type { JSXElement } from "solid-js"
 
