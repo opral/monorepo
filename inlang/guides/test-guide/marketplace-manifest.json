@@ -1,11 +1,11 @@
 {
-	"id": "library.inlang.paraglideJs",
+	"id": "guide.inlang.test",
 	"icon": "https://emojis.wiki/thumbs/emojis/parachute.webp",
 	"displayName": {
-		"en": "paraglideJS (former SDK-JS)"
+		"en": "Example Guide"
 	},
 	"description": {
-		"en": "A fully configurable JavaScript library that integrates within your framework."
+		"en": "Example guide"
 	},
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/paraglide/paraglide-js/README.md"
