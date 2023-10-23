@@ -1,5 +1,5 @@
 import { Button } from "#src/pages/index/components/Button.jsx"
-import SearchBar from "./SearchBar.jsx"
+import SearchBar from "../SearchBar.jsx"
 import CategoryTabs from "./CategoryTabs.jsx"
 import { For, Show } from "solid-js"
 import { currentPageContext } from "#src/renderer/state.js"
