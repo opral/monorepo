@@ -1,8 +1,9 @@
 import { currentPageContext } from "#src/renderer/state.js"
 import { rpc } from "@inlang/rpc"
+import { render } from "vite-plugin-ssr/abort"
 
-export async function onBeforeRender() {
-	const category = currentPageContext.urlParsed.pathname.replace("/c/", "")
+export async function onBeforeRender(pageContext: any) {
+	const { category } = pageContext.routeParams
 	const results = await rpc.search({ term: category, category: true })
 
 	const items = JSON.parse(results.data).map((item: any) => {
@@ -11,6 +12,10 @@ export async function onBeforeRender() {
 		delete item.objectID
 		return item
 	})
+
+	if (items.length === 0) {
+		throw render(404)
+	}
 
 	return {
 		pageContext: {

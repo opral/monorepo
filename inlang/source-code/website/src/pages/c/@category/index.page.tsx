@@ -10,7 +10,7 @@ import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
-export type Category = "application" | "markdown" | "email" | "payments" | "website"
+export type Category = "application" | "markdown" | "email" | "website"
 export type SubCategory = SubCategoryApplication
 
 /* Export searchValue to make subpages insert search-terms */
