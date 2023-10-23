@@ -10,10 +10,8 @@ const SubcategoryPills = (props: {
 				{(link) => (
 					<a
 						href={
-							currentPageContext.urlParsed.origin +
-							"//" +
-							currentPageContext.urlParsed.pathname +
-							"/?search=" +
+							(import.meta.env.DEV ? "http://localhost:3000" : "https://inlang.com") +
+							"/application/?search=" +
 							link.param
 						}
 					>
