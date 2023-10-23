@@ -1,5 +1,5 @@
 import { Button } from "#src/pages/index/components/Button.jsx"
-import MarketplaceSearchBar from "./MarketplaceSearchBar.jsx"
+import SearchBar from "./SearchBar.jsx"
 import CategoryTabs from "./CategoryTabs.jsx"
 import { For, Show } from "solid-js"
 import { currentPageContext } from "#src/renderer/state.js"
@@ -45,7 +45,7 @@ const MarketplaceHeader = () => {
 				</a>
 				<Show when={!currentPageContext.urlParsed.pathname.includes("/documentation")}>
 					<div class="absolute sm:static top-16 sm:top-0 w-full sm:max-w-sm mx-auto sm:mx-0">
-						<MarketplaceSearchBar />
+						<SearchBar />
 					</div>
 				</Show>
 				<div class="flex gap-8">

@@ -1,45 +1,45 @@
-import {
-	IconSvelte,
-	IconReact,
-	IconNextjs,
-	IconJavascript,
-	IconFlutter,
-	IconVue,
-} from "#src/pages/application/index.page.jsx"
+// import {
+// 	IconSvelte,
+// 	IconReact,
+// 	IconNextjs,
+// 	IconJavascript,
+// 	IconFlutter,
+// 	IconVue,
+// } from "#src/pages/application/index.page.jsx"
 import { For } from "solid-js"
 
 const Stack = () => {
 	const getSubCategies = [
-		{
-			name: "Svelte",
-			param: "svelte",
-			icon: <IconSvelte class="-ml-1 w-8 h-8" />,
-		},
-		{
-			name: "React",
-			param: "react",
-			icon: <IconReact class="-ml-1 w-8 h-8" />,
-		},
-		{
-			name: "Next.js",
-			param: "nextjs",
-			icon: <IconNextjs class="-ml-1 w-8 h-8" />,
-		},
-		{
-			name: "Vue",
-			param: "vue",
-			icon: <IconVue class="-ml-1 w-8 h-8" />,
-		},
-		{
-			name: "Javascript",
-			param: "javascript",
-			icon: <IconJavascript class="-ml-1 w-8 h-8" />,
-		},
-		{
-			name: "Flutter",
-			param: "flutter",
-			icon: <IconFlutter class="-ml-1 w-8 h-8" />,
-		},
+		// {
+		// 	name: "Svelte",
+		// 	param: "svelte",
+		// 	icon: <IconSvelte class="-ml-1 w-8 h-8" />,
+		// },
+		// {
+		// 	name: "React",
+		// 	param: "react",
+		// 	icon: <IconReact class="-ml-1 w-8 h-8" />,
+		// },
+		// {
+		// 	name: "Next.js",
+		// 	param: "nextjs",
+		// 	icon: <IconNextjs class="-ml-1 w-8 h-8" />,
+		// },
+		// {
+		// 	name: "Vue",
+		// 	param: "vue",
+		// 	icon: <IconVue class="-ml-1 w-8 h-8" />,
+		// },
+		// {
+		// 	name: "Javascript",
+		// 	param: "javascript",
+		// 	icon: <IconJavascript class="-ml-1 w-8 h-8" />,
+		// },
+		// {
+		// 	name: "Flutter",
+		// 	param: "flutter",
+		// 	icon: <IconFlutter class="-ml-1 w-8 h-8" />,
+		// },
 	]
 	return (
 		<div class="w-full flex gap-4 mt-4 md:mt-10 mb-10 flex-col-reverse md:flex-row">
