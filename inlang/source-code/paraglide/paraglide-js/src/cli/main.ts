@@ -7,6 +7,7 @@ import { paraglideDirectory } from "./state.js"
 export const cli = new Command()
 	.name("paraglide-js")
 	.addCommand(compileCommand)
+	.showHelpAfterError()
 	.action(() => {
 		// ------------------- VALIDATE IF RUNNING FROM CORRECT FOLDER -------------------
 		// the CLI expects to be running from the dist folder of the specific paraglide package
