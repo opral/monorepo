@@ -1,6 +1,7 @@
 import { defineConfig } from "vite"
 import solid from "vite-plugin-solid"
 import { ssr as vitePluginSsr } from "vite-plugin-ssr/plugin"
+import { watch } from "vite-plugin-watch"
 import { fileURLToPath, URL } from "node:url"
 import Icons from "unplugin-icons/vite"
 import { nodePolyfills } from "vite-plugin-node-polyfills"
@@ -26,6 +27,11 @@ export default defineConfig({
 		// use those sites to search for icons.
 		Icons({ compiler: "solid" }),
 		// markdownHotModuleReload(),
+		watch({
+			pattern: "static/messages.json",
+			command:
+				"paraglide-js compile --namespace inlang-marketplace --project ../../../project.inlang.json",
+		}),
 	],
 	resolve: {
 		alias: {
