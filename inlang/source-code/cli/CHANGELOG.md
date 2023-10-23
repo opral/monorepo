@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 1.15.0
+
+### Minor Changes
+
+- 870641305: improve: better error output with stack traces
+
 ## 1.14.0
 
 ### Minor Changes
