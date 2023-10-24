@@ -4,29 +4,29 @@ import { Button } from "./components/Button.jsx"
 import IconTwitter from "~icons/cib/twitter"
 import IconGithub from "~icons/cib/github"
 import IconDiscord from "~icons/cib/discord"
-
-const productsLinks = [
-	{
-		name: `Global Application`,
-		href: "/application",
-	},
-	{
-		name: `Global Website`,
-		href: "/website",
-	},
-	{
-		name: `Global Markdown`,
-		href: "/markdown",
-	},
-	{
-		name: `Lint Rules`,
-		href: "/lint",
-	},
-]
+import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
+import { LanguagePicker } from "./LanguagePicker.jsx"
 
 const Footer = () => {
 	const getProductsLinks = () => {
-		return [...productsLinks]
+		return [
+			{
+				name: `Global Application`,
+				href: "/application",
+			},
+			{
+				name: `Global Website`,
+				href: "/website",
+			},
+			{
+				name: `Global Markdown`,
+				href: "/markdown",
+			},
+			{
+				name: `Lint Rules`,
+				href: "/lint",
+			},
+		]
 	}
 
 	const socialMediaLinks = [
@@ -53,30 +53,30 @@ const Footer = () => {
 	const getResourceLinks = () => {
 		return [
 			{
-				name: `Roadmap`,
+				name: m.footer_resources_roadmap(),
 				href: "https://github.com/orgs/inlang/projects?query=is%3Aopen",
 			},
 			{
-				name: `Developers`,
-				href: "/developers",
+				name: m.footer_documentation_title(),
+				href: "/documentation",
 			},
 		]
 	}
 	const getContactLinks = () => {
 		return [
 			{
-				name: `Get in Touch`,
+				name: m.footer_contact_getInTouch(),
 				href: "mailto:hello@inlang.com",
 			},
 			{
-				name: `Contact`,
+				name: m.footer_contact_join(),
 				href: "https://github.com/inlang/monorepo/tree/main/careers",
 			},
 			{
-				name: `Feedback`,
+				name: m.footer_contact_feedback(),
 				href: "https://github.com/inlang/monorepo/discussions/categories/feedback",
 			},
-			{ name: `Blog`, href: "/blog" },
+			{ name: m.footer_contact_blog(), href: "/blog" },
 		]
 	}
 
@@ -107,7 +107,7 @@ const Footer = () => {
 					</div>
 				</div>
 				<div class="w-full sm:w-1/3 md:w-1/4 xl:px-4 flex flex-col pt-2">
-					<p class="font-semibold text-surface-900 pb-3">Resources</p>
+					<p class="font-semibold text-surface-900 pb-3">{m.footer_resources_title()}</p>
 					<For each={getResourceLinks()}>
 						{(link) => (
 							<div class="w-fit opacity-80">
@@ -131,7 +131,7 @@ const Footer = () => {
 					</For>
 				</div>
 				<div class="w-full sm:w-1/3 md:w-1/4 xl:px-4 xl:flex flex-col pt-2">
-					<p class="font-semibold text-surface-900 pb-3">Contact</p>
+					<p class="font-semibold text-surface-900 pb-3">{m.footer_contact_title()}</p>
 					<For each={getContactLinks()}>
 						{(link) => (
 							<div class="w-fit opacity-80">
@@ -146,6 +146,10 @@ const Footer = () => {
 			<div class="px-6 md:px-4 xl:px-0 flex flex-col xl:flex-row justify-between items-end gap-8 pb-16">
 				<div class="xl:px-4 xl:flex flex-col gap-2 md:gap-4 pt-2 max-xl:w-full">
 					<NewsletterForm />
+				</div>
+				<div class="xl:w-1/4 xl:px-4 flex items-center justify-between pt-2 max-xl:w-full">
+					<p class="text-surface-700 font-medium w-fit">© inlang 2023</p>
+					<LanguagePicker />
 				</div>
 			</div>
 		</footer>
