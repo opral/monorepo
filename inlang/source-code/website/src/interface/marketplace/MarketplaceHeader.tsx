@@ -52,7 +52,7 @@ const MarketplaceHeader = () => {
 					<Button type="text" href="/documentation">
 						Create your own
 					</Button>
-					<div class="flex gap-[2px] items-center">
+					<div class="gap-[2px] items-center hidden md:flex">
 						<For each={socialMediaLinks}>
 							{(link) => (
 								<a
