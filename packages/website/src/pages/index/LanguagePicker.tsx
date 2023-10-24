@@ -29,7 +29,7 @@ export function LanguagePicker(props: { darkmode?: boolean }) {
 							: "text-surface-700 hover:text-primary")
 					}
 				>
-					<p>{"en"}</p>
+					<p>{languageTag()}</p>
 					<IconExpand class="w-5 h-5 opacity-50" />
 				</div>
 				<sl-menu>
