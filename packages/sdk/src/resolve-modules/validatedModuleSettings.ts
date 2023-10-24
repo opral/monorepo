@@ -2,7 +2,7 @@ import type { InlangModule } from "@inlang/module"
 import { Value, type ValueError } from "@sinclair/typebox/value"
 
 export const validatedModuleSettings = (args: {
-	settingsSchema: InlangModule["default"]["settingsSchema"]
+	settingsSchema?: InlangModule["default"]["settingsSchema"]
 	moduleSettings: unknown
 }): "isValid" | ValueError[] => {
 	if (args.settingsSchema && args.moduleSettings) {
