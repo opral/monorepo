@@ -1,10 +1,10 @@
 import { Meta, Title } from "@solidjs/meta"
 import Hero from "./custom_section/Hero.jsx"
-import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
+import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import { Match, Switch } from "solid-js"
 import Lix from "./custom_section/Lix.jsx"
 import Stack from "./custom_section/Stack.jsx"
-import Gridview from "#src/components/marketplace/Gridview.jsx"
+import Gridview from "#src/interface/marketplace/Gridview.jsx"
 
 export function Page() {
 	const urlParams = new URLSearchParams(window.location.search)

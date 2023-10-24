@@ -1,6 +1,6 @@
 import { Show } from "solid-js"
 import type { SemanticColorTokens } from "../../../tailwind.config.cjs"
-import { Icon } from "../Icon.jsx"
+import { Icon } from "../components/Icon.jsx"
 
 /**
  * Inline notifications show up in task flows, to notify users of the status of an action.

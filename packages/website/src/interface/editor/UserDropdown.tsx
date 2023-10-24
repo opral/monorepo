@@ -1,6 +1,6 @@
 import { onSignOut } from "#src/services/auth/index.js"
 import { Switch, Match } from "solid-js"
-import { showToast } from "../Toast.jsx"
+import { showToast } from "../components/Toast.jsx"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import IconSignOut from "~icons/material-symbols/logout-rounded"

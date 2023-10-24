@@ -1,10 +1,9 @@
 import { For, Show, createSignal, onMount } from "solid-js"
-import { GetHelp } from "#src/components/GetHelp.jsx"
+import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
-import { search } from "./helper/searchHandler.js"
 import { currentPageContext } from "#src/renderer/state.js"
-import Highlight from "#src/components/Highlight.jsx"
-import Card, { CardBuildOwn, NoResultsCard } from "#src/components/Card.jsx"
+import Highlight from "#src/interface/components/Highlight.jsx"
+import Card, { CardBuildOwn, NoResultsCard } from "#src/interface/components/Card.jsx"
 import { rpc } from "@inlang/rpc"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"

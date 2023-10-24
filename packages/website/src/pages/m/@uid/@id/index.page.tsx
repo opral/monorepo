@@ -1,14 +1,14 @@
 import { Meta, Title } from "@solidjs/meta"
 import { For, Show, createSignal, onMount } from "solid-js"
-import { GetHelp } from "#src/components/GetHelp.jsx"
+import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { isModule } from "@inlang/marketplace-registry"
 import { Button } from "#src/pages/index/components/Button.jsx"
-import { Chip } from "#src/components/Chip.jsx"
+import { Chip } from "#src/interface/components/Chip.jsx"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 import { SelectRepo } from "../../Select.jsx"
 import Right from "~icons/material-symbols/chevron-right"
 import Left from "~icons/material-symbols/chevron-left"
-import { setSearchValue } from "#src/components/marketplace/Gridview.jsx"
+import { setSearchValue } from "#src/interface/marketplace/Gridview.jsx"
 import { colorForTypeOf, convertLinkToGithub, typeOfIdToTitle } from "../../utilities.js"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
@@ -19,7 +19,7 @@ import { currentPageContext } from "#src/renderer/state.js"
 // @ts-ignore
 import { createSlider } from "solid-slider"
 import "solid-slider/slider.css"
-import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
+import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.

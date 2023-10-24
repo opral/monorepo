@@ -1,6 +1,6 @@
 import { Show, createSignal } from "solid-js"
 import { Chip } from "./Chip.jsx"
-import { colorForTypeOf, typeOfIdToTitle } from "#src/components/marketplace/helper/utilities.js"
+import { colorForTypeOf, typeOfIdToTitle } from "#src/interface/marketplace/helper/utilities.js"
 import Plus from "~icons/material-symbols/add-rounded"
 import { showToast } from "./Toast.jsx"
 import { rpc } from "@inlang/rpc"
