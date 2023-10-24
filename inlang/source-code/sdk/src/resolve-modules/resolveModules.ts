@@ -20,7 +20,7 @@ const ModuleCompiler = TypeCompiler.Compile(InlangModule)
 
 export const resolveModules: ResolveModuleFunction = async (args) => {
 	const _import = args._import ?? createImport({ readFile: args.nodeishFs.readFile })
-	const moduleErrors: Array<any> = []
+	const moduleErrors: Array<ModuleError> = []
 
 	const allPlugins: Array<Plugin> = []
 	const allMessageLintRules: Array<MessageLintRule> = []
