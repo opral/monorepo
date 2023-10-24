@@ -31,7 +31,12 @@ const MarketplaceHeader = () => {
 
 	return (
 		<header class="sticky top-0 w-full z-[9999] bg-background border-b border-surface-200 px-4">
-			<div class="max-w-7xl mx-auto flex justify-between items-center relative sm:static mb-10 sm:mb-0">
+			<div
+				class={
+					"max-w-7xl mx-auto flex justify-between items-center relative sm:static sm:mb-0 " +
+					(!currentPageContext.urlParsed.pathname.includes("/documentation") ? "mb-10" : "mb-1")
+				}
+			>
 				<a
 					href={
 						window.location.pathname === "/"
