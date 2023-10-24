@@ -82,7 +82,7 @@ const Footer = () => {
 
 	return (
 		<footer class="overflow-hidden max-w-7xl mx-auto">
-			<div class="flex flex-row flex-wrap-reverse py-16 px-6 md:px-4 xl:px-0 gap-10 sm:gap-x-0 md:gap-y-10 xl:gap-0">
+			<div class="flex flex-row flex-wrap-reverse py-16 max-w-7xl mx-auto px-4 xl:px-0 gap-10 sm:gap-x-0 md:gap-y-10 xl:gap-0">
 				<div class="w-full md:w-1/4 xl:px-4 flex flex-row items-center sm:items-start md:flex-col gap-10 md:justify-start justify-between flex-wrap">
 					<div>
 						<a href="/" class="flex items-center w-fit mb-6">
@@ -143,7 +143,7 @@ const Footer = () => {
 					</For>
 				</div>
 			</div>
-			<div class="px-6 md:px-4 xl:px-0 flex flex-col xl:flex-row justify-between items-end gap-8 pb-16">
+			<div class="px-4 xl:px-0 flex flex-col xl:flex-row justify-between items-end gap-8 pb-16">
 				<div class="xl:px-4 xl:flex flex-col gap-2 md:gap-4 pt-2 max-xl:w-full">
 					<NewsletterForm />
 				</div>
