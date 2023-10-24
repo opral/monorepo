@@ -8,13 +8,12 @@
 		"asvuch18": "../message-lint-rules/identicalPattern/marketplace-manifest.json",
 		"10l6oyv1": "../message-lint-rules/messageWithoutSource/marketplace-manifest.json",
 		"4cxm3eqi": "../message-lint-rules/missingTranslation/marketplace-manifest.json",
+		"gkerinvo": "../message-lint-rules/snakeCaseId/marketplace-manifest.json",
 		"3i8bor92": "../plugins/i18next/marketplace-manifest.json",
 		"ig84ng0o": "../plugins/json/marketplace-manifest.json",
+		"reootnfj": "../plugins/inlang-message-format/marketplace-manifest.json",
 		"8y8sxj09": "../versioned-interfaces/language-tag/marketplace-manifest.json",
 		"ezdlll4o": "../versioned-interfaces/translatable/marketplace-manifest.json",
 		"gerre34r": "../paraglide/paraglide-js/marketplace-manifest.json"
-	},
-	"g": {
-		"AAAAAAAA": "../../guides/test-guide/marketplace-manifest.json"
 	}
 }
