@@ -50,7 +50,7 @@ const MarketplaceHeader = () => {
 				</Show>
 				<div class="flex gap-8">
 					<Button type="text" href="/documentation">
-						Developers
+						Create your own
 					</Button>
 					<div class="flex gap-[2px] items-center">
 						<For each={socialMediaLinks}>
