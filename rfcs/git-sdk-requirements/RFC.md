@@ -4,7 +4,7 @@
 
 This RFC evaluates two architectures on building a git backend that serves current and foreseen needs of inlang.
 
-The inlang editor currently uses the git JS implementation. The JS implementation lacks git features that are required to build out the editor. The lack of git features triggered the exploration of switching the underlying git implementation, see [https://github.com/inlang/monorepo/issues/278](https:github.com/inlang/monorepo/issues/278).
+The inlang editor currently uses the git JS implementation. The JS implementation lacks git features that are required to build out the editor. The lack of git features triggered the exploration of switching the underlying git implementation, see [https://github.com/inlang/monorepo/issues/278](https://github.com/inlang/monorepo/issues/278).
 
 ### Glossary
 
