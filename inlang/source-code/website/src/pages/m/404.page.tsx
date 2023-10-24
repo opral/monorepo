@@ -1,4 +1,4 @@
-import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
+import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import { Button } from "#src/pages/index/components/Button.jsx"
 import { Meta, Title } from "@solidjs/meta"
 

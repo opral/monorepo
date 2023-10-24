@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js"
-import { Icon } from "#src/components/Icon.jsx"
+import { Icon } from "#src/interface/components/Icon.jsx"
 import MaterialSymbolsChevronLeft from "~icons/material-symbols/chevron-left"
 import MaterialSymbolsChevronRight from "~icons/material-symbols/chevron-right"
 
