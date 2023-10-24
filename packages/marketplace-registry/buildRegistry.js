@@ -4,7 +4,6 @@ import { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { Value } from "@sinclair/typebox/value"
 import algoliasearch from "algoliasearch"
 import fetch from "node-fetch"
-import { registry } from "./dist/registry.js"
 
 const manifestLinks = JSON.parse(await fs.readFile("./registry.json", "utf-8"))
 
@@ -76,7 +75,7 @@ const client = algoliasearch(privateEnv.ALGOLIA_APPLICATION, privateEnv.ALGOLIA_
 const index = client.initIndex("registry")
 
 const objects = await Promise.all(
-	[...registry.values()].map(async (value) => {
+	[...manifests.values()].map(async (value) => {
 		const { uniqueID, readme, ...rest } = value
 
 		const text = { en: await fetch(readme.en).then((res) => res.text()) }
