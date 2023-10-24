@@ -1,4 +1,4 @@
-import { NewsletterForm } from "#src/components/NewsletterForm.jsx"
+import { NewsletterForm } from "#src/interface/components/NewsletterForm.jsx"
 import { For } from "solid-js"
 import { Button } from "./components/Button.jsx"
 import IconTwitter from "~icons/cib/twitter"
@@ -8,19 +8,19 @@ import IconDiscord from "~icons/cib/discord"
 const productsLinks = [
 	{
 		name: `Global Application`,
-		href: "/application",
+		href: "/c/application",
 	},
 	{
 		name: `Global Website`,
-		href: "/website",
+		href: "/c/website",
 	},
 	{
 		name: `Global Markdown`,
-		href: "/markdown",
+		href: "/c/markdown",
 	},
 	{
 		name: `Lint Rules`,
-		href: "/lint",
+		href: "/c/lint",
 	},
 ]
 
