@@ -8,11 +8,11 @@ import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { InstallationProvider } from "./InstallationProvider.jsx"
 import { SetupCard } from "./components/SetupCard.jsx"
 import { Gitlogin } from "./components/GitLogin.jsx"
-import { Icon } from "#src/components/Icon.jsx"
-import { GetHelp } from "#src/components/GetHelp.jsx"
-import { RepositoryCard } from "#src/components/editor/CommunityProjects.jsx"
+import { Icon } from "#src/interface/components/Icon.jsx"
+import { GetHelp } from "#src/interface/components/GetHelp.jsx"
+import { RepositoryCard } from "#src/interface/editor/CommunityProjects.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
-import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
+import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 
 export type Step = {
 	type: string
