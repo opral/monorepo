@@ -3,26 +3,29 @@ import { currentPageContext } from "#src/renderer/state.js"
 import { createSignal } from "solid-js"
 import { navigate } from "vite-plugin-ssr/client/router"
 
-const SearchBar = () => {
+export default function SearchBar() {
 	const [searchInput, setSearchInput] = createSignal<string>("")
 	const { q } = currentPageContext.urlParsed.search
-	const { category } = currentPageContext.routeParams
 
 	return (
 		<form
 			class="group flex justify-center gap-1 px-3 items-center border h-8 w-full py-0.5 rounded-full transition-all duration-150 bg-background border-surface-200 focus-within:border-primary"
 			onSubmit={(e) => {
 				e.preventDefault()
-				if (!category) {
+				if (!currentPageContext.routeParams.category) {
 					// !TODO write helper function for that
 					if (searchInput() !== "") window.history.pushState({}, "", "/search?q=" + searchInput())
 					if (searchInput() === "") navigate("/search")
 					else navigate("/search?q=" + searchInput())
 				} else {
 					if (searchInput() !== "")
-						window.history.pushState({}, "", "/c/" + category + "?q=" + searchInput())
-					if (searchInput() === "") navigate("/c/" + category)
-					else navigate("/c/" + category + "?q=" + searchInput())
+						window.history.pushState(
+							{},
+							"",
+							"/c/" + currentPageContext.routeParams.category + "?q=" + searchInput()
+						)
+					if (searchInput() === "") navigate("/c/" + currentPageContext.routeParams.category)
+					else navigate("/c/" + currentPageContext.routeParams.category + "?q=" + searchInput())
 				}
 			}}
 		>
@@ -31,6 +34,7 @@ const SearchBar = () => {
 				aria-label="search input"
 				id="search"
 				name="search"
+				placeholder="Search"
 				class="border-0 focus:ring-0 h-full w-full pl-0 text-sm"
 				value={q ? q : searchInput()}
 				onInput={(e) => {
@@ -43,5 +47,3 @@ const SearchBar = () => {
 		</form>
 	)
 }
-
-export default SearchBar
