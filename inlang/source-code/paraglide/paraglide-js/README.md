@@ -65,6 +65,11 @@ npm install @inlang/paraglide-js
 }
 ```
 
+| compile | [options]   |          |                                  |
+|---------|-------------|----------|----------------------------------|
+|         | --project   | \<path\> | default: "./project.inlang.json" |
+|         | --namespace | \<name\> | required                         |
+
 
 # Architecture 
 
