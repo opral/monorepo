@@ -5,11 +5,15 @@ on:
         branches:
           - "main"
 
+    schedule:
+      - cron: 0 0 1 * * # run monthly
+
 jobs:
   check-links:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      # Markdown files
       - name: Link Checker
         uses: lycheeverse/lychee-action@v1.8.0
         with:
@@ -17,3 +21,21 @@ jobs:
           args: --verbose --no-progress './*/documentation/**/*.md' './*/blog/**/*.md' './README.md' './*/README.md'
         env:
           GITHUB_TOKEN: '${{secrets.GITHUB_TOKEN}}'
+
+      # inlang.com 
+      - name: Broken Link Check
+        uses: technote-space/broken-link-checker-action@v2
+        env:
+            TARGET: htps://inlang.com
+            RECURSIVE: true
+            TITLE: Broken link found (${URL})
+            BODY: |
+              ## Broken link found
+
+              Broken Link Checker found a broken link on ${TARGET}
+        
+              Target: ${URL}
+              > ${REASON}
+
+              [View Actions Results](https://github.com/${OWNER}/${REPO}/commit/${SHA}/checks)
+            GITHUB_TOKEN: '${{secrets.GITHUB_TOKEN}}'
