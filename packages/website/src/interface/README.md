@@ -1,11 +1,13 @@
 # inlang Interface for website
+
 UI components, sections and helper functions used across the app.
 
 This folder contains:
+
 - [Components](/components)
 - [Sections](/sections)
 - [Icons](/custom-icons)
-... and some smaller files like helpers.
+  ... and some smaller files like helpers.
 
 ### Using dynamic colors like `bg-${props.color}`
 
