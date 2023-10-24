@@ -1,6 +1,7 @@
 import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
+import Link from "#src/renderer/Link.jsx"
 
 export type PageProps = {
 	markdown: string
@@ -25,13 +26,13 @@ export function Page() {
 							</h1>
 							<p class="text-lg text-surface-600 leading-relaxed mx-auto text-center">
 								{m.newsletter_unsubscribed_description()}
-								<a
+								<Link
 									class="text-primary hover:text-hover-primary font-semibold ml-1.5"
 									href="https://discord.gg/gdMPPWy57R"
 									target="_blank"
 								>
 									Discord
-								</a>
+								</Link>
 								.
 							</p>
 						</div>

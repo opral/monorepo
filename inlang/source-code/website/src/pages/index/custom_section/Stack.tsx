@@ -6,6 +6,7 @@ import {
 	IconFlutter,
 	IconVue,
 } from "#src/pages/application/index.page.jsx"
+import Link from "#src/renderer/Link.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 import { For } from "solid-js"
 
@@ -49,7 +50,7 @@ const Stack = () => {
 				<div class="flex gap-2 overflow-x-scroll hide-scrollbar">
 					<For each={getSubCategies}>
 						{(link) => (
-							<a
+							<Link
 								href={
 									(import.meta.env.DEV ? "http://localhost:3000" : "https://inlang.com") +
 									"/application/?search=" +
@@ -68,7 +69,7 @@ const Stack = () => {
 									{link.icon}
 									{link.name}
 								</div>
-							</a>
+							</Link>
 						)}
 					</For>
 				</div>

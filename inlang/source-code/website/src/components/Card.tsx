@@ -5,11 +5,12 @@ import Plus from "~icons/material-symbols/add-rounded"
 import { showToast } from "./Toast.jsx"
 import { rpc } from "@inlang/rpc"
 import { Button } from "#src/pages/index/components/Button.jsx"
+import Link from "#src/renderer/Link.jsx"
 
 export default function Card(props: { item: any; displayName: string; highlight?: boolean }) {
 	return (
 		<>
-			<a
+			<Link
 				href={`/m/${props.item.id}`}
 				class={
 					"relative no-underline flex gap-4 flex-col justify-between group w-full bg-background hover:bg-surface-50 transition-colors border border-surface-200 rounded-xl p-5 " +
@@ -67,8 +68,8 @@ export default function Card(props: { item: any; displayName: string; highlight?
 					}
 				>
 					{/* <sl-tooltip prop:content="Install"> */}
-					<a
-						onClick={(e) => {
+					<Link
+						onClick={(e: any) => {
 							e.stopPropagation()
 						}}
 						href={"/install?module=" + structuredClone(props.item.id)}
@@ -88,10 +89,10 @@ export default function Card(props: { item: any; displayName: string; highlight?
 								fill="currentColor"
 							/>
 						</svg>
-					</a>
+					</Link>
 					{/* </sl-tooltip> */}
 				</Show>
-			</a>
+			</Link>
 		</>
 	)
 }
@@ -99,7 +100,7 @@ export default function Card(props: { item: any; displayName: string; highlight?
 export function CardBuildOwn() {
 	return (
 		<>
-			<a
+			<Link
 				href="/documentation/publish-marketplace"
 				class="relative no-underline h-48 flex flex-col justify-center pt-8 items-center gap-4 group w-full bg-background hover:bg-surface-50 transition-colors border border-surface-200 rounded-xl p-5"
 			>
@@ -112,7 +113,7 @@ export function CardBuildOwn() {
 						Build your own solution!
 					</p>
 				</div>
-			</a>
+			</Link>
 		</>
 	)
 }

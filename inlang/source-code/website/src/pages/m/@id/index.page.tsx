@@ -7,12 +7,13 @@ import { Chip } from "#src/components/Chip.jsx"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 import { SelectRepo } from "../Select.jsx"
 import { colorForTypeOf, convertLinkToGithub, typeOfIdToTitle } from "../utilities.js"
-import { languageTag, sourceLanguageTag } from "@inlang/paraglide-js/inlang-marketplace"
+import { languageTag } from "@inlang/paraglide-js/inlang-marketplace"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { currentPageContext } from "#src/renderer/state.js"
 import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
+import Link from "#src/renderer/Link.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -24,11 +25,6 @@ export type PageProps = {
 
 export function Page(props: PageProps) {
 	const [readmore, setReadmore] = createSignal<boolean>(false)
-
-	const getLocale = () => {
-		const language = languageTag() || sourceLanguageTag
-		return language !== sourceLanguageTag ? "/" + language : ""
-	}
 
 	// mapping translatable types
 	const displayName = () =>
@@ -253,12 +249,12 @@ export function Page(props: PageProps) {
 												<div class="flex flex-wrap gap-2 items-center">
 													<For each={props?.manifest?.keywords}>
 														{(keyword) => (
-															<a
+															<Link
 																class="transition-opacity hover:opacity-80 cursor-pointer"
 																href={`/?search=${keyword.toString()}`}
 															>
 																<Chip text={keyword} color={colorForTypeOf(props.manifest.id)} />
-															</a>
+															</Link>
 														)}
 													</For>
 												</div>
@@ -282,7 +278,7 @@ export function Page(props: PageProps) {
 										<div class="col-span-1 md:order-1 -order-1">
 											<NavbarCommon
 												displayName={displayName}
-												getLocale={getLocale}
+												getLocale={languageTag}
 												tableOfContents={tableOfContents}
 											/>
 										</div>
@@ -400,8 +396,8 @@ function NavbarCommon(props: {
 				<For each={Object.keys(props.tableOfContents())}>
 					{(sectionTitle) => (
 						<li>
-							<a
-								onClick={(e) => {
+							<Link
+								onClick={(e: any) => {
 									e.preventDefault()
 									scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
 									setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
@@ -415,12 +411,12 @@ function NavbarCommon(props: {
 								href={`#${replaceChars(sectionTitle.toString().toLowerCase())}`}
 							>
 								{sectionTitle.replace("#", "")}
-							</a>
+							</Link>
 							<For each={props.tableOfContents()[sectionTitle]}>
 								{(heading) => (
 									<li>
-										<a
-											onClick={(e) => {
+										<Link
+											onClick={(e: any) => {
 												e.preventDefault()
 												scrollToAnchor(replaceChars(heading.toString().toLowerCase()))
 												setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
@@ -434,7 +430,7 @@ function NavbarCommon(props: {
 											href={`#${replaceChars(heading.toString().toLowerCase())}`}
 										>
 											{heading.replace("#", "")}
-										</a>
+										</Link>
 									</li>
 								)}
 							</For>

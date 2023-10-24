@@ -6,6 +6,7 @@ import IconGithub from "~icons/cib/github"
 import IconDiscord from "~icons/cib/discord"
 import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
 import { LanguagePicker } from "./LanguagePicker.jsx"
+import Link from "#src/renderer/Link.jsx"
 
 const Footer = () => {
 	const getProductsLinks = () => {
@@ -85,23 +86,23 @@ const Footer = () => {
 			<div class="flex flex-row flex-wrap-reverse py-16 px-6 md:px-4 xl:px-0 gap-10 sm:gap-x-0 md:gap-y-10 xl:gap-0">
 				<div class="w-full md:w-1/4 xl:px-4 flex flex-row items-center sm:items-start md:flex-col gap-10 md:justify-start justify-between flex-wrap">
 					<div>
-						<a href="/" class="flex items-center w-fit mb-6">
+						<Link href="/" class="flex items-center w-fit mb-6">
 							<img class="h-9 w-9" src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
 							<span class="self-center pl-2 text-left font-semibold text-surface-900">inlang</span>
-						</a>
+						</Link>
 						<p class="text-surface-600 text-sm">The ecosystem to go global</p>
 					</div>
 					<div class="flex gap-4">
 						<For each={socialMediaLinks}>
 							{(link) => (
-								<a
+								<Link
 									target="_blank"
 									class={"link link-primary flex space-x-2 items-center"}
 									href={link.href}
 								>
 									<link.Icon class="w-5 h-5" />
 									<span class="sr-only">{link.name}</span>
-								</a>
+								</Link>
 							)}
 						</For>
 					</div>

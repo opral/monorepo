@@ -2,15 +2,10 @@ import { For, Show } from "solid-js"
 import { repositories } from "./../../pages/editor/repositories.js"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
-import { sourceLanguageTag, languageTag } from "@inlang/paraglide-js/inlang-marketplace"
+import Link from "#src/renderer/Link.jsx"
 
 export function CommunityProjects() {
 	const [store] = useLocalStorage()
-
-	const getLocale = () => {
-		const language = languageTag() || sourceLanguageTag
-		return language !== sourceLanguageTag ? "/" + language : ""
-	}
 
 	return (
 		<div class="pb-16">
@@ -23,7 +18,7 @@ export function CommunityProjects() {
 							Projects that you recently opened with the editor.
 						</p>
 					</div>
-					<a href={getLocale() + "/documentation"} class="w-full md:w-auto">
+					<Link href={"/documentation"} class="w-full md:w-auto">
 						<sl-button prop:variant="default" prop:size="medium" class="w-full pt-4 md:pt-0">
 							Get started
 							<MaterialSymbolsArrowOutward
@@ -31,7 +26,7 @@ export function CommunityProjects() {
 								slot="suffix"
 							/>
 						</sl-button>
-					</a>
+					</Link>
 				</div>
 				<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-4 w-full auto-rows-min pb-24">
 					<For each={store.recentProjects}>
@@ -47,7 +42,7 @@ export function CommunityProjects() {
 						Explore projects in the inlang community or contribute translations.
 					</p>
 				</div>
-				<a
+				<Link
 					href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/website/src/pages/index/repositories.ts"
 					target="_blank"
 					class="w-full md:w-auto"
@@ -59,7 +54,7 @@ export function CommunityProjects() {
 							slot="suffix"
 						/>
 					</sl-button>
-				</a>
+				</Link>
 			</div>
 
 			<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-4 w-full auto-rows-min">
@@ -117,7 +112,7 @@ export function RepositoryCard(props: {
 	}
 
 	return (
-		<a
+		<Link
 			href={
 				props.install
 					? `/install?repo=github.com/${props.repository.owner}/${
@@ -152,6 +147,6 @@ export function RepositoryCard(props: {
 					</p>
 				</Show>
 			</div>
-		</a>
+		</Link>
 	)
 }

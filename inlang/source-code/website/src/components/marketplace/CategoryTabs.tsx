@@ -1,5 +1,6 @@
 import { For } from "solid-js"
 import { currentPageContext } from "#src/renderer/state.js"
+import Link from "#src/renderer/Link.jsx"
 
 const CategoryTabs = () => {
 	const getCategories = () => {
@@ -38,7 +39,10 @@ const CategoryTabs = () => {
 							" border-b-[2px] py-[4px] text-sm bg-transparent group content-box"
 						}
 					>
-						<a href={link.href} target={link.href.includes("github.com") ? "_blank" : "_default"}>
+						<Link
+							href={link.href}
+							target={link.href.includes("github.com") ? "_blank" : "_default"}
+						>
 							<div
 								class={
 									(currentPageContext.urlParsed.pathname.includes(link.href)
@@ -49,7 +53,7 @@ const CategoryTabs = () => {
 							>
 								{link.name}
 							</div>
-						</a>
+						</Link>
 					</div>
 				)}
 			</For>

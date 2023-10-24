@@ -7,7 +7,11 @@ import { Root } from "./_default.root.jsx"
 // import the css
 import "./app.css"
 import { MetaProvider, renderTags } from "@solidjs/meta"
-import { sourceLanguageTag, availableLanguageTags } from "@inlang/paraglide-js/inlang-marketplace"
+import {
+	sourceLanguageTag,
+	availableLanguageTags,
+	languageTag,
+} from "@inlang/paraglide-js/inlang-marketplace"
 
 // See https://vite-plugin-ssr.com/data-fetching
 export const passToClient = ["pageProps", "routeParams", "languageTag"] as const
@@ -87,19 +91,20 @@ gtag('config', 'G-5H3SDF7TVZ');
 `
 
 export function onBeforePrerender(prerenderContext: any) {
-	const pageContexts: any = []
+	const pageContexts = []
 	for (const pageContext of prerenderContext.pageContexts) {
 		// Duplicate pageContext for each locale
-		for (const languageTag of availableLanguageTags) {
+		for (const locale of availableLanguageTags) {
 			// Localize URL
 			let { urlOriginal } = pageContext
-			if (languageTag !== sourceLanguageTag) {
-				urlOriginal = `/${languageTag}${pageContext.urlOriginal}`
+			if (locale !== sourceLanguageTag) {
+				urlOriginal = `/${sourceLanguageTag}${pageContext.urlOriginal}`
 			}
 			pageContexts.push({
 				...pageContext,
 				urlOriginal,
-				languageTag,
+				// Set pageContext.locale
+				languageTag: languageTag(),
 			})
 		}
 	}
