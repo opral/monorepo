@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/cli",
-	"version": "1.11.0",
+	"version": "1.15.0",
 	"private": false,
 	"publishConfig": {
 		"access": "public"
@@ -56,7 +56,7 @@
 		"@inlang/telemetry": "*",
 		"@lix-js/fs": "*",
 		"@sentry/node": "^7.64.0",
-		"@sinclair/typebox": "^0.31.3",
+		"@sinclair/typebox": "^0.31.17",
 		"@types/fs-extra": "11.0.2",
 		"@types/node": "20.5.9",
 		"@types/promptly": "^3.0.2",

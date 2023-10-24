@@ -1,0 +1,32 @@
+{
+	"id": "library.inlang.paraglideJs",
+	"icon": "https://emojis.wiki/thumbs/emojis/parachute.webp",
+	"displayName": {
+		"en": "paraglideJS (former SDK-JS)"
+	},
+	"description": {
+		"en": "A fully configurable JavaScript library that integrates within your framework."
+	},
+	"readme": {
+		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/paraglide/paraglide-js/README.md"
+	},
+	"keywords": [
+		"application",
+		"website",
+		"developer",
+		"paraglide",
+		"i18n",
+		"library",
+		"localization",
+		"sdk",
+		"sdk-js",
+		"svelte",
+		"react",
+		"nextjs",
+		"vue",
+		"javascript"
+	],
+	"publisherName": "inlang",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"license": "Apache-2.0"
+}

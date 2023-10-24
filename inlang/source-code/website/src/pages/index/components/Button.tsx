@@ -3,7 +3,14 @@ import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { type JSXElement, Show } from "solid-js"
 import { navigate } from "vite-plugin-ssr/client/router"
 
-export type buttonType = "primary" | "secondary" | "secondaryOnGray" | "text" | "textPrimary"
+export type buttonType =
+	| "primary"
+	| "secondary"
+	| "secondaryOnGray"
+	| "text"
+	| "textPrimary"
+	| "textPrimaryOnDark"
+	| "textBackground"
 
 const bgColor = (type: buttonType) => {
 	switch (type) {
@@ -16,13 +23,18 @@ const bgColor = (type: buttonType) => {
 		case "text":
 			return "text-surface-700 hover:text-primary"
 		case "textPrimary":
-			return "text-primary-600 hover:text-primary"
+			return "text-primary hover:text-hover-primary"
+		case "textPrimaryOnDark":
+			return "text-primary-on-inverted-container hover:text-primary"
+		case "textBackground":
+			return "text-background hover:text-background/80"
 		default:
 			return "text-surface-700 bg-background hover:text-surface-900 hover:bg-surface-300 px-4"
 	}
 }
 
 interface ButtonProps {
+	class?: string
 	children: JSXElement
 	type: buttonType
 	href?: string
@@ -47,8 +59,10 @@ export const Button = (props: ButtonProps) => {
 						props.href && navigate(getLocale() + props.href)
 					}}
 					class={
-						"flex justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200 " +
-						bgColor(props.type)
+						"pointer-events-auto flex justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200 " +
+						bgColor(props.type) +
+						" " +
+						props.class
 					}
 				>
 					{props.children}
@@ -76,7 +90,9 @@ export const Button = (props: ButtonProps) => {
 					<div
 						class={
 							"flex justify-center items-center h-10 relative gap-2 rounded flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer " +
-							bgColor(props.type)
+							bgColor(props.type) +
+							" " +
+							props.class
 						}
 					>
 						{props.children}
@@ -107,7 +123,9 @@ export const Button = (props: ButtonProps) => {
 					}}
 					class={
 						"flex justify-center items-center h-10 relative gap-2 rounded flex-grow-0 flex-shrink-0 text-sm font-medium text-left " +
-						bgColor(props.type)
+						bgColor(props.type) +
+						" " +
+						props.class
 					}
 				>
 					{props.children}

@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/marketplace-manifest",
 	"type": "module",
-	"version": "1.2.0",
+	"version": "1.3.0",
 	"exports": {
 		".": "./dist/index.js"
 	},
@@ -25,12 +25,12 @@
 		"@inlang/project-settings": "*"
 	},
 	"devDependencies": {
-		"@sinclair/typebox": "^0.31.0",
+		"@sinclair/typebox": "^0.31.17",
 		"typescript": "5.2.2",
 		"vitest": "0.34.3"
 	},
 	"peerDependencies": {
-		"@sinclair/typebox": "^0.31.0"
+		"@sinclair/typebox": "^0.31.17"
 	},
 	"license": "Apache-2.0"
 }

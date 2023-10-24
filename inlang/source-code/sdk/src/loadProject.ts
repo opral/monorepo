@@ -6,13 +6,14 @@ import type {
 	Subscribable,
 } from "./api.js"
 import { type ImportFunction, resolveModules } from "./resolve-modules/index.js"
-import { TypeCompiler } from "@sinclair/typebox/compiler"
+import { TypeCompiler, ValueErrorType } from "@sinclair/typebox/compiler"
 import {
 	ProjectSettingsFileJSONSyntaxError,
 	ProjectSettingsFileNotFoundError,
 	ProjectSettingsInvalidError,
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
+	LoadProjectInvalidArgument,
 } from "./errors.js"
 import { createRoot, createSignal, createEffect } from "./reactivity/solid.js"
 import { createMessagesQuery } from "./createMessagesQuery.js"
@@ -21,7 +22,9 @@ import { createMessageLintReportsQuery } from "./createMessageLintReportsQuery.j
 import { ProjectSettings, Message, type NodeishFilesystemSubset } from "./versionedInterfaces.js"
 import { tryCatch, type Result } from "@inlang/result"
 import { migrateIfOutdated } from "@inlang/project-settings/migration"
-import { createNodeishFsWithAbsolutePaths } from "./resolve-modules/createNodeishFsWithAbsolutePaths.js"
+import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
+import { normalizePath } from "@lix-js/fs"
+import { isAbsolutePath } from "./isAbsolutePath.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -41,21 +44,32 @@ export const loadProject = async (args: {
 	_import?: ImportFunction
 	_capture?: (id: string, props: Record<string, unknown>) => void
 }): Promise<InlangProject> => {
+	// -- validation --------------------------------------------------------
+	//! the only place where throwing is acceptable because the project
+	//! won't even be loaded. do not throw anywhere else. otherwise, apps
+	//! can't handle errors gracefully.
+	if (!isAbsolutePath(args.settingsFilePath)) {
+		throw new LoadProjectInvalidArgument(
+			`Expected an absolute path but received "${args.settingsFilePath}".`,
+			{ argument: "settingsFilePath" }
+		)
+	}
+
+	const settingsFilePath = normalizePath(args.settingsFilePath)
+
+	// -- load project ------------------------------------------------------
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
-
-		// -- absolute path env -----------------------------------------------
-
 		const nodeishFs = createNodeishFsWithAbsolutePaths({
+			settingsFilePath,
 			nodeishFs: args.nodeishFs,
-			basePath: args.settingsFilePath.replace(/(.*?)[^/]*\..*$/, "$1"), // get directory of settings file
 		})
 
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
 		createEffect(() => {
-			loadSettings({ settingsFilePath: args.settingsFilePath, nodeishFs })
+			loadSettings({ settingsFilePath, nodeishFs })
 				.then((settings) => {
 					setSettings(settings)
 					// rename settings to get a convenient access to the data in Posthog
@@ -268,6 +282,24 @@ const parseSettings = (settings: unknown) => {
 			})
 		}
 	}
+
+	const { sourceLanguageTag, languageTags } = settings as ProjectSettings
+	if (!languageTags.includes(sourceLanguageTag)) {
+		throw new ProjectSettingsInvalidError({
+			errors: [
+				{
+					message: `The sourceLanguageTag "${sourceLanguageTag}" is not included in the languageTags "${languageTags.join(
+						'", "'
+					)}". Please add it to the languageTags.`,
+					type: ValueErrorType.String,
+					schema: ProjectSettings,
+					value: sourceLanguageTag,
+					path: "sourceLanguageTag",
+				},
+			],
+		})
+	}
+
 	return withMigration
 }
 
@@ -338,5 +370,3 @@ export function createSubscribable<T>(signal: () => T): Subscribable<T> {
 		},
 	})
 }
-
-

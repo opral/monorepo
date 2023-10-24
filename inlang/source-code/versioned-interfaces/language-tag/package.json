@@ -22,7 +22,7 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"peerDependencies": {
-		"@sinclair/typebox": "^0.31.0"
+		"@sinclair/typebox": "^0.31.17"
 	},
 	"devDependencies": {
 		"tsd": "0.28.1",

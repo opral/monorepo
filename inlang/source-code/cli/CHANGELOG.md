@@ -1,5 +1,31 @@
 # @inlang/cli
 
+## 1.15.0
+
+### Minor Changes
+
+- 870641305: improve: better error output with stack traces
+
+## 1.14.0
+
+### Minor Changes
+
+- 5d8b3d015: fix headline
+
+## 1.13.0
+
+### Minor Changes
+
+- bf448423f: fix: wording of project validate command
+
+## 1.12.0
+
+### Minor Changes
+
+- c3524d113: **removed the command `project init`**
+
+  De-facto can a project not be manually created. The project settings are app/library/plugin specific. Stating that a project can be manually created is misleading. And leadsto reports like #1448.
+
 ## 1.11.0
 
 ### Minor Changes

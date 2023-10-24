@@ -1,5 +1,4 @@
 import { Meta, Title } from "@solidjs/meta"
-import { Layout } from "#src/pages/Layout.jsx"
 import { Show, onMount } from "solid-js"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
@@ -7,6 +6,7 @@ import { currentPageContext } from "#src/renderer/state.js"
 import tableOfContents from "../../../../../../blog/tableOfContents.json"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
+import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -97,7 +97,7 @@ export function Page(props: PageProps) {
 					)?.description
 				}
 			/>
-			<Layout>
+			<MarketplaceLayout>
 				<div class="grid-row-2 py-10 w-full mx-auto ">
 					<Show
 						when={props.markdown}
@@ -111,7 +111,7 @@ export function Page(props: PageProps) {
 						&lt;- Back to Blog
 					</a>
 				</div>
-			</Layout>
+			</MarketplaceLayout>
 		</>
 	)
 }

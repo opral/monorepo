@@ -1,21 +1,19 @@
 {
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "app.inlang.ideExtension",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/ide-extension/assets/icon.png",
-	"gallery": [
-		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/ide_extension-marketplace-cover.jpg"
-	],
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/assets/icon.png",
 	"displayName": {
-		"en": "VS Code Extension"
+		"en": "IDE Extension"
 	},
 	"description": {
-		"en": "This extension allows you to use inlang in Visual Studio Code, enabling translating content directly in your code."
+		"en": "IDE Extension for inlang projects"
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/MARKETPLACE.md"
+		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/README.md"
 	},
-	"keywords": ["ide", "extension", "vscode"],
+	"keywords": ["application", "website", "developer", "vscode", "ide", "extension"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-	"website": "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
 	"license": "Apache-2.0"
 }
+  

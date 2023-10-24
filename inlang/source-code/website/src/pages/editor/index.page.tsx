@@ -1,22 +1,15 @@
 import { createSignal } from "solid-js"
-import { Layout as RootLayout } from "../Layout.jsx"
 import { navigate } from "vite-plugin-ssr/client/router"
 import { z } from "zod"
 import { Meta, Title } from "@solidjs/meta"
-import { CommunityProjects } from "../index/CommunityProjects.jsx"
+import { CommunityProjects } from "#src/components/editor/CommunityProjects.jsx"
 import { Button } from "../index/components/Button.jsx"
-import { useI18n } from "@solid-primitives/i18n"
-import { defaultLanguage } from "#src/renderer/_default.page.route.js"
+import EditorLayout from "#src/components/editor/EditorLayout.jsx"
 
 export function Page() {
 	/** is not reactive because window is not reactive */
 	const [input, setInput] = createSignal("")
-	const [, { locale }] = useI18n()
 
-	const getLocale = () => {
-		const language = locale() || defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
-	}
 	const isValidUrl = () =>
 		z
 			.string()
@@ -39,7 +32,7 @@ export function Page() {
 				content="Contribute to open source projects and manage translations with inlang's editor."
 			/>
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
-			<RootLayout>
+			<EditorLayout>
 				{/* START search bar */}
 				<div class="flex flex-col items-center justify-center py-16 md:py-20">
 					{/* negative margin as a dirty way of centering the search bar */}
@@ -47,22 +40,12 @@ export function Page() {
 						<h2 class="text-[40px] leading-tight md:text-6xl font-bold pb-6 md:pb-8 text-center">
 							Open the Editor
 						</h2>
-						<p class="text-xl text-surface-600 w-full md:w-[600px] text-center leading-relaxed">
-							To access the editor, you must have the{" "}
+						<p class="text-xl text-surface-600 w-full md:w-[400px] text-center leading-relaxed">
+							To access the editor, please create the{" "}
 							<span class="text-base font-mono py-[5px] px-2 bg-surface-100 rounded-lg text-surface-600">
 								project.inlang.json
 							</span>{" "}
-							file in your repository. Use the{" "}
-							<span
-								class="text-hover-primary hover:opacity-70 cursor-pointer"
-								onClick={
-									// @ts-ignore https://github.com/brillout/vite-plugin-ssr/issues/1106
-									() => navigate(getLocale() + "/documentation/quick-start")
-								}
-							>
-								inlang CLI
-							</span>{" "}
-							to create this file.
+							file in your repository.
 						</p>
 					</div>
 					{/* using a column to ease responsive design (mobile would be tricky othersie) */}
@@ -147,7 +130,7 @@ export function Page() {
 				</div>
 				{/* END search bar */}
 				<CommunityProjects />
-			</RootLayout>
+			</EditorLayout>
 		</>
 	)
 }

@@ -5,12 +5,14 @@ import type { ProjectSettings, Plugin, MessageLintRule, Message } from "./versio
 import type { ImportFunction } from "./resolve-modules/index.js"
 import type { InlangModule } from "@inlang/module"
 import {
+	LoadProjectInvalidArgument,
 	ProjectSettingsFileJSONSyntaxError,
 	ProjectSettingsFileNotFoundError,
 	ProjectSettingsInvalidError,
 } from "./errors.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 import { createMessage } from "./test-utilities/createMessage.js"
+import { tryCatch } from "@inlang/result"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -97,6 +99,37 @@ const _import: ImportFunction = async (name) =>
 // ------------------------------------------------------------------------------------------------
 
 describe("initialization", () => {
+	it("should throw if settingsFilePath is not an absolute path", async () => {
+		const fs = createNodeishMemoryFs()
+
+		const result = await tryCatch(() =>
+			loadProject({
+				settingsFilePath: "relative/path",
+				nodeishFs: fs,
+				_import,
+			})
+		)
+		expect(result.error).toBeInstanceOf(LoadProjectInvalidArgument)
+		expect(result.data).toBeUndefined()
+	})
+
+	it("should resolve from a windows path", async () => {
+		const fs = createNodeishMemoryFs()
+		fs.mkdir("C:\\Users\\user\\project", { recursive: true })
+		fs.writeFile("C:\\Users\\user\\project\\project.inlang.json", JSON.stringify(settings))
+
+		const result = await tryCatch(() =>
+			loadProject({
+				settingsFilePath: "C:\\Users\\user\\project\\project.inlang.json",
+				nodeishFs: fs,
+				_import,
+			})
+		)
+
+		expect(result.error).toBeUndefined()
+		expect(result.data).toBeDefined()
+	})
+
 	describe("settings", () => {
 		it("should return an error if settings file is not found", async () => {
 			const fs = createNodeishMemoryFs()
@@ -273,6 +306,28 @@ describe("functionality", () => {
 			expect(result.error).toBeInstanceOf(ProjectSettingsInvalidError)
 		})
 
+		it("should throw an error if sourceLanguageTag is not in languageTags", async () => {
+			const fs = await createNodeishMemoryFs()
+			await fs.mkdir("/user/project", { recursive: true })
+
+			const settings: ProjectSettings = {
+				sourceLanguageTag: "en",
+				languageTags: ["de"],
+				modules: [],
+			}
+
+			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
+
+			const project = await loadProject({
+				settingsFilePath: "/user/project/project.inlang.json",
+				nodeishFs: fs,
+				_import,
+			})
+
+			expect(project.errors()).toHaveLength(1)
+			expect(project.errors()![0]).toBeInstanceOf(ProjectSettingsInvalidError)
+		})
+
 		it("should write settings to disk", async () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.mkdir("/user/project", { recursive: true })
@@ -286,7 +341,7 @@ describe("functionality", () => {
 			const before = await fs.readFile("/user/project/project.inlang.json", { encoding: "utf-8" })
 			expect(before).toBeDefined()
 
-			const result = project.setSettings({ ...settings, languageTags: [] })
+			const result = project.setSettings({ ...settings, languageTags: ["en"] })
 			expect(result.data).toBeUndefined()
 			expect(result.error).toBeUndefined()
 
@@ -685,18 +740,17 @@ describe("functionality", () => {
 				sourceLanguageTag: "en",
 				languageTags: ["en", "de"],
 				modules: ["plugin.js"],
-				"plugin.project.json": {
+				"plugin.placeholder.name": {
 					pathPattern: "./resources/{languageTag}.json",
 				},
 			}
 
-			await fs.mkdir("/user/project", { recursive: true })
-			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
+			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
 
 			const mockSaveFn = vi.fn()
 
 			const _mockPlugin: Plugin = {
-				id: "plugin.project.json",
+				id: "plugin.placeholder.name",
 				description: "Mock plugin description",
 				displayName: "Mock Plugin",
 				loadMessages: () => [
@@ -714,7 +768,7 @@ describe("functionality", () => {
 			}
 
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				settingsFilePath: "/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})

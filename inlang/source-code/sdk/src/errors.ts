@@ -1,10 +1,19 @@
 import type { ValueError } from "@sinclair/typebox/errors"
 
+export class LoadProjectInvalidArgument extends Error {
+	constructor(message: string, options: { argument: string }) {
+		super(`The argument "${options.argument}" of loadProject() is invalid: ${message}`)
+		this.name = "LoadProjectInvalidArgument"
+	}
+}
+
 export class ProjectSettingsInvalidError extends Error {
 	constructor(options: { errors: ValueError[] }) {
+		// TODO: beatufiy ValueErrors
 		super(
 			`The project settings are invalid:\n\n${options.errors
-				.map((error) => `The value of "${error.path}" is invalid:\n\n${error.message}`)
+				.filter((error) => error.path)
+				.map((error) => `"${error.path}":\n\n${error.message}`)
 				.join("\n")}`
 		)
 		this.name = "ProjectSettingsInvalidError"

@@ -1,5 +1,9 @@
 # Introduction
 
+<doc-links>
+    <doc-link title="Guides are in the Marketplace" icon="material-symbols:add-business-outline-rounded" href="/" description="These docs guide you on how to build on top of inlang. You find guides in the marketplace"></doc-link>
+</doc-links>
+
 ## What is inlang?
 
 Inlang is globalization infrastructure that powers an ecosystem of apps, plugins, and solutions that make globalization simple.
@@ -20,5 +24,5 @@ Inlang apps are built on lix. Lix is a git-compatible version control backend fo
 
 <doc-links>
     <doc-link title="Getting started" icon="material-symbols:fast-forward-outline-rounded" href="/documentation/manually-create-project" description="Create a new project."></doc-link>
-    <doc-link title="Marketplace" icon="material-symbols:add-business-outline-rounded" href="/marketplace" description="Find apps, plugins, and lint rules."></doc-link>
+    <doc-link title="Marketplace" icon="material-symbols:add-business-outline-rounded" href="/" description="Find apps, plugins, and lint rules."></doc-link>
 </doc-links>

@@ -40,12 +40,12 @@ Translations from the resource files are automatically updated when you change t
 
 ## 1️⃣ Setup
 
-Create a `project.inlang.json` in the **root** of your project. You can use the following template when using json files as translation files, if not, please look for other [supported resource file types](https://inlang.com/marketplace):
+Create a `project.inlang.json` in the **root** of your project. You can use the following template when using json files as translation files, if not, please look for other [supported resource file types](https://inlang.com/):
 
 ```json
 {
 	// official schema ensures that your project file is valid
-	"$schema": "https://inlang.com/project-config-schema",
+	"$schema": "https://inlang.com/schema/project-settings",
 	// the "source" language tag that is used in your project
 	"sourceLanguageTag": "en",
 	// all the language tags you want to support in your project

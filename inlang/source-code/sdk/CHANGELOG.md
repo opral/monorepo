@@ -1,5 +1,52 @@
 # @inlang/sdk
 
+## 0.15.0
+
+### Minor Changes
+
+- f5d9aa485: improve: better error output for invalid project settings
+- d5e794e0c: fix: 'module' not defined error
+
+  The error was caused by the variable `module` being shadowed by vitest types.
+
+  ```diff
+  export class ModuleHasNoExportsError extends ModuleError {
+  	constructor(options: { module: string; cause?: Error }) {
+  		super(
+  -			`Module "${module}" has no exports. Every module must have an "export default".`,
+  +			`Module "${options.module}" has no exports. Every module must have an "export default".`,
+  			options
+  		)
+  		this.name = "ModuleHasNoExportsError"
+  	}
+  }
+  ```
+
+## 0.14.0
+
+### Minor Changes
+
+- 6fe144640: fix #1478 – loadProject with absolute windows paths
+
+## 0.13.0
+
+### Minor Changes
+
+- 0e0d910b7: check languageTags for sourceLanguageTag
+- 5c443c47a: chore: (again) removed the `PluginUsesReservedNamespaceError` from `loadProject()`. A previous merge conflict seemed to have re-introduced the error.
+- ae752c309: REFACTOR: Removed PluginUsesReservedNamespaceError.
+
+  The feedback loop for causing the error was too long. Creating a new inlang plugin always required adding the plugin to the whitelist, which has been forgotting leading to crashes in production.
+  Furthermore, the sdk should not crash if plugins are valid. The marketplace is the appropriate place to validate namespaces.
+
+- 029d78dc8: #1456 add windows tests & fix tests
+
+## 0.12.0
+
+### Minor Changes
+
+- 936cfa401: fix [[#1456](https://github.com/inlang/monorepo/issues/1456)]: resolving modules from relative paths sometimes lead to incorrect file paths and subsequent import failures
+
 ## 0.11.0
 
 ### Minor Changes

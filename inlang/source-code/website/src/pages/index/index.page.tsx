@@ -1,33 +1,35 @@
-import { LandingPageLayout as RootLayout } from "../Layout.jsx"
 import { Meta, Title } from "@solidjs/meta"
-import Hero from "./sections/01-hero/index.jsx"
-import Integration from "./sections/02-integration/index.jsx"
-import ConfigPage from "./sections/03-config/index.jsx"
-import Pricing from "./sections/04-pricing/index.jsx"
-import GetStarted from "./sections/06-getStarted/index.jsx"
-
-export type PageProps = {
-	markdown: string
-}
+import Hero from "./custom_section/Hero.jsx"
+import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
+import { Match, Switch } from "solid-js"
+import Lix from "./custom_section/Lix.jsx"
+import Stack from "./custom_section/Stack.jsx"
+import Gridview from "#src/components/marketplace/Gridview.jsx"
 
 export function Page() {
+	const urlParams = new URLSearchParams(window.location.search)
 	return (
 		<>
-			<Title>Globalization infrastructure for software</Title>
+			<Title>inlang Marketplace</Title>
 			<Meta
 				name="description"
-				content="inlang's ecosystem makes adapting your application to different markets easy."
+				content="Find apps, plugins and lint rules for inlang's ecosystem."
 			/>
-			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
-			<RootLayout landingpage>
-				<div>
-					<Hero />
-					<Integration />
-					<ConfigPage />
-					<Pricing />
-					<GetStarted />
-				</div>
-			</RootLayout>
+			<Meta name="og:image" content="/images/inlang-marketplace-image.jpg" />
+			<MarketplaceLayout>
+				<Switch>
+					<Match when={!urlParams.get("search")}>
+						<Hero />
+						<Stack />
+						<Lix />
+					</Match>
+					<Match when={urlParams.get("search")}>
+						<div class="pt-10">
+							<Gridview />
+						</div>
+					</Match>
+				</Switch>
+			</MarketplaceLayout>
 		</>
 	)
 }

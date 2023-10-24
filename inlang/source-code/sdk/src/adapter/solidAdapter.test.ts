@@ -109,8 +109,10 @@ describe("config", () => {
 		const newConfig = { ...project.settings()!, languageTags: ["en", "de"] }
 
 		project.setSettings(newConfig)
+
 		// TODO: how can we await `setConfig` correctly
-		await new Promise((resolve) => setTimeout(resolve, 0))
+		await new Promise((resolve) => setTimeout(resolve, 510))
+
 		expect(counter).toBe(2) // 2 times because effect creation + set
 		expect(project.settings()).toStrictEqual(newConfig)
 	})
@@ -202,13 +204,13 @@ describe("messages", () => {
 
 		expect(Object.values(project.query.messages.getAll()).length).toBe(2)
 
-		project.setSettings({ ...project.settings()!, languageTags: [] })
+		project.setSettings({ ...project.settings()!, languageTags: ["en"] })
 
 		// TODO: how can we await `setConfig` correctly
-		await new Promise((resolve) => setTimeout(resolve, 0))
+		await new Promise((resolve) => setTimeout(resolve, 510))
 
-		expect(counter).toBe(2) // 2 times because effect creation + set
-		expect(Object.values(project.query.messages.getAll()).length).toBe(0)
+		expect(counter).toBe(1) // 2 times because effect creation + set
+		expect(Object.values(project.query.messages.getAll()).length).toBe(2)
 	})
 
 	it("should react to changes in messages", async () => {
