@@ -1,7 +1,7 @@
 import type SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js"
 import { onMount, Show } from "solid-js"
 import { render } from "solid-js/web"
-import type { SemanticColorTokens } from "../../tailwind.config.cjs"
+import type { SemanticColorTokens } from "../../../tailwind.config.cjs"
 import { Icon } from "./Icon.jsx"
 
 /**

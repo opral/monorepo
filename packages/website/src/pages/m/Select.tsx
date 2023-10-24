@@ -56,7 +56,7 @@ export function SelectRepo(props: { size: "small" | "medium"; modules: any[] }) 
 /* Deprecated */
 export function SelectionWrapper(props: {
 	select: Accessor<boolean>
-	item: MarketplaceManifest
+	item: MarketplaceManifest & { uniqueID: string }
 	selectedPackages: Accessor<string[]>
 	setSelectedPackages: (items: string[]) => void
 	children: JSXElement
