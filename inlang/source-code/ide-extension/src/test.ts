@@ -14,7 +14,7 @@ async function test() {
 
 		// If the first argument is a path to a file/folder/workspace, the launched VS Code instance
 		// will open it.
-		const launchArgs = [path.resolve(__dirname, "../../starters/inlang-nextjs")]
+		const launchArgs = [path.resolve(__dirname, "../../end-to-end-tests/inlang-nextjs")]
 
 		// Download VS Code, unzip it and run the integration test
 		await runTests({ extensionDevelopmentPath, extensionTestsPath, launchArgs })
