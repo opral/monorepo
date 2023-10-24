@@ -4,11 +4,12 @@ import type SlDetails from "@shoelace-style/shoelace/dist/components/details/det
 import { Meta, Title } from "@solidjs/meta"
 import { Feedback } from "./Feedback.jsx"
 import { EditButton } from "./EditButton.jsx"
-import { languageTag, sourceLanguageTag } from "@inlang/paraglide-js/inlang-marketplace"
+import { languageTag } from "@inlang/paraglide-js/inlang-marketplace"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import tableOfContents from "../../../../../documentation/tableOfContents.json"
 import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
+import Link from "#src/renderer/Link.jsx"
 
 export type PageProps = {
 	markdown: Awaited<ReturnType<any>>
@@ -18,11 +19,6 @@ export function Page(props: PageProps) {
 	let mobileDetailMenu: SlDetails | undefined
 	const [editLink, setEditLink] = createSignal<string | undefined>("")
 	const [markdownHeadings, setMarkdownHeadings] = createSignal<Array<string>>([])
-
-	const getLocale = () => {
-		const language = languageTag() || sourceLanguageTag
-		return language !== sourceLanguageTag ? "/" + language : ""
-	}
 
 	onMount(() => {
 		setMarkdownHeadings(
@@ -46,7 +42,7 @@ export function Page(props: PageProps) {
 					"/" +
 					findPageBySlug(
 						currentPageContext.urlParsed.pathname
-							.replace(getLocale(), "")
+							.replace("/" + languageTag(), "")
 							.replace("/documentation/", "")
 					)?.path
 			)
@@ -59,7 +55,7 @@ export function Page(props: PageProps) {
 				{
 					findPageBySlug(
 						currentPageContext.urlParsed.pathname
-							.replace(getLocale(), "")
+							.replace("/" + languageTag(), "")
 							.replace("/documentation/", "")
 					)?.title
 				}
@@ -69,7 +65,7 @@ export function Page(props: PageProps) {
 				content={
 					findPageBySlug(
 						currentPageContext.urlParsed.pathname
-							.replace(getLocale(), "")
+							.replace("/" + languageTag(), "")
 							.replace("/documentation/", "")
 					)?.description
 				}
@@ -92,7 +88,7 @@ export function Page(props: PageProps) {
 								<Show when={tableOfContents && props.markdown}>
 									<NavbarCommon
 										tableOfContents={tableOfContents}
-										getLocale={getLocale}
+										getLocale={languageTag}
 										headings={markdownHeadings()}
 									/>
 								</Show>
@@ -114,7 +110,7 @@ export function Page(props: PageProps) {
 									onLinkClick={() => {
 										mobileDetailMenu?.hide()
 									}}
-									getLocale={getLocale}
+									getLocale={languageTag}
 									headings={markdownHeadings()}
 								/>
 							</Show>
@@ -242,7 +238,7 @@ function NavbarCommon(props: {
 									const slug = page.slug
 									return (
 										<li>
-											<a
+											<Link
 												onClick={props.onLinkClick}
 												class={
 													(isSelected(slug)
@@ -250,17 +246,17 @@ function NavbarCommon(props: {
 														: "text-info/80 hover:text-on-background ") +
 													"tracking-wide text-sm block w-full font-normal mb-2"
 												}
-												href={props.getLocale() + `/documentation/${slug}`}
+												href={`/documentation/${slug}`}
 											>
 												{page.title}
-											</a>
+											</Link>
 											<Show when={props.headings && props.headings.length > 0 && isSelected(slug)}>
 												<For each={props.headings}>
 													{(heading) => (
 														<Show when={!heading.includes(page.title)}>
 															<li>
-																<a
-																	onClick={(e) => {
+																<Link
+																	onClick={(e: any) => {
 																		e.preventDefault()
 																		onAnchorClick(replaceChars(heading.toString().toLowerCase()))
 																		props.onLinkClick?.()
@@ -275,7 +271,7 @@ function NavbarCommon(props: {
 																	href={`#${replaceChars(heading.toString().toLowerCase())}`}
 																>
 																	{heading.replace("#", "")}
-																</a>
+																</Link>
 															</li>
 														</Show>
 													)}

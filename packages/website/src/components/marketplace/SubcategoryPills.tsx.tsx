@@ -1,3 +1,4 @@
+import Link from "#src/renderer/Link.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 import { For, type JSX } from "solid-js"
 
@@ -8,7 +9,7 @@ const SubcategoryPills = (props: {
 		<nav class="flex gap-[5px]">
 			<For each={props.links}>
 				{(link) => (
-					<a
+					<Link
 						href={
 							(import.meta.env.DEV ? "http://localhost:3000" : "https://inlang.com") +
 							"/application/?search=" +
@@ -26,7 +27,7 @@ const SubcategoryPills = (props: {
 							{link.icon}
 							{link.name}
 						</div>
-					</a>
+					</Link>
 				)}
 			</For>
 		</nav>

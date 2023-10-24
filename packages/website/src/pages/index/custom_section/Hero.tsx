@@ -3,6 +3,7 @@ import { registry } from "@inlang/marketplace-registry"
 import { Chip } from "#src/components/Chip.jsx"
 import { colorForTypeOf, typeOfIdToTitle } from "#src/pages/m/utilities.js"
 import { Button } from "../components/Button.jsx"
+import Link from "#src/renderer/Link.jsx"
 
 const featuredArray = [
 	"app.inlang.editor",
@@ -24,7 +25,7 @@ const Hero = () => {
 							return (
 								<Show when={m}>
 									<li>
-										<a href={"/m/" + m?.id}>
+										<Link href={"/m/" + m?.id}>
 											<div class="flex gap-4 hover:bg-background px-1 py-[10px] rounded-lg items-center">
 												<img
 													class="w-9 h-9 rounded-md m-0 shadow-lg object-cover object-center"
@@ -48,7 +49,7 @@ const Hero = () => {
 													</Show>
 												</div>
 											</div>
-										</a>
+										</Link>
 									</li>
 								</Show>
 							)

@@ -11,6 +11,7 @@ import type { RecentProjectType } from "#src/services/local-storage/src/schema.j
 import { Message } from "./Message.jsx"
 import { Errors } from "./components/Errors.jsx"
 import { Layout } from "./Layout.jsx"
+import Link from "#src/renderer/Link.jsx"
 
 export function Page() {
 	return (
@@ -96,24 +97,24 @@ function TheActualPage() {
 						<p class="max-w-lg">
 							TL;DR you are currently cloning a real git repo, in the browser, on top of a virtual
 							file system, which might lead to a new generation of software (see{" "}
-							<a
+							<Link
 								class="link link-primary"
 								href="https://www.youtube.com/watch?v=vJ3jGgCrz2I"
 								target="_blank"
 							>
 								next git
-							</a>
+							</Link>
 							).
 							<br />
 							<br />
 							We are working on increasing the performance. Progress can be tracked in{" "}
-							<a
+							<Link
 								href="https://github.com/orgs/inlang/projects/9"
 								target="_blank"
 								class="link link-primary"
 							>
 								project #9
-							</a>
+							</Link>
 							.
 						</p>
 					</div>
@@ -181,13 +182,13 @@ function NoInlangConfigFoundCard() {
 				<p class="pt-1.5 pb-8">
 					Please refer to the documentation and write the config file manually.
 				</p>
-				<a class="self-center" href="/documentation" target="_blank">
+				<Link class="self-center" href="/documentation" target="_blank">
 					<sl-button prop:variant="text">
 						Take me to the documentation
 						{/* @ts-ignore */}
 						<MaterialSymbolsArrowOutwardRounded slot="suffix" />
 					</sl-button>
-				</a>
+				</Link>
 			</div>
 		</div>
 	)
@@ -221,7 +222,7 @@ function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number }) {
 						bottom of the page.
 					</li>
 				</ul>
-				<a
+				<Link
 					class="self-end pt-5"
 					href="https://github.com/inlang/monorepo/discussions/categories/help-questions-answers"
 					target="_blank"
@@ -231,7 +232,7 @@ function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number }) {
 						{/* @ts-ignore */}
 						<MaterialSymbolsArrowOutwardRounded slot="suffix" />
 					</sl-button>
-				</a>
+				</Link>
 			</div>
 		</div>
 	)

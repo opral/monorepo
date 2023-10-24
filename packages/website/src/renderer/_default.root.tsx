@@ -10,6 +10,8 @@ import {
 } from "@inlang/paraglide-js/inlang-marketplace"
 import { currentPageContext } from "./state.js"
 import type { JSXElement } from "solid-js"
+import type { LanguageTag } from "@inlang/sdk"
+import Link from "./Link.jsx"
 
 export type RootProps = Accessor<{
 	pageContext: PageContextRenderer
@@ -48,21 +50,16 @@ function ParaglideJsProvider(props: { children: JSXElement }) {
 		const pathIncludesLanguageTag = maybeLanguageTag
 			? availableLanguageTags.includes(maybeLanguageTag)
 			: false
-		onSetLanguageTag((newLanguageTag) => {
+		onSetLanguageTag((newLanguageTag: LanguageTag) => {
 			if (pathIncludesLanguageTag) {
-				const pathWithoutLanguageTag = window.location.pathname.slice(maybeLanguageTag!.length + 1)
-				// from non source language tag to source language tag
-				if (newLanguageTag === sourceLanguageTag) {
-					window.location.pathname = "/" + pathWithoutLanguageTag
-				}
-				// from non source language tag to non source language tag
-				else {
-					window.location.pathname = "/" + newLanguageTag + pathWithoutLanguageTag
-				}
-			}
-			// from source language tag to non source language tag
-			else {
-				window.location.pathname = window.location.pathname + newLanguageTag
+				//replace old languageTag with new one
+				window.location.pathname = window.location.pathname.replace(
+					currentPageContext.languageTag,
+					// if new is source languageTag remove the tag
+					newLanguageTag === sourceLanguageTag ? "" : newLanguageTag
+				)
+			} else {
+				window.location.pathname = "/" + newLanguageTag + window.location.pathname
 			}
 		})
 	}
@@ -79,13 +76,13 @@ function ErrorMessage(props: { error: Error }) {
 			<p class="text-danger text-lg font-medium">ERROR DURING RENDERING</p>
 			<p class="text-danger">
 				Check the console for more information and please{" "}
-				<a
+				<Link
 					class="link text-primary"
 					target="_blank"
 					href="https://github.com/inlang/monorepo/issues/new/choose"
 				>
 					report the bug.
-				</a>
+				</Link>
 			</p>
 			<p class="bg-danger-container text-on-danger-container rounded p-2 mt-4">
 				{props.error?.toString()}
