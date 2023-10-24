@@ -25,10 +25,11 @@ jobs:
       # inlang.com 
       - name: Broken Link Check
         uses: technote-space/broken-link-checker-action@v2
+        with:
+          EXCLUDE_EXTERNAL_LINKS: true
         env:
             TARGET: htps://inlang.com
             RECURSIVE: true
-            EXCLUDE_EXTERNAL_LINKS: true
             TITLE: Broken link found (${URL})
             BODY: |
               ## Broken link found
