@@ -2,7 +2,7 @@ import { For, Show, createSignal, onMount } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
-import Highlight from "#src/interface/components/Highlight.jsx"
+// import Highlight from "#src/interface/components/Highlight.jsx"
 import Card, { CardBuildOwn, NoResultsCard } from "#src/interface/components/Card.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
@@ -42,7 +42,7 @@ export function Page(props: {
 					<h2 class="text-md text-surface-600 pb-4 pt-8">All Products</h2>
 					<SectionLayout showLines={false} type="white">
 						<div class="relative">
-							<Show when={props.highlights}>
+							{/* <Show when={props.highlights}>
 								<Show when={props.highlights && props.highlights.length > 0}>
 									<div
 										class={
@@ -53,7 +53,7 @@ export function Page(props: {
 										<For each={props.highlights}>{(highlight) => <Highlight {...highlight} />}</For>
 									</div>
 								</Show>
-							</Show>
+							</Show> */}
 
 							<div class="mb-32 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
 								<Gallery items={props.items} />

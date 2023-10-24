@@ -25,7 +25,7 @@ import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
  */
 export type PageProps = {
 	markdown: Awaited<ReturnType<any>>
-	manifest: MarketplaceManifest
+	manifest: MarketplaceManifest & { uniqueID: string }
 }
 
 export function Page(props: PageProps) {

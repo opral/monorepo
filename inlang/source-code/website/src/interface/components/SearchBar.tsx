@@ -7,26 +7,32 @@ export default function SearchBar() {
 	const [searchInput, setSearchInput] = createSignal<string>("")
 	const { q } = currentPageContext.urlParsed.search
 
+	const handleNavigate = () => {
+		if (!currentPageContext.routeParams.category) {
+			if (searchInput() !== "") window.history.pushState({}, "", "/search?q=" + searchInput())
+			// @ts-ignore
+			if (searchInput() === "") navigate("/search")
+			// @ts-ignore
+			else navigate("/search?q=" + searchInput())
+		} else {
+			if (searchInput() !== "")
+				window.history.pushState(
+					{},
+					"",
+					"/c/" + currentPageContext.routeParams.category + "?q=" + searchInput()
+				) // @ts-ignore
+			if (searchInput() === "") navigate("/c/" + currentPageContext.routeParams.category)
+			// @ts-ignore
+			else navigate("/c/" + currentPageContext.routeParams.category + "?q=" + searchInput())
+		}
+	}
+
 	return (
 		<form
 			class="group flex justify-center gap-1 px-3 items-center border h-8 w-full py-0.5 rounded-full transition-all duration-150 bg-background border-surface-200 focus-within:border-primary"
 			onSubmit={(e) => {
 				e.preventDefault()
-				if (!currentPageContext.routeParams.category) {
-					// !TODO write helper function for that
-					if (searchInput() !== "") window.history.pushState({}, "", "/search?q=" + searchInput())
-					if (searchInput() === "") navigate("/search")
-					else navigate("/search?q=" + searchInput())
-				} else {
-					if (searchInput() !== "")
-						window.history.pushState(
-							{},
-							"",
-							"/c/" + currentPageContext.routeParams.category + "?q=" + searchInput()
-						)
-					if (searchInput() === "") navigate("/c/" + currentPageContext.routeParams.category)
-					else navigate("/c/" + currentPageContext.routeParams.category + "?q=" + searchInput())
-				}
+				handleNavigate()
 			}}
 		>
 			<input

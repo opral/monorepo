@@ -9,7 +9,7 @@
 import { For } from "solid-js"
 
 const Stack = () => {
-	const getSubCategies = [
+	const getSubCategies: boolean | any[] | null | undefined = [
 		// {
 		// 	name: "Svelte",
 		// 	param: "svelte",
