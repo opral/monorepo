@@ -6,7 +6,7 @@ const EditorLayout = (props: { children: JSXElement }) => {
 	return (
 		<div>
 			<EditorHeader />
-			<div class="max-w-7xl mx-auto">{props.children}</div>
+			<div class="max-w-7xl mx-auto px-4 h-full">{props.children}</div>
 			<Footer />
 		</div>
 	)
