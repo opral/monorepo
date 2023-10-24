@@ -7,11 +7,7 @@ const SubcategoryPills = (props: {
 		<nav class="flex gap-[5px]">
 			<For each={props.links}>
 				{(link) => (
-					<a
-						href={
-							window.location.origin + "//" + window.location.pathname + "/?search=" + link.param
-						}
-					>
+					<a href={window.location.origin + "//" + window.location.pathname + "?q=" + link.param}>
 						<div
 							class={
 								(window.location.search.includes(link.param)

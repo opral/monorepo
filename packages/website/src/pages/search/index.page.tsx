@@ -1,11 +1,11 @@
 import { For, Show, createSignal, onMount } from "solid-js"
-import { GetHelp } from "#src/components/GetHelp.jsx"
+import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
-import Highlight from "#src/components/Highlight.jsx"
-import Card, { CardBuildOwn, NoResultsCard } from "#src/components/Card.jsx"
+import Highlight from "#src/interface/components/Highlight.jsx"
+import Card, { CardBuildOwn, NoResultsCard } from "#src/interface/components/Card.jsx"
 import { Meta, Title } from "@solidjs/meta"
-import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
+import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -38,11 +38,6 @@ export function Page(props: {
 			<Meta name="description" content="Globalization infrastructure for software" />
 			<Meta name="og:image" content="/images/inlang-marketplace-image.jpg" />
 			<MarketplaceLayout>
-				<div class="pt-4 text-sm font-medium flex items-center gap-3">
-					<p class="pr-4 text-surface-400">Categories:</p>
-					{/* <SubcategoryPills links={getSubCategies} /> */}
-				</div>
-
 				<div class="pb-16 md:pb-20 min-h-screen relative">
 					<h2 class="text-md text-surface-600 pb-4 pt-8">All Products</h2>
 					<SectionLayout showLines={false} type="white">
@@ -55,7 +50,6 @@ export function Page(props: {
 											(props.highlights!.length > 1 ? "md:grid-cols-2" : "md:grid-cols-1")
 										}
 									>
-										{/* @ts-expect-error */}
 										<For each={props.highlights}>{(highlight) => <Highlight {...highlight} />}</For>
 									</div>
 								</Show>

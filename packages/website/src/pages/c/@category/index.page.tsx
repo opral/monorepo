@@ -6,6 +6,15 @@ import Highlight from "#src/interface/components/Highlight.jsx"
 import Card, { CardBuildOwn, NoResultsCard } from "#src/interface/components/Card.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
+import SubcategoryPills from "#src/interface/marketplace/SubcategoryPills.jsx"
+import {
+	IconFlutter,
+	IconJavascript,
+	IconNextjs,
+	IconReact,
+	IconSvelte,
+	IconVue,
+} from "#src/interface/custom-icons/subcategoryIcon.jsx"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -31,6 +40,38 @@ export function Page(props: {
 			setSearchValue(urlParams.get("search")?.replace(/%20/g, " ") || "")
 		}
 	})
+	const getSubCategies = [
+		{
+			name: "Svelte",
+			param: "svelte",
+			icon: <IconSvelte class="-ml-1 w-5 h-5" />,
+		},
+		{
+			name: "React",
+			param: "react",
+			icon: <IconReact class="-ml-1 w-5 h-5" />,
+		},
+		{
+			name: "Next.js",
+			param: "nextjs",
+			icon: <IconNextjs class="-ml-1 w-5 h-5" />,
+		},
+		{
+			name: "Vue",
+			param: "vue",
+			icon: <IconVue class="-ml-1 w-5 h-5" />,
+		},
+		{
+			name: "Javascript",
+			param: "javascript",
+			icon: <IconJavascript class="-ml-1 w-5 h-5" />,
+		},
+		{
+			name: "Flutter",
+			param: "flutter",
+			icon: <IconFlutter class="-ml-1 w-5 h-5" />,
+		},
+	]
 
 	return (
 		<>
@@ -38,11 +79,12 @@ export function Page(props: {
 			<Meta name="description" content="Globalization infrastructure for software" />
 			<Meta name="og:image" content="/images/inlang-marketplace-image.jpg" />
 			<MarketplaceLayout>
-				<div class="pt-4 text-sm font-medium flex items-center gap-3">
-					<p class="pr-4 text-surface-400">Categories:</p>
-					{/* <SubcategoryPills links={getSubCategies} /> */}
-				</div>
-
+				<Show when={currentPageContext.routeParams.category === "application"}>
+					<div class="pt-4 text-sm font-medium flex items-center gap-3">
+						<p class="pr-4 text-surface-400">Categories:</p>
+						<SubcategoryPills links={getSubCategies} />
+					</div>
+				</Show>
 				<div class="pb-16 md:pb-20 min-h-screen relative">
 					<h2 class="text-md text-surface-600 pb-4 pt-8">All Products</h2>
 					<SectionLayout showLines={false} type="white">
