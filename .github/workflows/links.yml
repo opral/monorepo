@@ -28,6 +28,7 @@ jobs:
         env:
             TARGET: htps://inlang.com
             RECURSIVE: true
+            EXCLUDE_EXTERNAL_LINKS: true
             TITLE: Broken link found (${URL})
             BODY: |
               ## Broken link found
