@@ -80,7 +80,7 @@ export function Page(props: {
 			<Meta name="og:image" content="/images/inlang-marketplace-image.jpg" />
 			<MarketplaceLayout>
 				<Show when={currentPageContext.routeParams.category === "application"}>
-					<div class="pt-4 text-sm font-medium flex items-center gap-3">
+					<div class="pt-4 text-sm font-medium flex items-center gap-3 w-full overflow-x-scroll pb-4 overflow-scrollbar overflow-scrollbar-x">
 						<p class="pr-4 text-surface-400">Categories:</p>
 						<SubcategoryPills links={getSubCategies} />
 					</div>

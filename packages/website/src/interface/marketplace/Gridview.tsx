@@ -16,7 +16,6 @@ export const [searchValue, setSearchValue] = createSignal<string>("")
 const selectedCategory = () => {
 	return currentPageContext.urlParsed.pathname.replace("/", "")
 }
-const [selectedSubCategories] = createSignal<SubCategory[]>([])
 const [filteredItems, setFilteredItems] = createSignal<any[]>([])
 
 const filterItems = async () => {
