@@ -12,12 +12,12 @@ export function Page() {
 
 	return (
 		<>
-			<Title>inlang Marketplace</Title>
+			<Title>inlang Marketplace - The ecosystem to go global</Title>
 			<Meta
 				name="description"
-				content="Find apps, plugins and lint rules for inlang's ecosystem."
+				content="Quickly find the best solution to globalize (i18n) your app. inlang helps you to expand to new markets and acquire new customers."
 			/>
-			<Meta name="og:image" content="/images/inlang-marketplace-image.jpg" />
+			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<MarketplaceLayout>
 				<Show
 					when={search}
