@@ -15,7 +15,7 @@ The inlang editor is part of the [website](../website/src/pages/editor). It give
 
 To open your existing project, you can visit the [inlang Editor](https://inlang.com/editor) and enter your repository URL. The editor will automatically load all your message and plugins / lint rules.
 
-**Depending on the size of your project, it can take up a few minutes to load your project.**
+**Depending on the size of your project, it can take up a few seconds to load your project.**
 
 # Filter messages
 
