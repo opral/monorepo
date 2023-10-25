@@ -39,6 +39,7 @@ const mockPlugin: Plugin = {
 	id: "plugin.project.i18next",
 	description: { en: "Mock plugin description" },
 	displayName: { en: "Mock Plugin" },
+
 	loadMessages: () => exampleMessages,
 	saveMessages: () => undefined as any,
 	addCustomApi: () => ({
@@ -425,6 +426,7 @@ describe("functionality", () => {
 				id: "plugin.project.i18next",
 				description: { en: "Mock plugin description" },
 				displayName: { en: "Mock Plugin" },
+
 				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
 				saveMessages: () => undefined,
 			}
@@ -462,6 +464,7 @@ describe("functionality", () => {
 				id: "messageLintRule.namepsace.mock",
 				description: { en: "Mock lint rule description" },
 				displayName: { en: "Mock Lint Rule" },
+
 				run: ({ report }) => {
 					report({
 						messageId: "some-message",
@@ -474,6 +477,7 @@ describe("functionality", () => {
 				id: "plugin.project.i18next",
 				description: { en: "Mock plugin description" },
 				displayName: { en: "Mock Plugin" },
+
 				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
 				saveMessages: () => undefined,
 			}
@@ -579,6 +583,7 @@ describe("functionality", () => {
 				id: "plugin.project.json",
 				description: { en: "Mock plugin description" },
 				displayName: { en: "Mock Plugin" },
+
 				loadMessages: () => exampleMessages,
 				saveMessages: mockSaveFn,
 			}
@@ -753,6 +758,7 @@ describe("functionality", () => {
 				id: "plugin.placeholder.name",
 				description: "Mock plugin description",
 				displayName: "Mock Plugin",
+
 				loadMessages: () => [
 					createMessage("first", { en: "first message" }),
 					createMessage("second", { en: "second message" }),
