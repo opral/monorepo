@@ -1,17 +1,17 @@
 import {
-	IconSvelte,
-	IconReact,
-	IconNextjs,
-	IconJavascript,
 	IconFlutter,
+	IconJavascript,
+	IconNextjs,
+	IconReact,
+	IconSvelte,
 	IconVue,
-} from "#src/pages/application/index.page.jsx"
+} from "#src/interface/custom-icons/subcategoryIcon.jsx"
 import Link from "#src/renderer/Link.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 import { For } from "solid-js"
 
 const Stack = () => {
-	const getSubCategies = [
+	const getSubCategies: boolean | any[] | null | undefined = [
 		{
 			name: "Svelte",
 			param: "svelte",
@@ -50,14 +50,7 @@ const Stack = () => {
 				<div class="flex gap-2 overflow-x-scroll hide-scrollbar">
 					<For each={getSubCategies}>
 						{(link) => (
-							<Link
-								href={
-									(import.meta.env.DEV ? "http://localhost:3000" : "https://inlang.com") +
-									"/application/?search=" +
-									link.param
-								}
-								class="flex-grow"
-							>
+							<Link href={"/search/?q=" + link.param} class="flex-grow">
 								<div
 									class={
 										(currentPageContext.urlParsed.searchOriginal?.includes(link.param)

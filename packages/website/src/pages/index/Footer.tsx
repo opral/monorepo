@@ -1,4 +1,4 @@
-import { NewsletterForm } from "#src/components/NewsletterForm.jsx"
+import { NewsletterForm } from "#src/interface/components/NewsletterForm.jsx"
 import { For } from "solid-js"
 import { Button } from "./components/Button.jsx"
 import IconTwitter from "~icons/cib/twitter"
@@ -92,12 +92,12 @@ const Footer = () => {
 						</Link>
 						<p class="text-surface-600 text-sm">The ecosystem to go global</p>
 					</div>
-					<div class="flex gap-4">
+					<div class="flex gap-7 flex-wrap">
 						<For each={socialMediaLinks}>
 							{(link) => (
 								<Link
 									target="_blank"
-									class={"link link-primary flex space-x-2 items-center"}
+									class={"link link-primary flex space-x-2 items-center text-xs"}
 									href={link.href}
 								>
 									<link.Icon class="w-5 h-5" />
@@ -149,7 +149,9 @@ const Footer = () => {
 					<NewsletterForm />
 				</div>
 				<div class="xl:w-1/4 xl:px-4 flex items-center justify-between pt-2 max-xl:w-full">
-					<p class="text-surface-700 font-medium w-fit">© inlang 2023</p>
+					<p class="text-sm text-surface-500">
+						Copyright {new Date().getFullYear().toString()} inlang
+					</p>
 					<LanguagePicker />
 				</div>
 			</div>

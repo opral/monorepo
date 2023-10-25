@@ -1,4 +1,4 @@
-import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
+import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
 import Link from "#src/renderer/Link.jsx"
