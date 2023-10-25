@@ -20,7 +20,7 @@ const productsLinks = [
 	},
 	{
 		name: `Lint Rules`,
-		href: "/c/lint",
+		href: "/c/lint-rules",
 	},
 ]
 
