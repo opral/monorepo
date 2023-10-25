@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 1.16.0
+
+### Minor Changes
+
+- 2f924df32: added Modulesettings validation via the Typebox JSON Schema Validation. This ensure that users can exclusively use module settings when there are given by the moduel
+
 ## 1.15.0
 
 ### Minor Changes
