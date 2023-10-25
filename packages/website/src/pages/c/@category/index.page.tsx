@@ -124,7 +124,10 @@ export function Page(props: {
 const Gallery = (props: { items: any }) => {
 	return (
 		<>
-			<Show when={props.items} fallback={<NoResultsCard category={selectedCategory()} />}>
+			<Show
+				when={props.items && props.items.length > 0}
+				fallback={<NoResultsCard category={selectedCategory().replace("c/", "")} />}
+			>
 				<For each={props.items}>
 					{(item) => {
 						const displayName =

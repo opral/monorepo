@@ -3,8 +3,11 @@ import { currentPageContext } from "#src/renderer/state.js"
 import { createSignal } from "solid-js"
 import { navigate } from "vite-plugin-ssr/client/router"
 
+// Make search input available to other components so it can get cleared
+export const [searchInput, setSearchInput] = createSignal<string>("")
+
 export default function SearchBar() {
-	const [searchInput, setSearchInput] = createSignal<string>("")
+	let inputElement: any
 	const { q } = currentPageContext.urlParsed.search
 
 	const handleNavigate = () => {
@@ -27,6 +30,14 @@ export default function SearchBar() {
 		}
 	}
 
+	if (typeof window !== "undefined")
+		window.addEventListener("keydown", (e) => {
+			if (e.metaKey && e.key === "k") {
+				e.preventDefault()
+				inputElement.focus()
+			}
+		})
+
 	return (
 		<form
 			class="group flex justify-center gap-1 px-3 items-center border h-8 w-full py-0.5 rounded-full transition-all duration-150 bg-background border-surface-200 focus-within:border-primary"
@@ -43,6 +54,7 @@ export default function SearchBar() {
 				placeholder="Search"
 				class="border-0 focus:ring-0 h-full w-full pl-0 text-sm"
 				value={q ? q : searchInput()}
+				ref={inputElement}
 				onInput={(e) => {
 					setSearchInput(e.target.value)
 				}}
