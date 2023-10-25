@@ -26,7 +26,13 @@ const Hero = () => {
 							return (
 								<Show when={m}>
 									<li>
-										<Link href={"/m/" + m?.id}>
+										<Link
+											href={
+												m?.id.split(".")[0] === "guide"
+													? `/g/${m?.uniqueID}/${m?.id.replaceAll(".", "-")}`
+													: `/m/${m?.uniqueID}/${m?.id.replaceAll(".", "-")}`
+											}
+										>
 											<div class="flex gap-4 hover:bg-background px-1 py-[10px] rounded-lg items-center">
 												<img
 													class="w-9 h-9 rounded-md m-0 shadow-lg object-cover object-center"
