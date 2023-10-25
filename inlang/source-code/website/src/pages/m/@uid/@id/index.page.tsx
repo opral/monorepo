@@ -99,8 +99,8 @@ export function Page(props: PageProps) {
 
 	return (
 		<>
-			<Title>{props.manifest && displayName()}</Title>
-			<Meta name="description" content={props.manifest && description()} />
+			<Title>{`${displayName()} - inlang`}</Title>
+			<Meta name="description" content={description()} />
 			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
 					<div class="md:py-28 py-16">
