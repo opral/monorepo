@@ -10,7 +10,9 @@
 	"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/message-lint-rules/identicalPattern/marketplace-manifest.json",
 	"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/message-lint-rules/messageWithoutSource/marketplace-manifest.json",
 	"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/message-lint-rules/missingTranslation/marketplace-manifest.json",
+	"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/message-lint-rules/snakeCaseId/marketplace-manifest.json",
 	"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/versioned-interfaces/language-tag/marketplace-manifest.json",
 	"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/versioned-interfaces/translatable/marketplace-manifest.json",
-	"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/marketplace-manifest.json"
+	"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/marketplace-manifest.json",
+	"https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/paraglide/paraglide-js-plugin/marketplace-manifest.json"
 ]
