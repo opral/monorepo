@@ -1,7 +1,7 @@
 // Settings for i18next plugin
 import { Type, type Static } from "@sinclair/typebox"
 const PathPattern = Type.String({
-	pattern: "^(\\./|\\../)[^*]*\\{languageTag\\}[^*]*\\.json",
+	pattern: "^(\\./|\\../|/)[^*]*\\{languageTag\\}[^*]*\\.json",
 	description: "The pathPattern must contain `{languageTag}` and end with `.json`.",
 	examples: [
 		"./{languageTag}/file.json",
