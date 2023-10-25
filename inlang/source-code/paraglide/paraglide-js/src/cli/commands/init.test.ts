@@ -1,9 +1,17 @@
 import { test, expect, vi, beforeAll, beforeEach } from "vitest"
-import { checkIfPackageJsonExists, findExistingInlangProjectPath } from "./init.js"
+import {
+	adjustTsConfigIfNecessary,
+	checkIfPackageJsonExists,
+	checkIfUncommittedChanges,
+	createNewProjectFlow,
+	findExistingInlangProjectPath,
+} from "./init.js"
 import consola from "consola"
 import { describe } from "node:test"
 import fsSync from "node:fs"
 import fs from "node:fs/promises"
+import childProcess from "node:child_process"
+
 import memfs from "memfs"
 
 beforeAll(() => {
@@ -14,7 +22,6 @@ beforeAll(() => {
 	vi.spyOn(consola, "success").mockImplementation(() => undefined as never)
 	vi.spyOn(consola, "error").mockImplementation(() => undefined as never)
 	vi.spyOn(consola, "warn").mockImplementation(() => undefined as never)
-	vi.spyOn(process, "exit").mockImplementation(() => undefined as never)
 })
 
 beforeEach(() => {
@@ -25,6 +32,92 @@ beforeEach(() => {
 	// set the current working directory to some mock value to prevent
 	// the tests from failing when running in a different environment
 	process.cwd = () => "/"
+})
+
+describe("end to end tests", () => {
+	test("it should exit if the user presses CTRL+C", async () => {
+		mockFs({})
+		mockUserInput([
+			// the first user input is CTRL+C
+			() => process.emit("SIGINT", "SIGINT"),
+		])
+		// simulating a throw to exit the command early without
+		// killing the process the test runs in
+		vi.spyOn(process, "exit").mockImplementation(() => {
+			throw "process.exit"
+		})
+		try {
+			await checkIfPackageJsonExists()
+		} catch (e) {
+			expect(e).toBe("process.exit")
+		}
+		expect(process.exit).toHaveBeenCalledOnce()
+	})
+})
+
+describe("createNewProjectFlow()", async () => {
+	test("it should succeed in creating a new project", async () => {
+		const fs = mockFs({})
+		await createNewProjectFlow()
+		// user is informed that a new project is created
+		expect(consola.info).toHaveBeenCalledOnce()
+		// the project shouldn't have errors
+		expect(consola.error).not.toHaveBeenCalled()
+		// user is informed that the project has successfully been created
+		expect(consola.success).toHaveBeenCalledOnce()
+		// the project file should exist
+		expect(fs.existsSync("/project.inlang.json")).toBe(true)
+	})
+})
+
+describe("checkIfUncommittedChanges()", () => {
+	test("it should not fail if the git cli is not installed", async () => {
+		vi.spyOn(childProcess, "execSync").mockImplementation(() => {
+			throw Error("Command failed: git status")
+		})
+		expect(checkIfUncommittedChanges()).resolves.toBeUndefined()
+	})
+
+	test("it should continue if no uncomitted changes exist", async () => {
+		vi.spyOn(childProcess, "execSync").mockImplementation(() => {
+			return Buffer.from("")
+		})
+		expect(checkIfUncommittedChanges()).resolves.toBeUndefined()
+	})
+
+	test("it should prompt the user if there are uncommitted changes and exit if the user doesn't want to continue", async () => {
+		vi.spyOn(childProcess, "execSync").mockImplementation(() => {
+			return Buffer.from("M package.json")
+		})
+		const processExit = vi.spyOn(process, "exit").mockImplementation(() => undefined as never)
+		mockUserInput([
+			// user does not want to continue
+			false,
+		])
+		await checkIfUncommittedChanges()
+		expect(consola.info).toHaveBeenCalledOnce()
+		expect(consola.prompt).toHaveBeenCalledOnce()
+		expect(processExit).toHaveBeenCalledOnce()
+	})
+
+	test("it should prompt the user if there are uncommitted changes and return if the user wants to continue", async () => {
+		vi.spyOn(childProcess, "execSync").mockImplementation(() => {
+			return Buffer.from("M package.json")
+		})
+		const processExit = vi.spyOn(process, "exit").mockImplementation(() => undefined as never)
+		mockUserInput([
+			// user does want to continue
+			true,
+		])
+		await checkIfUncommittedChanges()
+		expect(consola.info).toHaveBeenCalledOnce()
+		expect(consola.prompt).toHaveBeenCalledOnce()
+		expect(processExit).not.toHaveBeenCalledOnce()
+	})
+	test("it should not prompt the user if no uncommitted changes exist", async () => {
+		await checkIfUncommittedChanges()
+		expect(consola.prompt).not.toHaveBeenCalled()
+	})
 })
 
 describe("checkIfPackageJsonExists()", () => {
@@ -79,17 +172,112 @@ describe("findExistingInlangProjectPath()", () => {
 	})
 })
 
-// test("it should log true if the user has an existing project", async () => {
-// 	mockUserInput([true])
-// 	await initCommand.parseAsync()
-// 	expect(consola.log).toHaveBeenLastCalledWith(true)
-// })
+describe("adjustTsConfigIfNecessary()", () => {
+	test("it should return if no tsconfig.json exists", async () => {
+		mockFs({})
+		const result = await adjustTsConfigIfNecessary()
+		// no tsconfig exists, immediately return
+		expect(result).toBeUndefined()
+		// the tsconfig should not have been read
+		expect(fs.readFile).not.toHaveBeenCalled()
+		// no info that the moduleResolution needs to be adapted should be logged
+		expect(consola.info).not.toHaveBeenCalled()
+	})
 
-// test("it should log false if the user has an existing project", async () => {
-// 	mockUserInput([false])
-// 	await initCommand.parseAsync()
-// 	expect(consola.log).toHaveBeenLastCalledWith(false)
-// })
+	test("it should warn if the extended from tsconfig can't be read", async () => {
+		mockFs({
+			"/tsconfig.json": `{ 
+				"extends": "./non-existend.json",
+				"compilerOptions": {
+					"moduleResolution": "Bundler"
+				} 
+			}`,
+		})
+		await adjustTsConfigIfNecessary()
+		// no info that the moduleResolution needs to be adapted should be logged
+
+		expect(consola.warn).toHaveBeenCalledOnce()
+	})
+
+	test("it should detect if the extended from tsconfig already set the moduleResolution to bundler", async () => {
+		mockFs({
+			"/tsconfig.base.json": `{
+				"compilerOptions": {
+					"moduleResolution": "Bundler"
+				}
+			}`,
+			"/tsconfig.json": `{ 
+				"extends": "tsconfig.base.json", 
+			}`,
+		})
+		await adjustTsConfigIfNecessary()
+		// no info that the moduleResolution needs to be adapted should be logged
+		expect(consola.info).not.toHaveBeenCalled()
+	})
+
+	test("it should prompt the user to set the moduleResolution to bundler", async () => {
+		mockFs({
+			"/tsconfig.json": `{}`,
+		})
+
+		const userAdjustsTsConfigSpy = vi.fn()
+
+		mockUserInput([
+			// user confirms that the moduleResolution has been set to bundler
+			() => {
+				userAdjustsTsConfigSpy()
+				fs.writeFile(
+					"/tsconfig.json",
+					`{
+						"compilerOptions": {
+							"moduleResolution": "Bundler"
+						}
+					}`
+				)
+				return true
+			},
+		])
+
+		await adjustTsConfigIfNecessary()
+
+		// info that the moduleResolution needs to be adapted
+		expect(consola.info).toHaveBeenCalledOnce()
+		// prompt the user to set the moduleResolution to bundler
+		expect(consola.prompt).toHaveBeenCalledOnce()
+		// user has set the moduleResolution to bundler
+		expect(userAdjustsTsConfigSpy).toHaveBeenCalledOnce()
+	})
+
+	test("it should keep prompting the user to set the moduleResolution to bundler if the moduleResolution has not been set", async () => {
+		mockFs({
+			"/tsconfig.json": `{}`,
+		})
+
+		mockUserInput([
+			// user confirms that the moduleResolution has been set to bundler
+			// while the moduleResolution is still not set
+			// -> should prompt again
+			true,
+			// user wants to exit
+			// -> should warn that type errors might occur and continue with init
+			false,
+		])
+
+		await adjustTsConfigIfNecessary()
+
+		// info that the moduleResolution needs to be adapted
+		expect(consola.warn).toHaveBeenCalledOnce()
+		// 1. prompt the user to set the moduleResolution to bundler
+		// 2. prompt again because the moduleResolution is still not set
+		expect(consola.prompt).toHaveBeenCalledTimes(2)
+		// the user has not set the moduleResolution to bundler
+		// after the first prompt eventhough the user said it did
+		expect(consola.error).toHaveBeenCalledOnce()
+		// the user exists without setting the moduleResolution to bundler
+		// warn about type errors
+		expect(consola.warn).toHaveBeenCalledOnce()
+	})
+})
 
 // test("the paraglide plugin for vscode should be installed", () => {
 // 	throw new Error("Not implemented")
@@ -130,12 +318,25 @@ describe("findExistingInlangProjectPath()", () => {
 // 	throw new Error("Not implemented")
 // })
 
-// --- SETUP TEST INPUT CONSUMER ---
+/**
+ * Mock user input.
+ *
+ * @example
+ * 	 mockUserInput([
+ * 		"some input",
+ * 		() => {
+ *      fs.writeFileSync("some-file", "some content")
+ *      return true
+ *    }
+ * 	 ]),
+ */
 const mockUserInput = (testUserInput: any[]) => {
 	vi.spyOn(consola, "prompt").mockImplementation(() => {
 		const value = testUserInput.shift()
 		if (value === undefined) {
 			throw new Error("End of test input")
+		} else if (typeof value === "function") {
+			return value()
 		}
 		return value
 	})
@@ -150,6 +351,7 @@ const mockFs = (files: memfs.NestedDirectoryJSON) => {
 		// @ts-ignore - memfs has the same interface as node:fs/promises
 		vi.spyOn(fs, prop).mockImplementation(_memfs.promises[prop])
 	}
+	return _memfs
 }
 
 
