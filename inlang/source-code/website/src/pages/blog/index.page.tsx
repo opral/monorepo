@@ -3,7 +3,7 @@ import { For } from "solid-js"
 import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
 import tableOfContents from "../../../../../blog/tableOfContents.json"
-import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
+import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 
 export function Page() {
 	const [, { locale }] = useI18n()
