@@ -5,7 +5,7 @@ import { PatternEditor } from "./components/PatternEditor.jsx"
 import { showFilteredMessage } from "./helper/showFilteredMessage.js"
 import IconCopy from "~icons/material-symbols/content-copy-outline"
 import copy from "clipboard-copy"
-import { showToast } from "#src/components/Toast.jsx"
+import { showToast } from "#src/interface/components/Toast.jsx"
 import type { MessageLintReport, Message as MessageType } from "@inlang/sdk"
 import { sortLanguageTags } from "./helper/sortLanguageTags.js"
 

@@ -6,10 +6,10 @@ import IconAdd from "~icons/material-symbols/add"
 import IconClose from "~icons/material-symbols/close"
 import IconTranslate from "~icons/material-symbols/translate"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
-import { showToast } from "#src/components/Toast.jsx"
+import { showToast } from "#src/interface/components/Toast.jsx"
 import type { LanguageTag } from "@inlang/sdk"
 import { sortLanguageTags } from "./helper/sortLanguageTags.js"
-import EditorLayout from "#src/components/editor/EditorLayout.jsx"
+import EditorLayout from "#src/interface/editor/EditorLayout.jsx"
 
 interface Filter {
 	name: string
