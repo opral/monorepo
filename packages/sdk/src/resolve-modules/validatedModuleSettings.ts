@@ -1,4 +1,4 @@
-import type {  InlangModule } from "@inlang/module"
+import type { InlangModule } from "@inlang/module"
 import type { TSchema } from "@sinclair/typebox"
 import { Value, type ValueError } from "@sinclair/typebox/value"
 
