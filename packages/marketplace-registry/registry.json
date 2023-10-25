@@ -15,5 +15,8 @@
 		"8y8sxj09": "../versioned-interfaces/language-tag/marketplace-manifest.json",
 		"ezdlll4o": "../versioned-interfaces/translatable/marketplace-manifest.json",
 		"gerre34r": "../paraglide/paraglide-js/marketplace-manifest.json"
+	},
+	"g": {
+		"94ng94n4": "../../guides/how-to-inlang-app/marketplace-manifest.json"
 	}
 }

@@ -75,7 +75,13 @@ export function Page(props: {
 
 	return (
 		<>
-			<Title>Global Application</Title>
+			<Title>
+				Global{" "}
+				{currentPageContext.routeParams.category
+					?.replaceAll("-", " ")
+					.replace(/\w\S*/g, (w) => w.replace(/^\w/, (c) => c.toUpperCase()))}{" "}
+				- inlang
+			</Title>
 			<Meta name="description" content="Globalization infrastructure for software" />
 			<Meta name="og:image" content="/images/inlang-marketplace-image.jpg" />
 			<MarketplaceLayout>
