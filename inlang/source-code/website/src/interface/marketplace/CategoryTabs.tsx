@@ -18,7 +18,7 @@ const CategoryTabs = () => {
 			},
 			{
 				name: `Lint Rules`,
-				href: "/c/lint",
+				href: "/c/lint-rules",
 			},
 			{
 				name: `Missing something?`,
