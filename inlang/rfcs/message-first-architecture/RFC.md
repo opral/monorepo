@@ -10,7 +10,7 @@ Here is a 19:59 minute loom https://www.loom.com/share/8ff46ee202374e52b376d4d02
 
 Inlang core, and thereby inlang itself, is architected "resource-first". Among things, "resource-first" leads to:
 
-- Design flaws in inlang core [https://github.com/inlang/monorepo/issues/1096, https:github.com/inlang/monorepong/issues/945].
+- Design flaws in inlang core [https://github.com/inlang/monorepo/issues/1096, https://github.com/inlang/monorepo/issues/945].
 - Complicated application logic because apps care about messages, not resources.
 - Potentially, technical debt when extending inlang (core) beyong messages to other types of content (e.g. markdown, images, etc.).
 

@@ -6,10 +6,10 @@ import IconAdd from "~icons/material-symbols/add"
 import IconClose from "~icons/material-symbols/close"
 import IconTranslate from "~icons/material-symbols/translate"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
-import { showToast } from "#src/components/Toast.jsx"
+import { showToast } from "#src/interface/components/Toast.jsx"
 import type { LanguageTag } from "@inlang/sdk"
 import { sortLanguageTags } from "./helper/sortLanguageTags.js"
-import EditorLayout from "#src/components/editor/EditorLayout.jsx"
+import EditorLayout from "#src/interface/editor/EditorLayout.jsx"
 
 interface Filter {
 	name: string
@@ -128,12 +128,12 @@ export function Layout(props: { children: JSXElement }) {
 
 	return (
 		<EditorLayout>
-			<div class="pt-4 w-full flex flex-col grow">
+			<div class="pt-4 w-full flex flex-col grow bg-background">
 				<div class="flex items-center space-x-4 pt-5">
 					<Breadcrumbs />
 					<BranchMenu />
 				</div>
-				<div class="flex justify-between gap-2 py-5 sticky top-16 z-30 bg-background">
+				<div class="flex flex-wrap justify-between gap-2 py-5 sticky top-12 md:top-16 z-30 bg-background">
 					<div class="absolute -left-2 w-[calc(100%_+_16px)] h-full -translate-y-[20px] bg-background" />
 					<div class="flex z-20 justify-between gap-2 items-center">
 						<Show when={project()}>
