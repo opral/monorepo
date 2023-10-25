@@ -7,6 +7,7 @@ import IconTwitter from "~icons/cib/twitter"
 import IconGithub from "~icons/cib/github"
 import IconDiscord from "~icons/cib/discord"
 import Link from "#src/renderer/Link.jsx"
+import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
 
 const MarketplaceHeader = () => {
 	const socialMediaLinks = [
@@ -49,7 +50,7 @@ const MarketplaceHeader = () => {
 				</Show>
 				<div class="flex gap-8">
 					<Button type="text" href="/documentation">
-						Create your own
+						{m.marketplace_header_build_on_inlang_button()}
 					</Button>
 					<div class="gap-[2px] items-center hidden md:flex">
 						<For each={socialMediaLinks}>

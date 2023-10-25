@@ -2,6 +2,598 @@
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"data": [
 		{
+			"id": "marketplace_grid_build_your_own_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Build your own solution!"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_build_your_own_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Can't find what you are looking for?"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_placeholder",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Enter email..."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_secondary_button",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Help us build the ecosystem"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_button",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Notify me"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_description_last_part",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "some new results."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_description_first_part",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "We will let you know when we get"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "No results yet"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_unvalid_email",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Please enter a valid email address."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_no_email",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Please enter your email address."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_error",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Something went wrong. Please try again later."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_success",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "You will be notified when this feature is available."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_could_not_subscribe",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "You are already getting notified."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_need_help",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Need help or have questions? Join our Discord!"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_title_generic",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "All Products"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_search_placeholder",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Search"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_category_missing_something",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Missing something?"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_category_lint",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lint Rules"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_category_markdown",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Markdown"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_category_website",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Website"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_category_application",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Application"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_build_on_inlang_button",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Build on inlang"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_inlang_button",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "More about the ecosystem"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_inlang_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Expand to new markets and acquire more customers."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_inlang_title_first_part",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Welcome to inlang,"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_inlang_title_second_part",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "the ecosystem to go global."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_featured_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Featured"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_stack_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Stack"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_lix_button",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "More about Lix"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_lix_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "The backbone of the ecosystem"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_lix_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lix change control"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_inlang_tagline",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "The ecosystem to go global"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_category_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Categories"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_category_lint",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lint Rules"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_category_markdown",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Global Markdown"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_category_website",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Global Website"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_category_application",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Global Application"
+						}
+					]
+				}
+			]
+		},
+		{
 			"id": "footer_documentation_title",
 			"selectors": [],
 			"variants": [

@@ -2,6 +2,7 @@ import IconSearch from "~icons/material-symbols/search-rounded"
 import { currentPageContext } from "#src/renderer/state.js"
 import { createSignal } from "solid-js"
 import { navigate } from "vite-plugin-ssr/client/router"
+import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
 
 export default function SearchBar() {
 	const [searchInput, setSearchInput] = createSignal<string>("")
@@ -40,7 +41,7 @@ export default function SearchBar() {
 				aria-label="search input"
 				id="search"
 				name="search"
-				placeholder="Search"
+				placeholder={m.marketplace_header_search_placeholder()}
 				class="border-0 focus:ring-0 h-full w-full pl-0 text-sm"
 				value={q ? q : searchInput()}
 				onInput={(e) => {

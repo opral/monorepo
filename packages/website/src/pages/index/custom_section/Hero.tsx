@@ -4,6 +4,7 @@ import { Chip } from "#src/interface/components/Chip.jsx"
 import { colorForTypeOf, typeOfIdToTitle } from "#src/pages/m/utilities.js"
 import { Button } from "../components/Button.jsx"
 import Link from "#src/renderer/Link.jsx"
+import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
 
 const featuredArray = [
 	"library.inlang.paraglideJs",
@@ -17,7 +18,7 @@ const Hero = () => {
 	return (
 		<div class="w-full flex gap-4 mt-4 md:mt-10 mb-8 flex-col-reverse md:flex-row">
 			<div class="w-full md:w-1/4 md:pr-8">
-				<p class="pb-2 text-surface-500 text-sm">Featured</p>
+				<p class="pb-2 text-surface-500 text-sm">{m.home_featured_title()}</p>
 				<ul class="divide-y divide-surface-3">
 					<For each={featuredArray}>
 						{(feature) => {
@@ -67,15 +68,14 @@ const Hero = () => {
 				<div class="flex flex-col md:flex-row items-start md:items-end px-8 pb-6 pt-3">
 					<div class="flex flex-col gap-2 flex-1">
 						<h1 class="text-md text-surface-900 font-semibold">
-							Welcome to <span class="text-primary">inlang</span>, <br />
-							the ecosystem to go global.
+							{m.home_inlang_title_first_part()}
+							<br />
+							{m.home_inlang_title_second_part()}
 						</h1>
-						<p class="text-sm text-surface-500">
-							💡 Expand to new markets and acquire more customers
-						</p>
+						<p class="text-sm text-surface-500">{m.home_inlang_description()}</p>
 					</div>
 					<Button type="textPrimary" href="/documentation" class="-mb-[10px]">
-						{"More about the ecosystem >"}
+						{m.home_inlang_button()}
 					</Button>
 				</div>
 			</div>

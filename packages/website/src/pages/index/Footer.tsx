@@ -12,19 +12,19 @@ const Footer = () => {
 	const getProductsLinks = () => {
 		return [
 			{
-				name: `Global Application`,
+				name: m.footer_category_application(),
 				href: "/application",
 			},
 			{
-				name: `Global Website`,
+				name: m.footer_category_website(),
 				href: "/website",
 			},
 			{
-				name: `Global Markdown`,
+				name: m.footer_category_markdown(),
 				href: "/markdown",
 			},
 			{
-				name: `Lint Rules`,
+				name: m.footer_category_lint(),
 				href: "/lint",
 			},
 		]
@@ -90,7 +90,7 @@ const Footer = () => {
 							<img class="h-9 w-9" src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
 							<span class="self-center pl-2 text-left font-semibold text-surface-900">inlang</span>
 						</Link>
-						<p class="text-surface-600 text-sm">The ecosystem to go global</p>
+						<p class="text-surface-600 text-sm">{m.footer_inlang_tagline()}</p>
 					</div>
 					<div class="flex gap-7 flex-wrap">
 						<For each={socialMediaLinks}>
@@ -120,7 +120,7 @@ const Footer = () => {
 					</For>
 				</div>
 				<div class="w-full sm:w-1/3 md:w-1/4 xl:px-4 flex flex-col pt-2">
-					<p class="font-semibold text-surface-900 pb-3">Products</p>
+					<p class="font-semibold text-surface-900 pb-3">{m.footer_category_title()}</p>
 					<For each={getProductsLinks()}>
 						{(link) => (
 							<div class="w-fit opacity-80">
