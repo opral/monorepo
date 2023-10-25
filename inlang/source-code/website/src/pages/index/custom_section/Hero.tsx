@@ -6,11 +6,11 @@ import { Button } from "../components/Button.jsx"
 import Link from "#src/renderer/Link.jsx"
 
 const featuredArray = [
+	"library.inlang.paraglideJs",
 	"app.inlang.editor",
 	"app.inlang.cli",
 	"app.inlang.ideExtension",
 	"plugin.inlang.i18next",
-	"library.inlang.paraglideJs",
 ]
 
 const Hero = () => {
