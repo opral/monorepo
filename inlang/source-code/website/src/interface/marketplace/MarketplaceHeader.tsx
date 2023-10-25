@@ -1,5 +1,5 @@
 import { Button } from "#src/pages/index/components/Button.jsx"
-import SearchBar from "#src/interface/components/SearchBar.jsx"
+import SearchBar, { setSearchInput } from "#src/interface/components/SearchBar.jsx"
 import CategoryTabs from "./CategoryTabs.jsx"
 import { For, Show } from "solid-js"
 import { currentPageContext } from "#src/renderer/state.js"
@@ -38,6 +38,7 @@ const MarketplaceHeader = () => {
 				}
 			>
 				<a
+					onClick={() => setSearchInput("")}
 					href={
 						window.location.pathname === "/"
 							? window.location.origin + "//" + window.location.pathname

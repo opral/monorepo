@@ -1,5 +1,6 @@
 import { For } from "solid-js"
 import { currentPageContext } from "#src/renderer/state.js"
+import { setSearchInput } from "../components/SearchBar.jsx"
 
 const CategoryTabs = () => {
 	const getCategories = () => {
@@ -38,7 +39,11 @@ const CategoryTabs = () => {
 							" border-b-[2px] py-[4px] text-sm bg-transparent group content-box"
 						}
 					>
-						<a href={link.href} target={link.href.includes("github.com") ? "_blank" : "_default"}>
+						<a
+							href={link.href}
+							onClick={() => setSearchInput("")}
+							target={link.href.includes("github.com") ? "_blank" : "_default"}
+						>
 							<div
 								class={
 									(currentPageContext.urlParsed.pathname.includes(link.href)
