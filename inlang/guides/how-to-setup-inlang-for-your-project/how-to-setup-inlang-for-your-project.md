@@ -8,7 +8,7 @@ You need two things to use inlang with any project:
 
 There are two ways to get these:
 1. Create them manually
-2. Create them automatically with init command by inlang (comming soon)
+2. Create them automatically with init command by inlang (soon)
 
 ### Project file
 
