@@ -102,7 +102,7 @@ With the ide-extension, add a German translation (hover over the `m` function an
 ![image](https://github.com/inlang/monorepo/assets/58360188/55ad46fd-45c3-4526-8d42-248798f490e5)
 
 Example:
-```ts
+```svelte
 <script>
 	import * as m from "@inlang/paraglide-js/<namespace>/messages"
 	import { setLanguageTag } from "@inlang/paraglide-js/<namespace>"
