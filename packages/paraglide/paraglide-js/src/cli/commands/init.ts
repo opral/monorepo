@@ -104,23 +104,24 @@ const existingProjectFlow = async (args: { existingProjectPath: string }) => {
 	}
 }
 
-const createNewProjectFlow = async () => {
+export const createNewProjectFlow = async () => {
 	consola.info(`Creating a new inlang project in the current working directory.`)
 	await fs.writeFile(DEFAULT_PROJECT_PATH, JSON.stringify(newProjectTemplate, undefined, 2))
 	const project = await loadProject({
 		settingsFilePath: resolve(process.cwd(), DEFAULT_PROJECT_PATH),
 		nodeishFs: fs,
 	})
+	console.log("getting here")
 	if (project.errors().length > 0) {
-		consola.error("Failed to create a new inlang project.")
-		consola.log(
-			"This is likely an internal bug. Please file an issue at https://github.com/inlang/monorepo."
+		consola.warn(
+			"Failed to create a new inlang project.\n\nThis is likely an internal bug. Please file an issue at https://github.com/inlang/monorepo."
 		)
 		for (const error of project.errors()) {
 			consola.error(error)
 		}
 		return process.exit(1)
 	} else {
+		console.log("getting here toooo")
 		consola.success("Successfully created a new inlang project.")
 	}
 }
@@ -156,25 +157,30 @@ export const checkIfPackageJsonExists = async () => {
 	}
 }
 
-const checkIfUncommittedChanges = async () => {
-	if (childProcess.execSync("git status --porcelain").toString().length === 0) {
-		return
-	}
-
-	consola.info(
-		`You have uncommitted changes.\n\nPlease commit your changes before initializing inlang Paraglide-JS. Committing outstanding changes ensures that you don't lose any work, and see the changes the paraglide-js init command introduces.`
-	)
-	const response = await prompt(
-		"Do you want to initialize inlang Paraglide-JS without committing your current changes?",
-		{
-			type: "confirm",
-			initial: false,
+export const checkIfUncommittedChanges = async () => {
+	try {
+		if (childProcess.execSync("git status --porcelain").toString().length === 0) {
+			return
 		}
-	)
-	if (response === true) {
+
+		consola.info(
+			`You have uncommitted changes.\n\nPlease commit your changes before initializing inlang Paraglide-JS. Committing outstanding changes ensures that you don't lose any work, and see the changes the paraglide-js init command introduces.`
+		)
+		const response = await prompt(
+			"Do you want to initialize inlang Paraglide-JS without committing your current changes?",
+			{
+				type: "confirm",
+				initial: false,
+			}
+		)
+		if (response === true) {
+			return
+		} else {
+			process.exit(0)
+		}
+	} catch (e) {
+		// git cli is not installed
 		return
-	} else {
-		process.exit(0)
 	}
 }
 
@@ -231,7 +237,7 @@ Please add the following command to your build script manually:
  * Otherwise, types defined in `package.exports` are not resolved by TypeScript. Leading to type
  * errors with Paraglide-JS.
  */
-const adjustTsConfigIfNecessary = async () => {
+export const adjustTsConfigIfNecessary = async () => {
 	if (fsSync.existsSync("./tsconfig.json") === false) {
 		return
 	}
@@ -258,46 +264,46 @@ const adjustTsConfigIfNecessary = async () => {
 	const moduleResolution =
 		tsconfig.compilerOptions?.moduleResolution ?? parentTsConfig?.compilerOptions?.moduleResolution
 
-	if (
-		moduleResolution === undefined ||
-		(moduleResolution && invalidOptions.includes(moduleResolution.toLowerCase()))
-	) {
-		consola.info(
-			`You need to set the \`compilerOptions.moduleResolution\` to "Bundler" in the \`tsconfig.json\` file:
+	if (moduleResolution && invalidOptions.includes(moduleResolution.toLowerCase()) === false) {
+		// the moduleResolution is already set to bundler or similar
+		return
+	}
+
+	consola.info(
+		`You need to set the \`compilerOptions.moduleResolution\` to "Bundler" in the \`tsconfig.json\` file:
 
 \`{
   "compilerOptions": {
     "moduleResolution": "Bundler"
   }
 }\``
+	)
+	let isValid = false
+	while (isValid === false) {
+		const response = await prompt(
+			`Did you set the \`compilerOptions.moduleResolution\` to "Bundler"?`,
+			{
+				type: "confirm",
+				initial: false,
+			}
 		)
-		let isValid = false
-		while (isValid === false) {
-			const response = await prompt(
-				`Did you set the \`compilerOptions.moduleResolution\` to "Bundler"?`,
-				{
-					type: "confirm",
-					initial: false,
-				}
+		if (response === false) {
+			return consola.warn(
+				"Continuing without adjusting the tsconfig.json. This may lead to type errors."
 			)
-			if (response === false) {
-				return consola.warn(
-					"Continuing without adjusting the tsconfig.json. This may lead to type errors."
-				)
-			}
-			const file = await fs.readFile("./tsconfig.json", { encoding: "utf-8" })
-			const tsconfig = JSON5.parse(file)
-			if (
-				tsconfig?.compilerOptions?.moduleResolution &&
-				tsconfig.compilerOptions.moduleResolution.toLowerCase() === "bundler"
-			) {
-				isValid = true
-				return
-			} else {
-				consola.error(
-					"The compiler options have not been adjusted. Please set the `compilerOptions.moduleResolution` to `Bundler`."
-				)
-			}
+		}
+		const file = await fs.readFile("./tsconfig.json", { encoding: "utf-8" })
+		const tsconfig = JSON5.parse(file)
+		if (
+			tsconfig?.compilerOptions?.moduleResolution &&
+			tsconfig.compilerOptions.moduleResolution.toLowerCase() === "bundler"
+		) {
+			isValid = true
+			return
+		} else {
+			consola.error(
+				"The compiler options have not been adjusted. Please set the `compilerOptions.moduleResolution` to `Bundler`."
+			)
 		}
 	}
 }
@@ -307,7 +313,7 @@ const adjustTsConfigIfNecessary = async () => {
  */
 const prompt: typeof consola.prompt = async (message, options) => {
 	const response = await consola.prompt(message, options)
-	if (response.toString() === "Symbol(clack:cancel)") {
+	if (response?.toString() === "Symbol(clack:cancel)") {
 		process.exit(0)
 	}
 	return response
