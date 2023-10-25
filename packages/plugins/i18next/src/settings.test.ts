@@ -9,6 +9,7 @@ import { Value } from "@sinclair/typebox/value"
 
 test("valid path patterns", async () => {
 	const validPathPatterns = [
+		"/folder/{languageTag}.json",
 		"./{languageTag}/file.json",
 		"../folder/{languageTag}/file.json",
 		"./{languageTag}.json",
@@ -22,7 +23,8 @@ test("valid path patterns", async () => {
 		expect(isValid).toBe(true)
 	}
 })
-test("if path patter does starts with a ./ or ../", async () => {
+
+test("it should fail if the path pattern does not start with as a path", async () => {
 	const pathPattern = "{languageTag}.json"
 
 	const isValid = Value.Check(plugin.settingsSchema!, {
