@@ -1,7 +1,7 @@
 import { Title, Meta } from "@solidjs/meta"
 import { For } from "solid-js"
 import tableOfContents from "../../../../../blog/tableOfContents.json"
-import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
+import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
 
 export function Page() {

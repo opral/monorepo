@@ -5,7 +5,7 @@ import { currentPageContext } from "#src/renderer/state.js"
 import tableOfContents from "../../../../../../blog/tableOfContents.json"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
-import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
+import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
 
 /**
