@@ -9,7 +9,7 @@ import { useI18n } from "@solid-primitives/i18n"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import tableOfContents from "../../../../../documentation/tableOfContents.json"
-import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
+import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 
 export type PageProps = {
 	markdown: Awaited<ReturnType<any>>

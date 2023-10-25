@@ -1,4 +1,4 @@
-import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
+import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import { useI18n } from "@solid-primitives/i18n"
 import { Meta, Title } from "@solidjs/meta"
 
