@@ -1,5 +1,11 @@
 # @inlang/plugin-json
 
+## 4.9.0
+
+### Minor Changes
+
+- 2150b4873: fix: path patterns can start as as an absolute path like `/resources/{languageTag}.json`
+
 ## 4.8.0
 
 ### Minor Changes
