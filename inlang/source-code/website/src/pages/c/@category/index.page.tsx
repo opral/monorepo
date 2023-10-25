@@ -7,6 +7,7 @@ import Card, { CardBuildOwn, NoResultsCard } from "#src/interface/components/Car
 import { Meta, Title } from "@solidjs/meta"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import SubcategoryPills from "#src/interface/marketplace/SubcategoryPills.jsx"
+import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
 import {
 	IconFlutter,
 	IconJavascript,
@@ -87,12 +88,12 @@ export function Page(props: {
 			<MarketplaceLayout>
 				<Show when={currentPageContext.routeParams.category === "application"}>
 					<div class="pt-4 text-sm font-medium flex items-center gap-3 w-full overflow-x-scroll pb-4 overflow-scrollbar overflow-scrollbar-x">
-						<p class="pr-4 text-surface-400">Categories:</p>
+						<p class="pr-4 text-surface-400">{m.footer_category_title() + ":"}</p>
 						<SubcategoryPills links={getSubCategies} />
 					</div>
 				</Show>
 				<div class="pb-16 md:pb-20 min-h-screen relative">
-					<h2 class="text-md text-surface-600 pb-4 pt-8">All Products</h2>
+					<h2 class="text-md text-surface-600 pb-4 pt-8">{m.marketplace_grid_title_generic()}</h2>
 					<SectionLayout showLines={false} type="white">
 						<div class="relative">
 							<Show when={props.highlights}>

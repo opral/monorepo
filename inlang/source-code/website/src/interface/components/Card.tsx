@@ -6,8 +6,9 @@ import { showToast } from "./Toast.jsx"
 import { rpc } from "@inlang/rpc"
 import { Button } from "#src/pages/index/components/Button.jsx"
 import Link from "#src/renderer/Link.jsx"
+import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
 
-export default function Card(props: { item: any; displayName: string; highlight?: boolean }) {
+export default function Card(props: { item: any; displayName: string }) {
 	return (
 		<>
 			<Link
@@ -17,13 +18,12 @@ export default function Card(props: { item: any; displayName: string; highlight?
 						: `/m/${props.item.uniqueID}/${props.item.id.replaceAll(".", "-")}`
 				}
 				class={
-					"relative no-underline flex gap-4 flex-col justify-between group w-full bg-background hover:bg-surface-50 transition-colors border border-surface-200 rounded-xl p-5 " +
-					(props.highlight ? "h-96" : "h-48")
+					"relative no-underline flex gap-4 flex-col justify-between group w-full bg-background hover:bg-surface-50 transition-colors border border-surface-200 rounded-xl p-5 h-48"
 				}
 			>
-				<Show when={props.highlight && props.item.gallery}>
+				{/* <Show when={props.highlight && props.item.gallery}>
 					<img class="h-64 object-cover object-top rounded-lg" src={props.item.gallery[0]} />
-				</Show>
+				</Show> */}
 				<div class="flex flex-col gap-4">
 					<div class="w-full flex gap-4 items-start">
 						<div class="flex items-center gap-8 flex-shrink-0">
@@ -83,19 +83,11 @@ export default function Card(props: { item: any; displayName: string; highlight?
 							</sl-tooltip>
 						</Show>
 					</div>
-					<Show when={!props.highlight}>
-						<p class="text-sm line-clamp-2 text-surface-500 transition-colors group-hover:text-surface-600">
-							{props.item.description.en}
-						</p>
-					</Show>
+
+					<p class="text-sm line-clamp-2 text-surface-500 transition-colors group-hover:text-surface-600">
+						{props.item.description.en}
+					</p>
 				</div>
-				<Show when={!props.highlight}>
-					<div>
-						<p class="m-0 mb-2 text-surface-400 group-hover:text-surface-500 transition-colors leading-none no-underline text-sm">
-							{props.item.publisherName}
-						</p>
-					</div>
-				</Show>
 				<Show
 					when={
 						props.item.id.split(".")[0] === "plugin" ||
@@ -142,10 +134,10 @@ export function CardBuildOwn() {
 				<Plus class="w-10 h-10 text-surface-600 group-hover:text-surface-900 transition-colors" />
 				<div class="flex flex-col justify-center items-center">
 					<p class="m-0 mb-2 text-sm text-surface-600 leading-none no-underline text-center font-semibold group-hover:text-surface-900 transition-colors">
-						Can't find what you are looking for?
+						{m.marketplace_grid_build_your_own_title()}
 					</p>
 					<p class="line-clamp-3 text-sm text-surface-500 transition-colors text-center group-hover:text-surface-600">
-						Build your own solution!
+						{m.marketplace_grid_build_your_own_description()}
 					</p>
 				</div>
 			</Link>
@@ -166,26 +158,26 @@ export function NoResultsCard(props: { category: string }) {
 				showToast({
 					title: "Could not subscribe",
 					variant: "success",
-					message: "You are already getting notified.",
+					message: m.marketplace_grid_subscribe_could_not_subscribe(),
 				})
 			} else if (response.data === "success") {
 				showToast({
 					title: "Success",
 					variant: "success",
-					message: "You will be notified when this feature is available.",
+					message: m.marketplace_grid_subscribe_success(),
 				})
 			} else {
 				showToast({
 					title: "Error",
 					variant: "danger",
-					message: "Something went wrong. Please try again later.",
+					message: m.marketplace_grid_subscribe_error(),
 				})
 			}
 		} else {
 			showToast({
 				title: "Error",
 				variant: "danger",
-				message: "Something went wrong. Please try again later.",
+				message: m.marketplace_grid_subscribe_error(),
 			})
 		}
 
@@ -213,14 +205,14 @@ export function NoResultsCard(props: { category: string }) {
 			showToast({
 				title: "Error",
 				variant: "danger",
-				message: "Please enter your email address",
+				message: m.marketplace_grid_subscribe_no_email(),
 			})
 			return
 		} else if (checkEmail(emailValue) === "invalid") {
 			showToast({
 				title: "Error",
 				variant: "danger",
-				message: "Please enter a valid email address",
+				message: m.marketplace_grid_subscribe_unvalid_email(),
 			})
 			return
 		}
@@ -236,9 +228,11 @@ export function NoResultsCard(props: { category: string }) {
 				</div>
 			</div>
 			<div class="p-4 w-full h-full flex flex-col justify-center relative -translate-y-8 -mt-24">
-				<h2 class="font-medium text-center text-xl mb-4">No results yet</h2>
+				<h2 class="font-medium text-center text-xl mb-4">{m.marketplace_grid_subscribe_title()}</h2>
 				<p class="text-center text-surface-500 mb-12">
-					We will let you know when we get <br class="min-[350px]:block hidden" /> some new results.
+					{m.marketplace_grid_subscribe_description_first_part()}{" "}
+					<br class="min-[350px]:block hidden" />{" "}
+					{m.marketplace_grid_subscribe_description_last_part()}
 				</p>
 				<div class="w-full flex justify-center flex-col items-center gap-4">
 					<div
@@ -252,7 +246,7 @@ export function NoResultsCard(props: { category: string }) {
 								"border-none p-0 md:w-[312px] w-full " + (loading() ? "pointer-events-none" : "")
 							}
 							prop:size={"medium"}
-							prop:placeholder={"Enter email..."}
+							prop:placeholder={m.marketplace_grid_subscribe_placeholder()}
 							// @ts-ignore
 							value={email()}
 							onInput={(event) => {
@@ -276,11 +270,11 @@ export function NoResultsCard(props: { category: string }) {
 							}
 							onClick={handleSubscribe}
 						>
-							Notify me
+							{m.marketplace_grid_subscribe_button()}
 						</button>
 					</div>
 					<Button href="/documentation/publish-marketplace" chevron type="textPrimary">
-						Help us build the ecosystem
+						{m.marketplace_grid_subscribe_secondary_button()}
 					</Button>
 				</div>
 			</div>

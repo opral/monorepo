@@ -1,28 +1,29 @@
 import { For } from "solid-js"
 import { currentPageContext } from "#src/renderer/state.js"
 import Link from "#src/renderer/Link.jsx"
+import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
 
 const CategoryTabs = () => {
 	const getCategories = () => {
 		return [
 			{
-				name: `Application`,
+				name: m.marketplace_header_category_application(),
 				href: "/c/application",
 			},
 			{
-				name: `Website`,
+				name: m.marketplace_header_category_website(),
 				href: "/c/website",
 			},
 			{
-				name: `Markdown`,
+				name: m.marketplace_header_category_markdown(),
 				href: "/c/markdown",
 			},
 			{
-				name: `Lint Rules`,
+				name: m.marketplace_header_category_lint(),
 				href: "/c/lint",
 			},
 			{
-				name: `Missing something?`,
+				name: m.marketplace_header_category_missing_something(),
 				href: "https://github.com/inlang/monorepo/discussions",
 			},
 		]

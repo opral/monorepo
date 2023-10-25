@@ -9,6 +9,7 @@ import {
 import Link from "#src/renderer/Link.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 import { For } from "solid-js"
+import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
 
 const Stack = () => {
 	const getSubCategies: boolean | any[] | null | undefined = [
@@ -46,7 +47,7 @@ const Stack = () => {
 	return (
 		<div class="w-full flex gap-4 mt-4 md:mt-10 mb-10 flex-col-reverse md:flex-row">
 			<div class="w-full">
-				<p class="pb-2 text-surface-500 text-sm">Stack</p>
+				<p class="pb-2 text-surface-500 text-sm">{m.home_stack_title()}</p>
 				<div class="flex gap-2 overflow-x-scroll hide-scrollbar">
 					<For each={getSubCategies}>
 						{(link) => (

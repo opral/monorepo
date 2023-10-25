@@ -4,6 +4,7 @@ import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 import Card, { CardBuildOwn, NoResultsCard } from "#src/interface/components/Card.jsx"
 import { rpc } from "@inlang/rpc"
+import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -57,7 +58,7 @@ export default function Gridview(props: {
 
 				<Show when={!props.category && !props.slider && !props.minimal}>
 					<div class="mt-20">
-						<GetHelp text="Need help or have questions? Join our Discord!" />
+						<GetHelp text={m.marketplace_grid_need_help()} />
 					</div>
 				</Show>
 			</div>
