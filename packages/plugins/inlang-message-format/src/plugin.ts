@@ -50,7 +50,18 @@ export const plugin: Plugin<{
 
 const createFile = async (args: { path: string; nodeishFs: NodeishFilesystemSubset }) => {
 	const parsed = parsePath(args.path)
-	await args.nodeishFs.mkdir(parsed.dir, { recursive: true })
+	let previousPath = ""
+	for (const path of parsed.dir.split("/")) {
+		try {
+			// not using { recursive: true } because the option is flacky
+			// and is implemented differently in filesystem implementations
+			await args.nodeishFs.mkdir(previousPath + "/" + path)
+			previousPath += "/" + path
+		} catch {
+			// we assume that the directory already exists
+			continue
+		}
+	}
 	await args.nodeishFs.writeFile(
 		args.path,
 		JSON.stringify(
