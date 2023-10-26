@@ -152,7 +152,7 @@ const Gallery = (props: { items: any; guides?: boolean }) => {
 			>
 				<Show
 					when={props.items && props.items.length > 0}
-					fallback={<NoResultsCard category={selectedCategory()} />}
+					fallback={!props.guides && <NoResultsCard category={selectedCategory()} />}
 				>
 					<For
 						each={
@@ -190,6 +190,7 @@ const Guides = (props: { items: (MarketplaceManifest & { uniqueID: string })[] }
 	})
 	return (
 		<Show when={show()}>
+			<h2 class="text-md text-surface-600 pb-4 pt-8">{m.marketplace_grid_title_guides()}</h2>
 			<div class="mb-32 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
 				<Gallery items={props.items} guides />
 			</div>

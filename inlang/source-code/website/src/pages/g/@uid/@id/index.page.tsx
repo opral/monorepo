@@ -1,21 +1,16 @@
 import { Meta, Title } from "@solidjs/meta"
-import { For, Show, createSignal, onMount } from "solid-js"
+import { For, Show, createEffect, createSignal, onMount } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { isModule } from "@inlang/marketplace-registry"
 import { Button } from "#src/pages/index/components/Button.jsx"
 import { Chip } from "#src/interface/components/Chip.jsx"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 import { SelectRepo } from "../../Select.jsx"
-import Right from "~icons/material-symbols/chevron-right"
-import Left from "~icons/material-symbols/chevron-left"
 import { colorForTypeOf, convertLinkToGithub, typeOfIdToTitle } from "../../utilities.js"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { currentPageContext } from "#src/renderer/state.js"
-// @ts-ignore
-import { createSlider } from "solid-slider"
-import "solid-slider/slider.css"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import { languageTag } from "@inlang/paraglide-js/inlang-marketplace"
 import Link from "#src/renderer/Link.jsx"
@@ -45,10 +40,11 @@ export function Page(props: PageProps) {
 	const readme = () =>
 		typeof props.manifest.readme === "object" ? props.manifest.readme.en : props.manifest.readme
 
-	const tableOfContents = () => {
-		const tableOfContents = {}
-
+	const [tableOfContents, setTableOfContents] = createSignal({})
+	createEffect(() => {
+		const table: Record<string, Array<string>> = {}
 		if (
+			props.markdown &&
 			props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g) &&
 			props.markdown.match(/<h[1].*?>(.*?)<\/h[1]>/g)
 		) {
@@ -62,22 +58,18 @@ export function Page(props: PageProps) {
 
 				if (node.tagName === "H1") {
 					// @ts-ignore
-					tableOfContents[node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")] = []
+					table[node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")] = []
 				} else {
 					// @ts-ignore
-					if (!tableOfContents[lastH1Key]) {
-						const h1Keys = Object.keys(tableOfContents)
+					if (!table[lastH1Key]) {
+						const h1Keys = Object.keys(table)
 						// @ts-ignore
 						lastH1Key = h1Keys.at(-1)
 						// @ts-ignore
-						tableOfContents[lastH1Key].push(
-							node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")
-						)
+						table[lastH1Key].push(node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", ""))
 					} else {
 						// @ts-ignore
-						tableOfContents[lastH1Key].push(
-							node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")
-						)
+						table[lastH1Key].push(node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", ""))
 					}
 				}
 
@@ -85,20 +77,7 @@ export function Page(props: PageProps) {
 			})
 		}
 
-		return tableOfContents
-	}
-
-	const [details, setDetails] = createSignal({})
-	const [slider, { next, prev }] = createSlider({
-		slides: {
-			number: props.manifest && props.manifest.gallery ? props.manifest.gallery.length - 1 : 0,
-			perView: window ? (window.innerWidth > 768 ? 3 : 1) : 1,
-			spacing: 8,
-		},
-
-		detailsChanged: (slider: { track: { details: any } }) => {
-			setDetails(slider.track.details)
-		},
+		setTableOfContents(table)
 	})
 
 	return (
@@ -182,49 +161,6 @@ export function Page(props: PageProps) {
 												/>
 											</Button>
 										</div>
-										<Show
-											when={props.manifest.gallery && props.manifest.gallery.length > 1 && slider}
-										>
-											<div class="relative">
-												{/* @ts-ignore */}
-												<div use:slider class="mt-16 cursor-grab active:cursor-grabbing">
-													<For each={props.manifest.gallery}>
-														{(image) => (
-															<Link
-																href={image}
-																target="_blank"
-																rel="noopener noreferrer"
-																class="transition-opacity hover:opacity-80 cursor-pointer w-80 flex-shrink-0 active:cursor-grabbin flex items-center justify-center"
-															>
-																<img class="rounded-md w-80" src={image} />
-															</Link>
-														)}
-													</For>
-												</div>
-												<Show when={details()}>
-													<button
-														disabled={
-															// @ts-ignore
-															details() && details().progress ? details().progress === 0 : false
-														}
-														onClick={prev}
-														class="absolute -left-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
-													>
-														<Left class="h-8 w-8" />
-													</button>
-													<button
-														disabled={
-															// @ts-ignore
-															details() && details().progress ? details().progress > 0.99 : false
-														}
-														onClick={next}
-														class="absolute -right-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
-													>
-														<Right class="h-8 w-8" />
-													</button>
-												</Show>
-											</div>
-										</Show>
 									</div>
 									<div class="w-full">
 										<div class="flex flex-col gap-4 items-col flex-shrink-0">

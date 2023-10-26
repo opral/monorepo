@@ -74,31 +74,29 @@ if (!privateEnv.ALGOLIA_ADMIN || !privateEnv.ALGOLIA_APPLICATION) {
 	throw new Error("Algolia API keys are not set")
 }
 
-if (isProduction) {
-	const client = algoliasearch(privateEnv.ALGOLIA_APPLICATION, privateEnv.ALGOLIA_ADMIN)
-	const index = client.initIndex("registry")
+const client = algoliasearch(privateEnv.ALGOLIA_APPLICATION, privateEnv.ALGOLIA_ADMIN)
+const index = client.initIndex("registry")
 
-	const objects = await Promise.all(
-		[...manifests.values()].map(async (value) => {
-			const { uniqueID, readme, ...rest } = value
+const objects = await Promise.all(
+	[...manifests.values()].map(async (value) => {
+		const { uniqueID, readme, ...rest } = value
 
-			const text = { en: await fetch(readme.en).then((res) => res.text()) }
+		const text = { en: await fetch(readme.en).then((res) => res.text()) }
 
-			return { objectID: uniqueID, ...rest, readme: text }
-		})
-	)
+		return { objectID: uniqueID, ...rest, readme: text }
+	})
+)
 
-	index
-		.saveObjects(objects)
-		.then(() => {
-			// eslint-disable-next-line no-undef
-			console.info("Successfully uploaded registry on Algolia")
-		})
-		.catch((err) => {
-			// eslint-disable-next-line no-undef
-			console.error(err)
-		})
-}
+index
+	.saveObjects(objects)
+	.then(() => {
+		// eslint-disable-next-line no-undef
+		console.info("Successfully uploaded registry on Algolia")
+	})
+	.catch((err) => {
+		// eslint-disable-next-line no-undef
+		console.error(err)
+	})
 
 /* This function checks for uniqueIDs to verify they are not duplicated */
 function checkUniqueIDs(manifests) {
