@@ -82,7 +82,12 @@ export function Page(props: PageProps) {
 
 	return (
 		<>
-			<Title>{props.manifest && displayName()} - inlang Guide</Title>
+			<Title>{`${props.manifest && displayName()} ${
+				props.manifest &&
+				(props.manifest.publisherName === "inlang"
+					? "- inlang"
+					: `| Guide from ${props.manifest.publisherName}  - inlang`)
+			}`}</Title>
 			<Meta name="description" content={props.manifest && description()} />
 			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
