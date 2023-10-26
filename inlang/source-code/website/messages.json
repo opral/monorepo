@@ -1426,6 +1426,16 @@
 							"value": "Something went wrong. Please try again later."
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Etwas ist schief gelaufen. Bitte versuche es später noch einmal."
+						}
+					]
 				}
 			]
 		},
@@ -1440,6 +1450,16 @@
 						{
 							"type": "Text",
 							"value": "Please enter your email address."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Gib bitte deine Email-Adresse ein."
 						}
 					]
 				}
@@ -1458,6 +1478,16 @@
 							"value": "Enter email..."
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Email eingeben..."
+						}
+					]
 				}
 			]
 		},
@@ -1472,6 +1502,16 @@
 						{
 							"type": "Text",
 							"value": "Help us build the ecosystem"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Helfe uns, das Ökosystem aufzubauen"
 						}
 					]
 				}
@@ -1490,6 +1530,16 @@
 							"value": "You will be notified when this feature is available."
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Du wirst benachrichtigt, wenn diese Funktion verfügbar ist."
+						}
+					]
 				}
 			]
 		},
@@ -1504,6 +1554,16 @@
 						{
 							"type": "Text",
 							"value": "No results yet"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Noch keine Ergebnisse"
 						}
 					]
 				}
@@ -1522,6 +1582,16 @@
 							"value": "Please enter a valid email address."
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Bitte gib eine gültige E-Mail-Adresse ein."
+						}
+					]
 				}
 			]
 		},
@@ -1536,6 +1606,16 @@
 						{
 							"type": "Text",
 							"value": "All Products"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Alle Produkte"
 						}
 					]
 				}
@@ -1554,6 +1634,16 @@
 							"value": "All Guides"
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Alle Guides"
+						}
+					]
 				}
 			]
 		},
@@ -1568,6 +1658,16 @@
 						{
 							"type": "Text",
 							"value": "Build on inlang"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Baue auf inlang auf"
 						}
 					]
 				}
@@ -1586,6 +1686,16 @@
 							"value": "Application"
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Anwendung"
+						}
+					]
 				}
 			]
 		},
@@ -1602,6 +1712,16 @@
 							"value": "Lint Rules"
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lint Regeln"
+						}
+					]
 				}
 			]
 		},
@@ -1612,6 +1732,16 @@
 				{
 					"match": [],
 					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Markdown"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
 					"pattern": [
 						{
 							"type": "Text",
@@ -1634,6 +1764,16 @@
 							"value": "Missing something?"
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Fehlt etwas?"
+						}
+					]
 				}
 			]
 		},
@@ -1650,6 +1790,16 @@
 							"value": "Website"
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Webseite"
+						}
+					]
 				}
 			]
 		},
@@ -1664,6 +1814,16 @@
 						{
 							"type": "Text",
 							"value": "Search"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Suche"
 						}
 					]
 				}
