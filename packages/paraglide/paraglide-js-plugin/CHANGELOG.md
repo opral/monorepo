@@ -1,5 +1,11 @@
 # @inlang/plugin-paraglide-js
 
+## 1.1.0
+
+### Minor Changes
+
+- d40e5731a: update paraglide parser
+
 ## 1.0.0
 
 ### Major Changes
