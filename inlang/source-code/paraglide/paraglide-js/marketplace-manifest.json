@@ -5,7 +5,7 @@
 		"en": "paraglideJS"
 	},
 	"description": {
-		"en": "A fully configurable JavaScript library that integrates within your framework."
+		"en": "A fully configurable JavaScript i18n library that integrates within your framework."
 	},
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/paraglide/paraglide-js/README.md"
