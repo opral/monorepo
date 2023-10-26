@@ -7,6 +7,9 @@ import fetch from "node-fetch"
 
 const manifestLinks = JSON.parse(await fs.readFile("./registry.json", "utf-8"))
 
+// eslint-disable-next-line no-undef
+const isProduction = process.env.NODE_ENV === "production"
+
 /** @type {(import("@inlang/marketplace-manifest").MarketplaceManifest & { uniqueID: string })[]} */
 const manifests = []
 
@@ -71,29 +74,31 @@ if (!privateEnv.ALGOLIA_ADMIN || !privateEnv.ALGOLIA_APPLICATION) {
 	throw new Error("Algolia API keys are not set")
 }
 
-const client = algoliasearch(privateEnv.ALGOLIA_APPLICATION, privateEnv.ALGOLIA_ADMIN)
-const index = client.initIndex("registry")
+if (isProduction) {
+	const client = algoliasearch(privateEnv.ALGOLIA_APPLICATION, privateEnv.ALGOLIA_ADMIN)
+	const index = client.initIndex("registry")
 
-const objects = await Promise.all(
-	[...manifests.values()].map(async (value) => {
-		const { uniqueID, readme, ...rest } = value
+	const objects = await Promise.all(
+		[...manifests.values()].map(async (value) => {
+			const { uniqueID, readme, ...rest } = value
 
-		const text = { en: await fetch(readme.en).then((res) => res.text()) }
+			const text = { en: await fetch(readme.en).then((res) => res.text()) }
 
-		return { objectID: uniqueID, ...rest, readme: text }
-	})
-)
+			return { objectID: uniqueID, ...rest, readme: text }
+		})
+	)
 
-index
-	.saveObjects(objects)
-	.then(() => {
-		// eslint-disable-next-line no-undef
-		console.info("Successfully uploaded registry on Algolia")
-	})
-	.catch((err) => {
-		// eslint-disable-next-line no-undef
-		console.error(err)
-	})
+	index
+		.saveObjects(objects)
+		.then(() => {
+			// eslint-disable-next-line no-undef
+			console.info("Successfully uploaded registry on Algolia")
+		})
+		.catch((err) => {
+			// eslint-disable-next-line no-undef
+			console.error(err)
+		})
+}
 
 /* This function checks for uniqueIDs to verify they are not duplicated */
 function checkUniqueIDs(manifests) {
