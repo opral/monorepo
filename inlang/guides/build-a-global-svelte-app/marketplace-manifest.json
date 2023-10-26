@@ -1,0 +1,30 @@
+{
+	"id": "guide.nilsjacobsen.buildAGlobalSvelteApp",
+	"icon": "https://emojis.wiki/thumbs/emojis/blue-book.webp",
+	"displayName": {
+		"en": "Build a Global Svelte App"
+	},
+	"description": {
+		"en": "A complete guide on how to adopte inlang with paraglide.js and message-format-plugin"
+	},
+	"readme": {
+		"en": "./build-a-global-svelte-app.md"
+	},
+	"keywords": [
+		"application",
+		"developer",
+		"paraglide",
+		"i18n",
+		"library",
+		"localization",
+		"sdk",
+		"sdk-js",
+		"svelte",
+		"javascript",
+		"ide",
+		"guide"
+	],
+	"publisherName": "nilsjacobsen",
+	"publisherIcon": "https://avatars.githubusercontent.com/u/58360188?s=96&v=4",
+	"license": "Apache-2.0"
+}
