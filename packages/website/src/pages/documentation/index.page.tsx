@@ -179,9 +179,16 @@ function NavbarCommon(props: {
 	const isSelected = (slug: string) => {
 		if (
 			`/documentation/${slug}` ===
-				currentPageContext.urlParsed.pathname.replace(props.getLocale(), "") ||
+				currentPageContext.urlParsed.pathname.replace(
+					props.getLocale() === "en" ? "" : props.getLocale(),
+					""
+				) ||
 			`/documentation/${slug}` ===
-				currentPageContext.urlParsed.pathname.replace(props.getLocale(), "") + "/"
+				currentPageContext.urlParsed.pathname.replace(
+					props.getLocale() === "en" ? "" : props.getLocale(),
+					""
+				) +
+					"/"
 		) {
 			return true
 		} else {
@@ -238,7 +245,7 @@ function NavbarCommon(props: {
 									const slug = page.slug
 									return (
 										<li>
-											<Link
+											<a
 												onClick={props.onLinkClick}
 												class={
 													(isSelected(slug)
@@ -249,7 +256,7 @@ function NavbarCommon(props: {
 												href={`/documentation/${slug}`}
 											>
 												{page.title}
-											</Link>
+											</a>
 											<Show when={props.headings && props.headings.length > 0 && isSelected(slug)}>
 												<For each={props.headings}>
 													{(heading) => (
