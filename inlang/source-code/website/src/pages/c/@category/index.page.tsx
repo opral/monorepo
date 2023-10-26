@@ -190,9 +190,6 @@ const Guides = (props: { items: (MarketplaceManifest & { uniqueID: string })[] }
 	})
 	return (
 		<Show when={show()}>
-			<Show when={props.items.some((item) => item.id.split(".")[0] === "guide")}>
-				<h2 class="text-md text-surface-600 pb-4 pt-8">{m.marketplace_grid_title_guides()}</h2>
-			</Show>
 			<div class="mb-32 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
 				<Gallery items={props.items} guides />
 			</div>
