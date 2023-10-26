@@ -29,7 +29,7 @@ const createParser = () => {
 				Parsimmon.index, // start position of the message id
 				Parsimmon.regex(/[^(]*/), // message id
 				Parsimmon.index, // end position of the message id
-				Parsimmon.regex(/\([^)]*\)/), // function arguments
+				Parsimmon.regex(/\((?:[^()]|\([^()]*\))*\)/), // function arguments
 				(_, __, start, messageId, end, args) => {
 					return {
 						messageId: `${messageId}`,
