@@ -13,19 +13,19 @@ const Footer = () => {
 		return [
 			{
 				name: m.footer_category_application(),
-				href: "/application",
+				href: "/c/application",
 			},
 			{
 				name: m.footer_category_website(),
-				href: "/website",
+				href: "/c/website",
 			},
 			{
 				name: m.footer_category_markdown(),
-				href: "/markdown",
+				href: "/c/markdown",
 			},
 			{
 				name: m.footer_category_lint(),
-				href: "/lint",
+				href: "/c/lint",
 			},
 		]
 	}
