@@ -81,6 +81,15 @@ export function Page(props: PageProps) {
 			})
 		}
 
+		// If there is an extremely long heading, remove it from the table of contents
+		for (const key in table) {
+			for (const heading of table[key]) {
+				if (heading.length > 24) {
+					table[key].splice(table[key].indexOf(heading), 1)
+				}
+			}
+		}
+
 		setTableOfContents(table)
 	})
 

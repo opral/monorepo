@@ -20,7 +20,7 @@ export function Page(props: PageProps) {
 	const [editLink, setEditLink] = createSignal<string | undefined>("")
 	const [markdownHeadings, setMarkdownHeadings] = createSignal<Array<string>>([])
 
-	onMount(() => {
+	createEffect(() => {
 		setMarkdownHeadings(
 			props.markdown
 				? props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g).map((heading: string) => {

@@ -88,7 +88,7 @@ const Gallery = (props: { items: any }) => {
 					) : (
 						<div class="h-96 w-full col-span-4 flex items-center justify-center py-80 relative">
 							<div class="mx-auto">
-								<div class="h-24 w-24 animate-spin mb-4">
+								<div class="h-12 w-12 animate-spin mb-4">
 									<div class="h-full w-full bg-surface-50 border-primary border-4 rounded-full" />
 									<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-surface-50" />
 								</div>
