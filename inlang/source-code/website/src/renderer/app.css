@@ -259,7 +259,7 @@ sl-button.on-inverted::part(base):hover {
 }
 
 sl-menu {
-	width: 300px;
+	width: 320px;
 	border: solid var(--sl-panel-border-width) var(--sl-panel-border-color);
 	border-radius: var(--sl-border-radius-medium);
 	--tw-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);

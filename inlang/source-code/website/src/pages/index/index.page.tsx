@@ -1,34 +1,38 @@
 import { Meta, Title } from "@solidjs/meta"
 import Hero from "./custom_section/Hero.jsx"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
-import { Match, Switch } from "solid-js"
+import { Show } from "solid-js"
 import Lix from "./custom_section/Lix.jsx"
 import Stack from "./custom_section/Stack.jsx"
 import Gridview from "#src/interface/marketplace/Gridview.jsx"
+import { currentPageContext } from "#src/renderer/state.js"
 
 export function Page() {
-	const urlParams = new URLSearchParams(window.location.search)
+	const search = currentPageContext.urlParsed.search["search"]
+
 	return (
 		<>
-			<Title>inlang Marketplace</Title>
+			<Title>inlang Marketplace - The ecosystem to go global</Title>
 			<Meta
 				name="description"
-				content="Find apps, plugins and lint rules for inlang's ecosystem."
+				content="Quickly find the best solution to globalize (i18n) your app. inlang helps you to expand to new markets and acquire new customers."
 			/>
-			<Meta name="og:image" content="/images/inlang-marketplace-image.jpg" />
+			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<MarketplaceLayout>
-				<Switch>
-					<Match when={!urlParams.get("search")}>
-						<Hero />
-						<Stack />
-						<Lix />
-					</Match>
-					<Match when={urlParams.get("search")}>
-						<div class="pt-10">
-							<Gridview />
-						</div>
-					</Match>
-				</Switch>
+				<Show
+					when={search}
+					fallback={
+						<>
+							<Hero />
+							<Stack />
+							<Lix />
+						</>
+					}
+				>
+					<div class="pt-10">
+						<Gridview />
+					</div>
+				</Show>
 			</MarketplaceLayout>
 		</>
 	)

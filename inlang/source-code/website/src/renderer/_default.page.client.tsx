@@ -1,7 +1,7 @@
 import { type Component, createSignal } from "solid-js"
 import { createStore } from "solid-js/store"
 import { hydrate, render as renderApp } from "solid-js/web"
-import { Root } from "./Root.jsx"
+import { Root } from "./_default.root.jsx"
 import { setCurrentPageContext } from "./state.js"
 import type { PageContextRenderer } from "./types.js"
 import * as Sentry from "@sentry/browser"
@@ -70,7 +70,7 @@ export function render(pageContext: PageContextRenderer) {
 			;(isEditor ? renderApp : hydrate)(
 				() => (
 					<MetaProvider>
-						<Root page={currentPage()!} pageProps={currentPageProps} locale={pageContext.locale} />
+						<Root page={currentPage()!} pageProps={currentPageProps} />
 					</MetaProvider>
 				),
 				rootElement

@@ -1,7 +1,5 @@
-import { useI18n } from "@solid-primitives/i18n"
-import { defaultLanguage } from "#src/renderer/_default.page.route.js"
+import Link from "#src/renderer/Link.jsx"
 import { type JSXElement, Show } from "solid-js"
-import { navigate } from "vite-plugin-ssr/client/router"
 
 export type buttonType =
 	| "primary"
@@ -43,50 +41,41 @@ interface ButtonProps {
 }
 
 export const Button = (props: ButtonProps) => {
-	const [, { locale }] = useI18n()
-
-	const getLocale = () => {
-		const language = locale() || defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
-	}
-
 	return (
 		<>
 			<Show when={props?.href?.startsWith("/") && !props.function}>
-				<button
-					onClick={() => {
-						// @ts-ignore - https://github.com/brillout/vite-plugin-ssr/issues/1106
-						props.href && navigate(getLocale() + props.href)
-					}}
-					class={
-						"pointer-events-auto flex justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200 " +
-						bgColor(props.type) +
-						" " +
-						props.class
-					}
-				>
-					{props.children}
-					<Show when={props.chevron}>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="16"
-							height="16"
-							viewBox="0 0 16 16"
-							fill="none"
-						>
-							<path
-								d="M5.5 3L10.5 8L5.5 13"
-								stroke="currentColor"
-								stroke-width="1.5"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							/>
-						</svg>
-					</Show>
-				</button>
+				<Link href={props.href}>
+					<button
+						class={
+							"pointer-events-auto flex justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200 " +
+							bgColor(props.type) +
+							" " +
+							props.class
+						}
+					>
+						{props.children}
+						<Show when={props.chevron}>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="16"
+								height="16"
+								viewBox="0 0 16 16"
+								fill="none"
+							>
+								<path
+									d="M5.5 3L10.5 8L5.5 13"
+									stroke="currentColor"
+									stroke-width="1.5"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								/>
+							</svg>
+						</Show>
+					</button>
+				</Link>
 			</Show>
 			<Show when={!props?.href?.startsWith("/") && !props.function}>
-				<a href={props.href} target="_blank">
+				<Link href={props.href} target="_blank">
 					<div
 						class={
 							"flex justify-center items-center h-10 relative gap-2 rounded flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer " +
@@ -114,7 +103,7 @@ export const Button = (props: ButtonProps) => {
 							</svg>
 						</Show>
 					</div>
-				</a>
+				</Link>
 			</Show>
 			<Show when={props.function}>
 				<button

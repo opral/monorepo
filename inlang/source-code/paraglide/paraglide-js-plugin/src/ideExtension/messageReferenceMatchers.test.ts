@@ -193,7 +193,7 @@ describe("Paraglide Message Parser", () => {
 				},
 			},
 		])
-	}) 
+	})
 
 	it("should match if m is defined before the reference to paraglide", () => {
 		const sourceCode = `

@@ -1,37 +1,47 @@
+import type { LanguageTag } from "@inlang/sdk"
 import type { PageContextRenderer } from "./types.js"
+import { sourceLanguageTag, availableLanguageTags } from "@inlang/paraglide-js/inlang-marketplace"
 
-export { onBeforeRoute }
-
-export const defaultLanguage = "en"
-export const languages = ["en", "de", "zh", "sk", "pt_BR"]
-
-function onBeforeRoute(pageContext: PageContextRenderer) {
-	//console.log(pageContext)
-	const { urlWithoutLocale, locale } = extractLocale(pageContext.urlOriginal)
+export function onBeforeRoute(pageContext: PageContextRenderer) {
+	const { url: urlWithoutLanguageTag, languageTag } = i18nRouting(pageContext.urlOriginal)
 	return {
 		pageContext: {
-			// We make `locale` available as `pageContext.locale`. We can then use https://vite-plugin-ssr.com/pageContext-anywhere to access pageContext.locale in any React/Vue component.
-			locale,
-			// We overwrite the original URL
-			urlOriginal: urlWithoutLocale,
+			languageTag,
+			urlOriginal: urlWithoutLanguageTag,
 		},
 	}
 }
 
-export function extractLocale(url: string) {
+/**
+ * Returns the language tag and the url without the language tag to render the correct page.
+ *
+ * @example
+ *   i18nRouting("/de/marketplace") // { languageTag: "de", url: "/marketplace" }
+ *   i18nRouting("/de/about") // { languageTag: "de", url: "/about" }
+ *   i18nRouting("/about") // { languageTag: "en", url: "/about" }
+ *   i18nRouting("/") // { languageTag: "en", url: "/" }
+ */
+function i18nRouting(url: string) {
 	const urlPaths = url.split("/")
 
-	let locale
-	let urlWithoutLocale
-	// We remove the URL locale, for example `/de-DE/about` => `/about`
-	const firstPath = urlPaths[1]!
-	if (languages.filter((locale) => locale !== defaultLanguage).includes(firstPath)) {
-		locale = firstPath
-		urlWithoutLocale = "/" + urlPaths.slice(2).join("/")
-	} else {
-		locale = defaultLanguage
-		urlWithoutLocale = url
-	}
+	// first path of route is either / or a language tag
+	const maybeLanguageTag = urlPaths[1] as (typeof availableLanguageTags)[number]
 
-	return { locale, urlWithoutLocale }
+	// route is /de, /fr, etc. (a language tag is used)
+	if (
+		availableLanguageTags
+			.filter((tag: LanguageTag) => tag !== sourceLanguageTag)
+			.includes(maybeLanguageTag)
+	) {
+		return {
+			languageTag: maybeLanguageTag,
+			// remove the language tag from the url to provide vike with the page to be rendered
+			url: "/" + urlPaths.slice(2).join("/"),
+		}
+	} else {
+		return {
+			languageTag: sourceLanguageTag,
+			url: url,
+		}
+	}
 }
