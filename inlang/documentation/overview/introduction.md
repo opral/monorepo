@@ -1,4 +1,4 @@
-# Learn how to build inlang
+# Learn how to build on inlang
 
 <doc-links>
     <doc-link title="Guides are in the Marketplace" icon="material-symbols:add-business-outline-rounded" href="/" description="These docs guide you on how to build on top of inlang. You find guides in the marketplace"></doc-link>
