@@ -1,6 +1,5 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
-import { languageTag, sourceLanguageTag } from "@inlang/paraglide-js/inlang-marketplace"
 
 @customElement("doc-link")
 export class DocLink extends LitElement {
@@ -56,9 +55,7 @@ export class DocLink extends LitElement {
 	description: string = ""
 
 	override render() {
-		return html`<a
-			href="${languageTag() === sourceLanguageTag ? this.href : "/" + languageTag() + this.href}"
-		>
+		return html`<a href="${this.href}">
 			<div class="doc-link">
 				<div class="icons">
 					<div class="icon">
