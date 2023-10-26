@@ -16,6 +16,7 @@ import {
 	IconSvelte,
 	IconVue,
 } from "#src/interface/custom-icons/subcategoryIcon.jsx"
+import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -110,9 +111,11 @@ export function Page(props: {
 								</Show>
 							</Show>
 
-							<div class="mb-32 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
+							<div class="mb-8 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
 								<Gallery items={props.items} />
 							</div>
+
+							<Guides items={props.items} />
 
 							<Show when={!props.category && !props.slider && !props.minimal}>
 								<div class="mt-20">
@@ -127,9 +130,8 @@ export function Page(props: {
 	)
 }
 
-const Gallery = (props: { items: any }) => {
+const Gallery = (props: { items: any; guides?: boolean }) => {
 	const [show, setShow] = createSignal<boolean>(false)
-
 	onMount(() => {
 		setShow(true)
 	})
@@ -152,7 +154,19 @@ const Gallery = (props: { items: any }) => {
 					when={props.items && props.items.length > 0}
 					fallback={<NoResultsCard category={selectedCategory()} />}
 				>
-					<For each={props.items}>
+					<For
+						each={
+							props.guides
+								? props.items.filter(
+										(item: MarketplaceManifest & { uniqueID: string }) =>
+											item.id.split(".")[0] === "guide"
+								  )
+								: props.items.filter(
+										(item: MarketplaceManifest & { uniqueID: string }) =>
+											item.id.split(".")[0] !== "guide"
+								  )
+						}
+					>
 						{(item) => {
 							const displayName =
 								typeof item.displayName === "object" ? item.displayName.en : item.displayName
@@ -160,9 +174,28 @@ const Gallery = (props: { items: any }) => {
 							return <Card item={item} displayName={displayName} />
 						}}
 					</For>
-					<CardBuildOwn />
+					<Show when={!props.guides}>
+						<CardBuildOwn />
+					</Show>
 				</Show>
 			</Show>
 		</>
+	)
+}
+
+const Guides = (props: { items: (MarketplaceManifest & { uniqueID: string })[] }) => {
+	const [show, setShow] = createSignal<boolean>(false)
+	onMount(() => {
+		setShow(true)
+	})
+	return (
+		<Show when={show()}>
+			<Show when={props.items.some((item) => item.id.split(".")[0] === "guide")}>
+				<h2 class="text-md text-surface-600 pb-4 pt-8">{m.marketplace_grid_title_guides()}</h2>
+			</Show>
+			<div class="mb-32 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
+				<Gallery items={props.items} guides />
+			</div>
+		</Show>
 	)
 }
