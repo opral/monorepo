@@ -82,7 +82,7 @@ export function Page(props: PageProps) {
 
 	return (
 		<>
-			<Title>{props.manifest && displayName()}</Title>
+			<Title>{props.manifest && displayName()} - inlang Guide</Title>
 			<Meta name="description" content={props.manifest && description()} />
 			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
