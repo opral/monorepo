@@ -8,7 +8,7 @@
 		"en": "Understand general concept of inlang ecosystem and its benefits."
 	},
 	"readme": {
-		"en": "./what-is-inlang.md"
+		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/what-is-inlang/what-is-inlang.md"
 	},
 	"keywords": [
 		"application",
@@ -21,7 +21,7 @@
 		"localization",
 		"guide"
 	],
-	"publisherName": "niklasbuchfink",
+	"publisherName": "Niklas Buchfink",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/59048346?v=4",
 	"license": "Apache-2.0"
 }
