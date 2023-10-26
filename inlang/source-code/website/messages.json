@@ -242,6 +242,22 @@
 			]
 		},
 		{
+			"id": "marketplace_grid_title_guides",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "All Guides"
+						}
+					]
+				}
+			]
+		},
+		{
 			"id": "marketplace_header_search_placeholder",
 			"selectors": [],
 			"variants": [

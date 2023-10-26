@@ -21,7 +21,7 @@ const CategoryTabs = () => {
 			},
 			{
 				name: m.marketplace_header_category_lint(),
-				href: "/c/lint",
+				href: "/c/lint-rules",
 			},
 			{
 				name: m.marketplace_header_category_missing_something(),
