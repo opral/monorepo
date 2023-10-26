@@ -2,6 +2,7 @@ import { For } from "solid-js"
 import { currentPageContext } from "#src/renderer/state.js"
 import Link from "#src/renderer/Link.jsx"
 import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
+import { setSearchInput } from "../components/SearchBar.jsx"
 
 const CategoryTabs = () => {
 	const getCategories = () => {
@@ -42,6 +43,7 @@ const CategoryTabs = () => {
 					>
 						<Link
 							href={link.href}
+							onClick={() => setSearchInput("")}
 							target={link.href.includes("github.com") ? "_blank" : "_default"}
 						>
 							<div
