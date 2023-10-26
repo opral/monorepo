@@ -118,6 +118,16 @@
 							"value": "Global Website"
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Globale Webseite"
+						}
+					]
 				}
 			]
 		},
@@ -638,6 +648,16 @@
 							"value": "The ecosystem to go global"
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Das Ökosystem um global zu gehen"
+						}
+					]
 				}
 			]
 		},
@@ -990,6 +1010,16 @@
 							"value": "Featured"
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Hervorgehoben"
+						}
+					]
 				}
 			]
 		},
@@ -1004,6 +1034,16 @@
 						{
 							"type": "Text",
 							"value": "More about the ecosystem"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Mehr zum Ökosystem"
 						}
 					]
 				}
@@ -1022,6 +1062,16 @@
 							"value": "Expand to new markets and acquire more customers."
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Erschließe neue Märkte und gewinne mehr Kunden."
+						}
+					]
 				}
 			]
 		},
@@ -1036,6 +1086,16 @@
 						{
 							"type": "Text",
 							"value": "Welcome to inlang,"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Willkommen bei inlang,"
 						}
 					]
 				}
@@ -1054,6 +1114,16 @@
 							"value": "the ecosystem to go global."
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "das Ökosystem um global zu gehen."
+						}
+					]
 				}
 			]
 		},
@@ -1068,6 +1138,16 @@
 						{
 							"type": "Text",
 							"value": "More about Lix"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Mehr über Lix"
 						}
 					]
 				}
@@ -1086,6 +1166,16 @@
 							"value": "The backbone of the ecosystem"
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Die Basis des Ökosystems"
+						}
+					]
 				}
 			]
 		},
@@ -1102,6 +1192,16 @@
 							"value": "Lix change control"
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lix-Änderungskontrolle"
+						}
+					]
 				}
 			]
 		},
@@ -1112,6 +1212,16 @@
 				{
 					"match": [],
 					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Stack"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
 					"pattern": [
 						{
 							"type": "Text",
@@ -1160,6 +1270,16 @@
 							"value": "Can't find what you are looking for?"
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Du kannst nicht finden, was du suchst?"
+						}
+					]
 				}
 			]
 		},
@@ -1174,6 +1294,16 @@
 						{
 							"type": "Text",
 							"value": "Need help or have questions? Join our Discord!"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Benötigst du Hilfe oder hast du Fragen? Trete unserem Discord bei!"
 						}
 					]
 				}
@@ -1192,6 +1322,16 @@
 							"value": "Notify me"
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Benachrichtige mich"
+						}
+					]
 				}
 			]
 		},
@@ -1206,6 +1346,16 @@
 						{
 							"type": "Text",
 							"value": "You are already getting notified."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Du wirst bereits benachrichtigt."
 						}
 					]
 				}
@@ -1224,6 +1374,16 @@
 							"value": "We will let you know when we get"
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Wir werden dich informieren, wenn wir"
+						}
+					]
 				}
 			]
 		},
@@ -1238,6 +1398,16 @@
 						{
 							"type": "Text",
 							"value": "some new results."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "neue Ergebnisse haben."
 						}
 					]
 				}
