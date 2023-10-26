@@ -8,6 +8,7 @@ import IconGithub from "~icons/cib/github"
 import IconDiscord from "~icons/cib/discord"
 import Link from "#src/renderer/Link.jsx"
 import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
+import { LanguagePicker } from "#src/pages/index/LanguagePicker.jsx"
 
 const MarketplaceHeader = () => {
 	const socialMediaLinks = [
@@ -56,6 +57,7 @@ const MarketplaceHeader = () => {
 					<Button type="text" href="/documentation">
 						{m.marketplace_header_build_on_inlang_button()}
 					</Button>
+
 					<div class="gap-[2px] items-center hidden md:flex">
 						<For each={socialMediaLinks}>
 							{(link) => (
@@ -70,6 +72,7 @@ const MarketplaceHeader = () => {
 							)}
 						</For>
 					</div>
+					<LanguagePicker />
 				</div>
 			</div>
 			<Show
