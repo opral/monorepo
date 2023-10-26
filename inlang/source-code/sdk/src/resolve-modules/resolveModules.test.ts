@@ -7,10 +7,12 @@ import {
 	ModuleExportIsInvalidError,
 	ModuleHasNoExportsError,
 	ModuleImportError,
+	ModuleSettingsAreInvalidError,
 } from "./errors.js"
 import { resolveModules } from "./resolveModules.js"
 import type { ProjectSettings } from "@inlang/project-settings"
 import type { InlangModule } from "@inlang/module"
+import { Type } from "@sinclair/typebox"
 
 it("should return an error if a plugin cannot be imported", async () => {
 	const settings: ProjectSettings = {
@@ -39,6 +41,7 @@ it("should resolve plugins and message lint rules successfully", async () => {
 		id: "plugin.namespace.mock",
 		description: { en: "Mock plugin description" },
 		displayName: { en: "Mock Plugin" },
+
 		loadMessages: () => undefined as any,
 		saveMessages: () => undefined as any,
 		addCustomApi: () => ({
@@ -52,6 +55,7 @@ it("should resolve plugins and message lint rules successfully", async () => {
 		id: "messageLintRule.namespace.mock",
 		description: { en: "Mock lint rule description" },
 		displayName: { en: "Mock Lint Rule" },
+
 		run: () => undefined,
 	}
 
@@ -159,4 +163,31 @@ it("should handle other unhandled errors during plugin resolution", async () => 
 
 	// Assert results
 	expect(resolved.errors[0]).toBeInstanceOf(ModuleError)
+})
+it("should return an error if a moduleSettings are invalid", async () => {
+	const settings: ProjectSettings = {
+		sourceLanguageTag: "en",
+		languageTags: ["de", "en"],
+		modules: ["plugin.js"],
+		"plugin.namespace.mock": {
+			ignore: ["invalid"],
+		},
+	}
+
+	const _import = async () => ({
+		default: {
+			id: "plugin.namespace.mock",
+			description: { en: "Mock plugin description" },
+			displayName: { en: "Mock Plugin" },
+			settingsSchema: Type.Object({
+				ignore: Type.String(),
+			}),
+		},
+	})
+
+	// Call the function
+	const resolved = await resolveModules({ settings, _import, nodeishFs: {} as any })
+
+	// Assert results
+	expect(resolved.errors[0]).toBeInstanceOf(ModuleSettingsAreInvalidError)
 })

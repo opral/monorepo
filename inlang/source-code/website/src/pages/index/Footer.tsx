@@ -1,4 +1,4 @@
-import { NewsletterForm } from "#src/components/NewsletterForm.jsx"
+import { NewsletterForm } from "#src/interface/components/NewsletterForm.jsx"
 import { For } from "solid-js"
 import { Button } from "./components/Button.jsx"
 import IconTwitter from "~icons/cib/twitter"
@@ -8,19 +8,19 @@ import IconDiscord from "~icons/cib/discord"
 const productsLinks = [
 	{
 		name: `Global Application`,
-		href: "/application",
+		href: "/c/application",
 	},
 	{
 		name: `Global Website`,
-		href: "/website",
+		href: "/c/website",
 	},
 	{
 		name: `Global Markdown`,
-		href: "/markdown",
+		href: "/c/markdown",
 	},
 	{
 		name: `Lint Rules`,
-		href: "/lint",
+		href: "/c/lint-rules",
 	},
 ]
 
@@ -57,8 +57,8 @@ const Footer = () => {
 				href: "https://github.com/orgs/inlang/projects?query=is%3Aopen",
 			},
 			{
-				name: `Developers`,
-				href: "/developers",
+				name: `Developer Docs`,
+				href: "/documentation",
 			},
 		]
 	}
@@ -82,7 +82,7 @@ const Footer = () => {
 
 	return (
 		<footer class="overflow-hidden max-w-7xl mx-auto">
-			<div class="flex flex-row flex-wrap-reverse py-16 px-6 md:px-4 xl:px-0 gap-10 sm:gap-x-0 md:gap-y-10 xl:gap-0">
+			<div class="flex flex-row flex-wrap-reverse py-16 max-w-7xl mx-auto px-4 xl:px-0 gap-10 sm:gap-x-0 md:gap-y-10 xl:gap-0">
 				<div class="w-full md:w-1/4 xl:px-4 flex flex-row items-center sm:items-start md:flex-col gap-10 md:justify-start justify-between flex-wrap">
 					<div>
 						<a href="/" class="flex items-center w-fit mb-6">
@@ -91,16 +91,15 @@ const Footer = () => {
 						</a>
 						<p class="text-surface-600 text-sm">The ecosystem to go global</p>
 					</div>
-					<div class="flex gap-4">
+					<div class="flex gap-7 flex-wrap">
 						<For each={socialMediaLinks}>
 							{(link) => (
 								<a
 									target="_blank"
-									class={"link link-primary flex space-x-2 items-center"}
+									class={"link link-primary flex space-x-2 items-center text-xs"}
 									href={link.href}
 								>
-									<link.Icon class="w-5 h-5" />
-									<span class="sr-only">{link.name}</span>
+									{link.name}
 								</a>
 							)}
 						</For>
@@ -143,10 +142,13 @@ const Footer = () => {
 					</For>
 				</div>
 			</div>
-			<div class="px-6 md:px-4 xl:px-0 flex flex-col xl:flex-row justify-between items-end gap-8 pb-16">
+			<div class="px-4 xl:px-0 flex flex-col xl:flex-row justify-between items-end gap-8 pb-16">
 				<div class="xl:px-4 xl:flex flex-col gap-2 md:gap-4 pt-2 max-xl:w-full">
 					<NewsletterForm />
 				</div>
+				<p class="text-sm text-surface-500">
+					Copyright {new Date().getFullYear().toString()} inlang
+				</p>
 			</div>
 		</footer>
 	)

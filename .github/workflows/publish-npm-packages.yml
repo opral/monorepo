@@ -71,6 +71,12 @@ jobs:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/message-lint-rules/missingTranslation/package.json
 
+      - name: "@inlang/message-lint-rule-snake-case-id" 
+        uses: JS-DevTools/npm-publish@v2
+        with:
+            token: ${{ secrets.NPM_PUBLISH_TOKEN }}
+            package: inlang/source-code/message-lint-rules/snakeCaseId/package.json
+
       - name: "@inlang/plugin-json" 
         uses: JS-DevTools/npm-publish@v2
         with:
@@ -88,7 +94,12 @@ jobs:
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/plugins/inlang-message-format/package.json
-  
+
+      - name: "@inlang/plugin-paraglide-js" 
+        uses: JS-DevTools/npm-publish@v2
+        with:
+            token: ${{ secrets.NPM_PUBLISH_TOKEN }}
+            package: inlang/source-code/paraglide/paraglide-js-plugin/package.json
   
       - name: "@inlang/result" 
         uses: JS-DevTools/npm-publish@v2

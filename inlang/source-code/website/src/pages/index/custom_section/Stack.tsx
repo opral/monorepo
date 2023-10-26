@@ -1,15 +1,16 @@
 import {
-	IconSvelte,
-	IconReact,
-	IconNextjs,
-	IconJavascript,
 	IconFlutter,
+	IconJavascript,
+	IconNextjs,
+	IconReact,
+	IconSvelte,
 	IconVue,
-} from "#src/pages/application/index.page.jsx"
+} from "#src/interface/custom-icons/subcategoryIcon.jsx"
+
 import { For } from "solid-js"
 
 const Stack = () => {
-	const getSubCategies = [
+	const getSubCategies: boolean | any[] | null | undefined = [
 		{
 			name: "Svelte",
 			param: "svelte",
@@ -48,16 +49,7 @@ const Stack = () => {
 				<div class="flex gap-2 overflow-x-scroll hide-scrollbar">
 					<For each={getSubCategies}>
 						{(link) => (
-							<a
-								href={
-									window.location.origin +
-									"//" +
-									window.location.pathname +
-									"/?search=" +
-									link.param
-								}
-								class="flex-grow"
-							>
+							<a href={"/search/?q=" + link.param} class="flex-grow">
 								<div
 									class={
 										(window.location.search.includes(link.param)

@@ -12,5 +12,3 @@
 	"plugin.inlang.json": {
 		"pathPattern": "./inlang/source-code/website/lang/{languageTag}.json",
 		"variableReferencePattern": ["{", "}"]
-	}
-}

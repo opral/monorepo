@@ -9,6 +9,7 @@ export const cli = new Command()
 	.name("paraglide-js")
 	.addCommand(compileCommand)
 	.addCommand(initCommand)
+	.showHelpAfterError()
 	.action(() => {
 		// ------------------- VALIDATE IF RUNNING FROM CORRECT FOLDER -------------------
 		// the CLI expects to be running from the dist folder of the specific paraglide package
@@ -30,5 +31,3 @@ export const cli = new Command()
 		// show the help because no command is specified
 		return cli.help()
 	})
-
-cli.showHelpAfterError(true)
