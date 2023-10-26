@@ -6,6 +6,9 @@ import { currentPageContext } from "#src/renderer/state.js"
 import IconTwitter from "~icons/cib/twitter"
 import IconGithub from "~icons/cib/github"
 import IconDiscord from "~icons/cib/discord"
+import Link from "#src/renderer/Link.jsx"
+import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
+import { LanguagePicker } from "#src/pages/index/LanguagePicker.jsx"
 
 const MarketplaceHeader = () => {
 	const socialMediaLinks = [
@@ -37,18 +40,14 @@ const MarketplaceHeader = () => {
 					(!currentPageContext.urlParsed.pathname.includes("/documentation") ? "mb-10" : "mb-1")
 				}
 			>
-				<a
+				<Link
+					href={"/"}
 					onClick={() => setSearchInput("")}
-					href={
-						window.location.pathname === "/"
-							? window.location.origin + "//" + window.location.pathname
-							: "/"
-					}
 					class="flex items-center w-fit pointer-events-auto py-4"
 				>
 					<img class={"h-8 w-8"} src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
 					<span class={"self-center pl-2 text-left font-semibold text-surface-900"}>inlang</span>
-				</a>
+				</Link>
 				<Show when={!currentPageContext.urlParsed.pathname.includes("/documentation")}>
 					<div class="absolute sm:static top-16 sm:top-0 w-full sm:max-w-sm mx-auto sm:mx-0">
 						<SearchBar />
@@ -56,22 +55,24 @@ const MarketplaceHeader = () => {
 				</Show>
 				<div class="flex gap-8">
 					<Button type="text" href="/documentation">
-						Create your own
+						{m.marketplace_header_build_on_inlang_button()}
 					</Button>
+
 					<div class="gap-[2px] items-center hidden md:flex">
 						<For each={socialMediaLinks}>
 							{(link) => (
-								<a
+								<Link
 									target="_blank"
 									class={"text-surface-700 hover:text-primary flex space-x-2 items-center p-2"}
 									href={link.href}
 								>
 									<link.Icon class="w-5 h-5" />
 									<span class="sr-only">{link.name}</span>
-								</a>
+								</Link>
 							)}
 						</For>
 					</div>
+					<LanguagePicker />
 				</div>
 			</div>
 			<Show

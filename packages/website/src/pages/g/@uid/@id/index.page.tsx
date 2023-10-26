@@ -9,8 +9,6 @@ import { SelectRepo } from "../../Select.jsx"
 import Right from "~icons/material-symbols/chevron-right"
 import Left from "~icons/material-symbols/chevron-left"
 import { colorForTypeOf, convertLinkToGithub, typeOfIdToTitle } from "../../utilities.js"
-import { defaultLanguage } from "#src/renderer/_default.page.route.js"
-import { useI18n } from "@solid-primitives/i18n"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
@@ -19,6 +17,8 @@ import { currentPageContext } from "#src/renderer/state.js"
 import { createSlider } from "solid-slider"
 import "solid-slider/slider.css"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
+import { languageTag } from "@inlang/paraglide-js/inlang-marketplace"
+import Link from "#src/renderer/Link.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -30,12 +30,6 @@ export type PageProps = {
 
 export function Page(props: PageProps) {
 	const [readmore, setReadmore] = createSignal<boolean>(false)
-	const [, { locale }] = useI18n()
-
-	const getLocale = () => {
-		const language = locale() ?? defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
-	}
 
 	// mapping translatable types
 	const displayName = () =>
@@ -196,14 +190,14 @@ export function Page(props: PageProps) {
 												<div use:slider class="mt-16 cursor-grab active:cursor-grabbing">
 													<For each={props.manifest.gallery}>
 														{(image) => (
-															<a
+															<Link
 																href={image}
 																target="_blank"
 																rel="noopener noreferrer"
 																class="transition-opacity hover:opacity-80 cursor-pointer w-80 flex-shrink-0 active:cursor-grabbin flex items-center justify-center"
 															>
 																<img class="rounded-md w-80" src={image} />
-															</a>
+															</Link>
 														)}
 													</For>
 												</div>
@@ -264,12 +258,12 @@ export function Page(props: PageProps) {
 												<div class="flex flex-wrap gap-2 items-center">
 													<For each={props?.manifest?.keywords}>
 														{(keyword) => (
-															<a
+															<Link
 																class="transition-opacity hover:opacity-80 cursor-pointer"
 																href={"/search?q=" + keyword}
 															>
 																<Chip text={keyword} color={colorForTypeOf(props.manifest.id)} />
-															</a>
+															</Link>
 														)}
 													</For>
 												</div>
@@ -287,7 +281,7 @@ export function Page(props: PageProps) {
 										<div class="col-span-1 md:order-1 -order-1">
 											<NavbarCommon
 												displayName={displayName}
-												getLocale={getLocale}
+												getLocale={languageTag}
 												tableOfContents={tableOfContents}
 											/>
 										</div>
@@ -404,8 +398,8 @@ function NavbarCommon(props: {
 				<For each={Object.keys(props.tableOfContents())}>
 					{(sectionTitle) => (
 						<li>
-							<a
-								onClick={(e) => {
+							<Link
+								onClick={(e: Event) => {
 									e.preventDefault()
 									scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
 									setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
@@ -419,12 +413,12 @@ function NavbarCommon(props: {
 								href={`#${replaceChars(sectionTitle.toString().toLowerCase())}`}
 							>
 								{sectionTitle.replace("#", "")}
-							</a>
+							</Link>
 							<For each={props.tableOfContents()[sectionTitle]}>
 								{(heading) => (
 									<li>
-										<a
-											onClick={(e) => {
+										<Link
+											onClick={(e: Event) => {
 												e.preventDefault()
 												scrollToAnchor(replaceChars(heading.toString().toLowerCase()))
 												setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
@@ -438,7 +432,7 @@ function NavbarCommon(props: {
 											href={`#${replaceChars(heading.toString().toLowerCase())}`}
 										>
 											{heading.replace("#", "")}
-										</a>
+										</Link>
 									</li>
 								)}
 							</For>

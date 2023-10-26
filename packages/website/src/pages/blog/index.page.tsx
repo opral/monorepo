@@ -1,18 +1,10 @@
 import { Title, Meta } from "@solidjs/meta"
 import { For } from "solid-js"
-import { defaultLanguage } from "#src/renderer/_default.page.route.js"
-import { useI18n } from "@solid-primitives/i18n"
 import tableOfContents from "../../../../../blog/tableOfContents.json"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
+import Link from "#src/renderer/Link.jsx"
 
 export function Page() {
-	const [, { locale }] = useI18n()
-
-	const getLocale = () => {
-		const language = locale() || defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
-	}
-
 	return (
 		<>
 			<Title>inlang Blog - Globalization infrastructure for software</Title>
@@ -26,7 +18,7 @@ export function Page() {
 					<For each={Object.entries(tableOfContents)}>
 						{([, page]) => (
 							<div class="py-12">
-								<a href={getLocale() + "/blog/" + page.slug} class="text-ellipsis space-y-4">
+								<Link href={"/blog/" + page.slug} class="text-ellipsis space-y-4">
 									<h2 class="text-xl font-bold tracking-tight text-on-backround truncate">
 										{page.title}
 									</h2>
@@ -34,7 +26,7 @@ export function Page() {
 									{/* using link-primary and text-primary to render the link color by default in primary 
 							but also get hover effects from link-primary */}
 									<p class="link text-primary link-primary">Read more…</p>
-								</a>
+								</Link>
 							</div>
 						)}
 					</For>
