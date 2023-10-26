@@ -18,7 +18,9 @@
 		"getting-started",
 		"i18n",
 		"localization",
-		"guide"
+		"guide",
+		"markdown",
+		"lint rule"
 	],
 	"publisherName": "Niklas Buchfink",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/59048346?v=4",
