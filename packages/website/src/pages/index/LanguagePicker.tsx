@@ -36,8 +36,8 @@ export function LanguagePicker(props: { darkmode?: boolean }) {
 					<For each={availableLanguageTags}>
 						{(language) => (
 							<sl-menu-item
-								prop:type="checkbox"
-								// @ts-ignore
+								//@ts-ignore
+								type="checkbox"
 								checked={language === languageTag()}
 								onClick={() => setLanguageTag(language)}
 							>
