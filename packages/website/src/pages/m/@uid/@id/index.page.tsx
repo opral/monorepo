@@ -46,7 +46,7 @@ export function Page(props: PageProps) {
 
 	const [tableOfContents, setTableOfContents] = createSignal({})
 	createEffect(() => {
-		const table = {}
+		const table: Record<string, Array<string>> = {}
 		if (
 			props.markdown &&
 			props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g) &&
@@ -82,10 +82,12 @@ export function Page(props: PageProps) {
 		}
 
 		// If there is an extremely long heading, remove it from the table of contents
-		for (const key in table) {
-			for (const heading of table[key]) {
-				if (heading.length > 24) {
-					table[key].splice(table[key].indexOf(heading), 1)
+		for (const key in Object.keys(table)) {
+			if (table[key]) {
+				for (const heading of table[key]!) {
+					if (heading.length > 24) {
+						table[key]!.splice(table[key]!.indexOf(heading), 1)
+					}
 				}
 			}
 		}

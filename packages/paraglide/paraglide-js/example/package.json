@@ -3,8 +3,8 @@
 	"type": "module",
 	"scripts": {
 		"_build": "paraglide-js compile --namespace example-typescript",
-		"pretest": "npm run build",
-		"test": "tsc --noEmit && vitest run"
+		"_pretest": "npm run build",
+		"_test": "tsc --noEmit && vitest run"
 	},
 	"dependencies": {
 		"@inlang/paraglide-js": "*"

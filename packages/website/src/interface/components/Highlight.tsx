@@ -57,7 +57,6 @@ export default function Highlight(props: BannerProps | CardProps) {
 						{props.slogan}
 					</h3>
 					<Card
-						highlight
 						item={registry.find((item: { id: string }) => item.id === (props as CardProps).id)}
 						displayName={
 							// @ts-expect-error !TODO fix later
