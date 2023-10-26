@@ -114,12 +114,14 @@ describe("loadMessages", () => {
 			id: "plugin.namepsace.loadMessagesFirst",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
+
 			loadMessages: async () => undefined as any,
 		}
 		const mockPlugin2: Plugin = {
 			id: "plugin.namepsace.loadMessagesSecond",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
+
 			loadMessages: async () => undefined as any,
 		}
 
@@ -137,6 +139,7 @@ describe("loadMessages", () => {
 			id: "plugin.namepsace.loadMessagesFirst",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
+
 			saveMessages: async () => undefined as any,
 		}
 
@@ -181,7 +184,6 @@ describe("saveMessages", () => {
 			id: "plugin.namepsace.saveMessages2",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
-
 			saveMessages: async () => undefined as any,
 		}
 
@@ -199,6 +201,7 @@ describe("saveMessages", () => {
 			id: "plugin.namepsace.loadMessagesFirst",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
+
 			loadMessages: async () => undefined as any,
 		}
 
@@ -218,7 +221,6 @@ describe("addCustomApi", () => {
 			id: "plugin.namespace.placeholder",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
-
 			addCustomApi: () => ({
 				"my-app": {
 					messageReferenceMatcher: () => undefined as any,
@@ -253,7 +255,6 @@ describe("addCustomApi", () => {
 			id: "plugin.namespace.placeholder2",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
-
 			addCustomApi: () => ({
 				"my-app-3": {
 					functionOfMyApp3: () => undefined as any,

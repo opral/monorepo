@@ -1,9 +1,10 @@
-import type { Plugin } from "@inlang/sdk"
+import type { NodeishFilesystemSubset, Plugin } from "@inlang/sdk"
 import type { StorageSchema } from "./storageSchema.js"
 import { displayName, description } from "../marketplace-manifest.json"
 import { parse as validatePluginSettings } from "valibot"
 import { PluginSettings } from "./settings.js"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
+import parsePath from "path-parse"
 
 export const pluginId = "plugin.inlang.messageFormat"
 
@@ -27,18 +28,7 @@ export const plugin: Plugin<{
 		} catch (error) {
 			// file does not exist. create it.
 			if ((error as any)?.code === "ENOENT") {
-				await nodeishFs.writeFile(
-					settings["plugin.inlang.messageFormat"].filePath,
-					JSON.stringify(
-						{
-							$schema: "https://inlang.com/schema/inlang-message-format",
-							data: [],
-						} satisfies StorageSchema,
-						undefined,
-						// beautify the file
-						"\t"
-					)
-				)
+				await createFile({ path: settings["plugin.inlang.messageFormat"].filePath, nodeishFs })
 				return []
 			}
 			// unknown error
@@ -56,4 +46,21 @@ export const plugin: Plugin<{
 			} satisfies StorageSchema)
 		)
 	},
+}
+
+const createFile = async (args: { path: string; nodeishFs: NodeishFilesystemSubset }) => {
+	const parsed = parsePath(args.path)
+	await args.nodeishFs.mkdir(parsed.dir, { recursive: true })
+	await args.nodeishFs.writeFile(
+		args.path,
+		JSON.stringify(
+			{
+				$schema: "https://inlang.com/schema/inlang-message-format",
+				data: [],
+			} satisfies StorageSchema,
+			undefined,
+			// beautify the file
+			"\t"
+		)
+	)
 }

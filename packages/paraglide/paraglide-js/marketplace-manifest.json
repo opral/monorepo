@@ -2,7 +2,7 @@
 	"id": "library.inlang.paraglideJs",
 	"icon": "https://emojis.wiki/thumbs/emojis/parachute.webp",
 	"displayName": {
-		"en": "paraglideJS (former SDK-JS)"
+		"en": "paraglideJS"
 	},
 	"description": {
 		"en": "A fully configurable JavaScript library that integrates within your framework."

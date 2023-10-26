@@ -1,7 +1,7 @@
 import { useI18n } from "@solid-primitives/i18n"
 import { Meta, Title } from "@solidjs/meta"
-import { NewsletterForm } from "#src/components/NewsletterForm.jsx"
-import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
+import { NewsletterForm } from "#src/interface/components/NewsletterForm.jsx"
+import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 
 export type PageProps = {
 	markdown: string

@@ -32,6 +32,7 @@ const mockPlugin: Plugin = {
 	id: "plugin.project.i18next",
 	description: { en: "Mock plugin description" },
 	displayName: { en: "Mock Plugin" },
+
 	loadMessages: () => exampleMessages,
 	saveMessages: () => undefined,
 }
@@ -76,6 +77,7 @@ const mockLintRule: MessageLintRule = {
 	id: "messageLintRule.namespace.mock",
 	description: { en: "Mock lint rule description" },
 	displayName: { en: "Mock Lint Rule" },
+
 	run: () => undefined,
 }
 
@@ -179,6 +181,7 @@ describe("messages", () => {
 			description: {
 				en: "wo",
 			},
+
 			loadMessages: ({ settings }) => (settings.languageTags.length ? exampleMessages : []),
 			saveMessages: () => undefined,
 		}
