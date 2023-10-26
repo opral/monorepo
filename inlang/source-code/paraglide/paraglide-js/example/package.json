@@ -2,7 +2,7 @@
 	"name": "@inlang/paraglide-js-example-typescript",
 	"type": "module",
 	"scripts": {
-		"build": "paraglide-js compile --namespace example-typescript",
+		"_build": "paraglide-js compile --namespace example-typescript",
 		"pretest": "npm run build",
 		"test": "tsc --noEmit && vitest run"
 	},
