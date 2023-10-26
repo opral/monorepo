@@ -160,6 +160,41 @@ describe("Paraglide Message Parser", () => {
 		])
 	})
 
+	it("should match the m function with an object and the arguments a function call", () => {
+		const sourceCode = `
+		import * as m from "@inlang/paraglide-js/example/messages";
+		m.helloWorld({args1: someFunction(), args2: otherFunction(), args3: "some string"});
+		`
+		const result = parse(sourceCode)
+		expect(result).toEqual([
+			{
+				messageId: "helloWorld",
+				position: {
+					start: { line: 3, character: 5 },
+					end: { line: 3, character: 86 },
+				},
+			},
+		])
+	})
+
+	// it should match the m function which do have function chaining
+	it("should match the m function which do have function chaining", () => {
+		const sourceCode = `
+		import * as m from "@inlang/paraglide-js/example/messages";
+		m.helloWorld().someFunction().someOtherFunction();
+		`
+		const result = parse(sourceCode)
+		expect(result).toEqual([
+			{
+				messageId: "helloWorld",
+				position: {
+					start: { line: 3, character: 5 },
+					end: { line: 3, character: 17 },
+				},
+			},
+		])
+	}) 
+
 	it("should match if m is defined before the reference to paraglide", () => {
 		const sourceCode = `
 		m.helloWorld();
