@@ -1,5 +1,11 @@
 # @inlang/plugin-message-format
 
+## 1.2.0
+
+### Minor Changes
+
+- 091db828e: fix: don't rely on { recursive: true } as the implemention differs per environment
+
 ## 1.1.0
 
 ### Minor Changes
