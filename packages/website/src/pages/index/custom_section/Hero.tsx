@@ -80,7 +80,7 @@ const Hero = () => {
 						</h1>
 						<p class="text-sm text-surface-500">{m.home_inlang_description()}</p>
 					</div>
-					<Button type="textPrimary" href="/documentation" class="-mb-[10px]">
+					<Button type="textPrimary" href="/g/3go4f04m/guide-niklasbuchfink-whatIsInlang" class="-mb-[10px]">
 						{m.home_inlang_button()}
 					</Button>
 				</div>
