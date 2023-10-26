@@ -7,7 +7,7 @@ import type {
 	NodeishFilesystemSubset,
 	ProjectSettings,
 } from "@inlang/sdk"
-import { throwIfInvalidSettings, type PluginSettings } from "./settings.js"
+import { PluginSettings } from "./settings.js"
 import { replaceAll } from "./utilities.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
 import { flatten, unflatten } from "flat"
@@ -26,10 +26,11 @@ export const plugin: Plugin<{
 	id,
 	displayName,
 	description,
+	settingsSchema: PluginSettings,
+
 	loadMessages: async ({ settings, nodeishFs }) => {
 		settings["plugin.inlang.i18next"].variableReferencePattern = settings["plugin.inlang.i18next"]
 			.variableReferencePattern || ["{{", "}}"]
-		throwIfInvalidSettings(settings["plugin.inlang.i18next"])
 		return loadMessages({
 			settings,
 			pluginSettings: settings["plugin.inlang.i18next"],
@@ -39,7 +40,6 @@ export const plugin: Plugin<{
 	saveMessages: async ({ messages, settings, nodeishFs }) => {
 		settings["plugin.inlang.i18next"].variableReferencePattern = settings["plugin.inlang.i18next"]
 			.variableReferencePattern || ["{{", "}}"]
-		throwIfInvalidSettings(settings["plugin.inlang.i18next"])
 		return saveMessages({
 			pluginSettings: settings["plugin.inlang.i18next"],
 			nodeishFs,

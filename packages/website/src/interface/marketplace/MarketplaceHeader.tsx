@@ -1,5 +1,5 @@
 import { Button } from "#src/pages/index/components/Button.jsx"
-import SearchBar from "#src/interface/components/SearchBar.jsx"
+import SearchBar, { setSearchInput } from "#src/interface/components/SearchBar.jsx"
 import CategoryTabs from "./CategoryTabs.jsx"
 import { For, Show } from "solid-js"
 import { currentPageContext } from "#src/renderer/state.js"
@@ -39,7 +39,11 @@ const MarketplaceHeader = () => {
 					(!currentPageContext.urlParsed.pathname.includes("/documentation") ? "mb-10" : "mb-1")
 				}
 			>
-				<Link href={"/"} class="flex items-center w-fit pointer-events-auto py-4">
+				<Link
+					href={"/"}
+					onClick={() => setSearchInput("")}
+					class="flex items-center w-fit pointer-events-auto py-4"
+				>
 					<img class={"h-8 w-8"} src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
 					<span class={"self-center pl-2 text-left font-semibold text-surface-900"}>inlang</span>
 				</Link>

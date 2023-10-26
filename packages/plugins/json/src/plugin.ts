@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { Message, Variant, LanguageTag, Plugin, NodeishFilesystemSubset } from "@inlang/sdk"
 import { displayName, description } from "../marketplace-manifest.json"
-import { throwIfInvalidSettings, type PluginSettings } from "./settings.js"
+import { PluginSettings } from "./settings.js"
 import { replaceAll } from "./utilities.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
 import { flatten, unflatten } from "flat"
@@ -19,9 +19,9 @@ export const plugin: Plugin<{
 	id,
 	displayName,
 	description,
+	settingsSchema: PluginSettings,
 	loadMessages: async ({ settings, nodeishFs }) => {
 		settings[id].variableReferencePattern = settings[id].variableReferencePattern || ["{", "}"]
-		throwIfInvalidSettings(settings[id])
 		return loadMessages({
 			nodeishFs,
 			pluginSettings: settings[id],
@@ -31,7 +31,6 @@ export const plugin: Plugin<{
 	},
 	saveMessages: async ({ messages, settings, nodeishFs }) => {
 		settings[id].variableReferencePattern = settings[id].variableReferencePattern || ["{", "}"]
-		throwIfInvalidSettings(settings[id])
 		return saveMessages({
 			nodeishFs,
 			pluginSettings: settings[id],

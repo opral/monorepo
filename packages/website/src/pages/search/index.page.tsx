@@ -84,7 +84,7 @@ const Gallery = (props: { items: any }) => {
 				when={props.items && show()}
 				fallback={
 					show() ? (
-						<NoResultsCard category={selectedCategory()} />
+						<NoResultsCard category={selectedCategory().replace("c/", "")} />
 					) : (
 						<div class="h-96 w-full col-span-4 flex items-center justify-center py-80 relative">
 							<div class="mx-auto">
