@@ -8,10 +8,10 @@ import { SetupCard } from "./components/SetupCard.jsx"
 import { Gitlogin } from "./components/GitLogin.jsx"
 import { Icon } from "#src/interface/components/Icon.jsx"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
-import { RepositoryCard } from "#src/interface/editor/CommunityProjects.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
+import { RepositoryCard } from "#src/interface/components/RepositoryCard.jsx"
 
 export type Step = {
 	type: string
