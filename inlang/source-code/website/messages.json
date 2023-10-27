@@ -2,118 +2,6 @@
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"data": [
 		{
-			"id": "marketplace_application_header_svelte_button",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Get started"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_application_header_svelte_description",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "A basic guide on how to adopte inlang with paraglide.js and message-format-plugin in your svelte app."
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_application_header_svelte_title",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Build a global svelte app: A basic guide"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_application_header_generic_button",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Get started"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_application_header_generic_description",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "A general guide on the minimum steps required to make your project ready for the ecosystem of inlang."
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_application_header_generic_title",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Setup inlang for your project"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_application_header_generic_tag",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "How to"
-						}
-					]
-				}
-			]
-		},
-		{
 			"id": "footer_category_application",
 			"selectors": [],
 			"variants": [
@@ -1338,6 +1226,188 @@
 						{
 							"type": "Text",
 							"value": "Stack"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_application_header_generic_button",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Get started"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Loslegen"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_application_header_generic_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "A general guide on the minimum steps required to make your project ready for the ecosystem of inlang."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Eine allgemeine Anleitung, um dein Projekt mit dem inlang-Ökosystem aufzusetzen."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_application_header_generic_tag",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "How to"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "How to"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_application_header_generic_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Setup inlang for your project"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Baue inlang in dein Project ein"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_application_header_svelte_button",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Get started"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Loslegen"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_application_header_svelte_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "A basic guide on how to adopte inlang with paraglide.js and message-format-plugin in your svelte app."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Eine grundlegende Anleitung zur Einführung von inlang mit paraglide.js und dem message-format-plugin in deine Svelte App."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_application_header_svelte_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Build a global svelte app: A basic guide"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Erstelle eine globale Svelte App: Eine grundlegende Anleitung"
 						}
 					]
 				}
