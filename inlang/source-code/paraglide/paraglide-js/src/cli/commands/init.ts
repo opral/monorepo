@@ -34,7 +34,7 @@ export const initCommand = new Command()
 		)
 	})
 
-const initializeInlangProject = async () => {
+export const initializeInlangProject = async () => {
 	const existingProjectPath = await findExistingInlangProjectPath()
 
 	if (existingProjectPath) {
@@ -76,7 +76,7 @@ export const findExistingInlangProjectPath = async (): Promise<string | undefine
 	return undefined
 }
 
-const existingProjectFlow = async (args: { existingProjectPath: string }) => {
+export const existingProjectFlow = async (args: { existingProjectPath: string }) => {
 	const selection = (await prompt(
 		`Do you want to use the inlang project at "${args.existingProjectPath}" or create a new project?`,
 		{
@@ -111,7 +111,6 @@ export const createNewProjectFlow = async () => {
 		settingsFilePath: resolve(process.cwd(), DEFAULT_PROJECT_PATH),
 		nodeishFs: fs,
 	})
-	console.log("getting here")
 	if (project.errors().length > 0) {
 		consola.warn(
 			"Failed to create a new inlang project.\n\nThis is likely an internal bug. Please file an issue at https://github.com/inlang/monorepo."
@@ -121,12 +120,11 @@ export const createNewProjectFlow = async () => {
 		}
 		return process.exit(1)
 	} else {
-		console.log("getting here toooo")
 		consola.success("Successfully created a new inlang project.")
 	}
 }
 
-const newProjectTemplate: ProjectSettings = {
+export const newProjectTemplate: ProjectSettings = {
 	$schema: "https://inlang.com/schema/project-settings",
 	// defaulting to english to not overwhelm new users
 	// with prompts. The user can change this later.
