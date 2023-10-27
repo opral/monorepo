@@ -38,10 +38,11 @@ if (isTest) {
 			...tests.map((t) => ({ in: t, out: t.split(".").slice(0, -1).join(".") })),
 		],
 		format: "cjs",
-		bundle: false,
-		minify: false,
+		// extension wouldn't be able to resolve non-esm imports
+		bundle: true,
+		minify: true,
 		sourcemap: true,
-		external: [],
+		external: ["vscode"],
 	}
 }
 

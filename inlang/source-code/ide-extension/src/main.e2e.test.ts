@@ -16,5 +16,6 @@ suite("main.ts suite", () => {
 			)
 		)
 		await vscode.window.showTextDocument(document)
+		console.log("joo")
 	})
 })

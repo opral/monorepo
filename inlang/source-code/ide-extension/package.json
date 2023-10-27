@@ -74,7 +74,8 @@
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"---- OTHER ----------------------------------------------------------": "",
-		"clean": "rm -rf ./dist ./.turbo ./node_modules"
+		"clean": "rm -rf ./dist ./.turbo ./node_modules",
+		"wdio": "wdio run ./wdio.conf.ts"
 	},
 	"dependencies": {
 		"@inlang/result": "*",
@@ -89,6 +90,7 @@
 	"devDependencies": {
 		"@inlang/create-project": "*",
 		"@inlang/sdk": "*",
+		"@openscript/wdio-vscode-service": "5.2.4",
 		"@types/fs-extra": "^11.0.2",
 		"@types/glob": "^8.1.0",
 		"@types/mocha": "^10.0.2",
@@ -98,6 +100,12 @@
 		"@types/vscode": "^1.82.0",
 		"@vscode/test-electron": "^2.3.5",
 		"@vscode/vsce": "^2.21.1",
+		"@wdio/cli": "8.20.5",
+		"@wdio/globals": "8.20.5",
+		"@wdio/local-runner": "8.20.5",
+		"@wdio/mocha-framework": "8.20.3",
+		"@wdio/spec-reporter": "8.20.0",
+		"@wdio/types": "8.20.0",
 		"comment-json": "^4.2.3",
 		"esbuild": "^0.19.4",
 		"fs-extra": "^11.1.1",
@@ -107,7 +115,9 @@
 		"node-fetch": "^3.3.2",
 		"ovsx": "^0.8.3",
 		"posthog-node": "^3.1.2",
-		"typescript": "5.2.2"
+		"ts-node": "10.9.1",
+		"typescript": "5.2.2",
+		"vscode-uri": "3.0.7"
 	},
 	"activationEvents": [
 		"workspaceContains:**/project.inlang.json",
