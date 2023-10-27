@@ -49,7 +49,7 @@ const MarketplaceHeader = () => {
 					<span class={"self-center pl-2 text-left font-semibold text-surface-900"}>inlang</span>
 				</Link>
 				<Show when={!currentPageContext.urlParsed.pathname.includes("/documentation")}>
-					<div class="absolute sm:static top-16 sm:top-0 w-full sm:max-w-sm mx-auto sm:mx-0">
+					<div class="absolute lg:absolute lg:top-4 lg:left-1/2 lg:-translate-x-1/2 sm:static top-16 sm:top-0 w-full sm:max-w-sm mx-auto sm:mx-0">
 						<SearchBar />
 					</div>
 				</Show>
