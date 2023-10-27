@@ -37,7 +37,7 @@ export async function render(pageContext: PageContextRenderer): Promise<unknown>
 	// mutated during render so you can include in server-rendered template later
 	const tags: any[] = []
 
-	const isEditor = pageContext.urlPathname.includes("editor")
+	const isEditor = pageContext.urlPathname.includes("/editor")
 	const renderedPage = isEditor
 		? undefined
 		: renderToString(() => (

@@ -1,4 +1,4 @@
-import { For, Show, createSignal, onMount } from "solid-js"
+import { For, Show, createEffect, createSignal, onMount } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
@@ -185,8 +185,10 @@ const Gallery = (props: { items: any; guides?: boolean }) => {
 
 const Guides = (props: { items: (MarketplaceManifest & { uniqueID: string })[] }) => {
 	const [show, setShow] = createSignal<boolean>(false)
-	onMount(() => {
-		setShow(true)
+	createEffect(() => {
+		if (props.items && props.items?.some((item) => item.id.split(".")[0] === "guide")) {
+			setShow(true)
+		}
 	})
 	return (
 		<Show when={show()}>
