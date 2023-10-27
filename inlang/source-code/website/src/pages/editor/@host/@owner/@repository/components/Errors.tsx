@@ -85,7 +85,7 @@ export const Errors = (props: { errors: Array<any>; message: string; messagePlur
 						<Show when={props.errors[visibleError()]?.name === "ProjectSettingsFileNotFoundError"}>
 							<sl-button
 								class="w-full"
-								prop:href="inlang.com/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang"
+								prop:href="/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang"
 							>
 								{/* @ts-ignore */}
 								<MaterialSymbolsDeveloperGuide class="w-6 h-6" slot="prefix" />
