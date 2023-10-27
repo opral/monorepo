@@ -18,6 +18,7 @@ import {
 } from "#src/interface/custom-icons/subcategoryIcon.jsx"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import SvelteHeader from "#src/interface/marketplace/categoryHeaders/application/svelte.jsx"
+import GenericHeader from "#src/interface/marketplace/categoryHeaders/application/generic.jsx"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -93,7 +94,10 @@ export function Page(props: {
 						<p class="pr-4 text-surface-400">{m.footer_category_title() + ":"}</p>
 						<SubcategoryPills links={getSubCategies} />
 					</div>
-					<Show when={currentPageContext.urlParsed.search["q"]?.includes("svelte")}>
+					<Show
+						fallback={<GenericHeader />}
+						when={currentPageContext.urlParsed.search["q"]?.includes("svelte")}
+					>
 						<SvelteHeader />
 					</Show>
 				</Show>
