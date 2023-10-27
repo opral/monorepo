@@ -1,6 +1,6 @@
 import type { PageContextRenderer } from "./types.js"
 import { generateHydrationScript, renderToString } from "solid-js/web"
-import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr/server"
+import { escapeInject, dangerouslySkipEscape } from "vike/server"
 import { setCurrentPageContext } from "./state.js"
 import { Root } from "./_default.root.jsx"
 
@@ -37,10 +37,7 @@ export async function render(pageContext: PageContextRenderer): Promise<unknown>
 	// mutated during render so you can include in server-rendered template later
 	const tags: any[] = []
 
-	const isEditor = pageContext.urlPathname.includes("/editor")
-	const renderedPage = isEditor
-		? undefined
-		: renderToString(() => (
+	const renderedPage = renderToString(() => (
 				<MetaProvider tags={tags}>
 					<Root page={pageContext.Page} pageProps={pageContext.pageProps} />
 				</MetaProvider>
@@ -64,7 +61,7 @@ export async function render(pageContext: PageContextRenderer): Promise<unknown>
       </head>
 	  <!-- setting min-h/w-screen to allow child elements to span to the entire screen  -->
       <body class="min-h-screen min-w-screen bg-background text-on-background" id="root">
-		    ${isEditor ? "" : dangerouslySkipEscape(renderedPage!)}
+		    ${dangerouslySkipEscape(renderedPage!)}
       </body>
     </html>`
 }

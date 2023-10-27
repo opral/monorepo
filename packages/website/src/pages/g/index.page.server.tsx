@@ -1,4 +1,4 @@
-import { redirect } from "vite-plugin-ssr/abort"
+import { redirect } from "vike/abort"
 
 export async function onBeforeRender() {
 	throw redirect("/")

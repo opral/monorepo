@@ -1,5 +1,5 @@
 import type { PageContext } from "#src/renderer/types.js"
-import { redirect } from "vite-plugin-ssr/abort"
+import { redirect } from "vike/abort"
 
 export async function onBeforeRender(pageContext: PageContext) {
 	const { id } = pageContext.routeParams

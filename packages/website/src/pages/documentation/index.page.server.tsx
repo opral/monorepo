@@ -1,7 +1,7 @@
 import fs from "node:fs/promises"
 import tableOfContents from "../../../../../documentation/tableOfContents.json"
 import { convert } from "@inlang/markdown"
-import { render } from "vite-plugin-ssr/abort"
+import { render } from "vike/abort"
 
 const renderedMarkdown = {} as Record<string, string>
 

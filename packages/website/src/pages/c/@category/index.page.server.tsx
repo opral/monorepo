@@ -1,5 +1,5 @@
 import { rpc } from "@inlang/rpc"
-import { render } from "vite-plugin-ssr/abort"
+import { render } from "vike/abort"
 
 export async function onBeforeRender(pageContext: any) {
 	const { q } = pageContext.urlParsed.search

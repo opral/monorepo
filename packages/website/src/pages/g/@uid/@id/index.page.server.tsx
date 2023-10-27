@@ -3,7 +3,7 @@ import { convert } from "@inlang/markdown"
 import type { PageContext } from "#src/renderer/types.js"
 import type { PageProps } from "./index.page.jsx"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
-import { redirect } from "vite-plugin-ssr/abort"
+import { redirect } from "vike/abort"
 
 export async function onBeforeRender(pageContext: PageContext) {
 	const item = registry.find(
