@@ -130,12 +130,11 @@ export function Layout(props: { children: JSXElement }) {
 	return (
 		<EditorLayout>
 			<div class="pt-4 w-full flex flex-col grow bg-background">
-				<div class="flex items-center space-x-4 pt-5">
+				<div class="flex flex-wrap gap-2 items-center pt-5">
 					<Breadcrumbs />
 					<BranchMenu />
 				</div>
 				<div class="flex flex-wrap justify-between gap-2 py-5 sticky top-12 md:top-16 z-30 bg-background">
-					<div class="absolute -left-2 w-[calc(100%_+_16px)] h-full -translate-y-[20px] bg-background" />
 					<div class="flex z-20 justify-between gap-2 items-center">
 						<Show when={project()}>
 							<For each={filterOptions()}>
@@ -218,7 +217,7 @@ export function Layout(props: { children: JSXElement }) {
 							</Show>
 						</Show>
 					</div>
-					<div class="flex gap-2">
+					<div class="flex flex-wrap gap-2">
 						<SearchInput
 							placeholder="Search ..."
 							handleChange={(text: string) => setTextSearch(text)}
@@ -271,7 +270,7 @@ export function Layout(props: { children: JSXElement }) {
 function Breadcrumbs() {
 	const { routeParams } = useEditorState()
 	return (
-		<div class="flex flex-row items-center space-x-2 text-lg font-medium">
+		<div class="flex flex-wrap flex-row items-center gap-2 text-lg font-medium">
 			{/* repository icon */}
 			<svg class="w-4 h-4" viewBox="0 0 16 16">
 				<path
@@ -283,7 +282,7 @@ function Breadcrumbs() {
 			<Link
 				href={`https://github.com/${routeParams().owner}`}
 				target="_blank"
-				class="link hover:text-primary"
+				class="link hover:text-primary break-all"
 			>
 				<h3>{routeParams().owner}</h3>
 			</Link>
@@ -291,7 +290,7 @@ function Breadcrumbs() {
 			<Link
 				href={`https://github.com/${routeParams().owner}/${routeParams().repository}`}
 				target="_blank"
-				class="link hover:text-primary"
+				class="link hover:text-primary break-all"
 			>
 				<h3>{routeParams().repository}</h3>
 			</Link>

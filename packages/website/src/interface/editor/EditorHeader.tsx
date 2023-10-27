@@ -66,7 +66,7 @@ function EditorHeader() {
 						</div>
 						{/* MobileNavbar includes the Navigation for the Documentations sites  */}
 						<Show when={mobileMenuIsOpen()}>
-							<ol class="space-y-1 relativ w-full min-h-full pt-3 pl-[10px] overflow">
+							<ol class="space-y-1 relativ w-full min-h-full pt-3 pl-[5px] overflow">
 								<For each={getLinks()}>
 									{(link) => (
 										<sl-tree>

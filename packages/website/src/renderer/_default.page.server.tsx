@@ -47,7 +47,7 @@ export async function render(pageContext: PageContextRenderer): Promise<unknown>
 		  ))
 
 	return escapeInject`<!DOCTYPE html>
-    <html lang="en" class="min-h-screen min-w-screen">
+    <html lang="en" class="min-h-screen min-w-screen overflow-x-hidden">
       <head>
 			<meta charset="UTF-8" />
 			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
