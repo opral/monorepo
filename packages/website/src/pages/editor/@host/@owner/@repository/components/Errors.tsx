@@ -1,7 +1,8 @@
-import { createSignal } from "solid-js"
+import { Show, createSignal } from "solid-js"
 import { Icon } from "#src/interface/components/Icon.jsx"
 import MaterialSymbolsChevronLeft from "~icons/material-symbols/chevron-left"
 import MaterialSymbolsChevronRight from "~icons/material-symbols/chevron-right"
+import MaterialSymbolsDeveloperGuide from "~icons/material-symbols/developer-guide-outline"
 
 export const Errors = (props: { errors: Array<any>; message: string; messagePlural: string }) => {
 	const [visibleError, setVisibleError] = createSignal(0)
@@ -81,6 +82,16 @@ export const Errors = (props: { errors: Array<any>; message: string; messagePlur
 								</div>
 							</>
 						)}
+						<Show when={props.errors[visibleError()]?.name === "ProjectSettingsFileNotFoundError"}>
+							<sl-button
+								class="w-full"
+								prop:href="inlang.com/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang"
+							>
+								{/* @ts-ignore */}
+								<MaterialSymbolsDeveloperGuide class="w-6 h-6" slot="prefix" />
+								Check the guide if you need help setting up inlang
+							</sl-button>
+						</Show>
 					</div>
 				)}
 			</div>

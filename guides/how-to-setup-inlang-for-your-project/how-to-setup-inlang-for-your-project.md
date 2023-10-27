@@ -45,6 +45,8 @@ The `project.inlang.json` file must contain the following JSON:
 }
 ```
 
+Now you can install the suitable plugin from the [marketplace](/).
+
 <doc-links>
     <doc-link title="Explore the ecosystem" icon="material-symbols:add-business-outline-rounded" href="/" description="Start using apps, plugins and lint rules."></doc-link>
 </doc-links>
