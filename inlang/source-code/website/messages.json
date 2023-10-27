@@ -1232,6 +1232,32 @@
 			]
 		},
 		{
+			"id": "home_guides_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Guides"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Guides"
+						}
+					]
+				}
+			]
+		},
+		{
 			"id": "marketplace_application_header_generic_button",
 			"selectors": [],
 			"variants": [
