@@ -66,7 +66,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 			.find((rule) => rule.id === lintRuleId)
 
 	return (
-		<div class="h-14 w-full bg-background border border-surface-3 rounded-t-md flex items-center px-4 justify-between">
+		<div class="w-full bg-background border border-surface-3 rounded-t-md flex flex-wrap items-center justify-between gap-2 p-4">
 			<Show
 				when={filteredId() === ""}
 				fallback={
@@ -85,7 +85,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 				<div class="font-medium text-on-surface">{messageCount(props.ids) + " Messages"}</div>
 			</Show>
 
-			<div class="flex gap-2">
+			<div class="flex flex-wrap gap-2">
 				<For each={Object.keys(getLintSummary()) as MessageLintRule["id"][]}>
 					{(lintRule) => (
 						<Show when={getLintSummary()[lintRule] !== 0}>
