@@ -86,7 +86,13 @@ export function Page(props: {
 					.replace(/\w\S*/g, (w) => w.replace(/^\w/, (c) => c.toUpperCase()))}{" "}
 				- inlang
 			</Title>
-			<Meta name="description" content="Globalization infrastructure for software" />
+			<Meta
+				name="description"
+				content={`Find everything globalization (i18n) related to ${currentPageContext.routeParams.category?.replaceAll(
+					"-",
+					" "
+				)} - inlang`}
+			/>
 			<Meta name="og:image" content="/images/inlang-marketplace-image.jpg" />
 			<MarketplaceLayout>
 				<Show when={currentPageContext.routeParams.category === "application"}>

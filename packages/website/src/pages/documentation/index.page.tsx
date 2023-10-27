@@ -70,7 +70,7 @@ export function Page(props: PageProps) {
 					)?.description
 				}
 			/>
-			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
+			<Meta name="og:image" content="/opengraph/inlang-documentation-image.jpg" />
 			<MarketplaceLayout>
 				{/* important: the responsive breakpoints must align throughout the markup! */}
 				<div class="flex flex-col grow md:grid md:grid-cols-4 gap-10 w-full">

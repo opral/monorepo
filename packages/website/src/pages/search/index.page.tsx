@@ -39,7 +39,7 @@ export function Page(props: {
 		<>
 			<Title>Serach</Title>
 			<Meta name="description" content="Globalization infrastructure for software" />
-			<Meta name="og:image" content="/images/inlang-marketplace-image.jpg" />
+			<Meta name="og:image" content="/opengraph/inlang-search-image.jpg" />
 			<MarketplaceLayout>
 				<div class="pb-16 md:pb-20 min-h-screen relative">
 					<Show
