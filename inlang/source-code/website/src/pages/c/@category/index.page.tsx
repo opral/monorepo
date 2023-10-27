@@ -17,6 +17,7 @@ import {
 	IconVue,
 } from "#src/interface/custom-icons/subcategoryIcon.jsx"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
+import SvelteHeader from "#src/interface/marketplace/categoryHeaders/application/svelte.jsx"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -92,6 +93,9 @@ export function Page(props: {
 						<p class="pr-4 text-surface-400">{m.footer_category_title() + ":"}</p>
 						<SubcategoryPills links={getSubCategies} />
 					</div>
+					<Show when={currentPageContext.urlParsed.search["q"]?.includes("svelte")}>
+						<SvelteHeader />
+					</Show>
 				</Show>
 				<div class="pb-16 md:pb-20 min-h-screen relative">
 					<h2 class="text-md text-surface-600 pb-4 pt-8">{m.marketplace_grid_title_generic()}</h2>
