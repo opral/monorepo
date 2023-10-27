@@ -17,7 +17,7 @@ import { URL } from "node:url"
 import { privateEnv } from "@inlang/env-variables"
 import sirv from "sirv"
 import cookieSession from "cookie-session"
-import { router as vitePluginSsr } from "./vite-plugin-ssr.js"
+import { router as vikePlugin } from "./vike-plugin.js"
 import { router as authService } from "../services/auth/index.server.js"
 import { redirects } from "./redirects.js"
 
@@ -61,4 +61,4 @@ router.use(redirects)
 
 // ! vite plugin ssr must came last
 // ! because it uses the wildcard `*` to catch all routes
-router.use(vitePluginSsr)
+router.use(vikePlugin)
