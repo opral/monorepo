@@ -1,9 +1,11 @@
 import { languageTag, sourceLanguageTag } from "@inlang/paraglide-js/inlang-marketplace"
 
 const Link = (props: { href?: string; [key: string]: any }) => {
-	let modifiedHref =
-		languageTag() === sourceLanguageTag ? props.href : "/" + languageTag() + props.href
+	let modifiedHref = props.href
 
+	if (languageTag() !== sourceLanguageTag && !props.href?.includes("http")) {
+		modifiedHref = "/" + languageTag() + props.href
+	}
 	if (modifiedHref?.endsWith("/")) {
 		modifiedHref = modifiedHref.slice(0, -1)
 	}
