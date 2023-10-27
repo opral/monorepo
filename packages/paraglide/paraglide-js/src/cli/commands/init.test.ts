@@ -4,7 +4,10 @@ import {
 	checkIfPackageJsonExists,
 	checkIfUncommittedChanges,
 	createNewProjectFlow,
+	existingProjectFlow,
 	findExistingInlangProjectPath,
+	initializeInlangProject,
+	newProjectTemplate,
 } from "./init.js"
 import consola from "consola"
 import { describe } from "node:test"
@@ -22,6 +25,7 @@ beforeAll(() => {
 	vi.spyOn(consola, "success").mockImplementation(() => undefined as never)
 	vi.spyOn(consola, "error").mockImplementation(() => undefined as never)
 	vi.spyOn(consola, "warn").mockImplementation(() => undefined as never)
+	vi.spyOn(process, "exit").mockImplementation(() => undefined as never)
 })
 
 beforeEach(() => {
@@ -55,18 +59,99 @@ describe("end to end tests", () => {
 	})
 })
 
-describe("createNewProjectFlow()", async () => {
-	test("it should succeed in creating a new project", async () => {
+describe("initializeInlangProject()", () => {
+	test(
+		"it should execute existingProjectFlow() if a project has been found",
+		async () => {
+			mockFs({
+				"/folder/project.inlang.json": JSON.stringify(newProjectTemplate),
+				"/folder/subfolder": {},
+			})
+			process.cwd = () => "/folder/subfolder"
+			mockUserInput(["useExistingProject"])
+			const path = await initializeInlangProject()
+			expect(path).toBe("../project.inlang.json")
+		},
+		{
+			// i am on a plane with bad internet
+			timeout: 20000,
+		}
+	)
+	test("it should execute newProjectFlow() if not project has been found", async () => {
 		const fs = mockFs({})
+		mockUserInput(["newProject"])
+		const path = await initializeInlangProject()
+		expect(path).toBe("./project.inlang.json")
+		expect(fs.existsSync("./project.inlang.json")).toBe(true)
+	})
+})
+
+describe("existingProjectFlow()", () => {
+	test("if the user selects to proceed with the existing project and the project has no errors, the function should return", async () => {
+		mockFs({
+			"/project.inlang.json": JSON.stringify(newProjectTemplate),
+		})
+		mockUserInput(["useExistingProject"])
+		expect(
+			existingProjectFlow({ existingProjectPath: "/project.inlang.json" })
+		).resolves.toBeUndefined()
+	})
+
+	test("if the user selects new project, the newProjectFlow() should be executed", async () => {
+		const fs = mockFs({
+			"/folder/project.inlang.json": JSON.stringify(newProjectTemplate),
+		})
+		mockUserInput(["newProject"])
+
+		await existingProjectFlow({ existingProjectPath: "/folder/project.inlang.json" })
+		// info that a new project is created
+		expect(consola.info).toHaveBeenCalledOnce()
+		// the newly created project file should exist
+		expect(fs.existsSync("/project.inlang.json")).toBe(true)
+	})
+
+	test("it should exit if the existing project contains errors", async () => {
+		mockFs({
+			"/project.inlang.json": `BROKEN PROJECT FILE`,
+		})
+		mockUserInput(["useExistingProject"])
+		await existingProjectFlow({ existingProjectPath: "/project.inlang.json" })
+		expect(consola.error).toHaveBeenCalled()
+		expect(process.exit).toHaveBeenCalled()
+	})
+})
+
+describe("createNewProjectFlow()", async () => {
+	test(
+		"it should succeed in creating a new project",
+		async () => {
+			const fs = mockFs({})
+			await createNewProjectFlow()
+			// user is informed that a new project is created
+			expect(consola.info).toHaveBeenCalledOnce()
+			// the project shouldn't have errors
+			expect(consola.error).not.toHaveBeenCalled()
+			// user is informed that the project has successfully been created
+			expect(consola.success).toHaveBeenCalledOnce()
+			// the project file should exist
+			expect(fs.existsSync("/project.inlang.json")).toBe(true)
+		},
+		{
+			// i am testing this while i am on an airplane with slow internet
+			timeout: 20000,
+		}
+	)
+	test("it should exit if the project has errors", async () => {
+		mockFs({})
+		// invalid project settings file
+		vi.spyOn(JSON, "stringify").mockReturnValue(`{}`)
 		await createNewProjectFlow()
 		// user is informed that a new project is created
 		expect(consola.info).toHaveBeenCalledOnce()
-		// the project shouldn't have errors
-		expect(consola.error).not.toHaveBeenCalled()
-		// user is informed that the project has successfully been created
-		expect(consola.success).toHaveBeenCalledOnce()
-		// the project file should exist
-		expect(fs.existsSync("/project.inlang.json")).toBe(true)
+		// the project has errors
+		expect(consola.error).toHaveBeenCalled()
+		// the commands exits
+		expect(process.exit).toHaveBeenCalled()
 	})
 })
 
