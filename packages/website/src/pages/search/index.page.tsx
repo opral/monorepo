@@ -7,6 +7,8 @@ import Card, { CardBuildOwn, NoResultsCard } from "#src/interface/components/Car
 import { Meta, Title } from "@solidjs/meta"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import SvelteHeader from "#src/interface/marketplace/categoryHeaders/application/svelte.jsx"
+import GenericHeader from "#src/interface/marketplace/categoryHeaders/application/generic.jsx"
+import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -35,17 +37,24 @@ export function Page(props: {
 
 	return (
 		<>
-			<Title>Global Application</Title>
+			<Title>Serach</Title>
 			<Meta name="description" content="Globalization infrastructure for software" />
 			<Meta name="og:image" content="/images/inlang-marketplace-image.jpg" />
 			<MarketplaceLayout>
 				<div class="pb-16 md:pb-20 min-h-screen relative">
-					<Show when={currentPageContext.urlParsed.search["q"]?.includes("svelte")}>
+					<Show
+						fallback={
+							<div class="pt-8">
+								<GenericHeader />
+							</div>
+						}
+						when={currentPageContext.urlParsed.search["q"]?.includes("svelte")}
+					>
 						<div class="pt-8">
 							<SvelteHeader />
 						</div>
 					</Show>
-					<h2 class="text-md text-surface-600 pb-4 pt-8">All Products</h2>
+					<h2 class="text-md text-surface-600 pb-4 pt-8">{m.marketplace_grid_title_generic()}</h2>
 					<SectionLayout showLines={false} type="white">
 						<div class="relative">
 							<div class="mb-32 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">

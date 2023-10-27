@@ -1,5 +1,6 @@
 import { IconSvelte } from "#src/interface/custom-icons/subcategoryIcon.jsx"
 import { Button } from "#src/pages/index/components/Button.jsx"
+import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
 
 const SvelteHeader = () => {
 	return (
@@ -17,17 +18,16 @@ const SvelteHeader = () => {
 							<path fill="#334155" d="M0 0h28v38L14 26.057 0 38V0z" />
 						</svg>
 					</div>
-					<div class="flex items-center flex-col md:flex-row gap-2">
+					<div class="flex md:items-center flex-col md:flex-row gap-2">
 						<IconSvelte class="w-7 h-7" />
-						<h2 class="font-medium text-md">Build a global svelte app: A basic guide</h2>
+						<h2 class="font-medium text-md">{m.marketplace_application_header_svelte_title()}</h2>
 					</div>
-					<p class="w-1/2 text-sm text-surface-500">
-						A basic guide on how to adopte inlang with paraglide.js and message-format-plugin in
-						your svelte app.
+					<p class="md:w-1/2 text-sm text-surface-500">
+						{m.marketplace_application_header_svelte_description()}
 					</p>
 					<div class="py-6">
 						<Button type="secondary" href="/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp">
-							Get started
+							{m.marketplace_application_header_svelte_button()}
 						</Button>
 					</div>
 				</div>
