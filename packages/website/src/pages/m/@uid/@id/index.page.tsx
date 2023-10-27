@@ -106,6 +106,11 @@ export function Page(props: PageProps) {
 					: `from ${props.manifest.publisherName}  - inlang`)
 			}`}</Title>
 			<Meta name="description" content={props.manifest && description()} />
+			{props.manifest && props.manifest.gallery ? (
+				<Meta name="og:image" content={props.manifest.gallery[0]} />
+			) : (
+				<Meta name="og:image" content="/images/inlang-social-image.jpg" />
+			)}
 			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
 					<div class="md:py-28 py-16">
