@@ -529,21 +529,11 @@
 			"variants": [
 				{
 					"match": [],
-					"languageTag": "de",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Dokumentation"
-						}
-					]
-				},
-				{
-					"match": [],
 					"languageTag": "en",
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Documentation"
+							"value": "Build on inlang"
 						}
 					]
 				},
@@ -574,6 +564,16 @@
 						{
 							"type": "Text",
 							"value": "文档"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Bauen Sie auf Inlang auf"
 						}
 					]
 				}
