@@ -25,7 +25,6 @@ beforeAll(() => {
 	vi.spyOn(consola, "success").mockImplementation(() => undefined as never)
 	vi.spyOn(consola, "error").mockImplementation(() => undefined as never)
 	vi.spyOn(consola, "warn").mockImplementation(() => undefined as never)
-	vi.spyOn(process, "exit").mockImplementation(() => undefined as never)
 })
 
 beforeEach(() => {
