@@ -1,7 +1,6 @@
 import type { NodeishFilesystemSubset, Plugin } from "@inlang/sdk"
 import type { StorageSchema } from "./storageSchema.js"
 import { displayName, description } from "../marketplace-manifest.json"
-import { parse as validatePluginSettings } from "valibot"
 import { PluginSettings } from "./settings.js"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 
@@ -15,9 +14,8 @@ export const plugin: Plugin<{
 	id: pluginId,
 	displayName,
 	description,
+	settingsSchema: PluginSettings,
 	loadMessages: async ({ settings, nodeishFs }) => {
-		validatePluginSettings(PluginSettings, settings["plugin.inlang.messageFormat"])
-
 		try {
 			const file = await nodeishFs.readFile(settings["plugin.inlang.messageFormat"].filePath, {
 				encoding: "utf-8",
