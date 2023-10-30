@@ -3,9 +3,11 @@ import { customElement, property } from "lit/decorators.js"
 
 @customElement("doc-slider")
 export class DocSlider extends LitElement {
-	looping: boolean
 	private _firstIndex: number
 	private _offset: number
+
+	@property()
+	looping: boolean
 
 	@property()
 	items: string[]
