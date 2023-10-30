@@ -195,6 +195,114 @@ describe("Paraglide Message Parser", () => {
 		])
 	})
 
+	it("should match the m function in a complete file", () => {
+		const sourceCode = `
+		import { createSignal } from "solid-js"
+		import { showToast } from "./Toast.jsx"
+		import { rpc } from "@inlang/rpc"
+		import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
+
+		export function NewsletterForm() {
+			const [email, setEmail] = createSignal("")
+			const [loading, setLoading] = createSignal(false)
+
+			const fetchSubscriber = async (email: any) => {
+				setLoading(true)
+				const response = await rpc.subscribeNewsletter({ email })
+				if (!response.error) {
+					if (response.data === "already subscribed") {
+						showToast({
+							title: "Could not subscribe",
+							variant: "success",
+							message: m.newsletter_error_alreadySubscribed(),
+						})
+					} else if (response.data === "success") {
+						showToast({
+							title: "Success",
+							variant: "success",
+							message: m.newsletter_success(),
+						})
+					} else {
+						showToast({
+							title: "Error",
+							variant: "danger",
+							message: m.newsletter_error_generic(),
+						})
+					}
+				} else {
+					showToast({
+						title: "Error",
+						variant: "danger",
+						message: m.newsletter_error_generic(),
+					})
+				}
+
+				setLoading(false)
+				setEmail("")
+			}
+
+			return (
+				<div>test</div>
+			)
+		};
+		`
+		const result = parse(sourceCode)
+		expect(result).toEqual([
+			{
+				messageId: "newsletter_error_alreadySubscribed",
+				position: {
+					end: {
+						character: 55,
+						line: 19,
+					},
+					start: {
+						character: 19,
+						line: 19,
+					},
+				},
+			},
+			{
+				messageId: "newsletter_success",
+				position: {
+					end: {
+						character: 39,
+						line: 25,
+					},
+					start: {
+						character: 19,
+						line: 25,
+					},
+				},
+			},
+			{
+				messageId: "newsletter_error_generic",
+				position: {
+					end: {
+						character: 45,
+						line: 31,
+					},
+					start: {
+						character: 19,
+						line: 31,
+					},
+				},
+			},
+			{
+				messageId: "newsletter_error_generic",
+				position: {
+					end: {
+						character: 44,
+						line: 38,
+					},
+					start: {
+						character: 18,
+						line: 38,
+					},
+				},
+			},
+		])
+	})
+
 	it("should match if m is defined before the reference to paraglide", () => {
 		const sourceCode = `
 		m.helloWorld();
