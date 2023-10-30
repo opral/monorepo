@@ -78,11 +78,10 @@ app.use(rpcRouter)
 app.use(badgeRouter)
 
 app.use(
-	"/editor",
-	createProxyMiddleware({
+	createProxyMiddleware("/editor", {
 		target: "http://localhost:4001",
-		changeOrigin: false,
-		// pathRewrite: { "^/editor": "/" },
+		changeOrigin: true,
+		pathRewrite: { "^/editor": "/" },
 	})
 )
 

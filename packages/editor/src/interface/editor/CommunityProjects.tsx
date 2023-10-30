@@ -1,5 +1,5 @@
 import { For, Show } from "solid-js"
-import { repositories } from "./../../pages/editor/repositories.js"
+import { repositories } from "./../../pages/repositories.js"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import Link from "#src/renderer/Link.jsx"
