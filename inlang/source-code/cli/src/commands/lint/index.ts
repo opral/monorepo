@@ -7,9 +7,10 @@ import type { InlangProject, MessageLintReport } from "@inlang/sdk"
 export const lint = new Command()
 	.command("lint")
 	.description("Commands for linting translations.")
+	.requiredOption("--project <path>", "Path to the project settings file.", "./project.inlang.json")
 	.option("--no-fail", "Disable throwing an error if linting fails.", false)
-	.action(async () => {
-		const project = await getInlangProject()
+	.action(async (args: { project: string }) => {
+		const project = await getInlangProject({ projectPath: args.project })
 		await lintCommandAction({ project, logger: log })
 	})
 

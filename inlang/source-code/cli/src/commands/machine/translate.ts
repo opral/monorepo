@@ -8,9 +8,10 @@ import prompts from "prompts"
 
 export const translate = new Command()
 	.command("translate")
+	.requiredOption("--project <path>", "Path to the project settings file.", "./project.inlang.json")
 	.option("-f, --force", "Force machine translation and skip the confirmation prompt.", false)
 	.description("Machine translate all resources.")
-	.action(async (args: { force: boolean }) => {
+	.action(async (args: { force: boolean; project: string }) => {
 		try {
 			// Prompt the user to confirm
 			if (!args.force) {
@@ -28,7 +29,7 @@ export const translate = new Command()
 				}
 			}
 
-			const project = await getInlangProject()
+			const project = await getInlangProject({ projectPath: args.project })
 
 			translateCommandAction({ project })
 		} catch (error) {
