@@ -2,6 +2,7 @@ import { createSignal } from "solid-js"
 import { showToast } from "./Toast.jsx"
 import { rpc } from "@inlang/rpc"
 import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
+import { Button } from "#src/pages/index/components/Button.jsx"
 
 export function NewsletterForm() {
 	const [email, setEmail] = createSignal("")
@@ -79,18 +80,19 @@ export function NewsletterForm() {
 
 	return (
 		<div class="flex flex-col items-start justify-center w-full">
-			<p class="text-surface-800 font-semibold mb-3">{m.newsletter_title()}</p>
+			<p class="text-surface-800 text-sm font-semibold mb-3">{m.newsletter_title()}</p>
 			<div
 				class={
 					"flex items-start justify-stretch gap-3 w-full md:flex-row flex-col transition-opacity duration-150 " +
 					(loading() ? "opacity-70 cursor-not-allowed" : "")
 				}
 			>
-				<sl-input
-					class={"border-none p-0 md:w-[312px] w-full " + (loading() ? "pointer-events-none" : "")}
-					prop:size={"medium"}
-					prop:placeholder={m.newsletter_placeholder()}
-					// @ts-ignore
+				<input
+					class={
+						"p-0 md:w-[312px] w-full text-sm h-10 rounded-[4px] transition-colors focus:outline-primary/50 focus:-outline-offset-0 focus:ring-0 focus:border-primary px-4 border border-surface-300 " +
+						(loading() ? "pointer-events-none" : "")
+					}
+					placeholder={m.newsletter_placeholder()}
 					value={email()}
 					onInput={(event) => {
 						// @ts-ignore
@@ -100,7 +102,6 @@ export function NewsletterForm() {
 						// @ts-ignore
 						setEmail(event.target.value)
 					}}
-					// on enter press
 					onKeyDown={(event) => {
 						if (event.key === "Enter") {
 							handleSubscribe()
@@ -109,7 +110,7 @@ export function NewsletterForm() {
 				/>
 				<button
 					class={
-						"h-10 text-sm text-background px-4 bg-surface-700 hover:bg-surface-800 max-md:w-full rounded-md font-medium transition-all duration-200 " +
+						"h-10 text-sm text-background px-4 bg-surface-800 hover:bg-surface-900 max-md:w-full rounded-[4px] font-medium transition-all duration-200 " +
 						(loading() ? "pointer-events-none" : "")
 					}
 					onClick={handleSubscribe}
