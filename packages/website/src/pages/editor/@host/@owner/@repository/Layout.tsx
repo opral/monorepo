@@ -302,7 +302,7 @@ function Breadcrumbs() {
  * The menu to select the branch.
  */
 function BranchMenu() {
-	const { setActiveBranch, branchNames, activeBranch } = useEditorState()
+	const { setActiveBranch, branchNames, currentBranch } = useEditorState()
 	return (
 		<sl-dropdown>
 			<sl-button slot="trigger" prop:caret={true} prop:size="small">
@@ -316,14 +316,14 @@ function BranchMenu() {
 						/>
 					</svg>
 				</div>
-				{activeBranch() ?? "branch"}
+				{currentBranch() ?? "branch"}
 			</sl-button>
 
 			<sl-menu class="w-48 min-w-fit">
 				<For each={branchNames()}>
 					{(branch) => (
 						<div onClick={() => setActiveBranch(branch)}>
-							<sl-menu-item prop:type="checkbox" prop:checked={activeBranch() === branch}>
+							<sl-menu-item prop:type="checkbox" prop:checked={currentBranch() === branch}>
 								{branch}
 							</sl-menu-item>
 						</div>
