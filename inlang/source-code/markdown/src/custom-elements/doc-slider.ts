@@ -89,20 +89,6 @@ export class DocSlider extends LitElement {
 				position: relative;
 			}
 
-			#contents::after {
-				background: linear-gradient(
-					to right,
-					#f7fafc 0%,
-					transparent 3%,
-					transparent 97%,
-					#f7fafc 100%
-				);
-				content: "";
-				position: absolute;
-				height: 100%;
-				width: 100%;
-			}
-
 			.wrapper {
 				position: relative;
 				display: flex;
