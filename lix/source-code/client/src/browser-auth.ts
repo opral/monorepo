@@ -1,11 +1,8 @@
 import { publicEnv } from "@inlang/env-variables"
+import type { LixAuthModule } from "./api.js"
 
 const gitHubProxyUrl = publicEnv.PUBLIC_GIT_PROXY_BASE_URL + "/github-proxy/"
-
-// the authUrl for the oauth app with minimal scopes https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps
-// oauth apps can only require public (public_repo) or private repos but no further repo or org selection
-// email is required to commit with identity of who committed
-const authUrl = `https://github.com/login/oauth/authorize?client_id=${publicEnv.PUBLIC_GITHUB_APP_CLIENT_ID}&scope=repo,user:email`
+const githubAppClientId = publicEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID
 
 /**
  * Login user in new window.
@@ -14,11 +11,39 @@ const authUrl = `https://github.com/login/oauth/authorize?client_id=${publicEnv.
  * works only in browsers for now, but other methods should be supported in future
  */
 // TODO: later use url with default instead of env var: args: { url?: string }
-export function login() {
-	window.open(authUrl, "_blank")
+export async function login() {
+	const loginWindow = window.open(
+		`https://github.com/login/oauth/authorize?client_id=${githubAppClientId}`,
+		"_blank"
+	)
+
+	await new Promise((resolve) => {
+		const timer = setInterval(() => {
+			if (loginWindow?.closed) {
+				clearInterval(timer)
+				resolve(true)
+			}
+		}, 700)
+	})
 }
-export function logout() {
-	return fetch(`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/services/auth/sign-out`, {
+
+export async function addPermissions() {
+	const permissionWindow = window.open(
+		`https://github.com/apps/${publicEnv.PUBLIC_LIX_GITHUB_APP_NAME}/installations/select_target`,
+		"_blank"
+	)
+	await new Promise((resolve) => {
+		const timer = setInterval(() => {
+			if (permissionWindow?.closed) {
+				clearInterval(timer)
+				resolve(true)
+			}
+		}, 700)
+	})
+}
+
+export async function logout() {
+	await fetch(`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/services/auth/sign-out`, {
 		method: "POST",
 		credentials: "include",
 	})
@@ -28,7 +53,7 @@ type Email = {
 	email: string
 	primary: boolean
 	verified: boolean
-	visibility: string | null
+	visibility: string | undefined
 }
 
 /**
@@ -67,7 +92,7 @@ export async function getUser() {
 		},
 	})
 	if (email.ok === false) {
-		throw Error("Failed to get user email " + email.statusText)
+		throw Error(email.statusText)
 	}
 	const emailBody = await email.json()
 
@@ -95,4 +120,4 @@ export async function getUser() {
 	}
 }
 
-export default { login, logout, getUser }
+export const browserAuth: LixAuthModule = { login, logout, getUser, addPermissions }

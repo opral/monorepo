@@ -17,8 +17,10 @@ export function Page() {
 	const [localStorage] = useLocalStorage()
 
 	createEffect(() => {
-		if (localStorage.user?.username) {
-			window.close()
+		if (localStorage.user?.username && userInfo()) {
+			// FIXME: racecondition: if window closes too early local storage is set to remove the user somewhere and user is shown logged out when coming back to the editor
+			// this bug existed before and should be revisited seperately as it requires probably more involved refactor of the localstorageprovider
+			setTimeout(() => window.close(), 1000)
 		}
 	})
 
@@ -38,7 +40,7 @@ export function Page() {
 					<div class="items-center justify-center flex grow">
 						<div class="flex flex-col border rounded-lg border-outline p-10 max-w-sm">
 							<MaterialSymbolsCheckCircleRounded class="text-success w-16 h-16 self-center" />
-							<h2 class="text-xl font-medium self-center pt-2">Successfully logged in</h2>
+							<h2 class="text-xl font-medium self-center pt-2">Successfully authenticated</h2>
 							<p class="self-center">You can close this window.</p>
 							<sl-button
 								class="pt-6"

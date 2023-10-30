@@ -1,5 +1,5 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
-import type { Repository } from "./api.js"
+import type { Repository, LixError } from "./api.js"
 import { transformRemote, withLazyFetching, parseLixUri } from "./helpers.js"
 // @ts-ignore
 import http from "./http-client.js"
@@ -206,31 +206,6 @@ export async function openRepository(
 			})
 		},
 
-		async isCollaborator(cmdArgs) {
-			let response:
-				| Awaited<
-						ReturnType<typeof github.request<"GET /repos/{owner}/{repo}/collaborators/{username}">>
-				  >
-				| undefined
-			try {
-				response = await github.request("GET /repos/{owner}/{repo}/collaborators/{username}", {
-					owner,
-					repo: repoName,
-					username: cmdArgs.username,
-				})
-			} catch (err: any) {
-				/*  throws on non collaborator access, 403 on non collaborator, 401 for current user not authenticated correctly
-						TODO: move to consistent error classes everywhere when hiding git api more
-				*/
-				if (err.status === 401) {
-					// if we are logged out rethrow the error
-					throw err
-				}
-			}
-
-			return response?.status === 204 ? true : false
-		},
-
 		/**
 		 * Parses the origin from remotes.
 		 *
@@ -264,7 +239,7 @@ export async function openRepository(
 		},
 
 		errors: Object.assign(errors, {
-			subscribe: (callback: (value: Error[]) => void) => {
+			subscribe: (callback: (value: LixError[]) => void) => {
 				createEffect(() => {
 					// TODO: the subscription should not send the whole array but jsut the new errors
 					// const maybeLastError = errors().at(-1)
@@ -280,18 +255,34 @@ export async function openRepository(
 		 * Additional information about a repository provided by GitHub.
 		 */
 		async getMeta() {
-			const {
-				data: { name, private: isPrivate, fork: isFork, parent, owner: ownerMetaData },
-			}: Awaited<ReturnType<typeof github.request<"GET /repos/{owner}/{repo}">>> =
-				await github.request("GET /repos/{owner}/{repo}", {
+			const res: Awaited<
+				ReturnType<typeof github.request<"GET /repos/{owner}/{repo}">> | { error: Error }
+			> = await github
+				.request("GET /repos/{owner}/{repo}", {
 					owner,
 					repo: repoName,
 				})
+				.catch((newError: Error) => {
+					setErrors((previous) => [...(previous || []), newError])
+					return { error: newError }
+				})
 
+			if ("error" in res) {
+				return { error: res.error }
+			}
+
+			const {
+				data: { name, private: isPrivate, fork: isFork, parent, owner: ownerMetaData, permissions },
+			} = res
 			return {
 				name,
 				isPrivate,
 				isFork,
+				permissions: {
+					admin: permissions?.admin || false,
+					push: permissions?.push || false,
+					pull: permissions?.pull || false,
+				},
 				owner: {
 					name: ownerMetaData.name || undefined,
 					email: ownerMetaData.email || undefined,

@@ -9,6 +9,23 @@ type Author = {
 	timezoneOffset?: number
 }
 
+export class LixError extends Error {
+	// we currently mix standard errors with github errors and isomorphic git errors, we will start to transition into a clean lix error class as we replace implementations
+	// the response object is added for transitional compatitbility with github sdk errors
+	response?: { status?: number }
+}
+
+export type LixAuthModule = {
+	login: () => Promise<any>
+	logout: () => Promise<any>
+	getUser: () => Promise<{
+		username: string
+		email: string
+		avatarUrl?: string
+	}>
+	addPermissions: () => Promise<any>
+}
+
 export type Repository = {
 	nodeishFs: NodeishFilesystem
 	commit: (args: {
@@ -27,23 +44,28 @@ export type Repository = {
 	}) => Promise<
 		Endpoints["POST /repos/{owner}/{repo}/merge-upstream"]["response"]["data"] | undefined
 	>
-	isCollaborator: (args: { username: string }) => Promise<boolean>
 	createFork: () => Promise<Endpoints["POST /repos/{owner}/{repo}/forks"]["response"]>
 	getOrigin: () => Promise<string>
 	getCurrentBranch: () => Promise<string | undefined>
-	errors: Subscribable<Error[]>
-	getMeta: () => Promise<{
-		name: string
-		isPrivate: boolean
-		isFork: boolean
-		owner: { name?: string; email?: string; login: string }
-		parent:
-			| {
+	errors: Subscribable<LixError[]>
+	getMeta: () => Promise<
+		| {
+				name: string
+				isPrivate: boolean
+				isFork: boolean
+				owner: { name?: string; email?: string; login: string }
+				permissions: {
+					admin: boolean
+					pull: boolean
+					push: boolean
+				}
+				parent?: {
 					url: string
 					fullName: string
-			  }
-			| undefined
-	}>
+				}
+		  }
+		| { error: Error }
+	>
 
 	// TODO: implement these before publishing api, but not used in badge or editor, depends on strategy for statelessness
 	// currentBranch: () => unknown

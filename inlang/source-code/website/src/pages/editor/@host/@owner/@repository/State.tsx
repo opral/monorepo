@@ -27,7 +27,6 @@ import {
 } from "@inlang/sdk"
 import { parseOrigin, telemetryBrowser } from "@inlang/telemetry"
 import type { Result } from "@inlang/result"
-import { onSignOut } from "#src/services/auth/index.js"
 
 type EditorStateSchema = {
 	/**
@@ -196,38 +195,44 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		setSearchParams({ key: "lint", value: filteredMessageLintRules() })
 	})
 
-	const [localStorage, setLocalStorage] = useLocalStorage() ?? []
-
-	const [repo] = createResource(
-		() => {
-			return routeParams()
-		},
-		async ({ host, owner, repository }) => {
-			// open the repository
-
-			if (host && owner && repository) {
-				const newRepo = await openRepository(
-					`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${host}/${owner}/${repository}`,
-					{
-						nodeishFs: createNodeishMemoryFs(),
-						auth: browserAuth,
-					}
-				)
-				setLastPullTime(new Date())
-				return newRepo
-			} else {
-				return undefined
-			}
-		}
-	)
+	const [localStorage] = useLocalStorage() ?? []
 
 	// get lix errors
 	const [lixErrors, setLixErrors] = createSignal<ReturnType<Repository["errors"]>>([])
 	createEffect(() => {
+		// reset errors to empty on repo changes
+		setLixErrors([])
+
 		repo()?.errors.subscribe((errors) => {
 			setLixErrors(errors)
 		})
 	})
+
+	const [repo] = createResource(
+		() => {
+			return { routeParams: routeParams(), user: localStorage.user }
+		},
+		async ({ routeParams: { host, owner, repository } }) => {
+			if (host && owner && repository) {
+				try {
+					const newRepo = await openRepository(
+						`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${host}/${owner}/${repository}`,
+						{
+							nodeishFs: createNodeishMemoryFs(),
+							auth: browserAuth,
+						}
+					)
+					setLastPullTime(new Date())
+					return newRepo
+				} catch (err) {
+					console.error(err)
+					return
+				}
+			} else {
+				return
+			}
+		}
+	)
 
 	// open the inlang project and store it in a resource
 	const [project] = createResource(
@@ -298,52 +303,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	})
 
-	const [userIsCollaborator] = createResource(
-		/**
-		 * createResource is not reacting to changes like: "false","Null", or "undefined".
-		 * Hence, a string needs to be passed to the fetch of the resource.
-		 */
-		() => {
-			// do not fetch if no owner or repository is given
-			// can happen if the user navigated away from the editor
-			if (
-				currentPageContext.routeParams.owner === undefined ||
-				currentPageContext.routeParams.repository === undefined
-			) {
-				return false
-			}
-			return {
-				user: localStorage?.user ?? "not logged in",
-				routeParams: currentPageContext.routeParams as EditorRouteParams,
-				currentRepo: repo(),
-			}
-		},
-		async (args) => {
-			// user is not logged in, see the returned object above
-			if (typeof args.user === "string") {
-				return false
-			}
-			try {
-				if (args.currentRepo) {
-					return await args.currentRepo
-						.isCollaborator({ username: args.user.username })
-						.catch((err: any) => {
-							if (err.status === 401) {
-								onSignOut({ setLocalStorage })
-							}
-							return false
-						})
-				} else {
-					return false
-				}
-			} catch (error) {
-				// the user is not a collaborator, hence the request will fail,
-				// FIXME: is this still required? isCollaborator should now return false instead of failing
-				return false
-			}
-		}
-	)
-
 	const [githubRepositoryInformation] = createResource(
 		() => {
 			if (
@@ -359,7 +318,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				routeParams: routeParams(),
 			}
 		},
-		async () => await repo()?.getMeta()
+		async () => {
+			const repoMeta = await repo()?.getMeta()
+			return repoMeta
+		}
 	)
 
 	const [currentBranch] = createResource(
@@ -371,6 +333,42 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 		async () => {
 			return await repo()?.getCurrentBranch()
+		}
+	)
+
+	/**
+	 * createResource is not reacting to changes like: "false","Null", or "undefined".
+	 * Hence, a string needs to be passed to the fetch of the resource.
+	 */
+	const [userIsCollaborator] = createResource(
+		() => {
+			// do not fetch if no owner or repository is given
+			// can happen if the user navigated away from the editor
+			// setIsCollaborator(repoMeta?.permissions.push)
+			if (
+				currentPageContext.routeParams.owner === undefined ||
+				currentPageContext.routeParams.repository === undefined
+			) {
+				return false
+			}
+			return {
+				user: localStorage?.user ?? "not logged in",
+				routeParams: currentPageContext.routeParams as EditorRouteParams,
+				currentRepo: repo(),
+				repoMeta: githubRepositoryInformation(),
+			}
+		},
+		(args) => {
+			// user is not logged in, see the returned object above
+			if (
+				typeof args.repoMeta === "undefined" ||
+				typeof args.user === "string" ||
+				"error" in args.repoMeta
+			) {
+				return false
+			}
+
+			return args.repoMeta?.permissions?.push || false
 		}
 	)
 
@@ -421,6 +419,9 @@ export class PullException extends Error {
 
 export class PushException extends Error {
 	readonly #id = "PushException"
+	data?: {
+		statusCode?: number
+	}
 }
 
 export class UnknownException extends Error {
@@ -439,7 +440,7 @@ export async function pushChanges(args: {
 	user: NonNullable<LocalStorageSchema["user"]>
 	setFsChange: (date: Date) => void
 	setLastPullTime: (date: Date) => void
-}): Promise<Result<true, PushException | PullException>> {
+}): Promise<Result<true, PushException>> {
 	// stage all changes
 	const status = await args.repo.statusMatrix({
 		filter: (f: any) =>
@@ -457,21 +458,21 @@ export async function pushChanges(args: {
 			// added files
 			(row[2] === 2 && row[3] === 0)
 	)
-	if (filesWithUncommittedChanges.length === 0) {
-		return { error: new PushException("No changes to push.") }
+	if (filesWithUncommittedChanges.length > 0) {
+		// add all changes
+		for (const file of filesWithUncommittedChanges) {
+			await args.repo.add({ filepath: file[0] })
+		}
+		// commit changes
+		await args.repo.commit({
+			author: {
+				name: args.user.username,
+				email: args.user.email,
+			},
+			message: "inlang: update translations",
+		})
 	}
-	// add all changes
-	for (const file of filesWithUncommittedChanges) {
-		await args.repo.add({ filepath: file[0] })
-	}
-	// commit changes
-	await args.repo.commit({
-		author: {
-			name: args.user.username,
-			email: args.user.email,
-		},
-		message: "inlang: update translations",
-	})
+
 	// triggering a side effect here to trigger a re-render
 	// of components that depends on fs
 	args.setFsChange(new Date())

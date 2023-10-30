@@ -3,19 +3,19 @@ import { createSignal, Show } from "solid-js"
 import IconGithub from "~icons/cib/github"
 
 /**
- * A dialog that prompts the user to login with GitHub.
+ * A dialog that prompts the user to add missing permissions on GitHub.
  *
  * @example
- * 	let signInDialog: SlDialog | undefined;
+ * 	let PermissionDialog: SlDialog | undefined;
  *
  * 	function onX() {
- * 		signInDialog?.show();
+ * 		PermissionDialog?.show();
  * 	}
  */
-export function SignInDialog(props: {
+export function PushPermissionDialog(props: {
 	/** forwarding the ref */
 	ref: SlDialog
-	onClickOnSignInButton: () => void
+	onClickPushPermissionButton: () => void
 }) {
 	// web component slots load eagarly. applying manual conditional rendering
 	// combats flickering on initial render
@@ -28,18 +28,20 @@ export function SignInDialog(props: {
 			on:sl-after-hide={() => setIsShown(false)}
 		>
 			<Show when={isShown()}>
-				<h3 slot="label">Sign in</h3>
-				<p>To conduct changes, you must sign in with a GitHub account.</p>
+				<h3 slot="label">Add permissions</h3>
+				<p>
+					To push changes, you need to add the repository to your permissions of the github app.
+				</p>
 				<sl-button
 					slot="footer"
 					prop:variant="primary"
 					onClick={() => {
-						props.onClickOnSignInButton()
+						props.onClickPushPermissionButton()
 					}}
 				>
 					{/* @ts-ignore */}
 					<IconGithub slot="prefix" />
-					Sign in with GitHub
+					Add permissions on GitHub
 				</sl-button>
 			</Show>
 		</sl-dialog>
