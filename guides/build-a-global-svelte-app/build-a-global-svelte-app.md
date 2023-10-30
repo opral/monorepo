@@ -67,17 +67,10 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['@inlang/paraglide-js']
   },
-});
-```
-
-Or just in local environment (`serve` or `dev` command):
-```js
-// vite.config.js/ts
-export default defineConfig(({ command }) => ({
-  optimizeDeps: {
-    exclude: command === 'serve' ? ['@inlang/paraglide-js'] : []
+  ssr: {
+    noExternal: ['@inlang/paraglide-js']
   },
-}));
+});
 ```
 
 ### 3. Add message that can be translated.
