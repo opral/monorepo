@@ -75,27 +75,24 @@ export type Plugin<
 		| { "app.inlang.ideExtension": CustomApiInlangIdeExtension }
 }
 
-export const Plugin = Type.Object(
-	{
-		id: Type.String({
-			pattern: "^plugin\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)$",
-			examples: ["plugin.namespace.id"],
-		}) as unknown as TTemplateLiteral<[TLiteral<`plugin.${string}.${string}`>]>,
-		displayName: Translatable(Type.String()),
-		description: Translatable(Type.String()),
-		/**
-		 * Tyepbox is must be used to validate the Json Schema.
-		 * Github discussion to upvote a plain Json Schema validator and read the benefits of Typebox
-		 * https://github.com/inlang/monorepo/discussions/1503
-		 */
-		settingsSchema: Type.Optional(Type.Object({}, { additionalProperties: true })),
-		loadMessages: Type.Optional(Type.Any()),
-		saveMessages: Type.Optional(Type.Any()),
-		/**
-		 * @deprecated removed
-		 */
-		detectedLanguageTags: Type.Optional(Type.Any()),
-		addCustomApi: Type.Optional(Type.Any()),
-	},
-	{ additionalProperties: false }
-)
+export const Plugin = Type.Object({
+	id: Type.String({
+		pattern: "^plugin\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)$",
+		examples: ["plugin.namespace.id"],
+	}) as unknown as TTemplateLiteral<[TLiteral<`plugin.${string}.${string}`>]>,
+	displayName: Translatable(Type.String()),
+	description: Translatable(Type.String()),
+	/**
+	 * Tyepbox is must be used to validate the Json Schema.
+	 * Github discussion to upvote a plain Json Schema validator and read the benefits of Typebox
+	 * https://github.com/inlang/monorepo/discussions/1503
+	 */
+	settingsSchema: Type.Optional(Type.Object({}, { additionalProperties: true })),
+	loadMessages: Type.Optional(Type.Any()),
+	saveMessages: Type.Optional(Type.Any()),
+	/**
+	 * @deprecated removed
+	 */
+	detectedLanguageTags: Type.Optional(Type.Any()),
+	addCustomApi: Type.Optional(Type.Any()),
+})
