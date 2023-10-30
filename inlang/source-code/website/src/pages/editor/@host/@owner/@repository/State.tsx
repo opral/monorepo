@@ -10,6 +10,7 @@ import {
 	type Resource,
 	type Setter,
 	useContext,
+	type Accessor,
 } from "solid-js"
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
 import type { LocalStorageSchema } from "#src/services/local-storage/index.js"
@@ -38,6 +39,10 @@ type EditorStateSchema = {
 	 * The current branch.
 	 */
 	currentBranch: Resource<string | undefined>
+	/**
+	 * The branch names of current repo.
+	 */
+	branchNames: Resource<string[] | undefined>
 	/**
 	 * Additional information about a repository provided by GitHub.
 	 */
@@ -92,6 +97,9 @@ type EditorStateSchema = {
 
 	tourStep: () => TourStepId
 	setTourStep: Setter<TourStepId>
+
+	setActiveBranch: Setter<string | undefined>
+	activeBranch: Accessor<string | undefined>
 
 	/**
 	 * FilterLanguages show or hide the different messages.
@@ -208,11 +216,20 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		})
 	})
 
+	const [activeBranch, setActiveBranch] = createSignal<string | undefined>(
+		params.get("branch") || undefined
+	)
+	createEffect(() => {
+		const branch = activeBranch()
+		if (branch) {
+			setSearchParams({ key: "branch", value: branch })
+		}
+	})
 	const [repo] = createResource(
 		() => {
-			return { routeParams: routeParams(), user: localStorage.user }
+			return { routeParams: routeParams(), user: localStorage.user, branch: activeBranch() }
 		},
-		async ({ routeParams: { host, owner, repository } }) => {
+		async ({ routeParams: { host, owner, repository }, branch }) => {
 			if (host && owner && repository) {
 				try {
 					const newRepo = await openRepository(
@@ -220,9 +237,12 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						{
 							nodeishFs: createNodeishMemoryFs(),
 							auth: browserAuth,
+							branch,
 						}
 					)
 					setLastPullTime(new Date())
+					// Invalidate the project while we switch branches
+					setProject(undefined)
 					return newRepo
 				} catch (err) {
 					console.error(err)
@@ -235,7 +255,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	)
 
 	// open the inlang project and store it in a resource
-	const [project] = createResource(
+	const [project, { mutate: setProject }] = createResource(
 		() => {
 			return { newRepo: repo(), lixErrors: lixErrors() }
 		},
@@ -324,17 +344,21 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	)
 
-	const [currentBranch] = createResource(
-		() => {
-			if (lixErrors().length > 0 || repo() === undefined) {
-				return false
-			}
-			return true
-		},
-		async () => {
-			return await repo()?.getCurrentBranch()
+	const [currentBranch] = createResource(async () => {
+		if (lixErrors().length > 0 || repo() === undefined) {
+			return undefined
 		}
-	)
+
+		return await repo()?.getCurrentBranch()
+	})
+
+	const [branchNames] = createResource(async () => {
+		if (lixErrors().length > 0 || repo() === undefined) {
+			return undefined
+		}
+
+		return await repo()?.getBranches()
+	})
 
 	/**
 	 * createResource is not reacting to changes like: "false","Null", or "undefined".
@@ -378,6 +402,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				{
 					repo: repo,
 					currentBranch,
+					branchNames,
 					githubRepositoryInformation,
 					routeParams,
 					searchParams,
@@ -397,6 +422,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setFilteredLanguageTags,
 					filteredMessageLintRules,
 					setFilteredMessageLintRules,
+					setActiveBranch,
+					activeBranch,
 					localChanges,
 					setLocalChanges,
 					userIsCollaborator,

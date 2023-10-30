@@ -5,10 +5,16 @@ type SearchParams = {
 	id?: string
 	lint?: `${string}.${string}`[]
 	lang?: string[]
+	branch?: string
 }
 
 type SearchType = {
 	key: "search"
+	value: string
+}
+
+type BranchType = {
+	key: "branch"
 	value: string
 }
 
@@ -27,7 +33,7 @@ type LangType = {
 	value: string[]
 }
 
-type SearchParamsType = SearchType | LintType | LangType | idType
+type SearchParamsType = SearchType | LintType | LangType | idType | BranchType
 
 export const setSearchParams = ({ key, value }: SearchParamsType) => {
 	//get url from window
@@ -37,6 +43,7 @@ export const setSearchParams = ({ key, value }: SearchParamsType) => {
 	const searchParamsObj: SearchParams = {
 		search: currentUrl.searchParams.get("search") || "",
 		id: currentUrl.searchParams.get("id") || "",
+		branch: currentUrl.searchParams.get("branch") || "",
 		lint: currentUrl.searchParams.getAll("lint") as `${string}.${string}`[],
 		lang: currentUrl.searchParams.getAll("lang"),
 	}
@@ -52,6 +59,9 @@ export const setSearchParams = ({ key, value }: SearchParamsType) => {
 		case "lint":
 			searchParamsObj.lint = []
 			searchParamsObj.lint = [...value]
+			break
+		case "branch":
+			searchParamsObj.branch = value
 			break
 		case "lang":
 			searchParamsObj.lang = []
@@ -71,8 +81,8 @@ export const setSearchParams = ({ key, value }: SearchParamsType) => {
 		} else {
 			// for lint and lang
 			if (value.length > 0) {
-				value.map((val) => {
-					currentParams.append(key, val as string)
+				value.map((val: string) => {
+					currentParams.append(key, val)
 				})
 			}
 		}
