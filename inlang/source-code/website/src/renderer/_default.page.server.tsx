@@ -60,7 +60,7 @@ export async function render(pageContext: PageContextRenderer): Promise<unknown>
 			${dangerouslySkipEscape(renderTags(tags))}
       </head>
 	  <!-- setting min-h/w-screen to allow child elements to span to the entire screen  -->
-      <body class="min-h-screen min-w-screen bg-background text-on-background" id="root">
+      <body class="website min-h-screen min-w-screen bg-background text-on-background" id="root">
 		    ${dangerouslySkipEscape(renderedPage!)}
       </body>
     </html>`

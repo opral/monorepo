@@ -6,9 +6,9 @@ import { setCurrentPageContext } from "./state.js"
 import type { PageContextRenderer } from "./types.js"
 import * as Sentry from "@sentry/browser"
 import { MetaProvider } from "@solidjs/meta"
-import { telemetryBrowser } from "@inlang/telemetry"
+// import { telemetryBrowser } from "@inlang/telemetry"
 
-telemetryBrowser.init()
+// telemetryBrowser.init()
 
 // import the css
 import "./app.css"
@@ -66,6 +66,7 @@ export function render(pageContext: PageContextRenderer) {
 			//
 			// In the future, the editor might be server-side rendered.
 			// For now, the trouble of isomorphic rendering the editor is not worth it.
+			console.log("renderApp from editor")
 			renderApp(
 				() => (
 					<MetaProvider>
@@ -77,7 +78,7 @@ export function render(pageContext: PageContextRenderer) {
 			isFirstRender = false
 		}
 		// https://posthog.com/docs/integrate/client/js#one-page-apps-and-page-views
-		telemetryBrowser.capture("$pageview")
+		// telemetryBrowser.capture("$pageview")
 	} catch (e) {
 		console.error("ERROR in renderer", e)
 	}
