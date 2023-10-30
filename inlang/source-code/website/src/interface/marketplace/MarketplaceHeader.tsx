@@ -43,7 +43,7 @@ const MarketplaceHeader = () => {
 				<Link
 					href={"/"}
 					onClick={() => setSearchInput("")}
-					class="flex items-center w-fit pointer-events-auto py-4"
+					class="flex items-center w-fit pointer-events-auto py-4 transition-opacity hover:opacity-75"
 				>
 					<img class={"h-8 w-8"} src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
 					<span class={"self-center pl-2 text-left font-semibold text-surface-900"}>inlang</span>

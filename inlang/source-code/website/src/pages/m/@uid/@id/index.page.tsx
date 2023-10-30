@@ -84,22 +84,6 @@ export function Page(props: PageProps) {
 		setTableOfContents(table)
 	})
 
-	let sliderRef: HTMLDivElement | ((el: HTMLDivElement) => void) | undefined
-
-	const slider = () =>
-		typeof window !== "undefined"
-			? new Flicking("#carousel", {
-					align: "center",
-					circular: true,
-					bound: true,
-					renderOnlyVisible: true,
-			  })
-			: undefined
-
-	onMount(() => {
-		sliderRef && sliderRef instanceof HTMLDivElement && slider()
-	})
-
 	return (
 		<>
 			<Title>{`${props.manifest && displayName()} ${
@@ -141,13 +125,19 @@ export function Page(props: PageProps) {
 											<div class="flex flex-col gap-3">
 												<div class="flex items-center gap-4">
 													<h1 class="text-3xl font-bold">{displayName()}</h1>
-													<Link href="/search?q=lix">
-														<div class="w-6 text-primary hover:text-hover-primary transition-colors">
-															<sl-tooltip prop:content="Powered by lix">
-																<LixBadge />
-															</sl-tooltip>
-														</div>
-													</Link>
+													<Show
+														when={props.manifest.keywords
+															.map((keyword) => keyword.toLowerCase())
+															.includes("lix")}
+													>
+														<Link href="/search?q=lix">
+															<div class="w-6 text-primary hover:text-hover-primary transition-colors">
+																<sl-tooltip prop:content="Powered by lix">
+																	<LixBadge />
+																</sl-tooltip>
+															</div>
+														</Link>
+													</Show>
 												</div>
 												<div class="inline-block text-surface-500 ">
 													<p class={!readmore() ? "lg:line-clamp-2" : ""}>{description()}</p>
@@ -200,9 +190,12 @@ export function Page(props: PageProps) {
 												/>
 											</Button>
 										</div>
-										<div class="pt-12">
-											<doc-slider items={props.manifest.gallery} />
-										</div>
+										<Show when={props.manifest.gallery && props.manifest.gallery.length > 1}>
+											<div class="pt-12">
+												{/* @ts-ignore */}
+												<doc-slider items={props.manifest.gallery} />
+											</div>
+										</Show>
 									</div>
 									<div class="w-full">
 										<div class="flex flex-col gap-4 items-col flex-shrink-0">
