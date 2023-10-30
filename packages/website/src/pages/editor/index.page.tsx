@@ -123,7 +123,7 @@ export function Page() {
 					</form>
 
 					<div class="pt-3">
-						<Button type="text" href="/marketplace/app.inlang.editor">
+						<Button type="text" href="/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang">
 							How to get started?
 						</Button>
 					</div>
