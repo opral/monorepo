@@ -56,8 +56,8 @@ const Stack = () => {
 									class={
 										(currentPageContext.urlParsed.searchOriginal?.includes(link.param)
 											? "bg-primary text-background "
-											: "bg-background text-surface-600 border border-surface-200 hover:border-surface-400") +
-										" px-6 py-3 flex-grow font-medium cursor-pointer rounded-lg flex items-center gap-2"
+											: "bg-background text-surface-600 border border-surface-200 hover:shadow-lg hover:shadow-surface-100 hover:border-surface-300 active:border-surface-400") +
+										" px-6 py-3 flex-grow font-medium cursor-pointer rounded-lg flex items-center gap-2 transition-all"
 									}
 								>
 									{link.icon}

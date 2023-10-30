@@ -2021,7 +2021,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Search"
+							"value": "⌘ + k to search"
 						}
 					]
 				},
@@ -2031,7 +2031,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Suche"
+							"value": "⌘ + k um zu suchen"
 						}
 					]
 				}

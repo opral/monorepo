@@ -71,6 +71,22 @@ export function Page(props: PageProps) {
 				}
 			/>
 			<Meta name="og:image" content="/opengraph/inlang-documentation-image.jpg" />
+			<Meta name="twitter:card" content="summary_large_image" />
+			<Meta name="twitter:image" content="/opengraph/inlang-documentation-image.jpg" />
+			<Meta
+				name="twitter:image:alt"
+				content="inlang's ecosystem helps organizations to go global."
+			/>
+			<Meta
+				name="twitter:title"
+				content={findPageBySlug(currentPageContext.urlParsed.pathname)?.title}
+			/>
+			<Meta
+				name="twitter:description"
+				content={findPageBySlug(currentPageContext.urlParsed.pathname)?.description}
+			/>
+			<Meta name="twitter:site" content="@inlanghq" />
+			<Meta name="twitter:creator" content="@inlanghq" />
 			<MarketplaceLayout>
 				{/* important: the responsive breakpoints must align throughout the markup! */}
 				<div class="flex flex-col grow md:grid md:grid-cols-4 gap-10 w-full">
