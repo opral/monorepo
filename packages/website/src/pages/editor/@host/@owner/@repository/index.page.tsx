@@ -1,4 +1,4 @@
-import { For, Match, Switch, onMount } from "solid-js"
+import { For, Match, Switch, onMount, Show } from "solid-js"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
 import { Meta, Title } from "@solidjs/meta"
@@ -11,6 +11,7 @@ import type { RecentProjectType } from "#src/services/local-storage/src/schema.j
 import { Message } from "./Message.jsx"
 import { Errors } from "./components/Errors.jsx"
 import { Layout } from "./Layout.jsx"
+import Link from "#src/renderer/Link.jsx"
 import { browserAuth } from "@lix-js/client"
 
 export function Page() {
@@ -97,7 +98,7 @@ function TheActualPage() {
 				</Match>
 
 				<Match when={project() === undefined}>
-					<div class="flex flex-col grow justify-center items-center min-w-full gap-2">
+					<div class="flex flex-col grow justify-center items-center min-w-full min-h-[calc(100vh_-_200px)] gap-2">
 						{/* sl-spinner need a own div otherwise the spinner has a bug. The wheel is rendered on the outer div  */}
 						<div>
 							{/* use font-size to change the spinner size    */}
@@ -108,24 +109,24 @@ function TheActualPage() {
 						<p class="max-w-lg">
 							TL;DR you are currently cloning a real git repo, in the browser, on top of a virtual
 							file system, which might lead to a new generation of software (see{" "}
-							<a
+							<Link
 								class="link link-primary"
 								href="https://www.youtube.com/watch?v=vJ3jGgCrz2I"
 								target="_blank"
 							>
 								next git
-							</a>
+							</Link>
 							).
 							<br />
 							<br />
 							We are working on increasing the performance. Progress can be tracked in{" "}
-							<a
+							<Link
 								href="https://github.com/orgs/inlang/projects/9"
 								target="_blank"
 								class="link link-primary"
 							>
 								project #9
-							</a>
+							</Link>
 							.
 						</p>
 					</div>
@@ -145,20 +146,23 @@ function TheActualPage() {
 						doesInlangConfigExist() && project()?.query.messages.includedMessageIds() !== undefined
 					}
 				>
-					<div>
+					<div class="min-h-[calc(100vh_-_200px)]">
 						<ListHeader ids={project()?.query.messages.includedMessageIds() || []} />
-						<TourHintWrapper
-							currentId="textfield"
-							position="bottom-left"
-							offset={{ x: 110, y: 144 }}
-							isVisible={tourStep() === "textfield"}
-						>
-							<For each={project()!.query.messages.includedMessageIds()}>
-								{(id) => {
-									return <Message id={id} />
-								}}
-							</For>
-						</TourHintWrapper>
+						<Show when={window}>
+							<TourHintWrapper
+								currentId="textfield"
+								position="bottom-left"
+								offset={{ x: 110, y: 144 }}
+								isVisible={tourStep() === "textfield"}
+							>
+								<For each={project()!.query.messages.includedMessageIds()}>
+									{(id) => {
+										return <Message id={id} />
+									}}
+								</For>
+							</TourHintWrapper>
+						</Show>
+
 						<div
 							class="flex flex-col h-[calc(100vh_-_288px)] grow justify-center items-center min-w-full gap-2"
 							classList={{
@@ -190,13 +194,13 @@ function NoInlangConfigFoundCard() {
 				<p class="pt-1.5 pb-8">
 					Please refer to the documentation and write the config file manually.
 				</p>
-				<a class="self-center" href="/documentation" target="_blank">
+				<Link class="self-center" href="/documentation" target="_blank">
 					<sl-button prop:variant="text">
 						Take me to the documentation
 						{/* @ts-ignore */}
 						<MaterialSymbolsArrowOutwardRounded slot="suffix" />
 					</sl-button>
-				</a>
+				</Link>
 			</div>
 		</div>
 	)
@@ -226,8 +230,8 @@ function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number; user: a
 					</li>
 				</ul>
 
-				<a
-					class="self-start pt-5"
+				<Link
+					class="self-end pt-5"
 					href="https://github.com/inlang/monorepo/discussions/categories/help-questions-answers"
 					target="_blank"
 				>
@@ -236,7 +240,7 @@ function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number; user: a
 						{/* @ts-ignore */}
 						<MaterialSymbolsArrowOutwardRounded slot="suffix" />
 					</sl-button>
-				</a>
+				</Link>
 
 				{args.user ? (
 					<sl-button

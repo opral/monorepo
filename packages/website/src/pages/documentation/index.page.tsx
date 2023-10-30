@@ -4,12 +4,12 @@ import type SlDetails from "@shoelace-style/shoelace/dist/components/details/det
 import { Meta, Title } from "@solidjs/meta"
 import { Feedback } from "./Feedback.jsx"
 import { EditButton } from "./EditButton.jsx"
-import { defaultLanguage } from "#src/renderer/_default.page.route.js"
-import { useI18n } from "@solid-primitives/i18n"
+import { languageTag } from "@inlang/paraglide-js/inlang-marketplace"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import tableOfContents from "../../../../../documentation/tableOfContents.json"
-import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
+import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
+import Link from "#src/renderer/Link.jsx"
 
 export type PageProps = {
 	markdown: Awaited<ReturnType<any>>
@@ -18,12 +18,22 @@ export type PageProps = {
 export function Page(props: PageProps) {
 	let mobileDetailMenu: SlDetails | undefined
 	const [editLink, setEditLink] = createSignal<string | undefined>("")
-	const [, { locale }] = useI18n()
+	const [markdownHeadings, setMarkdownHeadings] = createSignal<Array<string>>([])
 
-	const getLocale = () => {
-		const language = locale() ?? defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
-	}
+	createEffect(() => {
+		setMarkdownHeadings(
+			props.markdown
+				? props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g).map((heading: string) => {
+						// We have to use DOMParser to parse the heading string to a HTML element
+						const parser = new DOMParser()
+						const doc = parser.parseFromString(heading, "text/html")
+						const node = doc.body.firstChild as HTMLElement
+
+						return node.innerText.replace(/(<([^>]+)>)/gi, "").toString()
+				  })
+				: []
+		)
+	})
 
 	createEffect(() => {
 		if (currentPageContext) {
@@ -32,7 +42,7 @@ export function Page(props: PageProps) {
 					"/" +
 					findPageBySlug(
 						currentPageContext.urlParsed.pathname
-							.replace(getLocale(), "")
+							.replace("/" + languageTag(), "")
 							.replace("/documentation/", "")
 					)?.path
 			)
@@ -45,7 +55,7 @@ export function Page(props: PageProps) {
 				{
 					findPageBySlug(
 						currentPageContext.urlParsed.pathname
-							.replace(getLocale(), "")
+							.replace("/" + languageTag(), "")
 							.replace("/documentation/", "")
 					)?.title
 				}
@@ -55,12 +65,12 @@ export function Page(props: PageProps) {
 				content={
 					findPageBySlug(
 						currentPageContext.urlParsed.pathname
-							.replace(getLocale(), "")
+							.replace("/" + languageTag(), "")
 							.replace("/documentation/", "")
 					)?.description
 				}
 			/>
-			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
+			<Meta name="og:image" content="/opengraph/inlang-documentation-image.jpg" />
 			<MarketplaceLayout>
 				{/* important: the responsive breakpoints must align throughout the markup! */}
 				<div class="flex flex-col grow md:grid md:grid-cols-4 gap-10 w-full">
@@ -78,17 +88,8 @@ export function Page(props: PageProps) {
 								<Show when={tableOfContents && props.markdown}>
 									<NavbarCommon
 										tableOfContents={tableOfContents}
-										getLocale={getLocale}
-										headings={props.markdown
-											.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
-											.map((heading: string) => {
-												// We have to use DOMParser to parse the heading string to a HTML element
-												const parser = new DOMParser()
-												const doc = parser.parseFromString(heading, "text/html")
-												const node = doc.body.firstChild as HTMLElement
-
-												return node.innerText.replace(/(<([^>]+)>)/gi, "").toString()
-											})}
+										getLocale={languageTag}
+										headings={markdownHeadings()}
 									/>
 								</Show>
 							</div>
@@ -109,17 +110,8 @@ export function Page(props: PageProps) {
 									onLinkClick={() => {
 										mobileDetailMenu?.hide()
 									}}
-									getLocale={getLocale}
-									headings={props.markdown
-										.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
-										.map((heading: string) => {
-											// We have to use DOMParser to parse the heading string to a HTML element
-											const parser = new DOMParser()
-											const doc = parser.parseFromString(heading, "text/html")
-											const node = doc.body.firstChild as HTMLElement
-
-											return node.innerText.replace(/(<([^>]+)>)/gi, "").toString()
-										})}
+									getLocale={languageTag}
+									headings={markdownHeadings()}
 								/>
 							</Show>
 						</sl-details>
@@ -187,9 +179,16 @@ function NavbarCommon(props: {
 	const isSelected = (slug: string) => {
 		if (
 			`/documentation/${slug}` ===
-				currentPageContext.urlParsed.pathname.replace(props.getLocale(), "") ||
+				currentPageContext.urlParsed.pathname.replace(
+					props.getLocale() === "en" ? "" : props.getLocale(),
+					""
+				) ||
 			`/documentation/${slug}` ===
-				currentPageContext.urlParsed.pathname.replace(props.getLocale(), "") + "/"
+				currentPageContext.urlParsed.pathname.replace(
+					props.getLocale() === "en" ? "" : props.getLocale(),
+					""
+				) +
+					"/"
 		) {
 			return true
 		} else {
@@ -254,7 +253,7 @@ function NavbarCommon(props: {
 														: "text-info/80 hover:text-on-background ") +
 													"tracking-wide text-sm block w-full font-normal mb-2"
 												}
-												href={props.getLocale() + `/documentation/${slug}`}
+												href={`/documentation/${slug}`}
 											>
 												{page.title}
 											</a>
@@ -263,8 +262,8 @@ function NavbarCommon(props: {
 													{(heading) => (
 														<Show when={!heading.includes(page.title)}>
 															<li>
-																<a
-																	onClick={(e) => {
+																<Link
+																	onClick={(e: any) => {
 																		e.preventDefault()
 																		onAnchorClick(replaceChars(heading.toString().toLowerCase()))
 																		props.onLinkClick?.()
@@ -279,7 +278,7 @@ function NavbarCommon(props: {
 																	href={`#${replaceChars(heading.toString().toLowerCase())}`}
 																>
 																	{heading.replace("#", "")}
-																</a>
+																</Link>
 															</li>
 														</Show>
 													)}

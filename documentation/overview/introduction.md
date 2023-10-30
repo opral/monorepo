@@ -1,4 +1,4 @@
-# Introduction
+# Learn how to build on inlang
 
 <doc-links>
     <doc-link title="Guides are in the Marketplace" icon="material-symbols:add-business-outline-rounded" href="/" description="These docs guide you on how to build on top of inlang. You find guides in the marketplace"></doc-link>
@@ -21,8 +21,3 @@ For every use case, there is an app, a plugin, a lint rule, or a custom solution
 Inlang apps are built on lix. Lix is a git-compatible version control backend for applications. Using lix provides inlang with CI/CD for globalization and collaboration between developers, translators, and designers on one common source of truth: your repository and your data.
 
 <doc-figure src="https://github.com/inlang/monorepo/assets/58360188/917cc987-669d-4203-a2ed-8184087fd070" alt="lix-based globalization infrastructure" caption="Lix repositories act as building blocks for tools, applications like the editor, and automation via CI/CD."></doc-figure>
-
-<doc-links>
-    <doc-link title="Getting started" icon="material-symbols:fast-forward-outline-rounded" href="/documentation/manually-create-project" description="Create a new project."></doc-link>
-    <doc-link title="Marketplace" icon="material-symbols:add-business-outline-rounded" href="/" description="Find apps, plugins, and lint rules."></doc-link>
-</doc-links>

@@ -8,5 +8,6 @@ import { cli } from "../dist/main.js"
 try {
 	cli.parse()
 } catch (error) {
+	console.log("catch")
 	console.error(error)
 }

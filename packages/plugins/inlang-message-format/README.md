@@ -42,4 +42,4 @@ The plugin stores messages as one-to-one mapping in a JSON file.
 
 ---
 
-_Is something unclear or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr), open a [Discussion](https://github.com/inlang/monorepo/discussions), or file an [Issue](https:github.com/inlang/monorepong/issues) on [Github](httpgithub.com/inlang/monorepolang)._
+_Is something unclear or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr), open a [Discussion](https://github.com/inlang/monorepo/discussions), or file an [Issue](https://github.com/inlang/monorepo/issues) on [Github](https://github.com/inlang/monorepo)._

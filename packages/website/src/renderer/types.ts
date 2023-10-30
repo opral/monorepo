@@ -11,7 +11,7 @@ export type PageContextRenderer<PageProps = Record<string, unknown>> =
 		 * The properties of a page.
 		 */
 		pageProps: PageProps
-		locale: string
+		languageTag: string
 		meta: any
 	}
 

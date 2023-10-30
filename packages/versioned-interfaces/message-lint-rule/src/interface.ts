@@ -1,7 +1,7 @@
 import type { Message } from "@inlang/message"
 import type { LanguageTag } from "@inlang/language-tag"
 import { Translatable } from "@inlang/translatable"
-import { Type, type Static } from "@sinclair/typebox"
+import { Type, type Static, type TObject } from "@sinclair/typebox"
 import type { JSONObject } from "@inlang/json-types"
 import {
 	_MessageLintRuleId,
@@ -39,9 +39,12 @@ export type MessageLintReport = {
  * 	}>
  * ```
  */
+
 export type MessageLintRule<
 	ExternalSettings extends Record<keyof ExternalProjectSettings, JSONObject> | unknown = unknown
-> = Static<typeof MessageLintRule> & {
+> = Omit<Static<typeof MessageLintRule>, "settingsSchema"> & {
+	settingsSchema?: TObject
+
 	run: (args: {
 		message: Message
 		settings: ProjectSettings & ExternalSettings
@@ -56,6 +59,12 @@ export const MessageLintRule = Type.Object({
 	id: _MessageLintRuleId,
 	displayName: Translatable(Type.String()),
 	description: Translatable(Type.String()),
+	/**
+	 * Tyepbox is must be used to validate the Json Schema.
+	 * Github discussion to upvote a plain Json Schema validator and read the benefits of Typebox
+	 * https://github.com/inlang/monorepo/discussions/1503
+	 */
+	settingsSchema: Type.Optional(Type.Object({}, { additionalProperties: true })),
 })
 
 /**

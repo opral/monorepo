@@ -3,7 +3,6 @@
 	"include": ["src/**/*.ts"],
 	"compilerOptions": {
 		"lib": ["ESNext", "DOM"],
-		"types": ["node"],
 		"outDir": "./dist",
 		"rootDir": "./src"
 	}

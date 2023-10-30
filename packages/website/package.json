@@ -7,9 +7,10 @@
 	},
 	"scripts": {
 		"_build_COMMENT": "To speed up CI/CD, the website is only built in deploy",
-		"_build": "vite build",
+		"_build": "paraglide-js compile --namespace inlang-marketplace --project ../../../project.inlang.json && vite build",
+		"build": "paraglide-js compile --namespace inlang-marketplace --project ../../../project.inlang.json",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "tsc --noEmit",
+		"test": "paraglide-js compile --namespace inlang-marketplace --project ../../../project.inlang.json && tsc --noEmit",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
@@ -71,6 +72,7 @@
 		"@inlang/markdown": "*",
 		"@inlang/marketplace-manifest": "*",
 		"@inlang/marketplace-registry": "*",
+		"@inlang/paraglide-js": "*",
 		"@inlang/result": "*",
 		"@inlang/rpc": "*",
 		"@inlang/sdk": "*",
@@ -95,6 +97,7 @@
 		"vite-plugin-node-polyfills": "0.12.0",
 		"vite-plugin-solid": "2.7.0",
 		"vite-plugin-ssr": "0.4.140",
+		"vite-plugin-watch": "0.2.0",
 		"vitest": "0.34.3"
 	},
 	"peerDependencies": {

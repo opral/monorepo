@@ -3,7 +3,7 @@ import { createEffect, createSignal, type JSXElement, onMount, Show, on } from "
 import IconGithub from "~icons/cib/github"
 import { pushChanges, useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
-import { showToast } from "#src/components/Toast.jsx"
+import { showToast } from "#src/interface/components/Toast.jsx"
 import { navigate } from "vite-plugin-ssr/client/router"
 import { currentPageContext } from "#src/renderer/state.js"
 import type { EditorRouteParams } from "../types.js"
@@ -240,18 +240,28 @@ export const Gitfloat = () => {
 
 	onMount(() => {
 		const gitfloat = document.querySelector(".gitfloat")
-		gitfloat?.classList.add("animate-slideIn")
+		const isMobile = window.innerWidth < 768
+		isMobile
+			? gitfloat?.classList.add("animate-slideInMobile")
+			: gitfloat?.classList.add("animate-slideIn")
 		setTimeout(() => {
-			gitfloat?.classList.remove("animate-slideIn")
+			isMobile
+				? gitfloat?.classList.remove("animate-slideInMobile")
+				: gitfloat?.classList.remove("animate-slideIn")
 		}, 400)
 	})
 
 	createEffect(() => {
+		const isMobile = window.innerWidth < 768
 		if (localChanges() > 0 && localStorage?.user !== undefined) {
 			const gitfloat = document.querySelector(".gitfloat")
-			gitfloat?.classList.add("animate-jump")
+			isMobile
+				? gitfloat?.classList.add("animate-jumpMobile")
+				: gitfloat?.classList.add("animate-jump")
 			setTimeout(() => {
-				gitfloat?.classList.remove("animate-jump")
+				isMobile
+					? gitfloat?.classList.remove("animate-jumpMobile")
+					: gitfloat?.classList.remove("animate-jump")
 			}, 1000)
 		}
 	})
@@ -267,7 +277,7 @@ export const Gitfloat = () => {
 
 	return (
 		<>
-			<div class="gitfloat z-30 sticky left-1/2 -translate-x-[150px] bottom-8 w-[300px] my-16 animate-slideIn">
+			<div class="gitfloat z-30 sticky mx-auto md:left-1/2 md:-translate-x-[150px] bottom-8 w-[300px] my-16">
 				<TourHintWrapper
 					currentId={tourStep()}
 					position="top-right"
