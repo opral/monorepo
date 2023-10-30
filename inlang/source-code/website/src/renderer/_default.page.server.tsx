@@ -2,15 +2,19 @@ import type { PageContextRenderer } from "./types.js"
 import { generateHydrationScript, renderToString } from "solid-js/web"
 import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr/server"
 import { setCurrentPageContext } from "./state.js"
-import { Root } from "./Root.jsx"
+import { Root } from "./_default.root.jsx"
 
 // import the css
 import "./app.css"
 import { MetaProvider, renderTags } from "@solidjs/meta"
-import { defaultLanguage, languages } from "./_default.page.route.js"
+import {
+	sourceLanguageTag,
+	availableLanguageTags,
+	languageTag,
+} from "@inlang/paraglide-js/inlang-marketplace"
 
 // See https://vite-plugin-ssr.com/data-fetching
-export const passToClient = ["pageProps", "routeParams", "locale"] as const
+export const passToClient = ["pageProps", "routeParams", "languageTag"] as const
 
 export async function render(pageContext: PageContextRenderer): Promise<unknown> {
 	//! TODO most likely cross request state pollution
@@ -33,22 +37,17 @@ export async function render(pageContext: PageContextRenderer): Promise<unknown>
 	// mutated during render so you can include in server-rendered template later
 	const tags: any[] = []
 
-	const isEditor = pageContext.urlPathname.startsWith("editor")
-
+	const isEditor = pageContext.urlPathname.includes("/editor")
 	const renderedPage = isEditor
 		? undefined
 		: renderToString(() => (
 				<MetaProvider tags={tags}>
-					<Root
-						page={pageContext.Page}
-						pageProps={pageContext.pageProps}
-						locale={pageContext.locale}
-					/>
+					<Root page={pageContext.Page} pageProps={pageContext.pageProps} />
 				</MetaProvider>
 		  ))
 
 	return escapeInject`<!DOCTYPE html>
-    <html lang="en" class="min-h-screen min-w-screen">
+    <html lang="en" class="min-h-screen min-w-screen overflow-x-hidden">
       <head>
 			<meta charset="UTF-8" />
 			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -92,20 +91,20 @@ gtag('config', 'G-5H3SDF7TVZ');
 `
 
 export function onBeforePrerender(prerenderContext: any) {
-	const pageContexts: any = []
+	const pageContexts = []
 	for (const pageContext of prerenderContext.pageContexts) {
 		// Duplicate pageContext for each locale
-		for (const locale of languages) {
+		for (const locale of availableLanguageTags) {
 			// Localize URL
 			let { urlOriginal } = pageContext
-			if (locale !== defaultLanguage) {
-				urlOriginal = `/${locale}${pageContext.urlOriginal}`
+			if (locale !== sourceLanguageTag) {
+				urlOriginal = `/${sourceLanguageTag}${pageContext.urlOriginal}`
 			}
 			pageContexts.push({
 				...pageContext,
 				urlOriginal,
 				// Set pageContext.locale
-				locale,
+				languageTag: languageTag(),
 			})
 		}
 	}

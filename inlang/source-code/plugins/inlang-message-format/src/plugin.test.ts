@@ -138,32 +138,47 @@ test("save the messages alphabetically to decrease git diff's and merge conflict
 	expect(json.data[2]?.id).toBe("c")
 })
 
-test("throw if the settings are invalid", async () => {
-	const { plugin } = await import("./plugin.js")
-	const fs = createNodeishMemoryFs()
+test("don't throw if the storage path does not exist. instead, create the file and/or folder (enables project initialization usage)", async () => {
+	for (const path of [
+		"./messages.json",
+		"./folder/messages.json",
+		"./folder/folder/messages.json",
+	]) {
+		const { plugin } = await import("./plugin.js")
+		const fs = createNodeishMemoryFs()
 
-	await expect(
-		plugin.loadMessages!({
+		const messages = await plugin.loadMessages!({
 			settings: {
-				[pluginId]: { filePath: "./messages.js" } satisfies PluginSettings,
+				[pluginId]: { filePath: path } satisfies PluginSettings,
 			} as any,
 			nodeishFs: fs,
 		})
-	).rejects.toThrow()
+
+		const createdFile = await fs.readFile(path, { encoding: "utf-8" })
+		const parsedFile = JSON.parse(createdFile)
+		// messages should be empty but no error should be thrown
+		expect(messages).toStrictEqual([])
+		expect(Value.Check(StorageSchema, parsedFile)).toBe(true)
+	}
 })
 
-test("don't throw if the storage path does not exist. instead, create the file (enables project initialization usage)", async () => {
+test("recursively creating a directory should not fail if a subpath already exists", async () => {
 	const { plugin } = await import("./plugin.js")
 	const fs = createNodeishMemoryFs()
+	// folder-a exists but folder-b doesn't
+	const path = "./folder-a/folder-b/messages.json"
+
+	await fs.mkdir("./folder-a/")
+	await fs.writeFile("./folder-a/placeholder.txt", "hi")
 
 	const messages = await plugin.loadMessages!({
 		settings: {
-			[pluginId]: { filePath: "./messages.json" } satisfies PluginSettings,
+			[pluginId]: { filePath: path } satisfies PluginSettings,
 		} as any,
 		nodeishFs: fs,
 	})
 
-	const createdFile = await fs.readFile("./messages.json", { encoding: "utf-8" })
+	const createdFile = await fs.readFile(path, { encoding: "utf-8" })
 	const parsedFile = JSON.parse(createdFile)
 	// messages should be empty but no error should be thrown
 	expect(messages).toStrictEqual([])

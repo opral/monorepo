@@ -2,14 +2,25 @@ import type { Text, Variant } from "@inlang/message"
 import type { MessageLintRule } from "@inlang/message-lint-rule"
 import { id, displayName, description } from "../marketplace-manifest.json"
 
-type RuleSettings = {
-	ignore?: string[]
-}
+import { Type, type Static } from "@sinclair/typebox"
+
+type RuleSettings = Static<typeof RuleSettings>
+const RuleSettings = Type.Object({
+	ignore: Type.Optional(
+		Type.Array(
+			Type.String({
+				pattern: "[^*]",
+				description: "All items in the array need quotaion marks at the end and beginning",
+			})
+		)
+	),
+})
 
 export const identicalPatternRule: MessageLintRule = {
 	id: id as MessageLintRule["id"],
 	displayName,
 	description,
+	settingsSchema: RuleSettings,
 	run: ({ message, report, settings }) => {
 		const ruleSettings = settings[id as keyof typeof settings] as RuleSettings | undefined
 

@@ -1,6 +1,6 @@
 # What is the inlang Web Editor?
 
-The inlang editor is part of the [website](../website/src/pages/editor). It gives people without deeper technical knowledge the opportunity to work with inlang's ecosystem without having to touch the code themselves. However, the editor provides them with the same extent of features as the other apps, resulting in seamless workflows enabling better cooperation.
+The inlang editor is part of the website. It gives people without deeper technical knowledge the opportunity to work with inlang's ecosystem without having to touch the code themselves. However, the editor provides them with the same extent of features as the other apps, resulting in seamless workflows enabling better cooperation.
 
 ### Benefits
 
@@ -13,9 +13,9 @@ The inlang editor is part of the [website](../website/src/pages/editor). It give
 
 ## Open existing project
 
-To open your existing project, you can visit the [inlang Editor](https://inlang.com/editor) and enter your repository URL. The editor will automatically load all your message and plugins / lint rules.
+To open your existing project, you can visit the [inlang Editor](/editor) and enter your repository URL. The editor will automatically load all your message and plugins / lint rules.
 
-**Depending on the size of your project, it can take up a few minutes to load your project.**
+**Depending on the size of your project, it can take up a few seconds to load your project.**
 
 # Filter messages
 

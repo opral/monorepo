@@ -23,6 +23,7 @@ export const compileCommand = new Command()
 		-> import * as m from "@inlang/paraglide-js/frontend/messages"
 		\n`
 	)
+	.showHelpAfterError()
 	.action((options) => {
 		runCompileCommand({
 			projectPath: options.project,
@@ -72,6 +73,7 @@ const exitIfErrors = (project: InlangProject) => {
 		// because project.errors() internal .toString() method
 		// is better than manual processing.
 		consola.error(`The project has errors:`)
+		consola.log(`Check options: compile -h --help\n`)
 		consola.log(project.errors())
 		process.exit(1)
 	}

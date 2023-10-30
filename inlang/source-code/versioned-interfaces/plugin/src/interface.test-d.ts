@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { Type } from "@sinclair/typebox"
 import type { Plugin } from "./interface.js"
 
 // -- it should be possible to extend the settings with the plugin's settings --

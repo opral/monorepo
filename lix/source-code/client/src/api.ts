@@ -15,7 +15,7 @@ export class LixError extends Error {
 	response?: { status?: number }
 }
 
-export type lixAuthModule = {
+export type LixAuthModule = {
 	login: () => Promise<any>
 	logout: () => Promise<any>
 	getUser: () => Promise<{

@@ -1,5 +1,5 @@
 import { publicEnv } from "@inlang/env-variables"
-import type { lixAuthModule } from "./api.js"
+import type { LixAuthModule } from "./api.js"
 
 const gitHubProxyUrl = publicEnv.PUBLIC_GIT_PROXY_BASE_URL + "/github-proxy/"
 const githubAppClientId = publicEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID
@@ -120,4 +120,4 @@ export async function getUser() {
 	}
 }
 
-export const browserAuth: lixAuthModule = { login, logout, getUser, addPermissions }
+export const browserAuth: LixAuthModule = { login, logout, getUser, addPermissions }

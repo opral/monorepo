@@ -1,12 +1,12 @@
 import { Meta, Title } from "@solidjs/meta"
 import { Show, onMount } from "solid-js"
-import { defaultLanguage } from "#src/renderer/_default.page.route.js"
-import { useI18n } from "@solid-primitives/i18n"
+import { languageTag } from "@inlang/paraglide-js/inlang-marketplace"
 import { currentPageContext } from "#src/renderer/state.js"
 import tableOfContents from "../../../../../../blog/tableOfContents.json"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
-import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
+import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
+import Link from "#src/renderer/Link.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -16,13 +16,6 @@ export type PageProps = {
 }
 
 export function Page(props: PageProps) {
-	const [, { locale }] = useI18n()
-
-	const getLocale = () => {
-		const language = locale() ?? defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
-	}
-
 	const replaceChars = (str: string) => {
 		return str
 			.replaceAll(" ", "-")
@@ -83,7 +76,9 @@ export function Page(props: PageProps) {
 			<Title>
 				{
 					findPageBySlug(
-						currentPageContext.urlParsed.pathname.replace(getLocale(), "").replace("/blog/", ""),
+						currentPageContext.urlParsed.pathname
+							.replace("/" + languageTag(), "")
+							.replace("/blog/", ""),
 						tableOfContents
 					)?.title
 				}
@@ -92,7 +87,9 @@ export function Page(props: PageProps) {
 				name="description"
 				content={
 					findPageBySlug(
-						currentPageContext.urlParsed.pathname.replace(getLocale(), "").replace("/blog/", ""),
+						currentPageContext.urlParsed.pathname
+							.replace("/" + languageTag(), "")
+							.replace("/blog/", ""),
 						tableOfContents
 					)?.description
 				}
@@ -107,9 +104,9 @@ export function Page(props: PageProps) {
 							<Markdown markdown={props.markdown} />
 						</div>
 					</Show>
-					<a class="flex justify-center link link-primary py-4 text-primary " href="/blog">
+					<Link class="flex justify-center link link-primary py-4 text-primary " href="/blog">
 						&lt;- Back to Blog
-					</a>
+					</Link>
 				</div>
 			</MarketplaceLayout>
 		</>
