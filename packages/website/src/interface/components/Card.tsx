@@ -128,7 +128,7 @@ export function CardBuildOwn() {
 	return (
 		<>
 			<Link
-				href="/documentation/publish-marketplace"
+				href="/documentation/publish-to-marketplace"
 				class="relative no-underline h-48 flex flex-col justify-center pt-8 items-center gap-4 group w-full bg-background hover:bg-surface-50 transition-colors border border-surface-200 rounded-xl p-5"
 			>
 				<Plus class="w-10 h-10 text-surface-600 group-hover:text-surface-900 transition-colors" />
