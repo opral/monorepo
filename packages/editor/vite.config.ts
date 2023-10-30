@@ -1,6 +1,6 @@
 import { defineConfig } from "vite"
 import solid from "vite-plugin-solid"
-import { ssr as vitePluginSsr } from "vike/plugin"
+import { ssr as vikePlugin } from "vike/plugin"
 import { watch } from "vite-plugin-watch"
 import { fileURLToPath, URL } from "node:url"
 import Icons from "unplugin-icons/vite"
@@ -21,8 +21,8 @@ export default defineConfig({
 			protocolImports: false,
 		}),
 		solid({ ssr: true }),
-		// the metaframework https://vite-plugin-ssr.com/
-		vitePluginSsr(),
+		// the metaframework https://vike.dev/
+		vikePlugin(),
 		// @ts-ignore
 		// only https://icon-sets.iconify.design/material-symbols/
 		// and https://icon-sets.iconify.design/cib/
