@@ -1,5 +1,11 @@
 # @inlang/plugin-paraglide-js
 
+## 1.2.0
+
+### Minor Changes
+
+- 6531d0cc3: fix parser to detect correct strings
+
 ## 1.1.0
 
 ### Minor Changes
