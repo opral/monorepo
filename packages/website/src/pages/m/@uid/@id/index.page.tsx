@@ -84,19 +84,6 @@ export function Page(props: PageProps) {
 		setTableOfContents(table)
 	})
 
-	// const [details, setDetails] = createSignal({})
-	// const [slider, { next, prev }] = createSlider({
-	// 	slides: {
-	// 		number: props.manifest && props.manifest.gallery ? props.manifest.gallery.length - 1 : 0,
-	// 		perView: window ? (window.innerWidth > 768 ? 3 : 1) : 1,
-	// 		spacing: 8,
-	// 	},
-
-	// 	detailsChanged: (slider: { track: { details: any } }) => {
-	// 		setDetails(slider.track.details)
-	// 	},
-	// })
-
 	return (
 		<>
 			<Title>{`${props.manifest && displayName()} ${
@@ -111,6 +98,20 @@ export function Page(props: PageProps) {
 			) : (
 				<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			)}
+			<Meta name="twitter:card" content="summary_large_image" />
+			{props.manifest && props.manifest.gallery ? (
+				<Meta name="twitter:image" content={props.manifest.gallery[0]} />
+			) : (
+				<Meta name="twitter:image" content="/images/inlang-social-image.jpg" />
+			)}
+			<Meta
+				name="twitter:image:alt"
+				content="inlang's ecosystem helps organizations to go global."
+			/>
+			<Meta name="twitter:title" content={props.manifest && displayName()} />
+			<Meta name="twitter:description" content={props.manifest && description()} />
+			<Meta name="twitter:site" content="@inlanghq" />
+			<Meta name="twitter:creator" content="@inlanghq" />
 			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
 					<div class="md:py-28 py-16">
@@ -136,7 +137,22 @@ export function Page(props: PageProps) {
 												/>
 											</Show>
 											<div class="flex flex-col gap-3">
-												<h1 class="text-3xl font-bold">{displayName()}</h1>
+												<div class="flex items-center gap-4">
+													<h1 class="text-3xl font-bold">{displayName()}</h1>
+													<Show
+														when={props.manifest.keywords
+															.map((keyword) => keyword.toLowerCase())
+															.includes("lix")}
+													>
+														<Link href="/search?q=lix">
+															<div class="w-6 text-primary hover:text-hover-primary transition-colors">
+																<sl-tooltip prop:content="Powered by lix">
+																	<LixBadge />
+																</sl-tooltip>
+															</div>
+														</Link>
+													</Show>
+												</div>
 												<div class="inline-block text-surface-500 ">
 													<p class={!readmore() ? "lg:line-clamp-2" : ""}>{description()}</p>
 													<Show when={description().length > 205}>
@@ -188,48 +204,12 @@ export function Page(props: PageProps) {
 												/>
 											</Button>
 										</div>
-										{/* <Show
-											when={props.manifest.gallery && props.manifest.gallery.length > 1 && slider}
-										>
-											<div class="relative">
-												<div use:slider class="mt-16 cursor-grab active:cursor-grabbing">
-													<For each={props.manifest.gallery}>
-														{(image) => (
-															<a
-																href={image}
-																target="_blank"
-																rel="noopener noreferrer"
-																class="transition-opacity hover:opacity-80 cursor-pointer w-80 flex-shrink-0 active:cursor-grabbin flex items-center justify-center"
-															>
-																<img class="rounded-md w-80" src={image} />
-															</a>
-														)}
-													</For>
-												</div>
-												<Show when={details()}>
-													<button
-														disabled={
-															// @ts-ignore
-															details() && details().progress ? details().progress === 0 : false
-														}
-														onClick={prev}
-														class="absolute -left-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
-													>
-														<Left class="h-8 w-8" />
-													</button>
-													<button
-														disabled={
-															// @ts-ignore
-															details() && details().progress ? details().progress > 0.99 : false
-														}
-														onClick={next}
-														class="absolute -right-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
-													>
-														<Right class="h-8 w-8" />
-													</button>
-												</Show>
+										<Show when={props.manifest.gallery && props.manifest.gallery.length > 1}>
+											<div class="pt-12">
+												{/* @ts-ignore */}
+												<doc-slider items={props.manifest.gallery} />
 											</div>
-										</Show> */}
+										</Show>
 									</div>
 									<div class="w-full">
 										<div class="flex flex-col gap-4 items-col flex-shrink-0">
@@ -452,5 +432,25 @@ function NavbarCommon(props: {
 				</For>
 			</ul>
 		</div>
+	)
+}
+
+function LixBadge() {
+	return (
+		<svg
+			width="100%"
+			height="100%"
+			viewBox="0 0 48 33"
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M26.8537 10L30.8594 17.6278L40.9645 0H47.1719L34.8509 20.9091L41.3424 31.8182H35.1634L30.8594 24.2756L26.6265 31.8182H20.3765L26.8537 20.9091L20.6037 10H26.8537Z"
+				fill="currentColor"
+			/>
+			<path d="M10.8984 31.8182V10H16.9496V31.8182H10.8984Z" fill="currentColor" />
+			<path d="M6 0.0654297V32.0654H0V0.0654297H6Z" fill="currentColor" />
+			<rect x="11" y="0.0654297" width="16" height="5" fill="currentColor" />
+		</svg>
 	)
 }
