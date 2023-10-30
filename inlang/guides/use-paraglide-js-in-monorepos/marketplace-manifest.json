@@ -8,7 +8,7 @@
 		"en": "This guide explains how to integrate paraglideJS into a monorepo, covering the setup, initial configuration, and testing process."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/build-a-global-svelte-app/build-a-global-svelte-app.md"
+		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/use-paraglide-js-in-monorepos/use-paraglide-js-in-monorepos.md"
 	},
 	"keywords": [
 		"application",
