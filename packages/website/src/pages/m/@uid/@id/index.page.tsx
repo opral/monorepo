@@ -84,18 +84,21 @@ export function Page(props: PageProps) {
 		setTableOfContents(table)
 	})
 
-	// const [details, setDetails] = createSignal({})
-	// const [slider, { next, prev }] = createSlider({
-	// 	slides: {
-	// 		number: props.manifest && props.manifest.gallery ? props.manifest.gallery.length - 1 : 0,
-	// 		perView: window ? (window.innerWidth > 768 ? 3 : 1) : 1,
-	// 		spacing: 8,
-	// 	},
+	let sliderRef: HTMLDivElement | ((el: HTMLDivElement) => void) | undefined
 
-	// 	detailsChanged: (slider: { track: { details: any } }) => {
-	// 		setDetails(slider.track.details)
-	// 	},
-	// })
+	const slider = () =>
+		typeof window !== "undefined"
+			? new Flicking("#carousel", {
+					align: "center",
+					circular: true,
+					bound: true,
+					renderOnlyVisible: true,
+			  })
+			: undefined
+
+	onMount(() => {
+		sliderRef && sliderRef instanceof HTMLDivElement && slider()
+	})
 
 	return (
 		<>
@@ -139,7 +142,7 @@ export function Page(props: PageProps) {
 												<div class="flex items-center gap-4">
 													<h1 class="text-3xl font-bold">{displayName()}</h1>
 													<Link href="/search?q=lix">
-														<div class="w-9 text-primary hover:text-hover-primary transition-colors">
+														<div class="w-6 text-primary hover:text-hover-primary transition-colors">
 															<sl-tooltip prop:content="Powered by lix">
 																<LixBadge />
 															</sl-tooltip>
@@ -197,48 +200,9 @@ export function Page(props: PageProps) {
 												/>
 											</Button>
 										</div>
-										{/* <Show
-											when={props.manifest.gallery && props.manifest.gallery.length > 1 && slider}
-										>
-											<div class="relative">
-												<div use:slider class="mt-16 cursor-grab active:cursor-grabbing">
-													<For each={props.manifest.gallery}>
-														{(image) => (
-															<a
-																href={image}
-																target="_blank"
-																rel="noopener noreferrer"
-																class="transition-opacity hover:opacity-80 cursor-pointer w-80 flex-shrink-0 active:cursor-grabbin flex items-center justify-center"
-															>
-																<img class="rounded-md w-80" src={image} />
-															</a>
-														)}
-													</For>
-												</div>
-												<Show when={details()}>
-													<button
-														disabled={
-															// @ts-ignore
-															details() && details().progress ? details().progress === 0 : false
-														}
-														onClick={prev}
-														class="absolute -left-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
-													>
-														<Left class="h-8 w-8" />
-													</button>
-													<button
-														disabled={
-															// @ts-ignore
-															details() && details().progress ? details().progress > 0.99 : false
-														}
-														onClick={next}
-														class="absolute -right-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
-													>
-														<Right class="h-8 w-8" />
-													</button>
-												</Show>
-											</div>
-										</Show> */}
+										<div class="pt-12">
+											<doc-slider items={props.manifest.gallery} />
+										</div>
 									</div>
 									<div class="w-full">
 										<div class="flex flex-col gap-4 items-col flex-shrink-0">
@@ -468,30 +432,18 @@ function LixBadge() {
 	return (
 		<svg
 			width="100%"
-			height="auto"
-			viewBox="0 0 77 47"
+			height="100%"
+			viewBox="0 0 48 33"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
 		>
-			<g clip-path="url(#clip0_1771_54)">
-				<rect width="76.5514" height="46.6222" rx="16" fill="currentColor" />
-				<path
-					d="M30.0854 14.1221C29.1858 14.1221 28.414 13.8238 27.7701 13.2272C27.1356 12.6211 26.8184 11.8967 26.8184 11.0539C26.8184 10.2206 27.1356 9.50559 27.7701 8.909C28.414 8.30294 29.1858 7.99991 30.0854 7.99991C30.9851 7.99991 31.7521 8.30294 32.3866 8.909C33.0305 9.50559 33.3525 10.2206 33.3525 11.0539C33.3525 11.8967 33.0305 12.6211 32.3866 13.2272C31.7521 13.8238 30.9851 14.1221 30.0854 14.1221Z"
-					fill="white"
-				/>
-				<path d="M22.0511 9.53125V38.6222H16V9.53125H22.0511Z" fill="white" />
-				<path
-					fill-rule="evenodd"
-					clip-rule="evenodd"
-					d="M46.0627 16.8036L50.0649 24.4249L51.5 27.5L51.7659 22.1825L73.7926 -7H80L54.0599 27.7127L60.5514 38.6218H54.3724L50.0684 31.0792L45.8354 38.6218H39.5854L44.7046 30H41.0857H41V29.9998C35.4146 29.9785 31.7353 27.8726 29.5619 24.8929C27.5025 22.0698 27.0854 18.8605 27.0854 17H33.0854C33.0854 18.1395 33.3685 19.9302 34.4093 21.3571C35.3248 22.6122 37.1191 24 41.0857 24H43.9356L39.8127 16.8036H46.0627Z"
-					fill="white"
-				/>
-			</g>
-			<defs>
-				<clipPath id="clip0_1771_54">
-					<rect width="76.5514" height="46.6222" rx="16" fill="white" />
-				</clipPath>
-			</defs>
+			<path
+				d="M26.8537 10L30.8594 17.6278L40.9645 0H47.1719L34.8509 20.9091L41.3424 31.8182H35.1634L30.8594 24.2756L26.6265 31.8182H20.3765L26.8537 20.9091L20.6037 10H26.8537Z"
+				fill="currentColor"
+			/>
+			<path d="M10.8984 31.8182V10H16.9496V31.8182H10.8984Z" fill="currentColor" />
+			<path d="M6 0.0654297V32.0654H0V0.0654297H6Z" fill="currentColor" />
+			<rect x="11" y="0.0654297" width="16" height="5" fill="currentColor" />
 		</svg>
 	)
 }

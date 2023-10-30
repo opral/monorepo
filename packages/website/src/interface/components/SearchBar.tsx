@@ -53,7 +53,7 @@ export default function SearchBar() {
 				id="search"
 				name="search"
 				placeholder={m.marketplace_header_search_placeholder()}
-				class="border-0 focus:ring-0 h-full w-full pl-0 text-sm placeholder:text-surface-400"
+				class="border-0 focus:ring-0 h-full w-full pl-0 text-sm md:placeholder:text-surface-400 placeholder:text-surface-900/0"
 				value={q ? q : searchInput()}
 				ref={inputElement}
 				onInput={(e) => {
