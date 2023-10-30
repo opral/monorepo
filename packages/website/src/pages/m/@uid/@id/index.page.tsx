@@ -136,7 +136,16 @@ export function Page(props: PageProps) {
 												/>
 											</Show>
 											<div class="flex flex-col gap-3">
-												<h1 class="text-3xl font-bold">{displayName()}</h1>
+												<div class="flex items-center gap-4">
+													<h1 class="text-3xl font-bold">{displayName()}</h1>
+													<Link href="/search?q=lix">
+														<div class="w-9 text-primary hover:text-hover-primary transition-colors">
+															<sl-tooltip prop:content="Powered by lix">
+																<LixBadge />
+															</sl-tooltip>
+														</div>
+													</Link>
+												</div>
 												<div class="inline-block text-surface-500 ">
 													<p class={!readmore() ? "lg:line-clamp-2" : ""}>{description()}</p>
 													<Show when={description().length > 205}>
@@ -452,5 +461,37 @@ function NavbarCommon(props: {
 				</For>
 			</ul>
 		</div>
+	)
+}
+
+function LixBadge() {
+	return (
+		<svg
+			width="100%"
+			height="auto"
+			viewBox="0 0 77 47"
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<g clip-path="url(#clip0_1771_54)">
+				<rect width="76.5514" height="46.6222" rx="16" fill="currentColor" />
+				<path
+					d="M30.0854 14.1221C29.1858 14.1221 28.414 13.8238 27.7701 13.2272C27.1356 12.6211 26.8184 11.8967 26.8184 11.0539C26.8184 10.2206 27.1356 9.50559 27.7701 8.909C28.414 8.30294 29.1858 7.99991 30.0854 7.99991C30.9851 7.99991 31.7521 8.30294 32.3866 8.909C33.0305 9.50559 33.3525 10.2206 33.3525 11.0539C33.3525 11.8967 33.0305 12.6211 32.3866 13.2272C31.7521 13.8238 30.9851 14.1221 30.0854 14.1221Z"
+					fill="white"
+				/>
+				<path d="M22.0511 9.53125V38.6222H16V9.53125H22.0511Z" fill="white" />
+				<path
+					fill-rule="evenodd"
+					clip-rule="evenodd"
+					d="M46.0627 16.8036L50.0649 24.4249L51.5 27.5L51.7659 22.1825L73.7926 -7H80L54.0599 27.7127L60.5514 38.6218H54.3724L50.0684 31.0792L45.8354 38.6218H39.5854L44.7046 30H41.0857H41V29.9998C35.4146 29.9785 31.7353 27.8726 29.5619 24.8929C27.5025 22.0698 27.0854 18.8605 27.0854 17H33.0854C33.0854 18.1395 33.3685 19.9302 34.4093 21.3571C35.3248 22.6122 37.1191 24 41.0857 24H43.9356L39.8127 16.8036H46.0627Z"
+					fill="white"
+				/>
+			</g>
+			<defs>
+				<clipPath id="clip0_1771_54">
+					<rect width="76.5514" height="46.6222" rx="16" fill="white" />
+				</clipPath>
+			</defs>
+		</svg>
 	)
 }
