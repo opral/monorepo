@@ -94,6 +94,25 @@ export function Page(props: {
 				)} - inlang`}
 			/>
 			<Meta name="og:image" content="/images/inlang-marketplace-image.jpg" />
+			<Meta name="twitter:card" content="summary_large_image" />
+			<Meta name="twitter:image" content="/opengraph/inlang-marketplace-image.jpg" />
+			<Meta
+				name="twitter:image:alt"
+				content="inlang's ecosystem helps organizations to go global."
+			/>
+			<Meta
+				name="twitter:title"
+				content={`Global ${currentPageContext.routeParams.category} - inlang`}
+			/>
+			<Meta
+				name="twitter:description"
+				content={`Find everything globalization (i18n) related to ${currentPageContext.routeParams.category?.replaceAll(
+					"-",
+					" "
+				)} - inlang`}
+			/>
+			<Meta name="twitter:site" content="@inlanghq" />
+			<Meta name="twitter:creator" content="@inlanghq" />
 			<MarketplaceLayout>
 				<Show when={currentPageContext.routeParams.category === "application"}>
 					<div class="pt-4 text-sm font-medium flex items-center gap-3 w-full overflow-x-scroll pb-4 overflow-scrollbar overflow-scrollbar-x">

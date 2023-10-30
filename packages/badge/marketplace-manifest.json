@@ -2,7 +2,9 @@
 	"id": "app.inlang.badge",
 	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"gallery": [
-		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/badge-marketplace-cover.jpg"
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/badge-marketplace-cover.jpg",
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/badge-gallery/badge-gallery-image-1.jpg",
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/badge-gallery/badge-gallery-image-2.jpg"
 	],
 	"displayName": {
 		"en": "Translation status badge"

@@ -98,6 +98,20 @@ export function Page(props: PageProps) {
 			) : (
 				<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			)}
+			<Meta name="twitter:card" content="summary_large_image" />
+			{props.manifest && props.manifest.gallery ? (
+				<Meta name="twitter:image" content={props.manifest.gallery[0]} />
+			) : (
+				<Meta name="twitter:image" content="/images/inlang-social-image.jpg" />
+			)}
+			<Meta
+				name="twitter:image:alt"
+				content="inlang's ecosystem helps organizations to go global."
+			/>
+			<Meta name="twitter:title" content={props.manifest && displayName()} />
+			<Meta name="twitter:description" content={props.manifest && description()} />
+			<Meta name="twitter:site" content="@inlanghq" />
+			<Meta name="twitter:creator" content="@inlanghq" />
 			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
 					<div class="md:py-28 py-16">

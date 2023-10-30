@@ -30,10 +30,10 @@ export default function Card(props: { item: any; displayName: string }) {
 				}
 			>
 				<Switch>
-					<Match when={showCover}>
+					<Match when={showCover && props.item.gallery}>
 						<img
 							class="w-full h-32 object-cover object-top rounded-xl"
-							src={props.item.gallery[0]}
+							src={props.item.gallery && props.item.gallery[0]}
 						/>
 						<div class="flex flex-shrink-0 flex-row flex-wrap justify-between items-start mb-2 px-4">
 							<p class="m-0 mb-2 text-sm text-surface-800 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors">
@@ -41,7 +41,7 @@ export default function Card(props: { item: any; displayName: string }) {
 							</p>
 						</div>
 					</Match>
-					<Match when={!showCover}>
+					<Match when={!showCover || props.item.gallery}>
 						<div class="flex flex-col gap-4">
 							<div class="w-full flex gap-4 items-start">
 								<div class="flex items-center gap-8 flex-shrink-0">
