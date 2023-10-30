@@ -475,26 +475,29 @@ export async function pushChanges(args: {
 	// triggering a side effect here to trigger a re-render
 	// of components that depends on fs
 	args.setFsChange(new Date())
+
+	// TODO #1459 start - uncomment to push changes to repo
 	// push changes
-	try {
-		const push = await args.repo.push()
-		if (push?.ok === false) {
-			return { error: new PushException("Failed to push", { cause: push.error }) }
-		}
-		await args.repo.pull({
-			author: {
-				name: args.user.username,
-				email: args.user.email,
-			},
-			fastForward: true,
-			singleBranch: true,
-		})
-		const time = new Date()
-		// triggering a rebuild of everything fs related
-		args.setFsChange(time)
-		args.setLastPullTime(time)
-		return { data: true }
-	} catch (error) {
-		return { error: (error as PushException) ?? "Unknown error" }
-	}
+	// try {
+	// 	const push = await args.repo.push()
+	// 	if (push?.ok === false) {
+	// 		return { error: new PushException("Failed to push", { cause: push.error }) }
+	// 	}
+	// 	await args.repo.pull({
+	// 		author: {
+	// 			name: args.user.username,
+	// 			email: args.user.email,
+	// 		},
+	// 		fastForward: true,
+	// 		singleBranch: true,
+	// 	})
+	// 	const time = new Date()
+	// 	// triggering a rebuild of everything fs related
+	// 	args.setFsChange(time)
+	// 	args.setLastPullTime(time)
+	// 	return { data: true }
+	// } catch (error) {
+	// 	return { error: (error as PushException) ?? "Unknown error" }
+	// }
+	// TODO #1459 end - uncomment to push changes to repo
 }

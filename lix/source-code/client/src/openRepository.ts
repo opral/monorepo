@@ -21,9 +21,11 @@ import {
 	log,
 	TREE, 
 	WORKDIR,
-	STAGE, 
+	STAGE,
+	listFiles, 
 } from "isomorphic-git"
 import { withLazyFetching } from "./helpers/withLazyFetching.js"
+import { flatFileListToDirectoryStructure } from "./isomorphic-git-forks/flatFileListToDirectoryStructure.js"
 
 export async function openRepository(
 	url: string,
@@ -164,11 +166,29 @@ export async function openRepository(
 		},
 
 		statusMatrix(cmdArgs) {
-			return statusMatrix({
-				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'statusMatrix'),
-				dir,
-				filter: cmdArgs.filter,
-			})
+			// TODO #1459 where is the type of cmdArgs defined?
+			if ((cmdArgs as any).filepaths !== undefined) {
+				throw new Error('Lazy fetching doesn\'t support filepaths for now - it will only create a matrix of fetched files for now');
+			}
+
+			return (async (cmdArgs) => {
+				// we pass only the lazy loaded files to the status matrix
+				const filepaths = await listFiles({
+					fs: rawFs,
+					gitdir: gitdir,
+					// TODO #1459 investigate the index cache further seem to be an in memory forwared on write cache to allow fast reads of the index... 
+					dir: dir,
+					// NOTE: no ref config! we don't set ref because we want the list of files on the index
+				});
+	
+				return statusMatrix({
+					fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'statusMatrix'),
+					dir,
+					filepaths,
+					filter: cmdArgs.filter,
+				})
+			})(cmdArgs)
+			
 		},
 
 		add(cmdArgs) {
@@ -180,12 +200,37 @@ export async function openRepository(
 		},
 
 		commit(cmdArgs) {
-			return commit({
-				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'commit'),
-				dir,
-				author: cmdArgs.author,
-				message: cmdArgs.message,
-			})
+
+			return (async (cmdArgs) => {
+				// TODO #1459 WIP start to implement a tree extraction
+				// we pass only the lazy loaded files to the status matrix
+				const filepaths = await listFiles({
+					fs: rawFs,
+					gitdir: gitdir,
+					// TODO #1459 investigate the index cache further seem to be an in memory forwared on write cache to allow fast reads of the index... 
+					dir: dir,
+					// NOTE: no ref config! we don't set ref because we want the list of files on the index
+				});
+
+				GitIndexManager.acquire({ fs: rawFs, gitdir }, async function(
+					index
+				  ) {
+					return index.entries.map(x => x.path)
+				  })
+
+				const flattFileList = flatFileListToDirectoryStructure(filepaths);
+
+
+	
+				return commit({
+					fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'commit'),
+					dir,
+					author: cmdArgs.author,
+					message: cmdArgs.message,
+				})
+			})(cmdArgs)
+			
+			
 		},
 
 		push() {
