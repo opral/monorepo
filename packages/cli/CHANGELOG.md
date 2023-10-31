@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 1.19.0
+
+### Minor Changes
+
+- 4ccdb2da6: fix `--no-fail` flag
+
 ## 1.18.0
 
 ### Minor Changes
