@@ -81,11 +81,16 @@ app.use(
 	createProxyMiddleware("/editor", {
 		target: "http://localhost:4001",
 		changeOrigin: true,
-		// pathRewrite: { "^/editor": "/" },
 	})
 )
 
-app.use("*", createProxyMiddleware({ target: "http://localhost:4002", changeOrigin: true }))
+app.use(
+	"*",
+	createProxyMiddleware({
+		target: "http://localhost:4002",
+		changeOrigin: true,
+	})
+)
 
 // ! website comes last in the routes because it uses the wildcard `*` to catch all routes
 
