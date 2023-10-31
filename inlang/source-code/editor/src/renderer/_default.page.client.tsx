@@ -66,7 +66,6 @@ export function render(pageContext: PageContextRenderer) {
 			//
 			// In the future, the editor might be server-side rendered.
 			// For now, the trouble of isomorphic rendering the editor is not worth it.
-			console.log("renderApp from editor")
 			renderApp(
 				() => (
 					<MetaProvider>
