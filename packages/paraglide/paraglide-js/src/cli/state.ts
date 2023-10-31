@@ -1,4 +1,5 @@
 import path from "node:path"
+import fs from "node:fs"
 import { fileURLToPath } from "node:url"
 
 /**
@@ -17,10 +18,20 @@ const currentFilePath = fileURLToPath(import.meta.url)
  * from '/Users/samuel/example/repository/node_modules/paraglide-js/dist/cli/main.js'
  * to   '/Users/samuel/example/repository/node_modules/paraglide-js'
  */
-export let paraglideDirectory: string = currentFilePath.slice(0, currentFilePath.indexOf("/dist/"))
+export let paraglideDirectory: string = currentFilePath.slice(
+	0,
+	currentFilePath.indexOf("/paraglide-js/") + "/paraglide-js".length
+)
 
 // this is only used for testing
 // use cmd + f to find all usages
 export const _setStateForTest = (values: Record<"paraglideDirectory", any>) => {
 	paraglideDirectory = values.paraglideDirectory
 }
+
+/**
+ * The version of the paraglide-js package.
+ */
+export const version = JSON.parse(
+	fs.readFileSync(`${paraglideDirectory}/package.json`, "utf-8")
+).version

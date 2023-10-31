@@ -1,5 +1,9 @@
 # @inlang/paraglide-js
 
+##  1.0.0-prerelease.4
+
+add: `paraglide-js init` command which simplifies the setup process
+
 ## 	1.0.0-prerelease.3
 
 fix: https://github.com/inlang/monorepo/issues/1478
