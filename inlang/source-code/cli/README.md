@@ -88,6 +88,8 @@ The translate command has the following options:
 
 - `-f, --force`: If this option is set, the command will not prompt confirmation. This is useful for CI/CD build pipelines. **We advise you to only use `machine translate` in build pipelines to avoid out-of-context/wrong translations.**
 
+- `--project <path>`: Specifies the path to the project root. The default project root is the current working directory.
+
 This command reads the project.inlang.json file in the repository and retrieves the resources and reference language specified in the configuration. It then translates all messages from the reference language to other languages defined in the configuration.
 
 The translations are performed using machine translation services. The translated messages are added to the respective language resources. Finally, the updated resources are written back to the file system.
@@ -108,6 +110,12 @@ Validates a project.
 npx @inlang/cli project validate
 ```
 
+**Options**
+
+The translate command has the following options:
+
+- `--project <path>`: Specifies the path to the project root. The default project root is the current working directory.
+
 This will launch an interactive prompt that will guide you through the process of migrating the inlang configuration file.
 
 ## `lint`
@@ -118,7 +126,13 @@ The lint command lints the translation with the configured lint rules, for examp
 npx @inlang/cli lint
 ```
 
-The `lint` command is provided with an optional `--no-fail` flag, which will not fail the command if there are any linting errors.
+**Options**
+
+The translate command has the following options:
+
+- `--no-fail`: If this option is set, the command will not fail if there are any linting errors.
+- `--project <path>`: Specifies the path to the project root. The default project root is the current working directory.
+- `--languageTags <tags>`: Specifies the language tags to lint. Defaults to all. Should be a comma-separated list of language tags specified in the `project.inlang.json`, e.g. `en,de,fr`.
 
 `lint` will read through all resources and find potential errors and warnings in the translation strings, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/monorepo/tree/main/inlang/source-code/message-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns/duplicates**.
 
