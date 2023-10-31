@@ -1,6 +1,6 @@
 import { Meta, Title } from "@solidjs/meta"
 import { Show, onMount } from "solid-js"
-import { languageTag } from "@inlang/paraglide-js/inlang-marketplace"
+import { languageTag } from "@inlang/paraglide-js/website"
 import { currentPageContext } from "#src/renderer/state.js"
 import tableOfContents from "../../../../../../blog/tableOfContents.json"
 import "@inlang/markdown/css"
