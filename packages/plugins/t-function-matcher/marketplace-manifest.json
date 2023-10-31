@@ -1,7 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "plugin.inlang.tFunctionMatcher",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/assets/icon.png",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/t-function-matcher/assets/t.png",
 	"displayName": {
 		"en": "t-function-matcher Plugin"
 	},
@@ -9,11 +9,11 @@
 		"en": "Enables the inlang VSCode extension to work with t-functions"
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/paraglide/paraglide-js-plugin/README.md"
+		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/t-function-matcher/README.md"
 	},
 	"keywords": ["application", "website", "vscode", "react", "nextjs", "sveltekit", "svelte", "vue"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0",
-	"module": "https://cdn.jsdelivr.net/npm/@inlang/plugin-paraglide-js@latest/dist/index.js"
+	"module": "https://cdn.jsdelivr.net/npm/@inlang/plugin-t-function-matcher@latest/dist/index.js"
 }
