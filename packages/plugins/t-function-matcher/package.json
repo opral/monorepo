@@ -1,6 +1,6 @@
 {
-	"name": "@inlang/plugin-paraglide-js",
-	"version": "1.3.0",
+	"name": "@inlang/plugin-t-function-matcher",
+	"version": "0.1.0",
 	"type": "module",
 	"exports": {
 		".": "./dist/index.js"
