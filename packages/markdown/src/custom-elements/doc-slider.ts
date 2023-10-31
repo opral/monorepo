@@ -51,9 +51,7 @@ export class DocSlider extends LitElement {
 				font-size: 36px;
 				outline: none;
 				background-color: #e2e8f0;
-				width: 40px;
-				height: 40px;
-				aspect-ratio: 1;
+				aspect-ratio: 1 / 1;
 				max-width: 40px;
 				max-height: 40px;
 				border-radius: 50%;
