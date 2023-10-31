@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 1.18.0
+
+### Minor Changes
+
+- 93dca7bb2: add `--languageTags` flag to `lint` cli command
+
 ## 1.17.0
 
 ### Minor Changes
