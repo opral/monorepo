@@ -7,7 +7,7 @@ import { resolve } from "node:path"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import JSON5 from "json5"
 import childProcess from "node:child_process"
-import { version } from "../../../package.json"
+import { version } from "../state.js"
 
 consola.options = {
 	...consola.options,

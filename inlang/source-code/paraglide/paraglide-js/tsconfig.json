@@ -2,10 +2,9 @@
 	"extends": "../../tsconfig.base.json",
 	"include": ["src/**/*.ts"],
 	"compilerOptions": {
-		"resolveJsonModule": true,
 		"outDir": "./dist",
+		"rootDir": "./src",
 		"declaration": true,
-		"rootDir": "./",
 		"sourceMap": false,
 		"checkJs": true
 	}

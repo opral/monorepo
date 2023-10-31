@@ -1,4 +1,5 @@
 import path from "node:path"
+import fs from "node:fs"
 import { fileURLToPath } from "node:url"
 
 /**
@@ -27,3 +28,10 @@ export let paraglideDirectory: string = currentFilePath.slice(
 export const _setStateForTest = (values: Record<"paraglideDirectory", any>) => {
 	paraglideDirectory = values.paraglideDirectory
 }
+
+/**
+ * The version of the paraglide-js package.
+ */
+export const version = JSON.parse(
+	fs.readFileSync(`${paraglideDirectory}/package.json`, "utf-8")
+).version
