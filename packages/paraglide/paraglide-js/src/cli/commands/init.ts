@@ -60,7 +60,12 @@ export const addParaglideJsToDependencies = async () => {
 }
 
 export const promptForNamespace = async (): Promise<string> => {
-	const directoryName = process.cwd().split("/").pop()
+	let assumedName = process.cwd().split("/").pop()
+	try {
+		assumedName = JSON.parse(await fs.readFile("./package.json", { encoding: "utf-8" })).name
+	} catch {
+		// nothing
+	}
 
 	consola.info(`You need to select a name for the project.
 
@@ -70,7 +75,7 @@ The name is used to create an importable 'namespace' to distinguish between mult
 
 	const namespace = await prompt(`What should be the name of the project?`, {
 		type: "text",
-		initial: directoryName,
+		initial: assumedName,
 	})
 	return namespace.trim()
 }
