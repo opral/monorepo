@@ -2,13 +2,14 @@ import { Command } from "commander"
 import Table from "cli-table3"
 import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { log } from "../../utilities/log.js"
-import type { InlangProject, MessageLintReport } from "@inlang/sdk"
+import { LanguageTag, type InlangProject, type MessageLintReport } from "@inlang/sdk"
 import { projectOption } from "../../utilities/globalFlags.js"
 
 export const lint = new Command()
 	.command("lint")
 	.description("Commands for linting translations.")
 	.requiredOption(projectOption.flags, projectOption.description, projectOption.defaultValue)
+	.option("--languageTags <languageTags>", "Comma separated list of language tags to lint.")
 	.option("--no-fail", "Disable throwing an error if linting fails.", false)
 	.action(async (args: { project: string }) => {
 		const project = await getInlangProject({ projectPath: args.project })
@@ -17,12 +18,16 @@ export const lint = new Command()
 
 export async function lintCommandAction(args: { project: InlangProject; logger: any }) {
 	try {
+		const options = lint.opts()
+
 		if (args.project.installed.messageLintRules().length === 0) {
 			args.logger.error(
 				`No message lint rules are installed. Visit the marketplace to install lint rules https://inlang.com/ .`
 			)
 			return
 		}
+
+		const languageTags: LanguageTag[] = options.languageTags ? options.languageTags.split(",") : []
 
 		// TODO: async reports
 		const MessageLintReportsAwaitable = (): Promise<MessageLintReport[]> => {
@@ -58,11 +63,24 @@ export async function lintCommandAction(args: { project: InlangProject; logger: 
 			})
 		}
 
-		const reports = await MessageLintReportsAwaitable()
+		let reports = await MessageLintReportsAwaitable()
 
 		if (reports.length === 0) {
 			args.logger.success("Linting successful.")
 			return
+		}
+
+		if (languageTags.length > 0) {
+			const projectLanguageTags = args.project.settings().languageTags
+			const languageTagsValid = languageTags.every((tag) => projectLanguageTags.includes(tag))
+			if (!languageTagsValid) {
+				args.logger.error(
+					`Some or all of the language tags "${languageTags}" are not included in the project settings languageTags. Possible language tags are ${projectLanguageTags}.`
+				)
+				return
+			}
+
+			reports = reports.filter((report) => languageTags.includes(report.languageTag))
 		}
 
 		// Map over lints with correct log function
