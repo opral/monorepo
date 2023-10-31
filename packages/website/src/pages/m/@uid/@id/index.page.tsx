@@ -11,13 +11,14 @@ import {
 	convertLinkToGithub,
 	typeOfIdToTitle,
 } from "#src/interface/marketplace/helper/utilities.js"
-import { languageTag } from "@inlang/paraglide-js/inlang-marketplace"
+import { languageTag } from "@inlang/paraglide-js/website"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { currentPageContext } from "#src/renderer/state.js"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
+import OnClient from "#src/interface/components/OnClient.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -205,10 +206,12 @@ export function Page(props: PageProps) {
 											</Button>
 										</div>
 										<Show when={props.manifest.gallery && props.manifest.gallery.length > 1}>
-											<div class="pt-12">
-												{/* @ts-ignore */}
-												<doc-slider items={props.manifest.gallery} />
-											</div>
+											<OnClient>
+												<div class="pt-12">
+													{/* @ts-ignore */}
+													<doc-slider items={props.manifest.gallery} />
+												</div>
+											</OnClient>
 										</Show>
 									</div>
 									<div class="w-full">

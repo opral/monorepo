@@ -1,7 +1,7 @@
 import { For } from "solid-js"
 import { currentPageContext } from "#src/renderer/state.js"
 import Link from "#src/renderer/Link.jsx"
-import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
+import * as m from "@inlang/paraglide-js/website/messages"
 import { setSearchInput } from "../components/SearchBar.jsx"
 
 const CategoryTabs = () => {

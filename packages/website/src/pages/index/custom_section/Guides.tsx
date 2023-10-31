@@ -1,5 +1,5 @@
 import { For } from "solid-js"
-import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
+import * as m from "@inlang/paraglide-js/website/messages"
 import Card from "#src/interface/components/Card.jsx"
 import { registry } from "@inlang/marketplace-registry"
 
@@ -8,7 +8,7 @@ const Guides = () => {
 		"guide.niklasbuchfink.howToSetupInlang",
 		"guide.niklasbuchfink.whatIsInlang",
 		"guide.nilsjacobsen.buildAGlobalSvelteApp",
-		"guide.inlang.buildOwnApp",
+		"guide.nilsjacobsen.useParaglideJsInMonorepos",
 	]
 	return (
 		<div class="w-full flex gap-4 mt-4 md:mt-10 mb-10 flex-col-reverse md:flex-row">

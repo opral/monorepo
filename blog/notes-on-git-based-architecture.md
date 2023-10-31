@@ -126,6 +126,6 @@ flowchart LR
 1. It’s the standard approach to build a SaaS.
    - Weak argument but might be true.
 2. The technology was not ready/is emerging.
-   - JavaScript became capable to run git in the browser recently [[source](https://github.com/isomorphic-git/isomorphic-git)] with workers and webassembly.
-   - Since early 2022 Chromium-based browsers and Safari have access to the file system [[source](https://caniuse.com/native-filesystem-api)]. Which already leads to an influx of applications like [vscode.dev](https://vscode.dev/).
+   - JavaScript became capable to run git in the browser recently [source](https://github.com/isomorphic-git/isomorphic-git) with workers and webassembly.
+   - Since early 2022 Chromium-based browsers and Safari have access to the file system [source](). Which already leads to an influx of applications like [vscode.dev](https://vscode.dev/).
 3. Using a database is "good enough". There is only one way to find out whether a git-based architecture is breakthrough for localization: try it.
