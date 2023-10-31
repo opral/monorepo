@@ -18,6 +18,9 @@ export const ideExtensionConfig = (
 		],
 		documentSelectors: [
 			{
+				language: "typescriptreact",
+			},
+			{
 				language: "javascript",
 			},
 			{

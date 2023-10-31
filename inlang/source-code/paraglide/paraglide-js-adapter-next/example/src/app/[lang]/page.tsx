@@ -1,5 +1,5 @@
 import * as m from "@inlang/paraglide-js/nextjs-example/messages"
-import { languageTag } from "@inlang/paraglide-js/nextjs-example"
+import { languageTag } from "@inlang/paraglide-js/website"
 
 export default function Home() {
 	return (

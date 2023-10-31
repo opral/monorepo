@@ -3,8 +3,6 @@ import { Meta, Title } from "@solidjs/meta"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { Button } from "../index/components/Button.jsx"
 import { z } from "zod"
-import { useI18n } from "@solid-primitives/i18n"
-import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { InstallationProvider } from "./InstallationProvider.jsx"
 import { SetupCard } from "./components/SetupCard.jsx"
 import { Gitlogin } from "./components/GitLogin.jsx"
@@ -13,6 +11,7 @@ import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { RepositoryCard } from "#src/interface/editor/CommunityProjects.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
+import { currentPageContext } from "#src/renderer/state.js"
 
 export type Step = {
 	type: string
@@ -48,17 +47,8 @@ const dynamicTitle = () => {
 }
 
 export function Page() {
-	const [, { locale }] = useI18n()
-
-	const url = new URLSearchParams(window.location.search)
-	const repo = url.get("repo") || ""
-	const modules = url.get("module")?.split(",") || []
-
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const getLocale = () => {
-		const language = locale() || defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
-	}
+	const repo = currentPageContext.urlParsed.search["repo"] || ""
+	const modules = currentPageContext.urlParsed.search["module"]?.split(",") || []
 
 	return (
 		<>

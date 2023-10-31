@@ -12,9 +12,17 @@
 		"3i8bor92": "../plugins/i18next/marketplace-manifest.json",
 		"ig84ng0o": "../plugins/json/marketplace-manifest.json",
 		"reootnfj": "../plugins/inlang-message-format/marketplace-manifest.json",
-		"38n9gnir": "../paraglide/paraglide-js-plugin/marketplace-manifest.json",
 		"8y8sxj09": "../versioned-interfaces/language-tag/marketplace-manifest.json",
 		"ezdlll4o": "../versioned-interfaces/translatable/marketplace-manifest.json",
-		"gerre34r": "../paraglide/paraglide-js/marketplace-manifest.json"
+		"gerre34r": "../paraglide/paraglide-js/marketplace-manifest.json",
+		"632iow21": "../plugins/m-function-matcher/marketplace-manifest.json",
+		"698iow33": "../plugins/t-function-matcher/marketplace-manifest.json"
+	},
+	"g": {
+		"94ng94n4": "../../guides/how-to-inlang-app/marketplace-manifest.json",
+		"2fg8ng94": "../../guides/build-a-global-svelte-app/marketplace-manifest.json",
+		"49fn9ggo": "../../guides/how-to-setup-inlang-for-your-project/marketplace-manifest.json",
+		"3go4f04m": "../../guides/what-is-inlang/marketplace-manifest.json",
+		"83gwpp32": "../../guides/use-paraglide-js-in-monorepos/marketplace-manifest.json"
 	}
 }

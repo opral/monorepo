@@ -89,15 +89,6 @@ describe("main workflow", () => {
 		expect(log[0]?.commit?.message).toBeTypeOf("string")
 	})
 
-	it.todo("returns collaborator information", async () => {
-		// currently would only test 1:1 the github api, enable this when we have lisa server auth
-		const isCollaborator1 = await repository.isCollaborator({ username: "IamnotACollaborator" })
-		expect(isCollaborator1).toBe(false)
-
-		const isCollaborator2 = await repository.isCollaborator({ username: "lucidNTR" })
-		expect(isCollaborator2).toBe(true)
-	})
-
 	it.todo("exposes metadata for repo", async () => {
 		const metadata = await repository.getMeta()
 		expect(metadata).toBe("main")

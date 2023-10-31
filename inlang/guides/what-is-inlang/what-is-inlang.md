@@ -28,5 +28,5 @@ Inlang's architecture consists of four main components:
 ![inlang architecture](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/architecture.jpg)
 
 <doc-links>
-    <doc-link title="How to setup inlang for your project" icon="material-symbols:fast-forward-outline-rounded" href="/g/how-to-setup-inlang-for-your-project" description=""></doc-link>
+    <doc-link title="How to setup inlang for your project" icon="material-symbols:developer-guide-outline" href="/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang" description="A general guide on the minimum steps required to make your project ready for the ecosystem of inlang."></doc-link>
 </doc-links>

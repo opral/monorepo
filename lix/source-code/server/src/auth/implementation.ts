@@ -1,4 +1,4 @@
-import type { AllEnvVariables, PrivateEnvVariables } from "@inlang/env-variables"
+import type { PrivateEnvVariables } from "@inlang/env-variables"
 import { CompactEncrypt, compactDecrypt, base64url } from "jose"
 
 // enc = encoding
@@ -50,11 +50,12 @@ export async function decryptAccessToken(args: {
  */
 export async function exchangeInterimCodeForAccessToken(args: {
 	code: string
-	env: AllEnvVariables
-}): Promise<string> {
+	githubAppClientId: string
+	githubClientSecret: string
+}): Promise<{ access_token: string }> {
 	// fetch post request to github
 	const request = await fetch(
-		`https://github.com/login/oauth/access_token?client_id=${args.env.PUBLIC_GITHUB_APP_CLIENT_ID}&client_secret=${args.env.INLANG_GITHUB_APP_CLIENT_SECRET}&code=${args.code}`,
+		`https://github.com/login/oauth/access_token?client_id=${args.githubAppClientId}&client_secret=${args.githubClientSecret}&code=${args.code}`,
 		{
 			method: "POST",
 			headers: {
@@ -73,5 +74,6 @@ export async function exchangeInterimCodeForAccessToken(args: {
 			cause: requestBody.error_description,
 		})
 	}
-	return requestBody.access_token
+
+	return requestBody
 }

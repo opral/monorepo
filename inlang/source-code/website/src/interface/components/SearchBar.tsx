@@ -2,6 +2,7 @@ import IconSearch from "~icons/material-symbols/search-rounded"
 import { currentPageContext } from "#src/renderer/state.js"
 import { createSignal } from "solid-js"
 import { navigate } from "vite-plugin-ssr/client/router"
+import * as m from "@inlang/paraglide-js/website/messages"
 
 // Make search input available to other components so it can get cleared
 export const [searchInput, setSearchInput] = createSignal<string>("")
@@ -9,6 +10,7 @@ export const [searchInput, setSearchInput] = createSignal<string>("")
 export default function SearchBar() {
 	let inputElement: any
 	const { q } = currentPageContext.urlParsed.search
+	const isMac = () => typeof window !== "undefined" && navigator.userAgent.includes("Mac")
 
 	const handleNavigate = () => {
 		if (!currentPageContext.routeParams.category) {
@@ -32,7 +34,10 @@ export default function SearchBar() {
 
 	if (typeof window !== "undefined")
 		window.addEventListener("keydown", (e) => {
-			if (e.metaKey && e.key === "k") {
+			if (e.metaKey && e.key === "k" && isMac()) {
+				e.preventDefault()
+				inputElement.focus()
+			} else if (e.ctrlKey && e.key === "k" && !isMac()) {
 				e.preventDefault()
 				inputElement.focus()
 			}
@@ -40,7 +45,7 @@ export default function SearchBar() {
 
 	return (
 		<form
-			class="group flex justify-center gap-1 px-3 items-center border h-8 w-full py-0.5 rounded-full transition-all duration-150 bg-background border-surface-200 focus-within:border-primary"
+			class="group relative flex justify-center gap-1 px-3 items-center border h-8 w-full py-0.5 rounded-full transition-all duration-150 bg-background border-surface-200 focus-within:border-primary"
 			onSubmit={(e) => {
 				e.preventDefault()
 				handleNavigate()
@@ -51,8 +56,14 @@ export default function SearchBar() {
 				aria-label="search input"
 				id="search"
 				name="search"
-				placeholder="Search"
-				class="border-0 focus:ring-0 h-full w-full pl-0 text-sm"
+				placeholder={
+					isMac()
+						? m.marketplace_header_search_placeholder()
+						: typeof window !== "undefined"
+						? "Search"
+						: ""
+				}
+				class="border-0 focus:ring-0 h-full w-full pl-0 text-sm md:placeholder:text-surface-400 placeholder:text-surface-900/0 transition-all"
 				value={q ? q : searchInput()}
 				ref={inputElement}
 				onInput={(e) => {

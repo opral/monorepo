@@ -1,24 +1,24 @@
 import { Meta, Title } from "@solidjs/meta"
-import { For, Show, createSignal, onMount } from "solid-js"
+import { For, Show, createEffect, createSignal, onMount } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { isModule } from "@inlang/marketplace-registry"
 import { Button } from "#src/pages/index/components/Button.jsx"
 import { Chip } from "#src/interface/components/Chip.jsx"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
-import { SelectRepo } from "../../Select.jsx"
-import Right from "~icons/material-symbols/chevron-right"
-import Left from "~icons/material-symbols/chevron-left"
-import { colorForTypeOf, convertLinkToGithub, typeOfIdToTitle } from "../../utilities.js"
-import { defaultLanguage } from "#src/renderer/_default.page.route.js"
-import { useI18n } from "@solid-primitives/i18n"
+import { SelectRepo } from "./../../Select.jsx"
+import {
+	colorForTypeOf,
+	convertLinkToGithub,
+	typeOfIdToTitle,
+} from "#src/interface/marketplace/helper/utilities.js"
+import { languageTag } from "@inlang/paraglide-js/website"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { currentPageContext } from "#src/renderer/state.js"
-// @ts-ignore
-import { createSlider } from "solid-slider"
-import "solid-slider/slider.css"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
+import Link from "#src/renderer/Link.jsx"
+import OnClient from "#src/interface/components/OnClient.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -30,12 +30,6 @@ export type PageProps = {
 
 export function Page(props: PageProps) {
 	const [readmore, setReadmore] = createSignal<boolean>(false)
-	const [, { locale }] = useI18n()
-
-	const getLocale = () => {
-		const language = locale() ?? defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
-	}
 
 	// mapping translatable types
 	const displayName = () =>
@@ -51,10 +45,11 @@ export function Page(props: PageProps) {
 	const readme = () =>
 		typeof props.manifest.readme === "object" ? props.manifest.readme.en : props.manifest.readme
 
-	const tableOfContents = () => {
-		const tableOfContents = {}
-
+	const [tableOfContents, setTableOfContents] = createSignal({})
+	createEffect(() => {
+		const table: Record<string, Array<string>> = {}
 		if (
+			props.markdown &&
 			props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g) &&
 			props.markdown.match(/<h[1].*?>(.*?)<\/h[1]>/g)
 		) {
@@ -68,22 +63,18 @@ export function Page(props: PageProps) {
 
 				if (node.tagName === "H1") {
 					// @ts-ignore
-					tableOfContents[node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")] = []
+					table[node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")] = []
 				} else {
 					// @ts-ignore
-					if (!tableOfContents[lastH1Key]) {
-						const h1Keys = Object.keys(tableOfContents)
+					if (!table[lastH1Key]) {
+						const h1Keys = Object.keys(table)
 						// @ts-ignore
 						lastH1Key = h1Keys.at(-1)
 						// @ts-ignore
-						tableOfContents[lastH1Key].push(
-							node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")
-						)
+						table[lastH1Key].push(node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", ""))
 					} else {
 						// @ts-ignore
-						tableOfContents[lastH1Key].push(
-							node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")
-						)
+						table[lastH1Key].push(node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", ""))
 					}
 				}
 
@@ -91,26 +82,37 @@ export function Page(props: PageProps) {
 			})
 		}
 
-		return tableOfContents
-	}
-
-	const [details, setDetails] = createSignal({})
-	const [slider, { next, prev }] = createSlider({
-		slides: {
-			number: props.manifest && props.manifest.gallery ? props.manifest.gallery.length - 1 : 0,
-			perView: window ? (window.innerWidth > 768 ? 3 : 1) : 1,
-			spacing: 8,
-		},
-
-		detailsChanged: (slider: { track: { details: any } }) => {
-			setDetails(slider.track.details)
-		},
+		setTableOfContents(table)
 	})
 
 	return (
 		<>
-			<Title>{props.manifest && displayName()}</Title>
+			<Title>{`${props.manifest && displayName()} ${
+				props.manifest &&
+				(props.manifest.publisherName === "inlang"
+					? "- inlang"
+					: `from ${props.manifest.publisherName}  - inlang`)
+			}`}</Title>
 			<Meta name="description" content={props.manifest && description()} />
+			{props.manifest && props.manifest.gallery ? (
+				<Meta name="og:image" content={props.manifest.gallery[0]} />
+			) : (
+				<Meta name="og:image" content="/images/inlang-social-image.jpg" />
+			)}
+			<Meta name="twitter:card" content="summary_large_image" />
+			{props.manifest && props.manifest.gallery ? (
+				<Meta name="twitter:image" content={props.manifest.gallery[0]} />
+			) : (
+				<Meta name="twitter:image" content="/images/inlang-social-image.jpg" />
+			)}
+			<Meta
+				name="twitter:image:alt"
+				content="inlang's ecosystem helps organizations to go global."
+			/>
+			<Meta name="twitter:title" content={props.manifest && displayName()} />
+			<Meta name="twitter:description" content={props.manifest && description()} />
+			<Meta name="twitter:site" content="@inlanghq" />
+			<Meta name="twitter:creator" content="@inlanghq" />
 			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
 					<div class="md:py-28 py-16">
@@ -119,7 +121,7 @@ export function Page(props: PageProps) {
 								when={props.markdown}
 								fallback={<p class="text-danger">{props.markdown?.error}</p>}
 							>
-								<div class="col-span-1 md:col-span-4 md:pb-10 pb-8 mb-12 md:mb-8 border-b border-surface-2 grid md:grid-cols-4 grid-cols-1 gap-16">
+								<section class="col-span-1 md:col-span-4 md:pb-10 pb-8 mb-12 md:mb-8 border-b border-surface-2 grid md:grid-cols-4 grid-cols-1 gap-16">
 									<div class="flex-col h-full justify-between md:col-span-3">
 										<div class="flex max-md:flex-col items-start gap-8 mb-12">
 											<Show
@@ -136,7 +138,22 @@ export function Page(props: PageProps) {
 												/>
 											</Show>
 											<div class="flex flex-col gap-3">
-												<h1 class="text-3xl font-bold">{displayName()}</h1>
+												<div class="flex items-center gap-4">
+													<h1 class="text-3xl font-bold">{displayName()}</h1>
+													<Show
+														when={props.manifest.keywords
+															.map((keyword) => keyword.toLowerCase())
+															.includes("lix")}
+													>
+														<Link href="/search?q=lix">
+															<div class="w-6 text-primary hover:text-hover-primary transition-colors">
+																<sl-tooltip prop:content="Powered by lix">
+																	<LixBadge />
+																</sl-tooltip>
+															</div>
+														</Link>
+													</Show>
+												</div>
 												<div class="inline-block text-surface-500 ">
 													<p class={!readmore() ? "lg:line-clamp-2" : ""}>{description()}</p>
 													<Show when={description().length > 205}>
@@ -188,48 +205,13 @@ export function Page(props: PageProps) {
 												/>
 											</Button>
 										</div>
-										<Show
-											when={props.manifest.gallery && props.manifest.gallery.length > 1 && slider}
-										>
-											<div class="relative">
-												{/* @ts-ignore */}
-												<div use:slider class="mt-16 cursor-grab active:cursor-grabbing">
-													<For each={props.manifest.gallery}>
-														{(image) => (
-															<a
-																href={image}
-																target="_blank"
-																rel="noopener noreferrer"
-																class="transition-opacity hover:opacity-80 cursor-pointer w-80 flex-shrink-0 active:cursor-grabbin flex items-center justify-center"
-															>
-																<img class="rounded-md w-80" src={image} />
-															</a>
-														)}
-													</For>
+										<Show when={props.manifest.gallery && props.manifest.gallery.length > 1}>
+											<OnClient>
+												<div class="pt-12">
+													{/* @ts-ignore */}
+													<doc-slider items={props.manifest.gallery} />
 												</div>
-												<Show when={details()}>
-													<button
-														disabled={
-															// @ts-ignore
-															details() && details().progress ? details().progress === 0 : false
-														}
-														onClick={prev}
-														class="absolute -left-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
-													>
-														<Left class="h-8 w-8" />
-													</button>
-													<button
-														disabled={
-															// @ts-ignore
-															details() && details().progress ? details().progress > 0.99 : false
-														}
-														onClick={next}
-														class="absolute -right-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
-													>
-														<Right class="h-8 w-8" />
-													</button>
-												</Show>
-											</div>
+											</OnClient>
 										</Show>
 									</div>
 									<div class="w-full">
@@ -264,12 +246,12 @@ export function Page(props: PageProps) {
 												<div class="flex flex-wrap gap-2 items-center">
 													<For each={props?.manifest?.keywords}>
 														{(keyword) => (
-															<a
+															<Link
 																class="transition-opacity hover:opacity-80 cursor-pointer"
 																href={"/search?q=" + keyword}
 															>
 																<Chip text={keyword} color={colorForTypeOf(props.manifest.id)} />
-															</a>
+															</Link>
 														)}
 													</For>
 												</div>
@@ -282,7 +264,7 @@ export function Page(props: PageProps) {
 											</div>
 										</div>
 									</div>
-								</div>
+								</section>
 								<Show
 									when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}
 									fallback={<Markdown markdown={props.markdown} fullWidth />}
@@ -290,13 +272,13 @@ export function Page(props: PageProps) {
 									<div class="grid md:grid-cols-4 grid-cols-1 col-span-1 md:col-span-4 gap-16">
 										<Markdown markdown={props.markdown} />
 										{/* Classes to be added: sticky z-10 top-16 pt-8 md:pt-0 md:static bg-background */}
-										<div class="col-span-1 md:order-1 -order-1">
+										<aside class="col-span-1 md:order-1 -order-1">
 											<NavbarCommon
 												displayName={displayName}
-												getLocale={getLocale}
+												getLocale={languageTag}
 												tableOfContents={tableOfContents}
 											/>
-										</div>
+										</aside>
 									</div>
 								</Show>
 							</Show>
@@ -379,7 +361,7 @@ function NavbarCommon(props: {
 					)
 				)
 
-				scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
+				//scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
 				setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
 			} else {
 				for (const heading of props.tableOfContents()[sectionTitle]!) {
@@ -410,8 +392,8 @@ function NavbarCommon(props: {
 				<For each={Object.keys(props.tableOfContents())}>
 					{(sectionTitle) => (
 						<li>
-							<a
-								onClick={(e) => {
+							<Link
+								onClick={(e: any) => {
 									e.preventDefault()
 									scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
 									setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
@@ -425,12 +407,12 @@ function NavbarCommon(props: {
 								href={`#${replaceChars(sectionTitle.toString().toLowerCase())}`}
 							>
 								{sectionTitle.replace("#", "")}
-							</a>
+							</Link>
 							<For each={props.tableOfContents()[sectionTitle]}>
 								{(heading) => (
 									<li>
-										<a
-											onClick={(e) => {
+										<Link
+											onClick={(e: any) => {
 												e.preventDefault()
 												scrollToAnchor(replaceChars(heading.toString().toLowerCase()))
 												setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
@@ -444,7 +426,7 @@ function NavbarCommon(props: {
 											href={`#${replaceChars(heading.toString().toLowerCase())}`}
 										>
 											{heading.replace("#", "")}
-										</a>
+										</Link>
 									</li>
 								)}
 							</For>
@@ -453,5 +435,25 @@ function NavbarCommon(props: {
 				</For>
 			</ul>
 		</div>
+	)
+}
+
+function LixBadge() {
+	return (
+		<svg
+			width="100%"
+			height="100%"
+			viewBox="0 0 48 33"
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M26.8537 10L30.8594 17.6278L40.9645 0H47.1719L34.8509 20.9091L41.3424 31.8182H35.1634L30.8594 24.2756L26.6265 31.8182H20.3765L26.8537 20.9091L20.6037 10H26.8537Z"
+				fill="currentColor"
+			/>
+			<path d="M10.8984 31.8182V10H16.9496V31.8182H10.8984Z" fill="currentColor" />
+			<path d="M6 0.0654297V32.0654H0V0.0654297H6Z" fill="currentColor" />
+			<rect x="11" y="0.0654297" width="16" height="5" fill="currentColor" />
+		</svg>
 	)
 }

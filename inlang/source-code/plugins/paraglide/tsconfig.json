@@ -1,6 +1,0 @@
-{
-	"include": ["src/**/*", "../../paraglide-js-sveltekit/src/settings.test.ts"],
-	"compilerOptions": {
-		"resolveJsonModule": true
-	}
-}

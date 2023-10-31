@@ -7,6 +7,9 @@ import fetch from "node-fetch"
 
 const manifestLinks = JSON.parse(await fs.readFile("./registry.json", "utf-8"))
 
+// eslint-disable-next-line no-undef
+const isProduction = process.env.NODE_ENV === "production"
+
 /** @type {(import("@inlang/marketplace-manifest").MarketplaceManifest & { uniqueID: string })[]} */
 const manifests = []
 

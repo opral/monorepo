@@ -1,5 +1,17 @@
 # @inlang/plugin-json
 
+## 5.0.0
+
+### Major Changes
+
+- 55d4c3497: The matcher functionallity of plugins is now unbundled. Former paraglide-jsplugin is moved to plugins and named m-function-matcher and the matching functionallity pf the json plugin is now unbundled in the t-function-matcher plugin.
+
+## 4.10.0
+
+### Minor Changes
+
+- a39638334: add support for new document selector typescriptreact
+
 ## 4.9.0
 
 ### Minor Changes

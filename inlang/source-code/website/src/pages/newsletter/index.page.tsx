@@ -1,15 +1,13 @@
-import { useI18n } from "@solid-primitives/i18n"
 import { Meta, Title } from "@solidjs/meta"
 import { NewsletterForm } from "#src/interface/components/NewsletterForm.jsx"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
+import * as m from "@inlang/paraglide-js/website/messages"
 
 export type PageProps = {
 	markdown: string
 }
 
 export function Page() {
-	const [t] = useI18n()
-
 	return (
 		<>
 			<Title>inlang's Newsletter</Title>
@@ -20,23 +18,14 @@ export function Page() {
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<Meta name="robots" content="noindex" />
 			<MarketplaceLayout>
-				<div class="relative max-w-screen-xl w-full mx-auto bg-background">
-					<div class="invisible xl:visible absolute top-0 left-0 h-full w-full z-0">
-						<div class="flex w-full h-full justify-between mx-auto items-end">
-							<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
-							<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
-							<div />
-							<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
-							<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
-						</div>
-					</div>
+				<div class="relative max-w-screen-xl w-full mx-auto">
 					<div class="w-full flex md:pt-12 flex-col gap-16">
 						<div class="w-full flex flex-col gap-6 h-full mx-auto justify-center max-w-lg mt-32 mb-8 px-6 relative z-10">
 							<h1 class="text-[40px] text-center leading-tight md:text-5xl font-bold text-surface-900 tracking-tight">
-								{t("newsletter.subscribe.title")}
+								{m.newsletter_subscribe_title()}
 							</h1>
 							<p class="text-lg text-surface-600 leading-relaxed mx-auto text-center">
-								{t("newsletter.subscribe.description")}
+								{m.newsletter_subscribe_description()}
 							</p>
 						</div>
 						<div class="w-full h-96 relative">

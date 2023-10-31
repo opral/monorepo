@@ -1,3 +1,4 @@
+import Link from "#src/renderer/Link.jsx"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
 import AppFlowy from "./assets/logos/appflowy.jsx"
 import Calcom from "./assets/logos/clacom.jsx"
@@ -58,14 +59,14 @@ const Hero = () => {
 									class="absolute z-0 bg-on-background top-0 left-0 w-full h-full opacity-80 blur-sm"
 								/>
 							</button>
-							<a
+							<Link
 								class="flex gap-2 items-center"
 								href="https://github.com/inlang/monorepo/tree/main/inlang"
 								target="_blank"
 							>
 								<IconGithub class="text-background" />
 								<span>GitHub</span>
-							</a>
+							</Link>
 						</div>
 					</div>
 				</div>
@@ -82,41 +83,41 @@ const Hero = () => {
 					</div>
 					<div class="w-full xl:w-3/4 flex flex-col gap-8 px-6 md:px-4 py-4">
 						<div class="flex gap-12 items-center w-full xl:justify-end text-surface-400 flex-wrap">
-							<a
+							<Link
 								class="transition-opacity hover:opacity-80"
 								href="https://cal.com/"
 								target="_blank"
 							>
 								<Calcom />
-							</a>
-							<a
+							</Link>
+							<Link
 								class="transition-opacity hover:opacity-80"
 								href="https://appflowy.io/"
 								target="_blank"
 							>
 								<AppFlowy />
-							</a>
-							<a
+							</Link>
+							<Link
 								class="transition-opacity hover:opacity-80"
 								href="https://meet.jit.si/"
 								target="_blank"
 							>
 								<Jitsi />
-							</a>
-							<a
+							</Link>
+							<Link
 								class="transition-opacity hover:opacity-80"
 								href="https://listmonk.app/"
 								target="_blank"
 							>
 								<Listmonk />
-							</a>
-							<a
+							</Link>
+							<Link
 								class="transition-opacity hover:opacity-80"
 								href="https://open-assistant.io/"
 								target="_blank"
 							>
 								<OpenAssistant />
-							</a>
+							</Link>
 						</div>
 					</div>
 				</div>
