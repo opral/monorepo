@@ -14,7 +14,7 @@
 		"@inlang/sdk": "^0.16.0"
 	},
 	"devDependencies": {
-		"@inlang/cli": "^1.18.0",
+		"@inlang/cli": "^1.19.0",
 		"typescript": "^5.2.2",
 		"vitest": "^0.34.4"
 	}
