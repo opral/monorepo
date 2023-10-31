@@ -1,11 +1,12 @@
 import { Command } from "commander"
 import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { log } from "../../utilities/log.js"
+import { projectOption } from "../../utilities/globalFlags.js"
 
 export const validate = new Command()
 	.command("validate")
 	.description("Validate the inlang prokect settings file.")
-	.requiredOption("--project <path>", "Path to the project settings file.", "./project.inlang.json")
+	.requiredOption(projectOption.flags, projectOption.description, projectOption.defaultValue)
 	.action((args: { project: string }) => {
 		validateCommandAction({ project: args.project })
 	})

@@ -1,14 +1,14 @@
 import fs from "node:fs/promises"
 import { loadProject, type InlangProject } from "@inlang/sdk"
 import { telemetry } from "../services/telemetry/implementation.js"
-import { normalizePath } from "@lix-js/fs"
+import { resolve } from "node:path"
 
 /**
  * Gets the inlang project and exists if the project contains errors.
  */
 export async function getInlangProject(args: { projectPath: string }): Promise<InlangProject> {
 	const baseDirectory = process.cwd()
-	const settingsFilePath = normalizePath(baseDirectory + "/" + args.projectPath)
+	const settingsFilePath = resolve(baseDirectory, args.projectPath)
 
 	const configExists = await fs
 		.access(settingsFilePath)
