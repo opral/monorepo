@@ -10,7 +10,7 @@ export const lint = new Command()
 	.description("Commands for linting translations.")
 	.requiredOption(projectOption.flags, projectOption.description, projectOption.defaultValue)
 	.option("--languageTags <languageTags>", "Comma separated list of language tags to lint.")
-	.option("--no-fail", "Disable throwing an error if linting fails.", false)
+	.option("--no-fail", "Disable throwing an error if linting fails.")
 	.action(async (args: { project: string }) => {
 		const project = await getInlangProject({ projectPath: args.project })
 		await lintCommandAction({ project, logger: log })
@@ -118,7 +118,7 @@ export async function lintCommandAction(args: { project: InlangProject; logger: 
 		args.logger.log("📊 Summary")
 		args.logger.log(summaryTable.toString())
 
-		if (hasError && lint.opts().fail) {
+		if (hasError && options.fail) {
 			// spacer line
 			args.logger.log("")
 			args.logger.info(
