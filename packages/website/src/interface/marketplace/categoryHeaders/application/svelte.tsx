@@ -1,6 +1,6 @@
 import { IconSvelte } from "#src/interface/custom-icons/subcategoryIcon.jsx"
 import { Button } from "#src/pages/index/components/Button.jsx"
-import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
+import * as m from "@inlang/paraglide-js/website/messages"
 
 const SvelteHeader = () => {
 	return (

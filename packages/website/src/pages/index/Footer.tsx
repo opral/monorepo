@@ -4,7 +4,7 @@ import { Button } from "./components/Button.jsx"
 import IconTwitter from "~icons/cib/twitter"
 import IconGithub from "~icons/cib/github"
 import IconDiscord from "~icons/cib/discord"
-import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
+import * as m from "@inlang/paraglide-js/website/messages"
 import { LanguagePicker } from "./LanguagePicker.jsx"
 import Link from "#src/renderer/Link.jsx"
 
