@@ -54,7 +54,7 @@ export async function exchangeInterimCodeForAccessToken(args: {
 }): Promise<string> {
 	// fetch post request to github
 	const request = await fetch(
-		`https://github.com/login/oauth/access_token?client_id=${args.env.PUBLIC_GITHUB_APP_CLIENT_ID}&client_secret=${args.env.INLANG_GITHUB_APP_CLIENT_SECRET}&code=${args.code}`,
+		`https://github.com/login/oauth/access_token?client_id=${args.env.PUBLIC_LIX_GITHUB_APP_CLIENT_ID}&client_secret=${args.env.LIX_GITHUB_APP_CLIENT_SECRET}&code=${args.code}`,
 		{
 			method: "POST",
 			headers: {
