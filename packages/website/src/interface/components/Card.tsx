@@ -81,7 +81,7 @@ export default function Card(props: { item: any; displayName: string }) {
 												e.stopPropagation()
 											}}
 											href={`/install?module=${props.item.id}`}
-											class="ml-auto flex-shrink-0 rounded-full p-2 w-8 h-8 flex items-center justify-center text-background hover:text-background hover:bg-surface-700 bg-surface-900 transition-all"
+											class="ml-auto flex-shrink-0 rounded-full p-2 w-8 h-8 flex items-center justify-center text-surface-900 hover:text-on-background hover:bg-surface-200 bg-surface-100 transition-all"
 										>
 											<svg
 												width="100%"
@@ -114,13 +114,12 @@ export default function Card(props: { item: any; displayName: string }) {
 						props.item.id.split(".")[0] === "messageLintRule"
 					}
 				>
-					{/* <sl-tooltip prop:content="Install"> */}
 					<Link
 						onClick={(e: any) => {
 							e.stopPropagation()
 						}}
 						href={"/install?module=" + structuredClone(props.item.id)}
-						class="absolute top-5 right-5 flex-shrink-0 rounded-full p-2 w-8 h-8 flex items-center justify-center text-background hover:text-background hover:bg-surface-700 bg-surface-900 transition-all"
+						class="absolute top-5 right-5 flex-shrink-0 rounded-full p-2 w-8 h-8 flex items-center justify-center text-surface-500 hover:text-on-background hover:bg-surface-200 bg-surface-100 transition-all"
 					>
 						<svg
 							width="100%"
