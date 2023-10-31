@@ -81,7 +81,7 @@ app.use(
 	createProxyMiddleware("/editor", {
 		target: "http://localhost:4001",
 		changeOrigin: true,
-		pathRewrite: { "^/editor": "/" },
+		// pathRewrite: { "^/editor": "/" },
 	})
 )
 
