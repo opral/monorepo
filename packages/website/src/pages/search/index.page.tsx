@@ -6,6 +6,9 @@ import { currentPageContext } from "#src/renderer/state.js"
 import Card, { CardBuildOwn, NoResultsCard } from "#src/interface/components/Card.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
+import SvelteHeader from "#src/interface/marketplace/categoryHeaders/application/svelte.jsx"
+import GenericHeader from "#src/interface/marketplace/categoryHeaders/application/generic.jsx"
+import * as m from "@inlang/paraglide-js/website/messages"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -34,27 +37,26 @@ export function Page(props: {
 
 	return (
 		<>
-			<Title>Global Application</Title>
+			<Title>Serach</Title>
 			<Meta name="description" content="Globalization infrastructure for software" />
-			<Meta name="og:image" content="/images/inlang-marketplace-image.jpg" />
+			<Meta name="og:image" content="/opengraph/inlang-search-image.jpg" />
 			<MarketplaceLayout>
 				<div class="pb-16 md:pb-20 min-h-screen relative">
-					<h2 class="text-md text-surface-600 pb-4 pt-8">All Products</h2>
+					<Show
+						fallback={
+							<div class="pt-8">
+								<GenericHeader />
+							</div>
+						}
+						when={currentPageContext.urlParsed.search["q"]?.includes("svelte")}
+					>
+						<div class="pt-8">
+							<SvelteHeader />
+						</div>
+					</Show>
+					<h2 class="text-md text-surface-600 pb-4 pt-8">{m.marketplace_grid_title_generic()}</h2>
 					<SectionLayout showLines={false} type="white">
 						<div class="relative">
-							{/* <Show when={props.highlights}>
-								<Show when={props.highlights && props.highlights.length > 0}>
-									<div
-										class={
-											"flex md:grid justify-between gap-6 md:flex-row flex-col mb-8 " +
-											(props.highlights!.length > 1 ? "md:grid-cols-2" : "md:grid-cols-1")
-										}
-									>
-										<For each={props.highlights}>{(highlight) => <Highlight {...highlight} />}</For>
-									</div>
-								</Show>
-							</Show> */}
-
 							<div class="mb-32 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
 								<Gallery items={props.items} />
 							</div>
@@ -68,27 +70,45 @@ export function Page(props: {
 					</SectionLayout>
 				</div>
 			</MarketplaceLayout>
-			´{" "}
 		</>
 	)
 }
 
 const Gallery = (props: { items: any }) => {
+	const [show, setShow] = createSignal<boolean>(false)
+
+	onMount(() => {
+		setShow(true)
+	})
 	return (
 		<>
 			<Show
-				when={props.items && props.items.length > 0}
-				fallback={<NoResultsCard category={selectedCategory().replace("c/", "")} />}
+				when={show()}
+				fallback={
+					<div class="h-96 w-full col-span-4 flex items-center justify-center py-80 relative">
+						<div class="mx-auto">
+							<div class="h-12 w-12 animate-spin mb-4">
+								<div class="h-full w-full bg-surface-50 border-primary border-4 rounded-full" />
+								<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-surface-50" />
+							</div>
+						</div>
+					</div>
+				}
 			>
-				<For each={props.items}>
-					{(item) => {
-						const displayName =
-							typeof item.displayName === "object" ? item.displayName.en : item.displayName
+				<Show
+					when={props.items && props.items.length > 0}
+					fallback={<NoResultsCard category={selectedCategory()} />}
+				>
+					<For each={props.items}>
+						{(item) => {
+							const displayName =
+								typeof item.displayName === "object" ? item.displayName.en : item.displayName
 
-						return <Card item={item} displayName={displayName} />
-					}}
-				</For>
-				<CardBuildOwn />
+							return <Card item={item} displayName={displayName} />
+						}}
+					</For>
+					<CardBuildOwn />
+				</Show>
 			</Show>
 		</>
 	)

@@ -8,6 +8,8 @@ This plugin stores messages in the inlang message format.
 
 # When to use
 
+**The message format is optimized to be edited with the [ide-xtension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension)**
+
 Use the inlang message format plugin if you have no previous translation files, or you want to migrate to the inlang format for a better experience.
 
 # Settings

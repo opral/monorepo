@@ -3,6 +3,7 @@ import { For, Show, createSignal } from "solid-js"
 import UserDropdown from "./UserDropdown.jsx"
 import IconClose from "~icons/material-symbols/close-rounded"
 import IconMenu from "~icons/material-symbols/menu-rounded"
+import Link from "#src/renderer/Link.jsx"
 
 function EditorHeader() {
 	const getLinks = () => {
@@ -13,7 +14,7 @@ function EditorHeader() {
 			},
 			{
 				name: `Apps`,
-				href: "/application",
+				href: "/c/application",
 			},
 		]
 	}
@@ -25,12 +26,12 @@ function EditorHeader() {
 				<div class="`w-full h-full py-3 px-4 relative z-10 bg-background">
 					<nav class="max-w-[1248px] w-full mx-auto">
 						<div class="flex">
-							<a href={"/"} class="flex items-center w-fit">
+							<Link href={"/"} class="flex items-center w-fit">
 								<img class={"h-8 w-8"} src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
 								<span class={"self-center pl-2 text-left font-semibold text-surface-900"}>
 									inlang
 								</span>
-							</a>
+							</Link>
 							<div class="w-full content-center">
 								<div class="hidden md:flex justify-end items-center gap-8">
 									<For each={getLinks()}>
@@ -65,17 +66,17 @@ function EditorHeader() {
 						</div>
 						{/* MobileNavbar includes the Navigation for the Documentations sites  */}
 						<Show when={mobileMenuIsOpen()}>
-							<ol class="space-y-1 relativ w-full min-h-full pt-3 pl-[10px] overflow">
+							<ol class="space-y-1 relativ w-full min-h-full pt-3 pl-[5px] overflow">
 								<For each={getLinks()}>
 									{(link) => (
 										<sl-tree>
-											<a
+											<Link
 												class="link grow min-w-full text-on-surface link-primary w-full"
 												href={link.href}
 												onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
 											>
 												<sl-tree-item>{link.name}</sl-tree-item>
-											</a>
+											</Link>
 										</sl-tree>
 									)}
 								</For>

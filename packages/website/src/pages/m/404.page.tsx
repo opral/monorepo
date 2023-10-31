@@ -1,5 +1,6 @@
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import { Button } from "#src/pages/index/components/Button.jsx"
+import Link from "#src/renderer/Link.jsx"
 import { Meta, Title } from "@solidjs/meta"
 
 export function Page() {
@@ -27,13 +28,13 @@ export function Page() {
 							<p class="text-lg text-surface-600 leading-relaxed mx-auto text-center mb-4">
 								Seems like the item you are looking for does not exist. This is a bug? Please report
 								it on our
-								<a
+								<Link
 									class="text-primary hover:text-hover-primary font-semibold ml-1.5"
 									href="https://discord.gg/gdMPPWy57R"
 									target="_blank"
 								>
 									Discord
-								</a>
+								</Link>
 								.
 							</p>
 							<Button href="/" type="primary">

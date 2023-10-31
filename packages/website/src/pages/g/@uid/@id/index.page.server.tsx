@@ -14,7 +14,7 @@ export async function onBeforeRender(pageContext: PageContext) {
 		!item ||
 		item.id.replaceAll(".", "-").toLowerCase() !== pageContext.routeParams.id?.toLowerCase()
 	) {
-		console.error("Item not found")
+		console.error("Guide not found")
 		throw redirect("/m/404")
 	}
 

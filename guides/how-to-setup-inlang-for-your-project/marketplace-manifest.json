@@ -8,7 +8,7 @@
 		"en": "A general guide on the minimum steps required to make your project ready for the ecosystem of inlang."
 	},
 	"readme": {
-		"en": "./how-to-setup-inlang-for-your-project.md"
+		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/how-to-setup-inlang-for-your-project/how-to-setup-inlang-for-your-project.md"
 	},
 	"keywords": [
 		"application",
@@ -18,9 +18,11 @@
 		"getting-started",
 		"i18n",
 		"localization",
-		"guide"
+		"guide",
+		"markdown",
+		"lint rule"
 	],
-	"publisherName": "niklasbuchfink",
+	"publisherName": "Niklas Buchfink",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/59048346?v=4",
 	"license": "Apache-2.0"
 }

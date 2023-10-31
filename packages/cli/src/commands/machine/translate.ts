@@ -5,12 +5,14 @@ import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { log } from "../../utilities/log.js"
 import type { InlangProject } from "@inlang/sdk"
 import prompts from "prompts"
+import { projectOption } from "../../utilities/globalFlags.js"
 
 export const translate = new Command()
 	.command("translate")
+	.requiredOption(projectOption.flags, projectOption.description, projectOption.defaultValue)
 	.option("-f, --force", "Force machine translation and skip the confirmation prompt.", false)
 	.description("Machine translate all resources.")
-	.action(async (args: { force: boolean }) => {
+	.action(async (args: { force: boolean; project: string }) => {
 		try {
 			// Prompt the user to confirm
 			if (!args.force) {
@@ -28,7 +30,7 @@ export const translate = new Command()
 				}
 			}
 
-			const project = await getInlangProject()
+			const project = await getInlangProject({ projectPath: args.project })
 
 			translateCommandAction({ project })
 		} catch (error) {

@@ -2,7 +2,10 @@
 	"id": "app.inlang.cli",
 	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"gallery": [
-		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/cli-marketplace-cover.jpg"
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/cli-marketplace-cover.jpg",
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/cli-gallery/cli-gallery-image-1.jpg",
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/cli-gallery/cli-gallery-image-2.jpg",
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/cli-gallery/cli-gallery-image-3.jpg"
 	],
 	"displayName": {
 		"en": "CLI"
@@ -13,7 +16,7 @@
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/cli/README.md"
 	},
-	"keywords": ["cli", "commands", "application", "website", "developer", "ai", "ci/cd"],
+	"keywords": ["cli", "commands", "application", "website", "developer", "ai", "ci/cd", "lix"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0"

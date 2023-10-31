@@ -1,101 +1,155 @@
-import { Show, createSignal } from "solid-js"
+import { Match, Show, Switch, createSignal } from "solid-js"
 import { Chip } from "./Chip.jsx"
 import { colorForTypeOf, typeOfIdToTitle } from "#src/interface/marketplace/helper/utilities.js"
 import Plus from "~icons/material-symbols/add-rounded"
 import { showToast } from "./Toast.jsx"
 import { rpc } from "@inlang/rpc"
 import { Button } from "#src/pages/index/components/Button.jsx"
+import Link from "#src/renderer/Link.jsx"
+import * as m from "@inlang/paraglide-js/website/messages"
+import { currentPageContext } from "#src/renderer/state.js"
 
-export default function Card(props: { item: any; displayName: string; highlight?: boolean }) {
+export default function Card(props: { item: any; displayName: string }) {
+	const showCover =
+		currentPageContext.urlParsed.pathname.includes("/lint-rules") &&
+		props.item.id.split(".")[0] !== "guide"
+			? true
+			: false
+
 	return (
 		<>
-			<a
+			<Link
 				href={
 					props.item.id.split(".")[0] === "guide"
 						? `/g/${props.item.uniqueID}/${props.item.id.replaceAll(".", "-")}`
 						: `/m/${props.item.uniqueID}/${props.item.id.replaceAll(".", "-")}`
 				}
 				class={
-					"relative no-underline flex gap-4 flex-col justify-between group w-full bg-background hover:bg-surface-50 transition-colors border border-surface-200 rounded-xl p-5 " +
-					(props.highlight ? "h-96" : "h-48")
+					"relative no-underline flex gap-4 flex-col justify-between group w-full bg-background transition-all border border-surface-200 rounded-xl h-48 hover:shadow-lg hover:shadow-surface-100 hover:border-surface-300 active:border-surface-400 " +
+					(showCover ? "" : "p-5")
 				}
 			>
-				<Show when={props.highlight && props.item.gallery}>
-					<img class="h-64 object-cover object-top rounded-lg" src={props.item.gallery[0]} />
-				</Show>
-				<div class="flex flex-col gap-4">
-					<div class="w-full flex gap-4 items-start">
-						<div class="flex items-center gap-8 flex-shrink-0">
-							<Show
-								when={props.item.icon}
-								fallback={
-									<div class="w-10 h-10 font-semibold text-xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
-										{props.displayName.split(" ")[0]![0]}
-									</div>
-								}
-							>
-								<img
-									class="w-10 h-10 rounded-lg m-0 object-cover object-center"
-									src={props.item.icon}
-								/>
-							</Show>
-						</div>
-						<div class="flex flex-col justify-between items-start">
+				<Switch>
+					<Match when={showCover && props.item.gallery}>
+						<img
+							class="w-full h-32 object-cover object-top rounded-xl"
+							src={props.item.gallery && props.item.gallery[0]}
+						/>
+						<div class="flex flex-shrink-0 flex-row flex-wrap justify-between items-start mb-2 px-4">
 							<p class="m-0 mb-2 text-sm text-surface-800 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors">
 								{props.displayName}
 							</p>
-							<Chip
-								text={typeOfIdToTitle(props.item.id)}
-								color={colorForTypeOf(props.item.id)}
-								customClasses="text-xs"
-							/>
 						</div>
-						<Show
-							when={
-								props.item.id.split(".")[0] === "plugin" ||
-								props.item.id.split(".")[0] === "messageLintRule"
-							}
-						>
-							<sl-tooltip prop:content={`Install`}>
-								<a
-									onClick={(e) => {
-										e.stopPropagation()
-									}}
-									href={`/install?module=${props.item.id}`}
-									class="ml-auto flex-shrink-0 rounded-full p-2 w-8 h-8 flex items-center justify-center text-background hover:text-background hover:bg-surface-700 bg-surface-900 transition-all"
-								>
-									<svg
-										width="100%"
-										height="100%"
-										viewBox="0 0 16 16"
-										fill="none"
-										xmlns="http://www.w3.org/2000/svg"
+					</Match>
+					<Match when={!showCover || props.item.gallery}>
+						<div class="flex flex-col gap-4">
+							<div class="w-full flex gap-4 items-start">
+								<div class="flex items-center gap-8 flex-shrink-0">
+									<Show
+										when={props.item.icon}
+										fallback={
+											<div class="w-10 h-10 font-semibold text-xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
+												{props.displayName.split(" ")[0]![0]}
+											</div>
+										}
 									>
-										<path
-											fill-rule="evenodd"
-											clip-rule="evenodd"
-											d="M11.6 5.54982L11.6 5.5498L8.99999 8.14981L11.6 5.54982ZM8.69999 8.87407L11.5962 5.97782L12.5794 6.99612L7.99999 11.5755L3.42056 6.99612L4.40374 5.97782L7.29999 8.87407V0.299805H8.69999V8.87407ZM14.3 14.2998V11.2998H15.7V13.9998C15.7 14.4696 15.5362 14.8643 15.2004 15.2002C14.8645 15.536 14.4698 15.6998 14 15.6998H1.99999C1.53019 15.6998 1.13547 15.536 0.79962 15.2002C0.463765 14.8643 0.299988 14.4696 0.299988 13.9998V11.2998H1.69999V14.2998H14.3Z"
-											fill="currentColor"
+										<img
+											class="w-10 h-10 rounded-lg m-0 object-cover object-center"
+											src={props.item.icon}
 										/>
-									</svg>
-								</a>
-							</sl-tooltip>
-						</Show>
-					</div>
-					<Show when={!props.highlight}>
-						<p class="text-sm line-clamp-2 text-surface-500 transition-colors group-hover:text-surface-600">
-							{props.item.description.en}
-						</p>
-					</Show>
-				</div>
-				<Show when={!props.highlight}>
-					<div>
-						<p class="m-0 mb-2 text-surface-400 group-hover:text-surface-500 transition-colors leading-none no-underline text-sm">
-							{props.item.publisherName}
-						</p>
-					</div>
+									</Show>
+								</div>
+								<div class="flex flex-col justify-between items-start">
+									<p class="m-0 mb-2 text-sm text-surface-800 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors">
+										{props.displayName}
+									</p>
+									<Chip
+										text={typeOfIdToTitle(props.item.id)}
+										color={colorForTypeOf(props.item.id)}
+										customClasses="text-xs"
+									/>
+								</div>
+								<Show
+									when={
+										props.item.id.split(".")[0] === "plugin" ||
+										props.item.id.split(".")[0] === "messageLintRule"
+									}
+								>
+									<sl-tooltip prop:content={`Install`}>
+										<a
+											onClick={(e) => {
+												e.stopPropagation()
+											}}
+											href={`/install?module=${props.item.id}`}
+											class="ml-auto flex-shrink-0 rounded-full p-2 w-8 h-8 flex items-center justify-center text-surface-900 hover:text-on-background hover:bg-surface-200 bg-surface-100 transition-all"
+										>
+											<svg
+												width="100%"
+												height="100%"
+												viewBox="0 0 16 16"
+												fill="none"
+												xmlns="http://www.w3.org/2000/svg"
+											>
+												<path
+													fill-rule="evenodd"
+													clip-rule="evenodd"
+													d="M11.6 5.54982L11.6 5.5498L8.99999 8.14981L11.6 5.54982ZM8.69999 8.87407L11.5962 5.97782L12.5794 6.99612L7.99999 11.5755L3.42056 6.99612L4.40374 5.97782L7.29999 8.87407V0.299805H8.69999V8.87407ZM14.3 14.2998V11.2998H15.7V13.9998C15.7 14.4696 15.5362 14.8643 15.2004 15.2002C14.8645 15.536 14.4698 15.6998 14 15.6998H1.99999C1.53019 15.6998 1.13547 15.536 0.79962 15.2002C0.463765 14.8643 0.299988 14.4696 0.299988 13.9998V11.2998H1.69999V14.2998H14.3Z"
+													fill="currentColor"
+												/>
+											</svg>
+										</a>
+									</sl-tooltip>
+								</Show>
+							</div>
+
+							<p class="text-sm line-clamp-2 text-surface-500 transition-colors group-hover:text-surface-600">
+								{props.item.description.en}
+							</p>
+						</div>
+						<div class="flex items-center gap-2">
+							<Show when={props.item.publisherIcon}>
+								<img
+									class="w-5 h-5 rounded-full object-cover object-center"
+									src={props.item.publisherIcon}
+								/>
+								<p class="text-sm text-surface-500 group-hover:text-surface-600 transition-colors">
+									{props.item.publisherName}
+								</p>
+							</Show>
+						</div>
+					</Match>
+				</Switch>
+				<Show
+					when={
+						props.item.id.split(".")[0] === "plugin" ||
+						props.item.id.split(".")[0] === "messageLintRule"
+					}
+				>
+					<Link
+						onClick={(e: any) => {
+							e.stopPropagation()
+						}}
+						href={"/install?module=" + structuredClone(props.item.id)}
+						class="absolute top-5 right-5 flex-shrink-0 rounded-full p-2 w-8 h-8 flex items-center justify-center text-surface-500 hover:text-on-background hover:bg-surface-200 bg-surface-100 transition-all"
+					>
+						<svg
+							width="100%"
+							height="100%"
+							viewBox="0 0 16 16"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								fill-rule="evenodd"
+								clip-rule="evenodd"
+								d="M11.6 5.54982L11.6 5.5498L8.99999 8.14981L11.6 5.54982ZM8.69999 8.87407L11.5962 5.97782L12.5794 6.99612L7.99999 11.5755L3.42056 6.99612L4.40374 5.97782L7.29999 8.87407V0.299805H8.69999V8.87407ZM14.3 14.2998V11.2998H15.7V13.9998C15.7 14.4696 15.5362 14.8643 15.2004 15.2002C14.8645 15.536 14.4698 15.6998 14 15.6998H1.99999C1.53019 15.6998 1.13547 15.536 0.79962 15.2002C0.463765 14.8643 0.299988 14.4696 0.299988 13.9998V11.2998H1.69999V14.2998H14.3Z"
+								fill="currentColor"
+							/>
+						</svg>
+					</Link>
+					{/* </sl-tooltip> */}
 				</Show>
-			</a>
+			</Link>
 		</>
 	)
 }
@@ -103,20 +157,20 @@ export default function Card(props: { item: any; displayName: string; highlight?
 export function CardBuildOwn() {
 	return (
 		<>
-			<a
-				href="/documentation/publish-marketplace"
-				class="relative no-underline h-48 flex flex-col justify-center pt-8 items-center gap-4 group w-full bg-background hover:bg-surface-50 transition-colors border border-surface-200 rounded-xl p-5"
+			<Link
+				href="/documentation/publish-to-marketplace"
+				class="relative no-underline h-48 flex flex-col justify-center pt-8 items-center gap-4 group w-full bg-background transition-colors border border-surface-200 rounded-xl p-5 hover:shadow-lg hover:shadow-surface-100 hover:border-surface-300 active:border-surface-400"
 			>
 				<Plus class="w-10 h-10 text-surface-600 group-hover:text-surface-900 transition-colors" />
 				<div class="flex flex-col justify-center items-center">
 					<p class="m-0 mb-2 text-sm text-surface-600 leading-none no-underline text-center font-semibold group-hover:text-surface-900 transition-colors">
-						Can't find what you are looking for?
+						{m.marketplace_grid_build_your_own_title()}
 					</p>
 					<p class="line-clamp-3 text-sm text-surface-500 transition-colors text-center group-hover:text-surface-600">
-						Build your own solution!
+						{m.marketplace_grid_build_your_own_description()}
 					</p>
 				</div>
-			</a>
+			</Link>
 		</>
 	)
 }
@@ -134,26 +188,26 @@ export function NoResultsCard(props: { category: string }) {
 				showToast({
 					title: "Could not subscribe",
 					variant: "success",
-					message: "You are already getting notified.",
+					message: m.marketplace_grid_subscribe_could_not_subscribe(),
 				})
 			} else if (response.data === "success") {
 				showToast({
 					title: "Success",
 					variant: "success",
-					message: "You will be notified when this feature is available.",
+					message: m.marketplace_grid_subscribe_success(),
 				})
 			} else {
 				showToast({
 					title: "Error",
 					variant: "danger",
-					message: "Something went wrong. Please try again later.",
+					message: m.marketplace_grid_subscribe_error(),
 				})
 			}
 		} else {
 			showToast({
 				title: "Error",
 				variant: "danger",
-				message: "Something went wrong. Please try again later.",
+				message: m.marketplace_grid_subscribe_error(),
 			})
 		}
 
@@ -181,14 +235,14 @@ export function NoResultsCard(props: { category: string }) {
 			showToast({
 				title: "Error",
 				variant: "danger",
-				message: "Please enter your email address",
+				message: m.marketplace_grid_subscribe_no_email(),
 			})
 			return
 		} else if (checkEmail(emailValue) === "invalid") {
 			showToast({
 				title: "Error",
 				variant: "danger",
-				message: "Please enter a valid email address",
+				message: m.marketplace_grid_subscribe_unvalid_email(),
 			})
 			return
 		}
@@ -204,9 +258,11 @@ export function NoResultsCard(props: { category: string }) {
 				</div>
 			</div>
 			<div class="p-4 w-full h-full flex flex-col justify-center relative -translate-y-8 -mt-24">
-				<h2 class="font-medium text-center text-xl mb-4">No results yet</h2>
+				<h2 class="font-medium text-center text-xl mb-4">{m.marketplace_grid_subscribe_title()}</h2>
 				<p class="text-center text-surface-500 mb-12">
-					We will let you know when we get <br class="min-[350px]:block hidden" /> some new results.
+					{m.marketplace_grid_subscribe_description_first_part()}{" "}
+					<br class="min-[350px]:block hidden" />{" "}
+					{m.marketplace_grid_subscribe_description_last_part()}
 				</p>
 				<div class="w-full flex justify-center flex-col items-center gap-4">
 					<div
@@ -220,7 +276,7 @@ export function NoResultsCard(props: { category: string }) {
 								"border-none p-0 md:w-[312px] w-full " + (loading() ? "pointer-events-none" : "")
 							}
 							prop:size={"medium"}
-							prop:placeholder={"Enter email..."}
+							prop:placeholder={m.marketplace_grid_subscribe_placeholder()}
 							// @ts-ignore
 							value={email()}
 							onInput={(event) => {
@@ -239,16 +295,16 @@ export function NoResultsCard(props: { category: string }) {
 						/>
 						<button
 							class={
-								"h-10 text-sm text-background px-4 bg-surface-700 hover:bg-surface-800 max-md:w-full rounded-md font-medium transition-all duration-200 " +
+								"h-10 text-sm text-background px-4 bg-surface-800 hover:bg-surface-900 max-md:w-full rounded-md font-medium transition-all duration-200 " +
 								(loading() ? "pointer-events-none" : "")
 							}
 							onClick={handleSubscribe}
 						>
-							Notify me
+							{m.marketplace_grid_subscribe_button()}
 						</button>
 					</div>
 					<Button href="/documentation/publish-marketplace" chevron type="textPrimary">
-						Help us build the ecosystem
+						{m.marketplace_grid_subscribe_secondary_button()}
 					</Button>
 				</div>
 			</div>

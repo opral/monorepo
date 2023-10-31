@@ -21,6 +21,7 @@ import {
 	Pattern,
 	type MessageLintReport,
 } from "@inlang/sdk"
+import Link from "#src/renderer/Link.jsx"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -485,13 +486,13 @@ export function PatternEditor(props: {
 								{'" '}
 								yet. Make sure that placeholders between the reference message and translations
 								match. For more information read{" "}
-								<a
+								<Link
 									href="https://github.com/orgs/inlang/discussions/228"
 									target="_blank"
 									class="link link-primary"
 								>
 									#228
-								</a>
+								</Link>
 								.
 							</li>
 						</ol>

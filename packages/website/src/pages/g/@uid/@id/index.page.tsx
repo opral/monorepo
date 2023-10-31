@@ -1,24 +1,15 @@
 import { Meta, Title } from "@solidjs/meta"
-import { For, Show, createSignal, onMount } from "solid-js"
+import { For, Show, onMount } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
-import { isModule } from "@inlang/marketplace-registry"
-import { Button } from "#src/pages/index/components/Button.jsx"
 import { Chip } from "#src/interface/components/Chip.jsx"
-import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
-import { SelectRepo } from "../../Select.jsx"
-import Right from "~icons/material-symbols/chevron-right"
-import Left from "~icons/material-symbols/chevron-left"
-import { colorForTypeOf, convertLinkToGithub, typeOfIdToTitle } from "../../utilities.js"
-import { defaultLanguage } from "#src/renderer/_default.page.route.js"
-import { useI18n } from "@solid-primitives/i18n"
+import { colorForTypeOf, convertLinkToGithub } from "../../utilities.js"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
-import { currentPageContext } from "#src/renderer/state.js"
-// @ts-ignore
-import { createSlider } from "solid-slider"
-import "solid-slider/slider.css"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
+import Link from "#src/renderer/Link.jsx"
+import { EditButton } from "#src/pages/documentation/EditButton.jsx"
+import { currentPageContext } from "#src/renderer/state.js"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -29,14 +20,6 @@ export type PageProps = {
 }
 
 export function Page(props: PageProps) {
-	const [readmore, setReadmore] = createSignal<boolean>(false)
-	const [, { locale }] = useI18n()
-
-	const getLocale = () => {
-		const language = locale() ?? defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
-	}
-
 	// mapping translatable types
 	const displayName = () =>
 		typeof props.manifest.displayName === "object"
@@ -51,248 +34,117 @@ export function Page(props: PageProps) {
 	const readme = () =>
 		typeof props.manifest.readme === "object" ? props.manifest.readme.en : props.manifest.readme
 
-	const tableOfContents = () => {
-		const tableOfContents = {}
-
-		if (
-			props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g) &&
-			props.markdown.match(/<h[1].*?>(.*?)<\/h[1]>/g)
-		) {
-			props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g).map((heading: string) => {
-				// We have to use DOMParser to parse the heading string to a HTML element
-				const parser = new DOMParser()
-				const doc = parser.parseFromString(heading, "text/html")
-				const node = doc.body.firstChild as HTMLElement
-
-				let lastH1Key = ""
-
-				if (node.tagName === "H1") {
-					// @ts-ignore
-					tableOfContents[node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")] = []
-				} else {
-					// @ts-ignore
-					if (!tableOfContents[lastH1Key]) {
-						const h1Keys = Object.keys(tableOfContents)
-						// @ts-ignore
-						lastH1Key = h1Keys.at(-1)
-						// @ts-ignore
-						tableOfContents[lastH1Key].push(
-							node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")
-						)
-					} else {
-						// @ts-ignore
-						tableOfContents[lastH1Key].push(
-							node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")
-						)
-					}
-				}
-
-				return node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")
+	const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
+		const element = document.getElementById(anchor)
+		if (element && window) {
+			window.scrollTo({
+				top: element.offsetTop - 96,
+				behavior: behavior ?? "instant",
 			})
 		}
-
-		return tableOfContents
+		window.history.pushState({}, "", `${currentPageContext.urlParsed.pathname}#${anchor}`)
 	}
 
-	const [details, setDetails] = createSignal({})
-	const [slider, { next, prev }] = createSlider({
-		slides: {
-			number: props.manifest && props.manifest.gallery ? props.manifest.gallery.length - 1 : 0,
-			perView: window ? (window.innerWidth > 768 ? 3 : 1) : 1,
-			spacing: 8,
-		},
-
-		detailsChanged: (slider: { track: { details: any } }) => {
-			setDetails(slider.track.details)
-		},
+	onMount(() => {
+		scrollToAnchor(currentPageContext.urlParsed.hash?.replace("#", "").toString(), "smooth")
 	})
 
 	return (
 		<>
-			<Title>{props.manifest && displayName()}</Title>
+			<Title>{`${props.manifest && displayName()} ${
+				props.manifest &&
+				(props.manifest.publisherName === "inlang"
+					? "- inlang"
+					: `| Guide from ${props.manifest.publisherName}  - inlang`)
+			}`}</Title>
 			<Meta name="description" content={props.manifest && description()} />
+			{props.manifest && props.manifest.gallery ? (
+				<Meta name="og:image" content={props.manifest.gallery[0]} />
+			) : (
+				<Meta name="og:image" content="/images/inlang-social-image.jpg" />
+			)}
+			<Meta name="twitter:card" content="summary_large_image" />
+			{props.manifest && props.manifest.gallery ? (
+				<Meta name="twitter:image" content={props.manifest.gallery[0]} />
+			) : (
+				<Meta name="twitter:image" content="/images/inlang-social-image.jpg" />
+			)}
+			<Meta
+				name="twitter:image:alt"
+				content="inlang's ecosystem helps organizations to go global."
+			/>
+			<Meta name="twitter:title" content={props.manifest && displayName()} />
+			<Meta name="twitter:description" content={props.manifest && description()} />
+			<Meta name="twitter:site" content="@inlanghq" />
+			<Meta name="twitter:creator" content="@inlanghq" />
 			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
-					<div class="md:py-28 py-16">
-						<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-20 md:gap-8 gap-6">
+					<div class="md:py-20 py-16">
+						<div class="w-full pb-20 md:gap-8 gap-6">
 							<Show
 								when={props.markdown}
 								fallback={<p class="text-danger">{props.markdown?.error}</p>}
 							>
-								<div class="col-span-1 md:col-span-4 md:pb-10 pb-8 mb-12 md:mb-8 border-b border-surface-2 grid md:grid-cols-4 grid-cols-1 gap-16">
-									<div class="flex-col h-full justify-between md:col-span-3">
-										<div class="flex max-md:flex-col items-start gap-8 mb-12">
+								<section class="w-full mb-32">
+									<div class="mx-auto w-full flex items-center flex-col justify-center gap-4 max-w-lg text-center md:px-8">
+										<Show
+											when={props.manifest.icon}
+											fallback={
+												<div class="w-16 h-16 font-semibold text-3xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
+													{displayName()[0]}
+												</div>
+											}
+										>
+											<img
+												src={props.manifest.icon}
+												class="w-16 h-16 rounded-md m-0 shadow-lg object-cover object-center mb-4"
+											/>
+										</Show>
+										<h1 class="text-4xl font-bold">{displayName()}</h1>
+										<p class="text-surface-500 mb-4">{description()}</p>
+										<div class="flex items-center gap-4">
 											<Show
-												when={props.manifest.icon}
+												when={props.manifest.publisherIcon}
 												fallback={
-													<div class="w-16 h-16 font-semibold text-3xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
-														{displayName()[0]}
+													<div
+														class={
+															"w-6 h-6 flex items-center justify-center text-background capitalize font-medium rounded-full m-0 bg-surface-900"
+														}
+													>
+														{props.manifest.publisherName[0]}
 													</div>
 												}
 											>
-												<img
-													class="w-16 h-16 rounded-md m-0 shadow-lg object-cover object-center"
-													src={props.manifest.icon}
-												/>
+												<img class="w-6 h-6 rounded-full m-0" src={props.manifest.publisherIcon} />
 											</Show>
-											<div class="flex flex-col gap-3">
-												<h1 class="text-3xl font-bold">{displayName()}</h1>
-												<div class="inline-block text-surface-500 ">
-													<p class={!readmore() ? "lg:line-clamp-2" : ""}>{description()}</p>
-													<Show when={description().length > 205}>
-														<p
-															onClick={() => setReadmore((prev) => !prev)}
-															class="cursor-pointer hover:text-surface-700 transition-all duration-150 font-medium max-lg:hidden"
-														>
-															{readmore() ? "Minimize" : "Read more"}
-														</p>
-													</Show>
-												</div>
-											</div>
-										</div>
-										<div class="flex gap-4 flex-wrap">
-											<Show
-												when={isModule(props.manifest)}
-												fallback={
-													/* @ts-ignore */
-													<Show when={props.manifest.website}>
-														{/* @ts-ignore */}
-														<Button type="primary" href={props.manifest.website}>
-															Open
-														</Button>
-													</Show>
-												}
-											>
-												<div class="flex items-center gap-2">
-													{/* @ts-ignore */}
-													<Button type="primary" href={`/install?module=${props.manifest.id}`}>
-														<span class="capitalize">
-															Install{" "}
-															{props.manifest.id.includes("messageLintRule")
-																? "Lint Rule"
-																: typeOfIdToTitle(props.manifest.id)}
-														</span>
-														{/* @ts-ignore */}
-														<SelectRepo size="medium" modules={[props.manifest.id]} />
-													</Button>
-												</div>
-											</Show>
-											<Button
-												type="secondary"
-												href={convertLinkToGithub(readme())?.replace("README.md", "")}
-											>
-												GitHub
-												<MaterialSymbolsArrowOutward
-													// @ts-ignore
-													slot="suffix"
-												/>
-											</Button>
-										</div>
-										<Show
-											when={props.manifest.gallery && props.manifest.gallery.length > 1 && slider}
-										>
-											<div class="relative">
-												{/* @ts-ignore */}
-												<div use:slider class="mt-16 cursor-grab active:cursor-grabbing">
-													<For each={props.manifest.gallery}>
-														{(image) => (
-															<a
-																href={image}
-																target="_blank"
-																rel="noopener noreferrer"
-																class="transition-opacity hover:opacity-80 cursor-pointer w-80 flex-shrink-0 active:cursor-grabbin flex items-center justify-center"
-															>
-																<img class="rounded-md w-80" src={image} />
-															</a>
-														)}
-													</For>
-												</div>
-												<Show when={details()}>
-													<button
-														disabled={
-															// @ts-ignore
-															details() && details().progress ? details().progress === 0 : false
-														}
-														onClick={prev}
-														class="absolute -left-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
-													>
-														<Left class="h-8 w-8" />
-													</button>
-													<button
-														disabled={
-															// @ts-ignore
-															details() && details().progress ? details().progress > 0.99 : false
-														}
-														onClick={next}
-														class="absolute -right-2 top-1/2 -translate-y-1/2 p-1 bg-background border border-surface-100 rounded-full shadow-xl shadow-on-background/20 transition-all hover:bg-surface-50 disabled:opacity-0"
-													>
-														<Right class="h-8 w-8" />
-													</button>
-												</Show>
-											</div>
-										</Show>
-									</div>
-									<div class="w-full">
-										<div class="flex flex-col gap-4 items-col flex-shrink-0">
-											<div>
-												<h3 class="text-surface-400 text-sm mb-2">Publisher</h3>
-												<div class="flex items-center gap-2">
-													<Show
-														when={props.manifest.publisherIcon}
-														fallback={
-															<div
-																class={
-																	"w-6 h-6 flex items-center justify-center text-background capitalize font-medium rounded-full m-0 bg-surface-900"
-																}
-															>
-																{props.manifest.publisherName[0]}
-															</div>
-														}
-													>
-														<img
-															class="w-6 h-6 rounded-full m-0"
-															src={props.manifest.publisherIcon}
-														/>
-													</Show>
-													<p class="m-0 text-surface-600 no-underline font-medium">
-														{props.manifest.publisherName}
-													</p>
-												</div>
-											</div>
-											<div>
-												<h3 class="text-surface-400 text-sm mb-2">Keywords</h3>
-												<div class="flex flex-wrap gap-2 items-center">
-													<For each={props?.manifest?.keywords}>
-														{(keyword) => (
-															<a
-																class="transition-opacity hover:opacity-80 cursor-pointer"
-																href={"/search?q=" + keyword}
-															>
-																<Chip text={keyword} color={colorForTypeOf(props.manifest.id)} />
-															</a>
-														)}
-													</For>
-												</div>
-											</div>
+											<p class="m-0 text-surface-600 no-underline font-medium">
+												{props.manifest.publisherName}
+											</p>
 										</div>
 									</div>
-								</div>
-								<Show
-									when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}
-									fallback={<Markdown markdown={props.markdown} fullWidth />}
-								>
-									<div class="grid md:grid-cols-4 grid-cols-1 col-span-1 md:col-span-4 gap-16">
-										<Markdown markdown={props.markdown} />
-										{/* Classes to be added: sticky z-10 top-16 pt-8 md:pt-0 md:static bg-background */}
-										<div class="col-span-1 md:order-1 -order-1">
-											<NavbarCommon
-												displayName={displayName}
-												getLocale={getLocale}
-												tableOfContents={tableOfContents}
-											/>
-										</div>
+								</section>
+								<section class="max-w-4xl mx-auto mb-24">
+									<Markdown markdown={props.markdown} />
+									<EditButton
+										// type="secondary"
+										href={convertLinkToGithub(readme())?.replace("README.md", "")}
+									/>
+								</section>
+								<section class="max-w-4xl mx-auto">
+									<h3 class="text-surface-400 text-sm mb-4">Keywords</h3>
+									<div class="flex flex-wrap gap-2 items-center">
+										<For each={props?.manifest?.keywords}>
+											{(keyword) => (
+												<Link
+													class="transition-opacity hover:opacity-80 cursor-pointer"
+													href={"/search?q=" + keyword}
+												>
+													<Chip text={keyword} color={colorForTypeOf(props.manifest.id)} />
+												</Link>
+											)}
+										</For>
 									</div>
-								</Show>
+								</section>
 							</Show>
 						</div>
 						<div class="mt-20">
@@ -317,135 +169,135 @@ function Markdown(props: { markdown: string; fullWidth?: boolean }) {
 	)
 }
 
-function NavbarCommon(props: {
-	getLocale: () => string
-	displayName: () => string
-	tableOfContents: () => Record<string, string[]>
-}) {
-	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
+// function NavbarCommon(props: {
+// 	getLocale: () => string
+// 	displayName: () => string
+// 	tableOfContents: () => Record<string, string[]>
+// }) {
+// 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
 
-	const replaceChars = (str: string) => {
-		return str
-			.replaceAll(" ", "-")
-			.replaceAll("/", "")
-			.replace("#", "")
-			.replaceAll("(", "")
-			.replaceAll(")", "")
-			.replaceAll("?", "")
-			.replaceAll(".", "")
-			.replaceAll("@", "")
-			.replaceAll(/([\uE000-\uF8FF]|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDDFF])/g, "")
-			.replaceAll("✂", "")
-			.replaceAll(":", "")
-	}
+// 	const replaceChars = (str: string) => {
+// 		return str
+// 			.replaceAll(" ", "-")
+// 			.replaceAll("/", "")
+// 			.replace("#", "")
+// 			.replaceAll("(", "")
+// 			.replaceAll(")", "")
+// 			.replaceAll("?", "")
+// 			.replaceAll(".", "")
+// 			.replaceAll("@", "")
+// 			.replaceAll(/([\uE000-\uF8FF]|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDDFF])/g, "")
+// 			.replaceAll("✂", "")
+// 			.replaceAll(":", "")
+// 	}
 
-	const isSelected = (heading: string) => {
-		if (heading === highlightedAnchor()) {
-			return true
-		} else {
-			return false
-		}
-	}
+// 	const isSelected = (heading: string) => {
+// 		if (heading === highlightedAnchor()) {
+// 			return true
+// 		} else {
+// 			return false
+// 		}
+// 	}
 
-	const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
-		const element = document.getElementById(anchor)
-		if (element && window) {
-			window.scrollTo({
-				top: element.offsetTop - 96,
-				behavior: behavior ?? "instant",
-			})
-		}
-		window.history.pushState({}, "", `${currentPageContext.urlParsed.pathname}#${anchor}`)
-	}
+// 	const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
+// 		const element = document.getElementById(anchor)
+// 		if (element && window) {
+// 			window.scrollTo({
+// 				top: element.offsetTop - 96,
+// 				behavior: behavior ?? "instant",
+// 			})
+// 		}
+// 		window.history.pushState({}, "", `${currentPageContext.urlParsed.pathname}#${anchor}`)
+// 	}
 
-	onMount(async () => {
-		for (const sectionTitle of Object.keys(props.tableOfContents())) {
-			if (
-				currentPageContext.urlParsed.hash?.replace("#", "").toString() ===
-				replaceChars(sectionTitle.toString().toLowerCase())
-			) {
-				/* Wait for all images to load before scrolling to anchor */
-				await Promise.all(
-					[...document.querySelectorAll("img")].map((img) =>
-						img.complete
-							? Promise.resolve()
-							: new Promise((resolve) => img.addEventListener("load", resolve))
-					)
-				)
+// 	onMount(async () => {
+// 		for (const sectionTitle of Object.keys(props.tableOfContents())) {
+// 			if (
+// 				currentPageContext.urlParsed.hash?.replace("#", "").toString() ===
+// 				replaceChars(sectionTitle.toString().toLowerCase())
+// 			) {
+// 				/* Wait for all images to load before scrolling to anchor */
+// 				await Promise.all(
+// 					[...document.querySelectorAll("img")].map((img) =>
+// 						img.complete
+// 							? Promise.resolve()
+// 							: new Promise((resolve) => img.addEventListener("load", resolve))
+// 					)
+// 				)
 
-				scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
-				setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
-			} else {
-				for (const heading of props.tableOfContents()[sectionTitle]!) {
-					if (
-						currentPageContext.urlParsed.hash?.replace("#", "").toString() ===
-						replaceChars(heading.toString().toLowerCase())
-					) {
-						/* Wait for all images to load before scrolling to anchor */
-						await Promise.all(
-							[...document.querySelectorAll("img")].map((img) =>
-								img.complete
-									? Promise.resolve()
-									: new Promise((resolve) => img.addEventListener("load", resolve))
-							)
-						)
+// 				scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
+// 				setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
+// 			} else {
+// 				for (const heading of props.tableOfContents()[sectionTitle]!) {
+// 					if (
+// 						currentPageContext.urlParsed.hash?.replace("#", "").toString() ===
+// 						replaceChars(heading.toString().toLowerCase())
+// 					) {
+// 						/* Wait for all images to load before scrolling to anchor */
+// 						await Promise.all(
+// 							[...document.querySelectorAll("img")].map((img) =>
+// 								img.complete
+// 									? Promise.resolve()
+// 									: new Promise((resolve) => img.addEventListener("load", resolve))
+// 							)
+// 						)
 
-						scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
-						setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
-					}
-				}
-			}
-		}
-	})
+// 						scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
+// 						setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
+// 					}
+// 				}
+// 			}
+// 		}
+// 	})
 
-	return (
-		<div class="mb-12 sticky top-28 max-h-[96vh] overflow-y-scroll overflow-scrollbar">
-			<ul role="list" class="w-full space-y-3">
-				<For each={Object.keys(props.tableOfContents())}>
-					{(sectionTitle) => (
-						<li>
-							<a
-								onClick={(e) => {
-									e.preventDefault()
-									scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
-									setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
-								}}
-								class={
-									(isSelected(replaceChars(sectionTitle.toString().toLowerCase()))
-										? "text-primary font-semibold "
-										: "text-info/80 hover:text-on-background ") +
-									"tracking-wide text-sm block w-full font-normal mb-2"
-								}
-								href={`#${replaceChars(sectionTitle.toString().toLowerCase())}`}
-							>
-								{sectionTitle.replace("#", "")}
-							</a>
-							<For each={props.tableOfContents()[sectionTitle]}>
-								{(heading) => (
-									<li>
-										<a
-											onClick={(e) => {
-												e.preventDefault()
-												scrollToAnchor(replaceChars(heading.toString().toLowerCase()))
-												setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
-											}}
-											class={
-												"text-sm tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
-												(highlightedAnchor() === replaceChars(heading.toString().toLowerCase())
-													? "font-medium text-on-background border-l-on-background "
-													: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
-											}
-											href={`#${replaceChars(heading.toString().toLowerCase())}`}
-										>
-											{heading.replace("#", "")}
-										</a>
-									</li>
-								)}
-							</For>
-						</li>
-					)}
-				</For>
-			</ul>
-		</div>
-	)
-}
+// 	return (
+// 		<div class="mb-12 sticky top-28 max-h-[96vh] overflow-y-scroll overflow-scrollbar">
+// 			<ul role="list" class="w-full space-y-3">
+// 				<For each={Object.keys(props.tableOfContents())}>
+// 					{(sectionTitle) => (
+// 						<li>
+// 							<Link
+// 								onClick={(e: Event) => {
+// 									e.preventDefault()
+// 									scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
+// 									setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
+// 								}}
+// 								class={
+// 									(isSelected(replaceChars(sectionTitle.toString().toLowerCase()))
+// 										? "text-primary font-semibold "
+// 										: "text-info/80 hover:text-on-background ") +
+// 									"tracking-wide text-sm block w-full font-normal mb-2"
+// 								}
+// 								href={`#${replaceChars(sectionTitle.toString().toLowerCase())}`}
+// 							>
+// 								{sectionTitle.replace("#", "")}
+// 							</Link>
+// 							<For each={props.tableOfContents()[sectionTitle]}>
+// 								{(heading) => (
+// 									<li>
+// 										<Link
+// 											onClick={(e: Event) => {
+// 												e.preventDefault()
+// 												scrollToAnchor(replaceChars(heading.toString().toLowerCase()))
+// 												setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
+// 											}}
+// 											class={
+// 												"text-sm tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
+// 												(highlightedAnchor() === replaceChars(heading.toString().toLowerCase())
+// 													? "font-medium text-on-background border-l-on-background "
+// 													: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
+// 											}
+// 											href={`#${replaceChars(heading.toString().toLowerCase())}`}
+// 										>
+// 											{heading.replace("#", "")}
+// 										</Link>
+// 									</li>
+// 								)}
+// 							</For>
+// 						</li>
+// 					)}
+// 				</For>
+// 			</ul>
+// 		</div>
+// 	)
+// }
