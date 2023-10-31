@@ -14,7 +14,9 @@
 		"reootnfj": "../plugins/inlang-message-format/marketplace-manifest.json",
 		"8y8sxj09": "../versioned-interfaces/language-tag/marketplace-manifest.json",
 		"ezdlll4o": "../versioned-interfaces/translatable/marketplace-manifest.json",
-		"gerre34r": "../paraglide/paraglide-js/marketplace-manifest.json"
+		"gerre34r": "../paraglide/paraglide-js/marketplace-manifest.json",
+		"632iow21": "../plugins/m-function-matcher/marketplace-manifest.json",
+		"698iow33": "../plugins/t-function-matcher/marketplace-manifest.json"
 	},
 	"g": {
 		"94ng94n4": "../../guides/how-to-inlang-app/marketplace-manifest.json",
