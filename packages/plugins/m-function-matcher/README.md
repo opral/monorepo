@@ -10,7 +10,7 @@ Just install it from the button in the marketplace or add the link manually to y
 {
 // ...
   "modules": [
-    "https://cdn.jsdelivr.net/npm/@inlang/plugin-paraglide-js@latest/dist/index.js"
+    "https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js"
   ]
 // ...
 }
