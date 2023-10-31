@@ -15,9 +15,7 @@ import express, { Router } from "express"
 import { createServer as createViteServer } from "vite"
 import { URL } from "node:url"
 import sirv from "sirv"
-import cookieSession from "cookie-session"
 import { router as vikePlugin } from "./vike-plugin.js"
-import { router as authService } from "../services/auth/index.server.js"
 import { redirects } from "./redirects.js"
 
 /** the root path of the server (website/) */
