@@ -1,6 +1,5 @@
 import type { SetStoreFunction } from "solid-js/store"
 import type { LocalStorageSchema } from "../../../services/local-storage/index.js"
-import { publicEnv } from "@inlang/env-variables"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { browserAuth } from "@lix-js/client"
 
@@ -8,18 +7,7 @@ import { browserAuth } from "@lix-js/client"
  * This function is called when the user clicks the "Sign Out" button.
  */
 export async function onSignOut(args: { setLocalStorage: SetStoreFunction<LocalStorageSchema> }) {
-	// sign out on the server
-	const hasExternalGitProxy =
-		publicEnv.PUBLIC_SERVER_BASE_URL !== publicEnv.PUBLIC_GIT_PROXY_BASE_URL
-
-	if (hasExternalGitProxy) {
-		await Promise.allSettled([
-			fetch("/services/auth/sign-out", { method: "POST" }),
-			browserAuth.logout(),
-		])
-	} else {
-		await fetch("/services/auth/sign-out", { method: "POST" })
-	}
+	await browserAuth.logout()
 
 	// sign out on the client by setting the user to undefined
 	args.setLocalStorage("user", undefined)

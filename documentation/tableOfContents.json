@@ -14,30 +14,36 @@
 			"description": "Architecture of inlang"
 		}
 	],
-	"Guide": [
+	"How to": [
 		{
-			"path": "./guide/develop-app.md",
+			"path": "./how-to/develop-app.md",
 			"slug": "develop-app",
 			"title": "Develop App",
 			"description": "Develop an app"
 		},
 		{
-			"path": "./guide/develop-plugin.md",
+			"path": "./how-to/develop-plugin.md",
 			"slug": "develop-plugin",
 			"title": "Develop Plugin",
 			"description": "Develop a plugin"
 		},
 		{
-			"path": "./guide/develop-lint-rule.md",
+			"path": "./how-to/develop-lint-rule.md",
 			"slug": "develop-lint-rule",
 			"title": "Develop Lint Rule",
 			"description": "Develop a lint rule"
 		},
 		{
-			"path": "./guide/publish-marketplace.md",
-			"slug": "publish-marketplace",
+			"path": "./how-to/publish-marketplace.md",
+			"slug": "publish-to-marketplace",
 			"title": "Publish Marketplace",
-			"description": "Publish a marketplace"
+			"description": "How to publish your product to inlang's marketplace."
+		},
+		{
+			"path": "./how-to/publish-guide.md",
+			"slug": "publish-guide",
+			"title": "Publish Guide",
+			"description": "Learn how to publish your own guide on inlang."
 		}
 	],
 	"Reference": [

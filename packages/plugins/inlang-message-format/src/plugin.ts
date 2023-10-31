@@ -1,10 +1,8 @@
 import type { NodeishFilesystemSubset, Plugin } from "@inlang/sdk"
 import type { StorageSchema } from "./storageSchema.js"
 import { displayName, description } from "../marketplace-manifest.json"
-import { parse as validatePluginSettings } from "valibot"
 import { PluginSettings } from "./settings.js"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
-import parsePath from "path-parse"
 
 export const pluginId = "plugin.inlang.messageFormat"
 
@@ -16,9 +14,8 @@ export const plugin: Plugin<{
 	id: pluginId,
 	displayName,
 	description,
+	settingsSchema: PluginSettings,
 	loadMessages: async ({ settings, nodeishFs }) => {
-		validatePluginSettings(PluginSettings, settings["plugin.inlang.messageFormat"])
-
 		try {
 			const file = await nodeishFs.readFile(settings["plugin.inlang.messageFormat"].filePath, {
 				encoding: "utf-8",
@@ -49,9 +46,8 @@ export const plugin: Plugin<{
 }
 
 const createFile = async (args: { path: string; nodeishFs: NodeishFilesystemSubset }) => {
-	const parsed = parsePath(args.path)
 	let previousPath = ""
-	for (const path of parsed.dir.split("/")) {
+	for (const path of dirname(args.path).split("/")) {
 		try {
 			// not using { recursive: true } because the option is flacky
 			// and is implemented differently in filesystem implementations
@@ -74,4 +70,31 @@ const createFile = async (args: { path: string; nodeishFs: NodeishFilesystemSubs
 			"\t"
 		)
 	)
+}
+
+/**
+ * Function extracted from https://www.npmjs.com/package/path-browserify
+ */
+function dirname(path: string) {
+	if (path.length === 0) return "."
+	let code = path.charCodeAt(0)
+	const hasRoot = code === 47 /*/*/
+	let end = -1
+	let matchedSlash = true
+	for (let i = path.length - 1; i >= 1; --i) {
+		code = path.charCodeAt(i)
+		if (code === 47 /*/*/) {
+			if (!matchedSlash) {
+				end = i
+				break
+			}
+		} else {
+			// We saw the first non-path separator
+			matchedSlash = false
+		}
+	}
+
+	if (end === -1) return hasRoot ? "/" : "."
+	if (hasRoot && end === 1) return "//"
+	return path.slice(0, end)
 }

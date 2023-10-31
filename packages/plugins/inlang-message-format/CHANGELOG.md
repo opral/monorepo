@@ -1,5 +1,12 @@
 # @inlang/plugin-message-format
 
+## 1.3.0
+
+### Minor Changes
+
+- 3016bfab8: improve: use new `settingsSchema` property for plugins to provide a shorter feedback loop when the settings are invalid.
+- 1d0d7fa05: fix: https://github.com/inlang/monorepo/issues/1530
+
 ## 1.2.0
 
 ### Minor Changes

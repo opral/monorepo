@@ -3,6 +3,7 @@ import { createStore, reconcile, type SetStoreFunction } from "solid-js/store"
 import { defaultLocalStorage, type LocalStorageSchema } from "./schema.js"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { browserAuth } from "@lix-js/client"
+import { onSignOut } from "#src/services/auth/index.js"
 
 const LocalStorageContext = createContext()
 
@@ -66,7 +67,15 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 				}
 			})
 			// set user to undefined if an error occurs
-			.catch(() => setStore("user", undefined))
+			.catch(async (err) => {
+				if (err.message === "token_invalid") {
+					// The token expired or access was revoked by the user and we have a stale token
+					await onSignOut({ setLocalStorage: setStore })
+					location.reload()
+				} else {
+					setStore("user", undefined)
+				}
+			})
 
 		if (typeof window !== "undefined") {
 			// listen for changes in other windows

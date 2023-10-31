@@ -2,31 +2,9 @@
 
 ## 2.2.0
 
-### Minor Changes
-
-- 2f924df32: added Modulesettings validation via the Typebox JSON Schema Validation. This ensure that users can exclusively use module settings when there are given by the moduel
-
-## 2.1.0
-
-### Minor Changes
-
-- 6f42758bb: force absolute path for settingsFilePath to intercept nodeishFs with absolute paths
-
-### Patch Changes
-
-- Updated dependencies [6f42758bb]
-  - @lix-js/fs@0.3.0
-
-## 2.0.0
-
 ### Major Changes
 
-- 404d365b2: BREAKING: The settings are now project settings that include the plugin settings.
-
-### Patch Changes
-
-- Updated dependencies [d57b1a2ce]
-  - @inlang/project-settings@2.2.0
+- added the property `settingsSchema` to add validation for settings
 
 ## 1.3.0
 

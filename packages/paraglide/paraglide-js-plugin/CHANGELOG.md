@@ -1,5 +1,18 @@
 # @inlang/plugin-paraglide-js
 
+## 1.3.0
+
+### Minor Changes
+
+- a39638334: add support for new document selector typescriptreact
+- 608ffc963: Refactor message options callback in ideExtensionConfig
+
+## 1.2.0
+
+### Minor Changes
+
+- 6531d0cc3: fix parser to detect correct strings
+
 ## 1.1.0
 
 ### Minor Changes
