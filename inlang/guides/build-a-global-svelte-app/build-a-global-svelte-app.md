@@ -56,6 +56,23 @@ npm run build
 ```
 If you did everything right, you'll get `✔ Successfully compiled the project.` in the terminal.
 
+<br/>
+
+Please note that before Paraglide-js's Vite plugin is released, you may be troubled by [Vite's Dependency Pre-Bundling](https://vitejs.dev/guide/dep-pre-bundling.html), which saves compiled dependencies in `node_modules/.vite` for subsequent use. However, the working mechanism of `paraglide-js` causes Vite to incorrectly cache `messages.js`, causing the application to use stale messages.
+
+We recommend that you add `@inlang/paraglide-js` to the exclusion list of dependency optimizations:
+```js
+// vite.config.js/ts
+export default defineConfig({
+  optimizeDeps: {
+    exclude: ['@inlang/paraglide-js']
+  },
+  ssr: {
+    noExternal: ['@inlang/paraglide-js']
+  },
+});
+```
+
 ### 3. Add message that can be translated.
 
 Now let's use the ide-extension to extract some hard-coded strings from the example project. Install the ide-extension -> [vs-code marketplace](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension).

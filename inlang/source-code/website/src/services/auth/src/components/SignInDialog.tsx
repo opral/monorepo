@@ -20,6 +20,7 @@ export function SignInDialog(props: {
 	// web component slots load eagarly. applying manual conditional rendering
 	// combats flickering on initial render
 	const [isShown, setIsShown] = createSignal(false)
+
 	return (
 		<sl-dialog
 			ref={props.ref}

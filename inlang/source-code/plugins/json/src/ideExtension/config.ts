@@ -15,6 +15,9 @@ export const ideExtensionConfig = (): ReturnType<Exclude<Plugin["addCustomApi"],
 		],
 		documentSelectors: [
 			{
+				language: "typescriptreact",
+			},
+			{
 				language: "javascript",
 			},
 			{

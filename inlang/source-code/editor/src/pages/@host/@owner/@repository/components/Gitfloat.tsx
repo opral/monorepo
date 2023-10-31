@@ -7,7 +7,11 @@ import { showToast } from "#src/interface/components/Toast.jsx"
 import { navigate } from "vike/client/router"
 import { currentPageContext } from "#src/renderer/state.js"
 import type { EditorRouteParams } from "../types.js"
-import { SignInDialog } from "#src/services/auth/index.js"
+import {
+	SignInDialog,
+	ForkPermissionDialog,
+	PushPermissionDialog,
+} from "#src/services/auth/index.js"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { TourHintWrapper, type TourStepId } from "./Notification/TourHintWrapper.jsx"
 import { browserAuth } from "@lix-js/client"
@@ -31,15 +35,22 @@ export const Gitfloat = () => {
 
 	// ui states
 	const gitState: () => "login" | "loading" | "fork" | "pullrequest" | "hasChanges" = () => {
+		const repoInfo = githubRepositoryInformation()
+
 		if (localStorage?.user === undefined) {
 			return "login"
-		} else if (userIsCollaborator.loading || !project() || isForking()) {
+		} else if (
+			typeof repoInfo === "undefined" ||
+			"error" in repoInfo ||
+			userIsCollaborator.loading ||
+			!project() ||
+			isForking()
+		) {
 			return "loading"
 		} else if (userIsCollaborator() === false) {
 			return "fork"
-		}
-		// if changes exist in a fork, show the pull request button
-		else if (hasPushedChanges() && localChanges() === 0 && githubRepositoryInformation()?.isFork) {
+		} else if (hasPushedChanges() && localChanges() === 0 && repoInfo.isFork) {
+			// if changes exist in a fork, show the pull request button
 			return "pullrequest"
 		}
 		// user is logged in and a collaborator, thus show changeStatus
@@ -51,6 +62,8 @@ export const Gitfloat = () => {
 	const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 
 	let signInDialog: SlDialog | undefined
+	let forkPermissionDialog: SlDialog | undefined
+	let pushPermissionDialog: SlDialog | undefined
 
 	function onSignIn() {
 		signInDialog?.show()
@@ -61,7 +74,9 @@ export const Gitfloat = () => {
 		if (localStorage.user === undefined) {
 			return
 		}
-		const response = await repo()?.createFork()
+		const response = await repo()
+			?.createFork()
+			.catch((err) => err)
 
 		telemetryBrowser.capture("EDITOR created fork", {
 			owner: routeParams().owner,
@@ -79,6 +94,9 @@ export const Gitfloat = () => {
 				// @ts-expect-error - type mismatch fix after refactoring
 				navigate(`/editor/github.com/${response.data.full_name}`)
 			}, 1000)
+			return
+		} else if (response?.status === 403) {
+			forkPermissionDialog.show()
 			return
 		} else {
 			showToast({
@@ -101,28 +119,38 @@ export const Gitfloat = () => {
 		setIsLoading(true)
 
 		// commit & push
-		if (!repo())
+		if (!repo()) {
 			return showToast({
 				title: "Failed to push changes",
 				message: "Please try again or file a bug.",
 				variant: "danger",
 			})
-		const push = await pushChanges({
+		}
+
+		const pushResult = await pushChanges({
 			repo: repo()!,
 			user: localStorage.user,
 			setFsChange,
 			setLastPullTime,
 		})
+
 		setIsLoading(false)
+
 		telemetryBrowser.capture("EDITOR pushed changes", {
 			owner: routeParams().owner,
 			repository: routeParams().repository,
-			sucess: push.error === undefined,
+			sucess: pushResult.error === undefined,
 		})
-		if (push.error) {
+
+		if (pushResult.error?.data?.statusCode === 403) {
+			pushPermissionDialog.show()
+			return
+		}
+
+		if (pushResult.error) {
 			return showToast({
 				title: "Failed to push changes",
-				message: "Please try again or file a bug. " + push.error.message,
+				message: "Please try again or file a bug. " + pushResult.error.message,
 				variant: "danger",
 			})
 		} else {
@@ -136,9 +164,13 @@ export const Gitfloat = () => {
 	}
 
 	const pullrequestUrl = () => {
-		return `https://github.com/${
-			githubRepositoryInformation()?.parent?.fullName
-		}/compare/${currentBranch()}...${routeParams().owner}:${
+		const repoInfo = githubRepositoryInformation()
+		if (typeof repoInfo === "undefined" || "error" in repoInfo) {
+			return
+		}
+		return `https://github.com/${repoInfo?.parent?.fullName}/compare/${currentBranch()}...${
+			routeParams().owner
+		}:${
 			routeParams().repository
 		}:${currentBranch()}?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20conducted%20here%0A%0APreview%20the%20messages%20on%20https%3A%2F%2Finlang.com%2Fgithub.com%2F${
 			(currentPageContext.routeParams as EditorRouteParams).owner
@@ -311,6 +343,23 @@ export const Gitfloat = () => {
 					// hide the sign in dialog to increase UX when switching back to this window
 					browserAuth.login()
 					signInDialog?.hide()
+				}}
+			/>
+			<ForkPermissionDialog
+				ref={forkPermissionDialog!}
+				onClickForkPermissionButton={() => {
+					// hide the sign in dialog to increase UX when switching back to this window
+					browserAuth.addPermissions()
+					forkPermissionDialog?.hide()
+					setIsForking(false)
+				}}
+			/>
+			<PushPermissionDialog
+				ref={pushPermissionDialog!}
+				onClickPushPermissionButton={() => {
+					// hide the sign in dialog to increase UX when switching back to this window
+					browserAuth.addPermissions()
+					pushPermissionDialog?.hide()
 				}}
 			/>
 		</>

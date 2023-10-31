@@ -1,5 +1,11 @@
 # @inlang/plugin-i18next
 
+## 4.11.0
+
+### Minor Changes
+
+- a39638334: add support for new document selector typescriptreact
+
 ## 4.10.0
 
 ### Minor Changes

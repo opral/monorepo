@@ -529,21 +529,11 @@
 			"variants": [
 				{
 					"match": [],
-					"languageTag": "de",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Dokumentation"
-						}
-					]
-				},
-				{
-					"match": [],
 					"languageTag": "en",
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Documentation"
+							"value": "Build on inlang"
 						}
 					]
 				},
@@ -574,6 +564,16 @@
 						{
 							"type": "Text",
 							"value": "文档"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Bauen Sie auf Inlang auf"
 						}
 					]
 				}
@@ -1232,6 +1232,214 @@
 			]
 		},
 		{
+			"id": "home_guides_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Guides"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Guides"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_application_header_generic_button",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Get started"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Loslegen"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_application_header_generic_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "A general guide on the minimum steps required to make your project ready for the ecosystem of inlang."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Eine allgemeine Anleitung, um dein Projekt mit dem inlang-Ökosystem aufzusetzen."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_application_header_generic_tag",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "How to"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "How to"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_application_header_generic_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Setup inlang for your project"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Baue inlang in dein Project ein"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_application_header_svelte_button",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Get started"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Loslegen"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_application_header_svelte_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "A basic guide on how to adopte inlang with paraglide.js and message-format-plugin in your svelte app."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Eine grundlegende Anleitung zur Einführung von inlang mit paraglide.js und dem message-format-plugin in deine Svelte App."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_application_header_svelte_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Build a global svelte app: A basic guide"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Erstelle eine globale Svelte App: Eine grundlegende Anleitung"
+						}
+					]
+				}
+			]
+		},
+		{
 			"id": "marketplace_grid_build_your_own_description",
 			"selectors": [],
 			"variants": [
@@ -1813,7 +2021,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Search"
+							"value": "⌘ + k to search"
 						}
 					]
 				},
@@ -1823,7 +2031,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Suche"
+							"value": "⌘ + k um zu suchen"
 						}
 					]
 				}

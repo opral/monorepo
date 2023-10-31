@@ -12,6 +12,7 @@ import { Message } from "./Message.jsx"
 import { Errors } from "./components/Errors.jsx"
 import { Layout } from "./Layout.jsx"
 import Link from "#src/renderer/Link.jsx"
+import { browserAuth } from "@lix-js/client"
 
 export function Page() {
 	return (
@@ -31,7 +32,7 @@ export function Page() {
  */
 function TheActualPage() {
 	const { project, routeParams, doesInlangConfigExist, tourStep, lixErrors } = useEditorState()
-	const [, setLocalStorage] = useLocalStorage()
+	const [localStorage, setLocalStorage] = useLocalStorage()
 
 	onMount(() => {
 		setLocalStorage("recentProjects", (prev) => {
@@ -72,12 +73,22 @@ function TheActualPage() {
 					</p>
 				}
 			>
-				<Match when={lixErrors().some((e) => e.message.includes("401"))}>
-					<RepositoryDoesNotExistOrNotAuthorizedCard code={401} />
+				<Match when={lixErrors().some((err) => err.message.includes("401"))}>
+					<RepositoryDoesNotExistOrNotAuthorizedCard code={401} user={localStorage?.user} />
 				</Match>
-				<Match when={lixErrors().some((e) => e.message.includes("404"))}>
-					<RepositoryDoesNotExistOrNotAuthorizedCard code={404} />
+
+				<Match
+					when={lixErrors().some(
+						(err) =>
+							err.message.includes("404") ||
+							err.message.includes("403") ||
+							err.response?.status === 404 ||
+							err.response?.status === 403
+					)}
+				>
+					<RepositoryDoesNotExistOrNotAuthorizedCard code={404} user={localStorage?.user} />
 				</Match>
+
 				<Match when={lixErrors().length > 0}>
 					<Errors
 						errors={lixErrors()}
@@ -85,6 +96,7 @@ function TheActualPage() {
 						messagePlural="errors occurred while cloning the repository:"
 					/>
 				</Match>
+
 				<Match when={project() === undefined}>
 					<div class="flex flex-col grow justify-center items-center min-w-full min-h-[calc(100vh_-_200px)] gap-2">
 						{/* sl-spinner need a own div otherwise the spinner has a bug. The wheel is rendered on the outer div  */}
@@ -194,34 +206,30 @@ function NoInlangConfigFoundCard() {
 	)
 }
 
-function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number }) {
-	const { routeParams } = useEditorState()
-
+function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number; user: any }) {
 	return (
 		<div class="flex grow items-center justify-center">
 			<div class="border border-outline p-12 rounded-xl flex flex-col max-w-lg">
-				<h1 class="text-5xl font-light pt-2">{args.code}</h1>
-				<h2 class="font-semibold pt-12">
-					Repo does not exist or you don't have sufficient access rights.
-				</h2>
+				<h2 class="font-semibold pt-12">Cannot access the repository</h2>
+
 				<ul class="pt-8 list-disc pl-4">
-					<li>
-						Make sure that you the repository owner{" "}
-						<code class="bg-secondary-container py-1 px-1.5 rounded text-on-secondary-container">
-							{routeParams().owner}
-						</code>{" "}
-						and the repository name{" "}
-						<code class="bg-secondary-container py-1 px-1.5 rounded text-on-secondary-container">
-							{routeParams().repository}
-						</code>{" "}
-						contain no mistake.
-					</li>
-					<li class="pt-2">Alternatively, you might not have access to the repository.</li>
+					{args.user ? (
+						<li class="pt-2">
+							If this is a <span class="font-bold">private repository</span> you need need to add it
+							to the github app permissions by clicking the button below
+						</li>
+					) : (
+						<li class="pt-2">
+							If this is a <span class="font-bold">private repository</span> you need to sign in at
+							the bottom of the page.
+						</li>
+					)}
+
 					<li class="pt-2">
-						If this is a <span class="font-bold">private repository</span> please sign in at the
-						bottom of the page.
+						If this is a <span class="font-bold">public repository</span> please check the spelling
 					</li>
 				</ul>
+
 				<Link
 					class="self-end pt-5"
 					href="https://github.com/inlang/monorepo/discussions/categories/help-questions-answers"
@@ -233,6 +241,28 @@ function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number }) {
 						<MaterialSymbolsArrowOutwardRounded slot="suffix" />
 					</sl-button>
 				</Link>
+
+				{args.user ? (
+					<sl-button
+						class="on-inverted self-end pt-5"
+						onClick={async () => {
+							await browserAuth.addPermissions()
+							location.reload()
+						}}
+					>
+						Add github app permissions{" "}
+						<div slot="suffix">
+							<svg viewBox="0 0 32 32" width="1.2em" height="1.2em">
+								<path
+									fill="currentColor"
+									d="M16 .396c-8.839 0-16 7.167-16 16c0 7.073 4.584 13.068 10.937 15.183c.803.151 1.093-.344 1.093-.772c0-.38-.009-1.385-.015-2.719c-4.453.964-5.391-2.151-5.391-2.151c-.729-1.844-1.781-2.339-1.781-2.339c-1.448-.989.115-.968.115-.968c1.604.109 2.448 1.645 2.448 1.645c1.427 2.448 3.744 1.74 4.661 1.328c.14-1.031.557-1.74 1.011-2.135c-3.552-.401-7.287-1.776-7.287-7.907c0-1.751.62-3.177 1.645-4.297c-.177-.401-.719-2.031.141-4.235c0 0 1.339-.427 4.4 1.641a15.436 15.436 0 0 1 4-.541c1.36.009 2.719.187 4 .541c3.043-2.068 4.381-1.641 4.381-1.641c.859 2.204.317 3.833.161 4.235c1.015 1.12 1.635 2.547 1.635 4.297c0 6.145-3.74 7.5-7.296 7.891c.556.479 1.077 1.464 1.077 2.959c0 2.14-.02 3.864-.02 4.385c0 .416.28.916 1.104.755c6.4-2.093 10.979-8.093 10.979-15.156c0-8.833-7.161-16-16-16z"
+								/>
+							</svg>
+						</div>
+					</sl-button>
+				) : (
+					""
+				)}
 			</div>
 		</div>
 	)

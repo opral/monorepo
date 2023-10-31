@@ -11,14 +11,25 @@ export const ideExtensionConfig = (): ReturnType<Exclude<Plugin["addCustomApi"],
 		extractMessageOptions: [
 			{
 				callback: (args: { messageId: string }) =>
-					`{m.${args.messageId.trim().replace(/\s+/g, "_").toLowerCase()}()}`,
+					`{m.${args.messageId
+						.trim()
+						.replace(/[^a-zA-Z0-9\s]/g, "")
+						.replace(/\s+/g, "_")
+						.toLowerCase()}()}`,
 			},
 			{
 				callback: (args: { messageId: string }) =>
-					`m.${args.messageId.trim().replace(/\s+/g, "_").toLowerCase()}()`,
+					`m.${args.messageId
+						.trim()
+						.replace(/[^a-zA-Z0-9\s]/g, "")
+						.replace(/\s+/g, "_")
+						.toLowerCase()}()`,
 			},
 		],
 		documentSelectors: [
+			{
+				language: "typescriptreact",
+			},
 			{
 				language: "javascript",
 			},

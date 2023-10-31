@@ -30,7 +30,13 @@ router.all(
 
 			// taking end of proxy path suffix as target url
 			const targetUrl = request.url.split(PATH)[1]
-			const res = await fetch(targetUrl!, {
+
+			if (typeof targetUrl === "undefined") {
+				response.status(400).send("Missing target url")
+				return
+			}
+
+			const res = await fetch(targetUrl, {
 				method: request.method,
 				// @ts-ignore
 				headers: {
@@ -48,10 +54,14 @@ router.all(
 			response.set("Access-Control-Allow-Credentials", "true")
 			response.set("Access-Control-Allow-Headers", "x-github-api-version")
 
-			if (res.headers.get("content-type")?.includes("json")) {
+			if (targetUrl.endsWith("/user/emails") && res.status === 401 && decryptedAccessToken) {
+				response.statusMessage = "token_invalid"
+				response.status(401)
+				response.send("Token invalid")
+			} else if (res.headers.get("content-type")?.includes("json")) {
 				response
 					.status(res.status)
-					.contentType(res.headers.get("content-type")!)
+					.contentType(res.headers.get("content-type") || "application/json")
 					.send(await res.json())
 			} else {
 				response.status(res.status).send(res.body)

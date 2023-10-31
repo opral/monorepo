@@ -2,7 +2,10 @@
 	"id": "app.inlang.cli",
 	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"gallery": [
-		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/cli-marketplace-cover.jpg"
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/cli-marketplace-cover.jpg",
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/cli-gallery/cli-gallery-image-1.jpg",
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/cli-gallery/cli-gallery-image-2.jpg",
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/cli-gallery/cli-gallery-image-3.jpg"
 	],
 	"displayName": {
 		"en": "CLI"

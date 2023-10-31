@@ -43,13 +43,13 @@ const MarketplaceHeader = () => {
 				<Link
 					href={"/"}
 					onClick={() => setSearchInput("")}
-					class="flex items-center w-fit pointer-events-auto py-4"
+					class="flex items-center w-fit pointer-events-auto py-4 transition-opacity hover:opacity-75"
 				>
 					<img class={"h-8 w-8"} src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
 					<span class={"self-center pl-2 text-left font-semibold text-surface-900"}>inlang</span>
 				</Link>
 				<Show when={!currentPageContext.urlParsed.pathname.includes("/documentation")}>
-					<div class="absolute sm:static top-16 sm:top-0 w-full sm:max-w-sm mx-auto sm:mx-0">
+					<div class="absolute lg:absolute lg:top-4 lg:left-1/2 lg:-translate-x-1/2 sm:static top-16 sm:top-0 w-full sm:max-w-sm mx-auto sm:mx-0">
 						<SearchBar />
 					</div>
 				</Show>

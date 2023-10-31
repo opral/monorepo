@@ -14,7 +14,7 @@ function EditorHeader() {
 			},
 			{
 				name: `Apps`,
-				href: "/application",
+				href: "/c/application",
 			},
 		]
 	}
