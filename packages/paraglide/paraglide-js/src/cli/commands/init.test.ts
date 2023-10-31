@@ -551,5 +551,4 @@ const mockFiles = (files: memfs.NestedDirectoryJSON) => {
 	return { existsSync: _memfs.existsSync }
 }
 
-
 test("a tsconfig with comments should be loaded correctly", () => {})
