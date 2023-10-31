@@ -3,9 +3,9 @@ import SearchBar, { setSearchInput } from "#src/interface/components/SearchBar.j
 import CategoryTabs from "./CategoryTabs.jsx"
 import { For, Show } from "solid-js"
 import { currentPageContext } from "#src/renderer/state.js"
-import IconTwitter from "~icons/cib/twitter"
 import IconGithub from "~icons/cib/github"
 import IconDiscord from "~icons/cib/discord"
+import { IconX } from "../components/Icon.jsx"
 import Link from "#src/renderer/Link.jsx"
 import * as m from "@inlang/paraglide-js/website/messages"
 import { LanguagePicker } from "#src/pages/index/LanguagePicker.jsx"
@@ -13,9 +13,9 @@ import { LanguagePicker } from "#src/pages/index/LanguagePicker.jsx"
 const MarketplaceHeader = () => {
 	const socialMediaLinks = [
 		{
-			name: "Twitter",
-			href: "https://twitter.com/inlangHQ",
-			Icon: IconTwitter,
+			name: "X",
+			href: "https://x.com/inlangHQ",
+			Icon: IconX,
 			screenreader: "Twitter Profile",
 		},
 		{
