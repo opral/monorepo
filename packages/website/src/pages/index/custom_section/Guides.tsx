@@ -8,7 +8,7 @@ const Guides = () => {
 		"guide.niklasbuchfink.howToSetupInlang",
 		"guide.niklasbuchfink.whatIsInlang",
 		"guide.nilsjacobsen.buildAGlobalSvelteApp",
-		"guide.inlang.buildOwnApp",
+		"guide.nilsjacobsen.useParaglideJsInMonorepos",
 	]
 	return (
 		<div class="w-full flex gap-4 mt-4 md:mt-10 mb-10 flex-col-reverse md:flex-row">

@@ -135,7 +135,7 @@ it("should return an error if a module exports an invalid plugin or lint rule", 
 	}
 	const _import = async () =>
 		({
-			// @ts-expect-error - invalid meta of a plugin
+			// invalid meta of a plugin
 			default: {
 				id: "plugin.namespace.mock",
 				description: { en: "Mock plugin description" },
