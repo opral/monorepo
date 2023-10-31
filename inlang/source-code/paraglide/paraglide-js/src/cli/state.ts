@@ -17,7 +17,10 @@ const currentFilePath = fileURLToPath(import.meta.url)
  * from '/Users/samuel/example/repository/node_modules/paraglide-js/dist/cli/main.js'
  * to   '/Users/samuel/example/repository/node_modules/paraglide-js'
  */
-export let paraglideDirectory: string = currentFilePath.slice(0, currentFilePath.indexOf("/dist/"))
+export let paraglideDirectory: string = currentFilePath.slice(
+	0,
+	currentFilePath.indexOf("/paraglide-js/") + "/paraglide-js".length
+)
 
 // this is only used for testing
 // use cmd + f to find all usages

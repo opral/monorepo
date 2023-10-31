@@ -26,9 +26,11 @@ export const compileCommand = new Command()
 	.action(async (options: { project: string; namespace: string }) => {
 		consola.info(`Compiling inlang project at "${options.project}".`)
 
+		const path = resolve(process.cwd(), options.project)
+
 		const project = exitIfErrors(
 			await loadProject({
-				settingsFilePath: resolve(process.cwd(), options.project),
+				settingsFilePath: path,
 				nodeishFs: fs,
 			})
 		)
