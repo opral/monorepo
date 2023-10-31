@@ -10,7 +10,7 @@ import type { EditorRouteParams } from "../types.js"
 import {
 	SignInDialog,
 	ForkPermissionDialog,
-	PushPermissionDialog
+	PushPermissionDialog,
 } from "#src/services/auth/index.js"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { TourHintWrapper, type TourStepId } from "./Notification/TourHintWrapper.jsx"
