@@ -56,8 +56,14 @@ export default function SearchBar() {
 				aria-label="search input"
 				id="search"
 				name="search"
-				placeholder={isMac() ? m.marketplace_header_search_placeholder() : "Search"}
-				class="border-0 focus:ring-0 h-full w-full pl-0 text-sm md:placeholder:text-surface-400 placeholder:text-surface-900/0"
+				placeholder={
+					isMac()
+						? m.marketplace_header_search_placeholder()
+						: typeof window !== "undefined"
+						? "Search"
+						: ""
+				}
+				class="border-0 focus:ring-0 h-full w-full pl-0 text-sm md:placeholder:text-surface-400 placeholder:text-surface-900/0 transition-all"
 				value={q ? q : searchInput()}
 				ref={inputElement}
 				onInput={(e) => {
