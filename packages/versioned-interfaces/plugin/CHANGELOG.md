@@ -1,5 +1,11 @@
 # @inlang/plugin
 
+## 2.3.0
+
+### Minor Changes
+
+- a33cfa169: chore: removed `additionalProperties: false` to allow the addition of APIs in the future without breaking pre-existing deployments
+
 ## 2.2.0
 
 ### Major Changes
