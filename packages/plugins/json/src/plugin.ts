@@ -3,7 +3,6 @@ import type { Message, Variant, LanguageTag, Plugin, NodeishFilesystemSubset } f
 import { displayName, description } from "../marketplace-manifest.json"
 import { PluginSettings } from "./settings.js"
 import { replaceAll } from "./utilities.js"
-import { ideExtensionConfig } from "./ideExtension/config.js"
 import { flatten, unflatten } from "flat"
 import { detectJsonFormatting } from "../../../detect-json-formatting/dist/index.js"
 
@@ -37,7 +36,6 @@ export const plugin: Plugin<{
 			messages,
 		})
 	},
-	addCustomApi: () => ideExtensionConfig(),
 }
 
 /**
