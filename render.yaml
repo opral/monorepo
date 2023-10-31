@@ -1,0 +1,6 @@
+previewsEnabled: true
+services:
+- type: web
+  plan: standard
+  name: express-server
+  runtime: node
