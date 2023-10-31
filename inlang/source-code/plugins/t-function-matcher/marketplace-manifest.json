@@ -3,7 +3,7 @@
 	"id": "plugin.inlang.tFunctionMatcher",
 	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/t-function-matcher/assets/t.png",
 	"displayName": {
-		"en": "t-function-matcher Plugin"
+		"en": "t-function-matcher"
 	},
 	"description": {
 		"en": "Enables the inlang VSCode extension to work with t-functions"
