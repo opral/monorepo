@@ -1,5 +1,29 @@
 # @inlang/cli
 
+## 1.20.0
+
+### Minor Changes
+
+- c90939a90: update README
+
+## 1.19.0
+
+### Minor Changes
+
+- 4ccdb2da6: fix `--no-fail` flag
+
+## 1.18.0
+
+### Minor Changes
+
+- 93dca7bb2: add `--languageTags` flag to `lint` cli command
+
+## 1.17.0
+
+### Minor Changes
+
+- 561a03ebe: add global `--project` flag
+
 ## 1.16.0
 
 ### Minor Changes

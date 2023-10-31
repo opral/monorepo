@@ -1,6 +1,9 @@
 # @inlang/paraglide-js
 
-## ATTENTION: Paraglide is in pre-release mode. Discuss the API at https://github.com/inlang/monorepo/discussions/1464
+<!-- ## ATTENTION: Paraglide is in pre-release mode. Discuss the API at https://github.com/inlang/monorepo/discussions/1464 -->
+<doc-links>
+    <doc-link title="ATTENTION: Paraglide is in pre-release mode." icon="mdi:github" href="https://github.com/inlang/monorepo/discussions/1464" description="Discuss the API on GitHub."></doc-link>
+</doc-links>
 
 <doc-gallery>TODO: adapter gallery</doc-gallery>
 
@@ -60,7 +63,7 @@ npm install @inlang/paraglide-js
 ```diff
 {
   "scripts": {
-+    "build": "paraglide-js compile --namespace <your project name>"
++    "build": "paraglide-js compile --namespace <namespace>"
   }
 }
 ```

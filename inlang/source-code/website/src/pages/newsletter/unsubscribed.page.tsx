@@ -1,6 +1,6 @@
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import { Meta, Title } from "@solidjs/meta"
-import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
+import * as m from "@inlang/paraglide-js/website/messages"
 import Link from "#src/renderer/Link.jsx"
 
 export type PageProps = {

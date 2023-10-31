@@ -7,11 +7,7 @@ import { Root } from "./_default.root.jsx"
 // import the css
 import "./app.css"
 import { MetaProvider, renderTags } from "@solidjs/meta"
-import {
-	sourceLanguageTag,
-	availableLanguageTags,
-	languageTag,
-} from "@inlang/paraglide-js/inlang-marketplace"
+import { sourceLanguageTag, availableLanguageTags, languageTag } from "@inlang/paraglide-js/website"
 
 // See https://vite-plugin-ssr.com/data-fetching
 export const passToClient = ["pageProps", "routeParams", "languageTag"] as const

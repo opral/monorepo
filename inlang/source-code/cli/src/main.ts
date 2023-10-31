@@ -35,8 +35,6 @@ export const cli = new Command()
 	.addCommand(machine)
 	.addCommand(open)
 	.addCommand(module)
-	// Global options
-	// .option("-c, --config <value>", "Path to the project.inlang.json file.")
 	// Hooks
 	.hook("preAction", (command) => {
 		// name enables better grouping in the telemetry dashboard

@@ -15,7 +15,7 @@
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/badge/README.md"
 	},
-	"keywords": ["application", "badge", "markdown", "translation", "status"],
+	"keywords": ["application", "badge", "markdown", "translation", "status", "lix"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0"

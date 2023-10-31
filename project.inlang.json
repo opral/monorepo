@@ -4,7 +4,7 @@
 	"languageTags": ["en", "de", "zh", "sk", "pt-BR"],
 	"modules": [
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-paraglide-js@latest/dist/index.js",
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source/dist/index.js",
@@ -12,5 +12,8 @@
 	],
 	"plugin.inlang.messageFormat": {
 		"filePath": "./inlang/source-code/website/messages.json"
+	},
+	"messageLintRuleLevels": {
+		"messageLintRule.inlang.missingTranslation": "error"
 	}
 }
