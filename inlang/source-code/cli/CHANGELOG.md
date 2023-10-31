@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 1.20.0
+
+### Minor Changes
+
+- c90939a90: update README
+
 ## 1.19.0
 
 ### Minor Changes
