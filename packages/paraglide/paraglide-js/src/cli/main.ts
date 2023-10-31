@@ -2,7 +2,7 @@ import consola from "consola"
 import dedent from "dedent"
 import { Command } from "commander"
 import { compileCommand } from "./commands/compile.js"
-import { paraglideDirectory } from "./state.js"
+import { paraglideDirectory, version } from "./state.js"
 import { initCommand } from "./commands/init.js"
 
 export const cli = new Command()
@@ -10,6 +10,7 @@ export const cli = new Command()
 	.addCommand(compileCommand)
 	.addCommand(initCommand)
 	.showHelpAfterError()
+	.version(version)
 	.action(() => {
 		// ------------------- VALIDATE IF RUNNING FROM CORRECT FOLDER -------------------
 		// the CLI expects to be running from the dist folder of the specific paraglide package
