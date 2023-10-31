@@ -7,6 +7,7 @@ import { resolve } from "node:path"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import JSON5 from "json5"
 import childProcess from "node:child_process"
+import { version } from "../../../package.json"
 
 consola.options = {
 	...consola.options,
@@ -28,9 +29,9 @@ export const initCommand = new Command()
 		const namespace = await promptForNamespace()
 		await addCompileStepToPackageJSON({ projectPath, namespace })
 		await adjustTsConfigIfNecessary()
-
+		await addParaglideJsToDependencies()
 		consola.success(
-			"inlang Paraglide-JS has been set up sucessfully. Happy paragliding 🪂\n\nFor questions and feedback, visit https://github.com/inlang/monorepo/discussions.\n"
+			"inlang Paraglide-JS has been set up sucessfully.\n\n1. Run your install command (npm i, yarn install, etc)\n2. Run the build script (npm run build, or similar.)\n 3. Done :) Happy paragliding 🪂\n\n For questions and feedback, visit https://github.com/inlang/monorepo/discussions.\n"
 		)
 	})
 
@@ -46,7 +47,19 @@ export const initializeInlangProject = async () => {
 	}
 }
 
-const promptForNamespace = async (): Promise<string> => {
+export const addParaglideJsToDependencies = async () => {
+	const file = await fs.readFile("./package.json", { encoding: "utf-8" })
+	const stringify = detectJsonFormatting(file)
+	const pkg = JSON.parse(file)
+	if (pkg.dependencies === undefined) {
+		pkg.dependencies = {}
+	}
+	pkg.dependencies["@inlang/paraglide-js"] = version
+	await fs.writeFile("./package.json", stringify(pkg))
+	consola.success("Added @inlang/paraglide-js to the dependencies in package.json.")
+}
+
+export const promptForNamespace = async (): Promise<string> => {
 	const directoryName = process.cwd().split("/").pop()
 
 	consola.info(`You need to select a name for the project.
@@ -149,7 +162,7 @@ export const newProjectTemplate: ProjectSettings = {
 export const checkIfPackageJsonExists = async () => {
 	if (fsSync.existsSync("./package.json") === false) {
 		consola.warn(
-			"No package.json found in the current working directory. Please run 'npm init' first."
+			"No package.json found in the current working directory. Please change the working directory to the directory with a package.json file."
 		)
 		return process.exit(0)
 	}
@@ -182,7 +195,10 @@ export const checkIfUncommittedChanges = async () => {
 	}
 }
 
-const addCompileStepToPackageJSON = async (args: { projectPath: string; namespace: string }) => {
+export const addCompileStepToPackageJSON = async (args: {
+	projectPath: string
+	namespace: string
+}) => {
 	const file = await fs.readFile("./package.json", { encoding: "utf-8" })
 	const stringify = detectJsonFormatting(file)
 	const pkg = JSON.parse(file)
@@ -190,19 +206,9 @@ const addCompileStepToPackageJSON = async (args: { projectPath: string; namespac
 		if (pkg.scripts === undefined) {
 			pkg.scripts = {}
 		}
-		if (args.projectPath !== DEFAULT_PROJECT_PATH) {
-			pkg.scripts.build = `paraglide-js compile --project ${args.projectPath} --namespace ${args.namespace}`
-		}
-	} else if (
-		pkg?.scripts?.build.includes("paraglide-js compile") === false &&
-		args.projectPath !== DEFAULT_PROJECT_PATH
-	) {
+		pkg.scripts.build = `paraglide-js compile --project ${args.projectPath} --namespace ${args.namespace}`
+	} else if (pkg?.scripts?.build.includes("paraglide-js compile") === false) {
 		pkg.scripts.build = `paraglide-js compile --project ${args.projectPath} --namespace ${args.namespace} && ${pkg.scripts.build}`
-	} else if (
-		pkg.scripts.build.includes("paraglide-js compile") === false &&
-		args.projectPath === DEFAULT_PROJECT_PATH
-	) {
-		pkg.scripts.build = `paraglide-js compile --namespace ${args.namespace} && ${pkg.scripts.build}`
 	} else {
 		consola.warn(`The "build" script in the \`package.json\` already contains a "paraglide-js compile" command.
 
@@ -210,7 +216,7 @@ Please add the following command to your build script manually:
 
 \`paraglide-js compile --project ${args.projectPath} --namespace ${args.namespace}\``)
 		const response = await consola.prompt(
-			"Are you sure that the paraglide-js compile command is working?",
+			"Have you added the compile command to your build script?",
 			{
 				type: "confirm",
 				initial: false,

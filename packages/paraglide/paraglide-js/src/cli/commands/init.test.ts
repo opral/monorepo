@@ -1,5 +1,7 @@
 import { test, expect, vi, beforeAll, beforeEach } from "vitest"
 import {
+	addCompileStepToPackageJSON,
+	addParaglideJsToDependencies,
 	adjustTsConfigIfNecessary,
 	checkIfPackageJsonExists,
 	checkIfUncommittedChanges,
@@ -8,12 +10,14 @@ import {
 	findExistingInlangProjectPath,
 	initializeInlangProject,
 	newProjectTemplate,
+	promptForNamespace,
 } from "./init.js"
 import consola from "consola"
 import { describe } from "node:test"
 import fsSync from "node:fs"
 import fs from "node:fs/promises"
 import childProcess from "node:child_process"
+import { version } from "./../../../package.json"
 
 import memfs from "memfs"
 
@@ -39,7 +43,7 @@ beforeEach(() => {
 
 describe("end to end tests", () => {
 	test("it should exit if the user presses CTRL+C", async () => {
-		mockFs({})
+		mockFiles({})
 		mockUserInput([
 			// the first user input is CTRL+C
 			() => process.emit("SIGINT", "SIGINT"),
@@ -62,7 +66,7 @@ describe("initializeInlangProject()", () => {
 	test(
 		"it should execute existingProjectFlow() if a project has been found",
 		async () => {
-			mockFs({
+			mockFiles({
 				"/folder/project.inlang.json": JSON.stringify(newProjectTemplate),
 				"/folder/subfolder": {},
 			})
@@ -77,17 +81,126 @@ describe("initializeInlangProject()", () => {
 		}
 	)
 	test("it should execute newProjectFlow() if not project has been found", async () => {
-		const fs = mockFs({})
+		const { existsSync } = mockFiles({})
 		mockUserInput(["newProject"])
 		const path = await initializeInlangProject()
 		expect(path).toBe("./project.inlang.json")
-		expect(fs.existsSync("./project.inlang.json")).toBe(true)
+		expect(existsSync("./project.inlang.json")).toBe(true)
+	})
+})
+
+describe("addParaglideJsToDependencies()", () => {
+	test("it should add paraglide-js to the dependencies with the latest version", async () => {
+		mockFiles({
+			"/package.json": "{}",
+		})
+		await addParaglideJsToDependencies()
+		expect(fs.writeFile).toHaveBeenCalledOnce()
+		expect(consola.success).toHaveBeenCalledOnce()
+		const packageJson = JSON.parse(
+			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
+		)
+		expect(packageJson.dependencies["@inlang/paraglide-js"]).toBe(version)
+	})
+})
+
+describe("addCompileStepToPackageJSON()", () => {
+	test("if no scripts exist, it should add scripts.build", async () => {
+		mockFiles({
+			"/package.json": "{}",
+		})
+		await addCompileStepToPackageJSON({
+			projectPath: "./project.inlang.json",
+			namespace: "frontend",
+		})
+		expect(fs.writeFile).toHaveBeenCalledOnce()
+		expect(consola.success).toHaveBeenCalledOnce()
+		const packageJson = JSON.parse(
+			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
+		)
+		expect(packageJson.scripts.build).toBe(
+			`paraglide-js compile --project ./project.inlang.json --namespace frontend`
+		)
+	})
+
+	test("if an existing build step exists, it should be preceeded by the paraglide-js compile command", async () => {
+		mockFiles({
+			"/package.json": JSON.stringify({
+				scripts: {
+					build: "some build step",
+				},
+			}),
+		})
+		await addCompileStepToPackageJSON({
+			projectPath: "./project.inlang.json",
+			namespace: "frontend",
+		})
+		expect(fs.writeFile).toHaveBeenCalledOnce()
+		expect(consola.success).toHaveBeenCalledOnce()
+		const packageJson = JSON.parse(
+			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
+		)
+		expect(packageJson.scripts.build).toBe(
+			`paraglide-js compile --project ./project.inlang.json --namespace frontend && some build step`
+		)
+	})
+
+	test("if a paraglide-js compile step already exists, the user should be prompted to update it manually and exit if the user rejects", async () => {
+		mockFiles({
+			"/package.json": JSON.stringify({
+				scripts: {
+					build: "paraglide-js compile --project ./project.inlang.json",
+				},
+			}),
+		})
+		mockUserInput([
+			// user does not want to update the build step
+			false,
+		])
+		await addCompileStepToPackageJSON({
+			projectPath: "./project.inlang.json",
+			namespace: "frontend",
+		})
+		expect(fs.writeFile).not.toHaveBeenCalled()
+		expect(consola.success).not.toHaveBeenCalled()
+		expect(consola.warn).toHaveBeenCalledOnce()
+		expect(process.exit).toHaveBeenCalled()
+	})
+
+	test("if a paraglide-js compile step already exists, the user should be prompted to update it manually and return if they did so", async () => {
+		mockFiles({
+			"/package.json": JSON.stringify({
+				scripts: {
+					build: "paraglide-js compile --project ./project.inlang.json",
+				},
+			}),
+		})
+		mockUserInput([
+			// user does not want to update the build step
+			true,
+		])
+		await addCompileStepToPackageJSON({
+			projectPath: "./project.inlang.json",
+			namespace: "frontend",
+		})
+		expect(fs.writeFile).not.toHaveBeenCalled()
+		expect(consola.success).not.toHaveBeenCalled()
+		expect(consola.warn).toHaveBeenCalledOnce()
+		expect(process.exit).not.toHaveBeenCalled()
+	})
+})
+
+describe("promptForNamespace()", async () => {
+	test("it should trim the input from whitespace", async () => {
+		mockUserInput(["  frontend  "])
+		const namespace = await promptForNamespace()
+		expect(namespace).toBe("frontend")
 	})
 })
 
 describe("existingProjectFlow()", () => {
 	test("if the user selects to proceed with the existing project and the project has no errors, the function should return", async () => {
-		mockFs({
+		mockFiles({
 			"/project.inlang.json": JSON.stringify(newProjectTemplate),
 		})
 		mockUserInput(["useExistingProject"])
@@ -97,7 +210,7 @@ describe("existingProjectFlow()", () => {
 	})
 
 	test("if the user selects new project, the newProjectFlow() should be executed", async () => {
-		const fs = mockFs({
+		const { existsSync } = mockFiles({
 			"/folder/project.inlang.json": JSON.stringify(newProjectTemplate),
 		})
 		mockUserInput(["newProject"])
@@ -106,11 +219,11 @@ describe("existingProjectFlow()", () => {
 		// info that a new project is created
 		expect(consola.info).toHaveBeenCalledOnce()
 		// the newly created project file should exist
-		expect(fs.existsSync("/project.inlang.json")).toBe(true)
+		expect(existsSync("/project.inlang.json")).toBe(true)
 	})
 
 	test("it should exit if the existing project contains errors", async () => {
-		mockFs({
+		mockFiles({
 			"/project.inlang.json": `BROKEN PROJECT FILE`,
 		})
 		mockUserInput(["useExistingProject"])
@@ -124,7 +237,7 @@ describe("createNewProjectFlow()", async () => {
 	test(
 		"it should succeed in creating a new project",
 		async () => {
-			const fs = mockFs({})
+			const { existsSync } = mockFiles({})
 			await createNewProjectFlow()
 			// user is informed that a new project is created
 			expect(consola.info).toHaveBeenCalledOnce()
@@ -133,7 +246,7 @@ describe("createNewProjectFlow()", async () => {
 			// user is informed that the project has successfully been created
 			expect(consola.success).toHaveBeenCalledOnce()
 			// the project file should exist
-			expect(fs.existsSync("/project.inlang.json")).toBe(true)
+			expect(existsSync("/project.inlang.json")).toBe(true)
 		},
 		{
 			// i am testing this while i am on an airplane with slow internet
@@ -141,7 +254,7 @@ describe("createNewProjectFlow()", async () => {
 		}
 	)
 	test("it should exit if the project has errors", async () => {
-		mockFs({})
+		mockFiles({})
 		// invalid project settings file
 		vi.spyOn(JSON, "stringify").mockReturnValue(`{}`)
 		await createNewProjectFlow()
@@ -206,14 +319,14 @@ describe("checkIfUncommittedChanges()", () => {
 
 describe("checkIfPackageJsonExists()", () => {
 	test("it should exit if no package.json has been found", async () => {
-		mockFs({})
+		mockFiles({})
 		await checkIfPackageJsonExists()
 		expect(consola.warn).toHaveBeenCalledOnce()
 		expect(process.exit).toHaveBeenCalledOnce()
 	})
 
 	test("it should not exit if a package.json exists in the current working directory", async () => {
-		mockFs({ "package.json": "" })
+		mockFiles({ "package.json": "" })
 		await checkIfPackageJsonExists()
 		expect(consola.warn).not.toHaveBeenCalled()
 		expect(process.exit).not.toHaveBeenCalled()
@@ -222,14 +335,14 @@ describe("checkIfPackageJsonExists()", () => {
 
 describe("findExistingInlangProjectPath()", () => {
 	test("it should return undefined if no project.inlang.json has been found", async () => {
-		mockFs({})
+		mockFiles({})
 		const path = await findExistingInlangProjectPath()
 		expect(path).toBeUndefined()
 	})
 
 	test("it find a project in the current working directory", async () => {
 		process.cwd = () => "/"
-		mockFs({ "project.inlang.json": "{}" })
+		mockFiles({ "project.inlang.json": "{}" })
 		const path = await findExistingInlangProjectPath()
 		expect(path).toBe("./project.inlang.json")
 	})
@@ -237,7 +350,7 @@ describe("findExistingInlangProjectPath()", () => {
 	test("it should find a project in a parent directory", async () => {
 		process.cwd = () => "/nested/"
 
-		mockFs({
+		mockFiles({
 			"/project.inlang.json": "{}",
 			"/nested/": {},
 		})
@@ -247,7 +360,7 @@ describe("findExistingInlangProjectPath()", () => {
 
 	test("it should find a project in a parent parent directory", async () => {
 		process.cwd = () => "/nested/nested/"
-		mockFs({
+		mockFiles({
 			"/project.inlang.json": "{}",
 			"/nested/nested/": {},
 		})
@@ -258,7 +371,7 @@ describe("findExistingInlangProjectPath()", () => {
 
 describe("adjustTsConfigIfNecessary()", () => {
 	test("it should return if no tsconfig.json exists", async () => {
-		mockFs({})
+		mockFiles({})
 		const result = await adjustTsConfigIfNecessary()
 		// no tsconfig exists, immediately return
 		expect(result).toBeUndefined()
@@ -269,7 +382,7 @@ describe("adjustTsConfigIfNecessary()", () => {
 	})
 
 	test("it should warn if the extended from tsconfig can't be read", async () => {
-		mockFs({
+		mockFiles({
 			"/tsconfig.json": `{ 
 				"extends": "./non-existend.json",
 				"compilerOptions": {
@@ -284,7 +397,7 @@ describe("adjustTsConfigIfNecessary()", () => {
 	})
 
 	test("it should detect if the extended from tsconfig already set the moduleResolution to bundler", async () => {
-		mockFs({
+		mockFiles({
 			"/tsconfig.base.json": `{
 				"compilerOptions": {
 					"moduleResolution": "Bundler"
@@ -300,7 +413,7 @@ describe("adjustTsConfigIfNecessary()", () => {
 	})
 
 	test("it should prompt the user to set the moduleResolution to bundler", async () => {
-		mockFs({
+		mockFiles({
 			"/tsconfig.json": `{}`,
 		})
 
@@ -333,7 +446,7 @@ describe("adjustTsConfigIfNecessary()", () => {
 	})
 
 	test("it should keep prompting the user to set the moduleResolution to bundler if the moduleResolution has not been set", async () => {
-		mockFs({
+		mockFiles({
 			"/tsconfig.json": `{}`,
 		})
 
@@ -426,7 +539,7 @@ const mockUserInput = (testUserInput: any[]) => {
 	})
 }
 
-const mockFs = (files: memfs.NestedDirectoryJSON) => {
+const mockFiles = (files: memfs.NestedDirectoryJSON) => {
 	const _memfs = memfs.createFsFromVolume(memfs.Volume.fromNestedJSON(files))
 	vi.spyOn(fsSync, "existsSync").mockImplementation(_memfs.existsSync)
 	for (const prop in fs) {
@@ -435,7 +548,7 @@ const mockFs = (files: memfs.NestedDirectoryJSON) => {
 		// @ts-ignore - memfs has the same interface as node:fs/promises
 		vi.spyOn(fs, prop).mockImplementation(_memfs.promises[prop])
 	}
-	return _memfs
+	return { existsSync: _memfs.existsSync }
 }
 
 
