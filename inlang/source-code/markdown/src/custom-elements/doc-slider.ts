@@ -36,7 +36,7 @@ export class DocSlider extends LitElement {
 		return css`
 			:host {
 				--item-margin: 8px;
-				--item-offset: 0px;
+				--item-offset: 7px;
 				--item-width: 348px;
 				display: flex;
 				flex-direction: row;
@@ -53,6 +53,9 @@ export class DocSlider extends LitElement {
 				background-color: #e2e8f0;
 				width: 40px;
 				height: 40px;
+				aspect-ratio: 1;
+				max-width: 40px;
+				max-height: 40px;
 				border-radius: 50%;
 				display: flex;
 				align-items: center;
@@ -65,11 +68,11 @@ export class DocSlider extends LitElement {
 			}
 
 			.btn-next {
-				right: 0;
+				right: -20px;
 			}
 
 			.btn-prev {
-				left: 0;
+				left: -20px;
 			}
 
 			.btn-next:hover,
@@ -95,7 +98,8 @@ export class DocSlider extends LitElement {
 				flex-direction: row;
 				align-items: center;
 				justify-content: center;
-				width: 100%;
+				width: calc(100% - 40px);
+				margin: 0 auto;
 			}
 
 			article {
