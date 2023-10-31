@@ -6,7 +6,6 @@ import {
 	PluginSaveMessagesFunctionAlreadyDefinedError,
 	PluginHasInvalidIdError,
 	PluginReturnedInvalidCustomApiError,
-	PluginHasInvalidSchemaError,
 	PluginsDoNotProvideLoadOrSaveMessagesError,
 } from "./errors.js"
 import type { Plugin } from "@inlang/plugin"
