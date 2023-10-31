@@ -1,9 +1,9 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
-	"id": "plugin.inlang.paraglide-js",
+	"id": "plugin.inlang.mFunctionMatcher",
 	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/assets/icon.png",
 	"displayName": {
-		"en": "paraglideJS plugin"
+		"en": "m-function-matcher Plugin"
 	},
 	"description": {
 		"en": "Enables the inlang VSCode extension to work with paraglide"
