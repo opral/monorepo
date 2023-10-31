@@ -136,10 +136,13 @@ export const Gitfloat = () => {
 	}
 
 	const pullrequestUrl = () => {
-		return `https://github.com/${githubRepositoryInformation()?.parent?.fullName
-			}/compare/${currentBranch()}...${routeParams().owner}:${routeParams().repository
-			}:${currentBranch()}?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20conducted%20here%0A%0APreview%20the%20messages%20on%20https%3A%2F%2Finlang.com%2Fgithub.com%2F${(currentPageContext.routeParams as EditorRouteParams).owner
-			}%2F${(currentPageContext.routeParams as EditorRouteParams).repository}%20.`
+		return `https://github.com/${
+			githubRepositoryInformation()?.parent?.fullName
+		}/compare/${currentBranch()}...${routeParams().owner}:${
+			routeParams().repository
+		}:${currentBranch()}?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20conducted%20here%0A%0APreview%20the%20messages%20on%20https%3A%2F%2Finlang.com%2Fgithub.com%2F${
+			(currentPageContext.routeParams as EditorRouteParams).owner
+		}%2F${(currentPageContext.routeParams as EditorRouteParams).repository}%20.`
 	}
 
 	interface GitfloatData {
@@ -287,12 +290,12 @@ export const Gitfloat = () => {
 								{data[gitState()].text}
 							</p>
 							<sl-button
-								prop: size="small"
+								prop:size="small"
 								onClick={() => data[gitState()].onClick()}
-								prop: href={data[gitState()].href === "pullrequest" ? pullrequestUrl() : undefined}
-								prop: target="_blank"
-								prop: loading={isLoading() || gitState() === "loading"}
-								prop: disabled={localChanges() === 0 && gitState() === "hasChanges"}
+								prop:href={data[gitState()].href === "pullrequest" ? pullrequestUrl() : undefined}
+								prop:target="_blank"
+								prop:loading={isLoading() || gitState() === "loading"}
+								prop:disabled={localChanges() === 0 && gitState() === "hasChanges"}
 								class={"on-inverted " + (gitState() === "pullrequest" && "grow")}
 							>
 								{data[gitState()].buttontext}

@@ -38,10 +38,10 @@ export async function render(pageContext: PageContextRenderer): Promise<unknown>
 	const tags: any[] = []
 
 	const renderedPage = renderToString(() => (
-				<MetaProvider tags={tags}>
-					<Root page={pageContext.Page} pageProps={pageContext.pageProps} />
-				</MetaProvider>
-		  ))
+		<MetaProvider tags={tags}>
+			<Root page={pageContext.Page} pageProps={pageContext.pageProps} />
+		</MetaProvider>
+	))
 
 	return escapeInject`<!DOCTYPE html>
     <html lang="en" class="min-h-screen min-w-screen overflow-x-hidden">

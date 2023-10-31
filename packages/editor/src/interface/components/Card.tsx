@@ -57,7 +57,7 @@ export default function Card(props: { item: any; displayName: string }) {
 								props.item.id.split(".")[0] === "messageLintRule"
 							}
 						>
-							<sl-tooltip prop: content={`Install`}>
+							<sl-tooltip prop:content={`Install`}>
 								<a
 									onClick={(e) => {
 										e.stopPropagation()
@@ -245,8 +245,8 @@ export function NoResultsCard(props: { category: string }) {
 							class={
 								"border-none p-0 md:w-[312px] w-full " + (loading() ? "pointer-events-none" : "")
 							}
-							prop: size={"medium"}
-							prop: placeholder={m.marketplace_grid_subscribe_placeholder()}
+							prop:size={"medium"}
+							prop:placeholder={m.marketplace_grid_subscribe_placeholder()}
 							// @ts-ignore
 							value={email()}
 							onInput={(event) => {

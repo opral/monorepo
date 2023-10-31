@@ -71,7 +71,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 				when={filteredId() === ""}
 				fallback={
 					<div class="flex gap-2 items-center">
-						<sl-button prop: size="small" onClick={() => setFilteredId("")}>
+						<sl-button prop:size="small" onClick={() => setFilteredId("")}>
 							{/* @ts-ignore */}
 							<IconArrowLeft slot="prefix" />
 							Back to all messages
@@ -99,19 +99,19 @@ export const ListHeader = (props: ListHeaderProps) => {
 								}
 							>
 								<sl-tooltip
-									prop: content={
+									prop:content={
 										typeof getLintRule(lintRule)?.description === "object"
 											? // @ts-ignore
-											getLintRule(lintRule)?.description.en
+											  getLintRule(lintRule)?.description.en
 											: getLintRule(lintRule)?.description
 									}
-									prop: placement="bottom"
-									prop: trigger="hover"
+									prop:placement="bottom"
+									prop:trigger="hover"
 									class="small"
 									style={{ "--show-delay": "1s" }}
 								>
 									<sl-button
-										prop: size="small"
+										prop:size="small"
 										class={
 											filteredMessageLintRules()?.includes(lintRule || "")
 												? getLintRule(lintRule)!.level === "warning"
@@ -153,7 +153,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 											<div class="text-xs text-on-surface-variant font-medium">
 												{typeof getLintRule(lintRule)?.displayName === "object"
 													? // @ts-ignore
-													getLintRule(lintRule)?.displayName.en
+													  getLintRule(lintRule)?.displayName.en
 													: getLintRule(lintRule)?.displayName}
 											</div>
 										</div>
@@ -171,15 +171,15 @@ export const ListHeader = (props: ListHeaderProps) => {
 						isVisible={tourStep() === "missing-lint-rules"}
 					>
 						<sl-tooltip
-							prop: content={
+							prop:content={
 								"Install lint rules from the marketplace. They will help you write better translations."
 							}
-							prop: placement="bottom"
-							prop: trigger="hover"
+							prop:placement="bottom"
+							prop:trigger="hover"
 							style={{ "--show-delay": "1s" }}
 						>
 							<sl-button
-								prop: size="small"
+								prop:size="small"
 								// @ts-ignore
 								onClick={() => navigate("/")}
 							>
