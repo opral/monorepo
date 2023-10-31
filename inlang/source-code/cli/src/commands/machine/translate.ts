@@ -5,10 +5,11 @@ import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { log } from "../../utilities/log.js"
 import type { InlangProject } from "@inlang/sdk"
 import prompts from "prompts"
+import { projectOption } from "../../utilities/globalFlags.js"
 
 export const translate = new Command()
 	.command("translate")
-	.requiredOption("--project <path>", "Path to the project settings file.", "./project.inlang.json")
+	.requiredOption(projectOption.flags, projectOption.description, projectOption.defaultValue)
 	.option("-f, --force", "Force machine translation and skip the confirmation prompt.", false)
 	.description("Machine translate all resources.")
 	.action(async (args: { force: boolean; project: string }) => {

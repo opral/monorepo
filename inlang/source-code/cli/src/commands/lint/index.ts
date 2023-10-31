@@ -3,11 +3,12 @@ import Table from "cli-table3"
 import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { log } from "../../utilities/log.js"
 import type { InlangProject, MessageLintReport } from "@inlang/sdk"
+import { projectOption } from "../../utilities/globalFlags.js"
 
 export const lint = new Command()
 	.command("lint")
 	.description("Commands for linting translations.")
-	.requiredOption("--project <path>", "Path to the project settings file.", "./project.inlang.json")
+	.requiredOption(projectOption.flags, projectOption.description, projectOption.defaultValue)
 	.option("--no-fail", "Disable throwing an error if linting fails.", false)
 	.action(async (args: { project: string }) => {
 		const project = await getInlangProject({ projectPath: args.project })
