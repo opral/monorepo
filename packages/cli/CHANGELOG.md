@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 1.17.0
+
+### Minor Changes
+
+- 561a03ebe: add global `--project` flag
+
 ## 1.16.0
 
 ### Minor Changes
