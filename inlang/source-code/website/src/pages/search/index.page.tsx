@@ -8,7 +8,7 @@ import { Meta, Title } from "@solidjs/meta"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import SvelteHeader from "#src/interface/marketplace/categoryHeaders/application/svelte.jsx"
 import GenericHeader from "#src/interface/marketplace/categoryHeaders/application/generic.jsx"
-import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
+import * as m from "@inlang/paraglide-js/website/messages"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 

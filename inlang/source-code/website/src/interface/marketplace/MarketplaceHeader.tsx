@@ -7,7 +7,7 @@ import IconTwitter from "~icons/cib/twitter"
 import IconGithub from "~icons/cib/github"
 import IconDiscord from "~icons/cib/discord"
 import Link from "#src/renderer/Link.jsx"
-import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
+import * as m from "@inlang/paraglide-js/website/messages"
 import { LanguagePicker } from "#src/pages/index/LanguagePicker.jsx"
 
 const MarketplaceHeader = () => {

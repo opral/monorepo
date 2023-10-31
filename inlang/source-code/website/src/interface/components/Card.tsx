@@ -6,7 +6,7 @@ import { showToast } from "./Toast.jsx"
 import { rpc } from "@inlang/rpc"
 import { Button } from "#src/pages/index/components/Button.jsx"
 import Link from "#src/renderer/Link.jsx"
-import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
+import * as m from "@inlang/paraglide-js/website/messages"
 import { currentPageContext } from "#src/renderer/state.js"
 
 export default function Card(props: { item: any; displayName: string }) {
@@ -105,6 +105,17 @@ export default function Card(props: { item: any; displayName: string }) {
 							<p class="text-sm line-clamp-2 text-surface-500 transition-colors group-hover:text-surface-600">
 								{props.item.description.en}
 							</p>
+						</div>
+						<div class="flex items-center gap-2">
+							<Show when={props.item.publisherIcon}>
+								<img
+									class="w-5 h-5 rounded-full object-cover object-center"
+									src={props.item.publisherIcon}
+								/>
+								<p class="text-sm text-surface-500 group-hover:text-surface-600 transition-colors">
+									{props.item.publisherName}
+								</p>
+							</Show>
 						</div>
 					</Match>
 				</Switch>

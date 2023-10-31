@@ -1,5 +1,5 @@
 import { For } from "solid-js"
-import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
+import * as m from "@inlang/paraglide-js/website/messages"
 import Card from "#src/interface/components/Card.jsx"
 import { registry } from "@inlang/marketplace-registry"
 
