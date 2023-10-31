@@ -4,7 +4,7 @@ import { Chip } from "#src/interface/components/Chip.jsx"
 import { colorForTypeOf, typeOfIdToTitle } from "#src/pages/m/utilities.js"
 import { Button } from "../components/Button.jsx"
 import Link from "#src/renderer/Link.jsx"
-import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
+import * as m from "@inlang/paraglide-js/website/messages"
 
 const featuredArray = [
 	"library.inlang.paraglideJs",
