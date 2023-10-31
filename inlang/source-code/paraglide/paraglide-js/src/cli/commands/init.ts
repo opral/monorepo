@@ -30,8 +30,8 @@ export const initCommand = new Command()
 		await addCompileStepToPackageJSON({ projectPath, namespace })
 		await adjustTsConfigIfNecessary()
 		await addParaglideJsToDependencies()
-		consola.success(
-			"inlang Paraglide-JS has been set up sucessfully.\n\n1. Run your install command (npm i, yarn install, etc)\n2. Run the build script (npm run build, or similar.)\n 3. Done :) Happy paragliding 🪂\n\n For questions and feedback, visit https://github.com/inlang/monorepo/discussions.\n"
+		consola.box(
+			"inlang Paraglide-JS has been set up sucessfully.\n\n1. Run your install command (npm i, yarn install, etc)\n2. Run the build script (npm run build, or similar.)\n3. Done :) Happy paragliding 🪂\n\n For questions and feedback, visit https://github.com/inlang/monorepo/discussions.\n"
 		)
 	})
 
