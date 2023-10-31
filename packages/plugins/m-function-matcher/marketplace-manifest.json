@@ -3,7 +3,7 @@
 	"id": "plugin.inlang.mFunctionMatcher",
 	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/m-function-matcher/assets/m.png",
 	"displayName": {
-		"en": "m-function-matcher Plugin"
+		"en": "m-function-matcher"
 	},
 	"description": {
 		"en": "Enables the inlang VSCode extension to work with paraglide"
