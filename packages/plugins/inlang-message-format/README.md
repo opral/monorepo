@@ -3,31 +3,17 @@
 This plugin stores messages in the inlang message format. 
 
 - [x] supports all inlang messages features (variants, markup, etc.)
-- [x] the simplest inlang storage plugin (because the messages are stored in the inlang format)
-- [x] typesafety for the messages file
+- [x] typesafe
 
 # When to use
 
 **The message format is optimized to be edited with the [ide-xtension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension)**
 
-Use the inlang message format plugin if you have no previous translation files, or you want to migrate to the inlang format for a better experience.
+Use the inlang message format plugin if you have no previous translation files, or you want to migrate to the inlang format for a better experience. If you want to edit messages manually, the [JSON translation files plugin](https://inlang.com/m/ig84ng0o) is a better choice.
 
 # Settings
 
-```typescript
-const PluginSettings = object({
-	/**
-	 * The path to the JSON file where the messages are stored.
-	 *
-	 * - Must start with "./".
-	 * - Must end with ".json".
-	 *
-	 * @example "./messages.json"
-	 * @example "./src/messages.json"
-	 */
-	filePath: string([startsWith("./"), endsWith(".json")]),
-})
-```
+`filePath`: The path where the messages are stored.
 
 # Architecture 
 
