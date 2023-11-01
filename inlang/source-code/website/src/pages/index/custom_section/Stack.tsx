@@ -51,7 +51,7 @@ const Stack = () => {
 				<div class="flex gap-2 overflow-x-scroll hide-scrollbar">
 					<For each={getSubCategies}>
 						{(link) => (
-							<Link href={"/search/?q=" + link.param} class="flex-grow">
+							<Link href={"/search?q=" + link.param} class="flex-grow">
 								<div
 									class={
 										(currentPageContext.urlParsed.searchOriginal?.includes(link.param)
