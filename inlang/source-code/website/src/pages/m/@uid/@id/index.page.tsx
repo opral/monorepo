@@ -230,7 +230,7 @@ export function Page(props: PageProps) {
 												{/* @ts-ignore */}
 												<img
 													src={props.manifest.gallery[0]}
-													class="max-w-sm mr-auto rounded-lg border border-surface-100 shadow-md shadow-on-background/[0.02]"
+													class="max-w-sm mx-auto rounded-lg border border-surface-100 shadow-md shadow-on-background/[0.02]"
 												/>
 											</div>
 										</Show>
