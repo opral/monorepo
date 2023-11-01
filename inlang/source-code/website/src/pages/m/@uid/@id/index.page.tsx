@@ -205,13 +205,34 @@ export function Page(props: PageProps) {
 												/>
 											</Button>
 										</div>
-										<Show when={props.manifest.gallery && props.manifest.gallery.length > 1}>
+										<Show
+											when={
+												props.manifest.gallery &&
+												props.manifest.gallery.length > 1 &&
+												!props.manifest.id.includes("messageLintRule")
+											}
+										>
 											<OnClient>
 												<div class="pt-12">
 													{/* @ts-ignore */}
 													<doc-slider items={props.manifest.gallery} />
 												</div>
 											</OnClient>
+										</Show>
+										<Show
+											when={
+												props.manifest.gallery &&
+												props.manifest.gallery.length === 1 &&
+												props.manifest.id.includes("messageLintRule")
+											}
+										>
+											<div class="pt-12">
+												{/* @ts-ignore */}
+												<img
+													src={props.manifest.gallery[0]}
+													class="max-w-sm mr-auto rounded-lg border border-surface-100 shadow-md shadow-on-background/[0.02]"
+												/>
+											</div>
 										</Show>
 									</div>
 									<div class="w-full">
