@@ -25,6 +25,7 @@
 		"@lix-js/fs": "*",
 		"@octokit/types": "11.1.0",
 		"isomorphic-git": "1.24.5",
+		"path-browserify": "0.0.1",
 		"octokit": "3.1.0",
 		"solid-js": "1.7.11"
 	},

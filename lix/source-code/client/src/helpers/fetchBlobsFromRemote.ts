@@ -14,19 +14,20 @@ export async function fetchBlobsFromRemote(args: {
     http: any, 
     oids: string[]
 }) {
-    await fetch({
-        fs: args.fs,
-        gitdir: args.gitdir,
-        // this time we fetch with blobs but we skip all objects but the one that was requested by fs
-        http: httpWithLazyInjection(args.http, { 
-            noneBlobFilter: false, 
-            // we don't need to override the haves any more since adding the capabilities 
-            // allow-tip-sha1-in-want allow-reachable-sha1-in-want to the request enable us to request objects explicetly
-            overrideHaves: undefined, 
-            overrideWants: args.oids,
-        }), 
-        depth: 1, 
-        singleBranch: true, 
-        tags: false,
-    });
+    
+		return fetch({
+			fs: args.fs,
+			gitdir: args.gitdir,
+			// this time we fetch with blobs but we skip all objects but the one that was requested by fs
+			http: httpWithLazyInjection(args.http, {
+				noneBlobFilter: false,
+				// we don't need to override the haves any more since adding the capabilities
+				// allow-tip-sha1-in-want allow-reachable-sha1-in-want to the request enable us to request objects explicetly
+				overrideHaves: undefined,
+				overrideWants: args.oids,
+			}),
+			depth: 1,
+			singleBranch: true,
+			tags: false,
+		})
 }

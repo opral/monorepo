@@ -11,8 +11,6 @@ export type EditorRouteParams = {
 export type EditorSearchParams = {
 	/**
 	 * the current branch
-	 *
-	 * not implemented yet see https://github.com/inlang/monorepo/discussions/166
 	 */
-	// branch?: string;
+	branch?: string
 }

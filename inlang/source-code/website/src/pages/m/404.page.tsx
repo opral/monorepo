@@ -1,5 +1,6 @@
-import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
+import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import { Button } from "#src/pages/index/components/Button.jsx"
+import Link from "#src/renderer/Link.jsx"
 import { Meta, Title } from "@solidjs/meta"
 
 export function Page() {
@@ -9,7 +10,7 @@ export function Page() {
 			<Meta name="description" content="Marketplace item not found" />
 			<Meta name="robots" content="noindex" />
 			<MarketplaceLayout>
-				<div class="relative max-w-screen-xl w-full mx-auto bg-background">
+				<div class="relative max-w-screen-xl w-full mx-auto">
 					<div class="invisible xl:visible absolute top-0 left-0 h-full w-full z-0">
 						<div class="flex w-full h-full justify-between mx-auto items-end">
 							<div class="h-full w-[2px] bg-surface-400 opacity-[7%]" />
@@ -27,13 +28,13 @@ export function Page() {
 							<p class="text-lg text-surface-600 leading-relaxed mx-auto text-center mb-4">
 								Seems like the item you are looking for does not exist. This is a bug? Please report
 								it on our
-								<a
+								<Link
 									class="text-primary hover:text-hover-primary font-semibold ml-1.5"
 									href="https://discord.gg/gdMPPWy57R"
 									target="_blank"
 								>
 									Discord
-								</a>
+								</Link>
 								.
 							</p>
 							<Button href="/" type="primary">

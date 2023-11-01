@@ -2,9 +2,9 @@ import { createSignal } from "solid-js"
 import { navigate } from "vite-plugin-ssr/client/router"
 import { z } from "zod"
 import { Meta, Title } from "@solidjs/meta"
-import { CommunityProjects } from "#src/components/editor/CommunityProjects.jsx"
+import { CommunityProjects } from "#src/interface/editor/CommunityProjects.jsx"
 import { Button } from "../index/components/Button.jsx"
-import EditorLayout from "#src/components/editor/EditorLayout.jsx"
+import EditorLayout from "#src/interface/editor/EditorLayout.jsx"
 
 export function Page() {
 	/** is not reactive because window is not reactive */
@@ -123,7 +123,7 @@ export function Page() {
 					</form>
 
 					<div class="pt-3">
-						<Button type="text" href="/marketplace/app.inlang.editor">
+						<Button type="text" href="/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang">
 							How to get started?
 						</Button>
 					</div>

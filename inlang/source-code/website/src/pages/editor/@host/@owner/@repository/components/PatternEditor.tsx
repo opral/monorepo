@@ -3,7 +3,7 @@ import { createTiptapEditor, useEditorJSON } from "solid-tiptap"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
-import { showToast } from "#src/components/Toast.jsx"
+import { showToast } from "#src/interface/components/Toast.jsx"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import { type Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
 import { telemetryBrowser } from "@inlang/telemetry"
@@ -21,6 +21,7 @@ import {
 	Pattern,
 	type MessageLintReport,
 } from "@inlang/sdk"
+import Link from "#src/renderer/Link.jsx"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -361,7 +362,7 @@ export function PatternEditor(props: {
 			onClick={() => editor().chain().focus()}
 			onFocusIn={() => setIsLineItemFocused(true)}
 			class={
-				"flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border first:mt-0 -mt-[1px] border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus-within:relative focus-within:border-primary focus-within:ring-[3px] focus-within:ring-hover-primary/50 "
+				"flex flex-col sm:flex-row justify-start items-start w-full gap-2 sm:gap-5 px-4 py-1.5 bg-background border first:mt-0 -mt-[1px] border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus-within:relative focus-within:border-primary focus-within:ring-[3px] focus-within:ring-hover-primary/50 "
 			}
 		>
 			<div class="flex justify-start items-start gap-2 py-[5px]">
@@ -380,7 +381,7 @@ export function PatternEditor(props: {
 			{/* tiptap floating menu */}
 			<div
 				id="parent"
-				class="w-full text-sm p-[6px] focus-within:border-none focus-within:ring-0 focus-within:outline-none"
+				class="w-full text-sm sm:p-[6px] focus-within:border-none focus-within:ring-0 focus-within:outline-none"
 			>
 				<FloatingMenu variableReferences={variableReferences()} editor={editor} />
 
@@ -401,7 +402,7 @@ export function PatternEditor(props: {
 			</div>
 
 			{/* action bar */}
-			<div class="w-[164px] h-8 flex justify-end items-center gap-2">
+			<div class="w-full sm:w-[164px] h-8 flex justify-end items-center gap-2">
 				<div class="flex items-center justify-end gap-2">
 					<Show
 						when={
@@ -485,13 +486,13 @@ export function PatternEditor(props: {
 								{'" '}
 								yet. Make sure that placeholders between the reference message and translations
 								match. For more information read{" "}
-								<a
+								<Link
 									href="https://github.com/orgs/inlang/discussions/228"
 									target="_blank"
 									class="link link-primary"
 								>
 									#228
-								</a>
+								</Link>
 								.
 							</li>
 						</ol>

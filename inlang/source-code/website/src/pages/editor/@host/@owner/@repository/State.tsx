@@ -10,6 +10,7 @@ import {
 	type Resource,
 	type Setter,
 	useContext,
+	type Accessor,
 } from "solid-js"
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
 import type { LocalStorageSchema } from "#src/services/local-storage/index.js"
@@ -27,7 +28,6 @@ import {
 } from "@inlang/sdk"
 import { parseOrigin, telemetryBrowser } from "@inlang/telemetry"
 import type { Result } from "@inlang/result"
-import { onSignOut } from "#src/services/auth/index.js"
 
 type EditorStateSchema = {
 	/**
@@ -39,6 +39,10 @@ type EditorStateSchema = {
 	 * The current branch.
 	 */
 	currentBranch: Resource<string | undefined>
+	/**
+	 * The branch names of current repo.
+	 */
+	branchNames: Resource<string[] | undefined>
 	/**
 	 * Additional information about a repository provided by GitHub.
 	 */
@@ -93,6 +97,9 @@ type EditorStateSchema = {
 
 	tourStep: () => TourStepId
 	setTourStep: Setter<TourStepId>
+
+	setActiveBranch: Setter<string | undefined>
+	activeBranch: Accessor<string | undefined>
 
 	/**
 	 * FilterLanguages show or hide the different messages.
@@ -196,41 +203,59 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		setSearchParams({ key: "lint", value: filteredMessageLintRules() })
 	})
 
-	const [localStorage, setLocalStorage] = useLocalStorage() ?? []
-
-	const [repo] = createResource(
-		() => {
-			return routeParams()
-		},
-		async ({ host, owner, repository }) => {
-			// open the repository
-
-			if (host && owner && repository) {
-				const newRepo = await openRepository(
-					`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${host}/${owner}/${repository}`,
-					{
-						nodeishFs: createNodeishMemoryFs(),
-						auth: browserAuth,
-					}
-				)
-				setLastPullTime(new Date())
-				return newRepo
-			} else {
-				return undefined
-			}
-		}
-	)
+	const [localStorage] = useLocalStorage() ?? []
 
 	// get lix errors
 	const [lixErrors, setLixErrors] = createSignal<ReturnType<Repository["errors"]>>([])
 	createEffect(() => {
+		// reset errors to empty on repo changes
+		setLixErrors([])
+
 		repo()?.errors.subscribe((errors) => {
 			setLixErrors(errors)
 		})
 	})
 
+	const [activeBranch, setActiveBranch] = createSignal<string | undefined>(
+		params.get("branch") || undefined
+	)
+	createEffect(() => {
+		const branch = activeBranch()
+		if (branch) {
+			setSearchParams({ key: "branch", value: branch })
+		}
+	})
+	const [repo] = createResource(
+		() => {
+			return { routeParams: routeParams(), user: localStorage.user, branch: activeBranch() }
+		},
+		async ({ routeParams: { host, owner, repository }, branch }) => {
+			if (host && owner && repository) {
+				try {
+					const newRepo = await openRepository(
+						`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${host}/${owner}/${repository}`,
+						{
+							nodeishFs: createNodeishMemoryFs(),
+							auth: browserAuth,
+							branch,
+						}
+					)
+					setLastPullTime(new Date())
+					// Invalidate the project while we switch branches
+					setProject(undefined)
+					return newRepo
+				} catch (err) {
+					console.error(err)
+					return
+				}
+			} else {
+				return
+			}
+		}
+	)
+
 	// open the inlang project and store it in a resource
-	const [project] = createResource(
+	const [project, { mutate: setProject }] = createResource(
 		() => {
 			return { newRepo: repo(), lixErrors: lixErrors() }
 		},
@@ -298,52 +323,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	})
 
-	const [userIsCollaborator] = createResource(
-		/**
-		 * createResource is not reacting to changes like: "false","Null", or "undefined".
-		 * Hence, a string needs to be passed to the fetch of the resource.
-		 */
-		() => {
-			// do not fetch if no owner or repository is given
-			// can happen if the user navigated away from the editor
-			if (
-				currentPageContext.routeParams.owner === undefined ||
-				currentPageContext.routeParams.repository === undefined
-			) {
-				return false
-			}
-			return {
-				user: localStorage?.user ?? "not logged in",
-				routeParams: currentPageContext.routeParams as EditorRouteParams,
-				currentRepo: repo(),
-			}
-		},
-		async (args) => {
-			// user is not logged in, see the returned object above
-			if (typeof args.user === "string") {
-				return false
-			}
-			try {
-				if (args.currentRepo) {
-					return await args.currentRepo
-						.isCollaborator({ username: args.user.username })
-						.catch((err: any) => {
-							if (err.status === 401) {
-								onSignOut({ setLocalStorage })
-							}
-							return false
-						})
-				} else {
-					return false
-				}
-			} catch (error) {
-				// the user is not a collaborator, hence the request will fail,
-				// FIXME: is this still required? isCollaborator should now return false instead of failing
-				return false
-			}
-		}
-	)
-
 	const [githubRepositoryInformation] = createResource(
 		() => {
 			if (
@@ -359,18 +338,71 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				routeParams: routeParams(),
 			}
 		},
-		async () => await repo()?.getMeta()
+		async () => {
+			const repoMeta = await repo()?.getMeta()
+			return repoMeta
+		}
 	)
 
 	const [currentBranch] = createResource(
 		() => {
 			if (lixErrors().length > 0 || repo() === undefined) {
+				return {}
+			} else {
+				return { repo: repo() }
+			}
+		},
+		async (args) => {
+			return await args.repo?.getCurrentBranch()
+		}
+	)
+
+	const [branchNames] = createResource(
+		() => {
+			if (lixErrors().length > 0 || repo() === undefined) {
+				return {}
+			} else {
+				return { repo: repo() }
+			}
+		},
+		async (args) => {
+			return await args.repo?.getBranches()
+		}
+	)
+
+	/**
+	 * createResource is not reacting to changes like: "false","Null", or "undefined".
+	 * Hence, a string needs to be passed to the fetch of the resource.
+	 */
+	const [userIsCollaborator] = createResource(
+		() => {
+			// do not fetch if no owner or repository is given
+			// can happen if the user navigated away from the editor
+			// setIsCollaborator(repoMeta?.permissions.push)
+			if (
+				currentPageContext.routeParams.owner === undefined ||
+				currentPageContext.routeParams.repository === undefined
+			) {
 				return false
 			}
-			return true
+			return {
+				user: localStorage?.user ?? "not logged in",
+				routeParams: currentPageContext.routeParams as EditorRouteParams,
+				currentRepo: repo(),
+				repoMeta: githubRepositoryInformation(),
+			}
 		},
-		async () => {
-			return await repo()?.getCurrentBranch()
+		(args) => {
+			// user is not logged in, see the returned object above
+			if (
+				typeof args.repoMeta === "undefined" ||
+				typeof args.user === "string" ||
+				"error" in args.repoMeta
+			) {
+				return false
+			}
+
+			return args.repoMeta?.permissions?.push || false
 		}
 	)
 
@@ -380,6 +412,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				{
 					repo: repo,
 					currentBranch,
+					branchNames,
 					githubRepositoryInformation,
 					routeParams,
 					searchParams,
@@ -399,6 +432,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setFilteredLanguageTags,
 					filteredMessageLintRules,
 					setFilteredMessageLintRules,
+					setActiveBranch,
+					activeBranch,
 					localChanges,
 					setLocalChanges,
 					userIsCollaborator,
@@ -421,6 +456,9 @@ export class PullException extends Error {
 
 export class PushException extends Error {
 	readonly #id = "PushException"
+	data?: {
+		statusCode?: number
+	}
 }
 
 export class UnknownException extends Error {
@@ -439,7 +477,7 @@ export async function pushChanges(args: {
 	user: NonNullable<LocalStorageSchema["user"]>
 	setFsChange: (date: Date) => void
 	setLastPullTime: (date: Date) => void
-}): Promise<Result<true, PushException | PullException>> {
+}): Promise<Result<true, PushException>> {
 	// stage all changes
 	const status = await args.repo.statusMatrix({
 		filter: (f: any) =>
@@ -457,47 +495,47 @@ export async function pushChanges(args: {
 			// added files
 			(row[2] === 2 && row[3] === 0)
 	)
-	if (filesWithUncommittedChanges.length === 0) {
-		return { error: new PushException("No changes to push.") }
+	if (filesWithUncommittedChanges.length > 0) {
+		// add all changes
+		for (const file of filesWithUncommittedChanges) {
+			await args.repo.add({ filepath: file[0] })
+		}
+		// commit changes
+		await args.repo.commit({
+			author: {
+				name: args.user.username,
+				email: args.user.email,
+			},
+			message: "inlang: update translations",
+		})
 	}
-	// add all changes
-	for (const file of filesWithUncommittedChanges) {
-		await args.repo.add({ filepath: file[0] })
-	}
-	// commit changes
-	await args.repo.commit({
-		author: {
-			name: args.user.username,
-			email: args.user.email,
-		},
-		message: "inlang: update translations",
-	})
+
 	// triggering a side effect here to trigger a re-render
 	// of components that depends on fs
 	args.setFsChange(new Date())
 
 	// TODO #1459 start - uncomment to push changes to repo
 	// push changes
-	// try {
-	// 	const push = await args.repo.push()
-	// 	if (push?.ok === false) {
-	// 		return { error: new PushException("Failed to push", { cause: push.error }) }
-	// 	}
-	// 	await args.repo.pull({
-	// 		author: {
-	// 			name: args.user.username,
-	// 			email: args.user.email,
-	// 		},
-	// 		fastForward: true,
-	// 		singleBranch: true,
-	// 	})
-	// 	const time = new Date()
-	// 	// triggering a rebuild of everything fs related
-	// 	args.setFsChange(time)
-	// 	args.setLastPullTime(time)
-	// 	return { data: true }
-	// } catch (error) {
-	// 	return { error: (error as PushException) ?? "Unknown error" }
-	// }
+	try {
+		const push = await args.repo.push()
+		if (push?.ok === false) {
+			return { error: new PushException("Failed to push", { cause: push.error }) }
+		}
+		await args.repo.pull({
+			author: {
+				name: args.user.username,
+				email: args.user.email,
+			},
+			fastForward: true,
+			singleBranch: true,
+		})
+		const time = new Date()
+		// triggering a rebuild of everything fs related
+		args.setFsChange(time)
+		args.setLastPullTime(time)
+		return { data: true }
+	} catch (error) {
+		return { error: (error as PushException) ?? "Unknown error" }
+	}
 	// TODO #1459 end - uncomment to push changes to repo
 }

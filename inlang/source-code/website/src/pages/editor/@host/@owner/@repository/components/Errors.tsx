@@ -1,14 +1,15 @@
-import { createSignal } from "solid-js"
-import { Icon } from "#src/components/Icon.jsx"
+import { Show, createSignal } from "solid-js"
+import { Icon } from "#src/interface/components/Icon.jsx"
 import MaterialSymbolsChevronLeft from "~icons/material-symbols/chevron-left"
 import MaterialSymbolsChevronRight from "~icons/material-symbols/chevron-right"
+import MaterialSymbolsDeveloperGuide from "~icons/material-symbols/developer-guide-outline"
 
 export const Errors = (props: { errors: Array<any>; message: string; messagePlural: string }) => {
 	const [visibleError, setVisibleError] = createSignal(0)
 	return (
 		<div class="w-full h-full flex flex-col items-center justify-center gap-16">
-			<div class="pt-24 md:w-[600px] mx-auto">
-				<div class="flex md:w-[600px] items-center gap-4 justify-between pb-4">
+			<div class="pt-12 sm:pt-24 w-full sm:w-[600px] mx-auto">
+				<div class="flex sm:w-[600px] items-center gap-4 justify-between pb-4">
 					{props.errors.length === 1 ? (
 						<p class="text-lg font-medium">{props.message}</p>
 					) : (
@@ -50,42 +51,47 @@ export const Errors = (props: { errors: Array<any>; message: string; messagePlur
 					)}
 				</div>
 				{props.errors.length !== 0 && (
-					<div class="pt-2 md:w-[600px]">
+					<div class="pt-2 sm:w-[600px]">
 						<div class="bg-danger text-background p-4 rounded-md flex items-center gap-4 mb-8">
 							<Icon name="danger" class="w-7 h-7 flex-shrink-0" />
 							<div>
-								<span class="font-semibold">{props.errors[visibleError()]?.name}: </span>
+								<span class="font-semibold break-all">{props.errors[visibleError()]?.name}: </span>
 								<br />
-								{/* @ts-ignore */}
 								{props.errors[visibleError()]?.message}
 							</div>
 						</div>
-						{/* @ts-ignore */}
 						{props.errors[visibleError()]?.cause && props.errors[visibleError()]?.cause.message && (
 							<>
 								<p class="text-surface-500 text-sm mb-1">Error cause</p>
 								<div class="font-mono p-4 bg-surface-800 text-background rounded-md text-sm mb-8">
 									<p>
 										<span class="font-semibold text-hover-danger">{"> "}</span>
-										{/* @ts-ignore */}
 										{props.errors[visibleError()]?.cause.message}
 									</p>
 								</div>
 							</>
 						)}
-						{/* @ts-ignore */}
 						{props.errors[visibleError()]?.stack && (
 							<>
 								<p class="text-surface-500 text-sm mb-1">Stack trace</p>
 								<div class="font-mono p-4 bg-surface-800 text-background rounded-md text-sm mb-8 break-words">
 									<p>
 										<span class="font-semibold text-hover-danger">{"> "}</span>
-										{/* @ts-ignore */}
 										{props.errors[visibleError()]?.stack}
 									</p>
 								</div>
 							</>
 						)}
+						<Show when={props.errors[visibleError()]?.name === "ProjectSettingsFileNotFoundError"}>
+							<sl-button
+								class="w-full"
+								prop:href="/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang"
+							>
+								{/* @ts-ignore */}
+								<MaterialSymbolsDeveloperGuide class="w-6 h-6" slot="prefix" />
+								Check the guide if you need help setting up inlang
+							</sl-button>
+						</Show>
 					</div>
 				)}
 			</div>

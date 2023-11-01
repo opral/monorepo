@@ -143,22 +143,27 @@ async function initializeRepo(
 		nodeishFs: createNodeishMemoryFs(),
 	})
 
-	const isCollaborator = await repo
-		.isCollaborator({
-			username: user.username,
-		})
-		.catch((err: any) => {
-			if (err.status === 401) {
-				setStep({
-					type: "github-login",
-					error: false,
-				})
+	const repoMeta = await repo.getMeta().catch((err: any) => {
+		if (err.status === 401) {
+			setStep({
+				type: "github-login",
+				error: false,
+			})
 
-				return
-			}
-		})
+			return
+		}
+	})
 
-	if (!isCollaborator) {
+	if (typeof repoMeta === "undefined" || "error" in repoMeta) {
+		setStep({
+			type: "error",
+			message: "Could not load repository information.",
+			error: true,
+		})
+		return
+	}
+
+	if (!repoMeta?.permissions.push) {
 		setStep({
 			type: "error",
 			message: "You are not a collaborator of this repository.",

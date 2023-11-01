@@ -6,10 +6,11 @@ import IconAdd from "~icons/material-symbols/add"
 import IconClose from "~icons/material-symbols/close"
 import IconTranslate from "~icons/material-symbols/translate"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
-import { showToast } from "#src/components/Toast.jsx"
+import { showToast } from "#src/interface/components/Toast.jsx"
 import type { LanguageTag } from "@inlang/sdk"
 import { sortLanguageTags } from "./helper/sortLanguageTags.js"
-import EditorLayout from "#src/components/editor/EditorLayout.jsx"
+import EditorLayout from "#src/interface/editor/EditorLayout.jsx"
+import Link from "#src/renderer/Link.jsx"
 
 interface Filter {
 	name: string
@@ -128,13 +129,12 @@ export function Layout(props: { children: JSXElement }) {
 
 	return (
 		<EditorLayout>
-			<div class="pt-4 w-full flex flex-col grow">
-				<div class="flex items-center space-x-4 pt-5">
+			<div class="pt-4 w-full flex flex-col grow bg-background">
+				<div class="flex flex-wrap gap-2 items-center pt-5">
 					<Breadcrumbs />
 					<BranchMenu />
 				</div>
-				<div class="flex justify-between gap-2 py-5 sticky top-16 z-30 bg-background">
-					<div class="absolute -left-2 w-[calc(100%_+_16px)] h-full -translate-y-[20px] bg-background" />
+				<div class="flex flex-wrap justify-between gap-2 py-5 sticky top-12 md:top-16 z-30 bg-background">
 					<div class="flex z-20 justify-between gap-2 items-center">
 						<Show when={project()}>
 							<For each={filterOptions()}>
@@ -217,7 +217,7 @@ export function Layout(props: { children: JSXElement }) {
 							</Show>
 						</Show>
 					</div>
-					<div class="flex gap-2">
+					<div class="flex flex-wrap gap-2">
 						<SearchInput
 							placeholder="Search ..."
 							handleChange={(text: string) => setTextSearch(text)}
@@ -270,7 +270,7 @@ export function Layout(props: { children: JSXElement }) {
 function Breadcrumbs() {
 	const { routeParams } = useEditorState()
 	return (
-		<div class="flex flex-row items-center space-x-2 text-lg font-medium">
+		<div class="flex flex-wrap flex-row items-center gap-2 text-lg font-medium">
 			{/* repository icon */}
 			<svg class="w-4 h-4" viewBox="0 0 16 16">
 				<path
@@ -279,21 +279,21 @@ function Breadcrumbs() {
 					d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 1 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7a.75.75 0 0 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 0 1 1-1h8zM5 12.25v3.25a.25.25 0 0 0 .4.2l1.45-1.087a.25.25 0 0 1 .3 0L8.6 15.7a.25.25 0 0 0 .4-.2v-3.25a.25.25 0 0 0-.25-.25h-3.5a.25.25 0 0 0-.25.25z"
 				/>
 			</svg>
-			<a
+			<Link
 				href={`https://github.com/${routeParams().owner}`}
 				target="_blank"
-				class="link hover:text-primary"
+				class="link hover:text-primary break-all"
 			>
 				<h3>{routeParams().owner}</h3>
-			</a>
+			</Link>
 			<h3>/</h3>
-			<a
+			<Link
 				href={`https://github.com/${routeParams().owner}/${routeParams().repository}`}
 				target="_blank"
-				class="link hover:text-primary"
+				class="link hover:text-primary break-all"
 			>
 				<h3>{routeParams().repository}</h3>
-			</a>
+			</Link>
 		</div>
 	)
 }
@@ -302,8 +302,7 @@ function Breadcrumbs() {
  * The menu to select the branch.
  */
 function BranchMenu() {
-	const { currentBranch } = useEditorState()
-
+	const { setActiveBranch, branchNames, currentBranch } = useEditorState()
 	return (
 		<sl-dropdown>
 			<sl-button slot="trigger" prop:caret={true} prop:size="small">
@@ -319,29 +318,17 @@ function BranchMenu() {
 				</div>
 				{currentBranch() ?? "branch"}
 			</sl-button>
-			<sl-menu class="w-48 min-w-full">
-				<div class="p-4">
-					Branches are not implemented yet. Discussion is on going in{" "}
-					<a
-						href="https://github.com/inlang/monorepo/discussions/166"
-						class="link link-primary"
-						target="blank"
-					>
-						#166
-					</a>
-					.
-				</div>
-				{/* <For each={branches()}>
+
+			<sl-menu class="w-48 min-w-fit">
+				<For each={branchNames()}>
 					{(branch) => (
-						<a
-						href={`${currentPageContext().urlParsed.pathname}?branch=${branch}`}
-						>
-						<sl-menu-item prop:checked={currentBranch() === branch}>
-						{branch}
-						</sl-menu-item>
-						</a>
-						)}
-					</For> */}
+						<div onClick={() => setActiveBranch(branch)}>
+							<sl-menu-item prop:type="checkbox" prop:checked={currentBranch() === branch}>
+								{branch}
+							</sl-menu-item>
+						</div>
+					)}
+				</For>
 			</sl-menu>
 		</sl-dropdown>
 	)
@@ -389,13 +376,13 @@ function LanguageFilter(props: { clearFunction: any }) {
 
 				<div class="flex px-3 gap-2 text-sm font-medium">
 					<span class="text-left text-outline-variant grow">Select</span>
-					<a
+					<Link
 						class="cursor-pointer link link-primary opacity-75"
 						onClick={() => setFilteredLanguageTags(() => project()?.settings()?.languageTags || [])}
 					>
 						All
-					</a>
-					<a
+					</Link>
+					<Link
 						class="cursor-pointer link link-primary opacity-75"
 						// filter all except the source language
 						onClick={() =>
@@ -406,7 +393,7 @@ function LanguageFilter(props: { clearFunction: any }) {
 						}
 					>
 						None
-					</a>
+					</Link>
 				</div>
 				<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
 				<div class="max-h-[300px] overflow-y-auto text-sm">
@@ -487,7 +474,7 @@ function LintFilter(props: { clearFunction: any }) {
 
 			<div class="flex px-3 gap-2 text-sm font-medium">
 				<span class="text-left text-outline-variant grow">Select</span>
-				<a
+				<Link
 					class="cursor-pointer link link-primary opacity-75"
 					onClick={() =>
 						setFilteredMessageLintRules(
@@ -498,13 +485,13 @@ function LintFilter(props: { clearFunction: any }) {
 					}
 				>
 					All
-				</a>
-				<a
+				</Link>
+				<Link
 					class="cursor-pointer link link-primary opacity-75"
 					onClick={() => setFilteredMessageLintRules([])}
 				>
 					None
-				</a>
+				</Link>
 			</div>
 			<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
 			<div class="max-h-[300px] overflow-y-auto">

@@ -1,7 +1,8 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Repository } from "./api.js"
 import { transformRemote, parseLixUri } from "./helpers.js"
-import { httpWithLazyInjection } from './helpers/httpWithLazyInjection.js'
+import { httpWithLazyInjection } from "./helpers/httpWithLazyInjection.js"
+
 // @ts-ignore
 import http from "./isomorphic-git-forks/http-client.js"
 import { Octokit } from "octokit"
@@ -19,10 +20,13 @@ import {
 	add,
 	walk,
 	log,
-	TREE, 
+	TREE,
 	WORKDIR,
 	STAGE,
-	listFiles, 
+	listFiles,
+	listServerRefs,
+	// fetch,
+	// listBranches,
 } from "isomorphic-git"
 import { withLazyFetching } from "./helpers/withLazyFetching.js"
 import { flatFileListToDirectoryStructure } from "./isomorphic-git-forks/flatFileListToDirectoryStructure.js"
@@ -32,6 +36,7 @@ export async function openRepository(
 	args: {
 		nodeishFs: NodeishFilesystem
 		workingDirectory?: string
+		branch?: string
 		auth?: unknown // unimplemented
 	}
 ): Promise<Repository> {
@@ -89,6 +94,7 @@ export async function openRepository(
 		url: gitUrl,
 		noCheckout: true,
 		singleBranch: true,
+		ref: args.branch,
 		depth: 1,
 		noTags: true,
 	})
@@ -101,41 +107,49 @@ export async function openRepository(
 
 	await pending
 
-	const oidToFilePaths = {} as { [oid: string] : string[] };
-    const filePathToOid = {} as { [filePath: string] : string };
+	const oidToFilePaths = {} as { [oid: string]: string[] }
+	const filePathToOid = {} as { [filePath: string]: string }
 
-	// TODO - lazy fetch use path.join 
-	const gitdir = dir.endsWith('/') ?  dir + '.git' : dir + '/.git';
+	// TODO - lazy fetch use path.join
+	const gitdir = dir.endsWith("/") ? dir + ".git" : dir + "/.git"
 	// TODO - lazy fetch what shall we use as ref?
-	const ref = 'main';
-
+	const ref = "main"
 
 	await walk({
-        fs: rawFs,
-        // cache
-        dir,
-        gitdir,
-        trees: [TREE({ ref }), WORKDIR(), STAGE()],
-        map: async function(fullpath, [commit, _workdir, _stage]) {
-            if (fullpath === '.') return;
+		fs: rawFs,
+		// cache
+		dir,
+		gitdir,
+		trees: [TREE({ ref }), WORKDIR(), STAGE()],
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		map: async function (fullpath, [commit, _workdir, _stage]) {
+			if (fullpath === ".") return
 
-            const oId = await commit?.oid();
-            if (oId === undefined) {
-				return;
+			const oId = await commit?.oid()
+			if (oId === undefined) {
+				return
 			}
-            
-			filePathToOid[fullpath] = oId;
-            if (oidToFilePaths[oId] === undefined) {
-                oidToFilePaths[oId] = [] as string[];
-            } 
-            oidToFilePaths[oId]?.push(fullpath);
-        }
-    });
+
+			filePathToOid[fullpath] = oId
+			if (oidToFilePaths[oId] === undefined) {
+				oidToFilePaths[oId] = [] as string[]
+			}
+			oidToFilePaths[oId]?.push(fullpath)
+		},
+	})
 	// delay all fs and repo operations until the repo clone and checkout have finished, this is preparation for the lazy feature
-	
 
 	return {
-		nodeishFs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'nodishfs'),
+		nodeishFs: withLazyFetching(
+			rawFs,
+			dir,
+			gitdir,
+			ref,
+			filePathToOid,
+			oidToFilePaths,
+			http,
+			"nodishfs"
+		),
 
 		/**
 		 * Gets the git origin url of the current repository.
@@ -144,7 +158,16 @@ export async function openRepository(
 		 */
 		async listRemotes() {
 			try {
-				const withLazyFetchingpedFS = withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'listRemotes');
+				const withLazyFetchingpedFS = withLazyFetching(
+					rawFs,
+					dir,
+					gitdir,
+					ref,
+					filePathToOid,
+					oidToFilePaths,
+					http,
+					"listRemotes"
+				)
 
 				const remotes = await listRemotes({
 					fs: withLazyFetchingpedFS,
@@ -159,7 +182,16 @@ export async function openRepository(
 
 		status(cmdArgs) {
 			return status({
-				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'status'),
+				fs: withLazyFetching(
+					rawFs,
+					dir,
+					gitdir,
+					ref,
+					filePathToOid,
+					oidToFilePaths,
+					http,
+					"status"
+				),
 				dir,
 				filepath: cmdArgs.filepath,
 			})
@@ -168,7 +200,9 @@ export async function openRepository(
 		statusMatrix(cmdArgs) {
 			// TODO #1459 where is the type of cmdArgs defined?
 			if ((cmdArgs as any).filepaths !== undefined) {
-				throw new Error('Lazy fetching doesn\'t support filepaths for now - it will only create a matrix of fetched files for now');
+				throw new Error(
+					"Lazy fetching doesn't support filepaths for now - it will only create a matrix of fetched files for now"
+				)
 			}
 
 			return (async (cmdArgs) => {
@@ -176,34 +210,42 @@ export async function openRepository(
 				const filepaths = await listFiles({
 					fs: rawFs,
 					gitdir: gitdir,
-					// TODO #1459 investigate the index cache further seem to be an in memory forwared on write cache to allow fast reads of the index... 
+					// TODO #1459 investigate the index cache further seem to be an in memory forwared on write cache to allow fast reads of the index...
 					dir: dir,
 					// NOTE: no ref config! we don't set ref because we want the list of files on the index
-				});
-	
+				})
+
 				return statusMatrix({
-					fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'statusMatrix'),
+					fs: withLazyFetching(
+						rawFs,
+						dir,
+						gitdir,
+						ref,
+						filePathToOid,
+						oidToFilePaths,
+						http,
+						"statusMatrix"
+					),
 					dir,
 					filepaths,
 					filter: cmdArgs.filter,
 				})
 			})(cmdArgs)
-			
 		},
 
 		add(cmdArgs) {
 			return add({
-				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'add'),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, "add"),
 				dir,
 				filepath: cmdArgs.filepath,
 			})
 		},
 
 		commit(cmdArgs) {
-
 			return (async (cmdArgs) => {
 				// TODO #1459 WIP start to implement a tree extraction
 				// we pass only the lazy loaded files to the status matrix
+				/*
 				const filepaths = await listFiles({
 					fs: rawFs,
 					gitdir: gitdir,
@@ -220,22 +262,29 @@ export async function openRepository(
 
 				const flattFileList = flatFileListToDirectoryStructure(filepaths);
 
+*/
 
-	
 				return commit({
-					fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'commit'),
+					fs: withLazyFetching(
+						rawFs,
+						dir,
+						gitdir,
+						ref,
+						filePathToOid,
+						oidToFilePaths,
+						http,
+						"commit"
+					),
 					dir,
 					author: cmdArgs.author,
 					message: cmdArgs.message,
 				})
 			})(cmdArgs)
-			
-			
 		},
 
 		push() {
 			return push({
-				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'push'),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, "push"),
 				url: gitUrl,
 				corsProxy: gitProxyUrl,
 				http,
@@ -245,7 +294,7 @@ export async function openRepository(
 
 		pull(cmdArgs) {
 			return pull({
-				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'pull'),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, "pull"),
 				url: gitUrl,
 				corsProxy: gitProxyUrl,
 				http,
@@ -258,7 +307,7 @@ export async function openRepository(
 
 		log(cmdArgs) {
 			return log({
-				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, 'log'),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, "log"),
 				depth: cmdArgs?.depth,
 				dir,
 				since: cmdArgs?.since,
@@ -285,31 +334,6 @@ export async function openRepository(
 				owner,
 				repo: repoName,
 			})
-		},
-
-		async isCollaborator(cmdArgs) {
-			let response:
-				| Awaited<
-						ReturnType<typeof github.request<"GET /repos/{owner}/{repo}/collaborators/{username}">>
-				  >
-				| undefined
-			try {
-				response = await github.request("GET /repos/{owner}/{repo}/collaborators/{username}", {
-					owner,
-					repo: repoName,
-					username: cmdArgs.username,
-				})
-			} catch (err: any) {
-				/*  throws on non collaborator access, 403 on non collaborator, 401 for current user not authenticated correctly
-						TODO: move to consistent error classes everywhere when hiding git api more
-				*/
-				if (err.status === 401) {
-					// if we are logged out rethrow the error
-					throw err
-				}
-			}
-
-			return response?.status === 204 ? true : false
 		},
 
 		/**
@@ -344,8 +368,21 @@ export async function openRepository(
 			)
 		},
 
+		async getBranches() {
+			return (
+				(
+					await listServerRefs({
+						url: gitUrl,
+						corsProxy: gitProxyUrl,
+						prefix: "refs/heads",
+						http,
+					})
+				).map((ref) => ref.ref.replace("refs/heads/", "")) || undefined
+			)
+		},
+
 		errors: Object.assign(errors, {
-			subscribe: (callback: (value: Error[]) => void) => {
+			subscribe: (callback: (value: LixError[]) => void) => {
 				createEffect(() => {
 					// TODO: the subscription should not send the whole array but jsut the new errors
 					// const maybeLastError = errors().at(-1)
@@ -361,18 +398,34 @@ export async function openRepository(
 		 * Additional information about a repository provided by GitHub.
 		 */
 		async getMeta() {
-			const {
-				data: { name, private: isPrivate, fork: isFork, parent, owner: ownerMetaData },
-			}: Awaited<ReturnType<typeof github.request<"GET /repos/{owner}/{repo}">>> =
-				await github.request("GET /repos/{owner}/{repo}", {
+			const res: Awaited<
+				ReturnType<typeof github.request<"GET /repos/{owner}/{repo}">> | { error: Error }
+			> = await github
+				.request("GET /repos/{owner}/{repo}", {
 					owner,
 					repo: repoName,
 				})
+				.catch((newError: Error) => {
+					setErrors((previous) => [...(previous || []), newError])
+					return { error: newError }
+				})
 
+			if ("error" in res) {
+				return { error: res.error }
+			}
+
+			const {
+				data: { name, private: isPrivate, fork: isFork, parent, owner: ownerMetaData, permissions },
+			} = res
 			return {
 				name,
 				isPrivate,
 				isFork,
+				permissions: {
+					admin: permissions?.admin || false,
+					push: permissions?.push || false,
+					pull: permissions?.pull || false,
+				},
 				owner: {
 					name: ownerMetaData.name || undefined,
 					email: ownerMetaData.email || undefined,

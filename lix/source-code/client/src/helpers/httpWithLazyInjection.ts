@@ -14,7 +14,11 @@ function overrideWants(lines: string[], oids: string[]) {
 		if (line.startsWith(WANT_PREFIX)) {
 			lastLineWasAWants = true;
 			if (oids.length > wantsCount) {
-				newLines.push(line.substring(0, WANT_PREFIX.length) + oids[wantsCount] + line.substring(WANT_PREFIX.length + oids[wantsCount]!.length));
+				newLines.push(
+					line.slice(0, Math.max(0, WANT_PREFIX.length)) +
+						oids[wantsCount] +
+						line.slice(Math.max(0, WANT_PREFIX.length + oids[wantsCount]!.length))
+				)
 			}
 			wantsCount += 1;
 		}
@@ -43,7 +47,9 @@ function addWantsCapabilities(lines: string[]) {
 			// lets take the original line withouth the trailing \n and add the new capabilities
 			// no-progress to skip informal stream that gives input about objects packed etc (https://git-scm.com/docs/protocol-capabilities#_no_progress)
 			// allow-tip-sha1-in-want allow-reachable-sha1-in-want to use wants  https://git-scm.com/docs/protocol-capabilities#_allow_reachable_sha1_in_want // TODO #1459 check what if we can only use  allow-reachable-sha1-in-want 
-			line = line.substring(0, line.length - 1) + ' allow-tip-sha1-in-want allow-reachable-sha1-in-want no-progress\n';
+			line =
+				line.slice(0, Math.max(0, line.length - 1)) +
+				" allow-tip-sha1-in-want allow-reachable-sha1-in-want no-progress\n"
 			line =line.replace('ofs-delta', '')
 			capabilitiesAdded = true;
 
@@ -71,7 +77,7 @@ function addBlobNoneFilter(lines: string[]) {
 		// finds the first wants line - and append the filter capability and adds "filter" after last wants line - this is capability declaration is needed for filter=blob:none to work
 		// see: https://git-scm.com/docs/protocol-capabilities#_filter
 		if (line.startsWith('want') && !filterCapabilityAdded) { 
-			line = line.substring(0, line.length - 1) + ' filter\n';
+			line = line.slice(0, Math.max(0, line.length - 1)) + " filter\n"
 			filterCapabilityAdded = true;
 		}
 
@@ -89,6 +95,40 @@ function addBlobNoneFilter(lines: string[]) {
 
 	}
 
+	return updatedLines;
+}
+
+
+
+/**
+ * Helper method taking lines about to be sent to git-upload-pack and replaceses the haves part with the overrides provided
+ * NOTE: this method was used to fetch only a subset of oids by building by substracting the them from all oids from the repo
+ *  now that we foud out about "allow-tip-sha1-in-want allow-reachable-sha1-in-want " capabilites we no longer use this
+ * @param lines
+ * @param oids 
+ * @returns 
+ */
+function overrideHaves(lines: string[], oids: string[]) {
+	// flush line is the only line with an empty string 
+	const linesWithoutHaves = [];
+	const flushLine = '';
+	
+	// delete existing haves
+	for (const line of lines) {
+		if (!line.startsWith('have ')) {
+			linesWithoutHaves.push(line);
+		}
+	}
+
+	const updatedLines = [];
+	for (const line of linesWithoutHaves) {
+		updatedLines.push(line);
+		if ( line === flushLine) {
+			for (const oid of oids) {
+				updatedLines.push('have '+oid+'\n');
+			}
+		}
+	}
 	return updatedLines;
 }
 
@@ -141,37 +181,4 @@ export const httpWithLazyInjection = (http: any, config: {
 			return Reflect.get(http, prop, receiver)
 		},
 	})
-}
-
-
-/**
- * Helper method taking lines about to be sent to git-upload-pack and replaceses the haves part with the overrides provided
- * NOTE: this method was used to fetch only a subset of oids by building by substracting the them from all oids from the repo
- *  now that we foud out about "allow-tip-sha1-in-want allow-reachable-sha1-in-want " capabilites we no longer use this
- * @param lines
- * @param oids 
- * @returns 
- */
-function overrideHaves(lines: string[], oids: string[]) {
-	// flush line is the only line with an empty string 
-	const linesWithoutHaves = [];
-	const flushLine = '';
-	
-	// delete existing haves
-	for (const line of lines) {
-		if (!line.startsWith('have ')) {
-			linesWithoutHaves.push(line);
-		}
-	}
-
-	const updatedLines = [];
-	for (const line of linesWithoutHaves) {
-		updatedLines.push(line);
-		if ( line === flushLine) {
-			for (const oid of oids) {
-				updatedLines.push('have '+oid+'\n');
-			}
-		}
-	}
-	return updatedLines;
 }

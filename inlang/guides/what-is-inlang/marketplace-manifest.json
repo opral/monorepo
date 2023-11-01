@@ -1,0 +1,27 @@
+{
+	"id": "guide.niklasbuchfink.whatIsInlang",
+	"icon": "https://emojis.wiki/thumbs/emojis/question-mark.webp",
+	"displayName": {
+		"en": "What is inlang?"
+	},
+	"description": {
+		"en": "Understand general concept of inlang ecosystem and its benefits."
+	},
+	"readme": {
+		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/what-is-inlang/what-is-inlang.md"
+	},
+	"keywords": [
+		"application",
+		"website",
+		"developer",
+		"translator",
+		"inlang",
+		"getting-started",
+		"i18n",
+		"localization",
+		"guide"
+	],
+	"publisherName": "Niklas Buchfink",
+	"publisherIcon": "https://avatars.githubusercontent.com/u/59048346?v=4",
+	"license": "Apache-2.0"
+}

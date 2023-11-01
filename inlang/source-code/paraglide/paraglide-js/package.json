@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/paraglide-js",
 	"type": "module",
-	"version": "1.0.0-prerelease.3",
+	"version": "1.0.0-prerelease.4",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"
@@ -26,10 +26,12 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
+		"@inlang/detect-json-formatting": "1.0.0",
 		"@inlang/sdk": "*",
 		"commander": "11.1.0",
 		"consola": "3.2.3",
 		"dedent": "1.5.1",
+		"json5": "2.2.3",
 		"typescript": "5.2.2"
 	},
 	"devDependencies": {
@@ -38,6 +40,7 @@
 		"@ts-morph/bootstrap": "0.20.0",
 		"@types/minimist": "1.2.3",
 		"@vitest/coverage-v8": "0.34.3",
+		"memfs": "4.6.0",
 		"rollup": "3.29.1",
 		"vitest": "0.34.3"
 	}

@@ -47,3 +47,15 @@ export class ModuleExportIsInvalidError extends ModuleError {
 		this.name = "ModuleExportIsInvalidError"
 	}
 }
+
+export class ModuleSettingsAreInvalidError extends ModuleError {
+	constructor(options: { module: string; errors: ValueError[] }) {
+		super(
+			`The settings are invalid of "${module}" are invalid:\n\n${options.errors
+				.map((error) => `Path "${error.path}" with value "${error.value}": "${error.message}"`)
+				.join("\n")}`,
+			options
+		)
+		this.name = "ModuleSettingsAreInvalidError"
+	}
+}
