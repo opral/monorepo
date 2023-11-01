@@ -3,7 +3,7 @@
 	"id": "messageLintRule.inlang.snakeCaseId",
 	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/snakeCaseId/assets/icon.png",
 	"gallery": [
-		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/without_source-marketplace-cover.jpg"
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/snake_case_id-cover.jpg"
 	],
 	"displayName": {
 		"en": "Snake case id"
