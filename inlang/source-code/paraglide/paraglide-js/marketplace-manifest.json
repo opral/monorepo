@@ -8,7 +8,7 @@
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-3.jpg"
 	],
 	"displayName": {
-		"en": "paraglideJS"
+		"en": "Paraglide JS"
 	},
 	"description": {
 		"en": "A fully configurable JavaScript i18n library that integrates within your framework."
