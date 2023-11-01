@@ -227,9 +227,8 @@ export function Page(props: PageProps) {
 											}
 										>
 											<div class="pt-12">
-												{/* @ts-ignore */}
 												<img
-													src={props.manifest.gallery[0]}
+													src={props.manifest.gallery && props.manifest.gallery[0]}
 													class="max-w-sm mx-auto rounded-lg border border-surface-100 shadow-md shadow-on-background/[0.02]"
 												/>
 											</div>
