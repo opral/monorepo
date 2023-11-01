@@ -40,7 +40,7 @@ export class ModuleExportIsInvalidError extends ModuleError {
 	constructor(options: { module: string; errors: ValueError[] }) {
 		super(
 			`The export(s) of "${options.module}" are invalid:\n\n${options.errors
-				.map((error) => `"${error.path}" "${error.value}": "${error.message}"`)
+				.map((error) => `"${error.path}" "${JSON.stringify(error.value)}": "${error.message}"`)
 				.join("\n")}`,
 			options
 		)
@@ -52,7 +52,10 @@ export class ModuleSettingsAreInvalidError extends ModuleError {
 	constructor(options: { module: string; errors: ValueError[] }) {
 		super(
 			`The settings are invalid of "${options.module}" are invalid:\n\n${options.errors
-				.map((error) => `Path "${error.path}" with value "${error.value}": "${error.message}"`)
+				.map(
+					(error) =>
+						`Path "${error.path}" with value "${JSON.stringify(error.value)}": "${error.message}"`
+				)
 				.join("\n")}`,
 			options
 		)
