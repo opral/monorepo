@@ -24,6 +24,16 @@
 							"value": "Globale Anwendung"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Globálna aplikácia"
+						}
+					]
 				}
 			]
 		},
@@ -48,6 +58,16 @@
 						{
 							"type": "Text",
 							"value": "Lint Regeln"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lint pravidlá"
 						}
 					]
 				}
@@ -76,6 +96,16 @@
 							"value": "Globales Markdown"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Global Markdown"
+						}
+					]
 				}
 			]
 		},
@@ -102,6 +132,16 @@
 							"value": "Kategorien"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Kategórie"
+						}
+					]
 				}
 			]
 		},
@@ -126,6 +166,16 @@
 						{
 							"type": "Text",
 							"value": "Globale Webseite"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Globálna webová stránka"
 						}
 					]
 				}
@@ -658,6 +708,16 @@
 							"value": "Das Ökosystem um global zu gehen"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Ekosystém, ktorý sa má stať globálnym"
+						}
+					]
 				}
 			]
 		},
@@ -1020,212 +1080,14 @@
 							"value": "Hervorgehoben"
 						}
 					]
-				}
-			]
-		},
-		{
-			"id": "home_inlang_button",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "More about the ecosystem"
-						}
-					]
 				},
 				{
-					"languageTag": "de",
+					"languageTag": "sk",
 					"match": [],
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Mehr zum Ökosystem"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "home_inlang_description",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Expand to new markets and acquire more customers."
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Erschließe neue Märkte und gewinne mehr Kunden."
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "home_inlang_title_first_part",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Welcome to inlang,"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Willkommen bei inlang,"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "home_inlang_title_second_part",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "the ecosystem to go global."
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "das Ökosystem um global zu gehen."
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "home_lix_button",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "More about Lix"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Mehr über Lix"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "home_lix_description",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "The backbone of the ecosystem"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Die Basis des Ökosystems"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "home_lix_title",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Lix change control"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Lix-Änderungskontrolle"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "home_stack_title",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Stack"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Stack"
+							"value": "Odporúčané"
 						}
 					]
 				}
@@ -1254,6 +1116,304 @@
 							"value": "Guides"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Sprievodcovia"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_inlang_button",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "More about the ecosystem"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Mehr zum Ökosystem"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Viac o ekosystéme"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_inlang_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Expand to new markets and acquire more customers."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Erschließe neue Märkte und gewinne mehr Kunden."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Expandujte na nové trhy a získajte viac zákazníkov."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_inlang_title_first_part",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Welcome to inlang,"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Willkommen bei inlang,"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vitajte v inlang,"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_inlang_title_second_part",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "the ecosystem to go global."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "das Ökosystem um global zu gehen."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "ekosystému, aby sa stal globálnym."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_lix_button",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "More about Lix"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Mehr über Lix"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Viac o Lix"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_lix_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "The backbone of the ecosystem"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Die Basis des Ökosystems"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Chrbtica ekosystému"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_lix_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lix change control"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lix-Änderungskontrolle"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Ovládanie zmeny Lix"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_stack_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Stack"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Stack"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Zásobník"
+						}
+					]
 				}
 			]
 		},
@@ -1278,6 +1438,16 @@
 						{
 							"type": "Text",
 							"value": "Loslegen"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Začať"
 						}
 					]
 				}
@@ -1306,6 +1476,16 @@
 							"value": "Eine allgemeine Anleitung, um dein Projekt mit dem inlang-Ökosystem aufzusetzen."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Všeobecný sprievodca minimálnymi krokmi potrebnými na to, aby bol váš projekt pripravený na ekosystém inlang."
+						}
+					]
 				}
 			]
 		},
@@ -1330,6 +1510,16 @@
 						{
 							"type": "Text",
 							"value": "How to"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Ako"
 						}
 					]
 				}
@@ -1358,6 +1548,16 @@
 							"value": "Baue inlang in dein Project ein"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Nastavte jazyk pre svoj projekt"
+						}
+					]
 				}
 			]
 		},
@@ -1382,6 +1582,16 @@
 						{
 							"type": "Text",
 							"value": "Loslegen"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Začať"
 						}
 					]
 				}
@@ -1410,6 +1620,16 @@
 							"value": "Eine grundlegende Anleitung zur Einführung von inlang mit paraglide.js und dem message-format-plugin in deine Svelte App."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Základný sprievodca, ako si osvojiť inlang pomocou paraglide.js a doplnku formátu správ vo vašej štíhlej aplikácii."
+						}
+					]
 				}
 			]
 		},
@@ -1434,6 +1654,16 @@
 						{
 							"type": "Text",
 							"value": "Erstelle eine globale Svelte App: Eine grundlegende Anleitung"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vytvorte si globálnu štíhlu aplikáciu: Základný sprievodca"
 						}
 					]
 				}
@@ -1462,6 +1692,16 @@
 							"value": "Baue deine eigene Lösung!"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Zostavte si vlastné riešenie!"
+						}
+					]
 				}
 			]
 		},
@@ -1486,6 +1726,16 @@
 						{
 							"type": "Text",
 							"value": "Du kannst nicht finden, was du suchst?"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Nenašli ste, čo ste hľadali?"
 						}
 					]
 				}
@@ -1514,6 +1764,16 @@
 							"value": "Benötigst du Hilfe oder hast du Fragen? Trete unserem Discord bei!"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Potrebujete pomoc alebo máte otázky? Pridajte sa k nášmu Discordu!"
+						}
+					]
 				}
 			]
 		},
@@ -1538,6 +1798,16 @@
 						{
 							"type": "Text",
 							"value": "Benachrichtige mich"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Upozorni ma"
 						}
 					]
 				}
@@ -1566,6 +1836,16 @@
 							"value": "Du wirst bereits benachrichtigt."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Už dostávate upozornenia."
+						}
+					]
 				}
 			]
 		},
@@ -1590,6 +1870,16 @@
 						{
 							"type": "Text",
 							"value": "Wir werden dich informieren, wenn wir"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Keď dostaneme, dáme vám vedieť"
 						}
 					]
 				}
@@ -1618,6 +1908,16 @@
 							"value": "neue Ergebnisse haben."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "nejaké nové výsledky."
+						}
+					]
 				}
 			]
 		},
@@ -1642,6 +1942,16 @@
 						{
 							"type": "Text",
 							"value": "Etwas ist schief gelaufen. Bitte versuche es später noch einmal."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Niečo sa pokazilo. Skúste neskôr prosím."
 						}
 					]
 				}
@@ -1670,6 +1980,16 @@
 							"value": "Gib bitte deine Email-Adresse ein."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Prosím, zadajte svoju e-mailovú adresu."
+						}
+					]
 				}
 			]
 		},
@@ -1694,6 +2014,16 @@
 						{
 							"type": "Text",
 							"value": "Email eingeben..."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Zadajte email..."
 						}
 					]
 				}
@@ -1722,6 +2052,16 @@
 							"value": "Helfe uns, das Ökosystem aufzubauen"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Pomôžte nám vybudovať ekosystém"
+						}
+					]
 				}
 			]
 		},
@@ -1746,6 +2086,16 @@
 						{
 							"type": "Text",
 							"value": "Du wirst benachrichtigt, wenn diese Funktion verfügbar ist."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Keď bude táto funkcia k dispozícii, budete upozornení."
 						}
 					]
 				}
@@ -1774,6 +2124,16 @@
 							"value": "Noch keine Ergebnisse"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Zatiaľ žiadne výsledky"
+						}
+					]
 				}
 			]
 		},
@@ -1798,6 +2158,16 @@
 						{
 							"type": "Text",
 							"value": "Bitte gib eine gültige E-Mail-Adresse ein."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Prosím zadajte platnú emailovú adresu."
 						}
 					]
 				}
@@ -1826,6 +2196,16 @@
 							"value": "Alle Produkte"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Všetky produkty"
+						}
+					]
 				}
 			]
 		},
@@ -1850,6 +2230,16 @@
 						{
 							"type": "Text",
 							"value": "Alle Guides"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Všetci sprievodcovia"
 						}
 					]
 				}
@@ -1878,6 +2268,16 @@
 							"value": "Baue auf inlang auf"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Stavte na inlang"
+						}
+					]
 				}
 			]
 		},
@@ -1902,6 +2302,16 @@
 						{
 							"type": "Text",
 							"value": "Anwendung"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Aplikácia"
 						}
 					]
 				}
@@ -1930,6 +2340,16 @@
 							"value": "Lint Regeln"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lint Rules"
+						}
+					]
 				}
 			]
 		},
@@ -1949,6 +2369,16 @@
 				},
 				{
 					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Markdown"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
 					"match": [],
 					"pattern": [
 						{
@@ -1982,6 +2412,16 @@
 							"value": "Fehlt etwas?"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Chýba vám niečo?"
+						}
+					]
 				}
 			]
 		},
@@ -2008,6 +2448,16 @@
 							"value": "Webseite"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Webová stránka"
+						}
+					]
 				}
 			]
 		},
@@ -2032,6 +2482,16 @@
 						{
 							"type": "Text",
 							"value": "⌘ + k um zu suchen"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "⌘ + k spustíte vyhľadávanie"
 						}
 					]
 				}
