@@ -30,7 +30,8 @@ async function generateSitemap() {
 	const publishDate = new Date().toISOString()
 	let content = `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="https://www.nsb.com/wp-content/plugins/wordpress-seo-premium/css/main-sitemap.xsl"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`
 	for (const route of routes) {
-		if (route.path !== "/c") content = `${content}${formatPage(siteURL + route.path, publishDate)}`
+		if (route.path !== "/c" && route.path !== "/g" && route.path !== "/m")
+			content = `${content}${formatPage(siteURL + route.path, publishDate)}`
 
 		if (route.dynamic && route.path === "/m") {
 			for (const item of registry) {
