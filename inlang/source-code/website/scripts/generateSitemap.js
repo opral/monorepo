@@ -13,6 +13,7 @@ const routes = [
 	{ path: "/m", dynamic: true },
 	{ path: "/newsletter", dynamic: false },
 	{ path: "/search", dynamic: false },
+	{ path: "/editor", dynamic: false },
 ]
 
 // Hardcoded categories for the marketplace
@@ -27,7 +28,7 @@ function formatPage(name, published) {
 
 async function generateSitemap() {
 	const publishDate = new Date().toISOString()
-	let content = `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="//www.nsb.com/wp-content/plugins/wordpress-seo-premium/css/main-sitemap.xsl"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`
+	let content = `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="https://www.nsb.com/wp-content/plugins/wordpress-seo-premium/css/main-sitemap.xsl"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`
 	for (const route of routes) {
 		if (route.path !== "/c") content = `${content}${formatPage(siteURL + route.path, publishDate)}`
 
