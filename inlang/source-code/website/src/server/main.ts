@@ -3,10 +3,10 @@ import compression from "compression"
 import { validateEnvVariables, privateEnv } from "@inlang/env-variables"
 import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
-import { isProduction } from "./env.js"
 import { router } from "./router.js"
 // --------------- SETUP -----------------
 
+export const isProduction = process.env.NODE_ENV === "production"
 const { error: errors } = validateEnvVariables({ forProduction: isProduction })
 
 if (errors) {

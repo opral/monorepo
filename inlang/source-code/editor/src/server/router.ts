@@ -11,18 +11,24 @@
  * ------------------------------------
  */
 
-import express, { Router } from "express"
+import express, { Router, type NextFunction, type Request, type Response } from "express"
 import { createServer as createViteServer } from "vite"
 import { URL } from "node:url"
 import { privateEnv } from "@inlang/env-variables"
 import sirv from "sirv"
 import cookieSession from "cookie-session"
 import { router as authService } from "../services/auth/index.server.js"
-import { redirects } from "./redirects.js"
 import { renderPage } from "vike/server"
 
 /** the root path of the server (website/) */
 const rootPath = new URL("../..", import.meta.url).pathname
+
+/**
+ * This middelware aims to redirect old Urls to new ones.
+ * You can use it by adding the old and the new url in the
+ * Object as key and value.
+ */
+const redirectMap: { [key: string]: string } = {}
 
 export const router: Router = express.Router()
 
@@ -57,7 +63,20 @@ if (process.env.NODE_ENV === "production") {
 
 router.use("/services/auth", authService)
 
-router.use(redirects)
+router.use((request: Request, response: Response, next: NextFunction) => {
+	try {
+		//redirect
+		if (Object.keys(redirectMap).includes(request.url)) {
+			const redirectUrl: string = redirectMap[request.url]
+				? redirectMap[request.url]!
+				: request.url!
+			response.redirect(redirectUrl)
+		}
+		next()
+	} catch (error) {
+		next(error)
+	}
+})
 
 // serving #src/pages and /public
 //! it is extremely important that a request handler is not async to catch errors
