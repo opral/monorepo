@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { setLanguageTag, languageTag } from '@inlang/paraglide-js/sveltekit-example';
-  import * as m from "@inlang/paraglide-js/sveltekit-example/messages"
+  import { setLanguageTag, languageTag } from '@inlang/paraglide-js/sveltekit';
+  import * as m from "@inlang/paraglide-js/sveltekit/messages"
 </script>
   
 <p>{m.greeting({ name: "Samuel", count: 5 })}</p>
