@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite",
-		"build": "paraglide-js compile --namespace inlang-marketplace --project ../../../project.inlang.json && vite build",
+		"build": "paraglide-js compile --namespace website --project ../../../project.inlang.json && vite build",
 		"production": "NODE_ENV=production tsx ./src/server/main.ts",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "paraglide-js compile --namespace website --project ../../../project.inlang.json && npx @inlang/cli@latest lint --project ../../../project.inlang.json --languageTags en,de && tsc --noEmit",
