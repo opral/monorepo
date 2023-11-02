@@ -2,6 +2,26 @@
 
 This plugin is a general purpose plugin to read and write messages of json files. It also determines how translation functions and namespaces are parsed and handled by the IDE extension.
 
+## Example
+
+_messages/en.json_
+
+```json
+{
+	"hello": "Hello {name}!",
+	"loginButton": "Login"
+}
+```
+
+_messages/de.json_
+
+```json
+{
+	"hello": "Hallo {name}!",
+	"loginButton": "Anmelden"
+}
+```
+
 # How to use
 
 ```json

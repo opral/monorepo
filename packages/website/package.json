@@ -11,7 +11,7 @@
 		"build": "paraglide-js compile --namespace website --project ../../../project.inlang.json",
 		"build:sitemap": "node ./scripts/generateSitemap.js",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "paraglide-js compile --namespace website --project ../../../project.inlang.json && npx @inlang/cli@latest lint --project ../../../project.inlang.json --languageTags en,de && tsc --noEmit",
+		"test": "paraglide-js compile --namespace website --project ../../../project.inlang.json && npx @inlang/cli lint --project ../../../project.inlang.json --languageTags en,de && tsc --noEmit",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
