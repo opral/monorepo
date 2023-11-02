@@ -56,6 +56,7 @@ export default function SearchBar() {
 				aria-label="search input"
 				id="search"
 				name="search"
+				autocomplete="off"
 				placeholder={
 					isMac()
 						? m.marketplace_header_search_placeholder()

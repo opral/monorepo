@@ -8,14 +8,18 @@ import { validatedModuleSettings } from "./validatedModuleSettings.js"
 const mockPluginSchema: Plugin["settingsSchema"] = Type.Object({
 	pathPattern: Type.Union([
 		Type.String({
-			pattern: "^[^*]*\\{languageTag\\}[^*]*\\.json",
-			description: "The PluginSettings must contain `{languageTag}` and end with `.json`.",
+			pattern: "^(\\./|\\../|/)[^*]*\\{languageTag\\}[^*]*\\.json",
+			description: "The pathPattern must contain `{languageTag}` and end with `.json`.",
 		}),
 		Type.Record(
-			Type.String({}),
 			Type.String({
-				pattern: "^[^*]*\\{languageTag\\}[^*]*\\.json",
-				description: "The PluginSettings must contain `{languageTag}` and end with `.json`.",
+				pattern: "^[^.]+$",
+				description: "Dots are not allowd ",
+				examples: ["website", "app", "homepage"],
+			}),
+			Type.String({
+				pattern: "^(\\./|\\../|/)[^*]*\\{languageTag\\}[^*]*\\.json",
+				description: "The pathPattern must contain `{languageTag}` and end with `.json`.",
 			})
 		),
 	]),
@@ -43,14 +47,19 @@ test("if PluginSchema does match with the moduleSettings", async () => {
 	expect(isValid).toBe("isValid")
 })
 
-test("if invalid module settings would pass", async () => {
+test("if namespace settings are valide", async () => {
 	const isValid = validatedModuleSettings({
 		settingsSchema: mockPluginSchema,
 		moduleSettings: {
-			pathPattern: "./examples/example01/{languageTag}.json",
+			pathPattern: {
+				website: "./{languageTag}examplerFolder/ExampleFile.json",
+				app: "../{languageTag}examplerFolder/ExampleFile.json",
+				footer: "./{languageTag}examplerFolder/ExampleFile.json",
+			},
+			variableReferencePattern: ["{", "}"],
 		},
 	})
-	expect(isValid).not.toBe("isValid")
+	expect(isValid).toBe("isValid")
 })
 
 test(" if MessageLintRuleSchema  match with the settings", async () => {
