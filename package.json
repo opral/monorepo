@@ -15,7 +15,6 @@
 	],
 	"scripts": {
 		"build": "npx nx run-many --target=build --all --parallel",
-		"build:production": "npm run build && npm run _build -w @inlang/website && npm run _build -w @inlang/editor",
 		"dev": "npx nx run-many --target=dev --all --parallel 1000 --output-style stream",
 		"production": "npx nx run-many --target=production --all --parallel",
 		"---- TEST ----------------------------------------------------------": "",
