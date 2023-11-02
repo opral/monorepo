@@ -164,10 +164,12 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 		const eventFiles = new Set(fileWatchfsEvents.map((event) => event.filename))
 		expect([...eventFiles]).toStrictEqual(["file"])
 
-		expect(fsEvents).toStrictEqual([
-			{ eventType: "rename", filename: "file" },
-			{ eventType: "rename", filename: "file2" },
-		])
+		expect(fsEvents).toHaveLength(2)
+
+		// only checking the filenames, as the eventType can be either change or rename, depending on node version, timing, and platform, this can also be inconsistent or randomly wrong among multiple runs
+		expect(fsEvents[0].filename).toBe("file")
+		expect(fsEvents[1].filename).toBe("file2")
+
 
 		expect(recursiveEvents).toStrictEqual([
 			{ eventType: "rename", filename: "file" },
