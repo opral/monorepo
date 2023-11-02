@@ -2,6 +2,26 @@
 
 This plugin is a general purpose plugin to read and write messages of json files. It also determines how translation functions and namespaces are parsed and handled by the IDE extension.
 
+## Example
+
+_messages/en.json_
+
+```json
+{
+	"hello": "Hello {name}!",
+	"loginButton": "Login"
+}
+```
+
+_messages/de.json_
+
+```json
+{
+	"hello": "Hallo {name}!",
+	"loginButton": "Anmelden"
+}
+```
+
 # How to use
 
 ```json
@@ -90,7 +110,7 @@ Run the following commands in your terminal (node and npm must be installed):
 1. `npm install`
 2. `npm run dev`
 
-`npm run dev` will start the development environment which automatically compiles the [src/index.ts](./src/index.ts) files to JavaScript ([dist/index.js](dist/index.js)), runs tests defined in `*.test.ts` files and watches changes.
+`npm run dev` will start the development environment which automatically compiles the [src/index.ts](#getting-started) files to JavaScript ([dist/index.js](#getting-started)), runs tests defined in `*.test.ts` files and watches changes.
 
 ## Publishing
 

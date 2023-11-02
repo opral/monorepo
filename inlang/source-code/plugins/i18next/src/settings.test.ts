@@ -24,7 +24,7 @@ test("valid path patterns", async () => {
 	}
 })
 
-test("it should fail if the path pattern does not start with as a path", async () => {
+test("it should fail if the path pattern does not start as a ralaitve path with a /,./ or ../", async () => {
 	const pathPattern = "{languageTag}.json"
 
 	const isValid = Value.Check(plugin.settingsSchema!, {

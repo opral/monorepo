@@ -72,6 +72,6 @@ Before publishing your plugin to the marketplace, thoroughly test it to ensure i
 
 ### 5. Publish your plugin
 
-To make your plugin available in the inlang.com marketplace, see [Publish on marketplace](/documentation/publish-marketplace).
+To make your plugin available in the inlang.com marketplace, see [Publish on marketplace](/documentation/publish-to-marketplace).
 
 Feel free to [join our Discord](https://discord.gg/gdMPPWy57R) if you have any questions or need assistance developing and publishing your plugin.

@@ -5,7 +5,7 @@ import { projectOption } from "../../utilities/globalFlags.js"
 
 export const validate = new Command()
 	.command("validate")
-	.description("Validate the inlang prokect settings file.")
+	.description("Validate the inlang project settings file.")
 	.requiredOption(projectOption.flags, projectOption.description, projectOption.defaultValue)
 	.action((args: { project: string }) => {
 		validateCommandAction({ project: args.project })
