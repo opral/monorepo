@@ -4,4 +4,4 @@ This module is a monolith that contains inlang's website and editor to manage tr
 
 ## Documentation
 
-The stack consists of https://vite-plugin-ssr.com/ for routing, data fetching, and SSR.
+The stack consists of https://vike.dev/ for routing, data fetching, and SSR.
