@@ -47,7 +47,7 @@ if (import.meta.env.PROD) {
 	})
 }
 
-// see https://vite-plugin-ssr.com/clientRouting#page-content
+// see https://vike.dev/clientRouting#page-content
 export const clientRouting = true
 
 let isFirstRender = true

@@ -10,7 +10,7 @@ import {
 	languageTag,
 } from "@inlang/paraglide-js/inlang-marketplace"
 
-// See https://vite-plugin-ssr.com/data-fetching
+// See https://vike.dev/data-fetching
 export const passToClient = ["pageProps", "routeParams", "languageTag"] as const
 
 export async function render(pageContext: PageContextRenderer): Promise<unknown> {
