@@ -4,7 +4,8 @@
 	"scripts": {
 		"_build": "paraglide-js compile --namespace example-typescript",
 		"_pretest": "npm run build",
-		"_test": "tsc --noEmit && vitest run"
+		"_test": "tsc --noEmit && vitest run",
+		"test": "paraglide-js compile --namespace example-typescript && vitest run"
 	},
 	"dependencies": {
 		"@inlang/paraglide-js": "*"
