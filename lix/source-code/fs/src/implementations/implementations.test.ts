@@ -1,6 +1,14 @@
 import { test, expect, afterAll, describe } from "vitest"
-import type { NodeishFilesystem } from "../NodeishFilesystemApi.js"
+import type { NodeishFilesystem, FileChangeInfo } from "../NodeishFilesystemApi.js"
 import { createNodeishMemoryFs } from "./memoryFs.js"
+
+async function wait(time: number) {
+	await new Promise((resolve) =>
+		setTimeout(() => {
+			resolve(undefined)
+		}, time)
+	)
+}
 
 // some node tests fail on windows (lol)
 describe.skipIf(process.platform === "win32")("node fs", async () => {
@@ -10,7 +18,8 @@ describe.skipIf(process.platform === "win32")("node fs", async () => {
 	const tempDir = path.join(url.fileURLToPath(import.meta.url), "../__test")
 
 	await fs.mkdir(tempDir, { recursive: true })
-	await runFsTestSuite("node fs", tempDir, fs)
+	// @ts-ignore
+	await runFsTestSuite("node fs", tempDir, fs as NodeishFilesystem)
 })
 
 describe("memory fs", async () => {
@@ -85,6 +94,101 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 		expect(await fs.readFile(`${tempDir}/file2`, { encoding: "utf-8" })).toEqual(textInSecondFile)
 	})
 
+	test("watch", async () => {
+		const watchTempDir = tempDir + "/watchdir"
+		await fs.mkdir(watchTempDir + "/subfolder", { recursive: true })
+		await fs.writeFile(`${watchTempDir}/file`, "")
+
+		await wait(200)
+
+		const abortController = new AbortController()
+		const fileWatch = fs.watch(`${watchTempDir}/file`, { signal: abortController.signal })
+
+		let fileWatchfsEvents: FileChangeInfo[] = []
+
+		;(async () => {
+			try {
+				for await (const event of fileWatch) {
+					fileWatchfsEvents.push(event)
+				}
+			} catch (err: any) {
+				if (err.name === "AbortError") return
+				throw err
+			}
+		})()
+
+		const folderWatch = fs.watch(`${watchTempDir}`, { signal: abortController.signal })
+
+		let fsEvents: any[] = []
+
+		;(async () => {
+			try {
+				for await (const event of folderWatch) {
+					fsEvents.push(event)
+				}
+			} catch (err: any) {
+				if (err.name === "AbortError") return
+				throw err
+			}
+		})()
+
+		const recursiveWatch = fs.watch(`${watchTempDir}`, {
+			recursive: true,
+			signal: abortController.signal,
+		})
+
+		let recursiveEvents: any[] = []
+
+		;(async () => {
+			try {
+				for await (const event of recursiveWatch) {
+					recursiveEvents.push(event)
+				}
+			} catch (err: any) {
+				if (err.name === "AbortError") return
+				throw err
+			}
+		})()
+
+		await fs.writeFile(`${watchTempDir}/file`, textInFirstFile)
+
+		await fs.writeFile(`${watchTempDir}/file2`, textInFirstFile)
+
+		await fs.writeFile(`${watchTempDir}/subfolder/file3`, textInFirstFile)
+
+		await wait(200)
+
+		abortController.abort()
+
+		// due to inconsistent node api all we can is check that the expected file emits at least one event, but the eventType and number of events varies widely
+		const eventFiles = new Set(fileWatchfsEvents.map((event) => event.filename))
+		expect([...eventFiles]).toStrictEqual(["file"])
+
+		expect(fsEvents).toStrictEqual([
+			{ eventType: "rename", filename: "file" },
+			{ eventType: "rename", filename: "file2" },
+		])
+
+		expect(recursiveEvents).toStrictEqual([
+			{ eventType: "rename", filename: "file" },
+			{ eventType: "rename", filename: "file2" },
+			{ eventType: "rename", filename: "subfolder/file3" },
+		])
+
+		fsEvents = []
+		fileWatchfsEvents = []
+		recursiveEvents = []
+		await fs.writeFile(`${watchTempDir}/file`, textInFirstFile)
+		await fs.writeFile(`${watchTempDir}/file2`, textInFirstFile)
+		await fs.writeFile(`${watchTempDir}/subfolder/file3`, textInFirstFile)
+
+		await wait(200)
+
+		expect(fsEvents).toHaveLength(0)
+		expect(fileWatchfsEvents).toHaveLength(0)
+		expect(recursiveEvents).toHaveLength(0)
+	})
+
 	test("r/w an empty file", async () => {
 		await fs.writeFile(`${tempDir}/file3`, "")
 		expect(await fs.readFile(`${tempDir}/file3`, { encoding: "utf-8" })).toEqual("")
@@ -106,7 +210,7 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 		expect(await fs.readdir(`${tempDir}/user1.link`)).toEqual(["documents", "downloads"])
 
 		const dirents = await fs.readdir(tempDir)
-		expect(dirents).toHaveLength(6)
+		expect(dirents).toHaveLength(7)
 		expect(dirents).toContain("file1.link")
 		expect(dirents).toContain("file3.link")
 		expect(dirents).toContain("user1.link")
@@ -154,7 +258,7 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 		await fs.unlink(`${tempDir}/file3.link`)
 
 		const dirents = await fs.readdir(tempDir)
-		expect(dirents).toHaveLength(3)
+		expect(dirents).toHaveLength(4)
 		expect(dirents).not.toContain("file1.link")
 		expect(dirents).not.toContain("file3.link")
 		expect(dirents).not.toContain("user1.link")
