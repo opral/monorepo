@@ -3,214 +3,206 @@
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
     <loc>https://inlang.com/</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/blog</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/blog/inlang-refactor</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/blog/the-next-git</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/blog/git-as-sdk</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/blog/notes-on-git-based-architecture</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/c/application</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/c/website</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/c/markdown</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/c/lint-rules</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/documentation</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/documentation/architecture</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/documentation/develop-app</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/documentation/develop-plugin</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/documentation/develop-lint-rule</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/documentation/publish-to-marketplace</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/documentation/publish-guide</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/documentation/sdk</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/documentation/comver</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/documentation/app</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/documentation/project</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/documentation/message</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/documentation/plugin</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/documentation/lint-rule</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/documentation/library</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/documentation/language-tag</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://inlang.com/g</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/g/94ng94n4/guide-inlang-buildOwnApp</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/g/3go4f04m/guide-niklasbuchfink-whatIsInlang</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/g/83gwpp32/guide-nilsjacobsen-useParaglideJsInMonorepos</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://inlang.com/m</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/m/zu942ln6/app-inlang-badge</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/m/2qj2w8pu/app-inlang-cli</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/m/tdozzpar/app-inlang-editor</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/m/r7kp499g/app-inlang-ideExtension</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/m/8y8sxj09/library-inlang-languageTag</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/m/gerre34r/library-inlang-paraglideJs</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/m/ezdlll4o/library-inlang-translatable</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/m/y0eo8f66/messageLintRule-inlang-emptyPattern</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/m/asvuch18/messageLintRule-inlang-identicalPattern</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/m/10l6oyv1/messageLintRule-inlang-messageWithoutSource</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/m/4cxm3eqi/messageLintRule-inlang-missingTranslation</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/m/gkerinvo/messageLintRule-inlang-snakeCaseId</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/m/3i8bor92/plugin-inlang-i18next</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/m/ig84ng0o/plugin-inlang-json</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/m/reootnfj/plugin-inlang-messageFormat</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/m/632iow21/plugin-inlang-mFunctionMatcher</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/m/698iow33/plugin-inlang-tFunctionMatcher</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/newsletter</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/search</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://inlang.com/editor</loc>
-    <lastmod>2023-11-02T10:07:52.670Z</lastmod>
+    <lastmod>2023-11-02T10:18:10.069Z</lastmod>
   </sitemap>
 </sitemapindex>
