@@ -2,43 +2,98 @@ import { decodeBuffer, encodePkLine } from "../isomorphic-git-forks/git-fetch-re
 
 const WANT_PREFIX = 'want ';
 
+/*
+ * overrides all wants in the given lines with the ids provided in oids
+ * 
+ * a set of orginal lines used to fetch a commit
+ * [
+ * "want d7e62aef79d771d1771cb44c9e01faa4b7a607fe multi_ack_detailed no-done side-band-64k ofs-delta agent=git/isomorphic-git@1.24.5\n",
+ * "deepen 1\n",
+ * "", // flush
+ * "done\n",
+ * ]
+ * with an array of oids passed like 
+ * [
+ *   "1111111111111111111111111111111111111111",
+ *   "2222222222222222222222222222222222222222",
+ * ]
+ * 
+ * would result in:
+ * [
+ * "want 1111111111111111111111111111111111111111 multi_ack_detailed no-done side-band-64k ofs-delta agent=git/isomorphic-git@1.24.5\n",
+ * "want 2222222222222222222222222222222222222222\n"
+ * "deepen 1\n",
+ * "", // flush
+ * "done\n",
+ * ]
+ * 
+ * @param lines the lines of the original request
+ * @returns the updated lines with wants lines containing the passed oids
+ */
 function overrideWants(lines: string[], oids: string[]) {
-	
-	const newLines = [];
-	let wantsCount = 0;
+	const newLines = []
+	let wantsCount = 0
 
-	let lastLineWasAWants = false;
-	
-	// override existing haves
+	let lastLineWasAWants = false
+
+	// override existing wants
 	for (const line of lines) {
 		if (line.startsWith(WANT_PREFIX)) {
-			lastLineWasAWants = true;
+			lastLineWasAWants = true
 			if (oids.length > wantsCount) {
-				newLines.push(
-					line.slice(0, Math.max(0, WANT_PREFIX.length)) +
-						oids[wantsCount] +
-						line.slice(Math.max(0, WANT_PREFIX.length + oids[wantsCount]!.length))
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- we check the length of the array in the step before
+				const postOidCurrentLine = line.slice(
+					Math.max(0, WANT_PREFIX.length + oids[wantsCount]!.length)
 				)
+				newLines.push(`${WANT_PREFIX}${oids[wantsCount]}${postOidCurrentLine}`)
 			}
-			wantsCount += 1;
+			wantsCount += 1
 		}
 
 		if (!line.startsWith(WANT_PREFIX)) {
 			if (lastLineWasAWants && oids.length > wantsCount) {
 				while (oids.length > wantsCount) {
-					newLines.push(WANT_PREFIX + oids[wantsCount] + '\n');
-					wantsCount += 1;
+					newLines.push(WANT_PREFIX + oids[wantsCount] + "\n")
+					wantsCount += 1
 				}
-				lastLineWasAWants = false;
-			} 
-			newLines.push(line);
+				lastLineWasAWants = false
+			}
+			newLines.push(line)
 		}
-			
 	}
 
-	return newLines;
+	return newLines
 }
 
+
+/*
+ * 
+ * adds "allow-tip-sha1-in-want", "allow-reachable-sha1-in-want" and "no-progress" as capabilities (appends it to the first wants line found) to be able to fetch specific blobs by there hash 
+ * compare: https://git-scm.com/docs/git-rev-list#Documentation/git-rev-list.txt---filterltfilter-specgt
+ * 
+ * The Orginal lines without the capabilities could look like this:
+ * 
+ * [
+ * "want d7e62aef79d771d1771cb44c9e01faa4b7a607fe multi_ack_detailed no-done side-band-64k ofs-delta agent=git/isomorphic-git@1.24.5\n",
+ * "deepen 1\n",
+ * "", // flush
+ * "done\n",
+ * ]
+ * ----
+ * 
+ * 
+ * The returned lines will look like this:
+ * 
+ * [
+ * "want d7e62aef79d771d1771cb44c9e01faa4b7a607fe multi_ack_detailed no-done side-band-64k ofs-delta agent=git/isomorphic-git@1.24.5 allow-tip-sha1-in-want allow-reachable-sha1-in-want no-progress\n",
+ * "deepen 1\n",
+ * "", // flush
+ * "done\n",
+ * ]
+ * 
+ * @param lines the lines of the original request
+ * @returns 
+ */
 function addWantsCapabilities(lines: string[]) {
 	let capabilitiesAdded = false;
 	const updatedLines = [];
@@ -59,9 +114,33 @@ function addWantsCapabilities(lines: string[]) {
 	return updatedLines;
 }
 
-/**
+/*
+ * 
  * adds filter=blob:none to the request represented by the given lines
  * compare: https://git-scm.com/docs/git-rev-list#Documentation/git-rev-list.txt---filterltfilter-specgt
+ * 
+ * The Orginal lines without blob filter could look like this:
+ * 
+ * [
+ * "want d7e62aef79d771d1771cb44c9e01faa4b7a607fe multi_ack_detailed no-done side-band-64k ofs-delta agent=git/isomorphic-git@1.24.5",
+ * "deepen 1",
+ * "",
+ * "done",
+ * ]
+ * ----
+ * 
+ * The returned lines will add the filter as capability into the first want line and adds filter blob:none after the deepen 1 line
+ * 
+ * The returned lines will look like this:
+ * 
+ * [
+ * "want d7e62aef79d771d1771cb44c9e01faa4b7a607fe multi_ack_detailed no-done side-band-64k ofs-delta agent=git/isomorphic-git@1.24.5 filter",
+ * "deepen 1",
+ * "filter blob:none"
+ * "",
+ * "done",
+ * ]
+ * 
  * @param lines the lines of the original request
  * @returns 
  */
