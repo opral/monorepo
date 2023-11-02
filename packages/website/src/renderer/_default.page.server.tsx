@@ -9,7 +9,7 @@ import "./app.css"
 import { MetaProvider, renderTags } from "@solidjs/meta"
 import { sourceLanguageTag, availableLanguageTags, languageTag } from "@inlang/paraglide-js/website"
 
-// See https://vite-plugin-ssr.com/data-fetching
+// See https://vike.dev/data-fetching
 export const passToClient = ["pageProps", "routeParams", "languageTag"] as const
 
 export async function render(pageContext: PageContextRenderer): Promise<unknown> {
