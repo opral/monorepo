@@ -12,6 +12,7 @@
 	},
 	"dependencies": {
 		"@inlang/badge": "*",
+		"@inlang/editor": "*",
 		"@inlang/env-variables": "*",
 		"@inlang/marketplace-manifest": "*",
 		"@inlang/plugin-message-format": "*",
