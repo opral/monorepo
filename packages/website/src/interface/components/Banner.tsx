@@ -1,4 +1,4 @@
-import { Icon } from "./Icon.jsx"
+import Arrow from "~icons/material-symbols/arrow-forward-rounded"
 
 /**
  * Displays a small banner on top of the navigation.
@@ -11,7 +11,7 @@ export function Banner(props: { text: string; href: string; customClasses?: stri
 					class={`text-sm group-hover:opacity-80 transition-opacity px-2 py-2 rounded-full w-full max-w-xl mx-auto text-background font-medium ${props.customClasses}`}
 				>
 					{props.text}
-					<Icon class="ml-2 w-4 h-4 inline-block" name="external" />
+					<Arrow class="ml-1.5 w-4.5 h-4.5 rounded-full inline-flex items-center justify-center transition-all group-hover:bg-background group-hover:text-[#0BB5D4] left-0 group-hover:left-1 relative bottom-0.5" />
 				</p>
 			</div>
 		</a>
