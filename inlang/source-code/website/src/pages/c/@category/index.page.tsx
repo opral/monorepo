@@ -13,6 +13,7 @@ import {
 	IconJavascript,
 	IconNextjs,
 	IconReact,
+	IconSolid,
 	IconSvelte,
 	IconVue,
 } from "#src/interface/custom-icons/subcategoryIcon.jsx"
@@ -49,6 +50,11 @@ export function Page(props: {
 			name: "Svelte",
 			param: "svelte",
 			icon: <IconSvelte class="-ml-1 w-5 h-5" />,
+		},
+		{
+			name: "Solid",
+			param: "solid",
+			icon: <IconSolid class="-ml-1 w-5 h-5" />,
 		},
 		{
 			name: "React",
