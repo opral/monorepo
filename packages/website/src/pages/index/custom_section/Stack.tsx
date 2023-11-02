@@ -4,6 +4,7 @@ import {
 	IconNextjs,
 	IconReact,
 	IconSvelte,
+	IconSolid,
 	IconVue,
 } from "#src/interface/custom-icons/subcategoryIcon.jsx"
 import Link from "#src/renderer/Link.jsx"
@@ -17,6 +18,11 @@ const Stack = () => {
 			name: "Svelte",
 			param: "svelte",
 			icon: <IconSvelte class="-ml-1 w-8 h-8" />,
+		},
+		{
+			name: "Solid",
+			param: "solid",
+			icon: <IconSolid class="-ml-1 w-8 h-8" />,
 		},
 		{
 			name: "React",

@@ -30,7 +30,9 @@
 		"react",
 		"nextjs",
 		"vue",
-		"javascript"
+		"javascript",
+		"solid",
+		"typescript"
 	],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
