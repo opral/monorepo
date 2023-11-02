@@ -10,12 +10,10 @@ export async function onBeforeRender(pageContext: PageContext) {
 		(item: any) => item.uniqueID === pageContext.routeParams.uid
 	) as MarketplaceManifest & { uniqueID: string }
 
-	if (
-		!item ||
-		item.id.replaceAll(".", "-").toLowerCase() !== pageContext.routeParams.id?.toLowerCase()
-	) {
-		console.error("Item not found")
-		throw redirect("/m/404")
+	if (!item) throw redirect("/m/404")
+
+	if (item.id.replaceAll(".", "-").toLowerCase() !== pageContext.routeParams.id?.toLowerCase()) {
+		throw redirect(`/m/${item.uniqueID}/${item.id.replaceAll(".", "-").toLowerCase()}`)
 	}
 
 	const text = await (
