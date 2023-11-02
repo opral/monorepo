@@ -38,6 +38,6 @@ In your app's `marketplace-manifest.json` make sure to define the following info
 
 ### 5. Publish your app
 
-To make your app available in the inlang.com marketplace, see [Publish on marketplace](/documentation/publish-marketplace).
+To make your app available in the inlang.com marketplace, see [Publish on marketplace](/documentation/publish-to-marketplace).
 
 Feel free to [join our Discord](https://discord.gg/gdMPPWy57R) if you have any questions or need assistance developing and publishing your app.
