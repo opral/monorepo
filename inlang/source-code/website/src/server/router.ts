@@ -15,8 +15,8 @@ import express, { Router } from "express"
 import { createServer as createViteServer } from "vite"
 import { URL } from "node:url"
 import sirv from "sirv"
-import { router as vikePlugin } from "./vike-plugin.js"
 import { redirects } from "./redirects.js"
+import { renderPage } from "vike/server"
 
 /** the root path of the server (website/) */
 const rootPath = new URL("../..", import.meta.url).pathname
@@ -42,6 +42,23 @@ if (process.env.NODE_ENV === "production") {
 
 router.use(redirects)
 
-// ! vite plugin ssr must came last
-// ! because it uses the wildcard `*` to catch all routes
-router.use(vikePlugin)
+// serving #src/pages and /public
+//! it is extremely important that a request handler is not async to catch errors
+//! express does not catch async errors. hence, renderPage uses the callback pattern
+router.get("*", (request, response, next) => {
+	renderPage({
+		urlOriginal: request.originalUrl,
+	})
+		.then((pageContext) => {
+			if (pageContext.httpResponse === null) {
+				next()
+			} else {
+				const { body, headers, statusCode } = pageContext.httpResponse
+				for (const [name, value] of headers) response.setHeader(name, value)
+				response.status(statusCode).send(body)
+			}
+		})
+		// pass the error to expresses error handling
+		.catch(next)
+})
+
