@@ -17,7 +17,6 @@ import { URL } from "node:url"
 import { privateEnv } from "@inlang/env-variables"
 import sirv from "sirv"
 import cookieSession from "cookie-session"
-import { router as authService } from "../services/auth/index.server.js"
 import { renderPage } from "vike/server"
 
 /** the root path of the server (website/) */
@@ -60,8 +59,6 @@ if (process.env.NODE_ENV === "production") {
 }
 
 // ------------------------ START ROUTES ------------------------
-
-router.use("/services/auth", authService)
 
 router.use((request: Request, response: Response, next: NextFunction) => {
 	try {
