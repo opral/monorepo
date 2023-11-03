@@ -21,11 +21,15 @@ export function InstallationProvider(props: {
 	optIn: Record<string, any>
 	children: JSXElement
 }) {
-	const [localStorage, setLocalStorage] = useLocalStorage() ?? []
-	const user = localStorage?.user
+	const [, setLocalStorage] = useLocalStorage() ?? []
+	const user = () => {
+		const localStorage = getLocalStorage()
+		if (!localStorage) return undefined
+		return localStorage.user
+	}
 
 	createEffect(() => {
-		validateRepo(user, setRecentProject, props)
+		validateRepo(user(), setRecentProject, props)
 	})
 
 	/* Set recent project into local storage */
@@ -66,6 +70,7 @@ export function InstallationProvider(props: {
  */
 function validateRepo(
 	user: { username: string; email: string } | undefined,
+	// user: { username: string; email: string } | undefined,
 	setRecentProject: () => void,
 	props: {
 		repo: string
