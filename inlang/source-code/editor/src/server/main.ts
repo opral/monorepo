@@ -44,5 +44,5 @@ if (isProduction) {
 app.set("base", "/editor")
 app.use("/editor", router)
 
-const port = process.env.PORT ?? 4001
+const port = 4001
 app.listen(port, () => console.info(`Server listening at http://localhost:${port}`))
