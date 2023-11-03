@@ -187,6 +187,7 @@ const runFsTestSuite = async (
 		await fs.writeFile(`${watchTempDir}/file2`, textInFirstFile)
 		await fs.writeFile(`${watchTempDir}/subfolder/file3`, textInFirstFile)
 
+		await fs.rm(`${watchTempDir}`, { recursive: true })
 		await wait(200)
 
 		expect(fsEvents).toHaveLength(0)
@@ -215,7 +216,7 @@ const runFsTestSuite = async (
 		expect(await fs.readdir(`${tempDir}/user1.link`)).toEqual(["documents", "downloads"])
 
 		const dirents = await fs.readdir(tempDir)
-		expect(dirents).toHaveLength(7)
+		expect(dirents).toHaveLength(6)
 		expect(dirents).toContain("file1.link")
 		expect(dirents).toContain("file3.link")
 		expect(dirents).toContain("user1.link")
@@ -263,7 +264,7 @@ const runFsTestSuite = async (
 		await fs.unlink(`${tempDir}/file3.link`)
 
 		const dirents = await fs.readdir(tempDir)
-		expect(dirents).toHaveLength(4)
+		expect(dirents).toHaveLength(3)
 		expect(dirents).not.toContain("file1.link")
 		expect(dirents).not.toContain("file3.link")
 		expect(dirents).not.toContain("user1.link")
