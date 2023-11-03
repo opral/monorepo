@@ -4,11 +4,7 @@ import { setCurrentPageContext } from "./state.js"
 
 // import the css
 import "./app.css"
-import {
-	sourceLanguageTag,
-	availableLanguageTags,
-	languageTag,
-} from "@inlang/paraglide-js/inlang-marketplace"
+import { sourceLanguageTag, availableLanguageTags, languageTag } from "@inlang/paraglide-js/editor"
 
 // See https://vike.dev/data-fetching
 export const passToClient = ["pageProps", "routeParams", "languageTag"] as const

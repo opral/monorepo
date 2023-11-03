@@ -1,4 +1,4 @@
-import { languageTag, sourceLanguageTag } from "@inlang/paraglide-js/inlang-marketplace"
+import { languageTag, sourceLanguageTag } from "@inlang/paraglide-js/editor"
 
 const Link = (props: { href?: string; [key: string]: any }) => {
 	let modifiedHref = props.href

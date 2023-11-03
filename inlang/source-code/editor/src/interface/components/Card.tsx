@@ -6,7 +6,7 @@ import { showToast } from "./Toast.jsx"
 import { rpc } from "@inlang/rpc"
 import { Button } from "#src/interface/components/Button.jsx"
 import Link from "#src/renderer/Link.jsx"
-import * as m from "@inlang/paraglide-js/inlang-marketplace/messages"
+import * as m from "@inlang/paraglide-js/editor/messages"
 
 export default function Card(props: { item: any; displayName: string }) {
 	return (
