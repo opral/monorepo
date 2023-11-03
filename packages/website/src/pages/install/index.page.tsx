@@ -5,13 +5,16 @@ import { Button } from "../index/components/Button.jsx"
 import { z } from "zod"
 import { InstallationProvider } from "./InstallationProvider.jsx"
 import { SetupCard } from "./components/SetupCard.jsx"
-import { Gitlogin } from "./components/GitLogin.jsx"
+import IconGithub from "~icons/cib/github"
 import { Icon } from "#src/interface/components/Icon.jsx"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 import { RepositoryCard } from "#src/interface/components/RepositoryCard.jsx"
+import { SignInDialog } from "#src/services/auth/index.js"
+import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js"
+import { browserAuth } from "@lix-js/client"
 
 export type Step = {
 	type: string
@@ -49,6 +52,11 @@ const dynamicTitle = () => {
 export function Page() {
 	const repo = currentPageContext.urlParsed.search["repo"] || ""
 	const modules = currentPageContext.urlParsed.search["module"]?.split(",") || []
+	let signInDialog: SlDialog | undefined
+
+	function onSignIn() {
+		signInDialog?.show()
+	}
 
 	return (
 		<>
@@ -83,13 +91,38 @@ export function Page() {
 										<h2 class="text-[24px] leading-tight md:text-2xl font-semibold mb-2">
 											Please authorize to continue
 										</h2>
-										<p class="text-surface-500">
+										<p class="text-surface-500 mb-8">
 											We need your authorization to install modules in your repository.
 										</p>
+										<sl-button
+											prop:size="medium"
+											onClick={() => {
+												return onSignIn()
+											}}
+											class={"on-inverted"}
+										>
+											<div slot="prefix">
+												<IconGithub />
+											</div>
+											Login
+										</sl-button>
 									</div>
-									<Gitlogin />
+									<SignInDialog
+										ref={signInDialog!}
+										onClickOnSignInButton={() => {
+											// hide the sign in dialog to increase UX when switching back to this window
+											browserAuth.login()
+											signInDialog?.hide()
+											setStep({
+												type: "opt-in",
+												message:
+													"We need your authorization to install modules in your repository.",
+											})
+										}}
+									/>
 								</SetupCard>
 							</Show>
+
 							<Show when={step().type === "opt-in"}>
 								<OptIn modules={modules} />
 							</Show>
