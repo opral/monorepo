@@ -21,11 +21,21 @@ export async function onBeforeRender(pageContext: PageContext) {
 	).text()
 	const markdown = await convert(text)
 
+	const recommends = item.recommends
+		? registry.filter((i: any) => {
+				for (const recommend of item.recommends!) {
+					if (recommend.replace("m/", "") === i.uniqueID) return true
+				}
+				return false
+		  })
+		: undefined
+
 	return {
 		pageContext: {
 			pageProps: {
 				markdown: markdown,
 				manifest: item,
+				recommends: recommends,
 			} satisfies PageProps,
 		},
 	}
