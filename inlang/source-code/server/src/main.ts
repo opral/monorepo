@@ -3,17 +3,17 @@ import compression from "compression"
 import { validateEnvVariables, privateEnv } from "@inlang/env-variables"
 import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
-import { isProduction } from "./env.js"
-import { router as websiteRouter } from "@inlang/website/router"
 import { router as telemetryRouter } from "@inlang/telemetry/router"
 import { router as rpcRouter } from "@inlang/rpc/router"
 import { router as badgeRouter } from "@inlang/badge/router"
 import { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { ProjectSettings } from "@inlang/project-settings"
 import { StorageSchema } from "@inlang/plugin-message-format/storage-schema"
+import { createProxyMiddleware } from "http-proxy-middleware"
 
 // --------------- SETUP -----------------
 
+export const isProduction = process.env.NODE_ENV === "production"
 const { error: errors } = validateEnvVariables({ forProduction: isProduction })
 
 if (errors) {
@@ -77,8 +77,22 @@ app.use(rpcRouter)
 
 app.use(badgeRouter)
 
+app.use(
+	createProxyMiddleware("/editor", {
+		target: "http://localhost:4001",
+		changeOrigin: true,
+	})
+)
+
+app.use(
+	"*",
+	createProxyMiddleware({
+		target: "http://localhost:4002",
+		changeOrigin: true,
+	})
+)
+
 // ! website comes last in the routes because it uses the wildcard `*` to catch all routes
-app.use(websiteRouter)
 
 // ----------------- START SERVER -----------------
 

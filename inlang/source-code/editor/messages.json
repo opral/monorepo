@@ -1,0 +1,2505 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"data": [
+		{
+			"id": "footer_category_application",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Global Application"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Globale Anwendung"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_category_lint",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lint Rules"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lint Regeln"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_category_markdown",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Global Markdown"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Globales Markdown"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_category_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Categories"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Kategorien"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_category_website",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Global Website"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Globale Webseite"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_contact_blog",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Blog"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Blog"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Blog"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Blog"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "博客"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_contact_feedback",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Feedback"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Feedback"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Feedback"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Spätná väzba"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "反馈"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_contact_getInTouch",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "In Kontakt treten"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Get in Touch"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Fale com a gente"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Kontaktujte nás"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "联系我们"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_contact_join",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Bewerben"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Join the Team"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Faça parte da equipe"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Pridajte sa k tímu"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "加入团队"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_contact_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Kontakt"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Let's talk"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vamos conversar"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Poďme sa rozprávať"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "联系"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_documentation_contribute",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Mitwirken"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Contribute"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Contribua"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Prispieť"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "贡献指南"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_documentation_gettingStarted",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Loslegen"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Getting Started"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Começando agora"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Začať"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "使用入门指南"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_documentation_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Dokumentation"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Documentation"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Documentação"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Dokumentácia"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "文档"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_documentation_whyInlang",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Warum inlang?"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Why inlang?"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Porquê o inlang?"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Prečo inlang?"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "为什么是 inlang？"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_inlang_tagline",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "The ecosystem to go global"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Das Ökosystem um global zu gehen"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_resources_discord",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Discord"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Discord"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Discord"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Discord"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Discord"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_resources_github",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "GitHub"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "GitHub"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "GitHub"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "GitHub"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "GitHub"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_resources_marketplace",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Marktplatz"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Marketplace"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Marketplace"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Trhovisko"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "市场"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_resources_roadmap",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Produktplan"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Roadmap"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Roadmap"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Roadmap"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "发展计划"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_resources_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Ressourcen"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Resources"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Recursos"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Zdroje"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "资源"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "footer_resources_twitter",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "X"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "X"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "X"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "X"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "推特"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_featured_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Featured"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Hervorgehoben"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_inlang_button",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "More about the ecosystem"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Mehr zum Ökosystem"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_inlang_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Expand to new markets and acquire more customers."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Erschließe neue Märkte und gewinne mehr Kunden."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_inlang_title_first_part",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Welcome to inlang,"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Willkommen bei inlang,"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_inlang_title_second_part",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "the ecosystem to go global."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "das Ökosystem um global zu gehen."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_lix_button",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "More about Lix"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Mehr über Lix"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_lix_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "The backbone of the ecosystem"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Die Basis des Ökosystems"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_lix_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lix change control"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lix-Änderungskontrolle"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_stack_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Stack"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Stack"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_build_your_own_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Build your own solution!"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Baue deine eigene Lösung!"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_build_your_own_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Can't find what you are looking for?"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Du kannst nicht finden, was du suchst?"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_need_help",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Need help or have questions? Join our Discord!"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Benötigst du Hilfe oder hast du Fragen? Trete unserem Discord bei!"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_button",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Notify me"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Benachrichtige mich"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_could_not_subscribe",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "You are already getting notified."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Du wirst bereits benachrichtigt."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_description_first_part",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "We will let you know when we get"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Wir werden dich informieren, wenn wir"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_description_last_part",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "some new results."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "neue Ergebnisse haben."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_error",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Something went wrong. Please try again later."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Etwas ist schief gelaufen. Bitte versuche es später noch einmal."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_no_email",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Please enter your email address."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Gib bitte deine Email-Adresse ein."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_placeholder",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Enter email..."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Email eingeben..."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_secondary_button",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Help us build the ecosystem"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Helfe uns, das Ökosystem aufzubauen"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_success",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "You will be notified when this feature is available."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Du wirst benachrichtigt, wenn diese Funktion verfügbar ist."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "No results yet"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Noch keine Ergebnisse"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_subscribe_unvalid_email",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Please enter a valid email address."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Bitte gib eine gültige E-Mail-Adresse ein."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_title_generic",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "All Products"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Alle Produkte"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_grid_title_guides",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "All Guides"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Alle Guides"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_build_on_inlang_button",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Build on inlang"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Baue auf inlang auf"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_category_application",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Application"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Anwendung"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_category_lint",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lint Rules"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lint Regeln"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_category_markdown",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Markdown"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Markdown"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_category_missing_something",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Missing something?"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Fehlt etwas?"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_category_website",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Website"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Webseite"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_search_placeholder",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Search"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Suche"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "newsletter_button",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Abschicken"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Subscribe"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Inscrever-se"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Prihlásiť sa"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "订阅"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "newsletter_error_alreadySubscribed",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Sie haben sich bereits für unseren Newsletter angemeldet."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "You are already subscribed to our newsletter."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Você já está inscrito em nossa newsletter."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Už ste sa prihlásili na odber nášho informačného bulletinu."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "你已经订阅了我们的通讯。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "newsletter_error_emptyEmail",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Bitte geben Sie Ihre E-Mail Adresse ein."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Please enter your email address."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Por favor, insira seu endereço de e-mail."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Zadajte svoju e-mailovú adresu."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "请输入你的电子邮件地址。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "newsletter_error_generic",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es später noch einmal."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Something went wrong. Please try again later."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Algo deu errado. Por favor, tente novamente mais tarde."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Niečo sa pokazilo. Skúste to prosím neskôr."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "出了点问题，请稍后再试。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "newsletter_error_invalidEmail",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Bitte geben Sie eine gültige E-Mail Adresse ein."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Please enter a valid email address."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Por favor, insira um endereço de e-mail válido."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Zadajte platnú e-mailovú adresu."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "请输入有效的电子邮件地址。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "newsletter_placeholder",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Eingabe der E-Mail ..."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Enter your email ..."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Digite o seu e-mail..."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Zadajte email ..."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "输入你的电子邮箱 ..."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "newsletter_subscribe_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Abonnieren Sie unseren Newsletter, um über die neuesten Entwicklungen auf dem Laufenden zu bleiben."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "We'll send you updates about inlang and globalization. You can unsubscribe at any time."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vamos te enviar atualizações sobre o inlang e globalização. Você pode se desinscrever a qualquer momento."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Budeme vám posielať aktuálne informácie o inlangu a globalizácii. Odber môžete kedykoľvek zrušiť."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "我们将向你发送有关 inlang 和全球化的最新信息。你可以随时取消订阅。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "newsletter_subscribe_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Bleiben Sie auf dem Laufenden"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Subscribe to our newsletter"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Receba as nossas novidades"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Prihláste sa na odber našich noviniek"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "订阅我们的通讯"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "newsletter_success",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vielen Dank für Ihr Abonnement!"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Thank you for subscribing!"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Obrigado por se inscrever!"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Ďakujeme, že ste sa prihlásili na odber!"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "感谢你的订阅！"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "newsletter_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Newsletter"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Newsletter"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Newsletter"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Newsletter"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "订阅邮件"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "newsletter_unsubscribed_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Sie haben sich erfolgreich von unserem Newsletter abgemeldet. Besuchen Sie uns bei Fragen auf"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "We're sad to see you go. If you have any feedback, please let us know on our"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Estamos tristes de ver você ir. Se você tiver qualquer feedback, nos informe em nosso"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Je nám ľúto, že odchádzate. Ak máte nejakú spätnú väzbu, dajte nám vedieť na našej"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "我们很舍不得你离开。如果你有任何反馈意见，请在我们的"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "newsletter_unsubscribed_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Abmeldung erfolgreich"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "You're unsubscribed"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "pt-BR",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Você se desinscreveu"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "sk",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Ste odhlásený z odberu"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "你已退订"
+						}
+					]
+				}
+			]
+		}
+	]
+}
