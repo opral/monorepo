@@ -23,12 +23,12 @@ const repositoryRoot = import.meta.url.slice(0, import.meta.url.lastIndexOf("inl
 
 // Formats a page for the sitemap
 function formatPage(name, published) {
-	return `\n  <sitemap>\n    <loc>${name}</loc>\n    <lastmod>${published}</lastmod>\n  </sitemap>`
+	return `\n  <url>\n    <loc>${name}</loc>\n    <lastmod>${published}</lastmod>\n  </url>`
 }
 
 async function generateSitemap() {
 	const publishDate = new Date().toISOString()
-	let content = `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="https://www.nsb.com/wp-content/plugins/wordpress-seo-premium/css/main-sitemap.xsl"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`
+	let content = `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="https://www.nsb.com/wp-content/plugins/wordpress-seo-premium/css/main-sitemap.xsl"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`
 	for (const route of routes) {
 		if (route.path !== "/c" && route.path !== "/g" && route.path !== "/m")
 			content = `${content}${formatPage(siteURL + route.path, publishDate)}`
@@ -79,7 +79,7 @@ async function generateSitemap() {
 		}
 	}
 
-	content = `${content}\n</sitemapindex>`
+	content = `${content}\n</urlset>`
 	await fs.writeFile(
 		new URL("./inlang/source-code/website/public/sitemap.xml", repositoryRoot),
 		content
