@@ -189,16 +189,16 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 				if (event.filename === watchPath) {
 					event.filename = changeName
 					queue.push(event)
-					handleNext(undefined)
+					setTimeout(() => handleNext(undefined), 0)
 				} else if (changeDir === watchPath + "/") {
 					event.filename = event.filename.replace(watchPath + "/", "") || changeName
 					queue.push(event)
-					handleNext(undefined)
+					setTimeout(() => handleNext(undefined), 0)
 				} else if (options?.recursive && event.filename.startsWith(watchPath)) {
 					// console.log(event.filename, { watchPath, changeDir, changeName })
 					event.filename = event.filename.replace(watchPath + "/", "") || changeName
 					queue.push(event)
-					handleNext(undefined)
+					setTimeout(() => handleNext(undefined), 0)
 				}
 			}
 

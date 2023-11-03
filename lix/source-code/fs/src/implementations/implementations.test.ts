@@ -105,8 +105,6 @@ const runFsTestSuite = async (
 		await fs.mkdir(watchTempDir + "/subfolder", { recursive: true })
 		await fs.writeFile(`${watchTempDir}/file`, "")
 
-		await wait(200)
-
 		const abortController = new AbortController()
 		const fileWatch = fs.watch(`${watchTempDir}/file`, { signal: abortController.signal })
 
@@ -157,13 +155,10 @@ const runFsTestSuite = async (
 		})()
 
 		await fs.writeFile(`${watchTempDir}/file`, textInFirstFile)
-
 		await fs.writeFile(`${watchTempDir}/file2`, textInFirstFile)
-
 		await fs.writeFile(`${watchTempDir}/subfolder/file3`, textInFirstFile)
 
-		await wait(200)
-
+		await wait(1)
 		abortController.abort()
 
 		// due to inconsistent node api all we can is check that the expected file emits at least one event, but the eventType and number of events varies widely
@@ -188,7 +183,7 @@ const runFsTestSuite = async (
 		await fs.writeFile(`${watchTempDir}/subfolder/file3`, textInFirstFile)
 
 		await fs.rm(`${watchTempDir}`, { recursive: true })
-		await wait(200)
+		await wait(1)
 
 		expect(fsEvents).toHaveLength(0)
 		expect(fileWatchfsEvents).toHaveLength(0)
