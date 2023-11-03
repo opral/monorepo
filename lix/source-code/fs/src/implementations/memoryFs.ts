@@ -95,14 +95,13 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 			if (typeof parentDir === "string") throw new FilesystemError("ENOTDIR", path, "mkdir")
 
-			for (const listener of listeners) {
-				listener({ eventType: "rename", filename: dirName + baseName })
-			}
-
 			if (parentDir && parentDir instanceof Set) {
 				parentDir.add(baseName)
 				newStatEntry(path, fsStats, 1, 0o755)
 				fsMap.set(path, new Set())
+				for (const listener of listeners) {
+					listener({ eventType: "rename", filename: dirName + baseName })
+				}
 				return path
 			}
 
@@ -130,14 +129,14 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 			if (parentDir instanceof Uint8Array) throw new FilesystemError("ENOTDIR", path, "rm")
 
-			for (const listener of listeners) {
-				listener({ eventType: "rename", filename: dirName + baseName })
-			}
-
 			if (target instanceof Uint8Array) {
 				parentDir.delete(baseName)
 				fsStats.delete(path)
 				fsMap.delete(path)
+				for (const listener of listeners) {
+					listener({ eventType: "rename", filename: dirName + baseName })
+				}
+
 				return
 			}
 
@@ -150,6 +149,10 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 				parentDir.delete(baseName)
 				fsStats.delete(path)
 				fsMap.delete(path)
+				for (const listener of listeners) {
+					listener({ eventType: "rename", filename: dirName + baseName })
+				}
+
 				return
 			}
 
@@ -246,13 +249,13 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 			if (target.size) throw new FilesystemError("ENOTEMPTY", path, "rmdir")
 
-			for (const listener of listeners) {
-				listener({ eventType: "rename", filename: dirName + baseName })
-			}
-
 			parentDir.delete(baseName)
 			fsStats.delete(path)
 			fsMap.delete(path)
+
+			for (const listener of listeners) {
+				listener({ eventType: "rename", filename: dirName + baseName })
+			}
 		},
 
 		symlink: async function (
