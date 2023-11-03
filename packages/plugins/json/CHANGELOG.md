@@ -1,5 +1,16 @@
 # @inlang/plugin-json
 
+## 5.1.0
+
+### Minor Changes
+
+- cafff8748: adjust tests and fix erros message
+
+### Patch Changes
+
+- Updated dependencies [cafff8748]
+  - @inlang/sdk@0.17.0
+
 ## 5.0.0
 
 ### Major Changes
