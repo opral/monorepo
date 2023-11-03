@@ -299,8 +299,8 @@ function ShowProgress() {
 		<SetupCard>
 			{/* Big loading spinner */}
 			<div class="relative h-24 w-24 animate-spin mb-4">
-				<div class="h-full w-full bg-background border-primary border-4 rounded-full" />
-				<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-background" />
+				<div class="h-full w-full bg-surface-50 border-primary border-4 rounded-full" />
+				<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-surface-50" />
 			</div>
 			<div class="flex flex-col justify-center gap-4 items-center">
 				<h2 class="text-[24px] leading-tight md:text-2xl font-semibold text-center">
