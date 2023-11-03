@@ -57,6 +57,15 @@ async function main(args: {
 		return
 	}
 
+	// Watch for changes in the config file
+	const watcher = vscode.workspace.createFileSystemWatcher(
+		new vscode.RelativePattern(workspaceFolder, CONFIGURATION.FILES.PROJECT)
+	)
+	// Listen for changes in the config file
+	watcher.onDidChange(() => {
+		main(args)
+	})
+
 	// Register commands and other extension functionality
 	args.context.subscriptions.push(
 		...Object.values(CONFIGURATION.COMMANDS).map((c) => c.register(c.command, c.callback as any))

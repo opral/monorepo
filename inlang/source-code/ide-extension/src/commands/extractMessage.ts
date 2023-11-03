@@ -52,18 +52,19 @@ export const extractMessageCommand = {
 				return acc
 			}
 			return [...acc, option.callback({ messageId, selection: messageValue })]
-		}, [] as string[])
+		}, [] as { messageId: string; messageReplacement: string }[])
+
+		const messageReplacements = preparedExtractOptions.map(
+			({ messageReplacement }) => messageReplacement
+		)
 
 		const preparedExtractOption = await window.showQuickPick(
-			[...preparedExtractOptions, "How to edit these replacement options?"],
+			[...messageReplacements, "How to edit these replacement options?"],
 			{ title: "Replace highlighted text with:" }
 		)
 		if (preparedExtractOption === undefined) {
 			return
-		} else if (
-			preparedExtractOption ===
-			"How to edit these replacement options? See `extractMessageOptions`."
-		) {
+		} else if (preparedExtractOption === "How to edit these replacement options?") {
 			// TODO #152
 			return env.openExternal(
 				Uri.parse(
@@ -72,12 +73,16 @@ export const extractMessageCommand = {
 			)
 		}
 
-		if (preparedExtractOption === undefined) {
+		const selectedExtractOption = preparedExtractOptions.find(
+			({ messageReplacement }) => messageReplacement === preparedExtractOption
+		)
+
+		if (selectedExtractOption === undefined) {
 			return msg("Couldn't find choosen extract option.", "warn", "notification")
 		}
 
 		const message: Message = {
-			id: messageId,
+			id: selectedExtractOption.messageId,
 			selectors: [],
 			variants: [
 				{

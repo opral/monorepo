@@ -1,5 +1,11 @@
 # @inlang/plugin
 
+## 2.4.0
+
+### Minor Changes
+
+- 39beea7dd: change return type of extractMessageOptions
+
 ## 2.3.0
 
 ### Minor Changes
