@@ -1,6 +1,14 @@
 import { test, expect, afterAll, describe } from "vitest"
-import type { NodeishFilesystem } from "../NodeishFilesystemApi.js"
+import type { NodeishFilesystem, FileChangeInfo } from "../NodeishFilesystemApi.js"
 import { createNodeishMemoryFs } from "./memoryFs.js"
+
+async function wait(time: number) {
+	await new Promise((resolve) =>
+		setTimeout(() => {
+			resolve(undefined)
+		}, time)
+	)
+}
 
 // some node tests fail on windows (lol)
 describe.skipIf(process.platform === "win32")("node fs", async () => {
@@ -10,7 +18,9 @@ describe.skipIf(process.platform === "win32")("node fs", async () => {
 	const tempDir = path.join(url.fileURLToPath(import.meta.url), "../__test")
 
 	await fs.mkdir(tempDir, { recursive: true })
-	await runFsTestSuite("node fs", tempDir, fs)
+	// @ts-ignore
+	const isNodeFs = true
+	await runFsTestSuite("node fs", tempDir, fs as NodeishFilesystem, isNodeFs)
 })
 
 describe("memory fs", async () => {
@@ -19,7 +29,12 @@ describe("memory fs", async () => {
 	await runFsTestSuite("memory fs", "", fs)
 })
 
-const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesystem) => {
+const runFsTestSuite = async (
+	name: string,
+	tempDir: string,
+	fs: NodeishFilesystem,
+	isNodeFs = false
+) => {
 	// testing characters is important. see bug https://github.com/inlang/monorepo/issues/785
 	const textInFirstFile = `
 	  Testing a variety of characters.
@@ -83,6 +98,101 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 		).toEqual(textInFirstFile)
 
 		expect(await fs.readFile(`${tempDir}/file2`, { encoding: "utf-8" })).toEqual(textInSecondFile)
+	})
+
+	test.skipIf(isNodeFs)("watch", async () => {
+		const watchTempDir = tempDir + "/watchdir"
+		await fs.mkdir(watchTempDir + "/subfolder", { recursive: true })
+		await fs.writeFile(`${watchTempDir}/file`, "")
+
+		await wait(200)
+
+		const abortController = new AbortController()
+		const fileWatch = fs.watch(`${watchTempDir}/file`, { signal: abortController.signal })
+
+		let fileWatchfsEvents: FileChangeInfo[] = []
+
+		;(async () => {
+			try {
+				for await (const event of fileWatch) {
+					fileWatchfsEvents.push(event)
+				}
+			} catch (err: any) {
+				if (err.name === "AbortError") return
+				throw err
+			}
+		})()
+
+		const folderWatch = fs.watch(`${watchTempDir}`, { signal: abortController.signal })
+
+		let fsEvents: any[] = []
+
+		;(async () => {
+			try {
+				for await (const event of folderWatch) {
+					fsEvents.push(event)
+				}
+			} catch (err: any) {
+				if (err.name === "AbortError") return
+				throw err
+			}
+		})()
+
+		const recursiveWatch = fs.watch(`${watchTempDir}`, {
+			recursive: true,
+			signal: abortController.signal,
+		})
+
+		let recursiveEvents: any[] = []
+
+		;(async () => {
+			try {
+				for await (const event of recursiveWatch) {
+					recursiveEvents.push(event)
+				}
+			} catch (err: any) {
+				if (err.name === "AbortError") return
+				throw err
+			}
+		})()
+
+		await fs.writeFile(`${watchTempDir}/file`, textInFirstFile)
+
+		await fs.writeFile(`${watchTempDir}/file2`, textInFirstFile)
+
+		await fs.writeFile(`${watchTempDir}/subfolder/file3`, textInFirstFile)
+
+		await wait(200)
+
+		abortController.abort()
+
+		// due to inconsistent node api all we can is check that the expected file emits at least one event, but the eventType and number of events varies widely
+		const fileEventFiles = new Set(fileWatchfsEvents.map((event) => event.filename))
+		expect([...fileEventFiles]).toStrictEqual(["file"])
+
+		// only checking the filenames, as the eventType can be either change or rename, depending on node version, timing, and platform, this can also be inconsistent or randomly wrong among multiple runs
+		const fsEventFiles = new Set(fsEvents.map((event) => event.filename))
+		expect([...fsEventFiles]).toStrictEqual(["file", "file2"])
+
+		expect(recursiveEvents).toStrictEqual([
+			{ eventType: "rename", filename: "file" },
+			{ eventType: "rename", filename: "file2" },
+			{ eventType: "rename", filename: "subfolder/file3" },
+		])
+
+		fsEvents = []
+		fileWatchfsEvents = []
+		recursiveEvents = []
+		await fs.writeFile(`${watchTempDir}/file`, textInFirstFile)
+		await fs.writeFile(`${watchTempDir}/file2`, textInFirstFile)
+		await fs.writeFile(`${watchTempDir}/subfolder/file3`, textInFirstFile)
+
+		await fs.rm(`${watchTempDir}`, { recursive: true })
+		await wait(200)
+
+		expect(fsEvents).toHaveLength(0)
+		expect(fileWatchfsEvents).toHaveLength(0)
+		expect(recursiveEvents).toHaveLength(0)
 	})
 
 	test("r/w an empty file", async () => {
