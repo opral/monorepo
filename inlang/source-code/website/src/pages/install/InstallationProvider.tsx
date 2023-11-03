@@ -13,6 +13,12 @@ import { registry } from "@inlang/marketplace-registry"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"
 
+const user = () => {
+	const localStorage = getLocalStorage()
+	if (!localStorage) return undefined
+	return localStorage.user
+}
+
 export function InstallationProvider(props: {
 	repo: string
 	modules: string[]
@@ -22,14 +28,9 @@ export function InstallationProvider(props: {
 	children: JSXElement
 }) {
 	const [, setLocalStorage] = useLocalStorage() ?? []
-	const user = () => {
-		const localStorage = getLocalStorage()
-		if (!localStorage) return undefined
-		return localStorage.user
-	}
 
 	createEffect(() => {
-		validateRepo(user(), setRecentProject, props)
+		validateRepo(setRecentProject, props)
 	})
 
 	/* Set recent project into local storage */
@@ -69,8 +70,6 @@ export function InstallationProvider(props: {
  * This function checks for common errors before repo initialization (to be more performant) and sets the step accordingly.
  */
 function validateRepo(
-	user: { username: string; email: string } | undefined,
-	// user: { username: string; email: string } | undefined,
 	setRecentProject: () => void,
 	props: {
 		repo: string
@@ -80,7 +79,7 @@ function validateRepo(
 		optIn: Record<string, any>
 	}
 ) {
-	if (!user && getLocalStorage()) {
+	if (!user() && getLocalStorage()) {
 		props.setStep({
 			type: "github-login",
 			error: false,
@@ -110,7 +109,7 @@ function validateRepo(
 		})
 
 		setRecentProject()
-		initializeRepo(props.repo, props.modules, user!, props.step, props.setStep)
+		initializeRepo(props.repo, props.modules, user()!, props.step, props.setStep)
 	}
 }
 
