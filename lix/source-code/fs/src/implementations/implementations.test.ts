@@ -161,15 +161,12 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 		abortController.abort()
 
 		// due to inconsistent node api all we can is check that the expected file emits at least one event, but the eventType and number of events varies widely
-		const eventFiles = new Set(fileWatchfsEvents.map((event) => event.filename))
-		expect([...eventFiles]).toStrictEqual(["file"])
-
-		expect(fsEvents).toHaveLength(2)
+		const fileEventFiles = new Set(fileWatchfsEvents.map((event) => event.filename))
+		expect([...fileEventFiles]).toStrictEqual(["file"])
 
 		// only checking the filenames, as the eventType can be either change or rename, depending on node version, timing, and platform, this can also be inconsistent or randomly wrong among multiple runs
-		expect(fsEvents[0].filename).toBe("file")
-		expect(fsEvents[1].filename).toBe("file2")
-
+		const fsEventFiles = new Set(fsEvents.map((event) => event.filename))
+		expect([...fsEventFiles]).toStrictEqual(["file", "file2"])
 
 		expect(recursiveEvents).toStrictEqual([
 			{ eventType: "rename", filename: "file" },
