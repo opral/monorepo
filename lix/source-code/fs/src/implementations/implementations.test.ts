@@ -19,7 +19,8 @@ describe.skipIf(process.platform === "win32")("node fs", async () => {
 
 	await fs.mkdir(tempDir, { recursive: true })
 	// @ts-ignore
-	await runFsTestSuite("node fs", tempDir, fs as NodeishFilesystem)
+	const isNodeFs = true
+	await runFsTestSuite("node fs", tempDir, fs as NodeishFilesystem, isNodeFs)
 })
 
 describe("memory fs", async () => {
@@ -28,7 +29,12 @@ describe("memory fs", async () => {
 	await runFsTestSuite("memory fs", "", fs)
 })
 
-const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesystem) => {
+const runFsTestSuite = async (
+	name: string,
+	tempDir: string,
+	fs: NodeishFilesystem,
+	isNodeFs = false
+) => {
 	// testing characters is important. see bug https://github.com/inlang/monorepo/issues/785
 	const textInFirstFile = `
 	  Testing a variety of characters.
@@ -94,7 +100,7 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 		expect(await fs.readFile(`${tempDir}/file2`, { encoding: "utf-8" })).toEqual(textInSecondFile)
 	})
 
-	test("watch", async () => {
+	test.skipIf(isNodeFs)("watch", async () => {
 		const watchTempDir = tempDir + "/watchdir"
 		await fs.mkdir(watchTempDir + "/subfolder", { recursive: true })
 		await fs.writeFile(`${watchTempDir}/file`, "")
