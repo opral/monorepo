@@ -1007,7 +1007,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Featured"
+							"value": "Featured Products"
 						}
 					]
 				},
@@ -1017,7 +1017,33 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Hervorgehoben"
+							"value": "Ausgewählte Produkte"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_guides_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Guides"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Guides"
 						}
 					]
 				}
@@ -1226,32 +1252,6 @@
 						{
 							"type": "Text",
 							"value": "Stack"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "home_guides_title",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Guides"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Guides"
 						}
 					]
 				}
