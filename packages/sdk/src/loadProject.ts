@@ -141,6 +141,7 @@ export const loadProject = async (args: {
 		createEffect(() => (settingsValue = settings()!)) // workaround to not run effects twice (e.g. settings change + modules change) (I'm sure there exists a solid way of doing this, but I haven't found it yet)
 
 		const [messages, setMessages] = createSignal<Message[]>()
+		const [watcherInitialized, setWatcherInitialized] = createSignal(false)
 
 		createEffect(() => {
 			const conf = settings()
@@ -170,7 +171,11 @@ export const loadProject = async (args: {
 			loadAndSetMessages()
 
 			const abortController = new AbortController()
-			if (Object.keys(settingsValue).includes("plugin.inlang.messageFormat")) {
+			if (
+				Object.keys(settingsValue).includes("plugin.inlang.messageFormat") &&
+				!watcherInitialized()
+			) {
+				setWatcherInitialized(true)
 				;(async () => {
 					try {
 						const watcher = nodeishFs.watch(
