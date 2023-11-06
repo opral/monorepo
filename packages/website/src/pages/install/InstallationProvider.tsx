@@ -85,7 +85,7 @@ function validateRepo(
 			type: "github-login",
 			error: false,
 		})
-	} else if (!props.repo) {
+	} else if (!props.repo || props.repo === "") {
 		props.setStep({
 			type: "no-repo",
 			message: "No repository URL provided.",
@@ -261,7 +261,7 @@ async function initializeRepo(
 	if (project.errors().length > 0) {
 		return setStep({
 			type: "error",
-			message: "There are errors in your project: " + project.errors().join(", "),
+			message: "Your project has errors, please fix them before installing.",
 			error: true,
 		})
 	}
@@ -291,16 +291,30 @@ async function initializeRepo(
 
 	await repo.push()
 
-	setStep({
-		type: "success",
-		message:
-			"Successfully installed the modules: " +
-			modulesURL.join(", ") +
-			" in your repository: " +
-			repoURL +
-			".",
-		error: false,
+	// look again if the project has errors
+	const projectAfterPush = await loadProject({
+		settingsFilePath: "/project.inlang.json",
+		nodeishFs: repo.nodeishFs,
 	})
+
+	if (projectAfterPush.errors().length > 0) {
+		return setStep({
+			type: "error",
+			message: "We encountered a bug. Please report it on GitHub.",
+			error: true,
+		})
+	} else {
+		setStep({
+			type: "success",
+			message:
+				"Successfully installed the modules: " +
+				modulesURL.join(", ") +
+				" in your repository: " +
+				repoURL +
+				".",
+			error: false,
+		})
+	}
 }
 
 function getLatestVersion(moduleURL: string) {
