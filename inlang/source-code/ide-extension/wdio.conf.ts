@@ -13,7 +13,7 @@ export const config: Options.Testrunner = {
 	autoCompileOpts: {
 		autoCompile: true,
 		tsNodeOpts: {
-			project: "./test/tsconfig.json",
+			project: "./tsconfig.e2e.json",
 			transpileOnly: true,
 		},
 	},
@@ -34,7 +34,7 @@ export const config: Options.Testrunner = {
 	// then the current working directory is where your `package.json` resides, so `wdio`
 	// will be called from there.
 	//
-	specs: ["./test/specs/**/*.ts"],
+	specs: ["./src/**/*.e2e.test.ts"],
 	// Patterns to exclude.
 	exclude: [
 		// 'path/to/excluded/files'
