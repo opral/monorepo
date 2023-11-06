@@ -79,7 +79,7 @@ app.use(badgeRouter)
 
 app.use(
 	createProxyMiddleware("/editor", {
-		target: "http://localhost:4001",
+		target: "http://[::1]:4001",
 		changeOrigin: true,
 		headers: {
 			Connection: "keep-alive",
@@ -90,7 +90,7 @@ app.use(
 app.use(
 	"*",
 	createProxyMiddleware({
-		target: "http://localhost:4002",
+		target: "http://[::1]:4002",
 		changeOrigin: true,
 		headers: {
 			Connection: "keep-alive",
