@@ -513,8 +513,6 @@ export async function pushChanges(args: {
 	// triggering a side effect here to trigger a re-render
 	// of components that depends on fs
 	args.setFsChange(new Date())
-
-	// TODO #1459 start - uncomment to push changes to repo
 	// push changes
 	try {
 		const push = await args.repo.push()
@@ -537,5 +535,4 @@ export async function pushChanges(args: {
 	} catch (error) {
 		return { error: (error as PushException) ?? "Unknown error" }
 	}
-	// TODO #1459 end - uncomment to push changes to repo
 }

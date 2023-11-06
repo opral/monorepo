@@ -1,5 +1,5 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
-import type { Repository } from "./api.js"
+import type { Repository, LixError } from "./api.js"
 import { transformRemote, parseLixUri } from "./helpers.js"
 import { httpWithLazyInjection } from "./helpers/httpWithLazyInjection.js"
 
@@ -29,7 +29,7 @@ import {
 	// listBranches,
 } from "isomorphic-git"
 import { withLazyFetching } from "./helpers/withLazyFetching.js"
-import { flatFileListToDirectoryStructure } from "./isomorphic-git-forks/flatFileListToDirectoryStructure.js"
+// import { flatFileListToDirectoryStructure } from "./isomorphic-git-forks/flatFileListToDirectoryStructure.js"
 
 export async function openRepository(
 	url: string,
@@ -249,7 +249,7 @@ export async function openRepository(
 				const filepaths = await listFiles({
 					fs: rawFs,
 					gitdir: gitdir,
-					// TODO #1459 investigate the index cache further seem to be an in memory forwared on write cache to allow fast reads of the index... 
+					// TODO #1459 investigate the index cache further seem to be an in memory forwared on write cache to allow fast reads of the index...
 					dir: dir,
 					// NOTE: no ref config! we don't set ref because we want the list of files on the index
 				});
