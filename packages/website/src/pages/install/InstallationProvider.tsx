@@ -12,6 +12,7 @@ import type { Step } from "./index.page.jsx"
 import { registry } from "@inlang/marketplace-registry"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"
+import { loadProject } from "@inlang/sdk"
 
 const user = () => {
 	const localStorage = getLocalStorage()
@@ -251,6 +252,19 @@ async function initializeRepo(
 
 	/* If any error has gone through, stop the installation here */
 	if (step().error) return
+
+	const project = await loadProject({
+		settingsFilePath: "/project.inlang.json",
+		nodeishFs: repo.nodeishFs,
+	})
+
+	if (project.errors().length > 0) {
+		return setStep({
+			type: "error",
+			message: "There are errors in your project: " + project.errors().join(", "),
+			error: true,
+		})
+	}
 
 	/* Otherwise, change the repo and finishd the process */
 	setStep({
