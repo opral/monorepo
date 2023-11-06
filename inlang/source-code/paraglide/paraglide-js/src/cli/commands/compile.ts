@@ -31,6 +31,7 @@ export const compileCommand = new Command()
 		const project = exitIfErrors(
 			await loadProject({
 				settingsFilePath: path,
+				//@ts-ignore
 				nodeishFs: fs,
 			})
 		)

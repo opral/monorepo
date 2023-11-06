@@ -153,6 +153,7 @@ export const existingProjectFlow = async (args: { existingProjectPath: string })
 	}
 	const project = await loadProject({
 		settingsFilePath: resolve(process.cwd(), args.existingProjectPath),
+		//@ts-ignore
 		nodeishFs: fs,
 	})
 	if (project.errors().length > 0) {
@@ -169,6 +170,7 @@ export const createNewProjectFlow = async () => {
 	await fs.writeFile(DEFAULT_PROJECT_PATH, JSON.stringify(newProjectTemplate, undefined, 2))
 	const project = await loadProject({
 		settingsFilePath: resolve(process.cwd(), DEFAULT_PROJECT_PATH),
+		//@ts-ignore
 		nodeishFs: fs,
 	})
 	if (project.errors().length > 0) {
