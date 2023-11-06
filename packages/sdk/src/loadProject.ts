@@ -141,6 +141,7 @@ export const loadProject = async (args: {
 		createEffect(() => (settingsValue = settings()!)) // workaround to not run effects twice (e.g. settings change + modules change) (I'm sure there exists a solid way of doing this, but I haven't found it yet)
 
 		const [messages, setMessages] = createSignal<Message[]>()
+
 		createEffect(() => {
 			const conf = settings()
 			if (!conf) return
@@ -153,16 +154,41 @@ export const loadProject = async (args: {
 				return
 			}
 
-			makeTrulyAsync(
-				_resolvedModules.resolvedPluginApi.loadMessages({
-					settings: settingsValue,
-				})
-			)
-				.then((messages) => {
-					setMessages(messages)
-					markInitAsComplete()
-				})
-				.catch((err) => markInitAsFailed(new PluginLoadMessagesError({ cause: err })))
+			const loadAndSetMessages = async () => {
+				makeTrulyAsync(
+					_resolvedModules.resolvedPluginApi.loadMessages({
+						settings: settingsValue,
+					})
+				)
+					.then((messages) => {
+						setMessages(messages)
+						markInitAsComplete()
+					})
+					.catch((err) => markInitAsFailed(new PluginLoadMessagesError({ cause: err })))
+			}
+
+			loadAndSetMessages()
+
+			const abortController = new AbortController()
+			if (Object.keys(settingsValue).includes("plugin.inlang.messageFormat")) {
+				;(async () => {
+					try {
+						const watcher = nodeishFs.watch(
+							settingsValue["plugin.inlang.messageFormat"]!.filePath as string,
+							{
+								signal: abortController.signal,
+							}
+						)
+						//eslint-disable-next-line @typescript-eslint/no-unused-vars
+						for await (const event of watcher) {
+							loadAndSetMessages()
+						}
+					} catch (err: any) {
+						if (err.name === "AbortError") return
+						throw err
+					}
+				})()
+			}
 		})
 
 		// -- installed items ----------------------------------------------------
