@@ -240,29 +240,15 @@ export const Gitfloat = () => {
 
 	onMount(() => {
 		const gitfloat = document.querySelector(".gitfloat")
-		const isMobile = window.innerWidth < 768
-		isMobile
-			? gitfloat?.classList.add("animate-slideInMobile")
-			: gitfloat?.classList.add("animate-slideIn")
-		setTimeout(() => {
-			isMobile
-				? gitfloat?.classList.remove("animate-slideInMobile")
-				: gitfloat?.classList.remove("animate-slideIn")
-		}, 400)
+		gitfloat?.classList.add("animate-slideIn")
+		setTimeout(() => gitfloat?.classList.remove("animate-slideIn"), 400)
 	})
 
 	createEffect(() => {
-		const isMobile = window.innerWidth < 768
 		if (localChanges() > 0 && localStorage?.user !== undefined) {
 			const gitfloat = document.querySelector(".gitfloat")
-			isMobile
-				? gitfloat?.classList.add("animate-jumpMobile")
-				: gitfloat?.classList.add("animate-jump")
-			setTimeout(() => {
-				isMobile
-					? gitfloat?.classList.remove("animate-jumpMobile")
-					: gitfloat?.classList.remove("animate-jump")
-			}, 1000)
+			gitfloat?.classList.add("animate-jump")
+			setTimeout(() => gitfloat?.classList.remove("animate-jump"), 1000)
 		}
 	})
 
@@ -277,7 +263,7 @@ export const Gitfloat = () => {
 
 	return (
 		<>
-			<div class="gitfloat z-30 sticky mx-auto md:left-1/2 md:-translate-x-[150px] bottom-8 w-[300px] my-16">
+			<div class="gitfloat z-30 sticky mx-auto bottom-8 w-[300px] my-16">
 				<TourHintWrapper
 					currentId={tourStep()}
 					position="top-right"
