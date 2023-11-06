@@ -37,7 +37,7 @@ export default function SearchBar() {
 			if (e.metaKey && e.key === "k" && isMac()) {
 				e.preventDefault()
 				inputElement.focus()
-			} else if (e.ctrlKey && e.key === "k" && !isMac()) {
+			} else if (!isMac() && e.key === "/") {
 				e.preventDefault()
 				inputElement.focus()
 			}
@@ -59,9 +59,9 @@ export default function SearchBar() {
 				autocomplete="off"
 				placeholder={
 					isMac()
-						? m.marketplace_header_search_placeholder()
+						? "⌘ + k " + m.marketplace_header_search_placeholder()
 						: typeof window !== "undefined"
-						? "Search"
+						? "/ " + m.marketplace_header_search_placeholder()
 						: ""
 				}
 				class="border-0 focus:ring-0 h-full w-full pl-0 text-sm md:placeholder:text-surface-400 placeholder:text-surface-900/0 transition-all"
