@@ -67,7 +67,7 @@ export const config: Options.Testrunner = {
 			browserVersion: "stable", // also possible: "insiders" or a specific version e.g. "1.80.0"
 			"wdio:vscodeOptions": {
 				// points to directory where extension package.json is located
-				extensionPath: path.resolve(__dirname, "../"),
+				extensionPath: __dirname,
 				// optional VS Code settings
 				userSettings: {
 					"editor.fontSize": 14,
