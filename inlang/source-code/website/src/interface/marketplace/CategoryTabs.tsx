@@ -20,6 +20,10 @@ const CategoryTabs = () => {
 				href: "/c/markdown",
 			},
 			{
+				name: "Plugins",
+				href: "/c/plugins",
+			},
+			{
 				name: m.marketplace_header_category_lint(),
 				href: "/c/lint-rules",
 			},
