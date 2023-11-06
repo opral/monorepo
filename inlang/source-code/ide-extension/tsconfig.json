@@ -1,7 +1,6 @@
 {
 	"extends": "../tsconfig.base.json",
-	"include": ["src/**/*", "./build.js", "test/test.cts"],
-	"exclude": ["src/**/*.e2e.test.ts"],
+	"include": ["src/**/*", "./build.js"],
 	"compilerOptions": {
 		"lib": ["ESNext"],
 		"outDir": "./dist",
@@ -9,6 +8,6 @@
 		// interestingly, extending a base config that contains module node16 still requires explicit manual
 		// setting of module node16 here.
 		"module": "Node16",
-		"resolveJsonModule": true
+		"resolveJsonModule": true,
 	}
 }

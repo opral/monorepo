@@ -1,5 +1,6 @@
 import type { Options } from "@wdio/types"
 import url from "node:url"
+import path from "node:path"
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url))
 export const config: Options.Testrunner = {
@@ -12,7 +13,7 @@ export const config: Options.Testrunner = {
 	autoCompileOpts: {
 		autoCompile: true,
 		tsNodeOpts: {
-			project: "./tsconfig.e2e.json",
+			project: "./tsconfig.json",
 			transpileOnly: true,
 		},
 	},
@@ -33,7 +34,7 @@ export const config: Options.Testrunner = {
 	// then the current working directory is where your `package.json` resides, so `wdio`
 	// will be called from there.
 	//
-	specs: ["./src/**/*.e2e.test.ts"],
+	specs: ["./spec/**/*.e2e.test.ts"],
 	// Patterns to exclude.
 	exclude: [
 		// 'path/to/excluded/files'
@@ -66,7 +67,8 @@ export const config: Options.Testrunner = {
 			browserVersion: "stable", // also possible: "insiders" or a specific version e.g. "1.80.0"
 			"wdio:vscodeOptions": {
 				// points to directory where extension package.json is located
-				extensionPath: __dirname,
+				extensionPath: path.join(__dirname, '..'),
+				workspacePath: path.join(__dirname, "../../../end-to-end-tests/inlang-nextjs"),
 				// optional VS Code settings
 				userSettings: {
 					"editor.fontSize": 14,
