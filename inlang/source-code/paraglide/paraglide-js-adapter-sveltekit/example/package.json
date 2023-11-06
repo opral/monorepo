@@ -3,8 +3,9 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"dev": "vite dev",
-		"_build": "paraglide-js compile --namespace sveltekit-example && vite build",
+		"_dev": "vite dev",
+		"build": "paraglide-js compile --namespace sveltekit-example && vite build",
+		"test": "paraglide-js compile --namespace sveltekit-example && vite build",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
@@ -13,6 +14,7 @@
 		"@sveltejs/adapter-auto": "^2.0.0",
 		"@sveltejs/kit": "^1.20.4",
 		"@inlang/paraglide-js": "*",
+		"@inlang/plugin-message-format": "*",
 		"svelte": "^4.0.5",
 		"svelte-check": "^3.4.3",
 		"tslib": "^2.4.1",

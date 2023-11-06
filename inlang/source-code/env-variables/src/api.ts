@@ -7,17 +7,13 @@ export type PrivateEnvVariables = z.infer<typeof privateEnvVariablesSchema>
 export type AllEnvVariables = PublicEnvVariables & PrivateEnvVariables
 
 export const publicEnvVariablesSchema = z.object({
-	PUBLIC_GITHUB_APP_CLIENT_ID: z.string(),
+	PUBLIC_LIX_GITHUB_APP_CLIENT_ID: z.string(),
+	PUBLIC_LIX_GITHUB_APP_NAME: z.string(),
 	PUBLIC_GIT_PROXY_BASE_URL: z
 		.string()
 		.startsWith("http")
 		.regex(/^(?!.*\/$).+$/, "Must not end with a slash")
 		.describe(`Must be a url including protocol`),
-	PUBLIC_GIT_PROXY_PATH: z
-		.string()
-		.startsWith("/")
-		.endsWith("/")
-		.describe(`Must be a path like /git-proxy/`),
 	PUBLIC_WEBSITE_SENTRY_DSN: z.string().optional().describe("DSN for Sentry (in the browser)"),
 	PUBLIC_POSTHOG_TOKEN: z.string().optional(),
 	PUBLIC_SERVER_BASE_URL: z
@@ -28,11 +24,13 @@ export const publicEnvVariablesSchema = z.object({
 })
 
 export const privateEnvVariablesSchema = z.object({
+	LIX_GITHUB_APP_CLIENT_SECRET: z.string(),
 	SESSION_COOKIE_SECRET: z.string(),
 	JWE_SECRET: z.string(),
 	OPEN_AI_KEY: z.string().optional(),
 	GOOGLE_TRANSLATE_API_KEY: z.string().optional(),
 	SERVER_SENTRY_DSN: z.string().optional().describe("DSN for Sentry (on the server)"),
+	ALGOLIA_ADMIN: z.string(),
+	ALGOLIA_APPLICATION: z.string(),
 	// prefixed with INLANG_ because github doesn't allow env vars with GITHUB_ in ci/cd.
-	INLANG_GITHUB_APP_CLIENT_SECRET: z.string(),
 })

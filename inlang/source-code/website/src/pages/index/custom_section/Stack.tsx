@@ -1,19 +1,28 @@
 import {
-	IconSvelte,
-	IconReact,
-	IconNextjs,
-	IconJavascript,
 	IconFlutter,
+	IconJavascript,
+	IconNextjs,
+	IconReact,
+	IconSvelte,
+	IconSolid,
 	IconVue,
-} from "#src/pages/application/index.page.jsx"
+} from "#src/interface/custom-icons/subcategoryIcon.jsx"
+import Link from "#src/renderer/Link.jsx"
+import { currentPageContext } from "#src/renderer/state.js"
 import { For } from "solid-js"
+import * as m from "@inlang/paraglide-js/website/messages"
 
 const Stack = () => {
-	const getSubCategies = [
+	const getSubCategies: boolean | any[] | null | undefined = [
 		{
 			name: "Svelte",
 			param: "svelte",
 			icon: <IconSvelte class="-ml-1 w-8 h-8" />,
+		},
+		{
+			name: "Solid",
+			param: "solid",
+			icon: <IconSolid class="-ml-1 w-8 h-8" />,
 		},
 		{
 			name: "React",
@@ -44,32 +53,23 @@ const Stack = () => {
 	return (
 		<div class="w-full flex gap-4 mt-4 md:mt-10 mb-10 flex-col-reverse md:flex-row">
 			<div class="w-full">
-				<p class="pb-2 text-surface-500 text-sm">Stack</p>
+				<p class="pb-2 text-surface-500 text-sm">{m.home_stack_title()}</p>
 				<div class="flex gap-2 overflow-x-scroll hide-scrollbar">
 					<For each={getSubCategies}>
 						{(link) => (
-							<a
-								href={
-									window.location.origin +
-									"//" +
-									window.location.pathname +
-									"/?search=" +
-									link.param
-								}
-								class="flex-grow"
-							>
+							<Link href={"/search?q=" + link.param} class="flex-grow">
 								<div
 									class={
-										(window.location.search.includes(link.param)
+										(currentPageContext.urlParsed.searchOriginal?.includes(link.param)
 											? "bg-primary text-background "
-											: "bg-background text-surface-600 border border-surface-200 hover:border-surface-400") +
-										" px-6 py-3 flex-grow font-medium cursor-pointer rounded-lg flex items-center gap-2"
+											: "bg-background text-surface-600 border border-surface-200 hover:shadow-lg hover:shadow-surface-100 hover:border-surface-300 active:border-surface-400") +
+										" px-6 py-3 flex-grow font-medium cursor-pointer rounded-lg flex items-center gap-2 transition-all"
 									}
 								>
 									{link.icon}
 									{link.name}
 								</div>
-							</a>
+							</Link>
 						)}
 					</For>
 				</div>

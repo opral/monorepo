@@ -3,16 +3,18 @@ import { Meta, Title } from "@solidjs/meta"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { Button } from "../index/components/Button.jsx"
 import { z } from "zod"
-import { useI18n } from "@solid-primitives/i18n"
-import { defaultLanguage } from "#src/renderer/_default.page.route.js"
 import { InstallationProvider } from "./InstallationProvider.jsx"
 import { SetupCard } from "./components/SetupCard.jsx"
-import { Gitlogin } from "./components/GitLogin.jsx"
-import { Icon } from "#src/components/Icon.jsx"
-import { GetHelp } from "#src/components/GetHelp.jsx"
-import { RepositoryCard } from "#src/components/editor/CommunityProjects.jsx"
+import IconGithub from "~icons/cib/github"
+import { Icon } from "#src/interface/components/Icon.jsx"
+import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
-import MarketplaceLayout from "#src/components/marketplace/MarketplaceLayout.jsx"
+import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
+import { currentPageContext } from "#src/renderer/state.js"
+import { RepositoryCard } from "#src/interface/components/RepositoryCard.jsx"
+import { SignInDialog } from "#src/services/auth/index.js"
+import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js"
+import { browserAuth } from "@lix-js/client"
 
 export type Step = {
 	type: string
@@ -48,16 +50,12 @@ const dynamicTitle = () => {
 }
 
 export function Page() {
-	const [, { locale }] = useI18n()
+	const repo = currentPageContext.urlParsed.search["repo"] || ""
+	const modules = currentPageContext.urlParsed.search["module"]?.split(",") || []
+	let signInDialog: SlDialog | undefined
 
-	const url = new URLSearchParams(window.location.search)
-	const repo = url.get("repo") || ""
-	const modules = url.get("module")?.split(",") || []
-
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const getLocale = () => {
-		const language = locale() || defaultLanguage
-		return language !== defaultLanguage ? "/" + language : ""
+	function onSignIn() {
+		signInDialog?.show()
 	}
 
 	return (
@@ -93,13 +91,38 @@ export function Page() {
 										<h2 class="text-[24px] leading-tight md:text-2xl font-semibold mb-2">
 											Please authorize to continue
 										</h2>
-										<p class="text-surface-500">
+										<p class="text-surface-500 mb-8">
 											We need your authorization to install modules in your repository.
 										</p>
+										<sl-button
+											prop:size="medium"
+											onClick={() => {
+												return onSignIn()
+											}}
+											class={"on-inverted"}
+										>
+											<div slot="prefix">
+												<IconGithub />
+											</div>
+											Login
+										</sl-button>
 									</div>
-									<Gitlogin />
+									<SignInDialog
+										ref={signInDialog!}
+										onClickOnSignInButton={() => {
+											// hide the sign in dialog to increase UX when switching back to this window
+											browserAuth.login()
+											signInDialog?.hide()
+											setStep({
+												type: "opt-in",
+												message:
+													"We need your authorization to install modules in your repository.",
+											})
+										}}
+									/>
 								</SetupCard>
 							</Show>
+
 							<Show when={step().type === "opt-in"}>
 								<OptIn modules={modules} />
 							</Show>
@@ -276,8 +299,8 @@ function ShowProgress() {
 		<SetupCard>
 			{/* Big loading spinner */}
 			<div class="relative h-24 w-24 animate-spin mb-4">
-				<div class="h-full w-full bg-background border-primary border-4 rounded-full" />
-				<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-background" />
+				<div class="h-full w-full bg-surface-50 border-primary border-4 rounded-full" />
+				<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-surface-50" />
 			</div>
 			<div class="flex flex-col justify-center gap-4 items-center">
 				<h2 class="text-[24px] leading-tight md:text-2xl font-semibold text-center">

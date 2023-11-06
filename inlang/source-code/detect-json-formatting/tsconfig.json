@@ -4,7 +4,6 @@
 	"compilerOptions": {
 		"target": "ES2021",
 		"outDir": "dist",
-		"resolveJsonModule": true,
-		"types": ["node"]
+		"resolveJsonModule": true
 	}
 }

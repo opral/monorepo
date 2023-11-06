@@ -15,11 +15,13 @@
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
 	},
 	"dependencies": {
+		"@inlang/env-variables": "*",
 		"@inlang/language-tag": "*",
 		"@inlang/message": "*",
-		"@inlang/env-variables": "*",
 		"@inlang/result": "*",
 		"@inlang/sdk": "*",
+		"@inlang/marketplace-registry": "*",
+		"algoliasearch": "4.20.0",
 		"body-parser": "^1.20.2",
 		"ts-dedent": "^2.2.0",
 		"typed-rpc": "3.0.0"

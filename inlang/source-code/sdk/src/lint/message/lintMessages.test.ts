@@ -7,6 +7,7 @@ const lintRule1 = {
 	id: "messageLintRule.x.1",
 	displayName: { en: "" },
 	description: { en: "" },
+
 	run: vi.fn(),
 } satisfies MessageLintRule
 
@@ -14,6 +15,7 @@ const lintRule2 = {
 	id: "messageLintRule.x.2",
 	displayName: { en: "" },
 	description: { en: "" },
+
 	run: vi.fn(),
 } satisfies MessageLintRule
 

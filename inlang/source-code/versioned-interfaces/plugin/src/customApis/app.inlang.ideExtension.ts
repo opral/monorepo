@@ -65,7 +65,10 @@ export const IdeExtensionConfigSchema = Type.Object({
 						selection: Type.String(),
 					}),
 				],
-				Type.String()
+				Type.Object({
+					messageId: Type.String(),
+					messageReplacement: Type.String(),
+				})
 			),
 		})
 	),

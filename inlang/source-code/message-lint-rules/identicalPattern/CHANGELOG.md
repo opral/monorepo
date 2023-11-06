@@ -1,5 +1,16 @@
 # @inlang/message-lint-rule-identical-pattern
 
+## 1.5.0
+
+### Minor Changes
+
+- 2f924df32: added Modulesettings validation via the Typebox JSON Schema Validation. This ensure that users can exclusively use module settings when there are given by the moduel
+
+### Patch Changes
+
+- Updated dependencies [2f924df32]
+  - @inlang/message-lint-rule@1.4.0
+
 ## 1.4.0
 
 ### Minor Changes

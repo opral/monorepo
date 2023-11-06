@@ -30,7 +30,7 @@
 
 Inlang consists of multiple applications that can be used individually or in combination.
 
-### [Editor](https://inlang.com/marketplace/app.inlang.editor)
+### [Editor](https://inlang.com/m/tdozzpar/app-inlang-editor)
 
 Manage translations in a simple web interface and push changes to your repository.
 
@@ -41,7 +41,7 @@ Manage translations in a simple web interface and push changes to your repositor
 
 ![the inlang editor to manage translations](https://github.com/inlang/monorepo/assets/59048346/85cfee69-96da-4b2d-8e34-a0b7abc72212)
 
-### [IDE-Extension](https://inlang.com/m/app.inlang.ideExtension)
+### [IDE-Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension)
 
 The IDE extension allows you to translate your content directly in your IDE.
 
@@ -51,7 +51,7 @@ The IDE extension allows you to translate your content directly in your IDE.
 
 ![VS code extension inline annotation](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/inline.gif)
 
-### [CLI](https://inlang.com/marketplace/app.inlang.cli)
+### [CLI](https://inlang.com/m/2qj2w8pu/app-inlang-cli)
 
 [@inlang/cli](https://github.com/inlang/monorepo/tree/main/inlang/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infrastructure.
 

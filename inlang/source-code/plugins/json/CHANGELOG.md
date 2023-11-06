@@ -1,5 +1,45 @@
 # @inlang/plugin-json
 
+## 5.1.0
+
+### Minor Changes
+
+- cafff8748: adjust tests and fix erros message
+
+### Patch Changes
+
+- Updated dependencies [cafff8748]
+  - @inlang/sdk@0.17.0
+
+## 5.0.0
+
+### Major Changes
+
+- 55d4c3497: The matcher functionallity of plugins is now unbundled. Former paraglide-jsplugin is moved to plugins and named m-function-matcher and the matching functionallity pf the json plugin is now unbundled in the t-function-matcher plugin.
+
+## 4.10.0
+
+### Minor Changes
+
+- a39638334: add support for new document selector typescriptreact
+
+## 4.9.0
+
+### Minor Changes
+
+- 2150b4873: fix: path patterns can start as as an absolute path like `/resources/{languageTag}.json`
+
+## 4.8.0
+
+### Minor Changes
+
+- 2f924df32: added Modulesettings validation via the Typebox JSON Schema Validation. This ensure that users can exclusively use module settings when there are given by the moduel
+
+### Patch Changes
+
+- Updated dependencies [2f924df32]
+  - @inlang/sdk@0.16.0
+
 ## 4.7.0
 
 ### Minor Changes

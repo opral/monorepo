@@ -16,6 +16,7 @@
 	"scripts": {
 		"build": "npx nx run-many --target=build --all --parallel",
 		"dev": "npx nx run-many --target=dev --all --parallel 1000 --output-style stream",
+		"production": "npx nx run-many --target=production --all --parallel 1000 --exclude @lix-js/server",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "npx nx run-many --target=test --all --parallel",
 		"---- LINT ----------------------------------------------------------": "",

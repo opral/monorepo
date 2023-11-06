@@ -33,6 +33,15 @@ const MarketplaceManifestBase = Type.Object({
 	readme: Translatable(
 		Type.TemplateLiteral("${string}.md", { description: "The path to the readme file." })
 	),
+	recommends: Type.Optional(
+		Type.Array(
+			Type.TemplateLiteral("m/${string}", {
+				description:
+					"The uniqueIDs, starting with m/[UNIQUEID] of the recommended marketplace items with a max amount of 3.",
+				maxLength: 3,
+			})
+		)
+	),
 	keywords: Type.Array(Type.String()),
 	license: Type.Literal("Apache-2.0"),
 	website: Type.Optional(

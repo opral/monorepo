@@ -134,6 +134,7 @@ describe("lint command", () => {
 			id: "messageLintRule.namespace.enabled",
 			description: { en: "Mock lint rule description" },
 			displayName: { en: "Mock Lint Rule" },
+
 			run: ({ report }) => {
 				report({
 					messageId: "some-message-1",

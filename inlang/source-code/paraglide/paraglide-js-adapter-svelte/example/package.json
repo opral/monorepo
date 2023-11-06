@@ -4,7 +4,8 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"build": "paraglide-js compile --namespace svelte-example && vite build",
+		"_build": "paraglide-js compile --namespace svelte-example && vite build",
+		"test": "paraglide-js compile --namespace svelte-example && vite build",
 		"preview": "vite preview"
 	},
 	"__ALL DEPENDENCIES MUST BE SET IN THE PARENT PACKAGE.JSON TOO!__": "SEE NPM BUG https://github.com/npm/cli/issues/6874",

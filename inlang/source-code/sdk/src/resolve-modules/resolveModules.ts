@@ -5,6 +5,7 @@ import {
 	ModuleImportError,
 	ModuleHasNoExportsError,
 	ModuleExportIsInvalidError,
+	ModuleSettingsAreInvalidError,
 } from "./errors.js"
 import { tryCatch } from "@inlang/result"
 import { resolveMessageLintRules } from "./message-lint-rules/resolveMessageLintRules.js"
@@ -13,6 +14,7 @@ import { createImport } from "./import.js"
 import type { MessageLintRule } from "@inlang/message-lint-rule"
 import { resolvePlugins } from "./plugins/resolvePlugins.js"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
+import { validatedModuleSettings } from "./validatedModuleSettings.js"
 
 const ModuleCompiler = TypeCompiler.Compile(InlangModule)
 
@@ -31,8 +33,8 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 		 */
 
 		const importedModule = await tryCatch<InlangModule>(() => _import(module))
-
 		// -- IMPORT MODULE --
+
 		if (importedModule.error) {
 			moduleErrors.push(
 				new ModuleImportError({
@@ -44,6 +46,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 		}
 
 		// -- MODULE DOES NOT EXPORT ANYTHING --
+
 		if (importedModule.data?.default === undefined) {
 			moduleErrors.push(
 				new ModuleHasNoExportsError({
@@ -53,8 +56,9 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 			continue
 		}
 
-		const isValidModule = ModuleCompiler.Check(importedModule.data)
+		// -- CHECK IF MODULE IS SYNTACTIALLY VALID
 
+		const isValidModule = ModuleCompiler.Check(importedModule.data)
 		if (isValidModule === false) {
 			const errors = [...ModuleCompiler.Errors(importedModule.data)]
 			moduleErrors.push(
@@ -63,6 +67,18 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 					errors,
 				})
 			)
+
+			continue
+		}
+
+		// -- VALIDATE MODULE SETTINGS
+
+		const result = validatedModuleSettings({
+			settingsSchema: importedModule.data.default.settingsSchema,
+			moduleSettings: args.settings[importedModule.data.default.id],
+		})
+		if (result !== "isValid") {
+			moduleErrors.push(new ModuleSettingsAreInvalidError({ module: module, errors: result }))
 			continue
 		}
 
@@ -76,10 +92,14 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 		} else if (importedModule.data.default.id.startsWith("messageLintRule.")) {
 			allMessageLintRules.push(importedModule.data.default as MessageLintRule)
 		} else {
-			throw new Error(`Unimplemented module type. Must start with "plugin." or "messageLintRule.`)
+			moduleErrors.push(
+				new ModuleError(
+					`Unimplemented module type ${importedModule.data.default.id}.The module has not been installed.`,
+					{ module: module }
+				)
+			)
 		}
 	}
-
 	const resolvedPlugins = await resolvePlugins({
 		plugins: allPlugins,
 		settings: args.settings,

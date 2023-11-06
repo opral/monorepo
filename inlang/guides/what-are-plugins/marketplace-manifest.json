@@ -1,0 +1,17 @@
+{
+	"id": "guide.nilsjacobsen.whatArePlugins",
+	"icon": "https://emojis.wiki/thumbs/emojis/electric-plug.webp",
+	"displayName": {
+		"en": "What are Plugins?"
+	},
+	"description": {
+		"en": "Discover the benefits of using plugins: freedom and low-cost adoption."
+	},
+	"readme": {
+		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/what-are-plugins/what-are-plugins.md"
+	},
+	"keywords": ["application", "website", "inlang", "getting-started", "guide", "plugins", "plugin"],
+	"publisherName": "Nils Jacobsen",
+	"publisherIcon": "https://avatars.githubusercontent.com/u/58360188?s=96&v=4",
+	"license": "Apache-2.0"
+}

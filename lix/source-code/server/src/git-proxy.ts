@@ -44,7 +44,14 @@ export async function proxy(request: Request, response: Response, next: NextFunc
 	}
 	try {
 		// remove the proxy path from the url
-		request.url = request.url.split(privateEnv.PUBLIC_GIT_PROXY_PATH)[1]!
+		const targetUrl = request.url.split("/git-proxy/")[1]
+
+		if (typeof targetUrl === "undefined") {
+			response.status(400).send("Missing target url")
+			return
+		}
+
+		request.url = targetUrl
 
 		response.set("Access-Control-Allow-Credentials", "true")
 

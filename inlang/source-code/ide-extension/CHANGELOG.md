@@ -1,5 +1,18 @@
 # inlang-vs-code-extension
 
+## 1.15.0
+
+### Minor Changes
+
+- 452553bed: remove reload prompt instead silent reload
+- 39beea7dd: change return type of extractMessageOptions
+
+## 1.14.0
+
+### Minor Changes
+
+- 77ed7a85c: update deps
+
 ## 1.13.0
 
 ### Minor Changes

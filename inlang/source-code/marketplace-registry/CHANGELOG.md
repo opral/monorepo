@@ -1,5 +1,11 @@
 # @inlang/marketplace-registry
 
+## 1.4.0
+
+### Minor Changes
+
+- 81633f1cb: implement advanced structure and uniqueID checking
+
 ## 1.3.0
 
 ### Minor Changes

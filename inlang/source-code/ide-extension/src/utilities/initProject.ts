@@ -1,5 +1,4 @@
 import { setState } from "../state.js"
-import { promptToReloadWindow } from "./promptToReload.js"
 import { createInlangConfigFile } from "./createInlangConfigFile.js"
 import { loadProject, type InlangProject } from "@inlang/sdk"
 import * as vscode from "vscode"
@@ -80,15 +79,6 @@ export async function initProject(args: {
 
 	setState({
 		project,
-	})
-
-	// Watch for changes in the config file
-	const watcher = vscode.workspace.createFileSystemWatcher(
-		new vscode.RelativePattern(args.workspaceFolder, CONFIGURATION.FILES.PROJECT)
-	)
-	// Listen for changes in the config file
-	watcher.onDidChange(() => {
-		promptToReloadWindow()
 	})
 
 	return { project, error: undefined }

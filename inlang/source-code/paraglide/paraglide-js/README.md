@@ -1,6 +1,7 @@
-# @inlang/paraglide-js
-
-## ATTENTION: Paraglide is in pre-release mode. Discuss the API at https://github.com/inlang/monorepo/discussions/1464
+<!-- ## ATTENTION: Paraglide is in pre-release mode. Discuss the API at https://github.com/inlang/monorepo/discussions/1464 -->
+<doc-links>
+    <doc-link title="ATTENTION: Paraglide is in pre-release mode." icon="mdi:github" href="https://github.com/inlang/monorepo/discussions/1464" description="Discuss the API on GitHub."></doc-link>
+</doc-links>
 
 <doc-gallery>TODO: adapter gallery</doc-gallery>
 
@@ -8,6 +9,20 @@
 - [x] only bundles the messages that are used (tree-shaking)
 - [x] storage agnostic (JSON, YAML, CSV, etc.) 
 - [x] plug & play with the [inlang ecosystem](https://inlang.com/marketplace)
+
+# Getting started
+
+1. Run the following command in your terminal: 
+
+```bash
+npx @inlang/paraglide-js@latest init
+```
+
+2. (If required) select an adapter.
+
+## Available Adapters
+
+- TODO: add adapters 
 
 # Usage
 
@@ -33,7 +48,7 @@ m.loginHeader({ name: "Samuel" }) // Hallo Samuel, bitte melde dich an, um fortz
 
 ```
 
-Paraglide JS exports four runtime variables and functions via "@inlang/paraglide-js":
+Paraglide JS exports four variables and functions via "@inlang/paraglide-js":
 
 - `sourceLanguageTag`: the source language tag of the project
 - `languageTags`: all language tags of the current project
@@ -41,41 +56,12 @@ Paraglide JS exports four runtime variables and functions via "@inlang/paraglide
 - `setLanguageTag()`: sets the language tag of the current user
 
 
-# Getting started
-
-## Available Adapters
-
-- TODO: add adapters 
-
-## Standalone
-
-1. Add paraglide as a dependency:
-
-```bash
-npm install @inlang/paraglide-js
-```
-
-2. Add the compiler to your build script:
-
-```diff
-{
-  "scripts": {
-+    "build": "paraglide-js compile --namespace <your project name>"
-  }
-}
-```
-
-| compile | [options]   |          |                                  |
-|---------|-------------|----------|----------------------------------|
-|         | --project   | \<path\> | default: "./project.inlang.json" |
-|         | --namespace | \<name\> | required                         |
-
 
 # Architecture 
 
-Inlang Paraglide JS leverages a compiler to emit a use-case optimized i18n library. 
+Inlang Paraglide JS leverages a compiler to emit vanilla JavaScript functions. 
 
-By leveraging a compiler, inlang Paraglide JS eliminates a class of edge cases while also being simpler, faster, and more reliable than other i18n libraries. The compiled runtime contains less than 50 LOC (lines of code) and is less than 1kb gzipped.
+The emitted functions are often referred to as "message functions". By emitting message functions, inlang Paraglide JS eliminates a class of edge cases while also being simpler, faster, and more reliable than other i18n libraries. The compiled runtime contains less than 50 LOC (lines of code) and is less than 1kb gzipped.
 
 Inlang Paraglide-JS consists of four main parts: 
 

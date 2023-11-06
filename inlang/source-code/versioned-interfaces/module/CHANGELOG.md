@@ -1,5 +1,11 @@
 # @inlang/module
 
+## 1.2.0
+
+### Minor Changes
+
+- ceeb69cb8: fix: type of module should include settingsSchema
+
 ## 1.1.0
 
 ### Minor Changes

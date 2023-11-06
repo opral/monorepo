@@ -95,11 +95,23 @@ jobs:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/plugins/inlang-message-format/package.json
 
-      - name: "@inlang/plugin-paraglide-js" 
+      - name: "@inlang/plugin-m-function-matcher" 
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
-            package: inlang/source-code/paraglide/paraglide-js-plugin/package.json
+            package: inlang/source-code/plugins/m-function-matcher/package.json
+
+      - name: "@inlang/plugin-t-function-matcher" 
+        uses: JS-DevTools/npm-publish@v2
+        with:
+            token: ${{ secrets.NPM_PUBLISH_TOKEN }}
+            package: inlang/source-code/plugins/t-function-matcher/package.json
+
+      - name: "@inlang/detect-json-formatting" 
+        uses: JS-DevTools/npm-publish@v2
+        with:
+            token: ${{ secrets.NPM_PUBLISH_TOKEN }}
+            package: inlang/source-code/detect-json-formatting/package.json
   
       - name: "@inlang/result" 
         uses: JS-DevTools/npm-publish@v2

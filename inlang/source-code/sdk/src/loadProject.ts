@@ -65,6 +65,21 @@ export const loadProject = async (args: {
 			nodeishFs: args.nodeishFs,
 		})
 
+		// const abortController = new AbortController()
+
+		// (async () => {
+		// 	const watcher = nodeishFs.watch(path.join('..', settingsFilePath), { signal: abortController.signal, recursive: true })
+		// 	for await (event of watcher) {
+		//	  if match event.filename else ignore
+		// 		// reload
+		// 	}
+		// } catch (err) {d
+		// 	if ((err.name = "AbortError")) {
+		// 	}
+		// }()
+
+		// abortController.abort()
+
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()

@@ -14,7 +14,7 @@ export const withLazyFetching = (
 			if (getTarget[prop as keyof typeof targetRoot]) {
 				return new Proxy(getTarget[prop as keyof typeof getTarget], {
 					apply(callTarget, thisArg, argumentsList) {
-						// console.verbose(`${module} fs:`, prop, argumentsList)
+						// console.verbose(`${_module} fs:`, prop, argumentsList)
 
 						const execute = () => Reflect.apply(callTarget, thisArg, argumentsList)
 

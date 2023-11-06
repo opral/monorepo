@@ -1,5 +1,28 @@
 # @inlang/sdk
 
+## 0.17.0
+
+### Minor Changes
+
+- cafff8748: adjust tests and fix erros message
+
+### Patch Changes
+
+- Updated dependencies [39beea7dd]
+  - @inlang/plugin@2.4.0
+
+## 0.16.0
+
+### Minor Changes
+
+- 2f924df32: added Modulesettings validation via the Typebox JSON Schema Validation. This ensure that users can exclusively use module settings when there are given by the moduel
+
+### Patch Changes
+
+- Updated dependencies [2f924df32]
+  - @inlang/message-lint-rule@1.4.0
+  - @inlang/plugin@2.2.0
+
 ## 0.15.0
 
 ### Minor Changes
