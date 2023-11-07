@@ -11,12 +11,24 @@ beforeEach(() => {
 	vi.resetModules()
 })
 
-describe("output", async () => {
+describe("files", async () => {
 	// the compiled should be ignored to avoid merge conflicts
-	test("the output should include a gitignore file", async () => {
+	test("the files should include a gitignore file", async () => {
 		const output = compile({ messages: [], settings: mockSettings })
 		expect(output).toHaveProperty(".gitignore")
 		expect(output[".gitignore"]).toContain("*")
+	})
+	// ignore all formatting stuff
+	test("the files should include a prettierignore file", async () => {
+		const output = compile({ messages: [], settings: mockSettings })
+		expect(output).toHaveProperty(".prettierignore")
+		expect(output[".prettierignore"]).toContain("*")
+	})
+	// ignore eslint stuff
+	test("files should include an eslint ignore", async () => {
+		const output = compile({ messages: [], settings: mockSettings })
+		expect(output).toHaveProperty(".eslintignore")
+		expect(output[".eslintignore"]).toContain("*")
 	})
 })
 
