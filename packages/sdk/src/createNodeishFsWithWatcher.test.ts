@@ -17,14 +17,21 @@ describe("watcher", () => {
 		await fs.readFile("file.txt", { encoding: "utf-8" })
 		expect(counter).toBe(0)
 
-		// change file
+		// initial file change
 		await fs.writeFile("file.txt", "b")
 		await new Promise((resolve) => setTimeout(resolve, 0))
 
 		expect(counter).toBe(1)
 
 		// change file
-		await fs.writeFile("file.txt", "b")
+		await fs.writeFile("file.txt", "a")
+		await new Promise((resolve) => setTimeout(resolve, 0))
+
+		//check if update function was called
+		expect(counter).toBe(2)
+
+		// change file
+		await fs.readFile("file.txt")
 		await new Promise((resolve) => setTimeout(resolve, 0))
 
 		//check if update function was called

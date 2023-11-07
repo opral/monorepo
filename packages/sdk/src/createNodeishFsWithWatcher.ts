@@ -18,6 +18,7 @@ export const createNodeishFsWithWatcher = (args: {
 			try {
 				const watcher = args.nodeishFs.watch(path, {
 					signal: abortController.signal,
+					persistent: false,
 				})
 				//eslint-disable-next-line @typescript-eslint/no-unused-vars
 				for await (const event of watcher) {
