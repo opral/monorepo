@@ -2,7 +2,7 @@ import { test, expect, vi, beforeAll, beforeEach } from "vitest"
 import {
 	addCompileStepToPackageJSON,
 	addParaglideJsToDependencies,
-	adjustTsConfigIfNecessary,
+	maybeChangeTsConfigModuleResolution,
 	checkIfPackageJsonExists,
 	checkIfUncommittedChanges,
 	createNewProjectFlow,
@@ -423,10 +423,10 @@ describe("findExistingInlangProjectPath()", () => {
 	})
 })
 
-describe("adjustTsConfigIfNecessary()", () => {
+describe("maybeChangeTsConfigModuleResolution()", () => {
 	test("it should return if no tsconfig.json exists", async () => {
 		mockFiles({})
-		const result = await adjustTsConfigIfNecessary()
+		const result = await maybeChangeTsConfigModuleResolution()
 		// no tsconfig exists, immediately return
 		expect(result).toBeUndefined()
 		// the tsconfig should not have been read
@@ -444,13 +444,13 @@ describe("adjustTsConfigIfNecessary()", () => {
 				} 
 			}`,
 		})
-		await adjustTsConfigIfNecessary()
+		await maybeChangeTsConfigModuleResolution()
 		// no info that the moduleResolution needs to be adapted should be logged
 
 		expect(consola.warn).toHaveBeenCalledOnce()
 	})
 
-	test("it should detect if the extended from tsconfig already set the moduleResolution to bundler", async () => {
+	test("it should detect if the extended from tsconfig already set the moduleResolution to bundler to ease the getting started process", async () => {
 		mockFiles({
 			"/tsconfig.base.json": `{
 				"compilerOptions": {
@@ -461,7 +461,7 @@ describe("adjustTsConfigIfNecessary()", () => {
 				"extends": "tsconfig.base.json", 
 			}`,
 		})
-		await adjustTsConfigIfNecessary()
+		await maybeChangeTsConfigModuleResolution()
 		// no info that the moduleResolution needs to be adapted should be logged
 		expect(consola.info).not.toHaveBeenCalled()
 	})
@@ -489,7 +489,7 @@ describe("adjustTsConfigIfNecessary()", () => {
 			},
 		])
 
-		await adjustTsConfigIfNecessary()
+		await maybeChangeTsConfigModuleResolution()
 
 		// info that the moduleResolution needs to be adapted
 		expect(consola.info).toHaveBeenCalledOnce()
@@ -514,7 +514,7 @@ describe("adjustTsConfigIfNecessary()", () => {
 			false,
 		])
 
-		await adjustTsConfigIfNecessary()
+		await maybeChangeTsConfigModuleResolution()
 
 		// info that the moduleResolution needs to be adapted
 		expect(consola.warn).toHaveBeenCalledOnce()
