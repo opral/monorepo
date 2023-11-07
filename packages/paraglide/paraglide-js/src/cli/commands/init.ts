@@ -26,9 +26,9 @@ export const initCommand = new Command()
 		await checkIfUncommittedChanges()
 		await checkIfPackageJsonExists()
 		const projectPath = await initializeInlangProject()
-		await addCompileStepToPackageJSON({ projectPath })
-		await adjustTsConfigIfNecessary()
 		await addParaglideJsToDependencies()
+		await addCompileStepToPackageJSON({ projectPath })
+		await maybeChangeTsConfigModuleResolution()
 		await maybeAddVsCodeExtension({ projectPath })
 
 		consola.box(
@@ -265,7 +265,7 @@ Please add the following command to your build script manually:
  * Otherwise, types defined in `package.exports` are not resolved by TypeScript. Leading to type
  * errors with Paraglide-JS.
  */
-export const adjustTsConfigIfNecessary = async () => {
+export const maybeChangeTsConfigModuleResolution = async () => {
 	if (fsSync.existsSync("./tsconfig.json") === false) {
 		return
 	}
