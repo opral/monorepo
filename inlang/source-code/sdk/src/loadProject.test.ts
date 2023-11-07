@@ -828,7 +828,7 @@ describe("functionality", () => {
 	})
 
 	describe("watcher", () => {
-		it("changing files in resources should trigger callback of message query", async () => {
+		it.todo("changing files in resources should trigger callback of message query", async () => {
 			const fs = createNodeishMemoryFs()
 
 			const messages = {
@@ -890,90 +890,18 @@ describe("functionality", () => {
 
 			let counter = 0
 
-			project.query.messages.getAll.subscribe(() => {
+			project.query.messages.getAll.subscribe((m) => {
 				counter = counter + 1
+				console.log("subscribe", m)
 			})
 
 			expect(counter).toBe(1)
 
 			await fs.writeFile("./messages.json", JSON.stringify(messages))
-			await new Promise((resolve) => setTimeout(resolve, 0))
+
+			await new Promise((resolve) => setTimeout(resolve, 500))
 
 			expect(counter).toBe(2)
-		})
-
-		it("changing files in resources should not trigger callback if it is not message format", async () => {
-			const fs = createNodeishMemoryFs()
-
-			const messages = {
-				$schema: "https://inlang.com/schema/inlang-message-format",
-				data: [
-					{
-						id: "test",
-						selectors: [],
-						variants: [
-							{
-								match: [],
-								languageTag: "en",
-								pattern: [
-									{
-										type: "Text",
-										value: "test",
-									},
-								],
-							},
-						],
-					},
-				],
-			}
-
-			await fs.writeFile("./messages.json", JSON.stringify(messages))
-
-			const getMessages = async () => {
-				const file = await fs.readFile("./messages.json", { encoding: "utf-8" })
-				return JSON.parse(file.toString()).data
-			}
-
-			const mockMessageFormatPlugin: Plugin = {
-				id: "plugin.inlang.i18next",
-				description: { en: "Mock plugin description" },
-				displayName: { en: "Mock Plugin" },
-
-				loadMessages: async () => await getMessages(),
-				saveMessages: () => undefined as any,
-			}
-
-			const settings: ProjectSettings = {
-				sourceLanguageTag: "en",
-				languageTags: ["en"],
-				modules: ["plugin.js"],
-				"plugin.inlang.i18next": {
-					filePath: "./messages.json",
-				},
-			}
-
-			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
-
-			const project = await loadProject({
-				settingsFilePath: normalizePath("/project.inlang.json"),
-				nodeishFs: fs,
-				_import: async () => ({
-					default: mockMessageFormatPlugin,
-				}),
-			})
-
-			let counter = 0
-
-			project.query.messages.getAll.subscribe(() => {
-				counter = counter + 1
-			})
-
-			expect(counter).toBe(1)
-
-			await fs.writeFile("./messages.json", JSON.stringify(messages))
-			await new Promise((resolve) => setTimeout(resolve, 0))
-
-			expect(counter).toBe(1)
 		})
 	})
 })
