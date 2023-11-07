@@ -11,7 +11,6 @@ import {
 	initializeInlangProject,
 	maybeAddVsCodeExtension,
 	newProjectTemplate,
-	promptForNamespace,
 } from "./init.js"
 import consola from "consola"
 import { describe } from "node:test"
@@ -112,16 +111,13 @@ describe("addCompileStepToPackageJSON()", () => {
 		})
 		await addCompileStepToPackageJSON({
 			projectPath: "./project.inlang.json",
-			namespace: "frontend",
 		})
 		expect(fs.writeFile).toHaveBeenCalledOnce()
 		expect(consola.success).toHaveBeenCalledOnce()
 		const packageJson = JSON.parse(
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
-		expect(packageJson.scripts.build).toBe(
-			`paraglide-js compile --project ./project.inlang.json --namespace frontend`
-		)
+		expect(packageJson.scripts.build).toBe(`paraglide-js compile --project ./project.inlang.json`)
 	})
 
 	test("if an existing build step exists, it should be preceeded by the paraglide-js compile command", async () => {
@@ -134,7 +130,6 @@ describe("addCompileStepToPackageJSON()", () => {
 		})
 		await addCompileStepToPackageJSON({
 			projectPath: "./project.inlang.json",
-			namespace: "frontend",
 		})
 		expect(fs.writeFile).toHaveBeenCalledOnce()
 		expect(consola.success).toHaveBeenCalledOnce()
@@ -142,7 +137,7 @@ describe("addCompileStepToPackageJSON()", () => {
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
 		expect(packageJson.scripts.build).toBe(
-			`paraglide-js compile --project ./project.inlang.json --namespace frontend && some build step`
+			`paraglide-js compile --project ./project.inlang.json && some build step`
 		)
 	})
 
@@ -160,7 +155,6 @@ describe("addCompileStepToPackageJSON()", () => {
 		])
 		await addCompileStepToPackageJSON({
 			projectPath: "./project.inlang.json",
-			namespace: "frontend",
 		})
 		expect(fs.writeFile).not.toHaveBeenCalled()
 		expect(consola.success).not.toHaveBeenCalled()
@@ -182,20 +176,11 @@ describe("addCompileStepToPackageJSON()", () => {
 		])
 		await addCompileStepToPackageJSON({
 			projectPath: "./project.inlang.json",
-			namespace: "frontend",
 		})
 		expect(fs.writeFile).not.toHaveBeenCalled()
 		expect(consola.success).not.toHaveBeenCalled()
 		expect(consola.warn).toHaveBeenCalledOnce()
 		expect(process.exit).not.toHaveBeenCalled()
-	})
-})
-
-describe("promptForNamespace()", async () => {
-	test("it should trim the input from whitespace", async () => {
-		mockUserInput(["  frontend  "])
-		const namespace = await promptForNamespace()
-		expect(namespace).toBe("frontend")
 	})
 })
 

@@ -26,8 +26,7 @@ export const initCommand = new Command()
 		await checkIfUncommittedChanges()
 		await checkIfPackageJsonExists()
 		const projectPath = await initializeInlangProject()
-		const namespace = await promptForNamespace()
-		await addCompileStepToPackageJSON({ projectPath, namespace })
+		await addCompileStepToPackageJSON({ projectPath })
 		await adjustTsConfigIfNecessary()
 		await addParaglideJsToDependencies()
 		await maybeAddVsCodeExtension({ projectPath })
@@ -99,27 +98,6 @@ export const addParaglideJsToDependencies = async () => {
 	pkg.dependencies["@inlang/paraglide-js"] = version
 	await fs.writeFile("./package.json", stringify(pkg))
 	consola.success("Added @inlang/paraglide-js to the dependencies in package.json.")
-}
-
-export const promptForNamespace = async (): Promise<string> => {
-	let assumedName = process.cwd().split("/").pop()
-	try {
-		assumedName = JSON.parse(await fs.readFile("./package.json", { encoding: "utf-8" })).name
-	} catch {
-		// nothing
-	}
-
-	consola.info(`You need to select a name for the project.
-
-The name is used to create an importable 'namespace' to distinguish between multiple projects in the same repository. For example, the name \`frontend\` will create the following import statement:
-	
-\`import * as m from "@inlang/paraglide-js/frontend/messages"\``)
-
-	const namespace = await prompt(`What should be the name of the project?`, {
-		type: "text",
-		initial: assumedName,
-	})
-	return namespace.trim()
 }
 
 export const findExistingInlangProjectPath = async (): Promise<string | undefined> => {
@@ -244,10 +222,7 @@ export const checkIfUncommittedChanges = async () => {
 	}
 }
 
-export const addCompileStepToPackageJSON = async (args: {
-	projectPath: string
-	namespace: string
-}) => {
+export const addCompileStepToPackageJSON = async (args: { projectPath: string }) => {
 	const file = await fs.readFile("./package.json", { encoding: "utf-8" })
 	const stringify = detectJsonFormatting(file)
 	const pkg = JSON.parse(file)
@@ -255,15 +230,15 @@ export const addCompileStepToPackageJSON = async (args: {
 		if (pkg.scripts === undefined) {
 			pkg.scripts = {}
 		}
-		pkg.scripts.build = `paraglide-js compile --project ${args.projectPath} --namespace ${args.namespace}`
+		pkg.scripts.build = `paraglide-js compile --project ${args.projectPath}`
 	} else if (pkg?.scripts?.build.includes("paraglide-js compile") === false) {
-		pkg.scripts.build = `paraglide-js compile --project ${args.projectPath} --namespace ${args.namespace} && ${pkg.scripts.build}`
+		pkg.scripts.build = `paraglide-js compile --project ${args.projectPath} && ${pkg.scripts.build}`
 	} else {
 		consola.warn(`The "build" script in the \`package.json\` already contains a "paraglide-js compile" command.
 
 Please add the following command to your build script manually:
 
-\`paraglide-js compile --project ${args.projectPath} --namespace ${args.namespace}\``)
+\`paraglide-js compile --project ${args.projectPath}`)
 		const response = await consola.prompt(
 			"Have you added the compile command to your build script?",
 			{
