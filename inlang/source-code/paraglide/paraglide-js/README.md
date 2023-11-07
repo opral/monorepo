@@ -32,8 +32,8 @@ Messages are imported as a namespace and can be used as follows:
 // m is a namespace that contains all messages of your project
 // a bundler like rollup or webpack only bundles
 // the messages that are used
-import * as m from "@inlang/paraglide-js/messages"
-import { setLanguageTag } from "@inlang/paraglide-js"
+import * as m from "./paraglide-js/messages"
+import { setLanguageTag } from "./paraglide-js/runtime"
 
 // use a message
 m.hello() // Hello world!
@@ -68,14 +68,14 @@ Inlang Paraglide-JS consists of four main parts:
 - `COMPILER`: compiles messages into tree-shakable message functions
 - `MESSAGES`: the compiled tree-shakable message functions
 - `RUNTIME`: a runtime that resolves the language tag of the current user
-- `ADAPTER`: (if required) an adapter that adjust the runtime for different frameworks
+- `ADAPTER`: (if required) an adapter that adjusts the runtime for different frameworks
 
 <img src="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/architecture.svg">
 
 
 ## COMPILER
 
-The compiler loads an inlang project and compiles the messages into tree-shakable and type safe message functions.
+The compiler loads an inlang project and compiles the messages into tree-shakable and typesafe message functions.
 
 ### Example
 
@@ -116,10 +116,10 @@ The namespace import ensures that bundlers like Rollup, Webpack, or Turbopack ca
 
 ### Example
 
-Three compiled message functions exists in an examplary project.
+Three compiled message functions exist in an example project.
 
 ```js
-// @inlang/paraglide-js/<namespace>/messages
+// ./paraglide-js/messages.js
 
 
 export function hello(params) {
@@ -141,12 +141,12 @@ Only the message `hello` is used in the source code.
 ```js
 // source/index.js
 
-import * as m from "@inlang/paraglide-js/<namespace>/messages"
+import * as m from "./praglide-js/messages"
 
 console.log(m.hello({ name: "Samuel" }))
 ```
 
-The bundler tree-shakes (removes) `loginButton` and `loginHeader` and only includes `hello` in the output.
+The bundler tree shakes (removes) `loginButton` and `loginHeader` and only includes `hello` in the output.
 
 ```js
 // output/index.js
@@ -161,7 +161,7 @@ console.log(hello({ name: "Samuel"}))
 
 ## RUNTIME
 
-View the source of your imports from `@inlang/paraglide-js/<namespace>` to find the latest runtime API and documentation. 
+View the source of your imports from `./paraglide-js/` to find the latest runtime API and documentation. 
 
 ## ADAPTER 
 
@@ -169,15 +169,15 @@ View the source of your imports from `@inlang/paraglide-js/<namespace>` to find 
 
 Paraglide-JS can be adapted to any framework or environment by calling `setLanguageTag()` and `onSetLanguageTag()`. 
 
-1.  `setLanguageTag()` can be used to set a getter function for the language tag. The getter function can be used to resolve server side language tags or to resolve the language tag from a global state management library like Redux or Vuex.
-2.  `onSetLanguageTag()` can be used to trigger side-effects such as updating the UI, or request the site in the new language from the server.
+1.  `setLanguageTag()` can be used to set a getter function for the language tag. The getter function can be used to resolve server-side language tags or to resolve the language tag from a global state management library like Redux or Vuex.
+2.  `onSetLanguageTag()` can be used to trigger side-effects such as updating the UI, or requesting the site in the new language from the server.
 
 
 ### Writing an Adapter
 
-The following example adapts Paraglide-JS to a fictious metaframework like NextJS, SolidStart, SvelteKit, or Nuxt. 
+The following example adapts Paraglide-JS to a fictitious metaframework like NextJS, SolidStart, SvelteKit, or Nuxt. 
 
-The goal is to provide a high-level understanding of how to adapt Paraglide-JS to a framework. Besides this example, we recommend to view the source-code of available adapters. In general, only two functions need to be called to adapt Paraglide-JS to a framework:
+The goal is to provide a high-level understanding of how to adapt Paraglide-JS to a framework. Besides this example, we recommend viewing the source-code of available adapters. In general, only two functions need to be called to adapt Paraglide-JS to a framework:
 
 1. `setLanguageTag()`: to set the language tag
 2. `onSetLanguageTag()`: to trigger a side-effect when the language changes
@@ -186,7 +186,7 @@ The goal is to provide a high-level understanding of how to adapt Paraglide-JS t
 
 
 ```tsx
-import { setLanguageTag, onSetLanguageTag } from "@inlang/paraglide-js/<namespace>"
+import { setLanguageTag, onSetLanguageTag } from "./paraglide-js/runtime"
 import { isServer, request, render } from "@example/framework"
 
 

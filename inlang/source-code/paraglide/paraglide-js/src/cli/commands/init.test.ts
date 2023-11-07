@@ -2,7 +2,8 @@ import { test, expect, vi, beforeAll, beforeEach } from "vitest"
 import {
 	addCompileStepToPackageJSON,
 	addParaglideJsToDependencies,
-	adjustTsConfigIfNecessary,
+	maybeChangeTsConfigAllowJs,
+	maybeChangeTsConfigModuleResolution,
 	checkIfPackageJsonExists,
 	checkIfUncommittedChanges,
 	createNewProjectFlow,
@@ -11,17 +12,15 @@ import {
 	initializeInlangProject,
 	maybeAddVsCodeExtension,
 	newProjectTemplate,
-	promptForNamespace,
 } from "./init.js"
 import consola from "consola"
 import { describe } from "node:test"
 import fsSync from "node:fs"
 import fs from "node:fs/promises"
 import childProcess from "node:child_process"
-
 import memfs from "memfs"
-import { version } from "../state.js"
 import type { ProjectSettings } from "@inlang/sdk"
+import { version } from "../state.js"
 
 beforeAll(() => {
 	// spy on commonly used functions to prevent console output
@@ -113,16 +112,13 @@ describe("addCompileStepToPackageJSON()", () => {
 		})
 		await addCompileStepToPackageJSON({
 			projectPath: "./project.inlang.json",
-			namespace: "frontend",
 		})
 		expect(fs.writeFile).toHaveBeenCalledOnce()
 		expect(consola.success).toHaveBeenCalledOnce()
 		const packageJson = JSON.parse(
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
-		expect(packageJson.scripts.build).toBe(
-			`paraglide-js compile --project ./project.inlang.json --namespace frontend`
-		)
+		expect(packageJson.scripts.build).toBe(`paraglide-js compile --project ./project.inlang.json`)
 	})
 
 	test("if an existing build step exists, it should be preceeded by the paraglide-js compile command", async () => {
@@ -135,7 +131,6 @@ describe("addCompileStepToPackageJSON()", () => {
 		})
 		await addCompileStepToPackageJSON({
 			projectPath: "./project.inlang.json",
-			namespace: "frontend",
 		})
 		expect(fs.writeFile).toHaveBeenCalledOnce()
 		expect(consola.success).toHaveBeenCalledOnce()
@@ -143,7 +138,7 @@ describe("addCompileStepToPackageJSON()", () => {
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
 		expect(packageJson.scripts.build).toBe(
-			`paraglide-js compile --project ./project.inlang.json --namespace frontend && some build step`
+			`paraglide-js compile --project ./project.inlang.json && some build step`
 		)
 	})
 
@@ -161,7 +156,6 @@ describe("addCompileStepToPackageJSON()", () => {
 		])
 		await addCompileStepToPackageJSON({
 			projectPath: "./project.inlang.json",
-			namespace: "frontend",
 		})
 		expect(fs.writeFile).not.toHaveBeenCalled()
 		expect(consola.success).not.toHaveBeenCalled()
@@ -183,20 +177,11 @@ describe("addCompileStepToPackageJSON()", () => {
 		])
 		await addCompileStepToPackageJSON({
 			projectPath: "./project.inlang.json",
-			namespace: "frontend",
 		})
 		expect(fs.writeFile).not.toHaveBeenCalled()
 		expect(consola.success).not.toHaveBeenCalled()
 		expect(consola.warn).toHaveBeenCalledOnce()
 		expect(process.exit).not.toHaveBeenCalled()
-	})
-})
-
-describe("promptForNamespace()", async () => {
-	test("it should trim the input from whitespace", async () => {
-		mockUserInput(["  frontend  "])
-		const namespace = await promptForNamespace()
-		expect(namespace).toBe("frontend")
 	})
 })
 
@@ -439,10 +424,10 @@ describe("findExistingInlangProjectPath()", () => {
 	})
 })
 
-describe("adjustTsConfigIfNecessary()", () => {
+describe("maybeChangeTsConfigModuleResolution()", () => {
 	test("it should return if no tsconfig.json exists", async () => {
 		mockFiles({})
-		const result = await adjustTsConfigIfNecessary()
+		const result = await maybeChangeTsConfigModuleResolution()
 		// no tsconfig exists, immediately return
 		expect(result).toBeUndefined()
 		// the tsconfig should not have been read
@@ -460,13 +445,13 @@ describe("adjustTsConfigIfNecessary()", () => {
 				} 
 			}`,
 		})
-		await adjustTsConfigIfNecessary()
+		await maybeChangeTsConfigModuleResolution()
 		// no info that the moduleResolution needs to be adapted should be logged
 
 		expect(consola.warn).toHaveBeenCalledOnce()
 	})
 
-	test("it should detect if the extended from tsconfig already set the moduleResolution to bundler", async () => {
+	test("it should detect if the extended from tsconfig already set the moduleResolution to bundler to ease the getting started process", async () => {
 		mockFiles({
 			"/tsconfig.base.json": `{
 				"compilerOptions": {
@@ -477,7 +462,7 @@ describe("adjustTsConfigIfNecessary()", () => {
 				"extends": "tsconfig.base.json", 
 			}`,
 		})
-		await adjustTsConfigIfNecessary()
+		await maybeChangeTsConfigModuleResolution()
 		// no info that the moduleResolution needs to be adapted should be logged
 		expect(consola.info).not.toHaveBeenCalled()
 	})
@@ -505,7 +490,7 @@ describe("adjustTsConfigIfNecessary()", () => {
 			},
 		])
 
-		await adjustTsConfigIfNecessary()
+		await maybeChangeTsConfigModuleResolution()
 
 		// info that the moduleResolution needs to be adapted
 		expect(consola.info).toHaveBeenCalledOnce()
@@ -530,7 +515,124 @@ describe("adjustTsConfigIfNecessary()", () => {
 			false,
 		])
 
-		await adjustTsConfigIfNecessary()
+		await maybeChangeTsConfigModuleResolution()
+
+		// info that the moduleResolution needs to be adapted
+		expect(consola.warn).toHaveBeenCalledOnce()
+		// 1. prompt the user to set the moduleResolution to bundler
+		// 2. prompt again because the moduleResolution is still not set
+		expect(consola.prompt).toHaveBeenCalledTimes(2)
+		// the user has not set the moduleResolution to bundler
+		// after the first prompt eventhough the user said it did
+		expect(consola.error).toHaveBeenCalledOnce()
+		// the user exists without setting the moduleResolution to bundler
+		// warn about type errors
+		expect(consola.warn).toHaveBeenCalledOnce()
+	})
+})
+
+describe("maybeChangeTsConfigAllowJs()", () => {
+	test("it should return if no tsconfig.json exists", async () => {
+		mockFiles({})
+		const result = await maybeChangeTsConfigAllowJs()
+		// no tsconfig exists, immediately return
+		expect(result).toBeUndefined()
+		// the tsconfig should not have been read
+		expect(fs.readFile).not.toHaveBeenCalled()
+		// no info that the moduleResolution needs to be adapted should be logged
+		expect(consola.info).not.toHaveBeenCalled()
+	})
+
+	test("it should return if the tsconfig already set allowJs to true", async () => {
+		mockFiles({
+			"/tsconfig.json": `{ 
+				"compilerOptions": {
+					"allowJs": true
+				} 
+			}`,
+		})
+		await maybeChangeTsConfigAllowJs()
+		expect(consola.prompt).not.toHaveBeenCalled()
+	})
+
+	test("even if a base tsconfig sets the correct option, prompt the user to change the tsconfig to avoid unexpected behaviour down the road when the base config changes", async () => {
+		mockFiles({
+			"/tsconfig.base.json": `{
+				"compilerOptions": {
+					"allowJs": true
+				}
+			}`,
+			"/tsconfig.json": `{ 
+				"extends": "tsconfig.base.json", 
+			}`,
+		})
+		mockUserInput([
+			() => {
+				fs.writeFile(
+					"/tsconfig.json",
+					`{
+					"compilerOptions": {
+						"allowJs": true
+					}
+				}`
+				)
+				return true
+			},
+		])
+		await maybeChangeTsConfigAllowJs()
+		// no info that the moduleResolution needs to be adapted should be logged
+		expect(consola.prompt).toHaveBeenCalledOnce()
+	})
+
+	test("it should prompt the user to set allowJs to true", async () => {
+		mockFiles({
+			"/tsconfig.json": `{}`,
+		})
+
+		const userAdjustsTsConfigSpy = vi.fn()
+
+		mockUserInput([
+			// user confirms that the moduleResolution has been set to bundler
+			() => {
+				userAdjustsTsConfigSpy()
+				fs.writeFile(
+					"/tsconfig.json",
+					`{
+						"compilerOptions": {
+							"allowJs": true
+						}
+					}`
+				)
+				return true
+			},
+		])
+
+		await maybeChangeTsConfigAllowJs()
+
+		// info that the moduleResolution needs to be adapted
+		expect(consola.info).toHaveBeenCalledOnce()
+		// prompt the user to set the moduleResolution to bundler
+		expect(consola.prompt).toHaveBeenCalledOnce()
+		// user has set the moduleResolution to bundler
+		expect(userAdjustsTsConfigSpy).toHaveBeenCalledOnce()
+	})
+
+	test("it should keep prompting the user if allowJs has not been set to true", async () => {
+		mockFiles({
+			"/tsconfig.json": `{}`,
+		})
+
+		mockUserInput([
+			// user confirms that the moduleResolution has been set to bundler
+			// while the moduleResolution is still not set
+			// -> should prompt again
+			true,
+			// user wants to exit
+			// -> should warn that type errors might occur and continue with init
+			false,
+		])
+
+		await maybeChangeTsConfigAllowJs()
 
 		// info that the moduleResolution needs to be adapted
 		expect(consola.warn).toHaveBeenCalledOnce()
