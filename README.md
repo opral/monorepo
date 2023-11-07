@@ -36,7 +36,7 @@
 
 ## 🌐 About inlang
 
-inlang is a whole ecosystem of building blocks for your globalization (internationalization / i18n) efforts with the goal of helping companies to enter new markets in no time. For example:
+**inlang is a whole ecosystem** of building blocks for your globalization (internationalization / i18n) efforts with the goal of helping companies to enter new markets in no time. For example:
 
 - use [inlang paraglide-js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) to have a fully translated, typesafe & fast app in minutes
 - use the [inlang CLI](https://inlang.com/m/2qj2w8pu/app-inlang-cli) to lint your messsages with lint rules or machine translate them & have quality control in CI/CD
