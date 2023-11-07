@@ -315,7 +315,7 @@ export function NoResultsCard(props: { category: string }) {
 function NoResultsArtwork() {
 	return (
 		<svg
-			width="auto"
+			width="100%"
 			height="auto"
 			viewBox="0 0 1252 300"
 			fill="none"
