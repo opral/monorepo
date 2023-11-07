@@ -1,5 +1,5 @@
 import { Button } from "../components/Button.jsx"
-import * as m from "@inlang/paraglide-js/website/messages"
+import * as m from "#src/paraglide/messages.js"
 
 const Lix = () => {
 	return (
