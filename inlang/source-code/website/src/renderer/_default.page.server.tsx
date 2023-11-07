@@ -39,8 +39,27 @@ export async function render(pageContext: PageContextRenderer): Promise<unknown>
 		</MetaProvider>
 	))
 
+	const alternateLinks = () => {
+		const alternateLinks = []
+		for (const locale of availableLanguageTags) {
+			if (locale !== languageTag()) {
+				alternateLinks.push(
+					`<link rel="alternate" hreflang="${locale}" href="https://inlang.com/${
+						locale !== sourceLanguageTag ? locale : ""
+					}${
+						// remove the last "/" if it exists
+						pageContext.urlOriginal.endsWith("/")
+							? pageContext.urlOriginal.slice(0, -1)
+							: pageContext.urlOriginal
+					}">`
+				)
+			}
+		}
+		return alternateLinks.join("\n")
+	}
+
 	return escapeInject`<!DOCTYPE html>
-    <html lang="en" class="min-h-screen min-w-screen overflow-x-hidden">
+    <html lang="${languageTag()}" class="min-h-screen min-w-screen overflow-x-hidden">
       <head>
 			<meta charset="UTF-8" />
 			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -50,6 +69,7 @@ export async function render(pageContext: PageContextRenderer): Promise<unknown>
 			<link rel="preconnect" href="https://rsms.me/">
 			<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
 		<!-- END import inter font -->
+			${dangerouslySkipEscape(alternateLinks())}
 			${dangerouslySkipEscape(import.meta.env.PROD ? analytics : "")}
 			${dangerouslySkipEscape(favicons)}
 			${dangerouslySkipEscape(generateHydrationScript())}
