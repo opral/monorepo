@@ -11,9 +11,9 @@
 
   <p align="center">
     <br>
-    <a href='https://inlang.com/documentation' target="_blank">📄 Docs</a>
-    ·
     <a href='https://inlang.com/c/application' target="_blank">🧩 Extensions</a>
+    ·
+    <a href='https://inlang.com/documentation' target="_blank">📄 Docs</a>
     ·
     <a href='https://discord.gg/gdMPPWy57R' target="_blank">💙 Discord</a>
     ·
