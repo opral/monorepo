@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-console */
-import * as m from "./paraglide-js/messages"
-import { languageTag, setLanguageTag } from "./paraglide-js/runtime"
+import * as m from "./paraglide/messages"
+import { languageTag, setLanguageTag } from "./paraglide/runtime"
 
 setLanguageTag("en")
 
