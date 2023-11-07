@@ -29,6 +29,7 @@ export const initCommand = new Command()
 		await addParaglideJsToDependencies()
 		await addCompileStepToPackageJSON({ projectPath })
 		await maybeChangeTsConfigModuleResolution()
+		await maybeChangeTsConfigAllowJs()
 		await maybeAddVsCodeExtension({ projectPath })
 
 		consola.box(
@@ -331,6 +332,55 @@ export const maybeChangeTsConfigModuleResolution = async () => {
 		} else {
 			consola.error(
 				"The compiler options have not been adjusted. Please set the `compilerOptions.moduleResolution` to `Bundler`."
+			)
+		}
+	}
+}
+
+/**
+ * Paraligde JS compiles to JS with JSDoc comments. TypeScript doesn't allow JS files by default.
+ */
+export const maybeChangeTsConfigAllowJs = async () => {
+	if (fsSync.existsSync("./tsconfig.json") === false) {
+		return
+	}
+	const file = await fs.readFile("./tsconfig.json", { encoding: "utf-8" })
+	// tsconfig allows comments ... FML
+	const tsconfig = JSON5.parse(file)
+
+	if (tsconfig.compilerOptions?.allowJs === true) {
+		// all clear, allowJs is already set to true
+		return
+	}
+
+	consola.info(
+		`You need to set the \`compilerOptions.allowJs\` to \`true\` in the \`tsconfig.json\` file:
+
+\`{
+  "compilerOptions": {
+    "allowJs": true
+  }
+}\``
+	)
+	let isValid = false
+	while (isValid === false) {
+		const response = await prompt(`Did you set the \`compilerOptions.allowJs\` to \`true\`?`, {
+			type: "confirm",
+			initial: false,
+		})
+		if (response === false) {
+			return consola.warn(
+				"Continuing without adjusting the tsconfig.json. This may lead to type errors."
+			)
+		}
+		const file = await fs.readFile("./tsconfig.json", { encoding: "utf-8" })
+		const tsconfig = JSON5.parse(file)
+		if (tsconfig?.compilerOptions?.allowJs === true) {
+			isValid = true
+			return
+		} else {
+			consola.error(
+				"The compiler options have not been adjusted. Please set the `compilerOptions.allowJs` to `true`."
 			)
 		}
 	}
