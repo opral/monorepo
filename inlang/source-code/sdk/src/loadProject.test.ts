@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect, vi } from "vitest"
 import { loadProject } from "./loadProject.js"
-import type { ProjectSettings, Plugin, MessageLintRule, Message } from "./versionedInterfaces.js"
+import type {
+	ProjectSettings,
+	Plugin,
+	MessageLintRule,
+	Message,
+	NodeishFilesystemSubset,
+} from "./versionedInterfaces.js"
 import type { ImportFunction } from "./resolve-modules/index.js"
 import type { InlangModule } from "@inlang/module"
 import {
@@ -828,7 +834,7 @@ describe("functionality", () => {
 	})
 
 	describe("watcher", () => {
-		it.todo("changing files in resources should trigger callback of message query", async () => {
+		it("changing files in resources should trigger callback of message query", async () => {
 			const fs = createNodeishMemoryFs()
 
 			const messages = {
@@ -855,8 +861,8 @@ describe("functionality", () => {
 
 			await fs.writeFile("./messages.json", JSON.stringify(messages))
 
-			const getMessages = async () => {
-				const file = await fs.readFile("./messages.json", { encoding: "utf-8" })
+			const getMessages = async (customFs: NodeishFilesystemSubset) => {
+				const file = await customFs.readFile("./messages.json", { encoding: "utf-8" })
 				return JSON.parse(file.toString()).data
 			}
 
@@ -865,7 +871,7 @@ describe("functionality", () => {
 				description: { en: "Mock plugin description" },
 				displayName: { en: "Mock Plugin" },
 
-				loadMessages: async () => await getMessages(),
+				loadMessages: async (args) => await getMessages(args.nodeishFs),
 				saveMessages: () => undefined as any,
 			}
 
@@ -880,6 +886,7 @@ describe("functionality", () => {
 
 			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
 
+			// establish watcher
 			const project = await loadProject({
 				settingsFilePath: normalizePath("/project.inlang.json"),
 				nodeishFs: fs,
@@ -892,16 +899,21 @@ describe("functionality", () => {
 
 			project.query.messages.getAll.subscribe((m) => {
 				counter = counter + 1
-				console.log("subscribe", m)
 			})
 
 			expect(counter).toBe(1)
 
+			// change file
 			await fs.writeFile("./messages.json", JSON.stringify(messages))
-
-			await new Promise((resolve) => setTimeout(resolve, 500))
+			await new Promise((resolve) => setTimeout(resolve, 0))
 
 			expect(counter).toBe(2)
+
+			// change file
+			await fs.writeFile("./messages.json", JSON.stringify(messages))
+			await new Promise((resolve) => setTimeout(resolve, 0))
+
+			expect(counter).toBe(3)
 		})
 	})
 })
