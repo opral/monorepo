@@ -25,6 +25,7 @@ import { migrateIfOutdated } from "@inlang/project-settings/migration"
 import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
 import { normalizePath } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
+import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -64,21 +65,6 @@ export const loadProject = async (args: {
 			settingsFilePath,
 			nodeishFs: args.nodeishFs,
 		})
-
-		// const abortController = new AbortController()
-
-		// (async () => {
-		// 	const watcher = nodeishFs.watch(path.join('..', settingsFilePath), { signal: abortController.signal, recursive: true })
-		// 	for await (event of watcher) {
-		//	  if match event.filename else ignore
-		// 		// reload
-		// 	}
-		// } catch (err) {d
-		// 	if ((err.name = "AbortError")) {
-		// 	}
-		// }()
-
-		// abortController.abort()
 
 		// -- settings ------------------------------------------------------------
 
@@ -141,7 +127,6 @@ export const loadProject = async (args: {
 		createEffect(() => (settingsValue = settings()!)) // workaround to not run effects twice (e.g. settings change + modules change) (I'm sure there exists a solid way of doing this, but I haven't found it yet)
 
 		const [messages, setMessages] = createSignal<Message[]>()
-		const [watcherInitialized, setWatcherInitialized] = createSignal(false)
 
 		createEffect(() => {
 			const conf = settings()
@@ -155,45 +140,35 @@ export const loadProject = async (args: {
 				return
 			}
 
-			const loadAndSetMessages = async () => {
-				makeTrulyAsync(
-					_resolvedModules.resolvedPluginApi.loadMessages({
-						settings: settingsValue,
-					})
-				)
-					.then((messages) => {
+			const fsWithWatcher = createNodeishFsWithWatcher({
+				nodeishFs: nodeishFs,
+				updateMessages: () => {
+					console.log("update")
+					makeTrulyAsync(
+						_resolvedModules.resolvedPluginApi.loadMessages({
+							settings: settingsValue,
+							nodeishFs: nodeishFs,
+						})
+					).then((messages) => {
 						setMessages(messages)
-						markInitAsComplete()
 					})
-					.catch((err) => markInitAsFailed(new PluginLoadMessagesError({ cause: err })))
-			}
+				},
+			})
 
-			loadAndSetMessages()
+			console.log("loadMessages")
 
-			const abortController = new AbortController()
-			if (
-				Object.keys(settingsValue).includes("plugin.inlang.messageFormat") &&
-				!watcherInitialized()
-			) {
-				setWatcherInitialized(true)
-				;(async () => {
-					try {
-						const watcher = nodeishFs.watch(
-							settingsValue["plugin.inlang.messageFormat"]!.filePath as string,
-							{
-								signal: abortController.signal,
-							}
-						)
-						//eslint-disable-next-line @typescript-eslint/no-unused-vars
-						for await (const event of watcher) {
-							loadAndSetMessages()
-						}
-					} catch (err: any) {
-						if (err.name === "AbortError") return
-						throw err
-					}
-				})()
-			}
+			makeTrulyAsync(
+				_resolvedModules.resolvedPluginApi.loadMessages({
+					settings: settingsValue,
+					nodeishFs: fsWithWatcher,
+				})
+			)
+				.then((messages) => {
+					console.log("setMessages")
+					setMessages(messages)
+					markInitAsComplete()
+				})
+				.catch((err) => markInitAsFailed(new PluginLoadMessagesError({ cause: err })))
 		})
 
 		// -- installed items ----------------------------------------------------
