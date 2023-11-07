@@ -11,6 +11,15 @@ beforeEach(() => {
 	vi.resetModules()
 })
 
+describe("output", async () => {
+	// the compiled should be ignored to avoid merge conflicts
+	test("the output should include a gitignore file", async () => {
+		const output = compile({ messages: [], settings: mockSettings })
+		expect(output).toHaveProperty(".gitignore")
+		expect(output[".gitignore"]).toContain("*")
+	})
+})
+
 describe("usage", async () => {
 	// The compiled output needs to be bundled into one file to be dynamically imported.
 	const bundle = await rollup({
@@ -238,7 +247,9 @@ test("typesafety", async () => {
 	})
 
 	for (const [fileName, code] of Object.entries(output)) {
-		project.createSourceFile(fileName, code)
+		if (fileName.endsWith(".js")) {
+			project.createSourceFile(fileName, code)
+		}
 	}
 
 	project.createSourceFile(

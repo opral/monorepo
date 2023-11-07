@@ -18,10 +18,9 @@ import { describe } from "node:test"
 import fsSync from "node:fs"
 import fs from "node:fs/promises"
 import childProcess from "node:child_process"
-
 import memfs from "memfs"
-import { version } from "../state.js"
 import type { ProjectSettings } from "@inlang/sdk"
+import { version } from "../state.js"
 
 beforeAll(() => {
 	// spy on commonly used functions to prevent console output
