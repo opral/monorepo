@@ -38,10 +38,10 @@
 
 inlang is a whole ecosystem of building blocks for your globalization (internationalization / i18n) efforts with the goal of helping companies to enter new markets in no time. For example:
 
-- use [inlang paraglide-js](./inlang-paraglide-js) to have a fully translated, typesafe & fast app in minutes
-- use the [inlang CLI](./inlang-cli) to lint your messsages with lint rules or machine translate them & have quality control in CI/CD
-- use the [inlang VSCode extension](./inlang-vscode) to translate your app right in the editor
-- use the [inlang Web Edtior](./inlang-web-editor) to translate your app in the browser & invite collaborators to help you
+- use [inlang paraglide-js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) to have a fully translated, typesafe & fast app in minutes
+- use the [inlang CLI](https://inlang.com/m/2qj2w8pu/app-inlang-cli) to lint your messsages with lint rules or machine translate them & have quality control in CI/CD
+- use the [inlang VSCode extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) to translate your app right in the editor
+- use the [inlang Web Edtior](https://inlang.com/m/tdozzpar/app-inlang-editor) to translate your app in the browser & invite collaborators to help you
 - *build your own app / plugin / lint rule* with the [inlang SDK](./inlang-api)
 - ...
 
