@@ -7,7 +7,6 @@ import { compileCommand } from "./compile.js"
 import type { ProjectSettings } from "@inlang/sdk"
 import { createMessage } from "@inlang/sdk/test-utilities"
 import { resolve } from "node:path"
-import { _setStateForTest } from "../state.js"
 
 beforeEach(() => {
 	vi.resetAllMocks()
@@ -45,38 +44,37 @@ test("it should exit if the project has errors", async () => {
 	).rejects.toEqual("PROCESS.EXIT()")
 })
 
-test("it should compile a project with a namespace", async () => {
-	const name = "frontend"
+test("it should compile a project into the provided outdir", async () => {
+	const outdirs = ["/paraglide-js", "./paraglide-js", "/src/paraglide-js", "./src/paraglide-js"]
 
-	_setStateForTest({ paraglideDirectory: "/node_modules/paraglide-js" })
-	const _fs = mockFs({
-		"/plugin.js": fs.readFileSync(
-			// using the inlang-message-format plugin
-			resolve(__dirname, "../../../../../plugins/inlang-message-format/dist/index.js"),
-			{ encoding: "utf-8" }
-		),
-		"/project.inlang.json": JSON.stringify({
-			sourceLanguageTag: "en",
-			languageTags: ["de", "en"],
-			modules: ["/plugin.js"],
-			"plugin.inlang.messageFormat": {
-				filePath: "/messages.json",
-			},
-		} satisfies ProjectSettings),
-		"/messages.json": JSON.stringify({
-			$schema: "https://inlang.com/schema/inlang-message-format",
-			data: [
-				createMessage("loginButton", {
-					en: "Login",
-					de: "Anmelden",
-				}),
-			],
-		}),
-	})
-	await compileCommand.parseAsync(["--project", "./project.inlang.json", "--namespace", name])
-	expect(
-		_fs.existsSync(`/node_modules/paraglide-js/dist/compiled-output/${name}/messages.js`)
-	).toBe(true)
+	for (const outdir of outdirs) {
+		const _fs = mockFs({
+			"/plugin.js": fs.readFileSync(
+				// using the inlang-message-format plugin
+				resolve(__dirname, "../../../../../plugins/inlang-message-format/dist/index.js"),
+				{ encoding: "utf-8" }
+			),
+			"/project.inlang.json": JSON.stringify({
+				sourceLanguageTag: "en",
+				languageTags: ["de", "en"],
+				modules: ["/plugin.js"],
+				"plugin.inlang.messageFormat": {
+					filePath: "/messages.json",
+				},
+			} satisfies ProjectSettings),
+			"/messages.json": JSON.stringify({
+				$schema: "https://inlang.com/schema/inlang-message-format",
+				data: [
+					createMessage("loginButton", {
+						en: "Login",
+						de: "Anmelden",
+					}),
+				],
+			}),
+		})
+		await compileCommand.parseAsync(["--project", "./project.inlang.json", "--outdir", outdir])
+		expect(_fs.existsSync(`${outdir}/messages.js`)).toBe(true)
+	}
 })
 
 const mockFs = (files: memfs.DirectoryJSON) => {
