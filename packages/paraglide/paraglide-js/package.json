@@ -6,10 +6,6 @@
 	"publishConfig": {
 		"access": "public"
 	},
-	"exports": {
-		"./*/messages": "./dist/compiled-output/*/messages.js",
-		"./*": "./dist/compiled-output/*/runtime.js"
-	},
 	"bin": {
 		"paraglide-js": "./bin/run.js"
 	},
