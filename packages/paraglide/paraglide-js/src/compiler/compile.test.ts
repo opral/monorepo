@@ -1,11 +1,10 @@
-import { expect, test, describe, vi } from "vitest"
+import { expect, test, describe, vi, beforeEach } from "vitest"
 import { createProject as typescriptProject, ts } from "@ts-morph/bootstrap"
 import { Message, ProjectSettings } from "@inlang/sdk"
 import { compile } from "./compile.js"
 import { rollup } from "rollup"
 import virtual from "@rollup/plugin-virtual"
 import terser from "@rollup/plugin-terser"
-import { beforeEach } from "node:test"
 
 beforeEach(() => {
 	// reset the imports to make sure that the runtime is reloaded

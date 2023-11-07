@@ -1,6 +1,5 @@
 import { compileMessage } from "./compileMessage.js"
 import { ProjectSettings, type Message } from "@inlang/sdk"
-import ts from "typescript"
 
 /**
  * A compile function takes a list of messages and project settings and returns
@@ -17,7 +16,7 @@ export const compile = (args: {
 }): Record<string, string> => {
 	const compiledMessages = args.messages.map(compileMessage).join("\n\n")
 
-	return withTsDeclarations({
+	return {
 		"messages.js": `
 import { languageTag } from "./runtime.js"
 
@@ -138,41 +137,5 @@ export const onSetLanguageTag = (fn) => {
  * @typedef {typeof availableLanguageTags[number]} AvailableLanguageTag
  */
 `,
-	})
-}
-
-/**
- * Compiles JavaScript with JSDoc type annotations into
- * JavaScript with TypeScript declaration files.
- *
- * This step is required to make typesafety work across
- * editors. TypeScript does not resolve NPM packages with
- * JSDoc type annotations.
- *
- * In the future, this step might be removed when TypeScript
- * supports resolving JS with JSDoc type annotations from
- * NPM packages.
- *
- * see https://github.com/microsoft/TypeScript/issues/33136#issuecomment-1764428377
- */
-const withTsDeclarations = (files: Record<string, string>): Record<string, string> => {
-	const options: ts.CompilerOptions = {
-		// forcing typescript to "fake" compile the JS files
-		// to ensure correct output (otherwise comments and more are stripped!)
-		declaration: true,
-		emitDeclarationOnly: true,
-		allowJs: true,
-		removeComments: false,
 	}
-	const host = ts.createCompilerHost(options)
-	host.readFile = (path) => {
-		// resolve the fake TS files as JS files
-		return files[path.replace(".ts", ".js")]
-	}
-	host.writeFile = (path, text) => {
-		files[path] = text
-	}
-	const program = ts.createProgram(Object.keys(files), options, host)
-	program.emit()
-	return files
 }
