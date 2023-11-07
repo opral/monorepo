@@ -44,6 +44,35 @@ test("it should exit if the project has errors", async () => {
 	).rejects.toEqual("PROCESS.EXIT()")
 })
 
+test("it should compile into the default outdir", async () => {
+	const _fs = mockFs({
+		"/plugin.js": fs.readFileSync(
+			// using the inlang-message-format plugin
+			resolve(__dirname, "../../../../../plugins/inlang-message-format/dist/index.js"),
+			{ encoding: "utf-8" }
+		),
+		"/project.inlang.json": JSON.stringify({
+			sourceLanguageTag: "en",
+			languageTags: ["de", "en"],
+			modules: ["/plugin.js"],
+			"plugin.inlang.messageFormat": {
+				filePath: "/messages.json",
+			},
+		} satisfies ProjectSettings),
+		"/messages.json": JSON.stringify({
+			$schema: "https://inlang.com/schema/inlang-message-format",
+			data: [
+				createMessage("loginButton", {
+					en: "Login",
+					de: "Anmelden",
+				}),
+			],
+		}),
+	})
+	await compileCommand.parseAsync(["--project", "./project.inlang.json"])
+	expect(_fs.existsSync("./src/paraglide/messages.js")).toBe(true)
+})
+
 test("it should compile a project into the provided outdir", async () => {
 	const outdirs = ["/paraglide-js", "./paraglide-js", "/src/paraglide-js", "./src/paraglide-js"]
 
