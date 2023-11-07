@@ -140,35 +140,28 @@ export const loadProject = async (args: {
 				return
 			}
 
+			const loadAndSetMessages = async (fs: NodeishFilesystemSubset) => {
+				makeTrulyAsync(
+					_resolvedModules.resolvedPluginApi.loadMessages({
+						settings: settingsValue,
+						nodeishFs: fs,
+					})
+				)
+					.then((messages) => {
+						setMessages(messages)
+						markInitAsComplete()
+					})
+					.catch((err) => markInitAsFailed(new PluginLoadMessagesError({ cause: err })))
+			}
+
 			const fsWithWatcher = createNodeishFsWithWatcher({
 				nodeishFs: nodeishFs,
 				updateMessages: () => {
-					console.log("update")
-					makeTrulyAsync(
-						_resolvedModules.resolvedPluginApi.loadMessages({
-							settings: settingsValue,
-							nodeishFs: nodeishFs,
-						})
-					).then((messages) => {
-						setMessages(messages)
-					})
+					loadAndSetMessages(nodeishFs)
 				},
 			})
 
-			console.log("loadMessages")
-
-			makeTrulyAsync(
-				_resolvedModules.resolvedPluginApi.loadMessages({
-					settings: settingsValue,
-					nodeishFs: fsWithWatcher,
-				})
-			)
-				.then((messages) => {
-					console.log("setMessages")
-					setMessages(messages)
-					markInitAsComplete()
-				})
-				.catch((err) => markInitAsFailed(new PluginLoadMessagesError({ cause: err })))
+			loadAndSetMessages(fsWithWatcher)
 		})
 
 		// -- installed items ----------------------------------------------------

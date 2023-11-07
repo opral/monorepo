@@ -13,8 +13,6 @@ export const createNodeishFsWithWatcher = (args: {
 	const pathList: string[] = []
 
 	const makeWatcher = (path: string) => {
-		//args.updateMessages()
-
 		const abortController = new AbortController()
 		;(async () => {
 			try {
