@@ -313,7 +313,7 @@ export const maybeChangeTsConfigModuleResolution = async () => {
 			`Did you set the \`compilerOptions.moduleResolution\` to "Bundler"?`,
 			{
 				type: "confirm",
-				initial: false,
+				initial: true,
 			}
 		)
 		if (response === false) {
@@ -366,7 +366,7 @@ export const maybeChangeTsConfigAllowJs = async () => {
 	while (isValid === false) {
 		const response = await prompt(`Did you set the \`compilerOptions.allowJs\` to \`true\`?`, {
 			type: "confirm",
-			initial: false,
+			initial: true,
 		})
 		if (response === false) {
 			return consola.warn(
