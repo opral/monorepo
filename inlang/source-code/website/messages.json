@@ -24,6 +24,16 @@
 							"value": "Globale Anwendung"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Aplicação Global"
+						}
+					]
 				}
 			]
 		},
@@ -48,6 +58,16 @@
 						{
 							"type": "Text",
 							"value": "Lint Regeln"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Regras de fiapos"
 						}
 					]
 				}
