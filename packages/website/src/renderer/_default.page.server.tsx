@@ -91,7 +91,7 @@ export function onBeforePrerender(prerenderContext: any) {
 			// Localize URL
 			let { urlOriginal } = pageContext
 			if (locale !== sourceLanguageTag) {
-				urlOriginal = `/${sourceLanguageTag}${pageContext.urlOriginal}`
+				urlOriginal = `/${locale}${pageContext.urlOriginal}`
 			}
 			pageContexts.push({
 				...pageContext,
