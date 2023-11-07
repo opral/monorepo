@@ -36,7 +36,7 @@ router.all(
 				return
 			}
 
-			if (!targetUrl.startsWith("https://api.github.com")) {
+			if (!targetUrl.startsWith("https://api.github.com/")) {
 				response.status(403).send("Only github supported")
 				return
 			}
