@@ -29,10 +29,10 @@ export const compileMessage = (message: Message): string => {
 
 	return `
 /**
- * This message has been compiled by [inlang paraglide](https://inlang.com/marketplace/library.inlang.paraglideJs).
+ * This message has been compiled by [inlang paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
  *
- * - Don't edit the message manually. Use the [inlang ide extension](https://inlang.com/marketplace/app.inlang.ideExtension)
- *   or the [web editor](https://inlang.com/marketplace/app.inlang.editor) to edit the message.
+ * - Don't edit the message manually. Use the [inlang ide extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension)
+ *   or the [web editor](https://inlang.com/m/tdozzpar/app-inlang-editor) to edit the message.
  * 
  * - The params are NonNullable<unknown> because inlang can't know the value type of a param (yet).
  * 
