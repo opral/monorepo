@@ -897,7 +897,7 @@ describe("functionality", () => {
 
 			let counter = 0
 
-			project.query.messages.getAll.subscribe((m) => {
+			project.query.messages.getAll.subscribe(() => {
 				counter = counter + 1
 			})
 
