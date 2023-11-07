@@ -170,7 +170,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 			// @ts-ignore
 			if (options?.persistent || options?.encoding) {
-				throw new Error("Most Options not implemented, only 'recursive' option allowed")
+				throw new Error("Some watch opptions not implemented, only 'recursive' allowed")
 			}
 
 			const queue: FileChangeInfo[] = []
