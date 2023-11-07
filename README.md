@@ -7,8 +7,8 @@
     Effortless globalization (i18n, l10n) for your app
   </h2>
   
-  <span align="center">powered by <a href="https://github.com/inlang/monorepo/tree/main/lix" target="_blank">lix</span>
-  
+  <p align="center">powered by <a href="https://github.com/inlang/monorepo/tree/main/lix" target="_blank">lix</p>
+
   <p align="center">
     <br>
     <a href='https://inlang.com/documentation' target="_blank">📄 Docs</a>
@@ -73,8 +73,8 @@ Example `project.inlang.json`
 
 **More specific guides:**
 
-Guide: [How to setup inlang for your project](https://inlang.com/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang#)
-Guide: [Build a Global Svelte App](https://inlang.com/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp)
+- Guide: [How to setup inlang for your project](https://inlang.com/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang#)
+- Guide: [Build a Global Svelte App](https://inlang.com/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp)
 
 ## 🔔 Stay up-to-date
 
@@ -85,12 +85,12 @@ We also regularly send out a newsletter with updates and tips & tricks. You can 
 
 ## ✍️ Contributing
 
-There are many ways you can contribute to crowd.dev! Here are a few options:
+There are many ways you can contribute to inlang! Here are a few options:
 
 - Star this repo
 - Create issues every time you feel something is missing or goes wrong
 - Upvote issues with 👍 reaction so we know what's the demand for a particular issue to prioritize it within the roadmap
 
-If you would like to contribute to the development of the project, please refer to our [Contributing guide](https://github.com/CrowdDotDev/crowd.dev/blob/main/CONTRIBUTING.md).
+If you would like to contribute to the development of the project, please refer to our [Contributing guide](https://github.com/inlang/monorepo/blob/main/CONTRIBUTING.md).
 
 All contributions are highly appreciated. 🙏
