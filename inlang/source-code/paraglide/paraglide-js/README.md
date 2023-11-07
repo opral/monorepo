@@ -70,7 +70,7 @@ Inlang Paraglide-JS consists of four main parts:
 - `RUNTIME`: a runtime that resolves the language tag of the current user
 - `ADAPTER`: (if required) an adapter that adjust the runtime for different frameworks
 
-<img src="./assets/architecture.svg">
+<img src="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/architecture.svg">
 
 
 ## COMPILER
