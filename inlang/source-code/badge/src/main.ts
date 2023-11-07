@@ -44,5 +44,6 @@ if (isProduction) {
 app.set("base", "/badge")
 app.use(router)
 
-const port = 4003
-app.listen(port, () => console.info(`Server listening at http://localhost:${port}`))
+const port = process.env.PORT ?? 4003
+app.listen(port)
+console.info(`Server running at http://localhost:${port}/`)
