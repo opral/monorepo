@@ -4,22 +4,34 @@ import type { NodeishFilesystem } from "@lix-js/fs"
  * Wraps a nodeishFs implementation with a js proxy for detailed logging, debugging and transparently replacing the file access behaviour.
  * advantage of using this approach is that the underlying fs can also be swapped to something like lightingfs seamlessly.
  */
-export const withLazyFetching = (
-	targetRoot: NodeishFilesystem,
-	_module: string,
-	fn?: (args: { prop: keyof typeof targetRoot; execute: () => any }) => any
-): NodeishFilesystem => {
-	return new Proxy(targetRoot, {
-		get(getTarget: typeof targetRoot, prop, receiver) {
-			if (getTarget[prop as keyof typeof targetRoot]) {
+type Args = {
+	nodeishFs: NodeishFilesystem
+	verbose?: boolean
+	description?: string
+	intercept?: (args: { prop: keyof NodeishFilesystem; execute: () => any }) => any
+}
+export const withLazyFetching = ({
+	nodeishFs,
+	verbose = false,
+	description,
+	intercept,
+}: Args): NodeishFilesystem => {
+	return new Proxy(nodeishFs, {
+		get(getTarget: typeof nodeishFs, prop, receiver) {
+			if (getTarget[prop as keyof typeof nodeishFs]) {
 				return new Proxy(getTarget[prop as keyof typeof getTarget], {
 					apply(callTarget, thisArg, argumentsList) {
-						// console.verbose(`${_module} fs:`, prop, argumentsList)
+						if (verbose) {
+							console.warn(`${description} fs:`, prop, argumentsList)
+						}
 
 						const execute = () => Reflect.apply(callTarget, thisArg, argumentsList)
 
-						return fn
-							? fn({ prop, execute } as { prop: keyof typeof targetRoot; execute: () => any })
+						return intercept
+							? intercept({ prop, argumentsList, execute } as {
+									prop: keyof typeof nodeishFs
+									execute: () => any
+							  })
 							: execute()
 					},
 				})

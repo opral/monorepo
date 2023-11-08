@@ -1,6 +1,6 @@
 /**
  * Forked from https://github.com/isomorphic-git/isomorphic-git/blob/main/src/http/web/index.js
- * for credentials: "include" support
+ * for credentials: "include" support, configurable payload overrides, configurable logging etc.
  * @typedef {Object} GitProgressEvent
  * @property {string} phase
  * @property {number} loaded
@@ -130,35 +130,81 @@ function fromStream(stream) {
 /* eslint-env browser */
 
 /**
- * HttpClient
+ * MakeHttpClient
  *
- * @param {GitHttpRequest} request
- * @returns {Promise<GitHttpResponse>}
+ * @param { verbose?: boolean, desciption?: string, onReq: ({body: any, url: string }) => {body: any, url: string} }
+ * @returns HttpClient
  */
-async function request({ url, method = "GET", headers = {}, body }) {
-	// onProgress param not used
-	// streaming uploads aren't possible yet in the browser
-	if (body) {
-		body = await collect(body)
-	}
-	const res = await fetch(url, { method, headers, body, credentials: "include" })
-	const iter =
-		res.body && res.body.getReader
-			? fromStream(res.body)
-			: [new Uint8Array(await res.arrayBuffer())]
-	// convert Header object to ordinary JSON
-	headers = {}
-	for (const [key, value] of res.headers.entries()) {
-		headers[key] = value
-	}
-	return {
-		url: res.url,
-		method: res.method,
-		statusCode: res.status,
-		statusMessage: res.statusText,
-		body: iter,
-		headers: headers,
-	}
-}
+export function makeHttpClient({ verbose, description, onReq, onRes }) {
+	/**
+	 * HttpClient
+	 *
+	 * @param {GitHttpRequest} request
+	 * @returns {Promise<GitHttpResponse>}
+	 */
+	async function request({ url, method = "GET", headers = {}, body }) {
+		// onProgress param not used
+		// streaming uploads aren't possible yet in the browser
 
-export default { request }
+		if (body) {
+			body = await collect(body)
+		}
+		const origUrl = url
+		const origMethod = method
+
+		if (onReq) {
+			const rewritten = await onReq({ body, url })
+
+			method = rewritten?.method || method
+			headers = rewritten?.headers || headers
+			body = rewritten?.body || body
+			url = rewritten?.url || url
+		}
+
+		const res = await fetch(url, { method, headers, body, credentials: "include" })
+
+		// convert Header object to ordinary JSON
+		let resHeaders = {}
+		for (const [key, value] of res.headers.entries()) {
+			resHeaders[key] = value
+		}
+
+		if (verbose) {
+			console.warn(
+				`${description} git req:`,
+				origUrl,
+				"\n",
+				body ? new TextDecoder().decode(body) : ""
+			)
+		}
+
+		const statusCode = res.status
+
+		let resBody
+		if (onRes) {
+			const uint8Array = new Uint8Array(await res.arrayBuffer())
+			const rewritten = await onRes({ url: origUrl, resBody: uint8Array, statusCode, resHeaders })
+
+			resHeaders = rewritten?.resHeaders || resHeaders
+			resBody = rewritten?.resBody || [uint8Array]
+		}
+
+		if (!resBody) {
+			resBody =
+				res.body && res.body.getReader
+					? fromStream(res.body)
+					: [new Uint8Array(await res.arrayBuffer())]
+		}
+
+		return {
+			url: origUrl,
+			method: origMethod,
+			statusCode,
+			statusMessage: res.statusText,
+			body: resBody,
+			headers: resHeaders,
+		}
+	}
+
+	return { request }
+}
