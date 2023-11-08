@@ -77,6 +77,12 @@ jobs:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/message-lint-rules/snakeCaseId/package.json
 
+      - name: "@inlang/message-lint-rule-camel-case-id" 
+        uses: JS-DevTools/npm-publish@v2
+        with:
+            token: ${{ secrets.NPM_PUBLISH_TOKEN }}
+            package: inlang/source-code/message-lint-rules/camelCaseId/package.json
+
       - name: "@inlang/plugin-json" 
         uses: JS-DevTools/npm-publish@v2
         with:
@@ -106,6 +112,12 @@ jobs:
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/plugins/t-function-matcher/package.json
+
+      - name: "@inlang/detect-json-formatting" 
+        uses: JS-DevTools/npm-publish@v2
+        with:
+            token: ${{ secrets.NPM_PUBLISH_TOKEN }}
+            package: inlang/source-code/detect-json-formatting/package.json
   
       - name: "@inlang/result" 
         uses: JS-DevTools/npm-publish@v2

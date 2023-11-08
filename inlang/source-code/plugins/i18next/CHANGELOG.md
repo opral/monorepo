@@ -1,5 +1,17 @@
 # @inlang/plugin-i18next
 
+## 4.12.0
+
+### Minor Changes
+
+- cafff8748: adjust tests and fix erros message
+- 39beea7dd: change return type of extractMessageOptions
+
+### Patch Changes
+
+- Updated dependencies [cafff8748]
+  - @inlang/sdk@0.17.0
+
 ## 4.11.0
 
 ### Minor Changes

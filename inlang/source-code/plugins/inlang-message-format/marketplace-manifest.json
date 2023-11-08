@@ -23,10 +23,11 @@
 		"load",
 		"import",
 		"export",
-		"messages"
+		"messages",
+		"plugin"
 	],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0",
-	"module": "https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format/dist/index.js"
+	"module": "https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/dist/index.js"
 }

@@ -1,6 +1,6 @@
 import type { PageContextRenderer } from "./types.js"
 import { generateHydrationScript, renderToString } from "solid-js/web"
-import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr/server"
+import { escapeInject, dangerouslySkipEscape } from "vike/server"
 import { setCurrentPageContext } from "./state.js"
 import { Root } from "./_default.root.jsx"
 
@@ -9,7 +9,7 @@ import "./app.css"
 import { MetaProvider, renderTags } from "@solidjs/meta"
 import { sourceLanguageTag, availableLanguageTags, languageTag } from "@inlang/paraglide-js/website"
 
-// See https://vite-plugin-ssr.com/data-fetching
+// See https://vike.dev/data-fetching
 export const passToClient = ["pageProps", "routeParams", "languageTag"] as const
 
 export async function render(pageContext: PageContextRenderer): Promise<unknown> {
@@ -33,14 +33,11 @@ export async function render(pageContext: PageContextRenderer): Promise<unknown>
 	// mutated during render so you can include in server-rendered template later
 	const tags: any[] = []
 
-	const isEditor = pageContext.urlPathname.includes("/editor")
-	const renderedPage = isEditor
-		? undefined
-		: renderToString(() => (
-				<MetaProvider tags={tags}>
-					<Root page={pageContext.Page} pageProps={pageContext.pageProps} />
-				</MetaProvider>
-		  ))
+	const renderedPage = renderToString(() => (
+		<MetaProvider tags={tags}>
+			<Root page={pageContext.Page} pageProps={pageContext.pageProps} />
+		</MetaProvider>
+	))
 
 	return escapeInject`<!DOCTYPE html>
     <html lang="en" class="min-h-screen min-w-screen overflow-x-hidden">
@@ -59,8 +56,8 @@ export async function render(pageContext: PageContextRenderer): Promise<unknown>
 			${dangerouslySkipEscape(renderTags(tags))}
       </head>
 	  <!-- setting min-h/w-screen to allow child elements to span to the entire screen  -->
-      <body class="min-h-screen min-w-screen bg-background text-on-background" id="root">
-		    ${isEditor ? "" : dangerouslySkipEscape(renderedPage!)}
+      <body class="website min-h-screen min-w-screen bg-background text-on-background" id="root">
+		    ${dangerouslySkipEscape(renderedPage!)}
       </body>
     </html>`
 }
@@ -94,7 +91,7 @@ export function onBeforePrerender(prerenderContext: any) {
 			// Localize URL
 			let { urlOriginal } = pageContext
 			if (locale !== sourceLanguageTag) {
-				urlOriginal = `/${sourceLanguageTag}${pageContext.urlOriginal}`
+				urlOriginal = `/${locale}${pageContext.urlOriginal}`
 			}
 			pageContexts.push({
 				...pageContext,

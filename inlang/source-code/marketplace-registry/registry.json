@@ -9,6 +9,7 @@
 		"10l6oyv1": "../message-lint-rules/messageWithoutSource/marketplace-manifest.json",
 		"4cxm3eqi": "../message-lint-rules/missingTranslation/marketplace-manifest.json",
 		"gkerinvo": "../message-lint-rules/snakeCaseId/marketplace-manifest.json",
+		"ewkole66": "../message-lint-rules/camelCaseId/marketplace-manifest.json",
 		"3i8bor92": "../plugins/i18next/marketplace-manifest.json",
 		"ig84ng0o": "../plugins/json/marketplace-manifest.json",
 		"reootnfj": "../plugins/inlang-message-format/marketplace-manifest.json",
@@ -23,6 +24,7 @@
 		"2fg8ng94": "../../guides/build-a-global-svelte-app/marketplace-manifest.json",
 		"49fn9ggo": "../../guides/how-to-setup-inlang-for-your-project/marketplace-manifest.json",
 		"3go4f04m": "../../guides/what-is-inlang/marketplace-manifest.json",
-		"83gwpp32": "../../guides/use-paraglide-js-in-monorepos/marketplace-manifest.json"
+		"83gwpp32": "../../guides/use-paraglide-js-in-monorepos/marketplace-manifest.json",
+		"00162hsd": "../../guides/what-are-plugins/marketplace-manifest.json"
 	}
 }

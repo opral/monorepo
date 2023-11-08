@@ -303,7 +303,7 @@ export function NoResultsCard(props: { category: string }) {
 							{m.marketplace_grid_subscribe_button()}
 						</button>
 					</div>
-					<Button href="/documentation/publish-marketplace" chevron type="textPrimary">
+					<Button href="/documentation/publish-to-marketplace" chevron type="textPrimary">
 						{m.marketplace_grid_subscribe_secondary_button()}
 					</Button>
 				</div>
@@ -315,7 +315,7 @@ export function NoResultsCard(props: { category: string }) {
 function NoResultsArtwork() {
 	return (
 		<svg
-			width="auto"
+			width="100%"
 			height="auto"
 			viewBox="0 0 1252 300"
 			fill="none"

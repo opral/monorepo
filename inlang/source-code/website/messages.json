@@ -24,6 +24,16 @@
 							"value": "Globale Anwendung"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Aplicação Global"
+						}
+					]
 				}
 			]
 		},
@@ -48,6 +58,16 @@
 						{
 							"type": "Text",
 							"value": "Lint Regeln"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Regras de fiapos"
 						}
 					]
 				}
@@ -1007,7 +1027,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Featured"
+							"value": "Featured Products"
 						}
 					]
 				},
@@ -1017,7 +1037,33 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Hervorgehoben"
+							"value": "Ausgewählte Produkte"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_guides_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Guides"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Guides"
 						}
 					]
 				}
@@ -1226,32 +1272,6 @@
 						{
 							"type": "Text",
 							"value": "Stack"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "home_guides_title",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Guides"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Guides"
 						}
 					]
 				}
@@ -2021,7 +2041,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "⌘ + k to search"
+							"value": "to search"
 						}
 					]
 				},
@@ -2031,7 +2051,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "⌘ + k um zu suchen"
+							"value": "um zu suchen"
 						}
 					]
 				}

@@ -7,9 +7,6 @@ import fetch from "node-fetch"
 
 const manifestLinks = JSON.parse(await fs.readFile("./registry.json", "utf-8"))
 
-// eslint-disable-next-line no-undef
-const isProduction = process.env.NODE_ENV === "production"
-
 /** @type {(import("@inlang/marketplace-manifest").MarketplaceManifest & { uniqueID: string })[]} */
 const manifests = []
 
@@ -47,6 +44,9 @@ for (const type of Object.keys(manifestLinks)) {
 
 // checks if every manifest has a unique id
 checkUniqueIDs(manifests)
+
+// checks if the module links have the correct schema
+checkModuleLinks(manifests)
 
 // sort the manifests by id
 manifests.sort((a, b) => {
@@ -107,5 +107,21 @@ function checkUniqueIDs(manifests) {
 			throw new Error(`Manifest with unique id '${manifest.uniqueID}' already exists.`)
 		}
 		uniqueIDs.add(manifest.uniqueID)
+	}
+}
+
+/* This function checks for the module links to have the correct schema */
+function checkModuleLinks(manifests) {
+	for (const manifest of manifests) {
+		if (manifest.module !== undefined) {
+			// should be in this schema https://cdn.jsdelivr.net/npm/PUBLISHER/NAME@latest/PATH
+			if (!manifest.module.startsWith("https://cdn.jsdelivr.net/npm/")) {
+				throw new Error(
+					`Module link '${manifest.module}' does not start with 'https://cdn.jsdelivr.net/npm/'.`
+				)
+			} else if (!manifest.module.includes("@latest")) {
+				throw new Error(`Module link '${manifest.module}' does not include a package name.`)
+			}
+		}
 	}
 }

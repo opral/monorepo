@@ -1,14 +1,14 @@
 {
-  "tasksRunnerOptions": {
-    "default": {
+	"tasksRunnerOptions": {
+		"default": {
 			"runner": "nx/tasks-runners/default",
 			"options": {
 				"cacheableOperations": ["build", "test", "lint", "format"],
 				"accessToken": "ODlkYjAwMjYtMGMyMS00YTI3LWIzNTAtN2RhZjgwYzAwZGJifHJlYWQtd3JpdGU="
 			}
 		}
-  },
-  "targetDefaults": {
+	},
+	"targetDefaults": {
 		"build": {
 			"dependsOn": ["^build"]
 		},

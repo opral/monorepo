@@ -9,6 +9,7 @@ import {
 	existingProjectFlow,
 	findExistingInlangProjectPath,
 	initializeInlangProject,
+	maybeAddVsCodeExtension,
 	newProjectTemplate,
 	promptForNamespace,
 } from "./init.js"
@@ -20,6 +21,7 @@ import childProcess from "node:child_process"
 
 import memfs from "memfs"
 import { version } from "../state.js"
+import type { ProjectSettings } from "@inlang/sdk"
 
 beforeAll(() => {
 	// spy on commonly used functions to prevent console output
@@ -80,7 +82,7 @@ describe("initializeInlangProject()", () => {
 			timeout: 20000,
 		}
 	)
-	test("it should execute newProjectFlow() if not project has been found", async () => {
+	test("it should execute newProjectFlow() if no project has been found", async () => {
 		const { existsSync } = mockFiles({})
 		mockUserInput(["newProject"])
 		const path = await initializeInlangProject()
@@ -230,6 +232,74 @@ describe("existingProjectFlow()", () => {
 		await existingProjectFlow({ existingProjectPath: "/project.inlang.json" })
 		expect(consola.error).toHaveBeenCalled()
 		expect(process.exit).toHaveBeenCalled()
+	})
+})
+
+describe("maybeAddVsCodeExtension()", () => {
+	test("it should add the vscode extension if the user uses vscode", async () => {
+		mockFiles({
+			"/project.inlang.json": JSON.stringify(newProjectTemplate),
+		})
+		mockUserInput([
+			// user uses vscode
+			true,
+		])
+		await maybeAddVsCodeExtension({ projectPath: "/project.inlang.json" })
+		expect(consola.prompt).toHaveBeenCalledOnce()
+		const extensions = await fs.readFile("/.vscode/extensions.json", {
+			encoding: "utf-8",
+		})
+		expect(extensions).toBe(
+			JSON.stringify(
+				{
+					recommendations: ["inlang.vs-code-extension"],
+				},
+				undefined,
+				2
+			)
+		)
+	})
+	test("it should not add the vscode extension if the user doesn't use vscode", async () => {
+		mockFiles({
+			"/project.inlang.json": JSON.stringify(newProjectTemplate),
+		})
+		mockUserInput([
+			// user does not use vscode
+			false,
+		])
+		await maybeAddVsCodeExtension({ projectPath: "/project.inlang.json" })
+		expect(consola.prompt).toHaveBeenCalledOnce()
+		expect(fs.writeFile).not.toHaveBeenCalled()
+	})
+
+	test("it should install the m function matcher if not installed", async () => {
+		const withEmptyModules = structuredClone(newProjectTemplate)
+		withEmptyModules.modules = []
+		mockFiles({
+			"/project.inlang.json": JSON.stringify(withEmptyModules),
+		})
+		mockUserInput([
+			// user uses vscode
+			true,
+		])
+		await maybeAddVsCodeExtension({ projectPath: "/project.inlang.json" })
+		const projectSettings = JSON.parse(
+			await fs.readFile("/project.inlang.json", {
+				encoding: "utf-8",
+			})
+		) as ProjectSettings
+		expect(projectSettings.modules.some((m) => m.includes("m-function-matcher"))).toBe(true)
+	})
+	test("it should create the .vscode folder if not existent", async () => {
+		mockFiles({
+			"/project.inlang.json": JSON.stringify(newProjectTemplate),
+		})
+		mockUserInput([
+			// user uses vscode
+			true,
+		])
+		await maybeAddVsCodeExtension({ projectPath: "/project.inlang.json" })
+		expect(fsSync.existsSync("/.vscode/extensions.json")).toBe(true)
 	})
 })
 
