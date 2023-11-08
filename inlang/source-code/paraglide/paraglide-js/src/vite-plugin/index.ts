@@ -1,26 +1,22 @@
 import type { PluginOption } from "vite"
 import { exec } from "node:child_process"
 import { readFile } from "node:fs/promises"
-import type { ProjectSettings } from "@inlang/sdk"
-import { resolve } from "node:path"
+import { loadProject, type ProjectSettings } from "@inlang/sdk"
+import { createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
 
 let cachedSettings: ProjectSettings | undefined = undefined
 
 export const paraglideJsVitePlugin = (config: {
 	settingsPath: string
 	namespace: string
-	silent?: boolean
 	timeout?: number
 	onInit?: boolean
 }): PluginOption => {
 	const options = {
 		silent: false,
-		timeout: 500,
 		onInit: true,
 		...config,
 	}
-
-	let throttled = false
 
 	const execute = () => {
 		exec(
@@ -45,38 +41,49 @@ export const paraglideJsVitePlugin = (config: {
 			if (options.onInit) {
 				execute()
 			}
+
+			const inlang = await loadProject({
+				settingsFilePath: options.settingsPath,
+				nodeishFs: createNodeishMemoryFs(),
+			})
+
+			inlang.query.messages.getAll.subscribe((messages) => {
+				if (messages.length > 0) {
+					execute()
+				}
+			})
 		},
 
-		async handleHotUpdate({ file }) {
-			if (throttled) return
+		// async handleHotUpdate({ file }) {
+		// 	if (throttled) return
 
-			throttled = true
+		// 	throttled = true
 
-			setTimeout(() => (throttled = false), options.timeout)
+		// 	setTimeout(() => (throttled = false), options.timeout)
 
-			let filePath =
-				cachedSettings && (cachedSettings["plugin.inlang.messageFormat"]?.filePath as string)
-			if (!filePath) {
-				console.warn(
-					"No `filePath` found in `project.inlang.json` settings. Skipping paraglide-js compilation."
-				)
-				return
-			}
+		// 	let filePath =
+		// 		cachedSettings && (cachedSettings["plugin.inlang.messageFormat"]?.filePath as string)
+		// 	if (!filePath) {
+		// 		console.warn(
+		// 			"No `filePath` found in `project.inlang.json` settings. Skipping paraglide-js compilation."
+		// 		)
+		// 		return
+		// 	}
 
-			if (!filePath.startsWith("/")) {
-				filePath = resolve(process.cwd(), filePath)
-			}
+		// 	if (!filePath.startsWith("/")) {
+		// 		filePath = resolve(process.cwd(), filePath)
+		// 	}
 
-			if (file === filePath) {
-				console.info(
-					"Running",
-					`paraglide-js compile --namespace ${options.namespace} --project ${options.settingsPath}`,
-					"with filePath:",
-					filePath,
-					"\n"
-				)
-				execute()
-			}
-		},
+		// 	if (file === filePath) {
+		// 		console.info(
+		// 			"Running",
+		// 			`paraglide-js compile --namespace ${options.namespace} --project ${options.settingsPath}`,
+		// 			"with filePath:",
+		// 			filePath,
+		// 			"\n"
+		// 		)
+		// 		execute()
+		// 	}
+		// },
 	}
 }
