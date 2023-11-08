@@ -1006,12 +1006,12 @@
 					]
 				},
 				{
-					"match": [],
 					"languageTag": "zh",
+					"match": [],
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "推特"
+							"value": "X"
 						}
 					]
 				}
