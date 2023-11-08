@@ -5,7 +5,6 @@ import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
 import { router as telemetryRouter } from "@inlang/telemetry/router"
 import { router as rpcRouter } from "@inlang/rpc/router"
-import { router as badgeRouter } from "@inlang/badge/router"
 import { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { ProjectSettings } from "@inlang/project-settings"
 import { StorageSchema } from "@inlang/plugin-message-format/storage-schema"
@@ -75,10 +74,22 @@ app.use(telemetryRouter)
 
 app.use(rpcRouter)
 
-app.use(badgeRouter)
+const badgeAddress = isProduction ? "http://badge-service:10000" : "http://[::1]:4003"
 
 app.use(
-	createProxyMiddleware("/editor", {
+	"/badge",
+	createProxyMiddleware({
+		target: badgeAddress,
+		changeOrigin: true,
+		headers: {
+			Connection: "keep-alive",
+		},
+	})
+)
+
+app.use(
+	"/editor",
+	createProxyMiddleware({
 		target: "http://[::1]:4001",
 		changeOrigin: true,
 		headers: {

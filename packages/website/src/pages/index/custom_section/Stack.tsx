@@ -10,7 +10,7 @@ import {
 import Link from "#src/renderer/Link.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 import { For } from "solid-js"
-import * as m from "@inlang/paraglide-js/website/messages"
+import * as m from "#src/paraglide/messages.js"
 
 const Stack = () => {
 	const getSubCategies: boolean | any[] | null | undefined = [

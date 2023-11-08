@@ -50,6 +50,7 @@ Here is the syntax for the PluginSettings object in TypeScript:
 type PluginSettings = {
 	pathPattern: string | { [key: string]: string }
 	variableReferencePattern?: [string] | [string, string]
+	ignore?: string[]
 }
 ```
 
@@ -95,7 +96,13 @@ default:
 | `[placeholder]`   | `["[", "]"]`   |
 | `:placeholder`    | `[":"]`        |
 
-<br>
+## `ignore`
+
+An array of strings that are used to ignore certain files. The strings are matched against the file path. If the file path contains the string, the file is ignored.
+
+```json
+"ignore": ["node_modules", "dist"]
+```
 
 # Expected behavior
 
