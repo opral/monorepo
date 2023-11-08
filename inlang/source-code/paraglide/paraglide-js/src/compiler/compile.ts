@@ -19,16 +19,53 @@ export const compile = (args: {
 	messages: Readonly<Message[]>
 	settings: ProjectSettings
 }): Record<string, string> => {
-	const compiledMessages = args.messages.map(compileMessage).join("\n\n")
+	const compiledMessages = args.messages.map(compileMessage)
+
+	const resources: Record<string, string> = {}
+
+	for (const compiledMessage of compiledMessages) {
+		for (const languageTag of Object.keys(compiledMessage)) {
+			if (languageTag === "index") {
+				continue
+			} else if (resources[languageTag] === undefined) {
+				resources[languageTag] = ""
+			}
+			resources[languageTag] += "\n\n" + compiledMessage[languageTag]
+		}
+	}
 
 	return {
+		// boilerplate files
 		".prettierignore": ignoreDirectory,
 		".gitignore": ignoreDirectory,
 		".eslintignore": ignoreDirectory,
+		// resources
+		// (messages/en.js)
+		// (messages/de.js)
+		// (etc...)
+		...Object.fromEntries(
+			Object.entries(resources).map(([languageTag, content]) => [
+				`messages/${languageTag}.js`,
+				`
+/** 
+* This file contains language specific message functions for tree-shaking. 
+* 
+*! WARNING: Only import messages from this file if you want to manually
+*! optimize your bundle. Else, import from the \`messages.js\` file. 
+* 
+* Your bundler will (in the future) automatically replace the index function 
+* with a language specific message function in the build step. 
+*/` + content,
+			])
+		),
+		// message index file
 		"messages.js": `
 import { languageTag } from "./runtime.js"
+${Object.keys(resources)
+	.map((languageTag) => `import * as ${languageTag} from "./messages/${languageTag}.js"`)
+	.join("\n")}
 
-${compiledMessages}
+${compiledMessages.map((message) => message.index).join("\n\n")}
 `,
 		"runtime.js": `
 /** @type {((tag: AvailableLanguageTag) => void) | undefined} */ 

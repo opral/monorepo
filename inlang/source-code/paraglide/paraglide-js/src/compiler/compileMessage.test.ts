@@ -92,10 +92,10 @@ it("should compile a message to a function", async () => {
 		],
 	})
 	const de = await import(
-		`data:application/javascript;base64,${btoa("let languageTag = () => 'de';" + result)}`
+		`data:application/javascript;base64,${btoa("let languageTag = () => 'de';" + result.de)}`
 	)
 	const en = await import(
-		`data:application/javascript;base64,${btoa("let languageTag = () => 'en';" + result)}`
+		`data:application/javascript;base64,${btoa("let languageTag = () => 'en';" + result.en)}`
 	)
 	expect(de.multipleParams({ name: "Samuel", count: 5 })).toBe(
 		"Hallo Samuel! Du hast 5 Nachrichten."
