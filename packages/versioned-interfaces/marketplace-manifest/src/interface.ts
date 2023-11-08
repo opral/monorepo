@@ -56,19 +56,36 @@ const ModuleBase = Type.Intersect([
 	}),
 ])
 
+const CommandBase = Type.Intersect([
+	MarketplaceManifestBase,
+	Type.Object({
+		command: Type.Optional(
+			Type.Union([
+				Type.String(),
+				Type.Object({
+					npm: Type.Optional(Type.String()),
+					pnpm: Type.Optional(Type.String()),
+					yarn: Type.Optional(Type.String()),
+					bun: Type.Optional(Type.String()),
+				}),
+			])
+		),
+	}),
+])
+
 /**
  * ---------------- MARKETPLACE ITEMS ----------------
  */
 
 const App = Type.Intersect([
-	MarketplaceManifestBase,
+	CommandBase,
 	Type.Object({
 		id: Type.TemplateLiteral("app.${string}.${string}"),
 	}),
 ])
 
 const Library = Type.Intersect([
-	MarketplaceManifestBase,
+	CommandBase,
 	Type.Object({
 		id: Type.TemplateLiteral("library.${string}.${string}"),
 	}),
