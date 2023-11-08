@@ -4,7 +4,7 @@ import { parse } from "./messageReferenceMatchers.js" // Replace with the actual
 describe("Paraglide Message Parser", () => {
 	it("should match simple m function call", () => {
 		const sourceCode = `
-		import * as m from "@inlang/paraglide-js/example/messages";
+		import * as m from "../../i18n-generated/messages";
 		m.helloWorld();
 		`
 		const result = parse(sourceCode)
@@ -22,22 +22,22 @@ describe("Paraglide Message Parser", () => {
 	// it should match minified m function call
 	it("should match minified m function call", () => {
 		const sourceCode = `
-		import * as m from "@inlang/paraglide-js/example/messages";m.helloWorld();m.hello_world();
+		import * as m from "../../i18n-generated/messages";m.helloWorld();m.hello_world();
 		`
 		const result = parse(sourceCode)
 		expect(result).toEqual([
 			{
 				messageId: "helloWorld",
 				position: {
-					start: { line: 2, character: 64 },
-					end: { line: 2, character: 76 },
+					start: { line: 2, character: 56 },
+					end: { line: 2, character: 68 },
 				},
 			},
 			{
 				messageId: "hello_world",
 				position: {
-					start: { line: 2, character: 79 },
-					end: { line: 2, character: 92 },
+					start: { line: 2, character: 71 },
+					end: { line: 2, character: 84 },
 				},
 			},
 		])
@@ -45,7 +45,7 @@ describe("Paraglide Message Parser", () => {
 
 	it("should match m function call with arguments", () => {
 		const sourceCode = `
-		import * as m from "@inlang/paraglide-js/example/messages";
+		import * as m from from "../../i18n-generated/messages";
 		
 		m.someFunction({args1: "", args2: ""}, {languageTag: "en"});
 		m.some_function({args1: "", args2: ""}, {languageTag: "en"});
@@ -71,7 +71,7 @@ describe("Paraglide Message Parser", () => {
 
 	it("should match multiple messages", () => {
 		const sourceCode = `
-		@inlang/paraglide-js
+		import * as m from "../../i18n-generated/messages";
 		
 		m.helloWorld();
 		m.someFunction({args1: "", args2: ""}, {languageTag: "en"});
@@ -117,7 +117,7 @@ describe("Paraglide Message Parser", () => {
 
 	it("should match message with no namespace", () => {
 		const sourceCode = `
-		import * as m from "@inlang/paraglide-js/messages";
+		import * as m from "../../i18n-generated/messages";
 		m.helloWorld();
 		`
 		const result = parse(sourceCode)
@@ -134,7 +134,7 @@ describe("Paraglide Message Parser", () => {
 
 	it("should match mutiple references to @inlang/paraglide-js", () => {
 		const sourceCode = `
-		import * as m from "@inlang/paraglide-js/example/messages";
+		import * as m from "../../i18n-generated/messages";
 
 		@inlang/paraglide-js
 		
@@ -162,7 +162,7 @@ describe("Paraglide Message Parser", () => {
 
 	it("should match the m function with an object and the arguments a function call", () => {
 		const sourceCode = `
-		import * as m from "@inlang/paraglide-js/example/messages";
+		import * as m from "../../i18n-generated/messages";
 		m.helloWorld({args1: someFunction(), args2: otherFunction(), args3: "some string"});
 		`
 		const result = parse(sourceCode)
@@ -180,7 +180,7 @@ describe("Paraglide Message Parser", () => {
 	// it should match the m function which do have function chaining
 	it("should match the m function which do have function chaining", () => {
 		const sourceCode = `
-		import * as m from "@inlang/paraglide-js/example/messages";
+		import * as m from "../../i18n-generated/messages";
 		m.helloWorld().someFunction().someOtherFunction();
 		`
 		const result = parse(sourceCode)
@@ -200,7 +200,7 @@ describe("Paraglide Message Parser", () => {
 		import { createSignal } from "solid-js"
 		import { showToast } from "./Toast.jsx"
 		import { rpc } from "@inlang/rpc"
-		import * as m from "@inlang/paraglide-js/website/messages"
+		import * as m from "../../i18n-generated/messages";
 
 		export function NewsletterForm() {
 			const [email, setEmail] = createSignal("")
@@ -306,7 +306,7 @@ describe("Paraglide Message Parser", () => {
 	it("should match if m is defined before the reference to paraglide", () => {
 		const sourceCode = `
 		m.helloWorld();
-		import * as m from "@inlang/paraglide-js/example/messages";
+		import * as m from "../../i18n-generated/messages";
 		`
 		const result = parse(sourceCode)
 		expect(result).toEqual([])
@@ -322,7 +322,7 @@ describe("Paraglide Message Parser", () => {
 
 	it("should match if m is defined but has a spell error", () => {
 		const sourceCode = `
-		import * as m from "@inlang/paraglide-js/example/messages";
+		import * as m from "../../i18n-generated/messages";
 		xm.helloWorld();
 		`
 		const result = parse(sourceCode)
