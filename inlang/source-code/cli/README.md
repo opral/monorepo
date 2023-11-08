@@ -1,6 +1,6 @@
 # Introduction
 
-[@inlang/cli](https://github.com/inlang/monorepo/tree/main/inlang/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infrastructure. It can be used to automate localization tasks, such as machine translation, lining, and more.
+[@inlang/cli](https://github.com/inlang/monorepo/tree/main/inlang/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infrastructure. It can be used to automate localization tasks, such as machine translation, linting, and more. To use the inlang CLI, you need a `project.inlang.json` file configured.
 
 ### Benefits
 
