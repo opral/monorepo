@@ -1,5 +1,21 @@
 # @inlang/paraglide-js
 
+##  1.0.0-prerelease.6
+
+BREAKING: Paraglide JS now compiles into source code, see https://github.com/inlang/monorepo/issues/1607. 
+
+What you need to change: 
+
+1. Remove `--namespace` from the compile command
+2. Replace imports from paraglide to point to the directory in ther source code: 
+
+```diff
+-import { setLanguageTag, languageTag } from '@inlang/paraglide-js/sveltekit-example';
++import { setLanguageTag, languageTag } from '../../paraglide-js/runtime';
+-import * as m from "@inlang/paraglide-js/sveltekit-example/messages"
++import * as m from "../../paraglide-js/messages"
+```
+
 ##  1.0.0-prerelease.5
 
 improve: `paraglide-js init` now adds the vs code extension if vscode is used

@@ -23,7 +23,8 @@
 		"load",
 		"import",
 		"export",
-		"messages"
+		"messages",
+		"plugin"
 	],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",

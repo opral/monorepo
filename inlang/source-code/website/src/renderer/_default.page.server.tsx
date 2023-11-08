@@ -7,7 +7,7 @@ import { Root } from "./_default.root.jsx"
 // import the css
 import "./app.css"
 import { MetaProvider, renderTags } from "@solidjs/meta"
-import { sourceLanguageTag, availableLanguageTags, languageTag } from "@inlang/paraglide-js/website"
+import { sourceLanguageTag, availableLanguageTags, languageTag } from "#src/paraglide/runtime.js"
 
 // See https://vike.dev/data-fetching
 export const passToClient = ["pageProps", "routeParams", "languageTag"] as const
@@ -91,7 +91,7 @@ export function onBeforePrerender(prerenderContext: any) {
 			// Localize URL
 			let { urlOriginal } = pageContext
 			if (locale !== sourceLanguageTag) {
-				urlOriginal = `/${sourceLanguageTag}${pageContext.urlOriginal}`
+				urlOriginal = `/${locale}${pageContext.urlOriginal}`
 			}
 			pageContexts.push({
 				...pageContext,

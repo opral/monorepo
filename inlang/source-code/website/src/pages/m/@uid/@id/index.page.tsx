@@ -11,7 +11,7 @@ import {
 	convertLinkToGithub,
 	typeOfIdToTitle,
 } from "#src/interface/marketplace/helper/utilities.js"
-import { languageTag } from "@inlang/paraglide-js/website"
+import { languageTag } from "#src/paraglide/runtime.js"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"

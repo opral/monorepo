@@ -112,11 +112,17 @@ export function Page() {
 										onClickOnSignInButton={() => {
 											// hide the sign in dialog to increase UX when switching back to this window
 											browserAuth.login()
-											signInDialog?.hide()
-											setStep({
-												type: "opt-in",
-												message:
-													"We need your authorization to install modules in your repository.",
+											signInDialog?.hide().then(() => {
+												if (!repo || repo === "") {
+													console.error("No repo provided")
+													window.location.reload()
+												} else {
+													setStep({
+														type: "opt-in",
+														message:
+															"We need your authorization to install modules in your repository.",
+													})
+												}
 											})
 										}}
 									/>

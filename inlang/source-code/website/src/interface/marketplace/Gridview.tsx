@@ -4,7 +4,7 @@ import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 import Card, { CardBuildOwn, NoResultsCard } from "#src/interface/components/Card.jsx"
 import { rpc } from "@inlang/rpc"
-import * as m from "@inlang/paraglide-js/website/messages"
+import * as m from "#src/paraglide/messages.js"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 

@@ -10,7 +10,17 @@
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/t-function-matcher/README.md"
 	},
-	"keywords": ["application", "website", "vscode", "react", "nextjs", "sveltekit", "svelte", "vue"],
+	"keywords": [
+		"application",
+		"website",
+		"vscode",
+		"react",
+		"nextjs",
+		"sveltekit",
+		"svelte",
+		"vue",
+		"plugin"
+	],
 	"recommends": ["m/r7kp499g", "m/3i8bor92"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",

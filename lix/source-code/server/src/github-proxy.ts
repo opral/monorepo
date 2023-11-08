@@ -36,6 +36,11 @@ router.all(
 				return
 			}
 
+			if (!targetUrl.startsWith("https://api.github.com/")) {
+				response.status(403).send("Only github supported")
+				return
+			}
+
 			const res = await fetch(targetUrl, {
 				method: request.method,
 				// @ts-ignore
