@@ -57,7 +57,7 @@ router.all(
 
 			response.set("Access-Control-Allow-Origin", privateEnv.PUBLIC_SERVER_BASE_URL)
 			response.set("Access-Control-Allow-Credentials", "true")
-			response.set("Access-Control-Allow-Headers", "x-github-api-version")
+			response.set("Access-Control-Allow-Headers", "x-github-api-version, user-agent")
 
 			if (targetUrl.endsWith("/user/emails") && res.status === 401 && decryptedAccessToken) {
 				response.statusMessage = "token_invalid"
