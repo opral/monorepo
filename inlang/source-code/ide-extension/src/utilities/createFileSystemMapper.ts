@@ -50,5 +50,14 @@ export function createFileSystemMapper(base: string): NodeishFilesystem {
 				path.startsWith(base) ? _path.normalize(path) : _path.normalize(base + "/" + path)
 			)
 		},
+		watch: (
+			path: Parameters<NodeishFilesystem["watch"]>[0],
+			options: Parameters<NodeishFilesystem["watch"]>[1]
+		) => {
+			return fs.watch(
+				path.startsWith(base) ? _path.normalize(path) : _path.normalize(base + "/" + path),
+				options
+			)
+		},
 	}
 }
