@@ -1261,7 +1261,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Stack"
+							"value": "Your Stack"
 						}
 					]
 				},
@@ -1271,7 +1271,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Stack"
+							"value": "Dein Stack"
 						}
 					]
 				}
