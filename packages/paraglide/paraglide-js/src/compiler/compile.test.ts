@@ -39,6 +39,8 @@ describe("usage", async () => {
 		plugins: [
 			// @ts-expect-error - rollup types are not up to date
 			virtual({
+				"paraglide/messages/de.js": output["messages/de.js"],
+				"paraglide/messages/en.js": output["messages/en.js"],
 				"paraglide/messages.js": output["messages.js"],
 				"paraglide/runtime.js": output["runtime.js"],
 				"test.js": `
@@ -103,7 +105,11 @@ describe("usage", async () => {
 		expect(m.onlyText()).toBe("Eine einfache Nachricht.")
 	})
 
-	test("should return the message id if the message is not translated", async () => {
+	// any missing translation heuristic e.g. "show the id" or similar
+	// can be mitigated by using lint rules. furthermore, the bundle
+	// size will be larger if the id is included in the compiled output
+	// instead of undefined.
+	test("should return undefined if the message is not translated", async () => {
 		const { m, runtime } = await import(
 			`data:application/javascript;base64,${Buffer.from(
 				compiledBundle.output[0].code,
@@ -113,9 +119,9 @@ describe("usage", async () => {
 
 		runtime.setLanguageTag("fr")
 
-		expect(m.onlyText()).toBe("onlyText")
-		expect(m.oneParam({ name: "Samuel" })).toBe("oneParam")
-		expect(m.multipleParams({ name: "Samuel", count: 5 })).toBe("multipleParams")
+		expect(m.onlyText()).toBe(undefined)
+		expect(m.oneParam({ name: "Samuel" })).toBe(undefined)
+		expect(m.multipleParams({ name: "Samuel", count: 5 })).toBe(undefined)
 	})
 
 	test("defining onSetLanguageTag should be possible and should be called when the language tag changes", async () => {
@@ -180,6 +186,8 @@ describe("tree-shaking", () => {
 				removeComments(),
 				// @ts-expect-error - rollup types are not up to date
 				virtual({
+					"paraglide/messages/de.js": output["messages/de.js"],
+					"paraglide/messages/en.js": output["messages/en.js"],
 					"paraglide/messages.js": output["messages.js"],
 					"paraglide/runtime.js": output["runtime.js"],
 					"app.js": `
@@ -212,6 +220,8 @@ describe("tree-shaking", () => {
 				removeComments(),
 				// @ts-expect-error - rollup types are not up to date
 				virtual({
+					"paraglide/messages/de.js": output["messages/de.js"],
+					"paraglide/messages/en.js": output["messages/en.js"],
 					"paraglide/messages.js": output["messages.js"],
 					"paraglide/runtime.js": output["runtime.js"],
 					"app.js": `
