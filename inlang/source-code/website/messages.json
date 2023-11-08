@@ -34,6 +34,16 @@
 							"value": "Aplicação Global"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Application"
+						}
+					]
 				}
 			]
 		},
@@ -70,6 +80,16 @@
 							"value": "Regras de fiapos"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Règles de formattage"
+						}
+					]
 				}
 			]
 		},
@@ -94,6 +114,16 @@
 						{
 							"type": "Text",
 							"value": "Globales Markdown"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Markdown"
 						}
 					]
 				}
@@ -122,6 +152,16 @@
 							"value": "Kategorien"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Catégories"
+						}
+					]
 				}
 			]
 		},
@@ -146,6 +186,16 @@
 						{
 							"type": "Text",
 							"value": "Globale Webseite"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Site web"
 						}
 					]
 				}
@@ -204,6 +254,16 @@
 							"value": "博客"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Blog"
+						}
+					]
 				}
 			]
 		},
@@ -258,6 +318,16 @@
 						{
 							"type": "Text",
 							"value": "反馈"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Retours & avis"
 						}
 					]
 				}
@@ -316,6 +386,16 @@
 							"value": "联系我们"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Contactez-nous"
+						}
+					]
 				}
 			]
 		},
@@ -370,6 +450,16 @@
 						{
 							"type": "Text",
 							"value": "加入团队"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Rejoindre l'équipe"
 						}
 					]
 				}
@@ -428,6 +518,16 @@
 							"value": "联系"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Discutons"
+						}
+					]
 				}
 			]
 		},
@@ -482,6 +582,16 @@
 						{
 							"type": "Text",
 							"value": "贡献指南"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Contribuer"
 						}
 					]
 				}
@@ -540,6 +650,16 @@
 							"value": "使用入门指南"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Commencer"
+						}
+					]
 				}
 			]
 		},
@@ -594,6 +714,16 @@
 						{
 							"type": "Text",
 							"value": "Bauen Sie auf Inlang auf"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Construire avec inlang"
 						}
 					]
 				}
@@ -652,6 +782,16 @@
 							"value": "为什么是 inlang？"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Pourquoi inlang ?"
+						}
+					]
 				}
 			]
 		},
@@ -676,6 +816,16 @@
 						{
 							"type": "Text",
 							"value": "Das Ökosystem um global zu gehen"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "L'écosystème pour s'ouvrir au monde"
 						}
 					]
 				}
@@ -728,6 +878,16 @@
 				{
 					"match": [],
 					"languageTag": "zh",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Discord"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
 					"pattern": [
 						{
 							"type": "Text",
@@ -790,6 +950,16 @@
 							"value": "GitHub"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "GitHub"
+						}
+					]
 				}
 			]
 		},
@@ -844,6 +1014,16 @@
 						{
 							"type": "Text",
 							"value": "市场"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Marché"
 						}
 					]
 				}
@@ -902,6 +1082,16 @@
 							"value": "发展计划"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Feuille de route"
+						}
+					]
 				}
 			]
 		},
@@ -958,6 +1148,16 @@
 							"value": "资源"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Ressources"
+						}
+					]
 				}
 			]
 		},
@@ -1006,12 +1206,22 @@
 					]
 				},
 				{
-					"match": [],
 					"languageTag": "zh",
+					"match": [],
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "推特"
+							"value": "X"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "X"
 						}
 					]
 				}
@@ -1040,6 +1250,16 @@
 							"value": "Ausgewählte Produkte"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Produits Populaires"
+						}
+					]
 				}
 			]
 		},
@@ -1059,6 +1279,16 @@
 				},
 				{
 					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Guides"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
 					"match": [],
 					"pattern": [
 						{
@@ -1092,6 +1322,16 @@
 							"value": "Mehr zum Ökosystem"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "En savoir plus sur l'écosystème"
+						}
+					]
 				}
 			]
 		},
@@ -1116,6 +1356,16 @@
 						{
 							"type": "Text",
 							"value": "Erschließe neue Märkte und gewinne mehr Kunden."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Développez-vous sur de nouveaux marchés et acquérez plus de clients."
 						}
 					]
 				}
@@ -1144,6 +1394,16 @@
 							"value": "Willkommen bei inlang,"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Bienvenue sur Inlang,"
+						}
+					]
 				}
 			]
 		},
@@ -1168,6 +1428,16 @@
 						{
 							"type": "Text",
 							"value": "das Ökosystem um global zu gehen."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "l’écosystème pour s'ouvrir au monde."
 						}
 					]
 				}
@@ -1196,6 +1466,16 @@
 							"value": "Mehr über Lix"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "En savoir plus sur Lix"
+						}
+					]
 				}
 			]
 		},
@@ -1220,6 +1500,16 @@
 						{
 							"type": "Text",
 							"value": "Die Basis des Ökosystems"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Le cœur de l'écosystème"
 						}
 					]
 				}
@@ -1248,6 +1538,16 @@
 							"value": "Lix-Änderungskontrolle"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Contrôle du changement Lix"
+						}
+					]
 				}
 			]
 		},
@@ -1261,7 +1561,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Stack"
+							"value": "Your Stack"
 						}
 					]
 				},
@@ -1271,7 +1571,17 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Stack"
+							"value": "Dein Stack"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Votre Pile"
 						}
 					]
 				}
@@ -1300,6 +1610,16 @@
 							"value": "Loslegen"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Commencer"
+						}
+					]
 				}
 			]
 		},
@@ -1324,6 +1644,16 @@
 						{
 							"type": "Text",
 							"value": "Eine allgemeine Anleitung, um dein Projekt mit dem inlang-Ökosystem aufzusetzen."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Un guide général sur les étapes minimales requises pour préparer votre projet à l'écosystème d'inlang."
 						}
 					]
 				}
@@ -1352,6 +1682,16 @@
 							"value": "How to"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Guide"
+						}
+					]
 				}
 			]
 		},
@@ -1376,6 +1716,16 @@
 						{
 							"type": "Text",
 							"value": "Baue inlang in dein Project ein"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Configurer inlang pour votre projet"
 						}
 					]
 				}
@@ -1404,6 +1754,16 @@
 							"value": "Loslegen"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Commencer"
+						}
+					]
 				}
 			]
 		},
@@ -1417,7 +1777,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "A basic guide on how to adopte inlang with paraglide.js and message-format-plugin in your svelte app."
+							"value": "A basic guide on how to adopt inlang with paraglide.js and message-format-plugin in your Svelte app."
 						}
 					]
 				},
@@ -1428,6 +1788,16 @@
 						{
 							"type": "Text",
 							"value": "Eine grundlegende Anleitung zur Einführung von inlang mit paraglide.js und dem message-format-plugin in deine Svelte App."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Un guide de base sur la façon d'adopter Inlang avec paraglide.js et message-format-plugin dans votre application Svelte."
 						}
 					]
 				}
@@ -1443,7 +1813,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Build a global svelte app: A basic guide"
+							"value": "Build a global Svelte app: A basic guide"
 						}
 					]
 				},
@@ -1454,6 +1824,16 @@
 						{
 							"type": "Text",
 							"value": "Erstelle eine globale Svelte App: Eine grundlegende Anleitung"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Créer une application Svelte globalisée : guide des bases"
 						}
 					]
 				}
@@ -1482,6 +1862,16 @@
 							"value": "Baue deine eigene Lösung!"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Créez votre propre solution !"
+						}
+					]
 				}
 			]
 		},
@@ -1506,6 +1896,16 @@
 						{
 							"type": "Text",
 							"value": "Du kannst nicht finden, was du suchst?"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vous ne trouvez pas ce que vous cherchez ?"
 						}
 					]
 				}
@@ -1534,6 +1934,16 @@
 							"value": "Benötigst du Hilfe oder hast du Fragen? Trete unserem Discord bei!"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Besoin d'aide ? Des questions ? Rejoignez notre Discord !"
+						}
+					]
 				}
 			]
 		},
@@ -1558,6 +1968,16 @@
 						{
 							"type": "Text",
 							"value": "Benachrichtige mich"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Me prévenir"
 						}
 					]
 				}
@@ -1586,6 +2006,16 @@
 							"value": "Du wirst bereits benachrichtigt."
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vous recevez déjà les notifications."
+						}
+					]
 				}
 			]
 		},
@@ -1610,6 +2040,16 @@
 						{
 							"type": "Text",
 							"value": "Wir werden dich informieren, wenn wir"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Nous vous ferons savoir quand nous recevrons"
 						}
 					]
 				}
@@ -1638,6 +2078,16 @@
 							"value": "neue Ergebnisse haben."
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "de nouveaux résultats."
+						}
+					]
 				}
 			]
 		},
@@ -1662,6 +2112,16 @@
 						{
 							"type": "Text",
 							"value": "Etwas ist schief gelaufen. Bitte versuche es später noch einmal."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Quelque chose s'est mal passé. Veuillez réessayer plus tard."
 						}
 					]
 				}
@@ -1690,6 +2150,16 @@
 							"value": "Gib bitte deine Email-Adresse ein."
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Veuillez entrer votre adresse e-mail."
+						}
+					]
 				}
 			]
 		},
@@ -1714,6 +2184,16 @@
 						{
 							"type": "Text",
 							"value": "Email eingeben..."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Entrez votre e-mail..."
 						}
 					]
 				}
@@ -1742,6 +2222,16 @@
 							"value": "Helfe uns, das Ökosystem aufzubauen"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Aidez-nous à construire l'écosystème"
+						}
+					]
 				}
 			]
 		},
@@ -1766,6 +2256,16 @@
 						{
 							"type": "Text",
 							"value": "Du wirst benachrichtigt, wenn diese Funktion verfügbar ist."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vous serez averti lorsque cette fonctionnalité sera disponible."
 						}
 					]
 				}
@@ -1794,6 +2294,16 @@
 							"value": "Noch keine Ergebnisse"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Aucun résultat pour l'instant"
+						}
+					]
 				}
 			]
 		},
@@ -1818,6 +2328,16 @@
 						{
 							"type": "Text",
 							"value": "Bitte gib eine gültige E-Mail-Adresse ein."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Veuillez entrer une adresse e-mail valide."
 						}
 					]
 				}
@@ -1846,6 +2366,16 @@
 							"value": "Alle Produkte"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Tous les produits"
+						}
+					]
 				}
 			]
 		},
@@ -1870,6 +2400,16 @@
 						{
 							"type": "Text",
 							"value": "Alle Guides"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Tous les guides"
 						}
 					]
 				}
@@ -1898,6 +2438,16 @@
 							"value": "Baue auf inlang auf"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Construire sur inlang"
+						}
+					]
 				}
 			]
 		},
@@ -1922,6 +2472,16 @@
 						{
 							"type": "Text",
 							"value": "Anwendung"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Application"
 						}
 					]
 				}
@@ -1950,6 +2510,16 @@
 							"value": "Lint Regeln"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Règles de formattage"
+						}
+					]
 				}
 			]
 		},
@@ -1969,6 +2539,16 @@
 				},
 				{
 					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Markdown"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
 					"match": [],
 					"pattern": [
 						{
@@ -2002,6 +2582,16 @@
 							"value": "Fehlt etwas?"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Il manque quelque chose ?"
+						}
+					]
 				}
 			]
 		},
@@ -2028,6 +2618,16 @@
 							"value": "Webseite"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Site web"
+						}
+					]
 				}
 			]
 		},
@@ -2052,6 +2652,16 @@
 						{
 							"type": "Text",
 							"value": "um zu suchen"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "pour rechercher"
 						}
 					]
 				}
@@ -2110,6 +2720,16 @@
 							"value": "订阅"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "S'abonner"
+						}
+					]
 				}
 			]
 		},
@@ -2164,6 +2784,16 @@
 						{
 							"type": "Text",
 							"value": "你已经订阅了我们的通讯。"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vous êtes déjà inscrit à notre newsletter."
 						}
 					]
 				}
@@ -2222,6 +2852,16 @@
 							"value": "请输入你的电子邮件地址。"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Veuillez entrer votre adresse e-mail."
+						}
+					]
 				}
 			]
 		},
@@ -2276,6 +2916,16 @@
 						{
 							"type": "Text",
 							"value": "出了点问题，请稍后再试。"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Quelque chose s'est mal passé. Veuillez réessayer plus tard."
 						}
 					]
 				}
@@ -2334,6 +2984,16 @@
 							"value": "请输入有效的电子邮件地址。"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Veuillez entrer une adresse e-mail valide."
+						}
+					]
 				}
 			]
 		},
@@ -2388,6 +3048,16 @@
 						{
 							"type": "Text",
 							"value": "输入你的电子邮箱 ..."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Entrez votre e-mail..."
 						}
 					]
 				}
@@ -2446,6 +3116,16 @@
 							"value": "我们将向你发送有关 inlang 和全球化的最新信息。你可以随时取消订阅。"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Nous vous enverrons des mises à jour sur inlang et la traduction. Vous pouvez vous désabonner à tout moment."
+						}
+					]
 				}
 			]
 		},
@@ -2500,6 +3180,16 @@
 						{
 							"type": "Text",
 							"value": "订阅我们的通讯"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Abonnez-vous à notre newsletter"
 						}
 					]
 				}
@@ -2558,6 +3248,16 @@
 							"value": "感谢你的订阅！"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Merci de vous être abonné !"
+						}
+					]
 				}
 			]
 		},
@@ -2612,6 +3312,16 @@
 						{
 							"type": "Text",
 							"value": "订阅邮件"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Newsletter"
 						}
 					]
 				}
@@ -2670,6 +3380,16 @@
 							"value": "我们很舍不得你离开。如果你有任何反馈意见，请在我们的"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Nous sommes tristes de vous voir partir. Si vous avez des commentaires, veuillez nous en informer sur notre"
+						}
+					]
 				}
 			]
 		},
@@ -2724,6 +3444,16 @@
 						{
 							"type": "Text",
 							"value": "你已退订"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vous êtes désabonné"
 						}
 					]
 				}

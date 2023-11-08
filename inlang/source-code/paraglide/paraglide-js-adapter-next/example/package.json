@@ -5,7 +5,6 @@
 	"scripts": {
 		"_dev": "next dev",
 		"_build": "paraglide-js compile --namespace nextjs-example && next build",
-		"test": "paraglide-js compile --namespace nextjs-example && next build",
 		"preview": "next start"
 	},
 	"dependencies": {

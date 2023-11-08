@@ -183,6 +183,9 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			})
 
 			const listener = (event: FileChangeInfo) => {
+				if (event.filename === null) {
+					throw new Error("Internal watcher error: missing filename")
+				}
 				const changeName = getBasename(event.filename)
 				const changeDir = getDirname(event.filename)
 
