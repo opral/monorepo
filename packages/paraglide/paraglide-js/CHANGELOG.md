@@ -1,5 +1,20 @@
 # @inlang/paraglide-js
 
+##  1.0.0-prerelease.7
+
+FIX: type error https://github.com/inlang/monorepo/pull/1610#issuecomment-1801768825
+
+```diff
+export const currentLanguageTag = (params) => {
++	/** @type {Record<string, string>} */
+	const variants = {
+		en: `The current language tag is "${params.languageTag}".`,
+		de: `Der aktuelle Sprachtag ist "${params.languageTag}".`,
+	}
+	return variants[languageTag()] ?? "currentLanguageTag"
+}
+```
+
 ##  1.0.0-prerelease.6
 
 BREAKING: Paraglide JS now compiles into source code, see https://github.com/inlang/monorepo/issues/1607. 
