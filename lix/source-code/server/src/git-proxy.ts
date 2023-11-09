@@ -56,6 +56,7 @@ export async function proxy(request: Request, response: Response, next: NextFunc
 		request.url = targetUrl
 
 		response.set("Access-Control-Allow-Credentials", "true")
+		response.set("Access-Control-Allow-Headers", "user-agent")
 
 		middleware(request, response, next)
 	} catch (error) {

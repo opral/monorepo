@@ -1,6 +1,6 @@
 # Introduction
 
-[@inlang/cli](https://github.com/inlang/monorepo/tree/main/inlang/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infrastructure. It can be used to automate localization tasks, such as machine translation, lining, and more.
+[@inlang/cli](https://github.com/inlang/monorepo/tree/main/inlang/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infrastructure. It can be used to automate localization tasks, such as machine translation, linting, and more.
 
 ### Benefits
 
@@ -38,6 +38,8 @@ npx @inlang/cli [command]
 Minimum node version: `v18.0.0`
 
 If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx @inlang/cli@latest [command]`.
+
+To use the inlang CLI, you need a `project.inlang.json` file configured, see [here](https://inlang.com/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang#).
 
 # Commands
 
