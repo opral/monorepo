@@ -1408,6 +1408,32 @@
 			]
 		},
 		{
+			"id": "home_inlang_search_popular",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Popular"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Beliebt"
+						}
+					]
+				}
+			]
+		},
+		{
 			"id": "home_inlang_search_placeholder",
 			"selectors": [],
 			"variants": [
