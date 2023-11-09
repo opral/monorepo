@@ -408,7 +408,7 @@ const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
 	const element = document.getElementById(anchor)
 	if (element && window) {
 		window.scrollTo({
-			top: element.offsetTop - 96,
+			top: element.offsetTop - 128,
 			behavior: behavior ?? "instant",
 		})
 	}
