@@ -233,7 +233,6 @@ export const httpWithLazyInjection = (
 				return new Proxy(getTarget[prop as keyof typeof getTarget], {
 					apply(callTarget, thisArg, argumentsList) {
 						const options = argumentsList[0]
-						const reolaceInfoRefsReq = true
 
 						// "http://localhost:3001/git-proxy//github.com/inlang/example/info/refs?service=git-upload-pack"
 
@@ -241,7 +240,6 @@ export const httpWithLazyInjection = (
 							config.filterRefList !== undefined &&
 							options.url.endsWith("info/refs?service=git-upload-pack")
 						) {
-							console.log("intercepting with: " + config.filterRefList)
 							return (async () => {
 								// create new url
 								const uploadPackUrl = options.url.replace(
@@ -251,10 +249,10 @@ export const httpWithLazyInjection = (
 								// create new body
 								const lines = []
 
-								lines.push(encodePkLine("command=ls-refs")) // TODO #27 check if we have to ask for the symrefs
+								lines.push(encodePkLine("command=ls-refs")) // TODO #1459 check if we have to ask for the symrefs
 								// 0001 - Delimiter Packet (delim-pkt) - separates sections of a message
 								lines.push(encodePkLine("agent=git/isomorphic-git@1.24.5") + "0001")
-								// TODO #27 we prefix refs/heads hardcoded here since the ref is set to main....
+								// TODO #1459 we prefix refs/heads hardcoded here since the ref is set to main....
 								if (config.filterRefList?.ref) {
 									lines.push(encodePkLine("ref-prefix refs/heads/" + config.filterRefList?.ref))
 								}
@@ -322,20 +320,6 @@ export const httpWithLazyInjection = (
 								return response
 							})()
 
-							// TODO #27 create the response body that mimics the original request
-
-							//
-
-							// response
-							const firstLine = "001e# service=git-upload-pack\n"
-							// flush + hash + refName + NULL + capabilities
-							const secondLine =
-								"00000153d7e62aef79d771d1771cb44c9e01faa4b7a607fe HEAD multi_ack thin-pack side-band side-band-64k ofs-delta shallow deepen-since deepen-not deepen-relative no-progress include-tag multi_ack_detailed allow-tip-sha1-in-want allow-reachable-sha1-in-want no-done symref=HEAD:refs/heads/main filter object-format=sha1 agent=git/github-cbc05ce31956\n"
-							const refLine =
-								"0051ec5b0fb1cdd67f0d33abf827a2449566de790080 refs/heads/Add-missing-translations\n"
-							const lastLine = "0000"
-
-							http.fetch()
 						} else if (options.body) {
 							// TODO #27 check the url instead to only apply for git-upload-pack
 
