@@ -319,6 +319,17 @@ test("typesafety", async () => {
 
 const mockMessages: Message[] = [
 	{
+		id: "missingTranslation",
+		selectors: [],
+		variants: [
+			{
+				match: [],
+				languageTag: "en",
+				pattern: [{ type: "Text", value: "A simple message." }],
+			},
+		],
+	},
+	{
 		id: "onlyText",
 		selectors: [],
 		variants: [
