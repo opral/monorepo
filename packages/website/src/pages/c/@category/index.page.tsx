@@ -23,7 +23,7 @@ import GenericHeader from "#src/interface/marketplace/categoryHeaders/applicatio
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
-export type Category = "application" | "markdown" | "email" | "website"
+export type Category = "application" | "markdown" | "email"
 export type SubCategory = SubCategoryApplication
 
 /* Export searchValue to make subpages insert search-terms */
