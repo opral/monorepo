@@ -87,7 +87,6 @@ export function Page(props: PageProps) {
 		}
 
 		setTableOfContents(table)
-		console.log(tableOfContents())
 	})
 
 	const gettingStarted = () => {

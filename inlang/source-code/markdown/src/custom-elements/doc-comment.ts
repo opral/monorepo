@@ -83,4 +83,3 @@ export class DocComments extends LitElement {
 		</div>`
 	}
 }
-
