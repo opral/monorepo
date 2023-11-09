@@ -79,7 +79,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Welcome "
+							"value": "Welcome to NYC "
 						},
 						{
 							"type": "VariableReference",
