@@ -23,11 +23,9 @@ export async function onBeforeRender(pageContext: PageContext) {
 		return typeof item.readme === "object" ? item.readme.en : item.readme
 	}
 
-	const text = await(
-		readme().includes("http")
-			? (await fetch(readme())).text()
-			: await fs.readFile(new URL(readme(), repositoryRoot), "utf-8")
-	)
+	const text = await (readme().includes("http")
+		? (await fetch(readme())).text()
+		: await fs.readFile(new URL(readme(), repositoryRoot), "utf-8"))
 
 	const markdown = await convert(text)
 
