@@ -1,6 +1,8 @@
 <!-- ## ATTENTION: Paraglide is in pre-release mode. Discuss the API at https://github.com/inlang/monorepo/discussions/1464 -->
 ![Paraglide JS header image](https://raw.githubusercontent.com/inlang/monorepo/enhance-product-pages/inlang/source-code/paraglide/paraglide-js/assets/paraglide-js-header.png)
 
+# The best i18n library for the web
+
 Paraglide is a new i18n library, introducing innovations such as a compiler that emits message functions and these message functions being tree-shakable which results in auto-optimized bundles.
 
 **But before talking about the technical part, here's a quick-start for you:**
@@ -244,3 +246,9 @@ You can find many examples on codesandbox:
 <doc-links>
     <doc-link title="Simple Vite Example" icon="lucide:codesandbox" href="https://github.com/inlang/monorepo/discussions/1464" description="Open Codesandbox project"></doc-link>
 </doc-links>
+
+# Wall of Love
+
+We are grateful for all the support we receive from the community.
+
+<doc-comment text="test" name="test"></doc-comment>
