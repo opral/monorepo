@@ -29,10 +29,10 @@
 
 ## Table of Contents
 
-- [About inlang](#🌐-about-inlang)
-- [Getting Started](#⚡️-getting-started)
-- [Stay up-to-date](#🔔-stay-up-to-date)
-- [Contributing](#✍️-contributing)
+- [About inlang](#-about-inlang)
+- [Getting Started](#%EF%B8%8F-getting-started)
+- [Stay up-to-date](#-stay-up-to-date)
+- [Contributing](#-contributing)
 
 ## 🌐 About inlang
 
