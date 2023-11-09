@@ -29,11 +29,17 @@ export const compileCommand = new Command()
 
 		const outputDirectory = resolve(process.cwd(), options.outdir)
 
+		// create the compiled-output directory if it doesn't exist
+		await fs.access(outputDirectory).catch(async () => {
+			await fs.mkdir(outputDirectory, { recursive: true })
+		})
+
+		// create the messages directory if it doesn't exist
+		await fs.access(outputDirectory + "/messages").catch(async () => {
+			await fs.mkdir(outputDirectory + "/messages")
+		})
+
 		for (const [fileName, fileContent] of Object.entries(output)) {
-			// create the compiled-output directory if it doesn't exist
-			await fs.access(outputDirectory).catch(async () => {
-				await fs.mkdir(outputDirectory, { recursive: true })
-			})
 			await fs.writeFile(`${outputDirectory}/${fileName}`, fileContent, {
 				encoding: "utf-8",
 			})
