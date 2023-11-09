@@ -81,7 +81,7 @@ ${[...args.languageTags]
 	.sort((a, b) => a.localeCompare(b))
 	.map(
 		(tag) =>
-			`\tif (languageTag() === "${tag}") return ${tag}.${args.message.id}(${
+			`\tif (languageTag() === "${tag}") return ${tag.replaceAll("-", "_")}.${args.message.id}(${
 				Object.keys(args.params).length > 0 ? "params" : ""
 			})`
 	)

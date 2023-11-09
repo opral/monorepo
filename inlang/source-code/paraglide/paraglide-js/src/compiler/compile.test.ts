@@ -5,44 +5,89 @@ import { compile } from "./compile.js"
 import { rollup } from "rollup"
 import virtual from "@rollup/plugin-virtual"
 import terser from "@rollup/plugin-terser"
+import { createMessage } from "@inlang/sdk/test-utilities"
 
 beforeEach(() => {
 	// reset the imports to make sure that the runtime is reloaded
 	vi.resetModules()
 })
 
-describe("files", async () => {
-	// the compiled should be ignored to avoid merge conflicts
-	test("the files should include a gitignore file", async () => {
-		const output = compile({ messages: [], settings: mockSettings })
-		expect(output).toHaveProperty(".gitignore")
-		expect(output[".gitignore"]).toContain("*")
-	})
-	// ignore all formatting stuff
-	test("the files should include a prettierignore file", async () => {
-		const output = compile({ messages: [], settings: mockSettings })
-		expect(output).toHaveProperty(".prettierignore")
-		expect(output[".prettierignore"]).toContain("*")
-	})
-	// ignore eslint stuff
-	test("files should include an eslint ignore", async () => {
-		const output = compile({ messages: [], settings: mockSettings })
-		expect(output).toHaveProperty(".eslintignore")
-		expect(output[".eslintignore"]).toContain("*")
-	})
+// the compiled should be ignored to avoid merge conflicts
+test("the files should include a gitignore file", async () => {
+	expect(output).toHaveProperty(".gitignore")
+	expect(output[".gitignore"]).toContain("*")
+})
+// ignore all formatting stuff
+test("the files should include a prettierignore file", async () => {
+	expect(output).toHaveProperty(".prettierignore")
+	expect(output[".prettierignore"]).toContain("*")
+})
+// ignore eslint stuff
+test("files should include an eslint ignore", async () => {
+	expect(output).toHaveProperty(".eslintignore")
+	expect(output[".eslintignore"]).toContain("*")
 })
 
-describe("usage", async () => {
+test("imports in the messages.js index file should use underscores instead of hyphens to avoid invalid JS imports", async () => {
+	expect(output["messages.js"]).toContain("import * as en_US")
+	expect(output["messages.js"]).not.toContain("import * as en-US")
+})
+
+test("it should be possible to directly import a message function via a resource file", async () => {
+	const output = compile({
+		messages: [
+			createMessage("mock_message", {
+				en: "A simple message.",
+				de: "Eine einfache Nachricht",
+			}),
+		],
+		settings: {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "de"],
+			modules: [],
+		},
+	})
+	const en = await import(
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		`data:application/javascript;base64,${Buffer.from(output["messages/en.js"]!, "utf8").toString(
+			"base64"
+		)}`
+	)
+	expect(en).toBeDefined()
+	expect(en.mock_message()).toBe("A simple message.")
+})
+
+// unexpected type errors if the language is not defined in settings will occur. hence throw.
+// if we deem this too strict, we can implement a more sophisticated solution in the future
+test("it should throw if a message uses a language tag that is not defined in the project settings", async () => {
+	expect(() =>
+		compile({
+			messages: [
+				createMessage("mock_message", {
+					en: "A simple message.",
+					de: "Eine einfache Nachricht",
+				}),
+			],
+			settings: {
+				sourceLanguageTag: "en",
+				// de is not contained
+				languageTags: ["en"],
+				modules: [],
+			},
+		})
+	).toThrow()
+})
+
+describe("e2e", async () => {
 	// The compiled output needs to be bundled into one file to be dynamically imported.
 	const bundle = await rollup({
 		input: "test.js",
 		plugins: [
 			// @ts-expect-error - rollup types are not up to date
 			virtual({
-				"paraglide/messages/de.js": output["messages/de.js"],
-				"paraglide/messages/en.js": output["messages/en.js"],
-				"paraglide/messages.js": output["messages.js"],
-				"paraglide/runtime.js": output["runtime.js"],
+				...Object.fromEntries(
+					Object.entries(output).map(([fileName, code]) => ["paraglide/" + fileName, code])
+				),
 				"test.js": `
           export * as m from "./paraglide/messages.js"
           export * as runtime from "./paraglide/runtime.js"
@@ -52,6 +97,17 @@ describe("usage", async () => {
 	})
 	// dynamically import the compiled output
 	const compiledBundle = await bundle.generate({ format: "esm" })
+
+	// test is a direct result of a bug
+	test("availableLanguageTags should include language tags with a hyphen", async () => {
+		const { runtime } = await import(
+			`data:application/javascript;base64,${Buffer.from(
+				compiledBundle.output[0].code,
+				"utf8"
+			).toString("base64")}`
+		)
+		expect(runtime.availableLanguageTags).toContain("en-US")
+	})
 
 	test("should set the source language tag as default language tag", async () => {
 		const { runtime } = await import(
@@ -186,10 +242,9 @@ describe("tree-shaking", () => {
 				removeComments(),
 				// @ts-expect-error - rollup types are not up to date
 				virtual({
-					"paraglide/messages/de.js": output["messages/de.js"],
-					"paraglide/messages/en.js": output["messages/en.js"],
-					"paraglide/messages.js": output["messages.js"],
-					"paraglide/runtime.js": output["runtime.js"],
+					...Object.fromEntries(
+						Object.entries(output).map(([fileName, code]) => ["paraglide/" + fileName, code])
+					),
 					"app.js": `
 					import * as m from "./paraglide/messages.js"
 
@@ -220,10 +275,9 @@ describe("tree-shaking", () => {
 				removeComments(),
 				// @ts-expect-error - rollup types are not up to date
 				virtual({
-					"paraglide/messages/de.js": output["messages/de.js"],
-					"paraglide/messages/en.js": output["messages/en.js"],
-					"paraglide/messages.js": output["messages.js"],
-					"paraglide/runtime.js": output["runtime.js"],
+					...Object.fromEntries(
+						Object.entries(output).map(([fileName, code]) => ["paraglide/" + fileName, code])
+					),
 					"app.js": `
 
 					import * as m from "./paraglide/messages.js"
@@ -287,7 +341,7 @@ test("typesafety", async () => {
     runtime.sourceLanguageTag satisfies "en"
 
     // availableLanguageTags should have a narrow type, not a generic string
-    runtime.availableLanguageTags satisfies Readonly<Array<"de" | "en">>
+    runtime.availableLanguageTags satisfies Readonly<Array<"de" | "en" | "en-US">>
 
     // setLanguageTag() should fail if the given language tag is not included in availableLanguageTags
     // @ts-expect-error - 
@@ -297,7 +351,7 @@ test("typesafety", async () => {
     runtime.setLanguageTag("de")
 
     // languageTag should return type should be a union of language tags, not a generic string
-    runtime.languageTag() satisfies "de" | "en"
+    runtime.languageTag() satisfies "de" | "en" | "en-US"
 
 		// setting the language tag as a getter function should be possible
 
@@ -347,6 +401,13 @@ const mockMessages: Message[] = [
 				match: [],
 				languageTag: "en",
 				pattern: [{ type: "Text", value: "A simple message." }],
+			},
+			{
+				match: [],
+				languageTag: "en-US",
+				pattern: [
+					{ type: "Text", value: "FUCKTARD. I am from New York. This is a simple message!" },
+				],
 			},
 			{
 				match: [],
@@ -411,7 +472,7 @@ const mockMessages: Message[] = [
 
 const mockSettings: ProjectSettings = {
 	sourceLanguageTag: "en",
-	languageTags: ["en", "de"],
+	languageTags: ["en", "de", "en-US"],
 	modules: [],
 }
 
