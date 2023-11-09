@@ -25,7 +25,7 @@ Having an adapter is only required if you want to use paraglide-js with a framew
     <doc-link title="Adapter for Vite" icon="tabler:brand-vite" href="https://github.com/inlang/monorepo/discussions/1464" description="Not yet published."></doc-link>
 </doc-links>
 
-#### Alternatively, [you can write your own adapter](#2-select-an-adapter-if-required)
+#### Alternatively, [you can write your own adapter](#writing-an-adapter)
 
 ### 3. Add the `compile` script to your `package.json`
 
