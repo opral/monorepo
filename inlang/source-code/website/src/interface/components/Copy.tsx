@@ -5,7 +5,7 @@ import { createSignal } from "solid-js"
 export function Copy(props: { copy: string; class?: string }) {
 	const [copied, setCopied] = createSignal(false)
 	return (
-		<div class="font-mono px-4 py-2.5 bg-surface-100 rounded-lg text-sm border border-surface-2 flex items-center gap-4 text-surface-600 justify-between md:w-auto w-full">
+		<div class="font-mono px-4 py-2.5 bg-surface-100 rounded-md text-sm border border-surface-2 flex items-center gap-4 text-surface-600 justify-between md:w-auto w-full">
 			<p class="overflow-x-scroll">{props.copy}</p>
 			{!copied() ? (
 				<CopyIcon
