@@ -30,9 +30,9 @@
 ## Table of Contents
 
 - [About inlang](#-about-inlang)
-- <a href='#:zap:-getting-started'>Getting Started</a>
-- [Stay up-to-date](#stay-up-to-date)
-- [Contributing](#contributing)
+- [Getting Started](#zap-getting-started)
+- [Stay up-to-date](#bell-stay-up-to-date)
+- [Contributing](#-contributing)
 
 ## 🌐 About inlang
 
@@ -76,7 +76,7 @@ Example `project.inlang.json`
 - Guide: [How to setup inlang for your project](https://inlang.com/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang#)
 - Guide: [Build a Global Svelte App](https://inlang.com/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp)
 
-## 🔔 Stay up-to-date
+## :bell: Stay up-to-date
 
 We are permantently working on new features and improvements. If you want to stay up-to-date, you can follow us on [Twitter](https://twitter.com/inlangHQ) or join our [Discord](https://discord.gg/gdMPPWy57R) server. 
 
