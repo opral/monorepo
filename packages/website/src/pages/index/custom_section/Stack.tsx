@@ -53,7 +53,9 @@ const Stack = () => {
 	return (
 		<div class="w-full flex gap-4 mt-4 md:mt-10 mb-10 flex-col-reverse md:flex-row">
 			<div class="w-full">
-				<p class="pb-2 text-surface-500 text-sm">{m.home_stack_title()}</p>
+				<h2 class="pb-4 text-surface-900 font-semibold text-2xl leading-snug tracking-tight">
+					{m.home_stack_title()}
+				</h2>
 				<div class="flex gap-2 overflow-x-scroll hide-scrollbar">
 					<For each={getSubCategies}>
 						{(link) => (
