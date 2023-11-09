@@ -72,6 +72,14 @@ Paraglide JS exports four variables and functions via "@inlang/paraglide-js":
 | `languageTag()` | Returns the language tag of the current user |
 | `setLanguageTag()` | Sets the language tag of the current user |
 
+# Playground
+
+You can find many examples for how to use paraglide on codesandbox:
+
+<doc-links>
+    <doc-link title="Simple Vite Example" icon="lucide:codesandbox" href="https://github.com/inlang/monorepo/discussions/1464" description="Open Codesandbox project"></doc-link>
+</doc-links>
+
 # Architecture
 
 Inlang Paraglide JS leverages a compiler to emit vanilla JavaScript functions.
@@ -239,16 +247,8 @@ render((page) =>
 )
 ```
 
-# Playground
-
-You can find many examples on codesandbox:
-
-<doc-links>
-    <doc-link title="Simple Vite Example" icon="lucide:codesandbox" href="https://github.com/inlang/monorepo/discussions/1464" description="Open Codesandbox project"></doc-link>
-</doc-links>
-
 # Wall of Love
 
 We are grateful for all the support we receive from the community.
 
-<doc-comment text="test" name="test"></doc-comment>
+<doc-comment text="test" name="Max Mustermann"></doc-comment>
