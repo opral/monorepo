@@ -21,10 +21,10 @@ npx @inlang/paraglide-js@latest init
 Having an adapter is only required if you want to use paraglide-js with a framework. If you don't use a framework, you can skip this step.
 
 <doc-links>
-    <doc-link title="Adapter for Svelte" icon="simple-icons:svelte" href="https://github.com/inlang/monorepo/discussions/1464" description="Not yet published."></doc-link>
-    <doc-link title="Adapter for SolidJS" icon="tabler:brand-solidjs" href="https://github.com/inlang/monorepo/discussions/1464" description="Not yet published."></doc-link>
-    <doc-link title="Adapter for ReactJS" icon="mdi:react" href="https://github.com/inlang/monorepo/discussions/1464" description="Not yet published."></doc-link>
-    <doc-link title="Adapter for Vite" icon="tabler:brand-vite" href="https://github.com/inlang/monorepo/discussions/1464" description="Not yet published."></doc-link>
+    <doc-link title="Adapter for Svelte" icon="simple-icons:svelte" href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-svelte/example" description="Go to GitHub example"></doc-link>
+    <doc-link title="Adapter for SolidJS" icon="tabler:brand-solidjs" href="https://discord.com/channels/897438559458430986/1163823207128776795" description="View progress"></doc-link>
+    <doc-link title="Adapter for NextJS" icon="tabler:brand-nextjs" href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/example" description="Go to GitHub example"></doc-link>
+    <doc-link title="Adapter for Vite" icon="tabler:brand-vite" href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/website" description="Find in @inlang/website"></doc-link>
 </doc-links>
 
 #### Alternatively, [you can write your own adapter](#writing-an-adapter)
@@ -77,7 +77,7 @@ Paraglide JS exports four variables and functions via "@inlang/paraglide-js":
 You can find many examples for how to use paraglide on codesandbox:
 
 <doc-links>
-    <doc-link title="Simple Vite Example" icon="lucide:codesandbox" href="https://github.com/inlang/monorepo/discussions/1464" description="Open Codesandbox project"></doc-link>
+    <doc-link title="Svelte + Paraglide JS" icon="lucide:codesandbox" href="https://dub.sh/paraglide-playground-svelte" description="Play around with Svelte and Paraglide JS"></doc-link>
 </doc-links>
 
 # Architecture
@@ -255,4 +255,5 @@ We are grateful for all the support we receive from the community. &#10084;&#650
 <doc-comment text="The lib is great guys!" author="ktarmyshov" icon="mdi:github"></doc-comment>
 <doc-comment text="Thank you for that huge work you have done and still doing!" author="ZerdoX-x" icon="mdi:github"></doc-comment>
 <doc-comment text="[...] the switch between the sdk-js and paraglide has been pretty great! " author="albbus" icon="mdi:discord"></doc-comment>
+<doc-comment text="Thanks for all the great work @Samuel Stroschein" author="Willem" icon="mdi:discord"></doc-comment>
 </doc-comments>
