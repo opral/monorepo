@@ -7,6 +7,7 @@ export function LanguagePicker() {
 	const languageNames: Record<LanguageTag, string> = {
 		en: "English",
 		de: "Deutsch",
+		fr: "Français",
 		zh: "中文",
 		sk: "Slovak",
 		"pt-BR": "Portuguese Brazil",
