@@ -3,7 +3,7 @@
     <doc-link title="ATTENTION: Paraglide is in pre-release mode." icon="mdi:github" href="https://github.com/inlang/monorepo/discussions/1464" description="Discuss the API on GitHub."></doc-link>
 </doc-links>
 
-<doc-gallery>TODO: adapter gallery</doc-gallery>
+<doc-gallery>TODO: adapter </doc-gallery>
 
 - [x] the smallest, fastest, and most typesafe i18n library
 - [x] only bundles the messages that are used (tree-shaking)
