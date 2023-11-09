@@ -1,32 +1,47 @@
 <!-- ## ATTENTION: Paraglide is in pre-release mode. Discuss the API at https://github.com/inlang/monorepo/discussions/1464 -->
-<doc-links>
-    <doc-link title="ATTENTION: Paraglide is in pre-release mode." icon="mdi:github" href="https://github.com/inlang/monorepo/discussions/1464" description="Discuss the API on GitHub."></doc-link>
-</doc-links>
+![Paraglide JS header image](https://raw.githubusercontent.com/inlang/monorepo/enhance-product-pages/inlang/source-code/paraglide/paraglide-js/assets/paraglide-js-header.png)
 
-<doc-gallery>TODO: adapter </doc-gallery>
+Paraglide is a new i18n library, introducing innovations such as a compiler that emits message functions and these message functions being tree-shakable which results in auto-optimized bundles.
 
-- [x] the smallest, fastest, and most typesafe i18n library
-- [x] only bundles the messages that are used (tree-shaking)
-- [x] storage agnostic (JSON, YAML, CSV, etc.) 
-- [x] plug & play with the [inlang ecosystem](https://inlang.com/marketplace)
+**But before talking about the technical part, here's a quick-start for you:**
 
 # Getting started
 
-1. Run the following command in your terminal: 
+### 1. Initialize paraglide-js
 
+You can initialize paraglide-js by running the following command in your terminal:
 ```bash
 npx @inlang/paraglide-js@latest init
 ```
 
-2. (If required) select an adapter.
+### 2. Select an adapter (if required)
 
-## Available Adapters
+Having an adapter is only required if you want to use paraglide-js with a framework. If you don't use a framework, you can skip this step.
 
-- TODO: add adapters 
+<doc-links>
+    <doc-link title="Adapter for Svelte" icon="simple-icons:svelte" href="https://github.com/inlang/monorepo/discussions/1464" description="Not yet published."></doc-link>
+    <doc-link title="Adapter for SolidJS" icon="tabler:brand-solidjs" href="https://github.com/inlang/monorepo/discussions/1464" description="Not yet published."></doc-link>
+    <doc-link title="Adapter for ReactJS" icon="mdi:react" href="https://github.com/inlang/monorepo/discussions/1464" description="Not yet published."></doc-link>
+    <doc-link title="Adapter for Vite" icon="tabler:brand-vite" href="https://github.com/inlang/monorepo/discussions/1464" description="Not yet published."></doc-link>
+</doc-links>
+
+#### Alternatively, [you can write your own adapter](#2-select-an-adapter-if-required)
+
+### 3. Add the `compile` script to your `package.json`
+
+You can customize the `compile` script to your needs. For example, you can add a `--watch` flag to watch for changes, if you have installed a watcher.
+
+```json
+{
+  "scripts": {
+    "compile": "paraglide-js compile"
+  }
+}
+```
 
 # Usage
 
-Messages are imported as a namespace and can be used as follows:
+Messages are imported as a namespace and are therefore not different from other i18n libraries. They can be used as follows:
 
 ```js
 // m is a namespace that contains all messages of your project
@@ -44,43 +59,41 @@ m.loginHeader({ name: "Samuel" }) // Hello Samuel, please login to continue.
 // change the language
 setLanguageTag("de")
 
-m.loginHeader({ name: "Samuel" }) // Hallo Samuel, bitte melde dich an, um fortzufahren.
-
+m.loginHeader({ name: "Samuel" }) // Hallo Samuel, bitte melde dich an, um fortzufahren.  
 ```
-
 Paraglide JS exports four variables and functions via "@inlang/paraglide-js":
 
-- `sourceLanguageTag`: the source language tag of the project
-- `languageTags`: all language tags of the current project
-- `languageTag()`: returns the language tag of the current user
-- `setLanguageTag()`: sets the language tag of the current user
+| Variable | Description |
+| --- | --- |
+| `sourceLanguageTag` | The source language tag of the project |
+| `availableLanguageTags` | All language tags of the current project |
+| `languageTag()` | Returns the language tag of the current user |
+| `setLanguageTag()` | Sets the language tag of the current user |
 
+# Architecture
 
-
-# Architecture 
-
-Inlang Paraglide JS leverages a compiler to emit vanilla JavaScript functions. 
+Inlang Paraglide JS leverages a compiler to emit vanilla JavaScript functions.
 
 The emitted functions are often referred to as "message functions". By emitting message functions, inlang Paraglide JS eliminates a class of edge cases while also being simpler, faster, and more reliable than other i18n libraries. The compiled runtime contains less than 50 LOC (lines of code) and is less than 1kb gzipped.
 
-Inlang Paraglide-JS consists of four main parts: 
+![paraglide JS architecture](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/architecture.svg)
 
-- `COMPILER`: compiles messages into tree-shakable message functions
-- `MESSAGES`: the compiled tree-shakable message functions
-- `RUNTIME`: a runtime that resolves the language tag of the current user
-- `ADAPTER`: (if required) an adapter that adjusts the runtime for different frameworks
+Inlang Paraglide-JS consists of four main parts:
 
-<img src="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/architecture.svg">
+| Part | Description |
+| --- | --- |
+| **Compiler** | Compiles messages into tree-shakable message functions |
+| **Messages** | The compiled tree-shakable message functions |
+| **Runtime** | A runtime that resolves the language tag of the current user |
+| **Adapter** | (if required) An adapter that adjusts the runtime for different frameworks |
 
-
-## COMPILER
+## Compiler
 
 The compiler loads an inlang project and compiles the messages into tree-shakable and typesafe message functions.
 
-### Example
+#### Example
 
-#### Input
-
+**Input**
 ```js
 // messages/en.json
 
@@ -89,8 +102,7 @@ hello: "Hello {name}!"
 loginButton: "Login"
 ```
 
-#### Output
-
+**Output**
 ```js
 // @inlang/paraglide-js/messages
 
@@ -107,14 +119,13 @@ function loginButton() {
 }
 ```
 
-
-## MESSAGES
+## Messages
 
 The compiled messages are importable as a namespace import (`import * as m`). 
 
 The namespace import ensures that bundlers like Rollup, Webpack, or Turbopack can tree-shake the messages that are not used.
 
-### Example
+#### Example
 
 Three compiled message functions exist in an example project.
 
@@ -159,13 +170,11 @@ console.log(hello({ name: "Samuel"}))
 ```
 
 
-## RUNTIME
+## Runtime
 
 View the source of your imports from `./paraglide-js/` to find the latest runtime API and documentation. 
 
-## ADAPTER 
-
-
+## Adapter 
 
 Paraglide-JS can be adapted to any framework or environment by calling `setLanguageTag()` and `onSetLanguageTag()`. 
 
@@ -173,7 +182,7 @@ Paraglide-JS can be adapted to any framework or environment by calling `setLangu
 2.  `onSetLanguageTag()` can be used to trigger side-effects such as updating the UI, or requesting the site in the new language from the server.
 
 
-### Writing an Adapter
+# Writing an Adapter
 
 The following example adapts Paraglide-JS to a fictitious metaframework like NextJS, SolidStart, SvelteKit, or Nuxt. 
 
@@ -228,3 +237,10 @@ render((page) =>
 )
 ```
 
+# Playground
+
+You can find many examples on codesandbox:
+
+<doc-links>
+    <doc-link title="Simple Vite Example" icon="lucide:codesandbox" href="https://github.com/inlang/monorepo/discussions/1464" description="Open Codesandbox project"></doc-link>
+</doc-links>
