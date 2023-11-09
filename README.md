@@ -32,7 +32,7 @@
 - [About inlang](#-about-inlang)
 - [Getting Started](#zap-getting-started)
 - [Stay up-to-date](#bell-stay-up-to-date)
-- [Contributing](#-contributing)
+- [Contributing](#balloon-contributing)
 
 ## 🌐 About inlang
 
@@ -83,7 +83,7 @@ We are permantently working on new features and improvements. If you want to sta
 We also regularly send out a newsletter with updates and tips & tricks. You can subscribe to it [here](https://inlang.com/newsletter).
 
 
-## ❤️ Contributing
+## :balloon: Contributing
 
 There are many ways you can contribute to inlang! Here are a few options:
 
