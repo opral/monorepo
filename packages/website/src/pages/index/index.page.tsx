@@ -26,7 +26,7 @@ export function Page() {
 				name="twitter:image:alt"
 				content="inlang's ecosystem helps organizations to go global."
 			/>
-			<Meta name="twitter:title" content="inlang Marketplace - The ecosystem to go global" />
+			<Meta name="twitter:title" content="inlang.com - The ecosystem to go global" />
 			<Meta
 				name="twitter:description"
 				content="Quickly find the best solution to globalize (i18n) your app. inlang helps you to expand to new markets and acquire new customers."
