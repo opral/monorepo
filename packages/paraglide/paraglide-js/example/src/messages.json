@@ -75,6 +75,32 @@
 				},
 				{
 					"match": [],
+					"languageTag": "en-US",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Welcome "
+						},
+						{
+							"type": "VariableReference",
+							"name": "name"
+						},
+						{
+							"type": "Text",
+							"value": "! You have "
+						},
+						{
+							"type": "VariableReference",
+							"name": "count"
+						},
+						{
+							"type": "Text",
+							"value": " messages."
+						}
+					]
+				},
+				{
+					"match": [],
 					"languageTag": "de",
 					"pattern": [
 						{

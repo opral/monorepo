@@ -34,6 +34,16 @@ export const compile = (args: {
 		}
 	}
 
+	if (args.settings.languageTags.length < Object.keys(resources).length) {
+		for (const languageTag of Object.keys(resources)) {
+			if (args.settings.languageTags.includes(languageTag) === false) {
+				throw new Error(
+					`The language tag "${languageTag}" is not included in the project's language tags but contained in of your messages. Please add the language tag to your project's language tags or delete the messages with the language tag "${languageTag}" to avoid unexpected type errors.`
+				)
+			}
+		}
+	}
+
 	return {
 		// boilerplate files
 		".prettierignore": ignoreDirectory,
@@ -62,7 +72,10 @@ export const compile = (args: {
 		"messages.js": `
 import { languageTag } from "./runtime.js"
 ${Object.keys(resources)
-	.map((languageTag) => `import * as ${languageTag} from "./messages/${languageTag}.js"`)
+	.map(
+		(languageTag) =>
+			`import * as ${languageTag.replaceAll("-", "_")} from "./messages/${languageTag}.js"`
+	)
 	.join("\n")}
 
 ${compiledMessages.map((message) => message.index).join("\n\n")}
