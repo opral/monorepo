@@ -31,12 +31,16 @@ export async function convert(markdown: string): Promise<string> {
 				"doc-copy",
 				"doc-links",
 				"doc-icon",
+				"doc-slider",
+				"doc-comment",
+				"doc-comments",
 				"inlang-badge-generator",
 				...defaultSchema.tagNames!,
 			],
 			attributes: {
 				"doc-figure": ["src", "alt", "caption"],
 				"doc-link": ["href", "description", "title", "icon"],
+				"doc-comment": ["author", "text", "icon"],
 				...defaultSchema.attributes,
 			},
 		})
