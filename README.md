@@ -49,10 +49,10 @@
 
 ## :zap: Getting Started
 
-It's fairly easy, you need two things to use inlang with any project:
+It's fairly easy. You need two things to use inlang with any project:
 
 1. A `project.inlang.json` file in the root of your project
-2. A plugin that reads and writes the messages from and to your project, we currently support [i18next](https://inlang.com/m/3i8bor92/plugin-inlang-i18next), [plain json](https://inlang.com/m/ig84ng0o/plugin-inlang-json) or [inlang message format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat).
+2. A plugin that reads and writes the i18n messages of your project, we currently support [i18next](https://inlang.com/m/3i8bor92/plugin-inlang-i18next), [plain json](https://inlang.com/m/ig84ng0o/plugin-inlang-json) or [inlang message format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat).
 3. 🏁 Done!
 4. *Optional: Setup lint rules, machine translation, ...*
 
