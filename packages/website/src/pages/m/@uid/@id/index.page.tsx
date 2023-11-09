@@ -130,13 +130,13 @@ export function Page(props: PageProps) {
 			<Meta name="twitter:creator" content="@inlanghq" />
 			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
-					<div class="md:py-28 py-16">
-						<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-20 md:gap-8 gap-6">
+					<div class="md:py-20 py-16">
+						<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-32 md:gap-8 gap-6">
 							<Show
 								when={props.markdown}
 								fallback={<p class="text-danger">{props.markdown?.error}</p>}
 							>
-								<section class="col-span-1 md:col-span-4 md:pb-10 pb-8 mb-16 grid md:grid-cols-4 grid-cols-1 gap-16">
+								<section class="col-span-1 md:col-span-4 pb-4 grid md:grid-cols-4 grid-cols-1 gap-16">
 									<div class="flex-col h-full justify-between md:col-span-3">
 										<div class="flex max-md:flex-col items-start gap-8 mb-4">
 											<Show
@@ -200,16 +200,6 @@ export function Page(props: PageProps) {
 																		</Show>
 																	</Button>
 																</Show>
-																<Show when={gettingStarted()}>
-																	<Button
-																		type="primary"
-																		function={() => {
-																			scrollToAnchor("getting-started", "smooth")
-																		}}
-																	>
-																		Get started
-																	</Button>
-																</Show>
 																{/* @ts-ignore */}
 																<Show when={props.manifest.command}>
 																	<Switch>
@@ -224,26 +214,6 @@ export function Page(props: PageProps) {
 												</div>
 											</div>
 										</div>
-
-										<Show
-											when={
-												props.manifest.gallery &&
-												props.manifest.gallery.length > 3 &&
-												!props.manifest.id.includes("messageLintRule")
-											}
-										>
-											<OnClient>
-												<div class="pt-12">
-													{/* @ts-ignore */}
-													<doc-slider
-														items={
-															/* @ts-ignore */
-															props.manifest.gallery.slice(1)
-														}
-													/>
-												</div>
-											</OnClient>
-										</Show>
 										<Show
 											when={
 												props.manifest.gallery &&
@@ -302,27 +272,6 @@ export function Page(props: PageProps) {
 													</p>
 												</div>
 											</div>
-											<div>
-												<h3 class="text-surface-400 text-sm mb-2">Keywords</h3>
-												<div class="flex flex-wrap gap-2 items-center">
-													<For each={props?.manifest?.keywords}>
-														{(keyword) => (
-															<Link
-																class="transition-opacity hover:opacity-80 cursor-pointer"
-																href={"/search?q=" + keyword}
-															>
-																<Chip text={keyword} color={colorForTypeOf(props.manifest.id)} />
-															</Link>
-														)}
-													</For>
-												</div>
-											</div>
-											<div>
-												<h3 class="text-surface-400 text-sm mb-2">License</h3>
-												<p class="m-0 text-surface-600 no-underline font-medium">
-													{props?.manifest?.license}
-												</p>
-											</div>
 										</div>
 									</div>
 								</section>
@@ -330,14 +279,10 @@ export function Page(props: PageProps) {
 									when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}
 									fallback={<Markdown markdown={props.markdown} />}
 								>
-									<div class="col-span-1 md:col-span-4">
+									<div class="col-span-1 md:col-span-4 mb-16">
 										<div class="grid md:grid-cols-4 grid-cols-1 gap-16">
 											<div class={"w-full rounded-lg col-span-1 md:col-span-3"}>
 												<Markdown markdown={props.markdown} />
-												<EditButton
-													// type="secondary"
-													href={convertLinkToGithub(readme())?.replace("README.md", "")}
-												/>
 											</div>
 											{/* Classes to be added: sticky z-10 top-16 pt-8 md:pt-0 md:static bg-background */}
 											<aside class="col-span-1 md:order-1 -order-1">
@@ -350,6 +295,35 @@ export function Page(props: PageProps) {
 										</div>
 									</div>
 								</Show>
+								<div>
+									<EditButton
+										// type="secondary"
+										href={convertLinkToGithub(readme())?.replace("README.md", "")}
+									/>
+								</div>
+								<div class="md:pl-6 md:col-span-2">
+									<div>
+										<h3 class="text-surface-400 text-sm mb-2">Keywords</h3>
+										<div class="flex flex-wrap gap-2 items-center">
+											<For each={props?.manifest?.keywords}>
+												{(keyword) => (
+													<Link
+														class="transition-opacity hover:opacity-80 cursor-pointer"
+														href={"/search?q=" + keyword}
+													>
+														<Chip text={keyword} color={colorForTypeOf(props.manifest.id)} />
+													</Link>
+												)}
+											</For>
+										</div>
+									</div>
+								</div>
+								<div class="md:pl-6">
+									<h3 class="text-surface-400 text-sm mb-2 ">License</h3>
+									<p class="m-0 text-surface-600 no-underline font-medium">
+										{props?.manifest?.license}
+									</p>
+								</div>
 							</Show>
 						</div>
 						<Show when={props.recommends}>
