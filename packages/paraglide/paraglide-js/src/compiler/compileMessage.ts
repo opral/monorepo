@@ -40,6 +40,7 @@ export const compileMessage = (message: Message): string => {
  * @returns {string}
  */
   export const ${message.id} = (${Object.keys(params).length > 0 ? "params" : ""}) => {
+		/** @type {Record<string, string>} */
     const variants = {
       ${Object.entries(contents)
 				.map(
