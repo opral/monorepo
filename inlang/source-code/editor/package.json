@@ -7,7 +7,7 @@
 		"build": "paraglide-js compile --project ../../../project.inlang.json && vite build",
 		"production": "NODE_ENV=production tsx ./src/server/main.ts",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "paraglide-js compile @--project ../../../project.inlang.json && tsc --noEmit",
+		"test": "paraglide-js compile --project ../../../project.inlang.json && tsc --noEmit",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"
