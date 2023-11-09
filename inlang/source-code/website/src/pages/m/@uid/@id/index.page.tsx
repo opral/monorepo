@@ -87,7 +87,19 @@ export function Page(props: PageProps) {
 		}
 
 		setTableOfContents(table)
+		console.log(tableOfContents())
 	})
+
+	const gettingStarted = () => {
+		if (tableOfContents() && Object.keys(tableOfContents()).length > 0) {
+			// look for a heading that contains "getting started"
+			for (const heading of Object.keys(tableOfContents())) {
+				if (heading.toLowerCase().includes("getting started")) {
+					return true
+				}
+			}
+		}
+	}
 
 	return (
 		<>
@@ -157,9 +169,28 @@ export function Page(props: PageProps) {
 													</div>
 												</div>
 												<div class="flex gap-4 flex-wrap">
-													<Show
-														when={isModule(props.manifest)}
-														fallback={
+													<Switch>
+														{/* IS MODULE */}
+														<Match when={isModule(props.manifest)}>
+															<div class="flex items-center gap-2">
+																{/* @ts-ignore */}
+																<Button
+																	type="primary"
+																	href={`/install?module=${props.manifest.id}`}
+																>
+																	<span class="capitalize">
+																		Install{" "}
+																		{props.manifest.id.includes("messageLintRule")
+																			? "Lint Rule"
+																			: typeOfIdToTitle(props.manifest.id)}
+																	</span>
+																	{/* @ts-ignore */}
+																	<SelectRepo size="medium" modules={[props.manifest.id]} />
+																</Button>
+															</div>
+														</Match>
+														{/* IS NO MODULE */}
+														<Match when={!isModule(props.manifest)}>
 															<>
 																<Show when={props.manifest.website}>
 																	{/* @ts-ignore */}
@@ -168,6 +199,16 @@ export function Page(props: PageProps) {
 																		<Show when={props.manifest.website?.includes("http")}>
 																			<ArrowOutward />
 																		</Show>
+																	</Button>
+																</Show>
+																<Show when={gettingStarted()}>
+																	<Button
+																		type="primary"
+																		function={() => {
+																			scrollToAnchor("getting-started", "smooth")
+																		}}
+																	>
+																		Get started
 																	</Button>
 																</Show>
 																{/* @ts-ignore */}
@@ -179,22 +220,8 @@ export function Page(props: PageProps) {
 																	</Switch>
 																</Show>
 															</>
-														}
-													>
-														<div class="flex items-center gap-2">
-															{/* @ts-ignore */}
-															<Button type="primary" href={`/install?module=${props.manifest.id}`}>
-																<span class="capitalize">
-																	Install{" "}
-																	{props.manifest.id.includes("messageLintRule")
-																		? "Lint Rule"
-																		: typeOfIdToTitle(props.manifest.id)}
-																</span>
-																{/* @ts-ignore */}
-																<SelectRepo size="medium" modules={[props.manifest.id]} />
-															</Button>
-														</div>
-													</Show>
+														</Match>
+													</Switch>
 												</div>
 											</div>
 										</div>
@@ -378,6 +405,17 @@ function Markdown(props: { markdown: string }) {
 	return <article innerHTML={props.markdown} />
 }
 
+const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
+	const element = document.getElementById(anchor)
+	if (element && window) {
+		window.scrollTo({
+			top: element.offsetTop - 96,
+			behavior: behavior ?? "instant",
+		})
+	}
+	window.history.pushState({}, "", `${currentPageContext.urlParsed.pathname}#${anchor}`)
+}
+
 function NavbarCommon(props: {
 	getLocale: () => string
 	displayName: () => string
@@ -406,17 +444,6 @@ function NavbarCommon(props: {
 		} else {
 			return false
 		}
-	}
-
-	const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
-		const element = document.getElementById(anchor)
-		if (element && window) {
-			window.scrollTo({
-				top: element.offsetTop - 96,
-				behavior: behavior ?? "instant",
-			})
-		}
-		window.history.pushState({}, "", `${currentPageContext.urlParsed.pathname}#${anchor}`)
 	}
 
 	onMount(async () => {
