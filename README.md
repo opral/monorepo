@@ -30,7 +30,7 @@
 ## Table of Contents
 
 - [About inlang](#-about-inlang)
-- [Getting Started](#:zap:-getting-started)
+- <a href='#:zap:-getting-started'>Getting Started</a>
 - [Stay up-to-date](#stay-up-to-date)
 - [Contributing](#contributing)
 
