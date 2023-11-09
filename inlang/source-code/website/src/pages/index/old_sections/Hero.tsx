@@ -1,60 +1,92 @@
-import IconGithub from "~icons/cib/github"
-import CibGit from "~icons/cib/git"
-import MaterialSymbolsArrowRightAltRounded from "~icons/material-symbols/arrow-right-alt-rounded"
+import { For, Show } from "solid-js"
+import { registry } from "@inlang/marketplace-registry"
+import { Chip } from "#src/interface/components/Chip.jsx"
+import { colorForTypeOf, typeOfIdToTitle } from "#src/pages/m/utilities.js"
+import { Button } from "../components/Button.jsx"
+import Link from "#src/renderer/Link.jsx"
+import * as m from "#src/paraglide/messages.js"
 
-export function Hero() {
+const featuredArray = [
+	"library.inlang.paraglideJs",
+	"app.inlang.editor",
+	"app.inlang.cli",
+	"app.inlang.ideExtension",
+	"plugin.inlang.i18next",
+]
+
+const Hero = () => {
 	return (
-		<div class="mx-auto max-w-3xl py-16 md:py-24">
-			{/* <div class="hidden sm:mb-8 sm:flex sm:justify-center">
-        <div class="relative overflow-hidden rounded-full py-1.5 px-4 text-sm leading-6 ring-1 ring-primary-container hover:ring-primary">
-          <span>
-            We are hiring engineers to make localization simple.{" "}
-            <a
-              target="_blank"
-              href="https://angel.co/l/2ykzNn"
-              class="font-semibold text-primary"
-            >
-              <span class="absolute inset-0" aria-hidden="true" />
-              Careers <span aria-hidden="true">&rarr;</span>
-            </a>
-          </span>
-        </div>
-      </div> */}
-			<div>
-				<h1 class="text-3xl sm:text-4xl font-bold tracking-tight sm:text-center md:text-5xl lg:text-6xl">
-					<span class="block xl:inline text-primary">
-						Localization infrastructure{" "}
-						<span class="text-on-background">
-							for software built on{" "}
-							<span class="inline-block">
-								git
-								{/* custom git color */}
-								<CibGit class="text-[#F54D27] inline pl-2 md:pl-3" />
-							</span>
-						</span>
-					</span>
-				</h1>
-				<p class="mt-2 md:mt-6 text-base sm:text-lg md:leading-6 text-gray-600 sm:text-center">
-					Inlang makes localization (i18n) simple by leveraging git repositories as collaboration
-					and automation hub for localization.
-				</p>
-				<div class="mt-8 flex gap-x-4 sm:justify-center">
-					<sl-button prop:href="/documentation" prop:size="large" prop:variant="primary">
-						Get started
-						{/* @ts-ignore */}
-						<MaterialSymbolsArrowRightAltRounded slot="suffix" />
-					</sl-button>
-					<sl-button
-						prop:href="https://github.com/inlang/monorepo"
-						prop:target="_blank"
-						prop:size="large"
+		<div class="w-full flex gap-4 mt-4 md:mt-10 mb-8 flex-col-reverse md:flex-row">
+			<div class="w-full md:w-1/4 md:pr-8">
+				<p class="pb-2 text-surface-500 text-sm">{m.home_featured_title()}</p>
+				<ul class="divide-y divide-surface-3">
+					<For each={featuredArray}>
+						{(feature) => {
+							const m = registry.find((m) => m.id === feature)
+							return (
+								<Show when={m}>
+									<li>
+										<Link
+											href={
+												m?.id.split(".")[0] === "guide"
+													? `/g/${m?.uniqueID}/${m?.id.replaceAll(".", "-")}`
+													: `/m/${m?.uniqueID}/${m?.id.replaceAll(".", "-")}`
+											}
+										>
+											<div class="flex gap-4 hover:bg-background px-1 py-[10px] rounded-lg items-center">
+												<img
+													class="w-9 h-9 rounded-md m-0 shadow-lg object-cover object-center"
+													src={m?.icon}
+													alt={m?.id}
+												/>
+												<div class="flex w-full flex-col gap-1">
+													<h3 class="text-sm w-full pr-10 text-surface-800 font-semibold truncate">
+														{typeof m?.displayName === "string"
+															? m.displayName
+															: typeof m?.displayName === "object"
+															? (m.displayName as { en: string }).en
+															: "Module"}
+													</h3>
+													<Show when={m}>
+														<Chip
+															text={typeOfIdToTitle(m!.id)}
+															color={colorForTypeOf(m!.id)}
+															customClasses="w-fit"
+														/>
+													</Show>
+												</div>
+											</div>
+										</Link>
+									</li>
+								</Show>
+							)
+						}}
+					</For>
+				</ul>
+			</div>
+			<div class="flex-1 flex flex-col gap-4 md:py-0 bg-background rounded-2xl border border-surface-200 overflow-hidden lg:min-h-[375px]">
+				<img
+					class="flex-1 hidden md:block w-full max-h-[260px] object-cover object-top"
+					src="./images/ecosystem-inlang.jpg"
+					alt="inlang Ecosystem"
+				/>
+				<img class="md:hidden" src="./images/ecosystem-inlang.jpg" alt="inlang Ecosystem" />
+				<div class="flex flex-col md:flex-row items-start md:items-end px-8 pb-6 pt-3">
+					<div class="flex flex-col gap-2 flex-1">
+						<h1 class="text-base text-surface-900 font-semibold leading-snug">Old Title</h1>
+						<p class="text-sm text-surface-500">{m.home_inlang_description()}</p>
+					</div>
+					<Button
+						type="textPrimary"
+						href="/g/3go4f04m/guide-niklasbuchfink-whatIsInlang"
+						class="-mb-[10px]"
 					>
-						View on GitHub
-						{/* @ts-ignore */}
-						<IconGithub slot="suffix" />
-					</sl-button>
+						{m.home_inlang_button()}
+					</Button>
 				</div>
 			</div>
 		</div>
 	)
 }
+
+export default Hero

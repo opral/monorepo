@@ -29,10 +29,10 @@
 
 ## Table of Contents
 
-- [About inlang](#🌐-about-inlang)
-- [Getting Started](#⚡️-getting-started)
-- [Stay up-to-date](#🔔-stay-up-to-date)
-- [Contributing](#✍️-contributing)
+- [About inlang](#-about-inlang)
+- [Getting Started](#zap-getting-started)
+- [Stay up-to-date](#bell-stay-up-to-date)
+- [Contributing](#balloon-contributing)
 
 ## 🌐 About inlang
 
@@ -42,17 +42,17 @@
 - use the [inlang CLI](https://inlang.com/m/2qj2w8pu/app-inlang-cli) to lint your messsages with lint rules or machine translate them & have quality control in CI/CD
 - use the [inlang VSCode extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) to translate your app right in the editor
 - use the [inlang Web Edtior](https://inlang.com/m/tdozzpar/app-inlang-editor) to translate your app in the browser & invite collaborators to help you
-- *build your own app / plugin / lint rule* with the [inlang SDK](./inlang-api)
+- *build your own app / plugin / lint rule* with the [inlang SDK](https://inlang.com/documentation/architecture)
 - ...
 
 **Go to [inlang.com](https://inlang.com) to see all extensions to the inlang ecosystem.**
 
-## ⚡️ Getting Started
+## :zap: Getting Started
 
-It's fairly easy, you need two things to use inlang with any project:
+It's fairly easy. You need two things to use inlang with any project:
 
 1. A `project.inlang.json` file in the root of your project
-2. A plugin that reads and writes the messages from and to your project, we currently support [i18next](https://inlang.com/m/3i8bor92/plugin-inlang-i18next), [plain json](https://inlang.com/m/ig84ng0o/plugin-inlang-json) or [inlang message format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat).
+2. A plugin that reads and writes the i18n messages of your project, we currently support [i18next](https://inlang.com/m/3i8bor92/plugin-inlang-i18next), [plain json](https://inlang.com/m/ig84ng0o/plugin-inlang-json) or [inlang message format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat).
 3. 🏁 Done!
 4. *Optional: Setup lint rules, machine translation, ...*
 
@@ -76,14 +76,14 @@ Example `project.inlang.json`
 - Guide: [How to setup inlang for your project](https://inlang.com/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang#)
 - Guide: [Build a Global Svelte App](https://inlang.com/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp)
 
-## 🔔 Stay up-to-date
+## :bell: Stay up-to-date
 
 We are permantently working on new features and improvements. If you want to stay up-to-date, you can follow us on [Twitter](https://twitter.com/inlangHQ) or join our [Discord](https://discord.gg/gdMPPWy57R) server. 
 
 We also regularly send out a newsletter with updates and tips & tricks. You can subscribe to it [here](https://inlang.com/newsletter).
 
 
-## ✍️ Contributing
+## :balloon: Contributing
 
 There are many ways you can contribute to inlang! Here are a few options:
 

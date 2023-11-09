@@ -1345,7 +1345,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Expand to new markets and acquire more customers."
+							"value": "Beyond an i18n library, inlang is your ecosystem to go global. Plug inlang's products together for market expansion and a broader customer reach."
 						}
 					]
 				},
@@ -1355,7 +1355,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Erschließe neue Märkte und gewinne mehr Kunden."
+							"value": "Ein Ökosystem, um global zu gehen. Kombiniere die Produkte um in neue Märkte einzutreten und neue Kunden zu gewinnen."
 						}
 					]
 				},
@@ -1365,14 +1365,14 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Développez-vous sur de nouveaux marchés et acquérez plus de clients."
+							"value": "Au-delà d'une bibliothèque i18n, inlang est votre écosystème pour vous mondialiser. Regroupez les produits d'Inlang pour une expansion du marché et une clientèle plus large."
 						}
 					]
 				}
 			]
 		},
 		{
-			"id": "home_inlang_title_first_part",
+			"id": "home_inlang_search_button",
 			"selectors": [],
 			"variants": [
 				{
@@ -1381,17 +1381,17 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Welcome to inlang,"
+							"value": "Search"
 						}
 					]
 				},
 				{
-					"languageTag": "de",
 					"match": [],
+					"languageTag": "de",
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Willkommen bei inlang,"
+							"value": "Suchen"
 						}
 					]
 				},
@@ -1401,14 +1401,14 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Bienvenue sur Inlang,"
+							"value": "Recherche"
 						}
 					]
 				}
 			]
 		},
 		{
-			"id": "home_inlang_title_second_part",
+			"id": "home_inlang_search_popular",
 			"selectors": [],
 			"variants": [
 				{
@@ -1417,17 +1417,43 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "the ecosystem to go global."
+							"value": "Popular"
 						}
 					]
 				},
 				{
-					"languageTag": "de",
 					"match": [],
+					"languageTag": "de",
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "das Ökosystem um global zu gehen."
+							"value": "Beliebt"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_inlang_search_placeholder",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Search the ecosystem ..."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Im Ökosystem suchen ..."
 						}
 					]
 				},
@@ -1437,7 +1463,79 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "l’écosystème pour s'ouvrir au monde."
+							"value": "Rechercher dans l'écosystème..."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_inlang_secondary_link",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Watch 11th Nov, 23 SvelteSummit Talk"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Schau am 11. Nov, 23 den SvelteSummit Talk"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Regarder la conférence SvelteSummit du 11 novembre 23"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_inlang_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Find all you need to go global."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Finde die richtigen Produkte, um global zu gehen."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Trouvez tout ce dont vous avez besoin pour vous mondialiser."
 						}
 					]
 				}
@@ -1546,6 +1644,42 @@
 						{
 							"type": "Text",
 							"value": "Contrôle du changement Lix"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_popular_products_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Popular Products"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Popular Products"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Produits populaires"
 						}
 					]
 				}
@@ -1833,7 +1967,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Créer une application Svelte globalisée : guide des bases"
+							"value": "Créer une application Svelte globalisée: guide des bases"
 						}
 					]
 				}
@@ -1869,7 +2003,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Créez votre propre solution !"
+							"value": "Créez votre propre solution!"
 						}
 					]
 				}
