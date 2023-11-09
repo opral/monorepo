@@ -1,11 +1,6 @@
 import { handleNavigate, setSearchInput } from "#src/interface/components/SearchBar.jsx"
 import Link from "#src/renderer/Link.jsx"
 import { For, createSignal } from "solid-js"
-import Calcom from "../old_sections/01-hero/assets/logos/clacom.jsx"
-import AppFlowy from "../old_sections/01-hero/assets/logos/appflowy.jsx"
-import Jitsi from "../old_sections/01-hero/assets/logos/jitsi.jsx"
-import Listmonk from "../old_sections/01-hero/assets/logos/listmonk.jsx"
-import OpenAssistant from "../old_sections/01-hero/assets/logos/openAssistant.jsx"
 import * as m from "#src/paraglide/messages.js"
 
 const HeroSearch = () => {
@@ -15,7 +10,7 @@ const HeroSearch = () => {
 		return [
 			{
 				name: "ParaglideJS",
-				href: "/m/gerre34r/library-inlang-paraglideJs",
+				href: "/search?q=Paraglide JS",
 			},
 			{
 				name: "Plugins",
@@ -27,7 +22,7 @@ const HeroSearch = () => {
 			},
 			{
 				name: "Web Editor",
-				href: "/m/tdozzpar/app-inlang-editor",
+				href: "/search?q=Web%20Editor",
 			},
 		]
 	}
@@ -124,7 +119,7 @@ const HeroSearch = () => {
 					</For>
 				</div>
 			</div>
-			<div class="w-full xl:w-3/4 flex flex-col gap-8 px-6 md:px-4 pb-14 md:pb-4 pt-8 md:pt-20">
+			{/* <div class="w-full xl:w-3/4 flex flex-col gap-8 px-6 md:px-4 pb-14 md:pb-4 pt-8 md:pt-20">
 				<div class="flex gap-4 justify-center md:gap-12 items-center w-full xl:justify-center text-surface-400 flex-wrap">
 					<Link class="transition-opacity hover:opacity-80" href="https://cal.com/" target="_blank">
 						<Calcom />
@@ -158,7 +153,7 @@ const HeroSearch = () => {
 						<OpenAssistant />
 					</Link>
 				</div>
-			</div>
+			</div> */}
 		</div>
 	)
 }
