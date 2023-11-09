@@ -10,23 +10,76 @@ export class DocComment extends LitElement {
 		}
 
 		.comment-wrapper {
-			background-color: #f1f5f9;
+			background-color: #e3e8ed;
 			border-radius: 0.5rem;
-			padding: 1rem;
+			padding: 1rem 0.6rem;
 			margin: 0;
+			font-weight: 500;
+			line-height: 1.2em;
+			color: #0f172a;
+			position: relative;
+		}
+
+		/* A little rectangle make it look like a speech bubble */
+		.comment-wrapper::after {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: 1;
+			width: 0;
+			height: 0;
+			border: 0.8rem solid transparent;
+			border-top-color: #e3e8ed;
+			border-bottom: 0;
+			margin-left: 0.8rem;
+			margin-top: -0.7rem;
+			transform: rotate(180deg);
+			background-color: transparent;
+		}
+
+		.name {
+			font-weight: 400;
 			font-size: 0.9rem;
+			margin-bottom: 1rem;
+			display: flex;
+			align-items: center;
 			color: #64748b;
+			gap: 0.5rem;
 		}
 	`
 
 	@property()
-	text: string = "TEST"
+	text: string = ""
 	@property()
-	name: string = "test"
+	author: string = ""
 	@property()
 	icon?: string = ""
 
 	override render() {
-		return html`<div class="comment-wrapper">${this.text}</div>`
+		return html`<div>
+			<p class="name">
+				${this.author}${this.icon ? html`<doc-icon icon=${this.icon}></doc-icon>` : ``}
+			</p>
+			<div class="comment-wrapper">${this.text}</div>
+		</div>`
 	}
 }
+
+@customElement("doc-comments")
+export class DocComments extends LitElement {
+	static override styles = css`
+		.doc-comment-grid {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 1rem;
+		}
+	`
+
+	override render() {
+		return html`<div class="doc-comment-grid">
+			<slot></slot>
+		</div>`
+	}
+}
+

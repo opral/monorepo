@@ -249,6 +249,10 @@ render((page) =>
 
 # Wall of Love
 
-We are grateful for all the support we receive from the community.
+We are grateful for all the support we receive from the community. &#10084;&#65039;
 
-<doc-comment text="test" name="Max Mustermann"></doc-comment>
+<doc-comments>
+<doc-comment text="The lib is great guys!" author="ktarmyshov" icon="mdi:github"></doc-comment>
+<doc-comment text="Thank you for that huge work you have done and still doing!" author="ZerdoX-x" icon="mdi:github"></doc-comment>
+<doc-comment text="[...] the switch between the sdk-js and paraglide has been pretty great! " author="albbus" icon="mdi:discord"></doc-comment>
+</doc-comments>
