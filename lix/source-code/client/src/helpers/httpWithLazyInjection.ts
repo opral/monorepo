@@ -216,43 +216,150 @@ function overrideHaves(lines: string[], oids: string[]) {
  * This takes the request, decodes the request body and extracts each line in the format of the git-upload-pack protocol (https://git-scm.com/docs/gitprotocol-v2)
  * and allows us to rewrite the request to add filters like blob:none (noneBlobFilter) or request only specific oids (overrideWants) or block list specific oids (overrideHaves)
  */
-export const httpWithLazyInjection = (http: any, config: { 
-	noneBlobFilter: boolean, 
-	overrideHaves?: string[] | undefined, 
-	overrideWants: string[] | undefined}) => {
-	
+export const httpWithLazyInjection = (
+	http: any,
+	config: {
+		noneBlobFilter: boolean
+		overrideHaves?: string[] | undefined
+		filterRefList?: {
+			ref: string | undefined
+		}
+		overrideWants: string[] | undefined
+	}
+) => {
 	return new Proxy(http, {
 		get(getTarget: typeof http, prop, receiver) {
-			if (prop === 'request' && getTarget[prop as keyof typeof http]) {
+			if (prop === "request" && getTarget[prop as keyof typeof http]) {
 				return new Proxy(getTarget[prop as keyof typeof getTarget], {
 					apply(callTarget, thisArg, argumentsList) {
+						const options = argumentsList[0]
+						const reolaceInfoRefsReq = true
 
-						const options = argumentsList[0];
+						// "http://localhost:3001/git-proxy//github.com/inlang/example/info/refs?service=git-upload-pack"
 
-						if (options.body) {
-         
+						if (
+							config.filterRefList !== undefined &&
+							options.url.endsWith("info/refs?service=git-upload-pack")
+						) {
+							console.log("intercepting with: " + config.filterRefList)
+							return (async () => {
+								// create new url
+								const uploadPackUrl = options.url.replace(
+									"info/refs?service=git-upload-pack",
+									"git-upload-pack"
+								)
+								// create new body
+								const lines = []
+
+								lines.push(encodePkLine("command=ls-refs")) // TODO #27 check if we have to ask for the symrefs
+								// 0001 - Delimiter Packet (delim-pkt) - separates sections of a message
+								lines.push(encodePkLine("agent=git/isomorphic-git@1.24.5") + "0001")
+								// TODO #27 we prefix refs/heads hardcoded here since the ref is set to main....
+								if (config.filterRefList?.ref) {
+									lines.push(encodePkLine("ref-prefix refs/heads/" + config.filterRefList?.ref))
+								}
+								lines.push(encodePkLine("ref-prefix HEAD"))
+								lines.push(encodePkLine("symrefs"))
+								lines.push(encodePkLine(""))
+
+								try {
+									const response = await fetch(uploadPackUrl, {
+										method: "POST",
+										headers: {
+											accept: "application/x-git-upload-pack-result",
+											"content-type": "application/x-git-upload-pack-request",
+											"git-protocol": "version=2",
+										},
+										body: lines.join(""),
+									})
+
+									if (response.status !== 200) {
+										return response
+									} else {
+										const headers = response.headers
+
+										let headSymref = ""
+
+										const bodyBufferArray = [Buffer.from(await response.arrayBuffer())]
+
+										const capabilites =
+											" multi_ack thin-pack side-band side-band-64k ofs-delta shallow deepen-since deepen-not deepen-relative no-progress include-tag multi_ack_detailed allow-tip-sha1-in-want allow-reachable-sha1-in-want no-done filter object-format=sha1"
+
+										const lines = decodeBuffer(bodyBufferArray)
+										const rawLines = ["# service=git-upload-pack\n", ""]
+										for (const line of lines) {
+											if (line.includes("HEAD symref-target")) {
+												// 0050d7e62aef79d771d1771cb44c9e01faa4b7a607fe HEAD symref-target: -> length
+												headSymref = "refs" + line.slice(64)
+												headSymref = headSymref.endsWith("\n")
+													? headSymref.slice(0, -1)
+													: headSymref
+												const headBlob = line.slice(0, 40)
+												rawLines.push(
+													headBlob + " HEAD" + capabilites + " symref=HEAD:" + headSymref
+												)
+
+												rawLines.push(headBlob + " " + headSymref)
+											} else {
+												rawLines.push(line)
+											}
+										}
+
+										rawLines.push("")
+										headers["content-type"] = "application/x-git-upload-pack-advertisement"
+
+										return {
+											statusCode: 200,
+											statusMessage: "OK",
+											headers: headers,
+											body: rawLines.map((updatedRawLine) => encodePkLine(updatedRawLine)).join(""),
+										}
+									}
+								} catch (e) {
+									debugger
+								}
+
+								return response
+							})()
+
+							// TODO #27 create the response body that mimics the original request
+
+							//
+
+							// response
+							const firstLine = "001e# service=git-upload-pack\n"
+							// flush + hash + refName + NULL + capabilities
+							const secondLine =
+								"00000153d7e62aef79d771d1771cb44c9e01faa4b7a607fe HEAD multi_ack thin-pack side-band side-band-64k ofs-delta shallow deepen-since deepen-not deepen-relative no-progress include-tag multi_ack_detailed allow-tip-sha1-in-want allow-reachable-sha1-in-want no-done symref=HEAD:refs/heads/main filter object-format=sha1 agent=git/github-cbc05ce31956\n"
+							const refLine =
+								"0051ec5b0fb1cdd67f0d33abf827a2449566de790080 refs/heads/Add-missing-translations\n"
+							const lastLine = "0000"
+
+							http.fetch()
+						} else if (options.body) {
+							// TODO #27 check the url instead to only apply for git-upload-pack
+
 							// decode the lines to be able to change them
-							let rawLines = decodeBuffer(options.body);
-							
+							let rawLines = decodeBuffer(options.body)
+
 							if (config.noneBlobFilter) {
-								rawLines = addBlobNoneFilter(rawLines);
+								rawLines = addBlobNoneFilter(rawLines)
 							}
-					
+
 							if (config.overrideHaves) {
 								rawLines = overrideHaves(rawLines, config.overrideHaves)
 							}
 
 							if (config.overrideWants) {
-								rawLines = addWantsCapabilities(rawLines);
+								rawLines = addWantsCapabilities(rawLines)
 								rawLines = overrideWants(rawLines, config.overrideWants)
 							}
 
 							// encode lines again to send them in a request
-							options.body = rawLines.map((updatedRawLine) => encodePkLine(updatedRawLine));
+							options.body = rawLines.map((updatedRawLine) => encodePkLine(updatedRawLine))
 						}
-						
-						
-						return Reflect.apply(callTarget, thisArg, argumentsList);
+
+						return Reflect.apply(callTarget, thisArg, argumentsList)
 					},
 				})
 			}

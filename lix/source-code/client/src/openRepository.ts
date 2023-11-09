@@ -86,6 +86,7 @@ export async function openRepository(
 		// to start the repo lazy - we add the blob:none filter here
 		http: httpWithLazyInjection(http, {
 			noneBlobFilter: true,
+			filterRefList: { ref: args.branch },
 			overrideHaves: undefined,
 			overrideWants: undefined,
 		}),

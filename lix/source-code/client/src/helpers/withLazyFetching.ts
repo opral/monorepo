@@ -99,6 +99,7 @@ export const withLazyFetching = (
 							fs: fs,
 							gitdir: gitdir,
 							http: http,
+							ref,
 							oids: [fileOid],
 						})
 					}
@@ -165,6 +166,7 @@ export const withLazyFetching = (
 			fs: fs,
 			gitdir,
 			http: http,
+			ref,
 			oids: [oid],
 		})
 
