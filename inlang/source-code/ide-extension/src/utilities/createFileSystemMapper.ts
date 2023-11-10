@@ -18,7 +18,9 @@ export function createFileSystemMapper(base: string): NodeishFilesystem {
 			options: Parameters<NodeishFilesystem["readFile"]>[1]
 		): Promise<string> => {
 			const fileData = await fs.readFile(
-				path.startsWith(normalizedBase) ? _path.normalize(path) : _path.normalize(normalizedBase + "/" + path),
+				path.startsWith(normalizedBase)
+					? _path.normalize(path)
+					: _path.normalize(normalizedBase + "/" + path),
 				options
 			)
 			if (typeof fileData === "string") {
@@ -32,24 +34,32 @@ export function createFileSystemMapper(base: string): NodeishFilesystem {
 			data: Parameters<NodeishFilesystem["writeFile"]>[1]
 		) => {
 			await fs.writeFile(
-				path.startsWith(normalizedBase) ? _path.normalize(path) : _path.normalize(normalizedBase + "/" + path),
+				path.startsWith(normalizedBase)
+					? _path.normalize(path)
+					: _path.normalize(normalizedBase + "/" + path),
 				data
 			)
 		},
 		mkdir: async (path: Parameters<NodeishFilesystem["mkdir"]>[0]) => {
 			await fs.mkdir(
-				path.startsWith(normalizedBase) ? _path.normalize(path) : _path.normalize(normalizedBase + "/" + path)
+				path.startsWith(normalizedBase)
+					? _path.normalize(path)
+					: _path.normalize(normalizedBase + "/" + path)
 			)
 			return path
 		},
 		readdir: async (path: Parameters<NodeishFilesystem["readdir"]>[0]) => {
 			return fs.readdir(
-				path.startsWith(normalizedBase) ? _path.normalize(path) : _path.normalize(normalizedBase + "/" + path)
+				path.startsWith(normalizedBase)
+					? _path.normalize(path)
+					: _path.normalize(normalizedBase + "/" + path)
 			)
 		},
 		stat: async (path: Parameters<NodeishFilesystem["stat"]>[0]) => {
 			return fs.stat(
-				path.startsWith(normalizedBase) ? _path.normalize(path) : _path.normalize(normalizedBase + "/" + path)
+				path.startsWith(normalizedBase)
+					? _path.normalize(path)
+					: _path.normalize(normalizedBase + "/" + path)
 			)
 		},
 	}
