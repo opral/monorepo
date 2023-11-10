@@ -18,7 +18,7 @@ import type { ProjectSettings } from "@inlang/project-settings"
  */
 export type NodeishFilesystemSubset = Pick<
 	NodeishFilesystem,
-	"readFile" | "readdir" | "mkdir" | "writeFile"
+	"readFile" | "readdir" | "mkdir" | "writeFile" | "watch"
 >
 
 /**
@@ -44,7 +44,10 @@ export type ResolvePluginsFunction = (args: {
  * The API after resolving the plugins.
  */
 export type ResolvedPluginApi = {
-	loadMessages: (args: { settings: ProjectSettings }) => Promise<Message[]> | Message[]
+	loadMessages: (args: {
+		settings: ProjectSettings
+		nodeishFs: NodeishFilesystemSubset
+	}) => Promise<Message[]> | Message[]
 	saveMessages: (args: { settings: ProjectSettings; messages: Message[] }) => Promise<void> | void
 	/**
 	 * App specific APIs.
