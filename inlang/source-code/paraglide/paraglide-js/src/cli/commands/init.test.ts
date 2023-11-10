@@ -21,6 +21,7 @@ import childProcess from "node:child_process"
 import memfs from "memfs"
 import type { ProjectSettings } from "@inlang/sdk"
 import { version } from "../state.js"
+import { createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
 
 beforeAll(() => {
 	// spy on commonly used functions to prevent console output
@@ -438,11 +439,11 @@ describe("maybeChangeTsConfigModuleResolution()", () => {
 
 	test("it should warn if the extended from tsconfig can't be read", async () => {
 		mockFiles({
-			"/tsconfig.json": `{ 
+			"/tsconfig.json": `{
 				"extends": "./non-existend.json",
 				"compilerOptions": {
 					"moduleResolution": "Bundler"
-				} 
+				}
 			}`,
 		})
 		await maybeChangeTsConfigModuleResolution()
@@ -458,8 +459,8 @@ describe("maybeChangeTsConfigModuleResolution()", () => {
 					"moduleResolution": "Bundler"
 				}
 			}`,
-			"/tsconfig.json": `{ 
-				"extends": "tsconfig.base.json", 
+			"/tsconfig.json": `{
+				"extends": "tsconfig.base.json",
 			}`,
 		})
 		await maybeChangeTsConfigModuleResolution()
@@ -545,10 +546,10 @@ describe("maybeChangeTsConfigAllowJs()", () => {
 
 	test("it should return if the tsconfig already set allowJs to true", async () => {
 		mockFiles({
-			"/tsconfig.json": `{ 
+			"/tsconfig.json": `{
 				"compilerOptions": {
 					"allowJs": true
-				} 
+				}
 			}`,
 		})
 		await maybeChangeTsConfigAllowJs()
@@ -562,8 +563,8 @@ describe("maybeChangeTsConfigAllowJs()", () => {
 					"allowJs": true
 				}
 			}`,
-			"/tsconfig.json": `{ 
-				"extends": "tsconfig.base.json", 
+			"/tsconfig.json": `{
+				"extends": "tsconfig.base.json",
 			}`,
 		})
 		mockUserInput([
@@ -713,12 +714,20 @@ const mockUserInput = (testUserInput: any[]) => {
 
 const mockFiles = (files: memfs.NestedDirectoryJSON) => {
 	const _memfs = memfs.createFsFromVolume(memfs.Volume.fromNestedJSON(files))
+	const lixFs = createNodeishMemoryFs()
 	vi.spyOn(fsSync, "existsSync").mockImplementation(_memfs.existsSync)
 	for (const prop in fs) {
 		// @ts-ignore - memfs has the same interface as node:fs/promises
 		if (typeof fs[prop] !== "function") continue
-		// @ts-ignore - memfs has the same interface as node:fs/promises
-		vi.spyOn(fs, prop).mockImplementation(_memfs.promises[prop])
+
+		// @ts-ignore - memfs dies not have a watch interface - quick fix should be updated
+		if (fs[prop].name === "watch") {
+			// @ts-ignore - memfs has the same interface as node:fs/promises
+			vi.spyOn(fs, prop).mockImplementation(lixFs[prop])
+		} else {
+			// @ts-ignore - memfs has the same interface as node:fs/promises
+			vi.spyOn(fs, prop).mockImplementation(_memfs.promises[prop])
+		}
 	}
 	return { existsSync: _memfs.existsSync }
 }

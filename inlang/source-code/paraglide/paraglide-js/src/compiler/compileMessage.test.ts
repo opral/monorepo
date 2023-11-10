@@ -32,6 +32,24 @@ it("should throw an error if a message has multiple variants with the same langu
 	).toThrow()
 })
 
+it("should compile a message with a language tag that contains a hyphen - to an underscore to prevent invalid JS imports", async () => {
+	const result = compileMessage({
+		id: "login_button",
+		selectors: [],
+		variants: [
+			{
+				match: [],
+				languageTag: "en-US",
+				pattern: [],
+			},
+		],
+	})
+	expect(result.en_US).toBeUndefined()
+	expect(result["en-US"]).toBeDefined()
+	expect(result.index.includes("en_US.login_button")).toBe(true)
+	expect(result.index.includes("en-US.login_button")).toBe(false)
+})
+
 it("should compile a message to a function", async () => {
 	const result = compileMessage({
 		id: "multipleParams",
@@ -92,10 +110,10 @@ it("should compile a message to a function", async () => {
 		],
 	})
 	const de = await import(
-		`data:application/javascript;base64,${btoa("let languageTag = () => 'de';" + result)}`
+		`data:application/javascript;base64,${btoa("let languageTag = () => 'de';" + result.de)}`
 	)
 	const en = await import(
-		`data:application/javascript;base64,${btoa("let languageTag = () => 'en';" + result)}`
+		`data:application/javascript;base64,${btoa("let languageTag = () => 'en';" + result.en)}`
 	)
 	expect(de.multipleParams({ name: "Samuel", count: 5 })).toBe(
 		"Hallo Samuel! Du hast 5 Nachrichten."
