@@ -26,6 +26,7 @@ export type NodeishFilesystem = {
 		options?: {
 			recursive?: boolean
 			signal?: AbortSignal
+			persistent?: false
 		}
 		// WatchOptions
 	): AsyncIterable<FileChangeInfo>

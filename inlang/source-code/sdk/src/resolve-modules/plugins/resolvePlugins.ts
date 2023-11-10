@@ -91,7 +91,7 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 			result.data.loadMessages = (_args) =>
 				plugin.loadMessages!({
 					..._args,
-					nodeishFs: args.nodeishFs,
+					// renoved nodeishFs from args because we need to pass custom wrapped fs that establishes a watcher
 				})
 		}
 

@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect, vi } from "vitest"
 import { loadProject } from "./loadProject.js"
-import type { ProjectSettings, Plugin, MessageLintRule, Message } from "./versionedInterfaces.js"
+import type {
+	ProjectSettings,
+	Plugin,
+	MessageLintRule,
+	Message,
+	NodeishFilesystemSubset,
+} from "./versionedInterfaces.js"
 import type { ImportFunction } from "./resolve-modules/index.js"
 import type { InlangModule } from "@inlang/module"
 import {
@@ -10,7 +16,7 @@ import {
 	ProjectSettingsFileNotFoundError,
 	ProjectSettingsInvalidError,
 } from "./errors.js"
-import { createNodeishMemoryFs } from "@lix-js/fs"
+import { createNodeishMemoryFs, normalizePath } from "@lix-js/fs"
 import { createMessage } from "./test-utilities/createMessage.js"
 import { tryCatch } from "@inlang/result"
 
@@ -824,6 +830,90 @@ describe("functionality", () => {
 			})
 			// TODO: test with real lint rules
 			project.query.messageLintReports.getAll.subscribe((r) => expect(r).toEqual([]))
+		})
+	})
+
+	describe("watcher", () => {
+		it("changing files in resources should trigger callback of message query", async () => {
+			const fs = createNodeishMemoryFs()
+
+			const messages = {
+				$schema: "https://inlang.com/schema/inlang-message-format",
+				data: [
+					{
+						id: "test",
+						selectors: [],
+						variants: [
+							{
+								match: [],
+								languageTag: "en",
+								pattern: [
+									{
+										type: "Text",
+										value: "test",
+									},
+								],
+							},
+						],
+					},
+				],
+			}
+
+			await fs.writeFile("./messages.json", JSON.stringify(messages))
+
+			const getMessages = async (customFs: NodeishFilesystemSubset) => {
+				const file = await customFs.readFile("./messages.json", { encoding: "utf-8" })
+				return JSON.parse(file.toString()).data
+			}
+
+			const mockMessageFormatPlugin: Plugin = {
+				id: "plugin.inlang.messageFormat",
+				description: { en: "Mock plugin description" },
+				displayName: { en: "Mock Plugin" },
+
+				loadMessages: async (args) => await getMessages(args.nodeishFs),
+				saveMessages: () => undefined as any,
+			}
+
+			const settings: ProjectSettings = {
+				sourceLanguageTag: "en",
+				languageTags: ["en"],
+				modules: ["plugin.js"],
+				"plugin.inlang.messageFormat": {
+					filePath: "./messages.json",
+				},
+			}
+
+			await fs.writeFile("./project.inlang.json", JSON.stringify(settings))
+
+			// establish watcher
+			const project = await loadProject({
+				settingsFilePath: normalizePath("/project.inlang.json"),
+				nodeishFs: fs,
+				_import: async () => ({
+					default: mockMessageFormatPlugin,
+				}),
+			})
+
+			let counter = 0
+
+			project.query.messages.getAll.subscribe(() => {
+				counter = counter + 1
+			})
+
+			expect(counter).toBe(1)
+
+			// change file
+			await fs.writeFile("./messages.json", JSON.stringify(messages))
+			await new Promise((resolve) => setTimeout(resolve, 0))
+
+			expect(counter).toBe(2)
+
+			// change file
+			await fs.writeFile("./messages.json", JSON.stringify(messages))
+			await new Promise((resolve) => setTimeout(resolve, 0))
+
+			expect(counter).toBe(3)
 		})
 	})
 })
