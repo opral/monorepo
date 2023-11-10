@@ -1408,32 +1408,6 @@
 			]
 		},
 		{
-			"id": "home_inlang_search_popular",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Popular"
-						}
-					]
-				},
-				{
-					"match": [],
-					"languageTag": "de",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Beliebt"
-						}
-					]
-				}
-			]
-		},
-		{
 			"id": "home_inlang_search_placeholder",
 			"selectors": [],
 			"variants": [
@@ -1464,6 +1438,32 @@
 						{
 							"type": "Text",
 							"value": "Rechercher dans l'écosystème..."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_inlang_search_popular",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Popular"
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Beliebt"
 						}
 					]
 				}
@@ -1515,7 +1515,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Find all you need to go global."
+							"value": "Find the products you need to go global."
 						}
 					]
 				},
