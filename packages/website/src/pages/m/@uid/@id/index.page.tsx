@@ -20,7 +20,6 @@ import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
 import Card from "#src/interface/components/Card.jsx"
 import { EditButton } from "#src/pages/documentation/EditButton.jsx"
-import { Copy } from "#src/interface/components/Copy.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
