@@ -25,6 +25,7 @@ import {
 	STAGE,
 	listFiles,
 	listServerRefs,
+	writeTree,
 	// fetch,
 	// listBranches,
 } from "isomorphic-git"
@@ -265,6 +266,183 @@ export async function openRepository(
 
 */
 
+				// TODO #1459 use central helper function
+				function normalPath(path: string): string {
+					const dots = /(\/|^)(\.\/)+/g
+					const slashes = /\/+/g
+
+					const upreference = /(?<!\.\.)[^/]+\/\.\.\//
+
+					// Append '/' to the beginning and end
+					path = `/${path}/`
+
+					// Handle the edge case where a path begins with '/..'
+					path = path.replace(/^\/\.\./, "")
+
+					// Remove extraneous '.' and '/'
+					path = path.replace(dots, "/").replace(slashes, "/")
+
+					// Resolve relative paths if they exist
+					let match
+					while ((match = path.match(upreference)?.[0])) {
+						path = path.replace(match, "")
+					}
+
+					return path
+				}
+
+				// TODO #1459 use central helper function
+				function getDirname(path: string): string {
+					return normalPath(
+						path
+							.split("/")
+							.filter((x) => x)
+							.slice(0, -1)
+							.join("/") ?? path
+					)
+				}
+				// TODO #1459 use central helper function
+				function getBasename(path: string): string {
+					return (
+						path
+							.split("/")
+							.filter((x) => x)
+							.at(-1) ?? path
+					)
+				}
+
+				const fileStates = {} as {
+					[parentFolder: string]: {
+						mode: string
+						path: string
+						type: "blob" | "tree" | "commit" | "special"
+						oid: string | undefined
+					}[]
+				}
+
+				async function createTree(
+					currentFolder: string,
+					fileStates: {
+						[parentFolder: string]: {
+							mode: string
+							path: string
+							type: "blob" | "tree" | "commit" | "special"
+							oid: string | undefined
+						}[]
+					}
+				): Promise<string> {
+					const entries = [] as {
+						mode: string
+						path: string
+						type: "blob" | "tree" | "commit"
+						oid: string
+					}[]
+
+					for (const entry of fileStates[currentFolder]!) {
+						const oid =
+							entry.oid ?? (await createTree(currentFolder + entry.path + "/", fileStates))
+
+						entries.push({
+							mode: !entry.oid && entry.type === "tree" ? "040000" : entry.mode,
+							path: entry.path,
+							type: entry.type as "blob" | "tree" | "commit", // TODO #1459 we cast here to remove special - check cases
+							oid,
+						})
+					}
+
+					console.log("writing tree for " + currentFolder)
+					return await writeTree({ fs: rawFs, dir, gitdir, tree: entries })
+				}
+
+				await walk({
+					fs: rawFs,
+					// cache
+					dir,
+					gitdir,
+					trees: [TREE({ ref }), WORKDIR(), STAGE()],
+					// eslint-disable-next-line @typescript-eslint/no-unused-vars
+					map: async function (fullpath, [refState, _workdir, stagingState]) {
+						if ((!refState && !stagingState) || fullpath === ".") {
+							// skip unmanaged files (not indexed nor in ref)
+							return
+						}
+
+						const fileDir = getDirname(fullpath)
+						if (fileStates[fileDir] === undefined) {
+							fileStates[fileDir] = []
+						}
+
+						// TODO #1459 compare the file state of commit vs stage if we see changes reset all oids of all parents
+
+						if (!stagingState && refState) {
+							// file was not checked out - open question how do we distinguis it from deleted?
+							fileStates[fileDir]?.push({
+								mode: await refState.mode(),
+								path: getBasename(fullpath),
+								type: await refState.type(),
+								oid: await refState.oid(),
+							})
+							return
+						}
+
+						if (stagingState && !refState) {
+							// file does not exist in ref - it was added
+
+							fileStates[fileDir]?.push({
+								mode: await stagingState.mode(),
+								path: getBasename(fullpath),
+								type: await stagingState.type(),
+								oid: await stagingState.oid(),
+							})
+
+							return
+						}
+
+						if (stagingState && refState) {
+							// file does exists in both
+
+							const stagingOid = await stagingState?.oid()
+							const refOid = await refState?.oid()
+
+							console.log(stagingState)
+
+							fileStates[fileDir]?.push({
+								mode: await stagingState.mode(),
+								path: getBasename(fullpath),
+								type: await stagingState!.type(),
+								oid: await stagingState!.oid(),
+							})
+
+							return
+						}
+
+						// if (stat)
+						// {
+						// 	fullpath: fullpath,
+						// 	mode: inode.metadata.mode,
+						// 	path: inode.basename,
+						// 	oid: inode.metadata.oid,
+						// 	type: inode.type,
+						// }
+						// if (fullpath === ".") return
+
+						// const oId = await commit?.oid()
+						// if (oId === undefined) {
+						// 	return
+						// }
+
+						// filePathToOid[fullpath] = oId
+						// if (oidToFilePaths[oId] === undefined) {
+						// 	oidToFilePaths[oId] = [] as string[]
+						// }
+						// oidToFilePaths[oId]?.push(fullpath)
+					},
+					reduce: async function (parent, children) {},
+				})
+
+				const tree = await createTree("/", fileStates)
+				console.log(tree)
+
 				return commit({
 					fs: withLazyFetching(
 						rawFs,
@@ -279,6 +457,7 @@ export async function openRepository(
 					dir,
 					author: cmdArgs.author,
 					message: cmdArgs.message,
+					tree,
 				})
 			})(cmdArgs)
 		},
