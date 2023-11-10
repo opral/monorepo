@@ -1,5 +1,16 @@
 # inlang-vs-code-extension
 
+## 1.16.0
+
+### Minor Changes
+
+- 9d754d722: add watch to fs
+
+### Patch Changes
+
+- Updated dependencies [9d754d722]
+  - @lix-js/fs@0.4.0
+
 ## 1.15.0
 
 ### Minor Changes
