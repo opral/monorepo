@@ -123,9 +123,9 @@ export function Page(props: PageProps) {
 								when={props.markdown}
 								fallback={<p class="text-danger">{props.markdown?.error}</p>}
 							>
-								<section class="col-span-1 md:col-span-4 pb-4 grid md:grid-cols-4 grid-cols-1 md:gap-16">
+								<section class="col-span-1 md:col-span-4 pb-4 md:pb-0 grid md:grid-cols-4 grid-cols-1 md:gap-16">
 									<div class="flex-col h-full justify-between md:col-span-3">
-										<div class="flex max-md:flex-col items-start gap-8 md:mb-4">
+										<div class="flex max-md:flex-col items-start gap-8">
 											<Show
 												when={props.manifest.icon}
 												fallback={
