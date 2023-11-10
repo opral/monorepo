@@ -17,10 +17,8 @@
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/README.md"
 	},
-	"keywords": ["application", "website", "developer", "vscode", "ide", "extension", "lix"],
-	"website": "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
+	"keywords": ["apps", "website", "developer", "vscode", "ide", "extension", "lix"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0"
 }
-  
