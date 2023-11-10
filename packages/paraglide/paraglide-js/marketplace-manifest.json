@@ -2,11 +2,11 @@
 	"id": "library.inlang.paraglideJs",
 	"icon": "https://emojis.wiki/thumbs/emojis/parachute.webp",
 	"gallery": [
-		"https://cdn.jsdelivr.net/gh/inlang/monorepo@enhance-product-pages/inlang/assets/marketplace/paraglide-marketplace-cover.jpg",
-		"https://cdn.jsdelivr.net/gh/inlang/monorepo@enhance-product-pages/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-1.jpg",
-		"https://cdn.jsdelivr.net/gh/inlang/monorepo@enhance-product-pages/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-2.jpg",
-		"https://cdn.jsdelivr.net/gh/inlang/monorepo@enhance-product-pages/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-3.jpg",
-		"https://cdn.jsdelivr.net/gh/inlang/monorepo@enhance-product-pages/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-4.jpg"
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/paraglide-marketplace-cover.jpg",
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-1.jpg",
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-2.jpg",
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-3.jpg",
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-4.jpg"
 	],
 	"displayName": {
 		"en": "Paraglide JS"
