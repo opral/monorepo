@@ -9,11 +9,12 @@ export class DocFeature extends LitElement {
 			flex-direction: column;
 			align-items: center;
 			justify-content: end;
-			gap: 3rem;
+			gap: 2rem;
 			padding: 1rem;
 			border-radius: 0.5rem;
 			background-color: #e3e8ed;
-			height: 176px;
+			height: 200px;
+			overflow: hidden;
 		}
 		.feature-name {
 			font-weight: 500;
@@ -36,8 +37,13 @@ export class DocFeature extends LitElement {
 			class="feature-card"
 			style="${this.color ? `background-color: ${this.color}` : ""}"
 		>
-			${this.icon && html`<iconify-icon height="64px" icon=${this.icon}></iconify-icon>`}
-			${this.image && html`<img src=${this.image} height="64px" />`}
+			${this.icon &&
+			html`<iconify-icon
+				height="64px"
+				style="margin-bottom: 24px;"
+				icon=${this.icon}
+			></iconify-icon>`}
+			${this.image && html`<img src=${this.image} height="128px" />`}
 			<p class="feature-name">${this.title}</p>
 		</div>`
 	}
