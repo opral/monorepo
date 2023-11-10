@@ -18,7 +18,6 @@ import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { currentPageContext } from "#src/renderer/state.js"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
-import OnClient from "#src/interface/components/OnClient.jsx"
 import Card from "#src/interface/components/Card.jsx"
 import { EditButton } from "#src/pages/documentation/EditButton.jsx"
 import { Copy } from "#src/interface/components/Copy.jsx"
@@ -88,17 +87,6 @@ export function Page(props: PageProps) {
 
 		setTableOfContents(table)
 	})
-
-	const gettingStarted = () => {
-		if (tableOfContents() && Object.keys(tableOfContents()).length > 0) {
-			// look for a heading that contains "getting started"
-			for (const heading of Object.keys(tableOfContents())) {
-				if (heading.toLowerCase().includes("getting started")) {
-					return true
-				}
-			}
-		}
-	}
 
 	return (
 		<>
