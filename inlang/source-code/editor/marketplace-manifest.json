@@ -17,7 +17,7 @@
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/editor/README.md"
 	},
-	"keywords": ["editor", "web", "application", "website", "translator", "lix"],
+	"keywords": ["editor", "web", "apps", "website", "translator", "lix"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"website": "/editor",
