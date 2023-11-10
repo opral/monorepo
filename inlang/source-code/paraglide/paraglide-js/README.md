@@ -1,4 +1,4 @@
-![Paraglide JS header image](https://raw.githubusercontent.com/inlang/monorepo/enhance-product-pages/inlang/source-code/paraglide/paraglide-js/assets/paraglide-js-header.png)
+![Paraglide JS header image](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglide-js-header.png)
 
 # The best i18n library for the web
 
@@ -11,9 +11,9 @@ npx @inlang/paraglide-js@latest init
 # Features
 
 <doc-features>
-  <doc-feature title="No unused translations" image="https://raw.githubusercontent.com/inlang/monorepo/enhance-product-pages/inlang/source-code/paraglide/paraglide-js/assets/unused-translations.png"></doc-feature>
-  <doc-feature title="Message functions" image="https://raw.githubusercontent.com/inlang/monorepo/enhance-product-pages/inlang/source-code/paraglide/paraglide-js/assets/message-functions.png"></doc-feature>
-  <doc-feature title="Type safety" image="https://raw.githubusercontent.com/inlang/monorepo/enhance-product-pages/inlang/source-code/paraglide/paraglide-js/assets/typesafe.png"></doc-feature>
+  <doc-feature title="No unused translations" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/unused-translations.png"></doc-feature>
+  <doc-feature title="Message functions" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/message-functions.png"></doc-feature>
+  <doc-feature title="Type safety" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/typesafe.png"></doc-feature>
 </doc-features>
 
 … and much more
