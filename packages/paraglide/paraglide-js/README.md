@@ -12,8 +12,8 @@ npx @inlang/paraglide-js@latest init
 
 <doc-features>
   <doc-feature title="No unused translations" image="https://raw.githubusercontent.com/inlang/monorepo/enhance-product-pages/inlang/source-code/paraglide/paraglide-js/assets/unused-translations.png"></doc-feature>
-  <doc-feature title="Message functions" icon="cil:functions"></doc-feature>
-  <doc-feature title="Type safety" icon="teenyicons:typescript-outline"></doc-feature>
+  <doc-feature title="Message functions" image="https://raw.githubusercontent.com/inlang/monorepo/enhance-product-pages/inlang/source-code/paraglide/paraglide-js/assets/message-functions.png"></doc-feature>
+  <doc-feature title="Type safety" image="https://raw.githubusercontent.com/inlang/monorepo/enhance-product-pages/inlang/source-code/paraglide/paraglide-js/assets/typesafe.png"></doc-feature>
 </doc-features>
 
 
