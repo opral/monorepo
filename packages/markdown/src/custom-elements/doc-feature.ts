@@ -59,13 +59,13 @@ export class DocFeatures extends LitElement {
 			width: 100%;
 		}
 
-		@media (max-width: 768px) {
+		@media (max-width: 1100px) {
 			.doc-features-grid {
 				grid-template-columns: repeat(2, 1fr);
 			}
 		}
 
-		@media (max-width: 480px) {
+		@media (max-width: 700px) {
 			.doc-features-grid {
 				grid-template-columns: repeat(1, 1fr);
 			}

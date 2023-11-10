@@ -16,8 +16,8 @@ npx @inlang/paraglide-js@latest init
   <doc-feature title="Type safety" image="https://raw.githubusercontent.com/inlang/monorepo/enhance-product-pages/inlang/source-code/paraglide/paraglide-js/assets/typesafe.png"></doc-feature>
 </doc-features>
 
+… and much more
 
-<!-- Paraglide is a new i18n library, introducing innovations such as a compiler that emits message functions and these message functions being tree-shakable which results in auto-optimized bundles. -->
 
 # Getting started
 
@@ -260,6 +260,9 @@ render((page) =>
 ```
 
 # Community
+
+We are grateful for all the support we get from the community. Here are just a few of the comments we've received over the last few weeks.
+Of course we are open to and value criticism as well. If you have any feedback, please let us know directly on [GitHub](https://github.com/inlang/monorepo/discussions/1464)
 
 <doc-comments>
 <doc-comment text="The lib is great guys!" author="ktarmyshov" icon="mdi:github"></doc-comment>
