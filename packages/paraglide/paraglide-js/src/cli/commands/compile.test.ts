@@ -56,7 +56,7 @@ test("it should compile into the default outdir", async () => {
 			languageTags: ["de", "en"],
 			modules: ["/plugin.js"],
 			"plugin.inlang.messageFormat": {
-				filePath: "/messages.json",
+				pathPattern: "/messages/{languageTag}.json",
 			},
 		} satisfies ProjectSettings),
 		"/messages.json": JSON.stringify({
@@ -88,7 +88,7 @@ test("it should compile a project into the provided outdir", async () => {
 				languageTags: ["de", "en"],
 				modules: ["/plugin.js"],
 				"plugin.inlang.messageFormat": {
-					filePath: "/messages.json",
+					pathPattern: "/messages/{languageTag}.json",
 				},
 			} satisfies ProjectSettings),
 			"/messages.json": JSON.stringify({
