@@ -11,6 +11,7 @@ import { Value } from "@sinclair/typebox/value"
 beforeEach(() => {
 	// clear plugin state between tests
 	vi.resetModules()
+	process.cwd = () => "/"
 })
 
 // the test ensures:
@@ -22,31 +23,41 @@ test("roundtrip (saving/loading messages)", async () => {
 	const fs = createNodeishMemoryFs()
 
 	const settings = {
-		[pluginId]: { filePath: "./messages.json" } satisfies PluginSettings,
-	} as any
+		sourceLanguageTag: "en",
+		languageTags: ["en", "de"],
+		modules: [],
+		[pluginId]: { pathPattern: "./messages/{languageTag}.json" } satisfies PluginSettings,
+	}
 
-	const m1 = createMessage("first-message", {
-		en: "If this fails I will be sad",
-	})
-
-	const m2 = createMessage("second-message", {
-		en: "Let's see if this works",
-		de: "Mal sehen ob das funktioniert",
-	})
-
-	const initialFile = JSON.stringify({
+	const enInitial = JSON.stringify({
 		$schema: "https://inlang.com/schema/inlang-message-format",
-		data: [m1, m2],
+		first_message: "If this fails I will be sad",
+		second_message: "Let's see if this works",
 	} satisfies StorageSchema)
 
-	await fs.writeFile("./messages.json", initialFile)
+	const deInitial = JSON.stringify({
+		$schema: "https://inlang.com/schema/inlang-message-format",
+		second_message: "Mal sehen ob das funktioniert",
+	} satisfies StorageSchema)
+
+	await fs.mkdir("./messages")
+	await fs.writeFile("./messages/en.json", enInitial)
+	await fs.writeFile("./messages/de.json", deInitial)
 
 	const firstMessageLoad = await plugin.loadMessages!({
 		settings,
 		nodeishFs: fs,
 	})
 
-	expect(firstMessageLoad).toStrictEqual([m1, m2])
+	expect(firstMessageLoad).toStrictEqual([
+		createMessage("first_message", {
+			en: "If this fails I will be sad",
+		}),
+		createMessage("second_message", {
+			en: "Let's see if this works",
+			de: "Mal sehen ob das funktioniert",
+		}),
+	])
 
 	await plugin.saveMessages!({
 		settings,
@@ -54,10 +65,13 @@ test("roundtrip (saving/loading messages)", async () => {
 		messages: firstMessageLoad,
 	})
 
-	const fileAfterRoundtrip = await fs.readFile("./messages.json", { encoding: "utf-8" })
+	const enAfterRoundtrip = await fs.readFile("./messages/en.json", { encoding: "utf-8" })
+	const deAfterRoundtrip = await fs.readFile("./messages/de.json", { encoding: "utf-8" })
 
-	expect(fileAfterRoundtrip).toStrictEqual(initialFile)
-	expect(Value.Check(StorageSchema, JSON.parse(fileAfterRoundtrip))).toBe(true)
+	expect(enAfterRoundtrip).toStrictEqual(enInitial)
+	expect(deAfterRoundtrip).toStrictEqual(deInitial)
+	expect(Value.Check(StorageSchema, JSON.parse(enAfterRoundtrip))).toBe(true)
+	expect(Value.Check(StorageSchema, JSON.parse(deAfterRoundtrip))).toBe(true)
 
 	const messagesAfterRoundtrip = await plugin.loadMessages!({
 		settings,
@@ -72,24 +86,24 @@ test("keep the json formatting to decrease git diff's and merge conflicts", asyn
 	const fs = createNodeishMemoryFs()
 
 	const settings = {
-		[pluginId]: { filePath: "./messages.json" } satisfies PluginSettings,
+		sourceLanguageTag: "en",
+		languageTags: ["en"],
+		modules: [],
+		[pluginId]: { pathPattern: "./messages/{languageTag}.json" } satisfies PluginSettings,
 	} as any
-
-	const m1 = createMessage("hello-world", {
-		en: "hello",
-	})
 
 	// double tab indentation
 	const initialFile = JSON.stringify(
 		{
 			$schema: "https://inlang.com/schema/inlang-message-format",
-			data: [m1],
+			hello_world: "hello",
 		} satisfies StorageSchema,
 		undefined,
 		2
 	)
 
-	await fs.writeFile("./messages.json", initialFile)
+	await fs.mkdir("./messages")
+	await fs.writeFile("./messages/en.json", initialFile)
 
 	const messages = await plugin.loadMessages!({
 		settings,
@@ -102,62 +116,50 @@ test("keep the json formatting to decrease git diff's and merge conflicts", asyn
 		messages,
 	})
 
-	const fileAfterRoundtrip = await fs.readFile("./messages.json", { encoding: "utf-8" })
+	const fileAfterRoundtrip = await fs.readFile("./messages/en.json", { encoding: "utf-8" })
 
 	// the file should still tab indentation
 	expect(fileAfterRoundtrip).toStrictEqual(initialFile)
 	expect(Value.Check(StorageSchema, JSON.parse(fileAfterRoundtrip))).toBe(true)
 })
 
-test("save the messages alphabetically to decrease git diff's and merge conflicts", async () => {
-	const { plugin } = await import("./plugin.js")
-
-	const fs = createNodeishMemoryFs()
-
-	const settings = {
-		[pluginId]: { filePath: "./messages.json" } satisfies PluginSettings,
-	} as any
-
-	const messages = [
-		createMessage("c", { en: "c" }),
-		createMessage("a", { en: "a" }),
-		createMessage("b", { en: "b" }),
-	]
-
-	await plugin.saveMessages!({
-		settings,
-		nodeishFs: fs,
-		messages,
-	})
-
-	const fileAfterSave = await fs.readFile("./messages.json", { encoding: "utf-8" })
-	const json = JSON.parse(fileAfterSave) as StorageSchema
-	expect(Value.Check(StorageSchema, json)).toBe(true)
-	expect(json.data[0]?.id).toBe("a")
-	expect(json.data[1]?.id).toBe("b")
-	expect(json.data[2]?.id).toBe("c")
-})
-
 test("don't throw if the storage path does not exist. instead, create the file and/or folder (enables project initialization usage)", async () => {
 	for (const path of [
-		"./messages.json",
-		"./folder/messages.json",
-		"./folder/folder/messages.json",
+		"./{languageTag}/main.json",
+		"./messages/{languageTag}.json",
+		"./folder/folder/{languageTag}.json",
 	]) {
 		const { plugin } = await import("./plugin.js")
 		const fs = createNodeishMemoryFs()
 
 		const messages = await plugin.loadMessages!({
 			settings: {
-				[pluginId]: { filePath: path } satisfies PluginSettings,
-			} as any,
+				sourceLanguageTag: "en",
+				languageTags: ["en"],
+				modules: [],
+				[pluginId]: { pathPattern: path } satisfies PluginSettings,
+			},
 			nodeishFs: fs,
 		})
 
-		const createdFile = await fs.readFile(path, { encoding: "utf-8" })
+		expect(messages).toStrictEqual([])
+
+		messages.push(createMessage("hello_world", { en: "hello" }))
+
+		await plugin.saveMessages!({
+			settings: {
+				[pluginId]: { pathPattern: path } satisfies PluginSettings,
+			} as any,
+			nodeishFs: fs,
+			messages,
+		})
+
+		const createdFile = await fs.readFile(path.replace("{languageTag}", "en"), {
+			encoding: "utf-8",
+		})
 		const parsedFile = JSON.parse(createdFile)
 		// messages should be empty but no error should be thrown
-		expect(messages).toStrictEqual([])
+		expect(messages).toStrictEqual([createMessage("hello_world", { en: "hello" })])
 		expect(Value.Check(StorageSchema, parsedFile)).toBe(true)
 	}
 })
@@ -166,22 +168,30 @@ test("recursively creating a directory should not fail if a subpath already exis
 	const { plugin } = await import("./plugin.js")
 	const fs = createNodeishMemoryFs()
 	// folder-a exists but folder-b doesn't
-	const path = "./folder-a/folder-b/messages.json"
+	const path = "./folder-a/folder-b/{languageTag}.json"
 
 	await fs.mkdir("./folder-a/")
 	await fs.writeFile("./folder-a/placeholder.txt", "hi")
 
-	const messages = await plugin.loadMessages!({
+	await plugin.saveMessages!({
 		settings: {
-			[pluginId]: { filePath: path } satisfies PluginSettings,
-		} as any,
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
+			modules: [],
+			[pluginId]: { pathPattern: path } satisfies PluginSettings,
+		},
 		nodeishFs: fs,
+		messages: [
+			createMessage("hello_world", {
+				en: "hello",
+			}),
+		],
 	})
 
-	const createdFile = await fs.readFile(path, { encoding: "utf-8" })
+	const createdFile = await fs.readFile(path.replace("{languageTag}", "en"), { encoding: "utf-8" })
 	const parsedFile = JSON.parse(createdFile)
 	// messages should be empty but no error should be thrown
-	expect(messages).toStrictEqual([])
+	expect(parsedFile.hello_world).toEqual("hello")
 	expect(Value.Check(StorageSchema, parsedFile)).toBe(true)
 })
 
@@ -192,18 +202,93 @@ test("it should add the $schema property to the file if it does not exist", asyn
 	const fs = createNodeishMemoryFs()
 
 	const settings = {
-		[pluginId]: { filePath: "./messages.json" } satisfies PluginSettings,
-	} as any
+		sourceLanguageTag: "en",
+		languageTags: ["en"],
+		modules: [],
+		[pluginId]: { pathPattern: "./messages/{languageTag}.json" } satisfies PluginSettings,
+	}
 
 	await plugin.saveMessages!({
 		settings,
 		nodeishFs: fs,
-		messages: [],
+		messages: [
+			createMessage("hello_world", {
+				en: "hello",
+			}),
+		],
 	})
 
-	const fileAfterSave = await fs.readFile("./messages.json", { encoding: "utf-8" })
+	const fileAfterSave = await fs.readFile("./messages/en.json", { encoding: "utf-8" })
 	const json = JSON.parse(fileAfterSave) as StorageSchema
 	expect(json.$schema).toBe("https://inlang.com/schema/inlang-message-format")
-	expect(json.data).toStrictEqual([])
+	expect(Object.keys(json).length).toBe(2)
 	expect(Value.Check(StorageSchema, json)).toBe(true)
+})
+
+test("it should migrate to v2", async () => {
+	const { plugin } = await import("./plugin.js")
+	const fs = createNodeishMemoryFs()
+
+	const messages = [
+		createMessage("greeting", {
+			en: "Hello",
+			de: "Guten Tag",
+			"en-US": "Howdy",
+		}),
+	]
+
+	await fs.writeFile(
+		"/messages.json",
+		JSON.stringify({
+			data: messages,
+		})
+	)
+
+	const loadedMessages = await plugin.loadMessages!({
+		settings: {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "de", "en-US"],
+			modules: [],
+			[pluginId]: {
+				filePath: "./messages.json",
+				pathPattern: "./i18n/{languageTag}.json",
+			} satisfies PluginSettings,
+		},
+		nodeishFs: fs,
+	})
+
+	expect(loadedMessages).toStrictEqual(messages)
+
+	const en = await fs.readFile("./i18n/en.json", { encoding: "utf-8" })
+	const de = await fs.readFile("./i18n/de.json", { encoding: "utf-8" })
+	const enUS = await fs.readFile("./i18n/en-US.json", { encoding: "utf-8" })
+
+	expect(JSON.parse(en)).toStrictEqual({
+		$schema: "https://inlang.com/schema/inlang-message-format",
+		greeting: "Hello",
+	} satisfies StorageSchema)
+
+	expect(JSON.parse(de)).toStrictEqual({
+		$schema: "https://inlang.com/schema/inlang-message-format",
+		greeting: "Guten Tag",
+	} satisfies StorageSchema)
+
+	expect(JSON.parse(enUS)).toStrictEqual({
+		$schema: "https://inlang.com/schema/inlang-message-format",
+		greeting: "Howdy",
+	} satisfies StorageSchema)
+
+	// if the files exist already, the load function should not throw
+	await plugin.loadMessages!({
+		settings: {
+			sourceLanguageTag: "en",
+			languageTags: ["en", "de", "en-US"],
+			modules: [],
+			[pluginId]: {
+				filePath: "./messages.json",
+				pathPattern: "./i18n/{languageTag}.json",
+			} satisfies PluginSettings,
+		},
+		nodeishFs: fs,
+	})
 })
