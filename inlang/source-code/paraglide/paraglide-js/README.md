@@ -1,11 +1,23 @@
-<!-- ## ATTENTION: Paraglide is in pre-release mode. Discuss the API at https://github.com/inlang/monorepo/discussions/1464 -->
 ![Paraglide JS header image](https://raw.githubusercontent.com/inlang/monorepo/enhance-product-pages/inlang/source-code/paraglide/paraglide-js/assets/paraglide-js-header.png)
 
 # The best i18n library for the web
 
-Paraglide is a new i18n library, introducing innovations such as a compiler that emits message functions and these message functions being tree-shakable which results in auto-optimized bundles.
+Type in the following command into your terminal to get started immediately:
 
-**But before talking about the technical part, here's a quick-start for you:**
+```bash
+npx @inlang/paraglide-js@latest init
+```
+
+# Features
+
+<doc-features>
+  <doc-feature title="No unused translations" image="https://raw.githubusercontent.com/inlang/monorepo/enhance-product-pages/inlang/source-code/paraglide/paraglide-js/assets/unused-translations.png"></doc-feature>
+  <doc-feature title="Message functions" icon="cil:functions"></doc-feature>
+  <doc-feature title="Type safety" icon="teenyicons:typescript-outline"></doc-feature>
+</doc-features>
+
+
+<!-- Paraglide is a new i18n library, introducing innovations such as a compiler that emits message functions and these message functions being tree-shakable which results in auto-optimized bundles. -->
 
 # Getting started
 
@@ -247,9 +259,7 @@ render((page) =>
 )
 ```
 
-# Wall of Love
-
-We are grateful for all the support we receive from the community. &#10084;&#65039;
+# Community
 
 <doc-comments>
 <doc-comment text="The lib is great guys!" author="ktarmyshov" icon="mdi:github"></doc-comment>

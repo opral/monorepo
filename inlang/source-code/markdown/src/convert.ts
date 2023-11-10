@@ -35,6 +35,8 @@ export async function convert(markdown: string): Promise<string> {
 				"doc-comment",
 				"doc-comments",
 				"doc-proof",
+				"doc-feature",
+				"doc-features",
 				"inlang-badge-generator",
 				...defaultSchema.tagNames!,
 			],
@@ -43,6 +45,7 @@ export async function convert(markdown: string): Promise<string> {
 				"doc-link": ["href", "description", "title", "icon"],
 				"doc-comment": ["author", "text", "icon"],
 				"doc-proof": ["organisations"],
+				"doc-feature": ["name", "icon", "image", "color"],
 				...defaultSchema.attributes,
 			},
 		})
