@@ -7,29 +7,29 @@ import * as m from "../../paraglide/messages.js"
 // Make search input available to other components so it can get cleared
 export const [searchInput, setSearchInput] = createSignal<string>("")
 
+export const handleNavigate = () => {
+	if (!currentPageContext.routeParams.category) {
+		if (searchInput() !== "") window.history.pushState({}, "", "/search?q=" + searchInput())
+		// @ts-ignore
+		if (searchInput() === "") navigate("/search")
+		// @ts-ignore
+		else navigate("/search?q=" + searchInput())
+	} else {
+		if (searchInput() !== "")
+			window.history.pushState(
+				{},
+				"",
+				"/c/" + currentPageContext.routeParams.category + "?q=" + searchInput()
+			) // @ts-ignore
+		if (searchInput() === "") navigate("/c/" + currentPageContext.routeParams.category)
+		// @ts-ignore
+		else navigate("/c/" + currentPageContext.routeParams.category + "?q=" + searchInput())
+	}
+}
+
 export default function SearchBar() {
 	let inputElement: any
 	const { q } = currentPageContext.urlParsed.search
-
-	const handleNavigate = () => {
-		if (!currentPageContext.routeParams.category) {
-			if (searchInput() !== "") window.history.pushState({}, "", "/search?q=" + searchInput())
-			// @ts-ignore
-			if (searchInput() === "") navigate("/search")
-			// @ts-ignore
-			else navigate("/search?q=" + searchInput())
-		} else {
-			if (searchInput() !== "")
-				window.history.pushState(
-					{},
-					"",
-					"/c/" + currentPageContext.routeParams.category + "?q=" + searchInput()
-				) // @ts-ignore
-			if (searchInput() === "") navigate("/c/" + currentPageContext.routeParams.category)
-			// @ts-ignore
-			else navigate("/c/" + currentPageContext.routeParams.category + "?q=" + searchInput())
-		}
-	}
 
 	// Make "/" focus the search input like GitHub or Google do
 	if (typeof window !== "undefined")

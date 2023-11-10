@@ -62,7 +62,7 @@ router.all(
 			if (targetUrl.endsWith("/user/emails") && res.status === 401 && decryptedAccessToken) {
 				response.statusMessage = "token_invalid"
 				response.status(401)
-				response.send("Token invalid")
+				response.send("token_invalid")
 			} else if (res.headers.get("content-type")?.includes("json")) {
 				response
 					.status(res.status)

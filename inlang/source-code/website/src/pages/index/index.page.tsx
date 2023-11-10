@@ -1,5 +1,5 @@
 import { Meta, Title } from "@solidjs/meta"
-import Hero from "./custom_section/Hero.jsx"
+import HeroSearch from "./custom_section/HeroSearch.jsx"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import { Show } from "solid-js"
 import Lix from "./custom_section/Lix.jsx"
@@ -7,6 +7,7 @@ import Stack from "./custom_section/Stack.jsx"
 import Gridview from "#src/interface/marketplace/Gridview.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 import Guides from "./custom_section/Guides.jsx"
+import Features from "./custom_section/Features.jsx"
 
 export function Page() {
 	const search = currentPageContext.urlParsed.search["search"]
@@ -37,7 +38,8 @@ export function Page() {
 					when={search}
 					fallback={
 						<>
-							<Hero />
+							<HeroSearch />
+							<Features />
 							<Stack />
 							<Guides />
 							<Lix />
