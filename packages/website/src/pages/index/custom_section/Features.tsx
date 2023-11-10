@@ -1,4 +1,4 @@
-import { For, Show } from "solid-js"
+import { For } from "solid-js"
 import * as m from "#src/paraglide/messages.js"
 import Card from "#src/interface/components/Card.jsx"
 import { registry } from "@inlang/marketplace-registry"
@@ -30,9 +30,9 @@ const Features = () => {
 							return (
 								<div class="relative">
 									<Card item={manifest} displayName={displayName()} />
-									<Show when={getProducts().indexOf(guide) === 0}>
+									{/* <Show when={getProducts().indexOf(guide) === 0}>
 										<div class="blur-[128px] absolute inset-0 pointer-events-none animate-pulse bg-gradient-to-tr from-hover-danger to-hover-warning opacity-5" />
-									</Show>
+									</Show> */}
 								</div>
 							)
 						}}
