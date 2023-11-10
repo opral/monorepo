@@ -8,12 +8,12 @@ const CategoryTabs = () => {
 	const getCategories = () => {
 		return [
 			{
-				name: m.marketplace_header_category_application(),
-				href: "/c/application",
+				name: "Apps",
+				href: "/c/apps",
 			},
 			{
-				name: m.marketplace_header_category_markdown(),
-				href: "/c/markdown",
+				name: "Libraries",
+				href: "/c/libraries",
 			},
 			{
 				name: "Plugins",
@@ -23,15 +23,11 @@ const CategoryTabs = () => {
 				name: m.marketplace_header_category_lint(),
 				href: "/c/lint-rules",
 			},
-			{
-				name: m.marketplace_header_category_missing_something(),
-				href: "https://github.com/inlang/monorepo/discussions",
-			},
 		]
 	}
 	return (
-		<nav class="max-w-7xl mx-auto flex gap-4 overflow-x-scroll hide-scrollbar items-center">
-			{/* <p class="text-sm pr-4 font-medium text-surface-600">Ecosystem:</p> */}
+		<nav class="max-w-7xl mx-auto flex gap-2 overflow-x-scroll hide-scrollbar items-center">
+			<p class="text-sm pr-4 font-regular text-surface-500">Ecosystem:</p>
 			<For each={getCategories()}>
 				{(link) => (
 					<div

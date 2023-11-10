@@ -14,7 +14,7 @@
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/identicalPattern/README.md"
 	},
-	"keywords": ["message", "lint rule", "itentical pattern", "application", "website"],
+	"keywords": ["message", "lint rule", "itentical pattern", "website"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0",

@@ -14,7 +14,7 @@
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/missingTranslation/README.md"
 	},
-	"keywords": ["message", "lint rule", "missing", "application", "website"],
+	"keywords": ["message", "lint rule", "missing", "website"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0",
