@@ -117,8 +117,8 @@ export function Page(props: PageProps) {
 			<Meta name="twitter:creator" content="@inlanghq" />
 			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
-					<div class="md:py-20 py-16">
-						<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-32 md:gap-8 gap-6">
+					<div class="md:py-16 py-8">
+						<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-32">
 							<Show
 								when={props.markdown}
 								fallback={<p class="text-danger">{props.markdown?.error}</p>}
@@ -439,7 +439,7 @@ function NavbarCommon(props: {
 	})
 
 	return (
-		<div class="mb-12 sticky top-36 max-h-[96vh] overflow-y-scroll overflow-scrollbar">
+		<div class="mb-12 sticky top-36 mt-16 max-h-[96vh] overflow-y-scroll overflow-scrollbar">
 			<ul role="list" class="w-full space-y-3">
 				<For each={Object.keys(props.tableOfContents())}>
 					{(sectionTitle) => (

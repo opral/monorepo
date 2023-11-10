@@ -15,7 +15,7 @@
 		"en": "IDE Extension for inlang projects"
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/README.md"
+		"en": "./inlang/source-code/ide-extension/MARKETPLACE.md"
 	},
 	"keywords": ["apps", "website", "developer", "vscode", "ide", "extension", "lix"],
 	"publisherName": "inlang",
