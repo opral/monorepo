@@ -183,7 +183,7 @@ export const newProjectTemplate: ProjectSettings = {
 	"plugin.inlang.messageFormat": {
 		// using .inlang/paraglide-js as directory to avoid future conflicts when an official .inlang
 		// directory is introduced, see https://github.com/inlang/monorepo/discussions/1418
-		filePath: "./.inlang/plugin.inlang.messageFormat/messages.json",
+		pathPattern: "./messages/{languageTag}.json",
 	},
 }
 
