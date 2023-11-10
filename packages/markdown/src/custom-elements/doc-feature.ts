@@ -31,6 +31,8 @@ export class DocFeature extends LitElement {
 	image?: string = ""
 	@property()
 	color?: string = ""
+	@property()
+	"text-color"?: string = ""
 
 	override render() {
 		return html`<div
@@ -40,11 +42,13 @@ export class DocFeature extends LitElement {
 			${this.icon &&
 			html`<iconify-icon
 				height="64px"
-				style="margin-bottom: 24px;"
+				style="margin-bottom: 24px; color: ${this["text-color"] ? this["text-color"] : "#0f172a"}"
 				icon=${this.icon}
 			></iconify-icon>`}
 			${this.image && html`<img src=${this.image} height="128px" />`}
-			<p class="feature-name">${this.title}</p>
+			<p class="feature-name" style="${this["text-color"] ? `color: ${this["text-color"]}` : ""}">
+				${this.title}
+			</p>
 		</div>`
 	}
 }

@@ -44,7 +44,7 @@ export async function convert(markdown: string): Promise<string> {
 				"doc-figure": ["src", "alt", "caption"],
 				"doc-link": ["href", "description", "title", "icon"],
 				"doc-comment": ["author", "text", "icon"],
-				"doc-feature": ["name", "icon", "image", "color"],
+				"doc-feature": ["name", "icon", "image", "color", "text-color"],
 				"doc-proof": ["organisations"],
 				...defaultSchema.attributes,
 			},
@@ -69,7 +69,7 @@ export async function convert(markdown: string): Promise<string> {
 			ol: "doc-list-decimal doc-list-inside",
 			li: "doc-space-y-3",
 			table:
-				"doc-table-auto doc-w-full doc-my-6 doc-rounded-xl doc-text-left max-w-full overflow-x-scroll",
+				"doc-table-auto doc-w-full doc-my-6 doc-rounded-xl doc-text-left doc-max-w-[100%] doc-overflow-x-scroll",
 			thead: "doc-font-medium pb-2 doc-border-b border-surface-4 doc-text-left",
 			th: "doc-py-2 doc-font-medium doc-border-b border-surface-2",
 			tr: "doc-py-2 doc-border-b border-surface-2",

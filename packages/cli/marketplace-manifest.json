@@ -14,7 +14,7 @@
 		"en": "Command line interface for inlang projects. Many commands and the possibility to do automation."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/cli/README.md"
+		"en": "./inlang/source-code/cli/README.md"
 	},
 	"keywords": ["cli", "commands", "application", "website", "developer", "ai", "ci/cd", "lix"],
 	"publisherName": "inlang",
