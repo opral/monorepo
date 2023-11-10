@@ -188,14 +188,6 @@ export function Page(props: PageProps) {
 																		</Show>
 																	</Button>
 																</Show>
-																{/* @ts-ignore */}
-																<Show when={props.manifest.command}>
-																	<Switch>
-																		<Match when={typeof props.manifest.command === "string"}>
-																			<Copy copy={props.manifest.command} />
-																		</Match>
-																	</Switch>
-																</Show>
 															</>
 														</Match>
 													</Switch>
