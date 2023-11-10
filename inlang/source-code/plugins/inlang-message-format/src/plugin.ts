@@ -1,12 +1,17 @@
-import type { NodeishFilesystemSubset, Plugin } from "@inlang/sdk"
+import type { LanguageTag, Message, NodeishFilesystemSubset, Plugin } from "@inlang/sdk"
 import type { StorageSchema } from "./storageSchema.js"
 import { displayName, description } from "../marketplace-manifest.json"
 import { PluginSettings } from "./settings.js"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
+import { serializeMessage } from "./parsing/serializeMessage.js"
+import { parseMessage } from "./parsing/parseMessage.js"
 
 export const pluginId = "plugin.inlang.messageFormat"
 
-let stringifyWithFormatting: ReturnType<typeof detectJsonFormatting>
+/**
+ * Stringify functions of each resource file to keep the formatting.
+ */
+const stringifyWithFormatting: Record<string, ReturnType<typeof detectJsonFormatting>> = {}
 
 export const plugin: Plugin<{
 	[pluginId]: PluginSettings
@@ -16,60 +21,87 @@ export const plugin: Plugin<{
 	description,
 	settingsSchema: PluginSettings,
 	loadMessages: async ({ settings, nodeishFs }) => {
-		try {
-			const file = await nodeishFs.readFile(settings["plugin.inlang.messageFormat"].filePath, {
-				encoding: "utf-8",
-			})
-			stringifyWithFormatting = detectJsonFormatting(file)
-			return (JSON.parse(file) as StorageSchema)["data"]
-		} catch (error) {
-			// file does not exist. create it.
-			if ((error as any)?.code === "ENOENT") {
-				await createFile({ path: settings["plugin.inlang.messageFormat"].filePath, nodeishFs })
-				return []
+		await maybeMigrateToV2({ settings, nodeishFs })
+
+		const result: Record<string, Message> = {}
+
+		for (const tag of settings.languageTags) {
+			try {
+				const file = await nodeishFs.readFile(
+					settings["plugin.inlang.messageFormat"].pathPattern.replace("{languageTag}", tag),
+					{
+						encoding: "utf-8",
+					}
+				)
+				stringifyWithFormatting[tag] = detectJsonFormatting(file)
+				const json = JSON.parse(file)
+				for (const key in json) {
+					if (key === "$schema") {
+						continue
+					}
+					// message already exists, add the variants
+					else if (result[key]) {
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+						result[key]!.variants = [
+							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+							...result[key]!.variants,
+							...parseMessage({ key, value: json[key], languageTag: tag }).variants,
+						]
+					}
+					// message does not exist yet, create it
+					else {
+						result[key] = parseMessage({ key, value: json[key], languageTag: tag })
+					}
+				}
+			} catch {
+				// file does not exist. likely, no translations for the file exist yet.
 			}
-			// unknown error
-			throw error
 		}
+		return Object.values(result)
 	},
 	saveMessages: async ({ settings, nodeishFs, messages }) => {
-		return nodeishFs.writeFile(
-			settings["plugin.inlang.messageFormat"].filePath,
-			//! - assumes that all messages are always passed to the plugin
-			//  - sorts alphabetically to minimize git diff's and merge conflicts
-			stringifyWithFormatting({
-				$schema: "https://inlang.com/schema/inlang-message-format",
-				data: messages.sort((a, b) => a.id.localeCompare(b.id)),
-			} satisfies StorageSchema)
-		)
+		const result: Record<LanguageTag, Record<string, string>> = {}
+		for (const message of messages) {
+			const serialized = serializeMessage(message)
+			for (const [languageTag, value] of Object.entries(serialized)) {
+				if (result[languageTag] === undefined) {
+					result[languageTag] = {}
+				}
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				result[languageTag]![message.id] = value
+			}
+		}
+		for (const [languageTag, messages] of Object.entries(result)) {
+			const path = settings["plugin.inlang.messageFormat"].pathPattern.replace(
+				"{languageTag}",
+				languageTag
+			)
+			await createDirectoryIfNotExits({ path, nodeishFs })
+			await nodeishFs.writeFile(
+				settings["plugin.inlang.messageFormat"].pathPattern.replace("{languageTag}", languageTag),
+				(
+					stringifyWithFormatting[languageTag] ??
+					// default to tab indentation
+					// PS sorry for anyone who reads this code
+					((data: object) => JSON.stringify(data, undefined, "\t"))
+				)({
+					$schema: "https://inlang.com/schema/inlang-message-format",
+					...messages,
+				} satisfies StorageSchema)
+			)
+		}
 	},
 }
 
-const createFile = async (args: { path: string; nodeishFs: NodeishFilesystemSubset }) => {
-	let previousPath = ""
-	for (const path of dirname(args.path).split("/")) {
-		try {
-			// not using { recursive: true } because the option is flacky
-			// and is implemented differently in filesystem implementations
-			await args.nodeishFs.mkdir(previousPath + "/" + path)
-			previousPath += "/" + path
-		} catch {
-			// we assume that the directory already exists
-			continue
-		}
+const createDirectoryIfNotExits = async (args: {
+	path: string
+	nodeishFs: NodeishFilesystemSubset
+}) => {
+	try {
+		await args.nodeishFs.mkdir(dirname(args.path), { recursive: true })
+	} catch {
+		// assume that the directory already exists
 	}
-	await args.nodeishFs.writeFile(
-		args.path,
-		JSON.stringify(
-			{
-				$schema: "https://inlang.com/schema/inlang-message-format",
-				data: [],
-			} satisfies StorageSchema,
-			undefined,
-			// beautify the file
-			"\t"
-		)
-	)
 }
 
 /**
@@ -97,4 +129,29 @@ function dirname(path: string) {
 	if (end === -1) return hasRoot ? "/" : "."
 	if (hasRoot && end === 1) return "//"
 	return path.slice(0, end)
+}
+
+const maybeMigrateToV2 = async (args: { nodeishFs: NodeishFilesystemSubset; settings: any }) => {
+	if (args.settings["plugin.inlang.messageFormat"].filePath == undefined) {
+		return
+	}
+	try {
+		const file = await args.nodeishFs.readFile(
+			args.settings["plugin.inlang.messageFormat"].filePath,
+			{
+				encoding: "utf-8",
+			}
+		)
+		await plugin.saveMessages?.({
+			messages: JSON.parse(file)["data"],
+			nodeishFs: args.nodeishFs,
+			settings: args.settings,
+		})
+		// eslint-disable-next-line no-console
+		console.log(
+			"Migration to v2 of the inlang-message-format plugin was successful. Please delete the old messages.json file and the filePath property in the project.inlang.json file."
+		)
+	} catch {
+		// we assume that the file does not exist any more
+	}
 }
