@@ -6,6 +6,9 @@
 	"publishConfig": {
 		"access": "public"
 	},
+	"exports": {
+		"./vite": "./dist/vite-plugin/index.js"
+	},
 	"bin": {
 		"paraglide-js": "./bin/run.js"
 	},

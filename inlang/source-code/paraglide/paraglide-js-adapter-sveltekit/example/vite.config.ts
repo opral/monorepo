@@ -1,13 +1,13 @@
 import { sveltekit } from '@sveltejs/kit/vite';
-import { paraglideJsVitePlugin } from "@inlang/paraglide-js"
+import { i18n } from "@inlang/paraglide-js/vite"
 import { defineConfig } from "vite"
 
 export default defineConfig({
 	plugins: [
 		sveltekit(),
-		paraglideJsVitePlugin({
-			namespace: "sveltekit",
-			settingsPath: "./project.inlang.json",
+		i18n({
+			outdir: "./src/paraglide",
+			project: "./project.inlang.json",
 		}),
 	],
 	// for easier debugging, don't minify

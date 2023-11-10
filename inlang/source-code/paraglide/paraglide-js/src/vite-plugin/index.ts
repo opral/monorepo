@@ -3,12 +3,13 @@ import { exec } from "node:child_process"
 import { readFile } from "node:fs/promises"
 import { loadProject, type ProjectSettings } from "@inlang/sdk"
 import { createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
+import path from "node:path"
 
 let cachedSettings: ProjectSettings | undefined = undefined
 
-export const paraglideJsVitePlugin = (config: {
-	settingsPath: string
-	namespace: string
+export const i18n = (config: {
+	project: string
+	outdir: string
 	timeout?: number
 	onInit?: boolean
 }): PluginOption => {
@@ -20,7 +21,7 @@ export const paraglideJsVitePlugin = (config: {
 
 	const execute = () => {
 		exec(
-			`paraglide-js compile --namespace ${options.namespace} --project ${options.settingsPath}`,
+			`paraglide-js compile --project ${options.project} --outdir ${options.outdir}`,
 			(exception, output, error) => {
 				// eslint-disable-next-line no-console
 				if (!options.silent && output) console.log(output)
@@ -34,7 +35,7 @@ export const paraglideJsVitePlugin = (config: {
 
 		async buildStart() {
 			if (!cachedSettings) {
-				const settingsContent = await readFile(options.settingsPath, "utf-8")
+				const settingsContent = await readFile(options.project, "utf-8")
 				cachedSettings = JSON.parse(settingsContent)
 			}
 
@@ -43,11 +44,13 @@ export const paraglideJsVitePlugin = (config: {
 			}
 
 			const inlang = await loadProject({
-				settingsFilePath: options.settingsPath,
+				settingsFilePath: path.resolve(process.cwd(), options.project),
 				nodeishFs: createNodeishMemoryFs(),
 			})
 
 			inlang.query.messages.getAll.subscribe((messages) => {
+				console.log("messages", messages)
+
 				if (messages.length > 0) {
 					execute()
 				}
