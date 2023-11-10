@@ -4,10 +4,11 @@ import { customElement, property } from "lit/decorators.js"
 @customElement("doc-icon")
 export class DocIcon extends LitElement {
 	static override styles = css`
-        :host {
-            display: inline-flex;
-            height: auto;
-    `
+		:host {
+			display: inline-flex;
+			height: auto;
+		}
+	`
 	@property()
 	icon: string = ""
 	@property()
