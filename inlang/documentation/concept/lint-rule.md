@@ -2,7 +2,7 @@
 
 Lint rules validate messages and other types of content in an inlang project.
 
-For example, the [missing translation lint rule](/m/messageLintRule.inlang.missingTranslation) reports an issue if a message is missing a translation for a specified [language tag](/documentation/concepts/language-tag). Inlang applications use lint rules to validate content and report issues to the user.
+For example, the [missing translation lint rule](/m/messageLintRule.inlang.missingTranslation) reports an issue if a message is missing a translation for a specified [language tag](/documentation/language-tag). Inlang applications use lint rules to validate content and report issues to the user.
 
 ## Types of lint rules
 
@@ -20,4 +20,4 @@ We will support more types of lint rules in the future. If you have an idea for 
 
 ## Develop your own lint rule
 
-Learn how to build custom lint rules in the [develop an inlang lint rule](/documentation/guides/develop-lint-rule) guide.
+Learn how to build custom lint rules in the [develop an inlang lint rule](/documentation/develop-lint-rule) guide.

@@ -3,17 +3,16 @@ import compression from "compression"
 import { validateEnvVariables, privateEnv } from "@inlang/env-variables"
 import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
-import { isProduction } from "./env.js"
-import { router as websiteRouter } from "@inlang/website/router"
 import { router as telemetryRouter } from "@inlang/telemetry/router"
 import { router as rpcRouter } from "@inlang/rpc/router"
-import { router as badgeRouter } from "@inlang/badge/router"
 import { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { ProjectSettings } from "@inlang/project-settings"
 import { StorageSchema } from "@inlang/plugin-message-format/storage-schema"
+import { createProxyMiddleware } from "http-proxy-middleware"
 
 // --------------- SETUP -----------------
 
+export const isProduction = process.env.NODE_ENV === "production"
 const { error: errors } = validateEnvVariables({ forProduction: isProduction })
 
 if (errors) {
@@ -75,10 +74,42 @@ app.use(telemetryRouter)
 
 app.use(rpcRouter)
 
-app.use(badgeRouter)
+const badgeAddress = isProduction ? "http://badge-service:10000" : "http://[::1]:4003"
+
+app.use(
+	"/badge",
+	createProxyMiddleware({
+		target: badgeAddress,
+		changeOrigin: true,
+		headers: {
+			Connection: "keep-alive",
+		},
+	})
+)
+
+app.use(
+	"/editor",
+	createProxyMiddleware({
+		target: "http://[::1]:4001",
+		changeOrigin: true,
+		headers: {
+			Connection: "keep-alive",
+		},
+	})
+)
+
+app.use(
+	"*",
+	createProxyMiddleware({
+		target: "http://[::1]:4002",
+		changeOrigin: true,
+		headers: {
+			Connection: "keep-alive",
+		},
+	})
+)
 
 // ! website comes last in the routes because it uses the wildcard `*` to catch all routes
-app.use(websiteRouter)
 
 // ----------------- START SERVER -----------------
 

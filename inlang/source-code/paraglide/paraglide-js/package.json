@@ -1,15 +1,10 @@
 {
 	"name": "@inlang/paraglide-js",
 	"type": "module",
-	"version": "1.0.0-prerelease.5",
+	"version": "1.0.0-prerelease.8",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"
-	},
-	"exports": {
-		"./*/messages": "./dist/compiled-output/*/messages.js",
-		"./*": "./dist/compiled-output/*/runtime.js",
-		".": "./dist/index.js"
 	},
 	"bin": {
 		"paraglide-js": "./bin/run.js"
@@ -32,8 +27,7 @@
 		"commander": "11.1.0",
 		"consola": "3.2.3",
 		"dedent": "1.5.1",
-		"json5": "2.2.3",
-		"typescript": "5.2.2"
+		"json5": "2.2.3"
 	},
 	"devDependencies": {
 		"@rollup/plugin-terser": "0.4.3",
@@ -42,6 +36,7 @@
 		"@types/minimist": "1.2.3",
 		"@types/node": "20.8.10",
 		"@vitest/coverage-v8": "0.34.3",
+		"typescript": "5.2.2",
 		"memfs": "4.6.0",
 		"rollup": "3.29.1",
 		"vite": "4.5.0",

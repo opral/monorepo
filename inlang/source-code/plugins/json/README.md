@@ -50,6 +50,7 @@ Here is the syntax for the PluginSettings object in TypeScript:
 type PluginSettings = {
 	pathPattern: string | { [key: string]: string }
 	variableReferencePattern?: [string] | [string, string]
+	ignore?: string[]
 }
 ```
 
@@ -95,7 +96,13 @@ default:
 | `[placeholder]`   | `["[", "]"]`   |
 | `:placeholder`    | `[":"]`        |
 
-<br>
+## `ignore`
+
+An array of strings that are used to ignore certain files. The strings are matched against the file path. If the file path contains the string, the file is ignored.
+
+```json
+"ignore": ["node_modules", "dist"]
+```
 
 # Expected behavior
 
@@ -110,7 +117,7 @@ Run the following commands in your terminal (node and npm must be installed):
 1. `npm install`
 2. `npm run dev`
 
-`npm run dev` will start the development environment which automatically compiles the [src/index.ts](./src/index.ts) files to JavaScript ([dist/index.js](dist/index.js)), runs tests defined in `*.test.ts` files and watches changes.
+`npm run dev` will start the development environment which automatically compiles the [src/index.ts](#getting-started) files to JavaScript ([dist/index.js](#getting-started)), runs tests defined in `*.test.ts` files and watches changes.
 
 ## Publishing
 

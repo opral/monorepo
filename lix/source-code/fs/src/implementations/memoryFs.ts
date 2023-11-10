@@ -1,4 +1,4 @@
-import type { NodeishFilesystem, NodeishStats } from "../NodeishFilesystemApi.js"
+import type { NodeishFilesystem, NodeishStats, FileChangeInfo } from "../NodeishFilesystemApi.js"
 import { FilesystemError } from "../errors/FilesystemError.js"
 
 type Inode = Uint8Array | Set<string>
@@ -11,6 +11,8 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 	// initialize the root to an empty dir
 	fsMap.set("/", new Set())
 	newStatEntry("/", fsStats, 1, 0o755)
+
+	const listeners: Set<(event: FileChangeInfo) => void> = new Set()
 
 	async function stat(path: Parameters<NodeishFilesystem["stat"]>[0]): Promise<NodeishStats> {
 		path = normalPath(path)
@@ -37,7 +39,9 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			const encoder = new TextEncoder()
 
 			path = normalPath(path)
-			const parentDir: Inode | undefined = fsMap.get(getDirname(path))
+			const dirName = getDirname(path)
+			const baseName = getBasename(path)
+			const parentDir: Inode | undefined = fsMap.get(dirName)
 
 			if (!(parentDir instanceof Set)) throw new FilesystemError("ENOENT", path, "writeFile")
 
@@ -45,9 +49,12 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 				data = encoder.encode(data)
 			}
 
-			parentDir.add(getBasename(path))
+			parentDir.add(baseName)
 			newStatEntry(path, fsStats, 0, options?.mode ?? 0o644)
 			fsMap.set(path, data)
+			for (const listener of listeners) {
+				listener({ eventType: "rename", filename: dirName + baseName })
+			}
 		},
 
 		// @ts-expect-error
@@ -82,14 +89,19 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			options: Parameters<NodeishFilesystem["mkdir"]>[1]
 		): Promise<string | undefined> {
 			path = normalPath(path)
-			const parentDir: Inode | undefined = fsMap.get(getDirname(path))
+			const dirName = getDirname(path)
+			const baseName = getBasename(path)
+			const parentDir: Inode | undefined = fsMap.get(dirName)
 
 			if (typeof parentDir === "string") throw new FilesystemError("ENOTDIR", path, "mkdir")
 
 			if (parentDir && parentDir instanceof Set) {
-				parentDir.add(getBasename(path))
+				parentDir.add(baseName)
 				newStatEntry(path, fsStats, 1, 0o755)
 				fsMap.set(path, new Set())
+				for (const listener of listeners) {
+					listener({ eventType: "rename", filename: dirName + baseName })
+				}
 				return path
 			}
 
@@ -107,8 +119,10 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			options: Parameters<NodeishFilesystem["rm"]>[1]
 		) {
 			path = normalPath(path)
+			const dirName = getDirname(path)
+			const baseName = getBasename(path)
 			const target: Inode | undefined = fsMap.get(path)
-			const parentDir: Inode | undefined = fsMap.get(getDirname(path))
+			const parentDir: Inode | undefined = fsMap.get(dirName)
 
 			if (parentDir === undefined || target === undefined)
 				throw new FilesystemError("ENOENT", path, "rm")
@@ -116,9 +130,13 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			if (parentDir instanceof Uint8Array) throw new FilesystemError("ENOTDIR", path, "rm")
 
 			if (target instanceof Uint8Array) {
-				parentDir.delete(getBasename(path))
+				parentDir.delete(baseName)
 				fsStats.delete(path)
 				fsMap.delete(path)
+				for (const listener of listeners) {
+					listener({ eventType: "rename", filename: dirName + baseName })
+				}
+
 				return
 			}
 
@@ -128,19 +146,103 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 						await rm(`${path}/${child}`, { recursive: true })
 					})
 				)
-				parentDir.delete(getBasename(path))
+				parentDir.delete(baseName)
 				fsStats.delete(path)
 				fsMap.delete(path)
+				for (const listener of listeners) {
+					listener({ eventType: "rename", filename: dirName + baseName })
+				}
+
 				return
 			}
 
 			throw new FilesystemError("EISDIR", path, "rm")
 		},
 
+		watch: function (
+			path: Parameters<NodeishFilesystem["watch"]>[0],
+			options: Parameters<NodeishFilesystem["watch"]>[1]
+		) {
+			path = normalPath(path)
+			const watchName = getBasename(path)
+			const watchDir = getDirname(path)
+			const watchPath = watchDir + watchName
+
+			// @ts-ignore
+			if (options?.persistent || options?.encoding) {
+				throw new Error("Some watch opptions not implemented, only 'recursive' allowed")
+			}
+
+			const queue: FileChangeInfo[] = []
+
+			let handleNext: (arg: any) => void
+			let rejecteNext: (err: Error) => void
+			let changeEvent: Promise<Error | undefined> = new Promise((resolve, reject) => {
+				handleNext = resolve
+				rejecteNext = reject
+			})
+
+			const listener = (event: FileChangeInfo) => {
+				if (event.filename === null) {
+					throw new Error("Internal watcher error: missing filename")
+				}
+				const changeName = getBasename(event.filename)
+				const changeDir = getDirname(event.filename)
+
+				if (event.filename === watchPath) {
+					event.filename = changeName
+					queue.push(event)
+					setTimeout(() => handleNext(undefined), 0)
+				} else if (changeDir === watchPath + "/") {
+					event.filename = event.filename.replace(watchPath + "/", "") || changeName
+					queue.push(event)
+					setTimeout(() => handleNext(undefined), 0)
+				} else if (options?.recursive && event.filename.startsWith(watchPath)) {
+					// console.log(event.filename, { watchPath, changeDir, changeName })
+					event.filename = event.filename.replace(watchPath + "/", "") || changeName
+					queue.push(event)
+					setTimeout(() => handleNext(undefined), 0)
+				}
+			}
+
+			listeners.add(listener)
+
+			if (options?.signal) {
+				options.signal.addEventListener(
+					"abort",
+					() => {
+						listeners.delete(listener)
+						try {
+							options.signal?.throwIfAborted()
+						} catch (err) {
+							rejecteNext(err as Error)
+						}
+					},
+					{ once: true }
+				)
+			}
+
+			return (async function* () {
+				while (!options?.signal?.aborted) {
+					if (queue.length > 0) {
+						yield queue.shift() as FileChangeInfo
+					} else {
+						await changeEvent
+						changeEvent = new Promise((resolve, reject) => {
+							handleNext = resolve
+							rejecteNext = reject
+						})
+					}
+				}
+			})()
+		},
+
 		rmdir: async function (path: Parameters<NodeishFilesystem["rmdir"]>[0]) {
 			path = normalPath(path)
+			const dirName = getDirname(path)
+			const baseName = getBasename(path)
 			const target: Inode | undefined = fsMap.get(path)
-			const parentDir: Inode | undefined = fsMap.get(getDirname(path))
+			const parentDir: Inode | undefined = fsMap.get(dirName)
 
 			if (parentDir === undefined || target === undefined)
 				throw new FilesystemError("ENOENT", path, "rmdir")
@@ -150,9 +252,13 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 			if (target.size) throw new FilesystemError("ENOTEMPTY", path, "rmdir")
 
-			parentDir.delete(getBasename(path))
+			parentDir.delete(baseName)
 			fsStats.delete(path)
 			fsMap.delete(path)
+
+			for (const listener of listeners) {
+				listener({ eventType: "rename", filename: dirName + baseName })
+			}
 		},
 
 		symlink: async function (
@@ -264,6 +370,7 @@ function getBasename(path: string): string {
 /**
  * Removes extraneous dots and slashes, resolves relative paths and ensures the
  * path begins and ends with '/'
+ * FIXME: unify with utilities/normalizePath!
  */
 function normalPath(path: string): string {
 	const dots = /(\/|^)(\.\/)+/g

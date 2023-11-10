@@ -12,6 +12,7 @@
 	},
 	"dependencies": {
 		"@inlang/badge": "*",
+		"@inlang/editor": "*",
 		"@inlang/env-variables": "*",
 		"@inlang/marketplace-manifest": "*",
 		"@inlang/plugin-message-format": "*",
@@ -23,6 +24,7 @@
 		"@sentry/tracing": "^7.47.0",
 		"compression": "^1.7.4",
 		"express": "^4.18.2",
+		"http-proxy-middleware": "2.0.6",
 		"tsx": "3.12.7"
 	},
 	"devDependencies": {

@@ -1,5 +1,16 @@
 # @inlang/sdk
 
+## 0.17.0
+
+### Minor Changes
+
+- cafff8748: adjust tests and fix erros message
+
+### Patch Changes
+
+- Updated dependencies [39beea7dd]
+  - @inlang/plugin@2.4.0
+
 ## 0.16.0
 
 ### Minor Changes

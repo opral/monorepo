@@ -11,7 +11,7 @@ import {
 	convertLinkToGithub,
 	typeOfIdToTitle,
 } from "#src/interface/marketplace/helper/utilities.js"
-import { languageTag } from "@inlang/paraglide-js/website"
+import { languageTag } from "#src/paraglide/runtime.js"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
@@ -19,6 +19,7 @@ import { currentPageContext } from "#src/renderer/state.js"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
 import OnClient from "#src/interface/components/OnClient.jsx"
+import Card from "#src/interface/components/Card.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -26,6 +27,7 @@ import OnClient from "#src/interface/components/OnClient.jsx"
 export type PageProps = {
 	markdown: Awaited<ReturnType<any>>
 	manifest: MarketplaceManifest & { uniqueID: string }
+	recommends?: MarketplaceManifest[]
 }
 
 export function Page(props: PageProps) {
@@ -223,7 +225,7 @@ export function Page(props: PageProps) {
 										<div class="flex flex-col gap-4 items-col flex-shrink-0">
 											<Show
 												when={props.manifest.keywords
-													.map((keyword) => keyword.toLowerCase())
+													.map((keyword: string) => keyword.toLowerCase())
 													.includes("lix")}
 											>
 												<div>
@@ -304,12 +306,49 @@ export function Page(props: PageProps) {
 								</Show>
 							</Show>
 						</div>
+						<Show when={props.recommends}>
+							<Recommends recommends={props.recommends!} />
+						</Show>
 						<div class="mt-20">
 							<GetHelp text="Do you have questions?" />
 						</div>
 					</div>
 				</Show>
 			</MarketplaceLayout>
+		</>
+	)
+}
+
+function Recommends(props: { recommends: MarketplaceManifest[] }) {
+	const [show, setShow] = createSignal<boolean>(false)
+
+	onMount(() => {
+		setShow(true)
+	})
+
+	return (
+		<>
+			<h3 class="font-semibold mb-4">Recommended to use with:</h3>
+			<div class="flex items-center gap-4 md:flex-row flex-col">
+				<Show
+					when={show()}
+					fallback={
+						<div class="h-auto w-full col-span-4 flex items-center justify-center py-16 relative">
+							<div class="mx-auto">
+								<div class="h-12 w-12 animate-spin mb-4">
+									<div class="h-full w-full bg-surface-50 border-primary border-4 rounded-full" />
+									<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-surface-50" />
+								</div>
+							</div>
+						</div>
+					}
+				>
+					<For each={props.recommends}>
+						{/* @ts-ignore */}
+						{(item) => <Card item={item} displayName={item.displayName.en} />}
+					</For>
+				</Show>
+			</div>
 		</>
 	)
 }

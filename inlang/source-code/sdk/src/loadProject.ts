@@ -25,6 +25,7 @@ import { migrateIfOutdated } from "@inlang/project-settings/migration"
 import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
 import { normalizePath } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
+import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -126,6 +127,7 @@ export const loadProject = async (args: {
 		createEffect(() => (settingsValue = settings()!)) // workaround to not run effects twice (e.g. settings change + modules change) (I'm sure there exists a solid way of doing this, but I haven't found it yet)
 
 		const [messages, setMessages] = createSignal<Message[]>()
+
 		createEffect(() => {
 			const conf = settings()
 			if (!conf) return
@@ -138,16 +140,28 @@ export const loadProject = async (args: {
 				return
 			}
 
-			makeTrulyAsync(
-				_resolvedModules.resolvedPluginApi.loadMessages({
-					settings: settingsValue,
-				})
-			)
-				.then((messages) => {
-					setMessages(messages)
-					markInitAsComplete()
-				})
-				.catch((err) => markInitAsFailed(new PluginLoadMessagesError({ cause: err })))
+			const loadAndSetMessages = async (fs: NodeishFilesystemSubset) => {
+				makeTrulyAsync(
+					_resolvedModules.resolvedPluginApi.loadMessages({
+						settings: settingsValue,
+						nodeishFs: fs,
+					})
+				)
+					.then((messages) => {
+						setMessages(messages)
+						markInitAsComplete()
+					})
+					.catch((err) => markInitAsFailed(new PluginLoadMessagesError({ cause: err })))
+			}
+
+			const fsWithWatcher = createNodeishFsWithWatcher({
+				nodeishFs: nodeishFs,
+				updateMessages: () => {
+					loadAndSetMessages(nodeishFs)
+				},
+			})
+
+			loadAndSetMessages(fsWithWatcher)
 		})
 
 		// -- installed items ----------------------------------------------------
@@ -198,21 +212,23 @@ export const loadProject = async (args: {
 				500,
 				async (newMessages) => {
 					try {
-						await resolvedModules()?.resolvedPluginApi.saveMessages({
-							settings: settingsValue,
-							messages: newMessages,
-						})
+						if (JSON.stringify(newMessages) !== JSON.stringify(messages())) {
+							await resolvedModules()?.resolvedPluginApi.saveMessages({
+								settings: settingsValue,
+								messages: newMessages,
+							})
+						}
 					} catch (err) {
 						throw new PluginSaveMessagesError({
 							cause: err,
 						})
 					}
-					if (
-						newMessages.length !== 0 &&
-						JSON.stringify(newMessages) !== JSON.stringify(messages())
-					) {
-						setMessages(newMessages)
-					}
+					// if (
+					// 	newMessages.length !== 0 &&
+					// 	JSON.stringify(newMessages) !== JSON.stringify(messages())
+					// ) {
+					// 	setMessages(newMessages)
+					// }
 				},
 				{ atBegin: false }
 			)

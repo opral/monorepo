@@ -7,7 +7,7 @@ import Card, { CardBuildOwn, NoResultsCard } from "#src/interface/components/Car
 import { Meta, Title } from "@solidjs/meta"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import SubcategoryPills from "#src/interface/marketplace/SubcategoryPills.jsx"
-import * as m from "@inlang/paraglide-js/website/messages"
+import * as m from "#src/paraglide/messages.js"
 import {
 	IconFlutter,
 	IconJavascript,
@@ -23,7 +23,7 @@ import GenericHeader from "#src/interface/marketplace/categoryHeaders/applicatio
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
-export type Category = "application" | "markdown" | "email" | "website"
+export type Category = "application" | "markdown" | "email"
 export type SubCategory = SubCategoryApplication
 
 /* Export searchValue to make subpages insert search-terms */

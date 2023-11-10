@@ -4,22 +4,28 @@
  *
  * Multiple things come together here:
  *  - express.js that powers the server https://expressjs.com/
- *  - vite-plugin-ssr that powers routing and rendering https://vite-plugin-ssr.com/
+ *  - vike that powers routing and rendering https://vike.dev/
  *
  * !Note: This file has not hot module reload. If you change code, you need to restart the server
  * !      by re-running `npm run dev`.
  * ------------------------------------
  */
 
-import express, { Router } from "express"
+import express, { Router, type NextFunction, type Request, type Response } from "express"
 import { createServer as createViteServer } from "vite"
 import { URL } from "node:url"
 import sirv from "sirv"
-import { router as vitePluginSsr } from "./vite-plugin-ssr.js"
-import { redirects } from "./redirects.js"
+import { renderPage } from "vike/server"
 
 /** the root path of the server (website/) */
 const rootPath = new URL("../..", import.meta.url).pathname
+
+/**
+ * This middelware aims to redirect old Urls to new ones.
+ * You can use it by adding the old and the new url in the
+ * Object as key and value.
+ */
+const redirectMap: { [key: string]: string } = {}
 
 export const router: Router = express.Router()
 
@@ -40,8 +46,37 @@ if (process.env.NODE_ENV === "production") {
 
 // ------------------------ START ROUTES ------------------------
 
-router.use(redirects)
+router.use((request: Request, response: Response, next: NextFunction) => {
+	try {
+		//redirect
+		if (Object.keys(redirectMap).includes(request.url)) {
+			const redirectUrl: string = redirectMap[request.url]
+				? redirectMap[request.url]!
+				: request.url!
+			response.redirect(redirectUrl)
+		}
+		next()
+	} catch (error) {
+		next(error)
+	}
+})
 
-// ! vite plugin ssr must came last
-// ! because it uses the wildcard `*` to catch all routes
-router.use(vitePluginSsr)
+// serving #src/pages and /public
+//! it is extremely important that a request handler is not async to catch errors
+//! express does not catch async errors. hence, renderPage uses the callback pattern
+router.get("*", (request, response, next) => {
+	renderPage({
+		urlOriginal: request.originalUrl,
+	})
+		.then((pageContext) => {
+			if (pageContext.httpResponse === null) {
+				next()
+			} else {
+				const { body, headers, statusCode } = pageContext.httpResponse
+				for (const [name, value] of headers) response.setHeader(name, value)
+				response.status(statusCode).send(body)
+			}
+		})
+		// pass the error to expresses error handling
+		.catch(next)
+})

@@ -92,7 +92,12 @@ export async function getUser() {
 		},
 	})
 	if (email.ok === false) {
-		throw Error(email.statusText)
+		const maybeTokenInvalid = await email.text()
+		if (maybeTokenInvalid === "token_invalid") {
+			throw Error("token_invalid")
+		} else {
+			throw Error(email.statusText)
+		}
 	}
 	const emailBody = await email.json()
 

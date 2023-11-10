@@ -1,7 +1,7 @@
 import { For } from "solid-js"
 import { currentPageContext } from "#src/renderer/state.js"
 import Link from "#src/renderer/Link.jsx"
-import * as m from "@inlang/paraglide-js/website/messages"
+import * as m from "#src/paraglide/messages.js"
 import { setSearchInput } from "../components/SearchBar.jsx"
 
 const CategoryTabs = () => {
@@ -12,12 +12,12 @@ const CategoryTabs = () => {
 				href: "/c/application",
 			},
 			{
-				name: m.marketplace_header_category_website(),
-				href: "/c/website",
-			},
-			{
 				name: m.marketplace_header_category_markdown(),
 				href: "/c/markdown",
+			},
+			{
+				name: "Plugins",
+				href: "/c/plugins",
 			},
 			{
 				name: m.marketplace_header_category_lint(),
@@ -30,7 +30,8 @@ const CategoryTabs = () => {
 		]
 	}
 	return (
-		<nav class="max-w-7xl mx-auto flex gap-4 overflow-x-scroll hide-scrollbar">
+		<nav class="max-w-7xl mx-auto flex gap-4 overflow-x-scroll hide-scrollbar items-center">
+			{/* <p class="text-sm pr-4 font-medium text-surface-600">Ecosystem:</p> */}
 			<For each={getCategories()}>
 				{(link) => (
 					<div

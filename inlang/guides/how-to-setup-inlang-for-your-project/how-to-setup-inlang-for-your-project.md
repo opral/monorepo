@@ -20,6 +20,8 @@ You need the right plugin to read and write messages from and to your project de
 - the **file format** of your translation files
 - the **message format** of your messages
 
+Read more about the benefits of using plugins. -> [Guide](/g/00162hsd/guide-nilsjacobsen-whatArePlugins)
+
 ## Recommended: Use inlang paraglide
 
 We recommend to use inlang paraglide to globalize your project. It will soon create the project file and the plugin for you automatically as well. Follow the steps in the [paraglideJS](/m/gerre34r/library-inlang-paraglideJs) to get started.
