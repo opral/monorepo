@@ -5,6 +5,6 @@
 	"modules": ["https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js"],
 	"plugin.inlang.messageFormat": {
-		"filePath": "./src/messages.json"
+		"pathPattern": "./messages/{languageTag}.json"
 	}
 }

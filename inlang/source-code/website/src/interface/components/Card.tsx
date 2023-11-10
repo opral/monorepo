@@ -25,7 +25,7 @@ export default function Card(props: { item: any; displayName: string }) {
 						: `/m/${props.item.uniqueID}/${props.item.id.replaceAll(".", "-")}`
 				}
 				class={
-					"relative no-underline flex gap-4 flex-col justify-between group w-full bg-background transition-all border border-surface-200 rounded-xl h-48 hover:shadow-lg hover:shadow-surface-100 hover:border-surface-300 active:border-surface-400 " +
+					"relative no-underline z-10 flex gap-4 flex-col justify-between group w-full bg-background transition-all border border-surface-200 rounded-xl h-48 hover:shadow-lg hover:shadow-surface-100 hover:border-surface-300 active:border-surface-400 " +
 					(showCover ? "" : "p-5")
 				}
 			>

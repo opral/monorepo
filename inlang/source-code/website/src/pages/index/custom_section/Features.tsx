@@ -27,7 +27,14 @@ const Features = () => {
 								typeof manifest.displayName === "object"
 									? manifest.displayName.en
 									: manifest.displayName
-							return <Card item={manifest} displayName={displayName()} />
+							return (
+								<div class="relative">
+									<Card item={manifest} displayName={displayName()} />
+									{/* <Show when={getProducts().indexOf(guide) === 0}>
+										<div class="blur-[128px] absolute inset-0 pointer-events-none animate-pulse bg-gradient-to-tr from-hover-danger to-hover-warning opacity-5" />
+									</Show> */}
+								</div>
+							)
 						}}
 					</For>
 				</div>

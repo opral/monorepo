@@ -1,5 +1,9 @@
 # @inlang/paraglide-js
 
+##  1.0.0-prerelease.9
+
+The `paraglide-js init` command now uses the [inlang message format](https://inlang.com/m/reootnfj) 2.0 which is human readable. 
+
 ##  1.0.0-prerelease.8
 
 IMPROVE: Paraglide now splits messages into different resource files as a step towards splitting messages by language via a bundler plugin. 

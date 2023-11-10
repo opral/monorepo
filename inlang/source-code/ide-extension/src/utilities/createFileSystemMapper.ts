@@ -1,4 +1,4 @@
-import type { NodeishFilesystem } from "@lix-js/fs"
+import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
 import fs from "node:fs/promises"
 import { default as _path } from "node:path"
 
@@ -9,6 +9,8 @@ import { default as _path } from "node:path"
  * @returns file system mapper
  */
 export function createFileSystemMapper(base: string): NodeishFilesystem {
+	// Prevent path issue on non Unix based system normalizing the <base> before using it
+	const normalizedBase = normalizePath(base)
 	return {
 		// @ts-expect-error
 		readFile: async (
@@ -16,7 +18,7 @@ export function createFileSystemMapper(base: string): NodeishFilesystem {
 			options: Parameters<NodeishFilesystem["readFile"]>[1]
 		): Promise<string> => {
 			const fileData = await fs.readFile(
-				path.startsWith(base) ? _path.normalize(path) : _path.normalize(base + "/" + path),
+				path.startsWith(normalizedBase) ? _path.normalize(path) : _path.normalize(normalizedBase + "/" + path),
 				options
 			)
 			if (typeof fileData === "string") {
@@ -30,33 +32,24 @@ export function createFileSystemMapper(base: string): NodeishFilesystem {
 			data: Parameters<NodeishFilesystem["writeFile"]>[1]
 		) => {
 			await fs.writeFile(
-				path.startsWith(base) ? _path.normalize(path) : _path.normalize(base + "/" + path),
+				path.startsWith(normalizedBase) ? _path.normalize(path) : _path.normalize(normalizedBase + "/" + path),
 				data
 			)
 		},
 		mkdir: async (path: Parameters<NodeishFilesystem["mkdir"]>[0]) => {
 			await fs.mkdir(
-				path.startsWith(base) ? _path.normalize(path) : _path.normalize(base + "/" + path)
+				path.startsWith(normalizedBase) ? _path.normalize(path) : _path.normalize(normalizedBase + "/" + path)
 			)
 			return path
 		},
 		readdir: async (path: Parameters<NodeishFilesystem["readdir"]>[0]) => {
 			return fs.readdir(
-				path.startsWith(base) ? _path.normalize(path) : _path.normalize(base + "/" + path)
+				path.startsWith(normalizedBase) ? _path.normalize(path) : _path.normalize(normalizedBase + "/" + path)
 			)
 		},
 		stat: async (path: Parameters<NodeishFilesystem["stat"]>[0]) => {
 			return fs.stat(
-				path.startsWith(base) ? _path.normalize(path) : _path.normalize(base + "/" + path)
-			)
-		},
-		watch: (
-			path: Parameters<NodeishFilesystem["watch"]>[0],
-			options: Parameters<NodeishFilesystem["watch"]>[1]
-		) => {
-			return fs.watch(
-				path.startsWith(base) ? _path.normalize(path) : _path.normalize(base + "/" + path),
-				options
+				path.startsWith(normalizedBase) ? _path.normalize(path) : _path.normalize(normalizedBase + "/" + path)
 			)
 		},
 	}

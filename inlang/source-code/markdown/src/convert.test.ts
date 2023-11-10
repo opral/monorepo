@@ -50,3 +50,11 @@ test("should be able to provide a badge generator", async () => {
 	const html = await convert(markdown)
 	expect(html).toContain("<inlang-badge-generator></inlang-badge-generator>")
 })
+
+test("should be able to display a comment", async () => {
+	const markdown = `
+<doc-comment text="Test comment." name="John Doe"></doc-comment>
+	`
+	const html = await convert(markdown)
+	expect(html).toContain("<doc-comment")
+})
