@@ -19,7 +19,7 @@ import type { ExternalProjectSettings, ProjectSettings } from "@inlang/project-s
  */
 export type NodeishFilesystemSubset = Pick<
 	NodeishFilesystem,
-	"readFile" | "readdir" | "mkdir" | "writeFile"
+	"readFile" | "readdir" | "mkdir" | "writeFile" | "watch"
 >
 
 // ---------------------------- RUNTIME VALIDATION TYPES ---------------------------------------------

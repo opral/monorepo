@@ -28,6 +28,7 @@ it("intercepts paths correctly for readFile", async () => {
 		readdir: vi.fn(),
 		mkdir: vi.fn(),
 		writeFile: vi.fn(),
+		watch: vi.fn(),
 	} satisfies Record<keyof NodeishFilesystemSubset, any>
 
 	const interceptedFs = createNodeishFsWithAbsolutePaths({

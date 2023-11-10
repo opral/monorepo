@@ -1,5 +1,18 @@
 # @inlang/paraglide-js
 
+##  1.0.0-prerelease.8
+
+IMPROVE: Paraglide now splits messages into different resource files as a step towards splitting messages by language via a bundler plugin. 
+
+```ts
+import * as en from "./paraglide/messages/en"
+import * as de from "./paraglide/messages/de"
+
+
+en.hello()
+de.hello()
+```
+
 ##  1.0.0-prerelease.7
 
 FIX: type error https://github.com/inlang/monorepo/pull/1610#issuecomment-1801768825
