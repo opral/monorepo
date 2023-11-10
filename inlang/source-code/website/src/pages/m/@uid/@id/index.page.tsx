@@ -123,9 +123,9 @@ export function Page(props: PageProps) {
 								when={props.markdown}
 								fallback={<p class="text-danger">{props.markdown?.error}</p>}
 							>
-								<section class="col-span-1 md:col-span-4 pb-4 grid md:grid-cols-4 grid-cols-1 gap-16">
+								<section class="col-span-1 md:col-span-4 pb-4 grid md:grid-cols-4 grid-cols-1 md:gap-16">
 									<div class="flex-col h-full justify-between md:col-span-3">
-										<div class="flex max-md:flex-col items-start gap-8 mb-4">
+										<div class="flex max-md:flex-col items-start gap-8 md:mb-4">
 											<Show
 												when={props.manifest.icon}
 												fallback={
@@ -264,7 +264,7 @@ export function Page(props: PageProps) {
 												<Markdown markdown={props.markdown} />
 											</div>
 											{/* Classes to be added: sticky z-10 top-16 pt-8 md:pt-0 md:static bg-background */}
-											<aside class="col-span-1 md:order-1 -order-1">
+											<aside class="col-span-1 md:order-1 -order-1 hidden md:block">
 												<NavbarCommon
 													displayName={displayName}
 													getLocale={languageTag}
