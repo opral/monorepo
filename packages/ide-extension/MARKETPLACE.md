@@ -1,4 +1,11 @@
-# Introduction: inlang VS Code Extension
+![inlang VS Code extension header image](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/ide-extension/assets/vs-code-extension-header.jpg)
+
+# Superchange your i18n dev workflow
+
+#### Trusted by developers from:
+<doc-proof organisations="calcom, appflowy, openassistant, listmonk, jitsi"></doc-proof>
+
+<br />
 
 This extension provides a seamless integration of the [Inlang](https://inlang.com) localization solution into Visual Studio Code. It allows you to translate your content directly in your IDE.
 
