@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.17.0
+
+### Minor Changes
+
+- ae3cad41c: latest bugfixes
+
 ## 1.16.0
 
 ### Minor Changes
