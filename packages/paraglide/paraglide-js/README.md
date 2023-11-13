@@ -1,5 +1,9 @@
 ![Paraglide JS header image](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglide-js-header.png)
 
+Attention: Paraglide JS is in prerelease. The following features are missing and will be added in the upcoming weeks: 
+
+- [ ] Support for pluralization
+
 # The best i18n library for the web
 
 Type in the following command into your terminal to get started immediately:
