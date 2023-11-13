@@ -17,7 +17,7 @@ const Lix = () => {
 				</div>
 				<Button
 					type="textPrimary"
-					href="https://github.com/inlang/monorepo/blob/ff2429c62ca5c4aa9443f18ca66f63249668784f/lix/design-principles.md#L1"
+					href="https://github.com/inlang/monorepo/tree/main/lix"
 					class="-mb-[10px]"
 				>
 					{m.home_lix_button()}
