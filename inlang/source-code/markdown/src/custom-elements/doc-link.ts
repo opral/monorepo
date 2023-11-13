@@ -55,7 +55,7 @@ export class DocLink extends LitElement {
 	description: string = ""
 
 	override render() {
-		return html`<a href="${this.href}">
+		return html`<a href="${this.href}" target="${this.href.includes("http") ? `_blank` : ``}">
 			<div class="doc-link">
 				<div class="icons">
 					<div class="icon">

@@ -5,19 +5,33 @@ import { StorageSchema } from "./storageSchema.js"
 /**
  * The risk of additional properties that get removed in a roundtrip is too high.
  */
-test("it should not be possible to create a storage schema with additional properties", () => {
+test("adding messages to the root level should be possible", () => {
 	const messages: StorageSchema = {
-		data: [],
-		// @ts-expect-error - this should not be possible
-		additional: "property",
+		hello_world: "property",
+		helloWorld: "property",
+		HELLO_WORLD: "property",
 	}
-	expect(Value.Check(StorageSchema, messages)).toBe(false)
+	expect(Value.Check(StorageSchema, messages)).toBe(true)
 })
 
 test("it should be possible to define $schema for typesafety", () => {
 	const messages: StorageSchema = {
 		$schema: "https://inlang.com/schema/inlang-message-format",
-		data: [],
+		hello_world: "property",
 	}
 	expect(Value.Check(StorageSchema, messages)).toBe(true)
+})
+
+test("using a hyphen (-) should not be possible to increase compatibility with libraries", () => {
+	const messages: StorageSchema = {
+		"hello-world": "property",
+	}
+	expect(Value.Check(StorageSchema, messages)).toBe(false)
+})
+
+test("using a dot (.) should not be possible to increase compatibility with libraries", () => {
+	const messages: StorageSchema = {
+		"hello.world": "property",
+	}
+	expect(Value.Check(StorageSchema, messages)).toBe(false)
 })

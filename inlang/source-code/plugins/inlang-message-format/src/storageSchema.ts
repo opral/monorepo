@@ -1,5 +1,22 @@
-import { Message } from "@inlang/sdk"
 import { Type, type Static } from "@sinclair/typebox"
+
+const InternalProperties = Type.Object(
+	{
+		$schema: Type.Optional(Type.Literal("https://inlang.com/schema/inlang-message-format")),
+	},
+	{ additionalProperties: false }
+)
+
+const Messages = Type.Record(
+	Type.String({
+		pattern: "^[^\\.-]+$",
+		description:
+			"The message key. Hypens (-) and dots (.) are not allowed to increase compatibility with libraries.",
+		examples: ["helloWorld", "hello_world", "helloWorld123", "hello_world_123"],
+	}),
+	Type.String(),
+	{ additionalProperties: false }
+)
 
 /**
  * 1. The storage schema is defined as object to enable the $schema
@@ -19,10 +36,4 @@ import { Type, type Static } from "@sinclair/typebox"
  *        in the future, IF REQUIRED.
  */
 export type StorageSchema = Static<typeof StorageSchema>
-export const StorageSchema = Type.Object(
-	{
-		$schema: Type.Optional(Type.Literal("https://inlang.com/schema/inlang-message-format")),
-		data: Type.Array(Message),
-	},
-	{ additionalProperties: false }
-)
+export const StorageSchema = Type.Union([InternalProperties, Messages])

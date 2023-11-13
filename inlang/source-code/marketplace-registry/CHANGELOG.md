@@ -1,5 +1,11 @@
 # @inlang/marketplace-registry
 
+## 1.5.0
+
+### Minor Changes
+
+- 9a208b466: enhanced capabilities of product pages
+
 ## 1.4.0
 
 ### Minor Changes

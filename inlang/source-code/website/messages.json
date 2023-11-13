@@ -87,7 +87,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Regras de fiapos"
+							"value": "Regras de formatação"
 						}
 					]
 				},
@@ -156,6 +156,16 @@
 							"value": "Markdown Globale"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Markdown"
+						}
+					]
 				}
 			]
 		},
@@ -202,6 +212,16 @@
 							"value": "Categorie"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Categorias"
+						}
+					]
 				}
 			]
 		},
@@ -246,6 +266,16 @@
 						{
 							"type": "Text",
 							"value": "Sito Globale"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Site Global"
 						}
 					]
 				}
@@ -978,6 +1008,16 @@
 							"value": "L'ecosistema per diventare globali"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "O ecossistema para se globalizar"
+						}
+					]
 				}
 			]
 		},
@@ -1480,6 +1520,16 @@
 							"value": "Prodotti consigliati"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Produtos em Destaque"
+						}
+					]
 				}
 			]
 		},
@@ -1524,6 +1574,16 @@
 						{
 							"type": "Text",
 							"value": "Guide"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Guias"
 						}
 					]
 				}
@@ -1572,6 +1632,16 @@
 							"value": "Più informazioni sull'ecosistema"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Mais sobre o ecossistema"
+						}
+					]
 				}
 			]
 		},
@@ -1616,6 +1686,16 @@
 						{
 							"type": "Text",
 							"value": "Oltre ad essere una libreria di internazionalizzazione, inlang è il tuo ecosistema per diventare globale. Collega i prodotti di inlang insieme per avere una espansione nel mercato e raggiungere più clienti."
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Mais do que apenas uma biblioteca de i18n. inlang é o seu ecossistema para a globalização. Conecte os produtos inlang para expandir o seu mercado e atingir mais consumidores."
 						}
 					]
 				}
@@ -1664,6 +1744,16 @@
 							"value": "Ricerca"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Pesquisar"
+						}
+					]
 				}
 			]
 		},
@@ -1687,6 +1777,7 @@
 					"pattern": [
 						{
 							"type": "Text",
+							"value": "Im Ökosystem suchen ..."
 							"value": "Im Ökosystem suchen ..."
 						}
 					]
@@ -1792,6 +1883,16 @@
 							"value": "Guarda il talk dello SvelteSummit l'11 Nov, 23 "
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Assista o SvelteSummit Talk em 11.11.23"
+						}
+					]
 				}
 			]
 		},
@@ -1805,7 +1906,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Find all you need to go global."
+							"value": "Find the products you need to go global."
 						}
 					]
 				},
@@ -1836,6 +1937,16 @@
 						{
 							"type": "Text",
 							"value": "Trova tutto quello che ti serve per diventare globale"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Encontre tudo o que você precisa para se globalizar."
 						}
 					]
 				}
@@ -1884,6 +1995,16 @@
 							"value": "Più informazioni su Lix"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Mais sobre o Lix"
+						}
+					]
 				}
 			]
 		},
@@ -1928,6 +2049,16 @@
 						{
 							"type": "Text",
 							"value": "La base dell'ecosistema"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "O backbone do ecossistema"
 						}
 					]
 				}
@@ -1976,6 +2107,16 @@
 							"value": "Controllo delle modifiche di Lix"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Alteração de controle Lix"
+						}
+					]
 				}
 			]
 		},
@@ -2020,6 +2161,16 @@
 						{
 							"type": "Text",
 							"value": "Prodotti Popolari"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Produtos Populares"
 						}
 					]
 				}
@@ -2068,6 +2219,16 @@
 							"value": "Il tuo Stack"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Sua Stack"
+						}
+					]
 				}
 			]
 		},
@@ -2112,6 +2273,16 @@
 						{
 							"type": "Text",
 							"value": "Inizia ora"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Comece agora"
 						}
 					]
 				}
@@ -2160,6 +2331,16 @@
 							"value": "Una guida generale con i passi minimi richiesti per rendere il tuo progetto pronto all'ecosistema di inlang."
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Um guia geral pelos passos necessários para deixar o seu projeto pronto para o ecossistema inlang."
+						}
+					]
 				}
 			]
 		},
@@ -2204,6 +2385,16 @@
 						{
 							"type": "Text",
 							"value": "How to"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Como"
 						}
 					]
 				}
@@ -2252,6 +2443,16 @@
 							"value": "Configura inlang per il tuo progetto"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Configure inlang no seu projeto"
+						}
+					]
 				}
 			]
 		},
@@ -2296,6 +2497,16 @@
 						{
 							"type": "Text",
 							"value": "Inizia ora"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Comece agora"
 						}
 					]
 				}
@@ -2344,6 +2555,16 @@
 							"value": "Una guida di base su come adottare inlang con paraglide.js e message-format-plugin nella tua app Svelte."
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Um guia básico em como adotar inlang com paraglide.js e message-format-plugin no seu app Svelte."
+						}
+					]
 				}
 			]
 		},
@@ -2388,6 +2609,16 @@
 						{
 							"type": "Text",
 							"value": "Sviluppa una app Svelte globale: Una guida di base"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Construa um app Svelte global: Um guia básico"
 						}
 					]
 				}
@@ -2436,6 +2667,16 @@
 							"value": "Sviluppa la tua soluzione!"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Construa sua própria solução!"
+						}
+					]
 				}
 			]
 		},
@@ -2480,6 +2721,16 @@
 						{
 							"type": "Text",
 							"value": "Non trovi quello che stai cercando?"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Não consegue encontrar o que está buscando?"
 						}
 					]
 				}
@@ -2528,6 +2779,16 @@
 							"value": "Hai bisogno di aiuto o hai domande? Entra sul nostro Discord!"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Precisa de ajuda ou tem dúvidas? Entre no nosso Discord!"
+						}
+					]
 				}
 			]
 		},
@@ -2572,6 +2833,16 @@
 						{
 							"type": "Text",
 							"value": "Notificami"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Me notifique"
 						}
 					]
 				}
@@ -2620,6 +2891,16 @@
 							"value": "Vieni già notificato."
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Você já está recebendo notificações."
+						}
+					]
 				}
 			]
 		},
@@ -2664,6 +2945,16 @@
 						{
 							"type": "Text",
 							"value": "Ti faremo sapere quando avremo"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Nós vamos te deixar saber assim que tivermos"
 						}
 					]
 				}
@@ -2712,6 +3003,16 @@
 							"value": "qualche nuovo risultato."
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "novos resultados."
+						}
+					]
 				}
 			]
 		},
@@ -2756,6 +3057,16 @@
 						{
 							"type": "Text",
 							"value": "Qualcosa è andato storto. Prova più tardi."
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Algo deu errado. Por favor, tente novamente mais tarde."
 						}
 					]
 				}
@@ -2804,6 +3115,16 @@
 							"value": "Inserisci il tuo indirizzo email."
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Por favor, insira seu endereço de e-mail."
+						}
+					]
 				}
 			]
 		},
@@ -2848,6 +3169,16 @@
 						{
 							"type": "Text",
 							"value": "Inserisci email..."
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Digite seu e-mail..."
 						}
 					]
 				}
@@ -2896,6 +3227,16 @@
 							"value": "Aiutaci a costruire l'ecosistema"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Nos ajude a construir o ecossistema"
+						}
+					]
 				}
 			]
 		},
@@ -2940,6 +3281,16 @@
 						{
 							"type": "Text",
 							"value": "Sarai notificato quando questa funzione sarà disponibile."
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Você será notificado assim que esta função estiver disponível."
 						}
 					]
 				}
@@ -2988,6 +3339,16 @@
 							"value": "Ancora nessun risultato"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Sem resultados"
+						}
+					]
 				}
 			]
 		},
@@ -3032,6 +3393,16 @@
 						{
 							"type": "Text",
 							"value": "Inserisci un indirizzo email valido."
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Por favor, digite um endereço de e-mail válido."
 						}
 					]
 				}
@@ -3080,6 +3451,16 @@
 							"value": "Tutti i Prodotti"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Todos os Produtos"
+						}
+					]
 				}
 			]
 		},
@@ -3124,6 +3505,16 @@
 						{
 							"type": "Text",
 							"value": "Tutte le Guide"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Todos os Guias"
 						}
 					]
 				}
@@ -3172,6 +3563,16 @@
 							"value": "Costruisci su inlang"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Construa no inlang"
+						}
+					]
 				}
 			]
 		},
@@ -3216,6 +3617,16 @@
 						{
 							"type": "Text",
 							"value": "Applicazione"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Aplicação"
 						}
 					]
 				}
@@ -3264,6 +3675,16 @@
 							"value": "Regole di Linting"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Regras de Formatação"
+						}
+					]
 				}
 			]
 		},
@@ -3303,6 +3724,16 @@
 				},
 				{
 					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Markdown"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
 					"match": [],
 					"pattern": [
 						{
@@ -3356,6 +3787,16 @@
 							"value": "Manca qualcosa?"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Algo está faltando?"
+						}
+					]
 				}
 			]
 		},
@@ -3402,6 +3843,16 @@
 							"value": "Sito Web"
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Site"
+						}
+					]
 				}
 			]
 		},
@@ -3446,6 +3897,16 @@
 						{
 							"type": "Text",
 							"value": "per cercare"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "para pesquisar"
 						}
 					]
 				}
@@ -4351,16 +4812,6 @@
 						}
 					]
 				},
-				{
-					"languageTag": "it",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Sei stato disiscritto"
-						}
-					]
-				}
 			]
 		}
 	]
