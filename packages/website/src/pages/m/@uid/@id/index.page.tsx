@@ -248,6 +248,12 @@ export function Page(props: PageProps) {
 													</p>
 												</div>
 											</div>
+											<div>
+												<h3 class="text-surface-400 text-sm mb-1.5">License</h3>
+												<p class="m-0 text-surface-600 no-underline font-medium">
+													{props?.manifest?.license}
+												</p>
+											</div>
 										</div>
 									</div>
 								</section>
@@ -277,7 +283,7 @@ export function Page(props: PageProps) {
 										href={convertLinkToGithub(readme())?.replace("README.md", "")}
 									/>
 								</div>
-								<div class="md:col-span-2 md:my-0 my-12">
+								<div class="md:col-span-3 md:my-0 my-12">
 									<div>
 										<h3 class="text-surface-400 text-sm mb-2">Keywords</h3>
 										<div class="flex flex-wrap gap-2 items-center">
@@ -293,12 +299,6 @@ export function Page(props: PageProps) {
 											</For>
 										</div>
 									</div>
-								</div>
-								<div class="md:pl-12">
-									<h3 class="text-surface-400 text-sm mb-2 ">License</h3>
-									<p class="m-0 text-surface-600 no-underline font-medium">
-										{props?.manifest?.license}
-									</p>
 								</div>
 							</Show>
 						</div>

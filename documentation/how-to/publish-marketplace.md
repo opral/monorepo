@@ -45,10 +45,23 @@ You can ensure that your manifest is valid by loading the following schema.
 |                | icon        | [Iconify](https://icon-sets.iconify.design/) icon tag.     | Yes      |
 |                | href        | The link behind the document link.                         | Yes      |
 |                | description | The description shown in the quick link.                   | Yes      |
+| `<doc-slider>` | items       | The images being shown in the slider.                      | Yes      |
+|                | looping     | True if you want the slider to loop.                       | No       |
+| `<doc-feature>`| title       | The title of the feature.                                  | Yes      |
+|                | icon        | Show an icon from [Iconify](https://icon-sets.iconify.design/).       | No       |
+|                | image       | Show an image (you can only show an image **or** an icon). | No       |
+|                | color       | The background color of the feature.                       | No       |
+|                | text-color     | The text color of the feature.                          | No       |
+
+
 
 This format reduces repetition by listing common attributes for each element under the respective element's section.
 
 ### 2. Add the link to your marketplace manifest to the registry
+
+Please note that you need to include a key of a 8 character long random string. You can generate one [here](https://passwordsgenerator.net/). Allowed are numbers and lowercase letters. This key is necessary for the marketplace to identify your item.
+
+If you are publishing an app, plugin or lint rule, you can add your product to the "m" category.
 
 Add the raw link of your manifest to [this file](https://github.com/inlang/monorepo/blob/main/inlang/source-code/marketplace-registry/registry.json). You can fork the repository to do so.
 
