@@ -3,6 +3,7 @@ function padHex(pad: number, n: number) {
     return '0'.repeat(pad - s.length) + s;
 }
 
+
 /**
  * Takes a line and addes the line lenght as 4 digit fixed hex value at the beginning…
  *
@@ -16,21 +17,21 @@ function padHex(pad: number, n: number) {
  * length characters into account is the flush line. this is signalled by 0000
  */
 export function encodePkLine(line: string) {
+	const flushLine = ""
 
-    const flushLine = ""
+	if (line === flushLine) {
+		// flush lines don't take the padded hex into account length = 0 (ignoring the leading 0000)
+		const paddedHex = padHex(4, 0)
 
-    if (line === flushLine) {
-        // flush lines don't take the padded hex into account length = 0 (ignoring the leading 0000)
-        return Buffer.from(padHex(4, 0), 'utf8');
-    } else {
-        // normal lines are composed of 4 chars for the line lingth + length of the line
-        const length = line.length + 4;
-        const hexLength = padHex(4, length);
-        return Buffer.concat([Buffer.from(hexLength + line, 'utf8')]);
-    }
+		return paddedHex
+	}
 
+	// normal lines are composed of 4 chars for the line length + length of the line
+	const length = line.length + 4
+	const hexLength = padHex(4, length)
+	const lineWithLength = hexLength + line
+	return lineWithLength
 }
-
 
 /***
  *
@@ -51,34 +52,38 @@ export function encodePkLine(line: string) {
  *  "done\n"
  * ]
  */
-export function decodeBuffer(buffers: Buffer[]) {
-    const concatenatedBuffer = Buffer.concat(buffers);
-    const strings: string[] = [];
-    let offset = 0;
+export function decodeGitPackLines(concatenatedUint8Array: Uint8Array) {
+	const strings: string[] = []
+	let offset = 0
 
-    while (offset + 4 < concatenatedBuffer.length) {
-        // Extract the hexadecimal length from the buffer
-        const hexLength = concatenatedBuffer.subarray(offset, offset + 4).toString('utf8');
+	while (offset + 4 < concatenatedUint8Array.length) {
+		// Extract the hexadecimal length from the Uint8Array
+		const hexLength = new TextDecoder().decode(concatenatedUint8Array.subarray(offset, offset + 4))
 
-        // Parse the hexadecimal length to an integer
-        const packLineLength = parseInt(hexLength, 16);
+		// Parse the hexadecimal length to an integer
+		const packLineLength = parseInt(hexLength, 16)
 
-        // Move the offset to the start of the string data
-        offset += 4;
+		if (packLineLength === 0) {
+			// flush
+			strings.push("")
+			offset += 4
+		} else if (packLineLength === 1) {
+			throw new Error("decodeGitPackLines does not support delimiter yet")
+		} else {
+			// not a flush
+			// Extract the string data based on the calculated length
+			const contentStart = offset + 4
+			const stringData = new TextDecoder().decode(
+				concatenatedUint8Array.subarray(contentStart, offset + packLineLength)
+			)
+			offset += packLineLength
+			strings.push(stringData)
+		}
 
-        let stringData = ""; // flush
-        if (packLineLength !== 0) {
-            // not a flush
-            // Extract the string data based on the calculated length
-            stringData = concatenatedBuffer.subarray(offset, offset + (packLineLength - 4)).toString('utf8');
-            offset += (packLineLength - 4);
-        }
+		// Add the string to the array
 
-        // Add the string to the array
-        strings.push(stringData);
+		// Move the offset to the next potential string
+	}
 
-        // Move the offset to the next potential string
-    }
-
-    return strings;
+	return strings
 }
