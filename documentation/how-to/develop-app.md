@@ -21,7 +21,7 @@ For working with inlang, you can make use of its
 
 In your app's `marketplace-manifest.json` make sure to define the following information:
 
-| **Parameter**        | **Description**                                               |
+| Parameter        | Description                                               |
 |----------------------|---------------------------------------------------------------|
 | `id`                 | Unique identifier for your app.                         |
 | `icon`        | Link to the icon of your app (optional).              |

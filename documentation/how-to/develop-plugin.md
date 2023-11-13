@@ -50,7 +50,7 @@ Implement the logic for each function according to your plugin's requirements.
 
 In your lint rule's `marketplace-manifest.json` make sure to define the following information:
 
-| **Parameter**        | **Description**                                               |
+| Parameter        | Description                                               |
 |----------------------|---------------------------------------------------------------|
 | `id`                 | Unique identifier for your plugin.                         |
 | `icon`        | Link to the icon of your plugin (optional).              |
