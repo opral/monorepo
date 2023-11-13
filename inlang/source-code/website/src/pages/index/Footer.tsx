@@ -12,20 +12,20 @@ const Footer = () => {
 	const getProductsLinks = () => {
 		return [
 			{
-				name: m.footer_category_application(),
-				href: "/c/application",
+				name: m.marketplace_header_apps_title(),
+				href: "/c/apps",
 			},
 			{
-				name: m.footer_category_website(),
-				href: "/c/website",
+				name: m.marketplace_header_libraries_title(),
+				href: "/c/libraries",
 			},
 			{
-				name: m.footer_category_markdown(),
-				href: "/c/markdown",
+				name: m.marketplace_header_plugins_title(),
+				href: "/c/plugins",
 			},
 			{
-				name: m.footer_category_lint(),
-				href: "/c/lint",
+				name: m.marketplace_header_lintRules_title(),
+				href: "/c/lint-rules",
 			},
 		]
 	}

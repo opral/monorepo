@@ -6,8 +6,6 @@ import { currentPageContext } from "#src/renderer/state.js"
 import Card, { CardBuildOwn, NoResultsCard } from "#src/interface/components/Card.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
-import SvelteHeader from "#src/interface/marketplace/categoryHeaders/application/svelte.jsx"
-import GenericHeader from "#src/interface/marketplace/categoryHeaders/application/generic.jsx"
 import * as m from "#src/paraglide/messages.js"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
@@ -42,18 +40,6 @@ export function Page(props: {
 			<Meta name="og:image" content="/opengraph/inlang-search-image.jpg" />
 			<MarketplaceLayout>
 				<div class="pb-16 md:pb-20 min-h-screen relative">
-					<Show
-						fallback={
-							<div class="pt-8">
-								<GenericHeader />
-							</div>
-						}
-						when={currentPageContext.urlParsed.search["q"]?.includes("svelte")}
-					>
-						<div class="pt-8">
-							<SvelteHeader />
-						</div>
-					</Show>
 					<h2 class="text-md text-surface-600 pb-4 pt-8">{m.marketplace_grid_title_generic()}</h2>
 					<SectionLayout showLines={false} type="white">
 						<div class="relative">

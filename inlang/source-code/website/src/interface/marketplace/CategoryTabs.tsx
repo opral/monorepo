@@ -8,26 +8,26 @@ const CategoryTabs = () => {
 	const getCategories = () => {
 		return [
 			{
-				name: "Apps",
+				name: m.marketplace_header_apps_title(),
 				href: "/c/apps",
 			},
 			{
-				name: "Libraries",
+				name: m.marketplace_header_libraries_title(),
 				href: "/c/libraries",
 			},
 			{
-				name: "Plugins",
+				name: m.marketplace_header_plugins_title(),
 				href: "/c/plugins",
 			},
 			{
-				name: m.marketplace_header_category_lint(),
+				name: m.marketplace_header_lintRules_title(),
 				href: "/c/lint-rules",
 			},
 		]
 	}
 	return (
 		<nav class="max-w-7xl mx-auto flex gap-2 overflow-x-scroll hide-scrollbar items-center">
-			<p class="text-sm pr-4 font-regular text-surface-500">Ecosystem:</p>
+			<p class="text-sm pr-4 font-regular text-surface-500">{m.footer_category_title() + ":"}</p>
 			<For each={getCategories()}>
 				{(link) => (
 					<div
