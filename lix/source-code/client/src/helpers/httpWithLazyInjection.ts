@@ -260,64 +260,55 @@ export const httpWithLazyInjection = (
 								lines.push(encodePkLine("symrefs"))
 								lines.push(encodePkLine(""))
 
-								try {
-									const response = await fetch(uploadPackUrl, {
-										method: "POST",
-										headers: {
-											accept: "application/x-git-upload-pack-result",
-											"content-type": "application/x-git-upload-pack-request",
-											"git-protocol": "version=2",
-										},
-										body: lines.join(""),
-									})
+								const response = await fetch(uploadPackUrl, {
+									method: "POST",
+									headers: {
+										accept: "application/x-git-upload-pack-result",
+										"content-type": "application/x-git-upload-pack-request",
+										"git-protocol": "version=2",
+									},
+									body: lines.join(""),
+								})
 
-									if (response.status !== 200) {
-										return response
-									} else {
-										const headers = response.headers
+								if (response.status !== 200) {
+									return response
+								} else {
+									const headers = response.headers
 
-										let headSymref = ""
+									let headSymref = ""
 
-										const bodyBufferArray = [Buffer.from(await response.arrayBuffer())]
+									const bodyBufferArray = [Buffer.from(await response.arrayBuffer())]
 
-										const capabilites =
-											" multi_ack thin-pack side-band side-band-64k ofs-delta shallow deepen-since deepen-not deepen-relative no-progress include-tag multi_ack_detailed allow-tip-sha1-in-want allow-reachable-sha1-in-want no-done filter object-format=sha1"
+									const capabilites =
+										" multi_ack thin-pack side-band side-band-64k ofs-delta shallow deepen-since deepen-not deepen-relative no-progress include-tag multi_ack_detailed allow-tip-sha1-in-want allow-reachable-sha1-in-want no-done filter object-format=sha1"
 
-										const lines = decodeBuffer(bodyBufferArray)
-										const rawLines = ["# service=git-upload-pack\n", ""]
-										for (const line of lines) {
-											if (line.includes("HEAD symref-target")) {
-												// 0050d7e62aef79d771d1771cb44c9e01faa4b7a607fe HEAD symref-target: -> length
-												headSymref = "refs" + line.slice(64)
-												headSymref = headSymref.endsWith("\n")
-													? headSymref.slice(0, -1)
-													: headSymref
-												const headBlob = line.slice(0, 40)
-												rawLines.push(
-													headBlob + " HEAD" + capabilites + " symref=HEAD:" + headSymref
-												)
+									const lines = decodeBuffer(bodyBufferArray)
+									const rawLines = ["# service=git-upload-pack\n", ""]
+									for (const line of lines) {
+										if (line.includes("HEAD symref-target")) {
+											// 0050d7e62aef79d771d1771cb44c9e01faa4b7a607fe HEAD symref-target: -> length
+											headSymref = "refs" + line.slice(64)
+											headSymref = headSymref.endsWith("\n") ? headSymref.slice(0, -1) : headSymref
+											const headBlob = line.slice(0, 40)
+											rawLines.push(headBlob + " HEAD" + capabilites + " symref=HEAD:" + headSymref)
 
-												rawLines.push(headBlob + " " + headSymref)
-											} else {
-												rawLines.push(line)
-											}
-										}
-
-										rawLines.push("")
-										headers["content-type"] = "application/x-git-upload-pack-advertisement"
-
-										return {
-											statusCode: 200,
-											statusMessage: "OK",
-											headers: headers,
-											body: rawLines.map((updatedRawLine) => encodePkLine(updatedRawLine)).join(""),
+											rawLines.push(headBlob + " " + headSymref)
+										} else {
+											rawLines.push(line)
 										}
 									}
-								} catch (e) {
-									debugger
+
+									rawLines.push("")
+									headers["content-type"] = "application/x-git-upload-pack-advertisement"
+
+									return {
+										statusCode: 200,
+										statusMessage: "OK",
+										headers: headers,
+										body: rawLines.map((updatedRawLine) => encodePkLine(updatedRawLine)).join(""),
+									}
 								}
 
-								return response
 							})()
 
 						} else if (options.body) {

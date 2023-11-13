@@ -377,7 +377,7 @@ export async function openRepository(
 						if (!stagingState && refState) {
 							// file was not checked out - open question how do we distinguis it from deleted?
 							fileStates[fileDir]?.push({
-								mode: await refState.mode(),
+								mode: (await refState.mode()).toString(8),
 								path: getBasename(fullpath),
 								type: await refState.type(),
 								oid: await refState.oid(),
@@ -389,7 +389,7 @@ export async function openRepository(
 							// file does not exist in ref - it was added
 
 							fileStates[fileDir]?.push({
-								mode: await stagingState.mode(),
+								mode: (await stagingState.mode()).toString(8),
 								path: getBasename(fullpath),
 								type: await stagingState.type(),
 								oid: await stagingState.oid(),
@@ -401,13 +401,14 @@ export async function openRepository(
 						if (stagingState && refState) {
 							// file does exists in both
 
-							const stagingOid = await stagingState?.oid()
-							const refOid = await refState?.oid()
-
-							console.log(stagingState)
+							const stagingOid = await stagingState.oid()
+							const refOid = await refState.oid()
+							const stagingMode = await stagingState.mode()
+							const refMode = await refState.mode()
+							console.log(stagingMode + " " + refMode)
 
 							fileStates[fileDir]?.push({
-								mode: await stagingState.mode(),
+								mode: stagingMode ? stagingMode.toString(8) : "040000",
 								path: getBasename(fullpath),
 								type: await stagingState!.type(),
 								oid: await stagingState!.oid(),
