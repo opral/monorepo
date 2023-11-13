@@ -1778,7 +1778,6 @@
 						{
 							"type": "Text",
 							"value": "Im Ökosystem suchen ..."
-							"value": "Im Ökosystem suchen ..."
 						}
 					]
 				},
@@ -4812,6 +4811,16 @@
 						}
 					]
 				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Sei stato disiscritto"
+						}
+					]
+				}
 			]
 		}
 	]
