@@ -24,7 +24,7 @@ You can ensure that your manifest is valid by loading the following schema.
 ```
 
 #### Naming your item
-| **Parameter**        | **Convention**                                               |
+| Parameter        | Convention                                               |
 |----------------------|---------------------------------------------------------------|
 | `id`                 | The unique identifier should always be written in camelCase like this: `camelCase.camelCase.camelCase`                         |
 | `displayName`                 | Please follow the [Apple Style Guide](https://support.apple.com/de-de/guide/applestyleguide/apsgb744e4a3/web) and write the first letter of a new word in the title always in uppercase, e.g. `Language Tag`. **Rule of thumb:** The first letter of the first word always has to be uppercase, except your displayName is a name written in lowercase letters everywhere else like `npm` for example.                       |

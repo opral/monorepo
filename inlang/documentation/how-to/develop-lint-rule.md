@@ -49,7 +49,7 @@ Helpful **example implementations** of lint rules can be found [here](https://gi
 
 In your lint rule's `marketplace-manifest.json` make sure to define the following information:
 
-| **Parameter**        | **Description**                                               |
+| Parameter        | Description                                               |
 |----------------------|---------------------------------------------------------------|
 | `id`                 | Unique identifier for your lint rule.                         |
 | `icon`        | Link to the icon of your lint rule (optional).              |
