@@ -5,6 +5,7 @@ import { Value } from "@sinclair/typebox/value"
 import algoliasearch from "algoliasearch"
 import fetch from "node-fetch"
 
+const repositoryRoot = import.meta.url.slice(0, import.meta.url.lastIndexOf("inlang/source-code"))
 const manifestLinks = JSON.parse(await fs.readFile("./registry.json", "utf-8"))
 
 /** @type {(import("@inlang/marketplace-manifest").MarketplaceManifest & { uniqueID: string })[]} */
@@ -22,7 +23,8 @@ for (const type of Object.keys(manifestLinks)) {
 			if (link.includes("http")) {
 				json = JSON.parse(await (await fetch(link)).text())
 			} else {
-				json = JSON.parse(await fs.readFile(link, "utf-8"))
+				// eslint-disable-next-line no-undef
+				json = JSON.parse(await fs.readFile(new URL(link, repositoryRoot), "utf-8"))
 			}
 
 			if (Value.Check(MarketplaceManifest, json) === false) {
@@ -79,11 +81,18 @@ const index = client.initIndex("registry")
 
 const objects = await Promise.all(
 	[...manifests.values()].map(async (value) => {
-		const { uniqueID, readme, ...rest } = value
+		const { uniqueID, ...rest } = value
 
-		const text = { en: await fetch(readme.en).then((res) => res.text()) }
+		const readme = () => {
+			return typeof value.readme === "object" ? value.readme.en : value.readme
+		}
 
-		return { objectID: uniqueID, ...rest, readme: text }
+		const text = await (readme().includes("http")
+			? (await fetch(readme())).text()
+			: // eslint-disable-next-line no-undef
+			  await fs.readFile(new URL(readme(), repositoryRoot), "utf-8"))
+
+		return { objectID: uniqueID, readme: text, ...rest }
 	})
 )
 

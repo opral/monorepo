@@ -60,7 +60,7 @@ it("should expose the project settings including the plugin settings", async () 
 		settings: settings,
 		nodeishFs: {} as any,
 	})
-	await resolved.data.loadMessages!({ settings })
+	await resolved.data.loadMessages!({ settings, nodeishFs: {} as any })
 	await resolved.data.saveMessages!({ settings, messages: [] })
 })
 
@@ -82,6 +82,7 @@ describe("loadMessages", () => {
 		expect(
 			await resolved.data.loadMessages!({
 				settings: {} as any,
+				nodeishFs: {} as any,
 			})
 		).toEqual([{ id: "test", expressions: [], selectors: [], variants: [] }])
 	})

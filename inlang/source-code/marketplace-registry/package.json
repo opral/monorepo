@@ -3,7 +3,8 @@
 	"type": "module",
 	"version": "1.4.0",
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/index.js",
+		"./registry.json": "./registry.json"
 	},
 	"files": [
 		"./dist",

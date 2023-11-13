@@ -19,16 +19,66 @@ export const compile = (args: {
 	messages: Readonly<Message[]>
 	settings: ProjectSettings
 }): Record<string, string> => {
-	const compiledMessages = args.messages.map(compileMessage).join("\n\n")
+	const compiledMessages = args.messages.map(compileMessage)
+
+	const resources: Record<string, string> = {}
+
+	for (const compiledMessage of compiledMessages) {
+		for (const languageTag of Object.keys(compiledMessage)) {
+			if (languageTag === "index") {
+				continue
+			} else if (resources[languageTag] === undefined) {
+				resources[languageTag] = ""
+			}
+			resources[languageTag] += "\n\n" + compiledMessage[languageTag]
+		}
+	}
+
+	if (args.settings.languageTags.length < Object.keys(resources).length) {
+		for (const languageTag of Object.keys(resources)) {
+			if (args.settings.languageTags.includes(languageTag) === false) {
+				throw new Error(
+					`The language tag "${languageTag}" is not included in the project's language tags but contained in of your messages. Please add the language tag to your project's language tags or delete the messages with the language tag "${languageTag}" to avoid unexpected type errors.`
+				)
+			}
+		}
+	}
 
 	return {
+		// boilerplate files
 		".prettierignore": ignoreDirectory,
 		".gitignore": ignoreDirectory,
 		".eslintignore": ignoreDirectory,
+		// resources
+		// (messages/en.js)
+		// (messages/de.js)
+		// (etc...)
+		...Object.fromEntries(
+			Object.entries(resources).map(([languageTag, content]) => [
+				`messages/${languageTag}.js`,
+				`
+/** 
+* This file contains language specific message functions for tree-shaking. 
+* 
+*! WARNING: Only import messages from this file if you want to manually
+*! optimize your bundle. Else, import from the \`messages.js\` file. 
+* 
+* Your bundler will (in the future) automatically replace the index function 
+* with a language specific message function in the build step. 
+*/` + content,
+			])
+		),
+		// message index file
 		"messages.js": `
 import { languageTag } from "./runtime.js"
+${Object.keys(resources)
+	.map(
+		(languageTag) =>
+			`import * as ${languageTag.replaceAll("-", "_")} from "./messages/${languageTag}.js"`
+	)
+	.join("\n")}
 
-${compiledMessages}
+${compiledMessages.map((message) => message.index).join("\n\n")}
 `,
 		"runtime.js": `
 /** @type {((tag: AvailableLanguageTag) => void) | undefined} */ 
