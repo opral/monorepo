@@ -5,7 +5,6 @@ import { isModule } from "@inlang/marketplace-registry"
 import { Button } from "#src/pages/index/components/Button.jsx"
 import { Chip } from "#src/interface/components/Chip.jsx"
 import ArrowOutward from "~icons/material-symbols/arrow-outward"
-import { SelectRepo } from "./../../Select.jsx"
 import {
 	colorForTypeOf,
 	convertLinkToGithub,
@@ -170,8 +169,6 @@ export function Page(props: PageProps) {
 																			? "Lint Rule"
 																			: typeOfIdToTitle(props.manifest.id)}
 																	</span>
-																	{/* @ts-ignore */}
-																	<SelectRepo size="medium" modules={[props.manifest.id]} />
 																</Button>
 															</div>
 														</Match>
