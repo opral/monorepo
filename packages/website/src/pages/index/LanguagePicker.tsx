@@ -8,6 +8,7 @@ export function LanguagePicker() {
 		en: "English",
 		de: "Deutsch",
 		fr: "Français",
+		it: "Italiano",
 		zh: "中文",
 		sk: "Slovak",
 		"pt-BR": "Portuguese Brazil",
