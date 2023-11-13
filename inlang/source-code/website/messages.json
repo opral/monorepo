@@ -2232,578 +2232,6 @@
 			]
 		},
 		{
-			"id": "marketplace_header_paraglide_title",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Paraglide JS"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Paraglide JS"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_paraglide_description",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "The best i18n libary for the web. A fully configurable JavaScript i18n library that integrates within your framework."
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "..."
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_paraglide_button_text",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Start with Paraglide JS"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Mit Paraglide JS starten"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_paraglide_button_secondary_text",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Watch SvelteSummit talk Fall 2023"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "SvelteSummit Fall 2023 anschauen"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_lintRule_toast_title",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "What are Lint Rules?"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Was sind Lint Regeln?"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_lintRule_toast_description",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Controll the complete translation process: From Design to Frontend."
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "..."
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_lintRule_toast_button_text",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Read more"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Mehr lesen"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_plugin_toast_title",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "What are Plugins?"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Was sind Plugins?"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_plugin_toast_description",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Discover the benefits of using plugins: freedom and low-cost adoption."
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "..."
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_plugin_toast_button_text",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Read more"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Mehr lesen"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_apps_title",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Apps"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Apps"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_apps_description",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Superpower your i18n experience with inlang apps."
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "..."
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_apps_button_text",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Build an App"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Eigene App bauen"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_libraries_title",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Libraries"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Libraries"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_libraries_description",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Use Libraries to extend your software project."
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "..."
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_libraries_button_text",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "New: Paraglide JS"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Neu: Paraglide JS"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_plugins_title",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Plugins"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Plugins"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_plugins_description",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Change or extend app behavior."
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "..."
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_plugins_button_text",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Build a Plugin"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Eigenes Plugin entwickeln"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_lintRules_title",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Lint Rules"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Lint Regeln"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_lintRules_description",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Validate content in an inlang project."
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "..."
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "marketplace_header_lintRules_button_text",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Custom Lint Rule"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Eigene Lint Regel entwickeln"
-						}
-					]
-				}
-			]
-		},
-		{
 			"id": "marketplace_application_header_generic_button",
 			"selectors": [],
 			"variants": [
@@ -4092,6 +3520,94 @@
 			]
 		},
 		{
+			"id": "marketplace_header_apps_button_text",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Build an App"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Eigene App bauen"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_apps_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Superpower your i18n experience with inlang apps."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Optimiere dein i18n-Erlebnis mit inlang-Apps."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Améliorez votre expérience i18n avec les applications Inlang."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_apps_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Apps"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Apps"
+						}
+					]
+				}
+			]
+		},
+		{
 			"id": "marketplace_header_build_on_inlang_button",
 			"selectors": [],
 			"variants": [
@@ -4422,6 +3938,560 @@
 						{
 							"type": "Text",
 							"value": "Site"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_libraries_button_text",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "New: Paraglide JS"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Neu: Paraglide JS"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_libraries_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Use Libraries to extend your software project."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Nutze Bibliotheken, um dein Softwareprojekt zu erweitern."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Utilisez les bibliothèques pour étendre votre projet logiciel."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_libraries_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Libraries"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Libraries"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_lintRule_toast_button_text",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Read more"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Mehr lesen"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_lintRule_toast_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Controll the complete translation process: From Design to Frontend."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Steuere den gesamten Übersetzungsprozess: Vom Design bis zum Frontend."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Contrôlez l'ensemble du processus de traduction : de la conception au frontend."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_lintRule_toast_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "What are Lint Rules?"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Was sind Lint Regeln?"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_lintRules_button_text",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Custom Lint Rule"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Eigene Lint Regel entwickeln"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_lintRules_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Validate content in an inlang project."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Validiere Inhalte in einem inlang-Projekt."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Valider le contenu dans un projet Inlang."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_lintRules_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lint Rules"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lint Regeln"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_paraglide_button_secondary_text",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Watch SvelteSummit talk Fall 2023"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "SvelteSummit Fall 2023 anschauen"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_paraglide_button_text",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Start with Paraglide JS"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Mit Paraglide JS starten"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_paraglide_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "The best i18n libary for the web. A fully configurable JavaScript i18n library that integrates within your framework."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Die beste i18n-Bibliothek für das Web. Eine vollständig konfigurierbare JavaScript-i18n-Bibliothek, die in Ihr Framework integriert werden kann."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "La meilleure bibliothèque i18n pour le web. Une bibliothèque JavaScript i18n entièrement configurable qui s'intègre dans votre framework."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_paraglide_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Paraglide JS"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Paraglide JS"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_plugin_toast_button_text",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Read more"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Mehr lesen"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_plugin_toast_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Discover the benefits of using plugins: freedom and low-cost adoption."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Entdecke die Vorteile der Verwendung von Plugins: Freiheit und kostengünstige Einführung."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Découvrez les avantages de l'utilisation de plugins : liberté et adoption à faible coût."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_plugin_toast_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "What are Plugins?"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Was sind Plugins?"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_plugins_button_text",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Build a Plugin"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Eigenes Plugin entwickeln"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_plugins_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Change or extend app behavior."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "App-Verhalten ändern oder erweitern."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Modifiez ou étendez le comportement de l'application."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_plugins_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Plugins"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Plugins"
 						}
 					]
 				}
