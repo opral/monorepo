@@ -5,7 +5,7 @@ import mockedFs from "node:fs/promises"
 import fs from "node:fs"
 import { compileCommand } from "./compile.js"
 import type { ProjectSettings } from "@inlang/sdk"
-import { createMessage } from "@inlang/sdk/test-utilities"
+import { createMessage, createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
 import { resolve } from "node:path"
 
 beforeEach(() => {
@@ -56,7 +56,7 @@ test("it should compile into the default outdir", async () => {
 			languageTags: ["de", "en"],
 			modules: ["/plugin.js"],
 			"plugin.inlang.messageFormat": {
-				filePath: "/messages.json",
+				pathPattern: "/messages/{languageTag}.json",
 			},
 		} satisfies ProjectSettings),
 		"/messages.json": JSON.stringify({
@@ -88,7 +88,7 @@ test("it should compile a project into the provided outdir", async () => {
 				languageTags: ["de", "en"],
 				modules: ["/plugin.js"],
 				"plugin.inlang.messageFormat": {
-					filePath: "/messages.json",
+					pathPattern: "/messages/{languageTag}.json",
 				},
 			} satisfies ProjectSettings),
 			"/messages.json": JSON.stringify({
@@ -108,11 +108,18 @@ test("it should compile a project into the provided outdir", async () => {
 
 const mockFs = (files: memfs.DirectoryJSON) => {
 	const _memfs = memfs.createFsFromVolume(memfs.Volume.fromJSON(files))
+	const lixFs = createNodeishMemoryFs()
 	for (const prop in mockedFs) {
 		// @ts-ignore - memfs has the same interface as node:fs/promises
 		if (typeof mockedFs[prop] !== "function") continue
-		// @ts-ignore - memfs has the same interface as node:fs/promises
-		vi.spyOn(mockedFs, prop).mockImplementation(_memfs.promises[prop])
+		// @ts-ignore - memfs dies not have a watch interface - quick fix should be updated
+		if (mockedFs[prop].name === "watch") {
+			// @ts-ignore - memfs has the same interface as node:fs/promises
+			vi.spyOn(mockedFs, prop).mockImplementation(lixFs[prop])
+		} else {
+			// @ts-ignore - memfs has the same interface as node:fs/promises
+			vi.spyOn(mockedFs, prop).mockImplementation(_memfs.promises[prop])
+		}
 	}
 	return _memfs
 }

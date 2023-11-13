@@ -1,15 +1,45 @@
-# Introduction
+![inlang CLI header image](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/cli/assets/cli-header.png)
+
+# Automate (i18n) localization tasks with the CLI
 
 [@inlang/cli](https://github.com/inlang/monorepo/tree/main/inlang/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infrastructure. It can be used to automate localization tasks, such as machine translation, linting, and more.
 
-### Benefits
+Get started with the CLI by using the following npx command:
+
+```bash
+npx @inlang/cli [command]
+```
+
+# Core features
+
+<doc-features>
+  <doc-feature text-color="#fff" color="#22272D" title="Automation" icon="mdi:file-auto"></doc-feature>
+  <doc-feature text-color="#fff" color="#22272D" title="Machine Translation" icon="streamline:ai-prompt-spark-solid"></doc-feature>
+  <doc-feature text-color="#fff" color="#22272D" title="Validation" icon="solar:bill-check-bold"></doc-feature>
+</doc-features>
+
+<br />
+
+<!-- ### Benefits
 
 - ✨ **Automate** tedious localization tasks
 - ⚙️ Integrate localization into your **CI/CD** pipeline
 - 🔍 **Lint** your translations
 - 🤖 **Machine translate** your resources
 - 🖊️ Open the web editor right from the command line
-- ✅ Validate your `project.inlang.json` configuration file
+- ✅ Validate your `project.inlang.json` configuration file -->
+
+#### Automate
+
+You can use the CLI to automate localization tasks, such as machine translation, linting, and more.
+
+#### Machine Translation
+
+The CLI allows you to machine translate your resources. This is useful if you want to get a first draft of your translations and then have them reviewed by a human translator.
+
+#### Validation
+
+The CLI allows you to validate your `project.inlang.json` configuration file. This is useful if you want to make sure that your configuration file is valid before you commit it to your repository.
 
 # Installation
 
@@ -42,6 +72,18 @@ If one of the commands can't be found, you are probably using an outdated versio
 To use the inlang CLI, you need a `project.inlang.json` file configured, see [here](https://inlang.com/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang#).
 
 # Commands
+
+
+| Name            | Command                                               | Description                                                                                                  |
+| --------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **CLI Version** | `npx @inlang/cli@latest [command]`                   | Get the latest version of the inlang CLI.                                                                     |
+| **Project**     | `npx @inlang/cli project [command]`                  | Manage your inlang project, including validation and interactive project creation.                           |
+| **Lint**        | `npx @inlang/cli lint [options]`                     | Lint translations using configured rules. Options include `--no-fail`, `--project`, and `--languageTags`.      |
+| **Machine**     | `npx @inlang/cli machine translate [options]`        | Automate translation processes. Options include `-f, --force` and `--project <path>`.                          |
+| **Open**        | `npx @inlang/cli open [command]`                     | Open parts of the Inlang infrastructure in your default browser, including the editor.                        |
+| **Module**      | `npx @inlang/cli module [command]`                   | Interact with Inlang modules, including initialization and building. Options include `--type`, `--entry`, and `--outdir`. |
+
+<!-- 
 
 We recommend using the CLI with `npx` to avoid installing the CLI globally. Not installing the CLI globally has the following advantages:
 
@@ -191,4 +233,4 @@ npx @inlang/cli module build --entry ./path/to/index.ts --outdir ./path/to/dist
 `--outdir <path>`: Specifies the output directory for the build files. The default output directory is "./dist."
 `--watch`: An optional flag that, when provided, enables a watch mode to monitor for changes and automatically rebuild the module when changes are detected.
 
-See how there is also a `--watch` flag, which enables a watch mode to monitor for changes and automatically rebuild the module when changes are detected. This command runs with `esbuild` under the hood.
+See how there is also a `--watch` flag, which enables a watch mode to monitor for changes and automatically rebuild the module when changes are detected. This command runs with `esbuild` under the hood. -->
