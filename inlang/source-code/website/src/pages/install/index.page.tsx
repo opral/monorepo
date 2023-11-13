@@ -160,7 +160,7 @@ export function Page() {
 													<code class="text-surface-600 text-sm p-1 rounded-md bg-surface-100">
 														project.inlang.json
 													</code>{" "}
-													file below the{" "}
+													file inside the{" "}
 													<code class="text-surface-600 text-sm p-1 rounded-md bg-surface-100">
 														modules
 													</code>{" "}
@@ -175,6 +175,15 @@ export function Page() {
 	...
 }`}
 												</pre>
+											</div>
+											<div class="mt-4">
+												<Button
+													// eslint-disable-next-line solid/reactivity
+													href="/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang"
+													type="textPrimary"
+												>
+													You don't have project file? Read how to get started
+												</Button>
 											</div>
 										</div>
 									</div>
