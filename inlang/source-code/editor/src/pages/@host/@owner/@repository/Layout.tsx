@@ -309,7 +309,7 @@ function BranchMenu() {
 				slot="trigger"
 				prop:caret={true}
 				prop:size="small"
-				prop: loading={currentBranch() !== activeBranch() && activeBranch() !== undefined}
+				prop:loading={currentBranch() !== activeBranch() && activeBranch() !== undefined}
 			>
 				<div slot="prefix">
 					{/* branch icon from github */}
