@@ -8,7 +8,7 @@ import fetch from "node-fetch"
 const repositoryRoot = import.meta.url.slice(0, import.meta.url.lastIndexOf("inlang/source-code"))
 const manifestLinks = JSON.parse(await fs.readFile("./registry.json", "utf-8"))
 
-/** @type {(import("@inlang/marketplace-manifest").MarketplaceManifest & { uniqueID: string })[]} */
+/** @type {(import("@inlang/marketplace-manifest").MarketplaceManifest)[]} */
 const manifests = []
 
 for (const type of Object.keys(manifestLinks)) {
@@ -21,7 +21,7 @@ for (const type of Object.keys(manifestLinks)) {
 
 		try {
 			if (link.includes("http")) {
-				json = JSON.parse(await (await fetch(link)).text())
+				json = JSON.parse(await fetch(link).then((res) => res.text()))
 			} else {
 				// eslint-disable-next-line no-undef
 				json = JSON.parse(await fs.readFile(new URL(link, repositoryRoot), "utf-8"))

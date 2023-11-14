@@ -89,3 +89,30 @@ test("should pass a valid guide", () => {
 	}
 	expect(Value.Check(MarketplaceManifest, guide)).toBe(true)
 })
+
+test("should allow apps from third party", () => {
+	const parrot: MarketplaceManifest = {
+		id: "app.parrot.figmaPlugin",
+		icon: "https://cdn.jsdelivr.net/gh/parrot-global/parrot@main/parrot-logo.svg",
+		gallery: [
+			"https://cdn.jsdelivr.net/gh/parrot-global/parrot@main/cover.png",
+			"https://cdn.jsdelivr.net/gh/parrot-global/parrot@main/layers.png",
+			"https://cdn.jsdelivr.net/gh/parrot-global/parrot@main/messages.png",
+		],
+		displayName: {
+			en: "Parrot – i18n Figma plugin",
+		},
+		description: {
+			en: "Parrot simplifies the translation management process right within Figma. If you deal with multilingual design projects and want to streamline your translation workflow, this plugin is for you!",
+		},
+		readme: {
+			en: "https://cdn.jsdelivr.net/gh/parrot-global/parrot@main/README.md",
+		},
+		keywords: ["editor", "web", "figma", "plugin", "application", "website", "translator", "lix"],
+		publisherName: "inlang",
+		publisherIcon: "https://cdn.jsdelivr.net/gh/parrot-global/parrot@main/parrot-logo.svg",
+		website: "https://www.figma.com/community/plugin/1205803482754362456",
+		license: "PolyForm Strict License 1.0.0",
+	}
+	expect(Value.Check(MarketplaceManifest, parrot)).toBe(true)
+})
