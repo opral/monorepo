@@ -12,9 +12,14 @@ import { currentPageContext } from "#src/renderer/state.js"
 export default function Card(props: { item: any; displayName: string }) {
 	const showCover =
 		currentPageContext.urlParsed.pathname.includes("/lint-rules") &&
+		// eslint-disable-next-line solid/reactivity
 		props.item.id.split(".")[0] !== "guide"
 			? true
 			: false
+
+	// eslint-disable-next-line solid/reactivity
+	const app =
+		props.item.id.split(".")[0] === "app" && currentPageContext.urlParsed.pathname.includes("/apps")
 
 	return (
 		<>
@@ -25,14 +30,58 @@ export default function Card(props: { item: any; displayName: string }) {
 						: `/m/${props.item.uniqueID}/${props.item.id.replaceAll(".", "-")}`
 				}
 				class={
-					"relative no-underline z-10 flex gap-4 flex-col justify-between group w-full bg-background transition-all border border-surface-200 rounded-xl h-48 hover:shadow-lg hover:shadow-surface-100 hover:border-surface-300 active:border-surface-400 " +
-					(showCover ? "" : "p-5")
+					"relative no-underline z-10 flex gap-4 justify-between flex-col group w-full bg-background transition-all border border-surface-200 rounded-xl hover:shadow-lg hover:shadow-surface-100 hover:border-surface-300 active:border-surface-400 " +
+					(showCover || app ? " " : " h-48 p-5")
 				}
 			>
 				<Switch>
-					<Match when={showCover && props.item.gallery}>
+					<Match when={app && props.item.gallery}>
+						<div
+							class={
+								"pt-6 px-6 rounded-[11px] relative overflow-hidden " +
+								(props.item.id.split(".")[2] === "editor"
+									? "bg-gradient-to-tr from-[#9FEAF6] to-[#CAD4F5]"
+									: props.item.id.split(".")[2] === "ideExtension"
+									? "bg-gradient-to-tr from-[#4F5B7A] to-[#17264B]"
+									: props.item.id.split(".")[2] === "cli"
+									? "bg-gradient-to-tr from-[#B1F69F] to-[#CAF3F5]"
+									: props.item.id.split(".")[2] === "badge"
+									? "bg-gradient-to-tr from-[#EA9FF6] to-[#A5C3F1]"
+									: "")
+							}
+						>
+							<img
+								class="w-full h-40 object-cover object-top rounded-t-xl"
+								src={props.item.gallery && props.item.gallery[0]}
+							/>
+							<img
+								src={props.item.icon}
+								class="absolute bottom-4 right-4 h-12 aspect-1 rounded-xl border border-surface-2 shadow-xl"
+							/>
+						</div>
+						<div class="flex flex-shrink-0 flex-row flex-wrap justify-between items-start px-4">
+							<p class="m-0 mb-2 text-sm text-surface-800 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors">
+								{props.displayName}
+							</p>
+							<p class="text-sm line-clamp-2 text-surface-500 transition-colors group-hover:text-surface-600 mb-4">
+								{props.item.description.en}
+							</p>
+						</div>
+						<div class="flex items-center gap-2 px-4 pb-4">
+							<Show when={props.item.publisherIcon}>
+								<img
+									class="w-5 h-5 rounded-full object-cover object-center"
+									src={props.item.publisherIcon}
+								/>
+								<p class="text-sm text-surface-500 group-hover:text-surface-600 transition-colors">
+									{props.item.publisherName}
+								</p>
+							</Show>
+						</div>
+					</Match>
+					<Match when={!app && showCover && props.item.gallery}>
 						<img
-							class="w-full h-32 object-cover object-top rounded-xl"
+							class="w-full h-36 object-cover object-top rounded-xl"
 							src={props.item.gallery && props.item.gallery[0]}
 						/>
 						<div class="flex flex-shrink-0 flex-row flex-wrap justify-between items-start mb-2 px-4">
@@ -41,7 +90,7 @@ export default function Card(props: { item: any; displayName: string }) {
 							</p>
 						</div>
 					</Match>
-					<Match when={!showCover || props.item.gallery}>
+					<Match when={(!app && !showCover) || (!app && props.item.gallery)}>
 						<div class="flex flex-col gap-4">
 							<div class="w-full flex gap-4 items-start">
 								<div class="flex items-center gap-8 flex-shrink-0">
@@ -101,8 +150,7 @@ export default function Card(props: { item: any; displayName: string }) {
 									</sl-tooltip>
 								</Show>
 							</div>
-
-							<p class="text-sm line-clamp-2 text-surface-500 transition-colors group-hover:text-surface-600">
+							<p class="text-sm line-clamp-2 text-surface-500 transition-colors group-hover:text-surface-600 mb-4">
 								{props.item.description.en}
 							</p>
 						</div>
