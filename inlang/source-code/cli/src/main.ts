@@ -61,13 +61,13 @@ export const cli = new Command()
 				const userResponse = prompt("Do you want to update to the latest version? (yes/no)")
 				if (userResponse?.toLowerCase().includes("y")) {
 					console.info("Updating to the latest...")
-					updateToLatestMinor()
+					updateToLatest()
 				} else {
 					console.info("Continuing with the current version...")
 				}
 			} else {
 				// Check for the latest minor version and update automatically in the background
-				updateToLatestMinor()
+				updateToLatest()
 			}
 		}
 	})
@@ -121,7 +121,7 @@ export function getLatestVersion(): string | void {
 }
 
 // Function to update to the latest minor version in the background
-export function updateToLatestMinor(): void {
+export function updateToLatest(): void {
 	try {
 		// Execute the update command in the background
 		execSync("npm i -g @inlang/cli@latest", { stdio: "ignore" })
