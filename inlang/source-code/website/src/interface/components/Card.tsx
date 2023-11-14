@@ -53,7 +53,7 @@ export default function Card(props: { item: any; displayName: string }) {
 							}
 						>
 							<img
-								class="w-full h-40 object-cover object-top rounded-t-xl"
+								class="w-full h-40 object-cover object-top rounded-t-lg"
 								src={props.item.gallery && props.item.gallery[0]}
 							/>
 							<img
