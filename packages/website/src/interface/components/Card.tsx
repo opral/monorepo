@@ -47,6 +47,8 @@ export default function Card(props: { item: any; displayName: string }) {
 									? "bg-gradient-to-tr from-[#B1F69F] to-[#CAF3F5]"
 									: props.item.id.split(".")[2] === "badge"
 									? "bg-gradient-to-tr from-[#EA9FF6] to-[#A5C3F1]"
+									: props.item.id.split(".")[1] === "parrot"
+									? "bg-gradient-to-tr from-[#F69FD4] to-[#F1A5A5]"
 									: "")
 							}
 						>
@@ -56,7 +58,7 @@ export default function Card(props: { item: any; displayName: string }) {
 							/>
 							<img
 								src={props.item.icon}
-								class="absolute bottom-4 right-4 h-12 aspect-1 rounded-xl border border-surface-2 shadow-xl"
+								class="absolute bottom-4 right-4 h-12 aspect-1 rounded-xl border border-surface-2 shadow-xl bg-surface-100"
 							/>
 						</div>
 						<div class="flex flex-shrink-0 flex-row flex-wrap justify-between items-start px-4">
@@ -203,11 +205,17 @@ export default function Card(props: { item: any; displayName: string }) {
 }
 
 export function CardBuildOwn() {
+	// eslint-disable-next-line solid/reactivity
+	const app = currentPageContext.urlParsed.pathname.includes("/apps")
+
 	return (
 		<>
 			<Link
 				href="/documentation/publish-to-marketplace"
-				class="relative no-underline h-48 flex flex-col justify-center pt-8 items-center gap-4 group w-full bg-background transition-colors border border-surface-200 rounded-xl p-5 hover:shadow-lg hover:shadow-surface-100 hover:border-surface-300 active:border-surface-400"
+				class={
+					"relative no-underline flex flex-col justify-center pt-8 items-center gap-4 group w-full bg-background transition-colors border border-surface-200 rounded-xl p-5 hover:shadow-lg hover:shadow-surface-100 hover:border-surface-300 active:border-surface-400 " +
+					(app ? "" : "h-48")
+				}
 			>
 				<Plus class="w-10 h-10 text-surface-600 group-hover:text-surface-900 transition-colors" />
 				<div class="flex flex-col justify-center items-center">
