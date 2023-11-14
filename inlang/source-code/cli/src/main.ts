@@ -1,3 +1,4 @@
+import semver from "semver"
 import { Command } from "commander"
 import { machine } from "./commands/machine/index.js"
 import { module } from "./commands/module/index.js"
@@ -9,6 +10,7 @@ import { gitOrigin, telemetry } from "./services/telemetry/implementation.js"
 import fetchPolyfill from "node-fetch"
 import { lint } from "./commands/lint/index.js"
 import { project } from "./commands/project/index.js"
+import { execSync } from "node:child_process"
 // --------------- INIT ---------------
 
 // polyfilling node < 18 with fetch
@@ -42,7 +44,6 @@ export const cli = new Command()
 			// shouldn't start with a flag and the previous arg shouldn't be a flag
 			(arg, i) => !arg.startsWith("-") && !command.args[i - 1]?.startsWith("-")
 		)
-
 		telemetry.capture({
 			event: `CLI command executed`,
 			properties: {
@@ -50,6 +51,25 @@ export const cli = new Command()
 				args: command.args.join(" "),
 			},
 		})
+		// Check for the latest version and notify if there's a major version update
+		const latestVersion = getLatestVersion()
+		const currentVersion = getCurrentVersion()
+		if (latestVersion && currentVersion) {
+			if (isMajorVersionUpdate(currentVersion, latestVersion)) {
+				console.info(`A major update to (${latestVersion}) is available.`)
+				// Prompt the user to update
+				const userResponse = prompt("Do you want to update to the latest version? (yes/no)")
+				if (userResponse?.toLowerCase().includes("y")) {
+					console.info("Updating to the latest...")
+					updateToLatestMinor()
+				} else {
+					console.info("Continuing with the current version...")
+				}
+			} else {
+				// Check for the latest minor version and update automatically in the background
+				updateToLatestMinor()
+			}
+		}
 	})
 
 // --------------- TELEMETRY ---------------
@@ -69,3 +89,45 @@ telemetry.groupIdentify({
 		name: gitOrigin,
 	},
 })
+
+// --------------- //
+// UPDATE UTILS
+// --------------- //
+
+// A function to check if there's a major version update
+export function isMajorVersionUpdate(currentVersion: string, latestVersion: string): boolean {
+	return semver.major(currentVersion) !== semver.major(latestVersion)
+}
+
+// Function to get the current version by executing "npx @inlang/cli --version"
+export function getCurrentVersion(): string | void {
+	try {
+		const output = execSync("npx @inlang/cli --version", { encoding: "utf-8" })
+		// Extract the version from the output (it's in the format "X.Y.Z")
+		if (output) return output.trim()
+	} catch (error) {
+		console.error(error instanceof Error ? error.message : error)
+	}
+}
+
+// Function to get the latest version from the npm registry
+export function getLatestVersion(): string | void {
+	try {
+		const output = execSync("npm show @inlang/cli version", { encoding: "utf-8" })
+		if (output) return output.trim()
+	} catch (error) {
+		console.error(error instanceof Error ? error.message : error)
+	}
+}
+
+// Function to update to the latest minor version in the background
+export function updateToLatestMinor(): void {
+	try {
+		// Execute the update command in the background
+		execSync("npm i -g @inlang/cli@latest", { stdio: "ignore" })
+		console.info("Updated @inlang/cli to the latest.")
+	} catch (error) {
+		console.error("Failed to update @inlang/cli to the latest.")
+		console.error(error instanceof Error ? error.message : error)
+	}
+}
