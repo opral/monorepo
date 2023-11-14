@@ -13,28 +13,24 @@ export const ideExtensionConfig = (): ReturnType<Exclude<Plugin["addCustomApi"],
 				callback: (args: { messageId: string }) => ({
 					messageId: args.messageId
 						.trim()
-						.replace(/[^a-zA-Z0-9\s]/g, "")
-						.replace(/\s+/g, "_")
-						.toLowerCase(),
+						.replace(/[^a-zA-Z0-9\s_.]/g, "")
+						.replace(/(\s|.)+/g, "_"),
 					messageReplacement: `{m.${args.messageId
 						.trim()
-						.replace(/[^a-zA-Z0-9\s]/g, "")
-						.replace(/\s+/g, "_")
-						.toLowerCase()}()}`,
+						.replace(/[^a-zA-Z0-9\s_.]/g, "")
+						.replace(/[\s.])+/g, "_")}()}`,
 				}),
 			},
 			{
 				callback: (args: { messageId: string }) => ({
 					messageId: args.messageId
 						.trim()
-						.replace(/[^a-zA-Z0-9\s]/g, "")
-						.replace(/\s+/g, "_")
-						.toLowerCase(),
+						.replace(/[^a-zA-Z0-9\s_.]/g, "")
+						.replace(/[\s.])+/g, "_"),
 					messageReplacement: `m.${args.messageId
 						.trim()
-						.replace(/[^a-zA-Z0-9\s]/g, "")
-						.replace(/\s+/g, "_")
-						.toLowerCase()}()`,
+						.replace(/[^a-zA-Z0-9\s_.]/g, "")
+						.replace(/[\s.])+/g, "_")}()`,
 				}),
 			},
 		],
