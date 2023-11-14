@@ -1,5 +1,6 @@
-import { parse } from "./messageReferenceMatchers.js"
 import type { Plugin } from "@inlang/plugin"
+import { parse } from "./messageReferenceMatchers.js"
+import transformMessageId from "./transformMessageId.js"
 
 export const ideExtensionConfig = (): ReturnType<Exclude<Plugin["addCustomApi"], undefined>> => ({
 	"app.inlang.ideExtension": {
@@ -47,10 +48,3 @@ export const ideExtensionConfig = (): ReturnType<Exclude<Plugin["addCustomApi"],
 		],
 	},
 })
-
-function transformMessageId(messageId: string): string {
-	return messageId
-		.trim()
-		.replace(/[^a-zA-Z0-9\s_.]/g, "")
-		.replace(/[\s.]+/g, "_")
-}
