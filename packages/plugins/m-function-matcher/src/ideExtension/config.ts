@@ -14,11 +14,11 @@ export const ideExtensionConfig = (): ReturnType<Exclude<Plugin["addCustomApi"],
 					messageId: args.messageId
 						.trim()
 						.replace(/[^a-zA-Z0-9\s_.]/g, "")
-						.replace(/(\s|.)+/g, "_"),
+						.replace(/[\s.]+/g, "_"),
 					messageReplacement: `{m.${args.messageId
 						.trim()
 						.replace(/[^a-zA-Z0-9\s_.]/g, "")
-						.replace(/[\s.])+/g, "_")}()}`,
+						.replace(/[\s.]+/g, "_")}()}`,
 				}),
 			},
 			{
@@ -26,11 +26,11 @@ export const ideExtensionConfig = (): ReturnType<Exclude<Plugin["addCustomApi"],
 					messageId: args.messageId
 						.trim()
 						.replace(/[^a-zA-Z0-9\s_.]/g, "")
-						.replace(/[\s.])+/g, "_"),
+						.replace(/[\s.]+/g, "_"),
 					messageReplacement: `m.${args.messageId
 						.trim()
 						.replace(/[^a-zA-Z0-9\s_.]/g, "")
-						.replace(/[\s.])+/g, "_")}()`,
+						.replace(/[\s.]+/g, "_")}()`,
 				}),
 			},
 		],
