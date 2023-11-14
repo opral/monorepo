@@ -61,7 +61,7 @@ export const cli = new Command()
 				const userResponse = prompt("Do you want to update to the latest version? (yes/no)")
 				if (userResponse?.toLowerCase().includes("y")) {
 					console.info("Updating to the latest...")
-					updateToLatest()
+					updateToLatest(true)
 				} else {
 					console.info("Continuing with the current version...")
 				}
@@ -90,9 +90,7 @@ telemetry.groupIdentify({
 	},
 })
 
-// --------------- //
-// UPDATE UTILS
-// --------------- //
+// --------------- UPDATE UTILS ---------------
 
 // A function to check if there's a major version update
 export function isMajorVersionUpdate(currentVersion: string, latestVersion: string): boolean {
@@ -121,13 +119,15 @@ export function getLatestVersion(): string | void {
 }
 
 // Function to update to the latest minor version in the background
-export function updateToLatest(): void {
+export function updateToLatest(show: boolean = false): void {
 	try {
 		// Execute the update command in the background
 		execSync("npm i -g @inlang/cli@latest", { stdio: "ignore" })
-		console.info("Updated @inlang/cli to the latest.")
+		if (show) console.info("Updated @inlang/cli to the latest.")
 	} catch (error) {
-		console.error("Failed to update @inlang/cli to the latest.")
-		console.error(error instanceof Error ? error.message : error)
+		if (show) {
+			console.error("Failed to update @inlang/cli to the latest.")
+			console.error(error instanceof Error ? error.message : error)
+		}
 	}
 }
