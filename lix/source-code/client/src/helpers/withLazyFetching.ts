@@ -175,7 +175,7 @@ export const withLazyFetching = (
 
 	return new Proxy(fs, {
 		get(getTarget: typeof fs, prop, receiver) {
-			if (getTarget[prop as keyof typeof fs]) {
+			if (getTarget[prop as keyof typeof fs] && prop !== "watch") {
 				return new Proxy(getTarget[prop as keyof typeof getTarget], {
 					apply(callTarget, thisArg, argumentsList) {
 						const execute = () => Reflect.apply(callTarget, thisArg, argumentsList)

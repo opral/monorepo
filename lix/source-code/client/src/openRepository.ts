@@ -26,7 +26,10 @@ import {
 	listFiles,
 	listServerRefs,
 	writeTree,
-	// fetch,
+	fetch as isoFetch,
+	merge,
+	checkout,
+
 	// listBranches,
 } from "isomorphic-git"
 import { withLazyFetching } from "./helpers/withLazyFetching.js"
@@ -122,9 +125,9 @@ export async function openRepository(
 		// cache
 		dir,
 		gitdir,
-		trees: [TREE({ ref }), WORKDIR(), STAGE()],
+		trees: [TREE({ ref })],
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		map: async function (fullpath, [commit, _workdir, _stage]) {
+		map: async function (fullpath, [commit]) {
 			if (fullpath === ".") return
 
 			const oId = await commit?.oid()
@@ -464,17 +467,137 @@ export async function openRepository(
 		},
 
 		push() {
+			// TODO #1459 fetch head from remote
+
 			return push({
 				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, "push"),
 				url: gitUrl,
 				corsProxy: gitProxyUrl,
-				http,
+				http /*: httpWithLazyInjection(http, {
+					noneBlobFilter: true,
+					filterRefList: { ref: args.branch },
+					overrideHaves: undefined,
+					overrideWants: undefined,
+				}),*/,
 				dir,
 			})
 		},
 
-		pull(cmdArgs) {
-			return pull({
+		// stage ->
+		// commit -> brings the
+		// pull
+		// push
+
+		async pull(cmdArgs) {
+			// if (!args.ref) {
+			const head = await currentBranch({ fs: rawFs, gitdir })
+			// TODO: use a better error.
+			if (!head) {
+				throw new Error(" MissingParameterError ref")
+			}
+			const ref = head
+			// }
+
+			const { fetchHead, fetchHeadDescription } = await isoFetch({
+				fs: rawFs,
+				// cache,
+				http: httpWithLazyInjection(http, {
+					noneBlobFilter: true,
+					filterRefList: { ref: args.branch },
+					overrideHaves: undefined,
+					overrideWants: undefined,
+				}),
+				// onProgress,
+				// onMessage,
+				// onAuth,
+				// onAuthSuccess,
+				// onAuthFailure,
+				gitdir,
+				corsProxy: gitProxyUrl,
+				ref,
+				url: gitUrl,
+				// remote,
+				// remoteRef,
+				singleBranch: true,
+				// headers,
+				// prune,
+				// pruneTags,
+			})
+			await merge({
+				// NOTE when a blob is needed during merge (changed on the client AND on theserver - oid is not sufficient) we utilize lazy fetching again
+				fs: withLazyFetching(
+					rawFs,
+					dir,
+					gitdir,
+					ref,
+					filePathToOid,
+					oidToFilePaths,
+					http,
+					"pull-merge"
+				),
+				// cache,
+				gitdir,
+				ours: ref,
+				theirs: fetchHead!, // seem to be not checked in orginal isomorphic git pull
+				fastForward: cmdArgs.fastForward,
+				// fastForwardOnly,
+				message: `Merge ${fetchHeadDescription}`,
+				author: cmdArgs.author,
+				// committer,
+				// signingKey,
+				dryRun: false,
+				noUpdateBranch: false,
+			})
+
+			const files: string[] = []
+
+			await walk({
+				fs: withLazyFetching(
+					rawFs,
+					dir,
+					gitdir,
+					ref,
+					filePathToOid,
+					oidToFilePaths,
+					http,
+					"pull-merge"
+				),
+				// cache
+				dir,
+				gitdir,
+				trees: [STAGE()],
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				map: async function (fullpath, [commit]) {
+					if (commit && (await commit.type()) === "blob") {
+						files.push(fullpath)
+					}
+				},
+			})
+
+			await checkout({
+				dir: dir,
+				gitdir: gitdir,
+				fs: withLazyFetching(
+					rawFs,
+					dir,
+					gitdir,
+					ref,
+					filePathToOid,
+					oidToFilePaths,
+					http,
+					"pull-merge"
+				),
+				filepaths: files,
+				ref: ref,
+			})
+
+			for (const file of files) {
+				console.log(await rawFs.readFile(file, { encoding: "utf-8" }))
+			}
+
+			// TODO #1459 add checkout see https://github.com/isomorphic-git/isomorphic-git/blob/d7f24f8041e18a44ccf72b7feb7a951337fa1149/src/commands/pull.js#L120
+
+			/*return pull({
 				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, "pull"),
 				url: gitUrl,
 				corsProxy: gitProxyUrl,
@@ -483,7 +606,7 @@ export async function openRepository(
 				fastForward: cmdArgs.fastForward,
 				singleBranch: cmdArgs.singleBranch,
 				author: cmdArgs.author,
-			})
+			})*/
 		},
 
 		log(cmdArgs) {
