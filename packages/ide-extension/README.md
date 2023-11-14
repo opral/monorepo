@@ -46,9 +46,11 @@ Translations from the resource files are automatically updated when you change t
 
 <img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/update.gif"/>
 
-## 1️⃣ Setup
+# How to use
 
-Create a `project.inlang.json` in the **root** of your project. You can use the following template when using json files as translation files, if not, please look for other [supported resource file types](https://inlang.com/marketplace):
+## Setup
+
+1. Create a `project.inlang.json` in the **root** of your project. You can use the following template when using json files as translation files, if not, please look for other [supported resource file types](https://inlang.com/):
 
 ```json
 {
@@ -58,17 +60,25 @@ Create a `project.inlang.json` in the **root** of your project. You can use the 
 	"sourceLanguageTag": "en",
 	// all the language tags you want to support in your project
 	"languageTags": ["en", "de"],
-	"modules": [],
+	"modules": [], // add a module from: https://inlang.com/c/plugins (i18next, json, inlang message format)
 	"settings": {}
 }
 ```
 
+2. If you already have a `project.inlang.json`, you should continue with **installing a function syntax matcher**. There are multiple syntax matcher available like:
+
+- m function matcher: https://inlang.com/m/632iow21/plugin-inlang-mFunctionMatcher
+- t function matcher: https://inlang.com/m/698iow33/plugin-inlang-tFunctionMatcher
+- *if you are using the i18next module, everything is already built-in*
+
+3. ✨ Recommended: If you want to add lint rules to your experience, you can add them from: https://inlang.com/c/lint-rules
+
 #### Requirements:
 
-- Requires VS Code version 1.80.1 or higher.
-- Node.js version 16.17.1 or higher.
+- VS Code version 1.84.0 or higher.
+- Node.js version v18 or higher.
 
-## 2️⃣ Usage
+## Usage
 
 Just _highlight/select_ the text you want and hit `cmd .` or `ctrl +` (Quick Fix / Yellow Bulb) to open the **translate dialog** to provide a id for it.
 
@@ -76,7 +86,7 @@ Hover over the message to see the tooltip with the translation.
 
 If something isn't working as expected, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](https://github.com/inlang/monorepo/issues/new/choose). We are happy to help!
 
-## 3️⃣ Configuration
+### API docs
 
 You can configure the extension to your needs by defining the `ideExtension` property in the config.
 
