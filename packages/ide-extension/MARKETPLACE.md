@@ -15,7 +15,7 @@ If something isn't working as expected or you have a feature suggestion, please 
 
 <doc-features>
   <doc-feature color="#E2E8F0" title="Extract messages" icon="solar:scissors-linear"></doc-feature>
-  <doc-feature color="#E2E8F0" title="Inline Annotations" icon="solar:magnifer-bug-outline"></doc-feature>
+  <doc-feature color="#E2E8F0" title="Lint messages" icon="solar:magnifer-bug-outline"></doc-feature>
   <doc-feature color="#E2E8F0" title="Inline Annotations" icon="solar:chat-square-code-outline"></doc-feature>
 </doc-features>
 
