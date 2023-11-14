@@ -4,7 +4,7 @@
     </p>
     <h4 align="center">
         <a href="https://inlang.com/documentation" target="_blank">Get Started</a> ·
-        <a href="https://github.com/inlang/monorepo/discussions" target="_blank">Discussions</a> · <a href="https://twitter.com/inlangHQ" target="_blank">X</a>
+        <a href="https://github.com/inlang/monorepo/discussions" target="_blank">Discussions</a> · <a href="https://twitter.com/inlangHQ" target="_blank">x.com</a>
     </h4>
 </div>
 
