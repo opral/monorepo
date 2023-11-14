@@ -65,7 +65,7 @@ Translations from the resource files are automatically updated when you change t
 	"sourceLanguageTag": "en",
 	// all the language tags you want to support in your project
 	"languageTags": ["en", "de"],
-	"modules": [],
+	"modules": [], // add a module from: https://inlang.com/c/plugins (i18next, json, inlang message format)
 	"settings": {}
 }
 ```
