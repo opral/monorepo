@@ -1,5 +1,6 @@
-import { parse } from "./messageReferenceMatchers.js"
 import type { Plugin } from "@inlang/plugin"
+import { parse } from "./messageReferenceMatchers.js"
+import transformMessageId from "./utils/transformMessageId.js"
 
 export const ideExtensionConfig = (): ReturnType<Exclude<Plugin["addCustomApi"], undefined>> => ({
 	"app.inlang.ideExtension": {
@@ -10,32 +11,22 @@ export const ideExtensionConfig = (): ReturnType<Exclude<Plugin["addCustomApi"],
 		],
 		extractMessageOptions: [
 			{
-				callback: (args: { messageId: string }) => ({
-					messageId: args.messageId
-						.trim()
-						.replace(/[^a-zA-Z0-9\s]/g, "")
-						.replace(/\s+/g, "_")
-						.toLowerCase(),
-					messageReplacement: `{m.${args.messageId
-						.trim()
-						.replace(/[^a-zA-Z0-9\s]/g, "")
-						.replace(/\s+/g, "_")
-						.toLowerCase()}()}`,
-				}),
+				callback: (args: { messageId: string }) => {
+					const messageId = transformMessageId(args.messageId)
+					return {
+						messageId,
+						messageReplacement: `{m.${messageId}()}`,
+					}
+				},
 			},
 			{
-				callback: (args: { messageId: string }) => ({
-					messageId: args.messageId
-						.trim()
-						.replace(/[^a-zA-Z0-9\s]/g, "")
-						.replace(/\s+/g, "_")
-						.toLowerCase(),
-					messageReplacement: `m.${args.messageId
-						.trim()
-						.replace(/[^a-zA-Z0-9\s]/g, "")
-						.replace(/\s+/g, "_")
-						.toLowerCase()}()`,
-				}),
+				callback: (args: { messageId: string }) => {
+					const messageId = transformMessageId(args.messageId)
+					return {
+						messageId,
+						messageReplacement: `m.${messageId}()`,
+					}
+				},
 			},
 		],
 		documentSelectors: [
