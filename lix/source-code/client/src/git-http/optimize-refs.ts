@@ -18,7 +18,7 @@ export async function optimizedRefsReq({
 	// create new body
 	const lines = []
 
-	lines.push(encodePackLine("command=ls-refs")) // TODO #1459 check if we have to ask for the symrefs
+	lines.push(encodePackLine("command=ls-refs"))
 	// 0001 - Delimiter Packet (delim-pkt) - separates sections of a message
 	lines.push(encodePackLine("agent=git/isomorphic-git@1.24.5") + "0001")
 	// TODO #1459 we prefix refs/heads hardcoded here since the ref is set to main....
