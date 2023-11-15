@@ -8,23 +8,11 @@ import * as m from "../../paraglide/messages.js"
 export const [searchInput, setSearchInput] = createSignal<string>("")
 
 export const handleNavigate = () => {
-	if (!currentPageContext.routeParams.category) {
-		if (searchInput() !== "") window.history.pushState({}, "", "/search?q=" + searchInput())
-		// @ts-ignore
-		if (searchInput() === "") navigate("/search")
-		// @ts-ignore
-		else navigate("/search?q=" + searchInput())
-	} else {
-		if (searchInput() !== "")
-			window.history.pushState(
-				{},
-				"",
-				"/c/" + currentPageContext.routeParams.category + "?q=" + searchInput()
-			) // @ts-ignore
-		if (searchInput() === "") navigate("/c/" + currentPageContext.routeParams.category)
-		// @ts-ignore
-		else navigate("/c/" + currentPageContext.routeParams.category + "?q=" + searchInput())
-	}
+	if (searchInput() !== "") window.history.pushState({}, "", "/search?q=" + searchInput())
+	// @ts-ignore
+	if (searchInput() === "") navigate("/search")
+	// @ts-ignore
+	else navigate("/search?q=" + searchInput())
 }
 
 export default function SearchBar() {
