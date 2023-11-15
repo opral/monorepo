@@ -23,7 +23,7 @@ const Guides = () => {
 					</Button>
 				</div>
 
-				<div class="w-full md:w-2/3 flex flex-col divide-y -mt-6">
+				<div class="w-full md:w-2/3 flex flex-col divide-y divide-surface-300 -mt-6">
 					<For each={getGuides()}>
 						{(guide) => {
 							const manifest = registry.find((manifest) => manifest.id === guide)
@@ -35,13 +35,15 @@ const Guides = () => {
 									? manifest.displayName.en
 									: manifest.displayName
 							return (
-								<div class="gap-4 py-8 flex">
+								<div class="gap-4 py-6 flex">
 									<img class="w-7 h-7 object-cover object-center rounded-lg" src={manifest.icon} />
 									<div class="flex flex-col gap-2 flex-1">
-										<h3 class="m-0 mb-2 text-surface-800 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors">
+										<h3 class="m-0 mb-2 text-surface-800 leading-none no-underline font-semibold">
 											{displayName()}
 										</h3>
-										<p>{(manifest.description as { en: string }).en}</p>
+										<p class="text-surface-600 text-sm">
+											{(manifest.description as { en: string }).en}
+										</p>
 									</div>
 									<Button
 										href={`/g/${manifest.uniqueID}/${manifest.id.replaceAll(".", "-")}`}
