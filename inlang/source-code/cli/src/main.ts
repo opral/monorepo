@@ -1,4 +1,3 @@
-import semver from "semver"
 import { Command } from "commander"
 import { machine } from "./commands/machine/index.js"
 import { module } from "./commands/module/index.js"
@@ -10,7 +9,12 @@ import { gitOrigin, telemetry } from "./services/telemetry/implementation.js"
 import fetchPolyfill from "node-fetch"
 import { lint } from "./commands/lint/index.js"
 import { project } from "./commands/project/index.js"
-import { execSync } from "node:child_process"
+import {
+	getCurrentVersion,
+	getLatestVersion,
+	isMajorVersionUpdate,
+	updateToLatest,
+} from "./utilities/versioning.js"
 // --------------- INIT ---------------
 
 // polyfilling node < 18 with fetch
@@ -23,47 +27,6 @@ initErrorMonitoring()
 // checks whether the gitOrigin corresponds to the pattern
 // beautiful logging
 ;(consola as unknown as Consola).wrapConsole()
-
-// --------------- UPDATE UTILS ---------------
-
-// A function to check if there's a major version update
-export function isMajorVersionUpdate(currentVersion: string, latestVersion: string): boolean {
-	return semver.major(currentVersion) !== semver.major(latestVersion)
-}
-
-// Function to get the current version by executing "npx @inlang/cli --version"
-export function getCurrentVersion(): string | void {
-	try {
-		const output = execSync("npx @inlang/cli --version", { encoding: "utf-8", stdio: "pipe" })
-		if (output) return output.toString().trim()
-	} catch (error) {
-		console.error(error instanceof Error ? error.message : error)
-	}
-}
-
-// Function to get the latest version from the npm registry
-export function getLatestVersion(): string | void {
-	try {
-		const output = execSync("npm show @inlang/cli version", { encoding: "utf-8", stdio: "pipe" })
-		if (output) return output.toString().trim()
-	} catch (error) {
-		console.error(error instanceof Error ? error.message : error)
-	}
-}
-
-// Function to update to the latest minor version in the background
-export function updateToLatest(show: boolean = false): void {
-	try {
-		// Execute the update command in the background
-		execSync("npm i -g @inlang/cli@latest", { stdio: "ignore" })
-		if (show) console.info("Updated @inlang/cli to the latest.")
-	} catch (error) {
-		if (show) {
-			console.error("Failed to update @inlang/cli to the latest.")
-			console.error(error instanceof Error ? error.message : error)
-		}
-	}
-}
 
 /**
  * Wrapper to exit the process if the user presses CTRL+C.
