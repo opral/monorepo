@@ -18,7 +18,7 @@ export class DocComment extends LitElement {
 			line-height: 1.2em;
 			color: #0f172a;
 			position: relative;
-			max-width: 296px;
+			max-width: 328px;
 		}
 
 		/* A little rectangle make it look like a speech bubble */

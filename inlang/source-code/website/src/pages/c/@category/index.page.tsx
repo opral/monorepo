@@ -92,7 +92,7 @@ export function Page(props: {
 				{currentPageContext.routeParams.category
 					?.replaceAll("-", " ")
 					.replace(/\w\S*/g, (w) => w.replace(/^\w/, (c) => c.toUpperCase()))}{" "}
-				- inlang
+				| inlang
 			</Title>
 			<Meta
 				name="description"
@@ -110,7 +110,7 @@ export function Page(props: {
 			/>
 			<Meta
 				name="twitter:title"
-				content={`Global ${currentPageContext.routeParams.category} - inlang`}
+				content={`Global ${currentPageContext.routeParams.category} | inlang`}
 			/>
 			<Meta
 				name="twitter:description"

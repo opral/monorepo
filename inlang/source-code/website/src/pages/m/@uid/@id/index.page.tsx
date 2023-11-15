@@ -91,8 +91,8 @@ export function Page(props: PageProps) {
 			<Title>{`${props.manifest && displayName()} ${
 				props.manifest &&
 				(props.manifest.publisherName === "inlang"
-					? "- inlang"
-					: `from ${props.manifest.publisherName}  - inlang`)
+					? "| inlang"
+					: `from ${props.manifest.publisherName} | inlang`)
 			}`}</Title>
 			<Meta name="description" content={props.manifest && description()} />
 			{props.manifest && props.manifest.gallery ? (
@@ -138,7 +138,7 @@ export function Page(props: PageProps) {
 													src={props.manifest.icon}
 												/>
 											</Show>
-											<div>
+											<div class="mb-10 md:mb-0">
 												<div class="flex flex-col gap-3 mb-8">
 													<h1 class="text-3xl font-bold">{displayName()}</h1>
 													<div class="inline-block text-surface-500 ">
