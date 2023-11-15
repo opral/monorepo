@@ -1,11 +1,11 @@
 import { sveltekit } from '@sveltejs/kit/vite';
-import { i18n } from "@inlang/paraglide-js/vite"
+import { paraglide } from "@inlang/paraglide-js/vite"
 import { defineConfig } from "vite"
 
 export default defineConfig({
 	plugins: [
 		sveltekit(),
-		i18n({
+		paraglide({
 			outdir: "./src/paraglide",
 			project: "./project.inlang.json",
 		}),

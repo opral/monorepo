@@ -1,13 +1,10 @@
 import type { PluginOption } from "vite"
 import { exec } from "node:child_process"
-import { readFile } from "node:fs/promises"
-import { loadProject, type ProjectSettings } from "@inlang/sdk"
-import { createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
+import { loadProject } from "@inlang/sdk"
 import path from "node:path"
+import fs from "node:fs/promises"
 
-let cachedSettings: ProjectSettings | undefined = undefined
-
-export const i18n = (config: {
+export const paraglide = (config: {
 	project: string
 	outdir: string
 	timeout?: number
@@ -34,59 +31,16 @@ export const i18n = (config: {
 		name: "vite-plugin-paraglide-js-watcher",
 
 		async buildStart() {
-			if (!cachedSettings) {
-				const settingsContent = await readFile(options.project, "utf-8")
-				cachedSettings = JSON.parse(settingsContent)
-			}
-
-			if (options.onInit) {
-				execute()
-			}
-
 			const inlang = await loadProject({
 				settingsFilePath: path.resolve(process.cwd(), options.project),
-				nodeishFs: createNodeishMemoryFs(),
+				nodeishFs: fs,
 			})
 
 			inlang.query.messages.getAll.subscribe((messages) => {
-				console.log("messages", messages)
-
 				if (messages.length > 0) {
 					execute()
 				}
 			})
 		},
-
-		// async handleHotUpdate({ file }) {
-		// 	if (throttled) return
-
-		// 	throttled = true
-
-		// 	setTimeout(() => (throttled = false), options.timeout)
-
-		// 	let filePath =
-		// 		cachedSettings && (cachedSettings["plugin.inlang.messageFormat"]?.filePath as string)
-		// 	if (!filePath) {
-		// 		console.warn(
-		// 			"No `filePath` found in `project.inlang.json` settings. Skipping paraglide-js compilation."
-		// 		)
-		// 		return
-		// 	}
-
-		// 	if (!filePath.startsWith("/")) {
-		// 		filePath = resolve(process.cwd(), filePath)
-		// 	}
-
-		// 	if (file === filePath) {
-		// 		console.info(
-		// 			"Running",
-		// 			`paraglide-js compile --namespace ${options.namespace} --project ${options.settingsPath}`,
-		// 			"with filePath:",
-		// 			filePath,
-		// 			"\n"
-		// 		)
-		// 		execute()
-		// 	}
-		// },
 	}
 }
