@@ -262,16 +262,6 @@
 							"value": "Kategórie"
 						}
 					]
-				},
-				{
-					"languageTag": "sk",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Kategórie"
-						}
-					]
 				}
 			]
 		},
@@ -1777,16 +1767,6 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Sprievodcovia"
-						}
-					]
-				},
-				{
-					"languageTag": "sk",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
 							"value": "Odporúčané"
 						}
 					]
@@ -2216,16 +2196,6 @@
 						{
 							"type": "Text",
 							"value": "Encontre tudo o que você precisa para se globalizar."
-						}
-					]
-				},
-				{
-					"languageTag": "sk",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "ekosystému, aby sa stal globálnym."
 						}
 					]
 				},
@@ -5012,16 +4982,6 @@
 						{
 							"type": "Text",
 							"value": "para pesquisar"
-						}
-					]
-				},
-				{
-					"languageTag": "sk",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "⌘ + k spustíte vyhľadávanie"
 						}
 					]
 				},
