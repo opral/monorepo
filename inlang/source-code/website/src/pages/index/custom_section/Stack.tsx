@@ -51,7 +51,7 @@ const Stack = () => {
 		},
 	]
 	return (
-		<div class="w-full flex gap-4 mt-4 md:mt-10 mb-10 flex-col-reverse md:flex-row">
+		<div class="w-full flex gap-4 mb-28 mt-10 flex-col-reverse md:flex-row">
 			<div class="w-full">
 				<h2 class="pb-4 text-surface-900 font-semibold text-2xl leading-snug tracking-tight">
 					{m.home_stack_title()}
