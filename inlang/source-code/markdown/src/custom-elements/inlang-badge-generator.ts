@@ -12,11 +12,62 @@ export class InlangBadgeGenerator extends LitElement {
 			height: 100%;
 			width: 100%;
 			padding: 1rem;
-			background: rgba(236, 237, 238, 0.25);
 			border-radius: 0.5rem;
 			font-weight: 500;
 			position: relative;
 		}
+		.mockup-stroke-wrapper {
+			position: absolute;
+			background: rgba(236, 237, 238, 0.25);
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			display: flex;
+			flex-direction: column;
+			align-items: start;
+			justify-content: start;
+			padding: 1rem;
+			border-radius: 0.5rem;
+			z-index: 0;
+		}
+		.mockup-stroke {
+			height: 1rem;
+			background: #ebeff2;
+			border-radius: 0.5rem;
+			margin-bottom: 1.5rem;
+		}
+		.mockup-stroke:nth-child(1) {
+			width: 65%;
+		}
+		.mockup-stroke:nth-child(2) {
+			width: 75%;
+		}
+		.mockup-stroke:nth-child(3) {
+			width: 20%;
+		}
+		.mockup-stroke:nth-child(4) {
+			width: 25%;
+		}
+		.mockup-stroke:nth-child(5) {
+			width: 22%;
+		}
+		.mockup-stroke:nth-child(6) {
+			width: 10%;
+		}
+		.mockup-stroke:nth-child(7) {
+			width: 12%;
+		}
+		.mockup-stroke:nth-child(8) {
+			width: 25%;
+		}
+		.mockup-stroke:nth-child(9) {
+			width: 80%;
+		}
+		.mockup-stroke:nth-child(10) {
+			width: 55%;
+		}
+
 		.badge-showcase {
 			display: flex;
 			flex-direction: row;
@@ -25,7 +76,8 @@ export class InlangBadgeGenerator extends LitElement {
 			justify-content: center;
 			gap: 1rem;
 			width: 100%;
-			height: 375px;
+			height: 400px;
+			z-index: 1;
 		}
 		.options-wrapper {
 			padding: 0.25rem;
@@ -200,6 +252,18 @@ export class InlangBadgeGenerator extends LitElement {
 
 	override render() {
 		return html`<div class="generator-wrapper">
+			<div class="mockup-stroke-wrapper">
+				<div class="mockup-stroke"></div>
+				<div class="mockup-stroke"></div>
+				<div class="mockup-stroke"></div>
+				<div class="mockup-stroke"></div>
+				<div class="mockup-stroke"></div>
+				<div class="mockup-stroke"></div>
+				<div class="mockup-stroke"></div>
+				<div class="mockup-stroke"></div>
+				<div class="mockup-stroke"></div>
+				<div class="mockup-stroke"></div>
+			</div>
 			${this.loading
 				? html`<div class="loading"><sl-spinner style="font-size: 3rem;"></sl-spinner></div>`
 				: ""}
