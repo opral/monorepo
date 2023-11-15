@@ -91,8 +91,8 @@ export function Page(props: PageProps) {
 			<Title>{`${props.manifest && displayName()} ${
 				props.manifest &&
 				(props.manifest.publisherName === "inlang"
-					? "- inlang"
-					: `from ${props.manifest.publisherName}  - inlang`)
+					? "| inlang"
+					: `from ${props.manifest.publisherName} | inlang`)
 			}`}</Title>
 			<Meta name="description" content={props.manifest && description()} />
 			{props.manifest && props.manifest.gallery ? (
