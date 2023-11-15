@@ -24,6 +24,58 @@ initErrorMonitoring()
 // beautiful logging
 ;(consola as unknown as Consola).wrapConsole()
 
+// --------------- UPDATE UTILS ---------------
+
+// A function to check if there's a major version update
+export function isMajorVersionUpdate(currentVersion: string, latestVersion: string): boolean {
+	return semver.major(currentVersion) !== semver.major(latestVersion)
+}
+
+// Function to get the current version by executing "npx @inlang/cli --version"
+export function getCurrentVersion(): string | void {
+	try {
+		const output = execSync("npx @inlang/cli --version", { encoding: "utf-8", stdio: "pipe" })
+		if (output) return output.toString().trim()
+	} catch (error) {
+		console.error(error instanceof Error ? error.message : error)
+	}
+}
+
+// Function to get the latest version from the npm registry
+export function getLatestVersion(): string | void {
+	try {
+		const output = execSync("npm show @inlang/cli version", { encoding: "utf-8", stdio: "pipe" })
+		if (output) return output.toString().trim()
+	} catch (error) {
+		console.error(error instanceof Error ? error.message : error)
+	}
+}
+
+// Function to update to the latest minor version in the background
+export function updateToLatest(show: boolean = false): void {
+	try {
+		// Execute the update command in the background
+		execSync("npm i -g @inlang/cli@latest", { stdio: "ignore" })
+		if (show) console.info("Updated @inlang/cli to the latest.")
+	} catch (error) {
+		if (show) {
+			console.error("Failed to update @inlang/cli to the latest.")
+			console.error(error instanceof Error ? error.message : error)
+		}
+	}
+}
+
+/**
+ * Wrapper to exit the process if the user presses CTRL+C.
+ */
+const prompt: typeof consola.prompt = async (message, options) => {
+	const response = await consola.prompt(message, options)
+	if (response?.toString() === "Symbol(clack:cancel)") {
+		process.exit(0)
+	}
+	return response
+}
+
 // --------------- CLI ---------------
 
 export const cli = new Command()
@@ -38,7 +90,7 @@ export const cli = new Command()
 	.addCommand(open)
 	.addCommand(module)
 	// Hooks
-	.hook("preAction", (command) => {
+	.hook("preAction", async (command) => {
 		// name enables better grouping in the telemetry dashboard
 		const name = command.args.filter(
 			// shouldn't start with a flag and the previous arg shouldn't be a flag
@@ -57,16 +109,17 @@ export const cli = new Command()
 		if (latestVersion && currentVersion) {
 			if (isMajorVersionUpdate(currentVersion, latestVersion)) {
 				console.info(`A major update to (${latestVersion}) is available.`)
-				// Prompt the user to update
-				const userResponse = prompt("Do you want to update to the latest version? (yes/no)")
-				if (userResponse?.toLowerCase().includes("y")) {
+				const userResponse = await prompt(`Do you want to update to the latest version?`, {
+					initial: true,
+					type: "confirm",
+				})
+				if (userResponse === true) {
 					console.info("Updating to the latest...")
 					updateToLatest(true)
 				} else {
 					console.info("Continuing with the current version...")
 				}
 			} else {
-				// Check for the latest minor version and update automatically in the background
 				updateToLatest()
 			}
 		}
@@ -89,45 +142,3 @@ telemetry.groupIdentify({
 		name: gitOrigin,
 	},
 })
-
-// --------------- UPDATE UTILS ---------------
-
-// A function to check if there's a major version update
-export function isMajorVersionUpdate(currentVersion: string, latestVersion: string): boolean {
-	return semver.major(currentVersion) !== semver.major(latestVersion)
-}
-
-// Function to get the current version by executing "npx @inlang/cli --version"
-export function getCurrentVersion(): string | void {
-	try {
-		const output = execSync("npx @inlang/cli --version", { encoding: "utf-8" })
-		// Extract the version from the output (it's in the format "X.Y.Z")
-		if (output) return output.trim()
-	} catch (error) {
-		console.error(error instanceof Error ? error.message : error)
-	}
-}
-
-// Function to get the latest version from the npm registry
-export function getLatestVersion(): string | void {
-	try {
-		const output = execSync("npm show @inlang/cli version", { encoding: "utf-8" })
-		if (output) return output.trim()
-	} catch (error) {
-		console.error(error instanceof Error ? error.message : error)
-	}
-}
-
-// Function to update to the latest minor version in the background
-export function updateToLatest(show: boolean = false): void {
-	try {
-		// Execute the update command in the background
-		execSync("npm i -g @inlang/cli@latest", { stdio: "ignore" })
-		if (show) console.info("Updated @inlang/cli to the latest.")
-	} catch (error) {
-		if (show) {
-			console.error("Failed to update @inlang/cli to the latest.")
-			console.error(error instanceof Error ? error.message : error)
-		}
-	}
-}
