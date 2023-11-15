@@ -81,7 +81,7 @@ function getIterator(iterable) {
 // Currently 'for await' upsets my linters.
 async function forAwait(iterable, cb) {
 	const iter = getIterator(iterable)
-	// @ts-ignore
+	// eslint-disable-next-line no-constant-condition
 	while (true) {
 		const { value, done } = await iter.next()
 		if (value) await cb(value)
