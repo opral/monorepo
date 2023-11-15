@@ -1534,6 +1534,84 @@
 			]
 		},
 		{
+			"id": "home_guides_button_text",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "See all Guides"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Alle Guides ansehen"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_guides_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Use plugins and adapters to easily make products work for your specific needs, no matter where you want them to work."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Verwende Plugins und Adapter, um Produkte einfach an deine spezifischen Anforderungen anzupassen, egal wo und egal wie sie funktionieren sollen."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_guides_item_button_text",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Read"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lesen"
+						}
+					]
+				}
+			]
+		},
+		{
 			"id": "home_guides_title",
 			"selectors": [],
 			"variants": [
@@ -1584,84 +1662,6 @@
 						{
 							"type": "Text",
 							"value": "Guias"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "home_guides_description",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Use plugins and adapters to easily make products work for your specific needs, no matter where you want them to work."
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Verwende Plugins und Adapter, um Produkte einfach an deine spezifischen Anforderungen anzupassen, egal wo und egal wie sie funktionieren sollen."
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "home_guides_button_text",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "See all Guides"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Alle Guides ansehen"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "home_guides_item_button_text",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Read"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Lesen"
 						}
 					]
 				}
@@ -1983,27 +1983,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Find the products you need to go global."
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Finde die richtigen Produkte, um global zu gehen."
-						}
-					]
-				},
-				{
-					"languageTag": "fr",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Trouvez tout ce dont vous avez besoin pour vous mondialiser."
+							"value": "Find products to go global."
 						}
 					]
 				},
@@ -2013,7 +1993,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Trova tutto quello che ti serve per diventare globale"
+							"value": "Trova tutto quello che ti serve per diventare globale."
 						}
 					]
 				},
@@ -2024,6 +2004,26 @@
 						{
 							"type": "Text",
 							"value": "Encontre tudo o que você precisa para se globalizar."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Finde Produkte um Global zu gehen."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Trouvez tout ce dont vous avez besoin pour vous mondialiser."
 						}
 					]
 				}
