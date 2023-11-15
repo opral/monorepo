@@ -79,9 +79,6 @@ export function decodeGitPackLines(concatenatedUint8Array: Uint8Array) {
 			strings.push(stringData)
 		}
 
-		// Add the string to the array
-
-		// Move the offset to the next potential string
 	}
 
 	return strings
