@@ -1590,86 +1590,14 @@
 							"value": "Produtos em Destaque"
 						}
 					]
-				}
-			]
-		},
-		{
-			"id": "home_guides_title",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Find the right guides"
-						}
-					]
 				},
 				{
-					"languageTag": "de",
+					"languageTag": "sk",
 					"match": [],
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Finde die richtigen Guides"
-						}
-					]
-				},
-				{
-					"languageTag": "fr",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Guides"
-						}
-					]
-				},
-				{
-					"languageTag": "it",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Guide"
-						}
-					]
-				},
-				{
-					"languageTag": "pt-BR",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Guias"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "home_guides_description",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Use plugins and adapters to easily make products work for your specific needs, no matter where you want them to work."
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Verwende Plugins und Adapter, um Produkte einfach an deine spezifischen Anforderungen anzupassen, egal wo und egal wie sie funktionieren sollen."
+							"value": "Vybrané produkty"
 						}
 					]
 				}
@@ -1698,6 +1626,52 @@
 							"value": "Alle Guides ansehen"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Pozrite si všetky príručky"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_guides_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Use plugins and adapters to easily make products work for your specific needs, no matter where you want them to work."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Verwende Plugins und Adapter, um Produkte einfach an deine spezifischen Anforderungen anzupassen, egal wo und egal wie sie funktionieren sollen."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Použite pluginy a adaptéry na jednoduché prispôsobenie produktov vašim špecifickým potrebám bez ohľadu na to, kde chcete, aby fungovali."
+						}
+					]
 				}
 			]
 		},
@@ -1722,42 +1696,6 @@
 						{
 							"type": "Text",
 							"value": "Lesen"
-						}
-					]
-				},
-				{
-					"languageTag": "sk",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Odporúčané"
-						}
-					]
-				}
-			]
-		},
-		{
-			"id": "home_guides_title",
-			"selectors": [],
-			"variants": [
-				{
-					"match": [],
-					"languageTag": "en",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Guides"
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Guides"
 						}
 					]
 				},
@@ -2050,6 +1988,16 @@
 							"value": "Cerca nell'ecosistema ..."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Hľadajte v ekosystéme..."
+						}
+					]
 				}
 			]
 		},
@@ -2084,6 +2032,16 @@
 						{
 							"type": "Text",
 							"value": "Popolari"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Populárne"
 						}
 					]
 				}
@@ -2140,6 +2098,16 @@
 						{
 							"type": "Text",
 							"value": "Assista o SvelteSummit Talk em 11.11.23"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Sledujte 11. novembra, 23. SvelteSummit Talk"
 						}
 					]
 				}
@@ -3986,6 +3954,16 @@
 							"value": "Eigene App bauen"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vytvorte si aplikáciu"
+						}
+					]
 				}
 			]
 		},
@@ -4012,6 +3990,16 @@
 							"value": "..."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vylepšite svoj zážitok z i18n pomocou aplikácií inlang."
+						}
+					]
 				}
 			]
 		},
@@ -4036,6 +4024,16 @@
 						{
 							"type": "Text",
 							"value": "Apps"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Aplikácie"
 						}
 					]
 				}
@@ -4460,6 +4458,16 @@
 							"value": "Neu: Paraglide JS"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Novinka: Paraglide JS"
+						}
+					]
 				}
 			]
 		},
@@ -4484,6 +4492,16 @@
 						{
 							"type": "Text",
 							"value": "..."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Použite knižnice na rozšírenie vášho softvérového projektu."
 						}
 					]
 				}
@@ -4512,6 +4530,16 @@
 							"value": "Libraries"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Knižnice"
+						}
+					]
 				}
 			]
 		},
@@ -4536,6 +4564,16 @@
 						{
 							"type": "Text",
 							"value": "Mehr lesen"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Čítaj viac"
 						}
 					]
 				}
@@ -4564,6 +4602,16 @@
 							"value": "..."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Ovládajte celý proces prekladu: od návrhu po frontend."
+						}
+					]
 				}
 			]
 		},
@@ -4588,6 +4636,16 @@
 						{
 							"type": "Text",
 							"value": "Was sind Lint Regeln?"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Čo sú pravidlá Lint?"
 						}
 					]
 				}
@@ -4616,6 +4674,16 @@
 							"value": "Eigene Lint Regel entwickeln"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vlastné pravidlo Lint"
+						}
+					]
 				}
 			]
 		},
@@ -4640,6 +4708,16 @@
 						{
 							"type": "Text",
 							"value": "..."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Overte obsah v projekte inlang."
 						}
 					]
 				}
@@ -4668,6 +4746,16 @@
 							"value": "Lint Regeln"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lint pravidlá"
+						}
+					]
 				}
 			]
 		},
@@ -4692,6 +4780,16 @@
 						{
 							"type": "Text",
 							"value": "SvelteSummit Fall 2023 anschauen"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Pozrite si prednášku SvelteSummit na jeseň 2023"
 						}
 					]
 				}
@@ -4720,6 +4818,16 @@
 							"value": "Mit Paraglide JS starten"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Začnite s Paraglide JS"
+						}
+					]
 				}
 			]
 		},
@@ -4746,6 +4854,16 @@
 							"value": "..."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Najlepšia knižnica i18n pre web. Plne konfigurovateľná knižnica JavaScript i18n, ktorá sa integruje do vášho rámca."
+						}
+					]
 				}
 			]
 		},
@@ -4765,6 +4883,16 @@
 				},
 				{
 					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Paraglide JS"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
 					"match": [],
 					"pattern": [
 						{
@@ -4798,6 +4926,16 @@
 							"value": "Mehr lesen"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Čítaj viac"
+						}
+					]
 				}
 			]
 		},
@@ -4822,6 +4960,16 @@
 						{
 							"type": "Text",
 							"value": "..."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Objavte výhody používania doplnkov: sloboda a nízke náklady."
 						}
 					]
 				}
@@ -4850,6 +4998,16 @@
 							"value": "Was sind Plugins?"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Čo sú pluginy?"
+						}
+					]
 				}
 			]
 		},
@@ -4874,6 +5032,16 @@
 						{
 							"type": "Text",
 							"value": "Eigenes Plugin entwickeln"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vytvorte doplnok"
 						}
 					]
 				}
@@ -4902,6 +5070,16 @@
 							"value": "..."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Zmeňte alebo rozšírte správanie aplikácie."
+						}
+					]
 				}
 			]
 		},
@@ -4926,6 +5104,16 @@
 						{
 							"type": "Text",
 							"value": "Plugins"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Pluginy"
 						}
 					]
 				}
