@@ -30,7 +30,7 @@ const HeroSearch = () => {
 	return (
 		<div class="flex flex-col gap-2 items-center">
 			<div class="pt-8 md:pt-16 group">
-				<Link href="https://www.sveltesummit.com/2023/fall" target="_blanc">
+				<Link href="https://www.youtube.com/live/pTgIx-ucMsY?feature=shared&t=3825" target="_blanc">
 					<div class="flex gap-4 items-center text-surface-500 group-hover:text-active-primary">
 						<Play />
 						<p>{m.home_inlang_secondary_link()}</p>

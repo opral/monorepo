@@ -15,7 +15,7 @@ If something isn't working as expected or you have a feature suggestion, please 
 
 <doc-features>
   <doc-feature color="#E2E8F0" title="Extract messages" icon="solar:scissors-linear"></doc-feature>
-  <doc-feature color="#E2E8F0" title="Inline Annotations" icon="solar:magnifer-bug-outline"></doc-feature>
+  <doc-feature color="#E2E8F0" title="Lint messages" icon="solar:magnifer-bug-outline"></doc-feature>
   <doc-feature color="#E2E8F0" title="Inline Annotations" icon="solar:chat-square-code-outline"></doc-feature>
 </doc-features>
 
@@ -55,7 +55,7 @@ Translations from the resource files are automatically updated when you change t
 
 ## Setup
 
-Create a `project.inlang.json` in the **root** of your project. You can use the following template when using json files as translation files, if not, please look for other [supported resource file types](https://inlang.com/):
+1. Create a `project.inlang.json` in the **root** of your project. You can use the following template when using json files as translation files, if not, please look for other [supported resource file types](https://inlang.com/):
 
 ```json
 {
@@ -65,15 +65,23 @@ Create a `project.inlang.json` in the **root** of your project. You can use the 
 	"sourceLanguageTag": "en",
 	// all the language tags you want to support in your project
 	"languageTags": ["en", "de"],
-	"modules": [],
+	"modules": [], // add a module from: https://inlang.com/c/plugins (i18next, json, inlang message format)
 	"settings": {}
 }
 ```
 
+2. If you already have a `project.inlang.json`, you should continue with **installing a function syntax matcher**. There are multiple syntax matcher available like:
+
+- m function matcher: https://inlang.com/m/632iow21/plugin-inlang-mFunctionMatcher
+- t function matcher: https://inlang.com/m/698iow33/plugin-inlang-tFunctionMatcher
+- *if you are using the i18next module, everything is already built-in*
+
+3. ✨ Recommended: If you want to add lint rules to your experience, you can add them from: https://inlang.com/c/lint-rules
+
 #### Requirements:
 
-- Requires VS Code version 1.80.1 or higher.
-- Node.js version 16.17.1 or higher.
+- VS Code version 1.84.0 or higher.
+- Node.js version v18 or higher.
 
 ## Usage
 

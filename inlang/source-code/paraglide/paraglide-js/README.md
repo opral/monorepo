@@ -1,6 +1,12 @@
-![Paraglide JS header image](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglide-js-header.png)
+<!-- ![Paraglide JS header image](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglide-js-header.png) -->
 
-# The best i18n library for the web
+[  <img src="https://cdn.loom.com/sessions/thumbnails/a8365ec4fa2c4f6bbbf4370cf22dd7f6-with-play.gif" width="100%" /> Watch the pre-release demo of Paraglide JS](https://www.loom.com/share/a8365ec4fa2c4f6bbbf4370cf22dd7f6?sid=6bbd43bb-74aa-41a0-bbdd-096432957e00)
+
+Attention: The following features are missing and will be added in the upcoming weeks: 
+
+- [ ] Support for pluralization
+
+# The i18n library that you can set up within 3 lines of code
 
 Type in the following command into your terminal to get started immediately:
 
@@ -12,8 +18,8 @@ npx @inlang/paraglide-js@latest init
 
 <doc-features>
   <doc-feature title="No unused translations" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/unused-translations.png"></doc-feature>
-  <doc-feature title="Message functions" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/message-functions.png"></doc-feature>
-  <doc-feature title="Type safety" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/typesafe.png"></doc-feature>
+  <doc-feature title="Reduced payload" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/reduced-payload.png"></doc-feature>
+  <doc-feature title="Typesafety" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/typesafe.png"></doc-feature>
 </doc-features>
 
 … and much more

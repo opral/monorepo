@@ -6,20 +6,12 @@ import Highlight from "#src/interface/components/Highlight.jsx"
 import Card, { CardBuildOwn, NoResultsCard } from "#src/interface/components/Card.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
-import SubcategoryPills from "#src/interface/marketplace/SubcategoryPills.jsx"
 import * as m from "#src/paraglide/messages.js"
-import {
-	IconFlutter,
-	IconJavascript,
-	IconNextjs,
-	IconReact,
-	IconSolid,
-	IconSvelte,
-	IconVue,
-} from "#src/interface/custom-icons/subcategoryIcon.jsx"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
-import SvelteHeader from "#src/interface/marketplace/categoryHeaders/application/svelte.jsx"
-import GenericHeader from "#src/interface/marketplace/categoryHeaders/application/generic.jsx"
+import TitleSection from "#src/interface/marketplace/categoryHeaders/titleSection.jsx"
+import PluginHeader from "#src/interface/marketplace/categoryHeaders/toast/plugins.jsx"
+import ParaglideHeader from "#src/interface/marketplace/categoryHeaders/cards/paraglide.jsx"
+import LintRulesHeader from "#src/interface/marketplace/categoryHeaders/toast/lintRules.jsx"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -45,43 +37,53 @@ export function Page(props: {
 			setSearchValue(urlParams.get("search")?.replace(/%20/g, " ") || "")
 		}
 	})
-	const getSubCategies = [
-		{
-			name: "Svelte",
-			param: "svelte",
-			icon: <IconSvelte class="-ml-1 w-5 h-5" />,
-		},
-		{
-			name: "Solid",
-			param: "solid",
-			icon: <IconSolid class="-ml-1 w-5 h-5" />,
-		},
-		{
-			name: "React",
-			param: "react",
-			icon: <IconReact class="-ml-1 w-5 h-5" />,
-		},
-		{
-			name: "Next.js",
-			param: "nextjs",
-			icon: <IconNextjs class="-ml-1 w-5 h-5" />,
-		},
-		{
-			name: "Vue",
-			param: "vue",
-			icon: <IconVue class="-ml-1 w-5 h-5" />,
-		},
-		{
-			name: "Javascript",
-			param: "javascript",
-			icon: <IconJavascript class="-ml-1 w-5 h-5" />,
-		},
-		{
-			name: "Flutter",
-			param: "flutter",
-			icon: <IconFlutter class="-ml-1 w-5 h-5" />,
-		},
-	]
+
+	type HeaderContentType = {
+		title: string
+		description: string
+		buttonLink: string
+		buttonText: string
+	}
+
+	const getHeaderContent = (): HeaderContentType | undefined => {
+		switch (currentPageContext.routeParams.category) {
+			case "apps":
+				return {
+					title: m.marketplace_header_apps_title(),
+					description: m.marketplace_header_apps_description(),
+					buttonLink: "/documentation/develop-app",
+					buttonText: m.marketplace_header_apps_button_text(),
+				}
+			case "libraries":
+				return {
+					title: m.marketplace_header_libraries_title(),
+					description: m.marketplace_header_libraries_description(),
+					buttonLink: "/m/gerre34r/library-inlang-paraglideJs",
+					buttonText: m.marketplace_header_libraries_button_text(),
+				}
+			case "plugins":
+				return {
+					title: m.marketplace_header_plugins_title(),
+					description: m.marketplace_header_plugins_description(),
+					buttonLink: "/documentation/develop-pluginp",
+					buttonText: m.marketplace_header_plugins_button_text(),
+				}
+			case "lint-rules":
+				return {
+					title: m.marketplace_header_lintRules_title(),
+					description: m.marketplace_header_lintRules_description(),
+					buttonLink: "/documentation/develop-lint-rule",
+					buttonText: m.marketplace_header_lintRules_button_text(),
+				}
+			default:
+				return {
+					title: "inlang",
+					description: "The ecosystem to go global.",
+					buttonLink: "/",
+					buttonText: "Home",
+				}
+		}
+	}
 
 	return (
 		<>
@@ -120,20 +122,24 @@ export function Page(props: {
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />
 			<MarketplaceLayout>
-				<Show when={currentPageContext.routeParams.category === "application"}>
-					<div class="pt-4 text-sm font-medium flex items-center gap-3 w-full overflow-x-scroll pb-4 overflow-scrollbar overflow-scrollbar-x">
-						<p class="pr-4 text-surface-400">{m.footer_category_title() + ":"}</p>
-						<SubcategoryPills links={getSubCategies} />
-					</div>
-					<Show
-						fallback={<GenericHeader />}
-						when={currentPageContext.urlParsed.search["q"]?.includes("svelte")}
-					>
-						<SvelteHeader />
+				<Show when={currentPageContext.routeParams.category && getHeaderContent()}>
+					<TitleSection
+						title={getHeaderContent()!.title}
+						description={getHeaderContent()!.description}
+						buttonLink={getHeaderContent()!.buttonLink}
+						buttonText={getHeaderContent()!.buttonText}
+					/>
+					<Show when={currentPageContext.routeParams.category === "plugins"}>
+						<PluginHeader />
+					</Show>
+					<Show when={currentPageContext.routeParams.category === "lint-rules"}>
+						<LintRulesHeader />
+					</Show>
+					<Show when={currentPageContext.routeParams.category === "libraries"}>
+						<ParaglideHeader />
 					</Show>
 				</Show>
 				<div class="pb-16 md:pb-20 min-h-screen relative">
-					<h2 class="text-md text-surface-600 pb-4 pt-8">{m.marketplace_grid_title_generic()}</h2>
 					<SectionLayout showLines={false} type="white">
 						<div class="relative">
 							<Show when={props.highlights}>
