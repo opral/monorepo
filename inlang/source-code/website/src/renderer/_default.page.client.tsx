@@ -1,6 +1,6 @@
 import { type Component, createSignal } from "solid-js"
 import { createStore } from "solid-js/store"
-import { hydrate, render as renderApp } from "solid-js/web"
+import { hydrate } from "solid-js/web"
 import { Root } from "./_default.root.jsx"
 import { setCurrentPageContext } from "./state.js"
 import type { PageContextRenderer } from "./types.js"
@@ -47,7 +47,7 @@ if (import.meta.env.PROD) {
 	})
 }
 
-// see https://vite-plugin-ssr.com/clientRouting#page-content
+// see https://vike.dev/clientRouting#page-content
 export const clientRouting = true
 
 let isFirstRender = true
@@ -58,7 +58,6 @@ const [currentPageProps, setCurrentPageProps] = createStore<Record<string, unkno
 
 export function render(pageContext: PageContextRenderer) {
 	try {
-		const isEditor = pageContext.urlPathname.includes("/editor")
 		setCurrentPageContext(pageContext)
 		setCurrentPage(() => pageContext.Page)
 		setCurrentPageProps(pageContext.pageProps)
@@ -67,7 +66,7 @@ export function render(pageContext: PageContextRenderer) {
 			//
 			// In the future, the editor might be server-side rendered.
 			// For now, the trouble of isomorphic rendering the editor is not worth it.
-			;(isEditor ? renderApp : hydrate)(
+			hydrate(
 				() => (
 					<MetaProvider>
 						<Root page={currentPage()!} pageProps={currentPageProps} />

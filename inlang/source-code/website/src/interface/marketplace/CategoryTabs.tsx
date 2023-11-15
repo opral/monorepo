@@ -1,36 +1,33 @@
 import { For } from "solid-js"
 import { currentPageContext } from "#src/renderer/state.js"
 import Link from "#src/renderer/Link.jsx"
-import * as m from "@inlang/paraglide-js/website/messages"
+import * as m from "#src/paraglide/messages.js"
 import { setSearchInput } from "../components/SearchBar.jsx"
 
 const CategoryTabs = () => {
 	const getCategories = () => {
 		return [
 			{
-				name: m.marketplace_header_category_application(),
-				href: "/c/application",
+				name: m.marketplace_header_apps_title(),
+				href: "/c/apps",
 			},
 			{
-				name: m.marketplace_header_category_website(),
-				href: "/c/website",
+				name: m.marketplace_header_libraries_title(),
+				href: "/c/libraries",
 			},
 			{
-				name: m.marketplace_header_category_markdown(),
-				href: "/c/markdown",
+				name: m.marketplace_header_plugins_title(),
+				href: "/c/plugins",
 			},
 			{
-				name: m.marketplace_header_category_lint(),
+				name: m.marketplace_header_lintRules_title(),
 				href: "/c/lint-rules",
-			},
-			{
-				name: m.marketplace_header_category_missing_something(),
-				href: "https://github.com/inlang/monorepo/discussions",
 			},
 		]
 	}
 	return (
-		<nav class="max-w-7xl mx-auto flex gap-4 overflow-x-scroll hide-scrollbar">
+		<nav class="max-w-7xl mx-auto flex gap-2 overflow-x-scroll hide-scrollbar items-center">
+			<p class="text-sm pr-4 font-regular text-surface-500">{m.footer_category_title() + ":"}</p>
 			<For each={getCategories()}>
 				{(link) => (
 					<div

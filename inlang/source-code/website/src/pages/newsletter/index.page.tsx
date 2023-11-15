@@ -1,7 +1,7 @@
 import { Meta, Title } from "@solidjs/meta"
 import { NewsletterForm } from "#src/interface/components/NewsletterForm.jsx"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
-import * as m from "@inlang/paraglide-js/website/messages"
+import * as m from "#src/paraglide/messages.js"
 
 export type PageProps = {
 	markdown: string

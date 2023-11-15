@@ -10,9 +10,6 @@ import { ProjectSettings } from "@inlang/project-settings"
 const MarketplaceManifestBase = Type.Object({
 	$schema: Type.Optional(Type.Literal("https://inlang.com/schema/marketplace-manifest")),
 	icon: Type.Optional(Type.String()),
-	coverImage: Type.Optional(
-		Type.String({ description: "The cover displayed in the marketplace." })
-	),
 	gallery: Type.Optional(
 		Type.Array(
 			Type.String({
@@ -33,10 +30,19 @@ const MarketplaceManifestBase = Type.Object({
 	readme: Translatable(
 		Type.TemplateLiteral("${string}.md", { description: "The path to the readme file." })
 	),
+	recommends: Type.Optional(
+		Type.Array(
+			Type.TemplateLiteral("m/${string}", {
+				description:
+					"The uniqueIDs, starting with m/[UNIQUEID] of the recommended items with a max amount of 3.",
+				maxLength: 3,
+			})
+		)
+	),
 	keywords: Type.Array(Type.String()),
-	license: Type.Literal("Apache-2.0"),
+	license: Type.String({ description: "The license of the item (e.g. Apache-2.0)." }),
 	website: Type.Optional(
-		Type.String({ description: "An optional link to the website of the marketplace item." })
+		Type.String({ description: "An optional link to the website of the item." })
 	),
 })
 

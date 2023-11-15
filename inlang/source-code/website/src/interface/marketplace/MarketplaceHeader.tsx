@@ -7,10 +7,10 @@ import IconGithub from "~icons/cib/github"
 import IconDiscord from "~icons/cib/discord"
 import { IconX } from "../components/Icon.jsx"
 import Link from "#src/renderer/Link.jsx"
-import * as m from "@inlang/paraglide-js/website/messages"
+import * as m from "#src/paraglide/messages.js"
 import { LanguagePicker } from "#src/pages/index/LanguagePicker.jsx"
 import { Banner } from "../components/Banner.jsx"
-import { languageTag } from "@inlang/paraglide-js/website"
+import { languageTag } from "#src/paraglide/runtime.js"
 
 const MarketplaceHeader = () => {
 	const socialMediaLinks = [
@@ -86,7 +86,6 @@ const MarketplaceHeader = () => {
 				</div>
 				<Show
 					when={
-						!currentPageContext.urlParsed.pathname.includes("/m/") &&
 						!currentPageContext.urlParsed.pathname.includes("/g/") &&
 						!currentPageContext.urlParsed.pathname.includes("/documentation") &&
 						!currentPageContext.urlParsed.pathname.includes("/install")

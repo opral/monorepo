@@ -49,7 +49,7 @@ Helpful **example implementations** of lint rules can be found [here](https://gi
 
 In your lint rule's `marketplace-manifest.json` make sure to define the following information:
 
-| **Parameter**        | **Description**                                               |
+| Parameter        | Description                                               |
 |----------------------|---------------------------------------------------------------|
 | `id`                 | Unique identifier for your lint rule.                         |
 | `icon`        | Link to the icon of your lint rule (optional).              |
@@ -69,6 +69,6 @@ Before publishing your lint rule to the marketplace, thoroughly test it to ensur
 
 ### 5. Publish your lint rule
 
-To make your lint rule available in the inlang.com marketplace, see [Publish on marketplace](/documentation/publish-marketplace).
+To make your lint rule available in the inlang.com marketplace, see [Publish on marketplace](/documentation/publish-to-marketplace).
 
 Feel free to [join our Discord](https://discord.gg/gdMPPWy57R) if you have any questions or need assistance developing and publishing your lint rule.

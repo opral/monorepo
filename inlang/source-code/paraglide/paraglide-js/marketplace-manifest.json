@@ -5,19 +5,21 @@
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/paraglide-marketplace-cover.jpg",
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-1.jpg",
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-2.jpg",
-		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-3.jpg"
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-3.jpg",
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-4.jpg"
 	],
 	"displayName": {
-		"en": "paraglideJS"
+		"en": "Paraglide JS"
 	},
 	"description": {
 		"en": "A fully configurable JavaScript i18n library that integrates within your framework."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/paraglide/paraglide-js/README.md"
+		"en": "./inlang/source-code/paraglide/paraglide-js/README.md"
 	},
 	"keywords": [
-		"application",
+		"paraglide js",
+		"libraries",
 		"website",
 		"developer",
 		"paraglide",
@@ -30,8 +32,11 @@
 		"react",
 		"nextjs",
 		"vue",
-		"javascript"
+		"javascript",
+		"solid",
+		"typescript"
 	],
+	"recommends": ["m/reootnfj", "m/632iow21", "m/r7kp499g"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0"

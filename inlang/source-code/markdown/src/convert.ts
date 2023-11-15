@@ -31,12 +31,21 @@ export async function convert(markdown: string): Promise<string> {
 				"doc-copy",
 				"doc-links",
 				"doc-icon",
+				"doc-slider",
+				"doc-comment",
+				"doc-comments",
+				"doc-proof",
+				"doc-feature",
+				"doc-features",
 				"inlang-badge-generator",
 				...defaultSchema.tagNames!,
 			],
 			attributes: {
 				"doc-figure": ["src", "alt", "caption"],
 				"doc-link": ["href", "description", "title", "icon"],
+				"doc-comment": ["author", "text", "icon"],
+				"doc-feature": ["name", "icon", "image", "color", "text-color"],
+				"doc-proof": ["organisations"],
 				...defaultSchema.attributes,
 			},
 		})
@@ -46,9 +55,9 @@ export async function convert(markdown: string): Promise<string> {
 		.use(addClasses, {
 			"h1,h2,h3,h4,h5,h6":
 				"doc-font-semibold doc-leading-relaxed doc-relative doc-my-6 doc-cursor-pointer doc-group/heading doc-no-underline",
-			h1: "doc-text-3xl doc-pb-3 doc-mb-2",
-			h2: "doc-text-2xl doc-pb-3 doc-mb-1",
-			h3: "doc-text-xl",
+			h1: "doc-text-3xl doc-pb-3 doc-mb-2 doc-mt-12",
+			h2: "doc-text-2xl doc-pb-3 doc-mb-1 doc-mt-8",
+			h3: "doc-text-xl doc-mt-8",
 			h4: "doc-text-lg",
 			h5: "doc-text-lg",
 			h6: "doc-text-base",
@@ -60,7 +69,7 @@ export async function convert(markdown: string): Promise<string> {
 			ol: "doc-list-decimal doc-list-inside",
 			li: "doc-space-y-3",
 			table:
-				"doc-table-auto doc-w-full doc-my-6 doc-rounded-xl doc-text-left max-w-full overflow-x-scroll",
+				"doc-table-auto doc-w-full doc-my-6 doc-rounded-xl doc-text-left doc-max-w-[100%] doc-overflow-x-scroll",
 			thead: "doc-font-medium pb-2 doc-border-b border-surface-4 doc-text-left",
 			th: "doc-py-2 doc-font-medium doc-border-b border-surface-2",
 			tr: "doc-py-2 doc-border-b border-surface-2",

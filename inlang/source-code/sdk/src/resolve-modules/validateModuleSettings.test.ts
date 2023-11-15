@@ -5,7 +5,6 @@ import { Plugin, MessageLintRule } from "@inlang/sdk"
 import { Type } from "@sinclair/typebox"
 import { validatedModuleSettings } from "./validatedModuleSettings.js"
 
-
 const mockPluginSchema: Plugin["settingsSchema"] = Type.Object({
 	pathPattern: Type.Union([
 		Type.String({

@@ -26,10 +26,12 @@ export const initCommand = new Command()
 		await checkIfUncommittedChanges()
 		await checkIfPackageJsonExists()
 		const projectPath = await initializeInlangProject()
-		const namespace = await promptForNamespace()
-		await addCompileStepToPackageJSON({ projectPath, namespace })
-		await adjustTsConfigIfNecessary()
 		await addParaglideJsToDependencies()
+		await addCompileStepToPackageJSON({ projectPath })
+		await maybeChangeTsConfigModuleResolution()
+		await maybeChangeTsConfigAllowJs()
+		await maybeAddVsCodeExtension({ projectPath })
+
 		consola.box(
 			"inlang Paraglide-JS has been set up sucessfully.\n\n1. Run your install command (npm i, yarn install, etc)\n2. Run the build script (npm run build, or similar.)\n3. Done :) Happy paragliding 🪂\n\n For questions and feedback, visit https://github.com/inlang/monorepo/discussions.\n"
 		)
@@ -47,6 +49,46 @@ export const initializeInlangProject = async () => {
 	}
 }
 
+export const maybeAddVsCodeExtension = async (args: { projectPath: string }) => {
+	const response = await prompt(`Are you using VSCode?`, {
+		type: "confirm",
+		initial: true,
+	})
+	if (response === false) {
+		return
+	}
+
+	const file = await fs.readFile(args.projectPath, { encoding: "utf-8" })
+	const stringify = detectJsonFormatting(file)
+	const settings = JSON.parse(file) as ProjectSettings
+
+	// m function matcher is not installed
+	if (settings.modules.some((m) => m.includes("plugin-m-function-matcher")) === false) {
+		// add the m function matcher plugin
+		settings.modules.push(
+			"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js"
+		)
+		await fs.writeFile(args.projectPath, stringify(settings))
+	}
+	let extensions: any = {}
+	try {
+		extensions = JSON5.parse(await fs.readFile("./.vscode/extensions.json", { encoding: "utf-8" }))
+	} catch {
+		// continue
+	}
+	if (extensions.recommendations === undefined) {
+		extensions.recommendations = []
+	}
+	if (extensions.recommendations.includes("inlang.vs-code-extension") === false) {
+		extensions.recommendations.push("inlang.vs-code-extension")
+		if (fsSync.existsSync("./.vscode") === false) {
+			await fs.mkdir("./.vscode")
+		}
+		await fs.writeFile("./.vscode/extensions.json", JSON.stringify(extensions, undefined, 2))
+		consola.success("Added the inlang vs code extension to the workspace recommendations.")
+	}
+}
+
 export const addParaglideJsToDependencies = async () => {
 	const file = await fs.readFile("./package.json", { encoding: "utf-8" })
 	const stringify = detectJsonFormatting(file)
@@ -57,27 +99,6 @@ export const addParaglideJsToDependencies = async () => {
 	pkg.dependencies["@inlang/paraglide-js"] = version
 	await fs.writeFile("./package.json", stringify(pkg))
 	consola.success("Added @inlang/paraglide-js to the dependencies in package.json.")
-}
-
-export const promptForNamespace = async (): Promise<string> => {
-	let assumedName = process.cwd().split("/").pop()
-	try {
-		assumedName = JSON.parse(await fs.readFile("./package.json", { encoding: "utf-8" })).name
-	} catch {
-		// nothing
-	}
-
-	consola.info(`You need to select a name for the project.
-
-The name is used to create an importable 'namespace' to distinguish between multiple projects in the same repository. For example, the name \`frontend\` will create the following import statement:
-	
-\`import * as m from "@inlang/paraglide-js/frontend/messages"\``)
-
-	const namespace = await prompt(`What should be the name of the project?`, {
-		type: "text",
-		initial: assumedName,
-	})
-	return namespace.trim()
 }
 
 export const findExistingInlangProjectPath = async (): Promise<string | undefined> => {
@@ -111,6 +132,7 @@ export const existingProjectFlow = async (args: { existingProjectPath: string })
 	}
 	const project = await loadProject({
 		settingsFilePath: resolve(process.cwd(), args.existingProjectPath),
+		//@ts-ignore
 		nodeishFs: fs,
 	})
 	if (project.errors().length > 0) {
@@ -127,6 +149,7 @@ export const createNewProjectFlow = async () => {
 	await fs.writeFile(DEFAULT_PROJECT_PATH, JSON.stringify(newProjectTemplate, undefined, 2))
 	const project = await loadProject({
 		settingsFilePath: resolve(process.cwd(), DEFAULT_PROJECT_PATH),
+		//@ts-ignore
 		nodeishFs: fs,
 	})
 	if (project.errors().length > 0) {
@@ -149,18 +172,20 @@ export const newProjectTemplate: ProjectSettings = {
 	sourceLanguageTag: "en",
 	languageTags: ["en"],
 	modules: [
-		// for instant gratification, we're adding the most common rules
+		// for instant gratification, we're adding common rules
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@latest/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@latest/dist/index.js",
 		// default to the message format plugin because it supports all features
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/dist/index.js",
+		// the m function matcher should be installed by default in case the ide extension is adopted
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js",
 	],
 	"plugin.inlang.messageFormat": {
 		// using .inlang/paraglide-js as directory to avoid future conflicts when an official .inlang
 		// directory is introduced, see https://github.com/inlang/monorepo/discussions/1418
-		filePath: "./.inlang/plugin.inlang.messageFormat/messages.json",
+		pathPattern: "./messages/{languageTag}.json",
 	},
 }
 
@@ -200,10 +225,7 @@ export const checkIfUncommittedChanges = async () => {
 	}
 }
 
-export const addCompileStepToPackageJSON = async (args: {
-	projectPath: string
-	namespace: string
-}) => {
+export const addCompileStepToPackageJSON = async (args: { projectPath: string }) => {
 	const file = await fs.readFile("./package.json", { encoding: "utf-8" })
 	const stringify = detectJsonFormatting(file)
 	const pkg = JSON.parse(file)
@@ -211,15 +233,15 @@ export const addCompileStepToPackageJSON = async (args: {
 		if (pkg.scripts === undefined) {
 			pkg.scripts = {}
 		}
-		pkg.scripts.build = `paraglide-js compile --project ${args.projectPath} --namespace ${args.namespace}`
+		pkg.scripts.build = `paraglide-js compile --project ${args.projectPath}`
 	} else if (pkg?.scripts?.build.includes("paraglide-js compile") === false) {
-		pkg.scripts.build = `paraglide-js compile --project ${args.projectPath} --namespace ${args.namespace} && ${pkg.scripts.build}`
+		pkg.scripts.build = `paraglide-js compile --project ${args.projectPath} && ${pkg.scripts.build}`
 	} else {
 		consola.warn(`The "build" script in the \`package.json\` already contains a "paraglide-js compile" command.
 
 Please add the following command to your build script manually:
 
-\`paraglide-js compile --project ${args.projectPath} --namespace ${args.namespace}\``)
+\`paraglide-js compile --project ${args.projectPath}`)
 		const response = await consola.prompt(
 			"Have you added the compile command to your build script?",
 			{
@@ -246,7 +268,7 @@ Please add the following command to your build script manually:
  * Otherwise, types defined in `package.exports` are not resolved by TypeScript. Leading to type
  * errors with Paraglide-JS.
  */
-export const adjustTsConfigIfNecessary = async () => {
+export const maybeChangeTsConfigModuleResolution = async () => {
 	if (fsSync.existsSync("./tsconfig.json") === false) {
 		return
 	}
@@ -293,7 +315,7 @@ export const adjustTsConfigIfNecessary = async () => {
 			`Did you set the \`compilerOptions.moduleResolution\` to "Bundler"?`,
 			{
 				type: "confirm",
-				initial: false,
+				initial: true,
 			}
 		)
 		if (response === false) {
@@ -312,6 +334,55 @@ export const adjustTsConfigIfNecessary = async () => {
 		} else {
 			consola.error(
 				"The compiler options have not been adjusted. Please set the `compilerOptions.moduleResolution` to `Bundler`."
+			)
+		}
+	}
+}
+
+/**
+ * Paraligde JS compiles to JS with JSDoc comments. TypeScript doesn't allow JS files by default.
+ */
+export const maybeChangeTsConfigAllowJs = async () => {
+	if (fsSync.existsSync("./tsconfig.json") === false) {
+		return
+	}
+	const file = await fs.readFile("./tsconfig.json", { encoding: "utf-8" })
+	// tsconfig allows comments ... FML
+	const tsconfig = JSON5.parse(file)
+
+	if (tsconfig.compilerOptions?.allowJs === true) {
+		// all clear, allowJs is already set to true
+		return
+	}
+
+	consola.info(
+		`You need to set the \`compilerOptions.allowJs\` to \`true\` in the \`tsconfig.json\` file:
+
+\`{
+  "compilerOptions": {
+    "allowJs": true
+  }
+}\``
+	)
+	let isValid = false
+	while (isValid === false) {
+		const response = await prompt(`Did you set the \`compilerOptions.allowJs\` to \`true\`?`, {
+			type: "confirm",
+			initial: true,
+		})
+		if (response === false) {
+			return consola.warn(
+				"Continuing without adjusting the tsconfig.json. This may lead to type errors."
+			)
+		}
+		const file = await fs.readFile("./tsconfig.json", { encoding: "utf-8" })
+		const tsconfig = JSON5.parse(file)
+		if (tsconfig?.compilerOptions?.allowJs === true) {
+			isValid = true
+			return
+		} else {
+			consola.error(
+				"The compiler options have not been adjusted. Please set the `compilerOptions.allowJs` to `true`."
 			)
 		}
 	}

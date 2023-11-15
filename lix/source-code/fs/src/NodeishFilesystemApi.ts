@@ -1,3 +1,5 @@
+// eslint-disable-next-line no-restricted-imports
+// import type { WatchOptions } from "node:fs"
 /**
  * The filesystem interface.
  *
@@ -19,12 +21,23 @@ export type NodeishFilesystem = {
 	mkdir(path: string, options?: { recursive: boolean }): Promise<string | undefined>
 	rm(path: string, options?: { recursive: boolean }): Promise<void>
 	rmdir(path: string): Promise<void>
+	watch(
+		path: string,
+		options?: {
+			recursive?: boolean
+			signal?: AbortSignal
+			persistent?: false
+		}
+		// WatchOptions
+	): AsyncIterable<FileChangeInfo>
 	symlink(target: string, path: string): Promise<void>
 	unlink(path: string): Promise<void>
 	readlink(path: string): Promise<string>
 	stat(path: string): Promise<NodeishStats>
 	lstat(path: string): Promise<NodeishStats>
 }
+
+export type FileChangeInfo = { eventType: "rename" | "change"; filename: string | null }
 
 export type FileData = string | Uint8Array
 

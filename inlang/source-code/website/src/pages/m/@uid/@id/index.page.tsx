@@ -1,24 +1,24 @@
 import { Meta, Title } from "@solidjs/meta"
-import { For, Show, createEffect, createSignal, onMount } from "solid-js"
+import { For, Show, createEffect, createSignal, onMount, Switch, Match } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { isModule } from "@inlang/marketplace-registry"
 import { Button } from "#src/pages/index/components/Button.jsx"
 import { Chip } from "#src/interface/components/Chip.jsx"
-import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
-import { SelectRepo } from "./../../Select.jsx"
+import ArrowOutward from "~icons/material-symbols/arrow-outward"
 import {
 	colorForTypeOf,
 	convertLinkToGithub,
 	typeOfIdToTitle,
 } from "#src/interface/marketplace/helper/utilities.js"
-import { languageTag } from "@inlang/paraglide-js/website"
+import { languageTag } from "#src/paraglide/runtime.js"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { currentPageContext } from "#src/renderer/state.js"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
-import OnClient from "#src/interface/components/OnClient.jsx"
+import Card from "#src/interface/components/Card.jsx"
+import { EditButton } from "#src/pages/documentation/EditButton.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -26,6 +26,7 @@ import OnClient from "#src/interface/components/OnClient.jsx"
 export type PageProps = {
 	markdown: Awaited<ReturnType<any>>
 	manifest: MarketplaceManifest & { uniqueID: string }
+	recommends?: MarketplaceManifest[]
 }
 
 export function Page(props: PageProps) {
@@ -90,8 +91,8 @@ export function Page(props: PageProps) {
 			<Title>{`${props.manifest && displayName()} ${
 				props.manifest &&
 				(props.manifest.publisherName === "inlang"
-					? "- inlang"
-					: `from ${props.manifest.publisherName}  - inlang`)
+					? "| inlang"
+					: `from ${props.manifest.publisherName} | inlang`)
 			}`}</Title>
 			<Meta name="description" content={props.manifest && description()} />
 			{props.manifest && props.manifest.gallery ? (
@@ -115,15 +116,15 @@ export function Page(props: PageProps) {
 			<Meta name="twitter:creator" content="@inlanghq" />
 			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
-					<div class="md:py-28 py-16">
-						<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-20 md:gap-8 gap-6">
+					<div class="md:py-16 py-8">
+						<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-32">
 							<Show
 								when={props.markdown}
 								fallback={<p class="text-danger">{props.markdown?.error}</p>}
 							>
-								<section class="col-span-1 md:col-span-4 md:pb-10 pb-8 mb-12 md:mb-8 border-b border-surface-2 grid md:grid-cols-4 grid-cols-1 gap-16">
+								<section class="col-span-1 md:col-span-4 pb-4 md:pb-0 grid md:grid-cols-4 grid-cols-1 md:gap-16">
 									<div class="flex-col h-full justify-between md:col-span-3">
-										<div class="flex max-md:flex-col items-start gap-8 mb-12">
+										<div class="flex max-md:flex-col items-start gap-8">
 											<Show
 												when={props.manifest.icon}
 												fallback={
@@ -137,73 +138,58 @@ export function Page(props: PageProps) {
 													src={props.manifest.icon}
 												/>
 											</Show>
-											<div class="flex flex-col gap-3">
-												<h1 class="text-3xl font-bold">{displayName()}</h1>
-												<div class="inline-block text-surface-500 ">
-													<p class={!readmore() ? "lg:line-clamp-2" : ""}>{description()}</p>
-													<Show when={description().length > 205}>
-														<p
-															onClick={() => setReadmore((prev) => !prev)}
-															class="cursor-pointer hover:text-surface-700 transition-all duration-150 font-medium max-lg:hidden"
-														>
-															{readmore() ? "Minimize" : "Read more"}
-														</p>
-													</Show>
+											<div class="mb-10 md:mb-0">
+												<div class="flex flex-col gap-3 mb-8">
+													<h1 class="text-3xl font-bold">{displayName()}</h1>
+													<div class="inline-block text-surface-500 ">
+														<p class={!readmore() ? "lg:line-clamp-2" : ""}>{description()}</p>
+														<Show when={description().length > 205}>
+															<p
+																onClick={() => setReadmore((prev) => !prev)}
+																class="cursor-pointer hover:text-surface-700 transition-all duration-150 font-medium max-lg:hidden"
+															>
+																{readmore() ? "Minimize" : "Read more"}
+															</p>
+														</Show>
+													</div>
+												</div>
+												<div class="flex gap-4 flex-wrap">
+													<Switch>
+														{/* IS MODULE */}
+														<Match when={isModule(props.manifest)}>
+															<div class="flex items-center gap-2">
+																{/* @ts-ignore */}
+																<Button
+																	type="primary"
+																	href={`/install?module=${props.manifest.id}`}
+																>
+																	<span class="capitalize">
+																		Install{" "}
+																		{props.manifest.id.includes("messageLintRule")
+																			? "Lint Rule"
+																			: typeOfIdToTitle(props.manifest.id)}
+																	</span>
+																</Button>
+															</div>
+														</Match>
+														{/* IS NO MODULE */}
+														<Match when={!isModule(props.manifest)}>
+															<>
+																<Show when={props.manifest.website}>
+																	{/* @ts-ignore */}
+																	<Button type="primary" href={props.manifest.website}>
+																		Open{" "}
+																		<Show when={props.manifest.website?.includes("http")}>
+																			<ArrowOutward />
+																		</Show>
+																	</Button>
+																</Show>
+															</>
+														</Match>
+													</Switch>
 												</div>
 											</div>
 										</div>
-										<div class="flex gap-4 flex-wrap">
-											<Show
-												when={isModule(props.manifest)}
-												fallback={
-													/* @ts-ignore */
-													<Show when={props.manifest.website}>
-														{/* @ts-ignore */}
-														<Button type="primary" href={props.manifest.website}>
-															Open
-														</Button>
-													</Show>
-												}
-											>
-												<div class="flex items-center gap-2">
-													{/* @ts-ignore */}
-													<Button type="primary" href={`/install?module=${props.manifest.id}`}>
-														<span class="capitalize">
-															Install{" "}
-															{props.manifest.id.includes("messageLintRule")
-																? "Lint Rule"
-																: typeOfIdToTitle(props.manifest.id)}
-														</span>
-														{/* @ts-ignore */}
-														<SelectRepo size="medium" modules={[props.manifest.id]} />
-													</Button>
-												</div>
-											</Show>
-											<Button
-												type="secondary"
-												href={convertLinkToGithub(readme())?.replace("README.md", "")}
-											>
-												GitHub
-												<MaterialSymbolsArrowOutward
-													// @ts-ignore
-													slot="suffix"
-												/>
-											</Button>
-										</div>
-										<Show
-											when={
-												props.manifest.gallery &&
-												props.manifest.gallery.length > 1 &&
-												!props.manifest.id.includes("messageLintRule")
-											}
-										>
-											<OnClient>
-												<div class="pt-12">
-													{/* @ts-ignore */}
-													<doc-slider items={props.manifest.gallery} />
-												</div>
-											</OnClient>
-										</Show>
 										<Show
 											when={
 												props.manifest.gallery &&
@@ -220,10 +206,10 @@ export function Page(props: PageProps) {
 										</Show>
 									</div>
 									<div class="w-full">
-										<div class="flex flex-col gap-4 items-col flex-shrink-0">
+										<div class="flex flex-col gap-6 items-col flex-shrink-0">
 											<Show
 												when={props.manifest.keywords
-													.map((keyword) => keyword.toLowerCase())
+													.map((keyword: string) => keyword.toLowerCase())
 													.includes("lix")}
 											>
 												<div>
@@ -263,22 +249,7 @@ export function Page(props: PageProps) {
 												</div>
 											</div>
 											<div>
-												<h3 class="text-surface-400 text-sm mb-2">Keywords</h3>
-												<div class="flex flex-wrap gap-2 items-center">
-													<For each={props?.manifest?.keywords}>
-														{(keyword) => (
-															<Link
-																class="transition-opacity hover:opacity-80 cursor-pointer"
-																href={"/search?q=" + keyword}
-															>
-																<Chip text={keyword} color={colorForTypeOf(props.manifest.id)} />
-															</Link>
-														)}
-													</For>
-												</div>
-											</div>
-											<div>
-												<h3 class="text-surface-400 text-sm mb-2">License</h3>
+												<h3 class="text-surface-400 text-sm mb-1.5">License</h3>
 												<p class="m-0 text-surface-600 no-underline font-medium">
 													{props?.manifest?.license}
 												</p>
@@ -288,22 +259,52 @@ export function Page(props: PageProps) {
 								</section>
 								<Show
 									when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}
-									fallback={<Markdown markdown={props.markdown} fullWidth />}
+									fallback={<Markdown markdown={props.markdown} />}
 								>
-									<div class="grid md:grid-cols-4 grid-cols-1 col-span-1 md:col-span-4 gap-16">
-										<Markdown markdown={props.markdown} />
-										{/* Classes to be added: sticky z-10 top-16 pt-8 md:pt-0 md:static bg-background */}
-										<aside class="col-span-1 md:order-1 -order-1">
-											<NavbarCommon
-												displayName={displayName}
-												getLocale={languageTag}
-												tableOfContents={tableOfContents}
-											/>
-										</aside>
+									<div class="col-span-1 md:col-span-4 mb-16">
+										<div class="grid md:grid-cols-4 grid-cols-1 gap-16">
+											<div class={"w-full rounded-lg col-span-1 md:col-span-3"}>
+												<Markdown markdown={props.markdown} />
+											</div>
+											{/* Classes to be added: sticky z-10 top-16 pt-8 md:pt-0 md:static bg-background */}
+											<aside class="col-span-1 md:order-1 -order-1 hidden md:block">
+												<NavbarCommon
+													displayName={displayName}
+													getLocale={languageTag}
+													tableOfContents={tableOfContents}
+												/>
+											</aside>
+										</div>
 									</div>
 								</Show>
+								<div>
+									<EditButton
+										// type="secondary"
+										href={convertLinkToGithub(readme())?.replace("README.md", "")}
+									/>
+								</div>
+								<div class="md:col-span-3 md:my-0 my-12">
+									<div>
+										<h3 class="text-surface-400 text-sm mb-2">Keywords</h3>
+										<div class="flex flex-wrap gap-2 items-center">
+											<For each={props?.manifest?.keywords}>
+												{(keyword) => (
+													<Link
+														class="transition-opacity hover:opacity-80 cursor-pointer"
+														href={"/search?q=" + keyword}
+													>
+														<Chip text={keyword} color={colorForTypeOf(props.manifest.id)} />
+													</Link>
+												)}
+											</For>
+										</div>
+									</div>
+								</div>
 							</Show>
 						</div>
+						<Show when={props.recommends}>
+							<Recommends recommends={props.recommends!} />
+						</Show>
 						<div class="mt-20">
 							<GetHelp text="Do you have questions?" />
 						</div>
@@ -314,16 +315,54 @@ export function Page(props: PageProps) {
 	)
 }
 
-function Markdown(props: { markdown: string; fullWidth?: boolean }) {
+function Recommends(props: { recommends: MarketplaceManifest[] }) {
+	const [show, setShow] = createSignal<boolean>(false)
+
+	onMount(() => {
+		setShow(true)
+	})
+
 	return (
-		<article
-			class={
-				"w-full rounded-lg col-span-1 " + (props.fullWidth ? "md:col-span-4" : "md:col-span-3")
-			}
-			// eslint-disable-next-line solid/no-innerhtml
-			innerHTML={props.markdown}
-		/>
+		<>
+			<h3 class="font-semibold mb-4">Recommended to use with:</h3>
+			<div class="flex items-center gap-4 md:flex-row flex-col">
+				<Show
+					when={show()}
+					fallback={
+						<div class="h-auto w-full col-span-4 flex items-center justify-center py-16 relative">
+							<div class="mx-auto">
+								<div class="h-12 w-12 animate-spin mb-4">
+									<div class="h-full w-full bg-surface-50 border-primary border-4 rounded-full" />
+									<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-surface-50" />
+								</div>
+							</div>
+						</div>
+					}
+				>
+					<For each={props.recommends}>
+						{/* @ts-ignore */}
+						{(item) => <Card item={item} displayName={item.displayName.en} />}
+					</For>
+				</Show>
+			</div>
+		</>
 	)
+}
+
+function Markdown(props: { markdown: string }) {
+	// eslint-disable-next-line solid/no-innerhtml
+	return <article innerHTML={props.markdown} />
+}
+
+const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
+	const element = document.getElementById(anchor)
+	if (element && window) {
+		window.scrollTo({
+			top: element.offsetTop - 128,
+			behavior: behavior ?? "instant",
+		})
+	}
+	window.history.pushState({}, "", `${currentPageContext.urlParsed.pathname}#${anchor}`)
 }
 
 function NavbarCommon(props: {
@@ -354,17 +393,6 @@ function NavbarCommon(props: {
 		} else {
 			return false
 		}
-	}
-
-	const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
-		const element = document.getElementById(anchor)
-		if (element && window) {
-			window.scrollTo({
-				top: element.offsetTop - 96,
-				behavior: behavior ?? "instant",
-			})
-		}
-		window.history.pushState({}, "", `${currentPageContext.urlParsed.pathname}#${anchor}`)
 	}
 
 	onMount(async () => {
@@ -408,7 +436,7 @@ function NavbarCommon(props: {
 	})
 
 	return (
-		<div class="mb-12 sticky top-28 max-h-[96vh] overflow-y-scroll overflow-scrollbar">
+		<div class="mb-12 sticky top-36 mt-16 max-h-[96vh] overflow-y-scroll overflow-scrollbar">
 			<ul role="list" class="w-full space-y-3">
 				<For each={Object.keys(props.tableOfContents())}>
 					{(sectionTitle) => (

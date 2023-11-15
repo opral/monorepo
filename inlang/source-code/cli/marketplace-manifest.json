@@ -1,6 +1,6 @@
 {
 	"id": "app.inlang.cli",
-	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"icon": "https://raw.githubusercontent.com/inlang/monorepo/e318fc5289b08664b9df54a74f7850d84be6e87b/inlang/source-code/cli/assets/cli-icon.png",
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/cli-marketplace-cover.jpg",
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/cli-gallery/cli-gallery-image-1.jpg",
@@ -14,7 +14,7 @@
 		"en": "Command line interface for inlang projects. Many commands and the possibility to do automation."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/cli/README.md"
+		"en": "./inlang/source-code/cli/README.md"
 	},
 	"keywords": ["cli", "commands", "application", "website", "developer", "ai", "ci/cd", "lix"],
 	"publisherName": "inlang",

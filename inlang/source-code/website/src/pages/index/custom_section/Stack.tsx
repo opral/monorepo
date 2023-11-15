@@ -4,12 +4,13 @@ import {
 	IconNextjs,
 	IconReact,
 	IconSvelte,
+	IconSolid,
 	IconVue,
 } from "#src/interface/custom-icons/subcategoryIcon.jsx"
 import Link from "#src/renderer/Link.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 import { For } from "solid-js"
-import * as m from "@inlang/paraglide-js/website/messages"
+import * as m from "#src/paraglide/messages.js"
 
 const Stack = () => {
 	const getSubCategies: boolean | any[] | null | undefined = [
@@ -17,6 +18,11 @@ const Stack = () => {
 			name: "Svelte",
 			param: "svelte",
 			icon: <IconSvelte class="-ml-1 w-8 h-8" />,
+		},
+		{
+			name: "Solid",
+			param: "solid",
+			icon: <IconSolid class="-ml-1 w-8 h-8" />,
 		},
 		{
 			name: "React",
@@ -45,9 +51,11 @@ const Stack = () => {
 		},
 	]
 	return (
-		<div class="w-full flex gap-4 mt-4 md:mt-10 mb-10 flex-col-reverse md:flex-row">
+		<div class="w-full flex gap-4 mb-28 mt-10 flex-col-reverse md:flex-row">
 			<div class="w-full">
-				<p class="pb-2 text-surface-500 text-sm">{m.home_stack_title()}</p>
+				<h2 class="pb-4 text-surface-900 font-semibold text-2xl leading-snug tracking-tight">
+					{m.home_stack_title()}
+				</h2>
 				<div class="flex gap-2 overflow-x-scroll hide-scrollbar">
 					<For each={getSubCategies}>
 						{(link) => (

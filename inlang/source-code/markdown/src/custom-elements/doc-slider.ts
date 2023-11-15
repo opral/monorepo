@@ -32,6 +32,9 @@ export class DocSlider extends LitElement {
 		window.removeEventListener("resize", this._initiateContainers)
 	}
 
+	@property()
+	popupIndex: number = -1
+
 	static override get styles() {
 		return css`
 			:host {
@@ -53,6 +56,7 @@ export class DocSlider extends LitElement {
 				background-color: #e2e8f0;
 				aspect-ratio: 1 / 1;
 				width: 40px;
+				max-width: 40px;
 				height: auto;
 				border-radius: 50%;
 				display: flex;
@@ -110,6 +114,7 @@ export class DocSlider extends LitElement {
 				transition: transform 300ms;
 				width: var(--item-width);
 				border-radius: 0.5rem;
+				cursor: zoom-in;
 			}
 
 			article img {
@@ -121,6 +126,26 @@ export class DocSlider extends LitElement {
 
 			:host([looping]) article {
 				transition: none;
+			}
+
+			.popup {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+				background-color: #00000080;
+				z-index: 99;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				cursor: zoom-out;
+			}
+
+			.popup > img {
+				max-width: 1100px;
+				width: 90%;
 			}
 		`
 	}
@@ -134,12 +159,26 @@ export class DocSlider extends LitElement {
 				<div id="contents">
 					${this.items.map(
 						(item) => html`
-							<article>
+							<article
+								@click=${() => {
+									this.popupIndex = this.items.indexOf(item)
+								}}
+							>
 								<img src="${item}" />
 							</article>
 						`
 					)}
 				</div>
+				${this.popupIndex !== -1
+					? html`<div
+							class="popup"
+							@click=${() => {
+								this.popupIndex = -1
+							}}
+					  >
+							<img src="${this.items[this.popupIndex]}" />
+					  </div>`
+					: undefined}
 				<button class="btn-next" @click=${() => this._move("right")}>
 					<doc-icon height="40" icon="mdi:chevron-right"></doc-icon>
 				</button>

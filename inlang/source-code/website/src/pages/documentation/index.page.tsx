@@ -4,7 +4,7 @@ import type SlDetails from "@shoelace-style/shoelace/dist/components/details/det
 import { Meta, Title } from "@solidjs/meta"
 import { Feedback } from "./Feedback.jsx"
 import { EditButton } from "./EditButton.jsx"
-import { languageTag } from "@inlang/paraglide-js/website"
+import { languageTag } from "#src/paraglide/runtime.js"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import tableOfContents from "../../../../../documentation/tableOfContents.json"
