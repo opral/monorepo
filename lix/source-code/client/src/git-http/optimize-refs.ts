@@ -85,7 +85,6 @@ export async function optimizedRefsRes({
 
 		rewrittenLines.push("")
 
-		// @ts-ignore
 		resHeaders["content-type"] = "application/x-git-upload-pack-advertisement"
 
 		const bodyString = rewrittenLines
