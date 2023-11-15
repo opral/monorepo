@@ -13,7 +13,7 @@
 		"en": "Badge showing missing messages in your codebase. Perfect for your README.md file."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/badge/README.md"
+		"en": "./inlang/source-code/badge/README.md"
 	},
 	"keywords": ["apps", "badge", "markdown", "translation", "status", "lix"],
 	"publisherName": "inlang",
