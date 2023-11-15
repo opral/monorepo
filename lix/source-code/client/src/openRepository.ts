@@ -248,27 +248,7 @@ export async function openRepository(
 
 		commit(cmdArgs) {
 			return (async (cmdArgs) => {
-				// TODO #1459 WIP start to implement a tree extraction
-				// we pass only the lazy loaded files to the status matrix
-				/*
-				const filepaths = await listFiles({
-					fs: rawFs,
-					gitdir: gitdir,
-					// TODO #1459 investigate the index cache further seem to be an in memory forwared on write cache to allow fast reads of the index...
-					dir: dir,
-					// NOTE: no ref config! we don't set ref because we want the list of files on the index
-				});
-
-				GitIndexManager.acquire({ fs: rawFs, gitdir }, async function(
-					index
-				  ) {
-					return index.entries.map(x => x.path)
-				  })
-
-				const flattFileList = flatFileListToDirectoryStructure(filepaths);
-
-*/
-
+				
 				// TODO #1459 use central helper function
 				function normalPath(path: string): string {
 					const dots = /(\/|^)(\.\/)+/g
@@ -343,7 +323,7 @@ export async function openRepository(
 
 					for (const entry of fileStates[currentFolder]!) {
 						const oid =
-							entry.oid ?? (await createTree(currentFolder + entry.path + "/", fileStates))
+							entry.type === 'tree' ? (await createTree(currentFolder + entry.path + "/", fileStates)) : entry.oid!;
 
 						entries.push({
 							mode: !entry.oid && entry.type === "tree" ? "040000" : entry.mode,
@@ -366,16 +346,19 @@ export async function openRepository(
 					// eslint-disable-next-line @typescript-eslint/no-unused-vars
 					map: async function (fullpath, [refState, _workdir, stagingState]) {
 						if ((!refState && !stagingState) || fullpath === ".") {
-							// skip unmanaged files (not indexed nor in ref)
+							// skip unmanaged files (not indexed nor in ref) and skip root
 							return
+						}
+
+						if (fullpath === ".") {
+							// skip root folder
+							return 
 						}
 
 						const fileDir = getDirname(fullpath)
 						if (fileStates[fileDir] === undefined) {
 							fileStates[fileDir] = []
 						}
-
-						// TODO #1459 compare the file state of commit vs stage if we see changes reset all oids of all parents
 
 						if (!stagingState && refState) {
 							// file was not checked out - open question how do we distinguis it from deleted?
@@ -403,12 +386,7 @@ export async function openRepository(
 
 						if (stagingState && refState) {
 							// file does exists in both
-
-							const stagingOid = await stagingState.oid()
-							const refOid = await refState.oid()
 							const stagingMode = await stagingState.mode()
-							const refMode = await refState.mode()
-							console.log(stagingMode + " " + refMode)
 
 							fileStates[fileDir]?.push({
 								mode: stagingMode ? stagingMode.toString(8) : "040000",
@@ -419,27 +397,6 @@ export async function openRepository(
 
 							return
 						}
-
-						// if (stat)
-						// {
-						// 	fullpath: fullpath,
-						// 	mode: inode.metadata.mode,
-						// 	path: inode.basename,
-						// 	oid: inode.metadata.oid,
-						// 	type: inode.type,
-						// }
-						// if (fullpath === ".") return
-
-						// const oId = await commit?.oid()
-						// if (oId === undefined) {
-						// 	return
-						// }
-
-						// filePathToOid[fullpath] = oId
-						// if (oidToFilePaths[oId] === undefined) {
-						// 	oidToFilePaths[oId] = [] as string[]
-						// }
-						// oidToFilePaths[oId]?.push(fullpath)
 					},
 					reduce: async function (parent, children) {},
 				})
