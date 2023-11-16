@@ -183,7 +183,13 @@ export function makeHttpClient({ verbose, description, onReq, onRes }) {
 		let resBody
 		if (onRes) {
 			const uint8Array = new Uint8Array(await res.arrayBuffer())
-			const rewritten = await onRes({ url: origUrl, resBody: uint8Array, statusCode, resHeaders })
+			const rewritten = await onRes({
+				origUrl,
+				usedUrl: url,
+				resBody: uint8Array,
+				statusCode,
+				resHeaders,
+			})
 
 			resHeaders = rewritten?.resHeaders || resHeaders
 			resBody = rewritten?.resBody || [uint8Array]

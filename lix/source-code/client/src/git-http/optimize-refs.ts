@@ -43,17 +43,18 @@ export async function optimizedRefsReq({
 }
 
 export async function optimizedRefsRes({
-	url,
+	origUrl,
 	resBody,
 	statusCode,
 	resHeaders,
 }: {
-	url: string
+	origUrl: string
+	usedUrl: string
 	resBody: Uint8Array
 	statusCode: number
 	resHeaders: Record<string, string>
 }) {
-	if (!url.endsWith("info/refs?service=git-upload-pack")) {
+	if (!origUrl.endsWith("info/refs?service=git-upload-pack")) {
 		return
 	}
 
