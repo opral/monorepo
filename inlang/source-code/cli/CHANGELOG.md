@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 1.21.0
+
+### Minor Changes
+
+- fd207085a: feat: Check for CLI package updates
+
 ## 1.20.0
 
 ### Minor Changes
