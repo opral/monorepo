@@ -7,7 +7,7 @@
 		"access": "public"
 	},
 	"exports": {
-		"./vite": "./dist/vite-plugin/index.js"
+		".": "./dist/index.js"
 	},
 	"bin": {
 		"paraglide-js": "./bin/run.js"

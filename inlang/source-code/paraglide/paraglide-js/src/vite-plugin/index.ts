@@ -4,7 +4,7 @@ import { loadProject } from "@inlang/sdk"
 import path from "node:path"
 import fs from "node:fs/promises"
 
-export const paraglide = (config: {
+export const vitePlugin = (config: {
 	project: string
 	outdir: string
 	timeout?: number

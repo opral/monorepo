@@ -1,1 +1,1 @@
-export { paraglide } from "./vite-plugin/index.js"
+export { vitePlugin } from "./vite-plugin/index.js"

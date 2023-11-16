@@ -1,10 +1,10 @@
 import { defineConfig } from "vite"
 import solid from "vite-plugin-solid"
 import { ssr as vikePlugin } from "vike/plugin"
-import { watch } from "vite-plugin-watch"
 import { fileURLToPath, URL } from "node:url"
 import Icons from "unplugin-icons/vite"
 import { nodePolyfills } from "vite-plugin-node-polyfills"
+import { vitePlugin } from "@inlang/paraglide-js"
 
 const isProduction = process.env.NODE_ENV === "production"
 
@@ -30,9 +30,9 @@ export default defineConfig({
 		// use those sites to search for icons.
 		Icons({ compiler: "solid" }),
 		// markdownHotModuleReload(),
-		watch({
-			pattern: "static/messages.json",
-			command: "paraglide-js compile --project ../../../project.inlang.json",
+		vitePlugin({
+			outdir: "./src/paraglide",
+			project: "./project.inlang.json",
 		}),
 	],
 	resolve: {
