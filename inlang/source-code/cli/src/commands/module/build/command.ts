@@ -6,16 +6,28 @@ import { moduleBuildOptions } from "./moduleBuildOptions.js"
  * Using regular esbuild is faster but opens the door for platform specific code which
  * can lead to bugs. Thus, rather a bit slower but more reliable.
  */
-import { context } from "esbuild-wasm"
+import { context, Plugin, BuildContext } from "esbuild-wasm"
 
 // Define the forbidden Node.js imports
-const forbiddenNodeImports = ['fs', 'path', 'os', 'net']
+const forbiddenNodeImports: string[] = ['fs', 'path', 'os', 'net']
 
+// Define types for the build action function arguments
+interface BuildActionArgs {
+	entry: string;
+	outdir: string;
+	watch: boolean;
+}
+
+interface ArgsTypes {
+	path: string;
+}
+
+  
 // Create an esbuild plugin to check Node.js imports
-const nodeAPICheckerPlugin = {
+const nodeAPICheckerPlugin: Plugin = {
 	name: 'node-api-checker',
-	setup(build) {
-	  build.onResolve({ filter: /./ }, (args) => {
+	setup(build: BuildContext) {
+	  build.onResolve({ filter: /./ }, (args: ArgsTypes) => {
 		const importee = args.path;
 		if (forbiddenNodeImports.includes(importee)) {
 		  throw new Error(`Forbidden Node.js import detected: ${importee}`);
