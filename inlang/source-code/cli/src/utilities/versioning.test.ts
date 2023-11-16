@@ -146,7 +146,6 @@ test("if minor update is available, the version is updated in the background", a
 			updateToLatest()
 			// Match the version with the one installed in this particular test
 			expect(getCurrentVersion()).toBe("1.20.0")
-			console.log("Updated to latest version in the background.")
 		}
 	}
 })
