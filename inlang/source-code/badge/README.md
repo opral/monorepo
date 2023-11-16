@@ -1,10 +1,10 @@
-<inlang-badge-generator></inlang-badge-generator>
+![inlang translation status badge](https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/badge/assets/images/badge-header.png)
 
 # Generate badges for your i18n status
 
-![inlang translation status badge](https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/badge/assets/images/badge-header.png)
-
 This badge provides you with the overall translation progress of your project. It is a great way to show off your project's localization progress to your users.
+
+<inlang-badge-generator></inlang-badge-generator>
 
 <br />
 
