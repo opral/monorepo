@@ -6,7 +6,7 @@ import { showToast } from "./Toast.jsx"
 import { rpc } from "@inlang/rpc"
 import { Button } from "#src/interface/components/Button.jsx"
 import Link from "#src/renderer/Link.jsx"
-import * as m from "@inlang/paraglide-js/editor/messages"
+import * as m from "#src/paraglide/messages.js"
 
 export default function Card(props: { item: any; displayName: string }) {
 	return (
@@ -285,7 +285,7 @@ export function NoResultsCard(props: { category: string }) {
 function NoResultsArtwork() {
 	return (
 		<svg
-			width="auto"
+			width="100%"
 			height="auto"
 			viewBox="0 0 1252 300"
 			fill="none"

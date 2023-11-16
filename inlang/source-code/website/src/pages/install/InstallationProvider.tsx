@@ -12,6 +12,7 @@ import type { Step } from "./index.page.jsx"
 import { registry } from "@inlang/marketplace-registry"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"
+import { loadProject } from "@inlang/sdk"
 
 const user = () => {
 	const localStorage = getLocalStorage()
@@ -84,7 +85,7 @@ function validateRepo(
 			type: "github-login",
 			error: false,
 		})
-	} else if (!props.repo) {
+	} else if (!props.repo || props.repo === "") {
 		props.setStep({
 			type: "no-repo",
 			message: "No repository URL provided.",
@@ -252,6 +253,19 @@ async function initializeRepo(
 	/* If any error has gone through, stop the installation here */
 	if (step().error) return
 
+	const project = await loadProject({
+		settingsFilePath: "/project.inlang.json",
+		nodeishFs: repo.nodeishFs,
+	})
+
+	if (project.errors().length > 0) {
+		return setStep({
+			type: "error",
+			message: "Your project has errors, please fix them before installing.",
+			error: true,
+		})
+	}
+
 	/* Otherwise, change the repo and finishd the process */
 	setStep({
 		type: "installing",
@@ -277,16 +291,30 @@ async function initializeRepo(
 
 	await repo.push()
 
-	setStep({
-		type: "success",
-		message:
-			"Successfully installed the modules: " +
-			modulesURL.join(", ") +
-			" in your repository: " +
-			repoURL +
-			".",
-		error: false,
+	// look again if the project has errors
+	const projectAfterPush = await loadProject({
+		settingsFilePath: "/project.inlang.json",
+		nodeishFs: repo.nodeishFs,
 	})
+
+	if (projectAfterPush.errors().length > 0) {
+		return setStep({
+			type: "error",
+			message: "We encountered a bug. Please report it on GitHub.",
+			error: true,
+		})
+	} else {
+		setStep({
+			type: "success",
+			message:
+				"Successfully installed the modules: " +
+				modulesURL.join(", ") +
+				" in your repository: " +
+				repoURL +
+				".",
+			error: false,
+		})
+	}
 }
 
 function getLatestVersion(moduleURL: string) {

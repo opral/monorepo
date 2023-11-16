@@ -4,10 +4,10 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite",
-		"build": "paraglide-js compile --namespace website --project ../../../project.inlang.json && vite build",
+		"build": "node ./scripts/generateSitemap.js && paraglide-js compile --project ../../../project.inlang.json && vite build",
 		"production": "NODE_ENV=production tsx ./src/server/main.ts",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "paraglide-js compile --namespace website --project ../../../project.inlang.json && npx @inlang/cli lint --project ../../../project.inlang.json --languageTags en,de && tsc --noEmit",
+		"test": "paraglide-js compile --project ../../../project.inlang.json && npx @inlang/cli lint --project ../../../project.inlang.json --languageTags en,de && tsc --noEmit",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./.turbo ./node_modules"

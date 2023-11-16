@@ -11,7 +11,7 @@
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/m-function-matcher/README.md"
 	},
-	"keywords": ["application", "website", "vscode", "react", "nextjs", "sveltekit", "svelte", "vue"],
+	"keywords": ["website", "vscode", "react", "nextjs", "sveltekit", "svelte", "vue", "plugin"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0",

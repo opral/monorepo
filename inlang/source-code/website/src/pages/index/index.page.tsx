@@ -1,12 +1,13 @@
 import { Meta, Title } from "@solidjs/meta"
-import Hero from "./custom_section/Hero.jsx"
+import HeroSearch from "./custom_section/HeroSearch.jsx"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import { Show } from "solid-js"
-import Lix from "./custom_section/Lix.jsx"
 import Stack from "./custom_section/Stack.jsx"
 import Gridview from "#src/interface/marketplace/Gridview.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 import Guides from "./custom_section/Guides.jsx"
+import Features from "./custom_section/Features.jsx"
+import ParaglideHeader from "#src/interface/marketplace/categoryHeaders/cards/paraglide.jsx"
 
 export function Page() {
 	const search = currentPageContext.urlParsed.search["search"]
@@ -25,7 +26,7 @@ export function Page() {
 				name="twitter:image:alt"
 				content="inlang's ecosystem helps organizations to go global."
 			/>
-			<Meta name="twitter:title" content="inlang Marketplace - The ecosystem to go global" />
+			<Meta name="twitter:title" content="inlang.com - The ecosystem to go global" />
 			<Meta
 				name="twitter:description"
 				content="Quickly find the best solution to globalize (i18n) your app. inlang helps you to expand to new markets and acquire new customers."
@@ -37,10 +38,11 @@ export function Page() {
 					when={search}
 					fallback={
 						<>
-							<Hero />
+							<HeroSearch />
+							<Features />
 							<Stack />
 							<Guides />
-							<Lix />
+							<ParaglideHeader />
 						</>
 					}
 				>

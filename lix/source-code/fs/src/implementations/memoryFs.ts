@@ -170,7 +170,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 			// @ts-ignore
 			if (options?.persistent || options?.encoding) {
-				throw new Error("Most Options not implemented, only 'recursive' option allowed")
+				throw new Error("Some watch opptions not implemented, only 'recursive' allowed")
 			}
 
 			const queue: FileChangeInfo[] = []
@@ -183,6 +183,9 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			})
 
 			const listener = (event: FileChangeInfo) => {
+				if (event.filename === null) {
+					throw new Error("Internal watcher error: missing filename")
+				}
 				const changeName = getBasename(event.filename)
 				const changeDir = getDirname(event.filename)
 

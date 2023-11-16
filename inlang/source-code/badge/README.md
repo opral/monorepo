@@ -1,17 +1,48 @@
-<inlang-badge-generator></inlang-badge-generator>
+![inlang translation status badge](https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/badge/assets/images/badge-header.png)
 
-# How to use the inlang Badge
+# Generate badges for your i18n status
 
 This badge provides you with the overall translation progress of your project. It is a great way to show off your project's localization progress to your users.
 
-## Prequesties
+<inlang-badge-generator></inlang-badge-generator>
 
-- You need to have an inlang project set up in your repository
+<br />
 
-## Usage
+Used by:
 
-1. Copy your repository URL and paste it into the badge generator
+<doc-proof organisations="appflowy, osmosis, pokemonautochess, frigate"></doc-proof>
 
-2. Copy the generated code and paste it into the README file of your repository
+# Prequesties
 
-3. Done! The badge will now automatically update itself. Your contributors can now see the translation progress of your project.
+- inlang project in your repository
+- public repository
+
+If you don't have an inlang project yet, [read this guide](/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang) to get started.
+
+# Getting started
+
+### Fill in your repository URL
+
+Go to your repository (where you already have set up inlang) and copy the URL. It should look something like this:
+
+```text
+https://github.com/inlang/monorepo
+```
+
+Then, you can paste it into the input field of the badge generator above.
+
+### Generate the badge
+
+Click on the "Generate" button or press enter. This will generate a markdown code snippet and the image source that you can copy and paste into your README file.
+
+### Done!
+
+The badge will now automatically update itself. Your contributors can now see the translation progress of your project.
+
+# Example
+
+This is how the badge could look like in your README, it is from the official inlang repository:
+
+<br />
+
+![inlang status badge](https://inlang.com/badge?url=github.com/inlang/monorepo)

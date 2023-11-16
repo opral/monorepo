@@ -11,8 +11,6 @@ export class InlangBadgeGenerator extends LitElement {
 			justify-content: center;
 			height: 100%;
 			width: 100%;
-			padding: 1rem;
-			background: rgba(236, 237, 238, 0.25);
 			border-radius: 0.5rem;
 			font-weight: 500;
 			position: relative;
@@ -25,7 +23,8 @@ export class InlangBadgeGenerator extends LitElement {
 			justify-content: center;
 			gap: 1rem;
 			width: 100%;
-			height: 375px;
+			height: 200px;
+			z-index: 1;
 		}
 		.options-wrapper {
 			padding: 0.25rem;
@@ -85,13 +84,9 @@ export class InlangBadgeGenerator extends LitElement {
 			opacity: 0.5;
 		}
 		.copy-badge {
-			position: absolute;
 			display: flex;
 			align-items: center;
 			gap: 0.5rem;
-			right: 32px;
-			top: 24px;
-			text-align: right;
 			cursor: pointer;
 			transition: all 0.2s ease-in-out;
 		}
@@ -99,17 +94,12 @@ export class InlangBadgeGenerator extends LitElement {
 			color: #7689a6;
 		}
 		.error-message {
-			position: absolute;
-			right: 1.5rem;
-			bottom: 5rem;
+			position: relative;
+			padding-top: 0.5rem;
 			font-size: 0.75rem;
 			color: #ff4d4f;
 			margin-top: 0.5rem;
 			font-weight: 400;
-		}
-		.image {
-			right: 32px;
-			top: 60px;
 		}
 	`
 
@@ -203,27 +193,7 @@ export class InlangBadgeGenerator extends LitElement {
 			${this.loading
 				? html`<div class="loading"><sl-spinner style="font-size: 3rem;"></sl-spinner></div>`
 				: ""}
-			<div class="badge-showcase">
-				${this.badgeURL !== "" && this.loading === false
-					? html`<span @click=${() => this.handleCopyMarkdown()} class="copy-badge">
-							${this.copyMarkdownText}
-					  </span>`
-					: ""}
-				${this.badgeURL !== "" && this.loading === false
-					? html`<div @click=${() => this.handleCopyImage()} class="copy-badge image">
-							${this.copyImageText}
-					  </div>`
-					: ""}
-				${this.badgeURL === ""
-					? html`<div class="empty-card">
-							<img width="56px" src="http://inlang.com/favicon/safari-pinned-tab.svg" />
-					  </div>`
-					: html`<img src=${this.badgeURL} />`}
-			</div>
 			<div class="options-wrapper">
-				${this.error
-					? html`<div class="error-message">Please enter a valid GitHub repository link</div>`
-					: ""}
 				<div class="options">
 					<input
 						${this.loading ? "disabled" : ""}
@@ -243,7 +213,29 @@ export class InlangBadgeGenerator extends LitElement {
 						>Generate</sl-button
 					>
 				</div>
+				${this.error
+					? html`<div class="error-message">Please enter a valid GitHub repository link</div>`
+					: ""}
 			</div>
+			${this.badgeURL === ""
+				? ""
+				: html` <div class="badge-showcase">
+						${this.badgeURL !== "" && this.loading === false
+							? html`<span @click=${() => this.handleCopyMarkdown()} class="copy-badge">
+									${this.copyMarkdownText}
+							  </span>`
+							: ""}
+						${this.badgeURL !== "" && this.loading === false
+							? html`<div @click=${() => this.handleCopyImage()} class="copy-badge image">
+									${this.copyImageText}
+							  </div>`
+							: ""}
+						${this.badgeURL === ""
+							? html`<div class="empty-card">
+									<img width="56px" src="http://inlang.com/favicon/safari-pinned-tab.svg" />
+							  </div>`
+							: html`<img src=${this.badgeURL} />`}
+				  </div>`}
 		</div>`
 	}
 }

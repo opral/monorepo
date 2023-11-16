@@ -26,6 +26,7 @@ export type NodeishFilesystem = {
 		options?: {
 			recursive?: boolean
 			signal?: AbortSignal
+			persistent?: false
 		}
 		// WatchOptions
 	): AsyncIterable<FileChangeInfo>
@@ -36,7 +37,7 @@ export type NodeishFilesystem = {
 	lstat(path: string): Promise<NodeishStats>
 }
 
-export type FileChangeInfo = { eventType: "rename" | "change"; filename: string }
+export type FileChangeInfo = { eventType: "rename" | "change"; filename: string | null }
 
 export type FileData = string | Uint8Array
 

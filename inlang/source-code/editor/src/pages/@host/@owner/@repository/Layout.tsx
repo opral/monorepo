@@ -302,10 +302,15 @@ function Breadcrumbs() {
  * The menu to select the branch.
  */
 function BranchMenu() {
-	const { setActiveBranch, branchNames, currentBranch } = useEditorState()
+	const { activeBranch, setActiveBranch, branchNames, currentBranch } = useEditorState()
 	return (
-		<sl-dropdown>
-			<sl-button slot="trigger" prop:caret={true} prop:size="small">
+		<sl-dropdown prop:distance={8}>
+			<sl-button
+				slot="trigger"
+				prop:caret={true}
+				prop:size="small"
+				prop:loading={currentBranch() !== activeBranch() && activeBranch() !== undefined}
+			>
 				<div slot="prefix">
 					{/* branch icon from github */}
 					<svg class="w-4 h-4">
@@ -360,7 +365,7 @@ function LanguageFilter(props: { clearFunction: any }) {
 				on:sl-clear={() => {
 					props.clearFunction
 				}}
-				class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
+				class="filter border-0 focus:ring-background/100 p-0 m-0 text-sm"
 			>
 				<div class="flex items-center gap-2 ml-1" slot="prefix">
 					<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant">
@@ -444,7 +449,7 @@ function LintFilter(props: { clearFunction: any }) {
 			on:sl-clear={() => {
 				props.clearFunction
 			}}
-			class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
+			class="filter border-0 focus:ring-background/100 p-0 m-0 text-sm"
 		>
 			<div class={"flex items-center gap-2 ml-1 mr-0"} slot="prefix">
 				<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant">

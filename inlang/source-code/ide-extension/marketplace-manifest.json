@@ -1,6 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "app.inlang.ideExtension",
+	"website": "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/vscode_extension-marketplace-cover.jpg",
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/vscode_extension-gallery/vscode_extension-gallery-image-1.jpg",
@@ -15,11 +16,10 @@
 		"en": "IDE Extension for inlang projects"
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/README.md"
+		"en": "./inlang/source-code/ide-extension/MARKETPLACE.md"
 	},
-	"keywords": ["application", "website", "developer", "vscode", "ide", "extension", "lix"],
+	"keywords": ["apps", "website", "developer", "vscode", "ide", "extension", "lix"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0"
 }
-  

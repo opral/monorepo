@@ -4,7 +4,7 @@ import UserDropdown from "./UserDropdown.jsx"
 import IconClose from "~icons/material-symbols/close-rounded"
 import IconMenu from "~icons/material-symbols/menu-rounded"
 import Link from "#src/renderer/Link.jsx"
-import { getLocalStorage } from "#src/services/local-storage/index.js"
+import { useLocalStorage } from "#src/services/local-storage/index.js"
 
 function EditorHeader() {
 	const getLinks = () => {
@@ -20,7 +20,7 @@ function EditorHeader() {
 		]
 	}
 
-	const localStorage = getLocalStorage()
+	const [localStorage] = useLocalStorage()
 	const user = () => {
 		if (!localStorage) return undefined
 		return localStorage.user

@@ -1,6 +1,6 @@
 import { Show, For, onMount, createSignal } from "solid-js"
 import IconExpand from "~icons/material-symbols/expand-more-rounded"
-import { setLanguageTag, availableLanguageTags, languageTag } from "@inlang/paraglide-js/editor"
+import { setLanguageTag, availableLanguageTags, languageTag } from "#src/paraglide/runtime.js"
 import type { LanguageTag } from "@inlang/sdk"
 
 export function LanguagePicker() {

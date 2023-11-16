@@ -15,6 +15,9 @@ import { RepositoryCard } from "#src/interface/components/RepositoryCard.jsx"
 import { SignInDialog } from "#src/services/auth/index.js"
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js"
 import { browserAuth } from "@lix-js/client"
+import { registry } from "@inlang/marketplace-registry"
+import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
+import { Copy } from "#src/interface/components/Copy.jsx"
 
 export type Step = {
 	type: string
@@ -58,6 +61,11 @@ export function Page() {
 		signInDialog?.show()
 	}
 
+	const moduleLink = () => {
+		// @ts-ignore
+		return registry.find((item) => item.id === modules[0])!.module as MarketplaceManifest["module"]
+	}
+
 	return (
 		<>
 			<Title>{dynamicTitle()}</Title>
@@ -67,7 +75,7 @@ export function Page() {
 			/>
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<MarketplaceLayout>
-				<div class="h-screen flex flex-col items-center justify-center pb-32">
+				<div class="lg:h-screen flex flex-col items-center justify-center pb-32">
 					<InstallationProvider
 						repo={repo}
 						modules={modules}
@@ -81,46 +89,105 @@ export function Page() {
 					>
 						<div
 							class={
-								"flex-grow flex justify-center items-center " +
+								"flex-grow w-full flex justify-center items-center " +
 								(step().type !== "no-repo" && "pb-16")
 							}
 						>
 							<Show when={step().type === "github-login"}>
-								<SetupCard>
-									<div class="text-center">
-										<h2 class="text-[24px] leading-tight md:text-2xl font-semibold mb-2">
-											Please authorize to continue
-										</h2>
-										<p class="text-surface-500 mb-8">
-											We need your authorization to install modules in your repository.
-										</p>
-										<sl-button
-											prop:size="medium"
-											onClick={() => {
-												return onSignIn()
+								<div class="w-full lg:h-full flex lg:flex-row flex-col gap-16 pt-24 justify-between lg:items-center">
+									<div class="md:h-full flex-shrink-0 flex items-center lg:max-w-sm">
+										<div class="text-left">
+											<h2 class="text-[24px] leading-tight md:text-2xl font-semibold mb-2">
+												Please authorize to continue
+											</h2>
+											<p class="text-surface-500 mb-8">
+												We need your authorization to install modules in your repository.
+											</p>
+											<sl-button
+												prop:size="medium"
+												onClick={() => {
+													return onSignIn()
+												}}
+												class={"on-inverted cursor-pointer"}
+											>
+												<div slot="prefix">
+													<IconGithub />
+												</div>
+												Login
+											</sl-button>
+										</div>
+										<SignInDialog
+											ref={signInDialog!}
+											onClickOnSignInButton={() => {
+												// hide the sign in dialog to increase UX when switching back to this window
+												browserAuth.login()
+												signInDialog?.hide().then(() => {
+													if (!repo || repo === "") {
+														console.error("No repo provided")
+														window.location.reload()
+													} else {
+														setStep({
+															type: "opt-in",
+															message:
+																"We need your authorization to install modules in your repository.",
+														})
+													}
+												})
 											}}
-											class={"on-inverted"}
-										>
-											<div slot="prefix">
-												<IconGithub />
-											</div>
-											Login
-										</sl-button>
+										/>
 									</div>
-									<SignInDialog
-										ref={signInDialog!}
-										onClickOnSignInButton={() => {
-											// hide the sign in dialog to increase UX when switching back to this window
-											browserAuth.login()
-											signInDialog?.hide()
-											setStep({
-												type: "opt-in",
-												message:
-													"We need your authorization to install modules in your repository.",
-											})
-										}}
-									/>
-								</SetupCard>
+									<div class="lg:h-[650px] lg:w-[1px] w-full h-[1px] bg-surface-2" />
+									<div class="md:h-full lg:py-32 lg:col-span-2 lg:w-auto w-full">
+										<div class="xl:max-w-xl lg:max-w-md">
+											<h2 class="text-[24px] leading-tight md:text-2xl font-semibold mb-2">
+												Manually install the module you've selected
+											</h2>
+											<p class="text-surface-500 mb-4">
+												In case you don't want to authorize inlang to install modules in your
+												repository, you can also install them manually.
+											</p>
+											<div class="w-full p-4 border border-surface-200 rounded-xl mb-8">
+												<h3 class="text-lg leading-tight font-semibold mb-2">Copy the module</h3>
+												<p class="text-surface-500 mb-8">Copy the module you've selected:</p>
+												<Copy copy={moduleLink()} />
+											</div>
+											<div class="w-full p-4 border border-surface-200 rounded-xl">
+												<h3 class="text-lg leading-tight font-semibold mb-2">
+													Paste the link into the project
+												</h3>
+												<p class="text-surface-500 mb-8">
+													Paste the copied link into the{" "}
+													<code class="text-surface-600 text-sm p-1 rounded-md bg-surface-100">
+														project.inlang.json
+													</code>{" "}
+													file inside the{" "}
+													<code class="text-surface-600 text-sm p-1 rounded-md bg-surface-100">
+														modules
+													</code>{" "}
+													section:
+												</p>
+												<pre class="text-surface-600 text-sm py-2 px-4 rounded-md border border-surface-2 bg-surface-100 overflow-x-scroll">
+													{`{
+	...
+		"modules": [
+			"${moduleLink()}"
+		],
+	...
+}`}
+												</pre>
+											</div>
+											<div class="mt-4">
+												<Button
+													// eslint-disable-next-line solid/reactivity
+													href="/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang"
+													type="textPrimary"
+												>
+													You don't have project file? Read how to get started
+												</Button>
+											</div>
+										</div>
+									</div>
+								</div>
 							</Show>
 
 							<Show when={step().type === "opt-in"}>

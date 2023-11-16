@@ -13,25 +13,15 @@ module.exports = {
 		extend: {
 			keyframes: {
 				slideIn: {
-					"0%": { transform: "translate(-150px, 64px)" },
-					"75%": { transform: "translate(-150px, -8px)" },
-					"100%": { transform: "translate(-150px, 0)" },
-				},
-				slideInMobile: {
 					"0%": { transform: "translate(0px, 64px)" },
 					"75%": { transform: "translate(0px, -8px)" },
 					"100%": { transform: "translate(0px, 0)" },
 				},
 				slideOut: {
-					"0%": { transform: "translate(-150px, 0)" },
-					"100%": { transform: "translate(-150px, 64px)" },
+					"0%": { transform: "translate(0px, 0)" },
+					"100%": { transform: "translate(0px, 64px)" },
 				},
 				jump: {
-					"0%": { transform: "translate(-150px, 0px)" },
-					"50%": { transform: "translate(-150px, -16px)" },
-					"100%": { transform: "translate(-150px, 0px)" },
-				},
-				jumpMobile: {
 					"0%": { transform: "translate(0px, 0px)" },
 					"50%": { transform: "translate(0px, -16px)" },
 					"100%": { transform: "translate(0px, 0px)" },

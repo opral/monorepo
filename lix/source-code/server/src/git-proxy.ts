@@ -39,9 +39,6 @@ const middleware = createMiddleware({
 })
 
 export async function proxy(request: Request, response: Response, next: NextFunction) {
-	if (request.path.includes("github") === false) {
-		response.status(500).send("Unsupported git hosting provider.")
-	}
 	try {
 		// remove the proxy path from the url
 		const targetUrl = request.url.split("/git-proxy/")[1]
@@ -51,9 +48,15 @@ export async function proxy(request: Request, response: Response, next: NextFunc
 			return
 		}
 
+		if (!targetUrl.startsWith("/github.com/")) {
+			response.status(403).send("Only github supported")
+			return
+		}
+
 		request.url = targetUrl
 
 		response.set("Access-Control-Allow-Credentials", "true")
+		response.set("Access-Control-Allow-Headers", "user-agent")
 
 		middleware(request, response, next)
 	} catch (error) {

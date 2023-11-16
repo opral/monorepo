@@ -1,7 +1,7 @@
 import { createSignal } from "solid-js"
 import { showToast } from "./Toast.jsx"
 import { rpc } from "@inlang/rpc"
-import * as m from "@inlang/paraglide-js/editor/messages"
+import * as m from "#src/paraglide/messages.js"
 
 export function NewsletterForm() {
 	const [email, setEmail] = createSignal("")

@@ -1,6 +1,6 @@
 {
 	"id": "app.inlang.badge",
-	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/badge/assets/images/badge-icon.jpg",
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/badge-marketplace-cover.jpg",
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/badge-gallery/badge-gallery-image-1.jpg",
@@ -13,9 +13,9 @@
 		"en": "Badge showing missing messages in your codebase. Perfect for your README.md file."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/badge/README.md"
+		"en": "./inlang/source-code/badge/README.md"
 	},
-	"keywords": ["application", "badge", "markdown", "translation", "status", "lix"],
+	"keywords": ["apps", "badge", "markdown", "translation", "status", "lix"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0"

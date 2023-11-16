@@ -19,7 +19,7 @@ const createParser = () => {
 		},
 
 		findReference: function (r) {
-			return Parsimmon.seq(Parsimmon.string("@inlang/paraglide-js"), r.findMessage!.many())
+			return Parsimmon.seq(Parsimmon.string("import * as m"), r.findMessage!.many())
 		},
 
 		findMessage: () => {

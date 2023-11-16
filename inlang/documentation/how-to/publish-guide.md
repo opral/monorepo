@@ -13,7 +13,7 @@ A guide, instead of an app or module inside of the marketplace, is a piece of co
 ### 1. Add the information to your marketplace manifest
 Adding the marketplace information is necessary for the marketplace to display your guide correctly.
 
-| **Parameter**        | **Description**                                               |
+| Parameter        | Description                                               |
 |----------------------|---------------------------------------------------------------|
 | `id`                 | Unique identifier for your guide.                         |
 | `icon`        | Link to the icon of your guide (optional).              |
