@@ -1,5 +1,11 @@
 # @inlang/plugin-m-function-matcher
 
+## 0.5.0
+
+### Minor Changes
+
+- 8e7d18f7d: Fix the transformation of a user-provided message ID
+
 ## 0.4.0
 
 ### Minor Changes

@@ -28,7 +28,7 @@ const HeroSearch = () => {
 	}
 
 	return (
-		<div class="flex flex-col gap-2 items-center">
+		<div class="flex flex-col gap-2 items-center pb-8 md:pb-0">
 			<div class="pt-8 md:pt-16 group">
 				<Link href="https://www.youtube.com/live/pTgIx-ucMsY?feature=shared&t=3825" target="_blanc">
 					<div class="flex gap-4 items-center text-surface-500 group-hover:text-active-primary">
@@ -105,7 +105,7 @@ const HeroSearch = () => {
 					class="absolute bg-on-background top-0 left-0 w-full h-full opacity-10 blur-sm group-hover:opacity-25 group-focus-within:opacity-25"
 				/>
 			</form>
-			<div class="flex md:items-center gap-4 pt-2">
+			<div class="md:items-center gap-4 pt-2 hidden md:flex">
 				<p class="pt-2 md:pt-0 text-surface-600">{m.home_inlang_search_popular() + ":"}</p>
 				<div class="flex flex-wrap items-center gap-1.5">
 					<For each={getPopularButtons()}>

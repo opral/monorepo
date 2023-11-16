@@ -1534,7 +1534,7 @@
 			]
 		},
 		{
-			"id": "home_guides_title",
+			"id": "home_guides_button_text",
 			"selectors": [],
 			"variants": [
 				{
@@ -1543,7 +1543,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Guides"
+							"value": "See all Guides"
 						}
 					]
 				},
@@ -1553,7 +1553,85 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Guides"
+							"value": "Alle Guides ansehen"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_guides_description",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Use plugins and adapters to easily make products work for your specific needs, no matter where you want them to work."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Verwende Plugins und Adapter, um Produkte einfach an deine spezifischen Anforderungen anzupassen, egal wo und egal wie sie funktionieren sollen."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_guides_item_button_text",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Read"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lesen"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "home_guides_title",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Find the right guides"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Finde die richtigen Guides"
 						}
 					]
 				},
@@ -1905,27 +1983,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Find the products to go global."
-						}
-					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Finde die richtigen Produkte, um global zu gehen."
-						}
-					]
-				},
-				{
-					"languageTag": "fr",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Trouvez tout ce dont vous avez besoin pour vous mondialiser."
+							"value": "Find products to go global."
 						}
 					]
 				},
@@ -1935,7 +1993,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Trova tutto quello che ti serve per diventare globale"
+							"value": "Trova tutto quello che ti serve per diventare globale."
 						}
 					]
 				},
@@ -1946,6 +2004,26 @@
 						{
 							"type": "Text",
 							"value": "Encontre tudo o que você precisa para se globalizar."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Finde Produkte um Global zu gehen."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Trouvez tout ce dont vous avez besoin pour vous mondialiser."
 						}
 					]
 				}
@@ -3565,17 +3643,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Optimiere dein i18n-Erlebnis mit inlang-Apps."
-						}
-					]
-				},
-				{
-					"languageTag": "fr",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Améliorez votre expérience i18n avec les applications Inlang."
+							"value": "..."
 						}
 					]
 				}
@@ -3989,17 +4057,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Nutze Bibliotheken, um dein Softwareprojekt zu erweitern."
-						}
-					]
-				},
-				{
-					"languageTag": "fr",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Utilisez les bibliothèques pour étendre votre projet logiciel."
+							"value": "..."
 						}
 					]
 				}
@@ -4077,17 +4135,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Steuere den gesamten Übersetzungsprozess: Vom Design bis zum Frontend."
-						}
-					]
-				},
-				{
-					"languageTag": "fr",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Contrôlez l'ensemble du processus de traduction : de la conception au frontend."
+							"value": "..."
 						}
 					]
 				}
@@ -4165,17 +4213,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Validiere Inhalte in einem inlang-Projekt."
-						}
-					]
-				},
-				{
-					"languageTag": "fr",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Valider le contenu dans un projet Inlang."
+							"value": "..."
 						}
 					]
 				}
@@ -4279,17 +4317,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Die beste i18n-Bibliothek für das Web. Eine vollständig konfigurierbare JavaScript-i18n-Bibliothek, die in Ihr Framework integriert werden kann."
-						}
-					]
-				},
-				{
-					"languageTag": "fr",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "La meilleure bibliothèque i18n pour le web. Une bibliothèque JavaScript i18n entièrement configurable qui s'intègre dans votre framework."
+							"value": "..."
 						}
 					]
 				}
@@ -4367,17 +4395,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Entdecke die Vorteile der Verwendung von Plugins: Freiheit und kostengünstige Einführung."
-						}
-					]
-				},
-				{
-					"languageTag": "fr",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Découvrez les avantages de l'utilisation de plugins : liberté et adoption à faible coût."
+							"value": "..."
 						}
 					]
 				}
@@ -4455,17 +4473,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "App-Verhalten ändern oder erweitern."
-						}
-					]
-				},
-				{
-					"languageTag": "fr",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Modifiez ou étendez le comportement de l'application."
+							"value": "..."
 						}
 					]
 				}
