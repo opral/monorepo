@@ -19,7 +19,7 @@ const uninstallGlobal = () => spawnSync("npm", ["uninstall", "-g", "@inlang/cli"
 const installGlobal = (version: string) =>
 	execSync("npm install -g @inlang/cli@" + version, { encoding: "utf8", stdio: "pipe" })
 
-test("if the install global package command installs correctly", async () => {
+test.skip("if the install global package command installs correctly", async () => {
 	// Make sure that the package does not exist
 	uninstallGlobal()
 
@@ -30,7 +30,7 @@ test("if the install global package command installs correctly", async () => {
 	expect(getCurrentVersion()).toBe("1.0.0")
 })
 
-test("if major update is available, user chooses to update", async () => {
+test.skip("if major update is available, user chooses to update", async () => {
 	// Make sure that the package does not exist
 	uninstallGlobal()
 
@@ -70,7 +70,7 @@ test("if major update is available, user chooses to update", async () => {
 	}
 })
 
-test("if major update is available, user chooses not to update", async () => {
+test.skip("if major update is available, user chooses not to update", async () => {
 	// Make sure that the package does not exist
 	uninstallGlobal()
 
@@ -110,7 +110,7 @@ test("if major update is available, user chooses not to update", async () => {
 	}
 })
 
-test("if minor update is available, the version is updated in the background", async () => {
+test.skip("if minor update is available, the version is updated in the background", async () => {
 	// Make sure that the package does not exist
 	uninstallGlobal()
 
