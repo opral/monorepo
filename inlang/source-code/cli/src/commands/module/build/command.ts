@@ -8,6 +8,22 @@ import { moduleBuildOptions } from "./moduleBuildOptions.js"
  */
 import { context } from "esbuild-wasm"
 
+// Define the forbidden Node.js imports
+const forbiddenNodeImports = ['fs', 'path', 'os', 'net']
+
+// Create an esbuild plugin to check Node.js imports
+const nodeAPICheckerPlugin = {
+	name: 'node-api-checker',
+	setup(build) {
+	  build.onResolve({ filter: /./ }, (args) => {
+		const importee = args.path;
+		if (forbiddenNodeImports.includes(importee)) {
+		  throw new Error(`Forbidden Node.js import detected: ${importee}`);
+		}
+	  });
+	},
+  };
+
 export const build = new Command()
 	.command("build")
 	.description("build an inlang module.")
@@ -32,6 +48,7 @@ export async function buildCommandAction(args: { entry: string; outdir: string; 
 				// in assumed dev mode
 				minify: args.watch ? false : true,
 				plugins: [
+					nodeAPICheckerPlugin,
 					{
 						name: "logger",
 						setup: ({ onEnd }) => onEnd(() => console.info("🎉 changes processed")),
