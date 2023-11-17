@@ -4012,6 +4012,54 @@
 			]
 		},
 		{
+			"id": "marketplace_header_guides_button_text",
+			"selectors": [],
+			"variants": [
+				{
+					"languageTag": "en",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Publish a guide"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_guides_description",
+			"selectors": [],
+			"variants": [
+				{
+					"languageTag": "en",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Learn how to use products from the inlang ecosystem."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_guides_title",
+			"selectors": [],
+			"variants": [
+				{
+					"languageTag": "en",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Guides"
+						}
+					]
+				}
+			]
+		},
+		{
 			"id": "marketplace_header_libraries_button_text",
 			"selectors": [],
 			"variants": [
