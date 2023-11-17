@@ -15,4 +15,3 @@ it('should only define public env variables that start with "PUBLIC_"', () => {
 	expect(publicEnv.PUBLIC_BASE_URL).toBe("https://inlang.com")
 	expect(publicEnv).not.toHaveProperty("API_TOKEN")
 })
-
