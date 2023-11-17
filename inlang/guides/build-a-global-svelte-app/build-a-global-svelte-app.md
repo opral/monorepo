@@ -5,7 +5,7 @@ In this guide we will use [paraglide.js](https://inlang.com/m/gerre34r/library-i
 ## 1. Starting point
 
 Start with a basic SvelteKit app with `npm create`:
-```
+```json
 npm create svelte@latest my-app
 cd my-app
 npm install
@@ -15,7 +15,7 @@ git init
 
 ## 2. Initialize Paraglide
 
-```
+```json
 npx @inlang/paraglide-js@latest init
 
 ✔ Successfully created a new inlang project.                                                                              
