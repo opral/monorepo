@@ -12,7 +12,7 @@ import { context, Plugin, BuildContext } from "esbuild-wasm"
 const forbiddenNodeImports: string[] = ['fs', 'path', 'os', 'net']
 
 // Define types for the build action function arguments
-interface BuildActionArgs {
+export interface BuildActionArgs {
 	entry: string;
 	outdir: string;
 	watch: boolean;
