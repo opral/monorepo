@@ -16,6 +16,7 @@ export function validateEnvVariables(args: {
 		? privateEnvVariablesSchema.merge(publicEnvVariablesSchema).required()
 		: privateEnvVariablesSchema.merge(publicEnvVariablesSchema)
 	const result = schema.safeParse(process.env)
+	console.info(Object.keys(process.env))
 	if (result.success === false) {
 		const errors = result.error.issues.map((issue) => ({
 			key: issue.path[0] as string,
