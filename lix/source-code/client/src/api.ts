@@ -27,13 +27,14 @@ export type LixAuthModule = {
 }
 
 export type Repository = {
+	// raw: any
 	nodeishFs: NodeishFilesystem
 	commit: (args: {
 		author: Author
 		message: string
 	}) => Promise<Awaited<ReturnType<typeof raw.commit>> | undefined>
 	push: () => Promise<Awaited<ReturnType<typeof raw.push>> | undefined>
-	pull: (args: { author: Author; fastForward: boolean; singleBranch: true }) => any
+	pull: (args: { author: Author; fastForward: boolean; singleBranch: true }) => Promise<any>
 	add: (args: { filepath: string }) => Promise<Awaited<ReturnType<typeof raw.add>>>
 	listRemotes: () => Promise<Awaited<ReturnType<typeof raw.listRemotes>> | undefined>
 	log: (args?: { since?: Date; depth?: number }) => Promise<Awaited<ReturnType<typeof raw.log>>>

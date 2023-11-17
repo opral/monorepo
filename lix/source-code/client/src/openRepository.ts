@@ -2,11 +2,14 @@ import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Repository, LixError } from "./api.js"
 import { transformRemote, withLazyFetching, parseLixUri } from "./helpers.js"
 // @ts-ignore
-import http from "./http-client.js"
+import { makeHttpClient } from "./git-http/client.js"
+import { optimizedRefsRes, optimizedRefsReq } from "./git-http/optimize-refs.js"
 import { Octokit } from "octokit"
 
 import { createSignal, createEffect } from "./solid.js"
-import {
+import isoGit from "isomorphic-git"
+
+const {
 	clone,
 	listRemotes,
 	status,
@@ -18,9 +21,11 @@ import {
 	add,
 	log,
 	listServerRefs,
-	// fetch,
-	// listBranches,
-} from "isomorphic-git"
+	checkout,
+	// fetch as isoFetch
+} = isoGit
+
+const verbose = false
 
 export async function openRepository(
 	url: string,
@@ -73,16 +78,38 @@ export async function openRepository(
 	const dir = "/"
 
 	let pending: Promise<void | { error: Error }> | undefined = clone({
-		fs: withLazyFetching(rawFs, "clone"),
-		http,
+		fs: withLazyFetching({ nodeishFs: rawFs, verbose, description: "clone" }),
+		http: makeHttpClient({
+			verbose,
+			description: "clone",
+
+			onReq: ({ url, body }: { url: string; body: any }) => {
+				return optimizedRefsReq({ url, body, addRef: args.branch })
+			},
+
+			onRes: optimizedRefsRes,
+		}),
 		dir,
 		corsProxy: gitProxyUrl,
 		url: gitUrl,
 		singleBranch: true,
+		noCheckout: true,
 		ref: args.branch,
 		depth: 1,
 		noTags: true,
 	})
+		.then(() => {
+			return checkout({
+				fs: withLazyFetching({
+					nodeishFs: rawFs,
+					verbose,
+					description: "checkout",
+				}),
+				dir,
+				ref: args.branch,
+				// filepaths: ["resources/en.json", "resources/de.json", "project.inlang.json"],
+			})
+		})
 		.finally(() => {
 			pending = undefined
 		})
@@ -102,7 +129,12 @@ export async function openRepository(
 	}
 
 	return {
-		nodeishFs: withLazyFetching(rawFs, "app", delayedAction),
+		nodeishFs: withLazyFetching({
+			nodeishFs: rawFs,
+			verbose,
+			description: "app",
+			intercept: delayedAction,
+		}),
 
 		/**
 		 * Gets the git origin url of the current repository.
@@ -111,7 +143,12 @@ export async function openRepository(
 		 */
 		async listRemotes() {
 			try {
-				const withLazyFetchingpedFS = withLazyFetching(rawFs, "listRemotes", delayedAction)
+				const withLazyFetchingpedFS = withLazyFetching({
+					nodeishFs: rawFs,
+					verbose,
+					description: "listRemotes",
+					intercept: delayedAction,
+				})
 
 				const remotes = await listRemotes({
 					fs: withLazyFetchingpedFS,
@@ -126,7 +163,12 @@ export async function openRepository(
 
 		status(cmdArgs) {
 			return status({
-				fs: withLazyFetching(rawFs, "statusMatrix", delayedAction),
+				fs: withLazyFetching({
+					nodeishFs: rawFs,
+					verbose,
+					description: "status",
+					intercept: delayedAction,
+				}),
 				dir,
 				filepath: cmdArgs.filepath,
 			})
@@ -134,7 +176,12 @@ export async function openRepository(
 
 		statusMatrix(cmdArgs) {
 			return statusMatrix({
-				fs: withLazyFetching(rawFs, "statusMatrix", delayedAction),
+				fs: withLazyFetching({
+					nodeishFs: rawFs,
+					verbose,
+					description: "statusMatrix",
+					intercept: delayedAction,
+				}),
 				dir,
 				filter: cmdArgs.filter,
 			})
@@ -142,7 +189,12 @@ export async function openRepository(
 
 		add(cmdArgs) {
 			return add({
-				fs: withLazyFetching(rawFs, "add", delayedAction),
+				fs: withLazyFetching({
+					nodeishFs: rawFs,
+					verbose,
+					description: "add",
+					intercept: delayedAction,
+				}),
 				dir,
 				filepath: cmdArgs.filepath,
 			})
@@ -150,7 +202,12 @@ export async function openRepository(
 
 		commit(cmdArgs) {
 			return commit({
-				fs: withLazyFetching(rawFs, "commit", delayedAction),
+				fs: withLazyFetching({
+					nodeishFs: rawFs,
+					verbose,
+					description: "commit",
+					intercept: delayedAction,
+				}),
 				dir,
 				author: cmdArgs.author,
 				message: cmdArgs.message,
@@ -159,20 +216,30 @@ export async function openRepository(
 
 		push() {
 			return push({
-				fs: withLazyFetching(rawFs, "push", delayedAction),
+				fs: withLazyFetching({
+					nodeishFs: rawFs,
+					verbose,
+					description: "push",
+					intercept: delayedAction,
+				}),
 				url: gitUrl,
 				corsProxy: gitProxyUrl,
-				http,
+				http: makeHttpClient({ verbose, description: "push" }),
 				dir,
 			})
 		},
 
 		pull(cmdArgs) {
 			return pull({
-				fs: withLazyFetching(rawFs, "pull", delayedAction),
+				fs: withLazyFetching({
+					nodeishFs: rawFs,
+					verbose,
+					description: "pull",
+					intercept: delayedAction,
+				}),
 				url: gitUrl,
 				corsProxy: gitProxyUrl,
-				http,
+				http: makeHttpClient({ verbose, description: "pull" }),
 				dir,
 				fastForward: cmdArgs.fastForward,
 				singleBranch: cmdArgs.singleBranch,
@@ -182,7 +249,12 @@ export async function openRepository(
 
 		log(cmdArgs) {
 			return log({
-				fs: withLazyFetching(rawFs, "log", delayedAction),
+				fs: withLazyFetching({
+					nodeishFs: rawFs,
+					verbose,
+					description: "log",
+					intercept: delayedAction,
+				}),
 				depth: cmdArgs?.depth,
 				dir,
 				since: cmdArgs?.since,
@@ -237,7 +309,12 @@ export async function openRepository(
 			// TODO: make stateless
 			return (
 				(await currentBranch({
-					fs: withLazyFetching(rawFs, "getCurrentBranch", delayedAction),
+					fs: withLazyFetching({
+						nodeishFs: rawFs,
+						verbose,
+						description: "getCurrentBranch",
+						intercept: delayedAction,
+					}),
 					dir,
 				})) || undefined
 			)
@@ -250,7 +327,7 @@ export async function openRepository(
 						url: gitUrl,
 						corsProxy: gitProxyUrl,
 						prefix: "refs/heads",
-						http,
+						http: makeHttpClient({ verbose, description: "getBranches" }),
 					})
 				).map((ref) => ref.ref.replace("refs/heads/", "")) || undefined
 			)
