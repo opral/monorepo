@@ -141,7 +141,7 @@ export function Page(props: PageProps) {
 												/>
 											</Show>
 											<div class="mb-10 md:mb-0">
-												<div class="flex flex-col gap-3 mb-8">
+												<div class="flex flex-col gap-3 mb-6">
 													<h1 class="text-3xl font-bold">{displayName()}</h1>
 													<div class="inline-block text-surface-500 ">
 														<p class={!readmore() ? "lg:line-clamp-2" : ""}>{description()}</p>
@@ -220,6 +220,17 @@ export function Page(props: PageProps) {
 												/>
 											</div>
 										</Show>
+
+										<Show
+											when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}
+											fallback={<Markdown markdown={props.markdown} />}
+										>
+											<div class="grid md:grid-cols-4 grid-cols-1 gap-16 md:mb-32 mb-8 mt-4">
+												<div class="w-full rounded-lg col-span-1 md:col-span-4">
+													<Markdown markdown={props.markdown} />
+												</div>
+											</div>
+										</Show>
 									</div>
 									<div class="w-full">
 										<div class="flex flex-col gap-6 items-col flex-shrink-0">
@@ -271,28 +282,16 @@ export function Page(props: PageProps) {
 												</p>
 											</div>
 										</div>
+										{/* Classes to be added: sticky z-10 top-16 pt-8 md:pt-0 md:static bg-background */}
+										<aside class="col-span-1 md:order-1 -order-1 hidden md:block sticky top-36 mb-32">
+											<NavbarCommon
+												displayName={displayName}
+												getLocale={languageTag}
+												tableOfContents={tableOfContents}
+											/>
+										</aside>
 									</div>
 								</section>
-								<Show
-									when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}
-									fallback={<Markdown markdown={props.markdown} />}
-								>
-									<div class="col-span-1 md:col-span-4 mb-16">
-										<div class="grid md:grid-cols-4 grid-cols-1 gap-16">
-											<div class={"w-full rounded-lg col-span-1 md:col-span-3"}>
-												<Markdown markdown={props.markdown} />
-											</div>
-											{/* Classes to be added: sticky z-10 top-16 pt-8 md:pt-0 md:static bg-background */}
-											<aside class="col-span-1 md:order-1 -order-1 hidden md:block">
-												<NavbarCommon
-													displayName={displayName}
-													getLocale={languageTag}
-													tableOfContents={tableOfContents}
-												/>
-											</aside>
-										</div>
-									</div>
-								</Show>
 								<div>
 									<EditButton
 										// type="secondary"

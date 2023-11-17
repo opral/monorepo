@@ -4024,6 +4024,16 @@
 							"value": "Publish a guide"
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Veröffentliche ein Guide"
+						}
+					]
 				}
 			]
 		},
@@ -4040,6 +4050,16 @@
 							"value": "Learn how to use products from the inlang ecosystem."
 						}
 					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lerne wie du Produkte aus dem inlang Ökosystem nutzen kannst."
+						}
+					]
 				}
 			]
 		},
@@ -4049,6 +4069,16 @@
 			"variants": [
 				{
 					"languageTag": "en",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Guides"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
 					"match": [],
 					"pattern": [
 						{

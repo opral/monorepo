@@ -148,9 +148,9 @@ export function Page(props: {
 				</Show>
 				<div class="pb-16 md:pb-20 min-h-screen relative">
 					<SectionLayout showLines={false} type="white">
-						<div class="relative">
-							<Switch>
-								<Match when={selectedCategory() !== "c/guides"}>
+						<Switch>
+							<Match when={selectedCategory() !== "c/guides"}>
+								<div class="min-h-[70vh]">
 									<Show when={props.highlights}>
 										<Show when={props.highlights && props.highlights.length > 0}>
 											<div
@@ -168,22 +168,23 @@ export function Page(props: {
 									</Show>
 									<div class="mb-8 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
 										<Gallery items={props.items} />
-									</div>
-								</Match>
-								<Match when={selectedCategory() === "c/guides"}>
+									</div>{" "}
+								</div>
+							</Match>
+							<Match when={selectedCategory() === "c/guides"}>
+								<div class="min-h-[70vh]">
 									{/* <Guides items={props.items} /> */}
 									<div class="mb-32 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
 										<Gallery items={props.items} guides />
 									</div>
-								</Match>
-							</Switch>
-
-							<Show when={!props.category && !props.slider && !props.minimal}>
-								<div class="mt-20">
-									<GetHelp text="Need help or have questions? Join our Discord!" />
 								</div>
-							</Show>
-						</div>
+							</Match>
+						</Switch>
+						<Show when={!props.category && !props.slider && !props.minimal}>
+							<div class="mt-20">
+								<GetHelp text="Need help or have questions? Join our Discord!" />
+							</div>
+						</Show>
 					</SectionLayout>
 				</div>
 			</MarketplaceLayout>
