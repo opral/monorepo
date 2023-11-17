@@ -4012,6 +4012,84 @@
 			]
 		},
 		{
+			"id": "marketplace_header_guides_button_text",
+			"selectors": [],
+			"variants": [
+				{
+					"languageTag": "en",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Publish a guide"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Veröffentliche ein Guide"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_guides_description",
+			"selectors": [],
+			"variants": [
+				{
+					"languageTag": "en",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Learn how to use products from the inlang ecosystem."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lerne wie du Produkte aus dem inlang Ökosystem nutzen kannst."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_guides_title",
+			"selectors": [],
+			"variants": [
+				{
+					"languageTag": "en",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Guides"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Guides"
+						}
+					]
+				}
+			]
+		},
+		{
 			"id": "marketplace_header_libraries_button_text",
 			"selectors": [],
 			"variants": [

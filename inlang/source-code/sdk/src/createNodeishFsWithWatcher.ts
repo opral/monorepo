@@ -26,6 +26,11 @@ export const createNodeishFsWithWatcher = (args: {
 				}
 			} catch (err: any) {
 				if (err.name === "AbortError") return
+				// https://github.com/inlang/monorepo/issues/1647
+				// the file does not exist (yet)
+				// this is not testable beacause the fs.watch api differs
+				// from node and lix. lenghty
+				else if (err.code === "ENOENT") return
 				throw err
 			}
 		})()

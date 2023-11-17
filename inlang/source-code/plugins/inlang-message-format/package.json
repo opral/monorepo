@@ -17,7 +17,7 @@
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
-		"clean": "rm -rf ./dist ./.turbo ./node_modules"
+		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"devDependencies": {
 		"@inlang/cli": "*",

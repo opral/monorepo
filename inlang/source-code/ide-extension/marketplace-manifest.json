@@ -1,7 +1,6 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "app.inlang.ideExtension",
-	"website": "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/vscode_extension-marketplace-cover.jpg",
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/vscode_extension-gallery/vscode_extension-gallery-image-1.jpg",

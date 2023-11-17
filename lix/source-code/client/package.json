@@ -19,7 +19,7 @@
 		"bench": "vitest bench --watch=false",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
-		"clean": "rm -rf ./dist ./.turbo ./node_modules"
+		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
 		"@lix-js/fs": "*",

@@ -73,8 +73,8 @@
 		"---- LINT ----------------------------------------------------------": "",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
-		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "rm -rf ./dist ./.turbo ./node_modules"
+		"---- OTHER ----------------------------------------------------------": "",
+		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
 		"@inlang/result": "*",

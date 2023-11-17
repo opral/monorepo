@@ -1,4 +1,4 @@
-import { For, Show, createEffect, createSignal, onMount } from "solid-js"
+import { For, Match, Show, Switch, createSignal, onMount } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
@@ -75,6 +75,13 @@ export function Page(props: {
 					buttonLink: "/documentation/develop-lint-rule",
 					buttonText: m.marketplace_header_lintRules_button_text(),
 				}
+			case "guides":
+				return {
+					title: m.marketplace_header_guides_title(),
+					description: m.marketplace_header_guides_description(),
+					buttonLink: "/documentation/publish-guide",
+					buttonText: m.marketplace_header_guides_button_text(),
+				}
 			default:
 				return {
 					title: "inlang",
@@ -141,33 +148,43 @@ export function Page(props: {
 				</Show>
 				<div class="pb-16 md:pb-20 min-h-screen relative">
 					<SectionLayout showLines={false} type="white">
-						<div class="relative">
-							<Show when={props.highlights}>
-								<Show when={props.highlights && props.highlights.length > 0}>
-									<div
-										class={
-											"flex md:grid justify-between gap-6 md:flex-row flex-col mb-8 " +
-											(props.highlights!.length > 1 ? "md:grid-cols-2" : "md:grid-cols-1")
-										}
-									>
-										{/* @ts-expect-error */}
-										<For each={props.highlights}>{(highlight) => <Highlight {...highlight} />}</For>
-									</div>
-								</Show>
-							</Show>
-
-							<div class="mb-8 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
-								<Gallery items={props.items} />
-							</div>
-
-							<Guides items={props.items} />
-
-							<Show when={!props.category && !props.slider && !props.minimal}>
-								<div class="mt-20">
-									<GetHelp text="Need help or have questions? Join our Discord!" />
+						<Switch>
+							<Match when={selectedCategory() !== "c/guides"}>
+								<div class="min-h-[70vh]">
+									<Show when={props.highlights}>
+										<Show when={props.highlights && props.highlights.length > 0}>
+											<div
+												class={
+													"flex md:grid justify-between gap-6 md:flex-row flex-col mb-8 " +
+													(props.highlights!.length > 1 ? "md:grid-cols-2" : "md:grid-cols-1")
+												}
+											>
+												<For each={props.highlights}>
+													{/* @ts-expect-error */}
+													{(highlight) => <Highlight {...highlight} />}
+												</For>
+											</div>
+										</Show>
+									</Show>
+									<div class="mb-8 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
+										<Gallery items={props.items} />
+									</div>{" "}
 								</div>
-							</Show>
-						</div>
+							</Match>
+							<Match when={selectedCategory() === "c/guides"}>
+								<div class="min-h-[70vh]">
+									{/* <Guides items={props.items} /> */}
+									<div class="mb-32 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
+										<Gallery items={props.items} guides />
+									</div>
+								</div>
+							</Match>
+						</Switch>
+						<Show when={!props.category && !props.slider && !props.minimal}>
+							<div class="mt-20">
+								<GetHelp text="Need help or have questions? Join our Discord!" />
+							</div>
+						</Show>
 					</SectionLayout>
 				</div>
 			</MarketplaceLayout>
@@ -225,22 +242,5 @@ const Gallery = (props: { items: any; guides?: boolean }) => {
 				</Show>
 			</Show>
 		</>
-	)
-}
-
-const Guides = (props: { items: (MarketplaceManifest & { uniqueID: string })[] }) => {
-	const [show, setShow] = createSignal<boolean>(false)
-	createEffect(() => {
-		if (props.items && props.items?.some((item) => item.id.split(".")[0] === "guide")) {
-			setShow(true)
-		}
-	})
-	return (
-		<Show when={show()}>
-			<h2 class="text-md text-surface-600 pb-4 pt-8">{m.marketplace_grid_title_guides()}</h2>
-			<div class="mb-32 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
-				<Gallery items={props.items} guides />
-			</div>
-		</Show>
 	)
 }

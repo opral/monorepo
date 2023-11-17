@@ -1,3 +1,5 @@
+[<img width="256px" height="auto" alt="VSCode install badge" src="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/vscode-install-badge.svg" />](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension)
+
 ![inlang VS Code extension header image](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/ide-extension/assets/vs-code-extension-header.jpg)
 
 # Superchange your i18n dev workflow

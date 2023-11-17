@@ -6,6 +6,23 @@
 	"publishConfig": {
 		"access": "public"
 	},
+	"author": "inlang <hello@inlang.com> (https://inlang.com/)",
+	"keywords": [
+		"paraglide",
+		"javascript i18n",
+		"i18n",
+		"l10n",
+		"translation",
+		"internationalization",
+		"svelte",
+		"localization",
+		"lint",
+		"react",
+		"vue",
+		"angular",
+		"nextjs",
+		"next i18n"
+	],
 	"bin": {
 		"paraglide-js": "./bin/run.js"
 	},
@@ -19,7 +36,7 @@
 		"test": "tsc --noEmit && vitest run --coverage ./src/**/*",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
-		"clean": "rm -rf ./dist ./.turbo ./node_modules"
+		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
 		"@inlang/detect-json-formatting": "1.0.0",

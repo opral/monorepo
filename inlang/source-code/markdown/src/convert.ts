@@ -62,7 +62,7 @@ export async function convert(markdown: string): Promise<string> {
 			h5: "doc-text-lg",
 			h6: "doc-text-base",
 			p: "doc-text-base text-surface-600 doc-my-4 doc-leading-relaxed",
-			a: "text-primary doc-font-medium hover:text-hover-primary doc-no-underline",
+			a: "text-primary doc-font-medium hover:text-hover-primary doc-no-underline doc-inline-block",
 			code: "doc-px-1 doc-py-0.5 doc-bg-surface-100 doc-rounded-lg bg-surface-200 doc-my-6 doc-text-sm doc-font-mono text-surface-900",
 			pre: "doc-relative",
 			ul: "doc-list-disc doc-list-inside",
@@ -75,7 +75,7 @@ export async function convert(markdown: string): Promise<string> {
 			tr: "doc-py-2 doc-border-b border-surface-2",
 			td: "doc-py-2 doc-leading-7",
 			hr: "doc-my-6 doc-border-b doc-border-surface-200",
-			img: "doc-mx-auto doc-my-4 doc-rounded-2xl doc-border border-surface-2",
+			img: "doc-mx-auto doc-my-4 doc-rounded-xl doc-border border-surface-2",
 		})
 		/* @ts-ignore */
 		.use(rehypeAutolinkHeadings, {
@@ -134,13 +134,13 @@ export async function convert(markdown: string): Promise<string> {
 					node.tagName === "pre" &&
 					node.children[0].properties.className.includes("language-mermaid")
 				) {
-					// delete node
 					node.tagName = "div"
 					node.children = []
 				} else if (
 					node.tagName === "a" &&
 					node.properties.href &&
-					node.properties.href.startsWith("http")
+					node.properties.href.startsWith("http") &&
+					node.children[0].tagName !== "img"
 				) {
 					;(node.children = [
 						...node.children,
@@ -155,6 +155,13 @@ export async function convert(markdown: string): Promise<string> {
 						},
 					]),
 						(node.properties.target = "_blank")
+				} else if (
+					node.tagName === "a" &&
+					node.properties.href &&
+					node.properties.href.startsWith("http") &&
+					node.children[0].tagName === "img"
+				) {
+					node.properties.target = "_blank"
 				}
 			},
 		})
