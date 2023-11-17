@@ -1,6 +1,5 @@
 import { it, expect } from "vitest"
-import { buildStepVariables, rootEnvFilePath } from "./buildStepVariables.js"
-import path from "node:path"
+import { buildStepVariables } from "./buildStepVariables.js"
 
 it("should return a stringified JSON because bundlers expect a stringified JSON", () => {
 	const def = buildStepVariables()
@@ -17,6 +16,3 @@ it('should only define public env variables that start with "PUBLIC_"', () => {
 	expect(publicEnv).not.toHaveProperty("API_TOKEN")
 })
 
-it("should be the inlang root path", () => {
-	expect(rootEnvFilePath.endsWith(path.join("inlang", ".env"))).toBe(true)
-})
