@@ -1,6 +1,6 @@
 {
 	"id": "app.inlang.editor",
-	"icon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"icon": "https://emojis.wiki/thumbs/emojis/bird.webp",
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-marketplace-cover.jpg",
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-1.jpg",
@@ -9,15 +9,15 @@
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-4.jpg"
 	],
 	"displayName": {
-		"en": "Web Editor"
+		"en": "Fink – Message editor"
 	},
 	"description": {
-		"en": "The inlang Web Editor enables you to work with globalized codebases in your browser, without having to touch code but still being able to have a git-based workflow."
+		"en": "The Fink message editor enables you to work with globalized codebases in your browser, without having to touch code but still being able to have a git-based workflow."
 	},
 	"readme": {
 		"en": "./inlang/source-code/editor/README.md"
 	},
-	"keywords": ["editor", "web", "apps", "website", "translator", "lix"],
+	"keywords": ["editor", "web", "apps", "website", "translator", "lix", "fink"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"website": "/editor",

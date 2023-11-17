@@ -1,9 +1,8 @@
 ![editor banner image](https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/editor/assets/editor-header.png)
 
-# Translate software without having to code.
+# Edit translations with version control in a visual editor.
 
-The editor gives people without deeper technical knowledge the opportunity to work on the translations of software without having to touch code themselves.
-
+Fink enables translators to edit translations in a visual editor and submit them to your repository. It is a client-side application that pulls the translations from your repository into the browser and commits changes back to it. Contributors can easily submit translations by creating forks and pull requests within the editor.
 <br />
 
 Used by 
@@ -17,16 +16,16 @@ Used by
 <doc-comment text="I was blown away when I realized that everything in the inlang web editor was done client side." author="Anonym" icon="mdi:discord"></doc-comment>
 </doc-comments>
 
-# Benefits
+# Why use Fink?
 <doc-features>
-  <doc-feature text-color="#fff" color="#0991B1" title="Git workflows – in the browser" icon="teenyicons:git-outline"></doc-feature>
   <doc-feature text-color="#fff" color="#0991B1" title="Edit messages visually" icon="teenyicons:chat-outline"></doc-feature>
-  <doc-feature text-color="#fff" color="#0991B1" title="Plugin & Lint rule compatible" icon="teenyicons:shield-tick-outline"></doc-feature>
+  <doc-feature text-color="#fff" color="#0991B1" title="Collaborate using version control" icon="teenyicons:git-outline"></doc-feature>
+  <doc-feature text-color="#fff" color="#0991B1" title="Ensure quality with lint rules" icon="teenyicons:shield-tick-outline"></doc-feature>
 </doc-features>
 
 # Getting started
 
-Using the Flink editor requires an inlang project.
+Using the Fink editor requires an inlang project.
 
 ## A - Existing inlang.project.json
 
