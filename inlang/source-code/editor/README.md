@@ -9,19 +9,20 @@ Used by
 
 <doc-proof organisations="osmosis, appflowy, remnote"></doc-proof>
 
-<doc-comments>
-<doc-comment text="The web editor is very well-made! ↹-compatible, fast auto-translate, nice working UI, all good!" author="WarningImHack3r" icon="mdi:github"></doc-comment>
-<doc-comment text="Looks like @inlangHQ is going to kill all the translation services with CLI, IDE extension, web editor,  plugins, and CI/CD combo. Amazing." author="Nedim Arabacı" icon="simple-icons:x"></doc-comment>
-</doc-comments>
-<doc-comment text="I was blown away when I realized that everything in the inlang web editor was done client side." author="Anonym" icon="mdi:discord"></doc-comment>
-</doc-comments>
-
 # Why use Fink?
 <doc-features>
   <doc-feature text-color="#fff" color="#0991B1" title="Edit messages visually" icon="teenyicons:chat-outline"></doc-feature>
   <doc-feature text-color="#fff" color="#0991B1" title="Collaborate using version control" icon="teenyicons:git-outline"></doc-feature>
   <doc-feature text-color="#fff" color="#0991B1" title="Ensure quality with lint rules" icon="teenyicons:shield-tick-outline"></doc-feature>
 </doc-features>
+<br />
+
+<doc-comments>
+<doc-comment text="The web editor is very well-made! ↹-compatible, fast auto-translate, nice working UI, all good!" author="WarningImHack3r" icon="mdi:github"></doc-comment>
+<doc-comment text="Looks like @inlangHQ is going to kill all the translation services with CLI, IDE extension, web editor,  plugins, and CI/CD combo. Amazing." author="Nedim Arabacı" icon="simple-icons:x"></doc-comment>
+</doc-comments>
+<doc-comment text="I was blown away when I realized that everything in the inlang web editor was done client side." author="Anonym" icon="mdi:discord"></doc-comment>
+</doc-comments>
 
 # Getting started
 
