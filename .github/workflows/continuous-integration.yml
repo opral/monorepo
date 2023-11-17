@@ -15,7 +15,6 @@ jobs:
         os: [ubuntu-latest, macos-latest]
         version: [18]
     runs-on: ${{ matrix.os }}
-    environment: ci-cd
     steps:
       - name: Checkout project
         uses: actions/checkout@v3
