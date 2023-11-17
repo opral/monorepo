@@ -510,27 +510,28 @@ export async function pushChanges(args: {
 		})
 	}
 
+	// creates a merge commit if remote has changed in the meantime
+	await args.repo.pull({
+		author: {
+			name: args.user.username,
+			email: args.user.email,
+		},
+		fastForward: true,
+		singleBranch: true,
+	})
+
 	// triggering a side effect here to trigger a re-render
 	// of components that depends on fs
-	args.setFsChange(new Date())
+	const time = new Date()
+	args.setFsChange(time)
+	args.setLastPullTime(time)
 	// push changes
 	try {
-		const push = await args.repo.push()
-		if (push?.ok === false) {
-			return { error: new PushException("Failed to push", { cause: push.error }) }
-		}
-		await args.repo.pull({
-			author: {
-				name: args.user.username,
-				email: args.user.email,
-			},
-			fastForward: true,
-			singleBranch: true,
-		})
-		const time = new Date()
-		// triggering a rebuild of everything fs related
-		args.setFsChange(time)
-		args.setLastPullTime(time)
+		// const push = await args.repo.push()
+		// if (push?.ok === false) {
+		// 	return { error: new PushException("Failed to push", { cause: push.error }) }
+		// }
+
 		return { data: true }
 	} catch (error) {
 		return { error: (error as PushException) ?? "Unknown error" }

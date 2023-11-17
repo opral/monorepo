@@ -1,8 +1,10 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Repository, LixError } from "./api.js"
-import { transformRemote, withLazyFetching, parseLixUri } from "./helpers.js"
+import { transformRemote, parseLixUri } from "./helpers.js"
+import { httpWithLazyInjection } from "./helpers/httpWithLazyInjection.js"
+
 // @ts-ignore
-import http from "./http-client.js"
+import http from "./isomorphic-git-forks/http-client.js"
 import { Octokit } from "octokit"
 
 import { createSignal, createEffect } from "./solid.js"
@@ -16,11 +18,30 @@ import {
 	commit,
 	currentBranch,
 	add,
+	walk,
 	log,
+	TREE,
+	WORKDIR,
+	STAGE,
+	listFiles,
 	listServerRefs,
-	// fetch,
+	writeTree,
+	fetch as isoFetch,
+	merge,
+	checkout,
+	type TreeEntry,
+
 	// listBranches,
 } from "isomorphic-git"
+import { withLazyFetching } from "./helpers/withLazyFetching.js"
+// import { flatFileListToDirectoryStructure } from "./isomorphic-git-forks/flatFileListToDirectoryStructure.js"
+
+type PartialEntry = {
+	mode: string
+	path: string
+	type: "blob" | "tree" | "commit" | "special"
+	oid: string | undefined
+}
 
 export async function openRepository(
 	url: string,
@@ -73,11 +94,18 @@ export async function openRepository(
 	const dir = "/"
 
 	let pending: Promise<void | { error: Error }> | undefined = clone({
-		fs: withLazyFetching(rawFs, "clone"),
-		http,
+		fs: rawFs, // withLazyFetching(rawFs, "clone"),
+		// to start the repo lazy - we add the blob:none filter here
+		http: httpWithLazyInjection(http, {
+			noneBlobFilter: true,
+			filterRefList: { ref: args.branch },
+			overrideHaves: undefined,
+			overrideWants: undefined,
+		}),
 		dir,
 		corsProxy: gitProxyUrl,
 		url: gitUrl,
+		noCheckout: true,
 		singleBranch: true,
 		ref: args.branch,
 		depth: 1,
@@ -92,17 +120,49 @@ export async function openRepository(
 
 	await pending
 
-	// delay all fs and repo operations until the repo clone and checkout have finished, this is preparation for the lazy feature
-	function delayedAction({ execute }: { execute: () => any }) {
-		if (pending) {
-			return pending.then(execute)
-		}
+	const oidToFilePaths = {} as { [oid: string]: string[] }
+	const filePathToOid = {} as { [filePath: string]: string }
 
-		return execute()
-	}
+	// TODO - lazy fetch use path.join
+	const gitdir = dir.endsWith("/") ? dir + ".git" : dir + "/.git"
+	// TODO - lazy fetch what shall we use as ref?
+	const ref = "main"
+
+	await walk({
+		fs: rawFs,
+		// cache
+		dir,
+		gitdir,
+		trees: [TREE({ ref })],
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		map: async function (fullpath, [commit]) {
+			if (fullpath === ".") return
+
+			const oId = await commit?.oid()
+			if (oId === undefined) {
+				return
+			}
+
+			filePathToOid[fullpath] = oId
+			if (oidToFilePaths[oId] === undefined) {
+				oidToFilePaths[oId] = [] as string[]
+			}
+			oidToFilePaths[oId]?.push(fullpath)
+		},
+	})
+	// delay all fs and repo operations until the repo clone and checkout have finished, this is preparation for the lazy feature
 
 	return {
-		nodeishFs: withLazyFetching(rawFs, "app", delayedAction),
+		nodeishFs: withLazyFetching(
+			rawFs,
+			dir,
+			gitdir,
+			ref,
+			filePathToOid,
+			oidToFilePaths,
+			http,
+			"nodishfs"
+		),
 
 		/**
 		 * Gets the git origin url of the current repository.
@@ -111,7 +171,16 @@ export async function openRepository(
 		 */
 		async listRemotes() {
 			try {
-				const withLazyFetchingpedFS = withLazyFetching(rawFs, "listRemotes", delayedAction)
+				const withLazyFetchingpedFS = withLazyFetching(
+					rawFs,
+					dir,
+					gitdir,
+					ref,
+					filePathToOid,
+					oidToFilePaths,
+					http,
+					"listRemotes"
+				)
 
 				const remotes = await listRemotes({
 					fs: withLazyFetchingpedFS,
@@ -126,50 +195,387 @@ export async function openRepository(
 
 		status(cmdArgs) {
 			return status({
-				fs: withLazyFetching(rawFs, "statusMatrix", delayedAction),
+				fs: withLazyFetching(
+					rawFs,
+					dir,
+					gitdir,
+					ref,
+					filePathToOid,
+					oidToFilePaths,
+					http,
+					"status"
+				),
 				dir,
 				filepath: cmdArgs.filepath,
 			})
 		},
 
 		statusMatrix(cmdArgs) {
-			return statusMatrix({
-				fs: withLazyFetching(rawFs, "statusMatrix", delayedAction),
-				dir,
-				filter: cmdArgs.filter,
-			})
+			// TODO #1459 where is the type of cmdArgs defined?
+			if ((cmdArgs as any).filepaths !== undefined) {
+				throw new Error(
+					"Lazy fetching doesn't support filepaths for now - it will only create a matrix of fetched files for now"
+				)
+			}
+
+			return (async (cmdArgs) => {
+				// we pass only the lazy loaded files to the status matrix
+				const filepaths = await listFiles({
+					fs: rawFs,
+					gitdir: gitdir,
+					// TODO #1459 investigate the index cache further seem to be an in memory forwared on write cache to allow fast reads of the index...
+					dir: dir,
+					// NOTE: no ref config! we don't set ref because we want the list of files on the index
+				})
+
+				return statusMatrix({
+					fs: withLazyFetching(
+						rawFs,
+						dir,
+						gitdir,
+						ref,
+						filePathToOid,
+						oidToFilePaths,
+						http,
+						"statusMatrix"
+					),
+					dir,
+					filepaths,
+					filter: cmdArgs.filter,
+				})
+			})(cmdArgs)
 		},
 
 		add(cmdArgs) {
 			return add({
-				fs: withLazyFetching(rawFs, "add", delayedAction),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, "add"),
 				dir,
 				filepath: cmdArgs.filepath,
 			})
 		},
 
 		commit(cmdArgs) {
-			return commit({
-				fs: withLazyFetching(rawFs, "commit", delayedAction),
-				dir,
-				author: cmdArgs.author,
-				message: cmdArgs.message,
-			})
+			return (async (cmdArgs) => {
+				// TODO #1459 use central helper function
+				function normalPath(path: string): string {
+					const dots = /(\/|^)(\.\/)+/g
+					const slashes = /\/+/g
+
+					const upreference = /(?<!\.\.)[^/]+\/\.\.\//
+
+					// Append '/' to the beginning and end
+					path = `/${path}/`
+
+					// Handle the edge case where a path begins with '/..'
+					path = path.replace(/^\/\.\./, "")
+
+					// Remove extraneous '.' and '/'
+					path = path.replace(dots, "/").replace(slashes, "/")
+
+					// Resolve relative paths if they exist
+					let match
+					while ((match = path.match(upreference)?.[0])) {
+						path = path.replace(match, "")
+					}
+
+					return path
+				}
+
+				// TODO #1459 use central helper function
+				function getDirname(path: string): string {
+					return normalPath(
+						path
+							.split("/")
+							.filter((x) => x)
+							.slice(0, -1)
+							.join("/") ?? path
+					)
+				}
+				// TODO #1459 use central helper function
+				function getBasename(path: string): string {
+					return (
+						path
+							.split("/")
+							.filter((x) => x)
+							.at(-1) ?? path
+					)
+				}
+
+				const fileStates = {} as {
+					[parentFolder: string]: PartialEntry[]
+				}
+
+				async function createTree(
+					currentFolder: string,
+					fileStates: {
+						[parentFolder: string]: PartialEntry[]
+					}
+				): Promise<string> {
+					const entries: TreeEntry[] = []
+
+					const currentFolderStates = fileStates[currentFolder]
+
+					if (!currentFolderStates) {
+						throw new Error("couldn't find folder " + currentFolder + " in file states")
+					}
+
+					for (const entry of currentFolderStates) {
+						if (entry.type === "tree") {
+							entries.push({
+								mode: "040000",
+								path: entry.path,
+								type: entry.type,
+								oid: await createTree(currentFolder + entry.path + "/", fileStates),
+							})
+						} else {
+							if (!entry.oid) {
+								throw new Error("OID should be set for types non tree")
+							}
+
+							entries.push({
+								mode: entry.mode,
+								path: entry.path,
+								type: entry.type as "blob" | "tree" | "commit", // TODO #1459 we cast here to remove special - check cases
+								oid: entry.oid,
+							})
+						}
+					}
+
+					console.log("writing tree for " + currentFolder)
+					return await writeTree({ fs: rawFs, dir, gitdir, tree: entries })
+				}
+
+				await walk({
+					fs: rawFs,
+					// cache
+					dir,
+					gitdir,
+					trees: [TREE({ ref }), STAGE()],
+					// eslint-disable-next-line @typescript-eslint/no-unused-vars
+					map: async function (fullpath, [refState, stagingState]) {
+						if (!refState && !stagingState) {
+							// skip unmanaged files (not indexed nor in ref) and skip root
+							throw new Error("At least one of the trees should contain an entry")
+						}
+
+						const refStateType = refState ? await refState.type() : undefined
+						const stagingStateType = stagingState ? await stagingState.type() : undefined
+
+						// 'commit' used by TREE to represent submodules
+						if (refStateType === "commit" || stagingStateType === "commit") {
+							throw new Error("Submodule found in " + fullpath + " currently not supported")
+						}
+
+						// - `'special'` used by `WORKDIR` to represent irregular files like sockets and FIFOs
+						if (refStateType === "special" || stagingStateType === "special") {
+							throw new Error("type special should not occure in ref or staging")
+						}
+
+						if (fullpath === ".") {
+							// skip root folder
+							return
+						}
+
+						const fileDir = getDirname(fullpath)
+						if (fileStates[fileDir] === undefined) {
+							fileStates[fileDir] = []
+						}
+
+						if (!stagingState && refState) {
+							// file was not checked out - open question how do we distinguis it from deleted?
+							fileStates[fileDir]?.push({
+								mode: (await refState.mode()).toString(8),
+								path: getBasename(fullpath),
+								type: refStateType as 'tree' | 'commit' | 'blob',
+								oid: await refState.oid(),
+							})
+							return
+						}
+
+						if (stagingState && !refState) {
+							// file does not exist in ref - it was added
+
+							fileStates[fileDir]?.push({
+								mode: (await stagingState.mode()).toString(8),
+								path: getBasename(fullpath),
+								type: stagingStateType  as 'tree' | 'commit' | 'blob',,
+								oid: await stagingState.oid(),
+							})
+
+							return
+						}
+
+						if (stagingState && refState) {
+							// file does exists in both
+							const stagingMode = await stagingState.mode()
+							const stagingType = await stagingState.type()
+
+							fileStates[fileDir]?.push({
+								mode: stagingType === "tree" ? "040000" : stagingMode.toString(8),
+								path: getBasename(fullpath),
+								type: await stagingStateType  as 'tree' | 'commit' | 'blob',,
+								oid: await stagingState.oid(),
+							})
+
+							return
+						}
+					},
+				})
+
+				const tree = await createTree("/", fileStates)
+
+				return commit({
+					fs: withLazyFetching(
+						rawFs,
+						dir,
+						gitdir,
+						ref,
+						filePathToOid,
+						oidToFilePaths,
+						http,
+						"commit"
+					),
+					dir,
+					author: cmdArgs.author,
+					message: cmdArgs.message,
+					tree,
+				})
+			})(cmdArgs)
 		},
 
 		push() {
+			// TODO #1459 fetch head from remote
+
 			return push({
-				fs: withLazyFetching(rawFs, "push", delayedAction),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, "push"),
 				url: gitUrl,
 				corsProxy: gitProxyUrl,
-				http,
+				http /*: httpWithLazyInjection(http, {
+					noneBlobFilter: true,
+					filterRefList: { ref: args.branch },
+					overrideHaves: undefined,
+					overrideWants: undefined,
+				}),*/,
 				dir,
 			})
 		},
 
-		pull(cmdArgs) {
-			return pull({
-				fs: withLazyFetching(rawFs, "pull", delayedAction),
+		// stage ->
+		// commit -> brings the
+		// pull
+		// push
+
+		async pull(cmdArgs) {
+			// if (!args.ref) {
+			const head = await currentBranch({ fs: rawFs, gitdir })
+			// TODO: use a better error.
+			if (!head) {
+				throw new Error(" MissingParameterError ref")
+			}
+			const ref = head
+			// }
+
+			const { fetchHead, fetchHeadDescription } = await isoFetch({
+				fs: rawFs,
+				// cache,
+				http: httpWithLazyInjection(http, {
+					noneBlobFilter: true,
+					filterRefList: { ref: args.branch },
+					overrideHaves: undefined,
+					overrideWants: undefined,
+				}),
+				// onProgress,
+				// onMessage,
+				// onAuth,
+				// onAuthSuccess,
+				// onAuthFailure,
+				gitdir,
+				corsProxy: gitProxyUrl,
+				ref,
+				url: gitUrl,
+				// remote,
+				// remoteRef,
+				singleBranch: true,
+				// headers,
+				// prune,
+				// pruneTags,
+			})
+			await merge({
+				// NOTE when a blob is needed during merge (changed on the client AND on theserver - oid is not sufficient) we utilize lazy fetching again
+				fs: withLazyFetching(
+					rawFs,
+					dir,
+					gitdir,
+					ref,
+					filePathToOid,
+					oidToFilePaths,
+					http,
+					"pull-merge"
+				),
+				// cache,
+				gitdir,
+				ours: ref,
+				theirs: fetchHead!, // seem to be not checked in orginal isomorphic git pull
+				fastForward: cmdArgs.fastForward,
+				// fastForwardOnly,
+				message: `Merge ${fetchHeadDescription}`,
+				author: cmdArgs.author,
+				// committer,
+				// signingKey,
+				dryRun: false,
+				noUpdateBranch: false,
+			})
+
+			const files: string[] = []
+
+			await walk({
+				fs: withLazyFetching(
+					rawFs,
+					dir,
+					gitdir,
+					ref,
+					filePathToOid,
+					oidToFilePaths,
+					http,
+					"pull-merge"
+				),
+				// cache
+				dir,
+				gitdir,
+				trees: [STAGE()],
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				map: async function (fullpath, [commit]) {
+					if (commit && (await commit.type()) === "blob") {
+						files.push(fullpath)
+					}
+				},
+			})
+
+			await checkout({
+				dir: dir,
+				gitdir: gitdir,
+				fs: withLazyFetching(
+					rawFs,
+					dir,
+					gitdir,
+					ref,
+					filePathToOid,
+					oidToFilePaths,
+					http,
+					"pull-merge"
+				),
+				filepaths: files,
+				ref: ref,
+			})
+
+			for (const file of files) {
+				console.log(await rawFs.readFile(file, { encoding: "utf-8" }))
+			}
+
+			// TODO #1459 add checkout see https://github.com/isomorphic-git/isomorphic-git/blob/d7f24f8041e18a44ccf72b7feb7a951337fa1149/src/commands/pull.js#L120
+
+			/*return pull({
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, "pull"),
 				url: gitUrl,
 				corsProxy: gitProxyUrl,
 				http,
@@ -177,12 +583,12 @@ export async function openRepository(
 				fastForward: cmdArgs.fastForward,
 				singleBranch: cmdArgs.singleBranch,
 				author: cmdArgs.author,
-			})
+			})*/
 		},
 
 		log(cmdArgs) {
 			return log({
-				fs: withLazyFetching(rawFs, "log", delayedAction),
+				fs: withLazyFetching(rawFs, dir, gitdir, ref, filePathToOid, oidToFilePaths, http, "log"),
 				depth: cmdArgs?.depth,
 				dir,
 				since: cmdArgs?.since,
@@ -237,7 +643,7 @@ export async function openRepository(
 			// TODO: make stateless
 			return (
 				(await currentBranch({
-					fs: withLazyFetching(rawFs, "getCurrentBranch", delayedAction),
+					fs: rawFs,
 					dir,
 				})) || undefined
 			)
