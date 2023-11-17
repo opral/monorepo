@@ -16,7 +16,7 @@
 	"scripts": {
 		"build": "npx nx run-many --target=build --parallel",
 		"dev": "npx nx run-many --target=dev --parallel 1000 --output-style stream",
-		"dev:lix": "npx nx run-many --target=dev --parallel 10 --nxBail --verbose --projects @lix-js/*,@inlang/server,@inlang/editor,@inlang/website --output-style stream",
+		"dev:lix": "npx nx run-many --target=dev --parallel=10 --nxBail --verbose --projects=@lix-js/*,@inlang/server,@inlang/editor,@inlang/website --output-style=stream",
 		"production": "npx nx run-many --target=production --parallel 1000 --exclude @lix-js/server --exclude @inlang/badge",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "npx nx run-many --target=test --parallel",
@@ -24,6 +24,7 @@
 		"lint": "npx nx run-many --target=lint --parallel",
 		"format": "npx nx run-many --target=format --parallel",
 		"---- OTHER ---------------------------------------------------------": "",
+		"fetchPublicEnv": "npx nx run @inlang/env-variables:fetchPublicEnv",
 		"changeset": "npx changeset",
 		"clean": "npm run clean -ws --if-present && rm -rf ./.env ./node_modules",
 		"----- CI ---- used to test the codebase on every commit": "",

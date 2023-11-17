@@ -9,7 +9,7 @@ const configName = "development"
 const publicServiceKey =
 	"dp" + ".st.development" + ".zAIS3YXnv7AyulOk" + "2YfNeOFiih21myQJ6GsjLFdKpbC"
 
-export async function fetchPublicEnv() {
+async function fetchPublicEnv() {
 	try {
 		const response = await fetch(
 			`https://api.doppler.com/v3/configs/config/secrets?project=${projectName}&config=${configName}&include_dynamic_secrets=false&include_managed_secrets=false`,
@@ -49,3 +49,6 @@ export async function fetchPublicEnv() {
 		console.error("❌ Failed to fetch public env variables remotely. ", error)
 	}
 }
+
+console.info("Fetching the public environment variables for external contributors into /.env...")
+fetchPublicEnv()
