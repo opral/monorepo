@@ -26,29 +26,75 @@ Used by
 
 # Getting started
 
-### 1. Open existing project
+Using the Flink editor requires an inlang project.
 
-To open your existing project, you can visit the [inlang Editor](/editor) and enter your repository URL. The editor will automatically load all your message and plugins / lint rules.
+## A - Existing inlang.project.json
 
-**Depending on the size of your project, it can take up a few seconds to load your project.**
+If you already have the `inlang.project.json` file in your repository you can just open the Fink Launcher and paste your GitHub url.
 
-You don't have an inlang project yet? [Read this guide](/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang) to get started.
+<doc-links>
+    <doc-link title="Open Fink Editor" icon="icon-park-outline:editor" href="/editor" description="You can simply open the editor with a remote project."></doc-link>
+</doc-links>
 
-### 2. Translate missing messages
+## B - Create a new inlang project
+
+- Create a `messages` directory. Let add a example `en.json` in it:
+```json
+{
+  "hello": "Hello World" 
+}
+```
+- Create the `inlang.project.json` file in your root directory. If you want to use another storage plugin choose another plugin at [inlang.com](http://localhost:3000/c/plugins)
+
+```json
+{
+  "$schema": "https://inlang.com/schema/project-settings",
+  "sourceLanguageTag": "en",
+  "languageTags": [
+    "en"
+  ],
+  "modules": [
+    "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
+    "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@latest/dist/index.js",
+    "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
+    "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@latest/dist/index.js",
+    "https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/dist/index.js",
+    "https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js"
+  ],
+  "plugin.inlang.messageFormat": {
+    "pathPattern": "./messages/{languageTag}.json"
+  }
+}
+```
+
+- Validate project with inlang's cli
+```cli
+npx @inlang/cli@latest project validate
+```
+- Push this changes to remote
+- Open the editor
+```cli
+npx @inlang/cli@latest open editor
+```
+
+
+# Usage
+
+### Translate missing messages
 
 After your project is loaded, you can see your messages. Additionally, if your project file includes lint rules, you might encounter warnings for specific keys.
 
-### 3. Push and commit your changes
+### Push and commit your changes
 
 To save what you've translated, you can use the so called GitFloat menu on the bottom of the page. If you've made changes, you are able to push and commit them. This will automatically create an addition to the git history inside of your repository, which is useful for seeing who has changed what and working on a single source of truth.
 
-# How to filter messages
+### How to filter messages
 
-### Filter after language
+**Filter after language**
 
 You can filter messages shown based on the language selected. You can find the filter on the top right corner of the editor.
 
-### Handle lint rules
+**Handle lint rules**
 
 Lint rules are a great way to ensure the quality of your translations, therefore you can select the lints you want to use in the editor. You can find it on the top left corner of the editor (filter options).
 
