@@ -206,7 +206,7 @@ export default function Card(props: { item: any; displayName: string }) {
 
 export function CardBuildOwn() {
 	// eslint-disable-next-line solid/reactivity
-	const app = currentPageContext.urlParsed.pathname.includes("/apps")
+	const app = () => currentPageContext.urlParsed.pathname.includes("/apps")
 
 	return (
 		<>
@@ -214,7 +214,7 @@ export function CardBuildOwn() {
 				href="/documentation/publish-to-marketplace"
 				class={
 					"relative no-underline flex flex-col justify-center pt-8 items-center gap-4 group w-full bg-background transition-colors border border-surface-200 rounded-xl p-5 hover:shadow-lg hover:shadow-surface-100 hover:border-surface-300 active:border-surface-400 " +
-					(app ? "" : "h-48")
+					(app() ? "" : "h-48")
 				}
 			>
 				<Plus class="w-10 h-10 text-surface-600 group-hover:text-surface-900 transition-colors" />
