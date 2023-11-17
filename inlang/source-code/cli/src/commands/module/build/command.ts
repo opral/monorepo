@@ -22,7 +22,6 @@ interface ArgsTypes {
 	path: string;
 }
 
-  
 // Create an esbuild plugin to check Node.js imports
 const nodeAPICheckerPlugin: Plugin = {
 	name: 'node-api-checker',
@@ -51,7 +50,7 @@ export const build = new Command()
 	.option("--watch", "Watch for changes and rebuild.", false)
 	.action(buildCommandAction)
 
-export async function buildCommandAction(args: { entry: string; outdir: string; watch: boolean }) {
+export async function buildCommandAction(args: BuildActionArgs & { mockFile?: string}) {
 	try {
 		const ctx = await context(
 			moduleBuildOptions({

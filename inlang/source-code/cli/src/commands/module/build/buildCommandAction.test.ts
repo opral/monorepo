@@ -8,9 +8,11 @@ const forbiddenNodeImports: string[] = [
   'path',
   'os',
   'net',
+  'node:fs',
+  'node:path',
 ];
 
-it('Forbidden Node.js API Detection', async () => {
+const runTestWithForbiddenImport = async (forbiddenImport: string) => {
   let originalConsoleError: (...data: any[]) => void;
   const errorLogs: string[] = [];
 
@@ -20,23 +22,42 @@ it('Forbidden Node.js API Detection', async () => {
     errorLogs.push(args.join(' '));
   };
 
-  for (const forbiddenImport of forbiddenNodeImports) {
-    await it(`Should detect forbidden Node.js import: ${forbiddenImport}`, async () => {
-      const args: BuildActionArgs = {
-        entry: 'testEntry.js', // Replace with an actual entry file path
-        outdir: './dist',
-        watch: false,
-      };
+  await it(`Should detect forbidden Node.js import: ${forbiddenImport}`, async () => {
+    const args: BuildActionArgs = {
+      entry: '/commands/module/build/buildCommandAction.ts',
+      outdir: './dist',
+      watch: false,
+    };
 
-      // Execute the build command action with the current forbidden import
-      await buildCommandAction(args);
+    // Generate mock import statements for the forbidden import
+    const generateMockFile = (forbiddenImport: string) => {
+      return `
+        import ${
+          forbiddenImport.startsWith('node:') ? forbiddenImport.split(':')[1] : forbiddenImport
+        } from "${forbiddenImport.startsWith('node:') ? forbiddenImport.split(':')[1] : forbiddenImport}";
 
-      // Check if console.error captured the expected error message
-      const errorMessage = `Forbidden Node.js import detected: ${forbiddenImport}`;
-      expect(errorLogs.some(log => log.includes(errorMessage))).toBe(true);
-    });
-  }
+        console.log(${
+          forbiddenImport.startsWith('node:') ? forbiddenImport.split(':')[1] : forbiddenImport
+        });
+      `;
+    };
+
+    // Create mockFile content for the forbidden import
+    const mockFile = generateMockFile(forbiddenImport);
+
+    // Execute the build command action with the specified arguments and mock file content
+    await buildCommandAction({ ...args, mockFile });
+
+    // Check if console.error captured the expected error message
+    const errorMessage = `Forbidden Node.js import detected: ${forbiddenImport}`;
+    expect(errorLogs.some(log => log.includes(errorMessage))).toBe(true);
+  });
 
   // Restore console.error to its original behavior after tests
   console.error = originalConsoleError;
-});
+};
+
+// Run tests for each forbidden import
+for (const forbiddenImport of forbiddenNodeImports) {
+  runTestWithForbiddenImport(forbiddenImport);
+}
