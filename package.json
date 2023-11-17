@@ -25,6 +25,7 @@
 		"format": "npx nx run-many --target=format --parallel",
 		"---- OTHER ---------------------------------------------------------": "",
 		"fetchPublicEnv": "npx nx run @inlang/env-variables:fetchPublicEnv",
+		"fetchInternalEnv": "doppler secrets download --no-file --format env > .env",
 		"changeset": "npx changeset",
 		"clean": "npm run clean -ws --if-present && rm -rf ./.env ./node_modules",
 		"----- CI ---- used to test the codebase on every commit": "",
