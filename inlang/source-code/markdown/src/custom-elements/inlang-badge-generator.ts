@@ -17,13 +17,12 @@ export class InlangBadgeGenerator extends LitElement {
 		}
 		.badge-showcase {
 			display: flex;
-			flex-direction: row;
-			flex-wrap: wrap;
+			flex-direction: column;
 			align-items: center;
 			justify-content: center;
 			gap: 1rem;
 			width: 100%;
-			height: 200px;
+			height: 360px;
 			z-index: 1;
 		}
 		.options-wrapper {
@@ -67,7 +66,7 @@ export class InlangBadgeGenerator extends LitElement {
 			align-items: center;
 			justify-content: center;
 			z-index: 1;
-			background: rgba(255, 255, 255, 0.8);
+			// background: rgba(255, 255, 255, 0.8);
 			border-radius: 0.5rem;
 		}
 		.empty-card {
@@ -220,6 +219,11 @@ export class InlangBadgeGenerator extends LitElement {
 			${this.badgeURL === ""
 				? ""
 				: html` <div class="badge-showcase">
+						${this.badgeURL === ""
+							? html`<div class="empty-card">
+									<img width="56px" src="http://inlang.com/favicon/safari-pinned-tab.svg" />
+							  </div>`
+							: html`<img src=${this.badgeURL} />`}
 						${this.badgeURL !== "" && this.loading === false
 							? html`<span @click=${() => this.handleCopyMarkdown()} class="copy-badge">
 									${this.copyMarkdownText}
@@ -230,11 +234,6 @@ export class InlangBadgeGenerator extends LitElement {
 									${this.copyImageText}
 							  </div>`
 							: ""}
-						${this.badgeURL === ""
-							? html`<div class="empty-card">
-									<img width="56px" src="http://inlang.com/favicon/safari-pinned-tab.svg" />
-							  </div>`
-							: html`<img src=${this.badgeURL} />`}
 				  </div>`}
 		</div>`
 	}
