@@ -19,11 +19,15 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@v3
 
+      - name: Install Doppler CLI for env (public) variables
+        uses: dopplerhq/cli-action@v2
+
       - name: Install node
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.version }}
           cache: "npm"
 
-      - run: npm run ci
-
+      - run: doppler run -- npm run ci
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_CI_ENV_TOKEN }}
