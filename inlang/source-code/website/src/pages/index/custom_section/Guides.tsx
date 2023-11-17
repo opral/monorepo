@@ -2,6 +2,7 @@ import { For } from "solid-js"
 import * as m from "#src/paraglide/messages.js"
 import { registry } from "@inlang/marketplace-registry"
 import { Button } from "../components/Button.jsx"
+import Link from "#src/renderer/Link.jsx"
 
 const Guides = () => {
 	const getGuides = () => [
@@ -35,9 +36,12 @@ const Guides = () => {
 									? manifest.displayName.en
 									: manifest.displayName
 							return (
-								<div class="gap-4 py-6 flex">
+								<Link
+									href={`/g/${manifest.uniqueID}/${manifest.id.replaceAll(".", "-")}`}
+									class="gap-4 py-6 flex group hover:cursor-pointer"
+								>
 									<img class="w-7 h-7 object-cover object-center rounded-lg" src={manifest.icon} />
-									<div class="flex flex-col gap-2 flex-1">
+									<div class="flex flex-col gap-1 flex-1">
 										<h3 class="m-0 mb-2 text-surface-800 leading-none no-underline font-semibold">
 											{displayName()}
 										</h3>
@@ -45,14 +49,10 @@ const Guides = () => {
 											{(manifest.description as { en: string }).en}
 										</p>
 									</div>
-									<Button
-										href={`/g/${manifest.uniqueID}/${manifest.id.replaceAll(".", "-")}`}
-										type="textPrimary"
-										class="hidden lg:block ml-32"
-									>
+									<p class="hidden lg:block ml-32 text-sm text-primary hover:text-active-primary">
 										{m.home_guides_item_button_text()}
-									</Button>
-								</div>
+									</p>
+								</Link>
 							)
 						}}
 					</For>

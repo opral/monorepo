@@ -29,6 +29,8 @@ export type PageProps = {
 	recommends?: MarketplaceManifest[]
 }
 
+const pagesToHideSlider = ["badge", "editor", "ide", "cli", "paraglide"]
+
 export function Page(props: PageProps) {
 	const [readmore, setReadmore] = createSignal<boolean>(false)
 
@@ -190,6 +192,20 @@ export function Page(props: PageProps) {
 												</div>
 											</div>
 										</div>
+										<Show
+											when={
+												props.manifest.gallery &&
+												props.manifest.gallery.length > 2 &&
+												!pagesToHideSlider.some((page) =>
+													currentPageContext.urlParsed.pathname.includes(page)
+												)
+											}
+										>
+											<div class="mt-12">
+												{/* @ts-ignore */}
+												<doc-slider items={props.manifest.gallery} />
+											</div>
+										</Show>
 										<Show
 											when={
 												props.manifest.gallery &&

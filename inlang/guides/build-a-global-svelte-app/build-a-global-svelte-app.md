@@ -20,7 +20,7 @@ Add the `project.inlang.json` file to the root of your repo:
 	"languageTags": ["en", "de"],
 	"modules": ["https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format/dist/index.js"],
 	"plugin.inlang.messageFormat": {
-		"filePath": "./src/messages.json"
+		"pathPattern": "./messages/{languageTag}.json"
 	}
 }
 ```
@@ -44,7 +44,7 @@ Add the paraglide compiler to the build script in your `package.json`:
 ```json
 {
   "scripts": {
-    "build": "paraglide-js compile --namespace <your project name> && vite build"
+    "build": "paraglide-js compile && vite build"
   }
 }
 ```
@@ -88,7 +88,7 @@ Add the m-function-matcher plugin to the `project.inlang.json`, so the ide-exten
 	    "https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js"
     ],
 	"plugin.inlang.messageFormat": {
-		"filePath": "./src/messages.json"
+		"pathPattern": "./messages/{languageTag}.json"
 	}
 }
 ```
@@ -106,11 +106,13 @@ Now select `Inlang: Extract Message`. This command extracts the `sourceLanguage`
 If the m function does not get recognize you need to import it:
 ```ts
 <script>
-	import * as m from "@inlang/paraglide-js/<namespace>/messages"
+	import * as m from "./../paraglide-js/messages"
 </script>
 ```
 
 After adding the extension, it should show you the translation inline. You could also add translations to the id or open a translation editor with the ide extension ... [Further reading](https://inlang.com/m/r7kp499g/app-inlang-ideExtension)
+
+> If the message is not yet compiled use `npm @inlang/paraglide-js compile`. (Watcher comes soon)
 
 ### 4. See paraglide.js in action
 
@@ -119,10 +121,10 @@ With the ide-extension, add a German translation (hover over the `m` function an
 ![image](https://github.com/inlang/monorepo/assets/58360188/55ad46fd-45c3-4526-8d42-248798f490e5)
 
 Example:
-```svelte
+```ts
 <script>
-	import * as m from "@inlang/paraglide-js/<namespace>/messages"
-	import { setLanguageTag } from "@inlang/paraglide-js/<namespace>"
+	import * as m from "./../paraglide-js/messages"
+	import { setLanguageTag } from "./../paraglide-js"
 </script>
 
 <div onclick={setLanguageTag("de")}>
@@ -137,4 +139,5 @@ npm run dev
 
 Click on the switcher and see the result.
 
+This guide is based on `paraglide-js 1.0.0-prerelease.9`, `plugin-message-format 2.0.0` and `m-function-matcher 0.5.0`.`
 If you have problems, file an [issue]() or ask on [Discord]().
