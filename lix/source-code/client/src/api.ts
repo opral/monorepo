@@ -2,7 +2,7 @@ import type { NodeishFilesystem } from "@lix-js/fs"
 import type raw from "isomorphic-git"
 import type { Endpoints } from "@octokit/types"
 
-type Author = {
+export type Author = {
 	name?: string
 	email?: string
 	timestamp?: number

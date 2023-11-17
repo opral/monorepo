@@ -7,8 +7,9 @@ import { optimizedRefsRes, optimizedRefsReq } from "./git-http/optimize-refs.js"
 import { Octokit } from "octokit"
 
 import { createSignal, createEffect } from "./solid.js"
-import isoGit from "isomorphic-git"
 
+import { commit } from "./git/commit.js"
+import isoGit from "isomorphic-git"
 const {
 	clone,
 	listRemotes,
@@ -16,7 +17,6 @@ const {
 	statusMatrix,
 	push,
 	pull,
-	commit,
 	currentBranch,
 	add,
 	log,
@@ -301,6 +301,7 @@ export async function openRepository(
 					intercept: delayedAction,
 				}),
 				dir,
+				ref: args.branch,
 				author: cmdArgs.author,
 				message: cmdArgs.message,
 			})
@@ -429,15 +430,23 @@ export async function openRepository(
 		},
 
 		async getBranches() {
+			const serverRefs = await listServerRefs({
+				url: gitUrl,
+				corsProxy: gitProxyUrl,
+				prefix: "refs/heads",
+				http: makeHttpClient({ verbose, description: "getBranches" }),
+			}).catch((error) => {
+				return { error }
+			})
+
+			if ("error" in serverRefs) {
+				return undefined
+			}
+
 			return (
-				(
-					await listServerRefs({
-						url: gitUrl,
-						corsProxy: gitProxyUrl,
-						prefix: "refs/heads",
-						http: makeHttpClient({ verbose, description: "getBranches" }),
-					})
-				).map((ref) => ref.ref.replace("refs/heads/", "")) || undefined
+				serverRefs
+					.filter((ref) => !ref.ref.startsWith("refs/heads/gh-readonly-queue/"))
+					.map((ref) => ref.ref.replace("refs/heads/", "")) || undefined
 			)
 		},
 

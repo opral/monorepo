@@ -1,5 +1,6 @@
 import type { NodeishFilesystem, NodeishStats, FileChangeInfo } from "../NodeishFilesystemApi.js"
 import { FilesystemError } from "../errors/FilesystemError.js"
+import { normalPath, getBasename, getDirname } from "../utilities/helpers.js"
 
 type Inode = Uint8Array | Set<string>
 
@@ -159,6 +160,10 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			throw new FilesystemError("EISDIR", path, "rm")
 		},
 
+		/**
+		 *
+		 * @throws {"ENOENT" | WatchAbortedError} // TODO: move to lix error classes FileDoesNotExistError
+		 */
 		watch: function (
 			path: Parameters<NodeishFilesystem["watch"]>[0],
 			options: Parameters<NodeishFilesystem["watch"]>[1]
@@ -348,50 +353,3 @@ function newStatEntry(
 	})
 }
 
-function getDirname(path: string): string {
-	return normalPath(
-		path
-			.split("/")
-			.filter((x) => x)
-			.slice(0, -1)
-			.join("/") ?? path
-	)
-}
-
-function getBasename(path: string): string {
-	return (
-		path
-			.split("/")
-			.filter((x) => x)
-			.at(-1) ?? path
-	)
-}
-
-/**
- * Removes extraneous dots and slashes, resolves relative paths and ensures the
- * path begins and ends with '/'
- * FIXME: unify with utilities/normalizePath!
- */
-function normalPath(path: string): string {
-	const dots = /(\/|^)(\.\/)+/g
-	const slashes = /\/+/g
-
-	const upreference = /(?<!\.\.)[^/]+\/\.\.\//
-
-	// Append '/' to the beginning and end
-	path = `/${path}/`
-
-	// Handle the edge case where a path begins with '/..'
-	path = path.replace(/^\/\.\./, "")
-
-	// Remove extraneous '.' and '/'
-	path = path.replace(dots, "/").replace(slashes, "/")
-
-	// Resolve relative paths if they exist
-	let match
-	while ((match = path.match(upreference)?.[0])) {
-		path = path.replace(match, "")
-	}
-
-	return path
-}
