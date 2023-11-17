@@ -11,7 +11,7 @@ on:
 jobs:
   publish-npm-packages:
     runs-on: ubuntu-latest
-    environment: ci-cd
+    environment: npm
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -35,97 +35,97 @@ jobs:
 
 # -------------------- @inlang/* --------------------
 
-      - name: "@inlang/cli" 
+      - name: "@inlang/cli"
         uses: JS-DevTools/npm-publish@v2
         with:
           token: ${{ secrets.NPM_PUBLISH_TOKEN }}
           package: inlang/source-code/cli/package.json
 
-      - name: "@inlang/json-types" 
+      - name: "@inlang/json-types"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/json-types/package.json
-      
-      - name: "@inlang/message-lint-rule-empty-pattern" 
+
+      - name: "@inlang/message-lint-rule-empty-pattern"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/message-lint-rules/emptyPattern/package.json
 
-      - name: "@inlang/message-lint-rule-identical-pattern" 
+      - name: "@inlang/message-lint-rule-identical-pattern"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/message-lint-rules/identicalPattern/package.json
 
-      - name: "@inlang/message-lint-rule-message-without-source" 
+      - name: "@inlang/message-lint-rule-message-without-source"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/message-lint-rules/messageWithoutSource/package.json
-  
-      - name: "@inlang/message-lint-rule-missing-translation" 
+
+      - name: "@inlang/message-lint-rule-missing-translation"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/message-lint-rules/missingTranslation/package.json
 
-      - name: "@inlang/message-lint-rule-snake-case-id" 
+      - name: "@inlang/message-lint-rule-snake-case-id"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/message-lint-rules/snakeCaseId/package.json
 
-      - name: "@inlang/message-lint-rule-camel-case-id" 
+      - name: "@inlang/message-lint-rule-camel-case-id"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/message-lint-rules/camelCaseId/package.json
 
-      - name: "@inlang/plugin-json" 
+      - name: "@inlang/plugin-json"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/plugins/json/package.json
 
-      - name: "@inlang/plugin-i18next" 
+      - name: "@inlang/plugin-i18next"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/plugins/i18next/package.json
 
-      - name: "@inlang/plugin-message-format" 
+      - name: "@inlang/plugin-message-format"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/plugins/inlang-message-format/package.json
 
-      - name: "@inlang/plugin-m-function-matcher" 
+      - name: "@inlang/plugin-m-function-matcher"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/plugins/m-function-matcher/package.json
 
-      - name: "@inlang/plugin-t-function-matcher" 
+      - name: "@inlang/plugin-t-function-matcher"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/plugins/t-function-matcher/package.json
 
-      - name: "@inlang/detect-json-formatting" 
+      - name: "@inlang/detect-json-formatting"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/detect-json-formatting/package.json
-  
-      - name: "@inlang/result" 
+
+      - name: "@inlang/result"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/result/package.json
 
-      - name: "@inlang/sdk" 
+      - name: "@inlang/sdk"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
@@ -133,49 +133,49 @@ jobs:
 
 # ------------- VERSIONED INTERFACES -------------
 
-      - name: "@inlang/language-tag" 
+      - name: "@inlang/language-tag"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/versioned-interfaces/language-tag/package.json
 
-      - name: "@inlang/marketplace-manifest" 
+      - name: "@inlang/marketplace-manifest"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/versioned-interfaces/marketplace-manifest/package.json
 
-      - name: "@inlang/message" 
+      - name: "@inlang/message"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/versioned-interfaces/message/package.json
 
-      - name: "@inlang/message-lint-rule" 
+      - name: "@inlang/message-lint-rule"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/versioned-interfaces/message-lint-rule/package.json
 
-      - name: "@inlang/module" 
+      - name: "@inlang/module"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/versioned-interfaces/module/package.json
 
-      - name: "@inlang/plugin" 
+      - name: "@inlang/plugin"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/versioned-interfaces/plugin/package.json
 
-      - name: "@inlang/project-settings" 
+      - name: "@inlang/project-settings"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: inlang/source-code/versioned-interfaces/project-settings/package.json
 
-      - name: "@inlang/translatable" 
+      - name: "@inlang/translatable"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
@@ -184,19 +184,19 @@ jobs:
 # ---------------- @lix-js/* -----------------
 
 
-      - name: "@lix-js/client" 
+      - name: "@lix-js/client"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: lix/source-code/client/package.json
 
-      - name: "@lix-js/fs" 
+      - name: "@lix-js/fs"
         uses: JS-DevTools/npm-publish@v2
         with:
             token: ${{ secrets.NPM_PUBLISH_TOKEN }}
             package: lix/source-code/fs/package.json
 
-      # - name: "@lix-js/server" 
+      # - name: "@lix-js/server"
       #   uses: JS-DevTools/npm-publish@v2
       #   with:
       #       token: ${{ secrets.NPM_PUBLISH_TOKEN }}
