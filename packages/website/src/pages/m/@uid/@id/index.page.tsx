@@ -141,7 +141,7 @@ export function Page(props: PageProps) {
 												/>
 											</Show>
 											<div class="mb-10 md:mb-0">
-												<div class="flex flex-col gap-3 mb-6">
+												<div class="flex flex-col gap-3 mb-4">
 													<h1 class="text-3xl font-bold">{displayName()}</h1>
 													<div class="inline-block text-surface-500 ">
 														<p class={!readmore() ? "lg:line-clamp-2" : ""}>{description()}</p>
@@ -164,6 +164,7 @@ export function Page(props: PageProps) {
 																<Button
 																	type="primary"
 																	href={`/install?module=${props.manifest.id}`}
+																	class="mb-6"
 																>
 																	<span class="capitalize">
 																		Install{" "}
@@ -179,7 +180,7 @@ export function Page(props: PageProps) {
 															<>
 																<Show when={props.manifest.website}>
 																	{/* @ts-ignore */}
-																	<Button type="primary" href={props.manifest.website}>
+																	<Button type="primary" class="mb-6" href={props.manifest.website}>
 																		Open{" "}
 																		<Show when={props.manifest.website?.includes("http")}>
 																			<ArrowOutward />
@@ -225,7 +226,7 @@ export function Page(props: PageProps) {
 											when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}
 											fallback={<Markdown markdown={props.markdown} />}
 										>
-											<div class="grid md:grid-cols-4 grid-cols-1 gap-16 md:mb-32 mb-8 mt-4">
+											<div class="grid md:grid-cols-4 grid-cols-1 gap-16 md:mb-32 mb-8">
 												<div class="w-full rounded-lg col-span-1 md:col-span-4">
 													<Markdown markdown={props.markdown} />
 												</div>
