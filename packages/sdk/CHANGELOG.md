@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.18.0
+
+### Minor Changes
+
+- 9212cc19d: fix: https://github.com/inlang/monorepo/issues/1647
+
 ## 0.17.0
 
 ### Minor Changes
