@@ -8,11 +8,18 @@ export class DocProof extends LitElement {
 			display: flex;
 			flex-direction: row;
 			justify-content: flex-start;
-			align-items: center;
+			align-items: start;
 			flex-wrap: wrap;
 			gap: 1rem;
 			width: 100%;
 			color: #475569;
+		}
+
+		@media screen and (max-width: 768px) {
+			.social-proof {
+				flex-direction: column;
+				align-items: center;
+			}
 		}
 	`
 
