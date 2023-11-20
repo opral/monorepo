@@ -20,9 +20,9 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"devDependencies": {
-		"@inlang/cli": "*",
-		"@inlang/detect-json-formatting": "*",
-		"@inlang/sdk": "*",
+		"@inlang/cli": "workspace:*",
+		"@inlang/detect-json-formatting": "workspace:*",
+		"@inlang/sdk": "workspace:*",
 		"@sinclair/typebox": "^0.31.17",
 		"@vitest/coverage-v8": "^0.33.0",
 		"typescript": "^5.1.3",

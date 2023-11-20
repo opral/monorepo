@@ -11,7 +11,7 @@
 	"dependencies": {},
 	"devDependencies": {
 		"@sveltejs/vite-plugin-svelte": "2.4.2",
-		"@inlang/paraglide-js": "*",
+		"@inlang/paraglide-js": "workspace:*",
 		"svelte": "4.0.5",
 		"vite": "4.4.5"
 	}

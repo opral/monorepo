@@ -21,13 +21,13 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/sdk": "*",
-		"@inlang/detect-json-formatting": "*"
+		"@inlang/sdk": "workspace:*",
+		"@inlang/detect-json-formatting": "workspace:*"
 	},
 	"devDependencies": {
-		"@lix-js/fs": "*",
-		"@inlang/cli": "*",
-		"@inlang/sdk": "*",
+		"@lix-js/fs": "workspace:*",
+		"@inlang/cli": "workspace:*",
+		"@inlang/sdk": "workspace:*",
 		"@size-limit/preset-small-lib": "^8.2.4",
 		"@types/flat": "^5.0.2",
 		"@types/lodash.merge": "^4.6.7",
