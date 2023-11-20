@@ -41,6 +41,9 @@ importers:
 
   inlang/source-code/badge:
     dependencies:
+      '@inlang/env-variables':
+        specifier: workspace:*
+        version: link:../env-variables
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../sdk
@@ -190,6 +193,9 @@ importers:
 
   inlang/source-code/create-project:
     dependencies:
+      '@inlang/env-variables':
+        specifier: workspace:*
+        version: link:../env-variables
       '@inlang/marketplace-registry':
         specifier: workspace:*
         version: link:../marketplace-registry
@@ -199,12 +205,18 @@ importers:
       '@inlang/project-settings':
         specifier: workspace:*
         version: link:../versioned-interfaces/project-settings
+      '@inlang/result':
+        specifier: workspace:*
+        version: link:../result
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../sdk
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../lix/source-code/fs
+      '@sinclair/typebox':
+        specifier: 0.31.28
+        version: 0.31.28
       terser:
         specifier: 5.19.4
         version: 5.19.4
@@ -786,6 +798,9 @@ importers:
       '@inlang/message-lint-rule':
         specifier: workspace:*
         version: link:../../versioned-interfaces/message-lint-rule
+      '@sinclair/typebox':
+        specifier: 0.31.28
+        version: 0.31.28
     devDependencies:
       '@inlang/cli':
         specifier: workspace:*
@@ -1033,6 +1048,9 @@ importers:
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../../sdk
+      '@sinclair/typebox':
+        specifier: 0.31.28
+        version: 0.31.28
     devDependencies:
       '@inlang/cli':
         specifier: workspace:*
@@ -1103,6 +1121,9 @@ importers:
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../../sdk
+      '@sinclair/typebox':
+        specifier: 0.31.28
+        version: 0.31.28
     devDependencies:
       '@inlang/cli':
         specifier: workspace:*
@@ -1137,6 +1158,9 @@ importers:
 
   inlang/source-code/plugins/m-function-matcher:
     dependencies:
+      '@inlang/plugin':
+        specifier: workspace:*
+        version: link:../../versioned-interfaces/plugin
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../../sdk
@@ -1171,6 +1195,9 @@ importers:
 
   inlang/source-code/plugins/t-function-matcher:
     dependencies:
+      '@inlang/plugin':
+        specifier: workspace:*
+        version: link:../../versioned-interfaces/plugin
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../../sdk
@@ -1843,6 +1870,9 @@ importers:
 
   lix/source-code/client:
     dependencies:
+      '@inlang/env-variables':
+        specifier: workspace:*
+        version: link:../../../inlang/source-code/env-variables
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../fs

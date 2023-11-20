@@ -21,7 +21,8 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/sdk": "workspace:*"
+		"@inlang/sdk": "workspace:*",
+		"@inlang/plugin": "workspace:*"
 	},
 	"devDependencies": {
 		"@inlang/cli": "workspace:*",
