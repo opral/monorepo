@@ -17,19 +17,38 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: "npm"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
 
-      - run: npm install
+      - name: Install dependencies
+        run: pnpm install
 
       - name: Install Doppler CLI for env variables
         uses: dopplerhq/cli-action@v2
 
-      - run: doppler run -- npm run test
+      - run: doppler run -- pnpm test
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
-      - run: doppler run -- npm run build
+      - run: doppler run -- pnpm build
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 

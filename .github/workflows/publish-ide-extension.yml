@@ -18,27 +18,47 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: "npm"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      
       - name: Install dependencies
-        run: npm ci
+        run: pnpm ci
 
       - name: Install Doppler CLI for env (public) variables
         uses: dopplerhq/cli-action@v2
 
       - name: Build
-        run: doppler run -- npm run build
+        run: doppler run -- pnpm build
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
       - name: test the code
-        run: npm run test
+        run: pnpm test
 
       - name: Build VSCode extension package
-        run: npm run package -w inlang/source-code/ide-extension
+        run: pnpm --filter vs-code-extension package
 
       - name: Publish to VSCode Marketplace
         run: npx @vscode/vsce publish -p ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
