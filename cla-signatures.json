@@ -167,6 +167,14 @@
       "created_at": "2023-11-16T05:47:48Z",
       "repoId": 394757291,
       "pullRequestNo": 1643
+    },
+    {
+      "name": "LorisSigrist",
+      "id": 43482866,
+      "comment_id": 1819259247,
+      "created_at": "2023-11-20T15:15:25Z",
+      "repoId": 394757291,
+      "pullRequestNo": 1659
     }
   ]
 }

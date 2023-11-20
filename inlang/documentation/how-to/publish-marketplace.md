@@ -53,9 +53,19 @@ You can ensure that your manifest is valid by loading the following schema.
 |                | color       | The background color of the feature.                       | No       |
 |                | text-color     | The text color of the feature.                          | No       |
 
+### Writing your readme
 
+#### ❗ Please note
 
-This format reduces repetition by listing common attributes for each element under the respective element's section.
+It is completely up to you how you want to style your product pages. This is just an inspiration for you to get started.
+
+#### How we at inlang style product pages
+
+We are using an engaging header image with up to three key features of the product. If it is important to the product, we introduce a `Getting started` section beforehand. 
+
+![How we style product pages at inlang](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/styleguide-mockup.svg)
+
+Of course styling product pages can change from time to time. If you have any questions regarding this, please reach out to us on [Discord](https://discord.com/invite/gdMPPWy57R).
 
 ### 2. Add the link to your marketplace manifest to the registry
 
