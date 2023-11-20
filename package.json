@@ -19,7 +19,8 @@
 		"clean": "pnpm recursive run clean --if-present && rm -rf ./.env ./node_modules",
 		"----- CI ---- used to test the codebase on every commit": "",
 		"ci": "pnpm i && pnpm format && pnpm lint && pnpm build && pnpm test",
-		"ci:publish": "pnpm publish -r"
+		"ci:publish": "pnpm --filter !vs-code-extension publish -r",
+		"ci:version": "npx changeset version"
 	},
 	"engines": {
 		"npm": ">=8.0.0",
