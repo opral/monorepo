@@ -503,7 +503,7 @@ function NavbarCommon(props: {
 	)
 }
 
-function LixBadge() {
+export function LixBadge() {
 	return (
 		<svg
 			width="100%"
