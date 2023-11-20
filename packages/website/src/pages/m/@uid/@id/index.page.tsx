@@ -140,8 +140,8 @@ export function Page(props: PageProps) {
 													src={props.manifest.icon}
 												/>
 											</Show>
-											<div class="mb-10 md:mb-0">
-												<div class="flex flex-col gap-3 mb-4">
+											<div class="mb-0">
+												<div class="flex flex-col gap-3">
 													<h1 class="text-3xl font-bold">{displayName()}</h1>
 													<div class="inline-block text-surface-500 ">
 														<p class={!readmore() ? "lg:line-clamp-2" : ""}>{description()}</p>
@@ -164,7 +164,7 @@ export function Page(props: PageProps) {
 																<Button
 																	type="primary"
 																	href={`/install?module=${props.manifest.id}`}
-																	class="mb-6"
+																	class="my-6"
 																>
 																	<span class="capitalize">
 																		Install{" "}
@@ -180,7 +180,7 @@ export function Page(props: PageProps) {
 															<>
 																<Show when={props.manifest.website}>
 																	{/* @ts-ignore */}
-																	<Button type="primary" class="mb-6" href={props.manifest.website}>
+																	<Button type="primary" class="my-6" href={props.manifest.website}>
 																		Open{" "}
 																		<Show when={props.manifest.website?.includes("http")}>
 																			<ArrowOutward />
@@ -242,7 +242,7 @@ export function Page(props: PageProps) {
 											>
 												<div>
 													<h3 class="text-surface-400 text-sm mb-2">Change control</h3>
-													<Link href="/search?q=lix">
+													<Link href="/c/lix">
 														<div class="w-16 text-primary hover:text-hover-primary group transition-colors">
 															<sl-tooltip prop:content="Click to view all">
 																<LixBadge />
@@ -367,7 +367,7 @@ function Recommends(props: { recommends: MarketplaceManifest[] }) {
 
 function Markdown(props: { markdown: string }) {
 	// eslint-disable-next-line solid/no-innerhtml
-	return <article innerHTML={props.markdown} />
+	return <article class="w-full overflow-hidden" innerHTML={props.markdown} />
 }
 
 const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
@@ -503,7 +503,7 @@ function NavbarCommon(props: {
 	)
 }
 
-function LixBadge() {
+export function LixBadge() {
 	return (
 		<svg
 			width="100%"

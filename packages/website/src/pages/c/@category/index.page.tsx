@@ -12,6 +12,7 @@ import TitleSection from "#src/interface/marketplace/categoryHeaders/titleSectio
 import PluginHeader from "#src/interface/marketplace/categoryHeaders/toast/plugins.jsx"
 import ParaglideHeader from "#src/interface/marketplace/categoryHeaders/cards/paraglide.jsx"
 import LintRulesHeader from "#src/interface/marketplace/categoryHeaders/toast/lintRules.jsx"
+import LixHeader from "#src/interface/marketplace/categoryHeaders/cards/lix.jsx"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -82,6 +83,13 @@ export function Page(props: {
 					buttonLink: "/documentation/publish-guide",
 					buttonText: m.marketplace_header_guides_button_text(),
 				}
+			case "lix":
+				return {
+					title: m.marketplace_header_lix_title(),
+					description: m.marketplace_header_lix_short_description(),
+					buttonLink: "https://github.com/inlang/monorepo/tree/main/lix",
+					buttonText: m.marketplace_header_lix_button_text(),
+				}
 			default:
 				return {
 					title: "inlang",
@@ -144,6 +152,9 @@ export function Page(props: {
 					</Show>
 					<Show when={currentPageContext.routeParams.category === "libraries"}>
 						<ParaglideHeader />
+					</Show>
+					<Show when={currentPageContext.routeParams.category === "lix"}>
+						<LixHeader />
 					</Show>
 				</Show>
 				<div class="pb-16 md:pb-20 min-h-screen relative">

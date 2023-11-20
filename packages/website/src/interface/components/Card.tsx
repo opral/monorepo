@@ -17,8 +17,8 @@ export default function Card(props: { item: any; displayName: string }) {
 			? true
 			: false
 
-	// eslint-disable-next-line solid/reactivity
 	const app =
+		// eslint-disable-next-line solid/reactivity
 		props.item.id.split(".")[0] === "app" && currentPageContext.urlParsed.pathname.includes("/apps")
 
 	return (
@@ -30,7 +30,7 @@ export default function Card(props: { item: any; displayName: string }) {
 						: `/m/${props.item.uniqueID}/${props.item.id.replaceAll(".", "-")}`
 				}
 				class={
-					"relative no-underline z-10 flex gap-4 justify-between flex-col group w-full bg-background transition-all border border-surface-200 rounded-xl hover:shadow-lg hover:shadow-surface-100 hover:border-surface-300 active:border-surface-400 " +
+					"relative no-underline z-10 flex justify-between gap-4 flex-col group w-full bg-background transition-all border border-surface-200 rounded-xl hover:shadow-lg hover:shadow-surface-100 hover:border-surface-300 active:border-surface-400 " +
 					(showCover || app ? " " : " h-48 p-5")
 				}
 			>
@@ -58,10 +58,10 @@ export default function Card(props: { item: any; displayName: string }) {
 							/>
 							<img
 								src={props.item.icon}
-								class="absolute bottom-4 right-4 h-12 aspect-1 rounded-xl border border-surface-2 shadow-xl bg-surface-100"
+								class="absolute bottom-4 right-4 h-12 aspect-1 rounded-xl border border-surface-2 shadow-xl bg-surface-100 object-cover object-center"
 							/>
 						</div>
-						<div class="flex flex-shrink-0 flex-row flex-wrap justify-between items-start px-4">
+						<div class="flex flex-1 flex-col items-start px-4">
 							<p class="m-0 mb-2 text-sm text-surface-800 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors">
 								{props.displayName}
 							</p>
@@ -69,15 +69,32 @@ export default function Card(props: { item: any; displayName: string }) {
 								{props.item.description.en}
 							</p>
 						</div>
-						<div class="flex items-center gap-2 px-4 pb-4">
+						<div class="flex items-center gap-2 px-4 pr-6 pb-4 justify-between">
 							<Show when={props.item.publisherIcon}>
-								<img
-									class="w-5 h-5 rounded-full object-cover object-center"
-									src={props.item.publisherIcon}
-								/>
-								<p class="text-sm text-surface-500 group-hover:text-surface-600 transition-colors">
-									{props.item.publisherName}
-								</p>
+								<div class="flex gap-2">
+									<img
+										class="w-5 h-5 rounded-full object-cover object-center"
+										src={props.item.publisherIcon}
+									/>
+									<p class="text-sm text-surface-500 group-hover:text-surface-600 transition-colors">
+										{props.item.publisherName}
+									</p>
+								</div>
+							</Show>
+							<Show
+								when={props.item.keywords
+									.map((keyword: string) => keyword.toLowerCase())
+									.includes("lix")}
+							>
+								<div>
+									<Link href="/c/lix">
+										<div class="w-5 text-primary hover:text-hover-primary group transition-colors relative z-60">
+											<sl-tooltip prop:content={m.marketplace_card_lix_tooltip()}>
+												<LixBadge />
+											</sl-tooltip>
+										</div>
+									</Link>
+								</div>
 							</Show>
 						</div>
 					</Match>
@@ -93,7 +110,7 @@ export default function Card(props: { item: any; displayName: string }) {
 						</div>
 					</Match>
 					<Match when={(!app && !showCover) || (!app && props.item.gallery)}>
-						<div class="flex flex-col gap-4">
+						<div class="flex flex-1 flex-col gap-4">
 							<div class="w-full flex gap-4 items-start">
 								<div class="flex items-center gap-8 flex-shrink-0">
 									<Show
@@ -156,16 +173,33 @@ export default function Card(props: { item: any; displayName: string }) {
 								{props.item.description.en}
 							</p>
 						</div>
-						<div class="flex items-center gap-2">
+						<div class="flex items-center gap-2 justify-between">
 							<Show when={props.item.publisherIcon}>
-								<img
-									class="w-5 h-5 rounded-full object-cover object-center"
-									src={props.item.publisherIcon}
-								/>
-								<p class="text-sm text-surface-500 group-hover:text-surface-600 transition-colors">
-									{props.item.publisherName}
-								</p>
+								<div class="flex gap-2">
+									<img
+										class="w-5 h-5 rounded-full object-cover object-center"
+										src={props.item.publisherIcon}
+									/>
+									<p class="text-sm text-surface-500 group-hover:text-surface-600 transition-colors">
+										{props.item.publisherName}
+									</p>
+								</div>
 							</Show>
+							<div>
+								<Show
+									when={props.item.keywords
+										.map((keyword: string) => keyword.toLowerCase())
+										.includes("lix")}
+								>
+									{/* <Link href="/c/lix"> */}
+									<div class="w-5 text-primary group transition-colors">
+										{/* <sl-tooltip prop:content={m.marketplace_card_lix_tooltip()}> */}
+										<LixBadge />
+										{/* </sl-tooltip> */}
+									</div>
+									{/* </Link> */}
+								</Show>
+							</div>
 						</div>
 					</Match>
 				</Switch>
@@ -445,6 +479,17 @@ function NoResultsArtwork() {
 					<stop offset="1" stop-color="#FAFCFD" />
 				</radialGradient>
 			</defs>
+		</svg>
+	)
+}
+
+function LixBadge() {
+	return (
+		<svg xmlns="http://www.w3.org/2000/svg" width="100%" fill="none" viewBox="0 0 48 33">
+			<path
+				fill="currentColor"
+				d="M26.854 10l4.005 7.628L40.964 0h6.208L34.85 20.91l6.491 10.908h-6.179l-4.304-7.542-4.233 7.542h-6.25l6.478-10.909L20.604 10h6.25zM10.898 31.818V10h6.052v21.818h-6.052zM6 .065v32H0v-32h6zM11 .065h16v5H11v-5z"
+			/>
 		</svg>
 	)
 }
