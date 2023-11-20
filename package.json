@@ -2,17 +2,6 @@
 	"private": true,
 	"name": "monorepo",
 	"type": "module",
-	"workspaces": [
-		"lix/source-code/*",
-		"inlang/source-code/*",
-		"inlang/source-code/plugins/*",
-		"inlang/source-code/paraglide/*",
-		"inlang/source-code/paraglide/*/example",
-		"inlang/source-code/paraglide/*/examples/*",
-		"inlang/source-code/templates/*",
-		"inlang/source-code/message-lint-rules/*",
-		"inlang/source-code/versioned-interfaces/*"
-	],
 	"scripts": {
 		"build": "npx nx run-many --target=build --parallel",
 		"dev": "npx nx run-many --target=dev --parallel 1000 --output-style stream",
