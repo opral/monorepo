@@ -18,7 +18,8 @@
 		"changeset": "npx changeset",
 		"clean": "pnpm recursive run clean --if-present && rm -rf ./.env ./node_modules",
 		"----- CI ---- used to test the codebase on every commit": "",
-		"ci": "pnpm i && pnpm format && pnpm lint && pnpm build && pnpm test"
+		"ci": "pnpm i && pnpm format && pnpm lint && pnpm build && pnpm test",
+		"ci:publish": "pnpm publish -r"
 	},
 	"engines": {
 		"npm": ">=8.0.0",
