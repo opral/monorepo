@@ -8,7 +8,7 @@ export class DocProof extends LitElement {
 			display: flex;
 			flex-direction: row;
 			justify-content: flex-start;
-			align-items: start;
+			align-items: center;
 			flex-wrap: wrap;
 			gap: 1rem;
 			width: 100%;
