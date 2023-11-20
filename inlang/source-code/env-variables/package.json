@@ -20,7 +20,7 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/result": "*"
+		"@inlang/result": "workspace:*"
 	},
 	"devDependencies": {
 		"@vitest/coverage-v8": "0.34.3",

@@ -42,13 +42,13 @@ importers:
   inlang/source-code/badge:
     dependencies:
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../sdk
       '@inlang/telemetry':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../telemetry
       '@lix-js/client':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../../lix/source-code/client
       '@resvg/resvg-js':
         specifier: ^2.4.1
@@ -110,28 +110,28 @@ importers:
         version: 11.1.1
     devDependencies:
       '@inlang/create-project':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../create-project
       '@inlang/env-variables':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../env-variables
       '@inlang/language-tag':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../versioned-interfaces/language-tag
       '@inlang/result':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../result
       '@inlang/rpc':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../rpc
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../sdk
       '@inlang/telemetry':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../telemetry
       '@lix-js/fs':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../../lix/source-code/fs
       '@sentry/node':
         specifier: ^7.64.0
@@ -191,19 +191,19 @@ importers:
   inlang/source-code/create-project:
     dependencies:
       '@inlang/marketplace-registry':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../marketplace-registry
       '@inlang/plugin':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../versioned-interfaces/plugin
       '@inlang/project-settings':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../versioned-interfaces/project-settings
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../sdk
       '@lix-js/fs':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../../lix/source-code/fs
       terser:
         specifier: 5.19.4
@@ -260,10 +260,10 @@ importers:
         specifier: ^2.7.1
         version: 2.7.1
       '@lix-js/client':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../../lix/source-code/client
       '@lix-js/fs':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../../lix/source-code/fs
       '@sentry/browser':
         specifier: ^7.27.0
@@ -399,37 +399,37 @@ importers:
         specifier: ^1.1.26
         version: 1.1.63
       '@inlang/design-system':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../design-system
       '@inlang/detect-json-formatting':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../detect-json-formatting
       '@inlang/env-variables':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../env-variables
       '@inlang/markdown':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../markdown
       '@inlang/marketplace-manifest':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../versioned-interfaces/marketplace-manifest
       '@inlang/marketplace-registry':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../marketplace-registry
       '@inlang/paraglide-js':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../paraglide/paraglide-js
       '@inlang/result':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../result
       '@inlang/rpc':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../rpc
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../sdk
       '@inlang/telemetry':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../telemetry
       '@tailwindcss/aspect-ratio':
         specifier: ^0.4.2
@@ -504,7 +504,7 @@ importers:
   inlang/source-code/env-variables:
     dependencies:
       '@inlang/result':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../result
     devDependencies:
       '@types/node':
@@ -535,13 +535,13 @@ importers:
   inlang/source-code/ide-extension:
     dependencies:
       '@inlang/result':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../result
       '@inlang/telemetry':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../telemetry
       '@lix-js/fs':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../../lix/source-code/fs
       '@vitest/coverage-v8':
         specifier: 0.34.6
@@ -560,10 +560,10 @@ importers:
         version: 0.34.6(terser@5.19.4)
     devDependencies:
       '@inlang/create-project':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../create-project
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../sdk
       '@types/fs-extra':
         specifier: ^11.0.2
@@ -706,10 +706,10 @@ importers:
   inlang/source-code/marketplace-registry:
     dependencies:
       '@inlang/env-variables':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../env-variables
       '@inlang/marketplace-manifest':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../versioned-interfaces/marketplace-manifest
       '@sinclair/typebox':
         specifier: ^0.31.8
@@ -728,17 +728,17 @@ importers:
   inlang/source-code/message-lint-rules/camelCaseId:
     dependencies:
       '@inlang/message-lint-rule':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../versioned-interfaces/message-lint-rule
     devDependencies:
       '@inlang/cli':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../cli
       '@inlang/message':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../versioned-interfaces/message
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../sdk
       '@vitest/coverage-v8':
         specifier: 0.33.0
@@ -756,17 +756,17 @@ importers:
   inlang/source-code/message-lint-rules/emptyPattern:
     dependencies:
       '@inlang/message-lint-rule':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../versioned-interfaces/message-lint-rule
     devDependencies:
       '@inlang/cli':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../cli
       '@inlang/message':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../versioned-interfaces/message
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../sdk
       '@vitest/coverage-v8':
         specifier: 0.33.0
@@ -784,17 +784,17 @@ importers:
   inlang/source-code/message-lint-rules/identicalPattern:
     dependencies:
       '@inlang/message-lint-rule':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../versioned-interfaces/message-lint-rule
     devDependencies:
       '@inlang/cli':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../cli
       '@inlang/message':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../versioned-interfaces/message
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../sdk
       '@vitest/coverage-v8':
         specifier: 0.33.0
@@ -812,17 +812,17 @@ importers:
   inlang/source-code/message-lint-rules/messageWithoutSource:
     dependencies:
       '@inlang/message-lint-rule':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../versioned-interfaces/message-lint-rule
     devDependencies:
       '@inlang/cli':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../cli
       '@inlang/message':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../versioned-interfaces/message
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../sdk
       '@vitest/coverage-v8':
         specifier: 0.33.0
@@ -840,17 +840,17 @@ importers:
   inlang/source-code/message-lint-rules/missingTranslation:
     dependencies:
       '@inlang/message-lint-rule':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../versioned-interfaces/message-lint-rule
     devDependencies:
       '@inlang/cli':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../cli
       '@inlang/message':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../versioned-interfaces/message
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../sdk
       '@vitest/coverage-v8':
         specifier: 0.33.0
@@ -868,17 +868,17 @@ importers:
   inlang/source-code/message-lint-rules/snakeCaseId:
     dependencies:
       '@inlang/message-lint-rule':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../versioned-interfaces/message-lint-rule
     devDependencies:
       '@inlang/cli':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../cli
       '@inlang/message':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../versioned-interfaces/message
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../sdk
       '@vitest/coverage-v8':
         specifier: 0.33.0
@@ -899,7 +899,7 @@ importers:
         specifier: 1.0.0
         version: link:../../detect-json-formatting
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../sdk
       commander:
         specifier: 11.1.0
@@ -945,7 +945,7 @@ importers:
   inlang/source-code/paraglide/paraglide-js-adapter-next/example:
     dependencies:
       '@inlang/paraglide-js':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../paraglide-js
       next:
         specifier: 13.5.4
@@ -973,7 +973,7 @@ importers:
   inlang/source-code/paraglide/paraglide-js-adapter-svelte/example:
     devDependencies:
       '@inlang/paraglide-js':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../paraglide-js
       '@sveltejs/vite-plugin-svelte':
         specifier: 2.4.2
@@ -988,10 +988,10 @@ importers:
   inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example:
     devDependencies:
       '@inlang/paraglide-js':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../paraglide-js
       '@inlang/plugin-message-format':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../../plugins/inlang-message-format
       '@sveltejs/adapter-auto':
         specifier: ^2.0.0
@@ -1018,7 +1018,7 @@ importers:
   inlang/source-code/paraglide/paraglide-js/example:
     dependencies:
       '@inlang/paraglide-js':
-        specifier: '*'
+        specifier: workspace:*
         version: link:..
     devDependencies:
       typescript:
@@ -1028,17 +1028,17 @@ importers:
   inlang/source-code/plugins/i18next:
     dependencies:
       '@inlang/detect-json-formatting':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../detect-json-formatting
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../sdk
     devDependencies:
       '@inlang/cli':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../cli
       '@lix-js/fs':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../../../lix/source-code/fs
       '@size-limit/preset-small-lib':
         specifier: ^8.2.4
@@ -1074,13 +1074,13 @@ importers:
   inlang/source-code/plugins/inlang-message-format:
     devDependencies:
       '@inlang/cli':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../cli
       '@inlang/detect-json-formatting':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../detect-json-formatting
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../sdk
       '@sinclair/typebox':
         specifier: ^0.31.17
@@ -1098,17 +1098,17 @@ importers:
   inlang/source-code/plugins/json:
     dependencies:
       '@inlang/detect-json-formatting':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../detect-json-formatting
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../sdk
     devDependencies:
       '@inlang/cli':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../cli
       '@lix-js/fs':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../../../lix/source-code/fs
       '@types/flat':
         specifier: ^5.0.2
@@ -1138,14 +1138,14 @@ importers:
   inlang/source-code/plugins/m-function-matcher:
     dependencies:
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../sdk
     devDependencies:
       '@inlang/cli':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../cli
       '@lix-js/fs':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../../../lix/source-code/fs
       '@size-limit/preset-small-lib':
         specifier: ^8.2.4
@@ -1172,14 +1172,14 @@ importers:
   inlang/source-code/plugins/t-function-matcher:
     dependencies:
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../sdk
     devDependencies:
       '@inlang/cli':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../cli
       '@lix-js/fs':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../../../lix/source-code/fs
       '@size-limit/preset-small-lib':
         specifier: ^8.2.4
@@ -1221,22 +1221,22 @@ importers:
   inlang/source-code/rpc:
     dependencies:
       '@inlang/env-variables':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../env-variables
       '@inlang/language-tag':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../versioned-interfaces/language-tag
       '@inlang/marketplace-registry':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../marketplace-registry
       '@inlang/message':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../versioned-interfaces/message
       '@inlang/result':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../result
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../sdk
       algoliasearch:
         specifier: 4.20.0
@@ -1273,34 +1273,34 @@ importers:
   inlang/source-code/sdk:
     dependencies:
       '@inlang/json-types':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../json-types
       '@inlang/language-tag':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../versioned-interfaces/language-tag
       '@inlang/message':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../versioned-interfaces/message
       '@inlang/message-lint-rule':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../versioned-interfaces/message-lint-rule
       '@inlang/module':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../versioned-interfaces/module
       '@inlang/plugin':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../versioned-interfaces/plugin
       '@inlang/project-settings':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../versioned-interfaces/project-settings
       '@inlang/result':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../result
       '@inlang/translatable':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../versioned-interfaces/translatable
       '@lix-js/fs':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../../lix/source-code/fs
       '@sinclair/typebox':
         specifier: ^0.31.17
@@ -1343,31 +1343,31 @@ importers:
   inlang/source-code/server:
     dependencies:
       '@inlang/badge':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../badge
       '@inlang/editor':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../editor
       '@inlang/env-variables':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../env-variables
       '@inlang/marketplace-manifest':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../versioned-interfaces/marketplace-manifest
       '@inlang/plugin-message-format':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../plugins/inlang-message-format
       '@inlang/project-settings':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../versioned-interfaces/project-settings
       '@inlang/rpc':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../rpc
       '@inlang/telemetry':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../telemetry
       '@inlang/website':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../website
       '@sentry/node':
         specifier: ^7.47.0
@@ -1401,10 +1401,10 @@ importers:
   inlang/source-code/telemetry:
     dependencies:
       '@inlang/env-variables':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../env-variables
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../sdk
       express:
         specifier: ^4.18.2
@@ -1451,10 +1451,10 @@ importers:
   inlang/source-code/templates/plugin:
     devDependencies:
       '@inlang/cli':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../cli
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../sdk
       typescript:
         specifier: ^5.2.2
@@ -1482,10 +1482,10 @@ importers:
   inlang/source-code/versioned-interfaces/marketplace-manifest:
     dependencies:
       '@inlang/project-settings':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../project-settings
       '@inlang/translatable':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../translatable
     devDependencies:
       '@sinclair/typebox':
@@ -1501,7 +1501,7 @@ importers:
   inlang/source-code/versioned-interfaces/message:
     dependencies:
       '@inlang/language-tag':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../language-tag
       '@sinclair/typebox':
         specifier: ^0.31.17
@@ -1514,19 +1514,19 @@ importers:
   inlang/source-code/versioned-interfaces/message-lint-rule:
     dependencies:
       '@inlang/json-types':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../json-types
       '@inlang/language-tag':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../language-tag
       '@inlang/message':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../message
       '@inlang/project-settings':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../project-settings
       '@inlang/translatable':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../translatable
       '@sinclair/typebox':
         specifier: ^0.31.17
@@ -1542,10 +1542,10 @@ importers:
   inlang/source-code/versioned-interfaces/module:
     dependencies:
       '@inlang/message-lint-rule':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../message-lint-rule
       '@inlang/plugin':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../plugin
       '@sinclair/typebox':
         specifier: ^0.31.17
@@ -1561,22 +1561,22 @@ importers:
   inlang/source-code/versioned-interfaces/plugin:
     dependencies:
       '@inlang/json-types':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../json-types
       '@inlang/language-tag':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../language-tag
       '@inlang/message':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../message
       '@inlang/project-settings':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../project-settings
       '@inlang/translatable':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../translatable
       '@lix-js/fs':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../../../lix/source-code/fs
       '@sinclair/typebox':
         specifier: ^0.31.17
@@ -1592,10 +1592,10 @@ importers:
   inlang/source-code/versioned-interfaces/project-settings:
     dependencies:
       '@inlang/json-types':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../json-types
       '@inlang/language-tag':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../language-tag
       '@sinclair/typebox':
         specifier: ^0.31.17
@@ -1614,7 +1614,7 @@ importers:
   inlang/source-code/versioned-interfaces/translatable:
     dependencies:
       '@inlang/language-tag':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../language-tag
       '@sinclair/typebox':
         specifier: ^0.31.17
@@ -1636,10 +1636,10 @@ importers:
         specifier: ^2.7.1
         version: 2.7.1
       '@lix-js/client':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../../lix/source-code/client
       '@lix-js/fs':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../../lix/source-code/fs
       '@sentry/browser':
         specifier: ^7.27.0
@@ -1739,37 +1739,37 @@ importers:
         specifier: ^1.1.26
         version: 1.1.63
       '@inlang/design-system':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../design-system
       '@inlang/detect-json-formatting':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../detect-json-formatting
       '@inlang/env-variables':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../env-variables
       '@inlang/markdown':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../markdown
       '@inlang/marketplace-manifest':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../versioned-interfaces/marketplace-manifest
       '@inlang/marketplace-registry':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../marketplace-registry
       '@inlang/paraglide-js':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../paraglide/paraglide-js
       '@inlang/result':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../result
       '@inlang/rpc':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../rpc
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../sdk
       '@inlang/telemetry':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../telemetry
       '@tailwindcss/aspect-ratio':
         specifier: ^0.4.2
@@ -1844,7 +1844,7 @@ importers:
   lix/source-code/client:
     dependencies:
       '@lix-js/fs':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../fs
       '@octokit/types':
         specifier: 11.1.0
@@ -1894,10 +1894,10 @@ importers:
   lix/source-code/server:
     dependencies:
       '@inlang/env-variables':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../../inlang/source-code/env-variables
       '@inlang/telemetry':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../../inlang/source-code/telemetry
       '@isomorphic-git/cors-proxy':
         specifier: 2.7.1

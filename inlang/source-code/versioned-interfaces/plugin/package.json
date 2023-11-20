@@ -22,12 +22,12 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/json-types": "*",
-		"@inlang/language-tag": "*",
-		"@inlang/message": "*",
-		"@inlang/project-settings": "*",
-		"@inlang/translatable": "*",
-		"@lix-js/fs": "*"
+		"@inlang/json-types": "workspace:*",
+		"@inlang/language-tag": "workspace:*",
+		"@inlang/message": "workspace:*",
+		"@inlang/project-settings": "workspace:*",
+		"@inlang/translatable": "workspace:*",
+		"@lix-js/fs": "workspace:*"
 	},
 	"peerDependencies": {
 		"@sinclair/typebox": "^0.31.17"

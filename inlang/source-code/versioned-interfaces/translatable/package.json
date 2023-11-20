@@ -22,7 +22,7 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/language-tag": "*"
+		"@inlang/language-tag": "workspace:*"
 	},
 	"peerDependencies": {
 		"@sinclair/typebox": "^0.31.17"
