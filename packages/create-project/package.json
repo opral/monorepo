@@ -24,8 +24,11 @@
 		"@inlang/marketplace-registry": "workspace:*",
 		"@inlang/plugin": "workspace:*",
 		"@inlang/project-settings": "workspace:*",
+		"@inlang/result": "workspace:*",
 		"@inlang/sdk": "workspace:*",
 		"@lix-js/fs": "workspace:*",
+		"@sinclair/typebox": "0.31.28",
+		"@inlang/env-variables": "workspace:*",
 		"terser": "5.19.4"
 	},
 	"license": "Apache-2.0",
