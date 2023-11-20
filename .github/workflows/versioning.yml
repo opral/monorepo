@@ -43,7 +43,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install Dependencies
-        run: pnpm ci
+        run: pnpm run ci # The "run" is needed here
 
       - name: Create Release Pull Request
         uses: changesets/action@v1
