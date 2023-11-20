@@ -164,7 +164,7 @@ export function Page(props: PageProps) {
 																<Button
 																	type="primary"
 																	href={`/install?module=${props.manifest.id}`}
-																	class="mb-6"
+																	class="my-6"
 																>
 																	<span class="capitalize">
 																		Install{" "}
@@ -180,7 +180,7 @@ export function Page(props: PageProps) {
 															<>
 																<Show when={props.manifest.website}>
 																	{/* @ts-ignore */}
-																	<Button type="primary" class="mb-6" href={props.manifest.website}>
+																	<Button type="primary" class="my-6" href={props.manifest.website}>
 																		Open{" "}
 																		<Show when={props.manifest.website?.includes("http")}>
 																			<ArrowOutward />
