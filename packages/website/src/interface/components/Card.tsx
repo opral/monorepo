@@ -58,7 +58,7 @@ export default function Card(props: { item: any; displayName: string }) {
 							/>
 							<img
 								src={props.item.icon}
-								class="absolute bottom-4 right-4 h-12 aspect-1 rounded-xl border border-surface-2 shadow-xl bg-surface-100"
+								class="absolute bottom-4 right-4 h-12 aspect-1 rounded-xl border border-surface-2 shadow-xl bg-surface-100 object-cover object-center"
 							/>
 						</div>
 						<div class="flex flex-1 flex-col items-start px-4">
