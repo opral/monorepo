@@ -78,7 +78,6 @@ export function decodeGitPackLines(concatenatedUint8Array: Uint8Array) {
 			offset += packLineLength
 			strings.push(stringData)
 		}
-
 	}
 
 	return strings

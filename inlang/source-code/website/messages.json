@@ -4324,6 +4324,32 @@
 			]
 		},
 		{
+			"id": "marketplace_header_lix_title",
+			"selectors": [],
+			"variants": [
+				{
+					"languageTag": "en",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lix"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lix"
+						}
+					]
+				}
+			]
+		},
+		{
 			"id": "marketplace_header_paraglide_button_secondary_text",
 			"selectors": [],
 			"variants": [
