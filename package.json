@@ -16,9 +16,9 @@
 		"fetchPublicEnv": "npx nx run @inlang/env-variables:fetchPublicEnv",
 		"fetchInternalEnv": "doppler secrets download --no-file --format env > .env",
 		"changeset": "npx changeset",
-		"clean": "npm run clean -ws --if-present && rm -rf ./.env ./node_modules",
+		"clean": "pnpm run clean --recursive --if-present --parallel && rm -rf ./.env ./node_modules",
 		"----- CI ---- used to test the codebase on every commit": "",
-		"ci": "npm i && npm run format && npm run lint && npm run build && npm run test"
+		"ci": "pnpm i && pnpm format && pnpm lint && pnpm build && pnpm test"
 	},
 	"engines": {
 		"npm": ">=8.0.0",
