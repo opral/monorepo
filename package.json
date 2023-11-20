@@ -16,7 +16,7 @@
 		"fetchPublicEnv": "npx nx run @inlang/env-variables:fetchPublicEnv",
 		"fetchInternalEnv": "doppler secrets download --no-file --format env > .env",
 		"changeset": "npx changeset",
-		"clean": "pnpm run clean --recursive --if-present --parallel && rm -rf ./.env ./node_modules",
+		"clean": "pnpm recursive run clean --if-present && rm -rf ./.env ./node_modules",
 		"----- CI ---- used to test the codebase on every commit": "",
 		"ci": "pnpm i && pnpm format && pnpm lint && pnpm build && pnpm test"
 	},
