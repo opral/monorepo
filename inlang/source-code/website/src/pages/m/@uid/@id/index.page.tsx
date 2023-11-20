@@ -140,8 +140,8 @@ export function Page(props: PageProps) {
 													src={props.manifest.icon}
 												/>
 											</Show>
-											<div class="mb-10 md:mb-0">
-												<div class="flex flex-col gap-3 mb-4">
+											<div class="mb-0">
+												<div class="flex flex-col gap-3">
 													<h1 class="text-3xl font-bold">{displayName()}</h1>
 													<div class="inline-block text-surface-500 ">
 														<p class={!readmore() ? "lg:line-clamp-2" : ""}>{description()}</p>
@@ -367,7 +367,7 @@ function Recommends(props: { recommends: MarketplaceManifest[] }) {
 
 function Markdown(props: { markdown: string }) {
 	// eslint-disable-next-line solid/no-innerhtml
-	return <article innerHTML={props.markdown} />
+	return <article class="w-full overflow-hidden" innerHTML={props.markdown} />
 }
 
 const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
