@@ -242,7 +242,7 @@ export function Page(props: PageProps) {
 											>
 												<div>
 													<h3 class="text-surface-400 text-sm mb-2">Change control</h3>
-													<Link href="/search?q=lix">
+													<Link href="/c/lix">
 														<div class="w-16 text-primary hover:text-hover-primary group transition-colors">
 															<sl-tooltip prop:content="Click to view all">
 																<LixBadge />

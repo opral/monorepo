@@ -4324,6 +4324,110 @@
 			]
 		},
 		{
+			"id": "marketplace_header_lix_button",
+			"selectors": [],
+			"variants": [
+				{
+					"languageTag": "en",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Read more"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Mehr lesen"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_lix_button_text",
+			"selectors": [],
+			"variants": [
+				{
+					"languageTag": "en",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Visit lix"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "lix besuchen"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_lix_description",
+			"selectors": [],
+			"variants": [
+				{
+					"languageTag": "en",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "The lix change control system is a system that allows you to run git in as a backend for\n\t\t\t\t\t\tyour application. It is available for the web."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Das lix change control system ist ein system, welches es dir erlaubt git im backend laufen zu lassen. Es ist außerdem für das Web verfügbar."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_lix_short_description",
+			"selectors": [],
+			"variants": [
+				{
+					"languageTag": "en",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "The change control system\tfor the web."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Das change control system fürs Web."
+						}
+					]
+				}
+			]
+		},
+		{
 			"id": "marketplace_header_lix_title",
 			"selectors": [],
 			"variants": [
@@ -4344,6 +4448,32 @@
 						{
 							"type": "Text",
 							"value": "Lix"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "marketplace_header_lix_title_explanation",
+			"selectors": [],
+			"variants": [
+				{
+					"languageTag": "en",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "What is the lix change control system?"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Was ist das lix change control system?"
 						}
 					]
 				}
