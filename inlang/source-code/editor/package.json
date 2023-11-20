@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite",
-		"build": "paraglide-js compile --project ../../../project.inlang.json && vite build",
+		"build": "paraglide-js compile --project ../../../project.inlang.json && vite build -- --max_old_space_size=1200000",
 		"production": "NODE_ENV=production tsx ./src/server/main.ts",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "paraglide-js compile --project ../../../project.inlang.json && tsc --noEmit",
@@ -93,7 +93,7 @@
 		"typescript": "5.2.2",
 		"unplugin-icons": "^0.15.0",
 		"vike": "0.4.144",
-		"vite": "4.4.9",
+		"vite": "^5.0.0",
 		"vite-plugin-node-polyfills": "0.12.0",
 		"vite-plugin-solid": "2.7.0",
 		"vite-plugin-watch": "0.2.0",
