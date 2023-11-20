@@ -204,7 +204,7 @@ export function Page(props: PageProps) {
 										>
 											<div class="mt-12">
 												{/* @ts-ignore */}
-												<doc-slider items={props.manifest.gallery} />
+												<doc-slider items={props.manifest.gallery!.map((item) => item).join(",")} />
 											</div>
 										</Show>
 										<Show
