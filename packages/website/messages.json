@@ -2702,6 +2702,32 @@
 			]
 		},
 		{
+			"id": "marketplace_card_lix_tooltip",
+			"selectors": [],
+			"variants": [
+				{
+					"languageTag": "en",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "See all"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Alle ansehen"
+						}
+					]
+				}
+			]
+		},
+		{
 			"id": "marketplace_grid_build_your_own_description",
 			"selectors": [],
 			"variants": [
