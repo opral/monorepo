@@ -3521,7 +3521,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "All Products"
+							"value": "All Results"
 						}
 					]
 				},
@@ -3531,7 +3531,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Alle Produkte"
+							"value": "Alle Ergebnisse"
 						}
 					]
 				},
@@ -3541,7 +3541,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Tous les produits"
+							"value": "Tous les résultats"
 						}
 					]
 				},
@@ -3551,7 +3551,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Tutti i Prodotti"
+							"value": "Tutti i risultati"
 						}
 					]
 				},
@@ -3561,7 +3561,27 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Todos os Produtos"
+							"value": "Todos os resultados"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Všetky výsledky"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "所有结果"
 						}
 					]
 				}
