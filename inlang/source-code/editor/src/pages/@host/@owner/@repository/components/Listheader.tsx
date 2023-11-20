@@ -181,7 +181,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 							<sl-button
 								prop:size="small"
 								// @ts-ignore
-								onClick={() => navigate("/install")}
+								onClick={() => navigate("/c/lint-rules")}
 							>
 								Install lint rules
 							</sl-button>
