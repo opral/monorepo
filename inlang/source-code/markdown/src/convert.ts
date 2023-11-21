@@ -47,6 +47,7 @@ export async function convert(markdown: string): Promise<string> {
 				"doc-feature": ["name", "icon", "image", "color", "text-color"],
 				"doc-proof": ["organisations"],
 				"doc-slider": ["items"],
+				"doc-icon": ["icon", "size"],
 				...defaultSchema.attributes,
 			},
 		})
@@ -63,7 +64,7 @@ export async function convert(markdown: string): Promise<string> {
 			h5: "doc-text-lg",
 			h6: "doc-text-base",
 			p: "doc-text-base text-surface-600 doc-my-4 doc-leading-relaxed",
-			a: "doc-text-primary doc-font-medium hover:text-hover-primary doc-no-underline doc-inline-block",
+			a: "text-primary doc-font-medium hover:text-hover-primary doc-no-underline doc-inline-block",
 			code: "doc-px-1 doc-py-0.5 doc-bg-surface-100 doc-rounded-lg bg-surface-200 doc-my-6 doc-text-sm doc-font-mono text-surface-900",
 			pre: "doc-relative",
 			ul: "doc-list-disc doc-list-inside",
@@ -75,7 +76,7 @@ export async function convert(markdown: string): Promise<string> {
 			th: "doc-py-2 doc-font-medium doc-border-b doc-border-surface-2 doc-truncate",
 			tr: "doc-py-2 doc-border-b border-surface-2",
 			td: "doc-py-2 doc-leading-7",
-			hr: "doc-my-6 doc-border-b doc-border-surface-200",
+			hr: "doc-my-6 doc-border-b border-surface-200",
 			img: "doc-mx-auto doc-my-4 doc-rounded-xl doc-border border-surface-2",
 		})
 		/* @ts-ignore */

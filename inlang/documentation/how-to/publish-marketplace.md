@@ -50,6 +50,8 @@ Attributes:
 ##### Preview
 <doc-figure src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/ecosystem.jpg" alt="inlang ecosystem" caption="The inlang ecosystem"></doc-figure>
 
+---
+
 #### `<doc-icon>`
 The `<doc-icon>` element is used to display icons in the readme.
 
@@ -63,6 +65,8 @@ Attributes:
 
 ##### Preview
 <doc-icon icon="mdi:github" size="1.5em"></doc-icon>
+
+---
 
 #### `<doc-link>`
 The `<doc-link>` element is used to display links in a more converting way inside of the readme.
@@ -80,8 +84,10 @@ Attributes:
 ##### Preview
 <doc-link title="Documentation" icon="mdi:book-open-page-variant" href="https://inlang.com/documentation" description="Read the documentation"></doc-link>
 
+---
+
 #### `<doc-slider>`
-The `<doc-slider>` element is used to display a slider with images in the readme.
+The `<doc-slider>` element is used to display a slider with images in the readme. As arrays are not supported in markdown, you have to separate the images with a comma.
 
 Attributes:
 - `items` (required): The images being shown in the slider.
