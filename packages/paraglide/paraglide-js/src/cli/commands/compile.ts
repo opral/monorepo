@@ -30,7 +30,7 @@ export const compileCommand = new Command()
 		)
 
 		telemetry.capture({
-			event: "Paraglide-js compile executed",
+			event: "PARAGLIDE-JS compile executed",
 		})
 
 		const output = compile({
