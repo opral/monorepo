@@ -30,7 +30,7 @@ export default function Card(props: { item: any; displayName: string }) {
 						: `/m/${props.item.uniqueID}/${props.item.id.replaceAll(".", "-")}`
 				}
 				class={
-					"relative no-underline z-10 flex justify-between gap-4 flex-col group w-full bg-background transition-all border border-surface-200 rounded-xl hover:shadow-lg hover:shadow-surface-100 hover:border-surface-300 active:border-surface-400 " +
+					"relative no-underline z-10 flex justify-between gap-4 overflow-hidden flex-col group w-full bg-background transition-all border border-surface-200 rounded-xl hover:shadow-lg hover:shadow-surface-100 hover:border-surface-300 active:border-surface-400 " +
 					(showCover || app ? " " : " h-48 p-5")
 				}
 			>
@@ -38,7 +38,7 @@ export default function Card(props: { item: any; displayName: string }) {
 					<Match when={app && props.item.gallery}>
 						<div
 							class={
-								"pt-6 px-6 rounded-[11px] relative overflow-hidden " +
+								"pt-6 px-6 relative overflow-hidden " +
 								(props.item.id.split(".")[2] === "editor"
 									? "bg-gradient-to-tr from-[#9FEAF6] to-[#CAD4F5]"
 									: props.item.id.split(".")[2] === "ideExtension"

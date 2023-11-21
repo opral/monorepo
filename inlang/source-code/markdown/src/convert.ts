@@ -46,6 +46,7 @@ export async function convert(markdown: string): Promise<string> {
 				"doc-comment": ["author", "text", "icon"],
 				"doc-feature": ["name", "icon", "image", "color", "text-color"],
 				"doc-proof": ["organisations"],
+				"doc-slider": ["items"],
 				...defaultSchema.attributes,
 			},
 		})
