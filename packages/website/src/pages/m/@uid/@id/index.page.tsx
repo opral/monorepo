@@ -367,7 +367,7 @@ function Recommends(props: { recommends: MarketplaceManifest[] }) {
 
 function Markdown(props: { markdown: string }) {
 	// eslint-disable-next-line solid/no-innerhtml
-	return <article class="w-full overflow-hidden" innerHTML={props.markdown} />
+	return <article class="w-full" innerHTML={props.markdown} />
 }
 
 const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
