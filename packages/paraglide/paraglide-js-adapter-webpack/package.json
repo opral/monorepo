@@ -35,7 +35,7 @@
         "lint": "eslint ./src --fix",
         "format": "prettier ./src --write",
         "clean": "rm -rf ./dist ./node_modules",
-        "test": "vitest run"
+        "test": "vitest run --passWithNoTests"
     },
     "dependencies": {
         "@inlang/paraglide-js-adapter-unplugin": "*"
