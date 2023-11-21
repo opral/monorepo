@@ -32,7 +32,7 @@ export default defineConfig({
 		Icons({ compiler: "solid" }),
 		// markdownHotModuleReload(),
 		watch({
-			pattern: "static/messages.json",
+			pattern: "messages.json",
 			command: "paraglide-js compile --project ../../../project.inlang.json",
 		}),
 	],

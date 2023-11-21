@@ -16,8 +16,8 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/env-variables": "*",
-		"@inlang/sdk": "*",
+		"@inlang/env-variables": "workspace:*",
+		"@inlang/sdk": "workspace:*",
 		"http-proxy-middleware": "^2.0.6"
 	},
 	"devDependencies": {

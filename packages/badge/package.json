@@ -19,9 +19,9 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/sdk": "*",
-		"@inlang/telemetry": "*",
-		"@lix-js/client": "*",
+		"@inlang/sdk": "workspace:*",
+		"@inlang/telemetry": "workspace:*",
+		"@lix-js/client": "workspace:*",
 		"@resvg/resvg-js": "^2.4.1",
 		"@sentry/node": "^7.47.0",
 		"@sentry/tracing": "^7.47.0",
@@ -30,7 +30,8 @@
 		"express": "^4.18.2",
 		"satori": "^0.10.3",
 		"satori-html": "^0.3.2",
-		"tsx": "3.12.7"
+		"tsx": "3.12.7",
+		"@inlang/env-variables": "workspace:*"
 	},
 	"devDependencies": {
 		"@playwright/test": "1.39.0",
