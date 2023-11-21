@@ -34,24 +34,82 @@ You can ensure that your manifest is valid by loading the following schema.
 
 #### Custom web components
 
-| Element        | Attribute   | Description                                                | Required |
-|----------------|-------------|------------------------------------------------------------|----------|
-| `<doc-figure>` | src         | Source to the image file.                                  | Yes      |
-|                | alt         | Alternative text for screen readers.                       | Yes      |
-|                | caption     | Caption shown below the image.                             | Yes      |
-| `<doc-icon>`   | icon        | [Iconify](https://icon-sets.iconify.design/) icon tag.     | Yes      |
-|                | size        | The size of the icon.                                      | Yes      |
-| `<doc-link>`   | title       | The title for the document link.                           | Yes      |
-|                | icon        | [Iconify](https://icon-sets.iconify.design/) icon tag.     | Yes      |
-|                | href        | The link behind the document link.                         | Yes      |
-|                | description | The description shown in the quick link.                   | Yes      |
-| `<doc-slider>` | items       | The images being shown in the slider.                      | Yes      |
-|                | looping     | True if you want the slider to loop.                       | No       |
-| `<doc-feature>`| title       | The title of the feature.                                  | Yes      |
-|                | icon        | Show an icon from [Iconify](https://icon-sets.iconify.design/).       | No       |
-|                | image       | Show an image (you can only show an image **or** an icon). | No       |
-|                | color       | The background color of the feature.                       | No       |
-|                | text-color     | The text color of the feature.                          | No       |
+#### `<doc-figure>`
+
+The `<doc-figure>` element is used to display images in the readme. It is a wrapper around the `<figure>` element and has the same attributes. 
+
+Attributes:
+- `src` (required): The source to the image file.
+- `alt` (required): Alternative text for screen readers.
+- `caption` (required): Caption shown below the image.
+
+```md
+<doc-figure src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/ecosystem.jpg" alt="inlang ecosystem" caption="The inlang ecosystem"></doc-figure>
+```
+
+##### Preview
+<doc-figure src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/ecosystem.jpg" alt="inlang ecosystem" caption="The inlang ecosystem"></doc-figure>
+
+#### `<doc-icon>`
+The `<doc-icon>` element is used to display icons in the readme.
+
+Attributes:
+- `icon` (required): [Iconify](https://icon-sets.iconify.design/) icon tag.
+- `size` (required): The size of the icon.
+
+```md
+<doc-icon icon="mdi:github" size="1.5em"></doc-icon>
+```
+
+##### Preview
+<doc-icon icon="mdi:github" size="1.5em"></doc-icon>
+
+#### `<doc-link>`
+The `<doc-link>` element is used to display links in a more converting way inside of the readme.
+
+Attributes:
+- `title` (required): The title for the document link.
+- `icon` (required): [Iconify](https://icon-sets.iconify.design/) icon tag.
+- `href` (required): The link behind the document link.
+- `description` (required): The description shown in the quick link.
+
+```md
+<doc-link title="Documentation" icon="mdi:book-open-page-variant" href="https://inlang.com/documentation" description="Read the documentation"></doc-link>
+```
+
+##### Preview
+<doc-link title="Documentation" icon="mdi:book-open-page-variant" href="https://inlang.com/documentation" description="Read the documentation"></doc-link>
+
+#### `<doc-slider>`
+The `<doc-slider>` element is used to display a slider with images in the readme.
+
+Attributes:
+- `items` (required): The images being shown in the slider.
+- `looping` (optional): True if you want the slider to loop.
+
+```md
+<doc-slider items="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/ecosystem.jpg,https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/ecosystem.jpg,https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/ecosystem.jpg"></doc-slider>
+```
+
+##### Preview
+<doc-slider items="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/ecosystem.jpg,https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/ecosystem.jpg,https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/ecosystem.jpg"></doc-slider>
+
+#### `<doc-feature>`
+The `<doc-feature>` element is used to display a feature in the readme.
+
+Attributes:
+- `title` (required): The title of the feature.
+- `icon` (optional): Show an icon from [Iconify](https://icon-sets.iconify.design/).
+- `image` (optional): Show an image (you can only show an image **or** an icon).
+- `color` (optional): The background color of the feature.
+- `text-color` (optional): The text color of the feature.
+
+```md
+<doc-feature title="Feature" icon="mdi:github" color="#E5E8EB"></doc-feature>
+```
+
+##### Preview
+<doc-feature title="Feature" icon="mdi:github" color="#E5E8EB"></doc-feature>
 
 ### Writing your readme
 
