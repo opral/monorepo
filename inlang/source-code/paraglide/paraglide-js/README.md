@@ -49,6 +49,8 @@ Having an adapter is only required if you want to use paraglide-js with a framew
 
 ### 3. Add the `compile` script to your `package.json`
 
+> If you are using `@inlang/paraglide-js-adapter-vite`, you can skip this step.
+
 You can customize the `compile` script to your needs. For example, you can add a `--watch` flag to watch for changes, if you have installed a watcher.
 
 ```json
