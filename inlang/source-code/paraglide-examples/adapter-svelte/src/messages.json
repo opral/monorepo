@@ -1,0 +1,105 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"data": [
+		{
+			"id": "currentLanguageTag",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "The current language tag is \""
+						},
+						{
+							"type": "VariableReference",
+							"name": "languageTag"
+						},
+						{
+							"type": "Text",
+							"value": "\"."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Der aktuelle Sprachtag ist \""
+						},
+						{
+							"type": "VariableReference",
+							"name": "languageTag"
+						},
+						{
+							"type": "Text",
+							"value": "\"."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "greeting",
+			"selectors": [],
+			"variants": [
+				{
+					"match": [],
+					"languageTag": "en",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Welcome "
+						},
+						{
+							"type": "VariableReference",
+							"name": "name"
+						},
+						{
+							"type": "Text",
+							"value": "! You have "
+						},
+						{
+							"type": "VariableReference",
+							"name": "count"
+						},
+						{
+							"type": "Text",
+							"value": " messages."
+						}
+					]
+				},
+				{
+					"match": [],
+					"languageTag": "de",
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Hallo "
+						},
+						{
+							"type": "VariableReference",
+							"name": "name"
+						},
+						{
+							"type": "Text",
+							"value": "! Du hast "
+						},
+						{
+							"type": "VariableReference",
+							"name": "count"
+						},
+						{
+							"type": "Text",
+							"value": " Nachrichten."
+						}
+					]
+				}
+			]
+		}
+	]
+}

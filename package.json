@@ -2,17 +2,6 @@
 	"private": true,
 	"name": "monorepo",
 	"type": "module",
-	"workspaces": [
-		"lix/source-code/*",
-		"inlang/source-code/*",
-		"inlang/source-code/plugins/*",
-		"inlang/source-code/paraglide/*",
-		"inlang/source-code/paraglide/*/example",
-		"inlang/source-code/paraglide/*/examples/*",
-		"inlang/source-code/templates/*",
-		"inlang/source-code/message-lint-rules/*",
-		"inlang/source-code/versioned-interfaces/*"
-	],
 	"scripts": {
 		"build": "npx nx run-many --target=build --parallel",
 		"dev": "npx nx run-many --target=dev --parallel 1000 --output-style stream",
@@ -27,9 +16,11 @@
 		"fetchPublicEnv": "npx nx run @inlang/env-variables:fetchPublicEnv",
 		"fetchInternalEnv": "doppler secrets download --no-file --format env > .env",
 		"changeset": "npx changeset",
-		"clean": "npm run clean -ws --if-present && rm -rf ./.env ./node_modules",
+		"clean": "pnpm recursive run clean --if-present && rm -rf ./.env ./node_modules",
 		"----- CI ---- used to test the codebase on every commit": "",
-		"ci": "npm i && npm run format && npm run lint && npm run build && npm run test"
+		"ci": "pnpm i && pnpm format && pnpm lint && pnpm build && pnpm test",
+		"ci:publish": "pnpm --filter !vs-code-extension publish -r",
+		"ci:version": "npx changeset version"
 	},
 	"engines": {
 		"npm": ">=8.0.0",

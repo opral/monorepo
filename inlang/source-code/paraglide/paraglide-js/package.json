@@ -40,9 +40,7 @@
 	},
 	"dependencies": {
 		"@inlang/detect-json-formatting": "1.0.0",
-		"@inlang/sdk": "*",
-		"@inlang/telemetry": "*",
-		"@inlang/env-variables": "*",
+		"@inlang/sdk": "workspace:*",
 		"commander": "11.1.0",
 		"consola": "3.2.3",
 		"dedent": "1.5.1",

@@ -22,11 +22,12 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@lix-js/fs": "*",
+		"@lix-js/fs": "workspace:*",
 		"@octokit/types": "11.1.0",
 		"isomorphic-git": "1.24.5",
 		"octokit": "3.1.0",
-		"solid-js": "1.7.11"
+		"solid-js": "1.7.11",
+		"@inlang/env-variables": "workspace:*"
 	},
 	"license": "Apache-2.0",
 	"devDependencies": {

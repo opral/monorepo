@@ -88,7 +88,7 @@ export async function convert(markdown: string): Promise<string> {
 		})
 		/* @ts-ignore */
 		.use(rehypeRewrite, {
-			rewrite: (node) => {
+			rewrite: (node: any) => {
 				if (
 					node.tagName === "h1" ||
 					node.tagName === "h2" ||
