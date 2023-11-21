@@ -221,6 +221,33 @@ describe("e2e", async () => {
 			runtime.onSetLanguageTag(() => {})
 		}).toThrow()
 	})
+
+	test("should return the correct message if a languageTag is set in the message options", async () => {
+		const { m, runtime } = await import(
+			`data:application/javascript;base64,${Buffer.from(
+				compiledBundle.output[0].code,
+				"utf8"
+			).toString("base64")}`
+		)
+
+		// set the language tag to de to make sure that the message options override the runtime language tag
+		runtime.setLanguageTag("de")
+
+		expect(m.onlyText(undefined, { languageTag: "en" })).toBe("A simple message.")
+		expect(m.oneParam({ name: "Samuel" }, { languageTag: "en" })).toBe("Good morning Samuel!")
+		expect(m.multipleParams({ name: "Samuel", count: 5 }, { languageTag: "en" })).toBe(
+			"Hello Samuel! You have 5 messages."
+		)
+
+		runtime.setLanguageTag("en")
+
+		expect(m.onlyText(undefined, { languageTag: "de" })).toBe("Eine einfache Nachricht.")
+		expect(m.oneParam({ name: "Samuel" }, { languageTag: "de" })).toBe("Guten Morgen Samuel!")
+		expect(m.multipleParams({ name: "Samuel", count: 5 }, { languageTag: "de" })).toBe(
+			"Hallo Samuel! Du hast 5 Nachrichten."
+		)
+	})
+
 })
 
 describe("tree-shaking", () => {
