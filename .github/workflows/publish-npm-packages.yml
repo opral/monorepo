@@ -25,7 +25,7 @@ jobs:
           node-version: 18
 
       - name: Setup npmrc
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_PUBLISH_TOKEN }}" > .npmrc
 
       - name: install dependencies
         run: pnpm install
