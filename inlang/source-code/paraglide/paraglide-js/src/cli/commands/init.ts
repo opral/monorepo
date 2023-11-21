@@ -250,9 +250,7 @@ Please add the following command to your build script manually:
 			}
 		)
 		if (response === false) {
-			consola.log(
-				"Please remove the paraglide-js compile command from your build script and try again."
-			)
+			consola.log("Please add the paraglide-js compile to your build script and try again.")
 			return process.exit(0)
 		} else {
 			return
