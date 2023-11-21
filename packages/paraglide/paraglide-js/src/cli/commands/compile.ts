@@ -1,11 +1,10 @@
 import { loadProject, type InlangProject } from "@inlang/sdk"
-import { parseOrigin, telemetryNode } from "@inlang/telemetry"
 import consola from "consola"
 import { compile } from "../../compiler/compile.js"
 import fs from "node:fs/promises"
 import { resolve } from "node:path"
 import { Command } from "commander"
-import { getGitRemotes } from "../../utils/git.js"
+import { telemetry } from "../../services/telemetry/implementation.js"
 
 export const compileCommand = new Command()
 	.name("compile")
@@ -21,31 +20,17 @@ export const compileCommand = new Command()
 				settingsFilePath,
 				nodeishFs: fs,
 				_capture(id, props) {
-					telemetryNode.capture({
+					telemetry.capture({
+						// @ts-ignore the event types
 						event: id,
 						properties: props,
-						distinctId: "unknown",
 					})
 				},
 			})
 		)
 
-		//For Telemetry
-		const gitOrigin = parseOrigin({
-			remotes: await getGitRemotes({ nodeishFs: fs, filepath: settingsFilePath }),
-		})
-
-		telemetryNode.capture({
-			event: "Paraglide compile",
-			groups: { repository: gitOrigin },
-			distinctId: "unknown",
-		})
-		telemetryNode.groupIdentify({
-			groupType: "repository",
-			groupKey: gitOrigin,
-			properties: {
-				name: gitOrigin,
-			},
+		telemetry.capture({
+			event: "Paraglide compile executed",
 		})
 
 		const output = compile({
