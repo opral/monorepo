@@ -1,6 +1,6 @@
 # @inlang/paraglide-js
 
-## 1.0.0
+## 1.0.0-prerelease.10
 
 ### Patch Changes
 
