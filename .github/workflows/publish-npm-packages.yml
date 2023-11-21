@@ -41,14 +41,6 @@ jobs:
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
-# -------------------- @inlang/* --------------------
-
-      - name: "@inlang/cli"
-        uses: JS-DevTools/npm-publish@v2
-        with:
-          token: ${{ secrets.NPM_PUBLISH_TOKEN }}
-          package: inlang/source-code/cli/package.json
-
       - name: create and publish versions
         uses: changesets/action@v1
         with:
