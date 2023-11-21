@@ -52,7 +52,7 @@ export async function commit({
 				})
 			} else {
 				if (!entry.oid) {
-					throw new Error("OID should be set for types non tree")
+					throw new Error("OID should be set for types except tree")
 				}
 
 				entries.push({
