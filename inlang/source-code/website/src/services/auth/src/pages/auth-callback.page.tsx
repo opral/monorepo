@@ -17,7 +17,7 @@ export function Page() {
 	const [localStorage] = useLocalStorage()
 
 	createEffect(() => {
-		if (localStorage.user?.username && userInfo()) {
+		if (localStorage.user?.isLoggedIn && userInfo()) {
 			// FIXME: racecondition: if window closes too early local storage is set to remove the user somewhere and user is shown logged out when coming back to the editor
 			// this bug existed before and should be revisited seperately as it requires probably more involved refactor of the localstorageprovider
 			setTimeout(() => window.close(), 1000)

@@ -474,10 +474,13 @@ export class UnknownException extends Error {
  */
 export async function pushChanges(args: {
 	repo: Repository
-	user: NonNullable<LocalStorageSchema["user"]>
+	user: LocalStorageSchema["user"]
 	setFsChange: (date: Date) => void
 	setLastPullTime: (date: Date) => void
 }): Promise<Result<true, PushException>> {
+	if (typeof args.user === "undefined" || args.user?.isLoggedIn === false) {
+		return { error: new PushException("User not logged in") }
+	}
 	// stage all changes
 	const status = await args.repo.statusMatrix({
 		filter: (f: any) =>

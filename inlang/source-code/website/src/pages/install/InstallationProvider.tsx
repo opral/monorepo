@@ -80,7 +80,7 @@ function validateRepo(
 		optIn: Record<string, any>
 	}
 ) {
-	if (!user() && getLocalStorage()) {
+	if (!user()?.isLoggedIn && getLocalStorage()) {
 		props.setStep({
 			type: "github-login",
 			error: false,
@@ -110,7 +110,13 @@ function validateRepo(
 		})
 
 		setRecentProject()
-		initializeRepo(props.repo, props.modules, user()!, props.step, props.setStep)
+		initializeRepo(
+			props.repo,
+			props.modules,
+			user() as { username: string; email: string; isLoggedIn: true },
+			props.step,
+			props.setStep
+		)
 	}
 }
 
@@ -121,7 +127,7 @@ function validateRepo(
 async function initializeRepo(
 	repoURL: string,
 	modulesID: string[],
-	user: { username: string; email: string },
+	user: { username: string; email: string; isLoggedIn: true },
 	step: () => Step,
 	setStep: (step: Step) => void
 ) {

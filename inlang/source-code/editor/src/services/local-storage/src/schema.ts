@@ -7,7 +7,7 @@ export type LocalStorageSchema = {
 				isLoggedIn: true
 				username: string
 				email: string
-				avatarUrl: string
+				avatarUrl?: string
 		  }
 		| { isLoggedIn: false }
 	/**

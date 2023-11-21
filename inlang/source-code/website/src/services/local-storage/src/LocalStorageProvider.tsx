@@ -60,8 +60,8 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 		// initialize the user in local storage
 		browserAuth
 			.getUser()
-			.then((user: { username: string; email: string; avatarUrl: string; isLoggedIn: boolean }) => {
-				user.isLoggedIn = true
+			.then((userData: { username: string; email: string; avatarUrl?: string }) => {
+				const user = { ...userData, isLoggedIn: true }
 
 				if (storage) {
 					// set the old local storage data and updated user object together

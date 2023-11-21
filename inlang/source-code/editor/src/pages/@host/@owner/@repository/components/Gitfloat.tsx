@@ -263,6 +263,11 @@ export const Gitfloat = () => {
 		})
 	)
 
+
+	const loggedInUser = (
+		user: typeof localStorage.user
+	): { username: string; avatarUrl?: string } | false => (user?.isLoggedIn ? user : false)
+
 	return (
 		<>
 			<div class="gitfloat z-30 sticky mx-auto bottom-8 w-[300px] my-16">
@@ -279,14 +284,16 @@ export const Gitfloat = () => {
 					}
 				>
 					<div class="w-full flex justify-start items-center rounded-lg bg-inverted-surface shadow-xl ">
-						<Show when={localStorage.user?.isLoggedIn}>
-							<div class="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2 p-1.5 rounded-tl-lg rounded-bl-lg border-t-0 border-r border-b-0 border-l-0 border-background/10">
-								<img
-									src={localStorage.user.avatarUrl}
-									alt="user avatar"
-									class="flex-grow-0 flex-shrink-0 w-[30px] h-[30px] rounded object-cover bg-on-inverted-surface"
-								/>
-							</div>
+						<Show when={loggedInUser(localStorage.user)}>
+							{(user) => (
+								<div class="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2 p-1.5 rounded-tl-lg rounded-bl-lg border-t-0 border-r border-b-0 border-l-0 border-background/10">
+									<img
+										src={user().avatarUrl}
+										alt="user avatar"
+										class="flex-grow-0 flex-shrink-0 w-[30px] h-[30px] rounded object-cover bg-on-inverted-surface"
+									/>
+								</div>
+							)}
 						</Show>
 						<div
 							class={
