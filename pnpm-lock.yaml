@@ -990,6 +990,9 @@ importers:
       typescript:
         specifier: 5.2.2
         version: 5.2.2
+      vitest:
+        specifier: ^0.34.6
+        version: 0.34.6(terser@5.19.4)
 
   inlang/source-code/paraglide/paraglide-js:
     dependencies:
@@ -1055,6 +1058,9 @@ importers:
       '@inlang/cli':
         specifier: workspace:*
         version: link:../../cli
+      '@inlang/plugin':
+        specifier: workspace:*
+        version: link:../../versioned-interfaces/plugin
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../../lix/source-code/fs
