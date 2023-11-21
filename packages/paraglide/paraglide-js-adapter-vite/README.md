@@ -1,4 +1,3 @@
-
 # Paraglide Adapter Vite
 
 This package provides a vite plugin to make it easier to use the paraglide-js in any Framework that uses vite.
@@ -12,14 +11,14 @@ You also do no longer need the `paraglide` commands in your `package.json`.
 After having set up paraglide-js, you can add this plugin to your vite config.
 
 ```js
-import { paraglide } from "@inlang/paraglide-js-adapter-vite";
+import { paraglide } from "@inlang/paraglide-js-adapter-vite"
 export default {
-  plugins: [
-    paraglide({
-        project: "./inlang.project.json", //Path to your inlang project file
-        outDir: "./src/paraglide"   //Where you want the generated files to be placed
-    }),
-  ],
+	plugins: [
+		paraglide({
+			project: "./inlang.project.json", //Path to your inlang project file
+			outDir: "./src/paraglide", //Where you want the generated files to be placed
+		}),
+	],
 }
 ```
 

@@ -1,7 +1,7 @@
 {
-    "name": "@inlang/paraglide-js-adapter-vite",
+    "name": "@inlang/paraglide-js-adapter-rollup",
     "version": "1.0.0-prerelease.1",
-    "description": "Vite adapter for Paraglide.js",
+    "description": "Rollup adapter for Paraglide.js",
     "license": "Apache-2.0",
     "type": "module",
     "publishConfig": {
@@ -17,15 +17,12 @@
         "l10n",
         "translation",
         "internationalization",
-        "svelte",
         "localization",
         "lint",
         "react",
         "vue",
         "angular",
-        "nextjs",
-        "next i18n",
-        "vite"
+        "rollup"
     ],
     "files": [
         "./dist"
@@ -43,7 +40,9 @@
     "devDependencies": {
         "@types/node": "20.9.3",
         "typescript": "5.2.2",
-        "vite": "5.0.0",
         "vitest": "0.34.3"
+    },
+    "peerDependencies": {
+        "rollup": "*"
     }
 }
