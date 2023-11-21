@@ -6,7 +6,8 @@
 		"allowJs": true,
 		"checkJs": true,
 		"outDir": "dist",
-		"strict": true
+		"strict": true,
+		"lib": ["ESNext", "DOM"]
 	}
 
 }
