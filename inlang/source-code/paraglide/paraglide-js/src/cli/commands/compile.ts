@@ -1,9 +1,11 @@
 import { loadProject, type InlangProject } from "@inlang/sdk"
+import { parseOrigin, telemetryNode } from "@inlang/telemetry"
 import consola from "consola"
 import { compile } from "../../compiler/compile.js"
 import fs from "node:fs/promises"
 import { resolve } from "node:path"
 import { Command } from "commander"
+import { getGitRemotes } from "../../utils/git.js"
 
 export const compileCommand = new Command()
 	.name("compile")
@@ -13,15 +15,38 @@ export const compileCommand = new Command()
 	.action(async (options: { project: string; outdir: string }) => {
 		consola.info(`Compiling inlang project at "${options.project}".`)
 
-		const path = resolve(process.cwd(), options.project)
-
+		const settingsFilePath = resolve(process.cwd(), options.project)
 		const project = exitIfErrors(
 			await loadProject({
-				settingsFilePath: path,
-				//@ts-ignore
+				settingsFilePath,
 				nodeishFs: fs,
+				_capture(id, props) {
+					telemetryNode.capture({
+						event: id,
+						properties: props,
+						distinctId: "unknown",
+					})
+				},
 			})
 		)
+
+		//For Telemetry
+		const gitOrigin = parseOrigin({
+			remotes: await getGitRemotes({ nodeishFs: fs, filepath: settingsFilePath }),
+		})
+
+		telemetryNode.capture({
+			event: "Paraglide compile",
+			groups: { repository: gitOrigin },
+			distinctId: "unknown",
+		})
+		telemetryNode.groupIdentify({
+			groupType: "repository",
+			groupKey: gitOrigin,
+			properties: {
+				name: gitOrigin,
+			},
+		})
 
 		const output = compile({
 			messages: project.query.messages.getAll(),
