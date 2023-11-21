@@ -2310,6 +2310,84 @@
 			]
 		},
 		{
+			"id": "inlang_global_description",
+			"selectors": [],
+			"variants": [
+				{
+					"languageTag": "en",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Quickly find the best solution to globalize (i18n) your app. inlang helps you to expand to new markets and acquire new customers."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Finde schnell die beste Lösung für die Globalisierung (i18n) Deiner Anwendung. inlang hilft Dir, in neue Märkte zu expandieren und neue Kunden zu gewinnen."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "inlang_global_title",
+			"selectors": [],
+			"variants": [
+				{
+					"languageTag": "en",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "inlang Marketplace - The ecosystem to go global"
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "inlang Marktplatz - Das Ökosystem um zu globalisieren"
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "inlang_twitter_title",
+			"selectors": [],
+			"variants": [
+				{
+					"languageTag": "en",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "inlang's ecosystem helps organizations to go global."
+						}
+					]
+				},
+				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "inlang's Ökosystem hilft Organisationen global zu gehen."
+						}
+					]
+				}
+			]
+		},
+		{
 			"id": "marketplace_application_header_generic_button",
 			"selectors": [],
 			"variants": [

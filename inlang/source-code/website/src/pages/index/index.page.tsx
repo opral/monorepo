@@ -1,4 +1,4 @@
-import { Meta, Title } from "@solidjs/meta"
+import { Link, Meta, Title } from "@solidjs/meta"
 import HeroSearch from "./custom_section/HeroSearch.jsx"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import { Show } from "solid-js"
@@ -8,31 +8,36 @@ import { currentPageContext } from "#src/renderer/state.js"
 import Guides from "./custom_section/Guides.jsx"
 import Features from "./custom_section/Features.jsx"
 import ParaglideHeader from "#src/interface/marketplace/categoryHeaders/cards/paraglide.jsx"
+import * as m from "#src/paraglide/messages.js"
+import { renderLocales } from "#src/renderer/renderLocales.js"
 
 export function Page() {
 	const search = currentPageContext.urlParsed.search["search"]
 
 	return (
 		<>
-			<Title>inlang Marketplace - The ecosystem to go global</Title>
-			<Meta
-				name="description"
-				content="Quickly find the best solution to globalize (i18n) your app. inlang helps you to expand to new markets and acquire new customers."
-			/>
+			<Title>{m.inlang_global_title()}</Title>
+			<Meta name="description" content={m.inlang_global_description()} />
 			<Meta name="og:image" content="/opengraph/inlang-social-image.jpg" />
 			<Meta name="twitter:card" content="summary_large_image" />
 			<Meta name="twitter:image" content="/opengraph/inlang-social-image.jpg" />
-			<Meta
-				name="twitter:image:alt"
-				content="inlang's ecosystem helps organizations to go global."
-			/>
-			<Meta name="twitter:title" content="inlang.com - The ecosystem to go global" />
-			<Meta
-				name="twitter:description"
-				content="Quickly find the best solution to globalize (i18n) your app. inlang helps you to expand to new markets and acquire new customers."
-			/>
+			<Meta name="twitter:image:alt" content={m.inlang_twitter_title()} />
+			<Meta name="twitter:title" content={m.inlang_global_title()} />
+			<Meta name="twitter:description" content={m.inlang_global_description()} />
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />
+			{renderLocales(currentPageContext.urlParsed.pathname).map((locale) => (
+				<Link
+					href={locale.href}
+					lang={locale.hreflang}
+					// @ts-ignore
+					rel={
+						locale.rel
+							? locale.rel // eslint-disable-next-line unicorn/no-null
+							: null
+					}
+				/>
+			))}
 			<MarketplaceLayout>
 				<Show
 					when={search}
