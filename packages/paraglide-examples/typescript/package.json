@@ -7,9 +7,10 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@inlang/paraglide-js": "*"
+		"@inlang/paraglide-js": "workspace:*"
 	},
 	"devDependencies": {
-		"typescript": "5.2.2"
+		"typescript": "5.2.2",
+		"vitest": "^0.34.6"
 	}
 }
