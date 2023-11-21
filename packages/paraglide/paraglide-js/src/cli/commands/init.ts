@@ -8,6 +8,7 @@ import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import JSON5 from "json5"
 import childProcess from "node:child_process"
 import { version } from "../state.js"
+import { telemetry } from "../../services/telemetry/implementation.js"
 
 consola.options = {
 	...consola.options,
@@ -22,6 +23,7 @@ export const initCommand = new Command()
 	.summary("Initializes inlang Paraglide-JS.")
 	.action(async () => {
 		consola.box("Welcome to inlang Paraglide-JS 🪂")
+		telemetry.capture({ event: "Paraglide init executed" })
 
 		await checkIfUncommittedChanges()
 		await checkIfPackageJsonExists()
