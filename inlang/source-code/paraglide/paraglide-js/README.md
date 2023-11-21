@@ -90,6 +90,15 @@ Paraglide JS exports four variables and functions via "@inlang/paraglide-js":
 | `languageTag()` | Returns the language tag of the current user |
 | `setLanguageTag()` | Sets the language tag of the current user |
 
+## Forcing a language
+It's common that you need to force a message to be in a certain language, especially on the server. You can do this by passing an options object to the message function as a 
+second parameter.
+
+```js
+import * as m from "./paraglide-js/messages"
+const msg = m.hello({ name: "Samuel" }, { languageTag: "de" }) // Hallo Samuel!
+```
+
 # Playground
 
 You can find many examples for how to use paraglide on codesandbox:
