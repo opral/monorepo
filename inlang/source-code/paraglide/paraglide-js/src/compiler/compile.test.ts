@@ -232,15 +232,13 @@ describe("e2e", async () => {
 
 		// set the language tag to de to make sure that the message options override the runtime language tag
 		runtime.setLanguageTag("de")
-
+		expect(m.onlyText()).toBe("Eine einfache Nachricht.")
 		expect(m.onlyText(undefined, { languageTag: "en" })).toBe("A simple message.")
-		expect(m.oneParam({ name: "Samuel" }, { languageTag: "en" })).toBe("Good morning Samuel!")
 		expect(m.multipleParams({ name: "Samuel", count: 5 }, { languageTag: "en" })).toBe(
 			"Hello Samuel! You have 5 messages."
 		)
 
 		runtime.setLanguageTag("en")
-
 		expect(m.onlyText(undefined, { languageTag: "de" })).toBe("Eine einfache Nachricht.")
 		expect(m.oneParam({ name: "Samuel" }, { languageTag: "de" })).toBe("Guten Morgen Samuel!")
 		expect(m.multipleParams({ name: "Samuel", count: 5 }, { languageTag: "de" })).toBe(
