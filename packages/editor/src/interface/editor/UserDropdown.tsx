@@ -1,5 +1,5 @@
 import { onSignOut } from "#src/services/auth/index.js"
-import { Switch, Match } from "solid-js"
+import { Show } from "solid-js"
 import { showToast } from "../components/Toast.jsx"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
@@ -31,17 +31,17 @@ function UserDropdown() {
 		}
 	}
 
+	const loggedInUser = (
+		user: typeof localStorage.user
+	): { username: string; avatarUrl?: string } | false => (user?.isLoggedIn ? user : false)
+
 	return (
 		<>
-			<Switch>
-				<Match when={localStorage.user?.isLoggedIn}>
+			<Show when={loggedInUser(localStorage.user)}>
+				{(user) => (
 					<sl-dropdown>
 						<div slot="trigger" class="flex items-center cursor-pointer">
-							<img
-								src={localStorage.user?.avatarUrl}
-								alt="user avatar"
-								class="w-6 h-6 rounded-full"
-							/>
+							<img src={user().avatarUrl} alt="user avatar" class="w-6 h-6 rounded-full" />
 							<div class="w-5 h-5 opacity-50">
 								<IconExpand />
 							</div>
@@ -49,7 +49,7 @@ function UserDropdown() {
 						<sl-menu>
 							<div class="px-7 py-2 bg-surface-1 text-on-surface">
 								<p>Signed in as</p>
-								<p class="font-medium">{localStorage.user?.username}</p>
+								<p class="font-medium">{user().username}</p>
 							</div>
 							<sl-menu-item onClick={handleSignOut}>
 								<IconSignOut
@@ -60,8 +60,8 @@ function UserDropdown() {
 							</sl-menu-item>
 						</sl-menu>
 					</sl-dropdown>
-				</Match>
-			</Switch>
+				)}
+			</Show>
 		</>
 	)
 }
