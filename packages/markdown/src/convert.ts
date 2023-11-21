@@ -67,9 +67,9 @@ export async function convert(markdown: string): Promise<string> {
 			a: "text-primary doc-font-medium hover:text-hover-primary doc-no-underline doc-inline-block",
 			code: "doc-px-1 doc-py-0.5 doc-bg-surface-100 doc-rounded-lg bg-surface-200 doc-my-6 doc-text-sm doc-font-mono text-surface-900",
 			pre: "doc-relative",
-			ul: "doc-list-disc doc-list-inside",
-			ol: "doc-list-decimal doc-list-inside",
-			li: "doc-space-y-3",
+			ul: "doc-list-disc doc-list-inside doc-space-y-3",
+			ol: "doc-list-decimal doc-list-inside doc-space-y-3",
+			li: "doc-list-outside",
 			table:
 				"doc-table-auto doc-w-full doc-my-6 doc-rounded-xl doc-text-left doc-max-w-[100%] doc-overflow-x-scroll",
 			thead: "doc-font-medium pb-2 doc-border-b doc-border-surface-2 doc-text-left",
