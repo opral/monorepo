@@ -26,7 +26,7 @@ export const initCommand = new Command()
 		await checkIfUncommittedChanges()
 		await checkIfPackageJsonExists()
 		const projectPath = await initializeInlangProject()
-		await addParaglideJsToDependencies()
+		await addParaglideJsToDevDependencies()
 		await addCompileStepToPackageJSON({ projectPath })
 		await maybeChangeTsConfigModuleResolution()
 		await maybeChangeTsConfigAllowJs()
@@ -89,16 +89,16 @@ export const maybeAddVsCodeExtension = async (args: { projectPath: string }) => 
 	}
 }
 
-export const addParaglideJsToDependencies = async () => {
+export const addParaglideJsToDevDependencies = async () => {
 	const file = await fs.readFile("./package.json", { encoding: "utf-8" })
 	const stringify = detectJsonFormatting(file)
 	const pkg = JSON.parse(file)
-	if (pkg.dependencies === undefined) {
-		pkg.dependencies = {}
+	if (pkg.devDependencies === undefined) {
+		pkg.devDependencies = {}
 	}
-	pkg.dependencies["@inlang/paraglide-js"] = version
+	pkg.devDependencies["@inlang/paraglide-js"] = version
 	await fs.writeFile("./package.json", stringify(pkg))
-	consola.success("Added @inlang/paraglide-js to the dependencies in package.json.")
+	consola.success("Added @inlang/paraglide-js to the devDependencies in package.json.")
 }
 
 export const findExistingInlangProjectPath = async (): Promise<string | undefined> => {

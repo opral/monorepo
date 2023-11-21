@@ -1,7 +1,7 @@
 import { test, expect, vi, beforeAll, beforeEach } from "vitest"
 import {
 	addCompileStepToPackageJSON,
-	addParaglideJsToDependencies,
+	addParaglideJsToDevDependencies,
 	maybeChangeTsConfigAllowJs,
 	maybeChangeTsConfigModuleResolution,
 	checkIfPackageJsonExists,
@@ -96,7 +96,7 @@ describe("addParaglideJsToDependencies()", () => {
 		mockFiles({
 			"/package.json": "{}",
 		})
-		await addParaglideJsToDependencies()
+		await addParaglideJsToDevDependencies()
 		expect(fs.writeFile).toHaveBeenCalledOnce()
 		expect(consola.success).toHaveBeenCalledOnce()
 		const packageJson = JSON.parse(
