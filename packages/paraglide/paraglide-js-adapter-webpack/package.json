@@ -1,7 +1,7 @@
 {
-    "name": "@inlang/paraglide-js-adapter-vite",
+    "name": "@inlang/paraglide-js-adapter-webpack",
     "version": "1.0.0-prerelease.1",
-    "description": "Vite adapter for Paraglide.js",
+    "description": "Webpack adapter for Paraglide.js",
     "license": "Apache-2.0",
     "type": "module",
     "publishConfig": {
@@ -17,7 +17,6 @@
         "l10n",
         "translation",
         "internationalization",
-        "svelte",
         "localization",
         "lint",
         "react",
@@ -25,7 +24,7 @@
         "angular",
         "nextjs",
         "next i18n",
-        "vite"
+        "webpack"
     ],
     "files": [
         "./dist"
@@ -45,8 +44,5 @@
         "@types/node": "20.9.3",
         "typescript": "5.2.2",
         "vitest": "0.34.3"
-    },
-    "peerDependencies": {
-        "vite": "^4.0.0 || ^5.0.0"
     }
 }
