@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect, test } from "vitest"
-import { Plugin, MessageLintRule } from "@inlang/sdk"
+import { Plugin, MessageLintRule } from "../index.js"
 // import { createNodeishMemoryFs } from "@lix-js/fs"
 import { Type } from "@sinclair/typebox"
 import { validatedModuleSettings } from "./validatedModuleSettings.js"

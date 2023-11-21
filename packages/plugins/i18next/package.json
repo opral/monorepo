@@ -28,6 +28,7 @@
 	"devDependencies": {
 		"@inlang/cli": "workspace:*",
 		"@inlang/sdk": "workspace:*",
+		"@inlang/plugin": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@size-limit/preset-small-lib": "^8.2.4",
 		"@types/flat": "^5.0.2",
