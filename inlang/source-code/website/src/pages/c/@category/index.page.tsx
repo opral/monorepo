@@ -4,7 +4,7 @@ import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 import Highlight from "#src/interface/components/Highlight.jsx"
 import Card, { CardBuildOwn, NoResultsCard } from "#src/interface/components/Card.jsx"
-import { Meta, Title } from "@solidjs/meta"
+import { Link, Meta, Title } from "@solidjs/meta"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import * as m from "#src/paraglide/messages.js"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
@@ -12,6 +12,8 @@ import TitleSection from "#src/interface/marketplace/categoryHeaders/titleSectio
 import PluginHeader from "#src/interface/marketplace/categoryHeaders/toast/plugins.jsx"
 import ParaglideHeader from "#src/interface/marketplace/categoryHeaders/cards/paraglide.jsx"
 import LintRulesHeader from "#src/interface/marketplace/categoryHeaders/toast/lintRules.jsx"
+import LixHeader from "#src/interface/marketplace/categoryHeaders/cards/lix.jsx"
+import { renderLocales } from "#src/renderer/renderLocales.js"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -82,6 +84,13 @@ export function Page(props: {
 					buttonLink: "/documentation/publish-guide",
 					buttonText: m.marketplace_header_guides_button_text(),
 				}
+			case "lix":
+				return {
+					title: m.marketplace_header_lix_title(),
+					description: m.marketplace_header_lix_short_description(),
+					buttonLink: "https://github.com/inlang/monorepo/tree/main/lix",
+					buttonText: m.marketplace_header_lix_button_text(),
+				}
 			default:
 				return {
 					title: "inlang",
@@ -128,6 +137,9 @@ export function Page(props: {
 			/>
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />
+			{renderLocales(currentPageContext.urlParsed.pathname).map((locale) => (
+				<Link href={locale.href} lang={locale.hreflang} rel={locale.rel} />
+			))}
 			<MarketplaceLayout>
 				<Show when={currentPageContext.routeParams.category && getHeaderContent()}>
 					<TitleSection
@@ -144,6 +156,9 @@ export function Page(props: {
 					</Show>
 					<Show when={currentPageContext.routeParams.category === "libraries"}>
 						<ParaglideHeader />
+					</Show>
+					<Show when={currentPageContext.routeParams.category === "lix"}>
+						<LixHeader />
 					</Show>
 				</Show>
 				<div class="pb-16 md:pb-20 min-h-screen relative">

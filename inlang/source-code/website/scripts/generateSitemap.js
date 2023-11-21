@@ -3,6 +3,8 @@ import { registry } from "@inlang/marketplace-registry"
 
 const siteURL = "https://inlang.com"
 
+const locales = ["", "/de"]
+
 // Add all routes that should be included in the sitemap here, dynamic routes should be marked with dynamic: true
 const routes = [
 	{ path: "/", dynamic: false },
@@ -31,29 +33,54 @@ async function generateSitemap() {
 	let content = `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="https://www.nsb.com/wp-content/plugins/wordpress-seo-premium/css/main-sitemap.xsl"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`
 	for (const route of routes) {
 		if (route.path !== "/c" && route.path !== "/g" && route.path !== "/m")
-			content = `${content}${formatPage(siteURL + route.path, publishDate)}`
+			if (route.path !== "/editor")
+				for (const locale of locales) {
+					content = `${content}${formatPage(siteURL + locale + route.path, publishDate)}`
+				}
+			else content = `${content}${formatPage(siteURL + route.path, publishDate)}`
 
 		if (route.dynamic && route.path === "/m") {
 			for (const item of registry) {
 				if (!item.id.startsWith("guide.")) {
-					content = `${content}${formatPage(
-						siteURL + route.path + "/" + item.uniqueID + "/" + item.id.replaceAll(".", "-"),
-						publishDate
-					)}`
+					for (const locale of locales) {
+						content = `${content}${formatPage(
+							siteURL +
+								locale +
+								route.path +
+								"/" +
+								item.uniqueID +
+								"/" +
+								item.id.replaceAll(".", "-"),
+							publishDate
+						)}`
+					}
 				}
 			}
 		} else if (route.dynamic && route.path === "/g") {
 			for (const item of registry) {
 				if (item.id.startsWith("guide.")) {
-					content = `${content}${formatPage(
-						siteURL + route.path + "/" + item.uniqueID + "/" + item.id.replaceAll(".", "-"),
-						publishDate
-					)}`
+					for (const locale of locales) {
+						content = `${content}${formatPage(
+							siteURL +
+								locale +
+								route.path +
+								"/" +
+								item.uniqueID +
+								"/" +
+								item.id.replaceAll(".", "-"),
+							publishDate
+						)}`
+					}
 				}
 			}
 		} else if (route.dynamic && route.path === "/c") {
 			for (const category of categories) {
-				content = `${content}${formatPage(siteURL + route.path + "/" + category, publishDate)}`
+				for (const locale of locales) {
+					content = `${content}${formatPage(
+						siteURL + locale + route.path + "/" + category,
+						publishDate
+					)}`
+				}
 			}
 		} else if ((route.dynamic && route.path === "/documentation") || route.path === "/blog") {
 			const tableOfContents = await fs.readFile(
@@ -63,16 +90,23 @@ async function generateSitemap() {
 
 			if (Array.isArray(JSON.parse(tableOfContents))) {
 				for (const item of JSON.parse(tableOfContents)) {
-					content = `${content}${formatPage(siteURL + route.path + "/" + item.slug, publishDate)}`
+					for (const locale of locales) {
+						content = `${content}${formatPage(
+							siteURL + locale + route.path + "/" + item.slug,
+							publishDate
+						)}`
+					}
 				}
 			} else {
 				for (const items of Object.values(JSON.parse(tableOfContents))) {
 					for (const item of items) {
 						if (item.slug !== "")
-							content = `${content}${formatPage(
-								siteURL + route.path + "/" + item.slug,
-								publishDate
-							)}`
+							for (const locale of locales) {
+								content = `${content}${formatPage(
+									siteURL + locale + route.path + "/" + item.slug,
+									publishDate
+								)}`
+							}
 					}
 				}
 			}

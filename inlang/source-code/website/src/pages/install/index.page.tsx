@@ -75,7 +75,7 @@ export function Page() {
 			/>
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<MarketplaceLayout>
-				<div class="lg:h-screen flex flex-col items-center justify-center pb-32">
+				<div class="lg:min-h-screen flex flex-col items-center justify-center pb-32">
 					<InstallationProvider
 						repo={repo}
 						modules={modules}
@@ -94,8 +94,9 @@ export function Page() {
 							}
 						>
 							<Show when={step().type === "github-login"}>
-								<div class="w-full lg:h-full flex lg:flex-row flex-col gap-16 pt-24 justify-between lg:items-center">
-									<div class="md:h-full flex-shrink-0 flex items-center lg:max-w-sm">
+								<div class="w-full lg:h-full flex lg:flex-row flex-col gap-16 lg:pt-0 pt-24 justify-between lg:items-center">
+									<div class="hidden lg:block w-full lg:max-w-sm" />
+									<div class="md:h-full flex-shrink-0 flex items-center lg:max-w-sm lg:absolute lg:top-1/2 lg:-translate-y-1/2">
 										<div class="text-left">
 											<h2 class="text-[24px] leading-tight md:text-2xl font-semibold mb-2">
 												Please authorize to continue
@@ -137,7 +138,7 @@ export function Page() {
 										/>
 									</div>
 									<div class="lg:h-[650px] lg:w-[1px] w-full h-[1px] bg-surface-2" />
-									<div class="md:h-full lg:py-32 lg:col-span-2 lg:w-auto w-full">
+									<div class="md:h-full lg:py-16 lg:col-span-2 lg:w-auto w-full">
 										<div class="xl:max-w-xl lg:max-w-md">
 											<h2 class="text-[24px] leading-tight md:text-2xl font-semibold mb-2">
 												Manually install the module you've selected
