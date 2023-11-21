@@ -15,12 +15,12 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/env-variables": "*",
-		"@inlang/language-tag": "*",
-		"@inlang/message": "*",
-		"@inlang/result": "*",
-		"@inlang/sdk": "*",
-		"@inlang/marketplace-registry": "*",
+		"@inlang/env-variables": "workspace:*",
+		"@inlang/language-tag": "workspace:*",
+		"@inlang/message": "workspace:*",
+		"@inlang/result": "workspace:*",
+		"@inlang/sdk": "workspace:*",
+		"@inlang/marketplace-registry": "workspace:*",
 		"algoliasearch": "4.20.0",
 		"body-parser": "^1.20.2",
 		"ts-dedent": "^2.2.0",

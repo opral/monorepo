@@ -16,21 +16,23 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@v3
 
+      - name: Setup Pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - name: Install node
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.version }}
-          cache: "npm"
-
-
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Run e2e tests on normal platforms
         if: startsWith(matrix.os, 'ubuntu')
-        run: xvfb-run -a npm run test:e2e -w vs-code-extension
+        run: xvfb-run -a pnpm --filter vs-code-extension run test:e2e
 
       - name: Run e2e tests on alien platforms
         if: startsWith(matrix.os, 'ubuntu') == false
-        run: npm run test:e2e -w vs-code-extension
+        run: pnpm --filter vs-code-extension run test:e2e

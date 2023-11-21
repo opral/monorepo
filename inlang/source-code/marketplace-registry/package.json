@@ -23,8 +23,8 @@
 		"node": ">=16.15.0"
 	},
 	"dependencies": {
-		"@inlang/marketplace-manifest": "*",
-		"@inlang/env-variables": "*",
+		"@inlang/marketplace-manifest": "workspace:*",
+		"@inlang/env-variables": "workspace:*",
 		"@sinclair/typebox": "^0.31.8",
 		"algoliasearch": "4.20.0",
 		"node-fetch": "3.3.2"

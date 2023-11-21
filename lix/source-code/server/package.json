@@ -19,8 +19,8 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/env-variables": "*",
-		"@inlang/telemetry": "*",
+		"@inlang/env-variables": "workspace:*",
+		"@inlang/telemetry": "workspace:*",
 		"@isomorphic-git/cors-proxy": "2.7.1",
 		"@sentry/node": "^7.47.0",
 		"@sentry/tracing": "^7.47.0",

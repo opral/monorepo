@@ -1,0 +1,4 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"greeting": "Welcome to NYC {name}! You have {count} messages."
+}
