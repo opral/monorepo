@@ -23,7 +23,7 @@ export const initCommand = new Command()
 	.summary("Initializes inlang Paraglide-JS.")
 	.action(async () => {
 		consola.box("Welcome to inlang Paraglide-JS 🪂")
-		telemetry.capture({ event: "Paraglide-js init executed" })
+		telemetry.capture({ event: "PARAGLIDE-JS init executed" })
 
 		await checkIfUncommittedChanges()
 		await checkIfPackageJsonExists()
