@@ -53,6 +53,7 @@
 		"@ts-morph/bootstrap": "0.20.0",
 		"@types/minimist": "1.2.3",
 		"@vitest/coverage-v8": "0.34.3",
+		"@inlang/env-variables": "workspace:*",
 		"memfs": "4.6.0",
 		"rollup": "3.29.1",
 		"typescript": "5.2.2",
