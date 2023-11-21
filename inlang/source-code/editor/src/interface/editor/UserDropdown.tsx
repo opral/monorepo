@@ -34,7 +34,7 @@ function UserDropdown() {
 	return (
 		<>
 			<Switch>
-				<Match when={localStorage.user}>
+				<Match when={localStorage.user?.isLoggedIn}>
 					<sl-dropdown>
 						<div slot="trigger" class="flex items-center cursor-pointer">
 							<img

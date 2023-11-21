@@ -229,8 +229,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		() => {
 			return { routeParams: routeParams(), user: localStorage.user, branch: activeBranch() }
 		},
-		async ({ routeParams: { host, owner, repository }, branch }) => {
-			if (host && owner && repository) {
+		async ({ routeParams: { host, owner, repository }, branch, user }) => {
+			if (host && owner && repository && user) {
 				try {
 					const newRepo = await openRepository(
 						`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${host}/${owner}/${repository}`,
@@ -302,7 +302,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	//the effect should skip tour guide steps if not needed
 	createEffect(() => {
-		if (localStorage?.user === undefined) {
+		if (localStorage?.user?.isLoggedIn === false) {
 			setTourStep("github-login")
 		} else if (!userIsCollaborator()) {
 			setTourStep("fork-repository")
@@ -386,7 +386,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				return false
 			}
 			return {
-				user: localStorage?.user ?? "not logged in",
+				user: localStorage?.user?.isLoggedIn ?? "not logged in",
 				routeParams: currentPageContext.routeParams as EditorRouteParams,
 				currentRepo: repo(),
 				repoMeta: githubRepositoryInformation(),

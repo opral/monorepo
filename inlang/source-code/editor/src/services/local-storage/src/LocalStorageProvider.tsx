@@ -9,6 +9,8 @@ const LocalStorageContext = createContext()
 
 const LOCAL_STORAGE_KEY = "inlang-local-storage"
 
+// FIXME: remove user object from localstorage
+
 /**
  * Retrieves (gets) the local storage.
  *
@@ -54,16 +56,23 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 	// read from local storage on mount
 	onMount(() => {
 		const storage = getLocalStorage()
-		if (storage) {
-			setStore(storage)
-		}
+
 		// initialize the user in local storage
 		browserAuth
 			.getUser()
-			.then((userOrUndefined) => {
-				setStore("user", userOrUndefined)
-				if (userOrUndefined) {
-					telemetryBrowser.identify(userOrUndefined.username)
+			.then((user: { username: string; email: string; avatarUrl: string; isLoggedIn: boolean }) => {
+				user.isLoggedIn = true
+
+				if (storage) {
+					// set the old local storage data and updated user object together
+					storage.user = user
+					setStore(storage)
+				} else {
+					setStore("user", user)
+				}
+
+				if (user) {
+					telemetryBrowser.identify(user.username)
 				}
 			})
 			// set user to undefined if an error occurs
@@ -73,7 +82,13 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 					await onSignOut({ setLocalStorage: setStore })
 					location.reload()
 				} else {
-					setStore("user", undefined)
+					if (storage) {
+						// set the old local storage data and removed user object together
+						storage.user = { isLoggedIn: false }
+						setStore(storage)
+					} else {
+						setStore("user", { isLoggedIn: false })
+					}
 				}
 			})
 

@@ -38,6 +38,8 @@ export const Gitfloat = () => {
 		const repoInfo = githubRepositoryInformation()
 
 		if (localStorage?.user === undefined) {
+			return "loading"
+		} else if (localStorage?.user?.isLoggedIn === false) {
 			return "login"
 		} else if (
 			typeof repoInfo === "undefined" ||
@@ -70,10 +72,10 @@ export const Gitfloat = () => {
 	}
 
 	async function handleFork() {
-		setIsForking(true)
-		if (localStorage.user === undefined) {
+		if (!localStorage.user?.isLoggedIn) {
 			return
 		}
+		setIsForking(true)
 		const response = await repo()
 			?.createFork()
 			.catch((err) => err)
@@ -109,7 +111,7 @@ export const Gitfloat = () => {
 	}
 
 	async function triggerPushChanges() {
-		if (localStorage?.user === undefined) {
+		if (!localStorage?.user?.isLoggedIn) {
 			return showToast({
 				title: "Failed to push changes",
 				message: "Please login first",
@@ -245,7 +247,7 @@ export const Gitfloat = () => {
 	})
 
 	createEffect(() => {
-		if (localChanges() > 0 && localStorage?.user !== undefined) {
+		if (localChanges() > 0 && localStorage?.user?.isLoggedIn) {
 			const gitfloat = document.querySelector(".gitfloat")
 			gitfloat?.classList.add("animate-jump")
 			setTimeout(() => gitfloat?.classList.remove("animate-jump"), 1000)
@@ -277,10 +279,10 @@ export const Gitfloat = () => {
 					}
 				>
 					<div class="w-full flex justify-start items-center rounded-lg bg-inverted-surface shadow-xl ">
-						<Show when={localStorage.user}>
+						<Show when={localStorage.user?.isLoggedIn}>
 							<div class="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2 p-1.5 rounded-tl-lg rounded-bl-lg border-t-0 border-r border-b-0 border-l-0 border-background/10">
 								<img
-									src={localStorage.user?.avatarUrl}
+									src={localStorage.user.avatarUrl}
 									alt="user avatar"
 									class="flex-grow-0 flex-shrink-0 w-[30px] h-[30px] rounded object-cover bg-on-inverted-surface"
 								/>
