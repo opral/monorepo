@@ -21,8 +21,8 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/translatable": "*",
-		"@inlang/project-settings": "*"
+		"@inlang/translatable": "workspace:*",
+		"@inlang/project-settings": "workspace:*"
 	},
 	"devDependencies": {
 		"@sinclair/typebox": "^0.31.17",

@@ -14,8 +14,8 @@ and run call commands with the `-w` flag.
 
 **Example**
 Running the `dev` command in a package:  
-`npm run dev -w <package-name>`  
--> `npm run dev -w @inlang/ast`
+`pnpm dev -w <package-name>`  
+-> `pnpm dev -w @inlang/ast`
 
 ### Guidelines
 
