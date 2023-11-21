@@ -38,7 +38,8 @@
         "dev": "tsc --watch",
         "lint": "eslint ./src --fix",
         "format": "prettier ./src --write",
-        "clean": "rm -rf ./dist ./node_modules"
+        "clean": "rm -rf ./dist ./node_modules",
+        "test": "vitest run"
     },
     "dependencies": {
         "@inlang/paraglide-js": "*",
