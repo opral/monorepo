@@ -12,6 +12,7 @@
 		·
 		<a href='https://github.com/orgs/inlang/projects/39' target="_blank">🗺️ Roadmap</a>
 	</p>
+	<br />
 </div>
 
 ✅ Supercharge i18n within VS Code with powerful tools designed to streamline the translation process. 
