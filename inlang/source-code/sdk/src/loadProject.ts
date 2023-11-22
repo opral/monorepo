@@ -23,9 +23,10 @@ import { ProjectSettings, Message, type NodeishFilesystemSubset } from "./versio
 import { tryCatch, type Result } from "@inlang/result"
 import { migrateIfOutdated } from "@inlang/project-settings/migration"
 import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
-import { normalizePath } from "@lix-js/fs"
+import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
+import { maybeMigrateToDirectory } from "./migrations/maybeMigrateToDirectory.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -41,7 +42,7 @@ const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
  */
 export const loadProject = async (args: {
 	settingsFilePath: string
-	nodeishFs: NodeishFilesystemSubset
+	nodeishFs: NodeishFilesystem
 	_import?: ImportFunction
 	_capture?: (id: string, props: Record<string, unknown>) => void
 }): Promise<InlangProject> => {
@@ -57,6 +58,9 @@ export const loadProject = async (args: {
 	}
 
 	const settingsFilePath = normalizePath(args.settingsFilePath)
+
+	// -- migrate -----------------------------------------------------------
+	await maybeMigrateToDirectory({ fs: args.nodeishFs, projectPath: settingsFilePath })
 
 	// -- load project ------------------------------------------------------
 	return await createRoot(async () => {
