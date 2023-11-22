@@ -239,13 +239,12 @@ describe("e2e", async () => {
 		)
 
 		runtime.setLanguageTag("en")
-		expect(m.onlyText(undefined, { languageTag: "de" })).toBe("Eine einfache Nachricht.")
+		expect(m.onlyText({}, { languageTag: "de" })).toBe("Eine einfache Nachricht.")
 		expect(m.oneParam({ name: "Samuel" }, { languageTag: "de" })).toBe("Guten Morgen Samuel!")
 		expect(m.multipleParams({ name: "Samuel", count: 5 }, { languageTag: "de" })).toBe(
 			"Hallo Samuel! Du hast 5 Nachrichten."
 		)
 	})
-
 })
 
 describe("tree-shaking", () => {
@@ -378,9 +377,8 @@ test("typesafety", async () => {
     // languageTag should return type should be a union of language tags, not a generic string
     runtime.languageTag() satisfies "de" | "en" | "en-US"
 
-		// setting the language tag as a getter function should be possible
-
-		runtime.setLanguageTag(() => "en")
+	// setting the language tag as a getter function should be possible
+	runtime.setLanguageTag(() => "en")
 
     // --------- MESSAGES ---------
 
@@ -395,6 +393,18 @@ test("typesafety", async () => {
 
     // a message without params shouldn't require params
     m.onlyText() satisfies string
+
+
+	// --------- MESSAGE OPTIONS ---------
+	// the languageTag option should be optional
+	m.onlyText({}, {}) satisfies string
+
+	// the languageTag option should be allowed
+	m.onlyText({}, { languageTag: "en" }) satisfies string
+
+	// the languageTag option must be a valid language tag
+	// @ts-expect-error - invalid language tag
+	m.onlyText({}, { languageTag: "---" })
   `
 	)
 
