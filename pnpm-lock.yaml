@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      isomorphic-git:
-        specifier: 1.25.0
-        version: 1.25.0
     devDependencies:
       '@changesets/cli':
         specifier: ^2.26.0
@@ -1015,6 +1011,9 @@ importers:
       dedent:
         specifier: 1.5.1
         version: 1.5.1
+      isomorphic-git:
+        specifier: 1.24.5
+        version: 1.24.5
       json5:
         specifier: 2.2.3
         version: 2.2.3
@@ -9431,24 +9430,6 @@ packages:
       readable-stream: 3.6.2
       sha.js: 2.4.11
       simple-get: 4.0.1
-
-  /isomorphic-git@1.25.0:
-    resolution: {integrity: sha512-F8X7z74gL+jN4bd6qB6a3Z0QQzonWPkiQ3nK/oFWlrc2pIwVM9Uksl3YMFh99ltswsqoCoOthgasybX08/fiGg==}
-    engines: {node: '>=12'}
-    hasBin: true
-    dependencies:
-      async-lock: 1.4.0
-      clean-git-ref: 2.0.1
-      crc-32: 1.2.2
-      diff3: 0.0.3
-      ignore: 5.3.0
-      minimisted: 2.0.1
-      pako: 1.0.11
-      pify: 4.0.1
-      readable-stream: 3.6.2
-      sha.js: 2.4.11
-      simple-get: 4.0.1
-    dev: false
 
   /isomorphic-timers-promises@1.0.1:
     resolution: {integrity: sha512-u4sej9B1LPSxTGKB/HiuzvEQnXH0ECYkSVQU39koSwmFAxhlEAFl9RdTvLv4TOTQUgBS5O3O5fwUxk6byBZ+IQ==}
