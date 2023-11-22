@@ -17,7 +17,7 @@ export function Page() {
 	const [localStorage] = useLocalStorage()
 
 	createEffect(() => {
-		if (localStorage.user?.username) {
+		if (localStorage.user?.isLoggedIn && localStorage.user?.username) {
 			window.close()
 		}
 	})
