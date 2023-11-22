@@ -24,7 +24,7 @@
 		"next i18n"
 	],
 	"bin": {
-		"paraglide-js": "./dist/bin.js"
+		"paraglide-js": "./bin/run.js"
 	},
 	"files": [
 		"./dist",
