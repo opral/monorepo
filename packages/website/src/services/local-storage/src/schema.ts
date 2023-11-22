@@ -2,11 +2,14 @@ export type LocalStorageSchema = {
 	/**
 	 * Reflects https://docs.github.com/en/rest/users/users#get-the-authenticated-user
 	 */
-	user?: {
-		username: string
-		email: string
-		avatarUrl: string
-	}
+	user?:
+		| {
+				isLoggedIn: true
+				username: string
+				email: string
+				avatarUrl?: string
+		  }
+		| { isLoggedIn: false }
 	/**
 	 * Whether to show the machine translation warning.
 	 *
