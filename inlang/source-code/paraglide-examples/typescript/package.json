@@ -1,6 +1,7 @@
 {
 	"name": "@inlang/paraglide-js-example-typescript",
 	"type": "module",
+	"private": true,
 	"scripts": {
 		"build": "paraglide-js compile && tsc",
 		"pretest": "paraglide-js compile",
