@@ -1,5 +1,10 @@
 # inlang-vs-code-extension
 
+## 1.18.0
+
+### Minor Changes
+- 6e1fddf71: update watch & README + MARKETPLACE
+
 ## 1.17.0
 
 ### Minor Changes
