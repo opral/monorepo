@@ -1,10 +1,3 @@
----
-title: Contributing to inlang
-shortTitle: Contributing
-href: /documentation/contributing
-description: Learn on how to contribute to inlang and its ecosystem.
----
-
 # Contributing
 
 Inlang is set up as [monorepo](https://monorepo.tools/) with [Nx](https://nx.dev/) (with caching some compile process for better dev/build performance).
