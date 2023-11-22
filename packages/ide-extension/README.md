@@ -15,7 +15,9 @@
 </div>
 
 ✅ Supercharge i18n within VS Code with powerful tools designed to streamline the translation process. 
+
 ✅ Visualize, edit, and lint translated strings effortlessly using Inline Decorations & Hover Support. 
+
 ✅ Extract new strings with a simple click, making localization tasks more intuitive and efficient.
 
 ## Geting started
