@@ -1022,6 +1022,9 @@ importers:
         specifier: 3.1.3
         version: 3.1.3
     devDependencies:
+      '@inlang/env-variables':
+        specifier: workspace:*
+        version: link:../../env-variables
       '@rollup/plugin-terser':
         specifier: 0.4.3
         version: 0.4.3(rollup@3.29.1)
