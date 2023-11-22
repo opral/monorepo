@@ -48,6 +48,8 @@ jobs:
 
       - name: Build VSCode extension package
         run: doppler run -- pnpm --filter vs-code-extension package
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
       - name: Publish to VSCode Marketplace
         run: npx @vscode/vsce publish -p ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
