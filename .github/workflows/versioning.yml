@@ -33,6 +33,8 @@ jobs:
 
       - name: Install Dependencies
         run: doppler run -- pnpm run ci # The "run" is needed here
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_CI_ENV_TOKEN }}
 
       - name: Create Release Pull Request
         uses: changesets/action@v1
