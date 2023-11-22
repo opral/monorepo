@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "_dev": "vite dev",
-    "_build": "tsc && vite build",
+    "_build": "vite build",
     "clean": "rm -rf ./dist ./node_modules ./src/paraglide"
   },
   "devDependencies": {
