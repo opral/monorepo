@@ -213,7 +213,7 @@ function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number; user: a
 				<h2 class="font-semibold pt-12">Cannot access the repository</h2>
 
 				<ul class="pt-8 list-disc pl-4">
-					{args.user ? (
+					{args.user?.isloggedIn ? (
 						<li class="pt-2">
 							If this is a <span class="font-bold">private repository</span> you need need to add it
 							to the github app permissions by clicking the button below
@@ -242,7 +242,7 @@ function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number; user: a
 					</sl-button>
 				</Link>
 
-				{args.user ? (
+				{args.user?.isloggedIn ? (
 					<sl-button
 						class="on-inverted self-end pt-5"
 						onClick={async () => {

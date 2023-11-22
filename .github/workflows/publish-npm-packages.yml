@@ -25,7 +25,10 @@ jobs:
           node-version: 18
 
       - name: Setup npmrc
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+        run: echo -e "//registry.npmjs.org/:_authToken=${{ secrets.NPM_PUBLISH_TOKEN }}\ngit-checks=false" > .npmrc
+      
+      - name: Disable Gitchecks
+        run: echo "git-checks=false" > .npmrn
 
       - name: install dependencies
         run: pnpm install
@@ -33,11 +36,11 @@ jobs:
       - name: Install Doppler CLI for env variables
         uses: dopplerhq/cli-action@v2
 
-      - run: doppler run -- pnpm test
+      - run: doppler run -- pnpm build
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
-      - run: doppler run -- pnpm build
+      - run: doppler run -- pnpm test
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 

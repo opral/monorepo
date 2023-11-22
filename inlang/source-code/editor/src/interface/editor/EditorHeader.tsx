@@ -50,7 +50,7 @@ function EditorHeader() {
 											</>
 										)}
 									</For>
-									<Show when={user()}>
+									<Show when={user()?.isLoggedIn}>
 										<UserDropdown />
 									</Show>
 								</div>
