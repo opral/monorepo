@@ -1,7 +1,8 @@
 import { publicEnv } from "@inlang/env-variables"
 import { PostHog } from "posthog-node"
 import type { TelemetryEvents } from "./events.js"
-import { getGitRemotes, parseOrigin } from "../../utils/git.js"
+import { getGitRemotes } from "../../utils/git.js"
+import { parseOrigin } from "@inlang/telemetry"
 
 export const gitOrigin = parseOrigin({ remotes: await getGitRemotes() })
 
