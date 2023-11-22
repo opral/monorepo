@@ -29,10 +29,6 @@ export const compileCommand = new Command()
 			})
 		)
 
-		telemetry.capture({
-			event: "PARAGLIDE-JS compile executed",
-		})
-
 		const output = compile({
 			messages: project.query.messages.getAll(),
 			settings: project.settings(),
