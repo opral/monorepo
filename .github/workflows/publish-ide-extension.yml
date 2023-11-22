@@ -31,7 +31,7 @@ jobs:
           node-version: 18
       
       - name: Install dependencies
-        run: pnpm run ci # The "run" is needed here
+        run: pnpm install
 
       - name: Install Doppler CLI for env variables
         uses: dopplerhq/cli-action@v2
