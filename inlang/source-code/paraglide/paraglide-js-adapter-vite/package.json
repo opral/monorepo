@@ -45,8 +45,5 @@
         "@types/node": "20.9.3",
         "typescript": "5.2.2",
         "vitest": "0.34.3"
-    },
-    "peerDependencies": {
-        "vite": "^5.0.0"
     }
 }
