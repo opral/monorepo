@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.20.0
+
+### Minor Changes
+
+- Adjust publish script to publish to marketplace
+
 ## 1.19.0
 
 ### Minor Changes
