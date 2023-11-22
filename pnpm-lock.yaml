@@ -1103,7 +1103,7 @@ importers:
         specifier: 0.34.3
         version: 0.34.3
 
-  inlang/source-code/paraglide/paraglide-js-adapter-vite/tests/basic:
+  inlang/source-code/paraglide/paraglide-js-adapter-vite/tests/build:
     devDependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
