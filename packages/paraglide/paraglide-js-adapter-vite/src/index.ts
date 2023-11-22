@@ -1,5 +1,6 @@
 import { paraglide as unpluginParaglide } from "@inlang/paraglide-js-adapter-unplugin"
-import type { Plugin } from "vite"
 
-type PluginOptions = Parameters<typeof unpluginParaglide.vite>
-export const paraglide: (...args: PluginOptions) => Plugin | Plugin[] = unpluginParaglide.vite
+// Vite is notorious for Plugin-Typeerrors between different versions
+// The plugins still work, but the types are not compatible
+// It's better not to annotate the type here, so that the user can use the plugin regardless of the vite version
+export const paraglide: any = unpluginParaglide.vite
