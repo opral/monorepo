@@ -1,6 +1,6 @@
 import { createUnplugin } from "unplugin"
 import { loadProject } from "@inlang/sdk"
-import { exec } from "node:child_process"
+import { execSync, exec } from "node:child_process"
 import path from "node:path"
 import fs from "node:fs/promises"
 
@@ -26,10 +26,16 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		)
 	}
 
+	const executeSync = () => {
+		execSync(`paraglide-js compile --project ${options.project} --outdir ${options.outdir}`)
+	}
+
 	return {
 		name: "unplugin-paraglide",
 
+		enforce: "pre",
 		async buildStart() {
+			executeSync()
 			const inlang = await loadProject({
 				settingsFilePath: path.resolve(process.cwd(), options.project),
 				nodeishFs: fs,
