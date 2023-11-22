@@ -14,6 +14,13 @@ export class DocProof extends LitElement {
 			width: 100%;
 			color: #475569;
 		}
+
+		@media screen and (max-width: 768px) {
+			.social-proof {
+				flex-direction: column;
+				align-items: center;
+			}
+		}
 	`
 
 	@property()

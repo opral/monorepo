@@ -27,6 +27,10 @@ const CategoryTabs = () => {
 				name: m.marketplace_header_guides_title(),
 				href: "/c/guides",
 			},
+			{
+				name: m.marketplace_header_lix_title(),
+				href: "/c/lix",
+			},
 		]
 	}
 	return (
