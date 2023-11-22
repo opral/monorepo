@@ -11,7 +11,7 @@ export type Params = Record<string, "NonNullable<unknown>">
  */
 export const paramsType = (params: Params, isMessagesIndex: boolean) => {
 	if (Object.keys(params).length === 0) {
-		if (isMessagesIndex) return "@param {{} | undefined} params"
+		if (isMessagesIndex) return "@param {{}} params"
 		return ""
 	}
 
