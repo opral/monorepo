@@ -21,10 +21,10 @@ To work on Windows, you will need to change some package.json files `(All this i
 
 #### (Required Changes for Dev)
 1. Go to `inlang/source-code/ide-extension/package.json` and edit the `dev` property at `scripts` and change the `DEV=true node ./build.js` to `set DEV=true && node ./build.js`
-2. Go to `inlang/source-code/env-variables/package.json` and edit the `dev` property at `scripts` and change the `DEV=true npm run build` to `set DEV=true && npm run build`
+2. Go to `inlang/source-code/env-variables/package.json` and edit the `dev` property at `scripts` and change the `DEV=true pnpm run build` to `set DEV=true && pnpm run build`
 
 #### (Required Changes to Run Test)
-1. Go to `inlang/source-code/ide-extension/package.json` and edit the `test:e2e` property at `scripts` and change the `TEST=true npm run pretest && node ./dist/test.cjs` to `set TEST=true && npm run pretest && node ./dist/test.cjs`
+1. Go to `inlang/source-code/ide-extension/package.json` and edit the `test:e2e` property at `scripts` and change the `TEST=true pnpm run pretest && node ./dist/test.cjs` to `set TEST=true && pnpm run pretest && node ./dist/test.cjs`
    
 #### (Optional - Used for Prod Build Only)
 1. Go to `inlang/source-code/website/package.json` and edit the `production` property at `scripts` and change the `NODE_ENV=production tsx ./src/server/main.ts` to `set NODE_ENV=production && tsx ./src/server/main.ts`
