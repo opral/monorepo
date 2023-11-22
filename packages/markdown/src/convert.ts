@@ -46,6 +46,8 @@ export async function convert(markdown: string): Promise<string> {
 				"doc-comment": ["author", "text", "icon"],
 				"doc-feature": ["name", "icon", "image", "color", "text-color"],
 				"doc-proof": ["organisations"],
+				"doc-slider": ["items"],
+				"doc-icon": ["icon", "size"],
 				...defaultSchema.attributes,
 			},
 		})
@@ -65,16 +67,16 @@ export async function convert(markdown: string): Promise<string> {
 			a: "text-primary doc-font-medium hover:text-hover-primary doc-no-underline doc-inline-block",
 			code: "doc-px-1 doc-py-0.5 doc-bg-surface-100 doc-rounded-lg bg-surface-200 doc-my-6 doc-text-sm doc-font-mono text-surface-900",
 			pre: "doc-relative",
-			ul: "doc-list-disc doc-list-inside",
-			ol: "doc-list-decimal doc-list-inside",
-			li: "doc-space-y-3",
+			ul: "doc-list-disc doc-list-inside doc-space-y-3",
+			ol: "doc-list-decimal doc-list-inside doc-space-y-3",
+			li: "doc-list-outside",
 			table:
 				"doc-table-auto doc-w-full doc-my-6 doc-rounded-xl doc-text-left doc-max-w-[100%] doc-overflow-x-scroll",
-			thead: "doc-font-medium pb-2 doc-border-b border-surface-4 doc-text-left",
-			th: "doc-py-2 doc-font-medium doc-border-b border-surface-2",
+			thead: "doc-font-medium pb-2 doc-border-b doc-border-surface-2 doc-text-left",
+			th: "doc-py-2 doc-font-medium doc-border-b doc-border-surface-2 doc-truncate",
 			tr: "doc-py-2 doc-border-b border-surface-2",
 			td: "doc-py-2 doc-leading-7",
-			hr: "doc-my-6 doc-border-b doc-border-surface-200",
+			hr: "doc-my-6 doc-border-b border-surface-200",
 			img: "doc-mx-auto doc-my-4 doc-rounded-xl doc-border border-surface-2",
 		})
 		/* @ts-ignore */
@@ -86,7 +88,7 @@ export async function convert(markdown: string): Promise<string> {
 		})
 		/* @ts-ignore */
 		.use(rehypeRewrite, {
-			rewrite: (node) => {
+			rewrite: (node: any) => {
 				if (
 					node.tagName === "h1" ||
 					node.tagName === "h2" ||

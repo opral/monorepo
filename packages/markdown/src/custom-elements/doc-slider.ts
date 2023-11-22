@@ -10,11 +10,11 @@ export class DocSlider extends LitElement {
 	looping: boolean
 
 	@property()
-	items: string[]
+	items: string
 	constructor() {
 		super()
 
-		this.items = []
+		this.items = ""
 		this.looping = false
 		this._firstIndex = 0
 		this._offset = 0
@@ -151,17 +151,19 @@ export class DocSlider extends LitElement {
 	}
 
 	override render() {
+		const itemsArray = this.items.split(",").map((item) => item.trim()) as string[]
+
 		return html`
 			<div class="wrapper">
 				<button class="btn-prev" @click=${() => this._move("left")}>
 					<doc-icon height="40" icon="mdi:chevron-left"></doc-icon>
 				</button>
 				<div id="contents">
-					${this.items.map(
-						(item) => html`
+					${itemsArray.map(
+						(item: string) => html`
 							<article
 								@click=${() => {
-									this.popupIndex = this.items.indexOf(item)
+									this.popupIndex = itemsArray.indexOf(item)
 								}}
 							>
 								<img src="${item}" />
@@ -176,7 +178,7 @@ export class DocSlider extends LitElement {
 								this.popupIndex = -1
 							}}
 					  >
-							<img src="${this.items[this.popupIndex]}" />
+							<img src="${itemsArray[this.popupIndex]}" />
 					  </div>`
 					: undefined}
 				<button class="btn-next" @click=${() => this._move("right")}>
@@ -193,6 +195,7 @@ export class DocSlider extends LitElement {
 	 * @param {string} direction The movement direction.
 	 */
 	_move(direction: string) {
+		const itemsArray = this.items.split(",").map((item) => item.trim()) as string[]
 		const container = this.shadowRoot?.getElementById("contents")
 		const styles = getComputedStyle(this)
 		const itemMargin = parseFloat(styles.getPropertyValue("--item-margin"))
@@ -226,7 +229,7 @@ export class DocSlider extends LitElement {
 				}px)`
 			}
 		} else {
-			const itemsTotalWidth = itemTotalWidth * this.items.length
+			const itemsTotalWidth = itemTotalWidth * itemsArray.length
 			const buffer = itemsTotalWidth - container!.clientWidth
 
 			if (direction === "left") {

@@ -19,13 +19,16 @@ export default function SearchBar() {
 	let inputElement: any
 	const { q } = currentPageContext.urlParsed.search
 
-	// Make "/" focus the search input like GitHub or Google do
 	if (typeof window !== "undefined")
 		window.addEventListener("keydown", (e) => {
-			if (e.key === "/") {
+			if (
+				e.key === "/" &&
+				document.activeElement!.tagName !== "INPUT" &&
+				document.activeElement!.tagName !== "INLANG-BADGE-GENERATOR"
+			) {
 				e.preventDefault()
 				inputElement.focus()
-			}
+			} else window.removeEventListener("keydown", () => {})
 		})
 
 	return (
