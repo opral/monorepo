@@ -1,6 +1,6 @@
-import type { NodeishFilesystem, NodeishStats, FileChangeInfo } from "../NodeishFilesystemApi.js"
-import { FilesystemError } from "../errors/FilesystemError.js"
-import { normalPath, getBasename, getDirname } from "../utilities/helpers.js"
+import type { NodeishFilesystem, NodeishStats, FileChangeInfo } from "./NodeishFilesystemApi.js"
+import { FilesystemError } from "./errors/FilesystemError.js"
+import { normalPath, getBasename, getDirname } from "./utilities/helpers.js"
 
 type Inode = Uint8Array | Set<string>
 
@@ -32,6 +32,12 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 	}
 
 	return {
+		_toJSON: function () {
+			return { fsMap, fsStats }
+		},
+
+		_fromJSON: function () {},
+
 		writeFile: async function (
 			path: Parameters<NodeishFilesystem["writeFile"]>[0],
 			data: Parameters<NodeishFilesystem["writeFile"]>[1],
@@ -352,4 +358,3 @@ function newStatEntry(
 		symlinkTarget: target,
 	})
 }
-

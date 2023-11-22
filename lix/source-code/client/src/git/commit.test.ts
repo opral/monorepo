@@ -18,10 +18,11 @@ describe("main workflow", () => {
 		expect(errorHandler.mock.calls[0][0][0].code).toBe("HttpError")
 	})
 
+	const nodeishFs = createNodeishMemoryFs()
 	it("opens a repo url without error and without blocking io", async () => {
 		// fix normalization of .git
 		repository = await openRepository("https://github.com/inlang/example", {
-			nodeishFs: createNodeishMemoryFs(),
+			nodeishFs,
 		})
 	})
 
@@ -49,6 +50,9 @@ describe("main workflow", () => {
 		})
 
 		const statusPost = await repository.status({ filepath: "project.inlang.json" })
+
+		// @ts-expect-error
+		console.info(nodeishFs._toJSON().fsMap)
 
 		expect(statusPost).toBe("unmodified")
 	})

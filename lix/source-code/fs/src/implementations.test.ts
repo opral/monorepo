@@ -1,5 +1,5 @@
 import { test, expect, afterAll, describe } from "vitest"
-import type { NodeishFilesystem, FileChangeInfo } from "../NodeishFilesystemApi.js"
+import type { NodeishFilesystem, FileChangeInfo } from "./NodeishFilesystemApi.js"
 import { createNodeishMemoryFs } from "./memoryFs.js"
 
 async function wait(time: number) {
