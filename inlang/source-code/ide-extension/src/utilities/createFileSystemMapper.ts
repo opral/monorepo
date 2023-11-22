@@ -1,5 +1,4 @@
 import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
-import fs from "node:fs/promises"
 import { default as _path } from "node:path"
 
 /**
@@ -8,7 +7,7 @@ import { default as _path } from "node:path"
  * @param base uri for relative paths
  * @returns file system mapper
  */
-export function createFileSystemMapper(base: string): NodeishFilesystem {
+export function createFileSystemMapper(base: string, fs: NodeishFilesystem): NodeishFilesystem {
 	// Prevent path issue on non Unix based system normalizing the <base> before using it
 	const normalizedBase = normalizePath(base)
 	return {
@@ -60,6 +59,17 @@ export function createFileSystemMapper(base: string): NodeishFilesystem {
 				path.startsWith(normalizedBase)
 					? _path.normalize(path)
 					: _path.normalize(normalizedBase + "/" + path)
+			)
+		},
+		watch: (
+			path: Parameters<NodeishFilesystem["watch"]>[0],
+			options: Parameters<NodeishFilesystem["watch"]>[1]
+		) => {
+			return fs.watch(
+				path.startsWith(normalizedBase)
+					? _path.normalize(path)
+					: _path.normalize(normalizedBase + "/" + path),
+				options
 			)
 		},
 	}
