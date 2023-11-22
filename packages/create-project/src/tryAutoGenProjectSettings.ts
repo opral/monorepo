@@ -84,7 +84,9 @@ export async function tryAutoGenProjectSettings(args: {
 				}
 			} else if (prop === "writeFile") {
 				return () => {
-					throw new Error("Writing to the filesystem is not allowed in tryAutoGenProjectSettings")
+					console.warn(
+						"Writing to the filesystem is not allowed in tryAutoGenProjectSettings. No file has been written to the filesystem."
+					)
 				}
 			}
 			// @ts-expect-error
