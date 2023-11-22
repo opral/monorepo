@@ -9,55 +9,15 @@
 
 <br />
 
-This extension provides a seamless integration of the [Inlang](https://inlang.com) localization solution into Visual Studio Code. It allows you to translate your content directly in your IDE.
+Supercharge i18n within VS Code with powerful tools designed to streamline the translation process. Visualize, edit, and lint translated strings effortlessly using Inline Decorations & Hover Support. Extract new strings with a simple click, making localization tasks more intuitive and efficient.
 
-If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](<[https](https://github.com/inlang/monorepo/issues/new/choose)>). We are happy to help!
+[Inlang](https://inlang.com) is a powerful [open-source](https://github.com/inlang/monorepo/tree/main/inlang/source-code/ide-extension) extension for [Visual Studio Code](https://code.visualstudio.com/)
 
-# Features
+## Geting started
 
-<doc-features>
-  <doc-feature color="#E2E8F0" title="Extract messages" icon="solar:scissors-linear"></doc-feature>
-  <doc-feature color="#E2E8F0" title="Lint messages" icon="solar:magnifer-bug-outline"></doc-feature>
-  <doc-feature color="#E2E8F0" title="Inline Annotations" icon="solar:chat-square-code-outline"></doc-feature>
-</doc-features>
+### 1. Create a `project.inlang.json` in the **root** of your project
 
-… and much more as seen below
-
-## Context Tooltips
-
-See translations and edit them directly in your code. No more back-and-forth looking into the translation files themselves.
-
-<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/tooltip.gif"/>
-
-## Extract Messages (translations)
-
-Extract Messages (translations) via the `Inlang: Extract Message` code action.
-
-<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/extract.gif"/>
-
-## Message Linting
-
-Get notified about missing translations and other issues directly in your IDE.
-
-<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/lint.gif"/>
-
-## Inline Annotations
-
-See translations directly in your code. No more back-and-forth looking into the translation files themselves.
-
-<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/inline.gif"/>
-
-## Update Translations
-
-Translations from the resource files are automatically updated when you change the source text.
-
-<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/update.gif"/>
-
-# How to use
-
-## Setup
-
-1. Create a `project.inlang.json` in the **root** of your project. You can use the following template when using json files as translation files, if not, please look for other [supported resource file types](https://inlang.com/):
+You can use the following template when using json files as translation files, if not, please look for other [supported resource file types](https://inlang.com/):
 
 ```json
 {
@@ -67,23 +27,70 @@ Translations from the resource files are automatically updated when you change t
 	"sourceLanguageTag": "en",
 	// all the language tags you want to support in your project
 	"languageTags": ["en", "de"],
-	"modules": [], // add a module from: https://inlang.com/c/plugins (i18next, json, inlang message format)
+	"modules": [
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js"
+	], // or use another storage module: https://inlang.com/c/plugins (i18next, json, inlang message format)
 	"settings": {}
 }
 ```
 
-2. If you already have a `project.inlang.json`, you should continue with **installing a function syntax matcher**. There are multiple syntax matcher available like:
+### 2. Decide on a **syntax matcher**
+
+You should continue with **installing a syntax matcher**. There are multiple syntax matcher available like:
 
 - m function matcher: https://inlang.com/m/632iow21/plugin-inlang-mFunctionMatcher
 - t function matcher: https://inlang.com/m/698iow33/plugin-inlang-tFunctionMatcher
 - *if you are using the i18next module, everything is already built-in*
 
-3. ✨ Recommended: If you want to add lint rules to your experience, you can add them from: https://inlang.com/c/lint-rules
+### 3. ✨ Recommended
+
+If you want to add lint rules to your experience, you can add them from: https://inlang.com/c/lint-rules
 
 #### Requirements:
 
 - VS Code version 1.84.0 or higher.
 - Node.js version v18 or higher.
+
+## Features
+
+<doc-features>
+  <doc-feature color="#E2E8F0" title="Extract messages" icon="solar:scissors-linear"></doc-feature>
+  <doc-feature color="#E2E8F0" title="Lint messages" icon="solar:magnifer-bug-outline"></doc-feature>
+  <doc-feature color="#E2E8F0" title="Inline Annotations" icon="solar:chat-square-code-outline"></doc-feature>
+</doc-features>
+
+… and much more as seen below
+
+### Context Tooltips
+
+See translations and edit them directly in your code. No more back-and-forth looking into the translation files themselves.
+
+<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/tooltip.gif"/>
+
+### Extract Messages (translations)
+
+Extract Messages (translations) via the `Inlang: Extract Message` code action.
+
+<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/extract.gif"/>
+
+### Message Linting
+
+Get notified about missing translations and other issues directly in your IDE.
+
+<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/lint.gif"/>
+
+### Inline Annotations
+
+See translations directly in your code. No more back-and-forth looking into the translation files themselves.
+
+<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/inline.gif"/>
+
+### Update Translations
+
+Translations from the resource files are automatically updated when you change the source text.
+
+<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/update.gif"/>
+
 
 ## Usage
 
@@ -105,3 +112,7 @@ You can configure the extension to your needs by defining the `ideExtension` pro
 
 For this example, the extension parses strings with a `t` translation function & gives the according extract options `{t("messageID")}` & `t("messageID")`.
 You can fully customize this behavior.
+
+## Support: Join our Discord!
+
+If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](<[https](https://github.com/inlang/monorepo/issues/new/choose)>). We are happy to help!

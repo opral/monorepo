@@ -4,6 +4,7 @@ import { getSetting, updateSetting } from "./settings/index.js"
 import { tryAutoGenProjectSettings } from "@inlang/create-project"
 import { createFileSystemMapper } from "./createFileSystemMapper.js"
 import { CONFIGURATION } from "../configuration.js"
+import fs from "node:fs/promises"
 
 /**
  * Creates an Inlang config file if it doesn't already exist and the user approves it.
@@ -18,7 +19,7 @@ export const createInlangConfigFile = async (args: { workspaceFolder: vscode.Wor
 	}
 
 	// Try to auto generate project settings
-	const nodeishFs = createFileSystemMapper(args.workspaceFolder.uri.fsPath)
+	const nodeishFs = createFileSystemMapper(args.workspaceFolder.uri.fsPath, fs)
 
 	// Check if prompt is disabled
 	if (await isDisabledConfigFileCreation()) return
