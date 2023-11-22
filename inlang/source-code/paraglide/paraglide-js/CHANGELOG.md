@@ -1,11 +1,11 @@
 # @inlang/paraglide-js
 
 ## 1.0.0-prerelease.10
-Add an optional options argument to message function, to allow forcing a locale, regardless of the current language tag.
+Add an optional options argument to message functions, to allow forcing a languageTag regardless of which languageTag is currently set.
 
 ```ts
 import * as m from "./paraglide/messages"
-const msg = m.hello({name: "John"}, { locale: "de" })
+const msg = m.hello({ name: "John" }, { languageTag: "de" })
 ```
 
 ##  1.0.0-prerelease.9
