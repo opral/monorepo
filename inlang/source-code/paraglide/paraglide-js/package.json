@@ -27,7 +27,8 @@
 		"paraglide-js": "./dist/bin.js"
 	},
 	"files": [
-		"./dist"
+		"./dist",
+		"./bin"
 	],
 	"scripts": {
 		"dev": "node ./build.js",
