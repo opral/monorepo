@@ -1092,9 +1092,6 @@ importers:
       '@inlang/paraglide-js-adapter-unplugin':
         specifier: '*'
         version: link:../paraglide-js-adapter-unplugin
-      vite:
-        specifier: ^5.0.0 || ^4.0.0
-        version: 4.4.9(@types/node@20.9.3)(terser@5.19.4)
     devDependencies:
       '@types/node':
         specifier: 20.9.3
@@ -1105,6 +1102,21 @@ importers:
       vitest:
         specifier: 0.34.3
         version: 0.34.3
+
+  inlang/source-code/paraglide/paraglide-js-adapter-vite/tests/basic:
+    devDependencies:
+      '@inlang/paraglide-js':
+        specifier: workspace:*
+        version: link:../../../paraglide-js
+      '@inlang/paraglide-js-adapter-vite':
+        specifier: workspace:*
+        version: link:../..
+      typescript:
+        specifier: ^4.9.3
+        version: 4.9.5
+      vite:
+        specifier: ^4.2.0
+        version: 4.4.9(@types/node@20.9.3)(terser@5.19.4)
 
   inlang/source-code/paraglide/paraglide-js-adapter-webpack:
     dependencies:
@@ -13742,6 +13754,12 @@ packages:
   /typed-rpc@3.0.0:
     resolution: {integrity: sha512-SaejFNKERSBKHLgNybZ+bUylQjqtbLU2Y4DjpGLIzibruTxzzWq0RLw2CYI2HHtGs3k0Q20y1L+ogh8de3Rahg==}
     dev: false
+
+  /typescript@4.9.5:
+    resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
+    engines: {node: '>=4.2.0'}
+    hasBin: true
+    dev: true
 
   /typescript@5.1.3:
     resolution: {integrity: sha512-XH627E9vkeqhlZFQuL+UsyAXEnibT0kWR2FWONlr4sTjvxyJYnyefgrkyECLzM5NenmKzRAy2rR/OlYLA1HkZw==}

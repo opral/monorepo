@@ -4,17 +4,14 @@ import { exec } from "node:child_process"
 import path from "node:path"
 import fs from "node:fs/promises"
 
-type UserConfig = {
+export type UserConfig = {
 	project: string
 	outdir: string
-	timeout?: number
-	onInit?: boolean
 }
 
 export const paraglide = createUnplugin((config: UserConfig) => {
 	const options = {
 		silent: false,
-		onInit: true,
 		...config,
 	}
 
