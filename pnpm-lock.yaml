@@ -1025,6 +1025,9 @@ importers:
       '@inlang/env-variables':
         specifier: workspace:*
         version: link:../../env-variables
+      '@lix-js/fs':
+        specifier: '*'
+        version: link:../../../../lix/source-code/fs
       '@rollup/plugin-terser':
         specifier: 0.4.3
         version: 0.4.3(rollup@3.29.1)
