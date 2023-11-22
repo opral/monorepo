@@ -25,7 +25,10 @@ jobs:
           node-version: 18
 
       - name: Setup npmrc
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_PUBLISH_TOKEN }}" > .npmrc
+        run: echo -e "//registry.npmjs.org/:_authToken=${{ secrets.NPM_PUBLISH_TOKEN }}\ngit-checks=false" > .npmrc
+      
+      - name: Disable Gitchecks
+        run: echo "git-checks=false" > .npmrn
 
       - name: install dependencies
         run: pnpm install
