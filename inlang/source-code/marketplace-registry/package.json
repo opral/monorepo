@@ -2,6 +2,7 @@
 	"name": "@inlang/marketplace-registry",
 	"type": "module",
 	"version": "1.5.0",
+	"private": true,
 	"exports": {
 		".": "./dist/index.js",
 		"./registry.json": "./registry.json"
