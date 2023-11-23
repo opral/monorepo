@@ -1,0 +1,21 @@
+{
+	"id": "library.QuiiBz.nextinternational",
+	"icon": "https://github.com/QuiiBz/next-international/blob/main/assets/logo-black.png?raw=true",
+	"gallery": [
+		"https://github.com/QuiiBz/next-international/blob/main/assets/logo-black.png?raw=true"
+	],
+	"displayName": {
+		"en": "next-international"
+	},
+	"description": {
+		"en": "Type-safe internationalization (i18n) for Next.js"
+	},
+	"readme": {
+		"en": "./inlang/external-projects/next-international/README.md"
+	},
+	"keywords": ["libraries", "nextjs", "next", "javascript", "developer", "i18n"],
+	"publisherName": "QuiiBz",
+	"publisherIcon": "https://avatars.githubusercontent.com/u/43268759?v=4",
+	"website": "https://next-international.vercel.app/?ref=inlang.com",
+	"license": "MIT License"
+}
