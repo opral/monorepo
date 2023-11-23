@@ -42,8 +42,8 @@
         "test": "vitest run --passWithNoTests"
     },
     "dependencies": {
-        "@inlang/paraglide-js": "*",
-        "@inlang/sdk": "*",
+        "@inlang/paraglide-js": "workspace:*",
+        "@inlang/sdk": "workspace:*",
         "unplugin": "1.5.1"
     },
     "devDependencies": {
