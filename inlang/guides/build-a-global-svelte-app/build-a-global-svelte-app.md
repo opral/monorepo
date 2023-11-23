@@ -61,7 +61,7 @@ In the beginning the folder is empty. There two ways of adding messages:
 
 ### Add messages manually
 
-- Go to the `messages` directory and create a `en.json` file in it. (Make sure the naming is according to the BCP-47 languageTags in the `inlang.project.json`)
+- Go to the `messages` directory and create a `en.json` file in it. (Make sure the naming is according to the BCP-47 languageTags in the `project.inlang.json`)
 
 - Add a message in the file.
 ```json
