@@ -106,11 +106,10 @@ const _import: ImportFunction = async (name) =>
 // ------------------------------------------------------------------------------------------------
 
 /**
- * Dear Developers, 
- * 
- * Inlang projects (folders) are not like .vscode, .git, or .github folders.
- * Inlang projects should be treated like regular files, to be renamed and moved
- * around. 
+ * Dear Developers,
+ *
+ * Inlang projects (folders) are not like .vscode, .git, or .github folders. Treat em
+ * like files: they can be renamed and moved around.
  */
 it("should throw if a project (path) does not have a name", async () => {
 	const fs = createNodeishMemoryFs()
@@ -123,7 +122,6 @@ it("should throw if a project (path) does not have a name", async () => {
 	)
 	expect(project.error).toBeInstanceOf(LoadProjectInvalidArgument)
 })
-
 
 it("should throw if a project path does not end with .inlang", async () => {
 	const fs = createNodeishMemoryFs()
