@@ -48,7 +48,6 @@ export const compile = (args: {
 		// boilerplate files
 		".prettierignore": ignoreDirectory,
 		".gitignore": ignoreDirectory,
-		".eslintignore": ignoreDirectory,
 		// resources
 		// (messages/en.js)
 		// (messages/de.js)
@@ -57,6 +56,7 @@ export const compile = (args: {
 			Object.entries(resources).map(([languageTag, content]) => [
 				`messages/${languageTag}.js`,
 				`
+/* eslint-disable */
 /** 
 * This file contains language specific message functions for tree-shaking. 
 * 
@@ -70,6 +70,7 @@ export const compile = (args: {
 		),
 		// message index file
 		"messages.js": `
+/* eslint-disable */
 import { languageTag } from "./runtime.js"
 ${Object.keys(resources)
 	.map(
@@ -81,6 +82,7 @@ ${Object.keys(resources)
 ${compiledMessages.map((message) => message.index).join("\n\n")}
 `,
 		"runtime.js": `
+/* eslint-disable */
 /** @type {((tag: AvailableLanguageTag) => void) | undefined} */ 
 let _onSetLanguageTag
 
