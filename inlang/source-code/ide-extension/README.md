@@ -1,9 +1,6 @@
 <div>
-    <p align="center">
-        <img width="100" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/source-code/ide-extension/assets/icon-vscode-marketplace.png"/>
-    </p>
-	<h1 align="center">inlang – Supercharge i18n in VS Code</h1>
-	<p align="center">
+	<h1>inlang – Supercharge i18n in VS Code</h1>
+	<p>
 		<br>
 		<a href='https://inlang.com/c/apps' target="_blank">🕹️ Apps</a>
 		·
@@ -15,11 +12,14 @@
 		·
 		<a href='https://github.com/orgs/inlang/projects/39' target="_blank">🗺️ Roadmap</a>
 	</p>
+	<br />
 </div>
 
-> Supercharge i18n within VS Code with powerful tools designed to streamline the translation process. Visualize, edit, and lint translated strings effortlessly using Inline Decorations & Hover Support. Extract new strings with a simple click, making localization tasks more intuitive and efficient.
+✅ Supercharge i18n within VS Code with powerful tools designed to streamline the translation process. 
 
-[Inlang](https://inlang.com) is a powerful [open-source](https://github.com/inlang/monorepo/tree/main/inlang/source-code/ide-extension) extension for [Visual Studio Code](https://code.visualstudio.com/)
+✅ Visualize, edit, and lint translated strings effortlessly using Inline Decorations & Hover Support. 
+
+✅ Extract new strings with a simple click, making localization tasks more intuitive and efficient.
 
 ## Geting started
 

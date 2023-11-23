@@ -10,7 +10,7 @@
 		"url": "https://github.com/inlang/monorepo.git"
 	},
 	"icon": "assets/icon-vscode-marketplace.png",
-	"version": "1.18.0",
+	"version": "1.20.0",
 	"engines": {
 		"vscode": "^1.82.0"
 	},
@@ -68,7 +68,7 @@
 		"package": "pnpm vsce package --no-dependencies",
 		"publish": "pnpm vsce publish --no-dependencies",
 		"vscode:prepublish": "npm run esbuild-base -- --minify",
-		"esbuild-base": "esbuild ./src/main.ts --bundle --outfile=dist/main.js --external:vscode --format=cjs --platform=node",
+		"esbuild-base": "esbuild ./src/main.ts --bundle --outfile=dist/main.cjs --external:vscode --format=cjs --platform=node",
 		"---- TEST ----------------------------------------------------------": "",
 		"pretest": "node ./build.js",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",

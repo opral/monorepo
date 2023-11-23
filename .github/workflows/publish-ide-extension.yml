@@ -52,7 +52,7 @@ jobs:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
       - name: Publish to VSCode Marketplace
-        run: pnpm --filter vs-code-extension publish -p ${{secrets.VSCODE_MARKETPLACE_TOKEN}} --no-git-checks
+        run: pnpm --filter vs-code-extension run publish -p ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
         working-directory: ./inlang/source-code/ide-extension
         env:
           VSCE_TOKEN: ${{secrets.VSCODE_MARKETPLACE_TOKEN}}

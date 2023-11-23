@@ -1,6 +1,6 @@
 <!-- ![Paraglide JS header image](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglide-js-header.png) -->
 
-[<img src="https://cdn.loom.com/sessions/thumbnails/a8365ec4fa2c4f6bbbf4370cf22dd7f6-with-play.gif" width="100%" /> Watch the pre-release demo of Paraglide JS](https://www.loom.com/share/a8365ec4fa2c4f6bbbf4370cf22dd7f6?sid=6bbd43bb-74aa-41a0-bbdd-096432957e00)
+[<img src="https://cdn.loom.com/sessions/thumbnails/a8365ec4fa2c4f6bbbf4370cf22dd7f6-with-play.gif" width="100%" /> Watch the pre-release demo of Paraglide JS](https://www.youtube.com/watch?v=-YES3CCAG90)
 
 Attention: The following features are missing and will be added in the upcoming weeks: 
 
@@ -89,6 +89,15 @@ Paraglide JS exports four variables and functions via "@inlang/paraglide-js":
 | `availableLanguageTags` | All language tags of the current project |
 | `languageTag()` | Returns the language tag of the current user |
 | `setLanguageTag()` | Sets the language tag of the current user |
+
+## Forcing a language
+It's common that you need to force a message to be in a certain language, especially on the server. You can do this by passing an options object to the message function as a 
+second parameter.
+
+```js
+import * as m from "./paraglide-js/messages"
+const msg = m.hello({ name: "Samuel" }, { languageTag: "de" }) // Hallo Samuel!
+```
 
 # Playground
 
