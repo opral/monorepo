@@ -70,13 +70,13 @@ export async function tryAutoGenProjectSettings(args: {
 	 * }
 	 */
 
-	const settingsPath = normalizePath(args.basePath + "/project.inlang.json")
+	const projectPath = normalizePath(args.basePath + "/project.inlang")
 
 	const mockFs = new Proxy(args.nodeishFs, {
 		get: (target, prop) => {
 			if (prop === "readFile") {
 				return (...args: Parameters<ReturnType<typeof createNodeishMemoryFs>["readFile"]>) => {
-					if (args[0] === settingsPath) {
+					if (args[0] === projectPath + "/settings.json") {
 						return JSON.stringify(result)
 					}
 					// @ts-expect-error
@@ -96,7 +96,7 @@ export async function tryAutoGenProjectSettings(args: {
 
 	const { data: project } = await tryCatch(() =>
 		loadProject({
-			settingsFilePath: settingsPath,
+			settingsFilePath: projectPath,
 			nodeishFs: mockFs,
 		})
 	)
