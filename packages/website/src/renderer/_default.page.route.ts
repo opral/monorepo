@@ -21,7 +21,7 @@ export function onBeforeRoute(pageContext: PageContextRenderer) {
  *   i18nRouting("/about") // { languageTag: "en", url: "/about" }
  *   i18nRouting("/") // { languageTag: "en", url: "/" }
  */
-function i18nRouting(url: string) {
+export function i18nRouting(url: string) {
 	const urlPaths = url.split("/")
 
 	// first path of route is either / or a language tag

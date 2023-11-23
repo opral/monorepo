@@ -1,0 +1,31 @@
+{
+	"id": "app.lokalise.i18nally",
+	"icon": "https://avatars.githubusercontent.com/u/14294501?s=200&v=4",
+	"gallery": [
+		"https://github.com/lokalise/i18n-ally/blob/main/screenshots/full-logo-new.png?raw=true"
+	],
+	"displayName": {
+		"en": "i18n ally"
+	},
+	"description": {
+		"en": "🌍 All in one i18n extension for VS Code"
+	},
+	"readme": {
+		"en": "./inlang/external-projects/i18n-ally/README.md"
+	},
+	"keywords": [
+		"apps",
+		"i18n-ally",
+		"i18n ally",
+		"vs-code",
+		"ide-extension",
+		"javascript",
+		"developer",
+		"i18n",
+		"external"
+	],
+	"publisherName": "lokalise",
+	"publisherIcon": "https://avatars.githubusercontent.com/u/14294501?s=200&v=4",
+	"website": "https://marketplace.visualstudio.com/items?itemName=lokalise.i18n-ally",
+	"license": "MIT License"
+}

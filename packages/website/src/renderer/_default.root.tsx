@@ -53,11 +53,13 @@ function ParaglideJsProvider(props: { children: JSXElement }) {
 		onSetLanguageTag((newLanguageTag: LanguageTag) => {
 			if (pathIncludesLanguageTag) {
 				//replace old languageTag with new one
-				window.location.pathname = window.location.pathname.replace(
-					currentPageContext.languageTag,
-					// if new is source languageTag remove the tag
-					newLanguageTag === sourceLanguageTag ? "" : newLanguageTag
-				)
+				window.location.pathname = window.location.pathname
+					.replace(
+						currentPageContext.languageTag,
+						// if new is source languageTag remove the tag
+						newLanguageTag === sourceLanguageTag ? "" : newLanguageTag
+					)
+					.replace("//", "/")
 			} else {
 				window.location.pathname = "/" + newLanguageTag + window.location.pathname
 			}

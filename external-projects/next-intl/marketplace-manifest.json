@@ -1,0 +1,28 @@
+{
+	"id": "library.amannn.nextintl",
+	"icon": "https://emojis.wiki/thumbs/emojis/globe-with-meridians.webp",
+	"gallery": ["https://github.com/amannn/next-intl/blob/main/media/logo.png?raw=true"],
+	"displayName": {
+		"en": "next-intl"
+	},
+	"description": {
+		"en": "Internationalization (i18n) for Next.js that gets out of your way."
+	},
+	"readme": {
+		"en": "./inlang/external-projects/next-intl/README.md"
+	},
+	"keywords": [
+		"libraries",
+		"next-intl",
+		"nextjs",
+		"next",
+		"react",
+		"developer",
+		"i18n",
+		"external"
+	],
+	"publisherName": "amannn",
+	"publisherIcon": "https://avatars.githubusercontent.com/u/4038316?v=4",
+	"website": "https://next-intl-docs.vercel.app/?ref=inlang.com",
+	"license": "MIT License"
+}
