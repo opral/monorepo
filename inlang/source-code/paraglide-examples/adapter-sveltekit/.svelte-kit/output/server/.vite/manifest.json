@@ -1,0 +1,65 @@
+{
+  "../../../../node_modules/.pnpm/@sveltejs+kit@1.27.6_svelte@4.0.5_vite@4.4.9/node_modules/@sveltejs/kit/src/runtime/components/error.svelte": {
+    "file": "entries/fallbacks/error.svelte.js",
+    "imports": [
+      "_ssr.js",
+      "_stores.js"
+    ],
+    "isEntry": true,
+    "src": "../../../../node_modules/.pnpm/@sveltejs+kit@1.27.6_svelte@4.0.5_vite@4.4.9/node_modules/@sveltejs/kit/src/runtime/components/error.svelte"
+  },
+  "../../../../node_modules/.pnpm/@sveltejs+kit@1.27.6_svelte@4.0.5_vite@4.4.9/node_modules/@sveltejs/kit/src/runtime/server/index.js": {
+    "file": "index.js",
+    "imports": [
+      "_internal.js",
+      "_ssr.js"
+    ],
+    "isEntry": true,
+    "src": "../../../../node_modules/.pnpm/@sveltejs+kit@1.27.6_svelte@4.0.5_vite@4.4.9/node_modules/@sveltejs/kit/src/runtime/server/index.js"
+  },
+  ".svelte-kit/generated/server/internal.js": {
+    "file": "internal.js",
+    "imports": [
+      "_internal.js"
+    ],
+    "isEntry": true,
+    "src": ".svelte-kit/generated/server/internal.js"
+  },
+  "_internal.js": {
+    "file": "chunks/internal.js",
+    "imports": [
+      "_ssr.js"
+    ]
+  },
+  "_runtime.js": {
+    "file": "chunks/runtime.js"
+  },
+  "_ssr.js": {
+    "file": "chunks/ssr.js"
+  },
+  "_stores.js": {
+    "file": "chunks/stores.js",
+    "imports": [
+      "_ssr.js"
+    ]
+  },
+  "src/routes/+layout.svelte": {
+    "file": "entries/pages/_layout.svelte.js",
+    "imports": [
+      "_ssr.js",
+      "_runtime.js",
+      "_stores.js"
+    ],
+    "isEntry": true,
+    "src": "src/routes/+layout.svelte"
+  },
+  "src/routes/[lang]/+page.svelte": {
+    "file": "entries/pages/_lang_/_page.svelte.js",
+    "imports": [
+      "_ssr.js",
+      "_runtime.js"
+    ],
+    "isEntry": true,
+    "src": "src/routes/[lang]/+page.svelte"
+  }
+}
