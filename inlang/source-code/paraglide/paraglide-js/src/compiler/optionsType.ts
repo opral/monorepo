@@ -1,6 +1,6 @@
 export const optionsType = (args: { languageTags: Iterable<string> }) => {
 	return `@param {{ languageTag?: ${
-		Array.from(args.languageTags).map(quote).join(" | ") ?? "undefined"
+		[...args.languageTags].map(quote).join(" | ") ?? "undefined"
 	} }} options`
 }
 
