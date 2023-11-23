@@ -59,6 +59,13 @@ You can customize the `compile` script to your needs. For example, you can add a
 }
 ```
 
+### 4. Run the `compile` script
+
+Running the `compile` script will generate a `src/paraglide` folder. This folder contains all the code that you need to use paraglide-js. 
+Throughout this guide, you will see imports from `./paraglide/*`. These are all to this folder.
+
+> Tip: If you are using a bundler, you can set up an alias to `./src/paraglide` to make the imports shorter. We recommend `$paraglide/*`
+
 # Usage
 
 Messages are imported as a namespace and are therefore not different from other i18n libraries. They can be used as follows:
@@ -81,7 +88,7 @@ setLanguageTag("de")
 
 m.loginHeader({ name: "Samuel" }) // Hallo Samuel, bitte melde dich an, um fortzufahren.  
 ```
-Paraglide JS exports four variables and functions via "@inlang/paraglide-js":
+Paraglide JS exports four variables and functions via `./paraglide-js/runtime`:
 
 | Variable | Description |
 | --- | --- |
@@ -90,7 +97,7 @@ Paraglide JS exports four variables and functions via "@inlang/paraglide-js":
 | `languageTag()` | Returns the language tag of the current user |
 | `setLanguageTag()` | Sets the language tag of the current user |
 
-## Forcing a language
+## Forcing a language
 It's common that you need to force a message to be in a certain language, especially on the server. You can do this by passing an options object to the message function as a 
 second parameter.
 
@@ -133,10 +140,10 @@ The compiler loads an inlang project and compiles the messages into tree-shakabl
 **Input**
 ```js
 // messages/en.json
-
-hello: "Hello {name}!"
-
-loginButton: "Login"
+{
+  "hello": "Hello {name}!",
+  "loginButton": "Login"
+}
 ```
 
 **Output**
