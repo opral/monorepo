@@ -26,7 +26,7 @@ import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsoluteP
 import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
-import { maybeMigrateToDirectory } from "./migrations/maybeMigrateToDirectory.js"
+import { migrateToDirectory } from "./migrations/migrateToDirectory.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -46,10 +46,13 @@ export const loadProject = async (args: {
 	_import?: ImportFunction
 	_capture?: (id: string, props: Record<string, unknown>) => void
 }): Promise<InlangProject> => {
+	let projectPath = normalizePath(args.settingsFilePath)
+
 	// -- validation --------------------------------------------------------
-	//! the only place where throwing is acceptable because the project
-	//! won't even be loaded. do not throw anywhere else. otherwise, apps
-	//! can't handle errors gracefully.
+	// the only place where throwing is acceptable because the project
+	// won't even be loaded. do not throw anywhere else. otherwise, apps
+	// can't handle errors gracefully.
+
 	if (!isAbsolutePath(args.settingsFilePath)) {
 		throw new LoadProjectInvalidArgument(
 			`Expected an absolute path but received "${args.settingsFilePath}".`,
@@ -57,16 +60,31 @@ export const loadProject = async (args: {
 		)
 	}
 
-	const settingsFilePath = normalizePath(args.settingsFilePath)
+	// -- migrate if outdated ------------------------------------------------
 
-	// -- migrate -----------------------------------------------------------
-	await maybeMigrateToDirectory({ fs: args.nodeishFs, projectPath: settingsFilePath })
+	// remove this conditional in January 2024
+	if (args.settingsFilePath.endsWith("project.inlang.json")) {
+		console.warn(
+			"The project.inlang.json file is deprecated. Please follow the instructions in the README to migrate to project directories."
+		)
+		await migrateToDirectory({ fs: args.nodeishFs, settingsFilePath: projectPath })
+		// remove the .json to get the new path
+		// ./project.inlang.json -> ./project.inlang
+		projectPath = projectPath.replace(/\.json$/, "")
+	} else {
+		if (/[^\\/]+\.inlang$/.test(projectPath) === false) {
+			throw new LoadProjectInvalidArgument(
+				`Expected a path ending in "{name}.inlang" but received "${projectPath}".\n\nValid examples: \n- "/path/to/micky-mouse.inlang"\n- "/path/to/green-elephant.inlang`,
+				{ argument: "projectPath" }
+			)
+		}
+	}
 
 	// -- load project ------------------------------------------------------
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
 		const nodeishFs = createNodeishFsWithAbsolutePaths({
-			settingsFilePath,
+			projectPath,
 			nodeishFs: args.nodeishFs,
 		})
 
@@ -74,7 +92,7 @@ export const loadProject = async (args: {
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
 		createEffect(() => {
-			loadSettings({ settingsFilePath, nodeishFs })
+			loadSettings({ settingsFilePath: projectPath + "/settings.json", nodeishFs })
 				.then((settings) => {
 					setSettings(settings)
 					// rename settings to get a convenient access to the data in Posthog

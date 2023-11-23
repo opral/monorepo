@@ -105,6 +105,47 @@ const _import: ImportFunction = async (name) =>
 
 // ------------------------------------------------------------------------------------------------
 
+/**
+ * Dear Developers, 
+ * 
+ * Inlang projects (folders) are not like .vscode, .git, or .github folders.
+ * Inlang projects should be treated like regular files, to be renamed and moved
+ * around. 
+ */
+it("should throw if a project (path) does not have a name", async () => {
+	const fs = createNodeishMemoryFs()
+	const project = await tryCatch(() =>
+		loadProject({
+			settingsFilePath: "/source-code/.inlang",
+			nodeishFs: fs,
+			_import,
+		})
+	)
+	expect(project.error).toBeInstanceOf(LoadProjectInvalidArgument)
+})
+
+
+it("should throw if a project path does not end with .inlang", async () => {
+	const fs = createNodeishMemoryFs()
+
+	const invalidPaths = [
+		"/source-code/frontend.inlang/settings",
+		"/source-code/frontend.inlang/settings.json",
+		"/source-code/frontend.inlang.md",
+	]
+
+	for (const invalidPath of invalidPaths) {
+		const project = await tryCatch(() =>
+			loadProject({
+				settingsFilePath: invalidPath,
+				nodeishFs: fs,
+				_import,
+			})
+		)
+		expect(project.error).toBeInstanceOf(LoadProjectInvalidArgument)
+	}
+})
+
 describe("initialization", () => {
 	it("should throw if settingsFilePath is not an absolute path", async () => {
 		const fs = createNodeishMemoryFs()
@@ -143,7 +184,7 @@ describe("initialization", () => {
 			fs.mkdir("/user/project", { recursive: true })
 
 			const project = await loadProject({
-				settingsFilePath: "/user/project/test.json",
+				settingsFilePath: "/user/non-existend-project.inlang",
 				nodeishFs: fs,
 				_import,
 			})

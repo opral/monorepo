@@ -6,12 +6,12 @@ it("throws an error if settingsFilePath is not an absolute path", () => {
 	const relativePath = "relative/path"
 
 	expect(() =>
-		createNodeishFsWithAbsolutePaths({ settingsFilePath: relativePath, nodeishFs: {} as any })
+		createNodeishFsWithAbsolutePaths({ projectPath: relativePath, nodeishFs: {} as any })
 	).toThrow()
 })
 
 it("intercepts paths correctly for readFile", async () => {
-	const settingsFilePath = `/Users/samuel/Documents/paraglide/example/project.inlang.json`
+	const projectPath = `/Users/samuel/Documents/paraglide/example/project.inlang`
 
 	const filePaths = [
 		["file.txt", `/Users/samuel/Documents/paraglide/example/file.txt`],
@@ -32,7 +32,7 @@ it("intercepts paths correctly for readFile", async () => {
 	} satisfies Record<keyof NodeishFilesystemSubset, any>
 
 	const interceptedFs = createNodeishFsWithAbsolutePaths({
-		settingsFilePath,
+		projectPath,
 		nodeishFs: mockNodeishFs,
 	})
 
