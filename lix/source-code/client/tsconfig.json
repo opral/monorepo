@@ -1,8 +1,11 @@
 {
 	"extends": "../tsconfig.base.json",
 	"include": ["src/**/*.ts"],
-	"exclude": ["src/http-client.js"],
+	"extensionsToTreatAsEsm": [".ts", ".tsx", ".mts", "js"],
+	"exclude": [],
 	"compilerOptions": {
+		"allowImportingTsExtensions": true,
+		"emitDeclarationOnly": true,
 		"lib": ["ESNext", "DOM"],
 		"outDir": "./dist",
 		"rootDir": "./src"

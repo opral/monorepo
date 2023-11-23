@@ -1,6 +1,6 @@
 import { test, expect, afterAll, describe } from "vitest"
-import type { NodeishFilesystem, FileChangeInfo } from "./NodeishFilesystemApi.js"
-import { createNodeishMemoryFs } from "./memoryFs.js"
+import type { NodeishFilesystem, FileChangeInfo } from "./NodeishFilesystemApi.ts"
+import { createNodeishMemoryFs, toSnapshot, fromSnapshot } from "./memoryFs.ts"
 
 async function wait(time: number) {
 	await new Promise((resolve) =>
@@ -98,6 +98,20 @@ const runFsTestSuite = async (
 		).toEqual(textInFirstFile)
 
 		expect(await fs.readFile(`${tempDir}/file2`, { encoding: "utf-8" })).toEqual(textInSecondFile)
+	})
+
+	test.skipIf(isNodeFs)("snapshotting", async () => {
+		await fs.writeFile(`${tempDir}/home/user1/documents/file1`, textInFirstFile)
+		await fs.writeFile(`${tempDir}/file2`, textInSecondFile)
+
+		const snapshot = JSON.parse(JSON.stringify(toSnapshot(fs)))
+
+		const sanpFs = createNodeishMemoryFs()
+		fromSnapshot(sanpFs, snapshot)
+
+		const snapshot2 = JSON.parse(JSON.stringify(toSnapshot(sanpFs)))
+
+		expect(snapshot).toStrictEqual(snapshot2)
 	})
 
 	test.skipIf(isNodeFs)("watch", async () => {
@@ -276,6 +290,13 @@ const runFsTestSuite = async (
 
 		test("mkdir", async () => {
 			await expect(async () => await fs.mkdir(`${tempDir}/home/dne/dne2`)).rejects.toThrow(/ENOENT/)
+		})
+
+		test.skipIf(isNodeFs)("write empty File", async () => {
+			// @ts-expect-error
+			await expect(async () => await fs.writeFile(`${tempDir}/file3`, undefined)).rejects.toThrow(
+				'The "data" argument must be of type string/Uint8Array'
+			)
 		})
 
 		test("writeFile", async () => {

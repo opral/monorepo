@@ -1,59 +1,70 @@
 import { describe, it, expect, vi } from "vitest"
-import { openRepository, createNodeishMemoryFs } from "../index.js"
+import { openRepository } from "../index.ts"
+import { createNodeishMemoryFs, toSnapshot, fromSnapshot } from "@lix-js/fs/src/memoryFs.ts" //
+import { readFileSync } from "node:fs"
+describe("main workflow", async () => {
+	const fs = createNodeishMemoryFs()
 
-describe("main workflow", () => {
-	let repository: Awaited<ReturnType<typeof openRepository>>
+	const snapshot = JSON.parse(readFileSync("./mocks/example-repo.json", { encoding: "utf-8" }))
+	fromSnapshot(fs, snapshot)
 
-	it("allows to subscribe to errors", async () => {
-		const errorHandler = vi.fn()
-		repository = await openRepository("https://github.com/inlang/examplX", {
-			nodeishFs: createNodeishMemoryFs(),
-		})
+	const repository: Awaited<ReturnType<typeof openRepository>> = await openRepository(
+		"https://github.com/inlang/example",
+		{
+			nodeishFs: fs,
+		}
+	)
 
-		repository.errors.subscribe(errorHandler)
+	// to create a new base snapshot:
+	// writeFileSync("./mocks/example-repo.json", JSON.stringify(toSnapshot(repository.nodeishFs), undefined, 4))
 
-		await new Promise((resolve) => setTimeout(resolve, 1000))
-
-		expect(errorHandler.mock.calls.length).toBe(1)
-		expect(errorHandler.mock.calls[0][0][0].code).toBe("HttpError")
-	})
-
-	const nodeishFs = createNodeishMemoryFs()
-	it("opens a repo url without error and without blocking io", async () => {
-		// fix normalization of .git
-		repository = await openRepository("https://github.com/inlang/example", {
-			nodeishFs,
-		})
-	})
-
-	let fileContent = ""
-	it("file is lazy fetched upon first access", async () => {
-		fileContent = await repository.nodeishFs.readFile("./project.inlang.json", {
+	async function testCommit(commitFun: (arg: any) => void) {
+		let fileContent = ""
+		fileContent = await repository.nodeishFs.readFile("./README.md", {
 			encoding: "utf-8",
 		})
-	})
 
-	it("modifying the file", async () => {
-		fileContent += "\n// bar"
-		await repository.nodeishFs.writeFile("./project.inlang.json", fileContent)
-	})
-
-	it("can commit local modifications to the repo", async () => {
-		const statusPre = await repository.status({ filepath: "project.inlang.json" })
+		fileContent += "\n// foo"
+		await repository.nodeishFs.writeFile("./README.md", fileContent)
+		const statusPre = await repository.status({ filepath: "README.md" })
 
 		expect(statusPre).toBe("*modified")
 
-		await repository.add({ filepath: "project.inlang.json" })
-		await repository.commit({
+		await repository.add({ filepath: "README.md" })
+		await commitFun({
+			fs,
+			dir: "/",
 			author: { name: "tests", email: "test@inlang.dev" },
 			message: "test changes commit",
 		})
 
-		const statusPost = await repository.status({ filepath: "project.inlang.json" })
-
-		// @ts-expect-error
-		console.info(nodeishFs._toJSON().fsMap)
+		const statusPost = await repository.status({ filepath: "README.md" })
 
 		expect(statusPost).toBe("unmodified")
+
+		fileContent += "\n// bar"
+		await repository.nodeishFs.writeFile("./README.md", fileContent)
+
+		await repository.add({ filepath: "README.md" })
+		await commitFun({
+			fs,
+			dir: "/",
+			author: { name: "tests", email: "test@inlang.dev" },
+			message: "test changes commit",
+		})
+
+		return toSnapshot(repository.nodeishFs)
+	}
+
+	it("coustom committed tree is identical to isomorphic gic", async () => {
+		vi.useFakeTimers()
+		const snapA = await testCommit(repository.commit)
+
+		fromSnapshot(fs, snapshot)
+
+		const snapB = await testCommit(repository._isoGit.commit)
+
+		expect(snapA).toStrictEqual(snapB)
+		vi.useRealTimers()
 	})
 })

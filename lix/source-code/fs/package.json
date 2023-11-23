@@ -6,8 +6,10 @@
 		"access": "public"
 	},
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/index.js",
+		"./src/*.ts": "./src/*.ts"
 	},
+	"types": "./dist/index.d.ts",
 	"files": [
 		"./dist",
 		"./src"
@@ -15,7 +17,7 @@
 	"scripts": {
 		"build": "tsc --build",
 		"dev": "tsc --watch",
-		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"test": "vitest run --passWithNoTests --coverage",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"

@@ -78,47 +78,54 @@ export async function openRepository(
 	// the directory we use for all git operations
 	const dir = "/"
 
-	let pending: Promise<void | { error: Error }> | undefined = clone({
-		fs: withLazyFetching({ nodeishFs: rawFs, verbose, description: "clone" }),
-		http: makeHttpClient({
-			verbose,
-			description: "clone",
+	let pending: Promise<void | { error: Error }> | undefined
+	// Simpel check for existing git repos
+	// TODO: check for same origin
+	const maybeGitDir = await rawFs.lstat("/.git").catch((error) => ({ error }))
+	if ("error" in maybeGitDir) {
+		pending = clone({
+			fs: withLazyFetching({ nodeishFs: rawFs, verbose, description: "clone" }),
+			http: makeHttpClient({
+				verbose,
+				description: "clone",
 
-			onReq: ({ url, body }: { url: string; body: any }) => {
-				return optimizedRefsReq({ url, body, addRef: args.branch })
-			},
+				onReq: ({ url, body }: { url: string; body: any }) => {
+					return optimizedRefsReq({ url, body, addRef: args.branch })
+				},
 
-			onRes: optimizedRefsRes,
-		}),
-		dir,
-		corsProxy: gitProxyUrl,
-		url: gitUrl,
-		singleBranch: true,
-		noCheckout: true,
-		ref: args.branch,
-		depth: 1,
-		noTags: true,
-	})
-		.then(() => {
-			return checkout({
-				fs: withLazyFetching({
-					nodeishFs: rawFs,
-					verbose,
-					description: "checkout",
-				}),
-				dir,
-				ref: args.branch,
-				// filepaths: ["resources/en.json", "resources/de.json", "project.inlang.json"],
+				onRes: optimizedRefsRes,
+			}),
+			dir,
+			corsProxy: gitProxyUrl,
+			url: gitUrl,
+			singleBranch: true,
+			noCheckout: true,
+			ref: args.branch,
+			depth: 1,
+			noTags: true,
+		})
+			.then(() => {
+				return checkout({
+					fs: withLazyFetching({
+						nodeishFs: rawFs,
+						verbose,
+						description: "checkout",
+					}),
+					dir,
+					ref: args.branch,
+					// filepaths: ["resources/en.json", "resources/de.json", "project.inlang.json"],
+				})
 			})
-		})
-		.finally(() => {
-			pending = undefined
-		})
-		.catch((newError: Error) => {
-			setErrors((previous) => [...(previous || []), newError])
-		})
+			.finally(() => {
+				pending = undefined
+			})
+			.catch((newError: Error) => {
+				setErrors((previous) => [...(previous || []), newError])
+			})
 
-	await pending
+		await pending
+	}
+
 
 	// delay all fs and repo operations until the repo clone and checkout have finished, this is preparation for the lazy feature
 	function delayedAction({ execute }: { execute: () => any }) {
@@ -130,6 +137,7 @@ export async function openRepository(
 	}
 
 	return {
+		_isoGit: isoGit,
 		nodeishFs: withLazyFetching({
 			nodeishFs: rawFs,
 			verbose,

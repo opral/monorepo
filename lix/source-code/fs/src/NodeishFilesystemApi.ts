@@ -9,6 +9,7 @@
  * Node API reference https://nodejs.org/api/fs.html#fspromisesaccesspath-mode
  */
 export type NodeishFilesystem = {
+	[x: string]: any
 	writeFile(path: string, data: string | Uint8Array, options?: { mode: number }): Promise<void>
 	readFile(path: string): Promise<Uint8Array>
 	readFile(path: string, options: { encoding: "utf-8" | "binary" }): Promise<string>
@@ -54,4 +55,5 @@ export type NodeishStats = {
 	isDirectory(): boolean
 	isSymbolicLink(): boolean
 	symlinkTarget?: string
+	[x: string]: any
 }

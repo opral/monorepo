@@ -1,5 +1,5 @@
 export type { NodeishFilesystem } from "./NodeishFilesystemApi.js"
-export { createNodeishMemoryFs } from "./memoryFs.js"
+export { createNodeishMemoryFs, toSnapshot, fromSnapshot } from "./memoryFs.js"
 export {
 	normalizePath,
 	normalPath, // FIXME: unify with normalizePath

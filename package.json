@@ -20,7 +20,7 @@
 		"fetch-env:public": "pnpm --filter=@inlang/env-variables fetch-env:public",
 		"fetch-env:internal": "doppler secrets download --no-file --format env > .env",
 		"changeset": "npx changeset",
-		"clean": "pnpm recursive run clean && rm -rf ./.env ./node_modules",
+		"clean": "pnpm recursive run clean --if-present && rm -rf ./.env ./node_modules",
 		"----- CI ---- used to test the codebase on every commit": "",
 		"ci": "pnpm install && pnpm check-all",
 		"check-all": "pnpm format && pnpm lint && pnpm build && pnpm test",

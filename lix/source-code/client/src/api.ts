@@ -27,7 +27,7 @@ export type LixAuthModule = {
 }
 
 export type Repository = {
-	// raw: any
+	[x: string]: any
 	nodeishFs: NodeishFilesystem
 	commit: (args: {
 		author: Author
