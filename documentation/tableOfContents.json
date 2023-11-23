@@ -16,20 +16,20 @@
 	],
 	"How to": [
 		{
-			"path": "./how-to/develop-app.md",
-			"slug": "develop-app",
+			"path": "./how-to/build-app.md",
+			"slug": "build-app",
 			"title": "Develop App",
 			"description": "Develop an app"
 		},
 		{
-			"path": "./how-to/develop-plugin.md",
-			"slug": "develop-plugin",
+			"path": "./how-to/build-plugin.md",
+			"slug": "build-plugin",
 			"title": "Develop Plugin",
 			"description": "Develop a plugin"
 		},
 		{
-			"path": "./how-to/develop-lint-rule.md",
-			"slug": "develop-lint-rule",
+			"path": "./how-to/build-lint-rule.md",
+			"slug": "build-lint-rule",
 			"title": "Develop Lint Rule",
 			"description": "Develop a lint rule"
 		},
