@@ -5,7 +5,10 @@ import type { NodeishFilesystem } from "@lix-js/fs"
  * Migrates to the new project directory structure
  * https://github.com/inlang/monorepo/issues/1678
  */
-export const migrateToDirectory = async (args: { fs: NodeishFilesystem; settingsFilePath: string }) => {
+export const migrateToDirectory = async (args: {
+	fs: NodeishFilesystem
+	settingsFilePath: string
+}) => {
 	const settingsFile = await tryCatch(() =>
 		args.fs.readFile(args.settingsFilePath, { encoding: "utf-8" })
 	)
