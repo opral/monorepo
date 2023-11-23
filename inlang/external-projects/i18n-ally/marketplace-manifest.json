@@ -1,21 +1,30 @@
 {
-	"id": "library.i18next.i18next",
-	"icon": "https://avatars.githubusercontent.com/u/8546082?s=200&v=4",
+	"id": "app.lokalise.i18nally",
+	"icon": "https://avatars.githubusercontent.com/u/14294501?s=200&v=4",
 	"gallery": [
-		"https://github.com/i18next/i18next/blob/master/assets/i18next-ecosystem.jpg?raw=true"
+		"https://github.com/lokalise/i18n-ally/blob/main/screenshots/full-logo-new.png?raw=true"
 	],
 	"displayName": {
-		"en": "i18next"
+		"en": "i18n ally"
 	},
 	"description": {
-		"en": "learn once - translate everywhere"
+		"en": "🌍 All in one i18n extension for VS Code"
 	},
 	"readme": {
-		"en": "./inlang/external-projects/i18next/README.md"
+		"en": "./inlang/external-projects/i18n-ally/README.md"
 	},
-	"keywords": ["libraries", "i18next", "javascript", "developer", "i18n"],
-	"publisherName": "i18next",
-	"publisherIcon": "https://avatars.githubusercontent.com/u/8546082?s=200&v=4",
-	"website": "https://www.i18next.com/?ref=inlang.com",
+	"keywords": [
+		"apps",
+		"i18n-ally",
+		"i18n ally",
+		"vs-code",
+		"ide-extension",
+		"javascript",
+		"developer",
+		"i18n"
+	],
+	"publisherName": "lokalise",
+	"publisherIcon": "https://avatars.githubusercontent.com/u/14294501?s=200&v=4",
+	"website": "https://marketplace.visualstudio.com/items?itemName=lokalise.i18n-ally",
 	"license": "MIT License"
 }
