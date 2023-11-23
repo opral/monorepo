@@ -5,30 +5,23 @@ import type { NodeishFilesystem } from "@lix-js/fs"
  * Migrates to the new project directory structure
  * https://github.com/inlang/monorepo/issues/1678
  */
-export const maybeMigrateToDirectory = async (args: {
-	fs: NodeishFilesystem
-	projectPath: string
-}) => {
-	// already migrated
-	if (args.projectPath.endsWith(".inlang.json") === false) {
-		return
-	}
+export const migrateToDirectory = async (args: { fs: NodeishFilesystem; settingsFilePath: string }) => {
 	const settingsFile = await tryCatch(() =>
-		args.fs.readFile(args.projectPath, { encoding: "utf-8" })
+		args.fs.readFile(args.settingsFilePath, { encoding: "utf-8" })
 	)
 	// the settings file does not exist or something else is wrong, let loadProject handle it
 	if (settingsFile.error) {
 		return
 	}
 	// ./project.inlang.json -> ./project.inlang
-	const directoryPath = args.projectPath.replace(/\.json$/, "")
+	const directoryPath = args.settingsFilePath.replace(/\.json$/, "")
 	// (Should be OK) naively assuming that the directory does not exist if stat throws
 	const { error: directoryDoesNotExist } = await tryCatch(() => args.fs.stat(directoryPath))
 	if (directoryDoesNotExist) {
 		await args.fs.mkdir(directoryPath)
 	}
 	await args.fs.writeFile(`${directoryPath}/settings.json`, settingsFile.data)
-	await args.fs.writeFile(args.projectPath.replace(/\.json$/, ".README.md"), readme)
+	await args.fs.writeFile(args.settingsFilePath.replace(/\.json$/, ".README.md"), readme)
 }
 
 const readme = `

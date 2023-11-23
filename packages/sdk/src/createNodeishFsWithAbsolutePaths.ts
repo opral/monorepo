@@ -6,19 +6,19 @@ import { isAbsolutePath } from "./isAbsolutePath.js"
  * Wraps the nodeish filesystem subset with a function that intercepts paths
  * and prepends the base path.
  *
- * The paths are resolved from the `settingsFilePath` argument.
+ * The paths are resolved from the `projectPath` argument.
  */
 export const createNodeishFsWithAbsolutePaths = (args: {
-	settingsFilePath: string
+	projectPath: string
 	nodeishFs: NodeishFilesystemSubset
 }): NodeishFilesystemSubset => {
-	if (!isAbsolutePath(args.settingsFilePath)) {
-		throw new Error(`Expected an absolute path but received "${args.settingsFilePath}".`)
+	if (!isAbsolutePath(args.projectPath)) {
+		throw new Error(`Expected an absolute path but received "${args.projectPath}".`)
 	}
 
 	// get the base path of the settings file by
 	// removing the file name from the path
-	const basePath = normalizePath(args.settingsFilePath).split("/").slice(0, -1).join("/")
+	const basePath = normalizePath(args.projectPath).split("/").slice(0, -1).join("/")
 
 	const makeAbsolute = (path: string) => {
 		if (isAbsolutePath(path)) {
