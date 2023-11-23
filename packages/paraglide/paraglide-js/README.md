@@ -93,7 +93,7 @@ Paraglide JS provides five exports in `./paraglide/runtime.js`:
 
 | Variable | Description |
 | --- | --- |
-| `sourceLanguageTag` | The default language tag of the project |
+| `sourceLanguageTag` | The source language tag of the project |
 | `availableLanguageTags` | All language tags of the current project |
 | `languageTag()` | Returns the language tag of the current user |
 | `setLanguageTag()` | Sets the language tag of the current user |
