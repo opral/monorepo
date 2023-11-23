@@ -52,6 +52,7 @@
 	"devDependencies": {
 		"@iconify-json/cib": "^1.1.2",
 		"@iconify-json/material-symbols": "^1.1.26",
+		"@inlang/cli": "workspace:*",
 		"@inlang/design-system": "workspace:*",
 		"@inlang/detect-json-formatting": "workspace:*",
 		"@inlang/env-variables": "workspace:*",
