@@ -19,6 +19,7 @@ import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
 import Card from "#src/interface/components/Card.jsx"
 import { EditButton } from "#src/pages/documentation/EditButton.jsx"
+import { i18nRouting } from "#src/renderer/_default.page.route.js"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -469,7 +470,9 @@ function NavbarCommon(props: {
 										: "text-info/80 hover:text-on-background ") +
 									"tracking-wide text-sm block w-full font-normal mb-2"
 								}
-								href={`#${replaceChars(sectionTitle.toString().toLowerCase())}`}
+								href={`${i18nRouting(currentPageContext.urlParsed.pathname).url}#${replaceChars(
+									sectionTitle.toString().toLowerCase()
+								)}`}
 							>
 								{sectionTitle.replace("#", "")}
 							</Link>
@@ -488,7 +491,9 @@ function NavbarCommon(props: {
 													? "font-medium text-on-background border-l-on-background "
 													: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
 											}
-											href={`#${replaceChars(heading.toString().toLowerCase())}`}
+											href={`${
+												i18nRouting(currentPageContext.urlParsed.pathname).url
+											}#${replaceChars(heading.toString().toLowerCase())}`}
 										>
 											{heading.replace("#", "")}
 										</Link>

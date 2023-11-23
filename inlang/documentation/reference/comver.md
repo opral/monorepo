@@ -4,7 +4,7 @@
 
 Inlang's ecosystem uses [ComVer](https://gitlab.com/staltz/comver) for versioning. ComVer has two numbers that can be incremented: Major and Minor. Major indicates a backwards incompatible change, while Minor indicates a 100% backwards compatible change.
 
-```
+```txt
 {Major}.{Minor}
 
 1.0     # Major 1, Minor 0

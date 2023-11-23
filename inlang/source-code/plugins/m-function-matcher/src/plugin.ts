@@ -3,7 +3,7 @@ import { displayName, description } from "../marketplace-manifest.json"
 import { PluginSettings } from "./settings.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
 
-const id = "plugin.inlang.paraglideJs"
+const id = "plugin.inlang.mFunctionMatcher"
 
 export const plugin: Plugin<{
 	[id]: PluginSettings

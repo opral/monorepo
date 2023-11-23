@@ -34,9 +34,9 @@ Used by
 
 Using the Fink editor requires an inlang project.
 
-## A - Existing inlang.project.json
+## A - Existing project.inlang.json
 
-If you already have the `inlang.project.json` file in your repository you can just open the Fink Launcher and paste your GitHub url.
+If you already have the `project.inlang.json` file in your repository you can just open the Fink Launcher and paste your GitHub url.
 
 <doc-links>
     <doc-link title="Open Fink Editor" icon="icon-park-outline:editor" href="/editor" description="You can simply open the editor with a remote project."></doc-link>
@@ -50,7 +50,7 @@ If you already have the `inlang.project.json` file in your repository you can ju
   "hello": "Hello World" 
 }
 ```
-- Create the `inlang.project.json` file in your root directory. If you want to use another storage plugin choose another plugin at [inlang.com](http://localhost:3000/c/plugins)
+- Create the `project.inlang.json` file in your root directory. If you want to use another storage plugin choose another plugin at [inlang.com](http://localhost:3000/c/plugins)
 
 ```json
 {
