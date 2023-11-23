@@ -42,14 +42,12 @@ Having an adapter is only required if you want to use paraglide-js with a framew
     <doc-link title="Adapter for Svelte" icon="simple-icons:svelte" href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-svelte/example" description="Go to GitHub example"></doc-link>
     <doc-link title="Adapter for SolidJS" icon="tabler:brand-solidjs" href="https://discord.com/channels/897438559458430986/1163823207128776795" description="View progress"></doc-link>
     <doc-link title="Adapter for NextJS" icon="tabler:brand-nextjs" href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/example" description="Go to GitHub example"></doc-link>
-    <doc-link title="Adapter for Vite" icon="tabler:brand-vite" href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite" description="Go to GitHub"></doc-link>
+    <doc-link title="Adapter for Vite" icon="tabler:brand-vite" href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/website" description="Find in @inlang/website"></doc-link>
 </doc-links>
 
 #### Alternatively, [you can write your own adapter](#writing-an-adapter)
 
 ### 3. Add the `compile` script to your `package.json`
-
-> If you are using `@inlang/paraglide-js-adapter-vite`, you can skip this step.
 
 You can customize the `compile` script to your needs. For example, you can add a `--watch` flag to watch for changes, if you have installed a watcher.
 
