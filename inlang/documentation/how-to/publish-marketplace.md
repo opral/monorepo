@@ -117,6 +117,20 @@ Attributes:
 ##### Preview
 <doc-feature title="Feature" icon="mdi:github" color="#E5E8EB"></doc-feature>
 
+#### `<doc-accordion>`
+The `<doc-accordion>` element is used to display content in an expandable accordion, which is useful e.g. for FAQs.
+
+Attributes:
+- `heading` (required): The heading of the accordion.
+- `text` (required): The content of the accordion.
+
+```md
+<doc-accordion heading="Question" text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, diam quis aliquam ultricies, nisl nunc ultricies nunc, vitae ultrices nisl nunc eu nunc."></doc-accordion>
+```
+
+##### Preview
+<doc-accordion heading="Question" text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, diam quis aliquam ultricies, nisl nunc ultricies nunc, vitae ultrices nisl nunc eu nunc."></doc-accordion>
+
 ### Writing your readme
 
 #### ❗ Please note
