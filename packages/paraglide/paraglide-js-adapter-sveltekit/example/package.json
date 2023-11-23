@@ -4,8 +4,8 @@
 	"private": true,
 	"scripts": {
 		"_dev": "vite dev",
-		"build": "paraglide-js compile && vite build",
-		"test": "paraglide-js compile && vite build",
+		"build": "paraglide-js compile --project ./project.inlang.json && vite build",
+		"test": "paraglide-js compile --project ./project.inlang.json && vite build",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
