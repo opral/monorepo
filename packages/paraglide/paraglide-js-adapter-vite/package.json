@@ -39,7 +39,7 @@
         "test": "pnpm -r --filter=@inlang/paraglide-js-adapter-vite-test-basic run _build"
     },
     "dependencies": {
-        "@inlang/paraglide-js-adapter-unplugin": "*"
+        "@inlang/paraglide-js-adapter-unplugin": "workspace:*"
     },
     "devDependencies": {
         "@types/node": "20.9.3",
