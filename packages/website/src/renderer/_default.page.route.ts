@@ -3,7 +3,9 @@ import type { PageContextRenderer } from "./types.js"
 import { sourceLanguageTag, availableLanguageTags } from "#src/paraglide/runtime.js"
 
 export function onBeforeRoute(pageContext: PageContextRenderer) {
+	console.log(pageContext.urlOriginal)
 	const { url: urlWithoutLanguageTag, languageTag } = i18nRouting(pageContext.urlOriginal)
+	console.log(urlWithoutLanguageTag, languageTag)
 	return {
 		pageContext: {
 			languageTag,
@@ -21,7 +23,7 @@ export function onBeforeRoute(pageContext: PageContextRenderer) {
  *   i18nRouting("/about") // { languageTag: "en", url: "/about" }
  *   i18nRouting("/") // { languageTag: "en", url: "/" }
  */
-function i18nRouting(url: string) {
+export function i18nRouting(url: string) {
 	const urlPaths = url.split("/")
 
 	// first path of route is either / or a language tag

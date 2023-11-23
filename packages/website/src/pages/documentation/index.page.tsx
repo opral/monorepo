@@ -181,6 +181,11 @@ function NavbarCommon(props: {
 	getLocale: () => string
 }) {
 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
+
+	createEffect(() => {
+		console.log(highlightedAnchor())
+	})
+
 	const replaceChars = (str: string) => {
 		return str
 			.replaceAll(" ", "-")
@@ -261,7 +266,7 @@ function NavbarCommon(props: {
 									const slug = page.slug
 									return (
 										<li>
-											<a
+											<Link
 												onClick={props.onLinkClick}
 												class={
 													(isSelected(slug)
@@ -272,7 +277,7 @@ function NavbarCommon(props: {
 												href={`/documentation/${slug}`}
 											>
 												{page.title}
-											</a>
+											</Link>
 											<Show when={props.headings && props.headings.length > 0 && isSelected(slug)}>
 												<For each={props.headings}>
 													{(heading) => (
@@ -291,7 +296,9 @@ function NavbarCommon(props: {
 																			? "font-medium text-on-background border-l-on-background "
 																			: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
 																	}
-																	href={`#${replaceChars(heading.toString().toLowerCase())}`}
+																	href={`/documentation/${slug}#${replaceChars(
+																		heading.toString().toLowerCase()
+																	)}`}
 																>
 																	{heading.replace("#", "")}
 																</Link>
