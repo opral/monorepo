@@ -985,6 +985,25 @@ importers:
         specifier: ^5
         version: 5.2.2
 
+  inlang/source-code/paraglide/paraglide-js-adapter-rollup:
+    dependencies:
+      '@inlang/paraglide-js-adapter-unplugin':
+        specifier: '*'
+        version: link:../paraglide-js-adapter-unplugin
+      rollup:
+        specifier: '*'
+        version: 3.29.1
+    devDependencies:
+      '@types/node':
+        specifier: 20.9.3
+        version: 20.9.3
+      typescript:
+        specifier: 5.2.2
+        version: 5.2.2
+      vitest:
+        specifier: 0.34.3
+        version: 0.34.3
+
   inlang/source-code/paraglide/paraglide-js-adapter-svelte/example:
     devDependencies:
       '@inlang/paraglide-js':
@@ -1005,6 +1024,9 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../../paraglide-js
+      '@inlang/paraglide-js-adapter-vite':
+        specifier: '*'
+        version: link:../../paraglide-js-adapter-vite
       '@inlang/plugin-message-format':
         specifier: workspace:*
         version: link:../../../plugins/inlang-message-format
@@ -1028,7 +1050,76 @@ importers:
         version: 5.2.2
       vite:
         specifier: ^4.4.2
-        version: 4.4.9(@types/node@20.8.10)(terser@5.19.4)
+        version: 4.4.9(@types/node@20.9.3)(terser@5.19.4)
+
+  inlang/source-code/paraglide/paraglide-js-adapter-unplugin:
+    dependencies:
+      '@inlang/paraglide-js':
+        specifier: '*'
+        version: link:../paraglide-js
+      '@inlang/sdk':
+        specifier: '*'
+        version: link:../../sdk
+      unplugin:
+        specifier: 1.5.1
+        version: 1.5.1
+    devDependencies:
+      '@types/node':
+        specifier: 20.9.3
+        version: 20.9.3
+      typescript:
+        specifier: 5.2.2
+        version: 5.2.2
+      vitest:
+        specifier: 0.34.3
+        version: 0.34.3
+
+  inlang/source-code/paraglide/paraglide-js-adapter-vite:
+    dependencies:
+      '@inlang/paraglide-js-adapter-unplugin':
+        specifier: '*'
+        version: link:../paraglide-js-adapter-unplugin
+    devDependencies:
+      '@types/node':
+        specifier: 20.9.3
+        version: 20.9.3
+      typescript:
+        specifier: 5.2.2
+        version: 5.2.2
+      vitest:
+        specifier: 0.34.3
+        version: 0.34.3
+
+  inlang/source-code/paraglide/paraglide-js-adapter-vite/tests/build:
+    devDependencies:
+      '@inlang/paraglide-js':
+        specifier: workspace:*
+        version: link:../../../paraglide-js
+      '@inlang/paraglide-js-adapter-vite':
+        specifier: workspace:*
+        version: link:../..
+      typescript:
+        specifier: ^4.9.3
+        version: 4.9.5
+      vite:
+        specifier: ^4.2.0
+        version: 4.4.9(@types/node@20.9.3)(terser@5.19.4)
+
+  inlang/source-code/paraglide/paraglide-js-adapter-webpack:
+    dependencies:
+      '@inlang/paraglide-js-adapter-unplugin':
+        specifier: '*'
+        version: link:../paraglide-js-adapter-unplugin
+    devDependencies:
+      '@types/node':
+        specifier: 20.9.3
+        version: 20.9.3
+      typescript:
+        specifier: 5.2.2
+        version: 5.2.2
+      vitest:
+        specifier: 0.34.3
+        version: 0.34.3
 
   inlang/source-code/paraglide/paraglide-js/example:
     dependencies:
@@ -14090,7 +14181,7 @@ packages:
       - terser
     dev: true
 
-  /vite-node@0.34.3(@types/node@20.8.10):
+  /vite-node@0.34.3(@types/node@20.9.3):
     resolution: {integrity: sha512-+0TzJf1g0tYXj6tR2vEyiA42OPq68QkRZCu/ERSo2PtsDJfBpDyEfuKbRvLmZqi/CgC7SCBtyC+WjTGNMRIaig==}
     engines: {node: '>=v14.18.0'}
     hasBin: true
@@ -14100,7 +14191,7 @@ packages:
       mlly: 1.4.2
       pathe: 1.1.1
       picocolors: 1.0.0
-      vite: 4.4.9(@types/node@20.8.10)
+      vite: 4.4.9(@types/node@20.9.3)(terser@5.19.4)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -14590,7 +14681,7 @@ packages:
     dependencies:
       '@types/chai': 4.3.10
       '@types/chai-subset': 1.3.5
-      '@types/node': 20.8.10
+      '@types/node': 20.9.3
       '@vitest/expect': 0.34.3
       '@vitest/runner': 0.34.3
       '@vitest/snapshot': 0.34.3
@@ -14609,8 +14700,8 @@ packages:
       strip-literal: 1.3.0
       tinybench: 2.5.1
       tinypool: 0.7.0
-      vite: 4.4.9(@types/node@20.8.10)
-      vite-node: 0.34.3(@types/node@20.8.10)
+      vite: 4.4.9(@types/node@20.9.3)(terser@5.19.4)
+      vite-node: 0.34.3(@types/node@20.9.3)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
       - less
