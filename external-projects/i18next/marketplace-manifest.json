@@ -1,0 +1,21 @@
+{
+	"id": "library.i18next.i18next",
+	"icon": "https://avatars.githubusercontent.com/u/8546082?s=200&v=4",
+	"gallery": [
+		"https://github.com/i18next/i18next/blob/master/assets/i18next-ecosystem.jpg?raw=true"
+	],
+	"displayName": {
+		"en": "i18next"
+	},
+	"description": {
+		"en": "learn once - translate everywhere"
+	},
+	"readme": {
+		"en": "./inlang/external-projects/i18next/README.md"
+	},
+	"keywords": ["libraries", "i18next", "javascript", "developer", "i18n", "external"],
+	"publisherName": "i18next",
+	"publisherIcon": "https://avatars.githubusercontent.com/u/8546082?s=200&v=4",
+	"website": "https://www.i18next.com/?ref=inlang.com",
+	"license": "MIT License"
+}
