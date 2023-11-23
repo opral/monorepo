@@ -26,10 +26,10 @@ test("the files should include a prettierignore file", async () => {
 // All JS files must be eslint ignored
 test("the files should include an eslint ignore comment", async () => {
 	for (const [filePath, content] of Object.entries(output)) {
-		if (!filePath.endsWith(".js")) continue;
+		if (!filePath.endsWith(".js")) continue
 		expect(content).toContain("/* eslint-disable */")
 	}
-});
+})
 
 test("imports in the messages.js index file should use underscores instead of hyphens to avoid invalid JS imports", async () => {
 	expect(output["messages.js"]).toContain("import * as en_US")
