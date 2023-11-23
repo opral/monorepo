@@ -1,0 +1,20 @@
+{
+	"id": "app.tolgee.tolgee-platform",
+	"gallery": [
+		"https://user-images.githubusercontent.com/18496315/188632536-3547fd70-755c-4a32-9b1e-fb1afbf84b33.png"
+	],
+	"icon": "https://user-images.githubusercontent.com/18496315/188628892-33fcc282-26f1-4035-8105-95952bd93de9.svg",
+	"displayName": {
+		"en": "Tolgee"
+	},
+	"description": {
+		"en": "An open-source localization platform developers enjoy to work with."
+	},
+	"readme": {
+		"en": "./inlang/external-projects/tolgee/README.md"
+	},
+	"keywords": ["apps", "tolgee", "editor", "messages", "translator"],
+	"publisherName": "tolgee",
+	"publisherIcon": "https://user-images.githubusercontent.com/18496315/188628892-33fcc282-26f1-4035-8105-95952bd93de9.svg",
+	"license": "Apache-2.0"
+}
