@@ -13,7 +13,7 @@
 	"readme": {
 		"en": "./inlang/external-projects/tolgee/README.md"
 	},
-	"keywords": ["apps", "tolgee", "editor", "messages", "translator"],
+	"keywords": ["apps", "tolgee", "editor", "messages", "translator", "external"],
 	"publisherName": "tolgee",
 	"publisherIcon": "https://user-images.githubusercontent.com/18496315/188628892-33fcc282-26f1-4035-8105-95952bd93de9.svg",
 	"license": "Apache-2.0"
