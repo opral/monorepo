@@ -58,12 +58,10 @@ const [currentPageProps, setCurrentPageProps] = createStore<Record<string, unkno
 
 export function render(pageContext: PageContextRenderer) {
 	try {
-		console.log("in try")
 		setCurrentPageContext(pageContext)
 		setCurrentPage(() => pageContext.Page)
 		setCurrentPageProps(pageContext.pageProps)
 		if (isFirstRender) {
-			console.log("first", currentPage(), currentPageProps)
 			// The editor is only rendered client-side.
 			//
 			// In the future, the editor might be server-side rendered.
