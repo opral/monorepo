@@ -8,6 +8,7 @@ import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import JSON5 from "json5"
 import childProcess from "node:child_process"
 import { version } from "../state.js"
+import { detectTechStack } from "../../services/detect-techstack/detect.js"
 
 consola.options = {
 	...consola.options,
@@ -31,6 +32,7 @@ export const initCommand = new Command()
 		await maybeChangeTsConfigModuleResolution()
 		await maybeChangeTsConfigAllowJs()
 		await maybeAddVsCodeExtension({ projectPath })
+		await maybeSuggestAdapter()
 
 		consola.box(
 			"inlang Paraglide-JS has been set up sucessfully.\n\n1. Run your install command (npm i, yarn install, etc)\n2. Run the build script (npm run build, or similar.)\n3. Done :) Happy paragliding 🪂\n\n For questions and feedback, visit https://github.com/inlang/monorepo/discussions.\n"
@@ -382,6 +384,44 @@ export const maybeChangeTsConfigAllowJs = async () => {
 			consola.error(
 				"The compiler options have not been adjusted. Please set the `compilerOptions.allowJs` to `true`."
 			)
+		}
+	}
+}
+
+/**
+ * Try to detect the tech stack and suggest an appropriate adapter.
+ */
+export async function maybeSuggestAdapter() {
+	const techStack = await detectTechStack()
+	switch (techStack) {
+		case "vite": {
+			consola.info(
+				`It looks like you're using vite. \nYou should take a look at @inlang/paraglide-js-adapter-vite to take your paraglide experience to the next level.`
+			)
+			break
+		}
+
+		case "rollup": {
+			consola.info(
+				`It looks like you're using rollup. \nYou should take a look at @inlang/paraglide-js-adapter-rollup to take your paraglide experience to the next level.`
+			)
+			break
+		}
+
+		case "webpack": {
+			consola.info(
+				`It looks like you're using webpack. \nYou should take a look at @inlang/paraglide-js-adapter-webpack to take your paraglide experience to the next level.`
+			)
+			break
+		}
+
+		case "next":
+		case "sveltekit":
+		case "solid-start":
+		case "other":
+		default: {
+			// No adapter to suggest
+			return
 		}
 	}
 }
