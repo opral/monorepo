@@ -10,6 +10,7 @@ import "@inlang/markdown/custom-elements"
 import tableOfContents from "../../../../../documentation/tableOfContents.json"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
+import { i18nRouting } from "#src/renderer/_default.page.route.js"
 
 export type PageProps = {
 	markdown: Awaited<ReturnType<any>>
@@ -182,10 +183,6 @@ function NavbarCommon(props: {
 }) {
 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
 
-	createEffect(() => {
-		console.log(highlightedAnchor())
-	})
-
 	const replaceChars = (str: string) => {
 		return str
 			.replaceAll(" ", "-")
@@ -198,22 +195,26 @@ function NavbarCommon(props: {
 	}
 
 	const isSelected = (slug: string) => {
-		if (
-			`/documentation/${slug}` ===
-				currentPageContext.urlParsed.pathname.replace(
-					props.getLocale() === "en" ? "" : props.getLocale(),
-					""
-				) ||
-			`/documentation/${slug}` ===
-				currentPageContext.urlParsed.pathname.replace(
-					props.getLocale() === "en" ? "" : props.getLocale(),
-					""
-				) +
-					"/"
-		) {
-			return true
+		const reference = `/documentation/${slug}`
+
+		if (props.getLocale() === "en") {
+			if (
+				reference === currentPageContext.urlParsed.pathname ||
+				reference === currentPageContext.urlParsed.pathname + "/"
+			) {
+				return true
+			} else {
+				return false
+			}
 		} else {
-			return false
+			if (
+				reference === i18nRouting(currentPageContext.urlParsed.pathname).url ||
+				reference === i18nRouting(currentPageContext.urlParsed.pathname).url + "/"
+			) {
+				return true
+			} else {
+				return false
+			}
 		}
 	}
 
