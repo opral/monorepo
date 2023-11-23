@@ -1,5 +1,13 @@
 # @inlang/paraglide-js
 
+## 1.0.0-prerelease.10
+Add an optional options argument to message functions, to allow forcing a languageTag regardless of which languageTag is currently set.
+
+```ts
+import * as m from "./paraglide/messages"
+const msg = m.hello({ name: "John" }, { languageTag: "de" })
+```
+
 ##  1.0.0-prerelease.9
 
 The `paraglide-js init` command now uses the [inlang message format](https://inlang.com/m/reootnfj) 2.0 which is human readable. 

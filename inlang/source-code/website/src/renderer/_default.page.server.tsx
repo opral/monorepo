@@ -99,7 +99,7 @@ export function onBeforePrerender(prerenderContext: any) {
 				...pageContext,
 				urlOriginal,
 				// Set pageContext.locale
-				languageTag: languageTag(),
+				languageTag: locale,
 			})
 		}
 	}
