@@ -31,9 +31,9 @@ jobs:
           node-version: 18
       
       - name: Install dependencies
-        run: pnpm run ci # The "run" is needed here
+        run: pnpm install
 
-      - name: Install Doppler CLI for env (public) variables
+      - name: Install Doppler CLI for env variables
         uses: dopplerhq/cli-action@v2
 
       - name: Build
@@ -41,14 +41,18 @@ jobs:
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
-      - name: test the code
-        run: pnpm test
+      - name: Test
+        run: doppler run -- pnpm test
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
       - name: Build VSCode extension package
-        run: pnpm --filter vs-code-extension package
+        run: doppler run -- pnpm --filter vs-code-extension package
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
       - name: Publish to VSCode Marketplace
-        run: npx @vscode/vsce publish -p ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
+        run: pnpm --filter vs-code-extension run publish -p ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
         working-directory: ./inlang/source-code/ide-extension
         env:
           VSCE_TOKEN: ${{secrets.VSCODE_MARKETPLACE_TOKEN}}

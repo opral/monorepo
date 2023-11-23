@@ -112,3 +112,4 @@ dist
 **/playwright-report/
 **/playwright/.cache/
 sitemap.xml
+.nx

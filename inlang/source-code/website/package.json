@@ -82,7 +82,6 @@
 		"unplugin-icons": "^0.15.0",
 		"vike": "0.4.144",
 		"vite": "4.4.9",
-		"vite-plugin-node-polyfills": "0.12.0",
 		"vite-plugin-solid": "2.7.0",
 		"vite-plugin-watch": "0.2.0",
 		"vitest": "0.34.3"
