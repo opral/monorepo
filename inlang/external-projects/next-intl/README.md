@@ -12,7 +12,7 @@
 
 <hr />
 
-## Features
+# Features
 
 Internationalization is an essential part of the user experience. next-intl gives you everything you need to get language subtleties right and has always got your back whenever you need to fine-tune a translation.
 
@@ -23,7 +23,7 @@ Internationalization is an essential part of the user experience. next-intl give
 - 🚀 **Next.js-native and performance-obsessed**: App Router, Server Components, static rendering—pick the right tool for the right job, next-intl works everywhere.
 - ⚔️ **Internationalized routing**: Provide unique pathnames per language and optionally localize pathnames for search engine optimization.
 
-## What does it look like?
+# What does it look like?
 
 This library is based on the premise that messages can be grouped by namespaces (typically a component name).
 
@@ -59,7 +59,7 @@ export default function UserProfile({user}) {
 }
 ```
 
-### [→ Read the docs](https://next-intl-docs.vercel.app/)
+## [→ Read the docs](https://next-intl-docs.vercel.app/)
 
 <div align="center">
   <a href="https://next-intl-docs.vercel.app/redirect?href=https://crowdin.com" target="_blank">

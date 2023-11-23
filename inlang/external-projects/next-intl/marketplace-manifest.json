@@ -11,7 +11,7 @@
 	"readme": {
 		"en": "./inlang/external-projects/next-intl/README.md"
 	},
-	"keywords": ["libraries", "next-intl", "next", "react", "developer", "i18n"],
+	"keywords": ["libraries", "next-intl", "nextjs", "next", "react", "developer", "i18n"],
 	"publisherName": "amannn",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/4038316?v=4",
 	"website": "https://next-intl-docs.vercel.app/?ref=inlang.com",
