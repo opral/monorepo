@@ -10,16 +10,6 @@ export async function getInlangProject(args: { projectPath: string }): Promise<I
 	const baseDirectory = process.cwd()
 	const settingsFilePath = resolve(baseDirectory, args.projectPath)
 
-	const configExists = await fs
-		.access(settingsFilePath)
-		.then(() => true)
-		.catch(() => false)
-
-	if (configExists === false) {
-		// should throw at this point bceause `loadProject` can't be executed
-		throw new Error("No project.inlang.json file found in the repository.")
-	}
-
 	const project = await loadProject({
 		projectPath: settingsFilePath,
 		nodeishFs: fs,
