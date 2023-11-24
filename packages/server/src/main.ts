@@ -76,10 +76,23 @@ app.use(rpcRouter)
 
 const badgeAddress = isProduction ? "http://badge-service:10000" : "http://[::1]:4003"
 
+const manageAdress = isProduction ? "http://manage.inlang.com" : "http://[::1]:4004"
+
 app.use(
 	"/badge",
 	createProxyMiddleware({
 		target: badgeAddress,
+		changeOrigin: true,
+		headers: {
+			Connection: "keep-alive",
+		},
+	})
+)
+
+app.use(
+	"/manage",
+	createProxyMiddleware({
+		target: manageAdress,
 		changeOrigin: true,
 		headers: {
 			Connection: "keep-alive",
