@@ -94,7 +94,7 @@ describe("config", () => {
 		await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(config))
 		const project = solidAdapter(
 			await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
 			}),
@@ -127,7 +127,7 @@ describe("installed", () => {
 		await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(config))
 		const project = solidAdapter(
 			await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
 			}),
@@ -192,7 +192,7 @@ describe("messages", () => {
 		await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(mockConfig))
 		const project = solidAdapter(
 			await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import: mockImport,
 			}),
@@ -222,7 +222,7 @@ describe("messages", () => {
 		await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(config))
 		const project = solidAdapter(
 			await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import: $import,
 			}),
@@ -283,7 +283,7 @@ describe("lint", () => {
 			await fs.writeFile("./project.config.json", JSON.stringify(config))
 			const project = solidAdapter(
 				await loadProject({
-					settingsFilePath: "./project.config.json",
+					projectPath: "./project.config.json",
 					nodeishFs: fs,
 					_import: $import,
 				}),
@@ -321,7 +321,7 @@ describe("lint", () => {
 			await fs.writeFile("./project.config.json", JSON.stringify(config))
 			const project = solidAdapter(
 				await loadProject({
-					settingsFilePath: "./project.config.json",
+					projectPath: "./project.config.json",
 					nodeishFs: fs,
 					_import: $import,
 				}),

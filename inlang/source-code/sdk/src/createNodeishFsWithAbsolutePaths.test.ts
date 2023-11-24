@@ -2,7 +2,7 @@ import { it, expect, vi } from "vitest"
 import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
 import type { NodeishFilesystemSubset } from "./versionedInterfaces.js"
 
-it("throws an error if settingsFilePath is not an absolute path", () => {
+it("throws an error if projectPath is not an absolute path", () => {
 	const relativePath = "relative/path"
 
 	expect(() =>

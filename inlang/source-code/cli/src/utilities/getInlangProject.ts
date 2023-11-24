@@ -21,7 +21,7 @@ export async function getInlangProject(args: { projectPath: string }): Promise<I
 	}
 
 	const project = await loadProject({
-		settingsFilePath,
+		projectPath: settingsFilePath,
 		nodeishFs: fs,
 		_capture(id, props) {
 			telemetry.capture({

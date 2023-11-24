@@ -96,7 +96,7 @@ export async function tryAutoGenProjectSettings(args: {
 
 	const { data: project } = await tryCatch(() =>
 		loadProject({
-			settingsFilePath: projectPath,
+			projectPath: projectPath,
 			nodeishFs: mockFs,
 		})
 	)

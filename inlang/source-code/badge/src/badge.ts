@@ -40,7 +40,7 @@ export const badge = async (url: string) => {
 	})
 
 	const project = await loadProject({
-		settingsFilePath,
+		projectPath: settingsFilePath,
 		nodeishFs: repo.nodeishFs,
 		_capture(id, props) {
 			telemetryNode.capture({

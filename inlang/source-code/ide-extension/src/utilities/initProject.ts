@@ -54,7 +54,7 @@ export async function initProject(args: {
 
 	const { data: project, error } = await tryCatch(() =>
 		loadProject({
-			settingsFilePath: closestProjectFilePathUri.fsPath,
+			projectPath: closestProjectFilePathUri.fsPath,
 			nodeishFs: createFileSystemMapper(args.workspaceFolder.uri.fsPath, fs),
 			_import: _import(args.workspaceFolder.uri.fsPath),
 			_capture(id, props) {

@@ -131,7 +131,7 @@ export const existingProjectFlow = async (args: { existingProjectPath: string })
 		return createNewProjectFlow()
 	}
 	const project = await loadProject({
-		settingsFilePath: resolve(process.cwd(), args.existingProjectPath),
+		projectPath: resolve(process.cwd(), args.existingProjectPath),
 		//@ts-ignore
 		nodeishFs: fs,
 	})
@@ -148,7 +148,7 @@ export const createNewProjectFlow = async () => {
 	consola.info(`Creating a new inlang project in the current working directory.`)
 	await fs.writeFile(DEFAULT_PROJECT_PATH, JSON.stringify(newProjectTemplate, undefined, 2))
 	const project = await loadProject({
-		settingsFilePath: resolve(process.cwd(), DEFAULT_PROJECT_PATH),
+		projectPath: resolve(process.cwd(), DEFAULT_PROJECT_PATH),
 		//@ts-ignore
 		nodeishFs: fs,
 	})
