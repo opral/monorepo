@@ -33,6 +33,9 @@ jobs:
           node-version: ${{ matrix.version }}
           cache: 'pnpm'
 
+      - name: Install dependencies
+        run: pnpm install
+
       # external contributors dont have access to doppler and need the public env vars
       - run: pnpm run fetchPublicEnv && pnpm run ci
         if: ${{ env.DOPPLER_TOKEN != 'sdf' }}
