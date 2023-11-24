@@ -13,7 +13,7 @@ Supercharge i18n within VS Code with powerful tools designed to streamline the t
 
 [Inlang](https://inlang.com) is a powerful [open-source](https://github.com/inlang/monorepo/tree/main/inlang/source-code/ide-extension) extension for [Visual Studio Code](https://code.visualstudio.com/)
 
-## Geting started
+## Getting started
 
 ### 1. Create a `project.inlang.json` in the **root** of your project
 
