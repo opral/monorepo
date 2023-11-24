@@ -38,16 +38,6 @@
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},
-	"dependencies": {
-		"@inlang/detect-json-formatting": "1.0.0",
-		"@inlang/sdk": "workspace:*",
-		"commander": "11.1.0",
-		"consola": "3.2.3",
-		"dedent": "1.5.1",
-		"isomorphic-git": "1.24.5",
-		"json5": "2.2.3",
-		"posthog-node": "3.1.3"
-	},
 	"devDependencies": {
 		"@inlang/env-variables": "workspace:*",
 		"@inlang/telemetry": "workspace:*",
@@ -62,6 +52,14 @@
 		"memfs": "4.6.0",
 		"rollup": "3.29.1",
 		"typescript": "5.2.2",
-		"vitest": "0.34.3"
+		"vitest": "0.34.3",
+		"@inlang/detect-json-formatting": "1.0.0",
+		"@inlang/sdk": "workspace:*",
+		"commander": "11.1.0",
+		"consola": "3.2.3",
+		"dedent": "1.5.1",
+		"isomorphic-git": "1.24.5",
+		"json5": "2.2.3",
+		"posthog-node": "3.1.3"
 	}
 }
