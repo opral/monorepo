@@ -37,7 +37,8 @@ jobs:
         run: pnpm install
 
       # external contributors dont have access to doppler and secrets and need the public env vars
-      - run: echo "::warning file=.github/workflows/continuous-integration.yml,line=40,col=5::Running the public env var CI with limited test scope!" && pnpm run fetchPublicEnv && pnpm run ci
+      # TODO: add warning to PR: Running CI with public env vars with limited test scope!
+      - run: pnpm run fetchPublicEnv && pnpm run ci
         if: ${{ env.DOPPLER_TOKEN = '' }}
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_CI_ENV_TOKEN }}
