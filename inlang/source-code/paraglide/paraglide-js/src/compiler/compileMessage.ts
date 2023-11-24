@@ -1,6 +1,7 @@
 import { LanguageTag, type Message } from "@inlang/sdk"
 import { compilePattern } from "./compilePattern.js"
 import { paramsType, type Params } from "./paramsType.js"
+import { optionsType } from "./optionsType.js"
 
 /**
  * Returns the compiled messages for the given message.
@@ -72,16 +73,21 @@ const messageIndexFunction = (args: {
  * 
  * - The params are NonNullable<unknown> because the inlang SDK does not provide information on the type of a param (yet).
  * 
- * ${paramsType(args.params)}
+ * ${paramsType(args.params, true)}
+ * ${optionsType({ languageTags: args.languageTags })}
  * @returns {string}
  */
-export const ${args.message.id} = (${Object.keys(args.params).length > 0 ? "params" : ""}) => {
+export const ${args.message.id} = (params ${
+		Object.keys(args.params).length > 0 ? "" : "= {}"
+	}, options = {}) => {
+
+	const tag = options.languageTag ?? languageTag();
 ${[...args.languageTags]
 	// sort language tags alphabetically to make the generated code more readable
 	.sort((a, b) => a.localeCompare(b))
 	.map(
 		(tag) =>
-			`\tif (languageTag() === "${tag}") return ${tag.replaceAll("-", "_")}.${args.message.id}(${
+			`\tif (tag === "${tag}") return ${tag.replaceAll("-", "_")}.${args.message.id}(${
 				Object.keys(args.params).length > 0 ? "params" : ""
 			})`
 	)
@@ -97,11 +103,11 @@ ${[...args.languageTags]
 
 const messageFunction = (args: { message: Message; params: Params; compiledPattern: string }) => {
 	return `
-/**
- * ${paramsType(args.params)}
- * @returns {string}
- */
-export const ${args.message.id} = (${Object.keys(args.params).length > 0 ? "params" : ""}) => {
-	return ${args.compiledPattern}
-}`
+	/**
+	 * ${paramsType(args.params, false)}
+	 * @returns {string}
+	 */
+	export const ${args.message.id} = (${Object.keys(args.params).length > 0 ? "params" : ""}) => {
+		return ${args.compiledPattern}
+	}`
 }

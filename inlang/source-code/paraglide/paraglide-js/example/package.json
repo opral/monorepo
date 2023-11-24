@@ -1,0 +1,17 @@
+{
+	"name": "@inlang/paraglide-js-example-typescript",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"build": "paraglide-js compile --project ./project.inlang.json && tsc",
+		"pretest": "paraglide-js compile",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@inlang/paraglide-js": "workspace:*"
+	},
+	"devDependencies": {
+		"typescript": "5.2.2",
+		"vitest": "^0.34.6"
+	}
+}

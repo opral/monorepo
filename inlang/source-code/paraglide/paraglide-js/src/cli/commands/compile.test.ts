@@ -22,9 +22,10 @@ beforeEach(() => {
 	vi.spyOn(consola, "log").mockImplementation(() => undefined as never)
 	vi.spyOn(consola, "info").mockImplementation(() => undefined as never)
 	vi.spyOn(consola, "success").mockImplementation(() => undefined as never)
-	vi.spyOn(consola, "error").mockImplementation(() => undefined as never)
+	vi.spyOn(consola, "error").mockImplementation(console.error)
 	vi.spyOn(consola, "warn").mockImplementation(() => undefined as never)
-	vi.spyOn(process, "exit").mockImplementation(() => {
+	vi.spyOn(process, "exit").mockImplementation((e) => {
+		console.error(`PROCESS.EXIT()`, e)
 		throw "PROCESS.EXIT()"
 	})
 })
@@ -69,7 +70,9 @@ test("it should compile into the default outdir", async () => {
 			],
 		}),
 	})
-	await compileCommand.parseAsync(["--project", "./project.inlang.json"])
+
+	// I have no idea why, but the { from: "user" } is required for the test to pass
+	await compileCommand.parseAsync(["--project", "./project.inlang.json"], { from: "user" })
 	expect(_fs.existsSync("./src/paraglide/messages.js")).toBe(true)
 })
 
@@ -101,7 +104,10 @@ test("it should compile a project into the provided outdir", async () => {
 				],
 			}),
 		})
-		await compileCommand.parseAsync(["--project", "./project.inlang.json", "--outdir", outdir])
+		// I have no idea why, but the { from: "user" } is required for the test to pass
+		await compileCommand.parseAsync(["--project", "./project.inlang.json", "--outdir", outdir], {
+			from: "user",
+		})
 		expect(_fs.existsSync(`${outdir}/messages.js`)).toBe(true)
 	}
 })
