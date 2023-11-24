@@ -1668,6 +1668,56 @@
 							"value": "Lesen"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lire"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Leggere"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Ler"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Čítať"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "读"
+						}
+					]
 				}
 			]
 		},
@@ -4153,6 +4203,26 @@
 				},
 				{
 					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Markdown"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Markdown"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
 					"match": [],
 					"pattern": [
 						{
