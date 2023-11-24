@@ -9,7 +9,7 @@ const ParaglideHeader = () => {
 					<div class="p-1 rounded-lg overflow-hidden bg-background mt-8 md:mt-0">
 						<img
 							class="w-10 h-10 object-cover"
-							src="https://emojis.wiki/thumbs/emojis/parachute.webp"
+							src="/images/paraglide-logo.webp"
 							alt="paraglide logo"
 						/>
 					</div>
