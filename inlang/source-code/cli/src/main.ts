@@ -36,7 +36,7 @@ export const cli = new Command()
 	.addCommand(open)
 	.addCommand(module)
 	// Hooks
-	.hook("preAction", (command) => {
+	.hook("postAction", (command) => {
 		// name enables better grouping in the telemetry dashboard
 		const name = command.args.filter(
 			// shouldn't start with a flag and the previous arg shouldn't be a flag
