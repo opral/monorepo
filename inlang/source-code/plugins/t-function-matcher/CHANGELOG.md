@@ -1,5 +1,11 @@
 # @inlang/plugin-t-function-matcher
 
+## 0.4.0
+
+### Minor Changes
+
+- a2f8e1044: rename id's of syntax matcher
+
 ## 0.3.0
 
 ### Minor Changes

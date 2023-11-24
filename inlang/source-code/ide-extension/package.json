@@ -1,16 +1,16 @@
 {
 	"name": "vs-code-extension",
 	"private": true,
-	"displayName": "inlang (i18n)",
+	"displayName": "inlang – i18n supercharged",
 	"type": "module",
-	"description": "i18n extension that makes developers more productive.",
+	"description": "Supercharge i18n within VS Code — Visualize, edit & lint translated strings at a glance via Inline Decorations & Hover Support, and extract new strings with a single click.",
 	"publisher": "inlang",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/inlang/monorepo.git"
 	},
-	"icon": "assets/inlang.png",
-	"version": "1.17.0",
+	"icon": "assets/icon-vscode-marketplace.png",
+	"version": "1.20.0",
 	"engines": {
 		"vscode": "^1.82.0"
 	},
@@ -65,7 +65,10 @@
 		"check": "tsc --noEmit",
 		"build": "node ./build.js",
 		"dev": "DEV=true node ./build.js",
-		"package": "npx @vscode/vsce package",
+		"package": "pnpm vsce package --no-dependencies",
+		"publish": "pnpm vsce publish --no-dependencies",
+		"vscode:prepublish": "npm run esbuild-base -- --minify",
+		"esbuild-base": "esbuild ./src/main.ts --bundle --outfile=dist/main.cjs --external:vscode --format=cjs --platform=node",
 		"---- TEST ----------------------------------------------------------": "",
 		"pretest": "node ./build.js",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",

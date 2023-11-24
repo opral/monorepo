@@ -3,10 +3,10 @@
 	"name": "monorepo",
 	"type": "module",
 	"scripts": {
-		"build": "npx nx run-many --target=build --parallel",
-		"dev": "npx nx run-many --target=dev --parallel 1000 --output-style stream",
-		"dev:lix": "npx nx run-many --target=dev --parallel=10 --nxBail --verbose --projects=@lix-js/*,@inlang/server,@inlang/editor,@inlang/website --output-style=stream",
-		"production": "npx nx run-many --target=production --parallel 1000 --exclude @lix-js/server --exclude @inlang/badge",
+		"build": "npx nx run-many --nx-bail --target=build --parallel",
+		"dev": "npx nx run-many --nx-bail --target=dev --parallel 1000 --output-style stream",
+		"dev:lix": "npx nx run-many --target=dev --parallel=10 --nx-bail --verbose --projects=@lix-js/*,@inlang/server,@inlang/editor,@inlang/website --output-style=stream",
+		"production": "npx nx run-many --nx-bail --target=production --parallel 1000 --exclude @lix-js/server --exclude @inlang/badge --output-style=stream",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "npx nx run-many --target=test --parallel",
 		"---- LINT ----------------------------------------------------------": "",
@@ -33,7 +33,7 @@
 		"eslint": "^8.32.0",
 		"eslint-config-prettier": "^8.6.0",
 		"eslint-plugin-unicorn": "^45.0.2",
-		"nx": "16.8.0",
+		"nx": "17.1.3",
 		"nx-cloud": "16.4.0",
 		"prettier": "2.8.3",
 		"typescript": "5.2.2"

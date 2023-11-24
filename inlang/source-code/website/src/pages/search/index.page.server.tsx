@@ -5,12 +5,14 @@ export async function onBeforeRender(pageContext: any) {
 
 	const results = await rpc.search({ term: q })
 
-	const items = JSON.parse(results.data as string).map((item: any) => {
+	let items = JSON.parse(results.data as string).map((item: any) => {
 		item.uniqueID = item.objectID
 		delete item.readme
 		delete item.objectID
 		return item
 	})
+
+	items = items.filter((i: any) => i.keywords.includes("external") === false)
 
 	return {
 		pageContext: {

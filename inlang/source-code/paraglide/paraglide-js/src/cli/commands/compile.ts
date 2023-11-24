@@ -9,7 +9,7 @@ import { telemetry } from "../../services/telemetry/implementation.js"
 export const compileCommand = new Command()
 	.name("compile")
 	.summary("Compiles inlang Paraglide-JS.")
-	.requiredOption("--project <path>", "The path to the inlang project.", "./project.inlang.json")
+	.requiredOption("--project <path>", "The path to the inlang project.")
 	.requiredOption("--outdir <path>", "The path to the output directory.", "./src/paraglide")
 	.action(async (options: { project: string; outdir: string }) => {
 		consola.info(`Compiling inlang project at "${options.project}".`)
