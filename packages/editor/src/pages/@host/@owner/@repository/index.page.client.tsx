@@ -98,7 +98,7 @@ function TheActualPage() {
 				</Match>
 
 				<Match when={project() === undefined}>
-					<div class="flex flex-col grow justify-center items-center min-w-full min-h-[calc(100vh_-_200px)] gap-2">
+					<div class="flex flex-col grow justify-center items-center min-w-full min-h-[calc(100vh_-_338px)] gap-2">
 						{/* sl-spinner need a own div otherwise the spinner has a bug. The wheel is rendered on the outer div  */}
 						<div>
 							{/* use font-size to change the spinner size    */}
@@ -187,7 +187,7 @@ function TheActualPage() {
 
 function NoInlangConfigFoundCard() {
 	return (
-		<div class="flex grow items-center justify-center">
+		<div class="min-h-[calc(100vh_-_338px)] flex grow items-center justify-center">
 			<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
 				<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center" />
 				<h1 class="font-semibold pt-5">Inlang has not been set up for this repository yet.</h1>
@@ -208,7 +208,7 @@ function NoInlangConfigFoundCard() {
 
 function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number; user: any }) {
 	return (
-		<div class="flex grow items-center justify-center">
+		<div class="min-h-[calc(100vh_-_338px)] flex grow items-center justify-center">
 			<div class="border border-outline p-12 rounded-xl flex flex-col max-w-lg">
 				<h2 class="font-semibold pt-12">Cannot access the repository</h2>
 

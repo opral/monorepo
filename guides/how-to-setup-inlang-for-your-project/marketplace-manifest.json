@@ -1,6 +1,6 @@
 {
 	"id": "guide.niklasbuchfink.howToSetupInlang",
-	"icon": "https://emojis.wiki/thumbs/emojis/puzzle-piece.webp",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/how-to-setup-inlang-for-your-project/puzzle-logo.webp",
 	"displayName": {
 		"en": "How to setup inlang for your project"
 	},

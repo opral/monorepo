@@ -54,6 +54,16 @@
 							"value": "Applicazione Globale"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Globálna Aplikácia"
+						}
+					]
 				}
 			]
 		},
@@ -166,6 +176,16 @@
 							"value": "Markdown"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Globálny Markdown"
+						}
+					]
 				}
 			]
 		},
@@ -222,6 +242,16 @@
 							"value": "Categorias"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Ekosystém"
+						}
+					]
 				}
 			]
 		},
@@ -276,6 +306,16 @@
 						{
 							"type": "Text",
 							"value": "Site Global"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Globálna Stránka"
 						}
 					]
 				}
@@ -549,7 +589,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Pridajte sa k tímu"
+							"value": "Pridajte sa do tímu"
 						}
 					]
 				},
@@ -621,16 +661,6 @@
 				},
 				{
 					"match": [],
-					"languageTag": "sk",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Poďme sa rozprávať"
-						}
-					]
-				},
-				{
-					"match": [],
 					"languageTag": "zh",
 					"pattern": [
 						{
@@ -656,6 +686,16 @@
 						{
 							"type": "Text",
 							"value": "Parliamone insieme"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Porozprávajme sa"
 						}
 					]
 				}
@@ -1018,6 +1058,16 @@
 							"value": "O ecossistema para se globalizar"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Globalizačný ekosystém"
+						}
+					]
 				}
 			]
 		},
@@ -1209,16 +1259,6 @@
 				},
 				{
 					"match": [],
-					"languageTag": "sk",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Trhovisko"
-						}
-					]
-				},
-				{
-					"match": [],
 					"languageTag": "zh",
 					"pattern": [
 						{
@@ -1244,6 +1284,16 @@
 						{
 							"type": "Text",
 							"value": "Marketplace"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Obchod"
 						}
 					]
 				}
@@ -1276,16 +1326,6 @@
 				{
 					"match": [],
 					"languageTag": "pt-BR",
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Roadmap"
-						}
-					]
-				},
-				{
-					"match": [],
-					"languageTag": "sk",
 					"pattern": [
 						{
 							"type": "Text",
@@ -1556,6 +1596,16 @@
 							"value": "Alle Guides ansehen"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Všetky návody"
+						}
+					]
 				}
 			]
 		},
@@ -1582,6 +1632,16 @@
 							"value": "Verwende Plugins und Adapter, um Produkte einfach an deine spezifischen Anforderungen anzupassen, egal wo und egal wie sie funktionieren sollen."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Použite rozšírenia a adaptéry, aby ste mohli jednoducho vyvýjať projekty, ktoré vyriešia vaše problémy, bezohľadu na to, kde majú fungovat."
+						}
+					]
 				}
 			]
 		},
@@ -1606,6 +1666,56 @@
 						{
 							"type": "Text",
 							"value": "Lesen"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lire"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Leggere"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Ler"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Čítať"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "读"
 						}
 					]
 				}
@@ -1664,6 +1774,16 @@
 							"value": "Guias"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Nájdite správne návody"
+						}
+					]
 				}
 			]
 		},
@@ -1718,6 +1838,16 @@
 						{
 							"type": "Text",
 							"value": "Mais sobre o ecossistema"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Viac o ekosystéme"
 						}
 					]
 				}
@@ -1832,6 +1962,16 @@
 							"value": "Pesquisar"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Hľadať"
+						}
+					]
 				}
 			]
 		},
@@ -1878,6 +2018,16 @@
 							"value": "Cerca nell'ecosistema ..."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Hľadať v ekosystéme..."
+						}
+					]
 				}
 			]
 		},
@@ -1912,6 +2062,16 @@
 						{
 							"type": "Text",
 							"value": "Popolari"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Populárne"
 						}
 					]
 				}
@@ -1968,6 +2128,16 @@
 						{
 							"type": "Text",
 							"value": "Assista o SvelteSummit Talk em 11.11.23"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Pozrite si SvelteSummit panel z 11 Nov, 23"
 						}
 					]
 				}
@@ -2082,6 +2252,16 @@
 							"value": "Mais sobre o Lix"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Viac o Lix"
+						}
+					]
 				}
 			]
 		},
@@ -2136,6 +2316,16 @@
 						{
 							"type": "Text",
 							"value": "O backbone do ecossistema"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Základ ekosystému"
 						}
 					]
 				}
@@ -4020,6 +4210,26 @@
 							"value": "Markdown"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Markdown"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Markdown"
+						}
+					]
 				}
 			]
 		},
@@ -4236,6 +4446,16 @@
 							"value": "Neu: Paraglide JS"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Nové: Paraglide JS"
+						}
+					]
 				}
 			]
 		},
@@ -4286,6 +4506,16 @@
 						{
 							"type": "Text",
 							"value": "Libraries"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Knižnice"
 						}
 					]
 				}
@@ -5795,7 +6025,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Ste odhlásený z odberu"
+							"value": "Ste odhlásení z odberu"
 						}
 					]
 				},

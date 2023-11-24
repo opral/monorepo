@@ -1,6 +1,14 @@
 # @inlang/paraglide-js
 
+## 1.0.0-prerelease.11
+
+`onSetLanguageTag` no longer throws when called multiple times. Newer callbacks will overwrite old ones. 
+Developers still should not call `onSetLanguageTag` multiple times, this is needed for HMR to work reliably.
+
+Big thanks to [@KraXen72](https://github.com/KraXen72) for helping us find this bug.
+
 ## 1.0.0-prerelease.10
+
 Add an optional options argument to message functions, to allow forcing a languageTag regardless of which languageTag is currently set.
 
 ```ts
