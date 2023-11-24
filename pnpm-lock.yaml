@@ -988,11 +988,8 @@ importers:
   inlang/source-code/paraglide/paraglide-js-adapter-rollup:
     dependencies:
       '@inlang/paraglide-js-adapter-unplugin':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../paraglide-js-adapter-unplugin
-      rollup:
-        specifier: '*'
-        version: 3.29.1
     devDependencies:
       '@types/node':
         specifier: 20.9.3
@@ -1025,7 +1022,7 @@ importers:
         specifier: workspace:*
         version: link:../../paraglide-js
       '@inlang/paraglide-js-adapter-vite':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../paraglide-js-adapter-vite
       '@inlang/plugin-message-format':
         specifier: workspace:*
@@ -1055,10 +1052,10 @@ importers:
   inlang/source-code/paraglide/paraglide-js-adapter-unplugin:
     dependencies:
       '@inlang/paraglide-js':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../paraglide-js
       '@inlang/sdk':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../sdk
       unplugin:
         specifier: 1.5.1
@@ -1077,7 +1074,7 @@ importers:
   inlang/source-code/paraglide/paraglide-js-adapter-vite:
     dependencies:
       '@inlang/paraglide-js-adapter-unplugin':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../paraglide-js-adapter-unplugin
     devDependencies:
       '@types/node':
@@ -1108,7 +1105,7 @@ importers:
   inlang/source-code/paraglide/paraglide-js-adapter-webpack:
     dependencies:
       '@inlang/paraglide-js-adapter-unplugin':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../paraglide-js-adapter-unplugin
     devDependencies:
       '@types/node':

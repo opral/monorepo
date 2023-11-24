@@ -36,14 +36,11 @@
         "test": "vitest run --passWithNoTests"
     },
     "dependencies": {
-        "@inlang/paraglide-js-adapter-unplugin": "*"
+        "@inlang/paraglide-js-adapter-unplugin": "workspace:*"
     },
     "devDependencies": {
         "@types/node": "20.9.3",
         "typescript": "5.2.2",
         "vitest": "0.34.3"
-    },
-    "peerDependencies": {
-        "rollup": "*"
     }
 }
