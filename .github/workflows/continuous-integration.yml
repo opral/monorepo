@@ -15,6 +15,8 @@ jobs:
         os: [ubuntu-latest, macos-latest]
         version: [18]
     runs-on: ${{ matrix.os }}
+    env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_CI_ENV_TOKEN }}
     steps:
       - name: Checkout project
         uses: actions/checkout@v3
@@ -35,11 +37,8 @@ jobs:
 
       # external contributors dont have access to doppler and need the public env vars
       - run: pnpm run fetchPublicEnv && pnpm run ci
-        if: ${{ secrets.DOPPLER_CI_ENV_TOKEN == '' }}
-        env:
-          DOPPLER_TOKEN: ${{ secrets.DOPPLER_CI_ENV_TOKEN }}
+        if: ${{ env.DOPPLER_CI_ENV_TOKEN == '' }}
 
       - run: doppler run -- pnpm run ci
         if: ${{ env.DOPPLER_CI_ENV_TOKEN != '' }}
-        env:
-          DOPPLER_TOKEN: ${{ secrets.DOPPLER_CI_ENV_TOKEN }}
+
