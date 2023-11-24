@@ -9,12 +9,12 @@ jobs:
   test:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest] # windows-latest is disabled because build.js is not compatible
+        os: [ubuntu-latest, macos-latest, windows-latest]
         version: [18]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout project
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Pnpm
         uses: pnpm/action-setup@v2
@@ -22,17 +22,24 @@ jobs:
           version: 8
 
       - name: Install node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.version }}
 
       - name: Install dependencies
         run: pnpm install
 
-      - name: Run e2e tests on normal platforms
+      - name: Run e2e tests on Linux
         if: startsWith(matrix.os, 'ubuntu')
         run: xvfb-run -a pnpm --filter vs-code-extension run test:e2e
 
-      - name: Run e2e tests on alien platforms
-        if: startsWith(matrix.os, 'ubuntu') == false
+      - name: Run e2e tests on MacOS
+        if: startsWith(matrix.os, 'macos')
         run: pnpm --filter vs-code-extension run test:e2e
+
+      - name: Run e2e tests on Windows
+        if: startsWith(matrix.os, 'windows')
+        shell: bash
+        run: |
+          pnpm config set script-shell "$(which bash)"
+          pnpm --filter vs-code-extension run test:e2e

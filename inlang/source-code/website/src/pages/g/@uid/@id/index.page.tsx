@@ -92,14 +92,14 @@ export function Page(props: PageProps) {
 										<Show
 											when={props.manifest.icon}
 											fallback={
-												<div class="w-16 h-16 font-semibold text-3xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
+												<div class="w-16 h-16 font-semibold text-3xl rounded-md m-0 object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
 													{displayName()[0]}
 												</div>
 											}
 										>
 											<img
 												src={props.manifest.icon}
-												class="w-16 h-16 rounded-md m-0 shadow-lg object-cover object-center mb-4"
+												class="w-16 h-16 rounded-md m-0 object-cover object-center mb-4"
 											/>
 										</Show>
 										<h1 class="text-4xl font-bold">{displayName()}</h1>
