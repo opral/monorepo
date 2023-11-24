@@ -9,6 +9,7 @@
 		"jsxImportSource": "solid-js",
 		"esModuleInterop": true,
 		"resolveJsonModule": true,
+		"outDir": "./dist",
 		"paths": {
 			// need to be defined in the vite config too!
 			"#src/*": ["./src/*"]

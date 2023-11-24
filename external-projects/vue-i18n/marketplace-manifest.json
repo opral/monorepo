@@ -1,0 +1,21 @@
+{
+	"id": "library.kazupon.vuei18n",
+	"icon": "https://raw.githubusercontent.com/kazupon/vue-i18n/ca513046480ecdb4565072a3b38ec0e2643f43e3/assets/vue-i18n-logo.svg",
+	"gallery": [
+		"https://raw.githubusercontent.com/kazupon/vue-i18n/ca513046480ecdb4565072a3b38ec0e2643f43e3/assets/vue-i18n-logo.svg"
+	],
+	"displayName": {
+		"en": "Vue I18n"
+	},
+	"description": {
+		"en": "Vue I18n is internationalization plugin for Vue.js"
+	},
+	"readme": {
+		"en": "./inlang/external-projects/vue-i18n/README.md"
+	},
+	"keywords": ["libraries", "vue-i18n", "vue", "javascript", "developer", "i18n", "external"],
+	"publisherName": "kazupon",
+	"publisherIcon": "https://avatars.githubusercontent.com/u/72989?v=4",
+	"website": "https://kazupon.github.io/vue-i18n/?ref=inlang.com",
+	"license": "MIT License"
+}

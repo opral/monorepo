@@ -263,7 +263,6 @@ export const Gitfloat = () => {
 		})
 	)
 
-
 	const loggedInUser = (
 		user: typeof localStorage.user
 	): { username: string; avatarUrl?: string } | false => (user?.isLoggedIn ? user : false)

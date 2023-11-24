@@ -4,7 +4,6 @@ import { ssr as vikePlugin } from "vike/plugin"
 import { watch } from "vite-plugin-watch"
 import { fileURLToPath, URL } from "node:url"
 import Icons from "unplugin-icons/vite"
-import { nodePolyfills } from "vite-plugin-node-polyfills"
 
 const isProduction = process.env.NODE_ENV === "production"
 
@@ -14,12 +13,6 @@ export default defineConfig({
 	},
 	envPrefix: "PUBLIC_",
 	plugins: [
-		nodePolyfills({
-			// Isomorphic git uses node dependencies in the browser without protocol node:* imports.
-			// other parts of the source code use server side node dependencies with protocol node:* imports.
-			// to not break server side node imports, don't polyfill node:* imports.
-			protocolImports: false,
-		}),
 		solid({ ssr: true }),
 		// the metaframework https://vike.dev/
 		vikePlugin(),
