@@ -23,7 +23,7 @@ export class InlangManager extends LitElement {
 	@property({ type: Number })
 	count = 0
 
-	render() {
+	override render() {
 		return html`
 			<div>
 				<a href="https://vitejs.dev" target="_blank">
@@ -45,7 +45,7 @@ export class InlangManager extends LitElement {
 		this.count++
 	}
 
-	static styles = css`
+	static override styles = css`
 		:host {
 			max-width: 1280px;
 			margin: 0 auto;
