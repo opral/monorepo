@@ -21,7 +21,7 @@
 
 ✅ Extract new strings with a simple click, making localization tasks more intuitive and efficient.
 
-## Geting started
+## Getting started
 
 ### 1. Create a `project.inlang.json` in the **root** of your project
 
