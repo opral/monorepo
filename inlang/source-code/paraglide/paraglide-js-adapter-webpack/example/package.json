@@ -1,0 +1,17 @@
+{
+  "name": "@inlang/paraglide-js-adapter-webpack-example",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "clean": "rm -rf ./dist ./node_modules ./src/paraglide"
+  },
+  "devDependencies": {
+    "@inlang/paraglide-js": "workspace:*",
+    "@inlang/paraglide-js-adapter-webpack": "workspace:*",
+    "typescript": "^4.9.3",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  }
+}
