@@ -150,11 +150,13 @@ const msg = m.hello({ name: "Samuel" }, { languageTag: "de" }) // Hallo Samuel!
 ## Usage with a Bundler
 
 We provide a few bundler plugins to make it easier to use paraglide-js with a bundler. If you
-are using one of these bundlers, we recommed using the corresponding plugin:
+are using one of these bundlers, we recommed using the corresponding plugin.
 
 - [Rollup](https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-rollup)
 - [Webpack](https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-webpack)
 - [Vite](https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite)
+
+These plugins make sure to rerun the `compile` script whenever you build your project. That way you don't need to modify your build script in `package.json`. If you are using a bundler with a dev-server, like Vite, the plugins also make sure to rerun the `compile` script whenever your messages change.
 
 # Playground
 
