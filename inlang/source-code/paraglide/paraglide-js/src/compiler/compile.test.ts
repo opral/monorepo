@@ -205,10 +205,10 @@ describe("e2e", async () => {
 		expect(mockOnSetLanguageTag).toHaveBeenCalledTimes(2)
 	})
 
-	test("should throw if the onSetLanguageTag callback is already called to avoid unexpected behavior", async () => {
-		// appending a random comment to make node treat this as a new module
-		// otherwise, the runtime would be cached and the callback would already be set
-		// from previous tests. using vi.resetModules() doesn't work for unknown reasons.
+	test("Calling onSetLanguageTag() multiple times should override the previous callback", async () => {
+		const cb1 = vi.fn().mockImplementation(() => {})
+		const cb2 = vi.fn().mockImplementation(() => {})
+
 		const { runtime } = await import(
 			`data:application/javascript;base64,${Buffer.from(
 				compiledBundle.output[0].code + "//" + Math.random(),
@@ -216,13 +216,16 @@ describe("e2e", async () => {
 			).toString("base64")}`
 		)
 
-		expect(() => {
-			runtime.onSetLanguageTag(() => {})
-		}).not.toThrow()
+		runtime.onSetLanguageTag(cb1)
+		runtime.setLanguageTag("en")
 
-		expect(() => {
-			runtime.onSetLanguageTag(() => {})
-		}).toThrow()
+		expect(cb1).toHaveBeenCalledTimes(1)
+
+		runtime.onSetLanguageTag(cb2)
+		runtime.setLanguageTag("de")
+
+		expect(cb2).toHaveBeenCalledTimes(1)
+		expect(cb1).toHaveBeenCalledTimes(1)
 	})
 
 	test("should return the correct message if a languageTag is set in the message options", async () => {

@@ -1,6 +1,6 @@
 {
 	"id": "guide.nilsjacobsen.whatArePlugins",
-	"icon": "https://emojis.wiki/thumbs/emojis/electric-plug.webp",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/what-are-plugins/electric-plug-logo.webp",
 	"displayName": {
 		"en": "What are Plugins?"
 	},

@@ -1,6 +1,6 @@
 {
 	"id": "guide.niklasbuchfink.whatIsInlang",
-	"icon": "https://emojis.wiki/thumbs/emojis/question-mark.webp",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/what-is-inlang/question-mark-logo.webp",
 	"displayName": {
 		"en": "What is inlang?"
 	},

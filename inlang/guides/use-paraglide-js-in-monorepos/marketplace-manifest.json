@@ -1,6 +1,6 @@
 {
 	"id": "guide.nilsjacobsen.useParaglideJsInMonorepos",
-	"icon": "https://emojis.wiki/thumbs/emojis/package.webp",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/use-paraglide-js-in-monorepos/monorepo-logo.webp",
 	"displayName": {
 		"en": "Use ParaglideJS in Monorepos"
 	},

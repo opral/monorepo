@@ -62,7 +62,7 @@ export default function Card(props: { item: any; displayName: string }) {
 							/>
 						</div>
 						<div class="flex flex-1 flex-col items-start px-4">
-							<p class="m-0 mb-2 text-sm text-surface-800 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors">
+							<p class="m-0 mb-2 text-sm text-surface-800 line-clamp-2 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors">
 								{props.displayName}
 							</p>
 							<p class="text-sm line-clamp-2 text-surface-500 transition-colors group-hover:text-surface-600 mb-4">
@@ -104,7 +104,7 @@ export default function Card(props: { item: any; displayName: string }) {
 							src={props.item.gallery && props.item.gallery[0]}
 						/>
 						<div class="flex flex-shrink-0 flex-row flex-wrap justify-between items-start mb-2 px-4">
-							<p class="m-0 mb-2 text-sm text-surface-800 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors">
+							<p class="m-0 mb-2 text-sm text-surface-800 line-clamp-2 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors">
 								{props.displayName}
 							</p>
 						</div>
@@ -116,7 +116,7 @@ export default function Card(props: { item: any; displayName: string }) {
 									<Show
 										when={props.item.icon}
 										fallback={
-											<div class="w-10 h-10 font-semibold text-xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
+											<div class="w-10 h-10 font-semibold text-xl line-clamp-2 rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
 												{props.displayName.split(" ")[0]![0]}
 											</div>
 										}
@@ -128,7 +128,7 @@ export default function Card(props: { item: any; displayName: string }) {
 									</Show>
 								</div>
 								<div class="flex flex-col justify-between items-start">
-									<p class="m-0 mb-2 text-sm text-surface-800 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors">
+									<p class="m-0 mb-2 text-sm text-surface-800 line-clamp-1 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors">
 										{props.displayName}
 									</p>
 									<Chip
