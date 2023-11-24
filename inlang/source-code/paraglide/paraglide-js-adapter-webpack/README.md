@@ -6,7 +6,7 @@ It automatically runs the compiler when  building, so you no longer need the `pa
 
 [Learn more about Paraglide](https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js)
 
-## Usage
+## Usage
 After having set up paraglide-js, you can add this plugin to your webpack config.
 
 ```js
