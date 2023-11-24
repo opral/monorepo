@@ -6,7 +6,7 @@ easier to use with bundler such as Vite, Webpack, Rollup, and RsPack.
 
 [Learn more about Paraglide](https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js)
 
-## Usage
+## Usage
 It's unlikely that you want to use this package directly. Instead, you should use the version
 specific to your bundler. 
 
