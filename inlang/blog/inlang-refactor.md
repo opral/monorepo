@@ -29,7 +29,7 @@
 ## VS Code Extension
 
 - Faster startup time & Realtime linting and message update
-- Auto migration of inlang.config.js to inlang.project.json
+- Auto migration of inlang.config.js to project.inlang.json
 - Better error handling
 
 ## Marketplace

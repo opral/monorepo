@@ -1,0 +1,17 @@
+{
+	"name": "@inlang/paraglide-js-adapter-svelte-example",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"_build": "paraglide-js compile --namespace svelte-example && vite build",
+		"preview": "vite preview"
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"@sveltejs/vite-plugin-svelte": "2.4.2",
+		"@inlang/paraglide-js": "workspace:*",
+		"svelte": "4.0.5",
+		"vite": "4.4.5"
+	}
+}

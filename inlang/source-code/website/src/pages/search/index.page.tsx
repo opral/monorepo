@@ -35,8 +35,8 @@ export function Page(props: {
 
 	return (
 		<>
-			<Title>Serach</Title>
-			<Meta name="description" content="Globalization infrastructure for software" />
+			<Title>Search</Title>
+			<Meta name="description" content="Search globalization products." />
 			<Meta name="og:image" content="/opengraph/inlang-search-image.jpg" />
 			<MarketplaceLayout>
 				<div class="pb-16 md:pb-20 min-h-screen relative">

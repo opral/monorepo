@@ -19,6 +19,7 @@ import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
 import Card from "#src/interface/components/Card.jsx"
 import { EditButton } from "#src/pages/documentation/EditButton.jsx"
+import { i18nRouting } from "#src/renderer/_default.page.route.js"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -130,13 +131,13 @@ export function Page(props: PageProps) {
 											<Show
 												when={props.manifest.icon}
 												fallback={
-													<div class="w-16 h-16 font-semibold text-3xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
+													<div class="w-16 h-16 font-semibold text-3xl rounded-md m-0 object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
 														{displayName()[0]}
 													</div>
 												}
 											>
 												<img
-													class="w-16 h-16 rounded-md m-0 shadow-lg object-cover object-center"
+													class="w-16 h-16 rounded-md m-0 object-cover object-center"
 													src={props.manifest.icon}
 												/>
 											</Show>
@@ -469,7 +470,9 @@ function NavbarCommon(props: {
 										: "text-info/80 hover:text-on-background ") +
 									"tracking-wide text-sm block w-full font-normal mb-2"
 								}
-								href={`#${replaceChars(sectionTitle.toString().toLowerCase())}`}
+								href={`${i18nRouting(currentPageContext.urlParsed.pathname).url}#${replaceChars(
+									sectionTitle.toString().toLowerCase()
+								)}`}
 							>
 								{sectionTitle.replace("#", "")}
 							</Link>
@@ -488,7 +491,9 @@ function NavbarCommon(props: {
 													? "font-medium text-on-background border-l-on-background "
 													: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
 											}
-											href={`#${replaceChars(heading.toString().toLowerCase())}`}
+											href={`${
+												i18nRouting(currentPageContext.urlParsed.pathname).url
+											}#${replaceChars(heading.toString().toLowerCase())}`}
 										>
 											{heading.replace("#", "")}
 										</Link>

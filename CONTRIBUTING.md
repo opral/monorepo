@@ -9,7 +9,8 @@ Inlang is set up as [monorepo](https://monorepo.tools/) with [Nx](https://nx.dev
 3. `pnpm install` to install dependencies.
 4. `pnpm dev` to run the development environment.
 5. `pnpm test` to run the tests.
-6. `pnpm build` to compile a production build.
+6. `pnpm fetchPublicEnv` to fetch necessary environment variables for the production build. (only for external contributor)
+7. `pnpm build` to compile a production build.
 
 ### For Windows users
 

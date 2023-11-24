@@ -104,10 +104,15 @@ export function Page(props: {
 	return (
 		<>
 			<Title>
-				Global{" "}
-				{currentPageContext.routeParams.category
-					?.replaceAll("-", " ")
-					.replace(/\w\S*/g, (w) => w.replace(/^\w/, (c) => c.toUpperCase()))}{" "}
+				{currentPageContext.routeParams.category?.toLowerCase() === "lix" ||
+				currentPageContext.routeParams.category?.toLowerCase() === "guides"
+					? ""
+					: "Global"}{" "}
+				{currentPageContext.routeParams.category?.toLowerCase() === "lix"
+					? currentPageContext.routeParams.category
+					: currentPageContext.routeParams.category
+							?.replaceAll("-", " ")
+							.replace(/\w\S*/g, (w) => w.replace(/^\w/, (c) => c.toUpperCase()))}{" "}
 				| inlang
 			</Title>
 			<Meta
@@ -126,7 +131,12 @@ export function Page(props: {
 			/>
 			<Meta
 				name="twitter:title"
-				content={`Global ${currentPageContext.routeParams.category} | inlang`}
+				content={`${
+					currentPageContext.routeParams.category?.toLowerCase() === "lix" ||
+					currentPageContext.routeParams.category?.toLowerCase() === "guides"
+						? ""
+						: "Global"
+				} ${currentPageContext.routeParams.category} | inlang`}
 			/>
 			<Meta
 				name="twitter:description"
