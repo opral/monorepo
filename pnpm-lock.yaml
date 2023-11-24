@@ -1001,6 +1001,28 @@ importers:
         specifier: 0.34.3
         version: 0.34.3
 
+  inlang/source-code/paraglide/paraglide-js-adapter-rollup/example:
+    dependencies:
+      '@rollup/plugin-alias':
+        specifier: ^5.0.1
+        version: 5.0.1(rollup@3.29.1)
+      rollup-plugin-alias:
+        specifier: ^2.2.0
+        version: 2.2.0
+    devDependencies:
+      '@inlang/paraglide-js':
+        specifier: workspace:*
+        version: link:../../paraglide-js
+      '@inlang/paraglide-js-adapter-rollup':
+        specifier: workspace:*
+        version: link:..
+      rollup:
+        specifier: 3.29.1
+        version: 3.29.1
+      typescript:
+        specifier: ^4.9.3
+        version: 4.9.5
+
   inlang/source-code/paraglide/paraglide-js-adapter-svelte/example:
     devDependencies:
       '@inlang/paraglide-js':
@@ -4461,6 +4483,19 @@ packages:
       '@resvg/resvg-js-win32-arm64-msvc': 2.6.0
       '@resvg/resvg-js-win32-ia32-msvc': 2.6.0
       '@resvg/resvg-js-win32-x64-msvc': 2.6.0
+    dev: false
+
+  /@rollup/plugin-alias@5.0.1(rollup@3.29.1):
+    resolution: {integrity: sha512-JObvbWdOHoMy9W7SU0lvGhDtWq9PllP5mjpAy+TUslZG/WzOId9u80Hsqq1vCUn9pFJ0cxpdcnAv+QzU2zFH3Q==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
+    peerDependenciesMeta:
+      rollup:
+        optional: true
+    dependencies:
+      rollup: 3.29.1
+      slash: 4.0.0
     dev: false
 
   /@rollup/plugin-inject@5.0.5:
@@ -12428,6 +12463,13 @@ packages:
       inherits: 2.0.4
     dev: true
 
+  /rollup-plugin-alias@2.2.0:
+    resolution: {integrity: sha512-9ZK410qeFed4gGrHoojBpxLsHF74vPgsheGg9JRW5RbALAxqdvJbd357mSqWBqUrBfRVnZnNUXTZdYLxxQEA5A==}
+    deprecated: This module has moved and is now available at @rollup/plugin-alias. Please update your dependencies. This version is no longer maintained.
+    dependencies:
+      slash: 3.0.0
+    dev: false
+
   /rollup@3.29.1:
     resolution: {integrity: sha512-c+ebvQz0VIH4KhhCpDsI+Bik0eT8ZFEVZEYw0cGMVqIP8zc+gnwl7iXCamTw7vzv2MeuZFZfdx5JJIq+ehzDlg==}
     engines: {node: '>=14.18.0', npm: '>=8.0.0'}
@@ -12775,7 +12817,11 @@ packages:
   /slash@3.0.0:
     resolution: {integrity: sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==}
     engines: {node: '>=8'}
-    dev: true
+
+  /slash@4.0.0:
+    resolution: {integrity: sha512-3dOsAHXXUkQTpOYcoAxLIorMTp4gIQr5IW3iVb7A7lFIp0VHhnynm9izx6TssdrIcVIESAlVjtnO2K8bg+Coew==}
+    engines: {node: '>=12'}
+    dev: false
 
   /smartwrap@2.0.2:
     resolution: {integrity: sha512-vCsKNQxb7PnCNd2wY1WClWifAc2lwqsG8OaswpJkVJsvMGcnEntdTCDajZCkk93Ay1U3t/9puJmb525Rg5MZBA==}
