@@ -18,8 +18,8 @@ import { paraglide } from "@inlang/paraglide-js-adapter-vite"
 export default defineConfig({
 	plugins: [
 		paraglide({
-			project: "./inlang.project.json", //Path to your inlang project file
-			outDir: "./src/paraglide", //Where you want the generated files to be placed
+			project: "./project.inlang.json", //Path to your inlang project file
+			outdir: "./src/paraglide", //Where you want the generated files to be placed
 		}),
 	],
 }
@@ -42,8 +42,8 @@ import path from "path"
 export default defineConfig({
 	plugins: [
 		paraglide({
-			project: "./inlang.project.json",
-			outDir: "./src/paraglide"
+			project: "./project.inlang.json",
+			outdir: "./src/paraglide"
 		}),
 	],
 	resolve: {
