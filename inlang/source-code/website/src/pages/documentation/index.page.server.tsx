@@ -10,7 +10,6 @@ This is necessary because the code is executed from the build folder. */
 const repositoryRoot = import.meta.url.slice(0, import.meta.url.lastIndexOf("inlang/source-code"))
 
 export async function onBeforeRender(pageContext: any) {
-
 	const slug =
 		pageContext.urlPathname === "/documentation"
 			? ""
