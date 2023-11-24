@@ -35,7 +35,7 @@ jobs:
 
       # external contributors dont have access to doppler and need the public env vars
       - run: pnpm run fetchPublicEnv && pnpm run ci
-        if: ${{ env.DOPPLER_TOKEN == '' }}
+        if: ${{ env.DOPPLER_TOKEN != 'sdf' }}
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_CI_ENV_TOKEN }}
 
