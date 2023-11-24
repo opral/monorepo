@@ -7,7 +7,7 @@ You also do no longer need the `paraglide` commands in your `package.json`.
 
 [Learn more about Paraglide](https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js)
 
-## Usage
+## Usage
 After having set up paraglide-js, you can add this plugin to your webpack config.
 
 ```js
