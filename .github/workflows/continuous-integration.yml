@@ -33,6 +33,12 @@ jobs:
           node-version: ${{ matrix.version }}
           cache: 'pnpm'
 
+      - run: pnpm run fetchPublicEnv && pnpm run ci
+        if: ${{ env.DOPPLER_CI_ENV_TOKEN == '' }}
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_CI_ENV_TOKEN }}
+
       - run: doppler run -- pnpm run ci
+        if: ${{ env.DOPPLER_CI_ENV_TOKEN != '' }}
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_CI_ENV_TOKEN }}
