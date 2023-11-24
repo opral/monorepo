@@ -4,7 +4,7 @@ const isProduction = process.env.NODE_ENV === "production"
 
 export default defineConfig({
 	server: {
-		port: 4003,
+		port: 4004,
 	},
 	envPrefix: "PUBLIC_",
 	build: {
