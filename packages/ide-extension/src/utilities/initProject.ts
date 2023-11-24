@@ -10,6 +10,7 @@ import { _import } from "./import/_import.js"
 import type { TelemetryEvents } from "../services/telemetry/events.js"
 import { tryCatch } from "@inlang/result"
 import { CONFIGURATION } from "../configuration.js"
+import fs from "node:fs/promises"
 
 // Helper Functions
 export function getActiveTextEditor(): vscode.TextEditor | undefined {
@@ -54,7 +55,7 @@ export async function initProject(args: {
 	const { data: project, error } = await tryCatch(() =>
 		loadProject({
 			settingsFilePath: closestProjectFilePathUri.fsPath,
-			nodeishFs: createFileSystemMapper(args.workspaceFolder.uri.fsPath),
+			nodeishFs: createFileSystemMapper(args.workspaceFolder.uri.fsPath, fs),
 			_import: _import(args.workspaceFolder.uri.fsPath),
 			_capture(id, props) {
 				telemetry.capture({
