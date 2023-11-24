@@ -1,5 +1,5 @@
 ---
-"@inlang/sdk": major
+"@inlang/sdk": minor
 ---
 
-refactor: rename `openProject({ settingsFilePath })` to `openProject({ projectPath })` to align with new project directory structure
+BREAKING refactor: rename `openProject({ settingsFilePath })` to `openProject({ projectPath })` to align with new project directory structure
