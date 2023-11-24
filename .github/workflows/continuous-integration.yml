@@ -31,15 +31,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.version }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install
 
       # external contributors dont have access to doppler and secrets and need the public env vars
       # TODO add warning to PR Running CI with public env vars with limited test scope
-      - run: pnpm run fetch-env:public && pnpm run check-all
 
+      - run: pnpm run fetch-env:public && pnpm run check-all
         if: ${{ env.DOPPLER_TOKEN == '' }}
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_CI_ENV_TOKEN }}
