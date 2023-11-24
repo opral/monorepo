@@ -36,9 +36,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      # external contributors dont have access to doppler and secrets and need the public env vars add warning to PR Running CI with public env vars with limited test scope
+      # external contributors dont have access to doppler and secrets and need the public env vars
+      # TODO add warning to PR Running CI with public env vars with limited test scope
       - run: pnpm run fetchPublicEnv && pnpm run ci
-        if: ${{ env.DOPPLER_TOKEN = '' }}
+        if: ${{ env.DOPPLER_TOKEN == '' }}
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_CI_ENV_TOKEN }}
 
