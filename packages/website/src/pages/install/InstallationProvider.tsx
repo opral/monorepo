@@ -260,7 +260,7 @@ async function initializeRepo(
 	if (step().error) return
 
 	const project = await loadProject({
-		settingsFilePath: "/project.inlang.json",
+		projectPath: "/project.inlang.json",
 		nodeishFs: repo.nodeishFs,
 	})
 
@@ -299,7 +299,7 @@ async function initializeRepo(
 
 	// look again if the project has errors
 	const projectAfterPush = await loadProject({
-		settingsFilePath: "/project.inlang.json",
+		projectPath: "/project.inlang.json",
 		nodeishFs: repo.nodeishFs,
 	})
 

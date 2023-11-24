@@ -20,7 +20,7 @@ it("should return fake messages to illustrate how a plugin works", async () => {
 	// opening the project file and loading the plugin
 	const project = await loadProject({
 		nodeishFs: fs,
-		settingsFilePath: "/project.inlang.json",
+		projectPath: "/project.inlang.json",
 		// simulate the import function that the SDK uses
 		// to inject the plugin into the project
 		_import: async () => import("./index.js"),

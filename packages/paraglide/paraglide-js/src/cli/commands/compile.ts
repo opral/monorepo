@@ -17,7 +17,7 @@ export const compileCommand = new Command()
 
 		const project = exitIfErrors(
 			await loadProject({
-				settingsFilePath: path,
+				projectPath: path,
 				nodeishFs: fs,
 			})
 		)

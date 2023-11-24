@@ -115,7 +115,7 @@ it("should throw if a project (path) does not have a name", async () => {
 	const fs = createNodeishMemoryFs()
 	const project = await tryCatch(() =>
 		loadProject({
-			settingsFilePath: "/source-code/.inlang",
+			projectPath: "/source-code/.inlang",
 			nodeishFs: fs,
 			_import,
 		})
@@ -135,7 +135,7 @@ it("should throw if a project path does not end with .inlang", async () => {
 	for (const invalidPath of invalidPaths) {
 		const project = await tryCatch(() =>
 			loadProject({
-				settingsFilePath: invalidPath,
+				projectPath: invalidPath,
 				nodeishFs: fs,
 				_import,
 			})
@@ -145,12 +145,12 @@ it("should throw if a project path does not end with .inlang", async () => {
 })
 
 describe("initialization", () => {
-	it("should throw if settingsFilePath is not an absolute path", async () => {
+	it("should throw if projectPath is not an absolute path", async () => {
 		const fs = createNodeishMemoryFs()
 
 		const result = await tryCatch(() =>
 			loadProject({
-				settingsFilePath: "relative/path",
+				projectPath: "relative/path",
 				nodeishFs: fs,
 				_import,
 			})
@@ -166,7 +166,7 @@ describe("initialization", () => {
 
 		const result = await tryCatch(() =>
 			loadProject({
-				settingsFilePath: "C:\\Users\\user\\project\\project.inlang.json",
+				projectPath: "C:\\Users\\user\\project\\project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -182,7 +182,7 @@ describe("initialization", () => {
 			fs.mkdir("/user/project", { recursive: true })
 
 			const project = await loadProject({
-				settingsFilePath: "/user/non-existend-project.inlang",
+				projectPath: "/user/non-existend-project.inlang",
 				nodeishFs: fs,
 				_import,
 			})
@@ -196,7 +196,7 @@ describe("initialization", () => {
 			await fs.writeFile("/user/project/project.inlang.json", "invalid json")
 
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -210,7 +210,7 @@ describe("initialization", () => {
 			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify({}))
 
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -223,7 +223,7 @@ describe("initialization", () => {
 			await fs.mkdir("/user/project", { recursive: true })
 			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -238,7 +238,7 @@ describe("initialization", () => {
 			await fs.writeFile("/user/project/project.inlang.json", settingsWithDeifferentFormatting)
 
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -271,7 +271,7 @@ describe("initialization", () => {
 			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import: $badImport,
 			})
@@ -303,7 +303,7 @@ describe("functionality", () => {
 			await fs.mkdir("/user/project", { recursive: true })
 			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -316,7 +316,7 @@ describe("functionality", () => {
 			await fs.mkdir("/user/project", { recursive: true })
 			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -342,7 +342,7 @@ describe("functionality", () => {
 			await fs.mkdir("/user/project", { recursive: true })
 			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -365,7 +365,7 @@ describe("functionality", () => {
 			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -379,7 +379,7 @@ describe("functionality", () => {
 			await fs.mkdir("/user/project", { recursive: true })
 			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -411,7 +411,7 @@ describe("functionality", () => {
 			await fs.mkdir("/user/project", { recursive: true })
 			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -445,7 +445,7 @@ describe("functionality", () => {
 			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -492,7 +492,7 @@ describe("functionality", () => {
 				} satisfies InlangModule
 			}
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -543,7 +543,7 @@ describe("functionality", () => {
 			}
 
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -562,7 +562,7 @@ describe("functionality", () => {
 			await fs.mkdir("/user/project", { recursive: true })
 			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -578,7 +578,7 @@ describe("functionality", () => {
 			await fs.mkdir("/user/project", { recursive: true })
 			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -595,7 +595,7 @@ describe("functionality", () => {
 			await fs.mkdir("/user/project", { recursive: true })
 			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -640,7 +640,7 @@ describe("functionality", () => {
 			}
 
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -819,7 +819,7 @@ describe("functionality", () => {
 			}
 
 			const project = await loadProject({
-				settingsFilePath: "/project.inlang.json",
+				projectPath: "/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -839,7 +839,7 @@ describe("functionality", () => {
 			await fs.mkdir("/user/project", { recursive: true })
 			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import,
 			})
@@ -861,7 +861,7 @@ describe("functionality", () => {
 			await fs.mkdir("/user/project", { recursive: true })
 			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
 			const project = await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project/project.inlang.json",
 				nodeishFs: fs,
 				_import: async () => ({
 					default: mockMessageLintRule,
@@ -927,7 +927,7 @@ describe("functionality", () => {
 
 			// establish watcher
 			const project = await loadProject({
-				settingsFilePath: normalizePath("/project.inlang.json"),
+				projectPath: normalizePath("/project.inlang.json"),
 				nodeishFs: fs,
 				_import: async () => ({
 					default: mockMessageFormatPlugin,

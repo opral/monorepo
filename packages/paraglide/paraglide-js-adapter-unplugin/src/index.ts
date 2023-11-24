@@ -37,7 +37,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		async buildStart() {
 			executeSync()
 			const inlang = await loadProject({
-				settingsFilePath: path.resolve(process.cwd(), options.project),
+				projectPath: path.resolve(process.cwd(), options.project),
 				nodeishFs: fs,
 			})
 

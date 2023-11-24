@@ -33,7 +33,7 @@ const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 /**
  * Creates an inlang instance.
  *
- * @param settingsFilePath - Absolute path to the inlang settings file.
+ * @param projectPath - Absolute path to the inlang settings file.
  * @param nodeishFs - Filesystem that implements the NodeishFilesystemSubset interface.
  * @param _import - Use `_import` to pass a custom import function for testing,
  *   and supporting legacy resolvedModules such as CJS.
@@ -41,29 +41,29 @@ const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
  *
  */
 export const loadProject = async (args: {
-	settingsFilePath: string
+	projectPath: string
 	nodeishFs: NodeishFilesystem
 	_import?: ImportFunction
 	_capture?: (id: string, props: Record<string, unknown>) => void
 }): Promise<InlangProject> => {
-	let projectPath = normalizePath(args.settingsFilePath)
+	let projectPath = normalizePath(args.projectPath)
 
 	// -- validation --------------------------------------------------------
 	// the only place where throwing is acceptable because the project
 	// won't even be loaded. do not throw anywhere else. otherwise, apps
 	// can't handle errors gracefully.
 
-	if (!isAbsolutePath(args.settingsFilePath)) {
+	if (!isAbsolutePath(args.projectPath)) {
 		throw new LoadProjectInvalidArgument(
-			`Expected an absolute path but received "${args.settingsFilePath}".`,
-			{ argument: "settingsFilePath" }
+			`Expected an absolute path but received "${args.projectPath}".`,
+			{ argument: "projectPath" }
 		)
 	}
 
 	// -- migrate if outdated ------------------------------------------------
 
 	// remove this conditional in January 2024
-	if (args.settingsFilePath.endsWith("project.inlang.json")) {
+	if (args.projectPath.endsWith("project.inlang.json")) {
 		console.warn(
 			"The project.inlang.json file is deprecated. Please follow the instructions in the README to migrate to project directories."
 		)

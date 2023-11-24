@@ -87,7 +87,7 @@ async function setupProject(enabledLintRule?: MessageLintRule) {
 	}
 
 	return await loadProject({
-		settingsFilePath: "/user/project/project.inlang.json",
+		projectPath: "/user/project/project.inlang.json",
 		nodeishFs: fs,
 		_import,
 	})
