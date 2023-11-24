@@ -54,9 +54,9 @@ If you want to add lint rules to your experience, you can add them from: https:/
 ## Features
 
 <doc-features>
-  <doc-feature color="#E2E8F0" title="Extract messages" icon="solar:scissors-linear"></doc-feature>
-  <doc-feature color="#E2E8F0" title="Lint messages" icon="solar:magnifer-bug-outline"></doc-feature>
-  <doc-feature color="#E2E8F0" title="Inline Annotations" icon="solar:chat-square-code-outline"></doc-feature>
+  <doc-feature text-color="#FFFFFF" color="#334155" title="Extract messages" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/ide-extension/assets/ide-extension01.png"></doc-feature>
+  <doc-feature text-color="#FFFFFF" color="#334155" title="Lint messages" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/ide-extension/assets/ide-extension02.png"></doc-feature>
+  <doc-feature text-color="#FFFFFF" color="#334155" title="Inline Annotations" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/ide-extension/assets/ide-extension03.png"></doc-feature>
 </doc-features>
 
 … and much more as seen below
