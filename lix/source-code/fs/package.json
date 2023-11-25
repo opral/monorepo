@@ -7,7 +7,7 @@
 	},
 	"exports": {
 		".": "./dist/index.js",
-		"./*.ts": "./src/index.d.ts"
+		"./src/*.ts": "./src/index.d.ts"
 	},
 	"types": "./dist/*.d.ts",
 	"files": [
@@ -15,7 +15,7 @@
 		"./src"
 	],
 	"scripts": {
-		"build": "tsc --build && esbuild ./src/index.ts --bundle --outfile=dist/index.js --format=esm",
+		"build": "tsc --build && esbuild ./src/index.ts --bundle --outfile=dist/index.js --format=esm --tree-shaking=true",
 		"dev": "tsc --watch; esbuild ./src/index.ts --bundle --outfile=dist/index.js --format=esm --watch",
 		"test": "vitest run --passWithNoTests --coverage",
 		"lint": "eslint ./src --fix",

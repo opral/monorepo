@@ -17,7 +17,7 @@
 	],
 	"scripts": {
 		"build": "tsc --build && esbuild ./src/index.ts --bundle --external:@inlang/env-variables --outfile=dist/index.js --format=esm --tree-shaking=true",
-		"dev": "tsc --watch",
+		"dev": "tsc --watch; esbuild ./src/index.ts --bundle --external:@inlang/env-variables --outfile=dist/index.js --format=esm --watch",
 		"test": "vitest run --coverage --test-timeout 60000",
 		"bench": "vitest bench --watch=false",
 		"lint": "eslint ./src --fix",
