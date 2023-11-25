@@ -10,12 +10,13 @@
 		"./src/*.ts": "./src/*.ts",
 		"./src/browser-auth.ts": "./src/browser-auth.ts"
 	},
+	"types": "./dist/index.d.ts",
 	"files": [
 		"./dist",
 		"./src"
 	],
 	"scripts": {
-		"build": "tsc --build",
+		"build": "tsc --build && esbuild ./src/index.ts --bundle --external:@inlang/env-variables --outfile=dist/index.js --format=esm --tree-shaking=true",
 		"dev": "tsc --watch",
 		"test": "vitest run --coverage --test-timeout 60000",
 		"bench": "vitest bench --watch=false",
@@ -33,6 +34,7 @@
 	},
 	"license": "Apache-2.0",
 	"devDependencies": {
+		"esbuild": "0.19.7",
 		"@vitest/coverage-v8": "0.34.3",
 		"typescript": "5.2.2",
 		"vitest": "0.34.3"
