@@ -253,8 +253,8 @@ We need to import a few things in pages before we can use translations. You need
   import * as m from "$paraglide/messages"; // this contains the translations
 
   // This function helps you make hrefs for <a> tags for example, to lead to the translated page.
-  function redirectHref(href: string) {
-    return languageTag() ? `/${languageTag()}${href}` : href;
+  function translatePath(href: string) {
+    return languageTag() ? `/${languageTag() == sourceLanguageTag ? "" : languageTag()}${href}` : href;
   }
 </script>
 ```
@@ -348,8 +348,8 @@ Let's make the the links change based on the language tags.
   import { setLanguageTag, languageTag } from "$paraglide/runtime";
   import * as m from "$paraglide/messages";
 
-  function redirectHref(href: string) {
-    return languageTag() ? `/${languageTag()}${href}` : href;
+  function translatePath(href: string) {
+    return languageTag() ? `/${languageTag() == sourceLanguageTag ? "" : languageTag()}${href}` : href;
   }
 </script>
 
@@ -359,7 +359,7 @@ Let's make the the links change based on the language tags.
 <button on:click={() => setLanguageTag("en")}>🇺🇸</button>
 
 // if the language is /de, it should redirect to /de/another-page (which probbably doesn't exist, but you get the point.)
-<a href={redirectHref("/another-page")}>{m.AnotherPage()}</a>
+<a href={translatePath("/another-page")}>{m.AnotherPage()}</a>
 
 ```
 
