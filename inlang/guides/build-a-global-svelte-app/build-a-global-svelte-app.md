@@ -19,7 +19,7 @@ git init
 
 The CLI might ask you some questions. To improve your experience, answer them thoroughly.
 
-```json
+```cmd
 npx @inlang/paraglide-js@latest init
 
 ✔ Successfully created a new inlang project.                                                                              
