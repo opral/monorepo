@@ -9,49 +9,7 @@
 				"default",
 				"^default",
 				{
-					"env": "ALGOLIA_ADMIN"
-				},
-				{
-					"env": "ALGOLIA_APPLICATION"
-				},
-				{
-					"env": "JWE_SECRET"
-				},
-				{
-					"env": "NODE_VERSION"
-				},
-				{
-					"env": "PUBLIC_GIT_PROXY_BASE_URL"
-				},
-				{
-					"env": "PUBLIC_LIX_GITHUB_APP_CLIENT_ID"
-				},
-				{
-					"env": "LIX_GITHUB_APP_CLIENT_SECRET"
-				},
-				{
-					"env": "PUBLIC_LIX_GITHUB_APP_NAME"
-				},
-				{
-					"env": "PUBLIC_SERVER_BASE_URL"
-				},
-				{
-					"env": "SESSION_COOKIE_SECRET"
-				},
-				{
-					"env": "SERVER_SENTRY_DSN"
-				},
-				{
-					"env": "PUBLIC_WEBSITE_SENTRY_DSN"
-				},
-				{
-					"env": "PUBLIC_POSTHOG_TOKEN"
-				},
-				{
-					"env": "OPEN_AI_KEY"
-				},
-				{
-					"env": "GOOGLE_TRANSLATE_API_KEY"
+					"runtime": "doppler secrets"
 				}
 			],
 			"cache": true
