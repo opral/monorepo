@@ -9,9 +9,9 @@
     "clean": "rm -rf ./dist ./node_modules ./src/paraglide"
   },
   "devDependencies": {
-    "typescript": "^4.9.3",
-    "vite": "^4.2.0",
+    "@inlang/paraglide-js": "workspace:*",
     "@inlang/paraglide-js-adapter-vite": "workspace:*",
-    "@inlang/paraglide-js": "workspace:*"
+    "typescript": "^4.9.3",
+    "vite": "^4.2.0"
   }
 }
