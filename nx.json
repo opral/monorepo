@@ -1,5 +1,15 @@
 {
 	"$schema": "./node_modules/nx/schemas/nx-schema.json",
+	"namedInputs": {
+		"default": [
+			"{projectRoot}/**/*"
+		],
+		"doppler": [
+			{
+				"runtime": "doppler secrets"
+			}
+		]
+	},
 	"targetDefaults": {
 		"build": {
 			"dependsOn": [
@@ -8,9 +18,7 @@
 			"inputs": [
 				"default",
 				"^default",
-				{
-					"runtime": "doppler secrets"
-				}
+				"doppler"
 			],
 			"cache": true
 		},
@@ -40,4 +48,3 @@
 		"defaultBase": "origin/main"
 	}
 }
-
