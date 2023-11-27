@@ -56,7 +56,7 @@ describe("main workflow", async () => {
 		return toSnapshot(repository.nodeishFs)
 	}
 
-	it("coustom committed tree is identical to isomorphic gic", async () => {
+	it("coustom committed tree is identical to isomorphic git", async () => {
 		vi.useFakeTimers()
 		const snapA = await testCommit(repository.commit)
 
@@ -67,4 +67,7 @@ describe("main workflow", async () => {
 		expect(snapA).toStrictEqual(snapB)
 		vi.useRealTimers()
 	})
+
+	// TODO: add loose checkout test when implemented in openRepo it("can commit loose file checkout same as full checkout", async () => {
+	// })
 })
