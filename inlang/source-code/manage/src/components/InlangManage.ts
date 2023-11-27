@@ -1,31 +1,52 @@
 import type { TemplateResult } from "lit"
 import { html } from "lit"
-import { customElement } from "lit/decorators.js"
+import { customElement, property } from "lit/decorators.js"
 import { TwLitElement } from "../common/TwLitElement"
+
+import "./InlangInstall"
 
 @customElement("inlang-manage")
 export class InlangManage extends TwLitElement {
+	@property({ type: Object })
+	query: Record<string, string | undefined> = {}
+
+	@property({ type: String })
+	step: string = ""
+
+	override connectedCallback() {
+		super.connectedCallback()
+		// put the query params into an object, example /install?repo=github.com/inlang/monorepo&module=plugin.inlang.mFunctionMatcher
+		if (window.location.search !== "") {
+			const query = {
+				path: window.location.pathname.replace("/", ""),
+				...Object.fromEntries(
+					window.location.search
+						.slice(1)
+						.split("&")
+						.map((x) => x.split("="))
+						.map(([key, value]) => [key, value])
+				),
+			}
+			this.query = query
+		} else {
+			this.query = {
+				path: undefined,
+			}
+		}
+	}
+
 	override render(): TemplateResult {
 		return html` <main class="w-full h-screen flex justify-center items-center px-4">
 			<div class="w-full max-w-md h-auto bg-slate-50 border border-slate-200 p-4 rounded-lg">
 				<div class="flex items-center gap-2 border-b border-b-slate-200 pb-4 mb-4">
 					<inlang-logo></inlang-logo>
-					<h1 class="font-semibold">Manage</h1>
+					<h1 class="font-semibold capitalize">${this.query.path ? this.query.path : "Manage"}</h1>
 				</div>
-				<p class="text-slate-500 mb-8">Manage your inlang project.</p>
-				<div class="flex flex-col gap-4">
-					<button
-						class="bg-slate-800 text-white py-2 rounded-lg font-medium hover:bg-slate-900 transition-colors"
-					>
-						Install a module
-					</button>
-					<button class="bg-slate-200 text-white py-2 rounded-lg font-medium cursor-not-allowed">
-						Uninstall a module
-					</button>
-					<button class="bg-slate-200 text-white py-2 rounded-lg font-medium cursor-not-allowed">
-						Update a module
-					</button>
-				</div>
+				${!this.query.path
+					? html`<inlang-menu></inlang-menu>`
+					: this.query.path === "install"
+					? html`<inlang-install></inlang-install>`
+					: ""}
 			</div>
 		</main>`
 	}
@@ -54,6 +75,28 @@ export class InlangLogo extends TwLitElement {
 					/>
 				</g>
 			</svg>
+		`
+	}
+}
+
+@customElement("inlang-menu")
+export class InlangMenu extends TwLitElement {
+	override render(): TemplateResult {
+		return html`
+			<p class="text-slate-500 mb-8">Manage your inlang project.</p>
+			<div class="flex flex-col gap-4">
+				<button
+					class="bg-slate-800 text-white py-2 rounded-lg font-medium hover:bg-slate-900 transition-colors"
+				>
+					Install a module
+				</button>
+				<button class="bg-slate-200 text-white py-2 rounded-lg font-medium cursor-not-allowed">
+					Uninstall a module
+				</button>
+				<button class="bg-slate-200 text-white py-2 rounded-lg font-medium cursor-not-allowed">
+					Update a module
+				</button>
+			</div>
 		`
 	}
 }

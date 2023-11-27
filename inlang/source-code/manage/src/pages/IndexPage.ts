@@ -11,7 +11,6 @@ export class IndexPage extends TwLitElement {
 	override render(): TemplateResult {
 		return html`
 			<div class="container">
-				<x-hello-world></x-hello-world>
 				<inlang-manage></inlang-manage>
 			</div>
 		`
