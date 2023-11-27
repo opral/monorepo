@@ -16,6 +16,10 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@v4
 
+      # Needed for nx affected
+      - uses: nrwl/nx-set-shas@v3
+      - run: git branch --track main origin/main
+
       - name: Setup Pnpm
         uses: pnpm/action-setup@v2
         with:

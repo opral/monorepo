@@ -17,6 +17,10 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
+      # Needed for nx affected
+      - uses: nrwl/nx-set-shas@v3
+      - run: git branch --track main origin/main
+
       - name: Install Doppler CLI for env (public) variables
         uses: dopplerhq/cli-action@v2
 

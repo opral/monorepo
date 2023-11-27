@@ -18,7 +18,7 @@
 		"changeset": "npx changeset",
 		"clean": "pnpm recursive run clean --if-present && rm -rf ./.env ./node_modules",
 		"----- CI ---- used to test the codebase on every commit": "",
-		"ci": "pnpm format && pnpm lint && pnpm build && pnpm test",
+		"ci": "nx affected -t format,lint,build,text",
 		"ci:publish": "pnpm --filter !vs-code-extension publish -r",
 		"ci:version": "npx changeset version"
 	},
