@@ -4,6 +4,7 @@ import { compile } from "../../compiler/compile.js"
 import fs from "node:fs/promises"
 import { resolve } from "node:path"
 import { Command } from "commander"
+import { telemetry } from "../../services/telemetry/implementation.js"
 
 export const compileCommand = new Command()
 	.name("compile")
@@ -20,12 +21,18 @@ export const compileCommand = new Command()
 	.action(async (options: { project: string; outdir: string }) => {
 		consola.info(`Compiling inlang project at "${options.project}".`)
 
-		const path = resolve(process.cwd(), options.project)
-
+		const settingsFilePath = resolve(process.cwd(), options.project)
 		const project = exitIfErrors(
 			await loadProject({
-				settingsFilePath: path,
+				settingsFilePath,
 				nodeishFs: fs,
+				_capture(id, props) {
+					telemetry.capture({
+						// @ts-ignore the event types
+						event: id,
+						properties: props,
+					})
+				},
 			})
 		)
 
