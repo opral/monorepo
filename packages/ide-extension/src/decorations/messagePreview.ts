@@ -4,6 +4,7 @@ import { contextTooltip } from "./contextTooltip.js"
 import { getStringFromPattern } from "../utilities/query.js"
 import { getActiveTextEditor } from "../utilities/initProject.js"
 import { CONFIGURATION } from "../configuration.js"
+import { resolveEscapedCharacters } from "../utilities/resolveEscapedCharacters.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -50,7 +51,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 
 				const variant = _message?.variants?.find((v) => v.languageTag === sourceLanguageTag)
 
-				const translation = getStringFromPattern({
+				const translationString = getStringFromPattern({
 					pattern: variant?.pattern || [
 						{
 							type: "Text",
@@ -60,6 +61,8 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 					languageTag: sourceLanguageTag,
 					messageId: message.messageId,
 				})
+
+				const translation = resolveEscapedCharacters(translationString)
 
 				const truncatedTranslation =
 					translation &&
