@@ -26,7 +26,7 @@ import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsoluteP
 import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
-import { migrateToDirectory } from "./migrations/migrateToDirectory.js"
+import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -46,7 +46,11 @@ export const loadProject = async (args: {
 	_import?: ImportFunction
 	_capture?: (id: string, props: Record<string, unknown>) => void
 }): Promise<InlangProject> => {
-	let projectPath = normalizePath(args.projectPath)
+	const projectPath = normalizePath(args.projectPath)
+
+	// -- migrate if outdated ------------------------------------------------
+
+	await maybeMigrateToDirectory({ nodeishFs: args.nodeishFs, projectPath })
 
 	// -- validation --------------------------------------------------------
 	// the only place where throwing is acceptable because the project
@@ -58,26 +62,11 @@ export const loadProject = async (args: {
 			`Expected an absolute path but received "${args.projectPath}".`,
 			{ argument: "projectPath" }
 		)
-	}
-
-	// -- migrate if outdated ------------------------------------------------
-
-	// remove this conditional in January 2024
-	if (args.projectPath.endsWith("project.inlang.json")) {
-		console.warn(
-			"The project.inlang.json file is deprecated. Please follow the instructions in the README to migrate to project directories."
+	} else if (/[^\\/]+\.inlang$/.test(projectPath) === false) {
+		throw new LoadProjectInvalidArgument(
+			`Expected a path ending in "{name}.inlang" but received "${projectPath}".\n\nValid examples: \n- "/path/to/micky-mouse.inlang"\n- "/path/to/green-elephant.inlang`,
+			{ argument: "projectPath" }
 		)
-		await migrateToDirectory({ fs: args.nodeishFs, settingsFilePath: projectPath })
-		// remove the .json to get the new path
-		// ./project.inlang.json -> ./project.inlang
-		projectPath = projectPath.replace(/\.json$/, "")
-	} else {
-		if (/[^\\/]+\.inlang$/.test(projectPath) === false) {
-			throw new LoadProjectInvalidArgument(
-				`Expected a path ending in "{name}.inlang" but received "${projectPath}".\n\nValid examples: \n- "/path/to/micky-mouse.inlang"\n- "/path/to/green-elephant.inlang`,
-				{ argument: "projectPath" }
-			)
-		}
 	}
 
 	// -- load project ------------------------------------------------------
@@ -106,7 +95,7 @@ export const loadProject = async (args: {
 		// TODO: create FS watcher and update settings on change
 
 		const writeSettingsToDisk = skipFirst((settings: ProjectSettings) =>
-			_writeSettingsToDisk({ nodeishFs, settings })
+			_writeSettingsToDisk({ nodeishFs, settings, projectPath })
 		)
 
 		const setSettings = (settings: ProjectSettings): Result<void, ProjectSettingsInvalidError> => {
@@ -342,6 +331,7 @@ const parseSettings = (settings: unknown) => {
 }
 
 const _writeSettingsToDisk = async (args: {
+	projectPath: string
 	nodeishFs: NodeishFilesystemSubset
 	settings: ProjectSettings
 }) => {
@@ -354,7 +344,7 @@ const _writeSettingsToDisk = async (args: {
 	}
 
 	const { error: writeSettingsError } = await tryCatch(async () =>
-		args.nodeishFs.writeFile("./project.inlang.json", serializedSettings)
+		args.nodeishFs.writeFile(args.projectPath + "/settings.json", serializedSettings)
 	)
 
 	if (writeSettingsError) {
