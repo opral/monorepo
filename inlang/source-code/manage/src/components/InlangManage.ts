@@ -8,16 +8,12 @@ import "./InlangInstall"
 @customElement("inlang-manage")
 export class InlangManage extends TwLitElement {
 	@property({ type: Object })
-	query: Record<string, string | undefined> = {}
-
-	@property({ type: String })
-	step: string = ""
+	url: Record<string, string | undefined> = {}
 
 	override connectedCallback() {
 		super.connectedCallback()
-		// put the query params into an object, example /install?repo=github.com/inlang/monorepo&module=plugin.inlang.mFunctionMatcher
-		if (window.location.search !== "") {
-			const query = {
+		if (window.location.search !== "" && window.location.pathname !== "") {
+			const url = {
 				path: window.location.pathname.replace("/", ""),
 				...Object.fromEntries(
 					window.location.search
@@ -27,10 +23,10 @@ export class InlangManage extends TwLitElement {
 						.map(([key, value]) => [key, value])
 				),
 			}
-			this.query = query
+			this.url = url
 		} else {
-			this.query = {
-				path: undefined,
+			this.url = {
+				path: window.location.pathname.replace("/", ""),
 			}
 		}
 	}
@@ -40,12 +36,12 @@ export class InlangManage extends TwLitElement {
 			<div class="w-full max-w-md h-auto bg-slate-50 border border-slate-200 p-4 rounded-lg">
 				<div class="flex items-center gap-2 border-b border-b-slate-200 pb-4 mb-4">
 					<inlang-logo></inlang-logo>
-					<h1 class="font-semibold capitalize">${this.query.path ? this.query.path : "Manage"}</h1>
+					<h1 class="font-semibold capitalize">${this.url.path ? this.url.path : "Manage"}</h1>
 				</div>
-				${!this.query.path
+				${!this.url.path
 					? html`<inlang-menu></inlang-menu>`
-					: this.query.path === "install"
-					? html`<inlang-install></inlang-install>`
+					: this.url.path === "install"
+					? html`<inlang-install url=${this.url}></inlang-install>`
 					: ""}
 			</div>
 		</main>`
@@ -85,17 +81,22 @@ export class InlangMenu extends TwLitElement {
 		return html`
 			<p class="text-slate-500 mb-8">Manage your inlang project.</p>
 			<div class="flex flex-col gap-4">
-				<button
-					class="bg-slate-800 text-white py-2 rounded-lg font-medium hover:bg-slate-900 transition-colors"
+				<a
+					href="/install"
+					class="bg-slate-800 text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
 				>
 					Install a module
-				</button>
-				<button class="bg-slate-200 text-white py-2 rounded-lg font-medium cursor-not-allowed">
+				</a>
+				<a
+					class="bg-slate-200 text-white text-center py-2 rounded-md font-medium cursor-not-allowed"
+				>
 					Uninstall a module
-				</button>
-				<button class="bg-slate-200 text-white py-2 rounded-lg font-medium cursor-not-allowed">
+				</a>
+				<a
+					class="bg-slate-200 text-white text-center py-2 rounded-md font-medium cursor-not-allowed"
+				>
 					Update a module
-				</button>
+				</a>
 			</div>
 		`
 	}
