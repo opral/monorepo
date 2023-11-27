@@ -14,7 +14,7 @@ export const CONFIGURATION = {
 		OPEN_IN_EDITOR: openInEditorCommand,
 	},
 	FILES: {
-		PROJECT: "project.inlang.json",
+		PROJECT: "project.inlang",
 	},
 } as const
 

@@ -69,13 +69,13 @@ describe("initializeInlangProject()", () => {
 		"it should execute existingProjectFlow() if a project has been found",
 		async () => {
 			mockFiles({
-				"/folder/project.inlang.json": JSON.stringify(newProjectTemplate),
+				"/folder/project.inlang/settings.json": JSON.stringify(newProjectTemplate),
 				"/folder/subfolder": {},
 			})
 			process.cwd = () => "/folder/subfolder"
 			mockUserInput(["useExistingProject"])
 			const path = await initializeInlangProject()
-			expect(path).toBe("../project.inlang.json")
+			expect(path).toBe("../project.inlang")
 		},
 		{
 			// i am on a plane with bad internet
@@ -86,8 +86,8 @@ describe("initializeInlangProject()", () => {
 		const { existsSync } = mockFiles({})
 		mockUserInput(["newProject"])
 		const path = await initializeInlangProject()
-		expect(path).toBe("./project.inlang.json")
-		expect(existsSync("./project.inlang.json")).toBe(true)
+		expect(path).toBe("./project.inlang")
+		expect(existsSync("./project.inlang")).toBe(true)
 	})
 })
 

@@ -31,12 +31,12 @@ export const badge = async (url: string) => {
 	})
 
 	// Settings file path has to be absolute
-	const settingsFilePath = "/project.inlang.json"
+	const settingsFilePath = "/project.inlang/settings.json"
 
-	// Get the content of the project.inlang.json file
+	// Get the content of the project.inlang/settings.json file
 	await repo.nodeishFs.readFile(settingsFilePath, { encoding: "utf-8" }).catch((e) => {
 		if (e.code !== "ENOENT") throw e
-		throw new Error("No project.inlang.json file found in the repository.")
+		throw new Error("No inlang project found in the repository.")
 	})
 
 	const project = await loadProject({

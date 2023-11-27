@@ -5,10 +5,10 @@ import { ProjectSettings, loadProject } from "@inlang/sdk"
 import { registry } from "@inlang/marketplace-registry"
 
 /**
- * Tries to automatically generate a project.inlang.json file based on the project's dependencies.
+ * Tries to automatically generate a *.inlang/settings.json file based on the project's dependencies.
  *
  * - The returned project settings are not written to the filesystem.
- * - Write the project settings manyally to the filesystem with `basePath` + '/project.inlang.json'
+ * - Write the project settings manyally to the filesystem with `basePath` + '/project.inlang'
  *
  * @param args.basePath The base path to resolve from.
  *

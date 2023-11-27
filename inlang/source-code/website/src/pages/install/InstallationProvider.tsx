@@ -121,7 +121,7 @@ function validateRepo(
 }
 
 /**
- * This function initializes the repository by adding the modules to the project.inlang.json file and pushing the changes to the repository.
+ * This function initializes the repository by adding the modules to the project.inlang file and pushing the changes to the repository.
  * If there are any errors, the error will be displayed in the UI.
  */
 async function initializeRepo(

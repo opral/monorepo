@@ -43,10 +43,11 @@ describe("i18next", () => {
 			basePath: "/",
 		})
 
-		await nodeishFs.writeFile("/project.inlang.json", JSON.stringify(settings))
+		await nodeishFs.mkdir("/project.inlang")
+		await nodeishFs.writeFile("/project.inlang/settings.json", JSON.stringify(settings))
 
 		const project = await loadProject({
-			projectPath: "/project.inlang.json",
+			projectPath: "/project.inlang",
 			nodeishFs,
 		})
 
