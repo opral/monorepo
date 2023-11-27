@@ -7,20 +7,6 @@ Match example:
 t('name')
 ```
 
-### Installation 
-
-Just install it from the button in the marketplace or add the link manually to your `modules` array in your `project.inlang.json`.
-
-```json
-{
-// ...
-  "modules": [
-    "https://cdn.jsdelivr.net/npm/@inlang/plugin-t-function-matcher@latest/dist/index.js"
-  ]
-// ...
-}
-```
-
 ### Usage
 
 The plugin will automatically extract messages from your code and show them inline in the editor. You can then click on the message to open the web editor and translate the message.
