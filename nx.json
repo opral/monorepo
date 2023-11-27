@@ -1,22 +1,50 @@
 {
-	"tasksRunnerOptions": {
-		"default": {
-			"runner": "nx/tasks-runners/default",
-			"options": {
-				"cacheableOperations": ["build", "test", "lint", "format"],
-				"accessToken": "ODlkYjAwMjYtMGMyMS00YTI3LWIzNTAtN2RhZjgwYzAwZGJifHJlYWQtd3JpdGU="
+	"$schema": "./node_modules/nx/schemas/nx-schema.json",
+	"namedInputs": {
+		"default": [
+			"{projectRoot}/**/*"
+		],
+		"doppler": [
+			{
+				"runtime": "doppler secrets"
 			}
-		}
+		]
 	},
 	"targetDefaults": {
 		"build": {
-			"dependsOn": ["^build"]
+			"dependsOn": [
+				"^build"
+			],
+			"inputs": [
+				"default",
+				"^default",
+				"doppler"
+			],
+			"cache": true
 		},
 		"dev": {
-			"dependsOn": ["^build"]
+			"dependsOn": [
+				"^build"
+			]
 		},
 		"test": {
-			"dependsOn": ["^build"]
+			"dependsOn": [
+				"^build"
+			],
+			"cache": true
+		},
+		"lint": {
+			"dependsOn": [
+				"format"
+			],
+			"cache": true
+		},
+		"format": {
+			"cache": true
 		}
+	},
+	"nxCloudAccessToken": "NmIwOWM4ZjUtZWNkMi00NTY1LThmZmEtNzMzZDEzOTZkYmVifHJlYWQ=",
+	"affected": {
+		"defaultBase": "origin/main"
 	}
 }
