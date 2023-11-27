@@ -61,6 +61,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 			})
 
 			inlang.query.messages.getAll.subscribe((messages) => {
+				if (messages.length === 0) return //messages probably haven't loaded yet
 				logMessageChange()
 				execute(messages, inlang.settings())
 				numCompiles++
