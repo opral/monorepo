@@ -5,6 +5,7 @@ import fs from "node:fs/promises"
 import { resolve } from "node:path"
 import { Command } from "commander"
 import { telemetry } from "../../services/telemetry/implementation.js"
+import { writeOutput } from "../../services/file-handling/write-output.js"
 
 export const compileCommand = new Command()
 	.name("compile")
@@ -42,23 +43,7 @@ export const compileCommand = new Command()
 		})
 
 		const outputDirectory = resolve(process.cwd(), options.outdir)
-
-		// create the compiled-output directory if it doesn't exist
-		await fs.access(outputDirectory).catch(async () => {
-			await fs.mkdir(outputDirectory, { recursive: true })
-		})
-
-		// create the messages directory if it doesn't exist
-		await fs.access(outputDirectory + "/messages").catch(async () => {
-			await fs.mkdir(outputDirectory + "/messages")
-		})
-
-		for (const [fileName, fileContent] of Object.entries(output)) {
-			await fs.writeFile(`${outputDirectory}/${fileName}`, fileContent, {
-				encoding: "utf-8",
-			})
-		}
-
+		await writeOutput(outputDirectory, output, fs)
 		consola.success("Successfully compiled the project.")
 	})
 

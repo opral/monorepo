@@ -4,7 +4,7 @@ import { context } from "esbuild"
 const isProduction = process.env.NODE_ENV === "production"
 
 const ctx = await context({
-	entryPoints: ["./src/cli/main.ts"],
+	entryPoints: ["./src/index.ts"],
 	bundle: true,
 	outdir: "./dist",
 	platform: "node",
