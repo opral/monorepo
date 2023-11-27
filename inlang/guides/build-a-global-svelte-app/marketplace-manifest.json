@@ -5,7 +5,7 @@
 		"en": "Build a Global Svelte App"
 	},
 	"description": {
-		"en": "A complete guide on how to adopte inlang with paraglide.js and message-format-plugin"
+		"en": "A complete guide on how to adopt inlang with paraglide.js and message-format-plugin"
 	},
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/build-a-global-svelte-app/build-a-global-svelte-app.md"
