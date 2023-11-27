@@ -2,19 +2,6 @@
 
 This plugin provides the integration for `paraglide-js` into the inlang VSCode extension. It allows you to extract messages from your code, view them inline in the text editor and get lints for your messages.
 
-### Installation 
-
-Just install it from the button in the marketplace or add the link manually to your `modules` array in your `project.inlang.json`.
-
-```json
-{
-// ...
-  "modules": [
-    "https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js"
-  ]
-// ...
-}
-```
 
 ### Usage
 

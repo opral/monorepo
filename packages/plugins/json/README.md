@@ -22,24 +22,6 @@ _messages/de.json_
 }
 ```
 
-# How to use
-
-```json
-// filename: project.inlang.json
-
-{
-	"$schema": "https://inlang.com/schema/project-settings",
-	"sourceLanguageTag": "en",
-	"languageTags": ["en", "de", "it"],
-	"modules": [
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js"
-	],
-	"plugin.inlang.json": {
-		"pathPattern": "./resources/{languageTag}.json"
-	}
-}
-```
-
 # Settings
 
 The plugin offers further configuration options that can be passed as arguments. The following settings exist:
