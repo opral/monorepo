@@ -10,6 +10,11 @@
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "author": "inlang <hello@inlang.com> (https://inlang.com/)",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/inlang/monorepo.git#inlang/source-code/paraglide/paraglide-js-adapter-unplugin"
+    },
+    "homepage": "https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-unplugin#README",
     "keywords": [
         "paraglide",
         "javascript i18n",
@@ -44,11 +49,13 @@
     "dependencies": {
         "@inlang/paraglide-js": "workspace:*",
         "@inlang/sdk": "workspace:*",
+        "kleur": "^4.1.5",
         "unplugin": "1.5.1"
     },
     "devDependencies": {
+        "@types/node": "20.9.3",
         "typescript": "5.2.2",
-        "vitest": "0.34.3",
-        "@types/node": "20.9.3"
+        "vite": "^5.0.2",
+        "vitest": "0.34.3"
     }
 }

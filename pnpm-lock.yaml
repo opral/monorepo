@@ -1095,6 +1095,9 @@ importers:
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../../sdk
+      kleur:
+        specifier: ^4.1.5
+        version: 4.1.5
       unplugin:
         specifier: 1.5.1
         version: 1.5.1
@@ -1105,6 +1108,9 @@ importers:
       typescript:
         specifier: 5.2.2
         version: 5.2.2
+      vite:
+        specifier: ^5.0.2
+        version: 5.0.2(@types/node@20.9.3)
       vitest:
         specifier: 0.34.3
         version: 0.34.3
@@ -15116,6 +15122,42 @@ packages:
     dependencies:
       '@types/node': 20.5.9
       esbuild: 0.19.6
+      postcss: 8.4.31
+      rollup: 4.5.0
+    optionalDependencies:
+      fsevents: 2.3.3
+    dev: true
+
+  /vite@5.0.2(@types/node@20.9.3):
+    resolution: {integrity: sha512-6CCq1CAJCNM1ya2ZZA7+jS2KgnhbzvxakmlIjN24cF/PXhRMzpM/z8QgsVJA/Dm5fWUWnVEsmtBoMhmerPxT0g==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+    peerDependencies:
+      '@types/node': ^18.0.0 || >=20.0.0
+      less: '*'
+      lightningcss: ^1.21.0
+      sass: '*'
+      stylus: '*'
+      sugarss: '*'
+      terser: ^5.4.0
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+      less:
+        optional: true
+      lightningcss:
+        optional: true
+      sass:
+        optional: true
+      stylus:
+        optional: true
+      sugarss:
+        optional: true
+      terser:
+        optional: true
+    dependencies:
+      '@types/node': 20.9.3
+      esbuild: 0.19.7
       postcss: 8.4.31
       rollup: 4.5.0
     optionalDependencies:
