@@ -19,6 +19,9 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@v3
 
+      - name: Track main branch
+        run: git branch --track main origin/main
+
       - name: Install Doppler CLI for env (public) variables
         uses: dopplerhq/cli-action@v2
 

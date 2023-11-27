@@ -13,7 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     environment: npm
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Track main branch
+        run: git branch --track main origin/main
 
       - name: Setup Pnpm
         uses: pnpm/action-setup@v2
