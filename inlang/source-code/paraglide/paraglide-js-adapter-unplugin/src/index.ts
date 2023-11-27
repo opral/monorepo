@@ -89,7 +89,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 			compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, async () => {
 				const project = await getProject()
 				await triggerCompile(project.query.messages.getAll(), project.settings())
-				console.log(
+				console.info(
 					`${color.bold().blue("[paraglide]")} Compiled Messages into ${color.italic(
 						options.outdir
 					)}`
