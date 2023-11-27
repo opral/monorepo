@@ -16,7 +16,7 @@ consola.options = {
 	formatOptions: { date: false },
 }
 
-const DEFAULT_PROJECT_PATH = "./project.inlang.json"
+const DEFAULT_PROJECT_PATH = "./project.inlang"
 
 export const initCommand = new Command()
 	.name("init")
@@ -108,11 +108,7 @@ export const addParaglideJsToDevDependencies = async () => {
 }
 
 export const findExistingInlangProjectPath = async (): Promise<string | undefined> => {
-	for (const path of [
-		"./project.inlang.json",
-		"../project.inlang.json",
-		"../../project.inlang.json",
-	]) {
+	for (const path of ["./project.inlang", "../project.inlang", "../../project.inlang"]) {
 		if (fsSync.existsSync(path)) {
 			return path
 		}
@@ -152,7 +148,11 @@ export const existingProjectFlow = async (args: { existingProjectPath: string })
 
 export const createNewProjectFlow = async () => {
 	consola.info(`Creating a new inlang project in the current working directory.`)
-	await fs.writeFile(DEFAULT_PROJECT_PATH, JSON.stringify(newProjectTemplate, undefined, 2))
+	await fs.mkdir(DEFAULT_PROJECT_PATH, { recursive: true })
+	await fs.writeFile(
+		DEFAULT_PROJECT_PATH + "/settings.json",
+		JSON.stringify(newProjectTemplate, undefined, 2)
+	)
 	const project = await loadProject({
 		projectPath: resolve(process.cwd(), DEFAULT_PROJECT_PATH),
 		//@ts-ignore

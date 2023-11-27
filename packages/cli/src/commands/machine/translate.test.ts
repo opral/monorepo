@@ -55,9 +55,9 @@ describe("translate command", () => {
 		async () => {
 			const fs = createNodeishMemoryFs()
 
-			await fs.mkdir("/user/project/", { recursive: true })
+			await fs.mkdir("/user/project.inlang", { recursive: true })
 			await fs.writeFile(
-				"/user/project/project.inlang.json",
+				"/user/project.inlang/settings.json",
 				JSON.stringify({
 					sourceLanguageTag: "en",
 					languageTags: ["en", "de", "it"],
@@ -80,7 +80,7 @@ describe("translate command", () => {
 			}
 
 			const project = await loadProject({
-				projectPath: "/user/project/project.inlang.json",
+				projectPath: "/user/project.inlang",
 				nodeishFs: fs,
 				_import,
 			})

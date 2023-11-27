@@ -11,7 +11,7 @@ import fs from "node:fs/promises"
  * @param args - An object containing the workspace folder.
  */
 export const createInlangConfigFile = async (args: { workspaceFolder: vscode.WorkspaceFolder }) => {
-	// Check if project.inlang.json already exists
+	// Check if project.inlang already exists
 	const configFiles = await vscode.workspace.findFiles(CONFIGURATION.FILES.PROJECT)
 	if (configFiles.length > 0) {
 		// skip

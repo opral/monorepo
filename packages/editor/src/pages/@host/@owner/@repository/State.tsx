@@ -264,7 +264,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				const project = solidAdapter(
 					await loadProject({
 						nodeishFs: newRepo.nodeishFs,
-						projectPath: "/project.inlang.json",
+						projectPath: "/project.inlang",
 						_capture(id, props) {
 							telemetryBrowser.capture(id, props)
 						},

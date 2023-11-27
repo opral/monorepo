@@ -16,7 +16,7 @@ import { paraglide } from "@inlang/paraglide-js-adapter-rollup"
 export default {
 	plugins: [
 		paraglide({
-			project: "./project.inlang.json", //Path to your inlang project file
+			project: "./project.inlang", //Path to your inlang project
 			outDir: "./src/paraglide", //Where you want the generated files to be placed
 		}),
 	]
@@ -54,7 +54,7 @@ export default {
 			}
 		}),
 		paraglide({
-			project: "./project.inlang.json",
+			project: "./project.inlang",
 			outdir: "./src/paraglide",
 		}),
 	],

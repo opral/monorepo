@@ -27,7 +27,7 @@ npx @inlang/cli [command]
 - 🔍 **Lint** your translations
 - 🤖 **Machine translate** your resources
 - 🖊️ Open the web editor right from the command line
-- ✅ Validate your `project.inlang.json` configuration file -->
+- ✅ Validate your inlang project -->
 
 #### Automate
 
@@ -39,7 +39,7 @@ The CLI allows you to machine translate your resources. This is useful if you wa
 
 #### Validation
 
-The CLI allows you to validate your `project.inlang.json` configuration file. This is useful if you want to make sure that your configuration file is valid before you commit it to your repository.
+The CLI allows you to validate your inlang project. This is useful if you want to make sure that your configuration file is valid before you commit it to your repository.
 
 # Installation
 
@@ -69,7 +69,6 @@ Minimum node version: `v18.0.0`
 
 If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx @inlang/cli@latest [command]`.
 
-To use the inlang CLI, you need a `project.inlang.json` file configured, see [here](https://inlang.com/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang#).
 
 # Commands
 

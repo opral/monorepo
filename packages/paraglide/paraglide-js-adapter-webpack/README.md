@@ -16,7 +16,7 @@ import Paraglide from "@inlang/paraglide-js-adapter-webpack"
 export default {
 	plugins: [
 		Paraglide({
-			project: "./project.inlang.json",
+			project: "./project.inlang",
 			outdir: "./src/paraglide",
 		}),
 	],
@@ -46,7 +46,7 @@ export default {
 	},
   plugins: [
 		Paraglide({
-			project: "./project.inlang.json",
+			project: "./project.inlang",
 			outdir: "./src/paraglide",
 		}),
 	]

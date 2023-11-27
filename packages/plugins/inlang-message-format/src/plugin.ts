@@ -149,7 +149,7 @@ const maybeMigrateToV2 = async (args: { nodeishFs: NodeishFilesystemSubset; sett
 		})
 		// eslint-disable-next-line no-console
 		console.log(
-			"Migration to v2 of the inlang-message-format plugin was successful. Please delete the old messages.json file and the filePath property in the project.inlang.json file."
+			"Migration to v2 of the inlang-message-format plugin was successful. Please delete the old messages.json file and the filePath property in the settings file of the project."
 		)
 	} catch {
 		// we assume that the file does not exist any more

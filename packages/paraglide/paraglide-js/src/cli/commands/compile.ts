@@ -10,10 +10,7 @@ import { writeOutput } from "../../services/file-handling/write-output.js"
 export const compileCommand = new Command()
 	.name("compile")
 	.summary("Compiles inlang Paraglide-JS.")
-	.requiredOption(
-		"--project <path>",
-		'The path to the inlang project. Example: "./project.inlang.json"'
-	)
+	.requiredOption("--project <path>", 'The path to the inlang project. Example: "./project.inlang"')
 	.requiredOption(
 		"--outdir <path>",
 		'The path to the output directory. Example: "./src/paraglide"',
