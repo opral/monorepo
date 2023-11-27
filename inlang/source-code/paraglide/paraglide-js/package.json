@@ -32,7 +32,7 @@
 	],
 	"scripts": {
 		"dev": "node ./build.js",
-		"build": "cross-env NODE_ENV=production node ./build.js",
+		"build": "cross-env NODE_ENV=production node ./build.js && tsc",
 		"test": "tsc --noEmit && vitest run --coverage ./src/**/*",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
