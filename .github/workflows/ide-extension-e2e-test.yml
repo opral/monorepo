@@ -16,9 +16,6 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@v4
 
-      - name: Track main branch
-        run: git branch --track main origin/main
-
       - name: Setup Pnpm
         uses: pnpm/action-setup@v2
         with:
