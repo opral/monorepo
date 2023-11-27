@@ -76,36 +76,39 @@ if (!privateEnv.ALGOLIA_ADMIN || !privateEnv.ALGOLIA_APPLICATION) {
 	throw new Error("Algolia API keys are not set")
 }
 
-const client = algoliasearch(privateEnv.ALGOLIA_APPLICATION, privateEnv.ALGOLIA_ADMIN)
-const index = client.initIndex("registry")
+// eslint-disable-next-line no-undef
+if (process.env.NODE_ENV === "production") {
+	const client = algoliasearch(privateEnv.ALGOLIA_APPLICATION, privateEnv.ALGOLIA_ADMIN)
+	const index = client.initIndex("registry")
 
-const objects = await Promise.all(
-	[...manifests.values()].map(async (value) => {
-		const { uniqueID, ...rest } = value
+	const objects = await Promise.all(
+		[...manifests.values()].map(async (value) => {
+			const { uniqueID, ...rest } = value
 
-		const readme = () => {
-			return typeof value.readme === "object" ? value.readme.en : value.readme
-		}
+			const readme = () => {
+				return typeof value.readme === "object" ? value.readme.en : value.readme
+			}
 
-		const text = await (readme().includes("http")
-			? (await fetch(readme())).text()
-			: // eslint-disable-next-line no-undef
-			  await fs.readFile(new URL(readme(), repositoryRoot), "utf-8"))
+			const text = await (readme().includes("http")
+				? (await fetch(readme())).text()
+				: // eslint-disable-next-line no-undef
+				  await fs.readFile(new URL(readme(), repositoryRoot), "utf-8"))
 
-		return { objectID: uniqueID, readme: text, ...rest }
-	})
-)
+			return { objectID: uniqueID, readme: text, ...rest }
+		})
+	)
 
-index
-	.saveObjects(objects)
-	.then(() => {
-		// eslint-disable-next-line no-undef
-		console.info("Successfully uploaded registry on Algolia")
-	})
-	.catch((err) => {
-		// eslint-disable-next-line no-undef
-		console.error(err)
-	})
+	index
+		.saveObjects(objects)
+		.then(() => {
+			// eslint-disable-next-line no-undef
+			console.info("Successfully uploaded registry on Algolia")
+		})
+		.catch((err) => {
+			// eslint-disable-next-line no-undef
+			console.error(err)
+		})
+}
 
 /* This function checks for uniqueIDs to verify they are not duplicated */
 function checkUniqueIDs(manifests) {

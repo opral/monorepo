@@ -159,6 +159,7 @@ export async function convert(markdown: string): Promise<string> {
 						},
 					]),
 						(node.properties.target = "_blank")
+					node.properties.href = node.properties.href + "?ref=inlang.com"
 				} else if (
 					node.tagName === "a" &&
 					node.properties.href &&

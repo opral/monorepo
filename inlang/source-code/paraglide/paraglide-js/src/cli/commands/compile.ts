@@ -4,21 +4,36 @@ import { compile } from "../../compiler/compile.js"
 import fs from "node:fs/promises"
 import { resolve } from "node:path"
 import { Command } from "commander"
+import { telemetry } from "../../services/telemetry/implementation.js"
+import { writeOutput } from "../../services/file-handling/write-output.js"
 
 export const compileCommand = new Command()
 	.name("compile")
 	.summary("Compiles inlang Paraglide-JS.")
-	.requiredOption("--project <path>", "The path to the inlang project.")
-	.requiredOption("--outdir <path>", "The path to the output directory.", "./src/paraglide")
+	.requiredOption(
+		"--project <path>",
+		'The path to the inlang project. Example: "./project.inlang.json"'
+	)
+	.requiredOption(
+		"--outdir <path>",
+		'The path to the output directory. Example: "./src/paraglide"',
+		"./src/paraglide"
+	)
 	.action(async (options: { project: string; outdir: string }) => {
 		consola.info(`Compiling inlang project at "${options.project}".`)
 
 		const path = resolve(process.cwd(), options.project)
-
 		const project = exitIfErrors(
 			await loadProject({
 				projectPath: path,
 				nodeishFs: fs,
+				_capture(id, props) {
+					telemetry.capture({
+						// @ts-ignore the event types
+						event: id,
+						properties: props,
+					})
+				},
 			})
 		)
 
@@ -28,23 +43,7 @@ export const compileCommand = new Command()
 		})
 
 		const outputDirectory = resolve(process.cwd(), options.outdir)
-
-		// create the compiled-output directory if it doesn't exist
-		await fs.access(outputDirectory).catch(async () => {
-			await fs.mkdir(outputDirectory, { recursive: true })
-		})
-
-		// create the messages directory if it doesn't exist
-		await fs.access(outputDirectory + "/messages").catch(async () => {
-			await fs.mkdir(outputDirectory + "/messages")
-		})
-
-		for (const [fileName, fileContent] of Object.entries(output)) {
-			await fs.writeFile(`${outputDirectory}/${fileName}`, fileContent, {
-				encoding: "utf-8",
-			})
-		}
-
+		await writeOutput(outputDirectory, output, fs)
 		consola.success("Successfully compiled the project.")
 	})
 
