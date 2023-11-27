@@ -79,7 +79,7 @@ To use the inlang CLI, you need a `project.inlang.json` file configured, see [he
 | **CLI Version** | `npx @inlang/cli@latest [command]`                   | Get the latest version of the inlang CLI.                                                                     |
 | **Project**     | `npx @inlang/cli project validate [options]`                  | Manage your inlang project, including validation and interactive project creation.                           |
 | **Lint**        | `npx @inlang/cli lint [options]`                     | Lint translations using configured rules. Options include `--no-fail`, `--project`, and `--languageTags`.      |
-| **Machine**     | `npx @inlang/cli machine translate [options]`        | Automate translation processes. Options include `-f, --force` and `--project <path>`.                          |
+| **Machine**     | `npx @inlang/cli machine translate [options]`        | Automate translation processes. Options include `-f, --force`, `--project <path>`, `--sourceLanguageTag <source>` and `--targetLanguageTags <targets...>`                          |
 | **Open**        | `npx @inlang/cli open editor`                     | Open parts of the Inlang infrastructure in your default browser, including the editor.                        |
 | **Module**      | `npx @inlang/cli module [command]`                   | Interact with Inlang modules, including initialization and building. Commands:  `init [options]`   Initialize a new inlang module codebase,   `build [options]`  build an inlang module. Options include `--type`, `--entry`, and `--outdir`. |
 
