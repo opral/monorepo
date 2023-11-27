@@ -4,6 +4,7 @@ import { commands, type TextEditor, window, env, Uri } from "vscode"
 import { telemetry } from "../services/telemetry/index.js"
 import type { Message } from "@inlang/sdk"
 import { CONFIGURATION } from "../configuration.js"
+import { isQuoted, stripQuotes } from "../utilities/isQuoted.js"
 
 /**
  * Helps the user to extract messages from the active text editor.
@@ -48,10 +49,13 @@ export const extractMessageCommand = {
 		const messageValue = textEditor.document.getText(textEditor.selection)
 
 		const preparedExtractOptions = ideExtension.extractMessageOptions.reduce((acc, option) => {
-			if (acc.includes(option.callback({ messageId, selection: messageValue }))) {
+			const formattedSelection = isQuoted(messageValue) ? stripQuotes(messageValue) : messageValue
+			const formattedOption = option.callback({ messageId, selection: formattedSelection })
+
+			if (acc.includes(formattedOption)) {
 				return acc
 			}
-			return [...acc, option.callback({ messageId, selection: messageValue })]
+			return [...acc, formattedOption]
 		}, [] as { messageId: string; messageReplacement: string }[])
 
 		const messageReplacements = preparedExtractOptions.map(
@@ -91,7 +95,7 @@ export const extractMessageCommand = {
 					pattern: [
 						{
 							type: "Text",
-							value: messageValue,
+							value: isQuoted(messageValue) ? stripQuotes(messageValue) : messageValue,
 						},
 					],
 				},
