@@ -4,7 +4,7 @@ import { html } from "lit"
 import { customElement } from "lit/decorators.js"
 import { TwLitElement } from "../common/TwLitElement"
 
-import "../components/HelloWorld"
+import "../components/InlangManage"
 
 @customElement("x-index-page")
 export class IndexPage extends TwLitElement {
@@ -12,6 +12,7 @@ export class IndexPage extends TwLitElement {
 		return html`
 			<div class="container">
 				<x-hello-world></x-hello-world>
+				<inlang-manage></inlang-manage>
 			</div>
 		`
 	}
