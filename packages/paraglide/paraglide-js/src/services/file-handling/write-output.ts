@@ -1,5 +1,5 @@
-import type nodeFsPromises from "fs/promises"
-import path from "path"
+import type nodeFsPromises from "node:fs/promises"
+import path from "node:path"
 
 export async function writeOutput(
 	outputDirectory: string,
