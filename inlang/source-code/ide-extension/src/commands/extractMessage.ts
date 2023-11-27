@@ -95,7 +95,7 @@ export const extractMessageCommand = {
 					pattern: [
 						{
 							type: "Text",
-							value: messageValue,
+							value: isQuoted(messageValue) ? stripQuotes(messageValue) : messageValue,
 						},
 					],
 				},
