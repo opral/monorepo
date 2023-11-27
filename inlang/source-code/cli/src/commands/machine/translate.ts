@@ -9,7 +9,7 @@ import { projectOption } from "../../utilities/globalFlags.js"
 
 export const translate = new Command()
 	.command("translate")
-	.requiredOption(projectOption.flags, projectOption.description, projectOption.defaultValue)
+	.requiredOption(projectOption.flags, projectOption.description)
 	.option("-f, --force", "Force machine translation and skip the confirmation prompt.", false)
 	.description("Machine translate all resources.")
 	.action(async (args: { force: boolean; project: string }) => {
