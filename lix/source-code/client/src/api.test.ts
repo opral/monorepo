@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest"
-import { openRepository, createNodeishMemoryFs } from "./index.js"
+import { openRepository, createNodeishMemoryFs } from "./index.ts"
 
 // - loading multiple repositories is possible
 // - loading a local repository is possible: const localRepository = await load("/bar.git", { fs: nodeFs })

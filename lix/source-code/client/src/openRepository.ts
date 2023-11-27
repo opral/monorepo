@@ -1,14 +1,14 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Repository, LixError } from "./api.js"
-import { transformRemote, withLazyFetching, parseLixUri } from "./helpers.js"
+import { transformRemote, withLazyFetching, parseLixUri } from "./helpers.ts"
 // @ts-ignore
 import { makeHttpClient } from "./git-http/client.js"
-import { optimizedRefsRes, optimizedRefsReq } from "./git-http/optimize-refs.js"
+import { optimizedRefsRes, optimizedRefsReq } from "./git-http/optimize-refs.ts"
 import { Octokit } from "octokit"
 
-import { createSignal, createEffect } from "./solid.js"
+import { createSignal, createEffect } from "./solid.ts"
 
-import { commit } from "./git/commit.js"
+import { commit } from "./git/commit.ts"
 import isoGit from "isomorphic-git"
 const {
 	clone,
@@ -125,7 +125,6 @@ export async function openRepository(
 
 		await pending
 	}
-
 
 	// delay all fs and repo operations until the repo clone and checkout have finished, this is preparation for the lazy feature
 	function delayedAction({ execute }: { execute: () => any }) {

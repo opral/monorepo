@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { parseLixUri } from "./helpers.js"
+import { parseLixUri } from "./helpers.ts"
 
 // TODO: add local uris when implemented: "file://repo"
 
