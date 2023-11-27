@@ -8,10 +8,10 @@ import { resolve } from "node:path"
  */
 export async function getInlangProject(args: { projectPath: string }): Promise<InlangProject> {
 	const baseDirectory = process.cwd()
-	const settingsFilePath = resolve(baseDirectory, args.projectPath)
+	const projectPath = resolve(baseDirectory, args.projectPath)
 
 	const project = await loadProject({
-		projectPath: settingsFilePath,
+		projectPath,
 		nodeishFs: fs,
 		_capture(id, props) {
 			telemetry.capture({
