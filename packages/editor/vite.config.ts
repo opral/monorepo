@@ -12,6 +12,13 @@ export default defineConfig({
 	base: "/editor",
 	server: {
 		port: 4001,
+		watch: {
+			usePolling: true,
+			awaitWriteFinish: {
+				pollInterval: 1000,
+				stabilityThreshold: 4000,
+			},
+		},
 	},
 	envPrefix: "PUBLIC_",
 	plugins: [
@@ -47,5 +54,8 @@ export default defineConfig({
 		// https://caniuse.com/?search=top%20level%20await
 		target: "es2022",
 		minify: isProduction,
+		watch: {
+			buildDelay: 4000,
+		},
 	},
 })
