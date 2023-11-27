@@ -1,5 +1,10 @@
 # @inlang/paraglide-js
 
+## 1.0.0-prerelease.12
+
+[Internal Change]
+Expose the compiler so that bundler plugins can call it programmatically instead of going through the CLI.
+
 ## 1.0.0-prerelease.11
 
 `onSetLanguageTag` no longer throws when called multiple times. Newer callbacks will overwrite old ones. 
