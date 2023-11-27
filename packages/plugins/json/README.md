@@ -119,7 +119,6 @@ The plugin can be used with the [IDE extension](https://inlang.com/marketplace/a
 3. Optional: Add lint rules: https://inlang.com/c/lint-rules
 4. 🎉 Done!
 
-
 # Contributing
 
 ## Getting started
