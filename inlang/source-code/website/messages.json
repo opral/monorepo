@@ -120,6 +120,16 @@
 							"value": "Regole di Linting"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lint Pravidlá"
+						}
+					]
 				}
 			]
 		},
@@ -1362,6 +1372,16 @@
 							"value": "Tabella di marcia"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Plány"
+						}
+					]
 				}
 			]
 		},
@@ -1568,6 +1588,16 @@
 						{
 							"type": "Text",
 							"value": "Produtos em Destaque"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vybrané Produkty"
 						}
 					]
 				}
@@ -1906,6 +1936,16 @@
 							"value": "Mais do que apenas uma biblioteca de i18n. inlang é o seu ecossistema para a globalização. Conecte os produtos inlang para expandir o seu mercado e atingir mais consumidores."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Okrem i18n knižnice, ilang je váš ekosystém na globalizáciu. Zapojte produkty inlang dohromady pre širšie pokrytie trhu a viac zákazníkov."
+						}
+					]
 				}
 			]
 		},
@@ -2196,6 +2236,16 @@
 							"value": "Trouvez tout ce dont vous avez besoin pour vous mondialiser."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Nájdite produkty na globalizáciu."
+						}
+					]
 				}
 			]
 		},
@@ -2384,6 +2434,16 @@
 							"value": "Alteração de controle Lix"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Ovládanie zmeny Lix"
+						}
+					]
 				}
 			]
 		},
@@ -2438,6 +2498,16 @@
 						{
 							"type": "Text",
 							"value": "Produtos Populares"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Populárne Produkty"
 						}
 					]
 				}
@@ -2496,6 +2566,16 @@
 							"value": "Sua Stack"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Váš Stack"
+						}
+					]
 				}
 			]
 		},
@@ -2520,6 +2600,16 @@
 						{
 							"type": "Text",
 							"value": "Finde schnell die beste Lösung für die Globalisierung (i18n) Deiner Anwendung. inlang hilft Dir, in neue Märkte zu expandieren und neue Kunden zu gewinnen."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Rýchlo nájdite najlepšie riešenie na globalizáciu (i18n) vašej aplikácie. inlang vám pomôže expandovať na nové trhy a získať nových zákazníkov."
 						}
 					]
 				}
@@ -2548,6 +2638,16 @@
 							"value": "inlang Marktplatz - Das Ökosystem um zu globalisieren"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "inlang Obchod - Ekosystém na globalizáciu"
+						}
+					]
 				}
 			]
 		},
@@ -2572,6 +2672,16 @@
 						{
 							"type": "Text",
 							"value": "inlang's Ökosystem hilft Organisationen global zu gehen."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Ekosystém inlang pomáha organizáciám dostať sa do sveta."
 						}
 					]
 				}
@@ -2630,6 +2740,16 @@
 							"value": "Comece agora"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Začať"
+						}
+					]
 				}
 			]
 		},
@@ -2684,6 +2804,16 @@
 						{
 							"type": "Text",
 							"value": "Um guia geral pelos passos necessários para deixar o seu projeto pronto para o ecossistema inlang."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Všeobecný sprievodca minimálnymi krokmi potrebnými na to, aby bol váš projekt pripravený na ekosystém inlang."
 						}
 					]
 				}
@@ -2742,6 +2872,16 @@
 							"value": "Como"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Ako"
+						}
+					]
 				}
 			]
 		},
@@ -2796,6 +2936,16 @@
 						{
 							"type": "Text",
 							"value": "Configure inlang no seu projeto"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Nastavte jazyk pre svoj projekt"
 						}
 					]
 				}
@@ -2854,6 +3004,16 @@
 							"value": "Comece agora"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Začať"
+						}
+					]
 				}
 			]
 		},
@@ -2908,6 +3068,16 @@
 						{
 							"type": "Text",
 							"value": "Um guia básico em como adotar inlang com paraglide.js e message-format-plugin no seu app Svelte."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Základný návod, ako si osvojiť inlang pomocou paraglide.js a doplnku message-format-plugin vo vašej Svelte aplikácii."
 						}
 					]
 				}
@@ -2966,6 +3136,16 @@
 							"value": "Construa um app Svelte global: Um guia básico"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vytvorte globálnu Svelte aplikáciu: Základný návod"
+						}
+					]
 				}
 			]
 		},
@@ -2990,6 +3170,16 @@
 						{
 							"type": "Text",
 							"value": "Alle ansehen"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vidieť všetko"
 						}
 					]
 				}
@@ -3048,6 +3238,16 @@
 							"value": "Construa sua própria solução!"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Zostavte svoje vlastné riešenie!"
+						}
+					]
 				}
 			]
 		},
@@ -3102,6 +3302,16 @@
 						{
 							"type": "Text",
 							"value": "Não consegue encontrar o que está buscando?"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Nenašli ste, čo ste hľadali?"
 						}
 					]
 				}
@@ -3160,6 +3370,16 @@
 							"value": "Precisa de ajuda ou tem dúvidas? Entre no nosso Discord!"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Potrebujete pomoc alebo máte otázky? Nájdete nás na Discorde!"
+						}
+					]
 				}
 			]
 		},
@@ -3214,6 +3434,16 @@
 						{
 							"type": "Text",
 							"value": "Me notifique"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Upozorni ma"
 						}
 					]
 				}
@@ -3272,6 +3502,16 @@
 							"value": "Você já está recebendo notificações."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Už dostávate upozornenia."
+						}
+					]
 				}
 			]
 		},
@@ -3326,6 +3566,16 @@
 						{
 							"type": "Text",
 							"value": "Nós vamos te deixar saber assim que tivermos"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Dáme vám vedieť keď dostaneme"
 						}
 					]
 				}
@@ -3384,6 +3634,16 @@
 							"value": "novos resultados."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "nejaké nové výsledky"
+						}
+					]
 				}
 			]
 		},
@@ -3438,6 +3698,16 @@
 						{
 							"type": "Text",
 							"value": "Algo deu errado. Por favor, tente novamente mais tarde."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Niečo sa pokazilo. Skúste neskôr prosím."
 						}
 					]
 				}
@@ -3496,6 +3766,16 @@
 							"value": "Por favor, insira seu endereço de e-mail."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Prosím zadajte svoju e-mailovú adresu."
+						}
+					]
 				}
 			]
 		},
@@ -3550,6 +3830,16 @@
 						{
 							"type": "Text",
 							"value": "Digite seu e-mail..."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Zadajte email..."
 						}
 					]
 				}
@@ -3608,6 +3898,16 @@
 							"value": "Nos ajude a construir o ecossistema"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Pomôžte nám vybudovať inlang ekosystém"
+						}
+					]
 				}
 			]
 		},
@@ -3662,6 +3962,16 @@
 						{
 							"type": "Text",
 							"value": "Você será notificado assim que esta função estiver disponível."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Keď bude táto funkcia dostupná, budete upozornení."
 						}
 					]
 				}
@@ -3720,6 +4030,16 @@
 							"value": "Sem resultados"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Zatiaľ žiadne výsledky"
+						}
+					]
 				}
 			]
 		},
@@ -3774,6 +4094,16 @@
 						{
 							"type": "Text",
 							"value": "Por favor, digite um endereço de e-mail válido."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Prosím zadajte platnú emailovú adresu."
 						}
 					]
 				}
@@ -3908,6 +4238,16 @@
 							"value": "Todos os Guias"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Všetky Návody"
+						}
+					]
 				}
 			]
 		},
@@ -3932,6 +4272,16 @@
 						{
 							"type": "Text",
 							"value": "Eigene App bauen"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vytvorte aplikáciu"
 						}
 					]
 				}
@@ -3960,6 +4310,16 @@
 							"value": "Optimieren dein i18n-Erlebnis mit Inlang-Apps."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vylepšite svoj zážitok z i18n pomocou aplikácií inlang."
+						}
+					]
 				}
 			]
 		},
@@ -3984,6 +4344,16 @@
 						{
 							"type": "Text",
 							"value": "Apps"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Aplikácie"
 						}
 					]
 				}
@@ -4042,6 +4412,16 @@
 							"value": "Construa no inlang"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Stavajte na inlang"
+						}
+					]
 				}
 			]
 		},
@@ -4098,6 +4478,16 @@
 							"value": "Aplicação"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Aplikácia"
+						}
+					]
 				}
 			]
 		},
@@ -4152,6 +4542,16 @@
 						{
 							"type": "Text",
 							"value": "Regras de Formatação"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lint Pravidl"
 						}
 					]
 				}
@@ -4286,6 +4686,16 @@
 							"value": "Algo está faltando?"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Chýba niečo?"
+						}
+					]
 				}
 			]
 		},
@@ -4342,6 +4752,16 @@
 							"value": "Site"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Stránka"
+						}
+					]
 				}
 			]
 		},
@@ -4366,6 +4786,16 @@
 						{
 							"type": "Text",
 							"value": "Veröffentliche ein Guide"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Zverejniť návod"
 						}
 					]
 				}
@@ -4394,6 +4824,16 @@
 							"value": "Lerne wie du Produkte aus dem inlang Ökosystem nutzen kannst."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Naučte sa používať produkty z ekosystému inlang."
+						}
+					]
 				}
 			]
 		},
@@ -4418,6 +4858,16 @@
 						{
 							"type": "Text",
 							"value": "Guides"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Návody"
 						}
 					]
 				}
@@ -4482,6 +4932,16 @@
 							"value": "Nutze Bibliotheken, um Ihr Softwareprojekt zu erweitern."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Použite knižnice na rozšírenie vášho softvérového projektu."
+						}
+					]
 				}
 			]
 		},
@@ -4544,6 +5004,16 @@
 							"value": "Mehr lesen"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Čítaj viac"
+						}
+					]
 				}
 			]
 		},
@@ -4557,7 +5027,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "Controll the complete translation process: From Design to Frontend."
+							"value": "Control the complete translation process: From Design to Frontend."
 						}
 					]
 				},
@@ -4568,6 +5038,16 @@
 						{
 							"type": "Text",
 							"value": "Steuere den gesamten Übersetzungsprozess: Vom Design bis zum Frontend."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Ovládajte celý proces prekladu: Od návrhu po používateľské rozhranie."
 						}
 					]
 				}
@@ -4596,6 +5076,16 @@
 							"value": "Was sind Lint Regeln?"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Čo sú Lint Pravidlá?"
+						}
+					]
 				}
 			]
 		},
@@ -4620,6 +5110,16 @@
 						{
 							"type": "Text",
 							"value": "Eigene Lint Regel entwickeln"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vlastné Lint Pravidlo"
 						}
 					]
 				}
@@ -4648,6 +5148,16 @@
 							"value": "Validiere Inhalte in einem Inlang-Projekt."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Overte obsah v projekte inlang."
+						}
+					]
 				}
 			]
 		},
@@ -4672,6 +5182,16 @@
 						{
 							"type": "Text",
 							"value": "Lint Regeln"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lint Pravidlá"
 						}
 					]
 				}
@@ -4700,6 +5220,16 @@
 							"value": "Mehr lesen"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Čítaj viac"
+						}
+					]
 				}
 			]
 		},
@@ -4724,6 +5254,16 @@
 						{
 							"type": "Text",
 							"value": "lix besuchen"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Navštívte lix"
 						}
 					]
 				}
@@ -4752,6 +5292,16 @@
 							"value": "Das lix change control system ist ein system, welches es dir erlaubt git im backend laufen zu lassen. Es ist außerdem für das Web verfügbar."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lix je systém, ktorý vám umožňuje použiť git ako backend pre vašu aplikáciu. Je k dispozícii pre web."
+						}
+					]
 				}
 			]
 		},
@@ -4765,7 +5315,7 @@
 					"pattern": [
 						{
 							"type": "Text",
-							"value": "The change control system\tfor the web."
+							"value": "The change control system for the web."
 						}
 					]
 				},
@@ -4776,6 +5326,16 @@
 						{
 							"type": "Text",
 							"value": "Das change control system fürs Web."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Change control systém pre web."
 						}
 					]
 				}
@@ -4797,6 +5357,16 @@
 				},
 				{
 					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lix"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
 					"match": [],
 					"pattern": [
 						{
@@ -4828,6 +5398,16 @@
 						{
 							"type": "Text",
 							"value": "Was ist das lix change control system?"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Čo je to Lix change control systém?"
 						}
 					]
 				}
@@ -4882,6 +5462,16 @@
 							"value": "Mit Paraglide JS starten"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Začnite s Paraglide JS"
+						}
+					]
 				}
 			]
 		},
@@ -4934,6 +5524,16 @@
 							"value": "Paraglide JS"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Paraglide JS"
+						}
+					]
 				}
 			]
 		},
@@ -4958,6 +5558,16 @@
 						{
 							"type": "Text",
 							"value": "Mehr lesen"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Čítaj viac"
 						}
 					]
 				}
@@ -5012,6 +5622,16 @@
 							"value": "Was sind Plugins?"
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Čo sú pluginy?"
+						}
+					]
 				}
 			]
 		},
@@ -5036,6 +5656,16 @@
 						{
 							"type": "Text",
 							"value": "Eigenes Plugin entwickeln"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vytvorte plugin"
 						}
 					]
 				}
@@ -5064,6 +5694,16 @@
 							"value": "App-Verhalten ändern oder erweitern."
 						}
 					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Zmeňte alebo rozšírte správanie aplikácie."
+						}
+					]
 				}
 			]
 		},
@@ -5088,6 +5728,16 @@
 						{
 							"type": "Text",
 							"value": "Plugins"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Pluginy"
 						}
 					]
 				}
@@ -5144,6 +5794,16 @@
 						{
 							"type": "Text",
 							"value": "para pesquisar"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "hľadať"
 						}
 					]
 				}
