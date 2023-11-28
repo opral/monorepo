@@ -8,7 +8,7 @@ import { registry } from "@inlang/marketplace-registry"
 @customElement("inlang-install")
 export class InlangInstall extends TwLitElement {
 	@property({ type: Boolean })
-	manual: boolean = true
+	manual: boolean = false
 
 	@property({ type: String })
 	step: string = ""
