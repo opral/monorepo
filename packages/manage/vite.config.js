@@ -16,4 +16,9 @@ export default defineConfig({
 		}),
 	],
 	envPrefix: "PUBLIC_",
+	rollupOptions: {
+		output: {
+			preserveModules: true,
+		},
+	},
 })

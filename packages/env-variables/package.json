@@ -4,7 +4,8 @@
 	"private": true,
 	"version": "0.1.0",
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/index.js",
+		"./dist/runtime/publicEnv.js": "./dist/runtime/publicEnv.js"
 	},
 	"files": [
 		"./dist",
