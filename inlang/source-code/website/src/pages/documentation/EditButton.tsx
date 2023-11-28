@@ -2,7 +2,7 @@ import Link from "#src/renderer/Link.jsx"
 import EditOutline from "~icons/material-symbols/edit-outline-rounded"
 
 interface EditButtonProps {
-	href: string
+	href: string | undefined
 }
 
 export function EditButton(props: EditButtonProps) {
