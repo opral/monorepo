@@ -70,6 +70,7 @@ export const compileCommand = new Command()
 				await execute()
 			})
 
+			/* eslint-disable no-constant-condition */
 			while (true) {
 				// Keep the process alive
 				await new Promise((resolve) => setTimeout(resolve, 10_000))
