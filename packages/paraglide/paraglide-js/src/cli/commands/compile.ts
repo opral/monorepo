@@ -19,10 +19,13 @@ export const compileCommand = new Command()
 		'The path to the output directory. Example: "./src/paraglide"',
 		"./src/paraglide"
 	)
-	.action(async (options: { project: string; outdir: string }) => {
+	.requiredOption("--watch", "Watch for changes and recompile.", false)
+	.action(async (options: { project: string; outdir: string; watch: boolean }) => {
 		consola.info(`Compiling inlang project at "${options.project}".`)
 
 		const settingsFilePath = resolve(process.cwd(), options.project)
+		const outputDirectory = resolve(process.cwd(), options.outdir)
+
 		const project = exitIfErrors(
 			await loadProject({
 				settingsFilePath,
@@ -37,13 +40,28 @@ export const compileCommand = new Command()
 			})
 		)
 
-		const output = compile({
-			messages: project.query.messages.getAll(),
-			settings: project.settings(),
-		})
+		async function execute() {
+			const output = compile({
+				messages: project.query.messages.getAll(),
+				settings: project.settings(),
+			})
 
-		const outputDirectory = resolve(process.cwd(), options.outdir)
-		await writeOutput(outputDirectory, output, fs)
+			await writeOutput(outputDirectory, output, fs)
+		}
+
+		await execute()
+
+		// await Promise that never resolves to keep the process alive
+		if (options.watch) {
+			project.query.messages.getAll.subscribe(async (messages) => {
+				consola.info("Messages changed, recompiling...")
+				await execute()
+			})
+
+			while (true) {
+				await new Promise((resolve) => setTimeout(resolve, 10_000))
+			}
+		}
 		consola.success("Successfully compiled the project.")
 	})
 
