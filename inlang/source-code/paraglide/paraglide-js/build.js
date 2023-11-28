@@ -1,4 +1,13 @@
 import { context } from "esbuild"
+import { fileURLToPath } from "node:url"
+import path from "node:path"
+import fs from "node:fs/promises"
+
+const packageJsonPath = path.join(path.dirname(fileURLToPath(import.meta.url)), "package.json")
+const packageJsonContents = await fs.readFile(packageJsonPath, "utf-8")
+const packageJson = JSON.parse(packageJsonContents)
+
+console.info(`Building ${packageJson.name} v${packageJson.version}`)
 
 // eslint-disable-next-line no-undef
 const isProduction = process.env.NODE_ENV === "production"
@@ -34,7 +43,9 @@ const __dirname = pathPolyfill123.dirname(__filename)
 			isProduction: isProduction,
 		}),
 	},
-	external: ["esbuild-wasm"],
+
+	//Don't bundle any explicit dependencies, only devDependencies
+	external: [...Object.keys(packageJson.dependencies || {})],
 })
 
 if (isProduction === false) {
