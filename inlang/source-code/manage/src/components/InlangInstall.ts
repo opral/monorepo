@@ -76,7 +76,7 @@ export class InlangInstall extends TwLitElement {
 							class=${"bg-slate-800 text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors " +
 							(!this.module ? "cursor-not-allowed" : "")}
 							@click=${() => {
-								// browserAuth.login()
+								browserAuth.login()
 							}}
 						>
 							Authorize inlang
