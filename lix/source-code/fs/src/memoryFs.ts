@@ -1,6 +1,6 @@
-import type { NodeishFilesystem, NodeishStats, FileChangeInfo } from "./NodeishFilesystemApi.ts"
-import { FilesystemError } from "./errors/FilesystemError.ts"
-import { normalPath, getBasename, getDirname } from "./utilities/helpers.ts"
+import type { NodeishFilesystem, NodeishStats, FileChangeInfo } from "./NodeishFilesystemApi.js"
+import { FilesystemError } from "./errors/FilesystemError.js"
+import { normalPath, getBasename, getDirname } from "./utilities/helpers.js"
 
 type Inode = Uint8Array | Set<string>
 

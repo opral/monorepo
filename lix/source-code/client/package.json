@@ -16,10 +16,8 @@
 		"./src"
 	],
 	"scripts": {
-		"build": "tsc --build && esbuild ./src/index.ts --minify=true --bundle --tree-shaking=true --splitting --external:@inlang/env-variables --outdir=dist --format=esm --tree-shaking=true",
-		"dev": "npm-run-all --print-label --parallel watch:types watch:build",
-		"watch:types": "tsc --watch",
-		"watch:build": "esbuild ./src/index.ts --bundle --minify=true --external:@inlang/env-variables --outdir=dist/ --format=esm --splitting --watch",
+		"build": "tsc --build",
+		"dev": "tsc --watc",
 		"test": "vitest run --coverage --test-timeout 60000",
 		"bench": "vitest bench --watch=false",
 		"lint": "eslint ./src --fix",
@@ -38,7 +36,6 @@
 	"license": "Apache-2.0",
 	"devDependencies": {
 		"@vitest/coverage-v8": "0.34.3",
-		"esbuild": "0.19.7",
 		"typescript": "5.2.2",
 		"vitest": "0.34.3"
 	}

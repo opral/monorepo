@@ -1,4 +1,4 @@
-import { encodePackLine, decodeGitPackLines } from "./helpers.ts"
+import { encodePackLine, decodeGitPackLines } from "./helpers.js"
 
 export async function optimizedRefsReq({
 	url,

@@ -1,4 +1,4 @@
-export { type Repository } from "./api.ts"
-export { openRepository } from "./openRepository.ts"
+export { type Repository } from "./api.js"
+export { openRepository } from "./openRepository.js"
 export { createNodeishMemoryFs } from "@lix-js/fs"
-export { browserAuth } from "./browser-auth.ts"
+export { browserAuth } from "./browser-auth.js"

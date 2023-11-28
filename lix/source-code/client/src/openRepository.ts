@@ -1,14 +1,14 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Repository, LixError } from "./api.js"
-import { transformRemote, withLazyFetching, parseLixUri } from "./helpers.ts"
+import { transformRemote, withLazyFetching, parseLixUri } from "./helpers.js"
 // @ts-ignore
 import { makeHttpClient } from "./git-http/client.js"
-import { optimizedRefsRes, optimizedRefsReq } from "./git-http/optimize-refs.ts"
+import { optimizedRefsRes, optimizedRefsReq } from "./git-http/optimize-refs.js"
 import { Octokit } from "octokit"
 
-import { createSignal, createEffect } from "./solid.ts"
+import { createSignal, createEffect } from "./solid.js"
 
-import { commit } from "./git/commit.ts"
+import { commit } from "./git/commit.js"
 import isoGit from "isomorphic-git"
 const {
 	clone,

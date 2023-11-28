@@ -2,7 +2,7 @@ import { walk, TREE, STAGE, writeTree, commit as doCommit, type TreeEntry } from
 import { getDirname, getBasename } from "@lix-js/fs"
 
 import type { NodeishFilesystem } from "@lix-js/fs"
-import type { Author } from "../api.ts"
+import type { Author } from "../api.js"
 
 type PartialEntry = {
 	mode: string

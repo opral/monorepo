@@ -2,10 +2,10 @@
 	"extends": "../tsconfig.base.json",
 	"include": ["src/**/*"],
 	"extensionsToTreatAsEsm": [".ts", ".tsx", ".mts", "js"],
-	"exclude": ["dist"],
+	"exclude": ["dist", "**/*.test.ts"],
 	"compilerOptions": {
-		"allowImportingTsExtensions": true,
-		"emitDeclarationOnly": true,
+		"allowImportingTsExtensions": false,
+		"emitDeclarationOnly": false,
 		"lib": ["ESNext", "DOM"],
 		"types": ["node"],
 		"outDir": "./dist",
