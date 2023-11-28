@@ -76,8 +76,7 @@ if (!privateEnv.ALGOLIA_ADMIN || !privateEnv.ALGOLIA_APPLICATION) {
 	throw new Error("Algolia API keys are not set")
 }
 
-// eslint-disable-next-line no-undef
-if (process.env.NODE_ENV === "production") {
+if (privateEnv.DOPPLER_ENVIRONMENT === "production") {
 	const client = algoliasearch(privateEnv.ALGOLIA_APPLICATION, privateEnv.ALGOLIA_ADMIN)
 	const index = client.initIndex("registry")
 
