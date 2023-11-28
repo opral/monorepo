@@ -60,7 +60,12 @@ export const compileCommand = new Command()
 				process.exit(0)
 			})
 
+			let numChanges = 0
 			project.query.messages.getAll.subscribe(async (messages) => {
+				numChanges++
+				if (messages.length === 0) return //messages probably haven't loaded yet
+				if (numChanges === 1) return //don't recompile on the first run
+
 				logger.info("Messages changed. Recompiling...")
 				await execute()
 			})
