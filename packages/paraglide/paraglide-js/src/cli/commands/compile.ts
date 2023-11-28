@@ -1,11 +1,11 @@
 import { loadProject, type InlangProject } from "@inlang/sdk"
-import consola from "consola"
 import { compile } from "../../compiler/compile.js"
 import fs from "node:fs/promises"
 import { resolve } from "node:path"
 import { Command } from "commander"
 import { telemetry } from "../../services/telemetry/implementation.js"
 import { writeOutput } from "../../services/file-handling/write-output.js"
+import { Logger } from "../../services/logger/index.js"
 
 export const compileCommand = new Command()
 	.name("compile")
@@ -21,11 +21,11 @@ export const compileCommand = new Command()
 	)
 	.requiredOption("--watch", "Watch for changes and recompile.", false)
 	.action(async (options: { project: string; outdir: string; watch: boolean }) => {
-		consola.info(`Compiling inlang project at "${options.project}".`)
-
+		const logger = new Logger({ silent: false, prefix: true })
 		const settingsFilePath = resolve(process.cwd(), options.project)
 		const outputDirectory = resolve(process.cwd(), options.outdir)
 
+		logger.info(`Compiling inlang project at "${options.project}".`)
 		const project = exitIfErrors(
 			await loadProject({
 				settingsFilePath,
@@ -37,7 +37,8 @@ export const compileCommand = new Command()
 						properties: props,
 					})
 				},
-			})
+			}),
+			logger
 		)
 
 		async function execute() {
@@ -53,15 +54,14 @@ export const compileCommand = new Command()
 
 		// await Promise that never resolves to keep the process alive
 		if (options.watch) {
-
 			process.on("SIGINT", () => {
-				console.log("")
-				consola.info("Stopping the watcher.")
+				//start with a new line, since the ^C is on the current line
+				logger.ln().info("Stopping the watcher.")
 				process.exit(0)
 			})
 
 			project.query.messages.getAll.subscribe(async (messages) => {
-				consola.info("Messages changed, recompiling...")
+				logger.info("Messages changed. Recompiling...")
 				await execute()
 			})
 
@@ -70,17 +70,18 @@ export const compileCommand = new Command()
 				await new Promise((resolve) => setTimeout(resolve, 10_000))
 			}
 		}
-		consola.success("Successfully compiled the project.")
+
+		logger.info("Sucessfully compiled the project.")
 	})
 
 /**
  * Utility function to exit when the project has errors.
  */
-const exitIfErrors = (project: InlangProject) => {
+const exitIfErrors = (project: InlangProject, logger: Logger) => {
 	if (project.errors().length > 0) {
-		consola.warn(`The project has errors:`)
+		logger.warn(`The project has errors:`)
 		for (const error of project.errors()) {
-			consola.error(error)
+			logger.error(error)
 		}
 		process.exit(1)
 	}
