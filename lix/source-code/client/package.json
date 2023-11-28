@@ -17,7 +17,7 @@
 	],
 	"scripts": {
 		"build": "tsc --build",
-		"dev": "tsc --watc",
+		"dev": "tsc --watch",
 		"test": "vitest run --coverage --test-timeout 60000",
 		"bench": "vitest bench --watch=false",
 		"lint": "eslint ./src --fix",
