@@ -8,11 +8,9 @@
 		"pretest": "paraglide-js compile --project ./project.inlang.json",
 		"test": "npm run pretest && vitest run"
 	},
-	"dependencies": {
-		"@inlang/paraglide-js": "workspace:*"
-	},
 	"devDependencies": {
 		"typescript": "5.2.2",
-		"vitest": "^0.34.6"
+		"vitest": "^0.34.6",
+		"@inlang/paraglide-js": "workspace:*"
 	}
 }

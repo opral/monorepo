@@ -22,15 +22,22 @@ import memfs from "memfs"
 import type { ProjectSettings } from "@inlang/sdk"
 import { version } from "../state.js"
 import { createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
+import { Logger } from "../../services/logger/index.js"
+
+const logger = new Logger()
 
 beforeAll(() => {
 	// spy on commonly used functions to prevent console output
 	// and allow expecations
-	vi.spyOn(consola, "log").mockImplementation(() => undefined as never)
-	vi.spyOn(consola, "info").mockImplementation(() => undefined as never)
-	vi.spyOn(consola, "success").mockImplementation(() => undefined as never)
-	vi.spyOn(consola, "error").mockImplementation(() => undefined as never)
-	vi.spyOn(consola, "warn").mockImplementation(() => undefined as never)
+	vi.spyOn(Logger.prototype, "ln").mockImplementation(() => Logger.prototype)
+	vi.spyOn(Logger.prototype, "info").mockImplementation(() => Logger.prototype)
+	vi.spyOn(Logger.prototype, "success").mockImplementation(() => Logger.prototype)
+	vi.spyOn(Logger.prototype, "warn").mockImplementation(() => Logger.prototype)
+	vi.spyOn(Logger.prototype, "error").mockImplementation(() => Logger.prototype)
+	vi.spyOn(process, "exit").mockImplementation((e) => {
+		console.error(`PROCESS.EXIT()`, e)
+		throw "PROCESS.EXIT()"
+	})
 })
 
 beforeEach(() => {
@@ -56,7 +63,7 @@ describe("end to end tests", () => {
 			throw "process.exit"
 		})
 		try {
-			await checkIfPackageJsonExists()
+			await checkIfPackageJsonExists(logger)
 		} catch (e) {
 			expect(e).toBe("process.exit")
 		}
@@ -74,7 +81,7 @@ describe("initializeInlangProject()", () => {
 			})
 			process.cwd = () => "/folder/subfolder"
 			mockUserInput(["useExistingProject"])
-			const path = await initializeInlangProject()
+			const path = await initializeInlangProject(logger)
 			expect(path).toBe("../project.inlang.json")
 		},
 		{
@@ -85,7 +92,7 @@ describe("initializeInlangProject()", () => {
 	test("it should execute newProjectFlow() if no project has been found", async () => {
 		const { existsSync } = mockFiles({})
 		mockUserInput(["newProject"])
-		const path = await initializeInlangProject()
+		const path = await initializeInlangProject(logger)
 		expect(path).toBe("./project.inlang.json")
 		expect(existsSync("./project.inlang.json")).toBe(true)
 	})
@@ -96,9 +103,9 @@ describe("addParaglideJsToDependencies()", () => {
 		mockFiles({
 			"/package.json": "{}",
 		})
-		await addParaglideJsToDevDependencies()
+		await addParaglideJsToDevDependencies(logger)
 		expect(fs.writeFile).toHaveBeenCalledOnce()
-		expect(consola.success).toHaveBeenCalledOnce()
+		expect(logger.success).toHaveBeenCalledOnce()
 		const packageJson = JSON.parse(
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
@@ -111,11 +118,14 @@ describe("addCompileStepToPackageJSON()", () => {
 		mockFiles({
 			"/package.json": "{}",
 		})
-		await addCompileStepToPackageJSON({
-			projectPath: "./project.inlang.json",
-		})
+		await addCompileStepToPackageJSON(
+			{
+				projectPath: "./project.inlang.json",
+			},
+			logger
+		)
 		expect(fs.writeFile).toHaveBeenCalledOnce()
-		expect(consola.success).toHaveBeenCalledOnce()
+		expect(logger.success).toHaveBeenCalledOnce()
 		const packageJson = JSON.parse(
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
@@ -130,11 +140,14 @@ describe("addCompileStepToPackageJSON()", () => {
 				},
 			}),
 		})
-		await addCompileStepToPackageJSON({
-			projectPath: "./project.inlang.json",
-		})
+		await addCompileStepToPackageJSON(
+			{
+				projectPath: "./project.inlang.json",
+			},
+			logger
+		)
 		expect(fs.writeFile).toHaveBeenCalledOnce()
-		expect(consola.success).toHaveBeenCalledOnce()
+		expect(logger.success).toHaveBeenCalledOnce()
 		const packageJson = JSON.parse(
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
@@ -155,12 +168,15 @@ describe("addCompileStepToPackageJSON()", () => {
 			// user does not want to update the build step
 			false,
 		])
-		await addCompileStepToPackageJSON({
-			projectPath: "./project.inlang.json",
-		})
+		await addCompileStepToPackageJSON(
+			{
+				projectPath: "./project.inlang.json",
+			},
+			logger
+		)
 		expect(fs.writeFile).not.toHaveBeenCalled()
-		expect(consola.success).not.toHaveBeenCalled()
-		expect(consola.warn).toHaveBeenCalledOnce()
+		expect(logger.success).not.toHaveBeenCalled()
+		expect(logger.warn).toHaveBeenCalledOnce()
 		expect(process.exit).toHaveBeenCalled()
 	})
 
@@ -176,12 +192,15 @@ describe("addCompileStepToPackageJSON()", () => {
 			// user does not want to update the build step
 			true,
 		])
-		await addCompileStepToPackageJSON({
-			projectPath: "./project.inlang.json",
-		})
+		await addCompileStepToPackageJSON(
+			{
+				projectPath: "./project.inlang.json",
+			},
+			logger
+		)
 		expect(fs.writeFile).not.toHaveBeenCalled()
-		expect(consola.success).not.toHaveBeenCalled()
-		expect(consola.warn).toHaveBeenCalledOnce()
+		expect(logger.success).not.toHaveBeenCalled()
+		expect(logger.warn).toHaveBeenCalledOnce()
 		expect(process.exit).not.toHaveBeenCalled()
 	})
 })
@@ -193,7 +212,7 @@ describe("existingProjectFlow()", () => {
 		})
 		mockUserInput(["useExistingProject"])
 		expect(
-			existingProjectFlow({ existingProjectPath: "/project.inlang.json" })
+			existingProjectFlow({ existingProjectPath: "/project.inlang.json" }, logger)
 		).resolves.toBeUndefined()
 	})
 
@@ -203,9 +222,9 @@ describe("existingProjectFlow()", () => {
 		})
 		mockUserInput(["newProject"])
 
-		await existingProjectFlow({ existingProjectPath: "/folder/project.inlang.json" })
+		await existingProjectFlow({ existingProjectPath: "/folder/project.inlang.json" }, logger)
 		// info that a new project is created
-		expect(consola.info).toHaveBeenCalledOnce()
+		expect(logger.info).toHaveBeenCalledOnce()
 		// the newly created project file should exist
 		expect(existsSync("/project.inlang.json")).toBe(true)
 	})
@@ -215,8 +234,8 @@ describe("existingProjectFlow()", () => {
 			"/project.inlang.json": `BROKEN PROJECT FILE`,
 		})
 		mockUserInput(["useExistingProject"])
-		await existingProjectFlow({ existingProjectPath: "/project.inlang.json" })
-		expect(consola.error).toHaveBeenCalled()
+		await existingProjectFlow({ existingProjectPath: "/project.inlang.json" }, logger)
+		expect(logger.error).toHaveBeenCalled()
 		expect(process.exit).toHaveBeenCalled()
 	})
 })
@@ -230,7 +249,7 @@ describe("maybeAddVsCodeExtension()", () => {
 			// user uses vscode
 			true,
 		])
-		await maybeAddVsCodeExtension({ projectPath: "/project.inlang.json" })
+		await maybeAddVsCodeExtension({ projectPath: "/project.inlang.json" }, logger)
 		expect(consola.prompt).toHaveBeenCalledOnce()
 		const extensions = await fs.readFile("/.vscode/extensions.json", {
 			encoding: "utf-8",
@@ -253,7 +272,7 @@ describe("maybeAddVsCodeExtension()", () => {
 			// user does not use vscode
 			false,
 		])
-		await maybeAddVsCodeExtension({ projectPath: "/project.inlang.json" })
+		await maybeAddVsCodeExtension({ projectPath: "/project.inlang.json" }, logger)
 		expect(consola.prompt).toHaveBeenCalledOnce()
 		expect(fs.writeFile).not.toHaveBeenCalled()
 	})
@@ -268,7 +287,7 @@ describe("maybeAddVsCodeExtension()", () => {
 			// user uses vscode
 			true,
 		])
-		await maybeAddVsCodeExtension({ projectPath: "/project.inlang.json" })
+		await maybeAddVsCodeExtension({ projectPath: "/project.inlang.json" }, logger)
 		const projectSettings = JSON.parse(
 			await fs.readFile("/project.inlang.json", {
 				encoding: "utf-8",
@@ -284,7 +303,7 @@ describe("maybeAddVsCodeExtension()", () => {
 			// user uses vscode
 			true,
 		])
-		await maybeAddVsCodeExtension({ projectPath: "/project.inlang.json" })
+		await maybeAddVsCodeExtension({ projectPath: "/project.inlang.json" }, logger)
 		expect(fsSync.existsSync("/.vscode/extensions.json")).toBe(true)
 	})
 })
@@ -294,13 +313,13 @@ describe("createNewProjectFlow()", async () => {
 		"it should succeed in creating a new project",
 		async () => {
 			const { existsSync } = mockFiles({})
-			await createNewProjectFlow()
+			await createNewProjectFlow(logger)
 			// user is informed that a new project is created
-			expect(consola.info).toHaveBeenCalledOnce()
+			expect(logger.info).toHaveBeenCalledOnce()
 			// the project shouldn't have errors
-			expect(consola.error).not.toHaveBeenCalled()
+			expect(logger.error).not.toHaveBeenCalled()
 			// user is informed that the project has successfully been created
-			expect(consola.success).toHaveBeenCalledOnce()
+			expect(logger.success).toHaveBeenCalledOnce()
 			// the project file should exist
 			expect(existsSync("/project.inlang.json")).toBe(true)
 		},
@@ -313,11 +332,11 @@ describe("createNewProjectFlow()", async () => {
 		mockFiles({})
 		// invalid project settings file
 		vi.spyOn(JSON, "stringify").mockReturnValue(`{}`)
-		await createNewProjectFlow()
+		await createNewProjectFlow(logger)
 		// user is informed that a new project is created
-		expect(consola.info).toHaveBeenCalledOnce()
+		expect(logger.info).toHaveBeenCalledOnce()
 		// the project has errors
-		expect(consola.error).toHaveBeenCalled()
+		expect(logger.error).toHaveBeenCalled()
 		// the commands exits
 		expect(process.exit).toHaveBeenCalled()
 	})
@@ -328,14 +347,14 @@ describe("checkIfUncommittedChanges()", () => {
 		vi.spyOn(childProcess, "execSync").mockImplementation(() => {
 			throw Error("Command failed: git status")
 		})
-		expect(checkIfUncommittedChanges()).resolves.toBeUndefined()
+		expect(checkIfUncommittedChanges(logger)).resolves.toBeUndefined()
 	})
 
 	test("it should continue if no uncomitted changes exist", async () => {
 		vi.spyOn(childProcess, "execSync").mockImplementation(() => {
 			return Buffer.from("")
 		})
-		expect(checkIfUncommittedChanges()).resolves.toBeUndefined()
+		expect(checkIfUncommittedChanges(logger)).resolves.toBeUndefined()
 	})
 
 	test("it should prompt the user if there are uncommitted changes and exit if the user doesn't want to continue", async () => {
@@ -347,8 +366,9 @@ describe("checkIfUncommittedChanges()", () => {
 			// user does not want to continue
 			false,
 		])
-		await checkIfUncommittedChanges()
-		expect(consola.info).toHaveBeenCalledOnce()
+
+		await checkIfUncommittedChanges(logger)
+		expect(logger.info).toHaveBeenCalledOnce()
 		expect(consola.prompt).toHaveBeenCalledOnce()
 		expect(processExit).toHaveBeenCalledOnce()
 	})
@@ -362,13 +382,15 @@ describe("checkIfUncommittedChanges()", () => {
 			// user does want to continue
 			true,
 		])
-		await checkIfUncommittedChanges()
-		expect(consola.info).toHaveBeenCalledOnce()
+
+		await checkIfUncommittedChanges(logger)
+
+		expect(logger.info).toHaveBeenCalledOnce()
 		expect(consola.prompt).toHaveBeenCalledOnce()
 		expect(processExit).not.toHaveBeenCalledOnce()
 	})
 	test("it should not prompt the user if no uncommitted changes exist", async () => {
-		await checkIfUncommittedChanges()
+		await checkIfUncommittedChanges(logger)
 		expect(consola.prompt).not.toHaveBeenCalled()
 	})
 })
@@ -376,15 +398,15 @@ describe("checkIfUncommittedChanges()", () => {
 describe("checkIfPackageJsonExists()", () => {
 	test("it should exit if no package.json has been found", async () => {
 		mockFiles({})
-		await checkIfPackageJsonExists()
-		expect(consola.warn).toHaveBeenCalledOnce()
+		await checkIfPackageJsonExists(logger)
+		expect(logger.warn).toHaveBeenCalledOnce()
 		expect(process.exit).toHaveBeenCalledOnce()
 	})
 
 	test("it should not exit if a package.json exists in the current working directory", async () => {
 		mockFiles({ "package.json": "" })
-		await checkIfPackageJsonExists()
-		expect(consola.warn).not.toHaveBeenCalled()
+		await checkIfPackageJsonExists(logger)
+		expect(logger.warn).not.toHaveBeenCalled()
 		expect(process.exit).not.toHaveBeenCalled()
 	})
 })
@@ -428,13 +450,13 @@ describe("findExistingInlangProjectPath()", () => {
 describe("maybeChangeTsConfigModuleResolution()", () => {
 	test("it should return if no tsconfig.json exists", async () => {
 		mockFiles({})
-		const result = await maybeChangeTsConfigModuleResolution()
+		const result = await maybeChangeTsConfigModuleResolution(logger)
 		// no tsconfig exists, immediately return
 		expect(result).toBeUndefined()
 		// the tsconfig should not have been read
 		expect(fs.readFile).not.toHaveBeenCalled()
 		// no info that the moduleResolution needs to be adapted should be logged
-		expect(consola.info).not.toHaveBeenCalled()
+		expect(logger.info).not.toHaveBeenCalled()
 	})
 
 	test("it should warn if the extended from tsconfig can't be read", async () => {
@@ -446,10 +468,10 @@ describe("maybeChangeTsConfigModuleResolution()", () => {
 				}
 			}`,
 		})
-		await maybeChangeTsConfigModuleResolution()
+		await maybeChangeTsConfigModuleResolution(logger)
 		// no info that the moduleResolution needs to be adapted should be logged
 
-		expect(consola.warn).toHaveBeenCalledOnce()
+		expect(logger.warn).toHaveBeenCalledOnce()
 	})
 
 	test("it should detect if the extended from tsconfig already set the moduleResolution to bundler to ease the getting started process", async () => {
@@ -463,9 +485,9 @@ describe("maybeChangeTsConfigModuleResolution()", () => {
 				"extends": "tsconfig.base.json",
 			}`,
 		})
-		await maybeChangeTsConfigModuleResolution()
+		await maybeChangeTsConfigModuleResolution(logger)
 		// no info that the moduleResolution needs to be adapted should be logged
-		expect(consola.info).not.toHaveBeenCalled()
+		expect(logger.info).not.toHaveBeenCalled()
 	})
 
 	test("it should prompt the user to set the moduleResolution to bundler", async () => {
@@ -491,10 +513,10 @@ describe("maybeChangeTsConfigModuleResolution()", () => {
 			},
 		])
 
-		await maybeChangeTsConfigModuleResolution()
+		await maybeChangeTsConfigModuleResolution(logger)
 
 		// info that the moduleResolution needs to be adapted
-		expect(consola.info).toHaveBeenCalledOnce()
+		expect(logger.info).toHaveBeenCalledOnce()
 		// prompt the user to set the moduleResolution to bundler
 		expect(consola.prompt).toHaveBeenCalledOnce()
 		// user has set the moduleResolution to bundler
@@ -516,32 +538,32 @@ describe("maybeChangeTsConfigModuleResolution()", () => {
 			false,
 		])
 
-		await maybeChangeTsConfigModuleResolution()
+		await maybeChangeTsConfigModuleResolution(logger)
 
 		// info that the moduleResolution needs to be adapted
-		expect(consola.warn).toHaveBeenCalledOnce()
+		expect(logger.warn).toHaveBeenCalledOnce()
 		// 1. prompt the user to set the moduleResolution to bundler
 		// 2. prompt again because the moduleResolution is still not set
 		expect(consola.prompt).toHaveBeenCalledTimes(2)
 		// the user has not set the moduleResolution to bundler
 		// after the first prompt eventhough the user said it did
-		expect(consola.error).toHaveBeenCalledOnce()
+		expect(logger.error).toHaveBeenCalledOnce()
 		// the user exists without setting the moduleResolution to bundler
 		// warn about type errors
-		expect(consola.warn).toHaveBeenCalledOnce()
+		expect(logger.warn).toHaveBeenCalledOnce()
 	})
 })
 
 describe("maybeChangeTsConfigAllowJs()", () => {
 	test("it should return if no tsconfig.json exists", async () => {
 		mockFiles({})
-		const result = await maybeChangeTsConfigAllowJs()
+		const result = await maybeChangeTsConfigAllowJs(logger)
 		// no tsconfig exists, immediately return
 		expect(result).toBeUndefined()
 		// the tsconfig should not have been read
 		expect(fs.readFile).not.toHaveBeenCalled()
 		// no info that the moduleResolution needs to be adapted should be logged
-		expect(consola.info).not.toHaveBeenCalled()
+		expect(logger.info).not.toHaveBeenCalled()
 	})
 
 	test("it should return if the tsconfig already set allowJs to true", async () => {
@@ -552,7 +574,7 @@ describe("maybeChangeTsConfigAllowJs()", () => {
 				}
 			}`,
 		})
-		await maybeChangeTsConfigAllowJs()
+		await maybeChangeTsConfigAllowJs(logger)
 		expect(consola.prompt).not.toHaveBeenCalled()
 	})
 
@@ -580,7 +602,7 @@ describe("maybeChangeTsConfigAllowJs()", () => {
 				return true
 			},
 		])
-		await maybeChangeTsConfigAllowJs()
+		await maybeChangeTsConfigAllowJs(logger)
 		// no info that the moduleResolution needs to be adapted should be logged
 		expect(consola.prompt).toHaveBeenCalledOnce()
 	})
@@ -608,10 +630,10 @@ describe("maybeChangeTsConfigAllowJs()", () => {
 			},
 		])
 
-		await maybeChangeTsConfigAllowJs()
+		await maybeChangeTsConfigAllowJs(logger)
 
 		// info that the moduleResolution needs to be adapted
-		expect(consola.info).toHaveBeenCalledOnce()
+		expect(logger.info).toHaveBeenCalledOnce()
 		// prompt the user to set the moduleResolution to bundler
 		expect(consola.prompt).toHaveBeenCalledOnce()
 		// user has set the moduleResolution to bundler
@@ -633,19 +655,19 @@ describe("maybeChangeTsConfigAllowJs()", () => {
 			false,
 		])
 
-		await maybeChangeTsConfigAllowJs()
+		await maybeChangeTsConfigAllowJs(logger)
 
 		// info that the moduleResolution needs to be adapted
-		expect(consola.warn).toHaveBeenCalledOnce()
+		expect(logger.warn).toHaveBeenCalledOnce()
 		// 1. prompt the user to set the moduleResolution to bundler
 		// 2. prompt again because the moduleResolution is still not set
 		expect(consola.prompt).toHaveBeenCalledTimes(2)
 		// the user has not set the moduleResolution to bundler
 		// after the first prompt eventhough the user said it did
-		expect(consola.error).toHaveBeenCalledOnce()
+		expect(logger.error).toHaveBeenCalledOnce()
 		// the user exists without setting the moduleResolution to bundler
 		// warn about type errors
-		expect(consola.warn).toHaveBeenCalledOnce()
+		expect(logger.warn).toHaveBeenCalledOnce()
 	})
 })
 
