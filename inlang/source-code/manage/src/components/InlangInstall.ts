@@ -1,8 +1,8 @@
 import type { TemplateResult } from "lit"
 import { html } from "lit"
 import { customElement, property } from "lit/decorators.js"
-import { TwLitElement } from "../common/TwLitElement"
-import { browserAuth } from "@lix-js/client"
+import { TwLitElement } from "../common/TwLitElement.js"
+import { browserAuth, getUser } from "@lix-js/client/src/browser-auth.ts"
 import { registry } from "@inlang/marketplace-registry"
 
 @customElement("inlang-install")
@@ -31,7 +31,7 @@ export class InlangInstall extends TwLitElement {
 	@property({ type: Boolean })
 	authorized: boolean = false
 
-	override connectedCallback() {
+	connectedCallback() {
 		super.connectedCallback()
 		this.url = JSON.parse(this.jsonURL)
 		// @ts-ignore
@@ -41,6 +41,10 @@ export class InlangInstall extends TwLitElement {
 		else if (!this.authorized) this.step = "noauth"
 		else if (!this.url.repo) this.step = "norepo"
 		else this.step = "install"
+
+		getUser().then((user) => {
+			console.log(user)
+		})
 	}
 
 	generateInstallLink() {
@@ -50,7 +54,7 @@ export class InlangInstall extends TwLitElement {
 		}`
 	}
 
-	override render(): TemplateResult {
+	render(): TemplateResult {
 		return this.step === "nomodule"
 			? html`<div class="flex flex-col gap-2">
 					<h2 class="text-xl font-semibold">No module found</h2>

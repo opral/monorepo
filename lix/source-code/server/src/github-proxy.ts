@@ -55,7 +55,10 @@ router.all(
 					request.method === "GET" ? undefined : JSON.stringify(request.body),
 			})
 
-			response.set("Access-Control-Allow-Origin", privateEnv.PUBLIC_SERVER_BASE_URL)
+			// PUBLIC_ALLOWED_DOMAINS is a comma separated list of domains that are allowed to access this service
+			for (const domain of privateEnv.PUBLIC_ALLOWED_DOMAINS.split(",")) {
+				response.set("Access-Control-Allow-Origin", domain)
+			}
 			response.set("Access-Control-Allow-Credentials", "true")
 			response.set("Access-Control-Allow-Headers", "x-github-api-version, user-agent")
 

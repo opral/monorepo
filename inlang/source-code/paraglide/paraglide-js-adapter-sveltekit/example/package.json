@@ -19,7 +19,7 @@
 		"svelte-check": "^3.4.3",
 		"tslib": "^2.4.1",
 		"typescript": "^5.0.0",
-		"vite": "^4.4.2",
+		"vite": "4.5.0",
 		"@inlang/paraglide-js-adapter-vite": "workspace:*"
 	},
 	"type": "module"
