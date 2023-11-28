@@ -41,7 +41,7 @@ export class InlangManage extends TwLitElement {
 				${!this.url.path
 					? html`<inlang-menu></inlang-menu>`
 					: this.url.path === "install"
-					? html`<inlang-install url=${this.url}></inlang-install>`
+					? html`<inlang-install jsonURL=${JSON.stringify(this.url)}></inlang-install>`
 					: ""}
 			</div>
 		</main>`
