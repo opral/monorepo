@@ -1,5 +1,22 @@
 # @inlang/paraglide-js
 
+## 1.0.0-prerelease.13
+
+`./paraglide/runtime.js` now exports a function called `isAvailableLanguageTag`. This is 
+the recommended way to check if something is a valid language tag, while maintaining
+type safety. 
+
+```ts
+//Pseudo code
+import { isAvailableLanguageTag } from "./paraglide/runtime"
+
+if (isAvailableLanguageTag(params.lang)) {
+   	return renderSite(params.lang)
+} else {
+	return 404
+}
+``` 
+
 ## 1.0.0-prerelease.12
 
 [Internal Change]
