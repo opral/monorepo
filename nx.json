@@ -1,42 +1,23 @@
 {
 	"$schema": "./node_modules/nx/schemas/nx-schema.json",
 	"namedInputs": {
-		"default": [
-			"{projectRoot}/**/*"
-		],
-		"doppler": [
-			{
-				"runtime": "env | grep ^PUBLIC_"
-			}
-		]
+		"default": ["{projectRoot}/**/*"]
 	},
 	"targetDefaults": {
 		"build": {
-			"dependsOn": [
-				"^build"
-			],
-			"inputs": [
-				"default",
-				"^default",
-				"doppler"
-			],
+			"dependsOn": ["^build"],
+			"inputs": ["default", "^default"],
 			"cache": true
 		},
 		"dev": {
-			"dependsOn": [
-				"^build"
-			]
+			"dependsOn": ["^build"]
 		},
 		"test": {
-			"dependsOn": [
-				"^build"
-			],
+			"dependsOn": ["^build"],
 			"cache": true
 		},
 		"lint": {
-			"dependsOn": [
-				"format"
-			],
+			"dependsOn": ["format"],
 			"cache": true
 		},
 		"format": {
