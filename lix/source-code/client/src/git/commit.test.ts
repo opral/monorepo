@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest"
 import { openRepository } from "../index.ts"
-import { createNodeishMemoryFs, toSnapshot, fromSnapshot } from "@lix-js/fs/src/memoryFs.ts"
+import { createNodeishMemoryFs, toSnapshot, fromSnapshot } from "@lix-js/fs"
 import { readFileSync } from "node:fs"
 describe("main workflow", async () => {
 	const fs = createNodeishMemoryFs()
