@@ -35,9 +35,12 @@ export const convertLinkToGithub = (link: string) => {
 		const path = parts.slice(6).join("/")
 		const user = parts[4]
 		const repo = parts[5]?.slice(0, parts[5].indexOf("@"))
-		const branch = parts[5]?.slice(parts[5].indexOf("@") + 1)
+		const branch =
+			parts[5]?.slice(parts[5].indexOf("@") + 1) === "latest"
+				? "main"
+				: parts[5]?.slice(parts[5].indexOf("@") + 1)
 
-		return `https://github.com/${user}/${repo}/tree/${branch}/${path}`
+		return `https://github.com/${user}/${repo}/edit/${branch}/${path}`
 	} else if (!link.includes("http")) {
 		return `https://github.com/inlang/monorepo/edit/main/${link.replace("./", "")}`
 	} else {
