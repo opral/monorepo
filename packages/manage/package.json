@@ -10,19 +10,20 @@
 		"lint": "eslint src --fix"
 	},
 	"devDependencies": {
+		"@inlang/markdown": "workspace:*",
+		"@inlang/marketplace-registry": "workspace:*",
+		"@lix-js/client": "workspace:*",
+		"@lix-js/fs": "workspace:*",
 		"autoprefixer": "^10.4.2",
 		"eslint": "^8.8.0",
 		"eslint-config-galex": "^3.6.3",
 		"lit": "^2.1.2",
-		"@lix-js/client": "workspace:*",
-		"@lix-js/fs": "workspace:*",
 		"tailwindcss": "^3.0.18",
 		"typescript": "^4.5.5",
-		"vite": "^2.7.13",
-		"@inlang/markdown": "workspace:*",
-		"@inlang/marketplace-registry": "workspace:*"
+		"vite": "^2.7.13"
 	},
 	"dependencies": {
-		"postcss": "^8.4.14"
+		"postcss": "^8.4.14",
+		"vite-plugin-node-polyfills": "0.12.0"
 	}
 }
