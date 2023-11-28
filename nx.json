@@ -6,7 +6,7 @@
 		],
 		"doppler": [
 			{
-				"runtime": "doppler secrets download --no-file --format env | grep -v NX_CLOUD_ACCESS_TOKEN | grep -v ^DOPPLER"
+				"runtime": "doppler secrets download --no-file --format env | grep -v ^NX_ | grep -v ^DOPPLER"
 			}
 		]
 	},
