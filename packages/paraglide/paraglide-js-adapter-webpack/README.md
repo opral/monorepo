@@ -32,7 +32,7 @@ Since you will be importing from the `paraglide` folder a lot, it's a good idea 
 In your `webpack.config.js`, add an alias to your `resolve` object:
 
 ```js
-import Paraglide from "@inlang/paraglide-js-adapter-webpack";
+import { paraglide } from "@inlang/paraglide-js-adapter-webpack";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -45,7 +45,7 @@ export default {
 		}
 	},
   plugins: [
-		Paraglide({
+		paraglide({
 			project: "./project.inlang.json",
 			outdir: "./src/paraglide",
 		}),
