@@ -53,12 +53,20 @@ export const compileCommand = new Command()
 
 		// await Promise that never resolves to keep the process alive
 		if (options.watch) {
+
+			process.on("SIGINT", () => {
+				console.log("")
+				consola.info("Stopping the watcher.")
+				process.exit(0)
+			})
+
 			project.query.messages.getAll.subscribe(async (messages) => {
 				consola.info("Messages changed, recompiling...")
 				await execute()
 			})
 
 			while (true) {
+				// Keep the process alive
 				await new Promise((resolve) => setTimeout(resolve, 10_000))
 			}
 		}

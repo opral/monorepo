@@ -4,9 +4,9 @@
 	"private": true,
 	"scripts": {
 		"build": "paraglide-js compile --project ./project.inlang.json && tsc",
-		"dev": "paraglide-js compile --project ./project.inlang.json --watch",
-		"pretest": "paraglide-js compile",
-		"test": "vitest run"
+		"_dev": "paraglide-js compile --project ./project.inlang.json --watch",
+		"pretest": "paraglide-js compile --project ./project.inlang.json",
+		"test": "npm run pretest && vitest run"
 	},
 	"dependencies": {
 		"@inlang/paraglide-js": "workspace:*"
