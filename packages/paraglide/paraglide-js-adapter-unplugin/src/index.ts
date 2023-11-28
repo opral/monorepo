@@ -3,7 +3,6 @@ import { Message, ProjectSettings, loadProject, type InlangProject } from "@inla
 import path from "node:path"
 import fs from "node:fs/promises"
 import { compile, writeOutput, Logger } from "@inlang/paraglide-js/internal"
-import color from "kleur"
 
 const PLUGIN_NAME = "unplugin-paraglide"
 
@@ -38,11 +37,11 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		if (options.silent) return
 
 		if (numCompiles === 0) {
-			logger.info(`Compiling Messages into ${color.italic(options.outdir)}`)
+			logger.info(`Compiling Messages into ${options.outdir}`)
 		}
 
 		if (numCompiles >= 1) {
-			logger.info(`Messages changed - Recompiling into ${color.italic(options.outdir)}`)
+			logger.info(`Messages changed - Recompiling into ${options.outdir}`)
 		}
 	}
 
@@ -74,7 +73,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 			compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, async () => {
 				const project = await getProject()
 				await triggerCompile(project.query.messages.getAll(), project.settings())
-				console.info(`Compiled Messages into ${color.italic(options.outdir)}`)
+				console.info(`Compiled Messages into ${options.outdir}`)
 			})
 		},
 	}

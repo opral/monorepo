@@ -29,7 +29,7 @@ export class Logger {
 
 	public log(message: string): Logger {
 		if (this.options.silent) return this
-		const prefix = this.options.prefix ? colors.bold(colors.blue("[paraglide] ")) : ""
+		const prefix = this.options.prefix ? colors.bold("[paraglide] ") : ""
 		consola.log(prefix + message)
 		return this
 	}
