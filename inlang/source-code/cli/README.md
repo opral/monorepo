@@ -73,19 +73,18 @@ To use the inlang CLI, you need a `project.inlang.json` file configured, see [he
 
 # Commands
 
-
 | Name            | Command                                               | Description                                                                                                  |
 | --------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | **CLI Version** | `npx @inlang/cli@latest [command]`                   | Get the latest version of the inlang CLI.                                                                     |
 | **Project**     | `npx @inlang/cli project validate [options]`                  | Manage your inlang project, including validation and interactive project creation.                           |
 | **Lint**        | `npx @inlang/cli lint [options]`                     | Lint translations using configured rules. Options include `--no-fail`, `--project`, and `--languageTags`.      |
-| **Machine**     | `npx @inlang/cli machine translate [options]`        | Automate translation processes. Options include `-f, --force` and `--project <path>`.                          |
+| **Machine**     | `npx @inlang/cli machine translate [options]`        | Automate translation processes. Options include `-f, --force`, `--project <path>`, `--sourceLanguageTag <source>` and `--targetLanguageTags <targets...>`                          |
 | **Open**        | `npx @inlang/cli open editor`                     | Open parts of the Inlang infrastructure in your default browser, including the editor.                        |
 | **Module**      | `npx @inlang/cli module [command]`                   | Interact with Inlang modules, including initialization and building. Commands:  `init [options]`   Initialize a new inlang module codebase,   `build [options]`  build an inlang module. Options include `--type`, `--entry`, and `--outdir`. |
 
-<!-- 
+---
 
-
+# Usage
 
 We recommend using the CLI with `npx` to avoid installing the CLI globally. Not installing the CLI globally has the following advantages:
 
@@ -133,8 +132,9 @@ npx @inlang/cli machine translate
 The translate command has the following options:
 
 - `-f, --force`: If this option is set, the command will not prompt confirmation. This is useful for CI/CD build pipelines. **We advise you to only use `machine translate` in build pipelines to avoid out-of-context/wrong translations.**
-
 - `--project <path>`: Specifies the path to the project root. The default project root is the current working directory.
+- `--sourceLanguageTag <source>`: Specifies the source language tag. The default source language tag is the one specified in the `project.inlang.json` file.
+- `--targetLanguageTags <targets...>`: Specifies the target language tags as comma seperated list (e.g. sk,zh,pt-BR). The default target language tags are the ones specified in the `project.inlang.json` file.
 
 This command reads the project.inlang.json file in the repository and retrieves the resources and reference language specified in the configuration. It then translates all messages from the reference language to other languages defined in the configuration.
 
@@ -158,7 +158,7 @@ npx @inlang/cli project validate
 
 **Options**
 
-The translate command has the following options:
+The validate command has the following options:
 
 - `--project <path>`: Specifies the path to the project root. The default project root is the current working directory.
 
