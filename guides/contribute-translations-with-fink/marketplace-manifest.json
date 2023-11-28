@@ -1,6 +1,6 @@
 {
 	"id": "guide.nilsjacobsen.contributeTranslationsWithFink",
-	"icon": "https://github.com/inlang/monorepo/blob/main/inlang/guides/contribute-translations-with-fink/bird-contribute.png?raw=true",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/contribute-translations-with-fink/bird-contribute.png?raw=true",
 	"displayName": {
 		"en": "Contribute Translations with Fink"
 	},
