@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 1.21.0
+
+### Minor Changes
+
+- f8d864297: add `sourceLanguageTag` & `targetLanguageTags` options to `machine translate` command
+
 ## 1.20.0
 
 ### Minor Changes
