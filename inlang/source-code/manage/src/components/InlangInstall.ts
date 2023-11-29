@@ -1,5 +1,6 @@
 import type { TemplateResult } from "lit"
 import { html } from "lit"
+import { openRepository, createNodeishMemoryFs } from "@lix-js/client"
 import { customElement, property } from "lit/decorators.js"
 import { TwLitElement } from "../common/TwLitElement.js"
 import { browserAuth, getUser } from "@lix-js/client/src/browser-auth.ts"
@@ -11,7 +12,7 @@ export class InlangInstall extends TwLitElement {
 	manual: boolean = false
 
 	@property({ type: String })
-	step: "nomodule" | "noauth" | "norepo" | "install" = "nomodule"
+	step: "" | "nomodule" | "noauth" | "norepo" | "install" = ""
 
 	@property({ type: String })
 	jsonURL: string = ""
@@ -34,6 +35,18 @@ export class InlangInstall extends TwLitElement {
 	@property({ type: Boolean })
 	loading: boolean = false
 
+	/* This function uses lix to inject the module into the inlang project */
+	install() {
+		const validRepoURL = `https://${this.repoURL.split("/").slice(0, 3).join("/")}`
+
+		const repo = openRepository(`http://localhost:3001/git/${validRepoURL}`, {
+			nodeishFs: createNodeishMemoryFs(),
+		})
+
+		console.log(repo)
+	}
+
+	/* This function checks if all necessary data is given to install into a project */
 	connectedCallback() {
 		super.connectedCallback()
 		this.url = JSON.parse(this.jsonURL)
@@ -44,6 +57,7 @@ export class InlangInstall extends TwLitElement {
 		this.loading = true
 
 		if (!this.module) {
+			console.error("No module found")
 			this.step = "nomodule"
 			this.loading = false
 		} else if (!this.authorized) {
@@ -51,25 +65,29 @@ export class InlangInstall extends TwLitElement {
 				.then((user) => {
 					if (user) {
 						this.authorized = true
-						this.step = "norepo"
 					} else {
+						console.error("No user found")
 						this.step = "noauth"
 					}
 					this.loading = false
 				})
 				.catch(() => {
+					console.error("No user found")
 					this.step = "noauth"
 					this.loading = false
 				})
 		} else if (!this.url.repo) {
+			console.error("No repo found")
 			this.step = "norepo"
 			this.loading = false
 		} else {
 			this.step = "install"
 			this.loading = false
+			this.install()
 		}
 	}
 
+	/* This function generates the install link for the user based on a repo url */
 	generateInstallLink() {
 		const url = new URL(this.repoURL)
 		return `/install?repo=${url.host}${url.pathname.split("/").slice(0, 3).join("/")}&module=${
