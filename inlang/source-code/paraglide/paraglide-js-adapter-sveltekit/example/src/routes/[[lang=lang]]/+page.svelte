@@ -10,17 +10,16 @@
 
 <h3>Switch Locales using Links</h3>
 
-<div role="radiogroup">
-	{#each availableLanguageTags as lang}
-		<a href={translatePath("/", lang)} {lang} hreflang={lang} aria-current={lang === languageTag()}
-			>{m.change_language_to({ languageTag: lang }, { languageTag: lang })}</a
-		>
-		<br />
-	{/each}
-</div>
+{#each availableLanguageTags as lang}
+	<a href={translatePath("/", lang)} hreflang={lang}>
+		{m.change_language_to({ languageTag: lang })}
+	</a
+	>
+	<br />
+{/each}
 
 <h3>Switch Locales Programatically</h3>
-
+ 
 <select on:change={(e) => goto(translatePath("/", e.target.value))}>
 	{#each availableLanguageTags as lang}
 		<option value={lang} selected={lang === languageTag()}>{lang}</option>
