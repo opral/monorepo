@@ -11,8 +11,8 @@ If you plan to create an i18n app, this is the perfect solution. You can use the
 
 ## Benefits
 <doc-features>
-  <doc-feature color="#EBF0F4" title="🖊️  Reactive CRUD API" image="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/crud.png"></doc-feature>
-  <doc-feature color="#EBF0F4" title="📂  No Storage complexity" image="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/storage.png"></doc-feature>
+  <doc-feature color="#EBF0F4" title="🖊️  Reactive CRUD API" image="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/crudV02.png.png"></doc-feature>
+  <doc-feature color="#EBF0F4" title="📂  No Storage complexity" image="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/storageV03.png"></doc-feature>
 </doc-features>
 
 <br/>
