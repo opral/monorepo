@@ -240,6 +240,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 							branch,
 						}
 					)
+					// @ts-expect-error
+					newRepo.nodeishFs.watch = () => undefined
 					setLastPullTime(new Date())
 					// Invalidate the project while we switch branches
 					setProject(undefined)
