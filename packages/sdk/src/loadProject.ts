@@ -64,7 +64,7 @@ export const loadProject = async (args: {
 		)
 	} else if (/[^\\/]+\.inlang$/.test(projectPath) === false) {
 		throw new LoadProjectInvalidArgument(
-			`Expected a path ending in "{name}.inlang" but received "${projectPath}".\n\nValid examples: \n- "/path/to/micky-mouse.inlang"\n- "/path/to/green-elephant.inlang`,
+			`Expected a path ending in "{name}.inlang" but received "${projectPath}".\n\nValid examples: \n- "/path/to/micky-mouse.inlang"\n- "/path/to/green-elephant.inlang\n`,
 			{ argument: "projectPath" }
 		)
 	}
