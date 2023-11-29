@@ -30,17 +30,8 @@ export const badge = async (url: string) => {
 		nodeishFs: createNodeishMemoryFs(),
 	})
 
-	// Settings file path has to be absolute
-	const settingsFilePath = "/project.inlang/settings.json"
-
-	// Get the content of the project.inlang/settings.json file
-	await repo.nodeishFs.readFile(settingsFilePath, { encoding: "utf-8" }).catch((e) => {
-		if (e.code !== "ENOENT") throw e
-		throw new Error("No inlang project found in the repository.")
-	})
-
 	const project = await loadProject({
-		projectPath: settingsFilePath,
+		projectPath: "/project.inlang",
 		nodeishFs: repo.nodeishFs,
 		_capture(id, props) {
 			telemetryNode.capture({
