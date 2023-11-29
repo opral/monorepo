@@ -32,24 +32,24 @@ Since you will be importing from the `paraglide` folder a lot, it's a good idea 
 In your `webpack.config.js`, add an alias to your `resolve` object:
 
 ```js
-import Paraglide from "@inlang/paraglide-js-adapter-webpack";
-import path from "path";
-import { fileURLToPath } from "url";
+import { paraglide } from "@inlang/paraglide-js-adapter-webpack"
+import path from "path"
+import { fileURLToPath } from "url"
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default {
 	resolve: {
 		alias: {
 			$paraglide: path.resolve(__dirname, "src/paraglide/"),
-		}
+		},
 	},
-  plugins: [
-		Paraglide({
+	plugins: [
+		paraglide({
 			project: "./project.inlang",
 			outdir: "./src/paraglide",
 		}),
-	]
+	],
 }
 ```
 
@@ -57,12 +57,12 @@ You can now import your messages from `$paraglide/messages`. But typescript will
 
 ```json
 {
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "$paraglide/*": ["src/paraglide/*"]
-    }
-  }
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"$paraglide/*": ["src/paraglide/*"]
+		}
+	}
 }
 ```
 

@@ -323,7 +323,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	})
 
-	const [githubRepositoryInformation] = createResource(
+	const [githubRepositoryInformation, { refetch }] = createResource(
 		() => {
 			if (
 				localStorage?.user === undefined ||
@@ -343,6 +343,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			return repoMeta
 		}
 	)
+
+	createEffect(() => {
+		if (localStorage?.user?.isLoggedIn) refetch()
+	})
 
 	const [currentBranch] = createResource(
 		() => {
@@ -401,7 +405,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			) {
 				return false
 			}
-
 			return args.repoMeta?.permissions?.push || false
 		}
 	)
