@@ -64,6 +64,16 @@
 							"value": "Globálna Aplikácia"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "全球应用"
+						}
+					]
 				}
 			]
 		},
@@ -128,6 +138,16 @@
 						{
 							"type": "Text",
 							"value": "Lint Pravidlá"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "皮棉规则"
 						}
 					]
 				}
@@ -196,6 +216,16 @@
 							"value": "Globálny Markdown"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "全球降价"
+						}
+					]
 				}
 			]
 		},
@@ -262,6 +292,16 @@
 							"value": "Ekosystém"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "生态系统"
+						}
+					]
 				}
 			]
 		},
@@ -326,6 +366,16 @@
 						{
 							"type": "Text",
 							"value": "Globálna Stránka"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "全球网站"
 						}
 					]
 				}
@@ -1078,6 +1128,16 @@
 							"value": "Globalizačný ekosystém"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "生态系统走向全球"
+						}
+					]
 				}
 			]
 		},
@@ -1600,6 +1660,16 @@
 							"value": "Vybrané Produkty"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "特色产品"
+						}
+					]
 				}
 			]
 		},
@@ -1636,6 +1706,46 @@
 							"value": "Všetky návody"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Voir tous les guides"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vedi tutte le guide"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Ver todos os guias"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "查看所有指南"
+						}
+					]
 				}
 			]
 		},
@@ -1670,6 +1780,46 @@
 						{
 							"type": "Text",
 							"value": "Použite rozšírenia a adaptéry, aby ste mohli jednoducho vyvýjať projekty, ktoré vyriešia vaše problémy, bezohľadu na to, kde majú fungovat."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Utilisez des plugins et des adaptateurs pour adapter facilement les produits à vos besoins spécifiques, quel que soit l'endroit où vous souhaitez qu'ils fonctionnent."
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Utilizza plug-in e adattatori per far sì che i prodotti funzionino facilmente per le tue esigenze specifiche, indipendentemente da dove desideri che funzionino."
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Use plug-ins e adaptadores para fazer com que os produtos funcionem facilmente para suas necessidades específicas, não importa onde você queira que eles funcionem."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "使用插件和适配器可以轻松地使产品满足您的特定需求，无论您希望它们在哪里工作。"
 						}
 					]
 				}
@@ -1814,6 +1964,16 @@
 							"value": "Nájdite správne návody"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "找到正确的指南"
+						}
+					]
 				}
 			]
 		},
@@ -1878,6 +2038,16 @@
 						{
 							"type": "Text",
 							"value": "Viac o ekosystéme"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "有关生态系统的更多信息"
 						}
 					]
 				}
@@ -1946,6 +2116,16 @@
 							"value": "Okrem i18n knižnice, ilang je váš ekosystém na globalizáciu. Zapojte produkty inlang dohromady pre širšie pokrytie trhu a viac zákazníkov."
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "除了 i18n 库之外，inlang 还是您走向全球的生态系统。将 inlang 的产品整合在一起以扩展市场并扩大客户范围。"
+						}
+					]
 				}
 			]
 		},
@@ -2012,6 +2192,16 @@
 							"value": "Hľadať"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "搜索"
+						}
+					]
 				}
 			]
 		},
@@ -2068,6 +2258,26 @@
 							"value": "Hľadať v ekosystéme..."
 						}
 					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Pesquise o ecossistema ..."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "搜索生态系统..."
+						}
+					]
 				}
 			]
 		},
@@ -2112,6 +2322,36 @@
 						{
 							"type": "Text",
 							"value": "Populárne"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Populaire"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Popular"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "受欢迎的"
 						}
 					]
 				}
@@ -2180,6 +2420,16 @@
 							"value": "Pozrite si SvelteSummit panel z 11 Nov, 23"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "观看 11 月 11 日、23 日 SvelteSummit 演讲"
+						}
+					]
 				}
 			]
 		},
@@ -2244,6 +2494,16 @@
 						{
 							"type": "Text",
 							"value": "Nájdite produkty na globalizáciu."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "寻找走向全球的产品。"
 						}
 					]
 				}
@@ -2312,6 +2572,16 @@
 							"value": "Viac o Lix"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "关于利克斯的更多信息"
+						}
+					]
 				}
 			]
 		},
@@ -2376,6 +2646,16 @@
 						{
 							"type": "Text",
 							"value": "Základ ekosystému"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "生态系统的支柱"
 						}
 					]
 				}
@@ -2444,6 +2724,16 @@
 							"value": "Ovládanie zmeny Lix"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lix变更控制"
+						}
+					]
 				}
 			]
 		},
@@ -2508,6 +2798,16 @@
 						{
 							"type": "Text",
 							"value": "Populárne Produkty"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "热门产品"
 						}
 					]
 				}
@@ -2576,6 +2876,16 @@
 							"value": "Váš Stack"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "你的堆栈"
+						}
+					]
 				}
 			]
 		},
@@ -2610,6 +2920,46 @@
 						{
 							"type": "Text",
 							"value": "Rýchlo nájdite najlepšie riešenie na globalizáciu (i18n) vašej aplikácie. inlang vám pomôže expandovať na nové trhy a získať nových zákazníkov."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Trouvez rapidement la meilleure solution pour mondialiser (i18n) votre application. inlang vous aide à vous développer sur de nouveaux marchés et à acquérir de nouveaux clients."
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Trova rapidamente la soluzione migliore per globalizzare (i18n) la tua app. inlang ti aiuta ad espanderti in nuovi mercati e ad acquisire nuovi clienti."
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Encontre rapidamente a melhor solução para globalizar (i18n) seu aplicativo. A inlang ajuda você a expandir para novos mercados e conquistar novos clientes."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "快速找到全球化 (i18n) 您的应用程序的最佳解决方案。 inlang 帮助您拓展新市场并获取新客户。"
 						}
 					]
 				}
@@ -2648,6 +2998,46 @@
 							"value": "inlang Obchod - Ekosystém na globalizáciu"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "inlang Marketplace - L'écosystème pour se mondialiser"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "inlang Marketplace: l'ecosistema per diventare globale"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "inlang Marketplace - O ecossistema que se tornará global"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "inlang Marketplace - 走向全球的生态系统"
+						}
+					]
 				}
 			]
 		},
@@ -2682,6 +3072,46 @@
 						{
 							"type": "Text",
 							"value": "Ekosystém inlang pomáha organizáciám dostať sa do sveta."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "L'écosystème d'inlang aide les organisations à se mondialiser."
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "L'ecosistema di inlang aiuta le organizzazioni a diventare globali."
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "O ecossistema da inlang ajuda as organizações a se tornarem globais."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "inlang的生态系统帮助组织走向全球。"
 						}
 					]
 				}
@@ -2750,6 +3180,16 @@
 							"value": "Začať"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "开始使用"
+						}
+					]
 				}
 			]
 		},
@@ -2814,6 +3254,16 @@
 						{
 							"type": "Text",
 							"value": "Všeobecný sprievodca minimálnymi krokmi potrebnými na to, aby bol váš projekt pripravený na ekosystém inlang."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "有关使您的项目为 inlang 生态系统做好准备所需的最低步骤的一般指南。"
 						}
 					]
 				}
@@ -2882,6 +3332,16 @@
 							"value": "Ako"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "如何"
+						}
+					]
 				}
 			]
 		},
@@ -2946,6 +3406,16 @@
 						{
 							"type": "Text",
 							"value": "Nastavte jazyk pre svoj projekt"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "为您的项目设置 inlang"
 						}
 					]
 				}
@@ -3014,6 +3484,16 @@
 							"value": "Začať"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "开始使用"
+						}
+					]
 				}
 			]
 		},
@@ -3078,6 +3558,16 @@
 						{
 							"type": "Text",
 							"value": "Základný návod, ako si osvojiť inlang pomocou paraglide.js a doplnku message-format-plugin vo vašej Svelte aplikácii."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "有关如何在 Svelte 应用程序中采用 paraglide.js 和 message-format-plugin 的 inlang 的基本指南。"
 						}
 					]
 				}
@@ -3146,6 +3636,16 @@
 							"value": "Vytvorte globálnu Svelte aplikáciu: Základný návod"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "构建全球 Svelte 应用程序：基本指南"
+						}
+					]
 				}
 			]
 		},
@@ -3180,6 +3680,46 @@
 						{
 							"type": "Text",
 							"value": "Vidieť všetko"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Voir tout"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Vedi tutto"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Ver tudo"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "查看全部"
 						}
 					]
 				}
@@ -3248,6 +3788,16 @@
 							"value": "Zostavte svoje vlastné riešenie!"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "构建您自己的解决方案！"
+						}
+					]
 				}
 			]
 		},
@@ -3312,6 +3862,16 @@
 						{
 							"type": "Text",
 							"value": "Nenašli ste, čo ste hľadali?"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "不能找到你想要的？"
 						}
 					]
 				}
@@ -3380,6 +3940,16 @@
 							"value": "Potrebujete pomoc alebo máte otázky? Nájdete nás na Discorde!"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "需要帮助或有疑问吗？加入我们的不和谐！"
+						}
+					]
 				}
 			]
 		},
@@ -3444,6 +4014,16 @@
 						{
 							"type": "Text",
 							"value": "Upozorni ma"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "提醒我"
 						}
 					]
 				}
@@ -3512,6 +4092,16 @@
 							"value": "Už dostávate upozornenia."
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "您已经收到通知了。"
+						}
+					]
 				}
 			]
 		},
@@ -3576,6 +4166,16 @@
 						{
 							"type": "Text",
 							"value": "Dáme vám vedieť keď dostaneme"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "当我们到达时我们会通知您"
 						}
 					]
 				}
@@ -3644,6 +4244,16 @@
 							"value": "nejaké nové výsledky"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "一些新的结果。"
+						}
+					]
 				}
 			]
 		},
@@ -3708,6 +4318,16 @@
 						{
 							"type": "Text",
 							"value": "Niečo sa pokazilo. Skúste neskôr prosím."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "出了些问题。请稍后再试。"
 						}
 					]
 				}
@@ -3776,6 +4396,16 @@
 							"value": "Prosím zadajte svoju e-mailovú adresu."
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "请输入您的电子邮件地址。"
+						}
+					]
 				}
 			]
 		},
@@ -3840,6 +4470,16 @@
 						{
 							"type": "Text",
 							"value": "Zadajte email..."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "输入电子邮件..."
 						}
 					]
 				}
@@ -3908,6 +4548,16 @@
 							"value": "Pomôžte nám vybudovať inlang ekosystém"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "帮助我们构建生态系统"
+						}
+					]
 				}
 			]
 		},
@@ -3972,6 +4622,16 @@
 						{
 							"type": "Text",
 							"value": "Keď bude táto funkcia dostupná, budete upozornení."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "当此功能可用时，您将收到通知。"
 						}
 					]
 				}
@@ -4040,6 +4700,16 @@
 							"value": "Zatiaľ žiadne výsledky"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "还没有结果"
+						}
+					]
 				}
 			]
 		},
@@ -4104,6 +4774,16 @@
 						{
 							"type": "Text",
 							"value": "Prosím zadajte platnú emailovú adresu."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "请输入有效的电子邮件地址。"
 						}
 					]
 				}
@@ -4248,6 +4928,16 @@
 							"value": "Všetky Návody"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "所有指南"
+						}
+					]
 				}
 			]
 		},
@@ -4282,6 +4972,46 @@
 						{
 							"type": "Text",
 							"value": "Vytvorte aplikáciu"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Créer une application"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Costruisci un'app"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Crie um aplicativo"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "构建一个应用程序"
 						}
 					]
 				}
@@ -4354,6 +5084,46 @@
 						{
 							"type": "Text",
 							"value": "Aplikácie"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "applications"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "App"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Aplicativos"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "应用"
 						}
 					]
 				}
@@ -4498,6 +5268,16 @@
 							"value": "Aplikácia"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "应用"
+						}
+					]
 				}
 			]
 		},
@@ -4562,6 +5342,16 @@
 						{
 							"type": "Text",
 							"value": "Lint Pravidl"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "皮棉规则"
 						}
 					]
 				}
@@ -4706,6 +5496,16 @@
 							"value": "Chýba niečo?"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "遗漏了什么？"
+						}
+					]
 				}
 			]
 		},
@@ -4772,6 +5572,16 @@
 							"value": "Stránka"
 						}
 					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "网站"
+						}
+					]
 				}
 			]
 		},
@@ -4806,6 +5616,46 @@
 						{
 							"type": "Text",
 							"value": "Zverejniť návod"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Publier un guide"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Pubblica una guida"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Publicar um guia"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "发布指南"
 						}
 					]
 				}
@@ -4844,6 +5694,46 @@
 							"value": "Naučte sa používať produkty z ekosystému inlang."
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Apprenez à utiliser les produits de l'écosystème inlang."
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Scopri come utilizzare i prodotti dell'ecosistema inlang."
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Aprenda como usar produtos do ecossistema inlang."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "了解如何使用 inlang 生态系统的产品。"
+						}
+					]
 				}
 			]
 		},
@@ -4878,6 +5768,46 @@
 						{
 							"type": "Text",
 							"value": "Návody"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Guides"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Guide"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Guias"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "指南"
 						}
 					]
 				}
@@ -4916,6 +5846,46 @@
 							"value": "Nové: Paraglide JS"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Nouveau : Parapente JS"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Novità: parapendio JS"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Novo: Parapente JS"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "新：滑翔伞 JS"
+						}
+					]
 				}
 			]
 		},
@@ -4950,6 +5920,46 @@
 						{
 							"type": "Text",
 							"value": "Použite knižnice na rozšírenie vášho softvérového projektu."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Utilisez les bibliothèques pour étendre votre projet logiciel."
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Utilizza le librerie per estendere il tuo progetto software."
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Use Bibliotecas para ampliar seu projeto de software."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "使用库来扩展您的软件项目。"
 						}
 					]
 				}
@@ -4988,6 +5998,46 @@
 							"value": "Knižnice"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Bibliothèques"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Biblioteche"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Bibliotecas"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "图书馆"
+						}
+					]
 				}
 			]
 		},
@@ -5022,6 +6072,46 @@
 						{
 							"type": "Text",
 							"value": "Čítaj viac"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "En savoir plus"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Per saperne di più"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Consulte Mais informação"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "阅读更多"
 						}
 					]
 				}
@@ -5060,6 +6150,46 @@
 							"value": "Ovládajte celý proces prekladu: Od návrhu po používateľské rozhranie."
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Contrôlez l'ensemble du processus de traduction : de la conception au frontend."
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Controlla l'intero processo di traduzione: dalla progettazione al frontend."
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Controle todo o processo de tradução: do design ao frontend."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "控制整个翻译过程：从设计到前端。"
+						}
+					]
 				}
 			]
 		},
@@ -5094,6 +6224,46 @@
 						{
 							"type": "Text",
 							"value": "Čo sú Lint Pravidlá?"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Que sont les règles de charpie ?"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Cosa sono le regole Lint?"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "O que são regras do Lint?"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "什么是 Lint 规则？"
 						}
 					]
 				}
@@ -5132,6 +6302,46 @@
 							"value": "Vlastné Lint Pravidlo"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Règle de charpie personnalisée"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Regola pelucchi personalizzata"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Regra Lint personalizada"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "自定义 Lint 规则"
+						}
+					]
 				}
 			]
 		},
@@ -5166,6 +6376,46 @@
 						{
 							"type": "Text",
 							"value": "Overte obsah v projekte inlang."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Valider le contenu dans un projet Inlang."
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Convalida il contenuto in un progetto inlang."
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Valide o conteúdo em um projeto inlang."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "验证 inlang 项目中的内容。"
 						}
 					]
 				}
@@ -5204,6 +6454,46 @@
 							"value": "Lint Pravidlá"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Règles relatives aux peluches"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Regole sulla lanugine"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Regras de fiapos"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "皮棉规则"
+						}
+					]
 				}
 			]
 		},
@@ -5238,6 +6528,46 @@
 						{
 							"type": "Text",
 							"value": "Čítaj viac"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "En savoir plus"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Per saperne di più"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Consulte Mais informação"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "阅读更多"
 						}
 					]
 				}
@@ -5276,6 +6606,46 @@
 							"value": "Navštívte lix"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Visitez lix"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Visita lix"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Visite lix"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "访问利克斯"
+						}
+					]
 				}
 			]
 		},
@@ -5310,6 +6680,46 @@
 						{
 							"type": "Text",
 							"value": "Lix je systém, ktorý vám umožňuje použiť git ako backend pre vašu aplikáciu. Je k dispozícii pre web."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Le système de contrôle des modifications lix est un système qui vous permet d'exécuter git comme backend pour votre application. Il est disponible pour le Web."
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Il sistema di controllo dei cambiamenti lix è un sistema che ti consente di eseguire git come backend per la tua applicazione. È disponibile per il web."
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "O sistema de controle de alterações lix é um sistema que permite executar o git como back-end para seu aplicativo. Está disponível para a web."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "lix 变更控制系统是一个允许您运行 git 作为应用程序后端的系统。它可用于网络。"
 						}
 					]
 				}
@@ -5348,6 +6758,46 @@
 							"value": "Change control systém pre web."
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Le système de contrôle des modifications pour le Web."
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Il sistema di controllo delle modifiche per il web."
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "O sistema de controle de mudanças para a web."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "网络变更控制系统。"
+						}
+					]
 				}
 			]
 		},
@@ -5382,6 +6832,46 @@
 						{
 							"type": "Text",
 							"value": "Lix"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "LIX"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lix"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Lix"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "利克斯"
 						}
 					]
 				}
@@ -5420,6 +6910,46 @@
 							"value": "Čo je to Lix change control systém?"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Qu'est-ce que le système de contrôle des changements lix ?"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Cos'è il sistema di controllo del cambio lix?"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Qual é o sistema de controle de alterações lix?"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "什么是 lix 变更控制系统？"
+						}
+					]
 				}
 			]
 		},
@@ -5444,6 +6974,56 @@
 						{
 							"type": "Text",
 							"value": "SvelteSummit Fall 2023 anschauen"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Regardez la conférence du SvelteSummit automne 2023"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Guarda il discorso di SvelteSummit dell'autunno 2023"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Assista à palestra do SvelteSummit no outono de 2023"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Pozrite si prednášku SvelteSummit na jeseň 2023"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "观看 2023 年秋季 SvelteSummit 演讲"
 						}
 					]
 				}
@@ -5480,6 +7060,46 @@
 						{
 							"type": "Text",
 							"value": "Začnite s Paraglide JS"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Commencez avec Paraglide JS"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Inizia con Paraglide JS"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Comece com Paraglide JS"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "从 Paraglide JS 开始"
 						}
 					]
 				}
@@ -5544,6 +7164,46 @@
 							"value": "Paraglide JS"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Parapente JS"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Parapendio JS"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Parapente JS"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "滑翔伞JS"
+						}
+					]
 				}
 			]
 		},
@@ -5580,6 +7240,46 @@
 							"value": "Čítaj viac"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "En savoir plus"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Per saperne di più"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Consulte Mais informação"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "阅读更多"
+						}
+					]
 				}
 			]
 		},
@@ -5604,6 +7304,56 @@
 						{
 							"type": "Text",
 							"value": "Entdecke die Vorteile der Verwendung von Plugins: Freiheit und kostengünstige Einführung."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Découvrez les avantages de l'utilisation de plugins : liberté et adoption à faible coût."
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Scopri i vantaggi dell'utilizzo dei plugin: libertà e adozione a basso costo."
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Descubra os benefícios de usar plugins: liberdade e adoção com baixo custo."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Objavte výhody používania doplnkov: sloboda a nízke náklady."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "发现使用插件的好处：自由和低成本采用。"
 						}
 					]
 				}
@@ -5642,6 +7392,46 @@
 							"value": "Čo sú pluginy?"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Que sont les plugins ?"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Cosa sono i plugin?"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "O que são plug-ins?"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "什么是插件？"
+						}
+					]
 				}
 			]
 		},
@@ -5676,6 +7466,46 @@
 						{
 							"type": "Text",
 							"value": "Vytvorte plugin"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Créer un plugin"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Costruisci un plugin"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Crie um plug-in"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "构建一个插件"
 						}
 					]
 				}
@@ -5714,6 +7544,46 @@
 							"value": "Zmeňte alebo rozšírte správanie aplikácie."
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Modifiez ou étendez le comportement de l'application."
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Modifica o estendi il comportamento dell'app."
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Altere ou estenda o comportamento do aplicativo."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "更改或扩展应用程序行为。"
+						}
+					]
 				}
 			]
 		},
@@ -5748,6 +7618,46 @@
 						{
 							"type": "Text",
 							"value": "Pluginy"
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Plugins"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Plugin"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Plug-ins"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "插件"
 						}
 					]
 				}
@@ -5814,6 +7724,16 @@
 						{
 							"type": "Text",
 							"value": "hľadať"
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "寻找"
 						}
 					]
 				}
