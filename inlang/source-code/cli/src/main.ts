@@ -8,7 +8,7 @@ import { open } from "./commands/open/index.js"
 import { gitOrigin, telemetry } from "./services/telemetry/implementation.js"
 import fetchPolyfill from "node-fetch"
 import { lint } from "./commands/lint/index.js"
-import { project } from "./commands/project/index.js"
+import { validate } from "./commands/validate/index.js"
 // --------------- INIT ---------------
 
 // polyfilling node < 18 with fetch
@@ -30,7 +30,7 @@ export const cli = new Command()
 	.version(version)
 	.description("CLI for inlang.")
 	// Commands
-	.addCommand(project)
+	.addCommand(validate)
 	.addCommand(lint)
 	.addCommand(machine)
 	.addCommand(open)
