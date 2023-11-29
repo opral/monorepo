@@ -14,7 +14,9 @@ export const CONFIGURATION = {
 		OPEN_IN_EDITOR: openInEditorCommand,
 	},
 	FILES: {
-		PROJECT: "project.inlang",
+		// TODO: remove this hardcoded assumption for multi project support
+		// 
+		PROJECT: "project.inlang/settings.json",
 	},
 } as const
 
