@@ -1018,8 +1018,8 @@ importers:
         version: 18.2.0(react@18.2.0)
     devDependencies:
       '@inlang/paraglide-js':
-        specifier: 1.0.0-prerelease.12
-        version: 1.0.0-prerelease.12
+        specifier: workspace:*
+        version: link:../../paraglide-js
       '@types/node':
         specifier: ^20
         version: 20.10.0
@@ -3856,11 +3856,6 @@ packages:
       local-pkg: 0.4.3
     transitivePeerDependencies:
       - supports-color
-    dev: true
-
-  /@inlang/paraglide-js@1.0.0-prerelease.12:
-    resolution: {integrity: sha512-YOXpLYfG8XgdinF6ZSEB0TQPtvXGQzLTbhxJY7aGBJzt+zmAtqaXpxresw7Hp++7EBd/2DMmMiiuKz6ch3OzrA==}
-    hasBin: true
     dev: true
 
   /@isaacs/cliui@8.0.2:

@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"_dev": "paraglide-js compile --project ./project.inlang.json &&next dev",
-		"_build": "paraglide-js compile --project ./project.inlang.json && next build",
+		"build": "paraglide-js compile --project ./project.inlang.json && next build",
 		"preview": "next start"
 	},
 	"dependencies": {

@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "paraglide-js compile --project ./project.inlang.json && next dev",
+    "_dev": "paraglide-js compile --project ./project.inlang.json && next dev",
     "build": "paraglide-js compile --project ./project.inlang.json && next build",
     "start": "next start",
     "lint": "next lint"
