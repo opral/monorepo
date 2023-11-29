@@ -26,11 +26,13 @@ describe("main workflow", async () => {
 
 		fileContent += "\n// foo"
 		await repository.nodeishFs.writeFile("./README.md", fileContent)
+		await repository.nodeishFs.writeFile("./README_newfile.md", fileContent)
 		const statusPre = await repository.status({ filepath: "README.md" })
 
 		expect(statusPre).toBe("*modified")
 
 		await repository.add({ filepath: "README.md" })
+		await repository.add({ filepath: "README_newfile.md" })
 		await commitFun({
 			fs,
 			dir: "/",
@@ -39,8 +41,10 @@ describe("main workflow", async () => {
 		})
 
 		const statusPost = await repository.status({ filepath: "README.md" })
+		const statusPost2 = await repository.status({ filepath: "README_newfile.md" })
 
 		expect(statusPost).toBe("unmodified")
+		expect(statusPost2).toBe("unmodified")
 
 		fileContent += "\n// bar"
 		await repository.nodeishFs.writeFile("./README.md", fileContent)
