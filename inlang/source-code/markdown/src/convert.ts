@@ -39,6 +39,8 @@ export async function convert(markdown: string): Promise<string> {
 				"doc-features",
 				"inlang-badge-generator",
 				"doc-accordion",
+				"doc-header",
+				"doc-image",
 				...defaultSchema.tagNames!,
 			],
 			attributes: {
@@ -50,6 +52,8 @@ export async function convert(markdown: string): Promise<string> {
 				"doc-slider": ["items"],
 				"doc-icon": ["icon", "size"],
 				"doc-accordion": ["heading", "text"],
+				"doc-header": ["title", "description", "button", "link"],
+				"doc-image": ["src", "alt"],
 				...defaultSchema.attributes,
 			},
 		})
@@ -80,6 +84,7 @@ export async function convert(markdown: string): Promise<string> {
 			td: "doc-py-2 doc-leading-7",
 			hr: "doc-my-6 doc-border-b border-surface-200",
 			img: "doc-mx-auto doc-my-4 doc-rounded-xl doc-border border-surface-2",
+			strong: "doc-font-bold",
 		})
 		/* @ts-ignore */
 		.use(rehypeAutolinkHeadings, {
