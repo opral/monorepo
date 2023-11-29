@@ -4,12 +4,11 @@
 <br/>
 <br/>
 
-![Infografic](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/sdk-image.png)
+<doc-image src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/sdk-image.png" alt="infografic"></doc-image>
+
 If you plan to create an i18n app, this is the perfect solution. You can use the SDK (Software Development Kit), which provides reactive APIs to assist you in managing and linting translation files that are saved in the repository.
 
-<br/>
-
-## Benefits
+## Build i18n apps fast
 <doc-features>
   <doc-feature color="#EBF0F4" title="🖊️  Reactive CRUD API" image="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/sdkDocCrudNew.png"></doc-feature>
   <doc-feature color="#EBF0F4" title="📂  No Storage complexity" image="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/sdkDocStorage.png"></doc-feature>
@@ -17,10 +16,8 @@ If you plan to create an i18n app, this is the perfect solution. You can use the
 
 <br/>
 
-<doc-links>
-    <doc-link title="Build your App" icon="material-symbols:code-outline-rounded" href="/documentation" description="Save hours with inlang's i18n SDK"></doc-link>
-</doc-links>
 
+Use the handy 🖊️ **CRUD API** to easily get to content without hassle. Keep your views up-to-date effortlessly with our ⚡️ **Reactive approach**. Configure storage operations, like importing and exporting, with user-friendly 🧩 **Plugins** in a simple 📂 **Storage-agnostic** setup that supports common formats and libraries.
 
 <br/>
-<br/>
+
