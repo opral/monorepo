@@ -39,6 +39,7 @@ export async function convert(markdown: string): Promise<string> {
 				"doc-features",
 				"inlang-badge-generator",
 				"doc-accordion",
+				"doc-header",
 				...defaultSchema.tagNames!,
 			],
 			attributes: {
@@ -50,6 +51,7 @@ export async function convert(markdown: string): Promise<string> {
 				"doc-slider": ["items"],
 				"doc-icon": ["icon", "size"],
 				"doc-accordion": ["heading", "text"],
+				"doc-header": ["title", "description", "button", "link"],
 				...defaultSchema.attributes,
 			},
 		})

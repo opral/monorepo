@@ -6,6 +6,7 @@ export class DocFeature extends LitElement {
 	static override styles = css`
 		.feature-card {
 			display: flex;
+			flex-grow: 2;
 			flex-direction: column;
 			align-items: center;
 			justify-content: end;
@@ -56,29 +57,23 @@ export class DocFeature extends LitElement {
 @customElement("doc-features")
 export class DocFeatures extends LitElement {
 	static override styles = css`
-		.doc-features-grid {
-			display: grid;
-			grid-template-columns: repeat(3, 1fr);
+		.doc-features-container {
+			display: flex;
+			flex-wrap: wrap;
 			gap: 1rem;
+			flex-direction: row;
 			width: 100%;
 		}
 
-		@media (max-width: 1100px) {
-			.doc-features-grid {
-				grid-template-columns: repeat(2, 1fr);
-			}
-		}
-
-		@media (max-width: 700px) {
-			.doc-features-grid {
-				grid-template-columns: repeat(1, 1fr);
-			}
+		::slotted(doc-feature) {
+			flex-grow: 2;
+			min-width: 200px;
 		}
 	`
 
 	override render() {
-		return html`<div class="doc-features-grid">
-			<slot></slot>
+		return html`<div class="doc-features-container">
+			<slot class="doc-feature-container"></slot>
 		</div>`
 	}
 }
