@@ -31,20 +31,43 @@ export class InlangInstall extends TwLitElement {
 	@property({ type: Boolean })
 	authorized: boolean = false
 
+	@property({ type: Boolean })
+	loading: boolean = false
+
 	connectedCallback() {
 		super.connectedCallback()
 		this.url = JSON.parse(this.jsonURL)
+
 		// @ts-ignore
 		if (this.url.module) this.module = registry.find((x) => x.id === this.url.module)?.module
 
-		if (!this.module) this.step = "nomodule"
-		else if (!this.authorized) this.step = "noauth"
-		else if (!this.url.repo) this.step = "norepo"
-		else this.step = "install"
+		this.loading = true
 
-		getUser().then((user) => {
-			console.log(user)
-		})
+		if (!this.module) {
+			this.step = "nomodule"
+			this.loading = false
+		} else if (!this.authorized) {
+			getUser()
+				.then((user) => {
+					if (user) {
+						this.authorized = true
+						this.step = "norepo"
+					} else {
+						this.step = "noauth"
+					}
+					this.loading = false
+				})
+				.catch(() => {
+					this.step = "noauth"
+					this.loading = false
+				})
+		} else if (!this.url.repo) {
+			this.step = "norepo"
+			this.loading = false
+		} else {
+			this.step = "install"
+			this.loading = false
+		}
 	}
 
 	generateInstallLink() {
@@ -55,7 +78,9 @@ export class InlangInstall extends TwLitElement {
 	}
 
 	render(): TemplateResult {
-		return this.step === "nomodule"
+		return this.loading
+			? html`<div class="flex flex-col gap-2">Loading</div>`
+			: this.step === "nomodule"
 			? html`<div class="flex flex-col gap-2">
 					<h2 class="text-xl font-semibold">No module found</h2>
 					</h2>
