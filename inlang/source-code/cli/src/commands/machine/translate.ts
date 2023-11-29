@@ -3,7 +3,7 @@ import { Command } from "commander"
 import { rpc } from "@inlang/rpc"
 import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { log } from "../../utilities/log.js"
-import type { InlangProject } from "@inlang/sdk"
+import { type InlangProject, ProjectSettings } from "@inlang/sdk"
 import prompts from "prompts"
 import { projectOption } from "../../utilities/globalFlags.js"
 
@@ -11,6 +11,11 @@ export const translate = new Command()
 	.command("translate")
 	.requiredOption(projectOption.flags, projectOption.description)
 	.option("-f, --force", "Force machine translation and skip the confirmation prompt.", false)
+	.option("--sourceLanguageTag <source>", "Source language tag for translation.")
+	.option(
+		"--targetLanguageTags <targets...>",
+		"Comma separated list of target language tags for translation."
+	)
 	.description("Machine translate all resources.")
 	.action(async (args: { force: boolean; project: string }) => {
 		try {
@@ -40,6 +45,7 @@ export const translate = new Command()
 
 export async function translateCommandAction(args: { project: InlangProject }) {
 	try {
+		const options = translate.opts()
 		const projectConfig = args.project.settings()
 
 		if (!projectConfig) {
@@ -47,22 +53,50 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 			return
 		}
 
-		const sourceLanguageTag = projectConfig.sourceLanguageTag
-		// Get languages to translate to with the reference language removed
+		const allLanguageTags = [...projectConfig.languageTags, projectConfig.sourceLanguageTag]
 
-		const languagesTagsToTranslateTo = projectConfig.languageTags.filter(
-			// @ts-ignore - type mismtach - fix after refactor
-			(tag) => tag !== sourceLanguageTag
-		)
+		const sourceLanguageTag: ProjectSettings["sourceLanguageTag"] =
+			options.sourceLanguageTag || projectConfig.sourceLanguageTag
+		if (!sourceLanguageTag) {
+			log.error(
+				`No source language tag defined. Please define a source language tag in the project.inlang.json file or as an argument with --sourceLanguageTag.`
+			)
+			return
+		}
+		if (options.sourceLanguageTag && !allLanguageTags.includes(options.sourceLanguageTag)) {
+			log.error(
+				`The source language tag "${options.sourceLanguageTag}" is not included in the project settings sourceLanguageTag & languageTags. Possible language tags are ${allLanguageTags}.`
+			)
+			return
+		}
 
-		log.info(`📝 Translating to ${languagesTagsToTranslateTo.length} languages.`)
+		const targetLanguageTags: ProjectSettings["languageTags"] = options.targetLanguageTags
+			? options.targetLanguageTags[0]?.split(",")
+			: projectConfig.languageTags
+		if (!targetLanguageTags) {
+			log.error(
+				`No language tags defined. Please define languageTags in the project.inlang.json file or as an argument with --targetLanguageTags.`
+			)
+			return
+		}
+		if (
+			options.targetLanguageTags &&
+			!targetLanguageTags.every((tag) => allLanguageTags.includes(tag))
+		) {
+			log.error(
+				`Some or all of the language tags "${options.targetLanguageTags}" are not included in the project settings sourceLanguageTag & languageTags. Possible language tags are ${allLanguageTags}.`
+			)
+			return
+		}
+
+		log.info(`📝 Translating to ${targetLanguageTags.length} languages.`)
 
 		// parallelize in the future
 		for (const id of args.project.query.messages.includedMessageIds()) {
 			const { data: translatedMessage, error } = await rpc.machineTranslateMessage({
 				message: args.project.query.messages.get({ where: { id } })!,
-				sourceLanguageTag: sourceLanguageTag,
-				targetLanguageTags: languagesTagsToTranslateTo,
+				sourceLanguageTag,
+				targetLanguageTags,
 			})
 			if (error) {
 				log.error(`Couldn't translate message "${id}": ${error}`)

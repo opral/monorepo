@@ -6,7 +6,7 @@
 		],
 		"doppler": [
 			{
-				"runtime": "doppler secrets"
+				"runtime": "env | grep ^PUBLIC_"
 			}
 		]
 	},

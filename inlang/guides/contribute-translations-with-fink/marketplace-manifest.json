@@ -1,0 +1,28 @@
+{
+	"id": "guide.nilsjacobsen.contributeTranslationsWithFink",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/contribute-translations-with-fink/bird-contribute.png?raw=true",
+	"displayName": {
+		"en": "Contribute Translations with Fink"
+	},
+	"description": {
+		"en": "You can create or improve community translations through the Fink i18n editor."
+	},
+	"readme": {
+		"en": "./inlang/guides/contribute-translations-with-fink/README.md"
+	},
+	"keywords": [
+		"i18n",
+		"fink",
+		"messages",
+		"translations",
+		"editor",
+		"contribute",
+		"localization",
+		"globalization",
+		"internationalization",
+		"guide"
+	],
+	"publisherName": "Nils Jacobsen",
+	"publisherIcon": "https://avatars.githubusercontent.com/u/58360188?s=96&v=4",
+	"license": "Apache-2.0"
+}

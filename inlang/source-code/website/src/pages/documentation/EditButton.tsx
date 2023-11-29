@@ -9,7 +9,7 @@ export function EditButton(props: EditButtonProps) {
 	return (
 		<div class="w-full max-sm:pb-8 flex justify-between">
 			<Link
-				href={props.href!}
+				href={props.href}
 				class="text-info/80 hover:text-info/100 text-sm font-semibold flex items-center"
 				target="_blank"
 			>
