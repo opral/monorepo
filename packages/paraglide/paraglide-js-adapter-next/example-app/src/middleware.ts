@@ -1,21 +1,30 @@
 import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
-import { AvailableLanguageTag, availableLanguageTags, sourceLanguageTag } from "./paraglide/runtime"
+import { NextRequest } from "next/server"
+import { availableLanguageTags, sourceLanguageTag } from "./paraglide/runtime"
 
+/**
+ * Sets the request headers to resolve the language tag in RSC.
+ *
+ * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
+ */
 export function middleware(request: NextRequest) {
-	const { pathname } = request.nextUrl
+	const languageTag = request.nextUrl.pathname.slice(1)
+	const [_, maybeLocale] = request.nextUrl.pathname.split("/")
 
-	console.log("middleware", pathname)
-
-	//If the path already contains a locale, do nothing
-	const [_, maybeLocale] = pathname.split("/")
-	if (availableLanguageTags.includes(maybeLocale as AvailableLanguageTag)) {
-		return NextResponse.next()
+	if (!availableLanguageTags.includes(maybeLocale as any)) {
+		const redirectUrl = `/${sourceLanguageTag}${request.nextUrl.pathname}`
+		request.nextUrl.pathname = redirectUrl
+		return NextResponse.redirect(request.nextUrl)
 	}
 
-	//If the path does not contain a locale, redirect to the default locale
-	request.nextUrl.pathname = `/${sourceLanguageTag}${pathname}`
-	return NextResponse.redirect(request.nextUrl)
+	const headers = new Headers(request.headers)
+	headers.set("x-language-tag", languageTag)
+
+	return NextResponse.next({
+		request: {
+			headers,
+		},
+	})
 }
 
 export const config = {
@@ -27,6 +36,6 @@ export const config = {
 		 * - _next/image (image optimization files)
 		 * - favicon.ico (favicon file)
 		 */
-		"/((?!api|_next/static|_next/image|favicon).*)",
+		"/((?!api|_next/static|_next/image|favicon.ico).*)",
 	],
 }
