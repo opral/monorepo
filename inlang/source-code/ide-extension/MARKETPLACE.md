@@ -54,9 +54,9 @@ If you want to add lint rules to your experience, you can add them from: https:/
 ## Features
 
 <doc-features>
-  <doc-feature text-color="#FFFFFF" color="#334155" title="Extract messages" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/ide-extension/assets/ide-extension01.png"></doc-feature>
-  <doc-feature text-color="#FFFFFF" color="#334155" title="Lint messages" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/ide-extension/assets/ide-extension02.png"></doc-feature>
-  <doc-feature text-color="#FFFFFF" color="#334155" title="Inline Annotations" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/ide-extension/assets/ide-extension03.png"></doc-feature>
+  <doc-feature text-color="#FFFFFF" color="#334155" title="Extract messages" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/ide-extension/assets/ide01new.png"></doc-feature>
+  <doc-feature text-color="#FFFFFF" color="#334155" title="Lint messages" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/ide-extension/assets/ide02new.png"></doc-feature>
+  <doc-feature text-color="#FFFFFF" color="#334155" title="Inline Annotations" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/ide-extension/assets/ide03new.png"></doc-feature>
 </doc-features>
 
 … and much more as seen below

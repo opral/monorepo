@@ -31,9 +31,6 @@ jobs:
           node-version: 18
           cache: "pnpm"
 
-      - name: Install Dependencies
-        run: pnpm install
-
       - name: Run CI
         run: doppler run -- pnpm run ci # The "run" is needed here
         env:
