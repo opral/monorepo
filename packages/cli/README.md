@@ -75,7 +75,7 @@ If one of the commands can't be found, you are probably using an outdated versio
 | Name            | Command                                               | Description                                                                                                  |
 | --------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | **CLI Version** | `npx @inlang/cli@latest [command]`                   | Get the latest version of the inlang CLI.                                                                     |
-| **Project**     | `npx @inlang/cli project validate [options]`                  | Manage your inlang project, including validation and interactive project creation.                           |
+| **Validate**     | `npx @inlang/cli validate [options]`                  | Validate if the project is working correctly.                          |
 | **Lint**        | `npx @inlang/cli lint [options]`                     | Lint translations using configured rules. Options include `--no-fail`, `--project`, and `--languageTags`.      |
 | **Machine**     | `npx @inlang/cli machine translate [options]`        | Automate translation processes. Options include `-f, --force`, `--project <path>`, `--sourceLanguageTag <source>` and `--targetLanguageTags <targets...>`                          |
 | **Open**        | `npx @inlang/cli open editor`                     | Open parts of the Inlang infrastructure in your default browser, including the editor.                        |
@@ -147,12 +147,12 @@ The project command is used to interact with the Inlang project. It allows to cr
 
 This will launch an interactive prompt that will guide you through the process of creating the inlang configuration file.
 
-### `project validate`
+## `validate`
 
 Validates a project.
 
 ```sh
-npx @inlang/cli project validate
+npx @inlang/cli validate --project ./path/to/{project-name}.inlang
 ```
 
 **Options**
