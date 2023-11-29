@@ -9,7 +9,6 @@ import { createFileSystemMapper } from "./createFileSystemMapper.js"
 import { _import } from "./import/_import.js"
 import type { TelemetryEvents } from "../services/telemetry/events.js"
 import { tryCatch } from "@inlang/result"
-import { CONFIGURATION } from "../configuration.js"
 import fs from "node:fs/promises"
 
 // Helper Functions
