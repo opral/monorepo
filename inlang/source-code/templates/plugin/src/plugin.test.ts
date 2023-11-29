@@ -15,12 +15,13 @@ it("should return fake messages to illustrate how a plugin works", async () => {
 	} satisfies ProjectSettings
 
 	// writing the project file to the virtual filesystem
-	await fs.writeFile("/project.inlang.json", JSON.stringify(settings))
+	await fs.mkdir("/project.inlang", { recursive: true })
+	await fs.writeFile("/project.inlang/settings.json", JSON.stringify(settings))
 
 	// opening the project file and loading the plugin
 	const project = await loadProject({
 		nodeishFs: fs,
-		projectPath: "/project.inlang.json",
+		projectPath: "/project.inlang",
 		// simulate the import function that the SDK uses
 		// to inject the plugin into the project
 		_import: async () => import("./index.js"),
