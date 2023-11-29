@@ -1957,6 +1957,9 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../paraglide/paraglide-js
+      '@inlang/paraglide-js-adapter-vite':
+        specifier: workspace:*
+        version: link:../paraglide/paraglide-js-adapter-vite
       '@inlang/result':
         specifier: workspace:*
         version: link:../result
@@ -2029,9 +2032,6 @@ importers:
       vite-plugin-solid:
         specifier: 2.7.0
         version: 2.7.0(solid-js@1.7.11)(vite@4.4.9)
-      vite-plugin-watch:
-        specifier: 0.2.0
-        version: 0.2.0
       vitest:
         specifier: 0.34.3
         version: 0.34.3

@@ -59,6 +59,7 @@
 		"@inlang/marketplace-manifest": "workspace:*",
 		"@inlang/marketplace-registry": "workspace:*",
 		"@inlang/paraglide-js": "workspace:*",
+		"@inlang/paraglide-js-adapter-vite": "workspace:*",
 		"@inlang/result": "workspace:*",
 		"@inlang/rpc": "workspace:*",
 		"@inlang/sdk": "workspace:*",
@@ -83,7 +84,6 @@
 		"vike": "0.4.144",
 		"vite": "4.4.9",
 		"vite-plugin-solid": "2.7.0",
-		"vite-plugin-watch": "0.2.0",
 		"vitest": "0.34.3"
 	},
 	"peerDependencies": {
