@@ -234,12 +234,14 @@ export const loadProject = async (args: {
 							cause: err,
 						})
 					}
-					// if (
-					// 	newMessages.length !== 0 &&
-					// 	JSON.stringify(newMessages) !== JSON.stringify(messages())
-					// ) {
-					// 	setMessages(newMessages)
-					// }
+					const abortController = new AbortController()
+					if (
+						newMessages.length !== 0 &&
+						JSON.stringify(newMessages) !== JSON.stringify(messages()) &&
+						nodeishFs.watch("/", { signal: abortController.signal }) === undefined
+					) {
+						setMessages(newMessages)
+					}
 				},
 				{ atBegin: false }
 			)
