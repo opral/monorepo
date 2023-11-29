@@ -4,5 +4,5 @@
 	"commit": false,
 	"access": "restricted",
 	"baseBranch": "main",
-	"ignore": ["template-*"]
+	"ignore": ["@inlang/template-*"]
 }
