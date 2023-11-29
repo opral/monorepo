@@ -22,7 +22,7 @@ npx @inlang/paraglide-js@latest init
   <doc-feature title="Typesafety" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/typesafe.png"></doc-feature>
 </doc-features>
 
-… and much more
+Treeshaking gives us superpowers. With it, each page of your app only loads the messages that it actually uses. Incremental loading like this would usually take hours of manual tweaking to get right. With Paraglide-JS you get it for free. Say goodbye to huge bundles.
 
 
 # Getting started
@@ -30,6 +30,7 @@ npx @inlang/paraglide-js@latest init
 ### 1. Initialize paraglide-js
 
 You can initialize paraglide-js by running the following command in your terminal:
+
 ```bash
 npx @inlang/paraglide-js@latest init
 ```
@@ -55,9 +56,9 @@ You can customize the `compile` script to your needs. For example, you can add a
 
 ```json
 {
-  "scripts": {
-    "compile": "paraglide-js compile"
-  }
+	"scripts": {
+		"compile": "paraglide-js compile"
+	}
 }
 ```
 
@@ -93,15 +94,16 @@ m.loginHeader({ name: "Samuel" }) // Hallo Samuel, bitte melde dich an, um fortz
 
 Paraglide JS provides five exports in `./paraglide/runtime.js`:
 
-| Variable | Description |
-| --- | --- |
-| `sourceLanguageTag` | The source language tag of the project |
-| `availableLanguageTags` | All language tags of the current project |
-| `languageTag()` | Returns the language tag of the current user |
-| `setLanguageTag()` | Sets the language tag of the current user |
-| `onSetLanguageTag()` | Registers a listener that is called whenever the language tag changes |
+| Variable                | Description                                                           |
+| ----------------------- | --------------------------------------------------------------------- |
+| `sourceLanguageTag`     | The source language tag of the project                                |
+| `availableLanguageTags` | All language tags of the current project                              |
+| `languageTag()`         | Returns the language tag of the current user                          |
+| `setLanguageTag()`      | Sets the language tag of the current user                             |
+| `onSetLanguageTag()`    | Registers a listener that is called whenever the language tag changes |
 
 ## Setting the language
+
 You can set the current language tag by calling `setLanguageTag()`. Any subsequent calls to either `languageTag()` or a message function will return the new language tag.
 
 ```js
@@ -118,6 +120,7 @@ m.hello() // Hello world!
 The language tag is global, so you need to be careful with it on the server to make sure multiple requests don't interfere with each other. That's why we recommend using an adapter for your framework. Adapters integrate with the framework's lifecycle and ensure that the language tag is managed correctly.
 
 ## Reacting to a language change
+
 You can react to a language change by calling `onSetLanguageTag()`. This function is called whenever the language tag changes.
 
 ```js
@@ -125,7 +128,7 @@ import { setLanguageTag, onSetLanguageTag } from "./paraglide/runtime"
 import * as m from "./paraglide/messages"
 
 onSetLanguageTag((newLanguageTag) => {
-  console.log(`The language changed to ${newLanguageTag}`)
+	console.log(`The language changed to ${newLanguageTag}`)
 })
 
 setLanguageTag("de") // The language changed to de
@@ -133,12 +136,14 @@ setLanguageTag("en") // The language changed to en
 ```
 
 There are a few things to know about `onSetLanguageTag()`:
+
 - You can only register one listener. If you register a second listener it will throw an error.
 - It shouldn't be used on the server.
 
 The main use case for `onSetLanguageTag()` is to trigger a rerender of your app's UI when the language changes. Again, if you are using an adapter this is handled for you.
 
 ## Forcing a language
+
 It's common that you need to force a message to be in a certain language, especially on the server. You can do this by passing an options object to the message function as a
 second parameter.
 
@@ -176,12 +181,12 @@ The emitted functions are often referred to as "message functions". By emitting 
 
 Inlang Paraglide-JS consists of four main parts:
 
-| Part | Description |
-| --- | --- |
-| **Compiler** | Compiles messages into tree-shakable message functions |
-| **Messages** | The compiled tree-shakable message functions |
-| **Runtime** | A runtime that resolves the language tag of the current user |
-| **Adapter** | (if required) An adapter that adjusts the runtime for different frameworks |
+| Part         | Description                                                                |
+| ------------ | -------------------------------------------------------------------------- |
+| **Compiler** | Compiles messages into tree-shakable message functions                     |
+| **Messages** | The compiled tree-shakable message functions                               |
+| **Runtime**  | A runtime that resolves the language tag of the current user               |
+| **Adapter**  | (if required) An adapter that adjusts the runtime for different frameworks |
 
 ## Compiler
 
@@ -190,6 +195,7 @@ The compiler loads an inlang project and compiles the messages into tree-shakabl
 #### Example
 
 **Input**
+
 ```js
 // messages/en.json
 {
@@ -199,6 +205,7 @@ The compiler loads an inlang project and compiles the messages into tree-shakabl
 ```
 
 **Output**
+
 ```js
 // src/paraglide/messages.js
 
@@ -207,11 +214,11 @@ The compiler loads an inlang project and compiles the messages into tree-shakabl
  * @param {string} params.name
  */
 function hello({ name }) {
-  return `Hello ${name}!`
+	return `Hello ${name}!`
 }
 
 function loginButton() {
-  return "Login"
+	return "Login"
 }
 ```
 
@@ -228,20 +235,18 @@ Three compiled message functions exist in an example project.
 ```js
 // src/paraglide/messages.js
 
-
 export function hello(params) {
-  return `Hello ${params.name}!`
+	return `Hello ${params.name}!`
 }
 
 export function loginButton() {
-  return "Login"
+	return "Login"
 }
 
 export function loginHeader(params) {
-  return `Hello ${params.name}, please login to continue.`
+	return `Hello ${params.name}, please login to continue.`
 }
 ```
-
 
 Only the message `hello` is used in the source code.
 
@@ -259,12 +264,11 @@ The bundler tree shakes (removes) `loginButton` and `loginHeader` and only inclu
 // output/index.js
 
 function hello(params) {
-  return `Hello ${params.name}!`
+	return `Hello ${params.name}!`
 }
 
-console.log(hello({ name: "Samuel"}))
+console.log(hello({ name: "Samuel" }))
 ```
-
 
 ## Runtime
 
@@ -277,7 +281,6 @@ Paraglide-JS can be adapted to any framework or environment by calling `setLangu
 1.  `setLanguageTag()` can be used to set a getter function for the language tag. The getter function can be used to resolve server-side language tags or to resolve the language tag from a global state management library like Redux or Vuex.
 2.  `onSetLanguageTag()` can be used to trigger side-effects such as updating the UI, or requesting the site in the new language from the server.
 
-
 # Writing an Adapter
 
 The following example adapts Paraglide-JS to a fictitious metaframework like NextJS, SolidStart, SvelteKit, or Nuxt.
@@ -287,13 +290,9 @@ The goal is to provide a high-level understanding of how to adapt Paraglide-JS t
 1. `setLanguageTag()`: to set the language tag
 2. `onSetLanguageTag()`: to trigger a side-effect when the language changes
 
-
-
-
 ```tsx
 import { setLanguageTag, onSetLanguageTag } from "./paraglide/runtime"
 import { isServer, request, render } from "@example/framework"
-
 
 // On a server, the language tag needs to be resolved on a
 // per-request basis. Hence, we need to pass a getter
@@ -302,8 +301,8 @@ import { isServer, request, render } from "@example/framework"
 // Most frameworks offer a way to access the current
 // request. In this example, we assume that the language tag
 // is available in the request object.
-if (isServer){
-  setLanguageTag(() => request.languageTag)
+if (isServer) {
+	setLanguageTag(() => request.languageTag)
 }
 // On a client, the language tag could be resolved from
 // the document's html lang tag.
@@ -311,26 +310,24 @@ if (isServer){
 // In addition, we also want to trigger a side-effect
 // to request the site if the language changes.
 else {
-  setLanguageTag(() => document.documentElement.lang)
+	setLanguageTag(() => document.documentElement.lang)
 
-  //! Make sure to call `onSetLanguageTag` after
-  //! the initial language tag has been set to
-  //! avoid an infinite loop.
+	//! Make sure to call `onSetLanguageTag` after
+	//! the initial language tag has been set to
+	//! avoid an infinite loop.
 
-  // route to the page in the new language
-  onSetLanguageTag((newLanguageTag) => {
-     window.location.pathname = `/${newLanguageTag}${window.location.pathname}`
-  })
+	// route to the page in the new language
+	onSetLanguageTag((newLanguageTag) => {
+		window.location.pathname = `/${newLanguageTag}${window.location.pathname}`
+	})
 }
 
 // render the app
-render((page) =>
-  <html lang={request.languageTag}>
-    <body>
-      {page}
-    </body>
-  </html>
-)
+render((page) => (
+	<html lang={request.languageTag}>
+		<body>{page}</body>
+	</html>
+))
 ```
 
 # Community
