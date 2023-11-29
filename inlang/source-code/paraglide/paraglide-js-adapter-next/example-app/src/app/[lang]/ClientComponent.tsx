@@ -1,12 +1,12 @@
 "use client"
-import * as m from "@/paraglide/messages.js"
-import { languageTag, setLanguageTag } from "@/paraglide/runtime"
+import * as m from "@/paraglide/messages"
+import { languageTag } from "@/paraglide/runtime"
 
 export function ClientComponent() {
 	return (
-		<>
-			<p>I'm on the client</p>
+		<div>
+			<h1>I'm on the client</h1>
 			<p>{m.currentLanguageTag({ languageTag: languageTag() })}</p>
-		</>
+		</div>
 	)
 }
