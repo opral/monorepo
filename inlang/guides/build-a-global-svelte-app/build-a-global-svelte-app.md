@@ -1,12 +1,13 @@
 # Build a global [SvelteKit](https://kit.svelte.com) app
 
-In this guide we will use [Paraglide.js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs), [inlang-message-format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) and [inlang's IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension).
+In this guide, we will be creating a simple SvelteKit app with i18n routing, using Paraglide for translations. This should be all you need to get started with Paraglide.
 
-Translated string(s) in this guide might be referred to as message(s) or translation(s).
+We will be using [Paraglide.js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs), the [inlang-message-format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) and [inlang's IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension).
 
-## 1. Starting point
 
-Start with a basic SvelteKit app with `npm create`:
+## 1. Create a SvelteKit app
+
+Set up a SvelteKit app as you normally would. If you need help, check out the [SvelteKit documentation](https://kit.svelte.dev/docs/creating-a-project).
 ```cmd
 npm create svelte@latest my-app
 cd my-app
@@ -17,7 +18,15 @@ git init
 
 ## 2. Initialize Paraglide
 
-The CLI might ask you some questions. To improve your experience, answer them thoroughly.
+We recommend that you initialize Paraglide using the CLI. This will make sure all files are in the right place, and that the correct dependencies are installed.
+
+In the root of your project, run:
+
+```cmd
+npx @inlang/paraglide-js@latest init
+```
+
+The CLI might ask you some questions depending on your environment. Answer them thuroughly & follow the instructions.
 
 ```cmd
 npx @inlang/paraglide-js@latest init
@@ -40,18 +49,18 @@ npx @inlang/paraglide-js@latest init
  ╰──────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
-## 3. Set up SvelteKit workspace for Paraglide
 
-We need to install some packages and change some files, for Paraglide and SvelteKit to work together.
+## 3. Setting up the SvelteKit workspace for Paraglide
+
+There are a few things we can do to improve our Paraglide experience when using Sveltekit.
+
+### Adding the Vite Plugin
 
 ```cmd
-npm install @inlang/paraglide-js-adapter-vite
+npm i -D @inlang/paraglide-js-adapter-vite
 ```
 
-### Vite.config.ts
-
 We import the vite adapter for paraglide, and reference the project file.
-The `outdir` is the default outdir, in case you change it, please update it in the following `svelte.config.js` too. 
 
 ```ts
 import { sveltekit } from "@sveltejs/kit/vite";
@@ -60,23 +69,23 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [
-	// ...
     sveltekit(),
     paraglide({
+      //Default values
       project: "./project.inlang.json",
       outdir: "./src/paraglide",
     }),
   ],
-  // for easier debugging, you might not want to minify
-  // build: {
-  // 	minify: false,
-  // },
 });
 ```
 
-### Svelte.config.js
+With the Vite-Plugin added, you can also remove the `paraglide-js compile` from your package.json, if you added those. The plugin will take care of that.
 
-With this we can access the `paraglide` folder easier from anywhere in the project, using `$paraglide/*`
+### Definining an Alias
+
+Paraglide will put the translations in the `./src/paraglide` folder, as specified in the `vite.config.ts` file. Since we will be importing from there a lot, adding an alias is a good idea.
+
+Luckily, SvelteKit makes this super easy. It has a dedicated `alias` option in the `kit` object in `svelte.config.js`. 
 
 ```js
 import adapter from "@sveltejs/adapter-auto";
@@ -84,184 +93,48 @@ import { vitePreprocess } from "@sveltejs/kit/vite";
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-  // Consult https://kit.svelte.dev/docs/integrations#preprocessors
-  // for more information about preprocessors
   preprocess: vitePreprocess(),
 
   kit: {
-    // adapter-auto only supports some environments, see https://kit.svelte.dev/docs/adapter-auto for a list.
-    // If your environment is not supported or you settled on a specific environment, switch out the adapter.
-    // See https://kit.svelte.dev/docs/adapters for more information about adapters.
     adapter: adapter(),
 
-    // with this we will be able to access paraglide easier.
     alias: {
+      //You can call this whatever you want
       $paraglide: "./src/paraglide",
     },
   },
 };
 
 export default config;
-
 ```
 
-### Adding an Adapter
-
-We also need to add an adapter for SvelteKit. This ensures routing and the dev server works correctly.
-
-The features of the provided router:
-- example.com/page -> loads the page in source language
-- example.com/de/page -> loads the page in given language
-- example.com/xxx/page -> if the given language does not exist, it redirects to the source language.
-
-Here is the actual adapter (`src/lib/ParaglideSvelteKit.svelte`), you can read the comments for what each part of the code does:
+With the alias, we can import the translations like this:
 
 ```ts
-<script lang="ts">
-  import {
-    availableLanguageTags,
-    setLanguageTag,
-    onSetLanguageTag,
-    sourceLanguageTag,
-    languageTag,
-  } from "../paraglide/runtime";
-  import { getContext, onMount, setContext } from "svelte";
-  import { page } from "$app/stores";
-  import { redirect } from "@sveltejs/kit";
-
-  // We check if the language tag is valid, if it is, we set it,
-  // if not, we redirect to the same page without the language tag
-  setContext(
-    "languageTag",
-    $page.params.lang
-      ? (availableLanguageTags as readonly string[]).includes($page.params.lang)
-        ? $page.params.lang
-        : (() => {
-            throw redirect(
-              302,
-              ("/" + $page.url.href.split($page.params.lang)[1]).replace(
-                "//",
-                "/"
-              )
-            );
-          })()
-      : sourceLanguageTag
-  );
-
-  setLanguageTag(() => getContext("languageTag"));
-
-  // We save the old language tag to check if the language tag has changed
-  let oldLanguageTag = languageTag();
-
-  if (import.meta.env.SSR === false) {
-    onSetLanguageTag((newLanguageTag) => {
-      // If the language tag is the same as the current language tag, we don't want to do anything
-      if (newLanguageTag === oldLanguageTag) return;
-
-      // If we set the language tag to the source language tag, we want to remove the language tag from the url
-      if (newLanguageTag === sourceLanguageTag) {
-        // this returns the route without the language tag
-        const route = window.location.href.match(
-          /^https?:\/\/[^\/]+\/[^\/]*(\/.*)/
-        );
-
-        // Redirect to the same page with the new language
-        window.location.href = route ? route[1] : "/";
-
-        // renew the old language tag
-        oldLanguageTag = newLanguageTag;
-
-        // if we set the language tag from the source language tag, we want to add the language tag to the url
-      } else if (oldLanguageTag === sourceLanguageTag) {
-        // this simply returns the route, since we don't have to remove the language tag,
-        // beacuse the preveous language was the source language.
-        // It also does not matter if for some reason "en" language tag is still given, it removes it anyway.
-        const route = window.location.href
-          .replace(/^https?:\/\/[^\/]+\/(en)(\/|$)/, "")
-          .match(/^https?:\/\/[^\/]+(\/.*)/);
-
-        // Redirect to the same page with the new language
-        window.location.href = route
-          ? "/" + newLanguageTag + route[1]
-          : "/" + newLanguageTag;
-
-        // renew the old language tag
-        oldLanguageTag = newLanguageTag;
-
-        // if we change the language tag not from and not to the source language, we want to keep the url
-      } else {
-        // this returns the route without the language tag
-        const route = window.location.href.match(
-          /^https?:\/\/[^\/]+\/[^\/]*(\/.*)/
-        );
-
-        // Redirect to the same page with the new language
-        window.location.href =
-          route && route[1]
-            ? "/" + newLanguageTag + route[1]
-            : "/" + newLanguageTag;
-
-        // renew the old language tag
-        oldLanguageTag = newLanguageTag;
-      }
-    });
-  }
-</script>
-
-<slot />
+import * as m from "$paraglide/messages";
 ```
 
-Now we can import the router for the application to work properly. For that, we need to edit `src/routes/+layout.svelte`:
+Neat right?
 
-```ts
-<script lang="ts">
-  import "../app.css";
-  import ParaglideJsSvelteKitAdapter from "$lib/ParaglideSvelteKit.svelte";
-</script>
+## 4. Adding and Using Messages
 
-<ParaglideJsSvelteKitAdapter>
-  <slot />
-</ParaglideJsSvelteKitAdapter>
+### Adding Messages
+By default, paraglide uses the [inlang-message-format Plugin](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) for storing messages. 
+
+The default path for translation files are `./messages/{lang}.json`. You can change this option in `project.inlang.json`. The Files just contain a Key-Value pair of the message ID and the message itself.
+
+```json
+// messages/en.json
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "hello_world": "Hello World",
+  "greeting": "Hello {name}"
+}
 ```
 
-The adapter is also made to work in a specific way. It uses a routing feature of SvelteKit called [slugs](https://kit.svelte.dev/docs/routing) to store the language in the URL. It basically allows us to get the parameter, and reactively update the page according to the value.
-
-In order to take advante of this feature, the structure of the routes should be the following:
-
-```cmd
-routes
-├── +layout.svelte
-└── [[lang]]              // double brackets makes it optional, /page and /de/page are both valid
-    ├── +page.svelte      // homepage
-    └── another-page
-        └── +page.svelte  // another page
-```
-
-Every new route and subroutes should go under the [[lang]] folder.
-
-## 4. Start working with Paraglide
-
-Now we need to prepare our projects to accept translations.
-
-### Prepare pages for translations
-
-We need to import a few things in pages before we can use translations. You need to place the following code into every page you want to translate
-
-```ts
-<script lang="ts">
-  import { setLanguageTag, languageTag } from "$paraglide/runtime"; // these two helps setting and getting the current language tag
-  import * as m from "$paraglide/messages"; // this contains the translations
-
-  // This function helps you make hrefs for <a> tags for example, to lead to the translated page.
-  function translatePath(href: string) {
-    return languageTag() ? `/${languageTag() == sourceLanguageTag ? "" : languageTag()}${href}` : href;
-  }
-</script>
-```
-Now you can proceed with adding messages.
-
-The default path for translation files are in the `./messages` directory. You can change this option in `project.inlang.json`. Here are the two ways you can add translations:
-
+You can add messages in two ways:
+1. Manually editing the translation files
+2. Using the [inlang IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension)
 
 ### Add messages through ide extension (recommended)
 
@@ -277,93 +150,252 @@ message. Give the message an ID and hit enter.
 
 - This command extracts the hard-coded string and places it into the source language translation file `en.json` in the `messages` directory.
 
-- Compile translation `npx paraglide-js compile --project ./project.inlang.json`
 
 
-### Add messages manually
-
-- Go to the `messages` directory and create a `en.json` file in it. (Make sure the naming is according to the [BCP-47](https://en.wikipedia.org/wiki/IETF_language_tag) language tags in the `project.inlang.json`)
-
-- Add a message in the file.
-```json
-{
-	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"Welcome": "Welcome",
-	"AnotherPage": "Another page"
-}
-```
-
-
-- Compile translation `npx paraglide-js compile --project ./project.inlang.json`
-
-
-## 5. See Paraglide JS in action
-
-Let's use Paraglide to display messages in the frontend.
+### Using Messages
+You can import messages into your code like this:
 
 ```ts
+import * as m from "$paraglide/messages";
+
+m.hello_world(); // Hello World
+m.greeting({ name: "John" }); // Hello John
+```
+
+Each message is a function that returns the message in the current language. If the message requires parameters, typescript will enforce that you pass them in.
+
+You can change which language is currently active by using the `setLanguageTag` function exported from `$paraglide/runtime`.
+
+```ts
+import * as m from "$paraglide/messages";
+import { setLanguageTag } from "$paraglide/runtime";
+
+setLanguageTag("en");
+m.hello_world(); // Hello World
+m.greeting({ name: "John" }); // Hello John
+
+setLanguageTag("de");
+m.hello_world(); // Hallo Welt
+m.greeting({ name: "John" }); // Hallo John
+```
+
+Messages are **not** reactive, so you will need to re-render your component when the language changes. We will see how to do that in the next step.
+
+## 5. Setting up i18n Routing
+Good i18n routing is essential for a good user experience. It's also one of the most difficult things to get right. There are many ways to do it, but the following example should prepare you for most use cases.
+
+We will be implementing the following routing structure:
+- `example.com/page` loads the page in default language
+- `example.com/de/page` loads the page in given language
+
+### Adding a  Language Parameter
+First, add an [optional parameter](https://kit.svelte.dev/docs/advanced-routing#optional-parameters) to your routes for the language. You can do this by adding double brackets to the route name. For example, `[[lang]]/page`.
+
+```cmd
+routes
+├── +layout.svelte
+└── [[lang]]           
+    ├── +page.svelte    
+    └── another-page
+        └── +page.svelte
+```
+
+Right now [[lang]] will match any string, not just languages. We can make sure that it only matches valid language tags by adding [matcher](https://kit.svelte.dev/docs/advanced-routing#matching). Add a `lang` matcher in `./src/params/lang.ts`.
+
+```ts
+// ./src/params/lang.ts
+import { availableLanguageTags, AvailableLanguageTag } from "$paraglide/runtime";
+
+export const match = (param: any) : param is AvailableLanguageTag => {
+  return availableLanguageTags.includes(param);
+};
+```
+
+Then tell the route parameter to use the matcher.
+
+```cmd
+routes
+├── +layout.svelte
+└── [[lang=lang]]       //the second lang is the name of the matcher
+    └── +page.svelte    
+```
+
+### Using the Language Parameter
+
+Armed with this route-parameter, the routing logic should already work, except for the language change. We need to communicate to Paraglide which language is currently active  & re-render the page when it changes.
+
+In your root layout, add some code that reactively sets the language tag based on the route parameter & rerenders if it changes.
+
+```svelte
 <script lang="ts">
-  import { setLanguageTag, languageTag } from "$paraglide/runtime";
-  import * as m from "$paraglide/messages";
+  import { page } from "$app/stores";
+  import { setLanguageTag, sourceLanguageTag type AvailableLanguageTag } from "$paraglide/runtime";
+
+  //Use the default language if no language is given
+  $: lang = $page.params.lang as AvailableLanguageTag ?? sourceLanguageTag; 
+  $: setLanguageTag(lang);
 </script>
 
-// display the message
-<p>{m.Welcome()}</p>
+{#key lang}
+  <slot/>
+{/key}
 ```
 
-Let's change the language.
+> If you've never seen the `#key` block before, check out the [Svelte docs](https://svelte.dev/docs/logic-blocks#key) for more info.
 
-Create a second translation, for example, `de.json`
+The language should now change when you navigate to a different language.
+You can navigate between languages by adding a language parameter to your links.
 
-```json
-{
-	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"Welcome": "Willkommen",
-	"AnotherPage": "Eine andere Seite"
+### Adding a language switcher
+Language switchers are challenging, because they require us to translate the path we're currently on.
+Because there are so many different ways to implement i18n routing, we can't provide a one-size-fits-all solution. Regardless, you will probably need to define a `translatePath` function that takes in a path (in any language), and returns the path in the specified language.
+
+```ts
+// ./src/lib/i18n-routing.ts
+import { sourceLanguageTag, type AvailableLanguageTag, availableLanguageTags } from "$paraglide/runtime";
+
+/**
+ * Returns the path in the given language, regardless of which language the path is in.
+ */
+export function translatePath(path: string, lang: AvailableLanguageTag) {
+  path = withoutLanguageTag(path);
+
+  // Don't prefix the default language
+  if (lang === sourceLanguageTag) return path;
+
+  // Prefix all other languages
+  return `/${lang}${path}`;
 }
-```
 
-Let's also add buttons to change the language.
-
-```ts
-<script lang="ts">
-  import { setLanguageTag, languageTag } from "$paraglide/runtime";
-  import * as m from "$paraglide/messages";
-</script>
-
-<p>{m.Welcome()}</p>
-
-// These will change the language on click
-<button on:click={() => setLanguageTag("de")}>🇩🇪</button>
-<button on:click={() => setLanguageTag("en")}>🇺🇸</button>
-
-```
-
-Now you can click each button and hopefully see the translation change.
-
-Let's make the the links change based on the language tags.
-
-```ts
-<script lang="ts">
-  import { setLanguageTag, languageTag } from "$paraglide/runtime";
-  import * as m from "$paraglide/messages";
-
-  function translatePath(href: string) {
-    return languageTag() ? `/${languageTag() == sourceLanguageTag ? "" : languageTag()}${href}` : href;
+/**
+ * Returns the path without the language tag
+ */
+function withoutLanguageTag(path: string) {
+  const [_, maybeLang, ...rest] = path.split("/");
+  if (availableLanguageTags.includes(maybeLang as AvailableLanguageTag)) {
+    return rest.join("/");
   }
-</script>
-
-<p>{m.Welcome()}</p>
-
-<button on:click={() => setLanguageTag("de")}>🇩🇪</button>
-<button on:click={() => setLanguageTag("en")}>🇺🇸</button>
-
-// if the language is /de, it should redirect to /de/another-page (which probbably doesn't exist, but you get the point.)
-<a href={translatePath("/another-page")}>{m.AnotherPage()}</a>
-
+  return path;
+}
 ```
 
-You are ready to use Paraglide!
+We can now get the link to the current page in a different language by calling `translatePath` with our current path.
 
-This guide is based on `paraglide-js 1.0.0-prerelease.11`, `plugin-message-format 2.0.0`, `m-function-matcher 0.5.0.` and `paraglide-js-adapter-vite 1.0.0-prerelease.1`
-If you have problems, file an [issue]() or ask on [Discord]().
+```svelte
+<script lang="ts">
+  import { availableLanguageTags } from "$paraglide/runtime";
+  import { page } from "$app/stores";
+  import { translatePath } from "$lib/i18n-routing";
+</script>
+
+{#each availableLanguageTags as lang}
+  <a href={translatePath($page.url.pathname, lang)} hreflang={lang}>Change language to {lang}</a>
+{/each}
+```
+
+If you don't want to use `<a>` tags, you can also use the `goto` function from `@sveltejs/kit` to navigate programmatically.
+
+```svelte
+<script lang="ts">
+  import { availableLanguageTags } from "$paraglide/runtime";
+  import { page } from "$app/stores";
+  import { translatePath } from "$lib/i18n-routing";
+  import { goto } from "@sveltejs/kit";
+</script>
+
+{#each availableLanguageTags as lang}
+  <button on:click={() => goto(translatePath($page.url.pathname, lang))}>Change language to {lang}</button>
+{/each}
+```
+
+## 6. SEO Considerations
+On multi-language sites, it's easy to mess up your SEO. Here are a few things to keep in mind:
+- 1. Set the `lang` attribute on your `<html>` tag. This will help search engines understand which language your site is in.
+- 2. Add `hreflang` attributes to your `<a>` tags, unless it's the same language as the current page.
+- 3. Link to all language versions of your page using `<link rel="alternate" hreflang="..." href="...">`. This will help search engines find all versions of your page.
+
+Let's implement these things in our app.
+
+### Setting the `lang` attribute
+We need to set the `lang` attribute in two places. The Server, so that it will be correct on the first render, and the client, so that it stays correct when navigating between pages. Let's start with the server.
+
+We can set the `lang` attribute in `hooks.server.ts` by modifying the returned HTML. We can make this easier by making sure that the `lang` attribute has an easy-to-find placeholder. In `./src/app.html` add a placeholder for the `lang` attribute.
+
+```html
+<!-- ./src/app.html -->
+<html lang="%lang%">
+```
+
+Then in `hooks.server.ts`, replace the placeholder with the correct language.
+
+```ts
+// ./src/hooks.server.ts
+export async function handle({event, resolve}) {
+  const lang = event.params.lang ?? sourceLanguageTag
+
+	return await resolve(event, {
+		transformPageChunk({ done, html }) {
+      //Only do it at the very end of the rendering process
+			if (done) {
+				return html.replace("%lang%", lang)
+			}
+		},
+	})
+}
+```
+
+If you now reload the page and inspect the HTML, you should see the correct `lang` attribute.
+
+On the client, we can set the `lang` attribute using JS. In your root layout, add some code that reactively sets the `lang` attribute based on the route parameter.
+
+```svelte
+<script lang="ts">
+  import { page } from "$app/stores";
+  import { setLanguageTag, sourceLanguageTag type AvailableLanguageTag } from "$paraglide/runtime";
+
+  //Use the default language if no language is given
+  $: lang = $page.params.lang as AvailableLanguageTag ?? sourceLanguageTag; 
+  $: setLanguageTag(lang);
+
+  //Set the lang attribute on the html tag
+  $: document.documentElement.lang = lang;
+</script>
+```
+
+Now when you navigate change languages, the `lang` attribute should update.
+
+> If you have a mix of `rtl` and `ltr` languages, you can use the exact same technique to set the `dir` attribute.
+
+### Linking to alternate language versions
+
+What we want is to generate a `<link rel="alternate" hreflang="..." href="...">` tag for each language version of the current page. Search Engines need this to differentiate between the different language versions of your page and to know which one to show to which user.
+
+Fortunately, we already did most of the work for this when building the language switcher. We can reuse the `translatePath` function to generate the correct `href` attribute.
+
+Let's create a new `I18NHeader` component that generates the `<link>` tags.
+
+```svelte
+<!-- ./src/lib/I18NHeader.svelte -->
+<script lang="ts">
+  import { availableLanguageTags } from "$paraglide/runtime";
+  import { page } from "$app/stores";
+  import { translatePath } from "$lib/i18n-routing";
+</script>
+
+<svelte:head>
+	{#each availableLanguageTags as lang}
+		<link rel="alternate" hreflang={lang} href={translatePath($page.url.pathname, lang)} />
+	{/each}
+</svelte:head>
+```
+
+> A page should link to itself, so we don't need to filter out the current language.
+
+## What's next?
+You are now ready to use Paraglide!
+
+If you have any questions, feel free to ask them in our [Discord](https://discord.gg/gdMPPWy57R) or open a discussion on [GitHub](https://github.com/inlang/monorepo/discussions).
+
+You can view this example project on [GitHub](https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example)
+
+This guide is based on `paraglide-js 1.0.0-prerelease.12`, `plugin-message-format 2.0.0`, `m-function-matcher 0.5.0.` and `paraglide-js-adapter-vite 1.0.0-prerelease.2`.
