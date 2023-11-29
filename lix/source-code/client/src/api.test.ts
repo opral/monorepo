@@ -44,17 +44,17 @@ describe("main workflow", () => {
 	})
 
 	it("can commit local modifications to the repo", async () => {
-		const statusPre = await repository.status({ filepath: "./README.md" })
+		const statusPre = await repository.status({ filepath: "README.md" })
 
 		expect(statusPre).toBe("*modified")
 
-		await repository.add({ filepath: "./README.md" })
+		await repository.add({ filepath: "README.md" })
 		await repository.commit({
 			author: { name: "tests", email: "test@inlang.dev" },
 			message: "test changes commit",
 		})
 
-		const statusPost = await repository.status({ filepath: "./README.md" })
+		const statusPost = await repository.status({ filepath: "README.md" })
 
 		expect(statusPost).toBe("unmodified")
 	})
