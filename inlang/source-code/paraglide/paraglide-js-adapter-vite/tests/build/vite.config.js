@@ -4,7 +4,7 @@ import { paraglide } from "@inlang/paraglide-js-adapter-vite"
 export default defineConfig({
 	plugins: [
 		paraglide({
-			project: "./project.inlang.json",
+			project: "./project.inlang",
 			outdir: "./src/paraglide",
 		}),
 	],
