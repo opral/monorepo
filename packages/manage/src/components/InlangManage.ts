@@ -1,7 +1,7 @@
 import type { TemplateResult } from "lit"
 import { html } from "lit"
 import { customElement, property } from "lit/decorators.js"
-import { TwLitElement } from "../common/TwLitElement"
+import { TwLitElement } from "../common/TwLitElement.js"
 
 import "./InlangInstall"
 
