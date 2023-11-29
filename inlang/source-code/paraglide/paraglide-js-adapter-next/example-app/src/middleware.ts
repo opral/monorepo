@@ -1,23 +1,23 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { AvailableLanguageTag, availableLanguageTags, sourceLanguageTag } from "./paraglide/runtime"
 
-/**
- * Sets the request headers to resolve the language tag in RSC.
- *
- * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
- */
 export function middleware(request: NextRequest) {
-	const languageTag = request.nextUrl.pathname.slice(1)
+	const { pathname } = request.nextUrl
 
 	const headers = new Headers(request.headers)
 
-	headers.set("x-language-tag", languageTag)
+	//If the path already contains a locale, do nothing
+	const [_, maybeLocale] = pathname.split("/")
+	if (availableLanguageTags.includes(maybeLocale as AvailableLanguageTag)) {
+		headers.set("x-language-tag", maybeLocale)
+		return NextResponse.next()
+	}
 
-	return NextResponse.next({
-		request: {
-			headers,
-		},
-	})
+	//If the path does not contain a locale, redirect to the default locale
+	headers.set("x-language-tag", sourceLanguageTag)
+	request.nextUrl.pathname = `/${sourceLanguageTag}${pathname}`
+	return NextResponse.redirect(request.nextUrl)
 }
 
 export const config = {
