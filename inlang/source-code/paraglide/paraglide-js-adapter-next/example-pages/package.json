@@ -6,8 +6,7 @@
   "scripts": {
     "_dev": "paraglide-js compile --project ./project.inlang.json && next dev",
     "build": "paraglide-js compile --project ./project.inlang.json && next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "next start"
   },
   "dependencies": {
     "react": "^18",
