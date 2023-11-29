@@ -3,8 +3,8 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"_dev": "next dev",
-		"_build": "paraglide-js compile --namespace nextjs-example && next build",
+		"_dev": "paraglide-js compile --project ./project.inlang.json &&next dev",
+		"_build": "paraglide-js compile --project ./project.inlang.json && next build",
 		"preview": "next start"
 	},
 	"dependencies": {
