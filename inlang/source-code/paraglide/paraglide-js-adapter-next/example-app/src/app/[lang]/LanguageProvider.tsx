@@ -1,10 +1,12 @@
-import { setLanguageTag } from "@/paraglide/runtime"
-import { headers } from "next/headers"
+"use client"
+import { AvailableLanguageTag, onSetLanguageTag } from "@/paraglide/runtime"
+import { createContext, useState, type ReactNode } from "react"
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-	setLanguageTag(() => {
-		return headers().get("x-language-tag") as any
-	})
+const LanguageContext = createContext("en")
 
-	return children
+export function LanguageProvider({ children }: { children: ReactNode }): JSX.Element {
+	const [lang, setLang] = useState<AvailableLanguageTag>("en")
+	onSetLanguageTag(setLang)
+
+	return <LanguageContext.Provider value={lang}>{children}</LanguageContext.Provider>
 }
