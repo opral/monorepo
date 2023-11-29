@@ -1,31 +1,10 @@
 import { handleNavigate, setSearchInput } from "#src/interface/components/SearchBar.jsx"
 import Link from "#src/renderer/Link.jsx"
-import { For, createSignal } from "solid-js"
+import { createSignal } from "solid-js"
 import * as m from "#src/paraglide/messages.js"
 
 const HeroSearch = () => {
 	const [input, setInput] = createSignal("")
-
-	const getPopularButtons = () => {
-		return [
-			{
-				name: "ParaglideJS",
-				href: "/search?q=Paraglide JS",
-			},
-			{
-				name: "Plugins",
-				href: "/c/plugins",
-			},
-			{
-				name: "Lint Rules",
-				href: "/c/lint-rules",
-			},
-			{
-				name: "Web Editor",
-				href: "/search?q=Web%20Editor",
-			},
-		]
-	}
 
 	return (
 		<div class="flex flex-col gap-2 items-center pb-8 md:pb-0">

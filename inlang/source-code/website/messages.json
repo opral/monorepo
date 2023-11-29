@@ -5050,6 +5050,46 @@
 							"value": "Vylepšite svoj zážitok z i18n pomocou aplikácií inlang."
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Améliorez votre expérience i18n avec les applications Inlang."
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Potenzia la tua esperienza i18n con le app inlang."
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Melhore sua experiência i18n com aplicativos inlang."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "使用 inlang 应用增强您的 i18n 体验。"
+						}
+					]
 				}
 			]
 		},
@@ -7126,6 +7166,56 @@
 						{
 							"type": "Text",
 							"value": "Die beste i18n-Bibliothek für das Web. Eine vollständig konfigurierbare JavaScript-i18n-Bibliothek, die in Ihr Framework integriert werden kann."
+						}
+					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "La meilleure bibliothèque i18n pour le web. Une bibliothèque JavaScript i18n entièrement configurable qui s'intègre dans votre framework."
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "La migliore libreria i18n per il web. Una libreria JavaScript i18n completamente configurabile che si integra nel tuo framework."
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "A melhor biblioteca i18n para a web. Uma biblioteca JavaScript i18n totalmente configurável que se integra à sua estrutura."
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Najlepšia knižnica i18n pre web. Plne konfigurovateľná knižnica JavaScript i18n, ktorá sa integruje do vášho rámca."
+						}
+					]
+				},
+				{
+					"languageTag": "zh",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "最好的网络 i18n 库。一个完全可配置的 JavaScript i18n 库，集成在您的框架中。"
 						}
 					]
 				}
