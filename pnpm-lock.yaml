@@ -1642,11 +1642,11 @@ importers:
   inlang/source-code/templates/message-lint-rule:
     dependencies:
       '@inlang/sdk':
-        specifier: ^0.18.0
+        specifier: ^0.19.0
         version: link:../../sdk
     devDependencies:
       '@inlang/cli':
-        specifier: ^1.21.0
+        specifier: ^2.0.0
         version: link:../../cli
       typescript:
         specifier: ^5.2.2
