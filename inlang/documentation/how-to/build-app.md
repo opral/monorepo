@@ -10,7 +10,7 @@ Open a repository locally or with [lix](https://github.com/inlang/monorepo/blob/
 
 ### 2. Open project
 
-After opening the repository, you're able to find the files inside. Usually, the `project.inlang.json` file is located in the root of the repository. Reading the file enables you to load the project configuration into your app.
+After opening the repository, you're able to find the files inside. Usually, the `*.inlang` directory is located in the root of the repository. Reading the file enables you to load the project configuration into your app.
 
 ### 3. Use the APIs from the SDK
 

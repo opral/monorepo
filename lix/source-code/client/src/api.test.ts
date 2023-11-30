@@ -12,7 +12,7 @@ describe("main workflow", () => {
 
 	it("allows to subscribe to errors", async () => {
 		const errorHandler = vi.fn()
-		repository = await openRepository("https://github.com/inlang/examplX", {
+		repository = await openRepository("https://github.com/inlang/does-not-exist", {
 			nodeishFs: createNodeishMemoryFs(),
 		})
 
@@ -26,42 +26,42 @@ describe("main workflow", () => {
 
 	it("opens a repo url without error and without blocking io", async () => {
 		// fix normalization of .git
-		repository = await openRepository("https://github.com/inlang/example", {
+		repository = await openRepository("https://github.com/inlang/ci-test-repo", {
 			nodeishFs: createNodeishMemoryFs(),
 		})
 	})
 
 	let fileContent = ""
 	it("file is lazy fetched upon first access", async () => {
-		fileContent = await repository.nodeishFs.readFile("./project.inlang.json", {
+		fileContent = await repository.nodeishFs.readFile("./README.md", {
 			encoding: "utf-8",
 		})
 	})
 
 	it("modifying the file", async () => {
 		fileContent += "\n// bar"
-		await repository.nodeishFs.writeFile("./project.inlang.json", fileContent)
+		await repository.nodeishFs.writeFile("./README.md", fileContent)
 	})
 
 	it("can commit local modifications to the repo", async () => {
-		const statusPre = await repository.status({ filepath: "project.inlang.json" })
+		const statusPre = await repository.status({ filepath: "README.md" })
 
 		expect(statusPre).toBe("*modified")
 
-		await repository.add({ filepath: "project.inlang.json" })
+		await repository.add({ filepath: "README.md" })
 		await repository.commit({
 			author: { name: "tests", email: "test@inlang.dev" },
 			message: "test changes commit",
 		})
 
-		const statusPost = await repository.status({ filepath: "project.inlang.json" })
+		const statusPost = await repository.status({ filepath: "README.md" })
 
 		expect(statusPost).toBe("unmodified")
 	})
 
 	it("exposes proper origin", async () => {
 		const gitOrigin = await repository.getOrigin()
-		expect(gitOrigin).toBe("github.com/inlang/example.git")
+		expect(gitOrigin).toBe("github.com/inlang/ci-test-repo.git")
 	})
 
 	it("exposes current branch", async () => {
@@ -74,7 +74,7 @@ describe("main workflow", () => {
 		expect(remotes).toEqual([
 			{
 				remote: "origin",
-				url: "https://github.com/inlang/example",
+				url: "https://github.com/inlang/ci-test-repo",
 			},
 		])
 	})
@@ -90,11 +90,11 @@ describe("main workflow", () => {
 	})
 
 	it.todo("exposes metadata for repo", async () => {
-		const metadata = await repository.getMeta()
-		expect(metadata).toBe("main")
+		// const metadata = await repository.getMeta()
+		// expect(metadata).toBe( .... )
 	})
 
 	it.todo("allows pushing back to git origin", async () => {
-		await repository.push()
+		// await repository.push()
 	})
 })

@@ -5,10 +5,10 @@ import { ProjectSettings, loadProject } from "@inlang/sdk"
 import { registry } from "@inlang/marketplace-registry"
 
 /**
- * Tries to automatically generate a project.inlang.json file based on the project's dependencies.
+ * Tries to automatically generate a *.inlang/settings.json file based on the project's dependencies.
  *
  * - The returned project settings are not written to the filesystem.
- * - Write the project settings manyally to the filesystem with `basePath` + '/project.inlang.json'
+ * - Write the project settings manyally to the filesystem with `basePath` + '/project.inlang'
  *
  * @param args.basePath The base path to resolve from.
  *
@@ -70,13 +70,13 @@ export async function tryAutoGenProjectSettings(args: {
 	 * }
 	 */
 
-	const settingsPath = normalizePath(args.basePath + "/project.inlang.json")
+	const projectPath = normalizePath(args.basePath + "/project.inlang")
 
 	const mockFs = new Proxy(args.nodeishFs, {
 		get: (target, prop) => {
 			if (prop === "readFile") {
 				return (...args: Parameters<ReturnType<typeof createNodeishMemoryFs>["readFile"]>) => {
-					if (args[0] === settingsPath) {
+					if (args[0] === projectPath + "/settings.json") {
 						return JSON.stringify(result)
 					}
 					// @ts-expect-error
@@ -84,7 +84,9 @@ export async function tryAutoGenProjectSettings(args: {
 				}
 			} else if (prop === "writeFile") {
 				return () => {
-					throw new Error("Writing to the filesystem is not allowed in tryAutoGenProjectSettings")
+					console.warn(
+						"Writing to the filesystem is not allowed in tryAutoGenProjectSettings. No file has been written to the filesystem."
+					)
 				}
 			}
 			// @ts-expect-error
@@ -94,7 +96,7 @@ export async function tryAutoGenProjectSettings(args: {
 
 	const { data: project } = await tryCatch(() =>
 		loadProject({
-			settingsFilePath: settingsPath,
+			projectPath: projectPath,
 			nodeishFs: mockFs,
 		})
 	)

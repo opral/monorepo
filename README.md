@@ -37,10 +37,10 @@
 
 ## Table of Contents
 
-- [About inlang](#-about-inlang)
-- [Getting Started](#zap-getting-started)
-- [Stay up-to-date](#bell-stay-up-to-date)
-- [Contributing](#balloon-contributing)
+- [Table of Contents](#table-of-contents)
+- [🌐 About inlang](#-about-inlang)
+- [:bell: Stay up-to-date](#bell-stay-up-to-date)
+- [:balloon: Contributing](#balloon-contributing)
 
 ## 🌐 About inlang
 
@@ -54,30 +54,6 @@
 - ...
 
 **Go to [inlang.com](https://inlang.com) to see all extensions to the inlang ecosystem.**
-
-## :zap: Getting Started
-
-It's fairly easy. You need two things to use inlang with any project:
-
-1. A `project.inlang.json` file in the root of your project
-2. A plugin that reads and writes the i18n messages of your project, we currently support [i18next](https://inlang.com/m/3i8bor92/plugin-inlang-i18next), [plain json](https://inlang.com/m/ig84ng0o/plugin-inlang-json) or [inlang message format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat).
-3. 🏁 Done!
-4. *Optional: Setup [lint rules](https://inlang.com/c/lint-rules), machine translation, ...*
-
-Example `project.inlang.json`
-```json
-{
-	"$schema": "https://inlang.com/schema/project-settings",
-	"sourceLanguageTag": "en",
-	"languageTags": ["en", "de", "it"],
-	"modules": [
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js"
-	],
-	"plugin.inlang.json": {
-		"pathPattern": "./resources/{languageTag}.json"
-	}
-}
-```
 
 **More specific guides:**
 

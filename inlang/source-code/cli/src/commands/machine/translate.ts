@@ -9,7 +9,7 @@ import { projectOption } from "../../utilities/globalFlags.js"
 
 export const translate = new Command()
 	.command("translate")
-	.requiredOption(projectOption.flags, projectOption.description, projectOption.defaultValue)
+	.requiredOption(projectOption.flags, projectOption.description)
 	.option("-f, --force", "Force machine translation and skip the confirmation prompt.", false)
 	.option("--sourceLanguageTag <source>", "Source language tag for translation.")
 	.option(
@@ -49,7 +49,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 		const projectConfig = args.project.settings()
 
 		if (!projectConfig) {
-			log.error(`No inlang settings file found, please add a project.inlang.json file`)
+			log.error(`No inlang project found`)
 			return
 		}
 
