@@ -12,6 +12,8 @@ const callbackUrl = `${privateEnv.PUBLIC_SERVER_BASE_URL}/services/auth/auth-cal
  * Be aware that the route set here is prefixed with /services/auth
  * and that the route is set in the GitHub app settings.
  */
+
+const allowedAuthUrls = publicEnv.PUBLIC_ALLOWED_AUTH_URLS.split(",")
 router.get("/github-auth-callback", async (request, response, next) => {
 	try {
 		// TODO: org installation
@@ -67,7 +69,12 @@ router.get("/github-auth-callback", async (request, response, next) => {
  * Sign out by setting the session to undefined.
  */
 router.post("/sign-out", (request, response) => {
-	response.set("Access-Control-Allow-Origin", privateEnv.PUBLIC_SERVER_BASE_URL)
+	const origin = request.headers.origin as string
+
+	if (allowedAuthUrls.includes(origin)) {
+		response.set("Access-Control-Allow-Origin", origin)
+	}
+
 	response.set("Access-Control-Allow-Credentials", "true")
 
 	request.session = undefined

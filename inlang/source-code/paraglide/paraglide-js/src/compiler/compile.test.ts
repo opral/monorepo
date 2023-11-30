@@ -251,6 +251,23 @@ describe("e2e", async () => {
 			"Hallo Samuel! Du hast 5 Nachrichten."
 		)
 	})
+
+	test("runtime.isAvailableLanguageTag should only return `true` if a language tag is passed to it", async () => {
+		const { runtime } = await import(
+			`data:application/javascript;base64,${Buffer.from(
+				compiledBundle.output[0].code,
+				"utf8"
+			).toString("base64")}`
+		)
+
+		for (const tag of runtime.availableLanguageTags) {
+			expect(runtime.isAvailableLanguageTag(tag)).toBe(true)
+		}
+
+		expect(runtime.isAvailableLanguageTag("")).toBe(false)
+		expect(runtime.isAvailableLanguageTag("pl")).toBe(false)
+		expect(runtime.isAvailableLanguageTag("--")).toBe(false)
+	})
 })
 
 describe("tree-shaking", () => {
@@ -385,6 +402,15 @@ test("typesafety", async () => {
 
 	// setting the language tag as a getter function should be possible
 	runtime.setLanguageTag(() => "en")
+
+	// isAvailableLanguageTag should narrow the type of it's argument
+	const thing = 5;
+	if(runtime.isAvailableLanguageTag(thing)) {
+		const a : "de" | "en" | "en-US" = thing
+	} else {
+		// @ts-expect-error - thing is not a language tag
+		const a : "de" | "en" | "en-US" = thing
+	}
 
     // --------- MESSAGES ---------
 

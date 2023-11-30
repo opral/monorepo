@@ -1,43 +1,14 @@
 import { handleNavigate, setSearchInput } from "#src/interface/components/SearchBar.jsx"
 import Link from "#src/renderer/Link.jsx"
-import { For, createSignal } from "solid-js"
+import { createSignal } from "solid-js"
 import * as m from "#src/paraglide/messages.js"
 
 const HeroSearch = () => {
 	const [input, setInput] = createSignal("")
 
-	const getPopularButtons = () => {
-		return [
-			{
-				name: "ParaglideJS",
-				href: "/search?q=Paraglide JS",
-			},
-			{
-				name: "Plugins",
-				href: "/c/plugins",
-			},
-			{
-				name: "Lint Rules",
-				href: "/c/lint-rules",
-			},
-			{
-				name: "Web Editor",
-				href: "/search?q=Web%20Editor",
-			},
-		]
-	}
-
 	return (
 		<div class="flex flex-col gap-2 items-center pb-8 md:pb-0">
-			<div class="pt-8 md:pt-16 group">
-				<Link href="https://www.youtube.com/live/pTgIx-ucMsY?feature=shared&t=3825" target="_blanc">
-					<div class="flex gap-4 items-center text-surface-500 group-hover:text-active-primary">
-						<Play />
-						<p>{m.home_inlang_secondary_link()}</p>
-					</div>
-				</Link>
-			</div>
-			<h1 class="text-4xl max-w-[1000px] md:text-6xl text-surface-900 text-center font-bold leading-snug tracking-tight mt-6">
+			<h1 class="text-4xl max-w-[1000px] md:text-6xl text-surface-900 text-center font-bold leading-snug tracking-tight mt-8 md:mt-16 ">
 				{m.home_inlang_title()}
 			</h1>
 			<p class="text-lg max-w-[700px] text-center text-surface-500 pt-4">
@@ -105,19 +76,13 @@ const HeroSearch = () => {
 					class="absolute bg-on-background top-0 left-0 w-full h-full opacity-10 blur-sm group-hover:opacity-25 group-focus-within:opacity-25"
 				/>
 			</form>
-			<div class="md:items-center gap-4 pt-2 hidden md:flex">
-				<p class="pt-2 md:pt-0 text-surface-600">{m.home_inlang_search_popular() + ":"}</p>
-				<div class="flex flex-wrap items-center gap-1.5">
-					<For each={getPopularButtons()}>
-						{(item) => (
-							<Link href={item.href}>
-								<p class="text-surface-500 text-sm md:text-md border border-surface-200 rounded-lg px-3 py-1.5 hover:border-surface-400 hover:bg-background transition-all">
-									{item.name}
-								</p>
-							</Link>
-						)}
-					</For>
-				</div>
+			<div class="pt-4 group">
+				<Link href="https://www.youtube.com/live/pTgIx-ucMsY?feature=shared&t=3825" target="_blanc">
+					<div class="flex gap-4 items-center text-surface-500 group-hover:text-active-primary">
+						<Play />
+						<p>{m.home_inlang_secondary_link()}</p>
+					</div>
+				</Link>
 			</div>
 			{/* <div class="w-full xl:w-3/4 flex flex-col gap-8 px-6 md:px-4 pb-14 md:pb-4 pt-8 md:pt-20">
 				<div class="flex gap-4 justify-center md:gap-12 items-center w-full xl:justify-center text-surface-400 flex-wrap">

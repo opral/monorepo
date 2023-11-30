@@ -23,7 +23,7 @@
 
 ## Getting started
 
-### 1. Create a `project.inlang.json` in the **root** of your project
+### 1. Create a `project.inlang/settings.json` in the **root** of your project
 
 You can use the following template when using json files as translation files, if not, please look for other [supported resource file types](https://inlang.com/):
 
