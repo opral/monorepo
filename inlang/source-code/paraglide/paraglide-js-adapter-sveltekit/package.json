@@ -1,0 +1,9 @@
+{
+    "name": "@inlang/paraglide-js-adapter-sveltekit",
+    "version": "0.0.1",
+    "type": "module",
+    "main": "./src/index.js",
+    "dependencies": {
+        "@inlang/paraglide-js": "workspace:*"
+    }
+}

@@ -1063,6 +1063,12 @@ importers:
         specifier: 4.4.5
         version: 4.4.5
 
+  inlang/source-code/paraglide/paraglide-js-adapter-sveltekit:
+    dependencies:
+      '@inlang/paraglide-js':
+        specifier: workspace:*
+        version: link:../paraglide-js
+
   inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example:
     devDependencies:
       '@inlang/paraglide-js':
