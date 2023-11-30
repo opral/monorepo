@@ -1,6 +1,6 @@
 {
     "name": "@inlang/paraglide-js-adapter-webpack",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Webpack adapter for Paraglide.js",
     "license": "Apache-2.0",
     "type": "module",
