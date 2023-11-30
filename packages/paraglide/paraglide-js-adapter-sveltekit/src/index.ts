@@ -1,28 +1,40 @@
-import { parse, PreprocessorGroup } from "svelte/compiler"
-import { overrideRanges } from "./utils"
+import { parse } from "svelte/compiler"
 import MagicString from "magic-string"
 
 type Ast = ReturnType<typeof parse>
 type TemplateNode = Ast["html"]
 
-type HrefAttribute = {
+type LinkElement = {
 	start: number
 	end: number
-	value: HrefAttributeValue[]
+	attributes: Attribute[]
+	name: string
 }
 
-type HrefAttributeValue = {
+type Attribute = {
 	start: number
 	end: number
-	type: "Text"
-	raw: string
-	data: string
+	name: string
+	value: AttributeValue[]
 }
 
-/**
- *
- * @returns
- */
+type AttributeValue =
+	| {
+			start: number
+			end: number
+			type: "Text"
+			raw: string
+			data: string
+	  }
+	| {
+			start: number
+			end: number
+			type: "MustacheTag"
+			expression: {
+				start: number
+				end: number
+			}
+	  }
 
 export function preprocess() {
 	return {
@@ -30,19 +42,10 @@ export function preprocess() {
 		markup: (data: { content: string }) => {
 			const ast = parse(data.content)
 
-			let hrefAttributes: HrefAttribute[] = []
+			let links: LinkElement[] = []
 			function walk(templateNode: TemplateNode) {
-				if (templateNode.type === "Element") {
-					if (templateNode.name === "a") {
-						const hrefAttribute = templateNode.attributes.find((attr) => attr.name === "href")
-						if (hrefAttribute) {
-							hrefAttributes.push({
-								start: hrefAttribute.start,
-								end: hrefAttribute.end,
-								value: hrefAttribute.value,
-							})
-						}
-					}
+				if (templateNode.type === "Element" && templateNode.name === "a") {
+					links.push(templateNode as LinkElement)
 				}
 
 				if (templateNode.children) {
@@ -51,20 +54,23 @@ export function preprocess() {
 			}
 			walk(ast.html)
 
-			const replacements = hrefAttributes.map((hrefAttribute) => {
-				const asTemplateString = valuesToTemplateString(hrefAttribute.value)
-				const newAttributeString = `href={translatePath(${asTemplateString}, languageTag())}`
+			const s = new MagicString(data.content)
+			for (const link of links) {
+				const hrefAttribute = link.attributes.find((attribute) => attribute.name === "href")
+				if (!hrefAttribute) continue
+				const hreflang = link.attributes.find((attribute) => attribute.name === "hreflang")
 
-				return {
-					start: hrefAttribute.start,
-					end: hrefAttribute.end,
-					value: newAttributeString,
-				}
-			})
+				const hrefAsTemplateString = attrubuteValuesToTemplateString(
+					hrefAttribute.value,
+					data.content
+				)
+				const langValue = hreflang
+					? attrubuteValuesToTemplateString(hreflang.value, data.content)
+					: "languageTag()"
 
-			let s = new MagicString(data.content)
-			overrideRanges(s, replacements)
-			console.log(s.toString())
+				const newHrefAttributeString = `href={translatePath(${hrefAsTemplateString}, ${langValue})}`
+				s.overwrite(hrefAttribute.start, hrefAttribute.end, newHrefAttributeString)
+			}
 
 			const map = s.generateMap({
 				includeContent: true,
@@ -75,6 +81,24 @@ export function preprocess() {
 	}
 }
 
-function valuesToTemplateString(values: HrefAttributeValue[]): string {
-	return "`" + values.map((value) => value.data).join("") + "`"
+function attrubuteValuesToTemplateString(values: AttributeValue[], originalCode: string): string {
+	let templateString = "`"
+
+	for (const value of values) {
+		switch (value.type) {
+			case "Text":
+				templateString += value.data
+				break
+			case "MustacheTag": {
+				const expressionCode = originalCode.slice(value.expression.start, value.expression.end)
+				templateString += "${"
+				templateString += expressionCode
+				templateString += "}"
+				break
+			}
+		}
+	}
+
+	templateString += "`"
+	return templateString
 }

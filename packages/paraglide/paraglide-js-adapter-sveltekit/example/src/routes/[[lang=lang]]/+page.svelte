@@ -11,19 +11,13 @@
 <h3>Switch Locales using Links</h3>
 
 {#each availableLanguageTags as lang}
-	<a href={translatePath("/", lang)} hreflang={lang}>
+	<a href="/" hreflang={lang}>
 		{m.change_language_to({ languageTag: lang })}
 	</a
 	>
 	<br />
 {/each}
 
-<h3>Switch Locales Programatically</h3>
+<a href="/about">About</a>
 
-<a href=/home>Home</a>
- 
-<select on:change={(e) => goto(translatePath("/", e.target.value))}>
-	{#each availableLanguageTags as lang}
-		<option value={lang} selected={lang === languageTag()}>{lang}</option>
-	{/each}
-</select>
+<h3>Switch Locales Programatically</h3>
