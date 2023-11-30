@@ -43,7 +43,7 @@ export function Page() {
 						<p class="text-xl text-surface-600 w-full md:w-[400px] text-center leading-relaxed">
 							To access the editor, please create the{" "}
 							<span class="text-base font-mono py-[5px] px-2 bg-surface-100 rounded-lg text-surface-600">
-								project.inlang.json
+								project.inlang
 							</span>{" "}
 							file in your repository.
 						</p>

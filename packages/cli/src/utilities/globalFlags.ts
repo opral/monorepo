@@ -2,6 +2,5 @@
 
 export const projectOption = {
 	flags: "--project <path>",
-	description: "Path to the project settings file.",
-	defaultValue: "./project.inlang.json",
+	description: "Path to the inlang project.",
 }

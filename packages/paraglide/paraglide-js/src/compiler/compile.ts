@@ -188,6 +188,23 @@ export const onSetLanguageTag = (fn) => {
 	_onSetLanguageTag = fn
 }
 
+/**
+ * Check if something is an available language tag.
+ * 
+ * @example
+ * 	if (isAvailableLanguageTag(params.locale)) {
+ * 		setLanguageTag(params.locale)
+ * 	} else {
+ * 		setLanguageTag("en")
+ * 	}
+ * 
+ * @param {any} thing
+ * @returns {thing is AvailableLanguageTag}
+ */
+export function isAvailableLanguageTag(thing) {
+	return availableLanguageTags.includes(thing)
+}
+
 // ------ TYPES ------
 
 /**

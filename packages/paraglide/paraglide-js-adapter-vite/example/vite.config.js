@@ -1,11 +1,11 @@
 import { defineConfig } from "vite"
 import { paraglide } from "@inlang/paraglide-js-adapter-vite"
-import path from "path"
+import path from "node:path"
 
 export default defineConfig({
 	plugins: [
 		paraglide({
-			project: "./project.inlang.json",
+			project: "./project.inlang",
 			outdir: "./src/paraglide",
 		}),
 	],

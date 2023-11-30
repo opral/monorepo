@@ -30,60 +30,6 @@ Used by
 <br />
 <br />
 
-# Getting started
-
-Using the Fink editor requires an inlang project.
-
-## A - Existing project.inlang.json
-
-If you already have the `project.inlang.json` file in your repository you can just open the Fink Launcher and paste your GitHub url.
-
-<doc-links>
-    <doc-link title="Open Fink Editor" icon="icon-park-outline:editor" href="/editor" description="You can simply open the editor with a remote project."></doc-link>
-</doc-links>
-
-## B - Create a new inlang project
-
-- Create a `messages` directory. Let add a example `en.json` in it:
-```json
-{
-  "hello": "Hello World" 
-}
-```
-- Create the `project.inlang.json` file in your root directory. If you want to use another storage plugin choose another plugin at [inlang.com](http://localhost:3000/c/plugins)
-
-```json
-{
-  "$schema": "https://inlang.com/schema/project-settings",
-  "sourceLanguageTag": "en",
-  "languageTags": [
-    "en"
-  ],
-  "modules": [
-    "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
-    "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@latest/dist/index.js",
-    "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
-    "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@latest/dist/index.js",
-    "https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/dist/index.js",
-    "https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js"
-  ],
-  "plugin.inlang.messageFormat": {
-    "pathPattern": "./messages/{languageTag}.json"
-  }
-}
-```
-
-- Validate project with inlang's cli
-```cli
-npx @inlang/cli@latest project validate
-```
-- Push this changes to remote
-- Open the editor
-```cli
-npx @inlang/cli@latest open editor
-```
-
-
 # Usage
 
 ### Translate missing messages

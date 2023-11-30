@@ -121,7 +121,7 @@ function validateRepo(
 }
 
 /**
- * This function initializes the repository by adding the modules to the project.inlang.json file and pushing the changes to the repository.
+ * This function initializes the repository by adding the modules to the project.inlang file and pushing the changes to the repository.
  * If there are any errors, the error will be displayed in the UI.
  */
 async function initializeRepo(
@@ -260,7 +260,7 @@ async function initializeRepo(
 	if (step().error) return
 
 	const project = await loadProject({
-		settingsFilePath: "/project.inlang.json",
+		projectPath: "/project.inlang.json",
 		nodeishFs: repo.nodeishFs,
 	})
 
@@ -299,7 +299,7 @@ async function initializeRepo(
 
 	// look again if the project has errors
 	const projectAfterPush = await loadProject({
-		settingsFilePath: "/project.inlang.json",
+		projectPath: "/project.inlang.json",
 		nodeishFs: repo.nodeishFs,
 	})
 

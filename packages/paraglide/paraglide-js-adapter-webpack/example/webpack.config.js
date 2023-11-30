@@ -1,6 +1,6 @@
-import path from "path"
-import { fileURLToPath } from "url"
-import Paraglide from "@inlang/paraglide-js-adapter-webpack"
+import path from "node:path"
+import { fileURLToPath } from "node:url"
+import { paraglide } from "@inlang/paraglide-js-adapter-webpack"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -18,8 +18,8 @@ export default {
 	},
 
 	plugins: [
-		Paraglide({
-			project: "./project.inlang.json",
+		paraglide({
+			project: "./project.inlang",
 			outdir: "./src/paraglide",
 		}),
 	],

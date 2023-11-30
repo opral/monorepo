@@ -11,7 +11,7 @@ import { version } from "../state.js"
 import { telemetry } from "../../services/telemetry/implementation.js"
 import { Logger } from "../../services/logger/index.js"
 
-const DEFAULT_PROJECT_PATH = "./project.inlang.json"
+const DEFAULT_PROJECT_PATH = "./project.inlang"
 
 export const initCommand = new Command()
 	.name("init")
@@ -106,11 +106,7 @@ export const addParaglideJsToDevDependencies = async (logger: Logger) => {
 }
 
 export const findExistingInlangProjectPath = async (): Promise<string | undefined> => {
-	for (const path of [
-		"./project.inlang.json",
-		"../project.inlang.json",
-		"../../project.inlang.json",
-	]) {
+	for (const path of ["./project.inlang", "../project.inlang", "../../project.inlang"]) {
 		if (fsSync.existsSync(path)) {
 			return path
 		}
@@ -138,7 +134,7 @@ export const existingProjectFlow = async (
 		return createNewProjectFlow(logger)
 	}
 	const project = await loadProject({
-		settingsFilePath: resolve(process.cwd(), args.existingProjectPath),
+		projectPath: resolve(process.cwd(), args.existingProjectPath),
 		//@ts-ignore
 		nodeishFs: fs,
 	})
@@ -153,9 +149,13 @@ export const existingProjectFlow = async (
 
 export const createNewProjectFlow = async (logger: Logger) => {
 	logger.info(`Creating a new inlang project in the current working directory.`)
-	await fs.writeFile(DEFAULT_PROJECT_PATH, JSON.stringify(newProjectTemplate, undefined, 2))
+	await fs.mkdir(DEFAULT_PROJECT_PATH, { recursive: true })
+	await fs.writeFile(
+		DEFAULT_PROJECT_PATH + "/settings.json",
+		JSON.stringify(newProjectTemplate, undefined, 2)
+	)
 	const project = await loadProject({
-		settingsFilePath: resolve(process.cwd(), DEFAULT_PROJECT_PATH),
+		projectPath: resolve(process.cwd(), DEFAULT_PROJECT_PATH),
 		//@ts-ignore
 		nodeishFs: fs,
 	})

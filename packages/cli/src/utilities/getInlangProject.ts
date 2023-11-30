@@ -8,20 +8,10 @@ import { resolve } from "node:path"
  */
 export async function getInlangProject(args: { projectPath: string }): Promise<InlangProject> {
 	const baseDirectory = process.cwd()
-	const settingsFilePath = resolve(baseDirectory, args.projectPath)
-
-	const configExists = await fs
-		.access(settingsFilePath)
-		.then(() => true)
-		.catch(() => false)
-
-	if (configExists === false) {
-		// should throw at this point bceause `loadProject` can't be executed
-		throw new Error("No project.inlang.json file found in the repository.")
-	}
+	const projectPath = resolve(baseDirectory, args.projectPath)
 
 	const project = await loadProject({
-		settingsFilePath,
+		projectPath,
 		nodeishFs: fs,
 		_capture(id, props) {
 			telemetry.capture({
