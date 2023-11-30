@@ -12,10 +12,9 @@ If you're setting up inlang for your project, you've probably read that you need
 ### Why are plugins great?
 Inlang project architecture is more flexible with the use of plugins. This means that you can use it without having to switch to another storage solution. You can customize and expand app or project behaviors easily. This gives you more freedom and keeps adoption costs low.
 
-### How can I add plugins?
-Here are two ways to do this:
-- You can use the web interface by going to a plugin page, such as the [message-format plugin](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat), and clicking on `Install Plugin`. Then, you'll need to add the repo URL. This will automatically install the plugin into your `project.inlang.json` file. Please note that a `project.inlang.json` file is required for this method. Under the hood this creates a pull request.
--  Alternatively, you can add the plugin manually by referring to the [Getting started guide](https://inlang.com/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang).
+### How can I install plugins?
+
+Go to https://inlang.com/c/plugins and click install. 
 
 ### Links
 -> Look for plugins at [inlang.com](https://inlang.com/c/application)

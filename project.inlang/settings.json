@@ -11,8 +11,7 @@
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern/dist/index.js"
 	],
 	"plugin.inlang.messageFormat": {
-		"filePath": "./inlang/source-code/website/messages.json",
-		"pathPattern": "./inlang/source-code/website/messages/{languageTag}.json"
+		"filePath": "./inlang/source-code/website/messages.json"
 	},
 	"messageLintRuleLevels": {
 		"messageLintRule.inlang.missingTranslation": "error"
