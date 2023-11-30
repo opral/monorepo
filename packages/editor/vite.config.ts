@@ -33,7 +33,7 @@ export default defineConfig({
 		// markdownHotModuleReload(),
 		watch({
 			pattern: "messages.json",
-			command: "paraglide-js compile --project ../../../project.inlang.json",
+			command: "paraglide-js compile --project ../../../project.inlang",
 		}),
 	],
 	resolve: {

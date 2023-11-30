@@ -9,7 +9,6 @@ import { createFileSystemMapper } from "./createFileSystemMapper.js"
 import { _import } from "./import/_import.js"
 import type { TelemetryEvents } from "../services/telemetry/events.js"
 import { tryCatch } from "@inlang/result"
-import { CONFIGURATION } from "../configuration.js"
 import fs from "node:fs/promises"
 
 // Helper Functions
@@ -21,8 +20,14 @@ export async function initProject(args: {
 	workspaceFolder: vscode.WorkspaceFolder
 	gitOrigin: string | undefined
 }): Promise<{ project?: InlangProject; error?: Error }> {
+	const possibleInlangProjectPaths = [
+		...(await vscode.workspace.findFiles("*.inlang/settings.json")),
+		// remove after migration
+		...(await vscode.workspace.findFiles("project.inlang.json")),
+	]
+
 	// if no settings file is found
-	if ((await vscode.workspace.findFiles(CONFIGURATION.FILES.PROJECT)).length === 0) {
+	if (possibleInlangProjectPaths.length === 0) {
 		// Try to auto config
 		await createInlangConfigFile({ workspaceFolder: args.workspaceFolder })
 	}
@@ -34,7 +39,7 @@ export async function initProject(args: {
 	}
 
 	const closestProjectFilePath = determineClosestPath({
-		options: (await vscode.workspace.findFiles(CONFIGURATION.FILES.PROJECT)).map((uri) => uri.path),
+		options: possibleInlangProjectPaths.map((uri) => uri.path),
 		to: activeTextEditor.document.uri.path,
 	})
 	const closestProjectFilePathUri = vscode.Uri.parse(closestProjectFilePath)
@@ -52,9 +57,23 @@ export async function initProject(args: {
 		})
 	}
 
+	// REMOVE THIS HARDCODED ASSUMPTION FOR MULTI PROJECT SUPPORT
+	// Has been implemented for https://github.com/inlang/monorepo/pull/1762
+	if (
+		(closestProjectFilePathUri.fsPath.endsWith(".inlang/settings.json") === false ||
+			closestProjectFilePathUri.fsPath.endsWith("project.inlang.json") === false) === false
+	) {
+		throw new Error("INTERNAL BUG 29j3d. Please report this to the inlang team.")
+	}
+
 	const { data: project, error } = await tryCatch(() =>
 		loadProject({
-			settingsFilePath: closestProjectFilePathUri.fsPath,
+			// SEE THROW ABOVE: remove the /settings.json from the path
+			projectPath: closestProjectFilePathUri.fsPath.includes(".inlang/settings.json")
+				? // */lucky-elephant.inlang/settings.json -> */lucky-elephant.inlang
+				  closestProjectFilePathUri.fsPath.replace("/settings.json", "")
+				: // */project.inlang.json -> */project.inlang
+				  closestProjectFilePathUri.fsPath.replace(".json", ""),
 			nodeishFs: createFileSystemMapper(args.workspaceFolder.uri.fsPath, fs),
 			_import: _import(args.workspaceFolder.uri.fsPath),
 			_capture(id, props) {

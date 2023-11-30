@@ -63,7 +63,7 @@ export default defineConfig({
 	// ...
     sveltekit(),
     paraglide({
-      project: "./project.inlang.json",
+      project: "./project.inlang",
       outdir: "./src/paraglide",
     }),
   ],
@@ -260,7 +260,7 @@ We need to import a few things in pages before we can use translations. You need
 ```
 Now you can proceed with adding messages.
 
-The default path for translation files are in the `./messages` directory. You can change this option in `project.inlang.json`. Here are the two ways you can add translations:
+The default path for translation files are in the `./messages` directory. You can change this option in `project.inlang/settings.json`. Here are the two ways you can add translations:
 
 
 ### Add messages through ide extension (recommended)
@@ -277,12 +277,12 @@ message. Give the message an ID and hit enter.
 
 - This command extracts the hard-coded string and places it into the source language translation file `en.json` in the `messages` directory.
 
-- Compile translation `npx paraglide-js compile --project ./project.inlang.json`
+- Compile translation `npx paraglide-js compile --project ./project.inlang`
 
 
 ### Add messages manually
 
-- Go to the `messages` directory and create a `en.json` file in it. (Make sure the naming is according to the [BCP-47](https://en.wikipedia.org/wiki/IETF_language_tag) language tags in the `project.inlang.json`)
+- Go to the `messages` directory and create a `en.json` file in it. (Make sure the naming is according to the [BCP-47](https://en.wikipedia.org/wiki/IETF_language_tag) language tags in the `project.inlang`)
 
 - Add a message in the file.
 ```json
@@ -294,7 +294,7 @@ message. Give the message an ID and hit enter.
 ```
 
 
-- Compile translation `npx paraglide-js compile --project ./project.inlang.json`
+- Compile translation `npx paraglide-js compile --project ./project.inlang`
 
 
 ## 5. See Paraglide JS in action

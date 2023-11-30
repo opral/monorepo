@@ -10,7 +10,7 @@ describe("isAbsolutePath", () => {
 
 	it("should correctly identify Windows absolute paths", () => {
 		assert.isTrue(isAbsolutePath("C:\\Users\\User\\Documents\\File.txt"))
-		assert.isTrue(isAbsolutePath("C:/Users/user/project/project.inlang.json"))
+		assert.isTrue(isAbsolutePath("C:/Users/user/project.inlang/settings.json"))
 		assert.isFalse(isAbsolutePath("Projects\\Project1\\source\\file.txt"))
 	})
 

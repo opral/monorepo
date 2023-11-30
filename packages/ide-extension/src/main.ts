@@ -86,7 +86,7 @@ async function main(args: {
 	// Register decorations
 	messagePreview(args)
 
-	// Properties missing decoration in project.inlang.json
+	// Properties missing decoration in project.inlang
 	propertiesMissingPreview()
 
 	// Add inlang extension to recommended extensions
