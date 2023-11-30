@@ -1,4 +1,3 @@
-import consola from "consola"
 import { vi, test, expect, beforeEach } from "vitest"
 import memfs from "memfs"
 import mockedFs from "node:fs/promises"
@@ -7,23 +6,21 @@ import { compileCommand } from "./compile.js"
 import type { ProjectSettings } from "@inlang/sdk"
 import { createMessage, createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
 import { resolve } from "node:path"
+import { Logger } from "../../services/logger/index.js"
 
 beforeEach(() => {
 	vi.resetAllMocks()
-	// Re-mock consola before each test call to remove calls from before
-	consola.mockTypes(() => vi.fn())
-
 	// set the current working directory to some mock value to prevent
 	// the tests from failing when running in a different environment
 	process.cwd = () => "/"
 
 	// spy on commonly used functions to prevent console output
 	// and allow expecations
-	vi.spyOn(consola, "log").mockImplementation(() => undefined as never)
-	vi.spyOn(consola, "info").mockImplementation(() => undefined as never)
-	vi.spyOn(consola, "success").mockImplementation(() => undefined as never)
-	vi.spyOn(consola, "error").mockImplementation(console.error)
-	vi.spyOn(consola, "warn").mockImplementation(() => undefined as never)
+	vi.spyOn(Logger.prototype, "ln").mockImplementation(() => Logger.prototype)
+	vi.spyOn(Logger.prototype, "info").mockImplementation(() => Logger.prototype)
+	vi.spyOn(Logger.prototype, "success").mockImplementation(() => Logger.prototype)
+	vi.spyOn(Logger.prototype, "warn").mockImplementation(() => Logger.prototype)
+	vi.spyOn(Logger.prototype, "error").mockImplementation(() => Logger.prototype)
 	vi.spyOn(process, "exit").mockImplementation((e) => {
 		console.error(`PROCESS.EXIT()`, e)
 		throw "PROCESS.EXIT()"
