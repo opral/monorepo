@@ -276,65 +276,9 @@ export default function LanguageProvider(props: { children: React.ReactNode }) {
 
 When you now visit `/en` and `/de` you should see the Client Components switch languages as well.
 
+You can switch langauges by linking to the same page with a different language parameter. This can be done with an `<a>` tag or with a programmatic navigation.
 
-## 6. Adding a Language Switcher
-
-
-
-## 7. Taking care of SEO
-
-NextJS has some sensible default behaviour built in for multilingual SEO. For example it will automatically set the `lang` attribute on the `html` tag to the correct language.
-
-The only thing we need to do is to add the alternat language links to the `head` of our page. That way search engines will know which pages are available in which languages.
-
-Let's define an `I18NHeader` component that will add the correct `link` tags to the `head` of our page.
-
-```jsx
-// src/lib/I18NHeader.js
-import { availableLanguageTags, sourceLanguageTag } from "@/paraglide/runtime"
-import Head from "next/head"
-import { useRouter } from "next/router"
-
-export function I18NHeader() {
-	const { asPath } = useRouter()
-
-	function getCurrentPathInLanguage(languageTag: string) {
-		if (languageTag === sourceLanguageTag) return asPath
-		return `/${languageTag}${asPath}`
-	}
-
-	return (
-		<Head>
-			{availableLanguageTags.map((lang) => (
-				<link rel="alternate" hrefLang={lang} href={getCurrentPathInLanguage(lang)} key={lang} />
-			))}
-		</Head>
-	)
-}
-```
-
-We can now use this component in our `_app.js` file to add the correct `link` tags to the `head` of our page.
-
-```jsx
-// src/pages/_app.js
-import { I18NHeader } from "@/lib/I18NHeader"
-import { AvailableLanguageTag, setLanguageTag } from "@/paraglide/runtime"
-import type { AppProps } from "next/app"
-
-export default function App({ Component, pageProps, router }: AppProps) {
-	setLanguageTag(router.locale as AvailableLanguageTag)
-	return (
-		<>
-			<I18NHeader />
-			<Component {...pageProps} />
-		</>
-	)
-}
-```
-
-If you now inspect the `head` of your page, you should see the correct `link` tags for each language.
-
-## 7. Next Steps
+## 6. Next Steps
 
 That's it! You should now have a fully functional multilingual NextJS app using ParaglideJS. Wasn't that hard was it?
 
