@@ -103,11 +103,11 @@ ${[...args.languageTags]
 
 const messageFunction = (args: { message: Message; params: Params; compiledPattern: string }) => {
 	return `
-	/**
-	 * ${paramsType(args.params, false)}
-	 * @returns {string}
-	 */
-	export const ${args.message.id} = (${Object.keys(args.params).length > 0 ? "params" : ""}) => {
-		return ${args.compiledPattern}
-	}`
+/**
+ * ${paramsType(args.params, false)}
+ * @returns {string}
+ */
+export const ${args.message.id} = (${Object.keys(args.params).length > 0 ? "params" : ""}) => {
+	return ${args.compiledPattern}
+}`
 }
