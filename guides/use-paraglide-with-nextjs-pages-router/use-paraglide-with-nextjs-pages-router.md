@@ -32,6 +32,7 @@ It's recommended to also manually add the same `paraglide-js compile` command to
 By default Paraglide uses [inlang-message-format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) plugin to load messages. If you look in your Inlang project settings, you will see the `pathPattern` option specifiing _where_ translation files should be stored.
 
 ```json
+// project.inlang/settings.json
 {
     "$schema": "https://inlang.com/schema/project-settings",
 	"sourceLanguageTag": "en",
