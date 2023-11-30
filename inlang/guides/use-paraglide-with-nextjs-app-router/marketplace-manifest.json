@@ -5,7 +5,7 @@
 		"en": "Use ParaglideJS with the NextJS App Router"
 	},
 	"description": {
-		"en": "This guide covers how to integrate ParaglideJS into a NextJS project using the app router. It will cover server & client components, i18n routing, SEO Pitfalls and more!"
+		"en": "This guide covers how to integrate ParaglideJS into a NextJS project using the app router. It will cover server & client components, i18n routing and more!"
 	},
 	"readme": {
 		"en": "./inlang/guides/use-paraglide-with-nextjs-app-router/use-paraglide-with-nextjs-app-router.md"
