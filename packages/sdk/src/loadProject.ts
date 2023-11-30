@@ -23,16 +23,17 @@ import { ProjectSettings, Message, type NodeishFilesystemSubset } from "./versio
 import { tryCatch, type Result } from "@inlang/result"
 import { migrateIfOutdated } from "@inlang/project-settings/migration"
 import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
-import { normalizePath } from "@lix-js/fs"
+import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
+import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
 /**
  * Creates an inlang instance.
  *
- * @param settingsFilePath - Absolute path to the inlang settings file.
+ * @param projectPath - Absolute path to the inlang settings file.
  * @param nodeishFs - Filesystem that implements the NodeishFilesystemSubset interface.
  * @param _import - Use `_import` to pass a custom import function for testing,
  *   and supporting legacy resolvedModules such as CJS.
@@ -40,29 +41,39 @@ const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
  *
  */
 export const loadProject = async (args: {
-	settingsFilePath: string
-	nodeishFs: NodeishFilesystemSubset
+	projectPath: string
+	nodeishFs: NodeishFilesystem
 	_import?: ImportFunction
 	_capture?: (id: string, props: Record<string, unknown>) => void
 }): Promise<InlangProject> => {
+	const projectPath = normalizePath(args.projectPath)
+
+	// -- migrate if outdated ------------------------------------------------
+
+	await maybeMigrateToDirectory({ nodeishFs: args.nodeishFs, projectPath })
+
 	// -- validation --------------------------------------------------------
-	//! the only place where throwing is acceptable because the project
-	//! won't even be loaded. do not throw anywhere else. otherwise, apps
-	//! can't handle errors gracefully.
-	if (!isAbsolutePath(args.settingsFilePath)) {
+	// the only place where throwing is acceptable because the project
+	// won't even be loaded. do not throw anywhere else. otherwise, apps
+	// can't handle errors gracefully.
+
+	if (!isAbsolutePath(args.projectPath)) {
 		throw new LoadProjectInvalidArgument(
-			`Expected an absolute path but received "${args.settingsFilePath}".`,
-			{ argument: "settingsFilePath" }
+			`Expected an absolute path but received "${args.projectPath}".`,
+			{ argument: "projectPath" }
+		)
+	} else if (/[^\\/]+\.inlang$/.test(projectPath) === false) {
+		throw new LoadProjectInvalidArgument(
+			`Expected a path ending in "{name}.inlang" but received "${projectPath}".\n\nValid examples: \n- "/path/to/micky-mouse.inlang"\n- "/path/to/green-elephant.inlang\n`,
+			{ argument: "projectPath" }
 		)
 	}
-
-	const settingsFilePath = normalizePath(args.settingsFilePath)
 
 	// -- load project ------------------------------------------------------
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
 		const nodeishFs = createNodeishFsWithAbsolutePaths({
-			settingsFilePath,
+			projectPath,
 			nodeishFs: args.nodeishFs,
 		})
 
@@ -70,7 +81,7 @@ export const loadProject = async (args: {
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
 		createEffect(() => {
-			loadSettings({ settingsFilePath, nodeishFs })
+			loadSettings({ settingsFilePath: projectPath + "/settings.json", nodeishFs })
 				.then((settings) => {
 					setSettings(settings)
 					// rename settings to get a convenient access to the data in Posthog
@@ -84,7 +95,7 @@ export const loadProject = async (args: {
 		// TODO: create FS watcher and update settings on change
 
 		const writeSettingsToDisk = skipFirst((settings: ProjectSettings) =>
-			_writeSettingsToDisk({ nodeishFs, settings })
+			_writeSettingsToDisk({ nodeishFs, settings, projectPath })
 		)
 
 		const setSettings = (settings: ProjectSettings): Result<void, ProjectSettingsInvalidError> => {
@@ -322,6 +333,7 @@ const parseSettings = (settings: unknown) => {
 }
 
 const _writeSettingsToDisk = async (args: {
+	projectPath: string
 	nodeishFs: NodeishFilesystemSubset
 	settings: ProjectSettings
 }) => {
@@ -334,7 +346,7 @@ const _writeSettingsToDisk = async (args: {
 	}
 
 	const { error: writeSettingsError } = await tryCatch(async () =>
-		args.nodeishFs.writeFile("./project.inlang.json", serializedSettings)
+		args.nodeishFs.writeFile(args.projectPath + "/settings.json", serializedSettings)
 	)
 
 	if (writeSettingsError) {

@@ -12,7 +12,7 @@ The first step is to initialize your project using the Inlang SDK. The `loadProj
 import { loadProject } from '@inlang/sdk';
 
 const inlang = loadProject({
-    settingsFilePath: "user/project/project.inlang.json"
+    projectPath: "user/project.inlang"
     nodeishFs // NodeishFs is a wrapper around the Node.js fs module
 });
 ```

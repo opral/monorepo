@@ -4,7 +4,7 @@ import type { NodeishFilesystemSubset } from "@inlang/plugin"
  * Wraps the nodeish filesystem subset with a function that intercepts paths
  * and prepends the base path.
  *
- * The paths are resolved from the `settingsFilePath` argument.
+ * The paths are resolved from the `projectPath` argument.
  */
 export const createNodeishFsWithWatcher = (args: {
 	nodeishFs: NodeishFilesystemSubset

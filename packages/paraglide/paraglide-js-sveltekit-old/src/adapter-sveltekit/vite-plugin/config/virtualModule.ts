@@ -57,7 +57,7 @@ export const initVirtualModule = async (): Promise<VirtualModule> => {
 
 	// eslint-disable-next-line no-async-promise-executor
 	return (VirtualModule = new Promise<VirtualModule>(async (resolve, reject) => {
-		const inlang = await loadProject({ nodeishFs, settingsFilePath: PATH_TO_INLANG_CONFIG })
+		const inlang = await loadProject({ nodeishFs, projectPath: PATH_TO_INLANG_CONFIG })
 
 		const errors = inlang.errors()
 		if (errors.length) {

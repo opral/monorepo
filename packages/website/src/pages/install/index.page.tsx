@@ -159,9 +159,9 @@ export function Page() {
 												<p class="text-surface-500 mb-8">
 													Paste the copied link into the{" "}
 													<code class="text-surface-600 text-sm p-1 rounded-md bg-surface-100">
-														project.inlang.json
+														settings.json
 													</code>{" "}
-													file inside the{" "}
+													file inside an inlang project and add the following to the{" "}
 													<code class="text-surface-600 text-sm p-1 rounded-md bg-surface-100">
 														modules
 													</code>{" "}
