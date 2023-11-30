@@ -11,7 +11,7 @@ export const propertiesMissingPreview = () => {
 	}
 
 	if (!ideExtension) {
-		// create decoration in project.inlang.json file stating that the ideExtension properties are missing
+		// create decoration in project.inlang file stating that the ideExtension properties are missing
 		const decorationType = vscode.window.createTextEditorDecorationType({
 			after: {
 				contentText:
@@ -28,8 +28,8 @@ export const propertiesMissingPreview = () => {
 		const firstLine = document.lineAt(0)
 		const range = new vscode.Range(firstLine.range.start, firstLine.range.end)
 
-		// if the file is project.inlang.json -> decorate the first line with the decorationType
-		if (document.fileName.endsWith("project.inlang.json")) {
+		// if a project settings file is opened -> decorate the first line with the decorationType
+		if (document.fileName.endsWith(".inlang/settings.json")) {
 			activeTextEditor.setDecorations(decorationType, [range])
 		}
 	}

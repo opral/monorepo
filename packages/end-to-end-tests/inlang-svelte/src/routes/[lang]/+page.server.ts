@@ -5,7 +5,7 @@ export const load = () => {
 }
 
 export const entries = async () => {
-	const { languages } = await initState(await import("../../../project.inlang.json"))
+	const { languages } = await initState(await import("../../../project.inlang/settings.json"))
 
 	return languages.map((language) => ({ lang: language }))
 }
