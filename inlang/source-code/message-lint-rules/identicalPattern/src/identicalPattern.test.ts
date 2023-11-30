@@ -14,8 +14,6 @@ const message1: Message = {
 	],
 }
 
-const messages = [message1]
-
 test("should report if identical message found in another language", async () => {
 	const result = await lintSingleMessage({
 		settings: {
@@ -26,7 +24,6 @@ test("should report if identical message found in another language", async () =>
 				[identicalPatternRule.id]: "warning",
 			},
 		},
-		messages,
 		message: message1,
 		rules: [identicalPatternRule],
 	})
@@ -53,7 +50,6 @@ test("should not report if pattern is present in 'ignore'", async () => {
 				ignore: ["This is Inlang"],
 			},
 		},
-		messages,
 		message: message1,
 		rules: [identicalPatternRule],
 	})

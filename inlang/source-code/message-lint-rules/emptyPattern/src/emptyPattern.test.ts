@@ -15,8 +15,6 @@ const message1: Message = {
 	],
 }
 
-const messages = [message1]
-
 test("should not report if all messages are present", async () => {
 	const result = await lintSingleMessage({
 		settings: {
@@ -27,7 +25,6 @@ test("should not report if all messages are present", async () => {
 				[emptyPatternRule.id]: "warning",
 			},
 		},
-		messages,
 		message: message1,
 		rules: [emptyPatternRule],
 	})
@@ -46,7 +43,6 @@ test("should report if no patterns are defined", async () => {
 				[emptyPatternRule.id]: "warning",
 			},
 		},
-		messages,
 		message: message1,
 		rules: [emptyPatternRule],
 	})
@@ -70,7 +66,6 @@ test("should report if a message has a pattern with only one text element that i
 				[emptyPatternRule.id]: "warning",
 			},
 		},
-		messages,
 		message: message1,
 		rules: [emptyPatternRule],
 	})
@@ -91,7 +86,6 @@ describe("reported by missingTranslationRule", () => {
 					[emptyPatternRule.id]: "warning",
 				},
 			},
-			messages,
 			message: message1,
 			rules: [emptyPatternRule],
 		})
@@ -110,7 +104,6 @@ describe("reported by missingTranslationRule", () => {
 					[emptyPatternRule.id]: "warning",
 				},
 			},
-			messages,
 			message: message1,
 			rules: [emptyPatternRule],
 		})

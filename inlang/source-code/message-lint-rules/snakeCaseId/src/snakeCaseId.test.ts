@@ -22,8 +22,6 @@ const messageInvalid: Message = {
 	],
 }
 
-const messages = [messageValid, messageInvalid]
-
 test("should not report if message id is in snake case format", async () => {
 	const result = await lintSingleMessage({
 		settings: {
@@ -34,7 +32,6 @@ test("should not report if message id is in snake case format", async () => {
 				[snakeCaseId.id]: "error",
 			},
 		},
-		messages,
 		message: messageValid,
 		rules: [snakeCaseId],
 	})
@@ -53,7 +50,6 @@ test("should report if message id is not in the format of snake case", async () 
 				[snakeCaseId.id]: "error",
 			},
 		},
-		messages,
 		message: messageInvalid,
 		rules: [snakeCaseId],
 	})
