@@ -69,13 +69,13 @@ describe("initializeInlangProject()", () => {
 		"it should execute existingProjectFlow() if a project has been found",
 		async () => {
 			mockFiles({
-				"/folder/project.inlang.json": JSON.stringify(newProjectTemplate),
+				"/folder/project.inlang/settings.json": JSON.stringify(newProjectTemplate),
 				"/folder/subfolder": {},
 			})
 			process.cwd = () => "/folder/subfolder"
 			mockUserInput(["useExistingProject"])
 			const path = await initializeInlangProject()
-			expect(path).toBe("../project.inlang.json")
+			expect(path).toBe("../project.inlang")
 		},
 		{
 			// i am on a plane with bad internet
@@ -86,8 +86,8 @@ describe("initializeInlangProject()", () => {
 		const { existsSync } = mockFiles({})
 		mockUserInput(["newProject"])
 		const path = await initializeInlangProject()
-		expect(path).toBe("./project.inlang.json")
-		expect(existsSync("./project.inlang.json")).toBe(true)
+		expect(path).toBe("./project.inlang")
+		expect(existsSync("./project.inlang")).toBe(true)
 	})
 })
 
@@ -112,14 +112,14 @@ describe("addCompileStepToPackageJSON()", () => {
 			"/package.json": "{}",
 		})
 		await addCompileStepToPackageJSON({
-			projectPath: "./project.inlang.json",
+			projectPath: "./project.inlang",
 		})
 		expect(fs.writeFile).toHaveBeenCalledOnce()
 		expect(consola.success).toHaveBeenCalledOnce()
 		const packageJson = JSON.parse(
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
-		expect(packageJson.scripts.build).toBe(`paraglide-js compile --project ./project.inlang.json`)
+		expect(packageJson.scripts.build).toBe(`paraglide-js compile --project ./project.inlang`)
 	})
 
 	test("if an existing build step exists, it should be preceeded by the paraglide-js compile command", async () => {
@@ -189,33 +189,31 @@ describe("addCompileStepToPackageJSON()", () => {
 describe("existingProjectFlow()", () => {
 	test("if the user selects to proceed with the existing project and the project has no errors, the function should return", async () => {
 		mockFiles({
-			"/project.inlang.json": JSON.stringify(newProjectTemplate),
+			"/project.inlang/settings.json": JSON.stringify(newProjectTemplate),
 		})
 		mockUserInput(["useExistingProject"])
-		expect(
-			existingProjectFlow({ existingProjectPath: "/project.inlang.json" })
-		).resolves.toBeUndefined()
+		expect(existingProjectFlow({ existingProjectPath: "/project.inlang" })).resolves.toBeUndefined()
 	})
 
-	test("if the user selects new project, the newProjectFlow() should be executed", async () => {
+	test("if the user selects a new project, the newProjectFlow() should be executed", async () => {
 		const { existsSync } = mockFiles({
-			"/folder/project.inlang.json": JSON.stringify(newProjectTemplate),
+			"/folder/project.inlang/settings.json": JSON.stringify(newProjectTemplate),
 		})
 		mockUserInput(["newProject"])
 
-		await existingProjectFlow({ existingProjectPath: "/folder/project.inlang.json" })
+		await existingProjectFlow({ existingProjectPath: "/folder/project.inlang" })
 		// info that a new project is created
 		expect(consola.info).toHaveBeenCalledOnce()
 		// the newly created project file should exist
-		expect(existsSync("/project.inlang.json")).toBe(true)
+		expect(existsSync("/project.inlang")).toBe(true)
 	})
 
 	test("it should exit if the existing project contains errors", async () => {
 		mockFiles({
-			"/project.inlang.json": `BROKEN PROJECT FILE`,
+			"/project.inlang/settings.json": `BROKEN PROJECT FILE`,
 		})
 		mockUserInput(["useExistingProject"])
-		await existingProjectFlow({ existingProjectPath: "/project.inlang.json" })
+		await existingProjectFlow({ existingProjectPath: "/project.inlang" })
 		expect(consola.error).toHaveBeenCalled()
 		expect(process.exit).toHaveBeenCalled()
 	})
@@ -302,7 +300,7 @@ describe("createNewProjectFlow()", async () => {
 			// user is informed that the project has successfully been created
 			expect(consola.success).toHaveBeenCalledOnce()
 			// the project file should exist
-			expect(existsSync("/project.inlang.json")).toBe(true)
+			expect(existsSync("/project.inlang")).toBe(true)
 		},
 		{
 			// i am testing this while i am on an airplane with slow internet
@@ -398,30 +396,30 @@ describe("findExistingInlangProjectPath()", () => {
 
 	test("it find a project in the current working directory", async () => {
 		process.cwd = () => "/"
-		mockFiles({ "project.inlang.json": "{}" })
+		mockFiles({ "project.inlang/settings.json": "{}" })
 		const path = await findExistingInlangProjectPath()
-		expect(path).toBe("./project.inlang.json")
+		expect(path).toBe("./project.inlang")
 	})
 
 	test("it should find a project in a parent directory", async () => {
 		process.cwd = () => "/nested/"
 
 		mockFiles({
-			"/project.inlang.json": "{}",
+			"/project.inlang/settings.json": "{}",
 			"/nested/": {},
 		})
 		const path = await findExistingInlangProjectPath()
-		expect(path).toBe("../project.inlang.json")
+		expect(path).toBe("../project.inlang")
 	})
 
 	test("it should find a project in a parent parent directory", async () => {
 		process.cwd = () => "/nested/nested/"
 		mockFiles({
-			"/project.inlang.json": "{}",
+			"/project.inlang/settings.json": "{}",
 			"/nested/nested/": {},
 		})
 		const path = await findExistingInlangProjectPath()
-		expect(path).toBe("../../project.inlang.json")
+		expect(path).toBe("../../project.inlang")
 	})
 })
 

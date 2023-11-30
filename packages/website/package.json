@@ -4,10 +4,10 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite",
-		"build": "node ./scripts/generateSitemap.js && paraglide-js compile --project ../../../project.inlang.json && npx @inlang/cli machine translate -f --project ../../../project.inlang.json --targetLanguageTags fr,it,pt-BR,sk,zh && vite build",
+		"build": "node ./scripts/generateSitemap.js && paraglide-js compile --project ../../../project.inlang && npx @inlang/cli machine translate -f --project ../../../project.inlang --targetLanguageTags fr,it,pt-BR,sk,zh && vite build",
 		"production": "NODE_ENV=production tsx ./src/server/main.ts ",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "paraglide-js compile --project ../../../project.inlang.json && npx @inlang/cli lint --project ../../../project.inlang.json && tsc --noEmit",
+		"test": "paraglide-js compile --project ../../../project.inlang && npx @inlang/cli lint --project ../../../project.inlang && tsc --noEmit",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
@@ -52,6 +52,7 @@
 	"devDependencies": {
 		"@iconify-json/cib": "^1.1.2",
 		"@iconify-json/material-symbols": "^1.1.26",
+		"@inlang/cli": "workspace:*",
 		"@inlang/design-system": "workspace:*",
 		"@inlang/detect-json-formatting": "workspace:*",
 		"@inlang/env-variables": "workspace:*",
