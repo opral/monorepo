@@ -23,7 +23,7 @@
 		"----- CI ---- used to test the codebase on every commit": "",
 		"ci": "pnpm install && pnpm check-all",
 		"check-all": "pnpm format && pnpm lint && pnpm build && pnpm test",
-		"ci:publish": "pnpm --filter !vs-code-extension publish -r",
+		"ci:publish": "echo RUNNING_CI_PUBLISH && pnpm --filter !vs-code-extension publish -r",
 		"ci:version": "npx changeset version"
 	},
 	"engines": {
