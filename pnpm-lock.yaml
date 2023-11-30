@@ -1203,10 +1203,11 @@ importers:
         version: 5.1.4(webpack@5.89.0)
 
   inlang/source-code/paraglide/paraglide-js/example:
-    devDependencies:
+    dependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:..
+    devDependencies:
       typescript:
         specifier: 5.2.2
         version: 5.2.2
