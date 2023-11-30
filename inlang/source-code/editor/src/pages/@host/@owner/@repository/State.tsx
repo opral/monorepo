@@ -258,10 +258,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	// open the inlang project and store it in a resource
 	const [project, { mutate: setProject }] = createResource(
 		() => {
-			if (
-				repo() === undefined ||
-				lixErrors().length > 0
-			) {
+			if (repo() === undefined || lixErrors().length > 0) {
 				return false
 			}
 			return { newRepo: repo(), lixErrors: lixErrors() }
