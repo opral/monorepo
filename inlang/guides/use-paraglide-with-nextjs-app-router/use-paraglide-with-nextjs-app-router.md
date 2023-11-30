@@ -138,6 +138,7 @@ app/
 ```
 
 In order to manage the language parameter, we will need to add some middleware. This will do a few things:
+
 - Make sure that the language parameter is a valid language tag
 - Redirect to the default language if no language parameter is present
 - Make the language tag available to our pages via a Header
@@ -196,9 +197,91 @@ When you run the dev server now and visit `/` you should be redirected to `/en`.
 
 We still need to inform Paraglide about the language tag. We will need to do this on both the server and the client. We will use two components to do this. One for the server and one for the client.
 
+Create a `LanguageProvider.tsx` server component wherever you want. I will put it in `src/lib/LanguageProvider.tsx`. All this component does is get the language from the request header that was set by our middleware and set it in Paraglide.
+
+```jsx
+// src/lib/LanguageProvider.tsx
+import { setLanguageTag } from "@/paraglide/runtime"
+import { headers } from "next/headers"
 
 
-## 6. Taking care of SEO
+//This only needs to be called once, so it's fine to do it here
+setLanguageTag(() => {
+	return headers().get("x-language-tag") as any
+})
+
+export default function LanguageProvider(props: { children: React.ReactNode }) {
+	return (
+		<>
+			{props.children}
+		</>
+	)
+}
+```
+
+Then wrap your Layout with this component. Make sure that it is the outermost component, since no translation will work without it. This is also a good opportunity to set the `lang` attribute on the `html` tag.
+
+```jsx
+// src/app/[lang]/layout.tsx
+import LanguageProvider from "@/lib/LanguageProvider"
+import { languageTag } from "@/paraglide/runtime"
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+	//The LanguageProvider component needs to come before any use of the `languageTag` function
+	return (
+		<LanguageProvider>
+			<html lang={languageTag()}>
+				<body>{children}</body>
+			</html>
+		</LanguageProvider>
+	)
+}
+```
+
+If you now run the dev server, and visit `/en` and `/de`, you should see the Server Components switch languages. The Client Components won't switch languages yet, let's fix that next.
+
+Add a `ClientLanguageProvider.tsx` client component that takes in the language tag as a prop and sets it in Paraglide.
+
+```jsx
+// src/lib/ClientLanguageProvider.tsx
+"use client"
+import { AvailableLanguageTag, setLanguageTag } from "@/paraglide/runtime"
+
+export function ClientLanguageProvider(props: { language: AvailableLanguageTag }) {
+	setLanguageTag(props.language)
+	return null
+}
+```
+
+Then use this component in the `LanguageProvider` component. Make it a siblint to the rest of the children, so that it won't turn your whole page into a client component.
+
+```jsx
+// src/lib/LanguageProvider.tsx
+import { ClientLanguageProvider } from "@/lib/ClientLanguageProvider"
+import { setLanguageTag, languageTag } from "@/paraglide/runtime"
+
+setLanguageTag(() => {
+	return headers().get("x-language-tag") as any
+})
+
+export default function LanguageProvider(props: { children: React.ReactNode }) {
+	return (
+		<>
+			<ClientLanguageProvider language={languageTag()} />
+			{props.children}
+		</>
+	)
+}
+```
+
+When you now visit `/en` and `/de` you should see the Client Components switch languages as well.
+
+
+## 6. Adding a Language Switcher
+
+
+
+## 7. Taking care of SEO
 
 NextJS has some sensible default behaviour built in for multilingual SEO. For example it will automatically set the `lang` attribute on the `html` tag to the correct language.
 
