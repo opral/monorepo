@@ -3,7 +3,7 @@
 	"type": "module",
 	"private": true,
 	"scripts": {
-		"build": "paraglide-js compile --project ./project.inlang.json && tsc",
+		"build": "paraglide-js compile --project ./project.inlang && tsc",
 		"pretest": "paraglide-js compile",
 		"test": "vitest run"
 	},

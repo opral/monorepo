@@ -33,20 +33,21 @@ describe("i18next", () => {
 			devDependencies: {},
 		})
 
-		nodeishFs.writeFile("/package.json", mockPackageJson)
-		nodeishFs.mkdir("/resources")
-		nodeishFs.writeFile("/resources/en.json", JSON.stringify({ mockMessage: "Hello world" }))
-		nodeishFs.writeFile("/resources/de.json", JSON.stringify({ mockMessage: "Hallo Welt" }))
+		await nodeishFs.writeFile("/package.json", mockPackageJson)
+		await nodeishFs.mkdir("/resources")
+		await nodeishFs.writeFile("/resources/en.json", JSON.stringify({ mockMessage: "Hello world" }))
+		await nodeishFs.writeFile("/resources/de.json", JSON.stringify({ mockMessage: "Hallo Welt" }))
 
 		const settings = await tryAutoGenProjectSettings({
 			nodeishFs,
 			basePath: "/",
 		})
 
-		await nodeishFs.writeFile("/project.inlang.json", JSON.stringify(settings))
+		await nodeishFs.mkdir("/project.inlang")
+		await nodeishFs.writeFile("/project.inlang/settings.json", JSON.stringify(settings))
 
 		const project = await loadProject({
-			settingsFilePath: "/project.inlang.json",
+			projectPath: "/project.inlang",
 			nodeishFs,
 		})
 

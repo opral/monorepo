@@ -32,7 +32,7 @@ beforeEach(() => {
 
 test("it should exit if the project has errors", async () => {
 	mockFs({
-		"/project.inlang.json": JSON.stringify({
+		"/project.inlang/settings.json": JSON.stringify({
 			// invalid source language tag
 			sourceLanguageTag: "en-EN-EN",
 			languageTags: [],
@@ -40,9 +40,9 @@ test("it should exit if the project has errors", async () => {
 		} satisfies ProjectSettings),
 	})
 
-	expect(
-		compileCommand.parseAsync(["--project", "./project.inlang.json", "--namespace", "frontend"])
-	).rejects.toEqual("PROCESS.EXIT()")
+	expect(compileCommand.parseAsync(["--project", "./project.inlang"])).rejects.toEqual(
+		"PROCESS.EXIT()"
+	)
 })
 
 test("it should compile into the default outdir", async () => {
@@ -52,7 +52,7 @@ test("it should compile into the default outdir", async () => {
 			resolve(__dirname, "../../../../../plugins/inlang-message-format/dist/index.js"),
 			{ encoding: "utf-8" }
 		),
-		"/project.inlang.json": JSON.stringify({
+		"/project.inlang/settings.json": JSON.stringify({
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
 			modules: ["/plugin.js"],
@@ -72,7 +72,7 @@ test("it should compile into the default outdir", async () => {
 	})
 
 	// I have no idea why, but the { from: "user" } is required for the test to pass
-	await compileCommand.parseAsync(["--project", "./project.inlang.json"], { from: "user" })
+	await compileCommand.parseAsync(["--project", "./project.inlang"], { from: "user" })
 	expect(_fs.existsSync("./src/paraglide/messages.js")).toBe(true)
 })
 
@@ -86,7 +86,7 @@ test("it should compile a project into the provided outdir", async () => {
 				resolve(__dirname, "../../../../../plugins/inlang-message-format/dist/index.js"),
 				{ encoding: "utf-8" }
 			),
-			"/project.inlang.json": JSON.stringify({
+			"/project.inlang/settings.json": JSON.stringify({
 				sourceLanguageTag: "en",
 				languageTags: ["de", "en"],
 				modules: ["/plugin.js"],
@@ -105,7 +105,7 @@ test("it should compile a project into the provided outdir", async () => {
 			}),
 		})
 		// I have no idea why, but the { from: "user" } is required for the test to pass
-		await compileCommand.parseAsync(["--project", "./project.inlang.json", "--outdir", outdir], {
+		await compileCommand.parseAsync(["--project", "./project.inlang", "--outdir", outdir], {
 			from: "user",
 		})
 		expect(_fs.existsSync(`${outdir}/messages.js`)).toBe(true)

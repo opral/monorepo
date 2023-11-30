@@ -113,7 +113,7 @@
 		"typescript": "5.2.2"
 	},
 	"activationEvents": [
-		"workspaceContains:**/project.inlang.json",
+		"workspaceContains:**/project.inlang/*",
 		"workspaceContains:**/inlang.config.js",
 		"onStartupFinished"
 	],
