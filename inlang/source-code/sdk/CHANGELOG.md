@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.19.0
+
+### Minor Changes
+
+- 8b05794d5: BREAKING refactor: rename `openProject({ settingsFilePath })` to `openProject({ projectPath })` to align with new project directory structure
+
 ## 0.18.0
 
 ### Minor Changes
