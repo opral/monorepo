@@ -9,27 +9,6 @@ import { LanguagePicker } from "./LanguagePicker.jsx"
 import Link from "#src/renderer/Link.jsx"
 
 const Footer = () => {
-	const getProductsLinks = () => {
-		return [
-			{
-				name: m.marketplace_header_apps_title(),
-				href: "/c/apps",
-			},
-			{
-				name: m.marketplace_header_libraries_title(),
-				href: "/c/libraries",
-			},
-			{
-				name: m.marketplace_header_plugins_title(),
-				href: "/c/plugins",
-			},
-			{
-				name: m.marketplace_header_lintRules_title(),
-				href: "/c/lint-rules",
-			},
-		]
-	}
-
 	const socialMediaLinks = [
 		{
 			name: "X",
@@ -61,23 +40,6 @@ const Footer = () => {
 				name: m.footer_documentation_title(),
 				href: "/documentation",
 			},
-		]
-	}
-	const getContactLinks = () => {
-		return [
-			{
-				name: m.footer_contact_getInTouch(),
-				href: "mailto:hello@inlang.com",
-			},
-			{
-				name: m.footer_contact_join(),
-				href: "https://github.com/inlang/monorepo/tree/main/careers",
-			},
-			{
-				name: m.footer_contact_feedback(),
-				href: "https://github.com/inlang/monorepo/discussions/categories/feedback",
-			},
-			{ name: m.footer_contact_blog(), href: "/blog" },
 		]
 	}
 
@@ -117,21 +79,29 @@ const Footer = () => {
 						)}
 					</For>
 				</div>
-				<div class="w-full sm:w-1/3 md:w-1/4 xl:px-4 flex flex-col pt-2">
-					<p class="font-semibold text-surface-900 pb-3">{m.footer_category_title()}</p>
-					<For each={getProductsLinks()}>
-						{(link) => (
-							<div class="w-fit opacity-80">
-								<Button type="text" href={link.href}>
-									{link.name}
-								</Button>
-							</div>
-						)}
-					</For>
-				</div>
 				<div class="w-full sm:w-1/3 md:w-1/4 xl:px-4 xl:flex flex-col pt-2">
 					<p class="font-semibold text-surface-900 pb-3">{m.footer_contact_title()}</p>
-					<For each={getContactLinks()}>
+					<For
+						each={[
+							{
+								name: m.footer_contact_getInTouch(),
+								href: "mailto:hello@inlang.com",
+							},
+							{
+								name: m.footer_contact_join(),
+								href: "https://github.com/inlang/monorepo/tree/main/careers",
+							},
+							{
+								name: m.footer_contact_feedback(),
+								href: "https://github.com/inlang/monorepo/discussions/categories/feedback",
+							},
+							{ name: m.footer_contact_blog(), href: "/blog" },
+							{
+								name: m.footer_privacy_policy(),
+								href: "https://www.iubenda.com/privacy-policy/63446420",
+							},
+						]}
+					>
 						{(link) => (
 							<div class="w-fit opacity-80">
 								<Button type="text" href={link.href}>
