@@ -1,6 +1,6 @@
 import { paraglide } from "@inlang/paraglide-js-adapter-rollup"
 import alias from "@rollup/plugin-alias"
-import { fileURLToPath } from "url"
+import { fileURLToPath } from "node:url"
 
 export default {
 	plugins: [
@@ -12,7 +12,7 @@ export default {
 			},
 		}),
 		paraglide({
-			project: "./project.inlang.json",
+			project: "./project.inlang",
 			outdir: "./src/paraglide",
 		}),
 	],

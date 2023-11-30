@@ -1,5 +1,12 @@
 # @inlang/create-project
 
+## 1.1.1
+
+### Patch Changes
+
+- Updated dependencies [8b05794d5]
+  - @inlang/sdk@0.19.0
+
 ## 1.1.0
 
 ### Minor Changes

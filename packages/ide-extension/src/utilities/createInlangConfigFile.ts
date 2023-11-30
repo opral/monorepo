@@ -11,7 +11,7 @@ import fs from "node:fs/promises"
  * @param args - An object containing the workspace folder.
  */
 export const createInlangConfigFile = async (args: { workspaceFolder: vscode.WorkspaceFolder }) => {
-	// Check if project.inlang.json already exists
+	// Check if project.inlang already exists
 	const configFiles = await vscode.workspace.findFiles(CONFIGURATION.FILES.PROJECT)
 	if (configFiles.length > 0) {
 		// skip
@@ -37,10 +37,12 @@ export const createInlangConfigFile = async (args: { workspaceFolder: vscode.Wor
 	const createSettingsFile = await promptUserTocreateSettingsFile()
 
 	if (createSettingsFile === "Accept") {
-		// create config file at root of workspace
-		const settingsFilePath = `${args.workspaceFolder.uri.fsPath}/${CONFIGURATION.FILES.PROJECT}`
-		await nodeishFs.writeFile(settingsFilePath, JSON.stringify(settings, undefined, 2))
-		console.info(`🎉 Created project.inlang.json file at ${settingsFilePath}`)
+		await nodeishFs.mkdir(`${args.workspaceFolder.uri.fsPath}/project.inlang`)
+		await nodeishFs.writeFile(
+			`${args.workspaceFolder.uri.fsPath}/project.inlang/settings.json`,
+			JSON.stringify(settings, undefined, 2)
+		)
+		console.info(`🎉 Success`)
 	} else if (createSettingsFile === "Reject") {
 		// Disable config file creation
 		disableConfigFileCreation()

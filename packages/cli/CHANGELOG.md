@@ -1,5 +1,17 @@
 # @inlang/cli
 
+## 2.0.0
+
+### Major Changes
+
+- 2cafaf56c: BREAKING: `inlang project validate` is now only `inlang validate` see https://github.com/inlang/monorepo/issues/1777
+- 34f1944a9: REFACTOR: --project paths now need to end with .inlang
+
+  ```diff
+  -inlang machine translate --project ../project.inlang.json
+  +inlang machine translate --project ../project.inlang
+  ```
+
 ## 1.21.0
 
 ### Minor Changes
