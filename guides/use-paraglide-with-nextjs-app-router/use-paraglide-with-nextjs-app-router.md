@@ -1,4 +1,4 @@
-# Using ParaglideJS with Next.js' Pages Router
+# Using ParaglideJS with Next.js' App Router
 
 In this guide we will use [Paraglide.js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs), [inlang-message-format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) and [inlang's IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension).
 
@@ -6,7 +6,7 @@ Translated string(s) in this guide might be referred to as message(s) or transla
 
 ## 1. Starting point
 
-This guide assumes that you have a Next.js project set up, and you are using the pages router. If you don't, you can follow the [official Next.js guide](https://nextjs.org/docs/getting-started/installation) to get started.
+This guide assumes that you have a Next.js project set up, and you are using the app router. If you don't, you can follow the [official Next.js guide](https://nextjs.org/docs/getting-started/installation) to get started.
 
 ## 2. Install ParaglideJS
 
@@ -25,7 +25,7 @@ This will have done a few things:
 - Added the required devDependencies to your `package.json`
 - Added the paraglide compiler to your `package.json` build scripts
 
-It's recommended to also manually add the same `paraglide-js compile` command to your `dev` script, as is already present in your `build` script. That way the paraglide compiler will run whenever you run `npm run dev`.
+It's recommended to also manually add the same `paraglide-js compile` command to your `dev` script as is already present in your `build` script. That way the paraglide compiler will run whenever you run `npm run dev`.
 
 ## 3. Our first Messages
 
@@ -58,7 +58,7 @@ If you now run the Paraglide Compiler you should see a new folder appear in your
 
 Your messages live at `./src/paraglide/messages.js`, you will be importing from there.
 
-Let's use the `hello_world` message on our homepage. Open `pages/index.js`, import all messages from `paraglide/messages.js` and use the `hello_world` message in the `h1` tag.
+Let's use the `hello_world` message on our homepage. Open `app/page.tsc`, import all messages from `paraglide/messages.js` and use the `hello_world` message in the `h1` tag.
 
 ```jsx
 import * as m from "@/paraglide/messages" //use nextjs's default alias for src folder
@@ -97,134 +97,105 @@ You can add more languages to your project by adding them to the `languageTags` 
 }
 ```
 
-Let's add a button to our homepage that will change the language to german when clicked. We will use the `setLanguageTag` function from `paraglide/messages.js` to do this.
-
-The way paraglide works is that you set the language by calling the `setLanguageTag`. This will change the language of any messages that are rendered going forward.
-It will **not** change the language of messages that have already been loaded.
-If you want to already rendere messages to change, you will need to force a rerender of the component. Once you have i18n routing set up this will happen automatically, but for now we will use a dummy state to force a rerender.
+If you now call `setLanguageTag("de")` before rendering the message, you should see the german translation. At least for the Server Components
 
 ```jsx
 import * as m from "@/paraglide/messages"
 import { setLanguageTag } from "@/paraglide/runtime"
 
 export default function Home() {
-	//some dummy state to force a rerender when the language changes
-	//We won't need this later
-	const [dummyState, setDummyState] = useState(false)
-
+  setLanguageTag("de")
 	return (
 		<div>
-			<h1>{m.hello_world()}</h1>
-			<button
-				onClick={() => {
-					setLanguageTag("de")
-					setDummyState(!dummyState)
-				}}
-			>
-				Deutsch
-			</button>
+			<h1>{m.hello_world()}</h1> // <-- Hallo Welt!
 		</div>
 	)
 }
 ```
 
-## 5. Using i18n routing
+## 5. Setting up i18n routing
 
-The Pages Router comes with i18n routing support out of the box. To enable it, you need to add the `i18n` object to your `next.config.js` file.
-Since it uses the same `languageTags` as paraglide, you can use the paraglide project settings to generate the `i18n` object.
+Since the App router renders on the server by default we can't just add a button to switch languages. That wouldn't rerender the server-rendered parts of the page. Instead we will need to do a navigation to switch languages.
 
-```js
-// next.config.js
-import { availableLanguageTags, sourceLanguageTag } from "./src/paraglide/runtime.js"
+There are many ways of implementing i18n routing. This guide will implement the following behaviour:
 
-export default {
-	i18n: {
-		//Use spread operator to shut typescript up
-		locales: [...availableLanguageTags],
-		defaultLocale: sourceLanguageTag,
-	},
-}
-```
-
-With this config in place, you should get the following routing behaviour:
-
-- `/some-page` - Default language (English)
+- `/some-page` - Redirect to default language (Eg. `/en/some-page`)
 - `/en/some-page` - English
 - `/de/some-page` - German
 
-All we need to do is to set the language tag using the locale determined by next.js. We can do this by adding the following code to our `_app.js` file.
+The code created here shouldn't be too hard to adapt to different routing behaviour, in case you need something else.
 
-```tsx
-import { AvailableLanguageTag, setLanguageTag } from "@/paraglide/runtime"
-import type { AppProps } from "next/app"
+### Setting the Language with a URL Parameter
 
-export default function App({ Component, pageProps, router }: AppProps) {
-	//Set the language tag to the locale determined by next.js
-	setLanguageTag(router.locale as AvailableLanguageTag)
+We will start by adding a URL parameter to our routes. This will match the `/en` and `/de` bits of our routes. Let's move all our routes into a `[lang]` folder. This will prefix all our routes with a language parameter.
 
-	return (
-		<>
-			<Component {...pageProps} />
-		</>
-	)
+```
+app/
+├── [lang]
+│   ├── layout.tsx
+│   └── page.tsx
+```
+
+In order to manage the language parameter, we will need to add some middleware. This will do a few things:
+- Make sure that the language parameter is a valid language tag
+- Redirect to the default language if no language parameter is present
+- Make the language tag available to our pages via a Header
+
+Add a `src/middleware.ts` file with the following code:
+
+```ts
+import { NextResponse } from "next/server"
+import { NextRequest } from "next/server"
+import { AvailableLanguageTag, availableLanguageTags, sourceLanguageTag } from "./paraglide/runtime"
+
+/**
+ * Sets the request headers to resolve the language tag in RSC.
+ *
+ * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
+ */
+export function middleware(request: NextRequest) {
+	//Get's the first segment of the URL path
+	const maybeLocale = request.nextUrl.pathname.split("/")[1]
+
+	//If it's not a valid language tag, redirect to the default language
+	if (!availableLanguageTags.includes(maybeLocale as any)) {
+		const redirectUrl = `/${sourceLanguageTag}${request.nextUrl.pathname}`
+		request.nextUrl.pathname = redirectUrl
+		return NextResponse.redirect(request.nextUrl)
+	}
+
+	//it _IS_ a valid language tag, so set the language tag header
+	const locale = maybeLocale as AvailableLanguageTag
+
+	const headers = new Headers(request.headers)
+	headers.set("x-language-tag", locale)
+
+	return NextResponse.next({
+		request: {
+			headers,
+		},
+	})
+}
+
+export const config = {
+	matcher: [
+		/*
+		 * Match all request paths except for the ones starting with:
+		 * - api (API routes)
+		 * - _next/static (static files)
+		 * - _next/image (image optimization files)
+		 * - favicon.ico (favicon file)
+		 */
+		"/((?!api|_next/static|_next/image|favicon.ico).*)",
+	],
 }
 ```
 
-When you visit `/de` you should now see the german translation of "Hello World!". (You might need to restart your dev-server for the changes to take effect).
+When you run the dev server now and visit `/` you should be redirected to `/en`. It won't switch languages yet, we will do that in the next step.
 
-### Switching languages the right way
+We still need to inform Paraglide about the language tag. We will need to do this on both the server and the client. We will use two components to do this. One for the server and one for the client.
 
-You can now remove the dummy state from the button in `pages/index.js`. Instead we will use a `<Link>` to switch languages. This will automatically rerender the page and load the correct messages.
 
-```jsx
-// pages/index.js
-import * as m from "@/paraglide/messages"
-import Link from "next/link"
-import { useRouter } from "next/router"
-
-export default function Home() {
-	const router = useRouter()
-
-	return (
-		<div>
-			<h1>{m.hello_world()}</h1>
-			<Link href={router.asPath} locale="en" hrefLang="en">
-				English
-			</Link>
-			<Link href={router.asPath} locale="de" hrefLang="de">
-				German
-			</Link>
-		</div>
-	)
-}
-```
-
-Alternatively, you could use Next's `router.push` function to switch languages programmatically.
-
-```jsx
-// pages/index.js
-
-import * as m from "@/paraglide/messages"
-import { useRouter } from "next/router"
-
-export default function Home() {
-	const router = useRouter()
-
-	return (
-		<div>
-			<h1>{m.hello_world()}</h1>
-			<button onClick={() => router.push(router.asPath, router.asPath, { locale: "en" })}>
-				English
-			</button>
-			<button onClick={() => router.push(router.asPath, router.asPath, { locale: "de" })}>
-				German
-			</button>
-		</div>
-	)
-}
-```
-
-You should _always_ switch languages by doing a navigation. This will ensure that the correct messages are loaded and that the correct language is set in the url.
 
 ## 6. Taking care of SEO
 
@@ -283,7 +254,7 @@ If you now inspect the `head` of your page, you should see the correct `link` ta
 
 That's it! You should now have a fully functional multilingual NextJS app using ParaglideJS. Wasn't that hard was it?
 
-You can check out the full source code of this example [here](https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/example-pages).
+You can check out the full source code of this example [here](https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/example-app).
 
 If you want to learn more about ParaglideJS, check out the [ParaglideJS Documentation](https://inlang.com/m/gerre34r/library-inlang-paraglideJs). If you need help or have some ideas, feel free to reach out to us on [Discord](https://discord.gg/gdMPPWy57R) or open a Discussion on [GitHub](https://github.com/inlang/monorepo/discussions).
 

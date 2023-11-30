@@ -1,0 +1,41 @@
+{
+	"id": "guide.lorissigrist.useParaglideJsWithNextjsAppRouter",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/use-paraglide-with-nextjs-app-router/app-router-logo.png",
+	"displayName": {
+		"en": "Use ParaglideJS with the NextJS App Router"
+	},
+	"description": {
+		"en": "This guide covers how to integrate ParaglideJS into a NextJS project using the app router. It will cover server & client components, i18n routing, SEO Pitfalls and more!"
+	},
+	"readme": {
+		"en": "./inlang/guides/use-paraglide-with-nextjs-app-router/use-paraglide-with-nextjs-app-router.md"
+	},
+	"keywords": [
+		"application",
+		"developer",
+		"paraglide",
+		"i18n",
+		"library",
+		"localization",
+		"sdk",
+		"sdk-js",
+		"react",
+		"build",
+		"javascript",
+		"ide",
+		"guide",
+		"next",
+		"nextjs",
+		"react",
+		"app router",
+		"server components",
+		"server component",
+		"RSC",
+		"client component",
+		"client components",
+		"i18n routing"
+	],
+	"publisherName": "Loris Sigrist",
+	"publisherIcon": "https://avatars.githubusercontent.com/u/43482866?v=4",
+	"license": "Apache-2.0"
+}
