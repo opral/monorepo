@@ -42,8 +42,6 @@ export class InlangInstall extends TwLitElement {
 		const repo = openRepository(`http://localhost:3001/git/${validRepoURL}`, {
 			nodeishFs: createNodeishMemoryFs(),
 		})
-
-		console.log(repo)
 	}
 
 	/* This function checks if all necessary data is given to install into a project */
@@ -122,8 +120,9 @@ export class InlangInstall extends TwLitElement {
 						<button
 							class=${"bg-slate-800 text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors " +
 							(!this.module ? "cursor-not-allowed" : "")}
-							@click=${() => {
-								browserAuth.login()
+							@click=${async () => {
+								await browserAuth.login()
+								window.location.reload()
 							}}
 						>
 							Authorize inlang
