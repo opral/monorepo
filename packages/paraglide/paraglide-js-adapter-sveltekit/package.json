@@ -3,7 +3,15 @@
     "version": "0.0.1",
     "type": "module",
     "main": "./src/index.js",
+    "scripts": {
+        "test": "vitest run --passWithNoTests"
+    },
     "dependencies": {
-        "@inlang/paraglide-js": "workspace:*"
+        "@inlang/paraglide-js": "workspace:*",
+        "magic-string": "^0.30.5"
+    },
+    "devDependencies": {
+        "svelte": "^4.2.8",
+        "vitest": "^0.34.6"
     }
 }

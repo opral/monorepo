@@ -14,3 +14,11 @@
 		<link rel="alternate" hreflang={lang} href={translatePath($page.url.pathname, lang)} />
 	{/each}
 </svelte:head>
+
+
+<style>
+	/* Optional styling */
+	:host {
+		display: block;
+	}
+</style>
