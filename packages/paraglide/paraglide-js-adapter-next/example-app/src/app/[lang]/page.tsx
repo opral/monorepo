@@ -1,5 +1,6 @@
-import * as m from "@inlang/paraglide-js/nextjs-example/messages"
-import { languageTag } from "@inlang/paraglide-js/website"
+import * as m from "@/paraglide/messages"
+import { languageTag } from "@/paraglide/runtime"
+import { ClientComponent } from "./ClientComponent"
 
 export default function Home() {
 	return (
@@ -12,6 +13,8 @@ export default function Home() {
 			<a href="/en">
 				<button>change language to "en"</button>
 			</a>
+
+			<ClientComponent />
 		</main>
 	)
 }
