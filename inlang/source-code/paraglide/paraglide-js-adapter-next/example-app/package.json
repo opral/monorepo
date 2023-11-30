@@ -3,8 +3,8 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"_dev": "paraglide-js compile --project ./project.inlang.json && next dev",
-		"build": "paraglide-js compile --project ./project.inlang.json && next build",
+		"_dev": "paraglide-js compile --project ./project.inlang && next dev",
+		"build": "paraglide-js compile --project ./project.inlang && next build",
 		"preview": "next start"
 	},
 	"dependencies": {
