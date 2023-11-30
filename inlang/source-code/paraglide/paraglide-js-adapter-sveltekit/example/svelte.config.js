@@ -1,9 +1,10 @@
 import adapter from "@sveltejs/adapter-static"
 import { vitePreprocess } from "@sveltejs/kit/vite"
+import { preprocess } from "@inlang/paraglide-js-adapter-sveltekit"
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	preprocess: vitePreprocess(),
+	preprocess: [vitePreprocess(), preprocess()],
 	kit: {
 		adapter: adapter(),
 

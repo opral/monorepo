@@ -19,6 +19,8 @@
 {/each}
 
 <h3>Switch Locales Programatically</h3>
+
+<a href=/home>Home</a>
  
 <select on:change={(e) => goto(translatePath("/", e.target.value))}>
 	{#each availableLanguageTags as lang}

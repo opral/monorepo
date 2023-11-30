@@ -1068,12 +1068,25 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../paraglide-js
+      magic-string:
+        specifier: ^0.30.5
+        version: 0.30.5
+    devDependencies:
+      svelte:
+        specifier: ^4.2.8
+        version: 4.2.8
+      vitest:
+        specifier: ^0.34.6
+        version: 0.34.6(terser@5.19.4)
 
   inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example:
     devDependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../../paraglide-js
+      '@inlang/paraglide-js-adapter-sveltekit':
+        specifier: workspace:*
+        version: link:..
       '@inlang/paraglide-js-adapter-vite':
         specifier: workspace:*
         version: link:../../paraglide-js-adapter-vite
@@ -13840,6 +13853,25 @@ packages:
 
   /svelte@4.0.5:
     resolution: {integrity: sha512-PHKPWP1wiWHBtsE57nCb8xiWB3Ht7/3Kvi3jac0XIxUM2rep8alO7YoAtgWeGD7++tFy46krilOrPW0mG3Dx+A==}
+    engines: {node: '>=16'}
+    dependencies:
+      '@ampproject/remapping': 2.2.1
+      '@jridgewell/sourcemap-codec': 1.4.15
+      '@jridgewell/trace-mapping': 0.3.20
+      acorn: 8.11.2
+      aria-query: 5.3.0
+      axobject-query: 3.2.1
+      code-red: 1.0.4
+      css-tree: 2.3.1
+      estree-walker: 3.0.3
+      is-reference: 3.0.2
+      locate-character: 3.0.0
+      magic-string: 0.30.5
+      periscopic: 3.1.0
+    dev: true
+
+  /svelte@4.2.8:
+    resolution: {integrity: sha512-hU6dh1MPl8gh6klQZwK/n73GiAHiR95IkFsesLPbMeEZi36ydaXL/ZAb4g9sayT0MXzpxyZjR28yderJHxcmYA==}
     engines: {node: '>=16'}
     dependencies:
       '@ampproject/remapping': 2.2.1
