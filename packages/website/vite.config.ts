@@ -24,7 +24,7 @@ export default defineConfig({
 		Icons({ compiler: "solid" }),
 		// markdownHotModuleReload(),
 		paraglide({
-			project: "../../../project.inlang.json",
+			project: "../../../project.inlang",
 			outdir: "./src/paraglide",
 		}),
 	],
