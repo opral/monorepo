@@ -11,7 +11,6 @@ import type { ProjectSettings } from "@inlang/project-settings"
 export const lintSingleMessage = async (args: {
 	settings: ProjectSettings & Required<Pick<ProjectSettings, "messageLintRuleLevels">>
 	rules: MessageLintRule[]
-	messages: Message[]
 	message: Message
 }): Promise<{ data: MessageLintReport[]; errors: MessagedLintRuleThrowedError[] }> => {
 	const reports: MessageLintReport[] = []

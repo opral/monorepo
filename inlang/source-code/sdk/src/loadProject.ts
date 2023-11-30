@@ -17,7 +17,6 @@ import {
 } from "./errors.js"
 import { createRoot, createSignal, createEffect } from "./reactivity/solid.js"
 import { createMessagesQuery } from "./createMessagesQuery.js"
-import { debounce } from "throttle-debounce"
 import { createMessageLintReportsQuery } from "./createMessageLintReportsQuery.js"
 import { ProjectSettings, Message, type NodeishFilesystemSubset } from "./versionedInterfaces.js"
 import { tryCatch, type Result } from "@inlang/result"
@@ -212,43 +211,37 @@ export const loadProject = async (args: {
 
 		const messagesQuery = createMessagesQuery(() => messages() || [])
 		const lintReportsQuery = createMessageLintReportsQuery(
-			messages,
+			messagesQuery,
 			settings as () => ProjectSettings,
 			installedMessageLintRules,
 			resolvedModules
 		)
 
-		const debouncedSave = skipFirst(
-			debounce(
-				500,
-				async (newMessages) => {
-					try {
-						if (JSON.stringify(newMessages) !== JSON.stringify(messages())) {
-							await resolvedModules()?.resolvedPluginApi.saveMessages({
-								settings: settingsValue,
-								messages: newMessages,
-							})
-						}
-					} catch (err) {
-						throw new PluginSaveMessagesError({
-							cause: err,
-						})
-					}
-					const abortController = new AbortController()
-					if (
-						newMessages.length !== 0 &&
-						JSON.stringify(newMessages) !== JSON.stringify(messages()) &&
-						nodeishFs.watch("/", { signal: abortController.signal }) === undefined
-					) {
-						setMessages(newMessages)
-					}
-				},
-				{ atBegin: false }
-			)
-		)
+		const save = skipFirst(async (newMessages) => {
+			try {
+				if (JSON.stringify(newMessages) !== JSON.stringify(messages())) {
+					await resolvedModules()?.resolvedPluginApi.saveMessages({
+						settings: settingsValue,
+						messages: newMessages,
+					})
+				}
+			} catch (err) {
+				throw new PluginSaveMessagesError({
+					cause: err,
+				})
+			}
+			const abortController = new AbortController()
+			if (
+				newMessages.length !== 0 &&
+				JSON.stringify(newMessages) !== JSON.stringify(messages()) &&
+				nodeishFs.watch("/", { signal: abortController.signal }) === undefined
+			) {
+				setMessages(newMessages)
+			}
+		})
 
 		createEffect(() => {
-			debouncedSave(messagesQuery.getAll())
+			save(messagesQuery.getAll())
 		})
 
 		return {

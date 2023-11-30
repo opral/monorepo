@@ -1,9 +1,13 @@
-import { createEffect } from "./reactivity/solid.js"
 import { createSubscribable } from "./loadProject.js"
-import type { InlangProject, InstalledMessageLintRule, MessageLintReportsQueryApi } from "./api.js"
+import type {
+	InlangProject,
+	InstalledMessageLintRule,
+	MessageLintReportsQueryApi,
+	MessageQueryApi,
+} from "./api.js"
 import type { ProjectSettings } from "@inlang/project-settings"
 import type { resolveModules } from "./resolve-modules/index.js"
-import type { MessageLintReport, Message } from "./versionedInterfaces.js"
+import type { MessageLintReport } from "./versionedInterfaces.js"
 import { lintSingleMessage } from "./lint/index.js"
 import { ReactiveMap } from "./reactivity/map.js"
 
@@ -11,7 +15,7 @@ import { ReactiveMap } from "./reactivity/map.js"
  * Creates a reactive query API for messages.
  */
 export function createMessageLintReportsQuery(
-	messages: () => Array<Message> | undefined,
+	messagesQuery: MessageQueryApi,
 	settings: () => ProjectSettings,
 	installedMessageLintRules: () => Array<InstalledMessageLintRule>,
 	resolvedModules: () => Awaited<ReturnType<typeof resolveModules>> | undefined
@@ -19,37 +23,35 @@ export function createMessageLintReportsQuery(
 	// @ts-expect-error
 	const index = new ReactiveMap<MessageLintReport["messageId"], MessageLintReport[]>()
 
-	createEffect(() => {
-		const modules = resolvedModules()
-		const _messages = messages()
-		const _settings = settings()
+	const modules = resolvedModules()
+	const _settings = settings()
 
-		if (_messages && _settings && modules) {
-			// index.clear()
-			for (const message of _messages) {
-				// TODO: only lint changed messages and update arrays selectively
-
-				lintSingleMessage({
-					rules: modules.messageLintRules,
-					settings: {
-						..._settings,
-						messageLintRuleLevels: Object.fromEntries(
-							installedMessageLintRules().map((rule) => [rule.id, rule.level])
-						),
-					},
-					messages: _messages,
-					message: message,
-				}).then((report) => {
-					if (
-						report.errors.length === 0 &&
-						JSON.stringify(index.get(message.id)) !== JSON.stringify(report.data)
-					) {
-						index.set(message.id, report.data || [])
-					}
+	if (messagesQuery.includedMessageIds() && _settings && modules) {
+		for (const messageId of messagesQuery.includedMessageIds()) {
+			index.set(
+				messageId,
+				messagesQuery.get.subscribe({ where: { id: messageId } }, async (message) => {
+					await lintSingleMessage({
+						rules: modules.messageLintRules,
+						settings: {
+							..._settings,
+							messageLintRuleLevels: Object.fromEntries(
+								installedMessageLintRules().map((rule) => [rule.id, rule.level])
+							),
+						},
+						message: message,
+					}).then((report) => {
+						if (
+							report.errors.length === 0 &&
+							JSON.stringify(index.get(message.id)) !== JSON.stringify(report.data)
+						) {
+							index.set(messageId, report.data)
+						}
+					})
 				})
-			}
+			)
 		}
-	})
+	}
 
 	const get = (args: Parameters<MessageLintReportsQueryApi["get"]>[0]) => {
 		return structuredClone(index.get(args.where.messageId))
