@@ -40,12 +40,13 @@ export type Repository = {
 	log: (args?: { since?: Date; depth?: number }) => Promise<Awaited<ReturnType<typeof raw.log>>>
 	statusMatrix: (args: { filter: any }) => Promise<Awaited<ReturnType<typeof raw.statusMatrix>>>
 	status: (args: { filepath: string }) => Promise<Awaited<ReturnType<typeof raw.status>>>
-	mergeUpstream: (args: {
-		branch: string
+	mergeUpstream: (args?: {
+		branch?: string
 	}) => Promise<
 		Endpoints["POST /repos/{owner}/{repo}/merge-upstream"]["response"]["data"] | undefined
 	>
 	createFork: () => Promise<Endpoints["POST /repos/{owner}/{repo}/forks"]["response"]>
+	forkStatus: () => Promise<{ ahead: number; behind: number } | { error: string }>
 	getOrigin: () => Promise<string>
 	getCurrentBranch: () => Promise<string | undefined>
 	getBranches: () => Promise<string[] | undefined>
