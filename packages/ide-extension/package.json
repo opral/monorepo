@@ -10,7 +10,7 @@
 		"url": "https://github.com/inlang/monorepo.git"
 	},
 	"icon": "assets/icon-vscode-marketplace.png",
-	"version": "1.21.0",
+	"version": "1.21.1",
 	"engines": {
 		"vscode": "^1.82.0"
 	},
