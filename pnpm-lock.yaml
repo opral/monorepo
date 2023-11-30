@@ -11,6 +11,9 @@ importers:
       '@changesets/cli':
         specifier: ^2.26.0
         version: 2.26.2
+      '@inlang/cli':
+        specifier: workspace:*
+        version: link:inlang/source-code/cli
       '@typescript-eslint/eslint-plugin':
         specifier: ^6.6.0
         version: 6.11.0(@typescript-eslint/parser@6.11.0)(eslint@8.54.0)(typescript@5.2.2)
@@ -38,6 +41,9 @@ importers:
       typescript:
         specifier: 5.2.2
         version: 5.2.2
+      vitest:
+        specifier: ^0.34.6
+        version: 0.34.6(terser@5.19.4)
 
   inlang/source-code/badge:
     dependencies:
@@ -410,6 +416,9 @@ importers:
       '@iconify-json/material-symbols':
         specifier: ^1.1.26
         version: 1.1.63
+      '@inlang/cli':
+        specifier: workspace:*
+        version: link:../cli
       '@inlang/design-system':
         specifier: workspace:*
         version: link:../design-system
@@ -1633,11 +1642,11 @@ importers:
   inlang/source-code/templates/message-lint-rule:
     dependencies:
       '@inlang/sdk':
-        specifier: ^0.18.0
+        specifier: ^0.19.0
         version: link:../../sdk
     devDependencies:
       '@inlang/cli':
-        specifier: ^1.21.0
+        specifier: ^2.0.0
         version: link:../../cli
       typescript:
         specifier: ^5.2.2
@@ -1936,6 +1945,9 @@ importers:
       '@iconify-json/material-symbols':
         specifier: ^1.1.26
         version: 1.1.63
+      '@inlang/cli':
+        specifier: workspace:*
+        version: link:../cli
       '@inlang/design-system':
         specifier: workspace:*
         version: link:../design-system

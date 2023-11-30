@@ -44,6 +44,7 @@ const __dirname = pathPolyfill123.dirname(__filename)
 	external: ["esbuild-wasm"],
 })
 
+// TODO: #1773 this line crashes NX because it changes the output folder irrespective of nx caching
 // copying templates to dist folder to bundle them in the cli and avoid having to install them separately
 // eslint-disable-next-line no-undef
 fs.copySync(path.join(__dirname, "../templates"), path.join(__dirname, "./dist/templates"), {

@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.21.1
+
+### Patch Changes
+
+- @inlang/telemetry@0.2.1
+
 ## 1.21.0
 
 ### Minor Changes
