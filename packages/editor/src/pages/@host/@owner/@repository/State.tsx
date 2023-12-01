@@ -207,11 +207,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	// get lix errors
 	const [lixErrors, setLixErrors] = createSignal<ReturnType<Repository["errors"]>>([])
-	createEffect(() => {
-		repo()?.errors.subscribe((errors) => {
-			setLixErrors(errors)
-		})
-	})
 
 	const [activeBranch, setActiveBranch] = createSignal<string | undefined>(
 		params.get("branch") || undefined
@@ -229,8 +224,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		async ({ routeParams: { host, owner, repository }, branch, user }) => {
 			if (host && owner && repository && user) {
 				try {
-					// reset errors to empty on repo changes
-					setLixErrors([])
 					const newRepo = await openRepository(
 						`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${host}/${owner}/${repository}`,
 						{
@@ -254,6 +247,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}
 		}
 	)
+
+	repo()?.errors.subscribe((errors) => {
+		setLixErrors(errors)
+	})
 
 	// open the inlang project and store it in a resource
 	const [project, { mutate: setProject }] = createResource(
