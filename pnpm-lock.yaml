@@ -589,9 +589,6 @@ importers:
       '@types/fs-extra':
         specifier: ^11.0.4
         version: 11.0.4
-      '@types/glob':
-        specifier: ^8.1.0
-        version: 8.1.0
       '@types/mocha':
         specifier: ^10.0.6
         version: 10.0.6
@@ -607,9 +604,6 @@ importers:
       '@types/vscode':
         specifier: ^1.84.2
         version: 1.84.2
-      '@vscode/test-electron':
-        specifier: ^2.3.8
-        version: 2.3.8
       '@vscode/vsce':
         specifier: ^2.21.1
         version: 2.22.0
@@ -646,9 +640,6 @@ importers:
       fs-extra:
         specifier: ^11.2.0
         version: 11.2.0
-      glob:
-        specifier: ^10.3.10
-        version: 10.3.10
       isomorphic-git:
         specifier: 1.25.0
         version: 1.25.0
@@ -6327,13 +6318,6 @@ packages:
       '@types/node': 20.10.1
     dev: true
 
-  /@types/glob@8.1.0:
-    resolution: {integrity: sha512-IO+MJPVhoqz+28h1qLAcBEH2+xHMK6MTyHJc7MTnnYb6wsoLR29POVGJ7LycmVXIqyy/4/2ShP5sUwTXuOwb/w==}
-    dependencies:
-      '@types/minimatch': 5.1.2
-      '@types/node': 20.10.0
-    dev: true
-
   /@types/hast@2.3.8:
     resolution: {integrity: sha512-aMIqAlFd2wTIDZuvLbhUT+TGvMxrNC8ECUIVtH6xxy0sQLs3iu6NO8Kp/VT5je7i5ufnebXzdV1dNDMnvaH6IQ==}
     dependencies:
@@ -6438,10 +6422,6 @@ packages:
 
   /@types/mime@3.0.4:
     resolution: {integrity: sha512-iJt33IQnVRkqeqC7PzBHPTC6fDlRNRW8vjrgqtScAhrmMwe8c4Eo7+fUGTa+XdWrpEgpyKWMYmi2dIwMAYRzPw==}
-
-  /@types/minimatch@5.1.2:
-    resolution: {integrity: sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==}
-    dev: true
 
   /@types/minimist@1.2.3:
     resolution: {integrity: sha512-ZYFzrvyWUNhaPomn80dsMNgMeXxNWZBdkuG/hWlUvXvbdUH8ZERNBGXnU87McuGcWDsyzX2aChCv/SVN348k3A==}
