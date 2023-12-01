@@ -30,7 +30,7 @@ services:
       - git.inlang.com
 
   - name: badge-service
-    type: web
+    type: pserv
     runtime: node
     region: frankfurt
     plan: standard
