@@ -26,23 +26,23 @@ export function createMessageLintReportsQuery(
 	const modules = resolvedModules()
 	const _settings = settings()
 
-	if (messagesQuery.includedMessageIds() && _settings && modules) {
+	const rulesArray = modules?.messageLintRules
+	const settingsObject = {
+		..._settings,
+		messageLintRuleLevels: Object.fromEntries(
+			installedMessageLintRules().map((rule) => [rule.id, rule.level])
+		),
+	}
+
+	if (messagesQuery.includedMessageIds() && _settings && rulesArray) {
 		for (const messageId of messagesQuery.includedMessageIds()) {
 			messagesQuery.get.subscribe({ where: { id: messageId } }, async (message) => {
 				await lintSingleMessage({
-					rules: modules.messageLintRules,
-					settings: {
-						..._settings,
-						messageLintRuleLevels: Object.fromEntries(
-							installedMessageLintRules().map((rule) => [rule.id, rule.level])
-						),
-					},
+					rules: rulesArray,
+					settings: settingsObject,
 					message: message,
 				}).then((report) => {
-					if (
-						report.errors.length === 0 &&
-						JSON.stringify(index.get(message.id)) !== JSON.stringify(report.data)
-					) {
+					if (report.errors.length === 0 && index.get(messageId) !== report.data) {
 						index.set(messageId, report.data)
 					}
 				})
