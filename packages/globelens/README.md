@@ -1,3 +1,5 @@
+[<img width="256px" height="auto" alt="Upvote on Github" src="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/globelens/assets/GlobeLens-cta.svg" />](https://github.com/inlang/monorepo/discussions/1793)
+
 ![Cover](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/globelens/assets/GlobeLens-coverV02.png)
 
 # Navigating SEO Success Worldwide
