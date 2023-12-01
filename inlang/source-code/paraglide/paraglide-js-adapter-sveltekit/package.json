@@ -13,7 +13,8 @@
     "dependencies": {
         "@inlang/paraglide-js-adapter-vite": "workspace:*",
         "magic-string": "^0.30.5",
-        "svelte": "^4.2.8"
+        "svelte": "^4.2.8",
+        "tiny-glob": "^0.2.9"
     },
     "devDependencies": {
         "typescript": "^5.3.2",

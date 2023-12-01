@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { availableLanguageTags, languageTag } from "$paraglide/runtime"
-	import { translatePath } from "$lib/i18n"
+	import { availableLanguageTags, languageTag } from "$paraglide/runtime.js"
 	import * as m from "$paraglide/messages.js"
 </script>
 
@@ -18,5 +17,4 @@
 {/each}
 
 <a href="/about">About</a>
-
 <h3>Switch Locales Programatically</h3>

@@ -1074,6 +1074,9 @@ importers:
       svelte:
         specifier: ^4.2.8
         version: 4.2.8
+      tiny-glob:
+        specifier: ^0.2.9
+        version: 0.2.9
     devDependencies:
       typescript:
         specifier: ^5.3.2
@@ -1093,9 +1096,6 @@ importers:
       '@inlang/paraglide-js-adapter-sveltekit':
         specifier: workspace:*
         version: link:..
-      '@inlang/paraglide-js-adapter-vite':
-        specifier: workspace:*
-        version: link:../../paraglide-js-adapter-vite
       '@inlang/plugin-message-format':
         specifier: workspace:*
         version: link:../../../plugins/inlang-message-format
@@ -9143,7 +9143,6 @@ packages:
 
   /globalyzer@0.1.0:
     resolution: {integrity: sha512-40oNTM9UfG6aBmuKxk/giHn5nQ8RVz/SS4Ir6zgzOv9/qC3kKZ9v4etGTcJbEl/NyVQH7FGU7d+X1egr57Md2Q==}
-    dev: true
 
   /globby@11.1.0:
     resolution: {integrity: sha512-jhIXaOzy1sb8IyocaruWSn1TjmnBVs8Ayhcy83rmxNJ8q2uWKCAj3CnJY+KpGSXCueAPc0i05kVvVKtP1t9S3g==}
@@ -9159,7 +9158,6 @@ packages:
 
   /globrex@0.1.2:
     resolution: {integrity: sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==}
-    dev: true
 
   /gopd@1.0.1:
     resolution: {integrity: sha512-d65bNlIadxvpb/A2abVdlqKqV563juRnZ1Wtk6s1sIR8uNsXR70xqIzVqxVf1eTqDunwT2MkczEeaezCKTZhwA==}
@@ -14023,7 +14021,6 @@ packages:
     dependencies:
       globalyzer: 0.1.0
       globrex: 0.1.2
-    dev: true
 
   /tiny-inflate@1.0.3:
     resolution: {integrity: sha512-pkY1fj1cKHb2seWDy0B16HeWyczlJA9/WW3u3c4z/NiWDsO3DOU5D7nhTLE9CF0yXv/QZFY7sEJmj24dK+Rrqw==}
