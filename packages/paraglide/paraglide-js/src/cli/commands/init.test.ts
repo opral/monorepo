@@ -142,7 +142,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		})
 		await addCompileStepToPackageJSON(
 			{
-				projectPath: "./project.inlang.json",
+				projectPath: "./project.inlang",
 			},
 			logger
 		)
@@ -152,7 +152,7 @@ describe("addCompileStepToPackageJSON()", () => {
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
 		expect(packageJson.scripts.build).toBe(
-			`paraglide-js compile --project ./project.inlang.json && some build step`
+			`paraglide-js compile --project ./project.inlang && some build step`
 		)
 	})
 
@@ -160,7 +160,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		mockFiles({
 			"/package.json": JSON.stringify({
 				scripts: {
-					build: "paraglide-js compile --project ./project.inlang.json",
+					build: "paraglide-js compile --project ./project.inlang",
 				},
 			}),
 		})
@@ -170,7 +170,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		])
 		await addCompileStepToPackageJSON(
 			{
-				projectPath: "./project.inlang.json",
+				projectPath: "./project.inlang",
 			},
 			logger
 		)
@@ -184,7 +184,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		mockFiles({
 			"/package.json": JSON.stringify({
 				scripts: {
-					build: "paraglide-js compile --project ./project.inlang.json",
+					build: "paraglide-js compile --project ./project.inlang",
 				},
 			}),
 		})
@@ -194,7 +194,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		])
 		await addCompileStepToPackageJSON(
 			{
-				projectPath: "./project.inlang.json",
+				projectPath: "./project.inlang",
 			},
 			logger
 		)
@@ -243,13 +243,13 @@ describe("existingProjectFlow()", () => {
 describe("maybeAddVsCodeExtension()", () => {
 	test("it should add the vscode extension if the user uses vscode", async () => {
 		mockFiles({
-			"/project.inlang.json": JSON.stringify(newProjectTemplate),
+			"/project.inlang/settings.json": JSON.stringify(newProjectTemplate),
 		})
 		mockUserInput([
 			// user uses vscode
 			true,
 		])
-		await maybeAddVsCodeExtension({ projectPath: "/project.inlang.json" }, logger)
+		await maybeAddVsCodeExtension({ projectPath: "/project.inlang" }, logger)
 		expect(consola.prompt).toHaveBeenCalledOnce()
 		const extensions = await fs.readFile("/.vscode/extensions.json", {
 			encoding: "utf-8",
@@ -266,13 +266,13 @@ describe("maybeAddVsCodeExtension()", () => {
 	})
 	test("it should not add the vscode extension if the user doesn't use vscode", async () => {
 		mockFiles({
-			"/project.inlang.json": JSON.stringify(newProjectTemplate),
+			"/project.inlang/settings.json": JSON.stringify(newProjectTemplate),
 		})
 		mockUserInput([
 			// user does not use vscode
 			false,
 		])
-		await maybeAddVsCodeExtension({ projectPath: "/project.inlang.json" }, logger)
+		await maybeAddVsCodeExtension({ projectPath: "/project.inlang" }, logger)
 		expect(consola.prompt).toHaveBeenCalledOnce()
 		expect(fs.writeFile).not.toHaveBeenCalled()
 	})
@@ -281,15 +281,15 @@ describe("maybeAddVsCodeExtension()", () => {
 		const withEmptyModules = structuredClone(newProjectTemplate)
 		withEmptyModules.modules = []
 		mockFiles({
-			"/project.inlang.json": JSON.stringify(withEmptyModules),
+			"/project.inlang/settings.json": JSON.stringify(withEmptyModules),
 		})
 		mockUserInput([
 			// user uses vscode
 			true,
 		])
-		await maybeAddVsCodeExtension({ projectPath: "/project.inlang.json" }, logger)
+		await maybeAddVsCodeExtension({ projectPath: "/project.inlang" }, logger)
 		const projectSettings = JSON.parse(
-			await fs.readFile("/project.inlang.json", {
+			await fs.readFile("/project.inlang/settings.json", {
 				encoding: "utf-8",
 			})
 		) as ProjectSettings
@@ -297,13 +297,13 @@ describe("maybeAddVsCodeExtension()", () => {
 	})
 	test("it should create the .vscode folder if not existent", async () => {
 		mockFiles({
-			"/project.inlang.json": JSON.stringify(newProjectTemplate),
+			"/project.inlang/settings.json": JSON.stringify(newProjectTemplate),
 		})
 		mockUserInput([
 			// user uses vscode
 			true,
 		])
-		await maybeAddVsCodeExtension({ projectPath: "/project.inlang.json" }, logger)
+		await maybeAddVsCodeExtension({ projectPath: "/project.inlang" }, logger)
 		expect(fsSync.existsSync("/.vscode/extensions.json")).toBe(true)
 	})
 })
@@ -412,7 +412,7 @@ describe("checkIfPackageJsonExists()", () => {
 })
 
 describe("findExistingInlangProjectPath()", () => {
-	test("it should return undefined if no project.inlang.json has been found", async () => {
+	test("it should return undefined if no project.inlang has been found", async () => {
 		mockFiles({})
 		const path = await findExistingInlangProjectPath()
 		expect(path).toBeUndefined()
