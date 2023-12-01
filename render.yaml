@@ -14,6 +14,8 @@ services:
     buildCommand: pnpm install && pnpm run build
     startCommand: pnpm run production
     autoDeploy: true
+    envVars:
+      fromGroup: production
     domains:
       - inlang.com
 
@@ -26,6 +28,8 @@ services:
     buildCommand: pnpm install && pnpm run build
     startCommand: pnpm --filter @lix-js/server production
     autoDeploy: true
+    envVars:
+      fromGroup: production
     buildFilter:
       paths:
         - lix/source-code/server/**
@@ -41,6 +45,8 @@ services:
     buildCommand: pnpm install && pnpm run build
     startCommand: pnpm --filter @inlang/badge run production
     autoDeploy: true
+    envVars:
+      fromGroup: production
     buildFilter:
       paths:
         - inlang/source-code/badge/**
