@@ -1,10 +1,10 @@
 {
-	"name": "@inlang/paraglide-js-adapter-next-example",
+	"name": "@inlang/paraglide-js-adapter-next-example-app",
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"_dev": "next dev",
-		"_build": "paraglide-js compile --namespace nextjs-example && next build",
+		"_dev": "paraglide-js compile --project ./project.inlang --watch & next dev",
+		"build": "paraglide-js compile --project ./project.inlang && next build",
 		"preview": "next start"
 	},
 	"dependencies": {

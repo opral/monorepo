@@ -57,8 +57,8 @@
 
 **More specific guides:**
 
-- Guide: [How to setup inlang for your project](https://inlang.com/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang#)
 - Guide: [Build a Global Svelte App](https://inlang.com/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp)
+- Guide: [Contribute Translations](https://inlang.com/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink)
 
 ## :bell: Stay up-to-date
 

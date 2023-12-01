@@ -1,5 +1,18 @@
 # @inlang/paraglide-js
 
+## 1.0.0-prerelease.15
+
+Fix crash when using `npx @inlang/paraglide-js init` and selecting vscode.
+
+## 1.0.0-prerelease.14
+
+Added `--watch` flag to the `paraglide-js compile` command. This will keep the process alive and recompile whenever messages are changed. 
+
+```bash
+paraglide-js compile --project ./project.inlang --watch
+```
+
+
 ## 1.0.0-prerelease.13
 
 `./paraglide/runtime.js` now exports a function called `isAvailableLanguageTag`. This is 

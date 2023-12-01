@@ -2,9 +2,7 @@ import { createUnplugin } from "unplugin"
 import { Message, ProjectSettings, loadProject, type InlangProject } from "@inlang/sdk"
 import path from "node:path"
 import fs from "node:fs/promises"
-import { compile, writeOutput } from "@inlang/paraglide-js/internal"
-import type { Logger } from "vite"
-import color from "kleur"
+import { compile, writeOutput, Logger } from "@inlang/paraglide-js/internal"
 
 const PLUGIN_NAME = "unplugin-paraglide"
 
@@ -21,7 +19,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 	}
 
 	const outputDirectory = path.resolve(process.cwd(), options.outdir)
-	let logger: Logger | undefined = undefined
+	let logger = new Logger({ silent: options.silent, prefix: true })
 
 	//Keep track of how many times we've compiled
 	let numCompiles = 0
@@ -39,19 +37,11 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		if (options.silent) return
 
 		if (numCompiles === 0) {
-			logger.info(
-				`${color.bold().blue("ℹ [paraglide]")} Compiling Messages into ${color.italic(
-					options.outdir
-				)}`
-			)
+			logger.info(`Compiling Messages into ${options.outdir}`)
 		}
 
 		if (numCompiles >= 1) {
-			logger.info(
-				`${color.bold().blue("ℹ [paraglide]")} Messages changed - Recompiling into ${color.italic(
-					options.outdir
-				)}`
-			)
+			logger.info(`Messages changed - Recompiling into ${options.outdir}`)
 		}
 	}
 
@@ -83,23 +73,13 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 			})
 		},
 
-		vite: {
-			configResolved(config) {
-				logger = config.logger
-			},
-		},
-
 		webpack(compiler) {
 			//we need the compiler to run before the build so that the message-modules will be present
 			//In the other bundlers `buildStart` already runs before the build. In webpack it's a race condition
 			compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, async () => {
 				const project = await getProject()
 				await triggerCompile(project.query.messages.getAll(), project.settings())
-				console.info(
-					`${color.bold().blue("[paraglide]")} Compiled Messages into ${color.italic(
-						options.outdir
-					)}`
-				)
+				console.info(`Compiled Messages into ${options.outdir}`)
 			})
 		},
 	}
