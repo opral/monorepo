@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { languageTag, sourceLanguageTag } from "#src/paraglide/runtime.js"
 
 const Link = (props: { href?: string; [key: string]: any }) => {
