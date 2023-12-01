@@ -28,28 +28,25 @@ export function createMessageLintReportsQuery(
 
 	if (messagesQuery.includedMessageIds() && _settings && modules) {
 		for (const messageId of messagesQuery.includedMessageIds()) {
-			index.set(
-				messageId,
-				messagesQuery.get.subscribe({ where: { id: messageId } }, async (message) => {
-					await lintSingleMessage({
-						rules: modules.messageLintRules,
-						settings: {
-							..._settings,
-							messageLintRuleLevels: Object.fromEntries(
-								installedMessageLintRules().map((rule) => [rule.id, rule.level])
-							),
-						},
-						message: message,
-					}).then((report) => {
-						if (
-							report.errors.length === 0 &&
-							JSON.stringify(index.get(message.id)) !== JSON.stringify(report.data)
-						) {
-							index.set(messageId, report.data)
-						}
-					})
+			messagesQuery.get.subscribe({ where: { id: messageId } }, async (message) => {
+				await lintSingleMessage({
+					rules: modules.messageLintRules,
+					settings: {
+						..._settings,
+						messageLintRuleLevels: Object.fromEntries(
+							installedMessageLintRules().map((rule) => [rule.id, rule.level])
+						),
+					},
+					message: message,
+				}).then((report) => {
+					if (
+						report.errors.length === 0 &&
+						JSON.stringify(index.get(message.id)) !== JSON.stringify(report.data)
+					) {
+						index.set(messageId, report.data)
+					}
 				})
-			)
+			})
 		}
 	}
 
