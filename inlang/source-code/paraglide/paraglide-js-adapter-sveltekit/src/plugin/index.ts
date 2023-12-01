@@ -22,14 +22,14 @@ function adapterSvelteKit(userConfig: UserConfig): Plugin {
 
 	return {
 		name: "@inlang/paraglide-js-adapter-sveltekit",
-		enforce: "pre",
 		resolveId(id) {
+			console.log("resolveId", id)
 			switch (true) {
 				case id === TRANSLATE_PATH_MODULE_ID:
-					return id
+					return TRANSLATE_PATH_MODULE_ID
 
 				case id === HEADER_COMPONENT_MODULE_ID:
-					return id
+					return id + ".svelte"
 
 				case id.startsWith(OUTDIR_ALIAS):
 					return id.replace(OUTDIR_ALIAS, outdir)
@@ -40,18 +40,18 @@ function adapterSvelteKit(userConfig: UserConfig): Plugin {
 		},
 
 		load(id) {
+			console.log("load", id)
 			switch (true) {
 				case id === TRANSLATE_PATH_MODULE_ID:
 					return getTranslatePathModuleCode()
 
-				case id === HEADER_COMPONENT_MODULE_ID:
+				case id === HEADER_COMPONENT_MODULE_ID + ".svelte":
 					return getHeaderComponentCode()
 
 				default:
 					return null
 			}
 		},
-
 		api: {
 			//The Svelte vite-plugin looks for this and automatically adds it to the preprocess array
 			sveltePreprocess: preprocess(),
