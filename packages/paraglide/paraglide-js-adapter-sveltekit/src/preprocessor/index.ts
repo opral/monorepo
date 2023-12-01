@@ -1,6 +1,11 @@
 import { parse } from "svelte/compiler"
 import MagicString from "magic-string"
-import { LANGUAGE_TAG_ALIAS, OUTDIR_ALIAS } from "../constants.js"
+import {
+	LANGUAGE_TAG_ALIAS,
+	OUTDIR_ALIAS,
+	TRANSLATE_PATH_FUNCTION_NAME,
+	TRANSLATE_PATH_MODULE_ID,
+} from "../constants.js"
 
 type Ast = ReturnType<typeof parse>
 type TemplateNode = Ast["html"]
@@ -40,18 +45,25 @@ type AttributeValue =
 export function preprocess() {
 	return {
 		name: "@inlang/paraglide-js-adapter-sveltekit",
-		markup: (data: { content: string }) => {
-			const ast = parse(data.content)
+		markup: ({ filename, content }: { content: string; filename: string }) => {
+			//TODO bail as much as possible before parsing
+			//dont' process built in Svelte files
+			if (filename.includes(".sveltekit")) {
+				code: content
+			}
+
+			//It's worth doing this to avoid parsing the file if it doesn't contain any links
+			//`parse` is expensive
+			if (!content.includes("href")) return { code: content }
+
+			const ast = parse(content)
 			const links = getLinkElements(ast)
+			const s = new MagicString(content)
 
-			const s = new MagicString(data.content)
-
-			//Insert the translatePath function
-			injectImport(
-				ast,
-				s,
-				`import { languageTag as ${LANGUAGE_TAG_ALIAS} } from '${OUTDIR_ALIAS}/runtime.js';`
-			)
+			injectImports(ast, s, [
+				`import { languageTag as ${LANGUAGE_TAG_ALIAS} } from '${OUTDIR_ALIAS}/runtime.js';`,
+				`import {${TRANSLATE_PATH_FUNCTION_NAME} } from '${TRANSLATE_PATH_MODULE_ID}';`,
+			])
 
 			//Replace all links with the new links
 			for (const link of links) {
@@ -60,19 +72,16 @@ export function preprocess() {
 				if (!hrefAttribute) continue
 
 				//Turn the href attribute contents into a template string
-				const hrefAsTemplateString = attrubuteValuesToTemplateString(
-					hrefAttribute.value,
-					data.content
-				)
+				const hrefAsTemplateString = attrubuteValuesToJSValue(hrefAttribute.value, content)
 
 				//If the link has a hreflang attribute, use it as the language tag
 				const hreflang = link.attributes.find((attribute) => attribute.name === "hreflang")
 				const langValue = hreflang
-					? attrubuteValuesToTemplateString(hreflang.value, data.content)
+					? attrubuteValuesToJSValue(hreflang.value, content)
 					: `${LANGUAGE_TAG_ALIAS}()`
 
 				//Replace the href attribute with the new href attribute
-				const newHrefAttributeString = `href={translatePath(${hrefAsTemplateString}, ${langValue})}`
+				const newHrefAttributeString = `href={${TRANSLATE_PATH_FUNCTION_NAME}(${hrefAsTemplateString}, ${langValue})}`
 				s.overwrite(hrefAttribute.start, hrefAttribute.end, newHrefAttributeString)
 			}
 
@@ -82,20 +91,18 @@ export function preprocess() {
 			})
 
 			const code = s.toString()
-			console.log(code)
-
 			return { code, map: map.toString() }
 		},
 	}
 }
 
-function injectImport(ast: Ast, code: MagicString, importStatement: string) {
+function injectImports(ast: Ast, code: MagicString, importStatements: string[]) {
 	if (!ast.instance) {
-		code.prepend("<script>\n" + importStatement + "\n</script>\n")
+		code.prepend("<script>\n" + importStatements.join("\n") + "\n</script>\n")
 	} else {
 		//@ts-ignore
 		const scriptStart = ast.instance.content.start as number
-		code.appendLeft(scriptStart, "\n" + importStatement + "\n")
+		code.appendLeft(scriptStart, "\n" + importStatements.join("\n") + "\n")
 	}
 }
 
@@ -112,7 +119,7 @@ function getLinkElements(ast: Ast): LinkElement[] {
 	return links
 }
 
-function attrubuteValuesToTemplateString(values: AttributeValue[], originalCode: string): string {
+function attrubuteValuesToJSValue(values: AttributeValue[], originalCode: string): string {
 	let templateString = "`"
 
 	for (const value of values) {
