@@ -62,9 +62,13 @@ export const maybeAddVsCodeExtension = async (args: { projectPath: string }, log
 		return
 	}
 
-	const file = await fs.readFile(args.projectPath, { encoding: "utf-8" })
-	const stringify = detectJsonFormatting(file)
-	const settings = JSON.parse(file) as ProjectSettings
+	const project = await loadProject({
+		projectPath: resolve(process.cwd(), args.projectPath),
+		//@ts-ignore
+		nodeishFs: fs,
+	})
+
+	const settings = project.settings()
 
 	// m function matcher is not installed
 	if (settings.modules.some((m) => m.includes("plugin-m-function-matcher")) === false) {
@@ -72,7 +76,7 @@ export const maybeAddVsCodeExtension = async (args: { projectPath: string }, log
 		settings.modules.push(
 			"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js"
 		)
-		await fs.writeFile(args.projectPath, stringify(settings))
+		project.setSettings(settings)
 	}
 	let extensions: any = {}
 	try {
