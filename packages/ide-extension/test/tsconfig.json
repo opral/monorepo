@@ -2,7 +2,13 @@
 	"include": ["./spec/**/*.e2e.test.ts", "./wdio.conf.ts"],
 	"compilerOptions": {
 		"module": "ESNext",
-		"types": ["@wdio/mocha-framework", "expect-webdriverio", "wdio-vscode-service"],
+		"types": [
+			"node",
+			"@wdio/globals",
+			"@wdio/mocha-framework",
+			"expect-webdriverio",
+			"wdio-vscode-service"
+		],
 		"target": "es2022",
 		"moduleResolution": "node",
 		"esModuleInterop": true,
