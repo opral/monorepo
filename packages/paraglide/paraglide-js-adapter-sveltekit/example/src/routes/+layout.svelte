@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { browser } from "$app/environment"
 	import { page } from "$app/stores"
-	import Header from "$lib/Header.svelte"
 	import { getTextDirection } from "$lib/i18n.js"
 	import { setLanguageTag, sourceLanguageTag, type AvailableLanguageTag } from "$paraglide/runtime"
 
@@ -23,9 +22,6 @@
 		document.documentElement.lang = lang
 	}
 </script>
-
-<!-- Include alternate language links in the head -->
-<Header />
 
 <!-- Rerender the page whenever the language changes -->
 {#key lang}
