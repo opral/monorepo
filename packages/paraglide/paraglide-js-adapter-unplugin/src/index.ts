@@ -72,7 +72,13 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		async buildStart() {
 			const project = await getProject()
 
+			//Always fully compile once on build start
+			await triggerCompile(project.query.messages.getAll(), project.settings())
+
+			let numInvocations = 0
 			project.query.messages.getAll.subscribe((messages) => {
+				numInvocations++
+				if (numInvocations === 1) return
 				triggerCompile(messages, project.settings())
 			})
 		},

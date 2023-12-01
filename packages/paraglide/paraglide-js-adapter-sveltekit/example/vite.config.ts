@@ -4,8 +4,6 @@ import { defineConfig } from "vite"
 
 export default defineConfig({
 	plugins: [
-		sveltekit(),
-
 		paraglide({
 			project: "./project.inlang",
 			outdir: "./src/paraglide",
@@ -14,5 +12,6 @@ export default defineConfig({
 				prefixDefault: false,
 			},
 		}),
+		sveltekit(),
 	],
 })
