@@ -45,12 +45,15 @@ export class InlangInstall extends TwLitElement {
 	}
 
 	/* This function checks if all necessary data is given to install into a project */
-	connectedCallback() {
+	async connectedCallback() {
 		super.connectedCallback()
 		this.url = JSON.parse(this.jsonURL)
 
 		// @ts-ignore
 		if (this.url.module) this.module = registry.find((x) => x.id === this.url.module)?.module
+
+		const auth = await getUser()
+		if (auth) this.authorized = true
 
 		this.loading = true
 
@@ -59,21 +62,9 @@ export class InlangInstall extends TwLitElement {
 			this.step = "nomodule"
 			this.loading = false
 		} else if (!this.authorized) {
-			getUser()
-				.then((user) => {
-					if (user) {
-						this.authorized = true
-					} else {
-						console.error("No user found")
-						this.step = "noauth"
-					}
-					this.loading = false
-				})
-				.catch(() => {
-					console.error("No user found")
-					this.step = "noauth"
-					this.loading = false
-				})
+			console.error("Not authorized")
+			this.step = "noauth"
+			this.loading = false
 		} else if (!this.url.repo) {
 			console.error("No repo found")
 			this.step = "norepo"
@@ -94,9 +85,7 @@ export class InlangInstall extends TwLitElement {
 	}
 
 	render(): TemplateResult {
-		return this.loading
-			? html`<div class="flex flex-col gap-2">Loading</div>`
-			: this.step === "nomodule"
+		return this.step === "nomodule"
 			? html`<div class="flex flex-col gap-2">
 					<h2 class="text-xl font-semibold">No module found</h2>
 					</h2>
@@ -255,9 +244,9 @@ export class InlangInstall extends TwLitElement {
 					class="bg-white text-slate-600 border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100">Install</button>
 					</div>
 			</div>`
-			: html`<div class="flex flex-col gap-2">
+			: this.step === "install"
+			? html`<div class="flex flex-col gap-2">
 			<h2 class="text-xl font-semibold flex items-center gap-2">
-			<!-- <doc-icon class="animate-spin" size="1.2em" icon="ic:round-refresh"></doc-icon> -->
 			Installing module
 			</h2>
 					</h2>
@@ -271,5 +260,6 @@ export class InlangInstall extends TwLitElement {
 					Cancel installation
 					</button>
 			</div>`
+			: html`<div class="flex flex-col gap-2">Loading</div>`
 	}
 }
