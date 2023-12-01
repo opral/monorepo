@@ -31,10 +31,10 @@ const verbose = false
 
 const whitelistedExperimentalRepos = [
 	"inlang/example",
-	"inalng/ci-test-repo",
+	"inlang/ci-test-repo",
 	"janfjohannes/inlang-example",
 	"inlang/monorepo",
-	"inalng/example-test",
+	"inlang/example-test",
 ]
 
 export async function openRepository(
