@@ -12,6 +12,10 @@
 	"devDependencies": {
 		"@inlang/markdown": "workspace:*",
 		"@inlang/marketplace-registry": "workspace:*",
+		"@inlang/env-variables": "workspace:*",
+		"@inlang/detect-json-formatting": "workspace:*",
+		"@inlang/result": "workspace:*",
+		"@inlang/sdk": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"autoprefixer": "^10.4.16",
