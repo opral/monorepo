@@ -5,6 +5,43 @@ export function getTranslatePathModuleCode(): string {
 	return prefixStrategy({ prefixDefault: true })
 }
 
+
+function domainStrategy({ domains }: { domains: Record<string, string> }): string {
+	return dedent`
+    import { sourceLanguageTag, availableLanguageTags } from "${OUTDIR_ALIAS}/runtime.js"
+
+    const domains = ${JSON.stringify(domains)}
+
+    /**
+     * Takes in a path without language information and
+     * returns a path with language information.
+     * 
+     * @param {string} path
+     * @param {string} lang
+     * @returns {string}
+     */
+    export function ${TRANSLATE_PATH_FUNCTION_NAME}(path, lang) {
+        // ignore external links & relative paths
+        if (!path.startsWith("/")) return path
+
+        path = getPathWithoutLang(path)
+
+        return domains[lang] + path
+    }
+
+    /**
+     * Removes the language tag from the path, if it exists.
+     * @param {string} path
+     */
+    function getPathWithoutLang(path) {
+        const [maybeLang, ...rest] = path.split(".")
+        if (availableLanguageTags.includes(maybeLang)) return rest.join(".")
+        else return path
+    }
+    `
+}
+
+
 function prefixStrategy({ prefixDefault }: { prefixDefault: boolean }): string {
 	return dedent`
     import { sourceLanguageTag, availableLanguageTags } from "${OUTDIR_ALIAS}/runtime.js"
