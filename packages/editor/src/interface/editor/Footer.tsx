@@ -9,27 +9,6 @@ import Link from "#src/renderer/Link.jsx"
 import { Button } from "../components/Button.jsx"
 
 const Footer = () => {
-	const getProductsLinks = () => {
-		return [
-			{
-				name: m.footer_category_application(),
-				href: "/c/application",
-			},
-			{
-				name: m.footer_category_website(),
-				href: "/c/website",
-			},
-			{
-				name: m.footer_category_markdown(),
-				href: "/c/markdown",
-			},
-			{
-				name: m.footer_category_lint(),
-				href: "/c/lint",
-			},
-		]
-	}
-
 	const socialMediaLinks = [
 		{
 			name: "Twitter",
@@ -118,7 +97,7 @@ const Footer = () => {
 					</For>
 				</div>
 				<div class="w-full sm:w-1/3 md:w-1/4 xl:px-4 flex flex-col pt-2">
-					<p class="font-semibold text-surface-900 pb-3">{m.footer_category_title()}</p>
+					{/* <p class="font-semibold text-surface-900 pb-3">{m.footer_category_title()}</p>
 					<For each={getProductsLinks()}>
 						{(link) => (
 							<div class="w-fit opacity-80">
@@ -127,7 +106,7 @@ const Footer = () => {
 								</Button>
 							</div>
 						)}
-					</For>
+					</For> */}
 				</div>
 				<div class="w-full sm:w-1/3 md:w-1/4 xl:px-4 xl:flex flex-col pt-2">
 					<p class="font-semibold text-surface-900 pb-3">{m.footer_contact_title()}</p>
