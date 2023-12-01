@@ -26,6 +26,9 @@ services:
     buildCommand: pnpm install && pnpm run build
     startCommand: pnpm --filter @lix-js/server production
     autoDeploy: true
+    buildFilter:
+      paths:
+        - lix/source-code/server/**
     domains:
       - git.inlang.com
 
