@@ -1,4 +1,6 @@
-[<img width="256px" height="auto" alt="Upvote on Github" src="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/globelens/assets/GlobeLens-cta.svg" />](https://github.com/inlang/monorepo/discussions/1793)
+<a href="https://github.com/inlang/monorepo/discussions/1793"><img width="200px" height="auto" alt="Upvote on Github" src="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/globelens/assets/GlobeLens-cta.svg" /></a>
+<a href="https://github.com/inlang/monorepo/discussions/1793"><img width="160px" height="auto" alt="Upvote on Github" src="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/globelens/assets/GlobeLens-soon.svg" />
+</a>
 
 ![Cover](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/globelens/assets/GlobeLens-coverV02.png)
 
