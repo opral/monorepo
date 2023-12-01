@@ -2,6 +2,7 @@ import { paraglide as vitePluginParaglide } from "@inlang/paraglide-js-adapter-v
 import type { Plugin } from "vite"
 import { resolve } from "node:path"
 import { OUTDIR_ALIAS, TRANSLATE_PATH_FUNCTION_NAME } from "../constants.js"
+import { preprocess } from "../index.js"
 
 type UserConfig = Parameters<typeof vitePluginParaglide>[0]
 
@@ -18,6 +19,10 @@ function adapterSvelteKit(userConfig: UserConfig): Plugin {
 		resolveId(id) {
 			if (!id.startsWith(OUTDIR_ALIAS)) return null
 			return id.replace(OUTDIR_ALIAS, outdir)
+		},
+
+		api: {
+			sveltePreprocess: preprocess(),
 		},
 	}
 }
