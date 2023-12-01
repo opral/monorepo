@@ -22,6 +22,11 @@ export const RewriteHrefs: PreprocessingPass = {
 			const hrefAttribute = link.attributes.find((attribute) => attribute.name === "href")
 			if (!hrefAttribute) continue
 
+			const optOutAttribute = link.attributes.find(
+				(attribute) => attribute.name === "data-no-translate"
+			)
+			if (optOutAttribute) continue
+
 			//Turn the href attribute contents into a template string
 			const hrefAsTemplateString = attrubuteValuesToJSValue(hrefAttribute.value, originalCode)
 
