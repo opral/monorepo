@@ -39,21 +39,15 @@ jobs:
 
       - name: Run e2e tests on Linux
         if: startsWith(matrix.os, 'ubuntu')
-        run: xvfb-run -a doppler run -- pnpm --filter vs-code-extension run test:e2e
-        env:
-          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
+        run: xvfb-run -a pnpm --filter vs-code-extension run test:e2e
 
       - name: Run e2e tests on MacOS
         if: startsWith(matrix.os, 'macos')
-        run: doppler run -- pnpm --filter vs-code-extension run test:e2e
-        env:
-          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
+        run: pnpm --filter vs-code-extension run test:e2e
 
       - name: Run e2e tests on Windows
         if: startsWith(matrix.os, 'windows')
         shell: bash
         run: |
           pnpm config set script-shell "$(which bash)"
-          doppler run -- pnpm --filter vs-code-extension run test:e2e
-        env:
-          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
+          pnpm --filter vs-code-extension run test:e2e
