@@ -6,6 +6,12 @@
 <p>{m.greeting({ name: "Samuel", count: 5 })}</p>
 <p>{m.currentLanguageTag({ languageTag: languageTag() })}</p>
 
+
+
+<a href="/not-translated" data-no-translate hreflang="en">Not translated</a>
+<a href="/about">{m.about()}</a>
+
+
 <h3>Switch Locales using Links</h3>
 
 {#each availableLanguageTags as lang}
@@ -15,9 +21,3 @@
 	>
 	<br />
 {/each}
-
-<a href="/not-translated" data-no-translate >Not translated</a>
-<a href="/about">About</a>
-
-
-<h3>Switch Locales Programatically</h3>

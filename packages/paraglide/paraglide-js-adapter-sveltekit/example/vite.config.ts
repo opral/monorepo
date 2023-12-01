@@ -9,6 +9,10 @@ export default defineConfig({
 		paraglide({
 			project: "./project.inlang",
 			outdir: "./src/paraglide",
+			strategy: {
+				name: "prefix",
+				prefixDefault: false,
+			},
 		}),
 	],
 })

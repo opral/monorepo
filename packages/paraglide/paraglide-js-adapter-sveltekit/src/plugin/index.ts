@@ -1,17 +1,16 @@
 import { paraglide as vitePluginParaglide } from "@inlang/paraglide-js-adapter-vite"
 import type { Plugin } from "vite"
 import { resolve } from "node:path"
-import {
-	HEADER_COMPONENT_MODULE_ID,
-	OUTDIR_ALIAS,
-	TRANSLATE_PATH_FUNCTION_NAME,
-	TRANSLATE_PATH_MODULE_ID,
-} from "../constants.js"
+import { HEADER_COMPONENT_MODULE_ID, OUTDIR_ALIAS, TRANSLATE_PATH_MODULE_ID } from "../constants.js"
 import { preprocess } from "../index.js"
-import dedent from "dedent"
-import { getTranslatePathModuleCode } from "./translatePath.js"
+import { getTranslatePathModuleCode, type RoutingStrategyConfig } from "./translatePath.js"
+import { getHeaderComponentCode } from "./header.js"
 
-type UserConfig = Parameters<typeof vitePluginParaglide>[0]
+type VitePluginUserConfig = Parameters<typeof vitePluginParaglide>[0]
+
+interface UserConfig extends VitePluginUserConfig {
+	strategy?: RoutingStrategyConfig
+}
 
 // Vite's Plugin type is often incompatible between vite versions, so we use any here
 export function paraglide(userConfig: UserConfig): any {
@@ -20,6 +19,7 @@ export function paraglide(userConfig: UserConfig): any {
 
 function adapterSvelteKit(userConfig: UserConfig): Plugin {
 	const outdir = resolve(process.cwd(), userConfig.outdir)
+	const strategy = userConfig.strategy ?? { name: "prefix", prefixDefault: false }
 
 	return {
 		name: "@inlang/paraglide-js-adapter-sveltekit",
@@ -43,7 +43,7 @@ function adapterSvelteKit(userConfig: UserConfig): Plugin {
 
 		load(id) {
 			if (id === "\0" + TRANSLATE_PATH_MODULE_ID) {
-				return getTranslatePathModuleCode()
+				return getTranslatePathModuleCode(strategy)
 			}
 
 			if (id === HEADER_COMPONENT_MODULE_ID) {
@@ -57,20 +57,4 @@ function adapterSvelteKit(userConfig: UserConfig): Plugin {
 			sveltePreprocess: preprocess(),
 		},
 	}
-}
-
-function getHeaderComponentCode(): string {
-	return dedent`
-		<script>
-			import { availableLanguageTags } from "${OUTDIR_ALIAS}/runtime.js"
-			import translatePath from "${TRANSLATE_PATH_MODULE_ID}"
-			import { page } from "$app/stores"
-		</script>
-
-		<svelte:head>
-			{#each availableLanguageTags as lang}
-				<link rel="alternate" hreflang={lang} href={translatePath($page.url.pathname, lang)} />
-			{/each}
-		</svelte:head>
-	`
 }
