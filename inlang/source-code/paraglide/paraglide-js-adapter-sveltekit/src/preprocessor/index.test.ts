@@ -1,28 +1,21 @@
 import { describe, it, expect } from "vitest"
 import { preprocess } from "./index.js"
+import { LANGUAGE_TAG_ALIAS } from "../constants.js"
 
 const preprocessor = preprocess()
 
 describe("preprocess", () => {
 	it("should wrap quoted text-only hrefs", () => {
-		const input = `<a href="https://inlang.dev">inlang</a>`
-		const output = "<a href={translatePath(`https://inlang.dev`, languageTag())}>inlang</a>"
+		const input = `<a href="https://inlang.com">inlang</a>`
+		const output = `<a href={translatePath(\`https://inlang.com\`, ${LANGUAGE_TAG_ALIAS}())}>inlang</a>`
 
 		const result = preprocessor.markup({ content: input })
 		expect(result.code).toEqual(output)
 	})
 
 	it("should wrap unqouted text-only hrefs", () => {
-		const input = "<a href=https://inlang.dev>inlang</a>"
-		const output = "<a href={translatePath(`https://inlang.dev`, languageTag())}>inlang</a>"
-
-		const result = preprocessor.markup({ content: input })
-		expect(result.code).toEqual(output)
-	})
-
-	it("should escape text-only hrefs", () => {
-		const input = "<a href=https://inlang.dev>inlang</a>"
-		const output = "<a href={translatePath(`https://inlang.dev`, languageTag())}>inlang</a>"
+		const input = "<a href=https://inlang.com>inlang</a>"
+		const output = `<a href={translatePath(\`https://inlang.com\`, ${LANGUAGE_TAG_ALIAS}())}>inlang</a>`
 
 		const result = preprocessor.markup({ content: input })
 		expect(result.code).toEqual(output)
@@ -30,18 +23,16 @@ describe("preprocess", () => {
 
 	it("should escape multiple hrefs", () => {
 		const input =
-			"<h1><a href=https://inlang.dev>inlang</a><a href=https://inlang.dev>inlang</a><a href=https://inlang.dev>inlang</a></h1>"
-		const output =
-			"<h1><a href={translatePath(`https://inlang.dev`, languageTag())}>inlang</a><a href={translatePath(`https://inlang.dev`, languageTag())}>inlang</a><a href={translatePath(`https://inlang.dev`, languageTag())}>inlang</a></h1>"
+			"<h1><a href=https://inlang.com>inlang</a><a href=https://inlang.com>inlang</a><a href=https://inlang.com>inlang</a></h1>"
+		const output = `<h1><a href={translatePath(\`https://inlang.com\`, ${LANGUAGE_TAG_ALIAS}())}>inlang</a><a href={translatePath(\`https://inlang.com\`, ${LANGUAGE_TAG_ALIAS}())}>inlang</a><a href={translatePath(\`https://inlang.com\`, ${LANGUAGE_TAG_ALIAS}())}>inlang</a></h1>`
 
 		const result = preprocessor.markup({ content: input })
 		expect(result.code).toEqual(output)
 	})
 
 	it("should  wrap quoted hrefs with variables", () => {
-		const input = '<a href="https://inlang.dev/{variable}">inlang</a>'
-		const output =
-			"<a href={translatePath(`https://inlang.dev/${variable}`, languageTag())}>inlang</a>"
+		const input = '<a href="https://inlang.com/{variable}">inlang</a>'
+		const output = `<a href={translatePath(\`https://inlang.com/\${variable}\`, ${LANGUAGE_TAG_ALIAS}())}>inlang</a>`
 
 		const result = preprocessor.markup({ content: input })
 		expect(result.code).toEqual(output)

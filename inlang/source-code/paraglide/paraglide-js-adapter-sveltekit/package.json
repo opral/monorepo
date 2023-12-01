@@ -11,11 +11,13 @@
         "dev": "tsc -w"
     },
     "dependencies": {
+        "@inlang/paraglide-js-adapter-vite": "workspace:*",
         "magic-string": "^0.30.5",
         "svelte": "^4.2.8"
     },
     "devDependencies": {
         "typescript": "^5.3.2",
+        "vite": "^5.0.4",
         "vitest": "^0.34.6"
     }
 }
