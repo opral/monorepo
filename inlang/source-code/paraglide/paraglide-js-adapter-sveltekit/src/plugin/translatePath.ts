@@ -1,11 +1,35 @@
-import { OUTDIR_ALIAS, TRANSLATE_PATH_FUNCTION_NAME } from "../constants.js"
+import { OUTDIR_ALIAS } from "../constants.js"
 import dedent from "dedent"
 
-export function getTranslatePathModuleCode(): string {
-	return prefixStrategy({ prefixDefault: false })
+export type RoutingStrategyConfig =
+	| {
+			name: "prefix"
+
+			/**
+			 * If the default language should be prefixed with the language tag.
+			 * If false, the default language will start at `/` instead of `/{lang}/`
+			 */
+			prefixDefault: boolean
+	  }
+	| {
+			name: "domain"
+
+			/**
+			 * Map each language tag to its domain.
+			 */
+			domains: Record<string, string>
+	  }
+
+export function getTranslatePathModuleCode(strategy: RoutingStrategyConfig): string {
+	switch (strategy.name) {
+		case "domain":
+			return domainStrategy(strategy)
+		case "prefix":
+			return prefixStrategy(strategy)
+	}
 }
 
-function domainStrategy({ domains }: { domains: Record<string, string> }): string {
+function domainStrategy({ domains }: Extract<RoutingStrategyConfig, { name: "domain" }>): string {
 	return dedent`
     import { sourceLanguageTag, availableLanguageTags } from "${OUTDIR_ALIAS}/runtime.js"
 
@@ -36,7 +60,9 @@ function domainStrategy({ domains }: { domains: Record<string, string> }): strin
     `
 }
 
-function prefixStrategy({ prefixDefault }: { prefixDefault: boolean }): string {
+function prefixStrategy({
+	prefixDefault,
+}: Extract<RoutingStrategyConfig, { name: "prefix" }>): string {
 	return dedent`
     import { sourceLanguageTag, availableLanguageTags } from "${OUTDIR_ALIAS}/runtime.js"
 
@@ -65,40 +91,6 @@ function prefixStrategy({ prefixDefault }: { prefixDefault: boolean }): string {
 
         //return the path with the language tag
         return "/" + lang + path
-    }
-
-    /**
-     * Removes the language tag from the path, if it exists.
-     * @param {string} path
-     */
-    function getPathWithoutLang(path) {
-        const [_, maybeLang, ...rest] = path.split("/")
-        if (availableLanguageTags.includes(maybeLang)) return "/" + rest.join("/")
-        else return path
-    }
-    `
-}
-
-function alwaysPrefix(): string {
-	return dedent`
-    import { sourceLanguageTag, availableLanguageTags } from "${OUTDIR_ALIAS}/runtime.js"
-
-    /**
-     * Takes in a path without language information and
-     * returns a path with language information.
-     * 
-     * @param {string} path
-     * @param {string} lang
-     * @returns {string}
-     */
-    export function ${TRANSLATE_PATH_FUNCTION_NAME}(path, lang) {
-        // ignore external links & relative paths
-        if (!path.startsWith("/")) return path 
-
-        path = getPathWithoutLang(path)
-
-        //Otherwise, prefix with the language tag
-        else return "/" + lang + path
     }
 
     /**
