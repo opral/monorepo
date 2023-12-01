@@ -2,5 +2,7 @@
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"currentLanguageTag": "Der aktuelle Sprachtag ist \"{languageTag}\".",
 	"greeting": "Hallo {name}! Du hast {count} Nachrichten.",
-	"change_language_to": "Sprache ändern zu {languageTag}"
+	"change_language_to": "Sprache ändern zu {languageTag}",
+	"about": "Über uns",
+	"home": "Startseite"
 }

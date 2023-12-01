@@ -50,9 +50,10 @@ export function preprocess() {
 
 			const imports: string[] = []
 			for (let i = 0; i < passMask.length; i++) {
+				//skip passes that shouldn't apply
 				if (!passMask[i]) continue
-				const pass = PASSES[i]!
-				const { imports: passImports } = pass.apply({ ast, code, originalCode: content })
+
+				const { imports: passImports } = PASSES[i]!.apply({ ast, code, originalCode: content })
 				imports.push(...passImports)
 			}
 
