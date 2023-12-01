@@ -2,7 +2,7 @@ import { OUTDIR_ALIAS, TRANSLATE_PATH_FUNCTION_NAME } from "../constants.js"
 import dedent from "dedent"
 
 export function getTranslatePathModuleCode(): string {
-	return prefixStrategy({ prefixDefault: true })
+	return prefixStrategy({ prefixDefault: false })
 }
 
 function domainStrategy({ domains }: { domains: Record<string, string> }): string {
@@ -23,7 +23,7 @@ function domainStrategy({ domains }: { domains: Record<string, string> }): strin
      * @param {string} lang
      * @returns {string}
      */
-    export function ${TRANSLATE_PATH_FUNCTION_NAME}(path, lang) {
+    export default function translatePath(path, lang) {
         // ignore external links & relative paths
         if (!path.startsWith("/")) return path
 
@@ -48,7 +48,7 @@ function prefixStrategy({ prefixDefault }: { prefixDefault: boolean }): string {
      * @param {string} lang
      * @returns {string}
      */
-    export function ${TRANSLATE_PATH_FUNCTION_NAME}(path, lang) {
+    export default function translatePath(path, lang) {
         // ignore external links & relative paths
         if (!path.startsWith("/")) return path 
 

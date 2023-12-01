@@ -63,13 +63,13 @@ function getHeaderComponentCode(): string {
 	return dedent`
 		<script>
 			import { availableLanguageTags } from "${OUTDIR_ALIAS}/runtime.js"
-			import { ${TRANSLATE_PATH_FUNCTION_NAME} } from "${TRANSLATE_PATH_MODULE_ID}"
+			import translatePath from "${TRANSLATE_PATH_MODULE_ID}"
 			import { page } from "$app/stores"
 		</script>
 
 		<svelte:head>
 			{#each availableLanguageTags as lang}
-				<link rel="alternate" hreflang={lang} href={${TRANSLATE_PATH_FUNCTION_NAME}($page.url.pathname, lang)} />
+				<link rel="alternate" hreflang={lang} href={translatePath($page.url.pathname, lang)} />
 			{/each}
 		</svelte:head>
 	`
