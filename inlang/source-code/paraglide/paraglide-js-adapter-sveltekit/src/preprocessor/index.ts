@@ -7,97 +7,68 @@ import {
 	TRANSLATE_PATH_FUNCTION_NAME,
 	TRANSLATE_PATH_MODULE_ID,
 } from "../constants.js"
+import { InjectHeader } from "./injectHeader.js"
+import { RewriteHrefs } from "./rewriteHrefs.js"
 
-type Ast = ReturnType<typeof parse>
-type TemplateNode = Ast["html"]
+export type Ast = ReturnType<typeof parse>
+export type TemplateNode = Ast["html"]
 
-type LinkElement = {
-	start: number
-	end: number
-	attributes: Attribute[]
-	name: string
+type PreprocessorArgs = {
+	filename: string
+	content: string
 }
 
-type Attribute = {
-	start: number
-	end: number
-	name: string
-	value: AttributeValue[]
+export type PreprocessingPass = {
+	/**
+	 * A quick and cheap check to see if this pass should be applied.
+	 * This is used to avoid parsing the file if it's not necessary.
+	 */
+	condition: (data: PreprocessorArgs) => boolean
+
+	/**
+	 * Applies the pass to the file.
+	 * @param ast 	The AST of the file.
+	 * @param code 	The code of the file. Modify this directly.
+	 * @returns A list of imports that should be injected into the file.
+	 */
+	apply: (data: { ast: Ast; code: MagicString; originalCode: string }) => {
+		imports: string[]
+	}
 }
 
-type AttributeValue =
-	| {
-			start: number
-			end: number
-			type: "Text"
-			raw: string
-			data: string
-	  }
-	| {
-			start: number
-			end: number
-			type: "MustacheTag"
-			expression: {
-				start: number
-				end: number
-			}
-	  }
+const PASSES: PreprocessingPass[] = [InjectHeader, RewriteHrefs]
 
 export function preprocess() {
 	return {
 		name: "@inlang/paraglide-js-adapter-sveltekit",
 		markup: ({ filename, content }: { content: string; filename: string }) => {
 			//dont' process built in Svelte files
-			if (filename.includes(".sveltekit")) {
-				code: content
+			if (filename.includes(".svelte-kit")) {
+				return { code: content }
 			}
 
-			const injectHeaderComponent = filename.endsWith("+page.svelte")
+			const passMask = PASSES.map((pass) => pass.condition({ filename, content }))
+			const shouldProcess = passMask.some((value) => value)
 
-			//It's worth doing this to avoid parsing the file if it doesn't contain any links
-			//`parse` is expensive
-			if (!content.includes("href") && !injectHeaderComponent) return { code: content }
+			if (!shouldProcess) {
+				return { code: content }
+			}
 
+			const code = new MagicString(content)
 			const ast = parse(content)
-			const links = getLinkElements(ast)
-			if (links.length === 0 && !injectHeaderComponent) return { code: content }
 
-			const s = new MagicString(content)
-			injectImports(ast, s, [
-				`import { languageTag as ${LANGUAGE_TAG_ALIAS} } from '${OUTDIR_ALIAS}/runtime.js';`,
-				`import { ${TRANSLATE_PATH_FUNCTION_NAME} } from '${TRANSLATE_PATH_MODULE_ID}';`,
-				injectHeaderComponent
-					? `import PARAGLIDE_HEADER from '${HEADER_COMPONENT_MODULE_ID}';`
-					: "",
-			])
-
-			if (injectHeaderComponent) {
-				s.appendLeft(ast.html.end, `<PARAGLIDE_HEADER />`)
+			const imports: string[] = []
+			for (let i = 0; i < passMask.length; i++) {
+				if (!passMask[i]) continue
+				const pass = PASSES[i]!
+				const { imports: passImports } = pass.apply({ ast, code, originalCode: content })
+				imports.push(...passImports)
 			}
 
-			//Replace all links with the new links
-			for (const link of links) {
-				//If the link has no href attribute there is nothing to do
-				const hrefAttribute = link.attributes.find((attribute) => attribute.name === "href")
-				if (!hrefAttribute) continue
+			injectImports(ast, code, imports)
 
-				//Turn the href attribute contents into a template string
-				const hrefAsTemplateString = attrubuteValuesToJSValue(hrefAttribute.value, content)
-
-				//If the link has a hreflang attribute, use it as the language tag
-				const hreflang = link.attributes.find((attribute) => attribute.name === "hreflang")
-				const langValue = hreflang
-					? attrubuteValuesToJSValue(hreflang.value, content)
-					: `${LANGUAGE_TAG_ALIAS}()`
-
-				//Replace the href attribute with the new href attribute
-				const newHrefAttributeString = `href={${TRANSLATE_PATH_FUNCTION_NAME}(${hrefAsTemplateString}, ${langValue})}`
-				s.overwrite(hrefAttribute.start, hrefAttribute.end, newHrefAttributeString)
-			}
-
-			const code = s.toString()
-			const map = s.generateMap({ hires: true })
-			return { code, map }
+			const map = code.generateMap({ hires: true })
+			return { code: code.toString(), map }
 		},
 	}
 }
@@ -110,43 +81,4 @@ function injectImports(ast: Ast, code: MagicString, importStatements: string[]) 
 		const scriptStart = ast.instance.content.start as number
 		code.appendLeft(scriptStart, "\n" + importStatements.join("\n") + "\n")
 	}
-}
-
-function getLinkElements(ast: Ast): LinkElement[] {
-	let links: LinkElement[] = []
-	function walk(templateNode: TemplateNode) {
-		if (templateNode.type === "Element" && templateNode.name === "a") {
-			links.push(templateNode as LinkElement)
-		}
-
-		templateNode.children?.forEach(walk)
-	}
-	walk(ast.html)
-	return links
-}
-
-function attrubuteValuesToJSValue(values: AttributeValue[], originalCode: string): string {
-	let templateString = "`"
-
-	for (const value of values) {
-		switch (value.type) {
-			case "Text":
-				templateString += escapeStringLiteral(value.data)
-				break
-			case "MustacheTag": {
-				const expressionCode = originalCode.slice(value.expression.start, value.expression.end)
-				templateString += "${"
-				templateString += expressionCode
-				templateString += "}"
-				break
-			}
-		}
-	}
-
-	templateString += "`"
-	return templateString
-}
-
-function escapeStringLiteral(string: string) {
-	return string.replace(/`/g, "\\`").replace(/\$/g, "\\$")
 }
