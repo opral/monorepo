@@ -33,13 +33,58 @@ const Footer = () => {
 	const getResourceLinks = () => {
 		return [
 			{
+				name: m.footer_resources_documentation(),
+				href: "/documentation",
+			},
+			{
 				name: m.footer_resources_roadmap(),
 				href: "https://github.com/orgs/inlang/projects?query=is%3Aopen",
 			},
 			{
-				name: m.footer_documentation_title(),
-				href: "/documentation",
+				name: m.footer_resources_guides(),
+				href: "/c/guides",
 			},
+		]
+	}
+
+	const getMoreLinks = () => {
+		return [
+			{
+				name: m.footer_contact_getInTouch(),
+				href: "mailto:hello@inlang.com",
+			},
+			{
+				name: m.footer_contact_join(),
+				href: "https://github.com/inlang/monorepo/tree/main/careers",
+			},
+			{
+				name: m.footer_contact_feedback(),
+				href: "https://github.com/inlang/monorepo/discussions/categories/feedback",
+			},
+			{ name: m.footer_contact_blog(), href: "/blog" },
+			{
+				name: m.footer_privacy_policy(),
+				href: "https://www.iubenda.com/privacy-policy/63446420",
+			},
+		]
+	}
+
+	const getCategoriesLinks = () => {
+		return [
+			{
+				name: m.footer_categories_apps(),
+				href: "/c/apps",
+			},
+			{
+				name: m.footer_categories_libraries(),
+				href: "/c/libraries",
+			},
+			{
+				name: m.footer_categories_plugins(),
+				href: "/c/plugins",
+			},
+			{ name: m.footer_categories_lintrules(), href: "/c/lint-rules" },
+			{ name: m.footer_categories_lix(), href: "/c/lix" },
 		]
 	}
 
@@ -79,29 +124,21 @@ const Footer = () => {
 						)}
 					</For>
 				</div>
+				<div class="w-full sm:w-1/3 md:w-1/4 xl:px-4 flex flex-col pt-2">
+					<p class="font-semibold text-surface-900 pb-3">Categories</p>
+					<For each={getCategoriesLinks()}>
+						{(link) => (
+							<div class="w-fit opacity-80">
+								<Button type="text" href={link.href}>
+									{link.name}
+								</Button>
+							</div>
+						)}
+					</For>
+				</div>
 				<div class="w-full sm:w-1/3 md:w-1/4 xl:px-4 xl:flex flex-col pt-2">
 					<p class="font-semibold text-surface-900 pb-3">{m.footer_contact_title()}</p>
-					<For
-						each={[
-							{
-								name: m.footer_contact_getInTouch(),
-								href: "mailto:hello@inlang.com",
-							},
-							{
-								name: m.footer_contact_join(),
-								href: "https://github.com/inlang/monorepo/tree/main/careers",
-							},
-							{
-								name: m.footer_contact_feedback(),
-								href: "https://github.com/inlang/monorepo/discussions/categories/feedback",
-							},
-							{ name: m.footer_contact_blog(), href: "/blog" },
-							{
-								name: m.footer_privacy_policy(),
-								href: "https://www.iubenda.com/privacy-policy/63446420",
-							},
-						]}
-					>
+					<For each={getMoreLinks()}>
 						{(link) => (
 							<div class="w-fit opacity-80">
 								<Button type="text" href={link.href}>
