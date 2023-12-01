@@ -39,7 +39,7 @@ services:
     plan: standard
     branch: main
     buildCommand: pnpm install && pnpm run build
-    startCommand: pnpm run production
+    startCommand: pnpm --filter @inlang/badge run production
     autoDeploy: true
     buildFilter:
       paths:
