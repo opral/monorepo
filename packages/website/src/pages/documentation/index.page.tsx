@@ -59,17 +59,18 @@ export function Page(props: PageProps) {
 							.replace("/" + languageTag(), "")
 							.replace("/documentation/", "")
 					)?.title
-				}
+				}{" "}
+				| inlang SDK Documentation
 			</Title>
 			<Meta
 				name="description"
-				content={
+				content={`${
 					findPageBySlug(
 						currentPageContext.urlParsed.pathname
 							.replace("/" + languageTag(), "")
 							.replace("/documentation/", "")
 					)?.description
-				}
+				} and more with inlang's Software Development Kit (SDK).`}
 			/>
 			<Meta name="og:image" content="/opengraph/inlang-documentation-image.jpg" />
 			<Meta name="twitter:card" content="summary_large_image" />
@@ -80,11 +81,19 @@ export function Page(props: PageProps) {
 			/>
 			<Meta
 				name="twitter:title"
-				content={findPageBySlug(currentPageContext.urlParsed.pathname)?.title}
+				content={`${
+					findPageBySlug(currentPageContext.urlParsed.pathname)?.title
+				} | inlang SDK Documentation`}
 			/>
 			<Meta
 				name="twitter:description"
-				content={findPageBySlug(currentPageContext.urlParsed.pathname)?.description}
+				content={`${
+					findPageBySlug(
+						currentPageContext.urlParsed.pathname
+							.replace("/" + languageTag(), "")
+							.replace("/documentation/", "")
+					)?.description
+				} and more with inlang's Software Development Kit (SDK).`}
 			/>
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />

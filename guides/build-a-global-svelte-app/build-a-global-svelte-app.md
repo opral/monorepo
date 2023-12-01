@@ -315,12 +315,12 @@ If you don't want to use `<a>` tags, you can also use the `goto` function from `
 {/each}
 ```
 
-## 6. SEO Considerations
+## 6. SEO Considerations
 On multi-language sites, it's easy to mess up your SEO. Here are a few things to keep in mind:
 
-- 1. Set the `lang` attribute on your `<html>` tag. This will help search engines understand which language your site is in.
-- 2. Add `hreflang` attributes to your `<a>` tags, unless it's the same language as the current page.
-- 3. Link to all language versions of your page using `<link rel="alternate" hreflang="..." href="...">`. This will help search engines find all versions of your page.
+1. Set the `lang` attribute on your `<html>` tag. This will help search engines understand which language your site is in.
+2. Add `hreflang` attributes to your `<a>` tags, unless it's the same language as the current page.
+3. Link to all language versions of your page using `<link rel="alternate" hreflang="..." href="...">`. This will help search engines find all versions of your page.
 
 Let's implement these things in our app.
 

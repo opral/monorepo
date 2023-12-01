@@ -25,7 +25,8 @@
 		"j8f8f832": "./inlang/external-projects/next-international/marketplace-manifest.json",
 		"0023fsjj": "./inlang/external-projects/i18n-ally/marketplace-manifest.json",
 		"1153khjh": "./inlang/external-projects/tolgee/marketplace-manifest.json",
-		"kkfjusgu": "./inlang/external-projects/svelte-i18n/marketplace-manifest.json"
+		"kkfjusgu": "./inlang/external-projects/svelte-i18n/marketplace-manifest.json",
+		"92fst3wd": "./inlang/source-code/globelens/marketplace-manifest.json"
 	},
 	"g": {
 		"94ng94n4": "./inlang/guides/how-to-inlang-app/marketplace-manifest.json",
@@ -33,6 +34,8 @@
 		"3go4f04m": "./inlang/guides/what-is-inlang/marketplace-manifest.json",
 		"00162hsd": "./inlang/guides/what-are-plugins/marketplace-manifest.json",
 		"940fn8mg": "./inlang/guides/i18n-mistakes/marketplace-manifest.json",
-		"6ddyhpoi": "./inlang/guides/contribute-translations-with-fink/marketplace-manifest.json"
+		"6ddyhpoi": "./inlang/guides/contribute-translations-with-fink/marketplace-manifest.json",
+		"uxohikde": "./inlang/guides/use-paraglide-with-nextjs-pages-router/marketplace-manifest.json",
+		"wxcebbig": "./inlang/guides/use-paraglide-with-nextjs-app-router/marketplace-manifest.json"
 	}
 }

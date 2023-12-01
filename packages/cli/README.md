@@ -132,20 +132,10 @@ The translate command has the following options:
 
 - `-f, --force`: If this option is set, the command will not prompt confirmation. This is useful for CI/CD build pipelines. **We advise you to only use `machine translate` in build pipelines to avoid out-of-context/wrong translations.**
 - `--project <path>`: Specifies the path to the project root. The default project root is the current working directory.
-- `--sourceLanguageTag <source>`: Specifies the source language tag. The default source language tag is the one specified in the `project.inlang.json` file.
-- `--targetLanguageTags <targets...>`: Specifies the target language tags as comma seperated list (e.g. sk,zh,pt-BR). The default target language tags are the ones specified in the `project.inlang.json` file.
-
-This command reads the project.inlang.json file in the repository and retrieves the resources and reference language specified in the configuration. It then translates all messages from the reference language to other languages defined in the configuration.
+- `--sourceLanguageTag <source>`: Specifies the source language tag. 
+- `--targetLanguageTags <targets...>`: Specifies the target language tags as comma seperated list (e.g. sk,zh,pt-BR).
 
 The translations are performed using machine translation services. The translated messages are added to the respective language resources. Finally, the updated resources are written back to the file system.
-
-> Note: The project.inlang.json file must be present in the repository for the translation to work.
-
-## `project`
-
-The project command is used to interact with the Inlang project. It allows to create a new project or migrate an existing project to the new `project.inlang.json`.
-
-This will launch an interactive prompt that will guide you through the process of creating the inlang configuration file.
 
 ## `validate`
 
@@ -177,7 +167,7 @@ The translate command has the following options:
 
 - `--no-fail`: If this option is set, the command will not fail if there are any linting errors.
 - `--project <path>`: Specifies the path to the project root. The default project root is the current working directory.
-- `--languageTags <tags>`: Specifies the language tags to lint. Defaults to all. Should be a comma-separated list of language tags specified in the `project.inlang.json`, e.g. `en,de,fr`.
+- `--languageTags <tags>`: Specifies the language tags to lint. Defaults to all. Should be a comma-separated list of language tags specified in the inlang project, e.g. `en,de,fr`.
 
 `lint` will read through all resources and find potential errors and warnings in the translation strings, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/monorepo/tree/main/inlang/source-code/message-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns/duplicates**.
 

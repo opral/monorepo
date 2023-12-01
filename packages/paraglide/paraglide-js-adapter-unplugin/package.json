@@ -1,6 +1,6 @@
 {
     "name": "@inlang/paraglide-js-adapter-unplugin",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Unplugin adapter for Paraglide.js",
     "license": "Apache-2.0",
     "type": "module",
@@ -49,7 +49,6 @@
     "dependencies": {
         "@inlang/paraglide-js": "workspace:*",
         "@inlang/sdk": "workspace:*",
-        "kleur": "^4.1.5",
         "unplugin": "1.5.1"
     },
     "devDependencies": {
