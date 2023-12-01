@@ -1,11 +1,11 @@
 previewsEnabled: true
 
-# cost control for preview deployments. 
-# if no activity for 3 days, the preview deployment will be deleted. 
+# cost control for preview deployments.
+# if no activity for 3 days, the preview deployment will be deleted.
 previewsExpireAfterDays: 3
 
 services:
-  - name: inlang-website 
+  - name: inlang-website
     type: web
     runtime: node
     region: frankfurt
