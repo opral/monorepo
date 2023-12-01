@@ -6,7 +6,6 @@ import { TwLitElement } from "../common/TwLitElement.js"
 import { browserAuth, getUser } from "@lix-js/client/src/browser-auth.ts"
 import { registry } from "@inlang/marketplace-registry"
 import { ProjectSettings, loadProject } from "@inlang/sdk"
-import { publicEnv } from "@inlang/env-variables"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import { tryCatch } from "@inlang/result"
 
@@ -16,7 +15,7 @@ export class InlangInstall extends TwLitElement {
 	manual: boolean = false
 
 	@property({ type: String })
-	step: "" | "nomodule" | "noauth" | "norepo" | "install" | "error" | "success" = ""
+	step: "" | "nomodule" | "noauth" | "norepo" | "install" | "error" | "success" | "abort" = ""
 
 	@property({ type: String })
 	jsonURL: string = ""
@@ -160,7 +159,16 @@ export class InlangInstall extends TwLitElement {
 			},
 		})
 
-		await repo.push()
+		if (this.step === "abort" || this.step === "error") {
+			return
+		}
+
+		const pushResult = await repo.push()
+
+		if (pushResult.error?.data?.statusCode === 403) {
+			this.step = "noauth"
+			browserAuth.addPermissions()
+		}
 
 		const inlangProjectAfter = await loadProject({
 			settingsFilePath: "/project.inlang.json",
@@ -185,7 +193,9 @@ export class InlangInstall extends TwLitElement {
 		// @ts-ignore
 		if (this.url.module) this.module = registry.find((x) => x.id === this.url.module)?.module
 
-		const auth = await getUser()
+		const auth = await getUser().catch(() => {
+			this.authorized = false
+		})
 		if (auth) {
 			this.authorized = true
 			this.user = auth
@@ -391,7 +401,11 @@ export class InlangInstall extends TwLitElement {
 					style="max-width: ${this.loadingProgress}%"
 					></div>
 					</div>
-					<button class="bg-red-500/10 text-red-500 text-center py-2 rounded-md font-medium hover:bg-red-500/20 transition-colors">
+					<button 
+					@click=${() => {
+						this.step = "abort"
+					}}
+					class="bg-red-500/10 text-red-500 text-center py-2 rounded-md font-medium hover:bg-red-500/20 transition-colors">
 					Cancel installation
 					</button>
 			</div>`
@@ -412,6 +426,23 @@ export class InlangInstall extends TwLitElement {
 					<p class="text-slate-500">
 					Your module was succesfully installed.
 					</p></div>`
+			: this.step === "abort"
+			? html`<div class="flex flex-col gap-2"><h2 class="text-xl font-semibold flex items-center gap-2">
+			Installation aborted
+			</h2>
+					</h2>
+					<p class="text-slate-500 mb-12">
+					Your module installation was aborted.
+					</p>
+					<button
+							class="bg-slate-800 text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
+							@click=${() => {
+								window.location.href = "/"
+							}}
+						>
+							Back to inlang/manage
+						</button>
+					</div>`
 			: html`<div class="flex flex-col gap-2">Loading</div>`
 	}
 }
