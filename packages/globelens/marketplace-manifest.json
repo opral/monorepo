@@ -13,9 +13,8 @@
 	"readme": {
 		"en": "./inlang/source-code/globelens/README.md"
 	},
-	"keywords": ["analysis", "i18n", "apps", "seo", "test", "url", "keyword", "external"],
+	"keywords": ["analysis", "i18n", "apps", "seo", "test", "url", "keyword"],
 	"publisherName": "inlang",
-	"website": "https://www.loom.com/share/b718df15d9174ba8b9c0aeae1cdb5502",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0"
 }
