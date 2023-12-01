@@ -315,7 +315,7 @@ If you don't want to use `<a>` tags, you can also use the `goto` function from `
 {/each}
 ```
 
-## 6. SEO Considerations
+## 6. SEO Considerations
 On multi-language sites, it's easy to mess up your SEO. Here are a few things to keep in mind:
 
 - 1. Set the `lang` attribute on your `<html>` tag. This will help search engines understand which language your site is in.
