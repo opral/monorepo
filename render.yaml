@@ -1,0 +1,46 @@
+previewsEnabled: true
+
+# cost control for preview deployments.
+# if no activity for 3 days, the preview deployment will be deleted.
+previewsExpireAfterDays: 3
+
+services:
+  - name: inlang-website
+    type: web
+    runtime: node
+    region: frankfurt
+    plan: standard
+    branch: main
+    buildCommand: pnpm install && pnpm run build
+    startCommand: pnpm run production
+    autoDeploy: true
+    domains:
+      - inlang.com
+
+  - name: git-proxy
+    type: web
+    runtime: node
+    region: frankfurt
+    plan: starter
+    branch: main
+    buildCommand: pnpm install && pnpm run build
+    startCommand: pnpm --filter @lix-js/server production
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - lix/source-code/server/**
+    domains:
+      - git.inlang.com
+
+  - name: badge-service
+    type: pserv
+    runtime: node
+    region: frankfurt
+    plan: standard
+    branch: main
+    buildCommand: pnpm install && pnpm run build
+    startCommand: pnpm run production
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - inlang/source-code/badge/**
