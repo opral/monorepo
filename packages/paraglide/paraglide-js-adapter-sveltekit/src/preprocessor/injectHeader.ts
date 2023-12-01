@@ -6,7 +6,7 @@ export const InjectHeader: PreprocessingPass = {
 		return filename.endsWith("+page.svelte")
 	},
 	apply: ({ ast, code }) => {
-		//add the header component into the code
+		//add the header component into the code. Placement does not matter
 		code.appendLeft(ast.html.end, `<PARAGLIDE_HEADER />`)
 
 		return {

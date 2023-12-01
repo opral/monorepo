@@ -4,39 +4,8 @@ import {
 	TRANSLATE_PATH_FUNCTION_NAME,
 	TRANSLATE_PATH_MODULE_ID,
 } from "../constants.js"
-import type { Ast, PreprocessingPass, TemplateNode } from "./index.js"
-
-type LinkElement = {
-	start: number
-	end: number
-	attributes: Attribute[]
-	name: string
-}
-
-type Attribute = {
-	start: number
-	end: number
-	name: string
-	value: AttributeValue[]
-}
-
-type AttributeValue =
-	| {
-			start: number
-			end: number
-			type: "Text"
-			raw: string
-			data: string
-	  }
-	| {
-			start: number
-			end: number
-			type: "MustacheTag"
-			expression: {
-				start: number
-				end: number
-			}
-	  }
+import type { PreprocessingPass } from "./index.js"
+import type { Ast, AttributeValue, LinkElement, TemplateNode } from "./types.js"
 
 export const RewriteHrefs: PreprocessingPass = {
 	condition: ({ content }) => {
