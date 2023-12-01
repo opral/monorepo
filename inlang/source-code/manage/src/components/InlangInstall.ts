@@ -42,6 +42,10 @@ export class InlangInstall extends TwLitElement {
 	@property({ type: Boolean })
 	loading: boolean = false
 
+	// Defines the loading progress of the installation in percent
+	@property({ type: Number })
+	loadingProgress: number = 0
+
 	@property()
 	error: string | string[] = "You've encountered an unknown error. Please try again later."
 
@@ -55,6 +59,8 @@ export class InlangInstall extends TwLitElement {
 			this.step = "error"
 			this.error = "Repository not found"
 		}
+
+		this.loadingProgress = 10
 
 		const meta = await repo.getMeta().catch((err: any) => {
 			if (err.status === 401) this.step = "noauth"
@@ -83,6 +89,8 @@ export class InlangInstall extends TwLitElement {
 			this.error = result.error.message
 		}
 
+		this.loadingProgress = 30
+
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const formatting = detectJsonFormatting(result.data!)
 
@@ -97,6 +105,8 @@ export class InlangInstall extends TwLitElement {
 			this.step = "error"
 			this.error = parseProject.error.message
 		}
+
+		this.loadingProgress = 50
 
 		const project = parseProject.data as ProjectSettings
 
@@ -116,6 +126,8 @@ export class InlangInstall extends TwLitElement {
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		project.modules.push(this.module!)
 
+		this.loadingProgress = 70
+
 		// Stringify the project
 		const generatedProject = formatting(project)
 
@@ -133,7 +145,8 @@ export class InlangInstall extends TwLitElement {
 			this.error = inlangProject.errors()
 		}
 
-		return
+		this.loadingProgress = 90
+
 		// Push the project to the repo
 		await repo.add({
 			filepath: "project.inlang.json",
@@ -362,7 +375,9 @@ export class InlangInstall extends TwLitElement {
 					Modules are getting installed into your repository...
 					</p>
 					<div class="flex items-start gap-2 w-full h-2 bg-slate-200 rounded-full mb-12">
-					<div class="bg-[#098DAC] h-2 rounded-lg w-full animate-grow"></div>
+					<div class="bg-[#098DAC] h-2 rounded-lg w-full transition-all"
+					style="max-width: ${this.loadingProgress}%"
+					></div>
 					</div>
 					<button class="bg-red-500/10 text-red-500 text-center py-2 rounded-md font-medium hover:bg-red-500/20 transition-colors">
 					Cancel installation
