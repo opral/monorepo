@@ -162,7 +162,19 @@ export class InlangInstall extends TwLitElement {
 
 		await repo.push()
 
-		this.step = "success"
+		const inlangProjectAfter = await loadProject({
+			settingsFilePath: "/project.inlang.json",
+			nodeishFs: repo.nodeishFs,
+		})
+
+		this.loadingProgress = 100
+
+		if (inlangProjectAfter.errors().length > 0) {
+			console.error(inlangProjectAfter.errors())
+			this.step = "error"
+			// @ts-ignore
+			this.error = inlangProjectAfter.errors()
+		} else this.step = "success"
 	}
 
 	/* This function checks if all necessary data is given to install into a project */
