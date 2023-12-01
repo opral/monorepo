@@ -1068,6 +1068,9 @@ importers:
       '@inlang/paraglide-js-adapter-vite':
         specifier: workspace:*
         version: link:../paraglide-js-adapter-vite
+      dedent:
+        specifier: 1.5.1
+        version: 1.5.1
       magic-string:
         specifier: ^0.30.5
         version: 0.30.5

@@ -1,6 +1,7 @@
 import { parse } from "svelte/compiler"
 import MagicString from "magic-string"
 import {
+	HEADER_COMPONENT_MODULE_ID,
 	LANGUAGE_TAG_ALIAS,
 	OUTDIR_ALIAS,
 	TRANSLATE_PATH_FUNCTION_NAME,
@@ -46,24 +47,33 @@ export function preprocess() {
 	return {
 		name: "@inlang/paraglide-js-adapter-sveltekit",
 		markup: ({ filename, content }: { content: string; filename: string }) => {
-			//TODO bail as much as possible before parsing
 			//dont' process built in Svelte files
 			if (filename.includes(".sveltekit")) {
 				code: content
 			}
 
+			const injectHeaderComponent = filename.endsWith("+page.svelte")
+
 			//It's worth doing this to avoid parsing the file if it doesn't contain any links
 			//`parse` is expensive
-			if (!content.includes("href")) return { code: content }
+			if (!content.includes("href") && !injectHeaderComponent) return { code: content }
 
 			const ast = parse(content)
 			const links = getLinkElements(ast)
-			const s = new MagicString(content)
+			if (links.length === 0 && !injectHeaderComponent) return { code: content }
 
+			const s = new MagicString(content)
 			injectImports(ast, s, [
 				`import { languageTag as ${LANGUAGE_TAG_ALIAS} } from '${OUTDIR_ALIAS}/runtime.js';`,
-				`import {${TRANSLATE_PATH_FUNCTION_NAME} } from '${TRANSLATE_PATH_MODULE_ID}';`,
+				`import { ${TRANSLATE_PATH_FUNCTION_NAME} } from '${TRANSLATE_PATH_MODULE_ID}';`,
+				injectHeaderComponent
+					? `import PARAGLIDE_HEADER from '${HEADER_COMPONENT_MODULE_ID}';`
+					: "",
 			])
+
+			if (injectHeaderComponent) {
+				s.appendLeft(ast.html.end, `<PARAGLIDE_HEADER />`)
+			}
 
 			//Replace all links with the new links
 			for (const link of links) {
@@ -85,13 +95,9 @@ export function preprocess() {
 				s.overwrite(hrefAttribute.start, hrefAttribute.end, newHrefAttributeString)
 			}
 
-			//Generate the sourcemap
-			const map = s.generateMap({
-				includeContent: true,
-			})
-
 			const code = s.toString()
-			return { code, map: map.toString() }
+			const map = s.generateMap({ hires: true })
+			return { code, map }
 		},
 	}
 }
