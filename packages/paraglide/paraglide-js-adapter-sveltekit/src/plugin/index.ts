@@ -23,34 +23,33 @@ function adapterSvelteKit(userConfig: UserConfig): Plugin {
 	return {
 		name: "@inlang/paraglide-js-adapter-sveltekit",
 		resolveId(id) {
-			console.log("resolveId", id)
-			switch (true) {
-				case id === TRANSLATE_PATH_MODULE_ID:
-					return TRANSLATE_PATH_MODULE_ID
-
-				case id === HEADER_COMPONENT_MODULE_ID:
-					return id + ".svelte"
-
-				case id.startsWith(OUTDIR_ALIAS):
-					return id.replace(OUTDIR_ALIAS, outdir)
-
-				default:
-					return null
+			if (id === TRANSLATE_PATH_MODULE_ID) {
+				const resolved = "\0" + TRANSLATE_PATH_MODULE_ID
+				return resolved
 			}
+
+			if (id === HEADER_COMPONENT_MODULE_ID) {
+				const resolved = HEADER_COMPONENT_MODULE_ID
+				return resolved
+			}
+
+			if (id.startsWith(OUTDIR_ALIAS)) {
+				return id.replace(OUTDIR_ALIAS, outdir)
+			}
+
+			return null
 		},
 
 		load(id) {
-			console.log("load", id)
-			switch (true) {
-				case id === TRANSLATE_PATH_MODULE_ID:
-					return getTranslatePathModuleCode()
-
-				case id === HEADER_COMPONENT_MODULE_ID + ".svelte":
-					return getHeaderComponentCode()
-
-				default:
-					return null
+			if (id === "\0" + TRANSLATE_PATH_MODULE_ID) {
+				return getTranslatePathModuleCode()
 			}
+
+			if (id === HEADER_COMPONENT_MODULE_ID) {
+				return getHeaderComponentCode()
+			}
+
+			return null
 		},
 		api: {
 			//The Svelte vite-plugin looks for this and automatically adds it to the preprocess array
@@ -101,12 +100,12 @@ function getHeaderComponentCode(): string {
 		<script>
 			import { availableLanguageTags } from "${OUTDIR_ALIAS}/runtime.js"
 			import { ${TRANSLATE_PATH_FUNCTION_NAME} } from "${TRANSLATE_PATH_MODULE_ID}"
-			import { page } from "$app/stores"
+			// import { page } from "$app/stores"
 		</script>
 
 		<svelte:head>
 			{#each availableLanguageTags as lang}
-				<link rel="alternate" hreflang={lang} href={${TRANSLATE_PATH_FUNCTION_NAME}($page.url.pathname, lang)} />
+				<link rel="alternate" hreflang={lang} href={${TRANSLATE_PATH_FUNCTION_NAME}("/", lang)} />
 			{/each}
 		</svelte:head>
 	`
