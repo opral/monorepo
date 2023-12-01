@@ -5,6 +5,10 @@ import { customElement, property } from "lit/decorators.js"
 import { TwLitElement } from "../common/TwLitElement.js"
 import { browserAuth, getUser } from "@lix-js/client/src/browser-auth.ts"
 import { registry } from "@inlang/marketplace-registry"
+import { ProjectSettings, loadProject } from "@inlang/sdk"
+import { publicEnv } from "@inlang/env-variables"
+import { detectJsonFormatting } from "@inlang/detect-json-formatting"
+import { tryCatch } from "@inlang/result"
 
 @customElement("inlang-install")
 export class InlangInstall extends TwLitElement {
@@ -12,7 +16,7 @@ export class InlangInstall extends TwLitElement {
 	manual: boolean = false
 
 	@property({ type: String })
-	step: "" | "nomodule" | "noauth" | "norepo" | "install" = ""
+	step: "" | "nomodule" | "noauth" | "norepo" | "install" | "error" | "success" = ""
 
 	@property({ type: String })
 	jsonURL: string = ""
@@ -32,16 +36,120 @@ export class InlangInstall extends TwLitElement {
 	@property({ type: Boolean })
 	authorized: boolean = false
 
+	@property({ type: Object })
+	user: Record<string, string> = {}
+
 	@property({ type: Boolean })
 	loading: boolean = false
 
-	/* This function uses lix to inject the module into the inlang project */
-	install() {
-		const validRepoURL = `https://${this.repoURL.split("/").slice(0, 3).join("/")}`
+	@property()
+	error: string | string[] = "You've encountered an unknown error. Please try again later."
 
-		const repo = openRepository(`http://localhost:3001/git/${validRepoURL}`, {
+	/* This function uses lix to inject the module into the inlang project */
+	async install() {
+		const repo = await openRepository(`http://localhost:3001/git/${this.url.repo}`, {
 			nodeishFs: createNodeishMemoryFs(),
 		})
+
+		if (!repo) {
+			this.step = "error"
+			this.error = "Repository not found"
+		}
+
+		const meta = await repo.getMeta().catch((err: any) => {
+			if (err.status === 401) this.step = "noauth"
+			else {
+				this.step = "error"
+				this.error = err.message
+			}
+		})
+
+		// @ts-ignore
+		if (!meta?.permissions.push) {
+			this.step = "error"
+			this.error = "You don't have push permissions for this repository."
+		}
+
+		const result = await tryCatch(async () => {
+			const inlangProjectString = (await repo.nodeishFs.readFile("./project.inlang.json", {
+				encoding: "utf-8",
+			})) as string
+
+			return inlangProjectString
+		})
+
+		if (result.error) {
+			this.step = "error"
+			this.error = result.error.message
+		}
+
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		const formatting = detectJsonFormatting(result.data!)
+
+		const projectString = result.data
+
+		const parseProject = tryCatch(() => {
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			return JSON.parse(projectString!)
+		})
+
+		if (parseProject.error) {
+			this.step = "error"
+			this.error = parseProject.error.message
+		}
+
+		const project = parseProject.data as ProjectSettings
+
+		// Looks if the module is already installed
+		for (const pkg of project.modules) {
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			const installedModules = pkg.includes(this.module!)
+			if (installedModules) {
+				this.step = "error"
+				this.error = "Module is already installed"
+			}
+		}
+
+		// If no modules where found in the project, create an empty array
+		if (!project.modules) project.modules = []
+
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		project.modules.push(this.module!)
+
+		// Stringify the project
+		const generatedProject = formatting(project)
+
+		await repo.nodeishFs.writeFile("./project.inlang.json", generatedProject)
+
+		const inlangProject = await loadProject({
+			settingsFilePath: "/project.inlang.json",
+			nodeishFs: repo.nodeishFs,
+		})
+
+		if (inlangProject.errors().length > 0) {
+			console.error(inlangProject.errors())
+			this.step = "error"
+			// @ts-ignore
+			this.error = inlangProject.errors()
+		}
+
+		return
+		// Push the project to the repo
+		await repo.add({
+			filepath: "project.inlang.json",
+		})
+
+		await repo.commit({
+			message: "inlang/manage: install module",
+			author: {
+				name: this.user.username,
+				email: this.user.email,
+			},
+		})
+
+		await repo.push()
+
+		this.step = "success"
 	}
 
 	/* This function checks if all necessary data is given to install into a project */
@@ -53,20 +161,20 @@ export class InlangInstall extends TwLitElement {
 		if (this.url.module) this.module = registry.find((x) => x.id === this.url.module)?.module
 
 		const auth = await getUser()
-		if (auth) this.authorized = true
+		if (auth) {
+			this.authorized = true
+			this.user = auth
+		}
 
 		this.loading = true
 
 		if (!this.module) {
-			console.error("No module found")
 			this.step = "nomodule"
 			this.loading = false
 		} else if (!this.authorized) {
-			console.error("Not authorized")
 			this.step = "noauth"
 			this.loading = false
 		} else if (!this.url.repo) {
-			console.error("No repo found")
 			this.step = "norepo"
 			this.loading = false
 		} else {
@@ -260,6 +368,23 @@ export class InlangInstall extends TwLitElement {
 					Cancel installation
 					</button>
 			</div>`
+			: this.step === "error"
+			? html`<div class="flex flex-col gap-2"><h2 class="text-xl font-semibold flex items-center gap-2">
+			An error occured
+			</h2>
+					</h2>
+					<div class="max-h-[256px] overflow-y-scroll">
+					<p class="text-slate-500">
+					${typeof this.error === "string" ? this.error : this.error.join("\n")}
+					</p></div></div>`
+			: this.step === "success"
+			? html`<div class="flex flex-col gap-2"><h2 class="text-xl font-semibold flex items-center gap-2">
+			Succesfully installed
+			</h2>
+					</h2>
+					<p class="text-slate-500">
+					Your module was succesfully installed.
+					</p></div>`
 			: html`<div class="flex flex-col gap-2">Loading</div>`
 	}
 }
