@@ -38,19 +38,18 @@ type AttributeValue =
 
 export function preprocess() {
 	return {
-		name: "paraglide-js-adapter-sveltekit",
+		name: "@inlang/paraglide-js-adapter-sveltekit",
 		markup: (data: { content: string }) => {
 			const ast = parse(data.content)
 
 			let links: LinkElement[] = []
 			function walk(templateNode: TemplateNode) {
+				console.log(templateNode)
 				if (templateNode.type === "Element" && templateNode.name === "a") {
 					links.push(templateNode as LinkElement)
 				}
 
-				if (templateNode.children) {
-					templateNode.children.forEach(walk)
-				}
+				templateNode.children?.forEach(walk)
 			}
 			walk(ast.html)
 
@@ -87,7 +86,7 @@ function attrubuteValuesToTemplateString(values: AttributeValue[], originalCode:
 	for (const value of values) {
 		switch (value.type) {
 			case "Text":
-				templateString += value.data
+				templateString += escapeStringLiteral(value.data)
 				break
 			case "MustacheTag": {
 				const expressionCode = originalCode.slice(value.expression.start, value.expression.end)
@@ -101,4 +100,8 @@ function attrubuteValuesToTemplateString(values: AttributeValue[], originalCode:
 
 	templateString += "`"
 	return templateString
+}
+
+function escapeStringLiteral(string: string) {
+	return string.replace(/`/g, "\\`")
 }

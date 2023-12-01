@@ -4,12 +4,12 @@ import {
 	type AvailableLanguageTag,
 } from "$paraglide/runtime"
 
-
 /**
  * Takes in a path with or without a language tag and returns the path with the given language tag.
- * @returns 
+ * @returns
  */
 export function translatePath(path: string, lang: AvailableLanguageTag) {
+	if (!path.startsWith("/")) return path // ignore external links & relative paths
 	path = getPathWithoutLang(path)
 
 	//Don't prefix with the source language tag, that's the default
@@ -26,7 +26,6 @@ function getPathWithoutLang(path: string) {
 	if (availableLanguageTags.includes(maybeLang as any)) return `/${rest.join("/")}`
 	else return path
 }
-
 
 /**
  * Look up the text direction for a given locale.

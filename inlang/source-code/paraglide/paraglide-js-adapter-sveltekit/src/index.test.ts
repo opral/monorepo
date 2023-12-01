@@ -54,9 +54,25 @@ describe("preprocess", () => {
 		expect(result.code).toEqual(output)
 	})
 
-	it("should respect existing hreflangs", () => {
+	it("should respect static hreflangs", () => {
 		const input = '<a hreflang="en" href="/about">about</a>'
 		const output = '<a hreflang="en" href={translatePath(`/about`, `en`)}>about</a>'
+
+		const result = preprocessor.markup({ content: input })
+		expect(result.code).toEqual(output)
+	})
+
+	it("should respect dynamic hreflangs", () => {
+		const input = '<a hreflang={lang} href="/about">about</a>'
+		const output = "<a hreflang={lang} href={translatePath(`/about`, `${lang}`)}>about</a>"
+
+		const result = preprocessor.markup({ content: input })
+		expect(result.code).toEqual(output)
+	})
+
+	it("escapes backticks in hrefs", () => {
+		const input = '<a href="/abou`t">About</a>'
+		const output = "<a href={translatePath(`/abou\\`t`, languageTag())}>About</a>"
 
 		const result = preprocessor.markup({ content: input })
 		expect(result.code).toEqual(output)

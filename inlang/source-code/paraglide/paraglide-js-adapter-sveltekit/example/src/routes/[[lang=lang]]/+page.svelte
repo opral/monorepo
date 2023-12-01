@@ -19,5 +19,6 @@
 {/each}
 
 <a href="/about">About</a>
+<a href="/abou`t">About</a>
 
 <h3>Switch Locales Programatically</h3>
