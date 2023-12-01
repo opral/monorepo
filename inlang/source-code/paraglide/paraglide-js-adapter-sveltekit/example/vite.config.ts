@@ -11,8 +11,4 @@ export default defineConfig({
 			outdir: "./src/paraglide",
 		}),
 	],
-	// for easier debugging, don't minify
-	build: {
-		minify: false,
-	},
 })

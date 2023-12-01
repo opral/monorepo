@@ -16,5 +16,7 @@
 	<br />
 {/each}
 
+<a href="/not-translated" hreflang="en">About</a>
+
 <a href="/about">About</a>
 <h3>Switch Locales Programatically</h3>

@@ -5,9 +5,9 @@ export const InjectHeader: PreprocessingPass = {
 	condition: ({ filename }) => {
 		return filename.endsWith("+page.svelte")
 	},
-	apply: ({ ast, code }) => {
+	apply: ({ code }) => {
 		//add the header component into the code. Placement does not matter
-		code.appendLeft(ast.html.end, `<PARAGLIDE_HEADER />`)
+		code.append(`<PARAGLIDE_HEADER />`)
 
 		return {
 			imports: [`import PARAGLIDE_HEADER from '${HEADER_COMPONENT_MODULE_ID}';`],
