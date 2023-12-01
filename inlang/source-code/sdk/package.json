@@ -29,20 +29,19 @@
 	},
 	"dependencies": {
 		"@inlang/json-types": "workspace:*",
-		"@inlang/translatable": "workspace:*",
-		"@inlang/message-lint-rule": "workspace:*",
-		"@inlang/module": "workspace:*",
 		"@inlang/language-tag": "workspace:*",
 		"@inlang/message": "workspace:*",
+		"@inlang/message-lint-rule": "workspace:*",
+		"@inlang/module": "workspace:*",
 		"@inlang/plugin": "workspace:*",
 		"@inlang/project-settings": "workspace:*",
 		"@inlang/result": "workspace:*",
+		"@inlang/translatable": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@sinclair/typebox": "^0.31.17",
+		"dedent": "1.5.1",
 		"deepmerge-ts": "^5.1.0",
-		"solid-js": "1.6.12",
-		"throttle-debounce": "5.0.0",
-		"dedent": "1.5.1"
+		"solid-js": "1.6.12"
 	},
 	"devDependencies": {
 		"@lix-js/fs": "workspace:*",
