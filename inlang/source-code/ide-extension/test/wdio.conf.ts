@@ -69,6 +69,7 @@ export const config: Options.Testrunner = {
 			browserName: "vscode",
 			browserVersion: "stable", // also possible: "insiders" or a specific version e.g. "1.80.0"
 			"wdio:vscodeOptions": {
+				verboseLogging: false,
 				// points to directory where extension package.json is located
 				extensionPath: path.join(__dirname, ".."),
 				workspacePath: path.join(__dirname, "../../end-to-end-tests/inlang-nextjs"),
@@ -87,7 +88,7 @@ export const config: Options.Testrunner = {
 	// Define all options that are relevant for the WebdriverIO instance here
 	//
 	// Level of logging verbosity: trace | debug | info | warn | error | silent
-	logLevel: "info",
+	logLevel: "warn",
 	//
 	// Set specific log levels per logger
 	// loggers:
