@@ -1,5 +1,6 @@
 import { browser, expect } from "@wdio/globals"
 import vscode from "vscode"
+import {} from "wdio-vscode-service"
 
 describe("Extract Message command", () => {
 	it("should be able to extract messages via Command Palette", async () => {
