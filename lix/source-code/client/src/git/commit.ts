@@ -117,9 +117,10 @@ export async function commit({
 
 			if (stagingState && !refState) {
 				// file does not exist in ref - it was added
+				const stMode = await stagingState.mode()
 
 				fileStates[fileDir]?.push({
-					mode: (await stagingState.mode()).toString(8),
+					mode: stMode?.toString(8),
 					path: getBasename(fullpath),
 					type: stagingStateType as "tree" | "blob",
 					oid: await stagingState.oid(),

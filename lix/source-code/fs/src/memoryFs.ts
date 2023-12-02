@@ -348,17 +348,24 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			const targetInode: Inode | undefined = state.fsMap.get(normalPath(target))
 			const parentDir: Inode | undefined = state.fsMap.get(getDirname(path))
 
-			if (state.fsMap.get(path)) throw new FilesystemError("EEXIST", path, "symlink", target)
+			if (state.fsMap.get(path)) {
+				throw new FilesystemError("EEXIST", path, "symlink", target)
+			}
 
-			if (parentDir instanceof Uint8Array)
+			if (parentDir instanceof Uint8Array) {
 				throw new FilesystemError("ENOTDIR", path, "symlink", target)
+			}
 
-			if (targetInode === undefined || parentDir === undefined)
+			if (parentDir === undefined) {
 				throw new FilesystemError("ENOENT", path, "symlink", target)
+			}
+
+			if (targetInode !== undefined) {
+				state.fsMap.set(path, targetInode)
+			}
 
 			parentDir.add(getBasename(path))
 			newStatEntry(path, state.fsStats, 2, 0o777, target)
-			state.fsMap.set(path, targetInode)
 		},
 
 		unlink: async function (path: Parameters<NodeishFilesystem["unlink"]>[0]) {
@@ -370,9 +377,13 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			if (parentDir === undefined || target === undefined)
 				throw new FilesystemError("ENOENT", path, "unlink")
 
-			if (parentDir instanceof Uint8Array) throw new FilesystemError("ENOTDIR", path, "unlink")
+			if (parentDir instanceof Uint8Array) {
+				throw new FilesystemError("ENOTDIR", path, "unlink")
+			}
 
-			if (targetStats?.isDirectory()) throw new FilesystemError("EISDIR", path, "unlink")
+			if (targetStats?.isDirectory()) {
+				throw new FilesystemError("EISDIR", path, "unlink")
+			}
 
 			parentDir.delete(getBasename(path))
 			state.fsStats.delete(path)
@@ -382,10 +393,13 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			path = normalPath(path)
 			const linkStats = await lstat(path)
 
-			if (linkStats === undefined) throw new FilesystemError("ENOENT", path, "readlink")
+			if (linkStats === undefined) {
+				throw new FilesystemError("ENOENT", path, "readlink")
+			}
 
-			if (linkStats.symlinkTarget === undefined)
+			if (linkStats.symlinkTarget === undefined) {
 				throw new FilesystemError("EINVAL", path, "readlink")
+			}
 
 			return linkStats.symlinkTarget
 		},
