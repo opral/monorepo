@@ -7,6 +7,7 @@ export default async function Page({ params: { lng } }) {
 		<>
 			<h1>{t("translation:title")}</h1>
 			<Link href={`/${lng}/second-page`}>{t("translation:to-second-page")}</Link>
+			<Link href={`/${lng}/second-page`}>Translate me</Link>
 			<br />
 			<Link href={`/${lng}/client-page`}>{t("translation:to-client-page")}</Link>
 			<Link href={`/${lng}/client-page`}>{t("translation:missingReference")}</Link>
