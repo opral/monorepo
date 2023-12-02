@@ -2,7 +2,7 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Debug Current Test File",
+			"name": "debug current vitest",
 			"type": "node",
 			"request": "launch",
 			"autoAttachChildProcesses": true,
@@ -13,7 +13,7 @@
 			"console": "integratedTerminal"
 		},
 		{
-			"name": "debug ide-extension",
+			"name": "debug vs-code-extension",
 			"type": "extensionHost",
 			"request": "launch",
 			"args": [
@@ -24,6 +24,15 @@
 				"${workspaceFolder}/inlang/source-code/end-to-end-tests/inlang-nextjs"
 			],
 			"outFiles": ["${workspaceFolder}/inlang/source-code/ide-extension/dist/**/*.cjs"]
+		},
+		{
+			"name": "debug vs-code-extension e2e",
+			"request": "launch",
+			"command": "DEBUG=\"true\" pnpm run --filter vs-code-extension test:e2e",
+			"autoAttachChildProcesses": true,
+			"skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+			"type": "node-terminal",
+			"localRoot": "${workspaceFolder}"
 		},
 		{
 			"name": "debug @inlang/website",
