@@ -1,20 +1,24 @@
-import { sveltekit } from '@sveltejs/kit/vite';
+import { sveltekit } from "@sveltejs/kit/vite"
+import { defineConfig } from "vitest/config"
 import { paraglide } from "@inlang/paraglide-js-adapter-sveltekit"
-import { defineConfig } from "vite"
 
 export default defineConfig({
 	plugins: [
+		sveltekit(),
 		paraglide({
 			project: "./project.inlang",
 			outdir: "./src/paraglide",
 			i18n: {
 				strategy: {
 					name: "prefix",
-					prefixDefault: true,
+					prefixDefault: false,
 				},
-				exclude: [new RegExp("^/api"), new RegExp("^/not-translated")],
+
+				exclude: [new RegExp("^/not-translated")],
 			},
 		}),
-		sveltekit(),
 	],
+	test: {
+		include: ["src/**/*.{test,spec}.{js,ts}"],
+	},
 })
