@@ -88,6 +88,8 @@ export class InlangInstall extends TwLitElement {
 			this.error = result.error.message
 		}
 
+		console.log(result)
+
 		this.loadingProgress = 30
 
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -165,6 +167,7 @@ export class InlangInstall extends TwLitElement {
 
 		const pushResult = await repo.push()
 
+		// @ts-ignore
 		if (pushResult.error?.data?.statusCode === 403) {
 			this.step = "noauth"
 			browserAuth.addPermissions()
@@ -186,7 +189,7 @@ export class InlangInstall extends TwLitElement {
 	}
 
 	/* This function checks if all necessary data is given to install into a project */
-	async connectedCallback() {
+	override async connectedCallback() {
 		super.connectedCallback()
 		this.url = JSON.parse(this.jsonURL)
 
@@ -227,7 +230,7 @@ export class InlangInstall extends TwLitElement {
 		}`
 	}
 
-	render(): TemplateResult {
+	override render(): TemplateResult {
 		return this.step === "nomodule"
 			? html`<div class="flex flex-col gap-2">
 					<h2 class="text-xl font-semibold">No module found</h2>
