@@ -1,4 +1,3 @@
-import { Button } from "#src/pages/index/components/Button.jsx"
 import SearchBar, { setSearchInput } from "#src/interface/components/SearchBar.jsx"
 import CategoryTabs from "./CategoryTabs.jsx"
 import { For, Show } from "solid-js"
@@ -57,15 +56,16 @@ const MarketplaceHeader = () => {
 						<img class={"h-8 w-8"} src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
 						<span class={"self-center pl-2 text-left font-semibold text-surface-900"}>inlang</span>
 					</Link>
-					<Show when={!currentPageContext.urlParsed.pathname.includes("/documentation")}>
-						<div class="absolute lg:absolute lg:top-4 lg:left-1/2 lg:-translate-x-1/2 sm:static top-16 sm:top-0 w-full sm:max-w-sm mx-auto sm:mx-0">
-							<SearchBar />
-						</div>
-					</Show>
+					<div class="absolute lg:absolute lg:top-4 lg:left-1/2 lg:-translate-x-1/2 sm:static top-16 sm:top-0 w-full sm:max-w-sm mx-auto sm:mx-0">
+						<SearchBar />
+					</div>
 					<div class="flex gap-8">
-						<Button type="text" href="/documentation">
+						<a
+							class="text-surface-700 hover:text-primary pointer-events-auto flex justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200"
+							href="/documentation"
+						>
 							{m.marketplace_header_build_on_inlang_button()}
-						</Button>
+						</a>
 
 						<div class="gap-[2px] items-center hidden md:flex">
 							<For each={socialMediaLinks}>
@@ -87,7 +87,6 @@ const MarketplaceHeader = () => {
 				<Show
 					when={
 						!currentPageContext.urlParsed.pathname.includes("/g/") &&
-						!currentPageContext.urlParsed.pathname.includes("/documentation") &&
 						!currentPageContext.urlParsed.pathname.includes("/install")
 					}
 				>

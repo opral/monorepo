@@ -40,7 +40,7 @@ export function LanguagePicker() {
 								<sl-menu-item
 									prop:type="checkbox"
 									prop:checked={language === languageTag()}
-									onClick={() => setLanguageTag(language)}
+									onClick={() => language !== languageTag() && setLanguageTag(language)}
 								>
 									<div class="flex flex-wrap gap-x-2 items-center">
 										<p class="text-sm">{languageNames[language]}</p>

@@ -240,6 +240,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 							branch,
 						}
 					)
+					// @ts-expect-error
+					newRepo.nodeishFs.watch = () => undefined
 					setLastPullTime(new Date())
 					// Invalidate the project while we switch branches
 					setProject(undefined)
@@ -264,7 +266,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				const project = solidAdapter(
 					await loadProject({
 						nodeishFs: newRepo.nodeishFs,
-						settingsFilePath: "/project.inlang.json",
+						projectPath: "/project.inlang",
 						_capture(id, props) {
 							telemetryBrowser.capture(id, props)
 						},
@@ -323,7 +325,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	})
 
-	const [githubRepositoryInformation] = createResource(
+	const [githubRepositoryInformation, { refetch }] = createResource(
 		() => {
 			if (
 				localStorage?.user === undefined ||
@@ -343,6 +345,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			return repoMeta
 		}
 	)
+
+	createEffect(() => {
+		if (localStorage?.user?.isLoggedIn) refetch()
+	})
 
 	const [currentBranch] = createResource(
 		() => {
@@ -401,7 +407,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			) {
 				return false
 			}
-
 			return args.repoMeta?.permissions?.push || false
 		}
 	)

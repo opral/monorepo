@@ -1,0 +1,36 @@
+{
+	"id": "guide.lorissigrist.useParaglideJsWithNextjsPagesRouter",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/use-paraglide-with-nextjs-pages-router/pages-router-logo.png",
+	"displayName": {
+		"en": "Use ParaglideJS with the NextJS Pages Router"
+	},
+	"description": {
+		"en": "This guide covers how to integrate ParaglideJS into a NextJS project using the pages router. It will cover i18n routing and SEO Pitfalls and more!"
+	},
+	"readme": {
+		"en": "./inlang/guides/use-paraglide-with-nextjs-pages-router/use-paraglide-with-nextjs-pages-router.md"
+	},
+	"keywords": [
+		"application",
+		"developer",
+		"paraglide",
+		"i18n",
+		"library",
+		"localization",
+		"sdk",
+		"sdk-js",
+		"react",
+		"build",
+		"javascript",
+		"ide",
+		"guide",
+		"next",
+		"nextjs",
+		"react",
+		"pages router",
+		"i18n routing"
+	],
+	"publisherName": "Loris Sigrist",
+	"publisherIcon": "https://avatars.githubusercontent.com/u/43482866?v=4",
+	"license": "Apache-2.0"
+}

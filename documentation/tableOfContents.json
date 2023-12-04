@@ -4,8 +4,8 @@
 			"startpage": true,
 			"path": "./overview/introduction.md",
 			"slug": "",
-			"title": "Learn how to build on inlang",
-			"description": "Introduction to inlang"
+			"title": "What is the SDK?",
+			"description": "Extend the ecosystem with inlang's SDK."
 		},
 		{
 			"path": "./overview/architecture.md",

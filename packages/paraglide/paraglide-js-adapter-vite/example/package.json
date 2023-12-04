@@ -1,0 +1,17 @@
+{
+  "name": "@inlang/paraglide-js-adapter-vite-example",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "_dev": "vite dev",
+    "build": "vite build",
+    "clean": "rm -rf ./dist ./node_modules ./src/paraglide"
+  },
+  "devDependencies": {
+    "@inlang/paraglide-js": "workspace:*",
+    "@inlang/paraglide-js-adapter-vite": "workspace:*",
+    "typescript": "^4.9.3",
+    "vite": "^4.2.0"
+  }
+}

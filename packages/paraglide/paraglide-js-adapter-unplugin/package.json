@@ -1,6 +1,6 @@
 {
     "name": "@inlang/paraglide-js-adapter-unplugin",
-    "version": "1.0.0-prerelease.1",
+    "version": "1.0.1",
     "description": "Unplugin adapter for Paraglide.js",
     "license": "Apache-2.0",
     "type": "module",
@@ -10,6 +10,11 @@
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "author": "inlang <hello@inlang.com> (https://inlang.com/)",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/inlang/monorepo.git#inlang/source-code/paraglide/paraglide-js-adapter-unplugin"
+    },
+    "homepage": "https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-unplugin#README",
     "keywords": [
         "paraglide",
         "javascript i18n",
@@ -47,8 +52,9 @@
         "unplugin": "1.5.1"
     },
     "devDependencies": {
+        "@types/node": "20.9.3",
         "typescript": "5.2.2",
-        "vitest": "0.34.3",
-        "@types/node": "20.9.3"
+        "vite": "^5.0.2",
+        "vitest": "0.34.3"
     }
 }

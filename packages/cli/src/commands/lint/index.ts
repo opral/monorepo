@@ -8,7 +8,7 @@ import { projectOption } from "../../utilities/globalFlags.js"
 export const lint = new Command()
 	.command("lint")
 	.description("Commands for linting translations.")
-	.requiredOption(projectOption.flags, projectOption.description, projectOption.defaultValue)
+	.requiredOption(projectOption.flags, projectOption.description)
 	.option("--languageTags <languageTags>", "Comma separated list of language tags to lint.")
 	.option("--no-fail", "Disable throwing an error if linting fails.")
 	.action(async (args: { project: string }) => {

@@ -8,7 +8,7 @@ import "@inlang/markdown/custom-elements"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
-import { EditButton } from "#src/pages/documentation/EditButton.jsx"
+import EditOutline from "~icons/material-symbols/edit-outline-rounded"
 import { currentPageContext } from "#src/renderer/state.js"
 
 /**
@@ -92,14 +92,14 @@ export function Page(props: PageProps) {
 										<Show
 											when={props.manifest.icon}
 											fallback={
-												<div class="w-16 h-16 font-semibold text-3xl rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
+												<div class="w-16 h-16 font-semibold text-3xl rounded-md m-0 object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
 													{displayName()[0]}
 												</div>
 											}
 										>
 											<img
 												src={props.manifest.icon}
-												class="w-16 h-16 rounded-md m-0 shadow-lg object-cover object-center mb-4"
+												class="w-16 h-16 rounded-md m-0 object-cover object-center mb-4"
 											/>
 										</Show>
 										<h1 class="text-4xl font-bold">{displayName()}</h1>
@@ -127,10 +127,14 @@ export function Page(props: PageProps) {
 								</section>
 								<section class="max-w-4xl mx-auto mb-24">
 									<Markdown markdown={props.markdown} />
-									<EditButton
-										// type="secondary"
-										href={convertLinkToGithub(readme())?.replace("README.md", "")}
-									/>
+									<a
+										class="text-info/80 hover:text-info/100 text-sm font-semibold flex items-center"
+										href={convertLinkToGithub(readme())}
+										target="_blank"
+									>
+										<EditOutline class="inline-block mr-2" />
+										Edit on GitHub
+									</a>
 								</section>
 								<section class="max-w-4xl mx-auto">
 									<h3 class="text-surface-400 text-sm mb-4">Keywords</h3>
@@ -170,136 +174,3 @@ function Markdown(props: { markdown: string; fullWidth?: boolean }) {
 		/>
 	)
 }
-
-// function NavbarCommon(props: {
-// 	getLocale: () => string
-// 	displayName: () => string
-// 	tableOfContents: () => Record<string, string[]>
-// }) {
-// 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
-
-// 	const replaceChars = (str: string) => {
-// 		return str
-// 			.replaceAll(" ", "-")
-// 			.replaceAll("/", "")
-// 			.replace("#", "")
-// 			.replaceAll("(", "")
-// 			.replaceAll(")", "")
-// 			.replaceAll("?", "")
-// 			.replaceAll(".", "")
-// 			.replaceAll("@", "")
-// 			.replaceAll(/([\uE000-\uF8FF]|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDDFF])/g, "")
-// 			.replaceAll("✂", "")
-// 			.replaceAll(":", "")
-// 	}
-
-// 	const isSelected = (heading: string) => {
-// 		if (heading === highlightedAnchor()) {
-// 			return true
-// 		} else {
-// 			return false
-// 		}
-// 	}
-
-// 	const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
-// 		const element = document.getElementById(anchor)
-// 		if (element && window) {
-// 			window.scrollTo({
-// 				top: element.offsetTop - 96,
-// 				behavior: behavior ?? "instant",
-// 			})
-// 		}
-// 		window.history.pushState({}, "", `${currentPageContext.urlParsed.pathname}#${anchor}`)
-// 	}
-
-// 	onMount(async () => {
-// 		for (const sectionTitle of Object.keys(props.tableOfContents())) {
-// 			if (
-// 				currentPageContext.urlParsed.hash?.replace("#", "").toString() ===
-// 				replaceChars(sectionTitle.toString().toLowerCase())
-// 			) {
-// 				/* Wait for all images to load before scrolling to anchor */
-// 				await Promise.all(
-// 					[...document.querySelectorAll("img")].map((img) =>
-// 						img.complete
-// 							? Promise.resolve()
-// 							: new Promise((resolve) => img.addEventListener("load", resolve))
-// 					)
-// 				)
-
-// 				scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
-// 				setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
-// 			} else {
-// 				for (const heading of props.tableOfContents()[sectionTitle]!) {
-// 					if (
-// 						currentPageContext.urlParsed.hash?.replace("#", "").toString() ===
-// 						replaceChars(heading.toString().toLowerCase())
-// 					) {
-// 						/* Wait for all images to load before scrolling to anchor */
-// 						await Promise.all(
-// 							[...document.querySelectorAll("img")].map((img) =>
-// 								img.complete
-// 									? Promise.resolve()
-// 									: new Promise((resolve) => img.addEventListener("load", resolve))
-// 							)
-// 						)
-
-// 						scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
-// 						setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
-// 					}
-// 				}
-// 			}
-// 		}
-// 	})
-
-// 	return (
-// 		<div class="mb-12 sticky top-28 max-h-[96vh] overflow-y-scroll overflow-scrollbar">
-// 			<ul role="list" class="w-full space-y-3">
-// 				<For each={Object.keys(props.tableOfContents())}>
-// 					{(sectionTitle) => (
-// 						<li>
-// 							<Link
-// 								onClick={(e: Event) => {
-// 									e.preventDefault()
-// 									scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
-// 									setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
-// 								}}
-// 								class={
-// 									(isSelected(replaceChars(sectionTitle.toString().toLowerCase()))
-// 										? "text-primary font-semibold "
-// 										: "text-info/80 hover:text-on-background ") +
-// 									"tracking-wide text-sm block w-full font-normal mb-2"
-// 								}
-// 								href={`#${replaceChars(sectionTitle.toString().toLowerCase())}`}
-// 							>
-// 								{sectionTitle.replace("#", "")}
-// 							</Link>
-// 							<For each={props.tableOfContents()[sectionTitle]}>
-// 								{(heading) => (
-// 									<li>
-// 										<Link
-// 											onClick={(e: Event) => {
-// 												e.preventDefault()
-// 												scrollToAnchor(replaceChars(heading.toString().toLowerCase()))
-// 												setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
-// 											}}
-// 											class={
-// 												"text-sm tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
-// 												(highlightedAnchor() === replaceChars(heading.toString().toLowerCase())
-// 													? "font-medium text-on-background border-l-on-background "
-// 													: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
-// 											}
-// 											href={`#${replaceChars(heading.toString().toLowerCase())}`}
-// 										>
-// 											{heading.replace("#", "")}
-// 										</Link>
-// 									</li>
-// 								)}
-// 							</For>
-// 						</li>
-// 					)}
-// 				</For>
-// 			</ul>
-// 		</div>
-// 	)
-// }

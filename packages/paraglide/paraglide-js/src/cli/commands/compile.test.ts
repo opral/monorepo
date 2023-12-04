@@ -1,4 +1,3 @@
-import consola from "consola"
 import { vi, test, expect, beforeEach } from "vitest"
 import memfs from "memfs"
 import mockedFs from "node:fs/promises"
@@ -7,23 +6,21 @@ import { compileCommand } from "./compile.js"
 import type { ProjectSettings } from "@inlang/sdk"
 import { createMessage, createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
 import { resolve } from "node:path"
+import { Logger } from "../../services/logger/index.js"
 
 beforeEach(() => {
 	vi.resetAllMocks()
-	// Re-mock consola before each test call to remove calls from before
-	consola.mockTypes(() => vi.fn())
-
 	// set the current working directory to some mock value to prevent
 	// the tests from failing when running in a different environment
 	process.cwd = () => "/"
 
 	// spy on commonly used functions to prevent console output
 	// and allow expecations
-	vi.spyOn(consola, "log").mockImplementation(() => undefined as never)
-	vi.spyOn(consola, "info").mockImplementation(() => undefined as never)
-	vi.spyOn(consola, "success").mockImplementation(() => undefined as never)
-	vi.spyOn(consola, "error").mockImplementation(console.error)
-	vi.spyOn(consola, "warn").mockImplementation(() => undefined as never)
+	vi.spyOn(Logger.prototype, "ln").mockImplementation(() => Logger.prototype)
+	vi.spyOn(Logger.prototype, "info").mockImplementation(() => Logger.prototype)
+	vi.spyOn(Logger.prototype, "success").mockImplementation(() => Logger.prototype)
+	vi.spyOn(Logger.prototype, "warn").mockImplementation(() => Logger.prototype)
+	vi.spyOn(Logger.prototype, "error").mockImplementation(() => Logger.prototype)
 	vi.spyOn(process, "exit").mockImplementation((e) => {
 		console.error(`PROCESS.EXIT()`, e)
 		throw "PROCESS.EXIT()"
@@ -32,7 +29,7 @@ beforeEach(() => {
 
 test("it should exit if the project has errors", async () => {
 	mockFs({
-		"/project.inlang.json": JSON.stringify({
+		"/project.inlang/settings.json": JSON.stringify({
 			// invalid source language tag
 			sourceLanguageTag: "en-EN-EN",
 			languageTags: [],
@@ -40,9 +37,9 @@ test("it should exit if the project has errors", async () => {
 		} satisfies ProjectSettings),
 	})
 
-	expect(
-		compileCommand.parseAsync(["--project", "./project.inlang.json", "--namespace", "frontend"])
-	).rejects.toEqual("PROCESS.EXIT()")
+	expect(compileCommand.parseAsync(["--project", "./project.inlang"])).rejects.toEqual(
+		"PROCESS.EXIT()"
+	)
 })
 
 test("it should compile into the default outdir", async () => {
@@ -52,7 +49,7 @@ test("it should compile into the default outdir", async () => {
 			resolve(__dirname, "../../../../../plugins/inlang-message-format/dist/index.js"),
 			{ encoding: "utf-8" }
 		),
-		"/project.inlang.json": JSON.stringify({
+		"/project.inlang/settings.json": JSON.stringify({
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
 			modules: ["/plugin.js"],
@@ -72,7 +69,7 @@ test("it should compile into the default outdir", async () => {
 	})
 
 	// I have no idea why, but the { from: "user" } is required for the test to pass
-	await compileCommand.parseAsync(["--project", "./project.inlang.json"], { from: "user" })
+	await compileCommand.parseAsync(["--project", "./project.inlang"], { from: "user" })
 	expect(_fs.existsSync("./src/paraglide/messages.js")).toBe(true)
 })
 
@@ -86,7 +83,7 @@ test("it should compile a project into the provided outdir", async () => {
 				resolve(__dirname, "../../../../../plugins/inlang-message-format/dist/index.js"),
 				{ encoding: "utf-8" }
 			),
-			"/project.inlang.json": JSON.stringify({
+			"/project.inlang/settings.json": JSON.stringify({
 				sourceLanguageTag: "en",
 				languageTags: ["de", "en"],
 				modules: ["/plugin.js"],
@@ -105,7 +102,7 @@ test("it should compile a project into the provided outdir", async () => {
 			}),
 		})
 		// I have no idea why, but the { from: "user" } is required for the test to pass
-		await compileCommand.parseAsync(["--project", "./project.inlang.json", "--outdir", outdir], {
+		await compileCommand.parseAsync(["--project", "./project.inlang", "--outdir", outdir], {
 			from: "user",
 		})
 		expect(_fs.existsSync(`${outdir}/messages.js`)).toBe(true)

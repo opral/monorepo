@@ -4,7 +4,7 @@ import type { NodeishFilesystemSubset } from "@inlang/plugin"
  * Wraps the nodeish filesystem subset with a function that intercepts paths
  * and prepends the base path.
  *
- * The paths are resolved from the `settingsFilePath` argument.
+ * The paths are resolved from the `projectPath` argument.
  */
 export const createNodeishFsWithWatcher = (args: {
 	nodeishFs: NodeishFilesystemSubset
@@ -20,9 +20,11 @@ export const createNodeishFsWithWatcher = (args: {
 					signal: abortController.signal,
 					persistent: false,
 				})
-				//eslint-disable-next-line @typescript-eslint/no-unused-vars
-				for await (const event of watcher) {
-					args.updateMessages()
+				if (watcher) {
+					//eslint-disable-next-line @typescript-eslint/no-unused-vars
+					for await (const event of watcher) {
+						args.updateMessages()
+					}
 				}
 			} catch (err: any) {
 				if (err.name === "AbortError") return

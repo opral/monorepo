@@ -8,9 +8,9 @@ import { languageTag } from "#src/paraglide/runtime.js"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import tableOfContents from "../../../../../documentation/tableOfContents.json"
-import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
 import { i18nRouting } from "#src/renderer/_default.page.route.js"
+import SdkDocsLayout from "#src/interface/sdkDocs/SdkDocsLayout.jsx"
 
 export type PageProps = {
 	markdown: Awaited<ReturnType<any>>
@@ -59,17 +59,18 @@ export function Page(props: PageProps) {
 							.replace("/" + languageTag(), "")
 							.replace("/documentation/", "")
 					)?.title
-				}
+				}{" "}
+				| inlang SDK Documentation
 			</Title>
 			<Meta
 				name="description"
-				content={
+				content={`${
 					findPageBySlug(
 						currentPageContext.urlParsed.pathname
 							.replace("/" + languageTag(), "")
 							.replace("/documentation/", "")
 					)?.description
-				}
+				} and more with inlang's Software Development Kit (SDK).`}
 			/>
 			<Meta name="og:image" content="/opengraph/inlang-documentation-image.jpg" />
 			<Meta name="twitter:card" content="summary_large_image" />
@@ -80,17 +81,25 @@ export function Page(props: PageProps) {
 			/>
 			<Meta
 				name="twitter:title"
-				content={findPageBySlug(currentPageContext.urlParsed.pathname)?.title}
+				content={`${
+					findPageBySlug(currentPageContext.urlParsed.pathname)?.title
+				} | inlang SDK Documentation`}
 			/>
 			<Meta
 				name="twitter:description"
-				content={findPageBySlug(currentPageContext.urlParsed.pathname)?.description}
+				content={`${
+					findPageBySlug(
+						currentPageContext.urlParsed.pathname
+							.replace("/" + languageTag(), "")
+							.replace("/documentation/", "")
+					)?.description
+				} and more with inlang's Software Development Kit (SDK).`}
 			/>
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />
-			<MarketplaceLayout>
+			<SdkDocsLayout>
 				{/* important: the responsive breakpoints must align throughout the markup! */}
-				<div class="flex flex-col grow md:grid md:grid-cols-4 gap-10 w-full">
+				<div class="flex flex-col grow md:grid md:grid-cols-4 gap-4 w-full">
 					{/* desktop navbar */}
 					{/* 
           hacking the left margins to apply bg-surface-2 with 100rem 
@@ -101,7 +110,7 @@ export function Page(props: PageProps) {
 							{/* `Show` is a hotfix when client side rendering loaded this page
 							 * filteredTableContents is not available on the client.
 							 */}
-							<div class="py-14 pr-8">
+							<div class="py-[48px] pr-4">
 								<Show when={tableOfContents && props.markdown}>
 									<NavbarCommon
 										tableOfContents={tableOfContents}
@@ -139,7 +148,7 @@ export function Page(props: PageProps) {
             the escaping of html. it is better to show the RFC's on the website
             and refer to github for the rendered version than to not show them at all. 
           */}
-						<div class="w-full justify-self-center mb-8 md:p-6 md:col-span-3">
+						<div class="w-full justify-self-center mb-8 md:px-6 md:col-span-3">
 							<Show when={currentPageContext.urlParsed.pathname.includes("rfc")}>
 								{/* <Callout variant="warning">
 									<p>
@@ -161,7 +170,7 @@ export function Page(props: PageProps) {
 						</div>
 					</Show>
 				</div>
-			</MarketplaceLayout>
+			</SdkDocsLayout>
 		</>
 	)
 }
