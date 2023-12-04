@@ -444,6 +444,6 @@ export class InlangInstall extends TwLitElement {
 							Back to inlang/manage
 						</button>
 					</div>`
-			: html`<div class="flex flex-col gap-2">Loading</div>`
+			: html`<div class="flex flex-col gap-2">Loading...</div>`
 	}
 }

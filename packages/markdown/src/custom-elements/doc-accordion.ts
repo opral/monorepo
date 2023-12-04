@@ -3,7 +3,7 @@ import { customElement, property } from "lit/decorators.js"
 
 @customElement("doc-accordion")
 export class DocAccordion extends LitElement {
-	static styles = css`
+	static override styles = css`
 		.accordion-wrapper {
 			margin: 0;
 			margin-top: 1em;
