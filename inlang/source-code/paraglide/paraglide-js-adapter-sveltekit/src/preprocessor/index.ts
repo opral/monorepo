@@ -5,6 +5,7 @@ import { RewriteHrefs } from "./passes/rewriteHrefs.js"
 import type { Ast } from "./types.js"
 import { RewriteActions } from "./passes/rewriteActions.js"
 import { RewriteFormActions } from "./passes/rewriteFormActions.js"
+import { HEADER_COMPONENT_MODULE_ID } from "../constants.js"
 
 export type PreprocessorConfig = Record<string, never>
 
@@ -42,6 +43,9 @@ export function preprocess(_config: PreprocessorConfig): PreprocessorGroup {
 
 			//I dont' know when this would happen, but it's better to be safe than sorry
 			if (!filename) return NOOP
+
+			//don't process the header component
+			if (filename === HEADER_COMPONENT_MODULE_ID) return NOOP
 
 			//dont' process components owned by the framework
 			if (filename.includes(".svelte-kit")) return NOOP
