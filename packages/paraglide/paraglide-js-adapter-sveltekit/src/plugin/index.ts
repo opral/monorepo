@@ -14,9 +14,25 @@ interface UserConfig extends VitePluginUserConfig {
 
 // Vite's Plugin type is often incompatible between vite versions, so we use any here
 export function paraglide(userConfig: UserConfig): any {
-	return [vitePluginParaglide(userConfig), adapterSvelteKit(userConfig)]
+	return [vitePluginParaglide(userConfig), adapterSvelteKit(userConfig), registerPreprocessor()]
 }
 
+/**
+ * This plugin registers the preprocessor with Svelte.
+ */
+function registerPreprocessor(): Plugin {
+	return {
+		name: "paraglide-js-adapter-sveltekit-register-preprocessor",
+		api: {
+			//The Svelte vite-plugin looks for this and automatically adds it to the preprocess array
+			sveltePreprocess: preprocess(),
+		},
+	}
+}
+
+/**
+ * Makes the necessary virtual modules available.
+ */
 function adapterSvelteKit(userConfig: UserConfig): Plugin {
 	const outdir = resolve(process.cwd(), userConfig.outdir)
 	const strategy = userConfig.strategy ?? { name: "prefix", prefixDefault: false }
@@ -51,10 +67,6 @@ function adapterSvelteKit(userConfig: UserConfig): Plugin {
 			}
 
 			return null
-		},
-		api: {
-			//The Svelte vite-plugin looks for this and automatically adds it to the preprocess array
-			sveltePreprocess: preprocess(),
 		},
 	}
 }
