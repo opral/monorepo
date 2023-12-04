@@ -10,10 +10,16 @@ describe("InjectHeader Pass", () => {
 		expect(result).toBe(false)
 	})
 
-	it("should apply if the file is a page file", () => {
+	it("should apply if the file is a +page.svelte file", () => {
 		const result = InjectHeader.condition({ filename: "src/routes/+page.svelte", content: "" })
 		expect(result).toBe(true)
 	})
+
+	it("should apply if the file is a page file, but doesn't use the .svelte extention", () => {
+		const result = InjectHeader.condition({ filename: "src/routes/+page.svx", content: "" })
+		expect(result).toBe(true)
+	})
+
 
 	it("should inject the header", () => {
 		const originalCode = `<h1>Hello</h1>`

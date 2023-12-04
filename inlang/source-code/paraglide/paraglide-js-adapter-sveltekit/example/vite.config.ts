@@ -11,6 +11,7 @@ export default defineConfig({
 				name: "prefix",
 				prefixDefault: false,
 			},
+			exclude: [/\/not-translated/],
 		}),
 		sveltekit(),
 	],

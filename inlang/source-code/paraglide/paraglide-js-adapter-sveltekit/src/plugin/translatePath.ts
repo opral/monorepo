@@ -20,16 +20,22 @@ export type RoutingStrategyConfig =
 			domains: Record<string, string>
 	  }
 
-export function getTranslatePathModuleCode(strategy: RoutingStrategyConfig): string {
+export function getTranslatePathModuleCode(
+	strategy: RoutingStrategyConfig,
+	excludeRegexes: RegExp[]
+): string {
 	switch (strategy.name) {
 		case "domain":
-			return domainStrategy(strategy)
+			return domainStrategy(strategy, excludeRegexes)
 		case "prefix":
-			return prefixStrategy(strategy)
+			return prefixStrategy(strategy, excludeRegexes)
 	}
 }
 
-function domainStrategy({ domains }: Extract<RoutingStrategyConfig, { name: "domain" }>): string {
+function domainStrategy(
+	{ domains }: Extract<RoutingStrategyConfig, { name: "domain" }>,
+	excludeRegexes: RegExp[]
+): string {
 	return dedent`
     import { sourceLanguageTag, availableLanguageTags, languageTag } from "${OUTDIR_ALIAS}/runtime.js"
 
@@ -63,11 +69,15 @@ function domainStrategy({ domains }: Extract<RoutingStrategyConfig, { name: "dom
     `
 }
 
-function prefixStrategy({
-	prefixDefault,
-}: Extract<RoutingStrategyConfig, { name: "prefix" }>): string {
+function prefixStrategy(
+	{ prefixDefault }: Extract<RoutingStrategyConfig, { name: "prefix" }>,
+	excludeRegexes: RegExp[]
+): string {
 	return dedent`
     import { sourceLanguageTag, availableLanguageTags } from "${OUTDIR_ALIAS}/runtime.js"
+
+    /** If the path matches any of these regexes, it will be _not_ translated */
+    const excludeRegexes = [${excludeRegexes.map((r) => `/${r.source}/`).join(", ")}];
 
     /**
      * Takes in a path without language information and
@@ -82,6 +92,10 @@ function prefixStrategy({
         if (!path.startsWith("/")) return path 
 
         path = getPathWithoutLang(path)
+
+
+        //If the path matches any of the exclude regexes, return it as is
+        if (excludeRegexes.some((r) => r.test(path))) return path
 
         ${
 					prefixDefault

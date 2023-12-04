@@ -18,5 +18,8 @@
 {/each}
 
 <form action="/">
-	<button formaction="/test"> </button>
+	<button formaction="/test">submit</button>
 </form>
+
+
+<a href="/not-translated">Not Translated</a>
