@@ -1,2 +1,2 @@
-declare var style: string
+declare let style: string
 export default style
