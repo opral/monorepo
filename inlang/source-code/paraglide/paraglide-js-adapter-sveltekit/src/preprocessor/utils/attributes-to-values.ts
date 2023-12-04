@@ -29,5 +29,5 @@ export function attrubuteValuesToJSValue(values: AttributeValue[], originalCode:
 }
 
 function escapeStringLiteral(string: string) {
-	return string.replace(/`/g, "\\`").replace(/\$/g, "\\$")
+	return string.replace(/`/g, "\\`").replace(/\${/g, "\\${")
 }
