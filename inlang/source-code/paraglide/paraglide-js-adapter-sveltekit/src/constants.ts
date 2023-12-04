@@ -11,7 +11,7 @@
 export const OUTDIR_ALIAS = "paraglide-adapter-sveltekit:outdir:"
 export const TRANSLATE_PATH_MODULE_ID = "paraglide-adapter-sveltekit:translate-path"
 export const HEADER_COMPONENT_MODULE_ID = "paraglide-adapter-sveltekit:header-component.svelte"
-export const HEADER_COMPONENT_NAME = "PARAGLIDE_HEADER"
+export const HEADER_COMPONENT_NAME = "PARAGLIDE_ADAPTER_SVELTEKIT_HEADER"
 
 /**
  * The name to give the `languageTag` function when injecting it into the code
