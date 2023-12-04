@@ -3,16 +3,16 @@ import {
 	OUTDIR_ALIAS,
 	TRANSLATE_PATH_FUNCTION_NAME,
 	TRANSLATE_PATH_MODULE_ID,
-} from "../constants.js"
-import type { PreprocessingPass } from "./index.js"
-import type { Ast, AttributeValue, LinkElement, TemplateNode } from "./types.js"
+} from "../../constants.js"
+import type { PreprocessingPass } from "../index.js"
+import { attrubuteValuesToJSValue, getElementsFromAst } from "../utils.js"
 
 export const RewriteHrefs: PreprocessingPass = {
 	condition: ({ content }) => {
 		return content.includes("href")
 	},
 	apply: ({ ast, code, originalCode }) => {
-		const links = getLinkElements(ast)
+		const links = getElementsFromAst(ast, "a")
 
 		let rewroteHref = false
 
@@ -54,43 +54,4 @@ export const RewriteHrefs: PreprocessingPass = {
 			],
 		}
 	},
-}
-
-function getLinkElements(ast: Ast): LinkElement[] {
-	let links: LinkElement[] = []
-	function walk(templateNode: TemplateNode) {
-		if (templateNode.type === "Element" && templateNode.name === "a") {
-			links.push(templateNode as LinkElement)
-		}
-
-		templateNode.children?.forEach(walk)
-	}
-	walk(ast.html)
-	return links
-}
-
-function attrubuteValuesToJSValue(values: AttributeValue[], originalCode: string): string {
-	let templateString = "`"
-
-	for (const value of values) {
-		switch (value.type) {
-			case "Text":
-				templateString += escapeStringLiteral(value.data)
-				break
-			case "MustacheTag": {
-				const expressionCode = originalCode.slice(value.expression.start, value.expression.end)
-				templateString += "${"
-				templateString += expressionCode
-				templateString += "}"
-				break
-			}
-		}
-	}
-
-	templateString += "`"
-	return templateString
-}
-
-function escapeStringLiteral(string: string) {
-	return string.replace(/`/g, "\\`").replace(/\$/g, "\\$")
 }

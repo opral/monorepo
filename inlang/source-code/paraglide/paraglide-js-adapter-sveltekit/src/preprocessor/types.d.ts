@@ -3,17 +3,18 @@ import type { parse } from "svelte/compiler"
 export type Ast = ReturnType<typeof parse>
 export type TemplateNode = Ast["html"]
 
-export type LinkElement = {
+export type ElementNode<Name extends stirng> = {
 	start: number
 	end: number
-	attributes: Attribute[]
-	name: string
+	type: "Element"
+	name: Name
+	attributes: Attribute<any>[]
 }
 
-export type Attribute = {
+export type Attribute<Name extends string> = {
 	start: number
 	end: number
-	name: string
+	name: Name
 	value: AttributeValue[]
 }
 

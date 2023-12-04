@@ -16,3 +16,7 @@
 	</a>
 	<br />
 {/each}
+
+<form action="/">
+	<button formaction="/test"> </button>
+</form>

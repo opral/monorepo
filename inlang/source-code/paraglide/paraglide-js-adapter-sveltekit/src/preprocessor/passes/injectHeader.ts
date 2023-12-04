@@ -1,5 +1,5 @@
-import { HEADER_COMPONENT_MODULE_ID } from "../constants.js"
-import type { PreprocessingPass } from "./index.js"
+import { HEADER_COMPONENT_MODULE_ID } from "../../constants.js"
+import type { PreprocessingPass } from "../index.js"
 
 export const InjectHeader: PreprocessingPass = {
 	condition: ({ filename }) => {
