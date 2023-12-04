@@ -17,3 +17,11 @@ export type RoutingStrategyConfig =
 			 */
 			domains: Record<string, string>
 	  }
+	| {
+			name: "searchParam"
+			/**
+			 * The name of the search param that contains the language tag.
+			 * @default "lang"
+			 */
+			searchParamName?: string
+	  }

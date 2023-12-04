@@ -11,6 +11,9 @@ export function getTranslatePathModuleCode(
 			return domainStrategy(strategy, excludeRegexes)
 		case "prefix":
 			return prefixStrategy(strategy, excludeRegexes)
+
+		case "searchParam":
+			return searchParamStrategy(strategy, excludeRegexes)
 	}
 }
 
@@ -109,5 +112,38 @@ function prefixStrategy(
         if (availableLanguageTags.includes(maybeLang)) return "/" + rest.join("/")
         else return path
     }
+    `
+}
+
+function searchParamStrategy(
+	strategy: Extract<RoutingStrategyConfig, { name: "searchParam" }>,
+	excludeRegexes: RegExp[]
+): string {
+	const searchParamName = strategy.searchParamName ?? "lang"
+
+	return dedent`
+        import { sourceLanguageTag, availableLanguageTags } from "${OUTDIR_ALIAS}/runtime.js"
+
+        /** If the path matches any of these regexes, it will be _not_ translated */
+        const excludeRegexes = [${excludeRegexes.map((r) => `/${r.source}/`).join(", ")}];
+
+
+        export default function translatePath(path, lang) {
+            // ignore external links & relative paths
+            if (!path.startsWith("/")) return path 
+
+
+            //If the path matches any of the exclude regexes, return it as is
+            if (excludeRegexes.some((r) => r.test(path))) return path
+
+            const [_, search] = path.split("?")
+
+            if(!search) return path + "?" + "${searchParamName}" + "=" + lang;
+
+            const searchParams = new URLSearchParams(search)
+            searchParams.set("${searchParamName}", lang)
+
+            return path + "?" + searchParams.toString()
+        }
     `
 }

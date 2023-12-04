@@ -9,8 +9,7 @@ export default defineConfig({
 			outdir: "./src/paraglide",
 			i18n: {
 				strategy: {
-					name: "prefix",
-					prefixDefault: false,
+					name: "searchParam",
 				},
 				exclude: [new RegExp("^/api"), new RegExp("^/not-translated")],
 			},
