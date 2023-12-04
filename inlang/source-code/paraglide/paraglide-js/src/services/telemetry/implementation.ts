@@ -14,6 +14,7 @@ const posthog = new PostHog(publicEnv.PUBLIC_POSTHOG_TOKEN ?? "placeholder", {
 	// are short-lived, see https://posthog.com/docs/libraries/node.
 	flushAt: 1,
 	flushInterval: 0,
+	requestTimeout: 1000,
 })
 
 /**
