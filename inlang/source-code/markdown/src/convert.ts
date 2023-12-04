@@ -41,6 +41,7 @@ export async function convert(markdown: string): Promise<string> {
 				"doc-accordion",
 				"doc-header",
 				"doc-image",
+				"doc-embed",
 				...defaultSchema.tagNames!,
 			],
 			attributes: {
@@ -54,6 +55,7 @@ export async function convert(markdown: string): Promise<string> {
 				"doc-accordion": ["heading", "text"],
 				"doc-header": ["title", "description", "button", "link"],
 				"doc-image": ["src", "alt"],
+				"doc-embed": ["path"],
 				...defaultSchema.attributes,
 			},
 		})
