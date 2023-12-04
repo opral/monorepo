@@ -41,6 +41,7 @@ function domainStrategy(strategy: Extract<RoutingStrategyConfig, { name: "domain
         `
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function prefixStrategy(strategy: Extract<RoutingStrategyConfig, { name: "prefix" }>): string {
 	return dedent`
         import { sourceLanguageTag, availableLanguageTags, isAvailableLanguageTag } from "${OUTDIR_ALIAS}/runtime.js"

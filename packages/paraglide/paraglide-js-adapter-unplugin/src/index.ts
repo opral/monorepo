@@ -19,7 +19,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 	}
 
 	const outputDirectory = path.resolve(process.cwd(), options.outdir)
-	let logger = new Logger({ silent: options.silent, prefix: true })
+	const logger = new Logger({ silent: options.silent, prefix: true })
 
 	//Keep track of how many times we've compiled
 	let numCompiles = 0
