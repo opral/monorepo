@@ -12,6 +12,8 @@ const callbackUrl = `${privateEnv.PUBLIC_SERVER_BASE_URL}/services/auth/auth-cal
  * Be aware that the route set here is prefixed with /services/auth
  * and that the route is set in the GitHub app settings.
  */
+
+const allowedAuthUrls = publicEnv.PUBLIC_ALLOWED_AUTH_URLS.split(",")
 router.get("/github-auth-callback", async (request, response, next) => {
 	try {
 		// TODO: org installation
@@ -32,7 +34,7 @@ router.get("/github-auth-callback", async (request, response, next) => {
 			githubClientSecret: privateEnv.LIX_GITHUB_APP_CLIENT_SECRET,
 		})
 
-		const { installations } = await (
+		const { installations } = await(
 			await fetch(`https://api.github.com/user/installations`, {
 				headers: {
 					Accept: "application/vnd.github+json",
@@ -52,7 +54,10 @@ router.get("/github-auth-callback", async (request, response, next) => {
 			encryptedAccessToken,
 		}
 
-		if (installations.length === 0) {
+		// we currently do not support org installations, we only look at user installations for now in case someone accidentally installs the app as org
+		if (
+			installations.filter((installation: any) => installation.target_type === "User").length === 0
+		) {
 			// if app not installed, redirect via the install permissions url
 			response.redirect(installUrl)
 		} else {
@@ -67,7 +72,12 @@ router.get("/github-auth-callback", async (request, response, next) => {
  * Sign out by setting the session to undefined.
  */
 router.post("/sign-out", (request, response) => {
-	response.set("Access-Control-Allow-Origin", privateEnv.PUBLIC_SERVER_BASE_URL)
+	const origin = request.headers.origin as string
+
+	if (allowedAuthUrls.includes(origin)) {
+		response.set("Access-Control-Allow-Origin", origin)
+	}
+
 	response.set("Access-Control-Allow-Credentials", "true")
 
 	request.session = undefined

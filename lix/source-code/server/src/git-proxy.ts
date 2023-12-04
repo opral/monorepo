@@ -13,12 +13,9 @@ import type { NextFunction, Request, Response } from "express"
 import createMiddleware from "@isomorphic-git/cors-proxy/middleware.js"
 import { decryptAccessToken } from "./auth/implementation.js"
 import { privateEnv } from "@inlang/env-variables"
+const allowedAuthUrls = privateEnv.PUBLIC_ALLOWED_AUTH_URLS.split(",")
 
 const middleware = createMiddleware({
-	// This is the cors allowed origin:
-	// !TODO: Adjust this to the production domain + public server base
-	origin: "http://localhost:4004",
-
 	authorization: async (request: Request, _response: Response, next: NextFunction) => {
 		try {
 			const encryptedAccessToken = request.session?.encryptedAccessToken
@@ -43,6 +40,7 @@ export async function proxy(request: Request, response: Response, next: NextFunc
 	try {
 		// remove the proxy path from the url
 		const targetUrl = request.url.split("/git-proxy/")[1]
+		const origin = request.headers.origin as string
 
 		if (typeof targetUrl === "undefined") {
 			response.status(400).send("Missing target url")
@@ -59,7 +57,13 @@ export async function proxy(request: Request, response: Response, next: NextFunc
 		response.set("Access-Control-Allow-Credentials", "true")
 		response.set("Access-Control-Allow-Headers", "user-agent")
 
-		middleware(request, response, next)
+		middleware(request, response, () => {
+			if (allowedAuthUrls.includes(origin)) {
+				response.set("Access-Control-Allow-Origin", origin)
+			}
+
+			next()
+		})
 	} catch (error) {
 		next(error)
 	}
