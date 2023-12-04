@@ -63,7 +63,6 @@ describe("attributesToValues", () => {
 		expect(result).toBe("`hello ${world}`")
 	})
 
-
 	it("escapes backticks in text", () => {
 		const originalCode = "hello `world`"
 

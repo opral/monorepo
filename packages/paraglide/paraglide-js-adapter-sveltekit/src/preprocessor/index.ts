@@ -6,7 +6,7 @@ import type { Ast } from "./types.js"
 import { RewriteActions } from "./passes/rewriteActions.js"
 import { RewriteFormActions } from "./passes/rewriteFormActions.js"
 
-export type PreprocessorConfig = {}
+export type PreprocessorConfig = Record<string, never>
 
 type MarkupPreprocessorArgs = {
 	filename: string
@@ -34,7 +34,7 @@ export type PreprocessingPass = {
 }
 
 const PASSES: PreprocessingPass[] = [RewriteHrefs, RewriteActions, RewriteFormActions, InjectHeader]
-export function preprocess(config: PreprocessorConfig): PreprocessorGroup {
+export function preprocess(_config: PreprocessorConfig): PreprocessorGroup {
 	return {
 		name: "@inlang/paraglide-js-adapter-sveltekit",
 		markup: ({ filename, content }) => {
@@ -59,11 +59,11 @@ export function preprocess(config: PreprocessorConfig): PreprocessorGroup {
 
 			//Apply the passes whose conditions returned true (be as lazy as possible)
 			const imports = new Set<string>()
-			for (let i = 0; i < passMask.length; i++) {
-				if (!passMask[i]) continue
+			for (const [i, element] of passMask.entries()) {
+				if (!element) continue
 
 				const passResult = PASSES[i]!.apply({ ast, code, originalCode: content })
-				passResult.imports.forEach((importStatement) => imports.add(importStatement))
+				for (const importStatement of passResult.imports) imports.add(importStatement)
 			}
 
 			//Inject any imports that were added by the passes
@@ -79,7 +79,7 @@ export function preprocess(config: PreprocessorConfig): PreprocessorGroup {
 function injectImports(ast: Ast, code: MagicString, importStatements: Iterable<string>) {
 	const importStatementsArray: string[] = Array.isArray(importStatements)
 		? importStatements
-		: Array.from(importStatements)
+		: [...importStatements]
 
 	if (!ast.instance) {
 		code.prepend("<script>\n" + importStatementsArray.join("\n") + "\n</script>\n")

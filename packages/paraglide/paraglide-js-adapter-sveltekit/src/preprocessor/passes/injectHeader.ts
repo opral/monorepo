@@ -4,7 +4,7 @@ import type { PreprocessingPass } from "../index.js"
 export const InjectHeader: PreprocessingPass = {
 	condition: ({ filename }) => {
 		const file = filename.split("/").pop() ?? ""
-		return file.startsWith("+page") 
+		return file.startsWith("+page")
 	},
 	apply: ({ code }) => {
 		//add the header component into the code. Placement does not matter

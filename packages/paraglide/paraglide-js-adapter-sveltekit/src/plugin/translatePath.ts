@@ -44,11 +44,14 @@ function domainStrategy(
      * @type {Record<string, string>}
      */
     const domains = ${JSON.stringify(domains)}
+    
+    /** If the path matches any of these regexes, it will be _not_ translated */
+    const excludeRegexes = [${excludeRegexes.map((r) => `/${r.source}/`).join(", ")}];
 
     /**
      * Takes in a path without language information and
      * returns a path with language information.
-     * 
+     *
      * @param {string} path
      * @param {string} lang
      * @returns {string}
@@ -56,6 +59,10 @@ function domainStrategy(
     export default function translatePath(path, lang) {
         // ignore external links & relative paths
         if (!path.startsWith("/")) return path
+
+
+        //If the path matches any of the exclude regexes, return it as is
+        if (excludeRegexes.some((r) => r.test(path))) return path
 
         //If the path keeps the language, return it as is
         if(lang === languageTag()) return path

@@ -1,7 +1,6 @@
 import { OUTDIR_ALIAS, TRANSLATE_PATH_MODULE_ID } from "../constants.js"
 import dedent from "dedent"
 
-
 export function getHeaderComponentCode(excludeRegexes: RegExp[]): string {
 	return dedent`
     <script>

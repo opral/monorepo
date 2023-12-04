@@ -11,7 +11,10 @@ export function getElementsFromAst<Name extends string>(
 			links.push(templateNode as ElementNode<Name>)
 		}
 
-		templateNode.children?.forEach(walk)
+		if (!templateNode.children) return
+		for (const child of templateNode.children) {
+			walk(child)
+		}
 	}
 
 	walk(ast.html)
