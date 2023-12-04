@@ -2,40 +2,61 @@ import { paraglide as vitePluginParaglide } from "@inlang/paraglide-js-adapter-v
 import type { Plugin } from "vite"
 import { resolve } from "node:path"
 import {
+	GET_LANGUAGE_MODULE_ID,
 	HEADER_COMPONENT_MODULE_ID,
 	OUTDIR_ALIAS,
 	PUBLIC_VIRTUAL_MODULE_ID,
 	TRANSLATE_PATH_MODULE_ID,
 } from "../constants.js"
-import { getTranslatePathModuleCode, type RoutingStrategyConfig } from "./translatePath.js"
+import type { RoutingStrategyConfig } from "./routing/strategy.js"
+import { getTranslatePathModuleCode } from "./routing/translatePath.js"
 import { getHeaderComponentCode } from "./header.js"
 import { preprocess, type PreprocessorConfig } from "../preprocessor/index.js"
 import { getPublicModuleCode } from "./public.js"
+import { getGetLanguageModuleCode } from "./routing/getLanguage.js"
 
 type VitePluginUserConfig = Parameters<typeof vitePluginParaglide>[0]
 
 interface UserConfig extends VitePluginUserConfig {
-	strategy?: RoutingStrategyConfig
-
 	/**
-	 * If the preprocessor should be disabled.
-	 * @default false
+	 * The configuration for i18n routing.
 	 */
-	disablePreprocessor?: boolean
+	i18n?: {
+		/**
+		 * The routing strategy to use.
+		 * @default { name: "prefix", prefixDefault: false }
+		 */
+		strategy?: RoutingStrategyConfig
 
-	//The below regex has a zero-width space between the * and the /
-	/**
-	 * An array of regexes for paths that should not be translated.
-	 * @default []
-	 */
-	exclude?: RegExp[]
+		/**
+		 * The preprocessor rewrites any links in your markup
+		 * and translates them according to the routing strategy.
+		 *
+		 * If you don't want this, you can disable it here.
+		 *
+		 * @default false
+		 */
+		disablePreprocessor?: boolean
+
+		/**
+		 * An array of regexes for paths that should not be translated.
+		 * @default []
+		 *
+		 * @example
+		 * ```ts
+		 * //Don't translate any paths starting with /not-translated or /api
+		 * exclude: [new RegExp("^/not-translated"), new RegExp("^/api")]
+		 * ```
+		 */
+		exclude?: RegExp[]
+	}
 }
 
 // Vite's Plugin type is often incompatible between vite versions, so we use any here
 export function paraglide(userConfig: UserConfig): any {
 	const plugins: Plugin[] = [vitePluginParaglide(userConfig), adapterSvelteKit(userConfig)]
 
-	if (userConfig.disablePreprocessor !== true) {
+	if (userConfig.i18n?.disablePreprocessor !== true) {
 		plugins.push(registerPreprocessor(userConfig))
 	}
 
@@ -61,9 +82,9 @@ function registerPreprocessor(_userConfig: UserConfig): Plugin {
  */
 function adapterSvelteKit(userConfig: UserConfig): Plugin {
 	const outdir = resolve(process.cwd(), userConfig.outdir)
-	const strategy = userConfig.strategy ?? { name: "prefix", prefixDefault: false }
+	const strategy = userConfig.i18n?.strategy ?? { name: "prefix", prefixDefault: false }
 
-	const excludeRegexes = userConfig.exclude ?? []
+	const excludeRegexes = userConfig.i18n?.exclude ?? []
 
 	return {
 		name: "@inlang/paraglide-js-adapter-sveltekit",
@@ -83,6 +104,11 @@ function adapterSvelteKit(userConfig: UserConfig): Plugin {
 				return resolved
 			}
 
+			if (id === GET_LANGUAGE_MODULE_ID) {
+				const resolved = "\0" + GET_LANGUAGE_MODULE_ID
+				return resolved
+			}
+
 			if (id.startsWith(OUTDIR_ALIAS)) {
 				return id.replace(OUTDIR_ALIAS, outdir)
 			}
@@ -97,6 +123,10 @@ function adapterSvelteKit(userConfig: UserConfig): Plugin {
 
 			if (id === HEADER_COMPONENT_MODULE_ID) {
 				return getHeaderComponentCode(excludeRegexes)
+			}
+
+			if (id === "\0" + GET_LANGUAGE_MODULE_ID) {
+				return getGetLanguageModuleCode(strategy)
 			}
 
 			if (id === "\0" + PUBLIC_VIRTUAL_MODULE_ID) {

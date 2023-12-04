@@ -8,6 +8,7 @@ Paraglide Adapter SvelteKit takes care of:
 
 
 ## Installation
+
 ```bash
 npm i -D @inlang/paraglide-js-adapter-sveltekit
 ```
@@ -20,11 +21,12 @@ import { paraglide } from '@inlang/paraglide-js-adapter-sveltekit'
 export default defineConfig({
     plugins: [
         paraglide({
-            // options
+            project: "./project.inlang",
+            outdir: "./src/paraglide"
         }),
         sveltekit()
     ]
 })
 ```
 
-And you're done! 🎉
+Running `dev` or `build` will now generate the necessary files in the `outdir` directory. We encourage you to take a look at the generated files to understand how Paraglide works.
