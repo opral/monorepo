@@ -174,7 +174,7 @@ export class InlangInstall extends TwLitElement {
 		const inlangProjectAfter = await loadProject({
 			projectPath: "/project.inlang",
 			nodeishFs: repo.nodeishFs,
-		})	
+		})
 
 		this.loadingProgress = 100
 
@@ -277,8 +277,16 @@ export class InlangInstall extends TwLitElement {
 						</button>
 					</div>
 					${this.manual
-						? html`<div class="fixed inset-0 z-10 bg-black/25 flex items-center justify-center px-4">
-			<div class="max-w-lg w-full bg-slate-100 rounded-xl relative p-4">
+						? html`<div class="fixed inset-0 z-10 bg-black/25 flex items-center justify-center px-4"
+						@click=${() => {
+							this.manual = false
+						}}
+						>
+			<div class="max-w-lg w-full bg-slate-100 rounded-xl relative p-4"
+			@click=${(e: Event) => {
+				e.stopPropagation()
+			}}
+			>
 				<doc-icon
 					class="absolute top-2 right-2 bg-slate-200 rounded-full p-1 cursor-pointer transition-colors hover:bg-slate-300"
 					size="1.6em"
@@ -322,7 +330,7 @@ export class InlangInstall extends TwLitElement {
 						Paste the link into the project
 					</h3>
 					<p class="text-slate-500 mb-4">
-						Paste the copied link into the project.inlang.json file inside the modules
+						Paste the copied link into the project.inlang/settings.json file inside the modules
 						section:
 					</p>
 					<div
@@ -379,6 +387,11 @@ export class InlangInstall extends TwLitElement {
 					.value=${this.repoURL}
 					@input=${(e: InputEvent) => {
 						this.repoURL = (e.target as HTMLInputElement).value
+					}}
+					@keydown=${(e: KeyboardEvent) => {
+						if (e.key === "Enter") {
+							window.location.href = this.generateInstallLink()
+						}
 					}}
 					class="active:outline-0 px-2 focus:outline-0 focus:ring-0 border-0 h-14 grow placeholder:text-slate-500 placeholder:font-normal placeholder:text-base" placeholder="https://github.com/user/example">
 					<button 
