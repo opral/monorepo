@@ -58,7 +58,20 @@ export async function proxy(request: Request, response: Response, next: NextFunc
 		response.set("Access-Control-Allow-Credentials", "true")
 		response.set("Access-Control-Allow-Headers", "user-agent")
 
+<<<<<<< HEAD
 		middleware(request, response, next)
+=======
+		middleware(request, response, () => {
+			console.log(allowedAuthUrls, origin)
+			if (allowedAuthUrls.includes(origin)) {
+				response.set("Access-Control-Allow-Origin", origin)
+			} else {
+				response.set("Access-Control-Allow-Origin", "")
+			}
+
+			next()
+		})
+>>>>>>> 8a9d6b128 (fix auth header fall back)
 	} catch (error) {
 		next(error)
 	}
