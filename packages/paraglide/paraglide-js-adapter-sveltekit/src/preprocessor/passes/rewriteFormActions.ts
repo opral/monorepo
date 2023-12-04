@@ -5,7 +5,8 @@ import {
 	TRANSLATE_PATH_MODULE_ID,
 } from "../../constants.js"
 import type { PreprocessingPass } from "../index.js"
-import { attrubuteValuesToJSValue, getElementsFromAst } from "../utils.js"
+import { getElementsFromAst } from "../utils/ast.js"
+import { attrubuteValuesToJSValue } from "../utils/attributes-to-values.js"
 
 export const RewriteFormActions: PreprocessingPass = {
 	condition: ({ content }) => {
