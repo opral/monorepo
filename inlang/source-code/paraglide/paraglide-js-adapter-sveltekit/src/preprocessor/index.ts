@@ -40,6 +40,8 @@ export function preprocess() {
 			if (filename.includes(".svelte-kit")) return NOOP
 
 			//Run quick checks to see if any passes should be applied - skip parsing if not
+
+			/** A boolean mask describing which passes passed and which didn't */
 			const passMask = PASSES.map((pass) => pass.condition({ filename, content }))
 			const skipProcessing = passMask.every((pass) => pass === false)
 			if (skipProcessing) return NOOP
@@ -48,15 +50,13 @@ export function preprocess() {
 			const ast = parse(content)
 			const code = new MagicString(content)
 
-			//Apply all passes
+			//Apply the passes whose conditions returned true (be as lazy as possible)
 			const imports = new Set<string>()
 			for (let i = 0; i < passMask.length; i++) {
-				//skip passes that shouldn't apply
 				if (!passMask[i]) continue
 
-				const { imports: passImports } = PASSES[i]!.apply({ ast, code, originalCode: content })
-
-				passImports.forEach((importStatement) => imports.add(importStatement))
+				const passResult = PASSES[i]!.apply({ ast, code, originalCode: content })
+				passResult.imports.forEach((importStatement) => imports.add(importStatement))
 			}
 
 			//Inject any imports that were added by the passes
