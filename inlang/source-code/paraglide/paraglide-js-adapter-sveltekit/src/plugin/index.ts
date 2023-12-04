@@ -1,10 +1,16 @@
 import { paraglide as vitePluginParaglide } from "@inlang/paraglide-js-adapter-vite"
 import type { Plugin } from "vite"
 import { resolve } from "node:path"
-import { HEADER_COMPONENT_MODULE_ID, OUTDIR_ALIAS, TRANSLATE_PATH_MODULE_ID } from "../constants.js"
+import {
+	HEADER_COMPONENT_MODULE_ID,
+	OUTDIR_ALIAS,
+	PUBLIC_VIRTUAL_MODULE_ID,
+	TRANSLATE_PATH_MODULE_ID,
+} from "../constants.js"
 import { getTranslatePathModuleCode, type RoutingStrategyConfig } from "./translatePath.js"
 import { getHeaderComponentCode } from "./header.js"
 import { preprocess, type PreprocessorConfig } from "../preprocessor/index.js"
+import { getPublicModuleCode } from "./public.js"
 
 type VitePluginUserConfig = Parameters<typeof vitePluginParaglide>[0]
 
@@ -72,6 +78,11 @@ function adapterSvelteKit(userConfig: UserConfig): Plugin {
 				return resolved
 			}
 
+			if (id === PUBLIC_VIRTUAL_MODULE_ID) {
+				const resolved = "\0" + PUBLIC_VIRTUAL_MODULE_ID
+				return resolved
+			}
+
 			if (id.startsWith(OUTDIR_ALIAS)) {
 				return id.replace(OUTDIR_ALIAS, outdir)
 			}
@@ -86,6 +97,10 @@ function adapterSvelteKit(userConfig: UserConfig): Plugin {
 
 			if (id === HEADER_COMPONENT_MODULE_ID) {
 				return getHeaderComponentCode(excludeRegexes)
+			}
+
+			if (id === "\0" + PUBLIC_VIRTUAL_MODULE_ID) {
+				return getPublicModuleCode()
 			}
 
 			return null
