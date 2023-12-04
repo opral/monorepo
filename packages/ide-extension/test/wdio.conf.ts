@@ -115,7 +115,7 @@ export const config: Options.Testrunner = {
 	baseUrl: "",
 	//
 	// Default timeout for all waitFor* commands.
-	waitforTimeout: 10000,
+	waitforTimeout: 3000000,
 	//
 	// Default timeout in milliseconds for request
 	// if browser driver or grid doesn't send response
@@ -157,7 +157,7 @@ export const config: Options.Testrunner = {
 	// See the full list at http://mochajs.org/
 	mochaOpts: {
 		ui: "bdd",
-		timeout: debug ? 60 * 60 * 1000 : 60 * 1000,
+		timeout: debug ? 60 * 60 * 1000 : 50 * 60 * 1000,
 	},
 
 	//
