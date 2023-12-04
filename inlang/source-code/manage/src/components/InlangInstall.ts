@@ -76,7 +76,7 @@ export class InlangInstall extends TwLitElement {
 		}
 
 		const result = await tryCatch(async () => {
-			const inlangProjectString = (await repo.nodeishFs.readFile("./project.inlang.json", {
+			const inlangProjectString = (await repo.nodeishFs.readFile("./project.inlang/settings.json", {
 				encoding: "utf-8",
 			})) as string
 
@@ -87,8 +87,6 @@ export class InlangInstall extends TwLitElement {
 			this.step = "error"
 			this.error = result.error.message
 		}
-
-		console.log(result)
 
 		this.loadingProgress = 30
 
@@ -132,10 +130,10 @@ export class InlangInstall extends TwLitElement {
 		// Stringify the project
 		const generatedProject = formatting(project)
 
-		await repo.nodeishFs.writeFile("./project.inlang.json", generatedProject)
+		await repo.nodeishFs.writeFile("./project.inlang/settings.json", generatedProject)
 
 		const inlangProject = await loadProject({
-			settingsFilePath: "/project.inlang.json",
+			projectPath: "/project.inlang",
 			nodeishFs: repo.nodeishFs,
 		})
 
@@ -150,7 +148,7 @@ export class InlangInstall extends TwLitElement {
 
 		// Push the project to the repo
 		await repo.add({
-			filepath: "project.inlang.json",
+			filepath: "project.inlang/settings.json",
 		})
 
 		await repo.commit({
@@ -174,9 +172,9 @@ export class InlangInstall extends TwLitElement {
 		}
 
 		const inlangProjectAfter = await loadProject({
-			settingsFilePath: "/project.inlang.json",
+			projectPath: "/project.inlang",
 			nodeishFs: repo.nodeishFs,
-		})
+		})	
 
 		this.loadingProgress = 100
 
