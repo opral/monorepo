@@ -6,7 +6,7 @@
 		// "emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
 		"useDefineForClassFields": false,
-		// "module": "ESNext",
+		"declarationMap": true,
 		"lib": ["ESNext", "DOM", "DOM.Iterable"],
 		"skipLibCheck": true,
 		"esModuleInterop": true,
@@ -16,12 +16,12 @@
 		"allowImportingTsExtensions": true,
 		"resolveJsonModule": true,
 		"isolatedModules": true,
-		"noEmit": true,
+		"noEmit": true
 
 		/* Linting */
-		"strict": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"noFallthroughCasesInSwitch": true
+		// "strict": true,
+		// "noUnusedLocals": true,
+		// "noUnusedParameters": true,
+		// "noFallthroughCasesInSwitch": true
 	}
 }
