@@ -337,6 +337,7 @@ export function Page(props: PageProps) {
 												displayName={displayName}
 												getLocale={languageTag}
 												tableOfContents={tableOfContents}
+												setActiveTab={setActiveTab}
 											/>
 										</aside>
 									</div>
@@ -437,6 +438,7 @@ function NavbarCommon(props: {
 	getLocale: () => string
 	displayName: () => string
 	tableOfContents: () => Record<string, string[]>
+	setActiveTab: (tab: "readme" | "changelog") => void
 }) {
 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
 
@@ -533,6 +535,7 @@ function NavbarCommon(props: {
 										<Link
 											onClick={(e: any) => {
 												e.preventDefault()
+												props.setActiveTab("readme")
 												scrollToAnchor(replaceChars(heading.toString().toLowerCase()))
 												setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
 											}}
