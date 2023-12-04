@@ -8,7 +8,7 @@ import { Octokit } from "octokit"
 
 import { createSignal, createEffect } from "./solid.js"
 
-import { commit } from "./git/commit.js"
+import { commit as lixCommit } from "./git/commit.js"
 import isoGit from "isomorphic-git"
 const {
 	clone,
@@ -29,12 +29,18 @@ const {
 
 const verbose = false
 
+// TODO addd tests for whitelist
+
 const whitelistedExperimentalRepos = [
 	"inlang/example",
 	"inlang/ci-test-repo",
-	"janfjohannes/inlang-example",
 	"inlang/monorepo",
 	"inlang/example-test",
+
+	"janfjohannes/inlang-example",
+	"janfjohannes/cal.com",
+
+	"niklasbuchfink/appflowy",
 ]
 
 export async function openRepository(
@@ -84,7 +90,15 @@ export async function openRepository(
 	// TODO: support for url scheme to use local repo already in the fs
 	const gitUrl = `https://${repoHost}/${owner}/${repoName}`
 
-	const enableExperimentalFeatures = whitelistedExperimentalRepos.includes(`${owner}/${repoName}`)
+	const enableExperimentalFeatures = whitelistedExperimentalRepos.includes(
+		`${owner}/${repoName}`.toLocaleLowerCase()
+	)
+
+	if (enableExperimentalFeatures) {
+		console.warn("using experimental git features for this repo.")
+	}
+
+	// Bail commit/ push on errors that are relevant or unknown
 
 	// the directory we use for all git operations
 	const dir = "/"
@@ -324,8 +338,8 @@ export async function openRepository(
 				message: cmdArgs.message,
 			}
 			if (enableExperimentalFeatures) {
-				console.warn("using experimental git features for repo.")
-				return commit(commitArgs)
+				console.warn("using experimental commit for this repo.")
+				return lixCommit(commitArgs)
 			} else {
 				return isoCommit(commitArgs)
 			}
