@@ -58,8 +58,11 @@ export async function proxy(request: Request, response: Response, next: NextFunc
 		response.set("Access-Control-Allow-Headers", "user-agent")
 
 		middleware(request, response, () => {
+			console.log(allowedAuthUrls, origin)
 			if (allowedAuthUrls.includes(origin)) {
 				response.set("Access-Control-Allow-Origin", origin)
+			} else {
+				response.set("Access-Control-Allow-Origin", "")
 			}
 
 			next()
