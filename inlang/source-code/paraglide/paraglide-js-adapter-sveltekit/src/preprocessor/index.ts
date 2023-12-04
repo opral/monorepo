@@ -35,6 +35,8 @@ export type PreprocessingPass = {
 }
 
 const PASSES: PreprocessingPass[] = [RewriteHrefs, RewriteActions, RewriteFormActions, InjectHeader]
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function preprocess(_config: PreprocessorConfig): PreprocessorGroup {
 	return {
 		name: "@inlang/paraglide-js-adapter-sveltekit",

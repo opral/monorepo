@@ -66,7 +66,10 @@ export function paraglide(userConfig: UserConfig): any {
 /**
  * This plugin registers the preprocessor with Svelte.
  */
-function registerPreprocessor(_userConfig: UserConfig): Plugin {
+function registerPreprocessor(
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	_userConfig: UserConfig
+): Plugin {
 	const preprocessConfig: PreprocessorConfig = {}
 	return {
 		name: "paraglide-js-adapter-sveltekit-register-preprocessor",
