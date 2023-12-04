@@ -62,4 +62,22 @@ describe("attributesToValues", () => {
 		const result = attrubuteValuesToJSValue(attributeValues, originalCode)
 		expect(result).toBe("`hello ${world}`")
 	})
+
+
+	it("escapes backticks in text", () => {
+		const originalCode = "hello `world`"
+
+		const attributeValues: AttributeValue[] = [
+			{
+				start: 0,
+				end: 13,
+				type: "Text",
+				raw: "hello `world`",
+				data: "hello `world`",
+			},
+		]
+
+		const result = attrubuteValuesToJSValue(attributeValues, originalCode)
+		expect(result).toBe("`hello \\`world\\``")
+	})
 })

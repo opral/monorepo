@@ -1,4 +1,4 @@
-import { parse } from "svelte/compiler"
+import { parse, type PreprocessorGroup } from "svelte/compiler"
 import MagicString from "magic-string"
 import { InjectHeader } from "./passes/injectHeader.js"
 import { RewriteHrefs } from "./passes/rewriteHrefs.js"
@@ -6,7 +6,9 @@ import type { Ast } from "./types.js"
 import { RewriteActions } from "./passes/rewriteActions.js"
 import { RewriteFormActions } from "./passes/rewriteFormActions.js"
 
-type PreprocessorArgs = {
+export type PreprocessorConfig = {}
+
+type MarkupPreprocessorArgs = {
 	filename: string
 	content: string
 }
@@ -16,7 +18,7 @@ export type PreprocessingPass = {
 	 * A quick and cheap check to see if this pass should be applied.
 	 * This is used to avoid parsing the file if it's not necessary.
 	 */
-	condition: (data: PreprocessorArgs) => boolean
+	condition: (data: MarkupPreprocessorArgs) => boolean
 
 	/**
 	 * Applies the pass to the file.
@@ -32,11 +34,14 @@ export type PreprocessingPass = {
 }
 
 const PASSES: PreprocessingPass[] = [RewriteHrefs, RewriteActions, RewriteFormActions, InjectHeader]
-export function preprocess() {
+export function preprocess(config: PreprocessorConfig): PreprocessorGroup {
 	return {
 		name: "@inlang/paraglide-js-adapter-sveltekit",
-		markup: ({ filename, content }: { content: string; filename: string }) => {
+		markup: ({ filename, content }) => {
 			const NOOP = { code: content }
+
+			//I dont' know when this would happen, but it's better to be safe than sorry
+			if (!filename) return NOOP
 
 			//dont' process components owned by the framework
 			if (filename.includes(".svelte-kit")) return NOOP
