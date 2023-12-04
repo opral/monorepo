@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.22.0
+
+### Minor Changes
+
+- e237b4942: chore: update SDK dependency and support for project directories
+
 ## 1.21.1
 
 ### Patch Changes
