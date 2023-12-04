@@ -20,7 +20,6 @@ describe("InjectHeader Pass", () => {
 		expect(result).toBe(true)
 	})
 
-
 	it("should inject the header", () => {
 		const originalCode = `<h1>Hello</h1>`
 		const ast = parse(originalCode)

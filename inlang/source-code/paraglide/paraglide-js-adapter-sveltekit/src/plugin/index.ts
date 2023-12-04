@@ -45,7 +45,7 @@ export function paraglide(userConfig: UserConfig): any {
 /**
  * This plugin registers the preprocessor with Svelte.
  */
-function registerPreprocessor(userConfig: UserConfig): Plugin {
+function registerPreprocessor(_userConfig: UserConfig): Plugin {
 	const preprocessConfig: PreprocessorConfig = {}
 	return {
 		name: "paraglide-js-adapter-sveltekit-register-preprocessor",
@@ -87,7 +87,7 @@ function adapterSvelteKit(userConfig: UserConfig): Plugin {
 				return id.replace(OUTDIR_ALIAS, outdir)
 			}
 
-			return null
+			return undefined
 		},
 
 		load(id) {
@@ -103,7 +103,7 @@ function adapterSvelteKit(userConfig: UserConfig): Plugin {
 				return getPublicModuleCode()
 			}
 
-			return null
+			return undefined
 		},
 	}
 }
