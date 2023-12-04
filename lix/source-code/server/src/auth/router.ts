@@ -34,7 +34,7 @@ router.get("/github-auth-callback", async (request, response, next) => {
 			githubClientSecret: privateEnv.LIX_GITHUB_APP_CLIENT_SECRET,
 		})
 
-		const { installations } = await (
+		const { installations } = await(
 			await fetch(`https://api.github.com/user/installations`, {
 				headers: {
 					Accept: "application/vnd.github+json",

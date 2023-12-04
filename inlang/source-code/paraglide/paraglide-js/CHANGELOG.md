@@ -1,6 +1,49 @@
 # @inlang/paraglide-js
 
+## 1.0.0-prerelease.15
+
+Fix crash when using `npx @inlang/paraglide-js init` and selecting vscode.
+
+## 1.0.0-prerelease.14
+
+Added `--watch` flag to the `paraglide-js compile` command. This will keep the process alive and recompile whenever messages are changed. 
+
+```bash
+paraglide-js compile --project ./project.inlang --watch
+```
+
+
+## 1.0.0-prerelease.13
+
+`./paraglide/runtime.js` now exports a function called `isAvailableLanguageTag`. This is 
+the recommended way to check if something is a valid language tag, while maintaining
+type safety. 
+
+```ts
+//Pseudo code
+import { isAvailableLanguageTag } from "./paraglide/runtime"
+
+if (isAvailableLanguageTag(params.lang)) {
+   	return renderSite(params.lang)
+} else {
+	return 404
+}
+``` 
+
+## 1.0.0-prerelease.12
+
+[Internal Change]
+Expose the compiler so that bundler plugins can call it programmatically instead of going through the CLI.
+
+## 1.0.0-prerelease.11
+
+`onSetLanguageTag` no longer throws when called multiple times. Newer callbacks will overwrite old ones. 
+Developers still should not call `onSetLanguageTag` multiple times, this is needed for HMR to work reliably.
+
+Big thanks to [@KraXen72](https://github.com/KraXen72) for helping us find this bug.
+
 ## 1.0.0-prerelease.10
+
 Add an optional options argument to message functions, to allow forcing a languageTag regardless of which languageTag is currently set.
 
 ```ts

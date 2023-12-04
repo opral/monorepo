@@ -90,11 +90,11 @@ const $import: ImportFunction = async (name) => ({
 describe("config", () => {
 	it("should react to changes in config", async () => {
 		const fs = createNodeishMemoryFs()
-		await fs.mkdir("/user/project", { recursive: true })
-		await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(config))
+		await fs.mkdir("/user/project.inlang", { recursive: true })
+		await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(config))
 		const project = solidAdapter(
 			await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project.inlang",
 				nodeishFs: fs,
 				_import: $import,
 			}),
@@ -123,11 +123,11 @@ describe("config", () => {
 describe("installed", () => {
 	it("react to changes that are unrelated to installed items", async () => {
 		const fs = createNodeishMemoryFs()
-		await fs.mkdir("/user/project", { recursive: true })
-		await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(config))
+		await fs.mkdir("/user/project.inlang", { recursive: true })
+		await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(config))
 		const project = solidAdapter(
 			await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project.inlang",
 				nodeishFs: fs,
 				_import: $import,
 			}),
@@ -188,11 +188,11 @@ describe("messages", () => {
 
 		const mockImport: ImportFunction = async () => ({ default: mockPlugin })
 
-		await fs.mkdir("/user/project", { recursive: true })
-		await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(mockConfig))
+		await fs.mkdir("/user/project.inlang.inlang", { recursive: true })
+		await fs.writeFile("/user/project.inlang.inlang/settings.json", JSON.stringify(mockConfig))
 		const project = solidAdapter(
 			await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project.inlang.inlang",
 				nodeishFs: fs,
 				_import: mockImport,
 			}),
@@ -218,11 +218,11 @@ describe("messages", () => {
 
 	it("should react to changes in messages", async () => {
 		const fs = createNodeishMemoryFs()
-		await fs.mkdir("/user/project", { recursive: true })
-		await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(config))
+		await fs.mkdir("/user/project.inlang.inlang", { recursive: true })
+		await fs.writeFile("/user/project.inlang.inlang/settings.json", JSON.stringify(config))
 		const project = solidAdapter(
 			await loadProject({
-				settingsFilePath: "/user/project/project.inlang.json",
+				projectPath: "/user/project.inlang.inlang",
 				nodeishFs: fs,
 				_import: $import,
 			}),
@@ -280,10 +280,11 @@ describe("lint", () => {
 	it.todo("should react to changes in config", async () => {
 		await createRoot(async () => {
 			const fs = createNodeishMemoryFs()
-			await fs.writeFile("./project.config.json", JSON.stringify(config))
+			await fs.mkdir("./project.inlang", { recursive: true })
+			await fs.writeFile("./project.inlang/settings.json", JSON.stringify(config))
 			const project = solidAdapter(
 				await loadProject({
-					settingsFilePath: "./project.config.json",
+					projectPath: "./project.inlang",
 					nodeishFs: fs,
 					_import: $import,
 				}),
@@ -321,7 +322,7 @@ describe("lint", () => {
 			await fs.writeFile("./project.config.json", JSON.stringify(config))
 			const project = solidAdapter(
 				await loadProject({
-					settingsFilePath: "./project.config.json",
+					projectPath: "./project.config.json",
 					nodeishFs: fs,
 					_import: $import,
 				}),

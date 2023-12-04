@@ -205,10 +205,10 @@ describe("e2e", async () => {
 		expect(mockOnSetLanguageTag).toHaveBeenCalledTimes(2)
 	})
 
-	test("should throw if the onSetLanguageTag callback is already called to avoid unexpected behavior", async () => {
-		// appending a random comment to make node treat this as a new module
-		// otherwise, the runtime would be cached and the callback would already be set
-		// from previous tests. using vi.resetModules() doesn't work for unknown reasons.
+	test("Calling onSetLanguageTag() multiple times should override the previous callback", async () => {
+		const cb1 = vi.fn().mockImplementation(() => {})
+		const cb2 = vi.fn().mockImplementation(() => {})
+
 		const { runtime } = await import(
 			`data:application/javascript;base64,${Buffer.from(
 				compiledBundle.output[0].code + "//" + Math.random(),
@@ -216,13 +216,16 @@ describe("e2e", async () => {
 			).toString("base64")}`
 		)
 
-		expect(() => {
-			runtime.onSetLanguageTag(() => {})
-		}).not.toThrow()
+		runtime.onSetLanguageTag(cb1)
+		runtime.setLanguageTag("en")
 
-		expect(() => {
-			runtime.onSetLanguageTag(() => {})
-		}).toThrow()
+		expect(cb1).toHaveBeenCalledTimes(1)
+
+		runtime.onSetLanguageTag(cb2)
+		runtime.setLanguageTag("de")
+
+		expect(cb2).toHaveBeenCalledTimes(1)
+		expect(cb1).toHaveBeenCalledTimes(1)
 	})
 
 	test("should return the correct message if a languageTag is set in the message options", async () => {
@@ -247,6 +250,23 @@ describe("e2e", async () => {
 		expect(m.multipleParams({ name: "Samuel", count: 5 }, { languageTag: "de" })).toBe(
 			"Hallo Samuel! Du hast 5 Nachrichten."
 		)
+	})
+
+	test("runtime.isAvailableLanguageTag should only return `true` if a language tag is passed to it", async () => {
+		const { runtime } = await import(
+			`data:application/javascript;base64,${Buffer.from(
+				compiledBundle.output[0].code,
+				"utf8"
+			).toString("base64")}`
+		)
+
+		for (const tag of runtime.availableLanguageTags) {
+			expect(runtime.isAvailableLanguageTag(tag)).toBe(true)
+		}
+
+		expect(runtime.isAvailableLanguageTag("")).toBe(false)
+		expect(runtime.isAvailableLanguageTag("pl")).toBe(false)
+		expect(runtime.isAvailableLanguageTag("--")).toBe(false)
 	})
 })
 
@@ -382,6 +402,15 @@ test("typesafety", async () => {
 
 	// setting the language tag as a getter function should be possible
 	runtime.setLanguageTag(() => "en")
+
+	// isAvailableLanguageTag should narrow the type of it's argument
+	const thing = 5;
+	if(runtime.isAvailableLanguageTag(thing)) {
+		const a : "de" | "en" | "en-US" = thing
+	} else {
+		// @ts-expect-error - thing is not a language tag
+		const a : "de" | "en" | "en-US" = thing
+	}
 
     // --------- MESSAGES ---------
 

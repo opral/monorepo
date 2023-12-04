@@ -21,9 +21,10 @@ export const publicEnvVariablesSchema = z.object({
 		.url()
 		.regex(/^(?!.*\/$).+$/, "Must not end with a slash")
 		.describe("The base url of the server e.g. https://inlang.com"),
-	PUBLIC_ALLOWED_DOMAINS: z.string().optional().describe("Comma separated list of domains"),
+	PUBLIC_ALLOWED_AUTH_URLS: z
+		.string()
+		.describe("List of allowed base urls eg https://inlang.com,https://manage.inlang.com"),
 })
-
 export const privateEnvVariablesSchema = z.object({
 	LIX_GITHUB_APP_CLIENT_SECRET: z.string(),
 	SESSION_COOKIE_SECRET: z.string(),

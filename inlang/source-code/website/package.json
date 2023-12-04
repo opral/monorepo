@@ -4,10 +4,10 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite",
-		"build": "node ./scripts/generateSitemap.js && paraglide-js compile --project ../../../project.inlang.json && vite build",
-		"production": "NODE_ENV=production tsx ./src/server/main.ts",
+		"build": "node ./scripts/generateSitemap.js && paraglide-js compile --project ../../../project.inlang && npx @inlang/cli machine translate -f --project ../../../project.inlang --targetLanguageTags fr,it,pt-BR,sk,zh && vite build",
+		"production": "NODE_ENV=production tsx ./src/server/main.ts ",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "paraglide-js compile --project ../../../project.inlang.json && npx @inlang/cli lint --project ../../../project.inlang.json --languageTags en,de && tsc --noEmit",
+		"test": "paraglide-js compile --project ../../../project.inlang && npx @inlang/cli lint --project ../../../project.inlang --languageTags de,en && tsc --noEmit ",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
@@ -52,6 +52,7 @@
 	"devDependencies": {
 		"@iconify-json/cib": "^1.1.2",
 		"@iconify-json/material-symbols": "^1.1.26",
+		"@inlang/cli": "workspace:*",
 		"@inlang/design-system": "workspace:*",
 		"@inlang/detect-json-formatting": "workspace:*",
 		"@inlang/env-variables": "workspace:*",
@@ -59,6 +60,7 @@
 		"@inlang/marketplace-manifest": "workspace:*",
 		"@inlang/marketplace-registry": "workspace:*",
 		"@inlang/paraglide-js": "workspace:*",
+		"@inlang/paraglide-js-adapter-vite": "workspace:*",
 		"@inlang/result": "workspace:*",
 		"@inlang/rpc": "workspace:*",
 		"@inlang/sdk": "workspace:*",
@@ -83,7 +85,6 @@
 		"vike": "0.4.144",
 		"vite": "4.5.0",
 		"vite-plugin-solid": "2.7.0",
-		"vite-plugin-watch": "0.2.0",
 		"vitest": "0.34.3"
 	},
 	"peerDependencies": {

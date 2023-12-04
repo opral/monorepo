@@ -2,26 +2,6 @@
 
 This plugin works with i18next to read and write messages. It also determines how translation functions and namespaces are parsed and handled by the IDE extension.
 
-# How to use
-
-You can add the plugin to your inlang project like this:
-
-```json
-// filename: project.inlang.json
-
-{
-	"$schema": "https://inlang.com/schema/project-settings",
-	"sourceLanguageTag": "en",
-	"languageTags": ["en", "de", "it"],
-	"modules": [
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@latest/dist/index.js"
-	],
-	"plugin.inlang.i18next": {
-		"pathPattern": "./resources/{languageTag}.json"
-	}
-}
-```
-
 # Settings
 
 The plugin offers further configuration options that can be passed as arguments. The following settings exist:
@@ -86,9 +66,9 @@ This setting is optional and should only be used if the file name of your source
 }
 ```
 
-# IDE-extension usage
+# Install the Inlang VS Code extension to supercharge your i18n workflow
 
-The plugin automatically informs the [IDE extension](https://inlang.com/marketplace/app.inlang.ideExtension) how to extract keys and namespaces from your code in order to display inline annotations.
+The plugin automatically informs the [IDE extension](https://inlang.com/marketplace/app.inlang.ideExtension) how to extract keys and namespaces from your code in order to display inline annotations. A quick run through of the most important features can be found [here (loom)](https://www.loom.com/share/68bc13eceb454a8fa69a7cfec5569b8a). Install: [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension).
 
 ## In-code usage
 

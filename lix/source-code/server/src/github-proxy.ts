@@ -4,6 +4,7 @@ import { decryptAccessToken } from "./auth/implementation.js"
 import { privateEnv } from "@inlang/env-variables"
 
 const PATH = "/github-proxy/"
+const allowedAuthUrls = privateEnv.PUBLIC_ALLOWED_AUTH_URLS.split(",")
 
 /**
  * Routes for the GitHub service.
@@ -55,13 +56,12 @@ router.all(
 					request.method === "GET" ? undefined : JSON.stringify(request.body),
 			})
 
-			// !TODO Change the headers
-			const allowedOrigins = ["http://localhost:3000", "http://localhost:4004"]
 			const origin = request.headers.origin as string
 
-			if (allowedOrigins.includes(origin)) {
+			if (allowedAuthUrls.includes(origin)) {
 				response.set("Access-Control-Allow-Origin", origin)
 			}
+
 			response.set("Access-Control-Allow-Credentials", "true")
 			response.set("Access-Control-Allow-Headers", "x-github-api-version, user-agent")
 

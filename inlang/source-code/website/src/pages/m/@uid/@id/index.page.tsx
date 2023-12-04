@@ -18,8 +18,8 @@ import { currentPageContext } from "#src/renderer/state.js"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
 import Card from "#src/interface/components/Card.jsx"
-import { EditButton } from "#src/pages/documentation/EditButton.jsx"
 import { i18nRouting } from "#src/renderer/_default.page.route.js"
+import EditOutline from "~icons/material-symbols/edit-outline-rounded"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -295,10 +295,14 @@ export function Page(props: PageProps) {
 									</div>
 								</section>
 								<div>
-									<EditButton
-										// type="secondary"
-										href={convertLinkToGithub(readme())?.replace("README.md", "")}
-									/>
+									<a
+										class="text-info/80 hover:text-info/100 text-sm font-semibold flex items-center"
+										href={convertLinkToGithub(readme())}
+										target="_blank"
+									>
+										<EditOutline class="inline-block mr-2" />
+										Edit on GitHub
+									</a>
 								</div>
 								<div class="md:col-span-3 md:my-0 my-12">
 									<div>

@@ -24,13 +24,7 @@ jobs:
         with:
           node-version: 18
 
-      - name: Setup npmrc
-        run: echo -e "//registry.npmjs.org/:_authToken=${{ secrets.NPM_PUBLISH_TOKEN }}\ngit-checks=false" > .npmrc
-      
-      - name: Disable Gitchecks
-        run: echo "git-checks=false" > .npmrn
-
-      - name: install dependencies
+      - name: Install dependencies
         run: pnpm install
 
       - name: Install Doppler CLI for env variables
@@ -44,12 +38,10 @@ jobs:
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
-      - name: create and publish versions
-        uses: changesets/action@v1
-        with:
-          version: pnpm ci:version
-          commit: "chore: update versions"
-          title: "chore: update versions"
-          publish: pnpm ci:publish
+      - name: Set publishing config
+        run: pnpm config set '//registry.npmjs.org/:_authToken' "${NPM_AUTH_TOKEN}" && pnpm config set 'git-checks' false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_AUTH_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
+
+      - name: create and publish versions
+        run: pnpm --filter !vs-code-extension publish -r

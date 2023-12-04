@@ -27,7 +27,7 @@ npx @inlang/cli [command]
 - 🔍 **Lint** your translations
 - 🤖 **Machine translate** your resources
 - 🖊️ Open the web editor right from the command line
-- ✅ Validate your `project.inlang.json` configuration file -->
+- ✅ Validate your inlang project -->
 
 #### Automate
 
@@ -39,7 +39,7 @@ The CLI allows you to machine translate your resources. This is useful if you wa
 
 #### Validation
 
-The CLI allows you to validate your `project.inlang.json` configuration file. This is useful if you want to make sure that your configuration file is valid before you commit it to your repository.
+The CLI allows you to validate your inlang project. This is useful if you want to make sure that your configuration file is valid before you commit it to your repository.
 
 # Installation
 
@@ -69,23 +69,21 @@ Minimum node version: `v18.0.0`
 
 If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx @inlang/cli@latest [command]`.
 
-To use the inlang CLI, you need a `project.inlang.json` file configured, see [here](https://inlang.com/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang#).
 
 # Commands
-
 
 | Name            | Command                                               | Description                                                                                                  |
 | --------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | **CLI Version** | `npx @inlang/cli@latest [command]`                   | Get the latest version of the inlang CLI.                                                                     |
-| **Project**     | `npx @inlang/cli project validate [options]`                  | Manage your inlang project, including validation and interactive project creation.                           |
+| **Validate**     | `npx @inlang/cli validate [options]`                  | Validate if the project is working correctly.                          |
 | **Lint**        | `npx @inlang/cli lint [options]`                     | Lint translations using configured rules. Options include `--no-fail`, `--project`, and `--languageTags`.      |
-| **Machine**     | `npx @inlang/cli machine translate [options]`        | Automate translation processes. Options include `-f, --force` and `--project <path>`.                          |
+| **Machine**     | `npx @inlang/cli machine translate [options]`        | Automate translation processes. Options include `-f, --force`, `--project <path>`, `--sourceLanguageTag <source>` and `--targetLanguageTags <targets...>`                          |
 | **Open**        | `npx @inlang/cli open editor`                     | Open parts of the Inlang infrastructure in your default browser, including the editor.                        |
 | **Module**      | `npx @inlang/cli module [command]`                   | Interact with Inlang modules, including initialization and building. Commands:  `init [options]`   Initialize a new inlang module codebase,   `build [options]`  build an inlang module. Options include `--type`, `--entry`, and `--outdir`. |
 
-<!-- 
+---
 
-
+# Usage
 
 We recommend using the CLI with `npx` to avoid installing the CLI globally. Not installing the CLI globally has the following advantages:
 
@@ -133,32 +131,23 @@ npx @inlang/cli machine translate
 The translate command has the following options:
 
 - `-f, --force`: If this option is set, the command will not prompt confirmation. This is useful for CI/CD build pipelines. **We advise you to only use `machine translate` in build pipelines to avoid out-of-context/wrong translations.**
-
 - `--project <path>`: Specifies the path to the project root. The default project root is the current working directory.
-
-This command reads the project.inlang.json file in the repository and retrieves the resources and reference language specified in the configuration. It then translates all messages from the reference language to other languages defined in the configuration.
+- `--sourceLanguageTag <source>`: Specifies the source language tag. 
+- `--targetLanguageTags <targets...>`: Specifies the target language tags as comma seperated list (e.g. sk,zh,pt-BR).
 
 The translations are performed using machine translation services. The translated messages are added to the respective language resources. Finally, the updated resources are written back to the file system.
 
-> Note: The project.inlang.json file must be present in the repository for the translation to work.
-
-## `project`
-
-The project command is used to interact with the Inlang project. It allows to create a new project or migrate an existing project to the new `project.inlang.json`.
-
-This will launch an interactive prompt that will guide you through the process of creating the inlang configuration file.
-
-### `project validate`
+## `validate`
 
 Validates a project.
 
 ```sh
-npx @inlang/cli project validate
+npx @inlang/cli validate --project ./path/to/{project-name}.inlang
 ```
 
 **Options**
 
-The translate command has the following options:
+The validate command has the following options:
 
 - `--project <path>`: Specifies the path to the project root. The default project root is the current working directory.
 
@@ -178,7 +167,7 @@ The translate command has the following options:
 
 - `--no-fail`: If this option is set, the command will not fail if there are any linting errors.
 - `--project <path>`: Specifies the path to the project root. The default project root is the current working directory.
-- `--languageTags <tags>`: Specifies the language tags to lint. Defaults to all. Should be a comma-separated list of language tags specified in the `project.inlang.json`, e.g. `en,de,fr`.
+- `--languageTags <tags>`: Specifies the language tags to lint. Defaults to all. Should be a comma-separated list of language tags specified in the inlang project, e.g. `en,de,fr`.
 
 `lint` will read through all resources and find potential errors and warnings in the translation strings, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/monorepo/tree/main/inlang/source-code/message-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns/duplicates**.
 

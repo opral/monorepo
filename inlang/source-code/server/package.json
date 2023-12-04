@@ -33,5 +33,6 @@
 		"@types/express": "^4.17.17",
 		"typescript": "5.2.2"
 	},
-	"license": "Apache-2.0"
+	"license": "Apache-2.0",
+	"version": null
 }

@@ -10,7 +10,7 @@
 		"url": "https://github.com/inlang/monorepo.git"
 	},
 	"icon": "assets/icon-vscode-marketplace.png",
-	"version": "1.20.0",
+	"version": "1.21.1",
 	"engines": {
 		"vscode": "^1.82.0"
 	},
@@ -113,7 +113,7 @@
 		"typescript": "5.2.2"
 	},
 	"activationEvents": [
-		"workspaceContains:**/project.inlang.json",
+		"workspaceContains:**/project.inlang/*",
 		"workspaceContains:**/inlang.config.js",
 		"onStartupFinished"
 	],

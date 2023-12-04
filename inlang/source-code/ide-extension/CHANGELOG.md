@@ -1,5 +1,18 @@
 # inlang-vs-code-extension
 
+## 1.21.1
+
+### Patch Changes
+
+- @inlang/telemetry@0.2.1
+
+## 1.21.0
+
+### Minor Changes
+
+- 82ccb9e80: add quote stripping to extract messages in vs code extension
+- cc3c17d8a: add resolve string escape for inline preview
+
 ## 1.20.0
 
 ### Minor Changes
