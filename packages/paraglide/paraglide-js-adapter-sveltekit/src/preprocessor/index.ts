@@ -62,7 +62,11 @@ export function preprocess(_config: PreprocessorConfig): PreprocessorGroup {
 			for (const [i, element] of passMask.entries()) {
 				if (!element) continue
 
-				const passResult = PASSES[i]!.apply({ ast, code, originalCode: content })
+				//pass is always defined, but eslint doesn't know that
+				const pass = PASSES[i]
+				if (!pass) continue
+
+				const passResult = pass.apply({ ast, code, originalCode: content })
 				for (const importStatement of passResult.imports) imports.add(importStatement)
 			}
 
