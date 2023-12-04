@@ -1,5 +1,11 @@
-import type { Ast, AttributeValue, ElementNode, TemplateNode } from "./types.js"
+import type { AttributeValue } from "../types.js"
 
+/**
+ * Takes in an AST of an AttributeValue and returns JS code that evaluates to the same value.
+ * @param values - An array of AttributeValues
+ * @param originalCode - The original code that the AST was parsed from, neede to sample the expression code
+ * @returns A JS expression that evaluates to the same value as the AttributeValue
+ */
 export function attrubuteValuesToJSValue(values: AttributeValue[], originalCode: string): string {
 	let templateString = "`"
 
@@ -24,21 +30,4 @@ export function attrubuteValuesToJSValue(values: AttributeValue[], originalCode:
 
 function escapeStringLiteral(string: string) {
 	return string.replace(/`/g, "\\`").replace(/\$/g, "\\$")
-}
-
-export function getElementsFromAst<Name extends string>(
-	ast: Ast,
-	elementName: Name
-): ElementNode<Name>[] {
-	const links: ElementNode<Name>[] = []
-
-	function walk(templateNode: TemplateNode) {
-		if (templateNode.type === "Element" && templateNode.name === elementName) {
-			links.push(templateNode as ElementNode<Name>)
-		}
-
-		templateNode.children?.forEach(walk)
-	}
-	walk(ast.html)
-	return links
 }
