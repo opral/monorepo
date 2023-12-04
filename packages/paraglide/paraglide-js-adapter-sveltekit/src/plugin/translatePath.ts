@@ -31,7 +31,7 @@ export function getTranslatePathModuleCode(strategy: RoutingStrategyConfig): str
 
 function domainStrategy({ domains }: Extract<RoutingStrategyConfig, { name: "domain" }>): string {
 	return dedent`
-    import { sourceLanguageTag, availableLanguageTags } from "${OUTDIR_ALIAS}/runtime.js"
+    import { sourceLanguageTag, availableLanguageTags, languageTag } from "${OUTDIR_ALIAS}/runtime.js"
 
     /**
      * Maps language tags to their domain
@@ -50,6 +50,9 @@ function domainStrategy({ domains }: Extract<RoutingStrategyConfig, { name: "dom
     export default function translatePath(path, lang) {
         // ignore external links & relative paths
         if (!path.startsWith("/")) return path
+
+        //If the path keeps the language, return it as is
+        if(lang === languageTag()) return path
 
         const domain = domains[lang]
         if (!domain) return path
@@ -84,9 +87,9 @@ function prefixStrategy({
 					prefixDefault
 						? ""
 						: dedent`
-                     //Don't prefix with the source language tag, that's the default
+                        //Don't prefix with the source language tag, that's the default
                         if (lang === sourceLanguageTag) return path
-                    `
+                        `
 				}
 
         //return the path with the language tag

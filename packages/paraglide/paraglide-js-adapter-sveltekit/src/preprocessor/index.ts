@@ -20,6 +20,8 @@ export type PreprocessingPass = {
 
 	/**
 	 * Applies the pass to the file.
+	 * Should only be called if `condition` returned true, since it may assume that.
+	 *
 	 * @param ast 	The AST of the file.
 	 * @param code 	The code of the file. Modify this directly.
 	 * @returns A list of imports that should be injected into the file.

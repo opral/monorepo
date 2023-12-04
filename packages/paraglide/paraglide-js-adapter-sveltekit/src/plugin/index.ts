@@ -2,19 +2,31 @@ import { paraglide as vitePluginParaglide } from "@inlang/paraglide-js-adapter-v
 import type { Plugin } from "vite"
 import { resolve } from "node:path"
 import { HEADER_COMPONENT_MODULE_ID, OUTDIR_ALIAS, TRANSLATE_PATH_MODULE_ID } from "../constants.js"
-import { preprocess } from "../index.js"
 import { getTranslatePathModuleCode, type RoutingStrategyConfig } from "./translatePath.js"
 import { getHeaderComponentCode } from "./header.js"
+import { preprocess } from "../preprocessor/index.js"
 
 type VitePluginUserConfig = Parameters<typeof vitePluginParaglide>[0]
 
 interface UserConfig extends VitePluginUserConfig {
 	strategy?: RoutingStrategyConfig
+	/**
+	 * If the preprocessor should be disabled.
+	 * @default false
+	 */
+	disablePreprocessor?: boolean
 }
 
 // Vite's Plugin type is often incompatible between vite versions, so we use any here
 export function paraglide(userConfig: UserConfig): any {
-	return [vitePluginParaglide(userConfig), adapterSvelteKit(userConfig), registerPreprocessor()]
+
+	const plugins = [vitePluginParaglide(userConfig), adapterSvelteKit(userConfig)]
+
+	if (userConfig.disablePreprocessor !== true) {
+		plugins.push(registerPreprocessor())
+	}
+
+	return plugins
 }
 
 /**
