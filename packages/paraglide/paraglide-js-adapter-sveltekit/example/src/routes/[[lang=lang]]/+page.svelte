@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { availableLanguageTags, languageTag } from "$paraglide/runtime.js"
+	import { goto } from "$paraglide-adapter-sveltekit"
 	import * as m from "$paraglide/messages.js"
 </script>
 
@@ -21,5 +22,8 @@
 	<button formaction="/test">submit</button>
 </form>
 
+<button on:click={()=>{
+	goto("/about", { language: "de" })
+}}>Programmatic Navigation</button>
 
 <a href="/not-translated">Not Translated</a>

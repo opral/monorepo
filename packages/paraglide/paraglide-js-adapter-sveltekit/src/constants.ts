@@ -13,6 +13,9 @@ export const TRANSLATE_PATH_MODULE_ID = "paraglide-adapter-sveltekit:translate-p
 export const HEADER_COMPONENT_MODULE_ID = "paraglide-adapter-sveltekit:header-component.svelte"
 export const HEADER_COMPONENT_NAME = "PARAGLIDE_ADAPTER_SVELTEKIT_HEADER"
 
+//The virtual module ID for the public interface
+export const PUBLIC_VIRTUAL_MODULE_ID = "$paraglide-adapter-sveltekit"
+
 /**
  * The name to give the `languageTag` function when injecting it into the code
  */
