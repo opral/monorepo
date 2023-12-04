@@ -1,4 +1,4 @@
-import { HEADER_COMPONENT_MODULE_ID } from "../../constants.js"
+import { HEADER_COMPONENT_MODULE_ID, HEADER_COMPONENT_NAME } from "../../constants.js"
 import type { PreprocessingPass } from "../index.js"
 
 export const InjectHeader: PreprocessingPass = {
@@ -7,10 +7,10 @@ export const InjectHeader: PreprocessingPass = {
 	},
 	apply: ({ code }) => {
 		//add the header component into the code. Placement does not matter
-		code.append(`<PARAGLIDE_HEADER />`)
+		code.append(`<${HEADER_COMPONENT_NAME} />`)
 
 		return {
-			imports: [`import PARAGLIDE_HEADER from '${HEADER_COMPONENT_MODULE_ID}';`],
+			imports: [`import ${HEADER_COMPONENT_NAME} from '${HEADER_COMPONENT_MODULE_ID}';`],
 		}
 	},
 }
