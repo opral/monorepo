@@ -1,24 +1,6 @@
-import { OUTDIR_ALIAS } from "../constants.js"
+import { OUTDIR_ALIAS } from "../../constants.js"
+import type { RoutingStrategyConfig } from "./strategy.js"
 import dedent from "dedent"
-
-export type RoutingStrategyConfig =
-	| {
-			name: "prefix"
-
-			/**
-			 * If the default language should be prefixed with the language tag.
-			 * If false, the default language will start at `/` instead of `/{lang}/`
-			 */
-			prefixDefault: boolean
-	  }
-	| {
-			name: "domain"
-
-			/**
-			 * Map each language tag to its domain.
-			 */
-			domains: Record<string, string>
-	  }
 
 export function getTranslatePathModuleCode(
 	strategy: RoutingStrategyConfig,
@@ -71,7 +53,8 @@ function domainStrategy(
         if (!domain) return path
         
         //absolute paths can always be prefixed with the domain
-        return domain + path
+        // the "//" prefix tells the browser to use the current protocol (http or https)
+        return "//" + domain + path
     }
     `
 }

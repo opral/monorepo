@@ -20,7 +20,7 @@ const config = {
 
 		// Need for crawling to work until
 		// https://github.com/sveltejs/kit/issues/11133
-		// is fixed
+		// is fixed (PR open)
 		prerender: {
 			entries: ["/"],
 		},

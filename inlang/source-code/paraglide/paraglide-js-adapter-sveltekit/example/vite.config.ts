@@ -7,11 +7,13 @@ export default defineConfig({
 		paraglide({
 			project: "./project.inlang",
 			outdir: "./src/paraglide",
-			strategy: {
-				name: "prefix",
-				prefixDefault: false,
+			i18n: {
+				strategy: {
+					name: "prefix",
+					prefixDefault: false,
+				},
+				exclude: [new RegExp("^/api"), new RegExp("^/not-translated")],
 			},
-			exclude: [/\/not-translated/],
 		}),
 		sveltekit(),
 	],

@@ -9,8 +9,12 @@
 
 <a href="/about">{m.about()}</a>
 
-<h3>Switch Locales using Links</h3>
+<br/>
 
+
+<br/>
+
+<!-- Navigation with languageTag -->
 {#each availableLanguageTags as lang}
 	<a href="/" hreflang={lang}>
 		{m.change_language_to({ languageTag: lang })}
@@ -18,12 +22,26 @@
 	<br />
 {/each}
 
+<!-- Programmatic Navigation with goto -->
+<select on:change={(e)=>{
+	goto("/", { 
+		//@ts-ignore
+		language: e.target.value ,
+	})
+}}>
+	{#each availableLanguageTags as lang}
+		<option value={lang} selected={lang === languageTag()}>{lang}</option>
+	{/each}
+</select>
+
+<br/>
+
+<!-- This path is excluded from being transalted in `vite.config.js` -->
+<a href="/not-translated">Not Translated</a>
+
+
+
 <form action="/">
+	<input type="text" name="test" />
 	<button formaction="/test">submit</button>
 </form>
-
-<button on:click={()=>{
-	goto("/about", { language: "de" })
-}}>Programmatic Navigation</button>
-
-<a href="/not-translated">Not Translated</a>

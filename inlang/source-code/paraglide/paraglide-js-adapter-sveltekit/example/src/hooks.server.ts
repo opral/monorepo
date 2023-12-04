@@ -1,5 +1,5 @@
-import { getTextDirection } from "$lib/i18n"
-import { sourceLanguageTag, type AvailableLanguageTag } from "$paraglide/runtime"
+import type { AvailableLanguageTag } from "$paraglide/runtime"
+import { getLanguage } from "$paraglide-adapter-sveltekit"
 
 /*
 	We set the `lang` and `dir` attributes on the `<html>` element using a hook.
@@ -7,15 +7,12 @@ import { sourceLanguageTag, type AvailableLanguageTag } from "$paraglide/runtime
 */
 
 export async function handle({ event, resolve }) {
-	const lang: AvailableLanguageTag =
-		(event.params.lang as AvailableLanguageTag) ?? sourceLanguageTag
-	const textDirection = getTextDirection(lang)
-
+	const lang: AvailableLanguageTag = getLanguage(event.url)
 
 	return await resolve(event, {
 		transformPageChunk({ done, html }) {
 			if (done) {
-				return html.replace("%lang%", lang).replace("%textDir%", textDirection)
+				return html.replace("%lang%", lang)
 			}
 		},
 	})
