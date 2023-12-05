@@ -66,6 +66,14 @@ const SdkDocsSubHeader = () => {
 		]
 	}
 
+	const getDocsBaseUrl = (link: string) => {
+		if (link.split("/")[2] === "plugin") {
+			return "/documentation/plugin"
+		} else {
+			return "/documentation"
+		}
+	}
+
 	return (
 		<nav class="max-w-7xl mx-auto flex gap-4 overflow-x-scroll hide-scrollbar items-center">
 			<For each={getCategories()}>
@@ -73,7 +81,7 @@ const SdkDocsSubHeader = () => {
 					<div
 						class={
 							//todo: fix this
-							(currentPageContext.urlParsed.pathname === link.href
+							(getDocsBaseUrl(currentPageContext.urlParsed.pathname) === link.href
 								? "border-hover-primary "
 								: "border-background ") +
 							" border-b-[2px] pt-[8px] pb-[6px] text-sm bg-transparent group content-box"
@@ -82,7 +90,7 @@ const SdkDocsSubHeader = () => {
 						<a href={link.href}>
 							<div
 								class={
-									(currentPageContext.urlParsed.pathname === link.href
+									(getDocsBaseUrl(currentPageContext.urlParsed.pathname) === link.href
 										? "text-surface-900 "
 										: "text-surface-500 hover:bg-surface-100 ") +
 									" px-2 py-[6px] rounded-md transition-colors font-medium cursor-pointer w-max"
