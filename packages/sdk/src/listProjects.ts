@@ -28,6 +28,5 @@ export const listProjects = async (
 	}
 
 	await searchDir(from, 0)
-
 	return projects
 }

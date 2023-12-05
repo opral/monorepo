@@ -17,13 +17,53 @@ const settings: ProjectSettings = {
 }
 
 describe("listProjects", () => {
-	it("should find all projects in the inlang monorepo", async () => {
+	it("should find all projects a given path", async () => {
 		const fs = createNodeishMemoryFs()
-		await fs.mkdir("/user/project.inlang", { recursive: true })
-		await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(settings))
+		await fs.mkdir("/user/dir1/project.inlang", { recursive: true })
+		await fs.writeFile("/user/dir1/project.inlang/settings.json", JSON.stringify(settings))
+		await fs.mkdir("/user/dir2/project.inlang", { recursive: true })
+		await fs.writeFile("/user/dir2/project.inlang/settings.json", JSON.stringify(settings))
 
 		await listProjects(fs, "/user").then((projects) => {
-			assert(projects.length === 1)
+			assert(projects.length === 2)
+		})
+	})
+
+	it("should return objects inside of an array with the projectPath", async () => {
+		const fs = createNodeishMemoryFs()
+		await fs.mkdir("/user/dir1/project.inlang", { recursive: true })
+		await fs.writeFile("/user/dir1/project.inlang/settings.json", JSON.stringify(settings))
+		await fs.mkdir("/user/dir2/project.inlang", { recursive: true })
+		await fs.writeFile("/user/dir2/project.inlang/settings.json", JSON.stringify(settings))
+
+		await listProjects(fs, "/user").then((projects) => {
+			assert.isTrue(typeof projects[0] === "object")
+			assert.isTrue(typeof projects[0]?.projectPath === "string")
+		})
+	})
+
+	it("should limit the recursion depth to 3", async () => {
+		const fs = createNodeishMemoryFs()
+		await fs.mkdir("/user/dir1/dir2/dir3/dir4/project.inlang", { recursive: true })
+		await fs.writeFile(
+			"/user/dir1/dir2/dir3/dir4/project.inlang/settings.json",
+			JSON.stringify(settings)
+		)
+
+		await listProjects(fs, "/user").then((projects) => {
+			assert(projects.length === 0)
+		})
+	})
+
+	it("should also find files inside of a dir that ends with *.inlang", async () => {
+		const fs = createNodeishMemoryFs()
+		await fs.mkdir("/user/dir1/go.inlang", { recursive: true })
+		await fs.writeFile("/user/dir1/go.inlang/settings.json", JSON.stringify(settings))
+		await fs.mkdir("/user/dir2/flutter.inlang", { recursive: true })
+		await fs.writeFile("/user/dir2/flutter.inlang/settings.json", JSON.stringify(settings))
+
+		await listProjects(fs, "/user").then((projects) => {
+			assert(projects.length === 2)
 		})
 	})
 })
