@@ -8,6 +8,22 @@ import { redirect } from "vike/abort"
 
 const repositoryRoot = import.meta.url.slice(0, import.meta.url.lastIndexOf("inlang/source-code"))
 
+async function fileExists(path: string): Promise<boolean> {
+	try {
+		// Check if it's a remote URL
+		if (path.startsWith("http")) {
+			const response = await fetch(path, { method: "HEAD" })
+			return response.ok
+		} else {
+			// Check if it's a local file
+			await fs.access(new URL(path, repositoryRoot))
+			return true
+		}
+	} catch (error) {
+		return false
+	}
+}
+
 export async function onBeforeRender(pageContext: PageContext) {
 	const item = registry.find(
 		(item: any) => item.uniqueID === pageContext.routeParams.uid
@@ -23,11 +39,25 @@ export async function onBeforeRender(pageContext: PageContext) {
 		return typeof item.readme === "object" ? item.readme.en : item.readme
 	}
 
-	const text = await (readme().includes("http")
-		? (await fetch(readme())).text()
-		: await fs.readFile(new URL(readme(), repositoryRoot), "utf-8"))
+	const changelog = async () => {
+		const changelogPath = readme().replace(/\/[^/]*$/, "/CHANGELOG.md")
 
-	const markdown = await convert(text)
+		if (await fileExists(changelogPath)) {
+			return changelogPath
+		} else {
+			return undefined
+		}
+	}
+
+	const text = (path: string) =>
+		path.includes("http")
+			? fetch(path).then((res) => res.text())
+			: fs.readFile(new URL(path, repositoryRoot)).then((res) => res.toString())
+
+	const readmeMarkdown = await convert(await text(readme()))
+	const changelogPath = await changelog()
+
+	const changelogMarkdown = changelogPath ? await convert(await text(changelogPath)) : undefined
 
 	const recommends = item.recommends
 		? registry.filter((i: any) => {
@@ -41,10 +71,11 @@ export async function onBeforeRender(pageContext: PageContext) {
 	return {
 		pageContext: {
 			pageProps: {
-				markdown: markdown,
+				readme: readmeMarkdown,
+				changelog: changelogMarkdown,
 				manifest: item,
 				recommends: recommends,
-			} satisfies PageProps,
+			} as PageProps,
 		},
 	}
 }

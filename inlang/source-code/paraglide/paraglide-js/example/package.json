@@ -5,7 +5,7 @@
 	"scripts": {
 		"_dev": "paraglide-js compile --project ./project.inlang --watch",
 		"build": "paraglide-js compile --project ./project.inlang && tsc",
-		"pretest": "paraglide-js compile",
+		"pretest": "paraglide-js compile --project ./project.inlang",
 		"test": "vitest run"
 	},
 	"dependencies": {

@@ -25,7 +25,8 @@ import EditOutline from "~icons/material-symbols/edit-outline-rounded"
  * The page props are undefined if an error occurred during parsing of the markdown.
  */
 export type PageProps = {
-	markdown: Awaited<ReturnType<any>>
+	readme: Awaited<ReturnType<any>>
+	changelog: Awaited<ReturnType<any>>
 	manifest: MarketplaceManifest & { uniqueID: string }
 	recommends?: MarketplaceManifest[]
 }
@@ -34,6 +35,7 @@ const pagesToHideSlider = ["badge", "editor", "ide", "cli", "paraglide"]
 
 export function Page(props: PageProps) {
 	const [readmore, setReadmore] = createSignal<boolean>(false)
+	const [activeTab, setActiveTab] = createSignal<"readme" | "changelog">("readme")
 
 	// mapping translatable types
 	const displayName = () =>
@@ -53,11 +55,11 @@ export function Page(props: PageProps) {
 	createEffect(() => {
 		const table: Record<string, Array<string>> = {}
 		if (
-			props.markdown &&
-			props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g) &&
-			props.markdown.match(/<h[1].*?>(.*?)<\/h[1]>/g)
+			props.readme &&
+			props.readme.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g) &&
+			props.readme.match(/<h[1].*?>(.*?)<\/h[1]>/g)
 		) {
-			props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g).map((heading: string) => {
+			props.readme.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g).map((heading: string) => {
 				// We have to use DOMParser to parse the heading string to a HTML element
 				const parser = new DOMParser()
 				const doc = parser.parseFromString(heading, "text/html")
@@ -118,13 +120,10 @@ export function Page(props: PageProps) {
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />
 			<MarketplaceLayout>
-				<Show when={props.markdown && props.manifest}>
+				<Show when={props.readme && props.manifest}>
 					<div class="md:py-16 py-8">
 						<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-32">
-							<Show
-								when={props.markdown}
-								fallback={<p class="text-danger">{props.markdown?.error}</p>}
-							>
+							<Show when={props.readme} fallback={<p class="text-danger">{props.readme?.error}</p>}>
 								<section class="col-span-1 md:col-span-4 pb-4 md:pb-0 grid md:grid-cols-4 grid-cols-1 md:gap-16">
 									<div class="flex-col h-full justify-between md:col-span-3">
 										<div class="flex max-md:flex-col items-start gap-8">
@@ -222,16 +221,64 @@ export function Page(props: PageProps) {
 												/>
 											</div>
 										</Show>
-
-										<Show
-											when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}
-											fallback={<Markdown markdown={props.markdown} />}
-										>
-											<div class="grid md:grid-cols-4 grid-cols-1 gap-16 md:mb-32 mb-8">
-												<div class="w-full rounded-lg col-span-1 md:col-span-4">
-													<Markdown markdown={props.markdown} />
-												</div>
+										<Show when={props.readme && props.changelog}>
+											<div class="flex items-center gap-6 mt-4 w-full border-b border-surface-2">
+												<button
+													class={
+														"text-sm font-medium transition-colors py-2 border-b-2 " +
+														(activeTab() === "readme"
+															? "text-primary border-primary"
+															: "text-surface-500 hover:text-surface-700 border-primary/0")
+													}
+													onClick={() => setActiveTab("readme")}
+												>
+													Documentation
+												</button>
+												<button
+													class={
+														"text-sm font-medium transition-colors py-2 border-b-2 " +
+														(activeTab() === "changelog"
+															? "text-primary border-primary"
+															: "text-surface-500 hover:text-surface-700 border-primary/0")
+													}
+													onClick={() => setActiveTab("changelog")}
+												>
+													Changelog
+												</button>
 											</div>
+										</Show>
+										<Show
+											when={props.readme && props.changelog}
+											fallback={
+												<Show
+													when={props.readme.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}
+													fallback={<Markdown markdown={props.readme} />}
+												>
+													<div class="grid md:grid-cols-4 grid-cols-1 gap-16 md:mb-32 mb-8">
+														<div class="w-full rounded-lg col-span-1 md:col-span-4">
+															<Markdown markdown={props.readme} />
+														</div>
+													</div>
+												</Show>
+											}
+										>
+											<Switch>
+												<Match when={activeTab() === "readme"}>
+													<Show
+														when={props.readme.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}
+														fallback={<Markdown markdown={props.readme} />}
+													>
+														<div class="grid md:grid-cols-4 grid-cols-1 gap-16 md:mb-32 mb-8">
+															<div class="w-full rounded-lg col-span-1 md:col-span-4">
+																<Markdown markdown={props.readme} />
+															</div>
+														</div>
+													</Show>
+												</Match>
+												<Match when={activeTab() === "changelog"}>
+													<Markdown markdown={props.changelog} />
+												</Match>
+											</Switch>
 										</Show>
 									</div>
 									<div class="w-full">
@@ -290,6 +337,7 @@ export function Page(props: PageProps) {
 												displayName={displayName}
 												getLocale={languageTag}
 												tableOfContents={tableOfContents}
+												setActiveTab={setActiveTab}
 											/>
 										</aside>
 									</div>
@@ -390,6 +438,7 @@ function NavbarCommon(props: {
 	getLocale: () => string
 	displayName: () => string
 	tableOfContents: () => Record<string, string[]>
+	setActiveTab: (tab: "readme" | "changelog") => void
 }) {
 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
 
@@ -486,6 +535,7 @@ function NavbarCommon(props: {
 										<Link
 											onClick={(e: any) => {
 												e.preventDefault()
+												props.setActiveTab("readme")
 												scrollToAnchor(replaceChars(heading.toString().toLowerCase()))
 												setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
 											}}
