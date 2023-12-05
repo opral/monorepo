@@ -13,7 +13,7 @@
 <svelte:head>
 	{#if availableLanguageTags.length >= 1}
 		{#each availableLanguageTags as lang}
-			<link rel="alternalte" hreflang={lang} href={translatePath($page.url.pathname, lang)} />
+			<link rel="alternate" hreflang={lang} href={translatePath($page.url.pathname, lang)} />
 		{/each}
 	{/if}
 </svelte:head>
