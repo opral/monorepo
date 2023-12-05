@@ -1,5 +1,5 @@
 import { PARAGLIDE_RUNTIME_MODULE_ALIAS } from "../../constants.js"
-import type { RoutingStrategyConfig } from "./strategy.js"
+import type { RoutingStrategyConfig } from "./config.js"
 import dedent from "dedent"
 
 export function getTranslatePathModuleCode(
@@ -119,7 +119,7 @@ function searchParamStrategy(
 	strategy: Extract<RoutingStrategyConfig, { name: "searchParam" }>,
 	excludeRegexes: RegExp[]
 ): string {
-	const searchParamName = strategy.searchParamName ?? "lang"
+	const searchParamName = strategy.searchParamName
 
 	return dedent`
         import { sourceLanguageTag, availableLanguageTags } from "${PARAGLIDE_RUNTIME_MODULE_ALIAS}"

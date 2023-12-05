@@ -1,5 +1,9 @@
 import type { paraglide as vitePluginParaglide } from "@inlang/paraglide-js-adapter-vite"
-import type { RoutingStrategyConfig } from "./routing/strategy.js"
+import {
+	type RoutingStrategyUserConfig,
+	type RoutingStrategyConfig,
+	resolveRoutingStrategyConfig,
+} from "./routing/config.js"
 
 type VitePluginUserConfig = Parameters<typeof vitePluginParaglide>[0]
 
@@ -13,7 +17,7 @@ export interface UserConfig extends VitePluginUserConfig {
 	 *
 	 * @default { name: "prefix", prefixDefault: false }
 	 */
-	routingStrategy?: RoutingStrategyConfig
+	routingStrategy?: RoutingStrategyUserConfig
 
 	/**
 	 * The preprocessor rewrites any links in your markup
@@ -61,7 +65,7 @@ export function resolveConfig(userConfig: UserConfig): Config {
 		outdir: userConfig.outdir,
 		silent: userConfig.silent,
 
-		routingStrategy: userConfig.routingStrategy ?? { name: "prefix", prefixDefault: false },
+		routingStrategy: resolveRoutingStrategyConfig(userConfig.routingStrategy),
 		disablePreprocessor: userConfig.disablePreprocessor ?? false,
 		exclude: userConfig.exclude ?? [],
 	}
