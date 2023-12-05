@@ -4,11 +4,33 @@ import { customElement, property } from "lit/decorators.js"
 import { TwLitElement } from "../common/TwLitElement.js"
 
 import "./InlangInstall"
+import { createNodeishMemoryFs, openRepository } from "@lix-js/client"
+import { listProjects } from "@inlang/sdk"
 
 @customElement("inlang-manage")
 export class InlangManage extends TwLitElement {
 	@property({ type: Object })
 	url: Record<string, string | undefined> = {}
+
+	@property({ type: String })
+	repoURL: string = ""
+
+	@property({ type: Object })
+	projects: Record<string, string>[] | undefined = undefined
+
+	async projectHandler() {
+		const repo = await openRepository(`http://localhost:3001/git/${this.url.repo}`, {
+			nodeishFs: createNodeishMemoryFs(),
+		})
+
+		this.projects = await listProjects(repo.nodeishFs, "/")
+	}
+
+	/* This function generates the install link for the user based on a repo url */
+	generateManageLink() {
+		const url = new URL(this.repoURL)
+		return `/?repo=${url.host}${url.pathname.split("/").slice(0, 3).join("/")}`
+	}
 
 	override connectedCallback() {
 		super.connectedCallback()
@@ -29,6 +51,8 @@ export class InlangManage extends TwLitElement {
 				path: window.location.pathname.replace("/", ""),
 			}
 		}
+
+		this.url.repo && this.projectHandler()
 	}
 
 	override render(): TemplateResult {
@@ -39,7 +63,37 @@ export class InlangManage extends TwLitElement {
 					<h1 class="font-semibold capitalize">${this.url.path ? this.url.path : "Manage"}</h1>
 				</div>
 				${!this.url.path
-					? html`<inlang-menu></inlang-menu>`
+					? html` <div
+								disabled=${this.url.repo}
+								class=${`px-2 gap-2 mb-8 relative z-10 flex items-center w-full border border-slate-200 bg-white rounded-lg focus-within:border-[#098DAC] transition-all ${
+									this.url.repo ? "opacity-50" : ""
+								}`}
+							>
+								<input
+									.value=${this.url.repo ? this.url.repo : this.repoURL}
+									@input=${(e: InputEvent) => {
+										this.repoURL = (e.target as HTMLInputElement).value
+									}}
+									@keydown=${(e: KeyboardEvent) => {
+										if (e.key === "Enter") {
+											window.location.href = this.generateManageLink()
+										}
+									}}
+									disabled=${this.url.repo}
+									class="active:outline-0 px-2 disabled:cursor-not-allowed focus:outline-0 focus:ring-0 border-0 h-14 grow placeholder:text-slate-500 placeholder:font-normal placeholder:text-base"
+									placeholder="https://github.com/user/example"
+								/>
+								<button
+									@click=${() => {
+										window.location.href = this.generateManageLink()
+									}}
+									disabled=${this.url.repo}
+									class="bg-white text-slate-600  disabled:cursor-not-allowed border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+								>
+									Install
+								</button>
+							</div>
+							<inlang-menu jsonURL=${JSON.stringify(this.url)}></inlang-menu>`
 					: this.url.path === "install"
 					? html`<inlang-install jsonURL=${JSON.stringify(this.url)}></inlang-install>`
 					: ""}
@@ -77,12 +131,14 @@ export class InlangLogo extends TwLitElement {
 
 @customElement("inlang-menu")
 export class InlangMenu extends TwLitElement {
+	@property({ type: Object })
+	jsonURL: Record<string, string | undefined> = {}
+
 	override render(): TemplateResult {
 		return html`
-			<p class="text-slate-500 mb-8">Manage your inlang project.</p>
 			<div class="flex flex-col gap-4">
 				<a
-					href="/install"
+					href=${`/install?repo=${this.jsonURL.repo}`}
 					class="bg-slate-800 text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
 				>
 					Install a module
