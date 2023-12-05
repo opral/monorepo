@@ -40,6 +40,7 @@ const send = (res, code, obj) => {
 		return
 	}
 
+	// eslint-disable-next-line no-undef
 	if (Buffer.isBuffer(obj)) {
 		if (!res.getHeader("Content-Type")) {
 			res.setHeader("Content-Type", "application/octet-stream")
@@ -74,12 +75,12 @@ const send = (res, code, obj) => {
 	}
 
 	if (typeof str === "string") {
+		// eslint-disable-next-line no-undef
 		res.setHeader("Content-Length", Buffer.byteLength(str))
 	}
 
 	res.end(str)
 }
-
 
 // forked from https://github.com/possibilities/micro-cors/blob/master/src/index.js for multi origin support
 const microCors =
@@ -287,7 +288,7 @@ export default ({ origins, insecure_origins = [], authorization = noop } = {}) =
 		}
 
 		let p = u.path
-		let parts = p.match(/\/([^\/]*)\/(.*)/)
+		let parts = p.match(/\/([^/]*)\/(.*)/)
 		let pathdomain = parts[1]
 		let remainingpath = parts[2]
 		let protocol = insecure_origins.includes(pathdomain) ? "http" : "https"
