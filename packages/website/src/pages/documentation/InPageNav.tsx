@@ -78,7 +78,7 @@ const InPageNav = (props: InPageNavProps) => {
 		const element = document.getElementById(anchor)
 		if (element && window) {
 			window.scrollTo({
-				top: element.offsetTop - 128,
+				top: element.offsetTop - 24,
 				behavior: behavior ?? "instant",
 			})
 		}
@@ -100,7 +100,6 @@ const InPageNav = (props: InPageNavProps) => {
 					)
 				)
 
-				//scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
 				setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
 			} else {
 				for (const heading of tableOfContents()[sectionTitle]!) {
@@ -134,18 +133,15 @@ const InPageNav = (props: InPageNavProps) => {
 							<a
 								onClick={(e: any) => {
 									e.preventDefault()
-									scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
+									scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
 									setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
 								}}
 								class={
 									(isSelected(replaceChars(sectionTitle.toString().toLowerCase()))
 										? "text-primary font-semibold "
 										: "text-surface-900 hover:text-on-background ") +
-									"tracking-wide text-sm block w-full font-normal mb-2"
+									"tracking-wide cursor-pointer text-sm block w-full font-normal mb-2"
 								}
-								href={`${currentPageContext.urlParsed.pathname}#${replaceChars(
-									sectionTitle.toString().toLowerCase()
-								)}`}
 							>
 								{sectionTitle.replace("#", "")}
 							</a>
@@ -155,18 +151,15 @@ const InPageNav = (props: InPageNavProps) => {
 										<a
 											onClick={(e: any) => {
 												e.preventDefault()
-												scrollToAnchor(replaceChars(heading.toString().toLowerCase()))
+												scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
 												setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
 											}}
 											class={
-												"text-sm tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
+												"text-sm cursor-pointer tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
 												(highlightedAnchor() === replaceChars(heading.toString().toLowerCase())
 													? "font-medium text-on-background border-l-on-background "
 													: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
 											}
-											href={`${currentPageContext.urlParsed.pathname}#${replaceChars(
-												heading.toString().toLowerCase()
-											)}`}
 										>
 											{heading.replace("#", "")}
 										</a>
