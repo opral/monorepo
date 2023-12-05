@@ -24,18 +24,7 @@
         "vite": "^5.0.4",
         "vitest": "^0.34.6"
     },
-    "exports": {
-        ".": {
-            "import": "./dist/index.js",
-            "types": "./dist/index.d.ts"
-        },
-        "./types": {
-            "import": "./types/index.js",
-            "types": "./types/index.d.ts"
-        }
-    },
     "files": [
-        "dist",
-        "types"
+        "dist"
     ]
 }

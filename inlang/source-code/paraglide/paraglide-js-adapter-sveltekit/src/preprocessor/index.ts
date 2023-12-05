@@ -1,11 +1,9 @@
 import { parse, type PreprocessorGroup } from "svelte/compiler"
 import MagicString from "magic-string"
-import { InjectHeader } from "./passes/injectHeader.js"
 import { RewriteHrefs } from "./passes/rewriteHrefs.js"
 import type { Ast } from "./types.js"
 import { RewriteActions } from "./passes/rewriteActions.js"
 import { RewriteFormActions } from "./passes/rewriteFormActions.js"
-import { HEADER_COMPONENT_MODULE_ID } from "../constants.js"
 
 export type PreprocessorConfig = Record<string, never>
 
@@ -34,7 +32,7 @@ export type PreprocessingPass = {
 	}
 }
 
-const PASSES: PreprocessingPass[] = [RewriteHrefs, RewriteActions, RewriteFormActions, InjectHeader]
+const PASSES: PreprocessingPass[] = [RewriteHrefs, RewriteActions, RewriteFormActions]
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function preprocess(_config: PreprocessorConfig): PreprocessorGroup {
@@ -45,9 +43,6 @@ export function preprocess(_config: PreprocessorConfig): PreprocessorGroup {
 
 			//I dont' know when this would happen, but it's better to be safe than sorry
 			if (!filename) return NOOP
-
-			//don't process the header component
-			if (filename === HEADER_COMPONENT_MODULE_ID) return NOOP
 
 			//dont' process components owned by the framework
 			if (filename.includes(".svelte-kit")) return NOOP
