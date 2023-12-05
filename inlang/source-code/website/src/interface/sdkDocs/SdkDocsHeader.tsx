@@ -9,7 +9,7 @@ const SdkDocsHeader = () => {
 			<header class="sticky top-0 w-full z-[9999] bg-background border-b border-surface-200 px-4">
 				<div
 					class={
-						"max-w-7xl mx-auto flex flex-wrap justify-between items-center relative sm:static sm:mb-0 mb-4"
+						"max-w-7xl mx-auto flex flex-col md:flex-row justify-between md:items-center relative sm:static"
 					}
 				>
 					<div class="flex items-center">
