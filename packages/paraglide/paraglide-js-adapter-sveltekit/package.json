@@ -7,7 +7,7 @@
     "types": "./dist/index.d.ts",
     "scripts": {
         "test": "vitest run --passWithNoTests",
-        "build": "tsc",
+        "build": "tsc && copyfiles -u 1 src/**/*.svelte dist",
         "dev": "tsc -w",
         "lint": "eslint ./src --fix",
         "format": "prettier ./src --write",
@@ -20,6 +20,7 @@
         "svelte": "^4.2.8"
     },
     "devDependencies": {
+        "copyfiles": "^2.4.1",
         "typescript": "^5.3.2",
         "vite": "^5.0.4",
         "vitest": "^0.34.6"
