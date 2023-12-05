@@ -7,7 +7,6 @@ import { EditButton } from "./EditButton.jsx"
 import { languageTag } from "#src/paraglide/runtime.js"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
-import { i18nRouting } from "#src/renderer/_default.page.route.js"
 import SdkDocsLayout from "#src/interface/sdkDocs/SdkDocsLayout.jsx"
 import { getTableOfContents } from "./getTableOfContents.js"
 import InPageNav from "./InPageNav.jsx"
@@ -117,7 +116,7 @@ export function Page(props: PageProps) {
 						</nav>
 					</div>
 					{/* Mobile navbar */}
-					<nav class="sticky top-[117px] w-screen z-10 -translate-x-4 sm:-translate-x-10 md:hidden overflow-y-scroll overflow-auto backdrop-blur-sm">
+					<nav class="sticky top-[150px] w-screen z-10 -translate-x-4 sm:-translate-x-10 md:hidden overflow-y-scroll overflow-auto backdrop-blur-sm">
 						<sl-details ref={mobileDetailMenu}>
 							<h3 slot="summary" class="font-medium sm:pl-6">
 								Menu
@@ -139,25 +138,25 @@ export function Page(props: PageProps) {
 					</nav>
 					<Show when={props.markdown} fallback={<p class="text-danger">{props.markdown?.error}</p>}>
 						<div class="flex flex-1 mb-8 md:ml-4 lg:ml-12">
-							<div class="flex-1 max-w-[724px] w-full justify-self-center md:col-span-3">
+							<div class="flex-1 md:max-w-[500px] lg:max-w-[724px] w-full justify-self-center md:col-span-3">
 								<Markdown markdown={props.markdown} />
 								<EditButton href={editLink()} />
 								<Feedback />
 							</div>
-							<div class="hidden xl:block w-[230px] py-16 text-sm ml-12 pl-4">
-								<InPageNav
-									markdown={props.markdown}
-									pageName={
-										findPageBySlug(
-											currentPageContext.urlParsed.pathname
-												.replace("/" + languageTag(), "")
-												.replace("/documentation/", "")
-										)?.title as string
-									}
-								/>
-							</div>
 						</div>
 					</Show>
+					<div class="top-[116px] hidden sticky xl:block h-[calc(100%_-_112px)] w-[230px] py-[60px] pl-4">
+						<InPageNav
+							markdown={props.markdown}
+							pageName={
+								findPageBySlug(
+									currentPageContext.urlParsed.pathname
+										.replace("/" + languageTag(), "")
+										.replace("/documentation/", "")
+								)?.title as string
+							}
+						/>
+					</div>
 				</div>
 			</SdkDocsLayout>
 		</>

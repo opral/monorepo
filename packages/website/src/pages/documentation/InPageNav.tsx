@@ -7,7 +7,7 @@ interface InPageNavProps {
 }
 
 const InPageNav = (props: InPageNavProps) => {
-	const [tableOfContents, setTableOfContents] = createSignal({})
+	const [tableOfContents, setTableOfContents] = createSignal<Record<string, Array<string>>>({})
 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
 
 	createEffect(() => {
@@ -49,10 +49,6 @@ const InPageNav = (props: InPageNavProps) => {
 		}
 
 		setTableOfContents(table)
-	})
-
-	createEffect(() => {
-		console.log("tableOfContents", tableOfContents())
 	})
 
 	const replaceChars = (str: string) => {
