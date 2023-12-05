@@ -4,9 +4,8 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"paraglide": "paraglide-js compile --project ./project.inlang",
-		"dev": "pnpm run paraglide --watch & solid-start dev",
-		"build": "pnpm run paraglide && solid-start build",
+		"_dev": "solid-start dev",
+		"build": "solid-start build",
 		"start": "solid-start start"
 	},
 	"dependencies": {
@@ -17,9 +16,10 @@
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "workspace:*",
+		"@inlang/paraglide-js-adapter-vite": "workspace:*",
+		"@types/node": "^20",
 		"solid-start-node": "^0.3",
-		"vite": "^4",
 		"typescript": "^5",
-		"@types/node": "^20"
+		"vite": "^4"
 	}
 }
