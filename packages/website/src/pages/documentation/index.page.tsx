@@ -147,17 +147,19 @@ export function Page(props: PageProps) {
 							</div>
 						</div>
 					</Show>
-					<div class="top-[116px] hidden sticky xl:block h-[calc(100%_-_112px)] w-[230px] py-[60px] pl-4">
-						<InPageNav
-							markdown={props.markdown}
-							pageName={
-								findPageBySlug(
-									currentPageContext.urlParsed.pathname
-										.replace("/" + languageTag(), "")
-										.replace("/documentation/", "")
-								)?.title as string
-							}
-						/>
+					<div class="sticky z-90 top-[116px] hidden xl:block h-[calc(100%_-_112px)] w-[230px]">
+						<div class="max-h-[96vh] overflow-y-scroll overflow-scrollbar -ml-4 pl-4 py-14">
+							<InPageNav
+								markdown={props.markdown}
+								pageName={
+									findPageBySlug(
+										currentPageContext.urlParsed.pathname
+											.replace("/" + languageTag(), "")
+											.replace("/documentation/", "")
+									)?.title as string
+								}
+							/>
+						</div>
 					</div>
 				</div>
 			</SdkDocsLayout>
