@@ -13,7 +13,7 @@ type GotoReturnType = ReturnType<typeof sk_goto>
  * Returns a Promise that resolves when SvelteKit navigates (or fails to navigate, in which case the promise rejects) to the specified url. For external URLs, use window.location = url instead of calling goto(url).
  * @param url — Where to navigate to. Note that if you've set config.kit.paths.base and the URL is root-relative, you need to prepend the base path if you want to navigate within the app.
  */
-export function goto(url: GotoPath, options: GotoOptions): GotoReturnType {
+export function goto(url: GotoPath, options?: GotoOptions): GotoReturnType {
 	//Bail if the url is not a string
 	if (typeof url !== "string") return sk_goto(url, options)
 

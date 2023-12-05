@@ -17,7 +17,7 @@ function domainStrategy(strategy: Extract<RoutingStrategyConfig, { name: "domain
 	const langToHostname = strategy.domains
 
 	const hostnameToLang = Object.fromEntries(
-		Object.entries(langToHostname).map(([lang, domain]) => [domain, lang]),
+		Object.entries(langToHostname).map(([lang, domain]) => [domain, lang])
 	)
 
 	return dedent`
@@ -31,12 +31,14 @@ function domainStrategy(strategy: Extract<RoutingStrategyConfig, { name: "domain
 
         /**
          * Takes in a url and returns the language tag that is used in the url.
-         * If the url does not contain a language tag, the source language tag is returned.
+         * If the url does not contain a language tag it returns undefined.
+         * It is assumed that the URL is not external.
+         * 
          * @param {URL} url
-         * @returns {string}
+         * @returns {string | undefined}
          */
         export default function getLanguage(url) {
-            return hostnames[url.hostname] ?? sourceLanguageTag;
+            return hostnames[url.hostname];
         }
         `
 }
@@ -48,40 +50,40 @@ function prefixStrategy(strategy: Extract<RoutingStrategyConfig, { name: "prefix
 
         /**
          * Takes in a url and returns the language tag that is used in the url.
-         * If the url does not contain a language tag, the source language tag is returned.
+         * If the url does not contain a language tag it returns undefined.
          * It is assumed that the URL is not external.
          * 
          * @param {URL} url
-         * @returns {string}
+         * @returns {string | undefined}
          */
         export default function getLanguage(url) {
             const maybeLanguageTag = url.pathname.split("/")[1];
             return isAvailableLanguageTag(maybeLanguageTag)
                 ? maybeLanguageTag 
-                : sourceLanguageTag;
+                : undefined;
         }
         `
 }
 
 function searchParamStrategy(
-	strategy: Extract<RoutingStrategyConfig, { name: "searchParam" }>,
+	strategy: Extract<RoutingStrategyConfig, { name: "searchParam" }>
 ): string {
 	return dedent`
         import { sourceLanguageTag, availableLanguageTags, isAvailableLanguageTag } from "${PARAGLIDE_RUNTIME_MODULE_ALIAS}"
 
         /**
          * Takes in a url and returns the language tag that is used in the url.
-         * If the url does not contain a language tag, the source language tag is returned.
+         * If the url does not contain a language tag it returns undefined.
          * It is assumed that the URL is not external.
          * 
          * @param {URL} url
-         * @returns {string}
+         * @returns {string | undefined}
          */
         export default function getLanguage(url) {
                 const maybeLanguageTag = url.searchParams.get("${strategy.searchParamName}");
                 return isAvailableLanguageTag(maybeLanguageTag)
                         ? maybeLanguageTag
-                        : sourceLanguageTag;
+                        : undefined;
         }
         `
 }

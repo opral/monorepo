@@ -1,4 +1,5 @@
 import getLanguage from "$paraglide-adapter-sveltekit:get-language"
+import { sourceLanguageTag } from "$paraglide-adapter-sveltekit:runtime"
 import type { Handle } from "@sveltejs/kit"
 
 /**
@@ -21,7 +22,7 @@ import type { Handle } from "@sveltejs/kit"
  */
 export const injectLangAttribute = (placeholder: string): Handle => {
 	return async ({ resolve, event }) => {
-		const lang = getLanguage(event.url)
+		const lang = getLanguage(event.url) ?? sourceLanguageTag
 		return await resolve(event, {
 			transformPageChunk({ html, done }) {
 				if (done) return html.replace(placeholder, lang)
