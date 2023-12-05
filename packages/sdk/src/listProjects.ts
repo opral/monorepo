@@ -2,9 +2,11 @@ import type { NodeishFilesystem } from "@lix-js/fs"
 
 export const listProjects = async (
 	nodeishFs: NodeishFilesystem,
-	from: string,
-	recursionLimit: number = 3
+	from: string
 ): Promise<Array<{ projectPath: string }>> => {
+	// !TODO: Remove this limit once we introduce caching
+	const recursionLimit = 5
+
 	const projects: Array<{ projectPath: string }> = []
 
 	async function searchDir(path: string, depth: number) {
