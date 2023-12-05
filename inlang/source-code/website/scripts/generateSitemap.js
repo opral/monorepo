@@ -82,7 +82,50 @@ async function generateSitemap() {
 					)}`
 				}
 			}
-		} else if ((route.dynamic && route.path === "/documentation") || route.path === "/blog") {
+		} else if (route.dynamic && route.path === "/documentation") {
+			const sdkTableOfContents = await fs.readFile(
+				new URL("./inlang" + route.path + "/sdk/tableOfContents.json", repositoryRoot),
+				"utf-8"
+			)
+			const pluginTableOfContents = await fs.readFile(
+				new URL("./inlang" + route.path + "/plugin/tableOfContents.json", repositoryRoot),
+				"utf-8"
+			)
+
+			if (
+				Array.isArray(JSON.parse(sdkTableOfContents)) &&
+				Array.isArray(JSON.parse(pluginTableOfContents))
+			) {
+				const tableOfContents = [
+					...JSON.parse(sdkTableOfContents),
+					...JSON.parse(pluginTableOfContents),
+				]
+				for (const item of tableOfContents) {
+					for (const locale of locales) {
+						content = `${content}${formatPage(
+							siteURL + locale + route.path + "/" + item.slug,
+							publishDate
+						)}`
+					}
+				}
+			} else {
+				const tableOfContents = [
+					...Object.values(JSON.parse(sdkTableOfContents)),
+					...Object.values(JSON.parse(pluginTableOfContents)),
+				]
+				for (const items of tableOfContents) {
+					for (const item of items) {
+						if (item.slug !== "")
+							for (const locale of locales) {
+								content = `${content}${formatPage(
+									siteURL + locale + route.path + "/" + item.slug,
+									publishDate
+								)}`
+							}
+					}
+				}
+			}
+		} else if (route.dynamic && route.path === "/blog") {
 			const tableOfContents = await fs.readFile(
 				new URL("./inlang" + route.path + "/tableOfContents.json", repositoryRoot),
 				"utf-8"
