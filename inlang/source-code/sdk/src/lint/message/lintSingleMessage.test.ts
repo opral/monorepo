@@ -22,6 +22,8 @@ const lintRule2 = {
 
 const message1 = {} as Message
 
+const messages = [message1]
+
 describe("lintSingleMessage", async () => {
 	beforeEach(() => {
 		vi.resetAllMocks()
@@ -41,6 +43,7 @@ describe("lintSingleMessage", async () => {
 						messageLintRuleLevels: {},
 						modules: [],
 					},
+					messages,
 					message: message1,
 					rules: [lintRule1],
 				})
@@ -61,6 +64,7 @@ describe("lintSingleMessage", async () => {
 						[lintRule1.id]: "error",
 					},
 				},
+				messages,
 				message: message1,
 				rules: [lintRule1],
 			})
@@ -82,6 +86,7 @@ describe("lintSingleMessage", async () => {
 
 			await lintSingleMessage({
 				settings,
+				messages,
 				message: message1,
 				rules: [lintRule1],
 			})
@@ -111,6 +116,7 @@ describe("lintSingleMessage", async () => {
 					[lintRule2.id]: "warning",
 				},
 			},
+			messages,
 			message: message1,
 			rules: [lintRule1, lintRule2],
 		})
@@ -143,6 +149,7 @@ describe("lintSingleMessage", async () => {
 					[lintRule2.id]: "warning",
 				},
 			},
+			messages,
 			message: message1,
 			rules: [lintRule1, lintRule2],
 		})
@@ -173,6 +180,7 @@ describe("lintSingleMessage", async () => {
 					[lintRule2.id]: "warning",
 				},
 			},
+			messages,
 			message: message1,
 			rules: [lintRule1, lintRule2],
 		})
