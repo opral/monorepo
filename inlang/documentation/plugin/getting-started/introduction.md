@@ -3,6 +3,8 @@
 
 <br/>
 
+![pluginCover](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/plugin/assets/plugin-cover.png)
+
 An inlang plugin is a small program that can be added to the inlang project to provide apps or the SDK with logic and information. By using plugins, developers can extend their apps without having to build everything from scratch.
 
 ## Why do I need plugins?
