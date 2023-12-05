@@ -50,6 +50,11 @@ export class InlangInstall extends TwLitElement {
 
 	/* This function uses lix to inject the module into the inlang project */
 	async install() {
+		if (!this.url.project) {
+			this.step = "error"
+			this.error = "No project found"
+		}
+
 		const repo = await openRepository(`http://localhost:3001/git/${this.url.repo}`, {
 			nodeishFs: createNodeishMemoryFs(),
 		})
@@ -76,9 +81,12 @@ export class InlangInstall extends TwLitElement {
 		}
 
 		const result = await tryCatch(async () => {
-			const inlangProjectString = (await repo.nodeishFs.readFile("./project.inlang/settings.json", {
-				encoding: "utf-8",
-			})) as string
+			const inlangProjectString = (await repo.nodeishFs.readFile(
+				`.${this.url.project}/settings.json`,
+				{
+					encoding: "utf-8",
+				}
+			)) as string
 
 			return inlangProjectString
 		})
@@ -130,10 +138,11 @@ export class InlangInstall extends TwLitElement {
 		// Stringify the project
 		const generatedProject = formatting(project)
 
-		await repo.nodeishFs.writeFile("./project.inlang/settings.json", generatedProject)
+		await repo.nodeishFs.writeFile(`.${this.url.project}/settings.json`, generatedProject)
 
 		const inlangProject = await loadProject({
-			projectPath: "/project.inlang",
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			projectPath: this.url.project!,
 			nodeishFs: repo.nodeishFs,
 		})
 
@@ -148,7 +157,7 @@ export class InlangInstall extends TwLitElement {
 
 		// Push the project to the repo
 		await repo.add({
-			filepath: "project.inlang/settings.json",
+			filepath: `${this.url.project?.slice(1)}/settings.json`,
 		})
 
 		await repo.commit({
@@ -172,7 +181,8 @@ export class InlangInstall extends TwLitElement {
 		}
 
 		const inlangProjectAfter = await loadProject({
-			projectPath: "/project.inlang",
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			projectPath: this.url.project!,
 			nodeishFs: repo.nodeishFs,
 		})
 
@@ -330,7 +340,7 @@ export class InlangInstall extends TwLitElement {
 						Paste the link into the project
 					</h3>
 					<p class="text-slate-500 mb-4">
-						Paste the copied link into the project.inlang/settings.json file inside the modules
+						Paste the copied link into the *.inlang/settings.json file inside the modules
 						section:
 					</p>
 					<div
@@ -434,7 +444,7 @@ export class InlangInstall extends TwLitElement {
 					</p></div></div>`
 			: this.step === "success"
 			? html`<div class="flex flex-col gap-2"><h2 class="text-xl font-semibold flex items-center gap-2">
-			Succesfully installed
+			Succesfully installed into your project: ${this.url.project}
 			</h2>
 					</h2>
 					<p class="text-slate-500">
