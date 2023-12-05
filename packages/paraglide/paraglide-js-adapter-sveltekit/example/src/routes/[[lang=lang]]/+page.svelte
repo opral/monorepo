@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { availableLanguageTags, languageTag } from "$paraglide/runtime.js"
-	import { goto } from "$paraglide-adapter-sveltekit"
+	import { goto } from "$lib/ParaglideJS.svelte"
 	import * as m from "$paraglide/messages.js"
 </script>
 

@@ -3,14 +3,12 @@ import type { Plugin } from "vite"
 import { resolve } from "node:path"
 import {
 	GET_LANGUAGE_MODULE_ID,
-	HEADER_COMPONENT_MODULE_ID,
 	OUTDIR_ALIAS,
 	PUBLIC_VIRTUAL_MODULE_ID,
 	TRANSLATE_PATH_MODULE_ID,
 } from "../constants.js"
 import type { RoutingStrategyConfig } from "./routing/strategy.js"
 import { getTranslatePathModuleCode } from "./routing/translatePath.js"
-import { getHeaderComponentCode } from "./header.js"
 import { preprocess, type PreprocessorConfig } from "../preprocessor/index.js"
 import { getPublicModuleCode } from "./public.js"
 import { getGetLanguageModuleCode } from "./routing/getLanguage.js"
@@ -97,11 +95,6 @@ function adapterSvelteKit(userConfig: UserConfig): Plugin {
 				return resolved
 			}
 
-			if (id === HEADER_COMPONENT_MODULE_ID) {
-				const resolved = HEADER_COMPONENT_MODULE_ID
-				return resolved
-			}
-
 			if (id === PUBLIC_VIRTUAL_MODULE_ID) {
 				const resolved = "\0" + PUBLIC_VIRTUAL_MODULE_ID
 				return resolved
@@ -122,10 +115,6 @@ function adapterSvelteKit(userConfig: UserConfig): Plugin {
 		load(id) {
 			if (id === "\0" + TRANSLATE_PATH_MODULE_ID) {
 				return getTranslatePathModuleCode(strategy, excludeRegexes)
-			}
-
-			if (id === HEADER_COMPONENT_MODULE_ID) {
-				return getHeaderComponentCode(excludeRegexes)
 			}
 
 			if (id === "\0" + GET_LANGUAGE_MODULE_ID) {

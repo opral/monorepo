@@ -8,11 +8,9 @@
  * import { languageTag } from {OUTDIR_ALIAS}/runtime.js"
  * ```
  */
-export const OUTDIR_ALIAS = "paraglide-adapter-sveltekit:outdir:"
-export const TRANSLATE_PATH_MODULE_ID = "paraglide-adapter-sveltekit:translate-path"
-export const GET_LANGUAGE_MODULE_ID = "paraglide-adapter-sveltekit:get-language"
-export const HEADER_COMPONENT_MODULE_ID = "paraglide-adapter-sveltekit:header-component.svelte"
-export const HEADER_COMPONENT_NAME = "PARAGLIDE_ADAPTER_SVELTEKIT_HEADER"
+export const OUTDIR_ALIAS = "$paraglide-adapter-sveltekit:outdir:"
+export const TRANSLATE_PATH_MODULE_ID = "$paraglide-adapter-sveltekit:translate-path"
+export const GET_LANGUAGE_MODULE_ID = "$paraglide-adapter-sveltekit:get-language"
 
 //The virtual module ID for the public interface
 export const PUBLIC_VIRTUAL_MODULE_ID = "$paraglide-adapter-sveltekit"
