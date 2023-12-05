@@ -7,7 +7,6 @@ import { EditButton } from "./EditButton.jsx"
 import { languageTag } from "#src/paraglide/runtime.js"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
-import Link from "#src/renderer/Link.jsx"
 import { i18nRouting } from "#src/renderer/_default.page.route.js"
 import SdkDocsLayout from "#src/interface/sdkDocs/SdkDocsLayout.jsx"
 import { getTableOfContents } from "./getTableOfContents.js"
@@ -98,14 +97,14 @@ export function Page(props: PageProps) {
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />
 			<SdkDocsLayout>
-				<div class="flex flex-col md:flex-row grow gap-12 w-full">
+				<div class="relative block md:flex grow w-full">
 					{/* desktop navbar */}
-					<div class="hidden md:block h-full w-[232px]">
-						<nav class="sticky top-22 max-h-[96vh] overflow-y-scroll overflow-scrollbar -ml-4 pl-4">
+					<div class="sticky top-[116px] hidden md:block h-[calc(100%_-_112px)] w-[230px]">
+						<nav class="max-h-[96vh] overflow-y-scroll overflow-scrollbar -ml-4 pl-4">
 							{/* `Show` is a hotfix when client side rendering loaded this page
 							 * filteredTableContents is not available on the client.
 							 */}
-							<div class="py-[48px]">
+							<div class="py-[48px] pb-32">
 								<Show when={getTableOfContents() && props.markdown}>
 									<NavbarCommon
 										tableOfContents={getTableOfContents()}
@@ -138,15 +137,15 @@ export function Page(props: PageProps) {
 						</sl-details>
 					</nav>
 					<Show when={props.markdown} fallback={<p class="text-danger">{props.markdown?.error}</p>}>
-						<div class="flex-1 max-w-[650px] justify-self-center mb-8 md:col-span-3">
-							<div class="w-full justify-self-center md:col-span-3">
+						<div class="flex flex-1 mb-8 md:ml-4 lg:ml-12">
+							<div class="flex-1 max-w-[724px] w-full justify-self-center md:col-span-3">
 								<Markdown markdown={props.markdown} />
 								<EditButton href={editLink()} />
 								<Feedback />
 							</div>
+							<div class="hidden xl:block w-[230px] py-16 text-sm ml-12 pl-4">This is headline</div>
 						</div>
 					</Show>
-					<div class="hidden xl:block w-[260px] py-16 text-sm pl-8">This is headline</div>
 				</div>
 			</SdkDocsLayout>
 		</>
