@@ -1,0 +1,25 @@
+{
+	"name": "@inlang/paraglide-js-adapter-solidstart-example",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"paraglide": "paraglide-js compile --project ./project.inlang",
+		"dev": "pnpm run paraglide --watch & solid-start dev",
+		"build": "pnpm run paraglide && solid-start build",
+		"start": "solid-start start"
+	},
+	"dependencies": {
+		"@solidjs/meta": "^0.29",
+		"@solidjs/router": "^0.9",
+		"solid-js": "^1.8",
+		"solid-start": "^0.3"
+	},
+	"devDependencies": {
+		"@inlang/paraglide-js": "workspace:*",
+		"solid-start-node": "^0.3",
+		"vite": "^4",
+		"typescript": "^5",
+		"@types/node": "^20"
+	}
+}
