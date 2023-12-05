@@ -219,6 +219,10 @@ function NavbarCommon(props: {
 		window.history.pushState({}, "", `${currentPageContext.urlParsed.pathname}#${anchor}`)
 	}
 
+	const onAnchorClick = async (anchor: string) => {
+		scrollToAnchor(anchor, "smooth")
+	}
+
 	onMount(async () => {
 		for (const heading of props.headings) {
 			if (
