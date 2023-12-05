@@ -1,21 +1,27 @@
-import { LitElement, css, html } from "lit"
+import { LitElement, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import { convert } from "../convert.js"
-import fs from "node:fs/promises"
-import path from "node:path"
+
+type url = `https://${string}`
 
 @customElement("doc-embed")
 export class DocEmbed extends LitElement {
-	static override styles = css``
+	@property()
+	url: url | undefined = undefined
 
 	@property()
-	path: string = ""
+	html: string | undefined = undefined
 
-	connectedCallback() {
+	override async connectedCallback() {
 		super.connectedCallback()
+
+		if (this.url) {
+			const text = await fetch(this.url).then((res) => res.text())
+			this.html = await convert(text)
+		}
 	}
 
 	override render() {
-		return html` <div>${this.path}</div>`
+		return html` <div .innerHTML=${this.html}></div>`
 	}
 }
