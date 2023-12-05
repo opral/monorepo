@@ -3,7 +3,7 @@
 	import getLanguage from "$paraglide-adapter-sveltekit:get-language"
 	import { setLanguageTag, availableLanguageTags, sourceLanguageTag, onSetLanguageTag } from "$paraglide-adapter-sveltekit:runtime"
 	import { page } from "$app/stores"
-	import { goto } from "$app/navigation"
+	import { afterNavigate, beforeNavigate, goto } from "$app/navigation"
 	import { browser } from "$app/environment"
 
 	/** @type { string | undefined } */
@@ -30,13 +30,49 @@
 	onSetLanguageTag((lang) => {
 		//Don't do anything if we're server-side rendering
 		if(browser) {
-
 			//check if the path would be different in the new language & navigate if so
 			const newPath = translatePath($page.url.pathname, lang);
 			if(normalizePath(newPath) !== normalizePath($page.url.pathname)) {
-				console.log($page.url.pathname, newPath)
-				goto(newPath)
+
+				const newSearch = new URLSearchParams($page.url.search);
+				newSearch.set("no-translate", "true")
+
+				goto(newPath + "?" + newSearch.toString())
 			}
+
+			//Update the html lang attribute
+			document.documentElement.lang = lang
+		}
+	})
+
+
+	beforeNavigate(event => {
+		//If `goto` to internal route
+		if(event.type === "goto" && event.to && event.to.route.id) {
+			if(event.to.url.searchParams.get("no-translate") === "true") {
+				return
+			}
+			const existingLanguage = getLanguage(event.to.url);
+
+			if(existingLanguage) {
+				//If the language is already in the path, we don't need to do anything
+				return
+			}
+
+			/*
+				If there isn't an existing language, check if translating the path would change it
+				only navigate if it would
+
+				This avoids an infinite loop of navigation where this beforeNavigate gets triggered again & again
+			*/
+
+			const translatedPath = translatePath(event.to.url.pathname, lang);
+			if(normalizePath(translatedPath) === normalizePath(event.to.url.pathname)) {
+				return
+			}
+
+			event.cancel();
+			goto(translatedPath);
 		}
 	})
 </script>

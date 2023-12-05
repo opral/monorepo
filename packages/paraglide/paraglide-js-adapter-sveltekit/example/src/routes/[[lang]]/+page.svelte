@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from "$app/navigation"
 	import { availableLanguageTags, languageTag, setLanguageTag } from "$paraglide/runtime.js"
 	import * as m from "$paraglide/messages.js"
 </script>
@@ -8,7 +9,11 @@
 
 <a href="/about">{m.about()}</a>
 
+<button on:click={() => goto("/about")}> Programmatic About</button>
+
 <br/>
+
+
 <!-- Navigation with languageTag -->
 {#each availableLanguageTags as lang}
 	<a href="/" hreflang={lang}>
@@ -19,6 +24,7 @@
 
 <!-- Programmatic Navigation with goto -->
 <select on:change={(e)=>{
+	// @ts-ignore
 	setLanguageTag(e.target.value)
 }}>
 	{#each availableLanguageTags as lang}
