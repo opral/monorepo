@@ -129,6 +129,7 @@ export default function Card(props: { item: any; displayName: string }) {
 								</div>
 								<div class="flex flex-col justify-between items-start">
 									<p
+										// eslint-disable-next-line solid/style-prop
 										style="text-wrap: balance;"
 										class="m-0 mb-2 text-sm text-surface-800 line-clamp-2 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors"
 									>
