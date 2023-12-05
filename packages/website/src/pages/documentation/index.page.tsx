@@ -11,6 +11,7 @@ import SdkDocsLayout from "#src/interface/sdkDocs/SdkDocsLayout.jsx"
 import { getTableOfContents } from "./getTableOfContents.js"
 import InPageNav from "./InPageNav.jsx"
 import MainActions from "./MainActions.jsx"
+import { getDocsBaseUrl } from "#src/interface/sdkDocs/SdkDocsHeader.jsx"
 
 export type PageProps = {
 	markdown: Awaited<ReturnType<any>>
@@ -39,13 +40,14 @@ export function Page(props: PageProps) {
 	createEffect(() => {
 		if (currentPageContext) {
 			setEditLink(
-				"https://github.com/inlang/monorepo/edit/main/inlang/documentation" +
+				"https://github.com/inlang/monorepo/edit/main/inlang" +
+					getDocsBaseUrl(currentPageContext.urlParsed.pathname) +
 					"/" +
 					findPageBySlug(
 						currentPageContext.urlParsed.pathname
 							.replace("/" + languageTag(), "")
 							.replace("/documentation/", "")
-					)?.path
+					)?.path.replace("./", "")
 			)
 		}
 	})
