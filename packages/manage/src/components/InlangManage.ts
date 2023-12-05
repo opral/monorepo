@@ -56,11 +56,49 @@ export class InlangManage extends TwLitElement {
 	}
 
 	override render(): TemplateResult {
-		return html` <main class="w-full h-screen flex justify-center items-center px-4">
+		return html` <main
+			class="w-full h-screen flex justify-center items-center px-4"
+			@click=${() => {
+				this.shadowRoot?.querySelector("#projects")?.classList.add("hidden")
+			}}
+		>
 			<div class="w-full max-w-md h-auto bg-slate-50 border border-slate-200 p-4 rounded-lg">
-				<div class="flex items-center gap-2 border-b border-b-slate-200 pb-4 mb-4">
-					<inlang-logo></inlang-logo>
-					<h1 class="font-semibold capitalize">${this.url.path ? this.url.path : "Manage"}</h1>
+				<div class="flex items-center gap-4 justify-between border-b border-b-slate-200 pb-4 mb-4">
+					<div class="flex items-center gap-2">
+						<inlang-logo></inlang-logo>
+						<h1 class="font-semibold capitalize">${this.url.path ? this.url.path : "Manage"}</h1>
+					</div>
+					<!-- Dropdown for all projects -->
+					<div
+						class="relative"
+						x-data="{ open: false }"
+						@click=${(e: Event) => {
+							e.stopPropagation()
+						}}
+					>
+						<button
+							@click=${() => {
+								this.shadowRoot?.querySelector("#projects")?.classList.toggle("hidden")
+							}}
+							class="bg-white text-slate-600 border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+						>
+							Projects
+						</button>
+						<div
+							id="projects"
+							class="hidden absolute top-12 right-0 w-48 bg-white border border-slate-200 rounded-md shadow-lg py-1 z-20"
+						>
+							${this.projects?.map(
+								(project) =>
+									html`<a
+										href=${`/?repo=${project.projectPath}`}
+										class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+									>
+										${project.projectPath}
+									</a>`
+							)}
+						</div>
+					</div>
 				</div>
 				${!this.url.path
 					? html` <div
