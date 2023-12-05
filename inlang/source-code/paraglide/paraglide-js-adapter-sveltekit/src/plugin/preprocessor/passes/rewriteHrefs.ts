@@ -3,7 +3,7 @@ import {
 	PARAGLIDE_RUNTIME_MODULE_ALIAS,
 	TRANSLATE_PATH_FUNCTION_NAME,
 	TRANSLATE_PATH_MODULE_ID,
-} from "../../constants.js"
+} from "../../../constants.js"
 import type { PreprocessingPass } from "../index.js"
 import { getElementsFromAst } from "../utils/ast.js"
 import { attrubuteValuesToJSValue } from "../utils/attributes-to-values.js"

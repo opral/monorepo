@@ -7,7 +7,7 @@ import {
 	TRANSLATE_PATH_MODULE_ID,
 } from "../constants.js"
 import { getTranslatePathModuleCode } from "./routing/translatePath.js"
-import { preprocess, type PreprocessorConfig } from "../preprocessor/index.js"
+import { preprocess, type PreprocessorConfig } from "./preprocessor/index.js"
 import { getGetLanguageModuleCode } from "./routing/getLanguage.js"
 import { type UserConfig, type Config, resolveConfig } from "./config.js"
 
