@@ -16,7 +16,7 @@ import { privateEnv } from "@inlang/env-variables"
 
 const middleware = createMiddleware({
 	// This is the cors allowed origin:
-	origin: privateEnv.PUBLIC_SERVER_BASE_URL,
+	origin: "http://localhost:4004",
 
 	authorization: async (request: Request, _response: Response, next: NextFunction) => {
 		try {
