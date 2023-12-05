@@ -10,10 +10,6 @@
 <a href="/about">{m.about()}</a>
 
 <br/>
-
-
-<br/>
-
 <!-- Navigation with languageTag -->
 {#each availableLanguageTags as lang}
 	<a href="/" hreflang={lang}>
@@ -25,8 +21,8 @@
 <!-- Programmatic Navigation with goto -->
 <select on:change={(e)=>{
 	goto("/", { 
-		//@ts-ignore
-		language: e.target.value ,
+		// @ts-ignore
+		language: e.target.value,
 	})
 }}>
 	{#each availableLanguageTags as lang}
@@ -38,8 +34,6 @@
 
 <!-- This path is excluded from being transalted in `vite.config.js` -->
 <a href="/not-translated">Not Translated</a>
-
-
 
 <form action="/">
 	<input type="text" name="test" />

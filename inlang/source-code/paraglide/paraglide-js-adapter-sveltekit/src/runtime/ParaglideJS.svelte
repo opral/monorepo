@@ -1,12 +1,13 @@
-<script context="module">
+<script>
 	import translatePath from "$paraglide-adapter-sveltekit:translate-path"
 	import getLanguage from "$paraglide-adapter-sveltekit:get-language"
 	import { setLanguageTag, availableLanguageTags } from "$paraglide-adapter-sveltekit:runtime"
 	import { page } from "$app/stores"
-</script>
 
-<script>
-	$: lang = getLanguage($page.url)
+	/** @type { string | undefined } */
+	export let languageTag = undefined
+
+	$: lang = languageTag ?? getLanguage($page.url)
 	$: setLanguageTag(lang)
 </script>
 
@@ -18,6 +19,7 @@
 	{/if}
 </svelte:head>
 
+<!-- Trigger a Re-Render whenever the language changes -->
 {#key lang}
 	<slot />
 {/key}
