@@ -1,5 +1,5 @@
 import { PARAGLIDE_RUNTIME_MODULE_ALIAS } from "../../constants.js"
-import type { RoutingStrategyConfig } from "./strategy.js"
+import type { RoutingStrategyConfig } from "./config.js"
 import dedent from "dedent"
 
 export function getGetLanguageModuleCode(strategy: RoutingStrategyConfig): string {
@@ -78,9 +78,7 @@ function searchParamStrategy(
          * @returns {string}
          */
         export default function getLanguage(url) {
-                const maybeLanguageTag = url.searchParams.get("${
-									strategy.searchParamName ?? "lang"
-								}");
+                const maybeLanguageTag = url.searchParams.get("${strategy.searchParamName}");
                 return isAvailableLanguageTag(maybeLanguageTag)
                         ? maybeLanguageTag
                         : sourceLanguageTag;
