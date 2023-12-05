@@ -31,7 +31,7 @@ export default function Card(props: { item: any; displayName: string }) {
 				}
 				class={
 					"relative no-underline z-10 flex justify-between gap-4 overflow-hidden flex-col group w-full bg-background transition-all border border-surface-200 rounded-xl hover:shadow-lg hover:shadow-surface-100 hover:border-surface-300 active:border-surface-400 " +
-					(showCover || app ? " " : " h-48 p-5")
+					(showCover || app ? " " : /* min-h-48 */ " min-h-[12rem] p-5")
 				}
 			>
 				<Switch>
@@ -128,7 +128,10 @@ export default function Card(props: { item: any; displayName: string }) {
 									</Show>
 								</div>
 								<div class="flex flex-col justify-between items-start">
-									<p class="m-0 mb-2 text-sm text-surface-800 line-clamp-1 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors">
+									<p
+										style="text-wrap: balance;"
+										class="m-0 mb-2 text-sm text-surface-800 line-clamp-2 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors"
+									>
 										{props.displayName}
 									</p>
 									<Chip
