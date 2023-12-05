@@ -54,7 +54,10 @@ router.get("/github-auth-callback", async (request, response, next) => {
 			encryptedAccessToken,
 		}
 
-		if (installations.length === 0) {
+		// we currently do not support org installations, we only look at user installations for now in case someone accidentally installs the app as org
+		if (
+			installations.filter((installation: any) => installation.target_type === "User").length === 0
+		) {
 			// if app not installed, redirect via the install permissions url
 			response.redirect(installUrl)
 		} else {

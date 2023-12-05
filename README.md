@@ -44,7 +44,7 @@
 
 ## 🌐 About inlang
 
-**inlang is a whole ecosystem** of building blocks for your globalization (internationalization / i18n) efforts with the goal of helping companies to enter new markets in no time. For example:
+**inlang is a whole ecosystem** of building blocks for your globalization (internationalization / i18n) efforts with the goal of helping companies enter new markets in no time. For example:
 
 - use [inlang paraglide-js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) to have a fully translated, typesafe & fast app in minutes
 - use the [inlang VSCode extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) to translate your app right in the editor
@@ -62,7 +62,7 @@
 
 ## :bell: Stay up-to-date
 
-We are permantently working on new features and improvements. If you want to stay up-to-date, you can follow us on [Twitter](https://twitter.com/inlangHQ) or join our [Discord](https://discord.gg/gdMPPWy57R) server. 
+Follow us on [Twitter](https://twitter.com/inlangHQ) or join our [Discord](https://discord.gg/gdMPPWy57R) server. 
 
 We also regularly send out a newsletter with updates and tips & tricks. You can subscribe to it [here](https://inlang.com/newsletter).
 
@@ -73,7 +73,7 @@ There are many ways you can contribute to inlang! Here are a few options:
 
 - Star this repo
 - Create issues every time you feel something is missing or goes wrong
-- Upvote issues with 👍 reaction so we know what's the demand for a particular issue to prioritize it within the roadmap
+- Upvote issues with 👍 reaction so we know what the demand for a particular issue to prioritize it within the roadmap
 
 If you would like to contribute to the development of the project, please refer to our [Contributing guide](https://github.com/inlang/monorepo/blob/main/CONTRIBUTING.md).
 

@@ -18,14 +18,14 @@ import { currentPageContext } from "#src/renderer/state.js"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
 import Card from "#src/interface/components/Card.jsx"
-import { i18nRouting } from "#src/renderer/_default.page.route.js"
 import EditOutline from "~icons/material-symbols/edit-outline-rounded"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
  */
 export type PageProps = {
-	markdown: Awaited<ReturnType<any>>
+	readme: Awaited<ReturnType<any>>
+	changelog: Awaited<ReturnType<any>>
 	manifest: MarketplaceManifest & { uniqueID: string }
 	recommends?: MarketplaceManifest[]
 }
@@ -34,6 +34,7 @@ const pagesToHideSlider = ["badge", "editor", "ide", "cli", "paraglide"]
 
 export function Page(props: PageProps) {
 	const [readmore, setReadmore] = createSignal<boolean>(false)
+	const [activeTab, setActiveTab] = createSignal<"readme" | "changelog">("readme")
 
 	// mapping translatable types
 	const displayName = () =>
@@ -52,12 +53,47 @@ export function Page(props: PageProps) {
 	const [tableOfContents, setTableOfContents] = createSignal({})
 	createEffect(() => {
 		const table: Record<string, Array<string>> = {}
-		if (
-			props.markdown &&
-			props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g) &&
-			props.markdown.match(/<h[1].*?>(.*?)<\/h[1]>/g)
+		if (activeTab() === "readme") {
+			if (
+				props.readme &&
+				props.readme.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g) &&
+				props.readme.match(/<h[1].*?>(.*?)<\/h[1]>/g)
+			) {
+				props.readme.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g).map((heading: string) => {
+					// We have to use DOMParser to parse the heading string to a HTML element
+					const parser = new DOMParser()
+					const doc = parser.parseFromString(heading, "text/html")
+					const node = doc.body.firstChild as HTMLElement
+
+					let lastH1Key = ""
+
+					if (node.tagName === "H1") {
+						// @ts-ignore
+						table[node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")] = []
+					} else {
+						// @ts-ignore
+						if (!table[lastH1Key]) {
+							const h1Keys = Object.keys(table)
+							// @ts-ignore
+							lastH1Key = h1Keys.at(-1)
+							// @ts-ignore
+							table[lastH1Key].push(node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", ""))
+						} else {
+							// @ts-ignore
+							table[lastH1Key].push(node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", ""))
+						}
+					}
+
+					return node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")
+				})
+			}
+		} else if (
+			activeTab() === "changelog" &&
+			props.changelog &&
+			props.changelog.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g) &&
+			props.changelog.match(/<h[1].*?>(.*?)<\/h[1]>/g)
 		) {
-			props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g).map((heading: string) => {
+			props.changelog.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g).map((heading: string) => {
 				// We have to use DOMParser to parse the heading string to a HTML element
 				const parser = new DOMParser()
 				const doc = parser.parseFromString(heading, "text/html")
@@ -118,13 +154,10 @@ export function Page(props: PageProps) {
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />
 			<MarketplaceLayout>
-				<Show when={props.markdown && props.manifest}>
+				<Show when={props.readme && props.manifest}>
 					<div class="md:py-16 py-8">
 						<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-32">
-							<Show
-								when={props.markdown}
-								fallback={<p class="text-danger">{props.markdown?.error}</p>}
-							>
+							<Show when={props.readme} fallback={<p class="text-danger">{props.readme?.error}</p>}>
 								<section class="col-span-1 md:col-span-4 pb-4 md:pb-0 grid md:grid-cols-4 grid-cols-1 md:gap-16">
 									<div class="flex-col h-full justify-between md:col-span-3">
 										<div class="flex max-md:flex-col items-start gap-8">
@@ -222,16 +255,64 @@ export function Page(props: PageProps) {
 												/>
 											</div>
 										</Show>
-
-										<Show
-											when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}
-											fallback={<Markdown markdown={props.markdown} />}
-										>
-											<div class="grid md:grid-cols-4 grid-cols-1 gap-16 md:mb-32 mb-8">
-												<div class="w-full rounded-lg col-span-1 md:col-span-4">
-													<Markdown markdown={props.markdown} />
-												</div>
+										<Show when={props.readme && props.changelog}>
+											<div class="flex items-center gap-6 mt-4 w-full border-b border-surface-2">
+												<button
+													class={
+														"text-sm font-medium transition-colors py-2 border-b-2 " +
+														(activeTab() === "readme"
+															? "text-primary border-primary"
+															: "text-surface-500 hover:text-surface-700 border-primary/0")
+													}
+													onClick={() => setActiveTab("readme")}
+												>
+													Documentation
+												</button>
+												<button
+													class={
+														"text-sm font-medium transition-colors py-2 border-b-2 " +
+														(activeTab() === "changelog"
+															? "text-primary border-primary"
+															: "text-surface-500 hover:text-surface-700 border-primary/0")
+													}
+													onClick={() => setActiveTab("changelog")}
+												>
+													Changelog
+												</button>
 											</div>
+										</Show>
+										<Show
+											when={props.readme && props.changelog}
+											fallback={
+												<Show
+													when={props.readme.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}
+													fallback={<Markdown markdown={props.readme} />}
+												>
+													<div class="grid md:grid-cols-4 grid-cols-1 gap-16 md:mb-32 mb-8">
+														<div class="w-full rounded-lg col-span-1 md:col-span-4">
+															<Markdown markdown={props.readme} />
+														</div>
+													</div>
+												</Show>
+											}
+										>
+											<Switch>
+												<Match when={activeTab() === "readme"}>
+													<Show
+														when={props.readme.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}
+														fallback={<Markdown markdown={props.readme} />}
+													>
+														<div class="grid md:grid-cols-4 grid-cols-1 gap-16 md:mb-32 mb-8">
+															<div class="w-full rounded-lg col-span-1 md:col-span-4">
+																<Markdown markdown={props.readme} />
+															</div>
+														</div>
+													</Show>
+												</Match>
+												<Match when={activeTab() === "changelog"}>
+													<Markdown markdown={props.changelog} />
+												</Match>
+											</Switch>
 										</Show>
 									</div>
 									<div class="w-full">
@@ -465,18 +546,15 @@ function NavbarCommon(props: {
 							<Link
 								onClick={(e: any) => {
 									e.preventDefault()
-									scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
+									scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
 									setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
 								}}
 								class={
 									(isSelected(replaceChars(sectionTitle.toString().toLowerCase()))
 										? "text-primary font-semibold "
 										: "text-info/80 hover:text-on-background ") +
-									"tracking-wide text-sm block w-full font-normal mb-2"
+									"tracking-wide text-sm block w-full font-normal mb-2 cursor-pointer"
 								}
-								href={`${i18nRouting(currentPageContext.urlParsed.pathname).url}#${replaceChars(
-									sectionTitle.toString().toLowerCase()
-								)}`}
 							>
 								{sectionTitle.replace("#", "")}
 							</Link>
@@ -486,18 +564,15 @@ function NavbarCommon(props: {
 										<Link
 											onClick={(e: any) => {
 												e.preventDefault()
-												scrollToAnchor(replaceChars(heading.toString().toLowerCase()))
+												scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
 												setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
 											}}
 											class={
-												"text-sm tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
+												"text-sm cursor-pointer tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
 												(highlightedAnchor() === replaceChars(heading.toString().toLowerCase())
 													? "font-medium text-on-background border-l-on-background "
 													: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
 											}
-											href={`${
-												i18nRouting(currentPageContext.urlParsed.pathname).url
-											}#${replaceChars(heading.toString().toLowerCase())}`}
 										>
 											{heading.replace("#", "")}
 										</Link>

@@ -251,7 +251,7 @@ You can navigate between languages by adding a language parameter to your links.
 ### Adding a language switcher
 
 Language switchers are challenging, because they require us to translate the path we're currently on.
-Because there are so many different ways to implement i18n routing, we can't provide a one-size-fits-all solution. Regardless, you will probably need to define a `translatePath` function that takes in a path (in any language), and returns the path in the specified language.
+Because there are so many different ways to implement i18n routing, we can't provide a one-size-fits-all solution. Regardless, you will probably need to define a `route` function that takes in a path (in any language), and returns the path in the specified language.
 
 ```ts
 // ./src/lib/i18n-routing.ts
@@ -264,7 +264,7 @@ import {
 /**
  * Returns the path in the given language, regardless of which language the path is in.
  */
-export function translatePath(path: string, lang: AvailableLanguageTag) {
+export function route(path: string, lang: AvailableLanguageTag) {
 	path = withoutLanguageTag(path)
 
 	// Don't prefix the default language
@@ -286,17 +286,17 @@ function withoutLanguageTag(path: string) {
 }
 ```
 
-We can now get the link to the current page in a different language by calling `translatePath` with our current path.
+We can now get the link to the current page in a different language by calling `route` with our current path.
 
 ```svelte
 <script lang="ts">
   import { availableLanguageTags } from "$paraglide/runtime";
   import { page } from "$app/stores";
-  import { translatePath } from "$lib/i18n-routing";
+  import { route } from "$lib/i18n-routing";
 </script>
 
 {#each availableLanguageTags as lang}
-  <a href={translatePath($page.url.pathname, lang)} hreflang={lang}>Change language to {lang}</a>
+  <a href={route($page.url.pathname, lang)} hreflang={lang}>Change language to {lang}</a>
 {/each}
 ```
 
@@ -306,12 +306,12 @@ If you don't want to use `<a>` tags, you can also use the `goto` function from `
 <script lang="ts">
   import { availableLanguageTags } from "$paraglide/runtime";
   import { page } from "$app/stores";
-  import { translatePath } from "$lib/i18n-routing";
+  import { route } from "$lib/i18n-routing";
   import { goto } from "@sveltejs/kit";
 </script>
 
 {#each availableLanguageTags as lang}
-  <button on:click={() => goto(translatePath($page.url.pathname, lang))}>Change language to {lang}</button>
+  <button on:click={() => goto(route($page.url.pathname, lang))}>Change language to {lang}</button>
 {/each}
 ```
 
@@ -379,7 +379,7 @@ Now when you navigate change languages, the `lang` attribute should update.
 
 What we want is to generate a `<link rel="alternate" hreflang="..." href="...">` tag for each language version of the current page. Search Engines need this to differentiate between the different language versions of your page and to know which one to show to which user.
 
-Fortunately, we already did most of the work for this when building the language switcher. We can reuse the `translatePath` function to generate the correct `href` attribute.
+Fortunately, we already did most of the work for this when building the language switcher. We can reuse the `route` function to generate the correct `href` attribute.
 
 Let's create a new `I18NHeader` component that generates the `<link>` tags.
 
@@ -388,12 +388,12 @@ Let's create a new `I18NHeader` component that generates the `<link>` tags.
 <script lang="ts">
   import { availableLanguageTags } from "$paraglide/runtime";
   import { page } from "$app/stores";
-  import { translatePath } from "$lib/i18n-routing";
+  import { route } from "$lib/i18n-routing";
 </script>
 
 <svelte:head>
 	{#each availableLanguageTags as lang}
-		<link rel="alternate" hreflang={lang} href={translatePath($page.url.pathname, lang)} />
+		<link rel="alternate" hreflang={lang} href={route($page.url.pathname, lang)} />
 	{/each}
 </svelte:head>
 ```
