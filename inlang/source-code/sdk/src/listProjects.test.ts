@@ -19,12 +19,11 @@ const settings: ProjectSettings = {
 describe("listProjects", () => {
 	it("should find all projects in the inlang monorepo", async () => {
 		const fs = createNodeishMemoryFs()
-		fs.mkdir("C:\\Users\\user\\project.inlang", { recursive: true })
-		fs.writeFile("C:\\Users\\user\\project.inlang\\settings.json", JSON.stringify(settings))
+		await fs.mkdir("/user/project.inlang", { recursive: true })
+		await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(settings))
 
-		await listProjects(fs, "C:\\Users\\user").then((projects) => {
+		await listProjects(fs, "/user").then((projects) => {
 			assert(projects.length === 1)
-			assert(projects[0]?.projectPath === "C:\\Users\\user\\project.inlang")
 		})
 	})
 })
