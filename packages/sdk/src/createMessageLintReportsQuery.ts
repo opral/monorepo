@@ -7,11 +7,10 @@ import type {
 } from "./api.js"
 import type { ProjectSettings } from "@inlang/project-settings"
 import type { resolveModules } from "./resolve-modules/index.js"
-import type { MessageLintReport } from "./versionedInterfaces.js"
+import type { MessageLintReport, Message } from "./versionedInterfaces.js"
 import { lintSingleMessage } from "./lint/index.js"
 import { ReactiveMap } from "./reactivity/map.js"
 import { debounce } from "throttle-debounce"
-import { Message } from "@inlang/message"
 
 /**
  * Creates a reactive query API for messages.
