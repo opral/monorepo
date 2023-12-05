@@ -1095,6 +1095,9 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../../paraglide-js
+      '@inlang/paraglide-js-adapter-vite':
+        specifier: workspace:*
+        version: link:../../paraglide-js-adapter-vite
       '@types/node':
         specifier: ^20
         version: 20.9.3
