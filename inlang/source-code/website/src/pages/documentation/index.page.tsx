@@ -191,6 +191,17 @@ function NavbarCommon(props: {
 		}
 	}
 
+	const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
+		const element = document.getElementById(anchor)
+		if (element && window) {
+			window.scrollTo({
+				top: element.offsetTop - 96,
+				behavior: behavior ?? "instant",
+			})
+		}
+		window.history.pushState({}, "", `${currentPageContext.urlParsed.pathname}#${anchor}`)
+	}
+
 	onMount(async () => {
 		for (const heading of props.headings) {
 			if (
@@ -205,6 +216,7 @@ function NavbarCommon(props: {
 							: new Promise((resolve) => img.addEventListener("load", resolve))
 					)
 				)
+				scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
 			}
 		}
 	})
