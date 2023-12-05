@@ -10,6 +10,8 @@ import type { resolveModules } from "./resolve-modules/index.js"
 import type { MessageLintReport } from "./versionedInterfaces.js"
 import { lintSingleMessage } from "./lint/index.js"
 import { ReactiveMap } from "./reactivity/map.js"
+import { debounce } from "throttle-debounce"
+import { Message } from "@inlang/message"
 
 /**
  * Creates a reactive query API for messages.
@@ -18,7 +20,8 @@ export function createMessageLintReportsQuery(
 	messagesQuery: MessageQueryApi,
 	settings: () => ProjectSettings,
 	installedMessageLintRules: () => Array<InstalledMessageLintRule>,
-	resolvedModules: () => Awaited<ReturnType<typeof resolveModules>> | undefined
+	resolvedModules: () => Awaited<ReturnType<typeof resolveModules>> | undefined,
+	hasWatcher: boolean
 ): InlangProject["query"]["messageLintReports"] {
 	// @ts-expect-error
 	const index = new ReactiveMap<MessageLintReport["messageId"], MessageLintReport[]>()
@@ -34,18 +37,40 @@ export function createMessageLintReportsQuery(
 		),
 	}
 
+	const messages = messagesQuery.getAll() as Message[]
+
 	if (messagesQuery.includedMessageIds() && _settings && rulesArray) {
 		for (const messageId of messagesQuery.includedMessageIds()) {
 			messagesQuery.get.subscribe({ where: { id: messageId } }, async (message) => {
-				await lintSingleMessage({
-					rules: rulesArray,
-					settings: settingsObject,
-					message: message,
-				}).then((report) => {
-					if (report.errors.length === 0 && index.get(messageId) !== report.data) {
-						index.set(messageId, report.data)
-					}
-				})
+				if (hasWatcher) {
+					await lintSingleMessage({
+						rules: rulesArray,
+						settings: settingsObject,
+						messages: messages,
+						message: message,
+					}).then((report) => {
+						if (report.errors.length === 0 && index.get(messageId) !== report.data) {
+							index.set(messageId, report.data)
+						}
+					})
+				} else {
+					debounce(
+						500,
+						async (message) => {
+							await lintSingleMessage({
+								rules: rulesArray,
+								settings: settingsObject,
+								messages: messages,
+								message: message,
+							}).then((report) => {
+								if (report.errors.length === 0 && index.get(messageId) !== report.data) {
+									index.set(messageId, report.data)
+								}
+							})
+						},
+						{ atBegin: false }
+					)(message)
+				}
 			})
 		}
 	}
