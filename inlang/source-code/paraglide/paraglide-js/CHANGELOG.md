@@ -1,5 +1,9 @@
 # @inlang/paraglide-js
 
+## 1.0.0-prerelease.16
+
+Fix `paraglide compile` hanging for a couple seconds after successful compilation 
+
 ## 1.0.0-prerelease.15
 
 Fix crash when using `npx @inlang/paraglide-js init` and selecting vscode.
