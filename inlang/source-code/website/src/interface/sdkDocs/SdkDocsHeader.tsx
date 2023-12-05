@@ -44,6 +44,14 @@ const SdkDocsHeader = () => {
 
 export default SdkDocsHeader
 
+export const getDocsBaseUrl = (link: string) => {
+	if (link.split("/")[2] === "plugin") {
+		return "/documentation/plugin"
+	} else {
+		return "/documentation"
+	}
+}
+
 const SdkDocsSubHeader = () => {
 	const getCategories = () => {
 		return [
@@ -64,14 +72,6 @@ const SdkDocsSubHeader = () => {
 			// 	href: "/documentation/content",
 			// },
 		]
-	}
-
-	const getDocsBaseUrl = (link: string) => {
-		if (link.split("/")[2] === "plugin") {
-			return "/documentation/plugin"
-		} else {
-			return "/documentation"
-		}
 	}
 
 	return (

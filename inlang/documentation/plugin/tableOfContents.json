@@ -12,5 +12,33 @@
 			"title": "How plugins work",
 			"description": "Learn how plugins work under the hood."
 		}
+	],
+	"Develop a Plugin": [
+		{
+			"path": "./build-plugin/start.md",
+			"slug": "plugin/build-plugin",
+			"title": "Build a Plugin",
+			"description": "Get started building a plugin for inlang's i18n ecosystem."
+		},
+		{
+			"path": "./build-plugin/test.md",
+			"slug": "plugin/build-plugin/test",
+			"title": "Test a Plugin",
+			"description": "How to test your plugins to ensure they work as expected."
+		}
+	],
+	"Plugin Reference": [
+		{
+			"path": "./plugin-reference/api-introduction.md",
+			"slug": "plugin/api/introduction",
+			"title": "Introduction",
+			"description": "How to work with the API and the design behind it."
+		},
+		{
+			"path": "./plugin-reference/api.md",
+			"slug": "plugin/api",
+			"title": "API",
+			"description": "The interface for plugins to interact with the inlang ecosystem."
+		}
 	]
 }

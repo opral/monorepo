@@ -10,6 +10,7 @@ import "@inlang/markdown/custom-elements"
 import SdkDocsLayout from "#src/interface/sdkDocs/SdkDocsLayout.jsx"
 import { getTableOfContents } from "./getTableOfContents.js"
 import InPageNav from "./InPageNav.jsx"
+import MainActions from "./MainActions.jsx"
 
 export type PageProps = {
 	markdown: Awaited<ReturnType<any>>
@@ -105,6 +106,7 @@ export function Page(props: PageProps) {
 							 * filteredTableContents is not available on the client.
 							 */}
 							<div class="py-[48px] pb-32">
+								<MainActions />
 								<Show when={getTableOfContents() && props.markdown}>
 									<NavbarCommon
 										tableOfContents={getTableOfContents()}
