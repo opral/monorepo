@@ -240,7 +240,7 @@ function NavbarCommon(props: {
 
 	const onAnchorClick = async (anchor: string) => {
 		setHighlightedAnchor(anchor)
-		scrollToAnchor(anchor)
+		scrollToAnchor(anchor, "smooth")
 	}
 
 	onMount(async () => {
@@ -300,15 +300,12 @@ function NavbarCommon(props: {
 																		props.onLinkClick?.()
 																	}}
 																	class={
-																		"text-sm tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
+																		"text-sm cursor-pointer tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
 																		(highlightedAnchor() ===
 																		replaceChars(heading.toString().toLowerCase())
 																			? "font-medium text-on-background border-l-on-background "
 																			: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
 																	}
-																	href={`/documentation/${slug}#${replaceChars(
-																		heading.toString().toLowerCase()
-																	)}`}
 																>
 																	{heading.replace("#", "")}
 																</Link>
