@@ -28,5 +28,10 @@ export const listProjects = async (
 	}
 
 	await searchDir(from, 0)
+
+	// remove double slashes
+	for (const project of projects) {
+		project.projectPath = project.projectPath.replace(/\/\//g, "/")
+	}
 	return projects
 }
