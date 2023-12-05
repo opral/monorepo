@@ -1,11 +1,19 @@
 <script context="module" lang="ts">
-	import { getLanguage, translatePath } from "$paraglide-adapter-sveltekit"
+
+	// @ts-ignore
+	import translatePath from "$paraglide-adapter-sveltekit:translate-path"
+	// @ts-ignore
+	import getLanguage from "$paraglide-adapter-sveltekit:get-language"
 	import { languageTag, setLanguageTag, type AvailableLanguageTag, availableLanguageTags } from "$paraglide/runtime"
 	import { goto as sk_goto } from "$app/navigation"
 	import { page } from "$app/stores"
 
+
+	declare function getLanguage(url: URL): string
+	declare function translatePath(path: string, language: AvailableLanguageTag): string
+
 	type GotoPath = Parameters<typeof sk_goto>[0]
-	type GotoOptions = (Parameters<typeof sk_goto>[1] & { language: string }) | undefined
+	type GotoOptions = (Parameters<typeof sk_goto>[1] & { language: AvailableLanguageTag }) | undefined
 	type GotoReturnType = ReturnType<typeof sk_goto>
 
 	/**

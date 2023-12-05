@@ -1,16 +1,10 @@
 import { paraglide as vitePluginParaglide } from "@inlang/paraglide-js-adapter-vite"
 import type { Plugin } from "vite"
 import { resolve } from "node:path"
-import {
-	GET_LANGUAGE_MODULE_ID,
-	OUTDIR_ALIAS,
-	PUBLIC_VIRTUAL_MODULE_ID,
-	TRANSLATE_PATH_MODULE_ID,
-} from "../constants.js"
+import { GET_LANGUAGE_MODULE_ID, OUTDIR_ALIAS, TRANSLATE_PATH_MODULE_ID } from "../constants.js"
 import type { RoutingStrategyConfig } from "./routing/strategy.js"
 import { getTranslatePathModuleCode } from "./routing/translatePath.js"
 import { preprocess, type PreprocessorConfig } from "../preprocessor/index.js"
-import { getPublicModuleCode } from "./public.js"
 import { getGetLanguageModuleCode } from "./routing/getLanguage.js"
 
 type VitePluginUserConfig = Parameters<typeof vitePluginParaglide>[0]
@@ -95,11 +89,6 @@ function adapterSvelteKit(userConfig: UserConfig): Plugin {
 				return resolved
 			}
 
-			if (id === PUBLIC_VIRTUAL_MODULE_ID) {
-				const resolved = "\0" + PUBLIC_VIRTUAL_MODULE_ID
-				return resolved
-			}
-
 			if (id === GET_LANGUAGE_MODULE_ID) {
 				const resolved = "\0" + GET_LANGUAGE_MODULE_ID
 				return resolved
@@ -119,10 +108,6 @@ function adapterSvelteKit(userConfig: UserConfig): Plugin {
 
 			if (id === "\0" + GET_LANGUAGE_MODULE_ID) {
 				return getGetLanguageModuleCode(strategy)
-			}
-
-			if (id === "\0" + PUBLIC_VIRTUAL_MODULE_ID) {
-				return getPublicModuleCode()
 			}
 
 			return undefined

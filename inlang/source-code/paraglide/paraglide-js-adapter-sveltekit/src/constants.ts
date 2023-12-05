@@ -12,9 +12,6 @@ export const OUTDIR_ALIAS = "$paraglide-adapter-sveltekit:outdir:"
 export const TRANSLATE_PATH_MODULE_ID = "$paraglide-adapter-sveltekit:translate-path"
 export const GET_LANGUAGE_MODULE_ID = "$paraglide-adapter-sveltekit:get-language"
 
-//The virtual module ID for the public interface
-export const PUBLIC_VIRTUAL_MODULE_ID = "$paraglide-adapter-sveltekit"
-
 /**
  * The name to give the `languageTag` function when injecting it into the code
  */
