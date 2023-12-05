@@ -181,24 +181,13 @@ function NavbarCommon(props: {
 	const isSelected = (slug: string) => {
 		const reference = `/documentation/${slug}`
 
-		if (props.getLocale() === "en") {
-			if (
-				reference === currentPageContext.urlParsed.pathname ||
-				reference === currentPageContext.urlParsed.pathname + "/"
-			) {
-				return true
-			} else {
-				return false
-			}
+		if (
+			reference === currentPageContext.urlParsed.pathname ||
+			reference === currentPageContext.urlParsed.pathname + "/"
+		) {
+			return true
 		} else {
-			if (
-				reference === i18nRouting(currentPageContext.urlParsed.pathname).url ||
-				reference === i18nRouting(currentPageContext.urlParsed.pathname).url + "/"
-			) {
-				return true
-			} else {
-				return false
-			}
+			return false
 		}
 	}
 
