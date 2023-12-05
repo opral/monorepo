@@ -8,7 +8,7 @@ type GotoOptions = (Parameters<typeof sk_goto>[1] & { language: string }) | unde
 type GotoReturnType = ReturnType<typeof sk_goto>
 
 /**
- * A wrapper around SvelteKit's goto function that translates the path before navigating.
+ * A wrapper around SvelteKit's goto function that translates the url before navigating.
  *
  * Returns a Promise that resolves when SvelteKit navigates (or fails to navigate, in which case the promise rejects) to the specified url. For external URLs, use window.location = url instead of calling goto(url).
  * @param url — Where to navigate to. Note that if you've set config.kit.paths.base and the URL is root-relative, you need to prepend the base path if you want to navigate within the app.
