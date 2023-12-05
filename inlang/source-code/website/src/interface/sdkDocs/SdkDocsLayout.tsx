@@ -1,6 +1,6 @@
-import Footer from "#src/pages/index/Footer.jsx"
 import type { JSXElement } from "solid-js"
 import SdkDocsHeader from "./SdkDocsHeader.jsx"
+import Footer from "./SdkDocsFooter.jsx"
 
 const SdkDocsLayout = (props: { children: JSXElement }) => {
 	return (
