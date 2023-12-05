@@ -230,6 +230,10 @@ export class InlangInstall extends TwLitElement {
 		}
 	}
 
+	listModules() {
+		return registry.filter((product) => product.module)
+	}
+
 	/* This function generates the install link for the user based on a repo url */
 	generateInstallLink() {
 		const url = new URL(this.repoURL)
@@ -244,8 +248,39 @@ export class InlangInstall extends TwLitElement {
 					<h2 class="text-xl font-semibold">No module found</h2>
 					</h2>
 					<p class="text-slate-500 mb-8">
-						Go to inlang.com to find a module you want to install.
+						Find available modules here, or search on inlang.com for more in-depth information. 
 					</p>
+
+					<!-- List of all modules -->
+					<div class="flex flex-col gap-2 max-h-72 overflow-y-scroll">
+						${this.listModules().map(
+							(product) =>
+								html`<div
+									class="flex items-center gap-2 w-full h-14 bg-slate-200 rounded-md px-3 py-2"
+								>
+									<img
+										class="w-8 h-8 rounded-md"
+										src=${product.icon}
+										alt=${product.displayName.en}
+									/>
+									<div class="flex-grow truncate">${product.displayName.en}</div>
+									<button
+										class="bg-slate-800 text-white text-sm text-center py-1.5 px-3 rounded-md font-medium hover:bg-slate-900 transition-colors"
+										@click=${() => {
+											this.module = product.id
+											window.location.href = window.location.href + `&module=${product.id}`
+										}}
+									>
+										Install
+									</button>
+								</div>`
+						)}
+					</div>
+					<div class="flex items-center gap-2 text-slate-500 text-sm">
+					<div class="h-[1px] w-full bg-slate-200 my-4"></div>
+										Or
+					<div class="h-[1px] w-full bg-slate-200 my-4"></div>
+					</div>
 					<a
 						href="https://inlang.com"
 						target="_blank"

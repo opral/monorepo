@@ -93,7 +93,8 @@ export class InlangManage extends TwLitElement {
 									html`<a
 										href=${`
 										${this.url.path === "install" ? "/install" : "/"}
-										?repo=${this.url.repo}&project=${project.projectPath}`}
+										?repo=${this.url.repo}&project=${project.projectPath}` +
+										(this.url.module ? `&module=${this.url.module}` : "")}
 										class=${"flex gap-2 items-center px-4 py-2 text-sm " +
 										(this.url.project === project.projectPath
 											? "bg-slate-100 text-slate-900"
