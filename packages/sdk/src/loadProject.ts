@@ -26,6 +26,7 @@ import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
+import { debounce } from "throttle-debounce"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -210,30 +211,39 @@ export const loadProject = async (args: {
 		// -- app ---------------------------------------------------------------
 
 		const initializeError: Error | undefined = await initialized.catch((error) => error)
+		const abortController = new AbortController()
+		const hasWatcher = nodeishFs.watch("/", { signal: abortController.signal }) !== undefined
 
 		const messagesQuery = createMessagesQuery(() => messages() || [])
 		const lintReportsQuery = createMessageLintReportsQuery(
 			messagesQuery,
 			settings as () => ProjectSettings,
 			installedMessageLintRules,
-			resolvedModules
+			resolvedModules,
+			hasWatcher
 		)
 
-		const save = skipFirst(async (newMessages) => {
-			try {
-				await resolvedModules()?.resolvedPluginApi.saveMessages({
-					settings: settingsValue,
-					messages: newMessages,
-				})
-			} catch (err) {
-				throw new PluginSaveMessagesError({
-					cause: err,
-				})
-			}
-		})
+		const debouncedSave = skipFirst(
+			debounce(
+				500,
+				async (newMessages) => {
+					try {
+						await resolvedModules()?.resolvedPluginApi.saveMessages({
+							settings: settingsValue,
+							messages: newMessages,
+						})
+					} catch (err) {
+						throw new PluginSaveMessagesError({
+							cause: err,
+						})
+					}
+				},
+				{ atBegin: false }
+			)
+		)
 
 		createEffect(() => {
-			save(messagesQuery.getAll())
+			debouncedSave(messagesQuery.getAll())
 		})
 
 		return {
