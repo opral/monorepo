@@ -1,8 +1,7 @@
 <script context="module">
 	import translatePath from "$paraglide-adapter-sveltekit:translate-path"
 	import getLanguage from "$paraglide-adapter-sveltekit:get-language"
-	import { setLanguageTag,  availableLanguageTags } from "$paraglide-adapter-sveltekit:runtime"
-
+	import { setLanguageTag, availableLanguageTags } from "$paraglide-adapter-sveltekit:runtime"
 	import { page } from "$app/stores"
 </script>
 

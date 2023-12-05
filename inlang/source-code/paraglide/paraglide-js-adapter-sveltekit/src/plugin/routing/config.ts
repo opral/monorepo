@@ -42,7 +42,7 @@ export type RoutingStrategyConfig =
 	  }
 
 export function resolveRoutingStrategyConfig(
-	userConfig: RoutingStrategyUserConfig
+	userConfig: RoutingStrategyUserConfig,
 ): RoutingStrategyConfig {
 	if (!userConfig) {
 		return { name: "prefix", prefixDefault: false }

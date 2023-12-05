@@ -4,7 +4,7 @@ import dedent from "dedent"
 
 export function getTranslatePathModuleCode(
 	strategy: RoutingStrategyConfig,
-	excludeRegexes: RegExp[]
+	excludeRegexes: RegExp[],
 ): string {
 	switch (strategy.name) {
 		case "domain":
@@ -19,7 +19,7 @@ export function getTranslatePathModuleCode(
 
 function domainStrategy(
 	{ domains }: Extract<RoutingStrategyConfig, { name: "domain" }>,
-	excludeRegexes: RegExp[]
+	excludeRegexes: RegExp[],
 ): string {
 	return dedent`
     import { sourceLanguageTag, availableLanguageTags, languageTag } from "${PARAGLIDE_RUNTIME_MODULE_ALIAS}"
@@ -64,7 +64,7 @@ function domainStrategy(
 
 function prefixStrategy(
 	{ prefixDefault }: Extract<RoutingStrategyConfig, { name: "prefix" }>,
-	excludeRegexes: RegExp[]
+	excludeRegexes: RegExp[],
 ): string {
 	return dedent`
     import { sourceLanguageTag, availableLanguageTags } from "${PARAGLIDE_RUNTIME_MODULE_ALIAS}"
@@ -117,7 +117,7 @@ function prefixStrategy(
 
 function searchParamStrategy(
 	strategy: Extract<RoutingStrategyConfig, { name: "searchParam" }>,
-	excludeRegexes: RegExp[]
+	excludeRegexes: RegExp[],
 ): string {
 	const searchParamName = strategy.searchParamName
 

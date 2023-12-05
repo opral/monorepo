@@ -2,7 +2,7 @@ import type { Ast, ElementNode, TemplateNode } from "../types.js"
 
 export function getElementsFromAst<Name extends string>(
 	ast: Ast,
-	elementName: Name
+	elementName: Name,
 ): ElementNode<Name>[] {
 	const links: ElementNode<Name>[] = []
 
