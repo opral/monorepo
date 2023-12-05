@@ -10,13 +10,14 @@
 
 import type { NextFunction, Request, Response } from "express"
 // @ts-ignore
-import createMiddleware from "@isomorphic-git/cors-proxy/middleware.js"
+import createMiddleware from "./auth/cors-middleware.js"
 import { decryptAccessToken } from "./auth/implementation.js"
 import { privateEnv } from "@inlang/env-variables"
+const allowedOrigins = privateEnv.PUBLIC_ALLOWED_AUTH_URLS.split(",")
 
 const middleware = createMiddleware({
 	// This is the cors allowed origin:
-	origin: privateEnv.PUBLIC_SERVER_BASE_URL,
+	origins: allowedOrigins,
 
 	authorization: async (request: Request, _response: Response, next: NextFunction) => {
 		try {
@@ -58,20 +59,7 @@ export async function proxy(request: Request, response: Response, next: NextFunc
 		response.set("Access-Control-Allow-Credentials", "true")
 		response.set("Access-Control-Allow-Headers", "user-agent")
 
-<<<<<<< HEAD
 		middleware(request, response, next)
-=======
-		middleware(request, response, () => {
-			console.log(allowedAuthUrls, origin)
-			if (allowedAuthUrls.includes(origin)) {
-				response.set("Access-Control-Allow-Origin", origin)
-			} else {
-				response.set("Access-Control-Allow-Origin", "")
-			}
-
-			next()
-		})
->>>>>>> 8a9d6b128 (fix auth header fall back)
 	} catch (error) {
 		next(error)
 	}
