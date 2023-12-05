@@ -10,6 +10,7 @@ import "@inlang/markdown/custom-elements"
 import { i18nRouting } from "#src/renderer/_default.page.route.js"
 import SdkDocsLayout from "#src/interface/sdkDocs/SdkDocsLayout.jsx"
 import { getTableOfContents } from "./getTableOfContents.js"
+import InPageNav from "./InPageNav.jsx"
 
 export type PageProps = {
 	markdown: Awaited<ReturnType<any>>
@@ -143,7 +144,18 @@ export function Page(props: PageProps) {
 								<EditButton href={editLink()} />
 								<Feedback />
 							</div>
-							<div class="hidden xl:block w-[230px] py-16 text-sm ml-12 pl-4">This is headline</div>
+							<div class="hidden xl:block w-[230px] py-16 text-sm ml-12 pl-4">
+								<InPageNav
+									markdown={props.markdown}
+									pageName={
+										findPageBySlug(
+											currentPageContext.urlParsed.pathname
+												.replace("/" + languageTag(), "")
+												.replace("/documentation/", "")
+										)?.title as string
+									}
+								/>
+							</div>
 						</div>
 					</Show>
 				</div>
