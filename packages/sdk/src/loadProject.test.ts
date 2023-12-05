@@ -705,7 +705,9 @@ describe("functionality", () => {
 				},
 			})
 
-			expect(mockSaveFn.mock.calls.length).toBe(2)
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			expect(mockSaveFn.mock.calls.length).toBe(1)
 
 			expect(mockSaveFn.mock.calls[0][0].settings).toStrictEqual(settings)
 

@@ -13,6 +13,8 @@ const message1: Message = {
 	],
 }
 
+const messages = [message1]
+
 test("should not report if source message present", async () => {
 	const result = await lintSingleMessage({
 		settings: {
@@ -23,6 +25,7 @@ test("should not report if source message present", async () => {
 				[messageWithoutSourceRule.id]: "warning",
 			},
 		},
+		messages,
 		message: message1,
 		rules: [messageWithoutSourceRule],
 	})
@@ -41,6 +44,7 @@ test("should report if source message is missing", async () => {
 				[messageWithoutSourceRule.id]: "warning",
 			},
 		},
+		messages,
 		message: message1,
 		rules: [messageWithoutSourceRule],
 	})
