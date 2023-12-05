@@ -11,7 +11,7 @@
 			"path": "./overview/architecture.md",
 			"slug": "architecture",
 			"title": "Architecture",
-			"description": "Architecture of inlang"
+			"description": "Architecture of inlang's SDK."
 		}
 	],
 	"How to": [
@@ -22,19 +22,13 @@
 			"description": "Develop an app"
 		},
 		{
-			"path": "./how-to/build-plugin.md",
-			"slug": "build-plugin",
-			"title": "Develop Plugin",
-			"description": "Develop a plugin"
-		},
-		{
-			"path": "./how-to/build-lint-rule.md",
+			"path": "/how-to/build-lint-rule.md",
 			"slug": "build-lint-rule",
 			"title": "Develop Lint Rule",
 			"description": "Develop a lint rule"
 		},
 		{
-			"path": "./how-to/publish-marketplace.md",
+			"path": "/how-to/publish-marketplace.md",
 			"slug": "publish-to-marketplace",
 			"title": "Publish Marketplace",
 			"description": "How to publish your product to inlang's marketplace."
@@ -63,7 +57,7 @@
 	"Concept": [
 		{
 			"path": "./concept/app.md",
-			"slug": "app",
+			"slug": "concept/app",
 			"title": "App",
 			"description": "App concept"
 		},
@@ -75,31 +69,31 @@
 		},
 		{
 			"path": "./concept/message.md",
-			"slug": "message",
+			"slug": "concept/message",
 			"title": "Message",
 			"description": "Message concept"
 		},
 		{
 			"path": "./concept/plugin.md",
-			"slug": "plugin",
+			"slug": "concept/plugin",
 			"title": "Plugin",
 			"description": "Plugin concept"
 		},
 		{
 			"path": "./concept/lint-rule.md",
-			"slug": "lint-rule",
+			"slug": "concept/lint-rule",
 			"title": "Lint Rule",
 			"description": "Lint Rule concept"
 		},
 		{
 			"path": "./concept/library.md",
-			"slug": "library",
+			"slug": "concept/library",
 			"title": "Library",
 			"description": "Library concept"
 		},
 		{
 			"path": "./concept/language-tag.md",
-			"slug": "language-tag",
+			"slug": "concept/language-tag",
 			"title": "Language Tag",
 			"description": "Language Tag concept"
 		}
