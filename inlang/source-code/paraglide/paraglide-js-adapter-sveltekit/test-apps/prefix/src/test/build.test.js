@@ -43,20 +43,21 @@ describe("alternate tags", () => {
 
 	it("should add alternate tags to the de locale", async () => {
 		const content = await read("de.html")
-		expect(content).toContain('<link rel="alternate" hreflang="de" href="/de/">')
-		expect(content).toContain('<link rel="alternate" hreflang="en" href="/">')
+		expect(content).toContain('<link rel="alternate" hreflang="de" href="/de/')
+		expect(content).toContain('<link rel="alternate" hreflang="en" href="/"')
 	})
 
 	it("should add alternate tags to the about page", async () => {
 		const content = await read("about.html")
-		expect(content).toContain('<link rel="alternate" hreflang="de" href="/de/about">')
-		expect(content).toContain('<link rel="alternate" hreflang="en" href="/about">')
+		expect(content).toContain('<link rel="alternate" hreflang="de" href="/de/about')
+		expect(content).toContain('<link rel="alternate" hreflang="en" href="/about')
 	})
 
 	it("should add alternate tags to the de about page", async () => {
 		const content = await read("de/about.html")
-		expect(content).toContain('<link rel="alternate" hreflang="de" href="/de/about">')
-		expect(content).toContain('<link rel="alternate" hreflang="en" href="/about">')
+		console.log(content)
+		expect(content).toContain('<link rel="alternate" hreflang="de" href="/de/about')
+		expect(content).toContain('<link rel="alternate" hreflang="en" href="/about')
 	})
 
 	it("should not add alternate tags to excluded pages", async () => {

@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/paraglide-js-adapter-sveltekit-test-prefix",
+	"name": "@inlang/paraglide-js-adapter-sveltekit-test-domain",
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {

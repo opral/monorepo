@@ -10,11 +10,12 @@ export default defineConfig({
 			outdir: "./src/paraglide",
 
 			routingStrategy: {
-				name: "prefix",
-				prefixDefault: false,
+				name: "domain",
+				domains: {
+					de: "site.de",
+					en: "side.com",
+				},
 			},
-
-			exclude: [new RegExp("^/not-translated")],
 		}),
 	],
 })
