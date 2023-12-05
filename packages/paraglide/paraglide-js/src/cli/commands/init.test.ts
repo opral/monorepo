@@ -204,7 +204,6 @@ describe("addCompileStepToPackageJSON()", () => {
 		expect(process.exit).not.toHaveBeenCalled()
 	})
 
-
 	test("if there is a lint script present, add the paraglide-js compile command to it", async () => {
 		mockFiles({
 			"/package.json": JSON.stringify({
