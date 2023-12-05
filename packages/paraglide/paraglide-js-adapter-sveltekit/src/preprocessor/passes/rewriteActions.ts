@@ -1,6 +1,6 @@
 import {
 	LANGUAGE_TAG_ALIAS,
-	OUTDIR_ALIAS,
+	PARAGLIDE_RUNTIME_ALIAS,
 	TRANSLATE_PATH_FUNCTION_NAME,
 	TRANSLATE_PATH_MODULE_ID,
 } from "../../constants.js"
@@ -48,7 +48,7 @@ export const RewriteActions: PreprocessingPass = {
 		return {
 			imports: [
 				`import ${TRANSLATE_PATH_FUNCTION_NAME} from '${TRANSLATE_PATH_MODULE_ID}';`,
-				`import { languageTag as ${LANGUAGE_TAG_ALIAS} } from '${OUTDIR_ALIAS}/runtime.js';`,
+				`import { languageTag as ${LANGUAGE_TAG_ALIAS} } from '${PARAGLIDE_RUNTIME_ALIAS}';`,
 			],
 		}
 	},

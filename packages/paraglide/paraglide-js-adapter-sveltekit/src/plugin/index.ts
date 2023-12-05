@@ -1,7 +1,11 @@
 import { paraglide as vitePluginParaglide } from "@inlang/paraglide-js-adapter-vite"
 import type { Plugin } from "vite"
 import { resolve } from "node:path"
-import { GET_LANGUAGE_MODULE_ID, OUTDIR_ALIAS, TRANSLATE_PATH_MODULE_ID } from "../constants.js"
+import {
+	GET_LANGUAGE_MODULE_ID,
+	PARAGLIDE_RUNTIME_ALIAS,
+	TRANSLATE_PATH_MODULE_ID,
+} from "../constants.js"
 import type { RoutingStrategyConfig } from "./routing/strategy.js"
 import { getTranslatePathModuleCode } from "./routing/translatePath.js"
 import { preprocess, type PreprocessorConfig } from "../preprocessor/index.js"
@@ -94,8 +98,8 @@ function adapterSvelteKit(userConfig: UserConfig): Plugin {
 				return resolved
 			}
 
-			if (id.startsWith(OUTDIR_ALIAS)) {
-				return id.replace(OUTDIR_ALIAS, outdir)
+			if (id === PARAGLIDE_RUNTIME_ALIAS) {
+				return resolve(outdir, "runtime.js")
 			}
 
 			return undefined

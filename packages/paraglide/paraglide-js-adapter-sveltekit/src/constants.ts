@@ -1,14 +1,4 @@
-/**
- * The Alias for the ParaglideJS Outdir
- * The vite plugin will replace this with the actual outdir
- *
- * This allows you to write imports like this:
- * @example
- * ```ts
- * import { languageTag } from {OUTDIR_ALIAS}/runtime.js"
- * ```
- */
-export const OUTDIR_ALIAS = "$paraglide-adapter-sveltekit:outdir:"
+export const PARAGLIDE_RUNTIME_ALIAS = "$paraglide-adapter-sveltekit:runtime"
 export const TRANSLATE_PATH_MODULE_ID = "$paraglide-adapter-sveltekit:translate-path"
 export const GET_LANGUAGE_MODULE_ID = "$paraglide-adapter-sveltekit:get-language"
 

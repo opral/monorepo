@@ -1,5 +1,5 @@
 import type { AvailableLanguageTag } from "$paraglide/runtime"
-import { getLanguage } from "$paraglide-adapter-sveltekit"
+import getLanguage from "$paraglide-adapter-sveltekit:get-language"
 
 /*
 	We set the `lang` and `dir` attributes on the `<html>` element using a hook.

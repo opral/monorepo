@@ -1,4 +1,4 @@
-import { OUTDIR_ALIAS } from "../../constants.js"
+import { PARAGLIDE_RUNTIME_ALIAS } from "../../constants.js"
 import type { RoutingStrategyConfig } from "./strategy.js"
 import dedent from "dedent"
 
@@ -22,7 +22,7 @@ function domainStrategy(
 	excludeRegexes: RegExp[]
 ): string {
 	return dedent`
-    import { sourceLanguageTag, availableLanguageTags, languageTag } from "${OUTDIR_ALIAS}/runtime.js"
+    import { sourceLanguageTag, availableLanguageTags, languageTag } from "${PARAGLIDE_RUNTIME_ALIAS}"
 
     /**
      * Maps language tags to their domain
@@ -67,7 +67,7 @@ function prefixStrategy(
 	excludeRegexes: RegExp[]
 ): string {
 	return dedent`
-    import { sourceLanguageTag, availableLanguageTags } from "${OUTDIR_ALIAS}/runtime.js"
+    import { sourceLanguageTag, availableLanguageTags } from "${PARAGLIDE_RUNTIME_ALIAS}"
 
     /** If the path matches any of these regexes, it will be _not_ translated */
     const excludeRegexes = [${excludeRegexes.map((r) => `/${r.source}/`).join(", ")}];
@@ -122,7 +122,7 @@ function searchParamStrategy(
 	const searchParamName = strategy.searchParamName ?? "lang"
 
 	return dedent`
-        import { sourceLanguageTag, availableLanguageTags } from "${OUTDIR_ALIAS}/runtime.js"
+        import { sourceLanguageTag, availableLanguageTags } from "${PARAGLIDE_RUNTIME_ALIAS}"
 
         /** If the path matches any of these regexes, it will be _not_ translated */
         const excludeRegexes = [${excludeRegexes.map((r) => `/${r.source}/`).join(", ")}];
