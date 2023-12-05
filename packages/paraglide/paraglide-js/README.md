@@ -62,7 +62,8 @@ You can customize the `compile` script to your needs. For example, you can add a
 ```json
 {
 	"scripts": {
-		"compile": "paraglide-js compile"
+		"compile": "paraglide-js compile --project ./project.inlang",
+		"watch": "paraglide-js compile --project ./project.inlang --watch"
 	}
 }
 ```
@@ -99,13 +100,14 @@ m.loginHeader({ name: "Samuel" }) // Hallo Samuel, bitte melde dich an, um fortz
 
 Paraglide JS provides five exports in `./paraglide/runtime.js`:
 
-| Variable                | Description                                                           |
-| ----------------------- | --------------------------------------------------------------------- |
-| `sourceLanguageTag`     | The source language tag of the project                                |
-| `availableLanguageTags` | All language tags of the current project                              |
-| `languageTag()`         | Returns the language tag of the current user                          |
-| `setLanguageTag()`      | Sets the language tag of the current user                             |
-| `onSetLanguageTag()`    | Registers a listener that is called whenever the language tag changes |
+| Variable                   | Description                                                           |
+| -------------------------- | --------------------------------------------------------------------- |
+| `sourceLanguageTag`        | The source language tag of the project                                |
+| `availableLanguageTags`    | All language tags of the current project                              |
+| `languageTag()`            | Returns the language tag of the current user                          |
+| `setLanguageTag()`         | Sets the language tag of the current user                             |
+| `onSetLanguageTag()`    	 | Registers a listener that is called whenever the language tag changes |
+| `isAvailableLanguageTag()` | Checks if a value is a valid language tag |
 
 ## Setting the language
 
