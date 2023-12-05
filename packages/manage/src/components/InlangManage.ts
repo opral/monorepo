@@ -62,15 +62,15 @@ export class InlangManage extends TwLitElement {
 				this.shadowRoot?.querySelector("#projects")?.classList.add("hidden")
 			}}
 		>
-			<div class="w-full max-w-md h-auto bg-slate-50 border border-slate-200 p-4 rounded-lg">
-				<div class="flex items-center gap-4 justify-between border-b border-b-slate-200 pb-4 mb-4">
+			<div class="w-full max-w-md h-auto bg-slate-50 border border-slate-200 p-3 rounded-lg">
+				<div class="flex items-center gap-4 justify-between border-b border-b-slate-200 pb-3 mb-4">
 					<div class="flex items-center gap-2">
 						<inlang-logo></inlang-logo>
 						<h1 class="font-semibold capitalize">${this.url.path ? this.url.path : "Manage"}</h1>
 					</div>
 					<!-- Dropdown for all projects -->
 					<div
-						class="relative"
+						class=${"relative " + (this.projects && this.url.repo ? "" : "invisible")}
 						x-data="{ open: false }"
 						@click=${(e: Event) => {
 							e.stopPropagation()
@@ -82,18 +82,29 @@ export class InlangManage extends TwLitElement {
 							}}
 							class="bg-white text-slate-600 border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
 						>
-							Projects
+							${this.url.project ? this.url.project : "Select project"}
 						</button>
 						<div
 							id="projects"
-							class="hidden absolute top-12 right-0 w-48 bg-white border border-slate-200 rounded-md shadow-lg py-1 z-20"
+							class="hidden absolute top-11 right-0 w-48 bg-white border border-slate-200 rounded-md shadow-lg py-1 z-20"
 						>
 							${this.projects?.map(
 								(project) =>
 									html`<a
-										href=${`/?repo=${project.projectPath}`}
-										class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+										href=${`
+										${this.url.path === "install" ? "/install" : "/"}
+										?repo=${this.url.repo}&project=${project.projectPath}`}
+										class=${"flex gap-2 items-center px-4 py-2 text-sm " +
+										(this.url.project === project.projectPath
+											? "bg-slate-100 text-slate-900"
+											: "text-slate-500 hover:bg-slate-50 hover:text-slate-600")}
 									>
+										${this.url.project === project.projectPath
+											? html`<doc-icon icon="mdi:check" class="inline-block w-4 h-4"></doc-icon>`
+											: html`<doc-icon
+													icon="mdi:check"
+													class="inline-block w-4 h-4 invisible"
+											  ></doc-icon>`}
 										${project.projectPath}
 									</a>`
 							)}
@@ -104,7 +115,7 @@ export class InlangManage extends TwLitElement {
 					? html` <div
 								disabled=${this.url.repo}
 								class=${`px-2 gap-2 mb-8 relative z-10 flex items-center w-full border border-slate-200 bg-white rounded-lg focus-within:border-[#098DAC] transition-all ${
-									this.url.repo ? "opacity-50" : ""
+									this.url.repo ? "opacity-50 cursor-not-allowed" : ""
 								}`}
 							>
 								<input
@@ -117,16 +128,16 @@ export class InlangManage extends TwLitElement {
 											window.location.href = this.generateManageLink()
 										}
 									}}
-									disabled=${this.url.repo}
-									class="active:outline-0 px-2 disabled:cursor-not-allowed focus:outline-0 focus:ring-0 border-0 h-14 grow placeholder:text-slate-500 placeholder:font-normal placeholder:text-base"
+									class=${"active:outline-0 px-2 focus:outline-0 focus:ring-0 border-0 h-14 grow placeholder:text-slate-500 placeholder:font-normal placeholder:text-base " +
+									(this.url.repo ? "pointer-events-none" : "")}
 									placeholder="https://github.com/user/example"
 								/>
 								<button
 									@click=${() => {
 										window.location.href = this.generateManageLink()
 									}}
-									disabled=${this.url.repo}
-									class="bg-white text-slate-600  disabled:cursor-not-allowed border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+									class=${"bg-white text-slate-600 border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100 " +
+									(this.url.repo ? "pointer-events-none" : "")}
 								>
 									Install
 								</button>
@@ -176,7 +187,9 @@ export class InlangMenu extends TwLitElement {
 		return html`
 			<div class="flex flex-col gap-4">
 				<a
-					href=${`/install?repo=${this.jsonURL.repo}`}
+					href=${`/install?${this.jsonURL.repo ? `repo=${this.jsonURL.repo}` : ""}${
+						this.jsonURL.project ? `&project=${this.jsonURL.project}` : ""
+					}`}
 					class="bg-slate-800 text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
 				>
 					Install a module
