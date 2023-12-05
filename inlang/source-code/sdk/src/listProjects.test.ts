@@ -42,11 +42,11 @@ describe("listProjects", () => {
 		})
 	})
 
-	it("should limit the recursion depth to 3", async () => {
+	it("should limit the recursion depth to 5", async () => {
 		const fs = createNodeishMemoryFs()
-		await fs.mkdir("/user/dir1/dir2/dir3/dir4/project.inlang", { recursive: true })
+		await fs.mkdir("/user/dir1/dir2/dir3/dir4/dir5/dir6/project.inlang", { recursive: true })
 		await fs.writeFile(
-			"/user/dir1/dir2/dir3/dir4/project.inlang/settings.json",
+			"/user/dir1/dir2/dir3/dir4/dir5/dir6/project.inlang/settings.json",
 			JSON.stringify(settings)
 		)
 
