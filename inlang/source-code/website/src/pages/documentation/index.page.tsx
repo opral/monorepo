@@ -139,7 +139,7 @@ export function Page(props: PageProps) {
 						</sl-details>
 					</nav>
 					<Show when={props.markdown} fallback={<p class="text-danger">{props.markdown?.error}</p>}>
-						<div class="flex flex-1 mb-8 md:ml-4 lg:ml-12">
+						<div class="flex flex-1 mb-8 md:ml-4 lg:ml-12 min-h-screen">
 							<div class="flex-1 md:max-w-[500px] lg:max-w-[724px] w-full justify-self-center md:col-span-3">
 								<Markdown markdown={props.markdown} />
 								<EditButton href={editLink()} />
