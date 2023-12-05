@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { availableLanguageTags, languageTag } from "$paraglide/runtime.js"
-	import { goto } from "@inlang/paraglide-js-adapter-sveltekit"
+	import { availableLanguageTags, languageTag, setLanguageTag } from "$paraglide/runtime.js"
 	import * as m from "$paraglide/messages.js"
 </script>
 
@@ -20,10 +19,7 @@
 
 <!-- Programmatic Navigation with goto -->
 <select on:change={(e)=>{
-	goto("/", { 
-		// @ts-ignore
-		language: e.target.value,
-	})
+	setLanguageTag(e.target.value)
 }}>
 	{#each availableLanguageTags as lang}
 		<option value={lang} selected={lang === languageTag()}>{lang}</option>

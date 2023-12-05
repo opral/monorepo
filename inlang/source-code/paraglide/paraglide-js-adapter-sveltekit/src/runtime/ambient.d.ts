@@ -5,7 +5,7 @@ declare module "$paraglide-adapter-sveltekit:translate-path" {
 }
 
 declare module "$paraglide-adapter-sveltekit:get-language" {
-	export default function getLanguage(url: URL): string
+	export default function getLanguage(url: URL): string | undefined
 }
 
 declare module "$paraglide-adapter-sveltekit:runtime" {
@@ -14,4 +14,5 @@ declare module "$paraglide-adapter-sveltekit:runtime" {
 	export function isAvailableLanguageTag(tag: string): boolean
 	export function languageTag(): string
 	export function setLanguageTag(tag: string): void
+	export function onSetLanguageTag(callback: (tag: string) => void): void
 }
