@@ -1,5 +1,5 @@
 import { sveltekit } from "@sveltejs/kit/vite"
-import { paraglide } from "@inlang/paraglide-js-adapter-sveltekit"
+import { paraglide } from "@inlang/paraglide-js-adapter-sveltekit/plugin"
 import { defineConfig } from "vite"
 
 export default defineConfig({
@@ -10,8 +10,9 @@ export default defineConfig({
 
 			routingStrategy: {
 				name: "prefix",
-				prefixDefault: true,
+				prefixDefault: false,
 			},
+
 			exclude: [new RegExp("^/api"), new RegExp("^/not-translated")],
 		}),
 		sveltekit(),

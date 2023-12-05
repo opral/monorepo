@@ -24,14 +24,14 @@ export const RewriteActions: PreprocessingPass = {
 			if (!actionAttribute) continue
 
 			const optOutAttribute = form.attributes.find(
-				(attribute) => attribute.name === "data-no-translate"
+				(attribute) => attribute.name === "data-no-translate",
 			)
 			if (optOutAttribute) continue
 
 			const langValue = `${LANGUAGE_TAG_ALIAS}()`
 			const actionAttributeAsTemplateString = attrubuteValuesToJSValue(
 				actionAttribute.value,
-				originalCode
+				originalCode,
 			)
 
 			//Replace the action attribute with the new action attribute

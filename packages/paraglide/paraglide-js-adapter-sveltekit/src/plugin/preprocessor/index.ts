@@ -1,9 +1,9 @@
 import { parse, type PreprocessorGroup } from "svelte/compiler"
 import MagicString from "magic-string"
 import { RewriteHrefs } from "./passes/rewriteHrefs.js"
-import type { Ast } from "./types.js"
 import { RewriteActions } from "./passes/rewriteActions.js"
 import { RewriteFormActions } from "./passes/rewriteFormActions.js"
+import type { Ast } from "./types.js"
 
 export type PreprocessorConfig = Record<string, never>
 

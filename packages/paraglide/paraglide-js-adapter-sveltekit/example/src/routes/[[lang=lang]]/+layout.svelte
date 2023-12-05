@@ -1,7 +1,7 @@
 <script lang="ts">
-	import ParaglideJs from "$lib/ParaglideJS.svelte";
+	import { ParaglideJS } from "@inlang/paraglide-js-adapter-sveltekit"
 </script>
 
-<ParaglideJs>
+<ParaglideJS>
 	<slot />
-</ParaglideJs>
+</ParaglideJS>

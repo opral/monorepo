@@ -24,7 +24,7 @@ export const RewriteHrefs: PreprocessingPass = {
 			if (!hrefAttribute) continue
 
 			const optOutAttribute = link.attributes.find(
-				(attribute) => attribute.name === "data-no-translate"
+				(attribute) => attribute.name === "data-no-translate",
 			)
 			if (optOutAttribute) continue
 
