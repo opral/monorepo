@@ -1,4 +1,4 @@
-import { OUTDIR_ALIAS } from "../../constants.js"
+import { PARAGLIDE_RUNTIME_ALIAS } from "../../constants.js"
 import type { RoutingStrategyConfig } from "./strategy.js"
 import dedent from "dedent"
 
@@ -21,7 +21,7 @@ function domainStrategy(strategy: Extract<RoutingStrategyConfig, { name: "domain
 	)
 
 	return dedent`
-        import { sourceLanguageTag, availableLanguageTags } from "${OUTDIR_ALIAS}/runtime.js"
+        import { sourceLanguageTag, availableLanguageTags } from "${PARAGLIDE_RUNTIME_ALIAS}"
 
         /**
          * Maps hostnames to their language tag
@@ -44,7 +44,7 @@ function domainStrategy(strategy: Extract<RoutingStrategyConfig, { name: "domain
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function prefixStrategy(strategy: Extract<RoutingStrategyConfig, { name: "prefix" }>): string {
 	return dedent`
-        import { sourceLanguageTag, availableLanguageTags, isAvailableLanguageTag } from "${OUTDIR_ALIAS}/runtime.js"
+        import { sourceLanguageTag, availableLanguageTags, isAvailableLanguageTag } from "${PARAGLIDE_RUNTIME_ALIAS}"
 
         /**
          * Takes in a url and returns the language tag that is used in the url.
@@ -67,7 +67,7 @@ function searchParamStrategy(
 	strategy: Extract<RoutingStrategyConfig, { name: "searchParam" }>
 ): string {
 	return dedent`
-        import { sourceLanguageTag, availableLanguageTags, isAvailableLanguageTag } from "${OUTDIR_ALIAS}/runtime.js"
+        import { sourceLanguageTag, availableLanguageTags, isAvailableLanguageTag } from "${PARAGLIDE_RUNTIME_ALIAS}"
 
         /**
          * Takes in a url and returns the language tag that is used in the url.
