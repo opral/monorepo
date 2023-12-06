@@ -243,6 +243,13 @@ export const addCompileStepToPackageJSON = async (
 	const file = await fs.readFile("./package.json", { encoding: "utf-8" })
 	const stringify = detectJsonFormatting(file)
 	const pkg = JSON.parse(file)
+
+	// add the compile command to the lint script if it exists
+	// this isn't super important, so we won't interrupt the user if it fails
+	if (pkg?.scripts?.lint && pkg.scripts.lint.includes("paraglide-js compile") === false) {
+		pkg.scripts.lint = `paraglide-js compile --project ${args.projectPath} && ${pkg.scripts.lint}`
+	}
+
 	if (pkg?.scripts?.build === undefined) {
 		if (pkg.scripts === undefined) {
 			pkg.scripts = {}
