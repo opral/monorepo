@@ -36,8 +36,7 @@ export const translate = new Command()
 			}
 
 			const project = await getInlangProject({ projectPath: args.project })
-
-			translateCommandAction({ project })
+			await translateCommandAction({ project })
 		} catch (error) {
 			log.error(error)
 		}
