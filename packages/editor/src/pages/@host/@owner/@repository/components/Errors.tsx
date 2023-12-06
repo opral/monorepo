@@ -1,8 +1,7 @@
-import { Show, createSignal } from "solid-js"
+import { createSignal } from "solid-js"
 import { Icon } from "#src/interface/components/Icon.jsx"
 import MaterialSymbolsChevronLeft from "~icons/material-symbols/chevron-left"
 import MaterialSymbolsChevronRight from "~icons/material-symbols/chevron-right"
-import MaterialSymbolsDeveloperGuide from "~icons/material-symbols/developer-guide-outline"
 
 export const Errors = (props: { errors: Array<any>; message: string; messagePlural: string }) => {
 	const [visibleError, setVisibleError] = createSignal(0)
