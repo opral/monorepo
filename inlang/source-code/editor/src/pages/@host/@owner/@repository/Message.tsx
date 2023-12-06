@@ -24,6 +24,7 @@ export function Message(props: { id: string }) {
 	const elementIsVisible = useVisibilityObserver(() => patternListElement)
 	// has been rendered should be true if the element was visible
 	const [hasBeenRendered, setHasBeenRendered] = createSignal(false)
+	const [hasBeenLinted, setHasBeenLinted] = createSignal(false)
 
 	createEffect(() => {
 		if (elementIsVisible()) {
@@ -46,6 +47,7 @@ export function Message(props: { id: string }) {
 				(report) => {
 					if (report) {
 						setLintReports(report)
+						setHasBeenLinted(true)
 					}
 				}
 			)
@@ -53,7 +55,7 @@ export function Message(props: { id: string }) {
 	})
 
 	createEffect(
-		on([filteredLanguageTags, filteredMessageLintRules, filteredId, textSearch], () => {
+		on([filteredLanguageTags, filteredMessageLintRules, filteredId, textSearch, hasBeenLinted], () => {
 			setShouldMessageBeShown(!showFilteredMessage(message()))
 		})
 	)
