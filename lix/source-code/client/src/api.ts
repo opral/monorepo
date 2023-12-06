@@ -43,7 +43,7 @@ export type Repository = {
 	mergeUpstream: (args?: {
 		branch?: string
 	}) => Promise<
-		Endpoints["POST /repos/{owner}/{repo}/merge-upstream"]["response"]["data"] | undefined
+		Endpoints["POST /repos/{owner}/{repo}/merge-upstream"]["response"]["data"] | { error: any }
 	>
 	createFork: () => Promise<Endpoints["POST /repos/{owner}/{repo}/forks"]["response"]>
 	forkStatus: () => Promise<{ ahead: number; behind: number } | { error: string }>

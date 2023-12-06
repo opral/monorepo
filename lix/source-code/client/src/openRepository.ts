@@ -378,7 +378,7 @@ export async function openRepository(
 					repo: repoName,
 				})
 			} catch (error) {
-				return({error})
+				return { error }
 			}
 
 			return response?.data
