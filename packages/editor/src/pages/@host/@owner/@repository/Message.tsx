@@ -55,9 +55,12 @@ export function Message(props: { id: string }) {
 	})
 
 	createEffect(
-		on([filteredLanguageTags, filteredMessageLintRules, filteredId, textSearch, hasBeenLinted], () => {
-			setShouldMessageBeShown(!showFilteredMessage(message()))
-		})
+		on(
+			[filteredLanguageTags, filteredMessageLintRules, filteredId, textSearch, hasBeenLinted],
+			() => {
+				setShouldMessageBeShown(!showFilteredMessage(message()))
+			}
+		)
 	)
 
 	return (

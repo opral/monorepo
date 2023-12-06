@@ -78,7 +78,9 @@ export const ListHeader = () => {
 					</div>
 				}
 			>
-				<div class="font-medium text-on-surface">{messageCount(project()?.query.messages.includedMessageIds() || []) + " Messages"}</div>
+				<div class="font-medium text-on-surface">
+					{messageCount(project()?.query.messages.includedMessageIds() || []) + " Messages"}
+				</div>
 			</Show>
 
 			<div class="flex flex-wrap gap-2">
