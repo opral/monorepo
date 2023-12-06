@@ -18,7 +18,6 @@ import { currentPageContext } from "#src/renderer/state.js"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
 import Card from "#src/interface/components/Card.jsx"
-import { i18nRouting } from "#src/renderer/_default.page.route.js"
 import EditOutline from "~icons/material-symbols/edit-outline-rounded"
 
 /**
@@ -54,12 +53,47 @@ export function Page(props: PageProps) {
 	const [tableOfContents, setTableOfContents] = createSignal({})
 	createEffect(() => {
 		const table: Record<string, Array<string>> = {}
-		if (
-			props.readme &&
-			props.readme.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g) &&
-			props.readme.match(/<h[1].*?>(.*?)<\/h[1]>/g)
+		if (activeTab() === "readme") {
+			if (
+				props.readme &&
+				props.readme.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g) &&
+				props.readme.match(/<h[1].*?>(.*?)<\/h[1]>/g)
+			) {
+				props.readme.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g).map((heading: string) => {
+					// We have to use DOMParser to parse the heading string to a HTML element
+					const parser = new DOMParser()
+					const doc = parser.parseFromString(heading, "text/html")
+					const node = doc.body.firstChild as HTMLElement
+
+					let lastH1Key = ""
+
+					if (node.tagName === "H1") {
+						// @ts-ignore
+						table[node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")] = []
+					} else {
+						// @ts-ignore
+						if (!table[lastH1Key]) {
+							const h1Keys = Object.keys(table)
+							// @ts-ignore
+							lastH1Key = h1Keys.at(-1)
+							// @ts-ignore
+							table[lastH1Key].push(node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", ""))
+						} else {
+							// @ts-ignore
+							table[lastH1Key].push(node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", ""))
+						}
+					}
+
+					return node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")
+				})
+			}
+		} else if (
+			activeTab() === "changelog" &&
+			props.changelog &&
+			props.changelog.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g) &&
+			props.changelog.match(/<h[1].*?>(.*?)<\/h[1]>/g)
 		) {
-			props.readme.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g).map((heading: string) => {
+			props.changelog.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g).map((heading: string) => {
 				// We have to use DOMParser to parse the heading string to a HTML element
 				const parser = new DOMParser()
 				const doc = parser.parseFromString(heading, "text/html")
@@ -337,7 +371,6 @@ export function Page(props: PageProps) {
 												displayName={displayName}
 												getLocale={languageTag}
 												tableOfContents={tableOfContents}
-												setActiveTab={setActiveTab}
 											/>
 										</aside>
 									</div>
@@ -438,7 +471,6 @@ function NavbarCommon(props: {
 	getLocale: () => string
 	displayName: () => string
 	tableOfContents: () => Record<string, string[]>
-	setActiveTab: (tab: "readme" | "changelog") => void
 }) {
 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
 
@@ -514,18 +546,15 @@ function NavbarCommon(props: {
 							<Link
 								onClick={(e: any) => {
 									e.preventDefault()
-									scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
+									scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
 									setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
 								}}
 								class={
 									(isSelected(replaceChars(sectionTitle.toString().toLowerCase()))
 										? "text-primary font-semibold "
 										: "text-info/80 hover:text-on-background ") +
-									"tracking-wide text-sm block w-full font-normal mb-2"
+									"tracking-wide text-sm block w-full font-normal mb-2 cursor-pointer"
 								}
-								href={`${i18nRouting(currentPageContext.urlParsed.pathname).url}#${replaceChars(
-									sectionTitle.toString().toLowerCase()
-								)}`}
 							>
 								{sectionTitle.replace("#", "")}
 							</Link>
@@ -535,19 +564,15 @@ function NavbarCommon(props: {
 										<Link
 											onClick={(e: any) => {
 												e.preventDefault()
-												props.setActiveTab("readme")
-												scrollToAnchor(replaceChars(heading.toString().toLowerCase()))
+												scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
 												setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
 											}}
 											class={
-												"text-sm tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
+												"text-sm cursor-pointer tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
 												(highlightedAnchor() === replaceChars(heading.toString().toLowerCase())
 													? "font-medium text-on-background border-l-on-background "
 													: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
 											}
-											href={`${
-												i18nRouting(currentPageContext.urlParsed.pathname).url
-											}#${replaceChars(heading.toString().toLowerCase())}`}
 										>
 											{heading.replace("#", "")}
 										</Link>

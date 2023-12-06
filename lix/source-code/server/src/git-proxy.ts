@@ -10,13 +10,14 @@
 
 import type { NextFunction, Request, Response } from "express"
 // @ts-ignore
-import createMiddleware from "@isomorphic-git/cors-proxy/middleware.js"
+import createMiddleware from "./auth/cors-middleware.js"
 import { decryptAccessToken } from "./auth/implementation.js"
 import { privateEnv } from "@inlang/env-variables"
+const allowedOrigins = privateEnv.PUBLIC_ALLOWED_AUTH_URLS.split(",")
 
 const middleware = createMiddleware({
 	// This is the cors allowed origin:
-	origin: "http://localhost:4004",
+	origins: allowedOrigins,
 
 	authorization: async (request: Request, _response: Response, next: NextFunction) => {
 		try {
