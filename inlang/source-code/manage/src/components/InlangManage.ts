@@ -57,93 +57,85 @@ export class InlangManage extends TwLitElement {
 
 	override render(): TemplateResult {
 		return html` <main
-			class="w-full h-screen flex justify-center items-center px-4"
+			class="w-full h-screen flex justify-center items-center px-4 bg-slate-50"
 			@click=${() => {
 				this.shadowRoot?.querySelector("#projects")?.classList.add("hidden")
 			}}
 		>
-			<div class="w-full max-w-md h-auto bg-slate-50 border border-slate-200 p-3 rounded-lg">
+			<div class="w-full max-w-lg h-auto bg-white border border-slate-200 p-3 rounded-lg">
 				<div class="flex items-center gap-4 justify-between border-b border-b-slate-200 pb-3 mb-4">
 					<div class="flex items-center gap-2">
 						<inlang-logo></inlang-logo>
 						<h1 class="font-semibold capitalize">${this.url.path ? this.url.path : "Manage"}</h1>
 					</div>
-					<!-- Dropdown for all projects -->
+				</div>
+				<div class="border-b border-slate-200 mb-4 pb-4">
 					<div
-						class=${"relative " + (this.projects && this.url.repo ? "" : "invisible")}
-						x-data="{ open: false }"
-						@click=${(e: Event) => {
-							e.stopPropagation()
-						}}
+						disabled=${this.url.repo}
+						class=${`px-2 gap-2 mb-4 relative z-10 flex items-center w-full border border-slate-200 bg-white rounded-lg focus-within:border-[#098DAC] transition-all ${
+							this.url.repo ? "opacity-50 cursor-not-allowed" : ""
+						}`}
 					>
+						<input
+							.value=${this.url.repo ? this.url.repo : this.repoURL}
+							@input=${(e: InputEvent) => {
+								this.repoURL = (e.target as HTMLInputElement).value
+							}}
+							@keydown=${(e: KeyboardEvent) => {
+								if (e.key === "Enter") {
+									window.location.href = this.generateManageLink()
+								}
+							}}
+							class=${"active:outline-0 px-2 focus:outline-0 focus:ring-0 border-0 h-14 grow placeholder:text-slate-500 placeholder:font-normal placeholder:text-base " +
+							(this.url.repo ? "pointer-events-none" : "")}
+							placeholder="https://github.com/user/example"
+						/>
 						<button
 							@click=${() => {
-								this.shadowRoot?.querySelector("#projects")?.classList.toggle("hidden")
+								window.location.href = this.generateManageLink()
 							}}
-							class="bg-white text-slate-600 border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+							class=${"bg-white text-slate-600 border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100 " +
+							(this.url.repo ? "pointer-events-none" : "")}
 						>
-							${this.url.project ? this.url.project : "Select project"}
+							Install
 						</button>
-						<div
-							id="projects"
-							class="hidden absolute top-11 right-0 w-48 bg-white border border-slate-200 rounded-md shadow-lg py-1 z-20"
-						>
-							${this.projects?.map(
-								(project) =>
-									html`<a
-										href=${`
-										${this.url.path === "install" ? "/install" : "/"}
-										?repo=${this.url.repo}&project=${project.projectPath}` +
-										(this.url.module ? `&module=${this.url.module}` : "")}
-										class=${"flex gap-2 items-center px-4 py-2 text-sm " +
-										(this.url.project === project.projectPath
-											? "bg-slate-100 text-slate-900"
-											: "text-slate-500 hover:bg-slate-50 hover:text-slate-600")}
-									>
-										${this.url.project === project.projectPath
-											? html`<doc-icon icon="mdi:check" class="inline-block w-4 h-4"></doc-icon>`
-											: html`<doc-icon
-													icon="mdi:check"
-													class="inline-block w-4 h-4 invisible"
-											  ></doc-icon>`}
-										${project.projectPath}
-									</a>`
-							)}
-						</div>
+					</div>
+					<div class="flex flex-col gap-0.5">
+						${this.projects?.map(
+							(project) =>
+								html`<a
+									href=${`
+								${this.url.path === "install" ? "/install" : "/"}
+								?repo=${this.url.repo}&project=${project.projectPath}` +
+									(this.url.module ? `&module=${this.url.module}` : "")}
+									class=${"flex gap-4 group items-center px-4 py-2 text-sm rounded-md " +
+									(this.url.project === project.projectPath
+										? "bg-slate-100 text-slate-900"
+										: "text-slate-500 hover:bg-slate-50 hover:text-slate-600")}
+								>
+									${this.url.project === project.projectPath
+										? html`<doc-icon
+												icon="mdi:folder-open"
+												size="1.4em"
+												class="inline-block aspect-square mt-1.5"
+										  ></doc-icon>`
+										: html`<doc-icon
+													icon="mdi:folder"
+													size="1.4em"
+													class="inline-block aspect-square mt-1.5 group-hover:hidden"
+												></doc-icon
+												><doc-icon
+													icon="mdi:folder-open"
+													size="1.4em"
+													class="aspect-square mt-1.5 hidden group-hover:inline-block"
+												></doc-icon>`}
+									${project.projectPath}
+								</a>`
+						)}
 					</div>
 				</div>
 				${!this.url.path
-					? html` <div
-								disabled=${this.url.repo}
-								class=${`px-2 gap-2 mb-8 relative z-10 flex items-center w-full border border-slate-200 bg-white rounded-lg focus-within:border-[#098DAC] transition-all ${
-									this.url.repo ? "opacity-50 cursor-not-allowed" : ""
-								}`}
-							>
-								<input
-									.value=${this.url.repo ? this.url.repo : this.repoURL}
-									@input=${(e: InputEvent) => {
-										this.repoURL = (e.target as HTMLInputElement).value
-									}}
-									@keydown=${(e: KeyboardEvent) => {
-										if (e.key === "Enter") {
-											window.location.href = this.generateManageLink()
-										}
-									}}
-									class=${"active:outline-0 px-2 focus:outline-0 focus:ring-0 border-0 h-14 grow placeholder:text-slate-500 placeholder:font-normal placeholder:text-base " +
-									(this.url.repo ? "pointer-events-none" : "")}
-									placeholder="https://github.com/user/example"
-								/>
-								<button
-									@click=${() => {
-										window.location.href = this.generateManageLink()
-									}}
-									class=${"bg-white text-slate-600 border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100 " +
-									(this.url.repo ? "pointer-events-none" : "")}
-								>
-									Install
-								</button>
-							</div>
-							<inlang-menu jsonURL=${JSON.stringify(this.url)}></inlang-menu>`
+					? html` <inlang-menu jsonURL=${JSON.stringify(this.url)}></inlang-menu>`
 					: this.url.path === "install"
 					? html`<inlang-install jsonURL=${JSON.stringify(this.url)}></inlang-install>`
 					: ""}

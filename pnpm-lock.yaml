@@ -7786,7 +7786,7 @@ packages:
       std-env: 3.5.0
       test-exclude: 6.0.0
       v8-to-istanbul: 9.1.3
-      vitest: 0.34.6
+      vitest: 0.34.6(terser@5.19.4)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -15898,9 +15898,9 @@ packages:
     peerDependencies:
       solid-js: ^1.3
     dependencies:
-      '@babel/generator': 7.23.5
+      '@babel/generator': 7.23.4
       '@babel/helper-module-imports': 7.22.15
-      '@babel/types': 7.23.5
+      '@babel/types': 7.23.4
       solid-js: 1.8.7
 
   /solid-slider@1.3.15:
