@@ -17,7 +17,7 @@ function domainStrategy(strategy: Extract<RoutingStrategyConfig, { name: "domain
 	const langToHostname = strategy.domains
 
 	const hostnameToLang = Object.fromEntries(
-		Object.entries(langToHostname).map(([lang, domain]) => [domain, lang])
+		Object.entries(langToHostname).map(([lang, domain]) => [domain, lang]),
 	)
 
 	return dedent`
@@ -66,7 +66,7 @@ function prefixStrategy(strategy: Extract<RoutingStrategyConfig, { name: "prefix
 }
 
 function searchParamStrategy(
-	strategy: Extract<RoutingStrategyConfig, { name: "searchParam" }>
+	strategy: Extract<RoutingStrategyConfig, { name: "searchParam" }>,
 ): string {
 	return dedent`
         import { sourceLanguageTag, availableLanguageTags, isAvailableLanguageTag } from "${PARAGLIDE_RUNTIME_MODULE_ALIAS}"
