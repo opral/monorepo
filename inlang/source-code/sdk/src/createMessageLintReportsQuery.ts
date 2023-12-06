@@ -44,7 +44,8 @@ export function createMessageLintReportsQuery(
 	createEffect(() => {
 		if (rulesArray) {
 			for (const messageId of messagesQuery.includedMessageIds()) {
-				messagesQuery.get.subscribe({ where: { id: messageId } }, (message) => {
+				createEffect(() => {
+					const message = messagesQuery.get({ where: { id: messageId } })
 					if (hasWatcher) {
 						lintSingleMessage({
 							rules: rulesArray,
