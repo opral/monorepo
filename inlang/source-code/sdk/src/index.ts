@@ -13,6 +13,7 @@ export type {
 } from "./api.js"
 export { type ImportFunction, createImport } from "./resolve-modules/index.js"
 export { loadProject } from "./loadProject.js"
+export { listProjects } from "./listProjects.js"
 export { solidAdapter, type InlangProjectWithSolidAdapter } from "./adapter/solidAdapter.js"
 export { createMessagesQuery } from "./createMessagesQuery.js"
 export {

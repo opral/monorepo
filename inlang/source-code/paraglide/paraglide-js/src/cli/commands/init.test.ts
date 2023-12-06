@@ -203,6 +203,59 @@ describe("addCompileStepToPackageJSON()", () => {
 		expect(logger.warn).toHaveBeenCalledOnce()
 		expect(process.exit).not.toHaveBeenCalled()
 	})
+
+	test("if there is a lint script present, add the paraglide-js compile command to it", async () => {
+		mockFiles({
+			"/package.json": JSON.stringify({
+				scripts: {
+					lint: "eslint",
+				},
+			}),
+		})
+		mockUserInput([
+			// user does not want to update the build step
+			false,
+		])
+		await addCompileStepToPackageJSON(
+			{
+				projectPath: "./project.inlang",
+			},
+			logger
+		)
+		expect(fs.writeFile).toHaveBeenCalled()
+		expect(logger.success).toHaveBeenCalled()
+
+		const packageJson = JSON.parse(
+			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
+		)
+		expect(packageJson.scripts.lint).toBe(
+			`paraglide-js compile --project ./project.inlang && eslint`
+		)
+	})
+
+	test("if there is a lint script present, but it already has a paraglide command, leave it as is", async () => {
+		mockFiles({
+			"/package.json": JSON.stringify({
+				scripts: {
+					lint: "paraglide-js compile && eslint",
+				},
+			}),
+		})
+		mockUserInput([
+			// user does not want to update the build step
+			false,
+		])
+		await addCompileStepToPackageJSON(
+			{
+				projectPath: "./project.inlang",
+			},
+			logger
+		)
+		const packageJson = JSON.parse(
+			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
+		)
+		expect(packageJson.scripts.lint).toBe(`paraglide-js compile && eslint`)
+	})
 })
 
 describe("existingProjectFlow()", () => {
