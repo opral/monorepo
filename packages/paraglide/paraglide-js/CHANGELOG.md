@@ -1,5 +1,9 @@
 # @inlang/paraglide-js
 
+## 1.0.0-prerelease.17
+
+`paraglide init` now adds `paraglide compile` to the postinstall script by default. This sidesteps numerous linting issues when using paraglide in CI environments. 
+
 ## 1.0.0-prerelease.16
 
 Fix `paraglide compile` hanging for a couple seconds after successful compilation 
