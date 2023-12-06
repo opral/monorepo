@@ -22,7 +22,8 @@ const {
 	log,
 	listServerRefs,
 	checkout,
-	// fetch as isoFetch
+	addRemote,
+	fetch: gitFetch,
 } = isoGit
 
 const verbose = false
@@ -174,6 +175,97 @@ export async function openRepository(
 			})
 		},
 
+		async forkStatus() {
+			const repo = await this
+
+			const { isFork, parent } = (await repo.getMeta()) as {
+				isFork: boolean
+				parent: { url: string }
+			}
+
+			if (!isFork) {
+				return { error: "could not get fork origin or repo not a fork" }
+			}
+			const forkFs = withLazyFetching({
+				nodeishFs: rawFs,
+				verbose,
+				description: "forkStatus",
+				intercept: delayedAction,
+			})
+
+			await addRemote({
+				dir,
+				remote: "upstream",
+				url: "https://" + parent.url,
+				fs: forkFs,
+			})
+
+			try {
+				await gitFetch({
+					depth: 1,
+					singleBranch: true,
+					dir,
+					ref: args.branch,
+					remote: "upstream",
+					http: makeHttpClient({ verbose, description: "forkStatus" }),
+					fs: forkFs,
+				})
+			} catch (err) {
+				return { error: err }
+			}
+
+			const branch = await isoGit.currentBranch({
+				fs: forkFs,
+				dir,
+				fullname: false,
+			})
+
+			if (typeof branch !== "string") {
+				return { error: "could not get current branch" }
+			}
+
+			const currentUpstreamCommit = await isoGit.resolveRef({
+				fs: forkFs,
+				dir: "/",
+				ref: "upstream/" + branch,
+			})
+
+			const currentOriginCommit = await isoGit.resolveRef({
+				fs: forkFs,
+				dir: "/",
+				ref: branch,
+			})
+
+			if (currentUpstreamCommit === currentOriginCommit) {
+				return { ahead: 0, behind: 0 }
+			}
+
+			const res: Promise<
+				| Awaited<
+						ReturnType<typeof github.request<"GET /repos/{owner}/{repo}/compare/{base}...{head}">>
+				  >
+				| { error: any }
+			> = github
+				.request("GET /repos/{owner}/{repo}/compare/{base}...{head}", {
+					owner,
+					repo: repoName,
+					base: currentUpstreamCommit,
+					head: currentOriginCommit,
+				})
+				.catch((newError: Error) => {
+					setErrors((previous) => [...(previous || []), newError])
+					return { error: newError }
+				})
+
+			const compare = await res
+
+			if ("error" in compare || !("data" in compare)) {
+				return { error: compare.error || "could not diff repos on github" }
+			}
+
+			return { ahead: compare.data.ahead_by, behind: compare.data.behind_by }
+		},
+
 		statusMatrix(cmdArgs) {
 			return statusMatrix({
 				fs: withLazyFetching({
@@ -262,15 +354,31 @@ export async function openRepository(
 		},
 
 		async mergeUpstream(cmdArgs) {
+			const branch =
+				cmdArgs?.branch ||
+				(await isoGit.currentBranch({
+					fs: withLazyFetching({
+						nodeishFs: rawFs,
+						verbose,
+						description: "mergeUpstream",
+						intercept: delayedAction,
+					}),
+					dir,
+					fullname: false,
+				}))
+			if (typeof branch !== "string") {
+				throw "could not get current branch"
+			}
+
 			let response
 			try {
 				response = await github.request("POST /repos/{owner}/{repo}/merge-upstream", {
-					branch: cmdArgs.branch,
+					branch,
 					owner,
 					repo: repoName,
 				})
-			} catch (_err) {
-				/* ignore */
+			} catch (error) {
+				return { error }
 			}
 
 			return response?.data
