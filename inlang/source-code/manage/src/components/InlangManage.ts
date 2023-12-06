@@ -29,7 +29,7 @@ export class InlangManage extends TwLitElement {
 	/* This function generates the install link for the user based on a repo url */
 	generateManageLink() {
 		const url = new URL(this.repoURL)
-		return `/?repo=${url.host}${url.pathname.split("/").slice(0, 3).join("/")}`
+		return `?repo=${url.host}${url.pathname.split("/").slice(0, 3).join("/")}`
 	}
 
 	override connectedCallback() {
@@ -56,24 +56,21 @@ export class InlangManage extends TwLitElement {
 	}
 
 	override render(): TemplateResult {
-		return html` <main
-			class="w-full h-screen flex justify-center items-center px-4 bg-slate-50"
-			@click=${() => {
-				this.shadowRoot?.querySelector("#projects")?.classList.add("hidden")
-			}}
-		>
+		return html` <main class="w-full h-screen flex justify-center items-center px-4 bg-slate-50">
 			<div class="w-full max-w-lg h-auto bg-white border border-slate-200 p-3 rounded-lg">
 				<div class="flex items-center gap-4 justify-between border-b border-b-slate-200 pb-3 mb-4">
 					<div class="flex items-center gap-2">
 						<inlang-logo></inlang-logo>
-						<h1 class="font-semibold capitalize">${this.url.path ? this.url.path : "Manage"}</h1>
+						<h1 class="font-semibold capitalize">
+							Manage ${this.url.path && `/ ${this.url.path}`}
+						</h1>
 					</div>
 				</div>
 				<div class="border-b border-slate-200 mb-4 pb-4">
 					<div
 						disabled=${this.url.repo}
-						class=${`px-2 gap-2 mb-4 relative z-10 flex items-center w-full border border-slate-200 bg-white rounded-lg focus-within:border-[#098DAC] transition-all ${
-							this.url.repo ? "opacity-50 cursor-not-allowed" : ""
+						class=${`px-1 gap-2 relative z-10 flex items-center w-full border border-slate-200 bg-white rounded-lg focus-within:border-[#098DAC] transition-all ${
+							this.url.repo ? "cursor-not-allowed" : ""
 						}`}
 					>
 						<input
@@ -83,24 +80,32 @@ export class InlangManage extends TwLitElement {
 							}}
 							@keydown=${(e: KeyboardEvent) => {
 								if (e.key === "Enter") {
-									window.location.href = this.generateManageLink()
+									window.location.href =
+										this.generateManageLink() +
+										(this.url.project ? `&project=${this.url.project}` : "") +
+										(this.url.module ? `&module=${this.url.module}` : "")
 								}
 							}}
-							class=${"active:outline-0 px-2 focus:outline-0 focus:ring-0 border-0 h-14 grow placeholder:text-slate-500 placeholder:font-normal placeholder:text-base " +
-							(this.url.repo ? "pointer-events-none" : "")}
+							class=${"active:outline-0 px-2 focus:outline-0 focus:ring-0 border-0 h-12 grow placeholder:text-slate-500 placeholder:font-normal placeholder:text-base " +
+							(this.url.repo ? "opacity-50 pointer-events-none" : "")}
 							placeholder="https://github.com/user/example"
 						/>
 						<button
 							@click=${() => {
-								window.location.href = this.generateManageLink()
+								this.url.repo // delete repo and project from url
+									? (window.location.href = "/")
+									: (window.location.href =
+											this.generateManageLink() +
+											(this.url.project ? `&project=${this.url.project}` : "") +
+											(this.url.module ? `&module=${this.url.module}` : ""))
 							}}
-							class=${"bg-white text-slate-600 border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100 " +
-							(this.url.repo ? "pointer-events-none" : "")}
+							class=${"bg-white text-slate-600 border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"}
 						>
-							Install
+							${this.url.repo ? "Edit" : "Install"}
 						</button>
 					</div>
-					<div class="flex flex-col gap-0.5">
+					${this.projects &&
+					html`<div class="flex flex-col gap-0.5 mt-4">
 						${this.projects?.map(
 							(project) =>
 								html`<a
@@ -132,7 +137,7 @@ export class InlangManage extends TwLitElement {
 									${project.projectPath}
 								</a>`
 						)}
-					</div>
+					</div>`}
 				</div>
 				${!this.url.path
 					? html` <inlang-menu jsonURL=${JSON.stringify(this.url)}></inlang-menu>`

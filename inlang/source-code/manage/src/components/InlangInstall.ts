@@ -15,7 +15,16 @@ export class InlangInstall extends TwLitElement {
 	manual: boolean = false
 
 	@property({ type: String })
-	step: "" | "nomodule" | "noauth" | "norepo" | "install" | "error" | "success" | "abort" = ""
+	step:
+		| ""
+		| "nomodule"
+		| "noauth"
+		| "norepo"
+		| "noproject"
+		| "install"
+		| "error"
+		| "success"
+		| "abort" = ""
 
 	@property({ type: String })
 	jsonURL: string = ""
@@ -223,6 +232,9 @@ export class InlangInstall extends TwLitElement {
 		} else if (!this.url.repo) {
 			this.step = "norepo"
 			this.loading = false
+		} else if (!this.url.project) {
+			this.step = "noproject"
+			this.loading = false
 		} else {
 			this.step = "install"
 			this.loading = false
@@ -231,6 +243,7 @@ export class InlangInstall extends TwLitElement {
 	}
 
 	listModules() {
+		// @ts-ignore
 		return registry.filter((product) => product.module)
 	}
 
@@ -261,8 +274,10 @@ export class InlangInstall extends TwLitElement {
 									<img
 										class="w-8 h-8 rounded-md"
 										src=${product.icon}
+										${/* @ts-ignore */ ""}
 										alt=${product.displayName.en}
 									/>
+									${/* @ts-ignore */ ""}
 									<div class="flex-grow truncate">${product.displayName.en}</div>
 									<button
 										class="bg-slate-800 text-white text-sm text-center py-1.5 px-3 rounded-md font-medium hover:bg-slate-900 transition-colors"
@@ -423,28 +438,20 @@ export class InlangInstall extends TwLitElement {
 			<h2 class="text-xl font-semibold">Insert your repository link
 			</h2>
 					</h2>
-					<p class="text-slate-500 mb-8">
+					<p class="text-slate-500 mb-4">
 					You can install modules into your repository
-					by providing the repository URL below.
+					by providing the repository URL above.
 					</p>
-					<div class="px-2 gap-2 relative z-10 flex items-center w-full border border-slate-200 bg-white rounded-lg focus-within:border-[#098DAC] transition-all ">
-					<input 
-					.value=${this.repoURL}
-					@input=${(e: InputEvent) => {
-						this.repoURL = (e.target as HTMLInputElement).value
-					}}
-					@keydown=${(e: KeyboardEvent) => {
-						if (e.key === "Enter") {
-							window.location.href = this.generateInstallLink()
-						}
-					}}
-					class="active:outline-0 px-2 focus:outline-0 focus:ring-0 border-0 h-14 grow placeholder:text-slate-500 placeholder:font-normal placeholder:text-base" placeholder="https://github.com/user/example">
-					<button 
-					@click=${() => {
-						window.location.href = this.generateInstallLink()
-					}}
-					class="bg-white text-slate-600 border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100">Install</button>
-					</div>
+			</div>`
+			: this.step === "noproject"
+			? html`<div class="flex flex-col gap-2">
+			<h2 class="text-xl font-semibold">Select your project
+			</h2>
+					</h2>
+					<p class="text-slate-500 mb-4">
+					You can install modules into your project 
+					by selecting the project above.
+					</p>
 			</div>`
 			: this.step === "install"
 			? html`<div class="flex flex-col gap-2">
