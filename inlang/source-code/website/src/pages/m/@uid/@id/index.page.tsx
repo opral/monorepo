@@ -206,7 +206,7 @@ export function Page(props: PageProps) {
 											</div>
 										</Show>
 										<Show when={props.tab}>
-											<div class="flex items-center gap-6 mt-4 w-full border-b border-surface-2">
+											<div class="flex items-center gap-6 mt-6 w-full border-b border-surface-2">
 												<a
 													href=""
 													onClick={(e) => {
@@ -215,17 +215,17 @@ export function Page(props: PageProps) {
 															window.location.replace(`${currentPageContext.urlParsed.pathname}`)
 													}}
 													class={
-														(props.tab === "documentation"
+														(props.tab !== "changelog"
 															? "border-hover-primary "
 															: "border-background/0 ") +
-														" border-b-[2px] pt-[8px] pb-[6px] text-sm bg-transparent group content-box"
+														" border-b-[2px] pt-[8px] pb-[6px] text-sm bg-transparent group content-box group"
 													}
 												>
 													<div
 														class={
-															(props.tab === "readme"
+															(props.tab !== "changelog"
 																? "text-surface-900 "
-																: "text-surface-500 hover:bg-surface-100 ") +
+																: "text-surface-500 group-hover:bg-surface-100 ") +
 															" px-2 py-[6px] flex items-center gap-1.5 rounded-md transition-colors font-medium cursor-pointer w-max"
 														}
 													>
@@ -247,14 +247,14 @@ export function Page(props: PageProps) {
 														(props.tab === "changelog"
 															? "border-hover-primary "
 															: "border-background/0 ") +
-														" border-b-[2px] pt-[8px] pb-[6px] text-sm bg-transparent group content-box"
+														" border-b-[2px] pt-[8px] pb-[6px] text-sm bg-transparent group content-box group"
 													}
 												>
 													<div
 														class={
 															(props.tab === "changelog"
 																? "text-surface-900 "
-																: "text-surface-500 hover:bg-surface-100 ") +
+																: "text-surface-500 group-hover:bg-surface-100 ") +
 															" px-2 py-[6px] flex items-center gap-1.5 rounded-md transition-colors font-medium cursor-pointer w-max"
 														}
 													>
