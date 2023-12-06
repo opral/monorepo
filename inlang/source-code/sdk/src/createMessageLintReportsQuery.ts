@@ -44,9 +44,9 @@ export function createMessageLintReportsQuery(
 	createEffect(() => {
 		if (rulesArray) {
 			for (const messageId of messagesQuery.includedMessageIds()) {
-				messagesQuery.get.subscribe({ where: { id: messageId } }, async (message) => {
+				messagesQuery.get.subscribe({ where: { id: messageId } }, (message) => {
 					if (hasWatcher) {
-						await lintSingleMessage({
+						lintSingleMessage({
 							rules: rulesArray,
 							settings: settingsObject(),
 							messages: messages,
@@ -59,8 +59,8 @@ export function createMessageLintReportsQuery(
 					} else {
 						debounce(
 							500,
-							async (message) => {
-								await lintSingleMessage({
+							(message) => {
+								lintSingleMessage({
 									rules: rulesArray,
 									settings: settingsObject(),
 									messages: messages,
