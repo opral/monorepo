@@ -247,8 +247,8 @@ export const addCompileStepToPackageJSON = async (
 	// add the compile command to the lint script if it exists
 	// this isn't super important, so we won't interrupt the user if it fails
 	if (pkg?.scripts?.lint && pkg.scripts.lint.includes("paraglide-js compile") === false) {
-			pkg.scripts.lint = `paraglide-js compile --project ${args.projectPath} && ${pkg.scripts.lint}`
-		}
+		pkg.scripts.lint = `paraglide-js compile --project ${args.projectPath} && ${pkg.scripts.lint}`
+	}
 
 	if (pkg?.scripts?.build === undefined) {
 		if (pkg.scripts === undefined) {

@@ -5,6 +5,7 @@ import type { PageProps } from "./index.page.jsx"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import fs from "node:fs/promises"
 import { redirect } from "vike/abort"
+import cheerio from "cheerio"
 
 const repositoryRoot = import.meta.url.slice(0, import.meta.url.lastIndexOf("inlang/source-code"))
 
@@ -25,6 +26,8 @@ async function fileExists(path: string): Promise<boolean> {
 }
 
 export async function onBeforeRender(pageContext: PageContext) {
+	const tab = pageContext.urlParsed.search.view === "changelog" ? "changelog" : "documentation"
+
 	const item = registry.find(
 		(item: any) => item.uniqueID === pageContext.routeParams.uid
 	) as MarketplaceManifest & { uniqueID: string }
@@ -68,14 +71,49 @@ export async function onBeforeRender(pageContext: PageContext) {
 		  })
 		: undefined
 
+	const tableOfContents = await generateTableOfContents(
+		tab === "changelog" ? changelogMarkdown : readmeMarkdown
+	)
+
 	return {
 		pageContext: {
 			pageProps: {
-				readme: readmeMarkdown,
-				changelog: changelogMarkdown,
+				markdown: tab === "changelog" ? changelogMarkdown : readmeMarkdown,
+				tab: changelogMarkdown ? tab : undefined,
+				tableOfContents: tableOfContents,
 				manifest: item,
 				recommends: recommends,
 			} as PageProps,
 		},
 	}
+}
+
+const generateTableOfContents = async (markdown: any) => {
+	const table = {}
+
+	if (
+		markdown &&
+		markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g) &&
+		markdown.match(/<h[1].*?>(.*?)<\/h[1]>/g)
+	) {
+		const headings = markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
+
+		for (const heading of headings) {
+			const $ = cheerio.load(heading)
+			const text = $("h1, h2, h3").text()
+
+			if (text) {
+				if ($("h1").length > 0) {
+					// @ts-ignore
+					table[text.replace(/(<([^>]+)>)/gi, "").replace("#", "")] = []
+				} else if (Object.keys(table).length > 0) {
+					const lastH1Key = Object.keys(table).pop()
+					// @ts-ignore
+					table[lastH1Key].push(text.replace(/(<([^>]+)>)/gi, "").replace("#", ""))
+				}
+			}
+		}
+	}
+
+	return table
 }
