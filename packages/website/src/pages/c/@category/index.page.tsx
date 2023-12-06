@@ -43,11 +43,13 @@ export function Page(props: {
 	type HeaderContentType = {
 		title: string
 		description: string
-		buttonLink: string
-		buttonText: string
+		buttonLink?: string
+		buttonText?: string
+		icon?: string
+		withGuides?: boolean
 	}
 
-	const getHeaderContent = (): HeaderContentType | undefined => {
+	const getCategoryContent = (): HeaderContentType | undefined => {
 		switch (currentPageContext.routeParams.category) {
 			case "apps":
 				return {
@@ -90,6 +92,20 @@ export function Page(props: {
 					description: m.marketplace_header_lix_short_description(),
 					buttonLink: "https://github.com/inlang/monorepo/tree/main/lix",
 					buttonText: m.marketplace_header_lix_button_text(),
+				}
+			case "svelte":
+				return {
+					title: "Svelte - i18n Tooling",
+					description: "Recommended internationalization tooling for your svelte stack.",
+					icon: "https://avatars.githubusercontent.com/u/23617963?s=200&v=4",
+					withGuides: true,
+				}
+			case "nextjs":
+				return {
+					title: "Next.js - i18n Tooling",
+					description: "Recommended internationalization tooling for your next.js stack.",
+					icon: "https://assets.vercel.com/image/upload/v1662130559/nextjs/Icon_light_background.png",
+					withGuides: true,
 				}
 			default:
 				return {
@@ -151,12 +167,13 @@ export function Page(props: {
 				<Link href={locale.href} lang={locale.hreflang} rel={locale.rel} />
 			))}
 			<MarketplaceLayout>
-				<Show when={currentPageContext.routeParams.category && getHeaderContent()}>
+				<Show when={currentPageContext.routeParams.category && getCategoryContent()}>
 					<TitleSection
-						title={getHeaderContent()!.title}
-						description={getHeaderContent()!.description}
-						buttonLink={getHeaderContent()!.buttonLink}
-						buttonText={getHeaderContent()!.buttonText}
+						title={getCategoryContent()!.title}
+						description={getCategoryContent()!.description}
+						buttonLink={getCategoryContent()!.buttonLink}
+						buttonText={getCategoryContent()!.buttonText}
+						icon={getCategoryContent()!.icon}
 					/>
 					<Show when={currentPageContext.routeParams.category === "plugins"}>
 						<PluginHeader />
@@ -190,8 +207,18 @@ export function Page(props: {
 								</Show>
 							</Show>
 							<div class="mb-8 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
-								<Gallery items={props.items} guides={selectedCategory().includes("c/guides")} />
+								<Gallery
+									items={props.items}
+									guides={selectedCategory().includes("c/guides")}
+									hideBuildYourOwn={getCategoryContent()?.withGuides}
+								/>
 							</div>{" "}
+							<Show when={getCategoryContent()?.withGuides}>
+								<p class="text-lg font-semibold leading-snug tracking-tight py-4">Guides</p>
+								<div class="mb-8 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
+									<Gallery items={props.items} guides={true} />
+								</div>{" "}
+							</Show>
 						</div>
 						<Show when={!props.category && !props.slider && !props.minimal}>
 							<div class="mt-20">
@@ -205,7 +232,7 @@ export function Page(props: {
 	)
 }
 
-const Gallery = (props: { items: any; guides?: boolean }) => {
+const Gallery = (props: { items: any; guides?: boolean; hideBuildYourOwn?: boolean }) => {
 	const [show, setShow] = createSignal<boolean>(false)
 	onMount(() => {
 		setShow(true)
@@ -249,7 +276,7 @@ const Gallery = (props: { items: any; guides?: boolean }) => {
 							return <Card item={item} displayName={displayName} />
 						}}
 					</For>
-					<Show when={!props.guides}>
+					<Show when={!props.guides && !props.hideBuildYourOwn}>
 						<CardBuildOwn />
 					</Show>
 				</Show>
