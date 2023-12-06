@@ -8,7 +8,7 @@ Fix `paraglide compile` hanging for a couple seconds after successful compilatio
 
 Fix crash when using `npx @inlang/paraglide-js init` and selecting vscode.
 
-## 1.0.0-prerelease.14
+## 1.0.0-prerelease.14
 
 Added `--watch` flag to the `paraglide-js compile` command. This will keep the process alive and recompile whenever messages are changed. 
 
@@ -17,7 +17,7 @@ paraglide-js compile --project ./project.inlang --watch
 ```
 
 
-## 1.0.0-prerelease.13
+## 1.0.0-prerelease.13
 
 `./paraglide/runtime.js` now exports a function called `isAvailableLanguageTag`. This is 
 the recommended way to check if something is a valid language tag, while maintaining
@@ -34,7 +34,7 @@ if (isAvailableLanguageTag(params.lang)) {
 }
 ``` 
 
-## 1.0.0-prerelease.12
+## 1.0.0-prerelease.12
 
 [Internal Change]
 Expose the compiler so that bundler plugins can call it programmatically instead of going through the CLI.
