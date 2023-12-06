@@ -11,6 +11,7 @@ import type { MessageLintReport, Message } from "./versionedInterfaces.js"
 import { lintSingleMessage } from "./lint/index.js"
 import { ReactiveMap } from "./reactivity/map.js"
 import { debounce } from "throttle-debounce"
+import { createEffect } from "./reactivity/solid.js"
 
 /**
  * Creates a reactive query API for messages.
@@ -26,53 +27,57 @@ export function createMessageLintReportsQuery(
 	const index = new ReactiveMap<MessageLintReport["messageId"], MessageLintReport[]>()
 
 	const modules = resolvedModules()
-	const _settings = settings()
 
 	const rulesArray = modules?.messageLintRules
-	const settingsObject = {
-		..._settings,
-		messageLintRuleLevels: Object.fromEntries(
-			installedMessageLintRules().map((rule) => [rule.id, rule.level])
-		),
+	const messageLintRuleLevels = Object.fromEntries(
+		installedMessageLintRules().map((rule) => [rule.id, rule.level])
+	)
+	const settingsObject = () => {
+		return {
+			...settings(),
+			messageLintRuleLevels,
+		}
 	}
 
 	const messages = messagesQuery.getAll() as Message[]
 
-	if (messagesQuery.includedMessageIds() && _settings && rulesArray) {
-		for (const messageId of messagesQuery.includedMessageIds()) {
-			messagesQuery.get.subscribe({ where: { id: messageId } }, async (message) => {
-				if (hasWatcher) {
-					await lintSingleMessage({
-						rules: rulesArray,
-						settings: settingsObject,
-						messages: messages,
-						message: message,
-					}).then((report) => {
-						if (report.errors.length === 0 && index.get(messageId) !== report.data) {
-							index.set(messageId, report.data)
-						}
-					})
-				} else {
-					debounce(
-						500,
-						async (message) => {
-							await lintSingleMessage({
-								rules: rulesArray,
-								settings: settingsObject,
-								messages: messages,
-								message: message,
-							}).then((report) => {
-								if (report.errors.length === 0 && index.get(messageId) !== report.data) {
-									index.set(messageId, report.data)
-								}
-							})
-						},
-						{ atBegin: false }
-					)(message)
-				}
-			})
+	createEffect(() => {
+		if (rulesArray) {
+			for (const messageId of messagesQuery.includedMessageIds()) {
+				messagesQuery.get.subscribe({ where: { id: messageId } }, async (message) => {
+					if (hasWatcher) {
+						await lintSingleMessage({
+							rules: rulesArray,
+							settings: settingsObject(),
+							messages: messages,
+							message: message,
+						}).then((report) => {
+							if (report.errors.length === 0 && index.get(messageId) !== report.data) {
+								index.set(messageId, report.data)
+							}
+						})
+					} else {
+						debounce(
+							500,
+							async (message) => {
+								await lintSingleMessage({
+									rules: rulesArray,
+									settings: settingsObject(),
+									messages: messages,
+									message: message,
+								}).then((report) => {
+									if (report.errors.length === 0 && index.get(messageId) !== report.data) {
+										index.set(messageId, report.data)
+									}
+								})
+							},
+							{ atBegin: false }
+						)(message)
+					}
+				})
+			}
 		}
-	}
+	})
 
 	const get = (args: Parameters<MessageLintReportsQueryApi["get"]>[0]) => {
 		return structuredClone(index.get(args.where.messageId))

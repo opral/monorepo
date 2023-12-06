@@ -142,9 +142,6 @@ export const loadProject = async (args: {
 		const [messages, setMessages] = createSignal<Message[]>()
 
 		createEffect(() => {
-			const conf = settings()
-			if (!conf) return
-
 			const _resolvedModules = resolvedModules()
 			if (!_resolvedModules) return
 
