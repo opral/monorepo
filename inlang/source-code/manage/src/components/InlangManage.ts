@@ -57,7 +57,7 @@ export class InlangManage extends TwLitElement {
 
 	override render(): TemplateResult {
 		return html` <main class="w-full h-screen flex justify-center items-center px-4 bg-slate-50">
-			<div class="w-full max-w-lg h-auto bg-white border border-slate-200 p-3 rounded-lg">
+			<div class="w-full max-w-lg h-auto bg-white border border-slate-200 p-6 rounded-lg">
 				<div class="flex items-center gap-4 justify-between border-b border-b-slate-200 pb-3 mb-4">
 					<div class="flex items-center gap-2">
 						<inlang-logo></inlang-logo>
