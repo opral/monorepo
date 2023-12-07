@@ -466,7 +466,7 @@ export class InlangInstall extends TwLitElement {
 			</h2>
 					</h2>
 					<p class="text-slate-500 mb-4">
-					Please confirm that you want to install the following module:</p>
+					Please confirm that you want to install the following module in the project selected above:</p>
 					<p class="font-medium">${
 						// @ts-ignore
 						registry.find((x) => x.id === this.url.module)?.displayName.en

@@ -6,6 +6,7 @@ import { TwLitElement } from "../common/TwLitElement.js"
 import "./InlangInstall"
 import { createNodeishMemoryFs, openRepository } from "@lix-js/client"
 import { listProjects } from "@inlang/sdk"
+import { browserAuth, getUser } from "@lix-js/client/src/browser-auth.ts"
 
 @customElement("inlang-manage")
 export class InlangManage extends TwLitElement {
@@ -16,7 +17,10 @@ export class InlangManage extends TwLitElement {
 	repoURL: string = ""
 
 	@property({ type: Object })
-	projects: Record<string, string>[] | undefined = undefined
+	projects: Record<string, string>[] | undefined | "load" = "load"
+
+	@property({ type: Object })
+	user: Record<string, any> | undefined | "load" = "load"
 
 	async projectHandler() {
 		const repo = await openRepository(`http://localhost:3001/git/${this.url.repo}`, {
@@ -32,7 +36,7 @@ export class InlangManage extends TwLitElement {
 		return `?repo=${url.host}${url.pathname.split("/").slice(0, 3).join("/")}`
 	}
 
-	override connectedCallback() {
+	override async connectedCallback() {
 		super.connectedCallback()
 		if (window.location.search !== "" && window.location.pathname !== "") {
 			const url = {
@@ -53,6 +57,13 @@ export class InlangManage extends TwLitElement {
 		}
 
 		this.url.repo && this.projectHandler()
+
+		const user = await getUser().catch(() => {
+			this.user = undefined
+		})
+		if (user) {
+			this.user = user
+		}
 	}
 
 	override render(): TemplateResult {
@@ -64,6 +75,30 @@ export class InlangManage extends TwLitElement {
 						<h1 class="font-semibold capitalize">
 							Manage ${this.url.path && `/ ${this.url.path}`}
 						</h1>
+					</div>
+					<div>
+						${this.user === "load"
+							? html`<div class="animate-pulse h-9 w-20 rounded-md bg-slate-100"></div>`
+							: this.user
+							? html`<button
+									class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md pl-2 pr-3 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+									@click=${async () => {
+										await browserAuth.logout()
+										window.location.reload()
+									}}
+							  >
+									<img src=${this.user.avatarUrl} class="w-6 h-6 rounded-full mr-2" />
+									Logout
+							  </button>`
+							: html`<button
+									class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+									@click=${async () => {
+										await browserAuth.login()
+										window.location.reload()
+									}}
+							  >
+									Login
+							  </button>`}
 					</div>
 				</div>
 				<div class="border-b border-slate-200 mb-4 pb-4">
@@ -99,45 +134,48 @@ export class InlangManage extends TwLitElement {
 											(this.url.project ? `&project=${this.url.project}` : "") +
 											(this.url.module ? `&module=${this.url.module}` : ""))
 							}}
-							class=${"bg-white text-slate-600 border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"}
+							class="bg-white text-slate-600 border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
 						>
 							${this.url.repo ? "Edit" : "Install"}
 						</button>
 					</div>
-					${this.projects &&
-					html`<div class="flex flex-col gap-0.5 mt-4">
-						${this.projects?.map(
-							(project) =>
-								html`<a
-									href=${`
+					${this.projects === "load"
+						? html`<div class="flex flex-col gap-0.5 mt-4">
+								<div class="animate-pulse h-12 w-full rounded-md bg-slate-100"></div>
+						  </div>`
+						: html`<div class="flex flex-col gap-0.5 mt-4">
+								${this.projects?.map(
+									(project) =>
+										html`<a
+											href=${`
 								${this.url.path === "install" ? "/install" : "/"}
 								?repo=${this.url.repo}&project=${project.projectPath}` +
-									(this.url.module ? `&module=${this.url.module}` : "")}
-									class=${"flex gap-4 group items-center px-4 py-2 text-sm rounded-md " +
-									(this.url.project === project.projectPath
-										? "bg-slate-100 text-slate-900"
-										: "text-slate-500 hover:bg-slate-50 hover:text-slate-600")}
-								>
-									${this.url.project === project.projectPath
-										? html`<doc-icon
-												icon="mdi:folder-open"
-												size="1.4em"
-												class="inline-block aspect-square mt-1.5"
-										  ></doc-icon>`
-										: html`<doc-icon
-													icon="mdi:folder"
-													size="1.4em"
-													class="inline-block aspect-square mt-1.5 group-hover:hidden"
-												></doc-icon
-												><doc-icon
-													icon="mdi:folder-open"
-													size="1.4em"
-													class="aspect-square mt-1.5 hidden group-hover:inline-block"
-												></doc-icon>`}
-									${project.projectPath}
-								</a>`
-						)}
-					</div>`}
+											(this.url.module ? `&module=${this.url.module}` : "")}
+											class=${"flex gap-4 group items-center px-4 py-2 text-sm rounded-md " +
+											(this.url.project === project.projectPath
+												? "bg-slate-100 text-slate-900"
+												: "text-slate-500 hover:bg-slate-50 hover:text-slate-600")}
+										>
+											${this.url.project === project.projectPath
+												? html`<doc-icon
+														icon="mdi:folder-open"
+														size="1.4em"
+														class="inline-block aspect-square mt-1.5"
+												  ></doc-icon>`
+												: html`<doc-icon
+															icon="mdi:folder"
+															size="1.4em"
+															class="inline-block aspect-square mt-1.5 group-hover:hidden"
+														></doc-icon
+														><doc-icon
+															icon="mdi:folder-open"
+															size="1.4em"
+															class="aspect-square mt-1.5 hidden group-hover:inline-block"
+														></doc-icon>`}
+											${project.projectPath}
+										</a>`
+								)}
+						  </div>`}
 				</div>
 				${!this.url.path
 					? html` <inlang-menu jsonURL=${JSON.stringify(this.url)}></inlang-menu>`
