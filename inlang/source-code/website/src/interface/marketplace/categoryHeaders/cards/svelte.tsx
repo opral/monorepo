@@ -14,9 +14,12 @@ const SvelteHeader = () => {
 					<p class="text-sm text-surface-500 pr-20">
 						A small collection of tooling to get you going to build your global svelt app.
 					</p>
-					<div class="pt-6">
+					<div class="pt-6 flex gap-4">
 						<Button type="secondary" href="/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp">
 							{m.marketplace_application_header_svelte_button()}
+						</Button>
+						<Button type="text" chevron href="/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp">
+							Svelte Summit Talk 2023
 						</Button>
 					</div>
 				</div>
