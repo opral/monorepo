@@ -6,6 +6,7 @@ import { z } from "zod"
 import "./InlangInstall"
 import { createNodeishMemoryFs, openRepository } from "@lix-js/client"
 import { listProjects } from "@inlang/sdk"
+import { publicEnv } from "@inlang/env-variables"
 import { browserAuth, getUser } from "@lix-js/client/src/browser-auth.ts"
 
 @customElement("inlang-manage")
@@ -26,9 +27,12 @@ export class InlangManage extends TwLitElement {
 	repoInput: HTMLInputElement | undefined
 
 	async projectHandler() {
-		const repo = await openRepository(`http://localhost:3001/git/${this.url.repo}`, {
-			nodeishFs: createNodeishMemoryFs(),
-		})
+		const repo = await openRepository(
+			`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${this.url.repo}`,
+			{
+				nodeishFs: createNodeishMemoryFs(),
+			}
+		)
 
 		this.projects = await listProjects(repo.nodeishFs, "/")
 	}
@@ -75,12 +79,12 @@ export class InlangManage extends TwLitElement {
 		if (user) {
 			this.user = user
 		}
-
-		if (this.url.path === "" && !this.url.repo && this.user) this.repoInput?.focus(), 0
 	}
 
 	override render(): TemplateResult {
-		return html` <main class="w-full h-screen flex justify-center items-center px-4 bg-slate-50">
+		return html` <main
+			class="w-full min-h-screen py-8 flex justify-center items-center px-4 bg-slate-50"
+		>
 			<div class="w-full max-w-lg h-auto bg-white border border-slate-200 p-6 rounded-lg">
 				<div class="flex items-center gap-4 justify-between border-b border-b-slate-200 pb-3 mb-4">
 					<div class="flex items-center gap-2">
@@ -162,13 +166,13 @@ export class InlangManage extends TwLitElement {
 								/>
 								<button
 									@click="${() => {
-										if (this.isValidUrl())
-											this.url.repo // delete repo and project from url
-												? (window.location.href = "/")
-												: (window.location.href =
-														this.generateManageLink() +
-														(this.url.project ? `&project=${this.url.project}` : "") +
-														(this.url.module ? `&module=${this.url.module}` : ""))
+										this.url.repo
+											? (window.location.href = "/")
+											: this.isValidUrl() &&
+											  (window.location.href =
+													this.generateManageLink() +
+													(this.url.project ? `&project=${this.url.project}` : "") +
+													(this.url.module ? `&module=${this.url.module}` : ""))
 									}}"
 									class="bg-white text-slate-600 border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
 								>
