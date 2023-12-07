@@ -18,7 +18,7 @@ export class InlangManage extends TwLitElement {
 	repoURL: string = ""
 
 	@property({ type: Object })
-	projects: Record<string, string>[] | undefined | "load" = "load"
+	projects: Record<string, string>[] | undefined | "no-access" | "load" = "load"
 
 	@property({ type: Object })
 	user: Record<string, any> | undefined | "load" = "load"
@@ -33,6 +33,11 @@ export class InlangManage extends TwLitElement {
 				nodeishFs: createNodeishMemoryFs(),
 			}
 		)
+
+		if (repo.errors().length > 0) {
+			this.projects = "no-access"
+			return
+		}
 
 		this.projects = await listProjects(repo.nodeishFs, "/")
 	}
@@ -190,6 +195,25 @@ export class InlangManage extends TwLitElement {
 								this.projects === "load"
 									? html`<div class="flex flex-col gap-0.5 mt-4">
 											<div class="animate-pulse h-12 w-full rounded-md bg-slate-100"></div>
+									  </div>`
+									: this.projects === "no-access"
+									? html`<div class="flex flex-col gap-0.5 mt-4">
+											<div
+												class="py-4 w-full rounded-md bg-red-100 text-red-500 flex flex-col items-center justify-center"
+											>
+												<p class="mb-4">You don't have access to this repository.</p>
+												<a
+													href="https://github.com/apps/${publicEnv.PUBLIC_LIX_GITHUB_APP_NAME}/installations/select_target"
+													target="_blank"
+													class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+													>Configure Permissions
+													<doc-icon
+														class="inline-block ml-1 translate-y-0.5"
+														size="1.2em"
+														icon="mdi:arrow-top-right"
+													></doc-icon>
+												</a>
+											</div>
 									  </div>`
 									: html`<div class="flex flex-col gap-0.5 mt-4">
 											${this.projects?.map(
@@ -628,9 +652,17 @@ export class InlangMenu extends TwLitElement {
 					Uninstall a module
 				</a>
 				<a
-					class="bg-slate-200 text-white text-center py-2 rounded-md font-medium cursor-not-allowed"
+					class="bg-slate-200 text-white text-center py-2 rounded-md font-medium cursor-not-allowed mb-4"
 				>
 					Update a module
+				</a>
+				<a
+					href="https://github.com/apps/${publicEnv.PUBLIC_LIX_GITHUB_APP_NAME}/installations/select_target"
+					target="_blank"
+					class="text-[#098DAC] font-medium transition-colors hover:text-[#06b6d4]"									"
+				>
+					Edit Permissions
+					<doc-icon class="inline-block ml-1 translate-y-0.5" size="1.2em" icon="mdi:arrow-top-right"></doc-icon>
 				</a>
 			</div>
 		`
