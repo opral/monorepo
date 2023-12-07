@@ -1,2 +1,3 @@
-import { injectLangAttribute } from "@inlang/paraglide-js-adapter-sveltekit"
-export const handle = injectLangAttribute("%lang%")
+import { handleRedirects, injectLangAttribute } from "@inlang/paraglide-js-adapter-sveltekit"
+import { sequence } from "@sveltejs/kit/hooks"
+export const handle = sequence(injectLangAttribute("%lang%"), handleRedirects)

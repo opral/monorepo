@@ -54,15 +54,12 @@
 	beforeNavigate((event) => {
 		//If `goto` to internal route
 		if (event.type === "goto") {
-			//If the user is navigating to a different language, we don't want to rewrite the path
+			//If the user is intentionally navigating to a different language, we don't want to rewrite the path
 			const skipHandling = isLanguageChange === true
 			isLanguageChange = false
 			if (skipHandling) return
 
 			if (event.to && event.to.route.id) {
-				if (event.to.url.searchParams.get("no-translate") === "true") {
-					return
-				}
 				const existingLanguage = getLanguage(event.to.url)
 
 				if (existingLanguage) {
