@@ -1,6 +1,6 @@
 import type { TemplateResult } from "lit"
 import { html } from "lit"
-import { customElement, property } from "lit/decorators.js"
+import { customElement, property, query } from "lit/decorators.js"
 import { TwLitElement } from "../common/TwLitElement.js"
 
 import "./InlangInstall"
@@ -21,6 +21,9 @@ export class InlangManage extends TwLitElement {
 
 	@property({ type: Object })
 	user: Record<string, any> | undefined | "load" = "load"
+
+	@query("#repo-input")
+	repoInput: HTMLInputElement | undefined
 
 	async projectHandler() {
 		const repo = await openRepository(`http://localhost:3001/git/${this.url.repo}`, {
@@ -64,6 +67,8 @@ export class InlangManage extends TwLitElement {
 		if (user) {
 			this.user = user
 		}
+
+		if (this.url.path === "" && !this.url.repo) this.repoInput?.focus(), 0
 	}
 
 	override render(): TemplateResult {
@@ -109,6 +114,7 @@ export class InlangManage extends TwLitElement {
 						}`}
 					>
 						<input
+							id="repo-input"
 							.value=${this.url.repo ? this.url.repo : this.repoURL}
 							@input=${(e: InputEvent) => {
 								this.repoURL = (e.target as HTMLInputElement).value
@@ -136,7 +142,7 @@ export class InlangManage extends TwLitElement {
 							}}
 							class="bg-white text-slate-600 border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
 						>
-							${this.url.repo ? "Edit" : "Install"}
+							${this.url.repo ? "Edit" : "Confirm"}
 						</button>
 					</div>
 					${this.projects === "load"
@@ -146,11 +152,19 @@ export class InlangManage extends TwLitElement {
 						: html`<div class="flex flex-col gap-0.5 mt-4">
 								${this.projects?.map(
 									(project) =>
-										html`<a
-											href=${`
-								${this.url.path === "install" ? "/install" : "/"}
-								?repo=${this.url.repo}&project=${project.projectPath}` +
-											(this.url.module ? `&module=${this.url.module}` : "")}
+										html`<button
+											@click=${() => {
+												this.url = {
+													...this.url,
+													project: project.projectPath,
+												}
+												window.history.pushState(
+													{},
+													"",
+													`?repo=${this.url.repo}&project=${project.projectPath}` +
+														(this.url.module ? `&module=${this.url.module}` : "")
+												)
+											}}
 											class=${"flex gap-4 group items-center px-4 py-2 text-sm rounded-md " +
 											(this.url.project === project.projectPath
 												? "bg-slate-100 text-slate-900"
@@ -173,7 +187,7 @@ export class InlangManage extends TwLitElement {
 															class="aspect-square mt-1.5 hidden group-hover:inline-block"
 														></doc-icon>`}
 											${project.projectPath}
-										</a>`
+										</button>`
 								)}
 						  </div>`}
 				</div>
