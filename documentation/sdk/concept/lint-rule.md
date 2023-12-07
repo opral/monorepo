@@ -6,13 +6,13 @@ For example, the [missing translation lint rule](/m/messageLintRule.inlang.missi
 
 ## Types of lint rules
 
-![inlang message lints](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/lintrule-messagelints.jpg)
+![inlang message lints](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/lintrule-messagelints.jpg)
 
 ### Message lint rule
 
 A message lint rule validates a message. For example, the [missing translation lint rule](/m/messageLintRule.inlang.missingTranslation) validates that a message has a translation for a specified [language tag](/documentation/language-tag).
 
-![inlang code lints](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/lintrule-codelints.jpg)
+![inlang code lints](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/lintrule-codelints.jpg)
 
 ### More soon...
 
