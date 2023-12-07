@@ -1,12 +1,8 @@
-import {
-	LANGUAGE_TAG_ALIAS,
-	PARAGLIDE_RUNTIME_MODULE_ALIAS,
-	TRANSLATE_PATH_FUNCTION_NAME,
-	TRANSLATE_PATH_MODULE_ID,
-} from "../../../constants.js"
+import { PARAGLIDE_RUNTIME_MODULE_ALIAS, TRANSLATE_PATH_MODULE_ID } from "../../../constants.js"
 import type { PreprocessingPass } from "../index.js"
 import { getElementsFromAst } from "../utils/ast.js"
 import { attrubuteValuesToJSValue } from "../utils/attributes-to-values.js"
+import { identifier } from "../utils/identifier.js"
 
 export const RewriteHrefs: PreprocessingPass = {
 	condition: ({ content }) => {
@@ -24,7 +20,7 @@ export const RewriteHrefs: PreprocessingPass = {
 			if (!hrefAttribute) continue
 
 			const optOutAttribute = link.attributes.find(
-				(attribute) => attribute.name === "data-no-translate",
+				(attribute) => attribute.name === "data-no-translate"
 			)
 			if (optOutAttribute) continue
 
@@ -35,10 +31,12 @@ export const RewriteHrefs: PreprocessingPass = {
 			const hreflang = link.attributes.find((attribute) => attribute.name === "hreflang")
 			const langValue = hreflang
 				? attrubuteValuesToJSValue(hreflang.value, originalCode)
-				: `${LANGUAGE_TAG_ALIAS}()`
+				: `${identifier("languageTag")}()`
 
 			//Replace the href attribute with the new href attribute
-			const newHrefAttributeString = `href={${TRANSLATE_PATH_FUNCTION_NAME}(${hrefAsTemplateString}, ${langValue})}`
+			const newHrefAttributeString = `href={${identifier(
+				"translatePath"
+			)}(${hrefAsTemplateString}, ${langValue})}`
 			code.overwrite(hrefAttribute.start, hrefAttribute.end, newHrefAttributeString)
 
 			rewroteHref = true
@@ -50,8 +48,10 @@ export const RewriteHrefs: PreprocessingPass = {
 
 		return {
 			imports: [
-				`import ${TRANSLATE_PATH_FUNCTION_NAME} from '${TRANSLATE_PATH_MODULE_ID}';`,
-				`import { languageTag as ${LANGUAGE_TAG_ALIAS} } from '${PARAGLIDE_RUNTIME_MODULE_ALIAS}';`,
+				`import ${identifier("translatePath")} from '${TRANSLATE_PATH_MODULE_ID}';`,
+				`import { languageTag as ${identifier(
+					"languageTag"
+				)} } from '${PARAGLIDE_RUNTIME_MODULE_ALIAS}';`,
 			],
 		}
 	},

@@ -1,12 +1,8 @@
-import {
-	LANGUAGE_TAG_ALIAS,
-	PARAGLIDE_RUNTIME_MODULE_ALIAS,
-	TRANSLATE_PATH_FUNCTION_NAME,
-	TRANSLATE_PATH_MODULE_ID,
-} from "../../../constants.js"
+import { PARAGLIDE_RUNTIME_MODULE_ALIAS, TRANSLATE_PATH_MODULE_ID } from "../../../constants.js"
 import type { PreprocessingPass } from "../index.js"
 import { getElementsFromAst } from "../utils/ast.js"
 import { attrubuteValuesToJSValue } from "../utils/attributes-to-values.js"
+import { identifier } from "../utils/identifier.js"
 
 export const RewriteFormActions: PreprocessingPass = {
 	condition: ({ content }) => {
@@ -21,27 +17,29 @@ export const RewriteFormActions: PreprocessingPass = {
 		for (const button of buttons) {
 			//If the link has no href attribute there is nothing to do
 			const formactionAttributes = button.attributes.find(
-				(attribute) => attribute.name === "formaction",
+				(attribute) => attribute.name === "formaction"
 			)
 			if (!formactionAttributes) continue
 
 			const optOutAttribute = button.attributes.find(
-				(attribute) => attribute.name === "data-no-translate",
+				(attribute) => attribute.name === "data-no-translate"
 			)
 			if (optOutAttribute) continue
 
-			const langValue = `${LANGUAGE_TAG_ALIAS}()`
+			const langValue = `${identifier("languageTag")}()`
 			const actionAttributeAsTemplateString = attrubuteValuesToJSValue(
 				formactionAttributes.value,
-				originalCode,
+				originalCode
 			)
 
 			//Replace the formaction attribute with the new formaction attribute
-			const newFormactionAttributeString = `formaction={${TRANSLATE_PATH_FUNCTION_NAME}(${actionAttributeAsTemplateString}, ${langValue})}`
+			const newFormactionAttributeString = `formaction={${identifier(
+				"translatePath"
+			)}(${actionAttributeAsTemplateString}, ${langValue})}`
 			code.overwrite(
 				formactionAttributes.start,
 				formactionAttributes.end,
-				newFormactionAttributeString,
+				newFormactionAttributeString
 			)
 
 			rewroteFormActions = true
@@ -53,8 +51,10 @@ export const RewriteFormActions: PreprocessingPass = {
 
 		return {
 			imports: [
-				`import ${TRANSLATE_PATH_FUNCTION_NAME} from '${TRANSLATE_PATH_MODULE_ID}';`,
-				`import { languageTag as ${LANGUAGE_TAG_ALIAS} } from '${PARAGLIDE_RUNTIME_MODULE_ALIAS}';`,
+				`import ${identifier("translatePath")} from '${TRANSLATE_PATH_MODULE_ID}';`,
+				`import { languageTag as ${identifier(
+					"languageTag"
+				)} } from '${PARAGLIDE_RUNTIME_MODULE_ALIAS}';`,
 			],
 		}
 	},
