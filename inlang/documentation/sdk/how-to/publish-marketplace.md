@@ -94,11 +94,11 @@ Attributes:
 - `looping` (optional): True if you want the slider to loop.
 
 ```md
-<doc-slider items="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg,https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg,https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg"></doc-slider>
+<doc-slider items="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg, https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg, https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg"></doc-slider>
 ```
 
 ##### Preview
-<doc-slider items="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg,https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg,https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg"></doc-slider>
+<doc-slider items="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg, https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg, https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg"></doc-slider>
 
 ---
 
