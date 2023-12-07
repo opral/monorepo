@@ -186,7 +186,7 @@ export class InlangManage extends TwLitElement {
 											(project) =>
 												html`<button
 													@click=${() => {
-														if (this.url.path === "install") {
+														if (this.url.path === "install" && !this.url.project) {
 															window.location.href = `/install?repo=${this.url.repo}&project=${project.projectPath}`
 														} else {
 															this.url = {
