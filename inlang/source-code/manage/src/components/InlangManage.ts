@@ -123,9 +123,9 @@ export class InlangManage extends TwLitElement {
 							  </button>`}
 					</div>
 				</div>
-				<div class="border-b border-slate-200 mb-4 pb-4">
-					${this.user && this.user !== "load"
-						? html`
+				${this.user && this.user !== "load"
+					? html`				<div class="border-b border-slate-200 mb-4 pb-4">
+
 							<div
 								disabled=${this.url.repo}
 								class=${`px-1 gap-2 relative z-10 flex items-center w-full border bg-white rounded-lg transition-all relative ${
@@ -233,16 +233,19 @@ export class InlangManage extends TwLitElement {
 											)}
 									  </div>`
 							}
-					  </div>`
-						: html`<div>
+					  </div></div>`
+					: this.url.path === ""
+					? html` <div class="border-b border-slate-200 mb-4 pb-4">
+							<div>
 								<manage-artwork></manage-artwork>
 								<h1 class="text-slate-900 text-lg font-semibold mb-2">What is inlang Manage?</h1>
 								<p class="text-slate-600">
 									inlang Manage is a tool to help you install and manage inlang modules without
 									having to use the command line.
 								</p>
-						  </div>`}
-				</div>
+							</div>
+					  </div>`
+					: ""}
 				${!this.url.path
 					? html` <inlang-menu jsonURL=${JSON.stringify(this.url)}></inlang-menu>`
 					: this.url.path === "install"
