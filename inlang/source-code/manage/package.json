@@ -10,10 +10,10 @@
 		"lint": "eslint src --fix"
 	},
 	"devDependencies": {
+		"@inlang/detect-json-formatting": "workspace:*",
+		"@inlang/env-variables": "workspace:*",
 		"@inlang/markdown": "workspace:*",
 		"@inlang/marketplace-registry": "workspace:*",
-		"@inlang/env-variables": "workspace:*",
-		"@inlang/detect-json-formatting": "workspace:*",
 		"@inlang/result": "workspace:*",
 		"@inlang/sdk": "workspace:*",
 		"@lix-js/client": "workspace:*",
@@ -28,6 +28,7 @@
 	"dependencies": {
 		"lit": "2.8.0",
 		"postcss": "^8.4.31",
-		"vite-plugin-node-polyfills": "0.16.0"
+		"vite-plugin-node-polyfills": "0.16.0",
+		"zod": "^3.22.4"
 	}
 }
