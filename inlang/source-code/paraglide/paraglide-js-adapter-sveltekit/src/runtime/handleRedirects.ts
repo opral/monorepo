@@ -17,7 +17,6 @@ export const handleRedirects: () => Handle =
 	() =>
 	async ({ event, resolve }) => {
 		const response = await resolve(event)
-		console.log("handleRedirects", response)
 		if (!isRedirect(response)) return response
 
 		//If the redirect is to an internal page, we need to rewrite the url to include the language
