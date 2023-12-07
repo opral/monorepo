@@ -1,5 +1,13 @@
 # @inlang/cli
 
+## 2.1.0
+
+### Minor Changes
+
+- f75a7a551: improve: `inlang machine translate` now shows a progress bar (closes https://github.com/inlang/monorepo/issues/1845)
+- 950173b4c: fix: machine translate command not exiting
+- 2cca8242a: improve: machine translation are conducted in parallel now, massively speeding up machine translations. see this loom https://www.loom.com/share/6467a97082224b31a6dd665c833a6cda?sid=65ec6913-b822-45b5-a111-0c9f303cceba
+
 ## 2.0.0
 
 ### Major Changes
