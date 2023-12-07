@@ -1,4 +1,4 @@
-import { For, Show, createSignal, onMount } from "solid-js"
+import { For, Show, createSignal, onMount, type JSX } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
@@ -14,6 +14,7 @@ import ParaglideHeader from "#src/interface/marketplace/categoryHeaders/cards/pa
 import LintRulesHeader from "#src/interface/marketplace/categoryHeaders/toast/lintRules.jsx"
 import LixHeader from "#src/interface/marketplace/categoryHeaders/cards/lix.jsx"
 import { renderLocales } from "#src/renderer/renderLocales.js"
+import SvelteHeader from "#src/interface/marketplace/categoryHeaders/cards/svelte.jsx"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -47,6 +48,7 @@ export function Page(props: {
 		buttonText?: string
 		icon?: string
 		withGuides?: boolean
+		coverCard?: JSX.Element
 	}
 
 	const getCategoryContent = (): HeaderContentType | undefined => {
@@ -64,6 +66,7 @@ export function Page(props: {
 					description: m.marketplace_header_libraries_description(),
 					buttonLink: "/m/gerre34r/library-inlang-paraglideJs",
 					buttonText: m.marketplace_header_libraries_button_text(),
+					coverCard: <ParaglideHeader />,
 				}
 			case "plugins":
 				return {
@@ -71,6 +74,7 @@ export function Page(props: {
 					description: m.marketplace_header_plugins_description(),
 					buttonLink: "/documentation/develop-pluginp",
 					buttonText: m.marketplace_header_plugins_button_text(),
+					coverCard: <PluginHeader />,
 				}
 			case "lint-rules":
 				return {
@@ -78,6 +82,7 @@ export function Page(props: {
 					description: m.marketplace_header_lintRules_description(),
 					buttonLink: "/documentation/develop-lint-rule",
 					buttonText: m.marketplace_header_lintRules_button_text(),
+					coverCard: <LintRulesHeader />,
 				}
 			case "guides":
 				return {
@@ -92,6 +97,7 @@ export function Page(props: {
 					description: m.marketplace_header_lix_short_description(),
 					buttonLink: "https://github.com/inlang/monorepo/tree/main/lix",
 					buttonText: m.marketplace_header_lix_button_text(),
+					coverCard: <LixHeader />,
 				}
 			case "svelte":
 				return {
@@ -99,6 +105,7 @@ export function Page(props: {
 					description: "Recommended internationalization tooling for your svelte stack.",
 					icon: "https://avatars.githubusercontent.com/u/23617963?s=200&v=4",
 					withGuides: true,
+					coverCard: <SvelteHeader />,
 				}
 			case "nextjs":
 				return {
@@ -175,18 +182,7 @@ export function Page(props: {
 						buttonText={getCategoryContent()!.buttonText}
 						icon={getCategoryContent()!.icon}
 					/>
-					<Show when={currentPageContext.routeParams.category === "plugins"}>
-						<PluginHeader />
-					</Show>
-					<Show when={currentPageContext.routeParams.category === "lint-rules"}>
-						<LintRulesHeader />
-					</Show>
-					<Show when={currentPageContext.routeParams.category === "libraries"}>
-						<ParaglideHeader />
-					</Show>
-					<Show when={currentPageContext.routeParams.category === "lix"}>
-						<LixHeader />
-					</Show>
+					<Show when={getCategoryContent()?.coverCard}>{getCategoryContent()?.coverCard}</Show>
 				</Show>
 				<div class="pb-16 md:pb-20 min-h-screen relative">
 					<SectionLayout showLines={false} type="white">
