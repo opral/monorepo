@@ -47,6 +47,6 @@
 }
 ```
 
-- [Documentation / Getting Started](/docs/Getting%20Started.md)
-- [Usage with Svelte Kit](/docs/Svelte-Kit.md)
+- [Documentation / Getting Started](https://github.com/kaisermann/svelte-i18n/blob/main/docs/Getting%20Started.md)
+- [Usage with Svelte Kit](https://github.com/kaisermann/svelte-i18n/blob/main/docs/Svelte-Kit.md)
 - [i18n VSCode extension (3rd party)](https://github.com/antfu/i18n-ally)

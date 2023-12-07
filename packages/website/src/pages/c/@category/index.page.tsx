@@ -59,7 +59,7 @@ export function Page(props: {
 				return {
 					title: m.marketplace_header_apps_title(),
 					description: m.marketplace_header_apps_description(),
-					buttonLink: "/documentation/develop-app",
+					buttonLink: "/documentation/build-app",
 					buttonText: m.marketplace_header_apps_button_text(),
 				}
 			case "libraries":
@@ -74,7 +74,7 @@ export function Page(props: {
 				return {
 					title: m.marketplace_header_plugins_title(),
 					description: m.marketplace_header_plugins_description(),
-					buttonLink: "/documentation/develop-pluginp",
+					buttonLink: "/documentation/plugin/guide",
 					buttonText: m.marketplace_header_plugins_button_text(),
 					coverCard: <PluginHeader />,
 				}
@@ -82,7 +82,7 @@ export function Page(props: {
 				return {
 					title: m.marketplace_header_lintRules_title(),
 					description: m.marketplace_header_lintRules_description(),
-					buttonLink: "/documentation/develop-lint-rule",
+					buttonLink: "/documentation/build-lint-rule",
 					buttonText: m.marketplace_header_lintRules_button_text(),
 					coverCard: <LintRulesHeader />,
 				}
