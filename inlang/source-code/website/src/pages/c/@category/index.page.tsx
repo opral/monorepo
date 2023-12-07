@@ -15,6 +15,7 @@ import LintRulesHeader from "#src/interface/marketplace/categoryHeaders/toast/li
 import LixHeader from "#src/interface/marketplace/categoryHeaders/cards/lix.jsx"
 import { renderLocales } from "#src/renderer/renderLocales.js"
 import SvelteHeader from "#src/interface/marketplace/categoryHeaders/cards/svelte.jsx"
+import NextjsHeader from "#src/interface/marketplace/categoryHeaders/cards/nextjs.jsx"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -113,6 +114,7 @@ export function Page(props: {
 					description: "Recommended internationalization tooling for your next.js stack.",
 					icon: "https://assets.vercel.com/image/upload/v1662130559/nextjs/Icon_light_background.png",
 					withGuides: true,
+					coverCard: <NextjsHeader />,
 				}
 			default:
 				return {
