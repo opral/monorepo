@@ -8,6 +8,7 @@ import { registry } from "@inlang/marketplace-registry"
 import { ProjectSettings, loadProject } from "@inlang/sdk"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import { tryCatch } from "@inlang/result"
+import { publicEnv } from "@inlang/env-variables"
 
 @customElement("inlang-install")
 export class InlangInstall extends TwLitElement {
@@ -68,9 +69,12 @@ export class InlangInstall extends TwLitElement {
 			this.error = "No project found"
 		}
 
-		const repo = await openRepository(`http://localhost:3001/git/${this.url.repo}`, {
-			nodeishFs: createNodeishMemoryFs(),
-		})
+		const repo = await openRepository(
+			`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${this.url.repo}`,
+			{
+				nodeishFs: createNodeishMemoryFs(),
+			}
+		)
 
 		if (!repo) {
 			this.step = "error"
