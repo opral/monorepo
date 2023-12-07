@@ -101,10 +101,10 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 
 		bar.start(messageIds.length, 0)
 
-		const logs = []
+		const logs: Array<() => void> = []
 
 		// parallelize in the future
-		for (const id of messageIds) {
+		const promises = messageIds.map(async (id) => {
 			const toBeTranslatedMessage = args.project.query.messages.get({ where: { id } })!
 			const { data: translatedMessage, error } = await rpc.machineTranslateMessage({
 				message: toBeTranslatedMessage,
@@ -113,7 +113,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 			})
 			if (error) {
 				logs.push(() => log.error(`Couldn't translate message "${id}": ${error}`))
-				continue
+				return
 			} else if (
 				translatedMessage &&
 				translatedMessage?.variants.length > toBeTranslatedMessage.variants.length
@@ -122,11 +122,16 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 				logs.push(() => log.info(`Machine translated message "${id}"`))
 			}
 			bar.increment()
-		}
+		})
+		await Promise.all(promises)
+
 		bar.stop()
 		for (const log of logs) {
 			log()
 		}
+
+		// https://github.com/inlang/monorepo/issues/1846
+		await new Promise((resolve) => setTimeout(resolve, 4000))
 		// Log the message counts
 		log.success("Machine translate complete.")
 	} catch (error) {
