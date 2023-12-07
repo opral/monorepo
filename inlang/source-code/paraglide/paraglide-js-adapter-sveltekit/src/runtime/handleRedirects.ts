@@ -13,18 +13,22 @@ function isRedirect(response: Response) {
  * @param param0
  * @returns
  */
-export const handleRedirects: Handle = async ({ event, resolve }) => {
-	const response = await resolve(event)
-	console.log("handleRedirects", response)
-	if (!isRedirect(response)) return response
+export const handleRedirects: () => Handle =
+	() =>
+	async ({ event, resolve }) => {
+		const response = await resolve(event)
+		console.log("handleRedirects", response)
+		if (!isRedirect(response)) return response
 
-	//If the redirect is to an internal page, we need to rewrite the url to include the language
-	const location = response.headers.get("location")
-	if (!location || !location.startsWith("/")) return response
+		//If the redirect is to an internal page, we need to rewrite the url to include the language
+		const location = response.headers.get("location")
+		if (!location || !location.startsWith("/")) return response
 
-	const language = getLanguageFromURL(event.url) ?? sourceLanguageTag
-	const newLocations = translatePath(location, language)
+		const language = getLanguageFromURL(event.url) ?? sourceLanguageTag
+		const newLocation = translatePath(location, language)
 
-	response.headers.set("location", newLocations)
-	return response
-}
+		console.log("newLocation", newLocation)
+
+		response.headers.set("location", newLocation)
+		return response
+	}
