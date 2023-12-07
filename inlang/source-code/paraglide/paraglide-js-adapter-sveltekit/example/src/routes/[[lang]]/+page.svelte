@@ -8,6 +8,7 @@
 <p>{m.currentLanguageTag({ languageTag: languageTag() })}</p>
 
 <a href="/about">{m.about()}</a>
+<a href="/some-subpage">Subpage with redirect</a>
 
 <button on:click={() => goto("/about")}> Programmatic About</button>
 

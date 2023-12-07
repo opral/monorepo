@@ -1,6 +1,10 @@
-import getLanguage from "$paraglide-adapter-sveltekit:get-language"
 import { sourceLanguageTag } from "$paraglide-adapter-sveltekit:runtime"
-import type { Handle } from "@sveltejs/kit"
+import type { Handle, RequestEvent } from "@sveltejs/kit"
+import { getLanguageFromURL } from "./getLanguageFromUrl.js"
+
+const defaultLanguageGetter = (event: RequestEvent) => {
+	return getLanguageFromURL(event.url) ?? sourceLanguageTag
+}
 
 /**
  * A SvelteKit Server hook to set the lang attribute on the html tag correctly.
@@ -18,11 +22,15 @@ import type { Handle } from "@sveltejs/kit"
  * ```
  *
  * @param placeholder The placeholder you put in `app.html` for the lang attribute.
+ * @param languageGetter A function that takes in a SvelteKit RequestEvent and returns the language to use. By default your routing strategy is used to determine the language from the url.
  * @returns A SvelteKit handle hook
  */
-export const injectLangAttribute = (placeholder: string): Handle => {
+export const injectLangAttribute = (
+	placeholder: string,
+	languageGetter: (event: RequestEvent) => string = defaultLanguageGetter
+): Handle => {
 	return async ({ resolve, event }) => {
-		const lang = getLanguage(event.url) ?? sourceLanguageTag
+		const lang = languageGetter(event)
 		return await resolve(event, {
 			transformPageChunk({ html, done }) {
 				if (done) return html.replace(placeholder, lang)
