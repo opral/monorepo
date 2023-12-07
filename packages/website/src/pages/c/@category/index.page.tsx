@@ -16,6 +16,7 @@ import LixHeader from "#src/interface/marketplace/categoryHeaders/cards/lix.jsx"
 import { renderLocales } from "#src/renderer/renderLocales.js"
 import SvelteHeader from "#src/interface/marketplace/categoryHeaders/cards/svelte.jsx"
 import NextjsHeader from "#src/interface/marketplace/categoryHeaders/cards/nextjs.jsx"
+import GenericHeader from "#src/interface/marketplace/categoryHeaders/cards/generic.jsx"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -118,10 +119,9 @@ export function Page(props: {
 				}
 			default:
 				return {
-					title: "inlang",
-					description: "The ecosystem to go global.",
-					buttonLink: "/",
-					buttonText: "Home",
+					title: currentPageContext.urlParsed.pathname.split("/")[2]?.toUpperCase() || "Your stack",
+					description: "Recommended internationalization tooling for your stack.",
+					coverCard: <GenericHeader />,
 				}
 		}
 	}

@@ -14,7 +14,7 @@ const NextjsHeader = () => {
 					<p class="text-sm text-surface-500 pr-20">
 						A small collection of tooling to get you going to build your global next app.
 					</p>
-					<div class="pt-6">
+					<div class="pt-6 flex gap-4">
 						<Button type="secondary" href="/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp">
 							{m.marketplace_application_header_svelte_button()}
 						</Button>
@@ -33,7 +33,7 @@ const NextjsHeader = () => {
 					</div>
 					<h3 class="font-medium text-lg px-8 pb-1 z-20">Paraglide JS - 18n library</h3>
 					<p class="text-surface-500 px-8 pb-6 text-sm pr-20 z-20">
-						A i18n library without async resources. Build for the svelte community.
+						A i18n library without async resources. Build for the Next community.
 					</p>
 					<div class="absolute z-20 top-4 right-4 w-8 h-8 border border-surface-400 rounded-full flex justify-center items-center group-hover:bg-surface-100 transition-all text-surface-500 group-hover:text-surface-900">
 						<Arrow />
