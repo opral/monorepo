@@ -86,7 +86,16 @@ export class InlangManage extends TwLitElement {
 					<div class="flex items-center gap-2">
 						<inlang-logo></inlang-logo>
 						<h1 class="font-semibold capitalize">
-							Manage ${this.url.path && `/ ${this.url.path}`}
+							${this.url.path !== ""
+								? html`<a
+										class="hover:text-slate-500 transition-colors duration-100"
+										href=${`/` +
+										(this.user ? `?repo=${this.url.repo}` : "") +
+										(this.url.project ? `&project=${this.url.project}` : "")}
+										>Manage</a
+								  >`
+								: "Manage"}
+							${this.url.path && `/ ${this.url.path}`}
 						</h1>
 					</div>
 					<div>
@@ -114,103 +123,111 @@ export class InlangManage extends TwLitElement {
 							  </button>`}
 					</div>
 				</div>
-				<div class="border-b border-slate-200 mb-4 pb-4">
-					<div
-						disabled=${this.url.repo}
-						class=${`px-1 gap-2 relative z-10 flex items-center w-full border bg-white rounded-lg transition-all relative ${
-							this.url.repo ? "cursor-not-allowed" : ""
-						} ${
-							!this.isValidUrl() && this.repoURL.length > 0
-								? " border-red-500 mb-8"
-								: " focus-within:border-[#098DAC] border-slate-200"
-						}	
+				${this.user && this.user !== "load"
+					? html`<div class="border-b border-slate-200 mb-4 pb-4">
+							<div
+								disabled=${this.url.repo}
+								class=${`px-1 gap-2 relative z-10 flex items-center w-full border bg-white rounded-lg transition-all relative ${
+									this.url.repo ? "cursor-not-allowed" : ""
+								} ${
+									!this.isValidUrl() && this.repoURL.length > 0
+										? " border-red-500 mb-8"
+										: " focus-within:border-[#098DAC] border-slate-200"
+								}	
 					`}
-					>
-						<input
-							id="repo-input"
-							.value=${this.url.repo ? this.url.repo : this.repoURL}
-							@input=${(e: InputEvent) => {
-								this.repoURL = (e.target as HTMLInputElement).value
-							}}
-							@keydown=${(e: KeyboardEvent) => {
-								if (e.key === "Enter" && this.isValidUrl()) {
-									window.location.href =
-										this.generateManageLink() +
-										(this.url.project ? `&project=${this.url.project}` : "") +
-										(this.url.module ? `&module=${this.url.module}` : "")
-								}
-							}}
-							class=${"active:outline-0 px-2 focus:outline-0 focus:ring-0 border-0 h-12 grow placeholder:text-slate-500 placeholder:font-normal placeholder:text-base " +
-							(this.url.repo ? "opacity-50 pointer-events-none " : " ") +
-							(!this.isValidUrl() && this.repoURL.length > 0 ? "text-red-500" : "text-slate-900")}
-							placeholder="https://github.com/user/example"
-						/>
-						<button
-							@click="${() => {
-								if (this.isValidUrl())
-									this.url.repo // delete repo and project from url
-										? (window.location.href = "/")
-										: (window.location.href =
+							>
+								<input
+									id="repo-input"
+									.value=${this.url.repo ? this.url.repo : this.repoURL}
+									@input=${(e: InputEvent) => {
+										this.repoURL = (e.target as HTMLInputElement).value
+									}}
+									@keydown=${(e: KeyboardEvent) => {
+										if (e.key === "Enter" && this.isValidUrl()) {
+											window.location.href =
 												this.generateManageLink() +
 												(this.url.project ? `&project=${this.url.project}` : "") +
-												(this.url.module ? `&module=${this.url.module}` : ""))
-							}}"
-							class="bg-white text-slate-600 border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
-						>
-							${this.url.repo ? "Edit" : "Confirm"}
-						</button>
-						${!this.isValidUrl() && this.repoURL.length > 0
-							? html`<p class="absolute text-red-500 -bottom-5 text-xs">
-									Please enter a valid GitHub repository URL.
-							  </p>`
-							: ""}
-					</div>
-					${this.projects === "load"
-						? html`<div class="flex flex-col gap-0.5 mt-4">
-								<div class="animate-pulse h-12 w-full rounded-md bg-slate-100"></div>
-						  </div>`
-						: html`<div class="flex flex-col gap-0.5 mt-4">
-								${this.projects?.map(
-									(project) =>
-										html`<button
-											@click=${() => {
-												this.url = {
-													...this.url,
-													project: project.projectPath,
-												}
-												window.history.pushState(
-													{},
-													"",
-													`?repo=${this.url.repo}&project=${project.projectPath}` +
-														(this.url.module ? `&module=${this.url.module}` : "")
-												)
-											}}
-											class=${"flex gap-4 group items-center px-4 py-2 text-sm rounded-md " +
-											(this.url.project === project.projectPath
-												? "bg-slate-100 text-slate-900"
-												: "text-slate-500 hover:bg-slate-50 hover:text-slate-600")}
-										>
-											${this.url.project === project.projectPath
-												? html`<doc-icon
-														icon="mdi:folder-open"
-														size="1.4em"
-														class="inline-block aspect-square mt-1.5"
-												  ></doc-icon>`
-												: html`<doc-icon
-															icon="mdi:folder"
-															size="1.4em"
-															class="inline-block aspect-square mt-1.5 group-hover:hidden"
-														></doc-icon
-														><doc-icon
-															icon="mdi:folder-open"
-															size="1.4em"
-															class="aspect-square mt-1.5 hidden group-hover:inline-block"
-														></doc-icon>`}
-											${project.projectPath}
-										</button>`
-								)}
-						  </div>`}
-				</div>
+												(this.url.module ? `&module=${this.url.module}` : "")
+										}
+									}}
+									class=${"active:outline-0 px-2 focus:outline-0 focus:ring-0 border-0 h-12 grow placeholder:text-slate-500 placeholder:font-normal placeholder:text-base " +
+									(this.url.repo ? "opacity-50 pointer-events-none " : " ") +
+									(!this.isValidUrl() && this.repoURL.length > 0
+										? "text-red-500"
+										: "text-slate-900")}
+									placeholder="https://github.com/user/example"
+								/>
+								<button
+									@click="${() => {
+										if (this.isValidUrl())
+											this.url.repo // delete repo and project from url
+												? (window.location.href = "/")
+												: (window.location.href =
+														this.generateManageLink() +
+														(this.url.project ? `&project=${this.url.project}` : "") +
+														(this.url.module ? `&module=${this.url.module}` : ""))
+									}}"
+									class="bg-white text-slate-600 border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+								>
+									${this.url.repo ? "Edit" : "Confirm"}
+								</button>
+								${!this.isValidUrl() && this.repoURL.length > 0
+									? html`<p class="absolute text-red-500 -bottom-5 text-xs">
+											Please enter a valid GitHub repository URL.
+									  </p>`
+									: ""}
+							</div>
+							${this.projects === "load"
+								? html`<div class="flex flex-col gap-0.5 mt-4">
+										<div class="animate-pulse h-12 w-full rounded-md bg-slate-100"></div>
+								  </div>`
+								: html`<div class="flex flex-col gap-0.5 mt-4">
+										${this.projects?.map(
+											(project) =>
+												html`<button
+													@click=${() => {
+														if (this.url.path === "install") {
+															window.location.href = `/install?repo=${this.url.repo}&project=${project.projectPath}`
+														} else {
+															this.url = {
+																...this.url,
+																project: project.projectPath,
+															}
+															window.history.pushState(
+																{},
+																"",
+																`?repo=${this.url.repo}&project=${project.projectPath}` +
+																	(this.url.module ? `&module=${this.url.module}` : "")
+															)
+														}
+													}}
+													class=${"flex gap-4 group items-center px-4 py-2 text-sm rounded-md " +
+													(this.url.project === project.projectPath
+														? "bg-slate-100 text-slate-900"
+														: "text-slate-500 hover:bg-slate-50 hover:text-slate-600")}
+												>
+													${this.url.project === project.projectPath
+														? html`<doc-icon
+																icon="mdi:folder-open"
+																size="1.4em"
+																class="inline-block aspect-square mt-1.5"
+														  ></doc-icon>`
+														: html`<doc-icon
+																	icon="mdi:folder"
+																	size="1.4em"
+																	class="inline-block aspect-square mt-1.5 group-hover:hidden"
+																></doc-icon
+																><doc-icon
+																	icon="mdi:folder-open"
+																	size="1.4em"
+																	class="aspect-square mt-1.5 hidden group-hover:inline-block"
+																></doc-icon>`}
+													${project.projectPath}
+												</button>`
+										)}
+								  </div>`}
+					  </div>`
+					: ""}
 				${!this.url.path
 					? html` <inlang-menu jsonURL=${JSON.stringify(this.url)}></inlang-menu>`
 					: this.url.path === "install"
