@@ -269,7 +269,7 @@ export class InlangInstall extends TwLitElement {
 	override render(): TemplateResult {
 		return this.step === "nomodule"
 			? html`<div class="flex flex-col gap-2">
-					<h2 class="text-xl font-semibold">No module found</h2>
+					<h2 class="text-xl font-semibold">No module selected</h2>
 					</h2>
 					<p class="text-slate-500 mb-8">
 						Find available modules here, or search on inlang.com for more in-depth information. 
