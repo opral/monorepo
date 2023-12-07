@@ -251,7 +251,7 @@ export class InlangInstall extends TwLitElement {
 
 	listModules() {
 		// @ts-ignore
-		return registry.filter((product) => product.module)
+		return registry.filter((product) => product.module) as Registry[]
 	}
 
 	/* This function generates the install link for the user based on a repo url */
