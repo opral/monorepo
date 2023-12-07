@@ -234,7 +234,7 @@ export class InlangManage extends TwLitElement {
 									  </div>`
 							}
 					  </div></div>`
-					: this.url.path === ""
+					: this.url.path === "" && !this.user
 					? html` <div class="border-b border-slate-200 mb-4 pb-4">
 							<div>
 								<manage-artwork></manage-artwork>
