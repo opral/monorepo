@@ -13,6 +13,6 @@ declare module "$paraglide-adapter-sveltekit:runtime" {
 	export const availableLanguageTags: readonly string[]
 	export function isAvailableLanguageTag(tag: string): boolean
 	export function languageTag(): string
-	export function setLanguageTag(tag: string): void
+	export function setLanguageTag(tag: string | ((tag: string) => string)): void
 	export function onSetLanguageTag(callback: (tag: string) => void): void
 }

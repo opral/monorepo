@@ -28,11 +28,11 @@ export type PreprocessingPass = {
 	 * @returns A list of imports that should be injected into the file.
 	 */
 	apply: (data: { ast: Ast; code: MagicString; originalCode: string }) => {
-		imports: string[]
+		scriptAdditions?: { before?: Iterable<string>; after?: Iterable<string> }
 	}
 }
 
-const PASSES: PreprocessingPass[] = [RewriteHrefs, RewriteActions, RewriteFormActions]
+const PASSES: PreprocessingPass[] = [RewriteHrefs /* RewriteActions, RewriteFormActions*/]
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function preprocess(_config: PreprocessorConfig): PreprocessorGroup {
@@ -58,8 +58,10 @@ export function preprocess(_config: PreprocessorConfig): PreprocessorGroup {
 			const ast = parse(content)
 			const code = new MagicString(content)
 
+			const scriptAdditonsStart = new Set<string>()
+			const scriptAdditonsEnd = new Set<string>()
+
 			//Apply the passes whose conditions returned true (be as lazy as possible)
-			const imports = new Set<string>()
 			for (const [i, element] of passMask.entries()) {
 				if (!element) continue
 
@@ -68,11 +70,16 @@ export function preprocess(_config: PreprocessorConfig): PreprocessorGroup {
 				if (!pass) continue
 
 				const passResult = pass.apply({ ast, code, originalCode: content })
-				for (const importStatement of passResult.imports) imports.add(importStatement)
+				for (const addition of passResult.scriptAdditions?.before ?? [])
+					scriptAdditonsStart.add(addition)
+				for (const addition of passResult.scriptAdditions?.after ?? [])
+					scriptAdditonsEnd.add(addition)
 			}
 
 			//Inject any imports that were added by the passes
-			injectImports(ast, code, imports)
+			modifyScriptTag(ast, code, { before: scriptAdditonsStart, after: scriptAdditonsEnd })
+
+			console.log(code.toString())
 
 			//Generate the code and map
 			const map = code.generateMap({ hires: true })
@@ -81,16 +88,22 @@ export function preprocess(_config: PreprocessorConfig): PreprocessorGroup {
 	}
 }
 
-function injectImports(ast: Ast, code: MagicString, importStatements: Iterable<string>) {
-	const importStatementsArray: string[] = Array.isArray(importStatements)
-		? importStatements
-		: [...importStatements]
+function modifyScriptTag(
+	ast: Ast,
+	code: MagicString,
+	additions: { before?: Iterable<string>; after?: Iterable<string> }
+) {
+	const before = additions.before ? [...additions.before] : []
+	const after = additions.after ? [...additions.after] : []
 
 	if (!ast.instance) {
-		code.prepend("<script>\n" + importStatementsArray.join("\n") + "\n</script>\n")
+		code.prepend("<script>\n" + before.join("\n") + "\n" + after.join("\n") + "</script>\n")
 	} else {
 		//@ts-ignore
 		const scriptStart = ast.instance.content.start as number
-		code.appendLeft(scriptStart, "\n" + importStatementsArray.join("\n") + "\n")
+		//@ts-ignore
+		const scriptEnd = ast.instance.content.end as number
+		code.appendLeft(scriptStart, "\n" + before.join("\n") + "\n")
+		code.appendRight(scriptEnd, "\n" + after.join("\n") + "\n")
 	}
 }

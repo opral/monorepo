@@ -1,8 +1,9 @@
-import { PARAGLIDE_RUNTIME_MODULE_ALIAS, TRANSLATE_PATH_MODULE_ID } from "../../../constants.js"
+import { PARAGLIDE_CONTEXT_KEY } from "../../../constants.js"
 import type { PreprocessingPass } from "../index.js"
 import { getElementsFromAst } from "../utils/ast.js"
 import { attrubuteValuesToJSValue } from "../utils/attributes-to-values.js"
-import { identifier } from "../utils/identifier.js"
+import { identifier as i } from "../utils/identifier.js"
+import dedent from "dedent"
 
 export const RewriteHrefs: PreprocessingPass = {
 	condition: ({ content }) => {
@@ -29,30 +30,39 @@ export const RewriteHrefs: PreprocessingPass = {
 
 			//If the link has a hreflang attribute, use it as the language tag
 			const hreflang = link.attributes.find((attribute) => attribute.name === "hreflang")
-			const langValue = hreflang
+			const hreflangValue = hreflang
 				? attrubuteValuesToJSValue(hreflang.value, originalCode)
-				: `${identifier("languageTag")}()`
+				: `undefined`
 
 			//Replace the href attribute with the new href attribute
-			const newHrefAttributeString = `href={${identifier(
-				"translatePath"
-			)}(${hrefAsTemplateString}, ${langValue})}`
+			const newHrefAttributeString = `href={${i(
+				"translateHref"
+			)}(${hrefAsTemplateString}, ${hreflangValue})}`
 			code.overwrite(hrefAttribute.start, hrefAttribute.end, newHrefAttributeString)
 
 			rewroteHref = true
 		}
 
 		if (!rewroteHref) {
-			return { imports: [] }
+			return {}
 		}
 
 		return {
-			imports: [
-				`import ${identifier("translatePath")} from '${TRANSLATE_PATH_MODULE_ID}';`,
-				`import { languageTag as ${identifier(
-					"languageTag"
-				)} } from '${PARAGLIDE_RUNTIME_MODULE_ALIAS}';`,
-			],
+			scriptAdditions: {
+				before: [`import { getContext as ${i("getContext")} } from 'svelte';`],
+
+				after: [
+					dedent`
+						const ${i("context")} = ${i("getContext")}('${PARAGLIDE_CONTEXT_KEY}');
+
+						// If there is a context, use it to translate the hrefs, 
+						// otherwise just return the hrefs as they are
+						const ${i("translateHref")} = ${i("context")} 
+							? (href, hreflang) => ${i("context")}.translatePath(href, hreflang ?? ${i("context")}.languageTag())
+							: (href, hreflang) => href;
+					`,
+				],
+			},
 		}
 	},
 }

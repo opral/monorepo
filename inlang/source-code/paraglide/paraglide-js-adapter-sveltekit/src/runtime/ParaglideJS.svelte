@@ -10,6 +10,8 @@
 	import { page } from "$app/stores"
 	import { beforeNavigate, goto } from "$app/navigation"
 	import { browser } from "$app/environment"
+	import { setContext } from "svelte"
+	import { PARAGLIDE_CONTEXT_KEY } from "../constants.js"
 
 	/** @type { string | undefined } */
 	export let languageTag = undefined
@@ -25,7 +27,6 @@
 	 * ```
 	 */
 	export let rewriteGoto = true;
-
 	$: lang = languageTag ?? getLanguage($page.url) ?? sourceLanguageTag
 	$: setLanguageTag(lang)
 
@@ -96,6 +97,13 @@
 				goto(translatedPath)
 			}
 		}
+	})
+
+
+	setContext(PARAGLIDE_CONTEXT_KEY, {
+		translatePath,
+		getLanguage,
+		languageTag: () => lang,
 	})
 </script>
 

@@ -1,8 +1,9 @@
-import { PARAGLIDE_RUNTIME_MODULE_ALIAS, TRANSLATE_PATH_MODULE_ID } from "../../../constants.js"
+import { PARAGLIDE_CONTEXT_KEY } from "../../../constants.js"
 import type { PreprocessingPass } from "../index.js"
 import { getElementsFromAst } from "../utils/ast.js"
 import { attrubuteValuesToJSValue } from "../utils/attributes-to-values.js"
-import { identifier } from "../utils/identifier.js"
+import { identifier as i } from "../utils/identifier.js"
+import dedent from "dedent"
 
 export const RewriteActions: PreprocessingPass = {
 	condition: ({ content }) => {
@@ -24,32 +25,40 @@ export const RewriteActions: PreprocessingPass = {
 			)
 			if (optOutAttribute) continue
 
-			const langValue = `${identifier("languageTag")}()`
 			const actionAttributeAsTemplateString = attrubuteValuesToJSValue(
 				actionAttribute.value,
 				originalCode
 			)
 
 			//Replace the action attribute with the new action attribute
-			const newActionAttributeString = `action={${identifier(
-				"translatePath"
-			)}(${actionAttributeAsTemplateString}, ${langValue})}`
+			const newActionAttributeString = `action={${i(
+				"translateHref"
+			)}(${actionAttributeAsTemplateString}, undefined)}`
 			code.overwrite(actionAttribute.start, actionAttribute.end, newActionAttributeString)
 
 			rewroteActions = true
 		}
 
 		if (!rewroteActions) {
-			return { imports: [] }
+			return {}
 		}
 
 		return {
-			imports: [
-				`import ${identifier("translatePath")} from '${TRANSLATE_PATH_MODULE_ID}';`,
-				`import { languageTag as ${identifier(
-					"languageTag"
-				)} } from '${PARAGLIDE_RUNTIME_MODULE_ALIAS}';`,
-			],
+			scriptAdditions: {
+				before: [`import { getContext as ${i("getContext")} } from 'svelte';`],
+
+				after: [
+					dedent`
+						const ${i("context")} = ${i("getContext")}('${PARAGLIDE_CONTEXT_KEY}');
+
+						// If there is a context, use it to translate the hrefs, 
+						// otherwise just return the hrefs as they are
+						const ${i("translateHref")} = ${i("context")} 
+							? (href, hreflang) => ${i("context")}.translatePath(href, hreflang ?? ${i("context")}.languageTag())
+							: (href, hreflang) => href;
+					`,
+				],
+			},
 		}
 	},
 }
