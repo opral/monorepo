@@ -2,7 +2,7 @@ import type { TemplateResult } from "lit"
 import { html } from "lit"
 import { customElement, property, query } from "lit/decorators.js"
 import { TwLitElement } from "../common/TwLitElement.js"
-
+import { z } from "zod"
 import "./InlangInstall"
 import { createNodeishMemoryFs, openRepository } from "@lix-js/client"
 import { listProjects } from "@inlang/sdk"
@@ -38,6 +38,14 @@ export class InlangManage extends TwLitElement {
 		const url = new URL(this.repoURL)
 		return `?repo=${url.host}${url.pathname.split("/").slice(0, 3).join("/")}`
 	}
+
+	/* Checks if the GitHub Repo Link is valid */
+	isValidUrl = () =>
+		z
+			.string()
+			.url()
+			.regex(/github/)
+			.safeParse(this.repoURL).success
 
 	override async connectedCallback() {
 		super.connectedCallback()
@@ -109,9 +117,14 @@ export class InlangManage extends TwLitElement {
 				<div class="border-b border-slate-200 mb-4 pb-4">
 					<div
 						disabled=${this.url.repo}
-						class=${`px-1 gap-2 relative z-10 flex items-center w-full border border-slate-200 bg-white rounded-lg focus-within:border-[#098DAC] transition-all ${
+						class=${`px-1 gap-2 relative z-10 flex items-center w-full border bg-white rounded-lg transition-all relative ${
 							this.url.repo ? "cursor-not-allowed" : ""
-						}`}
+						} ${
+							!this.isValidUrl() && this.repoURL.length > 0
+								? " border-red-500 mb-8"
+								: " focus-within:border-[#098DAC] border-slate-200"
+						}	
+					`}
 					>
 						<input
 							id="repo-input"
@@ -120,7 +133,7 @@ export class InlangManage extends TwLitElement {
 								this.repoURL = (e.target as HTMLInputElement).value
 							}}
 							@keydown=${(e: KeyboardEvent) => {
-								if (e.key === "Enter") {
+								if (e.key === "Enter" && this.isValidUrl()) {
 									window.location.href =
 										this.generateManageLink() +
 										(this.url.project ? `&project=${this.url.project}` : "") +
@@ -128,22 +141,29 @@ export class InlangManage extends TwLitElement {
 								}
 							}}
 							class=${"active:outline-0 px-2 focus:outline-0 focus:ring-0 border-0 h-12 grow placeholder:text-slate-500 placeholder:font-normal placeholder:text-base " +
-							(this.url.repo ? "opacity-50 pointer-events-none" : "")}
+							(this.url.repo ? "opacity-50 pointer-events-none " : " ") +
+							(!this.isValidUrl() && this.repoURL.length > 0 ? "text-red-500" : "text-slate-900")}
 							placeholder="https://github.com/user/example"
 						/>
 						<button
-							@click=${() => {
-								this.url.repo // delete repo and project from url
-									? (window.location.href = "/")
-									: (window.location.href =
-											this.generateManageLink() +
-											(this.url.project ? `&project=${this.url.project}` : "") +
-											(this.url.module ? `&module=${this.url.module}` : ""))
-							}}
+							@click="${() => {
+								if (this.isValidUrl())
+									this.url.repo // delete repo and project from url
+										? (window.location.href = "/")
+										: (window.location.href =
+												this.generateManageLink() +
+												(this.url.project ? `&project=${this.url.project}` : "") +
+												(this.url.module ? `&module=${this.url.module}` : ""))
+							}}"
 							class="bg-white text-slate-600 border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
 						>
 							${this.url.repo ? "Edit" : "Confirm"}
 						</button>
+						${!this.isValidUrl() && this.repoURL.length > 0
+							? html`<p class="absolute text-red-500 -bottom-5 text-xs">
+									Please enter a valid GitHub repository URL.
+							  </p>`
+							: ""}
 					</div>
 					${this.projects === "load"
 						? html`<div class="flex flex-col gap-0.5 mt-4">
