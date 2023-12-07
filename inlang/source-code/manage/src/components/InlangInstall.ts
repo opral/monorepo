@@ -649,9 +649,25 @@ export class InlangInstall extends TwLitElement {
 			Succesfully installed into your project: ${this.url.project}
 			</h2>
 					</h2>
-					<p class="text-slate-500">
+					<p class="text-slate-500 mb-8">
 					Your module was succesfully installed.
-					</p></div>`
+					</p>
+					<div class="flex gap-4">
+					<a
+							class="bg-slate-800 px-6 w-full text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
+							href=${`/?repo=${this.url.repo + (this.url.project ? `&project=${this.url.project}` : "")}`}
+						>
+							Back to manage 
+						</a>
+						<a
+						class="bg-slate-200 truncate px-6 w-full text-slate-900 text-center py-2 rounded-md font-medium hover:bg-slate-300 transition-colors"
+						href=${`https://inlang.com/editor/${this.url.repo}`}
+						target="_blank"
+						>
+						Go to Fink - Editor
+						</a>
+					</div>
+					</div>`
 			: this.step === "abort"
 			? html`<div class="flex flex-col gap-2"><h2 class="text-xl font-semibold flex items-center gap-2">
 			Installation aborted
