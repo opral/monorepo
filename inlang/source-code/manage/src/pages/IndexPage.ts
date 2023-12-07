@@ -9,7 +9,7 @@ import "../components/InlangManage"
 
 @customElement("x-index-page")
 export class IndexPage extends TwLitElement {
-	render(): TemplateResult {
+	override render(): TemplateResult {
 		return html`
 			<div class="container">
 				<inlang-manage></inlang-manage>
