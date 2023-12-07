@@ -148,6 +148,9 @@ importers:
       '@sinclair/typebox':
         specifier: ^0.31.17
         version: 0.31.28
+      '@types/cli-progress':
+        specifier: ^3.11.5
+        version: 3.11.5
       '@types/fs-extra':
         specifier: 11.0.2
         version: 11.0.2
@@ -163,6 +166,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^0.33.0
         version: 0.33.0(vitest@0.34.3)
+      cli-progress:
+        specifier: ^3.12.0
+        version: 3.12.0
       cli-table3:
         specifier: 0.6.3
         version: 0.6.3
@@ -6786,6 +6792,12 @@ packages:
   /@types/chai@4.3.10:
     resolution: {integrity: sha512-of+ICnbqjmFCiixUnqRulbylyXQrPqIGf/B3Jax1wIF3DvSheysQxAWvqHhZiW3IQrycvokcLcFQlveGp+vyNg==}
 
+  /@types/cli-progress@3.11.5:
+    resolution: {integrity: sha512-D4PbNRbviKyppS5ivBGyFO29POlySLmA2HyUFE4p5QGazAMM3CwkKWcvTl8gvElSuxRh6FPKL8XmidX873ou4g==}
+    dependencies:
+      '@types/node': 20.9.3
+    dev: true
+
   /@types/compression@1.7.5:
     resolution: {integrity: sha512-AAQvK5pxMpaT+nDvhHrsBhLSYG5yQdtkaJE1WYieSNY2mVFKAgmU4ks65rkZD5oqnGCFLyQpUr1CqI4DmUMyDg==}
     dependencies:
@@ -8601,6 +8613,13 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       restore-cursor: 3.1.0
+    dev: true
+
+  /cli-progress@3.12.0:
+    resolution: {integrity: sha512-tRkV3HJ1ASwm19THiiLIXLO7Im7wlTuKnvkYaTkyoAPefqjNg7W7DHKUlGRxy9vxDvbyCYQkQozvptuMkGCg8A==}
+    engines: {node: '>=4'}
+    dependencies:
+      string-width: 4.2.3
     dev: true
 
   /cli-spinners@2.6.1:

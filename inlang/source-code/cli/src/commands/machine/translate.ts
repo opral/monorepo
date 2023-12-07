@@ -6,6 +6,7 @@ import { log } from "../../utilities/log.js"
 import { type InlangProject, ProjectSettings } from "@inlang/sdk"
 import prompts from "prompts"
 import { projectOption } from "../../utilities/globalFlags.js"
+import progessBar from "cli-progress"
 
 export const translate = new Command()
 	.command("translate")
@@ -88,22 +89,43 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 			return
 		}
 
-		log.info(`📝 Translating to ${targetLanguageTags.length} languages.`)
+		const messageIds = args.project.query.messages.includedMessageIds()
+
+		const bar = new progessBar.SingleBar(
+			{
+				clearOnComplete: true,
+				format: `🤖 Machine translating messages | {bar} | {percentage}% | {value}/{total} Messages`,
+			},
+			progessBar.Presets.shades_grey
+		)
+
+		bar.start(messageIds.length, 0)
+
+		const logs = []
 
 		// parallelize in the future
-		for (const id of args.project.query.messages.includedMessageIds()) {
+		for (const id of messageIds) {
+			const toBeTranslatedMessage = args.project.query.messages.get({ where: { id } })!
 			const { data: translatedMessage, error } = await rpc.machineTranslateMessage({
-				message: args.project.query.messages.get({ where: { id } })!,
+				message: toBeTranslatedMessage,
 				sourceLanguageTag,
 				targetLanguageTags,
 			})
 			if (error) {
-				log.error(`Couldn't translate message "${id}": ${error}`)
+				logs.push(() => log.error(`Couldn't translate message "${id}": ${error}`))
 				continue
+			} else if (
+				translatedMessage &&
+				translatedMessage?.variants.length > toBeTranslatedMessage.variants.length
+			) {
+				args.project.query.messages.update({ where: { id: id }, data: translatedMessage! })
+				logs.push(() => log.info(`Machine translated message "${id}"`))
 			}
-
-			args.project.query.messages.update({ where: { id: id }, data: translatedMessage! })
-			log.info(`Machine translated message "${id}"`)
+			bar.increment()
+		}
+		bar.stop()
+		for (const log of logs) {
+			log()
 		}
 		// Log the message counts
 		log.success("Machine translate complete.")
