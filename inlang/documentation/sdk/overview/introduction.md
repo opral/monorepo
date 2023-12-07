@@ -4,14 +4,14 @@
 <br/>
 <br/>
 
-<doc-image src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/sdk-image.png" alt="infografic"></doc-image>
+<doc-image src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/sdk-image.png" alt="infografic"></doc-image>
 
 If you plan to create an i18n app, this is the perfect solution. You can use the SDK (Software Development Kit), which provides reactive APIs to assist you in managing and linting translation files that are saved in the repository.
 
 ## Build i18n apps fast
 <doc-features>
-  <doc-feature color="#EBF0F4" title="🖊️  Reactive CRUD API" image="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/sdkDocCrudNew.png"></doc-feature>
-  <doc-feature color="#EBF0F4" title="📂  No Storage complexity" image="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/sdkDocStorage.png"></doc-feature>
+  <doc-feature color="#EBF0F4" title="🖊️  Reactive CRUD API" image="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/sdkDocCrudNew.png"></doc-feature>
+  <doc-feature color="#EBF0F4" title="📂  No Storage complexity" image="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/sdkDocStorage.png"></doc-feature>
 </doc-features>
 
 <br/>
