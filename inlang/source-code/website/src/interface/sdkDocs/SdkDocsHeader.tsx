@@ -65,7 +65,7 @@ const SdkDocsSubHeader = () => {
 			},
 			// {
 			// 	name: "Lint Rule",
-			// 	href: "/documentation/lint-rule",
+			// 	href: "/documentation/concept/lint-rule",
 			// },
 			// {
 			// 	name: "Publish Content",

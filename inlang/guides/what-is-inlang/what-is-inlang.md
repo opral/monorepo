@@ -20,7 +20,7 @@ Inlang apps are built on lix. Lix is a git-compatible version control backend fo
 
 Inlang's architecture consists of four main components:
 
-1. [Applications](/documentation/app) - Provide users with an interface for their projects.
+1. [Applications](/documentation/concept/app) - Provide users with an interface for their projects.
 2. [SDK](/documentation/sdk) - Can be used by developers to build inlang apps.
 3. [Project file](/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang#create-project-file) - Defines the project's settings, which language tags exists and to be imported modules.
 4. [Modules](/documentation/plugin) - Contain plugins and/or lint rules that define the behavior of a project.
