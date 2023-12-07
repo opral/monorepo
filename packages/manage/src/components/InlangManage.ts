@@ -68,7 +68,7 @@ export class InlangManage extends TwLitElement {
 			this.user = user
 		}
 
-		if (this.url.path === "" && !this.url.repo) this.repoInput?.focus(), 0
+		if (this.url.path === "" && !this.url.repo && this.user) this.repoInput?.focus(), 0
 	}
 
 	override render(): TemplateResult {
@@ -89,7 +89,7 @@ export class InlangManage extends TwLitElement {
 									class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md pl-2 pr-3 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
 									@click=${async () => {
 										await browserAuth.logout()
-										window.location.reload()
+										window.location.href = "/"
 									}}
 							  >
 									<img src=${this.user.avatarUrl} class="w-6 h-6 rounded-full mr-2" />
