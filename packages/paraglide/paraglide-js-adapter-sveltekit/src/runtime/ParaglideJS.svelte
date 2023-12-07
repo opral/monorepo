@@ -14,6 +14,18 @@
 	/** @type { string | undefined } */
 	export let languageTag = undefined
 
+	/**
+	 * By default, ParaglideJS will intercept and rewrite any `goto` calls with their translated counterparts.
+	 * If you wish to disable this behaviour, set `rewriteGoto` to `false`.
+	 * 
+	 * @example
+	 * ```ts
+	 * goto("/about") 
+	 * // becomes goto("/en/about") if the current language is "en"
+	 * ```
+	 */
+	export let rewriteGoto = true;
+
 	$: lang = languageTag ?? getLanguage($page.url) ?? sourceLanguageTag
 	$: setLanguageTag(lang)
 
@@ -54,6 +66,7 @@
 	beforeNavigate((event) => {
 		//If `goto` to internal route
 		if (event.type === "goto") {
+			if(rewriteGoto === false) return;
 			//If the user is intentionally navigating to a different language, we don't want to rewrite the path
 			const skipHandling = isLanguageChange === true
 			isLanguageChange = false
