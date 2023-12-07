@@ -1,12 +1,8 @@
-import {
-	LANGUAGE_TAG_ALIAS,
-	PARAGLIDE_RUNTIME_MODULE_ALIAS,
-	TRANSLATE_PATH_FUNCTION_NAME,
-	TRANSLATE_PATH_MODULE_ID,
-} from "../../../constants.js"
+import { PARAGLIDE_RUNTIME_MODULE_ALIAS, TRANSLATE_PATH_MODULE_ID } from "../../../constants.js"
 import type { PreprocessingPass } from "../index.js"
 import { getElementsFromAst } from "../utils/ast.js"
 import { attrubuteValuesToJSValue } from "../utils/attributes-to-values.js"
+import { identifier } from "../utils/identifier.js"
 
 export const RewriteActions: PreprocessingPass = {
 	condition: ({ content }) => {
@@ -24,18 +20,20 @@ export const RewriteActions: PreprocessingPass = {
 			if (!actionAttribute) continue
 
 			const optOutAttribute = form.attributes.find(
-				(attribute) => attribute.name === "data-no-translate",
+				(attribute) => attribute.name === "data-no-translate"
 			)
 			if (optOutAttribute) continue
 
-			const langValue = `${LANGUAGE_TAG_ALIAS}()`
+			const langValue = `${identifier("languageTag")}()`
 			const actionAttributeAsTemplateString = attrubuteValuesToJSValue(
 				actionAttribute.value,
-				originalCode,
+				originalCode
 			)
 
 			//Replace the action attribute with the new action attribute
-			const newActionAttributeString = `action={${TRANSLATE_PATH_FUNCTION_NAME}(${actionAttributeAsTemplateString}, ${langValue})}`
+			const newActionAttributeString = `action={${identifier(
+				"translatePath"
+			)}(${actionAttributeAsTemplateString}, ${langValue})}`
 			code.overwrite(actionAttribute.start, actionAttribute.end, newActionAttributeString)
 
 			rewroteActions = true
@@ -47,8 +45,10 @@ export const RewriteActions: PreprocessingPass = {
 
 		return {
 			imports: [
-				`import ${TRANSLATE_PATH_FUNCTION_NAME} from '${TRANSLATE_PATH_MODULE_ID}';`,
-				`import { languageTag as ${LANGUAGE_TAG_ALIAS} } from '${PARAGLIDE_RUNTIME_MODULE_ALIAS}';`,
+				`import ${identifier("translatePath")} from '${TRANSLATE_PATH_MODULE_ID}';`,
+				`import { languageTag as ${identifier(
+					"languageTag"
+				)} } from '${PARAGLIDE_RUNTIME_MODULE_ALIAS}';`,
 			],
 		}
 	},
