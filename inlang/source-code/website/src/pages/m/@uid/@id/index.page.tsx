@@ -341,14 +341,16 @@ export function Page(props: PageProps) {
 												</p>
 											</div>
 										</div>
-										{/* Classes to be added: sticky z-10 top-16 pt-8 md:pt-0 md:static bg-background */}
-										<aside class="col-span-1 md:order-1 -order-1 hidden md:block sticky top-36 mb-32">
-											<NavbarCommon
-												displayName={displayName}
-												getLocale={languageTag}
-												tableOfContents={props.tableOfContents}
-											/>
-										</aside>
+										<Show when={props.tableOfContents}>
+											{/* Classes to be added: sticky z-10 top-16 pt-8 md:pt-0 md:static bg-background */}
+											<aside class="col-span-1 md:order-1 -order-1 hidden md:block sticky top-36 mb-32">
+												<NavbarCommon
+													displayName={displayName}
+													getLocale={languageTag}
+													tableOfContents={props.tableOfContents}
+												/>
+											</aside>
+										</Show>
 									</div>
 								</section>
 								<div>
