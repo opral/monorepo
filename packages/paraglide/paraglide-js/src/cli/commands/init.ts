@@ -244,16 +244,20 @@ export const addCompileStepToPackageJSON = async (
 	const stringify = detectJsonFormatting(file)
 	const pkg = JSON.parse(file)
 
-	// add the compile command to the lint script if it exists
-	// this isn't super important, so we won't interrupt the user if it fails
-	if (pkg?.scripts?.lint && pkg.scripts.lint.includes("paraglide-js compile") === false) {
-		pkg.scripts.lint = `paraglide-js compile --project ${args.projectPath} && ${pkg.scripts.lint}`
+	if (pkg.scripts === undefined) {
+		pkg.scripts = {}
 	}
 
+	// add the compile command to the postinstall script
+	// this isn't super important, so we won't interrupt the user if it fails
+	if (!pkg.scripts.postinstall) {
+		pkg.scripts.postinstall = `paraglide-js compile --project ${args.projectPath}`
+	} else if (pkg.scripts.postinstall.includes("paraglide-js compile") === false) {
+		pkg.scripts.postinstall = `paraglide-js compile --project ${args.projectPath} && ${pkg.scripts.postinstall}`
+	}
+
+	//Add the compile command to the build script
 	if (pkg?.scripts?.build === undefined) {
-		if (pkg.scripts === undefined) {
-			pkg.scripts = {}
-		}
 		pkg.scripts.build = `paraglide-js compile --project ${args.projectPath}`
 	} else if (pkg?.scripts?.build.includes("paraglide-js compile") === false) {
 		pkg.scripts.build = `paraglide-js compile --project ${args.projectPath} && ${pkg.scripts.build}`

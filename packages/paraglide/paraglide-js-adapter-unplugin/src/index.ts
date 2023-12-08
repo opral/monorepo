@@ -25,7 +25,11 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 	let numCompiles = 0
 
 	async function triggerCompile(messages: readonly Message[], settings: ProjectSettings) {
-		if (messages.length === 0) return //messages probably haven't loaded yet
+		if (messages.length === 0) {
+			logger.warn(`No messages found - Skipping compilation into ${options.outdir}`)
+			return
+		}
+
 		logMessageChange()
 		const output = compile({ messages, settings })
 		await writeOutput(outputDirectory, output, fs)
@@ -62,7 +66,13 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		async buildStart() {
 			const project = await getProject()
 
+			//Always fully compile once on build start
+			await triggerCompile(project.query.messages.getAll(), project.settings())
+
+			let numInvocations = 0
 			project.query.messages.getAll.subscribe((messages) => {
+				numInvocations++
+				if (numInvocations === 1) return
 				triggerCompile(messages, project.settings())
 			})
 		},
