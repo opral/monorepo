@@ -14,6 +14,7 @@ export function attrubuteValuesToJSValue(values: AttributeValue[], originalCode:
 			case "Text":
 				templateString += escapeStringLiteral(value.data)
 				break
+			case "AttributeShorthand":
 			case "MustacheTag": {
 				const expressionCode = originalCode.slice(value.expression.start, value.expression.end)
 				templateString += "${"
