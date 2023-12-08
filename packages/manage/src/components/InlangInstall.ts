@@ -538,7 +538,7 @@ export class InlangInstall extends TwLitElement {
 									(this.url.project ? `&project=${this.url.project}` : "")
 							}}
 						>
-							Back to manage 
+							To inlang Manage
 						</button>
 						<button
 							class="bg-slate-200 px-6 w-full text-slate-900 text-center py-2 rounded-md font-medium hover:bg-slate-300 transition-colors"
@@ -661,7 +661,7 @@ export class InlangInstall extends TwLitElement {
 							class="bg-slate-800 px-6 w-full text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
 							href=${`/?repo=${this.url.repo + (this.url.project ? `&project=${this.url.project}` : "")}`}
 						>
-							Back to manage 
+							To inlang Manage 
 						</a>
 						<a
 						class="bg-slate-200 truncate px-6 w-full text-slate-900 text-center py-2 rounded-md font-medium hover:bg-slate-300 transition-colors"
@@ -689,7 +689,7 @@ export class InlangInstall extends TwLitElement {
 									(this.url.project ? `&project=${this.url.project}` : "")
 							}}
 						>
-							Back to manage
+							To inlang Manage
 						</button>
 					</div>`
 			: html`<div class="flex flex-col gap-2">Loading...</div>`

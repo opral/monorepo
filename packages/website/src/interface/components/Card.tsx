@@ -9,6 +9,8 @@ import Link from "#src/renderer/Link.jsx"
 import * as m from "../../paraglide/messages.js"
 import { currentPageContext } from "#src/renderer/state.js"
 
+const isProduction = process.env.NODE_ENV === "production"
+
 export default function Card(props: { item: any; displayName: string }) {
 	const showCover =
 		currentPageContext.urlParsed.pathname.includes("/lint-rules") &&
@@ -152,7 +154,12 @@ export default function Card(props: { item: any; displayName: string }) {
 											onClick={(e) => {
 												e.stopPropagation()
 											}}
-											href={`/install?module=${props.item.id}`}
+											target="_blank"
+											href={`${
+												isProduction
+													? "https://manage.inlang.com/install"
+													: "http://localhost:4004/install"
+											}?module=${props.item.id}`}
 											class="ml-auto flex-shrink-0 rounded-full p-2 w-8 h-8 flex items-center justify-center text-surface-900 hover:text-on-background hover:bg-surface-200 bg-surface-100 transition-all"
 										>
 											<svg
@@ -217,7 +224,9 @@ export default function Card(props: { item: any; displayName: string }) {
 						onClick={(e: any) => {
 							e.stopPropagation()
 						}}
-						href={"/install?module=" + structuredClone(props.item.id)}
+						href={`${
+							isProduction ? "https://manage.inlang.com/install" : "http://localhost:4004/install"
+						}?module=${props.item.id}`}
 						class="absolute top-5 right-5 flex-shrink-0 rounded-full p-2 w-8 h-8 flex items-center justify-center text-surface-500 hover:text-on-background hover:bg-surface-200 bg-surface-100 transition-all"
 					>
 						<svg
