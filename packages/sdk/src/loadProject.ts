@@ -27,6 +27,7 @@ import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
+import { getMessageIdFromPath, parseMessage } from "./storage/helper.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -141,6 +142,8 @@ export const loadProject = async (args: {
 		// needed for granular linting
 		const [messages, setMessages] = createSignal<Message[]>()
 
+		const messageFolderPath = projectPath + "/messages"
+
 		createEffect(() => {
 			const _resolvedModules = resolvedModules()
 			if (!_resolvedModules) return
@@ -150,28 +153,108 @@ export const loadProject = async (args: {
 				return
 			}
 
+			// TODO #1844 this how  the messages are loaded
 			const loadAndSetMessages = async (fs: NodeishFilesystemSubset) => {
-				makeTrulyAsync(
-					_resolvedModules.resolvedPluginApi.loadMessages({
-						settings: settingsValue,
-						nodeishFs: fs,
-					})
-				)
-					.then((messages) => {
-						setMessages(messages)
-						markInitAsComplete()
-					})
-					.catch((err) => markInitAsFailed(new PluginLoadMessagesError({ cause: err })))
+				// load all messages
+				const messages: Message[] = [] // await this.parentKeyStore.load();
+
+				try {
+					// make sure the message folder exists within the .inlang folder
+					await fs.mkdir(messageFolderPath)
+
+					const messageFilePaths = await fs.readdir(messageFolderPath)
+					for (const messageFilePath of messageFilePaths) {
+						const messageRaw = await fs.readFile(`${messageFolderPath}/${messageFilePath}`, {
+							encoding: "utf-8",
+						})
+
+						// TODO #1844 the place where we read in the file - if this fails we should consider ignoring it
+						const message = JSON.parse(messageRaw) as Message
+						messages.push(message)
+					}
+
+					setMessages(messages)
+					markInitAsComplete()
+				} catch (err) {
+					markInitAsFailed(new PluginLoadMessagesError({ cause: err }))
+				}
+
+				// makeTrulyAsync(
+				// 	_resolvedModules.resolvedPluginApi.loadMessages({
+				// 		settings: settingsValue,
+				// 		nodeishFs: fs,
+				// 	})
+				// )
+				// 	.then((messages) => {
+				// 		setMessages(messages)
+				// 		markInitAsComplete()
+				// 	})
+				// 	.catch((err) => markInitAsFailed(new PluginLoadMessagesError({ cause: err })))
 			}
 
 			const fsWithWatcher = createNodeishFsWithWatcher({
 				nodeishFs: nodeishFs,
 				updateMessages: () => {
-					loadAndSetMessages(nodeishFs)
+					// TODO #1844 this is where the messages are loaded (all) when the message file changed
+					// TODO #1844 do we still need to reload all messages when plugins change - guess not
+					// loadAndSetMessages(nodeishFs)
 				},
 			})
 
-			loadAndSetMessages(fsWithWatcher)
+			// TODO #1844 inital load of the messages
+			loadAndSetMessages(fsWithWatcher).then(() => {
+				;(async () => {
+					try {
+						const watcher = nodeishFs.watch(messageFolderPath, {
+							// TODO #1844  - check who would signal here -
+							// signal: abortController.signal,
+							persistent: false,
+							recursive: true,
+						})
+						if (watcher) {
+							//eslint-disable-next-line @typescript-eslint/no-unused-vars
+							for await (const event of watcher) {
+								if (!event.filename) {
+									throw new Error("filename not set in event...")
+								}
+
+								let fileContent: string | undefined
+								// TODO #1844 lets read the message and reload it
+								try {
+									fileContent = await nodeishFs.readFile(
+										messageFolderPath + "/" + event.filename!,
+										{ encoding: "utf-8" }
+									)
+								} catch (e) {
+									// TODO #1844 check for file not exists - ENOENT and rethrow if different error
+									// if (e.code !== 'ENOENT') {
+									// 	throw e;
+									// }
+									// deleted = true;
+									// file does not exis - drop message in inlang project
+								}
+
+								const messageId = getMessageIdFromPath(event.filename)
+
+								if (!fileContent) {
+									messagesQuery.delete({ where: { id: messageId } })
+								} else {
+									const message = parseMessage(fileContent)
+									messagesQuery.upsert({ where: { id: messageId }, data: message })
+								}
+							}
+						}
+					} catch (err: any) {
+						if (err.name === "AbortError") return
+						// https://github.com/inlang/monorepo/issues/1647
+						// the file does not exist (yet)
+						// this is not testable beacause the fs.watch api differs
+						// from node and lix. lenghty
+						else if (err.code === "ENOENT") return
+						throw err
+					}
+				})()
+			})
 		})
 
 		// -- installed items ----------------------------------------------------
