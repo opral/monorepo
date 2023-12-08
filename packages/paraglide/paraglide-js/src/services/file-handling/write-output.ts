@@ -1,7 +1,6 @@
 import type nodeFsPromises from "node:fs/promises"
 import path from "node:path"
 
-
 export async function writeOutput(
 	outputDirectory: string,
 	output: Record<string, string>,
