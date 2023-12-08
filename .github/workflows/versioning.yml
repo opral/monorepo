@@ -3,14 +3,17 @@
 name: versioning
 
 on:
-  push:
-    branches:
-      - main
-
+  # trigger this workflow when the CI workflow is completed
+  workflow_run:
+    workflows: ["Continuous Integration"]
+    branches: [main]
+    types: 
+      - completed
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   versioning:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: versioning
     runs-on: ubuntu-latest
     steps:
@@ -30,11 +33,6 @@ jobs:
         with:
           node-version: 18
           cache: "pnpm"
-
-      - name: Run CI
-        run: doppler run -- pnpm run ci # The "run" is needed here
-        env:
-          DOPPLER_TOKEN: ${{ secrets.DOPPLER_CI_ENV_TOKEN }}
 
       - name: Create Release Pull Request
         uses: changesets/action@v1
