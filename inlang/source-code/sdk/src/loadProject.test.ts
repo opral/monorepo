@@ -691,7 +691,6 @@ describe("functionality", () => {
 								},
 							],
 						},
-
 						{
 							languageTag: "de",
 							match: [],

@@ -204,11 +204,11 @@ describe("addCompileStepToPackageJSON()", () => {
 		expect(process.exit).not.toHaveBeenCalled()
 	})
 
-	test("if there is a lint script present, add the paraglide-js compile command to it", async () => {
+	test("if there is a postinstall script present, add the paraglide-js compile command to it", async () => {
 		mockFiles({
 			"/package.json": JSON.stringify({
 				scripts: {
-					lint: "eslint",
+					postinstall: "do-something",
 				},
 			}),
 		})
@@ -228,16 +228,16 @@ describe("addCompileStepToPackageJSON()", () => {
 		const packageJson = JSON.parse(
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
-		expect(packageJson.scripts.lint).toBe(
-			`paraglide-js compile --project ./project.inlang && eslint`
+		expect(packageJson.scripts.postinstall).toBe(
+			`paraglide-js compile --project ./project.inlang && do-something`
 		)
 	})
 
-	test("if there is a lint script present, but it already has a paraglide command, leave it as is", async () => {
+	test("if there is a postinstall script present, but it already has a paraglide command, leave it as is", async () => {
 		mockFiles({
 			"/package.json": JSON.stringify({
 				scripts: {
-					lint: "paraglide-js compile && eslint",
+					postinstall: "paraglide-js compile && do-something",
 				},
 			}),
 		})
@@ -254,7 +254,27 @@ describe("addCompileStepToPackageJSON()", () => {
 		const packageJson = JSON.parse(
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
-		expect(packageJson.scripts.lint).toBe(`paraglide-js compile && eslint`)
+		expect(packageJson.scripts.postinstall).toBe(`paraglide-js compile && do-something`)
+	})
+
+	test("if there is no postinstall script present add the paragldie compile command", async () => {
+		mockFiles({
+			"/package.json": JSON.stringify({}),
+		})
+		mockUserInput([
+			// user does not want to update the build step
+			false,
+		])
+		await addCompileStepToPackageJSON(
+			{
+				projectPath: "./project.inlang",
+			},
+			logger
+		)
+		const packageJson = JSON.parse(
+			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
+		)
+		expect(packageJson.scripts.postinstall).toBe(`paraglide-js compile --project ./project.inlang`)
 	})
 })
 

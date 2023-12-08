@@ -137,12 +137,11 @@ export const loadProject = async (args: {
 		let settingsValue: ProjectSettings
 		createEffect(() => (settingsValue = settings()!)) // workaround to not run effects twice (e.g. settings change + modules change) (I'm sure there exists a solid way of doing this, but I haven't found it yet)
 
+		// please don't use this as source of truth, use the query instead
+		// needed for granular linting
 		const [messages, setMessages] = createSignal<Message[]>()
 
 		createEffect(() => {
-			const conf = settings()
-			if (!conf) return
-
 			const _resolvedModules = resolvedModules()
 			if (!_resolvedModules) return
 
@@ -209,13 +208,16 @@ export const loadProject = async (args: {
 		// -- app ---------------------------------------------------------------
 
 		const initializeError: Error | undefined = await initialized.catch((error) => error)
+		const abortController = new AbortController()
+		const hasWatcher = nodeishFs.watch("/", { signal: abortController.signal }) !== undefined
 
 		const messagesQuery = createMessagesQuery(() => messages() || [])
 		const lintReportsQuery = createMessageLintReportsQuery(
-			messages,
+			messagesQuery,
 			settings as () => ProjectSettings,
 			installedMessageLintRules,
-			resolvedModules
+			resolvedModules,
+			hasWatcher
 		)
 
 		const debouncedSave = skipFirst(
@@ -223,24 +225,14 @@ export const loadProject = async (args: {
 				500,
 				async (newMessages) => {
 					try {
-						if (JSON.stringify(newMessages) !== JSON.stringify(messages())) {
-							await resolvedModules()?.resolvedPluginApi.saveMessages({
-								settings: settingsValue,
-								messages: newMessages,
-							})
-						}
+						await resolvedModules()?.resolvedPluginApi.saveMessages({
+							settings: settingsValue,
+							messages: newMessages,
+						})
 					} catch (err) {
 						throw new PluginSaveMessagesError({
 							cause: err,
 						})
-					}
-					const abortController = new AbortController()
-					if (
-						newMessages.length !== 0 &&
-						JSON.stringify(newMessages) !== JSON.stringify(messages()) &&
-						nodeishFs.watch("/", { signal: abortController.signal }) === undefined
-					) {
-						setMessages(newMessages)
 					}
 				},
 				{ atBegin: false }
