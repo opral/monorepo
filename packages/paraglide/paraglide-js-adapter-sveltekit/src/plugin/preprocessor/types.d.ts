@@ -35,3 +35,13 @@ export type AttributeValue =
 				end: number
 			}
 	  }
+	| {
+			start: number
+			end: number
+			type: "AttributeShorthand"
+			expression: {
+				start: number
+				end: number
+			}
+	  }
+	
