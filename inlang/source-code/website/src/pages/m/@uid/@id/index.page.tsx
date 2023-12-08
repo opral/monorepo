@@ -22,6 +22,8 @@ import EditOutline from "~icons/material-symbols/edit-outline-rounded"
 import Documentation from "~icons/material-symbols/description-outline-rounded"
 import Changelog from "~icons/material-symbols/manage-history"
 
+const isProduction = process.env.NODE_ENV === "production"
+
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
  */
@@ -147,7 +149,11 @@ export function Page(props: PageProps) {
 																{/* @ts-ignore */}
 																<Button
 																	type="primary"
-																	href={`/install?module=${props.manifest.id}`}
+																	href={`${
+																		isProduction
+																			? "https://manage.inlang.com/install"
+																			: "http://localhost:4004/install"
+																	}?module=${props.manifest.id}`}
 																	class="my-6"
 																>
 																	<span class="capitalize">
