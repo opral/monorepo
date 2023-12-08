@@ -129,23 +129,32 @@ export function Page(props: {
 	return (
 		<>
 			<Title>
-				{currentPageContext.routeParams.category?.toLowerCase() === "lix" ||
-				currentPageContext.routeParams.category?.toLowerCase() === "guides"
-					? ""
-					: "Global"}{" "}
-				{currentPageContext.routeParams.category?.toLowerCase() === "lix"
-					? currentPageContext.routeParams.category
-					: currentPageContext.routeParams.category
-							?.replaceAll("-", " ")
-							.replace(/\w\S*/g, (w) => w.replace(/^\w/, (c) => c.toUpperCase()))}{" "}
+				{currentPageContext.routeParams.category === "svelte" ||
+				currentPageContext.routeParams.category === "nextjs"
+					? getCategoryContent()?.title + " "
+					: (currentPageContext.routeParams.category?.toLowerCase() === "lix" ||
+					  currentPageContext.routeParams.category?.toLowerCase() === "guides"
+							? ""
+							: "Global" + " ") +
+					  ((currentPageContext.routeParams.category?.toLowerCase() === "lix"
+							? currentPageContext.routeParams.category
+							: currentPageContext.routeParams.category
+									?.replaceAll("-", " ")
+									.replace(/\w\S*/g, (w) => w.replace(/^\w/, (c) => c.toUpperCase()))) +
+							" ")}
 				| inlang
 			</Title>
 			<Meta
 				name="description"
-				content={`Find everything globalization (i18n) related to ${currentPageContext.routeParams.category?.replaceAll(
-					"-",
-					" "
-				)} - inlang`}
+				content={
+					currentPageContext.routeParams.category === "svelte" ||
+					currentPageContext.routeParams.category === "nextjs"
+						? getCategoryContent()?.description
+						: `Find everything globalization (i18n) related to ${currentPageContext.routeParams.category?.replaceAll(
+								"-",
+								" "
+						  )} - inlang`
+				}
 			/>
 			<Meta name="og:image" content="/images/inlang-marketplace-image.jpg" />
 			<Meta name="twitter:card" content="summary_large_image" />
@@ -157,18 +166,32 @@ export function Page(props: {
 			<Meta
 				name="twitter:title"
 				content={`${
-					currentPageContext.routeParams.category?.toLowerCase() === "lix" ||
-					currentPageContext.routeParams.category?.toLowerCase() === "guides"
-						? ""
-						: "Global"
-				} ${currentPageContext.routeParams.category} | inlang`}
+					currentPageContext.routeParams.category === "svelte" ||
+					currentPageContext.routeParams.category === "nextjs"
+						? getCategoryContent()?.title + " "
+						: (currentPageContext.routeParams.category?.toLowerCase() === "lix" ||
+						  currentPageContext.routeParams.category?.toLowerCase() === "guides"
+								? ""
+								: "Global" + " ") +
+						  ((currentPageContext.routeParams.category?.toLowerCase() === "lix"
+								? currentPageContext.routeParams.category
+								: currentPageContext.routeParams.category
+										?.replaceAll("-", " ")
+										.replace(/\w\S*/g, (w) => w.replace(/^\w/, (c) => c.toUpperCase()))) +
+								" ")
+				} | inlang`}
 			/>
 			<Meta
 				name="twitter:description"
-				content={`Find everything globalization (i18n) related to ${currentPageContext.routeParams.category?.replaceAll(
-					"-",
-					" "
-				)} - inlang`}
+				content={
+					currentPageContext.routeParams.category === "svelte" ||
+					currentPageContext.routeParams.category === "nextjs"
+						? getCategoryContent()?.description
+						: `Find everything globalization (i18n) related to ${currentPageContext.routeParams.category?.replaceAll(
+								"-",
+								" "
+						  )} - inlang`
+				}
 			/>
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />
