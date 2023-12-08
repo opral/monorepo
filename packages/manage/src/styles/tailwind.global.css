@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer components {
-  .btn {
-    @apply pt-1 pb-1 pl-4 pr-4 text-purple-300 bg-slate-700;
-  }
+	.btn {
+		@apply pt-1 pb-1 pl-4 pr-4 text-purple-300 bg-slate-700;
+	}
 }
