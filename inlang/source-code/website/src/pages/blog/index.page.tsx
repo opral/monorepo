@@ -1,8 +1,10 @@
-import { Title, Meta } from "@solidjs/meta"
+import { Link as MetaLink, Title, Meta } from "@solidjs/meta"
 import { For } from "solid-js"
 import tableOfContents from "../../../../../blog/tableOfContents.json"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
+import { i18nRouting } from "#src/renderer/_default.page.route.js"
+import { currentPageContext } from "#src/renderer/state.js"
 
 export function Page() {
 	return (
@@ -13,6 +15,10 @@ export function Page() {
 				content="Posts that revolve around inlang, git, and globalization (i18n)."
 			/>
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
+			<MetaLink
+				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
+				rel="canonical"
+			/>
 			<MarketplaceLayout>
 				<div class="flex-row min-h-full w-full items-center justify-center mx-auto md:max-w-2xl divide-y divide-solid divide-outline">
 					<For each={Object.entries(tableOfContents)}>

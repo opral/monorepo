@@ -1,4 +1,4 @@
-import { Meta, Title } from "@solidjs/meta"
+import { Link as MetaLink, Meta, Title } from "@solidjs/meta"
 import { Show, onMount } from "solid-js"
 import { languageTag } from "#src/paraglide/runtime.js"
 import { currentPageContext } from "#src/renderer/state.js"
@@ -7,6 +7,7 @@ import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
+import { i18nRouting } from "#src/renderer/_default.page.route.js"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -93,6 +94,10 @@ export function Page(props: PageProps) {
 						tableOfContents
 					)?.description
 				}
+			/>
+			<MetaLink
+				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
+				rel="canonical"
 			/>
 			<MarketplaceLayout>
 				<div class="grid-row-2 py-10 w-full mx-auto ">

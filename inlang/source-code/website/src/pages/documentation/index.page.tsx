@@ -1,7 +1,7 @@
 import { For, Show, createEffect, createSignal, onMount } from "solid-js"
 import { currentPageContext } from "#src/renderer/state.js"
 import type SlDetails from "@shoelace-style/shoelace/dist/components/details/details.js"
-import { Meta, Title } from "@solidjs/meta"
+import { Link, Meta, Title } from "@solidjs/meta"
 import { Feedback } from "./Feedback.jsx"
 import { EditButton } from "./EditButton.jsx"
 import { languageTag } from "#src/paraglide/runtime.js"
@@ -12,6 +12,7 @@ import { getTableOfContents } from "./getTableOfContents.js"
 import InPageNav from "./InPageNav.jsx"
 import MainActions from "./MainActions.jsx"
 import { getDocsBaseUrl } from "#src/interface/sdkDocs/SdkDocsHeader.jsx"
+import { i18nRouting } from "#src/renderer/_default.page.route.js"
 
 export type PageProps = {
 	markdown: Awaited<ReturnType<any>>
@@ -99,6 +100,10 @@ export function Page(props: PageProps) {
 			/>
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />
+			<Link
+				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
+				rel="canonical"
+			/>
 			<SdkDocsLayout>
 				<div class="relative block md:flex grow w-full">
 					{/* desktop navbar */}

@@ -10,6 +10,7 @@ import Features from "./custom_section/Features.jsx"
 import ParaglideHeader from "#src/interface/marketplace/categoryHeaders/cards/paraglide.jsx"
 import * as m from "#src/paraglide/messages.js"
 import { renderLocales } from "#src/renderer/renderLocales.js"
+import { i18nRouting } from "#src/renderer/_default.page.route.js"
 
 export function Page() {
 	const search = currentPageContext.urlParsed.search["search"]
@@ -38,6 +39,10 @@ export function Page() {
 					}
 				/>
 			))}
+			<Link
+				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
+				rel="canonical"
+			/>
 			<MarketplaceLayout>
 				<Show
 					when={search}
