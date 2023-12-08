@@ -282,12 +282,18 @@ export class InlangInstall extends TwLitElement {
 								html`<div
 									class="flex items-center gap-2 w-full h-14 bg-slate-200 rounded-md px-3 py-2"
 								>
-									<img
-										class="w-8 h-8 rounded-md"
-										src=${product.icon}
-										${/* @ts-ignore */ ""}
-										alt=${product.displayName.en}
-									/>
+									${product.icon
+										? html`<img
+												class="w-8 h-8 rounded-md"
+												src=${product.icon}
+												${/* @ts-ignore */ ""}
+												alt=${product.displayName.en}
+										  />`
+										: html`<div
+												class="w-8 h-8 rounded-md bg-slate-300 flex items-center justify-center text-white text-xl font-semibold"
+										  >
+												${product.displayName.en[0]}
+										  </div>`}
 									${/* @ts-ignore */ ""}
 									<div class="flex-grow truncate">${product.displayName.en}</div>
 									<button
