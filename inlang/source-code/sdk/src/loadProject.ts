@@ -240,6 +240,11 @@ export const loadProject = async (args: {
 									messagesQuery.delete({ where: { id: messageId } })
 								} else {
 									const message = parseMessage(fileContent)
+									const currentMessage = messagesQuery.get({ where: { id: messageId } })
+									if (currentMessage && JSON.stringify(currentMessage) === fileContent) {
+										continue
+									}
+
 									messagesQuery.upsert({ where: { id: messageId }, data: message })
 								}
 							}
