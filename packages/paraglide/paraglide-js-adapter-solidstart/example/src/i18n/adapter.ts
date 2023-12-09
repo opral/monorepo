@@ -18,7 +18,7 @@ import * as router from "@solidjs/router"
  * (e.g. "foo" → "/foo")
  */
 export function normalizePathname(pathname: string): string {
-    return pathname[0] === "/" ? pathname : "/" + pathname
+	return pathname[0] === "/" ? pathname : "/" + pathname
 }
 
 /**
@@ -53,19 +53,19 @@ export function languageTagInPathname<T extends string>(
  * @returns The translated pathname. (e.g. "/en/bar")
  */
 export function translateHref<T extends string>(
-    pathname: string,
-    page_language_tag: T,
-    available_language_tags: readonly T[],
-    source_language_tag: T,
+	pathname: string,
+	page_language_tag: T,
+	available_language_tags: readonly T[],
+	source_language_tag: T
 ): string {
-    const to_normal_pathname = normalizePathname(pathname)
-    const to_language_tag = languageTagInPathname(to_normal_pathname, available_language_tags)
+	const to_normal_pathname = normalizePathname(pathname)
+	const to_language_tag = languageTagInPathname(to_normal_pathname, available_language_tags)
 
-    if (to_language_tag || to_language_tag === source_language_tag) {
-        return pathname
-    } else {
-        return '/' + page_language_tag + pathname
-    }
+	if (to_language_tag || to_language_tag === source_language_tag) {
+		return pathname
+	} else {
+		return "/" + page_language_tag + pathname
+	}
 }
 
 /**
@@ -74,7 +74,9 @@ export function translateHref<T extends string>(
  * @param all_language_tags All available language tags. (From paraglide, e.g. "en", "de")
  * @returns The language tag from the URL, or `undefined` if no language tag was found.
  */
-export function getLanguageTagFromURL<T extends string>(all_language_tags: readonly T[]): T | undefined {
+export function getLanguageTagFromURL<T extends string>(
+	all_language_tags: readonly T[]
+): T | undefined {
 	const location = router.useLocation()
 	const normalized_pathname = normalizePathname(location.pathname)
 	return languageTagInPathname(normalized_pathname, all_language_tags)
@@ -111,90 +113,87 @@ export interface I18n<T extends string> {
  * ```
  */
 export function createI18n<T extends string>(paraglide: Paraglide<T>): I18n<T> {
-    let languageTag: I18n<T>["languageTag"]
-		let setLanguageTag: I18n<T>["setLanguageTag"]
-		let LanguageTagProvider: I18n<T>["LanguageTagProvider"]
+	let languageTag: I18n<T>["languageTag"]
+	let setLanguageTag: I18n<T>["setLanguageTag"]
+	let LanguageTagProvider: I18n<T>["LanguageTagProvider"]
 
-		// SERVER
-		if (solid_web.isServer) {
-			const LanguageTagCtx = solid.createContext<T>()
-			LanguageTagProvider = LanguageTagCtx.Provider
+	// SERVER
+	if (solid_web.isServer) {
+		const LanguageTagCtx = solid.createContext<T>()
+		LanguageTagProvider = LanguageTagCtx.Provider
 
-			setLanguageTag = () => {
-				throw new Error("setLanguageTag not available on server")
-			}
-			languageTag = () => {
-				const ctx = solid.useContext(LanguageTagCtx)
-				if (!ctx) {
-					throw new Error("LanguageTagCtx not found")
-				}
-				return ctx
-			}
-
-			paraglide.setLanguageTag(languageTag)
+		setLanguageTag = () => {
+			throw new Error("setLanguageTag not available on server")
 		}
-		// BROWSER
-		else {
-			let language_tag: T
+		languageTag = () => {
+			const ctx = solid.useContext(LanguageTagCtx)
+			if (!ctx) {
+				throw new Error("LanguageTagCtx not found")
+			}
+			return ctx
+		}
 
-			LanguageTagProvider = (props) => {
-				language_tag = props.value
-				paraglide.setLanguageTag(language_tag)
+		paraglide.setLanguageTag(languageTag)
+	}
+	// BROWSER
+	else {
+		let language_tag: T
 
-				const navigate = router.useNavigate()
+		LanguageTagProvider = (props) => {
+			language_tag = props.value
+			paraglide.setLanguageTag(language_tag)
 
-				/*
+			const navigate = router.useNavigate()
+
+			/*
             Keep the language tag in the URL
             */
-				router.useBeforeLeave((e) => {
-					if (typeof e.to !== "string") return
+			router.useBeforeLeave((e) => {
+				if (typeof e.to !== "string") return
 
-					const from_pathname = normalizePathname(e.from.pathname)
-					const from_language_tag = languageTagInPathname(
-						from_pathname,
-						paraglide.availableLanguageTags
-					)
-					const to_pathname = normalizePathname(e.to)
-					const to_language_tag = languageTagInPathname(
-						to_pathname,
-						paraglide.availableLanguageTags
-					)
+				const from_pathname = normalizePathname(e.from.pathname)
+				const from_language_tag = languageTagInPathname(
+					from_pathname,
+					paraglide.availableLanguageTags
+				)
+				const to_pathname = normalizePathname(e.to)
+				const to_language_tag = languageTagInPathname(to_pathname, paraglide.availableLanguageTags)
 
-					//  /en/foo → /en/bar  |  /foo → /bar
-					if (to_language_tag === from_language_tag) return
+				//  /en/foo → /en/bar  |  /foo → /bar
+				if (to_language_tag === from_language_tag) return
 
-					e.preventDefault()
+				e.preventDefault()
 
-					//  /en/foo → /bar  |  /de/foo → /bar
-					if (!to_language_tag) {
-						navigate("/" + from_language_tag + to_pathname, e.options)
-					}
-					//  /foo → /en/bar
-					else if (to_language_tag === paraglide.sourceLanguageTag && !from_language_tag) {
-						navigate(to_pathname.slice(to_language_tag.length + 1), e.options)
-					}
-					//  /de/foo → /en/bar  |  /foo → /de/bar
-					else {
-						location.pathname = to_pathname
-					}
-				})
-
-				return props.children
-			}
-
-			setLanguageTag = paraglide.setLanguageTag
-			languageTag = () => language_tag
-
-			paraglide.onSetLanguageTag((new_language_tag) => {
-				if (new_language_tag === language_tag) return
-				const pathname = normalizePathname(location.pathname)
-				location.pathname = "/" + new_language_tag + pathname.replace("/" + language_tag, "")
+				//  /en/foo → /bar  |  /de/foo → /bar
+				if (!to_language_tag) {
+					navigate("/" + from_language_tag + to_pathname, e.options)
+				}
+				//  /foo → /en/bar
+				else if (to_language_tag === paraglide.sourceLanguageTag && !from_language_tag) {
+					navigate(to_pathname.slice(to_language_tag.length + 1), e.options)
+				}
+				//  /de/foo → /en/bar  |  /foo → /de/bar
+				else {
+					location.pathname = to_pathname
+				}
 			})
+
+			return props.children
 		}
 
-    return {
-			languageTag,
-			setLanguageTag,
-			LanguageTagProvider,
-		}
+		setLanguageTag = paraglide.setLanguageTag
+		languageTag = () => language_tag
+
+		paraglide.onSetLanguageTag((new_language_tag) => {
+			if (new_language_tag === language_tag) return
+			const pathname = normalizePathname(location.pathname)
+			location.pathname = "/" + new_language_tag + pathname.replace("/" + language_tag, "")
+		})
+	}
+
+	return {
+		languageTag,
+		setLanguageTag,
+		LanguageTagProvider,
+	}
 }
