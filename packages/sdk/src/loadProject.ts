@@ -308,28 +308,40 @@ export const loadProject = async (args: {
 			hasWatcher
 		)
 
-		const debouncedSave = skipFirst(
-			debounce(
-				500,
-				async (newMessages) => {
-					try {
-						await resolvedModules()?.resolvedPluginApi.saveMessages({
-							settings: settingsValue,
-							messages: newMessages,
-						})
-					} catch (err) {
-						throw new PluginSaveMessagesError({
-							cause: err,
-						})
-					}
-				},
-				{ atBegin: false }
-			)
-		)
+		// const debouncedSave = skipFirst(
+		// 	debounce(
+		// 		500,
+		// 		async (newMessages) => {
+		// 			try {
+		// 				await resolvedModules()?.resolvedPluginApi.saveMessages({
+		// 					settings: settingsValue,
+		// 					messages: newMessages,
+		// 				})
+		// 			} catch (err) {
+		// 				throw new PluginSaveMessagesError({
+		// 					cause: err,
+		// 				})
+		// 			}
+		// 		},
+		// 		{ atBegin: false }
+		// 	)
+		// )
+
+		// createEffect(() => {
+		// 	debouncedSave(messagesQuery.getAll())
+		// })
 
 		createEffect(() => {
-			debouncedSave(messagesQuery.getAll())
+			for (const messageId of messagesQuery.includedMessageIds()) {
+				createEffect(() => {
+					const message = messagesQuery.get({ where: { id: messageId } })
+					console.log("saveing Message " + message.id + " to ")
+					const messageFilePath = messageFolderPath + "/" + message.id
+					nodeishFs.writeFile(messageFilePath, JSON.stringify(message))
+				})
+			}
 		})
+	
 
 		return {
 			installed: {
