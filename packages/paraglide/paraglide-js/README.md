@@ -98,6 +98,21 @@ setLanguageTag("de")
 m.loginHeader({ name: "Samuel" }) // Hallo Samuel, bitte melde dich an, um fortzufahren.
 ```
 
+If you want to dynamically choose between a set of messages, you can create a record of messages and index into it. Note that this will not be tree-shaken by your bundler.
+
+```js
+import * as m from "./paraglide/messages"
+
+const season = {
+	spring: m.spring,
+	summer: m.summer,
+	autumn: m.autumn,
+	winter: m.winter,
+}
+
+const msg = season["spring"]() // Hello spring!
+```
+
 Paraglide JS provides five exports in `./paraglide/runtime.js`:
 
 | Variable                   | Description                                                           |
