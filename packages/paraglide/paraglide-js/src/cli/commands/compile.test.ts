@@ -73,7 +73,7 @@ test("it should compile into the default outdir", async () => {
 	expect(_fs.existsSync("./src/paraglide/messages.js")).toBe(true)
 })
 
-test.only("it should compile a project into the provided outdir", async () => {
+test("it should compile a project into the provided outdir", async () => {
 	const outdirs = ["/paraglide-js", "./paraglide-js", "/src/paraglide-js", "./src/paraglide-js"]
 
 	const _fs = mockFs({
