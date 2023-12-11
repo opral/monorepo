@@ -36,7 +36,12 @@
 		"solid",
 		"typescript"
 	],
-	"recommends": ["m/reootnfj", "m/632iow21", "m/r7kp499g"],
+	"recommends": [
+		"m/reootnfj",
+		"m/632iow21",
+		"m/r7kp499g",
+		"m/ewkole66"
+	],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0"
