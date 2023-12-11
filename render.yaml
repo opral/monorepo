@@ -14,6 +14,9 @@ services:
     buildCommand: pnpm install && pnpm run build
     startCommand: pnpm run production
     autoDeploy: true
+    buildFilter:
+      paths:
+        - lix/source-code/server/**
     envVars:
       - fromGroup: production
     domains:
@@ -31,8 +34,8 @@ services:
     envVars:
       - fromGroup: production
     buildFilter:
-      paths:
-        - lix/source-code/server/**
+      ignoredPaths:
+        - inlang/source-code/manage/**
     domains:
       - git.inlang.com
 
@@ -55,7 +58,7 @@ services:
     type: web
     runtime: node
     region: frankfurt
-    plan: starter
+    plan: standard
     branch: main
     buildCommand: pnpm install && pnpm run build
     startCommand: pnpm run production
