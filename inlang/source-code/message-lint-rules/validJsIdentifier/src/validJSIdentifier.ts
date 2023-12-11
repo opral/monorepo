@@ -27,7 +27,6 @@ export const validJsIdentifier: MessageLintRule = {
  * is-var-name | ISC (c) Shinnosuke Watanabe
  * https://github.com/shinnn/is-var-name
 */
-
 function isValidJsIdentifier(str: string): boolean {
 	if (str.trim() !== str) {
 		return false
