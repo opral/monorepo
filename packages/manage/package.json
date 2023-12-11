@@ -6,7 +6,6 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build",
-		"production": "NODE_ENV=production tsx ./src/server/main.ts",
 		"---- TEST ----------------------------------------------------------": "",
 		"lint": "eslint src --fix",
 		"format": "prettier ./src --write",
