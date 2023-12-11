@@ -15,8 +15,6 @@ services:
     startCommand: pnpm run production
     autoDeploy: true
     buildFilter:
-      paths:
-        - lix/source-code/server/**
       ignoredPaths:
         - inlang/source-code/manage/**
     envVars:
