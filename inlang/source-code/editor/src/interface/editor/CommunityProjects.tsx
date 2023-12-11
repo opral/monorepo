@@ -18,7 +18,7 @@ export function CommunityProjects() {
 							Projects that you recently opened with the editor.
 						</p>
 					</div>
-					<Link href={"/documentation"} class="w-full md:w-auto">
+					<Link href={"/c/guides"} class="w-full md:w-auto">
 						<sl-button prop:variant="default" prop:size="medium" class="w-full pt-4 md:pt-0">
 							Get started
 							<MaterialSymbolsArrowOutward
@@ -43,7 +43,7 @@ export function CommunityProjects() {
 					</p>
 				</div>
 				<Link
-					href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/website/src/pages/index/repositories.ts"
+					href="https://github.com/inlang/monorepo/blob/main/inlang/source-code/editor/src/pages/repositories.ts"
 					target="_blank"
 					class="w-full md:w-auto"
 				>

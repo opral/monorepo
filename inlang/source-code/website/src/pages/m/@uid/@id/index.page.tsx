@@ -1,4 +1,4 @@
-import { Meta, Title } from "@solidjs/meta"
+import { Link as MetaLink, Meta, Title } from "@solidjs/meta"
 import { For, Show, createSignal, onMount, Switch, Match } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { isModule } from "@inlang/marketplace-registry"
@@ -16,11 +16,12 @@ import "@inlang/markdown/custom-elements"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { currentPageContext } from "#src/renderer/state.js"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
-import Link from "#src/renderer/Link.jsx"
 import Card from "#src/interface/components/Card.jsx"
 import EditOutline from "~icons/material-symbols/edit-outline-rounded"
 import Documentation from "~icons/material-symbols/description-outline-rounded"
 import Changelog from "~icons/material-symbols/manage-history"
+import { i18nRouting } from "#src/renderer/_default.page.route.js"
+import Link from "#src/renderer/Link.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -100,6 +101,10 @@ export function Page(props: PageProps) {
 			/>
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />
+			<MetaLink
+				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
+				rel="canonical"
+			/>
 			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
 					<div class="md:py-16 py-8">
@@ -341,14 +346,16 @@ export function Page(props: PageProps) {
 												</p>
 											</div>
 										</div>
-										{/* Classes to be added: sticky z-10 top-16 pt-8 md:pt-0 md:static bg-background */}
-										<aside class="col-span-1 md:order-1 -order-1 hidden md:block sticky top-36 mb-32">
-											<NavbarCommon
-												displayName={displayName}
-												getLocale={languageTag}
-												tableOfContents={props.tableOfContents}
-											/>
-										</aside>
+										<Show when={props.tableOfContents}>
+											{/* Classes to be added: sticky z-10 top-16 pt-8 md:pt-0 md:static bg-background */}
+											<aside class="col-span-1 md:order-1 -order-1 hidden md:block sticky top-36 mb-32">
+												<NavbarCommon
+													displayName={displayName}
+													getLocale={languageTag}
+													tableOfContents={props.tableOfContents}
+												/>
+											</aside>
+										</Show>
 									</div>
 								</section>
 								<div>
