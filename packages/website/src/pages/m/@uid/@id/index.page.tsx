@@ -1,5 +1,5 @@
-import { Meta, Title } from "@solidjs/meta"
-import { For, Show, createEffect, createSignal, onMount, Switch, Match } from "solid-js"
+import { Link as MetaLink, Meta, Title } from "@solidjs/meta"
+import { For, Show, createSignal, onMount, Switch, Match } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { isModule } from "@inlang/marketplace-registry"
 import { Button } from "#src/pages/index/components/Button.jsx"
@@ -16,16 +16,20 @@ import "@inlang/markdown/custom-elements"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { currentPageContext } from "#src/renderer/state.js"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
-import Link from "#src/renderer/Link.jsx"
 import Card from "#src/interface/components/Card.jsx"
 import EditOutline from "~icons/material-symbols/edit-outline-rounded"
+import Documentation from "~icons/material-symbols/description-outline-rounded"
+import Changelog from "~icons/material-symbols/manage-history"
+import { i18nRouting } from "#src/renderer/_default.page.route.js"
+import Link from "#src/renderer/Link.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
  */
 export type PageProps = {
-	readme: Awaited<ReturnType<any>>
-	changelog: Awaited<ReturnType<any>>
+	markdown: Awaited<ReturnType<any>>
+	tab: string | boolean
+	tableOfContents: Record<string, string[]>
 	manifest: MarketplaceManifest & { uniqueID: string }
 	recommends?: MarketplaceManifest[]
 }
@@ -34,7 +38,6 @@ const pagesToHideSlider = ["badge", "editor", "ide", "cli", "paraglide"]
 
 export function Page(props: PageProps) {
 	const [readmore, setReadmore] = createSignal<boolean>(false)
-	const [activeTab, setActiveTab] = createSignal<"readme" | "changelog">("readme")
 
 	// mapping translatable types
 	const displayName = () =>
@@ -50,90 +53,27 @@ export function Page(props: PageProps) {
 	const readme = () =>
 		typeof props.manifest.readme === "object" ? props.manifest.readme.en : props.manifest.readme
 
-	const [tableOfContents, setTableOfContents] = createSignal({})
-	createEffect(() => {
-		const table: Record<string, Array<string>> = {}
-		if (activeTab() === "readme") {
-			if (
-				props.readme &&
-				props.readme.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g) &&
-				props.readme.match(/<h[1].*?>(.*?)<\/h[1]>/g)
-			) {
-				props.readme.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g).map((heading: string) => {
-					// We have to use DOMParser to parse the heading string to a HTML element
-					const parser = new DOMParser()
-					const doc = parser.parseFromString(heading, "text/html")
-					const node = doc.body.firstChild as HTMLElement
-
-					let lastH1Key = ""
-
-					if (node.tagName === "H1") {
-						// @ts-ignore
-						table[node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")] = []
-					} else {
-						// @ts-ignore
-						if (!table[lastH1Key]) {
-							const h1Keys = Object.keys(table)
-							// @ts-ignore
-							lastH1Key = h1Keys.at(-1)
-							// @ts-ignore
-							table[lastH1Key].push(node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", ""))
-						} else {
-							// @ts-ignore
-							table[lastH1Key].push(node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", ""))
-						}
-					}
-
-					return node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")
-				})
-			}
-		} else if (
-			activeTab() === "changelog" &&
-			props.changelog &&
-			props.changelog.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g) &&
-			props.changelog.match(/<h[1].*?>(.*?)<\/h[1]>/g)
-		) {
-			props.changelog.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g).map((heading: string) => {
-				// We have to use DOMParser to parse the heading string to a HTML element
-				const parser = new DOMParser()
-				const doc = parser.parseFromString(heading, "text/html")
-				const node = doc.body.firstChild as HTMLElement
-
-				let lastH1Key = ""
-
-				if (node.tagName === "H1") {
-					// @ts-ignore
-					table[node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")] = []
-				} else {
-					// @ts-ignore
-					if (!table[lastH1Key]) {
-						const h1Keys = Object.keys(table)
-						// @ts-ignore
-						lastH1Key = h1Keys.at(-1)
-						// @ts-ignore
-						table[lastH1Key].push(node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", ""))
-					} else {
-						// @ts-ignore
-						table[lastH1Key].push(node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", ""))
-					}
-				}
-
-				return node.innerText.replace(/(<([^>]+)>)/gi, "").replace("#", "")
-			})
-		}
-
-		setTableOfContents(table)
-	})
-
 	return (
 		<>
-			<Title>{`${props.manifest && displayName()} ${
+			<Title>{`${
+				props.tab === "changelog"
+					? `Changelog ${props.manifest && displayName()}`
+					: props.manifest && displayName()
+			} ${
 				props.manifest &&
 				(props.manifest.publisherName === "inlang"
 					? "| inlang"
 					: `from ${props.manifest.publisherName} | inlang`)
 			}`}</Title>
-			<Meta name="description" content={props.manifest && description()} />
+			<Meta
+				name="description"
+				content={
+					props.manifest &&
+					(props.tab === "changelog"
+						? `The changelogs with major and minor versions of ${displayName()}`
+						: description())
+				}
+			/>
 			{props.manifest && props.manifest.gallery ? (
 				<Meta name="og:image" content={props.manifest.gallery[0]} />
 			) : (
@@ -150,14 +90,29 @@ export function Page(props: PageProps) {
 				content="inlang's ecosystem helps organizations to go global."
 			/>
 			<Meta name="twitter:title" content={props.manifest && displayName()} />
-			<Meta name="twitter:description" content={props.manifest && description()} />
+			<Meta
+				name="twitter:description"
+				content={
+					props.manifest &&
+					(props.tab === "changelog"
+						? `The changelogs with major and minor versions of ${displayName()}`
+						: description())
+				}
+			/>
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />
+			<MetaLink
+				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
+				rel="canonical"
+			/>
 			<MarketplaceLayout>
-				<Show when={props.readme && props.manifest}>
+				<Show when={props.markdown && props.manifest}>
 					<div class="md:py-16 py-8">
 						<div class="w-full grid grid-cols-1 md:grid-cols-4 pb-32">
-							<Show when={props.readme} fallback={<p class="text-danger">{props.readme?.error}</p>}>
+							<Show
+								when={props.markdown}
+								fallback={<p class="text-danger">{props.markdown?.error}</p>}
+							>
 								<section class="col-span-1 md:col-span-4 pb-4 md:pb-0 grid md:grid-cols-4 grid-cols-1 md:gap-16">
 									<div class="flex-col h-full justify-between md:col-span-3">
 										<div class="flex max-md:flex-col items-start gap-8">
@@ -255,64 +210,90 @@ export function Page(props: PageProps) {
 												/>
 											</div>
 										</Show>
-										<Show when={props.readme && props.changelog}>
-											<div class="flex items-center gap-6 mt-4 w-full border-b border-surface-2">
-												<button
+										<Show when={props.tab}>
+											<div class="flex items-center gap-6 mt-6 w-full border-b border-surface-2">
+												<a
+													href=""
+													onClick={(e) => {
+														e.preventDefault()
+														typeof window !== "undefined" &&
+															window.location.replace(`${currentPageContext.urlParsed.pathname}`)
+													}}
 													class={
-														"text-sm font-medium transition-colors py-2 border-b-2 " +
-														(activeTab() === "readme"
-															? "text-primary border-primary"
-															: "text-surface-500 hover:text-surface-700 border-primary/0")
+														(props.tab !== "changelog"
+															? "border-hover-primary "
+															: "border-background/0 ") +
+														" border-b-[2px] pt-[8px] pb-[6px] text-sm bg-transparent group content-box group"
 													}
-													onClick={() => setActiveTab("readme")}
 												>
-													Documentation
-												</button>
-												<button
+													<div
+														class={
+															(props.tab !== "changelog"
+																? "text-surface-900 "
+																: "text-surface-500 group-hover:bg-surface-100 ") +
+															" px-2 py-[6px] flex items-center gap-1.5 rounded-md transition-colors font-medium cursor-pointer w-max"
+														}
+													>
+														<Documentation class="inline-block" />
+														Documentation
+													</div>
+												</a>
+												<a
+													href="?view=changelog"
+													onClick={(e) => {
+														e.preventDefault()
+														typeof window !== "undefined" &&
+															window.location.replace(
+																`${currentPageContext.urlParsed.pathname}?view=changelog`
+															)
+													}}
 													class={
-														"text-sm font-medium transition-colors py-2 border-b-2 " +
-														(activeTab() === "changelog"
-															? "text-primary border-primary"
-															: "text-surface-500 hover:text-surface-700 border-primary/0")
+														//todo: fix this
+														(props.tab === "changelog"
+															? "border-hover-primary "
+															: "border-background/0 ") +
+														" border-b-[2px] pt-[8px] pb-[6px] text-sm bg-transparent group content-box group"
 													}
-													onClick={() => setActiveTab("changelog")}
 												>
-													Changelog
-												</button>
+													<div
+														class={
+															(props.tab === "changelog"
+																? "text-surface-900 "
+																: "text-surface-500 group-hover:bg-surface-100 ") +
+															" px-2 py-[6px] flex items-center gap-1.5 rounded-md transition-colors font-medium cursor-pointer w-max"
+														}
+													>
+														<Changelog class="inline-block" />
+														Changelog
+													</div>
+												</a>
 											</div>
 										</Show>
 										<Show
-											when={props.readme && props.changelog}
+											when={props.markdown}
 											fallback={
 												<Show
-													when={props.readme.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}
-													fallback={<Markdown markdown={props.readme} />}
+													when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}
+													fallback={<Markdown markdown={props.markdown} />}
 												>
 													<div class="grid md:grid-cols-4 grid-cols-1 gap-16 md:mb-32 mb-8">
 														<div class="w-full rounded-lg col-span-1 md:col-span-4">
-															<Markdown markdown={props.readme} />
+															<Markdown markdown={props.markdown} />
 														</div>
 													</div>
 												</Show>
 											}
 										>
-											<Switch>
-												<Match when={activeTab() === "readme"}>
-													<Show
-														when={props.readme.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}
-														fallback={<Markdown markdown={props.readme} />}
-													>
-														<div class="grid md:grid-cols-4 grid-cols-1 gap-16 md:mb-32 mb-8">
-															<div class="w-full rounded-lg col-span-1 md:col-span-4">
-																<Markdown markdown={props.readme} />
-															</div>
-														</div>
-													</Show>
-												</Match>
-												<Match when={activeTab() === "changelog"}>
-													<Markdown markdown={props.changelog} />
-												</Match>
-											</Switch>
+											<Show
+												when={props.markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)}
+												fallback={<Markdown markdown={props.markdown} />}
+											>
+												<div class="grid md:grid-cols-4 grid-cols-1 gap-16 md:mb-32 mb-8">
+													<div class="w-full rounded-lg col-span-1 md:col-span-4">
+														<Markdown markdown={props.markdown} />
+													</div>
+												</div>
+											</Show>
 										</Show>
 									</div>
 									<div class="w-full">
@@ -365,14 +346,16 @@ export function Page(props: PageProps) {
 												</p>
 											</div>
 										</div>
-										{/* Classes to be added: sticky z-10 top-16 pt-8 md:pt-0 md:static bg-background */}
-										<aside class="col-span-1 md:order-1 -order-1 hidden md:block sticky top-36 mb-32">
-											<NavbarCommon
-												displayName={displayName}
-												getLocale={languageTag}
-												tableOfContents={tableOfContents}
-											/>
-										</aside>
+										<Show when={props.tableOfContents}>
+											{/* Classes to be added: sticky z-10 top-16 pt-8 md:pt-0 md:static bg-background */}
+											<aside class="col-span-1 md:order-1 -order-1 hidden md:block sticky top-36 mb-32">
+												<NavbarCommon
+													displayName={displayName}
+													getLocale={languageTag}
+													tableOfContents={props.tableOfContents}
+												/>
+											</aside>
+										</Show>
 									</div>
 								</section>
 								<div>
@@ -464,13 +447,21 @@ const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
 			behavior: behavior ?? "instant",
 		})
 	}
-	window.history.pushState({}, "", `${currentPageContext.urlParsed.pathname}#${anchor}`)
+	window.history.pushState(
+		{},
+		"",
+		`${currentPageContext.urlParsed.pathname}${
+			currentPageContext.urlParsed.search.view
+				? `?view=${currentPageContext.urlParsed.search.view}`
+				: ""
+		}#${anchor}`
+	)
 }
 
 function NavbarCommon(props: {
 	getLocale: () => string
 	displayName: () => string
-	tableOfContents: () => Record<string, string[]>
+	tableOfContents: Record<string, string[]>
 }) {
 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
 
@@ -498,7 +489,7 @@ function NavbarCommon(props: {
 	}
 
 	onMount(async () => {
-		for (const sectionTitle of Object.keys(props.tableOfContents())) {
+		for (const sectionTitle of Object.keys(props.tableOfContents)) {
 			if (
 				currentPageContext.urlParsed.hash?.replace("#", "").toString() ===
 				replaceChars(sectionTitle.toString().toLowerCase())
@@ -515,7 +506,7 @@ function NavbarCommon(props: {
 				//scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
 				setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
 			} else {
-				for (const heading of props.tableOfContents()[sectionTitle]!) {
+				for (const heading of props.tableOfContents[sectionTitle]!) {
 					if (
 						currentPageContext.urlParsed.hash?.replace("#", "").toString() ===
 						replaceChars(heading.toString().toLowerCase())
@@ -539,8 +530,8 @@ function NavbarCommon(props: {
 
 	return (
 		<div class="mb-12 sticky top-36 mt-16 max-h-[96vh] overflow-y-scroll overflow-scrollbar">
-			<ul role="list" class="w-full space-y-3">
-				<For each={Object.keys(props.tableOfContents())}>
+			<ul role="list" class="w-full">
+				<For each={Object.keys(props.tableOfContents)}>
 					{(sectionTitle) => (
 						<li>
 							<Link
@@ -553,12 +544,12 @@ function NavbarCommon(props: {
 									(isSelected(replaceChars(sectionTitle.toString().toLowerCase()))
 										? "text-primary font-semibold "
 										: "text-info/80 hover:text-on-background ") +
-									"tracking-wide text-sm block w-full font-normal mb-2 cursor-pointer"
+									"tracking-wide text-sm block w-full font-normal mb-2 cursor-pointer mt-3"
 								}
 							>
 								{sectionTitle.replace("#", "")}
 							</Link>
-							<For each={props.tableOfContents()[sectionTitle]}>
+							<For each={props.tableOfContents[sectionTitle]}>
 								{(heading) => (
 									<li>
 										<Link

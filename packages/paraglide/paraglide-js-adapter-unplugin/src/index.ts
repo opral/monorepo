@@ -25,7 +25,11 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 	let numCompiles = 0
 
 	async function triggerCompile(messages: readonly Message[], settings: ProjectSettings) {
-		if (messages.length === 0) return //messages probably haven't loaded yet
+		if (messages.length === 0) {
+			logger.warn(`No messages found - Skipping compilation into ${options.outdir}`)
+			return
+		}
+
 		logMessageChange()
 		const output = compile({ messages, settings })
 		await writeOutput(outputDirectory, output, fs)

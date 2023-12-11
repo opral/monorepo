@@ -5,15 +5,15 @@ Publishing your own plugin or lint rule to the [marketplace](/) is straightforwa
 ## Pre-requisites
 
 - [jsdelivr URL](https://www.jsdelivr.com/github) (other CDN's are not supported)
-- A developed [app](/documentation/develop-app), [plugin](/documentation/develop-plugin), or [lint rule](/documentation/develop-lint-rule)
+- A developed [app](/documentation/build-app), [plugin](/documentation/plugin/guide), or [lint rule](/documentation/build-lint-rule)
 
 ## Step-by-step
 
 ### 1. Add the information to your marketplace manifest
 Adding the marketplace information is necessary for the marketplace to display your item correctly. You can use these category-specific templates:
-- [Manifest template for apps](/documentation/develop-app#4.-configure-your-app)
-- [Manifest template for lint rules](/documentation/develop-lint-rule#3.-configure-your-lint-rule)
-- [Manifest template for plugins](/documentation/develop-plugin#3.-configure-your-plugin)
+- [Manifest template for apps](/documentation/build-app#4.-configure-your-app)
+- [Manifest template for lint rules](/documentation/build-lint-rule#3.-configure-your-lint-rule)
+- [Manifest template for plugins](/documentation/plugin/guide#3.-configure-your-plugin)
 
 #### Official JSON schema
 
@@ -44,11 +44,11 @@ Attributes:
 - `caption` (required): Caption shown below the image.
 
 ```md
-<doc-figure src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/ecosystem.jpg" alt="inlang ecosystem" caption="The inlang ecosystem"></doc-figure>
+<doc-figure src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg" alt="inlang ecosystem" caption="The inlang ecosystem"></doc-figure>
 ```
 
 ##### Preview
-<doc-figure src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/ecosystem.jpg" alt="inlang ecosystem" caption="The inlang ecosystem"></doc-figure>
+<doc-figure src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg" alt="inlang ecosystem" caption="The inlang ecosystem"></doc-figure>
 
 ---
 
@@ -94,11 +94,11 @@ Attributes:
 - `looping` (optional): True if you want the slider to loop.
 
 ```md
-<doc-slider items="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/ecosystem.jpg,https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/ecosystem.jpg,https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/ecosystem.jpg"></doc-slider>
+<doc-slider items="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg, https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg, https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg"></doc-slider>
 ```
 
 ##### Preview
-<doc-slider items="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/ecosystem.jpg,https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/ecosystem.jpg,https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/ecosystem.jpg"></doc-slider>
+<doc-slider items="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg, https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg, https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg"></doc-slider>
 
 ---
 
