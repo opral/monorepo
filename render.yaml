@@ -14,9 +14,6 @@ services:
     buildCommand: pnpm install && pnpm run build
     startCommand: pnpm run production
     autoDeploy: true
-    buildFilter:
-      ignoredPaths:
-        - inlang/source-code/manage/**
     envVars:
       - fromGroup: production
     domains:
@@ -61,7 +58,7 @@ services:
     plan: standard
     branch: main
     buildCommand: pnpm install && pnpm run build
-    startCommand: pnpm run production
+    startCommand: pnpm --filter @inlang/manage production
     autoDeploy: true
     envVars:
       - fromGroup: production
