@@ -540,9 +540,8 @@ function NavbarCommon(props: {
 				<For each={Object.keys(props.tableOfContents)}>
 					{(sectionTitle) => (
 						<li>
-							<Link
-								onClick={(e: any) => {
-									e.preventDefault()
+							<div
+								onClick={() => {
 									scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
 									setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
 								}}
@@ -554,13 +553,12 @@ function NavbarCommon(props: {
 								}
 							>
 								{sectionTitle.replace("#", "")}
-							</Link>
+							</div>
 							<For each={props.tableOfContents[sectionTitle]}>
 								{(heading) => (
 									<li>
-										<Link
-											onClick={(e: any) => {
-												e.preventDefault()
+										<div
+											onClick={() => {
 												scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
 												setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
 											}}
@@ -572,7 +570,7 @@ function NavbarCommon(props: {
 											}
 										>
 											{heading.replace("#", "")}
-										</Link>
+										</div>
 									</li>
 								)}
 							</For>
