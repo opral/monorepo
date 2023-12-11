@@ -17,6 +17,8 @@ services:
     buildFilter:
       paths:
         - lix/source-code/server/**
+      ignoredPaths:
+        - inlang/source-code/manage/**
     envVars:
       - fromGroup: production
     domains:
@@ -34,8 +36,8 @@ services:
     envVars:
       - fromGroup: production
     buildFilter:
-      ignoredPaths:
-        - inlang/source-code/manage/**
+      paths:
+        - lix/source-code/server/**
     domains:
       - git.inlang.com
 
