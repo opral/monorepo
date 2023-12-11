@@ -27,7 +27,12 @@ import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
-import { getMessageIdFromPath, parseMessage } from "./storage/helper.js"
+import {
+	getMessageIdFromPath,
+	getPathFromMessageId,
+	parseMessage,
+	encodeMessage,
+} from "./storage/helper.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -148,11 +153,6 @@ export const loadProject = async (args: {
 			const _resolvedModules = resolvedModules()
 			if (!_resolvedModules) return
 
-			if (!_resolvedModules.resolvedPluginApi.loadMessages) {
-				markInitAsFailed(undefined)
-				return
-			}
-
 			// TODO #1844 this how  the messages are loaded
 			const loadAndSetMessages = async (fs: NodeishFilesystemSubset) => {
 				// load all messages
@@ -160,7 +160,11 @@ export const loadProject = async (args: {
 
 				try {
 					// make sure the message folder exists within the .inlang folder
-					await fs.mkdir(messageFolderPath)
+					try {
+						await fs.mkdir(messageFolderPath)
+					} catch (e) {
+						// TODO find better way to check if the foolder exists
+					}
 
 					const messageFilePaths = await fs.readdir(messageFolderPath)
 					for (const messageFilePath of messageFilePaths) {
@@ -169,27 +173,17 @@ export const loadProject = async (args: {
 						})
 
 						// TODO #1844 the place where we read in the file - if this fails we should consider ignoring it
-						const message = JSON.parse(messageRaw) as Message
+						const message = parseMessage(messageRaw) as Message
 						messages.push(message)
 					}
 
 					setMessages(messages)
+
 					markInitAsComplete()
 				} catch (err) {
 					markInitAsFailed(new PluginLoadMessagesError({ cause: err }))
 				}
 
-				// makeTrulyAsync(
-				// 	_resolvedModules.resolvedPluginApi.loadMessages({
-				// 		settings: settingsValue,
-				// 		nodeishFs: fs,
-				// 	})
-				// )
-				// 	.then((messages) => {
-				// 		setMessages(messages)
-				// 		markInitAsComplete()
-				// 	})
-				// 	.catch((err) => markInitAsFailed(new PluginLoadMessagesError({ cause: err })))
 			}
 
 			const fsWithWatcher = createNodeishFsWithWatcher({
@@ -201,8 +195,9 @@ export const loadProject = async (args: {
 				},
 			})
 
-			// TODO #1844 inital load of the messages
+			// inital load of all messages
 			loadAndSetMessages(fsWithWatcher).then(() => {
+				// when initial message loading is done start watching on file changes in the message dir
 				;(async () => {
 					try {
 						const watcher = nodeishFs.watch(messageFolderPath, {
@@ -241,7 +236,7 @@ export const loadProject = async (args: {
 								} else {
 									const message = parseMessage(fileContent)
 									const currentMessage = messagesQuery.get({ where: { id: messageId } })
-									if (currentMessage && JSON.stringify(currentMessage) === fileContent) {
+									if (currentMessage && encodeMessage(currentMessage) === fileContent) {
 										continue
 									}
 
@@ -300,6 +295,42 @@ export const loadProject = async (args: {
 		const hasWatcher = nodeishFs.watch("/", { signal: abortController.signal }) !== undefined
 
 		const messagesQuery = createMessagesQuery(() => messages() || [])
+
+		// subscribe to all messages and write to disc on signal
+		createEffect(() => {
+			for (const messageId of messagesQuery.includedMessageIds()) {
+				createEffect(() => {
+					const message = messagesQuery.get({ where: { id: messageId } })
+					console.log("saveing Message " + message.id + " to ")
+					const messageFilePath = messageFolderPath + "/" + getPathFromMessageId(message.id)
+					nodeishFs.writeFile(messageFilePath, encodeMessage(message))
+				})
+			}
+		})
+
+		// run import
+		const _resolvedModules = resolvedModules()
+	
+		// initial project setup finished - import all messages usign legacy load Messages 
+		if (_resolvedModules?.resolvedPluginApi.loadMessages) {
+			const importedMessages = await makeTrulyAsync(
+				_resolvedModules.resolvedPluginApi.loadMessages({
+					// @ts-ignore
+					settings: settingsValue,
+					nodeishFs: nodeishFs,
+				})
+			)
+
+			for (const importedMessage of importedMessages) {
+				const currentMessage = messagesQuery.get({ where: { id: importedMessage.id } })
+				if (currentMessage && encodeMessage(currentMessage) === encodeMessage(importedMessage)) {
+					continue
+				}
+				console.log("updating message from import " + importedMessage.id)
+				messagesQuery.upsert({ where: { id: importedMessage.id }, data: importedMessage })
+			}
+		}
+
 		const lintReportsQuery = createMessageLintReportsQuery(
 			messagesQuery,
 			settings as () => ProjectSettings,
@@ -330,18 +361,6 @@ export const loadProject = async (args: {
 		// createEffect(() => {
 		// 	debouncedSave(messagesQuery.getAll())
 		// })
-
-		createEffect(() => {
-			for (const messageId of messagesQuery.includedMessageIds()) {
-				createEffect(() => {
-					const message = messagesQuery.get({ where: { id: messageId } })
-					console.log("saveing Message " + message.id + " to ")
-					const messageFilePath = messageFolderPath + "/" + message.id
-					nodeishFs.writeFile(messageFilePath, JSON.stringify(message))
-				})
-			}
-		})
-	
 
 		return {
 			installed: {
