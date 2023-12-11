@@ -1,14 +1,17 @@
 import type nodeFsPromises from "node:fs/promises"
 import path from "node:path"
+import crypto from "node:crypto"
+
+let previousOutputHash: string | undefined
 
 export async function writeOutput(
 	outputDirectory: string,
 	output: Record<string, string>,
 	fs: typeof nodeFsPromises
 ) {
-	//Bail if the output directory already contains identical files
-	const existing = await readCurrentOutputDirectory(outputDirectory, fs)
-	if (recordsAreEqual(existing, output)) return
+	// if the output hasn't changed, don't write it
+	const currentOutputHash = hashOutput(output, outputDirectory)
+	if (currentOutputHash === previousOutputHash) return
 
 	// create the output directory if it doesn't exist
 	await fs.access(outputDirectory).catch(async () => {
@@ -42,65 +45,14 @@ export async function writeOutput(
 			})
 		})
 	)
+
+	//Only update the previousOutputHash if the write was successful
+	previousOutputHash = currentOutputHash
 }
 
-/**
- * Performs a shallow comparison of two records by comparing their top level keys and values
- */
-function recordsAreEqual(a: Record<string, string>, b: Record<string, string>): boolean {
-	const aKeys = Object.keys(a)
-	const bKeys = Object.keys(b)
-
-	if (aKeys.length !== bKeys.length) {
-		return false
-	}
-
-	for (const key of aKeys) {
-		if (a[key] !== b[key]) {
-			return false
-		}
-	}
-
-	return true
-}
-
-/**
- * Tries to recursively read the current output directory and returns a map of all files and their content
- * If the output directory does not exist, it returns an empty map
- *
- *
- * @example
- * ```ts
- * const output = await readCurrentOutputDirectory(outputDirectory, fs)
- *
- * // output = {
- * //   "runtime.js": "...",
- * //   "messages.js": "...",
- * //   "messages/de.js": "...",
- * //   "messages/en.js": "...",
- * ```
- *
- */
-async function readCurrentOutputDirectory(
-	outputDirectory: string,
-	fs: typeof nodeFsPromises
-): Promise<Record<string, string>> {
-	try {
-		const files = await fs.readdir(outputDirectory, { recursive: true })
-		const output: Record<string, string> = {}
-
-		await Promise.allSettled(
-			files.map(async (file) => {
-				const filePath = path.resolve(outputDirectory, file)
-				const fileContent = await fs.readFile(filePath, {
-					encoding: "utf-8",
-				})
-				output[file] = fileContent
-			})
-		)
-
-		return output
-	} catch (e) {
-		return {}
-	}
+function hashOutput(output: Record<string, string>, outputDirectory: string): string {
+	const hash = crypto.createHash("sha256")
+	hash.update(JSON.stringify(output))
+	hash.update(outputDirectory)
+	return hash.digest("hex")
 }
