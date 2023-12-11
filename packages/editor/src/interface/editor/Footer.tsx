@@ -4,7 +4,7 @@ import IconTwitter from "~icons/cib/twitter"
 import IconGithub from "~icons/cib/github"
 import IconDiscord from "~icons/cib/discord"
 import * as m from "#src/paraglide/messages.js"
-import { LanguagePicker } from "./LanguagePicker.jsx"
+// import { LanguagePicker } from "./LanguagePicker.jsx"
 import Link from "#src/renderer/Link.jsx"
 import { Button } from "../components/Button.jsx"
 
@@ -129,7 +129,7 @@ const Footer = () => {
 					<p class="text-sm text-surface-500">
 						Copyright {new Date().getFullYear().toString()} inlang
 					</p>
-					<LanguagePicker />
+					{/* <LanguagePicker /> */}
 				</div>
 			</div>
 		</footer>
