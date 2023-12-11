@@ -47,6 +47,8 @@ export default SdkDocsHeader
 export const getDocsBaseUrl = (link: string) => {
 	if (link.split("/")[2] === "plugin") {
 		return "/documentation/plugin"
+	} else if (link.split("/")[2] === "lint-rule") {
+		return "/documentation/lint-rule"
 	} else {
 		return "/documentation"
 	}
@@ -63,10 +65,10 @@ const SdkDocsSubHeader = () => {
 				name: "Plugin",
 				href: "/documentation/plugin",
 			},
-			// {
-			// 	name: "Lint Rule",
-			// 	href: "/documentation/concept/lint-rule",
-			// },
+			{
+				name: "Lint Rule",
+				href: "/documentation/lint-rule",
+			},
 			// {
 			// 	name: "Publish Content",
 			// 	href: "/documentation/content",
