@@ -923,6 +923,34 @@ importers:
         specifier: 0.33.0
         version: 0.33.0(jsdom@22.1.0)
 
+  inlang/source-code/message-lint-rules/validJsIdentifier:
+    dependencies:
+      '@inlang/message-lint-rule':
+        specifier: workspace:*
+        version: link:../../versioned-interfaces/message-lint-rule
+    devDependencies:
+      '@inlang/cli':
+        specifier: workspace:*
+        version: link:../../cli
+      '@inlang/message':
+        specifier: workspace:*
+        version: link:../../versioned-interfaces/message
+      '@inlang/sdk':
+        specifier: workspace:*
+        version: link:../../sdk
+      '@vitest/coverage-v8':
+        specifier: 0.33.0
+        version: 0.33.0(vitest@0.33.0)
+      patch-package:
+        specifier: 6.5.1
+        version: 6.5.1
+      typescript:
+        specifier: ^5.1.3
+        version: 5.2.2
+      vitest:
+        specifier: 0.33.0
+        version: 0.33.0(jsdom@22.1.0)
+
   inlang/source-code/paraglide/paraglide-js:
     dependencies:
       '@inlang/detect-json-formatting':
@@ -16418,7 +16446,7 @@ packages:
       vite: 4.5.0(@types/node@20.5.9)
     dev: true
 
-  /vite-node@0.33.0(@types/node@20.10.0):
+  /vite-node@0.33.0(@types/node@20.9.3):
     resolution: {integrity: sha512-19FpHYbwWWxDr73ruNahC+vtEdza52kA90Qb3La98yZ0xULqV8A5JLNPUff0f5zID4984tW7l3DH2przTJUZSw==}
     engines: {node: '>=v14.18.0'}
     hasBin: true
@@ -16428,7 +16456,7 @@ packages:
       mlly: 1.4.2
       pathe: 1.1.1
       picocolors: 1.0.0
-      vite: 4.5.0(@types/node@20.10.0)(terser@5.19.4)
+      vite: 4.5.0(@types/node@20.9.3)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -16927,7 +16955,7 @@ packages:
       vite:
         optional: true
     dependencies:
-      vite: 4.4.9(@types/node@20.9.3)
+      vite: 4.4.9(@types/node@20.10.0)(terser@5.19.4)
 
   /vitefu@0.2.5(vite@4.5.0):
     resolution: {integrity: sha512-SgHtMLoqaeeGnd2evZ849ZbACbnwQCIwRH57t18FxcXoZop0uQu0uzlIhJBlF/eWVzuce0sHeqPcDo+evVcg8Q==}
@@ -16973,7 +17001,7 @@ packages:
     dependencies:
       '@types/chai': 4.3.10
       '@types/chai-subset': 1.3.5
-      '@types/node': 20.10.0
+      '@types/node': 20.9.3
       '@vitest/expect': 0.33.0
       '@vitest/runner': 0.33.0
       '@vitest/snapshot': 0.33.0
@@ -16993,8 +17021,8 @@ packages:
       strip-literal: 1.3.0
       tinybench: 2.5.1
       tinypool: 0.6.0
-      vite: 4.5.0(@types/node@20.10.0)(terser@5.19.4)
-      vite-node: 0.33.0(@types/node@20.10.0)
+      vite: 4.5.0(@types/node@20.9.3)
+      vite-node: 0.33.0(@types/node@20.9.3)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
       - less
