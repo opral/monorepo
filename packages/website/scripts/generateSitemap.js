@@ -153,6 +153,13 @@ async function generateSitemap() {
 					}
 				}
 			}
+		} else if (route.path === "/newsletter"){
+			for (const locale of locales) {
+				content = `${content}${formatPage(
+					siteURL + locale + route.path,
+					publishDate
+				)}`
+			}
 		}
 	}
 

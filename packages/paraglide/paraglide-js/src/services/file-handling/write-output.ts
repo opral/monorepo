@@ -1,11 +1,18 @@
 import type nodeFsPromises from "node:fs/promises"
 import path from "node:path"
+import crypto from "node:crypto"
+
+let previousOutputHash: string | undefined
 
 export async function writeOutput(
 	outputDirectory: string,
 	output: Record<string, string>,
 	fs: typeof nodeFsPromises
 ) {
+	// if the output hasn't changed, don't write it
+	const currentOutputHash = hashOutput(output, outputDirectory)
+	if (currentOutputHash === previousOutputHash) return
+
 	// create the output directory if it doesn't exist
 	await fs.access(outputDirectory).catch(async () => {
 		await fs.mkdir(outputDirectory, { recursive: true })
@@ -38,4 +45,14 @@ export async function writeOutput(
 			})
 		})
 	)
+
+	//Only update the previousOutputHash if the write was successful
+	previousOutputHash = currentOutputHash
+}
+
+function hashOutput(output: Record<string, string>, outputDirectory: string): string {
+	const hash = crypto.createHash("sha256")
+	hash.update(JSON.stringify(output))
+	hash.update(outputDirectory)
+	return hash.digest("hex")
 }

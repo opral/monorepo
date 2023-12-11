@@ -76,31 +76,32 @@ test("it should compile into the default outdir", async () => {
 test("it should compile a project into the provided outdir", async () => {
 	const outdirs = ["/paraglide-js", "./paraglide-js", "/src/paraglide-js", "./src/paraglide-js"]
 
+	const _fs = mockFs({
+		"/plugin.js": fs.readFileSync(
+			// using the inlang-message-format plugin
+			resolve(__dirname, "../../../../../plugins/inlang-message-format/dist/index.js"),
+			{ encoding: "utf-8" }
+		),
+		"/project.inlang/settings.json": JSON.stringify({
+			sourceLanguageTag: "en",
+			languageTags: ["de", "en"],
+			modules: ["/plugin.js"],
+			"plugin.inlang.messageFormat": {
+				pathPattern: "/messages/{languageTag}.json",
+			},
+		} satisfies ProjectSettings),
+		"/messages.json": JSON.stringify({
+			$schema: "https://inlang.com/schema/inlang-message-format",
+			data: [
+				createMessage("loginButton", {
+					en: "Login",
+					de: "Anmelden",
+				}),
+			],
+		}),
+	})
+
 	for (const outdir of outdirs) {
-		const _fs = mockFs({
-			"/plugin.js": fs.readFileSync(
-				// using the inlang-message-format plugin
-				resolve(__dirname, "../../../../../plugins/inlang-message-format/dist/index.js"),
-				{ encoding: "utf-8" }
-			),
-			"/project.inlang/settings.json": JSON.stringify({
-				sourceLanguageTag: "en",
-				languageTags: ["de", "en"],
-				modules: ["/plugin.js"],
-				"plugin.inlang.messageFormat": {
-					pathPattern: "/messages/{languageTag}.json",
-				},
-			} satisfies ProjectSettings),
-			"/messages.json": JSON.stringify({
-				$schema: "https://inlang.com/schema/inlang-message-format",
-				data: [
-					createMessage("loginButton", {
-						en: "Login",
-						de: "Anmelden",
-					}),
-				],
-			}),
-		})
 		// I have no idea why, but the { from: "user" } is required for the test to pass
 		await compileCommand.parseAsync(["--project", "./project.inlang", "--outdir", outdir], {
 			from: "user",
