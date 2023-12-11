@@ -1,4 +1,4 @@
-import { For, Show, createSignal, onMount } from "solid-js"
+import { For, Show, createSignal, onMount, type JSX } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
@@ -14,6 +14,10 @@ import ParaglideHeader from "#src/interface/marketplace/categoryHeaders/cards/pa
 import LintRulesHeader from "#src/interface/marketplace/categoryHeaders/toast/lintRules.jsx"
 import LixHeader from "#src/interface/marketplace/categoryHeaders/cards/lix.jsx"
 import { renderLocales } from "#src/renderer/renderLocales.js"
+import SvelteHeader from "#src/interface/marketplace/categoryHeaders/cards/svelte.jsx"
+import NextjsHeader from "#src/interface/marketplace/categoryHeaders/cards/nextjs.jsx"
+import GenericHeader from "#src/interface/marketplace/categoryHeaders/cards/generic.jsx"
+import { i18nRouting } from "#src/renderer/_default.page.route.js"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -43,17 +47,20 @@ export function Page(props: {
 	type HeaderContentType = {
 		title: string
 		description: string
-		buttonLink: string
-		buttonText: string
+		buttonLink?: string
+		buttonText?: string
+		icon?: string
+		withGuides?: boolean
+		coverCard?: JSX.Element
 	}
 
-	const getHeaderContent = (): HeaderContentType | undefined => {
+	const getCategoryContent = (): HeaderContentType | undefined => {
 		switch (currentPageContext.routeParams.category) {
 			case "apps":
 				return {
 					title: m.marketplace_header_apps_title(),
 					description: m.marketplace_header_apps_description(),
-					buttonLink: "/documentation/develop-app",
+					buttonLink: "/documentation/build-app",
 					buttonText: m.marketplace_header_apps_button_text(),
 				}
 			case "libraries":
@@ -62,20 +69,23 @@ export function Page(props: {
 					description: m.marketplace_header_libraries_description(),
 					buttonLink: "/m/gerre34r/library-inlang-paraglideJs",
 					buttonText: m.marketplace_header_libraries_button_text(),
+					coverCard: <ParaglideHeader />,
 				}
 			case "plugins":
 				return {
 					title: m.marketplace_header_plugins_title(),
 					description: m.marketplace_header_plugins_description(),
-					buttonLink: "/documentation/develop-pluginp",
+					buttonLink: "/documentation/plugin/guide",
 					buttonText: m.marketplace_header_plugins_button_text(),
+					coverCard: <PluginHeader />,
 				}
 			case "lint-rules":
 				return {
 					title: m.marketplace_header_lintRules_title(),
 					description: m.marketplace_header_lintRules_description(),
-					buttonLink: "/documentation/develop-lint-rule",
+					buttonLink: "/documentation/build-lint-rule",
 					buttonText: m.marketplace_header_lintRules_button_text(),
+					coverCard: <LintRulesHeader />,
 				}
 			case "guides":
 				return {
@@ -90,13 +100,29 @@ export function Page(props: {
 					description: m.marketplace_header_lix_short_description(),
 					buttonLink: "https://github.com/inlang/monorepo/tree/main/lix",
 					buttonText: m.marketplace_header_lix_button_text(),
+					coverCard: <LixHeader />,
+				}
+			case "svelte":
+				return {
+					title: "Svelte - i18n Tooling",
+					description: "Recommended internationalization tooling for your svelte stack.",
+					icon: "https://avatars.githubusercontent.com/u/23617963?s=200&v=4",
+					withGuides: true,
+					coverCard: <SvelteHeader />,
+				}
+			case "nextjs":
+				return {
+					title: "Next.js - i18n Tooling",
+					description: "Recommended internationalization tooling for your next.js stack.",
+					icon: "https://assets.vercel.com/image/upload/v1662130559/nextjs/Icon_light_background.png",
+					withGuides: true,
+					coverCard: <NextjsHeader />,
 				}
 			default:
 				return {
-					title: "inlang",
-					description: "The ecosystem to go global.",
-					buttonLink: "/",
-					buttonText: "Home",
+					title: currentPageContext.urlParsed.pathname.split("/")[2]?.toUpperCase() || "Your stack",
+					description: "Recommended internationalization tooling for your stack.",
+					coverCard: <GenericHeader />,
 				}
 		}
 	}
@@ -104,23 +130,32 @@ export function Page(props: {
 	return (
 		<>
 			<Title>
-				{currentPageContext.routeParams.category?.toLowerCase() === "lix" ||
-				currentPageContext.routeParams.category?.toLowerCase() === "guides"
-					? ""
-					: "Global"}{" "}
-				{currentPageContext.routeParams.category?.toLowerCase() === "lix"
-					? currentPageContext.routeParams.category
-					: currentPageContext.routeParams.category
-							?.replaceAll("-", " ")
-							.replace(/\w\S*/g, (w) => w.replace(/^\w/, (c) => c.toUpperCase()))}{" "}
+				{currentPageContext.routeParams.category === "svelte" ||
+				currentPageContext.routeParams.category === "nextjs"
+					? getCategoryContent()?.title + " "
+					: (currentPageContext.routeParams.category?.toLowerCase() === "lix" ||
+					  currentPageContext.routeParams.category?.toLowerCase() === "guides"
+							? ""
+							: "Global" + " ") +
+					  ((currentPageContext.routeParams.category?.toLowerCase() === "lix"
+							? currentPageContext.routeParams.category
+							: currentPageContext.routeParams.category
+									?.replaceAll("-", " ")
+									.replace(/\w\S*/g, (w) => w.replace(/^\w/, (c) => c.toUpperCase()))) +
+							" ")}
 				| inlang
 			</Title>
 			<Meta
 				name="description"
-				content={`Find everything globalization (i18n) related to ${currentPageContext.routeParams.category?.replaceAll(
-					"-",
-					" "
-				)} - inlang`}
+				content={
+					currentPageContext.routeParams.category === "svelte" ||
+					currentPageContext.routeParams.category === "nextjs"
+						? getCategoryContent()?.description
+						: `Find everything globalization (i18n) related to ${currentPageContext.routeParams.category?.replaceAll(
+								"-",
+								" "
+						  )} - inlang`
+				}
 			/>
 			<Meta name="og:image" content="/images/inlang-marketplace-image.jpg" />
 			<Meta name="twitter:card" content="summary_large_image" />
@@ -132,44 +167,52 @@ export function Page(props: {
 			<Meta
 				name="twitter:title"
 				content={`${
-					currentPageContext.routeParams.category?.toLowerCase() === "lix" ||
-					currentPageContext.routeParams.category?.toLowerCase() === "guides"
-						? ""
-						: "Global"
-				} ${currentPageContext.routeParams.category} | inlang`}
+					currentPageContext.routeParams.category === "svelte" ||
+					currentPageContext.routeParams.category === "nextjs"
+						? getCategoryContent()?.title + " "
+						: (currentPageContext.routeParams.category?.toLowerCase() === "lix" ||
+						  currentPageContext.routeParams.category?.toLowerCase() === "guides"
+								? ""
+								: "Global" + " ") +
+						  ((currentPageContext.routeParams.category?.toLowerCase() === "lix"
+								? currentPageContext.routeParams.category
+								: currentPageContext.routeParams.category
+										?.replaceAll("-", " ")
+										.replace(/\w\S*/g, (w) => w.replace(/^\w/, (c) => c.toUpperCase()))) +
+								" ")
+				} | inlang`}
 			/>
 			<Meta
 				name="twitter:description"
-				content={`Find everything globalization (i18n) related to ${currentPageContext.routeParams.category?.replaceAll(
-					"-",
-					" "
-				)} - inlang`}
+				content={
+					currentPageContext.routeParams.category === "svelte" ||
+					currentPageContext.routeParams.category === "nextjs"
+						? getCategoryContent()?.description
+						: `Find everything globalization (i18n) related to ${currentPageContext.routeParams.category?.replaceAll(
+								"-",
+								" "
+						  )} - inlang`
+				}
 			/>
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />
 			{renderLocales(currentPageContext.urlParsed.pathname).map((locale) => (
 				<Link href={locale.href} lang={locale.hreflang} rel={locale.rel} />
 			))}
+			<Link
+				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
+				rel="canonical"
+			/>
 			<MarketplaceLayout>
-				<Show when={currentPageContext.routeParams.category && getHeaderContent()}>
+				<Show when={currentPageContext.routeParams.category && getCategoryContent()}>
 					<TitleSection
-						title={getHeaderContent()!.title}
-						description={getHeaderContent()!.description}
-						buttonLink={getHeaderContent()!.buttonLink}
-						buttonText={getHeaderContent()!.buttonText}
+						title={getCategoryContent()!.title}
+						description={getCategoryContent()!.description}
+						buttonLink={getCategoryContent()!.buttonLink}
+						buttonText={getCategoryContent()!.buttonText}
+						icon={getCategoryContent()!.icon}
 					/>
-					<Show when={currentPageContext.routeParams.category === "plugins"}>
-						<PluginHeader />
-					</Show>
-					<Show when={currentPageContext.routeParams.category === "lint-rules"}>
-						<LintRulesHeader />
-					</Show>
-					<Show when={currentPageContext.routeParams.category === "libraries"}>
-						<ParaglideHeader />
-					</Show>
-					<Show when={currentPageContext.routeParams.category === "lix"}>
-						<LixHeader />
-					</Show>
+					<Show when={getCategoryContent()?.coverCard}>{getCategoryContent()?.coverCard}</Show>
 				</Show>
 				<div class="pb-16 md:pb-20 min-h-screen relative">
 					<SectionLayout showLines={false} type="white">
@@ -190,8 +233,18 @@ export function Page(props: {
 								</Show>
 							</Show>
 							<div class="mb-8 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
-								<Gallery items={props.items} guides={selectedCategory().includes("c/guides")} />
+								<Gallery
+									items={props.items}
+									guides={selectedCategory().includes("c/guides")}
+									hideBuildYourOwn={getCategoryContent()?.withGuides}
+								/>
 							</div>{" "}
+							<Show when={getCategoryContent()?.withGuides}>
+								<p class="text-lg font-semibold leading-snug tracking-tight py-4">Guides</p>
+								<div class="mb-8 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
+									<Gallery items={props.items} guides={true} />
+								</div>{" "}
+							</Show>
 						</div>
 						<Show when={!props.category && !props.slider && !props.minimal}>
 							<div class="mt-20">
@@ -205,7 +258,7 @@ export function Page(props: {
 	)
 }
 
-const Gallery = (props: { items: any; guides?: boolean }) => {
+const Gallery = (props: { items: any; guides?: boolean; hideBuildYourOwn?: boolean }) => {
 	const [show, setShow] = createSignal<boolean>(false)
 	onMount(() => {
 		setShow(true)
@@ -249,7 +302,7 @@ const Gallery = (props: { items: any; guides?: boolean }) => {
 							return <Card item={item} displayName={displayName} />
 						}}
 					</For>
-					<Show when={!props.guides}>
+					<Show when={!props.guides && !props.hideBuildYourOwn}>
 						<CardBuildOwn />
 					</Show>
 				</Show>

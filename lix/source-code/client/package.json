@@ -6,7 +6,9 @@
 		"access": "public"
 	},
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/index.js",
+		"./src/*.ts": "./src/*.ts",
+		"./src/browser-auth.ts": "./src/browser-auth.ts"
 	},
 	"files": [
 		"./dist",

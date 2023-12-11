@@ -9,6 +9,8 @@ import Link from "#src/renderer/Link.jsx"
 import * as m from "../../paraglide/messages.js"
 import { currentPageContext } from "#src/renderer/state.js"
 
+const isProduction = process.env.NODE_ENV === "production"
+
 export default function Card(props: { item: any; displayName: string }) {
 	const showCover =
 		currentPageContext.urlParsed.pathname.includes("/lint-rules") &&
@@ -31,7 +33,7 @@ export default function Card(props: { item: any; displayName: string }) {
 				}
 				class={
 					"relative no-underline z-10 flex justify-between gap-4 overflow-hidden flex-col group w-full bg-background transition-all border border-surface-200 rounded-xl hover:shadow-lg hover:shadow-surface-100 hover:border-surface-300 active:border-surface-400 " +
-					(showCover || app ? " " : " h-48 p-5")
+					(showCover || app ? " " : /* min-h-48 */ " min-h-[12rem] p-5")
 				}
 			>
 				<Switch>
@@ -128,7 +130,11 @@ export default function Card(props: { item: any; displayName: string }) {
 									</Show>
 								</div>
 								<div class="flex flex-col justify-between items-start">
-									<p class="m-0 mb-2 text-sm text-surface-800 line-clamp-1 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors">
+									<p
+										// eslint-disable-next-line solid/style-prop
+										style="text-wrap: balance;"
+										class="m-0 mb-2 text-sm text-surface-800 line-clamp-2 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors"
+									>
 										{props.displayName}
 									</p>
 									<Chip
@@ -148,7 +154,12 @@ export default function Card(props: { item: any; displayName: string }) {
 											onClick={(e) => {
 												e.stopPropagation()
 											}}
-											href={`/install?module=${props.item.id}`}
+											target="_blank"
+											href={`${
+												isProduction
+													? "https://manage.inlang.com/install"
+													: "http://localhost:4004/install"
+											}?module=${props.item.id}`}
 											class="ml-auto flex-shrink-0 rounded-full p-2 w-8 h-8 flex items-center justify-center text-surface-900 hover:text-on-background hover:bg-surface-200 bg-surface-100 transition-all"
 										>
 											<svg
@@ -213,7 +224,9 @@ export default function Card(props: { item: any; displayName: string }) {
 						onClick={(e: any) => {
 							e.stopPropagation()
 						}}
-						href={"/install?module=" + structuredClone(props.item.id)}
+						href={`${
+							isProduction ? "https://manage.inlang.com/install" : "http://localhost:4004/install"
+						}?module=${props.item.id}`}
 						class="absolute top-5 right-5 flex-shrink-0 rounded-full p-2 w-8 h-8 flex items-center justify-center text-surface-500 hover:text-on-background hover:bg-surface-200 bg-surface-100 transition-all"
 					>
 						<svg

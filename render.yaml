@@ -50,3 +50,20 @@ services:
     buildFilter:
       paths:
         - inlang/source-code/badge/**
+
+  - name: inlang-manage
+    type: web
+    runtime: node
+    region: frankfurt
+    plan: standard
+    branch: main
+    buildCommand: pnpm install && pnpm run build
+    startCommand: pnpm --filter @inlang/manage production
+    autoDeploy: true
+    envVars:
+      - fromGroup: production
+    buildFilter:
+      paths:
+        - inlang/source-code/manage/**
+    domains:
+      - manage.inlang.com

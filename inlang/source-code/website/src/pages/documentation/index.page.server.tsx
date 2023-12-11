@@ -1,5 +1,6 @@
 import fs from "node:fs/promises"
-import tableOfContents from "../../../../../documentation/tableOfContents.json"
+import sdkTableOfContents from "../../../../../documentation/sdk/tableOfContents.json"
+import pluginTableOfContents from "../../../../../documentation/plugin/tableOfContents.json"
 import { convert } from "@inlang/markdown"
 import { render } from "vike/abort"
 
@@ -14,13 +15,26 @@ export async function onBeforeRender(pageContext: any) {
 		pageContext.urlPathname === "/documentation"
 			? ""
 			: pageContext.urlPathname.replace("/documentation/", "")
-
 	if (renderedMarkdown[slug] === undefined) {
-		for (const categories of Object.entries(tableOfContents)) {
+		// get sdk documentation
+		for (const categories of Object.entries(sdkTableOfContents)) {
 			const [, pages] = categories
 			for (const page of pages) {
 				const text = await fs.readFile(
-					new URL(`inlang/documentation/${page.path}`, repositoryRoot),
+					new URL(`inlang/documentation/sdk/${page.path}`, repositoryRoot),
+					"utf-8"
+				)
+				const markdown = await convert(text)
+				renderedMarkdown[page.slug] = markdown
+			}
+		}
+		//get plugin documentation
+		for (const categories of Object.entries(pluginTableOfContents)) {
+			const [, pages] = categories
+
+			for (const page of pages) {
+				const text = await fs.readFile(
+					new URL(`inlang/documentation/plugin/${page.path}`, repositoryRoot),
 					"utf-8"
 				)
 				const markdown = await convert(text)

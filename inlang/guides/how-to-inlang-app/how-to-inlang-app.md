@@ -69,7 +69,7 @@ In this example, we subscribe to lint reports for a specific message using `mess
 
 ## Publishing your app
 
-If you are ready and want to release what you have built, please [publish your app](https://inlang.com/documentation/publish-to-marketplace) on our [Marketplace](https://inlang.com/application) – where you can also sell apps in the future.
+If you are ready and want to release what you have built, please [publish your app](https://inlang.com/documentation/publish-to-marketplace) on our [Marketplace](https://inlang.com) – where you can also sell apps in the future.
 
 ## Conclusion
 

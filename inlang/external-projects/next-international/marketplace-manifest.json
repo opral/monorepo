@@ -16,6 +16,6 @@
 	"keywords": ["libraries", "nextjs", "next", "javascript", "developer", "i18n", "external"],
 	"publisherName": "QuiiBz",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/43268759?v=4",
-	"website": "https://next-international.vercel.app/?ref=inlang.com",
+	"website": "https://next-international.vercel.app",
 	"license": "MIT License"
 }

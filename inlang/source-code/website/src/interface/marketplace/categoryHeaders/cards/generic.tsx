@@ -1,46 +1,86 @@
 import { Button } from "#src/pages/index/components/Button.jsx"
 import * as m from "#src/paraglide/messages.js"
+import Link from "#src/renderer/Link.jsx"
 
 const GenericHeader = () => {
 	return (
 		<>
-			<div class="relative bg-gradient-to-r from-background to-slate-200 overflow-hidden rounded-xl border border-surface-200 flex flex-col md:flex-row items-center">
-				<div class="relative z-30 flex-1 flex flex-col items-start gap-4 px-5 md:pl-8">
-					<div class="pb-4">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="28"
-							height="38"
-							fill="none"
-							viewBox="0 0 28 38"
-						>
-							<path fill="#334155" d="M0 0h28v38L14 26.057 0 38V0z" />
-						</svg>
+			<div class="relative bg-surface-100 overflow-hidden rounded-xl border border-surface-200 flex flex-col md:flex-row flex-wrap md:items-end mb-8 px-4 py-4 gap-4">
+				<div class="relative z-30 flex-1 flex flex-col items-start gap-4 px-6 py-3 md:min-w-[380px]">
+					<div class="flex flex-col gap-2 pt-2 md:pt-6">
+						<p class="text-sm text-[#3592FF] font-medium">For Developers</p>
+						<h2 class="font-medium text-xl">Recommended i18n stack</h2>
 					</div>
-					<div class="flex md:items-center flex-col md:flex-row gap-2">
-						<p class="text-sm px-2 py-1 rounded bg-surface-100 text-surface-500 font-medium w-fit">
-							{m.marketplace_application_header_generic_tag()}
-						</p>
-						<h2 class="font-medium text-md">{m.marketplace_application_header_generic_title()}</h2>
-					</div>
-					<p class="md:w-1/2 text-sm text-surface-500">
-						{m.marketplace_application_header_generic_description()}
+					<p class="text-sm text-surface-500 pr-20">
+						Recommended internationalization tooling for your stack.
 					</p>
-					<div class="py-6">
-						<Button type="secondary" href="/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang">
-							{m.marketplace_application_header_generic_button()}
+					<div class="pt-6 flex gap-4">
+						<Button type="secondary" href="/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp">
+							{m.marketplace_application_header_svelte_button()}
+						</Button>
+						<Button type="text" chevron href="/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp">
+							Svelte Summit Talk 2023
 						</Button>
 					</div>
 				</div>
-				<div class="relative z-20 md:w-1/2 px-4 md:pr-20 lg:pr-40">
-					<img
-						class="w-full h-full"
-						src="/images/inlang-header-image.png"
-						alt="svelte header image"
-					/>
-				</div>
-				<div class="z-10 top-[-20%] lg:top-[-120%] left-0 absolute w-full h-full">
-					<Background />
+				<Link
+					href="/m/gerre34r/library-inlang-paraglideJs"
+					class="relative flex-1 h-[260px] bg-background rounded-xl border border-surface-300 flex flex-col justify-end md:min-w-[380px] group hover:border-surface-400 transition-all cursor-pointer"
+				>
+					<div class="px-7 pb-4 z-20">
+						<img
+							class="w-20 pt-20"
+							src="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglideNoBg.png"
+							alt="ParaglideJS"
+						/>
+					</div>
+					<h3 class="font-medium text-lg px-8 pb-1 z-20">Paraglide JS - 18n library</h3>
+					<p class="text-surface-500 px-8 pb-6 text-sm pr-20 z-20">
+						A i18n library without async resources. Build for the developer community.
+					</p>
+					<div class="absolute z-20 top-4 right-4 w-8 h-8 border border-surface-400 rounded-full flex justify-center items-center group-hover:bg-surface-100 transition-all text-surface-500 group-hover:text-surface-900">
+						<Arrow />
+					</div>
+					<div class="absolute w-full h-full top-0 bg-[#3592FF] rounded-xl z-10 opacity-20" />
+					<div class="absolute w-full h-full top-0 bg-gradient-to-t from-background rounded-xl z-10" />
+				</Link>
+				<div class="flex-1 h-[260px] flex flex-col gap-4 md:min-w-[380px]">
+					<a
+						href="/documentation/plugin"
+						class="w-full flex-1 bg-background rounded-xl border border-surface-300 flex flex-col relative group hover:border-surface-400 transition-all cursor-pointer"
+					>
+						<div class="pl-8 pb-2 -mt-[2px]">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="20"
+								height="30"
+								fill="none"
+								viewBox="0 0 28 38"
+							>
+								<path fill="#CBD5E1" d="M0 0h28v38L14 26.057 0 38V0z" />
+							</svg>
+						</div>
+						<div class="flex-1 flex flex-col justify-end">
+							<h3 class="font-medium text-lg px-8 pb-1">Choose a plugin</h3>
+							<p class="text-surface-500 px-8 pb-6 text-sm pr-20">
+								Change or extend app behavior with custom plugins.
+							</p>
+						</div>
+						<div class="absolute top-4 right-4 w-8 h-8 border border-surface-300 rounded-full flex justify-center items-center group-hover:bg-surface-100 transition-all text-surface-500 group-hover:text-surface-900">
+							<Arrow />
+						</div>
+					</a>
+					<a
+						href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide"
+						target="_blanc"
+						class="w-full bg-background rounded-xl border border-surface-300 relative group hover:border-surface-400 transition-all cursor-pointer"
+					>
+						<h3 class="font-medium text-lg px-8 pb-1 pt-6">Code Examples</h3>
+						<p class="text-surface-500 px-8 pb-6 text-sm pr-20">Use Paraglide JS in any project.</p>
+						<div class="absolute top-4 right-4 w-8 h-8 border border-surface-300 rounded-full flex justify-center items-center group-hover:bg-surface-100 transition-all text-surface-500 group-hover:text-surface-900">
+							<Arrow />
+						</div>
+					</a>
 				</div>
 			</div>
 		</>
@@ -49,42 +89,16 @@ const GenericHeader = () => {
 
 export default GenericHeader
 
-function Background() {
+function Arrow() {
 	return (
-		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 1276 1006">
-			<g clip-path="url(#clip0_1761_16739)" filter="url(#filter0_d_1761_16739)" opacity="0.1">
-				<path
-					fill="#94A3B8"
-					d="M737.337 680.324V413.882h73.896v266.442h-73.896zm37.121-300.788c-10.986 0-20.411-3.643-28.275-10.928-7.748-7.402-11.622-16.248-11.622-26.541 0-10.176 3.874-18.907 11.622-26.193 7.864-7.401 17.289-11.102 28.275-11.102 10.986 0 20.353 3.701 28.102 11.102 7.863 7.286 11.795 16.017 11.795 26.193 0 10.293-3.932 19.139-11.795 26.541-7.749 7.285-17.116 10.928-28.102 10.928zm164.981 146.751v154.037h-73.896V413.882h70.427v47.009h3.122c5.898-15.496 15.785-27.754 29.663-36.775 13.877-9.135 30.703-13.703 50.475-13.703 18.51 0 34.64 4.047 48.4 12.142 13.76 8.095 24.46 19.66 32.09 34.693 7.63 14.918 11.45 32.727 11.45 53.427v169.649h-73.9V523.859c.12-16.306-4.04-29.027-12.49-38.163-8.44-9.251-20.06-13.877-34.863-13.877-9.945 0-18.734 2.14-26.366 6.418-7.517 4.279-13.415 10.524-17.694 18.735-4.163 8.095-6.302 17.867-6.418 29.315zm298.981-201.219v355.256h-73.89V325.068h73.89z"
-				/>
-			</g>
-			<defs>
-				<filter
-					id="filter0_d_1761_16739"
-					width="1684.1"
-					height="1715.05"
-					x="146.299"
-					y="-268.276"
-					color-interpolation-filters="sRGB"
-					filterUnits="userSpaceOnUse"
-				>
-					<feFlood flood-opacity="0" result="BackgroundImageFix" />
-					<feColorMatrix
-						in="SourceAlpha"
-						result="hardAlpha"
-						values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-					/>
-					<feOffset dy="86.425" />
-					<feGaussianBlur stdDeviation="172.851" />
-					<feComposite in2="hardAlpha" operator="out" />
-					<feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.2 0" />
-					<feBlend in2="BackgroundImageFix" result="effect1_dropShadow_1761_16739" />
-					<feBlend in="SourceGraphic" in2="effect1_dropShadow_1761_16739" result="shape" />
-				</filter>
-				<clipPath id="clip0_1761_16739">
-					<rect width="1276" height="1006" fill="#fff" rx="16" />
-				</clipPath>
-			</defs>
+		<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 28 28">
+			<path
+				stroke="currentColor"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2.75"
+				d="M3 14h22m0 0l-8.25 8.25M25 14l-8.25-8.25"
+			/>
 		</svg>
 	)
 }

@@ -147,7 +147,7 @@ function TheActualPage() {
 					}
 				>
 					<div class="min-h-[calc(100vh_-_200px)]">
-						<ListHeader ids={project()?.query.messages.includedMessageIds() || []} />
+						<ListHeader />
 						<Show when={window}>
 							<TourHintWrapper
 								currentId="textfield"

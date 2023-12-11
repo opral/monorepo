@@ -4,9 +4,10 @@ import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 // import Highlight from "#src/interface/components/Highlight.jsx"
 import Card, { CardBuildOwn, NoResultsCard } from "#src/interface/components/Card.jsx"
-import { Meta, Title } from "@solidjs/meta"
+import { Link, Meta, Title } from "@solidjs/meta"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import * as m from "#src/paraglide/messages.js"
+import { i18nRouting } from "#src/renderer/_default.page.route.js"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -38,6 +39,10 @@ export function Page(props: {
 			<Title>Search</Title>
 			<Meta name="description" content="Search globalization products." />
 			<Meta name="og:image" content="/opengraph/inlang-search-image.jpg" />
+			<Link
+				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
+				rel="canonical"
+			/>
 			<MarketplaceLayout>
 				<div class="pb-16 md:pb-20 min-h-screen relative">
 					<h2 class="text-md text-surface-600 pb-4 pt-8">{m.marketplace_grid_title_generic()}</h2>

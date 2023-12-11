@@ -2,13 +2,13 @@
 
 Inlang is globalization infrastructure that powers an ecosystem of apps, plugins, and solutions that make globalization simple.
 
-![inlang ecosystem](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/ecosystem.jpg)
+![inlang ecosystem](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg)
 
 ## Infrastructure approach
 
 For every use case, there is an app, a plugin, a lint rule, or a custom solution that can be built. Inlang's infrastructure powers an ecosystem of tools, applications, best practices, and automations for organizations to go global.
 
-<doc-figure src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/project.jpg" alt="one config file to power all infrastructure tools" caption="Sketch about the concept of one configuration file that powers all tools, automation, and applications for globalization that developers build on top of."></doc-figure>
+<doc-figure src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/project.jpg" alt="one config file to power all infrastructure tools" caption="Sketch about the concept of one configuration file that powers all tools, automation, and applications for globalization that developers build on top of."></doc-figure>
 
 ## Version control and automation via CI/CD
 
@@ -20,12 +20,12 @@ Inlang apps are built on lix. Lix is a git-compatible version control backend fo
 
 Inlang's architecture consists of four main components:
 
-1. [Applications](/documentation/app) - Provide users with an interface for their projects.
+1. [Applications](/documentation/concept/app) - Provide users with an interface for their projects.
 2. [SDK](/documentation/sdk) - Can be used by developers to build inlang apps.
 3. [Project file](/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang#create-project-file) - Defines the project's settings, which language tags exists and to be imported modules.
 4. [Modules](/documentation/plugin) - Contain plugins and/or lint rules that define the behavior of a project.
 
-![inlang architecture](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/assets/architecture.jpg)
+![inlang architecture](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/architecture.jpg)
 
 <doc-links>
     <doc-link title="How to setup inlang for your project" icon="material-symbols:developer-guide-outline" href="/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang" description="A general guide on the minimum steps required to make your project ready for the ecosystem of inlang."></doc-link>

@@ -6,10 +6,6 @@ import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
 import { type InstalledMessageLintRule, type MessageLintRule } from "@inlang/sdk"
 import { navigate } from "vike/client/router"
 
-interface ListHeaderProps {
-	ids: string[]
-}
-
 export const messageCount = (ids: string[]) => {
 	const { project } = useEditorState()
 	let counter = 0
@@ -19,7 +15,7 @@ export const messageCount = (ids: string[]) => {
 	return counter
 }
 
-export const ListHeader = (props: ListHeaderProps) => {
+export const ListHeader = () => {
 	const {
 		project,
 		setFilteredMessageLintRules,
@@ -82,7 +78,9 @@ export const ListHeader = (props: ListHeaderProps) => {
 					</div>
 				}
 			>
-				<div class="font-medium text-on-surface">{messageCount(props.ids) + " Messages"}</div>
+				<div class="font-medium text-on-surface">
+					{messageCount(project()?.query.messages.includedMessageIds() || []) + " Messages"}
+				</div>
 			</Show>
 
 			<div class="flex flex-wrap gap-2">

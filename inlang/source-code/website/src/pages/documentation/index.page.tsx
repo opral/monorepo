@@ -1,16 +1,18 @@
 import { For, Show, createEffect, createSignal, onMount } from "solid-js"
 import { currentPageContext } from "#src/renderer/state.js"
 import type SlDetails from "@shoelace-style/shoelace/dist/components/details/details.js"
-import { Meta, Title } from "@solidjs/meta"
+import { Link, Meta, Title } from "@solidjs/meta"
 import { Feedback } from "./Feedback.jsx"
 import { EditButton } from "./EditButton.jsx"
 import { languageTag } from "#src/paraglide/runtime.js"
 import "@inlang/markdown/css"
 import "@inlang/markdown/custom-elements"
-import tableOfContents from "../../../../../documentation/tableOfContents.json"
-import Link from "#src/renderer/Link.jsx"
-import { i18nRouting } from "#src/renderer/_default.page.route.js"
 import SdkDocsLayout from "#src/interface/sdkDocs/SdkDocsLayout.jsx"
+import { getTableOfContents } from "./getTableOfContents.js"
+import InPageNav from "./InPageNav.jsx"
+import MainActions from "./MainActions.jsx"
+import { getDocsBaseUrl } from "#src/interface/sdkDocs/SdkDocsHeader.jsx"
+import { i18nRouting } from "#src/renderer/_default.page.route.js"
 
 export type PageProps = {
 	markdown: Awaited<ReturnType<any>>
@@ -39,13 +41,14 @@ export function Page(props: PageProps) {
 	createEffect(() => {
 		if (currentPageContext) {
 			setEditLink(
-				"https://github.com/inlang/monorepo/edit/main/inlang/documentation" +
+				"https://github.com/inlang/monorepo/edit/main/inlang" +
+					getDocsBaseUrl(currentPageContext.urlParsed.pathname) +
 					"/" +
 					findPageBySlug(
 						currentPageContext.urlParsed.pathname
 							.replace("/" + languageTag(), "")
 							.replace("/documentation/", "")
-					)?.path
+					)?.path.replace("./", "")
 			)
 		}
 	})
@@ -70,7 +73,7 @@ export function Page(props: PageProps) {
 							.replace("/" + languageTag(), "")
 							.replace("/documentation/", "")
 					)?.description
-				} and more with inlang's Software Development Kit (SDK).`}
+				}`}
 			/>
 			<Meta name="og:image" content="/opengraph/inlang-documentation-image.jpg" />
 			<Meta name="twitter:card" content="summary_large_image" />
@@ -93,27 +96,27 @@ export function Page(props: PageProps) {
 							.replace("/" + languageTag(), "")
 							.replace("/documentation/", "")
 					)?.description
-				} and more with inlang's Software Development Kit (SDK).`}
+				}`}
 			/>
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />
+			<Link
+				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
+				rel="canonical"
+			/>
 			<SdkDocsLayout>
-				{/* important: the responsive breakpoints must align throughout the markup! */}
-				<div class="flex flex-col grow md:grid md:grid-cols-4 gap-4 w-full">
+				<div class="relative block md:flex grow w-full">
 					{/* desktop navbar */}
-					{/* 
-          hacking the left margins to apply bg-surface-2 with 100rem 
-              (tested on an ultrawide monitor, works!) 
-          */}
-					<div class="hidden md:block h-full -ml-[100rem] pl-[100rem] border-r-[1px] border-surface-2">
-						<nav class="sticky top-12 max-h-[96vh] overflow-y-scroll overflow-scrollbar">
+					<div class="sticky top-[116px] hidden md:block h-[calc(100%_-_112px)] w-[230px]">
+						<nav class="max-h-[96vh] overflow-y-scroll overflow-scrollbar -ml-4 pl-4">
 							{/* `Show` is a hotfix when client side rendering loaded this page
 							 * filteredTableContents is not available on the client.
 							 */}
-							<div class="py-[48px] pr-4">
-								<Show when={tableOfContents && props.markdown}>
+							<div class="py-[48px] pb-32">
+								<MainActions />
+								<Show when={getTableOfContents() && props.markdown}>
 									<NavbarCommon
-										tableOfContents={tableOfContents}
+										tableOfContents={getTableOfContents()}
 										getLocale={languageTag}
 										headings={markdownHeadings()}
 									/>
@@ -122,7 +125,7 @@ export function Page(props: PageProps) {
 						</nav>
 					</div>
 					{/* Mobile navbar */}
-					<nav class="sticky top-[69px] w-screen z-10 -translate-x-4 sm:-translate-x-10 md:hidden overflow-y-scroll overflow-auto backdrop-blur-sm">
+					<nav class="sticky top-[150px] w-screen z-10 -translate-x-4 sm:-translate-x-10 md:hidden overflow-y-scroll overflow-auto backdrop-blur-sm">
 						<sl-details ref={mobileDetailMenu}>
 							<h3 slot="summary" class="font-medium sm:pl-6">
 								Menu
@@ -130,9 +133,9 @@ export function Page(props: PageProps) {
 							{/* `Show` is a hotfix when client side rendering loaded this page
 							 * filteredTableContents is not available on the client.
 							 */}
-							<Show when={tableOfContents && props.markdown}>
+							<Show when={getTableOfContents() && props.markdown}>
 								<NavbarCommon
-									tableOfContents={tableOfContents}
+									tableOfContents={getTableOfContents()}
 									onLinkClick={() => {
 										mobileDetailMenu?.hide()
 									}}
@@ -143,32 +146,28 @@ export function Page(props: PageProps) {
 						</sl-details>
 					</nav>
 					<Show when={props.markdown} fallback={<p class="text-danger">{props.markdown?.error}</p>}>
-						{/* 
-            rendering on the website is broken due to relative paths and 
-            the escaping of html. it is better to show the RFC's on the website
-            and refer to github for the rendered version than to not show them at all. 
-          */}
-						<div class="w-full justify-self-center mb-8 md:px-6 md:col-span-3">
-							<Show when={currentPageContext.urlParsed.pathname.includes("rfc")}>
-								{/* <Callout variant="warning">
-									<p>
-										The rendering of RFCs on the website might be broken.{" "}
-										<a href="https://github.com/inlang/inlang/tree/main/rfcs" target="_blank">
-											Read the RFC on GitHub instead.
-										</a>
-									</p>
-								</Callout> */}
-							</Show>
-							<div
-								// change the col-span to 2 if a right side nav bar should be rendered
-								class="w-full justify-self-center md:col-span-3"
-							>
+						<div class="flex flex-1 mb-8 md:ml-4 lg:ml-12 min-h-screen">
+							<div class="flex-1 md:max-w-[500px] lg:max-w-[724px] w-full justify-self-center md:col-span-3">
 								<Markdown markdown={props.markdown} />
 								<EditButton href={editLink()} />
 								<Feedback />
 							</div>
 						</div>
 					</Show>
+					<div class="sticky z-90 top-[116px] hidden xl:block h-[calc(100%_-_112px)] w-[230px]">
+						<div class="max-h-[96vh] overflow-y-scroll overflow-scrollbar -ml-4 pl-4 py-14">
+							<InPageNav
+								markdown={props.markdown}
+								pageName={
+									findPageBySlug(
+										currentPageContext.urlParsed.pathname
+											.replace("/" + languageTag(), "")
+											.replace("/documentation/", "")
+									)?.title as string
+								}
+							/>
+						</div>
+					</div>
 				</div>
 			</SdkDocsLayout>
 		</>
@@ -185,13 +184,11 @@ function Markdown(props: { markdown: string }) {
 }
 
 function NavbarCommon(props: {
-	tableOfContents: typeof tableOfContents
+	tableOfContents: any
 	headings: string[]
 	onLinkClick?: () => void
 	getLocale: () => string
 }) {
-	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
-
 	const replaceChars = (str: string) => {
 		return str
 			.replaceAll(" ", "-")
@@ -206,24 +203,13 @@ function NavbarCommon(props: {
 	const isSelected = (slug: string) => {
 		const reference = `/documentation/${slug}`
 
-		if (props.getLocale() === "en") {
-			if (
-				reference === currentPageContext.urlParsed.pathname ||
-				reference === currentPageContext.urlParsed.pathname + "/"
-			) {
-				return true
-			} else {
-				return false
-			}
+		if (
+			reference === currentPageContext.urlParsed.pathname ||
+			reference === currentPageContext.urlParsed.pathname + "/"
+		) {
+			return true
 		} else {
-			if (
-				reference === i18nRouting(currentPageContext.urlParsed.pathname).url ||
-				reference === i18nRouting(currentPageContext.urlParsed.pathname).url + "/"
-			) {
-				return true
-			} else {
-				return false
-			}
+			return false
 		}
 	}
 
@@ -236,11 +222,6 @@ function NavbarCommon(props: {
 			})
 		}
 		window.history.pushState({}, "", `${currentPageContext.urlParsed.pathname}#${anchor}`)
-	}
-
-	const onAnchorClick = async (anchor: string) => {
-		setHighlightedAnchor(anchor)
-		scrollToAnchor(anchor)
 	}
 
 	onMount(async () => {
@@ -257,66 +238,37 @@ function NavbarCommon(props: {
 							: new Promise((resolve) => img.addEventListener("load", resolve))
 					)
 				)
-
-				setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
 				scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
 			}
 		}
 	})
 
 	return (
-		<ul role="list" class="w-full space-y-3 sm:pl-6">
+		<ul role="list" class="w-full flex flex-col gap-6">
 			<For each={Object.keys(props.tableOfContents)}>
 				{(category) => (
 					<li>
-						<h2 class="tracking-wide pt-2 text font-semibold text-on-surface pb-2">{category}</h2>
-						<ul class="space-y-2" role="list">
-							<For each={props.tableOfContents[category as keyof typeof props.tableOfContents]}>
+						<h2 class="tracking-wide pt-2 text-sm font-semibold text-surface-900 pb-2">
+							{category}
+						</h2>
+						<ul role="list">
+							<For each={props.tableOfContents[category]}>
 								{(page) => {
 									const slug = page.slug
 									return (
 										<li>
-											<Link
+											<a
 												onClick={props.onLinkClick}
 												class={
 													(isSelected(slug)
-														? "text-primary font-semibold "
-														: "text-info/80 hover:text-on-background ") +
-													"tracking-wide text-sm block w-full font-normal mb-2"
+														? "text-primary font-semibold bg-[#E2F5F9] "
+														: "text-surface-600 hover:bg-surface-100 ") +
+													"tracking-wide text-sm w-full font-normal h-[34px] flex items-center rounded-lg -ml-3 pl-3"
 												}
 												href={`/documentation/${slug}`}
 											>
 												{page.title}
-											</Link>
-											<Show when={props.headings && props.headings.length > 0 && isSelected(slug)}>
-												<For each={props.headings}>
-													{(heading) => (
-														<Show when={!heading.includes(page.title)}>
-															<li>
-																<Link
-																	onClick={(e: any) => {
-																		e.preventDefault()
-																		onAnchorClick(replaceChars(heading.toString().toLowerCase()))
-																		props.onLinkClick?.()
-																	}}
-																	class={
-																		"text-sm tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
-																		(highlightedAnchor() ===
-																		replaceChars(heading.toString().toLowerCase())
-																			? "font-medium text-on-background border-l-on-background "
-																			: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
-																	}
-																	href={`/documentation/${slug}#${replaceChars(
-																		heading.toString().toLowerCase()
-																	)}`}
-																>
-																	{heading.replace("#", "")}
-																</Link>
-															</li>
-														</Show>
-													)}
-												</For>
-											</Show>
+											</a>
 										</li>
 									)
 								}}
@@ -330,7 +282,7 @@ function NavbarCommon(props: {
 }
 
 function findPageBySlug(slug: string) {
-	for (const [, pageArray] of Object.entries(tableOfContents)) {
+	for (const [, pageArray] of Object.entries(getTableOfContents())) {
 		for (const page of pageArray) {
 			if (page.slug === slug || page.slug === slug.replace("/documentation", "")) {
 				return page

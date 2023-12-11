@@ -66,8 +66,8 @@ export async function convert(markdown: string): Promise<string> {
 			"h1,h2,h3,h4,h5,h6":
 				"doc-font-semibold doc-leading-relaxed doc-relative doc-my-6 doc-cursor-pointer doc-group/heading doc-no-underline",
 			h1: "doc-text-3xl doc-pb-3 doc-mb-2 doc-mt-12",
-			h2: "doc-text-2xl doc-pb-3 doc-mb-1 doc-mt-8",
-			h3: "doc-text-xl doc-mt-8",
+			h2: "doc-text-2xl doc-pb-3 doc-mb-1 doc-mt-10",
+			h3: "doc-text-xl doc-mt-10 doc-pb-0 doc-mb-0",
 			h4: "doc-text-lg",
 			h5: "doc-text-lg",
 			h6: "doc-text-base",
