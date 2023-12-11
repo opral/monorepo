@@ -14,7 +14,6 @@
 		"@inlang/badge": "workspace:*",
 		"@inlang/editor": "workspace:*",
 		"@inlang/env-variables": "workspace:*",
-		"@inlang/manage": "workspace:*",
 		"@inlang/marketplace-manifest": "workspace:*",
 		"@inlang/plugin-message-format": "workspace:*",
 		"@inlang/project-settings": "workspace:*",

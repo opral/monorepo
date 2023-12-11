@@ -1697,9 +1697,6 @@ importers:
       '@inlang/env-variables':
         specifier: workspace:*
         version: link:../env-variables
-      '@inlang/manage':
-        specifier: workspace:*
-        version: link:../manage
       '@inlang/marketplace-manifest':
         specifier: workspace:*
         version: link:../versioned-interfaces/marketplace-manifest
