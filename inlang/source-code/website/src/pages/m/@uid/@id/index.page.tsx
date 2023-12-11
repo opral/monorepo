@@ -23,6 +23,8 @@ import Changelog from "~icons/material-symbols/manage-history"
 import { i18nRouting } from "#src/renderer/_default.page.route.js"
 import Link from "#src/renderer/Link.jsx"
 
+const isProduction = process.env.NODE_ENV === "production"
+
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
  */
@@ -152,7 +154,11 @@ export function Page(props: PageProps) {
 																{/* @ts-ignore */}
 																<Button
 																	type="primary"
-																	href={`/install?module=${props.manifest.id}`}
+																	href={`${
+																		isProduction
+																			? "https://manage.inlang.com/install"
+																			: "http://localhost:4004/install"
+																	}?module=${props.manifest.id}`}
 																	class="my-6"
 																>
 																	<span class="capitalize">
