@@ -535,7 +535,7 @@ function NavbarCommon(props: {
 	})
 
 	return (
-		<div class="mb-12 sticky top-36 mt-16 max-h-[96vh] overflow-y-scroll overflow-scrollbar">
+		<div class="mb-12 sticky top-36 mt-16 h-[80vh] pb-8 overflow-y-scroll overflow-scrollbar">
 			<ul role="list" class="w-full">
 				<For each={Object.keys(props.tableOfContents)}>
 					{(sectionTitle) => (
