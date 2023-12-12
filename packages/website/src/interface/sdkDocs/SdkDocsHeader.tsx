@@ -57,7 +57,7 @@ const SdkDocsSubHeader = () => {
 	const getCategories = () => {
 		return [
 			{
-				name: "Development Kit",
+				name: "SDK",
 				href: "/documentation",
 				icon: <SDKIcon />,
 			},
