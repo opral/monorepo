@@ -10,7 +10,7 @@ import childProcess from "node:child_process"
 import { version } from "../state.js"
 import { telemetry } from "../../services/telemetry/implementation.js"
 import { Logger } from "../../services/logger/index.js"
-
+import { gitOrigin } from "../../services/telemetry/implementation.js"
 const DEFAULT_PROJECT_PATH = "./project.inlang"
 
 export const initCommand = new Command()
@@ -22,7 +22,13 @@ export const initCommand = new Command()
 		logger.box("Welcome to inlang Paraglide-JS 🪂")
 
 		telemetry.capture({ event: "PARAGLIDE-JS init started" })
-
+		telemetry.groupIdentify({
+			groupType: "repository",
+			groupKey: gitOrigin,
+			properties: {
+				name: gitOrigin,
+			},
+		})
 		await checkIfUncommittedChanges(logger)
 		await checkIfPackageJsonExists(logger)
 		const projectPath = await initializeInlangProject(logger)
