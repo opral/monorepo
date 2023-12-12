@@ -1,6 +1,6 @@
 function TemplateIcon() {
 	return (
-		<svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" fill="none" viewBox="0 0 29 29">
+		<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 28 28">
 			<rect width="27.242" height="27.241" x="0.439" y="0.439" rx="6.591" />
 			<path
 				fill="#475569"

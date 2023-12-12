@@ -1,6 +1,6 @@
 function MarketplaceIcon() {
 	return (
-		<svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" fill="none" viewBox="0 0 29 29">
+		<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 28 28">
 			<path
 				fill="#475569"
 				fill-rule="evenodd"
@@ -12,3 +12,4 @@ function MarketplaceIcon() {
 }
 
 export default MarketplaceIcon
+

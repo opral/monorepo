@@ -1,25 +1,32 @@
-<doc-header title="What is a Plugin?" description="Change or extend app behavior with custom plugins." button="Get started" link="/documentation/plugin/guide">
+<doc-header title="What is a Lint Rule?" description="Validate content in an inlang project." button="Get started" link="/documentation/lint-rule/guide">
 </doc-header>
 
 <br/>
 
-![pluginCover](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/plugin/assets/plugin-cover.png)
+<!-- ![pluginCover](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/plugin/assets/plugin-cover.png) -->
 
-An inlang plugin is a small program that can be added to the inlang project to provide apps or the SDK with logic and information. By using plugins, developers can extend their apps without having to build everything from scratch.
+Lint rules validate messages and other types of content in an inlang project.
 
-## Why do I need plugins?
+For example, the [missing translation lint rule](/m/messageLintRule.inlang.missingTranslation) reports an issue if a message is missing a translation for a specified [language tag](/documentation/concept/language-tag). Inlang applications use lint rules to validate content and report issues to the user.
 
-If you're setting up inlang for your project, you've probably read that you need a plugin that defines a load and save function. These plugins allow the inlang project to access translation storage, which is essential for inlang to work. There are also plugins that define custom APIs that are useful in specific apps. It's important to choose the right plugin to meet your needs.
+## Types of lint rules
 
-## Why are plugins great?
+![inlang message lints](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/lintrule-messagelints.jpg)
 
-Inlang project architecture is more flexible with the use of plugins. This means that you can use it without having to switch to another storage solution. You can customize and expand app or project behaviors easily. This gives you more freedom and keeps adoption costs low.
+### Message lint rule
 
-<br/>
+A message lint rule validates a message. For example, the [missing translation lint rule](/m/messageLintRule.inlang.missingTranslation) validates that a message has a translation for a specified [language tag](/documentation/concept/language-tag).
+
+![inlang code lints](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/lintrule-codelints.jpg)
+
+### More soon...
+
+We will support more types of lint rules in the future. If you have an idea for a new lint type, please share it with us on [GitHub](https://github.com/inlang/monorepo/discussions).
+
 
 <doc-links>
-    <doc-link title="API Introduction" icon="mdi:book-open-page-variant" href="/documentation/plugin/api-introduction" description="Read Plugin API Reference."></doc-link>
-    <doc-link title="Build a Plugin" icon="mdi:skip-next" href="/documentation/plugin/guide" description="Learn how to build your plugin."></doc-link>
+    <doc-link title="API Introduction" icon="mdi:book-open-page-variant" href="/documentation/lint-rule/api-introduction" description="Read Lint Rule API Reference."></doc-link>
+    <doc-link title="Build a Lint Rule" icon="mdi:skip-next" href="/documentation/lint-rule/guide" description="Learn how to build your first Lint Rule."></doc-link>
 </doc-links>
 
 <br/>
