@@ -73,7 +73,7 @@ export function Page(props: PageProps) {
 							.replace("/" + languageTag(), "")
 							.replace("/documentation/", "")
 					)?.description
-				} and more with inlang's Software Development Kit (SDK).`}
+				}`}
 			/>
 			<Meta name="og:image" content="/opengraph/inlang-documentation-image.jpg" />
 			<Meta name="twitter:card" content="summary_large_image" />
@@ -96,7 +96,7 @@ export function Page(props: PageProps) {
 							.replace("/" + languageTag(), "")
 							.replace("/documentation/", "")
 					)?.description
-				} and more with inlang's Software Development Kit (SDK).`}
+				}`}
 			/>
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />

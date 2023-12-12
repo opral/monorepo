@@ -1,4 +1,4 @@
-import { publicEnv } from "@inlang/env-variables"
+import { publicEnv } from "@inlang/env-variables/dist/runtime/publicEnv.js"
 import type { LixAuthModule } from "./api.js"
 
 const gitHubProxyUrl = publicEnv.PUBLIC_GIT_PROXY_BASE_URL + "/github-proxy/"

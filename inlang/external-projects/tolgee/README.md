@@ -50,7 +50,6 @@ An open-source alternative to Crowdin, Phrase or Lokalise
   - [Vue](https://tolgee.io/integrations/vue)
   - [Svelte](https://tolgee.io/integrations/svelte)
   - [Next.js](https://tolgee.io/integrations/next)
-  - [Gatsby](https://tolgee.io/integrations/gatsby)
   - [More...](https://tolgee.io/integrations/all)
 - [Tolgee platform docs](https://tolgee.io/docs/platform)
   - [Self-hosting](https://tolgee.io/docs/platform/self_hosting/running_with_docker)
@@ -120,13 +119,5 @@ For more detailed documentation about Tolgee, visit [tolgee.io](https://tolgee.i
 <a href="https://github.com/tolgee/tolgee-platform/graphs/contributors">
   <img alt="contributors" src="https://contrib.rocks/image?repo=tolgee/tolgee-platform"/>
 </a>
-
-# Launching Tolgee Rewards
- Contributed to Tolgee? Here is a big thank you from our community to you.
- Claim your badge and showcase them with pride.
- Let us inspire more folks !
-
- ![Tolgee Badges](https://aviyel.com/assets/uploads/rewards/share/project/28/512/share.png)
- ### **[Claim Now!](https://aviyel.com/projects/28/tolgee/rewards)**
 
 Let us know what you think! #feedbackwanted ❤️
