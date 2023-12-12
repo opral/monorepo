@@ -20,12 +20,6 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
-      - name: Setup Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: "pnpm"
-
       - name: Install Doppler CLI for env (public) variables
         uses: dopplerhq/cli-action@v2
 
@@ -33,6 +27,12 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: 8
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: "pnpm"
 
       - name: Install Dependencies
         run: pnpm install
