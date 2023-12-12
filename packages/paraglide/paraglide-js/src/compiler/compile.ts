@@ -49,6 +49,8 @@ export const compile = (args: {
 		}
 	}
 
+	telemetry.shutdown()
+
 	return {
 		// boilerplate files
 		".prettierignore": ignoreDirectory,

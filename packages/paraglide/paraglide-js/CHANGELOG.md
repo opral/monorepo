@@ -1,10 +1,22 @@
 # @inlang/paraglide-js
 
+## 1.0.0-prerelease.18
+
+`paraglide-js init` now adds `@inlang/message-lint-rule-valid-js-identifier` by default.
+
+## 1.0.0-prerelease.17
+
+`paraglide-js init` now adds `paraglide-js compile` to the postinstall script by default. This sidesteps numerous linting issues when using paraglide in CI environments. 
+
+## 1.0.0-prerelease.16
+
+Fix `paraglide-js compile` hanging for a couple seconds after successful compilation 
+
 ## 1.0.0-prerelease.15
 
 Fix crash when using `npx @inlang/paraglide-js init` and selecting vscode.
 
-## 1.0.0-prerelease.14
+## 1.0.0-prerelease.14
 
 Added `--watch` flag to the `paraglide-js compile` command. This will keep the process alive and recompile whenever messages are changed. 
 
@@ -13,7 +25,7 @@ paraglide-js compile --project ./project.inlang --watch
 ```
 
 
-## 1.0.0-prerelease.13
+## 1.0.0-prerelease.13
 
 `./paraglide/runtime.js` now exports a function called `isAvailableLanguageTag`. This is 
 the recommended way to check if something is a valid language tag, while maintaining
@@ -30,7 +42,7 @@ if (isAvailableLanguageTag(params.lang)) {
 }
 ``` 
 
-## 1.0.0-prerelease.12
+## 1.0.0-prerelease.12
 
 [Internal Change]
 Expose the compiler so that bundler plugins can call it programmatically instead of going through the CLI.

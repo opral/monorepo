@@ -18,4 +18,4 @@ Go to https://inlang.com/c/plugins and click install.
 
 ### Links
 -> Look for plugins at [inlang.com](https://inlang.com/c/application)
--> Do you want to write a plugin? [Guide](https://inlang.com/documentation/build-plugin)
+-> Do you want to write a plugin? [Guide](https://inlang.com/documentation/plugin)

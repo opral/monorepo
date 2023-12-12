@@ -6,6 +6,7 @@ import { log } from "../../utilities/log.js"
 import { type InlangProject, ProjectSettings } from "@inlang/sdk"
 import prompts from "prompts"
 import { projectOption } from "../../utilities/globalFlags.js"
+import progessBar from "cli-progress"
 
 export const translate = new Command()
 	.command("translate")
@@ -36,8 +37,7 @@ export const translate = new Command()
 			}
 
 			const project = await getInlangProject({ projectPath: args.project })
-
-			translateCommandAction({ project })
+			await translateCommandAction({ project })
 		} catch (error) {
 			log.error(error)
 		}
@@ -89,23 +89,50 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 			return
 		}
 
-		log.info(`📝 Translating to ${targetLanguageTags.length} languages.`)
+		const messageIds = args.project.query.messages.includedMessageIds()
+
+		const bar = new progessBar.SingleBar(
+			{
+				clearOnComplete: true,
+				format: `🤖 Machine translating messages | {bar} | {percentage}% | {value}/{total} Messages`,
+			},
+			progessBar.Presets.shades_grey
+		)
+
+		bar.start(messageIds.length, 0)
+
+		const logs: Array<() => void> = []
 
 		// parallelize in the future
-		for (const id of args.project.query.messages.includedMessageIds()) {
+		const promises = messageIds.map(async (id) => {
+			const toBeTranslatedMessage = args.project.query.messages.get({ where: { id } })!
 			const { data: translatedMessage, error } = await rpc.machineTranslateMessage({
-				message: args.project.query.messages.get({ where: { id } })!,
+				message: toBeTranslatedMessage,
 				sourceLanguageTag,
 				targetLanguageTags,
 			})
 			if (error) {
-				log.error(`Couldn't translate message "${id}": ${error}`)
-				continue
+				logs.push(() => log.error(`Couldn't translate message "${id}": ${error}`))
+				return
+			} else if (
+				translatedMessage &&
+				translatedMessage?.variants.length > toBeTranslatedMessage.variants.length
+			) {
+				args.project.query.messages.update({ where: { id: id }, data: translatedMessage! })
+				logs.push(() => log.info(`Machine translated message "${id}"`))
 			}
+			bar.increment()
+		})
+		await Promise.all(promises)
 
-			args.project.query.messages.update({ where: { id: id }, data: translatedMessage! })
-			log.info(`Machine translated message "${id}"`)
+		bar.stop()
+		for (const log of logs) {
+			log()
 		}
+
+		// https://github.com/inlang/monorepo/issues/1846
+		// 4000 is sometimes not working. no idea why.
+		await new Promise((resolve) => setTimeout(resolve, 4001))
 		// Log the message counts
 		log.success("Machine translate complete.")
 	} catch (error) {
