@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/message-lint-rule-vaild-js-identifier",
+	"name": "@inlang/message-lint-rule-valid-js-identifier",
 	"version": "1.0.0",
 	"type": "module",
 	"exports": {
