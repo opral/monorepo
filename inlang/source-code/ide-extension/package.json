@@ -122,7 +122,6 @@
 	},
 	"activationEvents": [
 		"workspaceContains:**/project.inlang/*",
-		"workspaceContains:**/inlang.config.js",
 		"onStartupFinished"
 	],
 	"license": "Apache-2.0"

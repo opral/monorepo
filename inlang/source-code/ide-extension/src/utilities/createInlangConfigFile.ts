@@ -5,6 +5,7 @@ import { tryAutoGenProjectSettings } from "@inlang/create-project"
 import { createFileSystemMapper } from "./createFileSystemMapper.js"
 import { CONFIGURATION } from "../configuration.js"
 import fs from "node:fs/promises"
+import { join } from "node:path"
 
 /**
  * Creates an Inlang config file if it doesn't already exist and the user approves it.
@@ -37,9 +38,9 @@ export const createInlangConfigFile = async (args: { workspaceFolder: vscode.Wor
 	const createSettingsFile = await promptUserTocreateSettingsFile()
 
 	if (createSettingsFile === "Accept") {
-		await nodeishFs.mkdir(`${args.workspaceFolder.uri.fsPath}/project.inlang`)
+		await nodeishFs.mkdir(join(args.workspaceFolder.uri.fsPath, "project.inlang"))
 		await nodeishFs.writeFile(
-			`${args.workspaceFolder.uri.fsPath}/project.inlang/settings.json`,
+			join(args.workspaceFolder.uri.fsPath, "project.inlang", "settings.json"),
 			JSON.stringify(settings, undefined, 2)
 		)
 		console.info(`🎉 Success`)
