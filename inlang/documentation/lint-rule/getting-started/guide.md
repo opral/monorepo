@@ -1,83 +1,84 @@
-# Build a Plugin
-Plugins are a powerful way to extend the functionality of inlang applications. This documentation provides you with the information you need to develop your own plugin.
+# Build a Lint Rule
+
+This documentation provides step-by-step instructions on developing a lint rule for the inlang ecosystem. Lint rules are used to check for specific patterns or issues in translated messages to ensure high-quality translations. Follow the guide below to create your own custom lint rule.
 
 ## Pre-requisites
+
+Before you begin developing a lint rule, make sure you have the following pre-requisites installed on your system:
 
 - [Node.js](https://nodejs.org/en/) (version 18 or higher)
 
 ## Step-by-step
 
-### 1. Initialize a new plugin module
+### 1. Initialize a new lint rule module
+
+You need to initialize a new lint rule module using the inlang CLI to get started. Open your terminal and run the following command:
 
 ```bash
-npx @inlang/cli@latest module init --type plugin
+npx @inlang/cli@latest module init --type lintRule
 ```
 
-### 2. Implement Plugin Logic
+This command will create a new lint rule project with the necessary files and directory structure.
 
-Each of the following functions in the code represents a key aspect of your plugin's functionality:
+### 2. Implement your lint rule
 
-- `loadMessages`: Load messages
-- `saveMessages`: Save messages
-- `addCustomApi`: Define app-specific APIs
-
+Now that you have a basic lint rule project, it's time to implement your custom lint rule logic. You can use the following code as a starting point and customize it to fit your lint rule requirements:
 
 ```typescript
-import type { Plugin, PluginSettings } from "@inlang/plugin"
-import { id, displayName, description } from "../marketplace-manifest.json"
+import type { MessageLintRule } from "@inlang/message-lint-rule";
+import { id, displayName, description } from "../marketplace-manifest.json";
 
-export const plugin: Plugin<PluginSettings> = {
-	id,
-	displayName,
-	description,
-	loadMessages: async ({ languageTags, sourceLanguageTag, settings, nodeishFs }) => {
-		// Plugin's loadMessages logic
-	},
-	saveMessages: async ({ messages, settings, nodeishFs }) => {
-		// Plugin's saveMessages logic
-	},
-	addCustomApi: ({ settings }) => {},
-}
+export const yourLintRule: MessageLintRule = {
+  meta: {
+    id: id as MessageLintRule["id"],
+    displayName,
+    description,
+  },
+  message: ({ message: { id, variants }, languageTags, sourceLanguageTag, report }) => {
+    // Your custom lint rule logic goes here
+    // You can analyze message variants and report issues if necessary
+  },
+};
 ```
 
-Implement the logic for each function according to your plugin's requirements.
-**Example implementation** of plugins can be found [here](https://github.com/inlang/monorepo/tree/main/inlang/source-code/plugins).
+Replace `yourLintRule` with a meaningful name for your lint rule.
 
-### 3. Configure your plugin
+Helpful **example implementations** of lint rules can be found [here](https://github.com/inlang/monorepo/tree/main/inlang/source-code/message-lint-rules).
+
+### 3. Configure your lint rule
 
 In your lint rule's `marketplace-manifest.json` make sure to define the following information:
 
 | Parameter        | Description                                               |
 |----------------------|---------------------------------------------------------------|
-| `id`                 | Unique identifier for your plugin.                         |
-| `icon`        | Link to the icon of your plugin (optional).              |
-| `gallery`        | Optional gallery, the first image acts as coverImage for your plugin.              |
-| `displayName`        | A user-friendly display name for your plugin.              |
-| `description`        | Briefly describe what your plugin does.              |
-| `readme`             | Link to the README documentation for your plugin.          |
-| `keywords`           | Keywords that describe your plugin.                        |
+| `id`                 | Unique identifier for your lint rule.                         |
+| `icon`        | Link to the icon of your lint rule (optional).              |
+| `gallery`        | Optional gallery, the first image acts as coverImage for your lint rule.              |
+| `displayName`        | A user-friendly display name for your lint rule.              |
+| `description`        | Briefly describe what your lint rule checks for.              |
+| `readme`             | Link to the README documentation for your lint rule.          |
+| `keywords`           | Keywords that describe your lint rule.                        |
 | `publisherName`      | Your publisher name.                                          |
 | `publisherIcon`      | Link to your publisher's icon or avatar (optional).           |
-| `license`            | The license under which your plugin is distributed.        |
-| `module`             | The path to your plugin's JavaScript module (Please use [jsDelivr](https://www.jsdelivr.com/)).               |
+| `license`            | The license under which your lint rule is distributed.        |
+| `module`             | The path to your lint rule's JavaScript module (Please use [jsDelivr](https://www.jsdelivr.com/)).               |
 
-Make sure these settings accurately represent your plugin's purpose and functionality.
+### 4. Test your lint rule
 
-### 4. Test your plugin
+Before publishing your lint rule to the marketplace, thoroughly test it to ensure it functions correctly and detects issues as intended.
 
-Before publishing your plugin to the marketplace, thoroughly test it to ensure it functions correctly and detects issues as intended.
+### 5. Publish your lint rule
 
-### 5. Publish your plugin
+To make your lint rule available in the inlang.com marketplace, see [Publish on marketplace](/documentation/publish-to-marketplace).
 
-To make your plugin available in the inlang.com marketplace, see [Publish on marketplace](/documentation/publish-to-marketplace).
+Feel free to [join our Discord](https://discord.gg/gdMPPWy57R) if you have any questions or need assistance developing and publishing your lint rule.
 
-Feel free to [join our Discord](https://discord.gg/gdMPPWy57R) if you have any questions or need assistance developing and publishing your plugin.
 
 <br/>
 
 <doc-links>
-    <doc-link title="Whatis a plugin?" icon="mdi:skip-previous" href="/documentation/plugin/guide" description="Learn why you should use plugins."></doc-link>
-	<doc-link title="API Introduction" icon="mdi:skip-next" href="/documentation/plugin/api-introduction" description="Read Plugin API Reference."></doc-link>
+    <doc-link title="Whatis a Lint Rule?" icon="mdi:skip-previous" href="/documentation/lint-rule/guide" description="Learn why you should use Lint Rules."></doc-link>
+	<doc-link title="API Introduction" icon="mdi:skip-next" href="/documentation/lint-rule/api-introduction" description="Read Lint Rule API Reference."></doc-link>
 </doc-links>
 
 <br/>
