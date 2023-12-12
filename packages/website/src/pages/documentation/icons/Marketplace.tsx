@@ -12,4 +12,3 @@ function MarketplaceIcon() {
 }
 
 export default MarketplaceIcon
-
