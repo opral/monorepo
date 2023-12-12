@@ -10,7 +10,7 @@
 		"url": "https://github.com/inlang/monorepo.git"
 	},
 	"icon": "assets/icon-vscode-marketplace.png",
-	"version": "1.21.1",
+	"version": "1.22.0",
 	"engines": {
 		"vscode": "^1.84.2"
 	},
@@ -82,6 +82,8 @@
 	"dependencies": {
 		"@inlang/result": "workspace:*",
 		"@inlang/telemetry": "workspace:*",
+		"@inlang/create-project": "workspace:*",
+		"@inlang/sdk": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@vitest/coverage-v8": "0.34.6",
 		"https-proxy-agent": "7.0.2",
@@ -90,11 +92,9 @@
 		"vitest": "0.34.6"
 	},
 	"devDependencies": {
-		"@inlang/create-project": "workspace:*",
-		"@inlang/sdk": "workspace:*",
-		"@types/fs-extra": "^11.0.4",
-		"@types/mocha": "^10.0.6",
-		"@types/node": "^18.15.0",
+		"@types/fs-extra": "^11.0.2",
+		"@types/glob": "^8.1.0",
+		"@types/mocha": "^10.0.2",
 		"@types/require-from-string": "^1.2.1",
 		"@types/throttle-debounce": "^5.0.2",
 		"@types/ungap__structured-clone": "^0.3.3",

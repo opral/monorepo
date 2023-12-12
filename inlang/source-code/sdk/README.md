@@ -13,4 +13,4 @@ Developer-first localization infrastructure that is built on git. Your git repos
 
 # @inlang/sdk
 
-The core module bundles "sdk" modules that depend on each other and is everything one needs to build [plugins](https://inlang.com/documentation/plugin) or entire [apps](https://inlang.com/documentation/develop-app) on inlang.
+The core module bundles "sdk" modules that depend on each other and is everything one needs to build [plugins](https://inlang.com/documentation/plugin) or entire [apps](https://inlang.com/documentation/build-app) on inlang.

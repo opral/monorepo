@@ -1,7 +1,9 @@
-import { Meta, Title } from "@solidjs/meta"
+import { Link, Meta, Title } from "@solidjs/meta"
 import { NewsletterForm } from "#src/interface/components/NewsletterForm.jsx"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import * as m from "#src/paraglide/messages.js"
+import { i18nRouting } from "#src/renderer/_default.page.route.js"
+import { currentPageContext } from "#src/renderer/state.js"
 
 export type PageProps = {
 	markdown: string
@@ -17,6 +19,10 @@ export function Page() {
 			/>
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<Meta name="robots" content="noindex" />
+			<Link
+				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
+				rel="canonical"
+			/>
 			<MarketplaceLayout>
 				<div class="relative max-w-screen-xl w-full mx-auto">
 					<div class="w-full flex md:pt-12 flex-col gap-16">

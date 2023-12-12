@@ -4,7 +4,8 @@
 	"private": true,
 	"version": "0.1.0",
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/index.js",
+		"./dist/runtime/publicEnv.js": "./dist/runtime/publicEnv.js"
 	},
 	"files": [
 		"./dist",
@@ -27,7 +28,7 @@
 		"@types/node": "20.6.0",
 		"dotenv": "^16.3.1",
 		"esbuild": "^0.19.2",
-		"tsx": "^3.12.7",
+		"tsx": "^4.6.2",
 		"typescript": "5.2.2",
 		"vitest": "0.34.3",
 		"zod": "^3.22.2"

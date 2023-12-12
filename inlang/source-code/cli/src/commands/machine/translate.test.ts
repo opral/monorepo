@@ -1,113 +1,153 @@
-import { describe, it, expect } from "vitest"
+import { test, expect } from "vitest"
 import { translateCommandAction } from "./translate.js"
 import { Message, ProjectSettings, loadProject, Plugin, type InlangModule } from "@inlang/sdk"
+import { createMessage } from "@inlang/sdk/test-utilities"
 import { privateEnv } from "@inlang/env-variables"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 
-const exampleMessages: Message[] = [
-	{
-		id: "a",
-		selectors: [],
-		variants: [
-			{
-				languageTag: "en",
-				match: [],
-				pattern: [
-					{
-						type: "Text",
-						value: "test",
-					},
-				],
-			},
-		],
-	},
-	{
-		id: "b",
-		selectors: [],
-		variants: [
-			{
-				languageTag: "en",
-				match: [],
-				pattern: [
-					{
-						type: "Text",
-						value: "title",
-					},
-				],
-			},
-			{
-				languageTag: "de",
-				match: [],
-				pattern: [
-					{
-						type: "Text",
-						value: "Titel",
-					},
-				],
-			},
-		],
-	},
-]
+test.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
+	"should tanslate the missing languages",
+	async () => {
+		const exampleMessages: Message[] = [
+			createMessage("a", {
+				en: "test",
+			}),
+			createMessage("b", {
+				en: "title",
+				de: "Titel",
+			}),
+		]
 
-describe("translate command", () => {
-	it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
-		"should tanslate the missing languages",
-		async () => {
-			const fs = createNodeishMemoryFs()
+		const fs = createNodeishMemoryFs()
 
-			await fs.mkdir("/user/project.inlang", { recursive: true })
-			await fs.writeFile(
-				"/user/project.inlang/settings.json",
-				JSON.stringify({
-					sourceLanguageTag: "en",
-					languageTags: ["en", "de", "it"],
-					modules: ["./plugin.js"],
-				} satisfies ProjectSettings)
-			)
+		await fs.mkdir("/user/project.inlang", { recursive: true })
+		await fs.writeFile(
+			"/user/project.inlang/settings.json",
+			JSON.stringify({
+				sourceLanguageTag: "en",
+				languageTags: ["en", "de", "it"],
+				modules: ["./plugin.js"],
+			} satisfies ProjectSettings)
+		)
 
-			const _mockPlugin: Plugin = {
-				id: "plugin.inlang.json",
-				description: { en: "Mock plugin description" },
-				displayName: { en: "Mock Plugin" },
-				loadMessages: () => exampleMessages,
-				saveMessages: () => undefined as any,
-			}
+		const _mockPlugin: Plugin = {
+			id: "plugin.inlang.json",
+			description: { en: "Mock plugin description" },
+			displayName: { en: "Mock Plugin" },
+			loadMessages: () => exampleMessages,
+			saveMessages: () => undefined as any,
+		}
 
-			const _import = async () => {
-				return {
-					default: _mockPlugin,
-				} satisfies InlangModule
-			}
+		const _import = async () => {
+			return {
+				default: _mockPlugin,
+			} satisfies InlangModule
+		}
 
-			const project = await loadProject({
-				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
-				_import,
-			})
+		const project = await loadProject({
+			projectPath: "/user/project.inlang",
+			nodeishFs: fs,
+			_import,
+		})
 
-			await translateCommandAction({ project })
+		await translateCommandAction({ project })
 
-			const messages = project.query.messages.getAll()
+		const messages = project.query.messages.getAll()
 
-			expect(messages[0]?.variants.length).toBe(3)
-			expect(messages[1]?.variants.length).toBe(3)
+		expect(messages[0]?.variants.length).toBe(3)
+		expect(messages[1]?.variants.length).toBe(3)
 
-			for (const message of messages) {
-				// @ts-ignore - type mismatch error - fix after refactor
-				expect(message.variants.map((variant) => variant.languageTag).sort()).toStrictEqual([
-					"de",
-					"en",
-					"it",
-				])
+		for (const message of messages) {
+			// @ts-ignore - type mismatch error - fix after refactor
+			expect(message.variants.map((variant) => variant.languageTag).sort()).toStrictEqual([
+				"de",
+				"en",
+				"it",
+			])
 
-				for (const variant of message.variants) {
-					expect(variant.pattern[0]?.type).toBe("Text")
+			for (const variant of message.variants) {
+				expect(variant.pattern[0]?.type).toBe("Text")
 
-					if (variant.pattern[0]?.type === "Text") {
-						expect(variant.pattern[0]?.value.length).toBeGreaterThan(2)
-					}
+				if (variant.pattern[0]?.type === "Text") {
+					expect(variant.pattern[0]?.value.length).toBeGreaterThan(2)
 				}
 			}
 		}
-	)
-})
+	}
+)
+
+test.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
+	"it should escape variable references",
+	async () => {
+		const exampleMessages: Message[] = [
+			{
+				id: "a",
+				selectors: [],
+				variants: [
+					{
+						languageTag: "en",
+						match: [],
+						pattern: [
+							{
+								type: "Text",
+								value: "Good morning ",
+							},
+							{
+								type: "VariableReference",
+								name: "username",
+							},
+							{
+								type: "Text",
+								value: ".",
+							},
+						],
+					},
+				],
+			},
+		]
+
+		const fs = createNodeishMemoryFs()
+
+		await fs.mkdir("/user/project.inlang", { recursive: true })
+		await fs.writeFile(
+			"/user/project.inlang/settings.json",
+			JSON.stringify({
+				sourceLanguageTag: "en",
+				languageTags: ["en", "de"],
+				modules: ["./plugin.js"],
+			} satisfies ProjectSettings)
+		)
+
+		const _mockPlugin: Plugin = {
+			id: "plugin.inlang.json",
+			description: { en: "Mock plugin description" },
+			displayName: { en: "Mock Plugin" },
+			loadMessages: () => exampleMessages,
+			saveMessages: () => undefined as any,
+		}
+
+		const _import = async () => {
+			return {
+				default: _mockPlugin,
+			} satisfies InlangModule
+		}
+
+		const project = await loadProject({
+			projectPath: "/user/project.inlang",
+			nodeishFs: fs,
+			_import,
+		})
+
+		await translateCommandAction({ project })
+
+		const messages = project.query.messages.getAll()
+
+		expect(messages[0]?.variants.length).toBe(2)
+		expect(messages[0]?.variants[1]?.languageTag).toBe("de")
+		expect(
+			messages[0]?.variants[1]?.pattern.some(
+				(value) => value.type === "VariableReference" && value.name === "username"
+			)
+		).toBeTruthy()
+	}
+)

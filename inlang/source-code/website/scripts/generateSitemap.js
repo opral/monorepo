@@ -15,7 +15,7 @@ const routes = [
 	{ path: "/m", dynamic: true },
 	{ path: "/newsletter", dynamic: false },
 	{ path: "/search", dynamic: false },
-	{ path: "/editor", dynamic: false },
+	// { path: "/editor", dynamic: false },
 ]
 
 // Hardcoded categories for the marketplace
@@ -82,7 +82,56 @@ async function generateSitemap() {
 					)}`
 				}
 			}
-		} else if ((route.dynamic && route.path === "/documentation") || route.path === "/blog") {
+		} else if (route.dynamic && route.path === "/documentation") {
+			const sdkTableOfContents = await fs.readFile(
+				new URL("./inlang" + route.path + "/sdk/tableOfContents.json", repositoryRoot),
+				"utf-8"
+			)
+			const pluginTableOfContents = await fs.readFile(
+				new URL("./inlang" + route.path + "/plugin/tableOfContents.json", repositoryRoot),
+				"utf-8"
+			)
+			const lintRuleTableOfContents = await fs.readFile(
+				new URL("./inlang" + route.path + "/lint-rule/tableOfContents.json", repositoryRoot),
+				"utf-8"
+			)
+
+			if (
+				Array.isArray(JSON.parse(sdkTableOfContents)) &&
+				Array.isArray(JSON.parse(pluginTableOfContents)) &&
+				Array.isArray(JSON.parse(lintRuleTableOfContents))
+			) {
+				const tableOfContents = [
+					...JSON.parse(sdkTableOfContents),
+					...JSON.parse(pluginTableOfContents),
+					...JSON.parse(lintRuleTableOfContents),
+				]
+				for (const item of tableOfContents) {
+					for (const locale of locales) {
+						content = `${content}${formatPage(
+							siteURL + locale + route.path + "/" + item.slug,
+							publishDate
+						)}`
+					}
+				}
+			} else {
+				const tableOfContents = [
+					...Object.values(JSON.parse(sdkTableOfContents)),
+					...Object.values(JSON.parse(pluginTableOfContents)),
+				]
+				for (const items of tableOfContents) {
+					for (const item of items) {
+						if (item.slug !== "")
+							for (const locale of locales) {
+								content = `${content}${formatPage(
+									siteURL + locale + route.path + "/" + item.slug,
+									publishDate
+								)}`
+							}
+					}
+				}
+			}
+		} else if (route.dynamic && route.path === "/blog") {
 			const tableOfContents = await fs.readFile(
 				new URL("./inlang" + route.path + "/tableOfContents.json", repositoryRoot),
 				"utf-8"
@@ -109,6 +158,13 @@ async function generateSitemap() {
 							}
 					}
 				}
+			}
+		} else if (route.path === "/newsletter"){
+			for (const locale of locales) {
+				content = `${content}${formatPage(
+					siteURL + locale + route.path,
+					publishDate
+				)}`
 			}
 		}
 	}

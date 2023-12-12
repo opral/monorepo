@@ -1,5 +1,5 @@
 import { createSignal, For, Show } from "solid-js"
-import { Meta, Title } from "@solidjs/meta"
+import { Link, Meta, Title } from "@solidjs/meta"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { Button } from "../index/components/Button.jsx"
 import { z } from "zod"
@@ -18,6 +18,7 @@ import { browserAuth } from "@lix-js/client"
 import { registry } from "@inlang/marketplace-registry"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { Copy } from "#src/interface/components/Copy.jsx"
+import { i18nRouting } from "#src/renderer/_default.page.route.js"
 
 export type Step = {
 	type: string
@@ -74,6 +75,10 @@ export function Page() {
 				content="Contribute to open source projects and manage translations with inlang's editor."
 			/>
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
+			<Link
+				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
+				rel="canonical"
+			/>
 			<MarketplaceLayout>
 				<div class="lg:min-h-screen flex flex-col items-center justify-center pb-32">
 					<InstallationProvider

@@ -9,6 +9,7 @@
 		"asvuch18": "./inlang/source-code/message-lint-rules/identicalPattern/marketplace-manifest.json",
 		"10l6oyv1": "./inlang/source-code/message-lint-rules/messageWithoutSource/marketplace-manifest.json",
 		"4cxm3eqi": "./inlang/source-code/message-lint-rules/missingTranslation/marketplace-manifest.json",
+		"teldgniy": "./inlang/source-code/message-lint-rules/validJsIdentifier/marketplace-manifest.json",
 		"gkerinvo": "./inlang/source-code/message-lint-rules/snakeCaseId/marketplace-manifest.json",
 		"ewkole66": "./inlang/source-code/message-lint-rules/camelCaseId/marketplace-manifest.json",
 		"3i8bor92": "./inlang/source-code/plugins/i18next/marketplace-manifest.json",
@@ -36,6 +37,7 @@
 		"940fn8mg": "./inlang/guides/i18n-mistakes/marketplace-manifest.json",
 		"6ddyhpoi": "./inlang/guides/contribute-translations-with-fink/marketplace-manifest.json",
 		"uxohikde": "./inlang/guides/use-paraglide-with-nextjs-pages-router/marketplace-manifest.json",
-		"wxcebbig": "./inlang/guides/use-paraglide-with-nextjs-app-router/marketplace-manifest.json"
+		"wxcebbig": "./inlang/guides/use-paraglide-with-nextjs-app-router/marketplace-manifest.json",
+		"38fnf03n": "./inlang/guides/localization-strategy/marketplace-manifest.json"
 	}
 }

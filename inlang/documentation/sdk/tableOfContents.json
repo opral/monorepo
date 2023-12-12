@@ -1,0 +1,101 @@
+{
+	"Overview": [
+		{
+			"startpage": true,
+			"path": "./overview/introduction.md",
+			"slug": "",
+			"title": "What is the SDK?",
+			"description": "Extend the ecosystem with inlang's SDK."
+		},
+		{
+			"path": "./overview/architecture.md",
+			"slug": "architecture",
+			"title": "Architecture",
+			"description": "Architecture of inlang's SDK."
+		}
+	],
+	"How to": [
+		{
+			"path": "./how-to/build-app.md",
+			"slug": "build-app",
+			"title": "Develop App",
+			"description": "Develop an app"
+		},
+		{
+			"path": "/how-to/build-lint-rule.md",
+			"slug": "build-lint-rule",
+			"title": "Develop Lint Rule",
+			"description": "Develop a lint rule"
+		},
+		{
+			"path": "/how-to/publish-marketplace.md",
+			"slug": "publish-to-marketplace",
+			"title": "Publish Marketplace",
+			"description": "How to publish your product to inlang's marketplace."
+		},
+		{
+			"path": "./how-to/publish-guide.md",
+			"slug": "publish-guide",
+			"title": "Publish Guide",
+			"description": "Learn how to publish your own guide on inlang."
+		}
+	],
+	"Reference": [
+		{
+			"path": "./reference/sdk.md",
+			"slug": "sdk",
+			"title": "SDK",
+			"description": "SDK reference"
+		},
+		{
+			"path": "./reference/comver.md",
+			"slug": "comver",
+			"title": "Comver",
+			"description": "Comver reference"
+		}
+	],
+	"Concept": [
+		{
+			"path": "./concept/app.md",
+			"slug": "concept/app",
+			"title": "App",
+			"description": "App concept"
+		},
+		{
+			"path": "./concept/project.md",
+			"slug": "project",
+			"title": "Project",
+			"description": "Project concept"
+		},
+		{
+			"path": "./concept/message.md",
+			"slug": "concept/message",
+			"title": "Message",
+			"description": "Message concept"
+		},
+		{
+			"path": "./concept/plugin.md",
+			"slug": "concept/plugin",
+			"title": "Plugin",
+			"description": "Plugin concept"
+		},
+		{
+			"path": "./concept/lint-rule.md",
+			"slug": "concept/lint-rule",
+			"title": "Lint Rule",
+			"description": "Lint Rule concept"
+		},
+		{
+			"path": "./concept/library.md",
+			"slug": "concept/library",
+			"title": "Library",
+			"description": "Library concept"
+		},
+		{
+			"path": "./concept/language-tag.md",
+			"slug": "concept/language-tag",
+			"title": "Language Tag",
+			"description": "Language Tag concept"
+		}
+	]
+}
