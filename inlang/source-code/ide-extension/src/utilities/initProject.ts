@@ -35,7 +35,7 @@ export async function initProject(args: {
 	// Load project
 	const activeTextEditor = getActiveTextEditor()
 	if (!activeTextEditor) {
-		return { project: undefined, error: new Error("No active test editor found – aborting.") }
+		return { project: undefined, error: new Error("No active text editor found – aborting.") }
 	}
 
 	const closestProjectFilePath = determineClosestPath({
