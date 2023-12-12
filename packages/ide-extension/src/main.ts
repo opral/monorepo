@@ -7,7 +7,7 @@ import { getGitOrigin } from "./services/telemetry/index.js"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
 import { recommendation } from "./utilities/recommendation.js"
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
-import { getActiveTextEditor, initProject } from "./utilities/initProject.js"
+import { initProject } from "./utilities/initProject.js"
 import { handleError, telemetryCapture } from "./utilities/utils.js"
 import { CONFIGURATION } from "./configuration.js"
 
@@ -30,13 +30,7 @@ async function main(args: {
 	context: vscode.ExtensionContext
 	gitOrigin: string | undefined
 }): Promise<void> {
-	const activeTextEditor = getActiveTextEditor()
-
-	if (!activeTextEditor) {
-		return
-	}
-
-	const workspaceFolder = vscode.workspace.getWorkspaceFolder(activeTextEditor.document.uri)
+	const workspaceFolder = vscode.workspace.workspaceFolders?.[0]
 
 	if (!workspaceFolder) {
 		console.warn("No workspace folder found.")
