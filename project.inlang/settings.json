@@ -8,12 +8,14 @@
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern/dist/index.js"
+		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern/dist/index.js",
+		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-valid-js-identifier/dist/index.js"
 	],
 	"plugin.inlang.messageFormat": {
 		"filePath": "./inlang/source-code/website/messages.json"
 	},
 	"messageLintRuleLevels": {
-		"messageLintRule.inlang.missingTranslation": "error"
+		"messageLintRule.inlang.missingTranslation": "error",
+		"messageLintRule.inlang.validJsIdentifier": "error"
 	}
 }
