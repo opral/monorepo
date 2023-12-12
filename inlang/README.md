@@ -18,7 +18,7 @@
 
 **[🌱 Ecosystem](https://inlang.com)** - Plugins, resources, and more.
 
-**[🛠️ SDKs](https://inlang.com/documentation/sdk)** - Supported SDKs to globalize your app.
+**[🛠️ SDKs](https://inlang.com/documentation)** - Supported SDKs to globalize your app.
 
 **[🚩 Issues](https://github.com/inlang/monorepo/issues)** - Bugs end errors you encounter using inlang.
 
