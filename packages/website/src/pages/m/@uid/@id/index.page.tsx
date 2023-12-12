@@ -23,6 +23,8 @@ import Changelog from "~icons/material-symbols/manage-history"
 import { i18nRouting } from "#src/renderer/_default.page.route.js"
 import Link from "#src/renderer/Link.jsx"
 
+const isProduction = process.env.NODE_ENV === "production"
+
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
  */
@@ -152,7 +154,11 @@ export function Page(props: PageProps) {
 																{/* @ts-ignore */}
 																<Button
 																	type="primary"
-																	href={`/install?module=${props.manifest.id}`}
+																	href={`${
+																		isProduction
+																			? "https://manage.inlang.com/install"
+																			: "http://localhost:4004/install"
+																	}?module=${props.manifest.id}`}
 																	class="my-6"
 																>
 																	<span class="capitalize">
@@ -534,9 +540,8 @@ function NavbarCommon(props: {
 				<For each={Object.keys(props.tableOfContents)}>
 					{(sectionTitle) => (
 						<li>
-							<Link
-								onClick={(e: any) => {
-									e.preventDefault()
+							<div
+								onClick={() => {
 									scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
 									setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
 								}}
@@ -548,13 +553,12 @@ function NavbarCommon(props: {
 								}
 							>
 								{sectionTitle.replace("#", "")}
-							</Link>
+							</div>
 							<For each={props.tableOfContents[sectionTitle]}>
 								{(heading) => (
 									<li>
-										<Link
-											onClick={(e: any) => {
-												e.preventDefault()
+										<div
+											onClick={() => {
 												scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
 												setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
 											}}
@@ -566,7 +570,7 @@ function NavbarCommon(props: {
 											}
 										>
 											{heading.replace("#", "")}
-										</Link>
+										</div>
 									</li>
 								)}
 							</For>
