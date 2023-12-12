@@ -2,6 +2,7 @@ import { Button } from "#src/pages/index/components/Button.jsx"
 import { For } from "solid-js"
 import Link from "#src/renderer/Link.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
+import { LintRuleIcon, PluginIcon, SDKIcon } from "#src/pages/documentation/icons/NavbarIcons.jsx"
 
 const SdkDocsHeader = () => {
 	return (
@@ -20,9 +21,7 @@ const SdkDocsHeader = () => {
 							<img class={"h-8 w-8"} src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
 						</Link>
 						<p class={"self-center text-left font-regular text-surface-400 pl-4 pr-1"}>/</p>
-						<p class={"self-center pl-2 text-left font-medium text-surface-900"}>
-							SDK Documentation
-						</p>
+						<p class={"self-center pl-2 text-left font-medium text-surface-900"}>Documentation</p>
 					</div>
 					<div class="flex gap-8">
 						<Button type="text" href="https://github.com/inlang/monorepo">
@@ -47,6 +46,8 @@ export default SdkDocsHeader
 export const getDocsBaseUrl = (link: string) => {
 	if (link.split("/")[2] === "plugin") {
 		return "/documentation/plugin"
+	} else if (link.split("/")[2] === "lint-rule") {
+		return "/documentation/lint-rule"
 	} else {
 		return "/documentation"
 	}
@@ -58,15 +59,18 @@ const SdkDocsSubHeader = () => {
 			{
 				name: "SDK",
 				href: "/documentation",
+				icon: <SDKIcon />,
 			},
 			{
 				name: "Plugin",
 				href: "/documentation/plugin",
+				icon: <PluginIcon />,
 			},
-			// {
-			// 	name: "Lint Rule",
-			// 	href: "/documentation/concept/lint-rule",
-			// },
+			{
+				name: "Lint Rule",
+				href: "/documentation/lint-rule",
+				icon: <LintRuleIcon />,
+			},
 			// {
 			// 	name: "Publish Content",
 			// 	href: "/documentation/content",
@@ -93,10 +97,21 @@ const SdkDocsSubHeader = () => {
 									(getDocsBaseUrl(currentPageContext.urlParsed.pathname) === link.href
 										? "text-surface-900 "
 										: "text-surface-500 hover:bg-surface-100 ") +
-									" px-2 py-[6px] rounded-md transition-colors font-medium cursor-pointer w-max"
+									" px-2 h-8 flex items-center rounded-md transition-colors font-medium cursor-pointer w-max"
 								}
 							>
-								{link.name}
+								<div class="flex items-center gap-2">
+									<div
+										class={
+											getDocsBaseUrl(currentPageContext.urlParsed.pathname) === link.href
+												? "text-primary"
+												: "text-surface-500"
+										}
+									>
+										{link.icon}
+									</div>
+									{link.name}
+								</div>
 							</div>
 						</a>
 					</div>

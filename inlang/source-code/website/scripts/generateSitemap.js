@@ -15,7 +15,7 @@ const routes = [
 	{ path: "/m", dynamic: true },
 	{ path: "/newsletter", dynamic: false },
 	{ path: "/search", dynamic: false },
-	{ path: "/editor", dynamic: false },
+	// { path: "/editor", dynamic: false },
 ]
 
 // Hardcoded categories for the marketplace
@@ -91,14 +91,20 @@ async function generateSitemap() {
 				new URL("./inlang" + route.path + "/plugin/tableOfContents.json", repositoryRoot),
 				"utf-8"
 			)
+			const lintRuleTableOfContents = await fs.readFile(
+				new URL("./inlang" + route.path + "/lint-rule/tableOfContents.json", repositoryRoot),
+				"utf-8"
+			)
 
 			if (
 				Array.isArray(JSON.parse(sdkTableOfContents)) &&
-				Array.isArray(JSON.parse(pluginTableOfContents))
+				Array.isArray(JSON.parse(pluginTableOfContents)) &&
+				Array.isArray(JSON.parse(lintRuleTableOfContents))
 			) {
 				const tableOfContents = [
 					...JSON.parse(sdkTableOfContents),
 					...JSON.parse(pluginTableOfContents),
+					...JSON.parse(lintRuleTableOfContents),
 				]
 				for (const item of tableOfContents) {
 					for (const locale of locales) {
@@ -152,6 +158,13 @@ async function generateSitemap() {
 							}
 					}
 				}
+			}
+		} else if (route.path === "/newsletter"){
+			for (const locale of locales) {
+				content = `${content}${formatPage(
+					siteURL + locale + route.path,
+					publishDate
+				)}`
 			}
 		}
 	}
