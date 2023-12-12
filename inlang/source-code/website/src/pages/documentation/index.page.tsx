@@ -13,6 +13,8 @@ import InPageNav from "./InPageNav.jsx"
 import MainActions from "./MainActions.jsx"
 import { getDocsBaseUrl } from "#src/interface/sdkDocs/SdkDocsHeader.jsx"
 import { i18nRouting } from "#src/renderer/_default.page.route.js"
+import NavbarIcon from "./NavbarIcon.jsx"
+import NavbarOtherPageIndicator from "./NavBarOtherPageIndicator.jsx"
 
 export type PageProps = {
 	markdown: Awaited<ReturnType<any>>
@@ -183,6 +185,19 @@ function Markdown(props: { markdown: string }) {
 	)
 }
 
+export const isSelected = (slug: string) => {
+	const reference = `/documentation/${slug}`
+
+	if (
+		reference === currentPageContext.urlParsed.pathname ||
+		reference === currentPageContext.urlParsed.pathname + "/"
+	) {
+		return true
+	} else {
+		return false
+	}
+}
+
 function NavbarCommon(props: {
 	tableOfContents: any
 	headings: string[]
@@ -198,19 +213,6 @@ function NavbarCommon(props: {
 			.replaceAll(")", "")
 			.replaceAll("?", "")
 			.replaceAll(".", "")
-	}
-
-	const isSelected = (slug: string) => {
-		const reference = `/documentation/${slug}`
-
-		if (
-			reference === currentPageContext.urlParsed.pathname ||
-			reference === currentPageContext.urlParsed.pathname + "/"
-		) {
-			return true
-		} else {
-			return false
-		}
 	}
 
 	const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
@@ -254,7 +256,7 @@ function NavbarCommon(props: {
 						<ul role="list">
 							<For each={props.tableOfContents[category]}>
 								{(page) => {
-									const slug = page.slug
+									const slug: string = page.slug
 									return (
 										<li>
 											<a
@@ -263,11 +265,15 @@ function NavbarCommon(props: {
 													(isSelected(slug)
 														? "text-primary font-semibold bg-[#E2F5F9] "
 														: "text-surface-600 hover:bg-surface-100 ") +
-													"tracking-wide text-sm w-full font-normal h-[34px] flex items-center rounded-lg -ml-3 pl-3"
+													"tracking-wide text-sm w-full font-normal h-[34px] flex items-center rounded-lg -ml-3 pl-3 pr-3"
 												}
 												href={`/documentation/${slug}`}
 											>
-												{page.title}
+												<div class="flex items-center w-full">
+													<NavbarIcon slug={slug} />
+													<p class="flex-1">{page.title}</p>
+													<NavbarOtherPageIndicator slug={slug} />
+												</div>
 											</a>
 										</li>
 									)
