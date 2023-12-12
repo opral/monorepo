@@ -6,6 +6,7 @@ import { Command } from "commander"
 import { telemetry } from "../../services/telemetry/implementation.js"
 import { writeOutput } from "../../services/file-handling/write-output.js"
 import { Logger } from "../../services/logger/index.js"
+import { gitOrigin } from "../../services/telemetry/implementation.js"
 
 export const compileCommand = new Command()
 	.name("compile")
@@ -23,6 +24,13 @@ export const compileCommand = new Command()
 		const outputDirectory = resolve(process.cwd(), options.outdir)
 
 		logger.info(`Compiling inlang project at "${options.project}".`)
+		telemetry.groupIdentify({
+			groupType: "repository",
+			groupKey: gitOrigin,
+			properties: {
+				name: gitOrigin,
+			},
+		})
 		const project = exitIfErrors(
 			await loadProject({
 				projectPath: path,
