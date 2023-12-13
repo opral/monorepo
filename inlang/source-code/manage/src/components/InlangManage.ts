@@ -10,6 +10,9 @@ import { publicEnv } from "@inlang/env-variables"
 import { browserAuth, getUser } from "@lix-js/client/src/browser-auth.ts"
 import { tryCatch } from "@inlang/result"
 import { registry } from "@inlang/marketplace-registry"
+import type { MarketplaceManifest } from "../../../versioned-interfaces/marketplace-manifest/dist/interface.js"
+
+type ManifestWithVersion = MarketplaceManifest & { version: string }
 
 @customElement("inlang-manage")
 export class InlangManage extends TwLitElement {
@@ -23,7 +26,7 @@ export class InlangManage extends TwLitElement {
 	projects: Record<string, string>[] | undefined | "no-access" | "load" = "load"
 
 	@property({ type: Object })
-	modules: Record<string, string>[] | undefined | "empty"
+	modules: ManifestWithVersion[] | undefined | "empty"
 
 	@property({ type: Object })
 	user: Record<string, any> | undefined | "load" = "load"
@@ -66,16 +69,26 @@ export class InlangManage extends TwLitElement {
 			const inlangProject = JSON.parse(result.data)
 			const modules = inlangProject.modules
 
+			const tempModules = []
 			for (const module of modules) {
 				// @ts-ignore
 				const registryModule = registry.find((x) => x.module === module)
 
 				if (registryModule) {
-					// @ts-ignore
-					this.modules = [...(this.modules ?? []), registryModule]
+					const response = await fetch(
+						// @ts-ignore
+						registryModule.module.replace("dist/index.js", `package.json`)
+					)
+
+					tempModules.push({
+						...registryModule,
+						// @ts-ignore
+						version: (await response.json()).version,
+					})
 				}
 			}
 
+			this.modules = tempModules
 			if (!this.modules) this.modules = "empty"
 		}
 	}
@@ -137,7 +150,6 @@ export class InlangManage extends TwLitElement {
 						</a>
 						<p class="self-center text-left font-regular text-slate-400 pl-4 pr-1">/</p>
 						<p class="self-center pl-2 text-left font-medium text-slate-900 truncate">Manage</p>
-
 						${this.url.project
 							? html`<div class="flex items-center flex-shrink-0">
 									<p class="self-center text-left font-regular text-slate-400 pl-2 pr-1">/</p>
@@ -168,166 +180,181 @@ export class InlangManage extends TwLitElement {
 					</div>
 				</div>
 			</header>
-			<div
-				class=${"w-full max-w-7xl h-full flex-grow mx-auto flex justify-center px-4 pb-24" +
-				(!this.modules ? " items-center" : " py-16 xl:px-0")}
-			>
-				${!this.url.repo
-					? html`<div class="max-w-lg w-full flex flex-col items-center gap-4">
-							<h1 class="font-bold text-4xl text-slate-900 text-center">Open your Repo</h1>
-							<p class="text-slate-600 w-full md:w-[400px] leading-relaxed mb-4 text-center">
-								To access your projects, please enter the URL of your GitHub repository.
-							</p>
-							<div
-								disabled=${this.url.repo}
-								class=${`px-1 gap-2 relative max-w-sm z-10 flex items-center w-full border bg-white rounded-lg transition-all relative ${
-									this.url.repo ? "cursor-not-allowed" : ""
-								} ${
-									!this.isValidUrl() && this.repoURL.length > 0
-										? " border-red-500 mb-8"
-										: " focus-within:border-[#098DAC] border-slate-200"
-								}	
-					`}
-							>
-								<input
-									id="repo-input"
-									.value=${this.url.repo ? this.url.repo : this.repoURL}
-									@input=${(e: InputEvent) => {
-										this.repoURL = (e.target as HTMLInputElement).value
-									}}
-									@keydown=${(e: KeyboardEvent) => {
-										if (e.key === "Enter" && this.isValidUrl()) {
-											window.location.href =
-												this.generateManageLink() +
-												(this.url.project ? `&project=${this.url.project}` : "") +
-												(this.url.module ? `&module=${this.url.module}` : "")
-										}
-									}}
-									class=${"active:outline-0 px-2 focus:outline-0 focus:ring-0 border-0 h-12 grow placeholder:text-slate-500 placeholder:font-normal placeholder:text-base " +
-									(this.url.repo ? "opacity-50 pointer-events-none " : " ") +
-									(!this.isValidUrl() && this.repoURL.length > 0
-										? "text-red-500"
-										: "text-slate-900")}
-									placeholder="https://github.com/user/example"
-								/>
-								<button
-									@click="${() => {
-										this.url.repo
-											? (window.location.href = "/")
-											: this.isValidUrl() &&
-											  (window.location.href =
-													this.generateManageLink() +
-													(this.url.project ? `&project=${this.url.project}` : "") +
-													(this.url.module ? `&module=${this.url.module}` : ""))
-									}}"
-									class="bg-white text-slate-600 border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
-								>
-									${this.url.repo ? "Edit" : "Confirm"}
-								</button>
-								${!this.isValidUrl() && this.repoURL.length > 0
-									? html`<p class="absolute text-red-500 -bottom-5 text-xs">
-											Please enter a valid GitHub repository URL.
-									  </p>`
-									: ""}
-							</div>
-					  </div>`
-					: this.projects === "load"
-					? html`<div class="flex flex-col gap-0.5 mt-4">
-							<div class="mx-auto">
-								<div class="h-12 w-12 animate-spin mb-4">
+			${this.url.path === ""
+				? html`<div
+						class=${"w-full max-w-7xl h-full flex-grow mx-auto flex justify-center px-4 pb-24" +
+						(!this.modules ? " items-center" : " py-16 xl:px-0")}
+				  >
+						${!this.url.repo
+							? html`<div class="max-w-lg w-full flex flex-col items-center gap-4">
+									<h1 class="font-bold text-4xl text-slate-900 text-center">Open your Repo</h1>
+									<p class="text-slate-600 w-full md:w-[400px] leading-relaxed mb-4 text-center">
+										To access your projects, please enter the URL of your GitHub repository.
+									</p>
 									<div
-										class="h-full w-full bg-surface-50 border-[#0891b2] border-4 rounded-full"
-									></div>
-									<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-slate-50"></div>
-								</div>
-							</div>
-					  </div>`
-					: this.projects === "no-access" && typeof this.user === "undefined"
-					? html`<div class="flex flex-col gap-0.5 mt-4">
-							<div
-								class="py-4 px-8 w-full rounded-md bg-red-100 text-red-500 flex flex-col items-center justify-center"
-							>
-								<p class="mb-4 font-medium">You have to be logged in to access this repository.</p>
-								<button
-									@click=${async () => {
-										await browserAuth.login()
-										window.location.reload()
-									}}
-									target="_blank"
-									class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
-								>
-									Login
-									<doc-icon
-										class="inline-block ml-1 translate-y-0.5"
-										size="1.2em"
-										icon="mdi:arrow-top-right"
-									></doc-icon>
-								</button>
-							</div>
-					  </div>`
-					: this.projects === "no-access" && typeof this.user === "object"
-					? html`<div class="flex flex-col gap-0.5 mt-4">
-							<div
-								class="py-4 px-8 w-full rounded-md bg-red-100 text-red-500 flex flex-col items-center justify-center"
-							>
-								<p class="mb-4 font-medium">You don't have access to this repository.</p>
-								<a
-									href="https://github.com/apps/${publicEnv.PUBLIC_LIX_GITHUB_APP_NAME}/installations/select_target"
-									target="_blank"
-									class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
-									>Configure Permissions
-									<doc-icon
-										class="inline-block ml-1 translate-y-0.5"
-										size="1.2em"
-										icon="mdi:arrow-top-right"
-									></doc-icon>
-								</a>
-							</div>
-					  </div>`
-					: !this.url.project
-					? html`<div class="flex flex-col w-full max-w-lg items-center">
-							<h1 class="font-bold text-4xl text-slate-900 mb-4 text-center">
-								Select your project
-							</h1>
-							<p class="text-slate-600 w-full md:w-[400px] leading-relaxed text-center">
-								Please select the project you want to manage from the list below.
-							</p>
-							<div class="w-full relative max-w-sm">
-								<div
-									class="absolute pointer-events-none h-12 bg-gradient-to-b from-slate-50 to-transparent w-full top-0"
-								></div>
-								<div
-									class="absolute pointer-events-none h-12 bg-gradient-to-t from-slate-50 to-transparent w-full bottom-0"
-								></div>
-								<div class="w-full flex flex-col gap-1 max-h-96 overflow-y-scroll py-12">
-									${
-										// @ts-ignore
-										this.projects?.map(
-											(project: Record<string, any>) =>
-												html`<button
-													@click=${() => {
-														window.location.href =
-															`/install?repo=${this.url.repo}&project=${project.projectPath}` +
-															(this.url.module ? `&module=${this.url.module}` : "")
-													}}
-													class=${"flex gap-4 group items-center text-left p-2 text-md rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-600"}
-												>
-													${this.url.project === project.projectPath
-														? html`<inlang-folder size="3rem"></inlang-logo>`
-														: html`<inlang-folder size="3rem"></inlang-logo>`}
-													${project.projectPath}
-												</button>`
-										)
-									}
-								</div>
-							</div>
-					  </div>`
-					: this.modules
-					? html`<div class="h-full w-full ">
+										disabled=${this.url.repo}
+										class=${`px-1 gap-2 relative max-w-sm z-10 flex items-center w-full border bg-white rounded-lg transition-all relative ${
+											this.url.repo ? "cursor-not-allowed" : ""
+										} ${
+											!this.isValidUrl() && this.repoURL.length > 0
+												? " border-red-500 mb-8"
+												: " focus-within:border-[#098DAC] border-slate-200"
+										}	
+					`}
+									>
+										<input
+											id="repo-input"
+											.value=${this.url.repo ? this.url.repo : this.repoURL}
+											@input=${(e: InputEvent) => {
+												this.repoURL = (e.target as HTMLInputElement).value
+											}}
+											@keydown=${(e: KeyboardEvent) => {
+												if (e.key === "Enter" && this.isValidUrl()) {
+													window.location.href =
+														this.generateManageLink() +
+														(this.url.project ? `&project=${this.url.project}` : "") +
+														(this.url.module ? `&module=${this.url.module}` : "")
+												}
+											}}
+											class=${"active:outline-0 px-2 focus:outline-0 focus:ring-0 border-0 h-12 grow placeholder:text-slate-500 placeholder:font-normal placeholder:text-base " +
+											(this.url.repo ? "opacity-50 pointer-events-none " : " ") +
+											(!this.isValidUrl() && this.repoURL.length > 0
+												? "text-red-500"
+												: "text-slate-900")}
+											placeholder="https://github.com/user/example"
+										/>
+										<button
+											@click="${() => {
+												this.url.repo
+													? (window.location.href = "/")
+													: this.isValidUrl() &&
+													  (window.location.href =
+															this.generateManageLink() +
+															(this.url.project ? `&project=${this.url.project}` : "") +
+															(this.url.module ? `&module=${this.url.module}` : ""))
+											}}"
+											class="bg-white text-slate-600 border flex justify-center items-center h-10 relative rounded-md px-4 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+										>
+											${this.url.repo ? "Edit" : "Confirm"}
+										</button>
+										${!this.isValidUrl() && this.repoURL.length > 0
+											? html`<p class="absolute text-red-500 -bottom-5 text-xs">
+													Please enter a valid GitHub repository URL.
+											  </p>`
+											: ""}
+									</div>
+							  </div>`
+							: this.projects === "load"
+							? html`<div class="flex flex-col gap-0.5 mt-4">
+									<div class="mx-auto">
+										<div class="h-12 w-12 animate-spin mb-4">
+											<div
+												class="h-full w-full bg-surface-50 border-[#0891b2] border-4 rounded-full"
+											></div>
+											<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-slate-50"></div>
+										</div>
+									</div>
+							  </div>`
+							: this.projects === "no-access" && typeof this.user === "undefined"
+							? html`<div class="flex flex-col gap-0.5 mt-4">
+									<div
+										class="py-4 px-8 w-full rounded-md bg-red-100 text-red-500 flex flex-col items-center justify-center"
+									>
+										<p class="mb-4 font-medium">
+											You have to be logged in to access this repository.
+										</p>
+										<button
+											@click=${async () => {
+												await browserAuth.login()
+												window.location.reload()
+											}}
+											target="_blank"
+											class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+										>
+											Login
+											<doc-icon
+												class="inline-block ml-1 translate-y-0.5"
+												size="1.2em"
+												icon="mdi:arrow-top-right"
+											></doc-icon>
+										</button>
+									</div>
+							  </div>`
+							: this.projects === "no-access" && typeof this.user === "object"
+							? html`<div class="flex flex-col gap-0.5 mt-4">
+									<div
+										class="py-4 px-8 w-full rounded-md bg-red-100 text-red-500 flex flex-col items-center justify-center"
+									>
+										<p class="mb-4 font-medium">You don't have access to this repository.</p>
+										<a
+											href="https://github.com/apps/${publicEnv.PUBLIC_LIX_GITHUB_APP_NAME}/installations/select_target"
+											target="_blank"
+											class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+											>Configure Permissions
+											<doc-icon
+												class="inline-block ml-1 translate-y-0.5"
+												size="1.2em"
+												icon="mdi:arrow-top-right"
+											></doc-icon>
+										</a>
+									</div>
+							  </div>`
+							: !this.url.project
+							? html`<div class="flex flex-col w-full max-w-lg items-center">
+									<h1 class="font-bold text-4xl text-slate-900 mb-4 text-center">
+										Select your project
+									</h1>
+									<p class="text-slate-600 w-full md:w-[400px] leading-relaxed text-center">
+										Please select the project you want to manage from the list below.
+									</p>
+									<div class="w-full relative max-w-sm">
+										<div
+											class="absolute pointer-events-none h-12 bg-gradient-to-b from-slate-50 to-transparent w-full top-0"
+										></div>
+										<div
+											class="absolute pointer-events-none h-12 bg-gradient-to-t from-slate-50 to-transparent w-full bottom-0"
+										></div>
+										<div class="w-full flex flex-col gap-1 max-h-96 overflow-y-scroll py-12">
+											${
+												// @ts-ignore
+												this.projects?.map(
+													(project: Record<string, any>) =>
+														html`<button
+															@click=${() => {
+																window.location.href =
+																	`/install?repo=${this.url.repo}&project=${project.projectPath}` +
+																	(this.url.module ? `&module=${this.url.module}` : "")
+															}}
+															class=${"flex gap-4 group items-center text-left p-2 text-md rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-600"}
+														>
+															${this.url.project === project.projectPath
+																? html`<inlang-folder size="3rem"></inlang-logo>`
+																: html`<inlang-folder size="3rem"></inlang-logo>`}
+															${project.projectPath}
+														</button>`
+												)
+											}
+										</div>
+									</div>
+							  </div>`
+							: this.modules
+							? html`<div class="h-full w-full">
+					<div class="mb-8 flex items-start justify-between gap-4">
+					<div>
 							<h1 class="font-bold text-4xl text-slate-900 mb-4">Installed modules</h1>
-							<p class="text-slate-600 w-full md:w-[400px] leading-relaxed mb-12">
+							<p class="text-slate-600 w-full md:w-[400px] leading-relaxed">
 								Here is a list of all modules installed in your project.
 							</p>
+							</div>
+							<button
+							class=${"bg-slate-800 text-white text-center px-4 py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"}
+							@click=${() => {
+								window.location.href = `/install?repo=${this.url.repo}&project=${this.url.project}`
+							}}
+						>
+							Install a module
+						</button>
+							</div>
 								${
 									this.modules && this.modules !== "empty"
 										? html`<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -336,12 +363,42 @@ export class InlangManage extends TwLitElement {
 													this.modules?.map(
 														(module: Record<string, any>) =>
 															html`<div
-																class="p-6 w-full bg-white border border-slate-200 rounded-xl"
+																class="p-6 w-full bg-white border border-slate-200 rounded-xl flex flex-col justify-between gap-2"
 															>
-																<h2 class="font-medium mb-2">${module.displayName.en}</h2>
-																<p class="text-slate-500 line-clamp-2 text-sm">
-																	${module.description.en}
-																</p>
+																<div>
+																	<div class="w-full flex items-center justify-between mb-4">
+																		<h2 class="font-semibold">${module.displayName.en}</h2>
+																		<p class="text-sm font-mono text-[#0891b2]">
+																			${module.version}
+																		</p>
+																	</div>
+																	<p class="text-slate-500 line-clamp-2 text-sm">
+																		${module.description.en}
+																	</p>
+																	<p class="text-slate-500 line-clamp-2 text-sm mb-4">
+																		${module.module}
+																	</p>
+																</div>
+																${
+																	/* html`<div class="grid grid-cols-2 gap-2 justify-between">
+																	<button
+																		class="bg-slate-200 px-3 text-sm w-full text-slate-900 text-center py-1.5 rounded-md font-medium hover:bg-slate-300 transition-colors"
+																		@click=${() => {
+																			window.location.href = `/install?repo=${this.url.repo}&project=${this.url.project}&module=${module.module}`
+																		}}
+																	>
+																		Update
+																	</button>
+																	<button
+																		class="bg-red-500/10 px-3 w-full text-red-500 text-sm text-center py-1.5 rounded-md font-medium hover:bg-red-500/20 transition-colors"
+																		@click=${() => {
+																			window.location.href = `/install?repo=${this.url.repo}&project=${this.url.project}&module=${module.module}`
+																		}}
+																	>
+																		Uninstall
+																	</button>
+																	</div>` */ ""
+																}
 															</div>`
 													)
 												}
@@ -365,8 +422,9 @@ export class InlangManage extends TwLitElement {
 					  </div>
 					 <div class="flex-grow"></div>
 					  `
-					: ""}
-			</div>
+							: ""}
+				  </div>`
+				: html`<inlang-install jsonURL=${JSON.stringify(this.url)}></inlang-install>`}
 		</main>`
 	}
 }

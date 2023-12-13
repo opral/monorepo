@@ -267,8 +267,9 @@ export class InlangInstall extends TwLitElement {
 	}
 
 	override render(): TemplateResult {
-		return this.step === "nomodule"
-			? html`<div class="flex flex-col gap-2">
+		return html`<div class="max-w-7xl mx-auto py-16 h-full">
+			${this.step === "nomodule"
+				? html`<div class="flex flex-col gap-2">
 					<h2 class="text-xl font-semibold">No module selected</h2>
 					</h2>
 					<p class="text-slate-500 mb-8">
@@ -321,40 +322,40 @@ export class InlangInstall extends TwLitElement {
 						Find a module
 					</a>
 			  </div>`
-			: this.step === "noauth"
-			? html`<div class="flex flex-col gap-2">
-						<h2 class="text-xl font-semibold">Please authorize to continue</h2>
-						<p class="text-slate-500 mb-8">
-							We need your authorization to install modules in your repository.
-						</p>
-						<button
-							class=${"bg-slate-800 text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors " +
-							(!this.module ? "cursor-not-allowed" : "")}
-							@click=${async () => {
-								await browserAuth.login()
-								window.location.reload()
-							}}
-						>
-							Authorize inlang
-						</button>
-						<div class="h-[1px] w-full bg-slate-200 my-4"></div>
-						<h2 class="text-xl font-semibold">Or install manually</h2>
-						<p class="text-slate-500 mb-4">
-							In case you don't want to authorize inlang to install modules in your repository, you
-							can also install them manually.
-						</p>
-						<button
-							class=${"bg-slate-200 text-slate-900 text-center py-2 rounded-md font-medium hover:bg-slate-300 transition-colors " +
-							(!this.module ? "cursor-not-allowed" : "")}
-							@click=${() => {
-								if (this.module) this.manual = true
-							}}
-						>
-							Manual Install Instructions
-						</button>
-					</div>
-					${this.manual
-						? html`<div class="fixed inset-0 z-10 bg-black/25 flex items-center justify-center px-4"
+				: this.step === "noauth"
+				? html`<div class="flex flex-col gap-2">
+							<h2 class="text-xl font-semibold">Please authorize to continue</h2>
+							<p class="text-slate-500 mb-8">
+								We need your authorization to install modules in your repository.
+							</p>
+							<button
+								class=${"bg-slate-800 text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors " +
+								(!this.module ? "cursor-not-allowed" : "")}
+								@click=${async () => {
+									await browserAuth.login()
+									window.location.reload()
+								}}
+							>
+								Authorize inlang
+							</button>
+							<div class="h-[1px] w-full bg-slate-200 my-4"></div>
+							<h2 class="text-xl font-semibold">Or install manually</h2>
+							<p class="text-slate-500 mb-4">
+								In case you don't want to authorize inlang to install modules in your repository,
+								you can also install them manually.
+							</p>
+							<button
+								class=${"bg-slate-200 text-slate-900 text-center py-2 rounded-md font-medium hover:bg-slate-300 transition-colors " +
+								(!this.module ? "cursor-not-allowed" : "")}
+								@click=${() => {
+									if (this.module) this.manual = true
+								}}
+							>
+								Manual Install Instructions
+							</button>
+						</div>
+						${this.manual
+							? html`<div class="fixed inset-0 z-10 bg-black/25 flex items-center justify-center px-4"
 						@click=${() => {
 							this.manual = false
 						}}
@@ -449,9 +450,9 @@ export class InlangInstall extends TwLitElement {
 				</a>
 			</div>
 	  </div>`
-						: ""} `
-			: this.step === "norepo"
-			? html`<div class="flex flex-col gap-2">
+							: ""} `
+				: this.step === "norepo"
+				? html`<div class="flex flex-col gap-2">
 			<h2 class="text-xl font-semibold">Insert your repository link
 			</h2>
 					</h2>
@@ -460,8 +461,8 @@ export class InlangInstall extends TwLitElement {
 					by providing the repository URL above.
 					</p>
 			</div>`
-			: this.step === "noproject"
-			? html`<div class="flex flex-col gap-2">
+				: this.step === "noproject"
+				? html`<div class="flex flex-col gap-2">
 			<h2 class="text-xl font-semibold">Select your project
 			</h2>
 					</h2>
@@ -470,8 +471,8 @@ export class InlangInstall extends TwLitElement {
 					by selecting the project above.
 					</p>
 			</div>`
-			: this.step === "no-optin"
-			? html`<div class="flex flex-col gap-2">
+				: this.step === "no-optin"
+				? html`<div class="flex flex-col gap-2">
 			<h2 class="text-xl font-semibold">Do you want to install this module?
 			</h2>
 					</h2>
@@ -503,8 +504,8 @@ export class InlangInstall extends TwLitElement {
 						</button>
 					</div>
 			</div>`
-			: this.step === "install"
-			? html`<div class="flex flex-col gap-2">
+				: this.step === "install"
+				? html`<div class="flex flex-col gap-2">
 			<h2 class="text-xl font-semibold flex items-center gap-2">
 			Installing module
 			</h2>
@@ -525,8 +526,8 @@ export class InlangInstall extends TwLitElement {
 					Cancel installation
 					</button>
 			</div>`
-			: this.step === "error"
-			? html`<div class="flex flex-col gap-2"><h2 class="text-xl font-semibold flex items-center gap-2">
+				: this.step === "error"
+				? html`<div class="flex flex-col gap-2"><h2 class="text-xl font-semibold flex items-center gap-2">
 			An error occured
 			</h2>
 					</h2>
@@ -654,8 +655,8 @@ export class InlangInstall extends TwLitElement {
 	  </div>`
 							: ""
 					} `
-			: this.step === "success"
-			? html`<div class="flex flex-col gap-2"><h2 class="text-xl font-semibold flex items-center gap-2">
+				: this.step === "success"
+				? html`<div class="flex flex-col gap-2"><h2 class="text-xl font-semibold flex items-center gap-2">
 			Succesfully installed into your project: ${this.url.project}
 			</h2>
 					</h2>
@@ -678,8 +679,8 @@ export class InlangInstall extends TwLitElement {
 						</a>
 					</div>
 					</div>`
-			: this.step === "abort"
-			? html`<div class="flex flex-col gap-2"><h2 class="text-xl font-semibold flex items-center gap-2">
+				: this.step === "abort"
+				? html`<div class="flex flex-col gap-2"><h2 class="text-xl font-semibold flex items-center gap-2">
 			Installation aborted
 			</h2>
 					</h2>
@@ -698,6 +699,16 @@ export class InlangInstall extends TwLitElement {
 							To inlang Manage
 						</button>
 					</div>`
-			: html`<div class="flex flex-col gap-2">Loading...</div>`
+				: html`<div class="flex flex-col gap-0.5 mt-72">
+						<div class="mx-auto">
+							<div class="h-12 w-12 animate-spin mb-4">
+								<div
+									class="h-full w-full bg-surface-50 border-[#0891b2] border-4 rounded-full"
+								></div>
+								<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-slate-50"></div>
+							</div>
+						</div>
+				  </div>`}
+		</div>`
 	}
 }
