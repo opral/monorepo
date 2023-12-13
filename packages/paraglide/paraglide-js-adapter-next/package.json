@@ -1,0 +1,43 @@
+{
+    "name": "@inlang/paraglide-js-adapter-next",
+    "version": "0.0.1",
+    "private": true,
+    "description": "A Next.js integration making it easy to work with Paraglide",
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc -w"
+    },
+    "keywords": [
+        "inlang",
+        "i18n",
+        "localization",
+        "translation",
+        "internationalization",
+        "next.js",
+        "next",
+        "react"
+    ],
+    "type": "module",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "peerDependencies": {
+        "next": "^13.0.0"
+    },
+    "devDependencies": {
+        "@inlang/paraglide-js-adapter-webpack": "workspace:^",
+        "typescript": "^5.3.3"
+    },
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        },
+        "./plugin": {
+            "import": "./dist/plugin.js",
+            "types": "./dist/plugin.d.ts"
+        }
+    }
+}
