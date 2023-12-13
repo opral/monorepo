@@ -1,13 +1,3 @@
-/*
-
-Paraglide — SolidStart Adapter
-
-This file will in the future be a npm package.
-Right now you can copy it into your project.
-And use it like this: (see ./index.tsx)
-
-*/
-
 import * as solid from "solid-js"
 import * as solid_web from "solid-js/web"
 import * as router from "@solidjs/router"
@@ -37,6 +27,7 @@ export function languageTagInPathname<T extends string>(
 			return tag
 		}
 	}
+	return undefined
 }
 
 /**
