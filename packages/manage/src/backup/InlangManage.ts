@@ -87,32 +87,54 @@ export class InlangManage extends TwLitElement {
 	}
 
 	override render(): TemplateResult {
-		return html` <main class="w-full min-h-screen flex flex-col bg-slate-50">
-			<header class="bg-white border-b border-slate-200 py-4 px-4">
-				<div
-					class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between md:items-center relative sm:static"
-				>
-					<div class="flex items-center">
-						<a
-							href="/"
-							class="flex items-center w-fit pointer-events-auto transition-opacity hover:opacity-75"
-						>
-							<inlang-logo size="2rem"></inlang-logo>
-						</a>
-						<p class="self-center text-left font-regular text-slate-400 pl-4 pr-1">/</p>
-						<p class="self-center pl-2 text-left font-medium text-slate-900">Manage</p>
+		return html` <main
+			class="w-full min-h-screen py-8 flex justify-center items-center px-4 bg-slate-50"
+		>
+			<div class="w-full max-w-lg h-auto bg-white border border-slate-200 p-6 rounded-lg">
+				<div class="flex items-center gap-4 justify-between border-b border-b-slate-200 pb-3 mb-4">
+					<div class="flex items-center gap-2">
+						<inlang-logo></inlang-logo>
+						<h1 class="font-semibold capitalize">
+							${this.url.path !== ""
+								? html`<a
+										class="hover:text-slate-500 transition-colors duration-100"
+										href=${`/` +
+										(this.user ? `?repo=${this.url.repo}` : "") +
+										(this.url.project ? `&project=${this.url.project}` : "")}
+										>Manage</a
+								  >`
+								: "Manage"}
+							${this.url.path && `/ ${this.url.path}`}
+						</h1>
+					</div>
+					<div>
+						${this.user === "load"
+							? html`<div class="animate-pulse h-9 w-20 rounded-md bg-slate-100"></div>`
+							: this.user
+							? html`<button
+									class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md pl-2 pr-3 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+									@click=${async () => {
+										await browserAuth.logout()
+										window.location.href = "/"
+									}}
+							  >
+									<img src=${this.user.avatarUrl} class="w-6 h-6 rounded-full mr-2" />
+									Logout
+							  </button>`
+							: html`<button
+									class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+									@click=${async () => {
+										await browserAuth.login()
+										window.location.reload()
+									}}
+							  >
+									Login
+							  </button>`}
 					</div>
 				</div>
-			</header>
-			<div
-				class="w-full max-w-7xl h-full flex-grow mx-auto flex items-center justify-center px-4 pb-24"
-			>
-				${!this.url.repo
-					? html`<div class="max-w-lg w-full flex flex-col gap-4">
-							<h1 class="font-bold text-4xl text-slate-900">Open your Repo</h1>
-							<p class="text-slate-600 w-full md:w-[400px] leading-relaxed mb-8">
-								To access your projects, please enter the URL of your GitHub repository.
-							</p>
+				${this.user && this.user !== "load"
+					? html`				<div class="border-b border-slate-200 mb-4 pb-4">
+
 							<div
 								disabled=${this.url.repo}
 								class=${`px-1 gap-2 relative z-10 flex items-center w-full border bg-white rounded-lg transition-all relative ${
@@ -138,11 +160,13 @@ export class InlangManage extends TwLitElement {
 												(this.url.module ? `&module=${this.url.module}` : "")
 										}
 									}}
-									class=${"active:outline-0 px-2 focus:outline-0 focus:ring-0 border-0 h-12 grow placeholder:text-slate-500 placeholder:font-normal placeholder:text-base " +
-									(this.url.repo ? "opacity-50 pointer-events-none " : " ") +
-									(!this.isValidUrl() && this.repoURL.length > 0
-										? "text-red-500"
-										: "text-slate-900")}
+									class=${
+										"active:outline-0 px-2 focus:outline-0 focus:ring-0 border-0 h-12 grow placeholder:text-slate-500 placeholder:font-normal placeholder:text-base " +
+										(this.url.repo ? "opacity-50 pointer-events-none " : " ") +
+										(!this.isValidUrl() && this.repoURL.length > 0
+											? "text-red-500"
+											: "text-slate-900")
+									}
 									placeholder="https://github.com/user/example"
 								/>
 								<button
@@ -159,104 +183,104 @@ export class InlangManage extends TwLitElement {
 								>
 									${this.url.repo ? "Edit" : "Confirm"}
 								</button>
-								${!this.isValidUrl() && this.repoURL.length > 0
-									? html`<p class="absolute text-red-500 -bottom-5 text-xs">
-											Please enter a valid GitHub repository URL.
-									  </p>`
-									: ""}
+								${
+									!this.isValidUrl() && this.repoURL.length > 0
+										? html`<p class="absolute text-red-500 -bottom-5 text-xs">
+												Please enter a valid GitHub repository URL.
+										  </p>`
+										: ""
+								}
+							</div>
+							${
+								this.projects === "load"
+									? html`<div class="flex flex-col gap-0.5 mt-4">
+											<div class="animate-pulse h-12 w-full rounded-md bg-slate-100"></div>
+									  </div>`
+									: this.projects === "no-access"
+									? html`<div class="flex flex-col gap-0.5 mt-4">
+											<div
+												class="py-4 w-full rounded-md bg-red-100 text-red-500 flex flex-col items-center justify-center"
+											>
+												<p class="mb-4">You don't have access to this repository.</p>
+												<a
+													href="https://github.com/apps/${publicEnv.PUBLIC_LIX_GITHUB_APP_NAME}/installations/select_target"
+													target="_blank"
+													class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+													>Configure Permissions
+													<doc-icon
+														class="inline-block ml-1 translate-y-0.5"
+														size="1.2em"
+														icon="mdi:arrow-top-right"
+													></doc-icon>
+												</a>
+											</div>
+									  </div>`
+									: html`<div class="flex flex-col gap-0.5 mt-4">
+											${this.projects?.map(
+												(project) =>
+													html`<button
+														@click=${() => {
+															if (this.url.path === "install" && !this.url.project) {
+																window.location.href =
+																	`/install?repo=${this.url.repo}&project=${project.projectPath}` +
+																	(this.url.module ? `&module=${this.url.module}` : "")
+															} else {
+																this.url = {
+																	...this.url,
+																	project: project.projectPath,
+																}
+																window.history.pushState(
+																	{},
+																	"",
+																	`?repo=${this.url.repo}&project=${project.projectPath}` +
+																		(this.url.module ? `&module=${this.url.module}` : "")
+																)
+															}
+														}}
+														class=${"flex gap-4 group items-center px-4 py-2 text-sm rounded-md " +
+														(this.url.project === project.projectPath
+															? "bg-slate-100 text-slate-900"
+															: "text-slate-500 hover:bg-slate-50 hover:text-slate-600")}
+													>
+														${this.url.project === project.projectPath
+															? html`<doc-icon
+																	icon="mdi:folder-open"
+																	size="1.4em"
+																	class="inline-block aspect-square mt-1.5"
+															  ></doc-icon>`
+															: html`<doc-icon
+																		icon="mdi:folder"
+																		size="1.4em"
+																		class="inline-block aspect-square mt-1.5 group-hover:hidden"
+																	></doc-icon
+																	><doc-icon
+																		icon="mdi:folder-open"
+																		size="1.4em"
+																		class="aspect-square mt-1.5 hidden group-hover:inline-block"
+																	></doc-icon>`}
+														${project.projectPath}
+													</button>`
+											)}
+									  </div>`
+							}
+					  </div></div>`
+					: this.url.path === "" && !this.user
+					? html` <div class="border-b border-slate-200 mb-4 pb-4">
+							<div>
+								<manage-artwork></manage-artwork>
+								<h1 class="text-slate-900 text-lg font-semibold mb-2">What is inlang Manage?</h1>
+								<p class="text-slate-600">
+									inlang Manage is a tool to help you install and manage inlang modules without
+									having to use the command line.
+								</p>
 							</div>
 					  </div>`
-					: this.projects === "load"
-					? html`<div class="flex flex-col gap-0.5 mt-4">
-							<div class="mx-auto">
-								<div class="h-12 w-12 animate-spin mb-4">
-									<div class="h-full w-full bg-surface-50 border-[#0891b2] border-4 rounded-full" />
-									<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-slate-50" />
-								</div>
-							</div>
-					  </div>`
-					: this.projects === "no-access" && typeof this.user === "undefined"
-					? html`<div class="flex flex-col gap-0.5 mt-4">
-							<div
-								class="py-4 px-8 w-full rounded-md bg-red-100 text-red-500 flex flex-col items-center justify-center"
-							>
-								<p class="mb-4 font-medium">You have to be logged in to access this repository.</p>
-								<button
-									@click=${async () => {
-										await browserAuth.login()
-										window.location.reload()
-									}}
-									target="_blank"
-									class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
-								>
-									Login
-									<doc-icon
-										class="inline-block ml-1 translate-y-0.5"
-										size="1.2em"
-										icon="mdi:arrow-top-right"
-									></doc-icon>
-								</button>
-							</div>
-					  </div>`
-					: this.projects === "no-access" && typeof this.user === "object"
-					? html`<div class="flex flex-col gap-0.5 mt-4">
-							<div
-								class="py-4 px-8 w-full rounded-md bg-red-100 text-red-500 flex flex-col items-center justify-center"
-							>
-								<p class="mb-4 font-medium">You don't have access to this repository.</p>
-								<a
-									href="https://github.com/apps/${publicEnv.PUBLIC_LIX_GITHUB_APP_NAME}/installations/select_target"
-									target="_blank"
-									class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
-									>Configure Permissions
-									<doc-icon
-										class="inline-block ml-1 translate-y-0.5"
-										size="1.2em"
-										icon="mdi:arrow-top-right"
-									></doc-icon>
-								</a>
-							</div>
-					  </div>`
-					: html`<div class="flex flex-col w-full max-w-lg ">
-							<h1 class="font-bold text-4xl text-slate-900 mb-4">Select your project</h1>
-							<p class="text-slate-600 w-full md:w-[400px] leading-relaxed mb-12">
-								Please select the project you want to manage from the list below.
-							</p>
-							<div class="w-full flex flex-col gap-1">
-								${this.projects?.map(
-									(project) =>
-										html`<button
-											@click=${() => {
-												if (this.url.path === "install" && !this.url.project) {
-													window.location.href =
-														`/install?repo=${this.url.repo}&project=${project.projectPath}` +
-														(this.url.module ? `&module=${this.url.module}` : "")
-												} else {
-													this.url = {
-														...this.url,
-														project: project.projectPath,
-													}
-													window.history.pushState(
-														{},
-														"",
-														`?repo=${this.url.repo}&project=${project.projectPath}` +
-															(this.url.module ? `&module=${this.url.module}` : "")
-													)
-												}
-											}}
-											class=${"flex gap-4 group items-center text-left py-2 text-md px-4 rounded-md " +
-											(this.url.project === project.projectPath
-												? "bg-slate-200 text-slate-900"
-												: "text-slate-500 hover:bg-slate-100 hover:text-slate-600")}
-										>
-											${this.url.project === project.projectPath
-												? html`<inlang-logo rounded size="2rem"></inlang-logo> `
-												: html`<inlang-logo rounded size="2rem"></inlang-logo>`}
-											${project.projectPath}
-										</button>`
-								)}
-							</div>
-					  </div>`}
+					: ""}
+				${!this.url.path
+					? html` <inlang-menu jsonURL=${JSON.stringify(this.url)}></inlang-menu>`
+					: this.url.path === "install"
+					? html`<inlang-install jsonURL=${JSON.stringify(this.url)}></inlang-install>`
+					: ""}
 			</div>
 		</main>`
 	}
@@ -264,18 +288,13 @@ export class InlangManage extends TwLitElement {
 
 @customElement("inlang-logo")
 export class InlangLogo extends TwLitElement {
-	@property({ type: String })
-	size: string = "1rem"
-	@property({ type: Boolean })
-	rounded: boolean = false
 	override render(): TemplateResult {
 		return html`
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				version="1.0"
-				class=${this.rounded ? "rounded-full" : ""}
-				width="${this.size}"
-				height="${this.size}"
+				width="24px"
+				height="24px"
 				viewBox="0 0 256.000000 256.000000"
 				preserveAspectRatio="xMidYMid meet"
 			>
