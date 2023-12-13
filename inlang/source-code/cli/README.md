@@ -132,7 +132,7 @@ The translate command has the following options:
 
 - `-f, --force`: If this option is set, the command will not prompt confirmation. This is useful for CI/CD build pipelines. **We advise you to only use `machine translate` in build pipelines to avoid out-of-context/wrong translations.**
 - `--project <path>`: Specifies the path to the project root. The default project root is the current working directory.
-- `--sourceLanguageTag <source>`: Specifies the source language tag. 
+- `--sourceLanguageTag <source>`: Specifies the source [language tag](/m/8y8sxj09/library-inlang-languageTag). 
 - `--targetLanguageTags <targets...>`: Specifies the target language tags as comma seperated list (e.g. sk,zh,pt-BR).
 
 The translations are performed using machine translation services. The translated messages are added to the respective language resources. Finally, the updated resources are written back to the file system.
@@ -167,7 +167,7 @@ The translate command has the following options:
 
 - `--no-fail`: If this option is set, the command will not fail if there are any linting errors.
 - `--project <path>`: Specifies the path to the project root. The default project root is the current working directory.
-- `--languageTags <tags>`: Specifies the language tags to lint. Defaults to all. Should be a comma-separated list of language tags specified in the inlang project, e.g. `en,de,fr`.
+- `--languageTags <tags>`: Specifies the [language tags](/m/8y8sxj09/library-inlang-languageTag) to lint. Defaults to all. Should be a comma-separated list of language tags specified in the inlang project, e.g. `en,de,fr`.
 
 `lint` will read through all resources and find potential errors and warnings in the translation strings, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/monorepo/tree/main/inlang/source-code/message-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns/duplicates**.
 

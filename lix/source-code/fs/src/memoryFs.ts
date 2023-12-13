@@ -1,22 +1,101 @@
-import type { NodeishFilesystem, NodeishStats, FileChangeInfo } from "../NodeishFilesystemApi.js"
-import { FilesystemError } from "../errors/FilesystemError.js"
+import type { NodeishFilesystem, NodeishStats, FileChangeInfo } from "./NodeishFilesystemApi.js"
+import { FilesystemError } from "./errors/FilesystemError.js"
+import { normalPath, getBasename, getDirname } from "./utilities/helpers.js"
 
 type Inode = Uint8Array | Set<string>
 
+export function toSnapshot(fs: NodeishFilesystem) {
+	return {
+		fsMap: Object.fromEntries(
+			[...fs._state.fsMap].map(([path, content]) => {
+				return [
+					path,
+					// requires node buffers, but no web standard method exists
+					content instanceof Set ? [...content].sort() : content.toString("base64"),
+
+					// Alternative to try:
+					// onst binaryData = new Uint8Array([255, 116, 79, 99 /*...*/]);
+					// const base64Encoded = btoa(String.fromCharCode.apply(null, binaryData));
+					// // Decode Base64 back to binary
+					// const decodedBinaryString = atob(base64Encoded);
+					// const decodedBinaryData = new Uint8Array([...decodedBinaryString].map(char => char.charCodeAt(0)));
+					// this breaks packfile binary data but could be fixed in future btoa(unescape(encodeURIComponent(new TextDecoder().decode(content)))),
+				]
+			})
+		),
+		fsStats: Object.fromEntries(
+			[...fs._state.fsStats].map(([path, fsStat]) => {
+				return [
+					path,
+					{
+						...fsStat,
+						ino: undefined,
+						isFile: undefined,
+						isDirectory: undefined,
+						isSymbolicLink: undefined,
+					},
+				]
+			})
+		),
+	}
+}
+
+export function fromSnapshot(fs: NodeishFilesystem, snapshot: { fsMap: any; fsStats: any }) {
+	fs._state.lastIno = 1
+	fs._state.fsMap = new Map(
+		// @ts-ignore FIXME: no idea what ts wants me to do here the error message is ridiculous
+		Object.entries(snapshot.fsMap).map(([path, content]) => {
+			if (typeof content === "string") {
+				// requires node buffers, but no web standard method exists
+				const data = Buffer.from(content, "base64")
+				// new TextEncoder().encode(decodeURIComponent(escape(atob(content)))) Buffer.from()
+				return [path, data]
+			}
+
+			return [path, new Set(content as string[])]
+		})
+	)
+	fs._state.fsStats = new Map(
+		Object.entries(snapshot.fsStats).map(([path, rawStat]) => {
+			const serializedStat = rawStat as Omit<
+				NodeishStats,
+				"isFile" | "isDirectory" | "isSymbolicLink" | "ino"
+			>
+
+			const statsObj = {
+				...serializedStat,
+				ino: fs._state.lastIno++,
+				isFile: () => serializedStat._kind === 0,
+				isDirectory: () => serializedStat._kind === 1,
+				isSymbolicLink: () => serializedStat._kind === 2,
+			} as NodeishStats
+
+			return [path, statsObj]
+		})
+	)
+}
+
 export function createNodeishMemoryFs(): NodeishFilesystem {
 	// local state
-	const fsMap: Map<string, Inode> = new Map()
-	const fsStats: Map<string, NodeishStats> = new Map()
+	const state: {
+		lastIno: number
+		fsMap: Map<string, Inode>
+		fsStats: Map<string, NodeishStats>
+	} = {
+		lastIno: 1,
+		fsMap: new Map(),
+		fsStats: new Map(),
+	}
 
 	// initialize the root to an empty dir
-	fsMap.set("/", new Set())
-	newStatEntry("/", fsStats, 1, 0o755)
+	state.fsMap.set("/", new Set())
+	newStatEntry("/", state.fsStats, 1, 0o755)
 
 	const listeners: Set<(event: FileChangeInfo) => void> = new Set()
 
 	async function stat(path: Parameters<NodeishFilesystem["stat"]>[0]): Promise<NodeishStats> {
 		path = normalPath(path)
-		const stats: NodeishStats | undefined = fsStats.get(path)
+		const stats: NodeishStats | undefined = state.fsStats.get(path)
 		if (stats === undefined) throw new FilesystemError("ENOENT", path, "stat")
 		if (stats.symlinkTarget) return stat(stats.symlinkTarget)
 		return Object.assign({}, stats)
@@ -24,34 +103,41 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 	async function lstat(path: Parameters<NodeishFilesystem["lstat"]>[0]) {
 		path = normalPath(path)
-		const stats: NodeishStats | undefined = fsStats.get(path)
+		const stats: NodeishStats | undefined = state.fsStats.get(path)
 		if (stats === undefined) throw new FilesystemError("ENOENT", path, "lstat")
 		if (!stats.symlinkTarget) return stat(path)
 		return Object.assign({}, stats)
 	}
 
 	return {
+		_state: state,
 		writeFile: async function (
 			path: Parameters<NodeishFilesystem["writeFile"]>[0],
 			data: Parameters<NodeishFilesystem["writeFile"]>[1],
 			options?: Parameters<NodeishFilesystem["writeFile"]>[2]
 		) {
-			const encoder = new TextEncoder()
-
 			path = normalPath(path)
 			const dirName = getDirname(path)
 			const baseName = getBasename(path)
-			const parentDir: Inode | undefined = fsMap.get(dirName)
+			const parentDir: Inode | undefined = state.fsMap.get(dirName)
 
 			if (!(parentDir instanceof Set)) throw new FilesystemError("ENOENT", path, "writeFile")
 
 			if (typeof data === "string") {
-				data = encoder.encode(data)
+				data = Buffer.from(new TextEncoder().encode(data))
+			} else if (!(data instanceof Uint8Array)) {
+				throw new FilesystemError(
+					'The "data" argument must be of type string/Uint8Array',
+					data,
+					"readFile"
+				)
+			} else if (!Buffer.isBuffer(data)) {
+				data = Buffer.from(data)
 			}
 
 			parentDir.add(baseName)
-			newStatEntry(path, fsStats, 0, options?.mode ?? 0o644)
-			fsMap.set(path, data)
+			newStatEntry(path, state.fsStats, 0, options?.mode ?? 0o644)
+			state.fsMap.set(path, data)
 			for (const listener of listeners) {
 				listener({ eventType: "rename", filename: dirName + baseName })
 			}
@@ -67,7 +153,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			const decoder = new TextDecoder()
 
 			path = normalPath(path)
-			const file: Inode | undefined = fsMap.get(path)
+			const file: Inode | undefined = state.fsMap.get(path)
 
 			if (file instanceof Set) throw new FilesystemError("EISDIR", path, "readFile")
 			if (file === undefined) throw new FilesystemError("ENOENT", path, "readFile")
@@ -78,7 +164,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 		readdir: async function (path: Parameters<NodeishFilesystem["readdir"]>[0]) {
 			path = normalPath(path)
-			const dir: Inode | undefined = fsMap.get(path)
+			const dir: Inode | undefined = state.fsMap.get(path)
 			if (dir instanceof Set) return [...dir.keys()]
 			if (dir === undefined) throw new FilesystemError("ENOENT", path, "readdir")
 			throw new FilesystemError("ENOTDIR", path, "readdir")
@@ -91,14 +177,14 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			path = normalPath(path)
 			const dirName = getDirname(path)
 			const baseName = getBasename(path)
-			const parentDir: Inode | undefined = fsMap.get(dirName)
+			const parentDir: Inode | undefined = state.fsMap.get(dirName)
 
 			if (typeof parentDir === "string") throw new FilesystemError("ENOTDIR", path, "mkdir")
 
 			if (parentDir && parentDir instanceof Set) {
 				parentDir.add(baseName)
-				newStatEntry(path, fsStats, 1, 0o755)
-				fsMap.set(path, new Set())
+				newStatEntry(path, state.fsStats, 1, 0o755)
+				state.fsMap.set(path, new Set())
 				for (const listener of listeners) {
 					listener({ eventType: "rename", filename: dirName + baseName })
 				}
@@ -121,8 +207,8 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			path = normalPath(path)
 			const dirName = getDirname(path)
 			const baseName = getBasename(path)
-			const target: Inode | undefined = fsMap.get(path)
-			const parentDir: Inode | undefined = fsMap.get(dirName)
+			const target: Inode | undefined = state.fsMap.get(path)
+			const parentDir: Inode | undefined = state.fsMap.get(dirName)
 
 			if (parentDir === undefined || target === undefined)
 				throw new FilesystemError("ENOENT", path, "rm")
@@ -131,8 +217,8 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 			if (target instanceof Uint8Array) {
 				parentDir.delete(baseName)
-				fsStats.delete(path)
-				fsMap.delete(path)
+				state.fsStats.delete(path)
+				state.fsMap.delete(path)
 				for (const listener of listeners) {
 					listener({ eventType: "rename", filename: dirName + baseName })
 				}
@@ -147,8 +233,8 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 					})
 				)
 				parentDir.delete(baseName)
-				fsStats.delete(path)
-				fsMap.delete(path)
+				state.fsStats.delete(path)
+				state.fsMap.delete(path)
 				for (const listener of listeners) {
 					listener({ eventType: "rename", filename: dirName + baseName })
 				}
@@ -159,6 +245,10 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			throw new FilesystemError("EISDIR", path, "rm")
 		},
 
+		/**
+		 *
+		 * @throws {"ENOENT" | WatchAbortedError} // TODO: move to lix error classes FileDoesNotExistError
+		 */
 		watch: function (
 			path: Parameters<NodeishFilesystem["watch"]>[0],
 			options: Parameters<NodeishFilesystem["watch"]>[1]
@@ -241,8 +331,8 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			path = normalPath(path)
 			const dirName = getDirname(path)
 			const baseName = getBasename(path)
-			const target: Inode | undefined = fsMap.get(path)
-			const parentDir: Inode | undefined = fsMap.get(dirName)
+			const target: Inode | undefined = state.fsMap.get(path)
+			const parentDir: Inode | undefined = state.fsMap.get(dirName)
 
 			if (parentDir === undefined || target === undefined)
 				throw new FilesystemError("ENOENT", path, "rmdir")
@@ -253,8 +343,8 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			if (target.size) throw new FilesystemError("ENOTEMPTY", path, "rmdir")
 
 			parentDir.delete(baseName)
-			fsStats.delete(path)
-			fsMap.delete(path)
+			state.fsStats.delete(path)
+			state.fsMap.delete(path)
 
 			for (const listener of listeners) {
 				listener({ eventType: "rename", filename: dirName + baseName })
@@ -267,131 +357,108 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 		) {
 			path = normalPath(path)
 			target = target.startsWith("/") ? target : `${path}/../${target}`
-			const targetInode: Inode | undefined = fsMap.get(normalPath(target))
-			const parentDir: Inode | undefined = fsMap.get(getDirname(path))
+			const targetInode: Inode | undefined = state.fsMap.get(normalPath(target))
+			const parentDir: Inode | undefined = state.fsMap.get(getDirname(path))
 
-			if (fsMap.get(path)) throw new FilesystemError("EEXIST", path, "symlink", target)
+			if (state.fsMap.get(path)) {
+				throw new FilesystemError("EEXIST", path, "symlink", target)
+			}
 
-			if (parentDir instanceof Uint8Array)
+			if (parentDir instanceof Uint8Array) {
 				throw new FilesystemError("ENOTDIR", path, "symlink", target)
+			}
 
-			if (targetInode === undefined || parentDir === undefined)
+			if (parentDir === undefined) {
 				throw new FilesystemError("ENOENT", path, "symlink", target)
+			}
+
+			if (targetInode !== undefined) {
+				state.fsMap.set(path, targetInode)
+			}
 
 			parentDir.add(getBasename(path))
-			newStatEntry(path, fsStats, 2, 0o777, target)
-			fsMap.set(path, targetInode)
+			newStatEntry(path, state.fsStats, 2, 0o777, target)
 		},
 
 		unlink: async function (path: Parameters<NodeishFilesystem["unlink"]>[0]) {
 			path = normalPath(path)
-			const targetStats = fsStats.get(path)
-			const target: Inode | undefined = fsMap.get(path)
-			const parentDir: Inode | undefined = fsMap.get(getDirname(path))
+			const targetStats = state.fsStats.get(path)
+			const target: Inode | undefined = state.fsMap.get(path)
+			const parentDir: Inode | undefined = state.fsMap.get(getDirname(path))
 
 			if (parentDir === undefined || target === undefined)
 				throw new FilesystemError("ENOENT", path, "unlink")
 
-			if (parentDir instanceof Uint8Array) throw new FilesystemError("ENOTDIR", path, "unlink")
+			if (parentDir instanceof Uint8Array) {
+				throw new FilesystemError("ENOTDIR", path, "unlink")
+			}
 
-			if (targetStats?.isDirectory()) throw new FilesystemError("EISDIR", path, "unlink")
+			if (targetStats?.isDirectory()) {
+				throw new FilesystemError("EISDIR", path, "unlink")
+			}
 
 			parentDir.delete(getBasename(path))
-			fsStats.delete(path)
-			fsMap.delete(path)
+			state.fsStats.delete(path)
+			state.fsMap.delete(path)
 		},
 		readlink: async function (path: Parameters<NodeishFilesystem["readlink"]>[0]) {
 			path = normalPath(path)
 			const linkStats = await lstat(path)
 
-			if (linkStats === undefined) throw new FilesystemError("ENOENT", path, "readlink")
+			if (linkStats === undefined) {
+				throw new FilesystemError("ENOENT", path, "readlink")
+			}
 
-			if (linkStats.symlinkTarget === undefined)
+			if (linkStats.symlinkTarget === undefined) {
 				throw new FilesystemError("EINVAL", path, "readlink")
+			}
 
 			return linkStats.symlinkTarget
 		},
 		stat,
 		lstat,
 	}
-}
 
-/**
- * Creates a new stat entry. 'kind' refers to whether the entry is for a file,
- * directory or symlink:
- * 0 = File
- * 1 = Directory
- * 2 = Symlink
- */
-function newStatEntry(
-	path: string,
-	stats: Map<string, NodeishStats>,
-	kind: number,
-	modeBits: number,
-	target?: string
-) {
-	const cdateMs: number = Date.now()
-	stats.set(normalPath(path), {
-		ctimeMs: cdateMs,
-		mtimeMs: cdateMs,
-		dev: 0,
-		ino: stats.size + 1,
-		mode: (!kind ? 0o100000 : kind === 1 ? 0o040000 : 0o120000) | modeBits,
-		uid: 0,
-		gid: 0,
-		size: -1,
-		isFile: () => kind === 0,
-		isDirectory: () => kind === 1,
-		isSymbolicLink: () => kind === 2,
-		// symlinkTarget is only for symlinks, and is not normalized
-		symlinkTarget: target,
-	})
-}
+	/**
+	 * Creates a new stat entry. 'kind' refers to whether the entry is for a file,
+	 * directory or symlink:
+	 * 0 = File
+	 * 1 = Directory
+	 * 2 = Symlink
+	 */
+	function newStatEntry(
+		path: string,
+		stats: Map<string, NodeishStats>,
+		kind: number,
+		modeBits: number,
+		target?: string
+	) {
+		const currentTime: number = Date.now()
+		const _kind = kind
 
-function getDirname(path: string): string {
-	return normalPath(
-		path
-			.split("/")
-			.filter((x) => x)
-			.slice(0, -1)
-			.join("/") ?? path
-	)
-}
+		const oldStats = stats.get(normalPath(path))
 
-function getBasename(path: string): string {
-	return (
-		path
-			.split("/")
-			.filter((x) => x)
-			.at(-1) ?? path
-	)
-}
+		// We need to always bump by 1 second in case mtime did not change since last write to trigger iso git 1 second resolution change detection
+		const mtimeMs =
+			Math.floor(currentTime / 1000) === (oldStats?.mtimeMs && Math.floor(oldStats?.mtimeMs / 1000))
+				? currentTime + 1000
+				: currentTime
 
-/**
- * Removes extraneous dots and slashes, resolves relative paths and ensures the
- * path begins and ends with '/'
- * FIXME: unify with utilities/normalizePath!
- */
-function normalPath(path: string): string {
-	const dots = /(\/|^)(\.\/)+/g
-	const slashes = /\/+/g
-
-	const upreference = /(?<!\.\.)[^/]+\/\.\.\//
-
-	// Append '/' to the beginning and end
-	path = `/${path}/`
-
-	// Handle the edge case where a path begins with '/..'
-	path = path.replace(/^\/\.\./, "")
-
-	// Remove extraneous '.' and '/'
-	path = path.replace(dots, "/").replace(slashes, "/")
-
-	// Resolve relative paths if they exist
-	let match
-	while ((match = path.match(upreference)?.[0])) {
-		path = path.replace(match, "")
+		stats.set(normalPath(path), {
+			ctimeMs: oldStats?.ctimeMs || currentTime,
+			mtimeMs,
+			dev: 0,
+			ino: oldStats?.ino || state.lastIno++,
+			mode: (!kind ? 0o100000 : kind === 1 ? 0o040000 : 0o120000) | modeBits,
+			uid: 0,
+			gid: 0,
+			size: -1,
+			isFile: () => kind === 0,
+			isDirectory: () => kind === 1,
+			isSymbolicLink: () => kind === 2,
+			// symlinkTarget is only for symlinks, and is not normalized
+			symlinkTarget: target,
+			_kind,
+		})
 	}
-
-	return path
 }

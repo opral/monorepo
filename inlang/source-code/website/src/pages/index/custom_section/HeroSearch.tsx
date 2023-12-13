@@ -11,7 +11,7 @@ const HeroSearch = () => {
 			<h1 class="text-4xl max-w-[1000px] md:text-6xl text-surface-900 text-center font-bold leading-snug tracking-tight mt-8 md:mt-16 ">
 				{m.home_inlang_title()}
 			</h1>
-			<p class="text-lg max-w-[700px] text-center text-surface-500 pt-4">
+			<p class="text-lg max-w-[900px] text-center text-surface-500 pt-4">
 				{m.home_inlang_description()}
 			</p>
 

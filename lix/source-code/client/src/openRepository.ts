@@ -7,8 +7,9 @@ import { optimizedRefsRes, optimizedRefsReq } from "./git-http/optimize-refs.js"
 import { Octokit } from "octokit"
 
 import { createSignal, createEffect } from "./solid.js"
-import isoGit from "isomorphic-git"
 
+import { commit as lixCommit } from "./git/commit.js"
+import isoGit from "isomorphic-git"
 const {
 	clone,
 	listRemotes,
@@ -16,7 +17,6 @@ const {
 	statusMatrix,
 	push,
 	pull,
-	commit,
 	currentBranch,
 	add,
 	log,
@@ -24,9 +24,24 @@ const {
 	checkout,
 	addRemote,
 	fetch: gitFetch,
+	commit: isoCommit,
 } = isoGit
 
 const verbose = false
+
+// TODO addd tests for whitelist
+
+const whitelistedExperimentalRepos = [
+	"inlang/example",
+	"inlang/ci-test-repo",
+	"inlang/monorepo",
+	"inlang/example-test",
+
+	"janfjohannes/inlang-example",
+	"janfjohannes/cal.com",
+
+	"niklasbuchfink/appflowy",
+]
 
 export async function openRepository(
 	url: string,
@@ -75,50 +90,66 @@ export async function openRepository(
 	// TODO: support for url scheme to use local repo already in the fs
 	const gitUrl = `https://${repoHost}/${owner}/${repoName}`
 
+	const enableExperimentalFeatures = whitelistedExperimentalRepos.includes(
+		`${owner}/${repoName}`.toLocaleLowerCase()
+	)
+
+	if (enableExperimentalFeatures) {
+		console.warn("using experimental git features for this repo.")
+	}
+
+	// Bail commit/ push on errors that are relevant or unknown
+
 	// the directory we use for all git operations
 	const dir = "/"
 
-	let pending: Promise<void | { error: Error }> | undefined = clone({
-		fs: withLazyFetching({ nodeishFs: rawFs, verbose, description: "clone" }),
-		http: makeHttpClient({
-			verbose,
-			description: "clone",
+	let pending: Promise<void | { error: Error }> | undefined
+	// Simpel check for existing git repos
+	// TODO: check for same origin
+	const maybeGitDir = await rawFs.lstat("/.git").catch((error) => ({ error }))
+	if ("error" in maybeGitDir) {
+		pending = clone({
+			fs: withLazyFetching({ nodeishFs: rawFs, verbose, description: "clone" }),
+			http: makeHttpClient({
+				verbose,
+				description: "clone",
 
-			onReq: ({ url, body }: { url: string; body: any }) => {
-				return optimizedRefsReq({ url, body, addRef: args.branch })
-			},
+				onReq: ({ url, body }: { url: string; body: any }) => {
+					return optimizedRefsReq({ url, body, addRef: args.branch })
+				},
 
-			onRes: optimizedRefsRes,
-		}),
-		dir,
-		corsProxy: gitProxyUrl,
-		url: gitUrl,
-		singleBranch: true,
-		noCheckout: true,
-		ref: args.branch,
-		depth: 1,
-		noTags: true,
-	})
-		.then(() => {
-			return checkout({
-				fs: withLazyFetching({
-					nodeishFs: rawFs,
-					verbose,
-					description: "checkout",
-				}),
-				dir,
-				ref: args.branch,
-				// filepaths: ["resources/en.json", "resources/de.json", "project.inlang.json"],
+				onRes: optimizedRefsRes,
+			}),
+			dir,
+			corsProxy: gitProxyUrl,
+			url: gitUrl,
+			singleBranch: true,
+			noCheckout: true,
+			ref: args.branch,
+			depth: 1,
+			noTags: true,
+		})
+			.then(() => {
+				return checkout({
+					fs: withLazyFetching({
+						nodeishFs: rawFs,
+						verbose,
+						description: "checkout",
+					}),
+					dir,
+					ref: args.branch,
+					// filepaths: ["resources/en.json", "resources/de.json", "project.inlang.json"],
+				})
 			})
-		})
-		.finally(() => {
-			pending = undefined
-		})
-		.catch((newError: Error) => {
-			setErrors((previous) => [...(previous || []), newError])
-		})
+			.finally(() => {
+				pending = undefined
+			})
+			.catch((newError: Error) => {
+				setErrors((previous) => [...(previous || []), newError])
+			})
 
-	await pending
+		await pending
+	}
 
 	// delay all fs and repo operations until the repo clone and checkout have finished, this is preparation for the lazy feature
 	function delayedAction({ execute }: { execute: () => any }) {
@@ -130,6 +161,8 @@ export async function openRepository(
 	}
 
 	return {
+		_isoGit: isoGit,
+		_enableExperimentalFeatures: enableExperimentalFeatures,
 		nodeishFs: withLazyFetching({
 			nodeishFs: rawFs,
 			verbose,
@@ -293,7 +326,7 @@ export async function openRepository(
 		},
 
 		commit(cmdArgs) {
-			return commit({
+			const commitArgs = {
 				fs: withLazyFetching({
 					nodeishFs: rawFs,
 					verbose,
@@ -301,9 +334,16 @@ export async function openRepository(
 					intercept: delayedAction,
 				}),
 				dir,
+				ref: args.branch,
 				author: cmdArgs.author,
 				message: cmdArgs.message,
-			})
+			}
+			if (enableExperimentalFeatures) {
+				console.warn("using experimental commit for this repo.")
+				return lixCommit(commitArgs)
+			} else {
+				return isoCommit(commitArgs)
+			}
 		},
 
 		push() {
@@ -429,15 +469,23 @@ export async function openRepository(
 		},
 
 		async getBranches() {
+			const serverRefs = await listServerRefs({
+				url: gitUrl,
+				corsProxy: gitProxyUrl,
+				prefix: "refs/heads",
+				http: makeHttpClient({ verbose, description: "getBranches" }),
+			}).catch((error) => {
+				return { error }
+			})
+
+			if ("error" in serverRefs) {
+				return undefined
+			}
+
 			return (
-				(
-					await listServerRefs({
-						url: gitUrl,
-						corsProxy: gitProxyUrl,
-						prefix: "refs/heads",
-						http: makeHttpClient({ verbose, description: "getBranches" }),
-					})
-				).map((ref) => ref.ref.replace("refs/heads/", "")) || undefined
+				serverRefs
+					.filter((ref) => !ref.ref.startsWith("refs/heads/gh-readonly-queue/"))
+					.map((ref) => ref.ref.replace("refs/heads/", "")) || undefined
 			)
 		},
 
