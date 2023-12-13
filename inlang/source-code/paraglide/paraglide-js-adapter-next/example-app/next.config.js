@@ -1,4 +1,12 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {}
+import { withParaglide } from "@inlang/paraglide-js-adapter-next/plugin"
 
-module.exports = nextConfig
+/** @type {import('next').NextConfig} */
+const nextConfig = withParaglide(
+	{
+		project: "./project.inlang",
+		outdir: "./src/paraglide",
+	},
+	{}
+)
+
+export default nextConfig

@@ -1,4 +1,4 @@
-import LanguageProvider from "@/lib/LanguageProvider"
+import { LanguageProvider } from "@inlang/paraglide-js-adapter-next"
 import { availableLanguageTags, languageTag } from "@/paraglide/runtime"
 
 export async function generateStaticParams() {
