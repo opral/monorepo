@@ -11,8 +11,15 @@ export function toSnapshot(fs: NodeishFilesystem) {
 				return [
 					path,
 					// requires node buffers, but no web standard method exists
-					content instanceof Set ? [...content] : content.toString("base64"),
-					// this breaks packfile binary data but could be fixed in futurebtoa(unescape(encodeURIComponent(new TextDecoder().decode(content)))),
+					content instanceof Set ? [...content].sort() : content.toString("base64"),
+
+					// Alternative to try:
+					// onst binaryData = new Uint8Array([255, 116, 79, 99 /*...*/]);
+					// const base64Encoded = btoa(String.fromCharCode.apply(null, binaryData));
+					// // Decode Base64 back to binary
+					// const decodedBinaryString = atob(base64Encoded);
+					// const decodedBinaryData = new Uint8Array([...decodedBinaryString].map(char => char.charCodeAt(0)));
+					// this breaks packfile binary data but could be fixed in future btoa(unescape(encodeURIComponent(new TextDecoder().decode(content)))),
 				]
 			})
 		),
@@ -22,6 +29,7 @@ export function toSnapshot(fs: NodeishFilesystem) {
 					path,
 					{
 						...fsStat,
+						ino: undefined,
 						isFile: undefined,
 						isDirectory: undefined,
 						isSymbolicLink: undefined,
@@ -33,6 +41,7 @@ export function toSnapshot(fs: NodeishFilesystem) {
 }
 
 export function fromSnapshot(fs: NodeishFilesystem, snapshot: { fsMap: any; fsStats: any }) {
+	fs._state.lastIno = 1
 	fs._state.fsMap = new Map(
 		// @ts-ignore FIXME: no idea what ts wants me to do here the error message is ridiculous
 		Object.entries(snapshot.fsMap).map(([path, content]) => {
@@ -50,11 +59,12 @@ export function fromSnapshot(fs: NodeishFilesystem, snapshot: { fsMap: any; fsSt
 		Object.entries(snapshot.fsStats).map(([path, rawStat]) => {
 			const serializedStat = rawStat as Omit<
 				NodeishStats,
-				"isFile" | "isDirectory" | "isSymbolicLink"
+				"isFile" | "isDirectory" | "isSymbolicLink" | "ino"
 			>
 
 			const statsObj = {
 				...serializedStat,
+				ino: fs._state.lastIno++,
 				isFile: () => serializedStat._kind === 0,
 				isDirectory: () => serializedStat._kind === 1,
 				isSymbolicLink: () => serializedStat._kind === 2,
@@ -68,9 +78,11 @@ export function fromSnapshot(fs: NodeishFilesystem, snapshot: { fsMap: any; fsSt
 export function createNodeishMemoryFs(): NodeishFilesystem {
 	// local state
 	const state: {
+		lastIno: number
 		fsMap: Map<string, Inode>
 		fsStats: Map<string, NodeishStats>
 	} = {
+		lastIno: 1,
 		fsMap: new Map(),
 		fsStats: new Map(),
 	}
@@ -406,38 +418,41 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 		stat,
 		lstat,
 	}
-}
 
-/**
- * Creates a new stat entry. 'kind' refers to whether the entry is for a file,
- * directory or symlink:
- * 0 = File
- * 1 = Directory
- * 2 = Symlink
- */
-function newStatEntry(
-	path: string,
-	stats: Map<string, NodeishStats>,
-	kind: number,
-	modeBits: number,
-	target?: string
-) {
-	const cdateMs: number = Date.now()
-	const _kind = kind
-	stats.set(normalPath(path), {
-		ctimeMs: cdateMs,
-		mtimeMs: cdateMs,
-		dev: 0,
-		ino: stats.size + 1,
-		mode: (!kind ? 0o100000 : kind === 1 ? 0o040000 : 0o120000) | modeBits,
-		uid: 0,
-		gid: 0,
-		size: -1,
-		isFile: () => kind === 0,
-		isDirectory: () => kind === 1,
-		isSymbolicLink: () => kind === 2,
-		// symlinkTarget is only for symlinks, and is not normalized
-		symlinkTarget: target,
-		_kind,
-	})
+	/**
+	 * Creates a new stat entry. 'kind' refers to whether the entry is for a file,
+	 * directory or symlink:
+	 * 0 = File
+	 * 1 = Directory
+	 * 2 = Symlink
+	 */
+	function newStatEntry(
+		path: string,
+		stats: Map<string, NodeishStats>,
+		kind: number,
+		modeBits: number,
+		target?: string
+	) {
+		const cdateMs: number = Date.now()
+		const _kind = kind
+
+		const oldStats = stats.get(normalPath(path))
+
+		stats.set(normalPath(path), {
+			ctimeMs: cdateMs,
+			mtimeMs: cdateMs,
+			dev: 0,
+			ino: oldStats?.ino || state.lastIno++,
+			mode: (!kind ? 0o100000 : kind === 1 ? 0o040000 : 0o120000) | modeBits,
+			uid: 0,
+			gid: 0,
+			size: -1,
+			isFile: () => kind === 0,
+			isDirectory: () => kind === 1,
+			isSymbolicLink: () => kind === 2,
+			// symlinkTarget is only for symlinks, and is not normalized
+			symlinkTarget: target,
+			_kind,
+		})
+	}
 }

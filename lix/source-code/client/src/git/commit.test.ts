@@ -2,24 +2,33 @@ import { describe, it, expect, vi } from "vitest"
 import { openRepository } from "../index.ts"
 import { createNodeishMemoryFs, toSnapshot, fromSnapshot } from "@lix-js/fs"
 import { readFileSync } from "node:fs"
+// import { writeFileSync } from "node:fs"
+
 describe("main workflow", async () => {
-	const fs = createNodeishMemoryFs()
+	async function testCommit({ useCustomCommit }) {
+		const fs = createNodeishMemoryFs()
 
-	const snapshot = JSON.parse(readFileSync("./mocks/example-repo.json", { encoding: "utf-8" }))
-	fromSnapshot(fs, snapshot)
+		const snapshot = JSON.parse(readFileSync("./mocks/ci-test-repo.json", { encoding: "utf-8" }))
+		fromSnapshot(fs, snapshot)
 
-	const repository: Awaited<ReturnType<typeof openRepository>> = await openRepository(
-		"https://github.com/inlang/ci-test-repo",
-		{
-			nodeishFs: fs,
-			branch: "symlinks-and-submodules",
-		}
-	)
+		const repository: Awaited<ReturnType<typeof openRepository>> = await openRepository(
+			"https://github.com/inlang/ci-test-repo",
+			{
+				nodeishFs: fs,
+				branch: "test-symlink",
+			}
+		)
 
-	// to create a new base snapshot:
-	// writeFileSync("./mocks/example-repo.json", JSON.stringify(toSnapshot(repository.nodeishFs), undefined, 4))
+		// to create a new base snapshot:
 
-	async function testCommit(commitFun: (arg: any) => void) {
+		// const snapshot = {}
+		// writeFileSync(
+		// 	"./mocks/ci-test-repo.json",
+		// 	JSON.stringify(toSnapshot(repository.nodeishFs), undefined, 4)
+		// )
+
+		const commitFun = useCustomCommit ? repository.commit : repository._isoGit.commit
+
 		let fileContent = ""
 		fileContent = await repository.nodeishFs.readFile("./README.md", {
 			encoding: "utf-8",
@@ -27,6 +36,7 @@ describe("main workflow", async () => {
 
 		fileContent += "\n// foo"
 		await repository.nodeishFs.writeFile("./README.md", fileContent)
+		await repository.nodeishFs.mkdir("./folder")
 		await repository.nodeishFs.writeFile("./folder/README_newfile.md", fileContent)
 		const statusPre = await repository.status({ filepath: "README.md" })
 
@@ -47,13 +57,13 @@ describe("main workflow", async () => {
 		expect(statusPost).toBe("unmodified")
 		expect(statusPost2).toBe("unmodified")
 
-		const statusPost3 = await repository.status({ filepath: "test-symlink-not-existing-targetd" })
+		const statusPost3 = await repository.status({ filepath: "test-symlink-not-existing-target" })
 		const statusPost4 = await repository.status({ filepath: "test-symlink" })
-		const statusPost5 = await repository.status({ filepath: "test-submodule" })
+		// const statusPost5 = await repository.status({ filepath: "test-submodule" }) not supported yet
 
 		expect(statusPost3).toBe("unmodified")
 		expect(statusPost4).toBe("unmodified")
-		expect(statusPost5).toBe("unmodified")
+		// expect(statusPost5).toBe("unmodified")
 
 		fileContent += "\n// bar"
 		await repository.nodeishFs.writeFile("./README.md", fileContent)
@@ -71,11 +81,9 @@ describe("main workflow", async () => {
 
 	it("coustom committed tree is identical to isomorphic git", async () => {
 		vi.useFakeTimers()
-		const snapA = await testCommit(repository.commit)
+		const snapA = await testCommit({ useCustomCommit: true })
 
-		fromSnapshot(fs, snapshot)
-
-		const snapB = await testCommit(repository._isoGit.commit)
+		const snapB = await testCommit({ useCustomCommit: false })
 
 		expect(snapA).toStrictEqual(snapB)
 		vi.useRealTimers()

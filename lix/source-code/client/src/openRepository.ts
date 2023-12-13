@@ -162,6 +162,7 @@ export async function openRepository(
 
 	return {
 		_isoGit: isoGit,
+		_enableExperimentalFeatures: enableExperimentalFeatures,
 		nodeishFs: withLazyFetching({
 			nodeishFs: rawFs,
 			verbose,

@@ -1,7 +1,5 @@
 import { describe, it, expect, vi } from "vitest"
 import { openRepository, createNodeishMemoryFs } from "./index.ts"
-import { commit as lixCustomCommit } from "./git/commit.js"
-import { commit as isoCommit } from "isomorphic-git"
 
 // - loading multiple repositories is possible
 // - loading a local repository is possible: const localRepository = await load("/bar.git", { fs: nodeFs })
@@ -34,11 +32,11 @@ describe("main workflow", () => {
 	})
 
 	it("usees the lix custom commit for the whitelistesd ci test repo", () => {
-		expect(repository.commit).toBe(lixCustomCommit)
+		expect(repository._enableExperimentalFeatures).toBe(true)
 	})
 
 	let fileContent = ""
-	it("file is lazy fetched upon first access", async () => {
+	it("file is read", async () => {
 		fileContent = await repository.nodeishFs.readFile("./README.md", {
 			encoding: "utf-8",
 		})
@@ -65,14 +63,14 @@ describe("main workflow", () => {
 		expect(statusPost).toBe("unmodified")
 	})
 
-	it("uses standard commit logic for ", async () => {
+	it("uses standard commit logic for non whitelisted repos", async () => {
 		const nonWhitelistedRepo = await openRepository(
 			"https://github.com/janfjohannes/unicode-bug-issues-1404",
 			{
 				nodeishFs: createNodeishMemoryFs(),
 			}
 		)
-		expect(nonWhitelistedRepo.commit).toBe(isoCommit)
+		expect(nonWhitelistedRepo._enableExperimentalFeatures).toBe(false)
 	})
 
 	it("exposes proper origin", async () => {
