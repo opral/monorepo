@@ -59,7 +59,7 @@ To use our plugin, you need to provide a path to the directory where your langua
 
 ## `variableReferencePattern`
 
-Defines the pattern for variable references. The default is how i18next suggests the usage of placeholders.
+Defines the pattern for variable references. The default is how [i18next](https://inlang.com/m/kl95463j/library-i18next-i18next) suggests the usage of placeholders.
 
 default:
 
