@@ -163,7 +163,7 @@ With this config in place, you should get the following routing behaviour:
 - `/en/some-page` - English
 - `/de/some-page` - German
 
-All we need to do is to set the language tag using the locale determined by next.js. We can do this by adding the following code to our `_app.js` file.
+All we need to do is to set the [language tag](/m/8y8sxj09/library-inlang-languageTag) using the locale determined by next.js. We can do this by adding the following code to our `_app.js` file.
 
 ```tsx
 import { AvailableLanguageTag, setLanguageTag } from "@/paraglide/runtime"
