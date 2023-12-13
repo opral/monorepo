@@ -103,10 +103,6 @@ export function Page(props: PageProps) {
 			/>
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />
-			<MetaLink
-				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
-				rel="canonical"
-			/>
 			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
 					<div class="md:py-16 py-8">
