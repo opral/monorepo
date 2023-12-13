@@ -13,6 +13,7 @@ export default function LanguageProvider(props: { children: React.ReactNode }): 
 	//That way the entire app isn't turned into a client component
 	return (
 		<>
+			{/* Pass the language tag to the client */}
 			<ClientLanguageProvider language={languageTag()} />
 			{props.children}
 		</>
