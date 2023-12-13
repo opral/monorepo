@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest"
-import { openRepository, createNodeishMemoryFs } from "./index.js"
+import { openRepository, createNodeishMemoryFs } from "./index.ts"
 
 // - loading multiple repositories is possible
 // - loading a local repository is possible: const localRepository = await load("/bar.git", { fs: nodeFs })
@@ -24,15 +24,19 @@ describe("main workflow", () => {
 		expect(errorHandler.mock.calls[0][0][0].code).toBe("HttpError")
 	})
 
-	it("opens a repo url without error and without blocking io", async () => {
+	it("opens a repo url without error", async () => {
 		// fix normalization of .git
 		repository = await openRepository("https://github.com/inlang/ci-test-repo", {
 			nodeishFs: createNodeishMemoryFs(),
 		})
 	})
 
+	it("usees the lix custom commit for the whitelistesd ci test repo", () => {
+		expect(repository._enableExperimentalFeatures).toBe(true)
+	})
+
 	let fileContent = ""
-	it("file is lazy fetched upon first access", async () => {
+	it("file is read", async () => {
 		fileContent = await repository.nodeishFs.readFile("./README.md", {
 			encoding: "utf-8",
 		})
@@ -57,6 +61,16 @@ describe("main workflow", () => {
 		const statusPost = await repository.status({ filepath: "README.md" })
 
 		expect(statusPost).toBe("unmodified")
+	})
+
+	it("uses standard commit logic for non whitelisted repos", async () => {
+		const nonWhitelistedRepo = await openRepository(
+			"https://github.com/janfjohannes/unicode-bug-issues-1404",
+			{
+				nodeishFs: createNodeishMemoryFs(),
+			}
+		)
+		expect(nonWhitelistedRepo._enableExperimentalFeatures).toBe(false)
 	})
 
 	it("exposes proper origin", async () => {

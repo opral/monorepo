@@ -1,5 +1,5 @@
 import { describe, it, expect, test } from "vitest"
-import { normalizePath } from "./normalizePath.js"
+import { normalizePath } from "./helpers.js"
 
 describe("single slash", () => {
 	it("should always return a single forward slash", () => {
