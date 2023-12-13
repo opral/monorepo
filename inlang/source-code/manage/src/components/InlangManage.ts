@@ -424,7 +424,11 @@ export class InlangManage extends TwLitElement {
 					  `
 							: ""}
 				  </div>`
-				: html`<inlang-install jsonURL=${JSON.stringify(this.url)}></inlang-install>`}
+				: html`<div
+						class="w-full max-w-7xl h-full flex-grow mx-auto flex justify-center px-4 pb-24"
+				  >
+						<inlang-install jsonURL=${JSON.stringify(this.url)}></inlang-install>
+				  </div>`}
 		</main>`
 	}
 }

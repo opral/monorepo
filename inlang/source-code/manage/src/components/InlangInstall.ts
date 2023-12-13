@@ -267,61 +267,20 @@ export class InlangInstall extends TwLitElement {
 	}
 
 	override render(): TemplateResult {
-		return html`<div class="max-w-7xl mx-auto py-16 h-full">
+		return html`<div class="w-full h-full flex flex-col justify-center items-center">
 			${this.step === "nomodule"
-				? html`<div class="flex flex-col gap-2">
-					<h2 class="text-xl font-semibold">No module selected</h2>
-					</h2>
-					<p class="text-slate-500 mb-8">
-						Find available modules here, or search on inlang.com for more in-depth information. 
-					</p>
-
-					<!-- List of all modules -->
-					<div class="flex flex-col gap-2 max-h-72 overflow-y-scroll">
-						${this.listModules().map(
-							(product) =>
-								html`<div
-									class="flex items-center gap-2 w-full h-14 bg-slate-200 rounded-md px-3 py-2"
-								>
-									${product.icon
-										? html`<img
-												class="w-8 h-8 rounded-md"
-												src=${product.icon}
-												${/* @ts-ignore */ ""}
-												alt=${product.displayName.en}
-										  />`
-										: html`<div
-												class="w-8 h-8 rounded-md bg-slate-300 flex items-center justify-center text-white text-xl font-semibold"
-										  >
-												${product.displayName.en[0]}
-										  </div>`}
-									${/* @ts-ignore */ ""}
-									<div class="flex-grow truncate">${product.displayName.en}</div>
-									<button
-										class="bg-slate-800 text-white text-sm text-center py-1.5 px-3 rounded-md font-medium hover:bg-slate-900 transition-colors"
-										@click=${() => {
-											this.module = product.id
-											window.location.href = window.location.href + `&module=${product.id}`
-										}}
-									>
-										Install
-									</button>
-								</div>`
-						)}
-					</div>
-					<div class="flex items-center gap-2 text-slate-500 text-sm">
-					<div class="h-[1px] w-full bg-slate-200 my-4"></div>
-										Or
-					<div class="h-[1px] w-full bg-slate-200 my-4"></div>
-					</div>
-					<a
-						href="https://inlang.com"
-						target="_blank"
-						class="bg-slate-800 text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
-					>
-						Find a module
-					</a>
-			  </div>`
+				? html`<div class="max-w-md w-full flex flex-col items-center gap-4">
+						<h1 class="font-bold text-4xl text-slate-900 text-center">No module selected</h1>
+						<p class="text-slate-600 w-full md:w-[400px] leading-relaxed mb-4 text-center">
+							Please select a module to install, you can find one on inlang.com.
+						</p>
+						<a
+							class="bg-slate-800 px-4 text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
+							href="https://inlang.com/"
+						>
+							Select module on inlang.com
+						</a>
+				  </div>`
 				: this.step === "noauth"
 				? html`<div class="flex flex-col gap-2">
 							<h2 class="text-xl font-semibold">Please authorize to continue</h2>
@@ -699,7 +658,7 @@ export class InlangInstall extends TwLitElement {
 							To inlang Manage
 						</button>
 					</div>`
-				: html`<div class="flex flex-col gap-0.5 mt-72">
+				: html`<div class="flex flex-col gap-0.5">
 						<div class="mx-auto">
 							<div class="h-12 w-12 animate-spin mb-4">
 								<div
