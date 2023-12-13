@@ -1,4 +1,4 @@
-import { Link as MetaLink, Meta, Title } from "@solidjs/meta"
+import { Meta, Title } from "@solidjs/meta"
 import { For, Show, createSignal, onMount, Switch, Match } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { isModule } from "@inlang/marketplace-registry"
@@ -20,7 +20,6 @@ import Card from "#src/interface/components/Card.jsx"
 import EditOutline from "~icons/material-symbols/edit-outline-rounded"
 import Documentation from "~icons/material-symbols/description-outline-rounded"
 import Changelog from "~icons/material-symbols/manage-history"
-import { i18nRouting } from "#src/renderer/_default.page.route.js"
 import Link from "#src/renderer/Link.jsx"
 
 const isProduction = process.env.NODE_ENV === "production"
