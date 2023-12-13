@@ -42,35 +42,37 @@ async function generateSitemap() {
 		if (route.dynamic && route.path === "/m") {
 			for (const item of registry) {
 				if (!item.id.startsWith("guide.")) {
-					for (const locale of locales) {
-						content = `${content}${formatPage(
-							siteURL +
-								locale +
-								route.path +
-								"/" +
-								item.uniqueID +
-								"/" +
-								item.id.replaceAll(".", "-"),
-							publishDate
-						)}`
-					}
+					// TODO: Include locales again when markdown editor is ready
+					// for (const locale of locales) {
+					content = `${content}${formatPage(
+						siteURL +
+							// locale +
+							route.path +
+							"/" +
+							item.uniqueID +
+							"/" +
+							item.id.replaceAll(".", "-"),
+						publishDate
+					)}`
+					// }
 				}
 			}
 		} else if (route.dynamic && route.path === "/g") {
 			for (const item of registry) {
 				if (item.id.startsWith("guide.")) {
-					for (const locale of locales) {
-						content = `${content}${formatPage(
-							siteURL +
-								locale +
-								route.path +
-								"/" +
-								item.uniqueID +
-								"/" +
-								item.id.replaceAll(".", "-"),
-							publishDate
-						)}`
-					}
+					// TODO: Include locales again when markdown editor is ready
+					// for (const locale of locales) {
+					content = `${content}${formatPage(
+						siteURL +
+							// locale +
+							route.path +
+							"/" +
+							item.uniqueID +
+							"/" +
+							item.id.replaceAll(".", "-"),
+						publishDate
+					)}`
+					// }
 				}
 			}
 		} else if (route.dynamic && route.path === "/c") {
