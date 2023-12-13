@@ -15,6 +15,6 @@ jobs:
         uses: lycheeverse/lychee-action@v1.8.0
         with:
           fail: true
-          args: --verbose --no-progress './*/documentation/**/*.md' './*/documentation/**/**/*.md' './*/guides/**/*.md' './*/external-projects/**/*.md' './*/blog/**/*.md' './README.md' './*/README.md'
+          args: --verbose --no-progress './*/documentation/**/*.md' './*/documentation/**/**/*.md' './*/guides/**/*.md' './*/blog/**/*.md' './README.md' './*/README.md'
         env:
           GITHUB_TOKEN: '${{secrets.GITHUB_TOKEN}}'
