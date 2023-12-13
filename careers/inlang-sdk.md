@@ -11,6 +11,7 @@ Develop [the SDK](https://inlang.com/documentation) that powers the [inlang ecos
 - inlang is still early and small
   - you will have the full 0 to 100 startup experience
   - high equity
+- work on open source
     
 **Requirements**
 
