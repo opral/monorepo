@@ -8,6 +8,8 @@ import { createNodeishMemoryFs, openRepository } from "@lix-js/client"
 import { listProjects } from "@inlang/sdk"
 import { publicEnv } from "@inlang/env-variables"
 import { browserAuth, getUser } from "@lix-js/client/src/browser-auth.ts"
+import { tryCatch } from "@inlang/result"
+import { registry } from "@inlang/marketplace-registry"
 
 @customElement("inlang-manage")
 export class InlangManage extends TwLitElement {
@@ -19,6 +21,9 @@ export class InlangManage extends TwLitElement {
 
 	@property({ type: Object })
 	projects: Record<string, string>[] | undefined | "no-access" | "load" = "load"
+
+	@property({ type: Object })
+	modules: Record<string, string>[] | undefined | "empty"
 
 	@property({ type: Object })
 	user: Record<string, any> | undefined | "load" = "load"
@@ -40,6 +45,39 @@ export class InlangManage extends TwLitElement {
 		}
 
 		this.projects = await listProjects(repo.nodeishFs, "/")
+
+		if (this.url.project) {
+			const result = await tryCatch(async () => {
+				const inlangProjectString = (await repo.nodeishFs.readFile(
+					`.${this.url.project}/settings.json`,
+					{
+						encoding: "utf-8",
+					}
+				)) as string
+
+				return inlangProjectString
+			})
+
+			if (result.error) {
+				this.projects = "no-access"
+				return
+			}
+
+			const inlangProject = JSON.parse(result.data)
+			const modules = inlangProject.modules
+
+			for (const module of modules) {
+				// @ts-ignore
+				const registryModule = registry.find((x) => x.module === module)
+
+				if (registryModule) {
+					// @ts-ignore
+					this.modules = [...(this.modules ?? []), registryModule]
+				}
+			}
+
+			if (!this.modules) this.modules = "empty"
+		}
 	}
 
 	/* This function generates the install link for the user based on a repo url */
@@ -88,10 +126,8 @@ export class InlangManage extends TwLitElement {
 
 	override render(): TemplateResult {
 		return html` <main class="w-full min-h-screen flex flex-col bg-slate-50">
-			<header class="bg-white border-b border-slate-200 py-4 px-4">
-				<div
-					class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between md:items-center relative sm:static"
-				>
+			<header class="bg-white border-b border-slate-200 py-3.5 px-4">
+				<div class="max-w-7xl mx-auto flex flex-row justify-between relative sm:static">
 					<div class="flex items-center">
 						<a
 							href="/"
@@ -100,27 +136,30 @@ export class InlangManage extends TwLitElement {
 							<inlang-logo size="2rem"></inlang-logo>
 						</a>
 						<p class="self-center text-left font-regular text-slate-400 pl-4 pr-1">/</p>
-						<p class="self-center pl-2 text-left font-medium text-slate-900">Manage</p>
+						<p class="self-center pl-2 text-left font-medium text-slate-900 truncate">Manage</p>
 
 						${this.url.project
-							? html`<div class="flex items-center">
+							? html`<div class="flex items-center flex-shrink-0">
 									<p class="self-center text-left font-regular text-slate-400 pl-2 pr-1">/</p>
-									<p
-										class="self-center text-left font-medium text-slate-900 hover:bg-slate-100 rounded-md cursor-pointer px-2 py-1"
+									<div
+										class="self-center relative text-left font-medium text-slate-900 hover:bg-slate-100 rounded-md cursor-pointer px-2 py-1.5"
 									>
-										${this.url.project.replace("/", "")}
-										${this.projects!.length > 1
-											? html`<doc-icon
-													class="inline-block translate-y-1"
-													size="1.2em"
-													icon="mdi:unfold-more-horizontal"
-											  ></doc-icon>`
-											: ""}
-									</p>
+										${this.url.project.split("/").at(-1)}
+										${
+											// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+											this.projects!.length > 1
+												? html`<doc-icon
+														class="inline-block translate-y-1"
+														size="1.2em"
+														icon="mdi:unfold-more-horizontal"
+												  ></doc-icon>`
+												: ""
+										}
+									</div>
 							  </div>`
 							: ""}
 					</div>
-					<div class="flex items-center gap-4">
+					<div class="flex items-center gap-4 flex-shrink-0">
 						${this.user && this.user !== "load"
 							? html`<div>
 									<img class="h-8 w-8 rounded-full" src=${this.user.avatarUrl} />
@@ -130,17 +169,18 @@ export class InlangManage extends TwLitElement {
 				</div>
 			</header>
 			<div
-				class="w-full max-w-7xl h-full flex-grow mx-auto flex items-center justify-center px-4 pb-24"
+				class=${"w-full max-w-7xl h-full flex-grow mx-auto flex justify-center px-4 pb-24" +
+				(!this.modules ? " items-center" : " py-16 xl:px-0")}
 			>
 				${!this.url.repo
-					? html`<div class="max-w-lg w-full flex flex-col gap-4">
-							<h1 class="font-bold text-4xl text-slate-900">Open your Repo</h1>
-							<p class="text-slate-600 w-full md:w-[400px] leading-relaxed mb-8">
+					? html`<div class="max-w-lg w-full flex flex-col items-center gap-4">
+							<h1 class="font-bold text-4xl text-slate-900 text-center">Open your Repo</h1>
+							<p class="text-slate-600 w-full md:w-[400px] leading-relaxed mb-4 text-center">
 								To access your projects, please enter the URL of your GitHub repository.
 							</p>
 							<div
 								disabled=${this.url.repo}
-								class=${`px-1 gap-2 relative z-10 flex items-center w-full border bg-white rounded-lg transition-all relative ${
+								class=${`px-1 gap-2 relative max-w-sm z-10 flex items-center w-full border bg-white rounded-lg transition-all relative ${
 									this.url.repo ? "cursor-not-allowed" : ""
 								} ${
 									!this.isValidUrl() && this.repoURL.length > 0
@@ -195,8 +235,10 @@ export class InlangManage extends TwLitElement {
 					? html`<div class="flex flex-col gap-0.5 mt-4">
 							<div class="mx-auto">
 								<div class="h-12 w-12 animate-spin mb-4">
-									<div class="h-full w-full bg-surface-50 border-[#0891b2] border-4 rounded-full" />
-									<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-slate-50" />
+									<div
+										class="h-full w-full bg-surface-50 border-[#0891b2] border-4 rounded-full"
+									></div>
+									<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-slate-50"></div>
 								</div>
 							</div>
 					  </div>`
@@ -243,16 +285,21 @@ export class InlangManage extends TwLitElement {
 							</div>
 					  </div>`
 					: !this.url.project
-					? html`<div class="flex flex-col w-full max-w-lg ">
-							<h1 class="font-bold text-4xl text-slate-900 mb-4">Select your project</h1>
-							<p class="text-slate-600 w-full md:w-[400px] leading-relaxed mb-12">
+					? html`<div class="flex flex-col w-full max-w-lg items-center">
+							<h1 class="font-bold text-4xl text-slate-900 mb-4 text-center">
+								Select your project
+							</h1>
+							<p class="text-slate-600 w-full md:w-[400px] leading-relaxed text-center">
 								Please select the project you want to manage from the list below.
 							</p>
-							<div class="w-full relative">
+							<div class="w-full relative max-w-sm">
 								<div
-									class="absolute pointer-events-none h-24 bg-gradient-to-t from-slate-50 to-transparent w-full bottom-0"
+									class="absolute pointer-events-none h-12 bg-gradient-to-b from-slate-50 to-transparent w-full top-0"
 								></div>
-								<div class="w-full flex flex-col gap-1 max-h-96 overflow-y-scroll pb-24">
+								<div
+									class="absolute pointer-events-none h-12 bg-gradient-to-t from-slate-50 to-transparent w-full bottom-0"
+								></div>
+								<div class="w-full flex flex-col gap-1 max-h-96 overflow-y-scroll py-12">
 									${
 										// @ts-ignore
 										this.projects?.map(
@@ -275,6 +322,49 @@ export class InlangManage extends TwLitElement {
 								</div>
 							</div>
 					  </div>`
+					: this.modules
+					? html`<div class="h-full w-full ">
+							<h1 class="font-bold text-4xl text-slate-900 mb-4">Installed modules</h1>
+							<p class="text-slate-600 w-full md:w-[400px] leading-relaxed mb-12">
+								Here is a list of all modules installed in your project.
+							</p>
+								${
+									this.modules && this.modules !== "empty"
+										? html`<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+												${
+													// @ts-ignore
+													this.modules?.map(
+														(module: Record<string, any>) =>
+															html`<div
+																class="p-6 w-full bg-white border border-slate-200 rounded-xl"
+															>
+																<h2 class="font-medium mb-2">${module.displayName.en}</h2>
+																<p class="text-slate-500 line-clamp-2 text-sm">
+																	${module.description.en}
+																</p>
+															</div>`
+													)
+												}
+										  </div>`
+										: html`<div
+												class="py-4 px-8 w-full rounded-md bg-red-100 text-red-500 flex flex-col items-center justify-center"
+										  >
+												<p class="mb-4 font-medium">You don't have any modules installed.</p>
+												<a
+													href="/install?${this.url.repo ? `repo=${this.url.repo}` : ""}${this.url
+														.project
+														? `&project=${this.url.project}`
+														: ""}"
+													target="_blank"
+													class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+													>Install a module
+												</a>
+										  </div>`
+								}
+							</div>
+					  </div>
+					 <div class="flex-grow"></div>
+					  `
 					: ""}
 			</div>
 		</main>`
