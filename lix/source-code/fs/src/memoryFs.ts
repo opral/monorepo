@@ -433,14 +433,20 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 		modeBits: number,
 		target?: string
 	) {
-		const cdateMs: number = Date.now()
+		const currentTime: number = Date.now()
 		const _kind = kind
 
 		const oldStats = stats.get(normalPath(path))
 
+		// We need to always bump by 1 second in case mtime did not change since last write to trigger iso git 1 second resolution change detection
+		const mtimeMs =
+			Math.floor(currentTime / 1000) === (oldStats?.mtimeMs && Math.floor(oldStats?.mtimeMs / 1000))
+				? currentTime + 1000
+				: currentTime
+
 		stats.set(normalPath(path), {
-			ctimeMs: cdateMs,
-			mtimeMs: cdateMs,
+			ctimeMs: oldStats?.ctimeMs || currentTime,
+			mtimeMs,
 			dev: 0,
 			ino: oldStats?.ino || state.lastIno++,
 			mode: (!kind ? 0o100000 : kind === 1 ? 0o040000 : 0o120000) | modeBits,
