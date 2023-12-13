@@ -364,11 +364,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [branchNames] = createResource(
 		() => {
-			if (lixErrors().length > 0 || repo() === undefined) {
-				return {}
-			} else {
-				return { repo: repo() }
-			}
+			return { repo: repo() }
 		},
 		async (args) => {
 			return await args.repo?.getBranches()
