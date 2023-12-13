@@ -8,7 +8,6 @@
 		"types": ["vite/client", "unplugin-icons/types/solid"],
 		"jsx": "preserve",
 		"jsxImportSource": "solid-js",
-		"outDir": "./dist",
 		"esModuleInterop": true,
 		"resolveJsonModule": true,
 		"paths": {
