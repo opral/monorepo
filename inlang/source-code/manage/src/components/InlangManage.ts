@@ -193,7 +193,7 @@ export class InlangManage extends TwLitElement {
 									</p>
 									<div
 										disabled=${this.url.repo}
-										class=${`px-1 gap-2 relative max-w-sm z-10 flex items-center w-full border bg-white rounded-lg transition-all relative ${
+										class=${`px-1 gap-2 relative max-w-lg z-10 flex items-center w-full border bg-white rounded-lg transition-all relative ${
 											this.url.repo ? "cursor-not-allowed" : ""
 										} ${
 											!this.isValidUrl() && this.repoURL.length > 0
@@ -322,7 +322,7 @@ export class InlangManage extends TwLitElement {
 														html`<button
 															@click=${() => {
 																window.location.href =
-																	`/install?repo=${this.url.repo}&project=${project.projectPath}` +
+																	`/?repo=${this.url.repo}&project=${project.projectPath}` +
 																	(this.url.module ? `&module=${this.url.module}` : "")
 															}}
 															class=${"flex gap-4 group items-center text-left p-2 text-md rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-600"}
@@ -339,7 +339,7 @@ export class InlangManage extends TwLitElement {
 							  </div>`
 							: this.modules
 							? html`<div class="h-full w-full">
-					<div class="mb-8 flex items-start justify-between gap-4">
+					<div class="mb-16 flex items-start justify-between gap-4">
 					<div>
 							<h1 class="font-bold text-4xl text-slate-900 mb-4">Installed modules</h1>
 							<p class="text-slate-600 w-full md:w-[400px] leading-relaxed">
@@ -355,32 +355,49 @@ export class InlangManage extends TwLitElement {
 							Install a module
 						</button>
 							</div>
+							<div class="mb-12">
+							${
+								// @ts-ignore
+								this.modules &&
+								this.modules !== "empty" &&
+								this.modules?.filter((module) => module.id.includes("plugin.")).length > 0 &&
+								html`<h2 class="text-lg font-medium my-4">
+									<doc-icon
+										class="inline-block mr-1 translate-y-1"
+										size="1.2em"
+										icon="mdi:plug"
+									></doc-icon>
+									Plugins
+								</h2>`
+							}
 								${
 									this.modules && this.modules !== "empty"
 										? html`<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 												${
 													// @ts-ignore
-													this.modules?.map(
-														(module: Record<string, any>) =>
-															html`<div
-																class="p-6 w-full bg-white border border-slate-200 rounded-xl flex flex-col justify-between gap-2"
-															>
-																<div>
-																	<div class="w-full flex items-center justify-between mb-4">
-																		<h2 class="font-semibold">${module.displayName.en}</h2>
-																		<p class="text-sm font-mono text-[#0891b2]">
-																			${module.version}
+													this.modules
+														?.filter((module) => module.id.includes("plugin."))
+														.map(
+															(module: Record<string, any>) =>
+																html`<div
+																	class="p-6 w-full bg-white border border-slate-200 rounded-xl flex flex-col justify-between gap-2"
+																>
+																	<div>
+																		<div class="w-full flex items-center justify-between mb-4">
+																			<h2 class="font-semibold">${module.displayName.en}</h2>
+																			<p class="text-sm font-mono text-[#0891b2]">
+																				${module.version}
+																			</p>
+																		</div>
+																		<p class="text-slate-500 line-clamp-2 text-sm">
+																			${module.description.en}
+																		</p>
+																		<p class="text-slate-500 line-clamp-2 text-sm mb-4">
+																			${module.module}
 																		</p>
 																	</div>
-																	<p class="text-slate-500 line-clamp-2 text-sm">
-																		${module.description.en}
-																	</p>
-																	<p class="text-slate-500 line-clamp-2 text-sm mb-4">
-																		${module.module}
-																	</p>
-																</div>
-																${
-																	/* html`<div class="grid grid-cols-2 gap-2 justify-between">
+																	${
+																		/* html`<div class="grid grid-cols-2 gap-2 justify-between">
 																	<button
 																		class="bg-slate-200 px-3 text-sm w-full text-slate-900 text-center py-1.5 rounded-md font-medium hover:bg-slate-300 transition-colors"
 																		@click=${() => {
@@ -398,15 +415,15 @@ export class InlangManage extends TwLitElement {
 																		Uninstall
 																	</button>
 																	</div>` */ ""
-																}
-															</div>`
-													)
+																	}
+																</div>`
+														)
 												}
 										  </div>`
 										: html`<div
 												class="py-4 px-8 w-full rounded-md bg-red-100 text-red-500 flex flex-col items-center justify-center"
 										  >
-												<p class="mb-4 font-medium">You don't have any modules installed.</p>
+												<p class="mb-4 font-medium">You don't have any plugins installed.</p>
 												<a
 													href="/install?${this.url.repo ? `repo=${this.url.repo}` : ""}${this.url
 														.project
@@ -414,10 +431,93 @@ export class InlangManage extends TwLitElement {
 														: ""}"
 													target="_blank"
 													class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
-													>Install a module
+													>Install a plugin
 												</a>
 										  </div>`
 								}
+								</div>
+								<div>
+							${
+								// @ts-ignore
+								this.modules &&
+								this.modules !== "empty" &&
+								this.modules?.filter((module) => module.id.includes("messageLintRule.")).length >
+									0 &&
+								html`<h2 class="text-lg font-medium my-4">
+									<doc-icon
+										class="inline-block mr-1 translate-y-1"
+										size="1.2em"
+										icon="mdi:ruler"
+									></doc-icon>
+									Lint Rules
+								</h2>`
+							}
+								${
+									this.modules && this.modules !== "empty"
+										? html`<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+												${
+													// @ts-ignore
+													this.modules
+														?.filter((module) => module.id.includes("messageLintRule."))
+														.map(
+															(module: Record<string, any>) =>
+																html`<div
+																	class="p-6 w-full bg-white border border-slate-200 rounded-xl flex flex-col justify-between gap-2"
+																>
+																	<div>
+																		<div class="w-full flex items-center justify-between mb-4">
+																			<h2 class="font-semibold">${module.displayName.en}</h2>
+																			<p class="text-sm font-mono text-[#0891b2]">
+																				${module.version}
+																			</p>
+																		</div>
+																		<p class="text-slate-500 line-clamp-2 text-sm">
+																			${module.description.en}
+																		</p>
+																		<p class="text-slate-500 line-clamp-2 text-sm mb-4">
+																			${module.module}
+																		</p>
+																	</div>
+																	${
+																		/* html`<div class="grid grid-cols-2 gap-2 justify-between">
+																	<button
+																		class="bg-slate-200 px-3 text-sm w-full text-slate-900 text-center py-1.5 rounded-md font-medium hover:bg-slate-300 transition-colors"
+																		@click=${() => {
+																			window.location.href = `/install?repo=${this.url.repo}&project=${this.url.project}&module=${module.module}`
+																		}}
+																	>
+																		Update
+																	</button>
+																	<button
+																		class="bg-red-500/10 px-3 w-full text-red-500 text-sm text-center py-1.5 rounded-md font-medium hover:bg-red-500/20 transition-colors"
+																		@click=${() => {
+																			window.location.href = `/install?repo=${this.url.repo}&project=${this.url.project}&module=${module.module}`
+																		}}
+																	>
+																		Uninstall
+																	</button>
+																	</div>` */ ""
+																	}
+																</div>`
+														)
+												}
+										  </div>`
+										: html`<div
+												class="py-4 px-8 w-full rounded-md bg-red-100 text-red-500 flex flex-col items-center justify-center"
+										  >
+												<p class="mb-4 font-medium">You don't have any rules installed.</p>
+												<a
+													href="/install?${this.url.repo ? `repo=${this.url.repo}` : ""}${this.url
+														.project
+														? `&project=${this.url.project}`
+														: ""}"
+													target="_blank"
+													class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+													>Install a lint rule
+												</a>
+										  </div>`
+								}
+								</div>
 							</div>
 					  </div>
 					 <div class="flex-grow"></div>
