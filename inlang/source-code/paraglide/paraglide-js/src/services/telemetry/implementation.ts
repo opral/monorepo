@@ -1,10 +1,11 @@
 import { publicEnv } from "@inlang/env-variables"
 import { PostHog } from "posthog-node"
 import type { TelemetryEvents } from "./events.js"
-import { getGitRemotes } from "../../utils/git.js"
-import { parseOrigin } from "@inlang/telemetry"
+// TODO add a project UUID to the tele.groups internal #196
+// import { getGitRemotes } from "../../utils/git.js"
+// import { parseOrigin } from "@inlang/telemetry"
 
-export const gitOrigin = parseOrigin({ remotes: await getGitRemotes() })
+// export const gitOrigin = parseOrigin({ remotes: await getGitRemotes() })
 
 const posthog = new PostHog(publicEnv.PUBLIC_POSTHOG_TOKEN ?? "placeholder", {
 	host: "https://eu.posthog.com",
@@ -44,9 +45,10 @@ function capture(args: CaptureEventArguments) {
 	return posthog.capture({
 		...args,
 		distinctId: "unknown",
-		groups: {
-			repository: gitOrigin,
-		},
+		// TODO add a project UUID to the tele.groups internal #196
+		// groups: {
+		// 	repository: gitOrigin,
+		// },
 	})
 }
 
