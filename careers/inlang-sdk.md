@@ -14,5 +14,6 @@ Develop [the SDK](https://inlang.com/documentation) that powers the [inlang ecos
 **Requirements**
 
 - located in the EU
+- strong web engineering skills 
 - pref experience with different reactive systems (RxJS, Signals, etc)
 - pref experience with (web) embedded databases
