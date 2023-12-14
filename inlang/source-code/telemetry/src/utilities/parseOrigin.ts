@@ -32,8 +32,10 @@ function transformRemote(remote: string) {
 		let host = matches[1].replace(/:/g, "/") // Replace colons with slashes in the host
 		const repo = matches[2]
 
-		// Remove ghp_ key if present in the host
-		host = host.replace(/ghp_[\w]+@/, "")
+		// Remove ghp_ or ghs_ key if present in the host
+		const hostRegex = /(ghp_|ghs_)[\w]+@/
+		
+		host = host.replace(hostRegex, "")
 
 		return `${host}/${repo}.git`
 	}

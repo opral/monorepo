@@ -3,7 +3,8 @@ import { createInlangConfigFile } from "./createInlangConfigFile.js"
 import { loadProject, type InlangProject } from "@inlang/sdk"
 import * as vscode from "vscode"
 import { determineClosestPath } from "./determineClosestPath.js"
-import { isInWorkspaceRecommendation } from "./recommendation.js"
+// TODO add a project UUID to the tele.groups internal #196
+// import { isInWorkspaceRecommendation } from "./recommendation.js"
 import { telemetry } from "../services/telemetry/implementation.js"
 import { createFileSystemMapper } from "./createFileSystemMapper.js"
 import { _import } from "./import/_import.js"
@@ -43,19 +44,19 @@ export async function initProject(args: {
 		to: activeTextEditor.document.uri.path,
 	})
 	const closestProjectFilePathUri = vscode.Uri.parse(closestProjectFilePath)
-
-	if (args.gitOrigin) {
-		telemetry.groupIdentify({
-			groupType: "repository",
-			groupKey: args.gitOrigin,
-			properties: {
-				name: args.gitOrigin,
-				isInWorkspaceRecommendation: await isInWorkspaceRecommendation({
-					workspaceFolder: args.workspaceFolder,
-				}),
-			},
-		})
-	}
+	// TODO add a project UUID to the tele.groups internal #196
+	// 	if (args.gitOrigin) {
+	// 		telemetry.groupIdentify({
+	// 			groupType: "repository",
+	// 			groupKey: args.gitOrigin,
+	// 			properties: {
+	// 				name: args.gitOrigin,
+	// 				isInWorkspaceRecommendation: await isInWorkspaceRecommendation({
+	// 					workspaceFolder: args.workspaceFolder,
+	// 				}),
+	// 			},
+	// 		})
+	// 	}
 
 	// REMOVE THIS HARDCODED ASSUMPTION FOR MULTI PROJECT SUPPORT
 	// Has been implemented for https://github.com/inlang/monorepo/pull/1762
