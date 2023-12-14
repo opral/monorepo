@@ -1,4 +1,4 @@
-import { Link as MetaLink, Meta, Title } from "@solidjs/meta"
+import { Meta, Title } from "@solidjs/meta"
 import { For, Show, createSignal, onMount, Switch, Match } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { isModule } from "@inlang/marketplace-registry"
@@ -20,8 +20,9 @@ import Card from "#src/interface/components/Card.jsx"
 import EditOutline from "~icons/material-symbols/edit-outline-rounded"
 import Documentation from "~icons/material-symbols/description-outline-rounded"
 import Changelog from "~icons/material-symbols/manage-history"
-import { i18nRouting } from "#src/renderer/_default.page.route.js"
 import Link from "#src/renderer/Link.jsx"
+
+const isProduction = process.env.NODE_ENV === "production"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -101,10 +102,6 @@ export function Page(props: PageProps) {
 			/>
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />
-			<MetaLink
-				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
-				rel="canonical"
-			/>
 			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
 					<div class="md:py-16 py-8">
@@ -152,7 +149,11 @@ export function Page(props: PageProps) {
 																{/* @ts-ignore */}
 																<Button
 																	type="primary"
-																	href={`/install?module=${props.manifest.id}`}
+																	href={`${
+																		isProduction
+																			? "https://manage.inlang.com/install"
+																			: "http://localhost:4004/install"
+																	}?module=${props.manifest.id}`}
 																	class="my-6"
 																>
 																	<span class="capitalize">
@@ -529,14 +530,13 @@ function NavbarCommon(props: {
 	})
 
 	return (
-		<div class="mb-12 sticky top-36 mt-16 max-h-[96vh] overflow-y-scroll overflow-scrollbar">
+		<div class="mb-12 sticky top-36 mt-16 h-[80vh] pb-8 overflow-y-scroll overflow-scrollbar">
 			<ul role="list" class="w-full">
 				<For each={Object.keys(props.tableOfContents)}>
 					{(sectionTitle) => (
 						<li>
-							<Link
-								onClick={(e: any) => {
-									e.preventDefault()
+							<div
+								onClick={() => {
 									scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
 									setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
 								}}
@@ -548,13 +548,12 @@ function NavbarCommon(props: {
 								}
 							>
 								{sectionTitle.replace("#", "")}
-							</Link>
+							</div>
 							<For each={props.tableOfContents[sectionTitle]}>
 								{(heading) => (
 									<li>
-										<Link
-											onClick={(e: any) => {
-												e.preventDefault()
+										<div
+											onClick={() => {
 												scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
 												setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
 											}}
@@ -566,7 +565,7 @@ function NavbarCommon(props: {
 											}
 										>
 											{heading.replace("#", "")}
-										</Link>
+										</div>
 									</li>
 								)}
 							</For>

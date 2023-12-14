@@ -3,15 +3,16 @@
 	"name": "monorepo",
 	"type": "module",
 	"scripts": {
-		"build": "npx nx run-many --nx-bail --target=build --parallel",
-		"dev": "npx nx run-many --nx-bail --target=dev --parallel 1000 --output-style stream",
-		"dev:lix": "npx nx run-many --target=dev --parallel=10 --nx-bail --verbose --projects=@lix-js/*,@inlang/server,@inlang/editor,@inlang/website --output-style=stream",
-		"production": "npx nx run-many --nx-bail --target=production --parallel 1000 --exclude @lix-js/server --exclude @inlang/badge --output-style=stream",
+		"dev": "pnpm exec nx run-many --nx-bail --target=dev --parallel 1000 --output-style stream",
+		"dev:ide": "pnpm exec nx run-many --target=dev --parallel=10 --nx-bail --verbose --projects=vs-code-extension --output-style=stream",
+		"production": "pnpm exec nx run-many --nx-bail --target=production --parallel 1000 --exclude @lix-js/server --exclude @inlang/badge --exclude @inlang/manage --output-style=stream",
+		"build": "pnpm exec nx run-many --nx-bail --target=build --parallel",
+		"dev:lix": "pnpm --stream --parallel --filter @lix-js/* --filter @inlang/server --filter @inlang/editor --filter @inlang/website dev",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "npx nx run-many --target=test --parallel",
+		"test": "pnpm exec nx run-many --target=test --parallel",
 		"---- LINT ----------------------------------------------------------": "",
-		"lint": "npx nx run-many --target=lint --parallel",
-		"format": "npx nx run-many --target=format --parallel",
+		"lint": "pnpm exec nx run-many --target=lint --parallel",
+		"format": "pnpm exec nx run-many --target=format --parallel",
 		"---- OTHER ---------------------------------------------------------": "",
 		"build:no-nx": "pnpm --stream --parallel build",
 		"dev:no-nx": "pnpm --stream --parallel dev",
@@ -23,7 +24,8 @@
 		"----- CI ---- used to test the codebase on every commit": "",
 		"ci": "pnpm install && pnpm check-all",
 		"check-all": "pnpm format && pnpm lint && pnpm build && pnpm test",
-		"ci:version": "npx changeset version"
+		"ci:publish": "pnpm --filter !vs-code-extension publish -r",
+		"ci:version": "pnpm exec changeset version"
 	},
 	"engines": {
 		"npm": ">=8.0.0",

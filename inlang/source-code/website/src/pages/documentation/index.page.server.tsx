@@ -1,6 +1,7 @@
 import fs from "node:fs/promises"
 import sdkTableOfContents from "../../../../../documentation/sdk/tableOfContents.json"
 import pluginTableOfContents from "../../../../../documentation/plugin/tableOfContents.json"
+import lintRuleTableOfContents from "../../../../../documentation/lint-rule/tableOfContents.json"
 import { convert } from "@inlang/markdown"
 import { render } from "vike/abort"
 
@@ -35,6 +36,19 @@ export async function onBeforeRender(pageContext: any) {
 			for (const page of pages) {
 				const text = await fs.readFile(
 					new URL(`inlang/documentation/plugin/${page.path}`, repositoryRoot),
+					"utf-8"
+				)
+				const markdown = await convert(text)
+				renderedMarkdown[page.slug] = markdown
+			}
+		}
+		//get lint rule documentation
+		for (const categories of Object.entries(lintRuleTableOfContents)) {
+			const [, pages] = categories
+
+			for (const page of pages) {
+				const text = await fs.readFile(
+					new URL(`inlang/documentation/lint-rule/${page.path}`, repositoryRoot),
 					"utf-8"
 				)
 				const markdown = await convert(text)

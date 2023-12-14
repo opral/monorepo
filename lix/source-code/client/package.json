@@ -6,8 +6,11 @@
 		"access": "public"
 	},
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/index.js",
+		"./src/*.ts": "./src/*.ts",
+		"./src/browser-auth.ts": "./src/browser-auth.ts"
 	},
+	"types": "./dist/index.d.ts",
 	"files": [
 		"./dist",
 		"./src"
@@ -22,12 +25,12 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
+		"@inlang/env-variables": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@octokit/types": "11.1.0",
 		"isomorphic-git": "1.24.5",
 		"octokit": "3.1.0",
-		"solid-js": "1.7.11",
-		"@inlang/env-variables": "workspace:*"
+		"solid-js": "1.7.11"
 	},
 	"license": "Apache-2.0",
 	"devDependencies": {

@@ -1,12 +1,20 @@
 # @inlang/paraglide-js
 
+## 1.0.0-prerelease.19
+
+fix: Fix inlang/internal#195
+
+## 1.0.0-prerelease.18
+
+`paraglide-js init` now adds `@inlang/message-lint-rule-valid-js-identifier` by default.
+
 ## 1.0.0-prerelease.17
 
-`paraglide init` now adds `paraglide compile` to the postinstall script by default. This sidesteps numerous linting issues when using paraglide in CI environments. 
+`paraglide-js init` now adds `paraglide-js compile` to the postinstall script by default. This sidesteps numerous linting issues when using paraglide in CI environments. 
 
 ## 1.0.0-prerelease.16
 
-Fix `paraglide compile` hanging for a couple seconds after successful compilation 
+Fix `paraglide-js compile` hanging for a couple seconds after successful compilation 
 
 ## 1.0.0-prerelease.15
 
