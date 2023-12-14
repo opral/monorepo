@@ -1,5 +1,11 @@
 # @inlang/plugin-i18next
 
+## 4.13.0
+
+### Minor Changes
+
+- b66068127: Matcher Improvments. 'useTranslation' hook can contain a namespace and keyPrefix for the whole page. The improved matcher can recognize it and adds it to the messageId if needed.
+
 ## 4.12.1
 
 ### Patch Changes
