@@ -9,6 +9,7 @@
 		"asvuch18": "./inlang/source-code/message-lint-rules/identicalPattern/marketplace-manifest.json",
 		"10l6oyv1": "./inlang/source-code/message-lint-rules/messageWithoutSource/marketplace-manifest.json",
 		"4cxm3eqi": "./inlang/source-code/message-lint-rules/missingTranslation/marketplace-manifest.json",
+		"teldgniy": "./inlang/source-code/message-lint-rules/validJsIdentifier/marketplace-manifest.json",
 		"gkerinvo": "./inlang/source-code/message-lint-rules/snakeCaseId/marketplace-manifest.json",
 		"ewkole66": "./inlang/source-code/message-lint-rules/camelCaseId/marketplace-manifest.json",
 		"3i8bor92": "./inlang/source-code/plugins/i18next/marketplace-manifest.json",

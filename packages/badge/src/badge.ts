@@ -114,19 +114,21 @@ export const badge = async (url: string) => {
 	)
 
 	await cache.set(url, image)
-	const gitOrigin = await repo.getOrigin()
 
-	telemetryNode.capture({
-		event: "BADGE created",
-		groups: { repository: gitOrigin },
-		distinctId: "unknown",
-	})
-	telemetryNode.groupIdentify({
-		groupType: "repository",
-		groupKey: gitOrigin,
-		properties: {
-			name: gitOrigin,
-		},
-	})
+	// TODO add a project UUID to the tele.groups internal #196
+
+	// const gitOrigin = await repo.getOrigin()
+	// telemetryNode.capture({
+	// 	event: "BADGE created",
+	// 	groups: { repository: gitOrigin },
+	// 	distinctId: "unknown",
+	// })
+	// telemetryNode.groupIdentify({
+	// 	groupType: "repository",
+	// 	groupKey: gitOrigin,
+	// 	properties: {
+	// 		name: gitOrigin,
+	// 	},
+	// })
 	return image
 }

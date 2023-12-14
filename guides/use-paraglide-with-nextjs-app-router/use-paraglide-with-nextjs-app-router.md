@@ -148,9 +148,9 @@ app/
 
 In order to manage the language parameter, we will need to add some middleware. This will do a few things:
 
-- Make sure that the language parameter is a valid language tag
+- Make sure that the language parameter is a valid [language tag](/m/8y8sxj09/library-inlang-languageTag)
 - Redirect to the default language if no language parameter is present
-- Make the language tag available to our pages via a Header
+- Make the [language tag](/m/8y8sxj09/library-inlang-languageTag) available to our pages via a Header
 
 Add a `src/middleware.ts` file with the following code:
 
@@ -204,7 +204,7 @@ export const config = {
 
 When you run the dev server now and visit `/` you should be redirected to `/en`. It won't switch languages yet, we will do that in the next step.
 
-We still need to inform Paraglide about the language tag. We will need to do this on both the server and the client. We will use two components to do this. One for the server and one for the client.
+We still need to inform Paraglide about the [language tag](/m/8y8sxj09/library-inlang-languageTag). We will need to do this on both the server and the client. We will use two components to do this. One for the server and one for the client.
 
 Create a `LanguageProvider.tsx` server component wherever you want. I will put it in `src/lib/LanguageProvider.tsx`. All this component does is get the language from the request header that was set by our middleware and set it in Paraglide.
 
@@ -249,7 +249,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 If you now run the dev server, and visit `/en` and `/de`, you should see the Server Components switch languages. The Client Components won't switch languages yet, let's fix that next.
 
-Add a `ClientLanguageProvider.tsx` client component that takes in the language tag as a prop and sets it in Paraglide.
+Add a `ClientLanguageProvider.tsx` client component that takes in the [language tag](/m/8y8sxj09/library-inlang-languageTag) as a prop and sets it in Paraglide.
 
 ```jsx
 // src/lib/ClientLanguageProvider.tsx

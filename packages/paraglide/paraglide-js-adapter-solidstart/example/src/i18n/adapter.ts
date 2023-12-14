@@ -40,6 +40,37 @@ export function languageTagInPathname<T extends string>(
 }
 
 /**
+ * Changes a provided url to include the correct language tag.
+ *
+ * To be used on `<A href="...">` components to make sure that the anchor tag will link to the correct language, when server side rendered.
+ *
+ * **Use only on internal links. (e.g. `<A href="/foo">` or `<A href="/en/foo">`)**
+ *
+ * @param pathname The pathname to link to. (e.g. "/foo/bar")
+ * @param page_language_tag The current language tag. (e.g. "en")
+ * @param available_language_tags All available language tags. (From paraglide, e.g. "en", "de")
+ * @param source_language_tag The source language tag. (From paraglide, e.g. "en")
+ * @returns The translated pathname. (e.g. "/en/bar")
+ */
+export function translateHref<T extends string>(
+	pathname: string,
+	page_language_tag: T,
+	available_language_tags: readonly T[],
+	source_language_tag: T
+): string {
+	const to_normal_pathname = normalizePathname(pathname)
+	const to_language_tag = languageTagInPathname(to_normal_pathname, available_language_tags)
+
+	if (to_language_tag === source_language_tag) {
+		return pathname
+	} else if (to_language_tag) {
+		return to_normal_pathname.replace(to_language_tag, page_language_tag)
+	} else {
+		return "/" + page_language_tag + pathname
+	}
+}
+
+/**
  * Get the language tag from the URL, using `router.useLocation()`. (needs to be used under `router.Router` context)
  *
  * @param all_language_tags All available language tags. (From paraglide, e.g. "en", "de")

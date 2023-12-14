@@ -8,8 +8,8 @@ const Guides = () => {
 	const getGuides = () => [
 		"guide.nilsjacobsen.buildAGlobalSvelteApp",
 		"guide.niklasbuchfink.whatIsInlang",
-		"guide.niklasbuchfink.howToSetupInlang",
-		"guide.nilsjacobsen.useParaglideJsInMonorepos",
+		"guide.nilsjacobsen.whatArePlugins",
+		"guide.lorissigrist.useParaglideJsWithNextjsAppRouter",
 	]
 	return (
 		<div class="w-full flex gap-4 my-28 flex-col-reverse md:flex-row">
@@ -19,7 +19,7 @@ const Guides = () => {
 						{m.home_guides_title()}
 					</h2>
 					<p class="text-surface-500 lg:pr-16 pb-2">{m.home_guides_description()}</p>
-					<Button href="/search?q=guides" type="secondary">
+					<Button href="/c/guides" type="secondary">
 						{m.home_guides_button_text()}
 					</Button>
 				</div>

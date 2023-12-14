@@ -1,5 +1,16 @@
 # @inlang/badge
 
+## 0.5.0
+
+### Minor Changes
+
+- 1d0f167b4: Bug fix of internal #195
+
+### Patch Changes
+
+- Updated dependencies [1d0f167b4]
+  - @inlang/telemetry@0.3.0
+
 ## 0.4.1
 
 ### Patch Changes
