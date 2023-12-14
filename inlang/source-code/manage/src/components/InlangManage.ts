@@ -34,6 +34,9 @@ export class InlangManage extends TwLitElement {
 	@query("#repo-input")
 	repoInput: HTMLInputElement | undefined
 
+	@query("project-dropdown")
+	projectDropdown: NodeListOf<Element> | undefined
+
 	async projectHandler() {
 		const repo = await openRepository(
 			`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${this.url.repo}`,
@@ -137,8 +140,25 @@ export class InlangManage extends TwLitElement {
 		}
 	}
 
+	handleProjectDropdown() {
+		this.projectDropdown = this.shadowRoot?.querySelectorAll(".project-dropdown")
+		if (this.projectDropdown)
+			// @ts-ignore
+			for (const dropdown of this.projectDropdown) {
+				dropdown.addEventListener("click", () => {
+					dropdown.classList.toggle("active")
+				})
+			}
+	}
+
 	override render(): TemplateResult {
-		return html` <main class="w-full min-h-screen flex flex-col bg-slate-50">
+		return html` <main
+			class="w-full min-h-screen flex flex-col bg-slate-50"
+			@click=${() => {
+				this.shadowRoot?.querySelector("#account")?.classList.add("hidden")
+				this.shadowRoot?.querySelector("#projects")?.classList.add("hidden")
+			}}
+		>
 			<header class="bg-white border-b border-slate-200 py-3.5 px-4">
 				<div class="max-w-7xl mx-auto flex flex-row justify-between relative sm:static">
 					<div class="flex items-center">
@@ -153,20 +173,69 @@ export class InlangManage extends TwLitElement {
 						${this.url.project
 							? html`<div class="flex items-center flex-shrink-0">
 									<p class="self-center text-left font-regular text-slate-400 pl-2 pr-1">/</p>
+									<!-- Dropdown for all projects -->
 									<div
-										class="self-center relative text-left font-medium text-slate-900 hover:bg-slate-100 rounded-md cursor-pointer px-2 py-1.5"
+										class="relative"
+										x-data="{ open: false }"
+										@click=${(e: Event) => {
+											e.stopPropagation()
+										}}
 									>
-										${this.url.project.split("/").at(-1)}
-										${
-											// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-											this.projects!.length > 1
-												? html`<doc-icon
-														class="inline-block translate-y-1"
-														size="1.2em"
-														icon="mdi:unfold-more-horizontal"
-												  ></doc-icon>`
-												: ""
-										}
+										<button
+											@click=${() => {
+												this.shadowRoot?.querySelector("#account")?.classList.add("hidden")
+												this.shadowRoot?.querySelector("#projects")?.classList.toggle("hidden")
+											}}
+										>
+											<div
+												@click=${() => {
+													this.handleProjectDropdown()
+												}}
+												class="self-center relative text-left font-medium text-slate-900 hover:bg-slate-100 rounded-md cursor-pointer px-2 py-1.5"
+											>
+												${this.url.project.split("/").at(-1)}
+												${
+													// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+													this.projects!.length > 1
+														? html`<doc-icon
+																class="inline-block translate-y-1"
+																size="1.2em"
+																icon="mdi:unfold-more-horizontal"
+														  ></doc-icon> `
+														: ""
+												}
+											</div>
+										</button>
+										<div
+											@click=${(e: { stopPropagation: () => void }) => {
+												e.stopPropagation()
+											}}
+											id="projects"
+											class="hidden absolute top-12 left-0 w-48 bg-white border border-slate-200 rounded-md shadow-lg py-0.5 z-20"
+										>
+											${typeof this.projects === "object"
+												? this.projects?.map(
+														(project) =>
+															html`<a
+																href=${`/?repo=${this.url.repo}&project=${project.projectPath}`}
+																class="flex items-center gap-1 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+															>
+																${this.url.project === project.projectPath
+																	? html`<doc-icon
+																			class="inline-block mr-1 translate-y-0.5"
+																			size="1.2em"
+																			icon="mdi:check"
+																	  ></doc-icon>`
+																	: html`<doc-icon
+																			class="inline-block mr-1 translate-y-0.5 text-transparent"
+																			size="1.2em"
+																			icon="mdi:check"
+																	  ></doc-icon>`}
+																${project.projectPath}
+															</a>`
+												  )
+												: ""}
+										</div>
 									</div>
 							  </div>`
 							: ""}
@@ -174,7 +243,40 @@ export class InlangManage extends TwLitElement {
 					<div class="flex items-center gap-4 flex-shrink-0">
 						${this.user && this.user !== "load"
 							? html`<div>
-									<img class="h-8 w-8 rounded-full" src=${this.user.avatarUrl} />
+									<!-- Dropdown for account settings -->
+									<div
+										class="relative"
+										x-data="{ open: false }"
+										@click=${(e: Event) => {
+											e.stopPropagation()
+										}}
+									>
+										<button
+											@click=${() => {
+												this.shadowRoot?.querySelector("#projects")?.classList.add("hidden")
+												this.shadowRoot?.querySelector("#account")?.classList.toggle("hidden")
+											}}
+										>
+											<img class="h-8 w-8 rounded-full" src=${this.user.avatarUrl} />
+										</button>
+										<div
+											@click=${(e: { stopPropagation: () => void }) => {
+												e.stopPropagation()
+											}}
+											id="account"
+											class="hidden absolute top-12 right-0 w-48 bg-white border border-slate-200 rounded-md shadow-lg z-20 py-0.5"
+										>
+											<div
+												@click=${async () => {
+													await browserAuth.logout()
+													window.location.reload()
+												}}
+												class="block cursor-pointer px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+											>
+												Logout
+											</div>
+										</div>
+									</div>
 							  </div>`
 							: ""}
 					</div>
@@ -341,7 +443,7 @@ export class InlangManage extends TwLitElement {
 							? html`<div class="h-full w-full">
 					<div class="mb-16 flex items-start justify-between gap-4">
 					<div>
-							<h1 class="font-bold text-4xl text-slate-900 mb-4">Installed modules</h1>
+							<h1 class="font-bold text-4xl text-slate-900 mb-4">Manage your inlang project</h1>
 							<p class="text-slate-600 w-full md:w-[400px] leading-relaxed">
 								Here is a list of all modules installed in your project.
 							</p>
@@ -349,7 +451,7 @@ export class InlangManage extends TwLitElement {
 							<button
 							class=${"bg-slate-800 text-white text-center px-4 py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"}
 							@click=${() => {
-								window.location.href = `/install?repo=${this.url.repo}&project=${this.url.project}`
+								window.location.href = `https://inlang.com/?repo=${this.url.repo}&project=${this.url.project}`
 							}}
 						>
 							Install a module
@@ -361,14 +463,7 @@ export class InlangManage extends TwLitElement {
 								this.modules &&
 								this.modules !== "empty" &&
 								this.modules?.filter((module) => module.id.includes("plugin.")).length > 0 &&
-								html`<h2 class="text-lg font-medium my-4">
-									<doc-icon
-										class="inline-block mr-1 translate-y-1"
-										size="1.2em"
-										icon="mdi:plug"
-									></doc-icon>
-									Plugins
-								</h2>`
+								html`<h2 class="text-lg font-semibold my-4">Plugins</h2>`
 							}
 								${
 									this.modules && this.modules !== "empty"
@@ -382,40 +477,30 @@ export class InlangManage extends TwLitElement {
 																html`<div
 																	class="p-6 w-full bg-white border border-slate-200 rounded-xl flex flex-col justify-between gap-2"
 																>
-																	<div>
+																	<div class="mb-4">
 																		<div class="w-full flex items-center justify-between mb-4">
 																			<h2 class="font-semibold">${module.displayName.en}</h2>
-																			<p class="text-sm font-mono text-[#0891b2]">
-																				${module.version}
-																			</p>
+																			<p class="text-sm font-mono">${module.version}</p>
 																		</div>
 																		<p class="text-slate-500 line-clamp-2 text-sm">
 																			${module.description.en}
 																		</p>
-																		<p class="text-slate-500 line-clamp-2 text-sm mb-4">
-																			${module.module}
-																		</p>
 																	</div>
-																	${
-																		/* html`<div class="grid grid-cols-2 gap-2 justify-between">
-																	<button
-																		class="bg-slate-200 px-3 text-sm w-full text-slate-900 text-center py-1.5 rounded-md font-medium hover:bg-slate-300 transition-colors"
-																		@click=${() => {
-																			window.location.href = `/install?repo=${this.url.repo}&project=${this.url.project}&module=${module.module}`
-																		}}
+																	<a
+																		target="_blank"
+																		href=${`https://inlang.com/m/${
+																			// @ts-ignore
+																			module.uniqueID
+																		}`}
+																		class="text-[#098DAC] text-sm font-medium transition-colors hover:text-[#06b6d4]"
 																	>
-																		Update
-																	</button>
-																	<button
-																		class="bg-red-500/10 px-3 w-full text-red-500 text-sm text-center py-1.5 rounded-md font-medium hover:bg-red-500/20 transition-colors"
-																		@click=${() => {
-																			window.location.href = `/install?repo=${this.url.repo}&project=${this.url.project}&module=${module.module}`
-																		}}
-																	>
-																		Uninstall
-																	</button>
-																	</div>` */ ""
-																	}
+																		More information
+																		<doc-icon
+																			class="inline-block ml-0.5 translate-y-0.5"
+																			size="1em"
+																			icon="mdi:arrow-top-right"
+																		></doc-icon>
+																	</a>
 																</div>`
 														)
 												}
@@ -443,14 +528,7 @@ export class InlangManage extends TwLitElement {
 								this.modules !== "empty" &&
 								this.modules?.filter((module) => module.id.includes("messageLintRule.")).length >
 									0 &&
-								html`<h2 class="text-lg font-medium my-4">
-									<doc-icon
-										class="inline-block mr-1 translate-y-1"
-										size="1.2em"
-										icon="mdi:ruler"
-									></doc-icon>
-									Lint Rules
-								</h2>`
+								html`<h2 class="text-lg font-semibold my-4">Lint Rules</h2>`
 							}
 								${
 									this.modules && this.modules !== "empty"
@@ -464,40 +542,30 @@ export class InlangManage extends TwLitElement {
 																html`<div
 																	class="p-6 w-full bg-white border border-slate-200 rounded-xl flex flex-col justify-between gap-2"
 																>
-																	<div>
+																	<div class="mb-4">
 																		<div class="w-full flex items-center justify-between mb-4">
 																			<h2 class="font-semibold">${module.displayName.en}</h2>
-																			<p class="text-sm font-mono text-[#0891b2]">
-																				${module.version}
-																			</p>
+																			<p class="text-sm font-mono">${module.version}</p>
 																		</div>
 																		<p class="text-slate-500 line-clamp-2 text-sm">
 																			${module.description.en}
 																		</p>
-																		<p class="text-slate-500 line-clamp-2 text-sm mb-4">
-																			${module.module}
-																		</p>
 																	</div>
-																	${
-																		/* html`<div class="grid grid-cols-2 gap-2 justify-between">
-																	<button
-																		class="bg-slate-200 px-3 text-sm w-full text-slate-900 text-center py-1.5 rounded-md font-medium hover:bg-slate-300 transition-colors"
-																		@click=${() => {
-																			window.location.href = `/install?repo=${this.url.repo}&project=${this.url.project}&module=${module.module}`
-																		}}
+																	<a
+																		target="_blank"
+																		href=${`https://inlang.com/m/${
+																			// @ts-ignore
+																			module.uniqueID
+																		}`}
+																		class="text-[#098DAC] text-sm font-medium transition-colors hover:text-[#06b6d4]"
 																	>
-																		Update
-																	</button>
-																	<button
-																		class="bg-red-500/10 px-3 w-full text-red-500 text-sm text-center py-1.5 rounded-md font-medium hover:bg-red-500/20 transition-colors"
-																		@click=${() => {
-																			window.location.href = `/install?repo=${this.url.repo}&project=${this.url.project}&module=${module.module}`
-																		}}
-																	>
-																		Uninstall
-																	</button>
-																	</div>` */ ""
-																	}
+																		More information
+																		<doc-icon
+																			class="inline-block ml-0.5 translate-y-0.5"
+																			size="1em"
+																			icon="mdi:arrow-top-right"
+																		></doc-icon>
+																	</a>
 																</div>`
 														)
 												}

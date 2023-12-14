@@ -308,7 +308,9 @@ export class InlangInstall extends TwLitElement {
 						</p>
 						<a
 							class="bg-slate-800 px-4 text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
-							href="https://inlang.com/"
+							href=${`https://inlang.com/?` +
+							(this.url.repo ? `repo=${this.url.repo}` : "") +
+							(this.url.project ? `&project=${this.url.project}` : "")}
 						>
 							Select module on inlang.com
 						</a>
@@ -452,7 +454,7 @@ export class InlangInstall extends TwLitElement {
 						</p>
 						<div
 							disabled=${this.url.repo}
-							class=${`px-1 gap-2 relative max-w-lg z-10 flex items-center w-full border bg-white rounded-lg transition-all relative ${
+							class=${`px-1 gap-2 relative z-10 flex items-center w-full border bg-white rounded-lg transition-all relative ${
 								this.url.repo ? "cursor-not-allowed" : ""
 							} ${
 								!this.isValidUrl() && this.repoURL.length > 0
@@ -634,18 +636,19 @@ export class InlangInstall extends TwLitElement {
 					</p></div>
 					<div class="flex gap-4">
 					<button
-							class="bg-slate-800 px-6 w-full text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
+							class="bg-slate-800 px-4 w-full text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
 							@click=${() => {
 								window.location.href =
-									"/" +
+									"/install" +
 									(this.url.repo ? `?repo=${this.url.repo}` : "") +
-									(this.url.project ? `&project=${this.url.project}` : "")
+									(this.url.project ? `&project=${this.url.project}` : "") +
+									(this.url.module ? `&module=${this.url.module}` : "")
 							}}
 						>
-							To inlang Manage
+							Retry
 						</button>
 						<button
-							class="bg-slate-200 px-6 w-full text-slate-900 text-center py-2 rounded-md font-medium hover:bg-slate-300 transition-colors"
+							class="bg-slate-200 px-4 truncate w-full text-slate-900 text-center py-2 rounded-md font-medium hover:bg-slate-300 transition-colors"
 							@click=${() => {
 								this.manual = true
 							}}
@@ -753,12 +756,12 @@ export class InlangInstall extends TwLitElement {
 							: ""
 					} `
 				: this.step === "success"
-				? html`<div class="flex flex-col gap-2">
+				? html`<div class="flex flex-col gap-2 max-w-lg">
 						<h1 class="font-bold text-4xl text-slate-900 mb-4 text-center">
-							Succesfully installed into your project: ${this.url.project}
+							Succesfully installed
 						</h1>
 						<p class="text-slate-600 w-full md:w-[400px] leading-relaxed text-center">
-							Your module was succesfully installed.
+							Your module was succesfully installed into your project: ${this.url.project}
 						</p>
 						<div class="flex gap-4">
 							<a
@@ -779,14 +782,12 @@ export class InlangInstall extends TwLitElement {
 						</div>
 				  </div>`
 				: this.step === "abort"
-				? html`<div class="flex flex-col gap-2"><h2 class="text-xl font-semibold flex items-center gap-2">
-			Installation aborted
-			</h2>
-					</h2>
-					<p class="text-slate-500 mb-12">
-					Your module installation was aborted.
-					</p>
-					<button
+				? html`<div class="flex flex-col gap-2">
+						<h1 class="font-bold text-4xl text-slate-900 mb-2 text-center">Installation aborted</h1>
+						<p class="text-slate-600 w-full md:w-[400px] leading-relaxed text-center mx-auto mb-8">
+							Your module installation was aborted.
+						</p>
+						<button
 							class="bg-slate-800 text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
 							@click=${() => {
 								window.location.href =
@@ -795,9 +796,9 @@ export class InlangInstall extends TwLitElement {
 									(this.url.project ? `&project=${this.url.project}` : "")
 							}}
 						>
-							To inlang Manage
+							Go back
 						</button>
-					</div>`
+				  </div>`
 				: html`<div class="flex flex-col gap-0.5">
 						<div class="mx-auto">
 							<div class="h-12 w-12 animate-spin mb-4">
