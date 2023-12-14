@@ -211,7 +211,7 @@ export class InlangManage extends TwLitElement {
 												e.stopPropagation()
 											}}
 											id="projects"
-											class="hidden absolute top-12 left-0 w-48 bg-white border border-slate-200 rounded-md shadow-lg py-0.5 z-20"
+											class="hidden absolute top-12 left-0 w-auto bg-white border border-slate-200 rounded-md shadow-lg py-0.5 z-20"
 										>
 											${typeof this.projects === "object"
 												? this.projects?.map(
@@ -231,7 +231,11 @@ export class InlangManage extends TwLitElement {
 																			size="1.2em"
 																			icon="mdi:check"
 																	  ></doc-icon>`}
-																${project.projectPath}
+																<p class="truncate">
+																	${project.projectPath?.split("/").at(-2)}/${project.projectPath
+																		?.split("/")
+																		.at(-1)}
+																</p>
 															</a>`
 												  )
 												: ""}
@@ -257,7 +261,10 @@ export class InlangManage extends TwLitElement {
 												this.shadowRoot?.querySelector("#account")?.classList.toggle("hidden")
 											}}
 										>
-											<img class="h-8 w-8 rounded-full" src=${this.user.avatarUrl} />
+											<img
+												class="h-8 w-8 rounded-full transition-opacity hover:opacity-70"
+												src=${this.user.avatarUrl}
+											/>
 										</button>
 										<div
 											@click=${(e: { stopPropagation: () => void }) => {
@@ -266,6 +273,15 @@ export class InlangManage extends TwLitElement {
 											id="account"
 											class="hidden absolute top-12 right-0 w-48 bg-white border border-slate-200 rounded-md shadow-lg z-20 py-0.5"
 										>
+											<div
+												@click=${async () => {
+													await browserAuth.addPermissions()
+													window.location.reload()
+												}}
+												class="block cursor-pointer px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+											>
+												Edit Permissions
+											</div>
 											<div
 												@click=${async () => {
 													await browserAuth.logout()
