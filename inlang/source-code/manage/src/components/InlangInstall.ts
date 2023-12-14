@@ -626,38 +626,36 @@ export class InlangInstall extends TwLitElement {
 				  </div>`
 				: this.step === "error"
 				? html`<div class="flex flex-col gap-2 max-w-lg">
-					</h2>
-					<h1 class="font-bold text-4xl text-slate-900 mb-2 text-center">
-					An error occured
-					</h1>
-					<div class="max-h-[256px] overflow-y-scroll">
-					<p class="text-slate-500 mb-8 text-center">
-					${typeof this.error === "string" ? this.error : this.error.join("\n")}
-					</p></div>
-					<div class="flex gap-4">
-					<button
-							class="bg-slate-800 px-4 w-full text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
-							@click=${() => {
-								window.location.href =
-									"/install" +
-									(this.url.repo ? `?repo=${this.url.repo}` : "") +
-									(this.url.project ? `&project=${this.url.project}` : "") +
-									(this.url.module ? `&module=${this.url.module}` : "")
-							}}
-						>
-							Retry
-						</button>
-						<button
-							class="bg-slate-200 px-4 truncate w-full text-slate-900 text-center py-2 rounded-md font-medium hover:bg-slate-300 transition-colors"
-							@click=${() => {
-								this.manual = true
-							}}
-							>
-							Manual instructions
-							</button>
-					</div>
-					</div>${
-						this.manual
+							<h1 class="font-bold text-4xl text-slate-900 mb-2 text-center">An error occured</h1>
+							<div class="max-h-[256px] overflow-y-scroll">
+								<p class="text-slate-500 mb-8 text-center">
+									${typeof this.error === "string" ? this.error : this.error.join("\n")}
+								</p>
+							</div>
+							<div class="flex gap-4">
+								<button
+									class="bg-slate-800 px-4 w-full text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
+									@click=${() => {
+										window.location.href =
+											"/install" +
+											(this.url.repo ? `?repo=${this.url.repo}` : "") +
+											(this.url.project ? `&project=${this.url.project}` : "") +
+											(this.url.module ? `&module=${this.url.module}` : "")
+									}}
+								>
+									Retry
+								</button>
+								<button
+									class="bg-slate-200 px-4 truncate w-full text-slate-900 text-center py-2 rounded-md font-medium hover:bg-slate-300 transition-colors"
+									@click=${() => {
+										this.manual = true
+									}}
+								>
+									Manual instructions
+								</button>
+							</div>
+						</div>
+						${this.manual
 							? html`<div class="fixed inset-0 z-10 bg-black/25 flex items-center justify-center px-4"
 						@click=${() => {
 							this.manual = false
@@ -753,8 +751,7 @@ export class InlangInstall extends TwLitElement {
 				</a>
 			</div>
 	  </div>`
-							: ""
-					} `
+							: ""} `
 				: this.step === "success"
 				? html`<div class="flex flex-col gap-2 max-w-lg">
 						<h1 class="font-bold text-4xl text-slate-900 mb-4 text-center">
