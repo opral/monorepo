@@ -15,6 +15,6 @@ jobs:
         uses: lycheeverse/lychee-action@v1.8.0
         with:
           fail: true
-          args: --verbose --no-progress './*/documentation/**/*.md' './*/documentation/**/**/*.md' './*/guides/**/*.md' './*/blog/**/*.md' './README.md' './*/README.md' --exclude netflix.com
+          args: --verbose --no-progress './*/documentation/**/*.md' './*/documentation/**/**/*.md' './*/guides/**/*.md' './*/blog/**/*.md' './README.md' './*/README.md' --exclude netflix.com airbnb.com
         env:
           GITHUB_TOKEN: '${{secrets.GITHUB_TOKEN}}'
