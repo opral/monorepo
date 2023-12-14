@@ -301,7 +301,7 @@ export class InlangInstall extends TwLitElement {
 	override render(): TemplateResult {
 		return html`<div class="w-full h-full flex flex-col items-start justify-center">
 			${this.step === "nomodule"
-				? html`<div class="max-w-md w-full flex flex-col items-center gap-4">
+				? html`<div class="max-w-lg w-full flex flex-col items-center gap-4">
 						<h1 class="font-bold text-4xl text-slate-900 text-center">No module selected</h1>
 						<p class="text-slate-600 w-full md:w-[400px] leading-relaxed mb-4 text-center">
 							Please select a module to install, you can find one on inlang.com.
