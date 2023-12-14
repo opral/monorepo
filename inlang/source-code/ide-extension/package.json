@@ -26,6 +26,24 @@
 	],
 	"main": "./dist/main.cjs",
 	"contributes": {
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "inlang_tab",
+					"title": "Inlang",
+					"icon": "assets/logo-negative.svg"
+				}
+			]
+		},
+		"views": {
+			"inlang_tab": [
+				{
+					"id": "inlang_tab",
+					"name": "Inlang",
+					"icon": "assets/logo-negative.svg"
+				}
+			]
+		},
 		"commands": [
 			{
 				"command": "inlang.editMessage",
@@ -121,8 +139,6 @@
 		"wdio-vscode-service": "^5.2.2"
 	},
 	"activationEvents": [
-		"workspaceContains:**/project.inlang/*",
-		"workspaceContains:**/inlang.config.js",
 		"onStartupFinished"
 	],
 	"license": "Apache-2.0"

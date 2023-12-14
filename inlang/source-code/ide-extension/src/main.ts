@@ -89,6 +89,69 @@ async function main(args: {
 	// Linter diagnostics
 	linterDiagnostics(args)
 
+	class DummyTreeItem {
+		constructor(
+			public readonly label: string,
+			public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+			public readonly command?: vscode.Command
+		) {}
+	}
+
+	class DummyTreeDataProvider implements vscode.TreeDataProvider<DummyTreeItem> {
+		private _onDidChangeTreeData: vscode.EventEmitter<DummyTreeItem | undefined | null | void> =
+			new vscode.EventEmitter<DummyTreeItem | undefined | null | void>()
+		readonly onDidChangeTreeData: vscode.Event<DummyTreeItem | undefined | null | void> =
+			this._onDidChangeTreeData.event
+
+		getTreeItem(element: DummyTreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
+			return element
+		}
+
+		getChildren(element?: DummyTreeItem): vscode.ProviderResult<DummyTreeItem[]> {
+			// Returning dummy tree items
+			if (!element) {
+				return Promise.resolve([
+					new DummyTreeItem("Parent 1", vscode.TreeItemCollapsibleState.Collapsed),
+					new DummyTreeItem("Parent 2", vscode.TreeItemCollapsibleState.Collapsed),
+				])
+			}
+
+			if (element.label === "Parent 1") {
+				return Promise.resolve([
+					new DummyTreeItem("Child 1", vscode.TreeItemCollapsibleState.None),
+					new DummyTreeItem("Child 2", vscode.TreeItemCollapsibleState.None),
+				])
+			}
+
+			return Promise.resolve([])
+		}
+
+		getParent(): vscode.ProviderResult<DummyTreeItem> {
+			// Logic to return parent for given element
+			return undefined // Returning null assuming it's a root element
+		}
+
+		resolveTreeItem?(item: vscode.TreeItem): vscode.ProviderResult<vscode.TreeItem> {
+			// Resolve tree item if some properties are undefined
+			return item // Return the item itself assuming all properties are defined
+		}
+
+		refresh(): void {
+			this._onDidChangeTreeData.fire(undefined)
+		}
+	}
+
+	// Usage
+	const treeDataProvider = new DummyTreeDataProvider()
+
+	vscode.window.createTreeView("inlang_tab", {
+		treeDataProvider,
+	})
+
+	args.context.subscriptions.push(
+		vscode.window.registerTreeDataProvider("inlang_tab", treeDataProvider)
+	)
+
 	// Log inlang errors
 	const inlangErrors = state().project.errors()
 	if (inlangErrors.length > 0) {
