@@ -83,7 +83,7 @@ export function Page(props: {
 				return {
 					title: m.marketplace_header_lintRules_title(),
 					description: m.marketplace_header_lintRules_description(),
-					buttonLink: "/documentation/build-lint-rule",
+					buttonLink: "/documentation/lint-rule",
 					buttonText: m.marketplace_header_lintRules_button_text(),
 					coverCard: <LintRulesHeader />,
 				}

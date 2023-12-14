@@ -15,7 +15,7 @@ After opening the repository, you're able to find the files inside. Usually, the
 ### 3. Use the APIs from the SDK
 
 For working with inlang, you can make use of its
-[SDK](/documentation/sdk) which provides you with all the necessary APIs.
+[SDK](/documentation) which provides you with all the necessary APIs.
 
 ### 4. Configure your app
 

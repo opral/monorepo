@@ -26,7 +26,7 @@ import {
 	solidAdapter,
 	type InlangProjectWithSolidAdapter,
 } from "@inlang/sdk"
-import { parseOrigin, telemetryBrowser } from "@inlang/telemetry"
+import { telemetryBrowser } from "@inlang/telemetry"
 import type { Result } from "@inlang/result"
 
 type EditorStateSchema = {
@@ -272,10 +272,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					}),
 					{ from }
 				)
-				const gitOrigin = parseOrigin({ remotes: await newRepo.listRemotes() })
-				telemetryBrowser.group("repository", gitOrigin, {
-					name: gitOrigin,
-				})
+				// TODO add a project UUID to the tele.groups internal #196
+				// const gitOrigin = parseOrigin({ remotes: await newRepo.listRemotes() })
+				// telemetryBrowser.group("repository", gitOrigin, {
+				// 	name: gitOrigin,
+				// })
 				telemetryBrowser.capture("EDITOR cloned repository", {
 					userPermission: userIsCollaborator() ? "iscollaborator" : "isNotCollaborator",
 				})
@@ -364,11 +365,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [branchNames] = createResource(
 		() => {
-			if (lixErrors().length > 0 || repo() === undefined) {
-				return {}
-			} else {
-				return { repo: repo() }
-			}
+			return { repo: repo() }
 		},
 		async (args) => {
 			return await args.repo?.getBranches()

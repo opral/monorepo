@@ -1,4 +1,4 @@
-import { Link as MetaLink, Meta, Title } from "@solidjs/meta"
+import { Meta, Title } from "@solidjs/meta"
 import { For, Show, onMount } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { Chip } from "#src/interface/components/Chip.jsx"
@@ -10,7 +10,6 @@ import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
 import EditOutline from "~icons/material-symbols/edit-outline-rounded"
 import { currentPageContext } from "#src/renderer/state.js"
-import { i18nRouting } from "#src/renderer/_default.page.route.js"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -80,10 +79,6 @@ export function Page(props: PageProps) {
 			<Meta name="twitter:description" content={props.manifest && description()} />
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />
-			<MetaLink
-				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
-				rel="canonical"
-			/>
 			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
 					<div class="md:py-20 py-16">
