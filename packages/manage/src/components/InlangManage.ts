@@ -458,15 +458,11 @@ export class InlangManage extends TwLitElement {
 						</button>
 							</div>
 							<div class="mb-12">
-							${
-								// @ts-ignore
-								this.modules &&
-								this.modules !== "empty" &&
-								this.modules?.filter((module) => module.id.includes("plugin.")).length > 0 &&
-								html`<h2 class="text-lg font-semibold my-4">Plugins</h2>`
-							}
+							<h2 class="text-lg font-semibold my-4">Plugins</h2>
 								${
-									this.modules && this.modules !== "empty"
+									this.modules &&
+									this.modules !== "empty" &&
+									this.modules?.filter((module) => module.id.includes("plugin.")).length > 0
 										? html`<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 												${
 													// @ts-ignore
@@ -506,14 +502,11 @@ export class InlangManage extends TwLitElement {
 												}
 										  </div>`
 										: html`<div
-												class="py-4 px-8 w-full rounded-md bg-red-100 text-red-500 flex flex-col items-center justify-center"
+												class="py-16 border border-dashed border-slate-300 px-8 w-full rounded-md bg-slate-100 text-slate-500 flex flex-col items-center justify-center"
 										  >
 												<p class="mb-4 font-medium">You don't have any plugins installed.</p>
 												<a
-													href="/install?${this.url.repo ? `repo=${this.url.repo}` : ""}${this.url
-														.project
-														? `&project=${this.url.project}`
-														: ""}"
+													href="https://inlang.com/c/plugins"
 													target="_blank"
 													class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
 													>Install a plugin
@@ -522,16 +515,12 @@ export class InlangManage extends TwLitElement {
 								}
 								</div>
 								<div>
-							${
-								// @ts-ignore
-								this.modules &&
-								this.modules !== "empty" &&
-								this.modules?.filter((module) => module.id.includes("messageLintRule.")).length >
-									0 &&
-								html`<h2 class="text-lg font-semibold my-4">Lint Rules</h2>`
-							}
+							<h2 class="text-lg font-semibold my-4">Lint Rules</h2>
 								${
-									this.modules && this.modules !== "empty"
+									this.modules &&
+									this.modules !== "empty" &&
+									this.modules?.filter((module) => module.id.includes("messageLintRule.")).length >
+										0
 										? html`<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 												${
 													// @ts-ignore
@@ -571,14 +560,11 @@ export class InlangManage extends TwLitElement {
 												}
 										  </div>`
 										: html`<div
-												class="py-4 px-8 w-full rounded-md bg-red-100 text-red-500 flex flex-col items-center justify-center"
+												class="py-16 border border-dashed border-slate-300 px-8 w-full rounded-md bg-slate-100 text-slate-500 flex flex-col items-center justify-center"
 										  >
 												<p class="mb-4 font-medium">You don't have any rules installed.</p>
 												<a
-													href="/install?${this.url.repo ? `repo=${this.url.repo}` : ""}${this.url
-														.project
-														? `&project=${this.url.project}`
-														: ""}"
+													href="https://inlang.com/c/lint-rules"
 													target="_blank"
 													class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
 													>Install a lint rule
