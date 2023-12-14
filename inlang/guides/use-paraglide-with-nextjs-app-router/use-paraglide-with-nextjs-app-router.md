@@ -31,7 +31,7 @@ It's recommended to also modify your `dev` command to include the `paraglide com
 // package.json
 {
 	"scripts": {
-		"dev": "next dev & paraglide compile --project ./project.inlang --watch"
+		"dev": "next dev & paraglide-js compile --project ./project.inlang --watch"
 	}
 }
 ```
@@ -215,11 +215,12 @@ import { headers } from "next/headers"
 
 
 //This only needs to be called once, so it's fine to do it here
+
+
+export default function LanguageProvider(props: { children: React.ReactNode }) {
 setLanguageTag(() => {
 	return headers().get("x-language-tag") as any
 })
-
-export default function LanguageProvider(props: { children: React.ReactNode }) {
 	return (
 		<>
 			{props.children}
