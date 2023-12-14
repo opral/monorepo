@@ -2,7 +2,7 @@ import type { NodeishFilesystem } from "@lix-js/fs"
 import type raw from "isomorphic-git"
 import type { Endpoints } from "@octokit/types"
 
-type Author = {
+export type Author = {
 	name?: string
 	email?: string
 	timestamp?: number
@@ -27,7 +27,8 @@ export type LixAuthModule = {
 }
 
 export type Repository = {
-	// raw: any
+	// we dont want to add isogit to types but its required for teting comparison and debugging
+	[x: string]: any
 	nodeishFs: NodeishFilesystem
 	commit: (args: {
 		author: Author

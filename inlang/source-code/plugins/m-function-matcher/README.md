@@ -1,6 +1,6 @@
 ### Introduction
 
-This plugin provides the integration for `paraglide-js` into the inlang VSCode extension. It allows you to extract messages from your code, view them inline in the text editor and get lints for your messages.
+This plugin provides the integration for [Paraglide JS](/m/gerre34r/library-inlang-paraglideJs)` into the inlang VSCode extension. It allows you to extract messages from your code, view them inline in the text editor and get lints for your messages.
 
 
 ### Usage
