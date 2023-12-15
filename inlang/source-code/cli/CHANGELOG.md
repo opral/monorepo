@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 2.3.0
+
+### Minor Changes
+
+- 25d9cb7f1: fix: https://github.com/inlang/monorepo/issues/1884
+
 ## 2.2.0
 
 ### Minor Changes
