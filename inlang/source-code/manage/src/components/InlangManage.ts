@@ -170,7 +170,15 @@ export class InlangManage extends TwLitElement {
 							<inlang-logo size="2rem"></inlang-logo>
 						</a>
 						<p class="self-center text-left font-regular text-slate-400 pl-4 pr-1">/</p>
-						<p class="self-center pl-2 text-left font-medium text-slate-900 truncate">Manage</p>
+						<a
+							href=${`/?${
+								(this.url.repo ? `&repo=${this.url.repo}` : "") +
+								(this.url.project ? `&project=${this.url.project}` : "")
+							}
+		`}
+							class="self-center pl-2 text-left font-medium text-slate-900 truncate hover:text-slate-800"
+							>Manage</a
+						>
 						${this.url.project
 							? html`<div class="flex items-center flex-shrink-0">
 									<p class="self-center text-left font-regular text-slate-400 pl-2 pr-1">/</p>
