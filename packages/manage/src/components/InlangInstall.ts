@@ -214,7 +214,7 @@ export class InlangInstall extends TwLitElement {
 			this.step = "error"
 			// @ts-ignore
 			this.error = inlangProjectAfter.errors()
-		} else this.step = "success"
+		} else window.location.href = `/?repo=${this.url.repo}&project=${this.url.project}&install=true`
 	}
 
 	/* This function checks if all necessary data is given to install into a project */
@@ -752,33 +752,33 @@ export class InlangInstall extends TwLitElement {
 			</div>
 	  </div>`
 							: ""} `
-				: this.step === "success"
-				? html`<div class="flex flex-col gap-2 max-w-lg">
-						<h1 class="font-bold text-4xl text-slate-900 mb-4 text-center">
-							Succesfully installed
-						</h1>
-						<p class="text-slate-600 w-full md:w-[400px] leading-relaxed text-center mb-8">
-							Your module was succesfully installed into your project: ${this.url.project}
-						</p>
-						<div class="flex gap-4">
-							<a
-								class="bg-slate-800 px-6 w-full text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
-								href=${`/?repo=${
-									this.url.repo + (this.url.project ? `&project=${this.url.project}` : "")
-								}`}
-							>
-								To inlang Manage
-							</a>
-							<a
-								class="bg-slate-200 truncate px-6 w-full text-slate-900 text-center py-2 rounded-md font-medium hover:bg-slate-300 transition-colors"
-								href=${`https://inlang.com/editor/${this.url.repo}`}
-								target="_blank"
-							>
-								Go to Fink - Editor
-							</a>
-						</div>
-				  </div>`
-				: this.step === "abort"
+				: // : this.step === "success"
+				// ? html`<div class="flex flex-col gap-2 max-w-lg">
+				// 		<h1 class="font-bold text-4xl text-slate-900 mb-4 text-center">
+				// 			Succesfully installed
+				// 		</h1>
+				// 		<p class="text-slate-600 w-full md:w-[400px] leading-relaxed text-center mb-8">
+				// 			Your module was succesfully installed into your project: ${this.url.project}
+				// 		</p>
+				// 		<div class="flex gap-4">
+				// 			<a
+				// 				class="bg-slate-800 px-6 w-full text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
+				// 				href=${`/?repo=${
+				// 					this.url.repo + (this.url.project ? `&project=${this.url.project}` : "")
+				// 				}`}
+				// 			>
+				// 				To inlang Manage
+				// 			</a>
+				// 			<a
+				// 				class="bg-slate-200 truncate px-6 w-full text-slate-900 text-center py-2 rounded-md font-medium hover:bg-slate-300 transition-colors"
+				// 				href=${`https://inlang.com/editor/${this.url.repo}`}
+				// 				target="_blank"
+				// 			>
+				// 				Go to Fink - Editor
+				// 			</a>
+				// 		</div>
+				//   </div>`
+				this.step === "abort"
 				? html`<div class="flex flex-col gap-2">
 						<h1 class="font-bold text-4xl text-slate-900 mb-2 text-center">Installation aborted</h1>
 						<p class="text-slate-600 w-full md:w-[400px] leading-relaxed text-center mx-auto mb-8">

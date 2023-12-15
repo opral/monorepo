@@ -468,19 +468,40 @@ export class InlangManage extends TwLitElement {
 							? html`<div class="h-full w-full">
 					<div class="mb-16 flex items-start justify-between flex-col-reverse md:flex-row gap-10 md:gap-4">
 					<div>
-							<h1 class="font-bold text-4xl text-slate-900 mb-4">Manage your inlang project</h1>
+							${
+								this.url.install === "true"
+									? html`<h1 class="font-bold text-4xl text-slate-900 mb-4">
+											Module successfully installed
+									  </h1>`
+									: this.url.uninstall === "true"
+									? html`<h1 class="font-bold text-4xl text-slate-900 mb-4">
+											Module successfully uninstalled
+									  </h1>`
+									: html`<h1 class="font-bold text-4xl text-slate-900 mb-4">
+											Manage your inlang project
+									  </h1>`
+							}
 							<p class="text-slate-600 w-full md:w-[400px] leading-relaxed">
 								Here is a list of all modules installed in your project.
 							</p>
 							</div>
+							<div class="flex items-center gap-2">
+							<a
+								class="bg-slate-200 text-slate-900 md:block hidden hover:bg-slate-300 truncate text-center px-4 py-2 rounded-md font-medium transition-colors"
+								href=${`https://inlang.com/editor/${this.url.repo}`}
+								target="_blank"
+							>
+								Go to Fink - Editor
+							</a>
 							<button
-							class=${"bg-slate-800 text-white text-center px-4 py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"}
+							class="bg-slate-800 text-white text-center px-4 py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
 							@click=${() => {
 								window.location.href = `https://inlang.com/?repo=${this.url.repo}&project=${this.url.project}`
 							}}
 						>
 							Install a module
 						</button>
+						</div>
 							</div>
 							<div class="mb-12">
 							<h2 class="text-lg font-semibold my-4">Plugins</h2>
