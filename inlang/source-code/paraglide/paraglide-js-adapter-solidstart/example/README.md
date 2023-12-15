@@ -19,7 +19,7 @@ src/
         en.json # english messages
         de.json # german messages
         index.tsx # your i18n module, this is where the adapter is used to wrap paraglide and provide an api to use for your app
-    routes/...
+    routes/... # each route will have /en/path and /de/path variants automatically generated
     root.tsx # solistart root, here the current locale is read from URL, and shared with the entire app via context
-vite.config.ts # adds the paraglide vite plugin
+vite.config.ts # paraglide vite plugin will compile the paraglide files when you run the dev server
 ```
