@@ -67,7 +67,7 @@ it("should match different origin patterns to one unambigious identifier", () =>
 		"username@github.com/example/repo.git",
 		"https://ghp_Es2aQE4V0jE7hnm59Zo1GfSSDdRVDE0BxMO1@github.com/example/repo.git",
 		"x-access-token/ghs_bWzL0m50asffasfLa2RmWkuPasd9Mo0jiK0A@github.com/example/repo.git",
-		"gitlab-ci-token/64_jprnG_nQR5sYNLTp6S3w@github.com/example/repo.git"
+		"gitlab-ci-token/64_jprnG_nQR5sYNLTp6S3w@github.com/example/repo.git",
 	]
 
 	for (const remote of remotes) {
