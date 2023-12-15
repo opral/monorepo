@@ -67,7 +67,7 @@ export function translateHref<T extends string>(
  * @param all_language_tags All available language tags. (From paraglide, e.g. "en", "de")
  * @returns The language tag from the URL, or `undefined` if no language tag was found.
  */
-export function getLanguageTagFromURL<T extends string>(
+export function useLocationLanguageTag<T extends string>(
 	all_language_tags: readonly T[]
 ): T | undefined {
 	const location = router.useLocation()

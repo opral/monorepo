@@ -8,8 +8,8 @@ export const sourceLanguageTag = paraglide.sourceLanguageTag
 
 export const { LanguageTagProvider, languageTag, setLanguageTag } = adapter.createI18n(paraglide)
 
-export function getLanguageTagFromURL(): AvailableLanguageTag | undefined {
-	return adapter.getLanguageTagFromURL(availableLanguageTags)
+export function useLocationLanguageTag(): AvailableLanguageTag | undefined {
+	return adapter.useLocationLanguageTag(availableLanguageTags)
 }
 
 export const LocaleSwitcher: Component = () => {
