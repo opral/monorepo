@@ -3,6 +3,7 @@ import { html } from "lit"
 import { customElement, property, query } from "lit/decorators.js"
 import { TwLitElement } from "../common/TwLitElement.js"
 import { z } from "zod"
+import "./InlangUninstall"
 import "./InlangInstall"
 import { createNodeishMemoryFs, openRepository } from "@lix-js/client"
 import { listProjects } from "@inlang/sdk"
@@ -159,7 +160,7 @@ export class InlangManage extends TwLitElement {
 				this.shadowRoot?.querySelector("#projects")?.classList.add("hidden")
 			}}
 		>
-			<header class="bg-white border-b border-slate-200 py-3.5 px-4">
+			<header class="bg-white border-b border-slate-200 py-3.5 px-4 sticky top-0">
 				<div class="max-w-7xl mx-auto flex flex-row justify-between relative sm:static">
 					<div class="flex items-center">
 						<a
@@ -498,21 +499,33 @@ export class InlangManage extends TwLitElement {
 																			${module.description.en}
 																		</p>
 																	</div>
-																	<a
-																		target="_blank"
-																		href=${`https://inlang.com/m/${
-																			// @ts-ignore
-																			module.uniqueID
-																		}`}
-																		class="text-[#098DAC] text-sm font-medium transition-colors hover:text-[#06b6d4]"
-																	>
-																		More information
-																		<doc-icon
-																			class="inline-block ml-0.5 translate-y-0.5"
-																			size="1em"
-																			icon="mdi:arrow-top-right"
-																		></doc-icon>
-																	</a>
+																	<div class="flex items-center justify-between gap-4">
+																		<a
+																			target="_blank"
+																			href=${`https://inlang.com/m/${
+																				// @ts-ignore
+																				module.uniqueID
+																			}`}
+																			class="text-[#098DAC] text-sm font-medium transition-colors hover:text-[#06b6d4]"
+																		>
+																			More information
+																			<doc-icon
+																				class="inline-block ml-0.5 translate-y-0.5"
+																				size="1em"
+																				icon="mdi:arrow-top-right"
+																			></doc-icon>
+																		</a>
+																		<a
+																			href=${`/uninstall?repo=${this.url.repo}&project=${this.url.project}&module=${module.id}`}
+																			class="text-red-500 text-sm font-medium transition-colors hover:text-red-400"
+																		>
+																			<doc-icon
+																				class="inline-block ml-0.5 translate-y-0.5"
+																				size="1.4em"
+																				icon="mdi:delete"
+																			></doc-icon>
+																		</a>
+																	</div>
 																</div>`
 														)
 												}
@@ -556,21 +569,33 @@ export class InlangManage extends TwLitElement {
 																			${module.description.en}
 																		</p>
 																	</div>
-																	<a
-																		target="_blank"
-																		href=${`https://inlang.com/m/${
-																			// @ts-ignore
-																			module.uniqueID
-																		}`}
-																		class="text-[#098DAC] text-sm font-medium transition-colors hover:text-[#06b6d4]"
-																	>
-																		More information
-																		<doc-icon
-																			class="inline-block ml-0.5 translate-y-0.5"
-																			size="1em"
-																			icon="mdi:arrow-top-right"
-																		></doc-icon>
-																	</a>
+																	<div class="flex items-center justify-between gap-4">
+																		<a
+																			target="_blank"
+																			href=${`https://inlang.com/m/${
+																				// @ts-ignore
+																				module.uniqueID
+																			}`}
+																			class="text-[#098DAC] text-sm font-medium transition-colors hover:text-[#06b6d4]"
+																		>
+																			More information
+																			<doc-icon
+																				class="inline-block ml-0.5 translate-y-0.5"
+																				size="1em"
+																				icon="mdi:arrow-top-right"
+																			></doc-icon>
+																		</a>
+																		<a
+																			href=${`/uninstall?repo=${this.url.repo}&project=${this.url.project}&module=${module.id}`}
+																			class="text-red-500 text-sm font-medium transition-colors hover:text-red-400"
+																		>
+																			<doc-icon
+																				class="inline-block ml-0.5 translate-y-0.5"
+																				size="1.4em"
+																				icon="mdi:delete"
+																			></doc-icon>
+																		</a>
+																	</div>
 																</div>`
 														)
 												}
@@ -594,11 +619,19 @@ export class InlangManage extends TwLitElement {
 					  `
 							: ""}
 				  </div>`
-				: html`<div
+				: this.url.path === "install"
+				? html`<div
 						class="w-full max-w-7xl h-full flex-grow mx-auto flex justify-center px-4 pb-24"
 				  >
 						<inlang-install jsonURL=${JSON.stringify(this.url)}></inlang-install>
-				  </div>`}
+				  </div>`
+				: this.url.path === "uninstall"
+				? html`<div
+						class="w-full max-w-7xl h-full flex-grow mx-auto flex justify-center px-4 pb-24"
+				  >
+						<inlang-uninstall jsonURL=${JSON.stringify(this.url)}></inlang-uninstall>
+				  </div>`
+				: ""}
 		</main>`
 	}
 }

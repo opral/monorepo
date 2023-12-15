@@ -23,7 +23,7 @@ export class InlangInstall extends TwLitElement {
 		| "noauth"
 		| "norepo"
 		| "noproject"
-		| "no-optin"
+		| "nooptin"
 		| "install"
 		| "error"
 		| "success"
@@ -262,7 +262,7 @@ export class InlangInstall extends TwLitElement {
 			this.step = "noproject"
 			this.loading = false
 		} else if (!this.optin) {
-			this.step = "no-optin"
+			this.step = "nooptin"
 			this.loading = false
 		} else {
 			this.step = "install"
@@ -539,13 +539,13 @@ export class InlangInstall extends TwLitElement {
 							</div>
 						</div>
 				  </div>`
-				: this.step === "no-optin"
+				: this.step === "nooptin"
 				? html`<div class="flex flex-col gap-2">
 						<h1 class="font-bold text-4xl text-slate-900 mb-2 text-center">We need your consent</h1>
 						<p class="text-slate-600 w-full md:w-[400px] leading-relaxed text-center mx-auto mb-4">
 							Please confirm that you want to install the following module:
 						</p>
-						<div class="mx-auto max-w-lg mb-8">
+						<div class="mx-auto w-full max-w-lg mb-8">
 							<div
 								class="p-6 w-full bg-white border border-slate-200 rounded-xl flex flex-col justify-between gap-2"
 							>
@@ -607,7 +607,7 @@ export class InlangInstall extends TwLitElement {
 				? html`<div class="flex flex-col gap-2">
 						<h1 class="font-bold text-4xl text-slate-900 mb-2 text-center">Installing module</h1>
 						<p class="text-slate-600 w-full md:w-[400px] leading-relaxed text-center mx-auto mb-4">
-							Modules are getting installed into your repository...
+							Modules are getting installed into your project...
 						</p>
 						<div class="flex items-start gap-2 w-full h-2 bg-slate-200 rounded-full mb-12">
 							<div
@@ -757,7 +757,7 @@ export class InlangInstall extends TwLitElement {
 						<h1 class="font-bold text-4xl text-slate-900 mb-4 text-center">
 							Succesfully installed
 						</h1>
-						<p class="text-slate-600 w-full md:w-[400px] leading-relaxed text-center">
+						<p class="text-slate-600 w-full md:w-[400px] leading-relaxed text-center mb-8">
 							Your module was succesfully installed into your project: ${this.url.project}
 						</p>
 						<div class="flex gap-4">
