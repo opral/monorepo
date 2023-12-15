@@ -57,6 +57,7 @@ services:
     region: frankfurt
     plan: standard
     branch: main
+    pullRequestPreviewsEnabled: false
     buildCommand: pnpm install && pnpm run build
     startCommand: pnpm --filter @inlang/manage production
     autoDeploy: true
