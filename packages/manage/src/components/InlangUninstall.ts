@@ -321,9 +321,7 @@ export class InlangInstall extends TwLitElement {
 				  </div>`
 				: this.step === "abort"
 				? html`<div class="flex flex-col gap-2">
-						<h1 class="font-bold text-4xl text-slate-900 mb-2 text-center">
-							Uninstallation aborted
-						</h1>
+						<h1 class="font-bold text-4xl text-slate-900 mb-2 text-center">Deletion aborted</h1>
 						<p class="text-slate-600 w-full md:w-[400px] leading-relaxed text-center mx-auto mb-8">
 							Your module deletion was aborted.
 						</p>
