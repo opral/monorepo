@@ -458,7 +458,7 @@ export class InlangManage extends TwLitElement {
 							  </div>`
 							: this.modules
 							? html`<div class="h-full w-full">
-					<div class="mb-16 flex items-start justify-between gap-4">
+					<div class="mb-16 flex items-start justify-between flex-col-reverse md:flex-row gap-10 md:gap-4">
 					<div>
 							<h1 class="font-bold text-4xl text-slate-900 mb-4">Manage your inlang project</h1>
 							<p class="text-slate-600 w-full md:w-[400px] leading-relaxed">
@@ -499,7 +499,9 @@ export class InlangManage extends TwLitElement {
 																			${module.description.en}
 																		</p>
 																	</div>
-																	<div class="flex items-center justify-between gap-4">
+																	<div
+																		class="flex md:items-center flex-col md:flex-row justify-between gap-4"
+																	>
 																		<a
 																			target="_blank"
 																			href=${`https://inlang.com/m/${
@@ -570,7 +572,9 @@ export class InlangManage extends TwLitElement {
 																			${module.description.en}
 																		</p>
 																	</div>
-																	<div class="flex items-center justify-between gap-4">
+																	<div
+																		class="flex md:items-center flex-col md:flex-row justify-between gap-4"
+																	>
 																		<a
 																			target="_blank"
 																			href=${`https://inlang.com/m/${
