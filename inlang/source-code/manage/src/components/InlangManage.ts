@@ -520,10 +520,11 @@ export class InlangManage extends TwLitElement {
 																			class="text-red-500 text-sm font-medium transition-colors hover:text-red-400"
 																		>
 																			<doc-icon
-																				class="inline-block ml-0.5 translate-y-0.5"
-																				size="1.4em"
+																				class="inline-block mr-0.5 translate-y-0.5"
+																				size="1em"
 																				icon="mdi:delete"
 																			></doc-icon>
+																			Uninstall
 																		</a>
 																	</div>
 																</div>`
@@ -590,10 +591,11 @@ export class InlangManage extends TwLitElement {
 																			class="text-red-500 text-sm font-medium transition-colors hover:text-red-400"
 																		>
 																			<doc-icon
-																				class="inline-block ml-0.5 translate-y-0.5"
-																				size="1.4em"
+																				class="inline-block mr-0.5 translate-y-0.5"
+																				size="1em"
 																				icon="mdi:delete"
 																			></doc-icon>
+																			Uninstall
 																		</a>
 																	</div>
 																</div>`
