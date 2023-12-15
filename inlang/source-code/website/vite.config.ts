@@ -1,6 +1,6 @@
 import { defineConfig } from "vite"
 import solid from "vite-plugin-solid"
-import { ssr as vikePlugin } from "vike/plugin"
+import vike from "vike/plugin"
 import { fileURLToPath, URL } from "node:url"
 import Icons from "unplugin-icons/vite"
 import { paraglide } from "@inlang/paraglide-js-adapter-vite"
@@ -13,9 +13,11 @@ export default defineConfig({
 	},
 	envPrefix: "PUBLIC_",
 	plugins: [
-		solid({ ssr: true }),
+		solid(),
 		// the metaframework https://vike.dev/
-		vikePlugin(),
+		vike({
+			prerender: true,
+		}),
 		// @ts-ignore
 		// only https://icon-sets.iconify.design/material-symbols/
 		// and https://icon-sets.iconify.design/cib/
