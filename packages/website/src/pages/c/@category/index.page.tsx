@@ -157,9 +157,9 @@ export function Page(props: {
 						  )} - inlang`
 				}
 			/>
-			<Meta name="og:image" content="/images/inlang-marketplace-image.jpg" />
+			<Meta name="og:image" content="/opengraph/inlang-social-image.jpg" />
 			<Meta name="twitter:card" content="summary_large_image" />
-			<Meta name="twitter:image" content="/opengraph/inlang-marketplace-image.jpg" />
+			<Meta name="twitter:image" content="/opengraph/inlang-social-image.jpg" />
 			<Meta
 				name="twitter:image:alt"
 				content="inlang's ecosystem helps organizations to go global."
