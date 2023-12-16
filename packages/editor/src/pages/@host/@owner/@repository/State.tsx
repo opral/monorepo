@@ -501,9 +501,8 @@ export async function pushChanges(args: {
 	)
 	if (filesWithUncommittedChanges.length > 0) {
 		// add all changes
-		for (const file of filesWithUncommittedChanges) {
-			await args.repo.add({ filepath: file[0] })
-		}
+		await args.repo.add({ filepath: filesWithUncommittedChanges.map((file) => file[0]), cache })
+
 		// commit changes
 		await args.repo.commit({
 			author: {
