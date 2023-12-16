@@ -33,8 +33,11 @@ export const createNodeishFsWithAbsolutePaths = (args: {
 		readFile: (path: string, options: { encoding: "utf-8" | "binary" }) =>
 			args.nodeishFs.readFile(makeAbsolute(path), options),
 		readdir: (path: string) => args.nodeishFs.readdir(makeAbsolute(path)),
-		mkdir: (path: string) => args.nodeishFs.mkdir(makeAbsolute(path)),
+		mkdir: (path: string, options: { recursive: boolean }) =>
+			args.nodeishFs.mkdir(makeAbsolute(path), options),
 		writeFile: (path: string, data: string) => args.nodeishFs.writeFile(makeAbsolute(path), data),
+		stat: (path: string) => args.nodeishFs.stat(makeAbsolute(path)),
+		rm: (path: string) => args.nodeishFs.rm(makeAbsolute(path)),
 		watch: (
 			path: string,
 			options: { signal: AbortSignal | undefined; recursive: boolean | undefined }

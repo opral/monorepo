@@ -54,5 +54,6 @@ export const createNodeishFsWithWatcher = (args: {
 		mkdir: args.nodeishFs.mkdir,
 		writeFile: args.nodeishFs.writeFile,
 		watch: args.nodeishFs.watch,
+		stat: args.nodeishFs.stat,
 	}
 }

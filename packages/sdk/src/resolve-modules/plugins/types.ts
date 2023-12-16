@@ -18,7 +18,7 @@ import type { ProjectSettings } from "@inlang/project-settings"
  */
 export type NodeishFilesystemSubset = Pick<
 	NodeishFilesystem,
-	"readFile" | "readdir" | "mkdir" | "writeFile" | "watch"
+	"readFile" | "readdir" | "mkdir" | "writeFile" | "watch" | "rm" | "stat"
 >
 
 /**
