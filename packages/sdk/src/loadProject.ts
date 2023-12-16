@@ -23,7 +23,7 @@ import { ProjectSettings, Message, type NodeishFilesystemSubset } from "./versio
 import { tryCatch, type Result } from "@inlang/result"
 import { migrateIfOutdated } from "@inlang/project-settings/migration"
 import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
-import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
+import { normalizePath, type NodeishFilesystem, getDirname } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
@@ -163,18 +163,45 @@ export const loadProject = async (args: {
 					try {
 						await fs.mkdir(messageFolderPath)
 					} catch (e) {
-						// TODO find better way to check if the foolder exists
+						// TODO #1844 find better way to check if the folder exists
 					}
 
-					const messageFilePaths = await fs.readdir(messageFolderPath)
-					for (const messageFilePath of messageFilePaths) {
-						const messageRaw = await fs.readFile(`${messageFolderPath}/${messageFilePath}`, {
-							encoding: "utf-8",
-						})
+					const readFilesFromFolderRecursive = async (
+						fileSystem: NodeishFilesystemSubset,
+						rootPath: string,
+						pathToRead: string
+					) => {
+						let filePaths: string[] = []
+						const paths = await fileSystem.readdir(rootPath + pathToRead)
+						for (const path of paths) {
+							const stat = await fileSystem.stat(rootPath + pathToRead + "/" + path)
 
-						// TODO #1844 the place where we read in the file - if this fails we should consider ignoring it
-						const message = parseMessage(messageRaw) as Message
-						messages.push(message)
+							if (stat.isDirectory()) {
+								const subfolderPaths = await readFilesFromFolderRecursive(
+									fileSystem,
+									rootPath,
+									pathToRead + "/" + path
+								)
+								filePaths = filePaths.concat(subfolderPaths)
+							} else {
+								filePaths.push(pathToRead + "/" + path)
+							}
+						}
+						return filePaths
+					}
+					const messageFilePaths = await readFilesFromFolderRecursive(fs, messageFolderPath, "")
+					for (const messageFilePath of messageFilePaths) {
+						try {
+							const messageRaw = await fs.readFile(`${messageFolderPath}${messageFilePath}`, {
+								encoding: "utf-8",
+							})
+
+							// TODO #1844 the place where we read in the file - if this fails we should consider ignoring it
+							const message = parseMessage(messageFilePath, messageRaw) as Message
+							messages.push(message)
+						} catch (e) {
+							console.log(e)
+						}
 					}
 
 					setMessages(messages)
@@ -186,16 +213,17 @@ export const loadProject = async (args: {
 
 			}
 
-			const fsWithWatcher = createNodeishFsWithWatcher({
-				nodeishFs: nodeishFs,
-				updateMessages: () => {
-					// TODO #1844 this is where the messages are loaded (all) when the message file changed
-					// TODO #1844 do we still need to reload all messages when plugins change - guess not
-					// loadAndSetMessages(nodeishFs)
-				},
-			})
+			// TODO #1844 this was used to create a watcher on all files that the fs reads - to trigger updates of plugins - check how we want this be handled with our own persistence
+			// const fsWithWatcher = createNodeishFsWithWatcher({
+			// 	nodeishFs: nodeishFs,
+			// 	updateMessages: () => {
+			// 		// TODO #1844 this is where the messages are loaded (all) when the message file changed
+			// 		// TODO #1844 do we still need to reload all messages when plugins change - guess not
+			// 		// loadAndSetMessages(nodeishFs)
+			// 	},
+			// })
 
-			// inital load of all messages
+			// inital loading of all messages
 			loadAndSetMessages(fsWithWatcher).then(() => {
 				// when initial message loading is done start watching on file changes in the message dir
 				;(async () => {
@@ -211,6 +239,11 @@ export const loadProject = async (args: {
 							for await (const event of watcher) {
 								if (!event.filename) {
 									throw new Error("filename not set in event...")
+								}
+
+								const messageId = getMessageIdFromPath(event.filename)
+								if (!messageId) {
+									continue
 								}
 
 								let fileContent: string | undefined
@@ -229,14 +262,13 @@ export const loadProject = async (args: {
 									// file does not exis - drop message in inlang project
 								}
 
-								const messageId = getMessageIdFromPath(event.filename)
-
 								if (!fileContent) {
 									messagesQuery.delete({ where: { id: messageId } })
 								} else {
-									const message = parseMessage(fileContent)
+									const message = parseMessage(event.filename, fileContent)
 									const currentMessage = messagesQuery.get({ where: { id: messageId } })
-									if (currentMessage && encodeMessage(currentMessage) === fileContent) {
+									const currentMessageEncoded = encodeMessage(currentMessage)
+									if (currentMessage && currentMessageEncoded === fileContent) {
 										continue
 									}
 
@@ -296,22 +328,75 @@ export const loadProject = async (args: {
 
 		const messagesQuery = createMessagesQuery(() => messages() || [])
 
+		let trackedMessages: Set<string> | undefined
 		// subscribe to all messages and write to disc on signal
 		createEffect(() => {
-			for (const messageId of messagesQuery.includedMessageIds()) {
-				createEffect(() => {
-					const message = messagesQuery.get({ where: { id: messageId } })
-					console.log("saveing Message " + message.id + " to ")
-					const messageFilePath = messageFolderPath + "/" + getPathFromMessageId(message.id)
-					nodeishFs.writeFile(messageFilePath, encodeMessage(message))
-				})
+			let initialEffectCreation = false
+			if (trackedMessages === undefined) {
+				initialEffectCreation = true
+				trackedMessages = new Set<string>()
+			}
+
+			const currentMessageIds = messagesQuery.includedMessageIds()
+			const deletedMessageIds = [...trackedMessages].filter(
+				(tracked) => !currentMessageIds.includes(tracked)
+			)
+			for (const messageId of currentMessageIds) {
+				const message = messagesQuery.get({ where: { id: messageId } })!
+				if (!trackedMessages!.has(messageId!)) {
+					createEffect(
+						() => {
+							if (!initialEffectCreation) {
+								debugger
+
+								const createMessage = async (
+									fs: NodeishFilesystemSubset,
+									path: string,
+									message: Message
+								) => {
+									let dir = getDirname(path)
+									dir = dir.endsWith("/") ? dir.slice(0, -1) : dir
+
+									try {
+										await fs.mkdir(dir, { recursive: true })
+									} catch (e) {}
+
+									console.log("filePath RECURSIVE " + path)
+
+									await fs.writeFile(path, encodeMessage(message))
+								}
+								const messageFilePath = messageFolderPath + "/" + getPathFromMessageId(message.id)
+								createMessage(nodeishFs, messageFilePath, message)
+							} else {
+								console.log("initial creation skipped")
+							}
+						},
+						{ signal: messagesQuery.get({ where: { id: messageId } }) }
+					)
+					trackedMessages.add(messageId)
+				}
+				// console.log("CREATE EFFECT to react on changes in specific message")
+			}
+
+			for (const deletedMessageId of deletedMessageIds) {
+				if (!initialEffectCreation) {
+					const messageFilePath = messageFolderPath + "/" + getPathFromMessageId(deletedMessageId)
+					try {
+						nodeishFs.rm(messageFilePath)
+					} catch (e) {
+						// TODO #1844 check if we have a file not exits error
+						console.log(
+							"message that was deleted in the project did not have a representation on disc"
+						)
+					}
+				}
+				trackedMessages.delete(deletedMessageId)
 			}
 		})
 
 		// run import
 		const _resolvedModules = resolvedModules()
-	
-		// initial project setup finished - import all messages usign legacy load Messages 
+		// initial project setup finished - import all messages usign legacy load Messages
 		if (_resolvedModules?.resolvedPluginApi.loadMessages) {
 			const importedMessages = await makeTrulyAsync(
 				_resolvedModules.resolvedPluginApi.loadMessages({
@@ -323,10 +408,12 @@ export const loadProject = async (args: {
 
 			for (const importedMessage of importedMessages) {
 				const currentMessage = messagesQuery.get({ where: { id: importedMessage.id } })
-				if (currentMessage && encodeMessage(currentMessage) === encodeMessage(importedMessage)) {
+				const importedEnecoded = encodeMessage(importedMessage)
+				const currentMessageEncoded = encodeMessage(currentMessage)
+				if (currentMessage && importedEnecoded === currentMessageEncoded) {
 					continue
 				}
-				console.log("updating message from import " + importedMessage.id)
+				// console.log("updating message from import " + importedMessage.id)
 				messagesQuery.upsert({ where: { id: importedMessage.id }, data: importedMessage })
 			}
 		}
