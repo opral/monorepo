@@ -19,6 +19,7 @@ const {
 	pull,
 	currentBranch,
 	add,
+	remove,
 	log,
 	listServerRefs,
 	checkout,
@@ -138,6 +139,7 @@ export async function openRepository(
 					}),
 					dir,
 					ref: args.branch,
+					// TODO #1844 force: true
 					// filepaths: ["resources/en.json", "resources/de.json", "project.inlang.json"],
 				})
 			})
@@ -318,6 +320,19 @@ export async function openRepository(
 					nodeishFs: rawFs,
 					verbose,
 					description: "add",
+					intercept: delayedAction,
+				}),
+				dir,
+				filepath: cmdArgs.filepath,
+			})
+		},
+
+		remove(cmdArgs) {
+			return remove({
+				fs: withLazyFetching({
+					nodeishFs: rawFs,
+					verbose,
+					description: "remove",
 					intercept: delayedAction,
 				}),
 				dir,
