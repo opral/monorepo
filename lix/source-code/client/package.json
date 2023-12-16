@@ -28,7 +28,7 @@
 		"@inlang/env-variables": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@octokit/types": "11.1.0",
-		"isomorphic-git": "1.24.5",
+		"isomorphic-git": "git@github.com:martin-lysk/isomorphic-git.git#build",
 		"octokit": "3.1.0",
 		"solid-js": "1.7.11"
 	},
