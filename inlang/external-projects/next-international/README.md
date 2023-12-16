@@ -35,7 +35,7 @@ Check out the documentation at [https://next-international.vercel.app](https://n
 
 # Contributing
 
-[See the contributing guide](./CONTRIBUTING.md).
+[See the contributing guide](https://github.com/QuiiBz/next-international/blob/main/CONTRIBUTING.md).
 
 # Sponsors
 
@@ -43,4 +43,4 @@ Check out the documentation at [https://next-international.vercel.app](https://n
 
 # License
 
-[MIT](./LICENSE)
+[MIT](https://github.com/QuiiBz/next-international/blob/main/LICENSE)

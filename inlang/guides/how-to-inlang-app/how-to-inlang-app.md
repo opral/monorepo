@@ -39,7 +39,7 @@ const updatedMessageData = /* your updated message data */;
 inlang.query.messages.update({ args: updatedMessageData });
 ```
 
-These functions internally handle the loading and saving of messages according to your defined plugin (e.g., JSON, i18next, Inlang message format).
+These functions internally handle the loading and saving of messages according to your defined plugin (e.g., [JSON](/m/ig84ng0o/plugin-inlang-json), [i18next](/m/3i8bor92/plugin-inlang-i18next), [Inlang message format](/m/reootnfj/plugin-inlang-messageFormat)).
 
 ## 3. Working with Lint Rules
 

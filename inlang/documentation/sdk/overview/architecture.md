@@ -3,8 +3,8 @@
 Inlang's architecture consists of four main components:
 
 1. [Applications](/documentation/concept/app) - Provide users with an interface for their projects.
-2. [SDK](/documentation/sdk) - Can be used by developers to build inlang apps.
-3. [Project file](/documentation/project) - Defines the project's settings, which language tags exists and to be imported modules.
+2. [SDK](/documentation) - Can be used by developers to build inlang apps.
+3. [Project file](/documentation/concept/project) - Defines the project's settings, which language tags exists and to be imported modules.
 4. [Modules](/documentation/plugin) - Contain plugins and/or lint rules that define the behavior of a project.
 
 ![inlang architecture](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/architecture.jpg)
