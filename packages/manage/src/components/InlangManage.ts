@@ -3,6 +3,7 @@ import { html } from "lit"
 import { customElement, property, query } from "lit/decorators.js"
 import { TwLitElement } from "../common/TwLitElement.js"
 import { z } from "zod"
+import "./InlangUninstall"
 import "./InlangInstall"
 import { createNodeishMemoryFs, openRepository } from "@lix-js/client"
 import { listProjects } from "@inlang/sdk"
@@ -159,7 +160,7 @@ export class InlangManage extends TwLitElement {
 				this.shadowRoot?.querySelector("#projects")?.classList.add("hidden")
 			}}
 		>
-			<header class="bg-white border-b border-slate-200 py-3.5 px-4">
+			<header class="bg-white border-b border-slate-200 py-3.5 px-4 sticky top-0">
 				<div class="max-w-7xl mx-auto flex flex-row justify-between relative sm:static">
 					<div class="flex items-center">
 						<a
@@ -169,7 +170,15 @@ export class InlangManage extends TwLitElement {
 							<inlang-logo size="2rem"></inlang-logo>
 						</a>
 						<p class="self-center text-left font-regular text-slate-400 pl-4 pr-1">/</p>
-						<p class="self-center pl-2 text-left font-medium text-slate-900 truncate">Manage</p>
+						<a
+							href=${`/?${
+								(this.url.repo ? `&repo=${this.url.repo}` : "") +
+								(this.url.project ? `&project=${this.url.project}` : "")
+							}
+		`}
+							class="self-center pl-2 text-left font-medium text-slate-900 truncate hover:text-slate-800"
+							>Manage</a
+						>
 						${this.url.project
 							? html`<div class="flex items-center flex-shrink-0">
 									<p class="self-center text-left font-regular text-slate-400 pl-2 pr-1">/</p>
@@ -211,7 +220,7 @@ export class InlangManage extends TwLitElement {
 												e.stopPropagation()
 											}}
 											id="projects"
-											class="hidden absolute top-12 left-0 w-48 bg-white border border-slate-200 rounded-md shadow-lg py-0.5 z-20"
+											class="hidden absolute top-12 left-0 w-auto bg-white border border-slate-200 rounded-md shadow-lg py-0.5 z-20"
 										>
 											${typeof this.projects === "object"
 												? this.projects?.map(
@@ -231,7 +240,11 @@ export class InlangManage extends TwLitElement {
 																			size="1.2em"
 																			icon="mdi:check"
 																	  ></doc-icon>`}
-																${project.projectPath}
+																<p class="truncate">
+																	${project.projectPath?.split("/").at(-2)}/${project.projectPath
+																		?.split("/")
+																		.at(-1)}
+																</p>
 															</a>`
 												  )
 												: ""}
@@ -257,7 +270,10 @@ export class InlangManage extends TwLitElement {
 												this.shadowRoot?.querySelector("#account")?.classList.toggle("hidden")
 											}}
 										>
-											<img class="h-8 w-8 rounded-full" src=${this.user.avatarUrl} />
+											<img
+												class="h-8 w-8 rounded-full transition-opacity hover:opacity-70"
+												src=${this.user.avatarUrl}
+											/>
 										</button>
 										<div
 											@click=${(e: { stopPropagation: () => void }) => {
@@ -266,6 +282,15 @@ export class InlangManage extends TwLitElement {
 											id="account"
 											class="hidden absolute top-12 right-0 w-48 bg-white border border-slate-200 rounded-md shadow-lg z-20 py-0.5"
 										>
+											<div
+												@click=${async () => {
+													await browserAuth.addPermissions()
+													window.location.reload()
+												}}
+												class="block cursor-pointer px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+											>
+												Edit Permissions
+											</div>
 											<div
 												@click=${async () => {
 													await browserAuth.logout()
@@ -441,21 +466,42 @@ export class InlangManage extends TwLitElement {
 							  </div>`
 							: this.modules
 							? html`<div class="h-full w-full">
-					<div class="mb-16 flex items-start justify-between gap-4">
+					<div class="mb-16 flex items-start justify-between flex-col-reverse md:flex-row gap-10 md:gap-4">
 					<div>
-							<h1 class="font-bold text-4xl text-slate-900 mb-4">Manage your inlang project</h1>
+							${
+								this.url.install === "true"
+									? html`<h1 class="font-bold text-4xl text-slate-900 mb-4">
+											Module successfully installed
+									  </h1>`
+									: this.url.uninstall === "true"
+									? html`<h1 class="font-bold text-4xl text-slate-900 mb-4">
+											Module successfully uninstalled
+									  </h1>`
+									: html`<h1 class="font-bold text-4xl text-slate-900 mb-4">
+											Manage your inlang project
+									  </h1>`
+							}
 							<p class="text-slate-600 w-full md:w-[400px] leading-relaxed">
 								Here is a list of all modules installed in your project.
 							</p>
 							</div>
+							<div class="flex items-center gap-2">
+							<a
+								class="bg-slate-200 text-slate-900 md:block hidden hover:bg-slate-300 truncate text-center px-4 py-2 rounded-md font-medium transition-colors"
+								href=${`https://inlang.com/editor/${this.url.repo}`}
+								target="_blank"
+							>
+								Go to Fink - Editor
+							</a>
 							<button
-							class=${"bg-slate-800 text-white text-center px-4 py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"}
+							class="bg-slate-800 text-white text-center px-4 py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
 							@click=${() => {
 								window.location.href = `https://inlang.com/?repo=${this.url.repo}&project=${this.url.project}`
 							}}
 						>
 							Install a module
 						</button>
+						</div>
 							</div>
 							<div class="mb-12">
 							<h2 class="text-lg font-semibold my-4">Plugins</h2>
@@ -482,21 +528,36 @@ export class InlangManage extends TwLitElement {
 																			${module.description.en}
 																		</p>
 																	</div>
-																	<a
-																		target="_blank"
-																		href=${`https://inlang.com/m/${
-																			// @ts-ignore
-																			module.uniqueID
-																		}`}
-																		class="text-[#098DAC] text-sm font-medium transition-colors hover:text-[#06b6d4]"
+																	<div
+																		class="flex md:items-center flex-col md:flex-row justify-between gap-4"
 																	>
-																		More information
-																		<doc-icon
-																			class="inline-block ml-0.5 translate-y-0.5"
-																			size="1em"
-																			icon="mdi:arrow-top-right"
-																		></doc-icon>
-																	</a>
+																		<a
+																			target="_blank"
+																			href=${`https://inlang.com/m/${
+																				// @ts-ignore
+																				module.uniqueID
+																			}`}
+																			class="text-[#098DAC] text-sm font-medium transition-colors hover:text-[#06b6d4]"
+																		>
+																			More information
+																			<doc-icon
+																				class="inline-block ml-0.5 translate-y-0.5"
+																				size="1em"
+																				icon="mdi:arrow-top-right"
+																			></doc-icon>
+																		</a>
+																		<a
+																			href=${`/uninstall?repo=${this.url.repo}&project=${this.url.project}&module=${module.id}`}
+																			class="text-red-500 text-sm font-medium transition-colors hover:text-red-400"
+																		>
+																			<doc-icon
+																				class="inline-block mr-0.5 translate-y-0.5"
+																				size="1em"
+																				icon="mdi:delete"
+																			></doc-icon>
+																			Uninstall
+																		</a>
+																	</div>
 																</div>`
 														)
 												}
@@ -540,21 +601,36 @@ export class InlangManage extends TwLitElement {
 																			${module.description.en}
 																		</p>
 																	</div>
-																	<a
-																		target="_blank"
-																		href=${`https://inlang.com/m/${
-																			// @ts-ignore
-																			module.uniqueID
-																		}`}
-																		class="text-[#098DAC] text-sm font-medium transition-colors hover:text-[#06b6d4]"
+																	<div
+																		class="flex md:items-center flex-col md:flex-row justify-between gap-4"
 																	>
-																		More information
-																		<doc-icon
-																			class="inline-block ml-0.5 translate-y-0.5"
-																			size="1em"
-																			icon="mdi:arrow-top-right"
-																		></doc-icon>
-																	</a>
+																		<a
+																			target="_blank"
+																			href=${`https://inlang.com/m/${
+																				// @ts-ignore
+																				module.uniqueID
+																			}`}
+																			class="text-[#098DAC] text-sm font-medium transition-colors hover:text-[#06b6d4]"
+																		>
+																			More information
+																			<doc-icon
+																				class="inline-block ml-0.5 translate-y-0.5"
+																				size="1em"
+																				icon="mdi:arrow-top-right"
+																			></doc-icon>
+																		</a>
+																		<a
+																			href=${`/uninstall?repo=${this.url.repo}&project=${this.url.project}&module=${module.id}`}
+																			class="text-red-500 text-sm font-medium transition-colors hover:text-red-400"
+																		>
+																			<doc-icon
+																				class="inline-block mr-0.5 translate-y-0.5"
+																				size="1em"
+																				icon="mdi:delete"
+																			></doc-icon>
+																			Uninstall
+																		</a>
+																	</div>
 																</div>`
 														)
 												}
@@ -578,11 +654,19 @@ export class InlangManage extends TwLitElement {
 					  `
 							: ""}
 				  </div>`
-				: html`<div
+				: this.url.path === "install"
+				? html`<div
 						class="w-full max-w-7xl h-full flex-grow mx-auto flex justify-center px-4 pb-24"
 				  >
 						<inlang-install jsonURL=${JSON.stringify(this.url)}></inlang-install>
-				  </div>`}
+				  </div>`
+				: this.url.path === "uninstall"
+				? html`<div
+						class="w-full max-w-7xl h-full flex-grow mx-auto flex justify-center px-4 pb-24"
+				  >
+						<inlang-uninstall jsonURL=${JSON.stringify(this.url)}></inlang-uninstall>
+				  </div>`
+				: ""}
 		</main>`
 	}
 }
