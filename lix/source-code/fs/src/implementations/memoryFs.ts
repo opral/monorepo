@@ -182,31 +182,29 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 				rejecteNext = reject
 			})
 
-			const listener = (event: FileChangeInfo) => {
-				const eventToForward = {
-					eventType: event.eventType,
-					filename: event.filename,
+			const listener = ({ eventType, filename }: FileChangeInfo) => {
+				const event: FileChangeInfo = {
+					eventType,
+					filename,
 				}
 
-				if (eventToForward.filename === null) {
+				if (event.filename === null) {
 					throw new Error("Internal watcher error: missing filename")
 				}
-				const changeName = getBasename(eventToForward.filename)
-				const changeDir = getDirname(eventToForward.filename)
+				const changeName = getBasename(event.filename)
+				const changeDir = getDirname(event.filename)
 
-				if (eventToForward.filename === watchPath) {
-					eventToForward.filename = changeName
-					queue.push(eventToForward)
+				if (event.filename === watchPath) {
+					event.filename = changeName
+					queue.push(event)
 					setTimeout(() => handleNext(undefined), 0)
 				} else if (changeDir === `${watchPath}/`) {
-					eventToForward.filename =
-						eventToForward.filename.replace(`${watchPath}/`, "") || changeName
-					queue.push(eventToForward)
+					event.filename = event.filename.replace(`${watchPath}/`, "") || changeName
+					queue.push(event)
 					setTimeout(() => handleNext(undefined), 0)
-				} else if (options?.recursive && eventToForward.filename.startsWith(watchPath)) {
-					eventToForward.filename =
-						eventToForward.filename.replace(`${watchPath}/`, "") || changeName
-					queue.push(eventToForward)
+				} else if (options?.recursive && event.filename.startsWith(watchPath)) {
+					event.filename = event.filename.replace(`${watchPath}/`, "") || changeName
+					queue.push(event)
 					setTimeout(() => handleNext(undefined), 0)
 				}
 			}
