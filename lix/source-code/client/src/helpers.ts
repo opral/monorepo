@@ -18,7 +18,8 @@ export const withLazyFetching = ({
 }: Args): NodeishFilesystem => {
 	return new Proxy(nodeishFs, {
 		get(getTarget: typeof nodeishFs, prop, receiver) {
-			if (getTarget[prop as keyof typeof nodeishFs]) {
+			// eslint-disable-next-line no-prototype-builtins
+			if (((getTarget as any).__proto__ as any).hasOwnProperty(prop)) {
 				return new Proxy(getTarget[prop as keyof typeof getTarget], {
 					apply(callTarget, thisArg, argumentsList) {
 						if (verbose) {
