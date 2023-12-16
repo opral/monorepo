@@ -21,8 +21,7 @@
 		"ide-extension",
 		"javascript",
 		"developer",
-		"i18n",
-		"external"
+		"i18n"
 	],
 	"publisherName": "lokalise",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/14294501?s=200&v=4",

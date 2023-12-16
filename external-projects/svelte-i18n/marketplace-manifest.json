@@ -11,7 +11,7 @@
 	"readme": {
 		"en": "./inlang/external-projects/svelte-i18n/README.md"
 	},
-	"keywords": ["libraries", "svelte-i18n", "svelte", "developer", "i18n", "external"],
+	"keywords": ["libraries", "svelte-i18n", "svelte", "developer", "i18n"],
 	"publisherName": "kaisermann",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/12702016?v=4",
 	"website": "https://github.com/kaisermann/svelte-i18n",
