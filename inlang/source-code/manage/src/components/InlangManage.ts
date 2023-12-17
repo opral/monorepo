@@ -75,23 +75,30 @@ export class InlangManage extends TwLitElement {
 
 			const tempModules = []
 			for (const module of modules) {
-				// @ts-ignore
-				const registryModule = registry.find((x) => x.module === module)
-
-				if (registryModule) {
-					const response = await fetch(
+				for (const registryModule of registry) {
+					if (
 						// @ts-ignore
-						registryModule.module.replace("dist/index.js", `package.json`)
-					)
-
-					tempModules.push({
-						...registryModule,
+						registryModule.module &&
 						// @ts-ignore
-						version: (await response.json()).version,
-					})
+						registryModule.module.includes(
+							module.split("/")[5].includes("@")
+								? module.split("/")[5].split("@")[0]
+								: module.split("/")[5]
+						)
+					) {
+						const response = await fetch(
+							// @ts-ignore
+							registryModule.module.replace("dist/index.js", `package.json`)
+						)
+
+						tempModules.push({
+							...registryModule,
+							// @ts-ignore
+							version: (await response.json()).version,
+						})
+					}
 				}
 			}
-
 			this.modules = tempModules
 			if (!this.modules) this.modules = "empty"
 		}
@@ -220,7 +227,7 @@ export class InlangManage extends TwLitElement {
 												e.stopPropagation()
 											}}
 											id="projects"
-											class="hidden absolute top-12 left-0 w-auto bg-white border border-slate-200 rounded-md shadow-lg py-0.5 z-20"
+											class="hidden absolute top-12 left-0 w-auto bg-white border border-slate-200 rounded-md shadow-lg py-0.5 z-40"
 										>
 											${typeof this.projects === "object"
 												? this.projects?.map(
