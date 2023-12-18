@@ -8,8 +8,7 @@ const Home: Component = () => {
 		<main>
 			<h1>{m.greeting({ name: "Loris", count: 5 })}</h1>
 			<p>{m.currentLanguageTag({ languageTag: languageTag() })}</p>
-
-			<A href={translateHref("/about")}>{m.about()}</A>
+			<A href={"/about"}>{m.about()}</A>
 			<br />
 			<LocaleSwitcher />
 		</main>
