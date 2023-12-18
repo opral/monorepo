@@ -32,6 +32,10 @@ Used by
 
 # Usage
 
+## Tutorial
+
+[![Fink Guide Ad](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-guide-image.jpg) Read in-depth guide](/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink)
+
 ### Translate missing messages
 
 After your project is loaded, you can see your messages. Additionally, if your project file includes lint rules, you might encounter warnings for specific keys.
