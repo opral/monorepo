@@ -30,29 +30,9 @@ Used by
 <br />
 <br />
 
-# Usage
+# Tutorial
 
-## Tutorial
-
-[![Fink Guide Ad](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-guide-image.jpg) Read in-depth guide](/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink)
-
-### Translate missing messages
-
-After your project is loaded, you can see your messages. Additionally, if your project file includes lint rules, you might encounter warnings for specific keys.
-
-### Push and commit your changes
-
-To save what you've translated, you can use the so called GitFloat menu on the bottom of the page. If you've made changes, you are able to push and commit them. This will automatically create an addition to the git history inside of your repository, which is useful for seeing who has changed what and working on a single source of truth.
-
-### How to filter messages
-
-**Filter after language**
-
-You can filter messages shown based on the language selected. You can find the filter on the top right corner of the editor.
-
-**Handle lint rules**
-
-Lint rules are a great way to ensure the quality of your translations, therefore you can select the lints you want to use in the editor. You can find it on the top left corner of the editor (filter options).
+[![Fink Guide Ad](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-guide-image.jpg) Read in-depth guide](https://inlang.com/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink)
 
 # Login via GitHub
 
