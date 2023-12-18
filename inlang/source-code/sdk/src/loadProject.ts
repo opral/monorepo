@@ -83,7 +83,7 @@ export const loadProject = async (args: {
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
 		createEffect(async () => {
-			let projectId
+			let projectId: string | undefined
 
 			try {
 				projectId = await nodeishFs.readFile(projectPath + "/projectId", {
@@ -110,18 +110,19 @@ export const loadProject = async (args: {
 				}
 			}
 
-			projectId &&
-				telemetryBrowser.group("project", projectId, {
-					name: projectId,
-				})
+			// TODO:
+			// if (projectId) {
+			// 	telemetryBrowser.group("project", projectId, {
+			// 		name: projectId,
+			// 	})
+			// }
 
 			loadSettings({ settingsFilePath: projectPath + "/settings.json", nodeishFs })
 				.then((settings) => {
 					setSettings(settings)
 					// rename settings to get a convenient access to the data in Posthog
 					const project_settings = settings
-					args._capture?.("SDK used settings", { project_settings })
-					telemetryBrowser.capture("SDK used settings", { project_settings })
+					args._capture?.("SDK used settings", { project_settings, group: projectId })
 				})
 				.catch((err) => {
 					markInitAsFailed(err)
