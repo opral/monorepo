@@ -1722,9 +1722,15 @@ importers:
       '@inlang/result':
         specifier: workspace:*
         version: link:../result
+      '@inlang/telemetry':
+        specifier: workspace:*
+        version: link:../telemetry
       '@inlang/translatable':
         specifier: workspace:*
         version: link:../versioned-interfaces/translatable
+      '@lix-js/client':
+        specifier: workspace:*
+        version: link:../../../lix/source-code/client
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../lix/source-code/fs
@@ -1829,9 +1835,6 @@ importers:
       '@inlang/env-variables':
         specifier: workspace:*
         version: link:../env-variables
-      '@inlang/sdk':
-        specifier: workspace:*
-        version: link:../sdk
       express:
         specifier: ^4.18.2
         version: 4.18.2

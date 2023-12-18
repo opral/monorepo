@@ -2,12 +2,6 @@ import { publicEnv } from "@inlang/env-variables"
 import { PostHog } from "posthog-node"
 import type { TelemetryEvents } from "./events.js"
 
-// TODO add a project UUID to the tele.groups internal #196
-// import { getGitRemotes } from "../../utilities/getGitRemotes.js"
-// import { parseOrigin } from "@inlang/telemetry"
-
-// export const gitOrigin = parseOrigin({ remotes: await getGitRemotes() })
-
 const posthog = new PostHog(publicEnv.PUBLIC_POSTHOG_TOKEN ?? "placeholder", {
 	host: "https://eu.posthog.com",
 	// Events are not captured if not immediately flushed.

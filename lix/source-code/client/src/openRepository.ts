@@ -523,9 +523,27 @@ export async function openRepository(
 			}
 
 			const {
-				data: { name, private: isPrivate, fork: isFork, parent, owner: ownerMetaData, permissions },
+				data: {
+					id: githubId,
+					name,
+					private: isPrivate,
+					fork: isFork,
+					parent,
+					owner: ownerMetaData,
+					permissions,
+				},
 			} = res
+
+			const idDigest = await crypto.subtle.digest(
+				"SHA-256",
+				new TextEncoder().encode(`${githubId}`)
+			)
+			const id = [...new Uint8Array(idDigest)]
+				.map((b) => ("00" + b.toString(16)).slice(-2))
+				.join("")
+
 			return {
+				id,
 				name,
 				isPrivate,
 				isFork,
