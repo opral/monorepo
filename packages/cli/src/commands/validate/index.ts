@@ -7,14 +7,12 @@ export const validate = new Command()
 	.command("validate")
 	.description("Validate the inlang project settings file.")
 	.requiredOption(projectOption.flags, projectOption.description)
-	.action((args: { project: string }) => {
-		validateCommandAction({ project: args.project })
-	})
+	.action(validateCommandAction)
 
 export async function validateCommandAction(args: { project: string }) {
 	try {
 		log.info("🔎 Validating the inlang project...")
-		// if `getInlangProject` doesn't return, the project is valid
+		// if `getInlangProject` doesn't throw, the project is valid
 		await getInlangProject({ projectPath: args.project })
 		log.success("The project is valid!")
 	} catch (error) {
