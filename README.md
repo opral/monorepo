@@ -17,7 +17,7 @@
     ·
     <a href='https://discord.gg/gdMPPWy57R' target="_blank">💙 Discord</a>
     ·
-    <a href='https://twitter.com/inlangHQ' target="_blank">🐦 Twitter</a>
+    <a href='https://twitter.com/inlangHQ' target="_blank">𝕏 Twitter</a>
     ·
     <a href='https://github.com/orgs/inlang/projects/39' target="_blank">🗺️ Roadmap</a>
   </p>
