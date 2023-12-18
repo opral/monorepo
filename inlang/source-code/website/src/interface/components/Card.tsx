@@ -54,22 +54,26 @@ export default function Card(props: { item: any; displayName: string }) {
 									<InlangBadge />
 								</Show>
 							</div>
-							<p class="text-sm line-clamp-2 text-surface-500 transition-colors group-hover:text-surface-600 mb-4">
+							<p class="text-sm line-clamp-2 text-surface-500 transition-colors group-hover:text-surface-600 mb-2">
 								{props.item.description.en}
 							</p>
 						</div>
-						<div class="flex items-center gap-2 px-4 pr-6 pb-4 justify-between">
-							<Show when={props.item.publisherIcon}>
-								<div class="flex gap-2">
-									<img
-										class="w-5 h-5 rounded-full object-cover object-center"
-										src={props.item.publisherIcon}
-									/>
-									<p class="text-sm text-surface-500 group-hover:text-surface-600 transition-colors">
-										{props.item.publisherName}
-									</p>
-								</div>
-							</Show>
+						<div class="flex items-center gap-2 px-4 pr-6 mb-4 justify-between h-[30px]">
+							<div>
+								<Show
+									when={
+										// @ts-ignore (Show components are not typed)
+										props.item.pricing
+									}
+								>
+									<div class="h-[30px] px-4 rounded-full bg-surface-200 flex items-center text-surface-500 font-semibold text-[13px]">
+										{
+											// @ts-ignore
+											props.item.pricing.toUpperCase()
+										}
+									</div>
+								</Show>
+							</div>
 							<Show
 								when={props.item.keywords
 									.map((keyword: string) => keyword.toLowerCase())
