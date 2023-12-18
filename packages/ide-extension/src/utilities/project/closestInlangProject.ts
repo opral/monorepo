@@ -1,26 +1,34 @@
-import { findInlangProjectRecursively } from "./findInlangProjectRecusively.js"
-import type { NodeishFilesystem } from "@lix-js/fs"
+import path from "node:path"
 
 export async function closestInlangProject(args: {
 	workingDirectory: string
-	nodeishFs: NodeishFilesystem
+	projects: string[]
 }): Promise<string | undefined> {
-	if (args.workingDirectory === "") {
-		return undefined // No working directory specified
+	if (args.workingDirectory === "" || args.projects.length === 0) {
+		return undefined // No working directory specified or no projects
 	}
 
-	const inlangProjects = await findInlangProjectRecursively({
-		rootPath: args.workingDirectory,
-		nodeishFs: args.nodeishFs, // Replace with your NodeishFilesystem implementation
-	})
-
-	if (inlangProjects.length === 0) {
-		return undefined // No inlang projects found
+	// Function to calculate the distance between two paths
+	const calculateDistance = (from: string, to: string): number => {
+		const relativePath = path.relative(from, to)
+		// Check if the project is a subdirectory of the working directory
+		if (!relativePath.startsWith("..") && !path.isAbsolute(relativePath)) {
+			return relativePath.split(path.sep).length
+		}
+		return Infinity // Return a large distance for non-subdirectories
 	}
 
-	// Sort the inlang projects by their path length (shorter paths first)
-	inlangProjects.sort((a, b) => a.length - b.length)
+	// Find the project with the minimum distance to the working directory
+	let closestProject = undefined
+	let minDistance = Infinity
 
-	// Return the closest project (the first one in the sorted array)
-	return inlangProjects[0]
+	for (const project of args.projects) {
+		const distance = calculateDistance(args.workingDirectory, project)
+		if (distance < minDistance) {
+			minDistance = distance
+			closestProject = project
+		}
+	}
+
+	return closestProject
 }

@@ -29,18 +29,21 @@
 		"viewsContainers": {
 			"activitybar": [
 				{
-					"id": "inlang_tab",
+					"id": "inlang",
 					"title": "Inlang",
 					"icon": "assets/logo-negative.svg"
 				}
 			]
 		},
 		"views": {
-			"inlang_tab": [
+			"inlang": [
 				{
-					"id": "inlang_tab",
-					"name": "Inlang",
-					"icon": "assets/logo-negative.svg"
+					"id": "projectView",
+					"name": "Projects"
+				},
+				{
+					"id": "messageView",
+					"name": "Messages"
 				}
 			]
 		},
@@ -56,8 +59,31 @@
 			{
 				"command": "inlang.openInEditor",
 				"title": "Inlang: Open in Editor"
+			},
+			{
+				"command": "inlang.openProject",
+				"title": "Open project"
+			},
+			{
+				"command": "inlang.openSettingsFile",
+				"title": "Open settings file",
+				"icon": "$(go-to-file)"
 			}
 		],
+		"menus": {
+			"view/item/context": [
+				{
+					"when": "view == projectView && viewItem == projectNode",
+					"command": "inlang.openProject",
+					"group": "navigation"
+				},
+				{
+					"when": "view == projectView && viewItem == projectNode",
+					"command": "inlang.openSettingsFile",
+					"group": "inline"
+				}
+			]
+		},
 		"configuration": {
 			"properties": {
 				"inlang.userId": {

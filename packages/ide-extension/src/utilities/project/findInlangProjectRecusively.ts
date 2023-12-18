@@ -12,6 +12,8 @@ export async function findInlangProjectRecursively(args: {
 		try {
 			const items = await args.nodeishFs.readdir(currentPath)
 			for (const item of items) {
+                if (item === "node_modules") continue
+                
 				const itemPath = path.join(currentPath, item)
 				const stat = await args.nodeishFs.stat(itemPath)
 
