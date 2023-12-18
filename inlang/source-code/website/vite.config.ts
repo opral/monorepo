@@ -13,11 +13,11 @@ export default defineConfig({
 	},
 	envPrefix: "PUBLIC_",
 	plugins: [
-		solid(),
-		// the metaframework https://vike.dev/
-		vike({
-			prerender: true,
+		solid({
+			ssr: true,
 		}),
+		// the metaframework https://vike.dev/
+		vike(),
 		// @ts-ignore
 		// only https://icon-sets.iconify.design/material-symbols/
 		// and https://icon-sets.iconify.design/cib/

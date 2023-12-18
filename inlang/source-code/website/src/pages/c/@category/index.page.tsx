@@ -35,7 +35,7 @@ export function Page(props: {
 	highlights?: Record<string, string>[]
 	category?: Category | undefined
 	slider?: boolean
-	items: Awaited<ReturnType<any>>
+	items: MarketplaceManifest[]
 }) {
 	onMount(() => {
 		const urlParams = new URLSearchParams(window.location.search)

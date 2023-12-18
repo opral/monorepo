@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite",
-		"build": "node ./scripts/generateSitemap.js && vite build",
+		"build": "node ./scripts/generateSitemap.js && npx @inlang/cli machine translate -f --project ../../../project.inlang --targetLanguageTags fr,it,pt-BR,sk,zh && vite build",
 		"production": "NODE_ENV=production tsx ./src/server/main.ts ",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "paraglide-js compile --project ../../../project.inlang && npx @inlang/cli lint --project ../../../project.inlang --languageTags de,en && tsc --noEmit ",
