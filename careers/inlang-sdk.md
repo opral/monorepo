@@ -6,7 +6,7 @@ Become the lead for [the SDK](https://inlang.com/documentation) that powers the 
 
 
 - [local first software](https://www.inkandswitch.com/local-first/)
-- reactive systems (in JS)
+- reactive systems
 - dev tools
 - i18n infrastructure
 
