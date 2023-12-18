@@ -27,6 +27,7 @@ import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
+import type { Repository } from "@lix-js/client"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -42,6 +43,7 @@ const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
  */
 export const loadProject = async (args: {
 	projectPath: string
+	repo?: Repository
 	nodeishFs: NodeishFilesystem
 	_import?: ImportFunction
 	_capture?: (id: string, props: Record<string, unknown>) => void
@@ -80,13 +82,46 @@ export const loadProject = async (args: {
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
-		createEffect(() => {
+		createEffect(async () => {
+			let projectId
+
+			try {
+				projectId = await nodeishFs.readFile(projectPath + "/projectId", {
+					encoding: "utf-8",
+				})
+			} catch (error) {
+				// @ts-ignore
+				if (error.code === "ENOENT") {
+					const repoMeta = await args.repo?.getMeta()
+
+					if (repoMeta && !("error" in repoMeta)) {
+						const idDigest = await crypto.subtle.digest(
+							"SHA-256",
+							new TextEncoder().encode(`${repoMeta.id + projectPath}`)
+						)
+						projectId = [...new Uint8Array(idDigest)]
+							.map((b) => ("00" + b.toString(16)).slice(-2))
+							.join("")
+
+						await nodeishFs.writeFile(projectPath + "/projectId", projectId)
+					}
+				} else {
+					console.error(error)
+				}
+			}
+
+			projectId &&
+				telemetryBrowser.group("project", projectId, {
+					name: projectId,
+				})
+
 			loadSettings({ settingsFilePath: projectPath + "/settings.json", nodeishFs })
 				.then((settings) => {
 					setSettings(settings)
 					// rename settings to get a convenient access to the data in Posthog
 					const project_settings = settings
 					args._capture?.("SDK used settings", { project_settings })
+					telemetryBrowser.capture("SDK used settings", { project_settings })
 				})
 				.catch((err) => {
 					markInitAsFailed(err)
