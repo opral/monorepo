@@ -9,8 +9,6 @@ import Link from "#src/renderer/Link.jsx"
 import * as m from "../../paraglide/messages.js"
 import { currentPageContext } from "#src/renderer/state.js"
 
-const isProduction = process.env.NODE_ENV === "production"
-
 export default function Card(props: { item: any; displayName: string }) {
 	const showCover =
 		currentPageContext.urlParsed.pathname.includes("/lint-rules") &&
@@ -89,13 +87,11 @@ export default function Card(props: { item: any; displayName: string }) {
 									.includes("lix")}
 							>
 								<div>
-									<Link href="/c/lix">
-										<div class="w-5 text-primary hover:text-hover-primary group transition-colors relative z-60">
-											<sl-tooltip prop:content={m.marketplace_card_lix_tooltip()}>
-												<LixBadge />
-											</sl-tooltip>
-										</div>
-									</Link>
+									<div class="w-5 text-primary group transition-colors relative z-60">
+										<sl-tooltip prop:content={m.marketplace_card_lix_tooltip()}>
+											<LixBadge />
+										</sl-tooltip>
+									</div>
 								</div>
 							</Show>
 						</div>
@@ -143,42 +139,6 @@ export default function Card(props: { item: any; displayName: string }) {
 										customClasses="text-xs"
 									/>
 								</div>
-								<Show
-									when={
-										props.item.id.split(".")[0] === "plugin" ||
-										props.item.id.split(".")[0] === "messageLintRule"
-									}
-								>
-									<sl-tooltip prop:content={`Install`}>
-										<a
-											onClick={(e) => {
-												e.stopPropagation()
-											}}
-											target="_blank"
-											href={`${
-												isProduction
-													? "https://manage.inlang.com/install"
-													: "http://localhost:4004/install"
-											}?module=${props.item.id}`}
-											class="ml-auto flex-shrink-0 rounded-full p-2 w-8 h-8 flex items-center justify-center text-surface-900 hover:text-on-background hover:bg-surface-200 bg-surface-100 transition-all"
-										>
-											<svg
-												width="100%"
-												height="100%"
-												viewBox="0 0 16 16"
-												fill="none"
-												xmlns="http://www.w3.org/2000/svg"
-											>
-												<path
-													fill-rule="evenodd"
-													clip-rule="evenodd"
-													d="M11.6 5.54982L11.6 5.5498L8.99999 8.14981L11.6 5.54982ZM8.69999 8.87407L11.5962 5.97782L12.5794 6.99612L7.99999 11.5755L3.42056 6.99612L4.40374 5.97782L7.29999 8.87407V0.299805H8.69999V8.87407ZM14.3 14.2998V11.2998H15.7V13.9998C15.7 14.4696 15.5362 14.8643 15.2004 15.2002C14.8645 15.536 14.4698 15.6998 14 15.6998H1.99999C1.53019 15.6998 1.13547 15.536 0.79962 15.2002C0.463765 14.8643 0.299988 14.4696 0.299988 13.9998V11.2998H1.69999V14.2998H14.3Z"
-													fill="currentColor"
-												/>
-											</svg>
-										</a>
-									</sl-tooltip>
-								</Show>
 							</div>
 							<p class="text-sm line-clamp-2 text-surface-500 transition-colors group-hover:text-surface-600 mb-4">
 								{props.item.description.en}
@@ -202,50 +162,15 @@ export default function Card(props: { item: any; displayName: string }) {
 										.map((keyword: string) => keyword.toLowerCase())
 										.includes("lix")}
 								>
-									{/* <Link href="/c/lix"> */}
 									<div class="w-5 text-primary group transition-colors">
 										{/* <sl-tooltip prop:content={m.marketplace_card_lix_tooltip()}> */}
 										<LixBadge />
-										{/* </sl-tooltip> */}
 									</div>
-									{/* </Link> */}
 								</Show>
 							</div>
 						</div>
 					</Match>
 				</Switch>
-				<Show
-					when={
-						props.item.id.split(".")[0] === "plugin" ||
-						props.item.id.split(".")[0] === "messageLintRule"
-					}
-				>
-					<Link
-						onClick={(e: any) => {
-							e.stopPropagation()
-						}}
-						href={`${
-							isProduction ? "https://manage.inlang.com/install" : "http://localhost:4004/install"
-						}?module=${props.item.id}`}
-						class="absolute top-5 right-5 flex-shrink-0 rounded-full p-2 w-8 h-8 flex items-center justify-center text-surface-500 hover:text-on-background hover:bg-surface-200 bg-surface-100 transition-all"
-					>
-						<svg
-							width="100%"
-							height="100%"
-							viewBox="0 0 16 16"
-							fill="none"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								fill-rule="evenodd"
-								clip-rule="evenodd"
-								d="M11.6 5.54982L11.6 5.5498L8.99999 8.14981L11.6 5.54982ZM8.69999 8.87407L11.5962 5.97782L12.5794 6.99612L7.99999 11.5755L3.42056 6.99612L4.40374 5.97782L7.29999 8.87407V0.299805H8.69999V8.87407ZM14.3 14.2998V11.2998H15.7V13.9998C15.7 14.4696 15.5362 14.8643 15.2004 15.2002C14.8645 15.536 14.4698 15.6998 14 15.6998H1.99999C1.53019 15.6998 1.13547 15.536 0.79962 15.2002C0.463765 14.8643 0.299988 14.4696 0.299988 13.9998V11.2998H1.69999V14.2998H14.3Z"
-								fill="currentColor"
-							/>
-						</svg>
-					</Link>
-					{/* </sl-tooltip> */}
-				</Show>
 			</Link>
 		</>
 	)
