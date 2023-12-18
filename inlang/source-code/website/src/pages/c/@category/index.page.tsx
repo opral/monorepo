@@ -118,6 +118,15 @@ export function Page(props: {
 					withGuides: true,
 					coverCard: <NextjsHeader />,
 				}
+
+			case "solid": {
+				return {
+					title: "Solid",
+					description: "Recommended internationalization tooling for your SolidStart stack.",
+					icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-solidstart/assets/icon.png",
+					coverCard: <GenericHeader />,
+				}
+			}
 			default:
 				return {
 					title: currentPageContext.urlParsed.pathname.split("/")[2]?.toUpperCase() || "Your stack",
