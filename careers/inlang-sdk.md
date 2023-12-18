@@ -19,7 +19,7 @@ Become the lead for [the SDK](https://inlang.com/documentation) that powers the 
 **Requirements**
 
 - located in the EU
-- strong web engineering skills
-- pref part of large scale i18n engineering team 
+- demonstratable experience with lower-level JS engineering 
+- pref part of large-scale i18n engineering team 
 - pref experience with different reactive systems (RxJS, Signals, etc)
 - pref experience with (web) embedded databases
