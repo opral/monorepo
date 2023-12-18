@@ -346,6 +346,12 @@ export function Page(props: PageProps) {
 													{props?.manifest?.license}
 												</p>
 											</div>
+											<Show when={props.manifest.pricing}>
+												<div>
+													<h3 class="text-surface-400 text-sm mb-2">Pricing</h3>
+													<p class="text-surface-600 font-medium">{props.manifest.pricing}</p>
+												</div>
+											</Show>
 										</div>
 										<Show when={props.tableOfContents}>
 											{/* Classes to be added: sticky z-10 top-16 pt-8 md:pt-0 md:static bg-background */}

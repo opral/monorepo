@@ -21,5 +21,6 @@
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"website": "https://inlang.com/editor",
-	"license": "Apache-2.0"
+	"license": "Apache-2.0",
+	"pricing": "Free Beta"
 }
