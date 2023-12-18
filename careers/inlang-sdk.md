@@ -1,4 +1,4 @@
-> write `hello@inlang.com` to apply
+_write `hello@inlang.com` to apply_
 
 **Full-time job opportunity**
 
