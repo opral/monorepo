@@ -274,52 +274,34 @@ export function Page(props: {
 }
 
 const Gallery = (props: { items: any; guides?: boolean; hideBuildYourOwn?: boolean }) => {
-	const [show, setShow] = createSignal<boolean>(false)
-	onMount(() => {
-		setShow(true)
-	})
 	return (
 		<>
 			<Show
-				when={show()}
-				fallback={
-					<div class="h-96 w-full col-span-4 flex items-center justify-center py-80 relative">
-						<div class="mx-auto">
-							<div class="h-12 w-12 animate-spin mb-4">
-								<div class="h-full w-full bg-surface-50 border-primary border-4 rounded-full" />
-								<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-surface-50" />
-							</div>
-						</div>
-					</div>
-				}
+				when={props.items && props.items.length > 0}
+				fallback={!props.guides && <NoResultsCard category={selectedCategory()} />}
 			>
-				<Show
-					when={props.items && props.items.length > 0}
-					fallback={!props.guides && <NoResultsCard category={selectedCategory()} />}
+				<For
+					each={
+						props.guides
+							? props.items.filter(
+									(item: MarketplaceManifest & { uniqueID: string }) =>
+										item.id.split(".")[0] === "guide"
+							  )
+							: props.items.filter(
+									(item: MarketplaceManifest & { uniqueID: string }) =>
+										item.id.split(".")[0] !== "guide"
+							  )
+					}
 				>
-					<For
-						each={
-							props.guides
-								? props.items.filter(
-										(item: MarketplaceManifest & { uniqueID: string }) =>
-											item.id.split(".")[0] === "guide"
-								  )
-								: props.items.filter(
-										(item: MarketplaceManifest & { uniqueID: string }) =>
-											item.id.split(".")[0] !== "guide"
-								  )
-						}
-					>
-						{(item) => {
-							const displayName =
-								typeof item.displayName === "object" ? item.displayName.en : item.displayName
+					{(item) => {
+						const displayName =
+							typeof item.displayName === "object" ? item.displayName.en : item.displayName
 
-							return <Card item={item} displayName={displayName} />
-						}}
-					</For>
-					<Show when={!props.guides && !props.hideBuildYourOwn}>
-						<CardBuildOwn />
-					</Show>
+						return <Card item={item} displayName={displayName} />
+					}}
+				</For>
+				<Show when={!props.guides && !props.hideBuildYourOwn}>
+					<CardBuildOwn />
 				</Show>
 			</Show>
 		</>
