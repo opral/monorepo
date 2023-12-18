@@ -67,6 +67,11 @@ const ModuleBase = Type.Intersect([
 const App = Type.Intersect([
 	MarketplaceManifestBase,
 	Type.Object({
+		pricing: Type.Optional(
+			Type.String({
+				description: "The pricing model of the app (e.g. free, paid, subscription).",
+			})
+		),
 		id: Type.TemplateLiteral("app.${string}.${string}"),
 	}),
 ])
