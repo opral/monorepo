@@ -199,7 +199,7 @@ If you want to navigate to a different route in a specific language, you can use
 <A href={translateHref("/about", "en")}>{m.about()}</A>
 ```
 
-> ⚠️ Don't use the `translateHref` function on links that point to external websites. It will break the link.
+> ⚠️ Don't use the `translateHref` function on links that point to external websites. It'll break the link.
 
 
 ## Feedback
