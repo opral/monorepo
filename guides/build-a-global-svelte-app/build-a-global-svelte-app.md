@@ -120,7 +120,7 @@ Neat right?
 
 By default, paraglide uses the [inlang-message-format Plugin](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) for storing messages.
 
-The default path for translation files are `./messages/{lang}.json`. You can change this option in `project.inlang/settings.json`. The Files just contain a Key-Value pair of the message ID and the message itself.
+The default path for translation files are `./messages/{lang}.json`. You can change this option in `project.inlang.json`. The Files just contain a Key-Value pair of the message ID and the message itself.
 
 ```json
 // messages/en.json
