@@ -6,7 +6,7 @@ Become the lead for [the SDK](https://inlang.com/documentation) that powers the 
 
 
 - [local first software](https://www.inkandswitch.com/local-first/)
-- reactive systems
+- reactive systems/reactive programming
 - dev tools
 - i18n infrastructure
 
@@ -14,12 +14,12 @@ Become the lead for [the SDK](https://inlang.com/documentation) that powers the 
 
 - startup. small team, high impact.
 - 75%tile SF equity globally equal
-- 25%tile SF salary with 80% international factor in the EU
+- competitive salary
     
 **Requirements**
 
 - located in the EU
-- demonstratable experience with lower-level JS engineering 
-- pref part of large-scale i18n engineering team 
-- pref experience with different reactive systems (RxJS, Signals, etc)
-- pref experience with (web) embedded databases
+- demonstratable experience with lower-level JS engineering
+- pref part of a large-scale i18n engineering team
+- pref experience with different reactive systems (RxJS, Signals, MobX, etc.)
+- pref experience with embedded databases (sqlite, pouchdb, indexdb)
