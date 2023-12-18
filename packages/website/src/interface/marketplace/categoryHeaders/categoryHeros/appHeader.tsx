@@ -1,7 +1,7 @@
 import { LixBadge } from "#src/interface/components/Card.jsx"
 import Link from "#src/renderer/Link.jsx"
 import { registry } from "@inlang/marketplace-registry"
-import { For, Match, Switch } from "solid-js"
+import { For, Match, Show, Switch } from "solid-js"
 
 const AppHeader = () => {
 	const getProducts = () => [
@@ -117,21 +117,23 @@ const AppHeader = () => {
 									<div class="text-surface-500 text-md font-regular line-clamp-2">
 										{description()}
 									</div>
-									<div class="flex justify-between items-center">
-										<div class="h-[30px] px-4 rounded-full bg-surface-200 flex items-center text-surface-500 font-semibold text-[13px]">
-											<Switch>
-												<Match when={manifest.id === "app.inlang.editor"}>FREE BETA</Match>
-												<Match when={manifest.id === "app.inlang.ideExtension"}>FREE</Match>
-												<Match when={manifest.id === "app.parrot.figmaPlugin"}>FREE BETA</Match>
-											</Switch>
-										</div>
-										{/* <Link href="/c/lix"> */}
+									<div class="flex flex-row-reverse justify-between items-center h-[30px]">
 										<div class="w-5 text-primary group transition-colors relative z-60">
-											{/* <sl-tooltip prop:content={m.marketplace_card_lix_tooltip()}> */}
 											<LixBadge />
-											{/* </sl-tooltip> */}
 										</div>
-										{/* </Link> */}
+										<Show
+											when={
+												// @ts-ignore (Show components are not typed)
+												manifest.pricing
+											}
+										>
+											<div class="h-[30px] px-4 rounded-full bg-surface-200 flex items-center text-surface-500 font-semibold text-[13px]">
+												{
+													// @ts-ignore
+													manifest.pricing.toUpperCase()
+												}
+											</div>
+										</Show>
 									</div>
 								</div>
 							</Link>

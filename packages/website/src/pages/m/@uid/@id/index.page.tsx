@@ -21,6 +21,7 @@ import EditOutline from "~icons/material-symbols/edit-outline-rounded"
 import Documentation from "~icons/material-symbols/description-outline-rounded"
 import Changelog from "~icons/material-symbols/manage-history"
 import Link from "#src/renderer/Link.jsx"
+import { InlangBadge } from "#src/interface/marketplace/categoryHeaders/categoryHeros/appHeader.jsx"
 
 const isProduction = process.env.NODE_ENV === "production"
 
@@ -127,8 +128,22 @@ export function Page(props: PageProps) {
 												/>
 											</Show>
 											<div class="mb-0">
-												<div class="flex flex-col gap-3">
-													<h1 class="text-3xl font-bold">{displayName()}</h1>
+												<div class="flex gap-3 flex-col">
+													<div class="flex gap-4 items-center">
+														<h1 class="text-3xl font-bold">{displayName()}</h1>
+														<Show
+															when={props.manifest.keywords
+																.map((keyword: string) => keyword.toLowerCase())
+																.includes("inlang")}
+														>
+															<div class="flex flex-row gap-2 items-center">
+																<InlangBadge />
+																<div class="flex-1 text-sm text-primary font-medium">
+																	inlang ecosystem compatible
+																</div>
+															</div>
+														</Show>
+													</div>
 													<div class="inline-block text-surface-500 ">
 														<p class={!readmore() ? "lg:line-clamp-2" : ""}>{description()}</p>
 														<Show when={description().length > 205}>
