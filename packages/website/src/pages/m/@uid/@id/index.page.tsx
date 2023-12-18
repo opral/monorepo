@@ -346,10 +346,20 @@ export function Page(props: PageProps) {
 													{props?.manifest?.license}
 												</p>
 											</div>
-											<Show when={props.manifest.pricing}>
+											<Show
+												when={
+													// @ts-ignore (Show components are not typed)
+													props.manifest.pricing
+												}
+											>
 												<div>
 													<h3 class="text-surface-400 text-sm mb-2">Pricing</h3>
-													<p class="text-surface-600 font-medium">{props.manifest.pricing}</p>
+													<p class="text-surface-600 font-medium">
+														{
+															// @ts-ignore
+															props.manifest.pricing
+														}
+													</p>
 												</div>
 											</Show>
 										</div>
