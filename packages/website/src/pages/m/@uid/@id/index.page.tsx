@@ -401,7 +401,7 @@ export function Page(props: PageProps) {
 	)
 }
 
-function Recommends(props: { recommends: MarketplaceManifest[] }) {
+export function Recommends(props: { recommends: MarketplaceManifest[] }) {
 	const [show, setShow] = createSignal<boolean>(false)
 
 	onMount(() => {
@@ -410,7 +410,12 @@ function Recommends(props: { recommends: MarketplaceManifest[] }) {
 
 	return (
 		<>
-			<h3 class="font-semibold mb-4">Recommended to use with:</h3>
+			<Show
+				when={currentPageContext.urlParsed.pathname.includes("/m/")}
+				fallback={<h3 class="font-semibold mb-4">Read more:</h3>}
+			>
+				<h3 class="font-semibold mb-4">Recommended to use with:</h3>
+			</Show>
 			<div class="flex items-center gap-4 md:flex-row flex-col">
 				<Show
 					when={show()}

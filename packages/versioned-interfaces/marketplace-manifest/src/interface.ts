@@ -32,11 +32,18 @@ const MarketplaceManifestBase = Type.Object({
 	),
 	recommends: Type.Optional(
 		Type.Array(
-			Type.TemplateLiteral("m/${string}", {
-				description:
-					"The uniqueIDs, starting with m/[UNIQUEID] of the recommended items with a max amount of 3.",
-				maxLength: 3,
-			})
+			Type.Union([
+				Type.TemplateLiteral("m/${string}", {
+					description:
+						"The uniqueIDs, starting with m/[UNIQUEID] of the recommended items with a max amount of 3.",
+					maxLength: 3,
+				}),
+				Type.TemplateLiteral("g/${string}", {
+					description:
+						"The uniqueIDs, starting with g/[UNIQUEID] of the recommended items with a max amount of 3.",
+					maxLength: 3,
+				}),
+			])
 		)
 	),
 	keywords: Type.Array(Type.String()),
