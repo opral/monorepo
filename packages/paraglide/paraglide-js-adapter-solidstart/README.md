@@ -105,11 +105,12 @@ const language_tag = languageTag() // in component body
 ```
 
 ### 6. Switch language
+You can switch languages by calling the `setLanguageTag` function provided by the adapter. This will navigate to the translated variant of the current route.
 
-Each route will have /en/path and /de/path variants automatically generated. To switch a language, do that by navigating to the other language's variant of the current route.
+If you want to navigate to a different route in a specific language, you can use the `translateHref` function provided by the adapter to generate the correct href. 
 
 ```tsx
-<A href={translateHref("/about")}>{m.about()}</A>
+<A href={translateHref("/about", "en")}>{m.about()}</A>
 ```
 
 > :warning: Don't use the `translateHref` function on links that point to external websites. It will break the link.
