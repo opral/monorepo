@@ -1,8 +1,15 @@
 import { LixBadge } from "#src/interface/components/Card.jsx"
 import Link from "#src/renderer/Link.jsx"
-import { For } from "solid-js"
+import { registry } from "@inlang/marketplace-registry"
+import { For, Match, Switch } from "solid-js"
 
 const AppHeader = () => {
+	const getProducts = () => [
+		"app.inlang.editor",
+		"app.inlang.ideExtension",
+		"app.parrot.figmaPlugin",
+	]
+
 	type DataItem = {
 		title: string
 		link: string
@@ -11,83 +18,134 @@ const AppHeader = () => {
 		image: string
 		cover: string
 	}
-	const data: Array<DataItem> = [
-		{
-			title: "Fink – Message editor",
-			link: "/m/tdozzpar/app-inlang-editor",
-			description:
-				"The Fink message editor enables you to work with globalized codebases in your browser...",
-			pricing: "Free Beta",
-			image:
-				"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/editor/assets/fink-logo.webp",
-			cover: "/images/fink-cover.png",
-		},
-		{
-			title: "IDE - Extension for  i18n",
-			link: "/m/r7kp499g/app-inlang-vscode-extension",
-			description:
-				"Supercharge i18n within VS Code — Visualize, edit & lint translated strings at a glance.",
-			pricing: "Free",
-			image:
-				"https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/assets/icon-vscode-marketplace.png",
-			cover: "/images/ide-cover.png",
-		},
-		{
-			title: "Parrot - i18n Figma plugin",
-			link: "/m/gkrpgoir/app-inlang-figma-plugin",
-			description: "Parrot simplifies the translation management process right within Figma.",
-			pricing: "Free Beta",
-			image: "https://cdn.jsdelivr.net/gh/parrot-global/parrot@latest/parrot-logo.svg",
-			cover: "/images/parrot-cover.png",
-		},
-	]
+
+	// const data: Array<DataItem> = [
+	// 	{
+	// 		title: "Fink – Message editor",
+	// 		link: "/m/tdozzpar/app-inlang-editor",
+	// 		description:
+	// 			"The Fink message editor enables you to work with globalized codebases in your browser...",
+	// 		pricing: "Free Beta",
+	// 		image:
+	// 			"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/editor/assets/fink-logo.webp",
+	// 		cover: "/images/fink-cover.png",
+	// 	},
+	// 	{
+	// 		title: "IDE - Extension for  i18n",
+	// 		link: "/m/r7kp499g/app-inlang-vscode-extension",
+	// 		description:
+	// 			"Supercharge i18n within VS Code — Visualize, edit & lint translated strings at a glance.",
+	// 		pricing: "Free",
+	// 		image:
+	// 			"https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/assets/icon-vscode-marketplace.png",
+	// 		cover: "/images/ide-cover.png",
+	// 	},
+	// 	{
+	// 		title: "Parrot - i18n Figma plugin",
+	// 		link: "/m/gkrpgoir/app-inlang-figma-plugin",
+	// 		description: "Parrot simplifies the translation management process right within Figma.",
+	// 		pricing: "Free Beta",
+	// 		image: "https://cdn.jsdelivr.net/gh/parrot-global/parrot@latest/parrot-logo.svg",
+	// 		cover: "/images/parrot-cover.png",
+	// 	},
+	// ]
 
 	return (
 		<>
 			<div class="flex flex-row w-full justify-between pb-8 flex-wrap gap-y-4">
-				<For each={data}>
-					{(item: DataItem) => (
-						<Link
-							href={item.link}
-							class="group sm:w-[calc((100%_-_16px)_/_2)] lg:w-[calc((100%_-_32px)_/_3)] bg-background border border-surface-200 rounded-xl overflow-hidden hover:border-surface-300 transition-all cursor-pointer"
-						>
-							<div class="w-full h-[200px] overflow-hidden">
-								<img
-									class="group-hover:scale-105 h-full w-full bg-surface-400 object-cover transition-all duration-500"
-									src={item.cover}
-									alt={item.description}
-								/>
-							</div>
+				<For each={getProducts()}>
+					{(product) => {
+						const manifest = registry.find((manifest) => manifest.id === product)
+						if (!manifest) {
+							return undefined
+						}
+						const displayName = () =>
+							typeof manifest.displayName === "object"
+								? manifest.displayName.en
+								: manifest.displayName
 
-							<div class="p-5 flex flex-col gap-5">
-								<div class="flex gap-5 items-center">
-									<img class="h-10 w-10 object-cover rounded" src={item.image} alt={item.title} />
-									<div class="flex-1">
-										<div class="w-full font-bold text-surface-900 tracking-tight">{item.title}</div>
-										<div class="w-full flex flex-row gap-2 items-center">
-											<InlangBadge />
-											<div class="flex-1 text-sm text-primary font-medium">
-												inlang ecosystem compatible
+						const description = () =>
+							typeof manifest.description === "object"
+								? manifest.description.en
+								: manifest.description
+
+						return (
+							<Link
+								href={
+									manifest.id.split(".")[0] === "guide"
+										? `/g/${manifest.uniqueID}/${manifest.id.replaceAll(".", "-")}`
+										: `/m/${manifest.uniqueID}/${manifest.id.replaceAll(".", "-")}`
+								}
+								class="group sm:w-[calc((100%_-_16px)_/_2)] lg:w-[calc((100%_-_32px)_/_3)] bg-background border border-surface-200 rounded-xl overflow-hidden hover:border-surface-300 transition-all cursor-pointer"
+							>
+								<div class="w-full h-[200px] overflow-hidden">
+									<Switch>
+										<Match when={manifest.id === "app.inlang.editor"}>
+											<img
+												class="group-hover:scale-105 h-full w-full bg-surface-400 object-cover transition-all duration-500"
+												src={"/images/fink-cover.png"}
+												alt={manifest.description as string}
+											/>
+										</Match>
+										<Match when={manifest.id === "app.inlang.ideExtension"}>
+											<img
+												class="group-hover:scale-105 h-full w-full bg-surface-400 object-cover transition-all duration-500"
+												src={"/images/ide-cover.png"}
+												alt={manifest.description as string}
+											/>
+										</Match>
+										<Match when={manifest.id === "app.parrot.figmaPlugin"}>
+											<img
+												class="group-hover:scale-105 h-full w-full bg-surface-400 object-cover transition-all duration-500"
+												src={"/images/parrot-cover.png"}
+												alt={manifest.description as string}
+											/>
+										</Match>
+									</Switch>
+								</div>
+
+								<div class="p-5 flex flex-col gap-5">
+									<div class="flex gap-5 items-center">
+										<img
+											class="h-10 w-10 object-cover rounded"
+											src={manifest.icon}
+											alt={displayName()}
+										/>
+										<div class="flex-1">
+											<div class="w-full font-bold text-surface-900 tracking-tight">
+												{displayName()}
+											</div>
+											<div class="w-full flex flex-row gap-2 items-center">
+												<InlangBadge />
+												<div class="flex-1 text-sm text-primary font-medium">
+													inlang ecosystem compatible
+												</div>
 											</div>
 										</div>
 									</div>
-								</div>
-								<div class="text-surface-500 text-md font-regular">{item.description}</div>
-								<div class="flex justify-between items-center">
-									<div class="h-[30px] px-4 rounded-full bg-surface-200 flex items-center text-surface-500 font-semibold text-[13px]">
-										{item.pricing.toUpperCase()}
+									<div class="text-surface-500 text-md font-regular line-clamp-2">
+										{description()}
 									</div>
-									{/* <Link href="/c/lix"> */}
-									<div class="w-5 text-primary group transition-colors relative z-60">
-										{/* <sl-tooltip prop:content={m.marketplace_card_lix_tooltip()}> */}
-										<LixBadge />
-										{/* </sl-tooltip> */}
+									<div class="flex justify-between items-center">
+										<div class="h-[30px] px-4 rounded-full bg-surface-200 flex items-center text-surface-500 font-semibold text-[13px]">
+											<Switch>
+												<Match when={manifest.id === "app.inlang.editor"}>FREE BETA</Match>
+												<Match when={manifest.id === "app.inlang.ideExtension"}>FREE</Match>
+												<Match when={manifest.id === "app.parrot.figmaPlugin"}>FREE BETA</Match>
+											</Switch>
+										</div>
+										{/* <Link href="/c/lix"> */}
+										<div class="w-5 text-primary group transition-colors relative z-60">
+											{/* <sl-tooltip prop:content={m.marketplace_card_lix_tooltip()}> */}
+											<LixBadge />
+											{/* </sl-tooltip> */}
+										</div>
+										{/* </Link> */}
 									</div>
-									{/* </Link> */}
 								</div>
-							</div>
-						</Link>
-					)}
+							</Link>
+						)
+					}}
 				</For>
 			</div>
 			<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
