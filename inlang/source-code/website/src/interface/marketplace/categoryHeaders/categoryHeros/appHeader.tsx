@@ -10,15 +10,6 @@ const AppHeader = () => {
 		"app.parrot.figmaPlugin",
 	]
 
-	type DataItem = {
-		title: string
-		link: string
-		description: string
-		pricing: string
-		image: string
-		cover: string
-	}
-
 	// const data: Array<DataItem> = [
 	// 	{
 	// 		title: "Fink – Message editor",
