@@ -1,7 +1,9 @@
 {
 	"name": "@inlang/paraglide-js-adapter-solidstart",
 	"version": "0.0.1",
-	"private": false,
+	"publishConfig": {
+		"access": "public"
+	},
 	"license": "Apache-2.0",
 	"type": "module",
 	"exports": {
