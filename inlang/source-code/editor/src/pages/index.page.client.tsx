@@ -31,7 +31,7 @@ export function Page() {
 				name="description"
 				content="Contribute to open source projects and manage translations with inlang's editor."
 			/>
-			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
+			<Meta name="og:image" content="/images/fink-social-image.jpg" />
 			<EditorLayout>
 				{/* START search bar */}
 				<div class="flex flex-col items-center justify-center py-16 md:py-20">

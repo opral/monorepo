@@ -25,33 +25,37 @@ type CaptureEventArguments =
 			event: TelemetryEvents
 	  }
 
-let gitOrigin: string | undefined
+// let gitOrigin: string | undefined
 let userID: string
 
 /**
  * Capture a telemetry event in a typesafe way.
  */
 async function capture(args: CaptureEventArguments) {
-	if (gitOrigin === undefined) {
-		gitOrigin = await getGitOrigin()
-	}
+	// TODO add a project UUID to the tele.groups internal #196
+	// if (gitOrigin === undefined) {
+	// 	gitOrigin = await getGitOrigin()
+	// }
 	if (userID === undefined) {
 		userID = await getUserId()
 	}
 	return telemetryNode.capture({
 		...args,
 		distinctId: userID,
-		groups: gitOrigin
-			? {
-					repository: gitOrigin,
-			  }
-			: undefined,
+		// TODO add a project UUID to the tele.groups internal #196
+
+		// groups: gitOrigin
+		// 	? {
+		// 			repository: gitOrigin,
+		// 	  }
+		// 	: undefined,
 	})
 }
 
 /**
  * Gets the git origin url of the currently opened repository.
  */
+
 export async function getGitOrigin() {
 	try {
 		const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
