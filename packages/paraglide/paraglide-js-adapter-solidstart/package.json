@@ -1,0 +1,29 @@
+{
+	"name": "@inlang/paraglide-js-adapter-solidstart",
+	"version": "0.0.0",
+	"private": false,
+	"license": "Apache-2.0",
+	"type": "module",
+	"exports": {
+		"types": "./dist/index.d.ts",
+		"import": "./dist/index.js"
+	},
+	"scripts": {
+		"build": "tsc --build",
+		"dev": "tsc --watch",
+		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"lint": "eslint ./src --fix",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./node_modules"
+	},
+	"dependencies": {
+		"@solidjs/router": "^0.9",
+		"solid-js": "^1.8"
+	},
+	"devDependencies": {
+		"@types/node": "^20",
+		"@vitest/coverage-v8": "0.34.3",
+		"vitest": "0.34.3",
+		"typescript": "^5"
+	}
+}
