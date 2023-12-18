@@ -18,10 +18,16 @@ describe("closestInlangProject", async () => {
 	await nodeishFs.writeFile("/root/path/file1.txt", "")
 	await nodeishFs.writeFile("/root/path/file2.txt", "")
 
+	const projects = [
+		"/root/path/folder2/project.inlang",
+		"/root/path/folder1.inlang",
+		"/root/path/folder2.inlang",
+	]
+
 	it("should find the closest inlang project", async () => {
 		const result = await closestInlangProject({
 			workingDirectory: "/root/path",
-			nodeishFs,
+			projects,
 		})
 
 		expect(result).toEqual("/root/path/folder1.inlang")
@@ -30,7 +36,7 @@ describe("closestInlangProject", async () => {
 	it("should return undefined if no inlang project is found", async () => {
 		const result = await closestInlangProject({
 			workingDirectory: "/root/path/folder3",
-			nodeishFs,
+			projects,
 		})
 
 		expect(result).toEqual(undefined)
@@ -39,7 +45,7 @@ describe("closestInlangProject", async () => {
 	it("should handle workingDirectory being empty", async () => {
 		const result = await closestInlangProject({
 			workingDirectory: "",
-			nodeishFs,
+			projects,
 		})
 
 		expect(result).toEqual(undefined)
