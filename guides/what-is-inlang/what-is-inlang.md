@@ -26,7 +26,3 @@ Inlang's architecture consists of four main components:
 4. [Modules](/documentation/plugin) - Contain plugins and/or lint rules that define the behavior of a project.
 
 ![inlang architecture](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/architecture.jpg)
-
-<doc-links>
-    <doc-link title="How to setup inlang for your project" icon="material-symbols:developer-guide-outline" href="/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang" description="A general guide on the minimum steps required to make your project ready for the ecosystem of inlang."></doc-link>
-</doc-links>
