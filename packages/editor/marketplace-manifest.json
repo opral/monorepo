@@ -17,7 +17,7 @@
 	"readme": {
 		"en": "./inlang/source-code/editor/README.md"
 	},
-	"keywords": ["editor", "web", "apps", "website", "translator", "lix", "fink"],
+	"keywords": ["editor", "web", "apps", "website", "translator", "lix", "fink", "inlang"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"website": "https://inlang.com/editor",

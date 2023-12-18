@@ -8,6 +8,7 @@ import { Button } from "#src/pages/index/components/Button.jsx"
 import Link from "#src/renderer/Link.jsx"
 import * as m from "../../paraglide/messages.js"
 import { currentPageContext } from "#src/renderer/state.js"
+import { InlangBadge } from "../marketplace/categoryHeaders/categoryHeros/appHeader.jsx"
 
 export default function Card(props: { item: any; displayName: string }) {
 	const showCover =
@@ -36,35 +37,23 @@ export default function Card(props: { item: any; displayName: string }) {
 			>
 				<Switch>
 					<Match when={app && props.item.gallery}>
-						<div
-							class={
-								"pt-6 px-6 relative overflow-hidden " +
-								(props.item.id.split(".")[2] === "editor"
-									? "bg-gradient-to-tr from-[#9FEAF6] to-[#CAD4F5]"
-									: props.item.id.split(".")[2] === "ideExtension"
-									? "bg-gradient-to-tr from-[#4F5B7A] to-[#17264B]"
-									: props.item.id.split(".")[2] === "cli"
-									? "bg-gradient-to-tr from-[#B1F69F] to-[#CAF3F5]"
-									: props.item.id.split(".")[2] === "badge"
-									? "bg-gradient-to-tr from-[#EA9FF6] to-[#A5C3F1]"
-									: props.item.id.split(".")[1] === "parrot"
-									? "bg-gradient-to-tr from-[#F69FD4] to-[#F1A5A5]"
-									: "")
-							}
-						>
-							<img
-								class="w-full h-40 object-cover object-top rounded-t-lg"
-								src={props.item.gallery && props.item.gallery[0]}
-							/>
-							<img
-								src={props.item.icon}
-								class="absolute bottom-4 right-4 h-12 aspect-1 rounded-xl border border-surface-2 shadow-xl bg-surface-100 object-cover object-center"
-							/>
-						</div>
+						<img
+							src={props.item.icon}
+							class="mx-4 mt-4 w-10 h-10 aspect-1 rounded object-cover object-center"
+						/>
 						<div class="flex flex-1 flex-col items-start px-4">
-							<p class="m-0 mb-2 text-sm text-surface-800 line-clamp-2 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors">
-								{props.displayName}
-							</p>
+							<div class="flex items-center gap-2 mb-2">
+								<p class="m-0 text-[15px] text-surface-800 line-clamp-2 leading-none no-underline font-bold group-hover:text-surface-900 transition-colors">
+									{props.displayName}
+								</p>
+								<Show
+									when={props.item.keywords
+										.map((keyword: string) => keyword.toLowerCase())
+										.includes("inlang")}
+								>
+									<InlangBadge />
+								</Show>
+							</div>
 							<p class="text-sm line-clamp-2 text-surface-500 transition-colors group-hover:text-surface-600 mb-4">
 								{props.item.description.en}
 							</p>
@@ -421,7 +410,7 @@ function NoResultsArtwork() {
 	)
 }
 
-function LixBadge() {
+export function LixBadge() {
 	return (
 		<svg xmlns="http://www.w3.org/2000/svg" width="100%" fill="none" viewBox="0 0 48 33">
 			<path

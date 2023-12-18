@@ -1,4 +1,4 @@
-import { For, Show, createSignal, onMount, type JSX } from "solid-js"
+import { For, Show, createSignal, onMount, type JSX, Switch, Match } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
@@ -18,6 +18,7 @@ import SvelteHeader from "#src/interface/marketplace/categoryHeaders/cards/svelt
 import NextjsHeader from "#src/interface/marketplace/categoryHeaders/cards/nextjs.jsx"
 import GenericHeader from "#src/interface/marketplace/categoryHeaders/cards/generic.jsx"
 import { i18nRouting } from "#src/renderer/_default.page.route.js"
+import AppHeader from "#src/interface/marketplace/categoryHeaders/categoryHeros/appHeader.jsx"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -247,6 +248,11 @@ export function Page(props: {
 									</div>
 								</Show>
 							</Show>
+							<Switch>
+								<Match when={selectedCategory().includes("c/apps")}>
+									<AppHeader />
+								</Match>
+							</Switch>
 							<div class="mb-8 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
 								<Gallery
 									items={props.items}
