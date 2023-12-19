@@ -1,7 +1,6 @@
 import { For, Match, Switch, onMount, Show } from "solid-js"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
-import { Meta, Title } from "@solidjs/meta"
 import { EditorStateProvider, useEditorState } from "./State.jsx"
 import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
 import { ListHeader, messageCount } from "./components/Listheader.jsx"
@@ -65,13 +64,6 @@ function TheActualPage() {
 
 	return (
 		<>
-			<Title>
-				{routeParams().owner}/{routeParams().repository}
-			</Title>
-			<Meta
-				name="description"
-				content={`Contribute translations to ${routeParams().repository} via inlangs editor.`}
-			/>
 			<Switch
 				fallback={
 					<p class="text-danger">
