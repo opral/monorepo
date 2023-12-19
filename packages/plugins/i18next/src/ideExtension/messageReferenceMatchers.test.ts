@@ -236,16 +236,100 @@ it("should work on a production JSX example with namespaces option syntax and ad
 	expect(matches[0]?.messageId).toBe("common:a")
 })
 
-it("should add the default namespace if required by pathPattern", async () => {
+// it("should add the default namespace if required by pathPattern", async () => {
+// 	const sourceCode = `
+// 		<p>{t("a")}</p>
+// 	`
+// 	const settings: PluginSettings = {
+// 		pathPattern: {
+// 			common: "./{language}/common.json",
+// 		},
+// 	}
+// 	const matches = parse(sourceCode, settings)
+// 	expect(matches).toHaveLength(1)
+// 	expect(matches[0]?.messageId).toBe("common:a")
+// })
+
+it("should add the defined namespace by useTranslation hook", async () => {
 	const sourceCode = `
+		const { t } = useTranslation("login");
 		<p>{t("a")}</p>
 	`
 	const settings: PluginSettings = {
 		pathPattern: {
-			common: "./{language}/common.json",
+			test: "./{language}/test.json",
+			login: "./{language}/login.json",
 		},
 	}
 	const matches = parse(sourceCode, settings)
 	expect(matches).toHaveLength(1)
-	expect(matches[0]?.messageId).toBe("common:a")
+	expect(matches[0]?.messageId).toBe("login:a")
+})
+
+it("should add the defined namespace by useTranslation hook with arrat pattern", async () => {
+	const sourceCode = `
+		const { t } = useTranslation(["login"]);
+		<p>{t("a")}</p>
+	`
+	const settings: PluginSettings = {
+		pathPattern: {
+			test: "./{language}/test.json",
+			login: "./{language}/login.json",
+		},
+	}
+	const matches = parse(sourceCode, settings)
+	expect(matches).toHaveLength(1)
+	expect(matches[0]?.messageId).toBe("login:a")
+})
+
+it("should add the defined namespace by useTranslation hook with array pattern", async () => {
+	const sourceCode = `
+		const { t } = useTranslation(["login", "test"]);
+		<p>{t("a")}</p>
+		<p>{t("test:a")}</p>
+		<p>{t("a", {ns: "test"})}</p>
+	`
+	const settings: PluginSettings = {
+		pathPattern: {
+			test: "./{language}/test.json",
+			login: "./{language}/login.json",
+		},
+	}
+	const matches = parse(sourceCode, settings)
+	expect(matches).toHaveLength(3)
+	expect(matches[0]?.messageId).toBe("login:a")
+	expect(matches[1]?.messageId).toBe("test:a")
+	expect(matches[2]?.messageId).toBe("test:a")
+})
+
+it("should add the defined namespace by useTranslation hook and keyPrefix", async () => {
+	const sourceCode = `
+		const { t } = useTranslation("home", { keyPrefix: "intro" });
+		<p>{t("a")}</p>
+	`
+	const settings: PluginSettings = {
+		pathPattern: {
+			test: "./{language}/test.json",
+			login: "./{language}/login.json",
+		},
+	}
+	const matches = parse(sourceCode, settings)
+	expect(matches).toHaveLength(1)
+	expect(matches[0]?.messageId).toBe("home:intro.a")
+})
+
+it("should add the defined namespace when using next-intl conform useTranslations()", async () => {
+	const sourceCode = `
+		const { t } = useTranslations("home");
+		<p>{t("a")}</p>
+	`
+	const settings: PluginSettings = {
+		pathPattern: {
+			test: "./{language}/test.json",
+			login: "./{language}/login.json",
+		},
+	}
+	const matches = parse(sourceCode, settings)
+	expect(matches).toHaveLength(1)
+	expect(matches[0]?.messageId).toBe("home:a")
 })

@@ -8,7 +8,7 @@ const About: Component = () => {
 		<main>
 			<h1>{m.about()}</h1>
 
-			<A href={translateHref("/")}>{m.home()}</A>
+			<A href="/">{m.home()}</A>
 			<br />
 			<LocaleSwitcher />
 		</main>

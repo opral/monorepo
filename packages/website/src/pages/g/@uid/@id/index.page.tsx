@@ -1,4 +1,4 @@
-import { Link as MetaLink, Meta, Title } from "@solidjs/meta"
+import { Meta, Title } from "@solidjs/meta"
 import { For, Show, onMount } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { Chip } from "#src/interface/components/Chip.jsx"
@@ -10,7 +10,7 @@ import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
 import EditOutline from "~icons/material-symbols/edit-outline-rounded"
 import { currentPageContext } from "#src/renderer/state.js"
-import { i18nRouting } from "#src/renderer/_default.page.route.js"
+import { Recommends } from "#src/pages/m/@uid/@id/index.page.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -18,6 +18,7 @@ import { i18nRouting } from "#src/renderer/_default.page.route.js"
 export type PageProps = {
 	markdown: Awaited<ReturnType<any>>
 	manifest: MarketplaceManifest & { uniqueID: string }
+	recommends?: MarketplaceManifest[]
 }
 
 export function Page(props: PageProps) {
@@ -80,10 +81,6 @@ export function Page(props: PageProps) {
 			<Meta name="twitter:description" content={props.manifest && description()} />
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />
-			<MetaLink
-				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
-				rel="canonical"
-			/>
 			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
 					<div class="md:py-20 py-16">
@@ -158,6 +155,9 @@ export function Page(props: PageProps) {
 								</section>
 							</Show>
 						</div>
+						<Show when={props.recommends}>
+							<Recommends recommends={props.recommends!} />
+						</Show>
 						<div class="mt-20">
 							<GetHelp text="Do you have questions?" />
 						</div>

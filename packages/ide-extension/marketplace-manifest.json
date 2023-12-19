@@ -26,9 +26,11 @@
 		"extension",
 		"lix",
 		"svelte",
-		"nextjs"
+		"nextjs",
+		"inlang"
 	],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-	"license": "Apache-2.0"
+	"license": "Apache-2.0",
+	"pricing": "Free"
 }

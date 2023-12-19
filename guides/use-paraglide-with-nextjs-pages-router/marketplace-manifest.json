@@ -30,6 +30,7 @@
 		"pages router",
 		"i18n routing"
 	],
+	"recommends": ["g/wxcebbig", "g/2fg8ng94", "g/00162hsd"],
 	"publisherName": "Loris Sigrist",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/43482866?v=4",
 	"license": "Apache-2.0"
