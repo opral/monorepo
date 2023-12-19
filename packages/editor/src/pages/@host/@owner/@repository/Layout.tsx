@@ -269,7 +269,7 @@ export function Layout(props: { children: JSXElement }) {
 				/>
 				<Show when={!isValidLanguageTag() && addLanguageText().length > 0}>
 					<p class="text-xs leading-5 text-danger max-sm:hidden pt-1 pb-0.5">
-						Please enter a valid language tag (e.g. en, en-GB)
+						Please enter a valid BCP-47 language tag (e.g. en, en-GB)
 					</p>
 				</Show>
 				<Show when={project()?.settings().languageTags.includes(addLanguageText())}>
