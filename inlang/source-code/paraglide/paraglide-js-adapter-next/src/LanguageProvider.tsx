@@ -1,6 +1,7 @@
 import { languageTag, setLanguageTag } from "$paraglide-adapter-next-internal/runtime.js"
 import { headers } from "next/headers"
 import { ClientLanguageProvider } from "./ClientLanguageProvider"
+import React from "react"
 
 //This only needs to be called once, so it's fine to do it here
 setLanguageTag(() => {

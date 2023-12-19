@@ -1,11 +1,15 @@
-import { availableLanguageTags, sourceLanguageTag } from "@/paraglide/runtime"
+import {
+	availableLanguageTags,
+	sourceLanguageTag,
+} from "$paraglide-adapter-next-internal/runtime.js"
 import Head from "next/head"
 import { useRouter } from "next/router"
+import React from "react"
 
 /**
  * Adds alternate links for all available languages to the head.
  */
-export function Header() {
+export function Header(): React.ReactNode {
 	const { asPath } = useRouter()
 
 	function getPathInLanguage(languageTag: string) {

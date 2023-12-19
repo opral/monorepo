@@ -22,6 +22,7 @@ export function withParaglide(
 ): NextConfig {
 	const webpack = !process.env.TURBOPACK
 	if (webpack) {
+		console.log("USING WEBPACK")
 		const originalWebpack = nextConfig.webpack
 		const wrappedWebpack: NextConfig["webpack"] = (config, options) => {
 			//register the alias in webpack
@@ -43,6 +44,7 @@ export function withParaglide(
 	}
 	//turbo
 	else {
+		console.log("USING TURBOPACK")
 		//register the alias in turbo
 		nextConfig.experimental = nextConfig.experimental ?? {}
 		nextConfig.experimental.turbo = nextConfig.experimental.turbo ?? {}
