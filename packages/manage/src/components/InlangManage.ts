@@ -123,11 +123,7 @@ export class InlangManage extends TwLitElement {
 		super.connectedCallback()
 
 		/* Initialize Telemetry via Posthog */
-		if (
-			!window.location.host.includes("127.0.0.1") &&
-			!window.location.host.includes("localhost") &&
-			publicEnv.PUBLIC_POSTHOG_TOKEN
-		) {
+		if (publicEnv.PUBLIC_POSTHOG_TOKEN) {
 			posthog.init(publicEnv.PUBLIC_POSTHOG_TOKEN ?? "placeholder", {
 				api_host: "https://eu.posthog.com",
 			})
