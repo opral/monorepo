@@ -38,6 +38,14 @@ export function Layout(props: { children: JSXElement }) {
 
 	const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
 	const [addLanguageText, setAddLanguageText] = createSignal("")
+
+	// check if the type matches the LanguageTag type
+	const isValidLanguageTag = (): boolean => {
+		const languageTagRegex =
+			/^((?<grandfathered>(en-GB-oed|i-ami|i-bnn|i-default|i-enochian|i-hak|i-klingon|i-lux|i-mingo|i-navajo|i-pwn|i-tao|i-tay|i-tsu|sgn-BE-FR|sgn-BE-NL|sgn-CH-DE)|(art-lojban|cel-gaulish|no-bok|no-nyn|zh-guoyu|zh-hakka|zh-min|zh-min-nan|zh-xiang))|((?<language>([A-Za-z]{2,3}(-(?<extlang>[A-Za-z]{3}(-[A-Za-z]{3}){0,2}))?))(-(?<script>[A-Za-z]{4}))?(-(?<region>[A-Za-z]{2}|[0-9]{3}))?(-(?<variant>[A-Za-z0-9]{5,8}|[0-9][A-Za-z0-9]{3}))*))$/
+		return languageTagRegex.test(addLanguageText())
+	}
+
 	const [filterOptions, setFilterOptions] = createSignal<Filter[]>([
 		{
 			name: "Language",
@@ -243,16 +251,34 @@ export function Layout(props: { children: JSXElement }) {
 					is creating a new language file and commits it to the local repository instance.
 				</p>
 				<sl-input
-					class="addLanguage p-0 border-0 focus:border-0 focus:outline-0 focus:ring-0 pb-6"
+					class="addLanguage p-0 border-0 focus:border-0 focus:outline-0 focus:ring-0"
 					prop:size="small"
 					prop:label="Tag"
 					prop:placeholder={"Add a language tag"}
-					prop:helpText={"Unique tags for languages (e.g. -> en, de, fr)"}
+					prop:helpText={
+						!(
+							(!isValidLanguageTag() && addLanguageText().length > 0) ||
+							project()?.settings().languageTags.includes(addLanguageText())
+						)
+							? "Unique tags for languages (e.g. -> en, de, fr)"
+							: ""
+					}
 					prop:value={addLanguageText()}
+					onPaste={(e) => setAddLanguageText(e.currentTarget.value)}
 					onInput={(e) => setAddLanguageText(e.currentTarget.value)}
 				/>
+				<Show when={!isValidLanguageTag() && addLanguageText().length > 0}>
+					<p class="text-xs leading-5 text-danger max-sm:hidden pt-1 pb-0.5">
+						Please enter a valid language tag (e.g. en, en-GB)
+					</p>
+				</Show>
+				<Show when={project()?.settings().languageTags.includes(addLanguageText())}>
+					<p class="text-xs leading-5 text-danger max-sm:hidden pt-1 pb-0.5">
+						Language tag "{addLanguageText()}" already exists
+					</p>
+				</Show>
 				<sl-button
-					class="w-full"
+					class="w-full pt-6"
 					prop:size={"small"}
 					prop:variant={"primary"}
 					onClick={() => {
