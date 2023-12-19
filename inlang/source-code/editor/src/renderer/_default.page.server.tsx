@@ -19,12 +19,20 @@ export async function render(pageContext: PageContextRenderer): Promise<unknown>
 			pageContext.urlParsed.pathname === "/"
 				? "Fink - i18n Message Editor"
 				: pageContext.urlParsed.pathname.split("/")[2] + " | Fink - i18n Message Editor",
+		description:
+			pageContext.urlParsed.pathname === "/"
+				? "Fink is an i18n message editor for managing translations of your application."
+				: `Fink is an i18n message editor for managing translations of your application. Edit ${
+						pageContext.urlParsed.pathname.split("/")[2]
+				  } translations here.`,
 	}
 
 	return escapeInject`<!DOCTYPE html>
     <html lang="en" class="min-h-screen min-w-screen overflow-x-hidden">
       <head>
 	  		<title>${dangerouslySkipEscape(metaInfo.title)}</title>
+			<meta name="description" content="${dangerouslySkipEscape(metaInfo.description)}" />
+			<meta name="og:image" content="/images/fink-social-image.jpg" />
 			<meta charset="UTF-8" />
 			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<!-- theme-color means the background color of the iOS status bar -->

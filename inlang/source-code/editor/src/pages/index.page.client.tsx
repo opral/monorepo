@@ -1,7 +1,6 @@
 import { createSignal, onMount } from "solid-js"
 import { navigate } from "vike/client/router"
 import { z } from "zod"
-import { Meta, Title } from "@solidjs/meta"
 import { CommunityProjects } from "#src/interface/editor/CommunityProjects.jsx"
 import { Button } from "#src/interface/components/Button.jsx"
 import EditorLayout from "#src/interface/editor/EditorLayout.jsx"
@@ -34,12 +33,6 @@ export function Page() {
 
 	return (
 		<>
-			<Title>inlang Editor</Title>
-			<Meta
-				name="description"
-				content="Contribute to open source projects and manage translations with inlang's editor."
-			/>
-			<Meta name="og:image" content="/images/fink-social-image.jpg" />
 			<EditorLayout>
 				{/* START search bar */}
 				<div class="flex flex-col items-center justify-center py-16 md:py-20">
