@@ -1,6 +1,5 @@
 import type { NextConfig } from "next"
 import { resolve } from "path"
-import { paraglide as paraglide_webpack } from "@inlang/paraglide-js-adapter-webpack"
 
 /** The alias for the paraglide folder. */
 const PARAGLIDE_ALIAS = "$paraglide-adapter-next-internal"
@@ -22,8 +21,8 @@ export function withParaglide(
 	nextConfig: NextConfig
 ): NextConfig {
 	const webpack = !process.env.TURBOPACK
-	const isWorker = process.env.NEXT_PRIVATE_WORKER !== undefined
 	if (webpack) {
+		const originalWebpack = nextConfig.webpack
 		const wrappedWebpack: NextConfig["webpack"] = (config, options) => {
 			//register the alias in webpack
 			const absoluteOutdir = resolve(config.context, paraglideConfig.outdir)
@@ -32,24 +31,10 @@ export function withParaglide(
 			config.resolve.alias = config.resolve.alias ?? {}
 			config.resolve.alias[PARAGLIDE_ALIAS] = absoluteOutdir
 
-			//Register webpack plugin
-			/*
-			if (!isWorker) {
-				config.plugins.push(
-					paraglide_webpack({
-						project: paraglideConfig.project,
-						outdir: paraglideConfig.outdir,
-					})
-				)
-			}
-			*/
-
-			/*
 			//apply any other webpack config if it exists
-			if (typeof nextConfig?.webpack === "function") {
-				return nextConfig.webpack(config, options)
+			if (typeof originalWebpack === "function") {
+				return originalWebpack(config, options)
 			}
-            */
 
 			return config
 		}

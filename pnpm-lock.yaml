@@ -1124,9 +1124,6 @@ importers:
         specifier: ^13.0.0
         version: 13.5.4(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
-      '@inlang/paraglide-js-adapter-webpack':
-        specifier: workspace:^
-        version: link:../paraglide-js-adapter-webpack
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
