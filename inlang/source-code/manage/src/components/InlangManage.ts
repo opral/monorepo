@@ -12,7 +12,7 @@ import { browserAuth, getUser } from "@lix-js/client/src/browser-auth.ts"
 import { tryCatch } from "@inlang/result"
 import { registry } from "@inlang/marketplace-registry"
 import type { MarketplaceManifest } from "../../../versioned-interfaces/marketplace-manifest/dist/interface.js"
-import posthog from "posthog-js"
+import { posthog } from "posthog-js"
 
 type ManifestWithVersion = MarketplaceManifest & { version: string }
 
@@ -127,7 +127,7 @@ export class InlangManage extends TwLitElement {
 			!window.location.host.includes("127.0.0.1") &&
 			!window.location.host.includes("localhost")
 		) {
-			posthog.init(publicEnv.PUBLIC_POSTHOG_TOKEN, { api_host: "https://manage.inlang.com" })
+			posthog.init(publicEnv.PUBLIC_POSTHOG_TOKEN!, { api_host: "https://manage.inlang.com" })
 		}
 
 		if (window.location.search !== "" && window.location.pathname !== "") {
@@ -564,6 +564,17 @@ export class InlangManage extends TwLitElement {
 																			></doc-icon>
 																		</a>
 																		<a
+																			@click=${() => {
+																				posthog.capture("Uninstall module", {
+																					$set: {
+																						name:
+																							typeof this.user === "object"
+																								? this.user.username
+																								: undefined,
+																					},
+																					$set_once: { initial_url: "https://manage.inlang.com" },
+																				})
+																			}}
 																			href=${`/uninstall?repo=${this.url.repo}&project=${this.url.project}&module=${module.id}`}
 																			class="text-red-500 text-sm font-medium transition-colors hover:text-red-400"
 																		>
@@ -638,7 +649,7 @@ export class InlangManage extends TwLitElement {
 																		</a>
 																		<a
 																			@click=${() => {
-																				posthog.capture("event_name", {
+																				posthog.capture("Uninstall module", {
 																					$set: {
 																						name:
 																							typeof this.user === "object"
