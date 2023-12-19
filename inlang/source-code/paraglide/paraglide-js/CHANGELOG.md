@@ -1,5 +1,9 @@
 # @inlang/paraglide-js
 
+## 1.0.0-prerelease.19
+
+fix: Fix inlang/internal#195
+
 ## 1.0.0-prerelease.18
 
 `paraglide-js init` now adds `@inlang/message-lint-rule-valid-js-identifier` by default.

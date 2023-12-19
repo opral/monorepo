@@ -4,7 +4,7 @@
   <img src="https://github.com/inlang/monorepo/blob/main/inlang/assets/logo_rounded.png?raw=true" alt="inlang icon" width="120px">
   
   <h2 align="center">
-    Effortless globalization (i18n, l10n) for your app
+    🎄 Effortless globalization (i18n, l10n) for your app 🎄
   </h2>
   
   <p align="center">powered by <a href="https://github.com/inlang/monorepo/tree/main/lix" target="_blank">lix</p>
@@ -17,7 +17,7 @@
     ·
     <a href='https://discord.gg/gdMPPWy57R' target="_blank">💙 Discord</a>
     ·
-    <a href='https://twitter.com/inlangHQ' target="_blank">🐦 Twitter</a>
+    <a href='https://twitter.com/inlangHQ' target="_blank">𝕏 Twitter</a>
     ·
     <a href='https://github.com/orgs/inlang/projects/39' target="_blank">🗺️ Roadmap</a>
   </p>

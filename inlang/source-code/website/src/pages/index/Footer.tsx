@@ -44,6 +44,10 @@ const Footer = () => {
 				name: m.footer_resources_guides(),
 				href: "/c/guides",
 			},
+			{
+				name: m.footer_resources_inlang_manage(),
+				href: "https://manage.inlang.com",
+			},
 		]
 	}
 

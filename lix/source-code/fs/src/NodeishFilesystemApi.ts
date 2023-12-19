@@ -9,6 +9,8 @@
  * Node API reference https://nodejs.org/api/fs.html#fspromisesaccesspath-mode
  */
 export type NodeishFilesystem = {
+	// we need to expose internal state _State to the snapshotter without adding it to code completions
+	[x: string]: any
 	writeFile(path: string, data: string | Uint8Array, options?: { mode: number }): Promise<void>
 	readFile(path: string): Promise<Uint8Array>
 	readFile(path: string, options: { encoding: "utf-8" | "binary" }): Promise<string>
@@ -54,4 +56,6 @@ export type NodeishStats = {
 	isDirectory(): boolean
 	isSymbolicLink(): boolean
 	symlinkTarget?: string
+	// we have the hidden property kind for serialization and deserialization in the snapshotter
+	[x: string]: any
 }

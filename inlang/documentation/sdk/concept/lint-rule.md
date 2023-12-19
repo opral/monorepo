@@ -20,4 +20,4 @@ We will support more types of lint rules in the future. If you have an idea for 
 
 ## Develop your own lint rule
 
-Learn how to build custom lint rules in the [develop an inlang lint rule](/documentation/build-lint-rule) guide.
+Learn how to build custom lint rules in the [develop an inlang lint rule](/documentation/lint-rule/guide) guide.

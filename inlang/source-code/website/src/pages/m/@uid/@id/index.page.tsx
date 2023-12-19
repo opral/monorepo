@@ -1,4 +1,4 @@
-import { Link as MetaLink, Meta, Title } from "@solidjs/meta"
+import { Meta, Title } from "@solidjs/meta"
 import { For, Show, createSignal, onMount, Switch, Match } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { isModule } from "@inlang/marketplace-registry"
@@ -20,8 +20,8 @@ import Card from "#src/interface/components/Card.jsx"
 import EditOutline from "~icons/material-symbols/edit-outline-rounded"
 import Documentation from "~icons/material-symbols/description-outline-rounded"
 import Changelog from "~icons/material-symbols/manage-history"
-import { i18nRouting } from "#src/renderer/_default.page.route.js"
 import Link from "#src/renderer/Link.jsx"
+import { InlangBadge } from "#src/interface/marketplace/categoryHeaders/categoryHeros/appHeader.jsx"
 
 const isProduction = process.env.NODE_ENV === "production"
 
@@ -103,10 +103,6 @@ export function Page(props: PageProps) {
 			/>
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />
-			<MetaLink
-				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
-				rel="canonical"
-			/>
 			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
 					<div class="md:py-16 py-8">
@@ -132,8 +128,22 @@ export function Page(props: PageProps) {
 												/>
 											</Show>
 											<div class="mb-0">
-												<div class="flex flex-col gap-3">
-													<h1 class="text-3xl font-bold">{displayName()}</h1>
+												<div class="flex gap-3 flex-col">
+													<div class="flex gap-4 items-center">
+														<h1 class="text-3xl font-bold">{displayName()}</h1>
+														<Show
+															when={props.manifest.keywords
+																.map((keyword: string) => keyword.toLowerCase())
+																.includes("inlang")}
+														>
+															<div class="flex flex-row gap-2 items-center">
+																<InlangBadge />
+																<div class="flex-1 text-sm text-primary font-medium">
+																	inlang ecosystem compatible
+																</div>
+															</div>
+														</Show>
+													</div>
 													<div class="inline-block text-surface-500 ">
 														<p class={!readmore() ? "lg:line-clamp-2" : ""}>{description()}</p>
 														<Show when={description().length > 205}>
@@ -351,6 +361,22 @@ export function Page(props: PageProps) {
 													{props?.manifest?.license}
 												</p>
 											</div>
+											<Show
+												when={
+													// @ts-ignore (Show components are not typed)
+													props.manifest.pricing
+												}
+											>
+												<div>
+													<h3 class="text-surface-400 text-sm mb-2">Pricing</h3>
+													<p class="text-surface-600 font-medium">
+														{
+															// @ts-ignore
+															props.manifest.pricing
+														}
+													</p>
+												</div>
+											</Show>
 										</div>
 										<Show when={props.tableOfContents}>
 											{/* Classes to be added: sticky z-10 top-16 pt-8 md:pt-0 md:static bg-background */}
@@ -406,7 +432,7 @@ export function Page(props: PageProps) {
 	)
 }
 
-function Recommends(props: { recommends: MarketplaceManifest[] }) {
+export function Recommends(props: { recommends: MarketplaceManifest[] }) {
 	const [show, setShow] = createSignal<boolean>(false)
 
 	onMount(() => {
@@ -415,7 +441,12 @@ function Recommends(props: { recommends: MarketplaceManifest[] }) {
 
 	return (
 		<>
-			<h3 class="font-semibold mb-4">Recommended to use with:</h3>
+			<Show
+				when={currentPageContext.urlParsed.pathname.includes("/m/")}
+				fallback={<h3 class="font-semibold mb-4">Read more:</h3>}
+			>
+				<h3 class="font-semibold mb-4">Recommended to use with:</h3>
+			</Show>
 			<div class="flex items-center gap-4 md:flex-row flex-col">
 				<Show
 					when={show()}

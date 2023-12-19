@@ -14,7 +14,7 @@ const LintRulesHeader = () => {
 						{m.marketplace_header_lintRule_toast_description()}
 					</p>
 				</div>
-				<Button type="secondaryOnGray" href="/documentation/concept/lint-rule">
+				<Button type="secondaryOnGray" href="/documentation/lint-rule">
 					{m.marketplace_header_lintRule_toast_button_text()}
 				</Button>
 			</div>

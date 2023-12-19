@@ -1,5 +1,11 @@
 # @inlang/telemetry
 
+## 0.3.0
+
+### Minor Changes
+
+- 1d0f167b4: Bug fix of internal #195
+
 ## 0.2.1
 
 ### Patch Changes

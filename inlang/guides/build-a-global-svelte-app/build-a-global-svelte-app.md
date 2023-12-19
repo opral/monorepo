@@ -1,4 +1,4 @@
-# Build a global [SvelteKit](https://kit.svelte.com) app
+# Build a global [SvelteKit](https://kit.svelte.dev) app
 
 In this guide, we will be creating a simple SvelteKit app with i18n routing, using Paraglide for translations. This should be all you need to get started with Paraglide.
 
@@ -202,7 +202,7 @@ routes
         └── +page.svelte
 ```
 
-Right now [[lang]] will match any string, not just languages. We can make sure that it only matches valid language tags by adding [matcher](https://kit.svelte.dev/docs/advanced-routing#matching). Add a `lang` matcher in `./src/params/lang.ts`.
+Right now [[lang]] will match any string, not just languages. We can make sure that it only matches valid [language tags](/m/8y8sxj09/library-inlang-languageTag) by adding [matcher](https://kit.svelte.dev/docs/advanced-routing#matching). Add a `lang` matcher in `./src/params/lang.ts`.
 
 ```ts
 // ./src/params/lang.ts

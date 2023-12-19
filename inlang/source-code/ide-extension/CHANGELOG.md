@@ -1,5 +1,16 @@
 # inlang-vs-code-extension
 
+## 1.23.0
+
+### Minor Changes
+
+- 1d0f167b4: Bug fix of internal #195
+
+### Patch Changes
+
+- Updated dependencies [1d0f167b4]
+  - @inlang/telemetry@0.3.0
+
 ## 1.22.0
 
 ### Minor Changes

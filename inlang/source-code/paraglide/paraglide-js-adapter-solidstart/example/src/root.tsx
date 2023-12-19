@@ -4,7 +4,7 @@ import { Body, FileRoutes, Head, Html, Routes, Scripts } from "solid-start"
 import * as i18n from "./i18n"
 
 const Root: Component = () => {
-	const url_language_tag = i18n.getLanguageTagFromURL()
+	const url_language_tag = i18n.useLocationLanguageTag()
 	const language_tag = url_language_tag ?? i18n.sourceLanguageTag
 
 	return (
