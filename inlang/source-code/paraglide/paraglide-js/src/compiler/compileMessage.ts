@@ -3,6 +3,8 @@ import { compilePattern } from "./compilePattern.js"
 import { paramsType, type Params } from "./paramsType.js"
 import { optionsType } from "./optionsType.js"
 
+const inlanAliasKey = "library.inlang.paraglideJs"
+
 /**
  * Returns the compiled messages for the given message.
  *
@@ -64,22 +66,6 @@ const messageIndexFunction = (args: {
 	params: Params
 	languageTags: Set<LanguageTag>
 }) => {
-	let deprecatedAlias: string | undefined = undefined
-	if (
-		args.message.alias["paraglide-alias"] &&
-		!args.message.alias["paraglide-alias"].includes("-")
-	) {
-		deprecatedAlias = `
-/**
- * ${paramsType(args.params, true)}
- * ${optionsType({ languageTags: args.languageTags })}
- * @deprecated don't use named messages - use preferred (${args.message.id}) instead
- * @returns {string}
- */
-export const ${args.message.alias["paraglide-alias"]} = ${args.message.id};
-`
-	}
-
 	return `
 /**
  * This message has been compiled by [inlang paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
@@ -115,7 +101,15 @@ ${[...args.languageTags]
 	// @ts-expect-error - for better DX treat a message function is always returning a string
 	return undefined
 }
-${deprecatedAlias !== undefined ? deprecatedAlias : ""}
+${
+	args.message.alias[inlanAliasKey] &&
+	`
+/**
+ * This message is an alias of ${args.message.id}
+ */
+export const ${args.message.alias[inlanAliasKey]} = ${args.message.id};
+`
+}
 `
 }
 
