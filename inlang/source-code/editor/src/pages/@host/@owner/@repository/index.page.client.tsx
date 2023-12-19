@@ -13,8 +13,14 @@ import { Errors } from "./components/Errors.jsx"
 import { Layout } from "./Layout.jsx"
 import Link from "#src/renderer/Link.jsx"
 import { browserAuth } from "@lix-js/client"
+import { currentPageContext } from "#src/renderer/state.js"
+import { replaceMetaInfo } from "./helper/ReplaceMetaInfo.js"
 
 export function Page() {
+	onMount(() => {
+		replaceMetaInfo(currentPageContext)
+	})
+
 	return (
 		<EditorStateProvider>
 			<Layout>

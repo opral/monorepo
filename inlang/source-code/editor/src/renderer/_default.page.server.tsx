@@ -14,9 +14,17 @@ export async function render(pageContext: PageContextRenderer): Promise<unknown>
 	//! Need to look into this in the future
 	setCurrentPageContext(pageContext)
 
+	const metaInfo = {
+		title:
+			pageContext.urlParsed.pathname === "/"
+				? "Fink - i18n Message Editor"
+				: pageContext.urlParsed.pathname.split("/")[2] + " | Fink - i18n Message Editor",
+	}
+
 	return escapeInject`<!DOCTYPE html>
     <html lang="en" class="min-h-screen min-w-screen overflow-x-hidden">
       <head>
+	  		<title>${dangerouslySkipEscape(metaInfo.title)}</title>
 			<meta charset="UTF-8" />
 			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<!-- theme-color means the background color of the iOS status bar -->
