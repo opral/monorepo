@@ -64,6 +64,22 @@ const messageIndexFunction = (args: {
 	params: Params
 	languageTags: Set<LanguageTag>
 }) => {
+	let deprecatedAlias: string | undefined = undefined
+	if (
+		args.message.alias["paraglide-alias"] &&
+		!args.message.alias["paraglide-alias"].includes("-")
+	) {
+		deprecatedAlias = `
+/**
+ * ${paramsType(args.params, true)}
+ * ${optionsType({ languageTags: args.languageTags })}
+ * @deprecated don't use named messages - use preferred (${args.message.id}) instead
+ * @returns {string}
+ */
+export const ${args.message.alias["paraglide-alias"]} = ${args.message.id};
+`
+	}
+
 	return `
 /**
  * This message has been compiled by [inlang paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
@@ -98,16 +114,20 @@ ${[...args.languageTags]
 	// see https://inlang.com/m/4cxm3eqi/messageLintRule-inlang-missingTranslation
 	// @ts-expect-error - for better DX treat a message function is always returning a string
 	return undefined
-}`
+}
+${deprecatedAlias !== undefined ? deprecatedAlias : ""}
+`
 }
 
 const messageFunction = (args: { message: Message; params: Params; compiledPattern: string }) => {
 	return `
+	
 /**
  * ${paramsType(args.params, false)}
  * @returns {string}
  */
 export const ${args.message.id} = (${Object.keys(args.params).length > 0 ? "params" : ""}) => {
 	return ${args.compiledPattern}
-}`
+}
+`
 }
