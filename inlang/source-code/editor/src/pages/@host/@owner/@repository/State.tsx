@@ -483,7 +483,7 @@ export async function pushChanges(args: {
 	// stage all changes
 	const status = await args.repo.statusMatrix({
 		filter: (f: any) =>
-			f.endsWith("projectId") ||
+			f.endsWith("project_id") ||
 			f.endsWith(".json") ||
 			f.endsWith(".po") ||
 			f.endsWith(".yaml") ||

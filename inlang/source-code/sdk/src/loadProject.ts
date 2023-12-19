@@ -28,6 +28,7 @@ import { isAbsolutePath } from "./isAbsolutePath.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
 import type { Repository } from "@lix-js/client"
+import { generateProjectId } from "./generateProjectId.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -72,6 +73,7 @@ export const loadProject = async (args: {
 	}
 
 	// -- load project ------------------------------------------------------
+	let idError: Error | undefined
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
 		const nodeishFs = createNodeishFsWithAbsolutePaths({
@@ -86,27 +88,20 @@ export const loadProject = async (args: {
 			let projectId: string | undefined
 
 			try {
-				projectId = await nodeishFs.readFile(projectPath + "/projectId", {
+				projectId = await nodeishFs.readFile(projectPath + "/project_id", {
 					encoding: "utf-8",
 				})
 			} catch (error) {
 				// @ts-ignore
 				if (error.code === "ENOENT") {
-					const repoMeta = await args.repo?.getMeta()
-
-					if (repoMeta && !("error" in repoMeta)) {
-						const idDigest = await crypto.subtle.digest(
-							"SHA-256",
-							new TextEncoder().encode(`${repoMeta.id + projectPath}`)
-						)
-						projectId = [...new Uint8Array(idDigest)]
-							.map((b) => ("00" + b.toString(16)).slice(-2))
-							.join("")
-
-						await nodeishFs.writeFile(projectPath + "/projectId", projectId)
+					if (args.repo) {
+						projectId = await generateProjectId(args.repo, projectPath)
+						if (projectId) {
+							await nodeishFs.writeFile(projectPath + "/project_id", projectId)
+						}
 					}
 				} else {
-					console.error(error)
+					idError = error as Error
 				}
 			}
 
@@ -244,6 +239,7 @@ export const loadProject = async (args: {
 		// -- app ---------------------------------------------------------------
 
 		const initializeError: Error | undefined = await initialized.catch((error) => error)
+
 		const abortController = new AbortController()
 		const hasWatcher = nodeishFs.watch("/", { signal: abortController.signal }) !== undefined
 
@@ -286,6 +282,7 @@ export const loadProject = async (args: {
 			},
 			errors: createSubscribable(() => [
 				...(initializeError ? [initializeError] : []),
+				...(idError ? [idError] : []),
 				...(resolvedModules() ? resolvedModules()!.errors : []),
 				// have a query error exposed
 				//...(lintErrors() ?? []),
