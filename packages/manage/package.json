@@ -35,6 +35,7 @@
 		"express": "^4.18.2",
 		"lit": "2.8.0",
 		"postcss": "^8.4.31",
+		"posthog-js": "^1.53.2",
 		"tsx": "^4.6.2",
 		"vite-plugin-node-polyfills": "0.16.0",
 		"zod": "^3.22.4"
