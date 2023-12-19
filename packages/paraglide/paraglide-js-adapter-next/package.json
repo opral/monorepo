@@ -18,16 +18,16 @@
         "react"
     ],
     "type": "module",
-    "main": "dist/index.js",
+    "module": "dist/index.js",
     "types": "dist/index.d.ts",
     "exports": {
         ".": {
-            "import": "./dist/index.js",
+            "import": "./dist/index.jsx",
             "types": "./dist/index.d.ts"
         },
         "./plugin": {
-            "import": "./dist/plugin.js",
-            "types": "./dist/plugin.d.ts"
+            "import": "./dist/plugin/index.js",
+            "types": "./dist/plugin/index.d.ts"
         }
     },
     "files": [
@@ -37,6 +37,8 @@
         "next": "^13.0.0"
     },
     "devDependencies": {
+        "@types/react": "^18",
+        "react": "^18",
         "typescript": "^5.3.3"
     }
 }
