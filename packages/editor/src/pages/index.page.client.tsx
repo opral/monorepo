@@ -1,10 +1,12 @@
-import { createSignal } from "solid-js"
+import { createSignal, onMount } from "solid-js"
 import { navigate } from "vike/client/router"
 import { z } from "zod"
 import { Meta, Title } from "@solidjs/meta"
 import { CommunityProjects } from "#src/interface/editor/CommunityProjects.jsx"
 import { Button } from "#src/interface/components/Button.jsx"
 import EditorLayout from "#src/interface/editor/EditorLayout.jsx"
+import { currentPageContext } from "#src/renderer/state.js"
+import { replaceMetaInfo } from "./@host/@owner/@repository/helper/ReplaceMetaInfo.js"
 
 export function Page() {
 	/** is not reactive because window is not reactive */
@@ -23,6 +25,12 @@ export function Page() {
 		// @ts-ignore - https://github.com/brillout/vite-plugin-ssr/issues/1106
 		return navigate(`/editor/${url.host}${url.pathname}`)
 	}
+
+	onMount(() => {
+		onMount(() => {
+			replaceMetaInfo(currentPageContext)
+		})
+	})
 
 	return (
 		<>
