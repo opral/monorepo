@@ -122,12 +122,17 @@ export class InlangManage extends TwLitElement {
 	override async connectedCallback() {
 		super.connectedCallback()
 
-		/* Implement Telemetry */
+		/* Initialize Telemetry via Posthog */
 		if (
 			!window.location.host.includes("127.0.0.1") &&
-			!window.location.host.includes("localhost")
+			!window.location.host.includes("localhost") &&
+			publicEnv.PUBLIC_POSTHOG_TOKEN
 		) {
-			posthog.init(publicEnv.PUBLIC_POSTHOG_TOKEN!, { api_host: "https://manage.inlang.com" })
+			posthog.init(publicEnv.PUBLIC_POSTHOG_TOKEN ?? "placeholder", {
+				api_host: "https://eu.posthog.com",
+			})
+		} else if (publicEnv.PUBLIC_POSTHOG_TOKEN === undefined) {
+			return console.warn("Posthog token is not set. Telemetry will not be initialized.")
 		}
 
 		if (window.location.search !== "" && window.location.pathname !== "") {
