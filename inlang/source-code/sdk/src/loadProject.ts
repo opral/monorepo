@@ -32,7 +32,8 @@ import {
 	getPathFromMessageId,
 	parseMessage,
 	encodeMessage,
-} from "./storage/helper.js"
+} from "./storage/helper.folders_by_first_namespace.js"
+import { humanId } from "human-id"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -147,21 +148,20 @@ export const loadProject = async (args: {
 		// needed for granular linting
 		const [messages, setMessages] = createSignal<Message[]>()
 
-		const messageFolderPath = projectPath + "/messages"
+		const messageFolderPath = projectPath + "/messages" + "/v1"
 
 		createEffect(() => {
 			const _resolvedModules = resolvedModules()
 			if (!_resolvedModules) return
 
-			// TODO #1844 this how  the messages are loaded
 			const loadAndSetMessages = async (fs: NodeishFilesystemSubset) => {
 				// load all messages
-				const messages: Message[] = [] // await this.parentKeyStore.load();
+				const messages: Message[] = []
 
 				try {
 					// make sure the message folder exists within the .inlang folder
 					try {
-						await fs.mkdir(messageFolderPath)
+						await fs.mkdir(messageFolderPath, { recursive: true })
 					} catch (e) {
 						// TODO #1844 find better way to check if the folder exists
 					}
@@ -192,6 +192,12 @@ export const loadProject = async (args: {
 					const messageFilePaths = await readFilesFromFolderRecursive(fs, messageFolderPath, "")
 					for (const messageFilePath of messageFilePaths) {
 						try {
+							const messageId = getMessageIdFromPath(messageFilePath)
+							if (!messageId) {
+								// ignore files not matching the expected id file path
+								continue
+							}
+
 							const messageRaw = await fs.readFile(`${messageFolderPath}${messageFilePath}`, {
 								encoding: "utf-8",
 							})
@@ -210,7 +216,6 @@ export const loadProject = async (args: {
 				} catch (err) {
 					markInitAsFailed(new PluginLoadMessagesError({ cause: err }))
 				}
-
 			}
 
 			// TODO #1844 this was used to create a watcher on all files that the fs reads - to trigger updates of plugins - check how we want this be handled with our own persistence
@@ -223,8 +228,8 @@ export const loadProject = async (args: {
 			// 	},
 			// })
 
-			// inital loading of all messages
-			loadAndSetMessages(fsWithWatcher).then(() => {
+			// setup watchers on message files
+			loadAndSetMessages(nodeishFs).then(() => {
 				// when initial message loading is done start watching on file changes in the message dir
 				;(async () => {
 					try {
@@ -263,6 +268,7 @@ export const loadProject = async (args: {
 								}
 
 								if (!fileContent) {
+									// file was deleted - drop the corresponding message
 									messagesQuery.delete({ where: { id: messageId } })
 								} else {
 									const message = parseMessage(event.filename, fileContent)
@@ -329,7 +335,7 @@ export const loadProject = async (args: {
 		const messagesQuery = createMessagesQuery(() => messages() || [])
 
 		let trackedMessages: Set<string> | undefined
-		// subscribe to all messages and write to disc on signal
+		// subscribe to all messages and write to files on signal
 		createEffect(() => {
 			let initialEffectCreation = false
 			if (trackedMessages === undefined) {
@@ -347,8 +353,6 @@ export const loadProject = async (args: {
 					createEffect(
 						() => {
 							if (!initialEffectCreation) {
-								debugger
-
 								const createMessage = async (
 									fs: NodeishFilesystemSubset,
 									path: string,
@@ -398,6 +402,15 @@ export const loadProject = async (args: {
 		const _resolvedModules = resolvedModules()
 		// initial project setup finished - import all messages usign legacy load Messages
 		if (_resolvedModules?.resolvedPluginApi.loadMessages) {
+			// TODO #1844 get plugin id by finding the loadMessages function in the plugins for now
+			const loadMessagePlugin = _resolvedModules.plugins.find(
+				(plugin) => plugin.loadMessages !== undefined
+			)
+			console.log(_resolvedModules)
+			const loadPluginId = loadMessagePlugin!.id
+			console.log(loadPluginId)
+
+			// TODO #1844 create new type that makes the id optional
 			const importedMessages = await makeTrulyAsync(
 				_resolvedModules.resolvedPluginApi.loadMessages({
 					// @ts-ignore
@@ -406,15 +419,55 @@ export const loadProject = async (args: {
 				})
 			)
 
+			// TODO #1844 change imported id to aliase and generate new id if we can't find a message with that alias
 			for (const importedMessage of importedMessages) {
-				const currentMessage = messagesQuery.get({ where: { id: importedMessage.id } })
-				const importedEnecoded = encodeMessage(importedMessage)
-				const currentMessageEncoded = encodeMessage(currentMessage)
-				if (currentMessage && importedEnecoded === currentMessageEncoded) {
-					continue
+				// TODO #1844 find
+
+				// TODO #1585 here we match using the id to support legacy load message plugins - after we introduced import / export this should not be needed
+				const currentMessages = messagesQuery
+					.getAll()
+					.filter((message) => message.alias[loadPluginId] === importedMessage.id)
+
+				console.log(
+					"found " +
+						currentMessages.length +
+						" messages for alias " +
+						loadPluginId +
+						":" +
+						importedMessage.id
+				)
+
+				if (currentMessages.length > 1) {
+					// TODO #1844 check how we want to handle the case that we find a dublicated alias during import? - change Error correspondingly
+					throw new Error("more than one message with the same alias found ")
+				} else if (currentMessages.length === 1) {
+					const importedEnecoded = encodeMessage(importedMessage)
+					const currentMessageEncoded = encodeMessage(currentMessages[0]!)
+					if (importedEnecoded === currentMessageEncoded) {
+						continue
+					}
+
+					// update message in place - leave message id and alias untouched
+					importedMessage.alias = {} as any
+					importedMessage.alias[loadPluginId] = importedMessage.id
+
+					importedMessage.id = currentMessages[0]!.id
+					// console.log("updating message from import " + importedMessage.id)
+					messagesQuery.update({ where: { id: importedMessage.id }, data: importedMessage })
+				} else {
+					// create new message - create a new human-id, use it as id and use the imported id as alias instead
+					// TODO #1585 when import export is in place we should have an import message interface that may not accept the id and we have the alias as first class property
+
+					// update message in place - leave message id and alias untouched
+					importedMessage.alias = {} as any
+					importedMessage.alias[loadPluginId] = importedMessage.id
+					importedMessage.id = humanId({
+						separator: "_",
+						capitalize: false,
+					})
+
+					messagesQuery.create({ data: importedMessage })
 				}
-				// console.log("updating message from import " + importedMessage.id)
-				messagesQuery.upsert({ where: { id: importedMessage.id }, data: importedMessage })
 			}
 		}
 
@@ -426,6 +479,9 @@ export const loadProject = async (args: {
 			hasWatcher
 		)
 
+		// TODO #1844 change id to first (for now) alias
+
+		// TODO #1844 change message's alias to id
 		// const debouncedSave = skipFirst(
 		// 	debounce(
 		// 		500,
