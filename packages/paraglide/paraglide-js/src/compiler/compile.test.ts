@@ -451,6 +451,7 @@ test("typesafety", async () => {
 const mockMessages: Message[] = [
 	{
 		id: "missingTranslation",
+		alias: {},
 		selectors: [],
 		variants: [
 			{
@@ -462,6 +463,7 @@ const mockMessages: Message[] = [
 	},
 	{
 		id: "onlyText",
+		alias: {},
 		selectors: [],
 		variants: [
 			{
@@ -485,6 +487,7 @@ const mockMessages: Message[] = [
 	},
 	{
 		id: "oneParam",
+		alias: {},
 		selectors: [],
 		variants: [
 			{
@@ -509,6 +512,7 @@ const mockMessages: Message[] = [
 	},
 	{
 		id: "multipleParams",
+		alias: {},
 		selectors: [],
 		variants: [
 			{

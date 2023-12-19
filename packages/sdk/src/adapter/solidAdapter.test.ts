@@ -41,6 +41,7 @@ const mockPlugin: Plugin = {
 const exampleMessages: Message[] = [
 	{
 		id: "a",
+		alias: {},
 		selectors: [],
 		variants: [
 			{
@@ -57,6 +58,7 @@ const exampleMessages: Message[] = [
 	},
 	{
 		id: "b",
+		alias: {},
 		selectors: [],
 		variants: [
 			{

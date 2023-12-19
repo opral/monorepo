@@ -70,7 +70,9 @@ describe("loadMessages", () => {
 			id: "plugin.namespace.placeholder",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
-			loadMessages: async () => [{ id: "test", expressions: [], selectors: [], variants: [] }],
+			loadMessages: async () => [
+				{ id: "test", alias: {}, expressions: [], selectors: [], variants: [] },
+			],
 		}
 
 		const resolved = await resolvePlugins({

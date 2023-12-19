@@ -11,6 +11,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			targetLanguageTags: ["de", "fr"],
 			message: {
 				id: "mockMessage",
+				alias: {},
 				selectors: [],
 				variants: [
 					{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "Hello world" }] },
@@ -38,6 +39,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			targetLanguageTags: ["de"],
 			message: {
 				id: "mockMessage",
+				alias: {},
 				selectors: [],
 				variants: [
 					{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "Good evening" }] },
@@ -57,6 +59,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 		expect(result.error).toBeUndefined()
 		expect(result.data).toEqual({
 			id: "mockMessage",
+			alias: {},
 			selectors: [],
 			variants: [
 				{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "Good evening" }] },
@@ -92,6 +95,7 @@ it.todo("should not naively compare the variant lenghts and instead match varian
 		targetLanguageTags: ["de"],
 		message: {
 			id: "mockMessage",
+			alias: {},
 			selectors: [
 				{
 					type: "VariableReference",
@@ -115,6 +119,7 @@ it.todo("should not naively compare the variant lenghts and instead match varian
 	expect(result.error).toBeUndefined()
 	expect(result.data).toEqual({
 		id: "mockMessage",
+		alias: {},
 		selectors: [
 			{
 				type: "VariableReference",
@@ -149,6 +154,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			targetLanguageTags: ["de"],
 			message: {
 				id: "mockMessage",
+				alias: {},
 				selectors: [],
 				variants: [
 					{
@@ -166,6 +172,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 		expect(result.error).toBeUndefined()
 		expect(result.data).toEqual({
 			id: "mockMessage",
+			alias: {},
 			selectors: [],
 			variants: [
 				{

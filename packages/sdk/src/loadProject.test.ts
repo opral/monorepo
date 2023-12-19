@@ -59,6 +59,7 @@ const mockPlugin: Plugin = {
 const exampleMessages: Message[] = [
 	{
 		id: "a",
+		alias: {},
 		selectors: [],
 		variants: [
 			{
@@ -75,6 +76,7 @@ const exampleMessages: Message[] = [
 	},
 	{
 		id: "b",
+		alias: {},
 		selectors: [],
 		variants: [
 			{
@@ -472,7 +474,7 @@ describe("functionality", () => {
 				description: { en: "Mock plugin description" },
 				displayName: { en: "Mock Plugin" },
 
-				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
+				loadMessages: () => [{ id: "some-message", alias: {}, selectors: [], variants: [] }],
 				saveMessages: () => undefined,
 			}
 			const fs = await createNodeishMemoryFs()
@@ -523,7 +525,7 @@ describe("functionality", () => {
 				description: { en: "Mock plugin description" },
 				displayName: { en: "Mock Plugin" },
 
-				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
+				loadMessages: () => [{ id: "some-message", alias: {}, selectors: [], variants: [] }],
 				saveMessages: () => undefined,
 			}
 			const fs = await createNodeishMemoryFs()
@@ -649,6 +651,7 @@ describe("functionality", () => {
 				where: { id: "a" },
 				data: {
 					id: "a",
+					alias: {},
 					selectors: [],
 					variants: [
 						{
@@ -679,6 +682,7 @@ describe("functionality", () => {
 				where: { id: "b" },
 				data: {
 					id: "b",
+					alias: {},
 					selectors: [],
 					variants: [
 						{

@@ -41,6 +41,7 @@
 		"@sinclair/typebox": "^0.31.17",
 		"dedent": "1.5.1",
 		"deepmerge-ts": "^5.1.0",
+		"human-id": "^4.1.0",
 		"solid-js": "1.6.12",
 		"throttle-debounce": "^5.0.0"
 	},
