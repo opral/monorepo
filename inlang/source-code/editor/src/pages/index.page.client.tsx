@@ -38,11 +38,11 @@ export function Page() {
 				<div class="flex flex-col items-center justify-center py-16 md:py-20">
 					{/* negative margin as a dirty way of centering the search bar */}
 					<div class="flex flex-col p-2 md:p-10 items-center tracking-tight">
-						<h2 class="text-[40px] leading-tight md:text-6xl font-bold pb-6 md:pb-8 text-center">
-							Open the Editor
+						<h2 class="text-[40px] leading-tight md:text-6xl font-bold max-w-xl pb-6 md:pb-8 text-center">
+							Open the Fink Message Editor
 						</h2>
 						<p class="text-xl text-surface-600 w-full md:w-[400px] text-center leading-relaxed">
-							To access the editor, please create the{" "}
+							To access the i18n editor, please create the{" "}
 							<span class="text-base font-mono py-[5px] px-2 bg-surface-100 rounded-lg text-surface-600">
 								project.inlang
 							</span>{" "}
