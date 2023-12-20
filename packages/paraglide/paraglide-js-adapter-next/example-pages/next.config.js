@@ -1,17 +1,15 @@
-import { withParaglide } from "@inlang/paraglide-js-adapter-next/plugin"
+const { withParaglide } = require("@inlang/paraglide-js-adapter-next/plugin")
 
 /** @type {import('next').NextConfig} */
-const config = {
-	i18n: {
-		locales: ["en", "de"],
-		defaultLocale: "en",
-	},
-}
-
-export default withParaglide(
+module.exports = withParaglide(
 	{
-		outdir: "./src/paraglide",
 		project: "./project.inlang",
+		outdir: "./src/paraglide",
 	},
-	config
+	{
+		i18n: {
+			locales: ["en", "de"],
+			defaultLocale: "en",
+		},
+	}
 )
