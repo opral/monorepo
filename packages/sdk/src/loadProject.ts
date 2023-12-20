@@ -104,7 +104,7 @@ export const loadProject = async (args: {
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
-		createEffect(async () => {
+		createEffect(() => {
 			// TODO:
 			// if (projectId) {
 			// 	telemetryBrowser.group("project", projectId, {
