@@ -1,0 +1,80 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "marketplace_header_category_application",
+        "library.inlang.paraglideJs": "marketplace_header_category_application"
+    },
+    "id": "social_rats_warn",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Anwendung"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "en",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Application"
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Application"
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Applicazione"
+                }
+            ]
+        },
+        {
+            "languageTag": "pt-BR",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Aplicação"
+                }
+            ]
+        },
+        {
+            "languageTag": "sk",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Aplikácia"
+                }
+            ]
+        },
+        {
+            "languageTag": "zh",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "应用"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,80 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "marketplace_header_search_placeholder",
+        "library.inlang.paraglideJs": "marketplace_header_search_placeholder"
+    },
+    "id": "eager_planets_run",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "um zu suchen"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "en",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "to search"
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "pour rechercher"
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "per cercare"
+                }
+            ]
+        },
+        {
+            "languageTag": "pt-BR",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "para pesquisar"
+                }
+            ]
+        },
+        {
+            "languageTag": "sk",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "hľadať"
+                }
+            ]
+        },
+        {
+            "languageTag": "zh",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "寻找"
+                }
+            ]
+        }
+    ]
+}

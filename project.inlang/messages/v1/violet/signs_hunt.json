@@ -1,0 +1,80 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "marketplace_grid_subscribe_unvalid_email",
+        "library.inlang.paraglideJs": "marketplace_grid_subscribe_unvalid_email"
+    },
+    "id": "violet_signs_hunt",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Bitte gib eine gültige E-Mail-Adresse ein."
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "en",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Please enter a valid email address."
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Veuillez entrer une adresse e-mail valide."
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Inserisci un indirizzo email valido."
+                }
+            ]
+        },
+        {
+            "languageTag": "pt-BR",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Por favor, digite um endereço de e-mail válido."
+                }
+            ]
+        },
+        {
+            "languageTag": "sk",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Prosím zadajte platnú emailovú adresu."
+                }
+            ]
+        },
+        {
+            "languageTag": "zh",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "请输入有效的电子邮件地址。"
+                }
+            ]
+        }
+    ]
+}

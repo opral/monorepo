@@ -1,0 +1,80 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "marketplace_header_category_missing_something",
+        "library.inlang.paraglideJs": "marketplace_header_category_missing_something"
+    },
+    "id": "shaky_clouds_follow",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Fehlt etwas?"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "en",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Missing something?"
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Il manque quelque chose ?"
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Manca qualcosa?"
+                }
+            ]
+        },
+        {
+            "languageTag": "pt-BR",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Algo está faltando?"
+                }
+            ]
+        },
+        {
+            "languageTag": "sk",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Chýba vám niečo?"
+                }
+            ]
+        },
+        {
+            "languageTag": "zh",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "遗漏了什么？"
+                }
+            ]
+        }
+    ]
+}

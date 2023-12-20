@@ -1,0 +1,80 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "newsletter_title",
+        "library.inlang.paraglideJs": "newsletter_title"
+    },
+    "id": "spicy_mugs_film",
+    "selectors": [],
+    "variants": [
+        {
+            "match": [],
+            "languageTag": "de",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Newsletter"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "en",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Newsletter"
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Newsletter"
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Newsletter"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "pt-BR",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Newsletter"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "sk",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Newsletter"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "zh",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "订阅邮件"
+                }
+            ]
+        }
+    ]
+}

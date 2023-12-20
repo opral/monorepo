@@ -1,0 +1,80 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "home_inlang_search_placeholder",
+        "library.inlang.paraglideJs": "home_inlang_search_placeholder"
+    },
+    "id": "pretty_oranges_sniff",
+    "selectors": [],
+    "variants": [
+        {
+            "match": [],
+            "languageTag": "de",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Im Ökosystem suchen ..."
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "en",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Search the ecosystem ..."
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Rechercher dans l'écosystème..."
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Cerca nell'ecosistema ..."
+                }
+            ]
+        },
+        {
+            "languageTag": "pt-BR",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Pesquise o ecossistema ..."
+                }
+            ]
+        },
+        {
+            "languageTag": "sk",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Hľadajte v ekosystéme..."
+                }
+            ]
+        },
+        {
+            "languageTag": "zh",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "搜索生态系统..."
+                }
+            ]
+        }
+    ]
+}

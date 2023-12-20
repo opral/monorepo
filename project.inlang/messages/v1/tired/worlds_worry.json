@@ -1,0 +1,80 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "newsletter_error_generic",
+        "library.inlang.paraglideJs": "newsletter_error_generic"
+    },
+    "id": "tired_worlds_worry",
+    "selectors": [],
+    "variants": [
+        {
+            "match": [],
+            "languageTag": "de",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es später noch einmal."
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "en",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Something went wrong. Please try again later."
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Quelque chose s'est mal passé. Veuillez réessayer plus tard."
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Qualcosa è andato storto. Prova più tardi."
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "pt-BR",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Algo deu errado. Por favor, tente novamente mais tarde."
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "sk",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Niečo sa pokazilo. Skúste to prosím neskôr."
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "zh",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "出了点问题，请稍后再试。"
+                }
+            ]
+        }
+    ]
+}

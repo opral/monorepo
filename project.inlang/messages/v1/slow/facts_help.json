@@ -1,0 +1,80 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "footer_documentation_gettingStarted",
+        "library.inlang.paraglideJs": "footer_documentation_gettingStarted"
+    },
+    "id": "slow_facts_help",
+    "selectors": [],
+    "variants": [
+        {
+            "match": [],
+            "languageTag": "de",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Loslegen"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "en",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Getting Started"
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Commencer"
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Inizia Ora"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "pt-BR",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Começando agora"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "sk",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Začať"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "zh",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "使用入门指南"
+                }
+            ]
+        }
+    ]
+}

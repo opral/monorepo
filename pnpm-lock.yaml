@@ -1709,6 +1709,9 @@ importers:
       deepmerge-ts:
         specifier: ^5.1.0
         version: 5.1.0
+      human-id:
+        specifier: ^4.1.0
+        version: 4.1.0
       solid-js:
         specifier: 1.6.12
         version: 1.6.12
@@ -2254,8 +2257,8 @@ importers:
         specifier: 11.1.0
         version: 11.1.0
       isomorphic-git:
-        specifier: 1.24.5
-        version: 1.24.5
+        specifier: git@github.com:martin-lysk/isomorphic-git.git#build
+        version: github.com/martin-lysk/isomorphic-git/e61cc00316a41edee2edf214b3698fad12300062
       octokit:
         specifier: 3.1.0
         version: 3.1.0
@@ -13425,6 +13428,11 @@ packages:
     resolution: {integrity: sha512-UNopramDEhHJD+VR+ehk8rOslwSfByxPIZyJRfV739NDhN5LF1fa1MqnzKm2lGTQRjNrjK19Q5fhkgIfjlVUKw==}
     dev: true
 
+  /human-id@4.1.0:
+    resolution: {integrity: sha512-WYeWmHXGo1ZPGZuy7I2c+sgM83GvlQR1jrF1zLX6fID9JEVGkZgZe8PHj5HacWC7d9V0rNc4iRVhb9QmO55CUQ==}
+    hasBin: true
+    dev: false
+
   /human-signals@2.1.0:
     resolution: {integrity: sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==}
     engines: {node: '>=10.17.0'}
@@ -21422,4 +21430,24 @@ packages:
 
   /zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
+    dev: false
+
+  github.com/martin-lysk/isomorphic-git/e61cc00316a41edee2edf214b3698fad12300062:
+    resolution: {tarball: https://codeload.github.com/martin-lysk/isomorphic-git/tar.gz/e61cc00316a41edee2edf214b3698fad12300062}
+    name: isomorphic-git
+    version: 0.0.0-development
+    engines: {node: '>=12'}
+    hasBin: true
+    dependencies:
+      async-lock: 1.4.0
+      clean-git-ref: 2.0.1
+      crc-32: 1.2.2
+      diff3: 0.0.3
+      ignore: 5.3.0
+      minimisted: 2.0.1
+      pako: 1.0.11
+      pify: 4.0.1
+      readable-stream: 3.6.2
+      sha.js: 2.4.11
+      simple-get: 4.0.1
     dev: false

@@ -1,0 +1,80 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "newsletter_error_alreadySubscribed",
+        "library.inlang.paraglideJs": "newsletter_error_alreadySubscribed"
+    },
+    "id": "spicy_hounds_pump",
+    "selectors": [],
+    "variants": [
+        {
+            "match": [],
+            "languageTag": "de",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Sie haben sich bereits für unseren Newsletter angemeldet."
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "en",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "You are already subscribed to our newsletter."
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Vous êtes déjà inscrit à notre newsletter."
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Sei già iscritto alla nostra newsletter."
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "pt-BR",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Você já está inscrito em nossa newsletter."
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "sk",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Už ste sa prihlásili na odber nášho informačného bulletinu."
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "zh",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "你已经订阅了我们的通讯。"
+                }
+            ]
+        }
+    ]
+}

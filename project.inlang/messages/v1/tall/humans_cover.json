@@ -1,0 +1,80 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "footer_resources_marketplace",
+        "library.inlang.paraglideJs": "footer_resources_marketplace"
+    },
+    "id": "tall_humans_cover",
+    "selectors": [],
+    "variants": [
+        {
+            "match": [],
+            "languageTag": "de",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Marktplatz"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "en",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Marketplace"
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Marché"
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Marketplace"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "pt-BR",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Marketplace"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "sk",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Trhovisko"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "zh",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "市场"
+                }
+            ]
+        }
+    ]
+}
