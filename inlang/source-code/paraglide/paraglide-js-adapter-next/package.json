@@ -4,8 +4,8 @@
     "private": true,
     "description": "A Next.js integration making it easy to work with Paraglide",
     "scripts": {
-        "build": "tsc",
-        "dev": "tsc -w"
+        "build": "tsup",
+        "dev": "tsup --watch"
     },
     "keywords": [
         "inlang",
@@ -17,16 +17,18 @@
         "next",
         "react"
     ],
-    "type": "module",
-    "module": "dist/index.js",
+    "main": "dist/index.js",
+    "module": "dist/index.mjs",
     "types": "dist/index.d.ts",
     "exports": {
         ".": {
-            "import": "./dist/index.jsx",
+            "import": "./dist/index.mjs",
+            "require": "./dist/index.js",
             "types": "./dist/index.d.ts"
         },
         "./plugin": {
-            "import": "./dist/plugin/index.js",
+            "import": "./dist/plugin/index.mjs",
+            "require": "./dist/plugin/index.js",
             "types": "./dist/plugin/index.d.ts"
         }
     },
@@ -34,11 +36,12 @@
         "dist"
     ],
     "peerDependencies": {
-        "next": "^13.0.0"
+        "next": "^13.0.0",
+        "react": "^18"
     },
     "devDependencies": {
         "@types/react": "^18",
-        "react": "^18",
+        "tsup": "^8.0.1",
         "typescript": "^5.3.3"
     }
 }
