@@ -704,6 +704,9 @@ importers:
       postcss:
         specifier: ^8.4.31
         version: 8.4.31
+      posthog-js:
+        specifier: ^1.91.1
+        version: 1.91.1
       tsx:
         specifier: ^4.6.2
         version: 4.6.2

@@ -48,13 +48,13 @@ The CLI allows you to validate your inlang project. This is useful if you want t
 You can install the @inlang/cli with this command:
 
 ```sh
-npm install @inlang/cli
+npm install -D @inlang/cli
 ```
 
 or
 
 ```sh
-yarn add @inlang/cli
+yarn add --dev @inlang/cli
 ```
 
 best
