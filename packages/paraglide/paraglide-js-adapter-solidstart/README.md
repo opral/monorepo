@@ -44,7 +44,7 @@ Take a look at (./example/src/i18n/index.tsx) to see how the adapter is used in 
 ### 4. Provide language tag to your app, and Solid Router.
 
 ```tsx
-// root.tsx
+// app.tsx
 
 import { Component, ErrorBoundary, Suspense } from "solid-js"
 import { Body, FileRoutes, Head, Html, Routes, Scripts } from "solid-start"
@@ -105,12 +105,29 @@ const language_tag = languageTag() // in component body
 ```
 
 ### 6. Switch language
+
 You can switch languages by calling the `setLanguageTag` function provided by the adapter. This will navigate to the translated variant of the current route.
 
-If you want to navigate to a different route in a specific language, you can use the `translateHref` function provided by the adapter to generate the correct href. 
+```tsx
+<select onChange={(e) => setLanguageTag(e.target.value)}>
+	{availableLanguageTags.map((tag) => (
+		<option value={tag} selected={tag === languageTag()}>
+			{tag}
+		</option>
+	))}
+</select>
+```
+
+If you want to navigate to a different route in a specific language, you can use the `translateHref` function provided by the adapter to generate the correct href.
 
 ```tsx
 <A href={translateHref("/about", "en")}>{m.about()}</A>
+```
+
+Similarly, if you value links having the correct language tag in the server-generated HTML *(important when JavaScript is disabled or not yet loaded)*, you can use the `translateHref` function to generate the correct href, without specifying the target language tag.
+
+```tsx
+<A href={translateHref("/about")}>{m.about()}</A>
 ```
 
 > ⚠️ Don't use the `translateHref` function on links that point to external websites. It will break the link.

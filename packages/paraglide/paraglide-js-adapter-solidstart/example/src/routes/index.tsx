@@ -1,7 +1,7 @@
 import { Component } from "solid-js"
-import { A } from "solid-start"
+import { A } from "@solidjs/router"
 import * as m from "../paraglide/messages.js"
-import { LocaleSwitcher, languageTag, translateHref } from "../i18n/index.jsx"
+import { LocaleSwitcher, languageTag } from "../i18n/index.jsx"
 
 const Home: Component = () => {
 	return (
