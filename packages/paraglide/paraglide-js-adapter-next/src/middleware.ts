@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { NextRequest } from "next/server"
 import {
 	availableLanguageTags,
+	setLanguageTag,
 	sourceLanguageTag,
 } from "$paraglide-adapter-next-internal/runtime.js"
 
@@ -25,6 +26,7 @@ export function setLocaleHeaderMiddleware(request: NextRequest) {
 
 	const headers = new Headers(request.headers)
 	headers.set("x-language-tag", locale)
+	setLanguageTag(locale)
 
 	return NextResponse.next({
 		request: {

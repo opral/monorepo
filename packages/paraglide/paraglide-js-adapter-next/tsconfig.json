@@ -8,7 +8,7 @@
 		"esModuleInterop": true,
 		"declaration": true,
 		"allowJs": true,
-		"jsx": "preserve",
+		"jsx": "react",
 		"outDir": "dist",
 		"skipLibCheck": true
 	},

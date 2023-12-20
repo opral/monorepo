@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server"
 import { NextRequest } from "next/server"
-import { AvailableLanguageTag, availableLanguageTags, sourceLanguageTag } from "./paraglide/runtime"
+import {
+	AvailableLanguageTag,
+	availableLanguageTags,
+	setLanguageTag,
+	sourceLanguageTag,
+} from "./paraglide/runtime"
 
 /**
  * Sets the request headers to resolve the language tag in RSC.
