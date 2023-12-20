@@ -2,7 +2,6 @@
     "name": "@inlang/paraglide-js-adapter-next",
     "version": "0.0.1",
     "private": true,
-    "description": "A Next.js integration making it easy to work with Paraglide",
     "scripts": {
         "build": "rollup -c",
         "dev": "rollup -c -w"
@@ -22,14 +21,16 @@
     "types": "dist/index.d.ts",
     "exports": {
         ".": {
-            "import": "./dist/index.mjs",
             "require": "./dist/index.js",
-            "types": "./dist/index.d.ts"
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.mjs",
+            "default": "./dist/index.js"
         },
         "./plugin": {
             "import": "./dist/plugin/index.mjs",
             "require": "./dist/plugin/index.js",
-            "types": "./dist/plugin/index.d.ts"
+            "types": "./dist/plugin/index.d.ts",
+            "default": "./dist/plugin/index.js"
         }
     },
     "files": [

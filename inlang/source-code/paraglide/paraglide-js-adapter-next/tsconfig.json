@@ -1,7 +1,6 @@
 {
 	"compilerOptions": {
-		"target": "ESNext",
-		"module": "ESNext",
+		"target": "es6",
 		"isolatedModules": true,
 		"moduleResolution": "Bundler",
 		"strict": true,
@@ -14,5 +13,6 @@
 		"skipLibCheck": true,
 		"declarationMap": true
 	},
-	"include": ["src"]
+	"include": ["src"],
+	"exclude": ["example-*"]
 }
