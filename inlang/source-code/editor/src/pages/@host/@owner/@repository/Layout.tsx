@@ -269,7 +269,15 @@ export function Layout(props: { children: JSXElement }) {
 				/>
 				<Show when={!isValidLanguageTag() && addLanguageText().length > 0}>
 					<p class="text-xs leading-5 text-danger max-sm:hidden pt-1 pb-0.5">
-						Please enter a valid BCP-47 language tag (e.g. en, en-GB)
+						Please enter a valid{" "}
+						<a
+							href="https://inlang.com/documentation/concept/language-tag"
+							target="_blank"
+							class="underline"
+						>
+							BCP-47 language tag
+						</a>{" "}
+						(e.g. en, en-GB)
 					</p>
 				</Show>
 				<Show when={project()?.settings().languageTags.includes(addLanguageText())}>
@@ -281,6 +289,9 @@ export function Layout(props: { children: JSXElement }) {
 					class="w-full pt-6"
 					prop:size={"small"}
 					prop:variant={"primary"}
+					prop:disabled={
+						!isValidLanguageTag() || project()?.settings().languageTags.includes(addLanguageText())
+					}
 					onClick={() => {
 						addLanguageTag(addLanguageText())
 						setAddLanguageModalOpen(false)
