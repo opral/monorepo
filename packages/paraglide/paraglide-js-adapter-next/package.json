@@ -26,6 +26,12 @@
             "import": "./dist/index.mjs",
             "default": "./dist/index.js"
         },
+        "./middleware": {
+            "require": "./dist/middleware.js",
+            "types": "./dist/middleware.d.ts",
+            "import": "./dist/middleware.mjs",
+            "default": "./dist/middleware.js"
+        },
         "./pages": {
             "require": "./dist/pages/index.js",
             "types": "./dist/pages/index.d.ts",
