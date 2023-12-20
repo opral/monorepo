@@ -142,7 +142,7 @@ export function Layout(props: { children: JSXElement }) {
 					<Breadcrumbs />
 					<BranchMenu />
 				</div>
-				<div class="flex flex-wrap justify-between gap-2 py-5 sticky top-12 md:top-16 z-30 bg-surface-50">
+				<div class="flex flex-wrap justify-between gap-2 py-5 sticky top-12 md:top-14 z-30 bg-surface-50">
 					<div class="flex flex-wrap z-20 gap-2 items-center">
 						<Show when={project()}>
 							<For each={filterOptions()}>
