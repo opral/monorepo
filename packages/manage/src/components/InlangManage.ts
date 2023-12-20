@@ -12,6 +12,7 @@ import { browserAuth, getUser } from "@lix-js/client/src/browser-auth.ts"
 import { tryCatch } from "@inlang/result"
 import { registry } from "@inlang/marketplace-registry"
 import type { MarketplaceManifest } from "../../../versioned-interfaces/marketplace-manifest/dist/interface.js"
+import { posthog } from "posthog-js"
 
 type ManifestWithVersion = MarketplaceManifest & { version: string }
 
@@ -120,6 +121,16 @@ export class InlangManage extends TwLitElement {
 
 	override async connectedCallback() {
 		super.connectedCallback()
+
+		/* Initialize Telemetry via Posthog */
+		if (publicEnv.PUBLIC_POSTHOG_TOKEN) {
+			posthog.init(publicEnv.PUBLIC_POSTHOG_TOKEN ?? "placeholder", {
+				api_host: "https://eu.posthog.com",
+			})
+		} else if (publicEnv.PUBLIC_POSTHOG_TOKEN === undefined) {
+			return console.warn("Posthog token is not set. Telemetry will not be initialized.")
+		}
+
 		if (window.location.search !== "" && window.location.pathname !== "") {
 			const url = {
 				path: window.location.pathname.replace("/", ""),
@@ -554,6 +565,17 @@ export class InlangManage extends TwLitElement {
 																			></doc-icon>
 																		</a>
 																		<a
+																			@click=${() => {
+																				posthog.capture("Uninstall module", {
+																					$set: {
+																						name:
+																							typeof this.user === "object"
+																								? this.user.username
+																								: undefined,
+																					},
+																					$set_once: { initial_url: "https://manage.inlang.com" },
+																				})
+																			}}
 																			href=${`/uninstall?repo=${this.url.repo}&project=${this.url.project}&module=${module.id}`}
 																			class="text-red-500 text-sm font-medium transition-colors hover:text-red-400"
 																		>
@@ -627,6 +649,17 @@ export class InlangManage extends TwLitElement {
 																			></doc-icon>
 																		</a>
 																		<a
+																			@click=${() => {
+																				posthog.capture("Uninstall module", {
+																					$set: {
+																						name:
+																							typeof this.user === "object"
+																								? this.user.username
+																								: undefined,
+																					},
+																					$set_once: { initial_url: "https://manage.inlang.com" },
+																				})
+																			}}
 																			href=${`/uninstall?repo=${this.url.repo}&project=${this.url.project}&module=${module.id}`}
 																			class="text-red-500 text-sm font-medium transition-colors hover:text-red-400"
 																		>

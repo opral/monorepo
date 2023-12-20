@@ -280,7 +280,7 @@ export function route(path: string, lang: AvailableLanguageTag) {
 function withoutLanguageTag(path: string) {
 	const [_, maybeLang, ...rest] = path.split("/")
 	if (availableLanguageTags.includes(maybeLang as AvailableLanguageTag)) {
-		return rest.join("/")
+		return `/${rest.join('/')}`
 	}
 	return path
 }
@@ -361,13 +361,14 @@ On the client, we can set the `lang` attribute using JS. In your root layout, ad
 <script lang="ts">
   import { page } from "$app/stores";
   import { setLanguageTag, sourceLanguageTag type AvailableLanguageTag } from "$paraglide/runtime";
+  import { browser } from "$app/environment";
 
   //Use the default language if no language is given
   $: lang = $page.params.lang as AvailableLanguageTag ?? sourceLanguageTag;
   $: setLanguageTag(lang);
 
   //Set the lang attribute on the html tag
-  $: document.documentElement.lang = lang;
+  $: if(browser) document.documentElement.lang = lang;
 </script>
 ```
 
