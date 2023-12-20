@@ -10,7 +10,8 @@
 		"allowJs": true,
 		"jsx": "react",
 		"outDir": "dist",
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"declarationMap": true
 	},
 	"include": ["src"]
 }

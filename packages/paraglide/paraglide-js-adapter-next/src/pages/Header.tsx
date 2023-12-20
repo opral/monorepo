@@ -9,7 +9,7 @@ import React from "react"
 /**
  * Adds alternate links for all available languages to the head.
  */
-export function Header(): React.ReactNode {
+export default function Header(): React.ReactNode {
 	const { asPath } = useRouter()
 
 	function getPathInLanguage(languageTag: string) {
