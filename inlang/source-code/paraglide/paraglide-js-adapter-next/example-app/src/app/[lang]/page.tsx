@@ -3,6 +3,7 @@ import { languageTag } from "@/paraglide/runtime"
 import { ClientComponent } from "./ClientComponent"
 
 export default function Home() {
+	console.log("rendering home", languageTag())
 	return (
 		<main>
 			<p>{languageTag()}</p>

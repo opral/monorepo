@@ -10,7 +10,8 @@ import React from "react"
 export default function LanguageProvider(props: { children: React.ReactNode }): React.ReactElement {
 	const langHeader = headers().get("x-language-tag")
 	if (isAvailableLanguageTag(langHeader)) {
-		//setLanguageTag(langHeader)
+		setLanguageTag(langHeader)
+		console.log("set language tag to", languageTag())
 	}
 
 	//we make the client side language provider a sibling of the children
