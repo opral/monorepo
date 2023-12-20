@@ -98,6 +98,14 @@ export function Message(props: { id: string }) {
 				>
 					<IconCopy />
 				</div>
+				<h3
+					slot="summary"
+					class="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left text-on-surface before:text-on-surface"
+				>
+					{message() && Object.keys(message()!.alias).length > 0
+						? message()!.alias[Object.keys(message()!.alias)[0]!]
+						: "alias"}
+				</h3>
 			</div>
 			<div>
 				<For

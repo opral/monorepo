@@ -32,7 +32,7 @@ import {
 	getPathFromMessageId,
 	parseMessage,
 	encodeMessage,
-} from "./storage/helper.folders_by_first_namespace.js"
+} from "./storage/helper.js"
 import { humanId } from "human-id"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
@@ -218,16 +218,6 @@ export const loadProject = async (args: {
 				}
 			}
 
-			// TODO #1844 this was used to create a watcher on all files that the fs reads - to trigger updates of plugins - check how we want this be handled with our own persistence
-			// const fsWithWatcher = createNodeishFsWithWatcher({
-			// 	nodeishFs: nodeishFs,
-			// 	updateMessages: () => {
-			// 		// TODO #1844 this is where the messages are loaded (all) when the message file changed
-			// 		// TODO #1844 do we still need to reload all messages when plugins change - guess not
-			// 		// loadAndSetMessages(nodeishFs)
-			// 	},
-			// })
-
 			// setup watchers on message files
 			loadAndSetMessages(nodeishFs).then(() => {
 				// when initial message loading is done start watching on file changes in the message dir
@@ -334,24 +324,26 @@ export const loadProject = async (args: {
 
 		const messagesQuery = createMessagesQuery(() => messages() || [])
 
-		let trackedMessages: Set<string> | undefined
+		let trackedMessages: Map<string, () => void> | undefined
 		// subscribe to all messages and write to files on signal
 		createEffect(() => {
 			let initialEffectCreation = false
 			if (trackedMessages === undefined) {
 				initialEffectCreation = true
-				trackedMessages = new Set<string>()
+				trackedMessages = new Map()
 			}
 
 			const currentMessageIds = messagesQuery.includedMessageIds()
-			const deletedMessageIds = [...trackedMessages].filter(
-				(tracked) => !currentMessageIds.includes(tracked)
+			const deletedMessageTrackedMessage = [...trackedMessages].filter(
+				(tracked) => !currentMessageIds.includes(tracked[0])
 			)
 			for (const messageId of currentMessageIds) {
-				const message = messagesQuery.get({ where: { id: messageId } })!
 				if (!trackedMessages!.has(messageId!)) {
-					createEffect(
-						() => {
+					// to avoid to drop the effect after creation we need to create a new disposable root
+					createRoot((dispose) => {
+						trackedMessages!.set(messageId, dispose)
+						createEffect(() => {
+							const message = messagesQuery.get({ where: { id: messageId } })!
 							if (!initialEffectCreation) {
 								const createMessage = async (
 									fs: NodeishFilesystemSubset,
@@ -363,28 +355,23 @@ export const loadProject = async (args: {
 
 									try {
 										await fs.mkdir(dir, { recursive: true })
-									} catch (e) {}
-
-									console.log("filePath RECURSIVE " + path)
+									} catch (e) {
+										// TODO #1844 check expected error here - rethrow on unexpected
+									}
 
 									await fs.writeFile(path, encodeMessage(message))
 								}
 								const messageFilePath = messageFolderPath + "/" + getPathFromMessageId(message.id)
 								createMessage(nodeishFs, messageFilePath, message)
-							} else {
-								console.log("initial creation skipped")
 							}
-						},
-						{ signal: messagesQuery.get({ where: { id: messageId } }) }
-					)
-					trackedMessages.add(messageId)
+						})
+					})
 				}
-				// console.log("CREATE EFFECT to react on changes in specific message")
 			}
 
-			for (const deletedMessageId of deletedMessageIds) {
+			for (const deletedMessage of deletedMessageTrackedMessage) {
 				if (!initialEffectCreation) {
-					const messageFilePath = messageFolderPath + "/" + getPathFromMessageId(deletedMessageId)
+					const messageFilePath = messageFolderPath + "/" + getPathFromMessageId(deletedMessage[0])
 					try {
 						nodeishFs.rm(messageFilePath)
 					} catch (e) {
@@ -394,21 +381,31 @@ export const loadProject = async (args: {
 						)
 					}
 				}
-				trackedMessages.delete(deletedMessageId)
+				// dispose
+				trackedMessages.get(deletedMessage[0])?.()
+				trackedMessages.delete(deletedMessage[0])
 			}
 		})
+
+		// TODO #1844 CLEARIFY this was used to create a watcher on all files that the fs reads - shall we import on every change as well?
+		// const fsWithWatcher = createNodeishFsWithWatcher({
+		// 	nodeishFs: nodeishFs,
+		// 	updateMessages: () => {
+		// 		// TODO #1844 this is where the messages are loaded (all) when the message file changed
+		// 		// TODO #1844 do we still need to reload all messages when plugins change - guess not
+		// 		// loadAndSetMessages(nodeishFs)
+		// 	},
+		// })
 
 		// run import
 		const _resolvedModules = resolvedModules()
 		// initial project setup finished - import all messages usign legacy load Messages
 		if (_resolvedModules?.resolvedPluginApi.loadMessages) {
-			// TODO #1844 get plugin id by finding the loadMessages function in the plugins for now
+			// get plugin id by finding the plugin that provides loadMessages function
 			const loadMessagePlugin = _resolvedModules.plugins.find(
 				(plugin) => plugin.loadMessages !== undefined
 			)
-			console.log(_resolvedModules)
 			const loadPluginId = loadMessagePlugin!.id
-			console.log(loadPluginId)
 
 			// TODO #1844 create new type that makes the id optional
 			const importedMessages = await makeTrulyAsync(
@@ -419,48 +416,34 @@ export const loadProject = async (args: {
 				})
 			)
 
-			// TODO #1844 change imported id to aliase and generate new id if we can't find a message with that alias
 			for (const importedMessage of importedMessages) {
-				// TODO #1844 find
-
-				// TODO #1585 here we match using the id to support legacy load message plugins - after we introduced import / export this should not be needed
 				const currentMessages = messagesQuery
 					.getAll()
+					// TODO #1585 here we match using the id to support legacy load message plugins - after we introduced import / export methods we will use importedMessage.alias
 					.filter((message) => message.alias[loadPluginId] === importedMessage.id)
 
-				console.log(
-					"found " +
-						currentMessages.length +
-						" messages for alias " +
-						loadPluginId +
-						":" +
-						importedMessage.id
-				)
-
 				if (currentMessages.length > 1) {
-					// TODO #1844 check how we want to handle the case that we find a dublicated alias during import? - change Error correspondingly
+					// TODO #1844 CLEARIFY how to handle the case that we find a dublicated alias during import? - change Error correspondingly
 					throw new Error("more than one message with the same alias found ")
 				} else if (currentMessages.length === 1) {
+					// update message in place - leave message id and alias untouched
+					importedMessage.alias = {} as any
+					// TODO #1585 we have to map the id of the importedMessage to the alias and fill the id property with the id of the existing message - change when import mesage provides importedMessage.alias
+					importedMessage.alias[loadPluginId] = importedMessage.id
+					importedMessage.alias["library.inlang.paraglideJs"] = importedMessage.id
+					importedMessage.id = currentMessages[0]!.id
 					const importedEnecoded = encodeMessage(importedMessage)
 					const currentMessageEncoded = encodeMessage(currentMessages[0]!)
 					if (importedEnecoded === currentMessageEncoded) {
 						continue
 					}
-
-					// update message in place - leave message id and alias untouched
-					importedMessage.alias = {} as any
-					importedMessage.alias[loadPluginId] = importedMessage.id
-
-					importedMessage.id = currentMessages[0]!.id
-					// console.log("updating message from import " + importedMessage.id)
 					messagesQuery.update({ where: { id: importedMessage.id }, data: importedMessage })
 				} else {
-					// create new message - create a new human-id, use it as id and use the imported id as alias instead
-					// TODO #1585 when import export is in place we should have an import message interface that may not accept the id and we have the alias as first class property
-
-					// update message in place - leave message id and alias untouched
 					importedMessage.alias = {} as any
+					// TODO #1585 we have to map the id of the importedMessage to the alias - change when import mesage provides importedMessage.alias
 					importedMessage.alias[loadPluginId] = importedMessage.id
+					importedMessage.alias["library.inlang.paraglideJs"] = importedMessage.id
+
 					importedMessage.id = humanId({
 						separator: "_",
 						capitalize: false,
@@ -479,9 +462,6 @@ export const loadProject = async (args: {
 			hasWatcher
 		)
 
-		// TODO #1844 change id to first (for now) alias
-
-		// TODO #1844 change message's alias to id
 		// const debouncedSave = skipFirst(
 		// 	debounce(
 		// 		500,
