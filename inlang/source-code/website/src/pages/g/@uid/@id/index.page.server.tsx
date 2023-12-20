@@ -19,7 +19,6 @@ export async function onBeforeRender(pageContext: PageContext) {
 		throw redirect(`/g/${item.uniqueID}/${item.id.replaceAll(".", "-").toLowerCase()}`)
 	}
 
-
 	const readme = () => {
 		return typeof item.readme === "object" ? item.readme.en : item.readme
 	}
