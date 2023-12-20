@@ -1,6 +1,6 @@
 {
 	"id": "guide.nilsjacobsen.ecosystemCompatible",
-	"icon": "https://emojis.wiki/thumbs/emojis/seedling.webp",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/ecosystem-compatible/assets/compatible-badge.png",
 	"displayName": {
 		"en": "inlang ecosystem compatible"
 	},
