@@ -1,7 +1,7 @@
 import * as vscode from "vscode"
 import { state } from "../state.js"
 import type { MessageLintReport } from "@inlang/sdk"
-import { getActiveTextEditor } from "../utilities/initProject.js"
+import { getActiveTextEditor } from "../main.js"
 
 export async function linterDiagnostics(args: { context: vscode.ExtensionContext }) {
 	const linterDiagnosticCollection = vscode.languages.createDiagnosticCollection("inlang-lint")

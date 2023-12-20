@@ -1,9 +1,9 @@
 import * as vscode from "vscode"
-import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js"
-import { getSetting, updateSetting } from "./settings/index.js"
+import { getGitOrigin, telemetry } from "../../services/telemetry/implementation.js"
+import { getSetting, updateSetting } from "../settings/index.js"
 import { tryAutoGenProjectSettings } from "@inlang/create-project"
-import { createFileSystemMapper } from "./createFileSystemMapper.js"
-import { CONFIGURATION } from "../configuration.js"
+import { createFileSystemMapper } from "../fs/createFileSystemMapper.js"
+import { CONFIGURATION } from "../../configuration.js"
 import fs from "node:fs/promises"
 
 /**

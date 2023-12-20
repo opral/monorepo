@@ -1,10 +1,10 @@
 import { state } from "../state.js"
-import { msg } from "../utilities/message.js"
+import { msg } from "../utilities/messages/message.js"
 import { commands, type TextEditor, window, env, Uri } from "vscode"
 import { telemetry } from "../services/telemetry/index.js"
 import type { Message } from "@inlang/sdk"
 import { CONFIGURATION } from "../configuration.js"
-import { isQuoted, stripQuotes } from "../utilities/isQuoted.js"
+import { isQuoted, stripQuotes } from "../utilities/messages/isQuoted.js"
 
 /**
  * Helps the user to extract messages from the active text editor.
