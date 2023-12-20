@@ -280,7 +280,7 @@ export function route(path: string, lang: AvailableLanguageTag) {
 function withoutLanguageTag(path: string) {
 	const [_, maybeLang, ...rest] = path.split("/")
 	if (availableLanguageTags.includes(maybeLang as AvailableLanguageTag)) {
-		return rest.join("/")
+		return `/${rest.join('/')}`
 	}
 	return path
 }
