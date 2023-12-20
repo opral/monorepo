@@ -2,7 +2,6 @@ import { NextResponse } from "next/server"
 import { NextRequest } from "next/server"
 import {
 	availableLanguageTags,
-	setLanguageTag,
 	sourceLanguageTag,
 } from "$paraglide-adapter-next-internal/runtime.js"
 

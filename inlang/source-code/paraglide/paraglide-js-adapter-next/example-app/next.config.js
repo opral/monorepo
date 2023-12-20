@@ -6,5 +6,14 @@ module.exports = withParaglide(
 		project: "./project.inlang",
 		outdir: "./src/paraglide",
 	},
-	{}
+	{
+		rewrites() {
+			return [
+				{
+					source: "/:locale(en|de)/:path*",
+					destination: "/:path*",
+				},
+			]
+		},
+	}
 )

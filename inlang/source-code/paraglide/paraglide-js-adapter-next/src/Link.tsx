@@ -5,7 +5,6 @@ import React from "react"
 
 export function Link(props: Parameters<typeof NextLink>[0]): ReturnType<typeof NextLink> {
 	const lang = props.locale || languageTag()
-	console.log("Link lang", lang)
 
 	let href = props.href
 	if (typeof props.href === "string") {

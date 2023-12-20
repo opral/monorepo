@@ -1,4 +1,4 @@
-import { paraglideMiddleware } from "../../dist"
+import { paraglideMiddleware } from "@inlang/paraglide-js-adapter-next/middleware"
 
 /**
  * Sets the request headers to resolve the language tag in RSC.
