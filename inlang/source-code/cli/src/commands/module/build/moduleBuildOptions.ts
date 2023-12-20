@@ -25,5 +25,6 @@ export const moduleBuildOptions = (args: {
 		// sourcemaps are unused at the moment
 		sourcemap: false,
 		plugins: args.plugins,
+		external: ["crypto"],
 	}
 }
