@@ -44,7 +44,6 @@ export async function render(pageContext: PageContextRenderer): Promise<unknown>
 			<link rel="preconnect" href="https://rsms.me/">
 			<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
 		<!-- END import inter font -->
-			<meta name="robots" content="noindex" />
 			${dangerouslySkipEscape(import.meta.env.PROD ? analytics : "")}
 			${dangerouslySkipEscape(favicons)}
       </head>
