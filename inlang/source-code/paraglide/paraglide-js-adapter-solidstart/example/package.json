@@ -4,22 +4,21 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"_dev": "solid-start dev",
-		"build": "solid-start build",
-		"start": "solid-start start"
+		"_dev": "vinxi dev",
+		"build": "vinxi build",
+		"start": "node ./.output/server/index.mjs"
 	},
 	"dependencies": {
 		"@inlang/paraglide-js-adapter-solidstart": "workspace:*",
-		"@solidjs/meta": "^0.29",
-		"@solidjs/router": "^0.9",
+		"@solidjs/router": "^0.10",
 		"solid-js": "^1.8",
-		"solid-start": "^0.3"
+		"@solidjs/start": "^0.4",
+		"vinxi": "0.0.52"
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "workspace:*",
 		"@inlang/paraglide-js-adapter-vite": "workspace:*",
 		"@types/node": "^20",
-		"solid-start-node": "^0.3",
 		"typescript": "^5",
 		"vite": "^4"
 	}

@@ -23,7 +23,10 @@ export function languageTagInPathname<T extends string>(
 	all_language_tags: readonly T[]
 ): T | undefined {
 	for (const tag of all_language_tags) {
-		if (pathname.startsWith(`/${tag}/`)) {
+		if (
+			pathname.startsWith(tag, 1) &&
+			(pathname.length === tag.length + 1 || pathname[tag.length + 1] === "/")
+		) {
 			return tag
 		}
 	}
@@ -70,9 +73,12 @@ export function translateHref<T extends string>(
 export function useLocationLanguageTag<T extends string>(
 	all_language_tags: readonly T[]
 ): T | undefined {
-	const location = router.useLocation()
-	const normalized_pathname = normalizePathname(location.pathname)
-	return languageTagInPathname(normalized_pathname, all_language_tags)
+	const pathname = solid_web.isServer
+		? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		  new URL(solid_web.getRequestEvent()!.request.url).pathname
+		: window.location.pathname
+
+	return languageTagInPathname(pathname, all_language_tags)
 }
 
 /**
@@ -139,8 +145,8 @@ export function createI18n<T extends string>(paraglide: Paraglide<T>): I18n<T> {
 			const navigate = router.useNavigate()
 
 			/*
-            Keep the language tag in the URL
-            */
+			Keep the language tag in the URL
+			*/
 			router.useBeforeLeave((e) => {
 				if (typeof e.to !== "string") return
 

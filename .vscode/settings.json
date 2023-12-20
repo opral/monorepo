@@ -37,5 +37,5 @@
 	"[typescript]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
-	"cSpell.words": ["inlang"]
+	"cSpell.words": ["inlang", "vinxi"]
 }
