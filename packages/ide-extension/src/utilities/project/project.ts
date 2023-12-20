@@ -6,6 +6,11 @@ import { closestInlangProject } from "./closestInlangProject.js"
 import { type NodeishFilesystem } from "@lix-js/fs"
 import { setState } from "../../state.js"
 import { CONFIGURATION } from "../../configuration.js"
+import { createFileSystemMapper } from "../fs/createFileSystemMapper.js"
+import fs from "node:fs/promises"
+import { telemetry } from "../../services/telemetry/implementation.js"
+import type { TelemetryEvents } from "../../services/telemetry/events.js"
+import { createInlangConfigFile } from "../settings/createInlangConfigFile.js"
 
 export interface ProjectNode {
 	label: string
@@ -29,15 +34,18 @@ function createProjectNode(args: {
 }
 
 export async function createProjectNodes(
-	workingDirectory: string,
+	workspaceFolder: vscode.WorkspaceFolder,
 	nodeishFs: NodeishFilesystem
 ): Promise<ProjectNode[]> {
 	const projects = await findInlangProjectRecursively({
-		rootPath: workingDirectory,
+		rootPath: workspaceFolder.uri.fsPath,
 		nodeishFs,
 	})
 
-	const closestProject = await closestInlangProject({ workingDirectory, projects })
+	const closestProject = await closestInlangProject({
+		workingDirectory: workspaceFolder.uri.fsPath,
+		projects,
+	})
 
 	projectNodes = projects.map((project) => {
 		const projectName = project.split("/").pop() ?? ""
@@ -78,8 +86,21 @@ function getTreeItem(element: ProjectNode, nodeishFs: NodeishFilesystem): vscode
 
 export async function handleTreeSelection(
 	selectedNode: ProjectNode,
-	nodeishFs: NodeishFilesystem
+	nodeishFs: NodeishFilesystem,
+	workspaceFolder?: vscode.WorkspaceFolder
 ): Promise<void> {
+	const possibleInlangProjectPaths = [
+		...(await vscode.workspace.findFiles("*.inlang/settings.json")),
+		// remove after migration
+		...(await vscode.workspace.findFiles("project.inlang.json")),
+	]
+
+	// if no settings file is found
+	if (workspaceFolder && possibleInlangProjectPaths.length === 0) {
+		// Try to auto config
+		await createInlangConfigFile({ workspaceFolder })
+	}
+
 	// update isSelected
 	projectNodes = projectNodes.map((node) => {
 		return {
@@ -95,9 +116,24 @@ export async function handleTreeSelection(
 		const inlangProject = await loadProject({
 			projectPath: selectedProject ?? "",
 			nodeishFs,
+			_capture(id, props) {
+				telemetry.capture({
+					event: id as TelemetryEvents,
+					properties: props,
+				})
+			},
+		})
+
+		telemetry.capture({
+			event: "IDE-EXTENSION loaded project",
+			properties: {
+				errors: inlangProject?.errors(),
+			},
 		})
 
 		setState({ project: inlangProject })
+
+		console.log("Loaded project:", inlangProject)
 
 		// Refresh the entire tree to reflect selection changes
 		CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.fire(undefined)
@@ -106,13 +142,28 @@ export async function handleTreeSelection(
 	}
 }
 
-export function createTreeDataProvider(
-	workingDirectory: string,
+export async function createTreeDataProvider(
+	workingDirectory: vscode.WorkspaceFolder,
 	nodeishFs: NodeishFilesystem
-): vscode.TreeDataProvider<ProjectNode> {
+): Promise<vscode.TreeDataProvider<ProjectNode>> {
 	return {
 		getTreeItem: (element: ProjectNode) => getTreeItem(element, nodeishFs),
-		getChildren: () => createProjectNodes(workingDirectory, nodeishFs),
+		getChildren: async () => await createProjectNodes(workingDirectory, nodeishFs),
 		onDidChangeTreeData: CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.event,
 	}
+}
+
+export const projectView = async (args: {
+	context: vscode.ExtensionContext
+	gitOrigin: string | undefined
+	workspaceFolder: vscode.WorkspaceFolder
+}) => {
+	const nodeishFs = createFileSystemMapper(args.workspaceFolder.uri.fsPath, fs)
+	const treeDataProvider = await createTreeDataProvider(args.workspaceFolder || "", nodeishFs)
+
+	await treeDataProvider.getChildren()
+
+	args.context.subscriptions.push(
+		vscode.window.registerTreeDataProvider("projectView", treeDataProvider)
+	)
 }

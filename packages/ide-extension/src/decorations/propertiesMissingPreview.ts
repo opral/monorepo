@@ -1,6 +1,6 @@
+import { getActiveTextEditor } from "../main.js"
 import { state } from "../state.js"
 import * as vscode from "vscode"
-import { getActiveTextEditor } from "../utilities/initProject.js"
 
 export const propertiesMissingPreview = () => {
 	const ideExtension = state().project.customApi()["app.inlang.ideExtension"]
