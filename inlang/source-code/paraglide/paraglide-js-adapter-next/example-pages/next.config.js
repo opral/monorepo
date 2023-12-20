@@ -1,4 +1,4 @@
-const { withParaglide } = require("@inlang/paraglide-js-adapter-next/plugin")
+import { withParaglide } from "@inlang/paraglide-js-adapter-next/plugin"
 
 /** @type {import('next').NextConfig} */
 const config = {
@@ -8,7 +8,7 @@ const config = {
 	},
 }
 
-module.exports = withParaglide(
+export default withParaglide(
 	{
 		outdir: "./src/paraglide",
 		project: "./project.inlang",
