@@ -9,12 +9,13 @@ export default function Home() {
 			<p>{languageTag()}</p>
 			<p>{m.greeting({ name: "Samuel", count: 5 })}</p>
 			<p>{m.currentLanguageTag({ languageTag: languageTag() })}</p>
-			<a href="/de">
-				<button>change language to "de"</button>
-			</a>
-			<a href="/en">
-				<button>change language to "en"</button>
-			</a>
+
+			<Link href="/" locale="de">
+				"change language to "de""
+			</Link>
+			<Link href="/" locale="en">
+				"change language to "en""
+			</Link>
 
 			<Link href="/about">"about"</Link>
 			<ClientComponent />
