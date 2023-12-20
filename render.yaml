@@ -51,6 +51,24 @@ services:
       paths:
         - inlang/source-code/badge/**
 
+  - name: fink-editor
+    type: web
+    runtime: node
+    region: frankfurt
+    plan: standard
+    branch: main
+    pullRequestPreviewsEnabled: false
+    buildCommand: pnpm install && pnpm run build
+    startCommand: pnpm --filter @inlang/editor production
+    autoDeploy: true
+    envVars:
+      - fromGroup: production
+    buildFilter:
+      paths:
+        - inlang/source-code/editor/**
+    domains:
+      - fink.inlang.com
+
   - name: inlang-manage
     type: web
     runtime: node
