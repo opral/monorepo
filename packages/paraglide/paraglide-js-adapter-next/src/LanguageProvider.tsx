@@ -9,7 +9,6 @@ import { ClientLanguageProvider } from "./ClientLanguageProvider"
 import React from "react"
 
 setLanguageTag(() => {
-	console.log("LanguageTag")
 	const langHeader = headers().get("x-language-tag")
 	if (isAvailableLanguageTag(langHeader)) return langHeader
 	return sourceLanguageTag
