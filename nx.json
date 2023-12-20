@@ -32,9 +32,7 @@
 			]
 		},
 		"test": {
-			"dependsOn": [
-				"^build"
-			],
+			"dependsOn": ["^build", "publicEnv", "nodeVersion", "platform"],
 			"cache": true
 		},
 		"lint": {
