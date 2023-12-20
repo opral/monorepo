@@ -20,9 +20,8 @@ export function withParaglide(
 	paraglideConfig: ParaglideConfig,
 	nextConfig: NextConfig
 ): NextConfig {
-	const webpack = !process.env.TURBOPACK
-	if (webpack) {
-		console.log("USING WEBPACK")
+	const bundler = process.env.TURBOPACK ? "turbo" : "webpack"
+	if (bundler === "webpack") {
 		const originalWebpack = nextConfig.webpack
 		const wrappedWebpack: NextConfig["webpack"] = (config, options) => {
 			//register the alias in webpack
@@ -41,15 +40,13 @@ export function withParaglide(
 		}
 
 		nextConfig.webpack = wrappedWebpack
-	}
-	//turbo
-	else {
-		console.log("USING TURBOPACK")
-		//register the alias in turbo
+	} else if (bundler === "turbo") {
 		nextConfig.experimental = nextConfig.experimental ?? {}
 		nextConfig.experimental.turbo = nextConfig.experimental.turbo ?? {}
 		nextConfig.experimental.turbo.resolveAlias = nextConfig.experimental.turbo.resolveAlias ?? {}
 		nextConfig.experimental.turbo.resolveAlias[PARAGLIDE_ALIAS] = paraglideConfig.outdir
+	} else {
+		throw new Error(`Unknown bundler ${bundler}`)
 	}
 
 	return nextConfig

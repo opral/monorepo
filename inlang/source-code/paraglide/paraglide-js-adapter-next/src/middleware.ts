@@ -10,7 +10,7 @@ import {
  * Sets the request headers to resolve the language tag in RSC.
  * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
  */
-export function setLocaleHeaderMiddleware(request: NextRequest) {
+export function paraglideMiddleware(request: NextRequest) {
 	//Get's the first segment of the URL path
 	const maybeLocale = request.nextUrl.pathname.split("/")[1]
 
@@ -26,7 +26,6 @@ export function setLocaleHeaderMiddleware(request: NextRequest) {
 
 	const headers = new Headers(request.headers)
 	headers.set("x-language-tag", locale)
-	setLanguageTag(locale)
 
 	return NextResponse.next({
 		request: {
