@@ -8,16 +8,7 @@ import { useLocalStorage } from "#src/services/local-storage/index.js"
 
 function EditorHeader() {
 	const getLinks = () => {
-		return [
-			{
-				name: `Editor Projects`,
-				href: "/editor",
-			},
-			{
-				name: `Apps`,
-				href: "/c/application",
-			},
-		]
+		return []
 	}
 
 	const [localStorage] = useLocalStorage()
