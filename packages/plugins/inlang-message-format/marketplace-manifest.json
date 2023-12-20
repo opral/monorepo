@@ -24,7 +24,7 @@
 		"messages",
 		"plugin"
 	],
-	"recommends": ["m/tdozzpa", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
+	"recommends": ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0",

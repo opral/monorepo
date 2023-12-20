@@ -14,7 +14,7 @@
 		"en": "./inlang/external-projects/tolgee/README.md"
 	},
 	"keywords": ["apps", "tolgee", "editor", "messages", "translator"],
-	"recommends": ["m/tdozzpa", "m/2qj2w8pu", "m/r7kp499g"],
+	"recommends": ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
 	"pricing": "start free",
 	"publisherName": "tolgee",
 	"publisherIcon": "https://user-images.githubusercontent.com/18496315/188628892-33fcc282-26f1-4035-8105-95952bd93de9.svg",
