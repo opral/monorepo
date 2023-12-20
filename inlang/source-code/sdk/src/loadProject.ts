@@ -81,30 +81,30 @@ export const loadProject = async (args: {
 			nodeishFs: args.nodeishFs,
 		})
 
+		let projectId: string | undefined
+
+		try {
+			projectId = await nodeishFs.readFile(projectPath + "/project_id", {
+				encoding: "utf-8",
+			})
+		} catch (error) {
+			// @ts-ignore
+			if (error.code === "ENOENT") {
+				if (args.repo) {
+					projectId = await generateProjectId(args.repo, projectPath)
+					if (projectId) {
+						await nodeishFs.writeFile(projectPath + "/project_id", projectId)
+					}
+				}
+			} else {
+				idError = error as Error
+			}
+		}
+
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
 		createEffect(async () => {
-			let projectId: string | undefined
-
-			try {
-				projectId = await nodeishFs.readFile(projectPath + "/project_id", {
-					encoding: "utf-8",
-				})
-			} catch (error) {
-				// @ts-ignore
-				if (error.code === "ENOENT") {
-					if (args.repo) {
-						projectId = await generateProjectId(args.repo, projectPath)
-						if (projectId) {
-							await nodeishFs.writeFile(projectPath + "/project_id", projectId)
-						}
-					}
-				} else {
-					idError = error as Error
-				}
-			}
-
 			// TODO:
 			// if (projectId) {
 			// 	telemetryBrowser.group("project", projectId, {

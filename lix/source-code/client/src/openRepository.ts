@@ -10,6 +10,8 @@ import { createSignal, createEffect } from "./solid.js"
 
 import { commit as lixCommit } from "./git/commit.js"
 import isoGit from "isomorphic-git"
+import { hash } from "./hash.js"
+
 const {
 	clone,
 	listRemotes,
@@ -534,13 +536,7 @@ export async function openRepository(
 				},
 			} = res
 
-			const idDigest = await crypto.subtle.digest(
-				"SHA-256",
-				new TextEncoder().encode(`${githubId}`)
-			)
-			const id = [...new Uint8Array(idDigest)]
-				.map((b) => ("00" + b.toString(16)).slice(-2))
-				.join("")
+			const id = await hash(`${githubId}`)
 
 			return {
 				id,
