@@ -10,6 +10,7 @@ export default defineConfig({
 	input: {
 		index: "src/index.tsx",
 		"plugin/index": "src/plugin/index.ts",
+		"pages/index": "src/pages/index.tsx",
 	},
 	output: [
 		{

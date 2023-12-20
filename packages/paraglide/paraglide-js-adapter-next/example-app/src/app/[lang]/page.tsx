@@ -13,6 +13,7 @@ export default function Home() {
 			<Link href="/" locale="de">
 				"change language to "de""
 			</Link>
+
 			<Link href="/" locale="en">
 				"change language to "en""
 			</Link>
