@@ -4,8 +4,8 @@
     "private": true,
     "description": "A Next.js integration making it easy to work with Paraglide",
     "scripts": {
-        "build": "tsup",
-        "dev": "tsup --watch"
+        "build": "rollup -c",
+        "dev": "rollup -c -w"
     },
     "keywords": [
         "inlang",
@@ -40,7 +40,11 @@
         "react": "^18"
     },
     "devDependencies": {
+        "@rollup/plugin-typescript": "^11.1.5",
         "@types/react": "^18",
+        "rollup": "3.29.1",
+        "rollup-plugin-peer-deps-external": "^2.2.4",
+        "rollup-preserve-directives": "^1.1.0",
         "tsup": "^8.0.1",
         "typescript": "^5.3.3"
     }
