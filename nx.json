@@ -6,6 +6,16 @@
 			{
 				"runtime": "env | grep ^PUBLIC_"
 			}
+		],
+		"nodeVersion": [
+			{
+				"runtime": "node --version"
+			}
+		],
+		"platform": [
+			{
+				"runtime": " node -e 'console.log(process.platform)'"
+			}
 		]
 	},
 	"targetDefaults": {
@@ -13,11 +23,7 @@
 			"dependsOn": [
 				"^build"
 			],
-			"inputs": [
-				"default",
-				"^default",
-				"publicEnv"
-			],
+			"inputs": ["default", "^default", "publicEnv", "nodeVersion", "platform"],
 			"cache": true
 		},
 		"dev": {
