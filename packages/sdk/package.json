@@ -39,9 +39,11 @@
 		"@inlang/translatable": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@sinclair/typebox": "^0.31.17",
+		"@types/murmurhash3js": "^3.0.7",
 		"dedent": "1.5.1",
 		"deepmerge-ts": "^5.1.0",
 		"human-id": "^4.1.0",
+		"murmurhash3js": "^3.0.1",
 		"solid-js": "1.6.12",
 		"throttle-debounce": "^5.0.0"
 	},
