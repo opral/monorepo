@@ -8,7 +8,7 @@ import {
 import { headers } from "next/headers"
 import { ClientLanguageProvider } from "./ClientLanguageProvider"
 import { LangaugeSpy } from "./LanguageSpy"
-import { LANGUAGE_HEADER } from "../contsants"
+import { LANGUAGE_HEADER } from "../constants"
 
 setLanguageTag(() => {
 	const langHeader = headers().get(LANGUAGE_HEADER)

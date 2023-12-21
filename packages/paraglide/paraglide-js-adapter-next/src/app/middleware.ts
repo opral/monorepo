@@ -4,7 +4,7 @@ import {
 	sourceLanguageTag,
 	isAvailableLanguageTag,
 } from "$paraglide-adapter-next-internal/runtime.js"
-import { LANGUAGE_HEADER } from "../contsants"
+import { LANGUAGE_HEADER } from "../constants"
 
 /**
  * Sets the request headers to resolve the language tag in RSC.
