@@ -1,6 +1,6 @@
 {
 	"id": "guide.nilsjacobsen.nextIntlIdeExtension",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/next-intl-with-ide-extension/assets/iconv2.png",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/next-intl-with-ide-extension/assets/iconv3.png",
 	"displayName": {
 		"en": "Setting Up next-intl with IDE Extension."
 	},
@@ -10,6 +10,9 @@
 	"readme": {
 		"en": "./inlang/guides/next-intl-with-ide-extension/README.md"
 	},
+	"gallery": [
+		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/next-intl-with-ide-extension/assets/next-intl-guide.png"
+	],
 	"keywords": [
 		"i18n",
 		"developer",
