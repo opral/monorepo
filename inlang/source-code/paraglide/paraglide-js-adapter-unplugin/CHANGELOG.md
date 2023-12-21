@@ -1,5 +1,11 @@
 # @inlang/paraglide-js-adapter-unplugin
 
+## 1.0.3
+
+### Patch Changes
+
+- 784e227ba: fix: check if messages have actually changed before recompiling
+
 ## 1.0.2
 
 ### Patch Changes
