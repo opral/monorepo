@@ -34,6 +34,7 @@ import {
 	encodeMessage,
 } from "./storage/helper.js"
 import { humanId } from "human-id"
+import { humanIdHash } from "./storage/human-id/human-readable-id.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -439,16 +440,16 @@ export const loadProject = async (args: {
 					}
 					messagesQuery.update({ where: { id: importedMessage.id }, data: importedMessage })
 				} else {
+					// message with the given alias does not exist so far
 					importedMessage.alias = {} as any
 					// TODO #1585 we have to map the id of the importedMessage to the alias - change when import mesage provides importedMessage.alias
 					importedMessage.alias[loadPluginId] = importedMessage.id
 					importedMessage.alias["library.inlang.paraglideJs"] = importedMessage.id
 
-					importedMessage.id = humanId({
-						separator: "_",
-						capitalize: false,
-					})
+					// create a humanId based on a hash of the alias 
+					importedMessage.id = humanIdHash(importedMessage.id)
 
+					// TODO #1844 - check for collision / block id on fs
 					messagesQuery.create({ data: importedMessage })
 				}
 			}

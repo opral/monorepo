@@ -179,9 +179,15 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			const baseName = getBasename(path)
 			const parentDir: Inode | undefined = state.fsMap.get(dirName)
 
-			if (typeof parentDir === "string") throw new FilesystemError("ENOTDIR", path, "mkdir")
+			if (typeof parentDir === "string") {
+				throw new FilesystemError("ENOTDIR", path, "mkdir")
+			}
 
 			if (parentDir && parentDir instanceof Set) {
+				if (state.fsMap.has(path)) {
+					throw new FilesystemError("EEXIST", path, "mkdir")
+				}
+
 				parentDir.add(baseName)
 				newStatEntry(path, state.fsStats, 1, 0o755)
 				state.fsMap.set(path, new Set())
