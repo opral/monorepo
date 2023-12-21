@@ -2,9 +2,9 @@
 
 Next-intl determines how its users store their messages and access them on the frontend. To ensure compatibility with the inlang ecosystem and other inlang apps, a plugin is required to provide the necessary information to these apps.
 
-# Get started
+## Manual Installation
 
-## Install wir manage.inlang.com
+> We recommend using the install button, but if you want to do it manually:
 
 Add this to the modules in your `project.inlang/settings.json`
 
