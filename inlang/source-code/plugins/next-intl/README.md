@@ -1,6 +1,23 @@
-# What does this plugin do?
+# What does the next-intl plugin do?
 
-This plugin works with i18next to read and write messages. It also determines how translation functions and namespaces are parsed and handled by the IDE extension.
+Next-intl determines how its users store their messages and access them on the frontend. To ensure compatibility with the inlang ecosystem and other inlang apps, a plugin is required to provide the necessary information to these apps.
+
+# Get started
+
+## Install wir manage.inlang.com
+
+Add this to the modules in your `project.inlang/settings.json`
+
+```json
+{
+	"modules": [
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-next-intl@1/dist/index.js",
+  	],
+	"plugin.inlang.nextIntl": {
+    	"pathPattern": "./messages/{languageTag}.json"
+  	}
+}
+```
 
 # Settings
 
@@ -8,34 +25,32 @@ The plugin offers further configuration options that can be passed as arguments.
 
 ```typescript
 type PluginSettings = {
-	pathPattern: string | { [key: string]: string }
+	pathPattern: string
 	variableReferencePattern?: [string] | [string, string]
 	sourceLanguageFilePath?: string
 }
 ```
 
-## `pathPattern`
-
-To use our plugin, you need to provide a path to the directory where your language-specific files are stored. Use the dynamic path syntax `{languageTag}` to specify the language name.
-
-### pathPattern without namespaces
+You can add this settings also in the `settings.json`:
 
 ```json
-"pathPattern": "./resources/{languageTag}.json"
-```
-
-### pathPattern with namespaces
-
-
-```json
-"pathPattern": {
-	"common": "./resources/{languageTag}/common.json",
-	"vital": "./resources/{languageTag}/vital.json"
+{
+	"modules": [
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-next-intl@1/dist/index.js",
+  	],
+	"plugin.inlang.nextIntl": {
+    	// settings
+  	}
 }
 ```
 
-`key` (prefix): is prefixing the key with a colon
-`values` (path): is the path to the namespace resources
+## `pathPattern`
+
+To use the plugin, you need to provide a path to the directory where your language-specific files are stored. Use the dynamic path syntax `{languageTag}` to specify the language name.
+
+```json
+"pathPattern": "./messages/{languageTag}.json"
+```
 
 ## `variableReferencePattern`
 
@@ -51,19 +66,8 @@ default:
 
 This setting is optional and should only be used if the file name of your sourceLanguageTag does not match your pathPattern structure. For example, if your sourceLanguageTag is `en` but your sourceLanguage file is called `main.json`, you can use this setting to specify the path to the sourceLanguage file. Our recommendation is to rename the file to `en.json` and not use this setting.
 
-### Without namespaces
-
 ```json
 "sourceLanguageFilePath": "./resources/main.json"
-```
-
-### With namespaces
-
-```json
-"sourceLanguageFilePath": {
-	"common": "./resources/main/common.json",
-	"vital": "./resources/main/vital.json"
-}
 ```
 
 # Install the Inlang VS Code extension to supercharge your i18n workflow
@@ -76,9 +80,16 @@ The plugin automatically informs the [IDE extension](https://inlang.com/m/r7kp49
 
 With namespaces:
 
-`t("namespace:key")` or `t("key", { ns: "namespace" })`
+```ts
+import {useTranslations} from 'next-intl';
+ 
+function About() {
+  const t = useTranslations('About');
+  return <h1>{t('title')}</h1>;
+}
+```
 
-To learn about namespaces and how to use translation functions in your code, you can refer to [i18next documentation](https://www.i18next.com/principles/namespaces). The plugin is capable of parsing the code and providing the IDE-extension with this information.
+To learn about namespaces and how to use translation functions in your code, you can refer to [next-intl documentation](https://next-intl-docs.vercel.app/docs/usage/messages). The plugin is capable of parsing the code and providing the IDE-extension with this information.
 
 # Expected behavior
 
