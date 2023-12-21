@@ -3,12 +3,12 @@
 
 ## What is this about?
 
-In this guide, I'll walk you through the seamless integration of the next-intl internationalization library with your favorite IDE extension. This powerful combination, featuring next-intl and an IDE extension, enhances your development workflow, offering i18n management for Next.js projects.
+In this guide, I'll walk you through the seamless integration of the [next-intl](/m/hheug211) internationalization library with your favorite [IDE extension](/m/r7kp499g). This powerful combination, featuring next-intl and an IDE extension, enhances your development workflow, offering i18n management for Next.js projects.
 
 #### Main Links:
 <doc-links>
     <doc-link title="Next-Intl" icon="mdi:bookmark-box-multiple" href="/m/hheug211" description="Read documentation"></doc-link>
-	<doc-link title="Nect-Intl Plugin" icon="mdi:puzzle" href="/m/193hsyds" description="Make it compatible"></doc-link>
+	<doc-link title="Next-Intl Plugin" icon="mdi:puzzle" href="/m/193hsyds" description="Make it compatible"></doc-link>
 	<doc-link title="IDE Extension" icon="mdi:microsoft-visual-studio-code" href="/m/r7kp499g" description="Supercharge i18n within VS Code"></doc-link>
 </doc-links>
 
