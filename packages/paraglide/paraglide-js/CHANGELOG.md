@@ -1,5 +1,9 @@
 # @inlang/paraglide-js
 
+## 1.0.0-prerelease.20
+
+Paraglide now checks if the messages have actually changed before recompiling. This should improve reliability and performance.
+
 ## 1.0.0-prerelease.19
 
 fix: Fix inlang/internal#195
