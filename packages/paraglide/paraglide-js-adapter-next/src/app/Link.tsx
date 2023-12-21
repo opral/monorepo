@@ -11,5 +11,9 @@ export function Link(props: Parameters<typeof NextLink>[0]): ReturnType<typeof N
 		href = translatePath(props.href, lang)
 	}
 
-	return <Link {...props} href={href} />
+	if (lang !== languageTag()) {
+		return <a {...props} href={href.toString()} />
+	}
+
+	return <NextLink {...props} href={href} />
 }
