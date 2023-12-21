@@ -9,9 +9,9 @@ import { nodePolyfills } from "vite-plugin-node-polyfills"
 const isProduction = process.env.NODE_ENV === "production"
 
 export default defineConfig({
-	base: "/editor",
+	base: "/",
 	server: {
-		port: 4001,
+		port: 4003,
 	},
 	envPrefix: "PUBLIC_",
 	plugins: [

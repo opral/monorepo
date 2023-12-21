@@ -9,7 +9,7 @@ const isProduction = process.env.NODE_ENV === "production"
 
 export default defineConfig({
 	server: {
-		port: 4002,
+		port: 4001,
 	},
 	envPrefix: "PUBLIC_",
 	plugins: [
