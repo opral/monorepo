@@ -1592,6 +1592,58 @@ importers:
         specifier: 0.33.0
         version: 0.33.0(jsdom@22.1.0)
 
+  inlang/source-code/plugins/next-intl:
+    dependencies:
+      '@inlang/detect-json-formatting':
+        specifier: workspace:*
+        version: link:../../detect-json-formatting
+      '@inlang/sdk':
+        specifier: workspace:*
+        version: link:../../sdk
+      '@sinclair/typebox':
+        specifier: 0.31.28
+        version: 0.31.28
+    devDependencies:
+      '@inlang/cli':
+        specifier: workspace:*
+        version: link:../../cli
+      '@inlang/plugin':
+        specifier: workspace:*
+        version: link:../../versioned-interfaces/plugin
+      '@lix-js/fs':
+        specifier: workspace:*
+        version: link:../../../../lix/source-code/fs
+      '@size-limit/preset-small-lib':
+        specifier: ^8.2.4
+        version: 8.2.6(size-limit@8.2.6)
+      '@types/flat':
+        specifier: ^5.0.2
+        version: 5.0.5
+      '@types/lodash.merge':
+        specifier: ^4.6.7
+        version: 4.6.7
+      '@types/parsimmon':
+        specifier: 1.10.6
+        version: 1.10.6
+      '@vitest/coverage-v8':
+        specifier: ^0.33.0
+        version: 0.33.0(vitest@0.33.0)
+      flat:
+        specifier: ^5.0.2
+        version: 5.0.2
+      parsimmon:
+        specifier: ^1.18.1
+        version: 1.18.1
+      patch-package:
+        specifier: 6.5.1
+        version: 6.5.1
+      typescript:
+        specifier: ^5.1.3
+        version: 5.3.2
+      vitest:
+        specifier: 0.33.0
+        version: 0.33.0(jsdom@22.1.0)
+
   inlang/source-code/plugins/t-function-matcher:
     dependencies:
       '@inlang/plugin':
