@@ -1,2 +1,2 @@
-export { default as LanguageProvider } from "./LanguageProvider.jsx"
-export { Link } from "./Link.jsx"
+export { default as LanguageProvider } from "./app/LanguageProvider.jsx"
+export { Link } from "./app/Link.jsx"

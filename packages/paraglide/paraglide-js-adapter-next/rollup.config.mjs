@@ -19,7 +19,7 @@ export default defineConfig({
 		index: "src/index.tsx",
 		"plugin/index": "src/plugin/index.ts",
 		"pages/index": "src/pages/index.tsx",
-		middleware: "src/middleware.ts",
+		middleware: "src/app/middleware.ts",
 	},
 	output: [
 		{

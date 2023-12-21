@@ -8,7 +8,7 @@ import {
 import { headers } from "next/headers"
 import { ClientLanguageProvider } from "./ClientLanguageProvider"
 import { LangaugeSpy } from "./LanguageSpy"
-import { LANGUAGE_HEADER } from "./contsants"
+import { LANGUAGE_HEADER } from "../contsants"
 
 setLanguageTag(() => {
 	const langHeader = headers().get(LANGUAGE_HEADER)
@@ -25,7 +25,7 @@ export default function LanguageProvider(props: { children: React.ReactNode }): 
 			<ClientLanguageProvider language={languageTag()} />
 			{/* Refresh when the language changes */}
 			<LangaugeSpy />
-			{props.children}
+			<React.Fragment key={languageTag()}>{props.children}</React.Fragment>
 		</>
 	)
 }
