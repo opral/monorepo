@@ -1,5 +1,6 @@
 "use client"
 
+import { isAvailableLanguageTag, sourceLanguageTag } from "@/paraglide/runtime"
 import { usePathname } from "next/navigation"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -8,12 +9,12 @@ import { useEffect, useState } from "react"
 export function LangaugeSpy() {
 	const router = useRouter()
 	const pathname = usePathname()
-	const language = pathname.split("/")[1]
+	const maybeLanguage = pathname.split("/")[1]
+	const language = isAvailableLanguageTag(maybeLanguage) ? maybeLanguage : sourceLanguageTag
 	const [currentLanguage, setCurrentLanguage] = useState(language)
 
 	useEffect(() => {
 		if (currentLanguage !== language) {
-			console.log("Language changed to", language)
 			setCurrentLanguage(language)
 			router.refresh()
 		}
