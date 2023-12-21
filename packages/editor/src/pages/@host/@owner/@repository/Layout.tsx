@@ -5,6 +5,7 @@ import { Gitfloat } from "./components/Gitfloat.jsx"
 import IconAdd from "~icons/material-symbols/add"
 import IconClose from "~icons/material-symbols/close"
 import IconTranslate from "~icons/material-symbols/translate"
+import IconDescription from "~icons/material-symbols/description-outline"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { showToast } from "#src/interface/components/Toast.jsx"
 import type { LanguageTag } from "@inlang/sdk"
@@ -141,6 +142,7 @@ export function Layout(props: { children: JSXElement }) {
 				<div class="flex flex-wrap gap-2 items-center pt-5">
 					<Breadcrumbs />
 					<BranchMenu />
+					<ProjectMenu />
 				</div>
 				<div class="flex flex-wrap justify-between gap-2 py-5 sticky top-12 md:top-16 z-30 bg-surface-50">
 					<div class="flex flex-wrap z-20 gap-2 items-center">
@@ -365,8 +367,48 @@ function BranchMenu() {
 				<For each={branchNames()}>
 					{(branch) => (
 						<div onClick={() => setActiveBranch(branch)}>
-							<sl-menu-item prop:type="checkbox" prop:checked={currentBranch() === branch}>
+							<sl-menu-item
+								prop:type="checkbox"
+								prop:checked={currentBranch() === branch}
+							>
 								{branch}
+							</sl-menu-item>
+						</div>
+					)}
+				</For>
+			</sl-menu>
+		</sl-dropdown>
+	)
+}
+
+/**
+ * The menu to select the project.
+ */
+function ProjectMenu() {
+	const { project, activeProject, setActiveProject, projectList, currentBranch, activeBranch } = useEditorState()
+	return (
+		<sl-dropdown prop:distance={8}>
+			<sl-button
+				slot="trigger"
+				prop:caret={true}
+				prop:size="small"
+				prop:loading={currentBranch() !== activeBranch() && activeBranch() !== undefined || project.loading}
+			>
+				<div slot="prefix">
+					<IconDescription class="-ml-1 w-5 h-5" />
+				</div>
+				{activeProject() ?? "project"}
+			</sl-button>
+
+			<sl-menu class="w-48 min-w-fit">
+				<For each={projectList()}>
+					{(project) => (
+						<div onClick={() => setActiveProject(project.projectPath)}>
+							<sl-menu-item
+								prop:type="checkbox"
+								prop:checked={activeProject() === project.projectPath}
+							>
+								{project.projectPath}
 							</sl-menu-item>
 						</div>
 					)}
