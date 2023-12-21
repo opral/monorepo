@@ -4,6 +4,7 @@ import {
 	availableLanguageTags,
 	sourceLanguageTag,
 } from "$paraglide-adapter-next-internal/runtime.js"
+import { LANGUAGE_HEADER } from "./contsants"
 
 /**
  * Sets the request headers to resolve the language tag in RSC.
@@ -24,7 +25,7 @@ export function paraglideMiddleware(request: NextRequest) {
 	const locale = maybeLocale
 
 	const headers = new Headers(request.headers)
-	headers.set("x-language-tag", locale)
+	headers.set(LANGUAGE_HEADER, locale)
 
 	return NextResponse.next({
 		request: {

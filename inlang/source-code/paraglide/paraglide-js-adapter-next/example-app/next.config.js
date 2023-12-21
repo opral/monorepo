@@ -6,5 +6,7 @@ module.exports = withParaglide(
 		project: "./project.inlang",
 		outdir: "./src/paraglide",
 	},
-	{}
+	{
+		//Regular Next.js config
+	}
 )
