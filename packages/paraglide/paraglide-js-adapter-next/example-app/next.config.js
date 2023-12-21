@@ -7,6 +7,8 @@ module.exports = withParaglide(
 		outdir: "./src/paraglide",
 	},
 	{
-		//Regular Next.js config
+		experimental: {
+			serverActions: true,
+		},
 	}
 )
