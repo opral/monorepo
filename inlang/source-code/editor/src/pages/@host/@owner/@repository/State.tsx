@@ -265,6 +265,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				const project = solidAdapter(
 					await loadProject({
 						nodeishFs: newRepo.nodeishFs,
+						repo: newRepo,
 						projectPath: "/project.inlang",
 						_capture(id, props) {
 							telemetryBrowser.capture(id, props)
@@ -272,11 +273,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					}),
 					{ from }
 				)
-				// TODO add a project UUID to the tele.groups internal #196
-				// const gitOrigin = parseOrigin({ remotes: await newRepo.listRemotes() })
-				// telemetryBrowser.group("repository", gitOrigin, {
-				// 	name: gitOrigin,
-				// })
+
 				telemetryBrowser.capture("EDITOR cloned repository", {
 					userPermission: userIsCollaborator() ? "iscollaborator" : "isNotCollaborator",
 				})
@@ -482,9 +479,11 @@ export async function pushChanges(args: {
 	if (typeof args.user === "undefined" || args.user?.isLoggedIn === false) {
 		return { error: new PushException("User not logged in") }
 	}
+
 	// stage all changes
 	const status = await args.repo.statusMatrix({
 		filter: (f: any) =>
+			f.endsWith("project_id") ||
 			f.endsWith(".json") ||
 			f.endsWith(".po") ||
 			f.endsWith(".yaml") ||
@@ -492,6 +491,7 @@ export async function pushChanges(args: {
 			f.endsWith(".js") ||
 			f.endsWith(".ts"),
 	})
+
 	const filesWithUncommittedChanges = status.filter(
 		(row: any) =>
 			// files with unstaged and uncommitted changes
@@ -499,6 +499,7 @@ export async function pushChanges(args: {
 			// added files
 			(row[2] === 2 && row[3] === 0)
 	)
+
 	if (filesWithUncommittedChanges.length > 0) {
 		// add all changes
 		for (const file of filesWithUncommittedChanges) {

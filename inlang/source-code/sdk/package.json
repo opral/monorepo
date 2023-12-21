@@ -38,6 +38,7 @@
 		"@inlang/result": "workspace:*",
 		"@inlang/translatable": "workspace:*",
 		"@lix-js/fs": "workspace:*",
+		"@lix-js/client": "workspace:*",
 		"@sinclair/typebox": "^0.31.17",
 		"dedent": "1.5.1",
 		"deepmerge-ts": "^5.1.0",

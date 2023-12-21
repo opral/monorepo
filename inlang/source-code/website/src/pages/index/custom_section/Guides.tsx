@@ -10,6 +10,7 @@ const Guides = () => {
 		"guide.niklasbuchfink.whatIsInlang",
 		"guide.nilsjacobsen.whatArePlugins",
 		"guide.lorissigrist.useParaglideJsWithNextjsAppRouter",
+		"guide.floriankiem.localizationStartegy",
 	]
 	return (
 		<div class="w-full flex gap-4 my-28 flex-col-reverse md:flex-row">
