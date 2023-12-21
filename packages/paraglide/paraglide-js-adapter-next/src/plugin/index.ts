@@ -1,5 +1,7 @@
 import type { NextConfig } from "next"
 import { resolve } from "path"
+import { addRewrites } from "./rewrites"
+import { addAlias } from "./alias"
 
 /** The alias for the paraglide folder. */
 const PARAGLIDE_ALIAS = "$paraglide-adapter-next-internal"
@@ -20,34 +22,20 @@ export function withParaglide(
 	paraglideConfig: ParaglideConfig,
 	nextConfig: NextConfig
 ): NextConfig {
-	const bundler = process.env.TURBOPACK ? "turbo" : "webpack"
-	if (bundler === "webpack") {
-		const originalWebpack = nextConfig.webpack
-		const wrappedWebpack: NextConfig["webpack"] = (config, options) => {
-			//register the alias in webpack
-			const absoluteOutdir = resolve(config.context, paraglideConfig.outdir)
+	addAlias(nextConfig, {
+		[PARAGLIDE_ALIAS]: paraglideConfig.outdir,
+	})
 
-			config.resolve = config.resolve ?? {}
-			config.resolve.alias = config.resolve.alias ?? {}
-			config.resolve.alias[PARAGLIDE_ALIAS] = absoluteOutdir
-
-			//apply any other webpack config if it exists
-			if (typeof originalWebpack === "function") {
-				return originalWebpack(config, options)
-			}
-
-			return config
-		}
-
-		nextConfig.webpack = wrappedWebpack
-	} else if (bundler === "turbo") {
-		nextConfig.experimental = nextConfig.experimental ?? {}
-		nextConfig.experimental.turbo = nextConfig.experimental.turbo ?? {}
-		nextConfig.experimental.turbo.resolveAlias = nextConfig.experimental.turbo.resolveAlias ?? {}
-		nextConfig.experimental.turbo.resolveAlias[PARAGLIDE_ALIAS] = paraglideConfig.outdir
-	} else {
-		throw new Error(`Unknown bundler ${bundler}`)
+	const router = nextConfig.i18n ? "pages" : "app"
+	if (router === "app") {
+		addRewrites(nextConfig, () => [
+			{
+				source: "/:locale(en|de)/:path*",
+				destination: "/:path*",
+			},
+		])
 	}
 
 	return nextConfig
 }
+
