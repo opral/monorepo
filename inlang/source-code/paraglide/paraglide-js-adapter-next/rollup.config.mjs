@@ -27,5 +27,11 @@ export default defineConfig({
 			dir: "dist",
 		},
 	],
-	external: [/node_modules/, "$paraglide-adapter-next-internal/runtime.js"],
+	external: [
+		/node_modules/,
+		"$paraglide-adapter-next-internal/runtime.js",
+		"path",
+		"url",
+		"fs/promises",
+	],
 })

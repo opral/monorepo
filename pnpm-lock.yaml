@@ -1130,6 +1130,9 @@ importers:
         specifier: ^18
         version: 18.2.0
     devDependencies:
+      '@inlang/sdk':
+        specifier: workspace:^
+        version: link:../../sdk
       '@rollup/plugin-typescript':
         specifier: ^11.1.5
         version: 11.1.5(rollup@3.29.1)(typescript@5.3.3)

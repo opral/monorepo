@@ -1,7 +1,8 @@
 import type { NextConfig } from "next"
-import { resolve } from "path"
 import { addRewrites } from "./rewrites"
 import { addAlias } from "./alias"
+import fs from "fs/promises"
+import { resolve } from "path"
 
 /** The alias for the paraglide folder. */
 const PARAGLIDE_ALIAS = "$paraglide-adapter-next-internal"
@@ -28,14 +29,23 @@ export function withParaglide(
 
 	const router = nextConfig.i18n ? "pages" : "app"
 	if (router === "app") {
-		addRewrites(nextConfig, () => [
-			{
-				source: "/:locale(en|de)/:path*",
-				destination: "/:path*",
-			},
-		])
+		addRewrites(nextConfig, async () => {
+			const { loadProject } = await import("@inlang/sdk")
+			const projectPath = resolve(process.cwd(), paraglideConfig.project)
+			const project = await loadProject({
+				projectPath,
+				nodeishFs: fs,
+			})
+			const { sourceLanguageTag, languageTags } = project.settings()
+
+			return [
+				{
+					source: `/:locale(${languageTags.join("|")})/:path*`,
+					destination: "/:path*",
+				},
+			]
+		})
 	}
 
 	return nextConfig
 }
-
