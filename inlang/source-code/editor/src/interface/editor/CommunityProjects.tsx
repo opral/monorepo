@@ -118,7 +118,7 @@ export function RepositoryCard(props: {
 					? `/install?repo=github.com/${props.repository.owner}/${
 							props.repository.repository
 					  }&module=${props.modules?.join(",")}`
-					: `/editor/github.com/${props.repository.owner}/${props.repository.repository}`
+					: `/github.com/${props.repository.owner}/${props.repository.repository}`
 			}
 			class="rounded-xl bg-background transition-all border border-surface-200 hover:shadow-lg hover:shadow-surface-100 hover:border-surface-300 active:border-surface-400 p-6 flex flex-col justify-between gap-5"
 		>
