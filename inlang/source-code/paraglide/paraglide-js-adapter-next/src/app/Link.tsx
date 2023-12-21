@@ -1,5 +1,5 @@
 import { languageTag } from "$paraglide-adapter-next-internal/runtime.js"
-import { translatePath } from "../utils"
+import { translatePath } from "./utils"
 import NextLink from "next/link"
 import React from "react"
 

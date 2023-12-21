@@ -36,12 +36,12 @@ export function withParaglide(
 				projectPath,
 				nodeishFs: fs,
 			})
-			const { sourceLanguageTag, languageTags } = project.settings()
+			const { languageTags } = project.settings()
 
 			return [
 				{
 					source: `/:locale(${languageTags.join("|")})/:path*`,
-					destination: "/:path*",
+					destination: "/:path*?locale=:locale",
 				},
 			]
 		})

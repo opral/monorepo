@@ -7,7 +7,7 @@ export function LanguageSwitcher() {
 	const pathname = usePathname()
 	return availableLanguageTags.map((lang) => (
 		<>
-			<Link href={pathname} locale={lang}>
+			<Link href={pathname} locale={lang} key={lang}>
 				{lang}
 			</Link>
 			<br />
