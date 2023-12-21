@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"target": "es6",
+		"target": "ESNext",
 		"isolatedModules": true,
 		"moduleResolution": "Bundler",
 		"strict": true,
