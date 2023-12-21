@@ -5,6 +5,7 @@ import { Gitfloat } from "./components/Gitfloat.jsx"
 import IconAdd from "~icons/material-symbols/add"
 import IconClose from "~icons/material-symbols/close"
 import IconTranslate from "~icons/material-symbols/translate"
+import IconDescription from "~icons/material-symbols/description-outline"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { showToast } from "#src/interface/components/Toast.jsx"
 import type { LanguageTag } from "@inlang/sdk"
@@ -137,12 +138,13 @@ export function Layout(props: { children: JSXElement }) {
 
 	return (
 		<EditorLayout>
-			<div class="pt-4 w-full flex flex-col grow bg-surface-50">
+			<div class="w-full flex flex-col grow bg-surface-50">
 				<div class="flex flex-wrap gap-2 items-center pt-5">
 					<Breadcrumbs />
 					<BranchMenu />
+					<ProjectMenu />
 				</div>
-				<div class="flex flex-wrap justify-between gap-2 py-5 sticky top-12 md:top-16 z-30 bg-surface-50">
+				<div class="flex flex-wrap justify-between gap-2 py-5 sticky top-12 md:top-14 z-30 bg-surface-50">
 					<div class="flex flex-wrap z-20 gap-2 items-center">
 						<Show when={project()}>
 							<For each={filterOptions()}>
@@ -341,38 +343,96 @@ function Breadcrumbs() {
 function BranchMenu() {
 	const { activeBranch, setActiveBranch, branchNames, currentBranch } = useEditorState()
 	return (
-		<sl-dropdown prop:distance={8}>
-			<sl-button
-				slot="trigger"
-				prop:caret={true}
-				prop:size="small"
-				prop:loading={currentBranch() !== activeBranch() && activeBranch() !== undefined}
-			>
-				<div slot="prefix">
-					{/* branch icon from github */}
-					<svg class="w-4 h-4">
-						<path
-							fill="currentColor"
-							fill-rule="evenodd"
-							d="M11.75 2.5a.75.75 0 1 0 0 1.5a.75.75 0 0 0 0-1.5zm-2.25.75a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25zM4.25 12a.75.75 0 1 0 0 1.5a.75.75 0 0 0 0-1.5zM3.5 3.25a.75.75 0 1 1 1.5 0a.75.75 0 0 1-1.5 0z"
-						/>
-					</svg>
-				</div>
-				{currentBranch() ?? "branch"}
-			</sl-button>
+		<sl-tooltip
+			prop:content="Select branch"
+			prop:placement="top"
+			prop:trigger="hover"
+			prop:hoist={true}
+			class="small"
+			style={{ "--show-delay": "1s" }}
+		>
+			<sl-dropdown prop:distance={8}>
+				<sl-button
+					slot="trigger"
+					prop:caret={true}
+					prop:size="small"
+					prop:loading={currentBranch() !== activeBranch() && activeBranch() !== undefined}
+				>
+					<div slot="prefix">
+						{/* branch icon from github */}
+						<svg class="w-4 h-4">
+							<path
+								fill="currentColor"
+								fill-rule="evenodd"
+								d="M11.75 2.5a.75.75 0 1 0 0 1.5a.75.75 0 0 0 0-1.5zm-2.25.75a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25zM4.25 12a.75.75 0 1 0 0 1.5a.75.75 0 0 0 0-1.5zM3.5 3.25a.75.75 0 1 1 1.5 0a.75.75 0 0 1-1.5 0z"
+							/>
+						</svg>
+					</div>
+					{currentBranch() ?? "branch"}
+				</sl-button>
 
-			<sl-menu class="w-48 min-w-fit">
-				<For each={branchNames()}>
-					{(branch) => (
-						<div onClick={() => setActiveBranch(branch)}>
-							<sl-menu-item prop:type="checkbox" prop:checked={currentBranch() === branch}>
-								{branch}
-							</sl-menu-item>
-						</div>
-					)}
-				</For>
-			</sl-menu>
-		</sl-dropdown>
+				<sl-menu class="w-48 min-w-fit">
+					<For each={branchNames()}>
+						{(branch) => (
+							<div onClick={() => setActiveBranch(branch)}>
+								<sl-menu-item
+									prop:type="checkbox"
+									prop:checked={currentBranch() === branch}
+								>
+									{branch}
+								</sl-menu-item>
+							</div>
+						)}
+					</For>
+				</sl-menu>
+			</sl-dropdown>
+		</sl-tooltip>
+	)
+}
+
+/**
+ * The menu to select the project.
+ */
+function ProjectMenu() {
+	const { project, activeProject, setActiveProject, projectList, currentBranch, activeBranch } = useEditorState()
+	return (
+		<sl-tooltip
+			prop:content="Select inlang project"
+			prop:placement="top"
+			prop:trigger="hover"
+			prop:hoist={true}
+			class="small"
+			style={{ "--show-delay": "1s" }}
+		>
+			<sl-dropdown prop:distance={8}>
+				<sl-button
+					slot="trigger"
+					prop:caret={true}
+					prop:size="small"
+					prop:loading={currentBranch() !== activeBranch() && activeBranch() !== undefined || project.loading}
+				>
+					<div slot="prefix">
+						<IconDescription class="-ml-1 w-5 h-5" />
+					</div>
+					{activeProject() ?? "project"}
+				</sl-button>
+
+				<sl-menu class="w-48 min-w-fit">
+					<For each={projectList()}>
+						{(project) => (
+							<div onClick={() => setActiveProject(project.projectPath)}>
+								<sl-menu-item
+									prop:type="checkbox"
+									prop:checked={activeProject() === project.projectPath}
+								>
+									{project.projectPath}
+								</sl-menu-item>
+							</div>
+						)}
+					</For>
+				</sl-menu>
+			</sl-dropdown>
+		</sl-tooltip>
 	)
 }
 

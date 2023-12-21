@@ -1,4 +1,4 @@
-import { Plugin } from "@inlang/sdk"
+import type { Plugin } from "@inlang/sdk"
 import { id, displayName, description } from "../marketplace-manifest.json"
 import { createMessage } from "@inlang/sdk/test-utilities"
 

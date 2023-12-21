@@ -136,12 +136,17 @@ export function Page(props: PageProps) {
 																.map((keyword: string) => keyword.toLowerCase())
 																.includes("inlang")}
 														>
-															<div class="flex flex-row gap-2 items-center">
-																<InlangBadge />
-																<div class="flex-1 text-sm text-primary font-medium">
-																	inlang ecosystem compatible
-																</div>
-															</div>
+															<sl-tooltip prop:content="Learn more">
+																<Link
+																	href="/g/7777asdy"
+																	class="flex flex-row gap-2 items-center hover:opacity-70"
+																>
+																	<InlangBadge />
+																	<div class="flex-1 text-sm text-primary font-medium">
+																		inlang ecosystem compatible
+																	</div>
+																</Link>
+															</sl-tooltip>
 														</Show>
 													</div>
 													<div class="inline-block text-surface-500 ">
