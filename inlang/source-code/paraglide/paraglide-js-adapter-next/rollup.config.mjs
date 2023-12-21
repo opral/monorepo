@@ -2,11 +2,19 @@ import preserveDirectives from "rollup-preserve-directives"
 import typescript from "@rollup/plugin-typescript"
 import { defineConfig } from "rollup"
 import peerDepsExternalImport from "rollup-plugin-peer-deps-external"
+import cjs from "@rollup/plugin-commonjs"
+import resolve from "@rollup/plugin-node-resolve"
 
 const peerDepsExternal = /** @type {any}*/ (peerDepsExternalImport)
 
 export default defineConfig({
-	plugins: [typescript({ tsconfig: "./tsconfig.json" }), peerDepsExternal(), preserveDirectives()],
+	plugins: [
+		typescript({ tsconfig: "./tsconfig.json" }),
+		cjs(),
+		resolve(),
+		peerDepsExternal(),
+		preserveDirectives(),
+	],
 	input: {
 		index: "src/index.tsx",
 		"plugin/index": "src/plugin/index.ts",
@@ -33,5 +41,6 @@ export default defineConfig({
 		"path",
 		"url",
 		"fs/promises",
+		"@inlang/sdk",
 	],
 })

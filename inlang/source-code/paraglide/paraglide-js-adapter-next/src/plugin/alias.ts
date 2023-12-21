@@ -1,5 +1,6 @@
 import { NextConfig } from "next"
 import { resolve } from "path"
+import { paraglide } from "@inlang/paraglide-js-adapter-webpack"
 
 /**
  * Adds an alias to the bundler config.
@@ -19,6 +20,8 @@ export function addAlias(nextConfig: NextConfig, aliases: Record<string, string>
 
 			config.resolve = config.resolve ?? {}
 			config.resolve.alias = config.resolve.alias ?? {}
+
+			console.log("paraglide", paraglide)
 
 			config.resolve.alias = {
 				...config.resolve.alias,
