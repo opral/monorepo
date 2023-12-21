@@ -1,6 +1,9 @@
 "use client"
 
-import { isAvailableLanguageTag, sourceLanguageTag } from "@/paraglide/runtime"
+import {
+	isAvailableLanguageTag,
+	sourceLanguageTag,
+} from "$paraglide-adapter-next-internal/runtime.js"
 import { usePathname } from "next/navigation"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
