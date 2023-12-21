@@ -1,24 +1,12 @@
-import { Button } from "#src/interface/components/Button.jsx"
-import { For, Show, createSignal } from "solid-js"
+import { Show } from "solid-js"
 import UserDropdown from "./UserDropdown.jsx"
-import IconClose from "~icons/material-symbols/close-rounded"
-import IconMenu from "~icons/material-symbols/menu-rounded"
 import Link from "#src/renderer/Link.jsx"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 
 function EditorHeader() {
-	const getLinks = () => {
-		return [
-			{
-				name: `Editor Projects`,
-				href: "/editor",
-			},
-			{
-				name: `Apps`,
-				href: "/c/application",
-			},
-		]
-	}
+	// const getLinks = () => {
+	// 	return []
+	// }
 
 	const [localStorage] = useLocalStorage()
 	const user = () => {
@@ -26,10 +14,10 @@ function EditorHeader() {
 		return localStorage.user
 	}
 
-	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false)
+	// const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false)
 	return (
 		<>
-			<header class="sticky top-0 z-[9999] w-full bg-transparent bg-background py-3.5 px-4 border-b border-surface-200">
+			<header class="sticky top-0 z-[1000] w-full bg-transparent bg-background py-3.5 px-4 border-b border-surface-200">
 				<div class="w-full h-full relative z-10 bg-background max-w-7xl mx-auto flex flex-row justify-between sm:static">
 					<nav class="max-w-[1248px] w-full mx-auto -mt-[0.8px] -mb-[1.5px]">
 						<div class="flex items-center">
@@ -65,7 +53,7 @@ function EditorHeader() {
 							{/* <p class="self-center text-left font-regular text-surface-400 pl-3 pr-1">/</p> */}
 							<div class="w-full content-center">
 								<div class="hidden md:flex justify-end items-center gap-8">
-									<For each={getLinks()}>
+									{/* <For each={getLinks()}>
 										{(link) => (
 											<>
 												<Button type="text" href={link.href}>
@@ -73,14 +61,14 @@ function EditorHeader() {
 												</Button>
 											</>
 										)}
-									</For>
+									</For> */}
 									<Show when={user()?.isLoggedIn}>
 										<UserDropdown />
 									</Show>
 								</div>
 							</div>
 							{/* Controll the Dropdown/Navbar  if its open then Show MobileNavMenue */}
-							<div class="md:hidden flex items-center">
+							{/* <div class="md:hidden flex items-center">
 								<button
 									onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
 									type="button"
@@ -93,10 +81,10 @@ function EditorHeader() {
 										<IconMenu class="w-6 h-6" />
 									)}
 								</button>
-							</div>
+							</div> */}
 						</div>
 						{/* MobileNavbar includes the Navigation for the Documentations sites  */}
-						<Show when={mobileMenuIsOpen()}>
+						{/* <Show when={mobileMenuIsOpen()}>
 							<ol class="space-y-1 relativ w-full min-h-full pt-3 pl-[5px] overflow">
 								<For each={getLinks()}>
 									{(link) => (
@@ -112,7 +100,7 @@ function EditorHeader() {
 									)}
 								</For>
 							</ol>
-						</Show>
+						</Show> */}
 					</nav>
 				</div>
 			</header>

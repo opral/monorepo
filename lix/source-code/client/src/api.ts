@@ -54,6 +54,7 @@ export type Repository = {
 	errors: Subscribable<LixError[]>
 	getMeta: () => Promise<
 		| {
+				id: string
 				name: string
 				isPrivate: boolean
 				isFork: boolean
