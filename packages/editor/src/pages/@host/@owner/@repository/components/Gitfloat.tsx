@@ -94,7 +94,7 @@ export const Gitfloat = () => {
 
 			setTimeout(() => {
 				// @ts-expect-error - type mismatch fix after refactoring
-				navigate(`/editor/github.com/${response.data.full_name}`)
+				navigate(`/github.com/${response.data.full_name}`)
 			}, 1000)
 			return
 		} else if (response?.status === 403) {
