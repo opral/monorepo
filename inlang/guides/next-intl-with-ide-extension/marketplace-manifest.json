@@ -1,6 +1,6 @@
 {
 	"id": "guide.nilsjacobsen.nextIntlIdeExtension",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/ecosystem-compatible/assets/compatible-badge.png",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/next-intl-with-ide-extension/assets/icon.png",
 	"displayName": {
 		"en": "Setting Up next-intl with IDE Extension."
 	},
