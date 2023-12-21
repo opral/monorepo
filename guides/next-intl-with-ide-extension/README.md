@@ -1,6 +1,6 @@
-# Setting Up next-intl with IDE Extension.
-
 In this guide, I'll walk you through the seamless integration of the next-intl internationalization library with your favorite IDE extension. This powerful combination, featuring next-intl and an IDE extension, enhances your development workflow, offering i18n management for Next.js projects.
+
+[!image](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/next-intl-with-ide-extension/assets/next-intl-guide.png)
 
 ## Why Choose the IDE Extension and next-intl Combo?
 
