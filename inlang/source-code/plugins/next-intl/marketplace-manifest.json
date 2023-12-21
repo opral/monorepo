@@ -1,17 +1,17 @@
 {
-	"id": "plugin.inlang.i18next",
+	"id": "plugin.inlang.nextIntl",
 	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/i18next/assets/icon.png",
 	"displayName": {
-		"en": "i18next"
+		"en": "next-intl"
 	},
 	"description": {
-		"en": "A plugin for inlang projects that works with i18next and reads + writes resources."
+		"en": "A plugin for inlang projects that work with next-intl and reads + writes resources and add matcher."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/i18next/README.md"
+		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/next-intl/README.md"
 	},
 	"keywords": [
-		"i18next",
+		"next-intl",
 		"javascript",
 		"react",
 		"nextjs",
@@ -27,5 +27,5 @@
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0",
-	"module": "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@latest/dist/index.js"
+	"module": "https://cdn.jsdelivr.net/npm/@inlang/plugin-next-intl@latest/dist/index.js"
 }
