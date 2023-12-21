@@ -27,7 +27,8 @@ The synergy of the next-intl i18n library and an IDE extension provides a robust
 <br/>
 
 - Ensure you have a working next-intl project. You could also find examples [here](https://next-intl-docs.vercel.app/examples)
-- Copy the provided settings file to your project: project.inlang/settings.json.
+- Add a `project.inlang` folder on the root
+- Copy the following `settings.json` file to that new dir `project.inlang/settings.json`.
 
 ```json
 {
