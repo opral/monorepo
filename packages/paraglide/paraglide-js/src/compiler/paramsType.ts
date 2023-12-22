@@ -1,5 +1,5 @@
 import { escapeForSingleQuoteString } from "../services/escape/index.js"
-import { isValidJsIdentifier } from "../services/valid-js-identifier/index.js"
+import { isValidJSIdentifier } from "@inlang/valid-js-identifier"
 
 export type Params = Record<string, "NonNullable<unknown>">
 
@@ -20,7 +20,7 @@ export const paramsType = (params: Params, isMessagesIndex: boolean) => {
 
 	const fieldTypes: `${string}: ${string}`[] = []
 	for (const [name, type] of Object.entries(params)) {
-		if (isValidJsIdentifier(name)) {
+		if (isValidJSIdentifier(name)) {
 			fieldTypes.push(`${name}: ${type}`)
 		} else {
 			fieldTypes.push(`'${escapeForSingleQuoteString(name)}': ${type}`)

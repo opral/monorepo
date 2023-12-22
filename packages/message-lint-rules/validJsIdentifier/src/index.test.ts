@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { lintMessages } from "@inlang/sdk/lint"
-import { validJsIdentifier } from "./validJSIdentifier.js"
+import validJsIdentifier from "./index.js"
 import { createMessage } from "@inlang/sdk/test-utilities"
 
 describe("validJsIdentifier", () => {

@@ -2,7 +2,7 @@ import { LanguageTag, type Message } from "@inlang/sdk"
 import { compilePattern } from "./compilePattern.js"
 import { paramsType, type Params } from "./paramsType.js"
 import { optionsType } from "./optionsType.js"
-import { isValidJsIdentifier } from "../services/valid-js-identifier/index.js"
+import { isValidJSIdentifier } from "@inlang/valid-js-identifier"
 
 /**
  * Returns the compiled messages for the given message.
@@ -22,7 +22,7 @@ export const compileMessage = (
 } => {
 	// choosing a regex for valid JS variable names is too long.
 	// (because JS allows almost any function or variable names).
-	if (!isValidJsIdentifier(message.id)) {
+	if (!isValidJSIdentifier(message.id)) {
 		throw new Error(
 			`Cannot compile message with ID "${message.id}".\n\nThe message is not a valid JavaScript variable name. Please choose a different ID.\n\nTo detect this issue during linting, use the valid-js-identifier lint rule: https://inlang.com/m/teldgniy/messageLintRule-inlang-validJsIdentifier`
 		)
