@@ -1,6 +1,6 @@
 {
     "name": "@inlang/valid-js-identifier",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Validates that a string is a valid JavaScript identifier",
     "type": "module",
     "main": "src/index.js",
@@ -10,9 +10,8 @@
         "access": "public"
     },
     "scripts": {
-        "postinstall": "node ./dts.js",
         "prepublishOnly": "node ./dts.js",
-        "lint": "eslint src",
+        "lint": "node ./dts.js && eslint src",
         "build": "node ./dts.js",
         "test": "vitest run",
         "clean": "rm -rf ./node_modules ./types"
