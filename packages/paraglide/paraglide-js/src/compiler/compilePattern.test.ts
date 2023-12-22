@@ -65,3 +65,12 @@ it("should compile a pattern with multiple VariableReference's", () => {
 	const { compiled } = compilePattern(pattern)
 	expect(compiled).toBe("`Hello ${params.name}! You have ${params.count} messages.`")
 })
+
+it("should compile a pattern with a variableReference that isn't a valid JS identifier", () => {
+	const pattern: Pattern = [
+		{ type: "Text", value: "Hello " },
+		{ type: "VariableReference", name: "000" },
+	]
+	const { compiled } = compilePattern(pattern)
+	expect(compiled).toBe("`Hello ${params['000']}`")
+})

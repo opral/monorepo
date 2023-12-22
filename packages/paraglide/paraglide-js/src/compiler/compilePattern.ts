@@ -1,4 +1,6 @@
 import type { Pattern } from "@inlang/sdk"
+import { isValidJsIdentifier } from "../services/valid-js-identifier/index.js"
+import { escapeForTemplateLiteral, escapeForSingleQuoteString } from "../services/escape/index.js"
 
 /**
  * Compiles a pattern into a template literal string.
@@ -21,7 +23,12 @@ export const compilePattern = (
 				result += escapeForTemplateLiteral(element.value)
 				break
 			case "VariableReference":
-				result += "${params." + element.name + "}"
+				if (isValidJsIdentifier(element.name)) {
+					result += "${params." + element.name + "}"
+				} else {
+					result += "${params['" + escapeForSingleQuoteString(element.name) + "']}"
+				}
+
 				params[element.name] = "NonNullable<unknown>"
 				break
 			default:
@@ -32,13 +39,4 @@ export const compilePattern = (
 		params,
 		compiled: "`" + result + "`",
 	}
-}
-
-/**
- * Escapes some Text so that it can safely be used inside a template literal.
- * @param text
- * @returns
- */
-function escapeForTemplateLiteral(text: string): string {
-	return text.replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\${/g, "\\${")
 }
