@@ -50,3 +50,23 @@ export class PluginLoadMessagesError extends Error {
 		this.name = "PluginLoadMessagesError"
 	}
 }
+
+export class LoadMessageError extends Error {
+	constructor(options: { path: string; messageId: string; cause: ErrorOptions["cause"] }) {
+		super(
+			`An error occured when loading message ${options.messageId} from path ${options.path} caused by ${options.cause}.`,
+			options
+		)
+		this.name = "LoadMessageError"
+	}
+}
+
+export class SaveMessageError extends Error {
+	constructor(options: { path: string; messageId: string; cause: ErrorOptions["cause"] }) {
+		super(
+			`An error occured when loading message ${options.messageId} from path ${options.path} caused by ${options.cause}.`,
+			options
+		)
+		this.name = "SaveMessageError"
+	}
+}
