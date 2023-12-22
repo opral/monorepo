@@ -11,6 +11,12 @@
 	"publishConfig": {
 		"access": "public"
 	},
+	"recommends": [
+		"m/tdozzpa",
+		"m/2qj2w8pu",
+		"m/r7kp499g",
+		"m/gerre34r"
+	],
 	"scripts": {
 		"postinstall": "patch-package --error-on-fail",
 		"dev": "inlang module build --entry ./src/index.ts --outdir ./dist --watch",

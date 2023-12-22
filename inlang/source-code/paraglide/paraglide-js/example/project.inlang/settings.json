@@ -1,7 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/project-settings",
 	"sourceLanguageTag": "en",
-	"languageTags": ["en", "de", "en-US"],
+	"languageTags": ["en", "de"],
 	"modules": ["../../../plugins/inlang-message-format/dist/index.js"],
 	"plugin.inlang.messageFormat": {
 		"pathPattern": "./messages/{languageTag}.json"

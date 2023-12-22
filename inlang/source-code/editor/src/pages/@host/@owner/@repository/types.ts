@@ -13,4 +13,8 @@ export type EditorSearchParams = {
 	 * the current branch
 	 */
 	branch?: string
+	/**
+	 * the current project
+	 */
+	project?: string
 }

@@ -165,6 +165,7 @@ export class InlangInstall extends TwLitElement {
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			projectPath: this.url.project!,
 			nodeishFs: repo.nodeishFs,
+			repo,
 		})
 
 		if (inlangProject.errors().length > 0) {
@@ -205,6 +206,7 @@ export class InlangInstall extends TwLitElement {
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			projectPath: this.url.project!,
 			nodeishFs: repo.nodeishFs,
+			repo,
 		})
 
 		this.loadingProgress = 100
@@ -460,7 +462,7 @@ export class InlangInstall extends TwLitElement {
 								!this.isValidUrl() && this.repoURL.length > 0
 									? " border-red-500 mb-8"
 									: " focus-within:border-[#098DAC] border-slate-200"
-							}	
+							}
 `}
 						>
 							<input

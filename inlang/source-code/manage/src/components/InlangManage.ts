@@ -25,7 +25,7 @@ export class InlangManage extends TwLitElement {
 	repoURL: string = ""
 
 	@property({ type: Object })
-	projects: Record<string, string>[] | undefined | "no-access" | "load" = "load"
+	projects: Record<string, string>[] | undefined | "no-access" | "load" | "error" = "load"
 
 	@property({ type: Object })
 	modules: ManifestWithVersion[] | undefined | "empty"
@@ -87,6 +87,11 @@ export class InlangManage extends TwLitElement {
 								: module.split("/")[5]
 						)
 					) {
+						if (!module.includes("jsdelivr")) {
+							this.projects = "error"
+							return
+						}
+
 						const response = await fetch(
 							// @ts-ignore
 							registryModule.module.replace("dist/index.js", `package.json`)
@@ -100,6 +105,16 @@ export class InlangManage extends TwLitElement {
 					}
 				}
 			}
+
+			// Remove duplicates
+			for (const [index, module] of tempModules.entries()) {
+				for (const [index2, module2] of tempModules.entries()) {
+					if (module.id === module2.id && index !== index2) {
+						tempModules.splice(index2, 1)
+					}
+				}
+			}
+
 			this.modules = tempModules
 			if (!this.modules) this.modules = "empty"
 		}
@@ -436,6 +451,28 @@ export class InlangManage extends TwLitElement {
 											target="_blank"
 											class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
 											>Configure Permissions
+											<doc-icon
+												class="inline-block ml-1 translate-y-0.5"
+												size="1.2em"
+												icon="mdi:arrow-top-right"
+											></doc-icon>
+										</a>
+									</div>
+							  </div>`
+							: this.projects === "error"
+							? html`<div class="flex flex-col gap-0.5 mt-4">
+									<div
+										class="py-4 px-8 w-full rounded-md bg-red-100 text-red-500 flex flex-col items-center justify-center"
+									>
+										<p class="mb-2 font-medium text-center">Your project settings seem invalid.</p>
+										<p class="mb-8 text-center">
+											Please make sure to use inlang's official links to properly load modules.
+										</p>
+										<a
+											href=${`https://${this.url.repo}`}
+											target="_blank"
+											class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+											>Go to Repository
 											<doc-icon
 												class="inline-block ml-1 translate-y-0.5"
 												size="1.2em"

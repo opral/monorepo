@@ -1,0 +1,35 @@
+{
+    "name": "@inlang/valid-js-identifier",
+    "version": "0.0.1",
+    "description": "Validates that a string is a valid JavaScript identifier",
+    "type": "module",
+    "main": "src/index.js",
+    "module": "src/index.js",
+    "types": "types/index.d.ts",
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "postinstall": "node ./dts.js",
+        "prepublishOnly": "node ./dts.js",
+        "lint": "eslint src",
+        "build": "node ./dts.js",
+        "test": "vitest run",
+        "clean": "rm -rf ./node_modules ./types"
+    },
+    "files": [
+        "src",
+        "!src/**/*.test.js",
+        "types"
+    ],
+    "devDependencies": {
+        "dts-buddy": "^0.4.3",
+        "vitest": "^1.1.0"
+    },
+    "exports": {
+        ".": {
+            "import": "./src/index.js",
+            "types": "./types/index.d.ts"
+        }
+    }
+}

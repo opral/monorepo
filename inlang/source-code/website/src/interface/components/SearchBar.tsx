@@ -33,7 +33,7 @@ export default function SearchBar() {
 
 	return (
 		<form
-			class="group relative flex justify-center gap-1 px-3 items-center border h-8 w-full py-0.5 rounded-full transition-all duration-150 bg-background border-surface-200 focus-within:border-primary"
+			class="group relative flex justify-center gap-1 px-3 items-center border h-8 w-full py-0.5 rounded-lg transition-all duration-150 bg-background border-surface-200 focus-within:border-primary"
 			onSubmit={(e) => {
 				e.preventDefault()
 				handleNavigate()
@@ -46,7 +46,7 @@ export default function SearchBar() {
 				name="search"
 				autocomplete="off"
 				placeholder={"/ " + m.marketplace_header_search_placeholder()}
-				class="border-0 focus:ring-0 h-full w-full pl-0 text-sm md:placeholder:text-surface-400 placeholder:text-surface-900/0 transition-all"
+				class="border-0 focus:ring-0 h-full w-full pl-0 text-sm placeholder:text-surface-500 transition-all"
 				value={q ? q : searchInput()}
 				ref={inputElement}
 				onInput={(e) => {
@@ -54,7 +54,7 @@ export default function SearchBar() {
 				}}
 			/>
 			<button type="submit" aria-label="submit search">
-				<IconSearch class="ml-1.5 transition-color duration-150 group-focus-within:text-primary" />
+				<IconSearch class="-mr-0.5 transition-color duration-150 group-focus-within:text-primary text-surface-400" />
 			</button>
 		</form>
 	)

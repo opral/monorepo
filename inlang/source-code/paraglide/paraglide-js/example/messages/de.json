@@ -1,5 +1,8 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"currentLanguageTag": "Der aktuelle Sprachtag ist \"{languageTag}\".",
-	"greeting": "Hallo {name}! Du hast {count} Nachrichten."
+	"greeting": "Hallo {name}! Du hast {count} Nachrichten.",
+	"hello": "Hallo Welt!",
+	"with_backtick": "`Hallo Welt!`",
+	"with_nonjs_variable": "Hallo {000}"
 }
