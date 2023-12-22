@@ -70,7 +70,7 @@ export const compile = (args: {
 *! WARNING: Only import messages from this file if you want to manually
 *! optimize your bundle. Else, import from the \`messages.js\` file. 
 * 
-* Your bundler will (in the future) automatically replace the index function 
+* Your bundler will (in future) automatically replace the index function 
 * with a language specific message function in the build step. 
 */` + content,
 			])
