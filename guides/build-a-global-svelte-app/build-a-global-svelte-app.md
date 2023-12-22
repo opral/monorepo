@@ -206,7 +206,7 @@ Right now [[lang]] will match any string, not just languages. We can make sure t
 
 ```ts
 // ./src/params/lang.ts
-import { availableLanguageTags, AvailableLanguageTag } from "$paraglide/runtime"
+import { availableLanguageTags, type AvailableLanguageTag } from "$paraglide/runtime"
 
 export const match = (param: any): param is AvailableLanguageTag => {
 	return availableLanguageTags.includes(param)
@@ -231,7 +231,7 @@ In your root layout, add some code that reactively sets the language tag based o
 ```svelte
 <script lang="ts">
   import { page } from "$app/stores";
-  import { setLanguageTag, sourceLanguageTag type AvailableLanguageTag } from "$paraglide/runtime";
+  import { setLanguageTag, sourceLanguageTag, type AvailableLanguageTag } from "$paraglide/runtime";
 
   //Use the default language if no language is given
   $: lang = $page.params.lang as AvailableLanguageTag ?? sourceLanguageTag;
@@ -280,7 +280,7 @@ export function route(path: string, lang: AvailableLanguageTag) {
 function withoutLanguageTag(path: string) {
 	const [_, maybeLang, ...rest] = path.split("/")
 	if (availableLanguageTags.includes(maybeLang as AvailableLanguageTag)) {
-		return rest.join("/")
+		return `/${rest.join('/')}`
 	}
 	return path
 }
@@ -339,6 +339,8 @@ Then in `hooks.server.ts`, replace the placeholder with the correct language.
 
 ```ts
 // ./src/hooks.server.ts
+import { sourceLanguageTag } from "$paraglide/runtime";
+
 export async function handle({ event, resolve }) {
 	const lang = event.params.lang ?? sourceLanguageTag
 
@@ -360,14 +362,15 @@ On the client, we can set the `lang` attribute using JS. In your root layout, ad
 ```svelte
 <script lang="ts">
   import { page } from "$app/stores";
-  import { setLanguageTag, sourceLanguageTag type AvailableLanguageTag } from "$paraglide/runtime";
+  import { setLanguageTag, sourceLanguageTag, type AvailableLanguageTag } from "$paraglide/runtime";
+  import { browser } from "$app/environment";
 
   //Use the default language if no language is given
   $: lang = $page.params.lang as AvailableLanguageTag ?? sourceLanguageTag;
   $: setLanguageTag(lang);
 
   //Set the lang attribute on the html tag
-  $: document.documentElement.lang = lang;
+  $: if(browser) document.documentElement.lang = lang;
 </script>
 ```
 

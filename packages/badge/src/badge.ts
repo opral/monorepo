@@ -40,6 +40,7 @@ export const badge = async (url: string) => {
 				distinctId: "unknown",
 			})
 		},
+		repo,
 	})
 
 	// access all messages via inlang instance query
@@ -115,20 +116,11 @@ export const badge = async (url: string) => {
 
 	await cache.set(url, image)
 
-	// TODO add a project UUID to the tele.groups internal #196
-
-	// const gitOrigin = await repo.getOrigin()
+	// TODO: additional badge telemetry event?
 	// telemetryNode.capture({
 	// 	event: "BADGE created",
 	// 	groups: { repository: gitOrigin },
 	// 	distinctId: "unknown",
-	// })
-	// telemetryNode.groupIdentify({
-	// 	groupType: "repository",
-	// 	groupKey: gitOrigin,
-	// 	properties: {
-	// 		name: gitOrigin,
-	// 	},
 	// })
 	return image
 }
