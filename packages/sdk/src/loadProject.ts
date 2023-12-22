@@ -166,13 +166,6 @@ export const loadProject = async (args: {
 					try {
 						await fs.mkdir(messageFolderPath, { recursive: true })
 					} catch (e) {
-						for (let a = 0; a < 1000; a++) {
-							console.log(
-								"asdsadasdasdsadsadasdasdasdasdasdsadasdasdasdasdasddsadasdasdasdasdasd" +
-									(e as any).code
-							)
-						}
-						console.log((e as any).code)
 						if ((e as any).code !== "EEXIST") {
 							throw e
 						}
@@ -278,12 +271,6 @@ export const loadProject = async (args: {
 										{ encoding: "utf-8" }
 									)
 								} catch (e) {
-									for (let a = 0; a < 1000; a++) {
-										console.log(
-											"asdsadasdasdsadsadasdasdasdasdasdsadasdasdasdasdasddsadasdasdasdasdasd22222222" +
-												(e as any).code
-										)
-									}
 									// check for file not exists error (expected in case of deletion of a message) rethrow on everything else
 									if ((e as any).code !== "ENOENT") {
 										throw e
@@ -415,12 +402,6 @@ export const loadProject = async (args: {
 				try {
 					nodeishFs.rm(messageFilePath)
 				} catch (e) {
-					for (let a = 0; a < 1000; a++) {
-						console.log(
-							"asdsadasdasdsadsadasdasdasdasdasdsadasdasdasdasdasddsadasdasdasdasdasd123213" +
-								(e as any).code
-						)
-					}
 					if ((e as any).code !== "ENOENT") {
 						throw e
 					}
