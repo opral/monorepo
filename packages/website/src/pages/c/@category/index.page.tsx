@@ -17,7 +17,6 @@ import { renderLocales } from "#src/renderer/renderLocales.js"
 import SvelteHeader from "#src/interface/marketplace/categoryHeaders/cards/svelte.jsx"
 import NextjsHeader from "#src/interface/marketplace/categoryHeaders/cards/nextjs.jsx"
 import GenericHeader from "#src/interface/marketplace/categoryHeaders/cards/generic.jsx"
-import { i18nRouting } from "#src/renderer/_default.page.route.js"
 import AppHeader from "#src/interface/marketplace/categoryHeaders/categoryHeros/appHeader.jsx"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
