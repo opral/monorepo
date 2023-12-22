@@ -1,11 +1,11 @@
 {
 	"id": "plugin.inlang.nextIntl",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/i18next/assets/icon.png",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/next-intl/assets/plugin-next-intl-logo.png",
 	"displayName": {
-		"en": "next-intl"
+		"en": "next-intl plugin"
 	},
 	"description": {
-		"en": "A plugin for inlang projects that work with next-intl and reads + writes resources and add matcher."
+		"en": "A plugin to make next-intl ecosystem compatible with inlang"
 	},
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/next-intl/README.md"
