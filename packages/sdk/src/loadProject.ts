@@ -480,12 +480,6 @@ export const loadProject = async (args: {
 						try {
 							await nodeishFs.stat(path)
 						} catch (e) {
-							for (let a = 0; a < 1000; a++) {
-								console.log(
-									"asdsadasdasdsadsadasdasdasdasdasdsadasdasdasdasdasddsadasdasdasdasdasdJOJO" +
-										(e as any).code
-								)
-							}
 							if ((e as any).code === "ENOENT") {
 								// keep the message id!
 								continue
