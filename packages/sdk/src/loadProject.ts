@@ -149,6 +149,8 @@ export const loadProject = async (args: {
 		// needed for granular linting
 		const [messages, setMessages] = createSignal<Message[]>()
 
+		const [messageParseErrors, setMessageParseErrors] = createSignal<Record<string, Error>>({})
+
 		const messageFolderPath = projectPath + "/messages" + "/v1"
 
 		createEffect(() => {
@@ -157,14 +159,23 @@ export const loadProject = async (args: {
 
 			const loadAndSetMessages = async (fs: NodeishFilesystemSubset) => {
 				// load all messages
-				const messages: Message[] = []
+				const loadedMessages: Message[] = []
 
 				try {
 					// make sure the message folder exists within the .inlang folder
 					try {
 						await fs.mkdir(messageFolderPath, { recursive: true })
 					} catch (e) {
-						// TODO #1844 find better way to check if the folder exists
+						for (let a = 0; a < 1000; a++) {
+							console.log(
+								"asdsadasdasdsadsadasdasdasdasdasdsadasdasdasdasdasddsadasdasdasdasdasd" +
+									(e as any).code
+							)
+						}
+						console.log((e as any).code)
+						if ((e as any).code !== "EEXIST") {
+							throw e
+						}
 					}
 
 					const readFilesFromFolderRecursive = async (
@@ -192,8 +203,8 @@ export const loadProject = async (args: {
 					}
 					const messageFilePaths = await readFilesFromFolderRecursive(fs, messageFolderPath, "")
 					for (const messageFilePath of messageFilePaths) {
+						const messageId = getMessageIdFromPath(messageFilePath)
 						try {
-							const messageId = getMessageIdFromPath(messageFilePath)
 							if (!messageId) {
 								// ignore files not matching the expected id file path
 								continue
@@ -203,15 +214,32 @@ export const loadProject = async (args: {
 								encoding: "utf-8",
 							})
 
-							// TODO #1844 the place where we read in the file - if this fails we should consider ignoring it
+							// TODO #1844 the place where we read in the file - if this fails we should consider ignoring it -> add error to messageParseErrors Array and ignore it for now
 							const message = parseMessage(messageFilePath, messageRaw) as Message
-							messages.push(message)
+							//tf
+							//
+							// message parsing was successfull remove entry in erros map if it exists
+							// TODO #1844
+							// if (messageParseErrors!) {
+							// 	messageParseErrors!().delete[messageId]
+							// 	setMessageParseErrors(messageParseErrors!)
+							// }
+							loadedMessages.push(message)
 						} catch (e) {
-							console.log(e)
+							// TODO #1844
+							// messageParseErrors!.set(
+							// 	messageId,
+							// 	new LoadMessageError({
+							// 		path: messageFilePath,
+							// 		messageId,
+							// 		cause: e,
+							// 	})
+							// )
+							// setMessageParseErrors(messageParseErrors)
 						}
 					}
 
-					setMessages(messages)
+					setMessages(loadedMessages)
 
 					markInitAsComplete()
 				} catch (err) {
@@ -224,8 +252,9 @@ export const loadProject = async (args: {
 				// when initial message loading is done start watching on file changes in the message dir
 				;(async () => {
 					try {
+						// NOTE: We dont use the abortController at the moment - this is the same for the SDK everywhere atm.
+						// const abortController = new AbortController()
 						const watcher = nodeishFs.watch(messageFolderPath, {
-							// TODO #1844  - check who would signal here -
 							// signal: abortController.signal,
 							persistent: false,
 							recursive: true,
@@ -243,43 +272,54 @@ export const loadProject = async (args: {
 								}
 
 								let fileContent: string | undefined
-								// TODO #1844 lets read the message and reload it
 								try {
 									fileContent = await nodeishFs.readFile(
 										messageFolderPath + "/" + event.filename!,
 										{ encoding: "utf-8" }
 									)
 								} catch (e) {
-									// TODO #1844 check for file not exists - ENOENT and rethrow if different error
-									// if (e.code !== 'ENOENT') {
-									// 	throw e;
-									// }
-									// deleted = true;
-									// file does not exis - drop message in inlang project
+									for (let a = 0; a < 1000; a++) {
+										console.log(
+											"asdsadasdasdsadsadasdasdasdasdasdsadasdasdasdasdasddsadasdasdasdasdasd22222222" +
+												(e as any).code
+										)
+									}
+									// check for file not exists error (expected in case of deletion of a message) rethrow on everything else
+									if ((e as any).code !== "ENOENT") {
+										throw e
+									}
 								}
 
 								if (!fileContent) {
 									// file was deleted - drop the corresponding message
 									messagesQuery.delete({ where: { id: messageId } })
 								} else {
-									const message = parseMessage(event.filename, fileContent)
-									const currentMessage = messagesQuery.get({ where: { id: messageId } })
-									const currentMessageEncoded = encodeMessage(currentMessage)
-									if (currentMessage && currentMessageEncoded === fileContent) {
-										continue
-									}
+									try {
+										const message = parseMessage(event.filename, fileContent)
+										// TODO #1844
+										// if (messageParseErrors![messageId]) {
+										// 	delete messageParseErrors![messageId]
+										// 	setMessageParseErrors(messageParseErrors)
+										// }
+										const currentMessage = messagesQuery.get({ where: { id: messageId } })
+										const currentMessageEncoded = encodeMessage(currentMessage)
+										if (currentMessage && currentMessageEncoded === fileContent) {
+											continue
+										}
 
-									messagesQuery.upsert({ where: { id: messageId }, data: message })
+										messagesQuery.upsert({ where: { id: messageId }, data: message })
+									} catch (e) {
+										// TODO #1844
+										// messageParseErrors[messageId] = new LoadMessageError(messageId, messagePath, {
+										// 	cause: e,
+										// })
+										// setMessageParseErrors(messageParseErrors)
+									}
 								}
 							}
 						}
 					} catch (err: any) {
 						if (err.name === "AbortError") return
-						// https://github.com/inlang/monorepo/issues/1647
-						// the file does not exist (yet)
-						// this is not testable beacause the fs.watch api differs
-						// from node and lix. lenghty
-						else if (err.code === "ENOENT") return
 						throw err
 					}
 				})()
@@ -325,15 +365,9 @@ export const loadProject = async (args: {
 
 		const messagesQuery = createMessagesQuery(() => messages() || [])
 
-		let trackedMessages: Map<string, () => void> | undefined
+		let trackedMessages: Map<string, () => void> = new Map()
 		// subscribe to all messages and write to files on signal
 		createEffect(() => {
-			let initialEffectCreation = false
-			if (trackedMessages === undefined) {
-				initialEffectCreation = true
-				trackedMessages = new Map()
-			}
-
 			const currentMessageIds = messagesQuery.includedMessageIds()
 			const deletedMessageTrackedMessage = [...trackedMessages].filter(
 				(tracked) => !currentMessageIds.includes(tracked[0])
@@ -342,11 +376,13 @@ export const loadProject = async (args: {
 				if (!trackedMessages!.has(messageId!)) {
 					// to avoid to drop the effect after creation we need to create a new disposable root
 					createRoot((dispose) => {
-						trackedMessages!.set(messageId, dispose)
 						createEffect(() => {
 							const message = messagesQuery.get({ where: { id: messageId } })!
-							if (!initialEffectCreation) {
-								const createMessage = async (
+							if (!message) {
+								return
+							}
+							if (trackedMessages?.has(messageId)) {
+								const persistMessage = async (
 									fs: NodeishFilesystemSubset,
 									path: string,
 									message: Message
@@ -363,7 +399,11 @@ export const loadProject = async (args: {
 									await fs.writeFile(path, encodeMessage(message))
 								}
 								const messageFilePath = messageFolderPath + "/" + getPathFromMessageId(message.id)
-								createMessage(nodeishFs, messageFilePath, message)
+								// TODO #1844 non awaited promise - how to handle errors on persistence - guess we add them to the project errors
+								persistMessage(nodeishFs, messageFilePath, message)
+							} else {
+								// initial effect execution - add dispose function
+								trackedMessages?.set(messageId, dispose)
 							}
 						})
 					})
@@ -371,15 +411,18 @@ export const loadProject = async (args: {
 			}
 
 			for (const deletedMessage of deletedMessageTrackedMessage) {
-				if (!initialEffectCreation) {
-					const messageFilePath = messageFolderPath + "/" + getPathFromMessageId(deletedMessage[0])
-					try {
-						nodeishFs.rm(messageFilePath)
-					} catch (e) {
-						// TODO #1844 check if we have a file not exits error
+				const messageFilePath = messageFolderPath + "/" + getPathFromMessageId(deletedMessage[0])
+				try {
+					nodeishFs.rm(messageFilePath)
+				} catch (e) {
+					for (let a = 0; a < 1000; a++) {
 						console.log(
-							"message that was deleted in the project did not have a representation on disc"
+							"asdsadasdasdsadsadasdasdasdasdasdsadasdasdasdasdasddsadasdasdasdasdasd123213" +
+								(e as any).code
 						)
+					}
+					if ((e as any).code !== "ENOENT") {
+						throw e
 					}
 				}
 				// dispose
@@ -408,7 +451,6 @@ export const loadProject = async (args: {
 			)
 			const loadPluginId = loadMessagePlugin!.id
 
-			// TODO #1844 create new type that makes the id optional
 			const importedMessages = await makeTrulyAsync(
 				_resolvedModules.resolvedPluginApi.loadMessages({
 					// @ts-ignore
@@ -417,7 +459,10 @@ export const loadProject = async (args: {
 				})
 			)
 
-			for (const importedMessage of importedMessages) {
+			const messagesToImportSorted = importedMessages.sort((importMessageA, importMessageB) =>
+				importMessageA.id.localeCompare(importMessageB.id)
+			)
+			for (const importedMessage of messagesToImportSorted) {
 				const currentMessages = messagesQuery
 					.getAll()
 					// TODO #1585 here we match using the id to support legacy load message plugins - after we introduced import / export methods we will use importedMessage.alias
@@ -446,10 +491,35 @@ export const loadProject = async (args: {
 					importedMessage.alias[loadPluginId] = importedMessage.id
 					importedMessage.alias["library.inlang.paraglideJs"] = importedMessage.id
 
-					// create a humanId based on a hash of the alias 
-					importedMessage.id = humanIdHash(importedMessage.id)
+					let currentOffset = 0
+					let messsageId: string | undefined
+					do {
+						messsageId = humanIdHash(importedMessage.id, currentOffset)
+						const path = /* messageFolderPath + "/" +*/ getPathFromMessageId(messsageId)
+						try {
+							await nodeishFs.stat(path)
+						} catch (e) {
+							for (let a = 0; a < 1000; a++) {
+								console.log(
+									"asdsadasdasdsadsadasdasdasdasdasdsadasdasdasdasdasddsadasdasdasdasdasdJOJO" +
+										(e as any).code
+								)
+							}
+							if ((e as any).code === "ENOENT") {
+								// keep the message id!
+								continue
+							}
+							throw e
+						}
 
-					// TODO #1844 - check for collision / block id on fs
+						currentOffset += 1
+						messsageId = undefined
+					} while (messsageId === undefined)
+
+					// create a humanId based on a hash of the alias
+					importedMessage.id = messsageId
+
+					// TODO #1844 CLEARIFY - we don't block fs here - we could have a situation where a file with the same message id is created in the meantime
 					messagesQuery.create({ data: importedMessage })
 				}
 			}
@@ -494,6 +564,7 @@ export const loadProject = async (args: {
 			errors: createSubscribable(() => [
 				...(initializeError ? [initializeError] : []),
 				...(resolvedModules() ? resolvedModules()!.errors : []),
+				// ...Object.values(messageParseErrors()),
 				// have a query error exposed
 				//...(lintErrors() ?? []),
 			]),
