@@ -242,6 +242,12 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 							branch,
 						}
 					)
+
+					if (newRepo.errors().length > 0) {
+						setLixErrors(newRepo.errors())
+						return
+					}
+
 					// @ts-expect-error
 					newRepo.nodeishFs.watch = () => undefined
 					setLastPullTime(new Date())
