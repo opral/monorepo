@@ -19,6 +19,22 @@ export const validJsIdentifier: MessageLintRule = {
 			})
 		}
 
+		for (const variant of message.variants) {
+			for (const element of variant.pattern) {
+				if (element.type !== "VariableReference") continue
+
+				if (KEYWORDS.includes(element.name) || !isValidJsIdentifier(element.name)) {
+					report({
+						messageId: message.id,
+						languageTag: settings.sourceLanguageTag,
+						body: {
+							en: `The variable '${element.name}' in message '${message.id}' is not a valid javascript identifier.`,
+						},
+					})
+				}
+			}
+		}
+
 		return
 	},
 }
