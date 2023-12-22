@@ -14,6 +14,8 @@ import {
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
 	LoadProjectInvalidArgument,
+	LoadMessageError,
+	SaveMessageError,
 } from "./errors.js"
 import { createRoot, createSignal, createEffect } from "./reactivity/solid.js"
 import { createMessagesQuery } from "./createMessagesQuery.js"
@@ -149,7 +151,13 @@ export const loadProject = async (args: {
 		// needed for granular linting
 		const [messages, setMessages] = createSignal<Message[]>()
 
-		const [messageParseErrors, setMessageParseErrors] = createSignal<Record<string, Error>>({})
+		const [messageLoadErrors, setMessageLoadErrors] = createSignal<{
+			[messageId: string]: Error
+		}>({})
+
+		const [messageSaveErrors, setMessageSaveErrors] = createSignal<{
+			[messageId: string]: Error
+		}>({})
 
 		const messageFolderPath = projectPath + "/messages" + "/v1"
 
@@ -197,38 +205,32 @@ export const loadProject = async (args: {
 					const messageFilePaths = await readFilesFromFolderRecursive(fs, messageFolderPath, "")
 					for (const messageFilePath of messageFilePaths) {
 						const messageId = getMessageIdFromPath(messageFilePath)
+						if (!messageId) {
+							// ignore files not matching the expected id file path
+							continue
+						}
 						try {
-							if (!messageId) {
-								// ignore files not matching the expected id file path
-								continue
-							}
-
 							const messageRaw = await fs.readFile(`${messageFolderPath}${messageFilePath}`, {
 								encoding: "utf-8",
 							})
 
-							// TODO #1844 the place where we read in the file - if this fails we should consider ignoring it -> add error to messageParseErrors Array and ignore it for now
 							const message = parseMessage(messageFilePath, messageRaw) as Message
-							//tf
-							//
+
 							// message parsing was successfull remove entry in erros map if it exists
-							// TODO #1844
-							// if (messageParseErrors!) {
-							// 	messageParseErrors!().delete[messageId]
-							// 	setMessageParseErrors(messageParseErrors!)
-							// }
+
+							delete messageLoadErrors()[messageId]
+							setMessageLoadErrors(messageLoadErrors)
+
 							loadedMessages.push(message)
 						} catch (e) {
-							// TODO #1844
-							// messageParseErrors!.set(
-							// 	messageId,
-							// 	new LoadMessageError({
-							// 		path: messageFilePath,
-							// 		messageId,
-							// 		cause: e,
-							// 	})
-							// )
-							// setMessageParseErrors(messageParseErrors)
+							// TODO #1844 test errors being propagated
+							// if reading of a single message fails we propagate the error to the project errors
+							messageLoadErrors()[messageId] = new LoadMessageError({
+								path: messageFilePath,
+								messageId,
+								cause: e,
+							})
+							setMessageLoadErrors(messageLoadErrors)
 						}
 					}
 
@@ -266,10 +268,9 @@ export const loadProject = async (args: {
 
 								let fileContent: string | undefined
 								try {
-									fileContent = await nodeishFs.readFile(
-										messageFolderPath + "/" + event.filename!,
-										{ encoding: "utf-8" }
-									)
+									fileContent = await nodeishFs.readFile(messageFolderPath + "/" + event.filename, {
+										encoding: "utf-8",
+									})
 								} catch (e) {
 									// check for file not exists error (expected in case of deletion of a message) rethrow on everything else
 									if ((e as any).code !== "ENOENT") {
@@ -283,11 +284,10 @@ export const loadProject = async (args: {
 								} else {
 									try {
 										const message = parseMessage(event.filename, fileContent)
-										// TODO #1844
-										// if (messageParseErrors![messageId]) {
-										// 	delete messageParseErrors![messageId]
-										// 	setMessageParseErrors(messageParseErrors)
-										// }
+
+										delete messageLoadErrors()[messageId]
+										setMessageLoadErrors(messageLoadErrors!)
+
 										const currentMessage = messagesQuery.get({ where: { id: messageId } })
 										const currentMessageEncoded = encodeMessage(currentMessage)
 										if (currentMessage && currentMessageEncoded === fileContent) {
@@ -296,11 +296,13 @@ export const loadProject = async (args: {
 
 										messagesQuery.upsert({ where: { id: messageId }, data: message })
 									} catch (e) {
-										// TODO #1844
-										// messageParseErrors[messageId] = new LoadMessageError(messageId, messagePath, {
-										// 	cause: e,
-										// })
-										// setMessageParseErrors(messageParseErrors)
+										// TODO #1844 test errors being propagated
+										messageLoadErrors()[messageId] = new LoadMessageError({
+											path: messageFolderPath + "/" + event.filename,
+											messageId,
+											cause: e,
+										})
+										setMessageLoadErrors(messageLoadErrors)
 									}
 								}
 							}
@@ -386,8 +388,21 @@ export const loadProject = async (args: {
 									await fs.writeFile(path, encodeMessage(message))
 								}
 								const messageFilePath = messageFolderPath + "/" + getPathFromMessageId(message.id)
-								// TODO #1844 non awaited promise - how to handle errors on persistence - guess we add them to the project errors
 								persistMessage(nodeishFs, messageFilePath, message)
+									.then(() => {
+										delete messageSaveErrors[messageId]
+										setMessageLoadErrors(messageSaveErrors)
+									})
+									.catch((error) => {
+										// TODO #1844 test if errors get propagated
+										// in case saving didn't work (problem during serialization or saving to file) - add to message error array in project
+										messageSaveErrors()[messageId] = new SaveMessageError({
+											path: messageFilePath,
+											messageId,
+											cause: error,
+										})
+										setMessageSaveErrors(messageLoadErrors)
+									})
 							} else {
 								// initial effect execution - add dispose function
 								trackedMessages?.set(messageId, dispose)
@@ -539,7 +554,8 @@ export const loadProject = async (args: {
 			errors: createSubscribable(() => [
 				...(initializeError ? [initializeError] : []),
 				...(resolvedModules() ? resolvedModules()!.errors : []),
-				// ...Object.values(messageParseErrors()),
+				...Object.values(messageLoadErrors()),
+				...Object.values(messageSaveErrors()),
 				// have a query error exposed
 				//...(lintErrors() ?? []),
 			]),
