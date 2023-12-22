@@ -16,7 +16,6 @@ it("should not return optional params if no params are needed, and we're not in 
 	expect(jsdoc).toBe("")
 })
 
-
 it("should quote param names that aren't valid JS identifiers", () => {
 	const jsdoc = paramsType(
 		{

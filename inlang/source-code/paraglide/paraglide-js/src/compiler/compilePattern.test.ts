@@ -29,7 +29,6 @@ it("should throw if an unknown expression is used", () => {
 	expect(() => compilePattern(pattern)).toThrow()
 })
 
-
 it("should escape backticks", () => {
 	const pattern: Pattern = [{ type: "Text", value: "`Hello world`" }]
 	const { compiled } = compilePattern(pattern)
