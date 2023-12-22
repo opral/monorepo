@@ -1,5 +1,6 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"greeting": "Welcome to NYC {name}! You have {count} messages.",
-	"hello": "Hello World!"
+	"hello": "Hello World!",
+	"with_backtick": "`Hello World!`"
 }

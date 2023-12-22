@@ -3,4 +3,5 @@
 	"currentLanguageTag": "The current language tag is \"{languageTag}\".",
 	"greeting": "Welcome {name}! You have {count} messages.",
 	"hello": "Hello World!",
+	"with_backtick": "`Hello World!`"
 }
