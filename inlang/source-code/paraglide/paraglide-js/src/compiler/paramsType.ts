@@ -18,12 +18,12 @@ export const paramsType = (params: Params, isMessagesIndex: boolean) => {
 		return ""
 	}
 
-	const fieldTypes: `${string} : ${string}`[] = []
+	const fieldTypes: `${string}: ${string}`[] = []
 	for (const [name, type] of Object.entries(params)) {
 		if (isValidJsIdentifier(name)) {
-			fieldTypes.push(`${name} : ${type}`)
+			fieldTypes.push(`${name}: ${type}`)
 		} else {
-			fieldTypes.push(`'${escapeForSingleQuoteString(name)}' : ${type}`)
+			fieldTypes.push(`'${escapeForSingleQuoteString(name)}': ${type}`)
 		}
 	}
 

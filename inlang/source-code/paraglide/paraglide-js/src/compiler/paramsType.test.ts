@@ -15,3 +15,14 @@ it("should not return optional params if no params are needed, and we're not in 
 	const jsdoc = paramsType({}, false)
 	expect(jsdoc).toBe("")
 })
+
+
+it("should quote param names that aren't valid JS identifiers", () => {
+	const jsdoc = paramsType(
+		{
+			"not valid": "NonNullable<unknown>",
+		},
+		false
+	)
+	expect(jsdoc).toBe("@param {{ 'not valid': NonNullable<unknown> }} params")
+})

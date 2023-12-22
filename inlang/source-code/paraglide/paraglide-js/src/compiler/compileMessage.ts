@@ -2,6 +2,7 @@ import { LanguageTag, type Message } from "@inlang/sdk"
 import { compilePattern } from "./compilePattern.js"
 import { paramsType, type Params } from "./paramsType.js"
 import { optionsType } from "./optionsType.js"
+import { isValidJsIdentifier } from "../services/valid-js-identifier/index.js"
 
 /**
  * Returns the compiled messages for the given message.
@@ -21,9 +22,9 @@ export const compileMessage = (
 } => {
 	// choosing a regex for valid JS variable names is too long.
 	// (because JS allows almost any function or variable names).
-	if (message.id.includes("-")) {
+	if (!isValidJsIdentifier(message.id)) {
 		throw new Error(
-			`Couldn't compile the message "${message.id}".\n\nThe message id included a "-". JavaScript functions can't contain a "-". Please rename the message id to not include a "-". For example, "hello-world" -> "hello_world.`
+			`Cannot compile message with ID "${message.id}".\n\nThe message is not a valid JavaScript variable name. Please choose a different ID.\n\nTo detect this issue during linting, use the valid-js-identifier lint rule: https://inlang.com/m/teldgniy/messageLintRule-inlang-validJsIdentifier`
 		)
 	}
 
