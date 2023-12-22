@@ -206,7 +206,7 @@ export function Layout(props: { children: JSXElement }) {
 																	setFilteredMessageLintRules(
 																		project()
 																			?.installed.messageLintRules()
-																			.map((lintRule) => lintRule.id) ?? []
+																			.map((lintRule: { id: any }) => lintRule.id) ?? []
 																	)
 																}
 																addFilter(filter.name)
@@ -375,10 +375,7 @@ function BranchMenu() {
 					<For each={branchNames()}>
 						{(branch) => (
 							<div onClick={() => setActiveBranch(branch)}>
-								<sl-menu-item
-									prop:type="checkbox"
-									prop:checked={currentBranch() === branch}
-								>
+								<sl-menu-item prop:type="checkbox" prop:checked={currentBranch() === branch}>
 									{branch}
 								</sl-menu-item>
 							</div>
@@ -394,7 +391,17 @@ function BranchMenu() {
  * The menu to select the project.
  */
 function ProjectMenu() {
-	const { project, activeProject, setActiveProject, projectList, currentBranch, activeBranch } = useEditorState()
+	const { project, activeProject, setActiveProject, projectList, currentBranch, activeBranch } =
+		useEditorState()
+
+	const activeProjectName = () => {
+		return (
+			activeProject()?.toString().split("/").at(-2) +
+			"/" +
+			activeProject()?.toString().split("/").at(-1)
+		)
+	}
+
 	return (
 		<sl-tooltip
 			prop:content="Select inlang project"
@@ -409,12 +416,14 @@ function ProjectMenu() {
 					slot="trigger"
 					prop:caret={true}
 					prop:size="small"
-					prop:loading={currentBranch() !== activeBranch() && activeBranch() !== undefined || project.loading}
+					prop:loading={
+						(currentBranch() !== activeBranch() && activeBranch() !== undefined) || project.loading
+					}
 				>
 					<div slot="prefix">
 						<IconDescription class="-ml-1 w-5 h-5" />
 					</div>
-					{activeProject() ?? "project"}
+					{activeProject() ? activeProjectName() : "project"}
 				</sl-button>
 
 				<sl-menu class="w-48 min-w-fit">
@@ -582,7 +591,7 @@ function LintFilter(props: { clearFunction: any }) {
 						setFilteredMessageLintRules(
 							project()
 								?.installed.messageLintRules()
-								.map((lintRule) => lintRule.id) ?? []
+								.map((lintRule: { id: string }) => lintRule.id) ?? []
 						)
 					}
 				>
@@ -601,7 +610,7 @@ function LintFilter(props: { clearFunction: any }) {
 					each={
 						project()
 							?.installed.messageLintRules()
-							.map((lintRule) => lintRule) ?? []
+							.map((lintRule: string) => lintRule) ?? []
 					}
 				>
 					{(lintRule) => (
