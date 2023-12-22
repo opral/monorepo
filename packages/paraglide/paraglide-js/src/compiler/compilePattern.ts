@@ -18,7 +18,7 @@ export const compilePattern = (
 	for (const element of pattern) {
 		switch (element.type) {
 			case "Text":
-				result += escapeText(element.value)
+				result += escapeForTemplateLiteral(element.value)
 				break
 			case "VariableReference":
 				result += "${params." + element.name + "}"
@@ -34,6 +34,11 @@ export const compilePattern = (
 	}
 }
 
-function escapeText(text: string): string {
-	return text.replace(/`/g, "\\`").replace(/\${/g, "\\${")
+/**
+ * Escapes some Text so that it can safely be used inside a template literal.
+ * @param text
+ * @returns
+ */
+function escapeForTemplateLiteral(text: string): string {
+	return text.replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\${/g, "\\${")
 }
