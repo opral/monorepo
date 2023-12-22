@@ -78,6 +78,7 @@ const messageIndexFunction = (args: {
  * ${optionsType({ languageTags: args.languageTags })}
  * @returns {string}
  */
+/* @__NO_SIDE_EFFECTS__ */
 export const ${args.message.id} = (params ${
 		Object.keys(args.params).length > 0 ? "" : "= {}"
 	}, options = {}) => {
@@ -108,6 +109,7 @@ const messageFunction = (args: { message: Message; params: Params; compiledPatte
  * ${paramsType(args.params, false)}
  * @returns {string}
  */
+/* @__NO_SIDE_EFFECTS__ */
 export const ${args.message.id} = (${Object.keys(args.params).length > 0 ? "params" : ""}) => ${
 		args.compiledPattern
 	}`
