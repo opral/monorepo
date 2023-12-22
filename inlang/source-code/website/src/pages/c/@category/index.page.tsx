@@ -105,16 +105,16 @@ export function Page(props: {
 				}
 			case "svelte":
 				return {
-					title: "Svelte - i18n Tooling",
-					description: "Recommended internationalization tooling for your svelte stack.",
+					title: m.marketplace_header_svelte_title(),
+					description: m.marketplace_header_svelte_description(),
 					icon: "https://avatars.githubusercontent.com/u/23617963?s=200&v=4",
 					withGuides: true,
 					coverCard: <SvelteHeader />,
 				}
 			case "nextjs":
 				return {
-					title: "Next.js - i18n Tooling",
-					description: "Recommended internationalization tooling for your next.js stack.",
+					title: m.marketplace_header_nextjs_title(),
+					description: m.marketplace_header_nextjs_description(),
 					icon: "https://assets.vercel.com/image/upload/v1662130559/nextjs/Icon_light_background.png",
 					withGuides: true,
 					coverCard: <NextjsHeader />,
@@ -122,16 +122,18 @@ export function Page(props: {
 
 			case "solid": {
 				return {
-					title: "Solid",
-					description: "Recommended internationalization tooling for your SolidStart stack.",
+					title: m.marketplace_header_solid_title(),
+					description: m.marketplace_header_solid_description(),
 					icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-solidstart/assets/icon.png",
 					coverCard: <GenericHeader />,
 				}
 			}
 			default:
 				return {
-					title: currentPageContext.urlParsed.pathname.split("/")[2]?.toUpperCase() || "Your stack",
-					description: "Recommended internationalization tooling for your stack.",
+					title:
+						currentPageContext.urlParsed.pathname.split("/")[2]?.toUpperCase() ||
+						m.marketplace_header_generic_title(),
+					description: m.marketplace_header_generic_description(),
 					coverCard: <GenericHeader />,
 				}
 		}
@@ -215,10 +217,10 @@ export function Page(props: {
 			{renderLocales(currentPageContext.urlParsed.pathname).map((locale) => (
 				<Link href={locale.href} lang={locale.hreflang} rel={locale.rel} />
 			))}
-			<Link
+			{/* <Link
 				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
 				rel="canonical"
-			/>
+			/> */}
 			<MarketplaceLayout>
 				<Show when={currentPageContext.routeParams.category && getCategoryContent()}>
 					<TitleSection
