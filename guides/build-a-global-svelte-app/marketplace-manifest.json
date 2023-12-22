@@ -24,6 +24,7 @@
 		"ide",
 		"guide"
 	],
+	"recommends": ["g/3go4f04m", "g/00162hsd", "g/wxcebbig", "g/uxohikde"],
 	"publisherName": "Nils Jacobsen",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/58360188?s=96&v=4",
 	"license": "Apache-2.0"

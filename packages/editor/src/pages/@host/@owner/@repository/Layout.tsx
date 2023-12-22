@@ -5,6 +5,7 @@ import { Gitfloat } from "./components/Gitfloat.jsx"
 import IconAdd from "~icons/material-symbols/add"
 import IconClose from "~icons/material-symbols/close"
 import IconTranslate from "~icons/material-symbols/translate"
+import IconDescription from "~icons/material-symbols/description-outline"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { showToast } from "#src/interface/components/Toast.jsx"
 import type { LanguageTag } from "@inlang/sdk"
@@ -38,6 +39,14 @@ export function Layout(props: { children: JSXElement }) {
 
 	const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
 	const [addLanguageText, setAddLanguageText] = createSignal("")
+
+	// check if the type matches the LanguageTag type
+	const isValidLanguageTag = (): boolean => {
+		const languageTagRegex =
+			/^((?<grandfathered>(en-GB-oed|i-ami|i-bnn|i-default|i-enochian|i-hak|i-klingon|i-lux|i-mingo|i-navajo|i-pwn|i-tao|i-tay|i-tsu|sgn-BE-FR|sgn-BE-NL|sgn-CH-DE)|(art-lojban|cel-gaulish|no-bok|no-nyn|zh-guoyu|zh-hakka|zh-min|zh-min-nan|zh-xiang))|((?<language>([A-Za-z]{2,3}(-(?<extlang>[A-Za-z]{3}(-[A-Za-z]{3}){0,2}))?))(-(?<script>[A-Za-z]{4}))?(-(?<region>[A-Za-z]{2}|[0-9]{3}))?(-(?<variant>[A-Za-z0-9]{5,8}|[0-9][A-Za-z0-9]{3}))*))$/
+		return languageTagRegex.test(addLanguageText())
+	}
+
 	const [filterOptions, setFilterOptions] = createSignal<Filter[]>([
 		{
 			name: "Language",
@@ -129,13 +138,14 @@ export function Layout(props: { children: JSXElement }) {
 
 	return (
 		<EditorLayout>
-			<div class="pt-4 w-full flex flex-col grow bg-background">
+			<div class="w-full flex flex-col grow bg-surface-50">
 				<div class="flex flex-wrap gap-2 items-center pt-5">
 					<Breadcrumbs />
 					<BranchMenu />
+					<ProjectMenu />
 				</div>
-				<div class="flex flex-wrap justify-between gap-2 py-5 sticky top-12 md:top-16 z-30 bg-background">
-					<div class="flex z-20 justify-between gap-2 items-center">
+				<div class="flex flex-wrap justify-between gap-2 py-5 sticky top-12 md:top-14 z-30 bg-surface-50">
+					<div class="flex flex-wrap z-20 gap-2 items-center">
 						<Show when={project()}>
 							<For each={filterOptions()}>
 								{(filter) => (
@@ -243,18 +253,47 @@ export function Layout(props: { children: JSXElement }) {
 					is creating a new language file and commits it to the local repository instance.
 				</p>
 				<sl-input
-					class="addLanguage p-0 border-0 focus:border-0 focus:outline-0 focus:ring-0 pb-6"
+					class="addLanguage p-0 border-0 focus:border-0 focus:outline-0 focus:ring-0"
 					prop:size="small"
 					prop:label="Tag"
 					prop:placeholder={"Add a language tag"}
-					prop:helpText={"Unique tags for languages (e.g. -> en, de, fr)"}
+					prop:helpText={
+						!(
+							(!isValidLanguageTag() && addLanguageText().length > 0) ||
+							project()?.settings().languageTags.includes(addLanguageText())
+						)
+							? "Unique tags for languages (e.g. -> en, de, fr)"
+							: ""
+					}
 					prop:value={addLanguageText()}
+					onPaste={(e) => setAddLanguageText(e.currentTarget.value)}
 					onInput={(e) => setAddLanguageText(e.currentTarget.value)}
 				/>
+				<Show when={!isValidLanguageTag() && addLanguageText().length > 0}>
+					<p class="text-xs leading-5 text-danger max-sm:hidden pt-1 pb-0.5">
+						Please enter a valid{" "}
+						<a
+							href="https://inlang.com/documentation/concept/language-tag"
+							target="_blank"
+							class="underline"
+						>
+							BCP-47 language tag
+						</a>{" "}
+						(e.g. en, en-GB)
+					</p>
+				</Show>
+				<Show when={project()?.settings().languageTags.includes(addLanguageText())}>
+					<p class="text-xs leading-5 text-danger max-sm:hidden pt-1 pb-0.5">
+						Language tag "{addLanguageText()}" already exists
+					</p>
+				</Show>
 				<sl-button
-					class="w-full"
+					class="w-full pt-6"
 					prop:size={"small"}
 					prop:variant={"primary"}
+					prop:disabled={
+						!isValidLanguageTag() || project()?.settings().languageTags.includes(addLanguageText())
+					}
 					onClick={() => {
 						addLanguageTag(addLanguageText())
 						setAddLanguageModalOpen(false)
@@ -304,38 +343,105 @@ function Breadcrumbs() {
 function BranchMenu() {
 	const { activeBranch, setActiveBranch, branchNames, currentBranch } = useEditorState()
 	return (
-		<sl-dropdown prop:distance={8}>
-			<sl-button
-				slot="trigger"
-				prop:caret={true}
-				prop:size="small"
-				prop:loading={currentBranch() !== activeBranch() && activeBranch() !== undefined}
-			>
-				<div slot="prefix">
-					{/* branch icon from github */}
-					<svg class="w-4 h-4">
-						<path
-							fill="currentColor"
-							fill-rule="evenodd"
-							d="M11.75 2.5a.75.75 0 1 0 0 1.5a.75.75 0 0 0 0-1.5zm-2.25.75a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25zM4.25 12a.75.75 0 1 0 0 1.5a.75.75 0 0 0 0-1.5zM3.5 3.25a.75.75 0 1 1 1.5 0a.75.75 0 0 1-1.5 0z"
-						/>
-					</svg>
-				</div>
-				{currentBranch() ?? "branch"}
-			</sl-button>
+		<sl-tooltip
+			prop:content="Select branch"
+			prop:placement="top"
+			prop:trigger="hover"
+			prop:hoist={true}
+			class="small"
+			style={{ "--show-delay": "1s" }}
+		>
+			<sl-dropdown prop:distance={8}>
+				<sl-button
+					slot="trigger"
+					prop:caret={true}
+					prop:size="small"
+					prop:loading={currentBranch() !== activeBranch() && activeBranch() !== undefined}
+				>
+					<div slot="prefix">
+						{/* branch icon from github */}
+						<svg class="w-4 h-4">
+							<path
+								fill="currentColor"
+								fill-rule="evenodd"
+								d="M11.75 2.5a.75.75 0 1 0 0 1.5a.75.75 0 0 0 0-1.5zm-2.25.75a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25zM4.25 12a.75.75 0 1 0 0 1.5a.75.75 0 0 0 0-1.5zM3.5 3.25a.75.75 0 1 1 1.5 0a.75.75 0 0 1-1.5 0z"
+							/>
+						</svg>
+					</div>
+					{currentBranch() ?? "branch"}
+				</sl-button>
 
-			<sl-menu class="w-48 min-w-fit">
-				<For each={branchNames()}>
-					{(branch) => (
-						<div onClick={() => setActiveBranch(branch)}>
-							<sl-menu-item prop:type="checkbox" prop:checked={currentBranch() === branch}>
-								{branch}
-							</sl-menu-item>
-						</div>
-					)}
-				</For>
-			</sl-menu>
-		</sl-dropdown>
+				<sl-menu class="w-48 min-w-fit">
+					<For each={branchNames()}>
+						{(branch) => (
+							<div onClick={() => setActiveBranch(branch)}>
+								<sl-menu-item prop:type="checkbox" prop:checked={currentBranch() === branch}>
+									{branch}
+								</sl-menu-item>
+							</div>
+						)}
+					</For>
+				</sl-menu>
+			</sl-dropdown>
+		</sl-tooltip>
+	)
+}
+
+/**
+ * The menu to select the project.
+ */
+function ProjectMenu() {
+	const { project, activeProject, setActiveProject, projectList, currentBranch, activeBranch } =
+		useEditorState()
+
+	const activeProjectName = () => {
+		return (
+			activeProject()?.toString().split("/").at(-2) +
+			"/" +
+			activeProject()?.toString().split("/").at(-1)
+		)
+	}
+
+	return (
+		<sl-tooltip
+			prop:content="Select inlang project"
+			prop:placement="top"
+			prop:trigger="hover"
+			prop:hoist={true}
+			class="small"
+			style={{ "--show-delay": "1s" }}
+		>
+			<sl-dropdown prop:distance={8}>
+				<sl-button
+					slot="trigger"
+					prop:caret={true}
+					prop:size="small"
+					prop:loading={
+						(currentBranch() !== activeBranch() && activeBranch() !== undefined) || project.loading
+					}
+				>
+					<div slot="prefix">
+						<IconDescription class="-ml-1 w-5 h-5" />
+					</div>
+					{activeProject() ? activeProjectName() : "project"}
+				</sl-button>
+
+				<sl-menu class="w-48 min-w-fit">
+					<For each={projectList()}>
+						{(project) => (
+							<div onClick={() => setActiveProject(project.projectPath)}>
+								<sl-menu-item
+									prop:type="checkbox"
+									prop:checked={activeProject() === project.projectPath}
+								>
+									{project.projectPath}
+								</sl-menu-item>
+							</div>
+						)}
+					</For>
+				</sl-menu>
+			</sl-dropdown>
+		</sl-tooltip>
 	)
 }
 

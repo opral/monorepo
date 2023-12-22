@@ -3,9 +3,36 @@ import sdkTableOfContents from "../../../../../documentation/sdk/tableOfContents
 import pluginTableOfContents from "../../../../../documentation/plugin/tableOfContents.json"
 import lintRuleTableOfContents from "../../../../../documentation/lint-rule/tableOfContents.json"
 import { convert } from "@inlang/markdown"
-import { render } from "vike/abort"
+import { render, redirect } from "vike/abort"
 
 const renderedMarkdown = {} as Record<string, string>
+
+const redirectLinks = [
+	{
+		from: "/documentation/apps/ide-extension",
+		to: "/m/r7kp499g/app-inlang-ideExtension",
+	},
+	{
+		from: "/documentation/apps/inlang-cli",
+		to: "/m/2qj2w8pu/app-inlang-cli",
+	},
+	{
+		from: "/documentation/plugins/registry",
+		to: "/",
+	},
+	{
+		from: "/documentation/sdk/overview",
+		to: "/documentation",
+	},
+	{
+		from: "/documentation/badge",
+		to: "/m/zu942ln6/app-inlang-badge",
+	},
+	{
+		from: "/documentation/sdk",
+		to: "/documentation",
+	},
+]
 
 /* Slices the relative path to the repository, no matter where in the file system the code is executed from.
 This is necessary because the code is executed from the build folder. */
@@ -16,6 +43,16 @@ export async function onBeforeRender(pageContext: any) {
 		pageContext.urlPathname === "/documentation"
 			? ""
 			: pageContext.urlPathname.replace("/documentation/", "")
+
+	// Look for redirects
+	for (const redirectLink of redirectLinks) {
+		if (redirectLink.from === pageContext.urlPathname)
+			throw redirect(
+				// @ts-ignore
+				redirectLink.to.startsWith("/") ? redirectLink.to : `/${redirectLink.to}`
+			)
+	}
+
 	if (renderedMarkdown[slug] === undefined) {
 		// get sdk documentation
 		for (const categories of Object.entries(sdkTableOfContents)) {

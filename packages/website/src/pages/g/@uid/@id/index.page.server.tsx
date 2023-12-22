@@ -13,7 +13,7 @@ export async function onBeforeRender(pageContext: PageContext) {
 		(item: any) => item.uniqueID === pageContext.routeParams.uid
 	) as MarketplaceManifest & { uniqueID: string }
 
-	if (!item) throw redirect("/m/404")
+	if (!item || item.id.split(".")[0] !== "guide") throw redirect("/g/404")
 
 	if (item.id.replaceAll(".", "-").toLowerCase() !== pageContext.routeParams.id?.toLowerCase()) {
 		throw redirect(`/g/${item.uniqueID}/${item.id.replaceAll(".", "-").toLowerCase()}`)
@@ -29,11 +29,23 @@ export async function onBeforeRender(pageContext: PageContext) {
 
 	const markdown = await convert(text)
 
+	const recommends = item.recommends
+		? registry.filter((i: any) => {
+				for (const recommend of item.recommends!) {
+					if (recommend.replace("g/", "") === i.uniqueID) {
+						return true
+					}
+				}
+				return false
+		  })
+		: undefined
+
 	return {
 		pageContext: {
 			pageProps: {
 				markdown: markdown,
 				manifest: item,
+				recommends: recommends,
 			} satisfies PageProps,
 		},
 	}

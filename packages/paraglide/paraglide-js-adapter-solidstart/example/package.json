@@ -9,6 +9,7 @@
 		"start": "solid-start start"
 	},
 	"dependencies": {
+		"@inlang/paraglide-js-adapter-solidstart": "workspace:*",
 		"@solidjs/meta": "^0.29",
 		"@solidjs/router": "^0.9",
 		"solid-js": "^1.8",

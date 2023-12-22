@@ -21,6 +21,7 @@
 		"localization",
 		"guide"
 	],
+	"recommends": ["g/00162hsd", "g/6ddyhpoi", "g/38fnf03n"],
 	"publisherName": "Niklas Buchfink",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/59048346?v=4",
 	"license": "Apache-2.0"

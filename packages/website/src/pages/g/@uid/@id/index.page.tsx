@@ -10,6 +10,7 @@ import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
 import EditOutline from "~icons/material-symbols/edit-outline-rounded"
 import { currentPageContext } from "#src/renderer/state.js"
+import { Recommends } from "#src/pages/m/@uid/@id/index.page.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -17,6 +18,7 @@ import { currentPageContext } from "#src/renderer/state.js"
 export type PageProps = {
 	markdown: Awaited<ReturnType<any>>
 	manifest: MarketplaceManifest & { uniqueID: string }
+	recommends?: MarketplaceManifest[]
 }
 
 export function Page(props: PageProps) {
@@ -87,7 +89,7 @@ export function Page(props: PageProps) {
 								when={props.markdown}
 								fallback={<p class="text-danger">{props.markdown?.error}</p>}
 							>
-								<section class="w-full mb-32">
+								<section class="w-full mb-20">
 									<div class="mx-auto w-full flex items-center flex-col justify-center gap-4 max-w-lg text-center md:px-8">
 										<Show
 											when={props.manifest.icon}
@@ -153,6 +155,9 @@ export function Page(props: PageProps) {
 								</section>
 							</Show>
 						</div>
+						<Show when={props.recommends}>
+							<Recommends recommends={props.recommends!} />
+						</Show>
 						<div class="mt-20">
 							<GetHelp text="Do you have questions?" />
 						</div>

@@ -1,6 +1,6 @@
 {
 	"id": "app.inlang.editor",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/editor/assets/fink-logo.webp",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/editor/assets/christmasFink.png",
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-marketplace-cover.jpg",
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-1.jpg",
@@ -17,9 +17,10 @@
 	"readme": {
 		"en": "./inlang/source-code/editor/README.md"
 	},
-	"keywords": ["editor", "web", "apps", "website", "translator", "lix", "fink"],
+	"keywords": ["editor", "web", "apps", "website", "translator", "lix", "fink", "inlang"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"website": "https://inlang.com/editor",
-	"license": "Apache-2.0"
+	"license": "Apache-2.0",
+	"pricing": "Free Beta"
 }
