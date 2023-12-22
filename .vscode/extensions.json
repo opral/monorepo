@@ -3,6 +3,7 @@
 		"ms-vscode-remote.remote-containers",
 		"dbaeumer.vscode-eslint",
 		"esbenp.prettier-vscode",
-		"inlang.vs-code-extension"
+		"inlang.vs-code-extension",
+		"zixuanchen.vitest-explorer"
 	]
 }
