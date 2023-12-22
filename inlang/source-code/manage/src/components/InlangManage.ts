@@ -12,6 +12,7 @@ import { browserAuth, getUser } from "@lix-js/client/src/browser-auth.ts"
 import { tryCatch } from "@inlang/result"
 import { registry } from "@inlang/marketplace-registry"
 import type { MarketplaceManifest } from "../../../versioned-interfaces/marketplace-manifest/dist/interface.js"
+import { posthog } from "posthog-js"
 
 type ManifestWithVersion = MarketplaceManifest & { version: string }
 
@@ -24,7 +25,7 @@ export class InlangManage extends TwLitElement {
 	repoURL: string = ""
 
 	@property({ type: Object })
-	projects: Record<string, string>[] | undefined | "no-access" | "load" = "load"
+	projects: Record<string, string>[] | undefined | "no-access" | "load" | "error" = "load"
 
 	@property({ type: Object })
 	modules: ManifestWithVersion[] | undefined | "empty"
@@ -75,20 +76,42 @@ export class InlangManage extends TwLitElement {
 
 			const tempModules = []
 			for (const module of modules) {
-				// @ts-ignore
-				const registryModule = registry.find((x) => x.module === module)
-
-				if (registryModule) {
-					const response = await fetch(
+				for (const registryModule of registry) {
+					if (
 						// @ts-ignore
-						registryModule.module.replace("dist/index.js", `package.json`)
-					)
-
-					tempModules.push({
-						...registryModule,
+						registryModule.module &&
 						// @ts-ignore
-						version: (await response.json()).version,
-					})
+						registryModule.module.includes(
+							module.split("/")[5].includes("@")
+								? module.split("/")[5].split("@")[0]
+								: module.split("/")[5]
+						)
+					) {
+						if (!module.includes("jsdelivr")) {
+							this.projects = "error"
+							return
+						}
+
+						const response = await fetch(
+							// @ts-ignore
+							registryModule.module.replace("dist/index.js", `package.json`)
+						)
+
+						tempModules.push({
+							...registryModule,
+							// @ts-ignore
+							version: (await response.json()).version,
+						})
+					}
+				}
+			}
+
+			// Remove duplicates
+			for (const [index, module] of tempModules.entries()) {
+				for (const [index2, module2] of tempModules.entries()) {
+					if (module.id === module2.id && index !== index2) {
+						tempModules.splice(index2, 1)
+					}
 				}
 			}
 
@@ -113,6 +136,16 @@ export class InlangManage extends TwLitElement {
 
 	override async connectedCallback() {
 		super.connectedCallback()
+
+		/* Initialize Telemetry via Posthog */
+		if (publicEnv.PUBLIC_POSTHOG_TOKEN) {
+			posthog.init(publicEnv.PUBLIC_POSTHOG_TOKEN ?? "placeholder", {
+				api_host: "https://eu.posthog.com",
+			})
+		} else if (publicEnv.PUBLIC_POSTHOG_TOKEN === undefined) {
+			return console.warn("Posthog token is not set. Telemetry will not be initialized.")
+		}
+
 		if (window.location.search !== "" && window.location.pathname !== "") {
 			const url = {
 				path: window.location.pathname.replace("/", ""),
@@ -220,7 +253,7 @@ export class InlangManage extends TwLitElement {
 												e.stopPropagation()
 											}}
 											id="projects"
-											class="hidden absolute top-12 left-0 w-auto bg-white border border-slate-200 rounded-md shadow-lg py-0.5 z-20"
+											class="hidden absolute top-12 left-0 w-auto bg-white border border-slate-200 rounded-md shadow-lg py-0.5 z-40"
 										>
 											${typeof this.projects === "object"
 												? this.projects?.map(
@@ -426,6 +459,28 @@ export class InlangManage extends TwLitElement {
 										</a>
 									</div>
 							  </div>`
+							: this.projects === "error"
+							? html`<div class="flex flex-col gap-0.5 mt-4">
+									<div
+										class="py-4 px-8 w-full rounded-md bg-red-100 text-red-500 flex flex-col items-center justify-center"
+									>
+										<p class="mb-2 font-medium text-center">Your project settings seem invalid.</p>
+										<p class="mb-8 text-center">
+											Please make sure to use inlang's official links to properly load modules.
+										</p>
+										<a
+											href=${`https://${this.url.repo}`}
+											target="_blank"
+											class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+											>Go to Repository
+											<doc-icon
+												class="inline-block ml-1 translate-y-0.5"
+												size="1.2em"
+												icon="mdi:arrow-top-right"
+											></doc-icon>
+										</a>
+									</div>
+							  </div>`
 							: !this.url.project
 							? html`<div class="flex flex-col w-full max-w-lg items-center">
 									<h1 class="font-bold text-4xl text-slate-900 mb-4 text-center">
@@ -547,6 +602,17 @@ export class InlangManage extends TwLitElement {
 																			></doc-icon>
 																		</a>
 																		<a
+																			@click=${() => {
+																				posthog.capture("Uninstall module", {
+																					$set: {
+																						name:
+																							typeof this.user === "object"
+																								? this.user.username
+																								: undefined,
+																					},
+																					$set_once: { initial_url: "https://manage.inlang.com" },
+																				})
+																			}}
 																			href=${`/uninstall?repo=${this.url.repo}&project=${this.url.project}&module=${module.id}`}
 																			class="text-red-500 text-sm font-medium transition-colors hover:text-red-400"
 																		>
@@ -620,6 +686,17 @@ export class InlangManage extends TwLitElement {
 																			></doc-icon>
 																		</a>
 																		<a
+																			@click=${() => {
+																				posthog.capture("Uninstall module", {
+																					$set: {
+																						name:
+																							typeof this.user === "object"
+																								? this.user.username
+																								: undefined,
+																					},
+																					$set_once: { initial_url: "https://manage.inlang.com" },
+																				})
+																			}}
 																			href=${`/uninstall?repo=${this.url.repo}&project=${this.url.project}&module=${module.id}`}
 																			class="text-red-500 text-sm font-medium transition-colors hover:text-red-400"
 																		>

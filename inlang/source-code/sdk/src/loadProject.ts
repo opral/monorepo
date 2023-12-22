@@ -29,14 +29,18 @@ import { normalizePath, type NodeishFilesystem, getDirname } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
+
 import {
 	getMessageIdFromPath,
 	getPathFromMessageId,
 	parseMessage,
 	encodeMessage,
 } from "./storage/helper.js"
-import { humanId } from "human-id"
+
 import { humanIdHash } from "./storage/human-id/human-readable-id.js"
+
+import type { Repository } from "@lix-js/client"
+import { generateProjectId } from "./generateProjectId.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -52,6 +56,7 @@ const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
  */
 export const loadProject = async (args: {
 	projectPath: string
+	repo?: Repository
 	nodeishFs: NodeishFilesystem
 	_import?: ImportFunction
 	_capture?: (id: string, props: Record<string, unknown>) => void
@@ -80,6 +85,7 @@ export const loadProject = async (args: {
 	}
 
 	// -- load project ------------------------------------------------------
+	let idError: Error | undefined
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
 		const nodeishFs = createNodeishFsWithAbsolutePaths({
@@ -87,16 +93,43 @@ export const loadProject = async (args: {
 			nodeishFs: args.nodeishFs,
 		})
 
+		let projectId: string | undefined
+
+		try {
+			projectId = await nodeishFs.readFile(projectPath + "/project_id", {
+				encoding: "utf-8",
+			})
+		} catch (error) {
+			// @ts-ignore
+			if (error.code === "ENOENT") {
+				if (args.repo) {
+					projectId = await generateProjectId(args.repo, projectPath)
+					if (projectId) {
+						await nodeishFs.writeFile(projectPath + "/project_id", projectId)
+					}
+				}
+			} else {
+				idError = error as Error
+			}
+		}
+
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
 		createEffect(() => {
+			// TODO:
+			// if (projectId) {
+			// 	telemetryBrowser.group("project", projectId, {
+			// 		name: projectId,
+			// 	})
+			// }
+
 			loadSettings({ settingsFilePath: projectPath + "/settings.json", nodeishFs })
 				.then((settings) => {
 					setSettings(settings)
 					// rename settings to get a convenient access to the data in Posthog
 					const project_settings = settings
-					args._capture?.("SDK used settings", { project_settings })
+					args._capture?.("SDK used settings", { project_settings, group: projectId })
 				})
 				.catch((err) => {
 					markInitAsFailed(err)
@@ -349,12 +382,13 @@ export const loadProject = async (args: {
 		// -- app ---------------------------------------------------------------
 
 		const initializeError: Error | undefined = await initialized.catch((error) => error)
+
 		const abortController = new AbortController()
 		const hasWatcher = nodeishFs.watch("/", { signal: abortController.signal }) !== undefined
 
 		const messagesQuery = createMessagesQuery(() => messages() || [])
 
-		let trackedMessages: Map<string, () => void> = new Map()
+		const trackedMessages: Map<string, () => void> = new Map()
 		// subscribe to all messages and write to files on signal
 		createEffect(() => {
 			const currentMessageIds = messagesQuery.includedMessageIds()
@@ -382,7 +416,9 @@ export const loadProject = async (args: {
 									try {
 										await fs.mkdir(dir, { recursive: true })
 									} catch (e) {
-										// TODO #1844 check expected error here - rethrow on unexpected
+										if ((e as any).code !== "EEXIST") {
+											throw e
+										}
 									}
 
 									await fs.writeFile(path, encodeMessage(message))
@@ -553,6 +589,7 @@ export const loadProject = async (args: {
 			},
 			errors: createSubscribable(() => [
 				...(initializeError ? [initializeError] : []),
+				...(idError ? [idError] : []),
 				...(resolvedModules() ? resolvedModules()!.errors : []),
 				...Object.values(messageLoadErrors()),
 				...Object.values(messageSaveErrors()),

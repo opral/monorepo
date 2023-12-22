@@ -10,6 +10,8 @@ import { createSignal, createEffect } from "./solid.js"
 
 import { commit as lixCommit } from "./git/commit.js"
 import isoGit from "isomorphic-git"
+import { hash } from "./hash.js"
+
 const {
 	clone,
 	listRemotes,
@@ -538,9 +540,21 @@ export async function openRepository(
 			}
 
 			const {
-				data: { name, private: isPrivate, fork: isFork, parent, owner: ownerMetaData, permissions },
+				data: {
+					id: githubId,
+					name,
+					private: isPrivate,
+					fork: isFork,
+					parent,
+					owner: ownerMetaData,
+					permissions,
+				},
 			} = res
+
+			const id = await hash(`${githubId}`)
+
 			return {
+				id,
 				name,
 				isPrivate,
 				isFork,

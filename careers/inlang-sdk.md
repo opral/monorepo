@@ -1,19 +1,26 @@
-> write `hello@inlang.com` to apply
+_write `hello@inlang.com` to apply_
 
 **Full-time job opportunity**
 
-Develop [the SDK](https://inlang.com/documentation) that powers the [inlang ecosystem](https://inlang.com/c/apps). Apply if you are interested in:
+Become the lead for [the SDK](https://inlang.com/documentation) that powers the [inlang ecosystem](https://inlang.com/c/apps). Apply if you are interested in:
 
 
 - [local first software](https://www.inkandswitch.com/local-first/)
-- reactive systems (in JS)
-- i18n/dev tools
-- open source
-- startups
+- reactive systems/reactive programming
+- dev tools
+- i18n infrastructure
+- multithreading
+
+**More info**
+
+- startup. small team, high impact.
+- 75%tile SF equity globally equal
+- competitive salary
     
 **Requirements**
 
 - located in the EU
-- strong web engineering skills 
-- pref experience with different reactive systems (RxJS, Signals, etc)
-- pref experience with (web) embedded databases
+- demonstratable experience with lower-level JS engineering
+- pref part of a large-scale i18n engineering team
+- pref experience with different reactive systems (RxJS, Signals, MobX, etc.)
+- pref experience with embedded databases (sqlite, pouchdb, indexdb)

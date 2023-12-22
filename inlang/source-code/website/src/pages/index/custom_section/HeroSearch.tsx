@@ -9,7 +9,9 @@ const HeroSearch = () => {
 	return (
 		<div class="flex flex-col gap-2 items-center pb-8 md:pb-0">
 			<h1 class="text-4xl max-w-[1000px] md:text-6xl text-surface-900 text-center font-bold leading-snug tracking-tight mt-8 md:mt-16 ">
+				<span class="pr-3 text-6xl">🎄</span>
 				{m.home_inlang_title()}
+				<span class="pl-3 text-6xl">🎄</span>
 			</h1>
 			<p class="text-lg max-w-[740px] text-center text-surface-500 pt-4">
 				{m.home_inlang_description()}

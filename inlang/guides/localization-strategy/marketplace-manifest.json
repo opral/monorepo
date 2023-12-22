@@ -23,6 +23,7 @@
 		"guide",
 		"localization guide"
 	],
+	"recommends": ["g/940fn8mg", "g/3go4f04m", "g/6ddyhpoi"],
 	"publisherName": "Florian Kiem",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/92092993?v=4",
 	"license": "Apache-2.0"
