@@ -23,7 +23,6 @@ export const SearchInput = (props: SearchInputProps) => {
 					"border-radius": "4px",
 				}}
 				prop:placeholder={props.placeholder}
-				prop:filled={true}
 				prop:size={"small"}
 				prop:value={textValue()}
 				onInput={(e) => setTextValue(e.currentTarget.value)}

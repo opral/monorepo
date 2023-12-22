@@ -9,6 +9,7 @@ Become the lead for [the SDK](https://inlang.com/documentation) that powers the 
 - reactive systems/reactive programming
 - dev tools
 - i18n infrastructure
+- multithreading
 
 **More info**
 
