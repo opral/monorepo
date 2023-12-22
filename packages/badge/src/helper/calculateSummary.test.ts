@@ -134,6 +134,7 @@ it("should work with multiple resources", () => {
 export const createMessage = (id: string, patterns: Record<string, Pattern | string>) =>
 	({
 		id,
+		alias: {},
 		selectors: [],
 		variants: Object.entries(patterns).map(([languageTag, patterns]) => ({
 			languageTag,
