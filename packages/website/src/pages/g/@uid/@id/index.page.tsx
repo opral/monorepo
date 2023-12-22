@@ -89,7 +89,7 @@ export function Page(props: PageProps) {
 								when={props.markdown}
 								fallback={<p class="text-danger">{props.markdown?.error}</p>}
 							>
-								<section class="w-full mb-32">
+								<section class="w-full mb-20">
 									<div class="mx-auto w-full flex items-center flex-col justify-center gap-4 max-w-lg text-center md:px-8">
 										<Show
 											when={props.manifest.icon}
