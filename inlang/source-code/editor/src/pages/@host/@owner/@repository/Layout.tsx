@@ -206,7 +206,7 @@ export function Layout(props: { children: JSXElement }) {
 																	setFilteredMessageLintRules(
 																		project()
 																			?.installed.messageLintRules()
-																			.map((lintRule: { id: any }) => lintRule.id) ?? []
+																			.map((lintRule) => lintRule.id) ?? []
 																	)
 																}
 																addFilter(filter.name)
@@ -591,7 +591,7 @@ function LintFilter(props: { clearFunction: any }) {
 						setFilteredMessageLintRules(
 							project()
 								?.installed.messageLintRules()
-								.map((lintRule: { id: string }) => lintRule.id) ?? []
+								.map((lintRule) => lintRule.id) ?? []
 						)
 					}
 				>
@@ -610,7 +610,7 @@ function LintFilter(props: { clearFunction: any }) {
 					each={
 						project()
 							?.installed.messageLintRules()
-							.map((lintRule: string) => lintRule) ?? []
+							.map((lintRule) => lintRule) ?? []
 					}
 				>
 					{(lintRule) => (
