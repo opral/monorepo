@@ -7,9 +7,12 @@
     "module": "src/index.js",
     "types": "types/index.d.ts",
     "scripts": {
+        "postinstall": "node ./dts.js",
         "prepublishOnly": "node ./dts.js",
+        "lint": "eslint src",
         "build": "node ./dts.js",
-        "test": "vitest run"
+        "test": "vitest run",
+        "clean": "rm -rf ./node_modules ./types"
     },
     "files": [
         "src",

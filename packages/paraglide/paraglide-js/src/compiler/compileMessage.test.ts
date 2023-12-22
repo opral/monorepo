@@ -121,7 +121,6 @@ it("should compile a message to a function", async () => {
 	expect(en.multipleParams({ name: "Samuel", count: 5 })).toBe("Hello Samuel! You have 5 messages.")
 })
 
-
 it("should add a /* @__NO_SIDE_EFFECTS__ */ comment to the compiled message", async () => {
 	const result = compileMessage({
 		id: "some_message",
