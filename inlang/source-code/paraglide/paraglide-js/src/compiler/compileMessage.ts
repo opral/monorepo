@@ -107,7 +107,7 @@ const messageFunction = (args: { message: Message; params: Params; compiledPatte
  * ${paramsType(args.params, false)}
  * @returns {string}
  */
-export const ${args.message.id} = (${Object.keys(args.params).length > 0 ? "params" : ""}) => {
-	return ${args.compiledPattern}
-}`
+export const ${args.message.id} = (${Object.keys(args.params).length > 0 ? "params" : ""}) => ${
+		args.compiledPattern
+	}`
 }
