@@ -3,6 +3,7 @@ import compression from "compression"
 import { validateEnvVariables, privateEnv } from "@inlang/env-variables"
 import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
+import { router } from "./router.js"
 // --------------- SETUP -----------------
 
 export const isProduction = process.env.NODE_ENV === "production"
@@ -39,6 +40,9 @@ if (isProduction) {
 	// TracingHandler creates a trace for every incoming request
 	app.use(Sentry.Handlers.tracingHandler())
 }
+
+app.set("base", "/")
+app.use("/", router)
 
 const port = process.env.PORT ?? 4003
 app.listen(port, () => console.info(`Server listening at http://localhost:${port}`))
