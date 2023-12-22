@@ -6,6 +6,9 @@
     "main": "src/index.js",
     "module": "src/index.js",
     "types": "types/index.d.ts",
+    "publishConfig": {
+        "access": "public"
+    },
     "scripts": {
         "postinstall": "node ./dts.js",
         "prepublishOnly": "node ./dts.js",
