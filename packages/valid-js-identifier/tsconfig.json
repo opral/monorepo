@@ -1,0 +1,11 @@
+{
+	"extends": "../tsconfig.base.json",
+	"include": ["src/**/*"],
+	"compilerOptions": {
+		"allowJs": true,
+		"checkJs": true,
+		"noEmit": true,
+		"declaration": true,
+		"declarationMap": true
+	}
+}
