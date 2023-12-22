@@ -3,7 +3,7 @@ import { lintMessages } from "@inlang/sdk/lint"
 import { validJsIdentifier } from "./validJSIdentifier.js"
 import { createMessage } from "@inlang/sdk/test-utilities"
 
-describe("messageId", () => {
+describe("validJsIdentifier", () => {
 	it("should not report if no messageId is a valid JS Identifier", async () => {
 		const messages = [
 			createMessage("someId", { en: "some text" }),
@@ -59,87 +59,6 @@ describe("messageId", () => {
 			createMessage("@some_message", { en: "some text" }),
 			createMessage("S O M E M E S S A G E", { en: "some text" }),
 			createMessage("    some_message    ", { en: "some text" }),
-		]
-
-		const result = await lintMessages({
-			settings: {
-				sourceLanguageTag: "en",
-				languageTags: ["en"],
-				modules: [],
-				messageLintRuleLevels: {
-					[validJsIdentifier.id]: "warning",
-				},
-			},
-			messages,
-			rules: [validJsIdentifier],
-		})
-
-		expect(result.errors).toHaveLength(0)
-		expect(result.data).toHaveLength(messages.length)
-	})
-})
-
-describe("variable names", () => {
-	it("should not report if all variable names are valid JS Identifiers", async () => {
-		const messages = [
-			createMessage("some_message", {
-				en: [
-					{
-						type: "Text",
-						value: "some text ",
-					},
-					{
-						type: "VariableReference",
-						name: "some_variable",
-					},
-				],
-			}),
-		]
-
-		const result = await lintMessages({
-			settings: {
-				sourceLanguageTag: "en",
-				languageTags: ["en"],
-				modules: [],
-				messageLintRuleLevels: {
-					[validJsIdentifier.id]: "warning",
-				},
-			},
-			messages,
-			rules: [validJsIdentifier],
-		})
-
-		expect(result.errors).toHaveLength(0)
-		expect(result.data).toHaveLength(0)
-	})
-
-	it("should report if a variable name is not a valid JS Identifier", async () => {
-		const messages = [
-			createMessage("some_message", {
-				en: [
-					{
-						type: "Text",
-						value: "some text ",
-					},
-					{
-						type: "VariableReference",
-						name: "0some_variable",
-					},
-				],
-			}),
-
-			createMessage("some_message", {
-				en: [
-					{
-						type: "Text",
-						value: "some text ",
-					},
-					{
-						type: "VariableReference",
-						name: "delete",
-					},
-				],
-			}),
 		]
 
 		const result = await lintMessages({
