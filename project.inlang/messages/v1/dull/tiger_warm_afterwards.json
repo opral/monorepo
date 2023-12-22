@@ -1,0 +1,80 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "newsletter_unsubscribed_description",
+        "library.inlang.paraglideJs": "newsletter_unsubscribed_description"
+    },
+    "id": "dull_tiger_warm_afterwards",
+    "selectors": [],
+    "variants": [
+        {
+            "match": [],
+            "languageTag": "de",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Sie haben sich erfolgreich von unserem Newsletter abgemeldet. Besuchen Sie uns bei Fragen auf"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "en",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "We're sad to see you go. If you have any feedback, please let us know on our"
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Nous sommes tristes de vous voir partir. Si vous avez des commentaires, veuillez nous en informer sur notre"
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Siamo tristi di vederti andare via. Se hai qualche feedback, perfavore facci sapere sul nostro"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "pt-BR",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Estamos tristes de ver você ir. Se você tiver qualquer feedback, nos informe em nosso"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "sk",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Je nám ľúto, že odchádzate. Ak máte nejakú spätnú väzbu, dajte nám vedieť na našej"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "zh",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "我们很舍不得你离开。如果你有任何反馈意见，请在我们的"
+                }
+            ]
+        }
+    ]
+}

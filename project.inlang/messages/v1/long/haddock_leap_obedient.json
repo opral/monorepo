@@ -1,0 +1,30 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "footer_resources_inlang_manage",
+        "library.inlang.paraglideJs": "footer_resources_inlang_manage"
+    },
+    "id": "long_haddock_leap_obedient",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Verwaltung"
+                }
+            ]
+        },
+        {
+            "languageTag": "en",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Manage"
+                }
+            ]
+        }
+    ]
+}

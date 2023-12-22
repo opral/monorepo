@@ -1,0 +1,30 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "footer_resources_manage",
+        "library.inlang.paraglideJs": "footer_resources_manage"
+    },
+    "id": "alone_carp_roam_abroad",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Verwalten"
+                }
+            ]
+        },
+        {
+            "languageTag": "en",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Manage"
+                }
+            ]
+        }
+    ]
+}

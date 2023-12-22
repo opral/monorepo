@@ -1,0 +1,80 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "marketplace_grid_need_help",
+        "library.inlang.paraglideJs": "marketplace_grid_need_help"
+    },
+    "id": "hour_duck_excel_clever",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Benötigst du Hilfe oder hast du Fragen? Trete unserem Discord bei!"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "en",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Need help or have questions? Join our Discord!"
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Besoin d'aide ? Des questions ? Rejoignez notre Discord !"
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Hai bisogno di aiuto o hai domande? Entra sul nostro Discord!"
+                }
+            ]
+        },
+        {
+            "languageTag": "pt-BR",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Precisa de ajuda ou tem dúvidas? Entre no nosso Discord!"
+                }
+            ]
+        },
+        {
+            "languageTag": "sk",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Potrebujete pomoc alebo máte otázky? Pridajte sa k nášmu Discordu!"
+                }
+            ]
+        },
+        {
+            "languageTag": "zh",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "需要帮助或有疑问吗？加入我们的不和谐！"
+                }
+            ]
+        }
+    ]
+}

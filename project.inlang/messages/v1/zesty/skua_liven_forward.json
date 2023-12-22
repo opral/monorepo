@@ -1,0 +1,80 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "newsletter_subscribe_description",
+        "library.inlang.paraglideJs": "newsletter_subscribe_description"
+    },
+    "id": "zesty_skua_liven_forward",
+    "selectors": [],
+    "variants": [
+        {
+            "match": [],
+            "languageTag": "de",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Abonnieren Sie unseren Newsletter, um über die neuesten Entwicklungen auf dem Laufenden zu bleiben."
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "en",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "We'll send you updates about inlang and globalization. You can unsubscribe at any time."
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Nous vous enverrons des mises à jour sur inlang et la traduction. Vous pouvez vous désabonner à tout moment."
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Ti manderemo aggiornamenti riguardanti inlang e la globalizzazione. Puoi disiscriverti quando vuoi."
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "pt-BR",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Vamos te enviar atualizações sobre o inlang e globalização. Você pode se desinscrever a qualquer momento."
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "sk",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Budeme vám posielať aktuálne informácie o inlangu a globalizácii. Odber môžete kedykoľvek zrušiť."
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "zh",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "我们将向你发送有关 inlang 和全球化的最新信息。你可以随时取消订阅。"
+                }
+            ]
+        }
+    ]
+}

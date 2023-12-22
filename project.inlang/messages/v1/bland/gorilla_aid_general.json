@@ -1,0 +1,80 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "home_inlang_secondary_link",
+        "library.inlang.paraglideJs": "home_inlang_secondary_link"
+    },
+    "id": "bland_gorilla_aid_general",
+    "selectors": [],
+    "variants": [
+        {
+            "match": [],
+            "languageTag": "de",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Schau am 11. Nov, 23 den SvelteSummit Talk"
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "en",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Watch 11th Nov, 23 SvelteSummit Talk"
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Regarder la conférence SvelteSummit du 11 novembre 2023"
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Guarda il talk dello SvelteSummit l'11 Nov, 23 "
+                }
+            ]
+        },
+        {
+            "languageTag": "pt-BR",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Assista o SvelteSummit Talk em 11.11.23"
+                }
+            ]
+        },
+        {
+            "languageTag": "sk",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Sledujte 11. novembra, 23. SvelteSummit Talk"
+                }
+            ]
+        },
+        {
+            "languageTag": "zh",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "观看 11 月 11 日、23 日 SvelteSummit 演讲"
+                }
+            ]
+        }
+    ]
+}

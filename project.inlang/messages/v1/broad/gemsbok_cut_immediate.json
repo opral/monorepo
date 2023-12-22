@@ -1,0 +1,80 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "marketplace_header_paraglide_description",
+        "library.inlang.paraglideJs": "marketplace_header_paraglide_description"
+    },
+    "id": "broad_gemsbok_cut_immediate",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Die beste i18n-Bibliothek für das Web. Eine vollständig konfigurierbare JavaScript-i18n-Bibliothek, die in Ihr Framework integriert werden kann."
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "en",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "The best i18n libary for the web. A fully configurable JavaScript i18n library that integrates within your framework."
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "La meilleure bibliothèque i18n pour le web. Une bibliothèque JavaScript i18n entièrement configurable qui s'intègre dans votre framework."
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "La migliore libreria i18n per il web. Una libreria JavaScript i18n completamente configurabile che si integra nel tuo framework."
+                }
+            ]
+        },
+        {
+            "languageTag": "pt-BR",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "A melhor biblioteca i18n para a web. Uma biblioteca JavaScript i18n totalmente configurável que se integra à sua estrutura."
+                }
+            ]
+        },
+        {
+            "languageTag": "sk",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Najlepšia knižnica i18n pre web. Plne konfigurovateľná knižnica JavaScript i18n, ktorá sa integruje do vášho rámca."
+                }
+            ]
+        },
+        {
+            "languageTag": "zh",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "最好的网络 i18n 库。一个完全可配置的 JavaScript i18n 库，集成在您的框架中。"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,80 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "inlang_global_description",
+        "library.inlang.paraglideJs": "inlang_global_description"
+    },
+    "id": "born_elk_bloom_queasi",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Finde schnell die beste Lösung für die Globalisierung (i18n) Deiner Anwendung. inlang hilft Dir, in neue Märkte zu expandieren und neue Kunden zu gewinnen."
+                }
+            ]
+        },
+        {
+            "languageTag": "en",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Quickly find the best solution to globalize (i18n) your app. inlang helps you to expand to new markets and acquire new customers."
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Trouvez rapidement la meilleure solution pour mondialiser (i18n) votre application. inlang vous aide à vous développer sur de nouveaux marchés et à acquérir de nouveaux clients."
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Trova rapidamente la soluzione migliore per globalizzare (i18n) la tua app. inlang ti aiuta ad espanderti in nuovi mercati e ad acquisire nuovi clienti."
+                }
+            ]
+        },
+        {
+            "languageTag": "pt-BR",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Encontre rapidamente a melhor solução para globalizar (i18n) seu aplicativo. A inlang ajuda você a expandir para novos mercados e conquistar novos clientes."
+                }
+            ]
+        },
+        {
+            "languageTag": "sk",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Rýchlo nájdite najlepšie riešenie na globalizáciu (i18n) vašej aplikácie. inlang vám pomôže expandovať na nové trhy a získať nových zákazníkov."
+                }
+            ]
+        },
+        {
+            "languageTag": "zh",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "快速找到全球化 (i18n) 您的应用程序的最佳解决方案。 inlang 帮助您拓展新市场并获取新客户。"
+                }
+            ]
+        }
+    ]
+}

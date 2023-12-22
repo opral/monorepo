@@ -1,0 +1,80 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "marketplace_application_header_generic_description",
+        "library.inlang.paraglideJs": "marketplace_application_header_generic_description"
+    },
+    "id": "tough_caribou_clip_occasional",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Eine allgemeine Anleitung, um dein Projekt mit dem inlang-Ökosystem aufzusetzen."
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "en",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "A general guide on the minimum steps required to make your project ready for the ecosystem of inlang."
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Un guide général sur les étapes minimales requises pour préparer votre projet à l'écosystème d'inlang."
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Una guida generale con i passi minimi richiesti per rendere il tuo progetto pronto all'ecosistema di inlang."
+                }
+            ]
+        },
+        {
+            "languageTag": "pt-BR",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Um guia geral pelos passos necessários para deixar o seu projeto pronto para o ecossistema inlang."
+                }
+            ]
+        },
+        {
+            "languageTag": "sk",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Všeobecný sprievodca minimálnymi krokmi potrebnými na to, aby bol váš projekt pripravený na ekosystém inlang."
+                }
+            ]
+        },
+        {
+            "languageTag": "zh",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "有关使您的项目为 inlang 生态系统做好准备所需的最低步骤的一般指南。"
+                }
+            ]
+        }
+    ]
+}

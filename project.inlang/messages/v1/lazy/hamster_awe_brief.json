@@ -1,0 +1,80 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "marketplace_header_plugin_toast_description",
+        "library.inlang.paraglideJs": "marketplace_header_plugin_toast_description"
+    },
+    "id": "lazy_hamster_awe_brief",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Entdecke die Vorteile der Verwendung von Plugins: Freiheit und kostengünstige Einführung."
+                }
+            ]
+        },
+        {
+            "match": [],
+            "languageTag": "en",
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Discover the benefits of using plugins: freedom and low-cost adoption."
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Découvrez les avantages de l'utilisation de plugins : liberté et adoption à faible coût."
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Scopri i vantaggi dell'utilizzo dei plugin: libertà e adozione a basso costo."
+                }
+            ]
+        },
+        {
+            "languageTag": "pt-BR",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Descubra os benefícios de usar plugins: liberdade e adoção com baixo custo."
+                }
+            ]
+        },
+        {
+            "languageTag": "sk",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Objavte výhody používania doplnkov: sloboda a nízke náklady."
+                }
+            ]
+        },
+        {
+            "languageTag": "zh",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "发现使用插件的好处：自由和低成本采用。"
+                }
+            ]
+        }
+    ]
+}

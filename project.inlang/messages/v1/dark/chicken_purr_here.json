@@ -1,0 +1,80 @@
+{
+    "alias": {
+        "plugin.inlang.messageFormat": "inlang_twitter_title",
+        "library.inlang.paraglideJs": "inlang_twitter_title"
+    },
+    "id": "dark_chicken_purr_here",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "inlang's Ökosystem hilft Organisationen global zu gehen."
+                }
+            ]
+        },
+        {
+            "languageTag": "en",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "inlang's ecosystem helps organizations to go global."
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "L'écosystème d'inlang aide les organisations à se mondialiser."
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "L'ecosistema di inlang aiuta le organizzazioni a diventare globali."
+                }
+            ]
+        },
+        {
+            "languageTag": "pt-BR",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "O ecossistema da inlang ajuda as organizações a se tornarem globais."
+                }
+            ]
+        },
+        {
+            "languageTag": "sk",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Ekosystém inlang pomáha organizáciám dostať sa do sveta."
+                }
+            ]
+        },
+        {
+            "languageTag": "zh",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "inlang的生态系统帮助组织走向全球。"
+                }
+            ]
+        }
+    ]
+}
