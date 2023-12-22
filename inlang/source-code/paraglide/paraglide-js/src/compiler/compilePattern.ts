@@ -1,5 +1,5 @@
 import type { Pattern } from "@inlang/sdk"
-import { isValidJsIdentifier } from "../services/valid-js-identifier/index.js"
+import { isValidJSIdentifier } from "@inlang/valid-js-identifier"
 import { escapeForTemplateLiteral, escapeForSingleQuoteString } from "../services/escape/index.js"
 
 /**
@@ -23,7 +23,7 @@ export const compilePattern = (
 				result += escapeForTemplateLiteral(element.value)
 				break
 			case "VariableReference":
-				if (isValidJsIdentifier(element.name)) {
+				if (isValidJSIdentifier(element.name)) {
 					result += "${params." + element.name + "}"
 				} else {
 					result += "${params['" + escapeForSingleQuoteString(element.name) + "']}"
