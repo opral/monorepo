@@ -28,3 +28,16 @@ it("should throw if an unknown expression is used", () => {
 	]
 	expect(() => compilePattern(pattern)).toThrow()
 })
+
+
+it("should escape backticks", () => {
+	const pattern: Pattern = [{ type: "Text", value: "`Hello world`" }]
+	const { compiled } = compilePattern(pattern)
+	expect(compiled).toBe("`\\`Hello world\\``")
+})
+
+it("should escape variable interpolation ( ${} )", () => {
+	const pattern: Pattern = [{ type: "Text", value: "${name" }]
+	const { compiled } = compilePattern(pattern)
+	expect(compiled).toBe("`\\${name`")
+})

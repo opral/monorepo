@@ -18,7 +18,7 @@ export const compilePattern = (
 	for (const element of pattern) {
 		switch (element.type) {
 			case "Text":
-				result += element.value
+				result += escapeText(element.value)
 				break
 			case "VariableReference":
 				result += "${params." + element.name + "}"
@@ -32,4 +32,8 @@ export const compilePattern = (
 		params,
 		compiled: "`" + result + "`",
 	}
+}
+
+function escapeText(text: string): string {
+	return text.replace(/`/g, "\\`").replace(/\${/g, "\\${")
 }
