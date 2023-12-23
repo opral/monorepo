@@ -1,0 +1,2 @@
+# Valid JS Identifier
+This package provides a utility function to check if a string is a valid JavaScript identifier. It also excludes any reserved JS keywords. You can read more about valid JS identifiers [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Lexical_grammar#identifiers).
