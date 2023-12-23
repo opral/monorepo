@@ -40,7 +40,6 @@
 	},
 	"dependencies": {
 		"@inlang/detect-json-formatting": "workspace:*",
-		"@inlang/valid-js-identifier": "workspace:*",
 		"@inlang/sdk": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"commander": "11.1.0",
