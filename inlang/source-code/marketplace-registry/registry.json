@@ -28,7 +28,8 @@
 		"0023fsjj": "./inlang/external-projects/i18n-ally/marketplace-manifest.json",
 		"1153khjh": "./inlang/external-projects/tolgee/marketplace-manifest.json",
 		"kkfjusgu": "./inlang/external-projects/svelte-i18n/marketplace-manifest.json",
-		"92fst3wd": "./inlang/source-code/globelens/marketplace-manifest.json"
+		"92fst3wd": "./inlang/source-code/globelens/marketplace-manifest.json",
+		"193hsyds": "./inlang/source-code/plugins/next-intl/marketplace-manifest.json"
 	},
 	"g": {
 		"94ng94n4": "./inlang/guides/how-to-inlang-app/marketplace-manifest.json",
@@ -41,6 +42,7 @@
 		"wxcebbig": "./inlang/guides/use-paraglide-with-nextjs-app-router/marketplace-manifest.json",
 		"38fnf03n": "./inlang/guides/localization-strategy/marketplace-manifest.json",
 		"lubhdyua": "./inlang/guides/build-a-global-solidstart-app/marketplace-manifest.json",
-		"7777asdy": "./inlang/guides/ecosystem-compatible/marketplace-manifest.json"
+		"7777asdy": "./inlang/guides/ecosystem-compatible/marketplace-manifest.json",
+		"hhfueysj": "./inlang/guides/next-intl-with-ide-extension/marketplace-manifest.json"
 	}
 }
