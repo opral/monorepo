@@ -1,6 +1,6 @@
 import type { Pattern } from "@inlang/sdk"
-import { isValidJSIdentifier } from "@inlang/valid-js-identifier"
 import { escapeForTemplateLiteral, escapeForSingleQuoteString } from "../services/escape/index.js"
+import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 
 /**
  * Compiles a pattern into a template literal string.
