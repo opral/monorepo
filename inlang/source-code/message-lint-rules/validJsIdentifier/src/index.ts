@@ -1,6 +1,6 @@
 import type { MessageLintRule } from "@inlang/message-lint-rule"
 import { id, displayName, description } from "../marketplace-manifest.json"
-import { isValidJSIdentifier } from "@inlang/valid-js-identifier"
+import { isValidJSIdentifier } from "./isValidJSIdentifier.js"
 
 const validJsIdentifier: MessageLintRule = {
 	id: id as MessageLintRule["id"],

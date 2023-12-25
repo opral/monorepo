@@ -1038,9 +1038,6 @@ importers:
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../../sdk
-      '@inlang/valid-js-identifier':
-        specifier: workspace:*
-        version: link:../../valid-js-identifier
       '@vitest/coverage-v8':
         specifier: 0.33.0
         version: 0.33.0(vitest@0.33.0)
@@ -1062,9 +1059,6 @@ importers:
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../../sdk
-      '@inlang/valid-js-identifier':
-        specifier: workspace:*
-        version: link:../../valid-js-identifier
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../../lix/source-code/fs
@@ -1949,15 +1943,6 @@ importers:
       vitest:
         specifier: ^0.34.4
         version: 0.34.6(webdriverio@8.26.1)
-
-  inlang/source-code/valid-js-identifier:
-    devDependencies:
-      dts-buddy:
-        specifier: ^0.4.3
-        version: 0.4.3(typescript@5.3.2)
-      vitest:
-        specifier: ^1.1.0
-        version: 1.1.0
 
   inlang/source-code/versioned-interfaces/language-tag:
     dependencies:
