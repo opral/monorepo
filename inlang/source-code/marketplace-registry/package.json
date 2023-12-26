@@ -15,7 +15,7 @@
 		"build": "node ./buildRegistry.js && npx prettier ./src --write && tsc --build",
 		"dev": "tsc --watch",
 		"purge": "node ./purgeRegistry.js",
-		"test": "tsc --noEmit",
+		"test": "node ./buildRegistry.js && npx prettier ./src --write && tsc --noEmit",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
