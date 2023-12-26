@@ -3,6 +3,7 @@ import { compilePattern } from "./compilePattern.js"
 import { paramsType, type Params } from "./paramsType.js"
 import { optionsType } from "./optionsType.js"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
+import { toStringUnion } from "../services/codegen/string-union.js"
 
 /**
  * Returns the compiled messages for the given message.
@@ -65,8 +66,7 @@ const messageIndexFunction = (args: {
 	params: Params
 	languageTags: Set<LanguageTag>
 }) => {
-	return `
-/**
+	return `/**
  * This message has been compiled by [inlang paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
  *
  * - Don't edit the message's code. Use the [inlang ide extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension),
@@ -82,24 +82,18 @@ const messageIndexFunction = (args: {
 export const ${args.message.id} = (params ${
 		Object.keys(args.params).length > 0 ? "" : "= {}"
 	}, options = {}) => {
-
-	const tag = options.languageTag ?? languageTag();
+	return {
 ${[...args.languageTags]
 	// sort language tags alphabetically to make the generated code more readable
 	.sort((a, b) => a.localeCompare(b))
 	.map(
 		(tag) =>
-			`\tif (tag === "${tag}") return ${tag.replaceAll("-", "_")}.${args.message.id}(${
-				Object.keys(args.params).length > 0 ? "params" : ""
-			})`
+			`\t\t${isValidJSIdentifier(tag) ? tag : `"${tag}"`}: ${tag.replaceAll("-", "_")}.${
+				args.message.id
+			}(${Object.keys(args.params).length > 0 ? "params" : ""})`
 	)
-	.join("\n")}
-	// if the language tag does not exist, return undefined
-	// 
-	// the missing translation lint rule catches errors like this in CI/CD
-	// see https://inlang.com/m/4cxm3eqi/messageLintRule-inlang-missingTranslation
-	// @ts-expect-error - for better DX treat a message function is always returning a string
-	return undefined
+	.join(",\n")}
+	}[/** @type {${toStringUnion(args.languageTags)}} */ (options.languageTag ?? languageTag())];
 }`
 }
 

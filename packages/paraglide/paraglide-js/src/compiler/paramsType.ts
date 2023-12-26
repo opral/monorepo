@@ -1,4 +1,4 @@
-import { escapeForSingleQuoteString } from "../services/escape/index.js"
+import { escapeForSingleQuoteString } from "../services/codegen/escape.js"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 
 export type Params = Record<string, "NonNullable<unknown>">

@@ -1,5 +1,5 @@
 import type { Pattern } from "@inlang/sdk"
-import { escapeForTemplateLiteral, escapeForSingleQuoteString } from "../services/escape/index.js"
+import { escapeForTemplateLiteral, escapeForSingleQuoteString } from "../services/codegen/escape.js"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 
 /**
