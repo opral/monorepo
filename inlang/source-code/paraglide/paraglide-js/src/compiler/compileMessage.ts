@@ -2,7 +2,7 @@ import { LanguageTag, type Message } from "@inlang/sdk"
 import { compilePattern } from "./compilePattern.js"
 import { paramsType, type Params } from "./paramsType.js"
 import { optionsType } from "./optionsType.js"
-import { isValidJSIdentifier } from "@inlang/valid-js-identifier"
+import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 
 /**
  * Returns the compiled messages for the given message.

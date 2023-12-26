@@ -1,5 +1,5 @@
 import { escapeForSingleQuoteString } from "../services/escape/index.js"
-import { isValidJSIdentifier } from "@inlang/valid-js-identifier"
+import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 
 export type Params = Record<string, "NonNullable<unknown>">
 
