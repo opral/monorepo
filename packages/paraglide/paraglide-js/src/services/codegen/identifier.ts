@@ -1,5 +1,3 @@
-const allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
-
 /**
  * Takes in a string and tries to convert it to a valid JS identifier.
  * The output is deterministic.
@@ -7,13 +5,9 @@ const allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345
  * "i" is short for "identifier".
  */
 export function i(str: string) {
-	let result = ""
-	for (const char of str) {
-		if (allowedChars.includes(char)) {
-			result += char
-		} else {
-			result += "_"
-		}
+	str = str.replaceAll(/[^a-zA-Z0-9_]/g, "_")
+	if (str[0]?.match(/[0-9]/)) {
+		str = "_" + str
 	}
-	return result
+	return str
 }
