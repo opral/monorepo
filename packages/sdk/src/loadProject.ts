@@ -27,7 +27,6 @@ import { migrateIfOutdated } from "@inlang/project-settings/migration"
 import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
 import { normalizePath, type NodeishFilesystem, getDirname } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
-import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
 
 import {
@@ -251,7 +250,8 @@ export const loadProject = async (args: {
 
 							// message parsing was successfull remove entry in erros map if it exists
 
-							delete messageLoadErrors()[messageId]
+							const _messageLoadErrors = { ... messageLoadErrors() }
+							delete _messageLoadErrors[messageId]
 							setMessageLoadErrors(messageLoadErrors)
 
 							loadedMessages.push(message)
@@ -318,8 +318,9 @@ export const loadProject = async (args: {
 									try {
 										const message = parseMessage(event.filename, fileContent)
 
-										delete messageLoadErrors()[messageId]
-										setMessageLoadErrors(messageLoadErrors!)
+										const _messageLoadErrors = messageLoadErrors()
+										delete _messageLoadErrors[messageId]
+										setMessageLoadErrors(_messageLoadErrors)
 
 										const currentMessage = messagesQuery.get({ where: { id: messageId } })
 										const currentMessageEncoded = encodeMessage(currentMessage)
@@ -422,12 +423,14 @@ export const loadProject = async (args: {
 									}
 
 									await fs.writeFile(path, encodeMessage(message))
+									debouncedSave(messagesQuery.getAll())
 								}
 								const messageFilePath = messageFolderPath + "/" + getPathFromMessageId(message.id)
 								persistMessage(nodeishFs, messageFilePath, message)
 									.then(() => {
-										delete messageSaveErrors[messageId]
-										setMessageLoadErrors(messageSaveErrors)
+										const _messageSaveErrors = messageSaveErrors()
+										delete _messageSaveErrors[messageId]
+										setMessageLoadErrors(_messageSaveErrors)
 									})
 									.catch((error) => {
 										// TODO #1844 test if errors get propagated
@@ -452,6 +455,7 @@ export const loadProject = async (args: {
 				const messageFilePath = messageFolderPath + "/" + getPathFromMessageId(deletedMessage[0])
 				try {
 					nodeishFs.rm(messageFilePath)
+					debouncedSave(messagesQuery.getAll())
 				} catch (e) {
 					if ((e as any).code !== "ENOENT") {
 						throw e
@@ -559,28 +563,39 @@ export const loadProject = async (args: {
 			hasWatcher
 		)
 
-		// const debouncedSave = skipFirst(
-		// 	debounce(
-		// 		500,
-		// 		async (newMessages) => {
-		// 			try {
-		// 				await resolvedModules()?.resolvedPluginApi.saveMessages({
-		// 					settings: settingsValue,
-		// 					messages: newMessages,
-		// 				})
-		// 			} catch (err) {
-		// 				throw new PluginSaveMessagesError({
-		// 					cause: err,
-		// 				})
-		// 			}
-		// 		},
-		// 		{ atBegin: false }
-		// 	)
-		// )
+		const debouncedSave = skipFirst(
+			debounce(
+				500,
+				async (newMessages) => {
+					try {
+						const loadMessagePlugin = _resolvedModules.plugins.find(
+							(plugin) => plugin.loadMessages !== undefined
+						)
+						const loadPluginId = loadMessagePlugin!.id
 
-		// createEffect(() => {
-		// 	debouncedSave(messagesQuery.getAll())
-		// })
+						const messagesToExport: Message[] = []
+						for (const message of newMessages) {
+							const fixedExportMessage = { ...message }
+							// TODO #1585 here we match using the id to support legacy load message plugins - after we introduced import / export methods we will use importedMessage.alias
+							fixedExportMessage.id =
+								fixedExportMessage.alias[loadPluginId] ?? fixedExportMessage.id
+
+							messagesToExport.push(fixedExportMessage)
+						}
+
+						await resolvedModules()?.resolvedPluginApi.saveMessages({
+							settings: settingsValue,
+							messages: messagesToExport,
+						})
+					} catch (err) {
+						throw new PluginSaveMessagesError({
+							cause: err,
+						})
+					}
+				},
+				{ atBegin: false }
+			)
+		)
 
 		return {
 			installed: {
