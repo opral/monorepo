@@ -1795,9 +1795,6 @@ importers:
       deepmerge-ts:
         specifier: ^5.1.0
         version: 5.1.0
-      human-id:
-        specifier: ^4.1.0
-        version: 4.1.0
       murmurhash3js:
         specifier: ^3.0.1
         version: 3.0.1
@@ -13528,11 +13525,6 @@ packages:
   /human-id@1.0.2:
     resolution: {integrity: sha512-UNopramDEhHJD+VR+ehk8rOslwSfByxPIZyJRfV739NDhN5LF1fa1MqnzKm2lGTQRjNrjK19Q5fhkgIfjlVUKw==}
     dev: true
-
-  /human-id@4.1.0:
-    resolution: {integrity: sha512-WYeWmHXGo1ZPGZuy7I2c+sgM83GvlQR1jrF1zLX6fID9JEVGkZgZe8PHj5HacWC7d9V0rNc4iRVhb9QmO55CUQ==}
-    hasBin: true
-    dev: false
 
   /human-signals@2.1.0:
     resolution: {integrity: sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==}
