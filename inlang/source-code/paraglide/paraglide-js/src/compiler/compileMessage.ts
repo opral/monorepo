@@ -4,6 +4,7 @@ import { paramsType, type Params } from "./paramsType.js"
 import { optionsType } from "./optionsType.js"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 import { toStringUnion } from "../services/codegen/string-union.js"
+import { i } from "../services/codegen/identifier.js"
 
 /**
  * Returns the compiled messages for the given message.
@@ -88,9 +89,9 @@ ${[...args.languageTags]
 	.sort((a, b) => a.localeCompare(b))
 	.map(
 		(tag) =>
-			`\t\t${isValidJSIdentifier(tag) ? tag : `"${tag}"`}: ${tag.replaceAll("-", "_")}.${
-				args.message.id
-			}(${Object.keys(args.params).length > 0 ? "params" : ""})`
+			`\t\t${isValidJSIdentifier(tag) ? tag : `"${tag}"`}: ${i(tag)}.${args.message.id}(${
+				Object.keys(args.params).length > 0 ? "params" : ""
+			})`
 	)
 	.join(",\n")}
 	}[/** @type {${toStringUnion(args.languageTags)}} */ (options.languageTag ?? languageTag())];
