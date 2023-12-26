@@ -17,7 +17,7 @@ function EditorHeader() {
 	// const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false)
 	return (
 		<>
-			<header class="sticky top-0 z-[9999] w-full bg-transparent bg-background py-3.5 px-4 border-b border-surface-200">
+			<header class="sticky top-0 z-[1000] w-full bg-transparent bg-background py-3.5 px-4 border-b border-surface-200">
 				<div class="w-full h-full relative z-10 bg-background max-w-7xl mx-auto flex flex-row justify-between sm:static">
 					<nav class="max-w-[1248px] w-full mx-auto -mt-[0.8px] -mb-[1.5px]">
 						<div class="flex items-center">
