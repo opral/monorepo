@@ -67,6 +67,8 @@ const messageIndexFunction = (args: {
 	params: Params
 	languageTags: Set<LanguageTag>
 }) => {
+	const hasParams = Object.keys(args.params).length > 0
+
 	return `/**
  * This message has been compiled by [inlang paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
  *
@@ -80,21 +82,21 @@ const messageIndexFunction = (args: {
  * @returns {string}
  */
 /* @__NO_SIDE_EFFECTS__ */
-export const ${args.message.id} = (params ${
-		Object.keys(args.params).length > 0 ? "" : "= {}"
-	}, options = {}) => {
-	return {
+export const ${args.message.id} = (params ${hasParams ? "" : "= {}"}, options = {}) => {
+	const messageFunction = {
 ${[...args.languageTags]
 	// sort language tags alphabetically to make the generated code more readable
 	.sort((a, b) => a.localeCompare(b))
-	.map(
-		(tag) =>
-			`\t\t${isValidJSIdentifier(tag) ? tag : `"${tag}"`}: ${i(tag)}.${args.message.id}(${
-				Object.keys(args.params).length > 0 ? "params" : ""
-			})`
-	)
+	.map((tag) => `\t\t${isValidJSIdentifier(tag) ? tag : `"${tag}"`}: ${i(tag)}.${args.message.id}`)
 	.join(",\n")}
-	}[/** @type {${toStringUnion(args.languageTags)}} */ (options.languageTag ?? languageTag())];
+	}[/** @type {${toStringUnion(args.languageTags)}} */ (options.languageTag ?? languageTag())]
+
+	// if the language tag does not exist, return undefined
+	// 
+	// the missing translation lint rule catches errors like this in CI/CD
+	// see https://inlang.com/m/4cxm3eqi/messageLintRule-inlang-missingTranslation
+	// @ts-expect-error - for better DX treat a message function is always returning a string
+	return messageFunction ? messageFunction(${hasParams ? "params" : ""}) : undefined;
 }`
 }
 
