@@ -22,7 +22,7 @@ export function Page() {
 		event.preventDefault()
 		const url = new URL(input())
 		// @ts-ignore - https://github.com/brillout/vite-plugin-ssr/issues/1106
-		return navigate(`/editor/${url.host}${url.pathname}`)
+		return navigate(`/${url.host}${url.pathname}`)
 	}
 
 	onMount(() => {
