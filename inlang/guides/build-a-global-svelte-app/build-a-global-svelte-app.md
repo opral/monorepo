@@ -206,7 +206,7 @@ Right now [[lang]] will match any string, not just languages. We can make sure t
 
 ```ts
 // ./src/params/lang.ts
-import { availableLanguageTags, AvailableLanguageTag } from "$paraglide/runtime"
+import { availableLanguageTags, type AvailableLanguageTag } from "$paraglide/runtime"
 
 export const match = (param: any): param is AvailableLanguageTag => {
 	return availableLanguageTags.includes(param)
@@ -231,7 +231,7 @@ In your root layout, add some code that reactively sets the language tag based o
 ```svelte
 <script lang="ts">
   import { page } from "$app/stores";
-  import { setLanguageTag, sourceLanguageTag type AvailableLanguageTag } from "$paraglide/runtime";
+  import { setLanguageTag, sourceLanguageTag, type AvailableLanguageTag } from "$paraglide/runtime";
 
   //Use the default language if no language is given
   $: lang = $page.params.lang as AvailableLanguageTag ?? sourceLanguageTag;
@@ -339,6 +339,8 @@ Then in `hooks.server.ts`, replace the placeholder with the correct language.
 
 ```ts
 // ./src/hooks.server.ts
+import { sourceLanguageTag } from "$paraglide/runtime";
+
 export async function handle({ event, resolve }) {
 	const lang = event.params.lang ?? sourceLanguageTag
 
@@ -360,7 +362,7 @@ On the client, we can set the `lang` attribute using JS. In your root layout, ad
 ```svelte
 <script lang="ts">
   import { page } from "$app/stores";
-  import { setLanguageTag, sourceLanguageTag type AvailableLanguageTag } from "$paraglide/runtime";
+  import { setLanguageTag, sourceLanguageTag, type AvailableLanguageTag } from "$paraglide/runtime";
   import { browser } from "$app/environment";
 
   //Use the default language if no language is given

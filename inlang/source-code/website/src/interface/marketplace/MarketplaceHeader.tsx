@@ -41,11 +41,10 @@ const MarketplaceHeader = () => {
 					href="/editor/github.com/inlang/monorepo"
 				/>
 			</Show>
-			<header class="sticky top-0 w-full z-[9999] bg-background border-b border-surface-200 px-4">
+			<header class="sticky top-0 w-full z-[9999] sm:bg-background border-b border-surface-200">
 				<div
 					class={
-						"max-w-7xl mx-auto flex justify-between items-center relative sm:static sm:mb-0 " +
-						(!currentPageContext.urlParsed.pathname.includes("/documentation") ? "mb-10" : "mb-1")
+						"max-w-7xl mx-auto flex justify-between items-center relative sm:static mb-0 gap-3 px-4 bg-background"
 					}
 				>
 					<Link
@@ -53,15 +52,19 @@ const MarketplaceHeader = () => {
 						onClick={() => setSearchInput("")}
 						class="flex items-center w-fit pointer-events-auto py-4 transition-opacity hover:opacity-75"
 					>
-						<img class={"h-8 w-8"} src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
+						<img
+							class={"h-8 w-8 rounded"}
+							src="/favicon/safari-pinned-tab.svg"
+							alt="Company Logo"
+						/>
 						<span class={"self-center pl-2 text-left font-semibold text-surface-900"}>inlang</span>
 					</Link>
-					<div class="absolute lg:absolute lg:top-4 lg:left-1/2 lg:-translate-x-1/2 sm:static top-16 sm:top-0 w-full sm:max-w-sm mx-auto sm:mx-0">
+					<div class="static top-0 lg:absolute lg:top-4 lg:left-1/2 lg:-translate-x-1/2 flex-1 sm:max-w-sm md:w-80 mx-0">
 						<SearchBar />
 					</div>
-					<div class="flex gap-8">
+					<div class="flex gap-8 items-center">
 						<a
-							class="text-surface-700 hover:text-primary pointer-events-auto flex justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200"
+							class="hidden text-surface-700 hover:text-primary pointer-events-auto md:flex justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200"
 							href="/documentation"
 						>
 							{m.marketplace_header_build_on_inlang_button()}

@@ -30,7 +30,7 @@ export function Page() {
 			{renderLocales(currentPageContext.urlParsed.pathname).map((locale) => (
 				<Link
 					href={locale.href}
-					lang={locale.hreflang}
+					hreflang={locale.hreflang}
 					// @ts-ignore
 					rel={
 						locale.rel
