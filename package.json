@@ -5,7 +5,7 @@
 	"scripts": {
 		"dev": "pnpm exec nx run-many --nx-bail --target=dev --parallel 1000 --output-style stream",
 		"dev:ide": "pnpm exec nx run-many --target=dev --parallel=10 --nx-bail --verbose --projects=vs-code-extension --output-style=stream",
-		"production": "pnpm exec nx run-many --nx-bail --target=production --parallel 1000 --exclude @lix-js/server --exclude @inlang/badge --exclude @inlang/manage --output-style=stream",
+		"production": "pnpm exec nx run-many --nx-bail --target=production --parallel 1000 --exclude @lix-js/server --exclude @inlang/badge --exclude @inlang/manage --exclude @inlang/editor --output-style=stream",
 		"build": "pnpm exec nx run-many --nx-bail --target=build --parallel",
 		"dev:lix": "pnpm --stream --parallel --filter @lix-js/* --filter @inlang/server --filter @inlang/editor --filter @inlang/website dev",
 		"---- TEST ----------------------------------------------------------": "",

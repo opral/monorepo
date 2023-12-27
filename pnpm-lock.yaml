@@ -1826,9 +1826,6 @@ importers:
       '@inlang/badge':
         specifier: workspace:*
         version: link:../badge
-      '@inlang/editor':
-        specifier: workspace:*
-        version: link:../editor
       '@inlang/env-variables':
         specifier: workspace:*
         version: link:../env-variables
