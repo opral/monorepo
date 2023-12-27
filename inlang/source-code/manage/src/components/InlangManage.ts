@@ -252,11 +252,23 @@ export class InlangManage extends TwLitElement {
 												this.shadowRoot?.querySelector("#projects")?.classList.add("hidden")
 												this.shadowRoot?.querySelector("#account")?.classList.toggle("hidden")
 											}}
+											class="flex items-center gap-1 group"
 										>
 											<img
-												class="h-8 w-8 rounded-full transition-opacity hover:opacity-70"
+												class="h-6 w-6 rounded-full transition-opacity group-hover:opacity-70"
 												src=${this.user.avatarUrl}
 											/>
+											<svg
+												viewBox="0 0 24 24"
+												width="1.2em"
+												height="1.2em"
+												class="text-slate-400 group-hover:text-slate-300 transition-colors"
+											>
+												<path
+													fill="currentColor"
+													d="M12 14.95q-.2 0-.375-.062t-.325-.213l-4.6-4.6q-.275-.275-.275-.7t.275-.7q.275-.275.7-.275t.7.275l3.9 3.9l3.9-3.9q.275-.275.7-.275t.7.275q.275.275.275.7t-.275.7l-4.6 4.6q-.15.15-.325.213T12 14.95Z"
+												></path>
+											</svg>
 										</button>
 										<div
 											@click=${(e: { stopPropagation: () => void }) => {
@@ -302,14 +314,17 @@ export class InlangManage extends TwLitElement {
 								/>
 							</svg>
 							<a
-								href="/"
+								target="_blank"
+								href=${`https://github.com/${this.url.repo.split("/")[1]}`}
 								class="self-center text-slate-900 truncate hover:text-[#098DAC] transition-colors duration-75"
 							>
 								${this.url.repo ? this.url.repo.split("/")[1] : ""}
 							</a>
 							<p class="mx-1.5">/</p>
 							<a
-								href="/"
+								target="_blank"
+								href=${`
+								https://github.com/${this.url.repo.split("/")[1]}/${this.url.repo.split("/")[2]}`}
 								class="self-center text-slate-900 truncate hover:text-[#098DAC] transition-colors duration-75"
 							>
 								${this.url.repo ? this.url.repo.split("/")[2] : ""}
@@ -369,7 +384,10 @@ export class InlangManage extends TwLitElement {
 												? this.branches?.map(
 														(branch) =>
 															html`<a
-																href=${`/?repo=${this.url.repo}&branch=${branch}&project=${this.url.project}`}
+																href=${`/${this.url.path !== "" ? this.url.path : ""}
+																?repo=${this.url.repo}&branch=${branch}&project=${this.url.project}${
+																	this.url.module ? `&module=${this.url.module}` : ""
+																}`}
 																class="flex items-center gap-1 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900"
 															>
 																${this.url.branch === branch ||
