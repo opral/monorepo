@@ -4,8 +4,9 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"_dev": "vinxi dev",
-		"build": "vinxi build",
+		"paraglide": "paraglide-js compile --project ./project.inlang",
+		"_dev": "pnpm run paraglide --watch & vinxi dev",
+		"build": "pnpm run paraglide && vinxi build",
 		"start": "node ./.output/server/index.mjs"
 	},
 	"dependencies": {
@@ -13,13 +14,12 @@
 		"@solidjs/router": "^0.10",
 		"@solidjs/start": "^0.4",
 		"solid-js": "^1.8",
-		"vinxi": "0.0.54"
+		"vinxi": "^0.0.54"
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "workspace:*",
 		"@inlang/paraglide-js-adapter-vite": "workspace:*",
 		"@types/node": "^20",
-		"typescript": "^5",
-		"vite": "^4"
+		"typescript": "^5.3"
 	}
 }
