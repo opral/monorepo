@@ -1,5 +1,15 @@
 # @inlang/paraglide-js
 
+## 1.0.0-prerelease.21
+
+feat: Handle variables that have invalid JS identifiers as names.
+fix: Better text escaping in the compiler.
+fix: Compiler now fails reliably when a message ID is an invalid JS identifier.
+
+## 1.0.0-prerelease.20
+
+Paraglide now checks if the messages have actually changed before recompiling. This should improve reliability and performance.
+
 ## 1.0.0-prerelease.19
 
 fix: Fix inlang/internal#195

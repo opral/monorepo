@@ -35,7 +35,7 @@ export async function render(pageContext: PageContextRenderer): Promise<unknown>
       <head>
 	  		<title>${dangerouslySkipEscape(metaInfo.title)}</title>
 			<meta name="description" content="${dangerouslySkipEscape(metaInfo.description)}" />
-			<meta name="og:image" content="/images/fink-social-image.jpg" />
+			<meta name="og:image" content="/editor/images/fink-social-image.jpg" />
 			<meta charset="UTF-8" />
 			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<!-- theme-color means the background color of the iOS status bar -->
