@@ -55,7 +55,7 @@ services:
     type: web
     runtime: node
     region: frankfurt
-    plan: starter
+    plan: standard
     branch: main
     pullRequestPreviewsEnabled: false
     buildCommand: pnpm install && pnpm run build
