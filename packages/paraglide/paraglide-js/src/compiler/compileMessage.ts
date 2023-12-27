@@ -91,11 +91,12 @@ ${[...args.languageTags]
 	.join(",\n")}
 	}[/** @type {${toStringUnion(args.languageTags)}} */ (options.languageTag ?? languageTag())]
 
-	// if the language tag does not exist, return the message id
+	// if the language tag does not exist, return undefined
 	// 
 	// the missing translation lint rule catches errors like this in CI/CD
 	// see https://inlang.com/m/4cxm3eqi/messageLintRule-inlang-missingTranslation
-	return messageFunction ? messageFunction(${hasParams ? "params" : ""}) : "${args.message.id}";
+	// @ts-expect-error - for better DX treat a message function is always returning a string
+	return messageFunction ? messageFunction(${hasParams ? "params" : ""}) : undefined;
 }`
 }
 

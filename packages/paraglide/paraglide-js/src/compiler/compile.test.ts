@@ -168,7 +168,7 @@ describe("e2e", async () => {
 	// can be mitigated by using lint rules. furthermore, the bundle
 	// size will be larger if the id is included in the compiled output
 	// instead of undefined.
-	test("should return the message ID if the message is not translated", async () => {
+	test("should return undefined if the message is not translated", async () => {
 		const { m, runtime } = await import(
 			`data:application/javascript;base64,${Buffer.from(
 				compiledBundle.output[0].code,
@@ -178,9 +178,9 @@ describe("e2e", async () => {
 
 		runtime.setLanguageTag("fr")
 
-		expect(m.onlyText()).toBe("onlyText")
-		expect(m.oneParam({ name: "Samuel" })).toBe("oneParam")
-		expect(m.multipleParams({ name: "Samuel", count: 5 })).toBe("multipleParams")
+		expect(m.onlyText()).toBe(undefined)
+		expect(m.oneParam({ name: "Samuel" })).toBe(undefined)
+		expect(m.multipleParams({ name: "Samuel", count: 5 })).toBe(undefined)
 	})
 
 	test("defining onSetLanguageTag should be possible and should be called when the language tag changes", async () => {
