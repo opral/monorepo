@@ -36,7 +36,15 @@ export function Page(props: {
 
 	return (
 		<>
-			<Title>Search</Title>
+			<Title>
+				{m.marketplace_search_seo_title()}
+				{currentPageContext.urlParsed.search.q !== ""
+					? ` ${
+							currentPageContext.urlParsed.search.q
+					  } ${m.marketplace_search_seo_global_products()}`
+					: ""}{" "}
+				| inlang
+			</Title>
 			<Meta name="description" content="Search globalization products." />
 			<Meta name="og:image" content="/opengraph/inlang-search-image.jpg" />
 			<Link
