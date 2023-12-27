@@ -48,6 +48,11 @@ export const repositories: Repositories = [
 		description: "A JSON Web Token authentication plugin for the Django REST Framework.",
 	},
 	{
+		owner: "flornkm",
+		repository: "florians-site",
+		description: "Personal Website of Florian Kiem.",
+	},
+	{
 		owner: "hecker",
 		repository: "hecker.vc",
 		description: "Personal Website of Jan Hecker.",
