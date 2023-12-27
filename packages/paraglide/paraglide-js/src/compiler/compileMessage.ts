@@ -3,6 +3,8 @@ import { compilePattern } from "./compilePattern.js"
 import { paramsType, type Params } from "./paramsType.js"
 import { optionsType } from "./optionsType.js"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
+import { toStringUnion } from "../services/codegen/string-union.js"
+import { i } from "../services/codegen/identifier.js"
 
 /**
  * Returns the compiled messages for the given message.
@@ -65,8 +67,9 @@ const messageIndexFunction = (args: {
 	params: Params
 	languageTags: Set<LanguageTag>
 }) => {
-	return `
-/**
+	const hasParams = Object.keys(args.params).length > 0
+
+	return `/**
  * This message has been compiled by [inlang paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
  *
  * - Don't edit the message's code. Use the [inlang ide extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension),
@@ -79,27 +82,21 @@ const messageIndexFunction = (args: {
  * @returns {string}
  */
 /* @__NO_SIDE_EFFECTS__ */
-export const ${args.message.id} = (params ${
-		Object.keys(args.params).length > 0 ? "" : "= {}"
-	}, options = {}) => {
-
-	const tag = options.languageTag ?? languageTag();
+export const ${args.message.id} = (params ${hasParams ? "" : "= {}"}, options = {}) => {
+	const messageFunction = {
 ${[...args.languageTags]
 	// sort language tags alphabetically to make the generated code more readable
 	.sort((a, b) => a.localeCompare(b))
-	.map(
-		(tag) =>
-			`\tif (tag === "${tag}") return ${tag.replaceAll("-", "_")}.${args.message.id}(${
-				Object.keys(args.params).length > 0 ? "params" : ""
-			})`
-	)
-	.join("\n")}
+	.map((tag) => `\t\t${isValidJSIdentifier(tag) ? tag : `"${tag}"`}: ${i(tag)}.${args.message.id}`)
+	.join(",\n")}
+	}[/** @type {${toStringUnion(args.languageTags)}} */ (options.languageTag ?? languageTag())]
+
 	// if the language tag does not exist, return undefined
 	// 
 	// the missing translation lint rule catches errors like this in CI/CD
 	// see https://inlang.com/m/4cxm3eqi/messageLintRule-inlang-missingTranslation
 	// @ts-expect-error - for better DX treat a message function is always returning a string
-	return undefined
+	return messageFunction ? messageFunction(${hasParams ? "params" : ""}) : undefined;
 }`
 }
 
