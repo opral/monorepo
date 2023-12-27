@@ -1,4 +1,4 @@
-import { escapeForSingleQuoteString } from "../services/escape/index.js"
+import { escapeForSingleQuoteString } from "../services/codegen/escape.js"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 
 export type Params = Record<string, "NonNullable<unknown>">
@@ -14,8 +14,7 @@ export type Params = Record<string, "NonNullable<unknown>">
  */
 export const paramsType = (params: Params, isMessagesIndex: boolean) => {
 	if (Object.keys(params).length === 0) {
-		if (isMessagesIndex) return "@param {{}} params"
-		return ""
+		return isMessagesIndex ? "@param {{}} params" : ""
 	}
 
 	const fieldTypes: `${string}: ${string}`[] = []
