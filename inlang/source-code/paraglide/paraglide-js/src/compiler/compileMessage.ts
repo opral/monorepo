@@ -4,6 +4,7 @@ import { paramsType, type Params } from "./paramsType.js"
 import { optionsType } from "./optionsType.js"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 import { i } from "../services/codegen/identifier.js"
+import { escapeForDoubleQuoteString } from "../services/codegen/escape.js"
 
 /**
  * Returns the compiled messages for the given message.
@@ -109,13 +110,7 @@ const messageFunction = (args: {
 	lookupTable: Record<LanguageTag, LanguageTag[]>
 }) => {
 	const compiledPattern = args.compiledPatterns[args.languageTag]
-	if (!compiledPattern) {
-		const fallbackLanguage = args.lookupTable[args.languageTag]![1]
-		if (!fallbackLanguage)
-			throw new Error(`No fallback language found for language tag ${args.languageTag}`)
-		return `export { ${args.message.id} } from "./${fallbackLanguage}.js"`
-	}
-
+	if (!compiledPattern) return fallbackFunction(args)
 	const hasParams = Object.keys(args.params).length > 0
 
 	return `
@@ -125,4 +120,20 @@ const messageFunction = (args: {
  */
 /* @__NO_SIDE_EFFECTS__ */
 export const ${args.message.id} = (${hasParams ? "params" : ""}) => ${compiledPattern}`
+}
+
+function fallbackFunction(args: {
+	message: Message
+	params: Params
+	languageTag: LanguageTag
+	compiledPatterns: Record<string, string>
+	lookupTable: Record<LanguageTag, LanguageTag[]>
+}) {
+	const fallbackLanguage = args.lookupTable[args.languageTag]![1]
+	if (!fallbackLanguage)
+		return `/**
+* Failed to resolve message ${args.message.id} for languageTag "${args.languageTag}". 
+*/
+export const ${args.message.id} = () => "${escapeForDoubleQuoteString(args.message.id)}"`
+	return `export { ${args.message.id} } from "./${fallbackLanguage}.js"`
 }

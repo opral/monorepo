@@ -157,3 +157,45 @@ it("should add a /* @__NO_SIDE_EFFECTS__ */ comment to the compiled message", as
 	expect(result.index.includes("/* @__NO_SIDE_EFFECTS__ */")).toBe(true)
 	expect(result.en?.includes("/* @__NO_SIDE_EFFECTS__ */")).toBe(true)
 })
+
+
+it("should re-export the message from a fallback language tag if the message is missing in the current language tag", async () => {
+	const result = compileMessage(
+		{
+			id: "some_message",
+			selectors: [],
+			variants: [
+				{
+					match: [],
+					languageTag: "en",
+					pattern: [{ type: "Text", value: "Hello world" }],
+				},
+			],
+		},
+		["en", "de"],
+		{ en: ["en"], de: ["de", "en"] }
+	)
+
+	expect(result.de?.includes('export { some_message } from "./en.js"')).toBe(true)
+})
+
+it.only("should return the message ID if no fallback can be found", async () => {
+	const result = compileMessage(
+		{
+			id: "some_message",
+			selectors: [],
+			variants: [
+				{
+					match: [],
+					languageTag: "de",
+					pattern: [{ type: "Text", value: "Etwas Text" }],
+				},
+			],
+		},
+		["en", "de"],
+		{ en: ["en"], de: ["de", "en"] }
+	)
+
+	console.log(result.en)
+	expect(result.en?.includes('export const some_message = () => "some_message"')).toBe(true)
+})
