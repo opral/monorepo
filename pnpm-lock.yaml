@@ -516,8 +516,8 @@ importers:
         specifier: 4.5.0
         version: 4.5.0(@types/node@20.5.9)
       vite-plugin-node-polyfills:
-        specifier: 0.12.0
-        version: 0.12.0(vite@4.5.0)
+        specifier: 0.17.0
+        version: 0.17.0(vite@4.5.0)
       vite-plugin-solid:
         specifier: 2.7.0
         version: 2.7.0(solid-js@1.7.11)(vite@4.5.0)
@@ -20151,20 +20151,6 @@ packages:
       - rollup
       - supports-color
 
-  /vite-plugin-node-polyfills@0.12.0(vite@4.5.0):
-    resolution: {integrity: sha512-xZfpD81aNhwEbIjccEiy8Q/hDdnlYqBSeEaUMIukOpGHuMaz65jqrC2lmnF/FXnliovISy2L1n92da0JOvk36A==}
-    peerDependencies:
-      vite: ^2.0.0 || ^3.0.0 || ^4.0.0
-    dependencies:
-      '@rollup/plugin-inject': 5.0.5
-      buffer-polyfill: /buffer@6.0.3
-      node-stdlib-browser: 1.2.0
-      process: 0.11.10
-      vite: 4.5.0(@types/node@20.5.9)
-    transitivePeerDependencies:
-      - rollup
-    dev: true
-
   /vite-plugin-node-polyfills@0.16.0(vite@4.5.0):
     resolution: {integrity: sha512-uj1ymOmk7TliMxiivmXokpMY5gVMBpFPSZPLQSCv/LjkJGGKwyLjpbFL64dbYZEdFSUQ3tM7pbrxNh25yvhqOA==}
     peerDependencies:
@@ -20178,6 +20164,20 @@ packages:
     transitivePeerDependencies:
       - rollup
     dev: false
+
+  /vite-plugin-node-polyfills@0.17.0(vite@4.5.0):
+    resolution: {integrity: sha512-iPmPn7376e5u6QvoTSJa16hf5Q0DFwHFXJk2uYpsNlmI3JdPms7hWyh55o+OysJ5jo9J5XPhLC9sMOYifwFd1w==}
+    peerDependencies:
+      vite: ^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0
+    dependencies:
+      '@rollup/plugin-inject': 5.0.5
+      buffer-polyfill: /buffer@6.0.3
+      node-stdlib-browser: 1.2.0
+      process: 0.11.10
+      vite: 4.5.0(@types/node@20.5.9)
+    transitivePeerDependencies:
+      - rollup
+    dev: true
 
   /vite-plugin-solid@2.7.0(solid-js@1.7.11)(vite@4.5.0):
     resolution: {integrity: sha512-avp/Jl5zOp/Itfo67xtDB2O61U7idviaIp4mLsjhCa13PjKNasz+IID0jYTyqUp9SFx6/PmBr6v4KgDppqompg==}
