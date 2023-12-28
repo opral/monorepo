@@ -10,11 +10,11 @@ const { translateHref } = prefixStrategy(availableLanguageTags, sourceLanguageTa
 
 type NextUseRouter = (typeof NextNavigation)["useRouter"]
 const useRouter: NextUseRouter = (...args) => {
-	const nextRouter = NextNavigation.useRouter()
+	const nextRouter = NextNavigation.useRouter(...args)
 
-	const push: (typeof nextRouter)["push"] = (href, options) => {
-		const translatedHref = translateHref(href, languageTag())
-		nextRouter.push(translatedHref, options)
+	const push: (typeof nextRouter)["push"] = (...args) => {
+		args[0] = translateHref(args[0], languageTag())
+		nextRouter.push(...args)
 	}
 
 	return {
