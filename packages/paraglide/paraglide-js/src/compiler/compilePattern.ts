@@ -1,6 +1,7 @@
 import type { Pattern } from "@inlang/sdk"
 import { escapeForTemplateLiteral, escapeForSingleQuoteString } from "../services/codegen/escape.js"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
+import { backtick } from "../services/codegen/quotes.js"
 
 /**
  * Compiles a pattern into a template literal string.
@@ -37,6 +38,6 @@ export const compilePattern = (
 	}
 	return {
 		params,
-		compiled: "`" + result + "`",
+		compiled: backtick(result),
 	}
 }

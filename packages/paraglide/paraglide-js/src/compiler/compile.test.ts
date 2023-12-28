@@ -164,25 +164,6 @@ describe("e2e", async () => {
 		expect(m.onlyText()).toBe("Eine einfache Nachricht.")
 	})
 
-	// any missing translation heuristic e.g. "show the id" or similar
-	// can be mitigated by using lint rules. furthermore, the bundle
-	// size will be larger if the id is included in the compiled output
-	// instead of undefined.
-	test("should return undefined if the message is not translated", async () => {
-		const { m, runtime } = await import(
-			`data:application/javascript;base64,${Buffer.from(
-				compiledBundle.output[0].code,
-				"utf8"
-			).toString("base64")}`
-		)
-
-		runtime.setLanguageTag("fr")
-
-		expect(m.onlyText()).toBe(undefined)
-		expect(m.oneParam({ name: "Samuel" })).toBe(undefined)
-		expect(m.multipleParams({ name: "Samuel", count: 5 })).toBe(undefined)
-	})
-
 	test("defining onSetLanguageTag should be possible and should be called when the language tag changes", async () => {
 		const { runtime } = await import(
 			`data:application/javascript;base64,${Buffer.from(

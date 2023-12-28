@@ -1,12 +1,11 @@
-import type { LanguageTag } from "@inlang/sdk"
+import type { LanguageTag } from "./interface.js"
 
 /**
- * Returns the lookup order for the given languages according to the BCP 47 spec.
- * The list is ordered by priority, with the first language being the most preferred.
- * 
+ * Returns the lookup order for the given language-tags according to the IETF BCP 47 spec.
+ *
  * All returned languages are available language tags.
  * The returned list is inclusive, meaning that the language itself is included.
- * 
+ *
  * @see https://datatracker.ietf.org/doc/html/rfc4647#section-3.4
  */
 export function getLookupOrder<LanguageTags extends readonly LanguageTag[]>(

@@ -39,6 +39,7 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
+		"@inlang/language-tag": "workspace:*",
 		"@inlang/detect-json-formatting": "workspace:*",
 		"@inlang/sdk": "workspace:*",
 		"@lix-js/fs": "workspace:*",
