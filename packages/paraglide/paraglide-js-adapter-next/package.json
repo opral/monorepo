@@ -4,7 +4,8 @@
     "private": true,
     "scripts": {
         "build": "rollup -c",
-        "dev": "rollup -c -w"
+        "dev": "rollup -c -w",
+        "test": "vitest run --passWithNoTests"
     },
     "keywords": [
         "inlang",
@@ -16,39 +17,40 @@
         "next",
         "react"
     ],
-    "main": "dist/index.js",
+    "main": "dist/index.cjs",
     "module": "dist/index.mjs",
     "types": "dist/index.d.ts",
+    "type": "module",
     "exports": {
         ".": {
-            "require": "./dist/index.js",
-            "types": "./dist/index.d.ts",
+            "require": "./dist/index.cjs",
             "import": "./dist/index.mjs",
-            "default": "./dist/index.js"
+            "default": "./dist/index.cjs",
+            "types": "./dist/index.d.ts"
         },
         "./middleware": {
-            "require": "./dist/app/middleware.js",
-            "types": "./dist/app/middleware.d.ts",
+            "require": "./dist/app/middleware.cjs",
             "import": "./dist/app/middleware.mjs",
-            "default": "./dist/app/middleware.js"
+            "default": "./dist/app/middleware.cjs",
+            "types": "./dist/app/middleware.d.ts"
         },
         "./navigation": {
-            "require": "./dist/app/navigation/index.js",
-            "types": "./dist/app/navigation/index.d.ts",
+            "require": "./dist/app/navigation/index.cjs",
             "import": "./dist/app/navigation/index.mjs",
-            "default": "./dist/app/navigation/index.js"
+            "default": "./dist/app/navigation/index.cjs",
+            "types": "./dist/app/navigation/index.d.ts"
         },
         "./pages": {
-            "require": "./dist/pages/index.js",
-            "types": "./dist/pages/index.d.ts",
+            "require": "./dist/pages/index.cjs",
             "import": "./dist/pages/index.mjs",
-            "default": "./dist/pages/index.js"
+            "types": "./dist/pages/index.d.ts",
+            "default": "./dist/pages/index.cjs"
         },
         "./plugin": {
             "import": "./dist/plugin/index.mjs",
-            "require": "./dist/plugin/index.js",
+            "require": "./dist/plugin/index.cjs",
             "types": "./dist/plugin/index.d.ts",
-            "default": "./dist/plugin/index.js"
+            "default": "./dist/plugin/index.cjs"
         }
     },
     "files": [
