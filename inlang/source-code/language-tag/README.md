@@ -1,3 +1,3 @@
 # `@inlang/language-tag`
 
-This package defines a canonical fallback order for language tags. It should be used to determine which language to use when a translation is missing.
+This package implements language fallbacks according to [BCP-47/RFC-4647](https://datatracker.ietf.org/doc/html/rfc4647). See [Lookup Section](https://datatracker.ietf.org/doc/html/rfc4647#section-3.4).
