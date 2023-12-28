@@ -1,10 +1,11 @@
-import { createSignal } from "solid-js"
+import { createSignal, onMount } from "solid-js"
 import { navigate } from "vike/client/router"
 import { z } from "zod"
-import { Meta, Title } from "@solidjs/meta"
 import { CommunityProjects } from "#src/interface/editor/CommunityProjects.jsx"
 import { Button } from "#src/interface/components/Button.jsx"
 import EditorLayout from "#src/interface/editor/EditorLayout.jsx"
+import { currentPageContext } from "#src/renderer/state.js"
+import { replaceMetaInfo } from "./@host/@owner/@repository/helper/ReplaceMetaInfo.js"
 
 export function Page() {
 	/** is not reactive because window is not reactive */
@@ -21,27 +22,27 @@ export function Page() {
 		event.preventDefault()
 		const url = new URL(input())
 		// @ts-ignore - https://github.com/brillout/vite-plugin-ssr/issues/1106
-		return navigate(`/editor/${url.host}${url.pathname}`)
+		return navigate(`/${url.host}${url.pathname}`)
 	}
+
+	onMount(() => {
+		onMount(() => {
+			replaceMetaInfo(currentPageContext)
+		})
+	})
 
 	return (
 		<>
-			<Title>inlang Editor</Title>
-			<Meta
-				name="description"
-				content="Contribute to open source projects and manage translations with inlang's editor."
-			/>
-			<Meta name="og:image" content="/images/fink-social-image.jpg" />
 			<EditorLayout>
 				{/* START search bar */}
 				<div class="flex flex-col items-center justify-center py-16 md:py-20">
 					{/* negative margin as a dirty way of centering the search bar */}
 					<div class="flex flex-col p-2 md:p-10 items-center tracking-tight">
-						<h2 class="text-[40px] leading-tight md:text-6xl font-bold pb-6 md:pb-8 text-center">
-							Open the Editor
+						<h2 class="text-[40px] leading-tight md:text-6xl font-bold max-w-xl pb-6 md:pb-8 text-center">
+							Open the Fink Message Editor
 						</h2>
 						<p class="text-xl text-surface-600 w-full md:w-[400px] text-center leading-relaxed">
-							To access the editor, please create the{" "}
+							To access the i18n editor, please create the{" "}
 							<span class="text-base font-mono py-[5px] px-2 bg-surface-100 rounded-lg text-surface-600">
 								project.inlang
 							</span>{" "}

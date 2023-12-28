@@ -1,7 +1,5 @@
-export const optionsType = (args: { languageTags: Iterable<string> }) => {
-	return `@param {{ languageTag?: ${
-		[...args.languageTags].map(quote).join(" | ") ?? "undefined"
-	} }} options`
-}
+import { toStringUnion } from "../services/codegen/string-union.js"
 
-const quote = (str: string) => `"${str}"`
+export const optionsType = (args: { languageTags: Iterable<string> }) => {
+	return `@param {{ languageTag?: ${toStringUnion(args.languageTags) ?? "undefined"} }} options`
+}

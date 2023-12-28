@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.24.0
+
+### Minor Changes
+
+- 013a0923b: fix windows close project selection bug
+
 ## 1.23.0
 
 ### Minor Changes

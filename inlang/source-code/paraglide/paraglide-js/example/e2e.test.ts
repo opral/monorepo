@@ -12,5 +12,5 @@ test("should log the messages in the correct language tag", async () => {
 	expect(consoleMock.mock.calls[3][0]).toBe("Hallo Samuel! Du hast 5 Nachrichten.")
 
 	// testing the direct import of a language file
-	expect(consoleMock.mock.calls[4][0]).toBe("Welcome to NYC Samuel! You have 5 messages.")
+	expect(consoleMock.mock.calls[4][0]).toBe("Welcome Samuel! You have 5 messages.")
 })
