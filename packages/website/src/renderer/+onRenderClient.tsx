@@ -53,7 +53,7 @@ const rootElement = document.querySelector("#root") as HTMLElement
 const [currentPage, setCurrentPage] = createSignal<Component>()
 const [currentPageProps, setCurrentPageProps] = createStore<Record<string, unknown>>({})
 
-export default function render(pageContext: PageContextRenderer) {
+export default function onRenderClient(pageContext: PageContextRenderer) {
 	try {
 		setCurrentPageContext(pageContext)
 		setCurrentPage(() => pageContext.Page)
