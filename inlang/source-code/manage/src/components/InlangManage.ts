@@ -223,7 +223,8 @@ export class InlangManage extends TwLitElement {
 				<div class="max-w-7xl mx-auto flex flex-row justify-between relative sm:static">
 					<div class="flex items-center">
 						<a
-							href="/"
+							href="https://inlang.com"
+							target="_blank"
 							class="flex items-center w-fit pointer-events-auto transition-opacity hover:opacity-75"
 						>
 							<inlang-logo size="2rem"></inlang-logo>
