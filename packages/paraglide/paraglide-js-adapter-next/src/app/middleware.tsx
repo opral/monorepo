@@ -11,6 +11,7 @@ import { LANGUAGE_HEADER } from "../constants"
  * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
  */
 export function paraglideMiddleware(request: NextRequest) {
+	console.log("paraglideMiddleware")
 	//Get's the first segment of the URL path
 	const maybeLocale = request.nextUrl.pathname.split("/")[1]
 

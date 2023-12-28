@@ -27,16 +27,16 @@
             "default": "./dist/index.js"
         },
         "./middleware": {
-            "require": "./dist/middleware.js",
-            "types": "./dist/middleware.d.ts",
-            "import": "./dist/middleware.mjs",
-            "default": "./dist/middleware.js"
+            "require": "./dist/app/middleware.js",
+            "types": "./dist/app/middleware.d.ts",
+            "import": "./dist/app/middleware.mjs",
+            "default": "./dist/app/middleware.js"
         },
         "./navigation": {
-            "require": "./dist/navigation/index.js",
-            "types": "./dist/navigation/index.d.ts",
-            "import": "./dist/navigation/index.mjs",
-            "default": "./dist/navigation/index.js"
+            "require": "./dist/app/navigation/index.js",
+            "types": "./dist/app/navigation/index.d.ts",
+            "import": "./dist/app/navigation/index.mjs",
+            "default": "./dist/app/navigation/index.js"
         },
         "./pages": {
             "require": "./dist/pages/index.js",
