@@ -1,4 +1,6 @@
 import type { Pattern } from "@inlang/sdk"
+import { escapeForTemplateLiteral, escapeForSingleQuoteString } from "../services/codegen/escape.js"
+import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 
 /**
  * Compiles a pattern into a template literal string.
@@ -18,10 +20,15 @@ export const compilePattern = (
 	for (const element of pattern) {
 		switch (element.type) {
 			case "Text":
-				result += element.value
+				result += escapeForTemplateLiteral(element.value)
 				break
 			case "VariableReference":
-				result += "${params." + element.name + "}"
+				if (isValidJSIdentifier(element.name)) {
+					result += "${params." + element.name + "}"
+				} else {
+					result += "${params['" + escapeForSingleQuoteString(element.name) + "']}"
+				}
+
 				params[element.name] = "NonNullable<unknown>"
 				break
 			default:

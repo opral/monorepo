@@ -133,7 +133,7 @@ const GithubLogin = () => {
 				<img
 					class="rounded"
 					width="100%"
-					src="/editor/images/TourGuideSVGs/github-login.svg"
+					src="/images/TourGuideSVGs/github-login.svg"
 					alt="github-login"
 				/>
 			</div>
@@ -159,7 +159,7 @@ const ForkRepository = () => {
 				<img
 					class="rounded"
 					width="100%"
-					src="/editor/images/TourGuideSVGs/fork-repository.svg"
+					src="/images/TourGuideSVGs/fork-repository.svg"
 					alt="fork-repository"
 				/>
 			</div>
@@ -184,7 +184,7 @@ const MissingLintRules = () => {
 				<img
 					class="rounded"
 					width="100%"
-					src="/editor/images/TourGuideSVGs/missing-lint-rules.svg"
+					src="/images/TourGuideSVGs/missing-lint-rules.svg"
 					alt="missing-message-rule"
 				/>
 			</div>
@@ -206,7 +206,7 @@ const MissingTranslationRule = () => {
 				<img
 					class="rounded"
 					width="100%"
-					src="/editor/images/TourGuideSVGs/missing-message-rule.svg"
+					src="/images/TourGuideSVGs/missing-message-rule.svg"
 					alt="missing-message-rule"
 				/>
 			</div>
@@ -227,7 +227,7 @@ const Textfield = () => {
 				<img
 					class="rounded"
 					width="100%"
-					src="/editor/images/TourGuideSVGs/textfield.svg"
+					src="/images/TourGuideSVGs/textfield.svg"
 					alt="textfield"
 				/>
 			</div>

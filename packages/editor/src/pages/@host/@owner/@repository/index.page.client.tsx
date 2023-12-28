@@ -1,7 +1,6 @@
 import { For, Match, Switch, onMount, Show } from "solid-js"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
-import { Meta, Title } from "@solidjs/meta"
 import { EditorStateProvider, useEditorState } from "./State.jsx"
 import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
 import { ListHeader, messageCount } from "./components/Listheader.jsx"
@@ -13,8 +12,14 @@ import { Errors } from "./components/Errors.jsx"
 import { Layout } from "./Layout.jsx"
 import Link from "#src/renderer/Link.jsx"
 import { browserAuth } from "@lix-js/client"
+import { currentPageContext } from "#src/renderer/state.js"
+import { replaceMetaInfo } from "./helper/ReplaceMetaInfo.js"
 
 export function Page() {
+	onMount(() => {
+		replaceMetaInfo(currentPageContext)
+	})
+
 	return (
 		<EditorStateProvider>
 			<Layout>
@@ -59,13 +64,6 @@ function TheActualPage() {
 
 	return (
 		<>
-			<Title>
-				{routeParams().owner}/{routeParams().repository}
-			</Title>
-			<Meta
-				name="description"
-				content={`Contribute translations to ${routeParams().repository} via inlangs editor.`}
-			/>
 			<Switch
 				fallback={
 					<p class="text-danger">
