@@ -5,7 +5,7 @@ import fs from "fs/promises"
 import { resolve } from "path"
 
 /** The alias for the paraglide folder. */
-const PARAGLIDE_ALIAS = "$paraglide-adapter-next-internal"
+const PARAGLIDE_ALIAS = "$paraglide-adapter-next-internal/runtime.js"
 
 type ParaglideConfig = {
 	project: string
@@ -24,7 +24,7 @@ export function withParaglide(
 	nextConfig: NextConfig
 ): NextConfig {
 	addAlias(nextConfig, {
-		[PARAGLIDE_ALIAS]: paraglideConfig.outdir,
+		[PARAGLIDE_ALIAS]: paraglideConfig.outdir + "/runtime.js",
 	})
 
 	const router = nextConfig.i18n ? "pages" : "app"

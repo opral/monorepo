@@ -1,1 +1,1 @@
-export const LANGUAGE_HEADER = "x-paraglide-language-tag"
+export const LANGUAGE_HEADER = "x-language-tag"
