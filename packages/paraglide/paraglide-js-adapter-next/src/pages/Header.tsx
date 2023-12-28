@@ -12,7 +12,7 @@ import React from "react"
 export default function Header(): React.ReactNode {
 	const { asPath } = useRouter()
 
-	function getPathInLanguage(languageTag: string) {
+	function getTranslatedPath(languageTag: string) {
 		if (languageTag === sourceLanguageTag) return asPath
 		return `/${languageTag}${asPath}`
 	}
@@ -20,7 +20,7 @@ export default function Header(): React.ReactNode {
 	return (
 		<Head>
 			{availableLanguageTags.map((lang) => (
-				<link rel="alternate" hrefLang={lang} href={getPathInLanguage(lang)} key={lang} />
+				<link rel="alternate" hrefLang={lang} href={getTranslatedPath(lang)} key={lang} />
 			))}
 		</Head>
 	)
