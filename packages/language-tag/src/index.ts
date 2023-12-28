@@ -1,17 +1,15 @@
 import type { LanguageTag } from "@inlang/sdk"
 
 /**
- * Returns the fallback languages for all available languages.
- *
+ * Returns the lookup order for the given languages according to the BCP 47 spec.
  * The list is ordered by priority, with the first language being the most preferred.
- * All languages are available language tags.
- *
- * The returned list is exclusive, meaning that the language itself is not included.
- * If there are no fallback languages, an empty array is returned.
- *
- * @returns
+ * 
+ * All returned languages are available language tags.
+ * The returned list is inclusive, meaning that the language itself is included.
+ * 
+ * @see https://datatracker.ietf.org/doc/html/rfc4647#section-3.4
  */
-export function getFallbackLanguages<LanguageTags extends LanguageTag[]>(
+export function getLookupOrder<LanguageTags extends readonly LanguageTag[]>(
 	availableLanguageTags: LanguageTags,
 	sourceLanguageTag: LanguageTags[number]
 ): Record<LanguageTags[number], LanguageTags[number][]> {
@@ -20,9 +18,9 @@ export function getFallbackLanguages<LanguageTags extends LanguageTag[]>(
 	for (const _languageTag of availableLanguageTags) {
 		const languageTag = _languageTag as LanguageTags[number]
 		if (!fallbackLanguages[languageTag]) fallbackLanguages[languageTag] = [] as string[]
-
 		const languageTagParts = languageTag.split("-")
-		for (let i = languageTagParts.length - 1; i > 0; i--) {
+
+		for (let i = languageTagParts.length; i > 0; i--) {
 			const fallbackLanguageTag = languageTagParts.slice(0, i).join("-")
 			if (!availableLanguageTags.includes(fallbackLanguageTag)) continue
 			fallbackLanguages[languageTag].push(fallbackLanguageTag)
@@ -34,7 +32,6 @@ export function getFallbackLanguages<LanguageTags extends LanguageTag[]>(
 		}
 	}
 
-	fallbackLanguages[sourceLanguageTag] = []
-
+	fallbackLanguages[sourceLanguageTag] = [sourceLanguageTag]
 	return fallbackLanguages
 }
