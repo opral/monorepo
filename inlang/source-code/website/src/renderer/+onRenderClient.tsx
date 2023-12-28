@@ -1,7 +1,7 @@
 import { type Component, createSignal } from "solid-js"
 import { createStore } from "solid-js/store"
 import { hydrate } from "solid-js/web"
-import { Root } from "./+Root.jsx"
+import Root from "./+Root.jsx"
 import { setCurrentPageContext } from "./state.js"
 import type { PageContextRenderer } from "./types.js"
 import * as Sentry from "@sentry/browser"
