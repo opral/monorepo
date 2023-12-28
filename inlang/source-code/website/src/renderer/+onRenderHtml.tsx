@@ -12,7 +12,7 @@ import { languageTag } from "#src/paraglide/runtime.js"
 // See https://vike.dev/data-fetching
 export const passToClient = ["pageProps", "routeParams", "languageTag"] as const
 
-export default async function render(pageContext: PageContextRenderer): Promise<unknown> {
+export default async function onRenderHtml(pageContext: PageContextRenderer): Promise<unknown> {
 	//! TODO most likely cross request state pollution
 	//! Need to look into this in the future
 	setCurrentPageContext(pageContext)
