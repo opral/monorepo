@@ -152,7 +152,7 @@ export default function Page(props: {
 							? currentPageContext.routeParams.category
 							: currentPageContext.routeParams.category
 									?.replaceAll("-", " ")
-									.replace(/\w\S*/g, (w) => w.replace(/^\w/, (c) => c.toUpperCase()))) +
+									.replace(/\w\S*/g, (w: string) => w.replace(/^\w/, (c) => c.toUpperCase()))) +
 							" ")}
 				| inlang
 			</Title>
@@ -195,7 +195,7 @@ export default function Page(props: {
 								? currentPageContext.routeParams.category
 								: currentPageContext.routeParams.category
 										?.replaceAll("-", " ")
-										.replace(/\w\S*/g, (w) => w.replace(/^\w/, (c) => c.toUpperCase()))) +
+										.replace(/\w\S*/g, (w: string) => w.replace(/^\w/, (c) => c.toUpperCase()))) +
 								" ")
 				} | inlang`}
 			/>
