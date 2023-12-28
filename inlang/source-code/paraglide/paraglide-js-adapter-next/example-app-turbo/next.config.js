@@ -8,7 +8,4 @@ const config = withParaglide(
 	},
 	{}
 )
-
-console.log(JSON.stringify(config))
-
 module.exports = config

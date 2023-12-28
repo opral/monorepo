@@ -5,7 +5,7 @@ import {
 	availableLanguageTags,
 } from "$paraglide-adapter-next-internal/runtime.js"
 import { LANGUAGE_HEADER } from "../constants"
-import { prefixStrategy } from "./navigation/utils"
+import { prefixStrategy } from "./navigation/prefixStrategy"
 
 const { getLocaleFromPath } = prefixStrategy(availableLanguageTags, sourceLanguageTag)
 
