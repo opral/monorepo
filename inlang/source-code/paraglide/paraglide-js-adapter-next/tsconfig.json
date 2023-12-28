@@ -5,7 +5,6 @@
 		"module": "ESNext",
 		"moduleResolution": "Bundler",
 		"strict": true,
-		"allowSyntheticDefaultImports": true,
 		"esModuleInterop": true,
 		"declaration": true,
 		"allowJs": true,
@@ -15,5 +14,5 @@
 		"declarationMap": true
 	},
 	"include": ["src"],
-	"exclude": ["example-*"]
+	"exclude": ["example-*", "src/**/*.test.ts", "src/**/*.test.tsx"]
 }

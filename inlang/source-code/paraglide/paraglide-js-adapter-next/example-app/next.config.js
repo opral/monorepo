@@ -6,9 +6,5 @@ module.exports = withParaglide(
 		project: "./project.inlang",
 		outdir: "./src/paraglide",
 	},
-	{
-		experimental: {
-			serverActions: true,
-		},
-	}
+	{}
 )

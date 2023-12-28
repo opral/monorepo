@@ -2,20 +2,19 @@ import { NextResponse } from "next/server"
 import { NextRequest } from "next/server"
 import {
 	sourceLanguageTag,
-	isAvailableLanguageTag,
+	availableLanguageTags,
 } from "$paraglide-adapter-next-internal/runtime.js"
 import { LANGUAGE_HEADER } from "../constants"
+import { prefixStrategy } from "./navigation/utils"
+
+const { getLocaleFromPath } = prefixStrategy(availableLanguageTags, sourceLanguageTag)
 
 /**
  * Sets the request headers to resolve the language tag in RSC.
  * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
  */
 export function paraglideMiddleware(request: NextRequest) {
-	console.log("paraglideMiddleware")
-	//Get's the first segment of the URL path
-	const maybeLocale = request.nextUrl.pathname.split("/")[1]
-
-	const locale = isAvailableLanguageTag(maybeLocale) ? maybeLocale : sourceLanguageTag
+	const locale = getLocaleFromPath(request.nextUrl.pathname) ?? sourceLanguageTag
 	const headers = new Headers(request.headers)
 
 	headers.set(LANGUAGE_HEADER, locale)

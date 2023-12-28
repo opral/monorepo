@@ -2,6 +2,7 @@
 	"name": "@inlang/paraglide-js-adapter-next-example-app",
 	"version": "0.1.0",
 	"private": true,
+	"type": "module",
 	"scripts": {
 		"_dev": "paraglide-js compile --project ./project.inlang && next dev",
 		"build": "paraglide-js compile --project ./project.inlang && next build",
@@ -9,12 +10,12 @@
 	},
 	"dependencies": {
 		"@inlang/paraglide-js": "workspace:*",
-		"next": "13.5.4",
+		"@inlang/paraglide-js-adapter-next": "workspace:*",
+		"next": "^14.0.0",
 		"react": "^18",
 		"react-dom": "^18"
 	},
 	"devDependencies": {
-		"@inlang/paraglide-js-adapter-next": "workspace:*",
 		"@types/node": "^20",
 		"@types/react": "^18",
 		"@types/react-dom": "^18",
