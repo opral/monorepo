@@ -12,7 +12,7 @@ import { useLocalStorage } from "#src/services/local-storage/index.js"
  *
  * Read more https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow
  */
-export function Page() {
+export default function Page() {
 	const [userInfo] = createResource(browserAuth.getUser)
 	const [localStorage] = useLocalStorage()
 
