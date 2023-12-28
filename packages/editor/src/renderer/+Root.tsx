@@ -24,7 +24,7 @@ export type RootProps = Accessor<{
  * to provide the page with the required context and provide
  * error boundaries.
  */
-export function Root(props: { page: Component; pageProps: Record<string, unknown> }) {
+export default function Root(props: { page: Component; pageProps: Record<string, unknown> }) {
 	return (
 		<ErrorBoundary fallback={(error) => <ErrorMessage error={error} />}>
 			<ParaglideJsProvider>
@@ -53,11 +53,13 @@ function ParaglideJsProvider(props: { children: JSXElement }) {
 		onSetLanguageTag((newLanguageTag: LanguageTag) => {
 			if (pathIncludesLanguageTag) {
 				//replace old languageTag with new one
-				window.location.pathname = window.location.pathname.replace(
-					currentPageContext.languageTag,
-					// if new is source languageTag remove the tag
-					newLanguageTag === sourceLanguageTag ? "" : newLanguageTag
-				)
+				window.location.pathname = window.location.pathname
+					.replace(
+						currentPageContext.languageTag,
+						// if new is source languageTag remove the tag
+						newLanguageTag === sourceLanguageTag ? "" : newLanguageTag
+					)
+					.replace("//", "/")
 			} else {
 				window.location.pathname = "/" + newLanguageTag + window.location.pathname
 			}
