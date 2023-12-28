@@ -2,7 +2,7 @@ import type { PageContextRenderer } from "./types.js"
 import { generateHydrationScript, renderToString } from "solid-js/web"
 import { escapeInject, dangerouslySkipEscape } from "vike/server"
 import { setCurrentPageContext } from "./state.js"
-import { Root } from "./+Root.jsx"
+import Root from "./+Root.jsx"
 
 // import the css
 import "./app.css"
@@ -12,7 +12,7 @@ import { languageTag } from "#src/paraglide/runtime.js"
 // See https://vike.dev/data-fetching
 export const passToClient = ["pageProps", "routeParams", "languageTag"] as const
 
-export default async function render(pageContext: PageContextRenderer): Promise<unknown> {
+export default async function onRenderHtml(pageContext: PageContextRenderer): Promise<unknown> {
 	//! TODO most likely cross request state pollution
 	//! Need to look into this in the future
 	setCurrentPageContext(pageContext)

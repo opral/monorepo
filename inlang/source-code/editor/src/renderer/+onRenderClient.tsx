@@ -1,7 +1,7 @@
 import { type Component, createSignal } from "solid-js"
 import { createStore } from "solid-js/store"
-import { render as renderApp } from "solid-js/web"
-import { Root } from "./+Root.jsx"
+import { render } from "solid-js/web"
+import Root from "./+Root.jsx"
 import { setCurrentPageContext } from "./state.js"
 import type { PageContextRenderer } from "./types.js"
 import * as Sentry from "@sentry/browser"
@@ -53,7 +53,7 @@ const rootElement = document.querySelector("#root") as HTMLElement
 const [currentPage, setCurrentPage] = createSignal<Component>()
 const [currentPageProps, setCurrentPageProps] = createStore<Record<string, unknown>>({})
 
-export default function render(pageContext: PageContextRenderer) {
+export default function onRenderClient(pageContext: PageContextRenderer) {
 	try {
 		setCurrentPageContext(pageContext)
 		setCurrentPage(() => pageContext.Page)
@@ -63,7 +63,7 @@ export default function render(pageContext: PageContextRenderer) {
 			//
 			// In the future, the editor might be server-side rendered.
 			// For now, the trouble of isomorphic rendering the editor is not worth it.
-			renderApp(
+			render(
 				() => (
 					<MetaProvider>
 						<Root page={currentPage()!} pageProps={currentPageProps} />
@@ -74,7 +74,7 @@ export default function render(pageContext: PageContextRenderer) {
 			isFirstRender = false
 		}
 		// https://posthog.com/docs/integrate/client/js#one-page-apps-and-page-views
-		// telemetryBrowser.capture("$pageview")
+		telemetryBrowser.capture("$pageview")
 	} catch (e) {
 		console.error("ERROR in renderer", e)
 	}
