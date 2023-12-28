@@ -249,6 +249,20 @@ describe("e2e", async () => {
 		expect(runtime.isAvailableLanguageTag("pl")).toBe(false)
 		expect(runtime.isAvailableLanguageTag("--")).toBe(false)
 	})
+
+	test("falls back to messages according to BCP 47 lookup order", async () => {
+		const { m, runtime } = await import(
+			`data:application/javascript;base64,${Buffer.from(
+				compiledBundle.output[0].code,
+				"utf8"
+			).toString("base64")}`
+		)
+
+		runtime.setLanguageTag("de")
+		expect(m.missingInGerman()).toBe("A simple message.")
+		runtime.setLanguageTag("en-US")
+		expect(m.missingInGerman()).toBe("A simple message.")
+	})
 })
 
 describe("tree-shaking", () => {
@@ -431,7 +445,7 @@ test("typesafety", async () => {
 
 const mockMessages: Message[] = [
 	{
-		id: "missingTranslation",
+		id: "missingInGerman",
 		selectors: [],
 		variants: [
 			{
