@@ -24,7 +24,7 @@ export type RootProps = Accessor<{
  * to provide the page with the required context and provide
  * error boundaries.
  */
-export function Root(props: { page: Component; pageProps: Record<string, unknown> }) {
+export default function Root(props: { page: Component; pageProps: Record<string, unknown> }) {
 	return (
 		<ErrorBoundary fallback={(error) => <ErrorMessage error={error} />}>
 			<ParaglideJsProvider>
