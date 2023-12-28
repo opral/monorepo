@@ -2,7 +2,7 @@ import type { PageContextRenderer } from "./types.js"
 import { generateHydrationScript, renderToString } from "solid-js/web"
 import { escapeInject, dangerouslySkipEscape } from "vike/server"
 import { setCurrentPageContext } from "./state.js"
-import { Root } from "./_default.root.jsx"
+import { Root } from "./+Root.jsx"
 
 // import the css
 import "./app.css"
