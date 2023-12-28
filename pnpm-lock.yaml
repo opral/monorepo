@@ -690,12 +690,6 @@ importers:
         specifier: 0.34.3
         version: 0.34.3
 
-  inlang/source-code/language-tag:
-    devDependencies:
-      '@inlang/sdk':
-        specifier: workspace:*
-        version: link:../sdk
-
   inlang/source-code/manage:
     dependencies:
       '@sentry/node':
@@ -1062,6 +1056,9 @@ importers:
       '@inlang/detect-json-formatting':
         specifier: workspace:*
         version: link:../../detect-json-formatting
+      '@inlang/language-tag':
+        specifier: workspace:*
+        version: link:../../versioned-interfaces/language-tag
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../../sdk
@@ -1090,9 +1087,6 @@ importers:
       '@inlang/env-variables':
         specifier: workspace:*
         version: link:../../env-variables
-      '@inlang/language-tag':
-        specifier: workspace:^
-        version: link:../../versioned-interfaces/language-tag
       '@inlang/telemetry':
         specifier: workspace:*
         version: link:../../telemetry
