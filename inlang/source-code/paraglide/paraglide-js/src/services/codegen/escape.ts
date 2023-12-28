@@ -12,7 +12,6 @@ export function escapeForSingleQuoteString(text: string): string {
 	return text.replace(/\\/g, "\\\\").replace(/'/g, "\\'")
 }
 
-
 export function escapeForDoubleQuoteString(text: string): string {
 	return text.replace(/\\/g, "\\\\").replace(/"/g, '\\"')
 }
