@@ -24,10 +24,9 @@ export const compile = (args: {
 }): Record<string, string> => {
 	const lookupTable = getLookupOrder(args.settings.languageTags, args.settings.sourceLanguageTag)
 
-	const compiledMessages = new Array(args.messages.length)
-	for (let i = 0; i < args.messages.length; i++) {
-		compiledMessages[i] = compileMessage(args.messages[i]!, args.settings.languageTags, lookupTable)
-	}
+	const compiledMessages = args.messages.map((message) =>
+		compileMessage(message, args.settings.languageTags, lookupTable)
+	)
 
 	telemetry.capture({
 		event: "PARAGLIDE-JS compile executed",

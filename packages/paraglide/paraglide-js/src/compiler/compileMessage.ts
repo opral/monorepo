@@ -129,7 +129,8 @@ function fallbackFunction(args: {
 	compiledPatterns: Record<string, string>
 	lookupTable: Record<LanguageTag, LanguageTag[]>
 }) {
-	const fallbackLanguage = args.lookupTable[args.languageTag]![1]
+	const fallbackOrder = args.lookupTable[args.languageTag] ?? []
+	const fallbackLanguage = fallbackOrder[1]
 	if (!fallbackLanguage)
 		return `/**
 * Failed to resolve message ${args.message.id} for languageTag "${args.languageTag}". 
