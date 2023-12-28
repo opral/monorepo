@@ -1,5 +1,5 @@
 import { it, expect } from "vitest"
-import { getLookupOrder } from "./index.js"
+import { getLookupOrder } from "./lookup.js"
 
 it("returns the source language tag for the source language tag", () => {
 	expect(getLookupOrder(["en-US"] as const, "en-US")).toEqual({
