@@ -2,7 +2,7 @@ import type { LanguageTag } from "@inlang/sdk"
 import type { PageContextRenderer } from "./types.js"
 import { sourceLanguageTag, availableLanguageTags } from "#src/paraglide/runtime.js"
 
-export function onBeforeRoute(pageContext: PageContextRenderer) {
+export default function onBeforeRoute(pageContext: PageContextRenderer) {
 	const { url: urlWithoutLanguageTag, languageTag } = i18nRouting(pageContext.urlOriginal)
 	return {
 		pageContext: {

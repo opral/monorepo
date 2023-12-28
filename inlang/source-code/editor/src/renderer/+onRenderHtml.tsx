@@ -4,12 +4,11 @@ import { setCurrentPageContext } from "./state.js"
 
 // import the css
 import "./app.css"
-import { sourceLanguageTag, availableLanguageTags, languageTag } from "#src/paraglide/runtime.js"
 
 // See https://vike.dev/data-fetching
 export const passToClient = ["pageProps", "routeParams", "languageTag"] as const
 
-export async function render(pageContext: PageContextRenderer): Promise<unknown> {
+export default async function render(pageContext: PageContextRenderer): Promise<unknown> {
 	//! TODO most likely cross request state pollution
 	//! Need to look into this in the future
 	setCurrentPageContext(pageContext)
@@ -74,28 +73,3 @@ gtag('js', new Date());
 gtag('config', 'G-5H3SDF7TVZ');
 </script>
 `
-
-export function onBeforePrerender(prerenderContext: any) {
-	const pageContexts = []
-	for (const pageContext of prerenderContext.pageContexts) {
-		// Duplicate pageContext for each locale
-		for (const locale of availableLanguageTags) {
-			// Localize URL
-			let { urlOriginal } = pageContext
-			if (locale !== sourceLanguageTag) {
-				urlOriginal = `/${sourceLanguageTag}${pageContext.urlOriginal}`
-			}
-			pageContexts.push({
-				...pageContext,
-				urlOriginal,
-				// Set pageContext.locale
-				languageTag: languageTag(),
-			})
-		}
-	}
-	return {
-		prerenderContext: {
-			pageContexts,
-		},
-	}
-}

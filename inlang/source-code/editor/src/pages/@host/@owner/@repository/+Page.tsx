@@ -15,7 +15,7 @@ import { browserAuth } from "@lix-js/client"
 import { currentPageContext } from "#src/renderer/state.js"
 import { replaceMetaInfo } from "./helper/ReplaceMetaInfo.js"
 
-export function Page() {
+export default function Page() {
 	onMount(() => {
 		replaceMetaInfo(currentPageContext)
 	})

@@ -510,8 +510,8 @@ importers:
         specifier: ^0.15.0
         version: 0.15.3
       vike:
-        specifier: 0.4.144
-        version: 0.4.144(vite@4.5.0)
+        specifier: 0.4.152
+        version: 0.4.152(vite@4.5.0)
       vite:
         specifier: 4.5.0
         version: 4.5.0(@types/node@20.5.9)
@@ -3967,18 +3967,8 @@ packages:
     resolution: {integrity: sha512-dh+JJlsBf3QYX+91Ezma8RLKNOjGDoBBmORv/NzRpQuasdyzwQCMXGGjsDu12ZhGz92TqQbL9pv79rvbheI21A==}
     dev: true
 
-  /@brillout/picocolors@1.0.9:
-    resolution: {integrity: sha512-Lt/W5JsA75hcDJ2cOAlE4TqSMl6c9K+rXGRo/cU2fApnmhbRcNdkR4UHQDAwtWfZyUKWaxdwSui+jp+74J1pZg==}
-    dev: true
-
   /@brillout/require-shim@0.1.2:
     resolution: {integrity: sha512-3I4LRHnVZXoSAsEoni5mosq9l6eiJED58d9V954W4CIZ88AUfYBanWGBGbJG3NztaRTpFHEA6wB3Hn93BmmJdg==}
-    dev: true
-
-  /@brillout/vite-plugin-import-build@0.2.20:
-    resolution: {integrity: sha512-/bdw1dg+H1nOYSy2PzYInQoZlIFP2uwyaF2GX64fyBqVAEWGopiMlnx294CbysjmP9Z+fJe48TkMzyogkyIDLw==}
-    dependencies:
-      '@brillout/import': 0.2.3
     dev: true
 
   /@brillout/vite-plugin-import-build@0.3.2:
@@ -20024,32 +20014,6 @@ packages:
       unist-util-stringify-position: 4.0.0
       vfile-message: 4.0.2
     dev: false
-
-  /vike@0.4.144(vite@4.5.0):
-    resolution: {integrity: sha512-smvBXv33IhP5FHOvoBYZuir/Zip93AoBGqiIdmWHva1RYeQDFlXQMbs/YZ5HqFc7OrL8cL3K7iUsEC6t/pF+/Q==}
-    engines: {node: '>=16.0.0'}
-    hasBin: true
-    peerDependencies:
-      react-streaming: '>=0.3.5'
-      vite: '>=3.1.0'
-    peerDependenciesMeta:
-      react-streaming:
-        optional: true
-    dependencies:
-      '@brillout/import': 0.2.3
-      '@brillout/json-serializer': 0.5.8
-      '@brillout/picocolors': 1.0.9
-      '@brillout/require-shim': 0.1.2
-      '@brillout/vite-plugin-import-build': 0.2.20
-      acorn: 8.11.2
-      cac: 6.7.14
-      es-module-lexer: 1.4.1
-      esbuild: 0.17.19
-      fast-glob: 3.3.2
-      sirv: 2.0.3
-      source-map-support: 0.5.21
-      vite: 4.5.0(@types/node@20.5.9)
-    dev: true
 
   /vike@0.4.152(vite@4.5.0):
     resolution: {integrity: sha512-KZ9hOp5eBt156klkK4pAjzkIS9eUIaJ+zy6Le8PUc7Jxqti6CIMFJZOX2RB2grn3u3PXbQdLZuEZWXc+tEaUaA==}

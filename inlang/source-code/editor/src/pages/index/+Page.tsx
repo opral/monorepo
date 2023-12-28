@@ -5,9 +5,9 @@ import { CommunityProjects } from "#src/interface/editor/CommunityProjects.jsx"
 import { Button } from "#src/interface/components/Button.jsx"
 import EditorLayout from "#src/interface/editor/EditorLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
-import { replaceMetaInfo } from "./@host/@owner/@repository/helper/ReplaceMetaInfo.js"
+import { replaceMetaInfo } from "../@host/@owner/@repository/helper/ReplaceMetaInfo.js"
 
-export function Page() {
+export default function Page() {
 	/** is not reactive because window is not reactive */
 	const [input, setInput] = createSignal("")
 

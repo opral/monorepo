@@ -1,12 +1,12 @@
-import type { PageContextRenderer } from "./types.js"
+import type { PageContextRenderer } from "#src/renderer/types.js"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
 import MaterialSymbolsArrowBackRounded from "~icons/material-symbols/arrow-back-rounded"
 import { Match, Switch } from "solid-js"
 import { Title } from "@solidjs/meta"
-import Link from "./Link.jsx"
+import Link from "#src/renderer/Link.jsx"
 
-export function Page(pageContext: PageContextRenderer) {
+export default function Page(pageContext: PageContextRenderer) {
 	return (
 		<>
 			<Title>inlang Error</Title>

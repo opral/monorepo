@@ -47,16 +47,13 @@ if (import.meta.env.PROD) {
 	})
 }
 
-// see https://vike.dev/clientRouting#page-content
-export const clientRouting = true
-
 let isFirstRender = true
 const rootElement = document.querySelector("#root") as HTMLElement
 
 const [currentPage, setCurrentPage] = createSignal<Component>()
 const [currentPageProps, setCurrentPageProps] = createStore<Record<string, unknown>>({})
 
-export function render(pageContext: PageContextRenderer) {
+export default function render(pageContext: PageContextRenderer) {
 	try {
 		setCurrentPageContext(pageContext)
 		setCurrentPage(() => pageContext.Page)

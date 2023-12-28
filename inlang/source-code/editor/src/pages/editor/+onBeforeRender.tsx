@@ -1,5 +1,5 @@
 import { redirect } from "vike/abort"
 
-export async function onBeforeRender() {
+export default async function onBeforeRender() {
 	throw redirect("https://fink.inlang.com/")
 }
