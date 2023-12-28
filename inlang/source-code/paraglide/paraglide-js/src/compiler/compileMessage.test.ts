@@ -178,7 +178,7 @@ it("should re-export the message from a fallback language tag if the message is 
 	expect(result.de?.includes('export { some_message } from "./en.js"')).toBe(true)
 })
 
-it.only("should return the message ID if no fallback can be found", async () => {
+it("should return the message ID if no fallback can be found", async () => {
 	const result = compileMessage(
 		{
 			id: "some_message",
