@@ -7,7 +7,7 @@ import {
 import { usePathname } from "next/navigation"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { prefixStrategy } from "./navigation/utils"
+import { prefixStrategy } from "./navigation/prefixStrategy"
 
 const { getLocaleFromPath } = prefixStrategy(availableLanguageTags, sourceLanguageTag)
 

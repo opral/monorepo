@@ -1,5 +1,5 @@
 import * as NextNavigation from "next/navigation"
-import { prefixStrategy } from "./utils"
+import { prefixStrategy } from "./prefixStrategy"
 import {
 	availableLanguageTags,
 	languageTag,
