@@ -17,11 +17,11 @@ export default async function onBeforeRender(pageContext: any) {
 	})
 
 	items = items.filter((i: any) => i.keywords.includes("external") === false)
-	/*
+
 	if (!q && items.length === 0) {
 		throw render(404)
 	}
-*/
+
 	return {
 		pageContext: {
 			pageProps: {
