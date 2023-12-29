@@ -10,7 +10,7 @@ it("should throw if a message uses `-` because `-` are invalid JS function names
 				variants: [],
 			},
 			["en"],
-			{ en: ["en"] }
+			"en"
 		)
 	).toThrow()
 })
@@ -35,7 +35,7 @@ it("should throw an error if a message has multiple variants with the same langu
 				],
 			},
 			["en"],
-			{ en: ["en"] }
+			"en"
 		)
 	).toThrow()
 })
@@ -54,7 +54,7 @@ it("should compile a message with a language tag that contains a hyphen - to an 
 			],
 		},
 		["en-US"],
-		{ "en-US": ["en-US"] }
+		"en-US"
 	)
 	expect(result.en_US).toBeUndefined()
 	expect(result["en-US"]).toBeDefined()
@@ -123,7 +123,7 @@ it("should compile a message to a function", async () => {
 			],
 		},
 		["en", "de"],
-		{ en: ["en"], de: ["de", "en"] }
+		"en"
 	)
 	const de = await import(
 		`data:application/javascript;base64,${btoa("let languageTag = () => 'de';" + result.de)}`
@@ -151,7 +151,7 @@ it("should add a /* @__NO_SIDE_EFFECTS__ */ comment to the compiled message", as
 			],
 		},
 		["en"],
-		{ en: ["en"] }
+		"en"
 	)
 
 	expect(result.index.includes("/* @__NO_SIDE_EFFECTS__ */")).toBe(true)
@@ -172,7 +172,7 @@ it("should re-export the message from a fallback language tag if the message is 
 			],
 		},
 		["en", "de"],
-		{ en: ["en"], de: ["de", "en"] }
+		"en"
 	)
 
 	expect(result.de?.includes('export { some_message } from "./en.js"')).toBe(true)
@@ -192,7 +192,7 @@ it("should return the message ID if no fallback can be found", async () => {
 			],
 		},
 		["en", "de"],
-		{ en: ["en"], de: ["de", "en"] }
+		"en"
 	)
 
 	expect(result.en?.includes('export const some_message = () => "some_message"')).toBe(true)

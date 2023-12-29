@@ -1,2 +1,2 @@
 export { LanguageTag } from "./interface.js"
-export { getLookupOrder } from "./lookup.js"
+export { lookup } from "./lookup.js"
