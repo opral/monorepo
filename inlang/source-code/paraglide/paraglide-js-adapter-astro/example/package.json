@@ -7,8 +7,7 @@
     "start": "paraglide-js compile --project ./project.inlang && astro dev",
     "build": "paraglide-js compile --project ./project.inlang && astro check && astro build",
     "preview": "astro preview",
-    "astro": "astro",
-    "postinstall": "paraglide-js compile --project ./project.inlang"
+    "astro": "astro"
   },
   "dependencies": {
     "@astrojs/check": "^0.3.4",
