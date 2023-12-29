@@ -21,6 +21,7 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
+		"cheerio": "1.0.0-rc.12",
 		"iconify-icon": "1.0.8",
 		"lit": "2.8.0",
 		"rehype-accessible-emojis": "0.3.2",

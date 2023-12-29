@@ -768,6 +768,9 @@ importers:
 
   inlang/source-code/markdown:
     dependencies:
+      cheerio:
+        specifier: 1.0.0-rc.12
+        version: 1.0.0-rc.12
       iconify-icon:
         specifier: 1.0.8
         version: 1.0.8
@@ -2149,9 +2152,6 @@ importers:
       '@types/flat':
         specifier: ^5.0.2
         version: 5.0.5
-      cheerio:
-        specifier: 1.0.0-rc.12
-        version: 1.0.0-rc.12
       clipboard-copy:
         specifier: ^4.0.1
         version: 4.0.1
