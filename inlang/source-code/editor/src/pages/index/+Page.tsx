@@ -37,6 +37,7 @@ export default function Page() {
 				{/* START search bar */}
 				<div class="flex flex-col items-center justify-center py-16 md:py-20">
 					{/* negative margin as a dirty way of centering the search bar */}
+					<h1 class="text-4xl font-bold text-center">RENDER TEST</h1>
 					<div class="flex flex-col p-2 md:p-10 items-center tracking-tight">
 						<h2 class="text-[40px] leading-tight md:text-6xl font-bold max-w-xl pb-6 md:pb-8 text-center">
 							Open the Fink Message Editor

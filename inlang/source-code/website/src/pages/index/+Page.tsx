@@ -43,6 +43,7 @@ export default function Page() {
 				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
 				rel="canonical"
 			/>
+			<h1 class="text-4xl font-bold text-center">RENDER TEST</h1>
 			<MarketplaceLayout>
 				<Show
 					when={search}
