@@ -1,4 +1,4 @@
-# Translating an Astro App with Paraglide
+# Build an internationalized Astro App using Paraglide
 
 In this Guide, we'll integrate the [ParaglideJs](/m/gerre34r/library-inlang-paraglideJs) i18n library into an Astro project. We'll use Paraglide to translate the page shell, aswell as some client side islands.
 
@@ -21,7 +21,7 @@ If you don't, you can follow the [official Astro Quickstart](https://docs.astro.
 
 The easiest way to add translated pages to your Astro project is to create a folder for each language. Often the default language get's placed in the root, and the other languages in subfolders. For example:
 
-```
+```txt
 ├── src/
 │   ├── pages/
 │   │   ├── index.astro
@@ -203,7 +203,7 @@ Now it's really just a matter of going through your app and extracting any hard-
 
 Then you just import the messages and use them in your components. 
 
-```
+```html
 ---
 import * as m from "../paraglide/messages.js"
 import DefaultLayout from "../layouts/default.astro"
@@ -221,6 +221,10 @@ Since we already added the script to set the language tag on the client, we can 
 Here is an example `Counter.astro`:
 
 ```html
+---
+import * as m from "../paraglide/messages"
+---
+
 <div class="counter">
     <span class="count" data-count="0" >{m.count({ count: 0})}</span>
     <button class="increment">+</button>
@@ -244,5 +248,7 @@ Here is an example `Counter.astro`:
 
 We encourage you to run `npm run build` and inspect the output. You will see that only the message `m.count` is shipped to the client. Any other messages are not included in the bundle.
 
-## Feedback
+## What's Next?
+There is a full Astro example project using Paraglide [on our GitHub](https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-astro/example).
+
 If you have any suggestions for this guide, please reach out to us on [Discord](https://discord.gg/gdMPPWy57R), or open an issue on [GitHub](https://www.github.com/inlang/monorepo/issues). If you have trouble following, don't hesitate to ask for help. We are happy to help getting you set up.

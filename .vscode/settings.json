@@ -40,5 +40,8 @@
 	"cSpell.words": ["inlang"],
 	"[astro]": {
 		"editor.defaultFormatter": "astro-build.astro-vscode"
+	},
+	"[svg]": {
+		"editor.defaultFormatter": "jock.svg"
 	}
 }
