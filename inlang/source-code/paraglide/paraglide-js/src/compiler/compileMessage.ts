@@ -75,7 +75,10 @@ export const compileMessage = (
 			resource[languageTag] = messageFunction({ message, params, languageTag, compiledPattern })
 		} else {
 			//Do a lookup using all the languages that do have the pattern
-			const fallbackLanguage = lookup(languageTag, Object.keys(compiledPatterns), sourceLanguageTag)
+			const fallbackLanguage = lookup(languageTag, {
+				languageTags: Object.keys(compiledPatterns),
+				defaultLanguageTag: sourceLanguageTag,
+			})
 
 			//Get the compiled pattern for the fallback language - if it exists
 			//It may not exist if the fallback language is the source language
