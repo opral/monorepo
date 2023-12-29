@@ -1,12 +1,13 @@
 ---
+import * as m from "../paraglide/messages.js"
 const today = new Date();
 ---
 
 <footer>
-	&copy; {today.getFullYear()} Your name here. All rights reserved.
+	&copy; {today.getFullYear()} Inlang. {m.all_rights_reserved()}
 	<div class="social-links">
 		<a href="https://m.webtoo.ls/@astro" target="_blank">
-			<span class="sr-only">Follow Astro on Mastodon</span>
+			<span class="sr-only">{m.follow_us_on({ site: "Mastodon" })}</span>
 			<svg
 				viewBox="0 0 16 16"
 				aria-hidden="true"
@@ -20,7 +21,7 @@ const today = new Date();
 			>
 		</a>
 		<a href="https://twitter.com/astrodotbuild" target="_blank">
-			<span class="sr-only">Follow Astro on Twitter</span>
+			<span class="sr-only">{m.follow_us_on({ site: "Twitter" })</span>
 			<svg viewBox="0 0 16 16" aria-hidden="true" width="32" height="32" astro-icon="social/twitter"
 				><path
 					fill="currentColor"

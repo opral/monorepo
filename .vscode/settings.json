@@ -37,5 +37,8 @@
 	"[typescript]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
-	"cSpell.words": ["inlang"]
+	"cSpell.words": ["inlang"],
+	"[astro]": {
+		"editor.defaultFormatter": "astro-build.astro-vscode"
+	}
 }

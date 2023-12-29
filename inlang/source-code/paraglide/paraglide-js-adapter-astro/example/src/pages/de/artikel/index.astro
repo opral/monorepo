@@ -5,6 +5,7 @@ import Footer from '../../../components/Footer.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../../../consts';
 import { getCollection } from 'astro:content';
 import FormattedDate from '../../../components/FormattedDate.astro';
+import HTML from '../../../layouts/HTML.astro';
 
 const posts = (await getCollection('blog')).sort(
 	(a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf()
@@ -18,8 +19,7 @@ const posts = (await getCollection('blog')).sort(
 }).filter((post) => post.lang === 'de');
 ---
 
-<!doctype html>
-<html lang="en">
+<HTML>
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
 		<style>
@@ -115,4 +115,4 @@ const posts = (await getCollection('blog')).sort(
 		</main>
 		<Footer />
 	</body>
-</html>
+</HTML>
