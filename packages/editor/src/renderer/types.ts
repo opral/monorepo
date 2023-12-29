@@ -1,6 +1,6 @@
 import type { Component } from "solid-js"
 import type { PageContextBuiltIn } from "vike/types"
-import type { passToClient } from "./_default.page.server.jsx"
+import type { passToClient } from "./+onRenderHtml.jsx"
 
 /**
  * The page context available during rendering.
