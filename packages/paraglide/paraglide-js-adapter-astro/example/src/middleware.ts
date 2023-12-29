@@ -2,8 +2,6 @@ import { setLanguageTag, isAvailableLanguageTag, sourceLanguageTag } from "./par
 
 export function onRequest({ url }: { url: URL }, next: () => Response | Promise<Response>) {
 	setLanguageTag(() => getLangFromPath(url.pathname))
-
-	// return a Response or the result of calling `next()`
 	return next()
 }
 
