@@ -5,6 +5,12 @@ import { optionsType } from "./optionsType.js"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 import { i } from "../services/codegen/identifier.js"
 import { escapeForDoubleQuoteString } from "../services/codegen/escape.js"
+import { lookup } from "@inlang/language-tag"
+
+type Resource = {
+	index: string
+	[languageTag: string]: string
+}
 
 /**
  * Returns the compiled messages for the given message.
@@ -21,12 +27,9 @@ import { escapeForDoubleQuoteString } from "../services/codegen/escape.js"
  */
 export const compileMessage = (
 	message: Message,
-	languageTags: LanguageTag[],
-	lookupTable: Record<LanguageTag, LanguageTag[]>
-): {
-	index: string
-	[languageTag: string]: string
-} => {
+	availableLanguageTags: LanguageTag[],
+	sourceLanguageTag: LanguageTag
+): Resource => {
 	if (!isValidJSIdentifier(message.id)) {
 		throw new Error(
 			`Cannot compile message with ID "${message.id}".\n\nThe message is not a valid JavaScript variable name. Please choose a different ID.\n\nTo detect this issue during linting, use the valid-js-identifier lint rule: https://inlang.com/m/teldgniy/messageLintRule-inlang-validJsIdentifier`
@@ -38,6 +41,7 @@ export const compileMessage = (
 	// only allowing types that JS transpiles to strings under the hood like string and number.
 	// the pattern nodes must be extended to hold type information in the future.
 	let params: Params = {}
+
 	for (const variant of message.variants) {
 		if (compiledPatterns[variant.languageTag]) {
 			throw new Error(
@@ -45,7 +49,7 @@ export const compileMessage = (
 			)
 		}
 
-		if (!languageTags.includes(variant.languageTag)) {
+		if (!availableLanguageTags.includes(variant.languageTag)) {
 			throw new Error(
 				`The language tag "${variant.languageTag}" is not included in the project's language tags but contained in of your messages. Please add the language tag to your project's language tags or delete the messages with the language tag "${variant.languageTag}" to avoid unexpected type errors.`
 			)
@@ -59,22 +63,41 @@ export const compileMessage = (
 		compiledPatterns[variant.languageTag] = compiled
 	}
 
-	return {
-		index: messageIndexFunction({ message, params, languageTags }),
-		...Object.fromEntries(
-			languageTags.map((languageTag) => [
-				languageTag,
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				messageFunction({ message, params, languageTag, compiledPatterns, lookupTable }),
-			])
-		),
+	const resource: Resource = {
+		index: messageIndexFunction({ message, params, availableLanguageTags }),
 	}
+
+	for (const languageTag of availableLanguageTags) {
+		const compiledPattern = compiledPatterns[languageTag]
+
+		//If there is a pattern for the language tag, compile it, otherwise fallback
+		if (compiledPattern) {
+			resource[languageTag] = messageFunction({ message, params, languageTag, compiledPattern })
+		} else {
+			//Do a lookup using all the languages that do have the pattern
+			const fallbackLanguage = lookup(languageTag, Object.keys(compiledPatterns), sourceLanguageTag)
+
+			//Get the compiled pattern for the fallback language - if it exists
+			//It may not exist if the fallback language is the source language
+			const compiledFallbackPattern = compiledPatterns[fallbackLanguage]
+
+			//if the fallback has the pattern, reexport the message from the fallback language
+			if (compiledFallbackPattern) {
+				resource[languageTag] = reexportMessage(message.id, fallbackLanguage)
+			} else {
+				//otherwise, fallback to the message ID
+				resource[languageTag] = messageIdFallback(message.id, languageTag)
+			}
+		}
+	}
+
+	return resource
 }
 
 const messageIndexFunction = (args: {
 	message: Message
 	params: Params
-	languageTags: LanguageTag[]
+	availableLanguageTags: LanguageTag[]
 }) => {
 	const hasParams = Object.keys(args.params).length > 0
 
@@ -87,13 +110,13 @@ const messageIndexFunction = (args: {
  * - The params are NonNullable<unknown> because the inlang SDK does not provide information on the type of a param (yet).
  * 
  * ${paramsType(args.params, true)}
- * ${optionsType({ languageTags: args.languageTags })}
+ * ${optionsType({ languageTags: args.availableLanguageTags })}
  * @returns {string}
  */
 /* @__NO_SIDE_EFFECTS__ */
 export const ${args.message.id} = (params ${hasParams ? "" : "= {}"}, options = {}) => {
 	return {
-${args.languageTags
+${args.availableLanguageTags
 	// sort language tags alphabetically to make the generated code more readable
 	.sort((a, b) => a.localeCompare(b))
 	.map((tag) => `\t\t${isValidJSIdentifier(tag) ? tag : `"${tag}"`}: ${i(tag)}.${args.message.id}`)
@@ -106,11 +129,8 @@ const messageFunction = (args: {
 	message: Message
 	params: Params
 	languageTag: LanguageTag
-	compiledPatterns: Record<string, string>
-	lookupTable: Record<LanguageTag, LanguageTag[]>
+	compiledPattern: string
 }) => {
-	const compiledPattern = args.compiledPatterns[args.languageTag]
-	if (!compiledPattern) return fallbackFunction(args)
 	const hasParams = Object.keys(args.params).length > 0
 
 	return `
@@ -119,22 +139,16 @@ const messageFunction = (args: {
  * @returns {string}
  */
 /* @__NO_SIDE_EFFECTS__ */
-export const ${args.message.id} = (${hasParams ? "params" : ""}) => ${compiledPattern}`
+export const ${args.message.id} = (${hasParams ? "params" : ""}) => ${args.compiledPattern}`
 }
 
-function fallbackFunction(args: {
-	message: Message
-	params: Params
-	languageTag: LanguageTag
-	compiledPatterns: Record<string, string>
-	lookupTable: Record<LanguageTag, LanguageTag[]>
-}) {
-	const fallbackOrder = args.lookupTable[args.languageTag] ?? []
-	const fallbackLanguage = fallbackOrder[1]
-	if (!fallbackLanguage)
-		return `/**
-* Failed to resolve message ${args.message.id} for languageTag "${args.languageTag}". 
-*/
-export const ${args.message.id} = () => "${escapeForDoubleQuoteString(args.message.id)}"`
-	return `export { ${args.message.id} } from "./${fallbackLanguage}.js"`
+function reexportMessage(messageId: string, fromLanguageTag: string) {
+	return `export { ${messageId} } from "./${fromLanguageTag}.js"`
+}
+
+function messageIdFallback(messageId: string, languageTag: string) {
+	return `/**
+	* Failed to resolve message ${messageId} for languageTag "${languageTag}". 
+	*/
+	export const ${messageId} = () => "${escapeForDoubleQuoteString(messageId)}"`
 }

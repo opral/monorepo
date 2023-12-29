@@ -1,36 +1,30 @@
 import type { LanguageTag } from "./interface.js"
 
 /**
- * Returns the lookup order for the given language-tags according to the IETF BCP 47 spec.
- *
- * All returned languages are available language tags.
- * The returned list is inclusive, meaning that the language itself is included.
+ * Performs a lookup for the given language tag, among the available language tags, 
+ * according to the IETF BCP 47 spec.
+ * 
+ * It **does not support Wildcards** at the moment.
  *
  * @see https://datatracker.ietf.org/doc/html/rfc4647#section-3.4
  */
-export function getLookupOrder<LanguageTags extends readonly LanguageTag[]>(
+export function lookup<LanguageTags extends readonly LanguageTag[]>(
+	languageTag: LanguageTags[number],
 	availableLanguageTags: LanguageTags,
-	sourceLanguageTag: LanguageTags[number]
-): Record<LanguageTags[number], LanguageTags[number][]> {
-	const fallbackLanguages: Record<LanguageTags[number], string[]> = {} as any
+	defaultLanguageTag: LanguageTags[number]
+): LanguageTags[number] {
+	const fallbackLanguages: LanguageTags[number][] = []
 
-	for (const _languageTag of availableLanguageTags) {
-		const languageTag = _languageTag as LanguageTags[number]
-		if (!fallbackLanguages[languageTag]) fallbackLanguages[languageTag] = [] as string[]
-		const languageTagParts = languageTag.split("-")
+	const languageTagParts = languageTag.split("-").filter(Boolean)
+	for (let i = languageTagParts.length; i > 0; i--) {
+		//Skip the x separator
+		if (languageTagParts[i - 1] === "x") continue
 
-		for (let i = languageTagParts.length; i > 0; i--) {
-			const fallbackLanguageTag = languageTagParts.slice(0, i).join("-")
-			if (!availableLanguageTags.includes(fallbackLanguageTag)) continue
-			fallbackLanguages[languageTag].push(fallbackLanguageTag)
-			if (fallbackLanguageTag === sourceLanguageTag) break
-		}
-
-		if (!fallbackLanguages[languageTag].includes(sourceLanguageTag)) {
-			fallbackLanguages[languageTag].push(sourceLanguageTag)
-		}
+		//Stringify the language tag parts
+		const fallbackLanguageTag = languageTagParts.slice(0, i).join("-")
+		if (!availableLanguageTags.includes(fallbackLanguageTag)) continue
+		fallbackLanguages.push(fallbackLanguageTag)
 	}
 
-	fallbackLanguages[sourceLanguageTag] = [sourceLanguageTag]
-	return fallbackLanguages
+	return fallbackLanguages[0] ?? defaultLanguageTag
 }
