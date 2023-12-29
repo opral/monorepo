@@ -8,7 +8,7 @@ import {
 	PluginIcon,
 	ProjectIcon,
 } from "./icons/TinyIcons.jsx"
-import { isSelected } from "./index.page.jsx"
+import { isSelected } from "./+Page.jsx"
 import { getDocsBaseUrl } from "#src/interface/sdkDocs/SdkDocsHeader.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 

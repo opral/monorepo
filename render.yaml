@@ -16,6 +16,11 @@ services:
     autoDeploy: true
     envVars:
       - fromGroup: production
+    buildFilter:
+      paths:
+        - inlang/source-code/website/**
+        - inlang/source-code/markdown/**
+        - inlang/source-code/marketplace-registry/**
     domains:
       - inlang.com
 
