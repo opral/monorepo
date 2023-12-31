@@ -124,6 +124,7 @@ export default function Page(props: PageProps) {
 											>
 												<img
 													class="w-16 h-16 rounded-md m-0 object-cover object-center"
+													alt={displayName()}
 													src={props.manifest.icon}
 												/>
 											</Show>
@@ -226,6 +227,9 @@ export default function Page(props: PageProps) {
 										>
 											<div class="pt-12">
 												<img
+													alt={
+														props.manifest.gallery && props.manifest.gallery[0]!.split("/").at(-1)
+													}
 													src={props.manifest.gallery && props.manifest.gallery[0]}
 													class="max-w-sm mx-auto rounded-lg border border-surface-100 shadow-md shadow-on-background/[0.02]"
 												/>
@@ -351,6 +355,7 @@ export default function Page(props: PageProps) {
 														}
 													>
 														<img
+															alt={props.manifest.publisherName}
 															class="w-6 h-6 rounded-full m-0"
 															src={props.manifest.publisherIcon}
 														/>
