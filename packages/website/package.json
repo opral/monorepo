@@ -29,7 +29,6 @@
 		"@solid-primitives/scroll": "2.0.20",
 		"@solidjs/meta": "0.28.2",
 		"@types/flat": "^5.0.2",
-		"cheerio": "1.0.0-rc.12",
 		"clipboard-copy": "^4.0.1",
 		"compression": "^1.7.4",
 		"cookie-session": "^2.0.0",

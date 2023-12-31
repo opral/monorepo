@@ -20,7 +20,7 @@
 	"keywords": ["editor", "web", "apps", "website", "translator", "lix", "fink", "inlang"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-	"website": "https://inlang.com/editor",
+	"website": "https://fink.inlang.com/",
 	"license": "Apache-2.0",
 	"pricing": "Free Beta"
 }

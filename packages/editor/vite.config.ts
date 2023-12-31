@@ -9,9 +9,9 @@ import { nodePolyfills } from "vite-plugin-node-polyfills"
 const isProduction = process.env.NODE_ENV === "production"
 
 export default defineConfig({
-	base: "/editor",
+	base: "/",
 	server: {
-		port: 4001,
+		port: 4003,
 	},
 	envPrefix: "PUBLIC_",
 	plugins: [
@@ -20,6 +20,7 @@ export default defineConfig({
 			// other parts of the source code use server side node dependencies with protocol node:* imports.
 			// to not break server side node imports, don't polyfill node:* imports.
 			protocolImports: false,
+			exclude: ["util", "zlib"],
 		}),
 		solid({ ssr: true }),
 		// the metaframework https://vike.dev/

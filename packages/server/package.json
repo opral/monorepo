@@ -12,7 +12,6 @@
 	},
 	"dependencies": {
 		"@inlang/badge": "workspace:*",
-		"@inlang/editor": "workspace:*",
 		"@inlang/env-variables": "workspace:*",
 		"@inlang/marketplace-manifest": "workspace:*",
 		"@inlang/plugin-message-format": "workspace:*",
