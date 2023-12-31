@@ -1249,13 +1249,13 @@ importers:
         version: 0.10.5(solid-js@1.8.7)
       '@solidjs/start':
         specifier: ^0.4
-        version: 0.4.2(solid-js@1.8.7)(vinxi@0.0.54)(vite@4.5.0)
+        version: 0.4.2(solid-js@1.8.7)(vinxi@0.0.61)(vite@4.5.0)
       solid-js:
         specifier: ^1.8
         version: 1.8.7
       vinxi:
-        specifier: ^0.0.54
-        version: 0.0.54(@types/node@20.9.3)
+        specifier: ^0.0.61
+        version: 0.0.61(@types/node@20.9.3)
     devDependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
@@ -4678,7 +4678,7 @@ packages:
       npmlog: 5.0.1
       rimraf: 3.0.2
       semver: 7.5.4
-      tar: 6.1.11
+      tar: 6.2.0
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -5939,7 +5939,7 @@ packages:
       rollup:
         optional: true
     dependencies:
-      '@rollup/pluginutils': 5.0.5(rollup@4.9.1)
+      '@rollup/pluginutils': 5.1.0(rollup@4.9.1)
       commondir: 1.0.1
       estree-walker: 2.0.2
       glob: 8.1.0
@@ -5971,7 +5971,7 @@ packages:
       rollup:
         optional: true
     dependencies:
-      '@rollup/pluginutils': 5.0.5(rollup@4.9.1)
+      '@rollup/pluginutils': 5.1.0(rollup@4.9.1)
       rollup: 4.9.1
     dev: false
 
@@ -5984,7 +5984,7 @@ packages:
       rollup:
         optional: true
     dependencies:
-      '@rollup/pluginutils': 5.0.5(rollup@4.9.1)
+      '@rollup/pluginutils': 5.1.0(rollup@4.9.1)
       '@types/resolve': 1.20.2
       deepmerge: 4.3.1
       is-builtin-module: 3.2.1
@@ -6002,7 +6002,7 @@ packages:
       rollup:
         optional: true
     dependencies:
-      '@rollup/pluginutils': 5.0.5(rollup@4.9.1)
+      '@rollup/pluginutils': 5.1.0(rollup@4.9.1)
       magic-string: 0.30.5
       rollup: 4.9.1
     dev: false
@@ -6058,7 +6058,7 @@ packages:
       rollup:
         optional: true
     dependencies:
-      '@rollup/pluginutils': 5.0.5(rollup@4.9.1)
+      '@rollup/pluginutils': 5.1.0(rollup@4.9.1)
       rollup: 4.9.1
     dev: false
 
@@ -6490,6 +6490,26 @@ packages:
       '@vinxi/plugin-directives': 0.0.50(vinxi@0.0.54)
       '@vinxi/server-components': 0.0.50(vinxi@0.0.54)
       '@vinxi/server-functions': 0.0.51(vinxi@0.0.54)
+      defu: 6.1.3
+      seroval: 1.0.2
+      seroval-plugins: 1.0.2(seroval@1.0.2)
+      vite-plugin-inspect: 0.7.42(vite@4.5.0)
+      vite-plugin-solid: 2.8.0(solid-js@1.8.7)(vite@4.5.0)
+    transitivePeerDependencies:
+      - '@nuxt/kit'
+      - rollup
+      - solid-js
+      - supports-color
+      - vinxi
+      - vite
+    dev: false
+
+  /@solidjs/start@0.4.2(solid-js@1.8.7)(vinxi@0.0.61)(vite@4.5.0):
+    resolution: {integrity: sha512-Ya7z78E6xzLLyUX5eUTHVum3LTf1SIkss1vHJ/hZ+UNkI2l81W66LkLZKwH3piF0b6+ZF8NoW7WEZ6T5ugW6ng==}
+    dependencies:
+      '@vinxi/plugin-directives': 0.0.50(vinxi@0.0.61)
+      '@vinxi/server-components': 0.0.50(vinxi@0.0.61)
+      '@vinxi/server-functions': 0.0.51(vinxi@0.0.61)
       defu: 6.1.3
       seroval: 1.0.2
       seroval-plugins: 1.0.2(seroval@1.0.2)
@@ -7898,6 +7918,23 @@ packages:
       vinxi: 0.0.54(@types/node@20.10.4)
     dev: false
 
+  /@vinxi/plugin-directives@0.0.50(vinxi@0.0.61):
+    resolution: {integrity: sha512-mwbUgEz6725WG19g9HrQ8fcMSW1hWsMUgjTBxFoYzwNz8J5DShIxiyVgBDnxG3I06IaMtntJIwUVOE95M9mI5A==}
+    peerDependencies:
+      vinxi: ^0.0.54
+    dependencies:
+      '@babel/parser': 7.23.5
+      acorn: 8.11.2
+      acorn-jsx: 5.3.2(acorn@8.11.2)
+      acorn-loose: 8.4.0
+      acorn-typescript: 1.4.12(acorn@8.11.2)
+      astring: 1.8.6
+      magicast: 0.2.11
+      recast: 0.23.4
+      tslib: 2.6.2
+      vinxi: 0.0.61(@types/node@20.9.3)
+    dev: false
+
   /@vinxi/server-components@0.0.50(vinxi@0.0.54):
     resolution: {integrity: sha512-Fw4LBdEoyIvtBGMCUgdWOXiL5E+w3g6h2jAz+2LDoA4o9KUhsc2/Tn7C0d1Hptb1kJloNul9wXXjdvGg6JtP9Q==}
     peerDependencies:
@@ -7913,6 +7950,21 @@ packages:
       vinxi: 0.0.54(@types/node@20.10.4)
     dev: false
 
+  /@vinxi/server-components@0.0.50(vinxi@0.0.61):
+    resolution: {integrity: sha512-Fw4LBdEoyIvtBGMCUgdWOXiL5E+w3g6h2jAz+2LDoA4o9KUhsc2/Tn7C0d1Hptb1kJloNul9wXXjdvGg6JtP9Q==}
+    peerDependencies:
+      vinxi: ^0.0.54
+    dependencies:
+      '@vinxi/plugin-directives': 0.0.50(vinxi@0.0.61)
+      acorn: 8.11.2
+      acorn-loose: 8.4.0
+      acorn-typescript: 1.4.12(acorn@8.11.2)
+      astring: 1.8.6
+      magicast: 0.2.11
+      recast: 0.23.4
+      vinxi: 0.0.61(@types/node@20.9.3)
+    dev: false
+
   /@vinxi/server-functions@0.0.51(vinxi@0.0.54):
     resolution: {integrity: sha512-r3V/lUUH4zpgjJABKPgulJ/fOIpyh4FFI49eWbTQhqRgj0wvAsxzWEMs2++vDlS3AgbXOpIQwEVUI7SASFy2Ag==}
     peerDependencies:
@@ -7926,6 +7978,21 @@ packages:
       magicast: 0.2.11
       recast: 0.23.4
       vinxi: 0.0.54(@types/node@20.10.4)
+    dev: false
+
+  /@vinxi/server-functions@0.0.51(vinxi@0.0.61):
+    resolution: {integrity: sha512-r3V/lUUH4zpgjJABKPgulJ/fOIpyh4FFI49eWbTQhqRgj0wvAsxzWEMs2++vDlS3AgbXOpIQwEVUI7SASFy2Ag==}
+    peerDependencies:
+      vinxi: ^0.0.54
+    dependencies:
+      '@vinxi/plugin-directives': 0.0.50(vinxi@0.0.61)
+      acorn: 8.11.2
+      acorn-loose: 8.4.0
+      acorn-typescript: 1.4.12(acorn@8.11.2)
+      astring: 1.8.6
+      magicast: 0.2.11
+      recast: 0.23.4
+      vinxi: 0.0.61(@types/node@20.9.3)
     dev: false
 
   /@vitest/coverage-v8@0.33.0(vitest@0.33.0):
@@ -15756,7 +15823,7 @@ packages:
       '@rollup/plugin-replace': 5.0.5(rollup@4.9.1)
       '@rollup/plugin-terser': 0.4.4(rollup@4.9.1)
       '@rollup/plugin-wasm': 6.2.2(rollup@4.9.1)
-      '@rollup/pluginutils': 5.0.5(rollup@4.9.1)
+      '@rollup/pluginutils': 5.1.0(rollup@4.9.1)
       '@types/http-proxy': 1.17.14
       '@vercel/nft': 0.24.4
       archiver: 6.0.1
@@ -19070,6 +19137,7 @@ packages:
       minizlib: 2.1.2
       mkdirp: 1.0.4
       yallist: 4.0.0
+    dev: true
 
   /tar@6.2.0:
     resolution: {integrity: sha512-/Wo7DcT0u5HUV486xg675HtjNd3BXZ6xDbzsCUZPt5iw8bTQ63bP0Raut3mvro9u+CUyq7YQd8Cx55fsZXxqLQ==}
@@ -20330,8 +20398,8 @@ packages:
       - xml2js
     dev: false
 
-  /vinxi@0.0.54(@types/node@20.9.3):
-    resolution: {integrity: sha512-tSWW/NxwcGtLGi9i7r+++PUlgas5hWtHwakbvmCe6di5PlRxGZD5XrZ8xCoCgExj1VAyuRdoWCpI5WIbQZ6erA==}
+  /vinxi@0.0.61(@types/node@20.9.3):
+    resolution: {integrity: sha512-jQ+4L5yVOM7bBJ9gdXDqMlGpEQVFXLlUxkFwz4TmBQyssgIiduUdHJU5/pn0zEQ9Z4EysyBuk84Ep4+FjY0BxQ==}
     hasBin: true
     dependencies:
       '@babel/core': 7.23.5
