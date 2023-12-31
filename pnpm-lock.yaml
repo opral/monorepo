@@ -510,14 +510,14 @@ importers:
         specifier: ^0.15.0
         version: 0.15.3
       vike:
-        specifier: 0.4.144
-        version: 0.4.144(vite@4.5.0)
+        specifier: 0.4.149
+        version: 0.4.149(vite@4.5.0)
       vite:
         specifier: 4.5.0
         version: 4.5.0(@types/node@20.5.9)
       vite-plugin-node-polyfills:
-        specifier: 0.12.0
-        version: 0.12.0(vite@4.5.0)
+        specifier: 0.17.0
+        version: 0.17.0(vite@4.5.0)
       vite-plugin-solid:
         specifier: 2.7.0
         version: 2.7.0(solid-js@1.7.11)(vite@4.5.0)
@@ -768,6 +768,9 @@ importers:
 
   inlang/source-code/markdown:
     dependencies:
+      cheerio:
+        specifier: 1.0.0-rc.12
+        version: 1.0.0-rc.12
       iconify-icon:
         specifier: 1.0.8
         version: 1.0.8
@@ -1823,9 +1826,6 @@ importers:
       '@inlang/badge':
         specifier: workspace:*
         version: link:../badge
-      '@inlang/editor':
-        specifier: workspace:*
-        version: link:../editor
       '@inlang/env-variables':
         specifier: workspace:*
         version: link:../env-variables
@@ -2149,9 +2149,6 @@ importers:
       '@types/flat':
         specifier: ^5.0.2
         version: 5.0.5
-      cheerio:
-        specifier: 1.0.0-rc.12
-        version: 1.0.0-rc.12
       clipboard-copy:
         specifier: ^4.0.1
         version: 4.0.1
@@ -3167,10 +3164,6 @@ packages:
 
   /@brillout/picocolors@1.0.10:
     resolution: {integrity: sha512-dh+JJlsBf3QYX+91Ezma8RLKNOjGDoBBmORv/NzRpQuasdyzwQCMXGGjsDu12ZhGz92TqQbL9pv79rvbheI21A==}
-    dev: true
-
-  /@brillout/picocolors@1.0.9:
-    resolution: {integrity: sha512-Lt/W5JsA75hcDJ2cOAlE4TqSMl6c9K+rXGRo/cU2fApnmhbRcNdkR4UHQDAwtWfZyUKWaxdwSui+jp+74J1pZg==}
     dev: true
 
   /@brillout/require-shim@0.1.2:
@@ -4685,7 +4678,7 @@ packages:
       npmlog: 5.0.1
       rimraf: 3.0.2
       semver: 7.5.4
-      tar: 6.2.0
+      tar: 6.1.11
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -5946,7 +5939,7 @@ packages:
       rollup:
         optional: true
     dependencies:
-      '@rollup/pluginutils': 5.1.0(rollup@4.9.1)
+      '@rollup/pluginutils': 5.0.5(rollup@4.9.1)
       commondir: 1.0.1
       estree-walker: 2.0.2
       glob: 8.1.0
@@ -5978,7 +5971,7 @@ packages:
       rollup:
         optional: true
     dependencies:
-      '@rollup/pluginutils': 5.1.0(rollup@4.9.1)
+      '@rollup/pluginutils': 5.0.5(rollup@4.9.1)
       rollup: 4.9.1
     dev: false
 
@@ -5991,7 +5984,7 @@ packages:
       rollup:
         optional: true
     dependencies:
-      '@rollup/pluginutils': 5.1.0(rollup@4.9.1)
+      '@rollup/pluginutils': 5.0.5(rollup@4.9.1)
       '@types/resolve': 1.20.2
       deepmerge: 4.3.1
       is-builtin-module: 3.2.1
@@ -6009,7 +6002,7 @@ packages:
       rollup:
         optional: true
     dependencies:
-      '@rollup/pluginutils': 5.1.0(rollup@4.9.1)
+      '@rollup/pluginutils': 5.0.5(rollup@4.9.1)
       magic-string: 0.30.5
       rollup: 4.9.1
     dev: false
@@ -6065,7 +6058,7 @@ packages:
       rollup:
         optional: true
     dependencies:
-      '@rollup/pluginutils': 5.1.0(rollup@4.9.1)
+      '@rollup/pluginutils': 5.0.5(rollup@4.9.1)
       rollup: 4.9.1
     dev: false
 
@@ -6498,8 +6491,8 @@ packages:
       '@vinxi/server-components': 0.0.50(vinxi@0.0.54)
       '@vinxi/server-functions': 0.0.51(vinxi@0.0.54)
       defu: 6.1.3
-      seroval: 1.0.0
-      seroval-plugins: 1.0.1(seroval@1.0.0)
+      seroval: 1.0.2
+      seroval-plugins: 1.0.2(seroval@1.0.2)
       vite-plugin-inspect: 0.7.42(vite@4.5.0)
       vite-plugin-solid: 2.8.0(solid-js@1.8.7)(vite@4.5.0)
     transitivePeerDependencies:
@@ -9500,8 +9493,8 @@ packages:
     engines: {node: '>= 0.8'}
     dev: false
 
-  /c12@1.5.1:
-    resolution: {integrity: sha512-BWZRJgDEveT8uI+cliCwvYSSSSvb4xKoiiu5S0jaDbKBopQLQF7E+bq9xKk1pTcG+mUa3yXuFO7bD9d8Lr9Xxg==}
+  /c12@1.6.1:
+    resolution: {integrity: sha512-fAZOi3INDvIbmjuwAVVggusyRTxwNdTAnwLay8IsXwhFzDwPPGzFxzrx6L55CPFGPulUSZI0eyFUvRDXveoE3g==}
     dependencies:
       chokidar: 3.5.3
       defu: 6.1.3
@@ -12631,7 +12624,7 @@ packages:
       consola: 3.2.3
       defu: 6.1.3
       node-fetch-native: 1.6.1
-      nypm: 0.3.3
+      nypm: 0.3.4
       ohash: 1.1.3
       pathe: 1.1.1
       tar: 6.2.0
@@ -15763,11 +15756,11 @@ packages:
       '@rollup/plugin-replace': 5.0.5(rollup@4.9.1)
       '@rollup/plugin-terser': 0.4.4(rollup@4.9.1)
       '@rollup/plugin-wasm': 6.2.2(rollup@4.9.1)
-      '@rollup/pluginutils': 5.1.0(rollup@4.9.1)
+      '@rollup/pluginutils': 5.0.5(rollup@4.9.1)
       '@types/http-proxy': 1.17.14
       '@vercel/nft': 0.24.4
       archiver: 6.0.1
-      c12: 1.5.1
+      c12: 1.6.1
       chalk: 5.3.0
       chokidar: 3.5.3
       citty: 0.1.5
@@ -15815,7 +15808,7 @@ packages:
       uncrypto: 0.1.3
       unctx: 2.3.1
       unenv: 1.8.0
-      unimport: 3.7.0(rollup@4.9.1)
+      unimport: 3.7.1(rollup@4.9.1)
       unstorage: 1.10.1
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -16110,8 +16103,8 @@ packages:
       - debug
     dev: true
 
-  /nypm@0.3.3:
-    resolution: {integrity: sha512-FHoxtTscAE723e80d2M9cJRb4YVjL82Ra+ZV+YqC6rfNZUWahi+ZhPF+krnR+bdMvibsfHCtgKXnZf5R6kmEPA==}
+  /nypm@0.3.4:
+    resolution: {integrity: sha512-1JLkp/zHBrkS3pZ692IqOaIKSYHmQXgqfELk6YTOfVBnwealAmPA1q2kKK7PHJAHSMBozerThEFZXP3G6o7Ukg==}
     engines: {node: ^14.16.0 || >=16.10.0}
     hasBin: true
     dependencies:
@@ -18150,13 +18143,13 @@ packages:
     dependencies:
       randombytes: 2.1.0
 
-  /seroval-plugins@1.0.1(seroval@1.0.0):
-    resolution: {integrity: sha512-NXeb6S2jh+sxFI8NMBpzyVWItblit9/j7B1q+vfxUccj0ycbqu4h3hzrrmb7GSy7b6WqTmo0apGBsLH5ei/VUg==}
+  /seroval-plugins@1.0.2(seroval@1.0.2):
+    resolution: {integrity: sha512-4G/G9dFOBfFhw3AO+sn5Y6jyxkpoBwqnN2wxWjl8cGffaW+2lsMJ4baIoJ+E8JHx8iPZd82lvaaBG5QN8JuKhA==}
     engines: {node: '>=10'}
     peerDependencies:
       seroval: '>=0.15'
     dependencies:
-      seroval: 1.0.0
+      seroval: 1.0.2
     dev: false
 
   /seroval@0.15.1:
@@ -18168,8 +18161,8 @@ packages:
     resolution: {integrity: sha512-ZfhQVB59hmIauJG5Ydynupy8KHyr5imGNtdDhbZG68Ufh1Ynkv9KOYOAABf71oVbQxJ8VkWnMHAjEHE7fWkH5g==}
     engines: {node: '>=10'}
 
-  /seroval@1.0.0:
-    resolution: {integrity: sha512-HA2BtUaLO6Gqpc1uc//v08DqvWKfGrD7wpsJSw+qkgBubJbYuKBVE2i2v09k5kwM6wA7R/dN37LCg+t48sBpCg==}
+  /seroval@1.0.2:
+    resolution: {integrity: sha512-buswWxRzf65ZGUk8MAf3qVtBJHbe5gq6hZyPeqlJCKEIl/tEhUZze0YJg7vB7tFRGgPeneRaP083OB/vDiYLvA==}
     engines: {node: '>=10'}
     dev: false
 
@@ -19077,7 +19070,6 @@ packages:
       minizlib: 2.1.2
       mkdirp: 1.0.4
       yallist: 4.0.0
-    dev: true
 
   /tar@6.2.0:
     resolution: {integrity: sha512-/Wo7DcT0u5HUV486xg675HtjNd3BXZ6xDbzsCUZPt5iw8bTQ63bP0Raut3mvro9u+CUyq7YQd8Cx55fsZXxqLQ==}
@@ -19833,8 +19825,8 @@ packages:
       vfile: 6.0.1
     dev: false
 
-  /unimport@3.7.0(rollup@4.9.1):
-    resolution: {integrity: sha512-vesCVjU3CYk41UZNY10kwii7l77vcP4IxPbBMgpve+vean7g7zJWrcCqSoG7u0eB9LZ5bM5BP+3vr3W2uYk0Yg==}
+  /unimport@3.7.1(rollup@4.9.1):
+    resolution: {integrity: sha512-V9HpXYfsZye5bPPYUgs0Otn3ODS1mDUciaBlXljI4C2fTwfFpvFZRywmlOu943puN9sncxROMZhsZCjNXEpzEQ==}
     dependencies:
       '@rollup/pluginutils': 5.1.0(rollup@4.9.1)
       acorn: 8.11.2
@@ -20236,32 +20228,6 @@ packages:
       vfile-message: 4.0.2
     dev: false
 
-  /vike@0.4.144(vite@4.5.0):
-    resolution: {integrity: sha512-smvBXv33IhP5FHOvoBYZuir/Zip93AoBGqiIdmWHva1RYeQDFlXQMbs/YZ5HqFc7OrL8cL3K7iUsEC6t/pF+/Q==}
-    engines: {node: '>=16.0.0'}
-    hasBin: true
-    peerDependencies:
-      react-streaming: '>=0.3.5'
-      vite: '>=3.1.0'
-    peerDependenciesMeta:
-      react-streaming:
-        optional: true
-    dependencies:
-      '@brillout/import': 0.2.3
-      '@brillout/json-serializer': 0.5.8
-      '@brillout/picocolors': 1.0.9
-      '@brillout/require-shim': 0.1.2
-      '@brillout/vite-plugin-import-build': 0.2.20
-      acorn: 8.11.2
-      cac: 6.7.14
-      es-module-lexer: 1.4.1
-      esbuild: 0.17.19
-      fast-glob: 3.3.2
-      sirv: 2.0.3
-      source-map-support: 0.5.21
-      vite: 4.5.0(@types/node@20.5.9)
-    dev: true
-
   /vike@0.4.149(vite@4.5.0):
     resolution: {integrity: sha512-5eB0obgc9rmYbVkWRSbADGZGwjaYF+JLScgj9Q86zFSGOnQzb+kDZ2OS7nG1PSOmnpnVqHQIjTYv2BAm6j2IOg==}
     engines: {node: '>=16.0.0'}
@@ -20301,7 +20267,7 @@ packages:
       '@vinxi/devtools': 0.0.5(vite@4.5.0)
       '@vinxi/listhen': 1.5.5
       boxen: 7.1.1
-      c12: 1.5.1
+      c12: 1.6.1
       chokidar: 3.5.3
       citty: 0.1.5
       consola: 3.2.3
@@ -20329,7 +20295,7 @@ packages:
       serve-static: 1.15.0
       ufo: 1.3.2
       unenv: 1.8.0
-      unimport: 3.7.0(rollup@4.9.1)
+      unimport: 3.7.1(rollup@4.9.1)
       unstorage: 1.10.1
       vite: 4.5.0(@types/node@20.10.4)
       ws: 8.14.2
@@ -20377,7 +20343,7 @@ packages:
       '@vinxi/devtools': 0.0.5(vite@4.5.0)
       '@vinxi/listhen': 1.5.5
       boxen: 7.1.1
-      c12: 1.5.1
+      c12: 1.6.1
       chokidar: 3.5.3
       citty: 0.1.5
       consola: 3.2.3
@@ -20405,7 +20371,7 @@ packages:
       serve-static: 1.15.0
       ufo: 1.3.2
       unenv: 1.8.0
-      unimport: 3.7.0(rollup@4.9.1)
+      unimport: 3.7.1(rollup@4.9.1)
       unstorage: 1.10.1
       vite: 4.5.0(@types/node@20.9.3)
       ws: 8.14.2
@@ -20551,20 +20517,6 @@ packages:
       - supports-color
     dev: false
 
-  /vite-plugin-node-polyfills@0.12.0(vite@4.5.0):
-    resolution: {integrity: sha512-xZfpD81aNhwEbIjccEiy8Q/hDdnlYqBSeEaUMIukOpGHuMaz65jqrC2lmnF/FXnliovISy2L1n92da0JOvk36A==}
-    peerDependencies:
-      vite: ^2.0.0 || ^3.0.0 || ^4.0.0
-    dependencies:
-      '@rollup/plugin-inject': 5.0.5(rollup@4.9.1)
-      buffer-polyfill: /buffer@6.0.3
-      node-stdlib-browser: 1.2.0
-      process: 0.11.10
-      vite: 4.5.0(@types/node@20.5.9)
-    transitivePeerDependencies:
-      - rollup
-    dev: true
-
   /vite-plugin-node-polyfills@0.16.0(vite@4.5.0):
     resolution: {integrity: sha512-uj1ymOmk7TliMxiivmXokpMY5gVMBpFPSZPLQSCv/LjkJGGKwyLjpbFL64dbYZEdFSUQ3tM7pbrxNh25yvhqOA==}
     peerDependencies:
@@ -20578,6 +20530,20 @@ packages:
     transitivePeerDependencies:
       - rollup
     dev: false
+
+  /vite-plugin-node-polyfills@0.17.0(vite@4.5.0):
+    resolution: {integrity: sha512-iPmPn7376e5u6QvoTSJa16hf5Q0DFwHFXJk2uYpsNlmI3JdPms7hWyh55o+OysJ5jo9J5XPhLC9sMOYifwFd1w==}
+    peerDependencies:
+      vite: ^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0
+    dependencies:
+      '@rollup/plugin-inject': 5.0.5(rollup@4.9.1)
+      buffer-polyfill: /buffer@6.0.3
+      node-stdlib-browser: 1.2.0
+      process: 0.11.10
+      vite: 4.5.0(@types/node@20.5.9)
+    transitivePeerDependencies:
+      - rollup
+    dev: true
 
   /vite-plugin-solid@2.7.0(solid-js@1.7.11)(vite@4.5.0):
     resolution: {integrity: sha512-avp/Jl5zOp/Itfo67xtDB2O61U7idviaIp4mLsjhCa13PjKNasz+IID0jYTyqUp9SFx6/PmBr6v4KgDppqompg==}
@@ -20797,7 +20763,7 @@ packages:
     dependencies:
       '@types/node': 20.5.9
       esbuild: 0.18.20
-      postcss: 8.4.32
+      postcss: 8.4.31
       rollup: 3.29.1
     optionalDependencies:
       fsevents: 2.3.3

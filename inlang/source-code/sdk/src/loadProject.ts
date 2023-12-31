@@ -257,14 +257,24 @@ export const loadProject = async (args: {
 				500,
 				async (newMessages) => {
 					try {
-						await resolvedModules()?.resolvedPluginApi.saveMessages({
-							settings: settingsValue,
-							messages: newMessages,
-						})
+						if (JSON.stringify(newMessages) !== JSON.stringify(messages())) {
+							await resolvedModules()?.resolvedPluginApi.saveMessages({
+								settings: settingsValue,
+								messages: newMessages,
+							})
+						}
 					} catch (err) {
 						throw new PluginSaveMessagesError({
 							cause: err,
 						})
+					}
+					const abortController = new AbortController()
+					if (
+						newMessages.length !== 0 &&
+						JSON.stringify(newMessages) !== JSON.stringify(messages()) &&
+						nodeishFs.watch("/", { signal: abortController.signal }) !== undefined
+					) {
+						setMessages(newMessages)
 					}
 				},
 				{ atBegin: false }
