@@ -17,12 +17,14 @@
 	"dependencies": {
 		"@inlang/env-variables": "workspace:*",
 		"@inlang/language-tag": "workspace:*",
+		"@inlang/marketplace-registry": "workspace:*",
 		"@inlang/message": "workspace:*",
 		"@inlang/result": "workspace:*",
 		"@inlang/sdk": "workspace:*",
-		"@inlang/marketplace-registry": "workspace:*",
+		"@types/cors": "^2.8.17",
 		"algoliasearch": "4.20.0",
 		"body-parser": "^1.20.2",
+		"cors": "^2.8.5",
 		"ts-dedent": "^2.2.0",
 		"typed-rpc": "3.0.0"
 	},
