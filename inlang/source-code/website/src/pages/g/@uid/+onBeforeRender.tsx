@@ -10,8 +10,8 @@ export default async function onBeforeRender(pageContext: PageContext) {
 
 	if (!item) {
 		console.error("Item not found")
-		throw redirect("/g/404")
+		throw redirect("/g/404", 301)
 	} else {
-		throw redirect(`/g/${item.uniqueID}/${item.id.replaceAll(".", "-").toLowerCase()}`)
+		throw redirect(`/g/${item.uniqueID}/${item.id.replaceAll(".", "-").toLowerCase()}`, 301)
 	}
 }
