@@ -11,7 +11,8 @@ export const router: Router = express.Router()
 const allowedOrigins = privateEnv.PUBLIC_ALLOWED_AUTH_URLS.split(",")
 
 // Enable CORS for all allowed origins
-router.use(route,
+router.use(
+	route,
 	cors({
 		origin: allowedOrigins,
 		methods: "GET,POST",
