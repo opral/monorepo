@@ -1,64 +1,80 @@
-<div>
-    <p align="center">
-        <img width="300" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/logo-white-background.png"/>
-    </p>
-    <h2 align="center">
-        Globalization infrastructure for software
-    </h2>
-</div>
-
 <p align="center">
-  <a href='https://discord.gg/gdMPPWy57R' target="_blank"><img alt='Join the community on Discord' src='https://img.shields.io/badge/Discord-100000?style=flat&logo=Discord&logoColor=white&labelColor=5865F2&color=5865F2'/></a>
-  <a href='https://twitter.com/inlangHQ' target="_blank"><img alt='Follow inlang on Twitter' src='https://img.shields.io/badge/Twitter-100000?style=flat&logo=Twitter&logoColor=white&labelColor=1A8CD8&color=1A8CD8'/></a>
+  <a href="https://github.com/inlang/monorepo">  </a>
+
+  <img src="https://github.com/inlang/monorepo/blob/main/inlang/assets/logo_rounded.png?raw=true" alt="inlang icon" width="120px">
+  
+  <h2 align="center">
+    Effortless globalization (i18n, l10n) for your app
+  </h2>
+  
+  <p align="center">powered by <a href="https://github.com/inlang/monorepo/tree/main/lix" target="_blank">lix</p>
+
+  <p align="center">
+    <br>
+    <a href='https://inlang.com/c/apps' target="_blank">🕹️ Apps</a>
+    ·
+    <a href='https://inlang.com/documentation' target="_blank">📄 Docs</a>
+    ·
+    <a href='https://discord.gg/gdMPPWy57R' target="_blank">💙 Discord</a>
+    ·
+    <a href='https://twitter.com/inlangHQ' target="_blank">𝕏 Twitter</a>
+    ·
+    <a href='https://github.com/orgs/inlang/projects/39' target="_blank">🗺️ Roadmap</a>
+  </p>
 </p>
 
-## Community & Support
+<br>
 
-**[📝 Documentation](https://inlang.com/documentation)** - Getting started and more.
+<p align="center">
+<a href='https://www.youtube.com/watch?v=mB2-Ze-SjXE' target="_blank">
+	<img src="https://img.youtube.com/vi/mB2-Ze-SjXE/mqdefault.jpg" alt="inlang in 100 seconds"
+</a>
+</p>
 
-**[🌱 Ecosystem](https://inlang.com)** - Plugins, resources, and more.
+<br>
 
-**[🛠️ SDKs](https://inlang.com/documentation)** - Supported SDKs to globalize your app.
+<!-- BODY -->
 
-**[🚩 Issues](https://github.com/inlang/monorepo/issues)** - Bugs end errors you encounter using inlang.
+## Table of Contents
 
-**[💬 Discussions](https://github.com/inlang/monorepo/discussions)** - Get help, ask questions, request features, and discuss inlang.
+- [Table of Contents](#table-of-contents)
+- [🌐 About inlang](#-about-inlang)
+- [:bell: Stay up-to-date](#bell-stay-up-to-date)
+- [:balloon: Contributing](#balloon-contributing)
 
-**[🗣️ Discord](https://discord.gg/gdMPPWy57R)** - Hanging out with the community.
+## 🌐 About inlang
 
-## Applications
+**inlang is a whole ecosystem** of building blocks for your globalization (internationalization / i18n) efforts with the goal of helping companies enter new markets in no time. For example:
 
-Inlang consists of multiple applications that can be used individually or in combination.
+- use [inlang Paraglide.js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) to have a fully translated, typesafe & fast app in minutes
+- use the [inlang VSCode extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) to translate your app right in the editor
+- use the [inlang Fink](https://inlang.com/m/tdozzpar/app-inlang-editor) to translate your app in the browser & invite collaborators to help you
+- use the [inlang CLI](https://inlang.com/m/2qj2w8pu/app-inlang-cli) to lint your messsages with lint rules or machine translate them & have quality control in CI/CD
+- *build your own app / plugin / lint rule* with the [inlang SDK](https://inlang.com/documentation)
+- ...
 
-### [Editor](https://inlang.com/m/tdozzpar/app-inlang-editor)
+**Go to [inlang.com](https://inlang.com) to see all extensions to the inlang ecosystem.**
 
-Manage translations in a simple web interface and push changes to your repository.
+**More specific guides:**
 
-✅ works with existing translation files </br>
-✅ git workflows like pull requests </br>
-✅ no hosting, no sync pipelines </br>
-✅ no extra accounts </br>
+- Guide: [Build a Global Svelte App](https://inlang.com/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp)
+- Guide: [Contribute Translations](https://inlang.com/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink)
 
-![the inlang editor to manage translations](https://github.com/inlang/monorepo/assets/59048346/85cfee69-96da-4b2d-8e34-a0b7abc72212)
+## :bell: Stay up-to-date
 
-### [IDE-Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension)
+Follow us on [Twitter](https://twitter.com/inlangHQ) or join our [Discord](https://discord.gg/gdMPPWy57R) server. 
 
-The IDE extension allows you to translate your content directly in your IDE.
+We also regularly send out a newsletter with updates and tips & tricks. You can subscribe to it [here](https://inlang.com/newsletter).
 
-✅ extract messages </br>
-✅ inline annotations to see translations </br>
-✅ linting errors and warnings </br>
 
-![VS code extension inline annotation](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/inline.gif)
+## :balloon: Contributing
 
-### [CLI](https://inlang.com/m/2qj2w8pu/app-inlang-cli)
+There are many ways you can contribute to inlang! Here are a few options:
 
-[@inlang/cli](https://github.com/inlang/monorepo/tree/main/inlang/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infrastructure.
+- Star this repo
+- Create issues every time you feel something is missing or goes wrong
+- Upvote issues with 👍 reaction so we know what the demand for a particular issue to prioritize it within the roadmap
 
-✅ init & validate config </br>
-✅ lint translations </br>
-✅ machine translate </br>
-✅ open inlang editor </br>
-✅ Automation integration with CI/CD</br>
+If you would like to contribute to the development of the project, please refer to our [Contributing guide](https://github.com/inlang/monorepo/blob/main/CONTRIBUTING.md).
 
-![CLI validate example](https://github.com/inlang/monorepo/assets/59048346/44fcaf1e-aff4-4533-b973-1690fc6db93e)
+All contributions are highly appreciated. 🙏
