@@ -184,7 +184,14 @@ export class InlangBadgeGenerator extends LitElement {
 			navigator.clipboard.writeText(
 				`[![inlang status badge](https://inlang.com${
 					this.badgeURL
-				})](https://fink.inlang.com/${this.badgeURL.replace("/badge?url=", "")}?ref=badge)`
+				})](https://fink.inlang.com/${this.badgeURL
+					.replace("/badge?url=", "")
+					.replace(
+						this._projectInput.value
+							? `&project=${this._projectInput.value}`
+							: "&project=/project.inlang",
+						""
+					)}?ref=badge)`
 			)
 
 			setTimeout(() => {
