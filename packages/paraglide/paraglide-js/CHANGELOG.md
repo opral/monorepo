@@ -1,5 +1,9 @@
 # @inlang/paraglide-js
 
+## 1.0.0-prerelease.26
+
+Hotfix: Bundle SDK
+
 ## 1.0.0-prerelease.25
 
 Update dependencies
