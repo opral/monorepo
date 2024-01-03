@@ -25,11 +25,13 @@ const HeroSearch = () => {
 				</p>
 
 				<div class="mt-8">
-					<Link href="/g/7777asdy/guide-nilsjacobsen-ecosystemCompatible">
-						<Button class="w-fit" type="secondary" chevron>
-							{m.home_inlang_button()}
-						</Button>
-					</Link>
+					<Button
+						class="w-fit"
+						type="secondary"
+						href="/g/7777asdy/guide-nilsjacobsen-ecosystemCompatible"
+					>
+						{m.home_inlang_button()}
+					</Button>
 				</div>
 			</div>
 			<div class="hidden mb-4 lg:block relative lg:absolute z-10 lg:top-[50%] lg:-translate-y-[40%] lg:right-0 w-full lg:w-[600px] xl:w-[900px] flex-1 md:mt-0 mt-12 overflow-hidden">
