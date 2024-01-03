@@ -1,5 +1,18 @@
 # inlang-vs-code-extension
 
+## 1.25.0
+
+### Minor Changes
+
+- bc5803235: hotfix reactivity bug in ide extension
+
+### Patch Changes
+
+- Updated dependencies [bc5803235]
+  - @inlang/sdk@0.20.0
+  - @inlang/create-project@1.1.2
+  - @inlang/telemetry@0.3.1
+
 ## 1.24.0
 
 ### Minor Changes
