@@ -88,3 +88,13 @@ services:
         - inlang/source-code/manage/**
     domains:
       - manage.inlang.com
+
+  - name: opral-website
+    type: web
+    runtime: static
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - opral/source-code/website/**
+    domains:
+      - opral.com
