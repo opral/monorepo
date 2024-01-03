@@ -46,7 +46,13 @@ export const AlternateLinks: Component<AlternateLinksProps> = (props) => {
 
 	for (const tag of availableLanguageTags) {
 		if (tag !== language_tag) {
-			links.push(<link rel="alternate" hreflang={tag} href={translateHref(href, tag)} />)
+			links.push(
+				<link
+					rel="alternate"
+					hreflang={tag}
+					href={adapter.translateHref(href, tag, paraglide.availableLanguageTags)}
+				/>
+			)
 		}
 	}
 
@@ -69,24 +75,4 @@ export function languageTagFromPathname(pathname: string): AvailableLanguageTag 
 export function useLocationLanguageTag(): AvailableLanguageTag | undefined {
 	const pathname = useLocationPathname()
 	return languageTagFromPathname(pathname)
-}
-
-/**
- * Changes a provided url to include the correct language tag.
- *
- * To be used on `<A href="...">` components to make sure that the anchor tag will link to the correct language, when server side rendered.
- *
- * **Use only on internal links. (e.g. `<A href="/foo">` or `<A href="/en/foo">`)**
- *
- * @example
- * ```tsx
- * <a href={i18n.translateHref("/foo/bar")}>...</a>
- * ```
- *
- * @param pathname The pathname to link to. (e.g. "/foo/bar")
- * @param language_tag The current language tag. Will read one from context by default, pass one explicitly if context is not available.
- * @returns The translated pathname. (e.g. "/en/bar")
- */
-export function translateHref(pathname: string, language_tag = languageTag()): string {
-	return adapter.translateHref(pathname, language_tag, paraglide.availableLanguageTags)
 }
