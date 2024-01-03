@@ -143,7 +143,8 @@ export class InlangBadgeGenerator extends LitElement {
 		const { owner, repo } = { owner: path[1], repo: path[2] }
 
 		this.badgeURL =
-			`/badge?url=github.com/${owner}/${repo}` + (project ? `&project=${project}` : "")
+			`https://badge.inlang.com/badge?url=github.com/${owner}/${repo}` +
+			(project ? `&project=${project}` : "")
 
 		const img = new Image()
 		img.src = this.badgeURL
@@ -182,7 +183,7 @@ export class InlangBadgeGenerator extends LitElement {
 				Successfully copied!`
 			this.markdownCopied = true
 			navigator.clipboard.writeText(
-				`[![inlang status badge](https://inlang.com${
+				`[![inlang status badge](https://badge.inlang.com${
 					this.badgeURL
 				})](https://fink.inlang.com/${this.badgeURL
 					.replace("/badge?url=", "")
