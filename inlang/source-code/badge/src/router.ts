@@ -8,17 +8,20 @@ export const router: Router = express.Router()
 // Route for the /badge endpoint
 router.get(
 	"/badge",
-	async (req: Request<object, object, object, { url?: string; size?: string }>, res: Response) => {
+	async (
+		req: Request<object, object, object, { url?: string; project?: string; size?: string }>,
+		res: Response
+	) => {
 		try {
 			// Get the url from the query
-			const { url } = req.query
+			const { url, project } = req.query
 			if (!url) {
 				res.send(
 					"No url provided, please provide a url like this: https://inlang.com/badge?url=github.com/inlang/example"
 				)
 				return
 			}
-			const image = await badge(url)
+			const image = await badge(url, project)
 
 			// render png
 			const resvg = new Resvg(image)
