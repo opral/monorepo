@@ -159,7 +159,7 @@ const Footer = () => {
 				</div>
 				<div class="xl:w-1/4 xl:px-4 flex items-center justify-between pt-2 max-xl:w-full">
 					<p class="text-sm text-surface-500">
-						Copyright {new Date().getFullYear().toString()} inlang
+						Copyright {new Date().getFullYear().toString()} Opral
 					</p>
 					<LanguagePicker />
 				</div>
