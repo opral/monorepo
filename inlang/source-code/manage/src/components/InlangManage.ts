@@ -556,7 +556,7 @@ export class InlangManage extends TwLitElement {
 											: ""}
 									</div>
 							  </div>`
-							: this.projects === "load"
+							: this.projects === "load" && typeof this.user === "undefined"
 							? html`<div class="flex flex-col gap-0.5 mt-4">
 									<div class="mx-auto">
 										<div class="h-12 w-12 animate-spin mb-4">

@@ -1,5 +1,5 @@
 import { redirect } from "vike/abort"
 
 export default async function onBeforeRender() {
-	throw redirect("/")
+	throw redirect("/", 301)
 }

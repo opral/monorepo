@@ -32,10 +32,10 @@ export default async function onBeforeRender(pageContext: PageContext) {
 		(item: any) => item.uniqueID === pageContext.routeParams.uid
 	) as MarketplaceManifest & { uniqueID: string }
 
-	if (!item || item.id.split(".")[0] === "guide") throw redirect("/m/404")
+	if (!item || item.id.split(".")[0] === "guide") throw redirect("/m/404", 301)
 
 	if (item.id.replaceAll(".", "-").toLowerCase() !== pageContext.routeParams.id?.toLowerCase()) {
-		throw redirect(`/m/${item.uniqueID}/${item.id.replaceAll(".", "-").toLowerCase()}`)
+		throw redirect(`/m/${item.uniqueID}/${item.id.replaceAll(".", "-").toLowerCase()}`, 301)
 	}
 
 	const readme = () => {
