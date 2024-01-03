@@ -93,6 +93,7 @@ services:
     type: web
     runtime: static
     autoDeploy: true
+    staticPublishPath: ./opral/source-code/website
     buildFilter:
       paths:
         - opral/source-code/website/**
