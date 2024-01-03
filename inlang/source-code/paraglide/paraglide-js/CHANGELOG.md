@@ -1,11 +1,12 @@
 # @inlang/paraglide-js
 
-## 1.0.0
+## 1.0.0-prerelease.23
 
-### Patch Changes
+Update dependencies
 
-- Updated dependencies [bc5803235]
-  - @inlang/sdk@0.20.0
+## 1.0.0-prerelease.22
+
+Update dependencies
 
 ## 1.0.0-prerelease.21
 
