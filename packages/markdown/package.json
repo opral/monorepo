@@ -25,7 +25,6 @@
 		"iconify-icon": "1.0.8",
 		"lit": "2.8.0",
 		"rehype-accessible-emojis": "0.3.2",
-		"rehype-add-classes": "1.0.0",
 		"rehype-autolink-headings": "7.0.0",
 		"rehype-class-names": "1.0.14",
 		"rehype-highlight": "7.0.0",
