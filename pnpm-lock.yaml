@@ -1059,6 +1059,9 @@ importers:
       '@inlang/detect-json-formatting':
         specifier: workspace:*
         version: link:../../detect-json-formatting
+      '@inlang/language-tag':
+        specifier: workspace:*
+        version: link:../../versioned-interfaces/language-tag
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../../sdk
