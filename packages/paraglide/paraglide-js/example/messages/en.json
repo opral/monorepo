@@ -4,5 +4,6 @@
 	"greeting": "Welcome {name}! You have {count} messages.",
 	"hello": "Hello World!",
 	"with_backtick": "`Hello World!`",
-	"with_nonjs_variable": "Hello {000}"
+	"with_nonjs_variable": "Hello {000}",
+	"missing_in_german": "This is missing in German"
 }

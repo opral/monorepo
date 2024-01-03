@@ -93,7 +93,7 @@ type EditorStateSchema = {
 	/**
 	 * List of projects in the repository.
 	 */
-	projectList: Resource<{ projectPath: string; }[]>
+	projectList: Resource<{ projectPath: string }[]>
 
 	doesInlangConfigExist: () => boolean
 
@@ -109,7 +109,6 @@ type EditorStateSchema = {
 
 	setActiveProject: Setter<string | undefined>
 	activeProject: Accessor<string | undefined>
-
 
 	/**
 	 * FilterLanguages show or hide the different messages.
