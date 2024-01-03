@@ -1,13 +1,13 @@
 <p align="center">
-  <a href="https://github.com/inlang/monorepo">  </a>
+  <a href="https://github.com/opral/monorepo">  </a>
 
-  <img src="https://github.com/inlang/monorepo/blob/main/inlang/assets/logo_rounded.png?raw=true" alt="inlang icon" width="120px">
+  <img src="https://github.com/opral/monorepo/blob/main/inlang/assets/logo_rounded.png?raw=true" alt="inlang icon" width="120px">
   
   <h2 align="center">
     Effortless globalization (i18n, l10n) for your app
   </h2>
   
-  <p align="center">powered by <a href="https://github.com/inlang/monorepo/tree/main/lix" target="_blank">lix</p>
+  <p align="center">powered by <a href="https://github.com/opral/monorepo/tree/main/lix" target="_blank">lix</p>
 
   <p align="center">
     <br>
@@ -19,7 +19,7 @@
     ·
     <a href='https://twitter.com/inlangHQ' target="_blank">𝕏 Twitter</a>
     ·
-    <a href='https://github.com/orgs/inlang/projects/39' target="_blank">🗺️ Roadmap</a>
+    <a href='https://github.com/orgs/opral/projects/39' target="_blank">🗺️ Roadmap</a>
   </p>
 </p>
 
@@ -75,6 +75,6 @@ There are many ways you can contribute to inlang! Here are a few options:
 - Create issues every time you feel something is missing or goes wrong
 - Upvote issues with 👍 reaction so we know what the demand for a particular issue to prioritize it within the roadmap
 
-If you would like to contribute to the development of the project, please refer to our [Contributing guide](https://github.com/inlang/monorepo/blob/main/CONTRIBUTING.md).
+If you would like to contribute to the development of the project, please refer to our [Contributing guide](https://github.com/opral/monorepo/blob/main/CONTRIBUTING.md).
 
 All contributions are highly appreciated. 🙏
