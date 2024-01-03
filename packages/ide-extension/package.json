@@ -117,7 +117,8 @@
 		"ovsx": "^0.8.3",
 		"posthog-node": "^3.1.2",
 		"ts-node": "^10.9.1",
-		"typescript": "5.3.2"
+		"typescript": "5.3.2",
+		"wdio-vscode-service": "^5.2.2"
 	},
 	"activationEvents": [
 		"workspaceContains:**/project.inlang/*",
