@@ -1065,9 +1065,6 @@ importers:
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../../sdk
-      '@lix-js/fs':
-        specifier: workspace:*
-        version: link:../../../../lix/source-code/fs
       commander:
         specifier: 11.1.0
         version: 11.1.0
@@ -1093,6 +1090,9 @@ importers:
       '@inlang/telemetry':
         specifier: workspace:*
         version: link:../../telemetry
+      '@lix-js/fs':
+        specifier: workspace:*
+        version: link:../../../../lix/source-code/fs
       '@rollup/plugin-terser':
         specifier: 0.4.3
         version: 0.4.3(rollup@3.29.1)
