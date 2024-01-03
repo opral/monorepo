@@ -35,6 +35,7 @@ export class InlangBadgeGenerator extends LitElement {
 			align-items: center;
 			justify-content: flex-end;
 			position: relative;
+			margin-bottom: 0.5rem;
 		}
 		.options > input {
 			position: absolute;
@@ -100,9 +101,29 @@ export class InlangBadgeGenerator extends LitElement {
 			margin-top: 0.5rem;
 			font-weight: 400;
 		}
+		.optional {
+			height: 32px;
+			display: flex;
+			gap: 0.5rem;
+			align-items: center;
+			justify-content: flex-start;
+			position: relative;
+		}
+		.optional > input {
+			position: relative;
+			height: 100%;
+			width: 100%;
+			border: 1px solid #ecedee;
+			border-radius: 0.5rem;
+			transition: all 0.2s ease-in-out;
+			outline-color: rgba(5, 182, 211, 0.1);
+			text-indent: 16px;
+			font-size: 0.8rem;
+		}
 	`
 
 	@property() badgeURL: string = ""
+	@property() projectPath: string = ""
 	@property() loading: boolean = false
 	@property() error: boolean = false
 
@@ -119,7 +140,7 @@ export class InlangBadgeGenerator extends LitElement {
 		const path = url.pathname.split("/")
 		const { owner, repo } = { owner: path[1], repo: path[2] }
 
-		this.badgeURL = `https://inlang.com/badge?url=github.com/${owner}/${repo}`
+		this.badgeURL = `/badge?url=github.com/${owner}/${repo}`
 
 		const img = new Image()
 		img.src = this.badgeURL
@@ -151,10 +172,9 @@ export class InlangBadgeGenerator extends LitElement {
 				Successfully copied!`
 			this.markdownCopied = true
 			navigator.clipboard.writeText(
-				`[![inlang status badge](${this.badgeURL})](https://fink.inlang.com/${this.badgeURL.replace(
-					"https://inlang.com/badge?url=",
-					""
-				)}?ref=badge)`
+				`[![inlang status badge](https://inlang.com${
+					this.badgeURL
+				})](https://fink.inlang.com/${this.badgeURL.replace("/badge?url=", "")}?ref=badge)`
 			)
 
 			setTimeout(() => {
@@ -175,7 +195,7 @@ export class InlangBadgeGenerator extends LitElement {
 			this.copyImageText = html`<doc-icon size="1.4em" icon="mdi:image"></doc-icon> Successfully
 				copied!`
 			this.imageCopied = true
-			navigator.clipboard.writeText(this.badgeURL)
+			navigator.clipboard.writeText("https://inlang.com" + this.badgeURL)
 
 			setTimeout(() => {
 				this.copyImageText = html`<doc-icon size="1.4em" icon="mdi:image"></doc-icon> Copy image
@@ -201,6 +221,7 @@ export class InlangBadgeGenerator extends LitElement {
 							}
 						}}
 						type="text"
+						required
 						placeholder="Link to your repository"
 						style=${this.error
 							? "border: 1px solid #ff4d4f; color: #ff4d4f; outline-color: rgba(255, 77, 79, 0.1);"
@@ -213,6 +234,21 @@ export class InlangBadgeGenerator extends LitElement {
 				${this.error
 					? html`<div class="error-message">Please enter a valid GitHub repository link</div>`
 					: ""}
+				<div class="optional">
+					<input
+						${this.loading ? "disabled" : ""}
+						@keydown=${(e: KeyboardEvent) => {
+							if (e.key === "Enter") {
+								this._generateBadge()
+							}
+						}}
+						type="text"
+						placeholder="Optional: Path to your project, e.g. /lang/project.inlang"
+						style=${this.error
+							? "border: 1px solid #ff4d4f; color: #ff4d4f; outline-color: rgba(255, 77, 79, 0.1);"
+							: ""}
+					/>
+				</div>
 			</div>
 			${this.badgeURL === ""
 				? ""
