@@ -1,6 +1,6 @@
 import { browser, expect } from "@wdio/globals"
 import vscode from "vscode"
-import {} from "wdio-vscode-service"
+// import {} from "wdio-vscode-service"
 
 describe("VSCode Extension E2E Testing Environment", () => {
 	it("should be able to load VSCode with inlang example code", async () => {
