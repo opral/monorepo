@@ -14,7 +14,7 @@
 		"@solidjs/router": "^0.10",
 		"@solidjs/start": "^0.4",
 		"solid-js": "^1.8",
-		"vinxi": "^0.0.61"
+		"vinxi": "^0.0.62"
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "workspace:*",
