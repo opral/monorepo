@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.20.0
+
+### Minor Changes
+
+- bc5803235: hotfix reactivity bug in ide extension
+
 ## 0.19.0
 
 ### Minor Changes
