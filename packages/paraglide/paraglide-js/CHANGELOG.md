@@ -1,5 +1,9 @@
 # @inlang/paraglide-js
 
+## 1.0.0-prerelease.24
+
+feat: Support language Fallbacks according to BCP 47 specification
+
 ## 1.0.0-prerelease.23
 
 Update dependencies
