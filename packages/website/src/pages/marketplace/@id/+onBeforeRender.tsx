@@ -4,5 +4,5 @@ import { redirect } from "vike/abort"
 export default async function onBeforeRender(pageContext: PageContext) {
 	const { id } = pageContext.routeParams
 
-	throw redirect(`/m/${id}`)
+	throw redirect(`/m/${id}`, 301)
 }
