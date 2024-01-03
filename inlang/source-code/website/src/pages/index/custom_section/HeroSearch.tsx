@@ -5,7 +5,7 @@ import { Button } from "../components/Button.jsx"
 const HeroSearch = () => {
 	return (
 		<div class="relative">
-			<div class="relative z-30 flex flex-col w-1/2gap-2 pb-6 mt-8">
+			<div class="relative z-30 flex flex-col w-1/2gap-2 pb-6 mt-4 md:mt-8">
 				<div class="pt-4 group">
 					<Link
 						href="https://www.youtube.com/live/pTgIx-ucMsY?feature=shared&t=3825"
@@ -17,7 +17,7 @@ const HeroSearch = () => {
 						</Button>
 					</Link>
 				</div>
-				<h1 class="text-4xl max-w-[650px] md:text-5xl text-surface-900 font-bold leading-snug tracking-tight mt-6">
+				<h1 class="text-4xl max-w-[650px] md:text-5xl text-surface-900 font-bold tracking-tight mt-6">
 					{m.home_inlang_title()}
 				</h1>
 				<p class="text-lg max-w-[450px] text-surface-500 pt-5">{m.home_inlang_description()}</p>
@@ -39,6 +39,11 @@ const HeroSearch = () => {
 					alt="lix header image"
 				/>
 			</div>
+			<img
+				class="lg:hidden w-full my-8 mb-16"
+				src="/images/lixProcess.png"
+				alt="lix header image"
+			/>
 		</div>
 	)
 }
