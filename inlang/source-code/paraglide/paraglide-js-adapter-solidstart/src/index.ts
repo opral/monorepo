@@ -54,11 +54,9 @@ export function translateHref<T extends string>(
 	const to_normal_pathname = normalizePathname(pathname)
 	const to_language_tag = languageTagFromPathname(to_normal_pathname, available_language_tags)
 
-	if (to_language_tag) {
-		return to_normal_pathname.replace(to_language_tag, page_language_tag)
-	} else {
-		return "/" + page_language_tag + pathname
-	}
+	return to_language_tag
+		? to_normal_pathname.replace(to_language_tag, page_language_tag)
+		: "/" + page_language_tag + to_normal_pathname
 }
 
 /**

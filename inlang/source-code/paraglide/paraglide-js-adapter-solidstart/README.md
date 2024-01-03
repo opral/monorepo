@@ -145,12 +145,6 @@ If you want to navigate to a different route in a specific language, you can use
 <A href={translateHref("/about", "en")}>{m.about()}</A>
 ```
 
-Similarly, if you value links having the correct language tag in the server-generated HTML *(important when JavaScript is disabled or not yet loaded)*, you can use the `translateHref` function to generate the correct href, without specifying the target language tag.
-
-```tsx
-<A href={translateHref("/about")}>{m.about()}</A>
-```
-
 > ⚠️ Don't use the `translateHref` function on links that point to external websites. It will break the link.
 
 ### 7. Alternate links
