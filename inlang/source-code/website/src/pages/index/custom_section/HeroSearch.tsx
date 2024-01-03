@@ -4,8 +4,8 @@ import { Button } from "../components/Button.jsx"
 
 const HeroSearch = () => {
 	return (
-		<div class="relative">
-			<div class="relative z-30 flex flex-col w-1/2gap-2 pb-12 md:pb-8 mt-8 md:mt-16">
+		<div class="relative flex flex-col items-center lg:items-start">
+			<div class="items-center lg:items-start relative z-30 flex flex-col w-1/2gap-2 pb-6 mt-4 md:mt-8">
 				<div class="pt-4 group">
 					<Link
 						href="https://www.youtube.com/live/pTgIx-ucMsY?feature=shared&t=3825"
@@ -17,27 +17,37 @@ const HeroSearch = () => {
 						</Button>
 					</Link>
 				</div>
-				<h1 class="text-4xl max-w-[650px] md:text-5xl text-surface-900 font-bold leading-snug tracking-tight mt-6">
+				<h1 class="text-4xl max-w-[650px] md:text-5xl text-surface-900 text-center lg:text-start font-bold tracking-tight mt-6">
 					{m.home_inlang_title()}
 				</h1>
-				<p class="text-lg max-w-[450px] text-surface-500 pt-5">{m.home_inlang_description()}</p>
+				<p class="text-center lg:text-start text-lg max-w-[450px] text-surface-500 pt-5">
+					{m.home_inlang_description()}
+				</p>
 
-				<div class="mt-8 lg:mb-14">
-					<Link href="/g/7777asdy/guide-nilsjacobsen-ecosystemCompatible">
-						<Button class="w-fit" type="secondary" chevron>
-							{m.home_inlang_button()}
-						</Button>
-					</Link>
+				<div class="mt-8">
+					<Button
+						class="w-fit"
+						type="secondary"
+						href="/g/7777asdy/guide-nilsjacobsen-ecosystemCompatible"
+					>
+						{m.home_inlang_button()}
+					</Button>
 				</div>
 			</div>
-			<div class="hidden mb-4 lg:block relative lg:absolute z-10 lg:top-[50%] lg:-translate-y-[50%] lg:right-0 w-full lg:w-[900px] flex-1 md:mt-0 mt-12 overflow-hidden">
+			<div class="hidden mb-4 lg:block relative lg:absolute z-10 lg:top-[50%] lg:-translate-y-[40%] lg:right-0 w-full lg:w-[600px] xl:w-[900px] flex-1 md:mt-0 mt-12 overflow-hidden">
 				<div class="lg:block absolute inset-0 bg-gradient-to-r from-surface-50 from-20% via-surface-50/0 via-40% hidden" />
+				<div class="lg:block absolute inset-0 bg-gradient-to-r from-surface-50/0 from-80% to-surface-50 hidden" />
 				<img
-					class="w-full lg:min-w-[900px] h-full object-contain object-right"
+					class="w-full lg:min-w-[900px] xl:min-w-[1000px] h-full object-contain object-right"
 					src="/images/lix-transparent.webp"
 					alt="lix header image"
 				/>
 			</div>
+			<img
+				class="lg:hidden w-full my-8 mb-16 max-w-[500px]"
+				src="/images/lixProcess.png"
+				alt="lix header image"
+			/>
 		</div>
 	)
 }
