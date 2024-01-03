@@ -1062,9 +1062,6 @@ importers:
       '@inlang/language-tag':
         specifier: workspace:*
         version: link:../../versioned-interfaces/language-tag
-      '@inlang/sdk':
-        specifier: workspace:*
-        version: link:../../sdk
       commander:
         specifier: 11.1.0
         version: 11.1.0
@@ -1087,6 +1084,9 @@ importers:
       '@inlang/env-variables':
         specifier: workspace:*
         version: link:../../env-variables
+      '@inlang/sdk':
+        specifier: workspace:*
+        version: link:../../sdk
       '@inlang/telemetry':
         specifier: workspace:*
         version: link:../../telemetry
