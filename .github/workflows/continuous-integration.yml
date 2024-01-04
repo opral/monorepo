@@ -33,6 +33,10 @@ jobs:
           node-version: ${{ matrix.version }}
           cache: "pnpm"
 
+      - name: Run Audit
+        # Exits with code 1 if there are vulnerabilities with severity high or above
+        run: pnpm audit --audit-level=high 
+
       - name: Install dependencies
         run: pnpm install
 
