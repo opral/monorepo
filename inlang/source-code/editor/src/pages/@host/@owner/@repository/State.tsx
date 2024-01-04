@@ -27,7 +27,7 @@ import {
 	listProjects,
 	type InlangProjectWithSolidAdapter,
 } from "@inlang/sdk"
-import { telemetryBrowser } from "@inlang/telemetry"
+import { posthog as telemetryBrowser } from "posthog-js"
 import type { Result } from "@inlang/result"
 
 type EditorStateSchema = {

@@ -1,7 +1,7 @@
 import type { SetStoreFunction } from "solid-js/store"
 import type { LocalStorageSchema } from "../../../services/local-storage/index.js"
 import { publicEnv } from "@inlang/env-variables"
-import { telemetryBrowser } from "@inlang/telemetry"
+import { posthog as telemetryBrowser } from "posthog-js"
 import { browserAuth } from "@lix-js/client"
 
 /**
