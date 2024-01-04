@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest"
 import { openRepository, findRepoRoot } from "./index.ts"
-import { createNodeishMemoryFs, toSnapshot, fromSnapshot } from "@lix-js/fs"
+import { createNodeishMemoryFs, fromSnapshot } from "@lix-js/fs"
 import { readFileSync } from "node:fs"
 
 // - loading multiple repositories is possible
@@ -52,6 +52,7 @@ describe("main workflow", () => {
 			branch: "test-symlink",
 		})
 
+		// test random repo action to make sure opening worked
 		const status = await repository.status({ filepath: "README.md" })
 
 		expect(status).toBe("unmodified")

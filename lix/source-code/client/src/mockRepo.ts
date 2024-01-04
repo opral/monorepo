@@ -1,16 +1,29 @@
-import { openRepository } from "./openRepository.js"
+import { openRepository, findRepoRoot } from "./openRepository.js"
 import { createNodeishMemoryFs, fromSnapshot } from "@lix-js/fs"
 // @ts-ignore
 import repoDaata from "./ci-test-repo.js"
 
-export async function mockRepo() {
+export async function mockRepo({ openLocal = false } = {}) {
 	const nodeishFs = createNodeishMemoryFs()
 
-	const snapshot = repoDaata
 	// JSON.parse(readFileSync("../mocks/ci-test-repo.json", { encoding: "utf-8" }))
-	fromSnapshot(nodeishFs, snapshot)
+	fromSnapshot(nodeishFs, repoDaata)
 
-	const repo = await openRepository("https://github.com/inlang/ci-test-repo", {
+	let repoUrl
+	if (openLocal) {
+		const repoRoot = await findRepoRoot({ nodeishFs, path: "/project.inlang" })
+		if (repoRoot) {
+			repoUrl = repoRoot
+		}
+	} else {
+		repoUrl = "https://github.com/inlang/ci-test-repo"
+	}
+
+	if (!repoUrl) {
+		throw new Error("Could not find repo root for mock repo")
+	}
+
+	const repo = await openRepository(repoUrl, {
 		nodeishFs,
 	})
 
