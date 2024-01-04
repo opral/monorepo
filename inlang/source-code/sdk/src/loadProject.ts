@@ -53,7 +53,6 @@ export const loadProject = async (args: {
 
 	let fs: Repository["nodeishFs"]
 	if (args.nodeishFs) {
-		console.warn("The nodeishFs argument is deprecated. Please use the repo argument instead.")
 		fs = args.nodeishFs
 	} else if (args.repo) {
 		fs = args.repo.nodeishFs
