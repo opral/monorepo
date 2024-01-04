@@ -1,0 +1,27 @@
+name: "Audit"
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "main"
+jobs:
+  ci:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        version: [18]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v3
+
+      - name: Setup Pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Run Audit
+        # Exits with code 1 if there are vulnerabilities with severity high or above
+        run: pnpm audit --audit-level=high 

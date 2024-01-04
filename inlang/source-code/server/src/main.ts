@@ -74,19 +74,6 @@ app.use(telemetryRouter)
 
 app.use(rpcRouter)
 
-const badgeAddress = isProduction ? "http://badge-service:10000" : "http://[::1]:4002"
-
-app.use(
-	"/badge",
-	createProxyMiddleware({
-		target: badgeAddress,
-		changeOrigin: true,
-		headers: {
-			Connection: "keep-alive",
-		},
-	})
-)
-
 app.use(
 	"*",
 	createProxyMiddleware({

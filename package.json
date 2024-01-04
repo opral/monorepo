@@ -31,6 +31,11 @@
 		"npm": ">=8.0.0",
 		"node": ">=18.0.0"
 	},
+	"pnpm": {
+		"overrides": {
+			"http-cache-semantics": "4.1.1"
+		}
+	},
 	"devDependencies": {
 		"@inlang/cli": "workspace:*",
 		"@changesets/cli": "^2.26.0",

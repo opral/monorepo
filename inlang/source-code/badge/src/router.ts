@@ -7,7 +7,7 @@ export const router: Router = express.Router()
 
 // Route for the /badge endpoint
 router.get(
-	"/badge",
+	"/",
 	async (
 		req: Request<object, object, object, { url?: string; project?: string; size?: string }>,
 		res: Response

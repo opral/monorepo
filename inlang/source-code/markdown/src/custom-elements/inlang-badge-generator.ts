@@ -143,7 +143,8 @@ export class InlangBadgeGenerator extends LitElement {
 		const { owner, repo } = { owner: path[1], repo: path[2] }
 
 		this.badgeURL =
-			`/badge?url=github.com/${owner}/${repo}` + (project ? `&project=${project}` : "")
+			`https://badge.inlang.com/?url=github.com/${owner}/${repo}` +
+			(project ? `&project=${project}` : "")
 
 		const img = new Image()
 		img.src = this.badgeURL
@@ -182,10 +183,8 @@ export class InlangBadgeGenerator extends LitElement {
 				Successfully copied!`
 			this.markdownCopied = true
 			navigator.clipboard.writeText(
-				`[![inlang status badge](https://inlang.com${
-					this.badgeURL
-				})](https://fink.inlang.com/${this.badgeURL
-					.replace("/badge?url=", "")
+				`[![inlang status badge](${this.badgeURL})](https://fink.inlang.com/${this.badgeURL
+					.replace("https://badge.inlang.com/badge?url=", "")
 					.replace(
 						this._projectInput.value
 							? `&project=${this._projectInput.value}`
@@ -212,7 +211,7 @@ export class InlangBadgeGenerator extends LitElement {
 			this.copyImageText = html`<doc-icon size="1.4em" icon="mdi:image"></doc-icon> Successfully
 				copied!`
 			this.imageCopied = true
-			navigator.clipboard.writeText("https://inlang.com" + this.badgeURL)
+			navigator.clipboard.writeText(this.badgeURL)
 
 			setTimeout(() => {
 				this.copyImageText = html`<doc-icon size="1.4em" icon="mdi:image"></doc-icon> Copy image
