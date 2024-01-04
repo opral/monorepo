@@ -1,7 +1,7 @@
 import { onSignOut } from "#src/services/auth/index.js"
 import { Show } from "solid-js"
 import { showToast } from "../components/Toast.jsx"
-import { telemetryBrowser } from "@inlang/telemetry"
+import { posthog as telemetryBrowser } from "posthog-js"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import IconSignOut from "~icons/material-symbols/logout-rounded"
 import IconExpand from "~icons/material-symbols/expand-more-rounded"

@@ -6,9 +6,15 @@ import { setCurrentPageContext } from "./state.js"
 import type { PageContextRenderer } from "./types.js"
 import * as Sentry from "@sentry/browser"
 import { MetaProvider } from "@solidjs/meta"
-import { telemetryBrowser } from "@inlang/telemetry"
+import { posthog as telemetryBrowser } from "posthog-js"
+import { publicEnv } from "@inlang/env-variables"
 
-telemetryBrowser.init()
+if (publicEnv.PUBLIC_POSTHOG_TOKEN) {
+	telemetryBrowser.init(publicEnv.PUBLIC_POSTHOG_TOKEN, {
+		api_host: "https://eu.posthog.com",
+		capture_performance: false,
+	})
+}
 
 // import the css
 import "./app.css"
@@ -36,7 +42,6 @@ import "@shoelace-style/shoelace/dist/components/button-group/button-group.js"
 import "@shoelace-style/shoelace/dist/components/spinner/spinner.js"
 import "@shoelace-style/shoelace/dist/components/select/select.js"
 import "@shoelace-style/shoelace/dist/components/option/option.js"
-import { publicEnv } from "@inlang/env-variables"
 
 // enable error logging via sentry in production
 if (import.meta.env.PROD) {
