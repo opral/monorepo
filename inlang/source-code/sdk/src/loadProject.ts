@@ -23,7 +23,7 @@ import { ProjectSettings, Message, type NodeishFilesystemSubset } from "./versio
 import { tryCatch, type Result } from "@inlang/result"
 import { migrateIfOutdated } from "@inlang/project-settings/migration"
 import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
-import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
+import { normalizePath } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
@@ -45,15 +45,25 @@ const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 export const loadProject = async (args: {
 	projectPath: string
 	repo?: Repository
-	nodeishFs: NodeishFilesystem
+	nodeishFs?: Repository["nodeishFs"]
 	_import?: ImportFunction
 	_capture?: (id: string, props: Record<string, unknown>) => void
 }): Promise<InlangProject> => {
 	const projectPath = normalizePath(args.projectPath)
 
+	let fs: Repository["nodeishFs"]
+	if (args.nodeishFs) {
+		console.warn("The nodeishFs argument is deprecated. Please use the repo argument instead.")
+		fs = args.nodeishFs
+	} else if (args.repo) {
+		fs = args.repo.nodeishFs
+	} else {
+		throw new LoadProjectInvalidArgument(`Repo missing from arguments.`, { argument: "repo" })
+	}
+
 	// -- migrate if outdated ------------------------------------------------
 
-	await maybeMigrateToDirectory({ nodeishFs: args.nodeishFs, projectPath })
+	await maybeMigrateToDirectory({ nodeishFs: fs, projectPath })
 
 	// -- validation --------------------------------------------------------
 	// the only place where throwing is acceptable because the project
@@ -78,7 +88,7 @@ export const loadProject = async (args: {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
 		const nodeishFs = createNodeishFsWithAbsolutePaths({
 			projectPath,
-			nodeishFs: args.nodeishFs,
+			nodeishFs: fs,
 		})
 
 		let projectId: string | undefined

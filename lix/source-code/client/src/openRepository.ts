@@ -27,6 +27,7 @@ const {
 	addRemote,
 	fetch: gitFetch,
 	commit: isoCommit,
+	findRoot,
 } = isoGit
 
 const verbose = false
@@ -45,6 +46,18 @@ const whitelistedExperimentalRepos = [
 	"niklasbuchfink/appflowy",
 ]
 
+export async function findRepoRoot(args: {
+	nodeishFs: NodeishFilesystem
+	path: string
+}): Promise<string | undefined> {
+	const gitroot = await findRoot({
+		fs: args.nodeishFs,
+		filepath: args.path,
+	}).catch(() => undefined)
+
+	return gitroot ? "file://" + gitroot : undefined
+}
+
 export async function openRepository(
 	url: string,
 	args: {
@@ -56,6 +69,7 @@ export async function openRepository(
 ): Promise<Repository> {
 	const rawFs = args.nodeishFs
 
+	// fixme: propper error handling with error return values and no signal dependency
 	const [errors, setErrors] = createSignal<Error[]>([])
 
 	// the url format for lix urls is
@@ -64,6 +78,17 @@ export async function openRepository(
 	// namespace is ignored until switching from git.inlang.com to lix.inlang.com and can eveolve in future to be used for repoType, api type or feature group
 	// the url format for direct github urls without a lix server is https://github.com/inlang/examplX (only per domain-enabled git hosters will be supported, currently just gitub)
 	// the url for opening a local repo allready in the fs provider is file://path/to/repo (not implemented yet)
+
+	if (url.startsWith("file:")) {
+		const remotes = await listRemotes({ fs: args.nodeishFs, dir: url.replace("file://", "") })
+		const origin = remotes.find(({ remote }) => remote === "origin")?.url || ""
+
+		if (origin.startsWith("git@github.com:")) {
+			url = origin.replace("git@github.com:", "https://github.com/")
+		} else {
+			url = origin
+		}
+	}
 
 	const { protocol, lixHost, repoHost, owner, repoName } = parseLixUri(url)
 

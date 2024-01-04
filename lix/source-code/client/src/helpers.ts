@@ -65,10 +65,6 @@ export function transformRemote(remote: string) {
 export function parseLixUri(uriText: string) {
 	const { protocol, host, pathname } = new URL(uriText)
 
-	if (protocol === "file:") {
-		throw new Error(`Local repos are not supported yet`)
-	}
-
 	const pathParts = pathname.split("/")
 
 	let lixHost = ""
