@@ -13,7 +13,7 @@ export async function getInlangProject(args: { projectPath: string }): Promise<I
 
 	const repoRoot = await findRepoRoot({ nodeishFs: fs, path: projectPath })
 
-  let repo
+	let repo
 	let usedFs
 	if (typeof repoRoot !== "string") {
 		console.error(
