@@ -197,7 +197,7 @@ describe("initialization", () => {
 		expect(result.data).toBeDefined()
 	})
 
-  it("should generate projectId on missing projectid in local repo", async () => {
+	it("should generate projectId on missing projectid in local repo", async () => {
 		const repo = await mockRepo({ openLocal: true })
 
 		const existing = await repo.nodeishFs
