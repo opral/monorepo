@@ -1,5 +1,7 @@
 import { describe, it, expect, vi } from "vitest"
-import { openRepository, createNodeishMemoryFs } from "./index.ts"
+import { openRepository, findRepoRoot } from "./index.ts"
+import { createNodeishMemoryFs, toSnapshot, fromSnapshot } from "@lix-js/fs"
+import { readFileSync } from "node:fs"
 
 // - loading multiple repositories is possible
 // - loading a local repository is possible: const localRepository = await load("/bar.git", { fs: nodeFs })
@@ -29,6 +31,30 @@ describe("main workflow", () => {
 		repository = await openRepository("https://github.com/inlang/ci-test-repo", {
 			nodeishFs: createNodeishMemoryFs(),
 		})
+	})
+
+	it("supports local repos", async () => {
+		const fs = createNodeishMemoryFs()
+
+		const snapshot = JSON.parse(readFileSync("./mocks/ci-test-repo.json", { encoding: "utf-8" }))
+		fromSnapshot(fs, snapshot)
+
+		const repoUrl = await findRepoRoot({
+			nodeishFs: fs,
+			path: "/src/routes/todo", // should find repo root from any path in the repo
+		})
+
+		expect(repoUrl).toBe("file:///")
+
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test fails if repoUrl is null
+		const repository: Awaited<ReturnType<typeof openRepository>> = await openRepository(repoUrl!, {
+			nodeishFs: fs,
+			branch: "test-symlink",
+		})
+
+		const status = await repository.status({ filepath: "README.md" })
+
+		expect(status).toBe("unmodified")
 	})
 
 	it("usees the lix custom commit for the whitelistesd ci test repo", () => {
