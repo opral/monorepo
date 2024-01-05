@@ -1,5 +1,16 @@
 # @inlang/paraglide-js-adapter-vite
 
+## 1.1.0
+
+### Minor Changes
+
+- e20364a46: release fixed dependency chain in preparation for paraglide 1.0
+
+### Patch Changes
+
+- Updated dependencies [e20364a46]
+  - @inlang/paraglide-js-adapter-unplugin@1.1.0
+
 ## 1.0.4
 
 ### Patch Changes
