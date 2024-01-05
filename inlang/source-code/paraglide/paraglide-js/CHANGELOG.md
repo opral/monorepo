@@ -1,5 +1,9 @@
 # @inlang/paraglide-js
 
+## 1.0.0
+
+Bump Version to 1.0 as no more breaking changes are expected.
+
 ## 1.0.0-prerelease.26
 
 Hotfix: Bundle SDK
