@@ -11,7 +11,7 @@ import { publicEnv } from "@inlang/env-variables"
 
 if (publicEnv.PUBLIC_POSTHOG_TOKEN) {
 	telemetryBrowser.init(publicEnv.PUBLIC_POSTHOG_TOKEN, {
-		api_host: import.meta.env.PROD ? "https://eu.posthog.com" : "http://localhost:4005",
+		api_host: import.meta.env.PROD ? "https://telemetry.inlang.com" : "http://localhost:4005",
 		capture_performance: false,
 	})
 }
