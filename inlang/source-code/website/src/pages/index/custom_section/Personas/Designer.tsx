@@ -16,8 +16,8 @@ const DesignrSlide = () => {
 			</div>
 
 			<div class="flex-1 bg-gradient-to-b from-surface-200 rounded-xl p-[1px] transition-all mt-4">
-				<div class="grid grid-cols-12 rounded-[11px] bg-gradient-to-b from-surface-50 to-background h-full">
-					<div class="col-span-5 pt-16 pl-8 pb-5 flex flex-col justify-between">
+				<div class="grid md:grid-cols-12 rounded-[11px] bg-gradient-to-b from-surface-50 to-background h-full">
+					<div class="hidden col-span-5 pt-16 pl-8 pb-5 md:flex flex-col justify-between">
 						<div>
 							<h4 class="text-3xl font-bold tracking-tight w-full text-surface-900 max-w-[300px]">
 								Globalization right from the design
@@ -31,11 +31,11 @@ const DesignrSlide = () => {
 							Read more
 						</Button>
 					</div>
-					<div class="col-span-7 relative">
-						<div class="absolute w-full top-0 left-0 pointer-events-none">
+					<div class="col-span-12 md:col-span-7 relative">
+						<div class="md:absolute w-full top-0 left-0 pointer-events-none">
 							<img src="/images/parrot-cover-landingpage.png" alt="cover" />
 						</div>
-						<div class="flex flex-col justify-end col-span-1 h-full p-6 pb-3">
+						<div class="flex flex-col justify-end md:col-span-1 md:h-full p-6 pb-3">
 							<div class="flex items-center gap-4">
 								<div class="w-10 h-10 rounded overflow-hidden">
 									<img
@@ -43,7 +43,7 @@ const DesignrSlide = () => {
 										alt="logo"
 									/>
 								</div>
-								<div>
+								<div class="flex-1">
 									<h4 class="font-bold text-surface-600">Parrot – i18n Figma plugin</h4>
 									<p class="text-surface-500 text-sm">
 										Parrot simplifies the translation management process right within Figma.

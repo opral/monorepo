@@ -22,7 +22,7 @@ const cards = [
 
 const TranslatorSlide = () => {
 	return (
-		<div class="flex flex-col gap-4 px-8 py-6 h-full">
+		<div class="flex flex-col gap-4 px-6 md:px-8 py-6 h-full">
 			<div>
 				<div class="flex items-center justify-between">
 					<h3 class="font-medium text-surface-600">Apps for Translators</h3>
@@ -33,7 +33,7 @@ const TranslatorSlide = () => {
 						</div>
 					</Link>
 				</div>
-				<div class="grid grid-cols-2 h-[254px] gap-4 mt-4">
+				<div class="grid md:grid-cols-2 min-h-[400px] md:min-h-[264px] h-[calc(100vw)] sm:h-[600px] md:h-[154px] gap-4 mt-4">
 					<For each={cards}>
 						{(card) => (
 							<Link
@@ -61,9 +61,11 @@ const TranslatorSlide = () => {
 			</div>
 			<div>
 				<h3 class="font-medium text-surface-600">Guide for Translators</h3>
-				<div class="flex justify-between items-center p-4 border border-surface-200 mt-4 rounded-xl bg-gradient-to-b from-surface-50">
-					<div class="flex items-center gap-4">
-						<p class="font-semibold text-primary bg-primary/20 px-4 py-1.5 rounded-lg">Guide</p>
+				<div class="flex flex-col md:flex-row gap-8 md:justify-between md:items-center p-6 md:p-4 border border-surface-200 mt-4 rounded-xl bg-gradient-to-b from-surface-50">
+					<div class="flex flex-col md:flex-row md:items-center gap-4">
+						<p class="font-semibold text-primary bg-primary/20 px-4 py-1.5 rounded-lg w-fit">
+							Guide
+						</p>
 						<h3 class="text-surface-900 font-semibold">How to contribute Translations</h3>
 						<p class="text-surface-500">A Beginner guide that helps translators.</p>
 					</div>
@@ -71,6 +73,7 @@ const TranslatorSlide = () => {
 						chevron
 						type="secondary"
 						href="/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink"
+						class="w-full"
 					>
 						Read Guide
 					</Button>
