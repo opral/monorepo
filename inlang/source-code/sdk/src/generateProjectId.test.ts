@@ -1,10 +1,10 @@
 import { generateProjectId } from "./generateProjectId.js"
 import { describe, it, expect } from "vitest"
 import { openRepository } from "@lix-js/client/src/openRepository.ts"
-import { mockRepo, createNodeishMemoryFs } from "@lix-js/client"
+import { mockRepo, createNodeishMemoryFs, ciTestRepo } from "@lix-js/client"
 
 describe("generateProjectId", async () => {
-	const repo = await mockRepo()
+	const repo = await mockRepo({ fromSnapshot: ciTestRepo })
 
 	it("should generate a project id", async () => {
 		const projectId = await generateProjectId(repo, "mocked_project_path")

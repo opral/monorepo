@@ -37,33 +37,45 @@ export const compileCommand = new Command()
 
 		const repoRoot = await findRepoRoot({ nodeishFs: fs, path })
 
-		let repo
-		let usedFs
-		if (typeof repoRoot !== "string") {
+		let project: Awaited<ReturnType<typeof loadProject>>
+		if (!repoRoot) {
 			logger.warn(`Could not find repository root for path ${path}`)
 			// We still support projects without git repo for now.
-			usedFs = fs
+
+			project = exitIfErrors(
+				await loadProject({
+					projectPath: path,
+					nodeishFs: fs,
+					_capture(id, props) {
+						telemetry.capture({
+							// @ts-ignore the event types
+							event: id,
+							properties: props,
+						})
+					},
+				}),
+				logger
+			)
 		} else {
-			repo = await openRepository(repoRoot, {
+			const repo = await openRepository(repoRoot, {
 				nodeishFs: fs,
 			})
-		}
 
-		const project = exitIfErrors(
-			await loadProject({
-				projectPath: path,
-				repo,
-				nodeishFs: usedFs,
-				_capture(id, props) {
-					telemetry.capture({
-						// @ts-ignore the event types
-						event: id,
-						properties: props,
-					})
-				},
-			}),
-			logger
-		)
+			project = exitIfErrors(
+				await loadProject({
+					projectPath: path,
+					repo,
+					_capture(id, props) {
+						telemetry.capture({
+							// @ts-ignore the event types
+							event: id,
+							properties: props,
+						})
+					},
+				}),
+				logger
+			)
+		}
 
 		async function execute() {
 			const output = compile({

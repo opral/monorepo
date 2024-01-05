@@ -4,6 +4,24 @@ import { normalPath, getBasename, getDirname } from "./utilities/helpers.js"
 
 type Inode = Uint8Array | Set<string>
 
+export type Snapshot = {
+	fsMap: {
+		[key: string]: string[] | string
+	}
+	fsStats: {
+		[key: string]: {
+			ctimeMs: number
+			mtimeMs: number
+			dev: number
+			mode: number
+			uid: number
+			gid: number
+			size: number
+			_kind: number
+		}
+	}
+}
+
 export function toSnapshot(fs: NodeishFilesystem) {
 	return {
 		fsMap: Object.fromEntries(

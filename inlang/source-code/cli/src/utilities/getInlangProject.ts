@@ -13,31 +13,41 @@ export async function getInlangProject(args: { projectPath: string }): Promise<I
 
 	const repoRoot = await findRepoRoot({ nodeishFs: fs, path: projectPath })
 
-	let repo
-	let usedFs
-	if (typeof repoRoot !== "string") {
+	let project
+	if (!repoRoot) {
 		console.error(
 			`Could not find repository root for path ${projectPath}, falling back to direct fs access`
 		)
-		usedFs = fs
-	} else {
-		repo = await openRepository(repoRoot, {
+
+		project = await loadProject({
+			projectPath,
 			nodeishFs: fs,
+			_capture(id, props) {
+				telemetry.capture({
+					// @ts-ignore the event types
+					event: id,
+					properties: props,
+				})
+			},
+		})
+	} else {
+		const repo = await openRepository(repoRoot, {
+			nodeishFs: fs,
+		})
+
+		project = await loadProject({
+			projectPath,
+			repo,
+			_capture(id, props) {
+				telemetry.capture({
+					// @ts-ignore the event types
+					event: id,
+					properties: props,
+				})
+			},
 		})
 	}
 
-	const project = await loadProject({
-		projectPath,
-		repo,
-		nodeishFs: usedFs,
-		_capture(id, props) {
-			telemetry.capture({
-				// @ts-ignore the event types
-				event: id,
-				properties: props,
-			})
-		},
-	})
 
 	if (project.errors().length > 0) {
 		for (const error of project.errors()) {

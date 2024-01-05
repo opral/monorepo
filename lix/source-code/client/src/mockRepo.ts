@@ -1,32 +1,23 @@
-import { openRepository, findRepoRoot } from "./openRepository.js"
-import { createNodeishMemoryFs, fromSnapshot } from "@lix-js/fs"
+import { openRepository } from "./openRepository.js"
+import { createNodeishMemoryFs, fromSnapshot as loadSnapshot, type Snapshot } from "@lix-js/fs"
+import isoGit from "isomorphic-git"
 // @ts-ignore
-import repoDaata from "./ci-test-repo.js"
+// to load from json file JSON.parse(readFileSync("../mocks/ci-test-repo.json", { encoding: "utf-8" }))
 
-export async function mockRepo({ openLocal = false } = {}) {
+export async function mockRepo({ fromSnapshot }: { fromSnapshot?: Snapshot } = {}) {
 	const nodeishFs = createNodeishMemoryFs()
 
-	// JSON.parse(readFileSync("../mocks/ci-test-repo.json", { encoding: "utf-8" }))
-	fromSnapshot(nodeishFs, repoDaata)
-
-	let repoUrl
-	if (openLocal) {
-		const repoRoot = await findRepoRoot({ nodeishFs, path: "/project.inlang" })
-		if (repoRoot) {
-			repoUrl = repoRoot
-		}
+	if (fromSnapshot) {
+		loadSnapshot(nodeishFs, fromSnapshot)
 	} else {
-		repoUrl = "https://github.com/inlang/ci-test-repo"
+		isoGit.init({ fs: nodeishFs, dir: "/" })
 	}
 
-	if (!repoUrl) {
-		throw new Error("Could not find repo root for mock repo")
-	}
-
-	const repo = await openRepository(repoUrl, {
+	const repo = await openRepository("file://", {
 		nodeishFs,
 	})
 
+	// temporarily all test repos get same test metadata, this can be removed when repo ids are implemented
 	repo.getMeta = async () => {
 		return {
 			id: "34c48e4ba4c128582466b8dc1330feac0733880b35f467f4161e259070d24a31",

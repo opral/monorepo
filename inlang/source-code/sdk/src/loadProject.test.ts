@@ -19,7 +19,7 @@ import {
 import { createNodeishMemoryFs, normalizePath } from "@lix-js/fs"
 import { createMessage } from "./test-utilities/createMessage.js"
 import { tryCatch } from "@inlang/result"
-import { mockRepo } from "@lix-js/client"
+import { mockRepo, ciTestRepo } from "@lix-js/client"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -161,44 +161,7 @@ describe("initialization", () => {
 	})
 
 	it("should generate projectId on missing projectid", async () => {
-		const repo = await mockRepo()
-
-		const existing = await repo.nodeishFs
-			.readFile("/project.inlang/project_id", {
-				encoding: "utf-8",
-			})
-			.catch((error) => {
-				return { error }
-			})
-
-		// @ts-ignore
-		expect(existing.error.code).toBe("ENOENT")
-
-		const result = await tryCatch(() =>
-			loadProject({
-				projectPath: "/project.inlang",
-				nodeishFs: repo.nodeishFs,
-				repo,
-				_import,
-			})
-		)
-
-		const newId = await repo.nodeishFs
-			.readFile("/project.inlang/project_id", {
-				encoding: "utf-8",
-			})
-			.catch((error) => {
-				return { error }
-			})
-
-		expect(newId).toBe("7cd6c2b7cf12febf99496408917123fdfe158b6bc442914f5fb42aa74346bd50")
-
-		expect(result.error).toBeUndefined()
-		expect(result.data).toBeDefined()
-	})
-
-	it("should generate projectId on missing projectid in local repo", async () => {
-		const repo = await mockRepo({ openLocal: true })
+		const repo = await mockRepo({ fromSnapshot: ciTestRepo })
 
 		const existing = await repo.nodeishFs
 			.readFile("/project.inlang/project_id", {
@@ -234,14 +197,13 @@ describe("initialization", () => {
 	})
 
 	it("should reuse projectId on existing projectid", async () => {
-		const repo = await mockRepo()
+		const repo = await mockRepo({ fromSnapshot: ciTestRepo })
 
 		repo.nodeishFs.writeFile("/project.inlang/project_id", "testId")
 
 		const result = await tryCatch(() =>
 			loadProject({
 				projectPath: "/project.inlang",
-				nodeishFs: repo.nodeishFs,
 				repo,
 				_import,
 			})

@@ -80,7 +80,10 @@ export async function openRepository(
 	// the url for opening a local repo allready in the fs provider is file://path/to/repo (not implemented yet)
 
 	if (url.startsWith("file:")) {
-		const remotes = await listRemotes({ fs: args.nodeishFs, dir: url.replace("file://", "") })
+		const remotes = await listRemotes({
+			fs: args.nodeishFs,
+			dir: url.replace("file://", ""),
+		}).catch(() => [])
 		const origin = remotes.find(({ remote }) => remote === "origin")?.url || ""
 
 		if (origin.startsWith("git@github.com:")) {
