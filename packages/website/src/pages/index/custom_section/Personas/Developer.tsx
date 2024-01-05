@@ -1,6 +1,7 @@
 import { For } from "solid-js"
 import Link from "#src/renderer/Link.jsx"
 import {
+	IconAstro,
 	IconFlutter,
 	IconJavascript,
 	IconNextjs,
@@ -27,47 +28,55 @@ const cards = [
 	},
 ]
 
+const logoStyling = "w-8 h-8 opacity-80 group-hover:opacity-100 transition-all"
+
 const stacks = [
 	{
 		name: "Svelte",
 		param: "svelte",
-		icon: <IconSvelte class="w-8 h-8" />,
+		icon: <IconSvelte class={logoStyling} />,
 		link: "/c/svelte",
 	},
 	{
 		name: "Next.js",
 		param: "nextjs",
-		icon: <IconNextjs class="w-8 h-8" />,
+		icon: <IconNextjs class={"w-[28px] h-[28px] " + logoStyling} />,
 		link: "/c/nextjs",
 	},
 	{
 		name: "Solid",
 		param: "solid",
-		icon: <IconSolid class="w-8 h-8" />,
+		icon: <IconSolid class={logoStyling} />,
 		link: "/c/solid",
+	},
+	{
+		name: "Astro",
+		param: "astro",
+		icon: <IconAstro class={logoStyling} />,
+		link: "/c/astro",
 	},
 	{
 		name: "React",
 		param: "react",
-		icon: <IconReact class="w-8 h-8" />,
+		icon: <IconReact class={"w-[34px] h-[34px] " + logoStyling} />,
 		link: "/c/react",
 	},
 	{
 		name: "Vue",
 		param: "vue",
-		icon: <IconVue class="w-8 h-8" />,
+		icon: <IconVue class={logoStyling} />,
 		link: "/c/vue",
 	},
 	{
 		name: "Javascript",
 		param: "javascript",
-		icon: <IconJavascript class="w-8 h-8" />,
+		icon: <IconJavascript class={logoStyling} />,
 		link: "/c/javascript",
 	},
 	{
 		name: "Flutter",
 		param: "flutter",
-		icon: <IconFlutter class="w-8 h-8" />,
+		icon: <IconFlutter class={logoStyling} />,
 		link: "/c/flutter",
 	},
 ]
@@ -117,11 +126,11 @@ const DeveloperSlide = () => {
 					<For each={stacks}>
 						{(stack) => (
 							<Link href={stack.link} class="flex-1">
-								<div class="w-full flex flex-col items-center gap-2">
+								<div class="group w-full flex flex-col items-center gap-2">
 									<div class="flex w-full justify-center items-center border border-surface-200 hover:border-surface-300 bg-gradient-to-b from-surface-50 hover:from-surface-100 rounded-lg h-[60px] overflow-hidden">
 										{stack.icon}
 									</div>
-									<p class="text-center text-sm">{stack.name}</p>
+									<p class="text-center text-sm text-surface-500 font-medium">{stack.name}</p>
 								</div>
 							</Link>
 						)}
