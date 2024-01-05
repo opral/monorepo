@@ -6,4 +6,4 @@
 "@inlang/paraglide-js-adapter-vite": minor
 ---
 
-bumbing fixed env var dependecy issue packages
+bumbing fixed env var dependecy issue affected packages
