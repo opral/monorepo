@@ -18,14 +18,11 @@ export async function search(args: {
 
 	const client = algolia(privateEnv.ALGOLIA_APPLICATION, privateEnv.ALGOLIA_ADMIN)
 	const index = client.initIndex("registry")
-	if (args.category) {
-		index.setSettings({
-			searchableAttributes: ["keywords"],
-		})
-		const data = await index.search(args.term)
-		return { data: JSON.stringify(data.hits) }
-	} else {
-		const data = await index.search(args.term)
-		return { data: JSON.stringify(data.hits) }
-	}
+
+	await index.setSettings({
+		searchableAttributes: args.category ? ["keywords"] : ["displayName", "description", "keywords"],
+	})
+
+	const data = await index.search(args.term)
+	return { data: JSON.stringify(data.hits) }
 }
