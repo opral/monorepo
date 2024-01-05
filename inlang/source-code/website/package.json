@@ -16,6 +16,7 @@
 		"node": ">=18.0.0"
 	},
 	"dependencies": {
+		"@lix-js/server": "workspace:*",
 		"@isomorphic-git/cors-proxy": "^2.7.1",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",

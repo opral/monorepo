@@ -25,7 +25,6 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/env-variables": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@octokit/types": "12.4.0 ",
 		"isomorphic-git": "1.24.5",
