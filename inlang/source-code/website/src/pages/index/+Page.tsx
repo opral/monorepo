@@ -2,7 +2,6 @@ import { Link, Meta, Title } from "@solidjs/meta"
 import HeroSearch from "./custom_section/HeroSearch.jsx"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import { Show } from "solid-js"
-import Stack from "./custom_section/Stack.jsx"
 import Gridview from "#src/interface/marketplace/Gridview.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 import Guides from "./custom_section/Guides.jsx"
@@ -11,6 +10,7 @@ import ParaglideHeader from "#src/interface/marketplace/categoryHeaders/cards/pa
 import * as m from "#src/paraglide/messages.js"
 import { renderLocales } from "#src/renderer/renderLocales.js"
 import { i18nRouting } from "#src/renderer/+onBeforeRoute.js"
+import Personas from "./custom_section/Personas/index.jsx"
 
 export default function Page() {
 	const search = currentPageContext.urlParsed.search["search"]
@@ -50,7 +50,7 @@ export default function Page() {
 						<>
 							<HeroSearch />
 							<Features />
-							<Stack />
+							<Personas />
 							<Guides />
 							<ParaglideHeader />
 						</>
