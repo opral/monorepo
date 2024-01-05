@@ -11,7 +11,7 @@ services:
     region: frankfurt
     plan: standard
     buildCommand: pnpm install && pnpm run build
-    startCommand: pnpm run production
+    startCommand: pnpm --filter @inlang/website run production
     autoDeploy: true
     envVars:
       - fromGroup: production
