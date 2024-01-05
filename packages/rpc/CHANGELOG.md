@@ -1,5 +1,14 @@
 # @inlang/rpc
 
+## 0.2.3
+
+### Patch Changes
+
+- Updated dependencies [e20364a46]
+  - @inlang/env-variables@0.2.0
+  - @inlang/sdk@0.21.0
+  - @inlang/marketplace-registry@1.5.1
+
 ## 0.2.2
 
 ### Patch Changes

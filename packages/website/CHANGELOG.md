@@ -1,5 +1,13 @@
 # @inlang/website
 
+## null
+
+### Patch Changes
+
+- Updated dependencies [e20364a46]
+  - @lix-js/client@0.4.0
+  - @lix-js/fs@0.5.0
+
 ## 0.5.3
 
 ### Patch Changes
