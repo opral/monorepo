@@ -1,5 +1,14 @@
 # @inlang/badge
 
+## 0.5.3
+
+### Patch Changes
+
+- Updated dependencies [cd29edb11]
+  - @inlang/sdk@0.22.0
+  - @lix-js/client@0.5.0
+  - @inlang/telemetry@0.3.3
+
 ## 0.5.2
 
 ### Patch Changes
