@@ -292,6 +292,9 @@ importers:
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../lix/source-code/fs
+      '@lix-js/server':
+        specifier: workspace:*
+        version: link:../../../lix/source-code/server
       '@sentry/browser':
         specifier: ^7.27.0
         version: 7.81.0
@@ -747,6 +750,9 @@ importers:
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../lix/source-code/fs
+      '@lix-js/server':
+        specifier: workspace:*
+        version: link:../../../lix/source-code/server
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.21
@@ -2153,6 +2159,9 @@ importers:
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../lix/source-code/fs
+      '@lix-js/server':
+        specifier: workspace:*
+        version: link:../../../lix/source-code/server
       '@sentry/browser':
         specifier: ^7.27.0
         version: 7.81.0
@@ -2355,9 +2364,6 @@ importers:
 
   lix/source-code/client:
     dependencies:
-      '@inlang/env-variables':
-        specifier: workspace:*
-        version: link:../../../inlang/source-code/env-variables
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../fs
