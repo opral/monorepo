@@ -1,5 +1,11 @@
 # @lix-js/fs
 
+## 0.5.0
+
+### Minor Changes
+
+- e20364a46: release fixed dependency chain in preparation for paraglide 1.0
+
 ## 0.4.0
 
 ### Minor Changes
