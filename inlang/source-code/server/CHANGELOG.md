@@ -4,6 +4,18 @@
 
 ### Patch Changes
 
+- Updated dependencies [e20364a46]
+  - @inlang/env-variables@0.2.0
+  - @inlang/badge@0.5.2
+  - @inlang/rpc@0.2.3
+  - @inlang/telemetry@0.3.2
+  - @inlang/website@null
+  - @inlang/plugin-message-format@2.0.0
+
+## null
+
+### Patch Changes
+
 - @inlang/badge@0.5.1
 - @inlang/plugin-message-format@2.0.0
 - @inlang/rpc@0.2.2
