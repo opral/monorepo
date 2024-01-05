@@ -8,7 +8,7 @@ const cards = [
 		title: "Fink - Translation Editor",
 		description: "Translation right from the browser.",
 		href: "/m/tdozzpar",
-		logo: "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/editor/assets/christmasFink.png",
+		logo: "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/editor/assets/fink-logo.webp",
 		cover: "/images/fink-cover-landingpage.png",
 	},
 	{

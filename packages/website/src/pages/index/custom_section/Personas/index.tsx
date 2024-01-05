@@ -65,7 +65,7 @@ const Personas = () => {
 					</div>
 				</Match>
 				<Match when={slide() === "designer"}>
-					<div class="grid grid-cols-12 sm:h-[480px] md:h-[396px] mt-8">
+					<div class="grid grid-cols-12 sm:h-[480px] md:h-[496px] mt-8">
 						<div class="col-span-12 lg:col-span-10 lg:col-start-2 bg-background h-full rounded-2xl border border-surface-200">
 							<DesignrSlide />
 						</div>
