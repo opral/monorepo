@@ -6,15 +6,13 @@ import { setCurrentPageContext } from "./state.js"
 import type { PageContextRenderer } from "./types.js"
 import * as Sentry from "@sentry/browser"
 import { MetaProvider } from "@solidjs/meta"
-import { posthog as telemetryBrowser } from "posthog-js"
+import { posthog } from "posthog-js"
 import { publicEnv } from "@inlang/env-variables"
 
-if (publicEnv.PUBLIC_POSTHOG_TOKEN) {
-	telemetryBrowser.init(publicEnv.PUBLIC_POSTHOG_TOKEN, {
-		api_host: import.meta.env.PROD ? "https://telemetry.inlang.com" : "http://localhost:4005",
-		capture_performance: false,
-	})
-}
+posthog.init(publicEnv.PUBLIC_POSTHOG_TOKEN ?? "placeholder", {
+	api_host: import.meta.env.PROD ? "https://telemetry.inlang.com" : "http://localhost:4005",
+	capture_performance: false,
+})
 
 // import the css
 import "./app.css"
@@ -79,7 +77,7 @@ export default function onRenderClient(pageContext: PageContextRenderer) {
 			isFirstRender = false
 		}
 		// https://posthog.com/docs/integrate/client/js#one-page-apps-and-page-views
-		telemetryBrowser.capture("$pageview")
+		posthog.capture("$pageview")
 	} catch (e) {
 		console.error("ERROR in renderer", e)
 	}
