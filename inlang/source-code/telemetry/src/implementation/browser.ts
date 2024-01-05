@@ -35,7 +35,7 @@ function initWrapper(
 	return posthog.init(
 		publicEnv.PUBLIC_POSTHOG_TOKEN,
 		{
-			api_host: ROUTE_PATH,
+			api_host: process.env.NODE_ENV === "production" ? ROUTE_PATH : "http://localhost:4005",
 			capture_performance: false,
 			...config,
 		},
