@@ -1,5 +1,16 @@
 # @inlang/sdk
 
+## 0.22.0
+
+### Minor Changes
+
+- cd29edb11: bumbing fixed env var dependecy issue affected packages
+
+### Patch Changes
+
+- Updated dependencies [cd29edb11]
+  - @lix-js/client@0.5.0
+
 ## 0.21.0
 
 ### Minor Changes

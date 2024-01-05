@@ -1,5 +1,12 @@
 # @inlang/plugin-i18next
 
+## 4.13.3
+
+### Patch Changes
+
+- Updated dependencies [cd29edb11]
+  - @inlang/sdk@0.22.0
+
 ## 4.13.2
 
 ### Patch Changes

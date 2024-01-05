@@ -1,5 +1,12 @@
 # @inlang/plugin-m-function-matcher
 
+## 0.6.4
+
+### Patch Changes
+
+- Updated dependencies [cd29edb11]
+  - @inlang/sdk@0.22.0
+
 ## 0.6.3
 
 ### Patch Changes

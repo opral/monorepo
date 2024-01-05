@@ -1,5 +1,12 @@
 # @inlang/rpc
 
+## 0.2.4
+
+### Patch Changes
+
+- Updated dependencies [cd29edb11]
+  - @inlang/sdk@0.22.0
+
 ## 0.2.3
 
 ### Patch Changes
