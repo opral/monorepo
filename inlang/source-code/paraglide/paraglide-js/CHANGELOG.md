@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 1.1.0
+
+### Minor Changes
+
+- cd29edb11: bumbing fixed env var dependecy issue affected packages
+
 ## 1.0.0
 
 Bump Version to 1.0 as no more breaking changes are expected.

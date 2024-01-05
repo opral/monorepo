@@ -1,5 +1,11 @@
 # @lix-js/client
 
+## 0.5.0
+
+### Minor Changes
+
+- cd29edb11: bumbing fixed env var dependecy issue affected packages
+
 ## 0.4.0
 
 ### Minor Changes

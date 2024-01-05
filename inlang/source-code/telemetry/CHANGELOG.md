@@ -1,5 +1,12 @@
 # @inlang/telemetry
 
+## 0.3.3
+
+### Patch Changes
+
+- Updated dependencies [cd29edb11]
+  - @inlang/sdk@0.22.0
+
 ## 0.3.2
 
 ### Patch Changes

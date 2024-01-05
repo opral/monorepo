@@ -1,5 +1,14 @@
 # inlang-vs-code-extension
 
+## 1.25.2
+
+### Patch Changes
+
+- Updated dependencies [cd29edb11]
+  - @inlang/sdk@0.22.0
+  - @inlang/create-project@1.1.4
+  - @inlang/telemetry@0.3.3
+
 ## 1.25.1
 
 ### Patch Changes
