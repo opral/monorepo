@@ -336,7 +336,6 @@ export async function openRepository(
 					intercept: delayedAction,
 				}),
 				dir,
-				ref: args.branch,
 				author: cmdArgs.author,
 				message: cmdArgs.message,
 			}
